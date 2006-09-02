@@ -1,0 +1,48 @@
+ISMINGW := $(shell uname | grep MINGW)
+ifneq ($(ISMINGW),)
+	EXTENSION = .exe
+else
+	EXTENSION = 
+endif
+
+TARGETS	 = sjasmplus$(EXTENSION)
+OBJECTS  = directives.o support.o parser.o z80.o reader.o sjasmplus.o sjio.o tables.o io_trd.o io_tape.o io_snapshot.o
+
+BINDIR   = /usr/local/bin
+
+CXXFLAGS = -Wall -O3
+ifneq ($(ISMINGW),)
+	CXXFLAGS += -DMINGW -DMAX_PATH=PATH_MAX
+else
+	CXXFLAGS += -DMAX_PATH=MAXPATHLEN
+endif
+LDFLAGS  = 
+
+DEPDIR = .deps
+DEPFILE = $(DEPDIR)/$(*F)
+
+all: $(TARGETS)
+
+sjasmplus$(EXTENSION): $(DEPDIR) $(OBJECTS)
+	g++ $(LDFLAGS) -o $@ $(OBJECTS) 
+	strip $@
+
+clean:
+	$(RM) $(OBJECTS) $(TARGETS)
+	$(RM) -r $(DEPDIR)	
+
+install: all
+	cp -f $(TARGETS) $(BINDIR)
+
+%.o : %.cpp
+	$(CXX) -Wp,-MD,$(DEPFILE).d $(CXXFLAGS) -c -o $@ $<
+	@cp $(DEPFILE).d $(DEPFILE).P; \
+		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+		-e '/^$$/ d' -e 's/$$/ :/' < $(DEPFILE).d >> $(DEPFILE).P; \
+	rm -f $(DEPFILE).d
+
+$(DEPDIR):
+	@mkdir $(DEPDIR)
+	
+-include $(OBJECTS:%.o=$(DEPDIR)/%.P)
+
