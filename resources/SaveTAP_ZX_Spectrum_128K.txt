@@ -1,0 +1,89 @@
+        OUTPUT "SaveTAP_ZX_Spectrum_128K.bin"
+
+        ORG 0x5E00
+Loader: 
+        
+
+        LD A,7*8
+        LD (23693),A
+        CALL 0x0D6B
+        
+        ; Load Screen$
+        LD A,(Settings.LoadScreen)
+        OR A
+        JR Z,.SkipScreen
+        
+        LD IX,$4000
+        LD DE,6912
+        LD A,255
+        SCF  
+        CALL 1366
+        
+.SkipScreen:
+
+        LD HL,Table_BlockList.Table
+        LD A,(Table_BlockList.Count)
+        OR A
+        JR Z,.CodeBlock
+        
+        ; Load Pages' Code Block
+.Loop:  PUSH AF,HL
+        
+        CALL .LoadPage
+        
+        POP HL,AF
+        INC HL,HL,HL,HL,HL
+        DEC A        
+        JR NZ,.Loop
+        
+.CodeBlock:           
+        ; Set Default RAM Page
+        LD A,(Settings.Page)
+        CALL .SetPage
+        
+        ; Load Code Block
+        LD HL,(Settings.Start)
+        PUSH HL
+        LD IX,(Settings.MainBlockStart)
+        LD DE,(Settings.MainBlockLength)
+        LD A,255
+        SCF  
+        JP 1366        
+        
+.LoadPage:
+        DI
+        LD A,(HL)
+        CALL .SetPage
+        EI
+        INC HL
+        LD A,(HL)
+        LD LX,A
+        INC HL
+        LD A,(HL)
+        LD HX,A
+        INC HL
+        LD E,(HL)
+        INC HL
+        LD D,(HL)
+        LD A,255
+        SCF  
+        JP 1366  
+
+.SetPage:
+        OR 16
+        LD BC,#7FFD
+        OUT (C),A
+        RET        
+
+Settings:     
+.LoadScreen:      DB 0 ; Is Load Screen$?
+.Start:           DW 0 ; start address
+.MainBlockStart:  DW 0
+.MainBlockLength: DW 0 ; block from 0x5E00 to 0xBFFF
+.Page:            DB 0 ; set 0 page by default   
+
+Table_BlockList:
+.Count:           DB 0
+.Table:          ;DB PAGENUM
+                 ;DW START
+                 ;DW LENGTH

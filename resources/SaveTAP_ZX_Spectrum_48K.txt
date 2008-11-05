@@ -1,0 +1,35 @@
+        OUTPUT "SaveTAP_ZX_Spectrum_48K.bin"
+
+        ORG 0x5E00
+Loader:
+        LD A,7*8
+        LD (23693),A
+        CALL 0x0D6B
+        
+        ; Load Screen$
+        LD A,(Settings.LoadScreen)
+        OR A
+        JR Z,.SkipScreen
+        
+        LD IX,0x4000
+        LD DE,6912
+        LD A,255
+        SCF  
+        CALL 1366
+          
+.SkipScreen:                
+        ; Load Code Block
+        LD HL,(Settings.Start)
+        PUSH HL
+        LD IX,(Settings.MainBlockStart)
+        LD DE,(Settings.MainBlockLength)
+        LD A,255
+        SCF  
+        JP 1366
+        
+Settings:     
+.LoadScreen:      DB 0 ; Is Load Screen$?
+.Start:           DW 0 ; start address
+.MainBlockStart:  DW 0 ;
+.MainBlockLength: DW 0 ; block from 0x5E00(may be) to 0xBFFF
+        
