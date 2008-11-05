@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
 	char buf[MAX_PATH];
 	int base_encoding; /* added */
 	char* p;
-	const char* logo = "SjASMPlus Z80 Cross-Assembler v1.07 Stable (build 04-04-2008)";
+	const char* logo = "SjASMPlus Z80 Cross-Assembler v1.07 RC8 (build 06-11-2008)";
 	int i = 1;
 
 	if (argc == 1) {

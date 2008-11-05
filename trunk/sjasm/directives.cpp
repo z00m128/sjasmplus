@@ -1014,7 +1014,7 @@ void dirSAVETRD() {
 
 	aint val;
 	char* fnaam, * fnaamh;
-	int start = -1,length = -1;
+	int start = -1,length = -1,autostart = -1; //autostart added by boo_boo 19_0ct_2008
 
 	fnaam = GetFileName(lp);
 	if (comma(lp)) {
@@ -1033,31 +1033,41 @@ void dirSAVETRD() {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
-			//if (val < 0x4000) {
-			//	Error("[SAVETRD] Values less than 4000h are not allowed", bp, PASS3); return;
-			//} else
 			if (val > 0xFFFF) {
-			  	Error("[SAVETRD] Values more than FFFFh are not allowed", bp, PASS3); return;
+			  	Error("[SAVETRD] Values more than 0FFFFh are not allowed", bp, PASS3); return;
 			}
 			start = val;
 		} else {
 		  	Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 		}
 		if (comma(lp)) {
+			if (!comma(lp)) {
+				if (!ParseExpression(lp, val)) {
+					Error("[SAVETRD] Syntax error", bp, PASS3); return;
+				}
+				if (val < 0) {
+					Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
+				}
+				length = val;
+			} else {
+		  		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
+			} 
+		}
+		if (comma(lp)) { //added by boo_boo 19_0ct_2008
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
 			if (val < 0) {
 				Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
 			}
-			length = val;
-		}
+			autostart = val;
+		}				
 	} else {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
 	if (exec) {
-		TRD_AddFile(fnaam, fnaamh, start, length);
+		TRD_AddFile(fnaam, fnaamh, start, length, autostart);
 	}
 	delete[] fnaam;
 	delete[] fnaamh;
@@ -1074,10 +1084,14 @@ void dirENCODING() {
 		*opt2 = (char) tolower(*opt2);
 	} while (*(opt2++));
 	if (!strcmp(opt, "dos")) {
-		ConvertEncoding = ENCDOS;delete[] opt;return;
+		ConvertEncoding = ENCDOS;
+		delete[] opt;
+		return;
 	}
 	if (!strcmp(opt, "win")) {
-		ConvertEncoding = ENCWIN;delete[] opt;return;
+		ConvertEncoding = ENCWIN;
+		delete[] opt;
+		return;
 	}
 	Error("[ENCODING] Syntax error. Bad parameter", bp, CATCHALL); delete[] opt;return;
 }

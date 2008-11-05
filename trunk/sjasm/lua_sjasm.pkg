@@ -58,7 +58,7 @@ module sj {
 
 module zx {
 	int TRD_SaveEmpty @ trdimage_create(char* fname);
-	int TRD_AddFile @ trdimage_add_file(char* fname, char* fhobname, int start, int length);
+	int TRD_AddFile @ trdimage_add_file(char* fname, char* fhobname, int start, int length, int autostart);
 	int SaveSNA_ZX @ save_snapshot_sna128(char* fname, unsigned short start);
 }
 
