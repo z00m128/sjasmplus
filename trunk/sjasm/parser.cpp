@@ -741,7 +741,7 @@ void ParseLabel() {
 		// Copy label name to last parsed label variable
 		if (!IsDEFL) {
 			if (LastParsedLabel != NULL) {
-				delete[] LastParsedLabel;
+				free(LastParsedLabel);
 				LastParsedLabel = NULL;
 			}
 			LastParsedLabel = STRDUP(tp);
@@ -773,6 +773,8 @@ void ParseLabel() {
 		} else if (!LabelTable.Insert(tp, val, false, IsDEFL)) {
 			Error("Duplicate label", tp, PASS1);
 		}
+
+		delete[] tp;
 	}
 }
 
@@ -894,11 +896,11 @@ void ParseLineSafe(bool parselabels) {
 
 	if (tmp2 != NULL) {
 		STRCPY(sline2, LINEMAX2, tmp2);
-		delete[] tmp2;
+		free(tmp2);
 	}
 	if (tmp != NULL) {
 		STRCPY(sline, LINEMAX2, tmp);
-		delete[] tmp;
+		free(tmp);
 	}
 	lp = rp;
 }

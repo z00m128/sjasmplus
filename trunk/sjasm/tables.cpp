@@ -81,6 +81,7 @@ char* ValidateLabel(char* naam) {
 		if (l) {
 			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
 		} else {
+			free(vorlabp);
 			vorlabp = STRDUP(naam);
 			if (vorlabp == NULL) {
 				Error("No enough memory!", 0, FATAL);
@@ -234,7 +235,8 @@ int GetLocalLabelValue(char*& op, aint& val) {
 	}
 	if (nval == (aint) - 1) {
 		if (pass == LASTPASS) {
-			Error("Label not found", naam, SUPPRESS); return 1;
+			Error("Local label not found", naam, SUPPRESS);
+			return 1;
 		} else {
 			nval = 0;
 		}
@@ -252,7 +254,7 @@ CLabelTable::CLabelTable() {
 }
 
 /* modified */
-int CLabelTable::Insert(char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false) {
+int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", 0, FATAL);
 	}
@@ -428,8 +430,8 @@ void CLabelTable::RemoveAll() {
 	NextLocation = 0;
 }
 
-int CLabelTable::Hash(char* s) {
-	char* ss = s;
+int CLabelTable::Hash(const char* s) {
+	const char* ss = s;
 	unsigned int h = 0,g;
 	for (; *ss != '\0'; ss++) {
 		h = (h << 4) + *ss;
@@ -546,7 +548,7 @@ CFunctionTable::CFunctionTable() {
 	NextLocation = 1;
 }
 
-int CFunctionTable::Insert(char* nname, void(*nfunp) (void)) {
+int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
 	char* p;
 	if (NextLocation >= FUNTABSIZE * 2 / 3) {
 		_COUT "Functions Table is full" _ENDL; ExitASM(1);
@@ -593,7 +595,7 @@ int CFunctionTable::Insert(char* nname, void(*nfunp) (void)) {
 	return 1;
 }
 
-int CFunctionTable::insertd(char* nname, void(*nfunp) (void)) {
+int CFunctionTable::insertd(const char* nname, void(*nfunp) (void)) {
 	size_t len = strlen(nname) + 2;
 	char* buf = new char[len];
 	//if (buf == NULL) {
@@ -608,7 +610,7 @@ int CFunctionTable::insertd(char* nname, void(*nfunp) (void)) {
 	return Insert(buf, nfunp);
 }
 
-int CFunctionTable::zoek(char* nname, bool bol) {
+int CFunctionTable::zoek(const char* nname, bool bol) {
 	int tr, htr, otr;
 	otr = tr = Hash(nname);
 	while (htr = HashTable[tr]) {
@@ -616,7 +618,8 @@ int CFunctionTable::zoek(char* nname, bool bol) {
 			if (bol && ((sizeof(nname) == 3 && (!strcmp("END", nname) || !strcmp("end", nname))) || (sizeof(nname) == 4 && (!strcmp(".END", nname) || !strcmp(".end", nname))))) {
 				return 0;
 			} else {
-				(*funtab[htr].funp)(); return 1;
+				(*funtab[htr].funp)();
+				return 1;
 			}
 		}
 		if (++tr >= FUNTABSIZE) {
@@ -646,8 +649,8 @@ int CFunctionTable::Find(char* nname) {
 	return 0;
 }
 
-int CFunctionTable::Hash(char* s) {
-	char* ss = s;
+int CFunctionTable::Hash(const char* s) {
+	const char* ss = s;
 	unsigned int h = 0;
 	for (; *ss != '\0'; ss++) {
 		h = (h << 3) + *ss;
@@ -720,8 +723,9 @@ aint CLocalLabelTable::zoekb(aint nnum) {
 	return (aint) - 1;
 }
 
-CDefineTableEntry::CDefineTableEntry(char* nname, char* nvalue, CStringsList* nnss/*added*/, CDefineTableEntry* nnext) {
-	char* s1, * s2;
+CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStringsList* nnss/*added*/, CDefineTableEntry* nnext) {
+	char* s1;
+    char* sbegin,*s2;
 	name = STRDUP(nname);
 	if (name == NULL) {
 		Error("No enough memory!", 0, FATAL);
@@ -730,12 +734,15 @@ CDefineTableEntry::CDefineTableEntry(char* nname, char* nvalue, CStringsList* nn
 	if (value == NULL) {
 		Error("No enough memory!", 0, FATAL);
 	}
-	s1 = value; s2 = nvalue; SkipBlanks(s2);
+	s1 = value;
+	sbegin = s2 = strdup(nvalue); 
+	SkipBlanks(s2);
 	while (*s2 && *s2 != '\n' && *s2 != '\r') {
 		*s1 = *s2; ++s1; ++s2;
 	} 
 	*s1 = 0;
-	//_COUT nvalue _ENDL;
+	free(sbegin);
+
 	next = nnext;
 	nss = nnss;
 }
@@ -779,11 +786,14 @@ int CDefineTable::FindDuplicate(char* name) {
 	return 0;
 }
 
-int CDefineTable::Replace(char* name, char* value) {
+int CDefineTable::Replace(const char* name, const char* value) {
 	CDefineTableEntry* p = defs[*name];
 	while (p) {
 		if (!strcmp(name, p->name)) {
-			p->value = value;
+			delete[](p->value);
+			p->value = new char[strlen(value)+1];
+			strcpy(p->value,value);
+
 			return 0;
 		}
 		p = p->next;
@@ -1199,6 +1209,7 @@ void CStructure::deflab() {
 			Error("Duplicate label", tp, PASS1);
 		}
 	}
+	free(p);
 	STRCAT(sn, LINEMAX, ".");
 	while (np) {
 		STRCPY(ln, LINEMAX, sn);
@@ -1219,6 +1230,7 @@ void CStructure::deflab() {
 				Error("Duplicate label", tp, PASS1);
 			}
 		}
+		free(p);
 		np = np->next;
 	}
 }
@@ -1242,6 +1254,7 @@ void CStructure::emitlab(char* iid) {
 			Error("Duplicate label", tp, PASS1);
 		}
 	}
+	free(p);
 	STRCAT(sn, LINEMAX, ".");
 	while (np) {
 		STRCPY(ln, LINEMAX, sn);
@@ -1262,6 +1275,7 @@ void CStructure::emitlab(char* iid) {
 				Error("Duplicate label", tp, PASS1);
 			}
 		}
+		free(p);
 		np = np->next;
 	}
 }
@@ -1278,20 +1292,27 @@ void CStructure::emitmembs(char*& p) {
 	while (ip) {
 		switch (ip->type) {
 		case SMEMBBLOCK:
-			t = ip->len; while (t--) {
-						 	e[et++] = ip->def;
-						 } break;
+			t = ip->len;
+			while (t--) {
+				e[et++] = ip->def;
+			}
+			break;
+
 		case SMEMBBYTE:
-			synerr = 0; if (!ParseExpression(p, val)) {
-							val = ip->def;
-						} synerr = 1;
+			synerr = 0;
+			if (!ParseExpression(p, val)) {
+				val = ip->def;
+			}
+			synerr = 1;
 			e[et++] = val % 256;
 			check8(val); comma(p);
 			break;
 		case SMEMBWORD:
-			synerr = 0; if (!ParseExpression(p, val)) {
-							val = ip->def;
-						} synerr = 1;
+			synerr = 0;
+			if (!ParseExpression(p, val)) {
+				val = ip->def;
+			}
+			synerr = 1;
 			e[et++] = val % 256; e[et++] = (val >> 8) % 256;
 			check16(val); comma(p);
 			break;
@@ -1360,7 +1381,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 	return strs[*sp];
 }
 
-CStructure* CStructureTable::zoek(char* naam, int gl) {
+CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	char sn[LINEMAX], * sp;
 	sn[0] = 0;
 	if (!gl && ModuleName) {

@@ -68,9 +68,7 @@ using std::endl;
 using std::flush;
 using std::stack;
 #include <stdio.h>
-#ifdef WIN32
 #include <stdlib.h>
-#endif
 #include <string.h>
 #include <ctype.h>
 #include <math.h>

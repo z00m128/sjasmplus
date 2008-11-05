@@ -52,7 +52,7 @@ public:
 class CLabelTable {
 public:
 	CLabelTable();
-	int Insert(char*, aint, bool, bool);
+	int Insert(const char*, aint, bool, bool);
 	int Update(char*, aint);
 	int GetValue(char*, aint&);
 	int Find(char*);
@@ -65,7 +65,7 @@ public:
 private:
 	int HashTable[LABTABSIZE], NextLocation;
 	CLabelTableEntry LabelTable[LABTABSIZE];
-	int Hash(char*);
+	int Hash(const char*);
 };
 
 class CFunctionTableEntry {
@@ -77,15 +77,15 @@ public:
 class CFunctionTable {
 public:
 	CFunctionTable();
-	int Insert(char*, void(*) (void));
-	int insertd(char*, void(*) (void));
+	int Insert(const char*, void(*) (void));
+	int insertd(const char*, void(*) (void));
 	/*int zoek(char*);*/
-	int zoek(char*, bool =0);
+	int zoek(const char*, bool =0);
 	int Find(char*);
 private:
 	int HashTable[LABTABSIZE], NextLocation;
 	CFunctionTableEntry funtab[LABTABSIZE];
-	int Hash(char*);
+	int Hash(const char*);
 };
 
 class CLocalLabelTableEntry {
@@ -138,7 +138,7 @@ public:
 	char* name, * value;
 	CStringsList* nss; /* added */
 	CDefineTableEntry* next;
-	CDefineTableEntry(char*, char*, CStringsList* /*added*/, CDefineTableEntry*);
+	CDefineTableEntry(const char*, const char*, CStringsList* /*added*/, CDefineTableEntry*);
 };
 
 class CMacroDefineTable {
@@ -164,7 +164,7 @@ public:
 	void Add(char*, char*, CStringsList* /*added*/);
 	char* Get(char*);
 	int FindDuplicate(char*);
-	int Replace(char*, char*);
+	int Replace(const char*, const char*);
 	int Remove(char*);
 	void RemoveAll();
 	CDefineTable() {
@@ -180,6 +180,7 @@ public:
 	CStringsList* args, * body;
 	CMacroTableEntry* next;
 	CMacroTableEntry(char*, CMacroTableEntry*);
+	~CMacroTableEntry(){if (next)delete next;};
 };
 
 class CMacroTable {
@@ -191,9 +192,20 @@ public:
 	CMacroTable() {
 		Init();
 	}
+	~CMacroTable(){if(macs) delete macs;};
+private:
+	enum
+	{
+		KDelimiter = '_',
+		KTotalJoinedParams = 64
+	};
+	void SplitToArray( const char* aName, char**& aArray, int& aCount, int* aPositions ) const;
+	int	Copy( char* aDest, int aDestPos, const char* aSource, int aSourcePos, int aBytes ) const;
+	void FreeArray( char** aArray, int aCount );
 private:
 	int used[128];
-	CMacroTableEntry* macs;
+	CDefineTableEntry* defs;
+	char tempBuf[ LABMAX ];	// for 'arg_someLabel_arg_anotherLabel' expansion
 };
 
 class CStructureEntry1 {
@@ -241,7 +253,7 @@ public:
 	CStructureTable() {
 		Init();
 	}
-	CStructure* zoek(char*, int);
+	CStructure* zoek(const char*, int);
 	int FindDuplicate(char*);
 	int Emit(char*, char*, char*&, int);
 private:

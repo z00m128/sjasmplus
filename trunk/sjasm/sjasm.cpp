@@ -97,7 +97,7 @@ CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
 CStructureTable StructureTable;
 CAddressList* AddressList = 0; /* from SjASM 0.39g */
-CStringsList* ModuleList = 0;
+CStringsList* ModuleList = NULL;
 
 lua_State *LUA;
 int LuaLine=-1;
@@ -124,14 +124,17 @@ void InitPass(int p) {
 		reglenwidth = 7;
 	}
 	if (ModuleName != NULL) {
-		delete[] ModuleName;
+		free(ModuleName);
+		ModuleName = NULL;
 	}
 	ModuleName = NULL;
 	if (LastParsedLabel != NULL) {
-		delete[] LastParsedLabel;
+		free(LastParsedLabel);
+		LastParsedLabel = NULL;
 	}
 	LastParsedLabel = NULL;
-	vorlabp = "_";
+	vorlabp = (char *)malloc(2);
+	STRCPY(vorlabp, sizeof("_"), "_");
 	macrolabp = NULL;
 	listmacro = 0;
 	pass = p;
@@ -140,7 +143,7 @@ void InitPass(int p) {
 	CurrentGlobalLine = CurrentLocalLine = CompiledCurrentLine = 0;
 	PseudoORG = 0; adrdisp = 0; /* added */
 	PreviousAddress = 0; epadres = 0; macronummer = 0; lijst = 0; comlin = 0;
-	ModuleList = 0;
+	ModuleList = NULL;
 	StructureTable.Init();
 	MacroTable.Init();
 	DefineTable.Init();
@@ -167,6 +170,7 @@ void FreeRAM() {
 	if (lijstp) {
 		delete lijstp;
 	}
+	free(vorlabp);
 }
 
 /* added */
@@ -287,7 +291,7 @@ int main(int argc, char **argv) {
 	char buf[MAX_PATH];
 	int base_encoding; /* added */
 	char* p;
-	char* logo = "SjASMPlus Z80 Cross-Assembler v1.07 Stable (build 04-04-2008)";
+	const char* logo = "SjASMPlus Z80 Cross-Assembler v1.07 Stable (build 04-04-2008)";
 	int i = 1;
 
 	if (argc == 1) {
@@ -351,7 +355,7 @@ int main(int argc, char **argv) {
 	CurrentDirectory = buf;
 
 	// get arguments
-	Options::IncludeDirsList = new CStringsList(".", Options::IncludeDirsList);
+	Options::IncludeDirsList = new CStringsList((char *)".", Options::IncludeDirsList);
 	while (argv[i]) {
 		Options::GetOptions(argv, i);
 		if (argv[i]) {

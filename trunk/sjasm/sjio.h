@@ -44,8 +44,8 @@ extern FILE* FP_UnrealList, * FP_Input; /* added */
 void OpenDest(int); /* added from new SjASM 0.39g */
 void NewDest(char* newfilename, int mode); /* added from new SjASM 0.39g */
 int FileExists(char* filename); /* added from new SjASM 0.39g */
-void Error(char*, char*, int =PASS2);
-void Warning(char*, char*, int =PASS2);
+void Error(const char*, const char*, int = PASS2);
+void Warning(const char*, const char*, int = PASS2);
 void ListFile();
 void ListFileSkip(char*);
 void CheckPage(); /* added */
@@ -53,13 +53,13 @@ void EmitByte(int byte);
 void EmitWord(int word);
 void EmitBytes(int* bytes);
 void EmitWords(int* words);
-void EmitBlock(aint byte, aint len, bool nulled=false);
+void EmitBlock(aint byte, aint len, bool nulled = false);
 void OpenFile(char* nfilename);
 void IncludeFile(char* nfilename); /* added */
 void Close();
 void OpenList();
 void OpenUnrealList(); /* added */
-void ReadBufLine(bool Parse=true, bool SplitByColon=true); /* added */
+void ReadBufLine(bool Parse = true, bool SplitByColon = true); /* added */
 void OpenDest();
 void PrintHEX32(char*& p, aint h);
 void PrintHEX16(char*& p, aint h); /* added */
@@ -71,14 +71,14 @@ unsigned char MemGetByte(unsigned int address); /* added */
 unsigned int MemGetWord(unsigned int address); /* added */
 int SaveBinary(char* fname, int start, int length); /* added */
 int SaveHobeta(char* fname, char* fhobname, int start, int length); /* added */
-int ReadLine(bool SplitByColon=true);
+int ReadLine(bool SplitByColon = true);
 EReturn ReadFile();
-EReturn ReadFile(char* pp, char* err); /* added */
+EReturn ReadFile(const char* pp, const char* err); /* added */
 EReturn SkipFile();
 EReturn SkipFile(char* pp, char* err); /* added */
 void NewDest(char* newfilename);
 void SeekDest(long, int); /* added from new SjASM 0.39g */
-int ReadFileToCStringsList(CStringsList*& f, char* end);
+int ReadFileToCStringsList(CStringsList*& f, const char* end);
 void WriteExp(char* n, aint v);
 
 //eof sjio.h

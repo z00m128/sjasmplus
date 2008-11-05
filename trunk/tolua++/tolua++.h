@@ -85,14 +85,14 @@ TOLUA_API int tolua_register_gc (lua_State* L, int lo);
 TOLUA_API int tolua_default_collect (lua_State* tolua_S);
 
 TOLUA_API void tolua_usertype (lua_State* L, char* type);
-TOLUA_API void tolua_beginmodule (lua_State* L, char* name);
+TOLUA_API void tolua_beginmodule (lua_State* L, const char* name);
 TOLUA_API void tolua_endmodule (lua_State* L);
-TOLUA_API void tolua_module (lua_State* L, char* name, int hasvar);
+TOLUA_API void tolua_module (lua_State* L, const char* name, int hasvar);
 TOLUA_API void tolua_class (lua_State* L, char* name, char* base);
 TOLUA_API void tolua_cclass (lua_State* L, char* lname, char* name, char* base, lua_CFunction col);
-TOLUA_API void tolua_function (lua_State* L, char* name, lua_CFunction func);
+TOLUA_API void tolua_function (lua_State* L, const char* name, lua_CFunction func);
 TOLUA_API void tolua_constant (lua_State* L, char* name, double value);
-TOLUA_API void tolua_variable (lua_State* L, char* name, lua_CFunction get, lua_CFunction set);
+TOLUA_API void tolua_variable (lua_State* L, const char* name, lua_CFunction get, lua_CFunction set);
 TOLUA_API void tolua_array (lua_State* L,char* name, lua_CFunction get, lua_CFunction set);
 
 /* TOLUA_API void tolua_set_call_event(lua_State* L, lua_CFunction func, char* type); */
