@@ -841,6 +841,12 @@ void CMacroDefineTable::Init() {
 
 void CMacroDefineTable::AddMacro(char* naam, char* vervanger) {
 	defs = new CDefineTableEntry(naam, vervanger, 0, defs);
+	// By Antipod: http://zx.pk.ru/showpost.php?p=159487&postcount=264
+	if ( !strcmp( naam, "_aFunc" ) )
+	{
+		defs = defs;
+	}
+	// --
 	used[*naam] = 1;
 }
 
@@ -854,17 +860,139 @@ void CMacroDefineTable::setdefs(CDefineTableEntry* ndefs) {
 
 char* CMacroDefineTable::getverv(char* name) {
 	CDefineTableEntry* p = defs;
-	if (!used[*name]) {
+	if (!used[*name] && *name != KDelimiter) {
 		return NULL;
-	}
+	}// std check
 	while (p) {
 		if (!strcmp(name, p->name)) {
-			return p->value;
+			return p->value;// full match
 		}
 		p = p->next;
 	}
-	return NULL;
+	// extended check for '_'
+	// By Antipod: http://zx.pk.ru/showpost.php?p=159487&postcount=264
+	char** array = NULL;
+	int count = 0;
+	int positions[ KTotalJoinedParams + 1 ];
+	SplitToArray( name, array, count, positions );
+
+	int tempBufPos = 0;
+	bool replaced = false;
+	for ( int i = 0; i<count; i++ )
+	{
+		p = defs;
+
+		if ( *array[ i ] != KDelimiter )
+		{
+			bool found = false;
+			while( p )
+			{
+				if ( !strcmp( array[ i ], p->name ) )
+				{
+					replaced = found = true;
+					tempBufPos = Copy( tempBuf, tempBufPos, p->value, 0, strlen( p->value ) );
+					break;
+				}
+				p = p->next;
+			}
+			if ( !found )
+			{
+				tempBufPos = Copy( tempBuf, tempBufPos, array[ i ], 0, strlen( array[i] ) );
+			}
+		}
+		else
+		{
+			tempBuf[ tempBufPos++ ] = KDelimiter;
+			tempBuf[ tempBufPos ] = 0;
+		}
+	}
+
+	FreeArray( array, count );
+
+	return replaced ? tempBuf : NULL;
+	// -- 
 }
+
+void CMacroDefineTable::SplitToArray( const char* aName, char**& aArray, int& aCount, int* aPositions ) const
+{
+	int nameLen = strlen( aName );
+	aCount = 0;
+	int itemSizes[ KTotalJoinedParams ];
+	int currentItemsize = 0;
+	bool newLex = false;
+	int prevLexPos = 0;
+	for ( int i = 0; i<nameLen; i++, currentItemsize++ )
+	{
+		if ( aName[ i ] == KDelimiter || aName[ prevLexPos ] == KDelimiter )
+		{
+			newLex = true;
+		}
+
+		if ( newLex && currentItemsize )
+		{
+			itemSizes[ aCount ] = currentItemsize;
+			currentItemsize = 0;
+			aPositions[ aCount ] = prevLexPos;
+			prevLexPos = i;
+			aCount++;
+			newLex = false;
+		}
+
+		if ( aCount == KTotalJoinedParams )
+		{
+			Error("Too much joined params!", 0, FATAL);
+		}
+	}
+
+	if ( currentItemsize )
+	{
+		itemSizes[ aCount ] = currentItemsize;
+		aPositions[ aCount ] = prevLexPos;
+		aCount++;
+	}
+
+	if ( aCount )
+	{
+		aArray = new char*[ aCount ];
+		for ( int i = 0; i<aCount; i++ )
+		{
+			int itemSize = itemSizes[ i ];
+			if ( itemSize )
+			{
+				aArray[ i ] = new char[ itemSize + 1 ];
+				Copy( aArray[ i ], 0, &aName[ aPositions[ i ] ], 0, itemSize );
+			}
+			else
+			{
+				Error("Internal error. SplitToArray()", 0, FATAL);
+			}
+		}
+	}
+}
+
+int CMacroDefineTable::Copy( char* aDest, int aDestPos, const char* aSource, int aSourcePos, int aBytes ) const
+{
+	int i = 0;
+    for ( i = 0; i < aBytes; i++ )
+    {
+        aDest[ i + aDestPos ] = aSource[ i + aSourcePos ];
+    }
+	aDest[ i + aDestPos ] = 0;
+	return i + aDestPos;
+}
+
+void CMacroDefineTable::FreeArray( char** aArray, int aCount )
+{
+	if ( aArray )
+	{
+		for ( int i = 0; i<aCount; i++ )
+		{
+			delete [] aArray[ i ];
+		}
+	}
+	delete aArray;
+}
+// --
 
 int CMacroDefineTable::FindDuplicate(char* name) {
 	CDefineTableEntry* p = defs;

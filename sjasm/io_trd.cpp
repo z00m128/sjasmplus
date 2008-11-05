@@ -80,11 +80,12 @@ int TRD_SaveEmpty(char* fname) {
 	return 1;
 }
 
-int TRD_AddFile(char* fname, char* fhobname, int start, int length) {
+int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostart) { //autostart added by boo_boo 19_0ct_2008
 	FILE* ff;
-	unsigned char hdr[16], trd[31];
+	unsigned char hdr[16], trd[31], abin[4];
 	int i,secs,pos = 0;
 	aint res;
+	int autostart_add = autostart > 0? 4 : 0; //added by boo_boo 19_0ct_2008
 
 	// for Lua
 	if (!DeviceID) {
@@ -94,7 +95,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length) {
 
 	// for Lua
 	if (start > 0xFFFF) {
-		Error("zx.trdimage_addfile: start address more than FFFFh are not allowed", bp, PASS3); return 0;
+		Error("zx.trdimage_addfile: start address more than 0FFFFh are not allowed", bp, PASS3); return 0;
 	}
 	// for Lua
 	if (length > 0x10000) {
@@ -121,7 +122,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length) {
 		_COUT "Read error: " _CMDL fname _ENDL; return 0;
 	}
 	secs = trd[4] + (trd[5] << 8);
-	if (secs < (length >> 8) + 1) {
+	if (secs < ((length + autostart_add) >> 8) + 1) {
 		Error("TRD image haven't free space", fname, CATCHALL); return 0;
 	}
 
@@ -151,6 +152,18 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length) {
 		length = 0x10000 - start;
 	}
 	SaveRAM(ff, start, length);
+
+	if(autostart_add)
+	{
+		abin[0] = 0x80;
+		abin[1] = 0xAA;
+		abin[2] = autostart & 0xFF;
+		abin[3] = (autostart >> 8) & 0xFF;
+		
+		if(fwrite(abin, 1, 4, ff) != 4) {
+			Error("Write error", fname, CATCHALL); return 0;
+		}
+	}
 
 	//header of file
 	for (i = 0; i != 9; hdr[i++] = 0x20) {
@@ -185,11 +198,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length) {
 
 	hdr[0x0b] = (unsigned char)(length & 0xff);
 	hdr[0x0c] = (unsigned char)(length >> 8);
-	if (hdr[0x0b] == 0) {
-		hdr[0x0d] = hdr[0x0c];
-	} else {
-		hdr[0x0d] = hdr[0x0c] + 1;
-	}
+	hdr[0x0d] = ((length + autostart_add) >> 8) + ((length + autostart_add) & 0xFF ? 1: 0);
 	hdr[0x0e] = trd[0];
 	hdr[0x0f] = trd[1];
 
