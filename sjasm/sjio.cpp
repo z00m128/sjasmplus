@@ -95,7 +95,7 @@ char hd[] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
 };
 
-void Error(char* fout, char* bd, int type) {
+void Error(const char* fout, const char* bd, int type) {
 	char* ep = ErrorLine;
 	char* count;
 	int ln;
@@ -123,6 +123,8 @@ void Error(char* fout, char* bd, int type) {
 	count = new char[25];
 	SPRINTF1(count, 25, "%lu", ErrorCount);
 	DefineTable.Replace("_ERRORS", count);
+
+	delete[] count;
 
 	/*SPRINTF3(ep, LINEMAX2, "%s line %lu: %s", filename, CurrentLocalLine, fout);
 	if (bd) {
@@ -164,7 +166,7 @@ void Error(char* fout, char* bd, int type) {
 	}
 }
 
-void Warning(char* fout, char* bd, int type) {
+void Warning(const char* fout, const char* bd, int type) {
 	char* ep = ErrorLine;
 	char* count;
 	int ln;
@@ -181,6 +183,8 @@ void Warning(char* fout, char* bd, int type) {
 	count = new char[25];
 	SPRINTF1(count, 25, "%lu", WarningCount);
 	DefineTable.Replace("_WARNINGS", count);
+
+	delete[] count;
 	
 	if (pass > LASTPASS) {
 		SPRINTF1(ep, LINEMAX2, "warning: %s", fout);
@@ -657,29 +661,29 @@ void EmitBlock(aint byte, aint len, bool nulled) {
 
 char* GetPath(char* fname, TCHAR** filenamebegin) {
 	int g = 0;
-	char* kip, nieuwzoekpad[MAX_PATH];
-	g = SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, nieuwzoekpad, filenamebegin);
+	char* kip, fullFilePath[MAX_PATH];
+	g = SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin);
 	if (!g) {
 		if (fname[0] == '<') {
 			fname++;
 		}
 		CStringsList* dir = Options::IncludeDirsList;
 		while (dir) {
-			if (SearchPath(dir->string, fname, NULL, MAX_PATH, nieuwzoekpad, filenamebegin)) {
+			if (SearchPath(dir->string, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
 				g = 1; break;
 			}
 			dir = dir->next;
 		}
 	}
 	if (!g) {
-		SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, nieuwzoekpad, filenamebegin);
+		SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin);
 	}
-	kip = STRDUP(nieuwzoekpad);
+	kip = STRDUP(fullFilePath);
 	if (kip == NULL) {
 		Error("No enough memory!", 0, FATAL);
 	}
 	if (filenamebegin) {
-		*filenamebegin += kip - nieuwzoekpad;
+		*filenamebegin += kip - fullFilePath;
 	}
 	return kip;
 }
@@ -689,14 +693,15 @@ void BinIncFile(char* fname, int offset, int len) {
 	FILE* bif;
 	int res;
 	int leng;
-	char* nieuwzoekpad;
-	nieuwzoekpad = GetPath(fname, NULL);
+	char* fullFilePath;
+	fullFilePath = GetPath(fname, NULL);
 	if (*fname == '<') {
 		fname++;
 	}
-	if (!FOPEN_ISOK(bif, nieuwzoekpad, "rb")) {
+	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) {
 		Error("Error opening file", fname, FATAL);
 	}
+	free(fullFilePath);
 	if (offset > 0) {
 		bp = new char[offset + 1];
 		if (bp == NULL) {
@@ -838,6 +843,7 @@ void OpenFile(char* nfilename) {
 	}
 	
 	if (!FOPEN_ISOK(FP_Input, fullpath, "r")) {
+		free(fullpath);
 		Error("Error opening file", nfilename, FATAL);
 	}
 
@@ -851,7 +857,12 @@ void OpenFile(char* nfilename) {
 		STRCPY(filename, LINEMAX, nfilename);
 	}
 
-	oCurrentDirectory = CurrentDirectory; *filenamebegin = 0; CurrentDirectory = fullpath;
+	oCurrentDirectory = CurrentDirectory;
+	*filenamebegin = 0;
+	CurrentDirectory = fullpath;
+
+	// Free memory
+	free(fullpath);
 
 	RL_Readed = 0; rlpbuf = rlbuf; 
 	ReadBufLine(true);
@@ -890,7 +901,7 @@ void IncludeFile(char* nfilename) {
 	STRCPY(rlbuf, 8192, buf);
 	RL_Readed = readed;
 
-	delete[] buf;
+	free(buf);
 
 	FP_Input = oFP_Input;
 }
@@ -1431,7 +1442,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	return 1;
 }
 
-EReturn ReadFile(char* pp, char* err) {
+EReturn ReadFile(const char* pp, const char* err) {
 	CStringsList* ol;
 	char* p;
 	while (RL_Readed > 0 || !feof(FP_Input)) {
@@ -1556,7 +1567,7 @@ int ReadLine(bool SplitByColon) {
 	return res;
 }
 
-int ReadFileToCStringsList(CStringsList*& f, char* end) {
+int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	CStringsList* s,* l = NULL;
 	char* p;
 	f = NULL;
@@ -1573,7 +1584,8 @@ int ReadFileToCStringsList(CStringsList*& f, char* end) {
 				++p;
 			}
 			if (cmphstr(p, end)) {
-				lp = ReplaceDefine(p); return 1;
+				lp = ReplaceDefine(p);
+				return 1;
 			}
 		}
 		s = new CStringsList(line, NULL);

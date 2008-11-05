@@ -47,13 +47,13 @@ int check16(aint val, bool error=true); /* changes applied from SjASM 0.39g */
 int check24(aint val, bool error=true); /* changes applied from SjASM 0.39g */
 int need(char*& p, char c);
 int need(char*& p, char* c);
-int needa(char*& p, char* c1, int r1, char* c2 = 0, int r2 = 0, char* c3 = 0, int r3 = 0);
+int needa(char*& p, const char* c1, int r1, const char* c2 = 0, int r2 = 0, char* c3 = 0, int r3 = 0);
 int GetConstant(char*& op, aint& val);
 int GetCharConst(char*& p, aint& val);
 int GetCharConstChar(char*& op, aint& val);
 int GetCharConstCharSingle(char*& op, aint& val); /* added */
 int GetBytes(char*& p, int e[], int add, int dc);
-int cmphstr(char*& p1, char* p2);
+int cmphstr(char*& p1, const char* p2);
 char* GetFileName(char*& p, bool convertslashes=false);
 char* GetHobetaFileName(char*& p); /* added */
 int needcomma(char*& p);

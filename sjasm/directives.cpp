@@ -463,7 +463,7 @@ void dirALIGN() {
 	}
 }
 
-void dirMODULE() {
+/*void dirMODULE() {
 	char* n;
 	ModuleList = new CStringsList(ModuleName, ModuleList);
 	if (ModuleName != NULL) {
@@ -493,6 +493,62 @@ void dirENDMODULE() {
 			ModuleName = NULL;
 		}
 		ModuleList = ModuleList->next;
+	} else {
+		Error("ENDMODULE without MODULE", 0);
+	}
+}*/
+
+void dirMODULE() {
+	char* n;
+	if (n = GetID(lp)) {
+		if(ModuleName == NULL)
+		{
+			ModuleName = STRDUP(n);
+			if (ModuleName == NULL) {
+				Error("Not enough memory!", 0, FATAL);
+			}
+		}
+		else
+		{
+			ModuleName = (char*)realloc(ModuleName,strlen(n)+strlen(ModuleName)+2);
+			if (ModuleName == NULL) {
+				Error("Not enough memory!", 0, FATAL);
+			}
+			STRCAT(ModuleName, sizeof("."), ".");
+			STRCAT(ModuleName, sizeof(n), n);
+		}
+	} else {
+		Error("[MODULE] Syntax error", 0, CATCHALL);
+	}
+
+	if (ModuleName != NULL) {
+		ModuleList = new CStringsList(ModuleName, ModuleList);
+	}
+}
+
+void dirENDMODULE() {
+	CStringsList* tmp;
+
+	if (ModuleList) {
+		if (ModuleName != NULL) {
+			free(ModuleName);
+			ModuleName = NULL;
+		}
+		tmp = ModuleList->next;
+		if(tmp!=NULL)
+		{
+			ModuleList->next = NULL;
+			delete ModuleList;
+		}
+		ModuleList = tmp;
+		if (ModuleList != NULL && ModuleList->string != NULL) {
+			ModuleName = STRDUP(ModuleList->string);
+			if (ModuleName == NULL) {
+				Error("No enough memory!", 0, FATAL);
+			}
+		} else {
+			ModuleName = NULL;
+		}
 	} else {
 		Error("ENDMODULE without MODULE", 0);
 	}
