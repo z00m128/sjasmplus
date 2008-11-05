@@ -1,0 +1,3174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<book>
+  <title>SjASMPlus 1.07 Documentation [03.04.2008]</title>
+
+  <chapter>
+    <title>Introduction</title>
+
+    <section>
+      <title>License</title>
+
+      <para>SjASMPlus licensed under BSD license.</para>
+    </section>
+
+    <section>
+      <title>What is it?</title>
+
+      <para>SjASMPlus is Z80 Assembly Language Cross Compiler. It is available
+      for Win32, DOS and FreeBSD(mainly 5.x) systems. It is based on SjASM
+      source code by Sjoerd Mastijn (<ulink
+      url="http://xl2s.tk">http://xl2s.tk</ulink>)</para>
+    </section>
+
+    <section>
+      <title>Main Features</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>Z80/R800 documented and undocumented opcodes support</para>
+          </listitem>
+
+          <listitem>
+            <para>Very fast compilation: 1 million lines by 2-3 seconds on
+            modern computer</para>
+          </listitem>
+
+          <listitem>
+            <para>Code inlining through colon (LD A,C:INC A:PUSH AF:IFDEF
+            FX:LD A,D:ENDIF…)</para>
+          </listitem>
+
+          <listitem>
+            <para>Structures to define data structures in memory more easily
+            (use STRUCT pseudo-op)</para>
+          </listitem>
+
+          <listitem>
+            <para>Conditional assembly</para>
+          </listitem>
+
+          <listitem>
+            <para>Macro definitions</para>
+          </listitem>
+
+          <listitem>
+            <para>Local labels</para>
+          </listitem>
+
+          <listitem>
+            <para>User’s messages</para>
+          </listitem>
+
+          <listitem>
+            <para>Temporary labels</para>
+          </listitem>
+
+          <listitem>
+            <para>Special mode</para>
+          </listitem>
+
+          <listitem>
+            <para>Defines and array of defines</para>
+          </listitem>
+
+          <listitem>
+            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and
+            more</para>
+          </listitem>
+
+          <listitem>
+            <para>Source and binary file inclusion</para>
+          </listitem>
+
+          <listitem>
+            <para>Multiline block comments</para>
+          </listitem>
+
+          <listitem>
+            <para>Multi file output and file updating</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Credits</title>
+
+      <para>Special thanks to <emphasis>Sjoerd Mastijn</emphasis>, the author
+      of SjASM.</para>
+
+      <para><emphasis>Aprisobal </emphasis>- main programming, documentation,
+      etc.</para>
+
+      <para>Thanks to:<itemizedlist>
+          <listitem>
+            <para><emphasis>Kurles/HS/CPU</emphasis> - additional
+            programming;</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>Krystian Wlosek
+            &lt;kwlosek(at)gmail.com&gt;</emphasis> - bug fix patches, Linux
+            makefile;</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>Ric Horne &lt;Ric.Hohne@eads-ts.com&gt;</emphasis>
+            - bug fix patches.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>breeze &lt;breeze@tut.by&gt;</emphasis> - bug fix
+            patches.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>psndcj &lt;psndcj.tbk@gmail.com&gt;</emphasis> -
+            bug reporting, beta-testing.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>elfh &lt;elphecy@gmail.com&gt;</emphasis> - bug
+            reporting.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>bugsy &lt;bugsy@ya.ru&gt;</emphasis> - bug
+            reporting.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>skrju &lt;sq-@mail.ru&gt;</emphasis> - bug
+            reporting.</para>
+          </listitem>
+        </itemizedlist></para>
+
+      <para>And big thanks to all people, who helped me in development of the
+      compiler!</para>
+    </section>
+
+    <section>
+      <title><anchor id="feedback" />Feedback</title>
+
+      <para>WWW: <ulink
+      url="http://sjasmplus.sourceforge.net">http://sjasmplus.sourceforge.net</ulink></para>
+
+      <para>E-Mail: my@aprisobal.by</para>
+    </section>
+
+    <section>
+      <title>What's new?</title>
+
+      <para><variablelist>
+          <varlistentry>
+            <term>03.04.2008 - 1.07 Stable</term>
+
+            <listitem>
+              <para><programlisting>- Added new SAVETAP pseudo-op. It's support up to 1024kb ZX-Spectrum's RAM.
+- Added new --nofakes commandline parameter.</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>02.04.2008 - 1.07 RC7</term>
+
+            <listitem>
+              <para><programlisting>- Another fix of 48k SNA snapshots saving routine.
+- Added new UNDEFINE pseudo-op.  
+- Added new IFUSED/IFNUSED pseudo-ops for labels (such IFDEF for defines).
+- Fixed labels list dump rountine (--lstlab command line parameter).</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>27.03.2008 - 1.07 RC6</term>
+
+            <listitem>
+              <para><programlisting>- Applied bugfix patches for SAVEHOB/SAVETRD pseudo-ops by Breeze.
+- Fixed memory leak in line parsing routine.
+- Fixed 48k SNA snapshots saving routine.
+- Added missing INF instruction.
+- Fixed code parser's invalid addressing of temporary labels in macros.</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>31.05.2007 - 1.07 RC5bf</term>
+
+            <listitem>
+              <para><programlisting>- Bugfix patches by Ric Hohne.
+- Important bugfix of memory leak.
+- Bugfix of strange crashes at several machines.
+- Added yet another sample for built-in LUA engine. See end of this file.
+- Added sources of CosmoCubes demo to the "examples" directory.</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>13.05.2007 - 1.07 RC5</term>
+
+            <listitem>
+              <para><programlisting>- ALIGN has new optional parameter.
+- Corrected bug of RAM sizing.
+- Corrected bug of structures naming.</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>02.12.2006 - 1.07 RC4bf</term>
+
+            <listitem>
+              <para><programlisting>- Corrected important bug in code generation functions of SjASMPlus.</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>28.11.2006 - 1.07 RC4</term>
+
+            <listitem>
+              <para><programlisting>- Corrected bug with SAVEBIN, SAVETRD and possible SAVESNA.
+- Add Makefile to build under Linux, FreeBSD etc.
+</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>12.10.2006 - 1.07 RC3</term>
+
+            <listitem>
+              <para><programlisting>- SAVESNA can save 48kb snapshots
+- Corrected DEFINE's bug.
+- Corrected bug of incorrect line numbering.
+</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>28.09.2006 - 1.07 RC2</term>
+
+            <listitem>
+              <para><programlisting>- SAVESNA works and with device ZXSPECTRUM48
+- Added new device PENTAGON128
+- In ZXSPECTRUM48 device and others attributes has black ink and white paper by default.</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>23.09.2006 - 1.07 RC1bf</term>
+
+            <listitem>
+              <para><programlisting>- Corrected bug with _ERRORS and _WARNINGS constants
+- Added error message, when SHELLEXEC program execution failed</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>17.09.2006 - 1.07 RC1</term>
+
+            <listitem>
+              <para><programlisting>- 3-pass design 
+- Built-in Lua scripting engine 
+- Changed command line keys 
+- Documentation converted to HTML. 
+- Added new directives: DEVICE, SLOT, SHELLEXEC 
+- Added predefined constanst: _SJASMPLUS=1, _ERRORS and other 
+- Changed output log format. 
+- And many many more.</programlisting></para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+
+      <para>Old SjASMPlus 1.06 log was removed.</para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Where to get and how to use</title>
+
+    <section>
+      <title>Packages</title>
+
+      <para>You can grab last binaries and sources SourceForge project page:
+      <ulink
+      url="http://sourceforge.net/projects/sjasmplus/">http://sourceforge.net/projects/sjasmplus/</ulink></para>
+
+      <para>Win32 package has:<itemizedlist>
+          <listitem>
+            <para>sjasmplus.exe - the Win32 executable. This is out compiler
+            and we will use it.</para>
+          </listitem>
+
+          <listitem>
+            <para>examples directory - some examples of use</para>
+          </listitem>
+
+          <listitem>
+            <para>documentation directory - documentation in various
+            formats</para>
+          </listitem>
+        </itemizedlist></para>
+
+      <para>DOS and FreeBSD versions has same files in their packages.</para>
+
+      <para><emphasis>Linux version</emphasis> you can compile using
+      <emphasis>GCC</emphasis> and <emphasis>Makefile</emphasis> from sources
+      package.</para>
+
+      <para>MacOS X version you can compile using <emphasis>XCode</emphasis>
+      package and included <emphasis>Makefile</emphasis>.</para>
+    </section>
+
+    <section>
+      <title>Command line</title>
+
+      <para>Usage:</para>
+
+      <para><emphasis>sjasmplus [options] sourcefile(s)</emphasis></para>
+
+      <para>Option flags as follows:</para>
+
+      <para><programlisting>  --help                   Help information
+  -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
+                           Include path
+  --lst=&lt;filename&gt;         Save listing to &lt;filename&gt;
+  --lstlab                 Enable label table in listing
+  --sym=&lt;filename&gt;         Save symbols list to &lt;filename&gt;
+  --exp=&lt;filename&gt;         Save exports to &lt;filename&gt; (see EXPORT pseudo-op)
+  --raw=&lt;filename&gt;         Save all output to &lt;filename&gt; ignoring OUTPUT pseudo-ops
+  Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
+ Logging:
+  --nologo                 Do not show startup message
+  --msg=error              Show only error messages
+  --msg=all                Show all messages (by default)
+  --fullpath               Show full path to error file
+ Other:
+  --reversepop             Enable reverse POP order (as in base SjASM version)
+  --dirbol                 Enable processing directives from the beginning of line
+  --nofakes                Disable fake instructions
+  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</programlisting></para>
+    </section>
+
+    <section>
+      <title>Source file format</title>
+
+      <para>Lines in the source file should have the following
+      form:<programlisting>Label Operator Operand Comment</programlisting>All
+      fields are optional. Lines without label should start with whitespace.
+      Operators and operands can be inlined:</para>
+
+      <para><programlisting>      Operator Operand:Operator Operand:Operator Operand... Comment</programlisting>Comments
+      should start with ';' or '//'. Comment blocks start with '/*' and end
+      with '*/'.</para>
+
+      <para><example>
+          <title></title>
+
+          <para><programlisting>; comment
+// comment
+ ld /* comment */ a,80
+/*
+ comment
+*/
+ ld /*
+ but this won't be ld a,3!
+ */ a,3</programlisting></para>
+        </example></para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Labels</title>
+
+    <section>
+      <title>Labels</title>
+
+      <para>Labels are case-sensitive and may be of any reasonable length,
+      that is: up to about 70 characters. Label definitions should start on
+      the beginning of a line, but don't have to be followed by a colon ':'.
+      Generally labels should start with a letter or a underscore ('_'), the
+      following characters may be chosen from letters, numbers and the
+      following special symbols: '_', '.', '!', '?', '#' and '@'. Note that
+      the '.' has special meaning, as it is used between module names, labels
+      and local labels. The following are all legal and distinct
+      labels:<programlisting>Kip
+KIP
+Kip@@
+MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
+      register names as labels but it is not advised to do so. Also note that
+      the identifiers defined with the DEFINE pseudo-op use another name
+      space.</para>
+    </section>
+
+    <section>
+      <title>Local labels</title>
+
+      <para>When there is a module definition (see module pseudo-op) all
+      labels (except those starting with a '@') are local to that module. To
+      use a label from outside the module use modulename.labelname, in this
+      example: 'vdp.Cls' Labels starting with a '.' are also local to the
+      previous non-local label.</para>
+
+      <para><example>
+          <title></title>
+
+          <para><programlisting>MODULE main
+Main:                           ; main.Main
+        CALL SetScreen          ; SetScreen
+        CALL vdp.Cls            ; vdp.Cls
+.loop:                          ; main.Main.loop
+        LD A,(.event)           ; main.Main.event
+        CALL ProcesEvent        ; label not found: main.ProcesEvent
+        DJNZ .loop              ; main.Main.loop
+
+    MODULE vdp
+@SetScreen:               ; SetScreen
+.loop                     ; vdp.SetScreen.loop
+        RET
+Cls:                      ; vdp.Cls
+.loop                     ; vdp.Cls.loop
+        DJNZ .loop        ; vdp.Cls.loop
+        RET
+
+    ENDMODULE
+Main.event                ; main.Main.event
+    BYTE 0</programlisting></para>
+        </example></para>
+    </section>
+
+    <section>
+      <title>@ Labels</title>
+
+      <para>Labels starting with a '@' are not touched by the label processing
+      and used 'as-is'. See 'SetScreen' in the previous example code. <example>
+          <title></title>
+
+          <para><programlisting>    MODULE xxx
+Label      ; xxx.Label
+.Local     ; xxx.Label.Local
+@Label     ; Label
+.Local     ; xxx.Label.Local =&gt; duplicate label error
+@Label2    ; Label2
+.Local     ; xxx.Label2.Local
+@yyy.Local ; yyy.Local
+yyy.Local  ; xxx.yyy.Local</programlisting></para>
+        </example></para>
+    </section>
+
+    <section>
+      <title>Temporary labels</title>
+
+      <para>To keep the number of used labels reasonable it is possible to use
+      numbers as labels. These labels can only be used as labels to jump to.
+      To jump to these labels, use the number followed by an 'F' for forward
+      branches or a 'B' for backward branches. Temporary labels should not be
+      used within macro's.</para>
+
+      <para><example>
+          <title></title>
+
+          <para><programlisting>        ADD A,E
+        JR NC,1F
+        INC D
+1       LD E,A
+2       LD B,4
+        LD A,(DE)
+        OUT (152),A
+        DJNZ 2B</programlisting></para>
+        </example></para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Constants, expressions and other features</title>
+
+    <section>
+      <title>Numeric constants</title>
+
+      <para>Numeric constants should always start with a digit or $, # or %.
+      The following formats are supported:</para>
+
+      <para><programlisting>12     decimal
+12d    decimal
+0ch    hexadecimal
+0xc    hexadecimal
+$c     hexadecimal
+#c     hexadecimal
+1100b  binary
+%1100  binary
+14q    octal
+14o    octal</programlisting></para>
+    </section>
+
+    <section>
+      <title>Character and string constants</title>
+
+      <para>Character constants are characters surrounded by single quotes. It
+      is possible to use double quotes in some cases, but in general it is
+      better to use single quotes. String constants are characters surrounded
+      by double quotes. The following escape sequences are recognized:</para>
+
+      <para><programlisting>\\ 92
+\? 63
+\' 39
+\" 34
+\A 7
+\B 8
+\D 127
+\E 27
+\F 12
+\N 10
+\R 13
+\T 9
+\V 11</programlisting><example>
+          <title></title>
+
+          <para><programlisting>    BYTE "stringconstant"  ;
+    BYTE 'stringconstant'  ;with single quotes escape sequences above (\N,\T..) will not work
+    LD HL,'hl'
+    LD HL,"hl" ; :(
+    LD A,"7"   ; :(
+    LD A,'8'   ; :)
+    LD A,'\E'
+    LD A,'"'
+    LD A,"'"</programlisting></para>
+        </example></para>
+    </section>
+
+    <section>
+      <title>Expressions</title>
+
+      <para>Expressions are evaluated in 32 bits in this version of
+      SjASMPlus.</para>
+
+      <para>'$' represents the current program counter. '$$' represents the
+      current page in the current slot in the <link
+      linkend="s_realdevice">real device emulation mode</link>.</para>
+
+      <para>It is possible to use parenthesis '(' and ')' to override the
+      precedence of the operators. The following operators may be used in
+      expressions:</para>
+
+      <para><programlisting>!     !x       logical not
+~     ~x       complement
++     +x       does absolutely nothing :)
+-     -x       minus
+low   low x    low 8 bits of 16 bit value
+high  high x   high 8 bits of 16 bit value
+not   not x    logical not
+
+*     x*y      multiplication
+/     x/y      division
+%     x%y      modulo
+mod   x mod y  modulo
+
++     x+y      addition
+-     x-y      subtraction
+
+&lt;&lt;    x&lt;&lt;y     shift left
+&gt;&gt;    x&gt;&gt;y     shift right signed
+&gt;&gt;&gt;   x&gt;&gt;&gt;y    shift right unsigned
+shl   x shl y  shift left
+shr   x shr y  shift right signed
+
+&lt;?    x&lt;?y     minimum
+&gt;?    x&gt;?y     maximum
+
+&lt;     x&lt;y      less than
+&gt;     x&gt;y      greater than
+&lt;=    x&lt;=y     equal or less than
+&gt;=    x&gt;=y     equal or greater than
+
+=     x=y      equal
+==    x==y     equal
+!=    x!=y     not equal
+
+&amp;     x&amp;y      bitwise and
+and   x and y  bitwise and
+
+^     x^y      bitwise xor
+xor   x xor y  bitwise xor
+
+|     x|y      bitwise or
+or    x or y   bitwise or
+
+&amp;&amp;    x&amp;&amp;y     logical and
+
+||    x||y     logical or</programlisting></para>
+    </section>
+
+    <section>
+      <title>Assembly language</title>
+
+      <para>This version only accepts Z80 mnemonics. There are some additions
+      to what I think is standard Z80: <itemizedlist>
+          <listitem>
+            <para>'[' and ']' can be used in stead of '(' and ')' for
+            indirections. So LD A,[HL] is the same as LD A,(HL).</para>
+          </listitem>
+
+          <listitem>
+            <para>IN F,(C) and OUT (C),0 and SLL/SLI can be used.</para>
+          </listitem>
+
+          <listitem>
+            <para>IXL (or LX, XL), IYL (or LY, YL), IXH (or HX, XH) and IYH
+            (or HY, YH) registers are supported.</para>
+          </listitem>
+
+          <listitem>
+            <para>Can write code throught colon: ORG 100h:LD A,10:LD B,10:SUB
+            B:RET:IFDEF AA:.....</para>
+          </listitem>
+
+          <listitem>
+            <para>JP HL, JP IX and JP IY may be used instead of JP (HL),
+            etc.</para>
+          </listitem>
+
+          <listitem>
+            <para>EX AF,AF or EX AF or EXA may be used instead of EX
+            AF,AF'.</para>
+          </listitem>
+
+          <listitem>
+            <para>R800's MULUB and MULUW are recognised (but won't work on
+            Z80, of course:)</para>
+          </listitem>
+
+          <listitem>
+            <para>RLC, RRC, RL, RR, SLA, SRA, SLL (SLI), RES, SET undocumented
+            instructions added.</para>
+          </listitem>
+        </itemizedlist><programlisting>    SET 4,(IX+4),C ; (aka LD C,SET 4,(IX+4)) is LD C,(IX+4) / SET 4,C / LD (IX+4),C
+    RRC (IY),A     ; (aka LD A,RRC (IY+0))   is LD A,(IY)   / RRC A   / LD (IY),A</programlisting><itemizedlist>
+          <listitem>
+            <para>PUSH and POP can take register lists:</para>
+          </listitem>
+        </itemizedlist><programlisting>    PUSH AF,BC  ; push af / push bc
+    POP  AF,BC  ; pop  af / pop  bc</programlisting><itemizedlist>
+          <listitem>
+            <para>and all other commands support this.</para>
+          </listitem>
+        </itemizedlist><programlisting>    LD A,B,B,D,D,H 
+   /* this is:
+     LD A,B
+     LD B,D
+     LD D,H
+   */
+   ;or you can write  LD A,B:LD B,D:LD D,H</programlisting></para>
+    </section>
+
+    <section>
+      <title>Fake instructions</title>
+
+      <para>Of course the Z80 is only an 8 bit cpu, but sometimes ld hl,de
+      would be nice. SjASMPlus now 'fakes' some instructions like that. This
+      improves the readability of the source, but it might not be the fastest
+      way to get the result. Also possibly some 'new' load instructions do
+      affect the flags in ways you wouldn't expect. Anyway, here's the
+      list:</para>
+
+      <para><programlisting>  rl bc
+  rl de
+  rl hl
+  rr bc
+  rr de
+  rr hl
+  sla bc
+  sla de
+  sla hl
+  sll bc
+  sll de
+  sll hl
+  sli bc
+  sli de
+  sli hl
+  sra bc
+  sra de
+  sra hl
+  srl bc
+  srl de
+  srl hl
+
+  ld bc,bc
+  ld bc,de
+  ld bc,hl
+  ld bc,ix
+  ld bc,iy
+  ld bc,(hl)
+  ld bc,(ix+nn)
+  ld bc,(iy+nn)
+
+  ld de,bc
+  ld de,de
+  ld de,hl
+  ld de,ix
+  ld de,iy
+  ld de,(hl)
+  ld de,(ix+nn)
+  ld de,(iy+nn)
+
+  ld hl,bc
+  ld hl,de
+  ld hl,hl
+  ld hl,ix
+  ld hl,iy
+  ld hl,(ix+nn)
+  ld hl,(iy+nn)
+
+  ld ix,bc
+  ld ix,de
+  ld ix,hl
+  ld ix,ix
+  ld ix,iy
+
+  ld iy,bc
+  ld iy,de
+  ld iy,hl
+  ld iy,ix
+  ld iy,iy
+
+  ld (hl),bc
+  ld (hl),de
+
+  ld (ix+nn),bc
+  ld (ix+nn),de
+  ld (ix+nn),hl
+
+  ld (iy+nn),bc
+  ld (iy+nn),de
+  ld (iy+nn),hl
+
+  ldi bc,(hl)
+  ldi bc,(ix+nn)
+  ldi bc,(iy+nn)
+
+  ldi de,(hl)
+  ldi de,(ix+nn)
+  ldi de,(iy+nn)
+
+  ldi hl,(ix+nn)
+  ldi hl,(iy+nn)
+
+  ldi (hl),bc
+  ldi (hl),de
+
+  ldi (ix+nn),bc
+  ldi (ix+nn),de
+  ldi (ix+nn),hl
+
+  ldi (iy+nn),bc
+  ldi (iy+nn),de
+  ldi (iy+nn),hl
+
+  ldi a,(bc)
+  ldi a,(de)
+  ldi a,(hl)
+  ldi b,(hl)
+  ldi c,(hl)
+  ldi d,(hl)
+  ldi e,(hl)
+  ldi h,(hl)
+  ldi l,(hl)
+  ldi a,(ix+nn)
+  ldi b,(ix+nn)
+  ldi c,(ix+nn)
+  ldi d,(ix+nn)
+  ldi e,(ix+nn)
+  ldi h,(ix+nn)
+  ldi l,(ix+nn)
+  ldi a,(iy+nn)
+  ldi b,(iy+nn)
+  ldi c,(iy+nn)
+  ldi d,(iy+nn)
+  ldi e,(iy+nn)
+  ldi h,(iy+nn)
+  ldi l,(iy+nn)
+
+  ldd a,(bc)
+  ldd a,(de)
+  ldd a,(hl)
+  ldd b,(hl)
+  ldd c,(hl)
+  ldd d,(hl)
+  ldd e,(hl)
+  ldd h,(hl)
+  ldd l,(hl)
+  ldd a,(ix+nn)
+  ldd b,(ix+nn)
+  ldd c,(ix+nn)
+  ldd d,(ix+nn)
+  ldd e,(ix+nn)
+  ldd h,(ix+nn)
+  ldd l,(ix+nn)
+  ldd a,(iy+nn)
+  ldd b,(iy+nn)
+  ldd c,(iy+nn)
+  ldd d,(iy+nn)
+  ldd e,(iy+nn)
+  ldd h,(iy+nn)
+  ldd l,(iy+nn)
+
+  ldi (bc),a
+  ldi (de),a
+  ldi (hl),a
+  ldi (hl),b
+  ldi (hl),c
+  ldi (hl),d
+  ldi (hl),e
+  ldi (hl),h
+  ldi (hl),l
+  ldi (ix+nn),a
+  ldi (ix+nn),b
+  ldi (ix+nn),c
+  ldi (ix+nn),d
+  ldi (ix+nn),e
+  ldi (ix+nn),h
+  ldi (ix+nn),l
+  ldi (iy+nn),a
+  ldi (iy+nn),b
+  ldi (iy+nn),c
+  ldi (iy+nn),d
+  ldi (iy+nn),e
+  ldi (iy+nn),h
+  ldi (iy+nn),l
+   
+  ldd (bc),a
+  ldd (de),a
+  ldd (hl),a
+  ldd (hl),b
+  ldd (hl),c
+  ldd (hl),d
+  ldd (hl),e
+  ldd (hl),h
+  ldd (hl),l
+  ldd (ix+nn),a
+  ldd (ix+nn),b
+  ldd (ix+nn),c
+  ldd (ix+nn),d
+  ldd (ix+nn),e
+  ldd (ix+nn),h
+  ldd (ix+nn),l
+  ldd (iy+nn),a
+  ldd (iy+nn),b
+  ldd (iy+nn),c
+  ldd (iy+nn),d
+  ldd (iy+nn),e
+  ldd (iy+nn),h
+  ldd (iy+nn),l
+
+  ldi (hl),nn
+  ldi (ix+nn),nn
+  ldi (iy+nn),nn
+
+  ldd (hl),nn
+  ldd (ix+nn),nn
+  ldd (iy+nn),nn
+
+  sub hl,bc
+  sub hl,de
+  sub hl,hl
+  sub hl,sp</programlisting>ldi increases the data pointer after the data
+      access, so LDI A,(HL) is the same as LD A,(HL):INC HL. likewise, LDD
+      A,(DE) is LD A,(DE):DEC DE.</para>
+    </section>
+
+    <section>
+      <title><anchor id="s_realdevice" />Real device emulation mode</title>
+
+      <para>To enable this mode you must use pseudo-op <link
+      linkend="po_device">DEVICE</link>.</para>
+
+      <para>In this mode the compiler compiling program to virtual memory (as
+      at MSX's WB-ASS2, ZX-Spectrum's GENS, ZEUS, ALASM etc). After this all
+      you can use new pseudo-ops as <link linkend="s_pseudoops">SAVEBIN,
+      SAVEHOB, SAVETRD, SAVETAP,PAGE, SLOT, LABELSLIST</link> and use special
+      functions in <link linkend="c_lua_scripting">Lua scripts</link>.</para>
+
+      <para><example>
+          <title></title>
+
+          <para><programlisting>    DEVICE ZXSPECTRUM128
+    ;in this device, SLOT 3 enables to current by default.    
+
+    ORG 32768
+StartProg:
+    JP $
+
+    DEVICE NONE
+    ;do something, if you don't want to corrupt virtual
+    ;memory with other code, for example, loader of code.
+    ;...code...
+
+    ;return to our virtual device:
+    DEVICE ZXSPECTRUM128
+
+    SAVESNA "snapshotname.sna",StartProg
+
+    SAVETAP "tapefile.tap",StartProg
+ </programlisting></para>
+        </example>Predefined devices:<variablelist>
+          <varlistentry>
+            <term>NONE</term>
+
+            <listitem>
+              <para>Disable real device emulation mode. By default.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ZXSPECTRUM48</term>
+
+            <listitem>
+              <para>Has 4 slots (0-3) with size 4000h, 4 pages (0-3) with size
+              4000h. Slot 3 (it from 0C000h) enables to current by
+              default.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ZXSPECTRUM128</term>
+
+            <listitem>
+              <para>Has 8 RAM pages (0-7) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ZXSPECTRUM256</term>
+
+            <listitem>
+              <para>Same as russian clone Scorption 256. Has 16 RAM pages
+              (0-15) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ZXSPECTRUM512</term>
+
+            <listitem>
+              <para>Same as russian clones ATM Turbo 512 and Pentagon 512. Has
+              32 RAM pages (0-31) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ZXSPECTRUM1024</term>
+
+            <listitem>
+              <para>Same as russian clones ATM Turbo 2 and Pentagon 1024 SL.
+              Has 64 RAM pages (0-63) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+
+      <para>If you want to see other devices you must write to us. See <link
+      linkend="feedback">Feedback</link> chapter.</para>
+    </section>
+
+    <section>
+      <title>Predefined defines</title>
+
+      <para>SjASMPlus has predefined <link
+      linkend="po_define">defines</link>.<variablelist>
+          <varlistentry>
+            <term>_SJASMPLUS = 1</term>
+
+            <listitem>
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>   IFDEF _SJASMPLUS
+     ;code for sjasmplus
+   ELSE
+     ;code for other compiler
+   ENDIF</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>_VERSION = "version"</term>
+
+            <listitem>
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>   IF _VERSION = "1.07"
+     ;code for 1.07
+   ELSE
+     ;code for other version
+   ENDIF</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>_RELEASE = releasenumber</term>
+
+            <listitem>
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>   IF _RELEASE = 1 ; 0 - is stable version
+     ;code for Release Candidate 1
+   ELSE
+     ;code for other version
+   ENDIF</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>_ERRORS = &lt;number&gt;</term>
+
+            <listitem>
+              <para>Number of errors.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>_WARNINGS = &lt;number&gt;</term>
+
+            <listitem>
+              <para>Number of warnings.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Pseudo-ops (aka Pseudo-instructions, Directives etc)</title>
+
+    <section>
+      <title>Simple example of usage</title>
+
+      <para><programlisting>     .SOMEPSEUDOOP ;or 
+     SOMEPSEUDOOP  ;or
+     somepseudoop</programlisting></para>
+    </section>
+
+    <section>
+      <title><anchor id="s_pseudoops" />Almost complete list</title>
+
+      <para></para>
+
+      <para><variablelist>
+          <varlistentry>
+            <term>.&lt;expression&gt; &lt;code&gt;</term>
+
+            <listitem>
+              <para>Repeat &lt;code&gt; &lt;expression&gt; once. Doesn't work
+              in the beginning of line.<example>
+                  <title></title>
+
+                  <para><programlisting> .3        INC A    ;will be compiled to INC A:INC A:INC A
+len        EQU 10 
+ .(12-len) BYTE 0   ;will be compiled to BYTE 0,0</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ABYTE &lt;offset&gt; &lt;bytes&gt;</term>
+
+            <listitem>
+              <para>Defines a byte or a string of bytes. The offset is added
+              to each of the following bytes.<example>
+                  <title></title>
+
+                  <para><programlisting>    ABYTE 2 4,9    ; Same as BYTE 6,11
+    ABYTE 3 "ABC"  ; Same as BYTE "DEF"</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ABYTEC &lt;offset&gt; &lt;bytes&gt;</term>
+
+            <listitem>
+              <para>Defines a byte or a string of bytes, where the last byte
+              of the string will have bit 7 set. The offset is added to each
+              of the following bytes.<example>
+                  <title></title>
+
+                  <para><programlisting>    ABYTEC 0 "KIP"        ; Same as BYTE "KI",'P'|128
+    ABYTEC 1 "ABC",0,"DE" ; Same as BYTE "BC",'D'|128,1,'E','F'|128</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ABYTEZ &lt;offset&gt; &lt;bytes&gt;</term>
+
+            <listitem>
+              <para>Defines a byte or a string of bytes, followed by a zero.
+              The offset is added to each of the following bytes.<example>
+                  <title></title>
+
+                  <para><programlisting>    ABYTEZ 0 "KIP"        ; Same as BYTE "KIP",0</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ALIGN
+            &lt;2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384 or
+            32768&gt;, &lt;byte&gt;</term>
+
+            <listitem>
+              <para>Align fills zero or more byte with &lt;byte&gt; until the
+              new address modulo &lt;expression&gt; equals zero.<example>
+                  <title></title>
+
+                  <para><programlisting>    ALIGN         ; =&gt; ALIGN 4 - simply align by 4
+    ALIGN 2       ; by 2
+    ALIGN 2,0       ; + fills memory by zero</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ASSERT &lt;expression&gt;</term>
+
+            <listitem>
+              <para>An 'assertion failed' error is issued if the expression
+              evaluates to zero.<example>
+                  <title></title>
+
+                  <para><programlisting>STACKPOINTER=0D500H
+    ASSERT END_OF_PROGRAM &lt; STACKPOINTER
+END_OF_PROGRAM
+    END</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>BINARY &lt;filename&gt;[,offset[,length]]</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_incbin">INCBIN</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_block" />BLOCK &lt;length&gt;[,&lt;fill
+            byte&gt;]</term>
+
+            <listitem>
+              <para>Defines space. Has to be followed by the number of byte to
+              reserve, optionally followed by the value to fill these bytes
+              with.<example>
+                  <title></title>
+
+                  <para><programlisting>    BLOCK 500     ; define a block of 500 bytes of zero
+    BLOCK 500,0   ; define a block of 500 bytes of zero
+    BLOCK 400,-1  ; define a block of 400 bytes of 255</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_byte" />BYTE &lt;bytes&gt;</term>
+
+            <listitem>
+              <para>Defines a byte or a string of bytes. Each value should be
+              between -129 and 256.<example>
+                  <title></title>
+
+                  <para><programlisting>    BYTE 0x56
+    BYTE 1,-78,'@'
+    BYTE "Format C:? ",0h</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DB</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DC</term>
+
+            <listitem>
+              <para>Same as <link linkend="po_byte">BYTE</link>, but every
+              last character of a string will have bit 7 set.<example>
+                  <title></title>
+
+                  <para><programlisting>    DC "kip" ; same as BYTE "ki",'p'|128</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DD</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_dword">DWORD</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DEFARRAY &lt;id&gt; &lt;replacements&gt;</term>
+
+            <listitem>
+              <para>Array of DEFINEs<example>
+                  <title></title>
+
+                  <para><programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
+CNT DEFL 0 ;or CNT=0
+    DUP 6
+    DISPLAY myarray[CNT]
+CNT DEFL CNT+1 ;or CNT=CNT+1
+    EDUP</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_dephase" />DEPHASE</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DEFB</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DEFD</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_dword">DWORD</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_defdevice" />DEFDEVICE
+            &lt;deviceid&gt;</term>
+
+            <listitem>
+              <para>Sorry, not available yet. If you want to see new device in
+              SjASMPlus, please, <link linkend="feedback">write
+              us</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_define" />DEFINE &lt;id&gt;
+            &lt;replacement&gt;</term>
+
+            <listitem>
+              <para>The identifier &lt;id&gt; will be replaced with the
+              &lt;replacement&gt;. The replacement could be omitted, in such
+              case it is still possible to check if the identifier was defined
+              with IFDEF or IFNDEF.<example>
+                  <title></title>
+
+                  <para><programlisting>    DEFINE str_honderd "Honderd"
+    BYTE str_honderd,0             ; BYTE "Honderd",0</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DEFM</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DEFS</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_block">BLOCK</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DEFW</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_word">WORD</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_device" />DEVICE &lt;deviceid&gt;</term>
+
+            <listitem>
+              <para>Enables <link linkend="s_realdevice">real device emulation
+              mode</link> by it identifier.</para>
+
+              <para>Predefined devices' identifiers list:</para>
+
+              <para><programlisting> NONE ; off real device emulation mode
+ ZXSPECTRUM48 ; ZX-Spectrum 48
+ ZXSPECTRUM128 ; ZX-Spectrum 128
+ SCORPION256 ; Scorpion 256 - exUSSR clone of ZX-Spectrum 128
+ ATMTURBO512 ; ATM-Turbo 512 - exUSSR clone of ZX-Spectrum 128
+
+ ;disable:
+   DEVICE NONE
+ ;enable:
+   DEVICE ZXSPECTRUM128</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_disp" />DISP &lt;address&gt;</term>
+
+            <listitem>
+              <para>Set the address in which the part of code should work.
+              <link linkend="po_phase">PHASE</link> and <link
+              linkend="po_textarea">TEXTAREA</link> are synonyms of DISP.
+              <link linkend="po_ent">ENT</link> is restore current address.
+              <link linkend="po_unphase">UNPHASE</link>, <link
+              linkend="po_dephase">DEPHASE</link> and <link
+              linkend="po_endt">ENDT</link> are synonyms of <link
+              linkend="po_ent">ENT</link><example>
+                  <title></title>
+
+                  <para><programlisting>SCREEN EQU $4000
+    ORG $8000
+    LD HL,BEGIN
+    LD DE,SCREEN
+    LD BC,ENDOFPROG-BEGIN
+    LDIR
+    CALL SCREEN
+    DI
+    HALT
+BEGIN  DISP SCREEN ;code will compile for address $4000, but to the current ORG
+MARKA  DEC A
+    HALT
+    JP NZ,MARKA
+    RET
+       ENT
+ENDOFPROG</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DISPLAY &lt;bytes&gt;</term>
+
+            <listitem>
+              <para><emphasis>This pseudo-op comes from ZX-Spectrum assembler
+              ALASM.</emphasis></para>
+
+              <para>Out to console a string of bytes. Each value should be
+              between -129 and 256. Keys /D, /H and /A set format of output of
+              numbers:<programlisting>/D - out only in Decimal
+/H - out only in Hexadecimal
+/A - out both in Hexadecimal and Decimal</programlisting><example>
+                  <title></title>
+
+                  <para><programlisting>    ORG 100h
+TESTLABEL:
+    ;...some code...
+    RET
+    DISPLAY "--the some program-- by me"
+    DISPLAY "TESTLABEL address is:",/A,TESTLABEL
+/*  
+will be out to the console next strings:
+&gt; --the some program-- by me
+&gt; TESTLABEL address is:0x100,257
+*/</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DM</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DS</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_block">BLOCK</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_dup" />DUP &lt;count&gt;</term>
+
+            <listitem>
+              <para>DUP specifies the number of times to generate the
+              statements inside the macro. DUP can be used in macro's.<example>
+                  <title></title>
+
+                  <para><programlisting>    DUP 3
+    NOP
+    EDUP
+/*this will expand to:
+    NOP
+    NOP
+    NOP
+*/</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DW</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_word">WORD</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_dword" />DWORD</term>
+
+            <listitem>
+              <para>Defines a so called doubleword. Values should be between
+              -2147483649 and 4294967296.<example>
+                  <title></title>
+
+                  <para><programlisting>    DWORD 4000h,0d000h
+    DWORD 4</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DZ</term>
+
+            <listitem>
+              <para>Same as <link linkend="po_byte">BYTE</link>, but an extra
+              zero will be added at the end.<example>
+                  <title></title>
+
+                  <para><programlisting>    DZ 1      ; same as BYTE 1,0
+    DZ "kip"  ; same as BYTE "kip",0</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>EMPTYTRD &lt;filenameoftrdimage&gt;</term>
+
+            <listitem>
+              <para><emphasis>Useful only for ZX-Spectrum
+              users</emphasis></para>
+
+              <para>Create the empty TRD image for emulators of ZX-Spectrum.
+              See example of <link linkend="po_savetrd">SAVETRD</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ENCODING &lt;encoding&gt;</term>
+
+            <listitem>
+              <para><emphasis>Useful only for non English
+              users</emphasis></para>
+
+              <para>Set the current encoding, i.e. if you set "DOS", SjASMPlus
+              will automatically convert strings from ANSI to DOS-866.
+              Encoding may be "DOS"(DOS-866) or "WIN"(ANSI/Win-1251). Default
+              is "WIN". <example>
+                  <title></title>
+
+                  <para><programlisting>    ENCODING "WIN"
+    DB "тексттекст" ;will be тексттекст
+    ENCODING "DOS"
+    DB "тексттекст" ;will be вҐЄбввҐЄбв</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>END</term>
+
+            <listitem>
+              <para>The assembler will stop at this point. The pseudo-op
+              doesn't work in the beginning of line(with and without key
+              --dirbol).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_endlua" />ENDLUA</term>
+
+            <listitem>
+              <para>See <link linkend="po_lua">LUA</link> for more
+              information.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ENDMOD</term>
+
+            <listitem>
+              <para>Synonym of <link
+              linkend="po_endmodule">ENDMODULE</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_endmodule" />ENDMODULE</term>
+
+            <listitem>
+              <para>To indicate the end of a module (see <link
+              linkend="po_module">MODULE</link>), and use the previous
+              modulename.<example>
+                  <title></title>
+
+                  <para><programlisting>    MODULE M1
+A                 ; M1.A
+    MODULE M2
+A                 ; M2.A
+    ENDMODULE
+B                 ; M1.B
+    ENDMODULE</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_endt" />ENDT</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_ent" />ENT</term>
+
+            <listitem>
+              <para>Restore current address. See <link
+              linkend="po_disp">DISP</link> for more information.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>EQU</term>
+
+            <listitem>
+              <para>To give a label a value other than the current program
+              counter. '=' can be used instead of 'EQU'. The label should not
+              already exist.<example>
+                  <title></title>
+
+                  <para><programlisting>Label EQU 3
+Kip=3</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>EXPORT label</term>
+
+            <listitem>
+              <para>The named label will be written to the export-file, in the
+              form 'label: EQU value'. This way the export-file can be
+              included in other sources.<example>
+                  <title></title>
+
+                  <para><programlisting>DRIE=3
+    EXPORT DRIE</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_field" />FIELD</term>
+
+            <listitem>
+              <para>To give a label the value of the current map counter.
+              Afterwards the map counter is increment by the given amount. '#'
+              May be used instead of 'FIELD'. With map and field it is
+              possible to create structure-like data structures. With '##' it
+              is possible to align the map counter.<example>
+                  <title></title>
+
+                  <para><programlisting>    MAP 8
+Label # 2     ; Label=8
+Kip   # 3     ; Kip=10
+Kop   #       ; Kop=13
+Kop2  # 1     ; Kop2=13
+     ##       ; align map address (align 4 is default)
+Kop3  # 6     ; Kop3=16</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>FPOS &lt;position&gt;</term>
+
+            <listitem>
+              <para>The FPOS directive makes it possible to set the file
+              position to anywhere in the output file.</para>
+
+              <para>In combination with <link
+              linkend="po_output">OUTPUT</link> “&lt;filename&gt;”,r it is
+              possible to update existing files.</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>; This example will result in a file with a length of one byte:
+    BYTE 0
+    FPOS 0
+    BYTE 1
+    END</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_incbin" />INCBIN
+            &lt;filename&gt;[,offset[,length]]</term>
+
+            <listitem>
+              <para>To include a binary file into the outputfile. The offset
+              and length are optional.<example>
+                  <title></title>
+
+                  <para><programlisting>    INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
+    INCBIN "rantab.com",3,256 ; include 256 bytes from offset 3
+    INCBIN gfx.scc ,7         ; note the space between the filename and the ',7' here :)</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>INCHOB &lt;filename&gt;[,offset[,length]]</term>
+
+            <listitem>
+              <para>To include a data from a hobeta file into the outputfile.
+              The offset and length are optional.<example>
+                  <title></title>
+
+                  <para><programlisting>    INCHOB "gfx.$c",7        ; include gfx.scc, skip first 7 bytes
+    INCHOB "sprs.$c",3,256   ; include 256 bytes from offset 3
+    INCHOB gfx.$c ,7        ; note the space between the filename and the ',7' here :)</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>INCLUDE &lt;filename&gt;</term>
+
+            <listitem>
+              <para>To include another sourcefile into the current.
+              Sourcefiles can be nested 20 levels deep. If the file cannot be
+              found in the current directory (the current directory is the
+              directory the current file comes from) the file will be searched
+              for in the directories specified at the commandline. When angle
+              brackets are used, the commandline directories are searched
+              before the current directory.<example>
+                  <title></title>
+
+                  <para><programlisting>    INCLUDE &lt;VDP.I&gt;
+    INCLUDE MORE.I
+    INCLUDE "MORE.I"</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>INCLUDELUA &lt;filename&gt;</term>
+
+            <listitem>
+              <para>To include another LUA script in first pass(!). If the
+              file cannot be found in the current directory (the current
+              directory is the directory the current file comes from) the file
+              will be searched for in the directories specified at the
+              commandline. When angle brackets are used, the commandline
+              directories are searched before the current directory.<example>
+                  <title></title>
+
+                  <para><programlisting>    INCLUDELUA &lt;mylibrary1.lua&gt;
+    INCLUDELUA mylibrary2.lua
+    INCLUDELUA "library_for_zx.lua"</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>INCTRD
+            &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,offset[,length]]</term>
+
+            <listitem>
+              <para>To include a file from a TRD image into the outputfile.
+              The offset and length are optional.<example>
+                  <title></title>
+
+                  <para><programlisting>    INCTRD "test.trd","mygfx.C" ; include mygfx.C from test.trd
+    INCTRD "test.trd","mygfx.C",12 ; include mygfx.C from test.trd, skip first 12 bytes</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>INSERT &lt;filename&gt;[,offset[,length]]</term>
+
+            <listitem>
+              <para>INSERT is a synonym of <link
+              linkend="po_incbin">INCBIN</link>. See above.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>LABELSLIST &lt;filename&gt;</term>
+
+            <listitem>
+              <para><emphasis>Useful only for ZX-Spectrum Emulator
+              UNREALSPECCY.</emphasis></para>
+
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Save labels list in format:</para>
+
+              <para><programlisting>NN:ADDRESS LABELNAME</programlisting>
+              ,where NN is number of page of RAM</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    LABELSLIST "x:/somepath/user.l"</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>LUA [pass]<anchor id="po_lua" /></term>
+
+            <listitem>
+              <para>Using pseudo-ops LUA and ENDLUA you can insert Lua
+              scripts. See more in the chapter "<link
+              linkend="c_lua_scripting">Lua scripting</link>".</para>
+
+              <para>Parameter is optional. It may be:<programlisting>PASS1  -  interpret Lua script in first pass only.
+PASS2  -  interpret Lua script in second pass only.
+PASS3  -  interpret Lua script in third pass only. By default.
+ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</programlisting></para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    LUA
+-- some comments
+        print "Hi, man! This is Lua!"
+    ENDLUA
+; some code now:
+    LUA ALLPASS
+        _pl("LABEL LD A,10")
+        _pc("RET")
+    ENDLUA</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>MAP &lt;address&gt;</term>
+
+            <listitem>
+              <para>Set the map counter to the specified value. See <link
+              linkend="po_field">FIELD</link> for an example.<example>
+                  <title></title>
+
+                  <para><programlisting>    MAP 5</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>MEMORYMAP</term>
+
+            <listitem>
+              <para>Not available yet.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_module" />MODULE &lt;name&gt;</term>
+
+            <listitem>
+              <para>Labels are to be unique only in the current module. Also
+              note the use of '@' to suppress all this label-processing. (The
+              '@' is NOT part of the label name though!)<example>
+                  <title></title>
+
+                  <para><programlisting>    MODULE xxx
+Kip                ; label xxx.Kip
+    CALL Kip         ; call xxx.Kip
+    CALL yyy.Kip     ; call yyy.Kip
+    CALL Kop         ; call xxx.Kop
+    CALL @Kop        ; call Kop
+    Call @Kip        ; call Kip
+
+    MODULE yyy
+Kip                ; label yyy.Kip
+@Kop               ; label Kop
+@xxx.Kop           ; label xxx.Kop
+
+    MODULE           ; no modulename
+Kip                ; label Kip</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ORG &lt;address&gt;</term>
+
+            <listitem>
+              <para>Set the program counter to a specific address.<example>
+                  <title></title>
+
+                  <para><programlisting>    ORG 100h ; or 0x100, or $100, or #100
+
+    ; useful macro that padding code
+    MACRO PADORG addr
+         ; add padding
+         IF $ &lt; addr
+         BLOCK addr-$
+         ENDIF
+         ORG addr
+    ENDM
+
+    MACRO PADORG2 addr
+         ; add padding + display warning
+         IF $ &gt; addr
+           ; no padding
+           DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", addr
+         ELSE
+           ; add padding
+           BLOCK addr-$
+         ENDIF
+         ORG addr
+    ENDM</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_output" />OUTPUT
+            “&lt;filename&gt;”,mode</term>
+
+            <listitem>
+              <para>With OUTPUT it is possible to create multiple files from
+              one source. All following instructions will be assembled to this
+              file.</para>
+
+              <para>There are three possible output modes: truncate (overwrite
+              existing files, this is the default), rewind (open and execute
+              FPOS 0) and append (open and leave the file pointer at the end
+              of the file).<programlisting>OUTPUT “&lt;filename&gt;”,t  ; truncate (default)
+OUTPUT “&lt;filename&gt;”,r  ; rewind
+OUTPUT “&lt;filename&gt;”,a  ; append</programlisting><example>
+                  <title>bigfile.asm</title>
+
+                  <para><programlisting>    OUTPUT loader.com
+    ORG 100H
+    INCLUDE loader.asm
+    INCLUDE bios.asm
+
+    OUTPUT bigfile.dat
+    ORG 4000H
+    INCLUDE main.asm
+    ORG 8000H
+    INCLUDE data.asm</programlisting></para>
+                </example>This will create two files: loader.com and
+              bigfile.dat.</para>
+
+              <para>When SjASMPlus is invoked without specifying an output
+              file, there is still one created even when no bytes are output
+              to it. So when the above file is called bigfile.asm, and
+              assembled with the following line:</para>
+
+              <para><programlisting>sjasmplus bigfile.asm</programlisting>The
+              following files are created: <programlisting>Bigfile.out  ; file length is zero
+Loader.com
+Bigfile.dat</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_page" />PAGE &lt;number&gt;</term>
+
+            <listitem>
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Set the current memory page to current slot.</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    PAGE 7 ;set 7 page
+    SAVEBIN "ram7.bin",$C000,$4000 ;- save $4000 begin from $C000 of RAM to file</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_phase" />PHASE</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_disp">DISP</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>REPT &lt;count&gt;</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_dup">DUP</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SAVEBIN
+            &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
+
+            <listitem>
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Save the block of RAM.</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    PAGE 7 ;set 7 page to current slot
+    SAVEBIN "ram7.bin",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
+    SAVEBIN "ram2.bin",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SAVEHOB
+            &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
+
+            <listitem>
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Save the block of RAM in Hobeta format.</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    PAGE 7 ;set 7 page to current slot
+    SAVEHOB "ram7.$c","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
+    SAVEHOB "ram2.$c","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SAVESNA &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
+
+            <listitem>
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Save the snapshot for emulators of ZX-Spectrum. <example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM128
+    ORG $8000
+START  .... ;something code
+    RET
+    SAVESNA "game.sna",START ;save snapshot to file game.sna. Start address is START ($8000)</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SAVETAP &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
+
+            <listitem>
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Save the tape file for emulators of ZX-Spectrum. Generated
+              tape file supports ZX-Spectrum clones with extended RAM such as
+              ATM Turbo 512, etc.<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM48
+    ORG $8000
+START  .... ;something code
+    RET
+    SAVETAP "game.tap",START ;save tape file to file game.tap. Start address is START ($8000)</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_savetrd" />SAVETRD
+            &lt;filenameoftrdimage&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
+
+            <listitem>
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Save the snapshot for emulators of ZX-Spectrum<example>
+                  <title></title>
+
+                  <para><programlisting>    EMPTYTRD "test.trd" ;create empty TRD image
+    PAGE 7 ;set 7 page to current slot
+    SAVETRD "test.trd","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file to TRD image
+    SAVETRD "test.trd","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file to TRD image</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SHELLEXEC &lt;filename&gt;[, &lt;parameters&gt;]</term>
+
+            <listitem>
+              <para>Execute external program &lt;filename&gt; using optional
+              command line &lt;parameters&gt;.<example>
+                  <title></title>
+
+                  <para><programlisting>    OUTPUT "mybin.bin"
+    ;some code
+    IF ((_ERRORS = 0) + (_WARNINGS = 0))
+        SHELLEXEC "x:/mydeveloping/bin2tap.exe mybin.bin mytap.tap"
+       ; or SHELLEXEC "x:/mydeveloping/bin2tap.exe","mybin.bin mytap.tap"
+    ENDIF</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SIZE &lt;filesize in bytes&gt;</term>
+
+            <listitem>
+              <para>If the resulting file is less than the given length, as
+              many bytes are added as necessary. See <link
+              linkend="po_output">OUTPUT</link> for more.<example>
+                  <title></title>
+
+                  <para><programlisting>    SIZE 32768       ; make sure file will be 32K</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SLOT &lt;number&gt;</term>
+
+            <listitem>
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Set current slot. Slot's defined by MEMORYMAP pseudo-op.
+              Use pseudo-op <link linkend="po_page">PAGE</link> to change page
+              in the current slot.</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM128
+    SLOT 3 ;from 0C000h to 0FFFFh
+    PAGE 1 ;set page 1 to slot 3
+    ORG 0C000h
+    ;your program here
+    PAGE 2
+    INCBIN "somegfx.bin"
+    ;....</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_textarea" />TEXTAREA &lt;address&gt;</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_disp">DISP</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>UNDEFINE &lt;id&gt;</term>
+
+            <listitem>
+              <para>Removes the identifier defined by <link
+              linkend="po_define">DEFINE</link></para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    DEFINE Release 1
+
+    IFDEF Release
+      DISPLAY "Building release version"
+    ENDIF
+
+    UNDEFINE Release
+
+    IFNDEF Release
+      DISPLAY "It's works!"
+    ENDIF
+
+    IFDEF _SJASMPLUS
+      DISPLAY "Yes, it's the sjasmplus!"
+    ENDIF
+
+    UNDEFINE *  ; undefine all identifiers
+
+    IFNDEF _SJASMPLUS
+      DISPLAY "It's not the sjasmplus??"
+    ENDIF</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_unphase" />UNPHASE</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_word" />WORD &lt;words&gt;</term>
+
+            <listitem>
+              <para>Defines a word. Values should be between -32787 and
+              65536.<example>
+                  <title></title>
+
+                  <para><programlisting>    WORD 4000h,0d000h
+    WORD 4,"HA"</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+
+    <section>
+      <title>Conditional assembly</title>
+
+      <para>It may be useful to assemble a part or not based on a certain
+      condition.</para>
+
+      <para><variablelist>
+          <varlistentry>
+            <term><anchor id="ca_if" />IF &lt;expression&gt;</term>
+
+            <listitem>
+              <para>If &lt;expression&gt; is non-zero the following lines are
+              assembled until an ELSE or ENDIF.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>IFN &lt;expression&gt;</term>
+
+            <listitem>
+              <para>If &lt;expression&gt; is zero the following lines are
+              assembled until an ELSE or ENDIF.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>IFDEF &lt;id&gt;</term>
+
+            <listitem>
+              <para>The condition is true if there is an id defined. These are
+              NOT labels.</para>
+
+              <para><example>
+                  <title>Example</title>
+
+                  <para><programlisting>    IFDEF MSX_LEAN_AND_MEAN
+        CALL InitOwnMM
+    ELSE
+        CALL InitDos2MemMan
+    ENDIF</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>IFNDEF &lt;id&gt;</term>
+
+            <listitem>
+              <para>The condition is true if there isn't an id defined. These
+              are NOT labels.</para>
+
+              <para><example>
+                  <title>Example</title>
+
+                  <para><programlisting>1   IN A,(0C4H)
+    AND 2
+    IFNDEF DEBUG
+        JR NC,1B
+    ENDIF</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>IFUSED &lt;label&gt;</term>
+
+            <listitem>
+              <para>The condition is true if there is an label used somewhere
+              in the code. You can create libraries of useful functions using
+              IFUSED pseudo-op</para>
+
+              <para><example>
+                  <title>Example</title>
+
+                  <para><programlisting>    OUTPUT "TEST.OUT"
+
+    CALL LABEL3 ; LABEL3 - yes
+    LD A,(LABEL1) ; LABEL1 - yes
+
+    IFUSED LABEL1
+LABEL1:
+    DB 1
+    ENDIF
+
+    IFUSED LABEL2
+LABEL2:
+    DB 2
+    ENDIF
+
+    IFUSED LABEL3
+LABEL3:
+    DB 3
+    ENDIF
+
+    IFUSED LABEL4
+LABEL4:
+    DB 4
+    ENDIF
+
+    LD A,LABEL2 ; LABEL2 - yes
+
+    RET
+
+; Output will contain bytes from LABEL1 to LABEL3 (1, 2, 3), but not contain from LABEL4, because this label is not used.
+
+; Alternative syntax:
+LABEL5:
+    IFUSED ; sjasmplus will use name of previous label, i.e. LABEL5
+
+    ENDIF
+    </programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>IFNUSED &lt;label&gt;</term>
+
+            <listitem>
+              <para>The condition is true if there is an label
+              <emphasis>not</emphasis> used somewhere in the code.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ELSE</term>
+
+            <listitem>
+              <para>See <link linkend="ca_if">IF</link>. If the condition is
+              not true, the else-part is assembled.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ENDIF</term>
+
+            <listitem>
+              <para>Every <link linkend="ca_if">IF</link> should be followed
+              by an ENDIF.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+
+    <section>
+      <title>Macro's</title>
+
+      <para>The MACRO pseudo-op defines a macro. It should be followed by the
+      name of the macro, optionally followed by the parameters. The following
+      lines will be stored as the macro-body until an ENDM pseudo-op is
+      encountered. Macro's have to be defined before their use.<example>
+          <title>Macro without parameters</title>
+
+          <para><programlisting>  MACRO ADD_HL_A
+    ADD A,L
+    JR NC,.hup
+    INC H
+.hup
+    LD L,A
+  ENDM</programlisting></para>
+        </example></para>
+
+      <para>Labels in a macro starting with a dot are local to each macro
+      expansion.<example>
+          <title>A macro with parameters</title>
+
+          <para><programlisting>  MACRO WAVEOUT reg, data
+    LD A,reg
+    OUT (7EH),A
+    LD A,data
+    OUT (7FH),A
+  ENDM
+; this macro will make
+  WAVEOUT 2,17
+; expand to:
+  LD A,2
+  OUT (7EH),A
+  LD A,17
+  OUT (7FH),A</programlisting></para>
+        </example><example>
+          <title>Another example</title>
+
+          <para><programlisting>    MACRO LOOP
+      IF $-.lus&lt;127
+        DJNZ .lus
+      ELSE
+        DEC B
+        JP NZ,.lus
+      ENDIF
+    ENDM
+
+Main
+.lus
+    CALL DoALot
+    LOOP
+; This will expand to:
+Main
+.lus                  ; Main.lus
+    CALL DoALot
+    DJNZ .lus         ; Main.lus</programlisting></para>
+        </example></para>
+
+      <para>Angle brackets can be used when the arguments contain
+      commas.<example>
+          <title></title>
+
+          <para><programlisting>    MACRO UseLess data
+      DB data
+    ENDM
+
+    UseLess &lt;10,12,13,0&gt;
+; expands to:
+    DB 10,12,13,0
+
+; use '!' to include '!' and '&gt;' in those strings.
+
+    UseLess &lt;5, 6 !&gt; 3&gt;
+; expands to:
+    DB 5, 6 &gt; 3
+
+    UseLess &lt;"Kip!!",3&gt;
+; expands to:
+    DB "Kip!",3</programlisting></para>
+        </example></para>
+
+      <para></para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title><anchor id="c_structures" />Structures</title>
+
+    <section>
+      <title>What is it?</title>
+
+      <para>Structures can be used to define data structures in memory more
+      easily. The name of the structure is set to the total size of the
+      structure.</para>
+    </section>
+
+    <section>
+      <title>Using</title>
+
+      <para>A structure definition starts with: <code>STRUCT
+      &lt;name&gt;,[&lt;initial offset&gt;]</code> and ends with
+      <code>ENDS</code>. Structure definitions are local to the current
+      module, but, as with labels, '@' can be used to override this.</para>
+
+      <para>Lines between STRUCT and ENDS should have the following
+      format:</para>
+
+      <para><code>membername pseudo-operation operands</code></para>
+
+      <para>All fields are optional. Lines without label should start with
+      whitespace.</para>
+    </section>
+
+    <section>
+      <title>Instructions</title>
+
+      <para>Between the STRUCT and ENDS pseudo-instructions the following
+      instructions can be used:</para>
+
+      <para><variablelist>
+          <varlistentry>
+            <term>BYTE [&lt;defaultvalue&gt;]</term>
+
+            <listitem>
+              <para>To define a one byte member. The defaultvalue is used when
+              no initialisation value is given when the structure is declared.
+              (DB and DEFB may be used instead of BYTE).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>WORD [&lt;defaultvalue&gt;]</term>
+
+            <listitem>
+              <para>To define a two byte member. The defaultvalue is used when
+              no initialisation value is given when the structure is declared.
+              (DW and DEFW may be used instead of WORD).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>D24 [&lt;defaultvalue&gt;]</term>
+
+            <listitem>
+              <para>To define a three byte member. The defaultvalue is used
+              when no initialisation value is given when the structure is
+              declared.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DWORD [&lt;defaultvalue&gt;]</term>
+
+            <listitem>
+              <para>To define a four byte member. The defaultvalue is used
+              when no initialisation value is given when the structure is
+              declared. (DD and DEFD may be used instead of WORD).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</term>
+
+            <listitem>
+              <para>To define an member of the specified number of bytes.
+              ('#', DS and DEFS may be used instead of WORD).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ALIGN [&lt;expression&gt;]</term>
+
+            <listitem>
+              <para>To align the offset. If the expression is omitted, 4 is
+              assumed. ('##' May be used instead of ALIGN).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>&lt;structure name&gt; [&lt;init values&gt;]</term>
+
+            <listitem>
+              <para>It is possible to nest structures, and give new defaults
+              for the BYTE and WORD members.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+
+    <section>
+      <title>Examples</title>
+
+      <para><example>
+          <title></title>
+
+          <para><programlisting>	STRUCT SCOLOR 
+RED	BYTE 4
+GREEN	BYTE 5
+BLUE	BYTE 6
+	ENDS</programlisting></para>
+
+          <para>This is identical to:</para>
+
+          <para><programlisting>SCOLOR		EQU 3 ; lenght 
+SCOLOR.RED	EQU 0 ; offset
+SCOLOR.GREEN	EQU 1 ; offset
+SCOLOR.BLUE	EQU 2 ; offset</programlisting></para>
+        </example><example>
+          <title></title>
+
+          <para><programlisting>	STRUCT SDOT
+X	BYTE
+Y	BYTE
+C	SCOLOR 0,0,0 ; use new default values
+	ENDS
+</programlisting></para>
+
+          <para>This is identical to:</para>
+
+          <para><programlisting>SDOT		EQU 5 ; length
+SDOT.X		EQU 0 ; offset
+SDOT.Y		EQU 1 ; offset
+SDOT.C		EQU 2 ; offset
+SDOT.C.RED	EQU 2 ; offset
+SDOT.C.GREEN	EQU 3 ; offset
+SDOT.C.BLUE	EQU 4 ; offset
+</programlisting></para>
+        </example><example>
+          <title></title>
+
+          <para><programlisting>	STRUCT SPOS,4
+X	WORD
+Y	BYTE
+	ALIGN 2
+AD	WORD
+	ENDS</programlisting></para>
+
+          <para>This is identical to:</para>
+
+          <para><programlisting>SPOS	EQU 10 ; length
+SPOS.X	EQU  4 ; offset
+SPOS.Y	EQU  6 ; offset
+SPOS.AD	EQU  8 ; offset</programlisting></para>
+        </example><example>
+          <title></title>
+
+          <para>When a structure is defined it is possible to declare labels
+          with it<programlisting>COLOR SCOLOR</programlisting>This is
+          identical to:<programlisting>COLOR
+COLOR.RED   BYTE 4
+COLOR.GREEN BYTE 5
+COLOR.BLUE  BYTE 6
+</programlisting>Note the default values.</para>
+
+          <para>Or without label:<programlisting>COLORTABLE
+  SCOLOR 0,0,0
+  SCOLOR 1,2,3
+  SCOLOR ,2
+  ; etc.</programlisting>This is identical to:<programlisting>COLORTABLE
+  BYTE 0,0,0
+  BYTE 1,2,3
+  BYTE 4,2,6
+  ; etc.
+
+DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
+          BYTE and WORD members can be initialised.</para>
+
+          <para>The resulting labels can be used as any other
+          label:<programlisting>  ld b,(ix+SCOLOR.RED)
+  ld a,(COLOR.GREEN)
+  ld de,COLOR
+  ; etc.</programlisting></para>
+
+          <para><warning>
+              <para>Do not use the offset labels in indirections
+              like:<programlisting>LD A,(SDOT.X)</programlisting>This will
+              conflict with futher 'improvements' ;-)</para>
+
+              <para>If this is absolutely necessary (why?) use something like
+              this:<programlisting>LD A,(+SDOT.X)</programlisting></para>
+            </warning></para>
+        </example></para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title><anchor id="c_lua_scripting" />Lua scripting</title>
+
+    <section>
+      <title>Why?</title>
+
+      <para><graphic align="left" fileref="lua.gif" />Why is scripting engine
+      as Lua embedded to the compiler? Answer is simple: It need to add extra
+      features by users. And to whole other Lua is enough small, fast and
+      powerful scripting engine.</para>
+    </section>
+
+    <section>
+      <title>How to use?</title>
+
+      <para>You must use <link linkend="po_lua">LUA</link> and <link
+      linkend="po_endlua">ENDLUA</link> pseudo-ops.<example>
+          <title>Hello World!</title>
+
+          <para><programlisting>    LUA
+        print ("Hello World!")
+    ENDLUA</programlisting></para>
+        </example></para>
+    </section>
+
+    <section>
+      <title>SjASMPlus binded functions</title>
+
+      <para>From Lua you can control some variables and use functions of the
+      compiler. Complete list:</para>
+
+      <para><variablelist>
+          <varlistentry>
+            <term><anchor id="lua__c" />[integer] _c("expression")</term>
+
+            <listitem>
+              <para>Calculate expression using calculator of the compiler.
+              Example: <code>val = _c("SOMELABEL+12")</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="lua__pc" />[void] _pc("code")</term>
+
+            <listitem>
+              <para>Parse string of Z80 assembly. Example: <code>_pc("ADD
+              A,B")</code></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="lua__pl" />[void] _pl("label code")</term>
+
+            <listitem>
+              <para>Parse line of Z80 assembly. Example: <code>_pc("SOMELABEL
+              ADD A,B")</code></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[integer] sj.calc("expression")</term>
+
+            <listitem>
+              <para>See <link linkend="lua__c">_c</link></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] sj.parse_code("label")</term>
+
+            <listitem>
+              <para>See <link linkend="lua__pc">_pc</link></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] sj.parse_line("label code")</term>
+
+            <listitem>
+              <para>See <link linkend="lua__pl">_pl</link></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] sj.error("message")</term>
+
+            <listitem>
+              <para>Print error message.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] sj.warning("message")</term>
+
+            <listitem>
+              <para>Print warning message.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[boolean] sj.file_exists("message")</term>
+
+            <listitem>
+              <para>Check for file exists.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[string] sj.get_define("name")</term>
+
+            <listitem>
+              <para>Get define value.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[boolean] sj.insert_define("name", "value")</term>
+
+            <listitem>
+              <para>Add new define.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[integer] sj.get_label("name")</term>
+
+            <listitem>
+              <para>Get label address.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[boolean] sj.insert_label("name", address)</term>
+
+            <listitem>
+              <para>Add new label.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="lua_sj_current_address" />[integer]
+            sj.current_address</term>
+
+            <listitem>
+              <para>Variable. Current address.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[integer] sj.error_count</term>
+
+            <listitem>
+              <para>Variable. Count of Errors.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[integer] sj.warning_count</term>
+
+            <listitem>
+              <para>Variable. Count of Warnings.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] sj.exit(errorcode)</term>
+
+            <listitem>
+              <para>Shutdown the compiler.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] sj.add_byte(byte)</term>
+
+            <listitem>
+              <para>Add byte to output (or to memory) and increase <link
+              linkend="lua_sj_current_address">sj.current_address</link></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] sj.add_word(word)</term>
+
+            <listitem>
+              <para>Add word to output (or to memory) and twice increase <link
+              linkend="lua_sj_current_address">sj.current_address</link></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[integer] sj.get_byte(address)</term>
+
+            <listitem>
+              <para>Get byte from memory. <emphasis>Work only in real device
+              emulation mode.</emphasis></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[integer] sj.get_word(address)</term>
+
+            <listitem>
+              <para>Get word from memory. <emphasis>Work only in real device
+              emulation mode.</emphasis></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[string] sj.get_device()</term>
+
+            <listitem>
+              <para>Return current emulating device's identifier. Returns
+              "NONE" if no emulation mode.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[boolean] sj.set_device("id")</term>
+
+            <listitem>
+              <para>Set current emulating device's identifier. Returns false
+              if no device found.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[boolean] sj.set_page(number)</term>
+
+            <listitem>
+              <para>Set page with number "number" to the current slot. Works
+              as pseudo-op PAGE.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[boolean] sj.set_slot(number)</term>
+
+            <listitem>
+              <para>Set current slot with number "number". Works as pseudo-op
+              SLOT.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] sj.shellexec("programname")</term>
+
+            <listitem>
+              <para>See pseudo-op SHELLEXEC.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] zx.trdimage_create("filename")</term>
+
+            <listitem>
+              <para>Creates emptry TRD image file.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] zx.trdimage_add_file("filename", "somenameC",
+            startaddress, length)</term>
+
+            <listitem>
+              <para>Save block of memory to TRD image file. <emphasis>Work
+              only in real device emulation mode.</emphasis></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[void] zx.save_snapshot_sna("filename.sna",
+            startaddressofprogram)</term>
+
+            <listitem>
+              <para>Save snapshot of memory in SNA format. <emphasis>Work only
+              in real device emulation mode and only for ZXSPECTRUM48 and
+              ZXSPECTRUM128..</emphasis></para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+
+    <section>
+      <title>Third-party embedded library(ies)</title>
+
+      <para><emphasis>lpack.c</emphasis></para>
+
+      <para>a Lua library for packing and unpacking binary data</para>
+
+      <para>by Luiz Henrique de Figueiredo
+      &lt;lhf(at)tecgraf.puc-rio.br&gt;</para>
+
+      <para>The library adds two functions to the string library:
+      <emphasis>string.pack</emphasis> and
+      <emphasis>string.unpack</emphasis>.</para>
+
+      <para>pack is called as follows: string.pack(F,x1,x2,...), where F is a
+      string describing how the values x1, x2, ... are to be interpreted and
+      formatted. Each letter in the format string F consumes one of the given
+      values. Only values of type number or string are accepted. pack returns
+      a (binary) string containing the values packed as described in F. The
+      letter codes understood by pack are listed in lpack.c (they are inspired
+      by Perl's codes but are not the same). Numbers following letter codes in
+      F indicate repetitions.</para>
+
+      <para>unpack is called as follows: string.unpack(s,F,[init]), where s is
+      a (binary) string containing data packed as if by pack, F is a format
+      string describing what is to be read from s, and the optional init marks
+      where in s to begin reading the values. unpack returns one value per
+      letter in F until F or s is exhausted (the letters codes are the same as
+      for pack, except that numbers following 'A' are interpreted as the
+      number of characters to read into the string, not as
+      repetitions).</para>
+
+      <para>The first value returned by unpack is the next unread position in
+      s, which can be used as the init position in a subsequent call to
+      unpack. This allows you to unpack values in a loop or in several steps.
+      If the position returned by unpack is beyond the end of s, then s has
+      been exhausted; any calls to unpack starting beyond the end of s will
+      always return nil values.</para>
+
+      <para>List of types for F string:<variablelist>
+          <varlistentry>
+            <term>z</term>
+
+            <listitem>
+              <para>zero-terminated string</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>p</term>
+
+            <listitem>
+              <para>string preceded by length byte</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>P</term>
+
+            <listitem>
+              <para>string preceded by length word</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>a</term>
+
+            <listitem>
+              <para>string preceded by length size_t</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>A</term>
+
+            <listitem>
+              <para>string</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>f</term>
+
+            <listitem>
+              <para>float</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>d</term>
+
+            <listitem>
+              <para>double</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>n</term>
+
+            <listitem>
+              <para>Lua number</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>c</term>
+
+            <listitem>
+              <para>char</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>b</term>
+
+            <listitem>
+              <para>byte = unsigned char</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>h</term>
+
+            <listitem>
+              <para>short = word</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>H</term>
+
+            <listitem>
+              <para>unsigned short</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>i</term>
+
+            <listitem>
+              <para>int</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>I</term>
+
+            <listitem>
+              <para>unsigned int</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>l</term>
+
+            <listitem>
+              <para>long</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>L</term>
+
+            <listitem>
+              <para>unsigned long</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>&lt;</term>
+
+            <listitem>
+              <para>little endian</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>&gt;</term>
+
+            <listitem>
+              <para>big endian</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>=</term>
+
+            <listitem>
+              <para>native endian</para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+
+    <section>
+      <title>Example</title>
+
+      <para></para>
+
+      <para><example>
+          <title>Variables doesn't clear in new passes of the compiler</title>
+
+          <para><programlisting>    LUA PASS1
+       v = 1
+    ENDLUA
+
+    LUA PASS2
+       print (v)
+-- out to console: 1
+       v++
+    ENDLUA
+
+    LUA PASS3
+       print (v)
+-- out to console: 2
+    ENDLUA</programlisting></para>
+        </example><example>
+          <title>To generate some code you need to generate it in all
+          passes</title>
+
+          <para><programlisting>    LUA ALLPASS
+        _pl("ClearScreen LD (.savesp+1),SP")
+        _pc("LD SP,16384+6144")
+        _pc("LD HL,0")
+        for i = 32768, 38912, 2 do
+            _pc("PUSH HL")
+        end
+        _pl(".savesp: LD SP,0")
+        _pc("RET")
+    ENDLUA</programlisting></para>
+        </example><example>
+          <title>Declare function and use it</title>
+
+          <para><programlisting>     LUA
+         function savetape_mytype(filename, startaddress)
+             local fp
+             fp = assert(io.open(fname, "wb"))
+             for i = 16384, 32767, 4 do
+                 assert(fp:write( string.pack("bbbb", 
+                                sj.get_byte(i), 
+                                sj.get_byte(i+1), 
+                                sj.get_byte(i+2), 
+                                sj.get_byte(i+3)) ))
+             end
+             assert(fp:flush())
+             assert(fp:close())
+         end
+     ENDLUA
+
+ ;somewhere in your program
+     LUA
+         savetape_mytype("tapefiles/myprogram.tape", _c("StartGameLabel"))
+     ENDLUA</programlisting></para>
+        </example><example>
+          <title>Simple sample :)</title>
+
+          <para><programlisting>	LUA
+-- Function reads number from file &lt;fname&gt;, increases it, creates define "BUILD" with the number and saves the number to &lt;fname&gt;.
+-- With this function you can control count of compilations.
+	function increase_build(fname)
+		local fp
+		local build
+		fp = assert(io.open(fname, "rb"))
+		build = tonumber(fp:read("*all"))
+		assert(fp:close())
+		if type(build) == "nil" then
+		    build = 0
+		end
+		build = build + 1;
+		sj.insert_define("BUILD", build)
+		fp = assert(io.open(fname, "wb"))
+		assert(fp:write( build ))
+		assert(fp:flush())
+		assert(fp:close())
+	end
+
+-- Before using you must create empty file "build.txt"!
+	increase_build("build.txt")
+	
+-- Creates define "TIME" with current time
+	sj.insert_define("TIME", '"' .. os.date("%Y-%m-%d %H:%M:%S") .. '"')
+	ENDLUA
+	
+; print to console our time and build number
+	DISPLAY "Build time: ", TIME
+	DISPLAY "Build number: ", /D, BUILD</programlisting></para>
+        </example></para>
+
+      <para></para>
+
+      <para></para>
+    </section>
+  </chapter>
+</book>

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="SjASMPlus" />
+		<Option makefile="Makefile.win32" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="default">
+				<Option output="bin\sjasmplus.exe" prefix_auto="0" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectResourceIncludeDirsRelation="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-DGCC=1" />
+					<Add directory="tolua++" />
+					<Add directory="lua5.1" />
+				</Compiler>
+			</Target>
+		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="default;" />
+		</VirtualTargets>
+		<Unit filename="lua5.1\lapi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lapi.h" />
+		<Unit filename="lua5.1\lauxlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lauxlib.h" />
+		<Unit filename="lua5.1\lbaselib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lcode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lcode.h" />
+		<Unit filename="lua5.1\ldblib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\ldebug.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\ldebug.h" />
+		<Unit filename="lua5.1\ldo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\ldo.h" />
+		<Unit filename="lua5.1\ldump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lfunc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lfunc.h" />
+		<Unit filename="lua5.1\lgc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lgc.h" />
+		<Unit filename="lua5.1\linit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\liolib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\llex.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\llex.h" />
+		<Unit filename="lua5.1\llimits.h" />
+		<Unit filename="lua5.1\lmathlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lmem.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lmem.h" />
+		<Unit filename="lua5.1\loadlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lobject.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lobject.h" />
+		<Unit filename="lua5.1\lopcodes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lopcodes.h" />
+		<Unit filename="lua5.1\loslib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lparser.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lparser.h" />
+		<Unit filename="lua5.1\lstate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lstate.h" />
+		<Unit filename="lua5.1\lstring.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lstring.h" />
+		<Unit filename="lua5.1\lstrlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\ltable.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\ltable.h" />
+		<Unit filename="lua5.1\ltablib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\ltm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\ltm.h" />
+		<Unit filename="lua5.1\lua.h" />
+		<Unit filename="lua5.1\lua.hpp" />
+		<Unit filename="lua5.1\luaconf.h" />
+		<Unit filename="lua5.1\lualib.h" />
+		<Unit filename="lua5.1\lundump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lundump.h" />
+		<Unit filename="lua5.1\lvm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lvm.h" />
+		<Unit filename="lua5.1\lzio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lua5.1\lzio.h" />
+		<Unit filename="resources\SaveTAP_ZX_Spectrum_128K.bin.h" />
+		<Unit filename="resources\SaveTAP_ZX_Spectrum_256K.bin.h" />
+		<Unit filename="resources\SaveTAP_ZX_Spectrum_48K.bin.h" />
+		<Unit filename="sjasm\devices.cpp" />
+		<Unit filename="sjasm\devices.h" />
+		<Unit filename="sjasm\directives.cpp" />
+		<Unit filename="sjasm\directives.h" />
+		<Unit filename="sjasm\io_snapshots.cpp" />
+		<Unit filename="sjasm\io_snapshots.h" />
+		<Unit filename="sjasm\io_tape.cpp" />
+		<Unit filename="sjasm\io_tape.h" />
+		<Unit filename="sjasm\io_trd.cpp" />
+		<Unit filename="sjasm\io_trd.h" />
+		<Unit filename="sjasm\lua_lpack.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sjasm\lua_lpack.h" />
+		<Unit filename="sjasm\lua_sjasm.cpp" />
+		<Unit filename="sjasm\lua_sjasm.h" />
+		<Unit filename="sjasm\parser.cpp" />
+		<Unit filename="sjasm\parser.h" />
+		<Unit filename="sjasm\reader.cpp" />
+		<Unit filename="sjasm\reader.h" />
+		<Unit filename="sjasm\sjasm.cpp" />
+		<Unit filename="sjasm\sjasm.h" />
+		<Unit filename="sjasm\sjdefs.h" />
+		<Unit filename="sjasm\sjio.cpp" />
+		<Unit filename="sjasm\sjio.h" />
+		<Unit filename="sjasm\support.cpp" />
+		<Unit filename="sjasm\support.h" />
+		<Unit filename="sjasm\tables.cpp" />
+		<Unit filename="sjasm\tables.h" />
+		<Unit filename="sjasm\tconvert.h" />
+		<Unit filename="sjasm\z80.cpp" />
+		<Unit filename="sjasm\z80.h" />
+		<Unit filename="sjasmwin32\sjasmplus.cbp.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="sjasmwin32\sjasmwin32.cpp" />
+		<Unit filename="sjasmwin32\sjasmwin32.h" />
+		<Unit filename="tolua++\tolua++.h" />
+		<Unit filename="tolua++\tolua_event.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="tolua++\tolua_event.h" />
+		<Unit filename="tolua++\tolua_is.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="tolua++\tolua_map.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="tolua++\tolua_push.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="tolua++\tolua_to.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

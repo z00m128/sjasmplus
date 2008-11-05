@@ -1,0 +1,378 @@
+;Memory driver
+;(C) Pawel/RS
+;(C) Creator
+;Перед  работой с драйвером вызовите подп-
+;рограмму START, для инициализации и опре-
+;деления свободной памяти.
+ 
+;Подключение логического банка, номер в A,
+;нумерация начинается с нуля.
+ONPAGE  PUSH    BC
+        PUSH    HL
+        LD      C,A
+        LD      B,0
+        LD      HL,TABL_PG
+        ADD     HL,BC
+        LD      A,(HL)
+        POP     HL
+        POP     BC
+EX_RAM  DI
+        PUSH    HL
+        PUSH    AF
+        PUSH    BC
+        LD      HL,TYPE
+        BIT     1,(HL)
+        JR      NZ,ZS256
+        BIT     2,(HL)
+        JR      NZ,PROFI
+        BIT     3,(HL)
+        JR      NZ,TURBO_2
+        BIT     4,(HL)
+        JR      NZ,ATM1
+        BIT     0,(HL)
+        JR      NZ,SPECCY
+        BIT     7,(HL)
+        JR      NZ,SPECCY
+        JR      TDK
+ 
+TURBO_2 PUSH    AF
+        PUSH    IX
+        AND     24
+        CPL
+        LD      BC,#FFF7
+        CALL    OUTC_A
+        POP     IX
+        POP     AF
+        JP      SPECCY
+ 
+ATM1    LD      BC,#FDFD
+        PUSH    AF
+        RRCA
+        RRCA
+        RRCA
+        AND     3
+        JR      HOME
+ 
+PROFI   LD      BC,#DFFD
+        PUSH    AF
+        RRCA
+        RRCA
+        RRCA
+        AND     7
+        JR      HOME
+ 
+ZS256   PUSH    AF
+        LD      B,A
+        AND     %00001000
+        RLCA
+        LD      C,A
+        LD      A,B
+        AND     %00110000
+        RLCA
+        RLCA
+        ADD     A,C
+        LD      BC,#1FFD
+HOME    OUT     (C),A
+        NOP
+        POP     AF
+ 
+SPECCY  LD      B,A
+        AND     24
+        RLCA
+        RLCA
+        RLCA
+        LD      C,A
+        LD      A,B
+        AND     7
+        ADD     A,C
+        OR      16
+        LD      BC,#7FFD
+        OUT     (C),A
+        NOP
+TDK     POP     BC
+        POP     AF
+        POP     HL
+        RET
+ 
+OUTC_A  LD      IX,10835
+        PUSH    IX
+        JP      15663
+ 
+ 
+;Инициализация  и тест памяти, вызывается
+;в начале работы, после чего память зани-
+;маемую программой ниже, можно использо-
+;вать по своему усмотрению.
+ 
+START   CALL    TEST
+        LD      A,(8)
+        CP      #2A   ;если SCORPION, то
+        RET     Z     ;удалить из списка
+        LD      C,8   ;8-й банк, исполь-
+        JP      DEBUG ;зующийся монитором.
+ 
+TEST    CALL    TABINIT
+        XOR     A
+        LD      (TYPE),A
+        INC     A
+        LD      (PAGE),A
+        DI
+        LD      A,(#08)
+        CP      #C3
+        JR      NZ,ITURBO
+        LD      HL,TYPE
+        SET     7,(HL)
+ITURBO  LD      HL,(1111)
+        LD      BC,#FFF7
+        LD      A,%00011111
+        CALL    OUTC_A
+        LD      DE,(#C000+1111)
+        AND     A
+        SBC     HL,DE
+        LD      BC,#FFF7
+        LD      A,255
+        CALL    OUTC_A
+        JR      NZ,IDFFD
+        LD      HL,TYPE
+        SET     3,(HL)
+        JR      I7FFD
+MM_ATM  DB      #DB,#1F,#C9
+IDFFD   LD      HL,#80
+        LD      DE,#1000
+        LD      BC,#DFFD
+        OUT     (C),D
+        NOP
+        LD      A,(HL)
+        INC     (HL)
+        CP      (HL)
+        LD      (HL),A
+        OUT     (C),E
+        NOP
+        JR      Z,I1FFD
+        LD      HL,TYPE
+        SET     2,(HL)
+        OUT     (C),D
+        NOP
+        LD      B,#7F
+        OUT     (C),D
+        NOP
+        LD      B,#DF
+        OUT     (C),E
+        NOP
+        JR      I7FFD
+I1FFD   LD      DE,#1110
+        LD      B,#1F
+        OUT     (C),D
+        NOP
+        LD      A,(HL)
+        INC     (HL)
+        CP      (HL)
+        LD      (HL),A
+        OUT     (C),E
+        NOP
+        JR      Z,IFDFD
+        XOR     A
+        OUT     (C),A
+        LD      HL,TYPE
+        SET     1,(HL)
+        JP      I7FFD
+IFDFD   LD      B,C
+        LD      HL,#FFFF
+        OUT     (C),D
+        NOP
+        LD      B,#7F
+        OUT     (C),D
+        NOP
+        LD      A,(HL)
+        LD      (RBT2+1),A
+        LD      (HL),D
+        LD      B,C
+        OUT     (C),E
+        NOP
+        LD      B,#7F
+        OUT     (C),D
+        NOP
+        LD      A,(HL)
+        LD      (RBT+1),A
+        LD      (HL),E
+        LD      B,C
+        OUT     (C),D
+        NOP
+        LD      B,#7F
+        OUT     (C),D
+        NOP
+        LD      A,(HL)
+        CP      D
+        JR      NZ,I7FFD
+        LD      HL,TYPE
+        SET     4,(HL)
+I7FFD   LD      HL,#FFFF
+        LD      B,#7F
+        OUT     (C),E
+        NOP
+        LD      A,(HL)
+        LD      (RBT0+1),A
+        LD      (HL),E
+        OUT     (C),D
+        NOP
+        LD      (HL),D
+        OUT     (C),E
+        NOP
+        LD      A,D
+        CP      (HL)
+        JR      Z,SIZED
+        LD      HL,TYPE
+        SET     0,(HL)
+SIZED   LD      HL,#FFFF
+RBT0    LD      (HL),0
+        LD      B,C
+        OUT     (C),E
+        NOP
+        LD      B,#7F
+        OUT     (C),D
+        NOP
+RBT     LD      (HL),0
+        LD      B,C
+        OUT     (C),D
+        NOP
+        LD      B,#7F
+        OUT     (C),D
+        NOP
+RBT2    LD      (HL),0
+        CALL    VIRT
+        LD      A,(PAGE)
+        CP      8
+        JR      C,ENDING
+        LD      A,(TYPE)
+        CP      1
+        JR      NZ,ENDING
+        LD      HL,TYPE
+        SET     5,(HL)
+ENDING  XOR     A
+        CALL    EX_RAM
+        EI
+        RET
+ 
+VIRT    LD      IX,#C000
+        LD      HL,VTABL+63
+        LD      B,64
+V_R11   LD      A,B
+        DEC     A
+        CALL    EX_RAM
+        LD      C,(IX+0)
+        LD      (HL),C
+        LD      (IX+0),A
+        DEC     HL
+        DJNZ    V_R11
+        PUSH    AF
+        LD      A,LENTABL-1
+        LD      (PAGE),A
+        POP     AF
+        LD      DE,TABL_PG
+V_R20   LD      A,(DE)
+        CP      #FF
+        JR      Z,V_R30
+        CALL    EX_RAM
+        CP      (IX+0)
+        JR      Z,V_R22
+        PUSH    DE
+        LD      HL,TABL_PG+LENTABL
+        AND     A
+        SBC     HL,DE
+        PUSH    HL
+        POP     BC
+        PUSH    DE
+        POP     HL
+        INC     HL
+        LDIR
+        PUSH    HL
+        LD      HL,PAGE
+        DEC     (HL)
+        POP     HL
+        POP     DE
+        DEC     DE
+V_R22   INC     DE
+        JR      V_R20
+V_R30   LD      B,64
+        LD      HL,VTABL
+V_R31   LD      A,64
+        SUB     B
+        CALL    EX_RAM
+        LD      A,(HL)
+        LD      (IX+0),A
+        INC     HL
+        DJNZ    V_R31
+        RET
+ 
+;удаление из таблицы банка с номером в
+;регистре C, вызывать сразу после теста.
+ 
+DEBUG   PUSH    DE
+        POP     HL
+NO_PG1  DEC     DE
+        LD      A,(DE)
+        CP      #FF
+        JR      Z,NO_PG2
+        CP      C
+        JR      NZ,NO_PG1
+        SBC     HL,DE
+        PUSH    HL
+        POP     BC
+        PUSH    DE
+        POP     HL
+        INC     HL
+        LDIR
+        PUSH    HL
+        LD      HL,PAGE
+        DEC     (HL)
+        POP     HL
+        DEC     HL
+        DEC     HL
+NO_PG2  EX      DE,HL
+        RET
+ 
+;Создание таблицы банков, с исключением
+;не использующихся, в данном варианте
+;удаляются 2-й и 5-й банки.
+ 
+TABINIT LD      HL,TABL_PG-1
+        LD      (HL),255
+        INC     HL
+        XOR     A
+TABI1   LD      (HL),A
+        INC     A
+        CP      2
+        JR      Z,TABI1A
+        CP      5
+        JR      Z,TABI1A
+        JR      TABI2
+TABI1A  INC     A
+TABI2   INC     HL
+        CP      LENTABL+1
+        JR      NZ,TABI1
+        LD      (HL),255
+        LD      HL,VTABL
+        PUSH    HL
+        POP     DE
+        INC     DE
+        LD      BC,63
+        LD      (HL),0
+        LDIR
+        RET
+ 
+LENTABL EQU     62 ;максимальное количес-
+                   ;тво использующихся
+                   ;банков.
+ 
+        DB      0  ;код начала таблицы
+TABL_PG DS      LENTABL+1
+ 
+TYPE    DB      0  ;тип компьютера
+ 
+PAGE    DB      0  ;общее число доступных
+                   ;банков
+ 
+VTABL   EQU     0xBB00 ;23296 ;таблица банков, ис-
+                      ;пользуется только
+                      ;при тесте, 64 байта
+                        

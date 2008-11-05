@@ -1,0 +1,435 @@
+/* 
+
+  SjASMPlus Z80 Cross Compiler
+
+  Copyright (c) 2004-2006 Aprisobal
+
+  This software is provided 'as-is', without any express or implied warranty.
+  In no event will the authors be held liable for any damages arising from the
+  use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it freely,
+  subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not claim
+	 that you wrote the original software. If you use this software in a product,
+	 an acknowledgment in the product documentation would be appreciated but is
+	 not required.
+
+  2. Altered source versions must be plainly marked as such, and must not be
+	 misrepresented as being the original software.
+
+  3. This notice may not be removed or altered from any source distribution.
+
+*/
+
+$hfile "sjdefs.h"
+
+$using namespace Options;
+
+// tables.h
+
+module sj {
+	char* DefineTable.Get @ get_define (char *);
+	bool DefineTable.Replace @ insert_define (char *, char *);
+	int LuaGetLabel @ get_label (char *);
+	bool LabelTable.Insert @ insert_label (char *, unsigned int, bool=false, bool=false);
+}
+
+// sjasm.h
+
+//extern tolua_readonly char SymbolListFName[LINEMAX];
+//extern tolua_readonly char ListingFName[LINEMAX];
+//extern tolua_readonly char ExportFName[LINEMAX];
+///extern tolua_readonly char DestionationFName[LINEMAX];
+//extern tolua_readonly char RAWFName[LINEMAX];
+//extern tolua_readonly char UnrealLabelListFName[LINEMAX];
+
+module sj {
+	extern tolua_readonly unsigned long CurAddress @ current_address;
+	//extern tolua_readonly unsigned long CurrentGlobalLine @ global_line_number;
+	//extern tolua_readonly unsigned long CurrentLocalLine @ local_line_number;
+	//extern tolua_readonly unsigned long CurrentLine @ line_number;
+	extern tolua_readonly int WarningCount @ warning_count;
+	extern tolua_readonly int ErrorCount @ error_count;
+	void LuaShellExec @ shellexec(char *command);
+}
+
+module zx {
+	int TRD_SaveEmpty @ trdimage_create(char* fname);
+	int TRD_AddFile @ trdimage_add_file(char* fname, char* fhobname, int start, int length);
+	int SaveSNA_ZX @ save_snapshot_sna128(char* fname, unsigned short start);
+}
+
+module sj {
+	extern tolua_readonly char* CurrentDirectory @ current_path;
+	void ExitASM @ exit(int p=1);
+}
+
+////////////////////////////////////
+
+// sjio.h
+
+module sj {
+	void Error @ error(char*, char*=0, int=0);
+	void Warning @ warning(char*, char*=0, int=0);
+	bool FileExists @ file_exists(char* filename);
+
+	char* GetPath @ get_path(char* fname, TCHAR** filenamebegin);
+	
+	bool SetDevice @ set_device(char* id);
+	char* GetDeviceName @ get_device();
+	
+	bool LuaSetPage @ set_page(unsigned int n);
+	bool LuaSetSlot @ set_slot(unsigned int n);
+	
+	unsigned char MemGetByte @ get_byte(unsigned int address);
+	unsigned char MemGetWord @ get_word(unsigned int address);
+	void EmitByte @ add_byte(unsigned char byte);
+	void EmitWord @ add_word(unsigned int word);
+	
+	unsigned long LuaCalculate @ calc(char *str);
+	void LuaParseLine @ parse_line(char *str);
+	void LuaParseCode @ parse_code(char *str);
+}
+
+unsigned long LuaCalculate @ _c(char *str);
+void LuaParseLine @ _pl(char *str);
+void LuaParseCode @ _pc(char *str);
+
+// reader.h
+
+
+// bit.lua
+$[
+
+--[[---------------
+LuaBit v0.3
+-------------------
+a bitwise operation lib for lua.
+
+http://luaforge.net/projects/bit/
+
+Under the MIT license.
+
+copyright(c) 2006 hanzhao (abrash_han@hotmail.com)
+--]]---------------
+
+do
+
+------------------------
+-- bit lib implementions
+
+local function check_int(n)
+ -- checking not float
+ if(n - math.floor(n) > 0) then
+  error("trying to use bitwise operation on non-integer!")
+ end
+end
+
+local function to_bits(n)
+ check_int(n)
+ if(n < 0) then
+  -- negative
+  return to_bits(bit.bnot(math.abs(n)) + 1)
+ end
+ -- to bits table
+ local tbl = {}
+ local cnt = 1
+ while (n > 0) do
+  local last = math.mod(n,2)
+  if(last == 1) then
+   tbl[cnt] = 1
+  else
+   tbl[cnt] = 0
+  end
+  n = (n-last)/2
+  cnt = cnt + 1
+ end
+
+ return tbl
+end
+
+local function tbl_to_number(tbl)
+ local n = table.getn(tbl)
+
+ local rslt = 0
+ local power = 1
+ for i = 1, n do
+  rslt = rslt + tbl[i]*power
+  power = power*2
+ end
+ 
+ return rslt
+end
+
+local function expand(tbl_m, tbl_n)
+ local big = {}
+ local small = {}
+ if(table.getn(tbl_m) > table.getn(tbl_n)) then
+  big = tbl_m
+  small = tbl_n
+ else
+  big = tbl_n
+  small = tbl_m
+ end
+ -- expand small
+ for i = table.getn(small) + 1, table.getn(big) do
+  small[i] = 0
+ end
+
+end
+
+local function bit_or(m, n)
+ local tbl_m = to_bits(m)
+ local tbl_n = to_bits(n)
+ expand(tbl_m, tbl_n)
+
+ local tbl = {}
+ local rslt = math.max(table.getn(tbl_m), table.getn(tbl_n))
+ for i = 1, rslt do
+  if(tbl_m[i]== 0 and tbl_n[i] == 0) then
+   tbl[i] = 0
+  else
+   tbl[i] = 1
+  end
+ end
+ 
+ return tbl_to_number(tbl)
+end
+
+local function bit_and(m, n)
+ local tbl_m = to_bits(m)
+ local tbl_n = to_bits(n)
+ expand(tbl_m, tbl_n) 
+
+ local tbl = {}
+ local rslt = math.max(table.getn(tbl_m), table.getn(tbl_n))
+ for i = 1, rslt do
+  if(tbl_m[i]== 0 or tbl_n[i] == 0) then
+   tbl[i] = 0
+  else
+   tbl[i] = 1
+  end
+ end
+
+ return tbl_to_number(tbl)
+end
+
+local function bit_not(n)
+ 
+ local tbl = to_bits(n)
+ local size = math.max(table.getn(tbl), 32)
+ for i = 1, size do
+  if(tbl[i] == 1) then 
+   tbl[i] = 0
+  else
+   tbl[i] = 1
+  end
+ end
+ return tbl_to_number(tbl)
+end
+
+local function bit_xor(m, n)
+ local tbl_m = to_bits(m)
+ local tbl_n = to_bits(n)
+ expand(tbl_m, tbl_n) 
+
+ local tbl = {}
+ local rslt = math.max(table.getn(tbl_m), table.getn(tbl_n))
+ for i = 1, rslt do
+  if(tbl_m[i] ~= tbl_n[i]) then
+   tbl[i] = 1
+  else
+   tbl[i] = 0
+  end
+ end
+ 
+ --table.foreach(tbl, print)
+
+ return tbl_to_number(tbl)
+end
+
+local function bit_rshift(n, bits)
+ check_int(n)
+ 
+ local high_bit = 0
+ if(n < 0) then
+  -- negative
+  n = bit_not(math.abs(n)) + 1
+  high_bit = 2147483648 -- 0x80000000
+ end
+
+ for i=1, bits do
+  n = n/2
+  n = bit_or(math.floor(n), high_bit)
+ end
+ return math.floor(n)
+end
+
+-- logic rightshift assures zero filling shift
+local function bit_logic_rshift(n, bits)
+ check_int(n)
+ if(n < 0) then
+  -- negative
+  n = bit_not(math.abs(n)) + 1
+ end
+ for i=1, bits do
+  n = n/2
+ end
+ return math.floor(n)
+end
+
+local function bit_lshift(n, bits)
+ check_int(n)
+ 
+ if(n < 0) then
+  -- negative
+  n = bit_not(math.abs(n)) + 1
+ end
+
+ for i=1, bits do
+  n = n*2
+ end
+ return bit_and(n, 4294967295) -- 0xFFFFFFFF
+end
+
+local function bit_xor2(m, n)
+ local rhs = bit_or(bit_not(m), bit_not(n))
+ local lhs = bit_or(m, n)
+ local rslt = bit_and(lhs, rhs)
+ return rslt
+end
+
+--------------------
+-- bit lib interface
+
+bit = {
+ -- bit operations
+ bnot = bit_not,
+ band = bit_and,
+ bor  = bit_or,
+ bxor = bit_xor,
+ brshift = bit_rshift,
+ blshift = bit_lshift,
+ bxor2 = bit_xor2,
+ blogic_rshift = bit_logic_rshift,
+
+ -- utility func
+ tobits = to_bits,
+ tonumb = tbl_to_number,
+}
+
+end
+
+--[[
+for i = 1, 100 do
+ for j = 1, 100 do
+  if(bit.bxor(i, j) ~= bit.bxor2(i, j)) then
+   error("bit.xor failed.")
+  end
+ end
+end
+--]]
+
+$]
+
+// hex.lua
+$[
+
+--[[---------------
+Hex v0.3
+-------------------
+Hex conversion lib for lua.
+
+Part of LuaBit(http://luaforge.net/projects/bit/).
+
+Under the MIT license.
+
+copyright(c) 2006 hanzhao (abrash_han@hotmail.com)
+--]]---------------
+
+do 
+
+local function to_hex(n)
+ if(type(n) ~= "number") then
+  error("non-number type passed in.")
+ end
+
+ -- checking not float
+ if(n - math.floor(n) > 0) then
+  error("trying to apply bitwise operation on non-integer!")
+ end
+
+ if(n < 0) then
+  -- negative
+  n = bit.tobits(bit.bnot(math.abs(n)) + 1)
+  n = bit.tonumb(n)
+ end
+
+ hex_tbl = {'A', 'B', 'C', 'D', 'E', 'F'}
+ hex_str = ""
+
+ while(n ~= 0) do
+  last = math.mod(n, 16)
+  if(last < 10) then
+   hex_str = tostring(last) .. hex_str
+  else
+   hex_str = hex_tbl[last-10+1] .. hex_str
+  end
+  n = math.floor(n/16)
+ end
+ if(hex_str == "") then
+  hex_str = "0"
+ end
+ return "0x" .. hex_str
+end
+
+local function to_dec(hex)
+ if(type(hex) ~= "string") then
+  error("non-string type passed in.")
+ end
+
+ head = string.sub(hex, 1, 2)
+ 
+ if( head ~= "0x" and head ~= "0X") then
+  error("wrong hex format, should lead by 0x or 0X.")
+ end
+
+ v = tonumber(string.sub(hex, 3), 16)
+
+ return v;
+end
+
+--------------------
+-- hex lib interface
+hex = {
+ to_dec = to_dec,
+ to_hex = to_hex,
+}
+
+end
+
+--[[
+-- test
+d = 4341688
+h = to_hex(d)
+print(h)
+print(to_dec(h))
+
+
+for i = 1, 100000 do
+ h = hex.to_hex(i)
+ d = hex.to_dec(h)
+ if(d ~= i) then 
+  error("failed " .. i .. ", " .. h)
+ end
+end
+--]]
+
+$] 
+
+
+
+
