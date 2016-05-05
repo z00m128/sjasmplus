@@ -1,5 +1,6 @@
 # Makefile for sjasmplus created by Tygrys' hands.
-# install/uninstall features added, io_tape.o, CFLAGS and LDFLAGS modification by z00m's hands. [05.05.2016]
+# install/uninstall features added, CFLAGS and LDFLAGS modification by z00m's hands. [05.05.2016]
+# overall optimization and beautification by mborik's hands. [05.05.2016]
 
 GCC=gcc
 CC=$(GCC)
@@ -12,32 +13,57 @@ UNINSTALL=rm -vf
 
 EXE=sjasmplus
 
-CFLAGS=-O2 -Wall -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -Ilua5.1 -Itolua++
+SUBDIR_BASE=sjasm
+SUBDIR_LUA=lua5.1
+SUBDIR_TOLUA=tolua++
+
+CFLAGS=-O2 -Wall -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
 CXXFLAGS=$(CFLAGS)
 
-#for Linux
-LDFLAGS=-ldl
+# for Linux (added strip flag)
+LDFLAGS=-ldl -s
 
 #sjasmplus object files
-OBJS=sjasm/devices.o sjasm/directives.o sjasm/io_snapshots.o sjasm/io_trd.o sjasm/io_tape.o \
-sjasm/lua_lpack.o sjasm/lua_sjasm.o sjasm/parser.o sjasm/reader.o sjasm/sjasm.o sjasm/sjio.o \
-sjasm/support.o sjasm/tables.o sjasm/z80.o
+OBJS=\
+	$(SUBDIR_BASE)/devices.o \
+	$(SUBDIR_BASE)/directives.o \
+	$(SUBDIR_BASE)/io_snapshots.o \
+	$(SUBDIR_BASE)/io_trd.o \
+	$(SUBDIR_BASE)/io_tape.o \
+	$(SUBDIR_BASE)/lua_lpack.o \
+	$(SUBDIR_BASE)/lua_sjasm.o \
+	$(SUBDIR_BASE)/parser.o \
+	$(SUBDIR_BASE)/reader.o \
+	$(SUBDIR_BASE)/sjasm.o \
+	$(SUBDIR_BASE)/sjio.o \
+	$(SUBDIR_BASE)/support.o \
+	$(SUBDIR_BASE)/tables.o \
+	$(SUBDIR_BASE)/z80.o 
 
 #liblua objects
-LUAOBJS= lua5.1/lapi.o lua5.1/lauxlib.o lua5.1/lbaselib.o lua5.1/lcode.o lua5.1/ldblib.o \
-lua5.1/ldebug.o lua5.1/ldo.o lua5.1/ldump.o lua5.1/lfunc.o lua5.1/lgc.o lua5.1/linit.o \
-lua5.1/liolib.o lua5.1/llex.o lua5.1/lmathlib.o lua5.1/lmem.o lua5.1/loadlib.o \
-lua5.1/lobject.o lua5.1/lopcodes.o lua5.1/loslib.o lua5.1/lparser.o lua5.1/lstate.o \
-lua5.1/lstring.o lua5.1/lstrlib.o lua5.1/ltable.o lua5.1/ltablib.o lua5.1/ltm.o \
-lua5.1/lundump.o lua5.1/lvm.o lua5.1/lzio.o
+LUAOBJS= \
+	$(SUBDIR_LUA)/lapi.o $(SUBDIR_LUA)/lauxlib.o $(SUBDIR_LUA)/lbaselib.o \
+	$(SUBDIR_LUA)/lcode.o $(SUBDIR_LUA)/ldblib.o $(SUBDIR_LUA)/ldebug.o \
+	$(SUBDIR_LUA)/ldo.o $(SUBDIR_LUA)/ldump.o $(SUBDIR_LUA)/lfunc.o \
+	$(SUBDIR_LUA)/lgc.o $(SUBDIR_LUA)/linit.o $(SUBDIR_LUA)/liolib.o \
+	$(SUBDIR_LUA)/llex.o $(SUBDIR_LUA)/lmathlib.o $(SUBDIR_LUA)/lmem.o \
+	$(SUBDIR_LUA)/loadlib.o $(SUBDIR_LUA)/lobject.o $(SUBDIR_LUA)/lopcodes.o \
+	$(SUBDIR_LUA)/loslib.o $(SUBDIR_LUA)/lparser.o $(SUBDIR_LUA)/lstate.o \
+	$(SUBDIR_LUA)/lstring.o $(SUBDIR_LUA)/lstrlib.o $(SUBDIR_LUA)/ltable.o \
+	$(SUBDIR_LUA)/ltablib.o $(SUBDIR_LUA)/ltm.o $(SUBDIR_LUA)/lundump.o \
+	$(SUBDIR_LUA)/lvm.o $(SUBDIR_LUA)/lzio.o
 
 # tolua objects
-TOLUAOBJS=tolua++/tolua_event.o tolua++/tolua_is.o tolua++/tolua_map.o \
-tolua++/tolua_push.o tolua++/tolua_to.o
+TOLUAOBJS=\
+	$(SUBDIR_TOLUA)/tolua_event.o \
+	$(SUBDIR_TOLUA)/tolua_is.o \
+	$(SUBDIR_TOLUA)/tolua_map.o \
+	$(SUBDIR_TOLUA)/tolua_push.o \
+	$(SUBDIR_TOLUA)/tolua_to.o
+
 
 all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS)
 	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS)
-	strip $(EXE)
 
 install:
 	$(INSTALL) $(EXE) $(PREFIX)/bin
@@ -52,4 +78,8 @@ uninstall:
 	$(GPP) $(CFLAGS) -o $@ -c $<
 
 clean:
-	$(UNINSTALL) *.o *.o lua5.1/*.o tolua++/*.o *~ $(EXE)
+	$(UNINSTALL) \
+		$(SUBDIR_BASE)/*.o \
+		$(SUBDIR_LUA)/*.o \
+		$(SUBDIR_TOLUA)/*.o \
+		$(EXE) *~
