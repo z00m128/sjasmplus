@@ -1,21 +1,27 @@
 # Makefile for sjasmplus created by Tygrys' hands.
+# install/uninstall features added, io_tape.o, CFLAGS and LDFLAGS modification by z00m's hands. [05.05.2016]
 
 GCC=gcc
 CC=$(GCC)
 GPP=g++
 C++=$(GPP)
 
+PREFIX=/usr/local
+INSTALL=install -c
+UNINSTALL=rm -vf
+
 EXE=sjasmplus
 
-CFLAGS=-O2 -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -Ilua5.1 -Itolua++
+CFLAGS=-O2 -Wall -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -Ilua5.1 -Itolua++
 CXXFLAGS=$(CFLAGS)
 
 #for Linux
-LDFLAGS="-ldl"
+LDFLAGS=-ldl
 
 #sjasmplus object files
-OBJS=sjasm/devices.o sjasm/directives.o sjasm/io_snapshots.o sjasm/io_trd.o sjasm/lua_lpack.o sjasm/lua_sjasm.o \
-sjasm/parser.o sjasm/reader.o sjasm/sjasm.o sjasm/sjio.o sjasm/support.o sjasm/tables.o sjasm/z80.o
+OBJS=sjasm/devices.o sjasm/directives.o sjasm/io_snapshots.o sjasm/io_trd.o sjasm/io_tape.o \
+sjasm/lua_lpack.o sjasm/lua_sjasm.o sjasm/parser.o sjasm/reader.o sjasm/sjasm.o sjasm/sjio.o \
+sjasm/support.o sjasm/tables.o sjasm/z80.o
 
 #liblua objects
 LUAOBJS= lua5.1/lapi.o lua5.1/lauxlib.o lua5.1/lbaselib.o lua5.1/lcode.o lua5.1/ldblib.o \
@@ -30,12 +36,20 @@ TOLUAOBJS=tolua++/tolua_event.o tolua++/tolua_is.o tolua++/tolua_map.o \
 tolua++/tolua_push.o tolua++/tolua_to.o
 
 all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS)
-	$(GPP) -o $(EXE) $(LDFLAGS) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS)
+	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS)
+	strip $(EXE)
+
+install:
+	$(INSTALL) $(EXE) $(PREFIX)/bin
+
+uninstall:
+	$(UNINSTALL) $(PREFIX)/bin/$(EXE)
 
 .c.o:
 	$(GCC) $(CFLAGS) -o $@ -c $< 
+
 .cpp.o:
 	$(GPP) $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -vf *.o *.o lua5.1/*.o tolua++/*.o *~ $(EXE)
+	$(UNINSTALL) *.o *.o lua5.1/*.o tolua++/*.o *~ $(EXE)
