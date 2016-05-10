@@ -142,7 +142,10 @@ void LuaShellExec(char *command) {
 
 	WinExec(command, SW_SHOWNORMAL);
 #else	
-	system(command);
+	int ret = system(command);
+	if ( ret == -1 ) {
+		Error("[LUASHELEXEC] Unable to start child process for command", command, CATCHALL);
+	}
 #endif
 #endif
 }
