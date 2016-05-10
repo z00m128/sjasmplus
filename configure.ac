@@ -25,7 +25,7 @@ AC_DEFUN([CHECK_SUBDIR_HEADER], [
     _SAVED_CPPFLAGS="$CPPFLAGS"
     AC_MSG_CHECKING([for $2 include dir])
     _check_subdir_header_dir=""
-    for _check_subdir_header_root in "$includedir" "/usr/local/include" "/usr/include" "/usr"
+    for _check_subdir_header_root in "$includedir" "/usr/local/include" "/usr/include"
     do
       for _check_subdir_header_sfx in $3; do
 		_check_subdir_header_dir="$_check_subdir_header_root/$_check_subdir_header_sfx"
@@ -51,7 +51,7 @@ AC_DEFUN([CHECK_SUBDIR_HEADER], [
 AC_LANG_PUSH(C++)
 have_lua_h=no
 lua_include_flags=""
-AC_CHECK_HEADER([<lua.h>], [have_lua_h=yes],[have_lua_h=no], [$liblua_CFLAGS])
+AC_CHECK_HEADER([<lua.h>], [have_lua_h=yes])
 if test $have_lua_h = no; then
 	CHECK_SUBDIR_HEADER(
 	   [lua_include_dir], [<lua.h>],
@@ -75,24 +75,16 @@ fi
 
 have_toluapp_h=no
 toluapp_include_flags=""
-#AC_CHECK_HEADER(<tolua++.h>, [have_toluapp_h=yes],[have_toluapp_h=no], [$lua_include_flags])
 AC_CHECK_HEADER([<tolua++.h>], [have_toluapp_h=yes])
-#if test $have_toluapp_h = no; then
-#	CHECK_SUBDIR_HEADER(
-#	   [toluapp_include_dir], [<tolua++.h>],
-#	   [tolua++5.1 tolua++-5.1 tolua++51 tolua++ include],
-#	   [have_toluapp_h=yes; toluapp_include_flags="-I$toluapp_include_dir"])
-#fi
-#if test $have_toluapp_h = yes; then
-	for toluapp_lib_name in tolua++ tolua++5.1 tolua++-5.1 tolua++51; do
-	AC_CHECK_LIB([$toluapp_lib_name], [tolua_function], [have_libtoluapp=yes], [have_libtoluapp=no], [$liblua_LIBS])
-	  	if test $have_libtoluapp = yes; then
-			AC_SUBST([libtoluapp_CFLAGS], ["$toluapp_include_flags"])
-			AC_SUBST([libtoluapp_LIBS], ["-l$toluapp_lib_name"])
-			break
-		fi
-	done
-#fi
+
+for toluapp_lib_name in tolua++ tolua++5.1 tolua++-5.1 tolua++51; do
+AC_CHECK_LIB([$toluapp_lib_name], [tolua_function], [have_libtoluapp=yes], [have_libtoluapp=no], [$liblua_LIBS])
+	if test $have_libtoluapp = yes; then
+		AC_SUBST([libtoluapp_CFLAGS], ["$toluapp_include_flags"])
+		AC_SUBST([libtoluapp_LIBS], ["-l$toluapp_lib_name"])
+		break
+	fi
+done
 
 AC_LANG_POP(C++)
 
