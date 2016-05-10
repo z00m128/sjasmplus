@@ -29,6 +29,8 @@
 #ifndef __SJDEFS
 #define __SJDEFS
 
+#include "config.h"
+
 // not used
 #define MAXPASSES 3
 
