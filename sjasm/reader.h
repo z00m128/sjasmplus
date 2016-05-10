@@ -46,8 +46,8 @@ int check8o(long val); /* changes applied from SjASM 0.39g */
 int check16(aint val, bool error=true); /* changes applied from SjASM 0.39g */
 int check24(aint val, bool error=true); /* changes applied from SjASM 0.39g */
 int need(char*& p, char c);
-int need(char*& p, char* c);
-int needa(char*& p, const char* c1, int r1, const char* c2 = 0, int r2 = 0, char* c3 = 0, int r3 = 0);
+int need(char*& p, const char* c);
+int needa(char*& p, const char* c1, int r1, const char* c2 = 0, int r2 = 0, const char* c3 = 0, int r3 = 0);
 int GetConstant(char*& op, aint& val);
 int GetCharConst(char*& p, aint& val);
 int GetCharConstChar(char*& op, aint& val);

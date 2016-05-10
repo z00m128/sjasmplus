@@ -166,7 +166,7 @@ int ParseExpAdd(char*& p, aint& nval) {
 	if (!ParseExpMul(p, left)) {
 		return 0;
 	}
-	while (oper = need(p, "+ - ")) {
+	while ((oper = need(p, "+ - "))) {
 		if (!ParseExpMul(p, right)) {
 			return 0;
 		}
@@ -217,7 +217,7 @@ int ParseExpMinMax(char*& p, aint& nval) {
 	if (!ParseExpShift(p, left)) {
 		return 0;
 	}
-	while (oper = need(p, "<?>?")) {
+	while ((oper = need(p, "<?>?"))) {
 		if (!ParseExpShift(p, right)) {
 			return 0;
 		}
@@ -239,7 +239,7 @@ int ParseExpCmp(char*& p, aint& nval) {
 	if (!ParseExpMinMax(p, left)) {
 		return 0;
 	}
-	while (oper = need(p, "<=>=< > ")) {
+	while ((oper = need(p, "<=>=< > "))) {
 		if (!ParseExpMinMax(p, right)) {
 			return 0;
 		}
@@ -265,7 +265,7 @@ int ParseExpEqu(char*& p, aint& nval) {
 	if (!ParseExpCmp(p, left)) {
 		return 0;
 	}
-	while (oper = need(p, "=_==!=")) {
+	while ((oper = need(p, "=_==!="))) {
 		if (!ParseExpCmp(p, right)) {
 			return 0;
 		}
@@ -366,7 +366,7 @@ char* ReplaceDefine(char* lp) {
 	/*char *nl=new char[LINEMAX2];*/
 	char* nl = sline; /* added. speed up! */
 	char* rp = nl,* nid,* kp,* ver,a;
-	int def = 0; /* added */
+//	int def = 0; /* added */ /* removed, not used ;] */
 	if (++replacedefineteller > 20) {
 		Error("Over 20 defines nested", 0, FATAL);
 	}
@@ -399,7 +399,7 @@ char* ReplaceDefine(char* lp) {
 			}
 			++lp;
 
-			if (a != '\'' || (*(lp - 2) != 'f' || *(lp - 3) != 'a') && (*(lp - 2) != 'F' || *(lp - 3) != 'A')) {
+			if (a != '\'' || ((*(lp - 2) != 'f' || *(lp - 3) != 'a') && (*(lp - 2) != 'F' || *(lp - 3) != 'A'))) {
 				while ('o') {
 					if (!*lp) {
 						*rp = 0; return nl;
@@ -508,7 +508,7 @@ char* ReplaceDefine(char* lp) {
 		if (dr) {
 			definegereplaced = 1;
 		}
-		while (*rp = *ver) {
+		while ((*rp = *ver)) {
 			++rp; ++ver;
 		}
 	}
@@ -526,7 +526,7 @@ char* ReplaceDefineNext(char* lp) {
 	int definegereplaced = 0,dr;
 	char* nl = sline2;
 	char* rp = nl,* nid,* kp,* ver,a;
-	int def = 0;
+//	int def = 0;
 	if (++replacedefineteller > 20) {
 		Error("Over 20 defines nested", 0, FATAL);
 	}
@@ -557,7 +557,7 @@ char* ReplaceDefineNext(char* lp) {
 			if (!comlin && !comnxtlin) {
 				*rp = *lp; ++rp;
 			 } ++lp;
-			if (a != '\'' || (*(lp - 2) != 'f' || *(lp - 3) != 'a') && (*(lp - 2) != 'F' && *(lp - 3) != 'A')) {
+			if (a != '\'' || ((*(lp - 2) != 'f' || *(lp - 3) != 'a') && (*(lp - 2) != 'F' && *(lp - 3) != 'A'))) {
 				while ('o') {
 					if (!*lp) {
 						*rp = 0; return nl;
@@ -644,7 +644,7 @@ char* ReplaceDefineNext(char* lp) {
 		if (dr) {
 			definegereplaced = 1;
 		}
-		while (*rp = *ver) {
+		while ((*rp = *ver)) {
 			++rp; ++ver;
 		}
 	}
@@ -1031,7 +1031,7 @@ void ParseStructLine(CStructure* st) {
 unsigned long LuaCalculate(char *str) {
 	aint val;
 	if (!ParseExpression(str, val)) {
-		return NULL;
+		return 0;
 	} else {
 		return val;
 	}

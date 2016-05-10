@@ -160,7 +160,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 			}
 		}*/
 	} else {
-		for (int i = 0; i < 8; i++) {
+		for (aint i = 0; i < 8; i++) {
 			if (i != Device->GetSlot(3)->Page->Number && i != 2 && i != 5) {
 				if (fwrite(Device->GetPage(i)->RAM, 1, Device->GetPage(i)->Size, ff) != Device->GetPage(i)->Size) {
 					Error("Write error (disk full?)", fname, CATCHALL);

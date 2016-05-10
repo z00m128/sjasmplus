@@ -331,7 +331,7 @@ private:
 
 class CDevice {
 public:
-	CDevice(char *, CDevice *);
+	CDevice(const char *, CDevice *);
 	~CDevice();
 	void AddSlot(aint adr, aint size);
 	void AddPage(aint size);

@@ -53,7 +53,7 @@ typedef struct tolua_Error tolua_Error;
 #define TOLUA_NOPEER	LUA_REGISTRYINDEX /* for lua 5.1 */
 
 TOLUA_API const char* tolua_typename (lua_State* L, int lo);
-TOLUA_API void tolua_error (lua_State* L, char* msg, tolua_Error* err);
+TOLUA_API void tolua_error (lua_State* L, const char* msg, tolua_Error* err);
 TOLUA_API int tolua_isnoobj (lua_State* L, int lo, tolua_Error* err);
 TOLUA_API int tolua_isvalue (lua_State* L, int lo, int def, tolua_Error* err);
 TOLUA_API int tolua_isboolean (lua_State* L, int lo, int def, tolua_Error* err);
@@ -84,7 +84,7 @@ TOLUA_API void* tolua_copy (lua_State* L, void* value, unsigned int size);
 TOLUA_API int tolua_register_gc (lua_State* L, int lo);
 TOLUA_API int tolua_default_collect (lua_State* tolua_S);
 
-TOLUA_API void tolua_usertype (lua_State* L, char* type);
+TOLUA_API void tolua_usertype (lua_State* L, const char* type);
 TOLUA_API void tolua_beginmodule (lua_State* L, const char* name);
 TOLUA_API void tolua_endmodule (lua_State* L);
 TOLUA_API void tolua_module (lua_State* L, const char* name, int hasvar);

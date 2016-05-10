@@ -36,7 +36,7 @@
 
 // http://legacy.imatix.com/html/sfl/sfl282.htm
 char* strpad(char* string, char ch, aint length) {
-	int cursize;
+	aint cursize;
 	cursize = strlen (string);          /*  Get current length of string     */
 	while (cursize < length)            /*  Pad until at desired length      */
 		string [cursize++] = ch;

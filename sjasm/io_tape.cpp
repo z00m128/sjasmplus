@@ -348,13 +348,13 @@ void writecode(unsigned char* block, aint length, unsigned short loadaddr, bool 
 
 void remove_basic_sp(unsigned char* ram) {
 	bool remove = true;
-	for (int i=0; i < sizeof(BASin48SP);i++) {
+	for (aint i=0; i < sizeof(BASin48SP);i++) {
 		if (BASin48SP[i] != ram[i]) {
 			remove = false;
 		}
 	}
 	if (remove) {
-		for (int i=0; i < sizeof(BASin48SP);i++) {
+		for (aint i=0; i < sizeof(BASin48SP);i++) {
 			ram[i] = 0;
 		}
 	}
@@ -364,14 +364,14 @@ void detect_vars_changes() {
 	unsigned char *psys = (unsigned char*)Device->GetSlot(1)->Page->RAM + 0x1C00;
 
 	bool nobas48 = false;
-	for (int i=0; i < sizeof(BASin48Vars);i++) {
+	for (aint i=0; i < sizeof(BASin48Vars);i++) {
 		if (BASin48Vars[i] != psys[i]) {
 			nobas48 = true;
 		}
 	}
 
 	bool nosys = false;
-	for (int i=0; i < sizeof(ZXSysVars);i++) {
+	for (aint i=0; i < sizeof(ZXSysVars);i++) {
 		if (ZXSysVars[i] != psys[i]) {
 			nosys = true;
 		}

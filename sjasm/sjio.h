@@ -75,7 +75,7 @@ int ReadLine(bool SplitByColon = true);
 EReturn ReadFile();
 EReturn ReadFile(const char* pp, const char* err); /* added */
 EReturn SkipFile();
-EReturn SkipFile(char* pp, char* err); /* added */
+EReturn SkipFile(char* pp, const char* err); /* added */
 void NewDest(char* newfilename);
 void SeekDest(long, int); /* added from new SjASM 0.39g */
 int ReadFileToCStringsList(CStringsList*& f, const char* end);

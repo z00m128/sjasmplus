@@ -2496,7 +2496,7 @@ namespace Z80 {
 																							 	e[0] = 0xdd;
 																							 } break;
 					}
-					if (beginhaakje = oparen(lp, '(')) {
+					if ((beginhaakje = oparen(lp, '('))) {
 						olp = --lp;
 					}
 					b = GetWord(lp);
@@ -2535,7 +2535,7 @@ namespace Z80 {
 																							 	e[0] = 0xfd;
 																							 } break;
 					}
-					if (beginhaakje = oparen(lp, '(')) {
+					if ((beginhaakje = oparen(lp, '('))) {
 						olp = --lp;
 					}
 					b = GetWord(lp);
@@ -2836,6 +2836,9 @@ namespace Z80 {
 				default:
 					if (oparen(lp, '[') || oparen(lp, '(')) {
 						reg = GetRegister(lp);
+						
+						b = 0;
+						
 						if (reg == Z80_IX || reg == Z80_IY) {
 							b = z80GetIDxoffset(lp);
 						}
@@ -3052,6 +3055,7 @@ namespace Z80 {
 				default:
 					if (oparen(lp, '[') || oparen(lp, '(')) {
 						reg = GetRegister(lp);
+						b = 0;
 						if (reg == Z80_IX || reg == Z80_IY) {
 							b = z80GetIDxoffset(lp);
 						}
@@ -4396,6 +4400,7 @@ namespace Z80 {
 				case Z80_SP:
 					ASSERT_FAKE_INSTRUCTIONS(break);
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x72; break;
+				default:;
 				}
 				break;
 			case Z80_A:

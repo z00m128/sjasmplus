@@ -299,7 +299,7 @@ int need(char*& p, char c) {
 	++p; return 1;
 }
 
-int needa(char*& p, const char* c1, int r1, const char* c2, int r2, char* c3, int r3) {
+int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3) {
 	//  SkipBlanks(p);
 	if (!isalpha((unsigned char) * p)) {
 		return 0;
@@ -316,7 +316,7 @@ int needa(char*& p, const char* c1, int r1, const char* c2, int r2, char* c3, in
 	return 0;
 }
 
-int need(char*& p, char* c) {
+int need(char*& p, const char* c) {
 	SkipBlanks(p);
 	while (*c) {
 		if (*p != *c) {

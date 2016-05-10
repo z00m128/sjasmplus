@@ -215,7 +215,7 @@ int SetDevice(char *id) {
 
 char* GetDeviceName() {
 	if (!DeviceID) {
-		return "NONE";
+		return (char *)"NONE";
 	} else {
 		return DeviceID;
 	}

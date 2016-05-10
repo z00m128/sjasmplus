@@ -500,7 +500,7 @@ void dirENDMODULE() {
 
 void dirMODULE() {
 	char* n;
-	if (n = GetID(lp)) {
+	if ((n = GetID(lp))) {
 		if(ModuleName == NULL)
 		{
 			ModuleName = STRDUP(n);
@@ -564,7 +564,7 @@ void dirEND() {
 	if (ParseExpression(lp, val)) {
 		if (val > 65535 || val < 0) {
 			char buf[LINEMAX];
-			SPRINTF1(buf, LINEMAX, "[END] Invalid address: %s", val);
+			SPRINTF1(buf, LINEMAX, "[END] Invalid address: %lu", val);
 			Error(buf, 0, CATCHALL); return;
 		}
 		StartAddress = val;
@@ -690,6 +690,8 @@ void dirINCTRD() {
 		} else {
 			Error("[INCTRD] Syntax error", bp, CATCHALL); return;
 		}
+	} else {
+		Error("[INCTRD] Syntax error", bp, CATCHALL); return; //is this ok?
 	}
 	if (comma(lp)) {
 		if (!comma(lp)) {
@@ -948,6 +950,8 @@ void dirSAVEHOB() {
 		} else {
 		  	Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
 		}
+	} else {
+		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return; //is this ok?
 	}
 
 	if (comma(lp)) {
@@ -1026,6 +1030,8 @@ void dirSAVETRD() {
 		} else {
 		  	Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 		}
+	} else {
+		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return; //is this ok?
 	}
 
 	if (comma(lp)) {
@@ -1612,7 +1618,7 @@ void dirDISPLAY() {
 						*(ep++) = ' ';
 					}
 					if (decprint == 1 || decprint == 2) {
-						SPRINTF1(ep, (int)(&e[0] + LINEMAX - ep), "%d", val);
+						SPRINTF1(ep, (int)(&e[0] + LINEMAX - ep), "%lu", val);
 						ep += strlen(ep);
 					}
 		  		  	decprint = 0;
@@ -1994,7 +2000,7 @@ void dirDEFARRAY() {
 		f->next = new CStringsList();
 		f = f->next;
 	}
-	DefineTable.Add(id, "\n", a);
+	DefineTable.Add(id, (char *)"\n", a);
 	//while (a) { STRCPY(ml,a->string); _COUT ml _ENDL; a=a->next; }
 }
 
@@ -2017,7 +2023,7 @@ void _lua_showerror() {
 
 	// print error and other actions
 	err = ErrorLine;
-	SPRINTF3(err, LINEMAX2, "%s(%lu): error: [LUA]%s", filename, ln, pos);
+	SPRINTF3(err, LINEMAX2, "%s(%d): error: [LUA]%s", filename, ln, pos);
 
 	if (!strchr(err, '\n')) {
 		STRCAT(err, LINEMAX2, "\n");
@@ -2033,7 +2039,7 @@ void _lua_showerror() {
 	ErrorCount++;
 
 	char count[25];
-	SPRINTF1(count, 25, "%lu", ErrorCount);
+	SPRINTF1(count, 25, "%d", ErrorCount);
 	DefineTable.Replace("_ERRORS", count);
 	// end Error(...)
 
@@ -2069,7 +2075,7 @@ void dirLUA() {
 	char *rp, *id;
 	char *buff = new char[32768];
 	char *bp=buff;
-	char size=0;
+//	char size=0;
 	int ln=0;
 	bool execute=false;
 
@@ -2189,7 +2195,7 @@ void dirINCLUDELUA() {
 void dirDEVICE() {
 	char* id;
 
-	if (id = GetID(lp)) {
+	if ((id = GetID(lp))) {
 		if (!SetDevice(id)) {
 			Error("[DEVICE] Invalid parameter", 0, CATCHALL);
 		}
