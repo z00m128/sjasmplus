@@ -29,6 +29,8 @@
 #ifndef __SJDEFS
 #define __SJDEFS
 
+#include "config.h"
+
 // not used
 #define MAXPASSES 3
 
@@ -73,6 +75,8 @@ using std::stack;
 #include <ctype.h>
 #include <math.h>
 
+#ifdef USE_LUA
+
 #ifdef UNDER_CE
 extern "C" {
 #include "lua.h"
@@ -89,6 +93,8 @@ extern "C" {
 }
 #endif
 
+#endif //USE_LUA
+
 // global defines
 #define LINEMAX 2048
 #define LINEMAX2 LINEMAX*2
@@ -103,10 +109,18 @@ extern "C" {
 #endif
 #define aint unsigned long
 
+#ifdef LINUX
+#include <linux/limits.h>
+#endif //LINUX
+
 // include all headers
+
+#ifdef USE_LUA
 extern "C" {
 #include "lua_lpack.h"
 }
+#endif //USE_LUA
+
 #include "devices.h"
 #include "support.h"
 #include "tables.h"
