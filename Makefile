@@ -107,17 +107,31 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am_bin2c_OBJECTS = utils/bin2c/bin2c.$(OBJEXT)
 bin2c_OBJECTS = $(am_bin2c_OBJECTS)
 bin2c_LDADD = $(LDADD)
+am__sjasmplus_SOURCES_DIST = sjasm/devices.cpp sjasm/directives.cpp \
+	sjasm/io_snapshots.cpp sjasm/io_tape.cpp sjasm/io_trd.cpp \
+	sjasm/parser.cpp sjasm/reader.cpp sjasm/sjasm.cpp \
+	sjasm/sjio.cpp sjasm/support.cpp sjasm/tables.cpp \
+	sjasm/z80.cpp sjasm/lua_sjasm.cpp sjasm/lua_lpack.c
+#am_sjasmplus_OBJECTS = sjasm/devices.$(OBJEXT) \
+#	sjasm/directives.$(OBJEXT) \
+#	sjasm/io_snapshots.$(OBJEXT) \
+#	sjasm/io_tape.$(OBJEXT) sjasm/io_trd.$(OBJEXT) \
+#	sjasm/parser.$(OBJEXT) sjasm/reader.$(OBJEXT) \
+#	sjasm/sjasm.$(OBJEXT) sjasm/sjio.$(OBJEXT) \
+#	sjasm/support.$(OBJEXT) sjasm/tables.$(OBJEXT) \
+#	sjasm/z80.$(OBJEXT)
 am_sjasmplus_OBJECTS = sjasm/devices.$(OBJEXT) \
-	sjasm/directives.$(OBJEXT) sjasm/io_snapshots.$(OBJEXT) \
-	sjasm/io_tape.$(OBJEXT) sjasm/io_trd.$(OBJEXT) \
-	sjasm/lua_sjasm.$(OBJEXT) sjasm/parser.$(OBJEXT) \
-	sjasm/reader.$(OBJEXT) sjasm/sjasm.$(OBJEXT) \
-	sjasm/sjio.$(OBJEXT) sjasm/support.$(OBJEXT) \
-	sjasm/tables.$(OBJEXT) sjasm/z80.$(OBJEXT) \
-	sjasm/lua_lpack.$(OBJEXT)
+	sjasm/directives.$(OBJEXT) \
+	sjasm/io_snapshots.$(OBJEXT) sjasm/io_tape.$(OBJEXT) \
+	sjasm/io_trd.$(OBJEXT) sjasm/lua_sjasm.$(OBJEXT) \
+	sjasm/parser.$(OBJEXT) sjasm/reader.$(OBJEXT) \
+	sjasm/sjasm.$(OBJEXT) sjasm/sjio.$(OBJEXT) \
+	sjasm/support.$(OBJEXT) sjasm/tables.$(OBJEXT) \
+	sjasm/z80.$(OBJEXT) sjasm/lua_lpack.$(OBJEXT)
 sjasmplus_OBJECTS = $(am_sjasmplus_OBJECTS)
 am__DEPENDENCIES_1 =
-sjasmplus_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+sjasmplus_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 sjasmplus_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(sjasmplus_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_$(V))
@@ -162,7 +176,7 @@ am__v_CXXLD_ = $(am__v_CXXLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(bin2c_SOURCES) $(sjasmplus_SOURCES)
-DIST_SOURCES = $(bin2c_SOURCES) $(sjasmplus_SOURCES)
+DIST_SOURCES = $(bin2c_SOURCES) $(am__sjasmplus_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -345,12 +359,13 @@ top_build_prefix =
 top_builddir = .
 top_srcdir = .
 AUTOMAKE_OPTIONS = subdir-objects
-sjasmplus_SOURCES = sjasm/devices.cpp sjasm/directives.cpp sjasm/io_snapshots.cpp sjasm/io_tape.cpp sjasm/io_trd.cpp sjasm/lua_sjasm.cpp sjasm/parser.cpp sjasm/reader.cpp sjasm/sjasm.cpp sjasm/sjio.cpp sjasm/support.cpp sjasm/tables.cpp sjasm/z80.cpp sjasm/lua_lpack.c
 nodist_include_HEADERS = config.h
+bin2c_SOURCES = utils/bin2c/bin2c.cpp
+#sjasmplus_SOURCES = sjasm/devices.cpp sjasm/directives.cpp sjasm/io_snapshots.cpp sjasm/io_tape.cpp sjasm/io_trd.cpp sjasm/parser.cpp sjasm/reader.cpp sjasm/sjasm.cpp sjasm/sjio.cpp sjasm/support.cpp sjasm/tables.cpp sjasm/z80.cpp
+sjasmplus_SOURCES = sjasm/devices.cpp sjasm/directives.cpp sjasm/io_snapshots.cpp sjasm/io_tape.cpp sjasm/io_trd.cpp sjasm/lua_sjasm.cpp sjasm/parser.cpp sjasm/reader.cpp sjasm/sjasm.cpp sjasm/sjio.cpp sjasm/support.cpp sjasm/tables.cpp sjasm/z80.cpp sjasm/lua_lpack.c
 AM_CPPFLAGS = $(LUA_INCLUDE) $(libtoluapp_CFLAGS)
 sjasmplus_LDADD = $(libtoluapp_LIBS) $(LUA_LIB)
 sjasmplus_LDFLAGS = -s 
-bin2c_SOURCES = utils/bin2c/bin2c.cpp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -474,8 +489,6 @@ sjasm/io_tape.$(OBJEXT): sjasm/$(am__dirstamp) \
 	sjasm/$(DEPDIR)/$(am__dirstamp)
 sjasm/io_trd.$(OBJEXT): sjasm/$(am__dirstamp) \
 	sjasm/$(DEPDIR)/$(am__dirstamp)
-sjasm/lua_sjasm.$(OBJEXT): sjasm/$(am__dirstamp) \
-	sjasm/$(DEPDIR)/$(am__dirstamp)
 sjasm/parser.$(OBJEXT): sjasm/$(am__dirstamp) \
 	sjasm/$(DEPDIR)/$(am__dirstamp)
 sjasm/reader.$(OBJEXT): sjasm/$(am__dirstamp) \
@@ -489,6 +502,8 @@ sjasm/support.$(OBJEXT): sjasm/$(am__dirstamp) \
 sjasm/tables.$(OBJEXT): sjasm/$(am__dirstamp) \
 	sjasm/$(DEPDIR)/$(am__dirstamp)
 sjasm/z80.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/lua_sjasm.$(OBJEXT): sjasm/$(am__dirstamp) \
 	sjasm/$(DEPDIR)/$(am__dirstamp)
 sjasm/lua_lpack.$(OBJEXT): sjasm/$(am__dirstamp) \
 	sjasm/$(DEPDIR)/$(am__dirstamp)

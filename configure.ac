@@ -6,7 +6,7 @@ AC_INIT([sjsamplus], [1.0], [cizo2000@gmail.com])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile])
 
-AM_INIT_AUTOMAKE([1.15])
+AM_INIT_AUTOMAKE([1.11])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -15,7 +15,7 @@ AC_PROG_CC
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/time.h unistd.h linux/limits.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -26,6 +26,16 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor gettimeofday memset strchr strdup strstr])
 
+AC_ARG_ENABLE([lua],
+[  --enable-lua    Turn on lua inline scripting],
+[case "${enableval}" in
+  yes) withlua=true ;;
+  no)  withlua=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --with-lua]) ;;
+esac],[withlua=false])
+
+AM_CONDITIONAL([LUA], [test x$withlua = xtrue])
+AM_COND_IF([LUA], [
 have_lua=no
 
 AX_PROG_LUA([5.1],[], [have_lua=yes], [have_lua=no])
@@ -53,9 +63,13 @@ done
 
 if test $have_toluapp = no; then
 	AC_MSG_ERROR([A tolua++ library is required, and none was found; aborting...])
-fi
+fi 
 
+AC_DEFINE(LUA_USE_LINUX, [], [Set LUA to be used under linux])
+AC_DEFINE(USE_LUA, [], [Set LUA to be used])
+])
+
+AC_DEFINE(LINUX, [], [We are using LINUX])
 AC_DEFINE(MAX_PATH, PATH_MAX, [Defines max path length])
-AC_DEFINE(LUA_USE_LINUX, [], [Set LUA to be used])
 
 AC_OUTPUT

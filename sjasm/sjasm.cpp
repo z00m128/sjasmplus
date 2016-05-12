@@ -29,7 +29,12 @@
 // sjasm.cpp
 
 #include "sjdefs.h"
+
+#ifdef USE_LUA
+
 #include "lua_sjasm.h"
+
+#endif //USE_LUA
 
 namespace Options {
 	char SymbolListFName[LINEMAX];
@@ -99,8 +104,12 @@ CStructureTable StructureTable;
 CAddressList* AddressList = 0; /* from SjASM 0.39g */
 CStringsList* ModuleList = NULL;
 
+#ifdef USE_LUA
+
 lua_State *LUA;
 int LuaLine=-1;
+
+#endif //USE_LUA
 
 /* modified */
 void InitPass(int p) {
@@ -274,9 +283,13 @@ namespace Options {
 	}
 }
 
+#ifdef USE_LUA
+
 void LuaFatalError(lua_State *L) {
 	Error((char *)lua_tostring(L, -1), 0, FATAL);
 }
+
+#endif //USE_LUA
 
 
 #ifdef UNDER_CE
@@ -329,6 +342,8 @@ int main(int argc, char **argv) {
 #endif
 	}
 
+#ifdef USE_LUA
+
 	// init LUA
 	LUA = lua_open();
 	lua_atpanic(LUA, (lua_CFunction)LuaFatalError);
@@ -336,6 +351,8 @@ int main(int argc, char **argv) {
 	luaopen_pack(LUA);
 
 	tolua_sjasm_open(LUA);
+
+#endif //USE_LUA
 
 	// init vars
 	Options::DestionationFName[0] = 0;
@@ -468,8 +485,10 @@ int main(int argc, char **argv) {
 	if (Devices) {
 		delete Devices;
 	}
+#ifdef USE_LUA
 	// close Lua
 	lua_close(LUA);
+#endif //USE_LUA
 
 	return (ErrorCount != 0);
 }

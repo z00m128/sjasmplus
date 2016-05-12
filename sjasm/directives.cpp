@@ -2004,6 +2004,8 @@ void dirDEFARRAY() {
 	//while (a) { STRCPY(ml,a->string); _COUT ml _ENDL; a=a->next; }
 }
 
+#ifdef USE_LUA
+
 void _lua_showerror() {
 	int ln;
 
@@ -2192,6 +2194,8 @@ void dirINCLUDELUA() {
 	delete[] fnaam;
 }
 
+#endif //USE_LUA
+
 void dirDEVICE() {
 	char* id;
 
@@ -2296,9 +2300,11 @@ void InsertDirectives() {
 
 	DirectivesTable.insertd("device", dirDEVICE);
 
+#ifdef USE_LUA
 	DirectivesTable.insertd("lua", dirLUA);
 	DirectivesTable.insertd("endlua", dirENDLUA);
 	DirectivesTable.insertd("includelua", dirINCLUDELUA);
+#endif //USE_LUA
 
 	DirectivesTable_dup.insertd("dup", dirDUP); /* added */
 	DirectivesTable_dup.insertd("edup", dirEDUP); /* added */
@@ -2306,6 +2312,8 @@ void InsertDirectives() {
 	DirectivesTable_dup.insertd("endr", dirEDUP); /* added */
 	DirectivesTable_dup.insertd("rept", dirDUP); /* added */
 }
+
+#ifdef USE_LUA
 
 bool LuaSetPage(aint n) {
 	if (n < 0) {
@@ -2333,5 +2341,7 @@ bool LuaSetSlot(aint n) {
 	CheckPage();
 	return true;
 }
+
+#endif //USE_LUA
 
 //eof direct.cpp

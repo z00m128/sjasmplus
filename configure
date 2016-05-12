@@ -639,6 +639,8 @@ LUA_SHORT_VERSION
 LUA_VERSION
 LUA
 SED
+LUA_FALSE
+LUA_TRUE
 LIBOBJS
 EGREP
 GREP
@@ -736,6 +738,7 @@ ac_user_opts='
 enable_option_checking
 enable_silent_rules
 enable_dependency_tracking
+enable_lua
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1372,6 +1375,7 @@ Optional Features:
                           do not reject slow dependency extractors
   --disable-dependency-tracking
                           speeds up one-time build
+  --enable-lua    Turn on lua inline scripting
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -4704,7 +4708,7 @@ fi
 done
 
 
-for ac_header in fcntl.h stdlib.h string.h sys/time.h unistd.h
+for ac_header in fcntl.h stdlib.h string.h sys/time.h unistd.h linux/limits.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -4966,7 +4970,25 @@ fi
 done
 
 
-have_lua=no
+# Check whether --enable-lua was given.
+if test "${enable_lua+set}" = set; then :
+  enableval=$enable_lua; case "${enableval}" in
+  yes) withlua=true ;;
+  no)  withlua=false ;;
+  *) as_fn_error $? "bad value ${enableval} for --with-lua" "$LINENO" 5 ;;
+esac
+else
+  withlua=false
+fi
+
+
+ if test x$withlua = xtrue; then
+  LUA_TRUE=
+  LUA_FALSE='#'
+else
+  LUA_TRUE='#'
+  LUA_FALSE=
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a sed that does not truncate output" >&5
 $as_echo_n "checking for a sed that does not truncate output... " >&6; }
@@ -5036,6 +5058,10 @@ fi
 $as_echo "$ac_cv_path_SED" >&6; }
  SED="$ac_cv_path_SED"
   rm -f conftest.sed
+
+if test -z "$LUA_TRUE"; then :
+
+have_lua=no
 
 
 
@@ -5897,10 +5923,19 @@ if test $have_toluapp = no; then
 fi
 
 
-$as_echo "#define MAX_PATH PATH_MAX" >>confdefs.h
-
-
 $as_echo "#define LUA_USE_LINUX /**/" >>confdefs.h
+
+
+$as_echo "#define USE_LUA /**/" >>confdefs.h
+
+
+fi
+
+
+$as_echo "#define LINUX /**/" >>confdefs.h
+
+
+$as_echo "#define MAX_PATH PATH_MAX" >>confdefs.h
 
 
 cat >confcache <<\_ACEOF
@@ -6038,6 +6073,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${LUA_TRUE}" && test -z "${LUA_FALSE}"; then
+  as_fn_error $? "conditional \"LUA\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
