@@ -95,6 +95,8 @@ long GetTickCount();
 
 #endif
 
+#ifdef USE_LUA
 void LuaShellExec(char *command);
+#endif //USE_LUA
 
 //eof support.h
