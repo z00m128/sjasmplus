@@ -87,7 +87,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = sjasmplus$(EXEEXT)
+bin_PROGRAMS = sjasmplus$(EXEEXT) bin2c$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -103,11 +103,18 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_sjasmplus_OBJECTS = devices.$(OBJEXT) directives.$(OBJEXT) \
-	io_snapshots.$(OBJEXT) io_tape.$(OBJEXT) io_trd.$(OBJEXT) \
-	lua_sjasm.$(OBJEXT) parser.$(OBJEXT) reader.$(OBJEXT) \
-	sjasm.$(OBJEXT) sjio.$(OBJEXT) support.$(OBJEXT) \
-	tables.$(OBJEXT) z80.$(OBJEXT) lua_lpack.$(OBJEXT)
+am__dirstamp = $(am__leading_dot)dirstamp
+am_bin2c_OBJECTS = utils/bin2c/bin2c.$(OBJEXT)
+bin2c_OBJECTS = $(am_bin2c_OBJECTS)
+bin2c_LDADD = $(LDADD)
+am_sjasmplus_OBJECTS = sjasm/devices.$(OBJEXT) \
+	sjasm/directives.$(OBJEXT) sjasm/io_snapshots.$(OBJEXT) \
+	sjasm/io_tape.$(OBJEXT) sjasm/io_trd.$(OBJEXT) \
+	sjasm/lua_sjasm.$(OBJEXT) sjasm/parser.$(OBJEXT) \
+	sjasm/reader.$(OBJEXT) sjasm/sjasm.$(OBJEXT) \
+	sjasm/sjio.$(OBJEXT) sjasm/support.$(OBJEXT) \
+	sjasm/tables.$(OBJEXT) sjasm/z80.$(OBJEXT) \
+	sjasm/lua_lpack.$(OBJEXT)
 sjasmplus_OBJECTS = $(am_sjasmplus_OBJECTS)
 am__DEPENDENCIES_1 =
 sjasmplus_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -129,10 +136,6 @@ DEFAULT_INCLUDES = -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
-AM_V_lt = $(am__v_lt_$(V))
-am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
-am__v_lt_0 = --silent
-am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_$(V))
@@ -158,8 +161,8 @@ AM_V_CXXLD = $(am__v_CXXLD_$(V))
 am__v_CXXLD_ = $(am__v_CXXLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(sjasmplus_SOURCES)
-DIST_SOURCES = $(sjasmplus_SOURCES)
+SOURCES = $(bin2c_SOURCES) $(sjasmplus_SOURCES)
+DIST_SOURCES = $(bin2c_SOURCES) $(sjasmplus_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -341,11 +344,13 @@ target_alias =
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
+AUTOMAKE_OPTIONS = subdir-objects
 sjasmplus_SOURCES = sjasm/devices.cpp sjasm/directives.cpp sjasm/io_snapshots.cpp sjasm/io_tape.cpp sjasm/io_trd.cpp sjasm/lua_sjasm.cpp sjasm/parser.cpp sjasm/reader.cpp sjasm/sjasm.cpp sjasm/sjio.cpp sjasm/support.cpp sjasm/tables.cpp sjasm/z80.cpp sjasm/lua_lpack.c
 nodist_include_HEADERS = config.h
 AM_CPPFLAGS = $(LUA_INCLUDE) $(libtoluapp_CFLAGS)
 sjasmplus_LDADD = $(libtoluapp_LIBS) $(LUA_LIB)
 sjasmplus_LDFLAGS = -s 
+bin2c_SOURCES = utils/bin2c/bin2c.cpp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -441,6 +446,52 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+utils/bin2c/$(am__dirstamp):
+	@$(MKDIR_P) utils/bin2c
+	@: > utils/bin2c/$(am__dirstamp)
+utils/bin2c/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) utils/bin2c/$(DEPDIR)
+	@: > utils/bin2c/$(DEPDIR)/$(am__dirstamp)
+utils/bin2c/bin2c.$(OBJEXT): utils/bin2c/$(am__dirstamp) \
+	utils/bin2c/$(DEPDIR)/$(am__dirstamp)
+
+bin2c$(EXEEXT): $(bin2c_OBJECTS) $(bin2c_DEPENDENCIES) $(EXTRA_bin2c_DEPENDENCIES) 
+	@rm -f bin2c$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(bin2c_OBJECTS) $(bin2c_LDADD) $(LIBS)
+sjasm/$(am__dirstamp):
+	@$(MKDIR_P) sjasm
+	@: > sjasm/$(am__dirstamp)
+sjasm/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) sjasm/$(DEPDIR)
+	@: > sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/devices.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/directives.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/io_snapshots.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/io_tape.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/io_trd.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/lua_sjasm.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/parser.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/reader.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/sjasm.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/sjio.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/support.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/tables.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/z80.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
+sjasm/lua_lpack.$(OBJEXT): sjasm/$(am__dirstamp) \
+	sjasm/$(DEPDIR)/$(am__dirstamp)
 
 sjasmplus$(EXEEXT): $(sjasmplus_OBJECTS) $(sjasmplus_DEPENDENCIES) $(EXTRA_sjasmplus_DEPENDENCIES) 
 	@rm -f sjasmplus$(EXEEXT)
@@ -448,248 +499,59 @@ sjasmplus$(EXEEXT): $(sjasmplus_OBJECTS) $(sjasmplus_DEPENDENCIES) $(EXTRA_sjasm
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f sjasm/*.$(OBJEXT)
+	-rm -f utils/bin2c/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/devices.Po
-include ./$(DEPDIR)/directives.Po
-include ./$(DEPDIR)/io_snapshots.Po
-include ./$(DEPDIR)/io_tape.Po
-include ./$(DEPDIR)/io_trd.Po
-include ./$(DEPDIR)/lua_lpack.Po
-include ./$(DEPDIR)/lua_sjasm.Po
-include ./$(DEPDIR)/parser.Po
-include ./$(DEPDIR)/reader.Po
-include ./$(DEPDIR)/sjasm.Po
-include ./$(DEPDIR)/sjio.Po
-include ./$(DEPDIR)/support.Po
-include ./$(DEPDIR)/tables.Po
-include ./$(DEPDIR)/z80.Po
+include sjasm/$(DEPDIR)/devices.Po
+include sjasm/$(DEPDIR)/directives.Po
+include sjasm/$(DEPDIR)/io_snapshots.Po
+include sjasm/$(DEPDIR)/io_tape.Po
+include sjasm/$(DEPDIR)/io_trd.Po
+include sjasm/$(DEPDIR)/lua_lpack.Po
+include sjasm/$(DEPDIR)/lua_sjasm.Po
+include sjasm/$(DEPDIR)/parser.Po
+include sjasm/$(DEPDIR)/reader.Po
+include sjasm/$(DEPDIR)/sjasm.Po
+include sjasm/$(DEPDIR)/sjio.Po
+include sjasm/$(DEPDIR)/support.Po
+include sjasm/$(DEPDIR)/tables.Po
+include sjasm/$(DEPDIR)/z80.Po
+include utils/bin2c/$(DEPDIR)/bin2c.Po
 
 .c.o:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+	$(am__mv) $$depbase.Tpo $$depbase.Po
 #	$(AM_V_CC)source='$<' object='$@' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(COMPILE) -c -o $@ $<
 
 .c.obj:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+	$(am__mv) $$depbase.Tpo $$depbase.Po
 #	$(AM_V_CC)source='$<' object='$@' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-lua_lpack.o: sjasm/lua_lpack.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lua_lpack.o -MD -MP -MF $(DEPDIR)/lua_lpack.Tpo -c -o lua_lpack.o `test -f 'sjasm/lua_lpack.c' || echo '$(srcdir)/'`sjasm/lua_lpack.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lua_lpack.Tpo $(DEPDIR)/lua_lpack.Po
-#	$(AM_V_CC)source='sjasm/lua_lpack.c' object='lua_lpack.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lua_lpack.o `test -f 'sjasm/lua_lpack.c' || echo '$(srcdir)/'`sjasm/lua_lpack.c
-
-lua_lpack.obj: sjasm/lua_lpack.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lua_lpack.obj -MD -MP -MF $(DEPDIR)/lua_lpack.Tpo -c -o lua_lpack.obj `if test -f 'sjasm/lua_lpack.c'; then $(CYGPATH_W) 'sjasm/lua_lpack.c'; else $(CYGPATH_W) '$(srcdir)/sjasm/lua_lpack.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lua_lpack.Tpo $(DEPDIR)/lua_lpack.Po
-#	$(AM_V_CC)source='sjasm/lua_lpack.c' object='lua_lpack.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lua_lpack.obj `if test -f 'sjasm/lua_lpack.c'; then $(CYGPATH_W) 'sjasm/lua_lpack.c'; else $(CYGPATH_W) '$(srcdir)/sjasm/lua_lpack.c'; fi`
-
 .cpp.o:
-	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+	$(am__mv) $$depbase.Tpo $$depbase.Po
 #	$(AM_V_CXX)source='$<' object='$@' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXXCOMPILE) -c -o $@ $<
 
 .cpp.obj:
-	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+	$(am__mv) $$depbase.Tpo $$depbase.Po
 #	$(AM_V_CXX)source='$<' object='$@' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-devices.o: sjasm/devices.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT devices.o -MD -MP -MF $(DEPDIR)/devices.Tpo -c -o devices.o `test -f 'sjasm/devices.cpp' || echo '$(srcdir)/'`sjasm/devices.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/devices.Tpo $(DEPDIR)/devices.Po
-#	$(AM_V_CXX)source='sjasm/devices.cpp' object='devices.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o devices.o `test -f 'sjasm/devices.cpp' || echo '$(srcdir)/'`sjasm/devices.cpp
-
-devices.obj: sjasm/devices.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT devices.obj -MD -MP -MF $(DEPDIR)/devices.Tpo -c -o devices.obj `if test -f 'sjasm/devices.cpp'; then $(CYGPATH_W) 'sjasm/devices.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/devices.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/devices.Tpo $(DEPDIR)/devices.Po
-#	$(AM_V_CXX)source='sjasm/devices.cpp' object='devices.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o devices.obj `if test -f 'sjasm/devices.cpp'; then $(CYGPATH_W) 'sjasm/devices.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/devices.cpp'; fi`
-
-directives.o: sjasm/directives.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT directives.o -MD -MP -MF $(DEPDIR)/directives.Tpo -c -o directives.o `test -f 'sjasm/directives.cpp' || echo '$(srcdir)/'`sjasm/directives.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/directives.Tpo $(DEPDIR)/directives.Po
-#	$(AM_V_CXX)source='sjasm/directives.cpp' object='directives.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o directives.o `test -f 'sjasm/directives.cpp' || echo '$(srcdir)/'`sjasm/directives.cpp
-
-directives.obj: sjasm/directives.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT directives.obj -MD -MP -MF $(DEPDIR)/directives.Tpo -c -o directives.obj `if test -f 'sjasm/directives.cpp'; then $(CYGPATH_W) 'sjasm/directives.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/directives.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/directives.Tpo $(DEPDIR)/directives.Po
-#	$(AM_V_CXX)source='sjasm/directives.cpp' object='directives.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o directives.obj `if test -f 'sjasm/directives.cpp'; then $(CYGPATH_W) 'sjasm/directives.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/directives.cpp'; fi`
-
-io_snapshots.o: sjasm/io_snapshots.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT io_snapshots.o -MD -MP -MF $(DEPDIR)/io_snapshots.Tpo -c -o io_snapshots.o `test -f 'sjasm/io_snapshots.cpp' || echo '$(srcdir)/'`sjasm/io_snapshots.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/io_snapshots.Tpo $(DEPDIR)/io_snapshots.Po
-#	$(AM_V_CXX)source='sjasm/io_snapshots.cpp' object='io_snapshots.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o io_snapshots.o `test -f 'sjasm/io_snapshots.cpp' || echo '$(srcdir)/'`sjasm/io_snapshots.cpp
-
-io_snapshots.obj: sjasm/io_snapshots.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT io_snapshots.obj -MD -MP -MF $(DEPDIR)/io_snapshots.Tpo -c -o io_snapshots.obj `if test -f 'sjasm/io_snapshots.cpp'; then $(CYGPATH_W) 'sjasm/io_snapshots.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/io_snapshots.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/io_snapshots.Tpo $(DEPDIR)/io_snapshots.Po
-#	$(AM_V_CXX)source='sjasm/io_snapshots.cpp' object='io_snapshots.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o io_snapshots.obj `if test -f 'sjasm/io_snapshots.cpp'; then $(CYGPATH_W) 'sjasm/io_snapshots.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/io_snapshots.cpp'; fi`
-
-io_tape.o: sjasm/io_tape.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT io_tape.o -MD -MP -MF $(DEPDIR)/io_tape.Tpo -c -o io_tape.o `test -f 'sjasm/io_tape.cpp' || echo '$(srcdir)/'`sjasm/io_tape.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/io_tape.Tpo $(DEPDIR)/io_tape.Po
-#	$(AM_V_CXX)source='sjasm/io_tape.cpp' object='io_tape.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o io_tape.o `test -f 'sjasm/io_tape.cpp' || echo '$(srcdir)/'`sjasm/io_tape.cpp
-
-io_tape.obj: sjasm/io_tape.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT io_tape.obj -MD -MP -MF $(DEPDIR)/io_tape.Tpo -c -o io_tape.obj `if test -f 'sjasm/io_tape.cpp'; then $(CYGPATH_W) 'sjasm/io_tape.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/io_tape.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/io_tape.Tpo $(DEPDIR)/io_tape.Po
-#	$(AM_V_CXX)source='sjasm/io_tape.cpp' object='io_tape.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o io_tape.obj `if test -f 'sjasm/io_tape.cpp'; then $(CYGPATH_W) 'sjasm/io_tape.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/io_tape.cpp'; fi`
-
-io_trd.o: sjasm/io_trd.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT io_trd.o -MD -MP -MF $(DEPDIR)/io_trd.Tpo -c -o io_trd.o `test -f 'sjasm/io_trd.cpp' || echo '$(srcdir)/'`sjasm/io_trd.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/io_trd.Tpo $(DEPDIR)/io_trd.Po
-#	$(AM_V_CXX)source='sjasm/io_trd.cpp' object='io_trd.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o io_trd.o `test -f 'sjasm/io_trd.cpp' || echo '$(srcdir)/'`sjasm/io_trd.cpp
-
-io_trd.obj: sjasm/io_trd.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT io_trd.obj -MD -MP -MF $(DEPDIR)/io_trd.Tpo -c -o io_trd.obj `if test -f 'sjasm/io_trd.cpp'; then $(CYGPATH_W) 'sjasm/io_trd.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/io_trd.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/io_trd.Tpo $(DEPDIR)/io_trd.Po
-#	$(AM_V_CXX)source='sjasm/io_trd.cpp' object='io_trd.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o io_trd.obj `if test -f 'sjasm/io_trd.cpp'; then $(CYGPATH_W) 'sjasm/io_trd.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/io_trd.cpp'; fi`
-
-lua_sjasm.o: sjasm/lua_sjasm.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT lua_sjasm.o -MD -MP -MF $(DEPDIR)/lua_sjasm.Tpo -c -o lua_sjasm.o `test -f 'sjasm/lua_sjasm.cpp' || echo '$(srcdir)/'`sjasm/lua_sjasm.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lua_sjasm.Tpo $(DEPDIR)/lua_sjasm.Po
-#	$(AM_V_CXX)source='sjasm/lua_sjasm.cpp' object='lua_sjasm.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o lua_sjasm.o `test -f 'sjasm/lua_sjasm.cpp' || echo '$(srcdir)/'`sjasm/lua_sjasm.cpp
-
-lua_sjasm.obj: sjasm/lua_sjasm.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT lua_sjasm.obj -MD -MP -MF $(DEPDIR)/lua_sjasm.Tpo -c -o lua_sjasm.obj `if test -f 'sjasm/lua_sjasm.cpp'; then $(CYGPATH_W) 'sjasm/lua_sjasm.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/lua_sjasm.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lua_sjasm.Tpo $(DEPDIR)/lua_sjasm.Po
-#	$(AM_V_CXX)source='sjasm/lua_sjasm.cpp' object='lua_sjasm.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o lua_sjasm.obj `if test -f 'sjasm/lua_sjasm.cpp'; then $(CYGPATH_W) 'sjasm/lua_sjasm.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/lua_sjasm.cpp'; fi`
-
-parser.o: sjasm/parser.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parser.o -MD -MP -MF $(DEPDIR)/parser.Tpo -c -o parser.o `test -f 'sjasm/parser.cpp' || echo '$(srcdir)/'`sjasm/parser.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/parser.Tpo $(DEPDIR)/parser.Po
-#	$(AM_V_CXX)source='sjasm/parser.cpp' object='parser.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parser.o `test -f 'sjasm/parser.cpp' || echo '$(srcdir)/'`sjasm/parser.cpp
-
-parser.obj: sjasm/parser.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parser.obj -MD -MP -MF $(DEPDIR)/parser.Tpo -c -o parser.obj `if test -f 'sjasm/parser.cpp'; then $(CYGPATH_W) 'sjasm/parser.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/parser.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/parser.Tpo $(DEPDIR)/parser.Po
-#	$(AM_V_CXX)source='sjasm/parser.cpp' object='parser.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parser.obj `if test -f 'sjasm/parser.cpp'; then $(CYGPATH_W) 'sjasm/parser.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/parser.cpp'; fi`
-
-reader.o: sjasm/reader.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT reader.o -MD -MP -MF $(DEPDIR)/reader.Tpo -c -o reader.o `test -f 'sjasm/reader.cpp' || echo '$(srcdir)/'`sjasm/reader.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/reader.Tpo $(DEPDIR)/reader.Po
-#	$(AM_V_CXX)source='sjasm/reader.cpp' object='reader.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o reader.o `test -f 'sjasm/reader.cpp' || echo '$(srcdir)/'`sjasm/reader.cpp
-
-reader.obj: sjasm/reader.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT reader.obj -MD -MP -MF $(DEPDIR)/reader.Tpo -c -o reader.obj `if test -f 'sjasm/reader.cpp'; then $(CYGPATH_W) 'sjasm/reader.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/reader.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/reader.Tpo $(DEPDIR)/reader.Po
-#	$(AM_V_CXX)source='sjasm/reader.cpp' object='reader.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o reader.obj `if test -f 'sjasm/reader.cpp'; then $(CYGPATH_W) 'sjasm/reader.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/reader.cpp'; fi`
-
-sjasm.o: sjasm/sjasm.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT sjasm.o -MD -MP -MF $(DEPDIR)/sjasm.Tpo -c -o sjasm.o `test -f 'sjasm/sjasm.cpp' || echo '$(srcdir)/'`sjasm/sjasm.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/sjasm.Tpo $(DEPDIR)/sjasm.Po
-#	$(AM_V_CXX)source='sjasm/sjasm.cpp' object='sjasm.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sjasm.o `test -f 'sjasm/sjasm.cpp' || echo '$(srcdir)/'`sjasm/sjasm.cpp
-
-sjasm.obj: sjasm/sjasm.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT sjasm.obj -MD -MP -MF $(DEPDIR)/sjasm.Tpo -c -o sjasm.obj `if test -f 'sjasm/sjasm.cpp'; then $(CYGPATH_W) 'sjasm/sjasm.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/sjasm.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/sjasm.Tpo $(DEPDIR)/sjasm.Po
-#	$(AM_V_CXX)source='sjasm/sjasm.cpp' object='sjasm.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sjasm.obj `if test -f 'sjasm/sjasm.cpp'; then $(CYGPATH_W) 'sjasm/sjasm.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/sjasm.cpp'; fi`
-
-sjio.o: sjasm/sjio.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT sjio.o -MD -MP -MF $(DEPDIR)/sjio.Tpo -c -o sjio.o `test -f 'sjasm/sjio.cpp' || echo '$(srcdir)/'`sjasm/sjio.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/sjio.Tpo $(DEPDIR)/sjio.Po
-#	$(AM_V_CXX)source='sjasm/sjio.cpp' object='sjio.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sjio.o `test -f 'sjasm/sjio.cpp' || echo '$(srcdir)/'`sjasm/sjio.cpp
-
-sjio.obj: sjasm/sjio.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT sjio.obj -MD -MP -MF $(DEPDIR)/sjio.Tpo -c -o sjio.obj `if test -f 'sjasm/sjio.cpp'; then $(CYGPATH_W) 'sjasm/sjio.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/sjio.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/sjio.Tpo $(DEPDIR)/sjio.Po
-#	$(AM_V_CXX)source='sjasm/sjio.cpp' object='sjio.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sjio.obj `if test -f 'sjasm/sjio.cpp'; then $(CYGPATH_W) 'sjasm/sjio.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/sjio.cpp'; fi`
-
-support.o: sjasm/support.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT support.o -MD -MP -MF $(DEPDIR)/support.Tpo -c -o support.o `test -f 'sjasm/support.cpp' || echo '$(srcdir)/'`sjasm/support.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/support.Tpo $(DEPDIR)/support.Po
-#	$(AM_V_CXX)source='sjasm/support.cpp' object='support.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o support.o `test -f 'sjasm/support.cpp' || echo '$(srcdir)/'`sjasm/support.cpp
-
-support.obj: sjasm/support.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT support.obj -MD -MP -MF $(DEPDIR)/support.Tpo -c -o support.obj `if test -f 'sjasm/support.cpp'; then $(CYGPATH_W) 'sjasm/support.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/support.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/support.Tpo $(DEPDIR)/support.Po
-#	$(AM_V_CXX)source='sjasm/support.cpp' object='support.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o support.obj `if test -f 'sjasm/support.cpp'; then $(CYGPATH_W) 'sjasm/support.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/support.cpp'; fi`
-
-tables.o: sjasm/tables.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tables.o -MD -MP -MF $(DEPDIR)/tables.Tpo -c -o tables.o `test -f 'sjasm/tables.cpp' || echo '$(srcdir)/'`sjasm/tables.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/tables.Tpo $(DEPDIR)/tables.Po
-#	$(AM_V_CXX)source='sjasm/tables.cpp' object='tables.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tables.o `test -f 'sjasm/tables.cpp' || echo '$(srcdir)/'`sjasm/tables.cpp
-
-tables.obj: sjasm/tables.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tables.obj -MD -MP -MF $(DEPDIR)/tables.Tpo -c -o tables.obj `if test -f 'sjasm/tables.cpp'; then $(CYGPATH_W) 'sjasm/tables.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/tables.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/tables.Tpo $(DEPDIR)/tables.Po
-#	$(AM_V_CXX)source='sjasm/tables.cpp' object='tables.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tables.obj `if test -f 'sjasm/tables.cpp'; then $(CYGPATH_W) 'sjasm/tables.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/tables.cpp'; fi`
-
-z80.o: sjasm/z80.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT z80.o -MD -MP -MF $(DEPDIR)/z80.Tpo -c -o z80.o `test -f 'sjasm/z80.cpp' || echo '$(srcdir)/'`sjasm/z80.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/z80.Tpo $(DEPDIR)/z80.Po
-#	$(AM_V_CXX)source='sjasm/z80.cpp' object='z80.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o z80.o `test -f 'sjasm/z80.cpp' || echo '$(srcdir)/'`sjasm/z80.cpp
-
-z80.obj: sjasm/z80.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT z80.obj -MD -MP -MF $(DEPDIR)/z80.Tpo -c -o z80.obj `if test -f 'sjasm/z80.cpp'; then $(CYGPATH_W) 'sjasm/z80.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/z80.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/z80.Tpo $(DEPDIR)/z80.Po
-#	$(AM_V_CXX)source='sjasm/z80.cpp' object='z80.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o z80.obj `if test -f 'sjasm/z80.cpp'; then $(CYGPATH_W) 'sjasm/z80.cpp'; else $(CYGPATH_W) '$(srcdir)/sjasm/z80.cpp'; fi`
 install-nodist_includeHEADERS: $(nodist_include_HEADERS)
 	@$(NORMAL_INSTALL)
 	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
@@ -967,6 +829,10 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f sjasm/$(DEPDIR)/$(am__dirstamp)
+	-rm -f sjasm/$(am__dirstamp)
+	-rm -f utils/bin2c/$(DEPDIR)/$(am__dirstamp)
+	-rm -f utils/bin2c/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -977,7 +843,7 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf ./$(DEPDIR)
+	-rm -rf sjasm/$(DEPDIR) utils/bin2c/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -1025,7 +891,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf ./$(DEPDIR)
+	-rm -rf sjasm/$(DEPDIR) utils/bin2c/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

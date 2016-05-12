@@ -2,11 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(sjsamplus, 1.0, cizo2000@gmail.com)
+AC_INIT([sjsamplus], [1.0], [cizo2000@gmail.com])
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES(Makefile)
+AC_CONFIG_FILES([Makefile])
 
-AM_INIT_AUTOMAKE(1.15)
+AM_INIT_AUTOMAKE([1.15])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -15,15 +15,20 @@ AC_PROG_CC
 # Checks for libraries.
 
 # Checks for header files.
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
+AC_TYPE_SIZE_T
 
 # Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([floor gettimeofday memset strchr strdup strstr])
 
 have_lua=no
 
-AX_PROG_LUA([5.1],[5.4], [have_lua=yes], [have_lua=no])
+AX_PROG_LUA([5.1],[], [have_lua=yes], [have_lua=no])
 
 if test $have_lua = no; then
 	AC_MSG_ERROR([A Lua library is required, and none was found; aborting...])
