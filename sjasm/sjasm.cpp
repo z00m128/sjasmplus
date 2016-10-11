@@ -291,13 +291,15 @@ int main(int argc, char **argv) {
 	char buf[MAX_PATH];
 	int base_encoding; /* added */
 	char* p;
-	const char* logo = "SjASMPlus Z80 Cross-Assembler v1.07 RC8 (build 06-11-2008)";
+	const char* logo = "SjASMPlus Z80 Cross-Assembler v1.07 RC9 (build 11-10-2016)";
 	int i = 1;
 
 	if (argc == 1) {
 		_COUT logo _ENDL;
 		_COUT "based on code of SjASM by Sjoerd Mastijn / http://www.xl2s.tk /" _ENDL;
 		_COUT "Copyright 2004-2008 by Aprisobal / http://sjasmplus.sf.net / my@aprisobal.by /" _ENDL;
+		_COUT "Bugfixes by Antipod / boo_boo / PulkoMandy /" _ENDL;
+		_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m /" _ENDL;
 		_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 		_COUT "\nOption flags as follows:" _ENDL;
 		_COUT "  --help                   Help information (you see it)" _ENDL;
