@@ -841,6 +841,7 @@ void CMacroDefineTable::Init() {
 
 void CMacroDefineTable::AddMacro(char* naam, char* vervanger) {
 	CDefineTableEntry* tmpdefs = new CDefineTableEntry(naam, vervanger, 0, defs);
+	defs = tmpdefs;
 	// By Antipod: http://zx.pk.ru/showpost.php?p=159487&postcount=264
 	if ( !strcmp( naam, "_aFunc" ) )
 	{
