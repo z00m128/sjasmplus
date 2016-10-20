@@ -1223,6 +1223,6 @@ TOLUA_API int tolua_sjasm_open (lua_State* tolua_S)
 #if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
  TOLUA_API int luaopen_sjasm (lua_State* tolua_S) {
  return tolua_sjasm_open(tolua_S);
-};
+}
 #endif
 
