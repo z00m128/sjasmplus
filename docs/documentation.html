@@ -1,0 +1,1088 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SjASMPlus 1.07 Documentation [03.04.2008]</title><meta name="generator" content="DocBook XSL Stylesheets V1.78.1" /></head><body><div class="book"><div class="titlepage"><div><div><h1 class="title"><a id="idp1396733700"></a>SjASMPlus 1.07 Documentation [03.04.2008]</h1></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="chapter"><a href="#idp1396837892">1. Introduction</a></span></dt><dd><dl><dt><span class="section"><a href="#idp1396731236">License</a></span></dt><dt><span class="section"><a href="#idp1396840220">What is it?</a></span></dt><dt><span class="section"><a href="#idp1396842116">Main Features</a></span></dt><dt><span class="section"><a href="#idp1396741692">Credits</a></span></dt><dt><span class="section"><a href="#idp1396691100">Feedback</a></span></dt><dt><span class="section"><a href="#idp1399190060">What's new?</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idp1397416988">2. Where to get and how to use</a></span></dt><dd><dl><dt><span class="section"><a href="#idp1397417308">Packages</a></span></dt><dt><span class="section"><a href="#idp1397421804">Command line</a></span></dt><dt><span class="section"><a href="#idp1397425796">Source file format</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idp1396848436">3. Labels</a></span></dt><dd><dl><dt><span class="section"><a href="#idp1396848772">Labels</a></span></dt><dt><span class="section"><a href="#idp1396850524">Local labels</a></span></dt><dt><span class="section"><a href="#idp1396852916">@ Labels</a></span></dt><dt><span class="section"><a href="#idp1396855028">Temporary labels</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idp1396856948">4. Constants, expressions and other features</a></span></dt><dd><dl><dt><span class="section"><a href="#idp1396857316">Numeric constants</a></span></dt><dt><span class="section"><a href="#idp1396858596">Character and string constants</a></span></dt><dt><span class="section"><a href="#idp1396860892">Expressions</a></span></dt><dt><span class="section"><a href="#idp1396709276">Assembly language</a></span></dt><dt><span class="section"><a href="#idp1396716268">Fake instructions</a></span></dt><dt><span class="section"><a href="#idp1396720380">Real device emulation mode</a></span></dt><dt><span class="section"><a href="#idp1396653780">Predefined defines</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idp1400095548">5. Pseudo-ops (aka Pseudo-instructions, Directives etc)</a></span></dt><dd><dl><dt><span class="section"><a href="#idp1400095932">Simple example of usage</a></span></dt><dt><span class="section"><a href="#idp1400096764">Almost complete list</a></span></dt><dt><span class="section"><a href="#idp1400225644">Conditional assembly</a></span></dt><dt><span class="section"><a href="#idp1400238132">Macro's</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idp1400243716">6. Structures</a></span></dt><dd><dl><dt><span class="section"><a href="#idp1400244220">What is it?</a></span></dt><dt><span class="section"><a href="#idp1400244956">Using</a></span></dt><dt><span class="section"><a href="#idp1400247044">Instructions</a></span></dt><dt><span class="section"><a href="#idp1400254892">Examples</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idp1400264020">7. Lua scripting</a></span></dt><dd><dl><dt><span class="section"><a href="#idp1400264524">Why?</a></span></dt><dt><span class="section"><a href="#idp1400265620">How to use?</a></span></dt><dt><span class="section"><a href="#idp1400267572">SjASMPlus binded functions</a></span></dt><dt><span class="section"><a href="#idp1400295876">Third-party embedded library(ies)</a></span></dt><dt><span class="section"><a href="#idp1400314852">Example</a></span></dt></dl></dd></dl></div><div class="list-of-examples"><p><strong>List of Examples</strong></p><dl><dt>2.1. <a href="#idp1396847476"></a></dt><dt>3.1. <a href="#idp1396851452"></a></dt><dt>3.2. <a href="#idp1396853524"></a></dt><dt>3.3. <a href="#idp1396855964"></a></dt><dt>4.1. <a href="#idp1396859860"></a></dt><dt>4.2. <a href="#idp1396723108"></a></dt><dt>4.3. <a href="#idp1396655372"></a></dt><dt>4.4. <a href="#idp1400091436"></a></dt><dt>4.5. <a href="#idp1400092868"></a></dt><dt>5.1. <a href="#idp1400098444"></a></dt><dt>5.2. <a href="#idp1400100132"></a></dt><dt>5.3. <a href="#idp1400101852"></a></dt><dt>5.4. <a href="#idp1400103564"></a></dt><dt>5.5. <a href="#idp1400105492"></a></dt><dt>5.6. <a href="#idp1400107348"></a></dt><dt>5.7. <a href="#idp1400110476"></a></dt><dt>5.8. <a href="#idp1400112340"></a></dt><dt>5.9. <a href="#idp1400115276"></a></dt><dt>5.10. <a href="#idp1400117828"></a></dt><dt>5.11. <a href="#idp1400125308"></a></dt><dt>5.12. <a href="#idp1400134692"></a></dt><dt>5.13. <a href="#idp1400137236"></a></dt><dt>5.14. <a href="#idp1400141500"></a></dt><dt>5.15. <a href="#idp1400144356"></a></dt><dt>5.16. <a href="#idp1400146172"></a></dt><dt>5.17. <a href="#idp1400149780"></a></dt><dt>5.18. <a href="#idp1400155420"></a></dt><dt>5.19. <a href="#idp1400159692"></a></dt><dt>5.20. <a href="#idp1400161268"></a></dt><dt>5.21. <a href="#idp1400163196"></a></dt><dt>5.22. <a href="#idp1400165780"></a></dt><dt>5.23. <a href="#idp1400167708"></a></dt><dt>5.24. <a href="#idp1400169532"></a></dt><dt>5.25. <a href="#idp1400171636"></a></dt><dt>5.26. <a href="#idp1400173604"></a></dt><dt>5.27. <a href="#idp1400175452"></a></dt><dt>5.28. <a href="#idp1400179756"></a></dt><dt>5.29. <a href="#idp1400182668"></a></dt><dt>5.30. <a href="#idp1400184660"></a></dt><dt>5.31. <a href="#idp1400187212"></a></dt><dt>5.32. <a href="#idp1400189132"></a></dt><dt>5.33. <a href="#idp1400192620">bigfile.asm</a></dt><dt>5.34. <a href="#idp1400196668"></a></dt><dt>5.35. <a href="#idp1400201380"></a></dt><dt>5.36. <a href="#idp1400203924"></a></dt><dt>5.37. <a href="#idp1400206292"></a></dt><dt>5.38. <a href="#idp1400208724"></a></dt><dt>5.39. <a href="#idp1400211300"></a></dt><dt>5.40. <a href="#idp1400213260"></a></dt><dt>5.41. <a href="#idp1400215404"></a></dt><dt>5.42. <a href="#idp1400218084"></a></dt><dt>5.43. <a href="#idp1400221348"></a></dt><dt>5.44. <a href="#idp1400224644"></a></dt><dt>5.45. <a href="#idp1400229556">Example</a></dt><dt>5.46. <a href="#idp1400231348">Example</a></dt><dt>5.47. <a href="#idp1400233196">Example</a></dt><dt>5.48. <a href="#idp1400238868">Macro without parameters</a></dt><dt>5.49. <a href="#idp1400239932">A macro with parameters</a></dt><dt>5.50. <a href="#idp1400240828">Another example</a></dt><dt>5.51. <a href="#idp1400242388"></a></dt><dt>6.1. <a href="#idp1400255276"></a></dt><dt>6.2. <a href="#idp1400256652"></a></dt><dt>6.3. <a href="#idp1400258108"></a></dt><dt>6.4. <a href="#idp1400259460"></a></dt><dt>7.1. <a href="#idp1400266692">Hello World!</a></dt><dt>7.2. <a href="#idp1400315364">Variables doesn't clear in new passes of the compiler</a></dt><dt>7.3. <a href="#idp1400316308">To generate some code you need to generate it in all
+          passes</a></dt><dt>7.4. <a href="#idp1400317340">Declare function and use it</a></dt><dt>7.5. <a href="#idp1400318708">Simple sample :)</a></dt></dl></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="idp1396837892"></a>Chapter 1. Introduction</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="section"><a href="#idp1396731236">License</a></span></dt><dt><span class="section"><a href="#idp1396840220">What is it?</a></span></dt><dt><span class="section"><a href="#idp1396842116">Main Features</a></span></dt><dt><span class="section"><a href="#idp1396741692">Credits</a></span></dt><dt><span class="section"><a href="#idp1396691100">Feedback</a></span></dt><dt><span class="section"><a href="#idp1399190060">What's new?</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396731236"></a>License</h2></div></div></div><p>SjASMPlus licensed under BSD license.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396840220"></a>What is it?</h2></div></div></div><p>SjASMPlus is Z80 Assembly Language Cross Compiler. It is available
+      for Win32, DOS and FreeBSD(mainly 5.x) systems. It is based on SjASM
+      source code by Sjoerd Mastijn (<a class="ulink" href="http://xl2s.tk" target="_top">http://xl2s.tk</a>)</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396842116"></a>Main Features</h2></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Z80/R800 documented and undocumented opcodes support</p></li><li class="listitem"><p>Very fast compilation: 1 million lines by 2-3 seconds on
+            modern computer</p></li><li class="listitem"><p>Code inlining through colon (LD A,C:INC A:PUSH AF:IFDEF
+            FX:LD A,D:ENDIF…)</p></li><li class="listitem"><p>Structures to define data structures in memory more easily
+            (use STRUCT pseudo-op)</p></li><li class="listitem"><p>Conditional assembly</p></li><li class="listitem"><p>Macro definitions</p></li><li class="listitem"><p>Local labels</p></li><li class="listitem"><p>User’s messages</p></li><li class="listitem"><p>Temporary labels</p></li><li class="listitem"><p>Special mode</p></li><li class="listitem"><p>Defines and array of defines</p></li><li class="listitem"><p>Fake instructions as LD HL,DE (LD H,D:LD L,E) and
+            more</p></li><li class="listitem"><p>Source and binary file inclusion</p></li><li class="listitem"><p>Multiline block comments</p></li><li class="listitem"><p>Multi file output and file updating</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396741692"></a>Credits</h2></div></div></div><p>Special thanks to <span class="emphasis"><em>Sjoerd Mastijn</em></span>, the author
+      of SjASM.</p><p><span class="emphasis"><em>Aprisobal </em></span>- main programming, documentation,
+      etc.</p><p>Thanks to:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="emphasis"><em>Kurles/HS/CPU</em></span> - additional
+            programming;</p></li><li class="listitem"><p><span class="emphasis"><em>Krystian Wlosek
+            &lt;kwlosek(at)gmail.com&gt;</em></span> - bug fix patches, Linux
+            makefile;</p></li><li class="listitem"><p><span class="emphasis"><em>Ric Horne &lt;Ric.Hohne@eads-ts.com&gt;</em></span>
+            - bug fix patches.</p></li><li class="listitem"><p><span class="emphasis"><em>breeze &lt;breeze@tut.by&gt;</em></span> - bug fix
+            patches.</p></li><li class="listitem"><p><span class="emphasis"><em>psndcj &lt;psndcj.tbk@gmail.com&gt;</em></span> -
+            bug reporting, beta-testing.</p></li><li class="listitem"><p><span class="emphasis"><em>elfh &lt;elphecy@gmail.com&gt;</em></span> - bug
+            reporting.</p></li><li class="listitem"><p><span class="emphasis"><em>bugsy &lt;bugsy@ya.ru&gt;</em></span> - bug
+            reporting.</p></li><li class="listitem"><p><span class="emphasis"><em>skrju &lt;sq-@mail.ru&gt;</em></span> - bug
+            reporting.</p></li></ul></div><p>And big thanks to all people, who helped me in development of the
+      compiler!</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396691100"></a><a id="feedback"></a>Feedback</h2></div></div></div><p>WWW: <a class="ulink" href="http://sjasmplus.sourceforge.net" target="_top">http://sjasmplus.sourceforge.net</a></p><p>E-Mail: my@aprisobal.by</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1399190060"></a>What's new?</h2></div></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">03.04.2008 - 1.07 Stable</span></dt><dd><pre class="programlisting">- Added new SAVETAP pseudo-op. It's support up to 1024kb ZX-Spectrum's RAM.
+- Added new --nofakes commandline parameter.</pre></dd><dt><span class="term">02.04.2008 - 1.07 RC7</span></dt><dd><pre class="programlisting">- Another fix of 48k SNA snapshots saving routine.
+- Added new UNDEFINE pseudo-op.  
+- Added new IFUSED/IFNUSED pseudo-ops for labels (such IFDEF for defines).
+- Fixed labels list dump rountine (--lstlab command line parameter).</pre></dd><dt><span class="term">27.03.2008 - 1.07 RC6</span></dt><dd><pre class="programlisting">- Applied bugfix patches for SAVEHOB/SAVETRD pseudo-ops by Breeze.
+- Fixed memory leak in line parsing routine.
+- Fixed 48k SNA snapshots saving routine.
+- Added missing INF instruction.
+- Fixed code parser's invalid addressing of temporary labels in macros.</pre></dd><dt><span class="term">31.05.2007 - 1.07 RC5bf</span></dt><dd><pre class="programlisting">- Bugfix patches by Ric Hohne.
+- Important bugfix of memory leak.
+- Bugfix of strange crashes at several machines.
+- Added yet another sample for built-in LUA engine. See end of this file.
+- Added sources of CosmoCubes demo to the "examples" directory.</pre></dd><dt><span class="term">13.05.2007 - 1.07 RC5</span></dt><dd><pre class="programlisting">- ALIGN has new optional parameter.
+- Corrected bug of RAM sizing.
+- Corrected bug of structures naming.</pre></dd><dt><span class="term">02.12.2006 - 1.07 RC4bf</span></dt><dd><pre class="programlisting">- Corrected important bug in code generation functions of SjASMPlus.</pre></dd><dt><span class="term">28.11.2006 - 1.07 RC4</span></dt><dd><pre class="programlisting">- Corrected bug with SAVEBIN, SAVETRD and possible SAVESNA.
+- Add Makefile to build under Linux, FreeBSD etc.
+</pre></dd><dt><span class="term">12.10.2006 - 1.07 RC3</span></dt><dd><pre class="programlisting">- SAVESNA can save 48kb snapshots
+- Corrected DEFINE's bug.
+- Corrected bug of incorrect line numbering.
+</pre></dd><dt><span class="term">28.09.2006 - 1.07 RC2</span></dt><dd><pre class="programlisting">- SAVESNA works and with device ZXSPECTRUM48
+- Added new device PENTAGON128
+- In ZXSPECTRUM48 device and others attributes has black ink and white paper by default.</pre></dd><dt><span class="term">23.09.2006 - 1.07 RC1bf</span></dt><dd><pre class="programlisting">- Corrected bug with _ERRORS and _WARNINGS constants
+- Added error message, when SHELLEXEC program execution failed</pre></dd><dt><span class="term">17.09.2006 - 1.07 RC1</span></dt><dd><pre class="programlisting">- 3-pass design 
+- Built-in Lua scripting engine 
+- Changed command line keys 
+- Documentation converted to HTML. 
+- Added new directives: DEVICE, SLOT, SHELLEXEC 
+- Added predefined constanst: _SJASMPLUS=1, _ERRORS and other 
+- Changed output log format. 
+- And many many more.</pre></dd></dl></div><p>Old SjASMPlus 1.06 log was removed.</p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="idp1397416988"></a>Chapter 2. Where to get and how to use</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="section"><a href="#idp1397417308">Packages</a></span></dt><dt><span class="section"><a href="#idp1397421804">Command line</a></span></dt><dt><span class="section"><a href="#idp1397425796">Source file format</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1397417308"></a>Packages</h2></div></div></div><p>You can grab last binaries and sources SourceForge project page:
+      <a class="ulink" href="http://sourceforge.net/projects/sjasmplus/" target="_top">http://sourceforge.net/projects/sjasmplus/</a></p><p>Win32 package has:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>sjasmplus.exe - the Win32 executable. This is out compiler
+            and we will use it.</p></li><li class="listitem"><p>examples directory - some examples of use</p></li><li class="listitem"><p>documentation directory - documentation in various
+            formats</p></li></ul></div><p>DOS and FreeBSD versions has same files in their packages.</p><p><span class="emphasis"><em>Linux version</em></span> you can compile using
+      <span class="emphasis"><em>GCC</em></span> and <span class="emphasis"><em>Makefile</em></span> from sources
+      package.</p><p>MacOS X version you can compile using <span class="emphasis"><em>XCode</em></span>
+      package and included <span class="emphasis"><em>Makefile</em></span>.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1397421804"></a>Command line</h2></div></div></div><p>Usage:</p><p><span class="emphasis"><em>sjasmplus [options] sourcefile(s)</em></span></p><p>Option flags as follows:</p><pre class="programlisting">  --help                   Help information
+  -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
+                           Include path
+  --lst=&lt;filename&gt;         Save listing to &lt;filename&gt;
+  --lstlab                 Enable label table in listing
+  --sym=&lt;filename&gt;         Save symbols list to &lt;filename&gt;
+  --exp=&lt;filename&gt;         Save exports to &lt;filename&gt; (see EXPORT pseudo-op)
+  --raw=&lt;filename&gt;         Save all output to &lt;filename&gt; ignoring OUTPUT pseudo-ops
+  Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
+ Logging:
+  --nologo                 Do not show startup message
+  --msg=error              Show only error messages
+  --msg=all                Show all messages (by default)
+  --fullpath               Show full path to error file
+ Other:
+  --reversepop             Enable reverse POP order (as in base SjASM version)
+  --dirbol                 Enable processing directives from the beginning of line
+  --nofakes                Disable fake instructions
+  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1397425796"></a>Source file format</h2></div></div></div><p>Lines in the source file should have the following
+      form:</p><pre class="programlisting">Label Operator Operand Comment</pre><p>All
+      fields are optional. Lines without label should start with whitespace.
+      Operators and operands can be inlined:</p><pre class="programlisting">      Operator Operand:Operator Operand:Operator Operand... Comment</pre><p>Comments
+      should start with ';' or '//'. Comment blocks start with '/*' and end
+      with '*/'.</p><div class="example"><a id="idp1396847476"></a><p class="title"><strong>Example 2.1. </strong></p><div class="example-contents"><pre class="programlisting">; comment
+// comment
+ ld /* comment */ a,80
+/*
+ comment
+*/
+ ld /*
+ but this won't be ld a,3!
+ */ a,3</pre></div></div><p><br class="example-break" /></p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="idp1396848436"></a>Chapter 3. Labels</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="section"><a href="#idp1396848772">Labels</a></span></dt><dt><span class="section"><a href="#idp1396850524">Local labels</a></span></dt><dt><span class="section"><a href="#idp1396852916">@ Labels</a></span></dt><dt><span class="section"><a href="#idp1396855028">Temporary labels</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396848772"></a>Labels</h2></div></div></div><p>Labels are case-sensitive and may be of any reasonable length,
+      that is: up to about 70 characters. Label definitions should start on
+      the beginning of a line, but don't have to be followed by a colon ':'.
+      Generally labels should start with a letter or a underscore ('_'), the
+      following characters may be chosen from letters, numbers and the
+      following special symbols: '_', '.', '!', '?', '#' and '@'. Note that
+      the '.' has special meaning, as it is used between module names, labels
+      and local labels. The following are all legal and distinct
+      labels:</p><pre class="programlisting">Kip
+KIP
+Kip@@
+MAIN.loop?</pre><p>It is possible to use mnemonics, pseudo-ops and
+      register names as labels but it is not advised to do so. Also note that
+      the identifiers defined with the DEFINE pseudo-op use another name
+      space.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396850524"></a>Local labels</h2></div></div></div><p>When there is a module definition (see module pseudo-op) all
+      labels (except those starting with a '@') are local to that module. To
+      use a label from outside the module use modulename.labelname, in this
+      example: 'vdp.Cls' Labels starting with a '.' are also local to the
+      previous non-local label.</p><div class="example"><a id="idp1396851452"></a><p class="title"><strong>Example 3.1. </strong></p><div class="example-contents"><pre class="programlisting">MODULE main
+Main:                           ; main.Main
+        CALL SetScreen          ; SetScreen
+        CALL vdp.Cls            ; vdp.Cls
+.loop:                          ; main.Main.loop
+        LD A,(.event)           ; main.Main.event
+        CALL ProcesEvent        ; label not found: main.ProcesEvent
+        DJNZ .loop              ; main.Main.loop
+
+    MODULE vdp
+@SetScreen:               ; SetScreen
+.loop                     ; vdp.SetScreen.loop
+        RET
+Cls:                      ; vdp.Cls
+.loop                     ; vdp.Cls.loop
+        DJNZ .loop        ; vdp.Cls.loop
+        RET
+
+    ENDMODULE
+Main.event                ; main.Main.event
+    BYTE 0</pre></div></div><p><br class="example-break" /></p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396852916"></a>@ Labels</h2></div></div></div><p>Labels starting with a '@' are not touched by the label processing
+      and used 'as-is'. See 'SetScreen' in the previous example code. </p><div class="example"><a id="idp1396853524"></a><p class="title"><strong>Example 3.2. </strong></p><div class="example-contents"><pre class="programlisting">    MODULE xxx
+Label      ; xxx.Label
+.Local     ; xxx.Label.Local
+@Label     ; Label
+.Local     ; xxx.Label.Local =&gt; duplicate label error
+@Label2    ; Label2
+.Local     ; xxx.Label2.Local
+@yyy.Local ; yyy.Local
+yyy.Local  ; xxx.yyy.Local</pre></div></div><p><br class="example-break" /></p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396855028"></a>Temporary labels</h2></div></div></div><p>To keep the number of used labels reasonable it is possible to use
+      numbers as labels. These labels can only be used as labels to jump to.
+      To jump to these labels, use the number followed by an 'F' for forward
+      branches or a 'B' for backward branches. Temporary labels should not be
+      used within macro's.</p><div class="example"><a id="idp1396855964"></a><p class="title"><strong>Example 3.3. </strong></p><div class="example-contents"><pre class="programlisting">        ADD A,E
+        JR NC,1F
+        INC D
+1       LD E,A
+2       LD B,4
+        LD A,(DE)
+        OUT (152),A
+        DJNZ 2B</pre></div></div><p><br class="example-break" /></p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="idp1396856948"></a>Chapter 4. Constants, expressions and other features</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="section"><a href="#idp1396857316">Numeric constants</a></span></dt><dt><span class="section"><a href="#idp1396858596">Character and string constants</a></span></dt><dt><span class="section"><a href="#idp1396860892">Expressions</a></span></dt><dt><span class="section"><a href="#idp1396709276">Assembly language</a></span></dt><dt><span class="section"><a href="#idp1396716268">Fake instructions</a></span></dt><dt><span class="section"><a href="#idp1396720380">Real device emulation mode</a></span></dt><dt><span class="section"><a href="#idp1396653780">Predefined defines</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396857316"></a>Numeric constants</h2></div></div></div><p>Numeric constants should always start with a digit or $, # or %.
+      The following formats are supported:</p><pre class="programlisting">12     decimal
+12d    decimal
+0ch    hexadecimal
+0xc    hexadecimal
+$c     hexadecimal
+#c     hexadecimal
+1100b  binary
+%1100  binary
+14q    octal
+14o    octal</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396858596"></a>Character and string constants</h2></div></div></div><p>Character constants are characters surrounded by single quotes. It
+      is possible to use double quotes in some cases, but in general it is
+      better to use single quotes. String constants are characters surrounded
+      by double quotes. The following escape sequences are recognized:</p><pre class="programlisting">\\ 92
+\? 63
+\' 39
+\" 34
+\A 7
+\B 8
+\D 127
+\E 27
+\F 12
+\N 10
+\R 13
+\T 9
+\V 11</pre><div class="example"><a id="idp1396859860"></a><p class="title"><strong>Example 4.1. </strong></p><div class="example-contents"><pre class="programlisting">    BYTE "stringconstant"  ;
+    BYTE 'stringconstant'  ;with single quotes escape sequences above (\N,\T..) will not work
+    LD HL,'hl'
+    LD HL,"hl" ; :(
+    LD A,"7"   ; :(
+    LD A,'8'   ; :)
+    LD A,'\E'
+    LD A,'"'
+    LD A,"'"</pre></div></div><p><br class="example-break" /></p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396860892"></a>Expressions</h2></div></div></div><p>Expressions are evaluated in 32 bits in this version of
+      SjASMPlus.</p><p>'$' represents the current program counter. '$$' represents the
+      current page in the current slot in the <a class="link" href="#s_realdevice">real device emulation mode</a>.</p><p>It is possible to use parenthesis '(' and ')' to override the
+      precedence of the operators. The following operators may be used in
+      expressions:</p><pre class="programlisting">!     !x       logical not
+~     ~x       complement
++     +x       does absolutely nothing :)
+-     -x       minus
+low   low x    low 8 bits of 16 bit value
+high  high x   high 8 bits of 16 bit value
+not   not x    logical not
+
+*     x*y      multiplication
+/     x/y      division
+%     x%y      modulo
+mod   x mod y  modulo
+
++     x+y      addition
+-     x-y      subtraction
+
+&lt;&lt;    x&lt;&lt;y     shift left
+&gt;&gt;    x&gt;&gt;y     shift right signed
+&gt;&gt;&gt;   x&gt;&gt;&gt;y    shift right unsigned
+shl   x shl y  shift left
+shr   x shr y  shift right signed
+
+&lt;?    x&lt;?y     minimum
+&gt;?    x&gt;?y     maximum
+
+&lt;     x&lt;y      less than
+&gt;     x&gt;y      greater than
+&lt;=    x&lt;=y     equal or less than
+&gt;=    x&gt;=y     equal or greater than
+
+=     x=y      equal
+==    x==y     equal
+!=    x!=y     not equal
+
+&amp;     x&amp;y      bitwise and
+and   x and y  bitwise and
+
+^     x^y      bitwise xor
+xor   x xor y  bitwise xor
+
+|     x|y      bitwise or
+or    x or y   bitwise or
+
+&amp;&amp;    x&amp;&amp;y     logical and
+
+||    x||y     logical or</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396709276"></a>Assembly language</h2></div></div></div><p>This version only accepts Z80 mnemonics. There are some additions
+      to what I think is standard Z80: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>'[' and ']' can be used in stead of '(' and ')' for
+            indirections. So LD A,[HL] is the same as LD A,(HL).</p></li><li class="listitem"><p>IN F,(C) and OUT (C),0 and SLL/SLI can be used.</p></li><li class="listitem"><p>IXL (or LX, XL), IYL (or LY, YL), IXH (or HX, XH) and IYH
+            (or HY, YH) registers are supported.</p></li><li class="listitem"><p>Can write code throught colon: ORG 100h:LD A,10:LD B,10:SUB
+            B:RET:IFDEF AA:.....</p></li><li class="listitem"><p>JP HL, JP IX and JP IY may be used instead of JP (HL),
+            etc.</p></li><li class="listitem"><p>EX AF,AF or EX AF or EXA may be used instead of EX
+            AF,AF'.</p></li><li class="listitem"><p>R800's MULUB and MULUW are recognised (but won't work on
+            Z80, of course:)</p></li><li class="listitem"><p>RLC, RRC, RL, RR, SLA, SRA, SLL (SLI), RES, SET undocumented
+            instructions added.</p></li></ul></div><pre class="programlisting">    SET 4,(IX+4),C ; (aka LD C,SET 4,(IX+4)) is LD C,(IX+4) / SET 4,C / LD (IX+4),C
+    RRC (IY),A     ; (aka LD A,RRC (IY+0))   is LD A,(IY)   / RRC A   / LD (IY),A</pre><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>PUSH and POP can take register lists:</p></li></ul></div><pre class="programlisting">    PUSH AF,BC  ; push af / push bc
+    POP  AF,BC  ; pop  af / pop  bc</pre><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>and all other commands support this.</p></li></ul></div><pre class="programlisting">    LD A,B,B,D,D,H 
+   /* this is:
+     LD A,B
+     LD B,D
+     LD D,H
+   */
+   ;or you can write  LD A,B:LD B,D:LD D,H</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396716268"></a>Fake instructions</h2></div></div></div><p>Of course the Z80 is only an 8 bit cpu, but sometimes ld hl,de
+      would be nice. SjASMPlus now 'fakes' some instructions like that. This
+      improves the readability of the source, but it might not be the fastest
+      way to get the result. Also possibly some 'new' load instructions do
+      affect the flags in ways you wouldn't expect. Anyway, here's the
+      list:</p><pre class="programlisting">  rl bc
+  rl de
+  rl hl
+  rr bc
+  rr de
+  rr hl
+  sla bc
+  sla de
+  sla hl
+  sll bc
+  sll de
+  sll hl
+  sli bc
+  sli de
+  sli hl
+  sra bc
+  sra de
+  sra hl
+  srl bc
+  srl de
+  srl hl
+
+  ld bc,bc
+  ld bc,de
+  ld bc,hl
+  ld bc,ix
+  ld bc,iy
+  ld bc,(hl)
+  ld bc,(ix+nn)
+  ld bc,(iy+nn)
+
+  ld de,bc
+  ld de,de
+  ld de,hl
+  ld de,ix
+  ld de,iy
+  ld de,(hl)
+  ld de,(ix+nn)
+  ld de,(iy+nn)
+
+  ld hl,bc
+  ld hl,de
+  ld hl,hl
+  ld hl,ix
+  ld hl,iy
+  ld hl,(ix+nn)
+  ld hl,(iy+nn)
+
+  ld ix,bc
+  ld ix,de
+  ld ix,hl
+  ld ix,ix
+  ld ix,iy
+
+  ld iy,bc
+  ld iy,de
+  ld iy,hl
+  ld iy,ix
+  ld iy,iy
+
+  ld (hl),bc
+  ld (hl),de
+
+  ld (ix+nn),bc
+  ld (ix+nn),de
+  ld (ix+nn),hl
+
+  ld (iy+nn),bc
+  ld (iy+nn),de
+  ld (iy+nn),hl
+
+  ldi bc,(hl)
+  ldi bc,(ix+nn)
+  ldi bc,(iy+nn)
+
+  ldi de,(hl)
+  ldi de,(ix+nn)
+  ldi de,(iy+nn)
+
+  ldi hl,(ix+nn)
+  ldi hl,(iy+nn)
+
+  ldi (hl),bc
+  ldi (hl),de
+
+  ldi (ix+nn),bc
+  ldi (ix+nn),de
+  ldi (ix+nn),hl
+
+  ldi (iy+nn),bc
+  ldi (iy+nn),de
+  ldi (iy+nn),hl
+
+  ldi a,(bc)
+  ldi a,(de)
+  ldi a,(hl)
+  ldi b,(hl)
+  ldi c,(hl)
+  ldi d,(hl)
+  ldi e,(hl)
+  ldi h,(hl)
+  ldi l,(hl)
+  ldi a,(ix+nn)
+  ldi b,(ix+nn)
+  ldi c,(ix+nn)
+  ldi d,(ix+nn)
+  ldi e,(ix+nn)
+  ldi h,(ix+nn)
+  ldi l,(ix+nn)
+  ldi a,(iy+nn)
+  ldi b,(iy+nn)
+  ldi c,(iy+nn)
+  ldi d,(iy+nn)
+  ldi e,(iy+nn)
+  ldi h,(iy+nn)
+  ldi l,(iy+nn)
+
+  ldd a,(bc)
+  ldd a,(de)
+  ldd a,(hl)
+  ldd b,(hl)
+  ldd c,(hl)
+  ldd d,(hl)
+  ldd e,(hl)
+  ldd h,(hl)
+  ldd l,(hl)
+  ldd a,(ix+nn)
+  ldd b,(ix+nn)
+  ldd c,(ix+nn)
+  ldd d,(ix+nn)
+  ldd e,(ix+nn)
+  ldd h,(ix+nn)
+  ldd l,(ix+nn)
+  ldd a,(iy+nn)
+  ldd b,(iy+nn)
+  ldd c,(iy+nn)
+  ldd d,(iy+nn)
+  ldd e,(iy+nn)
+  ldd h,(iy+nn)
+  ldd l,(iy+nn)
+
+  ldi (bc),a
+  ldi (de),a
+  ldi (hl),a
+  ldi (hl),b
+  ldi (hl),c
+  ldi (hl),d
+  ldi (hl),e
+  ldi (hl),h
+  ldi (hl),l
+  ldi (ix+nn),a
+  ldi (ix+nn),b
+  ldi (ix+nn),c
+  ldi (ix+nn),d
+  ldi (ix+nn),e
+  ldi (ix+nn),h
+  ldi (ix+nn),l
+  ldi (iy+nn),a
+  ldi (iy+nn),b
+  ldi (iy+nn),c
+  ldi (iy+nn),d
+  ldi (iy+nn),e
+  ldi (iy+nn),h
+  ldi (iy+nn),l
+   
+  ldd (bc),a
+  ldd (de),a
+  ldd (hl),a
+  ldd (hl),b
+  ldd (hl),c
+  ldd (hl),d
+  ldd (hl),e
+  ldd (hl),h
+  ldd (hl),l
+  ldd (ix+nn),a
+  ldd (ix+nn),b
+  ldd (ix+nn),c
+  ldd (ix+nn),d
+  ldd (ix+nn),e
+  ldd (ix+nn),h
+  ldd (ix+nn),l
+  ldd (iy+nn),a
+  ldd (iy+nn),b
+  ldd (iy+nn),c
+  ldd (iy+nn),d
+  ldd (iy+nn),e
+  ldd (iy+nn),h
+  ldd (iy+nn),l
+
+  ldi (hl),nn
+  ldi (ix+nn),nn
+  ldi (iy+nn),nn
+
+  ldd (hl),nn
+  ldd (ix+nn),nn
+  ldd (iy+nn),nn
+
+  sub hl,bc
+  sub hl,de
+  sub hl,hl
+  sub hl,sp</pre><p>ldi increases the data pointer after the data
+      access, so LDI A,(HL) is the same as LD A,(HL):INC HL. likewise, LDD
+      A,(DE) is LD A,(DE):DEC DE.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396720380"></a><a id="s_realdevice"></a>Real device emulation mode</h2></div></div></div><p>To enable this mode you must use pseudo-op <a class="link" href="#po_device">DEVICE</a>.</p><p>In this mode the compiler compiling program to virtual memory (as
+      at MSX's WB-ASS2, ZX-Spectrum's GENS, ZEUS, ALASM etc). After this all
+      you can use new pseudo-ops as <a class="link" href="#s_pseudoops">SAVEBIN,
+      SAVEHOB, SAVETRD, SAVETAP,PAGE, SLOT, LABELSLIST</a> and use special
+      functions in <a class="link" href="#c_lua_scripting">Lua scripts</a>.</p><div class="example"><a id="idp1396723108"></a><p class="title"><strong>Example 4.2. </strong></p><div class="example-contents"><pre class="programlisting">    DEVICE ZXSPECTRUM128
+    ;in this device, SLOT 3 enables to current by default.    
+
+    ORG 32768
+StartProg:
+    JP $
+
+    DEVICE NONE
+    ;do something, if you don't want to corrupt virtual
+    ;memory with other code, for example, loader of code.
+    ;...code...
+
+    ;return to our virtual device:
+    DEVICE ZXSPECTRUM128
+
+    SAVESNA "snapshotname.sna",StartProg
+
+    SAVETAP "tapefile.tap",StartProg
+ </pre></div></div><p><br class="example-break" />Predefined devices:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">NONE</span></dt><dd><p>Disable real device emulation mode. By default.</p></dd><dt><span class="term">ZXSPECTRUM48</span></dt><dd><p>Has 4 slots (0-3) with size 4000h, 4 pages (0-3) with size
+              4000h. Slot 3 (it from 0C000h) enables to current by
+              default.</p></dd><dt><span class="term">ZXSPECTRUM128</span></dt><dd><p>Has 8 RAM pages (0-7) with size 4000h.</p></dd><dt><span class="term">ZXSPECTRUM256</span></dt><dd><p>Same as russian clone Scorption 256. Has 16 RAM pages
+              (0-15) with size 4000h.</p></dd><dt><span class="term">ZXSPECTRUM512</span></dt><dd><p>Same as russian clones ATM Turbo 512 and Pentagon 512. Has
+              32 RAM pages (0-31) with size 4000h.</p></dd><dt><span class="term">ZXSPECTRUM1024</span></dt><dd><p>Same as russian clones ATM Turbo 2 and Pentagon 1024 SL.
+              Has 64 RAM pages (0-63) with size 4000h.</p></dd></dl></div><p>If you want to see other devices you must write to us. See <a class="link" href="#feedback">Feedback</a> chapter.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1396653780"></a>Predefined defines</h2></div></div></div><p>SjASMPlus has predefined <a class="link" href="#po_define">defines</a>.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">_SJASMPLUS = 1</span></dt><dd><div class="example"><a id="idp1396655372"></a><p class="title"><strong>Example 4.3. </strong></p><div class="example-contents"><pre class="programlisting">   IFDEF _SJASMPLUS
+     ;code for sjasmplus
+   ELSE
+     ;code for other compiler
+   ENDIF</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">_VERSION = "version"</span></dt><dd><div class="example"><a id="idp1400091436"></a><p class="title"><strong>Example 4.4. </strong></p><div class="example-contents"><pre class="programlisting">   IF _VERSION = "1.07"
+     ;code for 1.07
+   ELSE
+     ;code for other version
+   ENDIF</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">_RELEASE = releasenumber</span></dt><dd><div class="example"><a id="idp1400092868"></a><p class="title"><strong>Example 4.5. </strong></p><div class="example-contents"><pre class="programlisting">   IF _RELEASE = 1 ; 0 - is stable version
+     ;code for Release Candidate 1
+   ELSE
+     ;code for other version
+   ENDIF</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">_ERRORS = &lt;number&gt;</span></dt><dd><p>Number of errors.</p></dd><dt><span class="term">_WARNINGS = &lt;number&gt;</span></dt><dd><p>Number of warnings.</p></dd></dl></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="idp1400095548"></a>Chapter 5. Pseudo-ops (aka Pseudo-instructions, Directives etc)</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="section"><a href="#idp1400095932">Simple example of usage</a></span></dt><dt><span class="section"><a href="#idp1400096764">Almost complete list</a></span></dt><dt><span class="section"><a href="#idp1400225644">Conditional assembly</a></span></dt><dt><span class="section"><a href="#idp1400238132">Macro's</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400095932"></a>Simple example of usage</h2></div></div></div><pre class="programlisting">     .SOMEPSEUDOOP ;or 
+     SOMEPSEUDOOP  ;or
+     somepseudoop</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400096764"></a><a id="s_pseudoops"></a>Almost complete list</h2></div></div></div><p></p><div class="variablelist"><dl class="variablelist"><dt><span class="term">.&lt;expression&gt; &lt;code&gt;</span></dt><dd><p>Repeat &lt;code&gt; &lt;expression&gt; once. Doesn't work
+              in the beginning of line.</p><div class="example"><a id="idp1400098444"></a><p class="title"><strong>Example 5.1. </strong></p><div class="example-contents"><pre class="programlisting"> .3        INC A    ;will be compiled to INC A:INC A:INC A
+len        EQU 10 
+ .(12-len) BYTE 0   ;will be compiled to BYTE 0,0</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">ABYTE &lt;offset&gt; &lt;bytes&gt;</span></dt><dd><p>Defines a byte or a string of bytes. The offset is added
+              to each of the following bytes.</p><div class="example"><a id="idp1400100132"></a><p class="title"><strong>Example 5.2. </strong></p><div class="example-contents"><pre class="programlisting">    ABYTE 2 4,9    ; Same as BYTE 6,11
+    ABYTE 3 "ABC"  ; Same as BYTE "DEF"</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">ABYTEC &lt;offset&gt; &lt;bytes&gt;</span></dt><dd><p>Defines a byte or a string of bytes, where the last byte
+              of the string will have bit 7 set. The offset is added to each
+              of the following bytes.</p><div class="example"><a id="idp1400101852"></a><p class="title"><strong>Example 5.3. </strong></p><div class="example-contents"><pre class="programlisting">    ABYTEC 0 "KIP"        ; Same as BYTE "KI",'P'|128
+    ABYTEC 1 "ABC",0,"DE" ; Same as BYTE "BC",'D'|128,1,'E','F'|128</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">ABYTEZ &lt;offset&gt; &lt;bytes&gt;</span></dt><dd><p>Defines a byte or a string of bytes, followed by a zero.
+              The offset is added to each of the following bytes.</p><div class="example"><a id="idp1400103564"></a><p class="title"><strong>Example 5.4. </strong></p><div class="example-contents"><pre class="programlisting">    ABYTEZ 0 "KIP"        ; Same as BYTE "KIP",0</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">ALIGN
+            &lt;2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384 or
+            32768&gt;, &lt;byte&gt;</span></dt><dd><p>Align fills zero or more byte with &lt;byte&gt; until the
+              new address modulo &lt;expression&gt; equals zero.</p><div class="example"><a id="idp1400105492"></a><p class="title"><strong>Example 5.5. </strong></p><div class="example-contents"><pre class="programlisting">    ALIGN         ; =&gt; ALIGN 4 - simply align by 4
+    ALIGN 2       ; by 2
+    ALIGN 2,0       ; + fills memory by zero</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">ASSERT &lt;expression&gt;</span></dt><dd><p>An 'assertion failed' error is issued if the expression
+              evaluates to zero.</p><div class="example"><a id="idp1400107348"></a><p class="title"><strong>Example 5.6. </strong></p><div class="example-contents"><pre class="programlisting">STACKPOINTER=0D500H
+    ASSERT END_OF_PROGRAM &lt; STACKPOINTER
+END_OF_PROGRAM
+    END</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">BINARY &lt;filename&gt;[,offset[,length]]</span></dt><dd><p>Synonym of <a class="link" href="#po_incbin">INCBIN</a>.</p></dd><dt><span class="term"><a id="po_block"></a>BLOCK &lt;length&gt;[,&lt;fill
+            byte&gt;]</span></dt><dd><p>Defines space. Has to be followed by the number of byte to
+              reserve, optionally followed by the value to fill these bytes
+              with.</p><div class="example"><a id="idp1400110476"></a><p class="title"><strong>Example 5.7. </strong></p><div class="example-contents"><pre class="programlisting">    BLOCK 500     ; define a block of 500 bytes of zero
+    BLOCK 500,0   ; define a block of 500 bytes of zero
+    BLOCK 400,-1  ; define a block of 400 bytes of 255</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_byte"></a>BYTE &lt;bytes&gt;</span></dt><dd><p>Defines a byte or a string of bytes. Each value should be
+              between -129 and 256.</p><div class="example"><a id="idp1400112340"></a><p class="title"><strong>Example 5.8. </strong></p><div class="example-contents"><pre class="programlisting">    BYTE 0x56
+    BYTE 1,-78,'@'
+    BYTE "Format C:? ",0h</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">DB</span></dt><dd><p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p></dd><dt><span class="term">DC</span></dt><dd><p>Same as <a class="link" href="#po_byte">BYTE</a>, but every
+              last character of a string will have bit 7 set.</p><div class="example"><a id="idp1400115276"></a><p class="title"><strong>Example 5.9. </strong></p><div class="example-contents"><pre class="programlisting">    DC "kip" ; same as BYTE "ki",'p'|128</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">DD</span></dt><dd><p>Synonym of <a class="link" href="#po_dword">DWORD</a>.</p></dd><dt><span class="term">DEFARRAY &lt;id&gt; &lt;replacements&gt;</span></dt><dd><p>Array of DEFINEs</p><div class="example"><a id="idp1400117828"></a><p class="title"><strong>Example 5.10. </strong></p><div class="example-contents"><pre class="programlisting">    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
+CNT DEFL 0 ;or CNT=0
+    DUP 6
+    DISPLAY myarray[CNT]
+CNT DEFL CNT+1 ;or CNT=CNT+1
+    EDUP</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_dephase"></a>DEPHASE</span></dt><dd><p>Synonym of <a class="link" href="#po_ent">ENT</a>.</p></dd><dt><span class="term">DEFB</span></dt><dd><p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p></dd><dt><span class="term">DEFD</span></dt><dd><p>Synonym of <a class="link" href="#po_dword">DWORD</a>.</p></dd><dt><span class="term"><a id="po_defdevice"></a>DEFDEVICE
+            &lt;deviceid&gt;</span></dt><dd><p>Sorry, not available yet. If you want to see new device in
+              SjASMPlus, please, <a class="link" href="#feedback">write
+              us</a>.</p></dd><dt><span class="term"><a id="po_define"></a>DEFINE &lt;id&gt;
+            &lt;replacement&gt;</span></dt><dd><p>The identifier &lt;id&gt; will be replaced with the
+              &lt;replacement&gt;. The replacement could be omitted, in such
+              case it is still possible to check if the identifier was defined
+              with IFDEF or IFNDEF.</p><div class="example"><a id="idp1400125308"></a><p class="title"><strong>Example 5.11. </strong></p><div class="example-contents"><pre class="programlisting">    DEFINE str_honderd "Honderd"
+    BYTE str_honderd,0             ; BYTE "Honderd",0</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">DEFM</span></dt><dd><p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p></dd><dt><span class="term">DEFS</span></dt><dd><p>Synonym of <a class="link" href="#po_block">BLOCK</a>.</p></dd><dt><span class="term">DEFW</span></dt><dd><p>Synonym of <a class="link" href="#po_word">WORD</a>.</p></dd><dt><span class="term"><a id="po_device"></a>DEVICE &lt;deviceid&gt;</span></dt><dd><p>Enables <a class="link" href="#s_realdevice">real device emulation
+              mode</a> by it identifier.</p><p>Predefined devices' identifiers list:</p><pre class="programlisting"> NONE ; off real device emulation mode
+ ZXSPECTRUM48 ; ZX-Spectrum 48
+ ZXSPECTRUM128 ; ZX-Spectrum 128
+ SCORPION256 ; Scorpion 256 - exUSSR clone of ZX-Spectrum 128
+ ATMTURBO512 ; ATM-Turbo 512 - exUSSR clone of ZX-Spectrum 128
+
+ ;disable:
+   DEVICE NONE
+ ;enable:
+   DEVICE ZXSPECTRUM128</pre></dd><dt><span class="term"><a id="po_disp"></a>DISP &lt;address&gt;</span></dt><dd><p>Set the address in which the part of code should work.
+              <a class="link" href="#po_phase">PHASE</a> and <a class="link" href="#po_textarea">TEXTAREA</a> are synonyms of DISP.
+              <a class="link" href="#po_ent">ENT</a> is restore current address.
+              <a class="link" href="#po_unphase">UNPHASE</a>, <a class="link" href="#po_dephase">DEPHASE</a> and <a class="link" href="#po_endt">ENDT</a> are synonyms of <a class="link" href="#po_ent">ENT</a></p><div class="example"><a id="idp1400134692"></a><p class="title"><strong>Example 5.12. </strong></p><div class="example-contents"><pre class="programlisting">SCREEN EQU $4000
+    ORG $8000
+    LD HL,BEGIN
+    LD DE,SCREEN
+    LD BC,ENDOFPROG-BEGIN
+    LDIR
+    CALL SCREEN
+    DI
+    HALT
+BEGIN  DISP SCREEN ;code will compile for address $4000, but to the current ORG
+MARKA  DEC A
+    HALT
+    JP NZ,MARKA
+    RET
+       ENT
+ENDOFPROG</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">DISPLAY &lt;bytes&gt;</span></dt><dd><p><span class="emphasis"><em>This pseudo-op comes from ZX-Spectrum assembler
+              ALASM.</em></span></p><p>Out to console a string of bytes. Each value should be
+              between -129 and 256. Keys /D, /H and /A set format of output of
+              numbers:</p><pre class="programlisting">/D - out only in Decimal
+/H - out only in Hexadecimal
+/A - out both in Hexadecimal and Decimal</pre><div class="example"><a id="idp1400137236"></a><p class="title"><strong>Example 5.13. </strong></p><div class="example-contents"><pre class="programlisting">    ORG 100h
+TESTLABEL:
+    ;...some code...
+    RET
+    DISPLAY "--the some program-- by me"
+    DISPLAY "TESTLABEL address is:",/A,TESTLABEL
+/*  
+will be out to the console next strings:
+&gt; --the some program-- by me
+&gt; TESTLABEL address is:0x100,257
+*/</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">DM</span></dt><dd><p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p></dd><dt><span class="term">DS</span></dt><dd><p>Synonym of <a class="link" href="#po_block">BLOCK</a>.</p></dd><dt><span class="term"><a id="po_dup"></a>DUP &lt;count&gt;</span></dt><dd><p>DUP specifies the number of times to generate the
+              statements inside the macro. DUP can be used in macro's.</p><div class="example"><a id="idp1400141500"></a><p class="title"><strong>Example 5.14. </strong></p><div class="example-contents"><pre class="programlisting">    DUP 3
+    NOP
+    EDUP
+/*this will expand to:
+    NOP
+    NOP
+    NOP
+*/</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">DW</span></dt><dd><p>Synonym of <a class="link" href="#po_word">WORD</a>.</p></dd><dt><span class="term"><a id="po_dword"></a>DWORD</span></dt><dd><p>Defines a so called doubleword. Values should be between
+              -2147483649 and 4294967296.</p><div class="example"><a id="idp1400144356"></a><p class="title"><strong>Example 5.15. </strong></p><div class="example-contents"><pre class="programlisting">    DWORD 4000h,0d000h
+    DWORD 4</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">DZ</span></dt><dd><p>Same as <a class="link" href="#po_byte">BYTE</a>, but an extra
+              zero will be added at the end.</p><div class="example"><a id="idp1400146172"></a><p class="title"><strong>Example 5.16. </strong></p><div class="example-contents"><pre class="programlisting">    DZ 1      ; same as BYTE 1,0
+    DZ "kip"  ; same as BYTE "kip",0</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">EMPTYTRD &lt;filenameoftrdimage&gt;</span></dt><dd><p><span class="emphasis"><em>Useful only for ZX-Spectrum
+              users</em></span></p><p>Create the empty TRD image for emulators of ZX-Spectrum.
+              See example of <a class="link" href="#po_savetrd">SAVETRD</a>.</p></dd><dt><span class="term">ENCODING &lt;encoding&gt;</span></dt><dd><p><span class="emphasis"><em>Useful only for non English
+              users</em></span></p><p>Set the current encoding, i.e. if you set "DOS", SjASMPlus
+              will automatically convert strings from ANSI to DOS-866.
+              Encoding may be "DOS"(DOS-866) or "WIN"(ANSI/Win-1251). Default
+              is "WIN". </p><div class="example"><a id="idp1400149780"></a><p class="title"><strong>Example 5.17. </strong></p><div class="example-contents"><pre class="programlisting">    ENCODING "WIN"
+    DB "тексттекст" ;will be тексттекст
+    ENCODING "DOS"
+    DB "тексттекст" ;will be вҐЄбввҐЄбв</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">END</span></dt><dd><p>The assembler will stop at this point. The pseudo-op
+              doesn't work in the beginning of line(with and without key
+              --dirbol).</p></dd><dt><span class="term"><a id="po_endlua"></a>ENDLUA</span></dt><dd><p>See <a class="link" href="#po_lua">LUA</a> for more
+              information.</p></dd><dt><span class="term">ENDMOD</span></dt><dd><p>Synonym of <a class="link" href="#po_endmodule">ENDMODULE</a>.</p></dd><dt><span class="term"><a id="po_endmodule"></a>ENDMODULE</span></dt><dd><p>To indicate the end of a module (see <a class="link" href="#po_module">MODULE</a>), and use the previous
+              modulename.</p><div class="example"><a id="idp1400155420"></a><p class="title"><strong>Example 5.18. </strong></p><div class="example-contents"><pre class="programlisting">    MODULE M1
+A                 ; M1.A
+    MODULE M2
+A                 ; M2.A
+    ENDMODULE
+B                 ; M1.B
+    ENDMODULE</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_endt"></a>ENDT</span></dt><dd><p>Synonym of <a class="link" href="#po_ent">ENT</a>.</p></dd><dt><span class="term"><a id="po_ent"></a>ENT</span></dt><dd><p>Restore current address. See <a class="link" href="#po_disp">DISP</a> for more information.</p></dd><dt><span class="term">EQU</span></dt><dd><p>To give a label a value other than the current program
+              counter. '=' can be used instead of 'EQU'. The label should not
+              already exist.</p><div class="example"><a id="idp1400159692"></a><p class="title"><strong>Example 5.19. </strong></p><div class="example-contents"><pre class="programlisting">Label EQU 3
+Kip=3</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">EXPORT label</span></dt><dd><p>The named label will be written to the export-file, in the
+              form 'label: EQU value'. This way the export-file can be
+              included in other sources.</p><div class="example"><a id="idp1400161268"></a><p class="title"><strong>Example 5.20. </strong></p><div class="example-contents"><pre class="programlisting">DRIE=3
+    EXPORT DRIE</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_field"></a>FIELD</span></dt><dd><p>To give a label the value of the current map counter.
+              Afterwards the map counter is increment by the given amount. '#'
+              May be used instead of 'FIELD'. With map and field it is
+              possible to create structure-like data structures. With '##' it
+              is possible to align the map counter.</p><div class="example"><a id="idp1400163196"></a><p class="title"><strong>Example 5.21. </strong></p><div class="example-contents"><pre class="programlisting">    MAP 8
+Label # 2     ; Label=8
+Kip   # 3     ; Kip=10
+Kop   #       ; Kop=13
+Kop2  # 1     ; Kop2=13
+     ##       ; align map address (align 4 is default)
+Kop3  # 6     ; Kop3=16</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">FPOS &lt;position&gt;</span></dt><dd><p>The FPOS directive makes it possible to set the file
+              position to anywhere in the output file.</p><p>In combination with <a class="link" href="#po_output">OUTPUT</a> “&lt;filename&gt;”,r it is
+              possible to update existing files.</p><div class="example"><a id="idp1400165780"></a><p class="title"><strong>Example 5.22. </strong></p><div class="example-contents"><pre class="programlisting">; This example will result in a file with a length of one byte:
+    BYTE 0
+    FPOS 0
+    BYTE 1
+    END</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_incbin"></a>INCBIN
+            &lt;filename&gt;[,offset[,length]]</span></dt><dd><p>To include a binary file into the outputfile. The offset
+              and length are optional.</p><div class="example"><a id="idp1400167708"></a><p class="title"><strong>Example 5.23. </strong></p><div class="example-contents"><pre class="programlisting">    INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
+    INCBIN "rantab.com",3,256 ; include 256 bytes from offset 3
+    INCBIN gfx.scc ,7         ; note the space between the filename and the ',7' here :)</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">INCHOB &lt;filename&gt;[,offset[,length]]</span></dt><dd><p>To include a data from a hobeta file into the outputfile.
+              The offset and length are optional.</p><div class="example"><a id="idp1400169532"></a><p class="title"><strong>Example 5.24. </strong></p><div class="example-contents"><pre class="programlisting">    INCHOB "gfx.$c",7        ; include gfx.scc, skip first 7 bytes
+    INCHOB "sprs.$c",3,256   ; include 256 bytes from offset 3
+    INCHOB gfx.$c ,7        ; note the space between the filename and the ',7' here :)</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">INCLUDE &lt;filename&gt;</span></dt><dd><p>To include another sourcefile into the current.
+              Sourcefiles can be nested 20 levels deep. If the file cannot be
+              found in the current directory (the current directory is the
+              directory the current file comes from) the file will be searched
+              for in the directories specified at the commandline. When angle
+              brackets are used, the commandline directories are searched
+              before the current directory.</p><div class="example"><a id="idp1400171636"></a><p class="title"><strong>Example 5.25. </strong></p><div class="example-contents"><pre class="programlisting">    INCLUDE &lt;VDP.I&gt;
+    INCLUDE MORE.I
+    INCLUDE "MORE.I"</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">INCLUDELUA &lt;filename&gt;</span></dt><dd><p>To include another LUA script in first pass(!). If the
+              file cannot be found in the current directory (the current
+              directory is the directory the current file comes from) the file
+              will be searched for in the directories specified at the
+              commandline. When angle brackets are used, the commandline
+              directories are searched before the current directory.</p><div class="example"><a id="idp1400173604"></a><p class="title"><strong>Example 5.26. </strong></p><div class="example-contents"><pre class="programlisting">    INCLUDELUA &lt;mylibrary1.lua&gt;
+    INCLUDELUA mylibrary2.lua
+    INCLUDELUA "library_for_zx.lua"</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">INCTRD
+            &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,offset[,length]]</span></dt><dd><p>To include a file from a TRD image into the outputfile.
+              The offset and length are optional.</p><div class="example"><a id="idp1400175452"></a><p class="title"><strong>Example 5.27. </strong></p><div class="example-contents"><pre class="programlisting">    INCTRD "test.trd","mygfx.C" ; include mygfx.C from test.trd
+    INCTRD "test.trd","mygfx.C",12 ; include mygfx.C from test.trd, skip first 12 bytes</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">INSERT &lt;filename&gt;[,offset[,length]]</span></dt><dd><p>INSERT is a synonym of <a class="link" href="#po_incbin">INCBIN</a>. See above.</p></dd><dt><span class="term">LABELSLIST &lt;filename&gt;</span></dt><dd><p><span class="emphasis"><em>Useful only for ZX-Spectrum Emulator
+              UNREALSPECCY.</em></span></p><p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p><p>Save labels list in format:</p><pre class="programlisting">NN:ADDRESS LABELNAME</pre><p>
+              ,where NN is number of page of RAM</p><div class="example"><a id="idp1400179756"></a><p class="title"><strong>Example 5.28. </strong></p><div class="example-contents"><pre class="programlisting">    LABELSLIST "x:/somepath/user.l"</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">LUA [pass]<a id="po_lua"></a></span></dt><dd><p>Using pseudo-ops LUA and ENDLUA you can insert Lua
+              scripts. See more in the chapter "<a class="link" href="#c_lua_scripting">Lua scripting</a>".</p><p>Parameter is optional. It may be:</p><pre class="programlisting">PASS1  -  interpret Lua script in first pass only.
+PASS2  -  interpret Lua script in second pass only.
+PASS3  -  interpret Lua script in third pass only. By default.
+ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</pre><div class="example"><a id="idp1400182668"></a><p class="title"><strong>Example 5.29. </strong></p><div class="example-contents"><pre class="programlisting">    LUA
+-- some comments
+        print "Hi, man! This is Lua!"
+    ENDLUA
+; some code now:
+    LUA ALLPASS
+        _pl("LABEL LD A,10")
+        _pc("RET")
+    ENDLUA</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">MAP &lt;address&gt;</span></dt><dd><p>Set the map counter to the specified value. See <a class="link" href="#po_field">FIELD</a> for an example.</p><div class="example"><a id="idp1400184660"></a><p class="title"><strong>Example 5.30. </strong></p><div class="example-contents"><pre class="programlisting">    MAP 5</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">MEMORYMAP</span></dt><dd><p>Not available yet.</p></dd><dt><span class="term"><a id="po_module"></a>MODULE &lt;name&gt;</span></dt><dd><p>Labels are to be unique only in the current module. Also
+              note the use of '@' to suppress all this label-processing. (The
+              '@' is NOT part of the label name though!)</p><div class="example"><a id="idp1400187212"></a><p class="title"><strong>Example 5.31. </strong></p><div class="example-contents"><pre class="programlisting">    MODULE xxx
+Kip                ; label xxx.Kip
+    CALL Kip         ; call xxx.Kip
+    CALL yyy.Kip     ; call yyy.Kip
+    CALL Kop         ; call xxx.Kop
+    CALL @Kop        ; call Kop
+    Call @Kip        ; call Kip
+
+    MODULE yyy
+Kip                ; label yyy.Kip
+@Kop               ; label Kop
+@xxx.Kop           ; label xxx.Kop
+
+    MODULE           ; no modulename
+Kip                ; label Kip</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">ORG &lt;address&gt;</span></dt><dd><p>Set the program counter to a specific address.</p><div class="example"><a id="idp1400189132"></a><p class="title"><strong>Example 5.32. </strong></p><div class="example-contents"><pre class="programlisting">    ORG 100h ; or 0x100, or $100, or #100
+
+    ; useful macro that padding code
+    MACRO PADORG addr
+         ; add padding
+         IF $ &lt; addr
+         BLOCK addr-$
+         ENDIF
+         ORG addr
+    ENDM
+
+    MACRO PADORG2 addr
+         ; add padding + display warning
+         IF $ &gt; addr
+           ; no padding
+           DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", addr
+         ELSE
+           ; add padding
+           BLOCK addr-$
+         ENDIF
+         ORG addr
+    ENDM</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_output"></a>OUTPUT
+            “&lt;filename&gt;”,mode</span></dt><dd><p>With OUTPUT it is possible to create multiple files from
+              one source. All following instructions will be assembled to this
+              file.</p><p>There are three possible output modes: truncate (overwrite
+              existing files, this is the default), rewind (open and execute
+              FPOS 0) and append (open and leave the file pointer at the end
+              of the file).</p><pre class="programlisting">OUTPUT “&lt;filename&gt;”,t  ; truncate (default)
+OUTPUT “&lt;filename&gt;”,r  ; rewind
+OUTPUT “&lt;filename&gt;”,a  ; append</pre><div class="example"><a id="idp1400192620"></a><p class="title"><strong>Example 5.33. bigfile.asm</strong></p><div class="example-contents"><pre class="programlisting">    OUTPUT loader.com
+    ORG 100H
+    INCLUDE loader.asm
+    INCLUDE bios.asm
+
+    OUTPUT bigfile.dat
+    ORG 4000H
+    INCLUDE main.asm
+    ORG 8000H
+    INCLUDE data.asm</pre></div></div><p><br class="example-break" />This will create two files: loader.com and
+              bigfile.dat.</p><p>When SjASMPlus is invoked without specifying an output
+              file, there is still one created even when no bytes are output
+              to it. So when the above file is called bigfile.asm, and
+              assembled with the following line:</p><pre class="programlisting">sjasmplus bigfile.asm</pre><p>The
+              following files are created: </p><pre class="programlisting">Bigfile.out  ; file length is zero
+Loader.com
+Bigfile.dat</pre></dd><dt><span class="term"><a id="po_page"></a>PAGE &lt;number&gt;</span></dt><dd><p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p><p>Set the current memory page to current slot.</p><div class="example"><a id="idp1400196668"></a><p class="title"><strong>Example 5.34. </strong></p><div class="example-contents"><pre class="programlisting">    PAGE 7 ;set 7 page
+    SAVEBIN "ram7.bin",$C000,$4000 ;- save $4000 begin from $C000 of RAM to file</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_phase"></a>PHASE</span></dt><dd><p>Synonym of <a class="link" href="#po_disp">DISP</a>.</p></dd><dt><span class="term">REPT &lt;count&gt;</span></dt><dd><p>Synonym of <a class="link" href="#po_dup">DUP</a>.</p></dd><dt><span class="term">SAVEBIN
+            &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</span></dt><dd><p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p><p>Save the block of RAM.</p><div class="example"><a id="idp1400201380"></a><p class="title"><strong>Example 5.35. </strong></p><div class="example-contents"><pre class="programlisting">    PAGE 7 ;set 7 page to current slot
+    SAVEBIN "ram7.bin",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
+    SAVEBIN "ram2.bin",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">SAVEHOB
+            &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</span></dt><dd><p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p><p>Save the block of RAM in Hobeta format.</p><div class="example"><a id="idp1400203924"></a><p class="title"><strong>Example 5.36. </strong></p><div class="example-contents"><pre class="programlisting">    PAGE 7 ;set 7 page to current slot
+    SAVEHOB "ram7.$c","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
+    SAVEHOB "ram2.$c","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">SAVESNA &lt;filename&gt;,&lt;startadressofprogram&gt;</span></dt><dd><p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p><p>Save the snapshot for emulators of ZX-Spectrum. </p><div class="example"><a id="idp1400206292"></a><p class="title"><strong>Example 5.37. </strong></p><div class="example-contents"><pre class="programlisting">    DEVICE ZXSPECTRUM128
+    ORG $8000
+START  .... ;something code
+    RET
+    SAVESNA "game.sna",START ;save snapshot to file game.sna. Start address is START ($8000)</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">SAVETAP &lt;filename&gt;,&lt;startadressofprogram&gt;</span></dt><dd><p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p><p>Save the tape file for emulators of ZX-Spectrum. Generated
+              tape file supports ZX-Spectrum clones with extended RAM such as
+              ATM Turbo 512, etc.</p><div class="example"><a id="idp1400208724"></a><p class="title"><strong>Example 5.38. </strong></p><div class="example-contents"><pre class="programlisting">    DEVICE ZXSPECTRUM48
+    ORG $8000
+START  .... ;something code
+    RET
+    SAVETAP "game.tap",START ;save tape file to file game.tap. Start address is START ($8000)</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_savetrd"></a>SAVETRD
+            &lt;filenameoftrdimage&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</span></dt><dd><p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p><p>Save the snapshot for emulators of ZX-Spectrum</p><div class="example"><a id="idp1400211300"></a><p class="title"><strong>Example 5.39. </strong></p><div class="example-contents"><pre class="programlisting">    EMPTYTRD "test.trd" ;create empty TRD image
+    PAGE 7 ;set 7 page to current slot
+    SAVETRD "test.trd","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file to TRD image
+    SAVETRD "test.trd","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file to TRD image</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">SHELLEXEC &lt;filename&gt;[, &lt;parameters&gt;]</span></dt><dd><p>Execute external program &lt;filename&gt; using optional
+              command line &lt;parameters&gt;.</p><div class="example"><a id="idp1400213260"></a><p class="title"><strong>Example 5.40. </strong></p><div class="example-contents"><pre class="programlisting">    OUTPUT "mybin.bin"
+    ;some code
+    IF ((_ERRORS = 0) + (_WARNINGS = 0))
+        SHELLEXEC "x:/mydeveloping/bin2tap.exe mybin.bin mytap.tap"
+       ; or SHELLEXEC "x:/mydeveloping/bin2tap.exe","mybin.bin mytap.tap"
+    ENDIF</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">SIZE &lt;filesize in bytes&gt;</span></dt><dd><p>If the resulting file is less than the given length, as
+              many bytes are added as necessary. See <a class="link" href="#po_output">OUTPUT</a> for more.</p><div class="example"><a id="idp1400215404"></a><p class="title"><strong>Example 5.41. </strong></p><div class="example-contents"><pre class="programlisting">    SIZE 32768       ; make sure file will be 32K</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">SLOT &lt;number&gt;</span></dt><dd><p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p><p>Set current slot. Slot's defined by MEMORYMAP pseudo-op.
+              Use pseudo-op <a class="link" href="#po_page">PAGE</a> to change page
+              in the current slot.</p><div class="example"><a id="idp1400218084"></a><p class="title"><strong>Example 5.42. </strong></p><div class="example-contents"><pre class="programlisting">    DEVICE ZXSPECTRUM128
+    SLOT 3 ;from 0C000h to 0FFFFh
+    PAGE 1 ;set page 1 to slot 3
+    ORG 0C000h
+    ;your program here
+    PAGE 2
+    INCBIN "somegfx.bin"
+    ;....</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_textarea"></a>TEXTAREA &lt;address&gt;</span></dt><dd><p>Synonym of <a class="link" href="#po_disp">DISP</a>.</p></dd><dt><span class="term">UNDEFINE &lt;id&gt;</span></dt><dd><p>Removes the identifier defined by <a class="link" href="#po_define">DEFINE</a></p><div class="example"><a id="idp1400221348"></a><p class="title"><strong>Example 5.43. </strong></p><div class="example-contents"><pre class="programlisting">    DEFINE Release 1
+
+    IFDEF Release
+      DISPLAY "Building release version"
+    ENDIF
+
+    UNDEFINE Release
+
+    IFNDEF Release
+      DISPLAY "It's works!"
+    ENDIF
+
+    IFDEF _SJASMPLUS
+      DISPLAY "Yes, it's the sjasmplus!"
+    ENDIF
+
+    UNDEFINE *  ; undefine all identifiers
+
+    IFNDEF _SJASMPLUS
+      DISPLAY "It's not the sjasmplus??"
+    ENDIF</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term"><a id="po_unphase"></a>UNPHASE</span></dt><dd><p>Synonym of <a class="link" href="#po_ent">ENT</a>.</p></dd><dt><span class="term"><a id="po_word"></a>WORD &lt;words&gt;</span></dt><dd><p>Defines a word. Values should be between -32787 and
+              65536.</p><div class="example"><a id="idp1400224644"></a><p class="title"><strong>Example 5.44. </strong></p><div class="example-contents"><pre class="programlisting">    WORD 4000h,0d000h
+    WORD 4,"HA"</pre></div></div><p><br class="example-break" /></p></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400225644"></a>Conditional assembly</h2></div></div></div><p>It may be useful to assemble a part or not based on a certain
+      condition.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><a id="ca_if"></a>IF &lt;expression&gt;</span></dt><dd><p>If &lt;expression&gt; is non-zero the following lines are
+              assembled until an ELSE or ENDIF.</p></dd><dt><span class="term">IFN &lt;expression&gt;</span></dt><dd><p>If &lt;expression&gt; is zero the following lines are
+              assembled until an ELSE or ENDIF.</p></dd><dt><span class="term">IFDEF &lt;id&gt;</span></dt><dd><p>The condition is true if there is an id defined. These are
+              NOT labels.</p><div class="example"><a id="idp1400229556"></a><p class="title"><strong>Example 5.45. Example</strong></p><div class="example-contents"><pre class="programlisting">    IFDEF MSX_LEAN_AND_MEAN
+        CALL InitOwnMM
+    ELSE
+        CALL InitDos2MemMan
+    ENDIF</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">IFNDEF &lt;id&gt;</span></dt><dd><p>The condition is true if there isn't an id defined. These
+              are NOT labels.</p><div class="example"><a id="idp1400231348"></a><p class="title"><strong>Example 5.46. Example</strong></p><div class="example-contents"><pre class="programlisting">1   IN A,(0C4H)
+    AND 2
+    IFNDEF DEBUG
+        JR NC,1B
+    ENDIF</pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">IFUSED &lt;label&gt;</span></dt><dd><p>The condition is true if there is an label used somewhere
+              in the code. You can create libraries of useful functions using
+              IFUSED pseudo-op</p><div class="example"><a id="idp1400233196"></a><p class="title"><strong>Example 5.47. Example</strong></p><div class="example-contents"><pre class="programlisting">    OUTPUT "TEST.OUT"
+
+    CALL LABEL3 ; LABEL3 - yes
+    LD A,(LABEL1) ; LABEL1 - yes
+
+    IFUSED LABEL1
+LABEL1:
+    DB 1
+    ENDIF
+
+    IFUSED LABEL2
+LABEL2:
+    DB 2
+    ENDIF
+
+    IFUSED LABEL3
+LABEL3:
+    DB 3
+    ENDIF
+
+    IFUSED LABEL4
+LABEL4:
+    DB 4
+    ENDIF
+
+    LD A,LABEL2 ; LABEL2 - yes
+
+    RET
+
+; Output will contain bytes from LABEL1 to LABEL3 (1, 2, 3), but not contain from LABEL4, because this label is not used.
+
+; Alternative syntax:
+LABEL5:
+    IFUSED ; sjasmplus will use name of previous label, i.e. LABEL5
+
+    ENDIF
+    </pre></div></div><p><br class="example-break" /></p></dd><dt><span class="term">IFNUSED &lt;label&gt;</span></dt><dd><p>The condition is true if there is an label
+              <span class="emphasis"><em>not</em></span> used somewhere in the code.</p></dd><dt><span class="term">ELSE</span></dt><dd><p>See <a class="link" href="#ca_if">IF</a>. If the condition is
+              not true, the else-part is assembled.</p></dd><dt><span class="term">ENDIF</span></dt><dd><p>Every <a class="link" href="#ca_if">IF</a> should be followed
+              by an ENDIF.</p></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400238132"></a>Macro's</h2></div></div></div><p>The MACRO pseudo-op defines a macro. It should be followed by the
+      name of the macro, optionally followed by the parameters. The following
+      lines will be stored as the macro-body until an ENDM pseudo-op is
+      encountered. Macro's have to be defined before their use.</p><div class="example"><a id="idp1400238868"></a><p class="title"><strong>Example 5.48. Macro without parameters</strong></p><div class="example-contents"><pre class="programlisting">  MACRO ADD_HL_A
+    ADD A,L
+    JR NC,.hup
+    INC H
+.hup
+    LD L,A
+  ENDM</pre></div></div><p><br class="example-break" /></p><p>Labels in a macro starting with a dot are local to each macro
+      expansion.</p><div class="example"><a id="idp1400239932"></a><p class="title"><strong>Example 5.49. A macro with parameters</strong></p><div class="example-contents"><pre class="programlisting">  MACRO WAVEOUT reg, data
+    LD A,reg
+    OUT (7EH),A
+    LD A,data
+    OUT (7FH),A
+  ENDM
+; this macro will make
+  WAVEOUT 2,17
+; expand to:
+  LD A,2
+  OUT (7EH),A
+  LD A,17
+  OUT (7FH),A</pre></div></div><p><br class="example-break" /></p><div class="example"><a id="idp1400240828"></a><p class="title"><strong>Example 5.50. Another example</strong></p><div class="example-contents"><pre class="programlisting">    MACRO LOOP
+      IF $-.lus&lt;127
+        DJNZ .lus
+      ELSE
+        DEC B
+        JP NZ,.lus
+      ENDIF
+    ENDM
+
+Main
+.lus
+    CALL DoALot
+    LOOP
+; This will expand to:
+Main
+.lus                  ; Main.lus
+    CALL DoALot
+    DJNZ .lus         ; Main.lus</pre></div></div><p><br class="example-break" /></p><p>Angle brackets can be used when the arguments contain
+      commas.</p><div class="example"><a id="idp1400242388"></a><p class="title"><strong>Example 5.51. </strong></p><div class="example-contents"><pre class="programlisting">    MACRO UseLess data
+      DB data
+    ENDM
+
+    UseLess &lt;10,12,13,0&gt;
+; expands to:
+    DB 10,12,13,0
+
+; use '!' to include '!' and '&gt;' in those strings.
+
+    UseLess &lt;5, 6 !&gt; 3&gt;
+; expands to:
+    DB 5, 6 &gt; 3
+
+    UseLess &lt;"Kip!!",3&gt;
+; expands to:
+    DB "Kip!",3</pre></div></div><p><br class="example-break" /></p><p></p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="idp1400243716"></a>Chapter 6. <a id="c_structures"></a>Structures</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="section"><a href="#idp1400244220">What is it?</a></span></dt><dt><span class="section"><a href="#idp1400244956">Using</a></span></dt><dt><span class="section"><a href="#idp1400247044">Instructions</a></span></dt><dt><span class="section"><a href="#idp1400254892">Examples</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400244220"></a>What is it?</h2></div></div></div><p>Structures can be used to define data structures in memory more
+      easily. The name of the structure is set to the total size of the
+      structure.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400244956"></a>Using</h2></div></div></div><p>A structure definition starts with: <code class="code">STRUCT
+      &lt;name&gt;,[&lt;initial offset&gt;]</code> and ends with
+      <code class="code">ENDS</code>. Structure definitions are local to the current
+      module, but, as with labels, '@' can be used to override this.</p><p>Lines between STRUCT and ENDS should have the following
+      format:</p><p><code class="code">membername pseudo-operation operands</code></p><p>All fields are optional. Lines without label should start with
+      whitespace.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400247044"></a>Instructions</h2></div></div></div><p>Between the STRUCT and ENDS pseudo-instructions the following
+      instructions can be used:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">BYTE [&lt;defaultvalue&gt;]</span></dt><dd><p>To define a one byte member. The defaultvalue is used when
+              no initialisation value is given when the structure is declared.
+              (DB and DEFB may be used instead of BYTE).</p></dd><dt><span class="term">WORD [&lt;defaultvalue&gt;]</span></dt><dd><p>To define a two byte member. The defaultvalue is used when
+              no initialisation value is given when the structure is declared.
+              (DW and DEFW may be used instead of WORD).</p></dd><dt><span class="term">D24 [&lt;defaultvalue&gt;]</span></dt><dd><p>To define a three byte member. The defaultvalue is used
+              when no initialisation value is given when the structure is
+              declared.</p></dd><dt><span class="term">DWORD [&lt;defaultvalue&gt;]</span></dt><dd><p>To define a four byte member. The defaultvalue is used
+              when no initialisation value is given when the structure is
+              declared. (DD and DEFD may be used instead of WORD).</p></dd><dt><span class="term">BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</span></dt><dd><p>To define an member of the specified number of bytes.
+              ('#', DS and DEFS may be used instead of WORD).</p></dd><dt><span class="term">ALIGN [&lt;expression&gt;]</span></dt><dd><p>To align the offset. If the expression is omitted, 4 is
+              assumed. ('##' May be used instead of ALIGN).</p></dd><dt><span class="term">&lt;structure name&gt; [&lt;init values&gt;]</span></dt><dd><p>It is possible to nest structures, and give new defaults
+              for the BYTE and WORD members.</p></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400254892"></a>Examples</h2></div></div></div><div class="example"><a id="idp1400255276"></a><p class="title"><strong>Example 6.1. </strong></p><div class="example-contents"><pre class="programlisting">	STRUCT SCOLOR 
+RED	BYTE 4
+GREEN	BYTE 5
+BLUE	BYTE 6
+	ENDS</pre><p>This is identical to:</p><pre class="programlisting">SCOLOR		EQU 3 ; lenght 
+SCOLOR.RED	EQU 0 ; offset
+SCOLOR.GREEN	EQU 1 ; offset
+SCOLOR.BLUE	EQU 2 ; offset</pre></div></div><p><br class="example-break" /></p><div class="example"><a id="idp1400256652"></a><p class="title"><strong>Example 6.2. </strong></p><div class="example-contents"><pre class="programlisting">	STRUCT SDOT
+X	BYTE
+Y	BYTE
+C	SCOLOR 0,0,0 ; use new default values
+	ENDS
+</pre><p>This is identical to:</p><pre class="programlisting">SDOT		EQU 5 ; length
+SDOT.X		EQU 0 ; offset
+SDOT.Y		EQU 1 ; offset
+SDOT.C		EQU 2 ; offset
+SDOT.C.RED	EQU 2 ; offset
+SDOT.C.GREEN	EQU 3 ; offset
+SDOT.C.BLUE	EQU 4 ; offset
+</pre></div></div><p><br class="example-break" /></p><div class="example"><a id="idp1400258108"></a><p class="title"><strong>Example 6.3. </strong></p><div class="example-contents"><pre class="programlisting">	STRUCT SPOS,4
+X	WORD
+Y	BYTE
+	ALIGN 2
+AD	WORD
+	ENDS</pre><p>This is identical to:</p><pre class="programlisting">SPOS	EQU 10 ; length
+SPOS.X	EQU  4 ; offset
+SPOS.Y	EQU  6 ; offset
+SPOS.AD	EQU  8 ; offset</pre></div></div><p><br class="example-break" /></p><div class="example"><a id="idp1400259460"></a><p class="title"><strong>Example 6.4. </strong></p><div class="example-contents"><p>When a structure is defined it is possible to declare labels
+          with it</p><pre class="programlisting">COLOR SCOLOR</pre><p>This is
+          identical to:</p><pre class="programlisting">COLOR
+COLOR.RED   BYTE 4
+COLOR.GREEN BYTE 5
+COLOR.BLUE  BYTE 6
+</pre><p>Note the default values.</p><p>Or without label:</p><pre class="programlisting">COLORTABLE
+  SCOLOR 0,0,0
+  SCOLOR 1,2,3
+  SCOLOR ,2
+  ; etc.</pre><p>This is identical to:</p><pre class="programlisting">COLORTABLE
+  BYTE 0,0,0
+  BYTE 1,2,3
+  BYTE 4,2,6
+  ; etc.
+
+DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
+          BYTE and WORD members can be initialised.</p><p>The resulting labels can be used as any other
+          label:</p><pre class="programlisting">  ld b,(ix+SCOLOR.RED)
+  ld a,(COLOR.GREEN)
+  ld de,COLOR
+  ; etc.</pre><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Do not use the offset labels in indirections
+              like:</p><pre class="programlisting">LD A,(SDOT.X)</pre><p>This will
+              conflict with futher 'improvements' ;-)</p><p>If this is absolutely necessary (why?) use something like
+              this:</p><pre class="programlisting">LD A,(+SDOT.X)</pre></div></div></div><p><br class="example-break" /></p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="idp1400264020"></a>Chapter 7. <a id="c_lua_scripting"></a>Lua scripting</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="section"><a href="#idp1400264524">Why?</a></span></dt><dt><span class="section"><a href="#idp1400265620">How to use?</a></span></dt><dt><span class="section"><a href="#idp1400267572">SjASMPlus binded functions</a></span></dt><dt><span class="section"><a href="#idp1400295876">Third-party embedded library(ies)</a></span></dt><dt><span class="section"><a href="#idp1400314852">Example</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400264524"></a>Why?</h2></div></div></div><div align="left"><img src="lua.gif" align="left" /></div><p>Why is scripting engine
+      as Lua embedded to the compiler? Answer is simple: It need to add extra
+      features by users. And to whole other Lua is enough small, fast and
+      powerful scripting engine.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400265620"></a>How to use?</h2></div></div></div><p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a id="idp1400266692"></a><p class="title"><strong>Example 7.1. Hello World!</strong></p><div class="example-contents"><pre class="programlisting">    LUA
+        print ("Hello World!")
+    ENDLUA</pre></div></div><p><br class="example-break" /></p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400267572"></a>SjASMPlus binded functions</h2></div></div></div><p>From Lua you can control some variables and use functions of the
+      compiler. Complete list:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><a id="lua__c"></a>[integer] _c("expression")</span></dt><dd><p>Calculate expression using calculator of the compiler.
+              Example: <code class="code">val = _c("SOMELABEL+12")</code>.</p></dd><dt><span class="term"><a id="lua__pc"></a>[void] _pc("code")</span></dt><dd><p>Parse string of Z80 assembly. Example: <code class="code">_pc("ADD
+              A,B")</code></p></dd><dt><span class="term"><a id="lua__pl"></a>[void] _pl("label code")</span></dt><dd><p>Parse line of Z80 assembly. Example: <code class="code">_pc("SOMELABEL
+              ADD A,B")</code></p></dd><dt><span class="term">[integer] sj.calc("expression")</span></dt><dd><p>See <a class="link" href="#lua__c">_c</a></p></dd><dt><span class="term">[void] sj.parse_code("label")</span></dt><dd><p>See <a class="link" href="#lua__pc">_pc</a></p></dd><dt><span class="term">[void] sj.parse_line("label code")</span></dt><dd><p>See <a class="link" href="#lua__pl">_pl</a></p></dd><dt><span class="term">[void] sj.error("message")</span></dt><dd><p>Print error message.</p></dd><dt><span class="term">[void] sj.warning("message")</span></dt><dd><p>Print warning message.</p></dd><dt><span class="term">[boolean] sj.file_exists("message")</span></dt><dd><p>Check for file exists.</p></dd><dt><span class="term">[string] sj.get_define("name")</span></dt><dd><p>Get define value.</p></dd><dt><span class="term">[boolean] sj.insert_define("name", "value")</span></dt><dd><p>Add new define.</p></dd><dt><span class="term">[integer] sj.get_label("name")</span></dt><dd><p>Get label address.</p></dd><dt><span class="term">[boolean] sj.insert_label("name", address)</span></dt><dd><p>Add new label.</p></dd><dt><span class="term"><a id="lua_sj_current_address"></a>[integer]
+            sj.current_address</span></dt><dd><p>Variable. Current address.</p></dd><dt><span class="term">[integer] sj.error_count</span></dt><dd><p>Variable. Count of Errors.</p></dd><dt><span class="term">[integer] sj.warning_count</span></dt><dd><p>Variable. Count of Warnings.</p></dd><dt><span class="term">[void] sj.exit(errorcode)</span></dt><dd><p>Shutdown the compiler.</p></dd><dt><span class="term">[void] sj.add_byte(byte)</span></dt><dd><p>Add byte to output (or to memory) and increase <a class="link" href="#lua_sj_current_address">sj.current_address</a></p></dd><dt><span class="term">[void] sj.add_word(word)</span></dt><dd><p>Add word to output (or to memory) and twice increase <a class="link" href="#lua_sj_current_address">sj.current_address</a></p></dd><dt><span class="term">[integer] sj.get_byte(address)</span></dt><dd><p>Get byte from memory. <span class="emphasis"><em>Work only in real device
+              emulation mode.</em></span></p></dd><dt><span class="term">[integer] sj.get_word(address)</span></dt><dd><p>Get word from memory. <span class="emphasis"><em>Work only in real device
+              emulation mode.</em></span></p></dd><dt><span class="term">[string] sj.get_device()</span></dt><dd><p>Return current emulating device's identifier. Returns
+              "NONE" if no emulation mode.</p></dd><dt><span class="term">[boolean] sj.set_device("id")</span></dt><dd><p>Set current emulating device's identifier. Returns false
+              if no device found.</p></dd><dt><span class="term">[boolean] sj.set_page(number)</span></dt><dd><p>Set page with number "number" to the current slot. Works
+              as pseudo-op PAGE.</p></dd><dt><span class="term">[boolean] sj.set_slot(number)</span></dt><dd><p>Set current slot with number "number". Works as pseudo-op
+              SLOT.</p></dd><dt><span class="term">[void] sj.shellexec("programname")</span></dt><dd><p>See pseudo-op SHELLEXEC.</p></dd><dt><span class="term">[void] zx.trdimage_create("filename")</span></dt><dd><p>Creates emptry TRD image file.</p></dd><dt><span class="term">[void] zx.trdimage_add_file("filename", "somenameC",
+            startaddress, length)</span></dt><dd><p>Save block of memory to TRD image file. <span class="emphasis"><em>Work
+              only in real device emulation mode.</em></span></p></dd><dt><span class="term">[void] zx.save_snapshot_sna("filename.sna",
+            startaddressofprogram)</span></dt><dd><p>Save snapshot of memory in SNA format. <span class="emphasis"><em>Work only
+              in real device emulation mode and only for ZXSPECTRUM48 and
+              ZXSPECTRUM128..</em></span></p></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400295876"></a>Third-party embedded library(ies)</h2></div></div></div><p><span class="emphasis"><em>lpack.c</em></span></p><p>a Lua library for packing and unpacking binary data</p><p>by Luiz Henrique de Figueiredo
+      &lt;lhf(at)tecgraf.puc-rio.br&gt;</p><p>The library adds two functions to the string library:
+      <span class="emphasis"><em>string.pack</em></span> and
+      <span class="emphasis"><em>string.unpack</em></span>.</p><p>pack is called as follows: string.pack(F,x1,x2,...), where F is a
+      string describing how the values x1, x2, ... are to be interpreted and
+      formatted. Each letter in the format string F consumes one of the given
+      values. Only values of type number or string are accepted. pack returns
+      a (binary) string containing the values packed as described in F. The
+      letter codes understood by pack are listed in lpack.c (they are inspired
+      by Perl's codes but are not the same). Numbers following letter codes in
+      F indicate repetitions.</p><p>unpack is called as follows: string.unpack(s,F,[init]), where s is
+      a (binary) string containing data packed as if by pack, F is a format
+      string describing what is to be read from s, and the optional init marks
+      where in s to begin reading the values. unpack returns one value per
+      letter in F until F or s is exhausted (the letters codes are the same as
+      for pack, except that numbers following 'A' are interpreted as the
+      number of characters to read into the string, not as
+      repetitions).</p><p>The first value returned by unpack is the next unread position in
+      s, which can be used as the init position in a subsequent call to
+      unpack. This allows you to unpack values in a loop or in several steps.
+      If the position returned by unpack is beyond the end of s, then s has
+      been exhausted; any calls to unpack starting beyond the end of s will
+      always return nil values.</p><p>List of types for F string:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">z</span></dt><dd><p>zero-terminated string</p></dd><dt><span class="term">p</span></dt><dd><p>string preceded by length byte</p></dd><dt><span class="term">P</span></dt><dd><p>string preceded by length word</p></dd><dt><span class="term">a</span></dt><dd><p>string preceded by length size_t</p></dd><dt><span class="term">A</span></dt><dd><p>string</p></dd><dt><span class="term">f</span></dt><dd><p>float</p></dd><dt><span class="term">d</span></dt><dd><p>double</p></dd><dt><span class="term">n</span></dt><dd><p>Lua number</p></dd><dt><span class="term">c</span></dt><dd><p>char</p></dd><dt><span class="term">b</span></dt><dd><p>byte = unsigned char</p></dd><dt><span class="term">h</span></dt><dd><p>short = word</p></dd><dt><span class="term">H</span></dt><dd><p>unsigned short</p></dd><dt><span class="term">i</span></dt><dd><p>int</p></dd><dt><span class="term">I</span></dt><dd><p>unsigned int</p></dd><dt><span class="term">l</span></dt><dd><p>long</p></dd><dt><span class="term">L</span></dt><dd><p>unsigned long</p></dd><dt><span class="term">&lt;</span></dt><dd><p>little endian</p></dd><dt><span class="term">&gt;</span></dt><dd><p>big endian</p></dd><dt><span class="term">=</span></dt><dd><p>native endian</p></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp1400314852"></a>Example</h2></div></div></div><p></p><div class="example"><a id="idp1400315364"></a><p class="title"><strong>Example 7.2. Variables doesn't clear in new passes of the compiler</strong></p><div class="example-contents"><pre class="programlisting">    LUA PASS1
+       v = 1
+    ENDLUA
+
+    LUA PASS2
+       print (v)
+-- out to console: 1
+       v++
+    ENDLUA
+
+    LUA PASS3
+       print (v)
+-- out to console: 2
+    ENDLUA</pre></div></div><p><br class="example-break" /></p><div class="example"><a id="idp1400316308"></a><p class="title"><strong>Example 7.3. To generate some code you need to generate it in all
+          passes</strong></p><div class="example-contents"><pre class="programlisting">    LUA ALLPASS
+        _pl("ClearScreen LD (.savesp+1),SP")
+        _pc("LD SP,16384+6144")
+        _pc("LD HL,0")
+        for i = 32768, 38912, 2 do
+            _pc("PUSH HL")
+        end
+        _pl(".savesp: LD SP,0")
+        _pc("RET")
+    ENDLUA</pre></div></div><p><br class="example-break" /></p><div class="example"><a id="idp1400317340"></a><p class="title"><strong>Example 7.4. Declare function and use it</strong></p><div class="example-contents"><pre class="programlisting">     LUA
+         function savetape_mytype(filename, startaddress)
+             local fp
+             fp = assert(io.open(fname, "wb"))
+             for i = 16384, 32767, 4 do
+                 assert(fp:write( string.pack("bbbb", 
+                                sj.get_byte(i), 
+                                sj.get_byte(i+1), 
+                                sj.get_byte(i+2), 
+                                sj.get_byte(i+3)) ))
+             end
+             assert(fp:flush())
+             assert(fp:close())
+         end
+     ENDLUA
+
+ ;somewhere in your program
+     LUA
+         savetape_mytype("tapefiles/myprogram.tape", _c("StartGameLabel"))
+     ENDLUA</pre></div></div><p><br class="example-break" /></p><div class="example"><a id="idp1400318708"></a><p class="title"><strong>Example 7.5. Simple sample :)</strong></p><div class="example-contents"><pre class="programlisting">	LUA
+-- Function reads number from file &lt;fname&gt;, increases it, creates define "BUILD" with the number and saves the number to &lt;fname&gt;.
+-- With this function you can control count of compilations.
+	function increase_build(fname)
+		local fp
+		local build
+		fp = assert(io.open(fname, "rb"))
+		build = tonumber(fp:read("*all"))
+		assert(fp:close())
+		if type(build) == "nil" then
+		    build = 0
+		end
+		build = build + 1;
+		sj.insert_define("BUILD", build)
+		fp = assert(io.open(fname, "wb"))
+		assert(fp:write( build ))
+		assert(fp:flush())
+		assert(fp:close())
+	end
+
+-- Before using you must create empty file "build.txt"!
+	increase_build("build.txt")
+	
+-- Creates define "TIME" with current time
+	sj.insert_define("TIME", '"' .. os.date("%Y-%m-%d %H:%M:%S") .. '"')
+	ENDLUA
+	
+; print to console our time and build number
+	DISPLAY "Build time: ", TIME
+	DISPLAY "Build number: ", /D, BUILD</pre></div></div><p><br class="example-break" /></p><p></p><p></p></div></div></div></body></html>
