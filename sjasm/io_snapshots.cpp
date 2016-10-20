@@ -103,33 +103,33 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	}
 
 	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
-		if (fwrite(Device->GetPage(1)->RAM, 1, Device->GetPage(1)->Size, ff) != Device->GetPage(1)->Size) {
+		if ((aint) fwrite(Device->GetPage(1)->RAM, 1, Device->GetPage(1)->Size, ff) != Device->GetPage(1)->Size) {
 			Error("Write error (disk full?)", fname, CATCHALL);
 			fclose(ff);
 			return 0;
 		}
-		if (fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
+		if ((aint) fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
 			Error("Write error (disk full?)", fname, CATCHALL);
 			fclose(ff);
 			return 0;
 		}
-		if (fwrite(Device->GetPage(3)->RAM, 1, Device->GetPage(3)->Size, ff) != Device->GetPage(3)->Size) {
+		if ((aint) fwrite(Device->GetPage(3)->RAM, 1, Device->GetPage(3)->Size, ff) != Device->GetPage(3)->Size) {
 			Error("Write error (disk full?)", fname, CATCHALL);
 			fclose(ff);
 			return 0;
 		}
 	} else {
-		if (fwrite(Device->GetPage(5)->RAM, 1, Device->GetPage(5)->Size, ff) != Device->GetPage(5)->Size) {
+		if ((aint) fwrite(Device->GetPage(5)->RAM, 1, Device->GetPage(5)->Size, ff) != Device->GetPage(5)->Size) {
 			Error("Write error (disk full?)", fname, CATCHALL);
 			fclose(ff);
 			return 0;
 		}
-		if (fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
+		if ((aint) fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
 			Error("Write error (disk full?)", fname, CATCHALL);
 			fclose(ff);
 			return 0;
 		}
-		if (fwrite(Device->GetPage(Device->GetSlot(3)->Page->Number)->RAM, 1, Device->GetPage(0)->Size, ff) != Device->GetPage(0)->Size) {
+		if ((aint) fwrite(Device->GetPage(Device->GetSlot(3)->Page->Number)->RAM, 1, Device->GetPage(0)->Size, ff) != Device->GetPage(0)->Size) {
 			Error("Write error (disk full?)", fname, CATCHALL);
 			fclose(ff);
 			return 0;
@@ -162,7 +162,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	} else {
 		for (aint i = 0; i < 8; i++) {
 			if (i != Device->GetSlot(3)->Page->Number && i != 2 && i != 5) {
-				if (fwrite(Device->GetPage(i)->RAM, 1, Device->GetPage(i)->Size, ff) != Device->GetPage(i)->Size) {
+				if ((aint) fwrite(Device->GetPage(i)->RAM, 1, Device->GetPage(i)->Size, ff) != Device->GetPage(i)->Size) {
 					Error("Write error (disk full?)", fname, CATCHALL);
 					fclose(ff);
 					return 0;

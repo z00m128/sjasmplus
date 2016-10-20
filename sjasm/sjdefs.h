@@ -101,7 +101,7 @@ extern "C" {
 #define LABTABSIZE 32768
 #define FUNTABSIZE 4096
 #endif
-#define aint unsigned long
+#define aint long
 
 // include all headers
 extern "C" {

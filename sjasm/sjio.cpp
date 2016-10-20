@@ -218,10 +218,10 @@ void WriteDest() {
 		return;
 	}
 	destlen += WBLength;
-	if (FP_Output != NULL && fwrite(WriteBuffer, 1, WBLength, FP_Output) != WBLength) {
+	if (FP_Output != NULL && (aint) fwrite(WriteBuffer, 1, WBLength, FP_Output) != WBLength) {
 		Error("Write error (disk full?)", 0, FATAL);
 	}
-	if (FP_RAW != NULL && fwrite(WriteBuffer, 1, WBLength, FP_RAW) != WBLength) {
+	if (FP_RAW != NULL && (aint) fwrite(WriteBuffer, 1, WBLength, FP_RAW) != WBLength) {
 		Error("Write error (disk full?)", 0, FATAL);
 	}
 	WBLength = 0;
@@ -1190,7 +1190,7 @@ int SaveRAM(FILE* ff, int start, int length) {
 			} else {
 				save = S->Size - (start - S->Address);
 			}
-			if (fwrite(S->Page->RAM + (start - S->Address), 1, save, ff) != save) {
+			if ((aint) fwrite(S->Page->RAM + (start - S->Address), 1, save, ff) != save) {
 				return 0;
 			}
 			length -= save;
