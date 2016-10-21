@@ -77,7 +77,7 @@ static void *ll_load (lua_State *L, const char *path) {
 
 
 static lua_CFunction ll_sym (lua_State *L, void *lib, const char *sym) {
-  lua_CFunction f = (lua_CFunction)dlsym(lib, sym);
+  lua_CFunction f = __extension__ (lua_CFunction)dlsym(lib, sym);
   if (f == NULL) lua_pushstring(L, dlerror());
   return f;
 }
