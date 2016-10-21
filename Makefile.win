@@ -69,7 +69,7 @@ all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS)
 	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS)
 
 install:
-	$(CREATEDIR) $(PREFIX)\bin
+	if not exist "$(PREFIX)" $(CREATEDIR) $(PREFIX)\bin
 	$(INSTALL) $(EXE) $(PREFIX)\bin
 
 uninstall:
