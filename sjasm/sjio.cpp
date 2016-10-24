@@ -1290,7 +1290,7 @@ unsigned char MemGetByte(unsigned int address) {
 	CDeviceSlot* S;
 	for (aint i=0;i<Device->SlotsCount;i++) {
 		S = Device->GetSlot(i);
-		if (address >= S->Address  && address < S->Address + S->Size) {
+		if (address >= (unsigned int)S->Address && address < (unsigned int)(S->Address + S->Size)) {
 			return S->Page->RAM[address - S->Address];
 		}
 	}
