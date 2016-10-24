@@ -31,8 +31,12 @@
 extern CFunctionTable DirectivesTable;
 void InsertDirectives();
 
+#ifdef USE_LUA
+
 bool LuaSetPage(aint n);
 bool LuaSetSlot(aint n);
+
+#endif //USE_LUA
 
 //eof direct.h
 

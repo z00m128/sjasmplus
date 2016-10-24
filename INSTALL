@@ -1,0 +1,43 @@
+Installation Instructions
+*************************
+
+Copyright (C) 1994-1996, 1999-2002, 2004-2013 Free Software Foundation,
+Inc.
+
+   Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without warranty of any kind.
+
+Build Dependencies
+==================
+
+To successfully build and install this application you need to have cmake 
+with minimal version 2.8.12 including FindLua.cmake module.
+
+For Lua scripting you need Lua and Tolua++ libraries for development.
+
+Basic Installation
+==================
+
+Extract tarball and run following set of commands:
+
+	mkdir build 
+	cd build
+	cmake -DCMAKE_BUILD_TYPE=Release ..
+	make
+	make install
+
+- for disablin of LUA scripting support add following option:
+
+	-DENABLE_LUA=OFF 
+
+	E.g: cmake -DENABLE_LUA=OFF ..
+
+Binary sjasmplus file will be placed in /usr/bin by default.
+
+To change install directory prefix add following option with specified prefix:
+
+	-DCMAKE_INSTALL_PREFIX:PATH=/usr/local
+
+	e.g: cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..

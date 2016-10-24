@@ -123,6 +123,8 @@ long GetTickCount() {
 
 #endif
 
+#ifdef USE_LUA
+
 void LuaShellExec(char *command) {
 #ifdef UNDER_CE
 	//_wsystem(_towchar(command));
@@ -149,5 +151,6 @@ void LuaShellExec(char *command) {
 #endif
 #endif
 }
+#endif //USE_LUA
 
 //eof support.cpp

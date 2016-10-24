@@ -73,6 +73,8 @@ using std::stack;
 #include <ctype.h>
 #include <math.h>
 
+#ifdef USE_LUA
+
 #ifdef UNDER_CE
 extern "C" {
 #include "lua.h"
@@ -88,6 +90,8 @@ extern "C" {
 #include "tolua++.h"
 }
 #endif
+
+#endif //USE_LUA
 
 // global defines
 #define LINEMAX 2048
