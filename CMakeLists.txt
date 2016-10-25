@@ -8,8 +8,10 @@ cmake_minimum_required(VERSION 3.1.0)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 project(sjasmplus)
-set(LUA_LOCAL_LIBRARY "lua5.1")
-set(TOLUA++_LOCAL_LIBRARY "tolua++")
+set(MY_LUA_INCLUDE_DIR "lua5.1")
+set(MY_LUA_LIBRARY "lua5.1")
+set(MY_TOLUA++_INCLUDE_DIR "tolua++")
+set(MY_TOLUA++_LIBRARY "tolua++")
 
 set(SOURCES 
 	sjasm/devices.cpp
@@ -36,27 +38,47 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 
 option(ENABLE_LUA "Enable LUA scripting support" ON)
+option(SYSTEM_LUA "Use system LUA and Tolua++ package" OFF)
 
 if(ENABLE_LUA)
-	message(STATUS "${PROJECT_NAME} - Looking for LUA and Tolua++")
-	find_package(Lua51)
-	find_package(Tolua++)
+	message(STATUS "Looking for Lua and Tolua++")
+	message(STATUS "Looking for Tolua++")
 
-	if(LUA51_FOUND AND TOLUA++_FOUND)
-		message(STATUS "${PROJECT_NAME} - Looking for LUA and Tolua++ - system packages enabled")
-	else(LUA51_FOUND AND TOLUA++_FOUND)
-		add_subdirectory(${LUA_LOCAL_LIBRARY})
-		add_subdirectory(${TOLUA++_LOCAL_LIBRARY})	
-		set(LUA_INCLUDE_DIR ${LUA_LOCAL_LIBRARY})
-		set(TOLUA++_INCLUDE_DIR ${TOLUA++_LOCAL_LIBRARY})
-		set(LUA_LIBRARY ${TOLUA++_LOCAL_LIBRARY})
-		set(TOLUA++_LIBRARY ${TOLUA++_LOCAL_LIBRARY})
+	if(SYSTEM_LUA)
+		find_package(Tolua++)
+	endif(SYSTEM_LUA)
+
+	if(TOLUA++_FOUND)
+		message(STATUS "Looking for Tolua++ - found")
+	else(TOLUA++_FOUND)
+		message(STATUS "Looking for Tolua++ - using local")
+		set(TOLUA++_LIBRARY ${MY_TOLUA++_LIBRARY})
+		set(TOLUA++_INCLUDE_DIR ${MY_TOLUA++_INCLUDE_DIR})
+		add_subdirectory(${TOLUA++_INCLUDE_DIR})	
 		target_include_directories(
-			${LUA_INCLUDE_DIR} PUBLIC include
 			${TOLUA++_INCLUDE_DIR} PUBLIC include
 			)
-		message(STATUS "${PROJECT_NAME} - Looking for LUA and Tolua++ - local packages enabled")
-	endif(LUA51_FOUND AND TOLUA++_FOUND)
+		include_directories(${TOLUA++_INCLUDE_DIR})
+	endif(TOLUA++_FOUND)
+
+	message(STATUS "Looking for Lua 5.1")
+
+	if(SYSTEM_LUA)
+		find_package(Lua51)
+	endif(SYSTEM_LUA)
+
+	if(LUA51_FOUND)
+		message(STATUS "Looking for Lua 5.1 - found: ${LUA_LIBRARIES}")
+	else(LUA51_FOUND)
+		message(STATUS "Looking for Lua 5.1 - using local")
+		set(LUA_LIBRARY ${MY_LUA_LIBRARY})
+		set(LUA_INCLUDE_DIR ${MY_LUA_INCLUDE_DIR})
+		add_subdirectory(${LUA_INCLUDE_DIR})
+		target_include_directories(
+			${LUA_INCLUDE_DIR} PUBLIC include
+		)
+		include_directories(${LUA_INCLUDE_DIR})
+	endif(LUA51_FOUND)
 
 	list(APPEND SOURCES 
 		sjasm/lua_lpack.c
@@ -70,14 +92,11 @@ if(ENABLE_LUA)
 	elseif(CYGWIN)
 		add_definitions(-DLUA_USE_LINUX)
 	elseif(WIN32)
-		set(PROJECT_NAME "sjasmplus.exe")
 		add_definitions(-DLUA_USE_WINDOWS)
 	endif()
 endif(ENABLE_LUA)
 
 include_directories(sjasm)
-include_directories(${TOLUA++_INCLUDE_DIR})
-include_directories(${LUA_INCLUDE_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
@@ -92,7 +111,7 @@ if(NOT WIN32)
 	if(LIBDL_FOUND) 
 	target_link_libraries(
 		${PROJECT_NAME} 
-		${LIBDL_LIBRARY}
+		${LIBDL_LIBRARIES}
 	)
 	endif(LIBDL_FOUND)
 endif()

@@ -20,8 +20,20 @@ set(TOLUA_SOURCES
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wabi -pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wabi -pedantic")
 
-include_directories("../lua5.1")
+option(SYSTEM_LUA "Use system LUA and Tolua++ package" OFF)
+
+if(SYSTEM_LUA)
+	find_package(Lua51)
+endif(SYSTEM_LUA)
+
+if(LUA51_FOUND)
+	message(STATUS "Local ${PROJECT_NAME} - Looking for Lua 5.1 - found")
+else(LUA51_FOUND)
+	message(STATUS "Local ${PROJECT_NAME} - Looking for Lua 5.1 - using local")
+	include_directories("../lua5.1")
+	set(LUA_LIBRARY "lua5.1")
+endif(LUA51_FOUND)
 
 add_library(tolua++ ${TOLUA_SOURCES})
-target_link_libraries(tolua++ lua5.1)
+target_link_libraries(tolua++ ${LUA_LIBRARY})
 target_include_directories(tolua++ PUBLIC include)
