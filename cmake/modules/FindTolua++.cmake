@@ -24,7 +24,7 @@ else()
 		message(STATUS "Found library tolua++: ${TOLUA++_LIBRARY}")
 	else()
 		set(TOLUA++_FOUND false)
-		message(FATAL_ERROR "Could not find library or program tolua++")
+		message(STATUS "Could not find library or program tolua++")
 	endif()
 
 	mark_as_advanced(TOLUA++_INCLUDE_DIR AND TOLUA++_LIBRARY AND TOLUA++_APP)

@@ -20,5 +20,8 @@ set(TOLUA_SOURCES
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wabi -pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wabi -pedantic")
 
+include_directories("../lua5.1")
+
 add_library(tolua++ ${TOLUA_SOURCES})
+target_link_libraries(tolua++ lua5.1)
 target_include_directories(tolua++ PUBLIC include)
