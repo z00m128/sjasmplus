@@ -77,7 +77,6 @@ if(ENABLE_LUA)
 		target_include_directories(
 			${LUA_INCLUDE_DIR} PUBLIC include
 		)
-		include_directories(${LUA_INCLUDE_DIR})
 	endif(LUA51_FOUND)
 
 	list(APPEND SOURCES 
