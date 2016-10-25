@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -193,7 +193,7 @@ void Warning(const char* fout, const char* bd, int type) {
 	DefineTable.Replace("_WARNINGS", count);
 
 	delete[] count;
-	
+
 	if (pass > LASTPASS) {
 		SPRINTF1(ep, LINEMAX2, "warning: %s", fout);
 	} else {
@@ -205,7 +205,7 @@ void Warning(const char* fout, const char* bd, int type) {
 		} else {
 			ln = CurrentLocalLine;
 		}
-#else 
+#else
 		ln = CurrentLocalLine;
 #endif //USE_LUA
 		SPRINTF3(ep, LINEMAX2, "%s(%d): warning: %s", filename, ln, fout);
@@ -316,11 +316,11 @@ void PrintHEXAlt(char*& p, aint h) {
 	aint hh = h&0xffffffff;
 	if (hh >> 28 != 0) {
 		*(p++) = hd2[hh >> 28];
-	} 
+	}
 	hh &= 0xfffffff;
 	if (hh >> 24 != 0) {
 		*(p++) = hd2[hh >> 24];
-	} 
+	}
 	hh &= 0xffffff;
 	if (hh >> 20 != 0) {
 		*(p++) = hd2[hh >> 20];
@@ -403,8 +403,8 @@ void ListFile() {
 		if (listmacro) {
 			STRCAT(pp, LINEMAX2, ">");
 		}
-		STRCAT(pp, LINEMAX2, line); 
-		fputs(pline, FP_ListingFile); 
+		STRCAT(pp, LINEMAX2, line);
+		fputs(pline, FP_ListingFile);
 		listbytes3(pad);
 	}
 	epadres = CurAddress;
@@ -517,7 +517,7 @@ void CheckPage() {
 			}
 		}
 	}
-	
+
 	Warning("Error in CheckPage(). Please, contact with the author of this program.", 0, FATAL);
 	ExitASM(1);
 }
@@ -560,7 +560,7 @@ void Emit(int byte) {
 					_COUT CurAddress _ENDL;
 				}*/
 				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-					++CurAddress; 
+					++CurAddress;
 					CheckPage();
 					return;
 				}
@@ -619,10 +619,10 @@ void EmitBlock(aint byte, aint len, bool nulled) {
 	}
 	while (len--) {
 		if (pass == LASTPASS) {
-			WriteBuffer[WBLength++] = (char) byte; 
+			WriteBuffer[WBLength++] = (char) byte;
 			if (WBLength == DESTBUFLEN) {
 				WriteDest();
-			} 
+			}
 			/* (begin add) */
 			if (DeviceID) {
 				if (PseudoORG) {
@@ -741,10 +741,10 @@ void BinIncFile(char* fname, int offset, int len) {
 		}
 		while (len--) {
 			if (pass == LASTPASS) {
-				WriteBuffer[WBLength++] = *bp; 
+				WriteBuffer[WBLength++] = *bp;
 				if (WBLength == DESTBUFLEN) {
 					WriteDest();
-				} 
+				}
 				if (DeviceID) {
 					if (PseudoORG) {
 						if (CurAddress >= 0x10000) {
@@ -792,7 +792,7 @@ void BinIncFile(char* fname, int offset, int len) {
 				Error("Read error", fname, FATAL);
 			}
 			if (pass == LASTPASS) {
-				WBLength = res; 
+				WBLength = res;
 				if (DeviceID) {
 					leng = 0;
 					while (leng != res) {
@@ -845,7 +845,7 @@ void OpenFile(char* nfilename) {
 	char ofilename[LINEMAX];
 	char* oCurrentDirectory, * fullpath;
 	TCHAR* filenamebegin;
-	
+
 	if (++IncludeLevel > 20) {
 		Error("Over 20 files nested", 0, FATAL);
 	}
@@ -853,7 +853,7 @@ void OpenFile(char* nfilename) {
 	if (*nfilename == '<') {
 		nfilename++;
 	}
-	
+
 	if (!FOPEN_ISOK(FP_Input, fullpath, "r")) {
 		free(fullpath);
 		Error("Error opening file", nfilename, FATAL);
@@ -876,7 +876,7 @@ void OpenFile(char* nfilename) {
 	// Free memory
 	free(fullpath);
 
-	RL_Readed = 0; rlpbuf = rlbuf; 
+	RL_Readed = 0; rlpbuf = rlbuf;
 	ReadBufLine(true);
 
 	fclose(FP_Input);
@@ -995,7 +995,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 						CurrentGlobalLine++;
 						rlnewline = false;
 					}
-					rlcolon = true; 
+					rlcolon = true;
 					if (Parse) {
 						ParseLine();
 					} else {
@@ -1030,7 +1030,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				} else if (*rlpbuf == ';' && !rlsquotes && !rldquotes) {
 					rlcomment = true;
 				} else if (*rlpbuf == '/' && *(rlpbuf + 1) == '/' && !rlsquotes && !rldquotes) {
-					rlcomment = true;  
+					rlcomment = true;
 					*(rlppos++) = *(rlpbuf++); RL_Readed--;
 				} else if (*rlpbuf <= ' ' && !rlsquotes && !rldquotes && !rlcomment) {
 					rlspace = true;
@@ -1302,7 +1302,7 @@ unsigned char MemGetByte(unsigned int address) {
 	CDeviceSlot* S;
 	for (aint i=0;i<Device->SlotsCount;i++) {
 		S = Device->GetSlot(i);
-		if (address >= S->Address  && address < S->Address + S->Size) {
+		if (address >= (unsigned int)S->Address  && address < (unsigned int)S->Address + (unsigned int)S->Size) {
 			return S->Page->RAM[address - S->Address];
 		}
 	}
@@ -1310,7 +1310,7 @@ unsigned char MemGetByte(unsigned int address) {
 	Warning("Error with MemGetByte!", 0);
 	ExitASM(1);
 	return 0;
-	
+
 	/*// $4000-$7FFF
 	if (address < 0x8000) {
 		return MemoryRAM[address - 0x4000];

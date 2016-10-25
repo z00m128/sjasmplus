@@ -13,7 +13,7 @@ set(MY_LUA_LIBRARY "lua5.1")
 set(MY_TOLUA++_INCLUDE_DIR "tolua++")
 set(MY_TOLUA++_LIBRARY "tolua++")
 
-set(SOURCES 
+set(SOURCES
 	sjasm/devices.cpp
 	sjasm/directives.cpp
 	sjasm/io_snapshots.cpp
@@ -54,11 +54,10 @@ if(ENABLE_LUA)
 		message(STATUS "Looking for Tolua++ - using local")
 		set(TOLUA++_LIBRARY ${MY_TOLUA++_LIBRARY})
 		set(TOLUA++_INCLUDE_DIR ${MY_TOLUA++_INCLUDE_DIR})
-		add_subdirectory(${TOLUA++_INCLUDE_DIR})	
-		target_include_directories(
-			${TOLUA++_INCLUDE_DIR} PUBLIC include
-			)
-		include_directories(${TOLUA++_INCLUDE_DIR})
+		add_subdirectory(${TOLUA++_INCLUDE_DIR})
+		target_include_directories(${MY_TOLUA++_LIBRARY} PUBLIC
+            ${TOLUA++_INCLUDE_DIR}
+        )
 	endif(TOLUA++_FOUND)
 
 	message(STATUS "Looking for Lua 5.1")
@@ -74,19 +73,20 @@ if(ENABLE_LUA)
 		set(LUA_LIBRARY ${MY_LUA_LIBRARY})
 		set(LUA_INCLUDE_DIR ${MY_LUA_INCLUDE_DIR})
 		add_subdirectory(${LUA_INCLUDE_DIR})
-		target_include_directories(
-			${LUA_INCLUDE_DIR} PUBLIC include
+
+		target_include_directories(${MY_LUA_LIBRARY} PUBLIC
+            ${LUA_INCLUDE_DIR}
 		)
 	endif(LUA51_FOUND)
 
-	list(APPEND SOURCES 
+	list(APPEND SOURCES
 		sjasm/lua_lpack.c
 		sjasm/lua_sjasm.cpp
 	)
 
 	add_definitions(-DUSE_LUA)
 
-	if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux") 
+	if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 		add_definitions(-DLUA_USE_LINUX)
 	elseif(CYGWIN)
 		add_definitions(-DLUA_USE_LINUX)
@@ -100,16 +100,16 @@ include_directories(sjasm)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(
-	${PROJECT_NAME} 
-	${LUA_LIBRARY} 
+	${PROJECT_NAME}
+	${LUA_LIBRARY}
 	${TOLUA++_LIBRARY}
 )
 
 if(NOT WIN32)
 	find_package(LibDL)
-	if(LIBDL_FOUND) 
+	if(LIBDL_FOUND)
 	target_link_libraries(
-		${PROJECT_NAME} 
+		${PROJECT_NAME}
 		${LIBDL_LIBRARIES}
 	)
 	endif(LIBDL_FOUND)
