@@ -41,6 +41,8 @@ set(LUA_SOURCES
 	lzio.c
 )
 
+add_definitions(-DLUA_USE_LINUX)
+
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wabi -pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wabi -pedantic")
 
