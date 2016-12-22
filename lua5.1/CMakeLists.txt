@@ -41,7 +41,13 @@ set(LUA_SOURCES
 	lzio.c
 )
 
-add_definitions(-DLUA_USE_LINUX)
+if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+		add_definitions(-DLUA_USE_LINUX)
+	elseif(CYGWIN)
+		add_definitions(-DLUA_USE_LINUX)
+	elseif(WIN32)
+		add_definitions(-DLUA_USE_WINDOWS)
+endif()
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wabi -pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wabi -pedantic")
