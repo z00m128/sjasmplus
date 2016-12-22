@@ -1,26 +1,44 @@
 Installation Instructions
 *************************
 
-Copyright (C) 1994-1996, 1999-2002, 2004-2013 Free Software Foundation,
-Inc.
+Requirements
+============
+- Linux / Unix / MacOS / BSD with bash compatible shell 
+- all common system progs (grep, cat, etc...)
+- all common build requirements (libc, libstdc++, g++, make, etc...)
+- optionally cmake
 
-   Copying and distribution of this file, with or without modification,
-are permitted in any medium without royalty provided the copyright
-notice and this notice are preserved.  This file is offered as-is,
-without warranty of any kind.
+or
 
-Build Dependencies
-==================
+- complete MinGW environment for MS Windows, optionally CMake installed into MinGW bin directory
 
-To successfully build and install this application you need to have cmake 
-with minimal version 2.8.12 including FindLua.cmake module.
+Compilation is tested with GCC 5.3.0, it should run also with older versions, but warnings or errors may occur.
 
-For Lua scripting you need Lua and Tolua++ libraries for development.
+1. Make / Make Install method for Linux / Unix / MacOS / BSD
+************************************************************
+- download sjasmplus tarball archive
+- extract tarball archive and go to extracted folder
+- edit install path PREFIX in file 'Makefile' according your preferences (default /usr/local)
+- run make clean
+- run make
+- run make install as root or use sudo
 
-Basic Installation
-==================
 
-Extract tarball and run following set of commands:
+2. Make / Make Install method for MS Windows
+********************************************
+- download sjasmplus tarball archive
+- extract tarball archive and go to extracted folder
+- delete or rename file 'Makefile'
+- edit install path PREFIX in file 'Makefile.win' according your preferences (default c:\mingw\usr\local)
+- rename file 'Makefile.win' to 'Makefile'
+- run mingw32-make clean
+- run mingw32-make
+- run mingw32-make install
+
+
+3. CMAKE method for Linux / Unix / MacOS / BSD
+**********************************************
+Extract tarball archive, go to extracted folder and run following set of commands:
 
 	mkdir build 
 	cd build
@@ -28,7 +46,9 @@ Extract tarball and run following set of commands:
 	make
 	make install
 
-- for disablin of LUA scripting support add following option:
+You can have external Lua and ToLua, it is detected automatically. If not, internal version is used.
+
+For disabling of LUA scripting support add following option:
 
 	-DENABLE_LUA=OFF 
 
@@ -41,3 +61,20 @@ To change install directory prefix add following option with specified prefix:
 	-DCMAKE_INSTALL_PREFIX:PATH=/usr/local
 
 	e.g: cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
+
+
+4. MS Windows and MinGW with cmake
+**********************************
+- extract tarball archive and go to the extracted folder
+- delete or rename file 'Makefile'
+- rename file 'Makefile.win' to 'Makefile'
+- create 'build' subdirectory and enter to it
+- run 'cmake-gui' tool
+- click 'Browse Source...' button, select extracted tarball folder
+- click 'Browse Build...' button, select the 'build' folder
+- click 'Configure' button, select 'MinGW Makefiles', select 'Use default native compilers'
+- click 'Finish' and wait until configuration is done
+- change CMAKE_INSTALL_PREFIX install path according your peferences (click on path)
+- click 'Generate'
+
+Enjoy!
