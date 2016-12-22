@@ -13,28 +13,23 @@ or
 
 Compilation is tested with GCC 5.3.0, it should run also with older versions, but warnings or errors may occur.
 
-Make / Make Install method for Linux / Unix / MacOS / BSD
+Default method for Linux / Unix / MacOS / BSD
 =========================================================
 
-- download sjasmplus tarball archive
-- extract tarball archive and go to extracted folder
-- edit install path PREFIX in file 'Makefile' according your preferences (default /usr/local)
-- run make clean
-- run make
-- run make install as root or use sudo
+Extract tarball archive and go to extracted folder. Edit install path PREFIX in file 'Makefile' according your preferences (default /usr/local). Run following commands:
 
-Make / Make Install method for MS Windows
+	make clean
+	run make
+	run make install as root or use sudo
+
+Default method for MS Windows
 =========================================
 
-- download sjasmplus tarball archive
-- extract tarball archive and go to extracted folder
-- delete or rename file 'Makefile'
-- edit install path PREFIX in file 'Makefile.win' according your preferences (default c:\mingw\usr\local)
-- rename file 'Makefile.win' to 'Makefile'
-- run mingw32-make clean
-- run mingw32-make
-- run mingw32-make install
+Extract tarball archive and go to extracted folder. Delete or rename file 'Makefile'. Edit install path PREFIX in file 'Makefile.win' according your preferences (default c:\mingw\usr\local). Add '-static' parameter to CXXFLAGS if you need standalone Windows executable (without MinGW dependency). Rename file 'Makefile.win' to 'Makefile', then run following commands:
 
+	mingw32-make clean
+	mingw32-make
+	mingw32-make install
 
 CMAKE method for Linux / Unix / MacOS / BSD
 ===========================================
@@ -64,19 +59,16 @@ To change install directory prefix add following option with specified prefix:
 	e.g: cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
 
 
-MS Windows and MinGW with cmake
-===============================
+CMake method for MS Windows
+===========================
 
-- extract tarball archive and go to the extracted folder
-- delete or rename file 'Makefile'
-- rename file 'Makefile.win' to 'Makefile'
-- create 'build' subdirectory and enter to it
-- run 'cmake-gui' tool
-- click 'Browse Source...' button, select extracted tarball folder
-- click 'Browse Build...' button, select the 'build' folder
-- click 'Configure' button, select 'MinGW Makefiles', select 'Use default native compilers'
-- click 'Finish' and wait until configuration is done
-- change CMAKE_INSTALL_PREFIX install path according your peferences (click on path)
-- click 'Generate'
+Extract tarball archive and go to the extracted folder. Delete or rename file 'Makefile'. Rename file 'Makefile.win' to 'Makefile'. Create 'build' subdirectory and enter to it. Run following command:
+
+	cmake-gui
+	
+Click 'Browse Source...' button, select extracted tarball folder. Click 'Browse Build...' button, select the 'build' folder. Click 'Configure' button, select 'MinGW Makefiles', select 'Use default native compilers'. Click 'Finish' and wait until configuration is done. Change CMAKE_INSTALL_PREFIX install path according your peferences (click on path). Click 'Generate'. Run 'cmd.exe', enter the build directory and run following commands:
+
+	make
+	make install	
 
 Enjoy!
