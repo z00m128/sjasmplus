@@ -19,8 +19,8 @@ Default method for Linux / Unix / MacOS / BSD
 Extract tarball archive and go to extracted folder. Edit install path PREFIX in file 'Makefile' according your preferences (default /usr/local). Run following commands:
 
 	make clean
-	run make
-	run make install as root or use sudo
+	make
+	make install as root or use sudo
 
 Default method for MS Windows
 =========================================
