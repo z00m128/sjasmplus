@@ -1,8 +1,7 @@
 Installation Instructions
-*************************
+=========================
 
-Requirements
-============
+Requirements:
 - Linux / Unix / MacOS / BSD with bash compatible shell 
 - all common system progs (grep, cat, etc...)
 - all common build requirements (libc, libstdc++, g++, make, etc...)
@@ -14,8 +13,9 @@ or
 
 Compilation is tested with GCC 5.3.0, it should run also with older versions, but warnings or errors may occur.
 
-1. Make / Make Install method for Linux / Unix / MacOS / BSD
-************************************************************
+Make / Make Install method for Linux / Unix / MacOS / BSD
+=========================================================
+
 - download sjasmplus tarball archive
 - extract tarball archive and go to extracted folder
 - edit install path PREFIX in file 'Makefile' according your preferences (default /usr/local)
@@ -23,9 +23,9 @@ Compilation is tested with GCC 5.3.0, it should run also with older versions, bu
 - run make
 - run make install as root or use sudo
 
+Make / Make Install method for MS Windows
+=========================================
 
-2. Make / Make Install method for MS Windows
-********************************************
 - download sjasmplus tarball archive
 - extract tarball archive and go to extracted folder
 - delete or rename file 'Makefile'
@@ -36,8 +36,9 @@ Compilation is tested with GCC 5.3.0, it should run also with older versions, bu
 - run mingw32-make install
 
 
-3. CMAKE method for Linux / Unix / MacOS / BSD
-**********************************************
+CMAKE method for Linux / Unix / MacOS / BSD
+===========================================
+
 Extract tarball archive, go to extracted folder and run following set of commands:
 
 	mkdir build 
@@ -63,8 +64,9 @@ To change install directory prefix add following option with specified prefix:
 	e.g: cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
 
 
-4. MS Windows and MinGW with cmake
-**********************************
+MS Windows and MinGW with cmake
+===============================
+
 - extract tarball archive and go to the extracted folder
 - delete or rename file 'Makefile'
 - rename file 'Makefile.win' to 'Makefile'
