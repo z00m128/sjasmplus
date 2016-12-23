@@ -5,7 +5,7 @@ Requirements:
 - Linux / Unix / MacOS / BSD with bash compatible shell 
 - all common system progs (grep, cat, etc...)
 - all common build requirements (libc, libstdc++, g++, make, etc...)
-- optionally cmake
+- optionally CMake
 
 or
 
@@ -25,7 +25,7 @@ Extract tarball archive and go to extracted folder. Edit install path PREFIX in 
 Default method for MS Windows
 =========================================
 
-Extract tarball archive and go to extracted folder. Delete or rename file 'Makefile'. Edit install path PREFIX in file 'Makefile.win' according your preferences (default c:\mingw\usr\local). Add '-static' parameter to CXXFLAGS if you need standalone Windows executable (without MinGW dependency). Rename file 'Makefile.win' to 'Makefile', then run following commands:
+Extract tarball archive and go to extracted folder. Delete or rename file 'Makefile'. Edit install path PREFIX in file 'Makefile.win' according your preferences (default c:\mingw\usr\local). Add '-static' parameter to CFLAGS if you need standalone Windows executable (without MinGW dependency). Rename file 'Makefile.win' to 'Makefile', then run following commands:
 
 	mingw32-make clean
 	mingw32-make
