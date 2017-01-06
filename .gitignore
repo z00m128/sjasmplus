@@ -31,3 +31,4 @@ sjasmplus
 Makefile
 configure
 build/
+.kdev4/
