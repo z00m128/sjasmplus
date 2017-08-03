@@ -49,6 +49,7 @@ namespace Options {
 	extern bool FakeInstructions;
 
 	extern CStringsList* IncludeDirsList;
+	extern CDefineTable CmdDefineTable;
 
 	//extern EMemoryType MemoryType;
 } // eof namespace Options

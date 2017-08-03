@@ -29,6 +29,9 @@
 #ifndef __SJDEFS
 #define __SJDEFS
 
+// version string
+#define VERSION "1.08-z00m"
+
 // not used
 #define MAXPASSES 3
 

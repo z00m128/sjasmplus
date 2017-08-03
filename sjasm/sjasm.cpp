@@ -58,6 +58,7 @@ namespace Options {
 	bool FakeInstructions = 1;
 
 	CStringsList* IncludeDirsList = 0;
+	CDefineTable CmdDefineTable;
 
 
 } // eof namespace Options
@@ -155,12 +156,12 @@ void InitPass(int p) {
 	ModuleList = NULL;
 	StructureTable.Init();
 	MacroTable.Init();
-	DefineTable.Init();
+	DefineTable = Options::CmdDefineTable;
 	MacroDefineTable.Init();
 
 	// predefined
 	DefineTable.Replace("_SJASMPLUS", "1");
-	DefineTable.Replace("_VERSION", "\"1.07\"");
+	DefineTable.Replace("_VERSION", "\"" VERSION "\"");
 	DefineTable.Replace("_RELEASE", "0");
 	DefineTable.Replace("_ERRORS", "0");
 	DefineTable.Replace("_WARNINGS", "0");
@@ -199,6 +200,9 @@ namespace Options {
 #endif
 		char* p, *ps;
 		char c[LINEMAX];
+
+		CmdDefineTable.Init();
+
 #ifdef UNDER_CE
 		while (argv[i] && *argv[i] == '-') {
 			if (*(argv[i] + 1) == '-') {
@@ -276,6 +280,14 @@ namespace Options {
 				}
 			} else if (*p == 'i' || *p == 'I') {
 				IncludeDirsList = new CStringsList(p+1, IncludeDirsList);
+			} else if (*p == 'D') {
+				if ((ps)&&(ps+1)) {
+					CmdDefineTable.Add(c+1, ps+1, NULL);
+				} else if(c[1]) {
+					CmdDefineTable.Add(c+1, "", NULL);
+				} else {
+					_COUT "No parameters found in " _CMDL argv[i-1] _ENDL;
+				}
 			} else {
 				_COUT "Unrecognized option: " _CMDL c _ENDL;
 			}
@@ -303,15 +315,15 @@ int main(int argc, char **argv) {
 	char buf[MAX_PATH];
 	int base_encoding; /* added */
 	char* p;
-	const char* logo = "SjASMPlus Z80 Cross-Assembler v1.08";
+	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 	int i = 1;
 
 	if (argc == 1) {
 		_COUT logo _ENDL;
-		_COUT "based on code of SjASM by Sjoerd Mastijn / http://www.xl2s.tk /" _ENDL;
-		_COUT "Copyright 2004-2016 by Aprisobal and all other participants /" _ENDL;
-		_COUT "Patches by Antipod / boo_boo / PulkoMandy /" _ENDL;
-		_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m /" _ENDL;
+		_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
+		_COUT "Copyright 2004-2017 by Aprisobal and all other participants" _ENDL;
+		_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
+		_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 		_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 		_COUT "\nOption flags as follows:" _ENDL;
 		_COUT "  --help                   Help information (you see it)" _ENDL;
@@ -332,6 +344,7 @@ int main(int argc, char **argv) {
 		_COUT "  --msg=all                Show all messages (by default)" _ENDL;
 		_COUT "  --fullpath               Show full path to error file" _ENDL;
 		_COUT " Other:" _ENDL;
+		_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
 		_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 		_COUT "  --dirbol                 Enable processing directives from the beginning of line" _ENDL;
 		_COUT "  --nofakes                Disable fake instructions" _ENDL;
