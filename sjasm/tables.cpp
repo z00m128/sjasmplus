@@ -753,14 +753,14 @@ void CDefineTable::Init() {
 	}
 }
 
-void CDefineTable::Add(char* name, char* value, CStringsList* nss/*added*/) {
+void CDefineTable::Add(const char* name, const char* value, CStringsList* nss/*added*/) {
 	if (FindDuplicate(name)) {
 		Error("Duplicate define", name);
 	}
 	defs[(unsigned char)*name] = new CDefineTableEntry(name, value, nss, defs[(unsigned char)*name]);
 }
 
-char* CDefineTable::Get(char* name) {
+char* CDefineTable::Get(const char* name) {
 	CDefineTableEntry* p = defs[(unsigned char)*name];
 	DefArrayList = 0;
 	while (p) {
@@ -775,7 +775,7 @@ char* CDefineTable::Get(char* name) {
 	return NULL;
 }
 
-int CDefineTable::FindDuplicate(char* name) {
+int CDefineTable::FindDuplicate(const char* name) {
 	CDefineTableEntry* p = defs[(unsigned char)*name];
 	while (p) {
 		if (!strcmp(name, p->name)) {
@@ -802,7 +802,7 @@ int CDefineTable::Replace(const char* name, const char* value) {
 	return 1;
 }
 
-int CDefineTable::Remove(char* name) {
+int CDefineTable::Remove(const char* name) {
 	CDefineTableEntry* p = defs[(unsigned char)*name];
 	CDefineTableEntry* p2 = NULL;
 	while (p) {
