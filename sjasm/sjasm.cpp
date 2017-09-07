@@ -322,8 +322,8 @@ int main(int argc, char **argv) {
 		_COUT logo _ENDL;
 		_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
 		_COUT "Copyright 2004-2017 by Aprisobal and all other participants" _ENDL;
-		_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
-		_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
+		//_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
+		//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 		_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 		_COUT "\nOption flags as follows:" _ENDL;
 		_COUT "  --help                   Help information (you see it)" _ENDL;

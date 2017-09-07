@@ -755,7 +755,7 @@ void BinIncFile(char* fname, int offset, int len) {
 						*(MemoryPointer++) = *bp;
 						if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
 							++adrdisp; ++CurAddress;
-							CheckPage(); continue;
+							CheckPage(); bp++; continue;
 						}
 					} else {
 						if (CurAddress >= 0x10000) {
@@ -766,7 +766,7 @@ void BinIncFile(char* fname, int offset, int len) {
 						*(MemoryPointer++) = *bp;
 						if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
 							++CurAddress;
-							CheckPage(); continue;
+							CheckPage(); bp++; continue;
 						}
 					}
 				}
