@@ -28,6 +28,7 @@ sjasm/sjio.o
 sjasm/support.o
 sjasm/tables.o
 sjasm/z80.o
+sjasmwin32/sjasmplus.res
 sjasmplus
 Makefile
 configure
