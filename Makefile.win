@@ -9,7 +9,7 @@ CC=$(GCC)
 GPP=g++
 C++=$(GPP)
 
-PREFIX=c:\mingw\usr\local
+PREFIX=c:\mingw\usr\local\bin
 CREATEDIR=mkdir
 INSTALL=copy
 UNINSTALL=del
@@ -20,7 +20,7 @@ SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.1
 SUBDIR_TOLUA=tolua++
 
-CFLAGS=-O2 -Wall -pedantic -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
+CFLAGS=-O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
 CXXFLAGS=$(CFLAGS)
 
 # for Windows (removed -ldl flag)
@@ -69,11 +69,11 @@ all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS)
 	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS)
 
 install:
-	if not exist "$(PREFIX)" $(CREATEDIR) $(PREFIX)\bin
-	$(INSTALL) $(EXE) $(PREFIX)\bin
+	if not exist $(PREFIX) $(CREATEDIR) $(PREFIX)
+	$(INSTALL) $(EXE) $(PREFIX)
 
 uninstall:
-	$(UNINSTALL) $(PREFIX)\bin\$(EXE)
+	$(UNINSTALL) "$(PREFIX)\$(EXE)"
 
 .c.o:
 	$(GCC) $(CFLAGS) -o $@ -c $< 

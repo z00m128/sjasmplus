@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.07 Documentation [03.04.2008]</title>
+  <title>SjASMPlus 1.09 Documentation [07.09.2017]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -103,7 +103,7 @@
 
       <para>Thanks to:<itemizedlist>
           <listitem>
-            <para><emphasis>Kurles/HS/CPU</emphasis> - additional
+            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko</emphasis> - additional
             programming;</para>
           </listitem>
 
@@ -142,9 +142,20 @@
             <para><emphasis>skrju &lt;sq-@mail.ru&gt;</emphasis> - bug
             reporting.</para>
           </listitem>
+          
+          <listitem>
+            <para><emphasis>Tygrys, UB880D, Cizo, mborik, z00m</emphasis> - 
+            compilation errors and warnings clean up, makefiles, testing.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, busy</emphasis> - 
+            bug fix patches, testing.</para>
+          </listitem>
+                    
         </itemizedlist></para>
 
-      <para>And big thanks to all people, who helped me in development of the
+      <para>Big thanks to all people, who helped on development of the
       compiler!</para>
     </section>
 
@@ -152,15 +163,54 @@
       <title><anchor id="feedback" />Feedback</title>
 
       <para>WWW: <ulink
-      url="http://sjasmplus.sourceforge.net">http://sjasmplus.sourceforge.net</ulink></para>
+      url="https://sourceforge.net/projects/sjasmplus/">https://sourceforge.net/projects/sjasmplus/</ulink>  
+      (original Aprisobal's source)</para>
 
-      <para>E-Mail: my@aprisobal.by</para>
+      <para>WWW: <ulink
+      url="https://github.com/z00m128/sjasmplus">https://github.com/z00m128/sjasmplus</ulink> 
+      (newer versions maintained by z00m and others)</para>
+
+
+      <para>E-Mail: my@aprisobal.by, zoom@centrum.sk</para>
     </section>
 
     <section>
       <title>What's new?</title>
 
       <para><variablelist>
+		  
+          <varlistentry>
+            <term>07.09.2017 - 1.09</term>
+
+            <listitem>
+              <para><programlisting>- -D commandline parameter added, inchob / incbin bugfix.</programlisting></para>
+            </listitem>
+          </varlistentry>		  
+		  
+          <varlistentry>
+            <term>23.12.2016 - 1.08</term>
+
+            <listitem>
+              <para><programlisting>- compilation warnings cleanup, CMake installation method added.</programlisting></para>
+            </listitem>
+          </varlistentry>		  
+          
+          <varlistentry>
+            <term>11.10.2016 - 1.07 RC9</term>
+
+            <listitem>
+              <para><programlisting>- some docs added and compilation warnings cleanup.</programlisting></para>
+            </listitem>
+          </varlistentry>          
+          
+          <varlistentry>
+            <term>05.05.2016 - 1.07 RC8</term>
+
+            <listitem>
+              <para><programlisting>- new makefile, compilation errors fixed and some warnings cleanup.</programlisting></para>
+            </listitem>
+          </varlistentry>          
+          
           <varlistentry>
             <term>03.04.2008 - 1.07 Stable</term>
 
@@ -289,14 +339,13 @@
     <section>
       <title>Packages</title>
 
-      <para>You can grab last binaries and sources SourceForge project page:
+      <para>You can grab older (up to v1.07) binaries and sources at SourceForge project page:
       <ulink
-      url="http://sourceforge.net/projects/sjasmplus/">http://sourceforge.net/projects/sjasmplus/</ulink></para>
+      url="https://sourceforge.net/projects/sjasmplus/">https://sourceforge.net/projects/sjasmplus/</ulink></para>
 
       <para>Win32 package has:<itemizedlist>
           <listitem>
-            <para>sjasmplus.exe - the Win32 executable. This is out compiler
-            and we will use it.</para>
+            <para>sjasmplus.exe - the Win32 executable.</para>
           </listitem>
 
           <listitem>
@@ -310,13 +359,23 @@
         </itemizedlist></para>
 
       <para>DOS and FreeBSD versions has same files in their packages.</para>
+      
+      <para>Newer sources (v1.08 onwards) you can get on github project page:
+      <ulink
+      url="https://github.com/z00m128/sjasmplus/">https://github.com/z00m128/sjasmplus/</ulink></para>      
 
-      <para><emphasis>Linux version</emphasis> you can compile using
+      <para><emphasis>Linux, Unix, MacOS and BSD version</emphasis> you can compile using
       <emphasis>GCC</emphasis> and <emphasis>Makefile</emphasis> from sources
       package.</para>
 
-      <para>MacOS X version you can compile using <emphasis>XCode</emphasis>
-      package and included <emphasis>Makefile</emphasis>.</para>
+      <para>Windows binaries you can compile with <emphasis>MinGW</emphasis>
+      environment and included <emphasis>Makefile</emphasis>. Precompiled
+      win32 binary is available on 
+      <ulink
+      url="http://z00m.speccy.cz">http://z00m.speccy.cz</ulink></para>
+      
+      <para>There is an option to use CMake for compilation. 
+      See <emphasis>INSTALL.md</emphasis> file for details.</para>
     </section>
 
     <section>
@@ -343,6 +402,7 @@
   --msg=all                Show all messages (by default)
   --fullpath               Show full path to error file
  Other:
+  -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable processing directives from the beginning of line
   --nofakes                Disable fake instructions
