@@ -1,21 +1,21 @@
 # Makefile for sjasmplus created by Tygrys' hands.
 # install/uninstall features added, CFLAGS and LDFLAGS modification by z00m's hands. [05.05.2016]
 # overall optimization and beautification by mborik's hands. [05.05.2016]
-# MinGW adaptation and icon linking by z00m's hands. [21.10.2016, 08.09.2017] 
-# For build under MinGW delete linux Makefile, then rename Makefile.win to Makefile.
+# MinGW adaptation and icon linking by z00m's hands. [21.10.2016, 08.09.2017]
+# For build under MinGW run `make -f Makefile.win`.
 
-GCC=gcc
+GCC=gcc.exe
 CC=$(GCC)
-GPP=g++
+GPP=g++.exe
 C++=$(GPP)
 
 PREFIX=c:\mingw\usr\local\bin
 CREATEDIR=mkdir
-INSTALL=copy
-UNINSTALL=del
+INSTALL=xcopy
+UNINSTALL=rm -f
+WINDRES=windres.exe --preprocessor "cpp.exe"
 
 EXE=sjasmplus.exe
-RES=sjasmwin32/sjasmplus.res
 
 SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.1
@@ -42,7 +42,7 @@ OBJS=\
 	$(SUBDIR_BASE)/sjio.o \
 	$(SUBDIR_BASE)/support.o \
 	$(SUBDIR_BASE)/tables.o \
-	$(SUBDIR_BASE)/z80.o 
+	$(SUBDIR_BASE)/z80.o
 
 #liblua objects
 LUAOBJS= \
@@ -65,8 +65,12 @@ TOLUAOBJS=\
 	$(SUBDIR_TOLUA)/tolua_push.o \
 	$(SUBDIR_TOLUA)/tolua_to.o
 
+RES=sjasmwin32/sjasmplus.res
 
-all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS)
+
+.PHONY: all clean
+
+all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS) $(RES)
 	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS) $(RES)
 
 install:
@@ -77,14 +81,17 @@ uninstall:
 	$(UNINSTALL) "$(PREFIX)\$(EXE)"
 
 .c.o:
-	$(GCC) $(CFLAGS) -o $@ -c $< 
+	$(GCC) $(CFLAGS) -o $@ -c $<
 
 .cpp.o:
 	$(GPP) $(CFLAGS) -o $@ -c $<
 
+$(RES): sjasmwin32/sjasmplus.mingw.rc
+	$(WINDRES) -i $< -O coff -o $@
+
 clean:
 	$(UNINSTALL) \
-		$(SUBDIR_BASE)\*.o \
-		$(SUBDIR_LUA)\*.o \
-		$(SUBDIR_TOLUA)\*.o \
-		$(EXE) *~
+		$(SUBDIR_BASE)/*.o \
+		$(SUBDIR_LUA)/*.o \
+		$(SUBDIR_TOLUA)/*.o \
+		$(RES) $(EXE) *~

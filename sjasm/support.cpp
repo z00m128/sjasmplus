@@ -82,7 +82,7 @@ int SearchPath(char* oudzp, char* filename, char* whatever, int maxlen, char* ni
 char* strset(char* str, char val) {
 	//non-aligned
 	char* pByte = str;
-	while (((unsigned long)pByte) & 3) {
+	while (((uintptr_t) pByte) & 3) {
 		if (*pByte) {
 			*pByte++ = val;
 		} else {
@@ -143,7 +143,7 @@ void LuaShellExec(char *command) {
 #ifdef WIN32
 
 	WinExec(command, SW_SHOWNORMAL);
-#else	
+#else
 	int ret = system(command);
 	if ( ret == -1 ) {
 		Error("[LUASHELEXEC] Unable to start child process for command", command, CATCHALL);
