@@ -36,6 +36,36 @@
 
 #endif //USE_LUA
 
+void PrintHelp() {
+	_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
+	_COUT "Copyright 2004-2017 by Aprisobal and all other participants" _ENDL;
+	//_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
+	//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
+	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
+	_COUT "\nOption flags as follows:" _ENDL;
+	_COUT "  -h or --help             Help information (you see it)" _ENDL;
+	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
+	_COUT "                           Include path" _ENDL;
+	_COUT "  --lst=<filename>         Save listing to <filename>" _ENDL;
+	_COUT "  --lstlab                 Enable label table in listing" _ENDL;
+	_COUT "  --sym=<filename>         Save symbols list to <filename>" _ENDL;
+	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
+	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
+	_COUT "  --raw=<filename>         Save all output to <filename> ignoring OUTPUT pseudo-ops" _ENDL;
+	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
+	_COUT " Logging:" _ENDL;
+	_COUT "  --nologo                 Do not show startup message" _ENDL;
+	_COUT "  --msg=error              Show only error messages" _ENDL;
+	_COUT "  --msg=all                Show all messages (by default)" _ENDL;
+	_COUT "  --fullpath               Show full path to error file" _ENDL;
+	_COUT " Other:" _ENDL;
+	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
+	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
+	_COUT "  --dirbol                 Enable processing directives from the beginning of line" _ENDL;
+	_COUT "  --nofakes                Disable fake instructions" _ENDL;
+	_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
+}
+
 namespace Options {
 	char SymbolListFName[LINEMAX];
 	char ListingFName[LINEMAX];
@@ -54,6 +84,7 @@ namespace Options {
 	bool IsShowFullPath = 0;
 	bool AddLabelListing = 0;
 	bool HideLogo = 0;
+	bool ShowHelp = 0;
 	bool NoDestinationFile = 0;
 	bool FakeInstructions = 1;
 
@@ -203,21 +234,13 @@ namespace Options {
 
 		CmdDefineTable.Init();
 
-#ifdef UNDER_CE
 		while (argv[i] && *argv[i] == '-') {
 			if (*(argv[i] + 1) == '-') {
 				p = argv[i++] + 2;
 			} else {
 				p = argv[i++] + 1;
 			}
-#else
-		while (argv[i] && *argv[i] == '-') {
-			if (*(argv[i] + 1) == '-') {
-				p = argv[i++] + 2;
-			} else {
-				p = argv[i++] + 1;
-			}
-#endif
+
 			memset(c, 0, LINEMAX); //todo
 			ps = STRSTR(p, "=");
 			if (ps != NULL) {
@@ -226,10 +249,10 @@ namespace Options {
 				STRCPY(c, LINEMAX, p);
 			}
 
-			if (!strcmp(c, "lstlab")) {
+			if (*p == 'h' || !strcmp(c, "help")) {
+				ShowHelp = 1;
+			} else if (!strcmp(c, "lstlab")) {
 				AddLabelListing = 1;
-			} else if (!strcmp(c, "help")) {
-				// nothing
 			} else if (!strcmp(c, "sym")) {
 				if ((ps)&&(ps+1)) {
 					STRCPY(SymbolListFName, LINEMAX, ps+1);
@@ -318,42 +341,50 @@ int main(int argc, char **argv) {
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 	int i = 1;
 
-	if (argc == 1) {
+	// start counter
+	long dwStart;
+	dwStart = GetTickCount();
+
+	if (argc > 1) {
+		// init vars
+		Options::DestionationFName[0] = 0;
+		Options::ListingFName[0] = 0;
+		Options::UnrealLabelListFName[0] = 0;
+		Options::SymbolListFName[0] = 0;
+		Options::ExportFName[0] = 0;
+		Options::RAWFName[0] = 0;
+		Options::NoDestinationFile = true; // not *.out files by default
+
+		// get current directory
+		GetCurrentDirectory(MAX_PATH, buf);
+		CurrentDirectory = buf;
+
+		// get arguments
+		Options::IncludeDirsList = new CStringsList((char *)".", Options::IncludeDirsList);
+		while (argv[i]) {
+			Options::GetOptions(argv, i);
+			if (argv[i]) {
+#ifdef UNDER_CE
+				STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, _tochar(argv[i++]));
+#else
+				STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, argv[i++]);
+#endif
+			}
+		}
+	}
+
+	if (argc == 1 || Options::ShowHelp) {
 		_COUT logo _ENDL;
-		_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
-		_COUT "Copyright 2004-2017 by Aprisobal and all other participants" _ENDL;
-		//_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
-		//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
-		_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
-		_COUT "\nOption flags as follows:" _ENDL;
-		_COUT "  --help                   Help information (you see it)" _ENDL;
-		_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
-		_COUT "                           Include path" _ENDL;
-		_COUT "  --lst=<filename>         Save listing to <filename>" _ENDL;
-		_COUT "  --lstlab                 Enable label table in listing" _ENDL;
-		_COUT "  --sym=<filename>         Save symbols list to <filename>" _ENDL;
-		_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
-		//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
-		//_COUT " By output format (you can use it all in some time):" _ENDL;
-		_COUT "  --raw=<filename>         Save all output to <filename> ignoring OUTPUT pseudo-ops" _ENDL;
-		//_COUT "  --nooutput               Do not generate *.out file" _ENDL;
-		_COUT "  Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
-		_COUT " Logging:" _ENDL;
-		_COUT "  --nologo                 Do not show startup message" _ENDL;
-		_COUT "  --msg=error              Show only error messages" _ENDL;
-		_COUT "  --msg=all                Show all messages (by default)" _ENDL;
-		_COUT "  --fullpath               Show full path to error file" _ENDL;
-		_COUT " Other:" _ENDL;
-		_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
-		_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
-		_COUT "  --dirbol                 Enable processing directives from the beginning of line" _ENDL;
-		_COUT "  --nofakes                Disable fake instructions" _ENDL;
-		_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
+		PrintHelp();
 #ifdef UNDER_CE
 		return false;
 #else
 		exit(1);
 #endif
+	}
+
+	if (!Options::HideLogo) {
+		_COUT logo _ENDL;
 	}
 
 #ifdef USE_LUA
@@ -367,40 +398,6 @@ int main(int argc, char **argv) {
 	tolua_sjasm_open(LUA);
 
 #endif //USE_LUA
-
-	// init vars
-	Options::DestionationFName[0] = 0;
-	Options::ListingFName[0] = 0;
-	Options::UnrealLabelListFName[0] = 0;
-	Options::SymbolListFName[0] = 0;
-	Options::ExportFName[0] = 0;
-	Options::RAWFName[0] = 0;
-	Options::NoDestinationFile = true; // not *.out files by default
-
-	// start counter
-	long dwStart;
-	dwStart = GetTickCount();
-
-	// get current directory
-	GetCurrentDirectory(MAX_PATH, buf);
-	CurrentDirectory = buf;
-
-	// get arguments
-	Options::IncludeDirsList = new CStringsList((char *)".", Options::IncludeDirsList);
-	while (argv[i]) {
-		Options::GetOptions(argv, i);
-		if (argv[i]) {
-#ifdef UNDER_CE
-			STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, _tochar(argv[i++]));
-#else
-			STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, argv[i++]);
-#endif
-		}
-	}
-
-	if (!Options::HideLogo) {
-		_COUT logo _ENDL;
-	}
 
 	if (!SourceFNames[0][0]) {
 		_COUT "No inputfile(s)" _ENDL;
