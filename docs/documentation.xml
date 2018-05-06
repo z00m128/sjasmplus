@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.09 Documentation [07.09.2017]</title>
+  <title>SjASMPlus 1.10 Documentation [2018-05-06]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -142,17 +142,17 @@
             <para><emphasis>skrju &lt;sq-@mail.ru&gt;</emphasis> - bug
             reporting.</para>
           </listitem>
-          
+
           <listitem>
-            <para><emphasis>Tygrys, UB880D, Cizo, mborik, z00m</emphasis> - 
+            <para><emphasis>Tygrys, UB880D, Cizo, mborik, z00m</emphasis> -
             compilation errors and warnings clean up, makefiles, testing.</para>
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, busy</emphasis> - 
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, busy</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
-                    
+
         </itemizedlist></para>
 
       <para>Big thanks to all people, who helped on development of the
@@ -163,11 +163,11 @@
       <title><anchor id="feedback" />Feedback</title>
 
       <para>WWW: <ulink
-      url="https://sourceforge.net/projects/sjasmplus/">https://sourceforge.net/projects/sjasmplus/</ulink>  
+      url="https://sourceforge.net/projects/sjasmplus/">https://sourceforge.net/projects/sjasmplus/</ulink>
       (original Aprisobal's source)</para>
 
       <para>WWW: <ulink
-      url="https://github.com/z00m128/sjasmplus">https://github.com/z00m128/sjasmplus</ulink> 
+      url="https://github.com/z00m128/sjasmplus">https://github.com/z00m128/sjasmplus</ulink>
       (newer versions maintained by z00m and others)</para>
 
 
@@ -178,39 +178,47 @@
       <title>What's new?</title>
 
       <para><variablelist>
-		  
+
+          <varlistentry>
+            <term>06.05.2018 - 1.10</term>
+
+            <listitem>
+              <para><programlisting>- implemented full featured SAVETAP and EMPTYTAP command.</programlisting></para>
+            </listitem>
+          </varlistentry>
+
           <varlistentry>
             <term>07.09.2017 - 1.09</term>
 
             <listitem>
               <para><programlisting>- -D commandline parameter added, inchob / incbin bugfix.</programlisting></para>
             </listitem>
-          </varlistentry>		  
-		  
+          </varlistentry>
+
           <varlistentry>
             <term>23.12.2016 - 1.08</term>
 
             <listitem>
               <para><programlisting>- compilation warnings cleanup, CMake installation method added.</programlisting></para>
             </listitem>
-          </varlistentry>		  
-          
+          </varlistentry>
+
           <varlistentry>
             <term>11.10.2016 - 1.07 RC9</term>
 
             <listitem>
               <para><programlisting>- some docs added and compilation warnings cleanup.</programlisting></para>
             </listitem>
-          </varlistentry>          
-          
+          </varlistentry>
+
           <varlistentry>
             <term>05.05.2016 - 1.07 RC8</term>
 
             <listitem>
               <para><programlisting>- new makefile, compilation errors fixed and some warnings cleanup.</programlisting></para>
             </listitem>
-          </varlistentry>          
-          
+          </varlistentry>
+
           <varlistentry>
             <term>03.04.2008 - 1.07 Stable</term>
 
@@ -225,7 +233,7 @@
 
             <listitem>
               <para><programlisting>- Another fix of 48k SNA snapshots saving routine.
-- Added new UNDEFINE pseudo-op.  
+- Added new UNDEFINE pseudo-op.
 - Added new IFUSED/IFNUSED pseudo-ops for labels (such IFDEF for defines).
 - Fixed labels list dump rountine (--lstlab command line parameter).</programlisting></para>
             </listitem>
@@ -317,13 +325,13 @@
             <term>17.09.2006 - 1.07 RC1</term>
 
             <listitem>
-              <para><programlisting>- 3-pass design 
-- Built-in Lua scripting engine 
-- Changed command line keys 
-- Documentation converted to HTML. 
-- Added new directives: DEVICE, SLOT, SHELLEXEC 
-- Added predefined constanst: _SJASMPLUS=1, _ERRORS and other 
-- Changed output log format. 
+              <para><programlisting>- 3-pass design
+- Built-in Lua scripting engine
+- Changed command line keys
+- Documentation converted to HTML.
+- Added new directives: DEVICE, SLOT, SHELLEXEC
+- Added predefined constanst: _SJASMPLUS=1, _ERRORS and other
+- Changed output log format.
 - And many many more.</programlisting></para>
             </listitem>
           </varlistentry>
@@ -359,22 +367,22 @@
         </itemizedlist></para>
 
       <para>DOS and FreeBSD versions has same files in their packages.</para>
-      
+
       <para>Newer sources (v1.08 onwards) you can get on github project page:
       <ulink
-      url="https://github.com/z00m128/sjasmplus/">https://github.com/z00m128/sjasmplus/</ulink></para>      
+      url="https://github.com/z00m128/sjasmplus/">https://github.com/z00m128/sjasmplus/</ulink></para>
 
       <para><emphasis>Linux, Unix, MacOS and BSD version</emphasis> you can compile using
       <emphasis>GCC</emphasis> and <emphasis>Makefile</emphasis> from sources
       package.</para>
 
       <para>Windows binaries you can compile with <emphasis>MinGW</emphasis>
-      environment and included <emphasis>Makefile</emphasis>. Precompiled
-      win32 binary is available on 
+      environment and included <emphasis>Makefile.win</emphasis>. Precompiled
+      win32 binary is available on
       <ulink
       url="http://z00m.speccy.cz">http://z00m.speccy.cz</ulink></para>
-      
-      <para>There is an option to use CMake for compilation. 
+
+      <para>There is an option to use CMake for compilation.
       See <emphasis>INSTALL.md</emphasis> file for details.</para>
     </section>
 
@@ -387,7 +395,7 @@
 
       <para>Option flags as follows:</para>
 
-      <para><programlisting>  --help                   Help information
+      <para><programlisting>  -h or --help             Help information
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
                            Include path
   --lst=&lt;filename&gt;         Save listing to &lt;filename&gt;
@@ -710,7 +718,7 @@ or    x or y   bitwise or
           <listitem>
             <para>and all other commands support this.</para>
           </listitem>
-        </itemizedlist><programlisting>    LD A,B,B,D,D,H 
+        </itemizedlist><programlisting>    LD A,B,B,D,D,H
    /* this is:
      LD A,B
      LD B,D
@@ -893,7 +901,7 @@ or    x or y   bitwise or
   ldi (iy+nn),e
   ldi (iy+nn),h
   ldi (iy+nn),l
-   
+
   ldd (bc),a
   ldd (de),a
   ldd (hl),a
@@ -950,7 +958,7 @@ or    x or y   bitwise or
           <title></title>
 
           <para><programlisting>    DEVICE ZXSPECTRUM128
-    ;in this device, SLOT 3 enables to current by default.    
+    ;in this device, SLOT 3 enables to current by default.
 
     ORG 32768
 StartProg:
@@ -1105,7 +1113,7 @@ StartProg:
     <section>
       <title>Simple example of usage</title>
 
-      <para><programlisting>     .SOMEPSEUDOOP ;or 
+      <para><programlisting>     .SOMEPSEUDOOP ;or
      SOMEPSEUDOOP  ;or
      somepseudoop</programlisting></para>
     </section>
@@ -1125,7 +1133,7 @@ StartProg:
                   <title></title>
 
                   <para><programlisting> .3        INC A    ;will be compiled to INC A:INC A:INC A
-len        EQU 10 
+len        EQU 10
  .(12-len) BYTE 0   ;will be compiled to BYTE 0,0</programlisting></para>
                 </example></para>
             </listitem>
@@ -1207,7 +1215,7 @@ END_OF_PROGRAM
           </varlistentry>
 
           <varlistentry>
-            <term>BINARY &lt;filename&gt;[,offset[,length]]</term>
+            <term>BINARY &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_incbin">INCBIN</link>.</para>
@@ -1380,8 +1388,9 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               <para><programlisting> NONE ; off real device emulation mode
  ZXSPECTRUM48 ; ZX-Spectrum 48
  ZXSPECTRUM128 ; ZX-Spectrum 128
- SCORPION256 ; Scorpion 256 - exUSSR clone of ZX-Spectrum 128
- ATMTURBO512 ; ATM-Turbo 512 - exUSSR clone of ZX-Spectrum 128
+ ZXSPECTRUM256 ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
+ ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
+ ZXSPECTRUM1024
 
  ;disable:
    DEVICE NONE
@@ -1444,7 +1453,7 @@ TESTLABEL:
     RET
     DISPLAY "--the some program-- by me"
     DISPLAY "TESTLABEL address is:",/A,TESTLABEL
-/*  
+/*
 will be out to the console next strings:
 &gt; --the some program-- by me
 &gt; TESTLABEL address is:0x100,257
@@ -1522,6 +1531,19 @@ will be out to the console next strings:
                   <para><programlisting>    DZ 1      ; same as BYTE 1,0
     DZ "kip"  ; same as BYTE "kip",0</programlisting></para>
                 </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>EMPTYTAP &lt;filenameoftapefile&gt;</term>
+
+            <listitem>
+              <para><emphasis>Useful only for ZX-Spectrum
+              users</emphasis></para>
+
+              <para>Create the new or truncate existing standard tape file
+              for emulators of ZX-Spectrum. See example of
+              <link linkend="po_savetap">SAVETAP</link>.</para>
             </listitem>
           </varlistentry>
 
@@ -1683,7 +1705,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
               position to anywhere in the output file.</para>
 
               <para>In combination with <link
-              linkend="po_output">OUTPUT</link> “&lt;filename&gt;”,r it is
+              linkend="po_output">OUTPUT</link> &lt;filename&gt;,r it is
               possible to update existing files.</para>
 
               <para><example>
@@ -1700,7 +1722,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
 
           <varlistentry>
             <term><anchor id="po_incbin" />INCBIN
-            &lt;filename&gt;[,offset[,length]]</term>
+            &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>To include a binary file into the outputfile. The offset
@@ -1715,7 +1737,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>INCHOB &lt;filename&gt;[,offset[,length]]</term>
+            <term>INCHOB &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>To include a data from a hobeta file into the outputfile.
@@ -1770,7 +1792,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
 
           <varlistentry>
             <term>INCTRD
-            &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,offset[,length]]</term>
+            &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>To include a file from a TRD image into the outputfile.
@@ -1784,7 +1806,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>INSERT &lt;filename&gt;[,offset[,length]]</term>
+            <term>INSERT &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>INSERT is a synonym of <link
@@ -1928,7 +1950,7 @@ Kip                ; label Kip</programlisting></para>
 
           <varlistentry>
             <term><anchor id="po_output" />OUTPUT
-            “&lt;filename&gt;”,mode</term>
+            &lt;filename&gt;[,&lt;mode&gt;]</term>
 
             <listitem>
               <para>With OUTPUT it is possible to create multiple files from
@@ -1938,9 +1960,9 @@ Kip                ; label Kip</programlisting></para>
               <para>There are three possible output modes: truncate (overwrite
               existing files, this is the default), rewind (open and execute
               FPOS 0) and append (open and leave the file pointer at the end
-              of the file).<programlisting>OUTPUT “&lt;filename&gt;”,t  ; truncate (default)
-OUTPUT “&lt;filename&gt;”,r  ; rewind
-OUTPUT “&lt;filename&gt;”,a  ; append</programlisting><example>
+              of the file).<programlisting>OUTPUT &lt;filename&gt;,t  ; truncate (default)
+OUTPUT &lt;filename&gt;,r  ; rewind
+OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
                   <title>bigfile.asm</title>
 
                   <para><programlisting>    OUTPUT loader.com
@@ -2062,22 +2084,56 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_savetap" /><para>SAVETAP &lt;filename&gt;,BASIC,&lt;fileintapeheader&gt;,&lt;length&gt;[,&lt;autorunline&gt;[,&lt;lengthwithoutvars&gt;]]</para>
+            <para>SAVETAP &lt;filename&gt;,CODE,&lt;fileintapeheader&gt;,&lt;length&gt;[,&lt;startaddress&gt;[,&lt;optional3rdparam&gt;]]</para>
+            <para>SAVETAP &lt;filename&gt;,NUMBERS,&lt;fileintapeheader&gt;,&lt;length&gt;[,&lt;variableletter(1..26)&gt;]</para>
+            <para>SAVETAP &lt;filename&gt;,CHARS,&lt;fileintapeheader&gt;,&lt;length&gt;[,&lt;variableletter(1..26)&gt;]</para>
+            <para>SAVETAP &lt;filename&gt;,BLOCK,&lt;start&gt;,&lt;length&gt;[,&lt;customblockflag(1..255)&gt;]</para></term>
+
+            <listitem>
+              <para><emphasis>Work only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Append the tape header or block of data to the end of the
+              standard tape file for emulators of ZX-Spectrum.<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM48
+    ...
+    EMPTYTAP "output.tap"
+
+    SAVETAP "output.tap",BASIC,"noAutorun",1000
+    SAVETAP "output.tap",BASIC,"w/Autorun",1000,9999
+    SAVETAP "output.tap",BASIC,"withVars",1100,9999,1000
+    SAVETAP "output.tap",CODE,"bank17",16384
+    SAVETAP "output.tap",CODE,"screen",6912,16384
+    SAVETAP "output.tap",NUMBERS,"dimArray",100    ;  a()
+    SAVETAP "output.tap",NUMBERS,"othernum",200,2  ;  b()
+    SAVETAP "output.tap",CHARS,"charArray",300     ;  a$()
+    SAVETAP "output.tap",CHARS,"nextone",400,13    ;  m$()
+
+    SAVETAP "output.tap",BLOCK,start,length        ; store standard data block</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>SAVETAP &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the tape file for emulators of ZX-Spectrum. Generated
-              tape file supports ZX-Spectrum clones with extended RAM such as
-              ATM Turbo 512, etc.<example>
+              <para>Save the tape file for emulators of ZX-Spectrum as a snapshot
+              (Multiface-like) of whole memory. Generated tape file supports
+              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.<example>
                   <title></title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM48
     ORG $8000
 START  .... ;something code
     RET
-    SAVETAP "game.tap",START ;save tape file to file game.tap. Start address is START ($8000)</programlisting></para>
+    SAVETAP "game.tap",START ; save tape-snapshot to file game.tap. Start address is START ($8000)</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -2102,7 +2158,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>SHELLEXEC &lt;filename&gt;[, &lt;parameters&gt;]</term>
+            <term>SHELLEXEC &lt;filename&gt;[,&lt;parameters&gt;]</term>
 
             <listitem>
               <para>Execute external program &lt;filename&gt; using optional
@@ -2112,8 +2168,8 @@ START  .... ;something code
                   <para><programlisting>    OUTPUT "mybin.bin"
     ;some code
     IF ((_ERRORS = 0) + (_WARNINGS = 0))
-        SHELLEXEC "x:/mydeveloping/bin2tap.exe mybin.bin mytap.tap"
-       ; or SHELLEXEC "x:/mydeveloping/bin2tap.exe","mybin.bin mytap.tap"
+        SHELLEXEC "x:/somepath/bin2tap.exe mybin.bin mytap.tap"
+       ; or SHELLEXEC "x:/somepath/bin2tap.exe","mybin.bin mytap.tap"
     ENDIF</programlisting></para>
                 </example></para>
             </listitem>
@@ -2565,7 +2621,7 @@ Main
       <para><example>
           <title></title>
 
-          <para><programlisting>	STRUCT SCOLOR 
+          <para><programlisting>	STRUCT SCOLOR
 RED	BYTE 4
 GREEN	BYTE 5
 BLUE	BYTE 6
@@ -2573,7 +2629,7 @@ BLUE	BYTE 6
 
           <para>This is identical to:</para>
 
-          <para><programlisting>SCOLOR		EQU 3 ; lenght 
+          <para><programlisting>SCOLOR		EQU 3 ; lenght
 SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</programlisting></para>
@@ -3176,10 +3232,10 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
              local fp
              fp = assert(io.open(fname, "wb"))
              for i = 16384, 32767, 4 do
-                 assert(fp:write( string.pack("bbbb", 
-                                sj.get_byte(i), 
-                                sj.get_byte(i+1), 
-                                sj.get_byte(i+2), 
+                 assert(fp:write( string.pack("bbbb",
+                                sj.get_byte(i),
+                                sj.get_byte(i+1),
+                                sj.get_byte(i+2),
                                 sj.get_byte(i+3)) ))
              end
              assert(fp:flush())
@@ -3216,11 +3272,11 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
 
 -- Before using you must create empty file "build.txt"!
 	increase_build("build.txt")
-	
+
 -- Creates define "TIME" with current time
 	sj.insert_define("TIME", '"' .. os.date("%Y-%m-%d %H:%M:%S") .. '"')
 	ENDLUA
-	
+
 ; print to console our time and build number
 	DISPLAY "Build time: ", TIME
 	DISPLAY "Build number: ", /D, BUILD</programlisting></para>
