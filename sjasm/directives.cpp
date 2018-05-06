@@ -33,7 +33,6 @@
 CFunctionTable DirectivesTable;
 CFunctionTable DirectivesTable_dup;
 
-/* modified */
 int ParseDirective(bool bol) {
 	char* olp = lp;
 	char* n;
@@ -106,7 +105,6 @@ int ParseDirective(bool bol) {
 	return 0;
 }
 
-/* added */
 int ParseDirective_REPT() {
 	char* olp = lp;
 	char* n;
@@ -132,7 +130,6 @@ int ParseDirective_REPT() {
 	return 0;
 }
 
-/* modified */
 void dirBYTE() {
 	int teller, e[256];
 	teller = GetBytes(lp, e, 0, 0);
@@ -571,7 +568,7 @@ void dirEND() {
 	} else {
 		lp = p;
 	}
-	
+
 	IsRunning = 0;
 }
 
@@ -619,7 +616,6 @@ void dirINCBIN() {
 	delete[] fnaam;
 }
 
-/* added */
 void dirINCHOB() {
 	aint val;
 	char* fnaam, * fnaamh;
@@ -672,7 +668,6 @@ void dirINCHOB() {
 	delete[] fnaamh;
 }
 
-/* added */
 void dirINCTRD() {
 	aint val;
 	char* fnaam, * fnaamh, * fnaamh2;
@@ -777,7 +772,6 @@ void dirINCTRD() {
 	delete[] fnaamh2;
 }
 
-/* added */
 void dirSAVESNA() {
 	bool exec = true;
 
@@ -825,9 +819,28 @@ void dirSAVESNA() {
 	delete[] fnaam;
 }
 
-/* added */
+void dirEMPTYTAP() {
+	if (pass != LASTPASS) {
+		SkipParam(lp);
+		return;
+	}
+	char* fnaam;
+
+	fnaam = GetFileName(lp);
+	if (!*fnaam) {
+		Error("[EMPTYTAP] Syntax error", bp, CATCHALL); return;
+	}
+	TAP_SaveEmpty(fnaam);
+	delete[] fnaam;
+}
+
 void dirSAVETAP() {
-	bool exec = true;
+	bool exec = true, realtapeMode = false;
+	int headerType = -1;
+	aint val;
+	char* fnaam, *fnaamh = NULL;
+	int start = -1, length = -1;
+	int param1 = -1, param2 = -1, param3 = -1;
 
 	if (!DeviceID) {
 		if (pass == LASTPASS) {
@@ -838,27 +851,125 @@ void dirSAVETAP() {
 		exec = false;
 	}
 
-	if (exec && !IsZXSpectrumDevice(DeviceID)) {
-		Error("[SAVETAP] Device must be ZXSPECTRUM48, ZXSPECTRUM128, ZXSPECTRUM256, ZXSPECTRUM512 or ZXSPECTRUM1024.", 0);
-		exec = false;
-	}
-
-	aint val;
-	char* filename;
-	int start = -1;
-
-	filename = GetFileName(lp);
+	fnaam = GetFileName(lp);
 	if (comma(lp)) {
 		if (!comma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVETAP] Syntax error", bp, PASS3); return;
+			char *tlp = lp;
+			char *id;
+
+			if ((id = GetID(lp)) && strlen(id) > 0) {
+				if (cmphstr(id, "basic")) {
+					headerType = BASIC;
+					realtapeMode = true;
+				} else if (cmphstr(id, "numbers")) {
+					headerType = NUMBERS;
+					realtapeMode = true;
+				} else if (cmphstr(id, "chars")) {
+					headerType = CHARS;
+					realtapeMode = true;
+				} else if (cmphstr(id, "code")) {
+					headerType = CODE;
+					realtapeMode = true;
+				} else if (cmphstr(id, "block")) {
+					headerType = BLOCK;
+					realtapeMode = true;
+				}
 			}
-			if (val < 0) {
-				Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+
+			if (realtapeMode) {
+				if (comma(lp)) {
+					if (headerType == BLOCK) {
+						if (!comma(lp)) {
+							if (!ParseExpression(lp, val)) {
+								Error("[SAVETAP] Syntax error", bp, PASS3); return;
+							}
+							if (val < 0) {
+								Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+							} else if (val > 0xFFFF) {
+								Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+							}
+							start = val;
+						} else {
+							Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
+						}
+						if (comma(lp)) {
+							if (!ParseExpression(lp, val)) {
+								Error("[SAVETAP] Syntax error", bp, PASS3); return;
+							}
+							if (val < 0) {
+								Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+							} else if (val > 0xFFFF) {
+								Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+							}
+							length = val;
+						}
+						if (comma(lp)) {
+							if (!ParseExpression(lp, val)) {
+								Error("[SAVETAP] Syntax error", bp, PASS3); return;
+							}
+							if (val < 0 || val > 255) {
+								Error("[SAVETAP] Invalid flag byte", bp, PASS3); return;
+							}
+							param3 = val;
+						}
+					} else {
+						fnaamh = GetHobetaFileName(lp);
+						if (!*fnaamh) {
+							Error("[SAVETAP] Syntax error", bp, PASS3);
+							return;
+						} else if (comma(lp)) {
+							if (!comma(lp)) {
+								if (!ParseExpression(lp, val)) {
+									Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
+								}
+								if (val < 0) {
+									Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+								} else if (val > 0xFFFF) {
+									Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+								}
+								param1 = val;
+							}
+							if (comma(lp)) {
+								if (!ParseExpression(lp, val)) {
+									Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
+								}
+								if (val < 0) {
+									Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+								} else if (val > 0xFFFF) {
+									Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+								}
+								param2 = val;
+							}
+							if (comma(lp)) {
+								if (!ParseExpression(lp, val)) {
+									Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
+								}
+								if (val < 0) {
+									Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+								} else if (val > 0xFFFF) {
+									Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+								}
+								param3 = val;
+							}
+						} else {
+							Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
+						}
+					}
+				} else {
+					Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
+				}
+			} else {
+				lp = tlp;
+				if (!ParseExpression(lp, val)) {
+					Error("[SAVETAP] Syntax error", bp, PASS3); return;
+				}
+				if (val < 0) {
+					Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+				}
+				start = val;
 			}
-			start = val;
 		} else {
-		  	Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
+			Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
 		}
 	} else if (StartAddress < 0) {
 		Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
@@ -866,14 +977,32 @@ void dirSAVETAP() {
 		start = StartAddress;
 	}
 
-	if (exec && !SaveTAP_ZX(filename, start)) {
-		Error("[SAVETAP] Error writing file (Disk full?)", bp, CATCHALL); return;
+	if (exec && IsZXSpectrumDevice(DeviceID)) {
+		int done = 0;
+
+		if (realtapeMode) {
+			if (headerType <= CODE) {
+				done = TAP_SaveHeader(fnaam, headerType, fnaamh, param1, param2, param3);
+			} else {
+				done = TAP_SaveBlock(fnaam, (param3 % 0xff), start, length);
+			}
+		} else {
+			done = TAP_SaveSnapshot(fnaam, start);
+		}
+
+		if (!done) {
+			Error("[SAVETAP] Error writing file", bp, CATCHALL);
+		}
+	} else if (exec) {
+		Error("[SAVETAP] Device must be defined.", 0);
 	}
 
-	delete[] filename;
+	if (fnaamh) {
+		delete[] fnaamh;
+	}
+	delete[] fnaam;
 }
 
-/* added */
 void dirSAVEBIN() {
 	bool exec = true;
 
@@ -888,7 +1017,7 @@ void dirSAVEBIN() {
 
 	aint val;
 	char* fnaam;
-	int start = -1,length = -1;
+	int start = -1, length = -1;
 
 	fnaam = GetFileName(lp);
 	if (comma(lp)) {
@@ -924,7 +1053,6 @@ void dirSAVEBIN() {
 	delete[] fnaam;
 }
 
-/* added */
 void dirSAVEHOB() {
 	aint val;
 	char* fnaam, * fnaamh;
@@ -987,7 +1115,6 @@ void dirSAVEHOB() {
 	delete[] fnaamh;
 }
 
-/* added */
 void dirEMPTYTRD() {
 	if (pass != LASTPASS) {
 		SkipParam(lp);
@@ -1003,7 +1130,6 @@ void dirEMPTYTRD() {
 	delete[] fnaam;
 }
 
-/* added */
 void dirSAVETRD() {
 	bool exec = true;
 
@@ -1057,7 +1183,7 @@ void dirSAVETRD() {
 				length = val;
 			} else {
 		  		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
-			} 
+			}
 		}
 		if (comma(lp)) { //added by boo_boo 19_0ct_2008
 			if (!ParseExpression(lp, val)) {
@@ -1067,7 +1193,7 @@ void dirSAVETRD() {
 				Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
 			}
 			autostart = val;
-		}				
+		}
 	} else {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
@@ -1079,7 +1205,6 @@ void dirSAVETRD() {
 	delete[] fnaamh;
 }
 
-/* added */
 void dirENCODING() {
 	char* opt = GetHobetaFileName(lp);
 	char* opt2 = opt;
@@ -1102,7 +1227,6 @@ void dirENCODING() {
 	Error("[ENCODING] Syntax error. Bad parameter", bp, CATCHALL); delete[] opt;return;
 }
 
-/* added */
 void dirLABELSLIST() {
 	if (!DeviceID) {
 		Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)", 0);
@@ -1119,12 +1243,10 @@ void dirLABELSLIST() {
 	delete[] opt;
 }
 
-/* deleted */
 /*void dirTEXTAREA() {
 
 }*/
 
-/* modified */
 void dirIF() {
 	aint val;
 	IsLabelNotFound = 0;
@@ -1168,7 +1290,6 @@ void dirIF() {
 	}
 }
 
-/* added */
 void dirIFN() {
 	aint val;
 	IsLabelNotFound = 0;
@@ -1300,12 +1421,10 @@ void dirENDIF() {
 	Error("ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF", 0);
 }
 
-/* deleted */
 /*void dirENDTEXTAREA() {
   Error("ENDT without TEXTAREA",0);
 }*/
 
-/* modified */
 void dirINCLUDE() {
 	char* fnaam;
 	fnaam = GetFileName(lp);
@@ -1313,7 +1432,6 @@ void dirINCLUDE() {
 	delete[] fnaam;
 }
 
-/* modified */
 void dirOUTPUT() {
 	char* fnaam;
 
@@ -1339,10 +1457,9 @@ void dirOUTPUT() {
 	}
 	/* end from SjASM 0.39g */
 	//if (pass==2) NewDest(fnaam);
-	delete[] fnaam; /* added */
+	delete[] fnaam;
 }
 
-/* modified */
 void dirDEFINE() {
 	char* id;
 
@@ -1355,7 +1472,6 @@ void dirDEFINE() {
 	*(lp) = 0;
 }
 
-/* added */
 void dirUNDEFINE() {
 	char* id;
 
@@ -1380,7 +1496,6 @@ void dirUNDEFINE() {
 	}
 }
 
-/* modified */
 void dirIFDEF() {
 	/*char *p=line,*id;*/
 	char* id;
@@ -1432,7 +1547,6 @@ void dirIFDEF() {
 	/**lp=0;*/
 }
 
-/* modified */
 void dirIFNDEF() {
 	/*char *p=line,*id;*/
 	char* id;
@@ -1484,11 +1598,10 @@ void dirIFNDEF() {
 	/**lp=0;*/
 }
 
-/* modified */
 void dirEXPORT() {
 	aint val;
 	char* n, * p;
-	
+
 	if (!Options::ExportFName[0]) {
 		STRCPY(Options::ExportFName, LINEMAX, SourceFNames[CurrentSourceFName]);
 		if (!(p = strchr(Options::ExportFName, '.'))) {
@@ -1514,7 +1627,6 @@ void dirEXPORT() {
 	WriteExp(p, val);
 }
 
-/* added */
 void dirDISPLAY() {
 	char decprint = 0;
 	char e[LINEMAX];
@@ -1643,7 +1755,6 @@ void dirDISPLAY() {
 	}
 }
 
-/* modified */
 void dirMACRO() {
 	//if (lijst) Error("No macro definitions allowed here",0,FATAL);
 	if (lijst) {
@@ -1661,7 +1772,6 @@ void dirENDS() {
 	Error("[ENDS] End structre without structure", 0);
 }
 
-/* modified */
 void dirASSERT() {
 	char* p = lp;
 	aint val;
@@ -1820,7 +1930,6 @@ void dirSTRUCT() {
 	st->deflab();
 }
 
-/* added from SjASM 0.39g */
 void dirFORG() {
 	aint val;
 	int method = SEEK_SET;
@@ -1842,7 +1951,6 @@ void dirBIND() {
 }
 */
 
-/* added */
 void dirDUP() {
 	aint val;
 	IsLabelNotFound = 0;
@@ -1874,14 +1982,13 @@ void dirDUP() {
 
 	dup.Lines = new CStringsList(lp, NULL);
 	dup.Pointer = dup.Lines;
-	dup.lp = lp; //чтобы брать код перед EDUP
+	dup.lp = lp; // EDUP
 	dup.CurrentGlobalLine = CurrentGlobalLine;
 	dup.CurrentLocalLine = CurrentLocalLine;
 	dup.IsInWork = false;
 	RepeatStack.push(dup);
 }
 
-/* added */
 void dirEDUP() {
 	if (RepeatStack.empty()) {
 		Error("[EDUP/ENDR] End repeat without repeat", 0);return;
@@ -1904,7 +2011,7 @@ void dirEDUP() {
 		Error("[EDUP/ENDR] No enough memory!", 0, FATAL);
 	}
 	*dup.Pointer->string = 0;
-	STRNCAT(dup.Pointer->string, LINEMAX, dup.lp, lp - dup.lp - 4); //чтобы взять код перед EDUP/ENDR/ENDM
+	STRNCAT(dup.Pointer->string, LINEMAX, dup.lp, lp - dup.lp - 4); // EDUP/ENDR/ENDM
 	CStringsList* s;
 	olistmacro = listmacro;
 	listmacro = 1;
@@ -1945,7 +2052,6 @@ void dirENDM() {
 	}
 }
 
-/* modified */
 void dirDEFARRAY() {
 	char* n;
 	char* id;
@@ -2167,7 +2273,6 @@ void dirENDLUA() {
 	Error("[ENDLUA] End of lua script without script", 0);
 }
 
-/* modified */
 void dirINCLUDELUA() {
 	char* fnaam;
 	fnaam = GetFileName(lp);
@@ -2210,7 +2315,6 @@ void dirDEVICE() {
 
 }
 
-/* modified */
 void InsertDirectives() {
 	DirectivesTable.insertd("assert", dirASSERT);
 	DirectivesTable.insertd("byte", dirBYTE);
@@ -2233,32 +2337,33 @@ void InsertDirectives() {
 	//DirectivesTable.insertd("msx", dirZ80);
 	DirectivesTable.insertd("else", dirELSE);
 	DirectivesTable.insertd("export", dirEXPORT);
-	DirectivesTable.insertd("display", dirDISPLAY); /* added */
+	DirectivesTable.insertd("display", dirDISPLAY);
 	DirectivesTable.insertd("end", dirEND);
 	DirectivesTable.insertd("include", dirINCLUDE);
 	DirectivesTable.insertd("incbin", dirINCBIN);
-	DirectivesTable.insertd("binary", dirINCBIN); /* added */
-	DirectivesTable.insertd("inchob", dirINCHOB); /* added */
-	DirectivesTable.insertd("inctrd", dirINCTRD); /* added */
-	DirectivesTable.insertd("insert", dirINCBIN); /* added */
-	DirectivesTable.insertd("savesna", dirSAVESNA); /* added */
-	DirectivesTable.insertd("savetap", dirSAVETAP); /* added */
-	DirectivesTable.insertd("savehob", dirSAVEHOB); /* added */
-	DirectivesTable.insertd("savebin", dirSAVEBIN); /* added */
-	DirectivesTable.insertd("emptytrd", dirEMPTYTRD); /* added */
-	DirectivesTable.insertd("savetrd", dirSAVETRD); /* added */
-	DirectivesTable.insertd("shellexec", dirSHELLEXEC); /* added */
+	DirectivesTable.insertd("binary", dirINCBIN);
+	DirectivesTable.insertd("inchob", dirINCHOB);
+	DirectivesTable.insertd("inctrd", dirINCTRD);
+	DirectivesTable.insertd("insert", dirINCBIN);
+	DirectivesTable.insertd("savesna", dirSAVESNA);
+	DirectivesTable.insertd("savehob", dirSAVEHOB);
+	DirectivesTable.insertd("savebin", dirSAVEBIN);
+	DirectivesTable.insertd("emptytap", dirEMPTYTAP);
+	DirectivesTable.insertd("savetap", dirSAVETAP);
+	DirectivesTable.insertd("emptytrd", dirEMPTYTRD);
+	DirectivesTable.insertd("savetrd", dirSAVETRD);
+	DirectivesTable.insertd("shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
 	DirectivesTable.insertd("winexec", dirWINEXEC);
 #endif*/
 	DirectivesTable.insertd("if", dirIF);
-	DirectivesTable.insertd("ifn", dirIFN); /* added */
+	DirectivesTable.insertd("ifn", dirIFN);
 	DirectivesTable.insertd("ifused", dirIFUSED);
-	DirectivesTable.insertd("ufnused", dirIFNUSED); /* added */
+	DirectivesTable.insertd("ufnused", dirIFNUSED);
 	DirectivesTable.insertd("output", dirOUTPUT);
 	DirectivesTable.insertd("define", dirDEFINE);
 	DirectivesTable.insertd("undefine", dirUNDEFINE);
-	DirectivesTable.insertd("defarray", dirDEFARRAY); /* added */
+	DirectivesTable.insertd("defarray", dirDEFARRAY);
 	DirectivesTable.insertd("ifdef", dirIFDEF);
 	DirectivesTable.insertd("ifndef", dirIFNDEF);
 	DirectivesTable.insertd("macro", dirMACRO);
@@ -2266,7 +2371,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd("dc", dirDC);
 	DirectivesTable.insertd("dz", dirDZ);
 	DirectivesTable.insertd("db", dirBYTE);
-	DirectivesTable.insertd("dm", dirBYTE); /* added */
+	DirectivesTable.insertd("dm", dirBYTE);
 	DirectivesTable.insertd("dw", dirWORD);
 	DirectivesTable.insertd("ds", dirBLOCK);
 	DirectivesTable.insertd("dd", dirDWORD);
@@ -2274,28 +2379,28 @@ void InsertDirectives() {
 	DirectivesTable.insertd("defw", dirWORD);
 	DirectivesTable.insertd("defs", dirBLOCK);
 	DirectivesTable.insertd("defd", dirDWORD);
-	DirectivesTable.insertd("defm", dirBYTE); /* added */
+	DirectivesTable.insertd("defm", dirBYTE);
 	DirectivesTable.insertd("endmod", dirENDMODULE);
 	DirectivesTable.insertd("endmodule", dirENDMODULE);
-	DirectivesTable.insertd("endmap", dirENDMAP); /* added from SjASM 0.39g */
+	DirectivesTable.insertd("endmap", dirENDMAP);
 	DirectivesTable.insertd("rept", dirDUP);
-	DirectivesTable.insertd("dup", dirDUP); /* added */
-	DirectivesTable.insertd("disp", dirDISP); /* added */
-	DirectivesTable.insertd("phase", dirDISP); /* added */
-	DirectivesTable.insertd("ent", dirENT); /* added */
-	DirectivesTable.insertd("unphase", dirENT); /* added */
-	DirectivesTable.insertd("dephase", dirENT); /* added */
-	DirectivesTable.insertd("page", dirPAGE); /* added */
-	DirectivesTable.insertd("slot", dirSLOT); /* added */
-	DirectivesTable.insertd("encoding", dirENCODING); /* added */
-	DirectivesTable.insertd("labelslist", dirLABELSLIST); /* added */
+	DirectivesTable.insertd("dup", dirDUP);
+	DirectivesTable.insertd("disp", dirDISP);
+	DirectivesTable.insertd("phase", dirDISP);
+	DirectivesTable.insertd("ent", dirENT);
+	DirectivesTable.insertd("unphase", dirENT);
+	DirectivesTable.insertd("dephase", dirENT);
+	DirectivesTable.insertd("page", dirPAGE);
+	DirectivesTable.insertd("slot", dirSLOT);
+	DirectivesTable.insertd("encoding", dirENCODING);
+	DirectivesTable.insertd("labelslist", dirLABELSLIST);
 	//  DirectivesTable.insertd("bind",dirBIND); /* i didn't comment this */
 	DirectivesTable.insertd("endif", dirENDIF);
 	//DirectivesTable.insertd("endt",dirENDTEXTAREA);
 	DirectivesTable.insertd("endt", dirENT);
 	DirectivesTable.insertd("endm", dirENDM);
-	DirectivesTable.insertd("edup", dirEDUP); /* added */
-	DirectivesTable.insertd("endr", dirEDUP); /* added */
+	DirectivesTable.insertd("edup", dirEDUP);
+	DirectivesTable.insertd("endr", dirEDUP);
 	DirectivesTable.insertd("ends", dirENDS);
 
 	DirectivesTable.insertd("device", dirDEVICE);
@@ -2306,11 +2411,11 @@ void InsertDirectives() {
 	DirectivesTable.insertd("includelua", dirINCLUDELUA);
 #endif //USE_LUA
 
-	DirectivesTable_dup.insertd("dup", dirDUP); /* added */
-	DirectivesTable_dup.insertd("edup", dirEDUP); /* added */
-	DirectivesTable_dup.insertd("endm", dirENDM); /* added */
-	DirectivesTable_dup.insertd("endr", dirEDUP); /* added */
-	DirectivesTable_dup.insertd("rept", dirDUP); /* added */
+	DirectivesTable_dup.insertd("dup", dirDUP);
+	DirectivesTable_dup.insertd("edup", dirEDUP);
+	DirectivesTable_dup.insertd("endm", dirENDM);
+	DirectivesTable_dup.insertd("endr", dirEDUP);
+	DirectivesTable_dup.insertd("rept", dirDUP);
 }
 
 #ifdef USE_LUA

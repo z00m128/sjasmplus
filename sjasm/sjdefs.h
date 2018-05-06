@@ -30,7 +30,7 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.09"
+#define VERSION "1.10"
 
 // not used
 #define MAXPASSES 3
@@ -43,9 +43,9 @@
 #define _CMDL );WriteOutput(
 #define _ENDL );WriteOutputEOF();
 #define _END );
-#else 
-#define _COUT cout << 
-#define _CMDL  << 
+#else
+#define _COUT cout <<
+#define _CMDL  <<
 #define _ENDL << endl
 #define _END ;
 #endif
@@ -59,7 +59,7 @@
 #include <windows.h>
 #include <assert.h>
 #undef _ASSERTE
-#define _ASSERTE  
+#define _ASSERTE
 #include "tconvert.h"
 #endif
 
