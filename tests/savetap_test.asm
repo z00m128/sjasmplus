@@ -1,44 +1,48 @@
 		device	zxspectrum48
 
-		EMPTYTAP "output.tap"
 
+; BASIC block
 	module bas
-
-line10:		byte	0, 10
-		word	.len
+line10:		db	0, 10
+		dw	.len
 .cmds		; BORDER NOT PI:
-		byte	$E7, $C3, $A7, ':'
+		db	$E7, $C3, $A7, ':'
 		; PAPER NOT PI:
-		byte	$DA, $C3, $A7, ':'
+		db	$DA, $C3, $A7, ':'
 		; INK VAL "7":
-		byte	$D9, $B0, '"7":'
+		db	$D9, $B0, '"7":'
 		; CLEAR VAL "32767"
-		byte	$FD, $B0, '"32767"', $0D
+		db	$FD, $B0, '"32767"', $0D
 .len = $ - .cmds
 
-line20:		byte	0, 20
-		word	.len
+line20:		db	0, 20
+		dw	.len
 .cmds		; POKE VAL "23739",CODE "o":
-		byte	$F4, $B0, '"23739",', $AF, '"o":'
+		db	$F4, $B0, '"23739",', $AF, '"o":'
 		; LOAD ""SCREEN$: LOAD ""CODE
-		byte	$EF, '""', $AA, ':', $EF, '""', $AF, $0D
+		db	$EF, '""', $AA, ':', $EF, '""', $AF, $0D
 .len = $ - .cmds
 
-line30:		byte	0, 30
-		word	.len
+line30:		db	0, 30
+		dw	.len
 .cmds		; RANDOMIZE USR VAL "32768"
-		byte	$F9, $C0, $B0, '"32768"', $0D
+		db	$F9, $C0, $B0, '"32768"', $0D
 .len = $ - .cmds
 
 total = $ - line10
 	endmodule
 
-; store BASIC header
-		savetap	"output.tap",BASIC, "tstSAVETAP", bas.total, 10
-; store BASIC block
-		savetap "output.tap",BLOCK, bas.line10, bas.total
+
+; CHARS block
+chars:		db	1
+		dw	.datalen
+.data:		db	"SAVETAP testing character array"
+.datalen = $ - .data
+
+.len = $ - chars
 
 
+; SCREEN$ block
 		org	$4000
 screen:
 	rept 12
@@ -46,17 +50,13 @@ screen:
 		block	256,$55
 	endm
 	rept 24
-		byte	$07, $06, $06, $16, $05, $05, $0D, $04, $04, $14, $03, $03, $11, $02, $02, $29
-		byte	$29, $02, $02, $11, $03, $03, $14, $04, $04, $0D, $05, $05, $16, $06, $06, $07
+		db	$07, $06, $06, $16, $05, $05, $0D, $04, $04, $14, $03, $03, $11, $02, $02, $29
+		db	$29, $02, $02, $11, $03, $03, $14, $04, $04, $0D, $05, $05, $16, $06, $06, $07
 	endm
 .len = $ - screen
 
-; store SCREEN$ header
-		savetap	"output.tap",CODE, "intro", screen.len, screen
-; store SCREEN$ block
-		savetap "output.tap",BLOCK, screen, screen.len
 
-
+; CODE block
 		org	$8000
 
 demo:		ei
@@ -99,7 +99,15 @@ demo:		ei
 		ret
 .len = $ - demo
 
-; store CODE header
-		savetap	"output.tap",CODE, "demo", demo.len, demo
-; store CODE block
-		savetap "output.tap",BLOCK, demo, demo.len
+
+		emptytap "output.tap"
+; store BASIC
+		savetap	"output.tap",BASIC,"tstSAVETAP", bas.line10, bas.total, 10
+; store SCREEN$
+		savetap	"output.tap",CODE,"intro", screen, screen.len
+; store CODE
+		savetap	"output.tap",CODE,"demo", demo, demo.len
+; store CHARS
+		savetap "output.tap",CHARS,"t$", chars, chars.len, 't'
+; store HEADLESS
+		savetap "output.tap",HEADLESS, (screen + $1800), 32, 66 ; custom flag

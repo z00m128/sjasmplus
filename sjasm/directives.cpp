@@ -839,8 +839,7 @@ void dirSAVETAP() {
 	int headerType = -1;
 	aint val;
 	char* fnaam, *fnaamh = NULL;
-	int start = -1, length = -1;
-	int param1 = -1, param2 = -1, param3 = -1;
+	int start = -1, length = -1, param2 = -1, param3 = -1;
 
 	if (!DeviceID) {
 		if (pass == LASTPASS) {
@@ -870,15 +869,15 @@ void dirSAVETAP() {
 				} else if (cmphstr(id, "code")) {
 					headerType = CODE;
 					realtapeMode = true;
-				} else if (cmphstr(id, "block")) {
-					headerType = BLOCK;
+				} else if (cmphstr(id, "headless")) {
+					headerType = HEADLESS;
 					realtapeMode = true;
 				}
 			}
 
 			if (realtapeMode) {
 				if (comma(lp)) {
-					if (headerType == BLOCK) {
+					if (headerType == HEADLESS) {
 						if (!comma(lp)) {
 							if (!ParseExpression(lp, val)) {
 								Error("[SAVETAP] Syntax error", bp, PASS3); return;
@@ -886,11 +885,11 @@ void dirSAVETAP() {
 							if (val < 0) {
 								Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
 							} else if (val > 0xFFFF) {
-								Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+								Error("[SAVETAP] Values higher than FFFFh are not allowed", bp, PASS3); return;
 							}
 							start = val;
 						} else {
-							Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
+							Error("[SAVETAP] Syntax error. Missing start address", bp, PASS3); return;
 						}
 						if (comma(lp)) {
 							if (!ParseExpression(lp, val)) {
@@ -899,7 +898,7 @@ void dirSAVETAP() {
 							if (val < 0) {
 								Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
 							} else if (val > 0xFFFF) {
-								Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+								Error("[SAVETAP] Values higher than FFFFh are not allowed", bp, PASS3); return;
 							}
 							length = val;
 						}
@@ -912,53 +911,63 @@ void dirSAVETAP() {
 							}
 							param3 = val;
 						}
-					} else {
+					} else if (!comma(lp)) {
 						fnaamh = GetHobetaFileName(lp);
 						if (!*fnaamh) {
-							Error("[SAVETAP] Syntax error", bp, PASS3);
+							Error("[SAVETAP] Syntax error in tape file name", bp, PASS3);
 							return;
-						} else if (comma(lp)) {
-							if (!comma(lp)) {
-								if (!ParseExpression(lp, val)) {
-									Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
-								}
-								if (val < 0) {
-									Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
-								} else if (val > 0xFFFF) {
-									Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
-								}
-								param1 = val;
+						} else if (comma(lp) && !comma(lp) && ParseExpression(lp, val)) {
+							if (val < 0) {
+								Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+							} else if (val > 0xFFFF) {
+								Error("[SAVETAP] Values higher than FFFFh are not allowed", bp, PASS3); return;
 							}
-							if (comma(lp)) {
-								if (!ParseExpression(lp, val)) {
-									Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
-								}
+							start = val;
+
+							if (comma(lp) && !comma(lp) && ParseExpression(lp, val)) {
 								if (val < 0) {
 									Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
 								} else if (val > 0xFFFF) {
-									Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+									Error("[SAVETAP] Values higher than FFFFh are not allowed", bp, PASS3); return;
 								}
-								param2 = val;
-							}
-							if (comma(lp)) {
-								if (!ParseExpression(lp, val)) {
-									Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
+								length = val;
+
+								if (comma(lp)) {
+									if (!ParseExpression(lp, val)) {
+										Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
+									}
+									if (val < 0) {
+										Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+									} else if (val > 0xFFFF) {
+										Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+									}
+									param2 = val;
 								}
-								if (val < 0) {
-									Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
-								} else if (val > 0xFFFF) {
-									Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+								if (comma(lp)) {
+									if (!ParseExpression(lp, val)) {
+										Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
+									}
+									if (val < 0) {
+										Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
+									} else if (val > 0xFFFF) {
+										Error("[SAVETAP] Values more than FFFFh are not allowed", bp, PASS3); return;
+									}
+									param3 = val;
 								}
-								param3 = val;
+							} else {
+								Error("[SAVETAP] Syntax error. Missing block length", bp, PASS3); return;
 							}
 						} else {
-							Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
+							Error("[SAVETAP] Syntax error. Missing start address", bp, PASS3); return;
 						}
+					} else {
+						Error("[SAVETAP] Syntax error. Missing tape block file name", bp, PASS3); return;
 					}
 				} else {
-					Error("[SAVETAP] Syntax error. No parameters", bp, PASS3); return;
+					realtapeMode = false;
 				}
-			} else {
+			}
+			if (!realtapeMode) {
 				lp = tlp;
 				if (!ParseExpression(lp, val)) {
 					Error("[SAVETAP] Syntax error", bp, PASS3); return;
@@ -981,11 +990,7 @@ void dirSAVETAP() {
 		int done = 0;
 
 		if (realtapeMode) {
-			if (headerType <= CODE) {
-				done = TAP_SaveHeader(fnaam, headerType, fnaamh, param1, param2, param3);
-			} else {
-				done = TAP_SaveBlock(fnaam, (param3 % 0xff), start, length);
-			}
+			done = TAP_SaveBlock(fnaam, headerType, fnaamh, start, length, param2, param3);
 		} else {
 			done = TAP_SaveSnapshot(fnaam, start);
 		}

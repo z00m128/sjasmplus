@@ -55,58 +55,7 @@ int TAP_SaveEmpty(char* fname) {
 	return 1;
 }
 
-int TAP_SaveHeader(char* fname, unsigned char flag, const char *ftapname, int param1, int param2, int param3) {
-	FILE* fpout;
-	if (!FOPEN_ISOK(fpout, fname, "ab")) {
-		Error("Error opening file", fname, FATAL);
-	}
-
-	int varBase = 0x80, defaultValue = 0x8000;
-	switch (flag) {
-		case BASIC:
-			if (param2 < 0) {
-				param2 = defaultValue; // no autostart
-			} else if (param2 > 9999 && param2 != defaultValue) {
-				Error("[SAVETAP] Autostart LINE out of range", 0);
-			}
-			if (param3 < 0) {
-				param3 = param1;
-			}
-			break;
-
-		case CHARS:
-			varBase = 0xC0;
-		case NUMBERS:
-			if (param2 <= 0) {
-				param2 = 1; // reset to default A variable
-			}
-			if (param2 > varBase && param2 <= (varBase + 26)) { // A..Z
-				param2 &= 0x1F;
-			} else if (param2 < 1 || param2 > 26) {
-				Error("[SAVETAP] Variable name out of range", 0);
-			}
-			param2 = (param2 | varBase) << 8;
-			param3 = defaultValue;
-			break;
-
-		default:
-			flag = 3;	// fallback to CODE
-		case CODE:
-			if (param2 < 0) {
-				param2 = defaultValue;
-			}
-			if (param3 < 0) {
-				param3 = defaultValue;
-			}
-			break;
-	}
-
-	writeheader(flag, ftapname, param1, param2, param3, fpout);
-	fclose(fpout);
-	return 1;
-}
-
-int TAP_SaveBlock(char* fname, unsigned char flag, int start, int length) {
+int TAP_SaveBlock(char* fname, unsigned char flag, const char *ftapname, int start, int length, int param2, int param3) {
 	FILE* fpout;
 	if (!FOPEN_ISOK(fpout, fname, "ab")) {
 		Error("Error opening file", fname, FATAL);
@@ -117,6 +66,50 @@ int TAP_SaveBlock(char* fname, unsigned char flag, int start, int length) {
 	}
 	if (length <= 0) {
 	    length = 0x10000 - start;
+	}
+
+	int varBase = 0x80, defaultValue = 0x8000;
+	switch (flag) {
+		case BASIC:
+			if (param2 < 0) {
+				param2 = defaultValue; // no autostart
+			} else if (param2 >= 16384 && param2 != defaultValue) {
+				Error("[SAVETAP] Autostart LINE out of range", 0);
+			}
+			if (param3 < 0) {
+				param3 = length;
+			}
+			break;
+
+		case CHARS:
+			varBase = 0xC0;
+		case NUMBERS:
+			if (param2 <= 0) {
+				param2 = 1; // reset to default A variable
+			}
+			param2 &= 0x1F;
+			if (param2 < 1 || param2 > 26) { // A..Z
+				Error("[SAVETAP] Variable name out of range", 0);
+			}
+			param2 = (param2 | varBase) << 8;
+			param3 = defaultValue;
+			break;
+
+		case CODE:
+			if (param2 < 0) {
+				param2 = start;
+			}
+			if (param3 < 0) {
+				param3 = defaultValue;
+			}
+			break;
+	}
+
+	if (flag == HEADLESS) {
+		flag = param3 & 0xff;
+	} else if (ftapname) {
+		writeheader(flag, ftapname, length, param2, param3, fpout);
+		flag = 0xff;
 	}
 
 	writeword(length + 2, fpout);

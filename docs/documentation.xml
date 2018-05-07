@@ -951,7 +951,7 @@ or    x or y   bitwise or
       <para>In this mode the compiler compiling program to virtual memory (as
       at MSX's WB-ASS2, ZX-Spectrum's GENS, ZEUS, ALASM etc). After this all
       you can use new pseudo-ops as <link linkend="s_pseudoops">SAVEBIN,
-      SAVEHOB, SAVETRD, SAVETAP,PAGE, SLOT, LABELSLIST</link> and use special
+      SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST</link> and use special
       functions in <link linkend="c_lua_scripting">Lua scripts</link>.</para>
 
       <para><example>
@@ -2084,11 +2084,11 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savetap" /><para>SAVETAP &lt;filename&gt;,BASIC,&lt;fileintapeheader&gt;,&lt;length&gt;[,&lt;autorunline&gt;[,&lt;lengthwithoutvars&gt;]]</para>
-            <para>SAVETAP &lt;filename&gt;,CODE,&lt;fileintapeheader&gt;,&lt;length&gt;[,&lt;startaddress&gt;[,&lt;optional3rdparam&gt;]]</para>
-            <para>SAVETAP &lt;filename&gt;,NUMBERS,&lt;fileintapeheader&gt;,&lt;length&gt;[,&lt;variableletter(1..26)&gt;]</para>
-            <para>SAVETAP &lt;filename&gt;,CHARS,&lt;fileintapeheader&gt;,&lt;length&gt;[,&lt;variableletter(1..26)&gt;]</para>
-            <para>SAVETAP &lt;filename&gt;,BLOCK,&lt;start&gt;,&lt;length&gt;[,&lt;customblockflag(1..255)&gt;]</para></term>
+            <term><anchor id="po_savetap" /><para>SAVETAP &lt;filename&gt;,BASIC,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;autorunline&gt;[,&lt;lengthwithoutvars&gt;]]</para>
+            <para>SAVETAP &lt;filename&gt;,CODE,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;[,&lt;optional3rdparam&gt;]]</para>
+            <para>SAVETAP &lt;filename&gt;,NUMBERS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</para>
+            <para>SAVETAP &lt;filename&gt;,CHARS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</para>
+            <para>SAVETAP &lt;filename&gt;,HEADLESS,&lt;start&gt;,&lt;length&gt;[,&lt;customblockflag(0..255)&gt;]</para></term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
@@ -2102,17 +2102,16 @@ START  .... ;something code
     ...
     EMPTYTAP "output.tap"
 
-    SAVETAP "output.tap",BASIC,"noAutorun",1000
-    SAVETAP "output.tap",BASIC,"w/Autorun",1000,9999
-    SAVETAP "output.tap",BASIC,"withVars",1100,9999,1000
-    SAVETAP "output.tap",CODE,"bank17",16384
-    SAVETAP "output.tap",CODE,"screen",6912,16384
-    SAVETAP "output.tap",NUMBERS,"dimArray",100    ;  a()
-    SAVETAP "output.tap",NUMBERS,"othernum",200,2  ;  b()
-    SAVETAP "output.tap",CHARS,"charArray",300     ;  a$()
-    SAVETAP "output.tap",CHARS,"nextone",400,13    ;  m$()
-
-    SAVETAP "output.tap",BLOCK,start,length        ; store standard data block</programlisting></para>
+    SAVETAP "output.tap",BASIC,"noAutorun",label,100
+    SAVETAP "output.tap",BASIC,"w/Autorun",label,100,9999
+    SAVETAP "output.tap",BASIC,"withVars",label,123,9999,100
+    SAVETAP "output.tap",CODE,"bank17",screen,6912
+    SAVETAP "output.tap",CODE,"screen",demo,length,org
+    SAVETAP "output.tap",NUMBERS,"dimArray",label,100      ; a()
+    SAVETAP "output.tap",NUMBERS,"othernum",label,200,'b'  ; b()
+    SAVETAP "output.tap",CHARS,"charArray",label,300       ; a$()
+    SAVETAP "output.tap",CHARS,"nextone",label,400,'m'     ; m$()
+    SAVETAP "output.tap",HEADLESS,start,length</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -2124,8 +2123,8 @@ START  .... ;something code
               <para><emphasis>Work only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the tape file for emulators of ZX-Spectrum as a snapshot
-              (Multiface-like) of whole memory. Generated tape file supports
+              <para>Save the tape file for emulators of ZX-Spectrum as a
+              "snapshot" of whole memory. Generated tape file supports the
               ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.<example>
                   <title></title>
 

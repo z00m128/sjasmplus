@@ -31,11 +31,10 @@ misrepresented as being the original software.
 #ifndef __IO_TAPE
 #define __IO_TAPE
 
-enum ETapeHeaderType { BASIC = 0, NUMBERS, CHARS, CODE, BLOCK = 255 };
+enum ETapeHeaderType { BASIC = 0, NUMBERS, CHARS, CODE, HEADLESS = 255 };
 
 int TAP_SaveEmpty(char* fname);
-int TAP_SaveHeader(char* fname, unsigned char flag, const char *ftapname, int param1, int param2, int param3);
-int TAP_SaveBlock(char* fname, unsigned char flag, int start, int length);
+int TAP_SaveBlock(char* fname, unsigned char flag, const char *ftapname, int start, int length, int param2, int param3);
 int TAP_SaveSnapshot(char* fname, unsigned short start);
 
 #endif
