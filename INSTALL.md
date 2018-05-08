@@ -25,11 +25,11 @@ Extract tarball archive and go to extracted folder. Edit install path PREFIX in 
 Default method for MS Windows
 =========================================
 
-Extract tarball archive and go to extracted folder. Delete or rename file 'Makefile'. Edit install path PREFIX in file 'Makefile.win' according your preferences (default c:\mingw\usr\local\bin). Remove '-static' parameter in CFLAGS if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Rename file 'Makefile.win' to 'Makefile', then run following commands:
+Extract tarball archive and go to extracted folder. Delete or rename file 'Makefile'. Edit install path PREFIX in file 'Makefile.win' according your preferences (default c:\mingw\usr\local\bin). Remove '-static' parameter in CFLAGS if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Run following commands:
 
-	mingw32-make clean
-	mingw32-make
-	mingw32-make install
+	mingw32-make -f Makefile.win clean
+	mingw32-make -f Makefile.win
+	mingw32-make -f Makefile.win install
 
 CMAKE method for Linux / Unix / MacOS / BSD
 ===========================================
