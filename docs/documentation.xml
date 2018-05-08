@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.10 Documentation [2018-05-06]</title>
+  <title>SjASMPlus 1.10.0 Documentation [2018-05-06]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -180,7 +180,7 @@
       <para><variablelist>
 
           <varlistentry>
-            <term>06.05.2018 - 1.10</term>
+            <term>06.05.2018 - 1.10.0</term>
 
             <listitem>
               <para><programlisting>- implemented full featured SAVETAP and EMPTYTAP command.</programlisting></para>
