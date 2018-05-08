@@ -82,7 +82,12 @@ int SearchPath(char* oudzp, char* filename, char* whatever, int maxlen, char* ni
 char* strset(char* str, char val) {
 	//non-aligned
 	char* pByte = str;
-	while (((uintptr_t) pByte) & 3) {
+// mborik: fix for older compilers
+#ifdef _UINTPTR_T_DEFINED
+    	while (((uintptr_t) pByte) & 3) {
+#else
+	while (((unsigned long) pByte) & 3) {
+#endif
 		if (*pByte) {
 			*pByte++ = val;
 		} else {
