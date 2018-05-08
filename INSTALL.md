@@ -9,7 +9,8 @@ Requirements:
 
 or
 
-- complete MinGW environment for MS Windows, optionally CMake installed into MinGW bin directory
+- complete MinGW environment for MS Windows, with MinGW bin directories added in PATH variable (typically C:\MinGW\bin;C:\MinGW\msys\1.0\bin)
+- CMake installed into MinGW bin directory (optionally)
 
 Compilation is tested with GCC 5.3.0, it should run also with older versions, but warnings or errors may occur.
 
@@ -27,9 +28,9 @@ Default method for MS Windows
 
 Extract tarball archive and go to extracted folder. Delete or rename file 'Makefile'. Edit install path PREFIX in file 'Makefile.win' according your preferences (default c:\mingw\usr\local\bin). Remove '-static' parameter in CFLAGS if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Run following commands:
 
-	mingw32-make -f Makefile.win clean
-	mingw32-make -f Makefile.win
-	mingw32-make -f Makefile.win install
+	make -f Makefile.win clean
+	make -f Makefile.win
+	make -f Makefile.win install
 
 CMAKE method for Linux / Unix / MacOS / BSD
 ===========================================
