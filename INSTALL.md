@@ -9,7 +9,7 @@ Requirements:
 
 or
 
-- complete MinGW environment for MS Windows, with MinGW bin directories added in PATH variable (typically C:\MinGW\bin;C:\MinGW\msys\1.0\bin)
+- complete MinGW environment for MS Windows, with MinGW bin directories added in PATH variable (typically C:\MinGW\bin; C:\MinGW\msys\1.0\bin)
 - CMake installed into MinGW bin directory (optionally)
 
 Compilation is tested with GCC 5.3.0, it should run also with older versions, but warnings or errors may occur.
