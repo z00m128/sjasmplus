@@ -38,6 +38,7 @@ unsigned char blocknum=1;
 void writebyte(unsigned char, FILE *);
 void writenumber(unsigned int, FILE *);
 void writeword(unsigned int, FILE *);
+void writeheader(unsigned char, const char *, unsigned short, unsigned short, unsigned short, FILE *);
 void writecode(unsigned char*, aint, unsigned short, bool header, FILE *);
 void remove_basic_sp(unsigned char* ram);
 void detect_vars_changes();
@@ -45,16 +46,108 @@ bool has_screen_changes();
 aint remove_unused_space(unsigned char* ram, aint length);
 aint detect_ram_start(unsigned char* ram, aint length);
 
-int SaveTAP_ZX(char* fname, unsigned short start) {
-	// for Lua
-	if (!DeviceID) {
-		Error("[SAVETAP] Only for real device emulation mode.", 0);
-		return 0;
-	} else if (!IsZXSpectrumDevice(DeviceID)) {
-		Error("[SAVETAP] Device must be ZXSPECTRUM48, ZXSPECTRUM128, ZXSPECTRUM256, ZXSPECTRUM512 or ZXSPECTRUM1024.", 0);
-		return 0;
+int TAP_SaveEmpty(char* fname) {
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "wb")) {
+		Error("Error opening file", fname, CATCHALL); return 0;
+	}
+	fclose(ff);
+	return 1;
+}
+
+int TAP_SaveBlock(char* fname, unsigned char flag, const char *ftapname, int start, int length, int param2, int param3) {
+	FILE* fpout;
+	if (!FOPEN_ISOK(fpout, fname, "ab")) {
+		Error("Error opening file", fname, FATAL);
 	}
 
+	if (length + start > 0xFFFF) {
+	    length = -1;
+	}
+	if (length <= 0) {
+	    length = 0x10000 - start;
+	}
+
+	int varBase = 0x80, defaultValue = 0x8000;
+	switch (flag) {
+		case BASIC:
+			if (param2 < 0) {
+				param2 = defaultValue; // no autostart
+			} else if (param2 >= 16384 && param2 != defaultValue) {
+				Error("[SAVETAP] Autostart LINE out of range", 0);
+			}
+			if (param3 < 0) {
+				param3 = length;
+			}
+			break;
+
+		case CHARS:
+			varBase = 0xC0;
+		case NUMBERS:
+			if (param2 <= 0) {
+				param2 = 1; // reset to default A variable
+			}
+			param2 &= 0x1F;
+			if (param2 < 1 || param2 > 26) { // A..Z
+				Error("[SAVETAP] Variable name out of range", 0);
+			}
+			param2 = (param2 | varBase) << 8;
+			param3 = defaultValue;
+			break;
+
+		case CODE:
+			if (param2 < 0) {
+				param2 = start;
+			}
+			if (param3 < 0) {
+				param3 = defaultValue;
+			}
+			break;
+	}
+
+	if (flag == HEADLESS) {
+		flag = param3 & 0xff;
+	} else if (ftapname) {
+		writeheader(flag, ftapname, length, param2, param3, fpout);
+		flag = 0xff;
+	}
+
+	writeword(length + 2, fpout);
+	parity = 0;
+	writebyte(flag, fpout);
+
+	CDeviceSlot *S;
+	for (aint i = 0, save = 0, ptr; i < Device->SlotsCount; i++) {
+	    S = Device->GetSlot(i);
+	    if (start >= (int) S->Address && start < (int) (S->Address + S->Size)) {
+			ptr = (start - S->Address);
+			if (length < (int) (S->Size - ptr)) {
+				save = length;
+			} else {
+				save = S->Size - ptr;
+			}
+
+			while (save > 0) {
+				writebyte(S->Page->RAM[ptr], fpout);
+
+				length--;
+				start++;
+				save--;
+				ptr++;
+			}
+
+			if (length <= 0) {
+				break;
+			}
+	    }
+	}
+
+	writebyte(parity, fpout);
+	fclose(fpout);
+	return 1;
+}
+
+int TAP_SaveSnapshot(char* fname, unsigned short start) {
 	FILE* fpout;
 	if (!FOPEN_ISOK(fpout, fname, "wb")) {
 		Error("Error opening file", fname, FATAL);
@@ -62,31 +155,17 @@ int SaveTAP_ZX(char* fname, unsigned short start) {
 
 	aint datastart = 0x5E00;
 	aint exeat = 0x5E00;
+	aint basiclen = 0x1e + 2;
 
-	fputc(19, fpout);				// header length
-	fputc(0, fpout);
-	fputc(0, fpout);
-	parity = 0;						// initial checksum
-	writebyte(0, fpout);			// block type "BASIC"
+	/* Filetype (0: Basic), with autostart "LINE 10" */
+	writeheader(0, "LOADER", basiclen, 10, basiclen, fpout);
 
-	char filename[] = "Loader    ";
-	for	(aint i=0;i<=9;i++)
-		writebyte(filename[i], fpout);
-
-	writebyte(0x1e + 2/*CLS*/, fpout);    // line length
-	writebyte(0, fpout);
-	writebyte(0x0a, fpout);			// "LINE 10"
-	writebyte(0, fpout);
-	writebyte(0x1e + 2/*CLS*/, fpout);    // line length
-	writebyte(0, fpout);
-	writebyte(parity, fpout);		// checksum
-
-	writeword(0x1e + 2/*CLS*/ + 2, fpout);// length of block
+	writeword(basiclen + 2, fpout);	// length of block
 	parity = 0;
 	writebyte(0xff, fpout);
 	writebyte(0, fpout);
-	writebyte(0x0a, fpout);
-	writebyte(0x1a + 2/*CLS*/, fpout);	// basic line length - 0x1a
+	writebyte(10, fpout);		// LINE 10
+	writebyte(basiclen, fpout);	// basic line length
 	writebyte(0, fpout);
 
 	// :CLEAR VAL "xxxxx"
@@ -210,7 +289,7 @@ int SaveTAP_ZX(char* fname, unsigned short start) {
 		} else {
 			loader_defsize = SaveTAP_ZX_Spectrum_256K_SZ;
 			loader_code = (unsigned char*)&SaveTAP_ZX_Spectrum_256K[0];
-		}	
+		}
 		aint loader_len = loader_defsize + (Device->PagesCount - 2)*5;
 		unsigned char *loader = new unsigned char[loader_len];
 		memcpy(loader, loader_code, loader_defsize);
@@ -255,7 +334,7 @@ int SaveTAP_ZX(char* fname, unsigned short start) {
 				}
 			}
 		}
-		
+
 		// Table_BlockList.Count
 		loader[loader_defsize - 1] = char(count);
 
@@ -285,7 +364,7 @@ int SaveTAP_ZX(char* fname, unsigned short start) {
 	return 1;
 }
 
-void writenumber(unsigned int i, FILE *fp){
+void writenumber(unsigned int i, FILE *fp) {
 	int c;
 	c=i/10000;
 	i-=c*10000;
@@ -302,45 +381,49 @@ void writenumber(unsigned int i, FILE *fp){
 	writebyte(i+48, fp);
 }
 
-void writeword(unsigned int i, FILE *fp){
+void writeword(unsigned int i, FILE *fp) {
 	writebyte(i%256,fp);
 	writebyte(i/256,fp);
 }
 
-void writebyte(unsigned char c, FILE *fp){
+void writebyte(unsigned char c, FILE *fp) {
 	fputc(c,fp);
 	parity^=c;
 }
 
-void writecode(unsigned char* block, aint length, unsigned short loadaddr, bool header, FILE *fp){
+void writeheader(unsigned char flag, const char *fname, unsigned short param1, unsigned short param2, unsigned short param3, FILE *fp) {
+	/* Write out the code header file */
+	writeword(19, fp);		/* Header len */
+	writebyte(0, fp);		/* Header is 0 */
+	parity = 0;
+	writebyte(flag, fp);	/* Filetype flag */
+
+	const char *ptr = fname;
+	for (int i = 0; i < 10; i++) {
+		if (*ptr) {
+			writebyte(*ptr++, fp);
+		} else {
+			writebyte(' ', fp);
+		}
+	}
+
+	writeword(param1, fp);
+	writeword(param2, fp);
+	writeword(param3, fp);
+	writebyte(parity, fp);
+}
+
+void writecode(unsigned char* block, aint length, unsigned short loadaddr, bool header, FILE *fp) {
 	if (header) {
-		/* Write out the code header file */
-		fputc(19, fp);		/* Header len */
-		fputc(0, fp);		/* MSB of len */
-		fputc(0, fp);		/* Header is 0 */
-		parity=0;
-		writebyte(3, fp);	/* Filetype (Code) */
-
-		/*char *blockname = new char[32];
-		SPRINTF1(blockname, 32, "Code %02d   ", blocknum++);
-		for	(aint i=0;i<=9;i++)
-			writebyte(blockname[i], fp);
-		delete[] blockname;*/
-		char filename[] = "Loader    ";
-		for	(aint i=0;i<=9;i++)
-			writebyte(filename[i], fp);
-
-		writeword(length, fp);
-		writeword(loadaddr, fp); /* load address: 49152 by default */
-		writeword(0, fp);	/* offset */
-		writebyte(parity, fp);
+		/* Filetype (3: Code) */
+		writeheader(3, "loader", length, loadaddr, 0, fp);
 	}
 
 	/* Now onto the data bit */
-	writeword(length+2, fp);	/* Length of next block */
-	parity=0;
-	writebyte(255, fp);	/* Data... */
-	for (aint i=0; i<length;i++) {
+	writeword(length + 2, fp);	/* Length of next block */
+	parity = 0;
+	writebyte(255, fp); /* Data... */
+	for (aint i = 0; i < length; i++) {
 		writebyte(block[i], fp);
 	}
 	writebyte(parity, fp);
@@ -408,9 +491,9 @@ aint remove_unused_space(unsigned char* ram, aint length) {
 	return length;
 }
 
-aint detect_ram_start(unsigned char* ram, aint length){
+aint detect_ram_start(unsigned char* ram, aint length) {
 	aint start = 0;
-	
+
 	while (start < length && ram[start] == 0) {
 		start++;
 	}

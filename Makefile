@@ -10,6 +10,7 @@ C++=$(GPP)
 PREFIX=/usr/local
 INSTALL=install -c
 UNINSTALL=rm -vf
+DOCBOOKGEN=xsltproc
 
 EXE=sjasmplus
 
@@ -38,7 +39,7 @@ OBJS=\
 	$(SUBDIR_BASE)/sjio.o \
 	$(SUBDIR_BASE)/support.o \
 	$(SUBDIR_BASE)/tables.o \
-	$(SUBDIR_BASE)/z80.o 
+	$(SUBDIR_BASE)/z80.o
 
 #liblua objects
 LUAOBJS= \
@@ -62,6 +63,8 @@ TOLUAOBJS=\
 	$(SUBDIR_TOLUA)/tolua_to.o
 
 
+.PHONY: all clean docs
+
 all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS)
 	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS)
 
@@ -72,10 +75,17 @@ uninstall:
 	$(UNINSTALL) $(PREFIX)/bin/$(EXE)
 
 .c.o:
-	$(GCC) $(CFLAGS) -o $@ -c $< 
+	$(GCC) $(CFLAGS) -o $@ -c $<
 
 .cpp.o:
 	$(GPP) $(CFLAGS) -o $@ -c $<
+
+docs:
+	$(DOCBOOKGEN) \
+		--stringparam generate.toc "book toc" \
+		-o docs/documentation.html \
+		/usr/share/xml/docbook/stylesheet/docbook-xsl-ns/xhtml5/docbook.xsl \
+		docs/documentation.xml
 
 clean:
 	$(UNINSTALL) \
