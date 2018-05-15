@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.10.0 Documentation [2018-05-06]</title>
+  <title>SjASMPlus 1.10.1 Documentation [2018-05-15]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -149,7 +149,7 @@
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, busy</emphasis> -
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
 
@@ -180,10 +180,19 @@
       <para><variablelist>
 
           <varlistentry>
+            <term>15.05.2018 - 1.10.1</term>
+
+            <listitem>
+              <para><programlisting>- Corrected bug of OUTPUT directive (bugfix of flushing buffer).
+- Implemented TAPOUT/TAPEND and OUTEND directives.</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>06.05.2018 - 1.10.0</term>
 
             <listitem>
-              <para><programlisting>- implemented full featured SAVETAP and EMPTYTAP command.</programlisting></para>
+              <para><programlisting>- Implemented full featured SAVETAP and EMPTYTAP directives.</programlisting></para>
             </listitem>
           </varlistentry>
 
@@ -1949,6 +1958,14 @@ Kip                ; label Kip</programlisting></para>
           </varlistentry>
 
           <varlistentry>
+            <term>OUTEND</term>
+
+            <listitem>
+              <para>Ends generating compiler output to file specified in OUTPUT.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_output" />OUTPUT
             &lt;filename&gt;[,&lt;mode&gt;]</term>
 
@@ -1974,7 +1991,9 @@ OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
     ORG 4000H
     INCLUDE main.asm
     ORG 8000H
-    INCLUDE data.asm</programlisting></para>
+    INCLUDE data.asm
+    OUTEND
+    INCLUDE next.asm</programlisting></para>
                 </example>This will create two files: loader.com and
               bigfile.dat.</para>
 
@@ -1985,8 +2004,8 @@ OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
 
               <para><programlisting>sjasmplus bigfile.asm</programlisting>The
               following files are created: <programlisting>Bigfile.out  ; file length is zero
-Loader.com
-Bigfile.dat</programlisting></para>
+Loader.com   ; contains loader.asm and bios.asm
+Bigfile.dat  ; contains main.asm and data.asm</programlisting></para>
             </listitem>
           </varlistentry>
 
@@ -2213,6 +2232,43 @@ START  .... ;something code
                 </example></para>
             </listitem>
           </varlistentry>
+
+          <varlistentry>
+            <term>TAPEND</term>
+
+            <listitem>
+              <para>Ends generating compiler output to tape file block specified in TAPOUT.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>TAPOUT &lt;filename&gt;[,&lt;flagbyte&gt;]</term>
+
+            <listitem>
+              <para>Appends one tape block at the end of specified file.
+              All following code will be assembled to this tape file block.</para>
+
+              <para>Default value of flagbyte is 255.<example>
+                  <title>bigfile.asm</title>
+
+                  <para><programlisting>
+    EMPTYTAP screen.tap
+
+    TAPOUT screen.tap,0
+    DB 3
+    DB 'ScreenName'
+    DW 6912
+    DW 16384
+    DW 32768
+    TAPEND
+
+    TAPOUT screen.tap
+    INCBIN screen.bin
+    TAPEND</programlisting></para>
+                </example>This will create tap file with the screen.</para>
+            </listitem>
+          </varlistentry>
+
 
           <varlistentry>
             <term><anchor id="po_textarea" />TEXTAREA &lt;address&gt;</term>
