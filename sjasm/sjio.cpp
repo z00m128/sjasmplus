@@ -1200,7 +1200,7 @@ void OpenTapFile(char * tapename, int flagbyte)
 {
 	CloseTapFile();
 
-	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b"))	Error("Error opening file in TAPOUT", tapename, FATAL);
+	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b"))	Error( "Error opening file in TAPOUT", tapename, FATAL);
 	if (fseek(FP_tapout, 0, SEEK_END))			Error("File seek end error in TAPOUT", tapename, FATAL);
 	
 	tape_seek = ftell(FP_tapout);

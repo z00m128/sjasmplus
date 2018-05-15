@@ -71,11 +71,11 @@ baslen	=	$-basic
 	db	5,5,5,5
 
 	TAPOUT	tape_file		;; Bytes body
-	OUTPUT	pure_code
+	OUTPUT	pure_code		;; Pure data file
 
 	org	0x8000			;; Start address of code
 
-start	ld	a,0x02			;; Channel #2
+start	ld	a,0x02			;; Channel 2
 	call	0x1601			;; is opened
 	ld	de,text			;; Address of text
 	ld	bc,txtlen		;; Length of text
@@ -89,7 +89,7 @@ text	db	13			;; Cursor to next line
 txtlen	=	$-text
 codlen	=	$-start
 
-	OUTEND				;; End of pure data block
+	OUTEND				;; End of pure data file
 	TAPEND				;; End of tape block
 
 	db	6,6,6,6

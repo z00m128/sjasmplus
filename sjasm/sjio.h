@@ -66,8 +66,8 @@ void OpenUnrealList(); /* added */
 void ReadBufLine(bool Parse = true, bool SplitByColon = true); /* added */
 void OpenDest();
 void CloseDest();
-void OpenTapFile(char * tapename, int flagbyte);
 void CloseTapFile();
+void OpenTapFile(char * tapename, int flagbyte);
 void PrintHEX32(char*& p, aint h);
 void PrintHEX16(char*& p, aint h); /* added */
 void PrintHEXAlt(char*& p, aint h); /* added */

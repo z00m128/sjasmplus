@@ -1467,7 +1467,7 @@ void dirOUTPUT() {
 
 void dirOUTEND()
 {
-	// if (!FP_Output) Error("OUTEND without OUTPUT", bp, PASS3); return;
+	// if (!FP_Output) {Error("OUTEND without OUTPUT", bp, PASS3); return;}
 	if (pass == LASTPASS) CloseDest();
 }
 
@@ -1493,7 +1493,7 @@ void dirTAPOUT()
 
 void dirTAPEND()
 {
-	// if (!FP_tapout) Error("TAPEND without TAPOUT", bp, PASS3); return;
+	// if (!FP_tapout) {Error("TAPEND without TAPOUT", bp, PASS3); return;}
 	if (pass == LASTPASS) CloseTapFile();
 }
 

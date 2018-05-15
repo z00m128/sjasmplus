@@ -2251,8 +2251,7 @@ START  .... ;something code
               <para>Default value of flagbyte is 255.<example>
                   <title>bigfile.asm</title>
 
-                  <para><programlisting>
-    EMPTYTAP screen.tap
+                  <para><programlisting>    EMPTYTAP screen.tap
 
     TAPOUT screen.tap,0
     DB 3
