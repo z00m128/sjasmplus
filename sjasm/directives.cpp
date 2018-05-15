@@ -1465,6 +1465,38 @@ void dirOUTPUT() {
 	delete[] fnaam;
 }
 
+void dirOUTEND()
+{
+	// if (!FP_Output) {Error("OUTEND without OUTPUT", bp, PASS3); return;}
+	if (pass == LASTPASS) CloseDest();
+}
+
+void dirTAPOUT()
+{
+	aint val;
+	char* fnaam;
+
+	fnaam = GetFileName(lp);
+	int tape_flag = 255;
+	if (comma(lp))
+	{
+		if (!ParseExpression(lp, val))
+		{
+			Error("[TAPOUT] Missing flagbyte value", bp, PASS3); return;
+		}
+		tape_flag = val;
+	}
+	if (pass == LASTPASS) OpenTapFile(fnaam, tape_flag);
+
+	delete[] fnaam;
+}
+
+void dirTAPEND()
+{
+	// if (!FP_tapout) {Error("TAPEND without TAPOUT", bp, PASS3); return;}
+	if (pass == LASTPASS) CloseTapFile();
+}
+
 void dirDEFINE() {
 	char* id;
 
@@ -2366,6 +2398,9 @@ void InsertDirectives() {
 	DirectivesTable.insertd("ifused", dirIFUSED);
 	DirectivesTable.insertd("ufnused", dirIFNUSED);
 	DirectivesTable.insertd("output", dirOUTPUT);
+	DirectivesTable.insertd("outend", dirOUTEND);
+	DirectivesTable.insertd("tapout", dirTAPOUT);
+	DirectivesTable.insertd("tapend", dirTAPEND);
 	DirectivesTable.insertd("define", dirDEFINE);
 	DirectivesTable.insertd("undefine", dirUNDEFINE);
 	DirectivesTable.insertd("defarray", dirDEFARRAY);
