@@ -87,6 +87,10 @@ FILE* FP_UnrealList;
 
 int EB[1024 * 64],nEB = 0;
 char WriteBuffer[DESTBUFLEN];
+int tape_seek = 0;
+int tape_length = 0;
+int tape_parity = 0x55;
+FILE* FP_tapout = NULL;
 FILE* FP_Input = NULL, * FP_Output = NULL, * FP_RAW = NULL;
 FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
 aint PreviousAddress,epadres,IsSkipErrors = 0;
@@ -235,6 +239,23 @@ void WriteDest() {
 	}
 	if (FP_RAW != NULL && (aint) fwrite(WriteBuffer, 1, WBLength, FP_RAW) != WBLength) {
 		Error("Write error (disk full?)", 0, FATAL);
+	}
+
+	if (FP_tapout)
+	{
+		int write_length = tape_length + WBLength > 65535 ? 65535 - tape_length : WBLength;
+
+		if ( (aint)fwrite(WriteBuffer, 1, write_length, FP_tapout) != write_length) Error("Write error (disk full?)", 0, FATAL);
+
+		for (int i = 0; i < write_length; i++) tape_parity ^= WriteBuffer[i];
+		tape_length += write_length;
+
+		if (write_length < WBLength)
+		{
+			WBLength = 0;
+			CloseTapFile();
+			Error("Tape block exceeds maximal size", 0);
+		}
 	}
 	WBLength = 0;
 }
@@ -1076,15 +1097,20 @@ void OpenUnrealList() {
 }
 
 void CloseDest() {
+	
+	// Correction for 1.10.1
+	// Flush buffer before any other operations
+	WriteDest();
+
 	// simple check
 	if (FP_Output == NULL) {
 		return;
 	}
 
 	long pad;
-	if (WBLength) {
-		WriteDest();
-	}
+	//if (WBLength) {
+	//	WriteDest();
+	//}
 	if (size != (aint)-1) {
 		if (destlen > size) {
 			Error("File exceeds 'size'", 0);
@@ -1104,6 +1130,7 @@ void CloseDest() {
 		}
 	}
 	fclose(FP_Output);
+	FP_Output = NULL;
 }
 
 void SeekDest(long offset, int method) {
@@ -1149,6 +1176,47 @@ void OpenDest(int mode) {
 	}
 }
 
+void CloseTapFile()
+{
+	char tap_data[2];
+
+	WriteDest();
+	if (FP_tapout == NULL) return;
+
+	tap_data[0] = tape_parity & 0xFF;
+	if (fwrite(tap_data, 1, 1, FP_tapout) != 1) Error("Write error (disk full?)", 0, FATAL);
+
+	if (fseek(FP_tapout, tape_seek, SEEK_SET)) Error("File seek end error in TAPOUT", 0, FATAL);
+
+	tap_data[0] =  tape_length     & 0xFF;
+	tap_data[1] = (tape_length>>8) & 0xFF;
+	if (fwrite(tap_data, 1, 2, FP_tapout) != 2) Error("Write error (disk full?)", 0, FATAL);
+
+	fclose(FP_tapout);
+	FP_tapout = NULL;
+}
+
+void OpenTapFile(char * tapename, int flagbyte)
+{
+	CloseTapFile();
+
+	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b"))	Error("Error opening file in TAPOUT", tapename, FATAL);
+	if (fseek(FP_tapout, 0, SEEK_END))			Error("File seek end error in TAPOUT", tapename, FATAL);
+	
+	tape_seek = ftell(FP_tapout);
+	tape_parity = flagbyte;
+	tape_length = 2;
+	
+	char tap_data[4] = { 0,0,0,0 };
+	tap_data[2] = flagbyte;
+	
+	if (fwrite(tap_data, 1, 3, FP_tapout) != 3)
+	{
+		fclose(FP_tapout);
+		Error("Write error (disk full?)", 0, FATAL);
+	}
+}
+
 int FileExists(char* filename) {
 	int exists = 0;
 	FILE* test;
@@ -1161,6 +1229,7 @@ int FileExists(char* filename) {
 
 void Close() {
 	CloseDest();
+	CloseTapFile();
 	if (FP_ExportFile != NULL) {
 		fclose(FP_ExportFile);
 		FP_ExportFile = NULL;
