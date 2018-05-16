@@ -3,7 +3,6 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="SjASMPlus" />
-		<Option platforms="Windows;Unix;" />
 		<Option makefile="Makefile.cbm" />
 		<Option pch_mode="0" />
 		<Option compiler="gcc" />
@@ -40,9 +39,24 @@
 					<Add option="-ldl -s" />
 				</Linker>
 			</Target>
+			<Target title="osx">
+				<Option platforms="Mac;" />
+				<Option output="sjasmplus" prefix_auto="0" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectResourceIncludeDirsRelation="1" />
+				<Compiler>
+					<Add option="-DUSE_LUA -DLUA_USE_MACOSX -DMAX_PATH=PATH_MAX" />
+					<Add directory="tolua++" />
+					<Add directory="lua5.1" />
+				</Compiler>
+				<Linker>
+					<Add option="-ldl" />
+				</Linker>
+			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="All" targets="win;unix;" />
+			<Add alias="All" targets="win;unix;osx;" />
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-O2" />
