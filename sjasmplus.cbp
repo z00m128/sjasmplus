@@ -3,7 +3,7 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="SjASMPlus" />
-		<Option makefile="Makefile.win32" />
+		<Option makefile="Makefile.win" />
 		<Option pch_mode="0" />
 		<Option compiler="gcc" />
 		<Build>
@@ -134,9 +134,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="lua5.1\lzio.h" />
-		<Unit filename="resources\SaveTAP_ZX_Spectrum_128K.bin.h" />
-		<Unit filename="resources\SaveTAP_ZX_Spectrum_256K.bin.h" />
-		<Unit filename="resources\SaveTAP_ZX_Spectrum_48K.bin.h" />
 		<Unit filename="sjasm\devices.cpp" />
 		<Unit filename="sjasm\devices.h" />
 		<Unit filename="sjasm\directives.cpp" />
@@ -145,6 +142,7 @@
 		<Unit filename="sjasm\io_snapshots.h" />
 		<Unit filename="sjasm\io_tape.cpp" />
 		<Unit filename="sjasm\io_tape.h" />
+		<Unit filename="sjasm\io_tape_ldrs.h" />
 		<Unit filename="sjasm\io_trd.cpp" />
 		<Unit filename="sjasm\io_trd.h" />
 		<Unit filename="sjasm\lua_lpack.c">

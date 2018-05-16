@@ -374,6 +374,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sjasm\io_tape_ldrs.h"
+				>
+			</File>
+			<File
 				RelativePath=".\sjasm\io_trd.cpp"
 				>
 			</File>
@@ -723,22 +727,6 @@
 			</File>
 			<File
 				RelativePath=".\sjasmwin32\sjasmwin32.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="resources"
-			>
-			<File
-				RelativePath=".\resources\SaveTAP_ZX_Spectrum_128K.bin.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resources\SaveTAP_ZX_Spectrum_256K.bin.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resources\SaveTAP_ZX_Spectrum_48K.bin.h"
 				>
 			</File>
 		</Filter>
