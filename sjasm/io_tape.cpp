@@ -27,10 +27,7 @@ misrepresented as being the original software.
 // io_tape.cpp
 
 #include "sjdefs.h"
-
-#include "../resources/SaveTAP_ZX_Spectrum_48K.bin.h"
-#include "../resources/SaveTAP_ZX_Spectrum_128K.bin.h"
-#include "../resources/SaveTAP_ZX_Spectrum_256K.bin.h"
+#include "io_tape_ldrs.h"
 
 unsigned char parity;
 unsigned char blocknum=1;
