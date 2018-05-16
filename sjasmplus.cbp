@@ -21,11 +21,9 @@
 					<Add directory="lua5.1" />
 				</Compiler>
 				<Linker>
+					<Add option="-s" />
 					<Add option="-static" />
 				</Linker>
-				<ExtraCommands>
-					<Add after="strip bin\sjasmplus.exe" />
-				</ExtraCommands>
 			</Target>
 			<Target title="unix">
 				<Option platforms="Unix;" />
