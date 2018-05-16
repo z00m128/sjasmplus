@@ -36,7 +36,8 @@
 					<Add directory="lua5.1" />
 				</Compiler>
 				<Linker>
-					<Add option="-ldl -s" />
+					<Add option="-s" />
+					<Add option="-ldl" />
 				</Linker>
 			</Target>
 			<Target title="osx">
