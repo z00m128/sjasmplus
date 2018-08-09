@@ -1518,12 +1518,16 @@ void dirUNDEFINE() {
 
 	if (*lp == '*') {
 		lp++;
-		LabelTable.RemoveAll();
+		if (pass == PASS1) {
+			LabelTable.RemoveAll();
+		}
 		DefineTable.RemoveAll();
 	} else if (DefineTable.FindDuplicate(id)) {
 		DefineTable.Remove(id);
 	} else if (LabelTable.Find(id)) {
-		LabelTable.Remove(id);
+		if (pass == PASS1) {
+			LabelTable.Remove(id);
+		}
 	} else {
 		Warning("[UNDEFINE] Identifier not found", 0); return;
 	}

@@ -453,9 +453,6 @@ void ListFileSkip(char* line) {
 	if (strlen(line) && line[strlen(line) - 1] != 10) {
 		STRCAT(line, LINEMAX, "\n");
 	}
-	else {
-		STRCPY(line, LINEMAX, "\n");
-	}
 	*pp = 0;
 	printCurrentLocalLine(pp);
 	PrintHEX16(pp, pad);
@@ -961,6 +958,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					}
 				} else if (*rlpbuf == '\r') {
 					rlpbuf++;RL_Readed--;
+					if (*rlpbuf && *rlpbuf == '\n') {
+						rlpbuf++;RL_Readed--;
+					}
 				}
 				*rlppos = 0;
 				if (strlen(line) == LINEMAX - 1) {
@@ -1100,7 +1100,7 @@ void OpenUnrealList() {
 }
 
 void CloseDest() {
-	
+
 	// Correction for 1.10.1
 	// Flush buffer before any other operations
 	WriteDest();
@@ -1205,14 +1205,14 @@ void OpenTapFile(char * tapename, int flagbyte)
 
 	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b"))	Error( "Error opening file in TAPOUT", tapename, FATAL);
 	if (fseek(FP_tapout, 0, SEEK_END))			Error("File seek end error in TAPOUT", tapename, FATAL);
-	
+
 	tape_seek = ftell(FP_tapout);
 	tape_parity = flagbyte;
 	tape_length = 2;
-	
+
 	char tap_data[4] = { 0,0,0,0 };
 	tap_data[2] = flagbyte;
-	
+
 	if (fwrite(tap_data, 1, 3, FP_tapout) != 3)
 	{
 		fclose(FP_tapout);
