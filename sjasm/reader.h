@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -29,11 +29,11 @@
 // reader.h
 
 int White();
-void SkipParam(char*&); /* added */
+void SkipParam(char*&);
 int SkipBlanks();
 void SkipBlanks(char*& p);
 int NeedEQU();
-int NeedDEFL(); /* added */
+int NeedDEFL();
 int NeedField();
 char* GetID(char*& p);
 char* getinstr(char*& p);
@@ -51,11 +51,11 @@ int needa(char*& p, const char* c1, int r1, const char* c2 = 0, int r2 = 0, cons
 int GetConstant(char*& op, aint& val);
 int GetCharConst(char*& p, aint& val);
 int GetCharConstChar(char*& op, aint& val);
-int GetCharConstCharSingle(char*& op, aint& val); /* added */
+int GetCharConstCharSingle(char*& op, aint& val);
 int GetBytes(char*& p, int e[], int add, int dc);
 int cmphstr(char*& p1, const char* p2);
 char* GetFileName(char*& p, bool convertslashes=false);
-char* GetHobetaFileName(char*& p); /* added */
+char* GetHobetaFileName(char*& p);
 int needcomma(char*& p);
 int needbparen(char*& p);
 int islabchar(char p);

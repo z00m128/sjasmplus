@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -67,11 +67,11 @@ extern char mline[LINEMAX2], sline[LINEMAX2], sline2[LINEMAX2];
 extern char SourceFNames[128][MAX_PATH];
 extern int CurrentSourceFName;
 
-extern bool displayinprocces, displayerror; /* added */
-extern int ConvertEncoding; /* added */
+extern bool displayinprocces, displayerror;
+extern int ConvertEncoding;
 extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, IsListingFileOpened, donotlist, listdata, listmacro;
-extern int adrdisp, PseudoORG; /* added for spectrum mode */
-extern char* MemoryRAM, * MemoryPointer; /* added for spectrum ram */
+extern int adrdisp, PseudoORG;
+extern char* MemoryRAM, * MemoryPointer;
 extern int MemoryCPage, MemoryPagesCount, StartAddress;
 extern aint MemorySize;
 extern int macronummer, lijst, reglenwidth, synerr;
@@ -80,7 +80,7 @@ extern aint CurAddress, AddressOfMAP, CurrentGlobalLine, CurrentLocalLine, Compi
 extern void (*GetCPUInstruction)(void);
 extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
 
-extern FILE* FP_ListingFile; 
+extern FILE* FP_ListingFile;
 
 enum EEncoding { ENCDOS, ENCWIN };
 extern char* CurrentDirectory;

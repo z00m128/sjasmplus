@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -29,13 +29,13 @@
 // sjio.h
 
 enum EStatus { ALL, PASS1, PASS2, PASS3, FATAL, CATCHALL, SUPPRESS };
-enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM }; 
+enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM };
 
 #ifdef PAGESIZE
 #undef PAGESIZE
 #endif
 
-#define PAGESIZE 0x4000 /* added */
+#define PAGESIZE 0x4000
 
 extern aint PreviousAddress, epadres;
 
@@ -43,48 +43,48 @@ extern aint PreviousAddress, epadres;
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2
 
-extern FILE* FP_UnrealList, * FP_Input; /* added */
+extern FILE* FP_UnrealList, * FP_Input;
 
-void OpenDest(int); /* added from new SjASM 0.39g */
-void NewDest(char* newfilename, int mode); /* added from new SjASM 0.39g */
-int FileExists(char* filename); /* added from new SjASM 0.39g */
+void OpenDest(int);
+void NewDest(char* newfilename, int mode);
+int FileExists(char* filename);
 void Error(const char*, const char*, int = PASS2);
 void Warning(const char*, const char*, int = PASS2);
 void ListFile();
 void ListFileSkip(char*);
-void CheckPage(); /* added */
+void CheckPage();
 void EmitByte(int byte);
 void EmitWord(int word);
 void EmitBytes(int* bytes);
 void EmitWords(int* words);
 void EmitBlock(aint byte, aint len, bool nulled = false);
 void OpenFile(char* nfilename);
-void IncludeFile(char* nfilename); /* added */
+void IncludeFile(char* nfilename);
 void Close();
 void OpenList();
-void OpenUnrealList(); /* added */
-void ReadBufLine(bool Parse = true, bool SplitByColon = true); /* added */
+void OpenUnrealList();
+void ReadBufLine(bool Parse = true, bool SplitByColon = true);
 void OpenDest();
 void CloseDest();
 void CloseTapFile();
 void OpenTapFile(char * tapename, int flagbyte);
 void PrintHEX32(char*& p, aint h);
-void PrintHEX16(char*& p, aint h); /* added */
-void PrintHEXAlt(char*& p, aint h); /* added */
-char* GetPath(char* fname, TCHAR** filenamebegin); /* added */
+void PrintHEX16(char*& p, aint h);
+void PrintHEXAlt(char*& p, aint h);
+char* GetPath(char* fname, TCHAR** filenamebegin);
 void BinIncFile(char* fname, int offset, int length);
 int SaveRAM(FILE*, int, int);
-unsigned char MemGetByte(unsigned int address); /* added */
-unsigned int MemGetWord(unsigned int address); /* added */
-int SaveBinary(char* fname, int start, int length); /* added */
-int SaveHobeta(char* fname, char* fhobname, int start, int length); /* added */
+unsigned char MemGetByte(unsigned int address);
+unsigned int MemGetWord(unsigned int address);
+int SaveBinary(char* fname, int start, int length);
+int SaveHobeta(char* fname, char* fhobname, int start, int length);
 int ReadLine(bool SplitByColon = true);
 EReturn ReadFile();
-EReturn ReadFile(const char* pp, const char* err); /* added */
+EReturn ReadFile(const char* pp, const char* err);
 EReturn SkipFile();
-EReturn SkipFile(char* pp, const char* err); /* added */
+EReturn SkipFile(char* pp, const char* err);
 void NewDest(char* newfilename);
-void SeekDest(long, int); /* added from new SjASM 0.39g */
+void SeekDest(long, int);
 int ReadFileToCStringsList(CStringsList*& f, const char* end);
 void WriteExp(char* n, aint v);
 

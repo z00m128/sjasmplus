@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -31,9 +31,9 @@
 int ParseExpression(char*& lp, aint& val);
 int ParseDirective(bool bol = 0);
 int ParseDirective_REPT();
-void ParseInstruction(); /* added */
-char* ReplaceDefine(char* lp); /* added */
-char* ReplaceDefineNext(char* lp); /* added */
+void ParseInstruction();
+char* ReplaceDefine(char* lp);
+char* ReplaceDefineNext(char* lp);
 void ParseLine(bool = true);
 void ParseLineSafe(bool = true);
 void ParseStructLine(CStructure* st);

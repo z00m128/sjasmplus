@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -41,9 +41,9 @@ int GetLocalLabelValue(char*& op, aint& val);
 class CLabelTableEntry {
 public:
 	char* name;
-	char page; /* added */
-	bool IsDEFL; /* added */
-	unsigned char forwardref; /* added */
+	char page;
+	bool IsDEFL;
+	unsigned char forwardref;
 	aint value;
 	char used;
 	CLabelTableEntry();
@@ -60,8 +60,8 @@ public:
 	int IsUsed(char*);
 	void RemoveAll();
 	void Dump();
-	void DumpForUnreal(); /* added */
-	void DumpSymbols(); /* added from SjASM 0.39g */
+	void DumpForUnreal();
+	void DumpSymbols();
 private:
 	int HashTable[LABTABSIZE], NextLocation;
 	CLabelTableEntry LabelTable[LABTABSIZE];
@@ -136,9 +136,9 @@ public:
 class CDefineTableEntry {
 public:
 	char* name, * value;
-	CStringsList* nss; /* added */
+	CStringsList* nss;
 	CDefineTableEntry* next;
-	CDefineTableEntry(const char*, const char*, CStringsList* /*added*/, CDefineTableEntry*);
+	CDefineTableEntry(const char*, const char*, CStringsList*, CDefineTableEntry*);
 };
 
 class CMacroDefineTable {
@@ -171,9 +171,9 @@ private:
 
 class CDefineTable {
 public:
-	CStringsList* DefArrayList; /* added */
+	CStringsList* DefArrayList;
 	void Init();
-	void Add(const char*, const char*, CStringsList* /*added*/);
+	void Add(const char*, const char*, CStringsList*);
 	char* Get(const char*);
 	int FindDuplicate(const char*);
 	int Replace(const char*, const char*);

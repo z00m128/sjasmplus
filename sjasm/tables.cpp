@@ -253,7 +253,6 @@ CLabelTable::CLabelTable() {
 	NextLocation = 1;
 }
 
-/* modified */
 int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false) {
 	printf("Insert label %s\n", nname);
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
@@ -275,7 +274,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, 
 				//if label already added as used
 				LabelTable[htr].value = nvalue;
 				LabelTable[htr].page = MemoryCPage;
-				LabelTable[htr].IsDEFL = IsDEFL; /* added */
+				LabelTable[htr].IsDEFL = IsDEFL;
 				return 1;
 			}
 		} else if (++tr >= LABTABSIZE) {
@@ -287,7 +286,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, 
 	if (LabelTable[NextLocation].name == NULL) {
 		Error("No enough memory!", 0, FATAL);
 	}
-	LabelTable[NextLocation].IsDEFL = IsDEFL; /* added */
+	LabelTable[NextLocation].IsDEFL = IsDEFL;
 	LabelTable[NextLocation].value = nvalue;
 	if (!undefined) {
 		LabelTable[NextLocation].used = -1;
@@ -295,12 +294,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, 
 	} else {
 		LabelTable[NextLocation].used = 1;
 		LabelTable[NextLocation].page = -1;
-	} /* added */
+	}
 	++NextLocation;
 	return 1;
 }
 
-/* added */
 int CLabelTable::Update(char* nname, aint nvalue) {
 	int tr, htr, otr;
 	otr = tr = Hash(nname);
@@ -336,9 +334,9 @@ int CLabelTable::GetValue(char* nname, aint& nvalue) {
 			} else {
 				nvalue = LabelTable[htr].value;
 				//if (pass == LASTPASS - 1) {
-					
+
 				//}
-				
+
 				return 1;
 			}
 		}
@@ -479,7 +477,6 @@ void CLabelTable::Dump() {
 	}
 }
 
-/* added */
 void CLabelTable::DumpForUnreal() {
 	char ln[LINEMAX], * ep;
 	int page;
@@ -537,7 +534,7 @@ void CLabelTable::DumpSymbols() {
 			l = lnrs;
 			STRCAT(ErrorLine, LINEMAX2, "0x");
 			PrintHEX32(l, LabelTable[i].value);
-			*l = 0; 
+			*l = 0;
 			STRCAT(ErrorLine, LINEMAX2, lnrs);
 			STRCAT(ErrorLine, LINEMAX2, "\n");
 			fputs(ErrorLine, symfp);
@@ -660,7 +657,6 @@ int CFunctionTable::Hash(const char* s) {
 	return h % FUNTABSIZE;
 }
 
-/* modified */
 CLocalLabelTableEntry::CLocalLabelTableEntry(aint nnummer, aint nvalue, CLocalLabelTableEntry* n) {
 	regel = CompiledCurrentLine;
 	nummer = nnummer;
@@ -683,7 +679,6 @@ void CLocalLabelTable::Insert(aint nnummer, aint nvalue) {
 	}
 }
 
-/* modified */
 aint CLocalLabelTable::zoekf(aint nnum) {
 	CLocalLabelTableEntry* l = first;
 	while (l) {
@@ -704,7 +699,6 @@ aint CLocalLabelTable::zoekf(aint nnum) {
 	return (aint) - 1;
 }
 
-/* modified */
 aint CLocalLabelTable::zoekb(aint nnum) {
 	CLocalLabelTableEntry* l = last;
 	while (l) {
@@ -725,7 +719,7 @@ aint CLocalLabelTable::zoekb(aint nnum) {
 	return (aint) - 1;
 }
 
-CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStringsList* nnss/*added*/, CDefineTableEntry* nnext) {
+CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStringsList* nnss, CDefineTableEntry* nnext) {
 	char* s1;
     char* sbegin,*s2;
 	name = STRDUP(nname);
@@ -737,11 +731,11 @@ CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStr
 		Error("No enough memory!", 0, FATAL);
 	}
 	s1 = value;
-	sbegin = s2 = strdup(nvalue); 
+	sbegin = s2 = strdup(nvalue);
 	SkipBlanks(s2);
 	while (*s2 && *s2 != '\n' && *s2 != '\r') {
 		*s1 = *s2; ++s1; ++s2;
-	} 
+	}
 	*s1 = 0;
 	free(sbegin);
 
@@ -755,7 +749,7 @@ void CDefineTable::Init() {
 	}
 }
 
-void CDefineTable::Add(const char* name, const char* value, CStringsList* nss/*added*/) {
+void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	if (FindDuplicate(name)) {
 		Error("Duplicate define", name);
 	}
@@ -916,7 +910,7 @@ char* CMacroDefineTable::getverv(char* name) {
 	FreeArray( array, count );
 
 	return replaced ? tempBuf : NULL;
-	// -- 
+	// --
 }
 
 void CMacroDefineTable::SplitToArray( const char* aName, char**& aArray, int& aCount, int* aPositions ) const
@@ -1047,7 +1041,6 @@ int CMacroTable::FindDuplicate(char* naam) {
 	return 0;
 }
 
-/* modified */
 void CMacroTable::Add(char* nnaam, char*& p) {
 	char* n;
 	CStringsList* s,* l = NULL,* f = NULL;
@@ -1056,7 +1049,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 		Error("Duplicate macroname", 0, PASS1);return;
 	}
 	char* macroname;
-	macroname = STRDUP(nnaam); /* added */
+	macroname = STRDUP(nnaam);
 	if (macroname == NULL) {
 		Error("No enough memory!", 0, FATAL);
 	}
@@ -1109,13 +1102,13 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	omacrolabp = macrolabp;
 	SPRINTF1(labnr, LINEMAX, "%d", macronummer++);
 	macrolabp = labnr;
-	if (omacrolabp) { 
+	if (omacrolabp) {
 		STRCAT(macrolabp, LINEMAX, "."); STRCAT(macrolabp, LINEMAX, omacrolabp);
 	} else {
 		MacroDefineTable.Init();
 	}
 	odefs = MacroDefineTable.getdefs();
-	//*lp=0; /* added */
+	//*lp=0;
 	a = m->args;
 	/* old:
 	while (a) {
@@ -1217,7 +1210,7 @@ CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, EStructur
 
 CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStructure* p) {
 	mnf = mnl = 0; mbf = mbl = 0;
-	naam = STRDUP(nnaam); 
+	naam = STRDUP(nnaam);
 	if (naam == NULL) {
 		Error("No enough memory!", 0, FATAL);
 	}
