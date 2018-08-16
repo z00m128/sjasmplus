@@ -254,7 +254,6 @@ CLabelTable::CLabelTable() {
 }
 
 int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false) {
-	printf("Insert label %s\n", nname);
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", 0, FATAL);
 	}
@@ -400,7 +399,6 @@ int CLabelTable::Remove(char* nname) {
 	otr = tr = Hash(nname);
 	while ((htr = HashTable[tr])) {
 		if (!strcmp((LabelTable[htr].name), nname)) {
-			printf("Found !\n");
 			*LabelTable[htr].name = 0;
 			LabelTable[htr].value = 0;
 			LabelTable[htr].used = 0;
