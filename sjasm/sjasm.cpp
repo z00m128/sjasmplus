@@ -109,12 +109,12 @@ int CurrentSourceFName = 0;
 int SourceFNamesCount = 0;
 
 bool displayerror,displayinprocces = 0;
-int ConvertEncoding = ENCWIN; /* added */
+int ConvertEncoding = ENCWIN;
 
 int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, IsListingFileOpened = 1, donotlist = 0,listdata  = 0,listmacro  = 0;
-int adrdisp = 0,PseudoORG = 0; /* added for spectrum ram */
-char* MemoryRAM=NULL, * MemoryPointer=NULL; /* added for spectrum ram */
+int adrdisp = 0,PseudoORG = 0;
+char* MemoryRAM=NULL, * MemoryPointer=NULL;
 int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;
 aint MemorySize = 0;
 int macronummer = 0, lijst = 0, reglenwidth = 0, synerr = 1;
@@ -125,7 +125,7 @@ char* CurrentDirectory=NULL;
 void (*GetCPUInstruction)(void);
 
 char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
-stack<SRepeatStack> RepeatStack; /* added */
+stack<SRepeatStack> RepeatStack;
 CStringsList* lijstp = 0;
 CLabelTable LabelTable;
 CLocalLabelTable LocalLabelTable;
@@ -143,7 +143,6 @@ int LuaLine=-1;
 
 #endif //USE_LUA
 
-/* modified */
 void InitPass(int p) {
 	reglenwidth = 1;
 	if (maxlin > 9) {
@@ -182,7 +181,7 @@ void InitPass(int p) {
 	CurAddress = AddressOfMAP = 0;
 	IsRunning = 1;
 	CurrentGlobalLine = CurrentLocalLine = CompiledCurrentLine = 0;
-	PseudoORG = 0; adrdisp = 0; /* added */
+	PseudoORG = 0; adrdisp = 0;
 	PreviousAddress = 0; epadres = 0; macronummer = 0; lijst = 0; comlin = 0;
 	ModuleList = NULL;
 	StructureTable.Init();
@@ -214,7 +213,7 @@ void FreeRAM() {
 	free(vorlabp);
 }
 
-/* added */
+
 void ExitASM(int p) {
 	FreeRAM();
 	if (pass == LASTPASS) {
@@ -336,7 +335,7 @@ int main(int argc, char **argv) {
 #endif
 #endif
 	char buf[MAX_PATH];
-	int base_encoding; /* added */
+	int base_encoding;
 	char* p;
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 	int i = 1;

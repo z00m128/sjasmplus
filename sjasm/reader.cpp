@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -30,21 +30,20 @@
 
 #include "sjdefs.h"
 
-/* modified */
 int cmphstr(char*& p1, const char* p2) {
 	unsigned int i = 0;
 	/* old:
-	if (isupper(*p1)) 
-	  while (p2[i]) { 
-		if (p1[i]!=toupper(p2[i])) return 0; 
-		++i; 
+	if (isupper(*p1))
+	  while (p2[i]) {
+		if (p1[i]!=toupper(p2[i])) return 0;
+		++i;
 	  }
-	else 
-	  while (p2[i]) { 
-		if (p1[i]!=p2[i]) return 0; 
-		++i; 
+	else
+	  while (p2[i]) {
+		if (p1[i]!=p2[i]) return 0;
+		++i;
 	  }*/
-	/* (begin) */  
+	/* (begin) */
 	unsigned int v = 0;
 	if (strlen(p1) >= strlen(p2)) {
 		if (isupper(*p1)) {
@@ -53,7 +52,7 @@ int cmphstr(char*& p1, const char* p2) {
 					v = 0;
 				} else {
 					++v;
-				} 
+				}
 				++i;
 			}
 			if (strlen(p2) != v) {
@@ -65,7 +64,7 @@ int cmphstr(char*& p1, const char* p2) {
 					v = 0;
 				} else {
 					++v;
-				} 
+				}
 				++i;
 			}
 			if (strlen(p2) != v) {
@@ -101,7 +100,6 @@ void SkipBlanks(char*& p) {
 	}
 }
 
-/* added */
 void SkipParam(char*& p) {
 	SkipBlanks(p);
 	if (!(*p)) {
@@ -112,7 +110,6 @@ void SkipParam(char*& p) {
 	}
 }
 
-/* modified */
 int NeedEQU() {
 	char* olp = lp;
 	SkipBlanks();
@@ -128,7 +125,6 @@ int NeedEQU() {
 	return 0;
 }
 
-/* added */
 int NeedDEFL() {
 	char* olp = lp;
 	SkipBlanks();
@@ -216,8 +212,8 @@ char* getparen(char* p) {
 	return 0;
 }
 
-char nidtemp[LINEMAX]; /* added */
-/* modified */
+char nidtemp[LINEMAX];
+
 char* GetID(char*& p) {
 	/*char nid[LINEMAX],*/ char* np;
 	np = nidtemp;
@@ -237,8 +233,8 @@ char* GetID(char*& p) {
 	return nidtemp;
 }
 
-char instrtemp[LINEMAX]; /* added */
-/* modified */
+char instrtemp[LINEMAX];
+
 char* getinstr(char*& p) {
 	/*char nid[LINEMAX],*/ char* np;
 	np = instrtemp;
@@ -413,7 +409,7 @@ int GetConstant(char*& op, aint& val) {
 		}
 
 		op = p;
-		
+
 		return 1;
 	case '0':
 		++p;
@@ -541,7 +537,6 @@ int GetCharConstChar(char*& op, aint& val) {
 	return 0;
 }
 
-/* added */
 int GetCharConstCharSingle(char*& op, aint& val) {
 	if ((val = *op++) != '\\') {
 		return 1;
@@ -576,7 +571,6 @@ int GetCharConst(char*& p, aint& val) {
 	return 1;
 }
 
-/* modified */
 int GetBytes(char*& p, int e[], int add, int dc) {
 	aint val;
 	int t = 0;
@@ -645,7 +639,6 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	return t;
 }
 
-/* modified */
 char* GetFileName(char*& p, bool convertslashes) {
 	int o = 0;
 	int o2 = 0;
@@ -666,7 +659,7 @@ char* GetFileName(char*& p, bool convertslashes) {
 	}
 	if (*p && strstr(p, ":")) {
 		o2 = 1;
-	} /* added */
+	}
 	/* while (!White() && *p!='"' && *p!='>') { *np=*p; ++np; ++p; } */
 	while (*p && *p != '"' && *p != '>' && !(o == 0 && o2 == 1 && *p == ':')) {
 		*np = *p; ++np; ++p;
@@ -682,7 +675,7 @@ char* GetFileName(char*& p, bool convertslashes) {
 	} else if (*p) {
 		++p;
 	}
-	*np = 0; 
+	*np = 0;
 	for (np = fn; *np; ++np) {
 #if defined(WIN32) || defined(UNDER_CE)
 		if (*np == '/' && convertslashes) {
@@ -697,7 +690,6 @@ char* GetFileName(char*& p, bool convertslashes) {
 	return fn;
 }
 
-/* added */
 char* GetHobetaFileName(char*& p) {
 	int o = 0;
 	int o2 = 0;
@@ -718,7 +710,7 @@ char* GetHobetaFileName(char*& p) {
 	}
 	if (*p && strstr(p, ":")) {
 		o2 = 1;
-	} /* added */
+	}
 	while (*p && !White() && *p != '"' && *p != '>' && !(o == 0 && o2 == 1 && *p == ':')) {
 		*np = *p; ++np; ++p;
 	}
@@ -733,7 +725,7 @@ char* GetHobetaFileName(char*& p) {
 	} else if (*p) {
 		++p;
 	}
-	*np = 0; 
+	*np = 0;
 	return fn;
 }
 
@@ -839,7 +831,6 @@ EStructureMembers GetStructMemberId(char*& p) {
 	return SMEMBUNKNOWN;
 }
 
-/* added */
 int GetArray(char*& p, int e[], int add, int dc) {
 	aint val;
 	int t = 0;

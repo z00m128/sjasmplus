@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -33,9 +33,9 @@ namespace Z80 {
 #define ASSERT_FAKE_INSTRUCTIONS(operation) if (!Options::FakeInstructions) { \
 		operation; \
 	}
-	//char* my_p = lp; 
-	//SkipBlanks(my_p); 
-	//Warning("Fake instructions is disabled. The instruction was not compiled", my_p, LASTPASS); 
+	//char* my_p = lp;
+	//SkipBlanks(my_p);
+	//Warning("Fake instructions is disabled. The instruction was not compiled", my_p, LASTPASS);
 
 	CFunctionTable OpCodeTable;
 
@@ -211,7 +211,6 @@ namespace Z80 {
 		return Z80C_UNK;
 	}
 
-	/* modified */
 	Z80Reg GetRegister(char*& p) {
 		char* pp = p;
 		SkipBlanks(p);
@@ -221,7 +220,7 @@ namespace Z80 {
 				return Z80_A;
 			}
 			if (*p == 'f' && !islabchar(*(p + 1))) {
-				++p; 
+				++p;
 				return Z80_AF;
 			}
 			break;
@@ -520,12 +519,10 @@ namespace Z80 {
 		return Z80_UNK;
 	}
 
-	/* modified */
 	void OpCode_ADC() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_HL:
@@ -619,12 +616,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_ADD() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_HL:
@@ -752,18 +747,16 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_AND() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
 				/*if (!comma(lp)) { e[0]=0xa7; break; }
 							reg=GetRegister(lp);*/
-				e[0] = 0xa7; break; /* added */
+				e[0] = 0xa7; break;
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -833,12 +826,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_BIT() {
 		Z80Reg reg;
 		int e[5], bit;
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			bit = GetByte(lp);
 			if (!comma(lp)) {
@@ -888,12 +879,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_CALL() {
 		aint callad;
 		int e[4], b;
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (getz80cond(lp)) {
 			case Z80C_C:
@@ -954,12 +943,10 @@ namespace Z80 {
 		EmitByte(0x3f);
 	}
 
-	/* modified */
 	void OpCode_CP() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
@@ -1075,12 +1062,10 @@ namespace Z80 {
 		EmitByte(0x27);
 	}
 
-	/* modified */
 	void OpCode_DEC() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (GetRegister(lp)) {
 			case Z80_A:
@@ -1152,13 +1137,11 @@ namespace Z80 {
 		EmitByte(0xf3);
 	}
 
-	/* modified */
 	void OpCode_DJNZ() {
 		int jmp;
 		aint nad;
 		int e[3];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = -1;
 			if (!GetAddress(lp, nad)) {
 				nad = CurAddress + 2;
@@ -1246,12 +1229,10 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* added */
 	void OpCode_EXA() {
 		EmitByte(0x08);
 	}
 
-	/* added */
 	void OpCode_EXD() {
 		EmitByte(0xeb);
 	}
@@ -1280,12 +1261,10 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* modified */
 	void OpCode_IN() {
 		Z80Reg reg;
 		int e[3];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
@@ -1365,12 +1344,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_INC() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (GetRegister(lp)) {
 			case Z80_A:
@@ -1478,14 +1455,12 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* modified */
 	void OpCode_JP() {
 		Z80Reg reg;
 		int haakjes = 0;
 		aint jpad;
 		int e[4],b,k = 0;
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (getz80cond(lp)) {
 			case Z80C_C:
@@ -1572,12 +1547,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_JR() {
 		aint jrad=0;
 		int e[4], jmp=0;
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (getz80cond(lp)) {
 			case Z80C_C:
@@ -1632,7 +1605,6 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_LD() {
 		Z80Reg reg;
 		int e[7], beginhaakje;
@@ -1640,7 +1612,6 @@ namespace Z80 {
 		char* olp;
 
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = e[5] = e[6] = -1;
 			switch (GetRegister(lp)) {
 			case Z80_F:
@@ -2105,7 +2076,7 @@ namespace Z80 {
 				}
 				if (GetRegister(lp) == Z80_A) {
 					e[0] = 0xed;
-				} 
+				}
 				e[1] = 0x47; break;
 				break;
 
@@ -2115,7 +2086,7 @@ namespace Z80 {
 				}
 				if (GetRegister(lp) == Z80_A) {
 					e[0] = 0xed;
-				} 
+				}
 				e[1] = 0x4f; break;
 				break;
 
@@ -2306,7 +2277,7 @@ namespace Z80 {
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if (cparen(lp)) {
 							e[0] = 0x4e;
-						} 
+						}
 						e[1] = 0x23; e[2] = 0x46; e[3] = 0x2b;
 						break;
 					case Z80_IX:
@@ -2315,7 +2286,7 @@ namespace Z80 {
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							// _COUT "E1 " _CMDL b _ENDL;
 							Error("Offset out of range1", 0);
-						} 
+						}
 						if (cparen(lp)) {
 							e[0] = e[3] = reg;
 						} e[1] = 0x4e; e[4] = 0x46; e[2] = b; e[5] = b + 1; break;
@@ -2380,7 +2351,7 @@ namespace Z80 {
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							// _COUT "E2 " _CMDL b _ENDL;
 							Error("Offset out of range2", 0);
-						} 
+						}
 						if (cparen(lp)) {
 							e[0] = e[3] = reg;
 						} e[1] = 0x5e; e[4] = 0x56; e[2] = b; e[5] = b + 1; break;
@@ -2439,7 +2410,7 @@ namespace Z80 {
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							// _COUT "E3 " _CMDL b _ENDL;
 							Error("Offset out of range3", 0);
-						} 
+						}
 						if (cparen(lp)) {
 							e[0] = e[3] = reg;
 						} e[1] = 0x6e; e[4] = 0x66; e[2] = b; e[5] = b + 1; break;
@@ -2643,19 +2614,19 @@ namespace Z80 {
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if (e[2] == 127) {
 							Error("Offset out of range", 0, LASTPASS);
-						} 
+						}
 						e[0] = e[3] = 0xdd; e[1] = 0x71; e[4] = 0x70; e[5] = e[2] + 1; break;
 					case Z80_DE:
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if (e[2] == 127) {
 							Error("Offset out of range", 0, LASTPASS);
-						} 
+						}
 						e[0] = e[3] = 0xdd; e[1] = 0x73; e[4] = 0x72; e[5] = e[2] + 1; break;
 					case Z80_HL:
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if (e[2] == 127) {
 							Error("Offset out of range", 0, LASTPASS);
-						} 
+						}
 						e[0] = e[3] = 0xdd; e[1] = 0x75; e[4] = 0x74; e[5] = e[2] + 1; break;
 					default:
 						e[0] = 0xdd; e[1] = 0x36; e[3] = GetByte(lp);
@@ -2695,19 +2666,19 @@ namespace Z80 {
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if (e[2] == 127) {
 							Error("Offset out of range", 0, LASTPASS);
-						} 
+						}
 						e[0] = e[3] = 0xfd; e[1] = 0x71; e[4] = 0x70; e[5] = e[2] + 1; break;
 					case Z80_DE:
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if (e[2] == 127) {
 							Error("Offset out of range", 0, LASTPASS);
-						} 
+						}
 						e[0] = e[3] = 0xfd; e[1] = 0x73; e[4] = 0x72; e[5] = e[2] + 1; break;
 					case Z80_HL:
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if (e[2] == 127) {
 							Error("Offset out of range", 0, LASTPASS);
-						} 
+						}
 						e[0] = e[3] = 0xfd; e[1] = 0x75; e[4] = 0x74; e[5] = e[2] + 1; break;
 					default:
 						e[0] = 0xfd; e[1] = 0x36; e[3] = GetByte(lp);
@@ -2755,7 +2726,6 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_LDD() {
 		Z80Reg reg, reg2;
 		int e[7], b;
@@ -2769,7 +2739,6 @@ namespace Z80 {
 		}
 
 		do {
-			/* modified */
 			e[0] = e[1] = e[2] = e[3] = e[4] = e[5] = e[6] = -1;
 			//if (Options::FakeInstructions) {
 				switch (reg = GetRegister(lp)) {
@@ -2836,9 +2805,9 @@ namespace Z80 {
 				default:
 					if (oparen(lp, '[') || oparen(lp, '(')) {
 						reg = GetRegister(lp);
-						
+
 						b = 0;
-						
+
 						if (reg == Z80_IX || reg == Z80_IY) {
 							b = z80GetIDxoffset(lp);
 						}
@@ -2917,7 +2886,6 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* modified */
 	void OpCode_LDI() {
 		Z80Reg reg, reg2;
 		int e[11], b;
@@ -2931,9 +2899,8 @@ namespace Z80 {
 		}
 
 		do {
-			/* modified */
 			e[0] = e[1] = e[2] = e[3] = e[4] = e[5] = e[6] = e[10] = -1;
-			
+
 				switch (reg = GetRegister(lp)) {
 				case Z80_A:
 					if (!comma(lp)) {
@@ -3121,7 +3088,7 @@ namespace Z80 {
 						break;
 					}
 				}
-			
+
 			EmitBytes(e);
 			/* (begin add) */
 			if (*lp && comma(lp)) {
@@ -3193,18 +3160,16 @@ namespace Z80 {
 		EmitByte(0x0);
 	}
 
-	/* modified */
 	void OpCode_OR() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
 				/*if (!comma(lp)) { e[0]=0xb7; break; }
 							reg=GetRegister(lp);*/
-				e[0] = 0xb7; break; /* added */
+				e[0] = 0xb7; break;
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -3290,12 +3255,10 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* modified */
 	void OpCode_OUT() {
 		Z80Reg reg;
 		int e[3];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = -1;
 			if (oparen(lp, '[') || oparen(lp, '(')) {
 				if (GetRegister(lp) == Z80_C) {
@@ -3361,7 +3324,6 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* added */
 	void OpCode_POPreverse() {
 		int e[30],t = 29,c = 1;
 		e[t] = -1;
@@ -3389,7 +3351,6 @@ namespace Z80 {
 		EmitBytes(&e[t]);
 	}
 
-	/* modified. old version of this procedure is pizPOPreverse() */
 	void OpCode_POP() {
 		int e[30],t = 0,c = 1;
 		do {
@@ -3444,12 +3405,10 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* modified */
 	void OpCode_RES() {
 		Z80Reg reg;
 		int e[5], bit;
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			bit = GetByte(lp);
 			if (!comma(lp)) {
@@ -3514,11 +3473,9 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_RET() {
 		int e;
 		do {
-			/* added */
 			switch (getz80cond(lp)) {
 			case Z80C_C:
 				e = 0xd8; break;
@@ -3566,12 +3523,10 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* modified */
 	void OpCode_RL() {
 		Z80Reg reg;
 		int e[5];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_B:
@@ -3610,7 +3565,7 @@ namespace Z80 {
 				case Z80_HL:
 					if (cparen(lp)) {
 						e[0] = 0xcb;
-					} 
+					}
 					e[1] = 0x16; break;
 				case Z80_IX:
 				case Z80_IY:
@@ -3653,12 +3608,10 @@ namespace Z80 {
 		EmitByte(0x17);
 	}
 
-	/* modified */
 	void OpCode_RLC() {
 		Z80Reg reg;
 		int e[5];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_B:
@@ -3677,7 +3630,7 @@ namespace Z80 {
 				case Z80_HL:
 					if (cparen(lp)) {
 						e[0] = 0xcb;
-					} 
+					}
 					e[1] = 0x6; break;
 				case Z80_IX:
 				case Z80_IY:
@@ -3728,12 +3681,10 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* modified */
 	void OpCode_RR() {
 		Z80Reg reg;
 		int e[5];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_B:
@@ -3761,7 +3712,7 @@ namespace Z80 {
 				case Z80_HL:
 					if (cparen(lp)) {
 						e[0] = 0xcb;
-					} 
+					}
 					e[1] = 0x1e; break;
 				case Z80_IX:
 				case Z80_IY:
@@ -3804,12 +3755,10 @@ namespace Z80 {
 		EmitByte(0x1f);
 	}
 
-	/* modified */
 	void OpCode_RRC() {
 		Z80Reg reg;
 		int e[5];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_B:
@@ -3828,7 +3777,7 @@ namespace Z80 {
 				case Z80_HL:
 					if (cparen(lp)) {
 						e[0] = 0xcb;
-					} 
+					}
 					e[1] = 0xe; break;
 				case Z80_IX:
 				case Z80_IY:
@@ -3879,11 +3828,9 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	/* modified */
 	void OpCode_RST() {
 		int e;
 		do {
-			/* added */
 			switch (GetByte(lp)) {
 			case 0x00:
 				e = 0xc7; break;
@@ -3915,12 +3862,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_SBC() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_HL:
@@ -4018,12 +3963,10 @@ namespace Z80 {
 		EmitByte(0x37);
 	}
 
-	/* modified */
 	void OpCode_SET() {
 		Z80Reg reg;
 		int e[5], bit;
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			bit = GetByte(lp);
 			if (!comma(lp)) {
@@ -4088,12 +4031,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_SLA() {
 		Z80Reg reg;
 		int e[5];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_B:
@@ -4120,7 +4061,7 @@ namespace Z80 {
 				case Z80_HL:
 					if (cparen(lp)) {
 						e[0] = 0xcb;
-					} 
+					}
 					e[1] = 0x26; break;
 				case Z80_IX:
 				case Z80_IY:
@@ -4159,12 +4100,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_SLL() {
 		Z80Reg reg;
 		int e[5];
 		do {
-			/* modified */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_B:
@@ -4192,7 +4131,7 @@ namespace Z80 {
 				case Z80_HL:
 					if (cparen(lp)) {
 						e[0] = 0xcb;
-					} 
+					}
 					e[1] = 0x36; break;
 				case Z80_IX:
 				case Z80_IY:
@@ -4231,12 +4170,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_SRA() {
 		Z80Reg reg;
 		int e[5];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_B:
@@ -4264,7 +4201,7 @@ namespace Z80 {
 				case Z80_HL:
 					if (cparen(lp)) {
 						e[0] = 0xcb;
-					} 
+					}
 					e[1] = 0x2e; break;
 				case Z80_IX:
 				case Z80_IY:
@@ -4303,12 +4240,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_SRL() {
 		Z80Reg reg;
 		int e[5];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_B:
@@ -4336,7 +4271,7 @@ namespace Z80 {
 				case Z80_HL:
 					if (cparen(lp)) {
 						e[0] = 0xcb;
-					} 
+					}
 					e[1] = 0x3e; break;
 				case Z80_IX:
 				case Z80_IY:
@@ -4375,12 +4310,10 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_SUB() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_HL:
@@ -4406,7 +4339,7 @@ namespace Z80 {
 			case Z80_A:
 				/*if (!comma(lp)) { e[0]=0x97; break; }
 							reg=GetRegister(lp);*/
-				e[0] = 0x97; break; /* added */
+				e[0] = 0x97; break;
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -4476,18 +4409,16 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void OpCode_XOR() {
 		Z80Reg reg;
 		int e[4];
 		do {
-			/* added */
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
 				/*if (!comma(lp)) { e[0]=0xaf; break; }
 							reg=GetRegister(lp);*/
-				e[0] = 0xaf; break; /* added */
+				e[0] = 0xaf; break;
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -4557,7 +4488,6 @@ namespace Z80 {
 		/* (end add) */
 	}
 
-	/* modified */
 	void Init() {
 		OpCodeTable.Insert("adc", OpCode_ADC);
 		OpCodeTable.Insert("add", OpCode_ADD);
@@ -4577,8 +4507,8 @@ namespace Z80 {
 		OpCodeTable.Insert("djnz", OpCode_DJNZ);
 		OpCodeTable.Insert("ei", OpCode_EI);
 		OpCodeTable.Insert("ex", OpCode_EX);
-		OpCodeTable.Insert("exa", OpCode_EXA); /* added */
-		OpCodeTable.Insert("exd", OpCode_EXD); /* added */
+		OpCodeTable.Insert("exa", OpCode_EXA);
+		OpCodeTable.Insert("exd", OpCode_EXD);
 		OpCodeTable.Insert("exx", OpCode_EXX);
 		OpCodeTable.Insert("halt", OpCode_HALT);
 		OpCodeTable.Insert("im", OpCode_IM);

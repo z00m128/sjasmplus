@@ -327,12 +327,10 @@ void PrintHEX16(char*& p, aint h) {
 	*(p++) = hd[hh];
 }
 
-/* added */
 char hd2[] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
 };
 
-/* added */
 void PrintHEXAlt(char*& p, aint h) {
 	aint hh = h&0xffffffff;
 	if (hh >> 28 != 0) {
@@ -453,6 +451,9 @@ void ListFileSkip(char* line) {
 	if (strlen(line) && line[strlen(line) - 1] != 10) {
 		STRCAT(line, LINEMAX, "\n");
 	}
+	else {
+		STRCPY(line, LINEMAX, "\n");
+	}
 	*pp = 0;
 	printCurrentLocalLine(pp);
 	PrintHEX16(pp, pad);
@@ -472,7 +473,6 @@ void ListFileSkip(char* line) {
 	listdata = 0;
 }
 
-/* added */
 void CheckPage() {
 	if (!DeviceID) {
 		return;
@@ -543,7 +543,6 @@ void CheckPage() {
 	ExitASM(1);
 }
 
-/* modified */
 void Emit(int byte) {
 	EB[nEB++] = byte;
 	if (pass == LASTPASS) {
@@ -591,7 +590,7 @@ void Emit(int byte) {
 	}
 	if (PseudoORG) {
 		++adrdisp;
-	} /* added */
+	}
 
 	if (pass != LASTPASS && DeviceID && CurAddress >= 0x10000) {
 		char buf[1024];
@@ -632,7 +631,6 @@ void EmitWords(int* words) {
 	}
 }
 
-/* modified */
 void EmitBlock(aint byte, aint len, bool nulled) {
 	PreviousAddress = CurAddress;
 	if (len) {
@@ -682,7 +680,7 @@ void EmitBlock(aint byte, aint len, bool nulled) {
 		}
 		if (PseudoORG) {
 			++adrdisp;
-		} /* added */
+		}
 		if (pass != LASTPASS && DeviceID && CurAddress >= 0x10000) {
 			char buf[1024];
 			SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
@@ -910,7 +908,6 @@ void OpenFile(char* nfilename) {
 	CurrentLocalLine = oCurrentLocalLine;
 }
 
-/* added */
 void IncludeFile(char* nfilename) {
 	FILE* oFP_Input = FP_Input;
 	FP_Input = 0;
@@ -939,7 +936,6 @@ void IncludeFile(char* nfilename) {
 	FP_Input = oFP_Input;
 }
 
-/* added */
 void ReadBufLine(bool Parse, bool SplitByColon) {
 	rlppos = line;
 	if (rlcolon) {
@@ -997,9 +993,10 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				} else {
 					return;
 				}
-			  	rlppos = line; if (rlcolon) {
-							   	*(rlppos++) = ' ';
-							   }
+			  	rlppos = line;
+				if (rlcolon) {
+					*(rlppos++) = ' ';
+				}
 			} else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
 			  	lp = line; *rlppos = 0; char* n;
 				if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
@@ -1023,17 +1020,19 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 						return;
 					}
 					rlspace = true;
-					rlppos = line; if (rlcolon) {
-								   	*(rlppos++) = ' ';
-								   }
-				} else {
-					//it's label
-					*(rlppos++) = ':';
-					*(rlppos++) = ' ';
-					rlspace = true;
-					while (*rlpbuf && *rlpbuf == ':') {
-						rlpbuf++;RL_Readed--;
+					rlppos = line;
+					if (rlcolon) {
+						*(rlppos++) = ' ';
 					}
+				} else {
+				    // it's label
+				    *(rlppos++) = ':';
+				    *(rlppos++) = ' ';
+				    rlspace = true;
+				    while (*rlpbuf && *rlpbuf == ':') {
+					rlpbuf++;
+					RL_Readed--;
+				    }
 				}
 			} else {
 				if (*rlpbuf == '\'' && !rldquotes && !rlcomment) {
@@ -1080,7 +1079,6 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	}
 }
 
-/* modified */
 void OpenList() {
 	if (Options::ListingFName[0]) {
 		if (!FOPEN_ISOK(FP_ListingFile, Options::ListingFName, "w")) {
@@ -1089,7 +1087,6 @@ void OpenList() {
 	}
 }
 
-/* added */
 void OpenUnrealList() {
 	/*if (!FP_UnrealList && Options::UnrealLabelListFName && !FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
 		Error("Error opening file", Options::UnrealLabelListFName, FATAL);

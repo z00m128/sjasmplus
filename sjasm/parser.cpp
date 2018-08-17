@@ -31,9 +31,8 @@
 #include "sjdefs.h"
 
 int replacedefineteller = 0, comnxtlin;
-char dirDEFl[] = "def", dirDEFu[] = "DEF"; /* added for ReplaceDefine */
+char dirDEFl[] = "def", dirDEFu[] = "DEF";
 
-/* modified */
 int ParseExpPrim(char*& p, aint& nval) {
 	int res = 0;
 	SkipBlanks(p);
@@ -84,7 +83,7 @@ int ParseExpPrim(char*& p, aint& nval) {
 		if (synerr) {
 			Error("Syntax error", p, CATCHALL);
 		}
-		
+
 		return 0;
 	}
 	return res;
@@ -360,13 +359,12 @@ int ParseExpression(char*& p, aint& nval) {
 	return 0;
 }
 
-/* modified */
 char* ReplaceDefine(char* lp) {
 	int definegereplaced = 0,dr;
 	/*char *nl=new char[LINEMAX2];*/
-	char* nl = sline; /* added. speed up! */
+	char* nl = sline;
 	char* rp = nl,* nid,* kp,* ver,a;
-//	int def = 0; /* added */ /* removed, not used ;] */
+//	int def = 0;
 	if (++replacedefineteller > 20) {
 		Error("Over 20 defines nested", 0, FATAL);
 	}
@@ -521,7 +519,6 @@ char* ReplaceDefine(char* lp) {
 	return nl;
 }
 
-/* added */
 char* ReplaceDefineNext(char* lp) {
 	int definegereplaced = 0,dr;
 	char* nl = sline2;
@@ -657,7 +654,6 @@ char* ReplaceDefineNext(char* lp) {
 	return nl;
 }
 
-/* modified */
 void ParseLabel() {
 	char* tp, temp[LINEMAX], * ttp;
 	aint val, oval;
@@ -669,7 +665,7 @@ void ParseLabel() {
 			++lp;
 		}
 		return;
-	} /* added */
+	}
 	tp = temp;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
 		*tp = *lp; ++tp; ++lp;
@@ -692,7 +688,7 @@ void ParseLabel() {
 			LocalLabelTable.Insert(val, CurAddress);
 		}
 	} else {
-		bool IsDEFL = 0; /* added */
+		bool IsDEFL = 0;
 		if (NeedEQU()) {
 			if (!ParseExpression(lp, val)) {
 				Error("Expression error", lp); val = 0;
@@ -812,7 +808,6 @@ unsigned char win2dos[] = //taken from HorrorWord %)))
 };
 /* (end add) */
 
-/* modified */
 void ParseLine(bool parselabels) {
 	/*++CurrentGlobalLine;*/
 	replacedefineteller = comnxtlin = 0;
@@ -871,7 +866,6 @@ void ParseLine(bool parselabels) {
 	ListFile();
 }
 
-/* added */
 void ParseLineSafe(bool parselabels) {
 	char* tmp = NULL, * tmp2 = NULL;
 	char* rp = lp;
