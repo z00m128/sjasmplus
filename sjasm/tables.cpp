@@ -1151,7 +1151,23 @@ int CMacroTable::Emit(char* naam, char*& p) {
 				*n = *p; ++n; ++p;
 			}
 			++p;
-		} else {
+		} else if(*p == '"') {
+            *n = *p; ++n; ++p;
+            while(*p && *p != '"') {
+                *n = *p; ++n; ++p;
+            }
+            if(*p) {
+                *n = *p; ++n; ++p;
+            }
+		} else if(*p == '\'') {
+		    *n = *p; ++n; ++p;
+            while(*p && *p != '\'') {
+                *n = *p; ++n; ++p;
+            }
+            if(*p) {
+                *n = *p; ++n; ++p;
+            }
+        } else {
 			while (*p && *p != ',') {
 				*n = *p; ++n; ++p;
 			}
