@@ -214,6 +214,30 @@ namespace Z80 {
 	Z80Reg GetRegister(char*& p) {
 		char* pp = p;
 		SkipBlanks(p);
+		if(memcmp(p, "high ", 5) == 0 || memcmp(p, "HIGH ", 5) == 0) {
+			p += 5;
+			switch(GetRegister(p)) {
+				case Z80_AF : return Z80_A;
+				case Z80_BC : return Z80_B;
+				case Z80_DE : return Z80_D;
+				case Z80_HL : return Z80_H;
+				case Z80_IX : return Z80_IXH;
+				case Z80_IY : return Z80_IYH;
+				default : p -= 5; return Z80_UNK;
+			}
+		}
+		if(memcmp(p, "low ", 4) == 0 || memcmp(p, "LOW ", 4) == 0) {
+			p += 4;
+				switch(GetRegister(p)) {
+				case Z80_AF : return Z80_F;
+				case Z80_BC : return Z80_C;
+				case Z80_DE : return Z80_E;
+				case Z80_HL : return Z80_L;
+				case Z80_IX : return Z80_IXL;
+				case Z80_IY : return Z80_IYL;
+				default : p -= 4; return Z80_UNK;
+			}
+		}
 		switch (*(p++)) {
 		case 'a':
 			if (!islabchar(*p)) {
