@@ -32,7 +32,7 @@
 
 char* PreviousIsLabel;
 
-char* ValidateLabel(char* naam) {
+char* ValidateLabel(char* naam, int set_namespace) {
 	char* np = naam,* lp,* label,* mlp = macrolabp;
 	int p = 0,l = 0;
 	label = new char[LINEMAX];
@@ -80,7 +80,7 @@ char* ValidateLabel(char* naam) {
 		}
 		if (l) {
 			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
-		} else {
+		} else if (set_namespace) {
 			free(vorlabp);
 			vorlabp = STRDUP(naam);
 			if (vorlabp == NULL) {
@@ -1337,7 +1337,7 @@ void CStructure::deflab() {
 	STRCPY(sn, LINEMAX, "@");
 	STRCAT(sn, LINEMAX, id);
 	op = p = sn;
-	p = ValidateLabel(p);
+	p = ValidateLabel(p, 1);
 	if (pass == LASTPASS) {
 		if (!GetLabelValue(op, oval)) {
 			Error("Internal error. ParseLabel()", 0, FATAL);
@@ -1356,7 +1356,7 @@ void CStructure::deflab() {
 		STRCPY(ln, LINEMAX, sn);
 		STRCAT(ln, LINEMAX, np->naam);
 		op = ln;
-		if (!(p = ValidateLabel(ln))) {
+		if (!(p = ValidateLabel(ln, 1))) {
 			Error("Illegal labelname", ln, PASS1);
 		}
 		if (pass == LASTPASS) {
@@ -1382,7 +1382,7 @@ void CStructure::emitlab(char* iid) {
 	CStructureEntry1* np = mnf;
 	STRCPY(sn, LINEMAX, iid);
 	op = p = sn;
-	p = ValidateLabel(p);
+	p = ValidateLabel(p, 1);
 	if (pass == LASTPASS) {
 		if (!GetLabelValue(op, oval)) {
 			Error("Internal error. ParseLabel()", 0, FATAL);
@@ -1401,7 +1401,7 @@ void CStructure::emitlab(char* iid) {
 		STRCPY(ln, LINEMAX, sn);
 		STRCAT(ln, LINEMAX, np->naam);
 		op = ln;
-		if (!(p = ValidateLabel(ln))) {
+		if (!(p = ValidateLabel(ln, 1))) {
 			Error("Illegal labelname", ln, PASS1);
 		}
 		if (pass == LASTPASS) {

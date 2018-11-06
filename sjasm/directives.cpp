@@ -1341,7 +1341,7 @@ void dirIFUSED() {
 	if (id == NULL || *id == 0) {
 		id = LastParsedLabel;
 	} else {
-		id = ValidateLabel(id);
+		id = ValidateLabel(id, 0);
 		if (id == NULL) {
 			Error("[IFUSED] Invalid label name", 0, CATCHALL);
 			return;
@@ -1384,7 +1384,7 @@ void dirIFNUSED() {
 	if (id == NULL || *id == 0) {
 		id = LastParsedLabel;
 	} else {
-		id = ValidateLabel(id);
+		id = ValidateLabel(id, 0);
 		if (id == NULL) {
 			Error("[IFUSED] Invalid label name", 0, CATCHALL);
 			return;
@@ -2392,7 +2392,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd("if", dirIF);
 	DirectivesTable.insertd("ifn", dirIFN);
 	DirectivesTable.insertd("ifused", dirIFUSED);
-	DirectivesTable.insertd("ufnused", dirIFNUSED);
+	DirectivesTable.insertd("ifnused", dirIFNUSED);
 	DirectivesTable.insertd("output", dirOUTPUT);
 	DirectivesTable.insertd("outend", dirOUTEND);
 	DirectivesTable.insertd("tapout", dirTAPOUT);

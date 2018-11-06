@@ -731,7 +731,7 @@ void ParseLabel() {
 			val = CurAddress;
 		}
 	  	ttp = tp;
-		if (!(tp = ValidateLabel(tp))) {
+		if (!(tp = ValidateLabel(tp, 1))) {
 			return;
 		}
 		// Copy label name to last parsed label variable

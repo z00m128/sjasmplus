@@ -219,7 +219,7 @@ char* GetID(char*& p) {
 	np = nidtemp;
 	SkipBlanks(p);
 	//if (!isalpha(*p) && *p!='_') return 0;
-	if (*p && !isalpha((unsigned char) * p) && *p != '_') {
+	if (*p && !isalpha((unsigned char) * p) && *p != '_' && *p != '.') {
 		return 0;
 	}
 	while (*p) {
