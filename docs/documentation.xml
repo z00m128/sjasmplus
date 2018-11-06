@@ -3036,7 +3036,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
 
           <varlistentry>
             <term>[void] zx.trdimage_add_file("filename", "somenameC",
-            startaddress, length)</term>
+            startaddress, length, autostart)</term>
 
             <listitem>
               <para>Save block of memory to TRD image file. <emphasis>Work
