@@ -3,9 +3,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Compilation:
-;;      sjasmplus.exe ifused-test.asm --lstlab --lst=ifused-test.lst
+;;      sjasmplus.exe ifused_test.asm --lstlab --lst=ifused_test.lst
 ;;
-;; After compilation, please check the listing file "ifused-test.lst"
+;; After compilation, please check the listing file "ifused_test.lst"
 
 
 ;; This must generate syntax errors
