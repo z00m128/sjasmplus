@@ -1,9 +1,9 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test source for IFUSED / IFNUSED ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test case for IFUSED / IFNUSED ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Compilation:
-;;      sjasmplus.exe ifused_test.asm --lstlab --lst=ifused-test.lst
+;;      sjasmplus.exe ifused-test.asm --lstlab --lst=ifused-test.lst
 ;;
 ;; After compilation, please check the listing file "ifused-test.lst"
 
@@ -26,27 +26,27 @@ start
 ;; Some little direct tests
 
         IFUSED
-        nop     ;; Must generate NOP
+        db      'ok'
         ELSE
-        nop     ;; Must be skipped
+        db      'fail'
         ENDIF
 
         IFNUSED
-        nop     ;; Must be skipped
+        db      'fail'
         ELSE
-        nop     ;; Must generate NOP
+        db      'ok'
         ENDIF
 
         IFUSED  .used
-        nop     ;; Must generate NOP
+        db      'ok'
         ENDIF
 
         IFUSED  .noused
-        nop     ;; Must be skipped
+        db      'fail'
         ENDIF
 
         IFUSED  not_defined_label
-        nop     ;; Must be skipped
+        db      'fail'
         ENDIF
 
 ;; Some little library :)
@@ -57,11 +57,11 @@ EnableInt
         ret
         ENDIF
 
-        IFUSED  Wait
-Wait    ld      b,#FF
+Wait    IFUSED
+        ld      b,#FF
 .loop
         IFUSED  EnableInt
-.halter halt                    ;; This "halt" must be generated now
+.halter halt
         ELSE
         ld      c,#FF           ;; When the "call EnableInt" is commented out,
 .cycle  dec     c               ;; this branch after ELSE must be generated.
