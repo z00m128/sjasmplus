@@ -1445,7 +1445,7 @@ void CStructure::emitmembs(char*& p) {
 				val = ip->def;
 			}
 			synerr = 1;
-			e[et++] = val % 256;
+			e[et++] = val & 0xFF;
 			check8(val); comma(p);
 			break;
 		case SMEMBWORD:
@@ -1454,21 +1454,21 @@ void CStructure::emitmembs(char*& p) {
 				val = ip->def;
 			}
 			synerr = 1;
-			e[et++] = val % 256; e[et++] = (val >> 8) % 256;
+			e[et++] = val & 0xFF; e[et++] = (val >> 8) & 0xFF;
 			check16(val); comma(p);
 			break;
 		case SMEMBD24:
 			synerr = 0; if (!ParseExpression(p, val)) {
 							val = ip->def;
 						} synerr = 1;
-			e[et++] = val % 256; e[et++] = (val >> 8) % 256; e[et++] = (val >> 16) % 256;
+			e[et++] = val & 0xFF; e[et++] = (val >> 8) & 0xFF; e[et++] = (val >> 16) & 0xFF;
 			check24(val); comma(p);
 			break;
 		case SMEMBDWORD:
 			synerr = 0; if (!ParseExpression(p, val)) {
 							val = ip->def;
 						} synerr = 1;
-			e[et++] = val % 256; e[et++] = (val >> 8) % 256; e[et++] = (val >> 16) % 256; e[et++] = (val >> 24) % 256;
+			e[et++] = val & 0xFF; e[et++] = (val >> 8) & 0xFF; e[et++] = (val >> 16) & 0xFF; e[et++] = (val >> 24) & 0xFF;
 			comma(p);
 			break;
 		case SMEMBPARENOPEN:
@@ -1492,7 +1492,7 @@ void CStructure::emitmembs(char*& p) {
 	SkipBlanks(p); if (*p) {
 				   	Error("[STRUCT] Syntax error - too many arguments?", 0);
 				   } /* this line from SjASM 0.39g */
-	e[et] = -1; EmitBytes(e);
+	if (et) { e[et] = -1; EmitBytes(e); }
 	delete e;
 }
 
