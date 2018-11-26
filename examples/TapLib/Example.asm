@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Busy soft ;; 26.11.2018 ;; Priklad pouzitia Tape generating library ;;
+;; Busy soft ;; 26.11.2018 ;; Tape generating library usage example    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 	org	#8000
@@ -12,4 +12,4 @@ start	ld	hl,#0000
 length	=	$-start
 
 	include	 TapLib.asm
-	MakeTape ZXSPECTRUM48, "Priklad.tap", "Pokus", start, length, start
+	MakeTape ZXSPECTRUM48, "Example.tap", "Example", start, length, start
