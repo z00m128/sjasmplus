@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.10.2 Documentation [2018-08-09]</title>
+  <title>SjASMPlus 1.10.3 Documentation [2018-11-26]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -178,6 +178,17 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>26.11.2018 - 1.10.3</term>
+
+            <listitem>
+              <para><programlisting>- Fixed macro issue with commas inside quotes
+- Fixed IFUSED and IFNUSED directives
+- Fixed STRUCT directive
+- Added support of register operands for operators HIGH and LOW</programlisting></para>
+            </listitem>
+          </varlistentry>
 	      
           <varlistentry>
             <term>09.08.2018 - 1.10.2</term>
