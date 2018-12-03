@@ -4512,6 +4512,148 @@ namespace Z80 {
 		/* (end add) */
 	}
 
+    void OpCode_NEXTREG() {
+        Z80Reg reg;
+        int e[5];
+        do{
+            e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+            reg = GetRegister(lp);
+            if(reg==Z80_A) {
+                if(!comma(lp)){
+                    break;
+                }
+                e[0] = 0xed; e[1] = 0x92;e[2] = GetByte(lp);
+            }
+            else{
+                e[0] = 0xed; e[1] = 0x91;e[2] = GetByte(lp);
+                if(!comma(lp)){
+                    break;
+                }
+                e[3] = GetByte(lp);
+            }
+            EmitBytes(e);
+            /* (begin add) */
+            if (*lp && comma(lp)) {
+                continue;
+            } else {
+                break;
+            }
+        }while('o');
+    }
+
+    void OpCode_MIRROR() {
+        Z80Reg reg;
+        int e[3];
+        do{
+            e[0] = e[1] = e[2]= -1;
+            reg = GetRegister(lp);
+            switch(reg){
+                case Z80_A:
+                    e[0] = 0xed; e[1] = 0x24;
+                    break;
+                case Z80_DE:
+                    e[0] = 0xed; e[1] = 0x26;
+                    break;
+                default:
+                    break;
+            }
+            EmitBytes(e);
+            /* (begin add) */
+            if (*lp && comma(lp)) {
+                continue;
+            } else {
+                break;
+            }
+        }while('o');
+    }
+
+    void OpCode_TEST() {
+        int e[4];
+        do{
+            e[0] = 0xED;
+            e[1] = 0x27;
+            e[2] = GetByte(lp);
+            e[3] = -1;
+            EmitBytes(e);
+            /* (begin add) */
+            if (*lp && comma(lp)) {
+                continue;
+            } else {
+                break;
+            }
+        }while('o');
+    }
+
+    void OpCode_SWAPNIB() {
+        EmitByte(0xED);
+        EmitByte(0x23);
+    }
+
+    void OpCode_PIXELDN() {
+        EmitByte(0xED);
+        EmitByte(0x93);
+    }
+
+    void OpCode_PIXELAD() {
+        EmitByte(0xED);
+        EmitByte(0x94);
+    }
+
+    void OpCode_FILLDE() {
+        EmitByte(0xED);
+        EmitByte(0xB5);
+    }
+
+    void OpCode_LDIX() {
+        EmitByte(0xED);
+        EmitByte(0xA5);
+    }
+
+    void OpCode_LDIRX() {
+        EmitByte(0xED);
+        EmitByte(0xB4);
+    }
+
+    void OpCode_LDDX() {
+        EmitByte(0xED);
+        EmitByte(0xAC);
+    }
+
+    void OpCode_LDDRX() {
+        EmitByte(0xED);
+        EmitByte(0xBC);
+    }
+
+    void OpCode_LDIRSCALE() {
+        EmitByte(0xED);
+        EmitByte(0xB6);
+    }
+
+    void OpCode_LDPIRX() {
+        EmitByte(0xED);
+        EmitByte(0xB7);
+    }
+
+    void OpCode_MUL() {
+        EmitByte(0xED);
+        EmitByte(0x30);
+    }
+
+    void OpCode_OUTINB() {
+        EmitByte(0xED);
+        EmitByte(0x90);
+    }
+
+    void OpCode_POPX() {
+        EmitByte(0xED);
+        EmitByte(0x8B);
+    }
+
+    void OpCode_SETAE() {
+        EmitByte(0xED);
+        EmitByte(0x95);
+    }
+
 	void Init() {
 		OpCodeTable.Insert("adc", OpCode_ADC);
 		OpCodeTable.Insert("add", OpCode_ADD);
@@ -4591,8 +4733,28 @@ namespace Z80 {
 		OpCodeTable.Insert("srl", OpCode_SRL);
 		OpCodeTable.Insert("sub", OpCode_SUB);
 		OpCodeTable.Insert("xor", OpCode_XOR);
+
+		// Next extended opcodes
+        OpCodeTable.Insert("fillde",   OpCode_FILLDE);
+        OpCodeTable.Insert("ldix",     OpCode_LDIX);
+        OpCodeTable.Insert("ldirx",    OpCode_LDIRX);
+        OpCodeTable.Insert("lddx",     OpCode_LDDX);
+        OpCodeTable.Insert("lddrx",    OpCode_LDDRX);
+        OpCodeTable.Insert("ldirscale",OpCode_LDIRSCALE);
+        OpCodeTable.Insert("ldpirx",   OpCode_LDPIRX);
+        OpCodeTable.Insert("mul",      OpCode_MUL);
+        OpCodeTable.Insert("outinb",   OpCode_OUTINB);
+        OpCodeTable.Insert("pixeldn",  OpCode_PIXELDN);
+        OpCodeTable.Insert("pixelad",  OpCode_PIXELAD);
+        OpCodeTable.Insert("popx",     OpCode_POPX);
+        OpCodeTable.Insert("setae",    OpCode_SETAE);
+        OpCodeTable.Insert("nextreg",  OpCode_NEXTREG);
+        OpCodeTable.Insert("mirror",   OpCode_MIRROR);
+        OpCodeTable.Insert("test",     OpCode_TEST);
+        OpCodeTable.Insert("swapnib",  OpCode_SWAPNIB);
 	}
 } // eof namespace Z80
+
 
 void InitCPU() {
 	Z80::Init();
