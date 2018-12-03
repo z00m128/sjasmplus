@@ -4734,6 +4734,8 @@ namespace Z80 {
 		OpCodeTable.Insert("sub", OpCode_SUB);
 		OpCodeTable.Insert("xor", OpCode_XOR);
 
+		if(!Options::EnableNextExtension) return;
+
 		// Next extended opcodes
         OpCodeTable.Insert("fillde",   OpCode_FILLDE);
         OpCodeTable.Insert("ldix",     OpCode_LDIX);
