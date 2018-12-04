@@ -642,15 +642,15 @@ namespace Z80 {
 
 	void OpCode_ADD() {
 		Z80Reg reg;
-		int e[4];
+		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
+			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_HL:
 				if (!comma(lp)) {
 					Error("[ADD] Comma expected", 0); break;
 				}
-				switch (GetRegister(lp)) {
+                    switch (GetRegister(lp)) {
 				case Z80_BC:
 					e[0] = 0x09; break;
 				case Z80_DE:
@@ -659,10 +659,42 @@ namespace Z80 {
 					e[0] = 0x29; break;
 				case Z80_SP:
 					e[0] = 0x39; break;
+				case Z80_A:
+                    if(!Options::EnableNextExtension) break;
+                    e[0] = 0xED; e[1] = 0x31; break;
 				default:
-					;
+					auto b = GetWord(lp);
+                    e[0] = 0xED; e[1] = 0x34 ;
+                    e[2] = b & 255; e[3] = (b >> 8) & 255;
+                    break;
 				}
 				break;
+			case Z80_DE:
+                if (!comma(lp)) {
+                    Error("[ADD] Comma expected", 0); break;
+                }
+                if (Options::EnableNextExtension && GetRegister(lp) == Z80_A) {
+                    e[0] = 0xED; e[1] = 0x32;
+                }
+                else{
+                    auto b = GetWord(lp);
+                    e[0] = 0xED; e[1] = 0x35 ;
+                    e[2] = b & 255; e[3] = (b >> 8) & 255;
+                }
+                break;
+            case Z80_BC:
+                if (!comma(lp)) {
+                    Error("[ADD] Comma expected", 0); break;
+                }
+                if (Options::EnableNextExtension && GetRegister(lp) == Z80_A) {
+                    e[0] = 0xED; e[1] = 0x33;
+                }
+                else{
+                    auto b = GetWord(lp);
+                    e[0] = 0xED; e[1] = 0x36 ;
+                    e[2] = b & 255; e[3] = (b >> 8) & 255;
+                }
+                break;
 			case Z80_IX:
 				if (!comma(lp)) {
 					Error("[ADD] Comma expected", 0); break;
@@ -4584,6 +4616,17 @@ namespace Z80 {
         }while('o');
     }
 
+	void OpCode_MUL() {
+		int e[3];
+		e[0] = e[1] = e[2] = -1;
+		if (GetRegister(lp)==Z80_D && comma(lp) && GetRegister(lp)==Z80_E){
+			e[0]=0xED;
+			e[1]=0x30;
+		}
+		EmitBytes(e);
+	}
+
+    //Swaps the high and low nibbles of the accumulator.
     void OpCode_SWAPNIB() {
         EmitByte(0xED);
         EmitByte(0x23);
@@ -4605,6 +4648,11 @@ namespace Z80 {
     }
 
     void OpCode_LDIX() {
+        EmitByte(0xED);
+        EmitByte(0xA4);
+    }
+
+    void OpCode_LDWS() {
         EmitByte(0xED);
         EmitByte(0xA5);
     }
@@ -4634,10 +4682,7 @@ namespace Z80 {
         EmitByte(0xB7);
     }
 
-    void OpCode_MUL() {
-        EmitByte(0xED);
-        EmitByte(0x30);
-    }
+
 
     void OpCode_OUTINB() {
         EmitByte(0xED);
@@ -4737,23 +4782,24 @@ namespace Z80 {
 		if(!Options::EnableNextExtension) return;
 
 		// Next extended opcodes
-        OpCodeTable.Insert("fillde",   OpCode_FILLDE);
-        OpCodeTable.Insert("ldix",     OpCode_LDIX);
-        OpCodeTable.Insert("ldirx",    OpCode_LDIRX);
-        OpCodeTable.Insert("lddx",     OpCode_LDDX);
-        OpCodeTable.Insert("lddrx",    OpCode_LDDRX);
-        OpCodeTable.Insert("ldirscale",OpCode_LDIRSCALE);
-        OpCodeTable.Insert("ldpirx",   OpCode_LDPIRX);
-        OpCodeTable.Insert("mul",      OpCode_MUL);
+		OpCodeTable.Insert("swapnib",  OpCode_SWAPNIB);
+		OpCodeTable.Insert("mirror",   OpCode_MIRROR);
+		OpCodeTable.Insert("test",     OpCode_TEST);
+		OpCodeTable.Insert("mul",      OpCode_MUL);
         OpCodeTable.Insert("outinb",   OpCode_OUTINB);
+        OpCodeTable.Insert("nextreg",  OpCode_NEXTREG);
         OpCodeTable.Insert("pixeldn",  OpCode_PIXELDN);
         OpCodeTable.Insert("pixelad",  OpCode_PIXELAD);
-        OpCodeTable.Insert("popx",     OpCode_POPX);
         OpCodeTable.Insert("setae",    OpCode_SETAE);
-        OpCodeTable.Insert("nextreg",  OpCode_NEXTREG);
-        OpCodeTable.Insert("mirror",   OpCode_MIRROR);
-        OpCodeTable.Insert("test",     OpCode_TEST);
-        OpCodeTable.Insert("swapnib",  OpCode_SWAPNIB);
+        OpCodeTable.Insert("ldix",     OpCode_LDIX);
+        OpCodeTable.Insert("ldws",     OpCode_LDWS);
+        OpCodeTable.Insert("lddx",     OpCode_LDDX);
+        OpCodeTable.Insert("ldirx",    OpCode_LDIRX);
+        OpCodeTable.Insert("ldirscale",OpCode_LDIRSCALE);
+        OpCodeTable.Insert("ldpirx",   OpCode_LDPIRX);
+        OpCodeTable.Insert("lddrx",    OpCode_LDDRX);
+		OpCodeTable.Insert("fillde",   OpCode_FILLDE);
+        OpCodeTable.Insert("popx",     OpCode_POPX);
 	}
 } // eof namespace Z80
 
