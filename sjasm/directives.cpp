@@ -288,7 +288,7 @@ void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpression(lp, teller)) {
 		if ((signed) teller < 0) {
-			Error("Negative BLOCK?", 0, FATAL);
+			Warning("Negative BLOCK?", 0, LASTPASS);
 		}
 		if (comma(lp)) {
 			ParseExpression(lp, val);
