@@ -932,11 +932,11 @@ void ParseStructMember(CStructure* st) {
 	switch (GetStructMemberId(lp)) {
 	case SMEMBBLOCK:
 		if (!ParseExpression(lp, len)) {
-			len = 1; Error("[STRUCT] Expression expected", 0, PASS1);
+			len = 1; Error("[STRUCT] Expression expected", 0);
 		}
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				val = 0; Error("[STRUCT] Expression expected", 0, PASS1);
+				val = 0; Error("[STRUCT] Expression expected", 0);
 			}
 		} else {
 			val = 0;

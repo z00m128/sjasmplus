@@ -191,16 +191,16 @@ void Warning(const char* fout, const char* bd, int type) {
 		return;
 	}
 
-	++WarningCount;
 	count = new char[25];
 	SPRINTF1(count, 25, "%d", WarningCount);
 	DefineTable.Replace("_WARNINGS", count);
-
 	delete[] count;
 
 	if (type == LASTPASS && pass != 3) {
 		return;
 	}
+
+	++WarningCount;
 
 	if (pass > LASTPASS) {
 		SPRINTF1(ep, LINEMAX2, "warning: %s", fout);
@@ -238,7 +238,7 @@ void CheckRamLimitExceeded()
 	if (CurAddress >= 0x10000)
 	{
 		char buf[64];
-		SPRINTF2(buf, 1024, "RAM limit exceeded 0x%X by %s", CurAddress, PseudoORG ? "DISP":"ORG");
+		SPRINTF2(buf, 1024, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
 		Warning(buf, 0, LASTPASS);
 		CurAddress &= 0xFFFF;
 	}
@@ -246,7 +246,7 @@ void CheckRamLimitExceeded()
 	if (PseudoORG) if (adrdisp >= 0x10000)
 	{
 		char buf[64];
-		SPRINTF1(buf, 1024, "RAM limit exceeded 0x%X by ORG", adrdisp);
+		SPRINTF1(buf, 1024, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
 		Warning(buf, 0, LASTPASS);
 		adrdisp &= 0xFFFF;
 	}
