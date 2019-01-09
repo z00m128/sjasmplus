@@ -420,7 +420,7 @@
       environment and included <emphasis>Makefile.win</emphasis>. Precompiled
       win32 binary is available on
       <ulink
-      url="http://z00m.speccy.cz">http://z00m.speccy.cz</ulink></para>
+      url="https://github.com/z00m128/sjasmplus/releases">https://github.com/z00m128/sjasmplus/releases</ulink></para>
 
       <para>There is an option to use CMake for compilation.
       See <emphasis>INSTALL.md</emphasis> file for details.</para>
