@@ -259,7 +259,7 @@ char* getinstr(char*& p) {
 int check8(aint val, bool error) {
 	if ((val < -256 || val > 255) && error) {
 		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%X)", val);
+		sprintf(buffer, "Bytes lost (0x%lX)", val);
 		Warning(buffer, 0, LASTPASS);
 		return 0;
 	}
@@ -270,7 +270,7 @@ int check8(aint val, bool error) {
 int check8o(long val) {
 	if (val < -128 || val > 127) {
 		char buffer[32];
-		sprintf(buffer,"Offset out of range (%+i)", val);
+		sprintf(buffer,"Offset out of range (%+li)", val);
 		Error(buffer, 0, LASTPASS);
 		return 0;
 	}
@@ -281,7 +281,7 @@ int check8o(long val) {
 int check16(aint val, bool error) {
 	if ((val < -65536 || val > 65535) && error) {
 		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%X)", val);
+		sprintf(buffer, "Bytes lost (0x%lX)", val);
 		Warning(buffer, 0, LASTPASS);
 		return 0;
 	}
@@ -292,7 +292,7 @@ int check16(aint val, bool error) {
 int check24(aint val, bool error) {
 	if ((val < -16777216 || val > 16777215) && error) {
 		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%X)", val);
+		sprintf(buffer, "Bytes lost (0x%lX)", val);
 		Warning(buffer, 0, LASTPASS);
 		return 0;
 	}
