@@ -815,7 +815,7 @@ void ParseLine(bool parselabels) {
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
-			lp = line;
+			lp = ReplaceDefine(line);
 			CStringsList* f;
 			f = new CStringsList(lp, NULL);
 			dup.Pointer->next = f;
