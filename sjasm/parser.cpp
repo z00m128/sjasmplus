@@ -775,8 +775,8 @@ void ParseLabel() {
 }
 
 int ParseMacro() {
-	int gl = 0,r;
-	char* p = lp,* n;
+	int gl = 0, r;
+	char* p = lp, *n;
 	SkipBlanks(p);
 	if (*p == '@') {
 		gl = 1; ++p;
@@ -784,13 +784,12 @@ int ParseMacro() {
 	if (!(n = GetID(p))) {
 		return 0;
 	}
-	if (!(r = MacroTable.Emit(n, p))) {
-		//do none
-	} else if (r == 2) {
-		return 1; //return 1
-	} else if (StructureTable.Emit(n, 0, p, gl) || !gl) {
-		return 1;
-	}
+
+	r = MacroTable.Emit(n, p);
+	if (r == 2) return 1;
+	if (r == 1) return 0;
+	if (StructureTable.Emit(n, 0, p, gl)) { lp = p; return 1; }
+
 	return 0;
 }
 
