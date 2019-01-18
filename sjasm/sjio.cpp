@@ -787,7 +787,7 @@ void OpenFile(char* nfilename) {
 		nfilename++;
 	}
 
-	if (!FOPEN_ISOK(FP_Input, fullpath, "r")) {
+	if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 		free(fullpath);
 		Error("Error opening file", nfilename, FATAL);
 	}
@@ -861,6 +861,19 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 		}
 		while (RL_Readed > 0) {
 			if (*rlpbuf == '\n' || *rlpbuf == '\r') {
+
+				if (*rlpbuf == '\r')
+				{
+					rlpbuf++; RL_Readed--;
+					if (!RL_Readed)
+					{
+						RL_Readed = fread(rlbuf, 1, 4096, FP_Input);
+						if (!RL_Readed) break;
+						rlpbuf = rlbuf;
+					}
+					if (*rlpbuf == '\n') {rlpbuf++; RL_Readed--;}
+				}
+				/*
 				if (*rlpbuf == '\n') {
 					rlpbuf++;RL_Readed--;
 					if (*rlpbuf && *rlpbuf == '\r') {
@@ -869,6 +882,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				} else if (*rlpbuf == '\r') {
 					rlpbuf++;RL_Readed--;
 				}
+				*/
 				*rlppos = 0;
 				if (strlen(line) == LINEMAX - 1) {
 					Error("Line too long", 0, FATAL);
