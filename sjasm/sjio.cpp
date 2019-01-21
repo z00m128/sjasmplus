@@ -860,6 +860,14 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			rlpbuf = rlbuf;
 		}
 		while (RL_Readed > 0) {
+
+			if (!CurrentLocalLine)
+			{
+				CurrentLocalLine++;
+				CurrentGlobalLine++;
+				CompiledCurrentLine++;
+			}
+
 			if (*rlpbuf == '\n' || *rlpbuf == '\r') {
 
 				rlpbuf++; RL_Readed--;
@@ -887,16 +895,15 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				if (strlen(line) == LINEMAX - 1) {
 					Error("Line too long", 0, FATAL);
 				}
-				//if (rlnewline) {
-					CurrentLocalLine++;
-					CompiledCurrentLine++;
-					CurrentGlobalLine++;
-				//}
 				rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
 				//_COUT line _ENDL;
 				if (Parse) {
 					ParseLine();
 				} else {
+					rlnewline = true;
+					CurrentLocalLine++;
+					CurrentGlobalLine++;
+					CompiledCurrentLine++;
 					return;
 				}
 				rlppos = line;
@@ -904,6 +911,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					*(rlppos++) = ' ';
 				}
 				rlnewline = true;
+				CurrentLocalLine++;
+				CurrentGlobalLine++;
+				CompiledCurrentLine++;
 			} else if (SplitByColon && *rlpbuf == ':' && rlspace && !rldquotes && !rlsquotes && !rlcomment) {
 				while (*rlpbuf && *rlpbuf == ':') {
 					rlpbuf++;RL_Readed--;
@@ -915,7 +925,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				/*if (rlnewline) {
 					CurrentLocalLine++; CurrentLine++; CurrentGlobalLine++; rlnewline = false;
 				}*/
-			  	rlcolon = true;
+				rlcolon = true;
 				if (Parse) {
 					ParseLine();
 				} else {
@@ -925,9 +935,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				if (rlcolon) {
 					*(rlppos++) = ' ';
 				}
-			} else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
+			}  else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
 			  	lp = line; *rlppos = 0; char* n;
-				if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
+				/*	if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
 					//it's directive
 					while (*rlpbuf && *rlpbuf == ':') {
 						rlpbuf++;RL_Readed--;
@@ -952,15 +962,15 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					if (rlcolon) {
 						*(rlppos++) = ' ';
 					}
-				} else {
+				} else {	*/
 				    // it's label
 				    *(rlppos++) = ':';
-				    *(rlppos++) = ' ';
+				    //*(rlppos++) = ' ';
 				    rlspace = true;
 				    while (*rlpbuf && *rlpbuf == ':') {
 					rlpbuf++;
 					RL_Readed--;
-				    }
+				    // }
 				}
 			} else {
 				if (*rlpbuf == '\'' && !rldquotes && !rlcomment) {
@@ -990,11 +1000,11 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	}
 	//for end line
 	if (feof(FP_Input) && RL_Readed <= 0 && *line) { //line? not a *line ?
-		if (rlnewline) {
+		/* if (rlnewline) {
 			CurrentLocalLine++;
 			CompiledCurrentLine++;
 			CurrentGlobalLine++;
-		}
+		} */
 		rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
 		rlnewline = true;
 		*rlppos = 0;
