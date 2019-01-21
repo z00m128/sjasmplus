@@ -936,7 +936,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					*(rlppos++) = ' ';
 				}
 			}  else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
-			  	lp = line; *rlppos = 0; char* n;
+			  	lp = line; *rlppos = 0;
 				/*	if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
 					//it's directive
 					while (*rlpbuf && *rlpbuf == ':') {
