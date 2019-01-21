@@ -862,16 +862,16 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 		while (RL_Readed > 0) {
 			if (*rlpbuf == '\n' || *rlpbuf == '\r') {
 
-				if (*rlpbuf == '\r')
+				rlpbuf++; RL_Readed--;
+				if (rlpbuf[-1] == '\r')
 				{
-					rlpbuf++; RL_Readed--;
 					if (!RL_Readed)
 					{
 						RL_Readed = fread(rlbuf, 1, 4096, FP_Input);
 						if (!RL_Readed) break;
 						rlpbuf = rlbuf;
 					}
-					if (*rlpbuf == '\n') {rlpbuf++; RL_Readed--;}
+					if (*rlpbuf == '\n') { rlpbuf++; RL_Readed--; }
 				}
 				/*
 				if (*rlpbuf == '\n') {
