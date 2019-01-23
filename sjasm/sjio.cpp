@@ -396,6 +396,31 @@ void listbytes3(int pad) {
 	}
 }
 
+void PrepareListLine(aint hexadd)
+{
+	////////////////////////////////////////////////////
+	// Line numbers to 1 to 99999 are supported only  //
+	// For more lines, then first char is incremented //
+	////////////////////////////////////////////////////
+
+	int digit = ' ';
+	int linewidth = reglenwidth;
+	long linenumber = CurrentLocalLine % 10000;
+	if (linewidth > 5)
+	{
+		linewidth = 5;
+		digit = CurrentLocalLine / 10000 + '0';
+		if (digit > '~') digit = '~';
+		if (CurrentLocalLine >= 10000) linenumber += 10000;
+	}
+	memset(pline, ' ', 24);
+	STRCPY(pline + 24, LINEMAX2, line);
+	sprintf(pline, "%*lu", linewidth, linenumber); pline[linewidth] = ' ';
+	memcpy(pline + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
+	sprintf(pline + 6, "%04lX", hexadd & 0xFFFF); pline[10] = ' ';
+	if (digit > '0') *pline = digit & 0xFF;
+}
+
 void ListFile() {
 	char* pp = pline;
 	aint pad;
@@ -405,11 +430,13 @@ void ListFile() {
 	if (!Options::ListingFName[0] || FP_ListingFile == NULL) {
 		return;
 	}
+	/*
 	if (listmacro) {
 		if (!nEB) {
 			return;
 		}
 	}
+	*/
 	if ((pad = PreviousAddress) == (aint) - 1) {
 		pad = epadres;
 	}
@@ -418,6 +445,27 @@ void ListFile() {
 	} else {
 		STRCPY(line, LINEMAX, "\n");
 	}
+
+	PrepareListLine(pad);
+	if (listmacro) pline[23] = '>';
+
+	int i;
+	while (1)
+	{
+		pp = pline + 10;
+		int maxEB = nEB; if (maxEB > 4) maxEB = 4;
+		for (i = 0; i < maxEB; i++) pp += sprintf(pp, " %02X", EB[i]); *pp = ' ';
+		if (pline[24] == '\n' && !listmacro) { *pp = '\n'; pp[1] = 0; }
+		fputs(pline, FP_ListingFile);
+		nEB -= maxEB;
+		pad += maxEB;
+		if (!nEB) break;
+		memset(pline + 11, ' ', 11);
+		pline[24] = '\n';
+		pline[25] = 0;
+		sprintf(pline + 6, "%04lX", pad); pline[10] = ' ';
+	}
+	/*
 	*pp = 0;
 	printCurrentLocalLine(pp);
 	PrintHEX16(pp, pad);
@@ -430,14 +478,16 @@ void ListFile() {
 		}
 		STRCAT(pp, LINEMAX2, line);
 		fputs(pline, FP_ListingFile);
-	} else if (nEB < 6) {
+	}
+	else if (nEB < 6) {
 		listbytes2(pp); *pp = 0;
 		if (listmacro) {
 			STRCAT(pp, LINEMAX2, ">");
 		}
 		STRCAT(pp, LINEMAX2, line);
 		fputs(pline, FP_ListingFile);
-	} else {
+	}
+	else {
 		for (int i = 0; i != 12; ++i) {
 			*(pp++) = ' ';
 		}
@@ -449,6 +499,7 @@ void ListFile() {
 		fputs(pline, FP_ListingFile);
 		listbytes3(pad);
 	}
+	*/
 	epadres = CurAddress;
 	PreviousAddress = (aint) - 1;
 	nEB = 0;
@@ -456,7 +507,6 @@ void ListFile() {
 }
 
 void ListFileSkip(char* line) {
-	char* pp = pline;
 	aint pad;
 	if (pass != LASTPASS || !IsListingFileOpened || donotlist) {
 		donotlist = nEB = 0;
@@ -465,9 +515,11 @@ void ListFileSkip(char* line) {
 	if (!Options::ListingFName[0] || FP_ListingFile == NULL) {
 		return;
 	}
+	/*
 	if (listmacro) {
 		return;
 	}
+	*/
 	if ((pad = PreviousAddress) == (aint) - 1) {
 		pad = epadres;
 	}
@@ -477,11 +529,17 @@ void ListFileSkip(char* line) {
 	else {
 		STRCPY(line, LINEMAX, "\n");
 	}
+
+	PrepareListLine(pad);
+	pline[11] = '~';
+	if (*line == '\n') { pline[12] = '\n'; pline[13] = 0; }
+
+	/*
 	*pp = 0;
 	printCurrentLocalLine(pp);
 	PrintHEX16(pp, pad);
 	*pp = 0;
-	STRCAT(pp, LINEMAX2, "~            ");
+	STRCAT(pp, LINEMAX2, " ~           ");
 	if (nEB) {
 		Error("Internal error lfs", 0, FATAL);
 	}
@@ -489,6 +547,7 @@ void ListFileSkip(char* line) {
 		STRCAT(pp, LINEMAX2, ">");
 	}
 	STRCAT(pp, LINEMAX2, line);
+	*/
 	fputs(pline, FP_ListingFile);
 	epadres = CurAddress;
 	PreviousAddress = (aint) - 1;
@@ -936,8 +995,8 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					*(rlppos++) = ' ';
 				}
 			}  else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
-			  	lp = line; *rlppos = 0;
-				/*	if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
+			  	lp = line; *rlppos = 0; /* char* n;
+					if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
 					//it's directive
 					while (*rlpbuf && *rlpbuf == ':') {
 						rlpbuf++;RL_Readed--;
