@@ -231,7 +231,7 @@ namespace Options {
 		char* p, *ps;
 		char c[LINEMAX];
 
-		CmdDefineTable.Init();
+		// CmdDefineTable.Init();
 
 		while (argv[i] && *argv[i] == '-') {
 			if (*(argv[i] + 1) == '-') {
@@ -345,6 +345,9 @@ int main(int argc, char **argv) {
 	dwStart = GetTickCount();
 
 	if (argc > 1) {
+		// Init cmdline definitions by -D
+		Options::CmdDefineTable.Init();
+
 		// init vars
 		Options::DestionationFName[0] = 0;
 		Options::ListingFName[0] = 0;
