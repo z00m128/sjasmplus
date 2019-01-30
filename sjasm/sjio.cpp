@@ -589,18 +589,18 @@ void Emit(int byte)
 }
 
 void EmitByte(int byte) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	Emit(byte);
 }
 
 void EmitWord(int word) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	Emit(word % 256);
 	Emit(word / 256);
 }
 
 void EmitBytes(int* bytes) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	if (*bytes == -1) {
 		Error("Illegal instruction", line, CATCHALL); *lp = 0;
 	}
@@ -610,7 +610,7 @@ void EmitBytes(int* bytes) {
 }
 
 void EmitWords(int* words) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	while (*words != -1) {
 		Emit((*words) % 256);
 		Emit((*words++) / 256);
@@ -618,7 +618,7 @@ void EmitWords(int* words) {
 }
 
 void EmitBlock(aint byte, aint len, bool nulled) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	if (len) EB[nEB++] = byte;
 
 	if (len < 0)
@@ -936,8 +936,8 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					*(rlppos++) = ' ';
 				}
 			}  else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
-			  	lp = line; *rlppos = 0;
-				/*	if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
+			  	lp = line; *rlppos = 0; /* char* n;
+					if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
 					//it's directive
 					while (*rlpbuf && *rlpbuf == ':') {
 						rlpbuf++;RL_Readed--;
