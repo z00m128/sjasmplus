@@ -191,12 +191,16 @@ void Warning(const char* fout, const char* bd, int type) {
 		return;
 	}
 
-	++WarningCount;
 	count = new char[25];
 	SPRINTF1(count, 25, "%d", WarningCount);
 	DefineTable.Replace("_WARNINGS", count);
-
 	delete[] count;
+
+	if (type == LASTPASS && pass != 3) {
+		return;
+	}
+
+	++WarningCount;
 
 	if (pass > LASTPASS) {
 		SPRINTF1(ep, LINEMAX2, "warning: %s", fout);
@@ -227,6 +231,25 @@ void Warning(const char* fout, const char* bd, int type) {
 		fputs(ErrorLine, FP_ListingFile);
 	}
 	_COUT ErrorLine _END;
+}
+
+void CheckRamLimitExceeded()
+{
+	if (CurAddress >= 0x10000)
+	{
+		char buf[64];
+		SPRINTF2(buf, 1024, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
+		Warning(buf, 0, LASTPASS);
+		CurAddress &= 0xFFFF;
+	}
+
+	if (PseudoORG) if (adrdisp >= 0x10000)
+	{
+		char buf[64];
+		SPRINTF1(buf, 1024, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
+		Warning(buf, 0, LASTPASS);
+		adrdisp &= 0xFFFF;
+	}
 }
 
 void WriteDest() {
@@ -543,78 +566,41 @@ void CheckPage() {
 	ExitASM(1);
 }
 
-void Emit(int byte) {
+void Emit(int byte)
+{
 	EB[nEB++] = byte;
-	if (pass == LASTPASS) {
-		WriteBuffer[WBLength++] = (char) byte;
-		if (WBLength == DESTBUFLEN) {
-			WriteDest();
-		}
-		/* (begin add) */
-		if (DeviceID) {
-			if (PseudoORG) {
-				if (CurAddress >= 0x10000) {
-					char buf[1024];
-					SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-					Error(buf, 0, FATAL);
-				}
-				*(MemoryPointer++) = (char) byte;
-				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-					++adrdisp; ++CurAddress;
-					CheckPage();
-					return;
-				}
-			} else {
-				if (CurAddress >= 0x10000) {
-					char buf[1024];
-					SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-					Error(buf, 0, FATAL);
-				}
 
-				//if (!nulled) {
-				*(MemoryPointer++) = (char) byte;
-				//} else {
-				//	MemoryPointer++;
-				//}
-			/*	if (CurAddress > 0xFFFE || (CurAddress > 0x7FFE && CurAddress < 0x8001) || (CurAddress > 0xBFFE && CurAddress < 0xC001)) {
-					_COUT CurAddress _ENDL;
-				}*/
-				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-					++CurAddress;
-					CheckPage();
-					return;
-				}
-			}
-		}
-		/* (end add) */
-	}
-	if (PseudoORG) {
-		++adrdisp;
-	}
+	CheckRamLimitExceeded();
 
-	if (pass != LASTPASS && DeviceID && CurAddress >= 0x10000) {
-		char buf[1024];
-		SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-		Error(buf, 0, FATAL);
+	if (pass == LASTPASS)
+	{
+		WriteBuffer[WBLength++] = (char)byte;
+		if (WBLength == DESTBUFLEN) WriteDest();
+
+		if (DeviceID)
+		{
+			if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
+			*(MemoryPointer++) = (char)byte;
+		}
 	}
 
 	++CurAddress;
-
+	if (PseudoORG) ++adrdisp;
 }
 
 void EmitByte(int byte) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	Emit(byte);
 }
 
 void EmitWord(int word) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	Emit(word % 256);
 	Emit(word / 256);
 }
 
 void EmitBytes(int* bytes) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	if (*bytes == -1) {
 		Error("Illegal instruction", line, CATCHALL); *lp = 0;
 	}
@@ -624,7 +610,7 @@ void EmitBytes(int* bytes) {
 }
 
 void EmitWords(int* words) {
-	PreviousAddress = CurAddress;
+	//PreviousAddress = CurAddress;
 	while (*words != -1) {
 		Emit((*words) % 256);
 		Emit((*words++) / 256);
@@ -632,61 +618,34 @@ void EmitWords(int* words) {
 }
 
 void EmitBlock(aint byte, aint len, bool nulled) {
-	PreviousAddress = CurAddress;
-	if (len) {
-		EB[nEB++] = byte;
+	//PreviousAddress = CurAddress;
+	if (len) EB[nEB++] = byte;
+
+	if (len < 0)
+	{
+		CurAddress = (CurAddress + len) & 0xFFFF;
+		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
+		CheckPage();
 	}
-	while (len--) {
-		if (pass == LASTPASS) {
-			WriteBuffer[WBLength++] = (char) byte;
-			if (WBLength == DESTBUFLEN) {
-				WriteDest();
+	else while (len--)
+	{
+		CheckRamLimitExceeded();
+
+		if (pass == LASTPASS)
+		{
+			WriteBuffer[WBLength++] = (char)byte;
+			if (WBLength == DESTBUFLEN) WriteDest();
+
+			if (DeviceID)
+			{
+				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
+				if (!nulled) *MemoryPointer = (char)byte;
+
+				MemoryPointer++;
 			}
-			/* (begin add) */
-			if (DeviceID) {
-				if (PseudoORG) {
-					if (CurAddress >= 0x10000) {
-						char buf[1024];
-						SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-						Error(buf, 0, FATAL);
-					}
-					if (!nulled) {
-						*(MemoryPointer++) = (char) byte;
-					} else {
-						MemoryPointer++;
-					}
-					if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-						++adrdisp; ++CurAddress;
-						CheckPage(); continue;
-					}
-				} else {
-					if (CurAddress >= 0x10000) {
-						char buf[1024];
-						SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-						Error(buf, 0, FATAL);
-					}
-					if (!nulled) {
-						*(MemoryPointer++) = (char) byte;
-					} else {
-						MemoryPointer++;
-					}
-					if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-						++CurAddress;
-						CheckPage(); continue;
-					}
-				}
-			}
-			/* (end add) */
-		}
-		if (PseudoORG) {
-			++adrdisp;
-		}
-		if (pass != LASTPASS && DeviceID && CurAddress >= 0x10000) {
-			char buf[1024];
-			SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-			Error(buf, 0, FATAL);
 		}
 		++CurAddress;
+		if (PseudoORG) ++adrdisp;
 	}
 }
 
@@ -720,11 +679,11 @@ char* GetPath(char* fname, TCHAR** filenamebegin) {
 }
 
 void BinIncFile(char* fname, int offset, int len) {
-	char* bp;
 	FILE* bif;
 	int res;
-	int leng;
+	int totlen = 0;
 	char* fullFilePath;
+
 	fullFilePath = GetPath(fname, NULL);
 	if (*fname == '<') {
 		fname++;
@@ -733,129 +692,84 @@ void BinIncFile(char* fname, int offset, int len) {
 		Error("Error opening file", fname, FATAL);
 	}
 	free(fullFilePath);
-	if (offset > 0) {
-		bp = new char[offset + 1];
-		if (bp == NULL) {
-			Error("No enough memory!", 0, FATAL);
-		}
-		res = fread(bp, 1, offset, bif);
-		if (res == -1) {
-			Error("Read error", fname, FATAL);
-		}
-		if (res != offset) {
-			Error("Offset beyond filelength", fname, FATAL);
-		}
+
+	if (len == -1) len = 0;
+	if (offset == -1) offset = 0;
+
+	// Get length of file //
+	if (fseek(bif, 0, SEEK_END))
+		Error("Error seeking file (len)", fname, FATAL);
+	totlen = ftell(bif);
+	if (totlen < 0)
+		Error("Error telling file (len)", fname, FATAL);
+
+
+	printf("INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
+
+	// Seek to begin of including part //
+	if (offset > totlen)
+		Error("Offset overflows file length", fname, FATAL);
+	if (fseek(bif, offset, SEEK_SET))
+		Error("Error seeking file (offs)", fname, FATAL);
+	if (ftell(bif) != offset)
+		Error("Error telling file (offs)", fname, FATAL);
+
+	// Check requested data //
+	if (offset + len > totlen)
+		Error("Error file too short", fname, FATAL);
+
+	// Getting final length of included data //
+	if (!len) len = totlen - offset;
+	if (len > 0x10000)
+	{
+		len = 0x10000;
+		Warning("Included data truncated to 64kB", 0, LASTPASS);
 	}
-	if (len > 0) {
-		bp = new char[len + 1];
-		if (bp == NULL) {
-			Error("No enough memory!", 0, FATAL);
-		}
+
+	if (pass != LASTPASS)
+	{
+		CurAddress = (CurAddress + len) & 0xFFFF;
+		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
+	}
+	else
+	{
+		// Reading data from file //
+		char* data = new char[len + 1];
+		char *bp = data;
+
+		if (bp == NULL)
+			Error("No enough memory for file", 0, FATAL);
+
 		res = fread(bp, 1, len, bif);
-		if (res == -1) {
-			Error("Read error", fname, FATAL);
-		}
-		if (res != len) {
-			Error("Unexpected end of file", fname, FATAL);
-		}
-		while (len--) {
-			if (pass == LASTPASS) {
+
+		if (res == -1)
+			Error("Can't read file (read error)", fname, FATAL);
+		if (res != len)
+			Error("Can't read file (no enough data)", fname, FATAL);
+
+		while (len--)
+		{
+			CheckRamLimitExceeded();
+
+			if (pass == LASTPASS)
+			{
 				WriteBuffer[WBLength++] = *bp;
-				if (WBLength == DESTBUFLEN) {
-					WriteDest();
+				if (WBLength == DESTBUFLEN) WriteDest();
+
+				if (DeviceID)
+				{
+					if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
+					*MemoryPointer = *bp;
+
+					MemoryPointer++;
 				}
-				if (DeviceID) {
-					if (PseudoORG) {
-						if (CurAddress >= 0x10000) {
-							char buf[1024];
-							SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-							Error(buf, 0, FATAL);
-						}
-						*(MemoryPointer++) = *bp;
-						if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-							++adrdisp; ++CurAddress;
-							CheckPage(); bp++; continue;
-						}
-					} else {
-						if (CurAddress >= 0x10000) {
-							char buf[1024];
-							SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-							Error(buf, 0, FATAL);
-						}
-						*(MemoryPointer++) = *bp;
-						if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-							++CurAddress;
-							CheckPage(); bp++; continue;
-						}
-					}
-				}
-				bp++;
 			}
-			if (PseudoORG) {
-				++adrdisp;
-			}
-			if (pass != LASTPASS && DeviceID && CurAddress >= 0x10000) {
-				char buf[1024];
-				SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-				Error(buf, 0, FATAL);
-			}
+			++bp;
 			++CurAddress;
+			if (PseudoORG) ++adrdisp;
 		}
-	} else {
-		if (pass == LASTPASS) {
-			WriteDest();
-		}
-		do {
-			res = fread(WriteBuffer, 1, DESTBUFLEN, bif);
-			if (res == -1) {
-				Error("Read error", fname, FATAL);
-			}
-			if (pass == LASTPASS) {
-				WBLength = res;
-				if (DeviceID) {
-					leng = 0;
-					while (leng != res) {
-						if (PseudoORG) {
-							if (CurAddress >= 0x10000) {
-								Error("RAM limit exceeded", 0, FATAL);
-							}
-							*(MemoryPointer++) = (char) WriteBuffer[leng++];
-							if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-								++adrdisp; ++CurAddress;
-								CheckPage();
-							} else {
-								++adrdisp; ++CurAddress;
-							}
-						} else {
-							if (CurAddress >= 0x10000) {
-								Error("RAM limit exceeded", 0, FATAL);
-							}
-							*(MemoryPointer++) = (char) WriteBuffer[leng++];
-							if ((MemoryPointer - Page->RAM) >= (int)Page->Size) {
-								++CurAddress;
-								CheckPage();
-							} else {
-								++CurAddress;
-							}
-						}
-					}
-				}
-				WriteDest();
-			}
-			if (!DeviceID || pass != LASTPASS) {
-				if (PseudoORG) {
-					adrdisp += res;
-				}
-				for (int j=0;j < res;j++) {
-					if (pass != LASTPASS && DeviceID && CurAddress >= 0x10000) {
-						char buf[1024];
-						SPRINTF1(buf, 1024, "RAM limit exceeded %lu", CurAddress);
-						Error(buf, 0, FATAL);
-					}
-					++CurAddress;
-				}
-			}
-		} while (res == DESTBUFLEN);
+		CheckRamLimitExceeded();
+		delete[] data;
 	}
 	fclose(bif);
 }
@@ -873,7 +787,7 @@ void OpenFile(char* nfilename) {
 		nfilename++;
 	}
 
-	if (!FOPEN_ISOK(FP_Input, fullpath, "r")) {
+	if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 		free(fullpath);
 		Error("Error opening file", nfilename, FATAL);
 	}
@@ -946,7 +860,28 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			rlpbuf = rlbuf;
 		}
 		while (RL_Readed > 0) {
+
+			if (!CurrentLocalLine)
+			{
+				CurrentLocalLine++;
+				CurrentGlobalLine++;
+				CompiledCurrentLine++;
+			}
+
 			if (*rlpbuf == '\n' || *rlpbuf == '\r') {
+
+				rlpbuf++; RL_Readed--;
+				if (rlpbuf[-1] == '\r')
+				{
+					if (!RL_Readed)
+					{
+						RL_Readed = fread(rlbuf, 1, 4096, FP_Input);
+						if (!RL_Readed) break;
+						rlpbuf = rlbuf;
+					}
+					if (*rlpbuf == '\n') { rlpbuf++; RL_Readed--; }
+				}
+				/*
 				if (*rlpbuf == '\n') {
 					rlpbuf++;RL_Readed--;
 					if (*rlpbuf && *rlpbuf == '\r') {
@@ -955,20 +890,20 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				} else if (*rlpbuf == '\r') {
 					rlpbuf++;RL_Readed--;
 				}
+				*/
 				*rlppos = 0;
 				if (strlen(line) == LINEMAX - 1) {
 					Error("Line too long", 0, FATAL);
 				}
-				//if (rlnewline) {
-					CurrentLocalLine++;
-					CompiledCurrentLine++;
-					CurrentGlobalLine++;
-				//}
 				rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
 				//_COUT line _ENDL;
 				if (Parse) {
 					ParseLine();
 				} else {
+					rlnewline = true;
+					CurrentLocalLine++;
+					CurrentGlobalLine++;
+					CompiledCurrentLine++;
 					return;
 				}
 				rlppos = line;
@@ -976,6 +911,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					*(rlppos++) = ' ';
 				}
 				rlnewline = true;
+				CurrentLocalLine++;
+				CurrentGlobalLine++;
+				CompiledCurrentLine++;
 			} else if (SplitByColon && *rlpbuf == ':' && rlspace && !rldquotes && !rlsquotes && !rlcomment) {
 				while (*rlpbuf && *rlpbuf == ':') {
 					rlpbuf++;RL_Readed--;
@@ -987,7 +925,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				/*if (rlnewline) {
 					CurrentLocalLine++; CurrentLine++; CurrentGlobalLine++; rlnewline = false;
 				}*/
-			  	rlcolon = true;
+				rlcolon = true;
 				if (Parse) {
 					ParseLine();
 				} else {
@@ -997,9 +935,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				if (rlcolon) {
 					*(rlppos++) = ' ';
 				}
-			} else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
-			  	lp = line; *rlppos = 0; char* n;
-				if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
+			}  else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
+			  	lp = line; *rlppos = 0; /* char* n;
+					if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
 					//it's directive
 					while (*rlpbuf && *rlpbuf == ':') {
 						rlpbuf++;RL_Readed--;
@@ -1024,15 +962,15 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					if (rlcolon) {
 						*(rlppos++) = ' ';
 					}
-				} else {
+				} else {	*/
 				    // it's label
 				    *(rlppos++) = ':';
-				    *(rlppos++) = ' ';
+				    //*(rlppos++) = ' ';
 				    rlspace = true;
 				    while (*rlpbuf && *rlpbuf == ':') {
 					rlpbuf++;
 					RL_Readed--;
-				    }
+				    // }
 				}
 			} else {
 				if (*rlpbuf == '\'' && !rldquotes && !rlcomment) {
@@ -1062,11 +1000,11 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	}
 	//for end line
 	if (feof(FP_Input) && RL_Readed <= 0 && *line) { //line? not a *line ?
-		if (rlnewline) {
+		/* if (rlnewline) {
 			CurrentLocalLine++;
 			CompiledCurrentLine++;
 			CurrentGlobalLine++;
-		}
+		} */
 		rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
 		rlnewline = true;
 		*rlppos = 0;

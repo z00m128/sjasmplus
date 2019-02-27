@@ -288,7 +288,7 @@ void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpression(lp, teller)) {
 		if ((signed) teller < 0) {
-			Error("Negative BLOCK?", 0, FATAL);
+			Warning("Negative BLOCK?", 0, LASTPASS);
 		}
 		if (comma(lp)) {
 			ParseExpression(lp, val);
@@ -773,6 +773,12 @@ void dirINCTRD() {
 }
 
 void dirSAVESNA() {
+
+	if (pass != LASTPASS) {
+		SkipParam(lp);
+		return;
+	}
+
 	bool exec = true;
 
 	if (!DeviceID) {
@@ -835,6 +841,12 @@ void dirEMPTYTAP() {
 }
 
 void dirSAVETAP() {
+
+	if (pass != LASTPASS) {
+		SkipParam(lp);
+		return;
+	}
+
 	bool exec = true, realtapeMode = false;
 	int headerType = -1;
 	aint val;
@@ -1059,6 +1071,11 @@ void dirSAVEBIN() {
 }
 
 void dirSAVEHOB() {
+
+	if (pass != LASTPASS) {
+		SkipParam(lp);
+		return;
+	}
 	aint val;
 	char* fnaam, * fnaamh;
 	int start = -1,length = -1;
@@ -1136,6 +1153,12 @@ void dirEMPTYTRD() {
 }
 
 void dirSAVETRD() {
+
+	if (pass != LASTPASS) {
+		SkipParam(lp);
+		return;
+	}
+
 	bool exec = true;
 
 	if (!DeviceID) {
@@ -1543,7 +1566,7 @@ void dirIFDEF() {
 	*/
 	EReturn res;
 	if (!(id = GetID(lp))) {
-		Error("[IFDEF] Illegal identifier", 0, PASS1); return;
+		Error("[IFDEF] Illegal identifier", 0); return;
 	}
 
 	if (DefineTable.FindDuplicate(id)) {
@@ -1594,7 +1617,7 @@ void dirIFNDEF() {
 	*/
 	EReturn res;
 	if (!(id = GetID(lp))) {
-		Error("[IFNDEF] Illegal identifier", 0, PASS1); return;
+		Error("[IFNDEF] Illegal identifier", 0); return;
 	}
 
 	if (!DefineTable.FindDuplicate(id)) {
@@ -1796,7 +1819,7 @@ void dirMACRO() {
 	char* n;
 	//if (!(n=GetID(lp))) { Error("Illegal macroname",0,PASS1); return; }
 	if (!(n = GetID(lp))) {
-		Error("[MACRO] Illegal macroname", 0, PASS1); return;
+		Error("[MACRO] Illegal macroname", 0); return;
 	}
 	MacroTable.Add(n, lp);
 }
@@ -1933,7 +1956,7 @@ void dirSTRUCT() {
 	}
 
 	if (!(naam = GetID(lp)) || !strlen(naam)) {
-		Error("[STRUCT] Illegal structure name", 0, PASS1); return;
+		Error("[STRUCT] Illegal structure name", 0); return;
 	}
 	if (comma(lp)) {
 		IsLabelNotFound = 0;
@@ -1948,7 +1971,7 @@ void dirSTRUCT() {
 	ListFile();
 	while ('o') {
 		if (!ReadLine()) {
-			Error("[STRUCT] Unexpected end of structure", 0, PASS1); break;
+			Error("[STRUCT] Unexpected end of structure", 0); break;
 		}
 		lp = line; /*if (White()) { SkipBlanks(lp); if (*lp=='.') ++lp; if (cmphstr(lp,"ends")) break; }*/
 		SkipBlanks(lp);
@@ -2311,16 +2334,16 @@ void dirINCLUDELUA() {
 	fnaam = GetFileName(lp);
 	int error;
 
+	if (pass == LASTPASS && !FileExists(fnaam)) {
+		Error("[INCLUDELUA] File doesn't exist", fnaam);
+		return;
+	}
+
 	if (pass != 1) {
 		return;
 	}
 
 	//WinExec ( "C:\\path\\to\\program.exe", SW_SHOWNORMAL );
-
-	if (!FileExists(fnaam)) {
-		Error("[INCLUDELUA] File doesn't exist", fnaam, PASS1);
-		return;
-	}
 
 	LuaLine = CurrentLocalLine;
 	error = luaL_loadfile(LUA, fnaam) || lua_pcall(LUA, 0, 0, 0);

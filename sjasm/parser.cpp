@@ -775,8 +775,8 @@ void ParseLabel() {
 }
 
 int ParseMacro() {
-	int gl = 0,r;
-	char* p = lp,* n;
+	int gl = 0, r;
+	char* p = lp, *n;
 	SkipBlanks(p);
 	if (*p == '@') {
 		gl = 1; ++p;
@@ -784,13 +784,12 @@ int ParseMacro() {
 	if (!(n = GetID(p))) {
 		return 0;
 	}
-	if (!(r = MacroTable.Emit(n, p))) {
-		//do none
-	} else if (r == 2) {
-		return 1; //return 1
-	} else if (StructureTable.Emit(n, 0, p, gl) || !gl) {
-		return 1;
-	}
+
+	r = MacroTable.Emit(n, p);
+	if (r == 2) return 1;
+	if (r == 1) return 0;
+	if (StructureTable.Emit(n, 0, p, gl)) { lp = p; return 1; }
+
 	return 0;
 }
 
@@ -815,7 +814,7 @@ void ParseLine(bool parselabels) {
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
-			lp = line;
+			lp = ReplaceDefine(line);
 			CStringsList* f;
 			f = new CStringsList(lp, NULL);
 			dup.Pointer->next = f;
@@ -932,11 +931,11 @@ void ParseStructMember(CStructure* st) {
 	switch (GetStructMemberId(lp)) {
 	case SMEMBBLOCK:
 		if (!ParseExpression(lp, len)) {
-			len = 1; Error("[STRUCT] Expression expected", 0, PASS1);
+			len = 1; Error("[STRUCT] Expression expected", 0);
 		}
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				val = 0; Error("[STRUCT] Expression expected", 0, PASS1);
+				val = 0; Error("[STRUCT] Expression expected", 0);
 			}
 		} else {
 			val = 0;

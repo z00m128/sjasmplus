@@ -38,7 +38,7 @@
 
 void PrintHelp() {
 	_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
-	_COUT "Copyright 2004-2018 by Aprisobal and all other participants" _ENDL;
+	_COUT "Copyright 2004-2019 by Aprisobal and all other participants" _ENDL;
 	//_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
 	//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
@@ -232,7 +232,7 @@ namespace Options {
 		char* p, *ps;
 		char c[LINEMAX];
 
-		CmdDefineTable.Init();
+		// CmdDefineTable.Init();
 
 		while (argv[i] && *argv[i] == '-') {
 			if (*(argv[i] + 1) == '-') {
@@ -348,6 +348,9 @@ int main(int argc, char **argv) {
 	dwStart = GetTickCount();
 
 	if (argc > 1) {
+		// Init cmdline definitions by -D
+		Options::CmdDefineTable.Init();
+
 		// init vars
 		Options::DestionationFName[0] = 0;
 		Options::ListingFName[0] = 0;

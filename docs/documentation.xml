@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.10.3 Documentation [2018-11-26]</title>
+  <title>SjASMPlus 1.10.4 Documentation [2019-01-09]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -178,6 +178,17 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>09.01.2019 - 1.10.4</term>
+
+            <listitem>
+              <para><programlisting>- "Bytes lost" error reworked (and changed to warning)
+- Error/warning messages are displayed in last pass only (where possible)
+- Fixed 64k limit warnigs
+- BinIncFile reworked</programlisting></para>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>26.11.2018 - 1.10.3</term>
@@ -409,7 +420,7 @@
       environment and included <emphasis>Makefile.win</emphasis>. Precompiled
       win32 binary is available on
       <ulink
-      url="http://z00m.speccy.cz">http://z00m.speccy.cz</ulink></para>
+      url="https://github.com/z00m128/sjasmplus/releases">https://github.com/z00m128/sjasmplus/releases</ulink></para>
 
       <para>There is an option to use CMake for compilation.
       See <emphasis>INSTALL.md</emphasis> file for details.</para>

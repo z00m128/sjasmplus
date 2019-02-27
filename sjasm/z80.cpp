@@ -982,7 +982,7 @@ namespace Z80 {
 			b = (signed) callad;
 			e[1] = callad & 255; e[2] = (callad >> 8) & 255;
 			if (b > 65535) {
-				Error("[CALL] Bytes lost", 0);
+				Warning("[CALL] Bytes lost", 0, LASTPASS);
 			}
 			EmitBytes(e);
 			/* (begin add) */
@@ -1205,8 +1205,8 @@ namespace Z80 {
 			jmp = nad - CurAddress - 2;
 			if (jmp < -128 || jmp > 127) {
 				char el[LINEMAX];
-				SPRINTF1(el, LINEMAX, "[DJNZ] Target out of range (%i)", jmp);
-				Error(el, 0); jmp = 0;
+				SPRINTF1(el, LINEMAX, "[DJNZ] Target out of range (%+i)", jmp);
+				Error(el, 0, LASTPASS); jmp = 0;
 			}
 			e[0] = 0x10; e[1] = jmp < 0 ? 256 + jmp : jmp;
 			EmitBytes(e);
@@ -1589,7 +1589,7 @@ namespace Z80 {
 				b = (signed) jpad;
 				e[1] = jpad & 255; e[2] = (jpad >> 8) & 255;
 				if (b > 65535) {
-					Error("[JP] Bytes lost", 0);
+					Warning("[JP] Bytes lost", 0, LASTPASS);
 				}
 			}
 			EmitBytes(e);
@@ -1645,7 +1645,7 @@ namespace Z80 {
 				/*if (pass == LASTPASS) {
 					_COUT "AAAAAAA:" _CMDL jmp _CMDL " " _CMDL jrad _CMDL " " _CMDL CurAddress _ENDL;
 				}*/
-				SPRINTF1(el, LINEMAX, "[JR] Target out of range (%i)", jmp);
+				SPRINTF1(el, LINEMAX, "[JR] Target out of range (%+i)", jmp);
 				Error(el, 0, LASTPASS);
 				jmp = 0;
 			}

@@ -257,8 +257,11 @@ char* getinstr(char*& p) {
 
 /* changes applied from SjASM 0.39g */
 int check8(aint val, bool error) {
-	if (val != (val & 255) && ~val > 127 && error) {
-		Error("Bytes lost", 0); return 0;
+	if ((val < -256 || val > 255) && error) {
+		char buffer[32];
+		sprintf(buffer, "Bytes lost (0x%lX)", val);
+		Warning(buffer, 0, LASTPASS);
+		return 0;
 	}
 	return 1;
 }
@@ -266,23 +269,32 @@ int check8(aint val, bool error) {
 /* changes applied from SjASM 0.39g */
 int check8o(long val) {
 	if (val < -128 || val > 127) {
-		Error("Offset out of range", 0); return 0;
+		char buffer[32];
+		sprintf(buffer,"Offset out of range (%+li)", val);
+		Error(buffer, 0, LASTPASS);
+		return 0;
 	}
 	return 1;
 }
 
 /* changes applied from SjASM 0.39g */
 int check16(aint val, bool error) {
-	if (val != (val & 65535) && ~val > 32767 && error) {
-		Error("Bytes lost", 0); return 0;
+	if ((val < -65536 || val > 65535) && error) {
+		char buffer[32];
+		sprintf(buffer, "Bytes lost (0x%lX)", val);
+		Warning(buffer, 0, LASTPASS);
+		return 0;
 	}
 	return 1;
 }
 
 /* changes applied from SjASM 0.39g */
 int check24(aint val, bool error) {
-	if (val != (val & 16777215) && ~val > 8388607 && error) {
-		Error("Bytes lost", 0); return 0;
+	if ((val < -16777216 || val > 16777215) && error) {
+		char buffer[32];
+		sprintf(buffer, "Bytes lost (0x%lX)", val);
+		Warning(buffer, 0, LASTPASS);
+		return 0;
 	}
 	return 1;
 }
@@ -668,10 +680,10 @@ char* GetFileName(char*& p, bool convertslashes) {
 		if (*p == '"') {
 			++p;
 		} else {
-			Error("No closing '\"'", 0);
+			Error("No closing '\"'", 0, LASTPASS);
 		}
 	} else if (*p && o == 2 && *p != '>') {
-		Error("No closing '>'", 0);
+		Error("No closing '>'", 0, LASTPASS);
 	} else if (*p) {
 		++p;
 	}
@@ -718,10 +730,10 @@ char* GetHobetaFileName(char*& p) {
 		if (*p == '"') {
 			++p;
 		} else {
-			Error("No closing '\"'", 0);
+			Error("No closing '\"'", 0, LASTPASS);
 		}
 	} else if (*p && o == 2 && *p != '>') {
-		Error("No closing '>'", 0);
+		Error("No closing '>'", 0, LASTPASS);
 	} else if (*p) {
 		++p;
 	}
