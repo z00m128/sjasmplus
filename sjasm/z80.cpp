@@ -4574,29 +4574,13 @@ namespace Z80 {
     }
 
     void OpCode_MIRROR() {
-        Z80Reg reg;
-        int e[3];
-        do{
-            e[0] = e[1] = e[2]= -1;
-            reg = GetRegister(lp);
-            switch(reg){
-                case Z80_A:
-                    e[0] = 0xed; e[1] = 0x24;
-                    break;
-                case Z80_DE:
-                    e[0] = 0xed; e[1] = 0x26;
-                    break;
-                default:
-                    break;
-            }
-            EmitBytes(e);
-            /* (begin add) */
-            if (*lp && comma(lp)) {
-                continue;
-            } else {
-                break;
-            }
-        }while('o');
+        Z80Reg reg = GetRegister(lp);
+        if (Z80_UNK != reg && Z80_A != reg) {
+            Error("[MIRROR] Illegal operand", lp, CATCHALL);
+            return;
+        }
+        EmitByte(0xED);
+        EmitByte(0x24);
     }
 
     void OpCode_TEST() {
@@ -4628,6 +4612,11 @@ namespace Z80 {
 
     //Swaps the high and low nibbles of the accumulator.
     void OpCode_SWAPNIB() {
+        Z80Reg reg = GetRegister(lp);
+        if (Z80_UNK != reg && Z80_A != reg) {
+            Error("[SWAPNIB] Illegal operand", lp, CATCHALL);
+            return;
+        }
         EmitByte(0xED);
         EmitByte(0x23);
     }
@@ -4640,11 +4629,6 @@ namespace Z80 {
     void OpCode_PIXELAD() {
         EmitByte(0xED);
         EmitByte(0x94);
-    }
-
-    void OpCode_FILLDE() {
-        EmitByte(0xED);
-        EmitByte(0xB5);
     }
 
     void OpCode_LDIX() {
@@ -4672,26 +4656,20 @@ namespace Z80 {
         EmitByte(0xBC);
     }
 
-    void OpCode_LDIRSCALE() {
-        EmitByte(0xED);
-        EmitByte(0xB6);
-    }
+// LDIRSCALE is now very unlikely to happen, there's ~1% chance it may be introduced within the cased-Next release
+//     void OpCode_LDIRSCALE() {
+//         EmitByte(0xED);
+//         EmitByte(0xB6);
+//     }
 
     void OpCode_LDPIRX() {
         EmitByte(0xED);
         EmitByte(0xB7);
     }
 
-
-
     void OpCode_OUTINB() {
         EmitByte(0xED);
         EmitByte(0x90);
-    }
-
-    void OpCode_POPX() {
-        EmitByte(0xED);
-        EmitByte(0x8B);
     }
 
     void OpCode_SETAE() {
@@ -4795,11 +4773,9 @@ namespace Z80 {
         OpCodeTable.Insert("ldws",     OpCode_LDWS);
         OpCodeTable.Insert("lddx",     OpCode_LDDX);
         OpCodeTable.Insert("ldirx",    OpCode_LDIRX);
-        OpCodeTable.Insert("ldirscale",OpCode_LDIRSCALE);
+        //OpCodeTable.Insert("ldirscale",OpCode_LDIRSCALE);
         OpCodeTable.Insert("ldpirx",   OpCode_LDPIRX);
         OpCodeTable.Insert("lddrx",    OpCode_LDDRX);
-		OpCodeTable.Insert("fillde",   OpCode_FILLDE);
-        OpCodeTable.Insert("popx",     OpCode_POPX);
 	}
 } // eof namespace Z80
 
