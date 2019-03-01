@@ -3408,57 +3408,59 @@ namespace Z80 {
 	}
 
 	void OpCode_POP() {
-		int e[30],t = 0,c = 1;
+		Z80Reg reg;
 		do {
-			switch (GetRegister(lp)) {
+			int e[5];
+			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+			switch (reg = GetRegister(lp)) {
 			case Z80_AF:
-				e[t++] = 0xf1; break;
+				e[0] = 0xf1; break;
 			case Z80_BC:
-				e[t++] = 0xc1; break;
+				e[0] = 0xc1; break;
 			case Z80_DE:
-				e[t++] = 0xd1; break;
+				e[0] = 0xd1; break;
 			case Z80_HL:
-				e[t++] = 0xe1; break;
+				e[0] = 0xe1; break;
 			case Z80_IX:
-				e[t++] = 0xdd; e[t++] = 0xe1; break;
 			case Z80_IY:
-				e[t++] = 0xfd; e[t++] = 0xe1; break;
+				e[0] = reg; e[1] = 0xe1; break;
 			default:
-				c = 0; break;
+				break;
 			}
-			if (!comma(lp) || t > 27) {
-				c = 0;
-			}
-		} while (c);
-		e[t] = -1;
-		EmitBytes(e);
+			EmitBytes(e);
+		} while (comma(lp));
 	}
 
 	void OpCode_PUSH() {
-		int e[30],t = 0,c = 1;
+        Z80Reg reg;
 		do {
-			switch (GetRegister(lp)) {
+            int e[5];
+            e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+			switch (reg = GetRegister(lp)) {
 			case Z80_AF:
-				e[t++] = 0xf5; break;
+				e[0] = 0xf5; break;
 			case Z80_BC:
-				e[t++] = 0xc5; break;
+				e[0] = 0xc5; break;
 			case Z80_DE:
-				e[t++] = 0xd5; break;
+				e[0] = 0xd5; break;
 			case Z80_HL:
-				e[t++] = 0xe5; break;
+				e[0] = 0xe5; break;
 			case Z80_IX:
-				e[t++] = 0xdd; e[t++] = 0xe5; break;
 			case Z80_IY:
-				e[t++] = 0xfd; e[t++] = 0xe5; break;
+				e[0] = reg; e[1] = 0xe5; break;
+            case Z80_UNK:
+            {
+                if(!Options::EnableNextExtension) break;
+                int imm16 = GetWord(lp);
+                e[0] = 0xED; e[1] = 0x8A;
+                e[2] = (imm16 >> 8) & 255;  // push opcode is big-endian!
+                e[3] = imm16 & 255;
+            }
 			default:
-				c = 0; break;
+				break;
 			}
-			if (!comma(lp) || t > 27) {
-				c = 0;
-			}
-		} while (c);
-		e[t] = -1;
-		EmitBytes(e);
+            EmitBytes(e);
+		} while (comma(lp));
 	}
 
 	void OpCode_RES() {
