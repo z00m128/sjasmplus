@@ -670,26 +670,26 @@ namespace Z80 {
 				}
 				break;
 			case Z80_DE:
+                if (!Options::EnableNextExtension) break;   // DE is valid first operand only for Z80N
                 if (!comma(lp)) {
                     Error("[ADD] Comma expected", 0); break;
                 }
-                if (Options::EnableNextExtension && GetRegister(lp) == Z80_A) {
+                if (Z80_A == GetRegister(lp)) {
                     e[0] = 0xED; e[1] = 0x32;
-                }
-                else{
+                } else {
                     auto b = GetWord(lp);
                     e[0] = 0xED; e[1] = 0x35 ;
                     e[2] = b & 255; e[3] = (b >> 8) & 255;
                 }
                 break;
             case Z80_BC:
+                if (!Options::EnableNextExtension) break;   // BC is valid first operand only for Z80N
                 if (!comma(lp)) {
                     Error("[ADD] Comma expected", 0); break;
                 }
-                if (Options::EnableNextExtension && GetRegister(lp) == Z80_A) {
+                if (Z80_A == GetRegister(lp)) {
                     e[0] = 0xED; e[1] = 0x33;
-                }
-                else{
+                } else {
                     auto b = GetWord(lp);
                     e[0] = 0xED; e[1] = 0x36 ;
                     e[2] = b & 255; e[3] = (b >> 8) & 255;
