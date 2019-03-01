@@ -4585,19 +4585,11 @@ namespace Z80 {
 
     void OpCode_TEST() {
         int e[4];
-        do{
-            e[0] = 0xED;
-            e[1] = 0x27;
-            e[2] = GetByte(lp);
-            e[3] = -1;
-            EmitBytes(e);
-            /* (begin add) */
-            if (*lp && comma(lp)) {
-                continue;
-            } else {
-                break;
-            }
-        }while('o');
+        e[0] = 0xED;
+        e[1] = 0x27;
+        e[2] = GetByte(lp);
+        e[3] = -1;
+        EmitBytes(e);
     }
 
 	void OpCode_MUL() {
