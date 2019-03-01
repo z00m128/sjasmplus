@@ -47,7 +47,7 @@ namespace Options {
 	extern bool AddLabelListing;
 	extern bool NoDestinationFile;
 	extern bool FakeInstructions;
-	extern bool EnableNextExtension;
+	extern bool IsNextEnabled;
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;

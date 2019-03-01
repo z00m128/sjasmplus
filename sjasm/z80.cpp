@@ -660,7 +660,7 @@ namespace Z80 {
 				case Z80_SP:
 					e[0] = 0x39; break;
 				case Z80_A:
-                    if(!Options::EnableNextExtension) break;
+                    if(!Options::IsNextEnabled) break;
                     e[0] = 0xED; e[1] = 0x31; break;
 				default:
 					auto b = GetWord(lp);
@@ -670,7 +670,7 @@ namespace Z80 {
 				}
 				break;
 			case Z80_DE:
-                if (!Options::EnableNextExtension) break;   // DE is valid first operand only for Z80N
+                if (!Options::IsNextEnabled) break;   // DE is valid first operand only for Z80N
                 if (!comma(lp)) {
                     Error("[ADD] Comma expected", 0); break;
                 }
@@ -683,7 +683,7 @@ namespace Z80 {
                 }
                 break;
             case Z80_BC:
-                if (!Options::EnableNextExtension) break;   // BC is valid first operand only for Z80N
+                if (!Options::IsNextEnabled) break;   // BC is valid first operand only for Z80N
                 if (!comma(lp)) {
                     Error("[ADD] Comma expected", 0); break;
                 }
@@ -1603,7 +1603,7 @@ namespace Z80 {
 				switch (reg) {
 				case Z80_C:
 					// "(C)" is valid only on Z80N, and requires parentheses (although "[]" works here too)
-					if (!haakjes || !cparen(lp) || !Options::EnableNextExtension) break;
+					if (!haakjes || !cparen(lp) || !Options::IsNextEnabled) break;
 					e[0] = 0xED; e[1] = 0x98; k = 1;
 					break;
 				case Z80_HL:
@@ -3588,7 +3588,7 @@ namespace Z80 {
 				e[0] = reg; e[1] = 0xe5; break;
             case Z80_UNK:
             {
-                if(!Options::EnableNextExtension) break;
+                if(!Options::IsNextEnabled) break;
                 int imm16 = GetWord(lp);
                 e[0] = 0xED; e[1] = 0x8A;
                 e[2] = (imm16 >> 8) & 255;  // push opcode is big-endian!
@@ -4789,7 +4789,7 @@ namespace Z80 {
 		OpCodeTable.Insert("sub", OpCode_SUB);
 		OpCodeTable.Insert("xor", OpCode_XOR);
 
-		if(!Options::EnableNextExtension) return;
+		if(!Options::IsNextEnabled) return;
 
         // Next extended opcodes
         OpCodeTable.Insert("brlc",     OpCode_Next_BRLC);
