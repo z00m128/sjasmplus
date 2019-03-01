@@ -935,6 +935,38 @@ namespace Z80 {
 		/* (end add) */
 	}
 
+    // helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation
+    void OpCode_Z80N_BarrelShifts(int mainOpcode) {
+        int e[3];
+        e[0] = e[1] = e[2] = -1;
+        // verify the operands are "de,b" (only valid ones)
+        if (Z80_DE == GetRegister(lp) && comma(lp) && Z80_B == GetRegister(lp)) {
+            e[0]=0xED;
+            e[1]=mainOpcode;
+        }
+        EmitBytes(e);
+    }
+
+    void OpCode_BRLC() {
+        OpCode_Z80N_BarrelShifts(0x2C);
+    }
+
+    void OpCode_BSLA() {
+        OpCode_Z80N_BarrelShifts(0x28);
+    }
+
+    void OpCode_BSRA() {
+        OpCode_Z80N_BarrelShifts(0x29);
+    }
+
+    void OpCode_BSRF() {
+        OpCode_Z80N_BarrelShifts(0x2B);
+    }
+
+    void OpCode_BSRL() {
+        OpCode_Z80N_BarrelShifts(0x2A);
+    }
+
 	void OpCode_CALL() {
 		aint callad;
 		int e[4], b;
@@ -4755,6 +4787,11 @@ namespace Z80 {
 		if(!Options::EnableNextExtension) return;
 
         // Next extended opcodes
+        OpCodeTable.Insert("brlc",     OpCode_BRLC);
+        OpCodeTable.Insert("bsla",     OpCode_BSLA);
+        OpCodeTable.Insert("bsra",     OpCode_BSRA);
+        OpCodeTable.Insert("bsrf",     OpCode_BSRF);
+        OpCodeTable.Insert("bsrl",     OpCode_BSRL);
         OpCodeTable.Insert("lddrx",    OpCode_LDDRX);
         OpCodeTable.Insert("lddx",     OpCode_LDDX);
         //OpCodeTable.Insert("ldirscale",OpCode_LDIRSCALE);
