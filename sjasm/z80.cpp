@@ -4754,23 +4754,23 @@ namespace Z80 {
 
 		if(!Options::EnableNextExtension) return;
 
-		// Next extended opcodes
-		OpCodeTable.Insert("swapnib",  OpCode_SWAPNIB);
-		OpCodeTable.Insert("mirror",   OpCode_MIRROR);
-		OpCodeTable.Insert("test",     OpCode_TEST);
-		OpCodeTable.Insert("mul",      OpCode_MUL);
-        OpCodeTable.Insert("outinb",   OpCode_OUTINB);
-        OpCodeTable.Insert("nextreg",  OpCode_NEXTREG);
-        OpCodeTable.Insert("pixeldn",  OpCode_PIXELDN);
-        OpCodeTable.Insert("pixelad",  OpCode_PIXELAD);
-        OpCodeTable.Insert("setae",    OpCode_SETAE);
-        OpCodeTable.Insert("ldix",     OpCode_LDIX);
-        OpCodeTable.Insert("ldws",     OpCode_LDWS);
-        OpCodeTable.Insert("lddx",     OpCode_LDDX);
-        OpCodeTable.Insert("ldirx",    OpCode_LDIRX);
-        //OpCodeTable.Insert("ldirscale",OpCode_LDIRSCALE);
-        OpCodeTable.Insert("ldpirx",   OpCode_LDPIRX);
+        // Next extended opcodes
         OpCodeTable.Insert("lddrx",    OpCode_LDDRX);
+        OpCodeTable.Insert("lddx",     OpCode_LDDX);
+        //OpCodeTable.Insert("ldirscale",OpCode_LDIRSCALE);
+        OpCodeTable.Insert("ldirx",    OpCode_LDIRX);
+        OpCodeTable.Insert("ldix",     OpCode_LDIX);
+        OpCodeTable.Insert("ldpirx",   OpCode_LDPIRX);
+        OpCodeTable.Insert("ldws",     OpCode_LDWS);
+        OpCodeTable.Insert("mirror",   OpCode_MIRROR);
+        OpCodeTable.Insert("mul",      OpCode_MUL);
+        OpCodeTable.Insert("nextreg",  OpCode_NEXTREG);
+        OpCodeTable.Insert("outinb",   OpCode_OUTINB);
+        OpCodeTable.Insert("pixelad",  OpCode_PIXELAD);
+        OpCodeTable.Insert("pixeldn",  OpCode_PIXELDN);
+        OpCodeTable.Insert("setae",    OpCode_SETAE);
+        OpCodeTable.Insert("swapnib",  OpCode_SWAPNIB);
+        OpCodeTable.Insert("test",     OpCode_TEST);
 	}
 } // eof namespace Z80
 
