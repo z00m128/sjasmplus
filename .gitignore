@@ -3,3 +3,4 @@
 sjasmwin32/sjasmplus.res
 sjasmplus*
 Makefile*
+build/
