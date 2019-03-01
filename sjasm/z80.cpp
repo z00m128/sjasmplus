@@ -936,7 +936,7 @@ namespace Z80 {
 	}
 
     // helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation
-    void OpCode_Z80N_BarrelShifts(int mainOpcode) {
+    static void OpCode_Z80N_BarrelShifts(int mainOpcode) {
         int e[3];
         e[0] = e[1] = e[2] = -1;
         // verify the operands are "de,b" (only valid ones)
@@ -1601,6 +1601,11 @@ namespace Z80 {
 					reg = GetRegister(lp);
 				}
 				switch (reg) {
+				case Z80_C:
+					// "(C)" is valid only on Z80N, and requires parentheses (although "[]" works here too)
+					if (!haakjes || !cparen(lp) || !Options::EnableNextExtension) break;
+					e[0] = 0xED; e[1] = 0x98; k = 1;
+					break;
 				case Z80_HL:
 					if (haakjes && !cparen(lp)) {
 						break;
