@@ -4547,30 +4547,31 @@ namespace Z80 {
     void OpCode_NEXTREG() {
         Z80Reg reg;
         int e[5];
-        do{
+        do {
             e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+            // is operand1 register? (to give more precise error message to people using wrong `nextreg a,$nn`)
             reg = GetRegister(lp);
-            if(reg==Z80_A) {
-                if(!comma(lp)){
-                    break;
-                }
-                e[0] = 0xed; e[1] = 0x92;e[2] = GetByte(lp);
+            if (Z80_UNK != reg) {
+                Error("[NEXTREG] first operand should be register number", NULL, SUPPRESS); break;
             }
-            else{
-                e[0] = 0xed; e[1] = 0x91;e[2] = GetByte(lp);
-                if(!comma(lp)){
+            // this code would be enough to get correct assembling, the test above is "extra"
+            e[2] = GetByte(lp);
+            if (!comma(lp)) {
+                Error("[NEXTREG] Comma expected", NULL); break;
+            }
+            switch (reg = GetRegister(lp)) {
+                case Z80_A:
+                    e[0] = 0xED; e[1] = 0x92;
                     break;
-                }
-                e[3] = GetByte(lp);
+                case Z80_UNK:
+                    e[0] = 0xED; e[1] = 0x91;
+                    e[3] = GetByte(lp);
+                    break;
+                default:
+                    break;
             }
             EmitBytes(e);
-            /* (begin add) */
-            if (*lp && comma(lp)) {
-                continue;
-            } else {
-                break;
-            }
-        }while('o');
+        } while (comma(lp));
     }
 
     void OpCode_MIRROR() {
