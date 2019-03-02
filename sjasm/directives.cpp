@@ -2194,7 +2194,7 @@ void _lua_showerror() {
 	if (FP_ListingFile != NULL) {
 		fputs(ErrorLine, FP_ListingFile);
 	}
-	_COUT ErrorLine _END;
+	_CERR ErrorLine _END;
 
 	PreviousErrorLine = ln;
 

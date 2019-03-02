@@ -40,11 +40,13 @@
 // output
 #ifdef UNDER_CE
 #define _COUT WriteOutput(
+#define _CERR WriteOutput(
 #define _CMDL );WriteOutput(
 #define _ENDL );WriteOutputEOF();
 #define _END );
 #else
 #define _COUT cout <<
+#define _CERR cerr <<
 #define _CMDL  <<
 #define _ENDL << endl
 #define _END ;

@@ -168,7 +168,7 @@ void Error(const char* fout, const char* bd, int type) {
 		fputs(ErrorLine, FP_ListingFile);
 	}
 
-	_COUT ErrorLine _END;
+	_CERR ErrorLine _END;
 
 	/*if (type==FATAL) exit(1);*/
 	if (type == FATAL) {
@@ -230,7 +230,7 @@ void Warning(const char* fout, const char* bd, int type) {
 	if (FP_ListingFile != NULL) {
 		fputs(ErrorLine, FP_ListingFile);
 	}
-	_COUT ErrorLine _END;
+	_CERR ErrorLine _END;
 }
 
 void CheckRamLimitExceeded()

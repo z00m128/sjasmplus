@@ -257,31 +257,31 @@ namespace Options {
 				if ((ps)&&(ps+1)) {
 					STRCPY(SymbolListFName, LINEMAX, ps+1);
 				} else {
-					_COUT "No parameters found in " _CMDL argv[i-1] _ENDL;
+					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
 				}
 			} else if (!strcmp(c, "lst")) {
 				if ((ps)&&(ps+1)) {
 					STRCPY(ListingFName, LINEMAX, ps+1);
 				} else {
-					_COUT "No parameters found in " _CMDL argv[i-1] _ENDL;
+					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
 				}
 			} else if (!strcmp(c, "exp")) {
 				if ((ps)&&(ps+1)) {
 					STRCPY(ExportFName, LINEMAX, ps+1);
 				} else {
-					_COUT "No parameters found in " _CMDL argv[i-1] _ENDL;
+					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
 				}
 			/*} else if (!strcmp(c, "zxlab")) {
 				if (ps+1) {
 					STRCPY(UnrealLabelListFName, LINEMAX, ps+1);
 				} else {
-					_COUT "No parameters found in " _CMDL argv[i] _ENDL;
+					_CERR "No parameters found in " _CMDL argv[i] _ENDL;
 				}*/
 			} else if (!strcmp(c, "raw")) {
 				if ((ps)&&(ps+1)) {
 					STRCPY(RAWFName, LINEMAX, ps+1);
 				} else {
-					_COUT "No parameters found in " _CMDL argv[i-1] _ENDL;
+					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
 				}
 			} else if (!strcmp(c, "fullpath")) {
 				IsShowFullPath = 1;
@@ -301,7 +301,7 @@ namespace Options {
 				if ((ps)&&(ps+1)) {
 					IncludeDirsList = new CStringsList(ps+1, IncludeDirsList);
 				} else {
-					_COUT "No parameters found in " _CMDL argv[i-1] _ENDL;
+					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
 				}
 			} else if (*p == 'i' || *p == 'I') {
 				IncludeDirsList = new CStringsList(p+1, IncludeDirsList);
@@ -311,10 +311,10 @@ namespace Options {
 				} else if(c[1]) {
 					CmdDefineTable.Add(c+1, "", NULL);
 				} else {
-					_COUT "No parameters found in " _CMDL argv[i-1] _ENDL;
+					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
 				}
 			} else {
-				_COUT "Unrecognized option: " _CMDL c _ENDL;
+				_CERR "Unrecognized option: " _CMDL c _ENDL;
 			}
 		}
 	}
@@ -406,7 +406,7 @@ int main(int argc, char **argv) {
 #endif //USE_LUA
 
 	if (!SourceFNames[0][0]) {
-		_COUT "No inputfile(s)" _ENDL;
+		_CERR "No inputfile(s)" _ENDL;
 #ifdef UNDER_CE
 		return 0;
 #else
@@ -441,7 +441,7 @@ int main(int argc, char **argv) {
 		OpenFile(SourceFNames[i]);
 	}
 
-	_COUT "Pass 1 complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
+	_CERR "Pass 1 complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
 
 	ConvertEncoding = base_encoding;
 
@@ -462,9 +462,9 @@ int main(int argc, char **argv) {
 		}
 
 		if (pass != LASTPASS) {
-			_COUT "Pass " _CMDL pass _CMDL " complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
+			_CERR "Pass " _CMDL pass _CMDL " complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
 		} else {
-			_COUT "Pass 3 complete" _ENDL;
+			_CERR "Pass 3 complete" _ENDL;
 		}
 	} while (pass < 3);//MAXPASSES);
 
@@ -483,16 +483,17 @@ int main(int argc, char **argv) {
 		LabelTable.DumpSymbols();
 	}
 
-	_COUT "Errors: " _CMDL ErrorCount _CMDL ", warnings: " _CMDL WarningCount _CMDL ", compiled: " _CMDL CompiledCurrentLine _CMDL " lines" _END;
+	_CERR "Errors: " _CMDL ErrorCount _CMDL ", warnings: " _CMDL WarningCount _CMDL ", compiled: " _CMDL CompiledCurrentLine _CMDL " lines" _END;
 
 	double dwCount;
 	dwCount = GetTickCount() - dwStart;
 	if (dwCount < 0) {
 		dwCount = 0;
 	}
-	printf(", work time: %.3f seconds", dwCount / 1000);
+	char workTimeTxt[200] = "";
+	SPRINTF1(workTimeTxt, 200, ", work time: %.3f seconds", dwCount / 1000);
 
-	_COUT "" _ENDL;
+	_CERR workTimeTxt _ENDL;
 
 #ifndef UNDER_CE
 	cout << flush;
