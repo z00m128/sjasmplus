@@ -663,6 +663,7 @@ namespace Z80 {
                     if(!Options::IsNextEnabled) break;
                     e[0] = 0xED; e[1] = 0x31; break;
 				default:
+					if(!Options::IsNextEnabled) break;
 					auto b = GetWord(lp);
                     e[0] = 0xED; e[1] = 0x34 ;
                     e[2] = b & 255; e[3] = (b >> 8) & 255;
