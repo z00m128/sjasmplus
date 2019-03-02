@@ -56,8 +56,7 @@ void PrintHelp() {
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
-	_COUT "  --msg=error              Show only error messages" _ENDL;
-	_COUT "  --msg=all                Show all messages (by default)" _ENDL;
+	_COUT "  --msg=[all|war|err]      Stderr messages verbosity (\"all\" is default)" _ENDL;
 	_COUT "  --fullpath               Show full path to error file" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
@@ -68,16 +67,17 @@ void PrintHelp() {
 }
 
 namespace Options {
-	char SymbolListFName[LINEMAX];
-	char ListingFName[LINEMAX];
-	char ExportFName[LINEMAX];
-	char DestionationFName[LINEMAX];
-	char RAWFName[LINEMAX];
-	char UnrealLabelListFName[LINEMAX];
+	char SymbolListFName[LINEMAX] = {0};
+	char ListingFName[LINEMAX] = {0};
+	char ExportFName[LINEMAX] = {0};
+	char DestionationFName[LINEMAX] = {0};
+	char RAWFName[LINEMAX] = {0};
+	char UnrealLabelListFName[LINEMAX] = {0};
 
-	char ZX_SnapshotFName[LINEMAX];
-	char ZX_TapeFName[LINEMAX];
+	char ZX_SnapshotFName[LINEMAX] = {0};
+	char ZX_TapeFName[LINEMAX] = {0};
 
+	EOutputVerbosity OutputVerbosity = OV_ALL;
 	bool IsPseudoOpBOF = 0;
 	bool IsAutoReloc = 0;
 	bool IsLabelTableInListing = 0;
@@ -86,14 +86,16 @@ namespace Options {
 	bool AddLabelListing = 0;
 	bool HideLogo = 0;
 	bool ShowHelp = 0;
-	bool NoDestinationFile = 0;
+	bool NoDestinationFile = true;		// no *.out file by default
 	bool FakeInstructions = 1;
-	bool IsNextEnabled = 0;
-	CStringsList* IncludeDirsList = 0;
-	CDefineTable CmdDefineTable;
+	bool IsNextEnabled = false;
 
+	// Include directories list is initialized with "." directory
+	CStringsList* IncludeDirsList = new CStringsList((char *)".", NULL);
+	CDefineTable CmdDefineTable;		// is initialized by constructor
 
 } // eof namespace Options
+
 //EMemoryType MemoryType = MT_NONE;
 CDevice *Devices = 0;
 CDevice *Device = 0;
@@ -224,100 +226,118 @@ void ExitASM(int p) {
 }
 
 namespace Options {
-#ifdef UNDER_CE
-	void GetOptions(_TCHAR* argv[], int& i) {
-#else
-	void GetOptions(char**& argv, int& i) {
-#endif
-		char* p, *ps;
-		char c[LINEMAX];
 
-		// CmdDefineTable.Init();
+	class COptionsParser {
+	private:
+		char* arg;
+		char opt[LINEMAX];
+		char val[LINEMAX];
 
-		while (argv[i] && *argv[i] == '-') {
-			if (*(argv[i] + 1) == '-') {
-				p = argv[i++] + 2;
+		// returns 1 when argument was processed (keyword detected, value copied into buffer)
+		// If buffer == NULL, only detection of keyword + check for non-zero "value" is done (no copy)
+		int CheckAssignmentOption(const char* keyword, char* buffer, const size_t bufferSize) {
+			if (strcmp(keyword, opt)) return 0;		// detect "keyword" (return 0 if not)
+			if (*val) {
+				if (NULL != buffer) STRCPY(buffer, bufferSize, val);
 			} else {
-				p = argv[i++] + 1;
+				_CERR "No parameters found in " _CMDL arg _ENDL;
 			}
+			return 1;	// keyword detected, option was processed
+		}
 
-			memset(c, 0, LINEMAX); //todo
-			ps = STRSTR(p, "=");
-			if (ps != NULL) {
-				STRNCPY(c, LINEMAX, p, (int)(ps - p));
+		static void splitByChar(const char* s, const int splitter,
+							   char* v1, const size_t v1Size,
+							   char* v2, const size_t v2Size) {
+			// only non-zero splitter character is supported
+			const char* spos = splitter ? STRCHR(s, splitter) : NULL;
+			if (NULL == spos) {
+				// splitter character not found, copy whole input string into v1, v2 = empty string
+				STRCPY(v1, v1Size, s);
+				v2[0] = 0;
 			} else {
-				STRCPY(c, LINEMAX, p);
-			}
-
-			if (*p == 'h' || !strcmp(c, "help")) {
-				ShowHelp = 1;
-			} else if (!strcmp(c, "lstlab")) {
-				AddLabelListing = 1;
-			} else if (!strcmp(c, "sym")) {
-				if ((ps)&&(ps+1)) {
-					STRCPY(SymbolListFName, LINEMAX, ps+1);
-				} else {
-					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
-				}
-			} else if (!strcmp(c, "lst")) {
-				if ((ps)&&(ps+1)) {
-					STRCPY(ListingFName, LINEMAX, ps+1);
-				} else {
-					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
-				}
-			} else if (!strcmp(c, "exp")) {
-				if ((ps)&&(ps+1)) {
-					STRCPY(ExportFName, LINEMAX, ps+1);
-				} else {
-					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
-				}
-			/*} else if (!strcmp(c, "zxlab")) {
-				if (ps+1) {
-					STRCPY(UnrealLabelListFName, LINEMAX, ps+1);
-				} else {
-					_CERR "No parameters found in " _CMDL argv[i] _ENDL;
-				}*/
-			} else if (!strcmp(c, "raw")) {
-				if ((ps)&&(ps+1)) {
-					STRCPY(RAWFName, LINEMAX, ps+1);
-				} else {
-					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
-				}
-			} else if (!strcmp(c, "fullpath")) {
-				IsShowFullPath = 1;
-			} else if (!strcmp(c, "zxnext")) {
-				IsNextEnabled = true;
-			} else if (!strcmp(c, "reversepop")) {
-				IsReversePOP = 1;
-			} else if (!strcmp(c, "nologo")) {
-				HideLogo = 1;
-			} else if (!strcmp(c, "nofakes")) {
-				FakeInstructions = 0;
-			} else if (!strcmp(c, "dos866")) {
-				ConvertEncoding = ENCDOS;
-			} else if (!strcmp(c, "dirbol")) {
-				IsPseudoOpBOF = 1;
-			} else if (!strcmp(c, "inc")) {
-				if ((ps)&&(ps+1)) {
-					IncludeDirsList = new CStringsList(ps+1, IncludeDirsList);
-				} else {
-					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
-				}
-			} else if (*p == 'i' || *p == 'I') {
-				IncludeDirsList = new CStringsList(p+1, IncludeDirsList);
-			} else if (*p == 'D') {
-				if ((ps)&&(ps+1)) {
-					CmdDefineTable.Add(c+1, ps+1, NULL);
-				} else if(c[1]) {
-					CmdDefineTable.Add(c+1, "", NULL);
-				} else {
-					_CERR "No parameters found in " _CMDL argv[i-1] _ENDL;
-				}
-			} else {
-				_CERR "Unrecognized option: " _CMDL c _ENDL;
+				// splitter found, copy string ahead splitter to v1, after it to v2
+				STRNCPY(v1, v1Size, s, spos - s);
+				v1[spos - s] = 0;
+				STRCPY(v2, v2Size, spos + 1);
 			}
 		}
-	}
+
+	public:
+#ifdef UNDER_CE
+		void GetOptions(_TCHAR* argv[], int& i) {
+#else
+		void GetOptions(char**& argv, int& i) {
+#endif
+			while ((arg=argv[i]) && ('-' == arg[0])) {
+				++i;					// next CLI argument
+
+				// copy "option" (up to '=' char) into `opt`, copy "value" (after '=') into `val`
+				if ('-' == arg[1]) {	// double-dash detected, value is expected after "="
+					splitByChar(arg + 2, '=', opt, LINEMAX, val, LINEMAX);
+				} else {				// single dash, parse value from second character onward
+					opt[0] = arg[1];	// copy only single letter into `opt`
+					opt[1] = 0;
+					if (opt[0]) {		// if it was not empty, try to copy also `val`
+						STRCPY(val, LINEMAX, arg + 2);
+					}
+				}
+
+				// check for particular options and setup option value by it
+				if (!strcmp(opt,"h") || !strcmp(opt, "help")) {
+					ShowHelp = 1;
+				} else if (!strcmp(opt, "lstlab")) {
+					AddLabelListing = 1;
+				} else if (CheckAssignmentOption("msg", NULL, 0)) {
+					if (!strcmp("err", val)) {
+						OutputVerbosity = OV_ERROR;
+					} else if (!strcmp("war", val)) {
+						OutputVerbosity = OV_WARNING;
+					} else if (!strcmp("all", val)) {
+						OutputVerbosity = OV_ALL;
+					} else {
+						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
+					}
+				} else if (
+					CheckAssignmentOption("sym", SymbolListFName, LINEMAX) ||
+					CheckAssignmentOption("lst", ListingFName, LINEMAX) ||
+					CheckAssignmentOption("exp", ExportFName, LINEMAX) ||
+					CheckAssignmentOption("raw", RAWFName, LINEMAX) ) {
+					// was proccessed inside CheckAssignmentOption function
+				} else if (!strcmp(opt, "fullpath")) {
+					IsShowFullPath = 1;
+				} else if (!strcmp(opt, "zxnext")) {
+					IsNextEnabled = true;
+				} else if (!strcmp(opt, "reversepop")) {
+					IsReversePOP = 1;
+				} else if (!strcmp(opt, "nologo")) {
+					HideLogo = 1;
+				} else if (!strcmp(opt, "nofakes")) {
+					FakeInstructions = 0;
+				} else if (!strcmp(opt, "dos866")) {
+					ConvertEncoding = ENCDOS;
+				} else if (!strcmp(opt, "dirbol")) {
+					IsPseudoOpBOF = 1;
+				} else if (!strcmp(opt, "inc") || !strcmp(opt, "i") || !strcmp(opt, "I")) {
+					if (*val) {
+						IncludeDirsList = new CStringsList(val, IncludeDirsList);
+					} else {
+						_CERR "No include path found in " _CMDL arg _ENDL;
+					}
+				} else if (opt[0] == 'D') {
+					char defN[LINEMAX], defV[LINEMAX];
+					if (*val) {		// for -Dname=value the `val` contains "name=value" string
+						//TODO the `Error("Duplicate name"..)` is not shown while parsing CLI options
+						splitByChar(val, '=', defN, LINEMAX, defV, LINEMAX);
+						CmdDefineTable.Add(defN, defV, NULL);
+					} else {
+						_CERR "No parameters found in " _CMDL arg _ENDL;
+					}
+				} else {
+					_CERR "Unrecognized option: " _CMDL opt _ENDL;
+				}
+			}
+		}
+	};
 }
 
 #ifdef USE_LUA
@@ -347,28 +367,14 @@ int main(int argc, char **argv) {
 	long dwStart;
 	dwStart = GetTickCount();
 
+	// get current directory
+	GetCurrentDirectory(MAX_PATH, buf);
+	CurrentDirectory = buf;
+
 	if (argc > 1) {
-		// Init cmdline definitions by -D
-		Options::CmdDefineTable.Init();
-
-		// init vars
-		Options::DestionationFName[0] = 0;
-		Options::ListingFName[0] = 0;
-		Options::UnrealLabelListFName[0] = 0;
-		Options::SymbolListFName[0] = 0;
-		Options::ExportFName[0] = 0;
-		Options::RAWFName[0] = 0;
-		Options::NoDestinationFile = true; // not *.out files by default
-		Options::IsNextEnabled = false;
-
-		// get current directory
-		GetCurrentDirectory(MAX_PATH, buf);
-		CurrentDirectory = buf;
-
-		// get arguments
-		Options::IncludeDirsList = new CStringsList((char *)".", Options::IncludeDirsList);
+		Options::COptionsParser optParser;
 		while (argv[i]) {
-			Options::GetOptions(argv, i);
+			optParser.GetOptions(argv, i);
 			if (argv[i]) {
 #ifdef UNDER_CE
 				STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, _tochar(argv[i++]));
@@ -441,7 +447,9 @@ int main(int argc, char **argv) {
 		OpenFile(SourceFNames[i]);
 	}
 
-	_CERR "Pass 1 complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
+	if (Options::OutputVerbosity <= OV_ALL) {
+		_CERR "Pass 1 complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
+	}
 
 	ConvertEncoding = base_encoding;
 
@@ -461,10 +469,12 @@ int main(int argc, char **argv) {
 			CurAddress = adrdisp; PseudoORG = 0;
 		}
 
-		if (pass != LASTPASS) {
-			_CERR "Pass " _CMDL pass _CMDL " complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
-		} else {
-			_CERR "Pass 3 complete" _ENDL;
+		if (Options::OutputVerbosity <= OV_ALL) {
+			if (pass != LASTPASS) {
+				_CERR "Pass " _CMDL pass _CMDL " complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
+			} else {
+				_CERR "Pass 3 complete" _ENDL;
+			}
 		}
 	} while (pass < 3);//MAXPASSES);
 
@@ -483,17 +493,19 @@ int main(int argc, char **argv) {
 		LabelTable.DumpSymbols();
 	}
 
-	_CERR "Errors: " _CMDL ErrorCount _CMDL ", warnings: " _CMDL WarningCount _CMDL ", compiled: " _CMDL CompiledCurrentLine _CMDL " lines" _END;
+	if (Options::OutputVerbosity <= OV_ALL) {
+		_CERR "Errors: " _CMDL ErrorCount _CMDL ", warnings: " _CMDL WarningCount _CMDL ", compiled: " _CMDL CompiledCurrentLine _CMDL " lines" _END;
 
-	double dwCount;
-	dwCount = GetTickCount() - dwStart;
-	if (dwCount < 0) {
-		dwCount = 0;
+		double dwCount;
+		dwCount = GetTickCount() - dwStart;
+		if (dwCount < 0) {
+			dwCount = 0;
+		}
+		char workTimeTxt[200] = "";
+		SPRINTF1(workTimeTxt, 200, ", work time: %.3f seconds", dwCount / 1000);
+
+		_CERR workTimeTxt _ENDL;
 	}
-	char workTimeTxt[200] = "";
-	SPRINTF1(workTimeTxt, 200, ", work time: %.3f seconds", dwCount / 1000);
-
-	_CERR workTimeTxt _ENDL;
 
 #ifndef UNDER_CE
 	cout << flush;
