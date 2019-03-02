@@ -30,6 +30,7 @@
 #define __SJASM
 
 enum EMemoryType { MT_NONE, MT_SIZE };
+enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR };
 
 namespace Options {
 	extern char SymbolListFName[LINEMAX];
@@ -39,6 +40,7 @@ namespace Options {
 	extern char RAWFName[LINEMAX];
 	extern char UnrealLabelListFName[LINEMAX];
 
+	extern EOutputVerbosity OutputVerbosity;
 	extern bool IsPseudoOpBOF;
 	extern bool IsAutoReloc;
 	extern bool IsLabelTableInListing;

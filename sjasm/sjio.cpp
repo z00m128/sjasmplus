@@ -230,7 +230,9 @@ void Warning(const char* fout, const char* bd, int type) {
 	if (FP_ListingFile != NULL) {
 		fputs(ErrorLine, FP_ListingFile);
 	}
-	_CERR ErrorLine _END;
+	if (Options::OutputVerbosity <= OV_WARNING) {
+		_CERR ErrorLine _END;
+	}
 }
 
 void CheckRamLimitExceeded()

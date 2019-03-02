@@ -56,6 +56,7 @@ char* strpad(char* string, char ch, aint length);
 #define SPRINTF3(buffer, sizeOfBuffer, format, arg1, arg2, arg3) sprintf_s(buffer, sizeOfBuffer, format, arg1, arg2, arg3)
 #define STRNCAT(strDest, bufferSizeInBytes, strSource, count) strncat_s(strDest, bufferSizeInBytes, strSource, count)
 #define STRSTR(str, strSearch) strstr(str, strSearch)
+#define STRCHR(str, charToSearch) strchr(str, charToSearch)
 
 #else
 
@@ -92,6 +93,7 @@ long GetTickCount();
 #define SPRINTF3(buffer, sizeOfBuffer, format, arg1, arg2, arg3) sprintf(buffer, format, arg1, arg2, arg3)
 #define STRNCAT(strDest, bufferSizeInBytes, strSource, count) strncat(strDest, strSource, count)
 #define STRSTR(str, strSearch) strstr(str, strSearch)
+#define STRCHR(str, charToSearch) strchr(str, charToSearch)
 
 #endif
 
