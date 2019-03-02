@@ -67,6 +67,7 @@
       win32 binary is available on
       <a class="ulink" href="https://github.com/z00m128/sjasmplus/releases" target="_top">https://github.com/z00m128/sjasmplus/releases</a></p><p>There is an option to use CMake for compilation.
       See <span class="emphasis"><em>INSTALL.md</em></span> file for details.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp10"></a>Command line</h2></div></div></div><p>Usage:</p><p><span class="emphasis"><em>sjasmplus [options] sourcefile(s)</em></span></p><p>Option flags as follows:</p><pre class="programlisting">  -h or --help             Help information
+  --zxnext                 Enable SpecNext Z80 extensions
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
                            Include path
   --lst=&lt;filename&gt;         Save listing to &lt;filename&gt;
@@ -77,8 +78,7 @@
   Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
  Logging:
   --nologo                 Do not show startup message
-  --msg=error              Show only error messages
-  --msg=all                Show all messages (by default)
+  --msg=[all|war|err]      Stderr messages verbosity ("all" is default)
   --fullpath               Show full path to error file
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
