@@ -24,5 +24,6 @@ Main Features
 - Multi file output and file updating
 - ZX Spectrum device emulation mode (pseudo op DEVICE)
 - ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD...)
+- Suport for the Z80n found in the ZX Spectrum Next
 
 This repository was created by import from original Aprisobal's repository @ https://sourceforge.net/projects/sjasmplus/.

@@ -642,15 +642,15 @@ namespace Z80 {
 
 	void OpCode_ADD() {
 		Z80Reg reg;
-		int e[4];
+		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
+			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_HL:
 				if (!comma(lp)) {
 					Error("[ADD] Comma expected", 0); break;
 				}
-				switch (GetRegister(lp)) {
+                    switch (GetRegister(lp)) {
 				case Z80_BC:
 					e[0] = 0x09; break;
 				case Z80_DE:
@@ -659,10 +659,42 @@ namespace Z80 {
 					e[0] = 0x29; break;
 				case Z80_SP:
 					e[0] = 0x39; break;
+				case Z80_A:
+                    if(!Options::IsNextEnabled) break;
+                    e[0] = 0xED; e[1] = 0x31; break;
 				default:
-					;
+					auto b = GetWord(lp);
+                    e[0] = 0xED; e[1] = 0x34 ;
+                    e[2] = b & 255; e[3] = (b >> 8) & 255;
+                    break;
 				}
 				break;
+			case Z80_DE:
+                if (!Options::IsNextEnabled) break;   // DE is valid first operand only for Z80N
+                if (!comma(lp)) {
+                    Error("[ADD] Comma expected", 0); break;
+                }
+                if (Z80_A == GetRegister(lp)) {
+                    e[0] = 0xED; e[1] = 0x32;
+                } else {
+                    auto b = GetWord(lp);
+                    e[0] = 0xED; e[1] = 0x35 ;
+                    e[2] = b & 255; e[3] = (b >> 8) & 255;
+                }
+                break;
+            case Z80_BC:
+                if (!Options::IsNextEnabled) break;   // BC is valid first operand only for Z80N
+                if (!comma(lp)) {
+                    Error("[ADD] Comma expected", 0); break;
+                }
+                if (Z80_A == GetRegister(lp)) {
+                    e[0] = 0xED; e[1] = 0x33;
+                } else {
+                    auto b = GetWord(lp);
+                    e[0] = 0xED; e[1] = 0x36 ;
+                    e[2] = b & 255; e[3] = (b >> 8) & 255;
+                }
+                break;
 			case Z80_IX:
 				if (!comma(lp)) {
 					Error("[ADD] Comma expected", 0); break;
@@ -902,6 +934,38 @@ namespace Z80 {
 		} while ('o');
 		/* (end add) */
 	}
+
+    // helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation
+    static void OpCode_Z80N_BarrelShifts(int mainOpcode) {
+        int e[3];
+        e[0] = e[1] = e[2] = -1;
+        // verify the operands are "de,b" (only valid ones)
+        if (Z80_DE == GetRegister(lp) && comma(lp) && Z80_B == GetRegister(lp)) {
+            e[0]=0xED;
+            e[1]=mainOpcode;
+        }
+        EmitBytes(e);
+    }
+
+    void OpCode_Next_BRLC() {
+        OpCode_Z80N_BarrelShifts(0x2C);
+    }
+
+    void OpCode_Next_BSLA() {
+        OpCode_Z80N_BarrelShifts(0x28);
+    }
+
+    void OpCode_Next_BSRA() {
+        OpCode_Z80N_BarrelShifts(0x29);
+    }
+
+    void OpCode_Next_BSRF() {
+        OpCode_Z80N_BarrelShifts(0x2B);
+    }
+
+    void OpCode_Next_BSRL() {
+        OpCode_Z80N_BarrelShifts(0x2A);
+    }
 
 	void OpCode_CALL() {
 		aint callad;
@@ -1537,6 +1601,11 @@ namespace Z80 {
 					reg = GetRegister(lp);
 				}
 				switch (reg) {
+				case Z80_C:
+					// "(C)" is valid only on Z80N, and requires parentheses (although "[]" works here too)
+					if (!haakjes || !cparen(lp) || !Options::IsNextEnabled) break;
+					e[0] = 0xED; e[1] = 0x98; k = 1;
+					break;
 				case Z80_HL:
 					if (haakjes && !cparen(lp)) {
 						break;
@@ -2910,6 +2979,16 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
+    void OpCode_Next_LDDRX() {
+        EmitByte(0xED);
+        EmitByte(0xBC);
+    }
+
+    void OpCode_Next_LDDX() {
+        EmitByte(0xED);
+        EmitByte(0xAC);
+    }
+
 	void OpCode_LDI() {
 		Z80Reg reg, reg2;
 		int e[11], b;
@@ -3132,6 +3211,52 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
+// LDIRSCALE is now very unlikely to happen, there's ~1% chance it may be introduced within the cased-Next release
+//     void OpCode_Next_LDIRSCALE() {
+//         EmitByte(0xED);
+//         EmitByte(0xB6);
+//     }
+
+    void OpCode_Next_LDIRX() {
+        EmitByte(0xED);
+        EmitByte(0xB4);
+    }
+
+    void OpCode_Next_LDIX() {
+        EmitByte(0xED);
+        EmitByte(0xA4);
+    }
+
+    void OpCode_Next_LDPIRX() {
+        EmitByte(0xED);
+        EmitByte(0xB7);
+    }
+
+    void OpCode_Next_LDWS() {
+        EmitByte(0xED);
+        EmitByte(0xA5);
+    }
+
+    void OpCode_Next_MIRROR() {
+        Z80Reg reg = GetRegister(lp);
+        if (Z80_UNK != reg && Z80_A != reg) {
+            Error("[MIRROR] Illegal operand", lp, CATCHALL);
+            return;
+        }
+        EmitByte(0xED);
+        EmitByte(0x24);
+    }
+
+	void OpCode_Next_MUL() {
+		int e[3];
+		e[0] = e[1] = e[2] = -1;
+		if (GetRegister(lp)==Z80_D && comma(lp) && GetRegister(lp)==Z80_E){
+			e[0]=0xED;
+			e[1]=0x30;
+		}
+		EmitBytes(e);
+	}
+
 	void OpCode_MULUB() {
 		Z80Reg reg;
 		int e[3];
@@ -3179,6 +3304,36 @@ namespace Z80 {
 		e[2] = -1;
 		EmitBytes(e);
 	}
+
+    void OpCode_Next_NEXTREG() {
+        Z80Reg reg;
+        int e[5];
+        do {
+            e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+            // is operand1 register? (to give more precise error message to people using wrong `nextreg a,$nn`)
+            reg = GetRegister(lp);
+            if (Z80_UNK != reg) {
+                Error("[NEXTREG] first operand should be register number", NULL, SUPPRESS); break;
+            }
+            // this code would be enough to get correct assembling, the test above is "extra"
+            e[2] = GetByte(lp);
+            if (!comma(lp)) {
+                Error("[NEXTREG] Comma expected", NULL); break;
+            }
+            switch (reg = GetRegister(lp)) {
+                case Z80_A:
+                    e[0] = 0xED; e[1] = 0x92;
+                    break;
+                case Z80_UNK:
+                    e[0] = 0xED; e[1] = 0x91;
+                    e[3] = GetByte(lp);
+                    break;
+                default:
+                    break;
+            }
+            EmitBytes(e);
+        } while (comma(lp));
+    }
 
 	void OpCode_NOP() {
 		EmitByte(0x0);
@@ -3348,6 +3503,21 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
+    void OpCode_Next_OUTINB() {
+        EmitByte(0xED);
+        EmitByte(0x90);
+    }
+
+    void OpCode_Next_PIXELAD() {
+        EmitByte(0xED);
+        EmitByte(0x94);
+    }
+
+    void OpCode_Next_PIXELDN() {
+        EmitByte(0xED);
+        EmitByte(0x93);
+    }
+
 	void OpCode_POPreverse() {
 		int e[30],t = 29,c = 1;
 		e[t] = -1;
@@ -3376,57 +3546,59 @@ namespace Z80 {
 	}
 
 	void OpCode_POP() {
-		int e[30],t = 0,c = 1;
+		Z80Reg reg;
 		do {
-			switch (GetRegister(lp)) {
+			int e[5];
+			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+			switch (reg = GetRegister(lp)) {
 			case Z80_AF:
-				e[t++] = 0xf1; break;
+				e[0] = 0xf1; break;
 			case Z80_BC:
-				e[t++] = 0xc1; break;
+				e[0] = 0xc1; break;
 			case Z80_DE:
-				e[t++] = 0xd1; break;
+				e[0] = 0xd1; break;
 			case Z80_HL:
-				e[t++] = 0xe1; break;
+				e[0] = 0xe1; break;
 			case Z80_IX:
-				e[t++] = 0xdd; e[t++] = 0xe1; break;
 			case Z80_IY:
-				e[t++] = 0xfd; e[t++] = 0xe1; break;
+				e[0] = reg; e[1] = 0xe1; break;
 			default:
-				c = 0; break;
+				break;
 			}
-			if (!comma(lp) || t > 27) {
-				c = 0;
-			}
-		} while (c);
-		e[t] = -1;
-		EmitBytes(e);
+			EmitBytes(e);
+		} while (comma(lp));
 	}
 
 	void OpCode_PUSH() {
-		int e[30],t = 0,c = 1;
+        Z80Reg reg;
 		do {
-			switch (GetRegister(lp)) {
+            int e[5];
+            e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+			switch (reg = GetRegister(lp)) {
 			case Z80_AF:
-				e[t++] = 0xf5; break;
+				e[0] = 0xf5; break;
 			case Z80_BC:
-				e[t++] = 0xc5; break;
+				e[0] = 0xc5; break;
 			case Z80_DE:
-				e[t++] = 0xd5; break;
+				e[0] = 0xd5; break;
 			case Z80_HL:
-				e[t++] = 0xe5; break;
+				e[0] = 0xe5; break;
 			case Z80_IX:
-				e[t++] = 0xdd; e[t++] = 0xe5; break;
 			case Z80_IY:
-				e[t++] = 0xfd; e[t++] = 0xe5; break;
+				e[0] = reg; e[1] = 0xe5; break;
+            case Z80_UNK:
+            {
+                if(!Options::IsNextEnabled) break;
+                int imm16 = GetWord(lp);
+                e[0] = 0xED; e[1] = 0x8A;
+                e[2] = (imm16 >> 8) & 255;  // push opcode is big-endian!
+                e[3] = imm16 & 255;
+            }
 			default:
-				c = 0; break;
+				break;
 			}
-			if (!comma(lp) || t > 27) {
-				c = 0;
-			}
-		} while (c);
-		e[t] = -1;
-		EmitBytes(e);
+            EmitBytes(e);
+		} while (comma(lp));
 	}
 
 	void OpCode_RES() {
@@ -4055,6 +4227,11 @@ namespace Z80 {
 		/* (end add) */
 	}
 
+    void OpCode_Next_SETAE() {
+        EmitByte(0xED);
+        EmitByte(0x95);
+    }
+
 	void OpCode_SLA() {
 		Z80Reg reg;
 		int e[5];
@@ -4433,6 +4610,26 @@ namespace Z80 {
 		/* (end add) */
 	}
 
+    //Swaps the high and low nibbles of the accumulator.
+    void OpCode_Next_SWAPNIB() {
+        Z80Reg reg = GetRegister(lp);
+        if (Z80_UNK != reg && Z80_A != reg) {
+            Error("[SWAPNIB] Illegal operand", lp, CATCHALL);
+            return;
+        }
+        EmitByte(0xED);
+        EmitByte(0x23);
+    }
+
+    void OpCode_Next_TEST() {
+        int e[4];
+        e[0] = 0xED;
+        e[1] = 0x27;
+        e[2] = GetByte(lp);
+        e[3] = -1;
+        EmitBytes(e);
+    }
+
 	void OpCode_XOR() {
 		Z80Reg reg;
 		int e[4];
@@ -4591,8 +4788,34 @@ namespace Z80 {
 		OpCodeTable.Insert("srl", OpCode_SRL);
 		OpCodeTable.Insert("sub", OpCode_SUB);
 		OpCodeTable.Insert("xor", OpCode_XOR);
+
+		if(!Options::IsNextEnabled) return;
+
+        // Next extended opcodes
+        OpCodeTable.Insert("brlc",     OpCode_Next_BRLC);
+        OpCodeTable.Insert("bsla",     OpCode_Next_BSLA);
+        OpCodeTable.Insert("bsra",     OpCode_Next_BSRA);
+        OpCodeTable.Insert("bsrf",     OpCode_Next_BSRF);
+        OpCodeTable.Insert("bsrl",     OpCode_Next_BSRL);
+        OpCodeTable.Insert("lddrx",    OpCode_Next_LDDRX);
+        OpCodeTable.Insert("lddx",     OpCode_Next_LDDX);
+        //OpCodeTable.Insert("ldirscale",OpCode_Next_LDIRSCALE);
+        OpCodeTable.Insert("ldirx",    OpCode_Next_LDIRX);
+        OpCodeTable.Insert("ldix",     OpCode_Next_LDIX);
+        OpCodeTable.Insert("ldpirx",   OpCode_Next_LDPIRX);
+        OpCodeTable.Insert("ldws",     OpCode_Next_LDWS);
+        OpCodeTable.Insert("mirror",   OpCode_Next_MIRROR);
+        OpCodeTable.Insert("mul",      OpCode_Next_MUL);
+        OpCodeTable.Insert("nextreg",  OpCode_Next_NEXTREG);
+        OpCodeTable.Insert("outinb",   OpCode_Next_OUTINB);
+        OpCodeTable.Insert("pixelad",  OpCode_Next_PIXELAD);
+        OpCodeTable.Insert("pixeldn",  OpCode_Next_PIXELDN);
+        OpCodeTable.Insert("setae",    OpCode_Next_SETAE);
+        OpCodeTable.Insert("swapnib",  OpCode_Next_SWAPNIB);
+        OpCodeTable.Insert("test",     OpCode_Next_TEST);
 	}
 } // eof namespace Z80
+
 
 void InitCPU() {
 	Z80::Init();

@@ -44,6 +44,7 @@ void PrintHelp() {
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 	_COUT "\nOption flags as follows:" _ENDL;
 	_COUT "  -h or --help             Help information (you see it)" _ENDL;
+	_COUT "  --zxnext                 Enable SpecNext Z80 extensions" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
 	_COUT "                           Include path" _ENDL;
 	_COUT "  --lst=<filename>         Save listing to <filename>" _ENDL;
@@ -87,7 +88,7 @@ namespace Options {
 	bool ShowHelp = 0;
 	bool NoDestinationFile = 0;
 	bool FakeInstructions = 1;
-
+	bool IsNextEnabled = 0;
 	CStringsList* IncludeDirsList = 0;
 	CDefineTable CmdDefineTable;
 
@@ -284,6 +285,8 @@ namespace Options {
 				}
 			} else if (!strcmp(c, "fullpath")) {
 				IsShowFullPath = 1;
+			} else if (!strcmp(c, "zxnext")) {
+				IsNextEnabled = true;
 			} else if (!strcmp(c, "reversepop")) {
 				IsReversePOP = 1;
 			} else if (!strcmp(c, "nologo")) {
@@ -356,6 +359,7 @@ int main(int argc, char **argv) {
 		Options::ExportFName[0] = 0;
 		Options::RAWFName[0] = 0;
 		Options::NoDestinationFile = true; // not *.out files by default
+		Options::IsNextEnabled = false;
 
 		// get current directory
 		GetCurrentDirectory(MAX_PATH, buf);
