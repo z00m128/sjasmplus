@@ -284,7 +284,6 @@ namespace Z80 {
 			}
 			break;
 		case 'h':
-			/* (begin add) */
 			if (*p == 'x') {
 				if (!islabchar(*(p + 1))) {
 					++p;
@@ -297,7 +296,6 @@ namespace Z80 {
 					return Z80_IYH;
 				}
 			}
-			/* (end add) */
 			if (!islabchar(*p)) {
 				return Z80_H;
 			}
@@ -339,7 +337,6 @@ namespace Z80 {
 				return Z80_I;
 			}
 			break;
-			/* (begin add) */
 		case 'y':
 			if (*p == 'h') {
 				if (!islabchar(*(p + 1))) {
@@ -368,9 +365,7 @@ namespace Z80 {
 				}
 			}
 			break;
-			/* (end add) */
 		case 'l':
-			/* (begin add) */
 			if (*p == 'x') {
 				if (!islabchar(*(p + 1))) {
 					++p;
@@ -383,7 +378,6 @@ namespace Z80 {
 					return Z80_IYL;
 				}
 			}
-			/* (end add) */
 			if (!islabchar(*p)) {
 				return Z80_L;
 			}
@@ -439,7 +433,6 @@ namespace Z80 {
 			}
 			break;
 		case 'H':
-			/* (begin add) */
 			if (*p == 'X') {
 				if (!islabchar(*(p + 1))) {
 					++p; return Z80_IXH;
@@ -450,7 +443,6 @@ namespace Z80 {
 					++p; return Z80_IYH;
 				}
 			}
-			/* (end add) */
 			if (!islabchar(*p)) {
 				return Z80_H;
 			}
@@ -485,7 +477,6 @@ namespace Z80 {
 				return Z80_I;
 			}
 			break;
-			/* (begin add) */
 		case 'Y':
 			if (*p == 'H') {
 				if (!islabchar(*(p + 1))) {
@@ -510,9 +501,7 @@ namespace Z80 {
 				}
 			}
 			break;
-			/* (end add) */
 		case 'L':
-			/* (begin add) */
 			if (*p == 'X') {
 				if (!islabchar(*(p + 1))) {
 					++p; return Z80_IXL;
@@ -523,7 +512,6 @@ namespace Z80 {
 					++p; return Z80_IYL;
 				}
 			}
-			/* (end add) */
 			if (!islabchar(*p)) {
 				return Z80_L;
 			}
@@ -632,14 +620,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_ADD() {
@@ -796,14 +782,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_AND() {
@@ -875,14 +859,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_BIT() {
@@ -928,14 +910,12 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	// helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation
@@ -1020,14 +1000,12 @@ namespace Z80 {
 				Warning("[CALL] Bytes lost", 0, LASTPASS);
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_CCF() {
@@ -1103,14 +1081,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_CPD() {
@@ -1214,14 +1190,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_DI() {
@@ -1245,14 +1219,12 @@ namespace Z80 {
 			}
 			e[0] = 0x10; e[1] = jmp < 0 ? 256 + jmp : jmp;
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_EI() {
@@ -1427,14 +1399,12 @@ namespace Z80 {
 				e[1] = 0x70;
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_INC() {
@@ -1498,14 +1468,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_IND() {
@@ -1638,14 +1606,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_JR() {
@@ -1696,14 +1662,12 @@ namespace Z80 {
 			}
 			e[1] = jmp < 0 ? 256 + jmp : jmp;
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_LD() {
@@ -2834,14 +2798,12 @@ namespace Z80 {
 				break;
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_LDD() {
@@ -2988,14 +2950,12 @@ namespace Z80 {
 				e[1] = 0xa8;
 			}*/
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_LDDR() {
@@ -3231,14 +3191,12 @@ namespace Z80 {
 				}
 
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_LDIR() {
@@ -3446,14 +3404,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_OTDR() {
@@ -3515,14 +3471,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_OUTD() {
@@ -3697,14 +3651,12 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_RET() {
@@ -3731,14 +3683,12 @@ namespace Z80 {
 				e = 0xc9; break;
 			}
 			EmitByte(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_RETI() {
@@ -3828,14 +3778,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_RLA() {
@@ -3893,14 +3841,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_RLCA() {
@@ -3975,14 +3921,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_RRA() {
@@ -4040,14 +3984,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_RRCA() {
@@ -4086,14 +4028,12 @@ namespace Z80 {
 				Error("[RST] Illegal operand", line); *lp = 0; return;
 			}
 			EmitByte(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_SBC() {
@@ -4183,14 +4123,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_SCF() {
@@ -4255,14 +4193,12 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_Next_SETAE() {
@@ -4329,14 +4265,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_SLL() {
@@ -4399,14 +4333,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_SRA() {
@@ -4469,14 +4401,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_SRL() {
@@ -4539,14 +4469,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void OpCode_SUB() {
@@ -4638,14 +4566,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	//Swaps the high and low nibbles of the accumulator.
@@ -4737,14 +4663,12 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-			/* (begin add) */
 			if (*lp && comma(lp)) {
 				continue;
 			} else {
 				break;
 			}
 		} while ('o');
-		/* (end add) */
 	}
 
 	void Init() {

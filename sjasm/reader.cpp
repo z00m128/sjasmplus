@@ -608,7 +608,6 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			++p; if (dc && t) {
 				 	e[t - 1] |= 128;
 				 }
-			/* (begin add) */
 		} else if ((*p == 0x27) && (!*(p+2) || *(p+2) != 0x27)) {
 		  	p++;
 			do {
@@ -632,7 +631,6 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			if (dc && t) {
 				e[t - 1] |= 128;
 			}
-		  	/* (end add) */
 		} else {
 			if (ParseExpression(p, val)) {
 				check8(val); e[t++] = (val + add) & 255;
@@ -868,7 +866,6 @@ int GetArray(char*& p, int e[], int add, int dc) {
 			++p; if (dc && t) {
 				 	e[t - 1] |= 128;
 				 }
-			/* (begin add) */
 		} else if ((*p == 0x27) && (!*(p+2) || *(p+2) != 0x27)) {
 		  	p++;
 			do {
@@ -884,7 +881,6 @@ int GetArray(char*& p, int e[], int add, int dc) {
 			if (dc && t) {
 				 e[t - 1] |= 128;
 			}
-		  	/* (end add) */
 		} else {
 			if (ParseExpression(p, val)) {
 				check8(val); e[t++] = (val + add) & 255;

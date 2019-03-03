@@ -54,7 +54,6 @@ int ParseDirective(bool bol) {
 	if (DirectivesTable.zoek(n, bol)) {
 		return 1;
 	}
-	/* (begin add) */
 	else if ((!bol || Options::IsPseudoOpBOF) && *n == '.' && (isdigit((unsigned char) * (n + 1)) || *lp == '(')) {
 		aint val;
 		if (isdigit((unsigned char) * (n + 1))) {
@@ -100,7 +99,6 @@ int ParseDirective(bool bol) {
 		delete[] ml;
 		return 1;
 	}
-	/* (end add) */
 	lp = olp;
 	return 0;
 }
