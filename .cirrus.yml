@@ -1,0 +1,16 @@
+makefile_build_task:
+  container:
+    matrix:
+      image: gcc:5
+      image: gcc:6
+      image: gcc:7
+      image: gcc:8
+    cpu: 1
+    memory: 500M
+  build_script: make clean && make
+  install_script: make install
+
+test_assembling_task:
+  depends_on: makefile_build
+  assemble_tests_background_script: sjasmplus tests/struct_test.asm
+  assemble_examples_background_script: sjasmplus -Iexamples/3color examples/3color/3color.asm
