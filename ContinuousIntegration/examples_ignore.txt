@@ -1,0 +1,10 @@
+# This lists ".asm" files which shouldn't be assembled separately, as they are INCLUDE
+# files. To avoid the need to list them here file by file, use rather ".i.asm" extension.
+# Those will be ignored implicitly.
+
+# put each file name on new line (file names can contain space, or be enclosed in quotes)
+TapLib/TapLib.asm
+"frost4k/samples.asm"
+
+# this "example" exists mostly just to test file names with spaces
+file name test/option zxnext ignore.asm

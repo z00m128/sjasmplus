@@ -9,8 +9,8 @@ makefile_build_task:
     memory: 500M
   build_script: make clean && make
   install_script: make install
-  ## now try the built+installed sjasmplus with some tests/examples
-  # this is not separate task, because that would need again
-  # build of sjasmplus in new container instance, so just do everything in one try
+  ## now try the built+installed sjasmplus with some tests and examples
+  # this is not separate task, because that would need again build
+  # of sjasmplus in new container instance, so just do everything in one task
   assemble_tests_background_script: ContinuousIntegration/test_folder_tests.sh
-  assemble_examples_background_script: sjasmplus -Iexamples/3color examples/3color/3color.asm
+  assemble_examples_background_script: ContinuousIntegration/test_folder_examples.sh
