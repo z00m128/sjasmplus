@@ -2,7 +2,7 @@
 ;; Test case for STRUCT with -1 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-        OUTPUT  Struct-test.cod
+        OUTPUT  struct_test.bin
 
         STRUCT  str
 member0 db      0

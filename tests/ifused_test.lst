@@ -1,0 +1,86 @@
+01   0000             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+02   0000             ;; Test case for IFUSED / IFNUSED ;;
+03   0000             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+04   0000             
+05   0000             ;; Compilation:
+06   0000             ;;      sjasmplus.exe ifused_test.asm --lstlab --lst=ifused_test.lst
+07   0000             ;;
+08   0000             ;; After compilation, please check the listing file "ifused_test.lst"
+09   0000             
+10   0000             
+11   0000             ;; This must generate syntax errors
+12   0000             
+ifused_test.asm(13): error: [IFUSED] Syntax error
+13   0000                     IFUSED
+ifused_test.asm(14): error: [IFUSED] Syntax error
+14   0000                     IFNUSED
+15   0000             
+16   0000             ;; All rest of code must be compiled without errors
+17   0000             
+18   0000             start
+19   0000             
+20   0000             ;; Some little user program :)
+21   0000             
+22   0000 CD 0E 00    .noused call    EnableInt
+23   0003 CD 10 00    .used   call    Wait
+24   0006 18 FB               jr      .used
+25   0008             
+26   0008             ;; Some little direct tests
+27   0008             
+28   0008                     IFUSED
+29   0008 6F 6B               db      'ok'
+30   000A                     ELSE
+31   000A~                    db      'fail'
+32   000A                     ENDIF
+33   000A             
+34   000A                     IFNUSED
+35   000A~                    db      'fail'
+36   000A                     ELSE
+37   000A 6F 6B               db      'ok'
+38   000C                     ENDIF
+39   000C             
+40   000C                     IFUSED  .used
+41   000C 6F 6B               db      'ok'
+42   000E                     ENDIF
+43   000E             
+44   000E                     IFUSED  .noused
+45   000E~                    db      'fail'
+46   000E                     ENDIF
+47   000E             
+48   000E                     IFUSED  not_defined_label
+49   000E~                    db      'fail'
+50   000E                     ENDIF
+51   000E             
+52   000E             ;; Some little library :)
+53   000E             
+54   000E             EnableInt
+55   000E                     IFUSED  EnableInt
+56   000E FB                  ei
+57   000F C9                  ret
+58   0010                     ENDIF
+59   0010             
+60   0010             Wait    IFUSED
+61   0010 06 FF               ld      b,#FF
+62   0012             .loop
+63   0012                     IFUSED  EnableInt
+64   0012 76          .halter halt
+65   0013                     ELSE
+66   0013~                    ld      c,#FF           ;; When the "call EnableInt" is commented out,
+67   0013~            .cycle  dec     c               ;; this branch after ELSE must be generated.
+68   0013~                    jr      nz,.cycle
+69   0013                     ENDIF                   ;; End of IFUSED EnableInt
+70   0013             
+71   0013 10 FD               djnz    .loop
+72   0015 C9                  ret
+73   0016                     ENDIF                   ;; End of IFUSED Wait
+74   0016             
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X start
+0x0000 X start.noused
+0x000E   EnableInt
+0x0003   start.used
+0x0010   Wait
+0x0012   Wait.loop
+0x0012 X Wait.halter

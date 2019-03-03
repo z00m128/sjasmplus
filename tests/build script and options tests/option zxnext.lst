@@ -1,0 +1,13 @@
+01   0000             ; this is almost empty ASM to test the CI build script "test_folder_tests.sh" with:
+02   0000             ; # filenames containing spaces
+03   0000             ; # .options file provided
+04   0000             ; # .lst file provided
+05   0000             ; # --zxnext option test
+06   0000             
+07   0000                 OUTPUT "option zxnext.bin"
+08   0000             
+09   0000 ED 92 4C        nextreg $4C,a
+10   0003             
+
+Value    Label
+------ - -----------------------------------------------------------
