@@ -12,5 +12,5 @@ makefile_build_task:
   ## now try the built+installed sjasmplus with some tests/examples
   # this is not separate task, because that would need again
   # build of sjasmplus in new container instance, so just do everything in one try
-  assemble_tests_background_script: sjasmplus tests/struct_test.asm
+  assemble_tests_background_script: ContinuousIntegration/test_folder_tests.sh
   assemble_examples_background_script: sjasmplus -Iexamples/3color examples/3color/3color.asm

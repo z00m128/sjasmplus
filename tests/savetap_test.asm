@@ -100,14 +100,14 @@ demo:		ei
 .len = $ - demo
 
 
-		emptytap "output.tap"
+		emptytap "savetap_test.tap"
 ; store BASIC
-		savetap	"output.tap",BASIC,"tstSAVETAP", bas.line10, bas.total, 10
+		savetap	"savetap_test.tap",BASIC,"tstSAVETAP", bas.line10, bas.total, 10
 ; store SCREEN$
-		savetap	"output.tap",CODE,"intro", screen, screen.len
+		savetap	"savetap_test.tap",CODE,"intro", screen, screen.len
 ; store CODE
-		savetap	"output.tap",CODE,"demo", demo, demo.len
+		savetap	"savetap_test.tap",CODE,"demo", demo, demo.len
 ; store CHARS
-		savetap "output.tap",CHARS,"t$", chars, chars.len, 't'
+		savetap "savetap_test.tap",CHARS,"t$", chars, chars.len, 't'
 ; store HEADLESS
-		savetap "output.tap",HEADLESS, (screen + $1800), 32, 66 ; custom flag
+		savetap "savetap_test.tap",HEADLESS, (screen + $1800), 32, 66 ; custom flag
