@@ -9,16 +9,8 @@ makefile_build_task:
     memory: 500M
   build_script: make clean && make
   install_script: make install
-
-test_assembling_task:
-  container:
-    matrix:
-      image: gcc:5
-      image: gcc:6
-      image: gcc:7
-      image: gcc:8
-    cpu: 1
-    memory: 500M
-  depends_on: makefile_build
+  ## now try the built+installed sjasmplus with some tests/examples
+  # this is not separate task, because that would need again
+  # build of sjasmplus in new container instance, so just do everything in one try
   assemble_tests_background_script: sjasmplus tests/struct_test.asm
   assemble_examples_background_script: sjasmplus -Iexamples/3color examples/3color/3color.asm
