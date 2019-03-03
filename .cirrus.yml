@@ -1,12 +1,14 @@
+# global container definition
+container:
+  matrix:
+    image: gcc:5
+    image: gcc:6
+    image: gcc:7
+    image: gcc:8
+  cpu: 1
+  memory: 500M
+
 makefile_build_task:
-  container:
-    matrix:
-      image: gcc:5
-      image: gcc:6
-      image: gcc:7
-      image: gcc:8
-    cpu: 1
-    memory: 500M
   build_script: make clean && make
   install_script: make install
 
