@@ -6,7 +6,7 @@
 		org 8500h
 		page 7
 		;our image here
-image:		inchob "KillerBean2.$c"
+image:		inchob "killerbean2.$c"
 		;or incbin "KillerBean2.rgb"
 		;or incbin "scrshot7.rgb"
 .end:
