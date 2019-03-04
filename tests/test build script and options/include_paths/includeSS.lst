@@ -1,0 +1,23 @@
+01   0000             ; test include paths on command line and their priorities, there are multiple steps:
+02   0000             ; include.asm       = no extra include path, should include from working directory
+03   0000             ; includeS.asm      = +include paths "includeSSSS_v"
+04   0000             ; includeSS.asm     = +include paths "includeSSSS_i"
+05   0000             ; includeSSS.asm    = +include paths "includeSSSS_v", "includeSSSS_i"
+06   0000             ; includeSSSS.asm   = +include paths "includeSSSS_i", "includeSSSS_v"
+07   0000             
+08   0000                 INCLUDE includeSSSS_all.i.asm
+01+  0000             ; valid Z80 source
+02+  0000 C9              ret
+03+  0001             
+09   0001             
+10   0001                 INCLUDE <includeSSSS_all.i.asm>
+01+  0001             ; invalid Z80 source
+02+  0001                 retretret
+ ... some error ... (not sure how it will look, as it does not work as it should)
+03+  0001             
+11   0001             
+12   0001 C7              rst 0
+13   0002             
+
+Value    Label
+------ - -----------------------------------------------------------
