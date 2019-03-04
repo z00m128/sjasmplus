@@ -6,7 +6,9 @@ Add `some.asm` file somewhere into `tests/` directory, and watch it being assemb
 
 ## But I want to have some ".asm" include file along it
 
-To avoid include files being assembled, you **must** use "`.i.asm`" extension (or any other which does not end with ".asm").
+Before the test is assembled, files are copied into temporary build directory. **Only** files with name "`some*.asm`" from the directory of `some.asm` and sub-directories with name "`some*`" (with all files inside) are copied into temporary build directory. You can include any such file (keep paths relative to the position of `some.asm`).
+
+But to avoid such helper files being assembled separately (mistaken for other test), use "`.i.asm`" extension (or other extension which does not end with "`.asm`").
 
 ## But my test needs to contain errors intentionally
 
@@ -19,11 +21,11 @@ Make sure the basename of listing file is identical with asm file basename.
 
 Add `some.options` text file next to it with the required options (i.e. `echo "--zxnext" > some.options`).
 
-The listing options are automatically added when the test is accompanied by `some.lst` file.
-
-The include path for the directory of test itself is added automatically.
+The listing options are automatically added when the test is accompanied by `some.lst` file, do not add them manually.
 
 Make sure the basename of options file is identical with asm file basename.
+
+Keep include paths (for `-I` option) relative to base test file (`some.asm`) position (see above how to name and organize files for inclusion).
 
 ## But I also want to check if the produced file is binary identical
 
@@ -41,9 +43,9 @@ Well, ok? Go ahead.
 
 You are obviously some user of some obsolete operating system. Grow up, install your Linux or MacOS today, and figure out why file names should be precisely identical in both source, and on disk (hint: modern file systems are case sensitive) (hint 2: just fix your file names, there is no workaround, the bug is on your side).
 
-## Is my test assembled in the same working directory where the source is?
+## Is my test assembled in the `tests/...` directory where the source is?
 
-No. It's being assembled from `build/tests/` directory. If you have trouble implementing some idea under this condition, raise an issue on github and describe your idea, but for the sake of tests simplicity and self-containment, the current system should be enough (unless somebody shows me good use case and proves me wrong).
+No. A copy from source directory is being assembled in "`build/tests/`" directory, and only some files are copied (and available) for the test, see "inclusion" rules near the start of this document, how to name files which are needed for assembling.
 
 ## But I want also a lollipop, rainbow and Swiss watches with fountain
 
