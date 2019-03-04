@@ -60,5 +60,5 @@ done
     && echo -e "\e[92mFINISHED: OK, $totalAsmFiles examples built \e[91m■\e[93m■\e[32m■\e[96m■\e[0m" \
     && exit 0
 # display error summary and exit with error code
-echo -e "\e[91mFINISHED: $exitCode/$totalAsmFiles examples failed\e[0m"
+echo -e "\e[91mFINISHED: $exitCode/$totalAsmFiles examples failed \e[91m■\e[93m■\e[32m■\e[96m■\e[0m"
 exit $exitCode

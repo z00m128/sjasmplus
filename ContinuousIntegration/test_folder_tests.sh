@@ -81,5 +81,5 @@ done
     && echo -e "\e[92mFINISHED: OK, $totalChecks checks passed ($totalTests tests) \e[91m■\e[93m■\e[32m■\e[96m■\e[0m" \
     && exit 0
 # display error summary and exit with error code
-echo -e "\e[91mFINISHED: $exitCode/$totalChecks checks failed ($totalTests tests)\e[0m"
+echo -e "\e[91mFINISHED: $exitCode/$totalChecks checks failed ($totalTests tests) \e[91m■\e[93m■\e[32m■\e[96m■\e[0m"
 exit $exitCode
