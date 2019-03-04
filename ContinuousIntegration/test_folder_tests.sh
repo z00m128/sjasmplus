@@ -8,8 +8,10 @@ totalTests=0        # +1 per ASM
 totalChecks=0       # +1 per diff/check
 
 ## create temporary build directory for output
+echo -e "Creating temporary \e[96mbuild/tests\e[0m directory..."
 rm -rf $PROJECT_DIR/build/tests
-mkdir -p $PROJECT_DIR/build/tests && cd $PROJECT_DIR/build/tests
+# terminate in case the create+cd will fail, this is vital
+mkdir -p $PROJECT_DIR/build/tests && cd $PROJECT_DIR/build/tests || exit 1
 echo -e "Searching directory \e[96m${PROJECT_DIR}/tests/\e[0m for '.asm' files..."
 
 ## go through all asm files in tests directory and verify results
