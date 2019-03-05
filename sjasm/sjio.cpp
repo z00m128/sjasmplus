@@ -1512,9 +1512,8 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 }
 
 EReturn ReadFile(const char* pp, const char* err) {
-//	CStringsList* ol;
 	char* p;
-	while (RL_Readed > 0 || !feof(FP_Input)) {
+	while (lijst || RL_Readed > 0 || !feof(FP_Input)) {
 		if (!IsRunning) {
 			return END;
 		}
@@ -1522,10 +1521,8 @@ EReturn ReadFile(const char* pp, const char* err) {
 			if (!lijstp) {
 				return END;
 			}
-			//p = STRCPY(line, LINEMAX, lijstp->string); //mmm
 			STRCPY(line, LINEMAX, lijstp->string);
 			p = line;
-//			ol = lijstp;
 			lijstp = lijstp->next;
 		} else {
 			ReadBufLine(false);
@@ -1560,10 +1557,9 @@ EReturn ReadFile(const char* pp, const char* err) {
 
 
 EReturn SkipFile(char* pp, const char* err) {
-//	CStringsList* ol;
 	char* p;
 	int iflevel = 0;
-	while (RL_Readed > 0 || !feof(FP_Input)) {
+	while (lijst || RL_Readed > 0 || !feof(FP_Input)) {
 		if (!IsRunning) {
 			return END;
 		}
@@ -1571,10 +1567,8 @@ EReturn SkipFile(char* pp, const char* err) {
 			if (!lijstp) {
 				return END;
 			}
-			//p = STRCPY(line, LINEMAX, lijstp->string); //mmm
 			STRCPY(line, LINEMAX, lijstp->string);
 			p = line;
-//			ol = lijstp;
 			lijstp = lijstp->next;
 		} else {
 			ReadBufLine(false);

@@ -8,8 +8,6 @@ Ped:
 INCHOB "..",7  bugs out with "file too short"
 INCBIN "..",7  seems to work, but length printed to output is fake "0"
 
-http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku
-
 defines divne (pozri ci sa to neda prepojit s enums co su pre Error()):
 #define MAXPASSES 3
 #define LASTPASS 3
@@ -26,3 +24,8 @@ LUA quirks:
         inc_ld(A, pass)     -- bug, should be 'A'
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
+
+====================
+Docs:
+http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku
+REPT + DUP nemaju popis ako sa ukoncuju (EDUP, ENDR)
