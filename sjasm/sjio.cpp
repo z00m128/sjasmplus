@@ -398,6 +398,31 @@ void listbytes3(int pad) {
 	}
 }
 
+void PrepareListLine(aint hexadd)
+{
+	////////////////////////////////////////////////////
+	// Line numbers to 1 to 99999 are supported only  //
+	// For more lines, then first char is incremented //
+	////////////////////////////////////////////////////
+
+	int digit = ' ';
+	int linewidth = reglenwidth;
+	long linenumber = CurrentLocalLine % 10000;
+	if (linewidth > 5)
+	{
+		linewidth = 5;
+		digit = CurrentLocalLine / 10000 + '0';
+		if (digit > '~') digit = '~';
+		if (CurrentLocalLine >= 10000) linenumber += 10000;
+	}
+	memset(pline, ' ', 24);
+	STRCPY(pline + 24, LINEMAX2, line);
+	sprintf(pline, "%*lu", linewidth, linenumber); pline[linewidth] = ' ';
+	memcpy(pline + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
+	sprintf(pline + 6, "%04lX", hexadd & 0xFFFF); pline[10] = ' ';
+	if (digit > '0') *pline = digit & 0xFF;
+}
+
 void ListFile() {
 	char* pp = pline;
 	aint pad;
@@ -407,19 +432,44 @@ void ListFile() {
 	if (!Options::ListingFName[0] || FP_ListingFile == NULL) {
 		return;
 	}
+	/*
 	if (listmacro) {
 		if (!nEB) {
 			return;
 		}
 	}
-	if ((pad = PreviousAddress) == (aint) - 1) {
-		pad = epadres;
-	}
+	*/
+	pad = PreviousAddress;
+	if (pad == (aint) - 1) pad = epadres;
+
 	if (strlen(line) && line[strlen(line) - 1] != 10) {
 		STRCAT(line, LINEMAX, "\n");
 	} else {
 		STRCPY(line, LINEMAX, "\n");
 	}
+
+	PrepareListLine(pad);
+	if (listmacro) pline[23] = '>';
+
+	int i;
+	int pos = 0;
+	while (1)
+	{
+		pp = pline + 10;
+		int maxEB = nEB; if (maxEB > 4) maxEB = 4;
+		for (i = 0; i < maxEB; i++) pp += sprintf(pp, " %02X", EB[i + pos]); *pp = ' ';
+		if (pline[24] == '\n' && !listmacro) { *pp = '\n'; pp[1] = 0; }
+		fputs(pline, FP_ListingFile);
+		nEB -= maxEB;
+		pad += maxEB;
+		pos += maxEB;
+		if (!nEB) break;
+		memset(pline + 11, ' ', 11);
+		pline[24] = '\n';
+		pline[25] = 0;
+		sprintf(pline + 6, "%04lX", pad & 0xFFFF); pline[10] = ' ';
+	}
+	/*
 	*pp = 0;
 	printCurrentLocalLine(pp);
 	PrintHEX16(pp, pad);
@@ -432,14 +482,16 @@ void ListFile() {
 		}
 		STRCAT(pp, LINEMAX2, line);
 		fputs(pline, FP_ListingFile);
-	} else if (nEB < 6) {
+	}
+	else if (nEB < 6) {
 		listbytes2(pp); *pp = 0;
 		if (listmacro) {
 			STRCAT(pp, LINEMAX2, ">");
 		}
 		STRCAT(pp, LINEMAX2, line);
 		fputs(pline, FP_ListingFile);
-	} else {
+	}
+	else {
 		for (int i = 0; i != 12; ++i) {
 			*(pp++) = ' ';
 		}
@@ -451,6 +503,7 @@ void ListFile() {
 		fputs(pline, FP_ListingFile);
 		listbytes3(pad);
 	}
+	*/
 	epadres = CurAddress;
 	PreviousAddress = (aint) - 1;
 	nEB = 0;
@@ -458,7 +511,6 @@ void ListFile() {
 }
 
 void ListFileSkip(char* line) {
-	char* pp = pline;
 	aint pad;
 	if (pass != LASTPASS || !IsListingFileOpened || donotlist) {
 		donotlist = nEB = 0;
@@ -467,23 +519,31 @@ void ListFileSkip(char* line) {
 	if (!Options::ListingFName[0] || FP_ListingFile == NULL) {
 		return;
 	}
+	/*
 	if (listmacro) {
 		return;
 	}
-	if ((pad = PreviousAddress) == (aint) - 1) {
-		pad = epadres;
-	}
+	*/
+	pad = PreviousAddress;
+	if (pad == (aint)-1) pad = epadres;
+
 	if (strlen(line) && line[strlen(line) - 1] != 10) {
 		STRCAT(line, LINEMAX, "\n");
 	}
 	else {
 		STRCPY(line, LINEMAX, "\n");
 	}
+
+	PrepareListLine(pad);
+	pline[11] = '~';
+	if (*line == '\n') { pline[12] = '\n'; pline[13] = 0; }
+
+	/*
 	*pp = 0;
 	printCurrentLocalLine(pp);
 	PrintHEX16(pp, pad);
 	*pp = 0;
-	STRCAT(pp, LINEMAX2, "~            ");
+	STRCAT(pp, LINEMAX2, " ~           ");
 	if (nEB) {
 		Error("Internal error lfs", 0, FATAL);
 	}
@@ -491,6 +551,7 @@ void ListFileSkip(char* line) {
 		STRCAT(pp, LINEMAX2, ">");
 	}
 	STRCAT(pp, LINEMAX2, line);
+	*/
 	fputs(pline, FP_ListingFile);
 	epadres = CurAddress;
 	PreviousAddress = (aint) - 1;
@@ -591,18 +652,15 @@ void Emit(int byte)
 }
 
 void EmitByte(int byte) {
-	//PreviousAddress = CurAddress;
 	Emit(byte);
 }
 
 void EmitWord(int word) {
-	//PreviousAddress = CurAddress;
 	Emit(word % 256);
 	Emit(word / 256);
 }
 
 void EmitBytes(int* bytes) {
-	//PreviousAddress = CurAddress;
 	if (*bytes == -1) {
 		Error("Illegal instruction", line, CATCHALL); *lp = 0;
 	}
@@ -612,7 +670,6 @@ void EmitBytes(int* bytes) {
 }
 
 void EmitWords(int* words) {
-	//PreviousAddress = CurAddress;
 	while (*words != -1) {
 		Emit((*words) % 256);
 		Emit((*words++) / 256);
@@ -620,7 +677,6 @@ void EmitWords(int* words) {
 }
 
 void EmitBlock(aint byte, aint len, bool nulled) {
-	//PreviousAddress = CurAddress;
 	if (len) EB[nEB++] = byte;
 
 	if (len < 0)
@@ -1140,7 +1196,7 @@ void OpenTapFile(char * tapename, int flagbyte)
 	tape_length = 2;
 	
 	char tap_data[4] = { 0,0,0,0 };
-	tap_data[2] = flagbyte;
+	tap_data[2] = (char)flagbyte;
 	
 	if (fwrite(tap_data, 1, 3, FP_tapout) != 3)
 	{
@@ -1149,10 +1205,10 @@ void OpenTapFile(char * tapename, int flagbyte)
 	}
 }
 
-int FileExists(char* filename) {
+int FileExists(char* file_name) {
 	int exists = 0;
 	FILE* test;
-	if (FOPEN_ISOK(test, filename, "r")) {
+	if (FOPEN_ISOK(test, file_name, "r")) {
 		exists = 1;
 		fclose(test);
 	}
