@@ -43,10 +43,10 @@ int comma(char*& p);
 int oparen(char*& p, char c);
 int cparen(char*& p);
 char* getparen(char* p);
-int check8(aint val, bool error=true); /* changes applied from SjASM 0.39g */
-int check8o(long val); /* changes applied from SjASM 0.39g */
-int check16(aint val, bool error=true); /* changes applied from SjASM 0.39g */
-int check24(aint val, bool error=true); /* changes applied from SjASM 0.39g */
+int check8(aint val, bool error=true);
+int check8o(long val);
+int check16(aint val, bool error=true);
+int check24(aint val, bool error=true);
 int need(char*& p, char c);
 int need(char*& p, const char* c);
 int needa(char*& p, const char* c1, int r1, const char* c2 = 0, int r2 = 0, const char* c3 = 0, int r3 = 0);

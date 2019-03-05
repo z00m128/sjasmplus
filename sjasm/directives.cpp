@@ -393,7 +393,7 @@ void dirSLOT() {
 }
 
 void dirMAP() {
-	AddressList = new CAddressList(AddressOfMAP, AddressList); /* from SjASM 0.39g */
+	AddressList = new CAddressList(AddressOfMAP, AddressList);
 	aint val;
 	IsLabelNotFound = 0;
 	if (ParseExpression(lp, val)) {

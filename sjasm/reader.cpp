@@ -255,7 +255,6 @@ char* getinstr(char*& p) {
 	return instrtemp;
 }
 
-/* changes applied from SjASM 0.39g */
 int check8(aint val, bool error) {
 	if ((val < -256 || val > 255) && error) {
 		char buffer[32];
@@ -266,7 +265,6 @@ int check8(aint val, bool error) {
 	return 1;
 }
 
-/* changes applied from SjASM 0.39g */
 int check8o(long val) {
 	if (val < -128 || val > 127) {
 		char buffer[32];
@@ -277,7 +275,6 @@ int check8o(long val) {
 	return 1;
 }
 
-/* changes applied from SjASM 0.39g */
 int check16(aint val, bool error) {
 	if ((val < -65536 || val > 65535) && error) {
 		char buffer[32];
@@ -288,7 +285,6 @@ int check16(aint val, bool error) {
 	return 1;
 }
 
-/* changes applied from SjASM 0.39g */
 int check24(aint val, bool error) {
 	if ((val < -16777216 || val > 16777215) && error) {
 		char buffer[32];

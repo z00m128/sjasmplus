@@ -98,7 +98,7 @@ extern CDefineTable DefineTable;
 extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;
 extern CStructureTable StructureTable;
-extern CAddressList* AddressList; /*from SjASM 0.39g*/
+extern CAddressList* AddressList;
 extern CStringsList* ModuleList;
 
 #ifdef USE_LUA

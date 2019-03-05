@@ -136,7 +136,7 @@ CDefineTable DefineTable;
 CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
 CStructureTable StructureTable;
-CAddressList* AddressList = 0; /* from SjASM 0.39g */
+CAddressList* AddressList = 0;
 CStringsList* ModuleList = NULL;
 
 #ifdef USE_LUA

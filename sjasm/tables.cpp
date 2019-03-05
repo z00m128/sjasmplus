@@ -518,7 +518,6 @@ void CLabelTable::DumpForUnreal() {
 	fclose(FP_UnrealList);
 }
 
-/* from SjASM 0.39g */
 void CLabelTable::DumpSymbols() {
 	FILE* symfp;
 	char lnrs[16], * l;
@@ -1489,10 +1488,12 @@ void CStructure::emitmembs(char*& p) {
 			Error("closing } missing", 0);
 		}
 	}
-	SkipBlanks(p); if (*p) {
-				   	Error("[STRUCT] Syntax error - too many arguments?", 0);
-				   } /* this line from SjASM 0.39g */
-	if (et) { e[et] = -1; EmitBytes(e); }
+	SkipBlanks(p);
+	if (*p) Error("[STRUCT] Syntax error - too many arguments?", 0);
+	if (et) {
+		e[et] = -1;
+		EmitBytes(e);
+	}
 	delete e;
 }
 

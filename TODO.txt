@@ -8,8 +8,6 @@ Ped:
 INCHOB "..",7  bugs out with "file too short"
 INCBIN "..",7  seems to work, but length printed to output is fake "0"
 
-clean "/* changes applied from SjASM 0.39g */"
-
 http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku
 
 defines divne (pozri ci sa to neda prepojit s enums co su pre Error()):
