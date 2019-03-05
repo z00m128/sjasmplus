@@ -108,9 +108,5 @@ extern int LuaLine;
 
 #endif //USE_LUA
 
-#ifdef UNDER_CE
-int main(int argc, _TCHAR* argv[]);
-#endif
-
 #endif
 //eof sjasm.h

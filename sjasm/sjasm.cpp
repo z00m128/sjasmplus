@@ -263,11 +263,7 @@ namespace Options {
 		}
 
 	public:
-#ifdef UNDER_CE
-		void GetOptions(_TCHAR* argv[], int& i) {
-#else
 		void GetOptions(char**& argv, int& i) {
-#endif
 			while ((arg=argv[i]) && ('-' == arg[0])) {
 				++i;					// next CLI argument
 
@@ -348,14 +344,10 @@ void LuaFatalError(lua_State *L) {
 
 #endif //USE_LUA
 
-#ifdef UNDER_CE
-int main(int argc, _TCHAR* argv[]) {
-#else
 #ifdef WIN32
 int main(int argc, char* argv[]) {
 #else
 int main(int argc, char **argv) {
-#endif
 #endif
 	char buf[MAX_PATH];
 	int base_encoding;
@@ -375,24 +367,15 @@ int main(int argc, char **argv) {
 		Options::COptionsParser optParser;
 		while (argv[i]) {
 			optParser.GetOptions(argv, i);
-			if (argv[i]) {
-#ifdef UNDER_CE
-				STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, _tochar(argv[i++]));
-#else
-				STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, argv[i++]);
-#endif
-			}
+			if (!argv[i]) break;
+			STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, argv[i++]);
 		}
 	}
 
 	if (argc == 1 || Options::ShowHelp) {
 		_COUT logo _ENDL;
 		PrintHelp();
-#ifdef UNDER_CE
-		return false;
-#else
 		exit(1);
-#endif
 	}
 
 	if (!Options::HideLogo) {
@@ -413,11 +396,7 @@ int main(int argc, char **argv) {
 
 	if (!SourceFNames[0][0]) {
 		_CERR "No inputfile(s)" _ENDL;
-#ifdef UNDER_CE
-		return 0;
-#else
 		exit(1);
-#endif
 	}
 
 	if (!Options::DestionationFName[0]) {
@@ -507,9 +486,7 @@ int main(int argc, char **argv) {
 		_CERR workTimeTxt _ENDL;
 	}
 
-#ifndef UNDER_CE
 	cout << flush;
-#endif
 
 	// free RAM
 	if (Devices) {

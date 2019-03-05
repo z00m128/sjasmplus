@@ -645,7 +645,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	return t;
 }
 
-#if defined(WIN32) || defined(UNDER_CE)
+#if defined(WIN32)
 static const char badSlash = '/';
 static const char goodSlash = '\\';
 #else
