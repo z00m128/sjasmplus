@@ -1,64 +1,64 @@
 luaincS.asm(19): warning: Pass updated to 1, device: NONE
-01   0000             ; test include paths on command line and their priorities, there are multiple steps:
-02   0000             ; luainc.asm       = no extra include path, should include from working directory
-03   0000             ; luaincS.asm      = +include paths "luaincSSSS_v"
-04   0000             ; luaincSS.asm     = +include paths "luaincSSSS_i"
-05   0000             ; luaincSSS.asm    = +include paths "luaincSSSS_v", "luaincSSSS_i"
-06   0000             ; luaincSSSS.asm   = +include paths "luaincSSSS_i", "luaincSSSS_v"
-07   0000             
-08   0000             ; The following code is intentionally mischievous and damaging assembling process, and
-09   0000             ; the results of the assembling will very likely change in the future, as the work
-10   0000             ; on consolidation of sjasmplus will continue, this is NOT example how to use lua scripts!
-11   0000             ; it's more like anti-example, how to NOT use it.
-12   0000             
-13   0000                 LUA PASS1
-14   0000~                    pass = 0
-15   0000                 ENDLUA
-16   0000                 LUA ALLPASS
-17   0000~                    pass = pass + 1
-18   0000~                    if pass == 1 or pass == 3 then
-19   0000~                      sj.warning('Pass updated to ' .. pass .. ', device: ' .. sj.get_device())
-20   0000~                    end
+ 1    0000              ; test include paths on command line and their priorities, there are multiple steps:
+ 2    0000              ; luainc.asm       = no extra include path, should include from working directory
+ 3    0000              ; luaincS.asm      = +include paths "luaincSSSS_v"
+ 4    0000              ; luaincSS.asm     = +include paths "luaincSSSS_i"
+ 5    0000              ; luaincSSS.asm    = +include paths "luaincSSSS_v", "luaincSSSS_i"
+ 6    0000              ; luaincSSSS.asm   = +include paths "luaincSSSS_i", "luaincSSSS_v"
+ 7    0000
+ 8    0000              ; The following code is intentionally mischievous and damaging assembling process, and
+ 9    0000              ; the results of the assembling will very likely change in the future, as the work
+10    0000              ; on consolidation of sjasmplus will continue, this is NOT example how to use lua scripts!
+11    0000              ; it's more like anti-example, how to NOT use it.
+12    0000
+13    0000                  LUA PASS1
+14    0000 ~                    pass = 0
+15    0000                  ENDLUA
+16    0000                  LUA ALLPASS
+17    0000 ~                    pass = pass + 1
+18    0000 ~                    if pass == 1 or pass == 3 then
+19    0000 ~                      sj.warning('Pass updated to ' .. pass .. ', device: ' .. sj.get_device())
+20    0000 ~                    end
 luaincS.asm(19): warning: Pass updated to 3, device: ZXSPECTRUM1024
-21   0000                 ENDLUA
-22   0000             
-23   0000                 DEVICE ZXSPECTRUM1024
-24   0000             
-25   0000                 ORG     $8000
-26   8000             
-27   8000                 INCLUDELUA luaincSSSS.lua   ; this will load local version (defining two functions)
-28   8000             
-29   8000                 INCLUDELUA <luaincSSSS.lua> ; this may load "system" version depending on -I options
-30   8000             
-31   8000             loopyLoop:
-32   8000             
-33   8000 CD 0C 80        call    forwardyLabelo
-34   8003             
-35   8003                 LUA ALLPASS
-36   8003~                inc_ld_local('A', pass + 10)    -- defined only in local LUA script (never changes)
-37   8003 3E 0D       LD A,13 ; function only in local include
-37   8005 3E 0D       LD A,13 ; function only in local include
-37   8007 3E 0D       LD A,13 ; function only in local include
-37   8009                 ENDLUA
-38   8009             
-39   8009                 LUA ALLPASS
-40   8009~                inc_ld_system('A', pass)        -- defined in all includes, the one with priority wins
-41   8009 3A 03 00    LD A,(3) ; overloaded funcion (system-valid variant)
-41   800C                 ENDLUA
-42   800C             
-43   800C 18 F2           jr  loopyLoop
-44   800E             
+21    0000                  ENDLUA
+22    0000
+23    0000                  DEVICE ZXSPECTRUM1024
+24    0000
+25    0000                  ORG     $8000
+26    8000
+27    8000                  INCLUDELUA luaincSSSS.lua   ; this will load local version (defining two functions)
+28    8000
+29    8000                  INCLUDELUA <luaincSSSS.lua> ; this may load "system" version depending on -I options
+30    8000
+31    8000              loopyLoop:
+32    8000
+33    8000 CD 0C 80         call    forwardyLabelo
+34    8003
+35    8003                  LUA ALLPASS
+36    8003 ~                inc_ld_local('A', pass + 10)    -- defined only in local LUA script (never changes)
+37    8003 3E 0D        LD A,13 ; function only in local include
+37    8005 3E 0D        LD A,13 ; function only in local include
+37    8007 3E 0D        LD A,13 ; function only in local include
+37    8009                  ENDLUA
+38    8009
+39    8009                  LUA ALLPASS
+40    8009 ~                inc_ld_system('A', pass)        -- defined in all includes, the one with priority wins
+41    8009 3A 03 00     LD A,(3) ; overloaded funcion (system-valid variant)
+41    800C                  ENDLUA
+42    800C
+43    800C 18 F2            jr  loopyLoop
+44    800E
 luaincS.asm(45): warning: Label has different value in pass 3: previous value 32780 not equal 32782
-45   800E             forwardyLabelo:
-46   800E C7              rst 0
-47   800F             
+45    800E              forwardyLabelo:
+46    800E C7               rst 0
+47    800F
 luaincS.asm(48): warning: Negative BLOCK?
-48   800F C9              ds  stretchItEvenMore-forwardyLabelo-1, 201
-49   0000             
-50   0000                 ALIGN 256
-51   0000             stretchItEvenMore:
-52   0000 D7              rst 16
-53   0001             
+48    800F C9               ds  stretchItEvenMore-forwardyLabelo-1, 201
+49    0000
+50    0000                  ALIGN 256
+51    0000              stretchItEvenMore:
+52    0000 D7               rst 16
+53    0001
 
 Value    Label
 ------ - -----------------------------------------------------------

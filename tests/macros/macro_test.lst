@@ -1,100 +1,100 @@
-01   0000             ; new 'macro' test
-02   0000             ;
-03   0000             ; test1
-04   0000             
-05   0000             	macro MyMacro arg0, arg1
-06   0000~            		call arg0_f
-07   0000~            		call arg0_arg1
-08   0000~            		call arg1_arg0
-09   0000             	endm
-10   0000             
-11   0000             	MyMacro abc, def
+ 1    0000              ; new 'macro' test
+ 2    0000              ;
+ 3    0000              ; test1
+ 4    0000
+ 5    0000              	macro MyMacro arg0, arg1
+ 6    0000 ~            		call arg0_f
+ 7    0000 ~            		call arg0_arg1
+ 8    0000 ~            		call arg1_arg0
+ 9    0000              	endm
+10    0000
+11    0000              	MyMacro abc, def
 macro_test.asm(11): error: Label not found: abc_f
-11   0000 CD 00 00    >		call arg0_f
+11    0000 CD 00 00    >		call arg0_f
 macro_test.asm(11): error: Label not found: abc_def
-11   0003 CD 00 00    >		call arg0_arg1
+11    0003 CD 00 00    >		call arg0_arg1
 macro_test.asm(11): error: Label not found: def_abc
-11   0006 CD 00 00    >		call arg1_arg0
-12   0009             
-13   0009             ;should be expanded to:
-14   0009             ;
-15   0009             ;	call abc_f
-16   0009             ;	call abc_def
-17   0009             ;	call def_abc
-18   0009             
-19   0009             ;test 2
-20   0009             
-21   0009             	macro a0a1 a0, a1
-22   0009~            	call a0_a1__yyy
-23   0009             	endm
-24   0009             
-25   0009             	macro a1a0 a0, a1
-26   0009~            	call a1_a0___yyy
-27   0009             	endm
-28   0009             
-29   0009             	macro a1a0a1 a0, a1
-30   0009~            	call a1____a0__a1
-31   0009             	endm
-32   0009             
-33   0009             	macro a0_a a0
-34   0009~            	call a0_
-35   0009             	endm
-36   0009             
-37   0009             	macro a0_b a0
-38   0009~            	call __a0		
-39   0009             	endm
-40   0009             
-41   0009             	macro a0_c a0
-42   0009~            	call _a0_		
-43   0009             	endm
-44   0009             
-45   0009             	macro a0a1_a a0, a1
-46   0009~            	call a0____a1_
-47   0009             	endm
-48   0009             
-49   0009             	macro a0a1_b a0, a1
-50   0009~            	call a0____yy_a1
-51   0009~            	call _my___yyyyy____yy__call
-52   0009             	endm
-53   0009             
-54   0009             	a0a1 abc, def
+11    0006 CD 00 00    >		call arg1_arg0
+12    0009
+13    0009              ;should be expanded to:
+14    0009              ;
+15    0009              ;	call abc_f
+16    0009              ;	call abc_def
+17    0009              ;	call def_abc
+18    0009
+19    0009              ;test 2
+20    0009
+21    0009              	macro a0a1 a0, a1
+22    0009 ~            	call a0_a1__yyy
+23    0009              	endm
+24    0009
+25    0009              	macro a1a0 a0, a1
+26    0009 ~            	call a1_a0___yyy
+27    0009              	endm
+28    0009
+29    0009              	macro a1a0a1 a0, a1
+30    0009 ~            	call a1____a0__a1
+31    0009              	endm
+32    0009
+33    0009              	macro a0_a a0
+34    0009 ~            	call a0_
+35    0009              	endm
+36    0009
+37    0009              	macro a0_b a0
+38    0009 ~            	call __a0		
+39    0009              	endm
+40    0009
+41    0009              	macro a0_c a0
+42    0009 ~            	call _a0_		
+43    0009              	endm
+44    0009
+45    0009              	macro a0a1_a a0, a1
+46    0009 ~            	call a0____a1_
+47    0009              	endm
+48    0009
+49    0009              	macro a0a1_b a0, a1
+50    0009 ~            	call a0____yy_a1
+51    0009 ~            	call _my___yyyyy____yy__call
+52    0009              	endm
+53    0009
+54    0009              	a0a1 abc, def
 macro_test.asm(54): error: Label not found: abc_def__yyy
-54   0009 CD 00 00    >	call a0_a1__yyy
-55   000C             	a1a0 abc, def
+54    0009 CD 00 00    >	call a0_a1__yyy
+55    000C              	a1a0 abc, def
 macro_test.asm(55): error: Label not found: def_abc___yyy
-55   000C CD 00 00    >	call a1_a0___yyy
-56   000F             	a1a0a1 abc, def
+55    000C CD 00 00    >	call a1_a0___yyy
+56    000F              	a1a0a1 abc, def
 macro_test.asm(56): error: Label not found: def____abc__def
-56   000F CD 00 00    >	call a1____a0__a1
-57   0012             	a0_a abc
+56    000F CD 00 00    >	call a1____a0__a1
+57    0012              	a0_a abc
 macro_test.asm(57): error: Label not found: abc_
-57   0012 CD 00 00    >	call a0_
-58   0015             	a0_b abc
+57    0012 CD 00 00    >	call a0_
+58    0015              	a0_b abc
 macro_test.asm(58): error: Label not found: __abc
-58   0015 CD 00 00    >	call __a0		
-59   0018             	a0_c abc
+58    0015 CD 00 00    >	call __a0		
+59    0018              	a0_c abc
 macro_test.asm(59): error: Label not found: _abc_
-59   0018 CD 00 00    >	call _a0_		
-60   001B             	a0a1_a abc, def
+59    0018 CD 00 00    >	call _a0_		
+60    001B              	a0a1_a abc, def
 macro_test.asm(60): error: Label not found: abc____def_
-60   001B CD 00 00    >	call a0____a1_
-61   001E             	a0a1_b abc, def
+60    001B CD 00 00    >	call a0____a1_
+61    001E              	a0a1_b abc, def
 macro_test.asm(61): error: Label not found: abc____yy_def
-61   001E CD 00 00    >	call a0____yy_a1
+61    001E CD 00 00    >	call a0____yy_a1
 macro_test.asm(61): error: Label not found: _my___yyyyy____yy__call
-61   0021 CD 00 00    >	call _my___yyyyy____yy__call
-62   0024             
-63   0024             ;should be expanded as
-64   0024             ;	call abc_def__yyy
-65   0024             ;	call def_abc___yyy
-66   0024             ;	call def____abc__def
-67   0024             ;	call abc_
-68   0024             ;	call __abc
-69   0024             ;	call _abc_
-70   0024             ;	call abc____def_
-71   0024             ;	call abc____yy_def
-72   0024             ;	call _my___yyyyy____yy__call
-73   0024             
+61    0021 CD 00 00    >	call _my___yyyyy____yy__call
+62    0024
+63    0024              ;should be expanded as
+64    0024              ;	call abc_def__yyy
+65    0024              ;	call def_abc___yyy
+66    0024              ;	call def____abc__def
+67    0024              ;	call abc_
+68    0024              ;	call __abc
+69    0024              ;	call _abc_
+70    0024              ;	call abc____def_
+71    0024              ;	call abc____yy_def
+72    0024              ;	call _my___yyyyy____yy__call
+73    0024
 
 Value    Label
 ------ - -----------------------------------------------------------
