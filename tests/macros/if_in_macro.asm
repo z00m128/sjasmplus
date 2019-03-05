@@ -36,3 +36,6 @@
     ENDIF
 
     ret
+
+    ; verify that IF works inside macro even if there's nothing after the macro.
+    filler 117, 120, 137, 140
