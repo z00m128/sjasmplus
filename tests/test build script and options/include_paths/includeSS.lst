@@ -12,8 +12,8 @@
 09   0001             
 10   0001                 INCLUDE <includeSSSS_all.i.asm>
 01+  0001             ; invalid Z80 source
+includeSSSS_i/includeSSSS_all.i.asm(2): error: Unrecognized instruction: retretret
 02+  0001                 retretret
- ... some error ... (not sure how it will look, as it does not work as it should)
 03+  0001             
 11   0001             
 12   0001 C7              rst 0

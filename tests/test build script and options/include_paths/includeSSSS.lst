@@ -12,8 +12,8 @@
 09   0001             
 10   0001                 INCLUDE <includeSSSS_all.i.asm>
 01+  0001             ; valid Z80 source
-02+  0001 B7              or      a
-03+  0002 C9              ret
+02+  0001 BF              cp      a
+03+  0002 C8              ret     z
 04+  0003             
 11   0003             
 12   0003 C7              rst 0

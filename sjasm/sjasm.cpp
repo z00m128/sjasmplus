@@ -46,7 +46,7 @@ void PrintHelp() {
 	_COUT "  -h or --help             Help information (you see it)" _ENDL;
 	_COUT "  --zxnext                 Enable SpecNext Z80 extensions" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
-	_COUT "                           Include path" _ENDL;
+	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst=<filename>         Save listing to <filename>" _ENDL;
 	_COUT "  --lstlab                 Enable label table in listing" _ENDL;
 	_COUT "  --sym=<filename>         Save symbols list to <filename>" _ENDL;

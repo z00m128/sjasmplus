@@ -438,7 +438,7 @@
       <para><programlisting>  -h or --help             Help information
   --zxnext                 Enable SpecNext Z80 extensions
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
-                           Include path
+                           Include path (later defined have higher priority)
   --lst=&lt;filename&gt;         Save listing to &lt;filename&gt;
   --lstlab                 Enable label table in listing
   --sym=&lt;filename&gt;         Save symbols list to &lt;filename&gt;

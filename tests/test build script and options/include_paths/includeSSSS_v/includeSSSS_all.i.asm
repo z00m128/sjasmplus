@@ -1,3 +1,3 @@
 ; valid Z80 source
-    or      a
+    cp      a
     ret     z

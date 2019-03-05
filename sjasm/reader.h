@@ -26,7 +26,9 @@
 
 */
 
-// reader.h
+enum EDelimiterType { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
+#define DELIMITERS_B { ' ', '"', '\'', '<' }
+#define DELIMITERS_E { ' ', '"', '\'', '>' }
 
 int White();
 void SkipParam(char*&);
@@ -55,10 +57,9 @@ int GetCharConstCharSingle(char*& op, aint& val);
 int GetBytes(char*& p, int e[], int add, int dc);
 int cmphstr(char*& p1, const char* p2);
 char* GetFileName(char*& p, bool convertslashes=false);
-char* GetHobetaFileName(char*& p);
+EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called
 int needcomma(char*& p);
 int needbparen(char*& p);
 int islabchar(char p);
 EStructureMembers GetStructMemberId(char*& p);
-//eof reader.h
 

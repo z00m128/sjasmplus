@@ -649,94 +649,56 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	return t;
 }
 
+#if defined(WIN32) || defined(UNDER_CE)
+static const char badSlash = '/';
+static const char goodSlash = '\\';
+#else
+static const char badSlash = '\\';
+static const char goodSlash = '/';
+#endif
+
+static EDelimiterType delimiterOfLastFileName = DT_NONE;
+static const char delimiters_b[] = DELIMITERS_B;
+static const char delimiters_e[] = DELIMITERS_E;
+
 char* GetFileName(char*& p, bool convertslashes) {
-	int o = 0;
-	int o2 = 0;
-	char* fn, * np;
-	fn = np = new char[LINEMAX];
-	if (np == NULL) {
-		Error("No enough memory!", 0, FATAL);
-	}
-	*fn = 0;
+	char* newFn = new char[LINEMAX];
+	if (NULL == newFn) Error("No enough memory!", 0, FATAL);
+	char* result = newFn;
+	// find first non-blank character
 	SkipBlanks(p);
-	if (!(*p)) {
-		return fn;
+	// check if some and which delimiter is used for this filename
+	int delI = DT_COUNT;
+	while (delI-- && (delimiters_b[delI] != *p)) ;
+	if (delI < 0) delI = 0;	// no delimiter found, use default "space" for end
+	else ++p;				// if found, advance over it
+	// remember type of detected delimiter (for GetDelimiterOfLastFileName function)
+	delimiterOfLastFileName = static_cast<EDelimiterType>(delI);
+	const char deliE = delimiters_e[delI];	// expected ending delimiter
+	// copy all characters until zero or delimiter-end character is reached
+	while (*p && deliE != *p) {
+		*newFn = *p;		// copy character
+		if (convertslashes && badSlash == *newFn) *newFn = goodSlash;	// convert slashes if enabled
+		++newFn, ++p;
+		if (LINEMAX <= newFn-result) Error("Filename too long!", 0, FATAL);
 	}
-	if (*p == '"') {
-		o = 1; ++p;
-	} else if (*p == '<') {
-		o = 2; ++p;
-	}
-	if (*p && strstr(p, ":")) {
-		o2 = 1;
-	}
-	/* while (!White() && *p!='"' && *p!='>') { *np=*p; ++np; ++p; } */
-	while (*p && *p != '"' && *p != '>' && !(o == 0 && o2 == 1 && *p == ':')) {
-		*np = *p; ++np; ++p;
-	}
-	if (*p && o == 1) {
-		if (*p == '"') {
+	*newFn = 0;				// add string terminator at end of file name
+	// verify + skip end-delimiter (if other than space)
+	if (' ' != deliE) {
+		if (deliE == *p) {
 			++p;
 		} else {
-			Error("No closing '\"'", 0, LASTPASS);
+			const char delimiterTxt[2] = { deliE, 0 };
+			Error("No closing delimiter", delimiterTxt, PASS1);
 		}
-	} else if (*p && o == 2 && *p != '>') {
-		Error("No closing '>'", 0, LASTPASS);
-	} else if (*p) {
-		++p;
 	}
-	*np = 0;
-	for (np = fn; *np; ++np) {
-#if defined(WIN32) || defined(UNDER_CE)
-		if (*np == '/' && convertslashes) {
-			*np = '\\';
-		}
-#else
-		if (*np == '\\' && convertslashes) {
-			*np = '/';
-		}
-#endif
-	}
-	return fn;
+	SkipBlanks(p);			// skip blanks any way
+	return result;
 }
 
-char* GetHobetaFileName(char*& p) {
-	int o = 0;
-	int o2 = 0;
-	char* fn, * np;
-	np = fn = new char[LINEMAX];
-	if (np == NULL) {
-		Error("No enough memory!", 0, FATAL);
-	}
-	*fn = 0;
-	SkipBlanks(p);
-	if (!(*p)) {
-		return fn;
-	}
-	if (*p == '"') {
-		o = 1; ++p;
-	} else if (*p == '<') {
-		o = 2; ++p;
-	}
-	if (*p && strstr(p, ":")) {
-		o2 = 1;
-	}
-	while (*p && !White() && *p != '"' && *p != '>' && !(o == 0 && o2 == 1 && *p == ':')) {
-		*np = *p; ++np; ++p;
-	}
-	if (*p && o == 1) {
-		if (*p == '"') {
-			++p;
-		} else {
-			Error("No closing '\"'", 0, LASTPASS);
-		}
-	} else if (*p && o == 2 && *p != '>') {
-		Error("No closing '>'", 0, LASTPASS);
-	} else if (*p) {
-		++p;
-	}
-	*np = 0;
-	return fn;
+EDelimiterType GetDelimiterOfLastFileName() {
+	// DT_NONE if no GetFileName was called
+	return delimiterOfLastFileName;
 }
 
 int needcomma(char*& p) {

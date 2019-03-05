@@ -651,32 +651,32 @@ void EmitBlock(aint byte, aint len, bool nulled) {
 	}
 }
 
-char* GetPath(char* fname, TCHAR** filenamebegin) {
-	int g = 0;
-	char* kip, fullFilePath[MAX_PATH];
-	g = SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin);
-	if (!g) {
-		if (fname[0] == '<') {
-			fname++;
+char* GetPath(char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
+{
+	// temporary "head" with CurrentDirectory as first item in list
+	CStringsList includesWithCurrent(CurrentDirectory, Options::IncludeDirsList);
+	// start search either with the temporary head, or with the list of system include-paths
+	CStringsList* dir = systemPathsBeforeCurrent ? Options::IncludeDirsList : &includesWithCurrent;
+	char fullFilePath[MAX_PATH];
+	while (dir) {
+		if (SearchPath(dir->string, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) break;
+		dir = dir->next;
+	}
+	// disconnect temporary head from real include list (prevents destructor from releasing it all)
+	includesWithCurrent.next = NULL;
+	// if the file was not found in the list
+	if (NULL == dir) {
+		//and the current directory was not searched yet, do it now, set empty string if nothing
+		if (systemPathsBeforeCurrent ||
+			!SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
+			fullFilePath[0] = 0;
 		}
-		CStringsList* dir = Options::IncludeDirsList;
-		while (dir) {
-			if (SearchPath(dir->string, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
-				g = 1; break;
-			}
-			dir = dir->next;
-		}
 	}
-	if (!g) {
-		SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin);
-	}
-	kip = STRDUP(fullFilePath);
-	if (kip == NULL) {
-		Error("No enough memory!", 0, FATAL);
-	}
-	if (filenamebegin) {
-		*filenamebegin += kip - fullFilePath;
-	}
+	// copy the result into new memory
+	char* kip = STRDUP(fullFilePath);
+	if (kip == NULL) Error("No enough memory!", 0, FATAL);
+	// convert filenamebegin pointer into the copied string (from temporary buffer pointer)
+	if (filenamebegin) *filenamebegin += (kip - fullFilePath);
 	return kip;
 }
 
@@ -686,10 +686,7 @@ void BinIncFile(char* fname, int offset, int len) {
 	int totlen = 0;
 	char* fullFilePath;
 
-	fullFilePath = GetPath(fname, NULL);
-	if (*fname == '<') {
-		fname++;
-	}
+	fullFilePath = GetPath(fname);
 	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) {
 		Error("Error opening file", fname, FATAL);
 	}
@@ -776,7 +773,8 @@ void BinIncFile(char* fname, int offset, int len) {
 	fclose(bif);
 }
 
-void OpenFile(char* nfilename) {
+void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
+{
 	char ofilename[LINEMAX];
 	char* oCurrentDirectory, * fullpath;
 	TCHAR* filenamebegin;
@@ -784,10 +782,7 @@ void OpenFile(char* nfilename) {
 	if (++IncludeLevel > 20) {
 		Error("Over 20 files nested", 0, FATAL);
 	}
-	fullpath = GetPath(nfilename, &filenamebegin);
-	if (*nfilename == '<') {
-		nfilename++;
-	}
+	fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
 
 	if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 		free(fullpath);
@@ -808,15 +803,16 @@ void OpenFile(char* nfilename) {
 	*filenamebegin = 0;
 	CurrentDirectory = fullpath;
 
-	// Free memory
-	free(fullpath);
-
 	RL_Readed = 0; rlpbuf = rlbuf;
 	ReadBufLine(true);
 
 	fclose(FP_Input);
 	--IncludeLevel;
 	CurrentDirectory = oCurrentDirectory;
+
+	// Free memory
+	free(fullpath);
+
 	STRCPY(filename, LINEMAX, ofilename);
 	if (CurrentLocalLine > maxlin) {
 		maxlin = CurrentLocalLine;
@@ -824,15 +820,14 @@ void OpenFile(char* nfilename) {
 	CurrentLocalLine = oCurrentLocalLine;
 }
 
-void IncludeFile(char* nfilename) {
+void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
+{
 	FILE* oFP_Input = FP_Input;
 	FP_Input = 0;
 
 	char* pbuf = rlpbuf;
 	char* buf = STRDUP(rlbuf);
-	if (buf == NULL) {
-		Error("No enough memory!", 0, FATAL);
-	}
+	if (buf == NULL) Error("No enough memory!", 0, FATAL);
 	int readed = RL_Readed;
 	bool squotes = rlsquotes,dquotes = rldquotes,space = rlspace,comment = rlcomment,colon = rlcolon,newline = rlnewline;
 
@@ -840,7 +835,7 @@ void IncludeFile(char* nfilename) {
 
 	memset(rlbuf, 0, 8192);
 
-	OpenFile(nfilename);
+	OpenFile(nfilename, systemPathsBeforeCurrent);
 
 	rlsquotes = squotes,rldquotes = dquotes,rlspace = space,rlcomment = comment,rlcolon = colon,rlnewline = newline;
 	rlpbuf = pbuf;

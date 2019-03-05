@@ -643,10 +643,7 @@ void dirINCHOB() {
 		}
 	}
 
-	fnaamh = GetPath(fnaam, NULL);
-	if (*fnaam == '<') {
-		fnaam++;
-	}
+	fnaamh = GetPath(fnaam);
 	if (!FOPEN_ISOK(ff, fnaamh, "rb")) {
 		Error("[INCHOB] Error opening file", fnaam, FATAL);
 	}
@@ -676,7 +673,7 @@ void dirINCTRD() {
 	fnaam = GetFileName(lp);
 	if (comma(lp)) {
 		if (!comma(lp)) {
-			fnaamh = GetHobetaFileName(lp);
+			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[INCTRD] Syntax error", bp, CATCHALL); return;
 			}
@@ -725,10 +722,7 @@ void dirINCTRD() {
 		break;
 	}
 	// open TRD
-	fnaamh2 = GetPath(fnaam, NULL);
-	if (*fnaam == '<') {
-		fnaam++;
-	}
+	fnaamh2 = GetPath(fnaam);
 	if (!FOPEN_ISOK(ff, fnaamh2, "rb")) {
 		Error("[INCTRD] Error opening file", fnaam, FATAL);
 	}
@@ -922,7 +916,7 @@ void dirSAVETAP() {
 							param3 = val;
 						}
 					} else if (!comma(lp)) {
-						fnaamh = GetHobetaFileName(lp);
+						fnaamh = GetFileName(lp);
 						if (!*fnaamh) {
 							Error("[SAVETAP] Syntax error in tape file name", bp, PASS3);
 							return;
@@ -1091,7 +1085,7 @@ void dirSAVEHOB() {
 	fnaam = GetFileName(lp);
 	if (comma(lp)) {
 		if (!comma(lp)) {
-			fnaamh = GetHobetaFileName(lp);
+			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
 			}
@@ -1175,7 +1169,7 @@ void dirSAVETRD() {
 	fnaam = GetFileName(lp);
 	if (comma(lp)) {
 		if (!comma(lp)) {
-			fnaamh = GetHobetaFileName(lp);
+			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
@@ -1232,7 +1226,7 @@ void dirSAVETRD() {
 }
 
 void dirENCODING() {
-	char* opt = GetHobetaFileName(lp);
+	char* opt = GetFileName(lp);
 	char* opt2 = opt;
 	if (!(*opt)) {
 		Error("[ENCODING] Syntax error. No parameters", bp, CATCHALL); return;
@@ -1454,15 +1448,15 @@ void dirENDIF() {
 void dirINCLUDE() {
 	char* fnaam;
 	fnaam = GetFileName(lp);
-	ListFile(); /*OpenFile(fnaam);*/ IncludeFile(fnaam); donotlist = 1;
+	EDelimiterType dt = GetDelimiterOfLastFileName();
+	ListFile();
+	IncludeFile(fnaam, DT_ANGLE == dt);
+	donotlist = 1;
 	delete[] fnaam;
 }
 
 void dirOUTPUT() {
-	char* fnaam;
-
-	fnaam = GetFileName(lp); //if (fnaam[0]=='<') fnaam++;
-	/* begin from SjASM 0.39g */
+	char* fnaam = GetFileName(lp);
 	int mode = OUTPUT_TRUNCATE;
 	if (comma(lp)) {
 		char modechar = (*lp) | 0x20;
@@ -1481,8 +1475,6 @@ void dirOUTPUT() {
 	if (pass == LASTPASS) {
 		NewDest(fnaam, mode);
 	}
-	/* end from SjASM 0.39g */
-	//if (pass==2) NewDest(fnaam);
 	delete[] fnaam;
 }
 
@@ -2330,26 +2322,21 @@ void dirENDLUA() {
 void dirINCLUDELUA() {
 	char* fnaam;
 	fnaam = GetFileName(lp);
-	int error;
 
-	if (pass == LASTPASS && !FileExists(fnaam)) {
-		Error("[INCLUDELUA] File doesn't exist", fnaam);
-		return;
+	if (PASS1 == pass) {
+		EDelimiterType dt = GetDelimiterOfLastFileName();
+		if (!FileExists(fnaam)) {
+			Error("[INCLUDELUA] File doesn't exist", fnaam, PASS1);
+		} else {
+			//WinExec ( "C:\\path\\to\\program.exe", SW_SHOWNORMAL );
+			LuaLine = CurrentLocalLine;
+			int error = luaL_loadfile(LUA, fnaam) || lua_pcall(LUA, 0, 0, 0);
+			if (error) {
+				_lua_showerror();
+			}
+			LuaLine = -1;
+		}
 	}
-
-	if (pass != 1) {
-		return;
-	}
-
-	//WinExec ( "C:\\path\\to\\program.exe", SW_SHOWNORMAL );
-
-	LuaLine = CurrentLocalLine;
-	error = luaL_loadfile(LUA, fnaam) || lua_pcall(LUA, 0, 0, 0);
-	if (error) {
-		_lua_showerror();
-	}
-	LuaLine = -1;
-
 	delete[] fnaam;
 }
 
