@@ -15,27 +15,29 @@
     ENDLUA
     LUA ALLPASS
         pass = pass + 1
-        sj.warning('Pass updated to ' .. pass .. ', device: ' .. sj.get_device())
+        if pass == 1 or pass == 3 then
+          sj.warning('Pass updated to ' .. pass .. ', device: ' .. sj.get_device())
+        end
     ENDLUA
 
     DEVICE ZXSPECTRUM1024
 
     ORG     $8000
 
-    INCLUDELUA luaincSSSS.lua
+    INCLUDELUA luaincSSSS.lua   ; this will load local version (defining two functions)
+
+    INCLUDELUA <luaincSSSS.lua> ; this may load "system" version depending on -I options
 
 loopyLoop:
-
-    LUA ALLPASS
-        inc_ld('A', pass + 10)
-    ENDLUA
-
-    INCLUDELUA <luaincSSSS.lua>
 
     call    forwardyLabelo
 
     LUA ALLPASS
-        inc_ld('A', pass)
+    inc_ld_local('A', pass + 10)    -- defined only in local LUA script (never changes)
+    ENDLUA
+
+    LUA ALLPASS
+    inc_ld_system('A', pass)        -- defined in all includes, the one with priority wins
     ENDLUA
 
     jr  loopyLoop

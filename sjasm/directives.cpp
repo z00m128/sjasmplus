@@ -2325,17 +2325,18 @@ void dirINCLUDELUA() {
 
 	if (PASS1 == pass) {
 		EDelimiterType dt = GetDelimiterOfLastFileName();
-		if (!FileExists(fnaam)) {
+		char* fullpath = GetPath(fnaam, NULL, DT_ANGLE == dt);
+		if (!fullpath[0]) {
 			Error("[INCLUDELUA] File doesn't exist", fnaam, PASS1);
 		} else {
-			//WinExec ( "C:\\path\\to\\program.exe", SW_SHOWNORMAL );
 			LuaLine = CurrentLocalLine;
-			int error = luaL_loadfile(LUA, fnaam) || lua_pcall(LUA, 0, 0, 0);
+			int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
 			if (error) {
 				_lua_showerror();
 			}
 			LuaLine = -1;
 		}
+		free(fullpath);
 	}
 	delete[] fnaam;
 }

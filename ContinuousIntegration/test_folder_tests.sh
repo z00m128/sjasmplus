@@ -75,7 +75,8 @@ for f in "${PROJECT_DIR}/tests/"**/*.asm; do
             echo -n -e "\e[0m"
         fi
     done
-done
+    #read -p "press..."      # DEBUG helper to examine produced files
+done # end of FOR (go through all asm files)
 # display OK message if no error was detected
 [[ $exitCode -eq 0 ]] \
     && echo -e "\e[92mFINISHED: OK, $totalChecks checks passed ($totalTests tests) \e[91m■\e[93m■\e[32m■\e[96m■\e[0m" \
