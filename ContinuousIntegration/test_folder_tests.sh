@@ -28,8 +28,8 @@ for f in "${PROJECT_DIR}/tests/"**/*.asm; do
     file_asm=`basename "$f"`        # just "file.asm" name
     src_base="${f%.asm}"            # source directory + base ("src_dir/file"), to add extensions
     dst_base="${file_asm%.asm}"     # local-directory base (just "file" basically), to add extensions
-    # copy "src_dir/basename*.asm" file(s) into working directory
-    for subf in "$src_base"*.asm; do
+    # copy "src_dir/basename*.(asm|lua)" file(s) into working directory
+    for subf in "$src_base"*.{asm,lua}; do
         [[ -d "$subf" ]] && continue
         cp "$subf" ".${subf#$src_dir}"
     done

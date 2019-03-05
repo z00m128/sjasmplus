@@ -1,0 +1,68 @@
+luainc.asm(18): warning: Pass updated to 1, device: NONE
+luainc.asm(18): warning: Pass updated to 2, device: ZXSPECTRUM1024
+01   0000             ; test include paths on command line and their priorities, there are multiple steps:
+02   0000             ; luainc.asm       = no extra include path, should include from working directory
+03   0000             ; luaincS.asm      = +include paths "luaincSSSS_v"
+04   0000             ; luaincSS.asm     = +include paths "luaincSSSS_i"
+05   0000             ; luaincSSS.asm    = +include paths "luaincSSSS_v", "luaincSSSS_i"
+06   0000             ; luaincSSSS.asm   = +include paths "luaincSSSS_i", "luaincSSSS_v"
+07   0000             
+08   0000             ; The following code is intentionally mischievous and damaging assembling process, and
+09   0000             ; the results of the assembling will very likely change in the future, as the work
+10   0000             ; on consolidation of sjasmplus will continue, this is NOT example how to use lua scripts!
+11   0000             ; it's more like anti-example, how to NOT use it.
+12   0000             
+13   0000                 LUA PASS1
+14   0000~                    pass = 0
+15   0000                 ENDLUA
+16   0000                 LUA ALLPASS
+17   0000~                    pass = pass + 1
+18   0000~                    sj.warning('Pass updated to ' .. pass .. ', device: ' .. sj.get_device())
+luainc.asm(18): warning: Pass updated to 3, device: ZXSPECTRUM1024
+19   0000                 ENDLUA
+20   0000             
+21   0000                 DEVICE ZXSPECTRUM1024
+22   0000             
+23   0000                 ORG     $8000
+24   8000             
+25   8000                 INCLUDELUA luaincSSSS.lua
+26   8000             
+27   8000             loopyLoop:
+28   8000             
+29   8000                 LUA ALLPASS
+30   8000~                    inc_ld('A', pass + 10)
+31   8000 3E 0D       LD A,13
+31   8002 3E 0D       LD A,13
+31   8004 3E 0D       LD A,13
+31   8006                 ENDLUA
+32   8006             
+33   8006                 INCLUDELUA <luaincSSSS.lua>
+34   8006             
+35   8006 CD 0D 80        call    forwardyLabelo
+36   8009             
+37   8009                 LUA ALLPASS
+38   8009~                    inc_ld('A', pass)
+39   8009 3E 03       LD A,3
+39   800B 3E 03       LD A,3
+39   800D 3E 03       LD A,3
+39   800F                 ENDLUA
+40   800F             
+41   800F 18 EF           jr  loopyLoop
+42   8011             
+luainc.asm(43): warning: Label has different value in pass 3: previous value 32781 not equal 32785
+43   8011             forwardyLabelo:
+44   8011 C7              rst 0
+45   8012             
+luainc.asm(46): warning: Negative BLOCK?
+46   8012 C9              ds  stretchItEvenMore-forwardyLabelo-1, 201
+47   0000             
+48   0000                 ALIGN 256
+49   0000             stretchItEvenMore:
+50   0000 D7              rst 16
+51   0001             
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000   loopyLoop
+0x8011   forwardyLabelo
+0x0000   stretchItEvenMore

@@ -17,3 +17,14 @@ defines divne (pozri ci sa to neda prepojit s enums co su pre Error()):
 #define LASTPASS 3
 
 build scripts - extend with argument reading, to run only tests in particular subdirectory
+
+LUA quirks:
+    -- v includelua:
+    function inc_ld(reg, val)
+        _pc('LD '..reg..','..val)
+    end
+    -- v kode:
+    LUA
+        inc_ld(A, pass)     -- bug, should be 'A'
+    ENDLUA
+= no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
