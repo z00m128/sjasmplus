@@ -4,14 +4,14 @@
 
     add     iy,de       ; #FD19
 
-    ld      iy,0        ; #FD210000
-    ld      (0),iy      ; #FD220000
+    ld      iy,#100     ; #FD210001
+    ld      (#100),iy   ; #FD220001
     inc     iy          ; #FD23
     inc     iyh         ; #FD24
     dec     iyh         ; #FD25
     ld      iyh,0       ; #FD2600
     add     iy,iy       ; #FD29
-    ld      iy,(0)      ; #FD2A0000
+    ld      iy,(#100)   ; #FD2A0001
     dec     iy          ; #FD2B
     inc     iyl         ; #FD2C
     dec     iyl         ; #FD2D

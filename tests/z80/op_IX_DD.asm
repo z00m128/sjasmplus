@@ -4,14 +4,14 @@
 
     add     ix,de       ; #DD19
 
-    ld      ix,0        ; #DD210000
-    ld      (0),ix      ; #DD220000
+    ld      ix,#100     ; #DD210001
+    ld      (#100),ix   ; #DD220001
     inc     ix          ; #DD23
     inc     ixh         ; #DD24
     dec     ixh         ; #DD25
     ld      ixh,0       ; #DD2600
     add     ix,ix       ; #DD29
-    ld      ix,(0)      ; #DD2A0000
+    ld      ix,(#100)   ; #DD2A0001
     dec     ix          ; #DD2B
     inc     ixl         ; #DD2C
     dec     ixl         ; #DD2D
