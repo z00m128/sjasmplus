@@ -413,7 +413,8 @@ void ListFile() {
 	{
 		pp = pline + 10;
 		int maxEB = nEB; if (maxEB > 4) maxEB = 4;
-		for (i = 0; i < maxEB; i++) pp += sprintf(pp, " %02X", EB[i + pos]); *pp = ' ';
+		for (i = 0; i < maxEB; i++) pp += sprintf(pp, " %02X", EB[i + pos]);
+		*pp = ' ';
 		if (pline[24] == '\n' && !listmacro) { *pp = '\n'; pp[1] = 0; }
 		fputs(pline, FP_ListingFile);
 		nEB -= maxEB;
@@ -568,7 +569,10 @@ void CheckPage() {
 	CDeviceSlot* S;
 	for (aint i=0;i<Device->SlotsCount;i++) {
 		S = Device->GetSlot(i);
-		if (CurAddress >= S->Address && ((CurAddress < 65536 && CurAddress < S->Address + S->Size) || (CurAddress >= 65536 && CurAddress <= S->Address + S->Size))) {
+		if (CurAddress >= S->Address \
+			&& ((CurAddress < 65536 && CurAddress < S->Address + S->Size) \
+				|| (CurAddress >= 65536 && CurAddress <= S->Address + S->Size)) \
+		   ) {
 			if (PseudoORG) {
 				MemoryPointer = S->Page->RAM + (adrdisp - S->Address);
 				Page = S->Page;
