@@ -22,7 +22,7 @@ SUBDIR_LUA=lua5.1
 SUBDIR_TOLUA=tolua++
 
 CFLAGS=-O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
-CXXFLAGS=$(CFLAGS)
+CXXFLAGS=-std=c++14 $(CFLAGS)
 
 # for Windows (removed -ldl flag)
 LDFLAGS= -s
@@ -84,7 +84,7 @@ uninstall:
 	$(GCC) $(CFLAGS) -o $@ -c $<
 
 .cpp.o:
-	$(GPP) $(CFLAGS) -o $@ -c $<
+	$(GPP) $(CXXFLAGS) -o $@ -c $<
 
 $(RES): sjasmwin32/sjasmplus.mingw.rc
 	$(WINDRES) -i $< -O coff -o $@
