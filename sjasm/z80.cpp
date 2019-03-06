@@ -30,7 +30,9 @@ namespace Z80 {
 	enum Z80Reg { Z80_B = 0, Z80_C, Z80_D, Z80_E, Z80_H, Z80_L, Z80_A = 7, Z80_I, Z80_R, Z80_F,
 		Z80_BC = 0x10, Z80_DE = 0x20, Z80_HL = 0x30, Z80_IXH, Z80_IXL, Z80_IYH, Z80_IYL,
 		Z80_SP = 0x40, Z80_AF = 0x50, Z80_IX = 0xdd, Z80_IY = 0xfd, Z80_UNK = -1 };
-	enum Z80Cond { Z80C_C, Z80C_M, Z80C_NC, Z80C_NZ, Z80C_P, Z80C_PE, Z80C_PO, Z80C_Z, Z80C_UNK };
+	enum Z80Cond {	// also used to calculate instruction opcode, so do not edit values
+		Z80C_NZ = 0x00, Z80C_Z  = 0x08, Z80C_NC = 0x10, Z80C_C = 0x18,
+		Z80C_PO = 0x20, Z80C_PE = 0x28, Z80C_P  = 0x30, Z80C_M = 0x38, Z80C_UNK };
 
 #define ASSERT_FAKE_INSTRUCTIONS(operation) if (!Options::FakeInstructions) { \
 		operation; \
@@ -105,109 +107,44 @@ namespace Z80 {
 	}
 
 	int GetAddress(char*& p, aint& ad) {
-		if (GetLocalLabelValue(p, ad)) {
-			return 1;
-		}
-		if (ParseExpression(p, ad)) {
-			return 1;
-		}
+		if (GetLocalLabelValue(p, ad) || ParseExpression(p, ad)) return 1;
 		Error("Operand expected", 0, CATCHALL);
-		return 0;
+		return (ad = 0);
 	}
 
 	Z80Cond getz80cond(char*& p) {
-		char* pp = p;
 		SkipBlanks(p);
-		switch (*(p++)) {
-		case 'n':
-			switch (*(p++)) {
-			case 'z':
-				if (!islabchar(*p)) {
-					return Z80C_NZ;
-				} break;
-			case 'c':
-				if (!islabchar(*p)) {
-					return Z80C_NC;
-				} break;
-			case 's':
-				if (!islabchar(*p)) {
-					return Z80C_P;
-				} break;
-			default:
-				break;
+		char * const pp = p;
+		if (0 == p[0]) return Z80C_UNK;	// EOL detected
+		const char p0 = 0x20|p[0];		// lowercase ASCII conversion
+		if (!islabchar(p[1])) {			// can be only single letter condition at most
+			++p;
+			switch (p0) {
+				case 'z': return Z80C_Z;
+				case 'c': return Z80C_C;
+				case 'p': return Z80C_P;
+				case 'm': return Z80C_M;
+				case 's': return Z80C_M;
 			}
-			break;
-		case 'N':
-			switch (*(p++)) {
-			case 'Z':
-				if (!islabchar(*p)) {
-					return Z80C_NZ;
-				} break;
-			case 'C':
-				if (!islabchar(*p)) {
-					return Z80C_NC;
-				} break;
-			case 'S':
-				if (!islabchar(*p)) {
-					return Z80C_P;
-				} break;
-			default:
-				break;
+			p = pp;
+			return Z80C_UNK;
+		}
+		// ## p0 != 0 && p1 is label character
+		if ((p[0]^p[1])&0x20) return Z80C_UNK;	// different case of the letters detected
+		if (islabchar(p[2])) return Z80C_UNK;	// p2 is also label character = too many
+		const char p1 = 0x20|p[1];		// lowercase ASCII conversion
+		p += 2;
+		if ('n' == p0) {
+			switch (p1) {
+				case 'z': return Z80C_NZ;	// nz
+				case 'c': return Z80C_NC;	// nc
+				case 's': return Z80C_P;	// ns
 			}
-			break;
-		case 'z':
-		case 'Z':
-			if (!islabchar(*p)) {
-				return Z80C_Z;
-			} break;
-		case 'c':
-		case 'C':
-			if (!islabchar(*p)) {
-				return Z80C_C;
-			} break;
-		case 'm':
-		case 'M':
-		case 's':
-		case 'S':
-			if (!islabchar(*p)) {
-				return Z80C_M;
-			} break;
-		case 'p':
-			if (!islabchar(*p)) {
-				return Z80C_P;
+		} else if ('p' == p0) {
+			switch (p1) {
+				case 'o': return Z80C_PO;	// po
+				case 'e': return Z80C_PE;	// pe
 			}
-			switch (*(p++)) {
-			case 'e':
-				if (!islabchar(*p)) {
-					return Z80C_PE;
-				} break;
-			case 'o':
-				if (!islabchar(*p)) {
-					return Z80C_PO;
-				} break;
-			default:
-				break;
-			}
-			break;
-		case 'P':
-			if (!islabchar(*p)) {
-				return Z80C_P;
-			}
-			switch (*(p++)) {
-			case 'E':
-				if (!islabchar(*p)) {
-					return Z80C_PE;
-				} break;
-			case 'O':
-				if (!islabchar(*p)) {
-					return Z80C_PO;
-				} break;
-			default:
-				break;
-			}
-			break;
-		default:
-			break;
 		}
 		p = pp;
 		return Z80C_UNK;
@@ -535,6 +472,7 @@ namespace Z80 {
 
 	void OpCode_ADC() {
 		Z80Reg reg;
+		EBracketType bt;
 		int e[4];
 		do {
 			e[0] = e[1] = e[2] = e[3] = -1;
@@ -591,45 +529,34 @@ namespace Z80 {
 				case Z80_IY:
 					break;
 				default:
-					reg = Z80_UNK;
-					if (oparen(lp, '[')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
+					if (BT_NONE != (bt = OpenBracket(lp))) {
+						switch (reg = GetRegister(lp)) {
+						case Z80_HL:
+							if (CloseBracket(lp)) e[0] = 0x8e;
+							break;
+						case Z80_IX:
+						case Z80_IY:
+							e[1] = 0x8e; e[2] = z80GetIDxoffset(lp);
+							if (CloseBracket(lp)) e[0] = reg;
+							break;
+						default:
 							break;
 						}
-					} else if (oparen(lp, '(')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
-							--lp;
-						}
+						// give "(something..." another chance to parse as value expression
+						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					switch (reg) {
-					case Z80_HL:
-						if (cparen(lp)) {
-							e[0] = 0x8e;
-						}
-						break;
-					case Z80_IX:
-					case Z80_IY:
-						e[1] = 0x8e; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
-							e[0] = reg;
-						}
-						break;
-					default:
-						e[0] = 0xce; e[1] = GetByte(lp); break;
-					}
+					e[0] = 0xce; e[1] = GetByte(lp);
+					break;
 				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_ADD() {
 		Z80Reg reg;
+		EBracketType bt;
 		int e[5];
 		do {
 			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
@@ -753,45 +680,34 @@ namespace Z80 {
 				case Z80_IY:
 					break;
 				default:
-					reg = Z80_UNK;
-					if (oparen(lp, '[')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
+					if (BT_NONE != (bt = OpenBracket(lp))) {
+						switch (reg = GetRegister(lp)) {
+						case Z80_HL:
+							if (CloseBracket(lp)) e[0] = 0x86;
+							break;
+						case Z80_IX:
+						case Z80_IY:
+							e[1] = 0x86; e[2] = z80GetIDxoffset(lp);
+							if (CloseBracket(lp)) e[0] = reg;
+							break;
+						default:
 							break;
 						}
-					} else if (oparen(lp, '(')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
-							--lp;
-						}
+						// give "(something..." another chance to parse as value expression
+						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					switch (reg) {
-					case Z80_HL:
-						if (cparen(lp)) {
-							e[0] = 0x86;
-						}
-						break;
-					case Z80_IX:
-					case Z80_IY:
-						e[1] = 0x86; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
-							e[0] = reg;
-						}
-						break;
-					default:
-						e[0] = 0xc6; e[1] = GetByte(lp); break;
-					}
+					e[0] = 0xc6; e[1] = GetByte(lp);
+					break;
 				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_AND() {
 		Z80Reg reg;
+		EBracketType bt;
 		int e[4];
 		do {
 			e[0] = e[1] = e[2] = e[3] = -1;
@@ -830,41 +746,29 @@ namespace Z80 {
 				case Z80_IY:
 					break;
 				default:
-					reg = Z80_UNK;
-					if (oparen(lp, '[')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
+					if (BT_NONE != (bt = OpenBracket(lp))) {
+						switch (reg = GetRegister(lp)) {
+						case Z80_HL:
+							if (CloseBracket(lp)) e[0] = 0xa6;
+							break;
+						case Z80_IX:
+						case Z80_IY:
+							e[1] = 0xa6; e[2] = z80GetIDxoffset(lp);
+							if (CloseBracket(lp)) e[0] = reg;
+							break;
+						default:
 							break;
 						}
-					} else if (oparen(lp, '(')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
-							--lp;
-						}
+						// give "(something..." another chance to parse as value expression
+						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					switch (reg) {
-					case Z80_HL:
-						if (cparen(lp)) {
-							e[0] = 0xa6;
-						}
-						break;
-					case Z80_IX:
-					case Z80_IY:
-						e[1] = 0xa6; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
-							e[0] = reg;
-						}
-						break;
-					default:
-						e[0] = 0xe6; e[1] = GetByte(lp); break;
-					}
+					e[0] = 0xe6; e[1] = GetByte(lp);
+					break;
 				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_BIT() {
@@ -886,19 +790,19 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 8 * bit + 0x40 + reg; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 8 * bit + 0x46; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 8 * bit + 0x46;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					break;
@@ -951,61 +855,18 @@ namespace Z80 {
 	}
 
 	void OpCode_CALL() {
-		aint callad;
-		int e[4], b;
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (getz80cond(lp)) {
-			case Z80C_C:
-				if (comma(lp)) {
-					e[0] = 0xdc;
-				} break;
-			case Z80C_M:
-				if (comma(lp)) {
-					e[0] = 0xfc;
-				} break;
-			case Z80C_NC:
-				if (comma(lp)) {
-					e[0] = 0xd4;
-				} break;
-			case Z80C_NZ:
-				if (comma(lp)) {
-					e[0] = 0xc4;
-				} break;
-			case Z80C_P:
-				if (comma(lp)) {
-					e[0] = 0xf4;
-				} break;
-			case Z80C_PE:
-				if (comma(lp)) {
-					e[0] = 0xec;
-				} break;
-			case Z80C_PO:
-				if (comma(lp)) {
-					e[0] = 0xe4;
-				} break;
-			case Z80C_Z:
-				if (comma(lp)) {
-					e[0] = 0xcc;
-				} break;
-			default:
-				e[0] = 0xcd; break;
-			}
-			if (!(GetAddress(lp, callad))) {
-				callad = 0;
-			}
-			b = (signed) callad;
+			int e[] = { -1, -1, -1, -1 };
+			Z80Cond cc = getz80cond(lp);
+			if (Z80C_UNK == cc) e[0] = 0xcd;
+			else if (comma(lp)) e[0] = 0xC4 + cc;
+			// UNK != cc + no-comma leaves e[0] == -1 (invalid instruction)
+			aint callad;
+			GetAddress(lp, callad);
+			check16(callad);
 			e[1] = callad & 255; e[2] = (callad >> 8) & 255;
-			if (b > 65535) {
-				Warning("[CALL] Bytes lost", 0, LASTPASS);
-			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_CCF() {
@@ -1014,6 +875,7 @@ namespace Z80 {
 
 	void OpCode_CP() {
 		Z80Reg reg;
+		EBracketType bt;
 		int e[4];
 		do {
 			e[0] = e[1] = e[2] = e[3] = -1;
@@ -1052,41 +914,28 @@ namespace Z80 {
 				case Z80_IY:
 					break;
 				default:
-					reg = Z80_UNK;
-					if (oparen(lp, '[')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
+					if (BT_NONE != (bt = OpenBracket(lp))) {
+						switch (reg = GetRegister(lp)) {
+						case Z80_HL:
+							if (CloseBracket(lp)) e[0] = 0xbe;
+							break;
+						case Z80_IX:
+						case Z80_IY:
+							e[1] = 0xbe; e[2] = z80GetIDxoffset(lp);
+							if (CloseBracket(lp)) e[0] = reg;
+							break;
+						default:
 							break;
 						}
-					} else if (oparen(lp, '(')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
-							--lp;
-						}
+						// give "(something..." another chance to parse as value expression
+						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					switch (reg) {
-					case Z80_HL:
-						if (cparen(lp)) {
-							e[0] = 0xbe;
-						}
-						break;
-					case Z80_IX:
-					case Z80_IY:
-						e[1] = 0xbe; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
-							e[0] = reg;
-						}
-						break;
-					default:
-						e[0] = 0xfe; e[1] = GetByte(lp); break;
-					}
+					e[0] = 0xfe; e[1] = GetByte(lp);
 				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_CPD() {
@@ -1170,18 +1019,18 @@ namespace Z80 {
 			case Z80_IYL:
 				e[0] = 0xfd; e[1] = 0x2d; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0x35;
 					} break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0x35; e[2] = z80GetIDxoffset(lp);
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					break;
@@ -1267,13 +1116,13 @@ namespace Z80 {
 			e[0] = 0xeb;
 			break;
 		default:
-			if (!oparen(lp, '[') && !oparen(lp, '(')) {
+			if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 				break;
 			}
 			if (GetRegister(lp) != Z80_SP) {
 				break;
 			}
-			if (!cparen(lp)) {
+			if (!cparenOLD(lp)) {
 				break;
 			}
 			if (!comma(lp)) {
@@ -1334,17 +1183,17 @@ namespace Z80 {
 				if (!comma(lp)) {
 					break;
 				}
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				if (GetRegister(lp) == Z80_C) {
 					e[1] = 0x78;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xed;
 					}
 				} else {
 					e[1] = GetByte(lp);
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xdb;
 					}
 				}
@@ -1359,13 +1208,13 @@ namespace Z80 {
 				if (!comma(lp)) {
 					break;
 				}
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				if (GetRegister(lp) != Z80_C) {
 					break;
 				}
-				if (cparen(lp)) {
+				if (cparenOLD(lp)) {
 					e[0] = 0xed;
 				}
 				switch (reg) {
@@ -1387,13 +1236,13 @@ namespace Z80 {
 					;
 				}
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				if (GetRegister(lp) != Z80_C) {
 					break;
 				}
-				if (cparen(lp)) {
+				if (cparenOLD(lp)) {
 					e[0] = 0xed;
 				}
 				e[1] = 0x70;
@@ -1448,18 +1297,18 @@ namespace Z80 {
 			case Z80_IYL:
 				e[0] = 0xfd; e[1] = 0x2c; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0x34;
 					} break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0x34; e[2] = z80GetIDxoffset(lp);
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					break;
@@ -1517,157 +1366,68 @@ namespace Z80 {
 	}
 
 	void OpCode_JP() {
-		Z80Reg reg;
-		int haakjes = 0;
-		aint jpad;
-		int e[4],b,k = 0;
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (getz80cond(lp)) {
-			case Z80C_C:
-				if (comma(lp)) {
-					e[0] = 0xda;
-				} break;
-			case Z80C_M:
-				if (comma(lp)) {
-					e[0] = 0xfa;
-				} break;
-			case Z80C_NC:
-				if (comma(lp)) {
-					e[0] = 0xd2;
-				} break;
-			case Z80C_NZ:
-				if (comma(lp)) {
-					e[0] = 0xc2;
-				} break;
-			case Z80C_P:
-				if (comma(lp)) {
-					e[0] = 0xf2;
-				} break;
-			case Z80C_PE:
-				if (comma(lp)) {
-					e[0] = 0xea;
-				} break;
-			case Z80C_PO:
-				if (comma(lp)) {
-					e[0] = 0xe2;
-				} break;
-			case Z80C_Z:
-				if (comma(lp)) {
-					e[0] = 0xca;
-				} break;
-			default:
-				reg = Z80_UNK;
-				if (oparen(lp, '[')) {
-					if ((reg = GetRegister(lp)) == Z80_UNK) {
-						break;
-					}
-					haakjes = 1;
-				} else if (oparen(lp, '(')) {
-					if ((reg = GetRegister(lp)) == Z80_UNK) {
-						--lp;
-					} else {
-						haakjes = 1;
-					}
-				}
-				if (reg == Z80_UNK) {
-					reg = GetRegister(lp);
-				}
-				switch (reg) {
+			int e[] = { -1, -1, -1, -1 };
+			Z80Reg reg = Z80_UNK;
+			Z80Cond cc = getz80cond(lp);
+			if (Z80C_UNK == cc) {	// no condition, check for: jp (hl),... and Z80N jp (c)
+				EBracketType bt = OpenBracket(lp);
+				switch (reg = GetRegister(lp)) {
 				case Z80_C:
-					// "(C)" is valid only on Z80N, and requires parentheses (although "[]" works here too)
-					if (!haakjes || !cparen(lp) || !Options::IsNextEnabled) break;
-					e[0] = 0xED; e[1] = 0x98; k = 1;
+					// only "(C)" form with parentheses is legal syntax for Z80N "jp (C)"
+					if (BT_ROUND != bt || !CloseBracket(lp) || !Options::IsNextEnabled) break;
+					e[0] = 0xED; e[1] = 0x98;
 					break;
 				case Z80_HL:
-					if (haakjes && !cparen(lp)) {
-						break;
-					}
-					e[0] = 0xe9; k = 1; break;
 				case Z80_IX:
 				case Z80_IY:
-					e[1] = 0xe9;
-					if (haakjes && !cparen(lp)) {
-						break;
-					}
-					e[0] = reg; k = 1; break;
-				default:
-					e[0] = 0xc3;
+					if (BT_NONE != bt && !CloseBracket(lp)) break;	// check [optional] brackets
+					e[0] = reg;
+					e[Z80_HL != reg] = 0xe9;	// e[1] for IX/IY, e[0] for HL
+					break;
+				case Z80_UNK:
+					if (BT_SQUARE == bt) break;	// "[" has no chance, report it
+					if (BT_ROUND == bt) --lp;	// give "(" another chance to evaluate as expression
+					e[0] = 0xc3;				// jp imm16
+					break;
+				default:						// any other register is illegal
+					break;
 				}
+			} else {	// if (Z80C_UNK == cc)
+				if (comma(lp)) e[0] = 0xC2 + cc;	// jp cc,imm16
 			}
-			if (!k) {
-				if (!(GetAddress(lp, jpad))) {
-					jpad = 0;
-				}
-				b = (signed) jpad;
+			// calculate the imm16 data
+			if (Z80_UNK == reg) {
+				aint jpad;
+				GetAddress(lp, jpad);
+				check16(jpad);
 				e[1] = jpad & 255; e[2] = (jpad >> 8) & 255;
-				if (b > 65535) {
-					Warning("[JP] Bytes lost", 0, LASTPASS);
-				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_JR() {
-		aint jrad=0;
-		int e[4], jmp=0;
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (getz80cond(lp)) {
-			case Z80C_C:
-				if (comma(lp)) {
-					e[0] = 0x38;
-				} break;
-			case Z80C_NC:
-				if (comma(lp)) {
-					e[0] = 0x30;
-				} break;
-			case Z80C_NZ:
-				if (comma(lp)) {
-					e[0] = 0x20;
-				} break;
-			case Z80C_Z:
-				if (comma(lp)) {
-					e[0] = 0x28;
-				} break;
-			case Z80C_M:
-			case Z80C_P:
-			case Z80C_PE:
-			case Z80C_PO:
-				Error("[JR] Illegal condition", 0); break;
-			default:
-				e[0] = 0x18; break;
-			}
-			/*if (CurAddress == 47030) {
-				_COUT "JUST BREAKPOINT" _ENDL;
-			}*/
-			if (!(GetAddress(lp, jrad))) {
-				jrad = CurAddress + 2;
-			}
-			jmp = jrad - CurAddress - 2;
-			if (jmp < -128 || jmp > 127) {
-				char el[LINEMAX];
-				/*if (pass == LASTPASS) {
-					_COUT "AAAAAAA:" _CMDL jmp _CMDL " " _CMDL jrad _CMDL " " _CMDL CurAddress _ENDL;
-				}*/
-				SPRINTF1(el, LINEMAX, "[JR] Target out of range (%+i)", jmp);
-				Error(el, 0, LASTPASS);
-				jmp = 0;
-			}
-			e[1] = jmp < 0 ? 256 + jmp : jmp;
-			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
+			int e[] = { -1, -1, -1, -1 };
+			Z80Cond cc = getz80cond(lp);
+			if (Z80C_UNK == cc) e[0] = 0x18;
+			else if (cc <= Z80C_C && comma(lp)) e[0] = 0x20 + cc;
+			else {
+				Error("[JR] Illegal condition", 0);
 				break;
 			}
-		} while ('o');
+			aint jrad=0;
+			if (GetAddress(lp, jrad)) jrad -= CurAddress + 2;
+			if (jrad < -128 || jrad > 127) {
+				char el[LINEMAX];
+				SPRINTF1(el, LINEMAX, "[JR] Target out of range (%+li)", jrad);
+				Error(el, 0, LASTPASS);
+				jrad = 0;
+			}
+			e[1] = jrad & 0xFF;
+			EmitBytes(e);
+		} while (comma(lp));
 	}
 
 	void OpCode_LD() {
@@ -1718,15 +1478,15 @@ namespace Z80 {
 				case Z80_IYH:
 					e[0] = 0xfd; e[1] = 0x7c; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							b = GetWord(lp); e[1] = b & 255; e[2] = (b >> 8) & 255;
-							if (cparen(lp)) {
+							if (cparenOLD(lp)) {
 								e[0] = 0x3a;
 							} break;
 						}
 					} else {
-						if (oparen(lp, '(')) {
+						if (oparenOLD(lp, '(')) {
 							if ((reg = GetRegister(lp)) == Z80_UNK) {
 								olp = --lp;
 								if (!ParseExpression(lp, b)) {
@@ -1744,21 +1504,21 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_BC:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x0a;
 						} break;
 					case Z80_DE:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x1a;
 						} break;
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x7e;
 						} break;
 					case Z80_IX:
 					case Z80_IY:
 						e[1] = 0x7e; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = reg;
 						}
 						break;
@@ -1801,11 +1561,11 @@ namespace Z80 {
 				case Z80_IYH:
 					e[0] = 0xfd; e[1] = 0x44; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							break;
 						}
-					} else if (oparen(lp, '(')) {
+					} else if (oparenOLD(lp, '(')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							--lp; e[0] = 0x06; e[1] = GetByte(lp); break;
 						}
@@ -1814,12 +1574,12 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x46;
 						} break;
 					case Z80_IX:
 					case Z80_IY:
-						e[1] = 0x46; e[2] = z80GetIDxoffset(lp); if (cparen(lp)) {
+						e[1] = 0x46; e[2] = z80GetIDxoffset(lp); if (cparenOLD(lp)) {
 																 	e[0] = reg;
 																 } break;
 					default:
@@ -1861,11 +1621,11 @@ namespace Z80 {
 				case Z80_IYH:
 					e[0] = 0xfd; e[1] = 0x4c; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							break;
 						}
-					} else if (oparen(lp, '(')) {
+					} else if (oparenOLD(lp, '(')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							--lp; e[0] = 0x0e; e[1] = GetByte(lp); break;
 						}
@@ -1874,13 +1634,13 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x4e;
 						} break;
 					case Z80_IX:
 					case Z80_IY:
 						e[1] = 0x4e; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = reg;
 						}
 						break;
@@ -1923,11 +1683,11 @@ namespace Z80 {
 				case Z80_IYH:
 					e[0] = 0xfd; e[1] = 0x54; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							break;
 						}
-					} else if (oparen(lp, '(')) {
+					} else if (oparenOLD(lp, '(')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							--lp; e[0] = 0x16; e[1] = GetByte(lp); break;
 						}
@@ -1936,13 +1696,13 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x56;
 						} break;
 					case Z80_IX:
 					case Z80_IY:
 						e[1] = 0x56; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = reg;
 						}
 						break;
@@ -1990,11 +1750,11 @@ namespace Z80 {
 					e[0] = 0xfd; e[1] = 0x5c;
 					break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							break;
 						}
-					} else if (oparen(lp, '(')) {
+					} else if (oparenOLD(lp, '(')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							--lp;
 							e[0] = 0x1e;
@@ -2008,14 +1768,14 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x5e;
 						} break;
 					case Z80_IX:
 					case Z80_IY:
 						e[1] = 0x5e;
 						e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = reg;
 						}
 						break;
@@ -2055,11 +1815,11 @@ namespace Z80 {
 					e[0] = 0x60 + reg;
 					break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							break;
 						}
-					} else if (oparen(lp, '(')) {
+					} else if (oparenOLD(lp, '(')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							--lp; e[0] = 0x26; e[1] = GetByte(lp);
 							break;
@@ -2070,14 +1830,14 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x66;
 						}
 						break;
 					case Z80_IX:
 					case Z80_IY:
 						e[1] = 0x66; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = reg;
 						} break;
 					default:
@@ -2115,11 +1875,11 @@ namespace Z80 {
 				case Z80_L:
 					e[0] = 0x68 + reg; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							break;
 						}
-					} else if (oparen(lp, '(')) {
+					} else if (oparenOLD(lp, '(')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							--lp; e[0] = 0x2e; e[1] = GetByte(lp); break;
 						}
@@ -2128,13 +1888,13 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x6e;
 						} break;
 					case Z80_IX:
 					case Z80_IY:
 						e[1] = 0x6e; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = reg;
 						}
 						break;
@@ -2325,16 +2085,16 @@ namespace Z80 {
 					ASSERT_FAKE_INSTRUCTIONS(break);
 					e[0] = e[2] = 0xfd; e[1] = 0x44; e[3] = 0x4d; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							b = GetWord(lp); e[1] = 0x4b; e[2] = b & 255; e[3] = (b >> 8) & 255;
-							if (cparen(lp)) {
+							if (cparenOLD(lp)) {
 								e[0] = 0xed;
 							}
 							break;
 						}
 					} else {
-						if (oparen(lp, '(')) {
+						if (oparenOLD(lp, '(')) {
 							if ((reg = GetRegister(lp)) == Z80_UNK) {
 					  			olp = --lp;
 					  			b = GetWord(lp);
@@ -2351,7 +2111,7 @@ namespace Z80 {
 					switch (reg) {
 					case Z80_HL:
 						ASSERT_FAKE_INSTRUCTIONS(break);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x4e;
 						}
 						e[1] = 0x23; e[2] = 0x46; e[3] = 0x2b;
@@ -2363,7 +2123,7 @@ namespace Z80 {
 							// _COUT "E1 " _CMDL b _ENDL;
 							Error("Offset out of range1", 0);
 						}
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = reg;
 						} e[1] = 0x4e; e[4] = 0x46; e[2] = b; e[5] = b + 1; break;
 					default:
@@ -2393,15 +2153,15 @@ namespace Z80 {
 					ASSERT_FAKE_INSTRUCTIONS(break);
 					e[0] = e[2] = 0xfd; e[1] = 0x54; e[3] = 0x5d; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							b = GetWord(lp); e[1] = 0x5b; e[2] = b & 255; e[3] = (b >> 8) & 255;
-							if (cparen(lp)) {
+							if (cparenOLD(lp)) {
 								e[0] = 0xed;
 							} break;
 						}
 					} else {
-						if (oparen(lp, '(')) {
+						if (oparenOLD(lp, '(')) {
 							if ((reg = GetRegister(lp)) == Z80_UNK) {
 					  			olp = --lp;
 					  			b = GetWord(lp);
@@ -2418,7 +2178,7 @@ namespace Z80 {
 					switch (reg) {
 					case Z80_HL:
 						ASSERT_FAKE_INSTRUCTIONS(break);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x5e;
 						} e[1] = 0x23; e[2] = 0x56; e[3] = 0x2b; break;
 					case Z80_IX:
@@ -2428,7 +2188,7 @@ namespace Z80 {
 							// _COUT "E2 " _CMDL b _ENDL;
 							Error("Offset out of range2", 0);
 						}
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = reg;
 						} e[1] = 0x5e; e[4] = 0x56; e[2] = b; e[5] = b + 1; break;
 					default:
@@ -2458,16 +2218,16 @@ namespace Z80 {
 					ASSERT_FAKE_INSTRUCTIONS(break);
 					e[0] = 0xfd; e[1] = 0xe5; e[2] = 0xe1; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						if ((reg = GetRegister(lp)) == Z80_UNK) {
 							b = GetWord(lp); e[1] = b & 255; e[2] = (b >> 8) & 255;
-							if (cparen(lp)) {
+							if (cparenOLD(lp)) {
 								e[0] = 0x2a;
 							}
 							break;
 						}
 					} else {
-						if (oparen(lp, '(')) {
+						if (oparenOLD(lp, '(')) {
 							if ((reg = GetRegister(lp)) == Z80_UNK) {
 					  			olp = --lp;
 					  			b = GetWord(lp);
@@ -2489,7 +2249,7 @@ namespace Z80 {
 							// _COUT "E3 " _CMDL b _ENDL;
 							Error("Offset out of range3", 0);
 						}
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = reg;
 						} e[1] = 0x6e; e[4] = 0x66; e[2] = b; e[5] = b + 1; break;
 					default:
@@ -2509,9 +2269,9 @@ namespace Z80 {
 				case Z80_IY:
 					e[0] = reg; e[1] = 0xf9; break;
 				default:
-					if (oparen(lp, '(') || oparen(lp, '[')) {
+					if (oparenOLD(lp, '(') || oparenOLD(lp, '[')) {
 						b = GetWord(lp); e[1] = 0x7b; e[2] = b & 255; e[3] = (b >> 8) & 255;
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0xed;
 						}
 					} else {
@@ -2541,13 +2301,13 @@ namespace Z80 {
 					ASSERT_FAKE_INSTRUCTIONS(break);
 					e[0] = 0xfd; e[1] = 0xe5; e[2] = 0xdd; e[3] = 0xe1; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						b = GetWord(lp); e[1] = 0x2a; e[2] = b & 255; e[3] = (b >> 8) & 255;
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0xdd;
 						} break;
 					}
-					if ((beginhaakje = oparen(lp, '('))) {
+					if ((beginhaakje = oparenOLD(lp, '('))) {
 						olp = --lp;
 					}
 					b = GetWord(lp);
@@ -2581,14 +2341,14 @@ namespace Z80 {
 					ASSERT_FAKE_INSTRUCTIONS(break);
 					e[0] = e[2] = 0xfd; e[1] = 0x6d; e[3] = 0x64; break;
 				default:
-					if (oparen(lp, '[')) {
+					if (oparenOLD(lp, '[')) {
 						b = GetWord(lp); e[1] = 0x2a; e[2] = b & 255; e[3] = (b >> 8) & 255;
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0xfd;
 						}
 						break;
 					}
-					if ((beginhaakje = oparen(lp, '('))) {
+					if ((beginhaakje = oparenOLD(lp, '('))) {
 						olp = --lp;
 					}
 					b = GetWord(lp);
@@ -2602,12 +2362,12 @@ namespace Z80 {
 				break;
 
 			default:
-				if (!oparen(lp, '(') && !oparen(lp, '[')) {
+				if (!oparenOLD(lp, '(') && !oparenOLD(lp, '[')) {
 					break;
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					if (!cparen(lp)) {
+					if (!cparenOLD(lp)) {
 						break;
 					}
 					if (!comma(lp)) {
@@ -2618,7 +2378,7 @@ namespace Z80 {
 					}
 					e[0] = 0x02; break;
 				case Z80_DE:
-					if (!cparen(lp)) {
+					if (!cparenOLD(lp)) {
 						break;
 					}
 					if (!comma(lp)) {
@@ -2629,7 +2389,7 @@ namespace Z80 {
 					}
 					e[0] = 0x12; break;
 				case Z80_HL:
-					if (!cparen(lp)) {
+					if (!cparenOLD(lp)) {
 						break;
 					}
 					if (!comma(lp)) {
@@ -2665,7 +2425,7 @@ namespace Z80 {
 					break;
 				case Z80_IX:
 					e[2] = z80GetIDxoffset(lp);
-					if (!cparen(lp)) {
+					if (!cparenOLD(lp)) {
 						break;
 					}
 					if (!comma(lp)) {
@@ -2717,7 +2477,7 @@ namespace Z80 {
 					break;
 				case Z80_IY:
 					e[2] = z80GetIDxoffset(lp);
-					if (!cparen(lp)) {
+					if (!cparenOLD(lp)) {
 						break;
 					}
 					if (!comma(lp)) {
@@ -2769,7 +2529,7 @@ namespace Z80 {
 					break;
 				default:
 					b = GetWord(lp);
-					if (!cparen(lp)) {
+					if (!cparenOLD(lp)) {
 						break;
 					}
 					if (!comma(lp)) {
@@ -2826,20 +2586,20 @@ namespace Z80 {
 					if (!comma(lp)) {
 						break;
 					}
-					if (!oparen(lp, '[') && !oparen(lp, '(')) {
+					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
 					switch (reg = GetRegister(lp)) {
 					case Z80_BC:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x0a;
 						} e[1] = 0x0b; break;
 					case Z80_DE:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x1a;
 						} e[1] = 0x1b; break;
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x7e;
 						}
 						e[1] = 0x2b;
@@ -2847,7 +2607,7 @@ namespace Z80 {
 					case Z80_IX:
 					case Z80_IY:
 						e[1] = 0x7e; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = reg;
 						}
 						e[4] = 0x2b;
@@ -2865,18 +2625,18 @@ namespace Z80 {
 					if (!comma(lp)) {
 						break;
 					}
-					if (!oparen(lp, '[') && !oparen(lp, '(')) {
+					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
 					switch (reg2 = GetRegister(lp)) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x46 + reg * 8;
 						} e[1] = 0x2b; break;
 					case Z80_IX:
 					case Z80_IY:
 						e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = reg2;
 						}
 						e[1] = 0x46 + reg * 8; e[4] = 0x2b; break;
@@ -2885,7 +2645,7 @@ namespace Z80 {
 					}
 					break;
 				default:
-					if (oparen(lp, '[') || oparen(lp, '(')) {
+					if (oparenOLD(lp, '[') || oparenOLD(lp, '(')) {
 						reg = GetRegister(lp);
 
 						b = 0;
@@ -2893,7 +2653,7 @@ namespace Z80 {
 						if (reg == Z80_IX || reg == Z80_IY) {
 							b = z80GetIDxoffset(lp);
 						}
-						if (!cparen(lp) || !comma(lp)) {
+						if (!cparenOLD(lp) || !comma(lp)) {
 							break;
 						}
 						switch (reg) {
@@ -2996,29 +2756,29 @@ namespace Z80 {
 					if (!comma(lp)) {
 						break;
 					}
-					if (!oparen(lp, '[') && !oparen(lp, '(')) {
+					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
 					switch (reg = GetRegister(lp)) {
 					case Z80_BC:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x0a;
 						}
 						e[1] = 0x03; break;
 					case Z80_DE:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x1a;
 						}
 						e[1] = 0x13; break;
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x7e;
 						}
 						e[1] = 0x23; break;
 					case Z80_IX:
 					case Z80_IY:
 						e[1] = 0x7e; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = reg;
 						}
 						e[4] = 0x23; break;
@@ -3035,18 +2795,18 @@ namespace Z80 {
 					if (!comma(lp)) {
 						break;
 					}
-					if (!oparen(lp, '[') && !oparen(lp, '(')) {
+					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
 					switch (reg2 = GetRegister(lp)) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x46 + reg * 8;
 						} e[1] = 0x23; break;
 					case Z80_IX:
 					case Z80_IY:
 						e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = reg2;
 						}
 						e[1] = 0x46 + reg * 8; e[4] = 0x23; break;
@@ -3058,19 +2818,19 @@ namespace Z80 {
 					if (!comma(lp)) {
 						break;
 					}
-					if (!oparen(lp, '[') && !oparen(lp, '(')) {
+					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
 					switch (reg = GetRegister(lp)) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x4e;
 						}
 						e[1] = e[3] = 0x23; e[2] = 0x46; break;
 					case Z80_IX:
 					case Z80_IY:
 						e[2] = e[7] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = e[5] = e[8] = reg;
 						}
 						e[1] = 0x4e; e[6] = 0x46; e[4] = e[9] = 0x23; break;
@@ -3082,18 +2842,18 @@ namespace Z80 {
 					if (!comma(lp)) {
 						break;
 					}
-					if (!oparen(lp, '[') && !oparen(lp, '(')) {
+					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
 					switch (reg = GetRegister(lp)) {
 					case Z80_HL:
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = 0x5e;
 						} e[1] = e[3] = 0x23; e[2] = 0x56; break;
 					case Z80_IX:
 					case Z80_IY:
 						e[2] = e[7] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = e[5] = e[8] = reg;
 						}
 						e[1] = 0x5e; e[6] = 0x56; e[4] = e[9] = 0x23; break;
@@ -3105,14 +2865,14 @@ namespace Z80 {
 					if (!comma(lp)) {
 						break;
 					}
-					if (!oparen(lp, '[') && !oparen(lp, '(')) {
+					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
 					switch (reg = GetRegister(lp)) {
 					case Z80_IX:
 					case Z80_IY:
 						e[2] = e[7] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
+						if (cparenOLD(lp)) {
 							e[0] = e[3] = e[5] = e[8] = reg;
 						}
 						e[1] = 0x6e; e[6] = 0x66; e[4] = e[9] = 0x23; break;
@@ -3121,13 +2881,13 @@ namespace Z80 {
 					}
 					break;
 				default:
-					if (oparen(lp, '[') || oparen(lp, '(')) {
+					if (oparenOLD(lp, '[') || oparenOLD(lp, '(')) {
 						reg = GetRegister(lp);
 						b = 0;
 						if (reg == Z80_IX || reg == Z80_IY) {
 							b = z80GetIDxoffset(lp);
 						}
-						if (!cparen(lp) || !comma(lp)) {
+						if (!cparenOLD(lp) || !comma(lp)) {
 							break;
 						}
 						switch (reg) {
@@ -3337,6 +3097,7 @@ namespace Z80 {
 
 	void OpCode_OR() {
 		Z80Reg reg;
+		EBracketType bt;
 		int e[4];
 		do {
 			e[0] = e[1] = e[2] = e[3] = -1;
@@ -3375,41 +3136,28 @@ namespace Z80 {
 				case Z80_IY:
 					break;
 				default:
-					reg = Z80_UNK;
-					if (oparen(lp, '[')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
+					if (BT_NONE != (bt = OpenBracket(lp))) {
+						switch (reg = GetRegister(lp)) {
+						case Z80_HL:
+							if (CloseBracket(lp)) e[0] = 0xb6;
+							break;
+						case Z80_IX:
+						case Z80_IY:
+							e[1] = 0xb6; e[2] = z80GetIDxoffset(lp);
+							if (CloseBracket(lp)) e[0] = reg;
+							break;
+						default:
 							break;
 						}
-					} else if (oparen(lp, '(')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
-							--lp;
-						}
+						// give "(something..." another chance to parse as value expression
+						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					switch (reg) {
-					case Z80_HL:
-						if (cparen(lp)) {
-							e[0] = 0xb6;
-						}
-						break;
-					case Z80_IX:
-					case Z80_IY:
-						e[1] = 0xb6; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
-							e[0] = reg;
-						}
-						break;
-					default:
-						e[0] = 0xf6; e[1] = GetByte(lp); break;
-					}
+					e[0] = 0xf6; e[1] = GetByte(lp);
 				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_OTDR() {
@@ -3433,9 +3181,9 @@ namespace Z80 {
 		int e[3];
 		do {
 			e[0] = e[1] = e[2] = -1;
-			if (oparen(lp, '[') || oparen(lp, '(')) {
+			if (oparenOLD(lp, '[') || oparenOLD(lp, '(')) {
 				if (GetRegister(lp) == Z80_C) {
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						if (comma(lp)) {
 							switch (reg = GetRegister(lp)) {
 							case Z80_A:
@@ -3461,7 +3209,7 @@ namespace Z80 {
 					}
 				} else {
 					e[1] = GetByte(lp);
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						if (comma(lp)) {
 							if (GetRegister(lp) == Z80_A) {
 								e[0] = 0xd3;
@@ -3612,19 +3360,19 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 8 * bit + 0x80 + reg ; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 8 * bit + 0x86; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 8 * bit + 0x86;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -3660,35 +3408,10 @@ namespace Z80 {
 	}
 
 	void OpCode_RET() {
-		int e;
-		do {
-			switch (getz80cond(lp)) {
-			case Z80C_C:
-				e = 0xd8; break;
-			case Z80C_M:
-				e = 0xf8; break;
-			case Z80C_NC:
-				e = 0xd0; break;
-			case Z80C_NZ:
-				e = 0xc0; break;
-			case Z80C_P:
-				e = 0xf0; break;
-			case Z80C_PE:
-				e = 0xe8; break;
-			case Z80C_PO:
-				e = 0xe0; break;
-			case Z80C_Z:
-				e = 0xc8; break;
-			default:
-				e = 0xc9; break;
-			}
-			EmitByte(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		Z80Cond cc = getz80cond(lp);
+		if (Z80C_UNK == cc) EmitByte(0xc9);
+		else 				EmitByte(0xc0 + cc);
+		// multi-argument was intetionally removed by Ped7g (explain in issue why you want *that*?)
 	}
 
 	void OpCode_RETI() {
@@ -3742,19 +3465,19 @@ namespace Z80 {
 				e[3] = 0x14;
 				break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 0x16; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x16;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -3805,19 +3528,19 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x0 + reg ; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 0x6; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x6;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -3885,19 +3608,19 @@ namespace Z80 {
 				ASSERT_FAKE_INSTRUCTIONS(break);
 				e[0] = e[2] = 0xcb; e[1] = 0x1c; e[3] = 0x1d; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 0x1e; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x1e;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -3948,19 +3671,19 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x8 + reg ; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 0xe; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0xe;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -4038,6 +3761,7 @@ namespace Z80 {
 
 	void OpCode_SBC() {
 		Z80Reg reg;
+		EBracketType bt;
 		int e[4];
 		do {
 			e[0] = e[1] = e[2] = e[3] = -1;
@@ -4094,41 +3818,28 @@ namespace Z80 {
 				case Z80_IY:
 					break;
 				default:
-					reg = Z80_UNK;
-					if (oparen(lp, '[')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
+					if (BT_NONE != (bt = OpenBracket(lp))) {
+						switch (reg = GetRegister(lp)) {
+						case Z80_HL:
+							if (CloseBracket(lp)) e[0] = 0x9e;
+							break;
+						case Z80_IX:
+						case Z80_IY:
+							e[1] = 0x9e; e[2] = z80GetIDxoffset(lp);
+							if (CloseBracket(lp)) e[0] = reg;
+							break;
+						default:
 							break;
 						}
-					} else if (oparen(lp, '(')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
-							--lp;
-						}
+						// give "(something..." another chance to parse as value expression
+						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					switch (reg) {
-					case Z80_HL:
-						if (cparen(lp)) {
-							e[0] = 0x9e;
-						}
-						break;
-					case Z80_IX:
-					case Z80_IY:
-						e[1] = 0x9e; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
-							e[0] = reg;
-						}
-						break;
-					default:
-						e[0] = 0xde; e[1] = GetByte(lp); break;
-					}
+					e[0] = 0xde; e[1] = GetByte(lp);
 				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_SCF() {
@@ -4154,19 +3865,19 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 8 * bit + 0xc0 + reg ; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 8 * bit + 0xc6; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 8 * bit + 0xc6;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -4229,19 +3940,19 @@ namespace Z80 {
 			case Z80_HL:
 				e[0] = 0x29; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 0x26; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x26;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -4297,19 +4008,19 @@ namespace Z80 {
 				ASSERT_FAKE_INSTRUCTIONS(break);
 				e[0] = e[2] = 0xcb; e[1] = 0x35; e[3] = 0x14; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 0x36; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x36;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -4365,19 +4076,19 @@ namespace Z80 {
 				ASSERT_FAKE_INSTRUCTIONS(break);
 				e[0] = e[2] = 0xcb; e[1] = 0x2c; e[3] = 0x1d; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 0x2e; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x2e;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -4433,19 +4144,19 @@ namespace Z80 {
 				ASSERT_FAKE_INSTRUCTIONS(break);
 				e[0] = e[2] = 0xcb; e[1] = 0x3c; e[3] = 0x1d; break;
 			default:
-				if (!oparen(lp, '[') && !oparen(lp, '(')) {
+				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 					break;
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_HL:
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = 0xcb;
 					}
 					e[1] = 0x3e; break;
 				case Z80_IX:
 				case Z80_IY:
 					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x3e;
-					if (cparen(lp)) {
+					if (cparenOLD(lp)) {
 						e[0] = reg;
 					}
 					if (comma(lp)) {
@@ -4479,6 +4190,7 @@ namespace Z80 {
 
 	void OpCode_SUB() {
 		Z80Reg reg;
+		EBracketType bt;
 		int e[4];
 		do {
 			e[0] = e[1] = e[2] = e[3] = -1;
@@ -4537,41 +4249,28 @@ namespace Z80 {
 				case Z80_IY:
 					break;
 				default:
-					reg = Z80_UNK;
-					if (oparen(lp, '[')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
+					if (BT_NONE != (bt = OpenBracket(lp))) {
+						switch (reg = GetRegister(lp)) {
+						case Z80_HL:
+							if (CloseBracket(lp)) e[0] = 0x96;
+							break;
+						case Z80_IX:
+						case Z80_IY:
+							e[1] = 0x96; e[2] = z80GetIDxoffset(lp);
+							if (CloseBracket(lp)) e[0] = reg;
+							break;
+						default:
 							break;
 						}
-					} else if (oparen(lp, '(')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
-							--lp;
-						}
+						// give "(something..." another chance to parse as value expression
+						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					switch (reg) {
-					case Z80_HL:
-						if (cparen(lp)) {
-							e[0] = 0x96;
-						}
-						break;
-					case Z80_IX:
-					case Z80_IY:
-						e[1] = 0x96; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
-							e[0] = reg;
-						}
-						break;
-					default:
-						e[0] = 0xd6; e[1] = GetByte(lp); break;
-					}
+					e[0] = 0xd6; e[1] = GetByte(lp);
 				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	//Swaps the high and low nibbles of the accumulator.
@@ -4596,6 +4295,7 @@ namespace Z80 {
 
 	void OpCode_XOR() {
 		Z80Reg reg;
+		EBracketType bt;
 		int e[4];
 		do {
 			e[0] = e[1] = e[2] = e[3] = -1;
@@ -4634,41 +4334,29 @@ namespace Z80 {
 				case Z80_IY:
 					break;
 				default:
-					reg = Z80_UNK;
-					if (oparen(lp, '[')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
+					if (BT_NONE != (bt = OpenBracket(lp))) {
+						switch (reg = GetRegister(lp)) {
+						case Z80_HL:
+							if (CloseBracket(lp)) e[0] = 0xae;
+							break;
+						case Z80_IX:
+						case Z80_IY:
+							e[1] = 0xae; e[2] = z80GetIDxoffset(lp);
+							if (CloseBracket(lp)) e[0] = reg;
+							break;
+						default:
 							break;
 						}
-					} else if (oparen(lp, '(')) {
-						if ((reg = GetRegister(lp)) == Z80_UNK) {
-							--lp;
-						}
+						// give "(something..." another chance to parse as value expression
+						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					switch (reg) {
-					case Z80_HL:
-						if (cparen(lp)) {
-							e[0] = 0xae;
-						}
-						break;
-					case Z80_IX:
-					case Z80_IY:
-						e[1] = 0xae; e[2] = z80GetIDxoffset(lp);
-						if (cparen(lp)) {
-							e[0] = reg;
-						}
-						break;
-					default:
-						e[0] = 0xee; e[1] = GetByte(lp); break;
-					}
+					e[0] = 0xee; e[1] = GetByte(lp);
+					break;
 				}
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void Init() {

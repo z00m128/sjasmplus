@@ -25,6 +25,10 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
+Preco ENDM nefunguje ako EDUP/ENDR??? (implementacia tam aspon z casti je)
+
+Z80: continue to refactor the multi-argument while('o'), to introduce OFF option later
+
 ====================
 Docs:
 http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku

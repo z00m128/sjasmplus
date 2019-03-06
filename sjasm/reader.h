@@ -27,8 +27,12 @@
 */
 
 enum EDelimiterType { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
-#define DELIMITERS_B { ' ', '"', '\'', '<' }
-#define DELIMITERS_E { ' ', '"', '\'', '>' }
+#define DELIMITERS_B { ' ',    '"',       '\'',          '<',      0 }
+#define DELIMITERS_E { ' ',    '"',       '\'',          '>',      0 }
+
+enum EBracketType { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
+#define BRACKETS_B { 0,      '(',      '{',      '[',       0 }
+#define BRACKETS_E { 0,      ')',      '}',      ']',       0 }
 
 int White();
 void SkipParam(char*&);
@@ -40,8 +44,10 @@ int NeedField();
 char* GetID(char*& p);
 char* getinstr(char*& p);
 int comma(char*& p);
-int oparen(char*& p, char c);
-int cparen(char*& p);
+EBracketType OpenBracket(char*& p);
+int CloseBracket(char*& p);
+int oparenOLD(char*& p, char c);
+int cparenOLD(char*& p);
 char* getparen(char* p);
 int check8(aint val, bool error=true);
 int check8o(long val);

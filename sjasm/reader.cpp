@@ -166,10 +166,36 @@ int comma(char*& p) {
 	++p; return 1;
 }
 
+static const char brackets_b[] = BRACKETS_B;
+static const char brackets_e[] = BRACKETS_E;
+static int expectedAddressClosingBracket = -1;
+
+// memory-address bracket opener (only "(" and "[" types supported)
+EBracketType OpenBracket(char*& p) {
+	SkipBlanks(p);
+	for (const EBracketType bt : {BT_ROUND, BT_SQUARE}) {
+		if (brackets_b[bt] == *p) {
+			expectedAddressClosingBracket = brackets_e[bt];
+			++p;
+			return bt;
+		}
+	}
+	expectedAddressClosingBracket = -1;
+	return BT_NONE;
+}
+
+int CloseBracket(char*& p) {
+	SkipBlanks(p);
+	if (*p != expectedAddressClosingBracket) return 0;
+	expectedAddressClosingBracket = -1;
+	++p;
+	return 1;
+}
+
 int cpc = '4';
 
 /* not modified */
-int oparen(char*& p, char c) {
+int oparenOLD(char*& p, char c) {
 	SkipBlanks(p);
 	if (*p != c) {
 		return 0;
@@ -186,7 +212,7 @@ int oparen(char*& p, char c) {
 	++p; return 1;
 }
 
-int cparen(char*& p) {
+int cparenOLD(char*& p) {
 	SkipBlanks(p);
 	if (*p != cpc) {
 		return 0;
