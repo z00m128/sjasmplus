@@ -45,7 +45,7 @@ for f in "${PROJECT_DIR}/examples/"**/*.asm; do
     [[ -s "$optionsF" ]] && options=(`cat "${optionsF}"`)
     ## built it with sjasmplus (remember exit code)
     echo -e "\e[95mAssembling\e[0m example file \e[96m${asmname}\e[0m in \e[96m${dirpath}\e[0m, options [\e[96m${options[@]}\e[0m]"
-    sjasmplus --inc="${dirpath}" "${options[@]}" "$f"
+    sjasmplus --nologo --msg=war --fullpath --inc="${dirpath}" "${options[@]}" "$f"
     last_result=$?
     ## report assembling exit code problem
     if [[ $last_result -ne 0 ]]; then
