@@ -33,3 +33,5 @@ Z80: continue to refactor the multi-argument while('o'), to introduce OFF option
 Docs:
 http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku
 REPT + DUP nemaju popis ako sa ukoncuju (EDUP, ENDR)
+pridat <anchor id="po_***" /> pre vsetky pseudo-ops, aby sa dalo linkovat na kazdu z nich
+

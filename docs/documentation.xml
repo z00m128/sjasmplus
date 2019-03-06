@@ -1324,7 +1324,7 @@ END_OF_PROGRAM
           </varlistentry>
 
           <varlistentry>
-            <term>DEFARRAY &lt;id&gt; &lt;replacements&gt;</term>
+            <term><anchor id="po_defarray" />DEFARRAY &lt;id&gt; &lt;replacements&gt;</term>
 
             <listitem>
               <para>Array of DEFINEs<example>
