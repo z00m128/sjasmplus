@@ -84,7 +84,7 @@ docs:
 	$(DOCBOOKGEN) \
 		--stringparam generate.toc "book toc" \
 		-o docs/documentation.html \
-		docs/docbook-xsl-ns-html-customization.xsl \
+		docs/docbook-xsl-ns-html-customization-linux.xsl \
 		docs/documentation.xml
 
 clean:
