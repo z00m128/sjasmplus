@@ -19,7 +19,7 @@ SUBDIR_LUA=lua5.1
 SUBDIR_TOLUA=tolua++
 
 CFLAGS=-O2 -Wall -pedantic -DUSE_LUA -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
-CXXFLAGS=$(CFLAGS)
+CXXFLAGS=-std=c++14 $(CFLAGS)
 
 # for Linux (added strip flag)
 LDFLAGS=-ldl -s
@@ -78,7 +78,7 @@ uninstall:
 	$(GCC) $(CFLAGS) -o $@ -c $<
 
 .cpp.o:
-	$(GPP) $(CFLAGS) -o $@ -c $<
+	$(GPP) $(CXXFLAGS) -o $@ -c $<
 
 docs:
 	$(DOCBOOKGEN) \
