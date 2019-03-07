@@ -60,12 +60,21 @@ invalid.asm(30): error: Illegal instruction:     sbc     ix,sp
 30    000B                  sbc     ix,sp
 invalid.asm(31): error: Label not found: hl
 31    000B 36 00            ld      (hl),(hl)
-32    000D
-33    000D                  IFN 31=_ERRORS
-34    000D ~                    UNEXPECTED ERROR!
-35    000D                  ENDIF
-36    000D
-37    000D                  ;;; if expected amount of error happened, the output should be 0B long
+invalid.asm(32): error: Illegal instruction:     ex      de,de
+32    000D                  ex      de,de
+invalid.asm(33): error: [RST] Illegal operand:     rst     1
+33    000D                  rst     1
+invalid.asm(34): error: [RST] Illegal operand:     rst     2
+34    000D                  rst     2
+invalid.asm(35): error: [RST] Illegal operand:     rst     4
+35    000D                  rst     4
+invalid.asm(36): error: [RST] Illegal operand:     rst     $40
+36    000D                  rst     $40
+invalid.asm(37): error: [RST] Illegal operand:     rst     $80
+37    000D                  rst     $80
+38    000D
+39    000D                  ASSERT 37=_ERRORS
+40    000D
 
 Value    Label
 ------ - -----------------------------------------------------------

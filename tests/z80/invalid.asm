@@ -29,9 +29,11 @@
     sbc     ix,ix
     sbc     ix,sp
     ld      (hl),(hl)
+    ex      de,de
+    rst     1
+    rst     2
+    rst     4
+    rst     $40
+    rst     $80
 
-    IFN 31=_ERRORS
-        UNEXPECTED ERROR!
-    ENDIF
-
-    ;;; if expected amount of error happened, the output should be 0B long
+    ASSERT 37=_ERRORS
