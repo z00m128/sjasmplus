@@ -770,12 +770,7 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	// helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation
@@ -992,12 +987,7 @@ namespace Z80 {
 			}
 			e[0] = 0x10; e[1] = jmp < 0 ? 256 + jmp : jmp;
 			EmitBytes(e);
-			if (*lp && comma(lp)) {
-				continue;
-			} else {
-				break;
-			}
-		} while ('o');
+		} while (comma(lp));
 	}
 
 	void OpCode_EI() {
