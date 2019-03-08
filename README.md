@@ -1,5 +1,7 @@
 # sjasmplus
 [![Build Status](https://api.cirrus-ci.com/github/z00m128/sjasmplus.svg)](https://cirrus-ci.com/github/z00m128/sjasmplus)
+![GitHub repo size in bytes](https://img.shields.io/github/repo-size/z00m128/sjasmplus.svg)
+![GitHub](https://img.shields.io/github/license/z00m128/sjasmplus.svg)
 
 Command-line cross-compiler of assembly language for Z80 CPU. 
 
