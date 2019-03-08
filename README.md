@@ -1,4 +1,6 @@
 # sjasmplus
+[![Build Status](https://api.cirrus-ci.com/github/z00m128/sjasmplus.svg)](https://cirrus-ci.com/github/z00m128/sjasmplus)
+
 Command-line cross-compiler of assembly language for Z80 CPU. 
 
 Supports many ZX-Spectrum specific directives, has built-in Lua scripting engine and 3-pass design.
