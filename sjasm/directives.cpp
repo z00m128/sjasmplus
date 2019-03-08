@@ -595,7 +595,7 @@ void dirINCHOB() {
 	aint val;
 	char* fnaam, * fnaamh;
 	unsigned char len[2];
-	int offset = 17,length = -1,res;
+	int offset = 0,length = -1;
 	FILE* ff;
 
 	fnaam = GetFileName(lp);
@@ -608,7 +608,7 @@ void dirINCHOB() {
 				Error("[INCHOB] Negative values are not allowed", bp); return;
 			}
 			offset += val;
-		}
+		} else --lp;		// there was second comma right after, reread it
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
@@ -624,17 +624,15 @@ void dirINCHOB() {
 	if (!FOPEN_ISOK(ff, fnaamh, "rb")) {
 		Error("[INCHOB] Error opening file", fnaam, FATAL);
 	}
-	if (fseek(ff, 0x0b, 0)) {
+	if (fseek(ff, 0x0b, 0) || 2 != fread(len, 1, 2, ff)) {
 		Error("[INCHOB] Hobeta file has wrong format", fnaam, FATAL);
-	}
-	res = fread(len, 1, 2, ff);
-	if (res != 2) {
-		Error("[INCHOB] Hobeta file has wrong format", fnaam, FATAL);
-	}
-	if (length == -1) {
-		length = len[0] + (len[1] << 8);
 	}
 	fclose(ff);
+	if (length == -1) {
+		// calculate remaining length of the file (from the specified offset)
+		length = len[0] + (len[1] << 8) - offset;
+	}
+	offset += 17;		// adjust offset (skip HOB header)
 	BinIncFile(fnaam, offset, length);
 	delete[] fnaam;
 	delete[] fnaamh;

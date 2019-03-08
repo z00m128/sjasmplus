@@ -664,8 +664,9 @@ void BinIncFile(char* fname, int offset, int len) {
 	if (totlen < 0)
 		Error("Error telling file (len)", fname, FATAL);
 
-
-	printf("INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
+	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
+		printf("INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
+	}
 
 	// Seek to begin of including part //
 	if (offset > totlen)

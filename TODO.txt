@@ -5,7 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-INCHOB "..",7  bugs out with "file too short"
 INCBIN "..",7  seems to work, but length printed to output is fake "0"
 
 build scripts - extend with argument reading, to run only tests in particular subdirectory
@@ -20,8 +19,6 @@ LUA quirks:
         inc_ld(A, pass)     -- bug, should be 'A'
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
-
-Preco ENDM nefunguje ako EDUP/ENDR??? (implementacia tam aspon z casti je)
 
 Z80: multi-argument/strict: introduce the options
 
