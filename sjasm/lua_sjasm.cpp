@@ -353,9 +353,8 @@ static int tolua_sjasm_sj_error00(lua_State* tolua_S)
  {
   char* tolua_var_9 = ((char*)  tolua_tostring(tolua_S,1,0));
   char* tolua_var_10 = ((char*)  tolua_tostring(tolua_S,2,0));
-  int tolua_var_11 = ((int)  tolua_tonumber(tolua_S,3,0));
   {
-   Error(tolua_var_9,tolua_var_10,tolua_var_11);
+   Error(tolua_var_9, tolua_var_10, ALL);
   }
  }
  return 0;
@@ -385,9 +384,8 @@ static int tolua_sjasm_sj_warning00(lua_State* tolua_S)
  {
   char* tolua_var_12 = ((char*)  tolua_tostring(tolua_S,1,0));
   char* tolua_var_13 = ((char*)  tolua_tostring(tolua_S,2,0));
-  int tolua_var_14 = ((int)  tolua_tonumber(tolua_S,3,0));
   {
-   Warning(tolua_var_12,tolua_var_13,tolua_var_14);
+   Warning(tolua_var_12, tolua_var_13, W_ALL);
   }
  }
  return 0;

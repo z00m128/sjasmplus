@@ -46,7 +46,7 @@ for f in "${PROJECT_DIR}/tests/"**/*.asm; do
     ## built it with sjasmplus (remember exit code)
     echo -e "\e[95mAssembling\e[0m file \e[96m${file_asm}\e[0m in test \e[96m${src_dir}\e[0m, options [\e[96m${options[@]}\e[0m]"
     totalChecks=$((totalChecks + 1))    # assembling is one check
-    sjasmplus --nologo --msg=err --fullpath "${options[@]}" "$file_asm"
+    sjasmplus --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
     last_result=$?
     last_result_origin="sjasmplus"
     ## validate results

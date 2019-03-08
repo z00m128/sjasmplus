@@ -55,137 +55,84 @@ char hd[] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
 };
 
-void Error(const char* fout, const char* bd, int type) {
-	char* ep = ErrorLine;
-	char* count;
-	int ln;
-#ifdef USE_LUA
-	lua_Debug ar;
-#endif //USE_LUA
-
-	if (IsSkipErrors && PreviousErrorLine == CurrentLocalLine && type != FATAL) {
-		return;
+void Error(const char* message, const char* badValueMessage, EStatus type) {
+	// check if it is correct pass by the type of error
+	if (type == EARLY && LASTPASS <= pass) return;
+	if ((type == SUPPRESS || type == IF_FIRST || type == PASS3) && pass < LASTPASS) return;
+	// check if this one should be skipped due to type constraints and current-error-state
+	if (FATAL != type && PreviousErrorLine == CurrentLocalLine) {
+		// non-fatal error, on the same line as previous, maybe skip?
+		if (IsSkipErrors || IF_FIRST == type) return;
 	}
-	if (type == CATCHALL && PreviousErrorLine == CurrentLocalLine) {
-		return;
-	}
-	if (type == PASS1 && pass != 1) {
-		return;
-	}
-	if ((type == CATCHALL || type == PASS3) && pass < 3) {
-		return;
-	}
-	if ((type == SUPPRESS || type == PASS2) && pass < 2) {
-		return;
-	}
-	IsSkipErrors = (type == SUPPRESS);
+	// update current-error-state
+	if (PreviousErrorLine != CurrentLocalLine) IsSkipErrors = false;	// reset "skip" on new line
+	IsSkipErrors |= (SUPPRESS == type);		// keep it holding over the same line, raise it by SUPPRESS type
+	++ErrorCount;							// number of non-skipped (!) errors
 	PreviousErrorLine = CurrentLocalLine;
-	++ErrorCount;
 
-	count = new char[25];
-	SPRINTF1(count, 25, "%d", ErrorCount);
-	DefineTable.Replace("_ERRORS", count);
+	DefineTable.Replace("_ERRORS", ErrorCount);
 
-	delete[] count;
-
-	/*SPRINTF3(ep, LINEMAX2, "%s line %lu: %s", filename, CurrentLocalLine, fout);
-	if (bd) {
-		STRCAT(ep, LINEMAX2, ": "); STRCAT(ep, LINEMAX2, bd);
-	}
-	if (!strchr(ep, '\n')) {
-		STRCAT(ep, LINEMAX2, "\n");
-	}*/
-
-	if (pass > LASTPASS) {
-		SPRINTF1(ep, LINEMAX2, "error: %s", fout);
-	} else {
+	if (1 <= pass && pass <= LASTPASS) {	// during assembling, show also file+line info
+		int ln = CurrentLocalLine;
 #ifdef USE_LUA
 		if (LuaLine >= 0) {
+			lua_Debug ar;
 			lua_getstack(LUA, 1, &ar) ;
 			lua_getinfo(LUA, "l", &ar);
 			ln = LuaLine + ar.currentline;
-		} else {
-			ln = CurrentLocalLine;
 		}
-#else
-		ln = CurrentLocalLine;
 #endif //USE_LUA
-		SPRINTF3(ep, LINEMAX2, "%s(%d): error: %s", filename, ln, fout);
+		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", filename, ln);
+	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
+	STRCAT(ErrorLine, LINEMAX2, "error: ");
+	STRCAT(ErrorLine, LINEMAX2, message);
+	if (badValueMessage) {
+		STRCAT(ErrorLine, LINEMAX2, ": "); STRCAT(ErrorLine, LINEMAX2, badValueMessage);
 	}
-
-	if (bd) {
-		STRCAT(ep, LINEMAX2, ": "); STRCAT(ep, LINEMAX2, bd);
+	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2, "\n");	// append EOL if needed
+	// print the error into listing file (the OutputVerbosity is intentionally ignored in listing)
+	if (FP_ListingFile) fputs(ErrorLine, FP_ListingFile);
+	// print the error into stderr if OutputVerbosity allows errors
+	if (Options::OutputVerbosity <= OV_ERROR) {
+		_CERR ErrorLine _END;
 	}
-	if (!strchr(ep, '\n')) {
-		STRCAT(ep, LINEMAX2, "\n");
-	}
-
-	if (FP_ListingFile != NULL) {
-		fputs(ErrorLine, FP_ListingFile);
-	}
-
-	_CERR ErrorLine _END;
-
-	/*if (type==FATAL) exit(1);*/
+	// terminate whole assembler in case of fatal error
 	if (type == FATAL) {
 		ExitASM(1);
 	}
 }
 
-void Warning(const char* fout, const char* bd, int type) {
-	char* ep = ErrorLine;
-	char* count;
-	int ln;
-#ifdef USE_LUA
-	lua_Debug ar;
-#endif //USE_LUA
-
-	if (type == PASS1 && pass != 1) {
-		return;
-	}
-	if (type == PASS2 && pass < 2) {
-		return;
-	}
-
-	count = new char[25];
-	SPRINTF1(count, 25, "%d", WarningCount);
-	DefineTable.Replace("_WARNINGS", count);
-	delete[] count;
-
-	if (type == LASTPASS && pass != 3) {
-		return;
-	}
+void Warning(const char* message, const char* badValueMessage, EWStatus type)
+{
+	// check if it is correct pass by the type of error
+	if (type == W_EARLY && LASTPASS <= pass) return;
+	if (type == W_PASS3 && pass < LASTPASS) return;
 
 	++WarningCount;
 
-	if (pass > LASTPASS) {
-		SPRINTF1(ep, LINEMAX2, "warning: %s", fout);
-	} else {
+	DefineTable.Replace("_WARNINGS", WarningCount);
+
+	if (pass <= LASTPASS) {					// during assembling, show also file+line info
+		int ln = CurrentLocalLine;
 #ifdef USE_LUA
 		if (LuaLine >= 0) {
+			lua_Debug ar;
 			lua_getstack(LUA, 1, &ar) ;
 			lua_getinfo(LUA, "l", &ar);
 			ln = LuaLine + ar.currentline;
-		} else {
-			ln = CurrentLocalLine;
 		}
-#else
-		ln = CurrentLocalLine;
 #endif //USE_LUA
-		SPRINTF3(ep, LINEMAX2, "%s(%d): warning: %s", filename, ln, fout);
+		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", filename, ln);
+	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
+	STRCAT(ErrorLine, LINEMAX2, "warning: ");
+	STRCAT(ErrorLine, LINEMAX2, message);
+	if (badValueMessage) {
+		STRCAT(ErrorLine, LINEMAX2, ": "); STRCAT(ErrorLine, LINEMAX2, badValueMessage);
 	}
-
-	if (bd) {
-		STRCAT(ep, LINEMAX2, ": ");
-		STRCAT(ep, LINEMAX2, bd);
-	}
-	if (!strchr(ep, '\n')) {
-		STRCAT(ep, LINEMAX2, "\n");
-	}
-
-	if (FP_ListingFile != NULL) {
-		fputs(ErrorLine, FP_ListingFile);
-	}
+	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2, "\n");	// append EOL if needed
+	// print the error into listing file (the OutputVerbosity is intentionally ignored in listing)
+	if (FP_ListingFile) fputs(ErrorLine, FP_ListingFile);
+	// print the error into stderr if OutputVerbosity allows errors
 	if (Options::OutputVerbosity <= OV_WARNING) {
 		_CERR ErrorLine _END;
 	}
@@ -197,7 +144,7 @@ void CheckRamLimitExceeded()
 	{
 		char buf[64];
 		SPRINTF2(buf, 1024, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
-		Warning(buf, 0, LASTPASS);
+		Warning(buf);
 		CurAddress &= 0xFFFF;
 	}
 
@@ -205,7 +152,7 @@ void CheckRamLimitExceeded()
 	{
 		char buf[64];
 		SPRINTF1(buf, 1024, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
-		Warning(buf, 0, LASTPASS);
+		Warning(buf);
 		adrdisp &= 0xFFFF;
 	}
 }
@@ -585,8 +532,7 @@ void CheckPage() {
 		}
 	}
 
-	Warning("Error in CheckPage(). Please, contact with the author of this program.", 0, FATAL);
-	ExitASM(1);
+	Error("CheckPage(): please, contact the author of this program.", 0, FATAL);
 }
 
 void Emit(int byte)
@@ -622,7 +568,7 @@ void EmitWord(int word) {
 
 void EmitBytes(int* bytes) {
 	if (*bytes == -1) {
-		Error("Illegal instruction", line, CATCHALL); *lp = 0;
+		Error("Illegal instruction", line, IF_FIRST); *lp = 0;
 	}
 	while (*bytes != -1) {
 		Emit(*bytes++);
@@ -738,7 +684,7 @@ void BinIncFile(char* fname, int offset, int len) {
 	if (len > 0x10000)
 	{
 		len = 0x10000;
-		Warning("Included data truncated to 64kB", 0, LASTPASS);
+		Warning("Included data truncated to 64kB from");
 	}
 
 	if (pass != LASTPASS)
@@ -1324,8 +1270,7 @@ unsigned char MemGetByte(unsigned int address) {
 		}
 	}
 
-	Warning("Error with MemGetByte!", 0);
-	ExitASM(1);
+	Error("Error with MemGetByte!", NULL, FATAL);
 	return 0;
 
 	/*// $4000-$7FFF

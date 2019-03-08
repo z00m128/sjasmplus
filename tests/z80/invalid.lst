@@ -72,9 +72,40 @@ invalid.asm(36): error: [RST] Illegal operand:     rst     $40
 36    000D                  rst     $40
 invalid.asm(37): error: [RST] Illegal operand:     rst     $80
 37    000D                  rst     $80
-38    000D
-39    000D                  ASSERT 37=_ERRORS
-40    000D
+invalid.asm(38): error: [RLC] Illegal operand:     rlc     (ix+7),i
+38    000D DD CB 07 06      rlc     (ix+7),i
+invalid.asm(39): error: [RRC] Illegal operand:     rrc     (ix-7),r
+39    0011 DD CB F9 0E      rrc     (ix-7),r
+invalid.asm(40): error: Unrecognized instruction: nextreg $44,a
+40    0015                  nextreg $44,a
+invalid.asm(41): error: Unrecognized instruction: mirror  a
+41    0015                  mirror  a
+invalid.asm(42): error: [ASSERT] Assertion failed:  0=41        
+42    0015                  ASSERT 0=_ERRORS        ; this assert should fail
+43    0015
+44    0015                  ASSERT 42=_ERRORS       ; update this assert when editing the file, to make it pass
+45    0015
+46    0015              ;;; few labels/macros errors exercises
+47    0015
+48    0015              a123456789a123456789a123456789a123456789a123456789a123456789:
+invalid.asm(49): error: Label too long: B123456789a123456789a123456789a123456789a123456789a123456789a123456789a123456789
+49    0015              B123456789a123456789a123456789a123456789a123456789a123456789a123456789a123456789:
+50    0015
+51    0015                  MACRO dupName
+52    0015 ~                    ld      a,0
+53    0015                  ENDM
+54    0015
+invalid.asm(55): error: Duplicate macroname: dupName
+55    0015                  MACRO dupName
+56    0015 3E 00                ld      a,0
+invalid.asm(57): error: [ENDM] End macro without macro
+57    0017                  ENDM
+58    0017
+invalid.asm(59): warning: [UNDEFINE] Identifier not found: nononooo
+59    0017                  undefine nononooo
+60    0017
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x0015 X a123456789a123456789a123456789a123456789a123456789a123456789
+0x0015 X B123456789a123456789a123456789a123456789a123456789a123456789a123

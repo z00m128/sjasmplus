@@ -285,7 +285,7 @@ int check8(aint val, bool error) {
 	if ((val < -256 || val > 255) && error) {
 		char buffer[32];
 		sprintf(buffer, "Bytes lost (0x%lX)", val);
-		Warning(buffer, 0, LASTPASS);
+		Warning(buffer);
 		return 0;
 	}
 	return 1;
@@ -295,7 +295,7 @@ int check8o(long val) {
 	if (val < -128 || val > 127) {
 		char buffer[32];
 		sprintf(buffer,"Offset out of range (%+li)", val);
-		Error(buffer, 0, LASTPASS);
+		Error(buffer);
 		return 0;
 	}
 	return 1;
@@ -305,7 +305,7 @@ int check16(aint val, bool error) {
 	if ((val < -65536 || val > 65535) && error) {
 		char buffer[32];
 		sprintf(buffer, "Bytes lost (0x%lX)", val);
-		Warning(buffer, 0, LASTPASS);
+		Warning(buffer);
 		return 0;
 	}
 	return 1;
@@ -315,7 +315,7 @@ int check24(aint val, bool error) {
 	if ((val < -16777216 || val > 16777215) && error) {
 		char buffer[32];
 		sprintf(buffer, "Bytes lost (0x%lX)", val);
-		Warning(buffer, 0, LASTPASS);
+		Warning(buffer);
 		return 0;
 	}
 	return 1;
@@ -418,7 +418,7 @@ int GetConstant(char*& op, aint& val) {
 		}
 
 		if (p - p3 < 2) {
-			Error("Syntax error", op, CATCHALL);
+			Error("Syntax error", op, IF_FIRST);
 			return 0;
 		}
 
@@ -438,7 +438,7 @@ int GetConstant(char*& op, aint& val) {
 			}
 		}
 		if (p - p3 < 2) {
-			Error("Syntax error", op, CATCHALL);
+			Error("Syntax error", op, IF_FIRST);
 			return 0;
 		}
 
@@ -460,7 +460,7 @@ int GetConstant(char*& op, aint& val) {
 				}
 			}
 			if (p - p3 < 3) {
-				Error("Syntax error", op, CATCHALL);
+				Error("Syntax error", op, IF_FIRST);
 				return 0;
 			}
 
@@ -711,7 +711,7 @@ char* GetFileName(char*& p, bool convertslashes) {
 			++p;
 		} else {
 			const char delimiterTxt[2] = { deliE, 0 };
-			Error("No closing delimiter", delimiterTxt, PASS1);
+			Error("No closing delimiter", delimiterTxt, EARLY);
 		}
 	}
 	SkipBlanks(p);			// skip blanks any way
@@ -726,7 +726,7 @@ EDelimiterType GetDelimiterOfLastFileName() {
 int needcomma(char*& p) {
 	SkipBlanks(p);
 	if (*p != ',') {
-		Error("Comma expected", 0);
+		Error("Comma expected");
 	}
 	return (*(p++) == ',');
 }
@@ -734,7 +734,7 @@ int needcomma(char*& p) {
 int needbparen(char*& p) {
 	SkipBlanks(p);
 	if (*p != ']') {
-		Error("']' expected", 0);
+		Error("']' expected");
 	}
 	return (*(p++) == ']');
 }

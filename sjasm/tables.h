@@ -46,6 +46,7 @@ public:
 	unsigned char forwardref;
 	aint value;
 	char used;
+	int updatePass;	// last updated in pass
 	CLabelTableEntry();
 };
 
@@ -177,6 +178,7 @@ public:
 	char* Get(const char*);
 	int FindDuplicate(const char*);
 	int Replace(const char*, const char*);
+	int Replace(const char*, const int);
 	int Remove(const char*);
 	void RemoveAll();
 	CDefineTable() {

@@ -35,5 +35,25 @@
     rst     4
     rst     $40
     rst     $80
+    rlc     (ix+7),i
+    rrc     (ix-7),r
+    nextreg $44,a
+    mirror  a
+    ASSERT 0=_ERRORS        ; this assert should fail
 
-    ASSERT 37=_ERRORS
+    ASSERT 42=_ERRORS       ; update this assert when editing the file, to make it pass
+
+;;; few labels/macros errors exercises
+
+a123456789a123456789a123456789a123456789a123456789a123456789:
+B123456789a123456789a123456789a123456789a123456789a123456789a123456789a123456789:
+
+    MACRO dupName
+        ld      a,0
+    ENDM
+
+    MACRO dupName
+        ld      a,0
+    ENDM
+
+    undefine nononooo

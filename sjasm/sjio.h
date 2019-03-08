@@ -28,7 +28,17 @@
 
 // sjio.h
 
-enum EStatus { ALL, PASS1, PASS2, PASS3, FATAL, CATCHALL, SUPPRESS };
+/**
+ * Error types:
+ * ALL = will try to display in every pass
+ * FATAL = terminates assembler
+ * EARLY = displays only during early phase (pass 1+2)
+ * PASS3 = normal error message level for code-gen pass (pass 3)
+ * IF_FIRST = normal code-gen error, but will display only if it is first error on the current line
+ * SUPPRESS = will suppress further errors (PASS3+IF_FIRST+ALL) for current line, except FATAL
+ * */
+enum EStatus { ALL, FATAL, EARLY, PASS3, IF_FIRST, SUPPRESS };
+enum EWStatus { W_ALL, W_EARLY, W_PASS3 };
 enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM };
 
 #ifdef PAGESIZE
@@ -48,8 +58,8 @@ extern FILE* FP_UnrealList, * FP_Input;
 void OpenDest(int);
 void NewDest(char* newfilename, int mode);
 int FileExists(char* filename);
-void Error(const char*, const char*, int = LASTPASS);
-void Warning(const char*, const char*, int = LASTPASS);
+void Error(const char* message, const char* badValueMessage = NULL, EStatus type = PASS3);
+void Warning(const char* message, const char* badValueMessage = NULL, EWStatus type = W_PASS3);
 void ListFile();
 void ListFileSkip(char*);
 void CheckPage();

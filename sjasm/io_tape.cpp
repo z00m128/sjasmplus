@@ -46,7 +46,7 @@ aint detect_ram_start(unsigned char* ram, aint length);
 int TAP_SaveEmpty(char* fname) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname, CATCHALL); return 0;
+		Error("Error opening file", fname, IF_FIRST); return 0;
 	}
 	fclose(ff);
 	return 1;
@@ -458,7 +458,7 @@ void detect_vars_changes() {
 	}
 
 	if (nosys && nobas48) {
-		Warning("[SAVETAP] Tape file will not contains data from 0x5B00 to 0x5E00", NULL, LASTPASS);
+		Warning("[SAVETAP] Tape file will not contains data from 0x5B00 to 0x5E00");
 	}
 }
 

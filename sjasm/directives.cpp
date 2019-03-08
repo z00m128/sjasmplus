@@ -59,17 +59,17 @@ int ParseDirective(bool bol) {
 		if (isdigit((unsigned char) * (n + 1))) {
 			++n;
 			if (!ParseExpression(n, val)) {
-				Error("Syntax error", 0, CATCHALL); lp = olp; return 0;
+				Error("Syntax error", 0, IF_FIRST); lp = olp; return 0;
 			}
 		} else if (*lp == '(') {
 			if (!ParseExpression(lp, val)) {
-				Error("Syntax error", 0, CATCHALL); lp = olp; return 0;
+				Error("Syntax error", 0, IF_FIRST); lp = olp; return 0;
 			}
 		} else {
 			lp = olp; return 0;
 		}
 		if (val < 1) {
-			Error(".X must be positive integer", 0, CATCHALL); lp = olp; return 0;
+			Error(".X must be positive integer", 0, IF_FIRST); lp = olp; return 0;
 		}
 
 		int olistmacro;	char* ml;
@@ -214,7 +214,7 @@ void dirWORD() {
 			}
 			e[teller++] = val & 65535;
 		} else {
-			Error("[DW/DEFW/WORD] Syntax error", lp, CATCHALL); return;
+			Error("[DW/DEFW/WORD] Syntax error", lp, IF_FIRST); return;
 		}
 		SkipBlanks();
 		if (*lp != ',') {
@@ -240,7 +240,7 @@ void dirDWORD() {
 			}
 			e[teller * 2] = val & 65535; e[teller * 2 + 1] = val >> 16; ++teller;
 		} else {
-			Error("[DWORD] Syntax error", lp, CATCHALL); return;
+			Error("[DWORD] Syntax error", lp, IF_FIRST); return;
 		}
 		SkipBlanks();
 		if (*lp != ',') {
@@ -267,7 +267,7 @@ void dirD24() {
 			}
 			e[teller * 3] = val & 255; e[teller * 3 + 1] = (val >> 8) & 255; e[teller * 3 + 2] = (val >> 16) & 255; ++teller;
 		} else {
-			Error("[D24] Syntax error", lp, CATCHALL); return;
+			Error("[D24] Syntax error", lp, IF_FIRST); return;
 		}
 		SkipBlanks();
 		if (*lp != ',') {
@@ -286,14 +286,14 @@ void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpression(lp, teller)) {
 		if ((signed) teller < 0) {
-			Warning("Negative BLOCK?", 0, LASTPASS);
+			Warning("Negative BLOCK?");
 		}
 		if (comma(lp)) {
 			ParseExpression(lp, val);
 		}
 		EmitBlock(val, teller);
 	} else {
-		Error("[BLOCK] Syntax Error", lp, CATCHALL);
+		Error("[BLOCK] Syntax Error", lp, IF_FIRST);
 	}
 }
 
@@ -303,18 +303,18 @@ void dirORG() {
 		if (ParseExpression(lp, val)) {
 			CurAddress = val;
 		} else {
-			Error("[ORG] Syntax error", lp, CATCHALL); return;
+			Error("[ORG] Syntax error", lp, IF_FIRST); return;
 		}
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[ORG] Syntax error", lp, CATCHALL); return;
+				Error("[ORG] Syntax error", lp, IF_FIRST); return;
 			}
 			if (val < 0) {
 				Error("[ORG] Negative page number are not allowed", lp); return;
 			} else if (val > Device->PagesCount - 1) {
 				char buf[LINEMAX];
 				SPRINTF1(buf, LINEMAX, "[ORG] Page number must be in range 0..%lu", Device->PagesCount - 1);
-			  	Error(buf, 0, CATCHALL); return;
+			  	Error(buf, 0, IF_FIRST); return;
 			}
 			Slot->Page = Device->GetPage(val);
 			//Page = Slot->Page;
@@ -324,7 +324,7 @@ void dirORG() {
 		if (ParseExpression(lp, val)) {
 			CurAddress = val;
 		} else {
-			Error("[ORG] Syntax error", 0, CATCHALL);
+			Error("[ORG] Syntax error", 0, IF_FIRST);
 		}
 	}
 }
@@ -334,7 +334,7 @@ void dirDISP() {
 	if (ParseExpression(lp, val)) {
 		adrdisp = CurAddress;CurAddress = val;
 	} else {
-		Error("[DISP] Syntax error", 0, CATCHALL); return;
+		Error("[DISP] Syntax error", 0, IF_FIRST); return;
 	}
 	PseudoORG = 1;
 }
@@ -350,12 +350,12 @@ void dirENT() {
 void dirPAGE() {
 	aint val;
 	if (!DeviceID) {
-		Warning("PAGE only allowed in real device emulation mode (See DEVICE)", 0);
+		Warning("PAGE only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
 		return;
 	}
 	if (!ParseExpression(lp, val)) {
-		Error("Syntax error", 0, CATCHALL);
+		Error("Syntax error", 0, IF_FIRST);
 		return;
 	}
 	if (val < 0) {
@@ -363,7 +363,7 @@ void dirPAGE() {
 	} else if (val > Device->PagesCount - 1) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "[PAGE] Page number must be in range 0..%lu", Device->PagesCount - 1);
-		Error(buf, 0, CATCHALL); return;
+		Error(buf, 0, IF_FIRST); return;
 	}
 	Slot->Page = Device->GetPage(val);
 	CheckPage();
@@ -372,12 +372,12 @@ void dirPAGE() {
 void dirSLOT() {
 	aint val;
 	if (!DeviceID) {
-		Warning("SLOT only allowed in real device emulation mode (See DEVICE)", 0);
+		Warning("SLOT only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
 		return;
 	}
 	if (!ParseExpression(lp, val)) {
-		Error("Syntax error", 0, CATCHALL);
+		Error("Syntax error", 0, IF_FIRST);
 		return;
 	}
 	if (val < 0) {
@@ -385,7 +385,7 @@ void dirSLOT() {
 	} else if (val > Device->SlotsCount - 1) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%lu", Device->SlotsCount - 1);
-		Error(buf, 0, CATCHALL); return;
+		Error(buf, 0, IF_FIRST); return;
 	}
 	Slot = Device->GetSlot(val);
 	Device->CurrentSlot = Slot->Number;
@@ -399,7 +399,7 @@ void dirMAP() {
 	if (ParseExpression(lp, val)) {
 		AddressOfMAP = val;
 	} else {
-		Error("[MAP] Syntax error", 0, CATCHALL);
+		Error("[MAP] Syntax error", 0, IF_FIRST);
 	}
 	if (IsLabelNotFound) {
 		Error("[MAP] Forward reference", 0, ALL);
@@ -513,7 +513,7 @@ void dirMODULE() {
 			STRCAT(ModuleName, sizeof(n), n);
 		}
 	} else {
-		Error("[MODULE] Syntax error", 0, CATCHALL);
+		Error("[MODULE] Syntax error", 0, IF_FIRST);
 	}
 
 	if (ModuleName != NULL) {
@@ -560,7 +560,7 @@ void dirEND() {
 		if (val > 65535 || val < 0) {
 			char buf[LINEMAX];
 			SPRINTF1(buf, LINEMAX, "[END] Invalid address: %lu", val);
-			Error(buf, 0, CATCHALL); return;
+			Error(buf, 0, IF_FIRST); return;
 		}
 		StartAddress = val;
 	} else {
@@ -573,7 +573,7 @@ void dirEND() {
 void dirSIZE() {
 	aint val;
 	if (!ParseExpression(lp, val)) {
-		Error("[SIZE] Syntax error", bp, CATCHALL); return;
+		Error("[SIZE] Syntax error", bp, IF_FIRST); return;
 	}
 	if (pass == LASTPASS) {
 		return;
@@ -593,7 +593,7 @@ void dirINCBIN() {
 	if (comma(lp)) {
 		if (!comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCBIN] Syntax error", bp, CATCHALL); return;
+				Error("[INCBIN] Syntax error", bp, IF_FIRST); return;
 			}
 			if (val < 0) {
 				Error("[INCBIN] Negative values are not allowed", bp); return;
@@ -602,7 +602,7 @@ void dirINCBIN() {
 		}
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCBIN] Syntax error", bp, CATCHALL); return;
+				Error("[INCBIN] Syntax error", bp, IF_FIRST); return;
 			}
 			if (val < 0) {
 				Error("[INCBIN] Negative values are not allowed", bp); return;
@@ -625,7 +625,7 @@ void dirINCHOB() {
 	if (comma(lp)) {
 		if (!comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCHOB] Syntax error", bp, CATCHALL); return;
+				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
 			}
 			if (val < 0) {
 				Error("[INCHOB] Negative values are not allowed", bp); return;
@@ -634,7 +634,7 @@ void dirINCHOB() {
 		}
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCHOB] Syntax error", bp, CATCHALL); return;
+				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
 			}
 			if (val < 0) {
 				Error("[INCHOB] Negative values are not allowed", bp); return;
@@ -675,18 +675,18 @@ void dirINCTRD() {
 		if (!comma(lp)) {
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
-				Error("[INCTRD] Syntax error", bp, CATCHALL); return;
+				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
 			}
 		} else {
-			Error("[INCTRD] Syntax error", bp, CATCHALL); return;
+			Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
 		}
 	} else {
-		Error("[INCTRD] Syntax error", bp, CATCHALL); return; //is this ok?
+		Error("[INCTRD] Syntax error", bp, IF_FIRST); return; //is this ok?
 	}
 	if (comma(lp)) {
 		if (!comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCTRD] Syntax error", bp, CATCHALL); return;
+				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
 			}
 			if (val < 0) {
 				Error("[INCTRD] Negative values are not allowed", bp); return;
@@ -695,7 +695,7 @@ void dirINCTRD() {
 		}
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCTRD] Syntax error", bp, CATCHALL); return;
+				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
 			}
 			if (val < 0) {
 				Error("[INCTRD] Negative values are not allowed", bp); return;
@@ -732,14 +732,14 @@ void dirINCTRD() {
 		res = fread(hdr, 1, 16, ff);
 		hdr[16] = 0;
 		if (res != 16) {
-			Error("[INCTRD] Read error", fnaam, CATCHALL); return;
+			Error("[INCTRD] Read error", fnaam, IF_FIRST); return;
 		}
 		if (strstr(hdr, hobeta) != NULL) {
 			i = 0; break;
 		}
 	}
 	if (i) {
-		Error("[INCTRD] File not found in TRD image", fnaamh, CATCHALL); return;
+		Error("[INCTRD] File not found in TRD image", fnaamh, IF_FIRST); return;
 	}
 	if (length > 0) {
 		if (offset == -1) {
@@ -811,7 +811,7 @@ void dirSAVESNA() {
 	}
 
 	if (exec && !SaveSNA_ZX(fnaam, start)) {
-		Error("[SAVESNA] Error writing file (Disk full?)", bp, CATCHALL); return;
+		Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST); return;
 	}
 
 	delete[] fnaam;
@@ -826,7 +826,7 @@ void dirEMPTYTAP() {
 
 	fnaam = GetFileName(lp);
 	if (!*fnaam) {
-		Error("[EMPTYTAP] Syntax error", bp, CATCHALL); return;
+		Error("[EMPTYTAP] Syntax error", bp, IF_FIRST); return;
 	}
 	TAP_SaveEmpty(fnaam);
 	delete[] fnaam;
@@ -938,7 +938,7 @@ void dirSAVETAP() {
 
 								if (comma(lp)) {
 									if (!ParseExpression(lp, val)) {
-										Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
+										Error("[SAVETAP] Syntax error", bp, IF_FIRST); return;
 									}
 									if (val < 0) {
 										Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
@@ -949,7 +949,7 @@ void dirSAVETAP() {
 								}
 								if (comma(lp)) {
 									if (!ParseExpression(lp, val)) {
-										Error("[SAVETAP] Syntax error", bp, CATCHALL); return;
+										Error("[SAVETAP] Syntax error", bp, IF_FIRST); return;
 									}
 									if (val < 0) {
 										Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
@@ -1000,7 +1000,7 @@ void dirSAVETAP() {
 		}
 
 		if (!done) {
-			Error("[SAVETAP] Error writing file", bp, CATCHALL);
+			Error("[SAVETAP] Error writing file", bp, IF_FIRST);
 		}
 	} else if (exec) {
 		Error("[SAVETAP] Device must be defined.", 0);
@@ -1057,7 +1057,7 @@ void dirSAVEBIN() {
 	}
 
 	if (exec && !SaveBinary(fnaam, start, length)) {
-		Error("[SAVEBIN] Error writing file (Disk full?)", bp, CATCHALL); return;
+		Error("[SAVEBIN] Error writing file (Disk full?)", bp, IF_FIRST); return;
 	}
 	delete[] fnaam;
 }
@@ -1123,7 +1123,7 @@ void dirSAVEHOB() {
 		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
 	}
 	if (exec && !SaveHobeta(fnaam, fnaamh, start, length)) {
-		Error("[SAVEHOB] Error writing file (Disk full?)", bp, CATCHALL); return;
+		Error("[SAVEHOB] Error writing file (Disk full?)", bp, IF_FIRST); return;
 	}
 	delete[] fnaam;
 	delete[] fnaamh;
@@ -1138,7 +1138,7 @@ void dirEMPTYTRD() {
 
 	fnaam = GetFileName(lp);
 	if (!*fnaam) {
-		Error("[EMPTYTRD] Syntax error", bp, CATCHALL); return;
+		Error("[EMPTYTRD] Syntax error", bp, IF_FIRST); return;
 	}
 	TRD_SaveEmpty(fnaam);
 	delete[] fnaam;
@@ -1229,7 +1229,7 @@ void dirENCODING() {
 	char* opt = GetFileName(lp);
 	char* opt2 = opt;
 	if (!(*opt)) {
-		Error("[ENCODING] Syntax error. No parameters", bp, CATCHALL); return;
+		Error("[ENCODING] Syntax error. No parameters", bp, IF_FIRST); return;
 	}
 	do {
 		*opt2 = (char) tolower(*opt2);
@@ -1244,7 +1244,7 @@ void dirENCODING() {
 		delete[] opt;
 		return;
 	}
-	Error("[ENCODING] Syntax error. Bad parameter", bp, CATCHALL); delete[] opt;return;
+	Error("[ENCODING] Syntax error. Bad parameter", bp, IF_FIRST); delete[] opt;return;
 }
 
 void dirLABELSLIST() {
@@ -1257,7 +1257,7 @@ void dirLABELSLIST() {
 	}
 	char* opt = GetFileName(lp);
 	if (!(*opt)) {
-		Error("[LABELSLIST] Syntax error. No parameters", bp, CATCHALL); return;
+		Error("[LABELSLIST] Syntax error. No parameters", bp, IF_FIRST); return;
 	}
 	STRCPY(Options::UnrealLabelListFName, LINEMAX, opt);
 	delete[] opt;
@@ -1272,7 +1272,7 @@ void dirIF() {
 	IsLabelNotFound = 0;
 	/*if (!ParseExpression(p,val)) { Error("Syntax error",0,CATCHALL); return; }*/
 	if (!ParseExpression(lp, val)) {
-		Error("[IF] Syntax error", 0, CATCHALL); return;
+		Error("[IF] Syntax error", 0, IF_FIRST); return;
 	}
 	/*if (IsLabelNotFound) Error("Forward reference",0,ALL);*/
 	if (IsLabelNotFound) {
@@ -1314,7 +1314,7 @@ void dirIFN() {
 	aint val;
 	IsLabelNotFound = 0;
 	if (!ParseExpression(lp, val)) {
-		Error("[IFN] Syntax error", 0, CATCHALL); return;
+		Error("[IFN] Syntax error", 0, IF_FIRST); return;
 	}
 	if (IsLabelNotFound) {
 		Error("[IFN] Forward reference", 0, ALL);
@@ -1350,7 +1350,7 @@ void dirIFN() {
 void dirIFUSED() {
 	char* id;
 	if (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) {
-		Error("[IFUSED] Syntax error", 0, CATCHALL);
+		Error("[IFUSED] Syntax error", 0, IF_FIRST);
 		return;
 	}
 	if (id == NULL || *id == 0) {
@@ -1358,7 +1358,7 @@ void dirIFUSED() {
 	} else {
 		id = ValidateLabel(id, 0);
 		if (id == NULL) {
-			Error("[IFUSED] Invalid label name", 0, CATCHALL);
+			Error("[IFUSED] Invalid label name", 0, IF_FIRST);
 			return;
 		}
 	}
@@ -1393,7 +1393,7 @@ void dirIFUSED() {
 void dirIFNUSED() {
 	char* id;
 	if (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) {
-		Error("[IFUSED] Syntax error", 0, CATCHALL);
+		Error("[IFUSED] Syntax error", 0, IF_FIRST);
 		return;
 	}
 	if (id == NULL || *id == 0) {
@@ -1401,7 +1401,7 @@ void dirIFNUSED() {
 	} else {
 		id = ValidateLabel(id, 0);
 		if (id == NULL) {
-			Error("[IFUSED] Invalid label name", 0, CATCHALL);
+			Error("[IFUSED] Invalid label name", 0, IF_FIRST);
 			return;
 		}
 	}
@@ -1468,7 +1468,7 @@ void dirOUTPUT() {
 		} else if (modechar == 'a') {
 			mode = OUTPUT_APPEND;
 		} else {
-			Error("Syntax error", bp, CATCHALL);
+			Error("Syntax error", bp, IF_FIRST);
 		}
 	}
 	//Options::NoDestinationFile = false;
@@ -1538,7 +1538,7 @@ void dirUNDEFINE() {
 	} else if (LabelTable.Find(id)) {
 		LabelTable.Remove(id);
 	} else {
-		Warning("[UNDEFINE] Identifier not found", 0); return;
+		Warning("[UNDEFINE] Identifier not found", id); return;
 	}
 }
 
@@ -1659,7 +1659,7 @@ void dirEXPORT() {
 		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName);
 	}
 	if (!(n = p = GetID(lp))) {
-		Error("[EXPORT] Syntax error", lp, CATCHALL); return;
+		Error("[EXPORT] Syntax error", lp, IF_FIRST); return;
 	}
 	if (pass != LASTPASS) {
 		return;
@@ -1824,7 +1824,7 @@ void dirASSERT() {
 	/*if (!ParseExpression(lp,val)) { Error("Syntax error",0,CATCHALL); return; }
 	if (pass==2 && !val) Error("Assertion failed",p);*/
 	if (!ParseExpression(lp, val)) {
-		Error("[ASSERT] Syntax error", 0, CATCHALL); return;
+		Error("[ASSERT] Syntax error", 0, IF_FIRST); return;
 	}
 	if (pass == LASTPASS && !val) {
 		Error("[ASSERT] Assertion failed", p);
@@ -1946,12 +1946,12 @@ void dirSTRUCT() {
 	}
 
 	if (!(naam = GetID(lp)) || !strlen(naam)) {
-		Error("[STRUCT] Illegal structure name", 0); return;
+		Error("[STRUCT] Illegal structure name"); return;
 	}
 	if (comma(lp)) {
 		IsLabelNotFound = 0;
 		if (!ParseExpression(lp, offset)) {
-			Error("[STRUCT] Syntax error", 0, CATCHALL); return;
+			Error("[STRUCT] Syntax error", 0, IF_FIRST); return;
 		}
 		if (IsLabelNotFound) {
 			Error("[STRUCT] Forward reference", 0, ALL);
@@ -1984,7 +1984,7 @@ void dirFORG() {
 		method = SEEK_CUR;
 	}
 	if (!ParseExpression(lp, val)) {
-		Error("[FORG] Syntax error", 0, CATCHALL);
+		Error("[FORG] Syntax error", 0, IF_FIRST);
 	}
 	if (pass == LASTPASS) {
 		SeekDest(val, method);
@@ -2005,7 +2005,7 @@ void dirDUP() {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
 			if (!ParseExpression(lp, val)) {
-				Error("[DUP/REPT] Syntax error", 0, CATCHALL); return;
+				Error("[DUP/REPT] Syntax error", 0, IF_FIRST); return;
 			}
 			dup.Level++;
 			return;
@@ -2013,13 +2013,13 @@ void dirDUP() {
 	}
 
 	if (!ParseExpression(lp, val)) {
-		Error("[DUP/REPT] Syntax error", 0, CATCHALL); return;
+		Error("[DUP/REPT] Syntax error", 0, IF_FIRST); return;
 	}
 	if (IsLabelNotFound) {
 		Error("[DUP/REPT] Forward reference", 0, ALL);
 	}
 	if ((int) val < 1) {
-		Error("[DUP/REPT] Illegal repeat value", 0, CATCHALL); return;
+		Error("[DUP/REPT] Illegal repeat value", 0, IF_FIRST); return;
 	}
 
 	SRepeatStack dup;
@@ -2320,24 +2320,24 @@ void dirENDLUA() {
 }
 
 void dirINCLUDELUA() {
-	char* fnaam;
-	fnaam = GetFileName(lp);
-
-	if (PASS1 == pass) {
-		EDelimiterType dt = GetDelimiterOfLastFileName();
-		char* fullpath = GetPath(fnaam, NULL, DT_ANGLE == dt);
-		if (!fullpath[0]) {
-			Error("[INCLUDELUA] File doesn't exist", fnaam, PASS1);
-		} else {
-			LuaLine = CurrentLocalLine;
-			int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
-			if (error) {
-				_lua_showerror();
-			}
-			LuaLine = -1;
-		}
-		free(fullpath);
+	if (1 != pass) {
+		while (*lp) ++lp;	// skip till EOL (colon), to avoid parsing file name
+		return;
 	}
+	char* fnaam = GetFileName(lp);
+	EDelimiterType dt = GetDelimiterOfLastFileName();
+	char* fullpath = GetPath(fnaam, NULL, DT_ANGLE == dt);
+	if (!fullpath[0]) {
+		Error("[INCLUDELUA] File doesn't exist", fnaam, EARLY);
+	} else {
+		LuaLine = CurrentLocalLine;
+		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
+		if (error) {
+			_lua_showerror();
+		}
+		LuaLine = -1;
+	}
+	free(fullpath);
 	delete[] fnaam;
 }
 
@@ -2348,10 +2348,10 @@ void dirDEVICE() {
 
 	if ((id = GetID(lp))) {
 		if (!SetDevice(id)) {
-			Error("[DEVICE] Invalid parameter", 0, CATCHALL);
+			Error("[DEVICE] Invalid parameter", 0, IF_FIRST);
 		}
 	} else {
-		Error("[DEVICE] Syntax error", 0, CATCHALL);
+		Error("[DEVICE] Syntax error", 0, IF_FIRST);
 	}
 
 
@@ -2471,7 +2471,7 @@ bool LuaSetPage(aint n) {
 	} else if (n > Device->PagesCount - 1) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "sj.set_page: page number must be in range 0..%lu", Device->PagesCount - 1);
-		Error(buf, 0, CATCHALL); return false;
+		Error(buf, 0, IF_FIRST); return false;
 	}
 	Slot->Page = Device->GetPage(n);
 	CheckPage();
@@ -2484,7 +2484,7 @@ bool LuaSetSlot(aint n) {
 	} else if (n > Device->SlotsCount - 1) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "sj.set_slot: slot number must be in range 0..%lu", Device->SlotsCount - 1);
-		Error(buf, 0, CATCHALL); return false;
+		Error(buf, 0, IF_FIRST); return false;
 	}
 	Slot = Device->GetSlot(n);
 	Device->CurrentSlot = Slot->Number;

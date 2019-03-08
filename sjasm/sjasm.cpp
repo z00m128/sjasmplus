@@ -56,7 +56,7 @@ void PrintHelp() {
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
-	_COUT "  --msg=[all|war|err]      Stderr messages verbosity (\"all\" is default)" _ENDL;
+	_COUT "  --msg=[all|war|err|none] Stderr messages verbosity (\"all\" is default)" _ENDL;
 	_COUT "  --fullpath               Show full path to error file" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
@@ -284,7 +284,9 @@ namespace Options {
 				} else if (!strcmp(opt, "lstlab")) {
 					AddLabelListing = 1;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
-					if (!strcmp("err", val)) {
+					if (!strcmp("none", val)) {
+						OutputVerbosity = OV_NONE;
+					} else if (!strcmp("err", val)) {
 						OutputVerbosity = OV_ERROR;
 					} else if (!strcmp("war", val)) {
 						OutputVerbosity = OV_WARNING;
@@ -395,7 +397,9 @@ int main(int argc, char **argv) {
 #endif //USE_LUA
 
 	if (!SourceFNames[0][0]) {
-		_CERR "No inputfile(s)" _ENDL;
+		if (Options::OutputVerbosity <= OV_ERROR) {
+			_CERR "No inputfile(s)" _ENDL;
+		}
 		exit(1);
 	}
 

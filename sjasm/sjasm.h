@@ -30,7 +30,7 @@
 #define __SJASM
 
 enum EMemoryType { MT_NONE, MT_SIZE };
-enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR };
+enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR, OV_NONE };
 
 namespace Options {
 	extern char SymbolListFName[LINEMAX];

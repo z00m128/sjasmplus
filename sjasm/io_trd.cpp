@@ -33,17 +33,17 @@ int TRD_SaveEmpty(char* fname) {
 	int i;
 	unsigned char* buf;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname, CATCHALL); return 0;
+		Error("Error opening file", fname, IF_FIRST); return 0;
 	}
 	buf = (unsigned char*) calloc(1024, sizeof(unsigned char));
 	if (buf == NULL) {
 		Error("No enough memory", 0, FATAL);
 	}
 	if (fwrite(buf, 1, 1024, ff) < 1024) {
-		Error("Write error (disk full?)", fname, CATCHALL); return 0;
+		Error("Write error (disk full?)", fname, IF_FIRST); return 0;
 	} //catalog
 	if (fwrite(buf, 1, 1024, ff) < 1024) {
-		Error("Write error (disk full?)", fname, CATCHALL); return 0;
+		Error("Write error (disk full?)", fname, IF_FIRST); return 0;
 	} //catalog
 	buf[0xe1] = 0;
 	buf[0xe2] = 1;
@@ -63,17 +63,17 @@ int TRD_SaveEmpty(char* fname) {
 		;
 	}
 	if (fwrite(buf, 1, 256, ff) < 256) {
-		Error("Write error (disk full?)", fname, CATCHALL); return 0;
+		Error("Write error (disk full?)", fname, IF_FIRST); return 0;
 	} //
 	for (i = 0; i < 31; buf[0xe1 + i++] = 0) {
 		;
 	}
 	if (fwrite(buf, 1, 768, ff) < 768) {
-		Error("Write error (disk full?)", fname, CATCHALL); return 0;
+		Error("Write error (disk full?)", fname, IF_FIRST); return 0;
 	} //
 	for (i = 0; i < 640 - 3; i++) {
 		if (fwrite(buf, 1, 1024, ff) < 1024) {
-			Error("Write error (disk full?)", fname, CATCHALL); return 0;
+			Error("Write error (disk full?)", fname, IF_FIRST); return 0;
 		}
 	}
 	fclose(ff);
@@ -115,7 +115,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	}
 
 	if (fseek(ff, 0x8e1, SEEK_SET)) {
-		Error("TRD image has wrong format", fname, CATCHALL); return 0;
+		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
 	res = fread(trd, 1, 31, ff);
 	if (res != 31) {
@@ -123,7 +123,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	}
 	secs = trd[4] + (trd[5] << 8);
 	if (secs < ((length + autostart_add) >> 8) + 1) {
-		Error("TRD image haven't free space", fname, CATCHALL); return 0;
+		Error("TRD image haven't free space", fname, IF_FIRST); return 0;
 	}
 
 	// Find free position
@@ -131,7 +131,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	for (i = 0; i < 128; i++) {
 		res = fread(hdr, 1, 16, ff);
 		if (res != 16) {
-			Error("Read error", fname, CATCHALL); return 0;
+			Error("Read error", fname, IF_FIRST); return 0;
 		}
 		if (hdr[0] < 2) {
 			i = 0; break;
@@ -139,11 +139,11 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		pos += 16;
 	}
 	if (i) {
-		Error("TRD image is full of files", fname, CATCHALL); return 0;
+		Error("TRD image is full of files", fname, IF_FIRST); return 0;
 	}
 
 	if (fseek(ff, (trd[1] << 12) + (trd[0] << 8), SEEK_SET)) {
-		Error("TRD image has wrong format", fname, CATCHALL); return 0;
+		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
 	if (length + start > 0xFFFF) {
 		length = -1;
@@ -161,7 +161,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		abin[3] = (autostart >> 8) & 0xFF;
 		
 		if(fwrite(abin, 1, 4, ff) != 4) {
-			Error("Write error", fname, CATCHALL); return 0;
+			Error("Write error", fname, IF_FIRST); return 0;
 		}
 	}
 
@@ -203,11 +203,11 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	hdr[0x0f] = trd[1];
 
 	if (fseek(ff, pos, SEEK_SET)) {
-		Error("TRD image has wrong format", fname, CATCHALL); return 0;
+		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
 	res = fwrite(hdr, 1, 16, ff);
 	if (res != 16) {
-		Error("Write error", fname, CATCHALL); return 0;
+		Error("Write error", fname, IF_FIRST); return 0;
 	}
 
 	trd[0] += hdr[0x0d];
@@ -220,11 +220,11 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	trd[3]++;
 
 	if (fseek(ff, 0x8e1, SEEK_SET)) {
-		Error("TRD image has wrong format", fname, CATCHALL); return 0;
+		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
 	res = fwrite(trd, 1, 31, ff);
 	if (res != 31) {
-		Error("Write error", fname, CATCHALL); return 0;
+		Error("Write error", fname, IF_FIRST); return 0;
 	}
 
 	fclose(ff);

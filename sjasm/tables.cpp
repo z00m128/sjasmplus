@@ -66,7 +66,7 @@ char* ValidateLabel(char* naam, int set_namespace) {
 		}
 	}
 	if (strlen(naam) > LABMAX) {
-		Error("Label too long", naam, PASS1);
+		Error("Label too long", naam);
 		naam[LABMAX] = 0;
 	}
 	if (mlp && l) {
@@ -246,7 +246,7 @@ int GetLocalLabelValue(char*& op, aint& val) {
 }
 
 CLabelTableEntry::CLabelTableEntry() {
-	name = NULL; value = used = 0;
+	name = NULL; value = used = 0; updatePass = pass;
 }
 
 CLabelTable::CLabelTable() {
@@ -263,17 +263,14 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, 
 	tr = Hash(nname);
 	while ((htr = HashTable[tr])) {
 		if (!strcmp((LabelTable[htr].name), nname)) {
-			/*if (LabelTable[htr].IsDEFL) {
-							_COUT "A" _CMDL LabelTable[htr].value _ENDL;
-						}*/
-			//old: if (LabelTable[htr].page!=-1) return 0;
-			if (!LabelTable[htr].IsDEFL && LabelTable[htr].page != -1) {
+			if (!LabelTable[htr].IsDEFL && LabelTable[htr].page != -1 && LabelTable[htr].updatePass == pass) {
 				return 0;
 			} else {
-				//if label already added as used
+				//if label already added (as used, or in previous pass), just refresh values
 				LabelTable[htr].value = nvalue;
 				LabelTable[htr].page = MemoryCPage;
 				LabelTable[htr].IsDEFL = IsDEFL;
+				LabelTable[htr].updatePass = pass;
 				return 1;
 			}
 		} else if (++tr >= LABTABSIZE) {
@@ -286,6 +283,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, 
 		Error("No enough memory!", 0, FATAL);
 	}
 	LabelTable[NextLocation].IsDEFL = IsDEFL;
+	LabelTable[NextLocation].updatePass = pass;
 	LabelTable[NextLocation].value = nvalue;
 	if (!undefined) {
 		LabelTable[NextLocation].used = -1;
@@ -547,7 +545,7 @@ CFunctionTable::CFunctionTable() {
 int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
 	char* p;
 	if (NextLocation >= FUNTABSIZE * 2 / 3) {
-		_CERR "Functions Table is full" _ENDL; ExitASM(1);
+		Error("Functions Table is full", NULL, FATAL);
 	}
 	int tr, htr;
 	tr = Hash(nname);
@@ -570,7 +568,7 @@ int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
 	while ((*p = (char) toupper(*p))) { ++p; }
 
 	if (NextLocation >= FUNTABSIZE * 2 / 3) {
-		_CERR "Functions Table is full" _ENDL; ExitASM(1);
+		Error("Functions Table is full", NULL, FATAL);
 	}
 	tr = Hash(temp);
 	while ((htr = HashTable[tr])) {
@@ -793,6 +791,12 @@ int CDefineTable::Replace(const char* name, const char* value) {
 	}
 	defs[(unsigned char)*name] = new CDefineTableEntry(name, value, 0, defs[(unsigned char)*name]);
 	return 1;
+}
+
+int CDefineTable::Replace(const char* name, const int value) {
+	char newIntValue[24];
+	SPRINTF1(newIntValue, sizeof(newIntValue), "%d", value);
+	return Replace(name, newIntValue);
 }
 
 int CDefineTable::Remove(const char* name) {
@@ -1043,7 +1047,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	CStringsList* s,* l = NULL,* f = NULL;
 	/*if (FindDuplicate(nnaam)) Error("Duplicate macroname",0,PASS1);*/
 	if (FindDuplicate(nnaam)) {
-		Error("Duplicate macroname", 0, PASS1);return;
+		Error("Duplicate macroname", nnaam);return;
 	}
 	char* macroname;
 	macroname = STRDUP(nnaam);
@@ -1055,7 +1059,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	SkipBlanks(p);
 	while (*p) {
 		if (!(n = GetID(p))) {
-			Error("Illegal macro argument", p, PASS1); break;
+			Error("Illegal macro argument", p, EARLY); break;
 		}
 		s = new CStringsList(n, NULL); if (!f) {
 									  	f = s;
@@ -1070,11 +1074,11 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	}
 	macs->args = f;
 	if (*p/* && *p!=':'*/) {
-		Error("Unexpected", p, PASS1);
+		Error("Unexpected", p, EARLY);
 	}
 	ListFile();
 	if (!ReadFileToCStringsList(macs->body, "endm")) {
-		Error("Unexpected end of macro", 0, PASS1);
+		Error("Unexpected end of macro", 0, EARLY);
 	}
 }
 
@@ -1236,11 +1240,13 @@ CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStruct
 
 void CStructure::AddLabel(char* nnaam) {
 	CStructureEntry1* n = new CStructureEntry1(nnaam, noffset);
-	if (!mnf) {
+	if (!mnf) {		//FIXME Ped7g how about simple std::vector or similar and stop doing all this fuss manually with cryptic short names?
 		mnf = n;
-	} if (mnl) {
-	  	mnl->next = n;
-	  } mnl = n;
+	}
+	if (mnl) {
+		mnl->next = n;
+	}
+	mnl = n;
 }
 
 void CStructure::AddMember(CStructureEntry2* n) {
@@ -1270,7 +1276,7 @@ void CStructure::CopyLabels(CStructure* st) {
 	str[0] = 0;
 	STRCAT(str, LINEMAX, PreviousIsLabel);
 	STRCAT(str, LINEMAX, ".");
-	while (np) {
+	while (np) {	//FIXME Ped7g - optimize this? (need test first to validate rewritten code)
 		STRCPY(str2, LINEMAX, str);
 		STRCAT(str2, LINEMAX, np->naam);
 		CopyLabel(str2, np->offset);
@@ -1335,8 +1341,8 @@ void CStructure::deflab() {
 	CStructureEntry1* np = mnf;
 	STRCPY(sn, LINEMAX, "@");
 	STRCAT(sn, LINEMAX, id);
-	op = p = sn;
-	p = ValidateLabel(p, 1);
+	op = sn;
+	p = ValidateLabel(sn, 1);
 	if (pass == LASTPASS) {
 		if (!GetLabelValue(op, oval)) {
 			Error("Internal error. ParseLabel()", 0, FATAL);
@@ -1346,7 +1352,7 @@ void CStructure::deflab() {
 		}
 	} else {
 		if (!LabelTable.Insert(p, noffset)) {
-			Error("Duplicate label", tp, PASS1);
+			Error("Duplicate label", tp, EARLY);
 		}
 	}
 	free(p);
@@ -1356,7 +1362,7 @@ void CStructure::deflab() {
 		STRCAT(ln, LINEMAX, np->naam);
 		op = ln;
 		if (!(p = ValidateLabel(ln, 1))) {
-			Error("Illegal labelname", ln, PASS1);
+			Error("Illegal labelname", ln, EARLY);
 		}
 		if (pass == LASTPASS) {
 			if (!GetLabelValue(op, oval)) {
@@ -1367,7 +1373,7 @@ void CStructure::deflab() {
 			}
 		} else {
 			if (!LabelTable.Insert(p, np->offset)) {
-				Error("Duplicate label", tp, PASS1);
+				Error("Duplicate label", tp, EARLY);
 			}
 		}
 		free(p);
@@ -1391,7 +1397,7 @@ void CStructure::emitlab(char* iid) {
 		}
 	} else {
 		if (!LabelTable.Insert(p, CurAddress)) {
-			Error("Duplicate label", tp, PASS1);
+			Error("Duplicate label", tp, EARLY);
 		}
 	}
 	free(p);
@@ -1401,7 +1407,7 @@ void CStructure::emitlab(char* iid) {
 		STRCAT(ln, LINEMAX, np->naam);
 		op = ln;
 		if (!(p = ValidateLabel(ln, 1))) {
-			Error("Illegal labelname", ln, PASS1);
+			Error("Illegal labelname", ln, EARLY);
 		}
 		if (pass == LASTPASS) {
 			if (!GetLabelValue(op, oval)) {
@@ -1412,7 +1418,7 @@ void CStructure::emitlab(char* iid) {
 			}
 		} else {
 			if (!LabelTable.Insert(p, np->offset + CurAddress)) {
-				Error("Duplicate label", tp, PASS1);
+				Error("Duplicate label", tp, EARLY);
 			}
 		}
 		free(p);
@@ -1514,7 +1520,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
 	if (FindDuplicate(sp)) {
-		Error("Duplicate structure name", naam, PASS1);
+		Error("Duplicate structure name", naam, EARLY);
 	}
 	strs[(unsigned char)*sp] = new CStructure(naam, sp, idx, 0, gl, strs[(unsigned char)*sp]);
 	if (no) {

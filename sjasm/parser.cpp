@@ -43,19 +43,19 @@ int ParseExpPrim(char*& p, aint& nval) {
 		++p;
 		res = ParseExpression(p, nval);
 		if (!need(p, ')')) {
-				Error("')' expected", 0);
+				Error("')' expected");
 				return 0;
 		 }
 	} else if (DeviceID && *p == '{') {
 	  	++p; res = ParseExpression(p, nval);
 		/*if (nval < 0x4000) {
-			Error("Address in {..} must be more than 4000h", 0); return 0;
+			Error("Address in {..} must be more than 4000h"); return 0;
 		} */
 		if (nval > 0xFFFE) {
-			Error("Address in {..} must be less than FFFEh", 0); return 0;
+			Error("Address in {..} must be less than FFFEh"); return 0;
 		}
 		if (!need(p, '}')) {
-			Error("'}' expected", 0); return 0;
+			Error("'}' expected"); return 0;
 		}
 
 	  	nval = (aint) (MemGetByte(nval) + (MemGetByte(nval + 1) << 8));
@@ -81,7 +81,7 @@ int ParseExpPrim(char*& p, aint& nval) {
 		return 1;
 	} else if (!(res = GetCharConst(p, nval))) {
 		if (synerr) {
-			Error("Syntax error", p, CATCHALL);
+			Error("Syntax error", p, IF_FIRST);
 		}
 
 		return 0;
@@ -119,7 +119,7 @@ int ParseExpUnair(char*& p, aint& nval) {
 				return 0;
 			} nval = (right >> 8) & 255; break;
 		default:
-			Error("Parser error", 0); break;
+			Error("Parser error"); break;
 		}
 		return 1;
 	} else {
@@ -144,16 +144,16 @@ int ParseExpMul(char*& p, aint& nval) {
 			if (right) {
 				left /= right;
 			} else {
-				Error("Division by zero", 0); left = 0;
+				Error("Division by zero"); left = 0;
 			} break;
 		case '%':
 			if (right) {
 				left %= right;
 			} else {
-				Error("Division by zero", 0); left = 0;
+				Error("Division by zero"); left = 0;
 			} break;
 		default:
-			Error("Parser error", 0); break;
+			Error("Parser error"); break;
 		}
 	}
 	nval = left; return 1;
@@ -175,7 +175,7 @@ int ParseExpAdd(char*& p, aint& nval) {
 		case '-':
 			left -= right; break;
 		default:
-			Error("Parser error", 0); break;
+			Error("Parser error"); break;
 		}
 	}
 	nval = left; return 1;
@@ -204,7 +204,7 @@ int ParseExpShift(char*& p, aint& nval) {
 		case '>'+'@':
 			l = left; l >>= right; left = l; break;
 		default:
-			Error("Parser error", 0); break;
+			Error("Parser error"); break;
 		}
 	}
 	nval = left; return 1;
@@ -226,7 +226,7 @@ int ParseExpMinMax(char*& p, aint& nval) {
 		case '>'+'?':
 			left = left > right ? left : right; break;
 		default:
-			Error("Parser error", 0); break;
+			Error("Parser error"); break;
 		}
 	}
 	nval = left; return 1;
@@ -461,13 +461,13 @@ char* ReplaceDefine(char* lp) {
 			while (*(lp++) && (*lp <= ' ' || *lp == '['));
 			//_COUT lp _ENDL;
 			if (!ParseExpression(lp, val)) {
-				Error("[ARRAY] Expression error", 0, CATCHALL);break;
+				Error("[ARRAY] Expression error", 0, IF_FIRST);break;
 			}
 			//_COUT lp _ENDL;
 			while (*lp == ']' && *(lp++));
 			//_COUT "A" _CMDL val _ENDL;
 			if (val < 0) {
-				Error("Number of cell must be positive", 0, CATCHALL);break;
+				Error("Number of cell must be positive", 0, IF_FIRST);break;
 			}
 			val++;
 			while (a && val) {
@@ -477,7 +477,7 @@ char* ReplaceDefine(char* lp) {
 				val--;
 			}
 			if (val && !a) {
-				Error("Cell of array not found", 0, CATCHALL);break;
+				Error("Cell of array not found", 0, IF_FIRST);break;
 			}
 		}
 
@@ -602,7 +602,7 @@ char* ReplaceDefineNext(char* lp) {
 			while (*(lp++) && (*lp <= ' ' || *lp == '['));
 			//_COUT lp _ENDL;
 			if (!ParseExpression(lp, val)) {
-				Error("Array error", 0, CATCHALL);break;
+				Error("Array error", 0, IF_FIRST);break;
 			}
 			//_COUT lp _ENDL;
 			while (*lp == ']' && *(lp++));
@@ -614,7 +614,7 @@ char* ReplaceDefineNext(char* lp) {
 				a = a->next;val--;
 			}
 			if (val && !a) {
-				Error("Entry in array not found", 0, CATCHALL);break;
+				Error("Entry in array not found", 0, IF_FIRST);break;
 			}
 		}
 
@@ -690,7 +690,7 @@ void ParseLabel() {
 				Error("Expression error", lp); val = 0;
 			}
 			if (IsLabelNotFound) {
-				Error("Forward reference", 0, PASS1);
+				Error("Forward reference", 0, EARLY);
 			}
 			/* begin add */
 		} else if (NeedDEFL()) {
@@ -698,7 +698,7 @@ void ParseLabel() {
 				Error("Expression error", lp); val = 0;
 			}
 			if (IsLabelNotFound) {
-				Error("Forward reference", 0, PASS1);
+				Error("Forward reference", 0, EARLY);
 			}
 			IsDEFL = 1;
 			/* end add */
@@ -711,7 +711,7 @@ void ParseLabel() {
 			}
 			synerr = 1;
 			if (IsLabelNotFound) {
-				Error("Forward reference", 0, PASS1);
+				Error("Forward reference", 0, EARLY);
 			}
 		} else {
 			int gl = 0;
@@ -761,9 +761,9 @@ void ParseLabel() {
 				delete[] buf;
 			}
 		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL) && !LabelTable.Update(tp, val)) {
-			Error("Duplicate label", tp, PASS2);
-		} else if (!LabelTable.Insert(tp, val, false, IsDEFL)) {
-			Error("Duplicate label", tp, PASS1);
+			Error("Duplicate label", tp, EARLY);
+		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL)) {
+			Error("Duplicate label", tp, EARLY);
 		}
 
 		delete[] tp;
@@ -808,6 +808,7 @@ void ParseLine(bool parselabels) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
 			lp = ReplaceDefine(line);
+			//lp = line;		// TODO Issue #33
 			CStringsList* f;
 			f = new CStringsList(lp, NULL);
 			dup.Pointer->next = f;
@@ -851,9 +852,7 @@ void ParseLine(bool parselabels) {
 	if (SkipBlanks()) {
 		ListFile(); return;
 	}
-	if (*lp) {
-		Error("Unexpected", lp, LASTPASS);
-	}
+	if (*lp) Error("Unexpected", lp);
 	ListFile();
 }
 
@@ -980,7 +979,7 @@ void ParseStructMember(CStructure* st) {
 		if ((n = GetID(pp)) && (s = StructureTable.zoek(n, gl))) {
 			/* begin add */
 			if (cmphstr(st->naam, n)) {
-				Error("[STRUCT] Use structure itself", 0, CATCHALL);
+				Error("[STRUCT] Use structure itself", 0, IF_FIRST);
 				break;
 			}
 			/* end add */
