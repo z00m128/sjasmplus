@@ -2069,6 +2069,7 @@ void dirEDUP() {
 
 void dirENDM() {
 	if (!RepeatStack.empty()) {
+		Warning("ENDM used as DUP/REPT block terminator, this is deprecated (and bugged when used inside macro), change to EDUP or ENDR");
 		dirEDUP();
 	} else {
 		Error("[ENDM] End macro without macro", 0);
