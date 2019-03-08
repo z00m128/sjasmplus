@@ -895,26 +895,26 @@ StartProg:
 len        EQU 10
  .(12-len) BYTE 0   ;will be compiled to BYTE 0,0</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">ABYTE &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_abyte"></a>ABYTE &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
               <p>Defines a byte or a string of bytes. The offset is added
-              to each of the following bytes.</p><div class="example"><a name="idp445"></a><p class="title"><b>Example 5.2. </b></p><div class="example-contents">
+              to each of the following bytes.</p><div class="example"><a name="idp446"></a><p class="title"><b>Example 5.2. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ABYTE 2 4,9    ; Same as BYTE 6,11
     ABYTE 3 "ABC"  ; Same as BYTE "DEF"</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">ABYTEC &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_abytec"></a>ABYTEC &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
               <p>Defines a byte or a string of bytes, where the last byte
               of the string will have bit 7 set. The offset is added to each
-              of the following bytes.</p><div class="example"><a name="idp453"></a><p class="title"><b>Example 5.3. </b></p><div class="example-contents">
+              of the following bytes.</p><div class="example"><a name="idp455"></a><p class="title"><b>Example 5.3. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ABYTEC 0 "KIP"        ; Same as BYTE "KI",'P'|128
     ABYTEC 1 "ABC",0,"DE" ; Same as BYTE "BC",'D'|128,1,'E','F'|128</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">ABYTEZ &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_abytez"></a>ABYTEZ &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
               <p>Defines a byte or a string of bytes, followed by a zero.
-              The offset is added to each of the following bytes.</p><div class="example"><a name="idp461"></a><p class="title"><b>Example 5.4. </b></p><div class="example-contents">
+              The offset is added to each of the following bytes.</p><div class="example"><a name="idp464"></a><p class="title"><b>Example 5.4. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ABYTEZ 0 "KIP"        ; Same as BYTE "KIP",0</pre>
@@ -925,16 +925,16 @@ len        EQU 10
               <p>Align advances to nearest address where &lt;new address&gt; modulo &lt;expression&gt; (default 4)
                   equals zero (stays at current address if possible).</p>
               <p>If &lt;byte&gt; is specified, memory advanced over is set to it.
-                  </p><div class="example"><a name="idp471"></a><p class="title"><b>Example 5.5. </b></p><div class="example-contents">
+                  </p><div class="example"><a name="idp474"></a><p class="title"><b>Example 5.5. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ALIGN         ; =&gt; ALIGN 4 - simply align by 4
     ALIGN 2       ; by 2 (preserves value of "device" memory)
     ALIGN 2,0     ; + fills memory with zero</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">ASSERT &lt;expression&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_assert"></a>ASSERT &lt;expression&gt;</span></dt><dd>
               <p>An 'assertion failed' error is issued if the expression
-              evaluates to zero.</p><div class="example"><a name="idp479"></a><p class="title"><b>Example 5.6. </b></p><div class="example-contents">
+              evaluates to zero.</p><div class="example"><a name="idp483"></a><p class="title"><b>Example 5.6. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">STACKPOINTER=0D500H
@@ -942,13 +942,13 @@ len        EQU 10
 END_OF_PROGRAM
     END</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">BINARY &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_binary"></a>BINARY &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_incbin">INCBIN</a>.</p>
             </dd><dt><span class="term"><a name="po_block"></a>BLOCK &lt;length&gt;[,&lt;fill
             byte&gt;]</span></dt><dd>
               <p>Defines space. Has to be followed by the number of byte to
               reserve, optionally followed by the value to fill these bytes
-              with.</p><div class="example"><a name="idp493"></a><p class="title"><b>Example 5.7. </b></p><div class="example-contents">
+              with.</p><div class="example"><a name="idp498"></a><p class="title"><b>Example 5.7. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    BLOCK 500     ; define a block of 500 bytes of zero
@@ -957,26 +957,26 @@ END_OF_PROGRAM
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_byte"></a>BYTE &lt;bytes&gt;</span></dt><dd>
               <p>Defines a byte or a string of bytes. Each value should be
-              between -129 and 256.</p><div class="example"><a name="idp502"></a><p class="title"><b>Example 5.8. </b></p><div class="example-contents">
+              between -129 and 256.</p><div class="example"><a name="idp507"></a><p class="title"><b>Example 5.8. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    BYTE 0x56
     BYTE 1,-78,'@'
     BYTE "Format C:? ",0h</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">DB</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_db"></a>DB</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p>
-            </dd><dt><span class="term">DC</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_dc"></a>DC</span></dt><dd>
               <p>Same as <a class="link" href="#po_byte">BYTE</a>, but every
-              last character of a string will have bit 7 set.</p><div class="example"><a name="idp516"></a><p class="title"><b>Example 5.9. </b></p><div class="example-contents">
+              last character of a string will have bit 7 set.</p><div class="example"><a name="idp523"></a><p class="title"><b>Example 5.9. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DC "kip" ; same as BYTE "ki",'p'|128</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">DD</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_dd"></a>DD</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_dword">DWORD</a>.</p>
             </dd><dt><span class="term"><a name="po_defarray"></a>DEFARRAY &lt;id&gt; &lt;replacements&gt;</span></dt><dd>
-              <p>Array of DEFINEs</p><div class="example"><a name="idp530"></a><p class="title"><b>Example 5.10. </b></p><div class="example-contents">
+              <p>Array of DEFINEs</p><div class="example"><a name="idp538"></a><p class="title"><b>Example 5.10. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
@@ -988,9 +988,9 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_dephase"></a>DEPHASE</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_ent">ENT</a>.</p>
-            </dd><dt><span class="term">DEFB</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_defb"></a>DEFB</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p>
-            </dd><dt><span class="term">DEFD</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_defd"></a>DEFD</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_dword">DWORD</a>.</p>
             </dd><dt><span class="term"><a name="po_defdevice"></a>DEFDEVICE
             &lt;deviceid&gt;</span></dt><dd>
@@ -1002,17 +1002,17 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               <p>The identifier &lt;id&gt; will be replaced with the
               &lt;replacement&gt;. The replacement could be omitted, in such
               case it is still possible to check if the identifier was defined
-              with IFDEF or IFNDEF.</p><div class="example"><a name="idp561"></a><p class="title"><b>Example 5.11. </b></p><div class="example-contents">
+              with IFDEF or IFNDEF.</p><div class="example"><a name="idp571"></a><p class="title"><b>Example 5.11. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEFINE str_honderd "Honderd"
     BYTE str_honderd,0             ; BYTE "Honderd",0</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">DEFM</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_defm"></a>DEFM</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p>
-            </dd><dt><span class="term">DEFS</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_defs"></a>DEFS</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_block">BLOCK</a>.</p>
-            </dd><dt><span class="term">DEFW</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_defw"></a>DEFW</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_word">WORD</a>.</p>
             </dd><dt><span class="term"><a name="po_device"></a>DEVICE &lt;deviceid&gt;</span></dt><dd>
               <p>Enables <a class="link" href="#s_realdevice">real device emulation
@@ -1035,7 +1035,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               <p>Set the address in which the part of code should work.
               <a class="link" href="#po_phase">PHASE</a> and <a class="link" href="#po_textarea">TEXTAREA</a> are synonyms of DISP.
               <a class="link" href="#po_ent">ENT</a> is restore current address.
-              <a class="link" href="#po_unphase">UNPHASE</a>, <a class="link" href="#po_dephase">DEPHASE</a> and <a class="link" href="#po_endt">ENDT</a> are synonyms of <a class="link" href="#po_ent">ENT</a></p><div class="example"><a name="idp601"></a><p class="title"><b>Example 5.12. </b></p><div class="example-contents">
+              <a class="link" href="#po_unphase">UNPHASE</a>, <a class="link" href="#po_dephase">DEPHASE</a> and <a class="link" href="#po_endt">ENDT</a> are synonyms of <a class="link" href="#po_ent">ENT</a></p><div class="example"><a name="idp614"></a><p class="title"><b>Example 5.12. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">SCREEN EQU $4000
@@ -1055,7 +1055,7 @@ MARKA  DEC A
        ENT
 ENDOFPROG</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">DISPLAY &lt;bytes&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_display"></a>DISPLAY &lt;bytes&gt;</span></dt><dd>
               <p><span class="emphasis"><em>This pseudo-op comes from ZX-Spectrum assembler
               ALASM.</em></span></p>
 
@@ -1063,7 +1063,7 @@ ENDOFPROG</pre>
               between -129 and 256. Keys /D, /H and /A set format of output of
               numbers:</p><pre class="programlisting">/D - out only in Decimal
 /H - out only in Hexadecimal
-/A - out both in Hexadecimal and Decimal</pre><div class="example"><a name="idp612"></a><p class="title"><b>Example 5.13. </b></p><div class="example-contents">
+/A - out both in Hexadecimal and Decimal</pre><div class="example"><a name="idp626"></a><p class="title"><b>Example 5.13. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ORG 100h
@@ -1078,63 +1078,64 @@ will be out to the console next strings:
 &gt; TESTLABEL address is:0x100,257
 */</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">DM</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_dm"></a>DM</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p>
-            </dd><dt><span class="term">DS</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_ds"></a>DS</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_block">BLOCK</a>.</p>
             </dd><dt><span class="term"><a name="po_dup"></a>DUP &lt;count&gt;</span></dt><dd>
               <p>DUP specifies the number of times to generate the
-              statements inside the macro. DUP can be used in macro's.</p><div class="example"><a name="idp631"></a><p class="title"><b>Example 5.14. </b></p><div class="example-contents">
+              following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.</p><div class="example"><a name="idp647"></a><p class="title"><b>Example 5.14. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DUP 3
     NOP
     EDUP
+
 /*this will expand to:
     NOP
     NOP
     NOP
 */</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">DW</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_dw"></a>DW</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_word">WORD</a>.</p>
             </dd><dt><span class="term"><a name="po_dword"></a>DWORD</span></dt><dd>
               <p>Defines a so called doubleword. Values should be between
-              -2147483649 and 4294967296.</p><div class="example"><a name="idp645"></a><p class="title"><b>Example 5.15. </b></p><div class="example-contents">
+              -2147483649 and 4294967296.</p><div class="example"><a name="idp662"></a><p class="title"><b>Example 5.15. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DWORD 4000h,0d000h
     DWORD 4</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">DZ</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_dz"></a>DZ</span></dt><dd>
               <p>Same as <a class="link" href="#po_byte">BYTE</a>, but an extra
-              zero will be added at the end.</p><div class="example"><a name="idp654"></a><p class="title"><b>Example 5.16. </b></p><div class="example-contents">
+              zero will be added at the end.</p><div class="example"><a name="idp672"></a><p class="title"><b>Example 5.16. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DZ 1      ; same as BYTE 1,0
     DZ "kip"  ; same as BYTE "kip",0</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">EMPTYTAP &lt;filenameoftapefile&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_emptytap"></a>EMPTYTAP &lt;filenameoftapefile&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Useful only for ZX-Spectrum
               users</em></span></p>
 
               <p>Create the new or truncate existing standard tape file
               for emulators of ZX-Spectrum. See example of
               <a class="link" href="#po_savetap">SAVETAP</a>.</p>
-            </dd><dt><span class="term">EMPTYTRD &lt;filenameoftrdimage&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_emptytrd"></a>EMPTYTRD &lt;filenameoftrdimage&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Useful only for ZX-Spectrum
               users</em></span></p>
 
               <p>Create the empty TRD image for emulators of ZX-Spectrum.
               See example of <a class="link" href="#po_savetrd">SAVETRD</a>.</p>
-            </dd><dt><span class="term">ENCODING &lt;encoding&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_encoding"></a>ENCODING &lt;encoding&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Useful only for non English
               users</em></span></p>
 
               <p>Set the current encoding, i.e. if you set "DOS", SjASMPlus
               will automatically convert strings from ANSI to DOS-866.
               Encoding may be "DOS"(DOS-866) or "WIN"(ANSI/Win-1251). Default
-              is "WIN". </p><div class="example"><a name="idp678"></a><p class="title"><b>Example 5.17. </b></p><div class="example-contents">
+              is "WIN". </p><div class="example"><a name="idp699"></a><p class="title"><b>Example 5.17. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ENCODING "WIN"
@@ -1142,18 +1143,18 @@ will be out to the console next strings:
     ENCODING "DOS"
     DB "тексттекст" ;will be вҐЄбввҐЄбв</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">END</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_end"></a>END</span></dt><dd>
               <p>The assembler will stop at this point. The pseudo-op
               doesn't work in the beginning of line(with and without key
               --dirbol).</p>
             </dd><dt><span class="term"><a name="po_endlua"></a>ENDLUA</span></dt><dd>
               <p>See <a class="link" href="#po_lua">LUA</a> for more
               information.</p>
-            </dd><dt><span class="term">ENDMOD</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_endmod"></a>ENDMOD</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_endmodule">ENDMODULE</a>.</p>
             </dd><dt><span class="term"><a name="po_endmodule"></a>ENDMODULE</span></dt><dd>
               <p>To indicate the end of a module (see <a class="link" href="#po_module">MODULE</a>), and use the previous
-              modulename.</p><div class="example"><a name="idp703"></a><p class="title"><b>Example 5.18. </b></p><div class="example-contents">
+              modulename.</p><div class="example"><a name="idp726"></a><p class="title"><b>Example 5.18. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    MODULE M1
@@ -1168,19 +1169,19 @@ B                 ; M1.B
               <p>Synonym of <a class="link" href="#po_ent">ENT</a>.</p>
             </dd><dt><span class="term"><a name="po_ent"></a>ENT</span></dt><dd>
               <p>Restore current address. See <a class="link" href="#po_disp">DISP</a> for more information.</p>
-            </dd><dt><span class="term">EQU</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_equ"></a>EQU</span></dt><dd>
               <p>To give a label a value other than the current program
               counter. '=' can be used instead of 'EQU'. The label should not
-              already exist.</p><div class="example"><a name="idp723"></a><p class="title"><b>Example 5.19. </b></p><div class="example-contents">
+              already exist.</p><div class="example"><a name="idp747"></a><p class="title"><b>Example 5.19. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">Label EQU 3
 Kip=3</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">EXPORT label</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_export"></a>EXPORT label</span></dt><dd>
               <p>The named label will be written to the export-file, in the
               form 'label: EQU value'. This way the export-file can be
-              included in other sources.</p><div class="example"><a name="idp731"></a><p class="title"><b>Example 5.20. </b></p><div class="example-contents">
+              included in other sources.</p><div class="example"><a name="idp756"></a><p class="title"><b>Example 5.20. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">DRIE=3
@@ -1191,7 +1192,7 @@ Kip=3</pre>
               Afterwards the map counter is increment by the given amount. '#'
               May be used instead of 'FIELD'. With map and field it is
               possible to create structure-like data structures. With '##' it
-              is possible to align the map counter.</p><div class="example"><a name="idp740"></a><p class="title"><b>Example 5.21. </b></p><div class="example-contents">
+              is possible to align the map counter.</p><div class="example"><a name="idp765"></a><p class="title"><b>Example 5.21. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    MAP 8
@@ -1202,14 +1203,14 @@ Kop2  # 1     ; Kop2=13
      ##       ; align map address (align 4 is default)
 Kop3  # 6     ; Kop3=16</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">FPOS &lt;position&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_fpos"></a>FPOS &lt;position&gt;</span></dt><dd>
               <p>The FPOS directive makes it possible to set the file
               position to anywhere in the output file.</p>
 
               <p>In combination with <a class="link" href="#po_output">OUTPUT</a> &lt;filename&gt;,r it is
               possible to update existing files.</p>
 
-              <div class="example"><a name="idp751"></a><p class="title"><b>Example 5.22. </b></p><div class="example-contents">
+              <div class="example"><a name="idp777"></a><p class="title"><b>Example 5.22. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">; This example will result in a file with a length of one byte:
@@ -1221,61 +1222,61 @@ Kop3  # 6     ; Kop3=16</pre>
             </dd><dt><span class="term"><a name="po_incbin"></a>INCBIN
             &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a binary file into the outputfile. The offset
-              and length are optional.</p><div class="example"><a name="idp760"></a><p class="title"><b>Example 5.23. </b></p><div class="example-contents">
+              and length are optional.</p><div class="example"><a name="idp786"></a><p class="title"><b>Example 5.23. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
     INCBIN "rantab.com",3,256 ; include 256 bytes from offset 3
     INCBIN gfx.scc ,7         ; note the space between the filename and the ',7' here :)</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">INCHOB &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_inchob"></a>INCHOB &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a data from a hobeta file into the outputfile.
-              The offset and length are optional.</p><div class="example"><a name="idp768"></a><p class="title"><b>Example 5.24. </b></p><div class="example-contents">
+              The offset and length are optional.</p><div class="example"><a name="idp795"></a><p class="title"><b>Example 5.24. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCHOB "gfx.$c",7        ; include gfx.scc, skip first 7 bytes
     INCHOB "sprs.$c",3,256   ; include 256 bytes from offset 3
     INCHOB gfx.$c ,7        ; note the space between the filename and the ',7' here :)</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">INCLUDE &lt;filename&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_include"></a>INCLUDE &lt;filename&gt;</span></dt><dd>
               <p>To include another sourcefile into the current.
               Sourcefiles can be nested 20 levels deep. If the file cannot be
               found in the current directory (the current directory is the
               directory the current file comes from) the file will be searched
               for in the directories specified at the commandline. When angle
               brackets are used, the commandline directories are searched
-              before the current directory.</p><div class="example"><a name="idp776"></a><p class="title"><b>Example 5.25. </b></p><div class="example-contents">
+              before the current directory.</p><div class="example"><a name="idp804"></a><p class="title"><b>Example 5.25. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCLUDE &lt;VDP.I&gt;
     INCLUDE MORE.I
     INCLUDE "MORE.I"</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">INCLUDELUA &lt;filename&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_includelua"></a>INCLUDELUA &lt;filename&gt;</span></dt><dd>
               <p>To include another LUA script in first pass(!). If the
               file cannot be found in the current directory (the current
               directory is the directory the current file comes from) the file
               will be searched for in the directories specified at the
               commandline. When angle brackets are used, the commandline
-              directories are searched before the current directory.</p><div class="example"><a name="idp784"></a><p class="title"><b>Example 5.26. </b></p><div class="example-contents">
+              directories are searched before the current directory.</p><div class="example"><a name="idp813"></a><p class="title"><b>Example 5.26. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCLUDELUA &lt;mylibrary1.lua&gt;
     INCLUDELUA mylibrary2.lua
     INCLUDELUA "library_for_zx.lua"</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">INCTRD
+            </dd><dt><span class="term"><a name="po_inctrd"></a>INCTRD
             &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a file from a TRD image into the outputfile.
-              The offset and length are optional.</p><div class="example"><a name="idp792"></a><p class="title"><b>Example 5.27. </b></p><div class="example-contents">
+              The offset and length are optional.</p><div class="example"><a name="idp822"></a><p class="title"><b>Example 5.27. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCTRD "test.trd","mygfx.C" ; include mygfx.C from test.trd
     INCTRD "test.trd","mygfx.C",12 ; include mygfx.C from test.trd, skip first 12 bytes</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">INSERT &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_insert"></a>INSERT &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>INSERT is a synonym of <a class="link" href="#po_incbin">INCBIN</a>. See above.</p>
-            </dd><dt><span class="term">LABELSLIST &lt;filename&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_labelslist"></a>LABELSLIST &lt;filename&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Useful only for ZX-Spectrum Emulator
               UNREALSPECCY.</em></span></p>
 
@@ -1287,7 +1288,7 @@ Kop3  # 6     ; Kop3=16</pre>
               <pre class="programlisting">NN:ADDRESS LABELNAME</pre><p>
               ,where NN is number of page of RAM</p>
 
-              <div class="example"><a name="idp813"></a><p class="title"><b>Example 5.28. </b></p><div class="example-contents">
+              <div class="example"><a name="idp845"></a><p class="title"><b>Example 5.28. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    LABELSLIST "x:/somepath/user.l"</pre>
@@ -1301,7 +1302,7 @@ PASS2  -  interpret Lua script in second pass only.
 PASS3  -  interpret Lua script in third pass only. By default.
 ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</pre>
 
-              <div class="example"><a name="idp826"></a><p class="title"><b>Example 5.29. </b></p><div class="example-contents">
+              <div class="example"><a name="idp858"></a><p class="title"><b>Example 5.29. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    LUA
@@ -1314,18 +1315,18 @@ ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some
         _pc("RET")
     ENDLUA</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">MAP &lt;address&gt;</span></dt><dd>
-              <p>Set the map counter to the specified value. See <a class="link" href="#po_field">FIELD</a> for an example.</p><div class="example"><a name="idp835"></a><p class="title"><b>Example 5.30. </b></p><div class="example-contents">
+            </dd><dt><span class="term"><a name="po_map"></a>MAP &lt;address&gt;</span></dt><dd>
+              <p>Set the map counter to the specified value. See <a class="link" href="#po_field">FIELD</a> for an example.</p><div class="example"><a name="idp868"></a><p class="title"><b>Example 5.30. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    MAP 5</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">MEMORYMAP</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_memorymap"></a>MEMORYMAP</span></dt><dd>
               <p>Not available yet.</p>
             </dd><dt><span class="term"><a name="po_module"></a>MODULE &lt;name&gt;</span></dt><dd>
               <p>Labels are to be unique only in the current module. Also
               note the use of '@' to suppress all this label-processing. (The
-              '@' is NOT part of the label name though!)</p><div class="example"><a name="idp848"></a><p class="title"><b>Example 5.31. </b></p><div class="example-contents">
+              '@' is NOT part of the label name though!)</p><div class="example"><a name="idp882"></a><p class="title"><b>Example 5.31. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    MODULE xxx
@@ -1344,8 +1345,8 @@ Kip                ; label yyy.Kip
     MODULE           ; no modulename
 Kip                ; label Kip</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">ORG &lt;address&gt;</span></dt><dd>
-              <p>Set the program counter to a specific address.</p><div class="example"><a name="idp856"></a><p class="title"><b>Example 5.32. </b></p><div class="example-contents">
+            </dd><dt><span class="term"><a name="po_org"></a>ORG &lt;address&gt;</span></dt><dd>
+              <p>Set the program counter to a specific address.</p><div class="example"><a name="idp891"></a><p class="title"><b>Example 5.32. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ORG 100h ; or 0x100, or $100, or #100
@@ -1371,7 +1372,7 @@ Kip                ; label Kip</pre>
          ORG addr
     ENDM</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">OUTEND</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_outend"></a>OUTEND</span></dt><dd>
               <p>Ends generating compiler output to file specified in OUTPUT.</p>
             </dd><dt><span class="term"><a name="po_output"></a>OUTPUT
             &lt;filename&gt;[,&lt;mode&gt;]</span></dt><dd>
@@ -1384,7 +1385,7 @@ Kip                ; label Kip</pre>
               FPOS 0) and append (open and leave the file pointer at the end
               of the file).</p><pre class="programlisting">OUTPUT &lt;filename&gt;,t  ; truncate (default)
 OUTPUT &lt;filename&gt;,r  ; rewind
-OUTPUT &lt;filename&gt;,a  ; append</pre><div class="example"><a name="idp871"></a><p class="title"><b>Example 5.33. bigfile.asm</b></p><div class="example-contents">
+OUTPUT &lt;filename&gt;,a  ; append</pre><div class="example"><a name="idp907"></a><p class="title"><b>Example 5.33. bigfile.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT loader.com
@@ -1417,7 +1418,7 @@ Bigfile.dat  ; contains main.asm and data.asm</pre>
 
               <p>Set the current memory page to current slot.</p>
 
-              <div class="example"><a name="idp888"></a><p class="title"><b>Example 5.34. </b></p><div class="example-contents">
+              <div class="example"><a name="idp924"></a><p class="title"><b>Example 5.34. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page
@@ -1425,41 +1426,41 @@ Bigfile.dat  ; contains main.asm and data.asm</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_phase"></a>PHASE</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_disp">DISP</a>.</p>
-            </dd><dt><span class="term">REPT &lt;count&gt;</span></dt><dd>
-              <p>Synonym of <a class="link" href="#po_dup">DUP</a>.</p>
-            </dd><dt><span class="term">SAVEBIN
+            </dd><dt><span class="term"><a name="po_rept"></a>REPT &lt;count&gt;</span></dt><dd>
+              <p>Synonym of <a class="link" href="#po_dup">DUP</a>. There is also synonym ENDR to end REPT block (EDUP works too).</p>
+            </dd><dt><span class="term"><a name="po_savebin"></a>SAVEBIN
             &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Work only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Save the block of RAM.</p>
 
-              <div class="example"><a name="idp911"></a><p class="title"><b>Example 5.35. </b></p><div class="example-contents">
+              <div class="example"><a name="idp949"></a><p class="title"><b>Example 5.35. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page to current slot
     SAVEBIN "ram7.bin",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
     SAVEBIN "ram2.bin",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">SAVEHOB
+            </dd><dt><span class="term"><a name="po_savehob"></a>SAVEHOB
             &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Work only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Save the block of RAM in Hobeta format.</p>
 
-              <div class="example"><a name="idp923"></a><p class="title"><b>Example 5.36. </b></p><div class="example-contents">
+              <div class="example"><a name="idp962"></a><p class="title"><b>Example 5.36. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page to current slot
     SAVEHOB "ram7.$c","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
     SAVEHOB "ram2.$c","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">SAVESNA &lt;filename&gt;,&lt;startadressofprogram&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_savesna"></a>SAVESNA &lt;filename&gt;,&lt;startadressofprogram&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Work only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
-              <p>Save the snapshot for emulators of ZX-Spectrum. </p><div class="example"><a name="idp934"></a><p class="title"><b>Example 5.37. </b></p><div class="example-contents">
+              <p>Save the snapshot for emulators of ZX-Spectrum. </p><div class="example"><a name="idp974"></a><p class="title"><b>Example 5.37. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128
@@ -1477,7 +1478,7 @@ START  .... ;something code
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Append the tape header or block of data to the end of the
-              standard tape file for emulators of ZX-Spectrum.</p><div class="example"><a name="idp951"></a><p class="title"><b>Example 5.38. </b></p><div class="example-contents">
+              standard tape file for emulators of ZX-Spectrum.</p><div class="example"><a name="idp991"></a><p class="title"><b>Example 5.38. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM48
@@ -1501,7 +1502,7 @@ START  .... ;something code
 
               <p>Save the tape file for emulators of ZX-Spectrum as a
               "snapshot" of whole memory. Generated tape file supports the
-              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.</p><div class="example"><a name="idp962"></a><p class="title"><b>Example 5.39. </b></p><div class="example-contents">
+              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.</p><div class="example"><a name="idp1002"></a><p class="title"><b>Example 5.39. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM48
@@ -1515,7 +1516,7 @@ START  .... ;something code
               <p><span class="emphasis"><em>Work only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
-              <p>Save the snapshot for emulators of ZX-Spectrum</p><div class="example"><a name="idp974"></a><p class="title"><b>Example 5.40. </b></p><div class="example-contents">
+              <p>Save the snapshot for emulators of ZX-Spectrum</p><div class="example"><a name="idp1014"></a><p class="title"><b>Example 5.40. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    EMPTYTRD "test.trd" ;create empty TRD image
@@ -1523,9 +1524,9 @@ START  .... ;something code
     SAVETRD "test.trd","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file to TRD image
     SAVETRD "test.trd","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file to TRD image</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">SHELLEXEC &lt;filename&gt;[,&lt;parameters&gt;]</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_shellexec"></a>SHELLEXEC &lt;filename&gt;[,&lt;parameters&gt;]</span></dt><dd>
               <p>Execute external program &lt;filename&gt; using optional
-              command line &lt;parameters&gt;.</p><div class="example"><a name="idp982"></a><p class="title"><b>Example 5.41. </b></p><div class="example-contents">
+              command line &lt;parameters&gt;.</p><div class="example"><a name="idp1023"></a><p class="title"><b>Example 5.41. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT "mybin.bin"
@@ -1535,14 +1536,14 @@ START  .... ;something code
        ; or SHELLEXEC "x:/somepath/bin2tap.exe","mybin.bin mytap.tap"
     ENDIF</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">SIZE &lt;filesize in bytes&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_size"></a>SIZE &lt;filesize in bytes&gt;</span></dt><dd>
               <p>If the resulting file is less than the given length, as
-              many bytes are added as necessary. See <a class="link" href="#po_output">OUTPUT</a> for more.</p><div class="example"><a name="idp991"></a><p class="title"><b>Example 5.42. </b></p><div class="example-contents">
+              many bytes are added as necessary. See <a class="link" href="#po_output">OUTPUT</a> for more.</p><div class="example"><a name="idp1033"></a><p class="title"><b>Example 5.42. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    SIZE 32768       ; make sure file will be 32K</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">SLOT &lt;number&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_slot"></a>SLOT &lt;number&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Work only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
@@ -1550,7 +1551,7 @@ START  .... ;something code
               Use pseudo-op <a class="link" href="#po_page">PAGE</a> to change page
               in the current slot.</p>
 
-              <div class="example"><a name="idp1004"></a><p class="title"><b>Example 5.43. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1047"></a><p class="title"><b>Example 5.43. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128
@@ -1562,13 +1563,13 @@ START  .... ;something code
     INCBIN "somegfx.bin"
     ;....</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">TAPEND</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_tapend"></a>TAPEND</span></dt><dd>
               <p>Ends generating compiler output to tape file block specified in TAPOUT.</p>
-            </dd><dt><span class="term">TAPOUT &lt;filename&gt;[,&lt;flagbyte&gt;]</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_tapout"></a>TAPOUT &lt;filename&gt;[,&lt;flagbyte&gt;]</span></dt><dd>
               <p>Appends one tape block at the end of specified file.
               All following code will be assembled to this tape file block.</p>
 
-              <p>Default value of flagbyte is 255.</p><div class="example"><a name="idp1017"></a><p class="title"><b>Example 5.44. bigfile.asm</b></p><div class="example-contents">
+              <p>Default value of flagbyte is 255.</p><div class="example"><a name="idp1062"></a><p class="title"><b>Example 5.44. bigfile.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    EMPTYTAP screen.tap
@@ -1587,10 +1588,10 @@ START  .... ;something code
                 </div></div><p><br class="example-break">This will create tap file with the screen.</p>
             </dd><dt><span class="term"><a name="po_textarea"></a>TEXTAREA &lt;address&gt;</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_disp">DISP</a>.</p>
-            </dd><dt><span class="term">UNDEFINE &lt;id&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="po_undefine"></a>UNDEFINE &lt;id&gt;</span></dt><dd>
               <p>Removes the identifier defined by <a class="link" href="#po_define">DEFINE</a></p>
 
-              <div class="example"><a name="idp1033"></a><p class="title"><b>Example 5.45. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1079"></a><p class="title"><b>Example 5.45. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEFINE Release 1
@@ -1619,7 +1620,7 @@ START  .... ;something code
               <p>Synonym of <a class="link" href="#po_ent">ENT</a>.</p>
             </dd><dt><span class="term"><a name="po_word"></a>WORD &lt;words&gt;</span></dt><dd>
               <p>Defines a word. Values should be between -32787 and
-              65536.</p><div class="example"><a name="idp1048"></a><p class="title"><b>Example 5.46. </b></p><div class="example-contents">
+              65536.</p><div class="example"><a name="idp1094"></a><p class="title"><b>Example 5.46. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    WORD 4000h,0d000h
@@ -1637,14 +1638,14 @@ START  .... ;something code
       <div class="variablelist"><dl class="variablelist"><dt><span class="term"><a name="ca_if"></a>IF &lt;expression&gt;</span></dt><dd>
               <p>If &lt;expression&gt; is non-zero the following lines are
               assembled until an ELSE or ENDIF.</p>
-            </dd><dt><span class="term">IFN &lt;expression&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="ca_ifn"></a>IFN &lt;expression&gt;</span></dt><dd>
               <p>If &lt;expression&gt; is zero the following lines are
               assembled until an ELSE or ENDIF.</p>
-            </dd><dt><span class="term">IFDEF &lt;id&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="ca_ifdef"></a>IFDEF &lt;id&gt;</span></dt><dd>
               <p>The condition is true if there is an id defined. These are
               NOT labels.</p>
 
-              <div class="example"><a name="idp1070"></a><p class="title"><b>Example 5.47. Example</b></p><div class="example-contents">
+              <div class="example"><a name="idp1118"></a><p class="title"><b>Example 5.47. Example</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    IFDEF MSX_LEAN_AND_MEAN
@@ -1653,11 +1654,11 @@ START  .... ;something code
         CALL InitDos2MemMan
     ENDIF</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">IFNDEF &lt;id&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="ca_ifndef"></a>IFNDEF &lt;id&gt;</span></dt><dd>
               <p>The condition is true if there isn't an id defined. These
               are NOT labels.</p>
 
-              <div class="example"><a name="idp1079"></a><p class="title"><b>Example 5.48. Example</b></p><div class="example-contents">
+              <div class="example"><a name="idp1128"></a><p class="title"><b>Example 5.48. Example</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">1   IN A,(0C4H)
@@ -1666,12 +1667,12 @@ START  .... ;something code
         JR NC,1B
     ENDIF</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">IFUSED &lt;label&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="ca_ifused"></a>IFUSED &lt;label&gt;</span></dt><dd>
               <p>The condition is true if there is an label used somewhere
               in the code. You can create libraries of useful functions using
               IFUSED pseudo-op</p>
 
-              <div class="example"><a name="idp1088"></a><p class="title"><b>Example 5.49. Example</b></p><div class="example-contents">
+              <div class="example"><a name="idp1138"></a><p class="title"><b>Example 5.49. Example</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT "TEST.OUT"
@@ -1712,13 +1713,13 @@ LABEL5:
     ENDIF
     </pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term">IFNUSED &lt;label&gt;</span></dt><dd>
+            </dd><dt><span class="term"><a name="ca_ifnused"></a>IFNUSED &lt;label&gt;</span></dt><dd>
               <p>The condition is true if there is an label
               <span class="emphasis"><em>not</em></span> used somewhere in the code.</p>
-            </dd><dt><span class="term">ELSE</span></dt><dd>
+            </dd><dt><span class="term"><a name="ca_else"></a>ELSE</span></dt><dd>
               <p>See <a class="link" href="#ca_if">IF</a>. If the condition is
               not true, the else-part is assembled.</p>
-            </dd><dt><span class="term">ENDIF</span></dt><dd>
+            </dd><dt><span class="term"><a name="ca_endif"></a>ENDIF</span></dt><dd>
               <p>Every <a class="link" href="#ca_if">IF</a> should be followed
               by an ENDIF.</p>
             </dd></dl></div>
@@ -1730,7 +1731,7 @@ LABEL5:
       <p>The MACRO pseudo-op defines a macro. It should be followed by the
       name of the macro, optionally followed by the parameters. The following
       lines will be stored as the macro-body until an ENDM pseudo-op is
-      encountered. Macro's have to be defined before their use.</p><div class="example"><a name="idp1109"></a><p class="title"><b>Example 5.50. Macro without parameters</b></p><div class="example-contents">
+      encountered. Macro's have to be defined before their use.</p><div class="example"><a name="idp1162"></a><p class="title"><b>Example 5.50. Macro without parameters</b></p><div class="example-contents">
           
 
           <pre class="programlisting">  MACRO ADD_HL_A
@@ -1743,7 +1744,7 @@ LABEL5:
         </div></div><p><br class="example-break"></p>
 
       <p>Labels in a macro starting with a dot are local to each macro
-      expansion.</p><div class="example"><a name="idp1114"></a><p class="title"><b>Example 5.51. A macro with parameters</b></p><div class="example-contents">
+      expansion.</p><div class="example"><a name="idp1167"></a><p class="title"><b>Example 5.51. A macro with parameters</b></p><div class="example-contents">
           
 
           <pre class="programlisting">  MACRO WAVEOUT reg, data
@@ -1759,7 +1760,7 @@ LABEL5:
   OUT (7EH),A
   LD A,17
   OUT (7FH),A</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1118"></a><p class="title"><b>Example 5.52. Another example</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1171"></a><p class="title"><b>Example 5.52. Another example</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    MACRO LOOP
@@ -1783,7 +1784,7 @@ Main
         </div></div><p><br class="example-break"></p>
 
       <p>Angle brackets can be used when the arguments contain
-      commas.</p><div class="example"><a name="idp1123"></a><p class="title"><b>Example 5.53. </b></p><div class="example-contents">
+      commas.</p><div class="example"><a name="idp1176"></a><p class="title"><b>Example 5.53. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">    MACRO UseLess data
@@ -1843,26 +1844,26 @@ Main
       <p>Between the STRUCT and ENDS pseudo-instructions the following
       instructions can be used:</p>
 
-      <div class="variablelist"><dl class="variablelist"><dt><span class="term">BYTE [&lt;defaultvalue&gt;]</span></dt><dd>
+      <div class="variablelist"><dl class="variablelist"><dt><span class="term"><a name="st_byte"></a>BYTE [&lt;defaultvalue&gt;]</span></dt><dd>
               <p>To define a one byte member. The defaultvalue is used when
               no initialisation value is given when the structure is declared.
               (DB and DEFB may be used instead of BYTE).</p>
-            </dd><dt><span class="term">WORD [&lt;defaultvalue&gt;]</span></dt><dd>
+            </dd><dt><span class="term"><a name="st_word"></a>WORD [&lt;defaultvalue&gt;]</span></dt><dd>
               <p>To define a two byte member. The defaultvalue is used when
               no initialisation value is given when the structure is declared.
               (DW and DEFW may be used instead of WORD).</p>
-            </dd><dt><span class="term">D24 [&lt;defaultvalue&gt;]</span></dt><dd>
+            </dd><dt><span class="term"><a name="st_d24"></a>D24 [&lt;defaultvalue&gt;]</span></dt><dd>
               <p>To define a three byte member. The defaultvalue is used
               when no initialisation value is given when the structure is
               declared.</p>
-            </dd><dt><span class="term">DWORD [&lt;defaultvalue&gt;]</span></dt><dd>
+            </dd><dt><span class="term"><a name="st_dword"></a>DWORD [&lt;defaultvalue&gt;]</span></dt><dd>
               <p>To define a four byte member. The defaultvalue is used
               when no initialisation value is given when the structure is
               declared. (DD and DEFD may be used instead of WORD).</p>
-            </dd><dt><span class="term">BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</span></dt><dd>
+            </dd><dt><span class="term"><a name="st_block"></a>BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</span></dt><dd>
               <p>To define an member of the specified number of bytes.
               ('#', DS and DEFS may be used instead of WORD).</p>
-            </dd><dt><span class="term">ALIGN [&lt;expression&gt;]</span></dt><dd>
+            </dd><dt><span class="term"><a name="st_align"></a>ALIGN [&lt;expression&gt;]</span></dt><dd>
               <p>To align the offset. If the expression is omitted, 4 is
               assumed. ('##' May be used instead of ALIGN).</p>
             </dd><dt><span class="term">&lt;structure name&gt; [&lt;init values&gt;]</span></dt><dd>
@@ -1874,7 +1875,7 @@ Main
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp34"></a>Examples</h2></div></div></div>
       
 
-      <div class="example"><a name="idp1174"></a><p class="title"><b>Example 6.1. </b></p><div class="example-contents">
+      <div class="example"><a name="idp1233"></a><p class="title"><b>Example 6.1. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SCOLOR
@@ -1889,7 +1890,7 @@ BLUE	BYTE 6
 SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1181"></a><p class="title"><b>Example 6.2. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1240"></a><p class="title"><b>Example 6.2. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SDOT
@@ -1909,7 +1910,7 @@ SDOT.C.RED	EQU 2 ; offset
 SDOT.C.GREEN	EQU 3 ; offset
 SDOT.C.BLUE	EQU 4 ; offset
 </pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1188"></a><p class="title"><b>Example 6.3. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1247"></a><p class="title"><b>Example 6.3. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SPOS,4
@@ -1925,7 +1926,7 @@ AD	WORD
 SPOS.X	EQU  4 ; offset
 SPOS.Y	EQU  6 ; offset
 SPOS.AD	EQU  8 ; offset</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1195"></a><p class="title"><b>Example 6.4. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1254"></a><p class="title"><b>Example 6.4. </b></p><div class="example-contents">
           
 
           <p>When a structure is defined it is possible to declare labels
@@ -1982,7 +1983,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp37"></a>How to use?</h2></div></div></div>
       
 
-      <p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a name="idp1220"></a><p class="title"><b>Example 7.1. Hello World!</b></p><div class="example-contents">
+      <p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a name="idp1279"></a><p class="title"><b>Example 7.1. Hello World!</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    LUA
@@ -2158,7 +2159,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
 
       <p></p>
 
-      <div class="example"><a name="idp1452"></a><p class="title"><b>Example 7.2. Variables doesn't clear in new passes of the compiler</b></p><div class="example-contents">
+      <div class="example"><a name="idp1511"></a><p class="title"><b>Example 7.2. Variables doesn't clear in new passes of the compiler</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    LUA PASS1
@@ -2175,7 +2176,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
        print (v)
 -- out to console: 2
     ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1456"></a><p class="title"><b>Example 7.3. To generate some code you need to generate it in all
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1515"></a><p class="title"><b>Example 7.3. To generate some code you need to generate it in all
           passes</b></p><div class="example-contents">
           
 
@@ -2189,7 +2190,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
         _pl(".savesp: LD SP,0")
         _pc("RET")
     ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1460"></a><p class="title"><b>Example 7.4. Declare function and use it</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1519"></a><p class="title"><b>Example 7.4. Declare function and use it</b></p><div class="example-contents">
           
 
           <pre class="programlisting">     LUA
@@ -2212,7 +2213,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
      LUA
          savetape_mytype("tapefiles/myprogram.tape", _c("StartGameLabel"))
      ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1464"></a><p class="title"><b>Example 7.5. Simple sample :)</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1523"></a><p class="title"><b>Example 7.5. Simple sample :)</b></p><div class="example-contents">
           
 
           <pre class="programlisting">	LUA

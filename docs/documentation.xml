@@ -1180,7 +1180,7 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term>ABYTE &lt;offset&gt; &lt;bytes&gt;</term>
+            <term><anchor id="po_abyte" />ABYTE &lt;offset&gt; &lt;bytes&gt;</term>
 
             <listitem>
               <para>Defines a byte or a string of bytes. The offset is added
@@ -1194,7 +1194,7 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term>ABYTEC &lt;offset&gt; &lt;bytes&gt;</term>
+            <term><anchor id="po_abytec" />ABYTEC &lt;offset&gt; &lt;bytes&gt;</term>
 
             <listitem>
               <para>Defines a byte or a string of bytes, where the last byte
@@ -1209,7 +1209,7 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term>ABYTEZ &lt;offset&gt; &lt;bytes&gt;</term>
+            <term><anchor id="po_abytez" />ABYTEZ &lt;offset&gt; &lt;bytes&gt;</term>
 
             <listitem>
               <para>Defines a byte or a string of bytes, followed by a zero.
@@ -1241,7 +1241,7 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term>ASSERT &lt;expression&gt;</term>
+            <term><anchor id="po_assert" />ASSERT &lt;expression&gt;</term>
 
             <listitem>
               <para>An 'assertion failed' error is issued if the expression
@@ -1257,7 +1257,7 @@ END_OF_PROGRAM
           </varlistentry>
 
           <varlistentry>
-            <term>BINARY &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
+            <term><anchor id="po_binary" />BINARY &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_incbin">INCBIN</link>.</para>
@@ -1297,7 +1297,7 @@ END_OF_PROGRAM
           </varlistentry>
 
           <varlistentry>
-            <term>DB</term>
+            <term><anchor id="po_db" />DB</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
@@ -1305,7 +1305,7 @@ END_OF_PROGRAM
           </varlistentry>
 
           <varlistentry>
-            <term>DC</term>
+            <term><anchor id="po_dc" />DC</term>
 
             <listitem>
               <para>Same as <link linkend="po_byte">BYTE</link>, but every
@@ -1318,7 +1318,7 @@ END_OF_PROGRAM
           </varlistentry>
 
           <varlistentry>
-            <term>DD</term>
+            <term><anchor id="po_dd" />DD</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dword">DWORD</link>.</para>
@@ -1351,7 +1351,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term>DEFB</term>
+            <term><anchor id="po_defb" />DEFB</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
@@ -1359,7 +1359,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term>DEFD</term>
+            <term><anchor id="po_defd" />DEFD</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dword">DWORD</link>.</para>
@@ -1395,7 +1395,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term>DEFM</term>
+            <term><anchor id="po_defm" />DEFM</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
@@ -1403,7 +1403,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term>DEFS</term>
+            <term><anchor id="po_defs" />DEFS</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_block">BLOCK</link>.</para>
@@ -1411,7 +1411,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term>DEFW</term>
+            <term><anchor id="po_defw" />DEFW</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_word">WORD</link>.</para>
@@ -1476,7 +1476,7 @@ ENDOFPROG</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>DISPLAY &lt;bytes&gt;</term>
+            <term><anchor id="po_display" />DISPLAY &lt;bytes&gt;</term>
 
             <listitem>
               <para><emphasis>This pseudo-op comes from ZX-Spectrum assembler
@@ -1505,7 +1505,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>DM</term>
+            <term><anchor id="po_dm" />DM</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
@@ -1513,7 +1513,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>DS</term>
+            <term><anchor id="po_ds" />DS</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_block">BLOCK</link>.</para>
@@ -1525,12 +1525,13 @@ will be out to the console next strings:
 
             <listitem>
               <para>DUP specifies the number of times to generate the
-              statements inside the macro. DUP can be used in macro's.<example>
+              following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.<example>
                   <title></title>
 
                   <para><programlisting>    DUP 3
     NOP
     EDUP
+
 /*this will expand to:
     NOP
     NOP
@@ -1541,7 +1542,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>DW</term>
+            <term><anchor id="po_dw" />DW</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_word">WORD</link>.</para>
@@ -1563,7 +1564,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>DZ</term>
+            <term><anchor id="po_dz" />DZ</term>
 
             <listitem>
               <para>Same as <link linkend="po_byte">BYTE</link>, but an extra
@@ -1577,7 +1578,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>EMPTYTAP &lt;filenameoftapefile&gt;</term>
+            <term><anchor id="po_emptytap" />EMPTYTAP &lt;filenameoftapefile&gt;</term>
 
             <listitem>
               <para><emphasis>Useful only for ZX-Spectrum
@@ -1590,7 +1591,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>EMPTYTRD &lt;filenameoftrdimage&gt;</term>
+            <term><anchor id="po_emptytrd" />EMPTYTRD &lt;filenameoftrdimage&gt;</term>
 
             <listitem>
               <para><emphasis>Useful only for ZX-Spectrum
@@ -1602,7 +1603,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>ENCODING &lt;encoding&gt;</term>
+            <term><anchor id="po_encoding" />ENCODING &lt;encoding&gt;</term>
 
             <listitem>
               <para><emphasis>Useful only for non English
@@ -1623,7 +1624,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>END</term>
+            <term><anchor id="po_end" />END</term>
 
             <listitem>
               <para>The assembler will stop at this point. The pseudo-op
@@ -1642,7 +1643,7 @@ will be out to the console next strings:
           </varlistentry>
 
           <varlistentry>
-            <term>ENDMOD</term>
+            <term><anchor id="po_endmod" />ENDMOD</term>
 
             <listitem>
               <para>Synonym of <link
@@ -1688,7 +1689,7 @@ B                 ; M1.B
           </varlistentry>
 
           <varlistentry>
-            <term>EQU</term>
+            <term><anchor id="po_equ" />EQU</term>
 
             <listitem>
               <para>To give a label a value other than the current program
@@ -1703,7 +1704,7 @@ Kip=3</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>EXPORT label</term>
+            <term><anchor id="po_export" />EXPORT label</term>
 
             <listitem>
               <para>The named label will be written to the export-file, in the
@@ -1740,7 +1741,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>FPOS &lt;position&gt;</term>
+            <term><anchor id="po_fpos" />FPOS &lt;position&gt;</term>
 
             <listitem>
               <para>The FPOS directive makes it possible to set the file
@@ -1779,7 +1780,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>INCHOB &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
+            <term><anchor id="po_inchob" />INCHOB &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>To include a data from a hobeta file into the outputfile.
@@ -1794,7 +1795,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>INCLUDE &lt;filename&gt;</term>
+            <term><anchor id="po_include" />INCLUDE &lt;filename&gt;</term>
 
             <listitem>
               <para>To include another sourcefile into the current.
@@ -1814,7 +1815,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>INCLUDELUA &lt;filename&gt;</term>
+            <term><anchor id="po_includelua" />INCLUDELUA &lt;filename&gt;</term>
 
             <listitem>
               <para>To include another LUA script in first pass(!). If the
@@ -1833,7 +1834,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>INCTRD
+            <term><anchor id="po_inctrd" />INCTRD
             &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
@@ -1848,7 +1849,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>INSERT &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
+            <term><anchor id="po_insert" />INSERT &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>INSERT is a synonym of <link
@@ -1857,7 +1858,7 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>LABELSLIST &lt;filename&gt;</term>
+            <term><anchor id="po_labelslist" />LABELSLIST &lt;filename&gt;</term>
 
             <listitem>
               <para><emphasis>Useful only for ZX-Spectrum Emulator
@@ -1909,7 +1910,7 @@ ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some
           </varlistentry>
 
           <varlistentry>
-            <term>MAP &lt;address&gt;</term>
+            <term><anchor id="po_map" />MAP &lt;address&gt;</term>
 
             <listitem>
               <para>Set the map counter to the specified value. See <link
@@ -1922,7 +1923,7 @@ ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some
           </varlistentry>
 
           <varlistentry>
-            <term>MEMORYMAP</term>
+            <term><anchor id="po_memorymap" />MEMORYMAP</term>
 
             <listitem>
               <para>Not available yet.</para>
@@ -1958,7 +1959,7 @@ Kip                ; label Kip</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>ORG &lt;address&gt;</term>
+            <term><anchor id="po_org" />ORG &lt;address&gt;</term>
 
             <listitem>
               <para>Set the program counter to a specific address.<example>
@@ -1991,7 +1992,7 @@ Kip                ; label Kip</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>OUTEND</term>
+            <term><anchor id="po_outend" />OUTEND</term>
 
             <listitem>
               <para>Ends generating compiler output to file specified in OUTPUT.</para>
@@ -2069,15 +2070,15 @@ Bigfile.dat  ; contains main.asm and data.asm</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>REPT &lt;count&gt;</term>
+            <term><anchor id="po_rept" />REPT &lt;count&gt;</term>
 
             <listitem>
-              <para>Synonym of <link linkend="po_dup">DUP</link>.</para>
+              <para>Synonym of <link linkend="po_dup">DUP</link>. There is also synonym ENDR to end REPT block (EDUP works too).</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>SAVEBIN
+            <term><anchor id="po_savebin" />SAVEBIN
             &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
             <listitem>
@@ -2097,7 +2098,7 @@ Bigfile.dat  ; contains main.asm and data.asm</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>SAVEHOB
+            <term><anchor id="po_savehob" />SAVEHOB
             &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
             <listitem>
@@ -2117,7 +2118,7 @@ Bigfile.dat  ; contains main.asm and data.asm</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>SAVESNA &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
+            <term><anchor id="po_savesna" />SAVESNA &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
@@ -2209,7 +2210,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>SHELLEXEC &lt;filename&gt;[,&lt;parameters&gt;]</term>
+            <term><anchor id="po_shellexec" />SHELLEXEC &lt;filename&gt;[,&lt;parameters&gt;]</term>
 
             <listitem>
               <para>Execute external program &lt;filename&gt; using optional
@@ -2227,7 +2228,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>SIZE &lt;filesize in bytes&gt;</term>
+            <term><anchor id="po_size" />SIZE &lt;filesize in bytes&gt;</term>
 
             <listitem>
               <para>If the resulting file is less than the given length, as
@@ -2241,7 +2242,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>SLOT &lt;number&gt;</term>
+            <term><anchor id="po_slot" />SLOT &lt;number&gt;</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
@@ -2267,7 +2268,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>TAPEND</term>
+            <term><anchor id="po_tapend" />TAPEND</term>
 
             <listitem>
               <para>Ends generating compiler output to tape file block specified in TAPOUT.</para>
@@ -2275,7 +2276,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>TAPOUT &lt;filename&gt;[,&lt;flagbyte&gt;]</term>
+            <term><anchor id="po_tapout" />TAPOUT &lt;filename&gt;[,&lt;flagbyte&gt;]</term>
 
             <listitem>
               <para>Appends one tape block at the end of specified file.
@@ -2311,7 +2312,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>UNDEFINE &lt;id&gt;</term>
+            <term><anchor id="po_undefine" />UNDEFINE &lt;id&gt;</term>
 
             <listitem>
               <para>Removes the identifier defined by <link
@@ -2386,7 +2387,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>IFN &lt;expression&gt;</term>
+            <term><anchor id="ca_ifn" />IFN &lt;expression&gt;</term>
 
             <listitem>
               <para>If &lt;expression&gt; is zero the following lines are
@@ -2395,7 +2396,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>IFDEF &lt;id&gt;</term>
+            <term><anchor id="ca_ifdef" />IFDEF &lt;id&gt;</term>
 
             <listitem>
               <para>The condition is true if there is an id defined. These are
@@ -2414,7 +2415,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>IFNDEF &lt;id&gt;</term>
+            <term><anchor id="ca_ifndef" />IFNDEF &lt;id&gt;</term>
 
             <listitem>
               <para>The condition is true if there isn't an id defined. These
@@ -2433,7 +2434,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>IFUSED &lt;label&gt;</term>
+            <term><anchor id="ca_ifused" />IFUSED &lt;label&gt;</term>
 
             <listitem>
               <para>The condition is true if there is an label used somewhere
@@ -2485,7 +2486,7 @@ LABEL5:
           </varlistentry>
 
           <varlistentry>
-            <term>IFNUSED &lt;label&gt;</term>
+            <term><anchor id="ca_ifnused" />IFNUSED &lt;label&gt;</term>
 
             <listitem>
               <para>The condition is true if there is an label
@@ -2494,7 +2495,7 @@ LABEL5:
           </varlistentry>
 
           <varlistentry>
-            <term>ELSE</term>
+            <term><anchor id="ca_else" />ELSE</term>
 
             <listitem>
               <para>See <link linkend="ca_if">IF</link>. If the condition is
@@ -2503,7 +2504,7 @@ LABEL5:
           </varlistentry>
 
           <varlistentry>
-            <term>ENDIF</term>
+            <term><anchor id="ca_endif" />ENDIF</term>
 
             <listitem>
               <para>Every <link linkend="ca_if">IF</link> should be followed
@@ -2634,7 +2635,7 @@ Main
 
       <para><variablelist>
           <varlistentry>
-            <term>BYTE [&lt;defaultvalue&gt;]</term>
+            <term><anchor id="st_byte" />BYTE [&lt;defaultvalue&gt;]</term>
 
             <listitem>
               <para>To define a one byte member. The defaultvalue is used when
@@ -2644,7 +2645,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term>WORD [&lt;defaultvalue&gt;]</term>
+            <term><anchor id="st_word" />WORD [&lt;defaultvalue&gt;]</term>
 
             <listitem>
               <para>To define a two byte member. The defaultvalue is used when
@@ -2654,7 +2655,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term>D24 [&lt;defaultvalue&gt;]</term>
+            <term><anchor id="st_d24" />D24 [&lt;defaultvalue&gt;]</term>
 
             <listitem>
               <para>To define a three byte member. The defaultvalue is used
@@ -2664,7 +2665,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term>DWORD [&lt;defaultvalue&gt;]</term>
+            <term><anchor id="st_dword" />DWORD [&lt;defaultvalue&gt;]</term>
 
             <listitem>
               <para>To define a four byte member. The defaultvalue is used
@@ -2674,7 +2675,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term>BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</term>
+            <term><anchor id="st_block" />BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</term>
 
             <listitem>
               <para>To define an member of the specified number of bytes.
@@ -2683,7 +2684,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term>ALIGN [&lt;expression&gt;]</term>
+            <term><anchor id="st_align" />ALIGN [&lt;expression&gt;]</term>
 
             <listitem>
               <para>To align the offset. If the expression is omitted, 4 is
