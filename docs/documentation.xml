@@ -447,7 +447,7 @@
   Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
  Logging:
   --nologo                 Do not show startup message
-  --msg=[all|war|err]      Stderr messages verbosity ("all" is default)
+  --msg=[all|war|err|none] Stderr messages verbosity ("all" is default)
   --fullpath               Show full path to error file
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
