@@ -1222,18 +1222,20 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term>ALIGN
-            &lt;2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384 or
-            32768&gt;, &lt;byte&gt;</term>
+            <term><anchor id="po_align" />ALIGN
+            [&lt;expression equal to 1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384 or
+            32768&gt;[, &lt;byte&gt;]]</term>
 
             <listitem>
-              <para>Align fills zero or more byte with &lt;byte&gt; until the
-              new address modulo &lt;expression&gt; equals zero.<example>
+              <para>Align advances to nearest address where &lt;new address&gt; modulo &lt;expression&gt; (default 4)
+                  equals zero (stays at current address if possible).</para>
+              <para>If &lt;byte&gt; is specified, memory advanced over is set to it.
+                  <example>
                   <title></title>
 
                   <para><programlisting>    ALIGN         ; =&gt; ALIGN 4 - simply align by 4
-    ALIGN 2       ; by 2
-    ALIGN 2,0       ; + fills memory by zero</programlisting></para>
+    ALIGN 2       ; by 2 (preserves value of "device" memory)
+    ALIGN 2,0     ; + fills memory with zero</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>

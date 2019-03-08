@@ -8,10 +8,6 @@ Ped:
 INCHOB "..",7  bugs out with "file too short"
 INCBIN "..",7  seems to work, but length printed to output is fake "0"
 
-defines divne (pozri ci sa to neda prepojit s enums co su pre Error()):
-#define MAXPASSES 3
-#define LASTPASS 3
-
 build scripts - extend with argument reading, to run only tests in particular subdirectory
 
 LUA quirks:
