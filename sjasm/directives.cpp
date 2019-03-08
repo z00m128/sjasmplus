@@ -132,7 +132,7 @@ void dirBYTE() {
 	int teller, e[256];
 	teller = GetBytes(lp, e, 0, 0);
 	if (!teller) {
-		Error("BYTE/DEFB/DB with no arguments", 0); return;
+		Error("BYTE/DEFB/DB with no arguments"); return;
 	}
 	EmitBytes(e);
 }
@@ -141,7 +141,7 @@ void dirDC() {
 	int teller, e[129];
 	teller = GetBytes(lp, e, 0, 1);
 	if (!teller) {
-		Error("DC with no arguments", 0); return;
+		Error("DC with no arguments"); return;
 	}
 	EmitBytes(e);
 }
@@ -150,7 +150,7 @@ void dirDZ() {
 	int teller, e[130];
 	teller = GetBytes(lp, e, 0, 0);
 	if (!teller) {
-		Error("DZ with no arguments", 0); return;
+		Error("DZ with no arguments"); return;
 	}
 	e[teller++] = 0; e[teller] = -1;
 	EmitBytes(e);
@@ -163,11 +163,11 @@ void dirABYTE() {
 		check8(add); add &= 255;
 		teller = GetBytes(lp, e, add, 0);
 		if (!teller) {
-			Error("ABYTE with no arguments", 0); return;
+			Error("ABYTE with no arguments"); return;
 		}
 		EmitBytes(e);
 	} else {
-		Error("[ABYTE] Expression expected", 0);
+		Error("[ABYTE] Expression expected");
 	}
 }
 
@@ -178,11 +178,11 @@ void dirABYTEC() {
 		check8(add); add &= 255;
 		teller = GetBytes(lp, e, add, 1);
 		if (!teller) {
-			Error("ABYTEC with no arguments", 0); return;
+			Error("ABYTEC with no arguments"); return;
 		}
 		EmitBytes(e);
 	} else {
-		Error("[ABYTEC] Expression expected", 0);
+		Error("[ABYTEC] Expression expected");
 	}
 }
 
@@ -193,12 +193,12 @@ void dirABYTEZ() {
 		check8(add); add &= 255;
 		teller = GetBytes(lp, e, add, 0);
 		if (!teller) {
-			Error("ABYTEZ with no arguments", 0); return;
+			Error("ABYTEZ with no arguments"); return;
 		}
 		e[teller++] = 0; e[teller] = -1;
 		EmitBytes(e);
 	} else {
-		Error("[ABYTEZ] Expression expected", 0);
+		Error("[ABYTEZ] Expression expected");
 	}
 }
 
@@ -224,7 +224,7 @@ void dirWORD() {
 	}
 	e[teller] = -1;
 	if (!teller) {
-		Error("DW/DEFW/WORD with no arguments", 0); return;
+		Error("DW/DEFW/WORD with no arguments"); return;
 	}
 	EmitWords(e);
 }
@@ -250,7 +250,7 @@ void dirDWORD() {
 	}
 	e[teller * 2] = -1;
 	if (!teller) {
-		Error("DWORD with no arguments", 0); return;
+		Error("DWORD with no arguments"); return;
 	}
 	EmitWords(e);
 }
@@ -277,7 +277,7 @@ void dirD24() {
 	}
 	e[teller * 3] = -1;
 	if (!teller) {
-		Error("D24 with no arguments", 0); return;
+		Error("D24 with no arguments"); return;
 	}
 	EmitBytes(e);
 }
@@ -341,7 +341,7 @@ void dirDISP() {
 
 void dirENT() {
 	if (!PseudoORG) {
-		Error("ENT should be after DISP", 0);return;
+		Error("ENT should be after DISP");return;
 	}
 	CurAddress = adrdisp;
 	PseudoORG = 0;
@@ -410,52 +410,29 @@ void dirENDMAP() {
 	if (AddressList) {
 		AddressOfMAP = AddressList->val; AddressList = AddressList->next;
 	} else {
-		Error("ENDMAP without MAP", 0);
+		Error("ENDMAP without MAP");
 	}
 }
 
 void dirALIGN() {
-	aint val;
-	aint byte;
-	bool noexp=false;
-	if (!ParseExpression(lp, val)) {
-		noexp = true;
-		val = 4;
+	// default alignment is 4, default filler is "0/none" (if not specified in directive explicitly)
+	char *oldLp = lp;
+	aint val = 4, fill = 0;
+	bool explicitFiller = ParseExpression(lp, val) && comma(lp) && ParseExpression(lp, fill);
+	// check if alignment value is power of two (0..15-th power only)
+	if (val < 1 || (1<<15) < val || (val & (val-1))) {
+		Error("[ALIGN] Illegal align", oldLp-5, SUPPRESS);
+		return;
 	}
-	switch (val) {
-	case 1:
-		break;
-	case 2:
-	case 4:
-	case 8:
-	case 16:
-	case 32:
-	case 64:
-	case 128:
-	case 256:
-	case 512:
-	case 1024:
-	case 2048:
-	case 4096:
-	case 8192:
-	case 16384:
-	case 32768:
-		val = (~CurAddress + 1) & (val - 1);
-		if (!noexp && comma(lp)) {
-			if (!ParseExpression(lp, byte)) {
-				EmitBlock(0, val, true);
-			} else if (byte > 255 || byte < 0) {
-				Error("[ALIGN] Illegal align byte", 0); break;
-			} else {
-				EmitBlock(byte, val, false);
-			}
-		} else {
-			EmitBlock(0, val, true);
-		}
-		break;
-	default:
-		Error("[ALIGN] Illegal align", 0); break;
+	// check if filler byte is legal byte value
+	if (fill < 0 || 255 < fill) {
+		Error("[ALIGN] Illegal align fill-byte", oldLp-5, SUPPRESS);
+		return;
 	}
+	// calculate how many bytes has to be filled to reach desired alignment
+	aint len = (~CurAddress + 1) & (val - 1);
+	if (len < 1) return;		// nothing to fill, already aligned
+	EmitBlock(fill, len, !explicitFiller);
 }
 
 /*void dirMODULE() {
@@ -1809,13 +1786,13 @@ void dirMACRO() {
 	char* n;
 	//if (!(n=GetID(lp))) { Error("Illegal macroname",0,PASS1); return; }
 	if (!(n = GetID(lp))) {
-		Error("[MACRO] Illegal macroname", 0); return;
+		Error("[MACRO] Illegal macroname"); return;
 	}
 	MacroTable.Add(n, lp);
 }
 
 void dirENDS() {
-	Error("[ENDS] End structre without structure", 0);
+	Error("[ENDS] End structure without structure");
 }
 
 void dirASSERT() {

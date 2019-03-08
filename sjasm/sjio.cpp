@@ -582,7 +582,7 @@ void EmitWords(int* words) {
 	}
 }
 
-void EmitBlock(aint byte, aint len, bool nulled) {
+void EmitBlock(aint byte, aint len, bool preserveDeviceMemory) {
 	if (len) EB[nEB++] = byte;
 
 	if (len < 0)
@@ -603,7 +603,7 @@ void EmitBlock(aint byte, aint len, bool nulled) {
 			if (DeviceID)
 			{
 				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
-				if (!nulled) *MemoryPointer = (char)byte;
+				if (!preserveDeviceMemory) *MemoryPointer = (char)byte;
 
 				MemoryPointer++;
 			}
