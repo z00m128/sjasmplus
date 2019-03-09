@@ -537,7 +537,7 @@ void dirEND() {
 		if (val > 65535 || val < 0) {
 			char buf[LINEMAX];
 			SPRINTF1(buf, LINEMAX, "[END] Invalid address: %lu", val);
-			Error(buf, 0, IF_FIRST); return;
+			Error(buf, 0, IF_FIRST); return;	//FIXME Ped7g error with integer bad-val
 		}
 		StartAddress = val;
 	} else {

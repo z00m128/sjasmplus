@@ -819,7 +819,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 		if (!*rlpbuf) {
 			rlpbuf = rlbuf;
 		}
-		while (RL_Readed > 0) {
+		while (IsRunning && RL_Readed > 0) {
 
 			if (!CurrentLocalLine)
 			{
@@ -857,7 +857,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				}
 				rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
 				//_COUT line _ENDL;
-				if (Parse) {
+				if (IsRunning && Parse) {
 					ParseLine();
 				} else {
 					rlnewline = true;
@@ -886,7 +886,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					CurrentLocalLine++; CurrentLine++; CurrentGlobalLine++; rlnewline = false;
 				}*/
 				rlcolon = true;
-				if (Parse) {
+				if (IsRunning && Parse) {
 					ParseLine();
 				} else {
 					return;
@@ -958,17 +958,12 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 		}
 		rlpbuf = rlbuf;
 	}
-	//for end line
-	if (feof(FP_Input) && RL_Readed <= 0 && *line) { //line? not a *line ?
-		/* if (rlnewline) {
-			CurrentLocalLine++;
-			CompiledCurrentLine++;
-			CurrentGlobalLine++;
-		} */
+	//for end of line
+	if (feof(FP_Input) && RL_Readed <= 0 && *line) {
 		rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
 		rlnewline = true;
 		*rlppos = 0;
-		if (Parse) {
+		if (IsRunning && Parse) {
 			ParseLine();
 		} else {
 			return;
