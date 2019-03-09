@@ -1,0 +1,41 @@
+ 1    0000                  MACRO MYMACRO1 addr, string, term
+ 2    0000 ~                    ld de,addr
+ 3    0000                  ENDM
+ 4    0000
+ 5    0000                  MACRO MYMACRO2 addr, string
+ 6    0000 ~                    ld de,addr
+ 7    0000                  ENDM
+ 8    0000
+ 9    0000                  MACRO MYMACRO3 _addr, _string, _term
+10    0000 ~                    ld de,_addr
+11    0000                  ENDM
+12    0000
+13    0000                  MACRO MYMACRO4 addr?, string?, term?
+14    0000 ~                    ld de,addr?
+15    0000                  ENDM
+16    0000
+17    0000                  ORG 0x1234
+18    1234                  ; this will fail with "Label not found: test_result_1", because "string" sub-part is substitued with "1"
+19    1234                  MYMACRO1 test_result_string, 1, 0   ; this is feature, not bug (see "macro_test.asm")
+issue35.asm(19): error: Label not found: test_result_1
+19    1234 11 00 00    >        ld de,addr
+20    1237
+21    1237                  ; this will not fail (seems like BUG in sjasmplus multi-depth substitution algorithm)
+22    1237                  MYMACRO2 test_result_string, 1
+22    1237 11 40 12    >        ld de,addr
+23    123A
+24    123A                  ; this will not fail, seems again like bug? or weird internal rule, how the '_' does
+25    123A                  ; work as sub-part delimiter exactly.
+26    123A                  MYMACRO3 test_result_string, 1, 0
+26    123A 11 40 12    >        ld de,_addr
+27    123D
+28    123D                  ; this should work, and was suggested as fix to the Issue#35 reporter
+29    123D                  MYMACRO4 test_result_string, 1, 0
+29    123D 11 40 12    >        ld de,addr?
+30    1240
+31    1240 00           test_result_string: defb 0
+32    1241
+
+Value    Label
+------ - -----------------------------------------------------------
+0x1240   test_result_string
