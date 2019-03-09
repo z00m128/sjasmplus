@@ -1,6 +1,9 @@
 INC_DEPTH=0
 
     INCLUDE "i36_II.i.asm"
+
+    db  "0123456789ABCDEF", 0xFF
+
     END
 
 
