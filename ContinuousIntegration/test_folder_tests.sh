@@ -2,21 +2,39 @@
 
 ## script init + helper functions
 shopt -s globstar nullglob
+HELP_STRING="Run the script from \e[96mproject root\e[0m directory."
+HELP_STRING+="\nYou can provide one argument to specify particular sub-directory in \e[96mtests\e[0m directory, example:"
+HELP_STRING+="\n  $ \e[96mContinuousIntegration/test_folder_tests.sh z80/\e[0m \t\t# to run only tests from \e[96mtests/z80/\e[0m directory"
+HELP_STRING+="\nIf partial file name is provided, it'll be searched for (but file names with space break it,\e[1m it's not 100% functional\e[0m):"
+HELP_STRING+="\n  $ \e[96mContinuousIntegration/test_folder_tests.sh z8\e[0m \t\t# to run tests from \e[96mtests/z80/\e[0m and \e[96mtests/z80n/\e[0m directories"
 PROJECT_DIR=$PWD
 BUILD_DIR="$PROJECT_DIR/build/tests"
 exitCode=0
 totalTests=0        # +1 per ASM
 totalChecks=0       # +1 per diff/check
 
+# verify the directory structure is set up as expected and the working directory is project root
+[[ ! -f "${PROJECT_DIR}/ContinuousIntegration/test_folder_tests.sh" ]] && echo -e "\e[91munexpected working directory\e[0m\n$HELP_STRING" && exit 1
+
+# seek for files to be processed (either provided by user argument, or default tests/ dir)
+if [[ $# -gt 0 ]]; then
+    [[ "-h" == "$1" || "--help" == "$1" ]] && echo -e $HELP_STRING && exit 0
+    TEST_FILES=("${PROJECT_DIR}/tests/$1"**/*.asm)
+else
+    echo -e "Searching directory \e[96m${PROJECT_DIR}/tests/\e[0m for '.asm' files..."
+    TEST_FILES=("${PROJECT_DIR}/tests/"**/*.asm)  # try default test dir
+fi
+# check if some files were found, print help message if search failed
+[[ -z $TEST_FILES ]] && echo -e "\e[91mno files found\e[0m\n$HELP_STRING" && exit 1
+
 ## create temporary build directory for output
 echo -e "Creating temporary \e[96m$BUILD_DIR\e[0m directory..."
 rm -rf "$BUILD_DIR"
 # terminate in case the create+cd will fail, this is vital
 mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
-echo -e "Searching directory \e[96m${PROJECT_DIR}/tests/\e[0m for '.asm' files..."
 
 ## go through all asm files in tests directory and verify results
-for f in "${PROJECT_DIR}/tests/"**/*.asm; do
+for f in "${TEST_FILES[@]}"; do
     ## ignore directories themselves (which have "*.asm" name)
     [[ -d $f ]] && continue
     ## ignore "include" files (must have ".i.asm" extension)
