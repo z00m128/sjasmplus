@@ -7,32 +7,32 @@
  4    800C 4D 4E 4F 50
  4    8010 5A
  5    8011
- 6    8011                  SAVEBIN "dir_align.tap", $8000, 17  ; fake TAP file to abuse test script TAP-diff
- 7    8011
-dir_align.asm(8): error: [ALIGN] Illegal align: ALIGN   0       
- 8    8011                  ALIGN   0       ; error
-dir_align.asm(9): error: [ALIGN] Illegal align fill-byte: ALIGN   1,-1    
- 9    8011                  ALIGN   1,-1    ; error
-dir_align.asm(10): error: [ALIGN] Illegal align fill-byte: ALIGN   1,256   
-10    8011                  ALIGN   1,256   ; error
-dir_align.asm(11): error: [ALIGN] Illegal align: ALIGN   3       
-11    8011                  ALIGN   3       ; error
-dir_align.asm(12): error: [ALIGN] Illegal align: ALIGN   5,10    
-12    8011                  ALIGN   5,10    ; error
-dir_align.asm(13): error: [ALIGN] Illegal align: ALIGN   $10000  
-13    8011                  ALIGN   $10000  ; error
-14    8011
-15    8011                  ; re-run over the initial values again with different ALIGN directives
-16    8011                  org     $8000
-17    8000 61               db      'a'     ; [8000] = 'a'
-18    8001                  ALIGN   1       ; effective nothing should happen here
-19    8001                  ALIGN   1, '!'  ; and neighter here
-20    8001 00               ALIGN   2       ; this should advance to $8002 + preserve memory
-21    8002 62               ALIGN   4, 'b'  ; [8002] = [8003] = 'b'
-dir_align.asm(22): error: [ALIGN] Illegal align: ALIGN   7, '!'  
-22    8004                  ALIGN   7, '!'  ; error
-23    8004 00               ALIGN   8       ; advance to 8008, preserve memory
-24    8008 63               ALIGN   16, 'c' ; [8008..800F] = 'c'
+dir_align.asm(6): error: [ALIGN] Illegal align: ALIGN   0       
+ 6    8011                  ALIGN   0       ; error
+dir_align.asm(7): error: [ALIGN] Illegal align fill-byte: ALIGN   1,-1    
+ 7    8011                  ALIGN   1,-1    ; error
+dir_align.asm(8): error: [ALIGN] Illegal align fill-byte: ALIGN   1,256   
+ 8    8011                  ALIGN   1,256   ; error
+dir_align.asm(9): error: [ALIGN] Illegal align: ALIGN   3       
+ 9    8011                  ALIGN   3       ; error
+dir_align.asm(10): error: [ALIGN] Illegal align: ALIGN   5,10    
+10    8011                  ALIGN   5,10    ; error
+dir_align.asm(11): error: [ALIGN] Illegal align: ALIGN   $10000  
+11    8011                  ALIGN   $10000  ; error
+12    8011
+13    8011                  ; re-run over the initial values again with different ALIGN directives
+14    8011                  org     $8000
+15    8000 61               db      'a'     ; [8000] = 'a'
+16    8001                  ALIGN   1       ; effective nothing should happen here
+17    8001                  ALIGN   1, '!'  ; and neighter here
+18    8001 00               ALIGN   2       ; this should advance to $8002 + preserve memory
+19    8002 62               ALIGN   4, 'b'  ; [8002] = [8003] = 'b'
+dir_align.asm(20): error: [ALIGN] Illegal align: ALIGN   7, '!'  
+20    8004                  ALIGN   7, '!'  ; error
+21    8004 00               ALIGN   8       ; advance to 8008, preserve memory
+22    8008 63               ALIGN   16, 'c' ; [8008..800F] = 'c'
+23    8010
+24    8010                  ; the final result should be "aBbbEFGHccccccccZ"
 25    8010
 26    8010                  SAVEBIN "dir_align.bin", $8000, 17  ; modified area is saved into BIN file
 27    8010

@@ -3,8 +3,6 @@
     ; 17 bytes block of "default" memory values
     db      "ABCDEFGHIJKLMNOPZ"
 
-    SAVEBIN "dir_align.tap", $8000, 17  ; fake TAP file to abuse test script TAP-diff
-
     ALIGN   0       ; error
     ALIGN   1,-1    ; error
     ALIGN   1,256   ; error
@@ -22,5 +20,7 @@
     ALIGN   7, '!'  ; error
     ALIGN   8       ; advance to 8008, preserve memory
     ALIGN   16, 'c' ; [8008..800F] = 'c'
+
+    ; the final result should be "aBbbEFGHccccccccZ"
 
     SAVEBIN "dir_align.bin", $8000, 17  ; modified area is saved into BIN file
