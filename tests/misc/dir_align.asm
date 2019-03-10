@@ -20,6 +20,7 @@
     ALIGN   7, '!'  ; error
     ALIGN   8       ; advance to 8008, preserve memory
     ALIGN   16, 'c' ; [8008..800F] = 'c'
+    ALIGN           ; should not make any difference (already at MOD 4 address)
 
     ; the final result should be "aBbbEFGHccccccccZ"
 

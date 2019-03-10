@@ -417,8 +417,11 @@ void dirENDMAP() {
 void dirALIGN() {
 	// default alignment is 4, default filler is "0/none" (if not specified in directive explicitly)
 	char *oldLp = lp;
-	aint val = 4, fill = 0;
-	bool explicitFiller = ParseExpression(lp, val) && comma(lp) && ParseExpression(lp, fill);
+	aint val, fill = 0;
+	bool explicitVal;
+	bool explicitFill = (explicitVal = ParseExpression(lp, val)) && comma(lp) && ParseExpression(lp, fill);
+	if (!explicitVal) val = 4;
+	fprintf(stderr, "%ld %ld %p %p %s\n", val, fill, lp, oldLp, oldLp-5);
 	// check if alignment value is power of two (0..15-th power only)
 	if (val < 1 || (1<<15) < val || (val & (val-1))) {
 		Error("[ALIGN] Illegal align", oldLp-5, SUPPRESS);
@@ -432,7 +435,7 @@ void dirALIGN() {
 	// calculate how many bytes has to be filled to reach desired alignment
 	aint len = (~CurAddress + 1) & (val - 1);
 	if (len < 1) return;		// nothing to fill, already aligned
-	EmitBlock(fill, len, !explicitFiller);
+	EmitBlock(fill, len, !explicitFill);
 }
 
 /*void dirMODULE() {
