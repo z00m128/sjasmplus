@@ -18,9 +18,12 @@ totalChecks=0       # +1 per diff/check
 
 source ContinuousIntegration/common_fn.sh
 
-# find the most fresh executable
-find_newest_binary sjasmplus "$PROJECT_DIR"
-echo -e "The most fresh binary found: \033[96m$EXE\033[0m"
+## find the most fresh executable
+#find_newest_binary sjasmplus "$PROJECT_DIR"
+#echo -e "The most fresh binary found: \033[96m$EXE\033[0m"
+
+## revert back to hard-coded "sjasmplus" for binary, as the date check seems to not work on some windows machines
+EXE=sjasmplus
 
 # seek for files to be processed (either provided by user argument, or default tests/ dir)
 if [[ $# -gt 0 ]]; then
