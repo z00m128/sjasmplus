@@ -1,17 +1,15 @@
-# Makefile for sjasmplus created by Tygrys' hands.
-# install/uninstall features added, CFLAGS and LDFLAGS modification by z00m's hands. [05.05.2016]
-# overall optimization and beautification by mborik's hands. [05.05.2016, 05.05.2018]
-# MinGW adaptation and icon linking by z00m's hands. [21.10.2016, 08.09.2017]
-# For build under MinGW run `make -f Makefile.win`.
+# Makefile for MinGW by mborik & z00m
+# Change `PREFIX` according your needs
+# Run it with `make -f Makefile.win`
 
 GCC=gcc.exe
 CC=$(GCC)
 GPP=g++.exe
 C++=$(GPP)
 
-PREFIX=c:\mingw\usr\local\bin
-CREATEDIR=mkdir
-INSTALL=xcopy
+PREFIX=c:/mingw/usr/local/bin/
+CREATEDIR=mkdir -p
+INSTALL=cp
 UNINSTALL=rm -f
 WINDRES=windres.exe --preprocessor "cpp.exe"
 
@@ -22,9 +20,8 @@ SUBDIR_LUA=lua5.1
 SUBDIR_TOLUA=tolua++
 
 CFLAGS=-O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
-CXXFLAGS=-std=c++14 $(CFLAGS)
+CXXFLAGS=-std=gnu++14 $(CFLAGS)
 
-# for Windows (removed -ldl flag)
 LDFLAGS= -s
 
 #sjasmplus object files
@@ -74,11 +71,11 @@ all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS) $(RES)
 	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS) $(RES)
 
 install:
-	if not exist $(PREFIX) $(CREATEDIR) $(PREFIX)
+	$(CREATEDIR) $(PREFIX)
 	$(INSTALL) $(EXE) $(PREFIX)
 
 uninstall:
-	$(UNINSTALL) "$(PREFIX)\$(EXE)"
+	$(UNINSTALL) $(PREFIX)/$(EXE)
 
 .c.o:
 	$(GCC) $(CFLAGS) -o $@ -c $<
