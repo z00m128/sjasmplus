@@ -22,7 +22,7 @@ fi
 ## create temporary build directory for output
 rm -rf $PROJECT_DIR/build/examples
 mkdir -p $PROJECT_DIR/build/examples && cd $PROJECT_DIR/build/examples
-echo -e "Searching directory \e[96m${PROJECT_DIR}/examples/\e[0m for '.asm' files..."
+echo -e "Searching directory \033[96m${PROJECT_DIR}/examples/\033[0m for '.asm' files..."
 
 ## go through all asm files in examples directory and try to assemble them
 for f in "${PROJECT_DIR}/examples/"**/*.asm; do
@@ -44,21 +44,21 @@ for f in "${PROJECT_DIR}/examples/"**/*.asm; do
     options=()
     [[ -s "$optionsF" ]] && options=(`cat "${optionsF}"`)
     ## built it with sjasmplus (remember exit code)
-    echo -e "\e[95mAssembling\e[0m example file \e[96m${asmname}\e[0m in \e[96m${dirpath}\e[0m, options [\e[96m${options[@]}\e[0m]"
+    echo -e "\033[95mAssembling\033[0m example file \033[96m${asmname}\033[0m in \033[96m${dirpath}\033[0m, options [\033[96m${options[@]}\033[0m]"
     sjasmplus --nologo --msg=war --fullpath --inc="${dirpath}" "${options[@]}" "$f"
     last_result=$?
     ## report assembling exit code problem
     if [[ $last_result -ne 0 ]]; then
-        echo -e "\e[91mError status $last_result\e[0m"
+        echo -e "\033[91mError status $last_result\033[0m"
         exitCode=$((exitCode + 1))
     else
-        echo -e "\e[92mOK: done\e[0m"
+        echo -e "\033[92mOK: done\033[0m"
     fi
 done
 # display OK message if no error was detected
 [[ $exitCode -eq 0 ]] \
-    && echo -e "\e[92mFINISHED: OK, $totalAsmFiles examples built \e[91m■\e[93m■\e[32m■\e[96m■\e[0m" \
+    && echo -e "\033[92mFINISHED: OK, $totalAsmFiles examples built \033[91m■\033[93m■\033[32m■\033[96m■\033[0m" \
     && exit 0
 # display error summary and exit with error code
-echo -e "\e[91mFINISHED: $exitCode/$totalAsmFiles examples failed \e[91m■\e[93m■\e[32m■\e[96m■\e[0m"
+echo -e "\033[91mFINISHED: $exitCode/$totalAsmFiles examples failed \033[91m■\033[93m■\033[32m■\033[96m■\033[0m"
 exit $exitCode
