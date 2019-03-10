@@ -65,13 +65,13 @@ for f in "${TEST_FILES[@]}"; do
     ## built it with sjasmplus (remember exit code)
     echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
     totalChecks=$((totalChecks + 1))    # assembling is one check
-    sjasmplus --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+    ${PROJECT_DIR}/sjasmplus --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
     last_result=$?
     last_result_origin="sjasmplus"
     ## validate results
     # LST file overrides assembling exit code (new exit code is from diff between lst files)
     if [[ -s "${src_base}.lst" ]]; then
-        diff "${src_base}.lst" "${dst_base}.lst"
+        diff --strip-trailing-cr "${src_base}.lst" "${dst_base}.lst"
         last_result=$?
         last_result_origin="diff"
     fi
