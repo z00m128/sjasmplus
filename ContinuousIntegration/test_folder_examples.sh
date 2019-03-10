@@ -21,12 +21,14 @@ fi
 
 source ContinuousIntegration/common_fn.sh
 
-## find the most fresh executable
-#find_newest_binary sjasmplus "$PROJECT_DIR"
-#echo -e "The most fresh binary found: \033[96m$EXE\033[0m"
+[[ -n "$EXE" ]] && echo -e "Using EXE=\033[96m$EXE\033[0m as assembler binary"
 
-## revert back to hard-coded "sjasmplus" for binary, as the date check seems to not work on some windows machines
-EXE=sjasmplus
+## find the most fresh executable
+#[[ -z "$EXE" ]] && find_newest_binary sjasmplus "$PROJECT_DIR" \
+#    && echo -e "The most fresh binary found: \033[96m$EXE\033[0m"
+# reverted back to hard-coded "sjasmplus" for binary, as the date check seems to not work on some windows machines
+
+[[ -z "$EXE" ]] && EXE=sjasmplus
 
 ## create temporary build directory for output
 rm -rf $PROJECT_DIR/build/examples
@@ -54,7 +56,7 @@ for f in "${PROJECT_DIR}/examples/"**/*.asm; do
     [[ -s "$optionsF" ]] && options=(`cat "${optionsF}"`)
     ## built it with sjasmplus (remember exit code)
     echo -e "\033[95mAssembling\033[0m example file \033[96m${asmname}\033[0m in \033[96m${dirpath}\033[0m, options [\033[96m${options[@]}\033[0m]"
-    $EXE --nologo --msg=war --fullpath --inc="${dirpath}" "${options[@]}" "$f"
+    "$EXE" --nologo --msg=war --fullpath --inc="${dirpath}" "${options[@]}" "$f"
     last_result=$?
     ## report assembling exit code problem
     if [[ $last_result -ne 0 ]]; then

@@ -18,12 +18,14 @@ totalChecks=0       # +1 per diff/check
 
 source ContinuousIntegration/common_fn.sh
 
-## find the most fresh executable
-#find_newest_binary sjasmplus "$PROJECT_DIR"
-#echo -e "The most fresh binary found: \033[96m$EXE\033[0m"
+[[ -n "$EXE" ]] && echo -e "Using EXE=\033[96m$EXE\033[0m as assembler binary"
 
-## revert back to hard-coded "sjasmplus" for binary, as the date check seems to not work on some windows machines
-EXE=sjasmplus
+## find the most fresh executable
+#[[ -z "$EXE" ]] && find_newest_binary sjasmplus "$PROJECT_DIR" \
+#    && echo -e "The most fresh binary found: \033[96m$EXE\033[0m"
+# reverted back to hard-coded "sjasmplus" for binary, as the date check seems to not work on some windows machines
+
+[[ -z "$EXE" ]] && EXE=sjasmplus
 
 # seek for files to be processed (either provided by user argument, or default tests/ dir)
 if [[ $# -gt 0 ]]; then
@@ -74,7 +76,7 @@ for f in "${TEST_FILES[@]}"; do
     ## built it with sjasmplus (remember exit code)
     echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
     totalChecks=$((totalChecks + 1))    # assembling is one check
-    $EXE --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+    "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
     last_result=$?
     last_result_origin="sjasmplus"
     ## validate results
