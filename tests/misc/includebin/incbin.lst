@@ -1,0 +1,33 @@
+ 1    0000                  ;; the included incbin/incbin.bin is fake file (doesn't have correct checksums/etc)
+ 2    0000                  ; its payload is actually ASCII text, readable by text editor
+ 3    0000                  OUTPUT "incbin.bin"
+ 4    0000
+ 5    0000                  ; create copy of original 256B data by using 3 parts
+ 6    0000                  INCBIN "incbin/incbin.bin",,128
+ 7    0080                  INCBIN "incbin/incbin.bin",128,64
+ 8    00C0                  INCBIN "incbin/incbin.bin",192
+ 9    0100                  ; just read whole 256B data in one go
+10    0100                  INCBIN "incbin/incbin.bin"
+11    0200                  ; another composed 256B copy (having extra spaces everywhere to exercise parser)
+12    0200                  INCBIN "incbin/incbin.bin"  ,  ,  128
+13    0280                  INCBIN "incbin/incbin.bin"  ,  128  ,  64
+14    02C0                  INCBIN "incbin/incbin.bin"  ,  192
+15    0300                  ; = 3x256 = 768B output
+16    0300
+17    0300                  ; Exercise (some) error/warning states of INCBIN (others are type FATAL, PITA to test)
+incbin.asm(18): error: [INCBIN] Negative values are not allowed: INCBIN "incbin/incbin.bin",-1
+18    0300                  INCBIN "incbin/incbin.bin",-1
+incbin.asm(19): error: [INCBIN] Negative values are not allowed: INCBIN "incbin/incbin.bin",,-1
+19    0300                  INCBIN "incbin/incbin.bin",,-1
+incbin.asm(20): warning: INCBIN: requested to include no data (len=0)
+20    0300                  INCBIN "incbin/incbin.bin",,0
+incbin.asm(21): warning: INCBIN: requested to include no data (len=0)
+21    0300                  INCBIN "incbin/incbin.bin",256
+incbin.asm(22): warning: INCBIN: requested to include no data (len=0)
+22    0300                  INCBIN "incbin/incbin.bin",123,0
+23    0300
+24    0300                  OUTEND
+25    0300
+
+Value    Label
+------ - -----------------------------------------------------------

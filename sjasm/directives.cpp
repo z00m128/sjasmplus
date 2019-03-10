@@ -588,7 +588,7 @@ void dirINCBIN() {
 				Error("[INCBIN] Negative values are not allowed", bp); return;
 			}
 			offset = val;
-		}
+		} else --lp;		// there was second comma right after, reread it
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCBIN] Syntax error", bp, IF_FIRST); return;

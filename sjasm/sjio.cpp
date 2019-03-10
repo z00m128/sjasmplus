@@ -654,7 +654,6 @@ void BinIncFile(char* fname, int offset, int len) {
 	}
 	free(fullFilePath);
 
-	if (len == -1) len = 0;
 	if (offset == -1) offset = 0;
 
 	// Get length of file //
@@ -664,9 +663,21 @@ void BinIncFile(char* fname, int offset, int len) {
 	if (totlen < 0)
 		Error("Error telling file (len)", fname, FATAL);
 
+	if (len == -1) len = totlen - offset;
+	// Getting final length of included data //
+	if (0 == len) {
+		Warning("INCBIN: requested to include no data (len=0)");
+		fclose(bif);
+		return;
+	}
+
 	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
 		printf("INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
 	}
+
+	// Check requested data //
+	if (offset + len > totlen)
+		Error("Error file too short", fname, FATAL);
 
 	// Seek to begin of including part //
 	if (offset > totlen)
@@ -676,25 +687,16 @@ void BinIncFile(char* fname, int offset, int len) {
 	if (ftell(bif) != offset)
 		Error("Error telling file (offs)", fname, FATAL);
 
-	// Check requested data //
-	if (offset + len > totlen)
-		Error("Error file too short", fname, FATAL);
-
 	// Getting final length of included data //
-	if (!len) len = totlen - offset;
-	if (len > 0x10000)
-	{
+	if (len > 0x10000) {
 		len = 0x10000;
 		Warning("Included data truncated to 64kB from");
 	}
 
-	if (pass != LASTPASS)
-	{
+	if (pass != LASTPASS) {
 		CurAddress = (CurAddress + len) & 0xFFFF;
 		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
-	}
-	else
-	{
+	} else {
 		// Reading data from file //
 		char* data = new char[len + 1];
 		char *bp = data;
@@ -709,17 +711,14 @@ void BinIncFile(char* fname, int offset, int len) {
 		if (res != len)
 			Error("Can't read file (no enough data)", fname, FATAL);
 
-		while (len--)
-		{
+		while (len--) {
 			CheckRamLimitExceeded();
 
-			if (pass == LASTPASS)
-			{
+			if (pass == LASTPASS) {
 				WriteBuffer[WBLength++] = *bp;
 				if (WBLength == DESTBUFLEN) WriteDest();
 
-				if (DeviceID)
-				{
+				if (DeviceID) {
 					if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
 					*MemoryPointer = *bp;
 
