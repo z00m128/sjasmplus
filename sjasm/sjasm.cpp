@@ -341,7 +341,7 @@ namespace Options {
 #ifdef USE_LUA
 
 void LuaFatalError(lua_State *L) {
-	Error((char *)lua_tostring(L, -1), 0, FATAL);
+	Error((char *)lua_tostring(L, -1), NULL, FATAL);
 }
 
 #endif //USE_LUA

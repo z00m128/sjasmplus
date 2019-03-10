@@ -102,6 +102,12 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	}
 }
 
+void ErrorInt(const char* message, aint badValue, EStatus type) {
+	char numBuf[24];
+	SPRINTF1(numBuf, 24, "%ld", badValue);
+	Error(message, numBuf, type);
+}
+
 void Warning(const char* message, const char* badValueMessage, EWStatus type)
 {
 	// check if it is correct pass by the type of error
@@ -163,17 +169,17 @@ void WriteDest() {
 	}
 	destlen += WBLength;
 	if (FP_Output != NULL && (aint) fwrite(WriteBuffer, 1, WBLength, FP_Output) != WBLength) {
-		Error("Write error (disk full?)", 0, FATAL);
+		Error("Write error (disk full?)", NULL, FATAL);
 	}
 	if (FP_RAW != NULL && (aint) fwrite(WriteBuffer, 1, WBLength, FP_RAW) != WBLength) {
-		Error("Write error (disk full?)", 0, FATAL);
+		Error("Write error (disk full?)", NULL, FATAL);
 	}
 
 	if (FP_tapout)
 	{
 		int write_length = tape_length + WBLength > 65535 ? 65535 - tape_length : WBLength;
 
-		if ( (aint)fwrite(WriteBuffer, 1, write_length, FP_tapout) != write_length) Error("Write error (disk full?)", 0, FATAL);
+		if ( (aint)fwrite(WriteBuffer, 1, write_length, FP_tapout) != write_length) Error("Write error (disk full?)", NULL, FATAL);
 
 		for (int i = 0; i < write_length; i++) tape_parity ^= WriteBuffer[i];
 		tape_length += write_length;
@@ -182,7 +188,7 @@ void WriteDest() {
 		{
 			WBLength = 0;
 			CloseTapFile();
-			Error("Tape block exceeds maximal size", 0);
+			Error("Tape block exceeds maximal size");
 		}
 	}
 	WBLength = 0;
@@ -532,7 +538,7 @@ void CheckPage() {
 		}
 	}
 
-	Error("CheckPage(): please, contact the author of this program.", 0, FATAL);
+	Error("CheckPage(): please, contact the author of this program.", NULL, FATAL);
 }
 
 void Emit(int byte)
@@ -636,7 +642,7 @@ char* GetPath(char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
 	}
 	// copy the result into new memory
 	char* kip = STRDUP(fullFilePath);
-	if (kip == NULL) Error("No enough memory!", 0, FATAL);
+	if (kip == NULL) Error("No enough memory!", NULL, FATAL);
 	// convert filenamebegin pointer into the copied string (from temporary buffer pointer)
 	if (filenamebegin) *filenamebegin += (kip - fullFilePath);
 	return kip;
@@ -702,7 +708,7 @@ void BinIncFile(char* fname, int offset, int len) {
 		char *bp = data;
 
 		if (bp == NULL)
-			Error("No enough memory for file", 0, FATAL);
+			ErrorInt("No enough memory for file", (len + 1), FATAL);
 
 		res = fread(bp, 1, len, bif);
 
@@ -742,7 +748,7 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	TCHAR* filenamebegin;
 
 	if (++IncludeLevel > 20) {
-		Error("Over 20 files nested", 0, FATAL);
+		Error("Over 20 files nested", NULL, FATAL);
 	}
 	fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
 
@@ -789,7 +795,7 @@ void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
 
 	char* pbuf = rlpbuf;
 	char* buf = STRDUP(rlbuf);
-	if (buf == NULL) Error("No enough memory!", 0, FATAL);
+	if (buf == NULL) Error("No enough memory!", NULL, FATAL);
 	int readed = RL_Readed;
 	bool squotes = rlsquotes,dquotes = rldquotes,space = rlspace,comment = rlcomment,colon = rlcolon,newline = rlnewline;
 
@@ -852,7 +858,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				*/
 				*rlppos = 0;
 				if (strlen(line) == LINEMAX - 1) {
-					Error("Line too long", 0, FATAL);
+					Error("Line too long", NULL, FATAL);
 				}
 				rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
 				//_COUT line _ENDL;
@@ -879,7 +885,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				}
 			  	*rlppos = 0;
 				if (strlen(line) == LINEMAX - 1) {
-					Error("Line too long", 0, FATAL);
+					Error("Line too long", NULL, FATAL);
 				}
 				/*if (rlnewline) {
 					CurrentLocalLine++; CurrentLine++; CurrentGlobalLine++; rlnewline = false;
@@ -1002,7 +1008,7 @@ void CloseDest() {
 	//}
 	if (size != (aint)-1) {
 		if (destlen > size) {
-			Error("File exceeds 'size'", 0);
+			ErrorInt("File exceeds 'size'", destlen);
 		} else {
 			pad = size - destlen;
 			if (pad > 0) {
@@ -1025,7 +1031,7 @@ void CloseDest() {
 void SeekDest(long offset, int method) {
 	WriteDest();
 	if (FP_Output != NULL && fseek(FP_Output, offset, method)) {
-		Error("File seek error (FORG)", 0, FATAL);
+		Error("File seek error (FORG)", NULL, FATAL);
 	}
 }
 
@@ -1060,7 +1066,7 @@ void OpenDest(int mode) {
 	}
 	if (FP_Output != NULL && mode != OUTPUT_TRUNCATE) {
 		if (fseek(FP_Output, 0, mode == OUTPUT_REWIND ? SEEK_SET : SEEK_END)) {
-			Error("File seek error (OUTPUT)", 0, FATAL);
+			Error("File seek error (OUTPUT)", NULL, FATAL);
 		}
 	}
 }
@@ -1073,13 +1079,13 @@ void CloseTapFile()
 	if (FP_tapout == NULL) return;
 
 	tap_data[0] = tape_parity & 0xFF;
-	if (fwrite(tap_data, 1, 1, FP_tapout) != 1) Error("Write error (disk full?)", 0, FATAL);
+	if (fwrite(tap_data, 1, 1, FP_tapout) != 1) Error("Write error (disk full?)", NULL, FATAL);
 
-	if (fseek(FP_tapout, tape_seek, SEEK_SET)) Error("File seek end error in TAPOUT", 0, FATAL);
+	if (fseek(FP_tapout, tape_seek, SEEK_SET)) Error("File seek end error in TAPOUT", NULL, FATAL);
 
 	tap_data[0] =  tape_length     & 0xFF;
 	tap_data[1] = (tape_length>>8) & 0xFF;
-	if (fwrite(tap_data, 1, 2, FP_tapout) != 2) Error("Write error (disk full?)", 0, FATAL);
+	if (fwrite(tap_data, 1, 2, FP_tapout) != 2) Error("Write error (disk full?)", NULL, FATAL);
 
 	fclose(FP_tapout);
 	FP_tapout = NULL;
@@ -1102,7 +1108,7 @@ void OpenTapFile(char * tapename, int flagbyte)
 	if (fwrite(tap_data, 1, 3, FP_tapout) != 3)
 	{
 		fclose(FP_tapout);
-		Error("Write error (disk full?)", 0, FATAL);
+		Error("Write error (disk full?)", NULL, FATAL);
 	}
 }
 
@@ -1451,7 +1457,7 @@ EReturn ReadFile(const char* pp, const char* err) {
 		} // hmm??
 		ParseLineSafe();
 	}
-	Error("Unexpected end of file", 0, FATAL);
+	Error("Unexpected end of file", NULL, FATAL);
 	return END;
 }
 
@@ -1516,7 +1522,7 @@ EReturn SkipFile(char* pp, const char* err) {
 		}
 		ListFileSkip(line);
 	}
-	Error("Unexpected end of file", 0, FATAL);
+	Error("Unexpected end of file", NULL, FATAL);
 	return END;
 }
 
@@ -1560,7 +1566,7 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 		l = s;
 		ListFileSkip(line);
 	}
-	Error("Unexpected end of file", 0, FATAL);
+	Error("Unexpected end of file", NULL, FATAL);
 	return 0;
 }
 

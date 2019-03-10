@@ -108,7 +108,7 @@ namespace Z80 {
 
 	int GetAddress(char*& p, aint& ad) {
 		if (GetLocalLabelValue(p, ad) || ParseExpression(p, ad)) return 1;
-		Error("Operand expected", 0, IF_FIRST);
+		Error("Operand expected", NULL, IF_FIRST);
 		return (ad = 0);
 	}
 

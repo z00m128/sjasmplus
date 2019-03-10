@@ -379,7 +379,7 @@ int GetConstant(char*& op, aint& val) {
 			val = val * 16 + v;
 			++p;
 			if (oval > val) {
-				Error("Overflow", 0, SUPPRESS);
+				Error("Overflow", op, SUPPRESS);
 			}
 		}
 
@@ -400,7 +400,7 @@ int GetConstant(char*& op, aint& val) {
 			}
 			oval = val; val = val * 2 + v; ++p;
 			if (oval > val) {
-				Error("Overflow", 0, SUPPRESS);
+				Error("Overflow", op, SUPPRESS);
 			}
 		}
 		if (p - p3 < 2) {
@@ -413,7 +413,7 @@ int GetConstant(char*& op, aint& val) {
 		return 1;
 	case '0':
 		++p;
-		if (*p == 'x' || *p == 'X') {
+		if (*p == 'x' || *p == 'X') {	//FIXME Ped7g simplify this function..
 			++p;
 			while (isalnum((unsigned char) * p)) {
 				if ((v = getval(*p)) >= 16) {
@@ -422,7 +422,7 @@ int GetConstant(char*& op, aint& val) {
 				}
 				oval = val; val = val * 16 + v; ++p;
 				if (oval > val) {
-					Error("Overflow", 0, SUPPRESS);
+					Error("Overflow", op, SUPPRESS);
 				}
 			}
 			if (p - p3 < 3) {
@@ -469,7 +469,7 @@ int GetConstant(char*& op, aint& val) {
 				Error("Digit not in base", op); return 0;
 			}
 			oval = val; val += v * pb; if (oval > val) {
-									   	Error("Overflow", 0, SUPPRESS);
+									   	Error("Overflow", op, SUPPRESS);
 									   }
 			pb *= base;
 		} while (p-- != p3);
@@ -564,7 +564,7 @@ int GetCharConst(char*& p, aint& val) {
 		val += r << s; s -= 8; ++t;
 	} while (*p != q);
 	if (t > 4) {
-		Error("Overflow", 0, SUPPRESS);
+		Error("Overflow", op, SUPPRESS);
 	}
 	val = val >> (s + 8);
 	++p;
@@ -577,7 +577,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	while ('o') {
 		SkipBlanks(p);
 		if (!*p) {
-			Error("Expression expected", 0, SUPPRESS); break;
+			Error("Expression expected", NULL, SUPPRESS); break;
 		}
 		if (t == 128) {
 			Error("Too many arguments", p, SUPPRESS); break;
@@ -651,7 +651,7 @@ static const char delimiters_e[] = DELIMITERS_E;
 
 char* GetFileName(char*& p, bool convertslashes) {
 	char* newFn = new char[LINEMAX];
-	if (NULL == newFn) Error("No enough memory!", 0, FATAL);
+	if (NULL == newFn) ErrorInt("No enough memory!", LINEMAX, FATAL);
 	char* result = newFn;
 	// find first non-blank character
 	SkipBlanks(p);
@@ -668,7 +668,7 @@ char* GetFileName(char*& p, bool convertslashes) {
 		*newFn = *p;		// copy character
 		if (convertslashes && badSlash == *newFn) *newFn = goodSlash;	// convert slashes if enabled
 		++newFn, ++p;
-		if (LINEMAX <= newFn-result) Error("Filename too long!", 0, FATAL);
+		if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
 	}
 	*newFn = 0;				// add string terminator at end of file name
 	// verify + skip end-delimiter (if other than space)
@@ -797,7 +797,7 @@ int GetArray(char*& p, int e[], int add, int dc) {
 	while ('o') {
 		SkipBlanks(p);
 		if (!*p) {
-			Error("Expression expected", 0, SUPPRESS); break;
+			Error("Expression expected", NULL, SUPPRESS); break;
 		}
 		if (t == 128) {
 			Error("Too many arguments", p, SUPPRESS); break;

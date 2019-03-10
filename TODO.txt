@@ -5,8 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-INCBIN "..",7  seems to work, but length printed to output is fake "0"
-
 LUA quirks:
     -- v includelua:
     function inc_ld(reg, val)
@@ -21,6 +19,8 @@ LUA quirks:
 Z80: multi-argument/strict: introduce the options
 
 FIXME in sources mark further points worth refactoring
+
+UNDER_CE still there... OMG
 
 ====================
 Docs:

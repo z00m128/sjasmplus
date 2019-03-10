@@ -37,7 +37,7 @@ int TRD_SaveEmpty(char* fname) {
 	}
 	buf = (unsigned char*) calloc(1024, sizeof(unsigned char));
 	if (buf == NULL) {
-		Error("No enough memory", 0, FATAL);
+		Error("No enough memory", NULL, FATAL);
 	}
 	if (fwrite(buf, 1, 1024, ff) < 1024) {
 		Error("Write error (disk full?)", fname, IF_FIRST); return 0;
@@ -89,7 +89,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 
 	// for Lua
 	if (!DeviceID) {
-		Error("zx.trdimage_addfile: this function available only in real device emulation mode.", 0);
+		Error("zx.trdimage_addfile: this function available only in real device emulation mode.");
 		return 0;
 	}
 

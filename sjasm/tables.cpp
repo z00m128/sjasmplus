@@ -37,7 +37,7 @@ char* ValidateLabel(char* naam, int set_namespace) {
 	int p = 0,l = 0;
 	label = new char[LINEMAX];
 	if (label == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		ErrorInt("No enough memory!", LINEMAX, FATAL);
 	}
 	lp = label;
 	label[0] = 0;
@@ -84,7 +84,7 @@ char* ValidateLabel(char* naam, int set_namespace) {
 			free(vorlabp);
 			vorlabp = STRDUP(naam);
 			if (vorlabp == NULL) {
-				Error("No enough memory!", 0, FATAL);
+				Error("No enough memory!", NULL, FATAL);
 			}
 		}
 	}
@@ -255,7 +255,7 @@ CLabelTable::CLabelTable() {
 
 int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
-		Error("Label table full", 0, FATAL);
+		Error("Label table full", NULL, FATAL);
 	}
 
 	// Find label in label table
@@ -280,7 +280,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, 
 	HashTable[tr] = NextLocation;
 	LabelTable[NextLocation].name = STRDUP(nname);
 	if (LabelTable[NextLocation].name == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	LabelTable[NextLocation].IsDEFL = IsDEFL;
 	LabelTable[NextLocation].updatePass = pass;
@@ -559,7 +559,7 @@ int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
 	HashTable[tr] = NextLocation;
 	funtab[NextLocation].name = STRDUP(nname);
 	if (funtab[NextLocation].name == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	funtab[NextLocation].funp = nfunp;
 	++NextLocation;
@@ -581,7 +581,7 @@ int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
 	HashTable[tr] = NextLocation;
 	funtab[NextLocation].name = STRDUP(temp);
 	if (funtab[NextLocation].name == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	funtab[NextLocation].funp = nfunp;
 	++NextLocation;
@@ -711,11 +711,11 @@ CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStr
     char* sbegin,*s2;
 	name = STRDUP(nname);
 	if (name == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	value = new char[strlen(nvalue) + 1];
 	if (value == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	s1 = value;
 	sbegin = s2 = strdup(nvalue);
@@ -933,7 +933,7 @@ void CMacroDefineTable::SplitToArray( const char* aName, char**& aArray, int& aC
 
 		if ( aCount == KTotalJoinedParams )
 		{
-			Error("Too much joined params!", 0, FATAL);
+			Error("Too much joined params!", NULL, FATAL);
 		}
 	}
 
@@ -957,7 +957,7 @@ void CMacroDefineTable::SplitToArray( const char* aName, char**& aArray, int& aC
 			}
 			else
 			{
-				Error("Internal error. SplitToArray()", 0, FATAL);
+				Error("Internal error. SplitToArray()", NULL, FATAL);
 			}
 		}
 	}
@@ -1044,7 +1044,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	char* macroname;
 	macroname = STRDUP(nnaam);
 	if (macroname == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	macs = new CMacroTableEntry(macroname/*nnaam*/, macs);
 	used[(unsigned char)*macroname/*nnaam*/] = 1;
@@ -1070,7 +1070,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	}
 	ListFile();
 	if (!ReadFileToCStringsList(macs->body, "endm")) {
-		Error("Unexpected end of macro", 0, EARLY);
+		Error("Unexpected end of macro", NULL, EARLY);
 	}
 }
 
@@ -1208,7 +1208,7 @@ CStructureEntry1::CStructureEntry1(char* nnaam, aint noffset) {
 	next = 0;
 	naam = STRDUP(nnaam);
 	if (naam == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	offset = noffset;
 }
@@ -1221,11 +1221,11 @@ CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStruct
 	mnf = mnl = 0; mbf = mbl = 0;
 	naam = STRDUP(nnaam);
 	if (naam == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	id = STRDUP(nid);
 	if (id == NULL) {
-		Error("No enough memory!", 0, FATAL);
+		Error("No enough memory!", NULL, FATAL);
 	}
 	binding = idx; next = p; noffset = no; global = ngl;
 }
@@ -1315,13 +1315,13 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 								--haakjes; ++lp; comma(lp);
 							} break;
 		default:
-			Error("internalerror CStructure::CopyMembers", 0, FATAL);
+			Error("internalerror CStructure::CopyMembers", NULL, FATAL);
 		}
 		ip = ip->next;
 	}
 	while (haakjes--) {
 		if (!need(lp, '}')) {
-			Error("closing } missing", 0);
+			Error("closing } missing");
 		}
 	}
 	ip = new CStructureEntry2(noffset, 0, 0, SMEMBPARENCLOSE); AddMember(ip);
@@ -1337,7 +1337,7 @@ void CStructure::deflab() {
 	p = ValidateLabel(sn, 1);
 	if (pass == LASTPASS) {
 		if (!GetLabelValue(op, oval)) {
-			Error("Internal error. ParseLabel()", 0, FATAL);
+			Error("Internal error. ParseLabel()", op, FATAL);
 		}
 		if (noffset != oval) {
 			Error("Label has different value in pass 2", temp);
@@ -1358,7 +1358,7 @@ void CStructure::deflab() {
 		}
 		if (pass == LASTPASS) {
 			if (!GetLabelValue(op, oval)) {
-				Error("Internal error. ParseLabel()", 0, FATAL);
+				Error("Internal error. ParseLabel()", op, FATAL);
 			}
 			if (np->offset != oval) {
 				Error("Label has different value in pass 2", temp);
@@ -1382,7 +1382,7 @@ void CStructure::emitlab(char* iid) {
 	p = ValidateLabel(p, 1);
 	if (pass == LASTPASS) {
 		if (!GetLabelValue(op, oval)) {
-			Error("Internal error. ParseLabel()", 0, FATAL);
+			Error("Internal error. ParseLabel()", op, FATAL);
 		}
 		if (CurAddress != oval) {
 			Error("Label has different value in pass 2", temp);
@@ -1403,7 +1403,7 @@ void CStructure::emitlab(char* iid) {
 		}
 		if (pass == LASTPASS) {
 			if (!GetLabelValue(op, oval)) {
-				Error("Internal error. ParseLabel()", 0, FATAL);
+				Error("Internal error. ParseLabel()", op, FATAL);
 			}
 			if (np->offset + CurAddress != oval) {
 				Error("Label has different value in pass 2", temp);
@@ -1477,17 +1477,17 @@ void CStructure::emitmembs(char*& p) {
 						   	--haakjes; ++p; comma(p);
 						   } break;
 		default:
-			Error("Internal Error CStructure::emitmembs", 0, FATAL);
+			ErrorInt("Internal Error CStructure::emitmembs", ip->type, FATAL);
 		}
 		ip = ip->next;
 	}
 	while (haakjes--) {
 		if (!need(p, '}')) {
-			Error("closing } missing", 0);
+			Error("closing } missing");
 		}
 	}
 	SkipBlanks(p);
-	if (*p) Error("[STRUCT] Syntax error - too many arguments?", 0);
+	if (*p) Error("[STRUCT] Syntax error - too many arguments?");
 	if (et) {
 		e[et] = -1;
 		EmitBytes(e);
@@ -1656,7 +1656,7 @@ CDevicePage::CDevicePage(aint size, aint number /*, CDevicePage *n*/) {
 	Number = number;
 	RAM = (char*) calloc(size, sizeof(char));
 	if (RAM == NULL) {
-		Error("No enough memory", 0, FATAL);
+		ErrorInt("No enough memory", size, FATAL);
 	}
 	/*Next = NULL;
 	if (n) {

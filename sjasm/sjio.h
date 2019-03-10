@@ -59,6 +59,7 @@ void OpenDest(int);
 void NewDest(char* newfilename, int mode);
 int FileExists(char* filename);
 void Error(const char* message, const char* badValueMessage = NULL, EStatus type = PASS3);
+void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);
 void Warning(const char* message, const char* badValueMessage = NULL, EWStatus type = W_PASS3);
 void ListFile();
 void ListFileSkip(char*);
