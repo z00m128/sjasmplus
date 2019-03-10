@@ -16,6 +16,12 @@ totalChecks=0       # +1 per diff/check
 # verify the directory structure is set up as expected and the working directory is project root
 [[ ! -f "${PROJECT_DIR}/ContinuousIntegration/test_folder_tests.sh" ]] && echo -e "\033[91munexpected working directory\033[0m\n$HELP_STRING" && exit 1
 
+source ContinuousIntegration/common_fn.sh
+
+# find the most fresh executable
+find_newest_binary sjasmplus "$PROJECT_DIR"
+echo -e "The most fresh binary found: \033[96m$EXE\033[0m"
+
 # seek for files to be processed (either provided by user argument, or default tests/ dir)
 if [[ $# -gt 0 ]]; then
     [[ "-h" == "$1" || "--help" == "$1" ]] && echo -e $HELP_STRING && exit 0
@@ -65,7 +71,7 @@ for f in "${TEST_FILES[@]}"; do
     ## built it with sjasmplus (remember exit code)
     echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
     totalChecks=$((totalChecks + 1))    # assembling is one check
-    ${PROJECT_DIR}/sjasmplus --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+    $EXE --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
     last_result=$?
     last_result_origin="sjasmplus"
     ## validate results
