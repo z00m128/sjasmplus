@@ -87,6 +87,10 @@ extern "C" {
 #endif
 #define aint long
 
+#ifndef PATH_MAX
+#define PATH_MAX	4096
+#endif
+
 // include all headers
 extern "C" {
 #include "lua_lpack.h"
