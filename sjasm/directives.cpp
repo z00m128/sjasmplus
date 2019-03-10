@@ -1828,7 +1828,7 @@ void dirSHELLEXEC() {
 		} else {
 			_COUT "Executing " _CMDL command _ENDL;
 		}
-#if defined(WIN32) && !defined(UNDER_CE)
+#if defined(WIN32)
 		STARTUPINFO si;
 		PROCESS_INFORMATION pi;
 		ZeroMemory( &si, sizeof(si) );
@@ -1880,27 +1880,9 @@ void dirSHELLEXEC() {
 		//system(command);
 		///WinExec ( command, SW_SHOWNORMAL );
 #else
-#ifdef UNDER_CE
-		SHELLEXECUTEINFO info;
-		info.cbSize = sizeof(SHELLEXECUTEINFO);
-		info.fMask = NULL;
-		info.hwnd = NULL;
-		info.lpVerb = NULL;
-		info.lpFile = _totchar(command);
-		info.lpParameters = NULL;
-		info.lpDirectory = NULL;
-		info.nShow = SW_MAXIMIZE;
-		info.hInstApp = NULL;
-
-		//if (_wsystem(_towchar(command)) == -1) {
-		if (!ShellExecuteEx(&info)) {
-			Error( "[SHELLEXEC] Execution of command failed", command, PASS3 );
-		}
-#else
 		if (system(command) == -1) {
 			Error("[SHELLEXEC] Execution of command failed", command);
 		}
-#endif
 #endif
 	}
 	delete[] command;
