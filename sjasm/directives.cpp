@@ -33,9 +33,17 @@
 CFunctionTable DirectivesTable;
 CFunctionTable DirectivesTable_dup;
 
-int ParseDirective(bool bol) {
+int ParseDirective(bool beginningOfLine)
+{
 	char* olp = lp;
 	char* n;
+
+	// if END/.END directive is at the beginning of line = ignore them (even with "--dirbol")
+	if (beginningOfLine && (cmphstr(lp, "end") || cmphstr(lp, ".end"))) {
+		lp = olp;
+		return 0;
+	}
+
 	bp = lp;
 	if (!(n = getinstr(lp))) {
 		if (*lp == '#' && *(lp + 1) == '#') {
@@ -51,10 +59,12 @@ int ParseDirective(bool bol) {
 		}
 	}
 
-	if (DirectivesTable.zoek(n, bol)) {
-		return 1;
-	}
-	else if ((!bol || Options::IsPseudoOpBOF) && *n == '.' && (isdigit((unsigned char) * (n + 1)) || *lp == '(')) {
+	if (DirectivesTable.zoek(n)) return 1;
+
+	// Only "." repeat directive remains, but that one can't start at beginning of line (without --dirbol)
+	if (beginningOfLine && !Options::IsPseudoOpBOF) return 0;
+
+	if (*n == '.' && (isdigit((unsigned char) * (n + 1)) || *lp == '(')) {
 		aint val;
 		if (isdigit((unsigned char) * (n + 1))) {
 			++n;

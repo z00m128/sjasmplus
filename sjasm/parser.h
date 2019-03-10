@@ -29,7 +29,7 @@
 // parser.h
 
 int ParseExpression(char*& lp, aint& val);
-int ParseDirective(bool bol = 0);
+int ParseDirective(bool beginningOfLine = 0);
 int ParseDirective_REPT();
 void ParseInstruction();
 char* ReplaceDefine(char* lp);

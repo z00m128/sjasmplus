@@ -32,55 +32,21 @@
 
 int cmphstr(char*& p1, const char* p2) {
 	unsigned int i = 0;
-	/* old:
-	if (isupper(*p1))
-	  while (p2[i]) {
-		if (p1[i]!=toupper(p2[i])) return 0;
-		++i;
-	  }
-	else
-	  while (p2[i]) {
-		if (p1[i]!=p2[i]) return 0;
-		++i;
-	  }*/
-	/* (begin) */
-	unsigned int v = 0;
-	if (strlen(p1) >= strlen(p2)) {
-		if (isupper(*p1)) {
-			while (p2[i]) {
-				if (p1[i] != toupper(p2[i])) {
-					v = 0;
-				} else {
-					++v;
-				}
-				++i;
-			}
-			if (strlen(p2) != v) {
-				return 0;
-			}
-		} else {
-			while (p2[i]) {
-				if (p1[i] != p2[i]) {
-					v = 0;
-				} else {
-					++v;
-				}
-				++i;
-			}
-			if (strlen(p2) != v) {
-				return 0;
-			}
+	if (isupper(*p1)) {
+		while (p2[i]) {
+			if (p1[i] != toupper(p2[i])) return 0;
+			++i;
 		}
-		/* (end) */
-
-		if (i <= strlen(p1) && p1[i] > ' '/* && p1[i]!=':'*/) {
-			return 0;
-		}
-		p1 += i;
-		return 1;
 	} else {
-		return 0;
+		while (p2[i]) {
+			if (p1[i] != p2[i]) return 0;
+			++i;
+		}
 	}
+	if (' ' < p1[i]) return 0;		// any character above space means "no match"
+	// space, tab, enter, \0, ... => "match"
+	p1 += i;
+	return 1;
 }
 
 int White() {

@@ -81,7 +81,7 @@ public:
 	int Insert(const char*, void(*) (void));
 	int insertd(const char*, void(*) (void));
 	/*int zoek(char*);*/
-	int zoek(const char*, bool =0);
+	int zoek(const char*);
 	int Find(char*);
 private:
 	int HashTable[LABTABSIZE], NextLocation;

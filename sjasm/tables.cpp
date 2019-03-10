@@ -604,24 +604,16 @@ int CFunctionTable::insertd(const char* nname, void(*nfunp) (void)) {
 	return Insert(buf, nfunp);
 }
 
-int CFunctionTable::zoek(const char* nname, bool bol) {
+int CFunctionTable::zoek(const char* nname) {
 	int tr, htr, otr;
 	otr = tr = Hash(nname);
 	while ((htr = HashTable[tr])) {
 		if (!strcmp((funtab[htr].name), nname)) {
-			if (bol && ((sizeof(nname) == 3 && (!strcmp("END", nname) || !strcmp("end", nname))) || (sizeof(nname) == 4 && (!strcmp(".END", nname) || !strcmp(".end", nname))))) {
-				return 0;
-			} else {
-				(*funtab[htr].funp)();
-				return 1;
-			}
+			(*funtab[htr].funp)();
+			return 1;
 		}
-		if (++tr >= FUNTABSIZE) {
-			tr = 0;
-		}
-		if (tr == otr) {
-			break;
-		}
+		if (++tr >= FUNTABSIZE) tr = 0;
+		if (tr == otr) break;
 	}
 	return 0;
 }

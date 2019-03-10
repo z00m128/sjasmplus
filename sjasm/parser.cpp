@@ -656,12 +656,7 @@ void ParseLabel() {
 	if (White()) {
 		return;
 	}
-	if (Options::IsPseudoOpBOF && ParseDirective(1)) {
-		while (*lp && *lp == ':') {
-			++lp;
-		}
-		return;
-	}
+	if (Options::IsPseudoOpBOF && ParseDirective(true)) return;
 	tp = temp;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
 		*tp = *lp; ++tp; ++lp;
