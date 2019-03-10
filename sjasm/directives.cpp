@@ -421,7 +421,6 @@ void dirALIGN() {
 	bool explicitVal;
 	bool explicitFill = (explicitVal = ParseExpression(lp, val)) && comma(lp) && ParseExpression(lp, fill);
 	if (!explicitVal) val = 4;
-	fprintf(stderr, "%ld %ld %p %p %s\n", val, fill, lp, oldLp, oldLp-5);
 	// check if alignment value is power of two (0..15-th power only)
 	if (val < 1 || (1<<15) < val || (val & (val-1))) {
 		Error("[ALIGN] Illegal align", oldLp-5, SUPPRESS);
