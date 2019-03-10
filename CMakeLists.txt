@@ -123,21 +123,14 @@ endif()
 install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin)
 
-if(NOT WIN32)
-	execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/ContinuousIntegration
-		${CMAKE_BINARY_DIR}/ContinuousIntegration)
+find_program(BASH_PROGRAM bash)
 
-	execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/tests
-		${CMAKE_BINARY_DIR}/tests)
-
-	execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/examples
-		${CMAKE_BINARY_DIR}/examples)
-
-	add_custom_target(test COMMAND ${CMAKE_COMMAND} -E env "PATH=${CMAKE_BINARY_DIR}:$ENV{PATH}" ContinuousIntegration/test_folder_tests.sh
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+if(BASH_PROGRAM)
+	add_custom_target(tests COMMAND "EXE=${CMAKE_BINARY_DIR}/${PROJECT_NAME}" ${BASH_PROGRAM} "${CMAKE_SOURCE_DIR}/ContinuousIntegration/test_folder_tests.sh"
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 		DEPENDS ${PROJECT_NAME})
 
-	add_custom_target(example COMMAND ${CMAKE_COMMAND} -E env "PATH=${CMAKE_BINARY_DIR}:$ENV{PATH}" ContinuousIntegration/test_folder_examples.sh
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+	add_custom_target(examples COMMAND "EXE=${CMAKE_BINARY_DIR}/${PROJECT_NAME}" ${BASH_PROGRAM} "${CMAKE_SOURCE_DIR}/ContinuousIntegration/test_folder_examples.sh"
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 		DEPENDS ${PROJECT_NAME})
 endif()
