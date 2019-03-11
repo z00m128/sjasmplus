@@ -11,3 +11,8 @@ function find_newest_binary() {
         [[ -f "$EXE_CMAKE" && "$EXE_CMAKE" -nt "$EXE" ]] && EXE=$EXE_CMAKE
     done
 }
+
+# "decolorize" output if NOCOLOR is set to anything non-empty
+[[ -n "$NOCOLOR" ]] && function echo() {
+    command echo "$@" | sed -e 's/\x1b\[[0-9]\+m//g'
+}
