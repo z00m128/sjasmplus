@@ -6,6 +6,7 @@ GCC=gcc
 CC=$(GCC)
 GPP=g++
 C++=$(GPP)
+BASH=/bin/bash
 
 PREFIX=/usr/local
 INSTALL=install -c
@@ -63,7 +64,7 @@ TOLUAOBJS=\
 	$(SUBDIR_TOLUA)/tolua_to.o
 
 
-.PHONY: all clean docs
+.PHONY: all clean docs tests
 
 all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS)
 	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS)
@@ -79,6 +80,10 @@ uninstall:
 
 .cpp.o:
 	$(GPP) $(CXXFLAGS) -o $@ -c $<
+
+tests: all
+	EXE=$(CURDIR)/$(EXE) $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_tests.sh
+	EXE=$(CURDIR)/$(EXE) $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_examples.sh
 
 docs:
 	$(DOCBOOKGEN) \
