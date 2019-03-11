@@ -1003,9 +1003,6 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 
 CStringsList::CStringsList(char* nstring, CStringsList* nnext) {
 	string = STRDUP(nstring);
-	//if (string == NULL) {
-	//	Error("No enough memory!", 0, FATAL);
-	//}
 	next = nnext;
 }
 

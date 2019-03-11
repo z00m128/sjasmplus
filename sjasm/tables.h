@@ -273,7 +273,6 @@ struct SRepeatStack {
 	CStringsList* Pointer;
 	bool IsInWork;
 	int Level;
-	char* lp;
 };
 
 struct SConditionalStack {
@@ -284,29 +283,7 @@ struct SConditionalStack {
 	CStringsList* Pointer;
 	bool IsInWork;
 	int Level;
-	char* lp;
 };
-
-/*
-class LabelTable2entrycls {
-public:
-  char *name;
-  aint value;
-  CLabelTableEntry();
-};
-
-
-class LabelTable2cls {
-public:
-  LabelTable2cls();
-  int replace(char*,aint);
-  int count=0;
-private:
-  int HashTable[LABTABSIZE],NextLocation;
-  LabelTable2entrycls LabelTable[LABTABSIZE];
-  int Hash(char*);
-};
-*/
 
 class CDevicePage {
 public:

@@ -1966,10 +1966,9 @@ void dirDUP() {
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
-			if (!ParseExpression(lp, val)) {
-				Error("[DUP/REPT] Syntax error", lp, IF_FIRST); return;
-			}
-			dup.Level++;
+			// Just skip the expression to the end of line, don't try to evaluate yet
+			while (*lp) ++lp;
+			++dup.Level;
 			return;
 		}
 	}
@@ -1989,8 +1988,8 @@ void dirDUP() {
 	dup.Level = 0;
 
 	dup.Lines = new CStringsList(lp, NULL);
+	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
 	dup.Pointer = dup.Lines;
-	dup.lp = lp; // EDUP
 	dup.CurrentGlobalLine = CurrentGlobalLine;
 	dup.CurrentLocalLine = CurrentLocalLine;
 	dup.IsInWork = false;
@@ -1999,43 +1998,35 @@ void dirDUP() {
 
 void dirEDUP() {
 	if (RepeatStack.empty()) {
-		Error("[EDUP/ENDR] End repeat without repeat");return;
+		Error("[EDUP/ENDR] End repeat without repeat");
+		return;
 	}
 
-	if (!RepeatStack.empty()) {
-		SRepeatStack& dup = RepeatStack.top();
-		if (!dup.IsInWork && dup.Level) {
-			dup.Level--;
-			return;
-		}
+	SRepeatStack& dup = RepeatStack.top();
+	if (!dup.IsInWork && dup.Level) {
+		--dup.Level;
+		return;
 	}
 	int olistmacro;
 	long gcurln, lcurln;
 	char* ml;
-	SRepeatStack& dup = RepeatStack.top();
 	dup.IsInWork = true;
-	dup.Pointer->string = new char[LINEMAX];
-	if (dup.Pointer->string == NULL) {
-		Error("[EDUP/ENDR] No enough memory!", NULL, FATAL);
-	}
-	*dup.Pointer->string = 0;
-	STRNCAT(dup.Pointer->string, LINEMAX, dup.lp, lp - dup.lp - 4); // EDUP/ENDR/ENDM
-	CStringsList* s;
+	dup.Pointer->string = NULL;	// kill the EDUP inside DUP-list (also works as "while" terminator)
 	olistmacro = listmacro;
 	listmacro = 1;
-	ml = STRDUP(line);
-	if (ml == NULL) {
-		Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
-	}
+	ml = STRDUP(line);			// copy the EDUP line for List purposes (after the DUP block emit)
+	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
 	gcurln = CurrentGlobalLine;
 	lcurln = CurrentLocalLine;
 	while (dup.RepeatCount--) {
 		CurrentGlobalLine = dup.CurrentGlobalLine;
 		CurrentLocalLine = dup.CurrentLocalLine;
-		s = dup.Lines;
-		while (s) {
+		CStringsList* s = dup.Lines;
+		donotlist=1;	// skip first empty line (where DUP itself is parsed)
+		while (s && s->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
 			STRCPY(line, LINEMAX, s->string);
 			s = s->next;
+			//experimental: show end of DUP block: if (!s || !s->string) STRCAT(line, LINEMAX, ";kuk");
 			ParseLineSafe();
 			CurrentLocalLine++;
 			CurrentGlobalLine++;
@@ -2046,9 +2037,7 @@ void dirEDUP() {
 	CurrentGlobalLine = gcurln;
 	CurrentLocalLine = lcurln;
 	listmacro = olistmacro;
-	donotlist = 1;
-	STRCPY(line, LINEMAX,  ml);
-
+	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	ListFile();
 }
 

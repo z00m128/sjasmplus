@@ -802,17 +802,20 @@ void ParseLine(bool parselabels) {
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
-			lp = ReplaceDefine(line);
-			//lp = line;		// TODO Issue #33
-			CStringsList* f;
-			f = new CStringsList(lp, NULL);
+			lp = line;
+			CStringsList* f = new CStringsList(lp, NULL);
 			dup.Pointer->next = f;
 			dup.Pointer = f;
-			dup.lp = lp;
+// 			fprintf(stderr, ">%d %ld %c%ld-%d [%s]\n", pass, CurrentGlobalLine,
+// 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),
+// 					(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 			ParseDirective_REPT();
 			return;
 		}
 	}
+// 	fprintf(stderr, "|%d %ld %c%ld-%d [%s]\n", pass, CurrentGlobalLine,
+// 			(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'), RepeatStack.size(),
+// 			(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 	lp = ReplaceDefine(line);
 	if (!ConvertEncoding) {
 		unsigned char* lp2 = (unsigned char*) lp;
@@ -866,6 +869,9 @@ void ParseLineSafe(bool parselabels) {
 			Error("No enough memory!", NULL, FATAL);
 		}
 	}
+
+	// replace defines (at *this* place it does fix Issue #33 *and* keeps "DUP in DUP in MACRO" working)
+	lp = ReplaceDefine(line);
 
 	CompiledCurrentLine++;
 	ParseLine(parselabels);
