@@ -1250,177 +1250,108 @@ void dirLABELSLIST() {
 
 }*/
 
-void dirIF() {
-	aint val;
-	IsLabelNotFound = 0;
-	if (!ParseExpression(lp, val)) {
-		Error("[IF] Syntax error", lp, IF_FIRST);
-		return;
-	}
-	if (IsLabelNotFound) {
-		Error("[IF] Forward reference", NULL, ALL);
-	}
+// error message templates for IF**some** directives
+constexpr static size_t dirIfErrorsN = 2, dirIfErrorsSZ = 48;
+const static char dirIfErrorsTxtSrc[dirIfErrorsN][dirIfErrorsSZ] = {
+	{ "[%s] No ENDIF" },
+	{ "[%s] one ELSE only expected" }
+};
 
-	if (val) {
-		ListFile();
-		switch (ReadFile(lp, "[IF] No endif")) {
-		case ELSE:
-			if (SkipFile(lp, "[IF] No endif") != ENDIF) {
-				Error("[IF] No endif");
-			}
-			break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IF] No endif!");
-			break;
-		}
-	} else {
-		ListFile();
-		switch (SkipFile(lp, "[IF] No endif")) {
-		case ELSE:
-			if (ReadFile(lp, "[IF] No endif") != ENDIF) {
-				Error("[IF] No endif");
-			}
-			break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IF] No endif!");
-			break;
+// main IF implementation parsing/skipping part of source depending on "val", handling ELSE/ENDIF
+static void dirIfInternal(const char* dirName, aint val) {
+	// set up error messages for the particular pseudo-op
+	char errorsTxt[dirIfErrorsN][dirIfErrorsSZ];
+	for (size_t i = 0; i < dirIfErrorsN; ++i) {
+		SPRINTF1(errorsTxt[i], dirIfErrorsSZ, dirIfErrorsTxtSrc[i], dirName);
+	}
+	// do the IF**some** part
+	ListFile();
+	EReturn ret = END;
+	int elseCounter = 0;
+	while (ENDIF != ret) {
+		switch (ret = val ? ReadFile(lp, errorsTxt[0]) : SkipFile(lp, errorsTxt[0])) {
+			case ELSE:
+				if (elseCounter++) Warning(errorsTxt[1]);
+				val = !val;
+				break;
+			case ENDIF:
+				break;
+			default:
+				Error(errorsTxt[0]);
+				return;
 		}
 	}
 }
 
-void dirIFN() {
-	aint val;
+// IF and IFN internal helper, to evaluate expression
+static bool dirIfIfn(aint & val) {
 	IsLabelNotFound = 0;
 	if (!ParseExpression(lp, val)) {
-		Error("[IFN] Syntax error", lp, IF_FIRST);
-		return;
+		Error("[IF/IFN] Syntax error", lp, IF_FIRST);
+		return false;
 	}
-	if (IsLabelNotFound) {
-		Error("[IFN] Forward reference", NULL, ALL);
-	}
-
-	if (!val) {
-		ListFile();
-		switch (ReadFile(lp, "[IFN] No endif")) {
-		case ELSE:
-			if (SkipFile(lp, "[IFN] No endif") != ENDIF) {
-				Error("[IFN] No endif");
-			} break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IFN] No endif!"); break;
-		}
-	} else {
-		ListFile();
-		switch (SkipFile(lp, "[IFN] No endif")) {
-		case ELSE:
-			if (ReadFile(lp, "[IFN] No endif") != ENDIF) {
-				Error("[IFN] No endif");
-			} break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IFN] No endif!"); break;
-		}
-	}
+	if (IsLabelNotFound) Error("[IF/IFN] Forward reference");
+	return true;
 }
 
-void dirIFUSED() {
-	char* id;
-	if (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) {
-		Error("[IFUSED] Syntax error", NULL, IF_FIRST);
-		return;
+static void dirIF() {
+	aint val;
+	if (dirIfIfn(val)) dirIfInternal("IF", val);
+}
+
+static void dirIFN() {
+	aint val;
+	if (dirIfIfn(val)) dirIfInternal("IFN", !val);
+}
+
+// IFUSED and IFNUSED internal helper, to parse label
+static bool dirIfusedIfnused(char* & id) {
+	if ( (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) || !SkipBlanks()) {
+		Error("[IFUSED] Syntax error", bp, SUPPRESS);
+		return false;
 	}
 	if (id == NULL || *id == 0) {
 		id = LastParsedLabel;
-	} else {
-		id = ValidateLabel(id, 0);
-		if (id == NULL) {
-			Error("[IFUSED] Invalid label name", NULL, IF_FIRST);
-			return;
-		}
+	} else {	// Ped7g: I was unable to trigger this code path by ASM source, GetID is foolproof.
+		id = ValidateLabel(id, 0);		// So I added `|| !SkipBlanks()` above to verify there's only label
+		if (id == NULL) Error("[IFUSED] Invalid label name", bp, IF_FIRST);
 	}
-
-	if (LabelTable.IsUsed(id)) {
-		ListFile();
-		switch (ReadFile(lp, "[IFUSED] No endif")) {
-		case ELSE:
-			if (SkipFile(lp, "[IFUSED] No endif") != ENDIF) {
-				Error("[IFUSED] No endif");
-			} break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IFUSED] No endif!"); break;
-		}
-	} else {
-		ListFile();
-		switch (SkipFile(lp, "[IFUSED] No endif")) {
-		case ELSE:
-			if (ReadFile(lp, "[IFUSED] No endif") != ENDIF) {
-				Error("[IFUSED] No endif");
-			} break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IFUSED] No endif!"); break;
-		}
-	}
+	return NULL != id;
 }
 
-void dirIFNUSED() {
+static void dirIFUSED() {
 	char* id;
-	if (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) {
-		Error("[IFUSED] Syntax error", NULL, IF_FIRST);
-		return;
-	}
-	if (id == NULL || *id == 0) {
-		id = LastParsedLabel;
-	} else {
-		id = ValidateLabel(id, 0);
-		if (id == NULL) {
-			Error("[IFUSED] Invalid label name", NULL, IF_FIRST);
-			return;
-		}
-	}
+	if (dirIfusedIfnused(id)) dirIfInternal("IFUSED", LabelTable.IsUsed(id));
+}
 
-	if (!LabelTable.IsUsed(id)) {
-		ListFile();
-		switch (ReadFile(lp, "[IFNUSED] No endif")) {
-		case ELSE:
-			if (SkipFile(lp, "[IFNUSED] No endif") != ENDIF) {
-				Error("[IFNUSED] No endif");
-			} break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IFNUSED] No endif!"); break;
-		}
+static void dirIFNUSED() {
+	char* id;
+	if (dirIfusedIfnused(id)) dirIfInternal("IFUSED", !LabelTable.IsUsed(id));
+}
+
+static void dirIFDEF() {
+	char* id;
+	if ((id = GetID(lp)) && *id) {
+		dirIfInternal("IFDEF", DefineTable.FindDuplicate(id));
 	} else {
-		ListFile();
-		switch (SkipFile(lp, "[IFNUSED] No endif")) {
-		case ELSE:
-			if (ReadFile(lp, "[IFNUSED] No endif") != ENDIF) {
-				Error("[IFNUSED] No endif");
-			} break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IFNUSED] No endif!"); break;
-		}
+		Error("[IFDEF] Illegal identifier", bp);
 	}
 }
 
-void dirELSE() {
+static void dirIFNDEF() {
+	char* id;
+	if ((id = GetID(lp)) && *id) {
+		dirIfInternal("IFDEF", !DefineTable.FindDuplicate(id));
+	} else {
+		Error("[IFNDEF] Illegal identifier", bp);
+	}
+}
+
+static void dirELSE() {
 	Error("ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF");
 }
 
-void dirENDIF() {
+static void dirENDIF() {
 	Error("ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF");
 }
 
@@ -1523,106 +1454,6 @@ void dirUNDEFINE() {
 	} else {
 		Warning("[UNDEFINE] Identifier not found", id); return;
 	}
-}
-
-void dirIFDEF() {
-	/*char *p=line,*id;*/
-	char* id;
-	/* (this was cutted)
-	while ('o') {
-	  if (!*p) Error("ifdef error",0,FATAL);
-	  if (*p=='.') { ++p; continue; }
-	  if (*p=='i' || *p=='I') break;
-	  ++p;
-	}
-	if (!cmphstr(p,"ifdef")) Error("ifdef error",0,FATAL);
-	*/
-	EReturn res;
-	if (!(id = GetID(lp))) {
-		Error("[IFDEF] Illegal identifier"); return;
-	}
-
-	if (DefineTable.FindDuplicate(id)) {
-		ListFile();
-		/*switch (res=ReadFile()) {*/
-		switch (res = ReadFile(lp, "[IFDEF] No endif")) {
-			/*case ELSE: if (SkipFile()!=ENDIF) Error("No endif",0); break;*/
-		case ELSE:
-			if (SkipFile(lp, "[IFDEF] No endif") != ENDIF) {
-				Error("[IFDEF] No endif");
-			} break;
-		case ENDIF:
-			break;
-			/*default: Error("No endif!",0); break;*/
-		default:
-			Error("[IFDEF] No endif!"); break;
-		}
-	} else {
-		ListFile();
-		/*switch (res=SkipFile()) {*/
-		switch (res = SkipFile(lp, "[IFDEF] No endif")) {
-			/*case ELSE: if (ReadFile()!=ENDIF) Error("No endif",0); break;*/
-		case ELSE:
-			if (ReadFile(lp, "[IFDEF] No endif") != ENDIF) {
-				Error("[IFDEF] No endif");
-			} break;
-		case ENDIF:
-			break;
-			/*default: Error(" No endif!",0); break;*/
-		default:
-			Error("[IFDEF] No endif!"); break;
-		}
-	}
-	/**lp=0;*/
-}
-
-void dirIFNDEF() {
-	/*char *p=line,*id;*/
-	char* id;
-	/* (this was cutted)
-	while ('o') {
-	  if (!*p) Error("ifndef error",0,FATAL);
-	  if (*p=='.') { ++p; continue; }
-	  if (*p=='i' || *p=='I') break;
-	  ++p;
-	}
-	if (!cmphstr(p,"ifndef")) Error("ifndef error",0,FATAL);
-	*/
-	EReturn res;
-	if (!(id = GetID(lp))) {
-		Error("[IFNDEF] Illegal identifier"); return;
-	}
-
-	if (!DefineTable.FindDuplicate(id)) {
-		ListFile();
-		/*switch (res=ReadFile()) {*/
-		switch (res = ReadFile(lp, "[IFNDEF] No endif")) {
-			/*case ELSE: if (SkipFile()!=ENDIF) Error("No endif",0); break;*/
-		case ELSE:
-			if (SkipFile(lp, "[IFNDEF] No endif") != ENDIF) {
-				Error("[IFNDEF] No endif");
-			} break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IFNDEF] No endif!"); break;
-		}
-	} else {
-		ListFile();
-		/*switch (res=SkipFile()) {*/
-		switch (res = SkipFile(lp, "[IFNDEF] No endif")) {
-			/*case ELSE: if (ReadFile()!=ENDIF) Error("No endif",0); break;*/
-		case ELSE:
-			if (ReadFile(lp, "[IFNDEF] No endif") != ENDIF) {
-				Error("[IFNDEF] No endif");
-			} break;
-		case ENDIF:
-			break;
-		default:
-			Error("[IFNDEF] No endif!"); break;
-		}
-	}
-	/**lp=0;*/
 }
 
 void dirEXPORT() {
@@ -2354,6 +2185,8 @@ void InsertDirectives() {
 	DirectivesTable.insertd("ifn", dirIFN);
 	DirectivesTable.insertd("ifused", dirIFUSED);
 	DirectivesTable.insertd("ifnused", dirIFNUSED);
+	DirectivesTable.insertd("ifdef", dirIFDEF);
+	DirectivesTable.insertd("ifndef", dirIFNDEF);
 	DirectivesTable.insertd("output", dirOUTPUT);
 	DirectivesTable.insertd("outend", dirOUTEND);
 	DirectivesTable.insertd("tapout", dirTAPOUT);
@@ -2361,8 +2194,6 @@ void InsertDirectives() {
 	DirectivesTable.insertd("define", dirDEFINE);
 	DirectivesTable.insertd("undefine", dirUNDEFINE);
 	DirectivesTable.insertd("defarray", dirDEFARRAY);
-	DirectivesTable.insertd("ifdef", dirIFDEF);
-	DirectivesTable.insertd("ifndef", dirIFNDEF);
 	DirectivesTable.insertd("macro", dirMACRO);
 	DirectivesTable.insertd("struct", dirSTRUCT);
 	DirectivesTable.insertd("dc", dirDC);

@@ -1,0 +1,127 @@
+  1   0000              ;; use options from dir_ifdef.options: "-DextDef1 -DextDef2=X" to assemble this
+  2   0000
+  3   0000              ;; This must generate syntax errors
+dir_ifdef.asm(4): error: [IFDEF] Illegal identifier: IFDEF
+  4   0000                  IFDEF
+dir_ifdef.asm(5): error: [IFNDEF] Illegal identifier: IFNDEF
+  5   0000                  IFNDEF
+  6   0000
+  7   0000              ;; Rest of code must compile without errors
+  8   0000
+  9   0000                  DEFINE defined
+ 10   0000
+ 11   0000                  IFDEF undefined
+ 12   0000 ~                skip
+ 13   0000                  ELSE
+ 14   0000 76               halt
+ 15   0001                  ENDIF
+ 16   0001
+ 17   0001                  IFNDEF undefined
+ 18   0001 76               halt
+ 19   0002                  ELSE
+ 20   0002 ~                skip
+ 21   0002                  ENDIF
+ 22   0002
+ 23   0002                  IFDEF defined
+ 24   0002 76               halt
+ 25   0003                  ELSE
+ 26   0003 ~                skip
+ 27   0003                  ENDIF
+ 28   0003
+ 29   0003                  IFNDEF defined
+ 30   0003 ~                skip
+ 31   0003                  ELSE
+ 32   0003 76               halt
+ 33   0004                  ENDIF
+ 34   0004
+ 35   0004              ;; check the externally defined ones from command line: -DextDef1 -DextDef2=X
+ 36   0004
+ 37   0004                  IFDEF extDef1
+ 38   0004 76               halt
+ 39   0005                  ELSE
+ 40   0005 ~                skip
+ 41   0005                  ENDIF
+ 42   0005
+ 43   0005                  IFNDEF extDef1
+ 44   0005 ~                skip
+ 45   0005                  ELSE
+ 46   0005 76               halt
+ 47   0006                  ENDIF
+ 48   0006
+ 49   0006                  IFDEF extDef2
+ 50   0006 76               halt
+ 51   0007                  ELSE
+ 52   0007 ~                skip
+ 53   0007                  ENDIF
+ 54   0007
+ 55   0007                  IFNDEF extDef2
+ 56   0007 ~                skip
+ 57   0007                  ELSE
+ 58   0007 76               halt
+ 59   0008                  ENDIF
+ 60   0008
+ 61   0008              ;; check nesting
+ 62   0008
+ 63   0008                  IFDEF defined   ; true on top level
+ 64   0008
+ 65   0008                      IFDEF extDef1
+ 66   0008 76                   halt
+ 67   0009                      ELSE
+ 68   0009 ~                    skip
+ 69   0009                      ENDIF
+ 70   0009
+ 71   0009                      IFNDEF extDef1
+ 72   0009 ~                    skip
+ 73   0009                      ELSE
+ 74   0009 76                   halt
+ 75   000A                      ENDIF
+ 76   000A
+ 77   000A                  ELSE    ; false on top level
+ 78   000A ~
+ 79   000A ~                    IFDEF extDef1
+ 80   000A ~                    almost halt
+ 81   000A ~                    ELSE
+ 82   000A ~                    skip
+ 83   000A ~                    ENDIF
+ 84   000A ~
+ 85   000A ~                    IFNDEF extDef1
+ 86   000A ~                    skip
+ 87   000A ~                    ELSE
+ 88   000A ~                    almost halt
+ 89   000A ~                    ENDIF
+ 90   000A ~
+ 91   000A                  ENDIF
+ 92   000A
+ 93   000A                  IFNDEF defined  ; false on top level
+ 94   000A ~
+ 95   000A ~                    IFDEF extDef1
+ 96   000A ~                    almost halt
+ 97   000A ~                    ELSE
+ 98   000A ~                    skip
+ 99   000A ~                    ENDIF
+100   000A ~
+101   000A ~                    IFNDEF extDef1
+102   000A ~                    skip
+103   000A ~                    ELSE
+104   000A ~                    almost halt
+105   000A ~                    ENDIF
+106   000A ~
+107   000A                  ELSE    ; true on top level
+108   000A
+109   000A                      IFDEF extDef1
+110   000A 76                   halt
+111   000B                      ELSE
+112   000B ~                    skip
+113   000B                      ENDIF
+114   000B
+115   000B                      IFNDEF extDef1
+116   000B ~                    skip
+117   000B                      ELSE
+118   000B 76                   halt
+119   000C                      ENDIF
+120   000C
+121   000C                  ENDIF
+122   000C
+
+Value    Label
+------ - -----------------------------------------------------------

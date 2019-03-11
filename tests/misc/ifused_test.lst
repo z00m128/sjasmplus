@@ -10,9 +10,9 @@
 10    0000
 11    0000              ;; This must generate syntax errors
 12    0000
-ifused_test.asm(13): error: [IFUSED] Syntax error
+ifused_test.asm(13): error: [IFUSED] Syntax error: IFUSED
 13    0000                      IFUSED
-ifused_test.asm(14): error: [IFUSED] Syntax error
+ifused_test.asm(14): error: [IFUSED] Syntax error: IFNUSED
 14    0000                      IFNUSED
 15    0000
 16    0000              ;; All rest of code must be compiled without errors
@@ -74,6 +74,12 @@ ifused_test.asm(14): error: [IFUSED] Syntax error
 72    0015 C9                   ret
 73    0016                      ENDIF                   ;; End of IFUSED Wait
 74    0016
+75    0016              ;; ADDENDUM: different code path to generate some more syntax errors
+ifused_test.asm(76): error: [IFUSED] Syntax error: IFUSED  Invalid&Label   
+76    0016                      IFUSED  Invalid&Label   ; there's no obvious way how to hit "invalid label"
+ifused_test.asm(77): error: [IFUSED] Syntax error: IFNUSED Invalid%Label   
+77    0016                      IFNUSED Invalid%Label   ; error message, the GetID is too much foolproof.
+78    0016
 
 Value    Label
 ------ - -----------------------------------------------------------

@@ -71,3 +71,7 @@ Wait    IFUSED
         djnz    .loop
         ret
         ENDIF                   ;; End of IFUSED Wait
+
+;; ADDENDUM: different code path to generate some more syntax errors
+        IFUSED  Invalid&Label   ; there's no obvious way how to hit "invalid label"
+        IFNUSED Invalid%Label   ; error message, the GetID is too much foolproof.
