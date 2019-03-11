@@ -1,4 +1,4 @@
-; identical test with inc.asm, but first empty lines are included, to raise max-line
+; identical test with i36.asm, but first empty lines are included, to raise max-line
 ; number in listing file to three digits
 
 
