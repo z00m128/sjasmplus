@@ -1,0 +1,192 @@
+ 1    0000              ; identical test with i36b.asm, but first empty lines are included, to raise max-line
+ 2    0000              ; number in listing file to two digits
+ 3    0000
+ 4    0000
+ 5    0000
+ 6    0000
+ 7    0000
+ 8    0000
+ 9    0000
+10    0000              INC_DEPTH=0
+11    0000
+12    0000                  INCLUDE "i36b_II.i.asm"
+ 1+   0000              INC_DEPTH=INC_DEPTH+1 
+ 1+   0000                IF INC_DEPTH < 7 
+ 1+   0000              	 INCLUDE "i36b_II.i.asm" 
+ 1++  0000              INC_DEPTH=INC_DEPTH+1 
+ 1++  0000                IF INC_DEPTH < 7 
+ 1++  0000              	 INCLUDE "i36b_II.i.asm" 
+ 1+++ 0000              INC_DEPTH=INC_DEPTH+1 
+ 1+++ 0000                IF INC_DEPTH < 7 
+ 1+++ 0000              	 INCLUDE "i36b_II.i.asm" 
+ 1++++0000              INC_DEPTH=INC_DEPTH+1 
+ 1++++0000                IF INC_DEPTH < 7 
+ 1++++0000              	 INCLUDE "i36b_II.i.asm" 
+ 1++++0000              INC_DEPTH=INC_DEPTH+1 
+ 1++++0000                IF INC_DEPTH < 7 
+ 1++++0000              	 INCLUDE "i36b_II.i.asm" 
+ 1++++0000              INC_DEPTH=INC_DEPTH+1 
+ 1++++0000                IF INC_DEPTH < 7 
+ 1++++0000              	 INCLUDE "i36b_II.i.asm" 
+ 1++++0000              INC_DEPTH=INC_DEPTH+1 
+ 1++++0000                IF INC_DEPTH < 7 
+ 1++++0000 ~            	 INCLUDE "i36b_II.i.asm" 
+ 2++++0000              	 ENDIF
+ 2++++0000 06 07            ld  b,INC_DEPTH 
+ 2++++0002                DUP INC_DEPTH 
+ 3++++0002 1F          >  rra
+ 4++++0003 00          >    nop 
+ 5++++0004 C9          >  ret
+ 6++++0005 27          >    daa 
+ 3++++0006 1F          >  rra
+ 4++++0007 00          >    nop 
+ 5++++0008 C9          >  ret
+ 6++++0009 27          >    daa 
+ 3++++000A 1F          >  rra
+ 4++++000B 00          >    nop 
+ 5++++000C C9          >  ret
+ 6++++000D 27          >    daa 
+ 3++++000E 1F          >  rra
+ 4++++000F 00          >    nop 
+ 5++++0010 C9          >  ret
+ 6++++0011 27          >    daa 
+ 3++++0012 1F          >  rra
+ 4++++0013 00          >    nop 
+ 5++++0014 C9          >  ret
+ 6++++0015 27          >    daa 
+ 3++++0016 1F          >  rra
+ 4++++0017 00          >    nop 
+ 5++++0018 C9          >  ret
+ 6++++0019 27          >    daa 
+ 3++++001A 1F          >  rra
+ 4++++001B 00          >    nop 
+ 5++++001C C9          >  ret
+ 6++++001D 27          >    daa 
+ 4++++001E                EDUP 
+ 4++++001E 37             scf
+ 5++++001F              INC_DEPTH=INC_DEPTH-1
+ 2++++001F              	 ENDIF
+ 2++++001F 06 06            ld  b,INC_DEPTH 
+ 2++++0021                DUP INC_DEPTH 
+ 3++++0021 1F          >  rra
+ 4++++0022 00          >    nop 
+ 5++++0023 C9          >  ret
+ 6++++0024 27          >    daa 
+ 3++++0025 1F          >  rra
+ 4++++0026 00          >    nop 
+ 5++++0027 C9          >  ret
+ 6++++0028 27          >    daa 
+ 3++++0029 1F          >  rra
+ 4++++002A 00          >    nop 
+ 5++++002B C9          >  ret
+ 6++++002C 27          >    daa 
+ 3++++002D 1F          >  rra
+ 4++++002E 00          >    nop 
+ 5++++002F C9          >  ret
+ 6++++0030 27          >    daa 
+ 3++++0031 1F          >  rra
+ 4++++0032 00          >    nop 
+ 5++++0033 C9          >  ret
+ 6++++0034 27          >    daa 
+ 3++++0035 1F          >  rra
+ 4++++0036 00          >    nop 
+ 5++++0037 C9          >  ret
+ 6++++0038 27          >    daa 
+ 4++++0039                EDUP 
+ 4++++0039 37             scf
+ 5++++003A              INC_DEPTH=INC_DEPTH-1
+ 2++++003A              	 ENDIF
+ 2++++003A 06 05            ld  b,INC_DEPTH 
+ 2++++003C                DUP INC_DEPTH 
+ 3++++003C 1F          >  rra
+ 4++++003D 00          >    nop 
+ 5++++003E C9          >  ret
+ 6++++003F 27          >    daa 
+ 3++++0040 1F          >  rra
+ 4++++0041 00          >    nop 
+ 5++++0042 C9          >  ret
+ 6++++0043 27          >    daa 
+ 3++++0044 1F          >  rra
+ 4++++0045 00          >    nop 
+ 5++++0046 C9          >  ret
+ 6++++0047 27          >    daa 
+ 3++++0048 1F          >  rra
+ 4++++0049 00          >    nop 
+ 5++++004A C9          >  ret
+ 6++++004B 27          >    daa 
+ 3++++004C 1F          >  rra
+ 4++++004D 00          >    nop 
+ 5++++004E C9          >  ret
+ 6++++004F 27          >    daa 
+ 4++++0050                EDUP 
+ 4++++0050 37             scf
+ 5++++0051              INC_DEPTH=INC_DEPTH-1
+ 2++++0051              	 ENDIF
+ 2++++0051 06 04            ld  b,INC_DEPTH 
+ 2++++0053                DUP INC_DEPTH 
+ 3++++0053 1F          >  rra
+ 4++++0054 00          >    nop 
+ 5++++0055 C9          >  ret
+ 6++++0056 27          >    daa 
+ 3++++0057 1F          >  rra
+ 4++++0058 00          >    nop 
+ 5++++0059 C9          >  ret
+ 6++++005A 27          >    daa 
+ 3++++005B 1F          >  rra
+ 4++++005C 00          >    nop 
+ 5++++005D C9          >  ret
+ 6++++005E 27          >    daa 
+ 3++++005F 1F          >  rra
+ 4++++0060 00          >    nop 
+ 5++++0061 C9          >  ret
+ 6++++0062 27          >    daa 
+ 4++++0063                EDUP 
+ 4++++0063 37             scf
+ 5++++0064              INC_DEPTH=INC_DEPTH-1
+ 2+++ 0064              	 ENDIF
+ 2+++ 0064 06 03            ld  b,INC_DEPTH 
+ 2+++ 0066                DUP INC_DEPTH 
+ 3+++ 0066 1F          >  rra
+ 4+++ 0067 00          >    nop 
+ 5+++ 0068 C9          >  ret
+ 6+++ 0069 27          >    daa 
+ 3+++ 006A 1F          >  rra
+ 4+++ 006B 00          >    nop 
+ 5+++ 006C C9          >  ret
+ 6+++ 006D 27          >    daa 
+ 3+++ 006E 1F          >  rra
+ 4+++ 006F 00          >    nop 
+ 5+++ 0070 C9          >  ret
+ 6+++ 0071 27          >    daa 
+ 4+++ 0072                EDUP 
+ 4+++ 0072 37             scf
+ 5+++ 0073              INC_DEPTH=INC_DEPTH-1
+ 2++  0073              	 ENDIF
+ 2++  0073 06 02            ld  b,INC_DEPTH 
+ 2++  0075                DUP INC_DEPTH 
+ 3++  0075 1F          >  rra
+ 4++  0076 00          >    nop 
+ 5++  0077 C9          >  ret
+ 6++  0078 27          >    daa 
+ 3++  0079 1F          >  rra
+ 4++  007A 00          >    nop 
+ 5++  007B C9          >  ret
+ 6++  007C 27          >    daa 
+ 4++  007D                EDUP 
+ 4++  007D 37             scf
+ 5++  007E              INC_DEPTH=INC_DEPTH-1
+ 2+   007E              	 ENDIF
+ 2+   007E 06 01            ld  b,INC_DEPTH 
+ 2+   0080                DUP INC_DEPTH 
+ 3+   0080 1F          >  rra
+ 4+   0081 00          >    nop 
+ 5+   0082 C9          >  ret
+ 6+   0083 27          >    daa 
+ 4+   0084                EDUP 
+ 4+   0084 37             scf
+ 5+   0085              INC_DEPTH=INC_DEPTH-1
+13    0085
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   INC_DEPTH
