@@ -115,7 +115,7 @@ bool displayerror,displayinprocces = 0;
 int ConvertEncoding = ENCWIN;
 
 int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
-int IsRunning = 0, donotlist = 0,listdata  = 0,listmacro  = 0;
+int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0,PseudoORG = 0;
 char* MemoryRAM=NULL, * MemoryPointer=NULL;
 int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;

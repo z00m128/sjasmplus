@@ -326,127 +326,49 @@ void PrepareListLine(aint hexadd)
 	}
 	memset(pline, ' ', 24);
 	if (listmacro) pline[23] = '>';
-	STRCPY(pline + 24, LINEMAX2, line);
 	sprintf(pline, "%*lu", linewidth, linenumber); pline[linewidth] = ' ';
 	memcpy(pline + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
 	sprintf(pline + 6, "%04lX", hexadd & 0xFFFF); pline[10] = ' ';
 	if (digit > '0') *pline = digit & 0xFF;
+	STRCPY(pline + 24, LINEMAX2, line);
 }
 
-void ListFile() {
-	char* pp = pline;
+static void ListFileStringRtrim() {
+	// find end of currently prepared line
+	char* beyondLine = pline+24;
+	while (*beyondLine) ++beyondLine;
+	// and remove trailing white space (space, tab, newline, carriage return, etc..)
+	while (pline < beyondLine && beyondLine[-1] <= ' ') --beyondLine;
+	// set new line and new string terminator after
+	*beyondLine++ = '\n';
+	*beyondLine = 0;
+}
+
+void ListFile(bool showAsSkipped) {
 	if (LASTPASS != pass || NULL == FP_ListingFile || donotlist) {
 		donotlist = nEB = 0; return;
 	}
 	aint pad = PreviousAddress;
-	if (pad == (aint) - 1) pad = epadres;
+	if (pad == -1L) pad = epadres;
 
-	if (strlen(line) && line[strlen(line) - 1] != 10) {
-		STRCAT(line, LINEMAX, "\n");
-	} else {
-		STRCPY(line, LINEMAX, "\n");
-	}
-
-	PrepareListLine(pad);
-
-	int i;
 	int pos = 0;
-	while (1)
-	{
-		pp = pline + 10;
-		int maxEB = nEB; if (maxEB > 4) maxEB = 4;
-		for (i = 0; i < maxEB; i++) pp += sprintf(pp, " %02X", EB[i + pos]);
+	do {
+		PrepareListLine(pad);
+		if (pos) pline[24] = 0;		// remove source line on sub-sequent list-lines
+		char* pp = pline + 10;
+		int BtoList = (nEB < 4) ? nEB : 4;
+		for (int i = 0; i < BtoList; ++i) pp += sprintf(pp, " %02X", EB[i + pos]);
 		*pp = ' ';
-		if (pline[24] == '\n' && !listmacro) { *pp = '\n'; pp[1] = 0; }
+		if (showAsSkipped) pline[11] = '~';
+		ListFileStringRtrim();
 		fputs(pline, FP_ListingFile);
-		nEB -= maxEB;
-		pad += maxEB;
-		pos += maxEB;
-		if (!nEB) break;
-		memset(pline + 11, ' ', 11);
-		pline[24] = '\n';
-		pline[25] = 0;
-		sprintf(pline + 6, "%04lX", pad & 0xFFFF); pline[10] = ' ';
-	}
-	/*
-	*pp = 0;
-	printCurrentLocalLine(pp);
-	PrintHEX16(pp, pad);
-	*(pp++) = ' ';
-	if (nEB < 5) {
-		listbytes(pp);
-		*pp = 0;
-		if (listmacro) {
-			STRCAT(pp, LINEMAX2, ">");
-		}
-		STRCAT(pp, LINEMAX2, line);
-		fputs(pline, FP_ListingFile);
-	}
-	else if (nEB < 6) {
-		listbytes2(pp); *pp = 0;
-		if (listmacro) {
-			STRCAT(pp, LINEMAX2, ">");
-		}
-		STRCAT(pp, LINEMAX2, line);
-		fputs(pline, FP_ListingFile);
-	}
-	else {
-		for (int i = 0; i != 12; ++i) {
-			*(pp++) = ' ';
-		}
-		*pp = 0;
-		if (listmacro) {
-			STRCAT(pp, LINEMAX2, ">");
-		}
-		STRCAT(pp, LINEMAX2, line);
-		fputs(pline, FP_ListingFile);
-		listbytes3(pad);
-	}
-	*/
+		nEB -= BtoList;
+		pad += BtoList;
+		pos += BtoList;
+	} while (0 < nEB);
 	epadres = CurAddress;
-	PreviousAddress = (aint) - 1;
+	PreviousAddress = -1L;
 	nEB = 0;
-	listdata = 0;
-}
-
-void ListFileSkip(char* line) {
-	if (LASTPASS != pass || NULL == FP_ListingFile || donotlist) {
-		donotlist = nEB = 0;
-		return;
-	}
-	aint pad = PreviousAddress;
-	if (pad == (aint)-1) pad = epadres;
-
-	if (strlen(line) && line[strlen(line) - 1] != 10) {
-		STRCAT(line, LINEMAX, "\n");
-	}
-	else {
-		STRCPY(line, LINEMAX, "\n");
-	}
-
-	PrepareListLine(pad);
-	pline[11] = '~';
-	if (*line == '\n') { pline[12] = '\n'; pline[13] = 0; }
-
-	/*
-	*pp = 0;
-	printCurrentLocalLine(pp);
-	PrintHEX16(pp, pad);
-	*pp = 0;
-	STRCAT(pp, LINEMAX2, " ~           ");
-	if (nEB) {
-		Error("Internal error lfs", 0, FATAL);
-	}
-	if (listmacro) {
-		STRCAT(pp, LINEMAX2, ">");
-	}
-	STRCAT(pp, LINEMAX2, line);
-	*/
-	fputs(pline, FP_ListingFile);
-	epadres = CurAddress;
-	PreviousAddress = (aint) - 1;
-	nEB = 0;
-	listdata = 0;
 }
 
 void CheckPage() {
@@ -1501,7 +1423,7 @@ EReturn SkipFile(char* pp, const char* err) {
 				return ELSE;
 			}
 		}
-		ListFileSkip(line);
+		ListFile(true);
 	}
 	Error("Unexpected end of file", NULL, FATAL);
 	return END;
@@ -1545,7 +1467,7 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 			l->next = s;
 		}
 		l = s;
-		ListFileSkip(line);
+		ListFile(true);
 	}
 	Error("Unexpected end of file", NULL, FATAL);
 	return 0;

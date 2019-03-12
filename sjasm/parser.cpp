@@ -30,7 +30,6 @@
 
 #include "sjdefs.h"
 
-int comnxtlin;
 char dirDEFl[] = "def", dirDEFu[] = "DEF";
 
 int ParseExpPrim(char*& p, aint& nval) {
@@ -361,82 +360,60 @@ int ParseExpression(char*& p, aint& nval) {
 
 static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
-	char* rp = nl,* nid,* kp,* ver,a;
-	while ('o') {
-		if (comlin || comnxtlin) {
-			if (*lp == '*' && *(lp + 1) == '/') {
-				*rp = ' '; ++rp;
-				lp += 2; if (comnxtlin) {
-						 	--comnxtlin;
-						 } else {
-						 	--comlin;
-						 } continue;
-			}
+	char* rp = nl,* nid,* kp,* ver;
+	while (*lp) {
+		const char c1 = lp[0], c2 = lp[1];
+		if (c1 == '/' && c2 == '*') {	// block-comment local beginning (++block_nesting)
+			lp += 2;
+			++comlin;
+			continue;
 		}
-
-		if (*lp == ';' && !comlin && !comnxtlin) {
-			*rp = 0; return definegereplaced;
-		}
-		if (*lp == '/' && *(lp + 1) == '/' && !comlin && !comnxtlin) {
-			*rp = 0; return definegereplaced;
-		}
-		if (*lp == '/' && *(lp + 1) == '*') {
-			lp += 2; ++comnxtlin; continue;
-		}
-
-		if (*lp == '"' || *lp == '\'') {
-			a = *lp;
-			if (!comlin && !comnxtlin) {
-				*rp = *lp; ++rp;
-			}
-			++lp;
-
-			//detect "AF'"
-			if (a != '\'' || ((*(lp - 2) != 'f' || *(lp - 3) != 'a') && (*(lp - 2) != 'F' || *(lp - 3) != 'A'))) {
-				while ('o') {
-					if (!*lp) {
-						*rp = 0; return definegereplaced;
-					}
-					if (!comlin && !comnxtlin) {
-						*rp = *lp;
-					}
-					if (*lp == a) {
-						if (!comlin && !comnxtlin) {
-							++rp;
-						}
-						++lp;
-						break;
-					}
-					if (*lp == '\\') {
-						++lp;
-						if (!comlin && !comnxtlin) {
-							++rp;
-							*rp = *lp;
-						}
-					}
-					if (!comlin && !comnxtlin) {
-						++rp;
-					}
-					++lp;
+		if (comlin) {
+			if (c1 == '*' && c2 == '/') {
+				lp += 2;
+				// insert space into line, if the block ending may have affected parsing of line
+				if (1 == comlin) {
+					*rp++ = ' ';		// ^^ otherwise this line is completely commented out
 				}
+				--comlin;	// decrement block comment counter
+			} else {
+				++lp;		// just skip all characters inside comment block
+			}
+			continue;
+		}
+		// for following code (0 == comlin) (unless it has its own parse loop)
+
+		// single line comments -> finish
+		if (c1 == ';' || (c1 == '/' && c2 == '/')) break;
+
+		// detect "af'" register, as that hurts string parsing
+		if (cmphstr(lp, "af'")) {
+			*rp++ = 'a';
+			*rp++ = 'f';
+			continue;
+		}
+
+		// strings parsing
+		if (c1 == '"' || c1 == '\'') {
+			*rp++ = *lp++;
+			while (*lp) {
+				*rp = *lp;
+				if (*lp == c1) {
+					++rp;
+					++lp;
+					break;
+				}
+				if (*lp == '\\') {
+					*++rp = *++lp;
+				}
+				++rp;
+				++lp;
 			}
 			continue;
 		}
 
-		if (comlin || comnxtlin) {
-			if (!*lp) {
-				*rp = 0;
-				break;
-			}
-			++lp;
-			continue;
-		}
 		if (!isalpha((unsigned char) * lp) && *lp != '_') {
-			if (!(*rp = *lp)) {
-				break;
-			}
-			++rp;
-			++lp;
+			*rp++ = *lp++;
 			continue;
 		}
 
@@ -496,9 +473,15 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			++rp; ++ver;
 		}
 	}
+	// add line terminator to the output buffer
+	*rp = 0;
 	if (strlen(nl) > LINEMAX - 1) {
 		Error("line too long after macro expansion", NULL, FATAL);
 	}
+	// check if whole line is just blanks, then return just empty one
+	rp = nl;
+	SkipBlanks(rp);
+	if (!*rp) *nl = 0;
 	return definegereplaced;
 }
 
@@ -539,7 +522,6 @@ void ParseLabel() {
 			return;
 		}
 		val = atoi(tp);
-		//_COUT CurrentLine _CMDL " " _CMDL val _CMDL " " _CMDL CurAddress _ENDL;
 		if (pass == 1) {
 			LocalLabelTable.Insert(val, CurAddress);
 		}
@@ -552,7 +534,6 @@ void ParseLabel() {
 			if (IsLabelNotFound) {
 				Error("Forward reference", NULL, EARLY);
 			}
-			/* begin add */
 		} else if (NeedDEFL()) {
 			if (!ParseExpression(lp, val)) {
 				Error("Expression error", lp); val = 0;
@@ -561,7 +542,6 @@ void ParseLabel() {
 				Error("Forward reference", NULL, EARLY);
 			}
 			IsDEFL = 1;
-			/* end add */
 		} else if (NeedField()) {
 			aint nv;
 			val = AddressOfMAP;
@@ -586,7 +566,7 @@ void ParseLabel() {
 			}
 			val = CurAddress;
 		}
-	  	ttp = tp;
+		ttp = tp;
 		if (!(tp = ValidateLabel(tp, 1))) {
 			return;
 		}
@@ -608,15 +588,12 @@ void ParseLabel() {
 			if (!GetLabelValue(ttp, oval)) {
 				Error("Internal error. ParseLabel()", NULL, FATAL);
 			}
-	  		/*if (val!=oval) Error("Label has different value in pass 2",temp);*/
 			if (!IsDEFL && val != oval) {
 				char* buf = new char[LINEMAX];
 
 				SPRINTF2(buf, LINEMAX, "previous value %lu not equal %lu", oval, val);
-	  			Warning("Label has different value in pass 3", buf);
-				//_COUT "" _CMDL filename _CMDL ":" _CMDL CurrentLocalLine _CMDL ":(DEBUG)  " _CMDL "Label has different value in pass 2: ";
-	  			//_COUT val _CMDL "!=" _CMDL oval _ENDL;
-	  			LabelTable.Update(tp, val);
+				Warning("Label has different value in pass 3", buf);
+				LabelTable.Update(tp, val);
 
 				delete[] buf;
 			}
@@ -663,7 +640,6 @@ unsigned char win2dos[] = //taken from HorrorWord %)))
 
 void ParseLine(bool parselabels) {
 	/*++CurrentGlobalLine;*/
-	comnxtlin = 0;
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
@@ -690,14 +666,17 @@ void ParseLine(bool parselabels) {
 			}
 		}
 	}
-	if (comlin) {
-		comlin += comnxtlin;
-		ListFileSkip(line);
-		return;
-	}
-	comlin += comnxtlin;
 	if (!*lp) {
-		ListFile();
+		char *srcNonWhiteChar = line;
+		SkipBlanks(srcNonWhiteChar);
+		// check if only "end-line" comment remained, treat that one as "empty" line too
+		if (';' == *srcNonWhiteChar || ('/' == srcNonWhiteChar[0] && '/' == srcNonWhiteChar[1]))
+			srcNonWhiteChar = lp;			// force srcNonWhiteChar to point to 0
+		if (*srcNonWhiteChar || comlin) {	// non-empty source line turned into nothing
+			ListFile(true);					// or empty source inside comment-block -> "skipped"
+		} else {
+			ListFile();						// empty source line outside of block-comment -> "normal"
+		}
 		return;
 	}
 	if (parselabels) {
@@ -840,12 +819,10 @@ void ParseStructMember(CStructure* st) {
 							++pp; gl = 1;
 						}
 		if ((n = GetID(pp)) && (s = StructureTable.zoek(n, gl))) {
-			/* begin add */
 			if (cmphstr(st->naam, n)) {
 				Error("[STRUCT] Use structure itself", NULL, IF_FIRST);
 				break;
 			}
-			/* end add */
 			lp = pp;
 			st->CopyLabels(s);
 			st->CopyMembers(s, lp);
@@ -855,24 +832,13 @@ void ParseStructMember(CStructure* st) {
 }
 
 void ParseStructLine(CStructure* st) {
-	comnxtlin = 0;
 	lp = ReplaceDefine(line);
-	if (comlin) {
-		comlin += comnxtlin; return;
-	}
-	comlin += comnxtlin;
-	if (!*lp) {
-		return;
-	}
-	ParseStructLabel(st); if (SkipBlanks()) {
-						  	return;
-						  }
-	ParseStructMember(st); if (SkipBlanks()) {
-						   	return;
-						   }
-	if (*lp) {
-		Error("[STRUCT] Unexpected", lp);
-	}
+	if (!*lp) return;
+	ParseStructLabel(st);
+	if (SkipBlanks()) return;
+	ParseStructMember(st);
+	if (SkipBlanks()) return;
+	if (*lp) Error("[STRUCT] Unexpected", lp);
 }
 
 unsigned long LuaCalculate(char *str) {

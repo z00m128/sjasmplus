@@ -1764,7 +1764,7 @@ void dirSTRUCT() {
 			break;
 		 }
 		ParseStructLine(st);
-		ListFileSkip(line);
+		ListFile(true);
 	}
 	st->deflab();
 }
@@ -2079,7 +2079,7 @@ void dirLUA() {
 			}
 		}
 
-		ListFileSkip(line);
+		ListFile(true);
 	}
 
 	if (execute) {

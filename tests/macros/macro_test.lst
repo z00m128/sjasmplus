@@ -41,11 +41,11 @@ macro_test.asm(11): error: Label not found: def_abc
 35    0009              	endm
 36    0009
 37    0009              	macro a0_b a0
-38    0009 ~            	call __a0		
+38    0009 ~            	call __a0
 39    0009              	endm
 40    0009
 41    0009              	macro a0_c a0
-42    0009 ~            	call _a0_		
+42    0009 ~            	call _a0_
 43    0009              	endm
 44    0009
 45    0009              	macro a0a1_a a0, a1
@@ -71,10 +71,10 @@ macro_test.asm(57): error: Label not found: abc_
 57    0012 CD 00 00    >	call a0_
 58    0015              	a0_b abc
 macro_test.asm(58): error: Label not found: __abc
-58    0015 CD 00 00    >	call __a0		
+58    0015 CD 00 00    >	call __a0
 59    0018              	a0_c abc
 macro_test.asm(59): error: Label not found: _abc_
-59    0018 CD 00 00    >	call _a0_		
+59    0018 CD 00 00    >	call _a0_
 60    001B              	a0a1_a abc, def
 macro_test.asm(60): error: Label not found: abc____def_
 60    001B CD 00 00    >	call a0____a1_
