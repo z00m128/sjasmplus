@@ -740,9 +740,6 @@ void ParseLineSafe(bool parselabels) {
 		}
 	}
 
-	// replace defines (at *this* place it does fix Issue #33 *and* keeps "DUP in DUP in MACRO" working)
-	lp = ReplaceDefine(line);
-
 	CompiledCurrentLine++;
 	ParseLine(parselabels);
 
