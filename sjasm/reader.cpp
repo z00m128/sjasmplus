@@ -126,10 +126,9 @@ int NeedField() {
 
 int comma(char*& p) {
 	SkipBlanks(p);
-	if (*p != ',') {
-		return 0;
-	}
-	++p; return 1;
+	if (*p != ',') return 0;
+	++p;
+	return 1;
 }
 
 static const char brackets_b[] = BRACKETS_B;
@@ -574,7 +573,7 @@ int GetCharConst(char*& p, aint& val) {
 int GetBytes(char*& p, int e[], int add, int dc) {
 	aint val;
 	int t = 0;
-	while ('o') {
+	do {
 		SkipBlanks(p);
 		if (!*p) {
 			Error("Expression expected", NULL, SUPPRESS); break;
@@ -596,25 +595,25 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			++p; if (dc && t) {
 				 	e[t - 1] |= 128;
 				 }
-		} else if ((*p == 0x27) && (!*(p+2) || *(p+2) != 0x27)) {
-		  	p++;
+		} else if ((*p == '\'') && (!*(p+2) || *(p+2) != '\'')) {
+			p++;
 			do {
-				if (!*p || *p == 0x27) {
+				if (!*p || *p == '\'') {
 					Error("Syntax error", p, SUPPRESS);
 					e[t] = -1;
 					return t;
 				}
 				if (t == 128) {
-		  			Error("Too many arguments", p, SUPPRESS);
+					Error("Too many arguments", p, SUPPRESS);
 					e[t] = -1;
 					return t;
 				}
-		  		GetCharConstCharSingle(p, val);
+				GetCharConstCharSingle(p, val);
 				check8(val);
 				e[t++] = (val + add) & 255;
-			} while (*p != 0x27);
+			} while (*p != '\'');
 
-		  	++p;
+			++p;
 
 			if (dc && t) {
 				e[t - 1] |= 128;
@@ -627,12 +626,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 				break;
 			}
 		}
-		SkipBlanks(p);
-		if (*p != ',') {
-			break;
-		}
-		++p;
-	}
+	} while(comma(p));
 	e[t] = -1;
 	return t;
 }
@@ -816,17 +810,17 @@ int GetArray(char*& p, int e[], int add, int dc) {
 			++p; if (dc && t) {
 				 	e[t - 1] |= 128;
 				 }
-		} else if ((*p == 0x27) && (!*(p+2) || *(p+2) != 0x27)) {
+		} else if ((*p == '\'') && (!*(p+2) || *(p+2) != '\'')) {
 		  	p++;
 			do {
-				if (!*p || *p == 0x27) {
+				if (!*p || *p == '\'') {
 					Error("Syntax error", p, SUPPRESS); e[t] = -1; return t;
 				}
 				if (t == 128) {
 		  			Error("Too many arguments", p, SUPPRESS); e[t] = -1; return t;
 				}
 		  		GetCharConstCharSingle(p, val); check8(val); e[t++] = (val + add) & 255;
-			} while (*p != 0x27);
+			} while (*p != '\'');
 		  	++p;
 			if (dc && t) {
 				 e[t - 1] |= 128;

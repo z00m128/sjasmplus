@@ -880,7 +880,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 }
 
 void OpenList() {
-	if (FP_ListingFile) return;		// already opened
+	if (NULL != FP_ListingFile) return;		// already opened
 	if (Options::ListingFName[0]) {
 		if (!FOPEN_ISOK(FP_ListingFile, Options::ListingFName, "w")) {
 			Error("Error opening file", Options::ListingFName, FATAL);

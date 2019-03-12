@@ -387,7 +387,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		if (c1 == ';' || (c1 == '/' && c2 == '/')) break;
 
 		// detect "af'" register, as that hurts string parsing
-		if (cmphstr(lp, "af'")) {
+		if (cmphstr(lp, "af'")) {		// convert it into plain "AF" (it's enough)
 			*rp++ = 'a';
 			*rp++ = 'f';
 			continue;

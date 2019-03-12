@@ -138,78 +138,46 @@ int ParseDirective_REPT() {
 	return 0;
 }
 
-void dirBYTE() {
-	int teller, e[256];
-	teller = GetBytes(lp, e, 0, 0);
-	if (!teller) {
-		Error("BYTE/DEFB/DB with no arguments"); return;
+
+static void getBytesWithCheck(int add = 0, int dc = 0, bool dz = false) {
+	check8(add); add &= 255;
+	int dirDx[130];
+	if (GetBytes(lp, dirDx, add, dc)) {
+		EmitBytes(dirDx);
+		if (dz) EmitByte(0);
+	} else {	// actually this can't be reached at all? GetBytes spams all kind of errors
+		Error("no arguments");
 	}
-	EmitBytes(e);
+}
+
+void dirBYTE() {
+	getBytesWithCheck();
 }
 
 void dirDC() {
-	int teller, e[129];
-	teller = GetBytes(lp, e, 0, 1);
-	if (!teller) {
-		Error("DC with no arguments"); return;
-	}
-	EmitBytes(e);
+	getBytesWithCheck(0, 1);
 }
 
 void dirDZ() {
-	int teller, e[130];
-	teller = GetBytes(lp, e, 0, 0);
-	if (!teller) {
-		Error("DZ with no arguments"); return;
-	}
-	e[teller++] = 0; e[teller] = -1;
-	EmitBytes(e);
+	getBytesWithCheck(0, 0, true);
 }
 
 void dirABYTE() {
 	aint add;
-	int teller = 0,e[129];
-	if (ParseExpression(lp, add)) {
-		check8(add); add &= 255;
-		teller = GetBytes(lp, e, add, 0);
-		if (!teller) {
-			Error("ABYTE with no arguments"); return;
-		}
-		EmitBytes(e);
-	} else {
-		Error("[ABYTE] Expression expected");
-	}
+	if (ParseExpression(lp, add))	getBytesWithCheck(add);
+	else							Error("[ABYTE] Expression expected");
 }
 
 void dirABYTEC() {
 	aint add;
-	int teller = 0,e[129];
-	if (ParseExpression(lp, add)) {
-		check8(add); add &= 255;
-		teller = GetBytes(lp, e, add, 1);
-		if (!teller) {
-			Error("ABYTEC with no arguments"); return;
-		}
-		EmitBytes(e);
-	} else {
-		Error("[ABYTEC] Expression expected");
-	}
+	if (ParseExpression(lp, add))	getBytesWithCheck(add, 1);
+	else							Error("[ABYTEC] Expression expected");
 }
 
 void dirABYTEZ() {
 	aint add;
-	int teller = 0,e[129];
-	if (ParseExpression(lp, add)) {
-		check8(add); add &= 255;
-		teller = GetBytes(lp, e, add, 0);
-		if (!teller) {
-			Error("ABYTEZ with no arguments"); return;
-		}
-		e[teller++] = 0; e[teller] = -1;
-		EmitBytes(e);
-	} else {
-		Error("[ABYTEZ] Expression expected");
-	}
+	if (ParseExpression(lp, add))	getBytesWithCheck(add, 0, true);
+	else							Error("[ABYTEZ] Expression expected");
 }
 
 void dirWORD() {
@@ -1547,10 +1515,10 @@ void dirDISPLAY() {
 				*(ep++) = (char) (val & 255);
 			} while (*lp != '"');
 			++lp;
-		} else if (*lp == 0x27) {
+		} else if (*lp == '\'') {
 		  	lp++;
 			do {
-				if (!*lp || *lp == 0x27) {
+				if (!*lp || *lp == '\'') {
 		  			Error("[DISPLAY] Syntax error", line);
 					*ep = 0;
 					return;
@@ -1563,7 +1531,7 @@ void dirDISPLAY() {
 		  		GetCharConstCharSingle(lp, val);
 				check8(val);
 				*(ep++) = (char) (val & 255);
-			} while (*lp != 0x27);
+			} while (*lp != '\'');
 		  	++lp;
 		} else {
 		  	displayerror = 0;displayinprocces = 1;
