@@ -1,0 +1,64 @@
+ 1    0000                  OUTPUT "numeric_constants_defX.bin"
+ 2    0000                  ;; official documentation of v1.10.4 - all possible DEFx directives and synonyms
+ 3    0000
+ 4    0000                  ; should produce ABCDEFGHIJKLM, all possible numeric literals - byte size
+ 5    0000 41 42            BYTE    65, 66d
+ 6    0002 43 44 45 46      DB      43h, 0C4h-080h, 0x45, $46, #47
+ 6    0006 47
+ 7    0007 48 49 4A 4B      DEFB    1001000b, 01001001b, %1001010, %01001011
+ 8    000B 4C 4D            DEFM    114q, 115o
+ 9    000D
+10    000D                  ;; some char/string literals - quotes parse escape sequences
+11    000D                  ; \n, ", \, ', ', ', ?, ?, \n
+12    000D 0A 22 5C 27      DM      "\n", "\"", "\\", "''\'", "\??", "\N"
+12    0011 27 27 3F 3F
+12    0015 0A
+13    0016                  ; "012345678\n"
+14    0016 30 31 32 33      db      48-7+"\A", 49-8+"\B", 50-127+"\D", 51-27+"\E", 52-12+"\F"
+14    001A 34
+15    001B 35 36 37 38      db      53-10+"\N", 54-13+"\R", 55-9+"\T", 56-11+"\V", "\n"
+15    001F 0A
+16    0020
+17    0020                  ; WORD binary data
+18    0020 00 C0 41 48      WORD    0C000h, "HA"   ,   "HE"
+18    0024 45 48
+19    0026 AE 08            DW      %0000100010101110
+20    0028 E9 8A            DEFW    1000101011101001b
+21    002A
+22    002A                  ; DWORD binary data
+23    002A 78 56 34 12      DWORD   0x12345678
+24    002E 21 43 65 87      DD      87654321h,$FFFFFFFF
+24    0032 FF FF FF FF
+25    0036 0D F0 AD DE      DEFD    #DEADF00D   ,   "\nEEB"
+25    003A 42 45 45 0A
+26    003E
+27    003E 41 42 43         ABYTE   64 1, 2, 3          ; +64
+28    0041 44 45 C6 07      ABYTEC  3 "ABC", 4, "EF"    ; +3, last char of each substring |128
+28    0045 48 C9
+29    0047 4A 4B 4C 0D      ABYTEZ  9 "ABC", 4, "EF"    ; +9, extra 0 after last byte
+29    004B 4E 4F 00
+30    004E 0A 31 32 B3      DC      10, "123", "456"    ; last char of each substring |128
+30    0052 34 35 B6
+31    0055 0A 61 62 63      DZ      10, "abc", "def"    ; extra 0 after last byte
+31    0059 64 65 66 00
+32    005D
+33    005D                  ; block/ds directive
+34    005D 0A               BLOCK   3, "\n"
+35    0060 2A               DS      16, '*'
+36    0070
+37    0070                  ; 7x warning, testing 8/16b checks
+numeric_constants_defX.asm(38): warning: Bytes lost (0x10A)
+numeric_constants_defX.asm(38): warning: Bytes lost (0x100)
+numeric_constants_defX.asm(38): warning: Bytes lost (0xFFFFFFFFFFFFFEFF)
+numeric_constants_defX.asm(38): warning: Bytes lost (0xFFFFFFFFFFFFFE0A)
+38    0070 0A 00 FF 0A      DB      266, 256, -257, -502
+numeric_constants_defX.asm(39): warning: Bytes lost (0xFFFFFFFFFFFEFFFF)
+numeric_constants_defX.asm(39): warning: Bytes lost (0x10000)
+numeric_constants_defX.asm(39): warning: Bytes lost (0x44434241)
+39    0074 FF FF 00 00      DW      -65537, 65536, "DCBA"   ; last one should produce bytes 'A', 'B'
+39    0078 41 42
+40    007A
+41    007A                  END     ; scratch for some experiments
+
+Value    Label
+------ - -----------------------------------------------------------
