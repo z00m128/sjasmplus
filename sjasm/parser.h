@@ -33,7 +33,6 @@ int ParseDirective(bool beginningOfLine = 0);
 int ParseDirective_REPT();
 void ParseInstruction();
 char* ReplaceDefine(char* lp);
-char* ReplaceDefineNext(char* lp);
 void ParseLine(bool = true);
 void ParseLineSafe(bool = true);
 void ParseStructLine(CStructure* st);

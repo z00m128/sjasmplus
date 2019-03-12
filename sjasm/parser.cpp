@@ -30,7 +30,7 @@
 
 #include "sjdefs.h"
 
-int replacedefineteller = 0, comnxtlin;
+int comnxtlin;
 char dirDEFl[] = "def", dirDEFu[] = "DEF";
 
 int ParseExpPrim(char*& p, aint& nval) {
@@ -359,15 +359,9 @@ int ParseExpression(char*& p, aint& nval) {
 	return 0;
 }
 
-char* ReplaceDefine(char* lp) {
+static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
-	/*char *nl=new char[LINEMAX2];*/
-	char* nl = sline;
 	char* rp = nl,* nid,* kp,* ver,a;
-//	int def = 0;
-	if (++replacedefineteller > 20) {
-		Error("Over 20 defines nested", NULL, FATAL);
-	}
 	while ('o') {
 		if (comlin || comnxtlin) {
 			if (*lp == '*' && *(lp + 1) == '/') {
@@ -381,10 +375,10 @@ char* ReplaceDefine(char* lp) {
 		}
 
 		if (*lp == ';' && !comlin && !comnxtlin) {
-			*rp = 0; return nl;
+			*rp = 0; return definegereplaced;
 		}
 		if (*lp == '/' && *(lp + 1) == '/' && !comlin && !comnxtlin) {
-			*rp = 0; return nl;
+			*rp = 0; return definegereplaced;
 		}
 		if (*lp == '/' && *(lp + 1) == '*') {
 			lp += 2; ++comnxtlin; continue;
@@ -397,10 +391,11 @@ char* ReplaceDefine(char* lp) {
 			}
 			++lp;
 
+			//detect "AF'"
 			if (a != '\'' || ((*(lp - 2) != 'f' || *(lp - 3) != 'a') && (*(lp - 2) != 'F' || *(lp - 3) != 'A'))) {
 				while ('o') {
 					if (!*lp) {
-						*rp = 0; return nl;
+						*rp = 0; return definegereplaced;
 					}
 					if (!comlin && !comnxtlin) {
 						*rp = *lp;
@@ -509,145 +504,20 @@ char* ReplaceDefine(char* lp) {
 	if (strlen(nl) > LINEMAX - 1) {
 		Error("line too long after macro expansion", NULL, FATAL);
 	}
-	if (definegereplaced) {
-		return ReplaceDefineNext(nl);
-	}
-	return nl;
+	return definegereplaced;
 }
 
-char* ReplaceDefineNext(char* lp) {
-	int definegereplaced = 0,dr;
-	char* nl = sline2;
-	char* rp = nl,* nid,* kp,* ver,a;
-//	int def = 0;
-	if (++replacedefineteller > 20) {
-		Error("Over 20 defines nested", NULL, FATAL);
+char* ReplaceDefine(char* lp) {
+	// do first replacement into sline buffer (and if no define replace done, just return it)
+	if (!ReplaceDefineInternal(lp, sline)) return sline;
+	// Some define were replaced, line is in "sline", now ping-pong it between sline and sline2
+	int defineReplaceRecursion = 0;
+	while (defineReplaceRecursion++ < 10) {
+		if (!ReplaceDefineInternal(sline, sline2)) return sline2;
+		if (!ReplaceDefineInternal(sline2, sline)) return sline;
 	}
-	while ('o') {
-		if (comlin || comnxtlin) {
-			if (*lp == '*' && *(lp + 1) == '/') {
-				*rp = ' '; ++rp;
-				lp += 2; if (comnxtlin) {
-						 	--comnxtlin;
-						 } else {
-						 	--comlin;
-						 } continue;
-			}
-		}
-
-		if (*lp == ';' && !comlin && !comnxtlin) {
-			*rp = 0; return nl;
-		}
-		if (*lp == '/' && *(lp + 1) == '/' && !comlin && !comnxtlin) {
-			*rp = 0; return nl;
-		}
-		if (*lp == '/' && *(lp + 1) == '*') {
-			lp += 2; ++comnxtlin; continue;
-		}
-
-		if (*lp == '"' || *lp == '\'') {
-			a = *lp;
-			if (!comlin && !comnxtlin) {
-				*rp = *lp; ++rp;
-			 } ++lp;
-			if (a != '\'' || ((*(lp - 2) != 'f' || *(lp - 3) != 'a') && (*(lp - 2) != 'F' && *(lp - 3) != 'A'))) {
-				while ('o') {
-					if (!*lp) {
-						*rp = 0; return nl;
-					}
-					if (!comlin && !comnxtlin) {
-						*rp = *lp;
-					}
-					if (*lp == a) {
-						if (!comlin && !comnxtlin) {
-							++rp;
-						} ++lp; break;
-					}
-					if (*lp == '\\') {
-						++lp; if (!comlin && !comnxtlin) {
-							  	++rp; *rp = *lp;
-							  }
-					}
-					if (!comlin && !comnxtlin) {
-						++rp;
-					} ++lp;
-				}
-			}
-			continue;
-		}
-
-		if (comlin || comnxtlin) {
-			if (!*lp) {
-				*rp = 0; break;
-			} ++lp; continue;
-		}
-		if (!isalpha((unsigned char) * lp) && *lp != '_') {
-			if (!(*rp = *lp)) {
-				break;
-			} ++rp; ++lp; continue;
-		}
-
-		nid = GetID(lp); dr = 1;
-
-		if (!(ver = DefineTable.Get(nid))) {
-			if (!macrolabp || !(ver = MacroDefineTable.getverv(nid))) {
-				dr = 0; ver = nid;
-			}
-		}
-
-		if (DefineTable.DefArrayList) {
-			CStringsList* a = DefineTable.DefArrayList;
-			aint val;
-			//_COUT lp _ENDL;
-			while (*(lp++) && (*lp <= ' ' || *lp == '['));
-			//_COUT lp _ENDL;
-			if (!ParseExpression(lp, val)) {
-				Error("Array error", NULL, IF_FIRST);break;
-			}
-			//_COUT lp _ENDL;
-			while (*lp == ']' && *(lp++));
-			//_COUT "A" _CMDL val _ENDL;
-			val++;
-			while (a && val) {
-				STRCPY(ver, LINEMAX, a->string); //very danger!
-				/*_COUT val _CMDL "-" _CMDL ver _ENDL;*/
-				a = a->next;val--;
-			}
-			if (val && !a) {
-				Error("Entry in array not found", NULL, IF_FIRST);break;
-			}
-		}
-
-		if (dr) {
-			kp = lp - strlen(nid);
-			while (*(kp--) && *kp <= ' ') ;
-			kp = kp - 4;
-			if (cmphstr(kp, "ifdef")) {
-				dr = 0; ver = nid;
-			} else {
-				--kp;
-				if (cmphstr(kp, "ifndef")) {
-					dr = 0; ver = nid;
-				} else if (cmphstr(kp, "define")) {
-					dr = 0; ver = nid;
-				}
-			}
-		}
-
-		if (dr) {
-			definegereplaced = 1;
-		}
-		while ((*rp = *ver)) {
-			++rp; ++ver;
-		}
-	}
-	if (strlen(nl) > LINEMAX - 1) {
-		Error("line too long after macro expansion", NULL, FATAL);
-	}
-	if (definegereplaced) {
-		return ReplaceDefine(nl);
-	}
-	return nl;
+	Error("Over 20 defines nested", NULL, FATAL);
+	return NULL;
 }
 
 void ParseLabel() {
@@ -798,7 +668,7 @@ unsigned char win2dos[] = //taken from HorrorWord %)))
 
 void ParseLine(bool parselabels) {
 	/*++CurrentGlobalLine;*/
-	replacedefineteller = comnxtlin = 0;
+	comnxtlin = 0;
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
@@ -993,7 +863,7 @@ void ParseStructMember(CStructure* st) {
 }
 
 void ParseStructLine(CStructure* st) {
-	replacedefineteller = comnxtlin = 0;
+	comnxtlin = 0;
 	lp = ReplaceDefine(line);
 	if (comlin) {
 		comlin += comnxtlin; return;
