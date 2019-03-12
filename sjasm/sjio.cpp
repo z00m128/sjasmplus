@@ -335,21 +335,10 @@ void PrepareListLine(aint hexadd)
 
 void ListFile() {
 	char* pp = pline;
-	aint pad;
-	if (pass != LASTPASS || !IsListingFileOpened || donotlist) {
+	if (LASTPASS != pass || NULL == FP_ListingFile || donotlist) {
 		donotlist = nEB = 0; return;
 	}
-	if (!Options::ListingFName[0] || FP_ListingFile == NULL) {
-		return;
-	}
-	/*
-	if (listmacro) {
-		if (!nEB) {
-			return;
-		}
-	}
-	*/
-	pad = PreviousAddress;
+	aint pad = PreviousAddress;
 	if (pad == (aint) - 1) pad = epadres;
 
 	if (strlen(line) && line[strlen(line) - 1] != 10) {
@@ -421,20 +410,11 @@ void ListFile() {
 }
 
 void ListFileSkip(char* line) {
-	aint pad;
-	if (pass != LASTPASS || !IsListingFileOpened || donotlist) {
+	if (LASTPASS != pass || NULL == FP_ListingFile || donotlist) {
 		donotlist = nEB = 0;
 		return;
 	}
-	if (!Options::ListingFName[0] || FP_ListingFile == NULL) {
-		return;
-	}
-	/*
-	if (listmacro) {
-		return;
-	}
-	*/
-	pad = PreviousAddress;
+	aint pad = PreviousAddress;
 	if (pad == (aint)-1) pad = epadres;
 
 	if (strlen(line) && line[strlen(line) - 1] != 10) {
@@ -978,6 +958,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 }
 
 void OpenList() {
+	if (FP_ListingFile) return;		// already opened
 	if (Options::ListingFName[0]) {
 		if (!FOPEN_ISOK(FP_ListingFile, Options::ListingFName, "w")) {
 			Error("Error opening file", Options::ListingFName, FATAL);

@@ -115,7 +115,7 @@ bool displayerror,displayinprocces = 0;
 int ConvertEncoding = ENCWIN;
 
 int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
-int IsRunning = 0, IsListingFileOpened = 1, donotlist = 0,listdata  = 0,listmacro  = 0;
+int IsRunning = 0, donotlist = 0,listdata  = 0,listmacro  = 0;
 int adrdisp = 0,PseudoORG = 0;
 char* MemoryRAM=NULL, * MemoryPointer=NULL;
 int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;
@@ -147,25 +147,13 @@ int LuaLine=-1;
 #endif //USE_LUA
 
 void InitPass(int p) {
-	reglenwidth = 1;
-	if (maxlin > 9) {
-		reglenwidth = 2;
-	}
-	if (maxlin > 99) {
-		reglenwidth = 3;
-	}
-	if (maxlin > 999) {
-		reglenwidth = 4;
-	}
-	if (maxlin > 9999) {
-		reglenwidth = 5;
-	}
-	if (maxlin > 99999) {
-		reglenwidth = 6;
-	}
-	if (maxlin > 999999) {
-		reglenwidth = 7;
-	}
+	aint pow10 = 1;
+	reglenwidth = 0;
+	do {
+		++reglenwidth;
+		pow10 *= 10;
+		if (pow10 < 10) ExitASM(1);	// 32b overflow
+	} while (pow10 <= maxlin);
 	if (ModuleName != NULL) {
 		free(ModuleName);
 		ModuleName = NULL;

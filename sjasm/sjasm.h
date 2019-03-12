@@ -72,7 +72,7 @@ extern int CurrentSourceFName;
 
 extern bool displayinprocces, displayerror;
 extern int ConvertEncoding;
-extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, IsListingFileOpened, donotlist, listdata, listmacro;
+extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listdata, listmacro;
 extern int adrdisp, PseudoORG;
 extern char* MemoryRAM, * MemoryPointer;
 extern int MemoryCPage, MemoryPagesCount, StartAddress;
