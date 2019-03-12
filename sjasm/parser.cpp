@@ -452,22 +452,17 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		if (DefineTable.DefArrayList) {
 			CStringsList* a = DefineTable.DefArrayList;
 			aint val;
-			//_COUT lp _ENDL;
 			while (*(lp++) && (*lp <= ' ' || *lp == '['));
-			//_COUT lp _ENDL;
 			if (!ParseExpression(lp, val)) {
 				Error("[ARRAY] Expression error", lp, IF_FIRST);break;
 			}
-			//_COUT lp _ENDL;
 			while (*lp == ']' && *(lp++));
-			//_COUT "A" _CMDL val _ENDL;
 			if (val < 0) {
 				Error("Number of cell must be positive", NULL, IF_FIRST);break;
 			}
 			val++;
 			while (a && val) {
 				STRCPY(ver, LINEMAX, a->string); // very danger!
-				/*_COUT val _CMDL "-" _CMDL ver _ENDL;*/
 				a = a->next;
 				val--;
 			}
