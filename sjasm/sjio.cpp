@@ -325,6 +325,7 @@ void PrepareListLine(aint hexadd)
 		if (CurrentLocalLine >= 10000) linenumber += 10000;
 	}
 	memset(pline, ' ', 24);
+	if (listmacro) pline[23] = '>';
 	STRCPY(pline + 24, LINEMAX2, line);
 	sprintf(pline, "%*lu", linewidth, linenumber); pline[linewidth] = ' ';
 	memcpy(pline + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
@@ -358,7 +359,6 @@ void ListFile() {
 	}
 
 	PrepareListLine(pad);
-	if (listmacro) pline[23] = '>';
 
 	int i;
 	int pos = 0;
