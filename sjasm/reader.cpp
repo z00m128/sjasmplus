@@ -576,58 +576,39 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	do {
 		SkipBlanks(p);
 		if (!*p) {
-			Error("Expression expected", NULL, SUPPRESS); break;
-		}
-		if (t == 128) {
-			Error("Too many arguments", p, SUPPRESS); break;
-		}
-		if (*p == '"') {
-			p++;
-			do {
-				if (!*p || *p == '"') {
-					Error("Syntax error", p, SUPPRESS); e[t] = -1; return t;
-				}
-				if (t == 128) {
-					Error("Too many arguments", p, SUPPRESS); e[t] = -1; return t;
-				}
-				GetCharConstChar(p, val); check8(val); e[t++] = (val + add) & 255;
-			} while (*p != '"');
-			++p; if (dc && t) {
-				 	e[t - 1] |= 128;
-				 }
-		} else if ((*p == '\'') && (!*(p+2) || *(p+2) != '\'')) {
-			p++;
-			do {
-				if (!*p || *p == '\'') {
-					Error("Syntax error", p, SUPPRESS);
-					e[t] = -1;
-					return t;
-				}
-				if (t == 128) {
-					Error("Too many arguments", p, SUPPRESS);
-					e[t] = -1;
-					return t;
-				}
-				GetCharConstCharSingle(p, val);
+			Error("Expression expected", NULL, SUPPRESS);
+		} else if ('"' == *p || '\'' == *p) {	// string literals (both types)
+			const char qc = *p++;
+			const int oldT = t;
+			while (*p && qc != *p && t < 128) {
+				if ('"' == qc) 	GetCharConstChar(p, val);
+				else 			GetCharConstCharSingle(p, val);
 				check8(val);
 				e[t++] = (val + add) & 255;
-			} while (*p != '\'');
-
+			}
+			if (qc != *p) {		// too many arguments or zero-terminator can lead to this
+				if (!*p) Error("Syntax error", p, SUPPRESS);
+				break;
+			}
 			++p;
-
-			if (dc && t) {
-				e[t - 1] |= 128;
+			if (oldT == t)	Warning("Empty string", p-2);
+			else {
+				// mark last "string" byte with |128: single char in "" *is* string
+				// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
+				if (dc && ((qc == '\'') < (t - oldT))) e[t - 1] |= 128;
 			}
 		} else {
 			if (ParseExpression(p, val)) {
-				check8(val); e[t++] = (val + add) & 255;
+				check8(val);
+				e[t++] = (val + add) & 255;
 			} else {
 				Error("Syntax error", p, SUPPRESS);
 				break;
 			}
 		}
-	} while(comma(p));
+	} while(comma(p) && t < 128);
 	e[t] = -1;
+	if (t == 128 && *p) Error("Too many arguments", p, SUPPRESS);
 	return t;
 }
 

@@ -145,7 +145,7 @@ static void getBytesWithCheck(int add = 0, int dc = 0, bool dz = false) {
 	if (GetBytes(lp, dirDx, add, dc)) {
 		EmitBytes(dirDx);
 		if (dz) EmitByte(0);
-	} else {	// actually this can't be reached at all? GetBytes spams all kind of errors
+	} else {
 		Error("no arguments");
 	}
 }

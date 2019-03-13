@@ -38,6 +38,22 @@
     DB      266, 256, -257, -502
     DW      -65537, 65536, "DCBA"   ; last one should produce bytes 'A', 'B'
 
+    DC      'a', 'ab'               ; DC distincts between single (no |128) and two+ chars
+    DC      "a", "ab"               ; but only in apostrophes, quotes make it "string" always
+
+    DB                              ; expression expected error
+    DB      1,                      ; expression expected error
+    DC      "", ''                  ; 2x warning about empty "string" + 1x error "no arguments"
+
+    ;; too many arguments error tests:
+    ; 2x OK (max 128 bytes)
+    DB      "\n123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF","\n123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF"
+    DB      "\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+    ; 3x error too many
+    DB      "\n123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF",'!',"\n123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF"
+    DB      "\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF", 1
+    DB      "\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF!"
+
     END     ; scratch for some experiments
 
     ;;;FIXME work-in-progress
