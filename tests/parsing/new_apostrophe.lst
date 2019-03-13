@@ -1,3 +1,4 @@
+# file opened: new_apostrophe.asm
  1    0000                  OUTPUT "new_apostrophe.bin"
  2    0000
  3    0000                  ; test new \0 escape for double quotes
@@ -74,6 +75,7 @@ new_apostrophe.asm(39): warning: Bytes lost (0x5C45)
 42    0093 3E 27            LD A,''''   ; A = 0x27 ; since v1.11
 43    0095
 44    0095                  END     ; scratch for some experiments
+# file closed: new_apostrophe.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

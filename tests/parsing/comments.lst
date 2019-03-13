@@ -1,3 +1,4 @@
+# file opened: comments.asm
  1    0000                  ;; defines to require multi define-substitution
  2    0000                  DEFINE _zzzzz _zzzz
  3    0000                  DEFINE _zzzz _zzz
@@ -56,6 +57,7 @@
 35    000F ~           >        */
 35    000F 76          >        halt
 36    0010
+# file closed: comments.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

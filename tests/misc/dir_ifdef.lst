@@ -1,3 +1,4 @@
+# file opened: dir_ifdef.asm
   1   0000              ;; use options from dir_ifdef.options: "-DextDef1 -DextDef2=X" to assemble this
   2   0000
   3   0000              ;; This must generate syntax errors
@@ -122,6 +123,7 @@ dir_ifdef.asm(5): error: [IFNDEF] Illegal identifier: IFNDEF
 120   000C
 121   000C                  ENDIF
 122   000C
+# file closed: dir_ifdef.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

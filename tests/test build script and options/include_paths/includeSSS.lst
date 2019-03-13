@@ -1,3 +1,4 @@
+# file opened: includeSSS.asm
  1    0000              ; test include paths on command line and their priorities, there are multiple steps:
  2    0000              ; include.asm       = no extra include path, should include from working directory
  3    0000              ; includeS.asm      = +include paths "includeSSSS_v"
@@ -6,18 +7,23 @@
  6    0000              ; includeSSSS.asm   = +include paths "includeSSSS_i", "includeSSSS_v"
  7    0000
  8    0000                  INCLUDE includeSSSS_all.i.asm
+# file opened: includeSSSS_all.i.asm
  1+   0000              ; valid Z80 source
  2+   0000 C9               ret
  3+   0001
+# file closed: includeSSSS_all.i.asm
  9    0001
 10    0001                  INCLUDE <includeSSSS_all.i.asm>
+# file opened: includeSSSS_i/includeSSSS_all.i.asm
  1+   0001              ; invalid Z80 source
 includeSSSS_i/includeSSSS_all.i.asm(2): error: Unrecognized instruction: retretret
  2+   0001                  retretret
  3+   0001
+# file closed: includeSSSS_i/includeSSSS_all.i.asm
 11    0001
 12    0001 C7               rst 0
 13    0002
+# file closed: includeSSS.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

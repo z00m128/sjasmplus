@@ -1,24 +1,32 @@
+# file opened: i36b.asm
 1     0000              INC_DEPTH=0
 2     0000
 3     0000                  INCLUDE "i36b_II.i.asm"
+# file opened: i36b_II.i.asm
 1+    0000              INC_DEPTH=INC_DEPTH+1
 1+    0000                IF INC_DEPTH < 7
 1+    0000              	 INCLUDE "i36b_II.i.asm"
+# file opened: i36b_II.i.asm
 1++   0000              INC_DEPTH=INC_DEPTH+1
 1++   0000                IF INC_DEPTH < 7
 1++   0000              	 INCLUDE "i36b_II.i.asm"
+# file opened: i36b_II.i.asm
 1+++  0000              INC_DEPTH=INC_DEPTH+1
 1+++  0000                IF INC_DEPTH < 7
 1+++  0000              	 INCLUDE "i36b_II.i.asm"
+# file opened: i36b_II.i.asm
 1++++ 0000              INC_DEPTH=INC_DEPTH+1
 1++++ 0000                IF INC_DEPTH < 7
 1++++ 0000              	 INCLUDE "i36b_II.i.asm"
+# file opened: i36b_II.i.asm
 1+++++0000              INC_DEPTH=INC_DEPTH+1
 1+++++0000                IF INC_DEPTH < 7
 1+++++0000              	 INCLUDE "i36b_II.i.asm"
+# file opened: i36b_II.i.asm
 1+++++0000              INC_DEPTH=INC_DEPTH+1
 1+++++0000                IF INC_DEPTH < 7
 1+++++0000              	 INCLUDE "i36b_II.i.asm"
+# file opened: i36b_II.i.asm
 1+++++0000              INC_DEPTH=INC_DEPTH+1
 1+++++0000                IF INC_DEPTH < 7
 1+++++0000 ~            	 INCLUDE "i36b_II.i.asm"
@@ -56,6 +64,7 @@
 4+++++001E                EDUP
 4+++++001E 37             scf
 5+++++001F              INC_DEPTH=INC_DEPTH-1
+# file closed: i36b_II.i.asm
 2+++++001F              	 ENDIF
 2+++++001F 06 06            ld  b,INC_DEPTH
 2+++++0021                DUP INC_DEPTH
@@ -86,6 +95,7 @@
 4+++++0039                EDUP
 4+++++0039 37             scf
 5+++++003A              INC_DEPTH=INC_DEPTH-1
+# file closed: i36b_II.i.asm
 2+++++003A              	 ENDIF
 2+++++003A 06 05            ld  b,INC_DEPTH
 2+++++003C                DUP INC_DEPTH
@@ -112,6 +122,7 @@
 4+++++0050                EDUP
 4+++++0050 37             scf
 5+++++0051              INC_DEPTH=INC_DEPTH-1
+# file closed: i36b_II.i.asm
 2++++ 0051              	 ENDIF
 2++++ 0051 06 04            ld  b,INC_DEPTH
 2++++ 0053                DUP INC_DEPTH
@@ -134,6 +145,7 @@
 4++++ 0063                EDUP
 4++++ 0063 37             scf
 5++++ 0064              INC_DEPTH=INC_DEPTH-1
+# file closed: i36b_II.i.asm
 2+++  0064              	 ENDIF
 2+++  0064 06 03            ld  b,INC_DEPTH
 2+++  0066                DUP INC_DEPTH
@@ -152,6 +164,7 @@
 4+++  0072                EDUP
 4+++  0072 37             scf
 5+++  0073              INC_DEPTH=INC_DEPTH-1
+# file closed: i36b_II.i.asm
 2++   0073              	 ENDIF
 2++   0073 06 02            ld  b,INC_DEPTH
 2++   0075                DUP INC_DEPTH
@@ -166,6 +179,7 @@
 4++   007D                EDUP
 4++   007D 37             scf
 5++   007E              INC_DEPTH=INC_DEPTH-1
+# file closed: i36b_II.i.asm
 2+    007E              	 ENDIF
 2+    007E 06 01            ld  b,INC_DEPTH
 2+    0080                DUP INC_DEPTH
@@ -176,6 +190,7 @@
 4+    0084                EDUP
 4+    0084 37             scf
 5+    0085              INC_DEPTH=INC_DEPTH-1
+# file closed: i36b_II.i.asm
 4     0085
 5     0085 30 31 32 33      db  "0123456789ABCDEF", 0xFF
 5     0089 34 35 36 37
@@ -184,6 +199,7 @@
 5     0095 FF
 6     0096
 7     0096                  END
+# file closed: i36b.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

@@ -1,3 +1,4 @@
+# file opened: invalid.asm
 invalid.asm(1): error: Illegal instruction:     add     ix,iy
  1    0000                  add     ix,iy
 invalid.asm(2): error: Illegal instruction:     add     ix,hl
@@ -104,6 +105,7 @@ invalid.asm(57): error: [ENDM] End macro without macro
 invalid.asm(59): warning: [UNDEFINE] Identifier not found: nononooo
 59    0017                  undefine nononooo
 60    0017
+# file closed: invalid.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

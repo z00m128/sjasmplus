@@ -1,3 +1,4 @@
+# file opened: incbin.asm
  1    0000                  ;; the included incbin/incbin.bin is fake file (doesn't have correct checksums/etc)
  2    0000                  ; its payload is actually ASCII text, readable by text editor
  3    0000                  OUTPUT "incbin.bin"
@@ -28,6 +29,7 @@ incbin.asm(22): warning: INCBIN: requested to include no data (len=0)
 23    0300
 24    0300                  OUTEND
 25    0300
+# file closed: incbin.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

@@ -1,3 +1,4 @@
+# file opened: ifused_test.asm
  1    0000              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  2    0000              ;; Test case for IFUSED / IFNUSED ;;
  3    0000              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -80,6 +81,7 @@ ifused_test.asm(76): error: [IFUSED] Syntax error: IFUSED  Invalid&Label
 ifused_test.asm(77): error: [IFUSED] Syntax error: IFNUSED Invalid%Label   
 77    0016                      IFNUSED Invalid%Label   ; error message, the GetID is too much foolproof.
 78    0016
+# file closed: ifused_test.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

@@ -1,3 +1,4 @@
+# file opened: dir_align.asm
  1    0000                  DEVICE ZXSPECTRUM48
  2    0000                  org     $8000
  3    8000                  ; 17 bytes block of "default" memory values
@@ -37,6 +38,7 @@ dir_align.asm(20): error: [ALIGN] Illegal align: ALIGN   7, '!'
 26    8010
 27    8010                  SAVEBIN "dir_align.bin", $8000, 17  ; modified area is saved into BIN file
 28    8010
+# file closed: dir_align.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

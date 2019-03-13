@@ -1,3 +1,4 @@
+# file opened: option zxnext.asm
  1    0000              ; this is almost empty ASM to test the CI build script "test_folder_tests.sh" with:
  2    0000              ; # filenames containing spaces
  3    0000              ; # .options file provided
@@ -8,6 +9,7 @@
  8    0000
  9    0000 ED 92 4C         nextreg $4C,a
 10    0003
+# file closed: option zxnext.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

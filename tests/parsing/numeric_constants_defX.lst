@@ -1,3 +1,4 @@
+# file opened: numeric_constants_defX.asm
  1    0000                  OUTPUT "numeric_constants_defX.bin"
  2    0000                  ;; official documentation of v1.10.4 - all possible DEFx directives and synonyms
  3    0000
@@ -867,6 +868,7 @@ numeric_constants_defX.asm(88): error: Over 128 values in D24
 88    0C32 00 00 0E 00
 88    0C36 00 0F 00 00
 89    0C3A
+# file closed: numeric_constants_defX.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

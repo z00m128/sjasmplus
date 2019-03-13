@@ -1,3 +1,4 @@
+# file opened: i36_II.asm
   1   0000              ; identical test with i36.asm, but first empty lines are included, to raise max-line
   2   0000              ; number in listing file to three digits
   3   0000
@@ -100,24 +101,31 @@
 100   0000              INC_DEPTH=0
 101   0000
 102   0000                  INCLUDE "i36_II.i.asm"
+# file opened: i36_II.i.asm
   1+  0000              INC_DEPTH=INC_DEPTH+1
   2+  0000                  IF INC_DEPTH < 7
   3+  0000                      INCLUDE "i36_II.i.asm"
+# file opened: i36_II.i.asm
   1++ 0000              INC_DEPTH=INC_DEPTH+1
   2++ 0000                  IF INC_DEPTH < 7
   3++ 0000                      INCLUDE "i36_II.i.asm"
+# file opened: i36_II.i.asm
   1+++0000              INC_DEPTH=INC_DEPTH+1
   2+++0000                  IF INC_DEPTH < 7
   3+++0000                      INCLUDE "i36_II.i.asm"
+# file opened: i36_II.i.asm
   1+++0000              INC_DEPTH=INC_DEPTH+1
   2+++0000                  IF INC_DEPTH < 7
   3+++0000                      INCLUDE "i36_II.i.asm"
+# file opened: i36_II.i.asm
   1+++0000              INC_DEPTH=INC_DEPTH+1
   2+++0000                  IF INC_DEPTH < 7
   3+++0000                      INCLUDE "i36_II.i.asm"
+# file opened: i36_II.i.asm
   1+++0000              INC_DEPTH=INC_DEPTH+1
   2+++0000                  IF INC_DEPTH < 7
   3+++0000                      INCLUDE "i36_II.i.asm"
+# file opened: i36_II.i.asm
   1+++0000              INC_DEPTH=INC_DEPTH+1
   2+++0000                  IF INC_DEPTH < 7
   3+++0000 ~                    INCLUDE "i36_II.i.asm"
@@ -133,6 +141,7 @@
   7+++0008 00          >    nop
   8+++0009                  EDUP
   9+++0009              INC_DEPTH=INC_DEPTH-1
+# file closed: i36_II.i.asm
   4+++0009                  ENDIF
   5+++0009 06 06            ld  b,INC_DEPTH
   6+++000B                  DUP INC_DEPTH
@@ -144,6 +153,7 @@
   7+++0010 00          >    nop
   8+++0011                  EDUP
   9+++0011              INC_DEPTH=INC_DEPTH-1
+# file closed: i36_II.i.asm
   4+++0011                  ENDIF
   5+++0011 06 05            ld  b,INC_DEPTH
   6+++0013                  DUP INC_DEPTH
@@ -154,6 +164,7 @@
   7+++0017 00          >    nop
   8+++0018                  EDUP
   9+++0018              INC_DEPTH=INC_DEPTH-1
+# file closed: i36_II.i.asm
   4+++0018                  ENDIF
   5+++0018 06 04            ld  b,INC_DEPTH
   6+++001A                  DUP INC_DEPTH
@@ -163,6 +174,7 @@
   7+++001D 00          >    nop
   8+++001E                  EDUP
   9+++001E              INC_DEPTH=INC_DEPTH-1
+# file closed: i36_II.i.asm
   4+++001E                  ENDIF
   5+++001E 06 03            ld  b,INC_DEPTH
   6+++0020                  DUP INC_DEPTH
@@ -171,6 +183,7 @@
   7+++0022 00          >    nop
   8+++0023                  EDUP
   9+++0023              INC_DEPTH=INC_DEPTH-1
+# file closed: i36_II.i.asm
   4++ 0023                  ENDIF
   5++ 0023 06 02            ld  b,INC_DEPTH
   6++ 0025                  DUP INC_DEPTH
@@ -178,13 +191,16 @@
   7++ 0026 00          >    nop
   8++ 0027                  EDUP
   9++ 0027              INC_DEPTH=INC_DEPTH-1
+# file closed: i36_II.i.asm
   4+  0027                  ENDIF
   5+  0027 06 01            ld  b,INC_DEPTH
   6+  0029                  DUP INC_DEPTH
   7+  0029 00          >    nop
   8+  002A                  EDUP
   9+  002A              INC_DEPTH=INC_DEPTH-1
+# file closed: i36_II.i.asm
 103   002A
+# file closed: i36_II.asm
 
 Value    Label
 ------ - -----------------------------------------------------------

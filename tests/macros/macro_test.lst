@@ -1,3 +1,4 @@
+# file opened: macro_test.asm
  1    0000              ; new 'macro' test
  2    0000              ;
  3    0000              ; test1
@@ -95,6 +96,7 @@ macro_test.asm(61): error: Label not found: _my___yyyyy____yy__call
 71    0024              ;	call abc____yy_def
 72    0024              ;	call _my___yyyyy____yy__call
 73    0024
+# file closed: macro_test.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
