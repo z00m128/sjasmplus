@@ -1297,6 +1297,19 @@ END_OF_PROGRAM
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_d24" />D24</term>
+
+            <listitem>
+              <para>Defines three bytes by 24b constant. Values should be between
+              -16777217 and 16777216.<example>
+                  <title></title>
+
+                  <para><programlisting>    D24 0x123456   ; define three bytes 0x56, 0x34, 0x12</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_db" />DB</term>
 
             <listitem>

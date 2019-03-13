@@ -182,82 +182,70 @@ void dirABYTEZ() {
 
 void dirWORD() {
 	aint val;
-	int teller = 0,e[129];
-	SkipBlanks();
-	while (*lp) {
-		if (ParseExpression(lp, val)) {
+	int teller = 0, e[130];
+	do {
+		if (SkipBlanks()) {
+			Error("Expression expected", NULL, SUPPRESS);
+		} else if (ParseExpression(lp, val)) {
 			check16(val);
 			if (teller > 127) {
-				Error("Over 128 values in DW/DEFW/WORD", NULL, FATAL);
+				Error("Over 128 values in DW/DEFW/WORD", NULL, SUPPRESS);
+				break;
 			}
 			e[teller++] = val & 65535;
 		} else {
-			Error("[DW/DEFW/WORD] Syntax error", lp, IF_FIRST); return;
-		}
-		SkipBlanks();
-		if (*lp != ',') {
+			Error("[DW/DEFW/WORD] Syntax error", lp, SUPPRESS);
 			break;
 		}
-		++lp; SkipBlanks();
-	}
+	} while (comma(lp));
 	e[teller] = -1;
-	if (!teller) {
-		Error("DW/DEFW/WORD with no arguments"); return;
-	}
-	EmitWords(e);
+	if (teller) EmitWords(e);
+	else		Error("DW/DEFW/WORD with no arguments");
 }
 
 void dirDWORD() {
 	aint val;
-	int teller = 0,e[129 * 2];
-	SkipBlanks();
-	while (*lp) {
-		if (ParseExpression(lp, val)) {
+	int teller = 0, e[130 * 2];
+	do {
+		if (SkipBlanks()) {
+			Error("Expression expected", NULL, SUPPRESS);
+		} else if (ParseExpression(lp, val)) {
 			if (teller > 127) {
-				Error("[DWORD] Over 128 values", NULL, FATAL);
+				Error("Over 128 values in DWORD", NULL, SUPPRESS);
+				break;
 			}
-			e[teller * 2] = val & 65535; e[teller * 2 + 1] = val >> 16; ++teller;
+			e[teller * 2] = val & 65535; e[teller * 2 + 1] = (val >> 16) & 0xFFFF; ++teller;
 		} else {
-			Error("[DWORD] Syntax error", lp, IF_FIRST); return;
-		}
-		SkipBlanks();
-		if (*lp != ',') {
+			Error("[DWORD] Syntax error", lp, SUPPRESS);
 			break;
 		}
-		++lp; SkipBlanks();
-	}
+	} while (comma(lp));
 	e[teller * 2] = -1;
-	if (!teller) {
-		Error("DWORD with no arguments"); return;
-	}
-	EmitWords(e);
+	if (teller) EmitWords(e);
+	else		Error("DWORD with no arguments");
 }
 
 void dirD24() {
 	aint val;
-	int teller = 0,e[129 * 3];
-	SkipBlanks();
-	while (*lp) {
-		if (ParseExpression(lp, val)) {
+	int teller = 0, e[130 * 3];
+	do {
+		if (SkipBlanks()) {
+			Error("Expression expected", NULL, SUPPRESS);
+		} else if (ParseExpression(lp, val)) {
 			check24(val);
-			if (teller > 127) {
-				Error("[D24] Over 128 values", NULL, FATAL);
+			if (teller > 127*3) {
+				Error("Over 128 values in D24", NULL, SUPPRESS);
+				break;
 			}
-			e[teller * 3] = val & 255; e[teller * 3 + 1] = (val >> 8) & 255; e[teller * 3 + 2] = (val >> 16) & 255; ++teller;
+			e[teller++] = val & 255; e[teller++] = (val >> 8) & 255; e[teller++] = (val >> 16) & 255;
 		} else {
-			Error("[D24] Syntax error", lp, IF_FIRST); return;
-		}
-		SkipBlanks();
-		if (*lp != ',') {
+			Error("[D24] Syntax error", lp, SUPPRESS);
 			break;
 		}
-		++lp; SkipBlanks();
-	}
-	e[teller * 3] = -1;
-	if (!teller) {
-		Error("D24 with no arguments"); return;
-	}
-	EmitBytes(e);
+	} while (comma(lp));
+	e[teller] = -1;
+	if (teller) EmitBytes(e);
+	else		Error("D24 with no arguments");
 }
 
 void dirBLOCK() {
