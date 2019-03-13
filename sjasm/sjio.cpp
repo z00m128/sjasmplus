@@ -646,7 +646,7 @@ void BinIncFile(char* fname, int offset, int len) {
 void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 {
 	char ofilename[LINEMAX];
-	char* oCurrentDirectory, * fullpath;
+	char* oCurrentDirectory, * fullpath, * listFullName = NULL;
 	TCHAR* filenamebegin;
 
 	if (++IncludeLevel > 20) {
@@ -657,6 +657,14 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 		free(fullpath);
 		Error("Error opening file", nfilename, FATAL);
+	}
+
+	// show in listing file which file was opened
+	if (LASTPASS == pass && FP_ListingFile) {
+		listFullName = STRDUP(fullpath);	// create copy of full filename for listing file
+		fputs("# file opened: ", FP_ListingFile);
+		fputs(listFullName, FP_ListingFile);
+		fputs("\n", FP_ListingFile);
 	}
 
 	aint oCurrentLocalLine = CurrentLocalLine;
@@ -679,6 +687,14 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	fclose(FP_Input);
 	--IncludeLevel;
 	CurrentDirectory = oCurrentDirectory;
+
+	// show in listing file which file was closed
+	if (LASTPASS == pass && FP_ListingFile) {
+		fputs("# file closed: ", FP_ListingFile);
+		fputs(listFullName, FP_ListingFile);
+		fputs("\n", FP_ListingFile);
+		free(listFullName);
+	}
 
 	// Free memory
 	free(fullpath);
