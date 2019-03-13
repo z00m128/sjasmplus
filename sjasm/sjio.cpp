@@ -718,6 +718,7 @@ void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
 }
 
 void ReadBufLine(bool Parse, bool SplitByColon) {
+	//FIXME Ped7g - seems a bit too complicated, check + comment + refactor if needed
 	rlppos = line;
 	if (rlcolon) {
 		*(rlppos++) = '\t';
@@ -748,22 +749,11 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 					}
 					if (*rlpbuf == '\n') { rlpbuf++; RL_Readed--; }
 				}
-				/*
-				if (*rlpbuf == '\n') {
-					rlpbuf++;RL_Readed--;
-					if (*rlpbuf && *rlpbuf == '\r') {
-						rlpbuf++;RL_Readed--;
-					}
-				} else if (*rlpbuf == '\r') {
-					rlpbuf++;RL_Readed--;
-				}
-				*/
 				*rlppos = 0;
 				if (strlen(line) == LINEMAX - 1) {
 					Error("Line too long", NULL, FATAL);
 				}
 				rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
-				//_COUT line _ENDL;
 				if (IsRunning && Parse) {
 					ParseLine();
 				} else {
@@ -789,78 +779,39 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				if (strlen(line) == LINEMAX - 1) {
 					Error("Line too long", NULL, FATAL);
 				}
-				/*if (rlnewline) {
-					CurrentLocalLine++; CurrentLine++; CurrentGlobalLine++; rlnewline = false;
-				}*/
 				rlcolon = true;
 				if (IsRunning && Parse) {
 					ParseLine();
 				} else {
 					return;
 				}
-			  	rlppos = line;
-				if (rlcolon) {
-					*(rlppos++) = ' ';
-				}
-			}  else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
-			  	lp = line; *rlppos = 0; /* char* n;
-					if ((n = getinstr(lp)) && DirectivesTable.Find(n)) {
-					//it's directive
-					while (*rlpbuf && *rlpbuf == ':') {
-						rlpbuf++;RL_Readed--;
-					}
-					if (strlen(line) == LINEMAX - 1) {
-						Error("Line too long", 0, FATAL);
-					}
-					if (rlnewline) {
-						CurrentLocalLine++;
-						CompiledCurrentLine++;
-						CurrentGlobalLine++;
-						rlnewline = false;
-					}
-					rlcolon = true;
-					if (Parse) {
-						ParseLine();
-					} else {
-						return;
-					}
-					rlspace = true;
-					rlppos = line;
-					if (rlcolon) {
-						*(rlppos++) = ' ';
-					}
-				} else {	*/
-				    // it's label
-				    *(rlppos++) = ':';
-				    //*(rlppos++) = ' ';
-				    rlspace = true;
-				    while (*rlpbuf && *rlpbuf == ':') {
+				rlppos = line;
+				if (rlcolon) *(rlppos++) = ' ';
+			} else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
+				lp = line; *rlppos = 0;
+				// it's label
+				*(rlppos++) = ':';
+				rlspace = true;
+				while (*rlpbuf && *rlpbuf == ':') {
 					rlpbuf++;
 					RL_Readed--;
-				    // }
 				}
 			} else {
-				if (*rlpbuf == '\'' && !rldquotes && !rlcomment) {
-					if (rlsquotes) {
-						rlsquotes = false;
-					} else {
-						rlsquotes = true;
-					}
+				if (*rlpbuf == '\\' && rldquotes && !rlcomment) {	// \ inside "" = escaping next char
+					*rlppos++ = *rlpbuf++; RL_Readed--;		// copy extra backslash (escape)
+				} else if (*rlpbuf == '\'' && !rldquotes && !rlcomment) {
+					rlsquotes = !rlsquotes;
 				} else if (*rlpbuf == '"' && !rlsquotes && !rlcomment) {
-					if (rldquotes) {
-						rldquotes = false;
-					} else {
-						rldquotes = true;
-					}
+					rldquotes = !rldquotes;
 				} else if (*rlpbuf == ';' && !rlsquotes && !rldquotes) {
 					rlcomment = true;
 				} else if (*rlpbuf == '/' && *(rlpbuf + 1) == '/' && !rlsquotes && !rldquotes) {
 					rlcomment = true;
-					*(rlppos++) = *(rlpbuf++); RL_Readed--;
+					*rlppos++ = *rlpbuf++; RL_Readed--;		// copy extra slash
 				} else if (*rlpbuf <= ' ' && !rlsquotes && !rldquotes && !rlcomment) {
 					rlspace = true;
 				}
-				*(rlppos++) = *(rlpbuf++); RL_Readed--;
+				*rlppos++ = *rlpbuf++; RL_Readed--;
 			}
 		}
 		rlpbuf = rlbuf;

@@ -395,20 +395,15 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 
 		// strings parsing
 		if (c1 == '"' || c1 == '\'') {
-			*rp++ = *lp++;
-			while (*lp) {
-				*rp = *lp;
-				if (*lp == c1) {
-					++rp;
-					++lp;
-					break;
-				}
-				if (*lp == '\\') {
-					*++rp = *++lp;
-				}
-				++rp;
-				++lp;
+			*rp++ = *lp++;				// copy the string delimiter (" or ')
+			// aprostrophe inside apostrophes ('') will here parse as end + start of another string
+			// which sort of "accidentally" leads to correct final results
+			while (*lp && c1 != *lp) {	// until end of current string is reached (or line ends)
+				// inside double quotes the backslash should escape (anything after it)
+				if ('"' == c1 && '\\' == *lp) *rp++ = *lp++;	// copy escaping backslash extra
+				*rp++ = *lp++;			// copy string character
 			}
+			if (*lp) *rp++ = *lp++;		// copy the ending string delimiter (" or ')
 			continue;
 		}
 
@@ -658,6 +653,9 @@ void ParseLine(bool parselabels) {
 // 			(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'), RepeatStack.size(),
 // 			(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 	lp = ReplaceDefine(line);
+
+	//DEBUG:  fprintf(stderr,"rdOut [%s]->[%s] %ld\n", line, lp, comlin);
+
 	if (!ConvertEncoding) {
 		unsigned char* lp2 = (unsigned char*) lp;
 		while (*(lp2++)) {

@@ -1485,7 +1485,7 @@ void dirDISPLAY() {
 			SkipBlanks(lp);
 		}
 
-		if (*lp == '"') {
+		if (*lp == '"') {		//FIXME Ped7g fix the string literal parsing (GetBytes for new style)
 			lp++;
 			do {
 				if (!*lp || *lp == '"') {
@@ -1498,7 +1498,7 @@ void dirDISPLAY() {
 					*ep = 0;
 					return;
 				}
-				GetCharConstChar(lp, val);
+				GetCharConstInDoubleQuotes(lp, val);
 				check8(val);
 				*(ep++) = (char) (val & 255);
 			} while (*lp != '"');
@@ -1516,7 +1516,7 @@ void dirDISPLAY() {
 					*ep = 0;
 					return;
 				}
-		  		GetCharConstCharSingle(lp, val);
+		  		GetCharConstInApostrophes(lp, val);
 				check8(val);
 				*(ep++) = (char) (val & 255);
 			} while (*lp != '\'');

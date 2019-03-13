@@ -1031,7 +1031,6 @@ int CMacroTable::FindDuplicate(char* naam) {
 void CMacroTable::Add(char* nnaam, char*& p) {
 	char* n;
 	CStringsList* s,* l = NULL,* f = NULL;
-	/*if (FindDuplicate(nnaam)) Error("Duplicate macroname",0,PASS1);*/
 	if (FindDuplicate(nnaam)) {
 		Error("Duplicate macroname", nnaam);return;
 	}
@@ -1040,8 +1039,8 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	if (macroname == NULL) {
 		Error("No enough memory!", NULL, FATAL);
 	}
-	macs = new CMacroTableEntry(macroname/*nnaam*/, macs);
-	used[(unsigned char)*macroname/*nnaam*/] = 1;
+	macs = new CMacroTableEntry(macroname, macs);
+	used[(unsigned char)*macroname] = 1;
 	SkipBlanks(p);
 	while (*p) {
 		if (!(n = GetID(p))) {
@@ -1059,7 +1058,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 					   }
 	}
 	macs->args = f;
-	if (*p/* && *p!=':'*/) {
+	if (*p) {
 		Error("Unexpected", p, EARLY);
 	}
 	ListFile();
@@ -1119,7 +1118,6 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	}
 	SkipBlanks(p); if (*p) Error("Too many arguments",0);
 	*/
-	/* (begin new) */
 	while (a) {
 		n = ml;
 		SkipBlanks(p);
@@ -1148,7 +1146,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
             if(*p) {
                 *n = *p; ++n; ++p;
             }
-		} else if(*p == '\'') {
+		} else if(*p == '\'') {		//FIXME check parsing (probably "\"" will derail it
 		    *n = *p; ++n; ++p;
             while(*p && *p != '\'') {
                 *n = *p; ++n; ++p;
@@ -1176,7 +1174,6 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	if (*p) {
 		Error("Too many arguments for macro", naam);
 	}
-	/* (end new) */
 	ListFile();
 	olistmacro = listmacro; listmacro = 1;
 	olijstp = lijstp; olijst = lijst;

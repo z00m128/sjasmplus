@@ -479,15 +479,18 @@ int GetConstant(char*& op, aint& val) {
 	}
 }
 
-int GetCharConstChar(char*& op, aint& val) {
-	if ((val = *op++) != '\\') {
-		return 1;
-	}
+// parse single character of double-quoted string (backslash does escape characters)
+int GetCharConstInDoubleQuotes(char*& op, aint& val) {
+	if ('"' == *op || !*op) return 0;		// closing quotes or no more characters, return 0
+	if ((val = *op++) != '\\') return 1;	// un-escaped character, just return it
 	switch (val = *op++) {
 	case '\\':
 	case '\'':
 	case '\"':
 	case '\?':
+		return 1;
+	case '0':
+		val = 0;
 		return 1;
 	case 'n':
 	case 'N':
@@ -526,46 +529,53 @@ int GetCharConstChar(char*& op, aint& val) {
 		val = 127;
 		return 1;
 	default:
-		--op;
-		val = '\\';
-
-		Error("Unknown escape", op);
-
-		return 1;
+		break;
 	}
-	return 0;
-}
-
-int GetCharConstCharSingle(char*& op, aint& val) {
-	if ((val = *op++) != '\\') {
-		return 1;
-	}
-	switch (val = *op++) {
-	case '\'':
-		return 1;
-	}
-	--op; val = '\\';
+	// keep "val" equal to the second character
+	Error("Unknown escape", op-2);
 	return 1;
 }
 
+// parse single character of apostrophe-quoted string (no escaping, double '' is apostrophe itself)
+int GetCharConstInApostrophes(char*& op, aint& val) {
+	if ('\'' == op[0] && '\'' == op[1]) {	// '' converts to actual apostrophe as value
+		val = '\'';
+		op += 2;
+		return 1;
+	}
+	if ('\'' == *op || !*op) return 0;		// closing apostrophe or no more characters, return 0
+	// normal character, just return it
+	val = *op++;
+	return 1;
+}
+
+// parse single/double quoted string literal as single value ('012' == 0x00303132)
 int GetCharConst(char*& p, aint& val) {
-	aint s = 24,r,t = 0; val = 0;
-	char* op = p,q;
-	if (*p != '\'' && *p != '"') {
+	// check if string starts here
+	if ('"' != *p && '\'' != *p) return 0;
+	const char * const op = p;		// for error reporting
+	const bool quotes = '"' == *p++;
+	aint singleCharVal, bytes = 0;
+	val = 0;
+	// read through whole string and keep calculating value (may overflow if more than 4 bytes)
+	while (quotes ? GetCharConstInDoubleQuotes(p, singleCharVal) : GetCharConstInApostrophes(p, singleCharVal)) {
+		val = (val << 8) + singleCharVal;
+		++bytes;
+	}
+	if ((quotes ? '"' : '\'') != *p) {
+		Error("String is not closed", op);
 		return 0;
 	}
-	q = *p++;
-	do {
-		if (!*p || *p == q) {
-			p = op; return 0;
-		}
-		GetCharConstChar(p, r);
-		val += r << s; s -= 8; ++t;
-	} while (*p != q);
-	if (t > 4) {
-		Error("Overflow", op, SUPPRESS);
+	if (0 == bytes) {
+		Warning("Empty string literal converted to value 0!", op);
+	} else if (4 < bytes) {
+		val &= (1UL<<32)-1UL;		// make sure it's 32b truncated even on 64b platforms
+		*p = 0;						// shorten the string literal for warning display
+		char buffer[128];
+		sprintf(buffer, "String literal truncated to 0x%lX", val);
+		Warning(buffer, op+1);
+		*p = quotes ? '"' : '\'';	// restore it
 	}
-	val = val >> (s + 8);
 	++p;
 	return 1;
 }
@@ -578,14 +588,12 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 		if (!*p) {
 			Error("Expression expected", NULL, SUPPRESS);
 		} else if ('"' == *p || '\'' == *p) {	// string literals (both types)
-			const char qc = *p++;
+			const bool quotes = '"' == *p++;
 			const int oldT = t;
-			while (*p && qc != *p && t < 128) {
-				if ('"' == qc) 	GetCharConstChar(p, val);
-				else 			GetCharConstCharSingle(p, val);
+			while (t < 128 && (quotes ? GetCharConstInDoubleQuotes(p, val) : GetCharConstInApostrophes(p, val))) {
 				e[t++] = (val + add) & 255;
 			}
-			if (qc != *p) {		// too many arguments or zero-terminator can lead to this
+			if ((quotes ? '"' : '\'') != *p) {	// too many/invalid arguments or zero-terminator can lead to this
 				if (!*p) Error("Syntax error", p, SUPPRESS);
 				break;
 			}
@@ -604,7 +612,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 				}
 				// mark last "string" byte with |128: single char in "" *is* string
 				// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
-				if (dc && ((qc == '\'') < (t - oldT))) e[t - 1] |= 128;
+				if (dc && ((!quotes) < (t - oldT))) e[t - 1] |= 128;
 			}
 		} else {
 			if (ParseExpression(p, val)) {
@@ -786,7 +794,7 @@ int GetArray(char*& p, int e[], int add, int dc) {
 		if (t == 128) {
 			Error("Too many arguments", p, SUPPRESS); break;
 		}
-		if (*p == '"') {
+		if (*p == '"') {	//FIXME Ped7g simplify as GetBytes is done (or merge code!)
 			p++;
 			do {
 				if (!*p || *p == '"') {
@@ -795,7 +803,7 @@ int GetArray(char*& p, int e[], int add, int dc) {
 				if (t == 128) {
 					Error("Too many arguments", p, SUPPRESS); e[t] = -1; return t;
 				}
-				GetCharConstChar(p, val); check8(val); e[t++] = (val + add) & 255;
+				GetCharConstInDoubleQuotes(p, val); check8(val); e[t++] = (val + add) & 255;
 			} while (*p != '"');
 			++p; if (dc && t) {
 				 	e[t - 1] |= 128;
@@ -809,7 +817,7 @@ int GetArray(char*& p, int e[], int add, int dc) {
 				if (t == 128) {
 		  			Error("Too many arguments", p, SUPPRESS); e[t] = -1; return t;
 				}
-		  		GetCharConstCharSingle(p, val); check8(val); e[t++] = (val + add) & 255;
+		  		GetCharConstInApostrophes(p, val); check8(val); e[t++] = (val + add) & 255;
 			} while (*p != '\'');
 		  	++p;
 			if (dc && t) {
