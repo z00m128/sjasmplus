@@ -1,0 +1,7 @@
+1     0000 3E 0A            ld      a,10
+2     0002 06 0B            ld      b,11  ; should be on next line
+3     0004              ; one empty line
+4     0004                  END
+
+Value    Label
+------ - -----------------------------------------------------------
