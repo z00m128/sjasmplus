@@ -16,3 +16,11 @@ function find_newest_binary() {
 [[ -n "$NOCOLOR" ]] && function echo() {
     command echo "$@" | sed -e 's/\x1b\[[0-9]\+m//g'
 }
+
+function pushd () {
+    command pushd "$@" > /dev/null
+}
+
+function popd () {
+    command popd "$@" > /dev/null
+}
