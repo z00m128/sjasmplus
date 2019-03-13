@@ -614,12 +614,13 @@ $c     hexadecimal
       <para>Character constants are characters surrounded by single quotes. It
       is possible to use double quotes in some cases, but in general it is
       better to use single quotes. String constants are characters surrounded
-      by double quotes. The following escape sequences are recognized:</para>
-
+      by double quotes. When double quotes are used, the following escape
+      sequences are recognized:</para>
       <para><programlisting>\\ 92
 \? 63
 \' 39
 \" 34
+\0 0     ; since v1.11
 \A 7
 \B 8
 \D 127
@@ -628,18 +629,20 @@ $c     hexadecimal
 \N 10
 \R 13
 \T 9
-\V 11</programlisting><example>
+\V 11</programlisting><para>Inside single quotes two quotes after each other are
+    parsed as the apostrophe itself (since v1.11).</para><example>
           <title></title>
 
-          <para><programlisting>    BYTE "stringconstant"  ;
-    BYTE 'stringconstant'  ;with single quotes escape sequences above (\N,\T..) will not work
-    LD HL,'hl'
-    LD HL,"hl" ; :(
-    LD A,"7"   ; :(
-    LD A,'8'   ; :)
-    LD A,'\E'
-    LD A,'"'
-    LD A,"'"</programlisting></para>
+          <para><programlisting>    BYTE "stringconstant\n" ; escape sequence assembles to newline
+    BYTE 'stringconstant\n' ; \n assembles literally as two bytes: '\', 'n'
+    LD HL,'hl'  ; hl = 0x686C = 'l', 'h'
+    LD HL,"hl"  ; hl = 0x686C = 'l', 'h'
+    LD A,"7"    ; not recommended (but works)
+    LD A,'8'    ; recommended
+    LD A,'\E'   ; warning + truncating value to 'E' (0x45)
+    LD A,'"'    ; A = 0x22
+    LD A,"'"    ; A = 0x27
+    LD A,''''   ; A = 0x27 ; since v1.11</programlisting></para>
         </example></para>
     </section>
 
