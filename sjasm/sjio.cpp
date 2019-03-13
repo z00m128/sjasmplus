@@ -1380,14 +1380,10 @@ EReturn SkipFile(char* pp, const char* err) {
 	return END;
 }
 
-
 int ReadLine(bool SplitByColon) {
-	if (!IsRunning) {
-		return 0;
-	}
-	int res = (RL_Readed > 0 || !feof(FP_Input));
+	if (!IsRunning || (RL_Readed == 0 && feof(FP_Input))) return 0;
 	ReadBufLine(false, SplitByColon);
-	return res;
+	return 1;
 }
 
 int ReadFileToCStringsList(CStringsList*& f, const char* end) {
