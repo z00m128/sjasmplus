@@ -1,0 +1,79 @@
+ 1    0000                  OUTPUT "new_apostrophe.bin"
+ 2    0000
+ 3    0000                  ; test new \0 escape for double quotes
+ 4    0000 00               db  "\0"
+ 5    0001
+ 6    0001                  ; test new stricter rules for not-escaping apostrophe strings
+ 7    0001 5C 45 5C 5C      db  '\E', '\\'          ; test (4 bytes)
+ 8    0005 5C 45 5C 5C      db  "\\E", "\\\\"       ; expected (emulating expected result in quotes)
+new_apostrophe.asm(9): warning: Empty string: ''  
+ 9    0009 27 27 5C 00      db  '''''', '\', 0, ''  ; test (4 bytes) + warning
+10    000D 27 27 5C 00      db  "''", "\\", 0       ; expected (emulating expected result in quotes)
+11    0011
+12    0011                  ; more tricky ones (putting stress also on line parsers and buffer readers)
+13    0011 2F 2A 2A 2F      db  '/**/''/**/''\n\\''\"'''
+13    0015 27 2F 2A 2A
+13    0019 2F 27 5C 6E
+13    001D 5C 5C 27 5C
+13    0021 22 27
+14    0023 2F 2A 2A 2F      db  "/**/'/**/'\\n\\\\'\\\"'"    ; expected
+14    0027 27 2F 2A 2A
+14    002B 2F 27 5C 6E
+14    002F 5C 5C 27 5C
+14    0033 22 27
+15    0035
+16    0035 22               db  "\""
+16    0036 00             db 0
+17    0037 5C               db  '\'
+17    0038 01             db 1
+18    0039 5C 5C            db  '\\'
+18    003B 02             db 2
+new_apostrophe.asm(19): warning: Empty string: '' 
+new_apostrophe.asm(19): error: no arguments
+19    003C                  db  ''
+19    003C 03             db 3           ; warning empty string + error no arguments
+20    003D 27               db  ''''
+20    003E 04             db 4
+21    003F
+new_apostrophe.asm(22): warning: Bytes lost (0x41424344)
+new_apostrophe.asm(22): warning: String literal truncated to 0x47485858: ABCDEFGHXX
+new_apostrophe.asm(22): warning: Bytes lost (0x47485858)
+22    003F 44 43 58 58      dw  'ABCD', 'ABCDEFGHXX'; regular value check warnings + string literal overflow
+new_apostrophe.asm(23): warning: Bytes lost (0x41424344)
+new_apostrophe.asm(23): warning: String literal truncated to 0x47485858: ABCDEFGHXX
+new_apostrophe.asm(23): warning: Bytes lost (0x47485858)
+23    0043 44 43 58 58      dw  "ABCD", "ABCDEFGHXX"; regular value check warnings + string literal overflow
+24    0047
+25    0047                  ;; exercise remaining escape sequences inside apostrophes (shouldn't be escaped)
+26    0047 5C 41 5C 42      db  '\A', '\B', '\D', '\E'      ; verify nothing leaks into comments
+26    004B 5C 44 5C 45
+27    004F 5C 46 5C 4E      db  '\F', '\N', '\R', '\T'      ; verify nothing leaks into comments
+27    0053 5C 52 5C 54
+28    0057 5C 5C 5C 22      db  '\\', '\"', '\?', '"\'      ; verify nothing leaks into comments
+28    005B 5C 3F 22 5C
+29    005F 5C 30 5C 27      db  '\0', '\'''                 ; verify nothing leaks into comments
+30    0063 0A               db  "\n"
+31    0064
+32    0064                  ;; Example about string literals from documentation
+33    0064 73 74 72 69      BYTE "stringconstant\n" ; escape sequence assembles to newline
+33    0068 6E 67 63 6F
+33    006C 6E 73 74 61
+33    0070 6E 74 0A
+34    0073 73 74 72 69      BYTE 'stringconstant\n' ; \n assembles literally as two bytes: '\', 'n'
+34    0077 6E 67 63 6F
+34    007B 6E 73 74 61
+34    007F 6E 74 5C 6E
+35    0083 21 6C 68         LD HL,'hl'  ; hl = 0x686C = 'l', 'h'
+36    0086 21 6C 68         LD HL,"hl"  ; hl = 0x686C = 'l', 'h'
+37    0089 3E 37            LD A,"7"    ; not recommended (but works)
+38    008B 3E 38            LD A,'8'    ; recommended
+new_apostrophe.asm(39): warning: Bytes lost (0x5C45)
+39    008D 3E 45            LD A,'\E'   ; warning + truncating value to 'E' (0x45)
+40    008F 3E 22            LD A,'"'    ; A = 0x22
+41    0091 3E 27            LD A,"'"    ; A = 0x27
+42    0093 3E 27            LD A,''''   ; A = 0x27 ; since v1.11
+43    0095
+44    0095                  END     ; scratch for some experiments
+
+Value    Label
+------ - -----------------------------------------------------------
