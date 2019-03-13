@@ -583,7 +583,6 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			while (*p && qc != *p && t < 128) {
 				if ('"' == qc) 	GetCharConstChar(p, val);
 				else 			GetCharConstCharSingle(p, val);
-				check8(val);
 				e[t++] = (val + add) & 255;
 			}
 			if (qc != *p) {		// too many arguments or zero-terminator can lead to this
@@ -593,6 +592,16 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			++p;
 			if (oldT == t)	Warning("Empty string", p-2);
 			else {
+				// single byte "strings" may have further part of expression, handle it *here* :/
+				if (1 == t - oldT) {
+					SkipBlanks(p);
+					if (*p && ',' != *p) {
+						ParseExpression(p, val);
+						val += (e[t - 1] - add) & 255;	// restore "char" value back and add to expr.
+						check8(val);
+						e[t-1] = (val + add) & 255;
+					}
+				}
 				// mark last "string" byte with |128: single char in "" *is* string
 				// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
 				if (dc && ((qc == '\'') < (t - oldT))) e[t - 1] |= 128;
