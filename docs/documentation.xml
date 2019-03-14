@@ -204,7 +204,7 @@
 - Refactored options parser, instruction parser and Warning/Error system
 - C++14 standard is now required minimum (to compile sjasmplus sources)
 - Added automated-testing scripts, with 50+ tests
-- GitHub connected with Cirrus Continuous Integration service</programlisting></para>
+- GitHub connected with <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus">Cirrus Continuous Integration</ulink> service</programlisting></para>
             </listitem>
           </varlistentry>
 
