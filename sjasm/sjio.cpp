@@ -643,6 +643,8 @@ void BinIncFile(char* fname, int offset, int len) {
 	fclose(bif);
 }
 
+static void OpenDefaultList(const char *fullpath);
+
 void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 {
 	char ofilename[LINEMAX];
@@ -659,6 +661,10 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 		Error("Error opening file", nfilename, FATAL);
 	}
 
+	// open default listing file for each new source file (if default listing is ON)
+	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
+		OpenDefaultList(fullpath);			// explicit listing file is already opened
+	}
 	// show in listing file which file was opened
 	if (LASTPASS == pass && FP_ListingFile) {
 		listFullName = STRDUP(fullpath);	// create copy of full filename for listing file
@@ -685,7 +691,6 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	ReadBufLine(true);
 
 	fclose(FP_Input);
-	--IncludeLevel;
 	CurrentDirectory = oCurrentDirectory;
 
 	// show in listing file which file was closed
@@ -694,7 +699,16 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 		fputs(listFullName, FP_ListingFile);
 		fputs("\n", FP_ListingFile);
 		free(listFullName);
+
+		// close listing file (if "default" listing filename is used)
+		if (0 == IncludeLevel && Options::IsDefaultListingName) {
+			if (Options::AddLabelListing) LabelTable.Dump();
+			fclose(FP_ListingFile);
+			FP_ListingFile = NULL;
+		}
 	}
+
+	--IncludeLevel;
 
 	// Free memory
 	free(fullpath);
@@ -846,13 +860,39 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	}
 }
 
+static void OpenListImp(const char* listFilename) {
+	if (NULL == listFilename || !listFilename[0]) return;
+	if (!FOPEN_ISOK(FP_ListingFile, listFilename, "w")) {
+		Error("Error opening file", listFilename, FATAL);
+	}
+}
+
 void OpenList() {
-	if (NULL != FP_ListingFile) return;		// already opened
-	if (Options::ListingFName[0]) {
-		if (!FOPEN_ISOK(FP_ListingFile, Options::ListingFName, "w")) {
-			Error("Error opening file", Options::ListingFName, FATAL);
+	// check if listing file is already opened, or it is set to "default" file names
+	if (Options::IsDefaultListingName || NULL != FP_ListingFile) return;
+	// Only explicit listing files are opened here
+	OpenListImp(Options::ListingFName);
+}
+
+static void OpenDefaultList(const char *fullpath) {
+	// check if listing file is already opened, or it is set to explicit file name
+	if (!Options::IsDefaultListingName || NULL != FP_ListingFile) return;
+	if (NULL == fullpath || !*fullpath) return;		// no filename provided
+	// Create default listing name, and try to open it
+	char tempListName[LINEMAX+10];		// make sure there is enough room for new extension
+	STRCPY(tempListName, LINEMAX, fullpath);
+	// find extension of that file and overwrite it with ".lst"
+	char* extPos = tempListName + strlen(tempListName);
+	while (tempListName < extPos && '.' != *extPos) {
+		--extPos;
+		if ('/' == *extPos || '\\' == *extPos || tempListName == extPos) {	// no extension found
+			extPos = tempListName + strlen(tempListName);	// just append it then to the fullname
+			break;
 		}
 	}
+	STRCPY(extPos, 5, ".lst");
+	// list filename prepared, open it
+	OpenListImp(tempListName);
 }
 
 void OpenUnrealList() {

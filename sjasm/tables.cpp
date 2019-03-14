@@ -441,11 +441,7 @@ int CLabelTable::Hash(const char* s) {
 void CLabelTable::Dump() {
 	char line[LINEMAX], *ep;
 
-	OpenList();
-
-	if (FP_ListingFile == NULL) {
-		return;
-	}
+	if (NULL == FP_ListingFile) return;		// listing file must be already opened here
 
 	/*fputs("\nvalue      label\n",FP_ListingFile);*/
 	fputs("\nValue    Label\n", FP_ListingFile);

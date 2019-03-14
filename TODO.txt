@@ -23,7 +23,10 @@ FIXME in sources mark further points worth refactoring
 STRUCT test + fix bugs
 - new feature: ?warning ked instancujes so zlym fyzicky align?
 
---lst bez hodnoty nech spravi default nazov sam?
+"--lst" bez hodnoty nech spravi default nazov sam
+  ==> needs tests (badly, was bugged a lot during development)
+
+add test for END vs multi input files ... actually how about includes? Hmm...
 
 ====================
 Docs:

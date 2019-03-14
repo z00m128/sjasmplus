@@ -44,6 +44,7 @@ namespace Options {
 	extern bool IsPseudoOpBOF;
 	extern bool IsAutoReloc;
 	extern bool IsLabelTableInListing;
+	extern bool IsDefaultListingName;
 	extern bool IsReversePOP;
 	extern bool IsShowFullPath;
 	extern bool AddLabelListing;

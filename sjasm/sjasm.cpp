@@ -47,7 +47,7 @@ void PrintHelp() {
 	_COUT "  --zxnext                 Enable SpecNext Z80 extensions" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
-	_COUT "  --lst=<filename>         Save listing to <filename>" _ENDL;
+	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
 	_COUT "  --lstlab                 Enable label table in listing" _ENDL;
 	_COUT "  --sym=<filename>         Save symbols list to <filename>" _ENDL;
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
@@ -81,6 +81,7 @@ namespace Options {
 	bool IsPseudoOpBOF = 0;
 	bool IsAutoReloc = 0;
 	bool IsLabelTableInListing = 0;
+	bool IsDefaultListingName = false;
 	bool IsReversePOP = 0;
 	bool IsShowFullPath = 0;
 	bool AddLabelListing = 0;
@@ -146,7 +147,7 @@ int LuaLine=-1;
 
 #endif //USE_LUA
 
-void InitPass(int p) {
+void InitPass() {
 	aint pow10 = 1;
 	reglenwidth = 0;
 	do {
@@ -168,9 +169,7 @@ void InitPass(int p) {
 	STRCPY(vorlabp, sizeof("_"), "_");
 	macrolabp = NULL;
 	listmacro = 0;
-	pass = p;
 	CurAddress = AddressOfMAP = 0;
-	IsRunning = 1;
 	CurrentGlobalLine = CurrentLocalLine = CompiledCurrentLine = 0;
 	PseudoORG = 0; adrdisp = 0;
 	PreviousAddress = 0; epadres = 0; macronummer = 0; lijst = 0; comlin = 0;
@@ -283,6 +282,8 @@ namespace Options {
 					} else {
 						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
 					}
+				} else if (!strcmp(opt, "lst") && !val[0]) {
+					IsDefaultListingName = true;
 				} else if (
 					CheckAssignmentOption("sym", SymbolListFName, LINEMAX) ||
 					CheckAssignmentOption("lst", ListingFName, LINEMAX) ||
@@ -360,6 +361,9 @@ int main(int argc, char **argv) {
 			if (!argv[i]) break;
 			STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, argv[i++]);
 		}
+		if (Options::IsDefaultListingName && Options::ListingFName[0]) {
+			Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
+		}
 	}
 
 	if (argc == 1 || Options::ShowHelp) {
@@ -401,38 +405,23 @@ int main(int argc, char **argv) {
 		STRCAT(p, LINEMAX-(p-Options::DestionationFName), ".out");
 	}
 
+	base_encoding = ConvertEncoding;
+
 	// init some vars
 	InitCPU();
 
-	// if memory type != none
-	base_encoding = ConvertEncoding;
-
-	// init first pass
-	InitPass(1);
-
-	// open lists
+	// open lists (if not set to "default" file name, then the OpenFile will handle it)
 	OpenList();
 
-	// open source filenames
-	for (i = 0; i < SourceFNamesCount; i++) {
-		OpenFile(SourceFNames[i]);
-	}
-
-	if (Options::OutputVerbosity <= OV_ALL) {
-		_CERR "Pass 1 complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
-	}
-
-	ConvertEncoding = base_encoding;
-
 	do {
-		pass++;
+		++pass;
+		InitPass();
 
-		InitPass(pass);
+		if (pass == LASTPASS) OpenDest();
 
-		if (pass == LASTPASS) {
-			OpenDest();
-		}
 		for (i = 0; i < SourceFNamesCount; i++) {
+			IsRunning = 1;
+			ConvertEncoding = base_encoding;
 			OpenFile(SourceFNames[i]);
 		}
 
@@ -447,12 +436,12 @@ int main(int argc, char **argv) {
 				_CERR "Pass 3 complete" _ENDL;
 			}
 		}
-	} while (pass < 3);//MAXPASSES);
+	} while (pass < LASTPASS);
 
 	pass = 9999; /* added for detect end of compiling */
-	if (Options::AddLabelListing) {
-		LabelTable.Dump();
-	}
+
+	// dump label table into listing file, the explicit one (Options::IsDefaultListingName == false)
+	if (Options::AddLabelListing) LabelTable.Dump();
 
 	Close();
 
