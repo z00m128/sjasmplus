@@ -1,0 +1,1 @@
+cli_define/src2.a80 -DDEFINE_FROM_CLI='6' cli_define/src3.a80 --raw=cli_define.bin
