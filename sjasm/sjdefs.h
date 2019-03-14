@@ -30,10 +30,7 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.10.4"
-
-// not used
-#define MAXPASSES 3
+#define VERSION "1.11.0"
 
 #define LASTPASS 3
 
