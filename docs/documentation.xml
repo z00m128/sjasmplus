@@ -177,6 +177,34 @@
     <section>
       <title>What's new?</title>
 
+<varlistentry>
+            <term>14.03.2019 - 1.11.0 WORK IN PROGRESS</term>
+
+            <listitem>
+              <para><programlisting>- Added ZX Spectrum Next support
+- Added --msg option
+- Changed listing layout to fixed width typeto
+- Fixed docs templates
+- Fixed nesting DUP issue
+- STRUCT was fixed partially to work as documented
+- Fixed CRLF handling in parser
+- Fixed -D option for multiple asm files
+- Fixed address display when the 64kB limit exceeded
+- Fixed IF inside MACRO
+- Fixed ALIGN behavior and docs wording
+- Fixed INCHOB (offset / length)
+- Fixed END behavior
+- Fixed DEFARRAY to work as documented
+- Fixed and refactored WORD/DWORD/D24
+- Multiple bugfixes in listing generation
+- Multiple bugfixes of internal code
+- Refactored options parser
+- Refactored instruction parser
+- Refactored Warnig/Error system
+- A robust automated test system was created</programlisting></para>
+            </listitem>
+          </varlistentry>
+
       <para><variablelist>
 
 <varlistentry>
