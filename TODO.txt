@@ -26,8 +26,6 @@ STRUCT test + fix bugs
 "--lst" bez hodnoty nech spravi default nazov sam
   ==> needs tests (badly, was bugged a lot during development)
 
-add test for --reversepop
-
 ReadBufLine parsing fails on "/* END ... // : block comment */ : nop ; LIVE instr!
     - the `: nop` remains of this, the ReadBufLine doesn't find the colon after
     block comment, which does contain "EOL comment" tag.

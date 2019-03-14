@@ -1,0 +1,10 @@
+# file opened: dir_reversepop.asm
+1     0000                  OUTPUT  "dir_reversepop.bin"
+2     0000 00               nop
+3     0001 E5 C5            push    hl, bc  ; should compile as `push hl` `push bc`
+4     0003 C1 E1            pop     hl, bc  ; should compile as `pop bc` `pop hl` with --reversepop option
+5     0005
+# file closed: dir_reversepop.asm
+
+Value    Label
+------ - -----------------------------------------------------------
