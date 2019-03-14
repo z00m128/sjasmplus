@@ -49,24 +49,18 @@ void GetCurrentDirectory(int whatever, char* pad) {
 
 int SearchPath(char* oudzp, char* filename, char* whatever, int maxlen, char* nieuwzp, char** ach) {
 	FILE* fp;
-	char* p, * f;
 	if (filename[0] == '/') {
 		STRCPY(nieuwzp, maxlen, filename);
 	} else {
 		STRCPY(nieuwzp, maxlen, oudzp);
-		if (*nieuwzp && nieuwzp[strlen(nieuwzp)] != '/') {
-			STRCAT(nieuwzp, maxlen, "/");
-		}
+		if (*nieuwzp && nieuwzp[strlen(nieuwzp)-1] != '/') STRCAT(nieuwzp, maxlen, "/");
 		STRCAT(nieuwzp, maxlen, filename);
 	}
 	if (ach) {
-		p = f = nieuwzp;
+		char* p = *ach = nieuwzp;
 		while (*p) {
-			if (*p == '/') {
-				f = p + 1;
-			} ++p;
+			if (*p++ == '/') *ach = p;
 		}
-		*ach = f;
 	}
 	if (FOPEN_ISOK(fp, nieuwzp, "r")) {
 		fclose(fp);
