@@ -1,0 +1,10 @@
+// another simple file, but second on command line
+        ld      hl,end      ; loads label from first file!
+        ld      de,End      ; also second label from first file
+        ld      bc,verifyLabel  ; third label from first file (which is behind "end" label)
+// verify --dirbol was used to compile this (define MACRO on start of the line)
+MACRO xxx
+    nop
+ENDM
+        xxx
+        END End.end : start address provided

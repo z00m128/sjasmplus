@@ -1,0 +1,8 @@
+// has single include dir_end/dir_end3.i.asm (which does not END)
+    MACRO E_in_macro
+        END
+    ENDM
+        ld      hl,End.end
+INCLUDE "dir_end/dir_end3.i.asm"
+verifyLabelFrom_dir_end3.a80:
+    E_in_macro : third one ends here
