@@ -121,27 +121,30 @@
       
 
 <dt><span class="term">14.03.2019 - 1.11.0 WORK IN PROGRESS</span></dt><dd>
-              <pre class="programlisting">- Added ZX Spectrum Next support
+              <pre class="programlisting">- Added ZX Spectrum Next instructions support
 - Added --msg option
-- Changed listing layout to fixed width typeto
-- Fixed docs templates
+- Changed listing layout to fixed-width type
+- Errors, Warnings and similar are now channeled to STDERR
+- Fixed string literal parser, added two apostrophes and escaped zero
+- Fixed docs templates (HTML is now more valid)
 - Fixed nesting DUP issue
-- STRUCT was fixed partially to work as documented
 - Fixed CRLF handling in parser
 - Fixed -D option for multiple asm files
 - Fixed address display when the 64kB limit exceeded
 - Fixed IF inside MACRO
 - Fixed ALIGN behavior and docs wording
-- Fixed INCHOB (offset / length)
+- Fixed INCHOB/INCBIN (offset / length)
+- Fixed INCLUDE/INCLUDELUA system path priority ("" vs &lt;&gt;)
 - Fixed END behavior
 - Fixed DEFARRAY to work as documented
 - Fixed and refactored WORD/DWORD/D24
+- Partially fixed STRUCT (to work as documented)
 - Multiple bugfixes in listing generation
 - Multiple bugfixes of internal code
-- Refactored options parser
-- Refactored instruction parser
-- Refactored Warnig/Error system
-- A robust automated test system was created</pre>
+- Refactored options parser, instruction parser and Warning/Error system
+- C++14 standard is now required minimum (to compile sjasmplus sources)
+- Added automated-testing scripts, with 50+ tests
+- GitHub connected with Cirrus Continuous Integration service</pre>
             </dd>
 
       <div class="variablelist"><dl class="variablelist"><dt><span class="term">09.01.2019 - 1.10.4</span></dt><dd>
