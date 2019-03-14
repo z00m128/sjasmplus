@@ -48,11 +48,14 @@ for f in "${TEST_FILES[@]}"; do
     file_asm=`basename "$f"`        # just "file.asm" name
     src_base="${f%.asm}"            # source directory + base ("src_dir/file"), to add extensions
     dst_base="${file_asm%.asm}"     # local-directory base (just "file" basically), to add extensions
+    [[ -d "${src_base}.config" ]] && CFG_BASE="${src_base}.config/${dst_base}" || CFG_BASE="${src_base}"
+    OPTIONS_FILE="${CFG_BASE}.options"
+    LIST_FILE="${CFG_BASE}.lst"
     # see if there are extra options defined (and read them into array)
     options=()
-    [[ -s "${src_base}.options" ]] && options=(`cat "${src_base}.options"`)
+    [[ -s "${OPTIONS_FILE}" ]] && options=(`cat "${OPTIONS_FILE}"`)
     # check if .lst file already exists, set up options to refresh it + delete it
-    [[ -s "${src_base}.lst" ]] && options+=("--lst=${dst_base}.lst") && options+=('--lstlab') && rm "${src_base}.lst"
+    [[ -s "${LIST_FILE}" ]] && options+=("--lst=${LIST_FILE}") && options+=('--lstlab') && rm "${LIST_FILE}"
     ## built it with sjasmplus (remember exit code)
     echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
     # switch to test directory and run assembler
@@ -61,7 +64,7 @@ for f in "${TEST_FILES[@]}"; do
     last_result=$?
     popd
     # non-empty LST file overrides assembling exit code => OK
-    [[ -s "${src_base}.lst" ]] && last_result=0
+    [[ -s "${LIST_FILE}" ]] && last_result=0
     # report assembling exit code problem here
     if [[ $last_result -ne 0 ]]; then
         echo -e "\033[91mError status $last_result returned by $EXE\033[0m"
