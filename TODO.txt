@@ -23,6 +23,8 @@ FIXME in sources mark further points worth refactoring
 STRUCT test + fix bugs
 - new feature: ?warning ked instancujes so zlym fyzicky align?
 
+--lst bez hodnoty nech spravi default nazov sam?
+
 ====================
 Docs:
 http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku

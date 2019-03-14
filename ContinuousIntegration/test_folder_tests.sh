@@ -58,6 +58,9 @@ for f in "${TEST_FILES[@]}"; do
     file_asm=`basename "$f"`        # just "file.asm" name
     src_base="${f%.asm}"            # source directory + base ("src_dir/file"), to add extensions
     dst_base="${file_asm%.asm}"     # local-directory base (just "file" basically), to add extensions
+    [[ -d "${src_base}.config" ]] && CFG_BASE="${src_base}.config/${dst_base}" || CFG_BASE="${src_base}"
+    OPTIONS_FILE="${CFG_BASE}.options"
+    LIST_FILE="${CFG_BASE}.lst"
     # copy "src_dir/basename*.(asm|lua)" file(s) into working directory
     for subf in "$src_base"*.{asm,lua}; do
         [[ -d "$subf" ]] && continue
@@ -66,13 +69,14 @@ for f in "${TEST_FILES[@]}"; do
     # copy "src_dir/basename*" sub-directories into working directory (ALL files in them)
     for subf in "$src_base"*; do
         [[ ! -d "$subf" ]] && continue
+        [[ "${src_base}.config" == "$subf" ]] && continue   # some.config directory is not copied
         cp -r "$subf" ".${subf#$src_dir}"
     done
     # see if there are extra options defined (and read them into array)
     options=()
-    [[ -s "${src_base}.options" ]] && options=(`cat "${src_base}.options"`)
+    [[ -s "${OPTIONS_FILE}" ]] && options=(`cat "${OPTIONS_FILE}"`)
     # check if .lst file is required to verify the test, set up options to produce one
-    [[ -s "${src_base}.lst" ]] && options+=("--lst=${dst_base}.lst") && options+=('--lstlab')
+    [[ -s "${LIST_FILE}" ]] && options+=("--lst=${dst_base}.lst") && options+=('--lstlab')
     ## built it with sjasmplus (remember exit code)
     echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
     totalChecks=$((totalChecks + 1))    # assembling is one check
@@ -81,8 +85,8 @@ for f in "${TEST_FILES[@]}"; do
     last_result_origin="sjasmplus"
     ## validate results
     # LST file overrides assembling exit code (new exit code is from diff between lst files)
-    if [[ -s "${src_base}.lst" ]]; then
-        diff --strip-trailing-cr "${src_base}.lst" "${dst_base}.lst"
+    if [[ -s "${LIST_FILE}" ]]; then
+        diff --strip-trailing-cr "${LIST_FILE}" "${dst_base}.lst"
         last_result=$?
         last_result_origin="diff"
     fi
@@ -95,11 +99,11 @@ for f in "${TEST_FILES[@]}"; do
     fi
     # check binary results, if TAP or BIN are present in source directory
     for binext in {'tap','bin'}; do
-        if [[ -f "${src_base}.${binext}" ]]; then
+        if [[ -f "${CFG_BASE}.${binext}" ]]; then
             upExt=`echo $binext | tr '[:lower:]' '[:upper:]'`
             totalChecks=$((totalChecks + 1))        # +1 for each binary check
             echo -n -e "\033[91m"
-            ! diff "${src_base}.${binext}" "${dst_base}.${binext}" \
+            ! diff "${CFG_BASE}.${binext}" "${dst_base}.${binext}" \
                 && exitCode=$((exitCode + 1)) \
                 || echo -e "\033[92mOK: $upExt is identical\033[0m"
             echo -n -e "\033[0m"

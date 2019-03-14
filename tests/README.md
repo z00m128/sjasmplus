@@ -6,7 +6,7 @@ Add `some.asm` file somewhere into `tests/` directory, and watch it being assemb
 
 ## But I want to have some ".asm" include file along it
 
-Before the test is assembled, files are copied into temporary build directory. **Only** files with name "`some*.(asm|lua)`" from the directory of `some.asm` and sub-directories with name "`some*`" (with all files inside) are copied into temporary build directory. You can include any such file (keep paths relative to the position of `some.asm`).
+Before the test is assembled, files are copied into temporary build directory. **Only** files with name "`some*.(asm|lua)`" from the directory of `some.asm` and sub-directories with name "`some*`" (with all files inside) (except `some.config` directory) are copied into temporary build directory. You can include any such file (keep paths relative to the position of `some.asm`).
 
 But to avoid such helper files being assembled separately (mistaken for other test), use "`.i.asm`" extension (or other extension which does not end with "`.asm`").
 
@@ -38,6 +38,10 @@ Make sure the basename of binary files are identical with asm file basename (onl
 Well, ok? Go ahead.
 
 (In sanity without space insanity happens)
+
+## There's too much clutter around the original `some.asm` file
+
+If you add directory with `some.config` name, you can move `some.options`, `some.lst`, `some.tap` and `some.bin` files into it (this directory content is not copied into temporary build directory, so these files are not available to the test itself while being assembled).
 
 ## And I want to carelessly mix upper/lower case letters in file names, having different name in source and different on disk
 
