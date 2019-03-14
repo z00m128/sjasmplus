@@ -681,7 +681,7 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	*filenamebegin = 0;
 	CurrentDirectory = fullpath;
 
-	RL_Readed = 0; rlpbuf = rlbuf;
+	RL_Readed = 0; rlpbuf = rlbuf; rlcolon = false;
 	ReadBufLine(true);
 
 	fclose(FP_Input);
