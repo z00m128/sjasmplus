@@ -6,7 +6,7 @@
     DEFINE _z hl
 
     MACRO ccc varX?, varY?, varZ?
-        DUP varX?
+        DUP (varX?) & 0x03
         ld  a,varX?
         EDUP
         call .varY?_varZ?
@@ -33,7 +33,7 @@
     ret
     ld  _zzzzz,0x56AB
     xxx     ; emit macro
-    ccc 3, first, second
+    ccc 'd''d' | 0x2, first, second
     EDUP
 
     ; expected end result of following macDB usage
@@ -41,6 +41,8 @@
     ; test:
     macDB   1 + 14, "a\A\"", 'x''y', <4, 5, "!>!!!x">, '''\', "\\"
 
+    // warning on empty argument
+    ccc  13, , second
     // too few/many argument errors
     ccc  5, 6
     ccc  7, 8, 9, 10

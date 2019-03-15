@@ -7,7 +7,7 @@
  6    0000                  DEFINE _z hl
  7    0000
  8    0000                  MACRO ccc varX?, varY?, varZ?
- 9    0000 ~                    DUP varX?
+ 9    0000 ~                    DUP (varX?) & 0x03
 10    0000 ~                    ld  a,varX?
 11    0000 ~                    EDUP
 12    0000 ~                    call .varY?_varZ?
@@ -39,7 +39,7 @@
 30    000A             >        EDUP
 30    000A             >.labTest:
 30    000A             >        ccc 2, yyy, _zzzzz
-30    000A             >        DUP varX?
+30    000A             >        DUP (varX?) & 0x03
 31    000A 3E 02       >        ld  a,varX?
 31    000C 3E 02       >        ld  a,varX?
 30    000E             >        EDUP
@@ -60,67 +60,77 @@
 35    001F             >        EDUP
 35    001F             >.labTest:
 35    001F             >        ccc 2, yyy, _zzzzz
-35    001F             >        DUP varX?
+35    001F             >        DUP (varX?) & 0x03
 36    001F 3E 02       >        ld  a,varX?
 36    0021 3E 02       >        ld  a,varX?
 35    0023             >        EDUP
 35    0023 CD 26 00    >        call .varY?_varZ?
 35    0026             >.varY?_varZ?:
-36    0026             >    ccc 3, first, second
-36    0026             >        DUP varX?
-37    0026 3E 03       >        ld  a,varX?
-37    0028 3E 03       >        ld  a,varX?
-37    002A 3E 03       >        ld  a,varX?
-36    002C             >        EDUP
-36    002C CD 2F 00    >        call .varY?_varZ?
-36    002F             >.varY?_varZ?:
-33    002F C9          >    ret
-34    0030 21 AB 56    >    ld  _zzzzz,0x56AB
-35    0033             >    xxx     ; emit macro
-35    0033             >        DUP 2
-36    0033             >1:
-37    0033 21 34 12    >        ld _zzzzz,0x1234
-38    0036 18 FB       >        jr  1B
-36    0038             >1:
-37    0038 21 34 12    >        ld _zzzzz,0x1234
-38    003B 18 FB       >        jr  1B
-35    003D             >        EDUP
-35    003D             >.labTest:
-35    003D             >        ccc 2, yyy, _zzzzz
-35    003D             >        DUP varX?
+36    0026             >    ccc 'd''d' | 0x2, first, second
+36    0026             >        DUP (varX?) & 0x03
+macro_args.asm(37): warning: Bytes lost (0x642766)
+37    0026 3E 66       >        ld  a,varX?
+macro_args.asm(37): warning: Bytes lost (0x642766)
+37    0028 3E 66       >        ld  a,varX?
+36    002A             >        EDUP
+36    002A CD 2D 00    >        call .varY?_varZ?
+36    002D             >.varY?_varZ?:
+33    002D C9          >    ret
+34    002E 21 AB 56    >    ld  _zzzzz,0x56AB
+35    0031             >    xxx     ; emit macro
+35    0031             >        DUP 2
+36    0031             >1:
+37    0031 21 34 12    >        ld _zzzzz,0x1234
+38    0034 18 FB       >        jr  1B
+36    0036             >1:
+37    0036 21 34 12    >        ld _zzzzz,0x1234
+38    0039 18 FB       >        jr  1B
+35    003B             >        EDUP
+35    003B             >.labTest:
+35    003B             >        ccc 2, yyy, _zzzzz
+35    003B             >        DUP (varX?) & 0x03
+36    003B 3E 02       >        ld  a,varX?
 36    003D 3E 02       >        ld  a,varX?
-36    003F 3E 02       >        ld  a,varX?
-35    0041             >        EDUP
-35    0041 CD 44 00    >        call .varY?_varZ?
-35    0044             >.varY?_varZ?:
-36    0044             >    ccc 3, first, second
-36    0044             >        DUP varX?
-37    0044 3E 03       >        ld  a,varX?
-37    0046 3E 03       >        ld  a,varX?
-37    0048 3E 03       >        ld  a,varX?
-36    004A             >        EDUP
-36    004A CD 4D 00    >        call .varY?_varZ?
-36    004D             >.varY?_varZ?:
-37    004D                  EDUP
-38    004D
-39    004D                  ; expected end result of following macDB usage
-40    004D 0F 61 07 22      db      1 + 14, "a\A\"", 'x''y', 4, 5, ">!!x", '''\', "\\"
-40    0051 78 27 79 04
-40    0055 05 3E 21 21
-40    0059 78 27 5C 5C
-41    005D                  ; test:
-42    005D                  macDB   1 + 14, "a\A\"", 'x''y', <4, 5, "!>!!!x">, '''\', "\\"
-42    005D 0F 61 07 22 >        db a1?, a2?, a3?, a4?, a5?, a6?
-42    0061 78 27 79 04 >
-42    0065 05 3E 21 21 >
-42    0069 78 27 5C 5C >
-43    006D
-44    006D                  // too few/many argument errors
-macro_args.asm(45): error: Not enough arguments for macro: ccc
-45    006D                  ccc  5, 6
-macro_args.asm(46): error: Too many arguments for macro: ccc
-46    006D                  ccc  7, 8, 9, 10
-47    006D
+35    003F             >        EDUP
+35    003F CD 42 00    >        call .varY?_varZ?
+35    0042             >.varY?_varZ?:
+36    0042             >    ccc 'd''d' | 0x2, first, second
+36    0042             >        DUP (varX?) & 0x03
+macro_args.asm(37): warning: Bytes lost (0x642766)
+37    0042 3E 66       >        ld  a,varX?
+macro_args.asm(37): warning: Bytes lost (0x642766)
+37    0044 3E 66       >        ld  a,varX?
+36    0046             >        EDUP
+36    0046 CD 49 00    >        call .varY?_varZ?
+36    0049             >.varY?_varZ?:
+37    0049                  EDUP
+38    0049
+39    0049                  ; expected end result of following macDB usage
+40    0049 0F 61 07 22      db      1 + 14, "a\A\"", 'x''y', 4, 5, ">!!x", '''\', "\\"
+40    004D 78 27 79 04
+40    0051 05 3E 21 21
+40    0055 78 27 5C 5C
+41    0059                  ; test:
+42    0059                  macDB   1 + 14, "a\A\"", 'x''y', <4, 5, "!>!!!x">, '''\', "\\"
+42    0059 0F 61 07 22 >        db a1?, a2?, a3?, a4?, a5?, a6?
+42    005D 78 27 79 04 >
+42    0061 05 3E 21 21 >
+42    0065 78 27 5C 5C >
+43    0069
+44    0069                  // warning on empty argument
+macro_args.asm(45): warning: [Macro argument parser] empty value: , second
+45    0069                  ccc  13, , second
+45    0069             >        DUP (varX?) & 0x03
+46    0069 3E 0D       >        ld  a,varX?
+45    006B             >        EDUP
+45    006B CD 6E 00    >        call .varY?_varZ?
+45    006E             >.varY?_varZ?:
+46    006E                  // too few/many argument errors
+macro_args.asm(47): error: Not enough arguments for macro: ccc
+47    006E                  ccc  5, 6
+macro_args.asm(48): error: Too many arguments for macro: ccc
+48    006E                  ccc  7, 8, 9, 10
+49    006E
 # file closed: macro_args.asm
 
 Value    Label
@@ -129,7 +139,8 @@ Value    Label
 0x0011   1.0>yyy_hl
 0x001F X 2>labTest
 0x0026   3.2>yyy_hl
-0x002F   4>first_second
-0x003D X 5>labTest
-0x0044   6.5>yyy_hl
-0x004D   7>first_second
+0x002D   4>first_second
+0x003B X 5>labTest
+0x0042   6.5>yyy_hl
+0x0049   7>first_second
+0x006E   9>_second
