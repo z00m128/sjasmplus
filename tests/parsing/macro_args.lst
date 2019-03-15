@@ -1,0 +1,135 @@
+# file opened: macro_args.asm
+ 1    0000                  ;; defines to require multi define-substitution
+ 2    0000                  DEFINE _zzzzz _zzzz
+ 3    0000                  DEFINE _zzzz _zzz
+ 4    0000                  DEFINE _zzz _zz
+ 5    0000                  DEFINE _zz _z
+ 6    0000                  DEFINE _z hl
+ 7    0000
+ 8    0000                  MACRO ccc varX?, varY?, varZ?
+ 9    0000 ~                    DUP varX?
+10    0000 ~                    ld  a,varX?
+11    0000 ~                    EDUP
+12    0000 ~                    call .varY?_varZ?
+13    0000 ~            .varY?_varZ?:
+14    0000                  ENDM
+15    0000
+16    0000                  MACRO xxx
+17    0000 ~                    DUP 2
+18    0000 ~            1:
+19    0000 ~                    ld _zzzzz,0x1234
+20    0000 ~                    jr  1B
+21    0000 ~                    EDUP
+22    0000 ~            .labTest:
+23    0000 ~                    ccc 2, yyy, _zzzzz
+24    0000                  ENDM
+25    0000
+26    0000                  MACRO macDB a1?, a2?, a3?, a4?, a5?, a6?
+27    0000 ~                    db a1?, a2?, a3?, a4?, a5?, a6?
+28    0000                  ENDM
+29    0000
+30    0000                  xxx
+30    0000             >        DUP 2
+31    0000             >1:
+32    0000 21 34 12    >        ld _zzzzz,0x1234
+33    0003 18 FB       >        jr  1B
+31    0005             >1:
+32    0005 21 34 12    >        ld _zzzzz,0x1234
+33    0008 18 FB       >        jr  1B
+30    000A             >        EDUP
+30    000A             >.labTest:
+30    000A             >        ccc 2, yyy, _zzzzz
+30    000A             >        DUP varX?
+31    000A 3E 02       >        ld  a,varX?
+31    000C 3E 02       >        ld  a,varX?
+30    000E             >        EDUP
+30    000E CD 11 00    >        call .varY?_varZ?
+30    0011             >.varY?_varZ?:
+31    0011
+32    0011                  DUP 2
+33    0011 C9          >    ret
+34    0012 21 AB 56    >    ld  _zzzzz,0x56AB
+35    0015             >    xxx     ; emit macro
+35    0015             >        DUP 2
+36    0015             >1:
+37    0015 21 34 12    >        ld _zzzzz,0x1234
+38    0018 18 FB       >        jr  1B
+36    001A             >1:
+37    001A 21 34 12    >        ld _zzzzz,0x1234
+38    001D 18 FB       >        jr  1B
+35    001F             >        EDUP
+35    001F             >.labTest:
+35    001F             >        ccc 2, yyy, _zzzzz
+35    001F             >        DUP varX?
+36    001F 3E 02       >        ld  a,varX?
+36    0021 3E 02       >        ld  a,varX?
+35    0023             >        EDUP
+35    0023 CD 26 00    >        call .varY?_varZ?
+35    0026             >.varY?_varZ?:
+36    0026             >    ccc 3, first, second
+36    0026             >        DUP varX?
+37    0026 3E 03       >        ld  a,varX?
+37    0028 3E 03       >        ld  a,varX?
+37    002A 3E 03       >        ld  a,varX?
+36    002C             >        EDUP
+36    002C CD 2F 00    >        call .varY?_varZ?
+36    002F             >.varY?_varZ?:
+33    002F C9          >    ret
+34    0030 21 AB 56    >    ld  _zzzzz,0x56AB
+35    0033             >    xxx     ; emit macro
+35    0033             >        DUP 2
+36    0033             >1:
+37    0033 21 34 12    >        ld _zzzzz,0x1234
+38    0036 18 FB       >        jr  1B
+36    0038             >1:
+37    0038 21 34 12    >        ld _zzzzz,0x1234
+38    003B 18 FB       >        jr  1B
+35    003D             >        EDUP
+35    003D             >.labTest:
+35    003D             >        ccc 2, yyy, _zzzzz
+35    003D             >        DUP varX?
+36    003D 3E 02       >        ld  a,varX?
+36    003F 3E 02       >        ld  a,varX?
+35    0041             >        EDUP
+35    0041 CD 44 00    >        call .varY?_varZ?
+35    0044             >.varY?_varZ?:
+36    0044             >    ccc 3, first, second
+36    0044             >        DUP varX?
+37    0044 3E 03       >        ld  a,varX?
+37    0046 3E 03       >        ld  a,varX?
+37    0048 3E 03       >        ld  a,varX?
+36    004A             >        EDUP
+36    004A CD 4D 00    >        call .varY?_varZ?
+36    004D             >.varY?_varZ?:
+37    004D                  EDUP
+38    004D
+39    004D                  ; expected end result of following macDB usage
+40    004D 0F 61 07 22      db      1 + 14, "a\A\"", 'x''y', 4, 5, ">!!x", '''\', "\\"
+40    0051 78 27 79 04
+40    0055 05 3E 21 21
+40    0059 78 27 5C 5C
+41    005D                  ; test:
+42    005D                  macDB   1 + 14, "a\A\"", 'x''y', <4, 5, "!>!!!x">, '''\', "\\"
+42    005D 0F 61 07 22 >        db a1?, a2?, a3?, a4?, a5?, a6?
+42    0061 78 27 79 04 >
+42    0065 05 3E 21 21 >
+42    0069 78 27 5C 5C >
+43    006D
+44    006D                  // too few/many argument errors
+macro_args.asm(45): error: Not enough arguments for macro: ccc
+45    006D                  ccc  5, 6
+macro_args.asm(46): error: Too many arguments for macro: ccc
+46    006D                  ccc  7, 8, 9, 10
+47    006D
+# file closed: macro_args.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x000A X 0>labTest
+0x0011   1.0>yyy_hl
+0x001F X 2>labTest
+0x0026   3.2>yyy_hl
+0x002F   4>first_second
+0x003D X 5>labTest
+0x0044   6.5>yyy_hl
+0x004D   7>first_second
