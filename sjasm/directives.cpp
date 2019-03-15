@@ -1225,7 +1225,7 @@ static void dirIfInternal(const char* dirName, aint val) {
 	EReturn ret = END;
 	int elseCounter = 0;
 	while (ENDIF != ret) {
-		switch (ret = val ? ReadFile(lp, errorsTxt[0]) : SkipFile(lp, errorsTxt[0])) {
+		switch (ret = val ? ReadFile() : SkipFile()) {
 			case ELSE:
 				if (elseCounter++) Warning(errorsTxt[1]);
 				val = !val;

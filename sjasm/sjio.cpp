@@ -1318,103 +1318,55 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	return 1;
 }
 
-EReturn ReadFile(const char* pp, const char* err) {
-	char* p;
-	while (lijst || ReadBufData()) {
-		if (!IsRunning) {
-			return END;
-		}
+EReturn ReadFile() {
+	while (IsRunning && (lijst || ReadLine())) {
 		if (lijst) {
-			if (!lijstp) {
-				return END;
-			}
+			if (!lijstp) return END;
 			STRCPY(line, LINEMAX, lijstp->string);
-			p = line;
 			lijstp = lijstp->next;
-		} else {
-			ReadBufLine(false);
-			p = line;
-			//_COUT "RF:" _CMDL rlcolon _CMDL line _ENDL;
 		}
-
+		char* p = line;
 		SkipBlanks(p);
-		if (*p == '.') {
-			++p;
-		}
+		if ('.' == *p) ++p;
 		if (cmphstr(p, "endif")) {
-			lp = ReplaceDefine(p); return ENDIF;
+			lp = ReplaceDefine(p);
+			return ENDIF;
+		} else if (cmphstr(p, "else")) {
+			ListFile();
+			lp = ReplaceDefine(p);
+			return ELSE;
+		} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
+			lp = ReplaceDefine(p);
+			return ENDTEXTAREA;
 		}
-		if (cmphstr(p, "else")) {
-			ListFile(); lp = ReplaceDefine(p); return ELSE;
-		}
-		if (cmphstr(p, "endt")) {
-			lp = ReplaceDefine(p); return ENDTEXTAREA;
-		}
-		if (cmphstr(p, "dephase")) {
-			lp = ReplaceDefine(p); return ENDTEXTAREA;
-		} // hmm??
-		if (cmphstr(p, "unphase")) {
-			lp = ReplaceDefine(p); return ENDTEXTAREA;
-		} // hmm??
 		ParseLineSafe();
 	}
-	Error("Unexpected end of file", NULL, FATAL);
 	return END;
 }
 
 
-EReturn SkipFile(char* pp, const char* err) {
-	char* p;
+EReturn SkipFile() {
 	int iflevel = 0;
-	while (lijst || ReadBufData()) {
-		if (!IsRunning) {
-			return END;
-		}
+	while (IsRunning && (lijst || ReadLine())) {
 		if (lijst) {
-			if (!lijstp) {
-				return END;
-			}
+			if (!lijstp) return END;
 			STRCPY(line, LINEMAX, lijstp->string);
-			p = line;
 			lijstp = lijstp->next;
-		} else {
-			ReadBufLine(false);
-			p = line;
-			//_COUT "SF:" _CMDL rlcolon _CMDL line _ENDL;
 		}
+		char* p = line;
 		SkipBlanks(p);
-		if (*p == '.') {
-			++p;
-		}
-		if (cmphstr(p, "if")) {
+		if ('.' == *p) ++p;
+		if (cmphstr(p, "if") || cmphstr(p, "ifn") || cmphstr(p, "ifused") ||
+			cmphstr(p, "ifnused") || cmphstr(p, "ifdef") || cmphstr(p, "ifndef")) {
 			++iflevel;
-		}
-		if (cmphstr(p, "ifn")) {
-			++iflevel;
-		}
-		if (cmphstr(p, "ifused")) {
-			++iflevel;
-		}
-		if (cmphstr(p, "ifnused")) {
-			++iflevel;
-		}
-		//if (cmphstr(p,"ifexist")) { ++iflevel; }
-		//if (cmphstr(p,"ifnexist")) { ++iflevel; }
-		if (cmphstr(p, "ifdef")) {
-			++iflevel;
-		}
-		if (cmphstr(p, "ifndef")) {
-			++iflevel;
-		}
-		if (cmphstr(p, "endif")) {
+		} else if (cmphstr(p, "endif")) {
 			if (iflevel) {
 				--iflevel;
 			} else {
 				lp = ReplaceDefine(p);
 				return ENDIF;
 			}
-		}
-		if (cmphstr(p, "else")) {
+		} else if (cmphstr(p, "else")) {
 			if (!iflevel) {
 				ListFile();
 				lp = ReplaceDefine(p);
@@ -1423,7 +1375,6 @@ EReturn SkipFile(char* pp, const char* err) {
 		}
 		ListFile(true);
 	}
-	Error("Unexpected end of file", NULL, FATAL);
 	return END;
 }
 
@@ -1434,36 +1385,20 @@ int ReadLine(bool SplitByColon) {
 }
 
 int ReadFileToCStringsList(CStringsList*& f, const char* end) {
-	CStringsList* s,* l = NULL;
-	char* p;
-	f = NULL;
-	while (ReadBufData()) {
-		if (!IsRunning) {
-			return 0;
+	// f itself should be already NULL, not resetting it here
+	CStringsList** s = &f;
+	while (ReadLine(true)) {
+		char* p = line;
+		SkipBlanks(p);
+		if ('.' == *p) ++p;
+		if (cmphstr(p, end)) {
+			lp = ReplaceDefine(p);
+			return 1;
 		}
-		ReadBufLine(false);
-		p = line;
-
-		if (*p) {
-			SkipBlanks(p);
-			if (*p == '.') {
-				++p;
-			}
-			if (cmphstr(p, end)) {
-				lp = ReplaceDefine(p);
-				return 1;
-			}
-		}
-		s = new CStringsList(line, NULL);
-		if (!f) {
-			f = s;
-		} if (l) {
-			l->next = s;
-		}
-		l = s;
+		*s = new CStringsList(line, NULL);
+		s = &((*s)->next);
 		ListFile(true);
 	}
-	Error("Unexpected end of file", NULL, FATAL);
 	return 0;
 }
 
