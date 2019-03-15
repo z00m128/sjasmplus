@@ -1084,8 +1084,8 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	CStringsList* a = m->args;
 	while (a) {
 		char* n = ml;
-		bool lastArg = NULL == a->next;
-		if (!GetMacroArgumentValue(p, n, lastArg) || (!lastArg && !comma(p))) {
+		const bool lastArg = NULL == a->next;
+		if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
 			Error("Not enough arguments for macro", naam, SUPPRESS);
 			macrolabp = 0;
 			return 1;

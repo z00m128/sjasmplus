@@ -584,6 +584,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	aint val;
 	int t = 0;
 	do {
+		const char* const elementP = p;
 		SkipBlanks(p);
 		if (!*p) {
 			Error("Expression expected", NULL, SUPPRESS);
@@ -594,7 +595,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 				e[t++] = (val + add) & 255;
 			}
 			if ((quotes ? '"' : '\'') != *p) {	// too many/invalid arguments or zero-terminator can lead to this
-				if (!*p) Error("Syntax error", p, SUPPRESS);
+				if (!*p) Error("Syntax error", elementP, SUPPRESS);
 				break;
 			}
 			++p;
@@ -837,53 +838,56 @@ int GetArray(char*& p, int e[], int add, int dc) {
 	e[t] = -1; return t;
 }
 
-int GetMacroArgumentValue(char* & src, char* & dst, bool lastArg) {
+int GetMacroArgumentValue(char* & src, char* & dst) {
 	SkipBlanks(src);
-	if (!*src) return 0;
-
-	int delI = DT_COUNT;
-	while (--delI && (delimiters_b[delI] != *src)) ;
-	if (delI) {
+	const char* const dstOrig = dst, * const srcOrig = src;
+	while (*src && ',' != *src) {
+		// check if there is some kind of delimiter next (string literal or angle brackets expression)
+		int delI = DT_COUNT;
+		while (--delI && (delimiters_b[delI] != *src)) ;
+		if (!delI) {				// no delimiter found, ordinary expression, copy char by char
+			*dst++ = *src++;
+			continue;
+		}
+		// some delimiter found - parse those properly by their type
 		if (DT_ANGLE != delI) *dst++ = *src;	// quotes are part of parsed value, angles are NOT
 		++src;									// advance over delimiter
-	}
-	const char endCh = delI ? delimiters_e[delI] : ',';	// set expected ending delimiter
-
-	while (*src) {
-		// handle escape sequences by the type of delimiter
-		switch (delI) {
-		case DT_ANGLE:
-			if (('!' == *src && '!' == src[1]) || ('!' == *src && '>' == src[1])) {
-				*dst++ = src[1]; src += 2;				// escape sequence is converted into final char
-				continue;
+		const char endCh = delimiters_e[delI];	// set expected ending delimiter
+		while (*src) {
+			// handle escape sequences by the type of delimiter
+			switch (delI) {
+			case DT_ANGLE:
+				if (('!' == *src && '!' == src[1]) || ('!' == *src && '>' == src[1])) {
+					*dst++ = src[1]; src += 2;	// escape sequence is converted into final char
+					continue;
+				}
+				break;
+			case DT_QUOTES:
+				if ('\\' == *src && src[1]) {
+					*dst++ = *src++;	*dst++ = *src++;
+					continue;					// copy escape + escaped char (*any* non zero char)
+				}
+				break;
+			case DT_APOSTROPHE:
+				if ('\'' == *src && '\'' == src[1]) {
+					*dst++ = *src++;	*dst++ = *src++;
+					continue;					// copy two apostrophes (escaped apostrophe)
+				}
+				break;
 			}
-			break;
-		case DT_QUOTES:
-			if ('\\' == *src && src[1]) {
-				*dst++ = *src++;	*dst++ = *src++;	// copy escape + escaped char (*any* non zero char)
-				continue;
-			}
-			break;
-		case DT_APOSTROPHE:
-			if ('\'' == *src && '\'' == src[1]) {
-				*dst++ = *src++;	*dst++ = *src++;	// copy two apostrophes (escaped apostrophe)
-				continue;
-			}
-			break;
-		default:
-			break;
+			if (endCh == *src) break;			// ending delimiter found
+			*dst++ = *src++;					// just copy character
 		}
-		if (endCh == *src) break;				// ending delimiter found
-		*dst++ = *src++;						// just copy character
+		// ending delimiter must be identical to endCh
+		if (endCh != *src) return 0;
+		// set ending delimiter for quotes and apostrophe (angles are stripped from value)
+		if (DT_QUOTES == delI || DT_APOSTROPHE == delI) *dst++ = endCh;
+		++src;									// advance over delimiter
 	}
-
-	// ending delimiter must be identical to endCh, except last argument may end with \0 in DT_NONE
-	if (endCh != *src && delI != DT_NONE && !lastArg) return 0;
-	// set ending delimiter for quotes and apostrophe (angles and commas are stripped from value)
-	if (DT_QUOTES == delI || DT_APOSTROPHE == delI) *dst++ = endCh;
-	if (delI) ++src;							// advance over delimiter (except DT_NONE=comma)
 	*dst = 0;									// zero terminator of resulting string value
-	return 1;
+	int returnValue = *dstOrig || ',' == *src;	// return 1 if value is not empty or comma follows
+	if (!*dstOrig && returnValue) Warning("[Macro argument parser] empty value", srcOrig);
+	return (returnValue);		// but empty value will at least display warning
 }
 
 //eof reader.cpp

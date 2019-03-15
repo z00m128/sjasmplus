@@ -1838,58 +1838,27 @@ void dirENDM() {
 }
 
 void dirDEFARRAY() {
-	char* n;
 	char* id;
-	char ml[LINEMAX];
-	CStringsList* a;
-	CStringsList* f;
-
 	if (!(id = GetID(lp))) {
 		Error("[DEFARRAY] Syntax error"); return;
 	}
-	SkipBlanks(lp);
-	if (!*lp) {
-		Error("DEFARRAY must have less one entry"); return;
+	CStringsList* a = NULL;
+	CStringsList** f = &a;
+	char ml[LINEMAX];
+	while (!SkipBlanks()) {
+		const char* const itemLp = lp;
+		char* n = ml;
+		if (!GetMacroArgumentValue(lp, n)) {
+			Error("[DEFARRAY] Syntax error", itemLp);
+			return;
+		}
+		*f = new CStringsList(STRDUP(ml), NULL);
+		if ((*f)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
+		f = &((*f)->next);
+		if (!comma(lp)) break;
 	}
-
-	a = new CStringsList();
-	f = a;
-	while (*lp) {
-		n = ml;
-		SkipBlanks(lp);
-		if (*lp == '<') {
-			++lp;
-			while (*lp != '>') {
-				if (!*lp) {
-					Error("[DEFARRAY] No closing bracket - <..>"); return;
-				}
-				if (*lp == '!') {
-					++lp; if (!*lp) {
-						  	Error("[DEFARRAY] No closing bracket - <..>"); return;
-						  }
-				}
-				*n = *lp; ++n; ++lp;
-			}
-			++lp;
-		} else {
-			while (*lp && *lp != ',') {
-				*n = *lp; ++n; ++lp;
-			}
-		}
-		*n = 0;
-		//_COUT a->string _ENDL;
-		f->string = STRDUP(ml);
-		if (f->string == NULL) {
-			Error("[DEFARRAY] No enough memory", NULL, FATAL);
-		}
-		SkipBlanks(lp);
-		if (*lp == ',') {
-			++lp;
-		} else {
-			break;
-		}
-		f->next = new CStringsList();
-		f = f->next;
+	if (NULL == a) {
+		Error("DEFARRAY must have at least one entry"); return;
 	}
 	DefineTable.Add(id, (char *)"\n", a);
 	//while (a) { STRCPY(ml,a->string); _COUT ml _ENDL; a=a->next; }
