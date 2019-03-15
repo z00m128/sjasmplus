@@ -1064,24 +1064,14 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 }
 
 int CMacroTable::Emit(char* naam, char*& p) {
-	CStringsList* a, * olijstp;
-	char* n, labnr[LINEMAX], ml[LINEMAX], * omacrolabp;
+	// search for the desired macro
+	if (!used[(unsigned char)*naam]) return 0;
 	CMacroTableEntry* m = macs;
-	CDefineTableEntry* odefs;
-	int olistmacro, olijst;
-	if (!used[(unsigned char)*naam]) {
-		return 0;
-	}
-	while (m) {
-		if (!strcmp(naam, m->naam)) {
-			break;
-		}
-		m = m->next;
-	}
-	if (!m) {
-		return 0;
-	}
-	omacrolabp = macrolabp;
+	while (m && strcmp(naam, m->naam)) m = m->next;
+	if (!m) return 0;
+	// macro found, emit it, prepare temporary instance label base
+	char* omacrolabp = macrolabp;
+	char labnr[LINEMAX], ml[LINEMAX];
 	SPRINTF1(labnr, LINEMAX, "%d", macronummer++);
 	macrolabp = labnr;
 	if (omacrolabp) {
@@ -1089,90 +1079,31 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	} else {
 		MacroDefineTable.Init();
 	}
-	odefs = MacroDefineTable.getdefs();
-	//*lp=0;
-	a = m->args;
-	/* old:
+	// parse argument values
+	CDefineTableEntry* odefs = MacroDefineTable.getdefs();
+	CStringsList* a = m->args;
 	while (a) {
-	  n=ml;
-	  SkipBlanks(p);
-	  if (!*p) { Error("Not enough arguments",0); return 1; }
-	  if (*p=='<') {
-		++p;
-		while (*p!='>') {
-		  if (!*p) { Error("Not enough arguments",0); return 1; }
-		  if (*p=='!') {
-			++p; if (!*p) { Error("Not enough arguments",0); return 1; }
-		  }
-		  *n=*p; ++n; ++p;
+		char* n = ml;
+		bool lastArg = NULL == a->next;
+		if (!GetMacroArgumentValue(p, n, lastArg) || (!lastArg && !comma(p))) {
+			Error("Not enough arguments for macro", naam, SUPPRESS);
+			macrolabp = 0;
+			return 1;
 		}
-		++p;
-	  } else while (*p!=',' && *p) { *n=*p; ++n; ++p; }
-	  *n=0; MacroDefineTable.AddMacro(a->string,ml);
-	  SkipBlanks(p); a=a->next; if (a && *p!=',') { Error("Not enough arguments",0); return 1; }
-	  if (*p==',') ++p;
-	}
-	SkipBlanks(p); if (*p) Error("Too many arguments",0);
-	*/
-	while (a) {
-		n = ml;
-		SkipBlanks(p);
-		if (!*p) {
-			Error("Not enough arguments for macro", naam); macrolabp = 0; return 1;
-		}
-		if (*p == '<') {
-			++p;
-			while (*p != '>') {
-				if (!*p) {
-					Error("Not enough arguments for macro", naam); macrolabp = 0; return 1;
-				}
-				if (*p == '!') {
-					++p; if (!*p) {
-						 	Error("Not enough arguments for macro", naam); macrolabp = 0; return 1;
-						 }
-				}
-				*n = *p; ++n; ++p;
-			}
-			++p;
-		} else if(*p == '"') {
-            *n = *p; ++n; ++p;
-            while(*p && *p != '"') {
-                *n = *p; ++n; ++p;
-            }
-            if(*p) {
-                *n = *p; ++n; ++p;
-            }
-		} else if(*p == '\'') {		//FIXME check parsing (probably "\"" will derail it
-		    *n = *p; ++n; ++p;
-            while(*p && *p != '\'') {
-                *n = *p; ++n; ++p;
-            }
-            if(*p) {
-                *n = *p; ++n; ++p;
-            }
-        } else {
-			while (*p && *p != ',') {
-				*n = *p; ++n; ++p;
-			}
-		}
-		*n = 0;
 		MacroDefineTable.AddMacro(a->string, ml);
-		SkipBlanks(p); a = a->next;
-		if (a && *p != ',') {
-			Error("Not enough arguments for macro", naam); macrolabp = 0; return 1;
-		}
-		if (*p == ',') {
-			++p;
-		}
+		a = a->next;
 	}
 	SkipBlanks(p);
-	lp = p;
 	if (*p) {
-		Error("Too many arguments for macro", naam);
+		Error("Too many arguments for macro", naam, SUPPRESS);
+		macrolabp = 0;
+		return 1;
 	}
+	// arguments parsed, emit the macro lines and parse them
+	lp = p;
 	ListFile();
-	olistmacro = listmacro; listmacro = 1;
-	olijstp = lijstp; olijst = lijst;
+	int olistmacro = listmacro; listmacro = 1;
+	CStringsList* olijstp = lijstp; int olijst = lijst;
 	lijstp = m->body; lijst = 1;
 	STRCPY(ml, LINEMAX, line);
 	while (lijstp) {
@@ -1187,7 +1118,6 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	lijstp = olijstp;
 	MacroDefineTable.setdefs(odefs);
 	macrolabp = omacrolabp;
-	/*listmacro=olistmacro; donotlist=1; return 0;*/
 	listmacro = olistmacro; donotlist = 1; return 2;
 }
 

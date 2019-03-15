@@ -757,10 +757,6 @@ static bool ReadBufData() {
 	return (rlpbuf < rlpbuf_end);			// return true if some data were read
 }
 
-static void RBL_copyTillEol() {		// helper for EOL comments, nothing can intercept those
-	while (ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf) *rlppos++ = *rlpbuf++;
-}
-
 void ReadBufLine(bool Parse, bool SplitByColon) {
 	// if everything else fails (no data, not running, etc), return empty line
 	*line = 0;
@@ -812,7 +808,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			// not in label any more, check for EOL comments ";" or "//"
 			if ((';' == *rlppos) || ('/' == *rlppos && ReadBufData() && '/' == *rlpbuf)) {
 				++rlppos;					// EOL comment ";"
-				RBL_copyTillEol();
+				while (ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf) *rlppos++ = *rlpbuf++;
 				continue;
 			}
 			// check for string literals - double/single quotes

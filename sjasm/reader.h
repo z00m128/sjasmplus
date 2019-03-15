@@ -68,4 +68,5 @@ int needcomma(char*& p);
 int needbparen(char*& p);
 int islabchar(char p);
 EStructureMembers GetStructMemberId(char*& p);
+int GetMacroArgumentValue(char* & src, char* & dst, bool lastArg);
 
