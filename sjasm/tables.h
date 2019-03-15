@@ -125,13 +125,17 @@ class CStringsList {
 public:
 	char* string;
 	CStringsList* next;
+	int sourceLine;
 	CStringsList() {
-		next = 0;
+		string = NULL;
+		next = NULL;
+		sourceLine = 0;
 	}
 	~CStringsList() {
+		if (string) free(string);
 		if (next) delete next;
 	}
-	CStringsList(char*, CStringsList*);
+	CStringsList(const char* stringSource, CStringsList* next = NULL);
 };
 
 class CDefineTableEntry {
@@ -266,9 +270,7 @@ private:
 
 struct SRepeatStack {
 	int RepeatCount;
-	long CurrentGlobalLine;
-	long CurrentLocalLine;
-	long CurrentLine;
+	long CurrentSourceLine;
 	CStringsList* Lines;
 	CStringsList* Pointer;
 	bool IsInWork;
@@ -276,9 +278,7 @@ struct SRepeatStack {
 };
 
 struct SConditionalStack {
-	long CurrentGlobalLine;
-	long CurrentLocalLine;
-	long CurrentLine;
+	long CurrentSourceLine;
 	CStringsList* Lines;
 	CStringsList* Pointer;
 	bool IsInWork;

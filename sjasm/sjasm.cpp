@@ -92,7 +92,7 @@ namespace Options {
 	bool IsNextEnabled = false;
 
 	// Include directories list is initialized with "." directory
-	CStringsList* IncludeDirsList = new CStringsList((char *)".", NULL);
+	CStringsList* IncludeDirsList = new CStringsList((char *)".");
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
 } // eof namespace Options
@@ -122,7 +122,7 @@ char* MemoryRAM=NULL, * MemoryPointer=NULL;
 int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;
 aint MemorySize = 0;
 int macronummer = 0, lijst = 0, reglenwidth = 0, synerr = 1;
-aint CurAddress = 0, AddressOfMAP = 0, CurrentGlobalLine = 0, CurrentLocalLine = 0, CompiledCurrentLine = 0;
+aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
 aint destlen = 0, size = (aint)-1,PreviousErrorLine = (aint)-1, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
@@ -170,7 +170,7 @@ void InitPass() {
 	macrolabp = NULL;
 	listmacro = 0;
 	CurAddress = AddressOfMAP = 0;
-	CurrentGlobalLine = CurrentLocalLine = CompiledCurrentLine = 0;
+	CurrentSourceLine = CompiledCurrentLine = 0;
 	PseudoORG = 0; adrdisp = 0;
 	PreviousAddress = 0; epadres = 0; macronummer = 0; lijst = 0; comlin = 0;
 	ModuleList = NULL;

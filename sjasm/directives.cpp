@@ -1774,11 +1774,10 @@ void dirDUP() {
 	dup.RepeatCount = val;
 	dup.Level = 0;
 
-	dup.Lines = new CStringsList(lp, NULL);
+	dup.Lines = new CStringsList(lp);
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
 	dup.Pointer = dup.Lines;
-	dup.CurrentGlobalLine = CurrentGlobalLine;
-	dup.CurrentLocalLine = CurrentLocalLine;
+	dup.CurrentSourceLine = CurrentSourceLine;
 	dup.IsInWork = false;
 	RepeatStack.push(dup);
 }
@@ -1795,7 +1794,6 @@ void dirEDUP() {
 		return;
 	}
 	int olistmacro;
-	long gcurln, lcurln;
 	char* ml;
 	dup.IsInWork = true;
 	dup.Pointer->string = NULL;	// kill the EDUP inside DUP-list (also works as "while" terminator)
@@ -1803,26 +1801,22 @@ void dirEDUP() {
 	listmacro = 1;
 	ml = STRDUP(line);			// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
-	gcurln = CurrentGlobalLine;
-	lcurln = CurrentLocalLine;
+	long lcurln = CurrentSourceLine;
 	while (dup.RepeatCount--) {
-		CurrentGlobalLine = dup.CurrentGlobalLine;
-		CurrentLocalLine = dup.CurrentLocalLine;
+		CurrentSourceLine = dup.CurrentSourceLine;
 		CStringsList* s = dup.Lines;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		while (s && s->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
+			if (s->sourceLine) CurrentSourceLine = s->sourceLine;
 			STRCPY(line, LINEMAX, s->string);
 			s = s->next;
 			//experimental: show end of DUP block: if (!s || !s->string) STRCAT(line, LINEMAX, ";kuk");
 			ParseLineSafe();
-			CurrentLocalLine++;
-			CurrentGlobalLine++;
-			CompiledCurrentLine++;
+			CurrentSourceLine++;
 		}
 	}
 	RepeatStack.pop();
-	CurrentGlobalLine = gcurln;
-	CurrentLocalLine = lcurln;
+	CurrentSourceLine = lcurln;
 	listmacro = olistmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	ListFile();
@@ -1852,7 +1846,7 @@ void dirDEFARRAY() {
 			Error("[DEFARRAY] Syntax error", itemLp);
 			return;
 		}
-		*f = new CStringsList(STRDUP(ml), NULL);
+		*f = new CStringsList(ml);
 		if ((*f)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
 		f = &((*f)->next);
 		if (!comma(lp)) break;
@@ -1968,7 +1962,7 @@ void dirLUA() {
 		execute = true;
 	}
 
-	ln = CurrentLocalLine;
+	ln = CurrentSourceLine;
 	ListFile();
 	while (1) {
 		if (!ReadLine(false)) {
@@ -2038,7 +2032,7 @@ void dirINCLUDELUA() {
 	if (!fullpath[0]) {
 		Error("[INCLUDELUA] File doesn't exist", fnaam, EARLY);
 	} else {
-		LuaLine = CurrentLocalLine;
+		LuaLine = CurrentSourceLine;
 		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
 			_lua_showerror();

@@ -61,20 +61,20 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	if (type == EARLY && LASTPASS <= pass) return;
 	if ((type == SUPPRESS || type == IF_FIRST || type == PASS3) && pass < LASTPASS) return;
 	// check if this one should be skipped due to type constraints and current-error-state
-	if (FATAL != type && PreviousErrorLine == CurrentLocalLine) {
+	if (FATAL != type && PreviousErrorLine == CurrentSourceLine) {
 		// non-fatal error, on the same line as previous, maybe skip?
 		if (IsSkipErrors || IF_FIRST == type) return;
 	}
 	// update current-error-state
-	if (PreviousErrorLine != CurrentLocalLine) IsSkipErrors = false;	// reset "skip" on new line
+	if (PreviousErrorLine != CurrentSourceLine) IsSkipErrors = false;	// reset "skip" on new line
 	IsSkipErrors |= (SUPPRESS == type);		// keep it holding over the same line, raise it by SUPPRESS type
 	++ErrorCount;							// number of non-skipped (!) errors
-	PreviousErrorLine = CurrentLocalLine;
+	PreviousErrorLine = CurrentSourceLine;
 
 	DefineTable.Replace("_ERRORS", ErrorCount);
 
 	if (1 <= pass && pass <= LASTPASS) {	// during assembling, show also file+line info
-		int ln = CurrentLocalLine;
+		int ln = CurrentSourceLine;
 #ifdef USE_LUA
 		if (LuaLine >= 0) {
 			lua_Debug ar;
@@ -120,7 +120,7 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 	DefineTable.Replace("_WARNINGS", WarningCount);
 
 	if (pass <= LASTPASS) {					// during assembling, show also file+line info
-		int ln = CurrentLocalLine;
+		int ln = CurrentSourceLine;
 #ifdef USE_LUA
 		if (LuaLine >= 0) {
 			lua_Debug ar;
@@ -219,29 +219,6 @@ void listbytes2(char*& p) {
 	*(p++) = ' '; *(p++) = ' ';
 }
 
-void printCurrentLocalLine(char*& p) {
-	aint v = CurrentLocalLine;
-	switch (reglenwidth) {
-	default:
-		*(p++) = (unsigned char)('0' + v / 1000000); v %= 1000000;
-	case 6:
-		*(p++) = (unsigned char)('0' + v / 100000); v %= 100000;
-	case 5:
-		*(p++) = (unsigned char)('0' + v / 10000); v %= 10000;
-	case 4:
-		*(p++) = (unsigned char)('0' + v / 1000); v %= 1000;
-	case 3:
-		*(p++) = (unsigned char)('0' + v / 100); v %= 100;
-	case 2:
-		*(p++) = (unsigned char)('0' + v / 10); v %= 10;
-	case 1:
-		*(p++) = (unsigned char)('0' + v);
-	}
-	*(p++) = IncludeLevel > 0 ? '+' : ' ';
-	*(p++) = IncludeLevel > 1 ? '+' : ' ';
-	*(p++) = IncludeLevel > 2 ? '+' : ' ';
-}
-
 void PrintHEX32(char*& p, aint h) {
 	aint hh = h&0xffffffff;
 	*(p++) = hd[hh >> 28]; hh &= 0xfffffff;
@@ -317,13 +294,13 @@ void PrepareListLine(aint hexadd)
 
 	int digit = ' ';
 	int linewidth = reglenwidth;
-	long linenumber = CurrentLocalLine % 10000;
+	long linenumber = CurrentSourceLine % 10000;
 	if (linewidth > 5)
 	{
 		linewidth = 5;
-		digit = CurrentLocalLine / 10000 + '0';
+		digit = CurrentSourceLine / 10000 + '0';
 		if (digit > '~') digit = '~';
-		if (CurrentLocalLine >= 10000) linenumber += 10000;
+		if (CurrentSourceLine >= 10000) linenumber += 10000;
 	}
 	memset(pline, ' ', 24);
 	if (listmacro) pline[23] = '>';
@@ -674,8 +651,8 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 		fputs("\n", FP_ListingFile);
 	}
 
-	aint oCurrentLocalLine = CurrentLocalLine;
-	CurrentLocalLine = 0;
+	aint oCurrentLocalLine = CurrentSourceLine;
+	CurrentSourceLine = 0;
 	STRCPY(ofilename, LINEMAX, filename);
 
 	if (Options::IsShowFullPath) {
@@ -718,10 +695,10 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	free(fullpath);
 
 	STRCPY(filename, LINEMAX, ofilename);
-	if (CurrentLocalLine > maxlin) {
-		maxlin = CurrentLocalLine;
+	if (CurrentSourceLine > maxlin) {
+		maxlin = CurrentSourceLine;
 	}
-	CurrentLocalLine = oCurrentLocalLine;
+	CurrentSourceLine = oCurrentLocalLine;
 }
 
 void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
@@ -769,9 +746,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			colonSubline = false;	// (can't happen inside block comment)
 			*(rlppos++) = ' ';
 		} else {					// starting real new line
-			++CurrentLocalLine;
-			++CurrentGlobalLine;
-			++CompiledCurrentLine;
+			++CurrentSourceLine;
 			IsLabel = (0 == blockComment);
 		}
 		// copy data from read buffer into `line` buffer until EOL/colon is found
@@ -1391,7 +1366,7 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 			lp = ReplaceDefine(p);
 			return 1;
 		}
-		*s = new CStringsList(line, NULL);
+		*s = new CStringsList(line);
 		s = &((*s)->next);
 		ListFile(true);
 	}

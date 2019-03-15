@@ -30,18 +30,18 @@
 29    0000
 30    0000                  xxx
 30    0000             >        DUP 2
-31    0000             >1:
-32    0000 21 34 12    >        ld _zzzzz,0x1234
-33    0003 18 FB       >        jr  1B
-31    0005             >1:
-32    0005 21 34 12    >        ld _zzzzz,0x1234
-33    0008 18 FB       >        jr  1B
+30    0000             >1:
+30    0000 21 34 12    >        ld _zzzzz,0x1234
+30    0003 18 FB       >        jr  1B
+30    0005             >1:
+30    0005 21 34 12    >        ld _zzzzz,0x1234
+30    0008 18 FB       >        jr  1B
 30    000A             >        EDUP
 30    000A             >.labTest:
 30    000A             >        ccc 2, yyy, _zzzzz
 30    000A             >        DUP (varX?) & 0x03
-31    000A 3E 02       >        ld  a,varX?
-31    000C 3E 02       >        ld  a,varX?
+30    000A 3E 02       >        ld  a,varX?
+30    000C 3E 02       >        ld  a,varX?
 30    000E             >        EDUP
 30    000E CD 11 00    >        call .varY?_varZ?
 30    0011             >.varY?_varZ?:
@@ -51,27 +51,27 @@
 34    0012 21 AB 56    >    ld  _zzzzz,0x56AB
 35    0015             >    xxx     ; emit macro
 35    0015             >        DUP 2
-36    0015             >1:
-37    0015 21 34 12    >        ld _zzzzz,0x1234
-38    0018 18 FB       >        jr  1B
-36    001A             >1:
-37    001A 21 34 12    >        ld _zzzzz,0x1234
-38    001D 18 FB       >        jr  1B
+35    0015             >1:
+35    0015 21 34 12    >        ld _zzzzz,0x1234
+35    0018 18 FB       >        jr  1B
+35    001A             >1:
+35    001A 21 34 12    >        ld _zzzzz,0x1234
+35    001D 18 FB       >        jr  1B
 35    001F             >        EDUP
 35    001F             >.labTest:
 35    001F             >        ccc 2, yyy, _zzzzz
 35    001F             >        DUP (varX?) & 0x03
-36    001F 3E 02       >        ld  a,varX?
-36    0021 3E 02       >        ld  a,varX?
+35    001F 3E 02       >        ld  a,varX?
+35    0021 3E 02       >        ld  a,varX?
 35    0023             >        EDUP
 35    0023 CD 26 00    >        call .varY?_varZ?
 35    0026             >.varY?_varZ?:
 36    0026             >    ccc 'd''d' | 0x2, first, second
 36    0026             >        DUP (varX?) & 0x03
-macro_args.asm(37): warning: Bytes lost (0x642766)
-37    0026 3E 66       >        ld  a,varX?
-macro_args.asm(37): warning: Bytes lost (0x642766)
-37    0028 3E 66       >        ld  a,varX?
+macro_args.asm(36): warning: Bytes lost (0x642766)
+36    0026 3E 66       >        ld  a,varX?
+macro_args.asm(36): warning: Bytes lost (0x642766)
+36    0028 3E 66       >        ld  a,varX?
 36    002A             >        EDUP
 36    002A CD 2D 00    >        call .varY?_varZ?
 36    002D             >.varY?_varZ?:
@@ -79,27 +79,27 @@ macro_args.asm(37): warning: Bytes lost (0x642766)
 34    002E 21 AB 56    >    ld  _zzzzz,0x56AB
 35    0031             >    xxx     ; emit macro
 35    0031             >        DUP 2
-36    0031             >1:
-37    0031 21 34 12    >        ld _zzzzz,0x1234
-38    0034 18 FB       >        jr  1B
-36    0036             >1:
-37    0036 21 34 12    >        ld _zzzzz,0x1234
-38    0039 18 FB       >        jr  1B
+35    0031             >1:
+35    0031 21 34 12    >        ld _zzzzz,0x1234
+35    0034 18 FB       >        jr  1B
+35    0036             >1:
+35    0036 21 34 12    >        ld _zzzzz,0x1234
+35    0039 18 FB       >        jr  1B
 35    003B             >        EDUP
 35    003B             >.labTest:
 35    003B             >        ccc 2, yyy, _zzzzz
 35    003B             >        DUP (varX?) & 0x03
-36    003B 3E 02       >        ld  a,varX?
-36    003D 3E 02       >        ld  a,varX?
+35    003B 3E 02       >        ld  a,varX?
+35    003D 3E 02       >        ld  a,varX?
 35    003F             >        EDUP
 35    003F CD 42 00    >        call .varY?_varZ?
 35    0042             >.varY?_varZ?:
 36    0042             >    ccc 'd''d' | 0x2, first, second
 36    0042             >        DUP (varX?) & 0x03
-macro_args.asm(37): warning: Bytes lost (0x642766)
-37    0042 3E 66       >        ld  a,varX?
-macro_args.asm(37): warning: Bytes lost (0x642766)
-37    0044 3E 66       >        ld  a,varX?
+macro_args.asm(36): warning: Bytes lost (0x642766)
+36    0042 3E 66       >        ld  a,varX?
+macro_args.asm(36): warning: Bytes lost (0x642766)
+36    0044 3E 66       >        ld  a,varX?
 36    0046             >        EDUP
 36    0046 CD 49 00    >        call .varY?_varZ?
 36    0049             >.varY?_varZ?:
@@ -121,7 +121,7 @@ macro_args.asm(37): warning: Bytes lost (0x642766)
 macro_args.asm(45): warning: [Macro argument parser] empty value: , second
 45    0069                  ccc  13, , second
 45    0069             >        DUP (varX?) & 0x03
-46    0069 3E 0D       >        ld  a,varX?
+45    0069 3E 0D       >        ld  a,varX?
 45    006B             >        EDUP
 45    006B CD 6E 00    >        call .varY?_varZ?
 45    006E             >.varY?_varZ?:

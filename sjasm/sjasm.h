@@ -79,7 +79,7 @@ extern char* MemoryRAM, * MemoryPointer;
 extern int MemoryCPage, MemoryPagesCount, StartAddress;
 extern aint MemorySize;
 extern int macronummer, lijst, reglenwidth, synerr;
-extern aint CurAddress, AddressOfMAP, CurrentGlobalLine, CurrentLocalLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
+extern aint CurAddress, AddressOfMAP, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
 
 extern void (*GetCPUInstruction)(void);
 extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;

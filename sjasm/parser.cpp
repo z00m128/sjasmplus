@@ -634,24 +634,26 @@ unsigned char win2dos[] = //taken from HorrorWord %)))
 };
 
 void ParseLine(bool parselabels) {
-	/*++CurrentGlobalLine;*/
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
 			lp = line;
-			CStringsList* f = new CStringsList(lp, NULL);
+			CStringsList* f = new CStringsList(lp);
+			f->sourceLine = CurrentSourceLine;
 			dup.Pointer->next = f;
 			dup.Pointer = f;
-// 			fprintf(stderr, ">%d %ld %c%ld-%d [%s]\n", pass, CurrentGlobalLine,
+// 			fprintf(stderr, ">%d %ld %c%ld-%d [%s]\n", pass, CurrentLocalLine,
 // 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),
 // 					(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
+			++CompiledCurrentLine;
 			ParseDirective_REPT();
 			return;
 		}
 	}
-// 	fprintf(stderr, "|%d %ld %c%ld-%d [%s]\n", pass, CurrentGlobalLine,
+// 	fprintf(stderr, "|%d %ld %c%ld-%d [%s]\n", pass, CurrentLocalLine,
 // 			(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'), RepeatStack.size(),
 // 			(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
+	++CompiledCurrentLine;
 	lp = ReplaceDefine(line);
 
 	//DEBUG:  fprintf(stderr,"rdOut [%s]->[%s] %ld\n", line, lp, comlin);
@@ -712,7 +714,6 @@ void ParseLineSafe(bool parselabels) {
 		}
 	}
 
-	CompiledCurrentLine++;
 	ParseLine(parselabels);
 
 	*sline = 0;

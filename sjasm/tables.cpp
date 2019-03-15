@@ -661,40 +661,24 @@ void CLocalLabelTable::Insert(aint nnummer, aint nvalue) {
 
 aint CLocalLabelTable::zoekf(aint nnum) {
 	CLocalLabelTableEntry* l = first;
-	while (l) {
-		if (l->regel <= CompiledCurrentLine) {
-			l = l->next;
-		} else {
-			break;
-		}
-	}
-	//while (l) if (l->regel<=CurrentLocalLine) l=l->next; else break;
+	while (l && l->regel <= CompiledCurrentLine) l = l->next;
 	while (l) {
 		if (l->nummer == nnum) {
 			return l->value;
-		} else {
-			l = l->next;
 		}
+		l = l->next;
 	}
 	return (aint) - 1;
 }
 
 aint CLocalLabelTable::zoekb(aint nnum) {
 	CLocalLabelTableEntry* l = last;
-	while (l) {
-		if (l->regel > CompiledCurrentLine) {
-			l = l->prev;
-		} else {
-			break;
-		}
-	}
-	//while (l) if (l->regel>CurrentLocalLine) l=l->prev; else break;
+	while (l && l->regel > CompiledCurrentLine) l = l->prev;
 	while (l) {
 		if (l->nummer == nnum) {
 			return l->value;
-		} else {
-			l = l->prev;
 		}
+		l = l->prev;
 	}
 	return (aint) - 1;
 }
@@ -994,8 +978,8 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 	return 0;
 }
 
-CStringsList::CStringsList(char* nstring, CStringsList* nnext) {
-	string = STRDUP(nstring);
+CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
+	string = STRDUP(stringSource);
 	next = nnext;
 }
 
@@ -1042,7 +1026,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 		if (!(n = GetID(p))) {
 			Error("Illegal macro argument", p, EARLY); break;
 		}
-		s = new CStringsList(n, NULL); if (!f) {
+		s = new CStringsList(n); if (!f) {
 									  	f = s;
 									  } if (l) {
 											l->next = s;
