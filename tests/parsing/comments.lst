@@ -48,7 +48,7 @@
 31    000A 2F             /* block1 */  cpl /* block2 */
 32    000B C9               ret/*
 33    000C ~                zzz
-34    000C 21 00 00         */ld  _zzzzz,0
+34    000C 21 00 00     //  ;  '*/ld  _zzzzz,0
 35    000F                  xxx
 35    000F ~           >        /* /*
 35    000F ~           >        /* 3x nested
@@ -56,7 +56,21 @@
 35    000F ~           >        comment */ */
 35    000F ~           >        */
 35    000F 76          >        halt
-36    0010
+35    0010 ED A0         ldi/* : */
+35    0012
+35    0012 ED A8         ldd
+35    0014 ED B0         ldir
+35    0016 ~             /*:"*/
+35    0016 ED B8         lddr
+36    0018
+comments.asm(37): error: Invalid labelname: 
+37    0018 27           :   daa
+38    0019 ~            /* END ... // : block comment */
+38    0019 00             nop ; LIVE instr!
+comments.asm(39): error: Unrecognized instruction: */   
+comments.asm(39): error: Unexpected: */   
+39    001A                  /* invalid * * / amount of close blocks */ */ /* : */
+39    001A                ; and no <EOL> here
 # file closed: comments.asm
 
 Value    Label

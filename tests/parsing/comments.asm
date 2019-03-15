@@ -31,5 +31,9 @@
   /* block1 */  cpl /* block2 */
     ret/*
     zzz
-    */ld  _zzzzz,0
-    xxx
+//  ;  '*/ld  _zzzzz,0
+    xxx:ldi/* : */::ldd:ldir:/*:"*/:lddr
+
+:   daa
+/* END ... // : block comment */ : nop ; LIVE instr!
+    /* invalid * * / amount of close blocks */ */ /* : */ : ; and no <EOL> here

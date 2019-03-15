@@ -34,10 +34,11 @@
 
 #define DESTBUFLEN 8192
 
+// ReadLine buffer and variables around
 char rlbuf[4096 * 2]; //x2 to prevent errors
-int RL_Readed;
-bool rldquotes = false,rlsquotes = false,rlspace = false,rlcomment = false,rlcolon = false,rlnewline = true;
-char* rlpbuf, * rlppos;
+char * rlpbuf, * rlpbuf_end, * rlppos;
+bool colonSubline;
+int blockComment;
 
 FILE* FP_UnrealList;
 
@@ -687,8 +688,11 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	*filenamebegin = 0;
 	CurrentDirectory = fullpath;
 
-	RL_Readed = 0; rlpbuf = rlbuf; rlcolon = false;
-	ReadBufLine(true);
+	rlpbuf = rlpbuf_end = rlbuf;
+	colonSubline = false;
+	blockComment = 0;
+
+	ReadBufLine();
 
 	fclose(FP_Input);
 	CurrentDirectory = oCurrentDirectory;
@@ -725,139 +729,126 @@ void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
 	FILE* oFP_Input = FP_Input;
 	FP_Input = 0;
 
-	char* pbuf = rlpbuf;
-	char* buf = STRDUP(rlbuf);
+	char* pbuf = rlpbuf, * pbuf_end = rlpbuf_end, * buf = STRDUP(rlbuf);
 	if (buf == NULL) Error("No enough memory!", NULL, FATAL);
-	int readed = RL_Readed;
-	bool squotes = rlsquotes,dquotes = rldquotes,space = rlspace,comment = rlcomment,colon = rlcolon,newline = rlnewline;
-
-	rldquotes = false; rlsquotes = false;rlspace = false;rlcomment = false;rlcolon = false;rlnewline = true;
-
-	memset(rlbuf, 0, 8192);
+	bool oColonSubline = colonSubline;
+	if (blockComment) Error("Internal error 'block comment'", NULL, FATAL);	// comment can't INCLUDE
 
 	OpenFile(nfilename, systemPathsBeforeCurrent);
 
-	rlsquotes = squotes,rldquotes = dquotes,rlspace = space,rlcomment = comment,rlcolon = colon,rlnewline = newline;
-	rlpbuf = pbuf;
+	colonSubline = oColonSubline;
+	rlpbuf = pbuf, rlpbuf_end = pbuf_end;
 	STRCPY(rlbuf, 8192, buf);
-	RL_Readed = readed;
-
 	free(buf);
 
 	FP_Input = oFP_Input;
 }
 
+static bool ReadBufData() {
+	// check here also if `line` buffer is not full
+	if ((LINEMAX-2) <= (rlppos - line)) Error("Line too long", NULL, FATAL);
+	// now check for read data
+	if (rlpbuf < rlpbuf_end) return 1;		// some data still in buffer
+	if (feof(FP_Input)) return 0;			// no more data in file
+	// read next block of data
+	rlpbuf = rlbuf;
+	rlpbuf_end = rlbuf + fread(rlbuf, 1, 4096, FP_Input);
+	*rlpbuf_end = 0;						// add zero terminator after new block
+	return (rlpbuf < rlpbuf_end);			// return true if some data were read
+}
+
+static void RBL_copyTillEol() {		// helper for EOL comments, nothing can intercept those
+	while (ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf) *rlppos++ = *rlpbuf++;
+}
+
 void ReadBufLine(bool Parse, bool SplitByColon) {
-	//FIXME Ped7g - seems a bit too complicated, check + comment + refactor if needed
-	rlppos = line;
-	if (rlcolon) {
-		*(rlppos++) = '\t';
-	}
-	while (IsRunning && (RL_Readed > 0 || (RL_Readed = fread(rlbuf, 1, 4096, FP_Input)))) {
-		if (!*rlpbuf) {
-			rlpbuf = rlbuf;
-		}
-		while (IsRunning && RL_Readed > 0) {
-
-			if (!CurrentLocalLine)
-			{
-				CurrentLocalLine++;
-				CurrentGlobalLine++;
-				CompiledCurrentLine++;
-			}
-
-			if (*rlpbuf == '\n' || *rlpbuf == '\r') {
-
-				rlpbuf++; RL_Readed--;
-				if (rlpbuf[-1] == '\r')
-				{
-					if (!RL_Readed)
-					{
-						RL_Readed = fread(rlbuf, 1, 4096, FP_Input);
-						if (!RL_Readed) break;
-						rlpbuf = rlbuf;
-					}
-					if (*rlpbuf == '\n') { rlpbuf++; RL_Readed--; }
-				}
-				*rlppos = 0;
-				if (strlen(line) == LINEMAX - 1) {
-					Error("Line too long", NULL, FATAL);
-				}
-				rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
-				if (IsRunning && Parse) {
-					ParseLine();
-				} else {
-					rlnewline = true;
-					CurrentLocalLine++;
-					CurrentGlobalLine++;
-					CompiledCurrentLine++;
-					return;
-				}
-				rlppos = line;
-				if (rlcolon) {
-					*(rlppos++) = ' ';
-				}
-				rlnewline = true;
-				CurrentLocalLine++;
-				CurrentGlobalLine++;
-				CompiledCurrentLine++;
-			} else if (SplitByColon && *rlpbuf == ':' && rlspace && !rldquotes && !rlsquotes && !rlcomment) {
-				while (*rlpbuf && *rlpbuf == ':') {
-					rlpbuf++;RL_Readed--;
-				}
-			  	*rlppos = 0;
-				if (strlen(line) == LINEMAX - 1) {
-					Error("Line too long", NULL, FATAL);
-				}
-				rlcolon = true;
-				if (IsRunning && Parse) {
-					ParseLine();
-				} else {
-					return;
-				}
-				rlppos = line;
-				if (rlcolon) *(rlppos++) = ' ';
-			} else if (*rlpbuf == ':' && !rlspace && !rlcolon && !rldquotes && !rlsquotes && !rlcomment) {
-				lp = line; *rlppos = 0;
-				// it's label
-				*(rlppos++) = ':';
-				rlspace = true;
-				while (*rlpbuf && *rlpbuf == ':') {
-					rlpbuf++;
-					RL_Readed--;
-				}
-			} else {
-				if (*rlpbuf == '\\' && rldquotes && !rlcomment) {	// \ inside "" = escaping next char
-					*rlppos++ = *rlpbuf++; RL_Readed--;		// copy extra backslash (escape)
-				} else if (*rlpbuf == '\'' && !rldquotes && !rlcomment) {
-					rlsquotes = !rlsquotes;
-				} else if (*rlpbuf == '"' && !rlsquotes && !rlcomment) {
-					rldquotes = !rldquotes;
-				} else if (*rlpbuf == ';' && !rlsquotes && !rldquotes) {
-					rlcomment = true;
-				} else if (*rlpbuf == '/' && *(rlpbuf + 1) == '/' && !rlsquotes && !rldquotes) {
-					rlcomment = true;
-					*rlppos++ = *rlpbuf++; RL_Readed--;		// copy extra slash
-				} else if (*rlpbuf <= ' ' && !rlsquotes && !rldquotes && !rlcomment) {
-					rlspace = true;
-				}
-				*rlppos++ = *rlpbuf++; RL_Readed--;
-			}
-		}
-		rlpbuf = rlbuf;
-	}
-	//for end of line
-	if (feof(FP_Input) && RL_Readed <= 0 && *line) {
-		rlsquotes = rldquotes = rlcomment = rlspace = rlcolon = false;
-		rlnewline = true;
-		*rlppos = 0;
-		if (IsRunning && Parse) {
-			ParseLine();
-		} else {
-			return;
-		}
+	// if everything else fails (no data, not running, etc), return empty line
+	*line = 0;
+	bool IsLabel = true;
+	// try to read through the buffer and produce new line from it
+	while (IsRunning && ReadBufData()) {
+		// start of new line (or fake "line" by colon)
 		rlppos = line;
-	}
+		if (colonSubline) {			// starting from colon (creating new fake "line")
+			colonSubline = false;	// (can't happen inside block comment)
+			*(rlppos++) = ' ';
+		} else {					// starting real new line
+			++CurrentLocalLine;
+			++CurrentGlobalLine;
+			++CompiledCurrentLine;
+			IsLabel = (0 == blockComment);
+		}
+		// copy data from read buffer into `line` buffer until EOL/colon is found
+		while (
+				ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf &&	// split by EOL
+				// split by colon only on 2nd+ char && SplitByColon && not inside block comment
+				(blockComment || !SplitByColon || rlppos == line || ':' != *rlpbuf)) {
+			// copy the new character to new line
+			*rlppos = *rlpbuf++;
+			// Block comments logic first (anything serious may happen only "outside" of block comment
+			if ('*' == *rlppos && ReadBufData() && '/' == *rlpbuf) {
+				if (0 < blockComment) --blockComment;	// block comment ends here, -1 from nesting
+				++rlppos;	*rlppos++ = *rlpbuf++;		// copy the second char too
+				continue;
+			}
+			if ('/' == *rlppos && ReadBufData() && '*' == *rlpbuf) {
+				++rlppos, ++blockComment;				// block comment starts here, nest +1 more
+				*rlppos++ = *rlpbuf++;					// copy the second char too
+				continue;
+			}
+			if (blockComment) {							// inside block comment just copy chars
+				++rlppos;
+				continue;
+			}
+			// check if still in label area, if yes, copy the finishing colon as char (don't split by it)
+			if ((IsLabel = IsLabel && islabchar(*rlppos))) {
+				++rlppos;					// label character
+				if (ReadBufData() && ':' == *rlpbuf) {	// colon after label, add it
+					*rlppos++ = *rlpbuf++;
+					IsLabel = false;
+				}
+				continue;
+			}
+			// not in label any more, check for EOL comments ";" or "//"
+			if ((';' == *rlppos) || ('/' == *rlppos && ReadBufData() && '/' == *rlpbuf)) {
+				++rlppos;					// EOL comment ";"
+				RBL_copyTillEol();
+				continue;
+			}
+			// check for string literals - double/single quotes
+			if ('"' == *rlppos || '\'' == *rlppos) {
+				const bool quotes = '"' == *rlppos;
+				int escaped = 0;
+				do {
+					if (escaped) --escaped;
+					++rlppos;				// previous char confirmed
+					*rlppos = ReadBufData() ? *rlpbuf : 0;	// copy next char (if available)
+					if (!*rlppos || '\r' == *rlppos || '\n' == *rlppos) *rlppos = 0;	// not valid
+					else ++rlpbuf;			// buffer char read (accepted)
+					if (quotes && !escaped && '\\' == *rlppos) escaped = 2;	// escape sequence detected
+				} while (*rlppos && (escaped || (quotes ? '"' : '\'') != *rlppos));
+				if (*rlppos) ++rlppos;		// there should be ending "/' in line buffer, confirm it
+				continue;
+			}
+			// anything else just copy
+			++rlppos;				// previous char confirmed
+		} // while "some char in buffer, and it's not line delimiter"
+		// line interrupted somehow, may be correctly finished, check + finalize line and process it
+		*rlppos = 0;
+		// skip <EOL> char sequence in read buffer
+		if (ReadBufData() && ('\r' == *rlpbuf || '\n' == *rlpbuf)) {
+			char CRLFtest = (*rlpbuf++) ^ ('\r'^'\n');	// flip CR->LF || LF->CR (and eats first)
+			if (ReadBufData() && CRLFtest == *rlpbuf) ++rlpbuf;	// if CRLF/LFCR pair, eat also second
+			// if this was very last <EOL> in file (on non-empty line), add one more fake empty line
+			if (!ReadBufData() && *line) *rlpbuf_end++ = '\n';	// to make listing files "as before"
+		} else {
+			// advance over single colon if that was the reason to terminate line parsing
+			colonSubline = SplitByColon && ReadBufData() && (':' == *rlpbuf) && ++rlpbuf;
+		}
+		// line is parsed and ready to be processed
+		if (Parse) 	ParseLine();	// processed here in loop
+		else 		return;			// processed externally
+	} // while (IsRunning && ReadBufData())
 }
 
 static void OpenListImp(const char* listFilename) {
@@ -1329,7 +1320,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 
 EReturn ReadFile(const char* pp, const char* err) {
 	char* p;
-	while (lijst || RL_Readed > 0 || !feof(FP_Input)) {
+	while (lijst || ReadBufData()) {
 		if (!IsRunning) {
 			return END;
 		}
@@ -1375,7 +1366,7 @@ EReturn ReadFile(const char* pp, const char* err) {
 EReturn SkipFile(char* pp, const char* err) {
 	char* p;
 	int iflevel = 0;
-	while (lijst || RL_Readed > 0 || !feof(FP_Input)) {
+	while (lijst || ReadBufData()) {
 		if (!IsRunning) {
 			return END;
 		}
@@ -1437,7 +1428,7 @@ EReturn SkipFile(char* pp, const char* err) {
 }
 
 int ReadLine(bool SplitByColon) {
-	if (!IsRunning || (RL_Readed == 0 && feof(FP_Input))) return 0;
+	if (!IsRunning || !ReadBufData()) return 0;
 	ReadBufLine(false, SplitByColon);
 	return 1;
 }
@@ -1446,7 +1437,7 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	CStringsList* s,* l = NULL;
 	char* p;
 	f = NULL;
-	while (RL_Readed > 0 || !feof(FP_Input)) {
+	while (ReadBufData()) {
 		if (!IsRunning) {
 			return 0;
 		}
