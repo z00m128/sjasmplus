@@ -31,7 +31,8 @@ ReadBufLine parsing refactored. Now look for other parts of code trying to do si
 END in IF-ENDIF ???
 
 Z80 opcode40..7F test is using LUA to generate instructions, but I think macro system
-is now fixed enough to be capable of that too => try it.
+is now fixed enough to be capable of that too => try it. => nope, **needs "IF in DUP" fix**
+But it was possible to write 80..BF test with sjasmplus macros only with current sjasmplus
 
 ====================
 Docs:

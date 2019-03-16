@@ -15,14 +15,16 @@
     ENDLUA
 
 ;;; abandoned work in progress
-;;; does not work due to this fix: https://github.com/z00m128/sjasmplus/commit/1fea88f3775ec243a55fcc198c57e07f543a9253
-;;; the "ld  registers[R1],0" is then expanded to "ld b,0" even when R1 is changing
-;;; reverting that commit will break the DUP in DUP assembly files, so at this moment I will rather use LUA to generate this code
+; while the issue with DEFARRAY was resolved, the next blocker is IF inside DUP...
 
 ;     DEFARRAY registers b, c, d, e, h, l, (hl), a
 ;
 ; R1 DEFL 0
 ;     DUP 8
-;         ld  registers[R1],0
+;         IF R1==6
+;             halt
+;         ELSE
+;             ld  registers[R1],registers[R1]
+;         ENDIF
 ; R1 DEFL R1+1
 ;     EDUP
