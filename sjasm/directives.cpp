@@ -82,8 +82,7 @@ int ParseDirective(bool beginningOfLine)
 			ErrorInt(".X must be positive integer", val, IF_FIRST); lp = olp; return 0;
 		}
 
-		int olistmacro;	char* ml;
-		char* pp = mline; *pp = 0;
+		char* pp = mline;
 		STRCPY(pp, LINEMAX2, " ");
 
 		SkipBlanks(lp);
@@ -92,9 +91,8 @@ int ParseDirective(bool beginningOfLine)
 			lp += strlen(lp);
 		}
 		//_COUT pp _ENDL;
-		olistmacro = listmacro;
-		listmacro = 1;
-		ml = STRDUP(line);
+		++listmacro;
+		char* ml = STRDUP(line);
 		if (ml == NULL) {
 			Error("No enough memory!", NULL, FATAL);
 		}
@@ -103,7 +101,7 @@ int ParseDirective(bool beginningOfLine)
 			ParseLineSafe();
 		} while (--val);
 		STRCPY(line, LINEMAX, ml);
-		listmacro = olistmacro;
+		--listmacro;
 		donotlist = 1;
 
 		delete[] ml;
@@ -1793,13 +1791,10 @@ void dirEDUP() {
 		--dup.Level;
 		return;
 	}
-	int olistmacro;
-	char* ml;
 	dup.IsInWork = true;
 	dup.Pointer->string = NULL;	// kill the EDUP inside DUP-list (also works as "while" terminator)
-	olistmacro = listmacro;
-	listmacro = 1;
-	ml = STRDUP(line);			// copy the EDUP line for List purposes (after the DUP block emit)
+	++listmacro;
+	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
 	long lcurln = CurrentSourceLine;
 	while (dup.RepeatCount--) {
@@ -1810,14 +1805,13 @@ void dirEDUP() {
 			if (s->sourceLine) CurrentSourceLine = s->sourceLine;
 			STRCPY(line, LINEMAX, s->string);
 			s = s->next;
-			//experimental: show end of DUP block: if (!s || !s->string) STRCAT(line, LINEMAX, ";kuk");
 			ParseLineSafe();
 			CurrentSourceLine++;
 		}
 	}
 	RepeatStack.pop();
 	CurrentSourceLine = lcurln;
-	listmacro = olistmacro;
+	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	ListFile();
 }

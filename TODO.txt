@@ -34,6 +34,8 @@ Z80 opcode40..7F test is using LUA to generate instructions, but I think macro s
 is now fixed enough to be capable of that too => try it. => nope, **needs "IF in DUP" fix**
 But it was possible to write 80..BF test with sjasmplus macros only with current sjasmplus
 
+DISPLAY trying to display value "-2" (from macro argument) as decimal will display bogus value (seems like 64b clash + something extra)
+
 ====================
 Docs:
 http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku

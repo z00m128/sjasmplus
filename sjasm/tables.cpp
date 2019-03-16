@@ -1086,7 +1086,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	// arguments parsed, emit the macro lines and parse them
 	lp = p;
 	ListFile();
-	int olistmacro = listmacro; listmacro = 1;
+	++listmacro;
 	CStringsList* olijstp = lijstp; int olijst = lijst;
 	lijstp = m->body; lijst = 1;
 	STRCPY(ml, LINEMAX, line);
@@ -1102,7 +1102,8 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	lijstp = olijstp;
 	MacroDefineTable.setdefs(odefs);
 	macrolabp = omacrolabp;
-	listmacro = olistmacro; donotlist = 1; return 2;
+	--listmacro; donotlist = 1;
+	return 2;
 }
 
 CStructureEntry1::CStructureEntry1(char* nnaam, aint noffset) {
