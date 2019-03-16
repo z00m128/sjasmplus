@@ -1093,9 +1093,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	STRCPY(ml, LINEMAX, line);
 	while (lijstp) {
 		STRCPY(line, LINEMAX, lijstp->string);
-		//_COUT ">>" _CMDL line _ENDL;
 		lijstp = lijstp->next;
-		/* ParseLine(); */
 		ParseLineSafe();
 	}
 	STRCPY(line, LINEMAX, ml);
