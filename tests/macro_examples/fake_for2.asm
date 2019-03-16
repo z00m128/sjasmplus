@@ -40,4 +40,6 @@ var?=var?+step?
 
     OUTPUT "fake_for2.bin"
 ScreenBufferCWGI=$4000
-    FOR half, 0, $800, $800, <FOR y, 0, $E0, $20, <FOR x, 0, $700, $100, dw ScreenBufferCWGI+x+y+half !> >
+    ;FOR half, 0, $800, $800, <FOR y, 0, $E0, $20, <FOR x, 0, $700, $100, dw ScreenBufferCWGI+x+y+half !> >
+    ; example with fn_body macro usage (and how to break "single instruction" limit in practice)
+    FOR half, 0, $800, $800, <FOR y, 0, $E0, $20, <FOR x, 0, $700, $100, fn_body !> >
