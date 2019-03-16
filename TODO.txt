@@ -28,9 +28,10 @@ STRUCT test + fix bugs
 
 ReadBufLine parsing refactored. Now look for other parts of code trying to do similar things and refactor too..
 
-i36b.asm - DUP ked bol vytvoreny pomocu ": : : :", tak zkuivi line numbers
-
 END in IF-ENDIF ???
+
+Z80 opcode40..7F test is using LUA to generate instructions, but I think macro system
+is now fixed enough to be capable of that too => try it.
 
 ====================
 Docs:
