@@ -130,7 +130,7 @@ void (*GetCPUInstruction)(void);
 
 char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 stack<SRepeatStack> RepeatStack;
-CStringsList* lijstp = 0;
+CStringsList* lijstp = NULL;
 CLabelTable LabelTable;
 CLocalLabelTable LocalLabelTable;
 CDefineTable DefineTable;
@@ -173,6 +173,7 @@ void InitPass() {
 	CurrentSourceLine = CompiledCurrentLine = 0;
 	PseudoORG = 0; adrdisp = 0;
 	PreviousAddress = 0; epadres = 0; macronummer = 0; lijst = 0; comlin = 0;
+	lijstp = NULL;
 	ModuleList = NULL;
 	StructureTable.Init();
 	MacroTable.Init();

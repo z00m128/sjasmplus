@@ -1087,8 +1087,9 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	lp = p;
 	ListFile();
 	++listmacro;
-	CStringsList* olijstp = lijstp; int olijst = lijst;
-	lijstp = m->body; lijst = 1;
+	CStringsList* olijstp = lijstp;
+	lijstp = m->body;
+	++lijst;
 	STRCPY(ml, LINEMAX, line);
 	while (lijstp) {
 		STRCPY(line, LINEMAX, lijstp->string);
@@ -1098,8 +1099,8 @@ int CMacroTable::Emit(char* naam, char*& p) {
 		ParseLineSafe();
 	}
 	STRCPY(line, LINEMAX, ml);
-	lijst = olijst;
 	lijstp = olijstp;
+	--lijst;
 	MacroDefineTable.setdefs(odefs);
 	macrolabp = omacrolabp;
 	--listmacro; donotlist = 1;

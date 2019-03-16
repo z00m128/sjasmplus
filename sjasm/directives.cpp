@@ -1568,15 +1568,10 @@ void dirDISPLAY() {
 }
 
 void dirMACRO() {
-	//if (lijst) Error("No macro definitions allowed here",0,FATAL);
-	if (lijst) {
-		Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
-	}
-	char* n;
-	if (!(n = GetID(lp))) {
-		Error("[MACRO] Illegal macroname"); return;
-	}
-	MacroTable.Add(n, lp);
+	if (lijst) Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
+	char* n = GetID(lp);
+	if (n) MacroTable.Add(n, lp);
+	else   Error("[MACRO] Illegal macroname");
 }
 
 void dirENDS() {
