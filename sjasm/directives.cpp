@@ -1792,19 +1792,23 @@ void dirEDUP() {
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
 	long lcurln = CurrentSourceLine;
+	CStringsList* olijstp = lijstp;
+	++lijst;
 	while (dup.RepeatCount--) {
 		CurrentSourceLine = dup.CurrentSourceLine;
-		CStringsList* s = dup.Lines;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
-		while (s && s->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
-			if (s->sourceLine) CurrentSourceLine = s->sourceLine;
-			STRCPY(line, LINEMAX, s->string);
-			s = s->next;
+		lijstp = dup.Lines;
+		while (lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
+			if (lijstp->sourceLine) CurrentSourceLine = lijstp->sourceLine;
+			STRCPY(line, LINEMAX, lijstp->string);
+			lijstp = lijstp->next;
 			ParseLineSafe();
-			CurrentSourceLine++;
+			++CurrentSourceLine;
 		}
 	}
 	RepeatStack.pop();
+	lijstp = olijstp;
+	--lijst;
 	CurrentSourceLine = lcurln;
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
