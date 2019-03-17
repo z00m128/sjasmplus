@@ -85,12 +85,10 @@ int ParseDirective(bool beginningOfLine)
 		char* pp = mline;
 		STRCPY(pp, LINEMAX2, " ");
 
-		SkipBlanks(lp);
-		if (*lp) {
+		if (!SkipBlanks()) {
 			STRCAT(pp, LINEMAX2, lp);
 			lp += strlen(lp);
 		}
-		//_COUT pp _ENDL;
 		++listmacro;
 		char* ml = STRDUP(line);
 		if (ml == NULL) {
@@ -1447,8 +1445,7 @@ void dirDISPLAY() {
 	aint val;
 	int t = 0;
 	while (1) {
-		SkipBlanks(lp);
-		if (!*lp) {
+		if (SkipBlanks()) {
 			Error("[DISPLAY] Expression expected"); break;
 		}
 		if (t == LINEMAX - 1) {

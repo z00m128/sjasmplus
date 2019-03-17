@@ -43,37 +43,31 @@ int cmphstr(char*& p1, const char* p2) {
 			++i;
 		}
 	}
-	if (' ' < p1[i]) return 0;		// any character above space means "no match"
+	if (p1[i] && !White(p1[i])) return 0;		// any character above space means "no match"
 	// space, tab, enter, \0, ... => "match"
 	p1 += i;
 	return 1;
 }
 
-int White() {
-	return (*lp && *lp <= ' ');
+bool White(const char c) {
+	return c && (c&255) <= ' ';
+}
+
+bool White() {
+	return White(*lp);
+}
+
+int SkipBlanks(char*& p) {
+	while (White(*p)) ++p;
+	return (*p == 0);
 }
 
 int SkipBlanks() {
-	while (*lp && *lp <= ' ') {
-		++lp;
-	}
-	return (*lp == 0);
-}
-
-void SkipBlanks(char*& p) {
-	while (*p && *p <= ' ') {
-		++p;
-	}
+	return SkipBlanks(lp);
 }
 
 void SkipParam(char*& p) {
-	SkipBlanks(p);
-	if (!(*p)) {
-		return;
-	}
-	while (((*p) != '\0') && ((*p) != ',')) {
-		p++;
-	}
+	while (*p && (*p != ',')) ++p;
 }
 
 int NeedEQU() {
@@ -585,8 +579,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	int t = 0;
 	do {
 		const char* const elementP = p;
-		SkipBlanks(p);
-		if (!*p) {
+		if (SkipBlanks(p)) {
 			Error("Expression expected", NULL, SUPPRESS);
 		} else if ('"' == *p || '\'' == *p) {	// string literals (both types)
 			const bool quotes = '"' == *p++;
@@ -682,22 +675,6 @@ EDelimiterType GetDelimiterOfLastFileName() {
 	return delimiterOfLastFileName;
 }
 
-int needcomma(char*& p) {
-	SkipBlanks(p);
-	if (*p != ',') {
-		Error("Comma expected");
-	}
-	return (*(p++) == ',');
-}
-
-int needbparen(char*& p) {
-	SkipBlanks(p);
-	if (*p != ']') {
-		Error("']' expected");
-	}
-	return (*(p++) == ']');
-}
-
 int islabchar(char p) {
 	if (isalnum((unsigned char)p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
 		return 1;
@@ -788,8 +765,7 @@ int GetArray(char*& p, int e[], int add, int dc) {
 	aint val;
 	int t = 0;
 	while ('o') {
-		SkipBlanks(p);
-		if (!*p) {
+		if (SkipBlanks(p)) {
 			Error("Expression expected", NULL, SUPPRESS); break;
 		}
 		if (t == 128) {

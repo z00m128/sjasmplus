@@ -34,8 +34,7 @@ char dirDEFl[] = "def", dirDEFu[] = "DEF";
 
 int ParseExpPrim(char*& p, aint& nval) {
 	int res = 0;
-	SkipBlanks(p);
-	if (!*p) {
+	if (SkipBlanks(p)) {
 		return 0;
 	}
 	if (*p == '(') {
@@ -424,7 +423,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		if (DefineTable.DefArrayList) {
 			CStringsList* a = DefineTable.DefArrayList;
 			aint val;
-			while (*(lp++) && (*lp <= ' ' || *lp == '['));
+			while (White(*lp) || '[' == *lp) ++lp;
 			if (!ParseExpression(lp, val)) {
 				Error("[ARRAY] Expression error", lp, IF_FIRST);break;
 			}
@@ -445,7 +444,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 
 		if (dr) {
 			kp = lp - strlen(nid);
-			while (*(kp--) && *kp <= ' ');
+			while (White(*--kp)) ;		// return back (once) even from \0
 			kp = kp - 4;
 			if (cmphstr(kp, "ifdef")) {
 				dr = 0; ver = nid;
@@ -738,7 +737,7 @@ void ParseLineSafe(bool parselabels) {
 	lp = rp;
 }
 
-void ParseStructLabel(CStructure* st) {
+void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabel()?
 	char* tp, temp[LINEMAX];
 	PreviousIsLabel = 0;
 	if (White()) {

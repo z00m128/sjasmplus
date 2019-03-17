@@ -3919,8 +3919,8 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_HL:
-				if (!needcomma(lp)) {
-					break;
+				if (!comma(lp)) {
+					Error("[SUB] Comma expected"); break;
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:

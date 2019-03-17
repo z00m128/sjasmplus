@@ -316,7 +316,7 @@ static void ListFileStringRtrim() {
 	char* beyondLine = pline+24;
 	while (*beyondLine) ++beyondLine;
 	// and remove trailing white space (space, tab, newline, carriage return, etc..)
-	while (pline < beyondLine && beyondLine[-1] <= ' ') --beyondLine;
+	while (pline < beyondLine && White(beyondLine[-1])) --beyondLine;
 	// set new line and new string terminator after
 	*beyondLine++ = '\n';
 	*beyondLine = 0;

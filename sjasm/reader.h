@@ -34,10 +34,11 @@ enum EBracketType { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
 #define BRACKETS_B { 0,      '(',      '{',      '[',       0 }
 #define BRACKETS_E { 0,      ')',      '}',      ']',       0 }
 
-int White();
+bool White(const char c);
+bool White();
 void SkipParam(char*&);
+int SkipBlanks(char*& p);
 int SkipBlanks();
-void SkipBlanks(char*& p);
 int NeedEQU();
 int NeedDEFL();
 int NeedField();
@@ -64,9 +65,6 @@ int GetBytes(char*& p, int e[], int add, int dc);
 int cmphstr(char*& p1, const char* p2);
 char* GetFileName(char*& p, bool convertslashes=false);
 EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called
-int needcomma(char*& p);
-int needbparen(char*& p);
 int islabchar(char p);
 EStructureMembers GetStructMemberId(char*& p);
 int GetMacroArgumentValue(char* & src, char* & dst);
-
