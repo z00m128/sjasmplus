@@ -273,9 +273,9 @@ void dirORG() {
 			}
 			if (val < 0) {
 				Error("[ORG] Negative page number are not allowed", lp); return;
-			} else if (val > Device->PagesCount - 1) {
+			} else if (Device->PagesCount <= val) {
 				char buf[LINEMAX];
-				SPRINTF1(buf, LINEMAX, "[ORG] Page number must be in range 0..%lu", Device->PagesCount - 1);
+				SPRINTF1(buf, LINEMAX, "[ORG] Page number must be in range 0..%u", Device->PagesCount - 1);
 			  	Error(buf, NULL, IF_FIRST); return;
 			}
 			Slot->Page = Device->GetPage(val);
@@ -322,11 +322,12 @@ void dirPAGE() {
 	}
 	if (val < 0) {
 		Error("[PAGE] Negative page number are not allowed", lp); return;
-	} else if (val > Device->PagesCount - 1) {
+	} else if (Device->PagesCount <= val) {
 		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "[PAGE] Page number must be in range 0..%lu", Device->PagesCount - 1);
+		SPRINTF1(buf, LINEMAX, "[PAGE] Page number must be in range 0..%u", Device->PagesCount - 1);
 		Error(buf, NULL, IF_FIRST); return;
 	}
+
 	Slot->Page = Device->GetPage(val);
 	CheckPage();
 }
@@ -344,9 +345,9 @@ void dirSLOT() {
 	}
 	if (val < 0) {
 		Error("[SLOT] Negative slot number are not allowed", lp); return;
-	} else if (val > Device->SlotsCount - 1) {
+	} else if (Device->SlotsCount <= val) {
 		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%lu", Device->SlotsCount - 1);
+		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%u", Device->SlotsCount - 1);
 		Error(buf, NULL, IF_FIRST); return;
 	}
 	Slot = Device->GetSlot(val);
@@ -2161,9 +2162,9 @@ void InsertDirectives() {
 bool LuaSetPage(aint n) {
 	if (n < 0) {
 		Error("sj.set_page: negative page number are not allowed", lp); return false;
-	} else if (n > Device->PagesCount - 1) {
+	} else if (Device->PagesCount <= n) {
 		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "sj.set_page: page number must be in range 0..%lu", Device->PagesCount - 1);
+		SPRINTF1(buf, LINEMAX, "sj.set_page: page number must be in range 0..%u", Device->PagesCount - 1);
 		Error(buf, NULL, IF_FIRST); return false;
 	}
 	Slot->Page = Device->GetPage(n);
@@ -2174,9 +2175,9 @@ bool LuaSetPage(aint n) {
 bool LuaSetSlot(aint n) {
 	if (n < 0) {
 		Error("sj.set_slot: negative slot number are not allowed", lp); return false;
-	} else if (n > Device->SlotsCount - 1) {
+	} else if (Device->SlotsCount <= n) {
 		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "sj.set_slot: slot number must be in range 0..%lu", Device->SlotsCount - 1);
+		SPRINTF1(buf, LINEMAX, "sj.set_slot: slot number must be in range 0..%u", Device->SlotsCount - 1);
 		Error(buf, NULL, IF_FIRST); return false;
 	}
 	Slot = Device->GetSlot(n);

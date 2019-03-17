@@ -399,22 +399,14 @@ void CheckPage() {
 	}
 	MemoryPointer = MemoryRAM + addadr;*/
 
-	CDeviceSlot* S;
-	for (aint i=0;i<Device->SlotsCount;i++) {
-		S = Device->GetSlot(i);
-		if (CurAddress >= S->Address \
-			&& ((CurAddress < 65536 && CurAddress < S->Address + S->Size) \
-				|| (CurAddress >= 65536 && CurAddress <= S->Address + S->Size)) \
-		   ) {
-			if (PseudoORG) {
-				MemoryPointer = S->Page->RAM + (adrdisp - S->Address);
-				Page = S->Page;
-				return;
-			} else {
-				MemoryPointer = S->Page->RAM + (CurAddress - S->Address);
-				Page = S->Page;
-				return;
-			}
+	for (int i=0;i<Device->SlotsCount;i++) {
+		CDeviceSlot* S = Device->GetSlot(i);
+		int realAddr = PseudoORG ? adrdisp : CurAddress;
+		if (realAddr >= S->Address && ((realAddr < 65536 && realAddr < S->Address + S->Size) \
+										|| (realAddr >= 65536 && realAddr <= S->Address + S->Size))) {
+			MemoryPointer = S->Page->RAM + (realAddr - S->Address);
+			Page = S->Page;
+			return;
 		}
 	}
 
@@ -1030,7 +1022,7 @@ int SaveRAM(FILE* ff, int start, int length) {
 	}
 
 	CDeviceSlot* S;
-	for (aint i=0;i<Device->SlotsCount;i++) {
+	for (int i=0;i<Device->SlotsCount;i++) {
 		S = Device->GetSlot(i);
 		if (start >= (int)S->Address  && start < (int)(S->Address + S->Size)) {
 			if (length < (int)(S->Size - (start - S->Address))) {
@@ -1136,7 +1128,7 @@ unsigned char MemGetByte(unsigned int address) {
 	}
 
 	CDeviceSlot* S;
-	for (aint i=0;i<Device->SlotsCount;i++) {
+	for (int i=0;i<Device->SlotsCount;i++) {
 		S = Device->GetSlot(i);
 		if (address >= (unsigned int)S->Address  && address < (unsigned int)S->Address + (unsigned int)S->Size) {
 			return S->Page->RAM[address - S->Address];

@@ -318,10 +318,10 @@ public:
 	CDeviceSlot* GetSlot(aint);
 	char* ID;
 	CDevice* Next;
-	aint CurrentSlot;
-	aint CurrentPage;
-	aint SlotsCount;
-	aint PagesCount;
+	int CurrentSlot;
+	int CurrentPage;
+	int SlotsCount;
+	int PagesCount;
 private:
 	CDeviceSlot* Slots[256];
 	CDevicePage* Pages[256];
