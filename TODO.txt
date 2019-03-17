@@ -28,12 +28,6 @@ STRUCT test + fix bugs
 
 ReadBufLine parsing refactored. Now look for other parts of code trying to do similar things and refactor too..
 
-END in IF-ENDIF ???
-
-Z80 opcode40..7F test is using LUA to generate instructions, but I think macro system
-is now fixed enough to be capable of that too => try it. => nope, **needs "IF in DUP" fix**
-But it was possible to write 80..BF test with sjasmplus macros only with current sjasmplus
-
 DISPLAY trying to display value "-2" (from macro argument) as decimal will display bogus value (seems like 64b clash + something extra)
 
 ====================

@@ -1231,7 +1231,8 @@ static void dirIfInternal(const char* dirName, aint val) {
 			case ENDIF:
 				break;
 			default:
-				Error(errorsTxt[0]);
+				if (IsRunning) Error(errorsTxt[0]);
+				donotlist=!IsRunning;		// do the listing only if still running
 				return;
 		}
 	}
@@ -1798,7 +1799,7 @@ void dirEDUP() {
 		CurrentSourceLine = dup.CurrentSourceLine;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
-		while (lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
+		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
 			if (lijstp->sourceLine) CurrentSourceLine = lijstp->sourceLine;
 			STRCPY(line, LINEMAX, lijstp->string);
 			lijstp = lijstp->next;
