@@ -1,0 +1,22 @@
+# file opened: macro.asm
+ 1    0000                      device zxspectrum128
+ 2    0000
+ 3    0000                      org #8000
+ 4    8000
+ 5    8000                      MACRO WAVEOUT reg, data
+ 6    8000 ~                    LD A,reg
+ 7    8000 ~                    OUT (7EH),A
+ 8    8000 ~                    LD A,data
+ 9    8000 ~                    OUT (7FH),A
+10    8000                      ENDM
+11    8000
+12    8000                      WAVEOUT 2,17
+12    8000 3E 02       >        LD A,reg
+12    8002 D3 7E       >        OUT (7EH),A
+12    8004 3E 11       >        LD A,data
+12    8006 D3 7F       >        OUT (7FH),A
+13    8008
+# file closed: macro.asm
+
+Value    Label
+------ - -----------------------------------------------------------

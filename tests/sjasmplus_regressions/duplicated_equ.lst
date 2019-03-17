@@ -1,0 +1,12 @@
+duplicated_equ.asm(2): error: Duplicate label: label
+# file opened: duplicated_equ.asm
+duplicated_equ.asm(1): warning: Label has different value in pass 3: previous value 17185 not equal 4660
+1     0000              label   equ #1234
+duplicated_equ.asm(2): warning: Label has different value in pass 3: previous value 4660 not equal 17185
+2     0000              label   equ #4321
+3     0000
+# file closed: duplicated_equ.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x4321 X label

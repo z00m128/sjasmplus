@@ -1,0 +1,12 @@
+duplicated_label.asm(2): error: Duplicate label: lab
+# file opened: duplicated_label.asm
+duplicated_label.asm(1): warning: Label has different value in pass 3: previous value 1 not equal 0
+1     0000 00           lab     nop
+duplicated_label.asm(2): warning: Label has different value in pass 3: previous value 0 not equal 1
+2     0001 C9           lab     ret
+3     0002
+# file closed: duplicated_label.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X lab

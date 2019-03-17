@@ -1,0 +1,14 @@
+# file opened: reassign_label.asm
+1     0000                      device zxspectrum128
+2     0000
+3     0000              label=#1234
+4     0000              label defl #5432
+5     0000              label=#4321
+6     0000
+7     0000 21 43                dw label
+8     0002
+# file closed: reassign_label.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x4321   label

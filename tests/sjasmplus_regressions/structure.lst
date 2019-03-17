@@ -1,0 +1,61 @@
+# file opened: structure.asm
+ 1    0000                      device zxspectrum128
+ 2    0000
+ 3    0000                      struct str
+ 4    0000 ~            f0      byte 0
+ 5    0000 ~            f1      byte 0
+ 6    0000 ~                    byte 0
+ 7    0000                      ends
+ 8    0000
+ 9    0000                      struct str1
+10    0000 ~                    byte 0
+11    0000 ~            f0      byte 0
+12    0000                      ends
+13    0000
+14    0000                      module mod
+15    0000                      struct str
+16    0000 ~            f0      word 0
+17    0000 ~            f1      word 0
+18    0000 ~            f2      word 0
+19    0000 ~                    word 0
+20    0000                      ends
+21    0000
+22    0000                      ;offsets
+23    0000 08                   db str
+24    0001 00                   db str.f0
+25    0002 02                   db str.f1
+26    0003 04                   db str.f2
+27    0004
+28    0004 02                   db str1
+29    0005 01                   db str1.f0
+30    0006                      endmod
+31    0006
+32    0006 03                   db str
+33    0007 00                   db str.f0
+34    0008 01                   db str.f1
+35    0009 08                   db mod.str
+36    000A 00                   db mod.str.f0
+37    000B 02                   db mod.str.f1
+38    000C 04                   db mod.str.f2
+39    000D
+40    000D                      ;usage
+41    000D 01 02 03     usestr  str 1,2,3
+42    0010              ;EDITED: seems to work in v1.11 (original comment "TODO: fix structs usage without labels")
+43    0010 04 05                str1 4,5
+44    0012
+# file closed: structure.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0003   str
+0x0000   str.f0
+0x0001   str.f1
+0x0002   str1
+0x0001   str1.f0
+0x0008   mod.str
+0x0000   mod.str.f0
+0x0002   mod.str.f1
+0x0004   mod.str.f2
+0x000D X usestr
+0x000D X usestr.f0
+0x000E X usestr.f1

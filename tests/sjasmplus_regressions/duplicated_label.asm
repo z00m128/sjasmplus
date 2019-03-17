@@ -1,0 +1,2 @@
+lab     nop
+lab     ret

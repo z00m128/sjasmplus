@@ -1,0 +1,31 @@
+# file opened: define.asm
+ 1    0000                      device zxspectrum128
+ 2    0000
+ 3    0000                      org #8000
+ 4    8000
+ 5    8000                      DEFINE Scalar db 1
+define.asm(6): warning: [Macro argument parser] empty value: ,db 2,db 3,db 4
+ 6    8000                      DEFARRAY Array,db 2,db 3,db 4
+ 7    8000
+ 8    8000 01                   Scalar
+ 9    8001 04                   Array[3]
+10    8002 03                   Array[2]
+11    8003 02                   Array[1]
+12    8004 ~                    Array[0]
+define.asm(13): error: [ARRAY] Expression error: 
+13    8004 ~                    Array
+14    8004
+15    8004              ; original test has invalid syntax of DEFARRAY (by Docs definition), when "fixed":
+16    8004                      DEFARRAY Array2 db 2,db 3,db 4
+define.asm(17): error: Cell of array not found
+17    8004 ~                    Array2[3]
+18    8004 04                   Array2[2]
+19    8005 03                   Array2[1]
+20    8006 02                   Array2[0]
+define.asm(21): error: [ARRAY] Expression error: 
+21    8007 ~                    Array2
+22    8007
+# file closed: define.asm
+
+Value    Label
+------ - -----------------------------------------------------------

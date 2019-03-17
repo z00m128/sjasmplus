@@ -1,0 +1,22 @@
+# file opened: labels.asm
+ 1    0000                      device zxspectrum128
+ 2    0000
+ 3    0000                      org #8000
+ 4    8000 18 01                jr label
+ 5    8002 00           .label  nop
+ 6    8003 C9           label   ret
+ 7    8004
+ 8    8004                      module mod
+ 9    8004 04 80        label   dw label
+10    8006 03 80        .label  dw @label
+11    8008 06 80                dw .label
+12    800A                      endmod
+13    800A
+# file closed: labels.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8003   label
+0x8002 X _.label
+0x8004   mod.label
+0x8006   mod.label.label

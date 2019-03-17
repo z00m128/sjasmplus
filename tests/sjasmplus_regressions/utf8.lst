@@ -1,0 +1,19 @@
+# file opened: utf8.asm
+1     0000                      device zxspectrum128
+2     0000
+3     0000                      org #8000
+4     8000              ;комментарии на UTF-8
+5     8000
+6     8000 D0 BA D0 BE  string  db "кодировка UTF-8",0
+6     8004 D0 B4 D0 B8
+6     8008 D1 80 D0 BE
+6     800C D0 B2 D0 BA
+6     8010 D0 B0 20 55
+6     8014 54 46 2D 38
+6     8018 00
+7     8019
+# file closed: utf8.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000 X string

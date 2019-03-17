@@ -1,0 +1,43 @@
+# file opened: module.asm
+ 1    0000                      device zxspectrum128
+ 2    0000
+ 3    0000                      org #8000
+ 4    8000 00 80        label   dw $
+ 5    8002
+ 6    8002                      module l1
+ 7    8002 02 80        label   dw $
+ 8    8004
+ 9    8004                      module l11
+10    8004 04 80        label   dw $
+11    8006
+12    8006                      module l111
+13    8006 06 80        label   dw $
+14    8008                      endmod
+15    8008
+16    8008                      module l112
+17    8008 08 80        label   dw $
+18    800A                      endmod
+19    800A
+20    800A                      endmod
+21    800A
+22    800A                      module l12
+23    800A 0A 80        label   dw $
+24    800C                      endmod
+25    800C
+26    800C                      endmodule
+27    800C
+28    800C                      module l2
+29    800C 0C 80        label   dw $
+30    800E                      endmodule
+31    800E
+# file closed: module.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000 X label
+0x8002 X l1.label
+0x8004 X l1.l11.label
+0x8006 X l1.l11.l111.label
+0x8008 X l1.l11.l112.label
+0x800A X l1.l12.label
+0x800C X l2.label
