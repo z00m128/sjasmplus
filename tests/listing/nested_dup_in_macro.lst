@@ -1,0 +1,27 @@
+# file opened: nested_dup_in_macro.asm
+ 1    0000              	MACRO pokus count1,count2,data
+ 2    0000 ~                    DUP count1
+ 3    0000 ~                        DUP count2
+ 4    0000 ~                            db data
+ 5    0000 ~                        EDUP
+ 6    0000 ~                    EDUP
+ 7    0000              	ENDM
+ 8    0000
+ 9    0000              	pokus 2,3,#FF
+ 9    0000             >        DUP count1
+ 9    0000             >            DUP count2
+ 9    0000 FF          >                db data
+ 9    0001 FF          >                db data
+ 9    0002 FF          >                db data
+ 9    0003             >            EDUP
+ 9    0003             >            DUP count2
+ 9    0003 FF          >                db data
+ 9    0004 FF          >                db data
+ 9    0005 FF          >                db data
+ 9    0006             >            EDUP
+ 9    0006             >        EDUP
+10    0006
+# file closed: nested_dup_in_macro.asm
+
+Value    Label
+------ - -----------------------------------------------------------

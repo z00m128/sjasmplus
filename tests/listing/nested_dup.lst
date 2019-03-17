@@ -1,0 +1,26 @@
+# file opened: nested_dup.asm
+1     0000              cnt = 0
+2     0000                DUP 2
+3     0000             >  DUP 3
+4     0000 00          >  db  cnt
+5     0001             >cnt = cnt+1
+4     0001 01          >  db  cnt
+5     0002             >cnt = cnt+1
+4     0002 02          >  db  cnt
+5     0003             >cnt = cnt+1
+6     0003             >  EDUP
+3     0003             >  DUP 3
+4     0003 03          >  db  cnt
+5     0004             >cnt = cnt+1
+4     0004 04          >  db  cnt
+5     0005             >cnt = cnt+1
+4     0005 05          >  db  cnt
+5     0006             >cnt = cnt+1
+6     0006             >  EDUP
+7     0006                EDUP
+8     0006
+# file closed: nested_dup.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0006   cnt
