@@ -1,0 +1,47 @@
+# file opened: disp_missed_code.asm
+ 1    0000                      device zxspectrum128
+ 2    0000
+ 3    0000                      org #7ff1
+ 4    7FF1              start
+ 5    7FF1                      disp #1eb4
+ 6    1EB4
+ 7    1EB4 3E 77                ld a,77h
+ 8    1EB6 D3 03                out (3),a
+ 9    1EB8 DB 04        wdn     in a,(4)
+10    1EBA 17                   rla
+11    1EBB 38 FB                jr c,wdn
+12    1EBD C9                   ret
+13    1EBE
+14    1EBE DB 04        wdy	in a,(4)
+15    1EC0 17           	rla
+16    1EC1 30 FB        	jr nc,wdy
+17    1EC3 C9           	ret
+18    1EC4
+19    1EC4
+20    1EC4 F3           	di
+21    1EC5 ED 73 34 12  	ld (#1234),sp
+22    1EC9 3E 77                ld a,77h
+23    1ECB D3 03                out (3),a
+24    1ECD 3E 77                ld a,77h
+25    1ECF D3 03                out (3),a
+26    1ED1 3E 77                ld a,77h
+27    1ED3 D3 03                out (3),a
+28    1ED5 3E 77                ld a,77h
+29    1ED7 D3 03                out (3),a
+30    1ED9 20 68 65 6C  	db ' hello! '
+30    1EDD 6C 6F 21 20
+31    1EE1
+32    1EE1              	ent
+33    801E
+34    801E              len equ $-start
+35    801E
+36    801E                      savebin "disp_missed_code.bin",start,len
+37    801E
+# file closed: disp_missed_code.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x7FF1   start
+0x1EB8   wdn
+0x1EBE   wdy
+0x002D   len
