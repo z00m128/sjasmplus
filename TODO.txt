@@ -20,8 +20,9 @@ Z80: multi-argument/strict: introduce the options
 
 FIXME in sources mark further points worth refactoring
 
-STRUCT test + fix bugs
-- new feature: ?warning ked instancujes so zlym fyzicky align?
+FIXME: synerr = 0; trick to prevent Syntax Error in ParseExpression => refactor!
+
+STRUCT + new feature: ?warning ked instancujes so zlym fyzicky align?
 
 "--lst" bez hodnoty nech spravi default nazov sam
   ==> needs tests (badly, was bugged a lot during development)

@@ -357,6 +357,37 @@ int ParseExpression(char*& p, aint& nval) {
 	return 0;
 }
 
+int ParseExpressionNoSyntaxError(char*& lp, aint& val) {
+	int osynerr = synerr;
+	synerr = 0;
+	int ret_val = ParseExpression(lp, val);
+	synerr = osynerr;
+	return ret_val;
+}
+
+void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
+	SkipBlanks(src);
+	const char * const oldSrc = src;
+	fill = -1;
+	if (!ParseExpression(src, alignment)) {
+		alignment = -1;
+		return;
+	}
+	// check if alignment value is power of two (0..15-th power only)
+	if (alignment < 1 || (1<<15) < alignment || (alignment & (alignment-1))) {
+		Error("[ALIGN] Illegal align", oldSrc, SUPPRESS);
+		alignment = 0;
+		return;
+	}
+	if (!comma(src)) return;
+	if (!ParseExpression(lp, fill)) {
+		fill = -1;
+	} else if (fill < 0 || 255 < fill) {
+		Error("[ALIGN] Illegal align fill-byte", oldSrc, SUPPRESS);
+		fill = -1;
+	}
+}
+
 static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
 	char* rp = nl,* nid,* kp,* ver;
@@ -764,7 +795,6 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 }
 
 void ParseStructMember(CStructure* st) {
-	CStructureEntry2* smp;
 	aint val, len;
 	bp = lp;
 	switch (GetStructMemberId(lp)) {
@@ -776,47 +806,48 @@ void ParseStructMember(CStructure* st) {
 			if (!ParseExpression(lp, val)) {
 				val = 0; Error("[STRUCT] Expression expected");
 			}
+			check8(val);
+			val &= 255;
 		} else {
-			val = 0;
+			val = -1;
 		}
-		check8(val);
-		smp = new CStructureEntry2(st->noffset, len, val & 255, SMEMBBLOCK);
-		st->AddMember(smp);
+		st->AddMember(new CStructureEntry2(st->noffset, len, val, SMEMBBLOCK));
 		break;
 	case SMEMBBYTE:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		} check8(val);
-		smp = new CStructureEntry2(st->noffset, 1, val, SMEMBBYTE);
-		st->AddMember(smp);
+		st->AddMember(new CStructureEntry2(st->noffset, 1, val, SMEMBBYTE));
 		break;
 	case SMEMBWORD:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		} check16(val);
-		smp = new CStructureEntry2(st->noffset, 2, val, SMEMBWORD);
-		st->AddMember(smp);
+		st->AddMember(new CStructureEntry2(st->noffset, 2, val, SMEMBWORD));
 		break;
 	case SMEMBD24:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		} check24(val);
-		smp = new CStructureEntry2(st->noffset, 3, val, SMEMBD24);
-		st->AddMember(smp);
+		st->AddMember(new CStructureEntry2(st->noffset, 3, val, SMEMBD24));
 		break;
 	case SMEMBDWORD:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		}
-		smp = new CStructureEntry2(st->noffset, 4, val, SMEMBDWORD);
-		st->AddMember(smp);
+		st->AddMember(new CStructureEntry2(st->noffset, 4, val, SMEMBDWORD));
 		break;
 	case SMEMBALIGN:
-		if (!ParseExpression(lp, val)) {
-			val = 4;
-		}
-		st->noffset += ((~st->noffset + 1) & (val - 1));
+	{
+		aint val, fill;
+		ParseAlignArguments(lp, val, fill);
+		if (-1 == val) val = 4;
+		aint bytesToAdvance = (~st->noffset + 1) & (val - 1);
+		if (bytesToAdvance < 1) break;		// already aligned, nothing to do
+		// create alignment block
+		st->AddMember(new CStructureEntry2(st->noffset, bytesToAdvance, fill, SMEMBBLOCK));
 		break;
+	}
 	default:
 		char* pp = lp,* n;
 		int gl = 0;

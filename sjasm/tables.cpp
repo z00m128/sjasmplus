@@ -946,7 +946,7 @@ void CMacroDefineTable::FreeArray( char** aArray, int aCount )
 	{
 		for ( int i = 0; i<aCount; i++ )
 		{
-			delete [] aArray[ i ];
+			delete[] aArray[ i ];
 		}
 	}
 	delete aArray;
@@ -1217,172 +1217,108 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 	ip = new CStructureEntry2(noffset, 0, 0, SMEMBPARENCLOSE); AddMember(ip);
 }
 
-void CStructure::deflab() {
-	char ln[LINEMAX], sn[LINEMAX], * p, * op;
-	aint oval;
-	CStructureEntry1* np = mnf;
-	STRCPY(sn, LINEMAX, "@");
-	STRCAT(sn, LINEMAX, id);
-	op = sn;
-	p = ValidateLabel(sn, 1);
+static void InsertSingleStructLabel(char *name, const aint value) {
+	char *op = name, *p;
+	if (!(p = ValidateLabel(op, 1))) {
+		Error("Illegal labelname", op, EARLY);
+	}
 	if (pass == LASTPASS) {
+		aint oval;
 		if (!GetLabelValue(op, oval)) {
 			Error("Internal error. ParseLabel()", op, FATAL);
 		}
-		if (noffset != oval) {
+		if (value != oval) {
 			Error("Label has different value in pass 2", temp);
 		}
 	} else {
-		if (!LabelTable.Insert(p, noffset)) {
+		if (!LabelTable.Insert(p, value)) {
 			Error("Duplicate label", tp, EARLY);
 		}
 	}
-	free(p);
-	STRCAT(sn, LINEMAX, ".");
-	while (np) {
-		STRCPY(ln, LINEMAX, sn);
-		STRCAT(ln, LINEMAX, np->naam);
-		op = ln;
-		if (!(p = ValidateLabel(ln, 1))) {
-			Error("Illegal labelname", ln, EARLY);
-		}
-		if (pass == LASTPASS) {
-			if (!GetLabelValue(op, oval)) {
-				Error("Internal error. ParseLabel()", op, FATAL);
-			}
-			if (np->offset != oval) {
-				Error("Label has different value in pass 2", temp);
-			}
-		} else {
-			if (!LabelTable.Insert(p, np->offset)) {
-				Error("Duplicate label", tp, EARLY);
-			}
-		}
-		free(p);
-		np = np->next;
+	delete[] p;
+}
+
+static void InsertStructSubLabels(const char* mainName, const CStructureEntry1* members, const aint address = 0) {
+	char ln[LINEMAX];
+	while (members) {
+		STRCPY(ln, LINEMAX, mainName);
+		STRCAT(ln, LINEMAX, members->naam);
+		InsertSingleStructLabel(ln, members->offset + address);
+		members = members->next;
 	}
+}
+
+void CStructure::deflab() {
+	char sn[LINEMAX] = { '@' };
+	STRCPY(sn+1, LINEMAX, id);
+	InsertSingleStructLabel(sn, noffset);
+	STRCAT(sn, LINEMAX, ".");
+	InsertStructSubLabels(sn, mnf);
 }
 
 void CStructure::emitlab(char* iid) {
-	char ln[LINEMAX], sn[LINEMAX], * p, * op;
-	aint oval;
-	CStructureEntry1* np = mnf;
+	char sn[LINEMAX];
 	STRCPY(sn, LINEMAX, iid);
-	op = p = sn;
-	p = ValidateLabel(p, 1);
-	if (pass == LASTPASS) {
-		if (!GetLabelValue(op, oval)) {
-			Error("Internal error. ParseLabel()", op, FATAL);
-		}
-		if (CurAddress != oval) {
-			Error("Label has different value in pass 2", temp);
-		}
-	} else {
-		if (!LabelTable.Insert(p, CurAddress)) {
-			Error("Duplicate label", tp, EARLY);
-		}
-	}
-	free(p);
+	InsertSingleStructLabel(sn, CurAddress);
 	STRCAT(sn, LINEMAX, ".");
-	while (np) {
-		STRCPY(ln, LINEMAX, sn);
-		STRCAT(ln, LINEMAX, np->naam);
-		op = ln;
-		if (!(p = ValidateLabel(ln, 1))) {
-			Error("Illegal labelname", ln, EARLY);
-		}
-		if (pass == LASTPASS) {
-			if (!GetLabelValue(op, oval)) {
-				Error("Internal error. ParseLabel()", op, FATAL);
-			}
-			if (np->offset + CurAddress != oval) {
-				Error("Label has different value in pass 2", temp);
-			}
-		} else {
-			if (!LabelTable.Insert(p, np->offset + CurAddress)) {
-				Error("Duplicate label", tp, EARLY);
-			}
-		}
-		free(p);
-		np = np->next;
-	}
+	InsertStructSubLabels(sn, mnf, CurAddress);
 }
 
 void CStructure::emitmembs(char*& p) {
-	int* e,et = 0,t;
-	e = new int[noffset + 1];
-	CStructureEntry2* ip = mbf;
 	aint val;
 	int haakjes = 0;
-	SkipBlanks(p); if (*p && *p == '{') {
-				   	++haakjes; ++p;
-				   }
+	SkipBlanks(p);
+	if (*p == '{') {
+		++haakjes; ++p;
+	}
+	CStructureEntry2* ip = mbf;
 	while (ip) {
 		switch (ip->type) {
 		case SMEMBBLOCK:
-			t = ip->len;
-			while (t--) {
-				e[et++] = ip->def;
-			}
+			EmitBlock(ip->def != -1 ? ip->def : 0, ip->len, ip->def == -1, true);
 			break;
-
 		case SMEMBBYTE:
-			synerr = 0;
-			if (!ParseExpression(p, val)) {
-				val = ip->def;
-			}
-			synerr = 1;
-			e[et++] = val & 0xFF;
-			check8(val); comma(p);
+			if (!ParseExpressionNoSyntaxError(p, val)) val = ip->def;
+			check8(val);
+			EmitByte(val & 0xFF);
+			comma(p);
 			break;
 		case SMEMBWORD:
-			synerr = 0;
-			if (!ParseExpression(p, val)) {
-				val = ip->def;
-			}
-			synerr = 1;
-			e[et++] = val & 0xFF; e[et++] = (val >> 8) & 0xFF;
-			check16(val); comma(p);
+			if (!ParseExpressionNoSyntaxError(p, val)) val = ip->def;
+			check16(val);
+			EmitWord(val & 0xFFFF);
+			comma(p);
 			break;
 		case SMEMBD24:
-			synerr = 0; if (!ParseExpression(p, val)) {
-							val = ip->def;
-						} synerr = 1;
-			e[et++] = val & 0xFF; e[et++] = (val >> 8) & 0xFF; e[et++] = (val >> 16) & 0xFF;
-			check24(val); comma(p);
+			if (!ParseExpressionNoSyntaxError(p, val)) val = ip->def;
+			check24(val);
+			EmitByte(val & 0xFF);
+			EmitWord((val>>8) & 0xFFFF);
+			comma(p);
 			break;
 		case SMEMBDWORD:
-			synerr = 0; if (!ParseExpression(p, val)) {
-							val = ip->def;
-						} synerr = 1;
-			e[et++] = val & 0xFF; e[et++] = (val >> 8) & 0xFF; e[et++] = (val >> 16) & 0xFF; e[et++] = (val >> 24) & 0xFF;
+			if (!ParseExpressionNoSyntaxError(p, val)) val = ip->def;
+			EmitWord(val & 0xFFFF);
+			EmitWord((val>>16) & 0xFFFF);
 			comma(p);
 			break;
 		case SMEMBPARENOPEN:
-			SkipBlanks(p); if (*p == '{') {
-						   	++haakjes; ++p;
-						   } break;
+			SkipBlanks(p);
+			if (*p == '{') { ++haakjes; ++p; }
+			break;
 		case SMEMBPARENCLOSE:
-			SkipBlanks(p); if (haakjes && *p == '}') {
-						   	--haakjes; ++p; comma(p);
-						   } break;
+			SkipBlanks(p);
+			if (haakjes && *p == '}') { --haakjes; ++p; comma(p); }
+			break;
 		default:
 			ErrorInt("Internal Error CStructure::emitmembs", ip->type, FATAL);
 		}
 		ip = ip->next;
 	}
 	while (haakjes--) {
-		if (!need(p, '}')) {
-			Error("closing } missing");
-		}
+		if (!need(p, '}')) Error("closing } missing");
 	}
-	SkipBlanks(p);
-	if (*p) Error("[STRUCT] Syntax error - too many arguments?");
-	if (et) {
-		e[et] = -1;
-		EmitBytes(e);
-	}
-	delete e;
+	if (!SkipBlanks(p)) Error("[STRUCT] Syntax error - too many arguments?");
 }
 
 void CStructureTable::Init() {
@@ -1406,7 +1342,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 	}
 	strs[(unsigned char)*sp] = new CStructure(naam, sp, idx, 0, gl, strs[(unsigned char)*sp]);
 	if (no) {
-		strs[(unsigned char)*sp]->AddMember(new CStructureEntry2(0, no, 0, SMEMBBLOCK));
+		strs[(unsigned char)*sp]->AddMember(new CStructureEntry2(0, no, -1, SMEMBBLOCK));
 	}
 	return strs[(unsigned char)*sp];
 }

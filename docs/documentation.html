@@ -1874,6 +1874,10 @@ Main
 
       <p>All fields are optional. Lines without label should start with
       whitespace.</p>
+
+      <p>When non zero <code class="code">offset</code> is used, it acts as if 
+       <a class="link" href="#st_block">BLOCK</a> with <code class="code">length</code> equal to
+       <code class="code">offset</code> was defined as first member of structure.</p>
     </div>
 
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp33"></a>Instructions</h2></div></div></div>
@@ -1897,13 +1901,20 @@ Main
             </dd><dt><span class="term"><a name="st_dword"></a>DWORD [&lt;defaultvalue&gt;]</span></dt><dd>
               <p>To define a four byte member. The defaultvalue is used
               when no initialisation value is given when the structure is
-              declared. (DD and DEFD may be used instead of WORD).</p>
+              declared. (DD and DEFD may be used instead of DWORD).</p>
             </dd><dt><span class="term"><a name="st_block"></a>BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</span></dt><dd>
-              <p>To define an member of the specified number of bytes.
-              ('#', DS and DEFS may be used instead of WORD).</p>
-            </dd><dt><span class="term"><a name="st_align"></a>ALIGN [&lt;expression&gt;]</span></dt><dd>
-              <p>To align the offset. If the expression is omitted, 4 is
-              assumed. ('##' May be used instead of ALIGN).</p>
+              <p>To define an member of the specified number of bytes. Arguments are set
+                  when defining the current structure, and are not part of init values when
+                  the structure is later used.
+              ('#', DS and DEFS may be used instead of BLOCK).</p>
+
+              <p>If <code class="code">fillbyte</code> is omitted, the device memory content in the
+                  block area is preserved (not zeroed).</p>
+            </dd><dt><span class="term"><a name="st_align"></a>ALIGN [&lt;expression&gt;[, &lt;byte&gt;]]</span></dt><dd>
+              <p>To <a class="link" href="#po_align">align</a> the offset. If the expression
+                  is omitted, 4 is assumed. ('##' May be used instead of ALIGN).</p>
+
+              <p>If the byte is omitted, device memory content is preserved (not zeroed).</p>
             </dd><dt><span class="term">&lt;structure name&gt; [&lt;init values&gt;]</span></dt><dd>
               <p>It is possible to nest structures, and give new defaults
               for the BYTE and WORD members.</p>
@@ -1913,7 +1924,7 @@ Main
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp34"></a>Examples</h2></div></div></div>
       
 
-      <div class="example"><a name="idp1249"></a><p class="title"><b>Example 6.1. </b></p><div class="example-contents">
+      <div class="example"><a name="idp1258"></a><p class="title"><b>Example 6.1. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SCOLOR
@@ -1928,7 +1939,7 @@ BLUE	BYTE 6
 SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1256"></a><p class="title"><b>Example 6.2. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1265"></a><p class="title"><b>Example 6.2. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SDOT
@@ -1948,7 +1959,7 @@ SDOT.C.RED	EQU 2 ; offset
 SDOT.C.GREEN	EQU 3 ; offset
 SDOT.C.BLUE	EQU 4 ; offset
 </pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1263"></a><p class="title"><b>Example 6.3. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1272"></a><p class="title"><b>Example 6.3. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SPOS,4
@@ -1964,7 +1975,7 @@ AD	WORD
 SPOS.X	EQU  4 ; offset
 SPOS.Y	EQU  6 ; offset
 SPOS.AD	EQU  8 ; offset</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1270"></a><p class="title"><b>Example 6.4. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1279"></a><p class="title"><b>Example 6.4. </b></p><div class="example-contents">
           
 
           <p>When a structure is defined it is possible to declare labels
@@ -2021,7 +2032,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp37"></a>How to use?</h2></div></div></div>
       
 
-      <p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a name="idp1295"></a><p class="title"><b>Example 7.1. Hello World!</b></p><div class="example-contents">
+      <p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a name="idp1304"></a><p class="title"><b>Example 7.1. Hello World!</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    LUA
@@ -2197,7 +2208,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
 
       <p></p>
 
-      <div class="example"><a name="idp1527"></a><p class="title"><b>Example 7.2. Variables doesn't clear in new passes of the compiler</b></p><div class="example-contents">
+      <div class="example"><a name="idp1536"></a><p class="title"><b>Example 7.2. Variables doesn't clear in new passes of the compiler</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    LUA PASS1
@@ -2214,7 +2225,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
        print (v)
 -- out to console: 2
     ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1531"></a><p class="title"><b>Example 7.3. To generate some code you need to generate it in all
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1540"></a><p class="title"><b>Example 7.3. To generate some code you need to generate it in all
           passes</b></p><div class="example-contents">
           
 
@@ -2228,7 +2239,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
         _pl(".savesp: LD SP,0")
         _pc("RET")
     ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1535"></a><p class="title"><b>Example 7.4. Declare function and use it</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1544"></a><p class="title"><b>Example 7.4. Declare function and use it</b></p><div class="example-contents">
           
 
           <pre class="programlisting">     LUA
@@ -2251,7 +2262,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
      LUA
          savetape_mytype("tapefiles/myprogram.tape", _c("StartGameLabel"))
      ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1539"></a><p class="title"><b>Example 7.5. Simple sample :)</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1548"></a><p class="title"><b>Example 7.5. Simple sample :)</b></p><div class="example-contents">
           
 
           <pre class="programlisting">	LUA

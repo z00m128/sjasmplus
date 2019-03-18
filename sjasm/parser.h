@@ -29,6 +29,8 @@
 // parser.h
 
 int ParseExpression(char*& lp, aint& val);
+int ParseExpressionNoSyntaxError(char*& lp, aint& val);
+void ParseAlignArguments(char* & src, aint & alignment, aint & fill);
 int ParseDirective(bool beginningOfLine = 0);
 int ParseDirective_REPT();
 void ParseInstruction();

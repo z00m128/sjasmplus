@@ -460,21 +460,18 @@ void EmitWords(int* words) {
 	}
 }
 
-void EmitBlock(aint byte, aint len, bool preserveDeviceMemory) {
-	if (len) EB[nEB++] = byte;
-
-	if (len < 0)
-	{
+void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, bool emitAllToListing) {
+	if (len <= 0) {
 		CurAddress = (CurAddress + len) & 0xFFFF;
 		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
 		CheckPage();
+		return;
 	}
-	else while (len--)
-	{
-		CheckRamLimitExceeded();
+	if (!emitAllToListing) EB[nEB++] = byte;	// show only one byte in listing
 
-		if (pass == LASTPASS)
-		{
+	while (len--) {
+		CheckRamLimitExceeded();
+		if (pass == LASTPASS) {
 			WriteBuffer[WBLength++] = (char)byte;
 			if (WBLength == DESTBUFLEN) WriteDest();
 
@@ -485,6 +482,7 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory) {
 
 				MemoryPointer++;
 			}
+			if (emitAllToListing) EB[nEB++] = DeviceID ? MemoryPointer[-1] : byte;
 		}
 		++CurAddress;
 		if (PseudoORG) ++adrdisp;

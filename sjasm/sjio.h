@@ -67,7 +67,7 @@ void EmitByte(int byte);
 void EmitWord(int word);
 void EmitBytes(int* bytes);
 void EmitWords(int* words);
-void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false);
+void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, bool emitAllToListing = false);
 void OpenFile(char* nfilename, bool systemPathsBeforeCurrent = false);
 void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent);
 void Close();

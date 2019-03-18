@@ -2673,6 +2673,10 @@ Main
 
       <para>All fields are optional. Lines without label should start with
       whitespace.</para>
+
+      <para>When non zero <code>offset</code> is used, it acts as if 
+       <link linkend="st_block">BLOCK</link> with <code>length</code> equal to
+       <code>offset</code> was defined as first member of structure.</para>
     </section>
 
     <section>
@@ -2718,7 +2722,7 @@ Main
             <listitem>
               <para>To define a four byte member. The defaultvalue is used
               when no initialisation value is given when the structure is
-              declared. (DD and DEFD may be used instead of WORD).</para>
+              declared. (DD and DEFD may be used instead of DWORD).</para>
             </listitem>
           </varlistentry>
 
@@ -2726,17 +2730,24 @@ Main
             <term><anchor id="st_block" />BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</term>
 
             <listitem>
-              <para>To define an member of the specified number of bytes.
-              ('#', DS and DEFS may be used instead of WORD).</para>
+              <para>To define an member of the specified number of bytes. Arguments are set
+                  when defining the current structure, and are not part of init values when
+                  the structure is later used.
+              ('#', DS and DEFS may be used instead of BLOCK).</para>
+
+              <para>If <code>fillbyte</code> is omitted, the device memory content in the
+                  block area is preserved (not zeroed).</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="st_align" />ALIGN [&lt;expression&gt;]</term>
+            <term><anchor id="st_align" />ALIGN [&lt;expression&gt;[, &lt;byte&gt;]]</term>
 
             <listitem>
-              <para>To align the offset. If the expression is omitted, 4 is
-              assumed. ('##' May be used instead of ALIGN).</para>
+              <para>To <link linkend="po_align">align</link> the offset. If the expression
+                  is omitted, 4 is assumed. ('##' May be used instead of ALIGN).</para>
+
+              <para>If the byte is omitted, device memory content is preserved (not zeroed).</para>
             </listitem>
           </varlistentry>
 
