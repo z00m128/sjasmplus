@@ -199,7 +199,7 @@
 - Fixed END behavior
 - Fixed DEFARRAY to work as documented
 - Fixed and refactored WORD/DWORD/D24
-- Partially fixed STRUCT (to work as documented)
+- Fixed and extended STRUCT
 - Multiple bugfixes in listing generation
 - Multiple bugfixes of internal code
 - Refactored options parser, instruction parser and Warning/Error system
@@ -2730,13 +2730,13 @@ Main
             <term><anchor id="st_block" />BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</term>
 
             <listitem>
-              <para>To define an member of the specified number of bytes. Arguments are set
+              <para>To define a member of the specified number of bytes. Arguments are set
                   when defining the current structure, and are not part of init values when
                   the structure is later used.
               ('#', DS and DEFS may be used instead of BLOCK).</para>
 
-              <para>If <code>fillbyte</code> is omitted, the device memory content in the
-                  block area is preserved (not zeroed).</para>
+              <para>(since v1.11) If <code>fillbyte</code> is omitted, the device memory
+                  content in the block area is preserved (not zeroed).</para>
             </listitem>
           </varlistentry>
 
@@ -2747,7 +2747,7 @@ Main
               <para>To <link linkend="po_align">align</link> the offset. If the expression
                   is omitted, 4 is assumed. ('##' May be used instead of ALIGN).</para>
 
-              <para>If the byte is omitted, device memory content is preserved (not zeroed).</para>
+              <para>(since v1.11) If the byte is omitted, device memory content is preserved (not zeroed).</para>
             </listitem>
           </varlistentry>
 

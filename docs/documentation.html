@@ -139,7 +139,7 @@
 - Fixed END behavior
 - Fixed DEFARRAY to work as documented
 - Fixed and refactored WORD/DWORD/D24
-- Partially fixed STRUCT (to work as documented)
+- Fixed and extended STRUCT
 - Multiple bugfixes in listing generation
 - Multiple bugfixes of internal code
 - Refactored options parser, instruction parser and Warning/Error system
@@ -1903,18 +1903,18 @@ Main
               when no initialisation value is given when the structure is
               declared. (DD and DEFD may be used instead of DWORD).</p>
             </dd><dt><span class="term"><a name="st_block"></a>BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</span></dt><dd>
-              <p>To define an member of the specified number of bytes. Arguments are set
+              <p>To define a member of the specified number of bytes. Arguments are set
                   when defining the current structure, and are not part of init values when
                   the structure is later used.
               ('#', DS and DEFS may be used instead of BLOCK).</p>
 
-              <p>If <code class="code">fillbyte</code> is omitted, the device memory content in the
-                  block area is preserved (not zeroed).</p>
+              <p>(since v1.11) If <code class="code">fillbyte</code> is omitted, the device memory
+                  content in the block area is preserved (not zeroed).</p>
             </dd><dt><span class="term"><a name="st_align"></a>ALIGN [&lt;expression&gt;[, &lt;byte&gt;]]</span></dt><dd>
               <p>To <a class="link" href="#po_align">align</a> the offset. If the expression
                   is omitted, 4 is assumed. ('##' May be used instead of ALIGN).</p>
 
-              <p>If the byte is omitted, device memory content is preserved (not zeroed).</p>
+              <p>(since v1.11) If the byte is omitted, device memory content is preserved (not zeroed).</p>
             </dd><dt><span class="term">&lt;structure name&gt; [&lt;init values&gt;]</span></dt><dd>
               <p>It is possible to nest structures, and give new defaults
               for the BYTE and WORD members.</p>
