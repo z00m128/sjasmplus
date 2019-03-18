@@ -842,6 +842,7 @@ void ParseStructMember(CStructure* st) {
 		aint val, fill;
 		ParseAlignArguments(lp, val, fill);
 		if (-1 == val) val = 4;
+		if (st->maxAlignment < val) st->maxAlignment = val;	// update structure "max alignment"
 		aint bytesToAdvance = (~st->noffset + 1) & (val - 1);
 		if (bytesToAdvance < 1) break;		// already aligned, nothing to do
 		// create alignment block
@@ -859,6 +860,14 @@ void ParseStructMember(CStructure* st) {
 			if (cmphstr(st->naam, n)) {
 				Error("[STRUCT] Use structure itself", NULL, IF_FIRST);
 				break;
+			}
+			if (s->maxAlignment && ((~st->noffset + 1) & (s->maxAlignment - 1))) {
+				// Inserted structure did use ALIGN in definition and it is misaligned here
+				char warnTxt[LINEMAX];
+				SPRINTF3(warnTxt, LINEMAX,
+						 "Struct %s did use ALIGN %d in definition, but here it is misaligned by %ld bytes",
+						 s->naam, s->maxAlignment, ((~st->noffset + 1) & (s->maxAlignment - 1)));
+				Warning(warnTxt);
 			}
 			lp = pp;
 			st->CopyLabels(s);

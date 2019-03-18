@@ -11,7 +11,7 @@ AD      WORD
 
         STRUCT ST2
 ONEB    DB      'a'
-P1      SPOS    { 'bc', 'd', 'ef' }
+P1      SPOS    { 'bc', 'd', 'ef' }     ; will emit warning about misalignment (4 vs 3)
         ENDS
 
     ASSERT ST2.ONEB == 0 && ST2.P1 == 1 && ST2.P1.X == 5 && ST2.P1.Y == 7 && ST2.P1.AD == 13 && ST2 == 15
@@ -33,3 +33,16 @@ POS2    ST2     "\n", {,,"\ne"}
         ; '___!' (block+align), 'e\n' (AD) => final result: "\nPQRScbdW___!e\n"
 
         SAVEBIN "align.bin", POS1, SPOS + ST2
+
+; more misalignment warnings tests
+
+        ORG     0x8000
+NoWarning   SPOS    {1, 2, 3}
+        ORG     0x8001
+Warn3B  SPOS    {1, 2, 3}
+        ORG     0x8002
+Warn2B  SPOS    {1, 2, 3}
+        ORG     0x8003
+Warn1B  SPOS    {1, 2, 3}
+        ORG     0x8004
+NoWarning2  SPOS    {1, 2, 3}

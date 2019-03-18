@@ -1,0 +1,131 @@
+# file opened: align.asm
+ 1    0000                      STRUCT SPOS,4
+ 2    0000 ~            X       WORD
+ 3    0000 ~            Y       BYTE
+ 4    0000 ~                    ALIGN 2
+ 5    0000 ~                    BLOCK   3, '_'
+ 6    0000 ~                    ALIGN 4, '!'
+ 7    0000 ~            AD      WORD
+ 8    0000                      ENDS
+ 9    0000
+10    0000                  ASSERT SPOS.X == 4 && SPOS.Y == 6 && SPOS.AD == 12 && SPOS == 14
+11    0000
+12    0000                      STRUCT ST2
+13    0000 ~            ONEB    DB      'a'
+align.asm(14): warning: Struct SPOS did use ALIGN 4 in definition, but here it is misaligned by 3 bytes
+14    0000 ~            P1      SPOS    { 'bc', 'd', 'ef' }     ; will emit warning about misalignment (4 vs 3)
+15    0000                      ENDS
+16    0000
+17    0000                  ASSERT ST2.ONEB == 0 && ST2.P1 == 1 && ST2.P1.X == 5 && ST2.P1.Y == 7 && ST2.P1.AD == 13 && ST2 == 15
+18    0000
+19    0000                      DEVICE  ZXSPECTRUM48
+20    0000                      ; "old data" in memory (structs will be defined over, to check preservation)
+21    0000                      ORG     0x8000
+22    8000 41 42 43 44          db      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+22    8004 45 46 47 48
+22    8008 49 4A 4B 4C
+22    800C 4D 4E 4F 50
+22    8010 51 52 53 54
+22    8014 55 56 57 58
+22    8018 59 5A
+23    801A 41 42 43 44          db      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+23    801E 45 46 47 48
+23    8022 49 4A 4B 4C
+23    8026 4D 4E 4F 50
+23    802A 51 52 53 54
+23    802E 55 56 57 58
+23    8032 59 5A
+24    8034
+25    8034                      ;; TEST data from structs
+26    8034                      ORG     0x8000
+27    8000
+28    8000 41 42 43 44  POS1    SPOS    '12', '3', '4:'
+28    8004 32 31 33 48
+28    8008 5F 5F 5F 21
+28    800C 3A 34
+29    800E                      ; 4Bx old_value (to reach offset 4), X:0x1234, Y:0x56, 1Bx old_value, AD:0x789A
+30    800E
+31    800E 0A 50 51 52  POS2    ST2     "\n", {,,"\ne"}
+31    8012 53 63 62 64
+31    8016 57 5F 5F 5F
+31    801A 21 65 0A
+32    801D                      ; '\n' (ONEB), then 4x old value (offset), 'cbd' (X,Y), 1x old (align)
+33    801D                      ; '___!' (block+align), 'e\n' (AD) => final result: "\nPQRScbdW___!e\n"
+34    801D
+35    801D                      SAVEBIN "align.bin", POS1, SPOS + ST2
+36    801D
+37    801D              ; more misalignment warnings tests
+38    801D
+39    801D                      ORG     0x8000
+40    8000 41 42 43 44  NoWarning   SPOS    {1, 2, 3}
+40    8004 01 00 02 48
+40    8008 5F 5F 5F 21
+40    800C 03 00
+41    800E                      ORG     0x8001
+align.asm(42): warning: Struct SPOS did use ALIGN 4 in definition, but here it is misaligned by 3 bytes
+42    8001 42 43 44 01  Warn3B  SPOS    {1, 2, 3}
+42    8005 01 00 02 5F
+42    8009 5F 5F 5F 21
+42    800D 03 00
+43    800F                      ORG     0x8002
+align.asm(44): warning: Struct SPOS did use ALIGN 4 in definition, but here it is misaligned by 2 bytes
+44    8002 43 44 01 01  Warn2B  SPOS    {1, 2, 3}
+44    8006 01 00 02 5F
+44    800A 5F 5F 5F 21
+44    800E 03 00
+45    8010                      ORG     0x8003
+align.asm(46): warning: Struct SPOS did use ALIGN 4 in definition, but here it is misaligned by 1 bytes
+46    8003 44 01 01 01  Warn1B  SPOS    {1, 2, 3}
+46    8007 01 00 02 5F
+46    800B 5F 5F 5F 21
+46    800F 03 00
+47    8011                      ORG     0x8004
+48    8004 01 01 01 01  NoWarning2  SPOS    {1, 2, 3}
+48    8008 01 00 02 5F
+48    800C 5F 5F 5F 21
+48    8010 03 00
+49    8012
+# file closed: align.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x000E   SPOS
+0x0004   SPOS.X
+0x0006   SPOS.Y
+0x000C   SPOS.AD
+0x000F   ST2
+0x0000   ST2.ONEB
+0x0001   ST2.P1
+0x0005   ST2.P1.X
+0x0007   ST2.P1.Y
+0x000D   ST2.P1.AD
+0x8000   POS1
+0x8004 X POS1.X
+0x8006 X POS1.Y
+0x800C X POS1.AD
+0x800E X POS2
+0x800E X POS2.ONEB
+0x800F X POS2.P1
+0x8013 X POS2.P1.X
+0x8015 X POS2.P1.Y
+0x801B X POS2.P1.AD
+0x8000 X NoWarning
+0x8004 X NoWarning.X
+0x8006 X NoWarning.Y
+0x800C X NoWarning.AD
+0x8001 X Warn3B
+0x8005 X Warn3B.X
+0x8007 X Warn3B.Y
+0x800D X Warn3B.AD
+0x8002 X Warn2B
+0x8006 X Warn2B.X
+0x8008 X Warn2B.Y
+0x800E X Warn2B.AD
+0x8003 X Warn1B
+0x8007 X Warn1B.X
+0x8009 X Warn1B.Y
+0x800F X Warn1B.AD
+0x8004 X NoWarning2
+0x8008 X NoWarning2.X
+0x800A X NoWarning2.Y
+0x8010 X NoWarning2.AD

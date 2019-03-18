@@ -237,6 +237,7 @@ public:
 	char* naam, * id;
 	int binding;
 	int global;
+	int maxAlignment;
 	aint noffset;
 	void AddLabel(char*);
 	void AddMember(CStructureEntry2*);

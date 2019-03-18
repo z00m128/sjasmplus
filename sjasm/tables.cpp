@@ -1118,6 +1118,7 @@ CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStruct
 		Error("No enough memory!", NULL, FATAL);
 	}
 	binding = idx; next = p; noffset = no; global = ngl;
+	maxAlignment = 0;
 }
 
 void CStructure::AddLabel(char* nnaam) {
@@ -1257,6 +1258,15 @@ void CStructure::deflab() {
 }
 
 void CStructure::emitlab(char* iid) {
+	const aint misalignment = maxAlignment ? ((~CurAddress + 1) & (maxAlignment - 1)) : 0;
+	if (misalignment) {
+		// emitting in misaligned position (considering the ALIGN used to define this struct)
+		char warnTxt[LINEMAX];
+		SPRINTF3(warnTxt, LINEMAX,
+					"Struct %s did use ALIGN %d in definition, but here it is misaligned by %ld bytes",
+					naam, maxAlignment, misalignment);
+		Warning(warnTxt);
+	}
 	char sn[LINEMAX];
 	STRCPY(sn, LINEMAX, iid);
 	InsertSingleStructLabel(sn, CurAddress);
