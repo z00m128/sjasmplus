@@ -468,43 +468,32 @@ void CLabelTable::Dump() {
 
 void CLabelTable::DumpForUnreal() {
 	char ln[LINEMAX], * ep;
-	int page;
 	if (FP_UnrealList == NULL && !FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
 		Error("Error opening file", Options::UnrealLabelListFName, FATAL);
 	}
 	for (int i = 1; i < NextLocation; ++i) {
-		if (LabelTable[i].page != -1) {
-			page = LabelTable[i].page;
-			int lvalue = LabelTable[i].value;
-			if (lvalue >= 0 && lvalue < 0x4000) {
-				page = -1;
-			} else if (lvalue >= 0x4000 && lvalue < 0x8000) {
-				page = 5;
-				lvalue -= 0x4000;
-			} else if (lvalue >= 0x8000 && lvalue < 0xc000) {
-				page = 2;
-				lvalue -= 0x8000;
-			} else {
-				lvalue -= 0xc000;
-			}
-			ep = ln;
-			if (page != -1) {
-				*(ep++) = '0';
-				*(ep++) = page + '0';
-			} else if (page > 9) {
-				*(ep++) = ((int)fmod((float)page, 7)) + '0';
-				*(ep++) = ((int)floor((float)(page / 10))) + '0';
-			} else {
-				continue;
-			}
-			//*(ep++)='R';
-			*(ep++) = ':';
-			PrintHEXAlt(ep, lvalue);
-			*(ep++) = ' ';
-			STRCPY(ep, LINEMAX-(ep-ln), LabelTable[i].name);
-			STRCAT(ln, LINEMAX, "\n");
-			fputs(ln, FP_UnrealList);
-		}
+		if (-1 == LabelTable[i].page) continue;
+		const int pages48k[] = { -1, 5, 2, LabelTable[i].page };
+		int page = pages48k[(LabelTable[i].value>>14) & 3];
+		int lvalue = LabelTable[i].value & 0x3FFF;
+		ep = ln;
+		//TODO Ped7g: undecipherable intent of old code (it's unclear for page > 9, the code doesn't make sense)
+// 		if (page != -1) {
+// 			*(ep++) = '0';
+// 			*(ep++) = page + '0';
+// 		} else if (page > 9) {
+// 			*(ep++) = ((int)fmod((float)page, 7)) + '0';
+// 			*(ep++) = ((int)floor((float)(page / 10))) + '0';
+// 		} else {
+// 			continue;
+// 		}
+		if (0 <= page) ep += sprintf(ep, "%02d", page&255);
+		*(ep++) = ':';
+		PrintHEXAlt(ep, lvalue);
+		*(ep++) = ' ';
+		STRCPY(ep, LINEMAX-(ep-ln), LabelTable[i].name);
+		STRCAT(ep, LINEMAX, "\n");
+		fputs(ln, FP_UnrealList);
 	}
 	fclose(FP_UnrealList);
 }
