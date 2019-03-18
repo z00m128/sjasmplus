@@ -125,8 +125,9 @@ int comma(char*& p) {
 	return 1;
 }
 
-static const char brackets_b[] = BRACKETS_B;
-static const char brackets_e[] = BRACKETS_E;
+//enum EBracketType          { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
+static const char brackets_b[] = { 0,      '(',      '{',      '[',       0 };
+static const char brackets_e[] = { 0,      ')',      '}',      ']',       0 };
 static int expectedAddressClosingBracket = -1;
 
 // memory-address bracket opener (only "(" and "[" types supported)
@@ -632,8 +633,9 @@ static const char goodSlash = '/';
 #endif
 
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
-static const char delimiters_b[] = DELIMITERS_B;
-static const char delimiters_e[] = DELIMITERS_E;
+//enum EDelimiterType          { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
+static const char delimiters_b[] = { ' ',    '"',       '\'',          '<',      0 };
+static const char delimiters_e[] = { ' ',    '"',       '\'',          '>',      0 };
 
 char* GetFileName(char*& p, bool convertslashes) {
 	char* newFn = new char[LINEMAX];

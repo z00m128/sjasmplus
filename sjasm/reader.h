@@ -26,13 +26,10 @@
 
 */
 
-enum EDelimiterType { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
-#define DELIMITERS_B { ' ',    '"',       '\'',          '<',      0 }
-#define DELIMITERS_E { ' ',    '"',       '\'',          '>',      0 }
+#pragma once
 
+enum EDelimiterType { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
 enum EBracketType { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
-#define BRACKETS_B { 0,      '(',      '{',      '[',       0 }
-#define BRACKETS_E { 0,      ')',      '}',      ']',       0 }
 
 bool White(const char c);
 bool White();
