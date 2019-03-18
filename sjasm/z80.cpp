@@ -57,9 +57,7 @@ namespace Z80 {
 			if (*lp == '#' && *(lp + 1) == '#') {
 				lp += 2;
 				aint val;
-				synerr = 0; if (!ParseExpression(lp, val)) {
-								val = 4;
-							} synerr = 1;
+				if (!ParseExpressionNoSyntaxError(lp, val)) val = 4;
 				AddressOfMAP += ((~AddressOfMAP + 1) & (val - 1));
 				return;
 			} else {

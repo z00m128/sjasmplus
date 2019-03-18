@@ -78,7 +78,7 @@ extern int adrdisp, PseudoORG;
 extern char* MemoryRAM, * MemoryPointer;
 extern int MemoryCPage, MemoryPagesCount, StartAddress;
 extern aint MemorySize;
-extern int macronummer, lijst, reglenwidth, synerr;
+extern int macronummer, lijst, reglenwidth;
 extern aint CurAddress, AddressOfMAP, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
 
 extern void (*GetCPUInstruction)(void);

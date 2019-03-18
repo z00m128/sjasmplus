@@ -32,6 +32,8 @@
 
 char dirDEFl[] = "def", dirDEFu[] = "DEF";
 
+static bool synerr = true;	// flag whether ParseExpression should report syntax error with Error()
+
 int ParseExpPrim(char*& p, aint& nval) {
 	int res = 0;
 	if (SkipBlanks(p)) {
@@ -78,10 +80,7 @@ int ParseExpPrim(char*& p, aint& nval) {
 
 		return 1;
 	} else if (!(res = GetCharConst(p, nval))) {
-		if (synerr) {
-			Error("Syntax error", p, IF_FIRST);
-		}
-
+		if (synerr) Error("Syntax error", p, IF_FIRST);
 		return 0;
 	}
 	return res;
@@ -358,8 +357,8 @@ int ParseExpression(char*& p, aint& nval) {
 }
 
 int ParseExpressionNoSyntaxError(char*& lp, aint& val) {
-	int osynerr = synerr;
-	synerr = 0;
+	bool osynerr = synerr;
+	synerr = false;
 	int ret_val = ParseExpression(lp, val);
 	synerr = osynerr;
 	return ret_val;
@@ -570,11 +569,7 @@ void ParseLabel() {
 		} else if (NeedField()) {
 			aint nv;
 			val = AddressOfMAP;
-			synerr = 0;
-			if (ParseExpression(lp, nv)) {
-				AddressOfMAP += nv;
-			}
-			synerr = 1;
+			if (ParseExpressionNoSyntaxError(lp, nv)) AddressOfMAP += nv;
 			if (IsLabelNotFound) {
 				Error("Forward reference", NULL, EARLY);
 			}

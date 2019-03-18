@@ -1194,9 +1194,8 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 		case SMEMBWORD:
 		case SMEMBD24:
 		case SMEMBDWORD:
-			synerr = 0; if (!ParseExpression(lp, val)) {
-							val = ip->def;
-						} synerr = 1; CopyMember(ip, val); comma(lp); break;
+			if (!ParseExpressionNoSyntaxError(lp, val)) val = ip->def;
+			CopyMember(ip, val); comma(lp); break;
 		case SMEMBPARENOPEN:
 			SkipBlanks(lp); if (*lp == '{') {
 								++haakjes; ++lp;

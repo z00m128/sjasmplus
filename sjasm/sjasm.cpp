@@ -121,7 +121,7 @@ int adrdisp = 0,PseudoORG = 0;
 char* MemoryRAM=NULL, * MemoryPointer=NULL;
 int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;
 aint MemorySize = 0;
-int macronummer = 0, lijst = 0, reglenwidth = 0, synerr = 1;
+int macronummer = 0, lijst = 0, reglenwidth = 0;
 aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
 aint destlen = 0, size = (aint)-1,PreviousErrorLine = (aint)-1, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
