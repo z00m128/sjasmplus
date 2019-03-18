@@ -1,0 +1,5 @@
+label0: equ 0x00000000
+label1: equ 0x00004000
+label2: equ 0x00008000
+label3: equ 0x0000C000
+label4: equ 0x0000D000

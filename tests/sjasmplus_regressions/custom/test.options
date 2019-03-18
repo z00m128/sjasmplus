@@ -1,0 +1,1 @@
+--nologo --sym=test.tap --exp=test.exp --raw=test.raw
