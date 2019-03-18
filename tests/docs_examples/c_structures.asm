@@ -46,22 +46,11 @@ DOT1    SDOT    0,0, 0,0,0      ; X:0, Y:0, C = { 0, 0, 0 }
         SDOT    {1,2, {3,4,5}}  ; X:1, Y:2, C = { 3, 4, 5 }
         SDOT    {6,7 {,,8}}     ; X:6, Y:7, C = { 0, 1, 8 } (overriden defaults + 8)
 
-;        SAVEBIN "c_structures.tap", COLOR, $-COLOR
+        SAVEBIN "c_structures.tap", COLOR, $-COLOR
 
         ORG     0x8000
 
 POS1    SPOS    0x1234, 0x56, 0x789A
         ; 4Bx old_value (to reach offset 4), X:0x1234, Y:0x56, 1Bx old_value, AD:0x789A
 
-;        SAVEBIN "c_structures.bin", POS1, SPOS
-
-        DISPLAY "FIXME: The binary result test is disabled for now, under review, only compilation is tested."
-        DISPLAY "FIXME: Seems like old+current versions of sjasmplus are producing wrong output for the SPOS struct."
-
-    ; TODO:
-    ;  - clear up with other contributors, what is bug and what is as desired
-    ;   -- unaligned init of `POS1.AD` is agreed as bug, pending: initialization of "other" memory
-    ;  - add second variant "stress-test" into other tests folder
-    ;   -- exercise align also when base address is unaligned
-    ;   -- exercise incomplete initializers a bit more (and {})
-    ;   ... and more ...
+        SAVEBIN "c_structures.bin", POS1, SPOS
