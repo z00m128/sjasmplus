@@ -49,7 +49,7 @@
 # file opened: dir_end.asm
  1    001F 21 24 00             ld      hl,end
  2    0022              End             ; mixed case = label (not directive)
- 3    0022 00           .end    ALIGN   ; .END should not work at first column, not even with --dirbol enabled
+ 3    0022 00 00        .end    ALIGN   ; .END should not work at first column, not even with --dirbol enabled
  4    0024              end     DUP 2   ; END should not work at first column, not even with --dirbol enabled
  5    0024 00          >        nop     ; but other directive on the same line (ALIGN, DUP above) must work!
  5    0025 00          >        nop     ; but other directive on the same line (ALIGN, DUP above) must work!

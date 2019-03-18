@@ -8,17 +8,17 @@
  4    800C 4D 4E 4F 50
  4    8010 5A
  5    8011
-dir_align.asm(6): error: [ALIGN] Illegal align: ALIGN   0       
+dir_align.asm(6): error: [ALIGN] Illegal align: 0       
  6    8011                  ALIGN   0       ; error
-dir_align.asm(7): error: [ALIGN] Illegal align fill-byte: ALIGN   1,-1    
+dir_align.asm(7): error: [ALIGN] Illegal align fill-byte: 1,-1    
  7    8011                  ALIGN   1,-1    ; error
-dir_align.asm(8): error: [ALIGN] Illegal align fill-byte: ALIGN   1,256   
+dir_align.asm(8): error: [ALIGN] Illegal align fill-byte: 1,256   
  8    8011                  ALIGN   1,256   ; error
-dir_align.asm(9): error: [ALIGN] Illegal align: ALIGN   3       
+dir_align.asm(9): error: [ALIGN] Illegal align: 3       
  9    8011                  ALIGN   3       ; error
-dir_align.asm(10): error: [ALIGN] Illegal align: ALIGN   5,10    
+dir_align.asm(10): error: [ALIGN] Illegal align: 5,10    
 10    8011                  ALIGN   5,10    ; error
-dir_align.asm(11): error: [ALIGN] Illegal align: ALIGN   $10000  
+dir_align.asm(11): error: [ALIGN] Illegal align: $10000  
 11    8011                  ALIGN   $10000  ; error
 12    8011
 13    8011                  ; re-run over the initial values again with different ALIGN directives
@@ -26,12 +26,13 @@ dir_align.asm(11): error: [ALIGN] Illegal align: ALIGN   $10000
 15    8000 61               db      'a'     ; [8000] = 'a'
 16    8001                  ALIGN   1       ; effective nothing should happen here
 17    8001                  ALIGN   1, '!'  ; and neighter here
-18    8001 00               ALIGN   2       ; this should advance to $8002 + preserve memory
-19    8002 62               ALIGN   4, 'b'  ; [8002] = [8003] = 'b'
-dir_align.asm(20): error: [ALIGN] Illegal align: ALIGN   7, '!'  
+18    8001 42               ALIGN   2       ; this should advance to $8002 + preserve memory
+19    8002 62 62            ALIGN   4, 'b'  ; [8002] = [8003] = 'b'
+dir_align.asm(20): error: [ALIGN] Illegal align: 7, '!'  
 20    8004                  ALIGN   7, '!'  ; error
-21    8004 00               ALIGN   8       ; advance to 8008, preserve memory
-22    8008 63               ALIGN   16, 'c' ; [8008..800F] = 'c'
+21    8004 45 46 47 48      ALIGN   8       ; advance to 8008, preserve memory
+22    8008 63 63 63 63      ALIGN   16, 'c' ; [8008..800F] = 'c'
+22    800C 63 63 63 63
 23    8010                  ALIGN           ; should not make any difference (already at MOD 4 address)
 24    8010
 25    8010                  ; the final result should be "aBbbEFGHccccccccZ"
