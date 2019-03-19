@@ -55,10 +55,10 @@
 40    0080                  ; 7x warning, testing 8/16b checks
 numeric_constants_defX.asm(41): warning: Bytes lost (0x10A)
 numeric_constants_defX.asm(41): warning: Bytes lost (0x100)
-numeric_constants_defX.asm(41): warning: Bytes lost (0xFFFFFFFFFFFFFEFF)
-numeric_constants_defX.asm(41): warning: Bytes lost (0xFFFFFFFFFFFFFE0A)
+numeric_constants_defX.asm(41): warning: Bytes lost (0xFFFFFEFF)
+numeric_constants_defX.asm(41): warning: Bytes lost (0xFFFFFE0A)
 41    0080 0A 00 FF 0A      DB      266, 256, -257, -502
-numeric_constants_defX.asm(42): warning: Bytes lost (0xFFFFFFFFFFFEFFFF)
+numeric_constants_defX.asm(42): warning: Bytes lost (0xFFFEFFFF)
 numeric_constants_defX.asm(42): warning: Bytes lost (0x10000)
 numeric_constants_defX.asm(42): warning: Bytes lost (0x44434241)
 42    0084 FF FF 00 00      DW      -65537, 65536, "DCBA"   ; last one should produce bytes 'A', 'B'

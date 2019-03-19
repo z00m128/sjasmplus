@@ -425,7 +425,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		// strings parsing
 		if (c1 == '"' || c1 == '\'') {
 			*rp++ = *lp++;				// copy the string delimiter (" or ')
-			// aprostrophe inside apostrophes ('') will here parse as end + start of another string
+			// apostrophe inside apostrophes ('') will parse as end + start of another string
 			// which sort of "accidentally" leads to correct final results
 			while (*lp && c1 != *lp) {	// until end of current string is reached (or line ends)
 				// inside double quotes the backslash should escape (anything after it)

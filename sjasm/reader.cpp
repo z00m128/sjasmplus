@@ -244,7 +244,7 @@ char* getinstr(char*& p) {
 int check8(aint val, bool error) {
 	if ((val < -256 || val > 255) && error) {
 		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%lX)", val);
+		sprintf(buffer, "Bytes lost (0x%lX)", val&0xFFFFFFFFUL);
 		Warning(buffer);
 		return 0;
 	}
@@ -264,7 +264,7 @@ int check8o(long val) {
 int check16(aint val, bool error) {
 	if ((val < -65536 || val > 65535) && error) {
 		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%lX)", val);
+		sprintf(buffer, "Bytes lost (0x%lX)", val&0xFFFFFFFFUL);
 		Warning(buffer);
 		return 0;
 	}
@@ -274,7 +274,7 @@ int check16(aint val, bool error) {
 int check24(aint val, bool error) {
 	if ((val < -16777216 || val > 16777215) && error) {
 		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%lX)", val);
+		sprintf(buffer, "Bytes lost (0x%lX)", val&0xFFFFFFFFUL);
 		Warning(buffer);
 		return 0;
 	}
@@ -351,127 +351,79 @@ int getval(int p) {
 	}
 }
 
+// parses number literals, forces result to be confined into 32b (even on 64b platforms,
+// to have stable results in listings/tests across platforms).
 int GetConstant(char*& op, aint& val) {
-	aint base,pb = 1,v,oval;
-	char* p = op,* p2,* p3;
-
-	SkipBlanks(p);
-
-	p3 = p;
-	val = 0;
-
-	switch (*p) {
-	case '#':
-	case '$':
+#ifndef NDEBUG
+	// the input string has been already detected as numeric literal by ParseExpPrim (assert)
+	if (!isdigit(*op) && '#' != *op && '$' != *op && '%' != *op) ExitASM(32);
+#endif
+	// check if the format is defined by prefix (#, $, %, 0x, 0X)
+	char* p = op;
+	int shiftBase = 0, base = 0;
+	if ('#' == *p || '$' == *p) {
+		shiftBase = 4;
 		++p;
-		while (isalnum((unsigned char) * p)) {
-			if ((v = getval(*p)) >= 16) {
-				Error("Digit not in base", op);
-				return 0;
-			}
-			oval = val;
-			val = val * 16 + v;
-			++p;
-			if (oval > val) {
-				Error("Overflow", op, SUPPRESS);
-			}
-		}
-
-		if (p - p3 < 2) {
-			Error("Syntax error", op, IF_FIRST);
-			return 0;
-		}
-
-		op = p;
-
-		return 1;
-	case '%':
+	} else if ('0' == p[0] && 'x' == (p[1]|0x20)) {
+		shiftBase = 4;
+		p += 2;
+	} else if ('%' == *p) {
+		shiftBase = 1;
 		++p;
-		while (isdigit((unsigned char) * p)) {
-			if ((v = getval(*p)) >= 2) {
-				Error("Digit not in base", op);
-				return 0;
-			}
-			oval = val; val = val * 2 + v; ++p;
-			if (oval > val) {
-				Error("Overflow", op, SUPPRESS);
-			}
-		}
-		if (p - p3 < 2) {
-			Error("Syntax error", op, IF_FIRST);
-			return 0;
-		}
-
-		op = p;
-
-		return 1;
-	case '0':
-		++p;
-		if (*p == 'x' || *p == 'X') {	//FIXME Ped7g simplify this function..
-			++p;
-			while (isalnum((unsigned char) * p)) {
-				if ((v = getval(*p)) >= 16) {
-					Error("Digit not in base", op);
-					return 0;
-				}
-				oval = val; val = val * 16 + v; ++p;
-				if (oval > val) {
-					Error("Overflow", op, SUPPRESS);
-				}
-			}
-			if (p - p3 < 3) {
-				Error("Syntax error", op, IF_FIRST);
-				return 0;
-			}
-
-			op = p;
-
-			return 1;
-		}
-	default:
-		while (isalnum((unsigned char) * p)) {
-			++p;
-		}
-		p2 = p--;
-		if (isdigit((unsigned char) * p)) {
-			base = 10;
-		} else if (*p == 'b') {
-			base = 2; --p;
-		} else if (*p == 'h') {
-			base = 16; --p;
-		} else if (*p == 'B') {
-			base = 2; --p;
-		} else if (*p == 'H') {
-			base = 16; --p;
-		} else if (*p == 'o') {
-			base = 8; --p;
-		} else if (*p == 'q') {
-			base = 8; --p;
-		} else if (*p == 'd') {
-			base = 10; --p;
-		} else if (*p == 'O') {
-			base = 8; --p;
-		} else if (*p == 'Q') {
-			base = 8; --p;
-		} else if (*p == 'D') {
-			base = 10; --p;
-		} else {
-			return 0;
-		}
-		do {
-			if ((v = getval(*p)) >= base) {
-				Error("Digit not in base", op); return 0;
-			}
-			oval = val; val += v * pb; if (oval > val) {
-									   	Error("Overflow", op, SUPPRESS);
-									   }
-			pb *= base;
-		} while (p-- != p3);
-
-		op = p2;
-
-		return 1;
 	}
+	// find end of the numeric literal (pointer is beyond last alfa/digit character
+	char* pend = p;
+	while (isalnum(*pend)) ++pend;
+	char* const hardEnd = pend;
+	// if the base is still undecided, check for suffix format specifier
+	if (0 == shiftBase) {
+		switch (pend[-1]|0x20) {
+			case 'h': --pend; shiftBase = 4;  break;
+			case 'q': --pend; shiftBase = 3;  break;
+			case 'o': --pend; shiftBase = 3;  break;
+			case 'b': --pend; shiftBase = 1;  break;
+			case 'd': --pend;      base = 10; break;
+			default:
+				base = 10;
+				break;
+		}
+	}
+	// parse the number into value
+	val = 0;
+	if (pend <= p) {		// no actual digits between format specifiers
+		Error("Syntax error", op, SUPPRESS);
+		return 0;
+	}
+	aint digit;
+	if (0 < shiftBase) {
+		base = 1<<shiftBase;
+		const aint overflowMask = (~0UL)<<(32-shiftBase);
+		while (p < pend) {
+			if (base <= (digit = getval(*p))) {
+				Error("Digit not in base", op, SUPPRESS);
+				val &= 0xFFFFFFFFUL;
+				return 0;
+			}
+			if (val & overflowMask) Error("Overflow", op, SUPPRESS);
+			val = (val<<shiftBase) + digit;
+			++p;
+		}
+	} else {
+		while (p < pend) {
+			if (base <= (digit = getval(*p))) {
+				Error("Digit not in base", op, SUPPRESS);
+				val &= 0xFFFFFFFFUL;
+				return 0;
+			}
+			const unsigned long oval = static_cast<unsigned long>(val)&0xFFFFFFFFUL;
+			val = (val * base) + digit;
+			if (static_cast<unsigned long>(val&0xFFFFFFFFUL) < oval) Error("Overflow", op, SUPPRESS);
+			++p;
+		}
+	}
+	op = hardEnd;
+	val &= 0xFFFFFFFFUL;
+	return 1;
 }
 
 // parse single character of double-quoted string (backslash does escape characters)
