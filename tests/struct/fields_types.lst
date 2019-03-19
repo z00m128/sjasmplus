@@ -1,0 +1,936 @@
+# file opened: fields_types.asm
+  1   0000              ; Based on documentation example (definitions same as tests/docs_examples/c_structures.asm)
+  2   0000              ; But this test does focus on stressing initializers syntax
+  3   0000
+  4   0000                      STRUCT substr1
+  5   0000 ~            sm00    BYTE    '1'
+  6   0000                      ENDS
+  7   0000
+  8   0000                      STRUCT substr2
+  9   0000 ~                    byte    '2'
+ 10   0000 ~            sub0    substr1 '3'
+ 11   0000 ~                    byte    '4'
+ 12   0000 ~            sub1    substr1 '5'
+ 13   0000 ~                    byte    '6'
+ 14   0000                      ENDS
+ 15   0000
+ 16   0000
+ 17   0000                      STRUCT  str, 1
+ 18   0000 ~            m00     byte    'A'
+ 19   0000 ~            m01     db      'B'
+ 20   0000 ~            m02     defb    'C'
+ 21   0000 ~            m03     word    'ED'
+ 22   0000 ~            m04     dw      'GF'
+ 23   0000 ~            m05     defw    'IH'
+ 24   0000 ~            m06     d24     'LKJ'
+ 25   0000 ~            m07     dword   'PONM'
+ 26   0000 ~            m08     dd      'TSRQ'
+ 27   0000 ~            m09     defd    'XWVU'
+ 28   0000 ~            m10     block   1, 'Y'
+ 29   0000 ~            m11     ds      1, 'Z'
+ 30   0000 ~            m12     defs    1, 'a'
+ 31   0000 ~            m13     #       1, 'b'
+ 32   0000 ~            m14     align   2, 'c'
+ 33   0000 ~            m15     ##      4, 'd'  ; 2x 'd'
+ 34   0000 ~            m16     substr2
+ 35   0000                      ENDS
+ 36   0000
+ 37   0000                      DEVICE ZXSPECTRUM48
+ 38   0000
+ 39   0000                      ORG 0x8000
+ 40   8000 5F                   ds  0x4000, '_'     ; fill memory with '_'
+ 41   C000                      ORG 0x8000
+ 42   8000              ;; first set testing init-values list structure parsing
+ 43   8000 5F 41 42 43  d01     str
+ 43   8004 44 45 46 47
+ 43   8008 48 49 4A 4B
+ 43   800C 4C 4D 4E 4F
+ 43   8010 50 51 52 53
+ 43   8014 54 55 56 57
+ 43   8018 58 59 5A 61
+ 43   801C 62 63 64 64
+ 43   8020 32 33 34 35
+ 43   8024 36
+ 43   8025 0A 0A 0A       ALIGN   4, "\n"
+ 44   8028                  ; "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdd23456\n\n\n"
+ 45   8028 5F 41 42 43  d02     str     {{{'!'}}}
+ 45   802C 44 45 46 47
+ 45   8030 48 49 4A 4B
+ 45   8034 4C 4D 4E 4F
+ 45   8038 50 51 52 53
+ 45   803C 54 55 56 57
+ 45   8040 58 59 5A 61
+ 45   8044 62 63 64 64
+ 45   8048 32 21 34 35
+ 45   804C 36
+ 45   804D 0A 0A 0A       ALIGN   4, "\n"
+ 46   8050                  ; "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdd2!456\n\n\n"
+ 47   8050 5F 21 42 43  d03     str     {'!'{'!'{'!'}}}
+ 47   8054 44 45 46 47
+ 47   8058 48 49 4A 4B
+ 47   805C 4C 4D 4E 4F
+ 47   8060 50 51 52 53
+ 47   8064 54 55 56 57
+ 47   8068 58 59 5A 61
+ 47   806C 62 63 64 64
+ 47   8070 21 21 34 35
+ 47   8074 36
+ 47   8075 0A 0A 0A       ALIGN   4, "\n"
+ 48   8078                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!!456\n\n\n"
+ 49   8078 5F 21 42 43  d04     str     {'!'{'!',{'!'}}}
+ 49   807C 44 45 46 47
+ 49   8080 48 49 4A 4B
+ 49   8084 4C 4D 4E 4F
+ 49   8088 50 51 52 53
+ 49   808C 54 55 56 57
+ 49   8090 58 59 5A 61
+ 49   8094 62 63 64 64
+ 49   8098 21 21 34 35
+ 49   809C 36
+ 49   809D 0A 0A 0A       ALIGN   4, "\n"
+ 50   80A0                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!!456\n\n\n"
+ 51   80A0 5F 21 42 43  d05     str     {'!'{'!',,{'!'}}}
+ 51   80A4 44 45 46 47
+ 51   80A8 48 49 4A 4B
+ 51   80AC 4C 4D 4E 4F
+ 51   80B0 50 51 52 53
+ 51   80B4 54 55 56 57
+ 51   80B8 58 59 5A 61
+ 51   80BC 62 63 64 64
+ 51   80C0 21 33 34 21
+ 51   80C4 36
+ 51   80C5 0A 0A 0A       ALIGN   4, "\n"
+ 52   80C8                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!34!6\n\n\n"
+ 53   80C8 5F 21 42 43  d06     str     {'!'{,'!',{'!'}}}
+ 53   80CC 44 45 46 47
+ 53   80D0 48 49 4A 4B
+ 53   80D4 4C 4D 4E 4F
+ 53   80D8 50 51 52 53
+ 53   80DC 54 55 56 57
+ 53   80E0 58 59 5A 61
+ 53   80E4 62 63 64 64
+ 53   80E8 32 21 34 21
+ 53   80EC 36
+ 53   80ED 0A 0A 0A       ALIGN   4, "\n"
+ 54   80F0                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd2!4!6\n\n\n"
+ 55   80F0 5F 21 42 43  d07     str     {'!'{,'!','!'}}
+ 55   80F4 44 45 46 47
+ 55   80F8 48 49 4A 4B
+ 55   80FC 4C 4D 4E 4F
+ 55   8100 50 51 52 53
+ 55   8104 54 55 56 57
+ 55   8108 58 59 5A 61
+ 55   810C 62 63 64 64
+ 55   8110 32 21 21 35
+ 55   8114 36
+ 55   8115 0A 0A 0A       ALIGN   4, "\n"
+ 56   8118                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd2!!56\n\n\n"
+ 57   8118 5F 21 42 43  d08     str     {'!'{'!',,{'!'},'!'}}
+ 57   811C 44 45 46 47
+ 57   8120 48 49 4A 4B
+ 57   8124 4C 4D 4E 4F
+ 57   8128 50 51 52 53
+ 57   812C 54 55 56 57
+ 57   8130 58 59 5A 61
+ 57   8134 62 63 64 64
+ 57   8138 21 33 34 21
+ 57   813C 21
+ 57   813D 0A 0A 0A       ALIGN   4, "\n"
+ 58   8140                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!34!!\n\n\n"
+ 59   8140 5F 21 42 43  d09     str     {'!'{'!',{'!'},'!'}}
+ 59   8144 44 45 46 47
+ 59   8148 48 49 4A 4B
+ 59   814C 4C 4D 4E 4F
+ 59   8150 50 51 52 53
+ 59   8154 54 55 56 57
+ 59   8158 58 59 5A 61
+ 59   815C 62 63 64 64
+ 59   8160 21 21 21 35
+ 59   8164 36
+ 59   8165 0A 0A 0A       ALIGN   4, "\n"
+ 60   8168                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!!!56\n\n\n"
+ 61   8168 5F 41 21 43  d10     str     {,'!',,'!!',{{'!'}}}
+ 61   816C 21 21 46 47
+ 61   8170 48 49 4A 4B
+ 61   8174 4C 4D 4E 4F
+ 61   8178 50 51 52 53
+ 61   817C 54 55 56 57
+ 61   8180 58 59 5A 61
+ 61   8184 62 63 64 64
+ 61   8188 32 21 34 35
+ 61   818C 36
+ 61   818D 0A 0A 0A       ALIGN   4, "\n"
+ 62   8190                  ; "_A!C!!FGHIJKLMNOPQRSTUVWXYZabcdd2!456\n\n\n"
+ 63   8190 5F 41 21 43  d11     str     {,'!',,'!!',{'!'}}
+ 63   8194 21 21 46 47
+ 63   8198 48 49 4A 4B
+ 63   819C 4C 4D 4E 4F
+ 63   81A0 50 51 52 53
+ 63   81A4 54 55 56 57
+ 63   81A8 58 59 5A 61
+ 63   81AC 62 63 64 64
+ 63   81B0 21 33 34 35
+ 63   81B4 36
+ 63   81B5 0A 0A 0A       ALIGN   4, "\n"
+ 64   81B8                  ; "_A!C!!FGHIJKLMNOPQRSTUVWXYZabcdd!3456\n\n\n"
+ 65   81B8
+ 66   81B8              ;; identical test cases as d02..d11, but without the top-level enclosing {}
+ 67   81B8 5F 41 42 43  d12     str     ,{{'!'}}
+ 67   81BC 44 45 46 47
+ 67   81C0 48 49 4A 4B
+ 67   81C4 4C 4D 4E 4F
+ 67   81C8 50 51 52 53
+ 67   81CC 54 55 56 57
+ 67   81D0 58 59 5A 61
+ 67   81D4 62 63 64 64
+ 67   81D8 32 21 34 35
+ 67   81DC 36
+ 67   81DD 0A 0A 0A       ALIGN   4, "\n"
+ 68   81E0                  ; ^^^ Needs at least some hint the first { is not global level => "," added
+ 69   81E0                  ; "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdd2!456\n\n\n"
+ 70   81E0 5F 21 42 43  d13     str     '!'{'!'{'!'}}
+ 70   81E4 44 45 46 47
+ 70   81E8 48 49 4A 4B
+ 70   81EC 4C 4D 4E 4F
+ 70   81F0 50 51 52 53
+ 70   81F4 54 55 56 57
+ 70   81F8 58 59 5A 61
+ 70   81FC 62 63 64 64
+ 70   8200 21 21 34 35
+ 70   8204 36
+ 70   8205 0A 0A 0A       ALIGN   4, "\n"
+ 71   8208                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!!456\n\n\n"
+ 72   8208 5F 21 42 43  d14     str     '!'{'!',{'!'}}
+ 72   820C 44 45 46 47
+ 72   8210 48 49 4A 4B
+ 72   8214 4C 4D 4E 4F
+ 72   8218 50 51 52 53
+ 72   821C 54 55 56 57
+ 72   8220 58 59 5A 61
+ 72   8224 62 63 64 64
+ 72   8228 21 21 34 35
+ 72   822C 36
+ 72   822D 0A 0A 0A       ALIGN   4, "\n"
+ 73   8230                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!!456\n\n\n"
+ 74   8230 5F 21 42 43  d15     str     '!'{'!',,{'!'}}
+ 74   8234 44 45 46 47
+ 74   8238 48 49 4A 4B
+ 74   823C 4C 4D 4E 4F
+ 74   8240 50 51 52 53
+ 74   8244 54 55 56 57
+ 74   8248 58 59 5A 61
+ 74   824C 62 63 64 64
+ 74   8250 21 33 34 21
+ 74   8254 36
+ 74   8255 0A 0A 0A       ALIGN   4, "\n"
+ 75   8258                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!34!6\n\n\n"
+ 76   8258 5F 21 42 43  d16     str     '!'{,'!',{'!'}}
+ 76   825C 44 45 46 47
+ 76   8260 48 49 4A 4B
+ 76   8264 4C 4D 4E 4F
+ 76   8268 50 51 52 53
+ 76   826C 54 55 56 57
+ 76   8270 58 59 5A 61
+ 76   8274 62 63 64 64
+ 76   8278 32 21 34 21
+ 76   827C 36
+ 76   827D 0A 0A 0A       ALIGN   4, "\n"
+ 77   8280                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd2!4!6\n\n\n"
+ 78   8280 5F 21 42 43  d17     str     '!'{,'!','!'}
+ 78   8284 44 45 46 47
+ 78   8288 48 49 4A 4B
+ 78   828C 4C 4D 4E 4F
+ 78   8290 50 51 52 53
+ 78   8294 54 55 56 57
+ 78   8298 58 59 5A 61
+ 78   829C 62 63 64 64
+ 78   82A0 32 21 21 35
+ 78   82A4 36
+ 78   82A5 0A 0A 0A       ALIGN   4, "\n"
+ 79   82A8                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd2!!56\n\n\n"
+ 80   82A8 5F 21 42 43  d18     str     '!'{'!',,{'!'},'!'}
+ 80   82AC 44 45 46 47
+ 80   82B0 48 49 4A 4B
+ 80   82B4 4C 4D 4E 4F
+ 80   82B8 50 51 52 53
+ 80   82BC 54 55 56 57
+ 80   82C0 58 59 5A 61
+ 80   82C4 62 63 64 64
+ 80   82C8 21 33 34 21
+ 80   82CC 21
+ 80   82CD 0A 0A 0A       ALIGN   4, "\n"
+ 81   82D0                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!34!!\n\n\n"
+ 82   82D0 5F 21 42 43  d19     str     '!'{'!',{'!'},'!'}
+ 82   82D4 44 45 46 47
+ 82   82D8 48 49 4A 4B
+ 82   82DC 4C 4D 4E 4F
+ 82   82E0 50 51 52 53
+ 82   82E4 54 55 56 57
+ 82   82E8 58 59 5A 61
+ 82   82EC 62 63 64 64
+ 82   82F0 21 21 21 35
+ 82   82F4 36
+ 82   82F5 0A 0A 0A       ALIGN   4, "\n"
+ 83   82F8                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!!!56\n\n\n"
+ 84   82F8 5F 41 21 43  d20     str     ,'!',,'!!',{{'!'}}
+ 84   82FC 21 21 46 47
+ 84   8300 48 49 4A 4B
+ 84   8304 4C 4D 4E 4F
+ 84   8308 50 51 52 53
+ 84   830C 54 55 56 57
+ 84   8310 58 59 5A 61
+ 84   8314 62 63 64 64
+ 84   8318 32 21 34 35
+ 84   831C 36
+ 84   831D 0A 0A 0A       ALIGN   4, "\n"
+ 85   8320                  ; "_A!C!!FGHIJKLMNOPQRSTUVWXYZabcdd2!456\n\n\n"
+ 86   8320 5F 41 21 43  d21     str     ,'!',,'!!',{'!'}
+ 86   8324 21 21 46 47
+ 86   8328 48 49 4A 4B
+ 86   832C 4C 4D 4E 4F
+ 86   8330 50 51 52 53
+ 86   8334 54 55 56 57
+ 86   8338 58 59 5A 61
+ 86   833C 62 63 64 64
+ 86   8340 21 33 34 35
+ 86   8344 36
+ 86   8345 0A 0A 0A       ALIGN   4, "\n"
+ 87   8348                  ; "_A!C!!FGHIJKLMNOPQRSTUVWXYZabcdd!3456\n\n\n"
+ 88   8348
+ 89   8348              ;; few more extra tests
+ 90   8348 5F 21 42 43  d22     str     {'!'{'!',{'!'}'!'}}
+ 90   834C 44 45 46 47
+ 90   8350 48 49 4A 4B
+ 90   8354 4C 4D 4E 4F
+ 90   8358 50 51 52 53
+ 90   835C 54 55 56 57
+ 90   8360 58 59 5A 61
+ 90   8364 62 63 64 64
+ 90   8368 21 21 21 35
+ 90   836C 36
+ 90   836D 0A 0A 0A       ALIGN   4, "\n"
+ 91   8370                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!!!56\n\n\n"
+ 92   8370 5F 21 42 43  d23     str     {'!'{'!',{}'!'}}
+ 92   8374 44 45 46 47
+ 92   8378 48 49 4A 4B
+ 92   837C 4C 4D 4E 4F
+ 92   8380 50 51 52 53
+ 92   8384 54 55 56 57
+ 92   8388 58 59 5A 61
+ 92   838C 62 63 64 64
+ 92   8390 21 33 21 35
+ 92   8394 36
+ 92   8395 0A 0A 0A       ALIGN   4, "\n"
+ 93   8398                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!3!56\n\n\n"
+ 94   8398 5F 21 42 43  @d24    str     {'!'{'!',{},'!'}}
+ 94   839C 44 45 46 47
+ 94   83A0 48 49 4A 4B
+ 94   83A4 4C 4D 4E 4F
+ 94   83A8 50 51 52 53
+ 94   83AC 54 55 56 57
+ 94   83B0 58 59 5A 61
+ 94   83B4 62 63 64 64
+ 94   83B8 21 33 21 35
+ 94   83BC 36
+ 94   83BD 0A 0A 0A       ALIGN   4, "\n"
+ 95   83C0                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!3!56\n\n\n"
+ 96   83C0
+ 97   83C0              ;; value warnings
+fields_types.asm(98): warning: Bytes lost (0x2121)
+ 98   83C0 5F 21 42 43  w0     str     '!!'
+ 98   83C4 44 45 46 47
+ 98   83C8 48 49 4A 4B
+ 98   83CC 4C 4D 4E 4F
+ 98   83D0 50 51 52 53
+ 98   83D4 54 55 56 57
+ 98   83D8 58 59 5A 61
+ 98   83DC 62 63 64 64
+ 98   83E0 32 33 34 35
+ 98   83E4 36
+ 98   83E5 0A 0A 0A       ALIGN   4, "\n"
+ 99   83E8                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd23456\n\n\n"
+100   83E8
+101   83E8                      SAVEBIN  "fields_types.bin", 0x8000, $-0x8000
+# file closed: fields_types.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X substr1
+0x0000 X substr1.sm00
+0x0005 X substr2
+0x0001 X substr2.sub0
+0x0001 X substr2.sub0.sm00
+0x0003 X substr2.sub1
+0x0003 X substr2.sub1.sm00
+0x0025 X str
+0x0001 X str.m00
+0x0002 X str.m01
+0x0003 X str.m02
+0x0004 X str.m03
+0x0006 X str.m04
+0x0008 X str.m05
+0x000A X str.m06
+0x000D X str.m07
+0x0011 X str.m08
+0x0015 X str.m09
+0x0019 X str.m10
+0x001A X str.m11
+0x001B X str.m12
+0x001C X str.m13
+0x001D X str.m14
+0x001E X str.m15
+0x0020 X str.m16
+0x0021 X str.m16.sub0
+0x0021 X str.m16.sub0.sm00
+0x0023 X str.m16.sub1
+0x0023 X str.m16.sub1.sm00
+0x8000 X d01
+0x8001 X d01.m00
+0x8002 X d01.m01
+0x8003 X d01.m02
+0x8004 X d01.m03
+0x8006 X d01.m04
+0x8008 X d01.m05
+0x800A X d01.m06
+0x800D X d01.m07
+0x8011 X d01.m08
+0x8015 X d01.m09
+0x8019 X d01.m10
+0x801A X d01.m11
+0x801B X d01.m12
+0x801C X d01.m13
+0x801D X d01.m14
+0x801E X d01.m15
+0x8020 X d01.m16
+0x8021 X d01.m16.sub0
+0x8021 X d01.m16.sub0.sm00
+0x8023 X d01.m16.sub1
+0x8023 X d01.m16.sub1.sm00
+0x8028 X d02
+0x8029 X d02.m00
+0x802A X d02.m01
+0x802B X d02.m02
+0x802C X d02.m03
+0x802E X d02.m04
+0x8030 X d02.m05
+0x8032 X d02.m06
+0x8035 X d02.m07
+0x8039 X d02.m08
+0x803D X d02.m09
+0x8041 X d02.m10
+0x8042 X d02.m11
+0x8043 X d02.m12
+0x8044 X d02.m13
+0x8045 X d02.m14
+0x8046 X d02.m15
+0x8048 X d02.m16
+0x8049 X d02.m16.sub0
+0x8049 X d02.m16.sub0.sm00
+0x804B X d02.m16.sub1
+0x804B X d02.m16.sub1.sm00
+0x8050 X d03
+0x8051 X d03.m00
+0x8052 X d03.m01
+0x8053 X d03.m02
+0x8054 X d03.m03
+0x8056 X d03.m04
+0x8058 X d03.m05
+0x805A X d03.m06
+0x805D X d03.m07
+0x8061 X d03.m08
+0x8065 X d03.m09
+0x8069 X d03.m10
+0x806A X d03.m11
+0x806B X d03.m12
+0x806C X d03.m13
+0x806D X d03.m14
+0x806E X d03.m15
+0x8070 X d03.m16
+0x8071 X d03.m16.sub0
+0x8071 X d03.m16.sub0.sm00
+0x8073 X d03.m16.sub1
+0x8073 X d03.m16.sub1.sm00
+0x8078 X d04
+0x8079 X d04.m00
+0x807A X d04.m01
+0x807B X d04.m02
+0x807C X d04.m03
+0x807E X d04.m04
+0x8080 X d04.m05
+0x8082 X d04.m06
+0x8085 X d04.m07
+0x8089 X d04.m08
+0x808D X d04.m09
+0x8091 X d04.m10
+0x8092 X d04.m11
+0x8093 X d04.m12
+0x8094 X d04.m13
+0x8095 X d04.m14
+0x8096 X d04.m15
+0x8098 X d04.m16
+0x8099 X d04.m16.sub0
+0x8099 X d04.m16.sub0.sm00
+0x809B X d04.m16.sub1
+0x809B X d04.m16.sub1.sm00
+0x80A0 X d05
+0x80A1 X d05.m00
+0x80A2 X d05.m01
+0x80A3 X d05.m02
+0x80A4 X d05.m03
+0x80A6 X d05.m04
+0x80A8 X d05.m05
+0x80AA X d05.m06
+0x80AD X d05.m07
+0x80B1 X d05.m08
+0x80B5 X d05.m09
+0x80B9 X d05.m10
+0x80BA X d05.m11
+0x80BB X d05.m12
+0x80BC X d05.m13
+0x80BD X d05.m14
+0x80BE X d05.m15
+0x80C0 X d05.m16
+0x80C1 X d05.m16.sub0
+0x80C1 X d05.m16.sub0.sm00
+0x80C3 X d05.m16.sub1
+0x80C3 X d05.m16.sub1.sm00
+0x80C8 X d06
+0x80C9 X d06.m00
+0x80CA X d06.m01
+0x80CB X d06.m02
+0x80CC X d06.m03
+0x80CE X d06.m04
+0x80D0 X d06.m05
+0x80D2 X d06.m06
+0x80D5 X d06.m07
+0x80D9 X d06.m08
+0x80DD X d06.m09
+0x80E1 X d06.m10
+0x80E2 X d06.m11
+0x80E3 X d06.m12
+0x80E4 X d06.m13
+0x80E5 X d06.m14
+0x80E6 X d06.m15
+0x80E8 X d06.m16
+0x80E9 X d06.m16.sub0
+0x80E9 X d06.m16.sub0.sm00
+0x80EB X d06.m16.sub1
+0x80EB X d06.m16.sub1.sm00
+0x80F0 X d07
+0x80F1 X d07.m00
+0x80F2 X d07.m01
+0x80F3 X d07.m02
+0x80F4 X d07.m03
+0x80F6 X d07.m04
+0x80F8 X d07.m05
+0x80FA X d07.m06
+0x80FD X d07.m07
+0x8101 X d07.m08
+0x8105 X d07.m09
+0x8109 X d07.m10
+0x810A X d07.m11
+0x810B X d07.m12
+0x810C X d07.m13
+0x810D X d07.m14
+0x810E X d07.m15
+0x8110 X d07.m16
+0x8111 X d07.m16.sub0
+0x8111 X d07.m16.sub0.sm00
+0x8113 X d07.m16.sub1
+0x8113 X d07.m16.sub1.sm00
+0x8118 X d08
+0x8119 X d08.m00
+0x811A X d08.m01
+0x811B X d08.m02
+0x811C X d08.m03
+0x811E X d08.m04
+0x8120 X d08.m05
+0x8122 X d08.m06
+0x8125 X d08.m07
+0x8129 X d08.m08
+0x812D X d08.m09
+0x8131 X d08.m10
+0x8132 X d08.m11
+0x8133 X d08.m12
+0x8134 X d08.m13
+0x8135 X d08.m14
+0x8136 X d08.m15
+0x8138 X d08.m16
+0x8139 X d08.m16.sub0
+0x8139 X d08.m16.sub0.sm00
+0x813B X d08.m16.sub1
+0x813B X d08.m16.sub1.sm00
+0x8140 X d09
+0x8141 X d09.m00
+0x8142 X d09.m01
+0x8143 X d09.m02
+0x8144 X d09.m03
+0x8146 X d09.m04
+0x8148 X d09.m05
+0x814A X d09.m06
+0x814D X d09.m07
+0x8151 X d09.m08
+0x8155 X d09.m09
+0x8159 X d09.m10
+0x815A X d09.m11
+0x815B X d09.m12
+0x815C X d09.m13
+0x815D X d09.m14
+0x815E X d09.m15
+0x8160 X d09.m16
+0x8161 X d09.m16.sub0
+0x8161 X d09.m16.sub0.sm00
+0x8163 X d09.m16.sub1
+0x8163 X d09.m16.sub1.sm00
+0x8168 X d10
+0x8169 X d10.m00
+0x816A X d10.m01
+0x816B X d10.m02
+0x816C X d10.m03
+0x816E X d10.m04
+0x8170 X d10.m05
+0x8172 X d10.m06
+0x8175 X d10.m07
+0x8179 X d10.m08
+0x817D X d10.m09
+0x8181 X d10.m10
+0x8182 X d10.m11
+0x8183 X d10.m12
+0x8184 X d10.m13
+0x8185 X d10.m14
+0x8186 X d10.m15
+0x8188 X d10.m16
+0x8189 X d10.m16.sub0
+0x8189 X d10.m16.sub0.sm00
+0x818B X d10.m16.sub1
+0x818B X d10.m16.sub1.sm00
+0x8190 X d11
+0x8191 X d11.m00
+0x8192 X d11.m01
+0x8193 X d11.m02
+0x8194 X d11.m03
+0x8196 X d11.m04
+0x8198 X d11.m05
+0x819A X d11.m06
+0x819D X d11.m07
+0x81A1 X d11.m08
+0x81A5 X d11.m09
+0x81A9 X d11.m10
+0x81AA X d11.m11
+0x81AB X d11.m12
+0x81AC X d11.m13
+0x81AD X d11.m14
+0x81AE X d11.m15
+0x81B0 X d11.m16
+0x81B1 X d11.m16.sub0
+0x81B1 X d11.m16.sub0.sm00
+0x81B3 X d11.m16.sub1
+0x81B3 X d11.m16.sub1.sm00
+0x81B8 X d12
+0x81B9 X d12.m00
+0x81BA X d12.m01
+0x81BB X d12.m02
+0x81BC X d12.m03
+0x81BE X d12.m04
+0x81C0 X d12.m05
+0x81C2 X d12.m06
+0x81C5 X d12.m07
+0x81C9 X d12.m08
+0x81CD X d12.m09
+0x81D1 X d12.m10
+0x81D2 X d12.m11
+0x81D3 X d12.m12
+0x81D4 X d12.m13
+0x81D5 X d12.m14
+0x81D6 X d12.m15
+0x81D8 X d12.m16
+0x81D9 X d12.m16.sub0
+0x81D9 X d12.m16.sub0.sm00
+0x81DB X d12.m16.sub1
+0x81DB X d12.m16.sub1.sm00
+0x81E0 X d13
+0x81E1 X d13.m00
+0x81E2 X d13.m01
+0x81E3 X d13.m02
+0x81E4 X d13.m03
+0x81E6 X d13.m04
+0x81E8 X d13.m05
+0x81EA X d13.m06
+0x81ED X d13.m07
+0x81F1 X d13.m08
+0x81F5 X d13.m09
+0x81F9 X d13.m10
+0x81FA X d13.m11
+0x81FB X d13.m12
+0x81FC X d13.m13
+0x81FD X d13.m14
+0x81FE X d13.m15
+0x8200 X d13.m16
+0x8201 X d13.m16.sub0
+0x8201 X d13.m16.sub0.sm00
+0x8203 X d13.m16.sub1
+0x8203 X d13.m16.sub1.sm00
+0x8208 X d14
+0x8209 X d14.m00
+0x820A X d14.m01
+0x820B X d14.m02
+0x820C X d14.m03
+0x820E X d14.m04
+0x8210 X d14.m05
+0x8212 X d14.m06
+0x8215 X d14.m07
+0x8219 X d14.m08
+0x821D X d14.m09
+0x8221 X d14.m10
+0x8222 X d14.m11
+0x8223 X d14.m12
+0x8224 X d14.m13
+0x8225 X d14.m14
+0x8226 X d14.m15
+0x8228 X d14.m16
+0x8229 X d14.m16.sub0
+0x8229 X d14.m16.sub0.sm00
+0x822B X d14.m16.sub1
+0x822B X d14.m16.sub1.sm00
+0x8230 X d15
+0x8231 X d15.m00
+0x8232 X d15.m01
+0x8233 X d15.m02
+0x8234 X d15.m03
+0x8236 X d15.m04
+0x8238 X d15.m05
+0x823A X d15.m06
+0x823D X d15.m07
+0x8241 X d15.m08
+0x8245 X d15.m09
+0x8249 X d15.m10
+0x824A X d15.m11
+0x824B X d15.m12
+0x824C X d15.m13
+0x824D X d15.m14
+0x824E X d15.m15
+0x8250 X d15.m16
+0x8251 X d15.m16.sub0
+0x8251 X d15.m16.sub0.sm00
+0x8253 X d15.m16.sub1
+0x8253 X d15.m16.sub1.sm00
+0x8258 X d16
+0x8259 X d16.m00
+0x825A X d16.m01
+0x825B X d16.m02
+0x825C X d16.m03
+0x825E X d16.m04
+0x8260 X d16.m05
+0x8262 X d16.m06
+0x8265 X d16.m07
+0x8269 X d16.m08
+0x826D X d16.m09
+0x8271 X d16.m10
+0x8272 X d16.m11
+0x8273 X d16.m12
+0x8274 X d16.m13
+0x8275 X d16.m14
+0x8276 X d16.m15
+0x8278 X d16.m16
+0x8279 X d16.m16.sub0
+0x8279 X d16.m16.sub0.sm00
+0x827B X d16.m16.sub1
+0x827B X d16.m16.sub1.sm00
+0x8280 X d17
+0x8281 X d17.m00
+0x8282 X d17.m01
+0x8283 X d17.m02
+0x8284 X d17.m03
+0x8286 X d17.m04
+0x8288 X d17.m05
+0x828A X d17.m06
+0x828D X d17.m07
+0x8291 X d17.m08
+0x8295 X d17.m09
+0x8299 X d17.m10
+0x829A X d17.m11
+0x829B X d17.m12
+0x829C X d17.m13
+0x829D X d17.m14
+0x829E X d17.m15
+0x82A0 X d17.m16
+0x82A1 X d17.m16.sub0
+0x82A1 X d17.m16.sub0.sm00
+0x82A3 X d17.m16.sub1
+0x82A3 X d17.m16.sub1.sm00
+0x82A8 X d18
+0x82A9 X d18.m00
+0x82AA X d18.m01
+0x82AB X d18.m02
+0x82AC X d18.m03
+0x82AE X d18.m04
+0x82B0 X d18.m05
+0x82B2 X d18.m06
+0x82B5 X d18.m07
+0x82B9 X d18.m08
+0x82BD X d18.m09
+0x82C1 X d18.m10
+0x82C2 X d18.m11
+0x82C3 X d18.m12
+0x82C4 X d18.m13
+0x82C5 X d18.m14
+0x82C6 X d18.m15
+0x82C8 X d18.m16
+0x82C9 X d18.m16.sub0
+0x82C9 X d18.m16.sub0.sm00
+0x82CB X d18.m16.sub1
+0x82CB X d18.m16.sub1.sm00
+0x82D0 X d19
+0x82D1 X d19.m00
+0x82D2 X d19.m01
+0x82D3 X d19.m02
+0x82D4 X d19.m03
+0x82D6 X d19.m04
+0x82D8 X d19.m05
+0x82DA X d19.m06
+0x82DD X d19.m07
+0x82E1 X d19.m08
+0x82E5 X d19.m09
+0x82E9 X d19.m10
+0x82EA X d19.m11
+0x82EB X d19.m12
+0x82EC X d19.m13
+0x82ED X d19.m14
+0x82EE X d19.m15
+0x82F0 X d19.m16
+0x82F1 X d19.m16.sub0
+0x82F1 X d19.m16.sub0.sm00
+0x82F3 X d19.m16.sub1
+0x82F3 X d19.m16.sub1.sm00
+0x82F8 X d20
+0x82F9 X d20.m00
+0x82FA X d20.m01
+0x82FB X d20.m02
+0x82FC X d20.m03
+0x82FE X d20.m04
+0x8300 X d20.m05
+0x8302 X d20.m06
+0x8305 X d20.m07
+0x8309 X d20.m08
+0x830D X d20.m09
+0x8311 X d20.m10
+0x8312 X d20.m11
+0x8313 X d20.m12
+0x8314 X d20.m13
+0x8315 X d20.m14
+0x8316 X d20.m15
+0x8318 X d20.m16
+0x8319 X d20.m16.sub0
+0x8319 X d20.m16.sub0.sm00
+0x831B X d20.m16.sub1
+0x831B X d20.m16.sub1.sm00
+0x8320 X d21
+0x8321 X d21.m00
+0x8322 X d21.m01
+0x8323 X d21.m02
+0x8324 X d21.m03
+0x8326 X d21.m04
+0x8328 X d21.m05
+0x832A X d21.m06
+0x832D X d21.m07
+0x8331 X d21.m08
+0x8335 X d21.m09
+0x8339 X d21.m10
+0x833A X d21.m11
+0x833B X d21.m12
+0x833C X d21.m13
+0x833D X d21.m14
+0x833E X d21.m15
+0x8340 X d21.m16
+0x8341 X d21.m16.sub0
+0x8341 X d21.m16.sub0.sm00
+0x8343 X d21.m16.sub1
+0x8343 X d21.m16.sub1.sm00
+0x8348 X d22
+0x8349 X d22.m00
+0x834A X d22.m01
+0x834B X d22.m02
+0x834C X d22.m03
+0x834E X d22.m04
+0x8350 X d22.m05
+0x8352 X d22.m06
+0x8355 X d22.m07
+0x8359 X d22.m08
+0x835D X d22.m09
+0x8361 X d22.m10
+0x8362 X d22.m11
+0x8363 X d22.m12
+0x8364 X d22.m13
+0x8365 X d22.m14
+0x8366 X d22.m15
+0x8368 X d22.m16
+0x8369 X d22.m16.sub0
+0x8369 X d22.m16.sub0.sm00
+0x836B X d22.m16.sub1
+0x836B X d22.m16.sub1.sm00
+0x8370 X d23
+0x8371 X d23.m00
+0x8372 X d23.m01
+0x8373 X d23.m02
+0x8374 X d23.m03
+0x8376 X d23.m04
+0x8378 X d23.m05
+0x837A X d23.m06
+0x837D X d23.m07
+0x8381 X d23.m08
+0x8385 X d23.m09
+0x8389 X d23.m10
+0x838A X d23.m11
+0x838B X d23.m12
+0x838C X d23.m13
+0x838D X d23.m14
+0x838E X d23.m15
+0x8390 X d23.m16
+0x8391 X d23.m16.sub0
+0x8391 X d23.m16.sub0.sm00
+0x8393 X d23.m16.sub1
+0x8393 X d23.m16.sub1.sm00
+0x8398 X d24
+0x8399 X d24.m00
+0x839A X d24.m01
+0x839B X d24.m02
+0x839C X d24.m03
+0x839E X d24.m04
+0x83A0 X d24.m05
+0x83A2 X d24.m06
+0x83A5 X d24.m07
+0x83A9 X d24.m08
+0x83AD X d24.m09
+0x83B1 X d24.m10
+0x83B2 X d24.m11
+0x83B3 X d24.m12
+0x83B4 X d24.m13
+0x83B5 X d24.m14
+0x83B6 X d24.m15
+0x83B8 X d24.m16
+0x83B9 X d24.m16.sub0
+0x83B9 X d24.m16.sub0.sm00
+0x83BB X d24.m16.sub1
+0x83BB X d24.m16.sub1.sm00
+0x83C0 X w0
+0x83C1 X w0.m00
+0x83C2 X w0.m01
+0x83C3 X w0.m02
+0x83C4 X w0.m03
+0x83C6 X w0.m04
+0x83C8 X w0.m05
+0x83CA X w0.m06
+0x83CD X w0.m07
+0x83D1 X w0.m08
+0x83D5 X w0.m09
+0x83D9 X w0.m10
+0x83DA X w0.m11
+0x83DB X w0.m12
+0x83DC X w0.m13
+0x83DD X w0.m14
+0x83DE X w0.m15
+0x83E0 X w0.m16
+0x83E1 X w0.m16.sub0
+0x83E1 X w0.m16.sub0.sm00
+0x83E3 X w0.m16.sub1
+0x83E3 X w0.m16.sub1.sm00

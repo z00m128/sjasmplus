@@ -1,0 +1,135 @@
+# file opened: initializer_syntax.asm
+ 1    0000              ; Based on documentation example (definitions same as tests/docs_examples/c_structures.asm)
+ 2    0000              ; But this test does focus on stressing initializers syntax
+ 3    0000
+ 4    0000                      STRUCT  SCOLOR
+ 5    0000 ~            RED     BYTE 4
+ 6    0000 ~            GREEN   BYTE 5
+ 7    0000 ~            BLUE    BYTE 6
+ 8    0000                      ENDS
+ 9    0000
+10    0000                      STRUCT SDOT
+11    0000 ~            X       BYTE    8
+12    0000 ~            Y       BYTE    9
+13    0000 ~            C       SCOLOR  10,11,12 ; use new default values
+14    0000                      ENDS
+15    0000
+16    0000                      OUTPUT initializer_syntax.bin
+17    0000
+18    0000 04 05 06     COLOR   SCOLOR                  ; set by default to { 4, 5, 6 }
+19    0003
+20    0003              COLORTABLE      ; without labels per item
+21    0003 00 00 00             SCOLOR  0,0,0           ; { 0, 0, 0 }
+22    0006 04 05 03             SCOLOR  ,,3             ; { 4, 5, 3 }
+23    0009 04 02 06             SCOLOR  ,2              ; { 4, 2, 6 }
+24    000C
+25    000C 08 09 0A 0B  DOT1    SDOT                    ; X:8, Y:9, C = { 10, 11, 12 }
+25    0010 0C
+26    0011 01 02 03 04          SDOT    {1,2, {3,4,5}}  ; X:1, Y:2, C = { 3, 4, 5 }
+26    0015 05
+27    0016
+28    0016                      ; X:6, Y:7, C = { 10, 11, 8 }
+29    0016 06 07 0A 0B          SDOT    {6,7 {,,8}}
+29    001A 08
+30    001B 06 07 0A 0B          SDOT    6,7,,,8
+30    001F 08
+31    0020 06 07 0A 0B          SDOT    6,7 {,,8}
+31    0024 08
+32    0025 06 07 0A 0B          SDOT    {6,7 ,,,8}
+32    0029 08
+33    002A
+34    002A                      ; X:6, Y:9, C = { 10, 11, 8 }
+35    002A 06 09 0A 0B          SDOT    {6{,,8}}
+35    002E 08
+36    002F 06 09 0A 0B          SDOT    {6,{,,8}}
+36    0033 08
+37    0034 06 09 0A 0B          SDOT    {6, {,,8}}
+37    0038 08
+38    0039 06 09 0A 0B          SDOT    {6,,{,,8}}
+38    003D 08
+39    003E 06 09 0A 0B          SDOT    {  6  ,  ,  {  ,  ,  8  }  }
+39    0042 08
+40    0043
+41    0043                      ; X:8, Y:7, C = { 10, 8, 12 }
+42    0043 08 07 0A 08          SDOT    {,7{,8}}
+42    0047 0C
+43    0048 08 07 0A 08          SDOT    {,7,{,8}}
+43    004C 0C
+44    004D 08 07 0A 08          SDOT    {,7,{,8,}}
+44    0051 0C
+45    0052 08 07 0A 08          SDOT    { , 7 , { , 8 } }
+45    0056 0C
+46    0057 08 07 0A 08          SDOT    { , 7 , { , 8, } }
+46    005B 0C
+47    005C 08 07 0A 08          SDOT    ,7{,8}
+47    0060 0C
+48    0061 08 07 0A 08          SDOT    ,7,,8
+48    0065 0C
+49    0066 08 07 0A 08          SDOT    ,7,,8,
+49    006A 0C
+50    006B 08 07 0A 08          SDOT    {,7,,8}
+50    006F 0C
+51    0070
+52    0070 01 02 03 0B          SDOT    {1,2,3}         ; X:1, Y:2, C = { 3, 11, 12 }
+52    0074 0C
+53    0075 08 09 01 02          SDOT    ,{1,2,3}        ; X:8, Y:9, C = { 1, 2, 3 }
+53    0079 03
+54    007A
+55    007A                      ; few errors
+initializer_syntax.asm(56): error: [STRUCT] Syntax error - too many arguments?
+initializer_syntax.asm(56): error: Unrecognized instruction: }
+initializer_syntax.asm(56): error: Unexpected: }
+56    007A 08 07 0A 08          SDOT    {,7{,8}}}
+56    007E 0C
+initializer_syntax.asm(57): error: [STRUCT] Syntax error - too many arguments?
+initializer_syntax.asm(57): error: Unrecognized instruction: {
+initializer_syntax.asm(57): error: Unexpected: {
+57    007F 08 07 0A 08          SDOT    {,7{,8}}{
+57    0083 0C
+initializer_syntax.asm(58): error: closing } missing
+initializer_syntax.asm(58): error: closing } missing
+initializer_syntax.asm(58): error: [STRUCT] Syntax error - too many arguments?
+initializer_syntax.asm(58): error: Unrecognized instruction: {,8}}
+initializer_syntax.asm(58): error: Unexpected: {,8}}
+58    0084 08 09 0A 07          SDOT    {{,7{,8}}
+58    0088 0C
+initializer_syntax.asm(59): error: closing } missing
+initializer_syntax.asm(59): error: closing } missing
+initializer_syntax.asm(59): error: [STRUCT] Syntax error - too many arguments?
+initializer_syntax.asm(59): error: Unrecognized instruction: {,8}}}
+initializer_syntax.asm(59): error: Unexpected: {,8}}}
+59    0089 08 09 0A 07          SDOT    {{,7{,8}}}
+59    008D 0C
+initializer_syntax.asm(60): error: [STRUCT] Syntax error - too many arguments?
+initializer_syntax.asm(60): error: Unrecognized instruction: ,
+initializer_syntax.asm(60): error: Unexpected: ,
+60    008E 08 07 0A 08          SDOT    ,7,,8,,
+60    0092 0C
+61    0093
+# file closed: initializer_syntax.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0003 X SCOLOR
+0x0000 X SCOLOR.RED
+0x0001 X SCOLOR.GREEN
+0x0002 X SCOLOR.BLUE
+0x0005 X SDOT
+0x0000 X SDOT.X
+0x0001 X SDOT.Y
+0x0002 X SDOT.C
+0x0002 X SDOT.C.RED
+0x0003 X SDOT.C.GREEN
+0x0004 X SDOT.C.BLUE
+0x0000 X COLOR
+0x0000 X COLOR.RED
+0x0001 X COLOR.GREEN
+0x0002 X COLOR.BLUE
+0x0003 X COLORTABLE
+0x000C X DOT1
+0x000C X DOT1.X
+0x000D X DOT1.Y
+0x000E X DOT1.C
+0x000E X DOT1.C.RED
+0x000F X DOT1.C.GREEN
+0x0010 X DOT1.C.BLUE
