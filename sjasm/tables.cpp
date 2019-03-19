@@ -1107,6 +1107,30 @@ CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, EStructur
 	next = 0; offset = noffset; len = nlen; def = ndef; type = ntype;
 }
 
+// Parses source input for types: BYTE, WORD, DWORD, D24
+aint CStructureEntry2::ParseValue(char* & p) {
+	if (SMEMBBYTE != type && SMEMBWORD != type && SMEMBDWORD != type && SMEMBD24 != type) return def;
+	SkipBlanks(p);
+	if ('{' == *p) return def;	// unexpected {
+	aint val;
+	if (!ParseExpressionNoSyntaxError(p, val)) val = def;
+	switch (type) {
+		case SMEMBBYTE:
+			check8(val);
+			return(val & 0xFF);
+		case SMEMBWORD:
+			check16(val);
+			return(val & 0xFFFF);
+		case SMEMBD24:
+			check24(val);
+			return(val & 0xFFFFFF);
+		case SMEMBDWORD:
+			return(val & 0xFFFFFFFFL);
+		default:
+			return def;
+	}
+}
+
 CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStructure* p) {
 	mnf = mnl = 0; mbf = mbl = 0;
 	naam = STRDUP(nnaam);
@@ -1178,43 +1202,51 @@ void CStructure::CopyMember(CStructureEntry2* ni, aint ndef) {
 }
 
 void CStructure::CopyMembers(CStructure* st, char*& lp) {
-	CStructureEntry2* ip;
 	aint val;
 	int haakjes = 0;
-	ip = new CStructureEntry2(noffset, 0, 0, SMEMBPARENOPEN); AddMember(ip);
-	SkipBlanks(lp); if (*lp == '{') {
-						++haakjes; ++lp;
-					}
-	ip = st->mbf;
+	AddMember(new CStructureEntry2(noffset, 0, 0, SMEMBPARENOPEN));
+	SkipBlanks(lp);
+	if (*lp == '{') {
+		++haakjes; ++lp;
+	}
+	CStructureEntry2* ip = st->mbf;
 	while (ip) {
 		switch (ip->type) {
 		case SMEMBBLOCK:
-			CopyMember(ip, ip->def); break;
+			CopyMember(ip, ip->def);
+			break;
 		case SMEMBBYTE:
 		case SMEMBWORD:
 		case SMEMBD24:
 		case SMEMBDWORD:
 			if (!ParseExpressionNoSyntaxError(lp, val)) val = ip->def;
-			CopyMember(ip, val); comma(lp); break;
+			CopyMember(ip, val);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(lp);
+			break;
 		case SMEMBPARENOPEN:
-			SkipBlanks(lp); if (*lp == '{') {
-								++haakjes; ++lp;
-							} break;
+			SkipBlanks(lp);
+			if (*lp == '{') {
+				++haakjes; ++lp;
+			}
+			CopyMember(ip, 0);
+			break;
 		case SMEMBPARENCLOSE:
-			SkipBlanks(lp); if (haakjes && *lp == '}') {
-								--haakjes; ++lp; comma(lp);
-							} break;
+			SkipBlanks(lp);
+			if (haakjes && *lp == '}') {
+				--haakjes; ++lp;
+				if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(lp);
+			}
+			CopyMember(ip, 0);
+			break;
 		default:
 			Error("internalerror CStructure::CopyMembers", NULL, FATAL);
 		}
 		ip = ip->next;
 	}
 	while (haakjes--) {
-		if (!need(lp, '}')) {
-			Error("closing } missing");
-		}
+		if (!need(lp, '}')) Error("closing } missing");
 	}
-	ip = new CStructureEntry2(noffset, 0, 0, SMEMBPARENCLOSE); AddMember(ip);
+	AddMember(new CStructureEntry2(noffset, 0, 0, SMEMBPARENCLOSE));
 }
 
 static void InsertSingleStructLabel(char *name, const aint value) {
@@ -1287,29 +1319,24 @@ void CStructure::emitmembs(char*& p) {
 			EmitBlock(ip->def != -1 ? ip->def : 0, ip->len, ip->def == -1, true);
 			break;
 		case SMEMBBYTE:
-			if (!ParseExpressionNoSyntaxError(p, val)) val = ip->def;
-			check8(val);
-			EmitByte(val & 0xFF);
-			comma(p);
+			EmitByte(ip->ParseValue(p));
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
 			break;
 		case SMEMBWORD:
-			if (!ParseExpressionNoSyntaxError(p, val)) val = ip->def;
-			check16(val);
-			EmitWord(val & 0xFFFF);
-			comma(p);
+			EmitWord(ip->ParseValue(p));
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
 			break;
 		case SMEMBD24:
-			if (!ParseExpressionNoSyntaxError(p, val)) val = ip->def;
-			check24(val);
+			val = ip->ParseValue(p);
 			EmitByte(val & 0xFF);
 			EmitWord((val>>8) & 0xFFFF);
-			comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
 			break;
 		case SMEMBDWORD:
-			if (!ParseExpressionNoSyntaxError(p, val)) val = ip->def;
+			val = ip->ParseValue(p);
 			EmitWord(val & 0xFFFF);
 			EmitWord((val>>16) & 0xFFFF);
-			comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
 			break;
 		case SMEMBPARENOPEN:
 			SkipBlanks(p);
@@ -1317,7 +1344,10 @@ void CStructure::emitmembs(char*& p) {
 			break;
 		case SMEMBPARENCLOSE:
 			SkipBlanks(p);
-			if (haakjes && *p == '}') { --haakjes; ++p; comma(p); }
+			if (haakjes && *p == '}') {
+				--haakjes; ++p;
+			}
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
 			break;
 		default:
 			ErrorInt("Internal Error CStructure::emitmembs", ip->type, FATAL);
@@ -1343,7 +1373,6 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 		STRCPY(sn, LINEMAX, ModuleName);
 		STRCAT(sn, LINEMAX, ".");
 	}
-	//sp = STRCAT(sn, LINEMAX, naam); //mmmm
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
 	if (FindDuplicate(sp)) {
@@ -1363,7 +1392,6 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 		STRCPY(sn, LINEMAX, ModuleName);
 		STRCAT(sn, LINEMAX, ".");
 	}
-	//sp = STRCAT(sn, LINEMAX, naam); //mmm
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
 	CStructure* p = strs[(unsigned char)*sp];
@@ -1394,7 +1422,6 @@ int CStructureTable::FindDuplicate(char* naam) {
 }
 
 int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
-	//_COUT naam _ENDL; ExitASM(1);
 	CStructure* st = zoek(naam, gl);
 	if (!st) {
 		return 0;
@@ -1425,23 +1452,13 @@ CDevice::CDevice(const char *name, CDevice *n) {
 }
 
 CDevice::~CDevice() {
-	//CDefineSlot *Slot;
-
-	//Slot = Slots;
-	//while (Slot != NULL) {
-	//	Slot = Slots->Next;
 	for (int i=0;i<256;i++) {
 		if (Slots[i]) delete Slots[i];
 	}
-	//}
 
-	//Page = Pages;
-	//while (Page != NULL) {
-	//	Page = Pages->Next;
 	for (int i=0;i<256;i++) {
 		if (Pages[i]) delete Pages[i];
 	}
-	//}
 
 	if (Next) {
 		delete Next;
@@ -1476,33 +1493,22 @@ CDevicePage* CDevice::GetPage(aint num) {
 	return Pages[0];
 }
 
-CDeviceSlot::CDeviceSlot(aint adr, aint size, aint number /*, CDeviceSlot *n*/) {
+CDeviceSlot::CDeviceSlot(aint adr, aint size, aint number) {
 	Address = adr;
 	Size = size;
 	Number = number;
-	/*Next = NULL;
-	if (n) {
-	   	n->Next = this;
-    }*/
 }
 
-CDevicePage::CDevicePage(aint size, aint number /*, CDevicePage *n*/) {
+CDevicePage::CDevicePage(aint size, aint number) {
 	Size = size;
 	Number = number;
 	RAM = (char*) calloc(size, sizeof(char));
 	if (RAM == NULL) {
 		ErrorInt("No enough memory", size, FATAL);
 	}
-	/*Next = NULL;
-	if (n) {
-	   	n->Next = this;
-    }*/
 }
 
 CDeviceSlot::~CDeviceSlot() {
-	/*if (Next) {
-		delete Next;
-	}*/
 }
 
 CDevicePage::~CDevicePage() {
@@ -1510,9 +1516,6 @@ CDevicePage::~CDevicePage() {
 		free(RAM);
 	} catch(...) {
 
-	}*/
-	/*if (Next) {
-		delete Next;
 	}*/
 }
 

@@ -229,7 +229,8 @@ public:
 	aint offset, len, def;
 	EStructureMembers type;
 	CStructureEntry2* next;
-	CStructureEntry2(aint, aint, aint, EStructureMembers);
+	CStructureEntry2(aint noffset, aint nlen, aint ndef, EStructureMembers ntype);
+	aint ParseValue(char* & p);
 };
 
 class CStructure {
