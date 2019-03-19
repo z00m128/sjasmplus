@@ -1,0 +1,57 @@
+# file opened: numeric_constants_invalid.asm
+ 1    0000                  ;; invalid numeric literals errors
+ 2    0000
+ 3    0000                  ;; missing digits
+numeric_constants_invalid.asm(4): error: Syntax error: #
+numeric_constants_invalid.asm(4): error: [DWORD] Syntax error: #
+ 4    0000                  DD      #
+ 5    0000                  ;DD $   => is actual valid syntax for current address pointer
+numeric_constants_invalid.asm(6): error: Syntax error: 0x
+ 6    0000                  DD      0x
+numeric_constants_invalid.asm(7): error: Syntax error: %
+ 7    0000                  DD      %
+ 8    0000
+ 9    0000                  ;; hard 32b overflow
+10    0000 FF FF FF FF      DD      0xFFFFFFFF                          ; OK
+numeric_constants_invalid.asm(11): error: Overflow: 0x100000000                         
+11    0004 00 00 00 00      DD      0x100000000                         ; overflow error
+12    0008 FF FF FF FF      DD      %11111111111111111111111111111111   ; OK
+numeric_constants_invalid.asm(13): error: Overflow: %100000000000000000000000000000000  
+13    000C 00 00 00 00      DD      %100000000000000000000000000000000  ; overflow error
+14    0010 FF FF FF FF      DD      37777777777o                        ; OK
+numeric_constants_invalid.asm(15): error: Overflow: 40000000000o                        
+15    0014 00 00 00 00      DD      40000000000o                        ; overflow error
+16    0018 FF FF FF FF      DD      4294967295                          ; OK
+numeric_constants_invalid.asm(17): error: Overflow: 4294967296                          
+17    001C 00 00 00 00      DD      4294967296                          ; overflow error
+18    0020
+19    0020                  ;; digit out of base
+numeric_constants_invalid.asm(20): error: Digit not in base: 12A0
+20    0020                  DD      12A0
+numeric_constants_invalid.asm(21): error: Digit not in base: 12A0d
+21    0020                  DD      12A0d
+numeric_constants_invalid.asm(22): error: Digit not in base: 0FFGFh
+22    0020                  DD      0FFGFh
+numeric_constants_invalid.asm(23): error: Digit not in base: 0xFFGF
+23    0020                  DD      0xFFGF
+numeric_constants_invalid.asm(24): error: Digit not in base: $FFGF
+24    0020                  DD      $FFGF
+numeric_constants_invalid.asm(25): error: Digit not in base: #FFGF
+25    0020                  DD      #FFGF
+numeric_constants_invalid.asm(26): error: Digit not in base: 1002001b
+26    0020                  DD      1002001b
+numeric_constants_invalid.asm(27): error: Digit not in base: 01002001b
+27    0020                  DD      01002001b
+numeric_constants_invalid.asm(28): error: Digit not in base: %1002001
+28    0020                  DD      %1002001
+numeric_constants_invalid.asm(29): error: Digit not in base: %01002001
+29    0020                  DD      %01002001
+numeric_constants_invalid.asm(30): error: Digit not in base: 12834q
+30    0020                  DD      12834q
+numeric_constants_invalid.asm(31): error: Digit not in base: 12834o
+31    0020                  DD      12834o
+32    0020
+# file closed: numeric_constants_invalid.asm
+
+Value    Label
+------ - -----------------------------------------------------------
