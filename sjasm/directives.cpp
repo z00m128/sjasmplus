@@ -1425,128 +1425,62 @@ void dirEXPORT() {
 }
 
 void dirDISPLAY() {
-	char decprint = 0;
-	char e[LINEMAX];
+	char decprint = 'H';
+	char e[LINEMAX], optionChar;
 	char* ep = e;
 	aint val;
-	int t = 0;
-	while (1) {
+	do {
 		if (SkipBlanks()) {
-			Error("[DISPLAY] Expression expected"); break;
+			Error("[DISPLAY] Expression expected");
+			break;
 		}
-		if (t == LINEMAX - 1) {
-			Error("[DISPLAY] Too many arguments", lp); break;
-		}
-		if (*(lp) == '/') {
-			++lp;
-			switch (*(lp++)) {
-			case 'A':
-			case 'a':
-				decprint = 2;break;
-			case 'D':
-			case 'd':
-				decprint = 1;break;
-			case 'H':
-			case 'h':
-				decprint = 0;break ;
-			case 'L':
-			case 'l':
-				break ;
-			case 'T':
-			case 't':
+		if (*lp == '/') {
+			switch (optionChar = toupper(lp[1])) {
+			case 'A': case 'D': case 'H':	// known options, switching hex+dec / dec / hex mode
+				decprint = optionChar;
+				break;
+			case 'L': case 'T':				// silently ignored options (legacy compatibility)
 				break ;
 			default:
-				Error("[DISPLAY] Syntax error", line);return;
+				Error("[DISPLAY] Syntax error, unknown option", lp, SUPPRESS);
+				return;
 			}
-			SkipBlanks(lp);
-
-			if ((*(lp) != 0x2c)) {
-				Error("[DISPLAY] Syntax error", line);return;
-			}
-			++lp;
-			SkipBlanks(lp);
+			lp += 2;
+			continue;
 		}
-
-		if (*lp == '"') {		//FIXME Ped7g fix the string literal parsing (GetBytes for new style)
-			lp++;
-			do {
-				if (!*lp || *lp == '"') {
-					Error("[DISPLAY] Syntax error", line);
-					*ep = 0;
-					return;
-				}
-				if (t == 128) {
-					Error("[DISPLAY] Too many arguments", line);
-					*ep = 0;
-					return;
-				}
-				GetCharConstInDoubleQuotes(lp, val);
-				check8(val);
-				*(ep++) = (char) (val & 255);
-			} while (*lp != '"');
-			++lp;
-		} else if (*lp == '\'') {
-		  	lp++;
-			do {
-				if (!*lp || *lp == '\'') {
-		  			Error("[DISPLAY] Syntax error", line);
-					*ep = 0;
-					return;
-				}
-				if (t == LINEMAX - 1) {
-		  			Error("[DISPLAY] Too many arguments", line);
-					*ep = 0;
-					return;
-				}
-		  		GetCharConstInApostrophes(lp, val);
-				check8(val);
-				*(ep++) = (char) (val & 255);
-			} while (*lp != '\'');
-		  	++lp;
+		// try to parse some string literal
+		int ei = 0;
+		val = GetCharConstAsString(lp, ep, ei, LINEMAX - (ep-e));
+		if (-1 == val) {
+			Error("[DISPLAY] Syntax error", line);
+			return;
+		} else if (val) {
+			ep += ei;				// string literal successfuly parsed
 		} else {
-		  	displayerror = 0;displayinprocces = 1;
-			if (ParseExpression(lp, val)) {
-				if (displayerror) {
-					displayinprocces = 0;
-					Error("[DISPLAY] Bad argument", line);
-					return;
-				} else {
-		  		  	displayinprocces = 0;
-					if (decprint == 0 || decprint == 2) {
-		  		  		*(ep++) = '0';
-						*(ep++) = 'x';
-						if (val < 0x1000) {
-							PrintHEX16(ep, val);
-						} else {
-							PrintHEXAlt(ep, val);
-						}
-					}
-					if (decprint == 2) {
-						*(ep++) = ',';
-						*(ep++) = ' ';
-					}
-					if (decprint == 1 || decprint == 2) {
-						SPRINTF1(ep, (int)(&e[0] + LINEMAX - ep), "%lu", val);
-						ep += strlen(ep);
-					}
-		  		  	decprint = 0;
+			// string literal was not there, how about expression?
+			if (ParseExpressionNoSyntaxError(lp, val)) {
+				val &= 0xFFFFFFFFUL;
+				if (decprint == 'H' || decprint == 'A') {
+					*(ep++) = '0';
+					*(ep++) = 'x';
+					PrintHexAlt(ep, val);
 				}
+				if (decprint == 'D' || decprint == 'A') {
+					if (decprint == 'A') {
+						*(ep++) = ','; *(ep++) = ' ';
+					}
+					ep += SPRINTF1(ep, (int)(&e[0] + LINEMAX - ep), "%lu", val);
+				}
+				decprint = 'H';
 			} else {
-				Error("[DISPLAY] Syntax error", line);
+				Error("[DISPLAY] Syntax error", line, SUPPRESS);
 				return;
 			}
 		}
-		SkipBlanks(lp);
-		if (*lp != ',') {
-			break;
-		}
-		++lp;
-	}
+	} while(comma(lp));
 	*ep = 0; // end line
 
-	if (pass != LASTPASS) {
-		// do none
-	} else {
+	if (LASTPASS == pass && *e) {
 		_COUT "> " _CMDL e _ENDL;
 	}
 }

@@ -453,7 +453,7 @@ void CLabelTable::Dump() {
 			*(ep) = 0;
 			*(ep++) = '0';
 			*(ep++) = 'x';
-			PrintHEXAlt(ep, LabelTable[i].value);
+			PrintHexAlt(ep, LabelTable[i].value);
 			*(ep++) = ' ';
 			*(ep++) = LabelTable[i].used > 0 ? ' ' : 'X';
 			*(ep++) = ' ';
@@ -489,7 +489,7 @@ void CLabelTable::DumpForUnreal() {
 // 		}
 		if (0 <= page) ep += sprintf(ep, "%02d", page&255);
 		*(ep++) = ':';
-		PrintHEXAlt(ep, lvalue);
+		PrintHexAlt(ep, lvalue);
 		*(ep++) = ' ';
 		STRCPY(ep, LINEMAX-(ep-ln), LabelTable[i].name);
 		STRCAT(ep, LINEMAX, "\n");
@@ -500,7 +500,6 @@ void CLabelTable::DumpForUnreal() {
 
 void CLabelTable::DumpSymbols() {
 	FILE* symfp;
-	char lnrs[16], * l;
 	if (!FOPEN_ISOK(symfp, Options::SymbolListFName, "w")) {
 		Error("Error opening file", Options::SymbolListFName, FATAL);
 	}
@@ -508,9 +507,9 @@ void CLabelTable::DumpSymbols() {
 		if (isalpha(LabelTable[i].name[0])) {
 			STRCPY(ErrorLine, LINEMAX, LabelTable[i].name);
 			STRCAT(ErrorLine, LINEMAX2, ": equ ");
-			l = lnrs;
 			STRCAT(ErrorLine, LINEMAX2, "0x");
-			PrintHEX32(l, LabelTable[i].value);
+			char lnrs[16], * l = lnrs;
+			PrintHex32(l, LabelTable[i].value);
 			*l = 0;
 			STRCAT(ErrorLine, LINEMAX2, lnrs);
 			STRCAT(ErrorLine, LINEMAX2, "\n");

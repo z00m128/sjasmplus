@@ -71,7 +71,6 @@ extern char mline[LINEMAX2], sline[LINEMAX2], sline2[LINEMAX2];
 extern char SourceFNames[128][MAX_PATH];
 extern int CurrentSourceFName;
 
-extern bool displayinprocces, displayerror;
 extern int ConvertEncoding;
 extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
 extern int adrdisp, PseudoORG;

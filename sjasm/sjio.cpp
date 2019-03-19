@@ -52,9 +52,6 @@ FILE* FP_Input = NULL, * FP_Output = NULL, * FP_RAW = NULL;
 FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
 aint PreviousAddress,epadres,IsSkipErrors = 0;
 aint WBLength = 0;
-char hd[] = {
-	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-};
 
 void Error(const char* message, const char* badValueMessage, EStatus type) {
 	// check if it is correct pass by the type of error
@@ -195,94 +192,29 @@ void WriteDest() {
 	WBLength = 0;
 }
 
-void PrintHEX8(char*& p, aint h) {
-	aint hh = h&0xff;
-	*(p++) = hd[hh >> 4];
-	*(p++) = hd[hh & 15];
+void PrintHex(char* & dest, aint value, int nibbles) {
+	if (nibbles < 1 || 16 < nibbles) ExitASM(33);	// invalid argument
+	const char oldChAfter = dest[nibbles];
+	const aint mask = (int(sizeof(aint)*2) <= nibbles) ? ~0UL : (1UL<<(nibbles*4))-1UL;
+	if (nibbles != sprintf(dest, "%0*lX", nibbles, value&mask)) ExitASM(33);
+	dest += nibbles;
+	*dest = oldChAfter;
 }
 
-void listbytes(char*& p) {
-	int i = 0;
-	while (nEB--) {
-		PrintHEX8(p, EB[i++]); *(p++) = ' ';
-	}
-	i = 4 - i;
-	while (i--) {
-		*(p++) = ' '; *(p++) = ' '; *(p++) = ' ';
-	}
+void PrintHex8(char*& dest, aint value) {
+	PrintHex(dest, value, 2);
 }
 
-void listbytes2(char*& p) {
-	for (int i = 0; i != 5; ++i) {
-		PrintHEX8(p, EB[i]);
-	}
-	*(p++) = ' '; *(p++) = ' ';
+void PrintHex32(char*& dest, aint value) {
+	PrintHex(dest, value, 8);
 }
 
-void PrintHEX32(char*& p, aint h) {
-	aint hh = h&0xffffffff;
-	*(p++) = hd[hh >> 28]; hh &= 0xfffffff;
-	*(p++) = hd[hh >> 24]; hh &= 0xffffff;
-	*(p++) = hd[hh >> 20]; hh &= 0xfffff;
-	*(p++) = hd[hh >> 16]; hh &= 0xffff;
-	*(p++) = hd[hh >> 12]; hh &= 0xfff;
-	*(p++) = hd[hh >> 8];  hh &= 0xff;
-	*(p++) = hd[hh >> 4];  hh &= 0xf;
-	*(p++) = hd[hh];
-}
-
-void PrintHEX16(char*& p, aint h) {
-	aint hh = h&0xffff;
-	*(p++) = hd[hh >> 12]; hh &= 0xfff;
-	*(p++) = hd[hh >> 8]; hh &= 0xff;
-	*(p++) = hd[hh >> 4]; hh &= 0xf;
-	*(p++) = hd[hh];
-}
-
-char hd2[] = {
-	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-};
-
-void PrintHEXAlt(char*& p, aint h) {
-	aint hh = h&0xffffffff;
-	if (hh >> 28 != 0) {
-		*(p++) = hd2[hh >> 28];
-	}
-	hh &= 0xfffffff;
-	if (hh >> 24 != 0) {
-		*(p++) = hd2[hh >> 24];
-	}
-	hh &= 0xffffff;
-	if (hh >> 20 != 0) {
-		*(p++) = hd2[hh >> 20];
-	}
-	hh &= 0xfffff;
-	if (hh >> 16 != 0) {
-		*(p++) = hd2[hh >> 16];
-	}
-	hh &= 0xffff;
-	*(p++) = hd2[hh >> 12]; hh &= 0xfff;
-	*(p++) = hd2[hh >> 8];  hh &= 0xff;
-	*(p++) = hd2[hh >> 4];  hh &= 0xf;
-	*(p++) = hd2[hh];
-}
-
-void listbytes3(int pad) {
-	int i = 0,t;
-	char* pp,* sp = pline + 3 + reglenwidth;
-	while (nEB) {
-		pp = sp;
-		PrintHEX16(pp, pad);
-		*(pp++) = ' '; t = 0;
-		while (nEB && t < 32) {
-			PrintHEX8(pp, EB[i++]); --nEB; ++t;
-		}
-		*(pp++) = '\n'; *pp = 0;
-		if (FP_ListingFile != NULL) {
-			fputs(pline, FP_ListingFile);
-		}
-		pad += 32;
-	}
+void PrintHexAlt(char*& dest, aint value)
+{
+	value &= 0xFFFFFFFFUL;
+	char buffer[24] = { 0 }, * bp = buffer;
+	sprintf(buffer, "%04lX", value & 0xFFFFFFFFUL);
+	while (*bp) *dest++ = *bp++;
 }
 
 void PrepareListLine(aint hexadd)
@@ -1373,7 +1305,7 @@ void WriteExp(char* n, aint v) {
 	STRCPY(ErrorLine, LINEMAX2, n);
 	STRCAT(ErrorLine, LINEMAX2, ": EQU ");
 	STRCAT(ErrorLine, LINEMAX2, "0x");
-	PrintHEX32(l, v); *l = 0;
+	PrintHex32(l, v); *l = 0;
 	STRCAT(ErrorLine, LINEMAX2, lnrs);
 	STRCAT(ErrorLine, LINEMAX2, "\n");
 	fputs(ErrorLine, FP_ExportFile);

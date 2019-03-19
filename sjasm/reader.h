@@ -58,6 +58,7 @@ int GetConstant(char*& op, aint& val);
 int GetCharConst(char*& p, aint& val);
 int GetCharConstInDoubleQuotes(char*& op, aint& val);
 int GetCharConstInApostrophes(char*& op, aint& val);
+template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, int max_ei = 128, int add = 0);
 int GetBytes(char*& p, int e[], int add, int dc);
 int cmphstr(char*& p1, const char* p2);
 char* GetFileName(char*& p, bool convertslashes=false);

@@ -112,7 +112,6 @@ char SourceFNames[128][MAX_PATH];
 int CurrentSourceFName = 0;
 int SourceFNamesCount = 0;
 
-bool displayerror,displayinprocces = 0;
 int ConvertEncoding = ENCWIN;
 
 int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;

@@ -37,11 +37,11 @@ new_apostrophe.asm(19): error: no arguments
 20    003E 04             db 4
 21    003F
 new_apostrophe.asm(22): warning: Bytes lost (0x41424344)
-new_apostrophe.asm(22): warning: String literal truncated to 0x47485858: ABCDEFGHXX
+new_apostrophe.asm(22): warning: String literal truncated to 0x47485858: 'ABCDEFGHXX'
 new_apostrophe.asm(22): warning: Bytes lost (0x47485858)
 22    003F 44 43 58 58      dw  'ABCD', 'ABCDEFGHXX'; regular value check warnings + string literal overflow
 new_apostrophe.asm(23): warning: Bytes lost (0x41424344)
-new_apostrophe.asm(23): warning: String literal truncated to 0x47485858: ABCDEFGHXX
+new_apostrophe.asm(23): warning: String literal truncated to 0x47485858: "ABCDEFGHXX"
 new_apostrophe.asm(23): warning: Bytes lost (0x47485858)
 23    0043 44 43 58 58      dw  "ABCD", "ABCDEFGHXX"; regular value check warnings + string literal overflow
 24    0047

@@ -498,54 +498,62 @@ int GetCharConstInApostrophes(char*& op, aint& val) {
 
 // parse single/double quoted string literal as single value ('012' == 0x00303132)
 int GetCharConst(char*& p, aint& val) {
-	// check if string starts here
-	if ('"' != *p && '\'' != *p) return 0;
 	const char * const op = p;		// for error reporting
-	const bool quotes = '"' == *p++;
-	aint singleCharVal, bytes = 0;
+	char buffer[128];
+	int bytes = 0, strRes;
+	if (!(strRes = GetCharConstAsString(p, buffer, bytes))) return 0;		// no string detected
 	val = 0;
-	// read through whole string and keep calculating value (may overflow if more than 4 bytes)
-	while (quotes ? GetCharConstInDoubleQuotes(p, singleCharVal) : GetCharConstInApostrophes(p, singleCharVal)) {
-		val = (val << 8) + singleCharVal;
-		++bytes;
-	}
-	if ((quotes ? '"' : '\'') != *p) {
-		Error("String is not closed", op);
-		return 0;
-	}
+	if (-1 == strRes) return 0;		// some syntax/max_size error happened
+	for (int ii = 0; ii < bytes; ++ii) val = (val << 8) + (255&buffer[ii]);
 	if (0 == bytes) {
 		Warning("Empty string literal converted to value 0!", op);
 	} else if (4 < bytes) {
-		val &= (1UL<<32)-1UL;		// make sure it's 32b truncated even on 64b platforms
+		val &= 0xFFFFFFFFUL;		// make sure it's 32b truncated even on 64b platforms
+		const char oldCh = *p;
 		*p = 0;						// shorten the string literal for warning display
-		char buffer[128];
 		sprintf(buffer, "String literal truncated to 0x%lX", val);
-		Warning(buffer, op+1);
-		*p = quotes ? '"' : '\'';	// restore it
+		Warning(buffer, op);
+		*p = oldCh;					// restore it
 	}
-	++p;
 	return 1;
 }
 
+// returns (adjusts also "p" and "ei", and fills "e"):
+//  -1 = syntax error (or buffer full)
+//   0 = no string literal detected at p[0]
+//   1 = string literal in single quotes (apostrophe)
+//   2 = string literal in double quotes (")
+template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, int max_ei, int add) {
+	if ('"' != *p && '\'' != *p) return 0;
+	const char* const elementP = p;
+	const bool quotes = ('"' == *p++);
+	aint val;
+	while (ei < max_ei && (quotes ? GetCharConstInDoubleQuotes(p, val) : GetCharConstInApostrophes(p, val))) {
+		e[ei++] = (val + add) & 255;
+	}
+	if ((quotes ? '"' : '\'') != *p) {	// too many/invalid arguments or zero-terminator can lead to this
+		if (!*p) Error("Syntax error", elementP, SUPPRESS);
+		return -1;
+	}
+	++p;
+	return 1 + quotes;
+}
+
+// make sure both specialized instances for `char` and `int` are available for whole app
+template int GetCharConstAsString<char>(char* & p, char e[], int & ei, int max_ei, int add);
+template int GetCharConstAsString<int>(char* & p, int e[], int & ei, int max_ei, int add);
+
 int GetBytes(char*& p, int e[], int add, int dc) {
 	aint val;
-	int t = 0;
+	int t = 0, strRes;
 	do {
-		const char* const elementP = p;
+		const int oldT = t;
 		if (SkipBlanks(p)) {
 			Error("Expression expected", NULL, SUPPRESS);
-		} else if ('"' == *p || '\'' == *p) {	// string literals (both types)
-			const bool quotes = '"' == *p++;
-			const int oldT = t;
-			while (t < 128 && (quotes ? GetCharConstInDoubleQuotes(p, val) : GetCharConstInApostrophes(p, val))) {
-				e[t++] = (val + add) & 255;
-			}
-			if ((quotes ? '"' : '\'') != *p) {	// too many/invalid arguments or zero-terminator can lead to this
-				if (!*p) Error("Syntax error", elementP, SUPPRESS);
-				break;
-			}
-			++p;
-			if (oldT == t)	Warning("Empty string", p-2);
+		} else if (0 != (strRes = GetCharConstAsString(p, e, t, 128, add))) {
+			// string literal parsed (both types)
+			if (-1 == strRes) break;
+			if (oldT == t) Warning("Empty string", p-2);
 			else {
 				// single byte "strings" may have further part of expression, handle it *here* :/
 				if (1 == t - oldT) {
@@ -559,7 +567,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 				}
 				// mark last "string" byte with |128: single char in "" *is* string
 				// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
-				if (dc && ((!quotes) < (t - oldT))) e[t - 1] |= 128;
+				if (dc && ((1 == strRes) < (t - oldT))) e[t - 1] |= 128;
 			}
 		} else {
 			if (ParseExpression(p, val)) {
@@ -713,59 +721,6 @@ EStructureMembers GetStructMemberId(char*& p) {
 		break;
 	}
 	return SMEMBUNKNOWN;
-}
-
-int GetArray(char*& p, int e[], int add, int dc) {
-	aint val;
-	int t = 0;
-	while ('o') {
-		if (SkipBlanks(p)) {
-			Error("Expression expected", NULL, SUPPRESS); break;
-		}
-		if (t == 128) {
-			Error("Too many arguments", p, SUPPRESS); break;
-		}
-		if (*p == '"') {	//FIXME Ped7g simplify as GetBytes is done (or merge code!)
-			p++;
-			do {
-				if (!*p || *p == '"') {
-					Error("Syntax error", p, SUPPRESS); e[t] = -1; return t;
-				}
-				if (t == 128) {
-					Error("Too many arguments", p, SUPPRESS); e[t] = -1; return t;
-				}
-				GetCharConstInDoubleQuotes(p, val); check8(val); e[t++] = (val + add) & 255;
-			} while (*p != '"');
-			++p; if (dc && t) {
-				 	e[t - 1] |= 128;
-				 }
-		} else if ((*p == '\'') && (!*(p+2) || *(p+2) != '\'')) {
-		  	p++;
-			do {
-				if (!*p || *p == '\'') {
-					Error("Syntax error", p, SUPPRESS); e[t] = -1; return t;
-				}
-				if (t == 128) {
-		  			Error("Too many arguments", p, SUPPRESS); e[t] = -1; return t;
-				}
-		  		GetCharConstInApostrophes(p, val); check8(val); e[t++] = (val + add) & 255;
-			} while (*p != '\'');
-		  	++p;
-			if (dc && t) {
-				 e[t - 1] |= 128;
-			}
-		} else {
-			if (ParseExpression(p, val)) {
-				check8(val); e[t++] = (val + add) & 255;
-			} else {
-				Error("Syntax error", p, SUPPRESS); break;
-			}
-		}
-		SkipBlanks(p); if (*p != ',') {
-					   	break;
-					   } ++p;
-	}
-	e[t] = -1; return t;
 }
 
 int GetMacroArgumentValue(char* & src, char* & dst) {
