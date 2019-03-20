@@ -20,16 +20,16 @@
 19    0101 ~            > TESTLABEL address is:0x100, 256
 20    0101 ~            */
 21    0101
-22    0101              ;; Part of example in LUA chapter of documentation
+22    0101              ;; Part of example in LUA chapter of documentation (modified to pin date to fixed one)
 23    0101                  LUA
 24    0101 ~                    -- Creates define "TIME" with current time
-25    0101 ~                    sj.insert_define("TIME", '"' .. os.date("%Y-%m-%d %H:%M:%S") .. '"')
+25    0101 ~                    sj.insert_define("TIME", '"' .. os.date("%Y-%m-%d %H:%M:%S", 906000490) .. '"')
 26    0101                  ENDLUA
 27    0101
-28    0101                  DISPLAY "Build time: ", TIME
+28    0101                  DISPLAY "Build time: ", "1998-09-17 04:48:10"
 29    0101 ~            /*
 30    0101 ~            will output to the console strings:
-31    0101 ~            Build time: <current date+time>
+31    0101 ~            Build time: <current date+time>  --> not current, but fixed one, for automated tests to pass
 32    0101 ~            */
 33    0101
 34    0101              ;; Non-documentation manual tests of DISPLAY

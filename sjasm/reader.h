@@ -36,6 +36,7 @@ bool White();
 void SkipParam(char*&);
 int SkipBlanks(char*& p);
 int SkipBlanks();
+void SkipToEol(char*& p);
 int NeedEQU();
 int NeedDEFL();
 int NeedField();

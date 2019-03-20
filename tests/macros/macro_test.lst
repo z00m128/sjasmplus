@@ -11,11 +11,11 @@
 10    0000
 11    0000              	MyMacro abc, def
 macro_test.asm(11): error: Label not found: abc_f
-11    0000 CD 00 00    >		call arg0_f
+11    0000 CD 00 00    >		call abc_f
 macro_test.asm(11): error: Label not found: abc_def
-11    0003 CD 00 00    >		call arg0_arg1
+11    0003 CD 00 00    >		call abc_def
 macro_test.asm(11): error: Label not found: def_abc
-11    0006 CD 00 00    >		call arg1_arg0
+11    0006 CD 00 00    >		call def_abc
 12    0009
 13    0009              ;should be expanded to:
 14    0009              ;
@@ -60,28 +60,28 @@ macro_test.asm(11): error: Label not found: def_abc
 53    0009
 54    0009              	a0a1 abc, def
 macro_test.asm(54): error: Label not found: abc_def__yyy
-54    0009 CD 00 00    >	call a0_a1__yyy
+54    0009 CD 00 00    >	call abc_def__yyy
 55    000C              	a1a0 abc, def
 macro_test.asm(55): error: Label not found: def_abc___yyy
-55    000C CD 00 00    >	call a1_a0___yyy
+55    000C CD 00 00    >	call def_abc___yyy
 56    000F              	a1a0a1 abc, def
 macro_test.asm(56): error: Label not found: def____abc__def
-56    000F CD 00 00    >	call a1____a0__a1
+56    000F CD 00 00    >	call def____abc__def
 57    0012              	a0_a abc
 macro_test.asm(57): error: Label not found: abc_
-57    0012 CD 00 00    >	call a0_
+57    0012 CD 00 00    >	call abc_
 58    0015              	a0_b abc
 macro_test.asm(58): error: Label not found: __abc
-58    0015 CD 00 00    >	call __a0
+58    0015 CD 00 00    >	call __abc
 59    0018              	a0_c abc
 macro_test.asm(59): error: Label not found: _abc_
-59    0018 CD 00 00    >	call _a0_
+59    0018 CD 00 00    >	call _abc_
 60    001B              	a0a1_a abc, def
 macro_test.asm(60): error: Label not found: abc____def_
-60    001B CD 00 00    >	call a0____a1_
+60    001B CD 00 00    >	call abc____def_
 61    001E              	a0a1_b abc, def
 macro_test.asm(61): error: Label not found: abc____yy_def
-61    001E CD 00 00    >	call a0____yy_a1
+61    001E CD 00 00    >	call abc____yy_def
 macro_test.asm(61): error: Label not found: _my___yyyyy____yy__call
 61    0021 CD 00 00    >	call _my___yyyyy____yy__call
 62    0024

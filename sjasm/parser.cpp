@@ -506,6 +506,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	rp = nl;
 	SkipBlanks(rp);
 	if (!*rp) *nl = 0;
+	substitutedLine = nl;		// set global pointer to the latest substituted version
 	return definegereplaced;
 }
 

@@ -106,7 +106,7 @@ char* DeviceID = 0;
 
 // extend
 char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
-char sline[LINEMAX2], sline2[LINEMAX2];
+char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
 
 char SourceFNames[128][MAX_PATH];
 int CurrentSourceFName = 0;

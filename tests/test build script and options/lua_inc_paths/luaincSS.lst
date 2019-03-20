@@ -37,15 +37,15 @@ luaincSS.asm(19): warning: Pass updated to 3, device: ZXSPECTRUM1024
 34    8003
 35    8003                  LUA ALLPASS
 36    8003 ~                inc_ld_local('A', pass + 10)    -- defined only in local LUA script (never changes)
-37    8003 3E 0D        LD A,13 ; function only in local include
-37    8005 3E 0D        LD A,13 ; function only in local include
-37    8007 3E 0D        LD A,13 ; function only in local include
+37    8003 3E 0D        LD A,13
+37    8005 3E 0D        LD A,13
+37    8007 3E 0D        LD A,13
 37    8009                  ENDLUA
 38    8009
 39    8009                  LUA ALLPASS
 40    8009 ~                inc_ld_system('A', pass)        -- defined in all includes, the one with priority wins
 luaincSS.asm(42): error: Unrecognized instruction: LDINVALID A,3 
-41    8009              LDINVALID A,3 ; overloaded funcion (system-invalid variant)
+41    8009              LDINVALID A,3
 41    8009                  ENDLUA
 42    8009
 43    8009 18 F5            jr  loopyLoop

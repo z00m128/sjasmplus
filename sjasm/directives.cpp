@@ -86,6 +86,7 @@ int ParseDirective(bool beginningOfLine)
 		line[0] = ' ';
 		STRCPY(line+1, LINEMAX-1, pp);	// reset `line` to the content which should be repeated
 		ParseLineSafe();			// and parse it
+		eolComment = NULL;			// switch OFF EOL-comment after first line
 	} while (--val);
 	// restore everything
 	STRCPY(line, LINEMAX, ml);
@@ -1363,6 +1364,7 @@ void dirDEFINE() {
 	}
 
 	DefineTable.Add(id, lp, 0);
+	substitutedLine = line;		// override substituted listing for DEFINE
 
 	*(lp) = 0;
 }
@@ -1722,6 +1724,8 @@ void dirEDUP() {
 	CurrentSourceLine = lcurln;
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
+	free(ml);
+	substitutedLine = line;			// override substituted list line for EDUP
 	ListFile();
 }
 
@@ -1918,6 +1922,7 @@ void dirLUA() {
 	}
 
 	delete[] buff;
+	substitutedLine = line;		// override substituted list line for ENDLUA
 }
 
 void dirENDLUA() {

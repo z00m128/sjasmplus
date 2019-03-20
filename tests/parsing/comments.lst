@@ -20,21 +20,21 @@
 19    0000 ~            /*
 20    0000 ~              ass dada */ ld _zzzzz,0
 21    0000 ~            */
-22    0000                  DUP /* inbetween arguments for DUP-macro */ 2
-23    0000 C9          >    ret/* some live code on block comment line
+22    0000                  DUP   2
+23    0000 C9          >    ret
 24    0001 ~           >    zzz
-25    0001 21 00 00    >    */ld  _zzzzz,0
-26    0004             >    xxx     ; emit macro
+25    0001 21 00 00    > ld  hl,0
+26    0004             >    xxx
 26    0004 ~           >        /* /*
 26    0004 ~           >        /* 3x nested
 26    0004 ~           >        block
 26    0004 ~           >        comment */ */
 26    0004 ~           >        */
 26    0004 76          >        halt
-23    0005 C9          >    ret/* some live code on block comment line
+23    0005 C9          >    ret
 24    0006 ~           >    zzz
-25    0006 21 00 00    >    */ld  _zzzzz,0
-26    0009             >    xxx     ; emit macro
+25    0006 21 00 00    > ld  hl,0
+26    0009             >    xxx
 26    0009 ~           >        /* /*
 26    0009 ~           >        /* 3x nested
 26    0009 ~           >        block
@@ -45,10 +45,10 @@
 28    000A
 29    000A                  // similar test, but outside of DUP
 30    000A
-31    000A 2F             /* block1 */  cpl /* block2 */
-32    000B C9               ret/*
+31    000A 2F                cpl
+32    000B C9               ret
 33    000C ~                zzz
-34    000C 21 00 00     //  ;  '*/ld  _zzzzz,0
+34    000C 21 00 00      ld  hl,0
 35    000F                  xxx
 35    000F ~           >        /* /*
 35    000F ~           >        /* 3x nested
@@ -56,7 +56,7 @@
 35    000F ~           >        comment */ */
 35    000F ~           >        */
 35    000F 76          >        halt
-35    0010 ED A0         ldi/* : */
+35    0010 ED A0         ldi
 35    0012
 35    0012 ED A8         ldd
 35    0014 ED B0         ldir
@@ -69,7 +69,7 @@ comments.asm(37): error: Invalid labelname:
 38    0019 00             nop ; LIVE instr!
 comments.asm(39): error: Unrecognized instruction: */   
 comments.asm(39): error: Unexpected: */   
-39    001A                  /* invalid * * / amount of close blocks */ */ /* : */
+39    001A                    */
 39    001A                ; and no <EOL> here
 # file closed: comments.asm
 

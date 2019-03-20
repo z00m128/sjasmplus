@@ -70,6 +70,10 @@ void SkipParam(char*& p) {
 	while (*p && (*p != ',')) ++p;
 }
 
+void SkipToEol(char*& p) {
+	while (*p) ++p;
+}
+
 int NeedEQU() {
 	char* olp = lp;
 	SkipBlanks();
