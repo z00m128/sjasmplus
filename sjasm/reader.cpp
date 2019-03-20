@@ -729,7 +729,8 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 	while (*src && ',' != *src) {
 		// check if there is some kind of delimiter next (string literal or angle brackets expression)
 		int delI = DT_COUNT;
-		while (--delI && (delimiters_b[delI] != *src)) ;
+		// the angle-bracket can only be used around whole argument (i.e. '<' must be first char)
+		while (--delI && ((delimiters_b[delI] != *src) || (DT_ANGLE==delI && srcOrig != src))) ;
 		if (!delI) {				// no delimiter found, ordinary expression, copy char by char
 			*dst++ = *src++;
 			continue;
