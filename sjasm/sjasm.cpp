@@ -125,8 +125,6 @@ aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLin
 aint destlen = 0, size = (aint)-1,PreviousErrorLine = (aint)-1, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
-void (*GetCPUInstruction)(void);
-
 char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 stack<SRepeatStack> RepeatStack;
 CStringsList* lijstp = NULL;

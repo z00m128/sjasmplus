@@ -201,10 +201,6 @@ void PrintHex(char* & dest, aint value, int nibbles) {
 	*dest = oldChAfter;
 }
 
-void PrintHex8(char*& dest, aint value) {
-	PrintHex(dest, value, 2);
-}
-
 void PrintHex32(char*& dest, aint value) {
 	PrintHex(dest, value, 8);
 }

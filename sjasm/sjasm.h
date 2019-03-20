@@ -81,7 +81,6 @@ extern aint MemorySize;
 extern int macronummer, lijst, reglenwidth;
 extern aint CurAddress, AddressOfMAP, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
 
-extern void (*GetCPUInstruction)(void);
 extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
 
 extern FILE* FP_ListingFile;

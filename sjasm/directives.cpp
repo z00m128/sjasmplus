@@ -469,10 +469,6 @@ void dirENDMODULE() {
 	}
 }
 
-void dirZ80() {
-	GetCPUInstruction = Z80::GetOpCode;
-}
-
 void dirEND() {
 	char* p = lp;
 	aint val;
@@ -1982,11 +1978,9 @@ void InsertDirectives() {
 	DirectivesTable.insertd("map", dirMAP);
 	DirectivesTable.insertd("align", dirALIGN);
 	DirectivesTable.insertd("module", dirMODULE);
-	//DirectivesTable.insertd("z80", dirZ80);
 	DirectivesTable.insertd("size", dirSIZE);
 	//DirectivesTable.insertd("textarea",dirTEXTAREA);
 	DirectivesTable.insertd("textarea", dirDISP);
-	//DirectivesTable.insertd("msx", dirZ80);
 	DirectivesTable.insertd("else", dirELSE);
 	DirectivesTable.insertd("export", dirEXPORT);
 	DirectivesTable.insertd("display", dirDISPLAY);

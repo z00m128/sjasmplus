@@ -77,6 +77,7 @@ int TRD_SaveEmpty(char* fname) {
 		}
 	}
 	fclose(ff);
+	free(buf);
 	return 1;
 }
 

@@ -79,7 +79,6 @@ void CloseDest();
 void CloseTapFile();
 void OpenTapFile(char * tapename, int flagbyte);
 void PrintHex(char* & dest, aint value, int nibbles);
-void PrintHex8(char* & dest, aint value);
 void PrintHex32(char* & dest, aint value);
 void PrintHexAlt(char* & dest, aint value);
 char* GetPath(char* fname, char** filenamebegin = NULL, bool systemPathsBeforeCurrent = false);
