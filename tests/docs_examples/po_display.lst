@@ -23,41 +23,44 @@
 22    0101              ;; Part of example in LUA chapter of documentation (modified to pin date to fixed one)
 23    0101                  LUA
 24    0101 ~                    -- Creates define "TIME" with current time
-25    0101 ~                    sj.insert_define("TIME", '"' .. os.date("%Y-%m-%d %H:%M:%S", 906000490) .. '"')
-26    0101                  ENDLUA
-27    0101
-28    0101                  DISPLAY "Build time: ", "1998-09-17 04:48:10"
-29    0101 ~            /*
-30    0101 ~            will output to the console strings:
-31    0101 ~            Build time: <current date+time>  --> not current, but fixed one, for automated tests to pass
-32    0101 ~            */
-33    0101
-34    0101              ;; Non-documentation manual tests of DISPLAY
-35    0101
-36    0101                  DISPLAY 0x100, " | ", /D, 0x100, " | ", 0x100, " | ", /H, 0x100, " | ", 0x100, " | ", /A, 0x100, " | ", 0x100, " |s: ", "0x100"
-37    0101                  DISPLAY -2, " | ", /D, -2, " | ", -2, " | ", /H, -2, " | ", -2, " | ", /A, -2, " | ", -2, " |s: ", "-2"
-38    0101                  DISPLAY 0xFF0000, " | ", /D, 0xFF0000, " | ", 0xFF0000, " | ", /H, 0xFF0000, " | ", 0xFF0000, " | ", /A, 0xFF0000, " | ", 0xFF0000, " |s: ", "0xFF0000"
-39    0101                  DISPLAY 0xFF<<24, " | ", /D, 0xFF<<24, " | ", 0xFF<<24, " | ", /H, 0xFF<<24, " | ", 0xFF<<24, " | ", /A, 0xFF<<24, " | ", 0xFF<<24, " |s: ", "0xFF<<24"
-40    0101                  DISPLAY 0xFF<<20, " | ", /D, 0xFF<<20, " | ", 0xFF<<20, " | ", /H, 0xFF<<20, " | ", 0xFF<<20, " | ", /A, 0xFF<<20, " | ", 0xFF<<20, " |s: ", "0xFF<<20"
-41    0101 ~            /*
-42    0101 ~            will output to the console strings:
-43    0101 ~            > 0x0100 | 256 | 0x0100 | 0x0100 | 0x0100 | 0x0100, 256 | 0x0100 |s: 0x100
-44    0101 ~            > 0xFFFFFFFE | 4294967294 | 0xFFFFFFFE | 0xFFFFFFFE | 0xFFFFFFFE | 0xFFFFFFFE, 4294967294 | 0xFFFFFFFE |s: -2
-45    0101 ~            > 0xFF0000 | 16711680 | 0xFF0000 | 0xFF0000 | 0xFF0000 | 0xFF0000, 16711680 | 0xFF0000 |s: 0xFF0000
-46    0101 ~            > 0xFF000000 | 4278190080 | 0xFF000000 | 0xFF000000 | 0xFF000000 | 0xFF000000, 4278190080 | 0xFF000000 |s: 0xFF<<24
-47    0101 ~            > 0xFF00000 | 267386880 | 0xFF00000 | 0xFF00000 | 0xFF00000 | 0xFF00000, 267386880 | 0xFF00000 |s: 0xFF<<20
-48    0101 ~            */
-49    0101
-50    0101              ;; testing error reporting
-po_display.asm(51): error: [DISPLAY] Expression expected
-51    0101                  DISPLAY
-po_display.asm(52): error: [DISPLAY] Syntax error, unknown option: /X, 1
-52    0101                  DISPLAY /X, 1
-po_display.asm(53): error: Unexpected: 1
-53    0101                  DISPLAY /H 1
-po_display.asm(54): error: [DISPLAY] Syntax error:     DISPLAY ))((%*%!@)
-54    0101                  DISPLAY ))((%*%!@)
-55    0101
+25    0101 ~                    datetime = os.date("%Y-%m-%d %H:%M:%S")
+26    0101 ~                    print(datetime)
+27    0101 ~                    datetime = "1982-04-23 03:14:15"    -- set it to fixed string for CI tests to pass
+28    0101 ~                    sj.insert_define("TIME", '"' .. datetime .. '"')
+29    0101                  ENDLUA
+30    0101
+31    0101                  DISPLAY "Build time: ", "1982-04-23 03:14:15"
+32    0101 ~            /*
+33    0101 ~            will output to the console strings:
+34    0101 ~            Build time: <current date+time>  --> not current, but fixed one, for automated tests to pass
+35    0101 ~            */
+36    0101
+37    0101              ;; Non-documentation manual tests of DISPLAY
+38    0101
+39    0101                  DISPLAY 0x100, " | ", /D, 0x100, " | ", 0x100, " | ", /H, 0x100, " | ", 0x100, " | ", /A, 0x100, " | ", 0x100, " |s: ", "0x100"
+40    0101                  DISPLAY -2, " | ", /D, -2, " | ", -2, " | ", /H, -2, " | ", -2, " | ", /A, -2, " | ", -2, " |s: ", "-2"
+41    0101                  DISPLAY 0xFF0000, " | ", /D, 0xFF0000, " | ", 0xFF0000, " | ", /H, 0xFF0000, " | ", 0xFF0000, " | ", /A, 0xFF0000, " | ", 0xFF0000, " |s: ", "0xFF0000"
+42    0101                  DISPLAY 0xFF<<24, " | ", /D, 0xFF<<24, " | ", 0xFF<<24, " | ", /H, 0xFF<<24, " | ", 0xFF<<24, " | ", /A, 0xFF<<24, " | ", 0xFF<<24, " |s: ", "0xFF<<24"
+43    0101                  DISPLAY 0xFF<<20, " | ", /D, 0xFF<<20, " | ", 0xFF<<20, " | ", /H, 0xFF<<20, " | ", 0xFF<<20, " | ", /A, 0xFF<<20, " | ", 0xFF<<20, " |s: ", "0xFF<<20"
+44    0101 ~            /*
+45    0101 ~            will output to the console strings:
+46    0101 ~            > 0x0100 | 256 | 0x0100 | 0x0100 | 0x0100 | 0x0100, 256 | 0x0100 |s: 0x100
+47    0101 ~            > 0xFFFFFFFE | 4294967294 | 0xFFFFFFFE | 0xFFFFFFFE | 0xFFFFFFFE | 0xFFFFFFFE, 4294967294 | 0xFFFFFFFE |s: -2
+48    0101 ~            > 0xFF0000 | 16711680 | 0xFF0000 | 0xFF0000 | 0xFF0000 | 0xFF0000, 16711680 | 0xFF0000 |s: 0xFF0000
+49    0101 ~            > 0xFF000000 | 4278190080 | 0xFF000000 | 0xFF000000 | 0xFF000000 | 0xFF000000, 4278190080 | 0xFF000000 |s: 0xFF<<24
+50    0101 ~            > 0xFF00000 | 267386880 | 0xFF00000 | 0xFF00000 | 0xFF00000 | 0xFF00000, 267386880 | 0xFF00000 |s: 0xFF<<20
+51    0101 ~            */
+52    0101
+53    0101              ;; testing error reporting
+po_display.asm(54): error: [DISPLAY] Expression expected
+54    0101                  DISPLAY
+po_display.asm(55): error: [DISPLAY] Syntax error, unknown option: /X, 1
+55    0101                  DISPLAY /X, 1
+po_display.asm(56): error: Unexpected: 1
+56    0101                  DISPLAY /H 1
+po_display.asm(57): error: [DISPLAY] Syntax error:     DISPLAY ))((%*%!@)
+57    0101                  DISPLAY ))((%*%!@)
+58    0101
 # file closed: po_display.asm
 
 Value    Label
