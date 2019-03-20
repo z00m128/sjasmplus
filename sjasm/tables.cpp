@@ -1131,7 +1131,7 @@ aint CStructureEntry2::ParseValue(char* & p) {
 }
 
 CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStructure* p) {
-	mnf = mnl = 0; mbf = mbl = 0;
+	mnf = mnl = NULL; mbf = mbl = NULL;
 	naam = STRDUP(nnaam);
 	if (naam == NULL) {
 		Error("No enough memory!", NULL, FATAL);
@@ -1145,59 +1145,39 @@ CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStruct
 }
 
 void CStructure::AddLabel(char* nnaam) {
-	CStructureEntry1* n = new CStructureEntry1(nnaam, noffset);
-	if (!mnf) {		//FIXME Ped7g how about simple std::vector or similar and stop doing all this fuss manually with cryptic short names?
-		mnf = n;
-	}
-	if (mnl) {
-		mnl->next = n;
-	}
-	mnl = n;
+	CopyLabel(nnaam, 0);
 }
 
 void CStructure::AddMember(CStructureEntry2* n) {
-	if (!mbf) {
-		mbf = n;
-	} if (mbl) {
-	  	mbl->next = n;
-	  } mbl = n;
+	if (!mbf)	mbf = n;
+	else 		mbl->next = n;
+	mbl = n;
 	noffset += n->len;
 }
 
 void CStructure::CopyLabel(char* nnaam, aint offset) {
 	CStructureEntry1* n = new CStructureEntry1(nnaam, noffset + offset);
-	if (!mnf) {
-		mnf = n;
-	} if (mnl) {
-	  	mnl->next = n;
-	  } mnl = n;
+	if (!mnf)	mnf = n;
+	else		mnl->next = n;
+	mnl = n;
 }
 
 void CStructure::CopyLabels(CStructure* st) {
-	char str[LINEMAX], str2[LINEMAX];
 	CStructureEntry1* np = st->mnf;
-	if (!np || !PreviousIsLabel) {
-		return;
-	}
-	str[0] = 0;
-	STRCAT(str, LINEMAX, PreviousIsLabel);
+	if (!np || !PreviousIsLabel) return;
+	char str[LINEMAX];
+	STRCPY(str, LINEMAX, PreviousIsLabel);
 	STRCAT(str, LINEMAX, ".");
-	while (np) {	//FIXME Ped7g - optimize this? (need test first to validate rewritten code)
-		STRCPY(str2, LINEMAX, str);
-		STRCAT(str2, LINEMAX, np->naam);
-		CopyLabel(str2, np->offset);
+	char * const stw = str + strlen(str);
+	while (np) {
+		STRCPY(stw, LINEMAX, np->naam);	// overwrite the second part of label
+		CopyLabel(str, np->offset);
 		np = np->next;
 	}
 }
 
 void CStructure::CopyMember(CStructureEntry2* ni, aint ndef) {
-	CStructureEntry2* n = new CStructureEntry2(noffset, ni->len, ndef, ni->type);
-	if (!mbf) {
-		mbf = n;
-	} if (mbl) {
-	  	mbl->next = n;
-	  } mbl = n;
-	noffset += n->len;
+	AddMember(new CStructureEntry2(noffset, ni->len, ndef, ni->type));
 }
 
 void CStructure::CopyMembers(CStructure* st, char*& lp) {
@@ -1271,9 +1251,10 @@ static void InsertSingleStructLabel(char *name, const aint value) {
 
 static void InsertStructSubLabels(const char* mainName, const CStructureEntry1* members, const aint address = 0) {
 	char ln[LINEMAX];
+	STRCPY(ln, LINEMAX, mainName);
+	char * const lnsubw = ln + strlen(ln);
 	while (members) {
-		STRCPY(ln, LINEMAX, mainName);
-		STRCAT(ln, LINEMAX, members->naam);
+		STRCPY(lnsubw, LINEMAX, members->naam);		// overwrite sub-label part
 		InsertSingleStructLabel(ln, members->offset + address);
 		members = members->next;
 	}
@@ -1395,39 +1376,31 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	sp = sn;
 	CStructure* p = strs[(unsigned char)*sp];
 	while (p) {
-		if (!strcmp(sp, p->id)) {
-			return p;
-		} p = p->next;
+		if (!strcmp(sp, p->id)) return p;
+		p = p->next;
 	}
-	if (!gl && ModuleName) {
-		sp += 1 + strlen(ModuleName); p = strs[(unsigned char)*sp];
-		while (p) {
-			if (!strcmp(sp, p->id)) {
-				return p;
-			} p = p->next;
-		}
+	if (gl || !ModuleName) return NULL;
+	sp += 1 + strlen(ModuleName); p = strs[(unsigned char)*sp];
+	while (p) {
+		if (!strcmp(sp, p->id)) return p;
+		p = p->next;
 	}
-	return 0;
+	return NULL;
 }
 
 int CStructureTable::FindDuplicate(char* naam) {
 	CStructure* p = strs[(unsigned char)*naam];
 	while (p) {
-		if (!strcmp(naam, p->naam)) {
-			return 1;
-		} p = p->next;
+		if (!strcmp(naam, p->naam)) return 1;
+		p = p->next;
 	}
 	return 0;
 }
 
 int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	CStructure* st = zoek(naam, gl);
-	if (!st) {
-		return 0;
-	}
-	if (l) {
-		st->emitlab(l);
-	}
+	if (!st) return 0;
+	if (l) st->emitlab(l);
 	st->emitmembs(p);
 	return 1;
 }
