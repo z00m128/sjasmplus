@@ -31,6 +31,8 @@ FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 
 ReadBufLine parsing refactored. Now look for other parts of code trying to do similar things and refactor too..
 
+I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
+
 ====================
 Docs:
 http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku

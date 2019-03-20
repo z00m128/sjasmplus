@@ -217,6 +217,8 @@ void PrintHexAlt(char*& dest, aint value)
 	while (*bp) *dest++ = *bp++;
 }
 
+static char pline[4*LINEMAX];
+
 void PrepareListLine(aint hexadd)
 {
 	////////////////////////////////////////////////////
@@ -1225,8 +1227,8 @@ EReturn ReadFile() {
 			lp = ReplaceDefine(p);
 			return ENDIF;
 		} else if (cmphstr(p, "else")) {
-			ListFile();
 			lp = ReplaceDefine(p);
+			ListFile();
 			return ELSE;
 		} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
 			lp = ReplaceDefine(p);
@@ -1261,8 +1263,8 @@ EReturn SkipFile() {
 			}
 		} else if (cmphstr(p, "else")) {
 			if (!iflevel) {
-				ListFile();
 				lp = ReplaceDefine(p);
+				ListFile();
 				return ELSE;
 			}
 		}

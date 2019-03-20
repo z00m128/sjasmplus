@@ -105,7 +105,7 @@ CDevicePage *Page = 0;
 char* DeviceID = 0;
 
 // extend
-char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], * tp, pline[LINEMAX2], ErrorLine[LINEMAX2], * bp;
+char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
 char mline[LINEMAX2], sline[LINEMAX2], sline2[LINEMAX2];
 
 char SourceFNames[128][MAX_PATH];

@@ -1242,9 +1242,7 @@ static void InsertSingleStructLabel(char *name, const aint value) {
 			Error("Label has different value in pass 2", temp);
 		}
 	} else {
-		if (!LabelTable.Insert(p, value)) {
-			Error("Duplicate label", tp, EARLY);
-		}
+		if (!LabelTable.Insert(p, value)) Error("Duplicate label", p, EARLY);
 	}
 	delete[] p;
 }
