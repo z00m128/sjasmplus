@@ -36,7 +36,6 @@ CFunctionTable DirectivesTable_dup;
 int ParseDirective(bool beginningOfLine)
 {
 	char* olp = lp;
-	char* n;
 
 	// if END/.END directive is at the beginning of line = ignore them (even with "--dirbol")
 	if (beginningOfLine && (cmphstr(lp, "end") || cmphstr(lp, ".end"))) {
@@ -45,10 +44,11 @@ int ParseDirective(bool beginningOfLine)
 	}
 
 	bp = lp;
+	char* n;
+	aint val;
 	if (!(n = getinstr(lp))) {
 		if (*lp == '#' && *(lp + 1) == '#') {
 			lp += 2;
-			aint val;
 			if (!ParseExpressionNoSyntaxError(lp, val)) val = 4;
 			AddressOfMAP += ((~AddressOfMAP + 1) & (val - 1));
 			return 1;
@@ -60,51 +60,43 @@ int ParseDirective(bool beginningOfLine)
 	if (DirectivesTable.zoek(n)) return 1;
 
 	// Only "." repeat directive remains, but that one can't start at beginning of line (without --dirbol)
-	if (beginningOfLine && !Options::IsPseudoOpBOF) return 0;
-
-	if (*n == '.' && (isdigit((unsigned char) * (n + 1)) || *lp == '(')) {
-		aint val;
-		if (isdigit((unsigned char) * (n + 1))) {
-			++n;
-			if (!ParseExpression(n, val)) {
-				Error("Syntax error", n, IF_FIRST); lp = olp; return 0;
-			}
-		} else if (*lp == '(') {
-			if (!ParseExpression(lp, val)) {
-				Error("Syntax error", lp, IF_FIRST); lp = olp; return 0;
-			}
-		} else {
-			lp = olp; return 0;
-		}
-		if (val < 1) {
-			ErrorInt(".X must be positive integer", val, IF_FIRST); lp = olp; return 0;
-		}
-
-		char* pp = mline;
-		STRCPY(pp, LINEMAX2, " ");
-
-		if (!SkipBlanks()) {
-			STRCAT(pp, LINEMAX2, lp);
-			lp += strlen(lp);
-		}
-		++listmacro;
-		char* ml = STRDUP(line);
-		if (ml == NULL) {
-			Error("No enough memory!", NULL, FATAL);
-		}
-		do {
-			STRCPY(line, LINEMAX, pp);
-			ParseLineSafe();
-		} while (--val);
-		STRCPY(line, LINEMAX, ml);
-		--listmacro;
-		donotlist = 1;
-
-		delete[] ml;
-		return 1;
+	if ((beginningOfLine && !Options::IsPseudoOpBOF) || ('.' != *n) || (!isdigit(n[1]) && *lp != '(')) {
+		lp = olp;		// alo "." must be followed by digit, or math expression in parentheses
+		return 0;		// otherwise just return
 	}
-	lp = olp;
-	return 0;
+
+	// parse repeat-count either from n+1 (digits) or lp (parentheses)
+	++n;
+	if (!ParseExpression(isdigit(*n) ? n : lp, val)) {
+		lp = olp; Error("Syntax error", n, IF_FIRST);
+		return 0;
+	}
+	if (val < 1) {
+		lp = olp; ErrorInt(".X must be positive integer", val, IF_FIRST);
+		return 0;
+	}
+
+	// preserve original line buffer, and also the line to be repeated (at `lp`)
+	char* ml = STRDUP(line);
+	SkipBlanks();
+	char* pp = STRDUP(lp);
+	if (NULL == ml || NULL == pp) Error("Not enough memory!", NULL, FATAL);
+	++listmacro;
+	do {
+		line[0] = ' ';
+		STRCPY(line+1, LINEMAX-1, pp);	// reset `line` to the content which should be repeated
+		ParseLineSafe();			// and parse it
+	} while (--val);
+	// restore everything
+	STRCPY(line, LINEMAX, ml);
+	--listmacro;
+	donotlist = 1;
+	free(pp);
+	free(ml);
+	// make lp point at \0, as the repeating line was processed fully
+	lp = sline;
+	*sline = 0;
+	return 1;
 }
 
 int ParseDirective_REPT() {

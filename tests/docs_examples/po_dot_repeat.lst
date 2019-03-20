@@ -1,0 +1,26 @@
+# file opened: po_dot_repeat.asm
+1     0000 3C          > INC A
+1     0001 3C          > INC A
+1     0002 3C          > INC A
+2     0003              len        EQU 10
+3     0003 00          > BYTE 0
+3     0004 00          > BYTE 0
+4     0005
+5     0005 C9          > ret
+5     0006 C9          > ret
+5     0007 C9          > ret
+5     0008 C9          > ret
+5     0009 C9          > ret
+5     000A C9          > ret
+5     000B C9          > ret
+5     000C C9          > ret
+5     000D C9          > ret
+5     000E C9          > ret
+5     000F C9          > ret
+5     0010 C9          > ret
+6     0011
+# file closed: po_dot_repeat.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x000A   len
