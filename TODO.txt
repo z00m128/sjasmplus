@@ -34,6 +34,12 @@ ReadBufLine parsing refactored. Now look for other parts of code trying to do si
 
 I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
 
+Make option to compile stdin (pipe-in) to make this a bit more unix-like... and to redirect output to stdout.
+
+from env. variables disc: nie, myslel som ako "SJASMPLUSEXT" premennu ktora by tvorila priamo obsah pre
+ten `--ext` switch... pouzitie stylom ako "prilep k command line" mi nenapadlo... nieco ako CFLAGS
+v Makefile? ... na to by som dal ale druhu premennu "SJASMPLUSFLAGS"
+
 Macro world issues:
 - macros for operators?
 - ability to issue real instruction (ignoring possible macro of same name)

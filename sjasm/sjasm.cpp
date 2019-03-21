@@ -58,7 +58,8 @@ void PrintHelp() {
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
-	_COUT "  --msg=[all|war|err|none] Stderr messages verbosity (\"all\" is default)" _ENDL;
+	_COUT "  --msg=[all|war|err|none|lst|lstlab]" _ENDL;
+	_COUT "                           Stderr messages verbosity (\"all\" is default)" _ENDL;
 	_COUT "  --fullpath               Show full path to error file" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;

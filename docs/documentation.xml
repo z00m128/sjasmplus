@@ -479,12 +479,15 @@
   Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
  Logging:
   --nologo                 Do not show startup message
-  --msg=[all|war|err|none] Stderr messages verbosity ("all" is default)
+  --msg=[all|war|err|none|lst|lstlab]  Stderr messages verbosity ("all" is default)
+  Note: "lst" or "lstlab" will turn STDERR into listing file (there's then no need
+  for `--lst`, that would produce extra listing). Some diagnostic messages of "all"
+  are omitted, as they are not part of listing files.
   --fullpath               Show full path to error file
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
   --reversepop             Enable reverse POP order (as in base SjASM version)
-  --dirbol                 Enable processing directives from the beginning of line
+  --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions
   --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</programlisting></para>
     </section>
