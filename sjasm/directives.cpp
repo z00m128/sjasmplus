@@ -233,6 +233,15 @@ void dirD24() {
 	else		Error("D24 with no arguments");
 }
 
+void dirDG() {
+	int dirDx[130];
+	if (GetBits(lp, dirDx)) {
+		EmitBytes(dirDx);
+	} else {
+		Error("no arguments");
+	}
+}
+
 void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpression(lp, teller)) {
@@ -1973,6 +1982,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd("block", dirBLOCK);
 	DirectivesTable.insertd("dword", dirDWORD);
 	DirectivesTable.insertd("d24", dirD24);
+	DirectivesTable.insertd("dg", dirDG);
 	DirectivesTable.insertd("org", dirORG);
 	DirectivesTable.insertd("fpos",dirFORG);
 	DirectivesTable.insertd("map", dirMAP);

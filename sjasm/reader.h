@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <array>
+
 enum EDelimiterType { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
 enum EBracketType { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
 
@@ -61,9 +63,12 @@ int GetCharConstInDoubleQuotes(char*& op, aint& val);
 int GetCharConstInApostrophes(char*& op, aint& val);
 template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, int max_ei = 128, int add = 0);
 int GetBytes(char*& p, int e[], int add, int dc);
+int GetBits(char*& p, int e[]);
 int cmphstr(char*& p1, const char* p2);
 char* GetFileName(char*& p, bool convertslashes=false);
 EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called
 int islabchar(char p);
 EStructureMembers GetStructMemberId(char*& p);
+EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> delimiters, bool advanceSrc = true);
+EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc = true);
 int GetMacroArgumentValue(char* & src, char* & dst);

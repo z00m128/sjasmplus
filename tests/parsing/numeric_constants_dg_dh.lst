@@ -1,0 +1,52 @@
+# file opened: numeric_constants_dg_dh.asm
+ 1    0000                  ;; new directives DG for v1.11 (should be compatible with Zeus assembler)
+ 2    0000 21               DG --#----#
+ 3    0001 21               DG "--#----#"
+ 4    0002 21               DG '--#----#'
+ 5    0003
+ 6    0003                  ; 64 bits defined
+ 7    0003 13 5F 13 5F      DG ---#--##-#-#####---#--##-#-#####---#--##-#-#####---#--##-#-#####
+ 7    0007 13 5F 13 5F
+ 8    000B
+ 9    000B                  ;; skip spaces
+10    000B 21               DG --#- ---#                ; 8 bits defined
+11    000C 18 00            DG ---# #--- ---- ----      ; 16 bits defined
+12    000E
+13    000E                  ;; warning about multiple chars used for ones -> should be emitted only once per assembling
+numeric_constants_dg_dh.asm(14): warning: [DG] multiple characters used for 'ones'
+14    000E 21               DG --#----1
+15    000F 21               DG --#----1
+16    0010
+17    0010                  ;; errors - wrong delimiters will get eaten as part of value
+numeric_constants_dg_dh.asm(18): error: No closing delimiter
+18    0010 21               DG "--#----'
+numeric_constants_dg_dh.asm(19): error: No closing delimiter
+19    0011 21               DG '--#----"
+20    0012
+21    0012                  ;; (3+3)x error short strings
+numeric_constants_dg_dh.asm(22): error: [DG] byte needs eight characters:     DG --
+22    0012                  DG --
+numeric_constants_dg_dh.asm(23): error: [DG] byte needs eight characters:     DG "--"
+23    0012                  DG "--"
+numeric_constants_dg_dh.asm(24): error: [DG] byte needs eight characters:     DG '--'
+24    0012                  DG '--'
+25    0012
+numeric_constants_dg_dh.asm(26): error: [DG] byte needs eight characters:     DG --#----#--#      
+26    0012 21               DG --#----#--#      ; 8 + 3 bits
+numeric_constants_dg_dh.asm(27): error: [DG] byte needs eight characters:     DG "--#----#--#"
+27    0013 21               DG "--#----#--#"
+numeric_constants_dg_dh.asm(28): error: [DG] byte needs eight characters:     DG '--#----#--#'
+28    0014 21               DG '--#----#--#'
+29    0015
+30    0015                  ;; error when digit "grouping" through space is more than single character long
+numeric_constants_dg_dh.asm(31): error: [DG] byte needs eight characters:     DG --#-  ---#               
+31    0015                  DG --#-  ---#               ; 8 bits defined, but two spaces in middle = error
+32    0015
+33    0015                  ; Cyrillic long dash, code 151, should work as non-one (10101010 01010101)
+34    0015 AA 55            DG —-—-—-—- -—-—-—-—
+35    0017
+36    0017                  END
+# file closed: numeric_constants_dg_dh.asm
+
+Value    Label
+------ - -----------------------------------------------------------

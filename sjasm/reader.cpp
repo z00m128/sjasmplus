@@ -30,6 +30,12 @@
 
 #include "sjdefs.h"
 
+//enum EDelimiterType          { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
+static const char delimiters_b[] = { ' ',    '"',       '\'',          '<',      0 };
+static const char delimiters_e[] = { ' ',    '"',       '\'',          '>',      0 };
+static const std::array<EDelimiterType, 3> delimiters_all = {DT_QUOTES, DT_APOSTROPHE, DT_ANGLE};
+static const std::array<EDelimiterType, 3> delimiters_noAngle = {DT_QUOTES, DT_APOSTROPHE, DT_COUNT};
+
 int cmphstr(char*& p1, const char* p2) {
 	unsigned int i = 0;
 	if (isupper(*p1)) {
@@ -588,6 +594,42 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	return t;
 }
 
+int GetBits(char*& p, int e[]) {
+	EDelimiterType dt = DelimiterBegins(p, delimiters_noAngle);	//also skip blanks
+	static int one = 0;		// the warning about multi-chars should be emitted only once per pass
+	int bytes = 0;
+	while (*p && (dt == DT_NONE || delimiters_e[dt] != *p)) {
+		// collect whole byte (eight bits)
+		int value = 1, pch;
+		while (value < 256 && *p && (pch = 255 & (*p++))) {
+			if (White(pch)) {
+				if (White(*p)) break;		// two spaces is too much, abort
+				else           continue;	// one space can be used to "group" bits for visual effect
+			}
+			value <<= 1;
+			if ('-' == pch) continue;
+			value |= 1;
+			if (LASTPASS != pass) continue;
+			if (0 < one && one != pch) {
+				Warning("[DG] multiple characters used for 'ones'");
+				one = -1;					// emit this warning only once
+			} else if (!one) one = pch;		// remember char used first time for "ones"
+		}
+		if (value < 256) {		// there was not eight characters, ended prematurely
+			Error("[DG] byte needs eight characters", substitutedLine, SUPPRESS);
+		} else {
+			e[bytes++] = value & 255;
+		}
+		SkipBlanks(p);
+	}
+	if (0 < one) one = 0;		// reset "ones" type if everything was OK this time
+	e[bytes] = -1;
+	if (dt == DT_NONE) return bytes;
+	if (delimiters_e[dt] != *p)	Error("No closing delimiter", NULL, SUPPRESS);
+	else 						++p;
+	return bytes;
+}
+
 #if defined(WIN32)
 static const char badSlash = '/';
 static const char goodSlash = '\\';
@@ -597,24 +639,15 @@ static const char goodSlash = '/';
 #endif
 
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
-//enum EDelimiterType          { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
-static const char delimiters_b[] = { ' ',    '"',       '\'',          '<',      0 };
-static const char delimiters_e[] = { ' ',    '"',       '\'',          '>',      0 };
 
 char* GetFileName(char*& p, bool convertslashes) {
 	char* newFn = new char[LINEMAX];
 	if (NULL == newFn) ErrorInt("No enough memory!", LINEMAX, FATAL);
 	char* result = newFn;
-	// find first non-blank character
-	SkipBlanks(p);
-	// check if some and which delimiter is used for this filename
-	int delI = DT_COUNT;
-	while (delI-- && (delimiters_b[delI] != *p)) ;
-	if (delI < 0) delI = 0;	// no delimiter found, use default "space" for end
-	else ++p;				// if found, advance over it
-	// remember type of detected delimiter (for GetDelimiterOfLastFileName function)
-	delimiterOfLastFileName = static_cast<EDelimiterType>(delI);
-	const char deliE = delimiters_e[delI];	// expected ending delimiter
+	// check if some and which delimiter is used for this filename (does advance over white chars)
+	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
+	delimiterOfLastFileName = DelimiterAnyBegins(p);
+	const char deliE = delimiters_e[delimiterOfLastFileName];	// expected ending delimiter
 	// copy all characters until zero or delimiter-end character is reached
 	while (*p && deliE != *p) {
 		*newFn = *p;		// copy character
@@ -732,10 +765,9 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 	const char* const dstOrig = dst, * const srcOrig = src;
 	while (*src && ',' != *src) {
 		// check if there is some kind of delimiter next (string literal or angle brackets expression)
-		int delI = DT_COUNT;
 		// the angle-bracket can only be used around whole argument (i.e. '<' must be first char)
-		while (--delI && ((delimiters_b[delI] != *src) || (DT_ANGLE==delI && srcOrig != src))) ;
-		if (!delI) {				// no delimiter found, ordinary expression, copy char by char
+		EDelimiterType delI = DelimiterBegins(src, srcOrig==src ? delimiters_all : delimiters_noAngle, false);
+		if (DT_NONE == delI) {		// no delimiter found, ordinary expression, copy char by char
 			*dst++ = *src++;
 			continue;
 		}
@@ -764,6 +796,8 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 					continue;					// copy two apostrophes (escaped apostrophe)
 				}
 				break;
+			default:
+				break;
 			}
 			if (endCh == *src) break;			// ending delimiter found
 			*dst++ = *src++;					// just copy character
@@ -778,6 +812,20 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 	int returnValue = *dstOrig || ',' == *src;	// return 1 if value is not empty or comma follows
 	if (!*dstOrig && returnValue) Warning("[Macro argument parser] empty value", srcOrig);
 	return (returnValue);		// but empty value will at least display warning
+}
+
+EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> delimiters, bool advanceSrc) {
+	if (advanceSrc && SkipBlanks(src)) return DT_NONE;
+	for (const auto dt : delimiters) {
+		if (delimiters_b[dt] != *src) continue;
+		if (advanceSrc) ++src;
+		return dt;
+	}
+	return DT_NONE;
+}
+
+EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc) {
+	return DelimiterBegins(src, delimiters_all, advanceSrc);
 }
 
 //eof reader.cpp
