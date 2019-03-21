@@ -361,6 +361,65 @@ int getval(int p) {
 	}
 }
 
+const char* getNumericValueLastErr = NULL;
+const char* const getNumericValueErr_syntax = "Syntax error";
+const char* const getNumericValueErr_digit = "Digit not in base";
+const char* const getNumericValueErr_overflow = "Overflow";
+
+bool GetNumericValue_ProcessLastError(const char* const srcLine) {
+	if (NULL == getNumericValueLastErr) return false;
+	Error(getNumericValueLastErr, srcLine, SUPPRESS);
+	// Overflow type error lets assembler to emit truncated machine code (return "false" here)
+	return (getNumericValueErr_overflow != getNumericValueLastErr);
+}
+
+bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const int shiftBase) {
+	if (shiftBase < 1 || 5 < shiftBase) Error("Internal error, wrong base", NULL, FATAL);
+	getNumericValueLastErr = NULL;
+	val = 0;
+	if (pend <= p) {		// no actual digits between format specifiers
+		getNumericValueLastErr = getNumericValueErr_syntax;
+		return false;
+	}
+	aint digit;
+	const int base = 1<<shiftBase;
+	const aint overflowMask = (~0UL)<<(32-shiftBase);
+	while (p < pend) {
+		if (base <= (digit = getval(*p))) {
+			getNumericValueLastErr = getNumericValueErr_digit;
+			break;
+		}
+		if (val & overflowMask) getNumericValueLastErr = getNumericValueErr_overflow;
+		val = (val<<shiftBase) + digit;
+		++p;
+	}
+	val &= 0xFFFFFFFFUL;
+	return (NULL == getNumericValueLastErr);
+}
+
+bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const int base) {
+	if (base < 2 || 36 < base) Error("Internal error, wrong base", NULL, FATAL);
+	getNumericValueLastErr = NULL;
+	val = 0;
+	if (pend <= p) {		// no actual digits between format specifiers
+		getNumericValueLastErr = getNumericValueErr_syntax;
+		return false;
+	}
+	aint digit;
+	while (p < pend) {
+		if (base <= (digit = getval(*p))) {
+			getNumericValueLastErr = getNumericValueErr_digit;
+			break;
+		}
+		const unsigned long oval = static_cast<unsigned long>(val)&0xFFFFFFFFUL;
+		val = (val * base) + digit;
+		if (static_cast<unsigned long>(val&0xFFFFFFFFUL) < oval) getNumericValueLastErr = getNumericValueErr_overflow;
+		++p;
+	}
+	val &= 0xFFFFFFFFUL;
+	return (NULL == getNumericValueLastErr);
+}
+
 // parses number literals, forces result to be confined into 32b (even on 64b platforms,
 // to have stable results in listings/tests across platforms).
 int GetConstant(char*& op, aint& val) {
@@ -399,37 +458,12 @@ int GetConstant(char*& op, aint& val) {
 		}
 	}
 	// parse the number into value
-	val = 0;
-	if (pend <= p) {		// no actual digits between format specifiers
-		Error("Syntax error", op, SUPPRESS);
-		return 0;
-	}
-	aint digit;
 	if (0 < shiftBase) {
-		base = 1<<shiftBase;
-		const aint overflowMask = (~0UL)<<(32-shiftBase);
-		while (p < pend) {
-			if (base <= (digit = getval(*p))) {
-				Error("Digit not in base", op, SUPPRESS);
-				val &= 0xFFFFFFFFUL;
-				return 0;
-			}
-			if (val & overflowMask) Error("Overflow", op, SUPPRESS);
-			val = (val<<shiftBase) + digit;
-			++p;
-		}
+		if (!GetNumericValue_TwoBased(p, pend, val, shiftBase) && GetNumericValue_ProcessLastError(op))
+			return 0;
 	} else {
-		while (p < pend) {
-			if (base <= (digit = getval(*p))) {
-				Error("Digit not in base", op, SUPPRESS);
-				val &= 0xFFFFFFFFUL;
-				return 0;
-			}
-			const unsigned long oval = static_cast<unsigned long>(val)&0xFFFFFFFFUL;
-			val = (val * base) + digit;
-			if (static_cast<unsigned long>(val&0xFFFFFFFFUL) < oval) Error("Overflow", op, SUPPRESS);
-			++p;
-		}
+		if (!GetNumericValue_IntBased(p, pend, val, base) && GetNumericValue_ProcessLastError(op))
+			return 0;
 	}
 	op = hardEnd;
 	val &= 0xFFFFFFFFUL;
@@ -618,6 +652,10 @@ int GetBits(char*& p, int e[]) {
 		if (value < 256) {		// there was not eight characters, ended prematurely
 			Error("[DG] byte needs eight characters", substitutedLine, SUPPRESS);
 		} else {
+			if (128 <= bytes) {
+				Error("Too many arguments", p, SUPPRESS);
+				break;
+			}
 			e[bytes++] = value & 255;
 		}
 		SkipBlanks(p);
