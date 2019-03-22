@@ -364,6 +364,7 @@ int getval(int p) {
 const char* getNumericValueLastErr = NULL;
 const char* const getNumericValueErr_syntax = "Syntax error";
 const char* const getNumericValueErr_digit = "Digit not in base";
+const char* const getNumericValueErr_no_digit = "Missing next digit";
 const char* const getNumericValueErr_overflow = "Overflow";
 
 bool GetNumericValue_ProcessLastError(const char* const srcLine) {
@@ -385,6 +386,10 @@ bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const
 	const int base = 1<<shiftBase;
 	const aint overflowMask = (~0UL)<<(32-shiftBase);
 	while (p < pend) {
+		if (0 == *p || !isalnum(*p)) {
+			getNumericValueLastErr = getNumericValueErr_no_digit;
+			break;
+		}
 		if (base <= (digit = getval(*p))) {
 			getNumericValueLastErr = getNumericValueErr_digit;
 			break;
@@ -407,6 +412,10 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 	}
 	aint digit;
 	while (p < pend) {
+		if (0 == *p || !isalnum(*p)) {
+			getNumericValueLastErr = getNumericValueErr_no_digit;
+			break;
+		}
 		if (base <= (digit = getval(*p))) {
 			getNumericValueLastErr = getNumericValueErr_digit;
 			break;
@@ -664,6 +673,35 @@ int GetBits(char*& p, int e[]) {
 	e[bytes] = -1;
 	if (dt == DT_NONE) return bytes;
 	if (delimiters_e[dt] != *p)	Error("No closing delimiter", NULL, SUPPRESS);
+	else 						++p;
+	return bytes;
+}
+
+int GetBytesHexaText(char*& p, int e[]) {
+	const char* const op_full = p;
+	EDelimiterType dt = DelimiterBegins(p, delimiters_noAngle);	//also skip blanks
+	int bytes = 0;
+	while (*p && (dt == DT_NONE || delimiters_e[dt] != *p)) {
+		const char* const op = p;
+		// collect whole byte = two hexa digits
+		aint val;
+		if (!GetNumericValue_TwoBased(p, p+2, val, 4) && GetNumericValue_ProcessLastError(op)) {
+			return 0;		// total failure, don't emit anything
+		}
+		if (128 <= bytes) {
+			Error("Too many arguments", NULL, SUPPRESS);
+			break;
+		}
+		e[bytes++] = val & 255;
+		if (White(*p)) ++p;		// one space is legit between each hexa digit pair
+		if (White(*p) && !SkipBlanks(p)) {	// two+ spaces are legit only at EOL
+			Error(getNumericValueErr_syntax, op, SUPPRESS);
+			break;
+		}
+	}
+	e[bytes] = -1;
+	if (dt == DT_NONE) return bytes;
+	if (delimiters_e[dt] != *p)	Error("No closing delimiter", op_full, SUPPRESS);
 	else 						++p;
 	return bytes;
 }

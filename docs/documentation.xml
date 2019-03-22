@@ -182,7 +182,7 @@
 
             <listitem>
               <para><programlisting>- Added ZX Spectrum Next instructions support
-- Added --msg option
+- Added --msg option, added directives DG and DH
 - Changed listing layout to fixed-width type
 - Errors, Warnings and similar are now channeled to STDERR
 - Fixed string literal parser, added two apostrophes and escaped zero
@@ -1486,6 +1486,24 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
    DEVICE NONE
  ;enable:
    DEVICE ZXSPECTRUM128</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_dg" />DG &lt;data encoded in bits&gt;</term>
+
+            <listitem>
+              <para>Data comprises of characters in multiples of eight, each block
+              is converted to a byte value.</para>
+
+              <para>A hyphen '-' represents 0 and any other non-whitespace character
+              represents 1, single white space is skipped - can be used for visual
+              grouping of bits (warning, "DG 10100001" is value 255,
+              because character '0' is not a dash '-').<example>
+                  <title></title>
+                  <para><programlisting>    DG 1-1----1  ; store 161 at the current location
+    DG ---# #--- -##- ---- ; store two bytes: 0x18, 0x60</programlisting></para>
+              </example></para>
             </listitem>
           </varlistentry>
 

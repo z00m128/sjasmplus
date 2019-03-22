@@ -242,6 +242,15 @@ void dirDG() {
 	}
 }
 
+void dirDH() {
+	int dirDx[130];
+	if (GetBytesHexaText(lp, dirDx)) {
+		EmitBytes(dirDx);
+	} else {
+		Error("no arguments");
+	}
+}
+
 void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpression(lp, teller)) {
@@ -1983,6 +1992,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd("dword", dirDWORD);
 	DirectivesTable.insertd("d24", dirD24);
 	DirectivesTable.insertd("dg", dirDG);
+	DirectivesTable.insertd("dh", dirDH);
 	DirectivesTable.insertd("org", dirORG);
 	DirectivesTable.insertd("fpos",dirFORG);
 	DirectivesTable.insertd("map", dirMAP);

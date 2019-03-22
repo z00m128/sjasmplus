@@ -1,51 +1,155 @@
 # file opened: numeric_constants_dg_dh.asm
- 1    0000                  ;; new directives DG for v1.11 (should be compatible with Zeus assembler)
- 2    0000 21               DG --#----#
- 3    0001 21               DG "--#----#"
- 4    0002 21               DG '--#----#'
- 5    0003
- 6    0003                  ; 64 bits defined
- 7    0003 13 5F 13 5F      DG ---#--##-#-#####---#--##-#-#####---#--##-#-#####---#--##-#-#####
- 7    0007 13 5F 13 5F
- 8    000B
- 9    000B                  ;; skip spaces
-10    000B 21               DG --#- ---#                ; 8 bits defined
-11    000C 18 00            DG ---# #--- ---- ----      ; 16 bits defined
-12    000E
-13    000E                  ;; warning about multiple chars used for ones -> should be emitted only once per assembling
-numeric_constants_dg_dh.asm(14): warning: [DG] multiple characters used for 'ones'
-14    000E 21               DG --#----1
-15    000F 21               DG --#----1
-16    0010
-17    0010                  ;; errors - wrong delimiters will get eaten as part of value
-numeric_constants_dg_dh.asm(18): error: No closing delimiter
-18    0010 21               DG "--#----'
+ 1    0000                  ;;;;;;;;;;;;;;;;;;;;;;;; DG ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 2    0000                  ;; new directives DG for v1.11 (should be compatible with Zeus assembler)
+ 3    0000 21               DG --#----#
+ 4    0001 21               DG "--#----#"
+ 5    0002 21               DG '--#----#'
+ 6    0003
+ 7    0003                  ; 64 bits defined
+ 8    0003 13 5F 13 5F      DG ---#--##-#-#####---#--##-#-#####---#--##-#-#####---#--##-#-#####
+ 8    0007 13 5F 13 5F
+ 9    000B
+10    000B                  ;; skip spaces
+11    000B 21               DG --#- ---#                ; 8 bits defined
+12    000C 18 00            DG ---# #--- ---- ----      ; 16 bits defined
+13    000E
+14    000E                  ;; warning about multiple chars used for ones -> should be emitted only once per assembling
+numeric_constants_dg_dh.asm(15): warning: [DG] multiple characters used for 'ones'
+15    000E 21               DG --#----1
+16    000F 21               DG --#----1
+17    0010
+18    0010                  ;; errors - wrong delimiters will get eaten as part of value
 numeric_constants_dg_dh.asm(19): error: No closing delimiter
-19    0011 21               DG '--#----"
-20    0012
-21    0012                  ;; (3+3)x error short strings
-numeric_constants_dg_dh.asm(22): error: [DG] byte needs eight characters:     DG --
-22    0012                  DG --
-numeric_constants_dg_dh.asm(23): error: [DG] byte needs eight characters:     DG "--"
-23    0012                  DG "--"
-numeric_constants_dg_dh.asm(24): error: [DG] byte needs eight characters:     DG '--'
-24    0012                  DG '--'
-25    0012
-numeric_constants_dg_dh.asm(26): error: [DG] byte needs eight characters:     DG --#----#--#      
-26    0012 21               DG --#----#--#      ; 8 + 3 bits
-numeric_constants_dg_dh.asm(27): error: [DG] byte needs eight characters:     DG "--#----#--#"
-27    0013 21               DG "--#----#--#"
-numeric_constants_dg_dh.asm(28): error: [DG] byte needs eight characters:     DG '--#----#--#'
-28    0014 21               DG '--#----#--#'
-29    0015
-30    0015                  ;; error when digit "grouping" through space is more than single character long
-numeric_constants_dg_dh.asm(31): error: [DG] byte needs eight characters:     DG --#-  ---#               
-31    0015                  DG --#-  ---#               ; 8 bits defined, but two spaces in middle = error
-32    0015
-33    0015                  ; Cyrillic long dash, code 151, should work as non-one (10101010 01010101)
-34    0015 AA 55            DG —-—-—-—- -—-—-—-—
-35    0017
-36    0017                  END
+19    0010 21               DG "--#----'
+numeric_constants_dg_dh.asm(20): error: No closing delimiter
+20    0011 21               DG '--#----"
+21    0012
+22    0012                  ;; (3+3)x error short strings
+numeric_constants_dg_dh.asm(23): error: [DG] byte needs eight characters:     DG --
+23    0012                  DG --
+numeric_constants_dg_dh.asm(24): error: [DG] byte needs eight characters:     DG "--"
+24    0012                  DG "--"
+numeric_constants_dg_dh.asm(25): error: [DG] byte needs eight characters:     DG '--'
+25    0012                  DG '--'
+26    0012
+numeric_constants_dg_dh.asm(27): error: [DG] byte needs eight characters:     DG --#----#--#      
+27    0012 21               DG --#----#--#      ; 8 + 3 bits
+numeric_constants_dg_dh.asm(28): error: [DG] byte needs eight characters:     DG "--#----#--#"
+28    0013 21               DG "--#----#--#"
+numeric_constants_dg_dh.asm(29): error: [DG] byte needs eight characters:     DG '--#----#--#'
+29    0014 21               DG '--#----#--#'
+30    0015
+31    0015                  ;; error when digit "grouping" through space is more than single character long
+numeric_constants_dg_dh.asm(32): error: [DG] byte needs eight characters:     DG --#-  ---#               
+32    0015                  DG --#-  ---#               ; 8 bits defined, but two spaces in middle = error
+33    0015
+34    0015                  ; Cyrillic long dash, code 151, should work as non-one (10101010 01010101)
+35    0015 AA 55            DG —-—-—-—- -—-—-—-—
+36    0017
+37    0017                  ;;;;;;;;;;;;;;;;;;;;;;;; DH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+38    0017                  ;; new directives DH for v1.11 (should be compatible with Zeus assembler)
+39    0017 01 23 45 67      DH "0123456789ABCDEF"           ; recommended syntax
+39    001B 89 AB CD EF
+40    001F 01 23 45 67      DH '0123456789ABCDEF'           ; but this works too
+40    0023 89 AB CD EF
+41    0027 01 23 45 67      DH 0123456789ABCDEF             ; and this works too
+41    002B 89 AB CD EF
+42    002F
+43    002F                  ; single space between values is legit
+44    002F 01 23 45 67      DH "01 23 45 67 89 AB CD EF"    ; the check is not 100% perfect,
+44    0033 89 AB CD EF
+45    0037 01 23 45 67      DH '01 23 45 67 89 AB CD EF'    ; extra spaces after last value are ignored too
+45    003B 89 AB CD EF
+46    003F 01 23 45 67      DH 01 23 45 67 89 AB CD EF      ; but that's implementation quirk (not in test)
+46    0043 89 AB CD EF
+47    0047
+48    0047                  ; error states
+numeric_constants_dg_dh.asm(49): error: Missing next digit: 3          
+49    0047                  DH 123          ; syntax error (digits are not in pairs
+numeric_constants_dg_dh.asm(50): error: Missing next digit: 3"
+50    0047                  DH "123"
+numeric_constants_dg_dh.asm(51): error: Digit not in base: G034       
+51    0047                  DH 12G034       ; wrong base
+numeric_constants_dg_dh.asm(52): error: Digit not in base: G034"
+52    0047                  DH "12G034"
+numeric_constants_dg_dh.asm(53): error: Syntax error: 12  34       
+53    0047 12               DH 12  34       ; two+ spaces between
+numeric_constants_dg_dh.asm(54): error: Syntax error: 12  34"
+54    0048 12               DH "12  34"
+55    0049                                  ; missing delimiter
+numeric_constants_dg_dh.asm(56): error: No closing delimiter:  "0123456789ABCDEF
+56    0049 01 23 45 67      DH "0123456789ABCDEF
+56    004D 89 AB CD EF
+57    0051
+58    0051                  ; 128 arguments at most (256 chars)
+59    0051 01 23 45 67      DH 0123456789ABCDEF0123456789ABCDEF 0123456789ABCDEF0123456789ABCD0F 0123456789ABCDEF0123456789ABCDEF 0123456789ABCDEF0123456789ABCD0F 0123456789ABCDEF0123456789ABCDEF 0123456789ABCDEF0123456789ABCD0F 0123456789ABCDEF0123456789ABCDEF 0123456789ABCDEF0123456789ABCD0F ; should be OK (8x16 = 128)
+59    0055 89 AB CD EF
+59    0059 01 23 45 67
+59    005D 89 AB CD EF
+59    0061 01 23 45 67
+59    0065 89 AB CD EF
+59    0069 01 23 45 67
+59    006D 89 AB CD 0F
+59    0071 01 23 45 67
+59    0075 89 AB CD EF
+59    0079 01 23 45 67
+59    007D 89 AB CD EF
+59    0081 01 23 45 67
+59    0085 89 AB CD EF
+59    0089 01 23 45 67
+59    008D 89 AB CD 0F
+59    0091 01 23 45 67
+59    0095 89 AB CD EF
+59    0099 01 23 45 67
+59    009D 89 AB CD EF
+59    00A1 01 23 45 67
+59    00A5 89 AB CD EF
+59    00A9 01 23 45 67
+59    00AD 89 AB CD 0F
+59    00B1 01 23 45 67
+59    00B5 89 AB CD EF
+59    00B9 01 23 45 67
+59    00BD 89 AB CD EF
+59    00C1 01 23 45 67
+59    00C5 89 AB CD EF
+59    00C9 01 23 45 67
+59    00CD 89 AB CD 0F
+60    00D1                  ; 129 -> should error
+numeric_constants_dg_dh.asm(61): error: Too many arguments
+61    00D1 01 23 45 67      DH 0123456789ABCDEF0123456789ABCDEF 0123456789ABCDEF0123456789ABCD0F 0123456789ABCDEF0123456789ABCDEF 0123456789ABCDEF0123456789ABCD0F 0123456789ABCDEF0123456789ABCDEF 0123456789ABCDEF0123456789ABCD0F 0123456789ABCDEF0123456789ABCDEF 0123456789ABCDEF0123456789ABCD0F EE
+61    00D5 89 AB CD EF
+61    00D9 01 23 45 67
+61    00DD 89 AB CD EF
+61    00E1 01 23 45 67
+61    00E5 89 AB CD EF
+61    00E9 01 23 45 67
+61    00ED 89 AB CD 0F
+61    00F1 01 23 45 67
+61    00F5 89 AB CD EF
+61    00F9 01 23 45 67
+61    00FD 89 AB CD EF
+61    0101 01 23 45 67
+61    0105 89 AB CD EF
+61    0109 01 23 45 67
+61    010D 89 AB CD 0F
+61    0111 01 23 45 67
+61    0115 89 AB CD EF
+61    0119 01 23 45 67
+61    011D 89 AB CD EF
+61    0121 01 23 45 67
+61    0125 89 AB CD EF
+61    0129 01 23 45 67
+61    012D 89 AB CD 0F
+61    0131 01 23 45 67
+61    0135 89 AB CD EF
+61    0139 01 23 45 67
+61    013D 89 AB CD EF
+61    0141 01 23 45 67
+61    0145 89 AB CD EF
+61    0149 01 23 45 67
+61    014D 89 AB CD 0F
+62    0151
+63    0151                  END
 # file closed: numeric_constants_dg_dh.asm
 
 Value    Label
