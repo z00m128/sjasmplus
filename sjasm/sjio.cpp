@@ -270,7 +270,10 @@ void ListFile(bool showAsSkipped) {
 		if (pos) pline[24] = 0;		// remove source line on sub-sequent list-lines
 		char* pp = pline + 10;
 		int BtoList = (nEB < 4) ? nEB : 4;
-		for (int i = 0; i < BtoList; ++i) pp += sprintf(pp, " %02X", EB[i + pos]);
+		for (int i = 0; i < BtoList; ++i) {
+			if (-2 == EB[i + pos]) pp += sprintf(pp, "...");
+			else pp += sprintf(pp, " %02X", EB[i + pos]);
+		}
 		*pp = ' ';
 		if (showAsSkipped) pline[11] = '~';
 		ListFileStringRtrim();
@@ -396,15 +399,13 @@ void EmitWords(int* words) {
 	}
 }
 
-void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, bool emitAllToListing) {
+void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
 	if (len <= 0) {
 		CurAddress = (CurAddress + len) & 0xFFFF;
 		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
 		CheckPage();
 		return;
 	}
-	if (!emitAllToListing) EB[nEB++] = byte;	// show only one byte in listing
-
 	while (len--) {
 		CheckRamLimitExceeded();
 		if (pass == LASTPASS) {
@@ -418,7 +419,11 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, bool emitAllToLis
 
 				MemoryPointer++;
 			}
-			if (emitAllToListing) EB[nEB++] = DeviceID ? MemoryPointer[-1] : byte;
+			if (emitMaxToListing) {
+				// put "..." marker into listing if some more bytes are emitted after last listed
+				if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
+				else EB[nEB++] = DeviceID ? MemoryPointer[-1] : byte;
+			}
 		}
 		++CurAddress;
 		if (PseudoORG) ++adrdisp;

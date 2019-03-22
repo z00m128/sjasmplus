@@ -392,8 +392,8 @@ void dirALIGN() {
 	// calculate how many bytes has to be filled to reach desired alignment
 	aint len = (~CurAddress + 1) & (val - 1);
 	if (len < 1) return;		// nothing to fill, already aligned
-	if (-1 == fill) EmitBlock(0, len, true, true);
-	else			EmitBlock(fill, len, false, true);
+	if (-1 == fill) EmitBlock(0, len, true);
+	else			EmitBlock(fill, len, false);
 }
 
 /*void dirMODULE() {
