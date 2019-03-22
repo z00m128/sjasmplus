@@ -49,8 +49,8 @@
 34    0067 64 65 66 00
 35    006B
 36    006B                  ; block/ds directive
-37    006B 0A               BLOCK   5, "\n"
-38    0070 2A               DS      16, '*'
+37    006B 0A 0A 0A...      BLOCK   5, "\n"
+38    0070 2A 2A 2A...      DS      16, '*'
 39    0080
 40    0080                  ; 7x warning, testing 8/16b checks
 numeric_constants_defX.asm(41): warning: Bytes lost (0x10A)
