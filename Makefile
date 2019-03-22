@@ -10,8 +10,9 @@
 # make PREFIX=~/.local install			- to install release version into ~/.local/bin/
 # make clean && make CC=gcc-8 CXX=g++-8		- to compile binary with gcc-8
 
-# CC=gcc
-# CXX=g++
+# set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
+CC=gcc
+CXX=g++
 BASH=/bin/bash
 
 PREFIX=/usr/local
@@ -27,6 +28,7 @@ BUILD_DIR := build
 SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.1
 SUBDIR_TOLUA=tolua++
+SUBDIR_DOCS=docs
 
 CFLAGS := -Wall -pedantic -DUSE_LUA -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
 LDFLAGS := -ldl
@@ -103,12 +105,14 @@ else
 	MEMCHECK="$(MEMCHECK)" EXE="$(EXE_FP)" $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_examples.sh
 endif
 
-docs:
+docs: $(SUBDIR_DOCS)/documentation.html ;
+
+$(SUBDIR_DOCS)/documentation.html: $(wildcard $(SUBDIR_DOCS)/*.xml) $(wildcard $(SUBDIR_DOCS)/*.xsl)
 	$(DOCBOOKGEN) \
 		--stringparam generate.toc "book toc" \
-		-o docs/documentation.html \
-		docs/docbook-xsl-ns-html-customization-linux.xsl \
-		docs/documentation.xml
+		-o $(SUBDIR_DOCS)/documentation.html \
+		$(SUBDIR_DOCS)/docbook-xsl-ns-html-customization-linux.xsl \
+		$(SUBDIR_DOCS)/documentation.xml
 
 clean:
 	$(UNINSTALL) \
