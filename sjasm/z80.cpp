@@ -65,7 +65,8 @@ namespace Z80 {
 			}
 		}
 		if (!OpCodeTable.zoek(n)) {
-			Error("Unrecognized instruction", bp); *lp = 0;
+			Error("Unrecognized instruction", bp);
+			SkipToEol(lp);
 		}
 	}
 
@@ -3498,7 +3499,8 @@ namespace Z80 {
 		do {
 			int e = GetByte(lp);
 			if (e&(~0x38)) {	// some bit is set which should be not
-				Error("[RST] Illegal operand", line); *lp = 0; return;
+				Error("[RST] Illegal operand", line); SkipToEol(lp);
+				return;
 			} else {			// e == { $00, $08, $10, $18, $20, $28, $30, $38 }
 				EmitByte(0xC7 + e);
 			}

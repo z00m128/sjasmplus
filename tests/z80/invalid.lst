@@ -82,9 +82,9 @@ invalid.asm(40): error: Unrecognized instruction: nextreg $44,a
 invalid.asm(41): error: Unrecognized instruction: mirror  a
 41    0015                  mirror  a
 invalid.asm(42): error: [ASSERT] Assertion failed:  0=41        
-42    0015                  ASSERT 0=_ERRORS        ; this assert should fail
+42    0015                  ASSERT 0=41        ; this assert should fail
 43    0015
-44    0015                  ASSERT 42=_ERRORS       ; update this assert when editing the file, to make it pass
+44    0015                  ASSERT 42=42       ; update this assert when editing the file, to make it pass
 45    0015
 46    0015              ;;; few labels/macros errors exercises
 47    0015

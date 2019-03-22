@@ -38,7 +38,7 @@
  37   0000                      DEVICE ZXSPECTRUM48
  38   0000
  39   0000                      ORG 0x8000
- 40   8000 5F                   ds  0x4000, '_'     ; fill memory with '_'
+ 40   8000 5F 5F 5F...          ds  0x4000, '_'     ; fill memory with '_'
  41   C000                      ORG 0x8000
  42   8000              ;; first set testing init-values list structure parsing
  43   8000 5F 41 42 43  d01     str

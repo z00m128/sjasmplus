@@ -19,16 +19,19 @@ will output to the console strings:
 > TESTLABEL address is:0x100, 256
 */
 
-;; Part of example in LUA chapter of documentation
+;; Part of example in LUA chapter of documentation (modified to pin date to fixed one)
     LUA
         -- Creates define "TIME" with current time
-        sj.insert_define("TIME", '"' .. os.date("%Y-%m-%d %H:%M:%S") .. '"')
+        datetime = os.date("%Y-%m-%d %H:%M:%S")
+        print(datetime)
+        datetime = "1982-04-23 03:14:15"    -- set it to fixed string for CI tests to pass
+        sj.insert_define("TIME", '"' .. datetime .. '"')
     ENDLUA
 
     DISPLAY "Build time: ", TIME
 /*
 will output to the console strings:
-Build time: <current date+time>
+Build time: <current date+time>  --> not current, but fixed one, for automated tests to pass
 */
 
 ;; Non-documentation manual tests of DISPLAY

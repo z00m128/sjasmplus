@@ -86,6 +86,7 @@ int ParseDirective(bool beginningOfLine)
 		line[0] = ' ';
 		STRCPY(line+1, LINEMAX-1, pp);	// reset `line` to the content which should be repeated
 		ParseLineSafe();			// and parse it
+		eolComment = NULL;			// switch OFF EOL-comment after first line
 	} while (--val);
 	// restore everything
 	STRCPY(line, LINEMAX, ml);
@@ -232,6 +233,24 @@ void dirD24() {
 	else		Error("D24 with no arguments");
 }
 
+void dirDG() {
+	int dirDx[130];
+	if (GetBits(lp, dirDx)) {
+		EmitBytes(dirDx);
+	} else {
+		Error("no arguments");
+	}
+}
+
+void dirDH() {
+	int dirDx[130];
+	if (GetBytesHexaText(lp, dirDx)) {
+		EmitBytes(dirDx);
+	} else {
+		Error("no arguments");
+	}
+}
+
 void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpression(lp, teller)) {
@@ -373,8 +392,8 @@ void dirALIGN() {
 	// calculate how many bytes has to be filled to reach desired alignment
 	aint len = (~CurAddress + 1) & (val - 1);
 	if (len < 1) return;		// nothing to fill, already aligned
-	if (-1 == fill) EmitBlock(0, len, true, true);
-	else			EmitBlock(fill, len, false, true);
+	if (-1 == fill) EmitBlock(0, len, true);
+	else			EmitBlock(fill, len, false);
 }
 
 /*void dirMODULE() {
@@ -466,10 +485,6 @@ void dirENDMODULE() {
 	} else {
 		Error("ENDMODULE without MODULE");
 	}
-}
-
-void dirZ80() {
-	GetCPUInstruction = Z80::GetOpCode;
 }
 
 void dirEND() {
@@ -1363,6 +1378,7 @@ void dirDEFINE() {
 	}
 
 	DefineTable.Add(id, lp, 0);
+	substitutedLine = line;		// override substituted listing for DEFINE
 
 	*(lp) = 0;
 }
@@ -1722,6 +1738,8 @@ void dirEDUP() {
 	CurrentSourceLine = lcurln;
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
+	free(ml);
+	substitutedLine = line;			// override substituted list line for EDUP
 	ListFile();
 }
 
@@ -1918,6 +1936,7 @@ void dirLUA() {
 	}
 
 	delete[] buff;
+	substitutedLine = line;		// override substituted list line for ENDLUA
 }
 
 void dirENDLUA() {
@@ -1972,16 +1991,19 @@ void InsertDirectives() {
 	DirectivesTable.insertd("block", dirBLOCK);
 	DirectivesTable.insertd("dword", dirDWORD);
 	DirectivesTable.insertd("d24", dirD24);
+	DirectivesTable.insertd("dg", dirDG);
+	DirectivesTable.insertd("defg", dirDG);
+	DirectivesTable.insertd("dh", dirDH);
+	DirectivesTable.insertd("defh", dirDH);
+	DirectivesTable.insertd("hex", dirDH);
 	DirectivesTable.insertd("org", dirORG);
 	DirectivesTable.insertd("fpos",dirFORG);
 	DirectivesTable.insertd("map", dirMAP);
 	DirectivesTable.insertd("align", dirALIGN);
 	DirectivesTable.insertd("module", dirMODULE);
-	//DirectivesTable.insertd("z80", dirZ80);
 	DirectivesTable.insertd("size", dirSIZE);
 	//DirectivesTable.insertd("textarea",dirTEXTAREA);
 	DirectivesTable.insertd("textarea", dirDISP);
-	//DirectivesTable.insertd("msx", dirZ80);
 	DirectivesTable.insertd("else", dirELSE);
 	DirectivesTable.insertd("export", dirEXPORT);
 	DirectivesTable.insertd("display", dirDISPLAY);

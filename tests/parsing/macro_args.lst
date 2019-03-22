@@ -31,78 +31,78 @@
 30    0000                  xxx
 30    0000             >        DUP 2
 30    0000             >1:
-30    0000 21 34 12    >        ld _zzzzz,0x1234
+30    0000 21 34 12    >        ld hl,0x1234
 30    0003 18 FB       >        jr  1B
 30    0005             >1:
-30    0005 21 34 12    >        ld _zzzzz,0x1234
+30    0005 21 34 12    >        ld hl,0x1234
 30    0008 18 FB       >        jr  1B
 30    000A             >        EDUP
 30    000A             >.labTest:
-30    000A             >        ccc 2, yyy, _zzzzz
-30    000A             >        DUP (varX?) & 0x03
-30    000A 3E 02       >        ld  a,varX?
-30    000C 3E 02       >        ld  a,varX?
+30    000A             >        ccc 2, yyy, hl
+30    000A             >        DUP (2) & 0x03
+30    000A 3E 02       >        ld  a,2
+30    000C 3E 02       >        ld  a,2
 30    000E             >        EDUP
-30    000E CD 11 00    >        call .varY?_varZ?
-30    0011             >.varY?_varZ?:
+30    000E CD 11 00    >        call .yyy_hl
+30    0011             >.yyy_hl:
 31    0011
 32    0011                  DUP 2
 33    0011 C9          >    ret
-34    0012 21 AB 56    >    ld  _zzzzz,0x56AB
-35    0015             >    xxx     ; emit macro
+34    0012 21 AB 56    >    ld  hl,0x56AB
+35    0015             >    xxx
 35    0015             >        DUP 2
 35    0015             >1:
-35    0015 21 34 12    >        ld _zzzzz,0x1234
+35    0015 21 34 12    >        ld hl,0x1234
 35    0018 18 FB       >        jr  1B
 35    001A             >1:
-35    001A 21 34 12    >        ld _zzzzz,0x1234
+35    001A 21 34 12    >        ld hl,0x1234
 35    001D 18 FB       >        jr  1B
 35    001F             >        EDUP
 35    001F             >.labTest:
-35    001F             >        ccc 2, yyy, _zzzzz
-35    001F             >        DUP (varX?) & 0x03
-35    001F 3E 02       >        ld  a,varX?
-35    0021 3E 02       >        ld  a,varX?
+35    001F             >        ccc 2, yyy, hl
+35    001F             >        DUP (2) & 0x03
+35    001F 3E 02       >        ld  a,2
+35    0021 3E 02       >        ld  a,2
 35    0023             >        EDUP
-35    0023 CD 26 00    >        call .varY?_varZ?
-35    0026             >.varY?_varZ?:
+35    0023 CD 26 00    >        call .yyy_hl
+35    0026             >.yyy_hl:
 36    0026             >    ccc 'd''d' | 0x2, first, second
-36    0026             >        DUP (varX?) & 0x03
+36    0026             >        DUP ('d''d' | 0x2) & 0x03
 macro_args.asm(36): warning: Bytes lost (0x642766)
-36    0026 3E 66       >        ld  a,varX?
+36    0026 3E 66       >        ld  a,'d''d' | 0x2
 macro_args.asm(36): warning: Bytes lost (0x642766)
-36    0028 3E 66       >        ld  a,varX?
+36    0028 3E 66       >        ld  a,'d''d' | 0x2
 36    002A             >        EDUP
-36    002A CD 2D 00    >        call .varY?_varZ?
-36    002D             >.varY?_varZ?:
+36    002A CD 2D 00    >        call .first_second
+36    002D             >.first_second:
 33    002D C9          >    ret
-34    002E 21 AB 56    >    ld  _zzzzz,0x56AB
-35    0031             >    xxx     ; emit macro
+34    002E 21 AB 56    >    ld  hl,0x56AB
+35    0031             >    xxx
 35    0031             >        DUP 2
 35    0031             >1:
-35    0031 21 34 12    >        ld _zzzzz,0x1234
+35    0031 21 34 12    >        ld hl,0x1234
 35    0034 18 FB       >        jr  1B
 35    0036             >1:
-35    0036 21 34 12    >        ld _zzzzz,0x1234
+35    0036 21 34 12    >        ld hl,0x1234
 35    0039 18 FB       >        jr  1B
 35    003B             >        EDUP
 35    003B             >.labTest:
-35    003B             >        ccc 2, yyy, _zzzzz
-35    003B             >        DUP (varX?) & 0x03
-35    003B 3E 02       >        ld  a,varX?
-35    003D 3E 02       >        ld  a,varX?
+35    003B             >        ccc 2, yyy, hl
+35    003B             >        DUP (2) & 0x03
+35    003B 3E 02       >        ld  a,2
+35    003D 3E 02       >        ld  a,2
 35    003F             >        EDUP
-35    003F CD 42 00    >        call .varY?_varZ?
-35    0042             >.varY?_varZ?:
+35    003F CD 42 00    >        call .yyy_hl
+35    0042             >.yyy_hl:
 36    0042             >    ccc 'd''d' | 0x2, first, second
-36    0042             >        DUP (varX?) & 0x03
+36    0042             >        DUP ('d''d' | 0x2) & 0x03
 macro_args.asm(36): warning: Bytes lost (0x642766)
-36    0042 3E 66       >        ld  a,varX?
+36    0042 3E 66       >        ld  a,'d''d' | 0x2
 macro_args.asm(36): warning: Bytes lost (0x642766)
-36    0044 3E 66       >        ld  a,varX?
+36    0044 3E 66       >        ld  a,'d''d' | 0x2
 36    0046             >        EDUP
-36    0046 CD 49 00    >        call .varY?_varZ?
-36    0049             >.varY?_varZ?:
+36    0046 CD 49 00    >        call .first_second
+36    0049             >.first_second:
 37    0049                  EDUP
 38    0049
 39    0049                  ; expected end result of following macDB usage
@@ -112,7 +112,7 @@ macro_args.asm(36): warning: Bytes lost (0x642766)
 40    0055 78 27 5C 5C
 41    0059                  ; test:
 42    0059                  macDB   1 + 14, "a\A\"", 'x''y', <4, 5, "!>!!!x">, '''\', "\\"
-42    0059 0F 61 07 22 >        db a1?, a2?, a3?, a4?, a5?, a6?
+42    0059 0F 61 07 22 >        db 1 + 14, "a\A\"", 'x''y', 4, 5, ">!!x", '''\', "\\"
 42    005D 78 27 79 04 >
 42    0061 05 3E 21 21 >
 42    0065 78 27 5C 5C >
@@ -120,11 +120,11 @@ macro_args.asm(36): warning: Bytes lost (0x642766)
 44    0069                  // warning on empty argument
 macro_args.asm(45): warning: [Macro argument parser] empty value: , second
 45    0069                  ccc  13, , second
-45    0069             >        DUP (varX?) & 0x03
-45    0069 3E 0D       >        ld  a,varX?
+45    0069             >        DUP (13) & 0x03
+45    0069 3E 0D       >        ld  a,13
 45    006B             >        EDUP
-45    006B CD 6E 00    >        call .varY?_varZ?
-45    006E             >.varY?_varZ?:
+45    006B CD 6E 00    >        call ._second
+45    006E             >._second:
 46    006E                  // too few/many argument errors
 macro_args.asm(47): error: Not enough arguments for macro: ccc
 47    006E                  ccc  5, 6

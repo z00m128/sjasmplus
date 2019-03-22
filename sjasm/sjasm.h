@@ -66,7 +66,8 @@ extern char* DeviceID;
 
 // extend
 extern char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
-extern char sline[LINEMAX2], sline2[LINEMAX2];
+extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
+// the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
 extern char SourceFNames[128][MAX_PATH];
 extern int CurrentSourceFName;
@@ -80,7 +81,6 @@ extern aint MemorySize;
 extern int macronummer, lijst, reglenwidth;
 extern aint CurAddress, AddressOfMAP, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
 
-extern void (*GetCPUInstruction)(void);
 extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
 
 extern FILE* FP_ListingFile;

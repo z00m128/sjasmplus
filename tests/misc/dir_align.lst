@@ -31,8 +31,7 @@ dir_align.asm(11): error: [ALIGN] Illegal align: $10000
 dir_align.asm(20): error: [ALIGN] Illegal align: 7, '!'  
 20    8004                  ALIGN   7, '!'  ; error
 21    8004 45 46 47 48      ALIGN   8       ; advance to 8008, preserve memory
-22    8008 63 63 63 63      ALIGN   16, 'c' ; [8008..800F] = 'c'
-22    800C 63 63 63 63
+22    8008 63 63 63...      ALIGN   16, 'c' ; [8008..800F] = 'c'
 23    8010                  ALIGN           ; should not make any difference (already at MOD 4 address)
 24    8010
 25    8010                  ; the final result should be "aBbbEFGHccccccccZ"

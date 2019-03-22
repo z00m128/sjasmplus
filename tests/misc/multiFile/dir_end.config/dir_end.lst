@@ -35,11 +35,11 @@
  3+   0019 11 1F 00             ld      de,verifyLabelFrom_dir_end3.a80
  4+   001C
  5+   001C                      ; do not END here : END : not here */ : END
- 6+   001C 37                   /* END : END : not even in // : END : block comment */scf
+ 6+   001C 37                    scf
  6+   001D 3F            ccf ; these are LIVE
  7+   001E                  // : /* END : END : */ : END // END : END
  8+   001E                      xxx     ; MACRO from dir_end1.a80
- 8+   001E 00          >    nop
+ 8+   001E 00          >    nop; MACRO from dir_end1.a80
  9+   001F
 # file closed: ./dir_end/dir_end3.i.asm
  7    001F              verifyLabelFrom_dir_end3.a80:
@@ -51,13 +51,13 @@
  2    0022              End             ; mixed case = label (not directive)
  3    0022 00 00        .end    ALIGN   ; .END should not work at first column, not even with --dirbol enabled
  4    0024              end     DUP 2   ; END should not work at first column, not even with --dirbol enabled
- 5    0024 00          >        nop     ; but other directive on the same line (ALIGN, DUP above) must work!
- 5    0025 00          >        nop     ; but other directive on the same line (ALIGN, DUP above) must work!
+ 5    0024 00          >        nop
+ 5    0025 00          >        nop
  6    0026                      EDUP
  7    0026              verifyLabel:
- 8    0026 06 01       > ld      b,1
+ 8    0026 06 01       > ld      b,1         ; China number one!
  8    0028 06 01       > ld      b,1
- 9    002A 0E FF       > ld      c,-1
+ 9    002A 0E FF       > ld      c,-1        ; Taiwan number dash one!
  9    002C 0E FF       > ld      c,-1
 10    002E                      END
 # file closed: dir_end.asm

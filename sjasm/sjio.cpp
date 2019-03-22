@@ -201,10 +201,6 @@ void PrintHex(char* & dest, aint value, int nibbles) {
 	*dest = oldChAfter;
 }
 
-void PrintHex8(char*& dest, aint value) {
-	PrintHex(dest, value, 2);
-}
-
 void PrintHex32(char*& dest, aint value) {
 	PrintHex(dest, value, 8);
 }
@@ -242,7 +238,11 @@ void PrepareListLine(aint hexadd)
 	memcpy(pline + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
 	sprintf(pline + 6, "%04lX", hexadd & 0xFFFF); pline[10] = ' ';
 	if (digit > '0') *pline = digit & 0xFF;
-	STRCPY(pline + 24, LINEMAX2, line);
+	// if substitutedLine is completely empty, list rather source line any way
+	if (!*substitutedLine) substitutedLine = line;
+	STRCPY(pline + 24, LINEMAX2-24, substitutedLine);
+	// add EOL comment if substituted was used and EOL comment is available
+	if (substitutedLine != line && eolComment) STRCAT(pline, LINEMAX2, eolComment);
 }
 
 static void ListFileStringRtrim() {
@@ -265,11 +265,15 @@ void ListFile(bool showAsSkipped) {
 
 	int pos = 0;
 	do {
+		if (showAsSkipped) substitutedLine = line;	// override substituted lines in skipped mode
 		PrepareListLine(pad);
 		if (pos) pline[24] = 0;		// remove source line on sub-sequent list-lines
 		char* pp = pline + 10;
 		int BtoList = (nEB < 4) ? nEB : 4;
-		for (int i = 0; i < BtoList; ++i) pp += sprintf(pp, " %02X", EB[i + pos]);
+		for (int i = 0; i < BtoList; ++i) {
+			if (-2 == EB[i + pos]) pp += sprintf(pp, "...");
+			else pp += sprintf(pp, " %02X", EB[i + pos]);
+		}
 		*pp = ' ';
 		if (showAsSkipped) pline[11] = '~';
 		ListFileStringRtrim();
@@ -380,7 +384,8 @@ void EmitWord(int word) {
 
 void EmitBytes(int* bytes) {
 	if (*bytes == -1) {
-		Error("Illegal instruction", line, IF_FIRST); *lp = 0;
+		Error("Illegal instruction", line, IF_FIRST);
+		SkipToEol(lp);
 	}
 	while (*bytes != -1) {
 		Emit(*bytes++);
@@ -394,15 +399,13 @@ void EmitWords(int* words) {
 	}
 }
 
-void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, bool emitAllToListing) {
+void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
 	if (len <= 0) {
 		CurAddress = (CurAddress + len) & 0xFFFF;
 		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
 		CheckPage();
 		return;
 	}
-	if (!emitAllToListing) EB[nEB++] = byte;	// show only one byte in listing
-
 	while (len--) {
 		CheckRamLimitExceeded();
 		if (pass == LASTPASS) {
@@ -416,7 +419,11 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, bool emitAllToLis
 
 				MemoryPointer++;
 			}
-			if (emitAllToListing) EB[nEB++] = DeviceID ? MemoryPointer[-1] : byte;
+			if (emitMaxToListing) {
+				// put "..." marker into listing if some more bytes are emitted after last listed
+				if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
+				else EB[nEB++] = DeviceID ? MemoryPointer[-1] : byte;
+			}
 		}
 		++CurAddress;
 		if (PseudoORG) ++adrdisp;
@@ -666,6 +673,8 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	while (IsRunning && ReadBufData()) {
 		// start of new line (or fake "line" by colon)
 		rlppos = line;
+		substitutedLine = line;		// also reset "substituted" line to the raw new one
+		eolComment = NULL;
 		if (colonSubline) {			// starting from colon (creating new fake "line")
 			colonSubline = false;	// (can't happen inside block comment)
 			*(rlppos++) = ' ';
@@ -706,6 +715,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			}
 			// not in label any more, check for EOL comments ";" or "//"
 			if ((';' == *rlppos) || ('/' == *rlppos && ReadBufData() && '/' == *rlpbuf)) {
+				eolComment = rlppos;
 				++rlppos;					// EOL comment ";"
 				while (ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf) *rlppos++ = *rlpbuf++;
 				continue;
@@ -1218,6 +1228,7 @@ EReturn ReadFile() {
 		if (lijst) {
 			if (!lijstp) return END;
 			STRCPY(line, LINEMAX, lijstp->string);
+			substitutedLine = line;		// reset substituted listing
 			lijstp = lijstp->next;
 		}
 		char* p = line;
@@ -1225,13 +1236,16 @@ EReturn ReadFile() {
 		if ('.' == *p) ++p;
 		if (cmphstr(p, "endif")) {
 			lp = ReplaceDefine(p);
+			substitutedLine = line;		// override substituted listing for ENDIF
 			return ENDIF;
 		} else if (cmphstr(p, "else")) {
 			lp = ReplaceDefine(p);
+			substitutedLine = line;		// override substituted listing for ELSE
 			ListFile();
 			return ELSE;
 		} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
 			lp = ReplaceDefine(p);
+			substitutedLine = line;		// override substituted listing for ENDT
 			return ENDTEXTAREA;
 		}
 		ParseLineSafe();
@@ -1246,6 +1260,7 @@ EReturn SkipFile() {
 		if (lijst) {
 			if (!lijstp) return END;
 			STRCPY(line, LINEMAX, lijstp->string);
+			substitutedLine = line;		// reset substituted listing
 			lijstp = lijstp->next;
 		}
 		char* p = line;
@@ -1259,11 +1274,13 @@ EReturn SkipFile() {
 				--iflevel;
 			} else {
 				lp = ReplaceDefine(p);
+				substitutedLine = line;		// override substituted listing for ENDIF
 				return ENDIF;
 			}
 		} else if (cmphstr(p, "else")) {
 			if (!iflevel) {
 				lp = ReplaceDefine(p);
+				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;
 			}

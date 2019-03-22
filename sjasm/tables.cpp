@@ -1294,7 +1294,7 @@ void CStructure::emitmembs(char*& p) {
 	while (ip) {
 		switch (ip->type) {
 		case SMEMBBLOCK:
-			EmitBlock(ip->def != -1 ? ip->def : 0, ip->len, ip->def == -1, true);
+			EmitBlock(ip->def != -1 ? ip->def : 0, ip->len, ip->def == -1, 8);
 			break;
 		case SMEMBBYTE:
 			EmitByte(ip->ParseValue(p));

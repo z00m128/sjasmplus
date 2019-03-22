@@ -30,6 +30,12 @@
 
 #include "sjdefs.h"
 
+//enum EDelimiterType          { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
+static const char delimiters_b[] = { ' ',    '"',       '\'',          '<',      0 };
+static const char delimiters_e[] = { ' ',    '"',       '\'',          '>',      0 };
+static const std::array<EDelimiterType, 3> delimiters_all = {DT_QUOTES, DT_APOSTROPHE, DT_ANGLE};
+static const std::array<EDelimiterType, 3> delimiters_noAngle = {DT_QUOTES, DT_APOSTROPHE, DT_COUNT};
+
 int cmphstr(char*& p1, const char* p2) {
 	unsigned int i = 0;
 	if (isupper(*p1)) {
@@ -68,6 +74,10 @@ int SkipBlanks() {
 
 void SkipParam(char*& p) {
 	while (*p && (*p != ',')) ++p;
+}
+
+void SkipToEol(char*& p) {
+	while (*p) ++p;
 }
 
 int NeedEQU() {
@@ -351,6 +361,74 @@ int getval(int p) {
 	}
 }
 
+const char* getNumericValueLastErr = NULL;
+const char* const getNumericValueErr_syntax = "Syntax error";
+const char* const getNumericValueErr_digit = "Digit not in base";
+const char* const getNumericValueErr_no_digit = "Missing next digit";
+const char* const getNumericValueErr_overflow = "Overflow";
+
+bool GetNumericValue_ProcessLastError(const char* const srcLine) {
+	if (NULL == getNumericValueLastErr) return false;
+	Error(getNumericValueLastErr, srcLine, SUPPRESS);
+	// Overflow type error lets assembler to emit truncated machine code (return "false" here)
+	return (getNumericValueErr_overflow != getNumericValueLastErr);
+}
+
+bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const int shiftBase) {
+	if (shiftBase < 1 || 5 < shiftBase) Error("Internal error, wrong base", NULL, FATAL);
+	getNumericValueLastErr = NULL;
+	val = 0;
+	if (pend <= p) {		// no actual digits between format specifiers
+		getNumericValueLastErr = getNumericValueErr_syntax;
+		return false;
+	}
+	aint digit;
+	const int base = 1<<shiftBase;
+	const aint overflowMask = (~0UL)<<(32-shiftBase);
+	while (p < pend) {
+		if (0 == *p || !isalnum(*p)) {
+			getNumericValueLastErr = getNumericValueErr_no_digit;
+			break;
+		}
+		if (base <= (digit = getval(*p))) {
+			getNumericValueLastErr = getNumericValueErr_digit;
+			break;
+		}
+		if (val & overflowMask) getNumericValueLastErr = getNumericValueErr_overflow;
+		val = (val<<shiftBase) + digit;
+		++p;
+	}
+	val &= 0xFFFFFFFFUL;
+	return (NULL == getNumericValueLastErr);
+}
+
+bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const int base) {
+	if (base < 2 || 36 < base) Error("Internal error, wrong base", NULL, FATAL);
+	getNumericValueLastErr = NULL;
+	val = 0;
+	if (pend <= p) {		// no actual digits between format specifiers
+		getNumericValueLastErr = getNumericValueErr_syntax;
+		return false;
+	}
+	aint digit;
+	while (p < pend) {
+		if (0 == *p || !isalnum(*p)) {
+			getNumericValueLastErr = getNumericValueErr_no_digit;
+			break;
+		}
+		if (base <= (digit = getval(*p))) {
+			getNumericValueLastErr = getNumericValueErr_digit;
+			break;
+		}
+		const unsigned long oval = static_cast<unsigned long>(val)&0xFFFFFFFFUL;
+		val = (val * base) + digit;
+		if (static_cast<unsigned long>(val&0xFFFFFFFFUL) < oval) getNumericValueLastErr = getNumericValueErr_overflow;
+		++p;
+	}
+	val &= 0xFFFFFFFFUL;
+	return (NULL == getNumericValueLastErr);
+}
+
 // parses number literals, forces result to be confined into 32b (even on 64b platforms,
 // to have stable results in listings/tests across platforms).
 int GetConstant(char*& op, aint& val) {
@@ -389,37 +467,12 @@ int GetConstant(char*& op, aint& val) {
 		}
 	}
 	// parse the number into value
-	val = 0;
-	if (pend <= p) {		// no actual digits between format specifiers
-		Error("Syntax error", op, SUPPRESS);
-		return 0;
-	}
-	aint digit;
 	if (0 < shiftBase) {
-		base = 1<<shiftBase;
-		const aint overflowMask = (~0UL)<<(32-shiftBase);
-		while (p < pend) {
-			if (base <= (digit = getval(*p))) {
-				Error("Digit not in base", op, SUPPRESS);
-				val &= 0xFFFFFFFFUL;
-				return 0;
-			}
-			if (val & overflowMask) Error("Overflow", op, SUPPRESS);
-			val = (val<<shiftBase) + digit;
-			++p;
-		}
+		if (!GetNumericValue_TwoBased(p, pend, val, shiftBase) && GetNumericValue_ProcessLastError(op))
+			return 0;
 	} else {
-		while (p < pend) {
-			if (base <= (digit = getval(*p))) {
-				Error("Digit not in base", op, SUPPRESS);
-				val &= 0xFFFFFFFFUL;
-				return 0;
-			}
-			const unsigned long oval = static_cast<unsigned long>(val)&0xFFFFFFFFUL;
-			val = (val * base) + digit;
-			if (static_cast<unsigned long>(val&0xFFFFFFFFUL) < oval) Error("Overflow", op, SUPPRESS);
-			++p;
-		}
+		if (!GetNumericValue_IntBased(p, pend, val, base) && GetNumericValue_ProcessLastError(op))
+			return 0;
 	}
 	op = hardEnd;
 	val &= 0xFFFFFFFFUL;
@@ -584,6 +637,80 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	return t;
 }
 
+int GetBits(char*& p, int e[]) {
+	EDelimiterType dt = DelimiterBegins(p, delimiters_noAngle);	//also skip blanks
+	static int one = 0;		// the warning about multi-chars should be emitted only once per pass
+	static bool zeroInDgWarning = false;
+	int bytes = 0;
+	while (*p && (dt == DT_NONE || delimiters_e[dt] != *p)) {
+		// collect whole byte (eight bits)
+		int value = 1, pch;
+		while (value < 256 && *p && (pch = 255 & (*p++))) {
+			if (White(pch)) continue;		// skip spaces
+			value <<= 1;
+			if ('-' == pch || '.' == pch || '_' == pch) continue;
+			value |= 1;
+			if (LASTPASS != pass) continue;
+			if (0 < one && one != pch) {
+				Warning("[DG] multiple characters used for 'ones'");
+				one = -1;					// emit this warning only once
+			} else if (!one) one = pch;		// remember char used first time for "ones"
+			if ('0' == pch && !zeroInDgWarning) {
+				zeroInDgWarning = true;
+				Warning("[DG] character '0' in DG works as value 1");
+			}
+		}
+		if (value < 256) {		// there was not eight characters, ended prematurely
+			Error("[DG] byte needs eight characters", substitutedLine, SUPPRESS);
+		} else {
+			if (128 <= bytes) {
+				Error("Too many arguments", p, SUPPRESS);
+				break;
+			}
+			e[bytes++] = value & 255;
+		}
+		SkipBlanks(p);
+	}
+	if (0 < one) one = 0;		// reset "ones" type if everything was OK this time
+	e[bytes] = -1;
+	if (dt == DT_NONE) return bytes;
+	if (delimiters_e[dt] != *p)	Error("No closing delimiter", NULL, SUPPRESS);
+	else 						++p;
+	return bytes;
+}
+
+int GetBytesHexaText(char*& p, int e[]) {
+	const char* const op_full = p;
+	int bytes = 0;
+	do {
+		EDelimiterType dt = DelimiterBegins(p, delimiters_noAngle);	//also skip blanks
+		if (!*p) Error("no arguments");
+		while (*p && (dt == DT_NONE || delimiters_e[dt] != *p)) {
+			const char* const op = p;
+			// collect whole byte = two hexa digits
+			aint val;
+			if (!GetNumericValue_TwoBased(p, p+2, val, 4) && GetNumericValue_ProcessLastError(op)) {
+				return 0;		// total failure, don't emit anything
+			}
+			if (128 <= bytes) {
+				Error("Too many arguments", NULL, SUPPRESS);
+				break;
+			}
+			e[bytes++] = val & 255;
+			SkipBlanks(p);			// skip spaces
+			if (dt == DT_NONE && ',' == *p) break;	// loop through multi arguments in outer do-while loop
+		}
+		if (dt != DT_NONE) {
+			if (delimiters_e[dt] == *p)	{
+				++p;
+				SkipBlanks(p);
+			} else Error("No closing delimiter", op_full, SUPPRESS);
+		}
+	} while (comma(p));
+	e[bytes] = -1;
+	return bytes;
+}
+
 #if defined(WIN32)
 static const char badSlash = '/';
 static const char goodSlash = '\\';
@@ -593,24 +720,15 @@ static const char goodSlash = '/';
 #endif
 
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
-//enum EDelimiterType          { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
-static const char delimiters_b[] = { ' ',    '"',       '\'',          '<',      0 };
-static const char delimiters_e[] = { ' ',    '"',       '\'',          '>',      0 };
 
 char* GetFileName(char*& p, bool convertslashes) {
 	char* newFn = new char[LINEMAX];
 	if (NULL == newFn) ErrorInt("No enough memory!", LINEMAX, FATAL);
 	char* result = newFn;
-	// find first non-blank character
-	SkipBlanks(p);
-	// check if some and which delimiter is used for this filename
-	int delI = DT_COUNT;
-	while (delI-- && (delimiters_b[delI] != *p)) ;
-	if (delI < 0) delI = 0;	// no delimiter found, use default "space" for end
-	else ++p;				// if found, advance over it
-	// remember type of detected delimiter (for GetDelimiterOfLastFileName function)
-	delimiterOfLastFileName = static_cast<EDelimiterType>(delI);
-	const char deliE = delimiters_e[delI];	// expected ending delimiter
+	// check if some and which delimiter is used for this filename (does advance over white chars)
+	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
+	delimiterOfLastFileName = DelimiterAnyBegins(p);
+	const char deliE = delimiters_e[delimiterOfLastFileName];	// expected ending delimiter
 	// copy all characters until zero or delimiter-end character is reached
 	while (*p && deliE != *p) {
 		*newFn = *p;		// copy character
@@ -728,10 +846,9 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 	const char* const dstOrig = dst, * const srcOrig = src;
 	while (*src && ',' != *src) {
 		// check if there is some kind of delimiter next (string literal or angle brackets expression)
-		int delI = DT_COUNT;
 		// the angle-bracket can only be used around whole argument (i.e. '<' must be first char)
-		while (--delI && ((delimiters_b[delI] != *src) || (DT_ANGLE==delI && srcOrig != src))) ;
-		if (!delI) {				// no delimiter found, ordinary expression, copy char by char
+		EDelimiterType delI = DelimiterBegins(src, srcOrig==src ? delimiters_all : delimiters_noAngle, false);
+		if (DT_NONE == delI) {		// no delimiter found, ordinary expression, copy char by char
 			*dst++ = *src++;
 			continue;
 		}
@@ -760,6 +877,8 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 					continue;					// copy two apostrophes (escaped apostrophe)
 				}
 				break;
+			default:
+				break;
 			}
 			if (endCh == *src) break;			// ending delimiter found
 			*dst++ = *src++;					// just copy character
@@ -774,6 +893,20 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 	int returnValue = *dstOrig || ',' == *src;	// return 1 if value is not empty or comma follows
 	if (!*dstOrig && returnValue) Warning("[Macro argument parser] empty value", srcOrig);
 	return (returnValue);		// but empty value will at least display warning
+}
+
+EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> delimiters, bool advanceSrc) {
+	if (advanceSrc && SkipBlanks(src)) return DT_NONE;
+	for (const auto dt : delimiters) {
+		if (delimiters_b[dt] != *src) continue;
+		if (advanceSrc) ++src;
+		return dt;
+	}
+	return DT_NONE;
+}
+
+EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc) {
+	return DelimiterBegins(src, delimiters_all, advanceSrc);
 }
 
 //eof reader.cpp

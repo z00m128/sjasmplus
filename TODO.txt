@@ -34,6 +34,10 @@ ReadBufLine parsing refactored. Now look for other parts of code trying to do si
 
 I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
 
+Macro world issues:
+- macros for operators?
+- ability to issue real instruction (ignoring possible macro of same name)
+
 ====================
 Docs:
 http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku

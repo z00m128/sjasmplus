@@ -37,6 +37,8 @@
 #endif //USE_LUA
 
 void PrintHelp() {
+	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
+	//     |<-- ...8901234567890123456789012345678901234567890123456789012... 80 chars -->|
 	_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
 	_COUT "Copyright 2004-2019 by Aprisobal and all other participants" _ENDL;
 	//_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
@@ -52,7 +54,7 @@ void PrintHelp() {
 	_COUT "  --sym=<filename>         Save symbols list to <filename>" _ENDL;
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
 	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
-	_COUT "  --raw=<filename>         Save all output to <filename> ignoring OUTPUT pseudo-ops" _ENDL;
+	_COUT "  --raw=<filename>         All output to <filename> ignoring OUTPUT pseudo-ops" _ENDL;
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
@@ -61,7 +63,7 @@ void PrintHelp() {
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
-	_COUT "  --dirbol                 Enable processing directives from the beginning of line" _ENDL;
+	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --nofakes                Disable fake instructions" _ENDL;
 	_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
 }
@@ -106,7 +108,7 @@ char* DeviceID = 0;
 
 // extend
 char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
-char sline[LINEMAX2], sline2[LINEMAX2];
+char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
 
 char SourceFNames[128][MAX_PATH];
 int CurrentSourceFName = 0;
@@ -124,8 +126,6 @@ int macronummer = 0, lijst = 0, reglenwidth = 0;
 aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
 aint destlen = 0, size = (aint)-1,PreviousErrorLine = (aint)-1, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
-
-void (*GetCPUInstruction)(void);
 
 char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 stack<SRepeatStack> RepeatStack;

@@ -260,7 +260,7 @@ int TAP_SaveSnapshot(char* fname, unsigned short start) {
 		// write code block
 		writecode(ram + ram_start, ram_length, 0x5E00 + ram_start, false, fpout);
 
-		delete[] ram;
+		free(ram);
 	} else {
 		detect_vars_changes();
 
@@ -354,7 +354,7 @@ int TAP_SaveSnapshot(char* fname, unsigned short start) {
 		// write main code block
 		writecode(ram + ram_start, ram_length, 0x5E00 + ram_start, false, fpout);
 
-		delete[] ram;
+		free(ram);
 	}
 
 	fclose(fpout);

@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.10.4 Documentation [2019-01-09]</title>
+  <title>SjASMPlus 1.11.0 Documentation [2019-03-22]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -103,7 +103,7 @@
 
       <para>Thanks to:<itemizedlist>
           <listitem>
-            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko</emphasis> - additional
+            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Ped7g</emphasis> - additional
             programming;</para>
           </listitem>
 
@@ -178,11 +178,11 @@
       <title>What's new?</title>
 
 <varlistentry>
-            <term>14.03.2019 - 1.11.0 WORK IN PROGRESS</term>
+            <term>22.03.2019 - 1.11.0</term>
 
             <listitem>
               <para><programlisting>- Added ZX Spectrum Next instructions support
-- Added --msg option
+- Added --msg option, directives DG and DH
 - Changed listing layout to fixed-width type
 - Errors, Warnings and similar are now channeled to STDERR
 - Fixed string literal parser, added two apostrophes and escaped zero
@@ -1391,14 +1391,6 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dephase" />DEPHASE</term>
-
-            <listitem>
-              <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><anchor id="po_defb" />DEFB</term>
 
             <listitem>
@@ -1422,6 +1414,22 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               <para>Sorry, not available yet. If you want to see new device in
               SjASMPlus, please, <link linkend="feedback">write
               us</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_defg" />DEFG</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_dg">DG</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_defh" />DEFH</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_dh">DH</link>.</para>
             </listitem>
           </varlistentry>
 
@@ -1467,6 +1475,14 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_dephase" />DEPHASE</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_device" />DEVICE &lt;deviceid&gt;</term>
 
             <listitem>
@@ -1486,6 +1502,35 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
    DEVICE NONE
  ;enable:
    DEVICE ZXSPECTRUM128</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_dg" />DG &lt;data encoded in bits&gt;</term>
+
+            <listitem>
+              <para>Data comprises of characters in multiples of eight, each block
+              is converted to a byte value.</para>
+
+              <para>A hyphen '-' (also '.' and '_') represents 0 and any other non-whitespace character
+              represents 1. It ignores spaces, use them for formatting if you like. Warning, "DG 10100001" is value 255, because character '0' is not a dash '-'. (since v1.11)<example>
+                  <title></title>
+                  <para><programlisting>    DG 1-1----1  ; store 161 at the current location
+    DG ...# #... .##. .... ; store two bytes: 0x18, 0x60</programlisting></para>
+              </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_dh" />DH "&lt;data&gt;"[,"&lt;data2&gt;"...]</term>
+
+            <listitem>
+              <para>The data string comprises pairs of hexadecimal digits, each pair is converted to
+              a byte value. You can add spaces between pairs as you like. (since v1.11)<example>
+                  <title></title>
+                  <para><programlisting>    DH "0123456789ABCDEF"   ; eight bytes #01 #23 ...
+    DH "01 23  45 67"        ; four bytes #01 #23 #45 #67</programlisting></para>
+              </example></para>
             </listitem>
           </varlistentry>
 
@@ -1808,6 +1853,14 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
     BYTE 1
     END</programlisting></para>
                 </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_hex" />HEX</term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_dh">DH</link>, usually used without quotes around data.</para>
             </listitem>
           </varlistentry>
 
