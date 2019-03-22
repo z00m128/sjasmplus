@@ -31,7 +31,7 @@
     ;; error when digit "grouping" through space is more than single character long
     DG --#-  ---#               ; 8 bits defined, but two spaces in middle = error
 
-    ; Cyrillic long dash, code 151, should work as non-one (10101010 01010101)
+    ; Cyrillic long dash, code 151, should work as 'one' (10101010 01010101)
     DG —-—-—-—- -—-—-—-—
 
     ;;;;;;;;;;;;;;;;;;;;;;;; DH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

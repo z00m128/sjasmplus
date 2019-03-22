@@ -43,7 +43,7 @@ numeric_constants_dg_dh.asm(29): error: [DG] byte needs eight characters:     DG
 numeric_constants_dg_dh.asm(32): error: [DG] byte needs eight characters:     DG --#-  ---#               
 32    0015                  DG --#-  ---#               ; 8 bits defined, but two spaces in middle = error
 33    0015
-34    0015                  ; Cyrillic long dash, code 151, should work as non-one (10101010 01010101)
+34    0015                  ; Cyrillic long dash, code 151, should work as 'one' (10101010 01010101)
 35    0015 AA 55            DG —-—-—-—- -—-—-—-—
 36    0017
 37    0017                  ;;;;;;;;;;;;;;;;;;;;;;;; DH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
