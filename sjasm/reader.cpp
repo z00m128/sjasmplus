@@ -640,23 +640,25 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 int GetBits(char*& p, int e[]) {
 	EDelimiterType dt = DelimiterBegins(p, delimiters_noAngle);	//also skip blanks
 	static int one = 0;		// the warning about multi-chars should be emitted only once per pass
+	static bool zeroInDgWarning = false;
 	int bytes = 0;
 	while (*p && (dt == DT_NONE || delimiters_e[dt] != *p)) {
 		// collect whole byte (eight bits)
 		int value = 1, pch;
 		while (value < 256 && *p && (pch = 255 & (*p++))) {
-			if (White(pch)) {
-				if (White(*p)) break;		// two spaces is too much, abort
-				else           continue;	// one space can be used to "group" bits for visual effect
-			}
+			if (White(pch)) continue;		// skip spaces
 			value <<= 1;
-			if ('-' == pch) continue;
+			if ('-' == pch || '.' == pch || '_' == pch) continue;
 			value |= 1;
 			if (LASTPASS != pass) continue;
 			if (0 < one && one != pch) {
 				Warning("[DG] multiple characters used for 'ones'");
 				one = -1;					// emit this warning only once
 			} else if (!one) one = pch;		// remember char used first time for "ones"
+			if ('0' == pch && !zeroInDgWarning) {
+				zeroInDgWarning = true;
+				Warning("[DG] character '0' in DG works as value 1");
+			}
 		}
 		if (value < 256) {		// there was not eight characters, ended prematurely
 			Error("[DG] byte needs eight characters", substitutedLine, SUPPRESS);
@@ -679,30 +681,33 @@ int GetBits(char*& p, int e[]) {
 
 int GetBytesHexaText(char*& p, int e[]) {
 	const char* const op_full = p;
-	EDelimiterType dt = DelimiterBegins(p, delimiters_noAngle);	//also skip blanks
 	int bytes = 0;
-	while (*p && (dt == DT_NONE || delimiters_e[dt] != *p)) {
-		const char* const op = p;
-		// collect whole byte = two hexa digits
-		aint val;
-		if (!GetNumericValue_TwoBased(p, p+2, val, 4) && GetNumericValue_ProcessLastError(op)) {
-			return 0;		// total failure, don't emit anything
+	do {
+		EDelimiterType dt = DelimiterBegins(p, delimiters_noAngle);	//also skip blanks
+		if (!*p) Error("no arguments");
+		while (*p && (dt == DT_NONE || delimiters_e[dt] != *p)) {
+			const char* const op = p;
+			// collect whole byte = two hexa digits
+			aint val;
+			if (!GetNumericValue_TwoBased(p, p+2, val, 4) && GetNumericValue_ProcessLastError(op)) {
+				return 0;		// total failure, don't emit anything
+			}
+			if (128 <= bytes) {
+				Error("Too many arguments", NULL, SUPPRESS);
+				break;
+			}
+			e[bytes++] = val & 255;
+			SkipBlanks(p);			// skip spaces
+			if (dt == DT_NONE && ',' == *p) break;	// loop through multi arguments in outer do-while loop
 		}
-		if (128 <= bytes) {
-			Error("Too many arguments", NULL, SUPPRESS);
-			break;
+		if (dt != DT_NONE) {
+			if (delimiters_e[dt] == *p)	{
+				++p;
+				SkipBlanks(p);
+			} else Error("No closing delimiter", op_full, SUPPRESS);
 		}
-		e[bytes++] = val & 255;
-		if (White(*p)) ++p;		// one space is legit between each hexa digit pair
-		if (White(*p) && !SkipBlanks(p)) {	// two+ spaces are legit only at EOL
-			Error(getNumericValueErr_syntax, op, SUPPRESS);
-			break;
-		}
-	}
+	} while (comma(p));
 	e[bytes] = -1;
-	if (dt == DT_NONE) return bytes;
-	if (delimiters_e[dt] != *p)	Error("No closing delimiter", op_full, SUPPRESS);
-	else 						++p;
 	return bytes;
 }
 

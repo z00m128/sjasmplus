@@ -1992,7 +1992,10 @@ void InsertDirectives() {
 	DirectivesTable.insertd("dword", dirDWORD);
 	DirectivesTable.insertd("d24", dirD24);
 	DirectivesTable.insertd("dg", dirDG);
+	DirectivesTable.insertd("defg", dirDG);
 	DirectivesTable.insertd("dh", dirDH);
+	DirectivesTable.insertd("defh", dirDH);
+	DirectivesTable.insertd("hex", dirDH);
 	DirectivesTable.insertd("org", dirORG);
 	DirectivesTable.insertd("fpos",dirFORG);
 	DirectivesTable.insertd("map", dirMAP);
