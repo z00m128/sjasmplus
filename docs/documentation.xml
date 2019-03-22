@@ -1499,10 +1499,23 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               <para>A hyphen '-' represents 0 and any other non-whitespace character
               represents 1, single white space is skipped - can be used for visual
               grouping of bits (warning, "DG 10100001" is value 255,
-              because character '0' is not a dash '-').<example>
+              because character '0' is not a dash '-'). (since v1.11)<example>
                   <title></title>
                   <para><programlisting>    DG 1-1----1  ; store 161 at the current location
     DG ---# #--- -##- ---- ; store two bytes: 0x18, 0x60</programlisting></para>
+              </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_dh" />DH "&lt;data&gt;"</term>
+
+            <listitem>
+              <para>The data string comprises pairs of hexadecimal digits, each pair is converted to
+              a byte value. (since v1.11)<example>
+                  <title></title>
+                  <para><programlisting>    DH "0123456789ABCDEF"   ; eight bytes #01 #23 ...
+    DH "01 23 45 67"        ; four bytes #01 #23 #45 #67</programlisting></para>
               </example></para>
             </listitem>
           </varlistentry>
