@@ -497,6 +497,7 @@ void BinIncFile(char* fname, int offset, int len) {
 	}
 
 	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
+		//FIXME STDOUT
 		printf("INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
 	}
 
@@ -992,7 +993,6 @@ int SaveRAM(FILE* ff, int start, int length) {
 			}
 			length -= save;
 			start += save;
-			//_COUT "Start: " _CMDL start _CMDL " Length: " _CMDL length _ENDL;
 			if (length <= 0) {
 				return 1;
 			}
@@ -1154,7 +1154,6 @@ int SaveBinary(char* fname, int start, int length) {
 	if (length <= 0) {
 		length = 0x10000 - start;
 	}
-	//_COUT "Start: " _CMDL start _CMDL " Length: " _CMDL length _ENDL;
 	if (!SaveRAM(ff, start, length)) {
 		fclose(ff);return 0;
 	}

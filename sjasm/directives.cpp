@@ -1489,6 +1489,7 @@ void dirDISPLAY() {
 	*ep = 0; // end line
 
 	if (LASTPASS == pass && *e) {
+		//FIXME STDOUT
 		_COUT "> " _CMDL e _ENDL;
 	}
 }
@@ -1529,6 +1530,7 @@ void dirSHELLEXEC() {
 		parameters = 0;
 	}
 	if (pass == LASTPASS) {
+		//FIXME STDOUT
 		if (parameters) {
 			_COUT "Executing " _CMDL command _CMDL " " _CMDL parameters _ENDL;
 		} else {
@@ -1776,7 +1778,6 @@ void dirDEFARRAY() {
 		Error("DEFARRAY must have at least one entry"); return;
 	}
 	DefineTable.Add(id, (char *)"\n", a);
-	//while (a) { STRCPY(ml,a->string); _COUT ml _ENDL; a=a->next; }
 }
 
 #ifdef USE_LUA
@@ -1789,13 +1790,9 @@ void _lua_showerror() {
 	if (err == NULL) {
 		Error("No enough memory!", NULL, FATAL);
 	}
-	//_COUT err _ENDL;
 	err += 18;
 	char *pos = strstr(err, ":");
-	//_COUT err _ENDL;
-	//_COUT pos _ENDL;
 	*(pos++) = 0;
-	//_COUT err _ENDL;
 	ln = atoi(err) + LuaLine;
 
 	// print error and other actions
@@ -1876,7 +1873,6 @@ void dirLUA() {
 		} else if (cmphstr(id, "allpass")) {
 			execute = true;
 		} else {
-			//_COUT id _CMDL "A" _ENDL;
 			Error("[LUA] Syntax error", id);
 		}
 	} else if (pass == LASTPASS) {
