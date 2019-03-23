@@ -30,7 +30,7 @@
 #define __SJASM
 
 enum EMemoryType { MT_NONE, MT_SIZE };
-enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR, OV_NONE };
+enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR, OV_NONE, OV_LST };
 
 namespace Options {
 	extern char SymbolListFName[LINEMAX];
@@ -82,8 +82,6 @@ extern int macronummer, lijst, reglenwidth;
 extern aint CurAddress, AddressOfMAP, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
 
 extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
-
-extern FILE* FP_ListingFile;
 
 enum EEncoding { ENCDOS, ENCWIN };
 extern char* CurrentDirectory;

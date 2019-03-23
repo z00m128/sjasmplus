@@ -439,14 +439,12 @@ int CLabelTable::Hash(const char* s) {
 }
 
 void CLabelTable::Dump() {
+	FILE* listFile = GetListingFile();
+	if (NULL == listFile) return;		// listing file must be already opened here
+
 	char line[LINEMAX], *ep;
-
-	if (NULL == FP_ListingFile) return;		// listing file must be already opened here
-
-	/*fputs("\nvalue      label\n",FP_ListingFile);*/
-	fputs("\nValue    Label\n", FP_ListingFile);
-	/*fputs("-------- - -----------------------------------------------------------\n",FP_ListingFile);*/
-	fputs("------ - -----------------------------------------------------------\n", FP_ListingFile);
+	fputs("\nValue    Label\n", listFile);
+	fputs("------ - -----------------------------------------------------------\n", listFile);
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LabelTable[i].page != -1) {
 			ep = line;
@@ -461,7 +459,7 @@ void CLabelTable::Dump() {
 			ep += strlen(LabelTable[i].name);
 			*(ep++) = '\n';
 			*(ep) = 0;
-			fputs(line, FP_ListingFile);
+			fputs(line, listFile);
 		}
 	}
 }

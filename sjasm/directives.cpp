@@ -1806,10 +1806,10 @@ void _lua_showerror() {
 		STRCAT(err, LINEMAX2, "\n");
 	}
 
-	if (FP_ListingFile != NULL) {
-		fputs(ErrorLine, FP_ListingFile);
+	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
+	if (Options::OutputVerbosity <= OV_ERROR) {
+		_CERR ErrorLine _END;
 	}
-	_CERR ErrorLine _END;
 
 	PreviousErrorLine = ln;
 

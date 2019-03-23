@@ -87,7 +87,7 @@ namespace Options {
 	bool IsDefaultListingName = false;
 	bool IsReversePOP = 0;
 	bool IsShowFullPath = 0;
-	bool AddLabelListing = 0;
+	bool AddLabelListing = false;
 	bool HideLogo = 0;
 	bool ShowHelp = 0;
 	bool NoDestinationFile = true;		// no *.out file by default
@@ -270,7 +270,7 @@ namespace Options {
 				if (!strcmp(opt,"h") || !strcmp(opt, "help")) {
 					ShowHelp = 1;
 				} else if (!strcmp(opt, "lstlab")) {
-					AddLabelListing = 1;
+					AddLabelListing = true;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
 					if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;
@@ -280,6 +280,12 @@ namespace Options {
 						OutputVerbosity = OV_WARNING;
 					} else if (!strcmp("all", val)) {
 						OutputVerbosity = OV_ALL;
+					} else if (!strcmp("lst", val)) {
+						OutputVerbosity = OV_LST;
+						AddLabelListing = false;
+					} else if (!strcmp("lstlab", val)) {
+						OutputVerbosity = OV_LST;
+						AddLabelListing = true;
 					} else {
 						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
 					}

@@ -289,8 +289,8 @@
  Logging:
   --nologo                 Do not show startup message
   --msg=[all|war|err|none|lst|lstlab]  Stderr messages verbosity ("all" is default)
-  Note: "lst" or "lstlab" will turn STDERR into listing file (there's then no need
-  for `--lst`, that would produce extra listing). Some diagnostic messages of "all"
+  Note: "lst" or "lstlab" will turn STDERR into listing file (this will clash with
+  `--lst`, use only one of the options) and some diagnostic messages of "all"
   are omitted, as they are not part of listing files.
   --fullpath               Show full path to error file
  Other:

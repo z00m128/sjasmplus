@@ -88,8 +88,8 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 		STRCAT(ErrorLine, LINEMAX2, ": "); STRCAT(ErrorLine, LINEMAX2, badValueMessage);
 	}
 	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2, "\n");	// append EOL if needed
-	// print the error into listing file (the OutputVerbosity is intentionally ignored in listing)
-	if (FP_ListingFile) fputs(ErrorLine, FP_ListingFile);
+	// print the error into listing file always (the OutputVerbosity does not apply to listing)
+	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
 	// print the error into stderr if OutputVerbosity allows errors
 	if (Options::OutputVerbosity <= OV_ERROR) {
 		_CERR ErrorLine _END;
@@ -134,9 +134,9 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 		STRCAT(ErrorLine, LINEMAX2, ": "); STRCAT(ErrorLine, LINEMAX2, badValueMessage);
 	}
 	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2, "\n");	// append EOL if needed
-	// print the error into listing file (the OutputVerbosity is intentionally ignored in listing)
-	if (FP_ListingFile) fputs(ErrorLine, FP_ListingFile);
-	// print the error into stderr if OutputVerbosity allows errors
+	// print the warning into listing file always (the OutputVerbosity does not apply to listing)
+	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
+	// print the warning into stderr if OutputVerbosity allows warnings
 	if (Options::OutputVerbosity <= OV_WARNING) {
 		_CERR ErrorLine _END;
 	}
@@ -256,8 +256,16 @@ static void ListFileStringRtrim() {
 	*beyondLine = 0;
 }
 
+// returns FILE* handle to either actual file defined by --lst=xxx, or stderr if --msg=lst, or NULL
+// ! do not fclose this handle, for fclose logic use the FP_ListingFile variable itself !
+FILE* GetListingFile() {
+	if (NULL != FP_ListingFile) return FP_ListingFile;
+	if (OV_LST == Options::OutputVerbosity) return stderr;
+	return NULL;
+}
+
 void ListFile(bool showAsSkipped) {
-	if (LASTPASS != pass || NULL == FP_ListingFile || donotlist) {
+	if (LASTPASS != pass || NULL == GetListingFile() || donotlist) {
 		donotlist = nEB = 0; return;
 	}
 	aint pad = PreviousAddress;
@@ -277,7 +285,7 @@ void ListFile(bool showAsSkipped) {
 		*pp = ' ';
 		if (showAsSkipped) pline[11] = '~';
 		ListFileStringRtrim();
-		fputs(pline, FP_ListingFile);
+		fputs(pline, GetListingFile());
 		nEB -= BtoList;
 		pad += BtoList;
 		pos += BtoList;
@@ -575,11 +583,12 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 		OpenDefaultList(fullpath);			// explicit listing file is already opened
 	}
 	// show in listing file which file was opened
-	if (LASTPASS == pass && FP_ListingFile) {
+	FILE* listFile = GetListingFile();
+	if (LASTPASS == pass && listFile) {
 		listFullName = STRDUP(fullpath);	// create copy of full filename for listing file
-		fputs("# file opened: ", FP_ListingFile);
-		fputs(listFullName, FP_ListingFile);
-		fputs("\n", FP_ListingFile);
+		fputs("# file opened: ", listFile);
+		fputs(listFullName, listFile);
+		fputs("\n", listFile);
 	}
 
 	aint oCurrentLocalLine = CurrentSourceLine;
@@ -606,14 +615,14 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	CurrentDirectory = oCurrentDirectory;
 
 	// show in listing file which file was closed
-	if (LASTPASS == pass && FP_ListingFile) {
-		fputs("# file closed: ", FP_ListingFile);
-		fputs(listFullName, FP_ListingFile);
-		fputs("\n", FP_ListingFile);
+	if (LASTPASS == pass && listFile) {
+		fputs("# file closed: ", listFile);
+		fputs(listFullName, listFile);
+		fputs("\n", listFile);
 		free(listFullName);
 
 		// close listing file (if "default" listing filename is used)
-		if (0 == IncludeLevel && Options::IsDefaultListingName) {
+		if (FP_ListingFile && 0 == IncludeLevel && Options::IsDefaultListingName) {
 			if (Options::AddLabelListing) LabelTable.Dump();
 			fclose(FP_ListingFile);
 			FP_ListingFile = NULL;
@@ -757,6 +766,8 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 }
 
 static void OpenListImp(const char* listFilename) {
+	// if STDERR is configured to contain listing, disable other listing files
+	if (OV_LST == Options::OutputVerbosity) return;
 	if (NULL == listFilename || !listFilename[0]) return;
 	if (!FOPEN_ISOK(FP_ListingFile, listFilename, "w")) {
 		Error("Error opening file", listFilename, FATAL);
@@ -764,6 +775,8 @@ static void OpenListImp(const char* listFilename) {
 }
 
 void OpenList() {
+	// if STDERR is configured to contain listing, disable other listing files
+	if (OV_LST == Options::OutputVerbosity) return;
 	// check if listing file is already opened, or it is set to "default" file names
 	if (Options::IsDefaultListingName || NULL != FP_ListingFile) return;
 	// Only explicit listing files are opened here
@@ -771,6 +784,8 @@ void OpenList() {
 }
 
 static void OpenDefaultList(const char *fullpath) {
+	// if STDERR is configured to contain listing, disable other listing files
+	if (OV_LST == Options::OutputVerbosity) return;
 	// check if listing file is already opened, or it is set to explicit file name
 	if (!Options::IsDefaultListingName || NULL != FP_ListingFile) return;
 	if (NULL == fullpath || !*fullpath) return;		// no filename provided
