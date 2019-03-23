@@ -61,6 +61,7 @@ for f in "${TEST_FILES[@]}"; do
     [[ -d "${src_base}.config" ]] && CFG_BASE="${src_base}.config/${dst_base}" || CFG_BASE="${src_base}"
     OPTIONS_FILE="${CFG_BASE}.options"
     LIST_FILE="${CFG_BASE}.lst"
+    MSG_LIST_FILE="${CFG_BASE}.msglst"
     # copy "src_dir/basename*.(asm|lua)" file(s) into working directory
     for subf in "$src_base"*.{asm,lua}; do
         [[ -d "$subf" ]] && continue
@@ -76,12 +77,18 @@ for f in "${TEST_FILES[@]}"; do
     options=()
     [[ -s "${OPTIONS_FILE}" ]] && options=(`cat "${OPTIONS_FILE}"`)
     # check if .lst file is required to verify the test, set up options to produce one
-    [[ -s "${LIST_FILE}" ]] && options+=("--lst=${dst_base}.lst") && options+=('--lstlab')
+    [[ -s "${LIST_FILE}" ]] && MSG_LIST_FILE="" && options+=("--lst=${dst_base}.lst") && options+=('--lstlab')
+    [[ ! -s "${MSG_LIST_FILE}" ]] && MSG_LIST_FILE="" || LIST_FILE="${MSG_LIST_FILE}"
     ## built it with sjasmplus (remember exit code)
     echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
     totalChecks=$((totalChecks + 1))    # assembling is one check
-    $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
-    last_result=$?
+    if [[ -z "${MSG_LIST_FILE}" ]]; then
+        $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+        last_result=$?
+    else
+        $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
+        last_result=$?
+    fi
     last_result_origin="sjasmplus"
     ## validate results
     # LST file overrides assembling exit code (new exit code is from diff between lst files)
