@@ -365,11 +365,14 @@ int main(int argc, char **argv) {
 		Options::COptionsParser optParser;
 		while (argv[i]) {
 			optParser.GetOptions(argv, i);
-			if (!argv[i]) break;
-			STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, argv[i++]);
+			if (!argv[i] || 128 <= SourceFNamesCount) break;
+			STRCPY(SourceFNames[SourceFNamesCount++], MAX_PATH-32, argv[i++]);
 		}
 		if (Options::IsDefaultListingName && Options::ListingFName[0]) {
 			Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
+		}
+		if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
+			Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
 		}
 	}
 

@@ -41,8 +41,10 @@ ten `--ext` switch... pouzitie stylom ako "prilep k command line" mi nenapadlo..
 v Makefile? ... na to by som dal ale druhu premennu "SJASMPLUSFLAGS"
 
 Macro world issues:
-- macros for operators?
+- macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
 - ability to issue real instruction (ignoring possible macro of same name)
+
+Input file without extension does produce wrong default output filename
 
 ====================
 Docs:
