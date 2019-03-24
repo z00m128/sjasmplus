@@ -486,6 +486,7 @@
   --fullpath               Show full path to error file
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
+  -                        Reads STDIN as source (no other sourcefile allowed)
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions
@@ -2099,18 +2100,20 @@ Kip                ; label Kip</programlisting></para>
             <term><anchor id="po_outend" />OUTEND</term>
 
             <listitem>
-              <para>Ends generating compiler output to file specified in OUTPUT.</para>
+              <para>Ends generating compiler output to file specified in OUTPUT and resets
+              <link linkend="po_size">SIZE</link> value to default "none".</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><anchor id="po_output" />OUTPUT
-            &lt;filename&gt;[,&lt;mode&gt;]</term>
+            [&lt;filename&gt;[,&lt;mode&gt;]]</term>
 
             <listitem>
               <para>With OUTPUT it is possible to create multiple files from
               one source. All following instructions will be assembled to this
-              file.</para>
+              file. It will also <link linkend="po_outend">close (OUTEND)</link>
+              and finalize any previously opened output.</para>
 
               <para>There are three possible output modes: truncate (overwrite
               existing files, this is the default), rewind (open and execute
@@ -2135,15 +2138,6 @@ OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
                 </example>This will create two files: loader.com and
               bigfile.dat.</para>
 
-              <para>When SjASMPlus is invoked without specifying an output
-              file, there is still one created even when no bytes are output
-              to it. So when the above file is called bigfile.asm, and
-              assembled with the following line:</para>
-
-              <para><programlisting>sjasmplus bigfile.asm</programlisting>The
-              following files are created: <programlisting>Bigfile.out  ; file length is zero
-Loader.com   ; contains loader.asm and bios.asm
-Bigfile.dat  ; contains main.asm and data.asm</programlisting></para>
             </listitem>
           </varlistentry>
 
@@ -2336,7 +2330,7 @@ START  .... ;something code
 
             <listitem>
               <para>If the resulting file is less than the given length, as
-              many bytes are added as necessary. See <link
+              many zero bytes are added as necessary. See <link
               linkend="po_output">OUTPUT</link> for more.<example>
                   <title></title>
 
