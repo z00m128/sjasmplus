@@ -1,0 +1,73 @@
+# file opened: Issue42B.asm
+ 1    0000 CD 22 00         CALL LABEL3 ; LABEL3 - yes
+ 2    0003 3A 10 00         LD A,(LABEL1) ; LABEL1 - yes
+ 3    0006
+Issue42B.asm(4): error: Local label not found: 1B      
+ 4    0006 18 F8            jr  1B      ;; error
+ 5    0008 18 02            jr  1F
+ 6    000A 18 1B            jr  4F
+ 7    000C              1
+ 8    000C 18 FE            jr  1B
+Issue42B.asm(9): error: Local label not found: 1F      
+ 9    000E 18 F0            jr  1F      ;; error
+10    0010                  IFUSED LABEL1
+11    0010              LABEL1:
+12    0010 31               DB '1'
+13    0011                  ENDIF
+14    0011
+15    0011 18 02            jr  2F
+16    0013 18 12            jr  4F
+17    0015              2
+18    0015 18 F5            jr  1B
+19    0017 18 FC            jr  2B
+20    0019                  IFUSED LABEL2
+21    0019              LABEL2:
+22    0019 32               DB '2'
+23    001A                  ENDIF
+24    001A
+25    001A 18 02            jr  3F
+26    001C 18 09            jr  4F
+27    001E              3
+28    001E 18 EC            jr  1B
+29    0020 18 FC            jr  3B
+30    0022                  IFUSED LABEL3
+31    0022              LABEL3:
+32    0022 33               DB '3'
+33    0023                  ENDIF
+34    0023
+Issue42B.asm(35): error: Local label not found: 4B      
+35    0023 18 DB            jr  4B      ;; error
+36    0025 18 00            jr  4F
+37    0027              4
+38    0027 18 E3            jr  1B
+39    0029 18 FC            jr  4B
+40    002B 18 04            jr  4F
+41    002D                  IFUSED LABEL4
+42    002D ~            LABEL4:
+43    002D ~                DB '4'
+44    002D                  ENDIF
+45    002D
+46    002D 18 F8            jr  4B
+47    002F 18 00            jr  4F
+48    0031              4               ;; double "4" local label (according to docs this should work)
+49    0031 18 D9            jr  1B
+50    0033 18 FC            jr  4B
+Issue42B.asm(51): error: Local label not found: 4F      
+51    0035 18 C9            jr  4F      ;; error
+52    0037
+53    0037 3E 19            LD A,LABEL2 ; LABEL2 - yes
+54    0039
+55    0039 CD 10 00         call LABEL1
+56    003C CD 19 00         call LABEL2
+57    003F CD 22 00         call LABEL3
+58    0042              ;    call LABEL4 - stay unused
+59    0042
+60    0042 C9               RET
+61    0043
+# file closed: Issue42B.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0022   LABEL3
+0x0010   LABEL1
+0x0019   LABEL2
