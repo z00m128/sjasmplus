@@ -1,0 +1,8 @@
+# run the ASM file as STDIN input. The variant of setup with .MSGLST is REQUIRED
+if [[ -z "${MSG_LIST_FILE}" ]]; then
+    last_result=1
+else
+    # there should be "asm.out" produced, which will be renamed to "asm.bin" for further comparison
+    $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" - < "$file_asm" 2> "${dst_base}.lst" && mv asm.out asm.bin
+    last_result=$?
+fi

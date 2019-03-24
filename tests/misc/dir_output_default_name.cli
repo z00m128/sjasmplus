@@ -1,0 +1,3 @@
+# use normal way of assembling, but rename the resulting "%.out" file to "%.bin" for the comparison
+$MEMCHECK "$EXE" --nologo --msg=war --fullpath "${options[@]}" "$file_asm" && mv "${dst_base}.out" "${dst_base}.bin"
+last_result=$?
