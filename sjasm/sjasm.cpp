@@ -63,6 +63,7 @@ void PrintHelp() {
 	_COUT "  --fullpath               Show full path to error file" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
+	_COUT "  -                        Reads STDIN as source (no other sourcefile allowed)" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --nofakes                Disable fake instructions" _ENDL;
@@ -73,7 +74,7 @@ namespace Options {
 	char SymbolListFName[LINEMAX] = {0};
 	char ListingFName[LINEMAX] = {0};
 	char ExportFName[LINEMAX] = {0};
-	char DestionationFName[LINEMAX] = {0};
+	char DestinationFName[LINEMAX] = {0};
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
 
@@ -93,6 +94,7 @@ namespace Options {
 	bool NoDestinationFile = true;		// no *.out file by default
 	bool FakeInstructions = 1;
 	bool IsNextEnabled = false;
+	bool SourceStdIn = false;
 
 	// Include directories list is initialized with "." directory
 	CStringsList* IncludeDirsList = new CStringsList((char *)".");
@@ -112,8 +114,8 @@ char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2],
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
 
 char SourceFNames[128][MAX_PATH];
-int CurrentSourceFName = 0;
-int SourceFNamesCount = 0;
+static int SourceFNamesCount = 0;
+std::vector<char> stdin_log;
 
 int ConvertEncoding = ENCWIN;
 
@@ -125,7 +127,7 @@ int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;
 aint MemorySize = 0;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
 aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
-aint destlen = 0, size = (aint)-1,PreviousErrorLine = (aint)-1, maxlin = 0, comlin = 0;
+aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
 char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
@@ -326,6 +328,9 @@ namespace Options {
 					} else {
 						_CERR "No parameters found in " _CMDL arg _ENDL;
 					}
+				} else if (0 == opt[0]) {
+					SourceStdIn = true;		// only single "-" was on command line = source STDIN
+					stdin_log.reserve(100000);	// reserve 100k bytes for a start
 				} else {
 					_CERR "Unrecognized option: " _CMDL opt _ENDL;
 				}
@@ -399,21 +404,36 @@ int main(int argc, char **argv) {
 
 #endif //USE_LUA
 
-	if (!SourceFNames[0][0]) {
+	// exit with error if no input file were specified
+	if (!SourceFNames[0][0] && !Options::SourceStdIn) {
 		if (Options::OutputVerbosity <= OV_ERROR) {
 			_CERR "No inputfile(s)" _ENDL;
 		}
 		exit(1);
 	}
+	// verify for STDIN input there is no other file specified + create empty name signaling STDIN
+	if (Options::SourceStdIn) {
+		if (0 < SourceFNamesCount) {	// list of explicit input files must be empty with `-` option
+			if (Options::OutputVerbosity <= OV_ERROR) {
+				_CERR "Don't add input file when STDIN option is specified." _ENDL;
+			}
+			exit(1);
+		}
+		// stdin itself has empty filename
+		SourceFNames[SourceFNamesCount++][0] = 0;
+		// but fake output name if not selected explicitly
+		if (!Options::DestinationFName[0]) STRCPY(Options::DestinationFName, LINEMAX, "asm.out");
+	}
 
-	if (!Options::DestionationFName[0]) {
-		STRCPY(Options::DestionationFName, LINEMAX, SourceFNames[0]);
-		if (!(p = strchr(Options::DestionationFName, '.'))) {
-			p = Options::DestionationFName;
+	// create default output name, if not specified
+	if (!Options::DestinationFName[0]) {
+		STRCPY(Options::DestinationFName, LINEMAX, SourceFNames[0]);
+		if (!(p = strchr(Options::DestinationFName, '.'))) {
+			p = Options::DestinationFName;
 		} else {
 			*p = 0;
 		}
-		STRCAT(p, LINEMAX-(p-Options::DestionationFName), ".out");
+		STRCAT(p, LINEMAX-(p-Options::DestinationFName), ".out");
 	}
 
 	base_encoding = ConvertEncoding;

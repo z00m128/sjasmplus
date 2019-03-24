@@ -563,6 +563,8 @@ void BinIncFile(char* fname, int offset, int len) {
 
 static void OpenDefaultList(const char *fullpath);
 
+static auto stdin_log_it = stdin_log.cbegin();
+
 void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 {
 	char ofilename[LINEMAX];
@@ -572,11 +574,18 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	if (++IncludeLevel > 20) {
 		Error("Over 20 files nested", NULL, FATAL);
 	}
-	fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
+	if (!*nfilename) {
+		fullpath = STRDUP("console_input");
+		filenamebegin = fullpath;
+		FP_Input = stdin;
+		stdin_log_it = stdin_log.cbegin();	// reset read iterator (for 2nd+ pass)
+	} else {
+		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
 
-	if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
-		free(fullpath);
-		Error("Error opening file", nfilename, FATAL);
+		if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
+			free(fullpath);
+			Error("Error opening file", nfilename, FATAL);
+		}
 	}
 
 	// open default listing file for each new source file (if default listing is ON)
@@ -599,7 +608,7 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	if (Options::IsShowFullPath) {
 		STRCPY(filename, LINEMAX, fullpath);
 	} else {
-		STRCPY(filename, LINEMAX, nfilename);
+		STRCPY(filename, LINEMAX, filenamebegin);
 	}
 
 	oCurrentDirectory = CurrentDirectory;
@@ -612,7 +621,8 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 
 	ReadBufLine();
 
-	fclose(FP_Input);
+	if (stdin != FP_Input) fclose(FP_Input);
+	else if (1 == pass) stdin_log.push_back(0);		// add extra zero terminator
 	CurrentDirectory = oCurrentDirectory;
 
 	// show in listing file which file was closed
@@ -667,11 +677,31 @@ static bool ReadBufData() {
 	if ((LINEMAX-2) <= (rlppos - line)) Error("Line too long", NULL, FATAL);
 	// now check for read data
 	if (rlpbuf < rlpbuf_end) return 1;		// some data still in buffer
-	if (feof(FP_Input)) return 0;			// no more data in file
+	if (stdin != FP_Input && feof(FP_Input)) return 0;	// no more data in file
 	// read next block of data
 	rlpbuf = rlbuf;
-	rlpbuf_end = rlbuf + fread(rlbuf, 1, 4096, FP_Input);
-	*rlpbuf_end = 0;						// add zero terminator after new block
+	// handle STDIN file differently (pass1 = read it, pass2+ replay "log" variable)
+	if (1 == pass || stdin != FP_Input) {	// ordinary file is re-read every pass normally
+		rlpbuf_end = rlbuf + fread(rlbuf, 1, 4096, FP_Input);
+		*rlpbuf_end = 0;					// add zero terminator after new block
+	}
+	if (stdin == FP_Input) {
+		// store copy of stdin into stdin_log during pass 1
+		if (1 == pass && rlpbuf < rlpbuf_end) {
+			stdin_log.insert(stdin_log.end(), rlpbuf, rlpbuf_end);
+		}
+		// replay the log in 2nd+ pass
+		if (1 < pass) {
+			rlpbuf_end = rlpbuf;
+			long toCopy = std::min(8000L, (stdin_log.cend() - stdin_log_it));
+			if (0 < toCopy) {
+				memcpy(rlbuf, &(*stdin_log_it), toCopy);
+				stdin_log_it += toCopy;
+				rlpbuf_end += toCopy;
+			}
+			*rlpbuf_end = 0;				// add zero terminator after new block
+		}
+	}
 	return (rlpbuf < rlpbuf_end);			// return true if some data were read
 }
 
@@ -814,37 +844,21 @@ void OpenUnrealList() {
 }
 
 void CloseDest() {
-	
-	// Correction for 1.10.1
 	// Flush buffer before any other operations
 	WriteDest();
-
-	// simple check
-	if (FP_Output == NULL) {
-		return;
-	}
-
-	long pad;
-	//if (WBLength) {
-	//	WriteDest();
-	//}
-	if (size != (aint)-1) {
+	// does main output file exist? (to close it)
+	if (FP_Output == NULL) return;
+	// pad to desired size (and check for exceed of it)
+	if (size != -1L) {
 		if (destlen > size) {
-			ErrorInt("File exceeds 'size'", destlen);
-		} else {
-			pad = size - destlen;
-			if (pad > 0) {
-				while (pad--) {
-					WriteBuffer[WBLength++] = 0;
-					if (WBLength == 256) {
-						WriteDest();
-					}
-				}
-			}
-			if (WBLength) {
-				WriteDest();
-			}
+			ErrorInt("File exceeds 'size' by", destlen - size);
 		}
+		memset(WriteBuffer, 0, DESTBUFLEN);
+		while (destlen < size) {
+			WBLength = std::min(aint(DESTBUFLEN), size-destlen);
+			WriteDest();
+		}
+		size = -1L;
 	}
 	fclose(FP_Output);
 	FP_Output = NULL;
@@ -857,30 +871,22 @@ void SeekDest(long offset, int method) {
 	}
 }
 
-void NewDest(char* newfilename) {
-	NewDest(newfilename, OUTPUT_TRUNCATE);
-}
-
 void NewDest(char* newfilename, int mode) {
-	// close file
+	// close previous output file
 	CloseDest();
 
-	// and open new file
-	STRCPY(Options::DestionationFName, LINEMAX, newfilename);
+	// and open new file (keep previous/default name, if no explicit was provided)
+	if (newfilename && *newfilename) STRCPY(Options::DestinationFName, LINEMAX, newfilename);
 	OpenDest(mode);
-}
-
-void OpenDest() {
-	OpenDest(OUTPUT_TRUNCATE);
 }
 
 void OpenDest(int mode) {
 	destlen = 0;
-	if (mode != OUTPUT_TRUNCATE && !FileExists(Options::DestionationFName)) {
+	if (mode != OUTPUT_TRUNCATE && !FileExists(Options::DestinationFName)) {
 		mode = OUTPUT_TRUNCATE;
 	}
-	if (!Options::NoDestinationFile && !FOPEN_ISOK(FP_Output, Options::DestionationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
-		Error("Error opening file", Options::DestionationFName, FATAL);
+	if (!Options::NoDestinationFile && !FOPEN_ISOK(FP_Output, Options::DestinationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
+		Error("Error opening file", Options::DestinationFName, FATAL);
 	}
 	Options::NoDestinationFile = false;
 	if (FP_RAW == NULL && Options::RAWFName[0] && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {

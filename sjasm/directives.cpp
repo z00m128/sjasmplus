@@ -503,15 +503,12 @@ void dirEND() {
 void dirSIZE() {
 	aint val;
 	if (!ParseExpression(lp, val)) {
-		Error("[SIZE] Syntax error", bp, IF_FIRST); return;
-	}
-	if (pass == LASTPASS) {
+		Error("[SIZE] Syntax error", bp, IF_FIRST);
 		return;
 	}
-	if (size != (aint) - 1) {
-		Error("[SIZE] Multiple sizes?"); return;
-	}
-	size = val;
+	if (LASTPASS != pass) return;	// only active during final pass
+	if (-1L == size) size = val;	// first time set
+	else if (size != val) ErrorInt("[SIZE] Different size than previous", size);	// just check it's same
 }
 
 void dirINCBIN() {
@@ -1340,7 +1337,6 @@ void dirOUTPUT() {
 
 void dirOUTEND()
 {
-	// if (!FP_Output) {Error("OUTEND without OUTPUT", bp, PASS3); return;}
 	if (pass == LASTPASS) CloseDest();
 }
 
@@ -1408,7 +1404,7 @@ void dirEXPORT() {
 	char* n, * p;
 
 	if (!Options::ExportFName[0]) {
-		STRCPY(Options::ExportFName, LINEMAX, SourceFNames[CurrentSourceFName]);
+		STRCPY(Options::ExportFName, LINEMAX, filename);
 		if (!(p = strchr(Options::ExportFName, '.'))) {
 			p = Options::ExportFName;
 		} else {

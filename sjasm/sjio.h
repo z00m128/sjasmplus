@@ -55,8 +55,8 @@ extern aint PreviousAddress, epadres;
 
 extern FILE* FP_UnrealList, * FP_Input;
 
-void OpenDest(int);
-void NewDest(char* newfilename, int mode);
+void OpenDest(int mode = OUTPUT_TRUNCATE);
+void NewDest(char* newfilename, int mode = OUTPUT_TRUNCATE);
 int FileExists(char* filename);
 void Error(const char* message, const char* badValueMessage = NULL, EStatus type = PASS3);
 void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);
@@ -75,7 +75,6 @@ void Close();
 void OpenList();
 void OpenUnrealList();
 void ReadBufLine(bool Parse = true, bool SplitByColon = true);
-void OpenDest();
 void CloseDest();
 void CloseTapFile();
 void OpenTapFile(char * tapename, int flagbyte);
@@ -92,7 +91,6 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length);
 int ReadLine(bool SplitByColon = true);
 EReturn ReadFile();
 EReturn SkipFile();
-void NewDest(char* newfilename);
 void SeekDest(long, int);
 int ReadFileToCStringsList(CStringsList*& f, const char* end);
 void WriteExp(char* n, aint v);

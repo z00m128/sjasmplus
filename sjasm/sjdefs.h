@@ -47,6 +47,7 @@
 #endif
 
 #include <stack>
+#include <vector>
 #include <iostream>
 using std::cout;
 using std::cerr;
