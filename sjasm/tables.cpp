@@ -204,44 +204,24 @@ int GetLabelValue(char*& p, aint& val) {
 }
 
 int GetLocalLabelValue(char*& op, aint& val) {
-	aint nval = 0;
-	int nummer = 0;
-	char* p = op,naam[LINEMAX],* np,ch;
-	SkipBlanks(p);
-	np = naam;
-	if (!isdigit((unsigned char) * p)) {
-		return 0;
+	char* p = op;
+	if (SkipBlanks(p) || !isdigit(*p)) return 0;
+	char* const numberB = p;
+	while (isdigit(*p)) ++p;
+	const char type = *p|0x20;		// [bB] => 'b', [fF] => 'f'
+	if ('b' != type && 'f' != type) return 0;	// local label must have "b" or "f" after number
+	const char following = p[1];	// should be EOL, colon or whitespace
+	if (0 != following && ':' != following && !White(following)) return 0;
+	// numberB -> p are digits to be parsed as integer
+	if (!GetNumericValue_IntBased(op = numberB, p, val, 10)) return 0;
+	++op;
+	// ^^ advance main parsing pointer op beyond the local label (here it *is* local label)
+	val = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
+	if (-1L == val) {
+		Error("Local label not found", numberB, SUPPRESS);
+		val = 0L;
+		return 1;
 	}
-	while (*p) {
-		if (!isdigit((unsigned char) * p)) {
-			break;
-		}
-		*np = *p; ++p; ++np;
-	}
-	*np = 0; nummer = atoi(naam);
-	ch = *p++;
-	if (isalnum((unsigned char) * p)) {
-		return 0;
-	}
-	switch (ch) {
-	case 'b':
-	case 'B':
-		nval = LocalLabelTable.zoekb(nummer); break;
-	case 'f':
-	case 'F':
-		nval = LocalLabelTable.zoekf(nummer); break;
-	default:
-		return 0;
-	}
-	if (nval == (aint) - 1) {
-		if (pass == LASTPASS) {
-			Error("Local label not found", naam, SUPPRESS);
-			return 1;
-		} else {
-			nval = 0;
-		}
-	}
-	op = p; val = nval;
 	return 1;
 }
 
@@ -625,50 +605,60 @@ int CFunctionTable::Hash(const char* s) {
 	return h % FUNTABSIZE;
 }
 
-CLocalLabelTableEntry::CLocalLabelTableEntry(aint nnummer, aint nvalue, CLocalLabelTableEntry* n) {
-	regel = CompiledCurrentLine;
-	nummer = nnummer;
-	value = nvalue;
-	//regel=CurrentLocalLine; nummer=nnummer; value=nvalue;
-	prev = n; next = NULL;
-	if (n) {
-		n->next = this;
-	}
+CLocalLabelTableEntry::CLocalLabelTableEntry(long int number, long int address, CLocalLabelTableEntry* previous) {
+	nummer = number;
+	value = address;
+	prev = previous; next = NULL;
+	if (previous) previous->next = this;
 }
 
 CLocalLabelTable::CLocalLabelTable() {
-	first = last = NULL;
+	first = last = refresh = NULL;
 }
 
-void CLocalLabelTable::Insert(aint nnummer, aint nvalue) {
-	last = new CLocalLabelTableEntry(nnummer, nvalue, last);
-	if (!first) {
-		first = last;
+CLocalLabelTable::~CLocalLabelTable() {
+	while (last) {		// release all local labels
+		refresh = last->prev;
+		delete last;
+		last = refresh;
 	}
 }
 
-aint CLocalLabelTable::zoekf(aint nnum) {
-	CLocalLabelTableEntry* l = first;
-	while (l && l->regel <= CompiledCurrentLine) l = l->next;
-	while (l) {
-		if (l->nummer == nnum) {
-			return l->value;
-		}
-		l = l->next;
-	}
-	return (aint) - 1;
+void CLocalLabelTable::InitPass() {
+	// reset refresh pointer for next pass
+	refresh = first;
 }
 
-aint CLocalLabelTable::zoekb(aint nnum) {
-	CLocalLabelTableEntry* l = last;
-	while (l && l->regel > CompiledCurrentLine) l = l->prev;
-	while (l) {
-		if (l->nummer == nnum) {
-			return l->value;
-		}
-		l = l->prev;
-	}
-	return (aint) - 1;
+bool CLocalLabelTable::insertImpl(const aint labelNumber) {
+	last = new CLocalLabelTableEntry(labelNumber, CurAddress, last);
+	if (!first) first = last;
+	return true;
+}
+
+bool CLocalLabelTable::refreshImpl(const aint labelNumber) {
+	if (!refresh || refresh->nummer != labelNumber) return false;
+	if (refresh->value != CurAddress) Warning("Local label has different address");
+	refresh->value = CurAddress;
+	refresh = refresh->next;
+	return true;
+}
+
+bool CLocalLabelTable::InsertRefresh(const aint nnummer) {
+	return (1 == pass) ? insertImpl(nnummer) : refreshImpl(nnummer);
+}
+
+aint CLocalLabelTable::seekForward(const aint labelNumber) const {
+	if (1 == pass) return 0;			// just building tables in first pass, no results yet
+	CLocalLabelTableEntry* l = refresh;	// already points on first "forward" local label
+	while (l && l->nummer != labelNumber) l = l->next;
+	return l ? l->value : -1L;
+}
+
+aint CLocalLabelTable::seekBack(const aint labelNumber) const {
+	if (1 == pass) return 0;			// just building tables in first pass, no results yet
+	CLocalLabelTableEntry* l = refresh ? refresh->prev : last;
+	while (l && l->nummer != labelNumber) l = l->prev;
+	return l ? l->value : -1L;
 }
 
 CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStringsList* nnss, CDefineTableEntry* nnext) {

@@ -178,6 +178,7 @@ void InitPass() {
 	MacroTable.Init();
 	DefineTable = Options::CmdDefineTable;
 	MacroDefineTable.Init();
+	LocalLabelTable.InitPass();
 
 	// predefined
 	DefineTable.Replace("_SJASMPLUS", "1");
