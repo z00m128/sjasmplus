@@ -1,0 +1,69 @@
+# file opened: make_djnz_dot_assemble.asm
+ 1    0000              ;; while trying to compile one larger legacy code written with Zeus syntax on mind,
+ 2    0000              ;; I run into lines "DJNZ .", which are basically the same thing as "DJNZ $" in sjasmplus
+ 3    0000              ;; To avoid editing whole file and replacing those on each occurence, I managed to get
+ 4    0000              ;; them fixed by defining this macro at beginning of the file:
+ 5    0000
+ 6    0000                  ;; fix "DJNZ ." to "DJNZ $"
+ 7    0000                  MACRO DJNZ arg0?
+ 8    0000 ~                    DEFINE .._arg0?
+ 9    0000 ~                    IFDEF .._.
+10    0000 ~                        djnz $
+11    0000 ~                    ELSE
+12    0000 ~                        djnz arg0?
+13    0000 ~                    ENDIF
+14    0000 ~                    IFDEF .._           ;; extra test for "$" argument, that one produces ".._" define
+15    0000 ~                        UNDEFINE .._
+16    0000 ~                    ELSE
+17    0000 ~                        UNDEFINE .._arg0?
+18    0000 ~                    ENDIF
+19    0000                  ENDM
+20    0000
+21    0000              ;; let's see it in action
+22    0000
+23    0000              OrdinaryLabelDjnz   DJNZ    OrdinaryLabelDjnz
+23    0000             >        DEFINE .._arg0?
+23    0000             >        IFDEF .._.
+23    0000 ~           >            djnz $
+23    0000             >        ELSE
+23    0000 10 FE       >            djnz OrdinaryLabelDjnz
+23    0002             >        ENDIF
+23    0002             >        IFDEF .._
+23    0002 ~           >            UNDEFINE .._
+23    0002             >        ELSE
+23    0002             >            UNDEFINE .._OrdinaryLabelDjnz
+23    0002             >        ENDIF
+24    0002
+25    0002                      DJNZ    $           ;; sjasmplus syntax
+25    0002             >        DEFINE .._arg0?
+25    0002             >        IFDEF .._.;; sjasmplus syntax
+25    0002 ~           >            djnz $
+25    0002             >        ELSE
+25    0002 10 FE       >            djnz $           ;; sjasmplus syntax
+25    0004             >        ENDIF
+25    0004             >        IFDEF .._           ;; extra test for "$" argument, that one produces ".._" define
+25    0004             >            UNDEFINE .._;; extra test for "$" argument, that one produces ".._" define
+25    0004             >        ELSE
+25    0004 ~           >            UNDEFINE .._arg0?
+25    0004             >        ENDIF
+26    0004
+27    0004                      DJNZ    .           ;; Zeus syntax, will be corrected by the macro "DJNZ"
+27    0004             >        DEFINE .._arg0?
+27    0004             >        IFDEF .._.;; Zeus syntax, will be corrected by the macro "DJNZ"
+27    0004 10 FE       >            djnz $;; Zeus syntax, will be corrected by the macro "DJNZ"
+27    0006             >        ELSE
+27    0006 ~           >            djnz arg0?
+27    0006             >        ENDIF
+27    0006             >        IFDEF .._           ;; extra test for "$" argument, that one produces ".._" define
+27    0006 ~           >            UNDEFINE .._
+27    0006             >        ELSE
+27    0006             >            UNDEFINE .._.           ?
+27    0006             >        ENDIF
+28    0006
+29    0006 10 FE                djnz    $           ;; avoid macro by using lowercase :D
+30    0008
+# file closed: make_djnz_dot_assemble.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   OrdinaryLabelDjnz
