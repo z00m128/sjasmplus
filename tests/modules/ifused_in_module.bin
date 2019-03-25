@@ -1,0 +1,12 @@
+/ Check [main body], USED labels:
+| M1.LABEL1
+| M1.LABEL2
+> UNUSED labels:
+| M1.LABEL3
+\ Check [main body] END
+/ Check [M2 body], USED labels:
+| M1.LABEL1
+| M1.LABEL2
+> UNUSED labels:
+| M1.LABEL3
+\ Check [M2 body] END
