@@ -475,7 +475,7 @@
   --lstlab                 Enable label table in listing
   --sym=&lt;filename&gt;         Save symbols list to &lt;filename&gt;
   --exp=&lt;filename&gt;         Save exports to &lt;filename&gt; (see EXPORT pseudo-op)
-  --raw=&lt;filename&gt;         Save all output to &lt;filename&gt; ignoring OUTPUT pseudo-ops
+  --raw=&lt;filename&gt;         Machine code saved also to &lt;filename&gt; (- is STDOUT)
   Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
  Logging:
   --nologo                 Do not show startup message
