@@ -38,6 +38,8 @@ Macro world issues:
 - macros for operators?
 - ability to issue real instruction (ignoring possible macro of same name)
 
+- ValidateLabel z makra zhltne jedno @ do stratena?!?
+
 ====================
 Docs:
 http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku
