@@ -890,6 +890,7 @@ void OpenDest(int mode) {
 		Error("Error opening file", Options::DestinationFName, FATAL);
 	}
 	Options::NoDestinationFile = false;
+	if (NULL == FP_RAW && '-' == Options::RAWFName[0] && 0 == Options::RAWFName[1]) FP_RAW = stdout;
 	if (FP_RAW == NULL && Options::RAWFName[0] && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {
 		Error("Error opening file", Options::RAWFName);
 	}
@@ -959,7 +960,7 @@ void Close() {
 		FP_ExportFile = NULL;
 	}
 	if (FP_RAW != NULL) {
-		fclose(FP_RAW);
+		if (stdout != FP_RAW) fclose(FP_RAW);
 		FP_RAW = NULL;
 	}
 	if (FP_ListingFile != NULL) {
