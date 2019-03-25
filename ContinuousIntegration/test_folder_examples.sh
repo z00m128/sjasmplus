@@ -31,8 +31,11 @@ source ContinuousIntegration/common_fn.sh
 [[ -z "$EXE" ]] && EXE=sjasmplus
 
 ## create temporary build directory for output
-rm -rf $PROJECT_DIR/build/examples
-mkdir -p $PROJECT_DIR/build/examples && cd $PROJECT_DIR/build/examples
+BUILD_DIR="$PROJECT_DIR/build/examples"
+echo -e "Creating temporary \033[96m$BUILD_DIR\033[0m directory..."
+rm -rf "$BUILD_DIR"
+# terminate in case the create+cd will fail, this is vital
+mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 echo -e "Searching directory \033[96m${PROJECT_DIR}/examples/\033[0m for '.asm' files..."
 
 ## go through all asm files in examples directory and try to assemble them

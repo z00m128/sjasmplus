@@ -1249,14 +1249,16 @@ static void dirIFN() {
 
 // IFUSED and IFNUSED internal helper, to parse label
 static bool dirIfusedIfnused(char* & id) {
+	SkipBlanks();
+	bool global = ('@' == *lp) && ++lp;		// if global marker, remember it + skip it
 	if ( (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) || !SkipBlanks()) {
 		Error("[IFUSED] Syntax error", bp, SUPPRESS);
 		return false;
 	}
 	if (id == NULL || *id == 0) {
 		id = LastParsedLabel;
-	} else {	// Ped7g: I was unable to trigger this code path by ASM source, GetID is foolproof.
-		id = ValidateLabel(id, 0);		// So I added `|| !SkipBlanks()` above to verify there's only label
+	} else {
+		id = ValidateLabel(id, global ? VALIDATE_LABEL_AS_GLOBAL : 0);
 		if (id == NULL) Error("[IFUSED] Invalid label name", bp, IF_FIRST);
 	}
 	return NULL != id;
@@ -1269,7 +1271,7 @@ static void dirIFUSED() {
 
 static void dirIFNUSED() {
 	char* id;
-	if (dirIfusedIfnused(id)) dirIfInternal("IFUSED", !LabelTable.IsUsed(id));
+	if (dirIfusedIfnused(id)) dirIfInternal("IFNUSED", !LabelTable.IsUsed(id));
 }
 
 static void dirIFDEF() {
@@ -1284,7 +1286,7 @@ static void dirIFDEF() {
 static void dirIFNDEF() {
 	char* id;
 	if ((id = GetID(lp)) && *id) {
-		dirIfInternal("IFDEF", !DefineTable.FindDuplicate(id));
+		dirIfInternal("IFNDEF", !DefineTable.FindDuplicate(id));
 	} else {
 		Error("[IFNDEF] Illegal identifier", bp);
 	}

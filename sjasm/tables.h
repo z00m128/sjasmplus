@@ -33,7 +33,10 @@ using std::endl;
 
 enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
 
-char* ValidateLabel(char*, int);
+// bit flags for ValidateLabel
+constexpr int VALIDATE_LABEL_SET_NAMESPACE = 0x01;
+constexpr int VALIDATE_LABEL_AS_GLOBAL = 0x02;
+char* ValidateLabel(char* naam, int flags);
 extern char* PreviousIsLabel;
 int GetLabelValue(char*& p, aint& val);
 int GetLocalLabelValue(char*& op, aint& val);
@@ -91,19 +94,23 @@ private:
 
 class CLocalLabelTableEntry {
 public:
-	aint regel, nummer, value;
+	aint nummer, value;
 	CLocalLabelTableEntry* next, * prev;
-	CLocalLabelTableEntry(aint, aint, CLocalLabelTableEntry*);
+	CLocalLabelTableEntry(long int number, long int address, CLocalLabelTableEntry* previous);
 };
 
 class CLocalLabelTable {
 public:
 	CLocalLabelTable();
-	aint zoekf(aint);
-	aint zoekb(aint);
-	void Insert(aint, aint);
+	~CLocalLabelTable();
+	void InitPass();
+	aint seekForward(const aint labelNumber) const;
+	aint seekBack(const aint labelNumber) const;
+	bool InsertRefresh(const aint labelNumber);
 private:
-	CLocalLabelTableEntry* first, * last;
+	bool insertImpl(const aint labelNumber);
+	bool refreshImpl(const aint labelNumber);
+	CLocalLabelTableEntry* first, * last, * refresh;
 };
 
 class CAddressList {
