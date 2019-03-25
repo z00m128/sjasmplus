@@ -389,8 +389,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (!Options::HideLogo) {
-		//FIXME STDOUT
-		_COUT logo _ENDL;
+		_CERR logo _ENDL;
 	}
 
 #ifdef USE_LUA

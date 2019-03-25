@@ -1487,8 +1487,7 @@ void dirDISPLAY() {
 	*ep = 0; // end line
 
 	if (LASTPASS == pass && *e) {
-		//FIXME STDOUT
-		_COUT "> " _CMDL e _ENDL;
+		_CERR "> " _CMDL e _ENDL;
 	}
 }
 
@@ -1528,11 +1527,12 @@ void dirSHELLEXEC() {
 		parameters = 0;
 	}
 	if (pass == LASTPASS) {
-		//FIXME STDOUT
-		if (parameters) {
-			_COUT "Executing " _CMDL command _CMDL " " _CMDL parameters _ENDL;
-		} else {
-			_COUT "Executing " _CMDL command _ENDL;
+		if (Options::OutputVerbosity <= OV_ALL) {
+			if (parameters) {
+				_CERR "Executing " _CMDL command _CMDL " " _CMDL parameters _ENDL;
+			} else {
+				_CERR "Executing " _CMDL command _ENDL;
+			}
 		}
 #if defined(WIN32)
 		STARTUPINFO si;

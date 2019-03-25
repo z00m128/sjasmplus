@@ -497,8 +497,9 @@ void BinIncFile(char* fname, int offset, int len) {
 	}
 
 	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
-		//FIXME STDOUT
-		printf("INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
+		char diagnosticTxt[MAX_PATH];
+		SPRINTF3(diagnosticTxt, MAX_PATH, "INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
+		_CERR diagnosticTxt _ENDL;
 	}
 
 	// Check requested data //
