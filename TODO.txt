@@ -34,8 +34,6 @@ ReadBufLine parsing refactored. Now look for other parts of code trying to do si
 
 I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
 
-Make option to compile stdin (pipe-in) to make this a bit more unix-like... and to redirect output to stdout.
-
 from env. variables disc: nie, myslel som ako "SJASMPLUSEXT" premennu ktora by tvorila priamo obsah pre
 ten `--ext` switch... pouzitie stylom ako "prilep k command line" mi nenapadlo... nieco ako CFLAGS
 v Makefile? ... na to by som dal ale druhu premennu "SJASMPLUSFLAGS"
@@ -50,4 +48,3 @@ Input file without extension does produce wrong default output filename
 
 ====================
 Docs:
-http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku
