@@ -1,5 +1,5 @@
     DEVICE ZXSPECTRUM128
-    OUTPUT "Issue42.bin"
+    OUTPUT "Issue42_local_labels.bin"
     ORG #8000
 
     MODULE M1
