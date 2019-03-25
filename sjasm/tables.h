@@ -33,7 +33,10 @@ using std::endl;
 
 enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
 
-char* ValidateLabel(char*, int);
+// bit flags for ValidateLabel
+constexpr int VALIDATE_LABEL_SET_NAMESPACE = 0x01;
+constexpr int VALIDATE_LABEL_AS_GLOBAL = 0x02;
+char* ValidateLabel(char* naam, int flags);
 extern char* PreviousIsLabel;
 int GetLabelValue(char*& p, aint& val);
 int GetLocalLabelValue(char*& op, aint& val);

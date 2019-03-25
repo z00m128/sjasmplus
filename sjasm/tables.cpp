@@ -32,9 +32,9 @@
 
 char* PreviousIsLabel;
 
-char* ValidateLabel(char* naam, int set_namespace) {
+char* ValidateLabel(char* naam, int flags) {
 	char* np = naam,* lp,* label,* mlp = macrolabp;
-	int p = 0,l = 0;
+	int p = (flags&VALIDATE_LABEL_AS_GLOBAL), l = 0;
 	label = new char[LINEMAX];
 	if (label == NULL) {
 		ErrorInt("No enough memory!", LINEMAX, FATAL);
@@ -80,7 +80,7 @@ char* ValidateLabel(char* naam, int set_namespace) {
 		}
 		if (l) {
 			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
-		} else if (set_namespace) {
+		} else if (flags&VALIDATE_LABEL_SET_NAMESPACE) {
 			free(vorlabp);
 			vorlabp = STRDUP(naam);
 			if (vorlabp == NULL) {
@@ -1220,7 +1220,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 
 static void InsertSingleStructLabel(char *name, const aint value) {
 	char *op = name, *p;
-	if (!(p = ValidateLabel(op, 1))) {
+	if (!(p = ValidateLabel(op, VALIDATE_LABEL_SET_NAMESPACE))) {
 		Error("Illegal labelname", op, EARLY);
 	}
 	if (pass == LASTPASS) {
