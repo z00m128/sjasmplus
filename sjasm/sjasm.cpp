@@ -277,6 +277,7 @@ namespace Options {
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
 					if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;
+						HideLogo = true;
 					} else if (!strcmp("err", val)) {
 						OutputVerbosity = OV_ERROR;
 					} else if (!strcmp("war", val)) {
