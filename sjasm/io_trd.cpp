@@ -146,7 +146,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	if (fseek(ff, (trd[1] << 12) + (trd[0] << 8), SEEK_SET)) {
 		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {

@@ -980,7 +980,7 @@ int SaveRAM(FILE* ff, int start, int length) {
 		return 0;
 	}
 
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {
@@ -1156,7 +1156,7 @@ int SaveBinary(char* fname, int start, int length) {
 		Error("Error opening file", fname, FATAL);
 	}
 
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {
@@ -1192,7 +1192,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	}
 
 
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {

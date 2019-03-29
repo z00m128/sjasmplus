@@ -58,7 +58,7 @@ int TAP_SaveBlock(char* fname, unsigned char flag, const char *ftapname, int sta
 		Error("Error opening file", fname, FATAL);
 	}
 
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 	    length = -1;
 	}
 	if (length <= 0) {
