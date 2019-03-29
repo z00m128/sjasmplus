@@ -48,3 +48,6 @@ Input file without extension does produce wrong default output filename
 
 ====================
 Docs:
+
+"pseudo-ops as SAVEBIN, SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST and use special functions in Lua scripts."
+^^ link each?

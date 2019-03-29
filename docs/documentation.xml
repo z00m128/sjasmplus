@@ -177,6 +177,22 @@
     <section>
       <title>What's new?</title>
 
+      <para><variablelist>
+
+<varlistentry>
+            <term>29.03.2019 - 1.11.1</term>
+
+            <listitem>
+              <para><programlisting>- Fixed global labels in MACRO and in IFUSED/IFNUSED
+- Fixed nested IF-DUP-IF
+- Fixed local labels fail when amount of lines did change between passes
+- Fixed Makefile to build when path to project contains space
+- Added macro-example: turn "DJNZ ." into "DJNZ $" (to fix Zeus syntax source)
+- Added --msg=lst and --msg=lstlab options to produce listing file to STDERR
+- Added options to read input file from STDIN and output "raw" binary to STDOUT</programlisting></para>
+            </listitem>
+          </varlistentry>
+
 <varlistentry>
             <term>22.03.2019 - 1.11.0</term>
 
@@ -208,8 +224,6 @@
 - GitHub connected with <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus">Cirrus Continuous Integration</ulink> service</programlisting></para>
             </listitem>
           </varlistentry>
-
-      <para><variablelist>
 
 <varlistentry>
             <term>09.01.2019 - 1.10.4</term>
