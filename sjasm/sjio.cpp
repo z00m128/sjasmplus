@@ -1253,22 +1253,25 @@ EReturn ReadFile() {
 			substitutedLine = line;		// reset substituted listing
 			lijstp = lijstp->next;
 		}
-		char* p = line;
-		SkipBlanks(p);
-		if ('.' == *p) ++p;
-		if (cmphstr(p, "endif")) {
-			lp = ReplaceDefine(p);
-			substitutedLine = line;		// override substituted listing for ENDIF
-			return ENDIF;
-		} else if (cmphstr(p, "else")) {
-			lp = ReplaceDefine(p);
-			substitutedLine = line;		// override substituted listing for ELSE
-			ListFile();
-			return ELSE;
-		} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
-			lp = ReplaceDefine(p);
-			substitutedLine = line;		// override substituted listing for ENDT
-			return ENDTEXTAREA;
+		const bool isInsideDupCollectingLines = !RepeatStack.empty() && !RepeatStack.top().IsInWork;
+		if (!isInsideDupCollectingLines) {
+			char* p = line;
+			SkipBlanks(p);
+			if ('.' == *p) ++p;
+			if (cmphstr(p, "endif")) {
+				lp = ReplaceDefine(p);
+				substitutedLine = line;		// override substituted listing for ENDIF
+				return ENDIF;
+			} else if (cmphstr(p, "else")) {
+				lp = ReplaceDefine(p);
+				substitutedLine = line;		// override substituted listing for ELSE
+				ListFile();
+				return ELSE;
+			} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
+				lp = ReplaceDefine(p);
+				substitutedLine = line;		// override substituted listing for ENDT
+				return ENDTEXTAREA;
+			}
 		}
 		ParseLineSafe();
 	}
