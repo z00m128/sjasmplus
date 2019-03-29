@@ -46,6 +46,7 @@
 #include <windows.h>
 #endif
 
+#include <algorithm>
 #include <stack>
 #include <vector>
 #include <iostream>
