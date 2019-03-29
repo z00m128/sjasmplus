@@ -41,11 +41,9 @@ char* ValidateLabel(char* naam, int flags) {
 	}
 	lp = label;
 	label[0] = 0;
-	if (mlp && *np == '@') {
-		++np; mlp = 0;
-	}
 	switch (*np) {
 	case '@':
+		if (mlp) mlp = NULL;
 		p = 1; ++np; break;
 	case '.':
 		l = 1; ++np; break;
