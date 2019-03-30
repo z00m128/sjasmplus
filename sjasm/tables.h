@@ -56,9 +56,9 @@ public:
 class CLabelTable {
 public:
 	CLabelTable();
-	int Insert(const char*, aint, bool, bool);
+	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false);
 	int Update(char*, aint);
-	int GetValue(char*, aint&);
+	int GetValue(char* nname, aint& nvalue);
 	int Find(char*);
 	int Remove(char*);
 	int IsUsed(char*);

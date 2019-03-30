@@ -92,64 +92,34 @@ char* ValidateLabel(char* naam, int flags) {
 
 int GetLabelValue(char*& p, aint& val) {
 	char* mlp = macrolabp, *op = p;
-	int g = 0, l = 0, oIsLabelNotFound = IsLabelNotFound;//, plen;
+	int g = 0, l = 0, oIsLabelNotFound = IsLabelNotFound;
 	unsigned int len;
 	char* np;
 	if (mlp && *p == '@') {
-		++op;
 		mlp = 0;
 	}
-	if (mlp) {
-		switch (*p) {
-		case '@':
-			g = 1;
-			++p;
-			break;
-		case '.':
-			l = 1;
-			++p;
-			break;
-		default:
-			break;
+	if (mlp && '.' == *p) {
+		++p;
+		STRCPY(temp, LINEMAX, macrolabp);
+		STRCAT(temp, LINEMAX, ">");
+		len = strlen(temp);
+		np = temp + len;
+		if (!isalpha((unsigned char) * p) && *p != '_') {
+			Error("Invalid labelname", temp);
+			return 0;
 		}
-		temp[0] = 0;
-		if (l) {
-			STRCAT(temp, LINEMAX, macrolabp);
-			STRCAT(temp, LINEMAX, ">");
-			len = strlen(temp);
-			np = temp + len;
-//			plen = 0;
-			if (!isalpha((unsigned char) * p) && *p != '_') {
-				Error("Invalid labelname", temp);
-				return 0;
-			}
-			while (isalnum((unsigned char) * p) || *p == '_' || *p == '.' || *p == '?' || *p == '!' || *p == '#' || *p == '@') {
-				*np = *p;
-				++np;
-				++p;
-			}
-			*np = 0;
-			if (strlen(temp) > LABMAX + len) {
-				Error("Label too long", temp + len);
-				temp[LABMAX + len] = 0;
-			}
-			np = temp;
-			g = 1;
-			do {
-				if (LabelTable.GetValue(np, val)) {
-					return 1;
-				}
-				IsLabelNotFound = oIsLabelNotFound;
-				while ('o') {
-					if (*np == '>') {
-						g = 0; break;
-					}
-					if (*np == '.') {
-						++np; break;
-					}
-					++np;
-				}
-			} while (g);
+		while (islabchar(*p)) *np++ = *p++;
+		*np = 0;
+		if (strlen(temp) > LABMAX + len) {
+			Error("Label too long", temp + len);
+			temp[LABMAX + len] = 0;
+		}
+		np = temp;
+		while (*np && '>' != *np) {
+			if (LabelTable.GetValue(np, val)) return 1;
+			IsLabelNotFound = oIsLabelNotFound;
+			while (*np && '>' != *np && '.' != *np) ++np;
+			if ('.' == *np) ++np;
 		}
 	}
 
@@ -176,24 +146,21 @@ int GetLabelValue(char*& p, aint& val) {
 		STRCAT(temp, LINEMAX, ".");
 	}
 	len = strlen(temp); np = temp + len;
-	if (!isalpha((unsigned char) * p) && *p != '_') {
+	if (!isalpha((unsigned char) *p) && *p != '_') {
 		Error("Invalid labelname", temp); return 0;
 	}
-	while (isalnum((unsigned char) * p) || *p == '_' || *p == '.' || *p == '?' || *p == '!' || *p == '#' || *p == '@') {
-		*np = *p; ++np; ++p;
-	}
+	while (islabchar(*p)) *np++ = *p++;
 	*np = 0;
 	if (strlen(temp) > LABMAX + len) {
 		Error("Label too long", temp + len);
 		temp[LABMAX + len] = 0;
 	}
-	if (LabelTable.GetValue(temp, val)) {
-		return 1;
-	}
+	if (LabelTable.GetValue(temp, val)) return 1;
+	bool undefinedInTable = (2 == IsLabelNotFound);
 	IsLabelNotFound = oIsLabelNotFound;
-	if (!l && !g && LabelTable.GetValue(temp + len, val)) {
-		return 1;
-	}
+	if (!l && !g && LabelTable.GetValue(temp + len, val)) return 1;
+	undefinedInTable |= (2 == IsLabelNotFound);
+	if (!undefinedInTable) LabelTable.Insert(temp, 0, true);
 	if (pass == LASTPASS) {
 		Error("Label not found", temp); return 1;
 	}
@@ -231,7 +198,7 @@ CLabelTable::CLabelTable() {
 	NextLocation = 1;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false) {
+int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", NULL, FATAL);
 	}
@@ -322,7 +289,6 @@ int CLabelTable::GetValue(char* nname, aint& nvalue) {
 			break;
 		}
 	}
-	this->Insert(nname, 0, true);
 	IsLabelNotFound = 1;
 	nvalue = 0;
 	return 0;
