@@ -177,6 +177,22 @@
     <section>
       <title>What's new?</title>
 
+      <para><variablelist>
+
+<varlistentry>
+            <term>29.03.2019 - 1.11.1</term>
+
+            <listitem>
+              <para><programlisting>- Fixed global labels in MACRO and in IFUSED/IFNUSED
+- Fixed nested IF-DUP-IF
+- Fixed local labels fail when amount of lines did change between passes
+- Fixed Makefile to build when path to project contains space
+- Added macro-example: turn "DJNZ ." into "DJNZ $" (to fix Zeus syntax source)
+- Added --msg=lst and --msg=lstlab options to produce listing file to STDERR
+- Added options to read input file from STDIN and output "raw" binary to STDOUT</programlisting></para>
+            </listitem>
+          </varlistentry>
+
 <varlistentry>
             <term>22.03.2019 - 1.11.0</term>
 
@@ -208,8 +224,6 @@
 - GitHub connected with <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus">Cirrus Continuous Integration</ulink> service</programlisting></para>
             </listitem>
           </varlistentry>
-
-      <para><variablelist>
 
 <varlistentry>
             <term>09.01.2019 - 1.10.4</term>
@@ -475,16 +489,20 @@
   --lstlab                 Enable label table in listing
   --sym=&lt;filename&gt;         Save symbols list to &lt;filename&gt;
   --exp=&lt;filename&gt;         Save exports to &lt;filename&gt; (see EXPORT pseudo-op)
-  --raw=&lt;filename&gt;         Save all output to &lt;filename&gt; ignoring OUTPUT pseudo-ops
+  --raw=&lt;filename&gt;         Machine code saved also to &lt;filename&gt; (- is STDOUT)
   Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
  Logging:
   --nologo                 Do not show startup message
-  --msg=[all|war|err|none] Stderr messages verbosity ("all" is default)
+  --msg=[all|war|err|none|lst|lstlab]  Stderr messages verbosity ("all" is default)
+  Note: "lst" or "lstlab" will turn STDERR into listing file (this will clash with
+  `--lst`, use only one of the options) and some diagnostic messages of "all"
+  are omitted, as they are not part of listing files.
   --fullpath               Show full path to error file
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
+  -                        Reads STDIN as source (no other sourcefile allowed)
   --reversepop             Enable reverse POP order (as in base SjASM version)
-  --dirbol                 Enable processing directives from the beginning of line
+  --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions
   --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</programlisting></para>
     </section>
@@ -2096,18 +2114,20 @@ Kip                ; label Kip</programlisting></para>
             <term><anchor id="po_outend" />OUTEND</term>
 
             <listitem>
-              <para>Ends generating compiler output to file specified in OUTPUT.</para>
+              <para>Ends generating compiler output to file specified in OUTPUT and resets
+              <link linkend="po_size">SIZE</link> value to default "none".</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><anchor id="po_output" />OUTPUT
-            &lt;filename&gt;[,&lt;mode&gt;]</term>
+            [&lt;filename&gt;[,&lt;mode&gt;]]</term>
 
             <listitem>
               <para>With OUTPUT it is possible to create multiple files from
               one source. All following instructions will be assembled to this
-              file.</para>
+              file. It will also <link linkend="po_outend">close (OUTEND)</link>
+              and finalize any previously opened output.</para>
 
               <para>There are three possible output modes: truncate (overwrite
               existing files, this is the default), rewind (open and execute
@@ -2132,15 +2152,6 @@ OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
                 </example>This will create two files: loader.com and
               bigfile.dat.</para>
 
-              <para>When SjASMPlus is invoked without specifying an output
-              file, there is still one created even when no bytes are output
-              to it. So when the above file is called bigfile.asm, and
-              assembled with the following line:</para>
-
-              <para><programlisting>sjasmplus bigfile.asm</programlisting>The
-              following files are created: <programlisting>Bigfile.out  ; file length is zero
-Loader.com   ; contains loader.asm and bios.asm
-Bigfile.dat  ; contains main.asm and data.asm</programlisting></para>
             </listitem>
           </varlistentry>
 
@@ -2333,7 +2344,7 @@ START  .... ;something code
 
             <listitem>
               <para>If the resulting file is less than the given length, as
-              many bytes are added as necessary. See <link
+              many zero bytes are added as necessary. See <link
               linkend="po_output">OUTPUT</link> for more.<example>
                   <title></title>
 

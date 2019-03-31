@@ -46,7 +46,7 @@ endif
 # C++ flags (the CPPFLAGS are for preprocessor BTW, if you always wonder, like me...)
 CXXFLAGS = -std=gnu++14 $(CFLAGS)
 #full path to executable
-EXE_FP := $(CURDIR)/$(BUILD_DIR)/$(EXE)
+EXE_FP := "$(CURDIR)/$(BUILD_DIR)/$(EXE)"
 
 # turns list of %.c/%.cpp files into $BUILD_DIR/%.o list
 define object_files
@@ -91,23 +91,23 @@ uninstall:
 
 tests: $(EXE_FP)
 ifdef TEST
-	EXE="$(EXE_FP)" $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_tests.sh $(TEST)
+	EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh" $(TEST)
 else
-	@EXE="$(EXE_FP)" $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_tests.sh
-	@EXE="$(EXE_FP)" $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_examples.sh
+	EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh"
+	@EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_examples.sh"
 endif
 
 memcheck: $(EXE_FP)
 ifdef TEST
-	MEMCHECK="$(MEMCHECK)" EXE="$(EXE_FP)" $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_tests.sh $(TEST)
+	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh" $(TEST)
 else
-	MEMCHECK="$(MEMCHECK)" EXE="$(EXE_FP)" $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_tests.sh
-	MEMCHECK="$(MEMCHECK)" EXE="$(EXE_FP)" $(BASH) $(CURDIR)/ContinuousIntegration/test_folder_examples.sh
+	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh"
+	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_examples.sh"
 endif
 
 docs: $(SUBDIR_DOCS)/documentation.html ;
 
-$(SUBDIR_DOCS)/documentation.html: $(wildcard $(SUBDIR_DOCS)/*.xml) $(wildcard $(SUBDIR_DOCS)/*.xsl)
+$(SUBDIR_DOCS)/documentation.html: Makefile $(wildcard $(SUBDIR_DOCS)/*.xml) $(wildcard $(SUBDIR_DOCS)/*.xsl)
 	$(DOCBOOKGEN) \
 		--stringparam generate.toc "book toc" \
 		-o $(SUBDIR_DOCS)/documentation.html \

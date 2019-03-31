@@ -1,0 +1,30 @@
+# file opened: dir_size.asm
+ 1    0000                  ;; test of default output file name in normal input file mode
+ 2    0000
+ 3    0000                  ; enable output into default output file ("dir_output_default_name.out")
+ 4    0000                  SIZE  8     ; should be preserved across first OUTPUT directive
+ 5    0000                  OUTPUT  "dir_size.bin"
+ 6    0000 54 62 69 6E      DB      'Tbin'
+ 7    0004
+ 8    0004                  ; should do 2x error, modifying already set old SIZE
+dir_size.asm(9): error: [SIZE] Different size than previous: 8
+ 9    0004                  SIZE 16
+dir_size.asm(10): error: [SIZE] Different size than previous: 8
+10    0004                  SIZE -1
+11    0004
+12    0004                  OUTEND      ; should PAD the file up to 8B
+13    0004
+14    0004                  SIZE -1     ; shouldn't do anything, as OUTEND was supposed to reset SIZE and -1 == -1
+15    0004
+16    0004                  OUTPUT  "dir_size.tap"
+17    0004 54 74 61 70      DB      'Ttap'
+18    0008
+19    0008                  SIZE 16     ; make the TAP file 16B
+20    0008
+21    0008                  ; try to end + close OUTPUT by specifying new one
+22    0008                  OUTPUT  "justToEndTap.bin"
+23    0008
+# file closed: dir_size.asm
+
+Value    Label
+------ - -----------------------------------------------------------

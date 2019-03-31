@@ -1,0 +1,15 @@
+# file opened: raw_to_stdout.asm
+1     0000 52 41 57 20  	DB	"RAW only\n"
+1     0004 6F 6E 6C 79
+1     0008 0A
+2     0009              	OUTPUT 	"raw_to_stdout.tap"
+3     0009 66 61 6B 65  	DB	"fake TAP content\n"
+3     000D 20 54 41 50
+3     0011 20 63 6F 6E
+3     0015 74 65 6E 74
+3     0019 0A
+4     001A
+# file closed: raw_to_stdout.asm
+
+Value    Label
+------ - -----------------------------------------------------------

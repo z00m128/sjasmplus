@@ -1,5 +1,3 @@
-;; These tests produce console output and that's not covered by CI test running script
-;; So they are basically manual tests + example, not validated on CI.
 ; DISPLAY options
 ; /D - out only in Decimal
 ; /H - out only in Hexadecimal
@@ -23,7 +21,6 @@ will output to the console strings:
     LUA
         -- Creates define "TIME" with current time
         datetime = os.date("%Y-%m-%d %H:%M:%S")
-        print(datetime)
         datetime = "1982-04-23 03:14:15"    -- set it to fixed string for CI tests to pass
         sj.insert_define("TIME", '"' .. datetime .. '"')
     ENDLUA

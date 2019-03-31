@@ -34,10 +34,20 @@ ReadBufLine parsing refactored. Now look for other parts of code trying to do si
 
 I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
 
+from env. variables disc: nie, myslel som ako "SJASMPLUSEXT" premennu ktora by tvorila priamo obsah pre
+ten `--ext` switch... pouzitie stylom ako "prilep k command line" mi nenapadlo... nieco ako CFLAGS
+v Makefile? ... na to by som dal ale druhu premennu "SJASMPLUSFLAGS"
+
 Macro world issues:
-- macros for operators?
+- macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
 - ability to issue real instruction (ignoring possible macro of same name)
+
+Input file without extension does produce wrong default output filename
+
+- ValidateLabel z makra zhltne jedno @ do stratena?!?
 
 ====================
 Docs:
-http://z00m128.github.io/sjasmplus/documentation.html#po_output  - kecy o output-e vzdy na disku
+
+"pseudo-ops as SAVEBIN, SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST and use special functions in Lua scripts."
+^^ link each?

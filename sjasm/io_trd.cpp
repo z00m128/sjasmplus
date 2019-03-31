@@ -120,7 +120,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	}
 	res = fread(trd, 1, 31, ff);
 	if (res != 31) {
-		_CERR "Read error: " _CMDL fname _ENDL; return 0;
+		Error("TRD image read error", fname, IF_FIRST); return 0;
 	}
 	secs = trd[4] + (trd[5] << 8);
 	if (secs < ((length + autostart_add) >> 8) + 1) {
@@ -146,7 +146,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	if (fseek(ff, (trd[1] << 12) + (trd[0] << 8), SEEK_SET)) {
 		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {

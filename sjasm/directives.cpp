@@ -503,15 +503,12 @@ void dirEND() {
 void dirSIZE() {
 	aint val;
 	if (!ParseExpression(lp, val)) {
-		Error("[SIZE] Syntax error", bp, IF_FIRST); return;
-	}
-	if (pass == LASTPASS) {
+		Error("[SIZE] Syntax error", bp, IF_FIRST);
 		return;
 	}
-	if (size != (aint) - 1) {
-		Error("[SIZE] Multiple sizes?"); return;
-	}
-	size = val;
+	if (LASTPASS != pass) return;	// only active during final pass
+	if (-1L == size) size = val;	// first time set
+	else if (size != val) ErrorInt("[SIZE] Different size than previous", size);	// just check it's same
 }
 
 void dirINCBIN() {
@@ -1252,14 +1249,16 @@ static void dirIFN() {
 
 // IFUSED and IFNUSED internal helper, to parse label
 static bool dirIfusedIfnused(char* & id) {
+	SkipBlanks();
+	bool global = ('@' == *lp) && ++lp;		// if global marker, remember it + skip it
 	if ( (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) || !SkipBlanks()) {
 		Error("[IFUSED] Syntax error", bp, SUPPRESS);
 		return false;
 	}
 	if (id == NULL || *id == 0) {
 		id = LastParsedLabel;
-	} else {	// Ped7g: I was unable to trigger this code path by ASM source, GetID is foolproof.
-		id = ValidateLabel(id, 0);		// So I added `|| !SkipBlanks()` above to verify there's only label
+	} else {
+		id = ValidateLabel(id, global ? VALIDATE_LABEL_AS_GLOBAL : 0);
 		if (id == NULL) Error("[IFUSED] Invalid label name", bp, IF_FIRST);
 	}
 	return NULL != id;
@@ -1272,7 +1271,7 @@ static void dirIFUSED() {
 
 static void dirIFNUSED() {
 	char* id;
-	if (dirIfusedIfnused(id)) dirIfInternal("IFUSED", !LabelTable.IsUsed(id));
+	if (dirIfusedIfnused(id)) dirIfInternal("IFNUSED", !LabelTable.IsUsed(id));
 }
 
 static void dirIFDEF() {
@@ -1287,7 +1286,7 @@ static void dirIFDEF() {
 static void dirIFNDEF() {
 	char* id;
 	if ((id = GetID(lp)) && *id) {
-		dirIfInternal("IFDEF", !DefineTable.FindDuplicate(id));
+		dirIfInternal("IFNDEF", !DefineTable.FindDuplicate(id));
 	} else {
 		Error("[IFNDEF] Illegal identifier", bp);
 	}
@@ -1340,7 +1339,6 @@ void dirOUTPUT() {
 
 void dirOUTEND()
 {
-	// if (!FP_Output) {Error("OUTEND without OUTPUT", bp, PASS3); return;}
 	if (pass == LASTPASS) CloseDest();
 }
 
@@ -1408,7 +1406,7 @@ void dirEXPORT() {
 	char* n, * p;
 
 	if (!Options::ExportFName[0]) {
-		STRCPY(Options::ExportFName, LINEMAX, SourceFNames[CurrentSourceFName]);
+		STRCPY(Options::ExportFName, LINEMAX, filename);
 		if (!(p = strchr(Options::ExportFName, '.'))) {
 			p = Options::ExportFName;
 		} else {
@@ -1489,7 +1487,7 @@ void dirDISPLAY() {
 	*ep = 0; // end line
 
 	if (LASTPASS == pass && *e) {
-		_COUT "> " _CMDL e _ENDL;
+		_CERR "> " _CMDL e _ENDL;
 	}
 }
 
@@ -1529,10 +1527,12 @@ void dirSHELLEXEC() {
 		parameters = 0;
 	}
 	if (pass == LASTPASS) {
-		if (parameters) {
-			_COUT "Executing " _CMDL command _CMDL " " _CMDL parameters _ENDL;
-		} else {
-			_COUT "Executing " _CMDL command _ENDL;
+		if (Options::OutputVerbosity <= OV_ALL) {
+			if (parameters) {
+				_CERR "Executing " _CMDL command _CMDL " " _CMDL parameters _ENDL;
+			} else {
+				_CERR "Executing " _CMDL command _ENDL;
+			}
 		}
 #if defined(WIN32)
 		STARTUPINFO si;
@@ -1776,7 +1776,6 @@ void dirDEFARRAY() {
 		Error("DEFARRAY must have at least one entry"); return;
 	}
 	DefineTable.Add(id, (char *)"\n", a);
-	//while (a) { STRCPY(ml,a->string); _COUT ml _ENDL; a=a->next; }
 }
 
 #ifdef USE_LUA
@@ -1789,13 +1788,9 @@ void _lua_showerror() {
 	if (err == NULL) {
 		Error("No enough memory!", NULL, FATAL);
 	}
-	//_COUT err _ENDL;
 	err += 18;
 	char *pos = strstr(err, ":");
-	//_COUT err _ENDL;
-	//_COUT pos _ENDL;
 	*(pos++) = 0;
-	//_COUT err _ENDL;
 	ln = atoi(err) + LuaLine;
 
 	// print error and other actions
@@ -1806,10 +1801,10 @@ void _lua_showerror() {
 		STRCAT(err, LINEMAX2, "\n");
 	}
 
-	if (FP_ListingFile != NULL) {
-		fputs(ErrorLine, FP_ListingFile);
+	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
+	if (Options::OutputVerbosity <= OV_ERROR) {
+		_CERR ErrorLine _END;
 	}
-	_CERR ErrorLine _END;
 
 	PreviousErrorLine = ln;
 
@@ -1876,7 +1871,6 @@ void dirLUA() {
 		} else if (cmphstr(id, "allpass")) {
 			execute = true;
 		} else {
-			//_COUT id _CMDL "A" _ENDL;
 			Error("[LUA] Syntax error", id);
 		}
 	} else if (pass == LASTPASS) {

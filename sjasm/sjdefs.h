@@ -30,7 +30,7 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.11.0"
+#define VERSION "1.11.1"
 
 #define LASTPASS 3
 
@@ -43,10 +43,13 @@
 
 // standard libraries
 #ifdef WIN32
+#define NOMINMAX
 #include <windows.h>
 #endif
 
+#include <algorithm>
 #include <stack>
+#include <vector>
 #include <iostream>
 using std::cout;
 using std::cerr;

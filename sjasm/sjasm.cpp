@@ -54,14 +54,16 @@ void PrintHelp() {
 	_COUT "  --sym=<filename>         Save symbols list to <filename>" _ENDL;
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
 	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
-	_COUT "  --raw=<filename>         All output to <filename> ignoring OUTPUT pseudo-ops" _ENDL;
+	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
-	_COUT "  --msg=[all|war|err|none] Stderr messages verbosity (\"all\" is default)" _ENDL;
+	_COUT "  --msg=[all|war|err|none|lst|lstlab]" _ENDL;
+	_COUT "                           Stderr messages verbosity (\"all\" is default)" _ENDL;
 	_COUT "  --fullpath               Show full path to error file" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
+	_COUT "  -                        Reads STDIN as source (no other sourcefile allowed)" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --nofakes                Disable fake instructions" _ENDL;
@@ -72,7 +74,7 @@ namespace Options {
 	char SymbolListFName[LINEMAX] = {0};
 	char ListingFName[LINEMAX] = {0};
 	char ExportFName[LINEMAX] = {0};
-	char DestionationFName[LINEMAX] = {0};
+	char DestinationFName[LINEMAX] = {0};
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
 
@@ -86,12 +88,13 @@ namespace Options {
 	bool IsDefaultListingName = false;
 	bool IsReversePOP = 0;
 	bool IsShowFullPath = 0;
-	bool AddLabelListing = 0;
+	bool AddLabelListing = false;
 	bool HideLogo = 0;
 	bool ShowHelp = 0;
 	bool NoDestinationFile = true;		// no *.out file by default
 	bool FakeInstructions = 1;
 	bool IsNextEnabled = false;
+	bool SourceStdIn = false;
 
 	// Include directories list is initialized with "." directory
 	CStringsList* IncludeDirsList = new CStringsList((char *)".");
@@ -111,8 +114,8 @@ char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2],
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
 
 char SourceFNames[128][MAX_PATH];
-int CurrentSourceFName = 0;
-int SourceFNamesCount = 0;
+static int SourceFNamesCount = 0;
+std::vector<char> stdin_log;
 
 int ConvertEncoding = ENCWIN;
 
@@ -124,7 +127,7 @@ int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;
 aint MemorySize = 0;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
 aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
-aint destlen = 0, size = (aint)-1,PreviousErrorLine = (aint)-1, maxlin = 0, comlin = 0;
+aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
 char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
@@ -178,6 +181,7 @@ void InitPass() {
 	MacroTable.Init();
 	DefineTable = Options::CmdDefineTable;
 	MacroDefineTable.Init();
+	LocalLabelTable.InitPass();
 
 	// predefined
 	DefineTable.Replace("_SJASMPLUS", "1");
@@ -269,16 +273,23 @@ namespace Options {
 				if (!strcmp(opt,"h") || !strcmp(opt, "help")) {
 					ShowHelp = 1;
 				} else if (!strcmp(opt, "lstlab")) {
-					AddLabelListing = 1;
+					AddLabelListing = true;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
 					if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;
+						HideLogo = true;
 					} else if (!strcmp("err", val)) {
 						OutputVerbosity = OV_ERROR;
 					} else if (!strcmp("war", val)) {
 						OutputVerbosity = OV_WARNING;
 					} else if (!strcmp("all", val)) {
 						OutputVerbosity = OV_ALL;
+					} else if (!strcmp("lst", val)) {
+						OutputVerbosity = OV_LST;
+						AddLabelListing = false;
+					} else if (!strcmp("lstlab", val)) {
+						OutputVerbosity = OV_LST;
+						AddLabelListing = true;
 					} else {
 						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
 					}
@@ -319,6 +330,9 @@ namespace Options {
 					} else {
 						_CERR "No parameters found in " _CMDL arg _ENDL;
 					}
+				} else if (0 == opt[0]) {
+					SourceStdIn = true;		// only single "-" was on command line = source STDIN
+					stdin_log.reserve(100000);	// reserve 100k bytes for a start
 				} else {
 					_CERR "Unrecognized option: " _CMDL opt _ENDL;
 				}
@@ -358,11 +372,14 @@ int main(int argc, char **argv) {
 		Options::COptionsParser optParser;
 		while (argv[i]) {
 			optParser.GetOptions(argv, i);
-			if (!argv[i]) break;
-			STRCPY(SourceFNames[SourceFNamesCount++], LINEMAX, argv[i++]);
+			if (!argv[i] || 128 <= SourceFNamesCount) break;
+			STRCPY(SourceFNames[SourceFNamesCount++], MAX_PATH-32, argv[i++]);
 		}
 		if (Options::IsDefaultListingName && Options::ListingFName[0]) {
 			Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
+		}
+		if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
+			Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
 		}
 	}
 
@@ -373,7 +390,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (!Options::HideLogo) {
-		_COUT logo _ENDL;
+		_CERR logo _ENDL;
 	}
 
 #ifdef USE_LUA
@@ -388,21 +405,36 @@ int main(int argc, char **argv) {
 
 #endif //USE_LUA
 
-	if (!SourceFNames[0][0]) {
+	// exit with error if no input file were specified
+	if (!SourceFNames[0][0] && !Options::SourceStdIn) {
 		if (Options::OutputVerbosity <= OV_ERROR) {
 			_CERR "No inputfile(s)" _ENDL;
 		}
 		exit(1);
 	}
+	// verify for STDIN input there is no other file specified + create empty name signaling STDIN
+	if (Options::SourceStdIn) {
+		if (0 < SourceFNamesCount) {	// list of explicit input files must be empty with `-` option
+			if (Options::OutputVerbosity <= OV_ERROR) {
+				_CERR "Don't add input file when STDIN option is specified." _ENDL;
+			}
+			exit(1);
+		}
+		// stdin itself has empty filename
+		SourceFNames[SourceFNamesCount++][0] = 0;
+		// but fake output name if not selected explicitly
+		if (!Options::DestinationFName[0]) STRCPY(Options::DestinationFName, LINEMAX, "asm.out");
+	}
 
-	if (!Options::DestionationFName[0]) {
-		STRCPY(Options::DestionationFName, LINEMAX, SourceFNames[0]);
-		if (!(p = strchr(Options::DestionationFName, '.'))) {
-			p = Options::DestionationFName;
+	// create default output name, if not specified
+	if (!Options::DestinationFName[0]) {
+		STRCPY(Options::DestinationFName, LINEMAX, SourceFNames[0]);
+		if (!(p = strchr(Options::DestinationFName, '.'))) {
+			p = Options::DestinationFName;
 		} else {
 			*p = 0;
 		}
-		STRCAT(p, LINEMAX-(p-Options::DestionationFName), ".out");
+		STRCAT(p, LINEMAX-(p-Options::DestinationFName), ".out");
 	}
 
 	base_encoding = ConvertEncoding;

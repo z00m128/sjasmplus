@@ -88,8 +88,8 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 		STRCAT(ErrorLine, LINEMAX2, ": "); STRCAT(ErrorLine, LINEMAX2, badValueMessage);
 	}
 	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2, "\n");	// append EOL if needed
-	// print the error into listing file (the OutputVerbosity is intentionally ignored in listing)
-	if (FP_ListingFile) fputs(ErrorLine, FP_ListingFile);
+	// print the error into listing file always (the OutputVerbosity does not apply to listing)
+	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
 	// print the error into stderr if OutputVerbosity allows errors
 	if (Options::OutputVerbosity <= OV_ERROR) {
 		_CERR ErrorLine _END;
@@ -134,9 +134,9 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 		STRCAT(ErrorLine, LINEMAX2, ": "); STRCAT(ErrorLine, LINEMAX2, badValueMessage);
 	}
 	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2, "\n");	// append EOL if needed
-	// print the error into listing file (the OutputVerbosity is intentionally ignored in listing)
-	if (FP_ListingFile) fputs(ErrorLine, FP_ListingFile);
-	// print the error into stderr if OutputVerbosity allows errors
+	// print the warning into listing file always (the OutputVerbosity does not apply to listing)
+	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
+	// print the warning into stderr if OutputVerbosity allows warnings
 	if (Options::OutputVerbosity <= OV_WARNING) {
 		_CERR ErrorLine _END;
 	}
@@ -256,8 +256,16 @@ static void ListFileStringRtrim() {
 	*beyondLine = 0;
 }
 
+// returns FILE* handle to either actual file defined by --lst=xxx, or stderr if --msg=lst, or NULL
+// ! do not fclose this handle, for fclose logic use the FP_ListingFile variable itself !
+FILE* GetListingFile() {
+	if (NULL != FP_ListingFile) return FP_ListingFile;
+	if (OV_LST == Options::OutputVerbosity) return stderr;
+	return NULL;
+}
+
 void ListFile(bool showAsSkipped) {
-	if (LASTPASS != pass || NULL == FP_ListingFile || donotlist) {
+	if (LASTPASS != pass || NULL == GetListingFile() || donotlist) {
 		donotlist = nEB = 0; return;
 	}
 	aint pad = PreviousAddress;
@@ -277,7 +285,7 @@ void ListFile(bool showAsSkipped) {
 		*pp = ' ';
 		if (showAsSkipped) pline[11] = '~';
 		ListFileStringRtrim();
-		fputs(pline, FP_ListingFile);
+		fputs(pline, GetListingFile());
 		nEB -= BtoList;
 		pad += BtoList;
 		pos += BtoList;
@@ -489,7 +497,9 @@ void BinIncFile(char* fname, int offset, int len) {
 	}
 
 	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
-		printf("INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
+		char diagnosticTxt[MAX_PATH];
+		SPRINTF3(diagnosticTxt, MAX_PATH, "INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
+		_CERR diagnosticTxt _ENDL;
 	}
 
 	// Check requested data //
@@ -554,6 +564,8 @@ void BinIncFile(char* fname, int offset, int len) {
 
 static void OpenDefaultList(const char *fullpath);
 
+static auto stdin_log_it = stdin_log.cbegin();
+
 void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 {
 	char ofilename[LINEMAX];
@@ -563,11 +575,18 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	if (++IncludeLevel > 20) {
 		Error("Over 20 files nested", NULL, FATAL);
 	}
-	fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
+	if (!*nfilename) {
+		fullpath = STRDUP("console_input");
+		filenamebegin = fullpath;
+		FP_Input = stdin;
+		stdin_log_it = stdin_log.cbegin();	// reset read iterator (for 2nd+ pass)
+	} else {
+		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
 
-	if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
-		free(fullpath);
-		Error("Error opening file", nfilename, FATAL);
+		if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
+			free(fullpath);
+			Error("Error opening file", nfilename, FATAL);
+		}
 	}
 
 	// open default listing file for each new source file (if default listing is ON)
@@ -575,11 +594,12 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 		OpenDefaultList(fullpath);			// explicit listing file is already opened
 	}
 	// show in listing file which file was opened
-	if (LASTPASS == pass && FP_ListingFile) {
+	FILE* listFile = GetListingFile();
+	if (LASTPASS == pass && listFile) {
 		listFullName = STRDUP(fullpath);	// create copy of full filename for listing file
-		fputs("# file opened: ", FP_ListingFile);
-		fputs(listFullName, FP_ListingFile);
-		fputs("\n", FP_ListingFile);
+		fputs("# file opened: ", listFile);
+		fputs(listFullName, listFile);
+		fputs("\n", listFile);
 	}
 
 	aint oCurrentLocalLine = CurrentSourceLine;
@@ -589,7 +609,7 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	if (Options::IsShowFullPath) {
 		STRCPY(filename, LINEMAX, fullpath);
 	} else {
-		STRCPY(filename, LINEMAX, nfilename);
+		STRCPY(filename, LINEMAX, filenamebegin);
 	}
 
 	oCurrentDirectory = CurrentDirectory;
@@ -602,18 +622,19 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 
 	ReadBufLine();
 
-	fclose(FP_Input);
+	if (stdin != FP_Input) fclose(FP_Input);
+	else if (1 == pass) stdin_log.push_back(0);		// add extra zero terminator
 	CurrentDirectory = oCurrentDirectory;
 
 	// show in listing file which file was closed
-	if (LASTPASS == pass && FP_ListingFile) {
-		fputs("# file closed: ", FP_ListingFile);
-		fputs(listFullName, FP_ListingFile);
-		fputs("\n", FP_ListingFile);
+	if (LASTPASS == pass && listFile) {
+		fputs("# file closed: ", listFile);
+		fputs(listFullName, listFile);
+		fputs("\n", listFile);
 		free(listFullName);
 
 		// close listing file (if "default" listing filename is used)
-		if (0 == IncludeLevel && Options::IsDefaultListingName) {
+		if (FP_ListingFile && 0 == IncludeLevel && Options::IsDefaultListingName) {
 			if (Options::AddLabelListing) LabelTable.Dump();
 			fclose(FP_ListingFile);
 			FP_ListingFile = NULL;
@@ -657,11 +678,31 @@ static bool ReadBufData() {
 	if ((LINEMAX-2) <= (rlppos - line)) Error("Line too long", NULL, FATAL);
 	// now check for read data
 	if (rlpbuf < rlpbuf_end) return 1;		// some data still in buffer
-	if (feof(FP_Input)) return 0;			// no more data in file
+	if (stdin != FP_Input && feof(FP_Input)) return 0;	// no more data in file
 	// read next block of data
 	rlpbuf = rlbuf;
-	rlpbuf_end = rlbuf + fread(rlbuf, 1, 4096, FP_Input);
-	*rlpbuf_end = 0;						// add zero terminator after new block
+	// handle STDIN file differently (pass1 = read it, pass2+ replay "log" variable)
+	if (1 == pass || stdin != FP_Input) {	// ordinary file is re-read every pass normally
+		rlpbuf_end = rlbuf + fread(rlbuf, 1, 4096, FP_Input);
+		*rlpbuf_end = 0;					// add zero terminator after new block
+	}
+	if (stdin == FP_Input) {
+		// store copy of stdin into stdin_log during pass 1
+		if (1 == pass && rlpbuf < rlpbuf_end) {
+			stdin_log.insert(stdin_log.end(), rlpbuf, rlpbuf_end);
+		}
+		// replay the log in 2nd+ pass
+		if (1 < pass) {
+			rlpbuf_end = rlpbuf;
+			long toCopy = std::min(8000L, (stdin_log.cend() - stdin_log_it));
+			if (0 < toCopy) {
+				memcpy(rlbuf, &(*stdin_log_it), toCopy);
+				stdin_log_it += toCopy;
+				rlpbuf_end += toCopy;
+			}
+			*rlpbuf_end = 0;				// add zero terminator after new block
+		}
+	}
 	return (rlpbuf < rlpbuf_end);			// return true if some data were read
 }
 
@@ -757,6 +798,8 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 }
 
 static void OpenListImp(const char* listFilename) {
+	// if STDERR is configured to contain listing, disable other listing files
+	if (OV_LST == Options::OutputVerbosity) return;
 	if (NULL == listFilename || !listFilename[0]) return;
 	if (!FOPEN_ISOK(FP_ListingFile, listFilename, "w")) {
 		Error("Error opening file", listFilename, FATAL);
@@ -764,6 +807,8 @@ static void OpenListImp(const char* listFilename) {
 }
 
 void OpenList() {
+	// if STDERR is configured to contain listing, disable other listing files
+	if (OV_LST == Options::OutputVerbosity) return;
 	// check if listing file is already opened, or it is set to "default" file names
 	if (Options::IsDefaultListingName || NULL != FP_ListingFile) return;
 	// Only explicit listing files are opened here
@@ -771,6 +816,8 @@ void OpenList() {
 }
 
 static void OpenDefaultList(const char *fullpath) {
+	// if STDERR is configured to contain listing, disable other listing files
+	if (OV_LST == Options::OutputVerbosity) return;
 	// check if listing file is already opened, or it is set to explicit file name
 	if (!Options::IsDefaultListingName || NULL != FP_ListingFile) return;
 	if (NULL == fullpath || !*fullpath) return;		// no filename provided
@@ -798,37 +845,21 @@ void OpenUnrealList() {
 }
 
 void CloseDest() {
-	
-	// Correction for 1.10.1
 	// Flush buffer before any other operations
 	WriteDest();
-
-	// simple check
-	if (FP_Output == NULL) {
-		return;
-	}
-
-	long pad;
-	//if (WBLength) {
-	//	WriteDest();
-	//}
-	if (size != (aint)-1) {
+	// does main output file exist? (to close it)
+	if (FP_Output == NULL) return;
+	// pad to desired size (and check for exceed of it)
+	if (size != -1L) {
 		if (destlen > size) {
-			ErrorInt("File exceeds 'size'", destlen);
-		} else {
-			pad = size - destlen;
-			if (pad > 0) {
-				while (pad--) {
-					WriteBuffer[WBLength++] = 0;
-					if (WBLength == 256) {
-						WriteDest();
-					}
-				}
-			}
-			if (WBLength) {
-				WriteDest();
-			}
+			ErrorInt("File exceeds 'size' by", destlen - size);
 		}
+		memset(WriteBuffer, 0, DESTBUFLEN);
+		while (destlen < size) {
+			WBLength = std::min(aint(DESTBUFLEN), size-destlen);
+			WriteDest();
+		}
+		size = -1L;
 	}
 	fclose(FP_Output);
 	FP_Output = NULL;
@@ -841,32 +872,25 @@ void SeekDest(long offset, int method) {
 	}
 }
 
-void NewDest(char* newfilename) {
-	NewDest(newfilename, OUTPUT_TRUNCATE);
-}
-
 void NewDest(char* newfilename, int mode) {
-	// close file
+	// close previous output file
 	CloseDest();
 
-	// and open new file
-	STRCPY(Options::DestionationFName, LINEMAX, newfilename);
+	// and open new file (keep previous/default name, if no explicit was provided)
+	if (newfilename && *newfilename) STRCPY(Options::DestinationFName, LINEMAX, newfilename);
 	OpenDest(mode);
-}
-
-void OpenDest() {
-	OpenDest(OUTPUT_TRUNCATE);
 }
 
 void OpenDest(int mode) {
 	destlen = 0;
-	if (mode != OUTPUT_TRUNCATE && !FileExists(Options::DestionationFName)) {
+	if (mode != OUTPUT_TRUNCATE && !FileExists(Options::DestinationFName)) {
 		mode = OUTPUT_TRUNCATE;
 	}
-	if (!Options::NoDestinationFile && !FOPEN_ISOK(FP_Output, Options::DestionationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
-		Error("Error opening file", Options::DestionationFName, FATAL);
+	if (!Options::NoDestinationFile && !FOPEN_ISOK(FP_Output, Options::DestinationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
+		Error("Error opening file", Options::DestinationFName, FATAL);
 	}
 	Options::NoDestinationFile = false;
+	if (NULL == FP_RAW && '-' == Options::RAWFName[0] && 0 == Options::RAWFName[1]) FP_RAW = stdout;
 	if (FP_RAW == NULL && Options::RAWFName[0] && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {
 		Error("Error opening file", Options::RAWFName);
 	}
@@ -936,7 +960,7 @@ void Close() {
 		FP_ExportFile = NULL;
 	}
 	if (FP_RAW != NULL) {
-		fclose(FP_RAW);
+		if (stdout != FP_RAW) fclose(FP_RAW);
 		FP_RAW = NULL;
 	}
 	if (FP_ListingFile != NULL) {
@@ -956,7 +980,7 @@ int SaveRAM(FILE* ff, int start, int length) {
 		return 0;
 	}
 
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {
@@ -977,7 +1001,6 @@ int SaveRAM(FILE* ff, int start, int length) {
 			}
 			length -= save;
 			start += save;
-			//_COUT "Start: " _CMDL start _CMDL " Length: " _CMDL length _ENDL;
 			if (length <= 0) {
 				return 1;
 			}
@@ -1133,13 +1156,12 @@ int SaveBinary(char* fname, int start, int length) {
 		Error("Error opening file", fname, FATAL);
 	}
 
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {
 		length = 0x10000 - start;
 	}
-	//_COUT "Start: " _CMDL start _CMDL " Length: " _CMDL length _ENDL;
 	if (!SaveRAM(ff, start, length)) {
 		fclose(ff);return 0;
 	}
@@ -1170,7 +1192,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	}
 
 
-	if (length + start > 0xFFFF) {
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {
@@ -1231,22 +1253,25 @@ EReturn ReadFile() {
 			substitutedLine = line;		// reset substituted listing
 			lijstp = lijstp->next;
 		}
-		char* p = line;
-		SkipBlanks(p);
-		if ('.' == *p) ++p;
-		if (cmphstr(p, "endif")) {
-			lp = ReplaceDefine(p);
-			substitutedLine = line;		// override substituted listing for ENDIF
-			return ENDIF;
-		} else if (cmphstr(p, "else")) {
-			lp = ReplaceDefine(p);
-			substitutedLine = line;		// override substituted listing for ELSE
-			ListFile();
-			return ELSE;
-		} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
-			lp = ReplaceDefine(p);
-			substitutedLine = line;		// override substituted listing for ENDT
-			return ENDTEXTAREA;
+		const bool isInsideDupCollectingLines = !RepeatStack.empty() && !RepeatStack.top().IsInWork;
+		if (!isInsideDupCollectingLines) {
+			char* p = line;
+			SkipBlanks(p);
+			if ('.' == *p) ++p;
+			if (cmphstr(p, "endif")) {
+				lp = ReplaceDefine(p);
+				substitutedLine = line;		// override substituted listing for ENDIF
+				return ENDIF;
+			} else if (cmphstr(p, "else")) {
+				lp = ReplaceDefine(p);
+				substitutedLine = line;		// override substituted listing for ELSE
+				ListFile();
+				return ELSE;
+			} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
+				lp = ReplaceDefine(p);
+				substitutedLine = line;		// override substituted listing for ENDT
+				return ENDTEXTAREA;
+			}
 		}
 		ParseLineSafe();
 	}

@@ -58,11 +58,13 @@ for f in "${TEST_FILES[@]}"; do
     file_asm=`basename "$f"`        # just "file.asm" name
     src_base="${f%.asm}"            # source directory + base ("src_dir/file"), to add extensions
     dst_base="${file_asm%.asm}"     # local-directory base (just "file" basically), to add extensions
+    CLI_FILE="${dst_base}.cli"      # sub-script test-runner (internal feature, not documented)
     [[ -d "${src_base}.config" ]] && CFG_BASE="${src_base}.config/${dst_base}" || CFG_BASE="${src_base}"
     OPTIONS_FILE="${CFG_BASE}.options"
     LIST_FILE="${CFG_BASE}.lst"
-    # copy "src_dir/basename*.(asm|lua)" file(s) into working directory
-    for subf in "$src_base"*.{asm,lua}; do
+    MSG_LIST_FILE="${CFG_BASE}.msglst"
+    # copy "src_dir/basename*.(asm|lua|cli)" file(s) into working directory
+    for subf in "$src_base"*.{asm,lua,cli}; do
         [[ -d "$subf" ]] && continue
         cp "$subf" ".${subf#$src_dir}"
     done
@@ -76,13 +78,27 @@ for f in "${TEST_FILES[@]}"; do
     options=()
     [[ -s "${OPTIONS_FILE}" ]] && options=(`cat "${OPTIONS_FILE}"`)
     # check if .lst file is required to verify the test, set up options to produce one
-    [[ -s "${LIST_FILE}" ]] && options+=("--lst=${dst_base}.lst") && options+=('--lstlab')
+    [[ -s "${LIST_FILE}" ]] && MSG_LIST_FILE="" && options+=("--lst=${dst_base}.lst") && options+=('--lstlab')
+    [[ ! -s "${MSG_LIST_FILE}" ]] && MSG_LIST_FILE="" || LIST_FILE="${MSG_LIST_FILE}"
     ## built it with sjasmplus (remember exit code)
-    echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
     totalChecks=$((totalChecks + 1))    # assembling is one check
-    $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
-    last_result=$?
-    last_result_origin="sjasmplus"
+    if [[ -s "${CLI_FILE}" ]]; then
+        # custom test-runner detected, run it... WARNING, this acts as part of main script (do not exit(..), etc)
+        echo -e "\033[95mRunning\033[0m file \033[96m${CLI_FILE}\033[0m in test \033[96m${src_dir}\033[0m"
+        last_result=126         # custom script must override this
+        source ${CLI_FILE}
+        last_result_origin="custom test script ${CLI_FILE}"
+    else
+        echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
+        if [[ -z "${MSG_LIST_FILE}" ]]; then
+            $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+            last_result=$?
+        else
+            $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
+            last_result=$?
+        fi
+        last_result_origin="sjasmplus"
+    fi
     ## validate results
     # LST file overrides assembling exit code (new exit code is from diff between lst files)
     if [[ -s "${LIST_FILE}" ]]; then

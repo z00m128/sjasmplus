@@ -32,20 +32,18 @@
 
 char* PreviousIsLabel;
 
-char* ValidateLabel(char* naam, int set_namespace) {
+char* ValidateLabel(char* naam, int flags) {
 	char* np = naam,* lp,* label,* mlp = macrolabp;
-	int p = 0,l = 0;
+	int p = (flags&VALIDATE_LABEL_AS_GLOBAL), l = 0;
 	label = new char[LINEMAX];
 	if (label == NULL) {
 		ErrorInt("No enough memory!", LINEMAX, FATAL);
 	}
 	lp = label;
 	label[0] = 0;
-	if (mlp && *np == '@') {
-		++np; mlp = 0;
-	}
 	switch (*np) {
 	case '@':
+		if (mlp) mlp = NULL;
 		p = 1; ++np; break;
 	case '.':
 		l = 1; ++np; break;
@@ -80,7 +78,7 @@ char* ValidateLabel(char* naam, int set_namespace) {
 		}
 		if (l) {
 			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
-		} else if (set_namespace) {
+		} else if (flags&VALIDATE_LABEL_SET_NAMESPACE) {
 			free(vorlabp);
 			vorlabp = STRDUP(naam);
 			if (vorlabp == NULL) {
@@ -94,64 +92,34 @@ char* ValidateLabel(char* naam, int set_namespace) {
 
 int GetLabelValue(char*& p, aint& val) {
 	char* mlp = macrolabp, *op = p;
-	int g = 0, l = 0, oIsLabelNotFound = IsLabelNotFound;//, plen;
+	int g = 0, l = 0, oIsLabelNotFound = IsLabelNotFound;
 	unsigned int len;
 	char* np;
 	if (mlp && *p == '@') {
-		++op;
 		mlp = 0;
 	}
-	if (mlp) {
-		switch (*p) {
-		case '@':
-			g = 1;
-			++p;
-			break;
-		case '.':
-			l = 1;
-			++p;
-			break;
-		default:
-			break;
+	if (mlp && '.' == *p) {
+		++p;
+		STRCPY(temp, LINEMAX, macrolabp);
+		STRCAT(temp, LINEMAX, ">");
+		len = strlen(temp);
+		np = temp + len;
+		if (!isalpha((unsigned char) * p) && *p != '_') {
+			Error("Invalid labelname", temp);
+			return 0;
 		}
-		temp[0] = 0;
-		if (l) {
-			STRCAT(temp, LINEMAX, macrolabp);
-			STRCAT(temp, LINEMAX, ">");
-			len = strlen(temp);
-			np = temp + len;
-//			plen = 0;
-			if (!isalpha((unsigned char) * p) && *p != '_') {
-				Error("Invalid labelname", temp);
-				return 0;
-			}
-			while (isalnum((unsigned char) * p) || *p == '_' || *p == '.' || *p == '?' || *p == '!' || *p == '#' || *p == '@') {
-				*np = *p;
-				++np;
-				++p;
-			}
-			*np = 0;
-			if (strlen(temp) > LABMAX + len) {
-				Error("Label too long", temp + len);
-				temp[LABMAX + len] = 0;
-			}
-			np = temp;
-			g = 1;
-			do {
-				if (LabelTable.GetValue(np, val)) {
-					return 1;
-				}
-				IsLabelNotFound = oIsLabelNotFound;
-				while ('o') {
-					if (*np == '>') {
-						g = 0; break;
-					}
-					if (*np == '.') {
-						++np; break;
-					}
-					++np;
-				}
-			} while (g);
+		while (islabchar(*p)) *np++ = *p++;
+		*np = 0;
+		if (strlen(temp) > LABMAX + len) {
+			Error("Label too long", temp + len);
+			temp[LABMAX + len] = 0;
+		}
+		np = temp;
+		while (*np && '>' != *np) {
+			if (LabelTable.GetValue(np, val)) return 1;
+			IsLabelNotFound = oIsLabelNotFound;
+			while (*np && '>' != *np && '.' != *np) ++np;
+			if ('.' == *np) ++np;
 		}
 	}
 
@@ -178,24 +146,21 @@ int GetLabelValue(char*& p, aint& val) {
 		STRCAT(temp, LINEMAX, ".");
 	}
 	len = strlen(temp); np = temp + len;
-	if (!isalpha((unsigned char) * p) && *p != '_') {
+	if (!isalpha((unsigned char) *p) && *p != '_') {
 		Error("Invalid labelname", temp); return 0;
 	}
-	while (isalnum((unsigned char) * p) || *p == '_' || *p == '.' || *p == '?' || *p == '!' || *p == '#' || *p == '@') {
-		*np = *p; ++np; ++p;
-	}
+	while (islabchar(*p)) *np++ = *p++;
 	*np = 0;
 	if (strlen(temp) > LABMAX + len) {
 		Error("Label too long", temp + len);
 		temp[LABMAX + len] = 0;
 	}
-	if (LabelTable.GetValue(temp, val)) {
-		return 1;
-	}
+	if (LabelTable.GetValue(temp, val)) return 1;
+	bool undefinedInTable = (2 == IsLabelNotFound);
 	IsLabelNotFound = oIsLabelNotFound;
-	if (!l && !g && LabelTable.GetValue(temp + len, val)) {
-		return 1;
-	}
+	if (!l && !g && LabelTable.GetValue(temp + len, val)) return 1;
+	undefinedInTable |= (2 == IsLabelNotFound);
+	if (!undefinedInTable) LabelTable.Insert(temp, 0, true);
 	if (pass == LASTPASS) {
 		Error("Label not found", temp); return 1;
 	}
@@ -204,44 +169,24 @@ int GetLabelValue(char*& p, aint& val) {
 }
 
 int GetLocalLabelValue(char*& op, aint& val) {
-	aint nval = 0;
-	int nummer = 0;
-	char* p = op,naam[LINEMAX],* np,ch;
-	SkipBlanks(p);
-	np = naam;
-	if (!isdigit((unsigned char) * p)) {
-		return 0;
+	char* p = op;
+	if (SkipBlanks(p) || !isdigit(*p)) return 0;
+	char* const numberB = p;
+	while (isdigit(*p)) ++p;
+	const char type = *p|0x20;		// [bB] => 'b', [fF] => 'f'
+	if ('b' != type && 'f' != type) return 0;	// local label must have "b" or "f" after number
+	const char following = p[1];	// should be EOL, colon or whitespace
+	if (0 != following && ':' != following && !White(following)) return 0;
+	// numberB -> p are digits to be parsed as integer
+	if (!GetNumericValue_IntBased(op = numberB, p, val, 10)) return 0;
+	++op;
+	// ^^ advance main parsing pointer op beyond the local label (here it *is* local label)
+	val = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
+	if (-1L == val) {
+		Error("Local label not found", numberB, SUPPRESS);
+		val = 0L;
+		return 1;
 	}
-	while (*p) {
-		if (!isdigit((unsigned char) * p)) {
-			break;
-		}
-		*np = *p; ++p; ++np;
-	}
-	*np = 0; nummer = atoi(naam);
-	ch = *p++;
-	if (isalnum((unsigned char) * p)) {
-		return 0;
-	}
-	switch (ch) {
-	case 'b':
-	case 'B':
-		nval = LocalLabelTable.zoekb(nummer); break;
-	case 'f':
-	case 'F':
-		nval = LocalLabelTable.zoekf(nummer); break;
-	default:
-		return 0;
-	}
-	if (nval == (aint) - 1) {
-		if (pass == LASTPASS) {
-			Error("Local label not found", naam, SUPPRESS);
-			return 1;
-		} else {
-			nval = 0;
-		}
-	}
-	op = p; val = nval;
 	return 1;
 }
 
@@ -253,7 +198,7 @@ CLabelTable::CLabelTable() {
 	NextLocation = 1;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false) {
+int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", NULL, FATAL);
 	}
@@ -344,7 +289,6 @@ int CLabelTable::GetValue(char* nname, aint& nvalue) {
 			break;
 		}
 	}
-	this->Insert(nname, 0, true);
 	IsLabelNotFound = 1;
 	nvalue = 0;
 	return 0;
@@ -439,14 +383,12 @@ int CLabelTable::Hash(const char* s) {
 }
 
 void CLabelTable::Dump() {
+	FILE* listFile = GetListingFile();
+	if (NULL == listFile) return;		// listing file must be already opened here
+
 	char line[LINEMAX], *ep;
-
-	if (NULL == FP_ListingFile) return;		// listing file must be already opened here
-
-	/*fputs("\nvalue      label\n",FP_ListingFile);*/
-	fputs("\nValue    Label\n", FP_ListingFile);
-	/*fputs("-------- - -----------------------------------------------------------\n",FP_ListingFile);*/
-	fputs("------ - -----------------------------------------------------------\n", FP_ListingFile);
+	fputs("\nValue    Label\n", listFile);
+	fputs("------ - -----------------------------------------------------------\n", listFile);
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LabelTable[i].page != -1) {
 			ep = line;
@@ -461,7 +403,7 @@ void CLabelTable::Dump() {
 			ep += strlen(LabelTable[i].name);
 			*(ep++) = '\n';
 			*(ep) = 0;
-			fputs(line, FP_ListingFile);
+			fputs(line, listFile);
 		}
 	}
 }
@@ -625,50 +567,60 @@ int CFunctionTable::Hash(const char* s) {
 	return h % FUNTABSIZE;
 }
 
-CLocalLabelTableEntry::CLocalLabelTableEntry(aint nnummer, aint nvalue, CLocalLabelTableEntry* n) {
-	regel = CompiledCurrentLine;
-	nummer = nnummer;
-	value = nvalue;
-	//regel=CurrentLocalLine; nummer=nnummer; value=nvalue;
-	prev = n; next = NULL;
-	if (n) {
-		n->next = this;
-	}
+CLocalLabelTableEntry::CLocalLabelTableEntry(long int number, long int address, CLocalLabelTableEntry* previous) {
+	nummer = number;
+	value = address;
+	prev = previous; next = NULL;
+	if (previous) previous->next = this;
 }
 
 CLocalLabelTable::CLocalLabelTable() {
-	first = last = NULL;
+	first = last = refresh = NULL;
 }
 
-void CLocalLabelTable::Insert(aint nnummer, aint nvalue) {
-	last = new CLocalLabelTableEntry(nnummer, nvalue, last);
-	if (!first) {
-		first = last;
+CLocalLabelTable::~CLocalLabelTable() {
+	while (last) {		// release all local labels
+		refresh = last->prev;
+		delete last;
+		last = refresh;
 	}
 }
 
-aint CLocalLabelTable::zoekf(aint nnum) {
-	CLocalLabelTableEntry* l = first;
-	while (l && l->regel <= CompiledCurrentLine) l = l->next;
-	while (l) {
-		if (l->nummer == nnum) {
-			return l->value;
-		}
-		l = l->next;
-	}
-	return (aint) - 1;
+void CLocalLabelTable::InitPass() {
+	// reset refresh pointer for next pass
+	refresh = first;
 }
 
-aint CLocalLabelTable::zoekb(aint nnum) {
-	CLocalLabelTableEntry* l = last;
-	while (l && l->regel > CompiledCurrentLine) l = l->prev;
-	while (l) {
-		if (l->nummer == nnum) {
-			return l->value;
-		}
-		l = l->prev;
-	}
-	return (aint) - 1;
+bool CLocalLabelTable::insertImpl(const aint labelNumber) {
+	last = new CLocalLabelTableEntry(labelNumber, CurAddress, last);
+	if (!first) first = last;
+	return true;
+}
+
+bool CLocalLabelTable::refreshImpl(const aint labelNumber) {
+	if (!refresh || refresh->nummer != labelNumber) return false;
+	if (refresh->value != CurAddress) Warning("Local label has different address");
+	refresh->value = CurAddress;
+	refresh = refresh->next;
+	return true;
+}
+
+bool CLocalLabelTable::InsertRefresh(const aint nnummer) {
+	return (1 == pass) ? insertImpl(nnummer) : refreshImpl(nnummer);
+}
+
+aint CLocalLabelTable::seekForward(const aint labelNumber) const {
+	if (1 == pass) return 0;			// just building tables in first pass, no results yet
+	CLocalLabelTableEntry* l = refresh;	// already points on first "forward" local label
+	while (l && l->nummer != labelNumber) l = l->next;
+	return l ? l->value : -1L;
+}
+
+aint CLocalLabelTable::seekBack(const aint labelNumber) const {
+	if (1 == pass) return 0;			// just building tables in first pass, no results yet
+	CLocalLabelTableEntry* l = refresh ? refresh->prev : last;
+	while (l && l->nummer != labelNumber) l = l->prev;
+	return l ? l->value : -1L;
 }
 
 CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStringsList* nnss, CDefineTableEntry* nnext) {
@@ -1230,7 +1182,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 
 static void InsertSingleStructLabel(char *name, const aint value) {
 	char *op = name, *p;
-	if (!(p = ValidateLabel(op, 1))) {
+	if (!(p = ValidateLabel(op, VALIDATE_LABEL_SET_NAMESPACE))) {
 		Error("Illegal labelname", op, EARLY);
 	}
 	if (pass == LASTPASS) {

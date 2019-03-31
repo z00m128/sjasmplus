@@ -1,0 +1,19 @@
+# file opened: Issue43_extra_labels_in_dump.asm
+ 1    0000                  ORG 0x8000
+ 2    8000
+ 3    8000                  MODULE ma
+ 4    8000              lb: equ 6
+ 5    8000 00               nop
+ 6    8001 3E 06            ld a,lb
+ 7    8003 3E 06            ld a,ma.lb
+ 8    8005 3E 08            ld a,lb2
+ 9    8007 3E 08            ld a,ma.lb2
+10    8009              lb2=8
+11    8009                  ENDMODULE
+12    8009
+# file closed: Issue43_extra_labels_in_dump.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0006   ma.lb
+0x0008   ma.lb2

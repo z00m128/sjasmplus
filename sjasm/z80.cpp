@@ -1987,7 +1987,6 @@ namespace Z80 {
 					case Z80_IY:
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if ((b = z80GetIDxoffset(lp)) == 127) {
-							// _COUT "E1 " _CMDL b _ENDL;
 							Error("Offset out of range1");
 						}
 						if (cparenOLD(lp)) {
@@ -2052,7 +2051,6 @@ namespace Z80 {
 					case Z80_IY:
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if ((b = z80GetIDxoffset(lp)) == 127) {
-							// _COUT "E2 " _CMDL b _ENDL;
 							Error("Offset out of range2");
 						}
 						if (cparenOLD(lp)) {
@@ -2113,7 +2111,6 @@ namespace Z80 {
 					case Z80_IY:
 						ASSERT_FAKE_INSTRUCTIONS(break);
 						if ((b = z80GetIDxoffset(lp)) == 127) {
-							// _COUT "E3 " _CMDL b _ENDL;
 							Error("Offset out of range3");
 						}
 						if (cparenOLD(lp)) {

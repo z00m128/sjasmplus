@@ -1,0 +1,79 @@
+# file opened: console_input
+ 1    0000                  OUTPUT "srcStdIn.bin"
+ 2    0000
+ 3    0000                  INCLUDE "srcStdIn.i.asm"
+# file opened: srcStdIn.i.asm
+ 1+   0000 64 61 74 61      DZ 'data to include from real file'
+ 1+   0004 20 74 6F 20
+ 1+   0008 69 6E 63 6C
+ 1+   000C 75 64 65 20
+ 1+   0010 66 72 6F 6D
+ 1+   0014 20 72 65 61
+ 1+   0018 6C 20 66 69
+ 1+   001C 6C 65 00
+ 2+   001F 23               DB '#'      ;; 32 bytes in total
+ 3+   0020
+# file closed: srcStdIn.i.asm
+ 4    0020
+ 5    0020                  ORG $8000       ;; uncut align blocks
+ 6    8000                  ALIGN 4
+ 7    8000 01               DB  1
+ 8    8001 00 00 00         ALIGN 4
+ 9    8004 02 03            DB  2, 3
+10    8006 00 00            ALIGN 4
+11    8008 04 05 06         DB  4, 5, 6
+12    800B 00               ALIGN 4
+13    800C 07 08 09 0A      DB  7, 8, 9, 10
+14    8010                  ALIGN 4
+15    8010
+16    8010                  ORG $8100       ;; cut to 3 and "..." align blocks
+17    8100                  ALIGN 16
+18    8100 01               DB  1
+19    8101 00 00 00...      ALIGN 16
+20    8110 02 03            DB  2, 3
+21    8112 00 00 00...      ALIGN 16
+22    8120 04 05 06         DB  4, 5, 6
+23    8123 00 00 00...      ALIGN 16
+24    8130 07 08 09 0A      DB  7, 8, 9, 10
+25    8134 00 00 00...      ALIGN 16
+26    8140
+27    8140                  ORG $8200       ;; some should fit fully, some should be cut
+28    8200                  ALIGN 8
+29    8200 01 02 03         DB   1,  2,  3
+30    8203 00 00 00...      ALIGN 8
+31    8208 04 05 06 07      DB   4,  5,  6,  7
+32    820C 00 00 00 00      ALIGN 8
+33    8210 08 09 0A 0B      DB   8,  9, 10, 11, 12
+33    8214 0C
+34    8215 00 00 00         ALIGN 8
+35    8218 0D 0E 0F 10      DB  13, 14, 15, 16, 17, 18
+35    821C 11 12
+36    821E 00 00            ALIGN 8
+37    8220
+38    8220                  ORG $8300       ;; same as $8200 case, crammed into single source line
+39    8300                  ALIGN 8
+39    8300 01 02 03      DB 1,2,3
+39    8303 00 00 00...   ALIGN 8
+39    8308 04 05 06 07   DB 4,5,6,7
+39    830C 00 00 00 00   ALIGN 8
+39    8310 08 09 0A 0B   DB 8,9,10,11,12
+39    8314 0C
+39    8315 00 00 00      ALIGN 8
+39    8318 0D 0E 0F 10   DB 13,14,15,16,17,18
+39    831C 11 12
+39    831E 00 00         ALIGN 8
+40    8320
+41    8320                  ORG $9000       ;; BLOCK emit
+42    9000 01               BLOCK   1, 1
+43    9001 02 02            BLOCK   2, 2
+44    9003 03 03 03         BLOCK   3, 3
+45    9006 04 04 04 04      BLOCK   4, 4
+46    900A 05 05 05...      BLOCK   5, 5
+47    900F 06 06 06...      BLOCK   6, 6
+48    9015 07 07 07...      BLOCK   7, 7
+49    901C 08 08 08...      BLOCK   8, 8
+50    9024
+# file closed: console_input
+
+Value    Label
+------ - -----------------------------------------------------------
