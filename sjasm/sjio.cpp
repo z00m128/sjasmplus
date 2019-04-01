@@ -694,7 +694,7 @@ static bool ReadBufData() {
 		// replay the log in 2nd+ pass
 		if (1 < pass) {
 			rlpbuf_end = rlpbuf;
-			long toCopy = std::min(8000L, (stdin_log.cend() - stdin_log_it));
+			long toCopy = std::min(8000L, (long)std::distance(stdin_log_it, stdin_log.cend()));
 			if (0 < toCopy) {
 				memcpy(rlbuf, &(*stdin_log_it), toCopy);
 				stdin_log_it += toCopy;
