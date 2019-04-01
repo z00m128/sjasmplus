@@ -43,7 +43,7 @@
 31    0053 48 C9
 32    0055 4A 4B 4C 0D      ABYTEZ  9 "ABC", 4, "EF"    ; +9, extra 0 after last byte
 32    0059 4E 4F 00
-33    005C 0A C1 42 C3      DC      10, "a"-32, "BC", "DEF" ; last char of each substring |128
+33    005C 0A C1 42 C3      DC      10, "A", "BC", "DEF" ; last char of each substring |128
 33    0060 44 45 C6
 34    0063 0A 61 62 63      DZ      10, "abc", "def"    ; extra 0 after last byte
 34    0067 64 65 66 00

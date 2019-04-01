@@ -44,8 +44,6 @@ Macro world issues:
 
 Input file without extension does produce wrong default output filename
 
-- ValidateLabel z makra zhltne jedno @ do stratena?!?
-
 ====================
 Docs:
 
