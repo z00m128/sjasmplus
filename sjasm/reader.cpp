@@ -601,35 +601,35 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	int t = 0, strRes;
 	do {
 		const int oldT = t;
+		char* const oldP = p;
 		if (SkipBlanks(p)) {
 			Error("Expression expected", NULL, SUPPRESS);
+			break;
 		} else if (0 != (strRes = GetCharConstAsString(p, e, t, 128, add))) {
 			// string literal parsed (both types)
-			if (-1 == strRes) break;
-			if (oldT == t) Warning("Empty string", p-2);
-			else {
-				// single byte "strings" may have further part of expression, handle it *here* :/
-				if (1 == t - oldT) {
-					SkipBlanks(p);
-					if (*p && ',' != *p) {
-						ParseExpression(p, val);
-						val += (e[t - 1] - add) & 255;	// restore "char" value back and add to expr.
-						check8(val);
-						e[t-1] = (val + add) & 255;
-					}
+			if (-1 == strRes) break;		// syntax error happened
+			// single byte "strings" may have further part of expression, detect it here
+			if (1 == t - oldT && !SkipBlanks(p) && ',' != *p) {
+				// expression with single char detected (like 'a'|128), revert the string parsing
+				t = oldT;
+				p = oldP;		// and continue with the last code-path trying to parse expression
+			} else {	// string literal (not expression), handle the extra string literal logic
+				if (oldT == t) {
+					Warning("Empty string", p-2);
+				} else {
+					// mark last "string" byte with |128: single char in "" *is* string
+					// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
+					if (dc && ((1 == strRes) < (t - oldT))) e[t - 1] |= 128;
 				}
-				// mark last "string" byte with |128: single char in "" *is* string
-				// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
-				if (dc && ((1 == strRes) < (t - oldT))) e[t - 1] |= 128;
+				continue;
 			}
+		}
+		if (ParseExpression(p, val)) {
+			check8(val);
+			e[t++] = (val + add) & 255;
 		} else {
-			if (ParseExpression(p, val)) {
-				check8(val);
-				e[t++] = (val + add) & 255;
-			} else {
-				Error("Syntax error", p, SUPPRESS);
-				break;
-			}
+			Error("Syntax error", p, SUPPRESS);
+			break;
 		}
 	} while(comma(p) && t < 128);
 	e[t] = -1;
