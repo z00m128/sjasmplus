@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.11.0 Documentation [2019-03-22]</title>
+  <title>SjASMPlus 1.11.1 Documentation [2019-04-01]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -180,7 +180,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>29.03.2019 - 1.11.1</term>
+            <term>01.04.2019 - 1.11.1</term>
 
             <listitem>
               <para><programlisting>- Fixed global labels in MACRO and in IFUSED/IFNUSED
