@@ -430,7 +430,7 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 			if (emitMaxToListing) {
 				// put "..." marker into listing if some more bytes are emitted after last listed
 				if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
-				else EB[nEB++] = DeviceID ? MemoryPointer[-1] : byte;
+				else EB[nEB++] = (DeviceID ? MemoryPointer[-1] : byte)&0xFF;
 			}
 		}
 		++CurAddress;

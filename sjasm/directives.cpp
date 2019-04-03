@@ -258,7 +258,7 @@ void dirBLOCK() {
 			Warning("Negative BLOCK?");
 		}
 		if (comma(lp)) {
-			ParseExpression(lp, val);
+			if (ParseExpression(lp, val)) check8(val);
 		}
 		EmitBlock(val, teller);
 	} else {
