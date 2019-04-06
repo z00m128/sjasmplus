@@ -390,6 +390,7 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
 	char* rp = nl,* nid,* kp,* ver;
+	bool isPrevDefDir, isCurrDefDir = false;	// to remember if one of DEFINE-related directives was previous word
 	while (*lp) {
 		const char c1 = lp[0], c2 = lp[1];
 		if (c1 == '/' && c2 == '*') {	// block-comment local beginning (++block_nesting)
@@ -417,6 +418,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 
 		// detect "af'" register, as that hurts string parsing
 		if (cmphstr(lp, "af'")) {		// convert it into plain "AF" (it's enough)
+			isPrevDefDir = isCurrDefDir;
+			isCurrDefDir = false;
 			*rp++ = 'a';
 			*rp++ = 'f';
 			continue;
@@ -424,6 +427,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 
 		// strings parsing
 		if (c1 == '"' || c1 == '\'') {
+			isPrevDefDir = isCurrDefDir;
+			isCurrDefDir = false;
 			*rp++ = *lp++;				// copy the string delimiter (" or ')
 			// apostrophe inside apostrophes ('') will parse as end + start of another string
 			// which sort of "accidentally" leads to correct final results
@@ -441,12 +446,20 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			continue;
 		}
 
+		// update previous/current word is define-related directive
+		isPrevDefDir = isCurrDefDir;
+		kp = lp;
+		isCurrDefDir = cmphstr(kp, "define") || cmphstr(kp, "undefine")
+			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef");
+
 		nid = GetID(lp); dr = 1;
 
 		if (!(ver = DefineTable.Get(nid))) {
 			if (!macrolabp || !(ver = MacroDefineTable.getverv(nid))) {
 				dr = 0;
 				ver = nid;
+			} else {
+				dr = 2;		// this is macro argument, substitute it more aggressively
 			}
 		}
 
@@ -472,22 +485,9 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			}
 		}
 
-		if (dr) {
-			kp = lp - strlen(nid);
-			while (White(*--kp)) ;		// return back (once) even from \0
-			kp = kp - 4;
-			if (cmphstr(kp, "ifdef")) {
-				dr = 0; ver = nid;
-			} else {
-				--kp;
-				if (cmphstr(kp, "ifndef")) {
-					dr = 0; ver = nid;
-				} else if (cmphstr(kp, "define")) {
-					dr = 0; ver = nid;
-				} else if (cmphstr(kp, "defarray")) {
-					dr = 0; ver = nid;
-				}
-			}
+		if ((1 == dr) && isPrevDefDir) {	// do not substitute after ifdef/ifndef/define/...
+			dr = 0;							// if the "id" is already pure define
+			ver = nid;						// but (dr == 2) are macro arguments => substitute those!
 		}
 
 		if (dr) {
