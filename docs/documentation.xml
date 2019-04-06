@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.11.1 Documentation [2019-04-01]</title>
+  <title>SjASMPlus 1.11.2 Documentation [2019-04-07]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -178,6 +178,18 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>07.04.2019 - 1.11.2</term>
+
+            <listitem>
+              <para><programlisting>- Fixed parsing of expressions starting with string literal
+- Fixed listing of DS directive with negative values, added value check warning
+- Making macro arguments substitution a bit more aggressive, to work also with
+  DEFINE/IFDEF/IFNDEF/DEFARRAY directives inside macro (this gives the coder
+  more macro power and freedom, but the error reporting may get lot more confused)</programlisting></para>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>01.04.2019 - 1.11.1</term>
