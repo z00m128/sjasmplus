@@ -46,7 +46,7 @@ void PrintHelp() {
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 	_COUT "\nOption flags as follows:" _ENDL;
 	_COUT "  -h or --help             Help information (you see it)" _ENDL;
-	_COUT "  --zxnext                 Enable SpecNext Z80 extensions" _ENDL;
+	_COUT "  --zxnext[=cspect]        Enable SpecNext Z80 extensions" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
@@ -93,7 +93,7 @@ namespace Options {
 	bool ShowHelp = 0;
 	bool NoDestinationFile = true;		// no *.out file by default
 	bool FakeInstructions = 1;
-	bool IsNextEnabled = false;
+	int IsNextEnabled = 0;		// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
 	bool SourceStdIn = false;
 
 	// Include directories list is initialized with "." directory
@@ -304,7 +304,8 @@ namespace Options {
 				} else if (!strcmp(opt, "fullpath")) {
 					IsShowFullPath = 1;
 				} else if (!strcmp(opt, "zxnext")) {
-					IsNextEnabled = true;
+					IsNextEnabled = 1;
+					if (!strcmp(val, "cspect")) IsNextEnabled = 2;	// CSpect emulator extensions
 				} else if (!strcmp(opt, "reversepop")) {
 					IsReversePOP = 1;
 				} else if (!strcmp(opt, "nologo")) {

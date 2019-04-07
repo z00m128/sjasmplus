@@ -772,6 +772,11 @@ namespace Z80 {
 		} while (comma(lp));
 	}
 
+	void OpCode_Next_BREAK() {	// this is fake instruction for CSpect emulator, not for real Z80N
+		EmitByte(0xDD);
+		EmitByte(0x01);
+	}
+
 	// helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation
 	static void OpCode_Z80N_BarrelShifts(int mainOpcode) {
 		int e[] = { -1, -1, -1 };
@@ -1056,6 +1061,11 @@ namespace Z80 {
 
 	void OpCode_EXD() {
 		EmitByte(0xeb);
+	}
+
+	void OpCode_Next_EXIT() {	// this is fake instruction for CSpect emulator, not for real Z80N
+		EmitByte(0xDD);
+		EmitByte(0x00);
 	}
 
 	void OpCode_EXX() {
@@ -4183,6 +4193,11 @@ namespace Z80 {
 		OpCodeTable.Insert("setae",		OpCode_Next_SETAE);
 		OpCodeTable.Insert("swapnib",	OpCode_Next_SWAPNIB);
 		OpCodeTable.Insert("test",		OpCode_Next_TEST);
+		// CSpect emulator extensions, fake instructions "exit" and "break"
+		if (2 == Options::IsNextEnabled) {
+			OpCodeTable.Insert("exit",		OpCode_Next_EXIT);
+			OpCodeTable.Insert("break",		OpCode_Next_BREAK);
+		}
 	}
 } // eof namespace Z80
 
