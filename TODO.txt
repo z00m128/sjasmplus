@@ -5,10 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-
-    MACRO Reset4000: nop: nop:ENDM
-    Reset4000
-
 LUA quirks:
     -- v includelua:
     function inc_ld(reg, val)
