@@ -165,18 +165,6 @@ public:
 		Init();
 	}
 private:
-	// By Antipod: http://zx.pk.ru/showpost.php?p=159487&postcount=264
-	enum
-	{
-		KDelimiter = '_',
-		KTotalJoinedParams = 64
-	};
-	void SplitToArray( const char* aName, char**& aArray, int& aCount, int* aPositions ) const;
-	int	Copy( char* aDest, int aDestPos, const char* aSource, int aSourcePos, int aBytes ) const;
-	void FreeArray( char** aArray, int aCount );
-	char tempBuf[ LABMAX ];	// for 'arg_someLabel_arg_anotherLabel' expansion
-	// --
-
 	int used[128];
 	CDefineTableEntry* defs;
 };

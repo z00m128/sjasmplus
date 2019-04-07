@@ -5,6 +5,10 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+
+    MACRO Reset4000: nop: nop:ENDM
+    Reset4000
+
 LUA quirks:
     -- v includelua:
     function inc_ld(reg, val)
@@ -43,6 +47,20 @@ Macro world issues:
 - ability to issue real instruction (ignoring possible macro of same name)
 
 Input file without extension does produce wrong default output filename
+
+** Macro/define substitution rules and implementation (proposal):
+- macro arguments substitute with priority, from the longest ones
+- macro arguments substitute even in define related directives
+- define arguments substitute next, from the longest ones (inc. defarray)
+- name of define/macroarg starting with underscore prohibits substitution into middle
+(can substitute only at beginning)
+? extend that rule to underscore at end sealing also the tail?
+- lock some keywords for define/etc... at least put them under warning
+** Current refactored implementation:
+- doesn't play priorities as proposed above
+- evaluation of defarray index is still flaky and doesn't work correctly inside macro/etc
+- needs lot more testing and cleanup
++ should be already a bit more intuitive than 1.08+ (although it may break legacy source)
 
 ====================
 Docs:

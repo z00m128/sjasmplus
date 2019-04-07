@@ -18,11 +18,12 @@
     ; this will fail with "Label not found: test_result_1", because "string" sub-part is substitued with "1"
     MYMACRO1 test_result_string, 1, 0   ; this is feature, not bug (see "macro_test.asm")
 
-    ; this will not fail (seems like BUG in sjasmplus multi-depth substitution algorithm)
+    ; this will fail with "Label not found: test_result_1", because "string" sub-part is substitued with "1"
     MYMACRO2 test_result_string, 1
 
-    ; this will not fail, seems again like bug? or weird internal rule, how the '_' does
-    ; work as sub-part delimiter exactly.
+    ; this will not fail, since v1.11.2 the sjasmplus substitution rules were modified.
+    ; The macro arguments and define's names starting with underscore will prevent the in-middle substition
+    ; so the `_string` macro argument can substitute only whole `_string` term, but not at the end of `test_result_string`
     MYMACRO3 test_result_string, 1, 0
 
     ; this should work, and was suggested as fix to the Issue#35 reporter

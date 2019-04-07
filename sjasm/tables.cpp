@@ -51,12 +51,12 @@ char* ValidateLabel(char* naam, int flags) {
 		break;
 	}
 	naam = np;
-	if (!isalpha((unsigned char) * np) && *np != '_') {
+	if (!isalpha(*np) && *np != '_') {
 		Error("Invalid labelname", naam);
 		return 0;
 	}
 	while (*np) {
-		if (isalnum((unsigned char) * np) || *np == '_' || *np == '.' || *np == '?' || *np == '!' || *np == '#' || *np == '@') {
+		if (isalnum(*np) || *np == '_' || *np == '.' || *np == '?' || *np == '!' || *np == '#' || *np == '@') {
 			++np;
 		} else {
 			Error("Invalid labelname", naam);
@@ -91,6 +91,7 @@ char* ValidateLabel(char* naam, int flags) {
 }
 
 int GetLabelValue(char*& p, aint& val) {
+	val = 0;
 	char* mlp = macrolabp, *op = p;
 	int g = 0, l = 0, oIsLabelNotFound = IsLabelNotFound;
 	unsigned int len;
@@ -104,12 +105,16 @@ int GetLabelValue(char*& p, aint& val) {
 		STRCAT(temp, LINEMAX, ">");
 		len = strlen(temp);
 		np = temp + len;
-		if (!isalpha((unsigned char) * p) && *p != '_') {
+		if (!isalpha(*p) && *p != '_') {
 			Error("Invalid labelname", temp);
 			return 0;
 		}
 		while (islabchar(*p)) *np++ = *p++;
 		*np = 0;
+		if (need(p, '[')) {		// check if this is DEFARRAY name, refuse to parse as label then
+			p = op;
+			return 0;
+		}
 		if (strlen(temp) > LABMAX + len) {
 			Error("Label too long", temp + len);
 			temp[LABMAX + len] = 0;
@@ -146,11 +151,15 @@ int GetLabelValue(char*& p, aint& val) {
 		STRCAT(temp, LINEMAX, ".");
 	}
 	len = strlen(temp); np = temp + len;
-	if (!isalpha((unsigned char) *p) && *p != '_') {
+	if (!isalpha(*p) && *p != '_') {
 		Error("Invalid labelname", temp); return 0;
 	}
 	while (islabchar(*p)) *np++ = *p++;
 	*np = 0;
+	if (need(p, '[')) {		// check if this is DEFARRAY name, refuse to parse as label then
+		p = op;
+		return 0;
+	}
 	if (strlen(temp) > LABMAX + len) {
 		Error("Label too long", temp + len);
 		temp[LABMAX + len] = 0;
@@ -657,11 +666,11 @@ void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	if (FindDuplicate(name)) {
 		Error("Duplicate define", name);
 	}
-	defs[(unsigned char)*name] = new CDefineTableEntry(name, value, nss, defs[(unsigned char)*name]);
+	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }
 
 char* CDefineTable::Get(const char* name) {
-	CDefineTableEntry* p = defs[(unsigned char)*name];
+	CDefineTableEntry* p = defs[(*name)&127];
 	DefArrayList = 0;
 	while (p) {
 		if (!strcmp(name, p->name)) {
@@ -676,7 +685,7 @@ char* CDefineTable::Get(const char* name) {
 }
 
 int CDefineTable::FindDuplicate(const char* name) {
-	CDefineTableEntry* p = defs[(unsigned char)*name];
+	CDefineTableEntry* p = defs[(*name)&127];
 	while (p) {
 		if (!strcmp(name, p->name)) {
 			return 1;
@@ -687,7 +696,7 @@ int CDefineTable::FindDuplicate(const char* name) {
 }
 
 int CDefineTable::Replace(const char* name, const char* value) {
-	CDefineTableEntry* p = defs[(unsigned char)*name];
+	CDefineTableEntry* p = defs[(*name)&127];
 	while (p) {
 		if (!strcmp(name, p->name)) {
 			delete[](p->value);
@@ -698,7 +707,7 @@ int CDefineTable::Replace(const char* name, const char* value) {
 		}
 		p = p->next;
 	}
-	defs[(unsigned char)*name] = new CDefineTableEntry(name, value, 0, defs[(unsigned char)*name]);
+	defs[(*name)&127] = new CDefineTableEntry(name, value, 0, defs[(*name)&127]);
 	return 1;
 }
 
@@ -709,10 +718,10 @@ int CDefineTable::Replace(const char* name, const int value) {
 }
 
 int CDefineTable::Remove(const char* name) {
-	CDefineTableEntry* p = defs[(unsigned char)*name];
+	CDefineTableEntry* p = defs[(*name)&127];
 	CDefineTableEntry* p2 = NULL;
 	if (p && !strcmp(name, p->name)) {
-		defs[(unsigned char)*name] = p->next;
+		defs[(*name)&127] = p->next;
 	} else
 		while (p) {
 		if (!strcmp(name, p->name)) {
@@ -743,21 +752,13 @@ void CDefineTable::RemoveAll() {
 
 void CMacroDefineTable::Init() {
 	defs = NULL;
-	for (int i = 0; i < 128; used[i++] = 0) {
-		;
-	}
+	for (int i = 0; i < 128; ) used[i++] = 0;
 }
 
 void CMacroDefineTable::AddMacro(char* naam, char* vervanger) {
 	CDefineTableEntry* tmpdefs = new CDefineTableEntry(naam, vervanger, 0, defs);
 	defs = tmpdefs;
-	// By Antipod: http://zx.pk.ru/showpost.php?p=159487&postcount=264
-	if ( !strcmp( naam, "_aFunc" ) )
-	{
-		defs = tmpdefs;
-	}
-	// --
-	used[(unsigned char)*naam] = 1;
+	used[(*naam)&127] = 1;
 }
 
 CDefineTableEntry* CMacroDefineTable::getdefs() {
@@ -770,143 +771,17 @@ void CMacroDefineTable::setdefs(CDefineTableEntry* ndefs) {
 
 char* CMacroDefineTable::getverv(char* name) {
 	CDefineTableEntry* p = defs;
-	if (!used[(unsigned char)*name] && *name != KDelimiter) {
-		return NULL;
-	}// std check
+	if (!used[(*name)&127]) return NULL;
 	while (p) {
-		if (!strcmp(name, p->name)) {
-			return p->value;// full match
-		}
+		if (!strcmp(name, p->name)) return p->value;
 		p = p->next;
 	}
-	// extended check for '_'
-	// By Antipod: http://zx.pk.ru/showpost.php?p=159487&postcount=264
-	char** array = NULL;
-	int count = 0;
-	int positions[ KTotalJoinedParams + 1 ];
-	SplitToArray( name, array, count, positions );
-
-	int tempBufPos = 0;
-	bool replaced = false;
-	for ( int i = 0; i<count; i++ )
-	{
-		p = defs;
-
-		if ( *array[ i ] != KDelimiter )
-		{
-			bool found = false;
-			while( p )
-			{
-				if ( !strcmp( array[ i ], p->name ) )
-				{
-					replaced = found = true;
-					tempBufPos = Copy( tempBuf, tempBufPos, p->value, 0, strlen( p->value ) );
-					break;
-				}
-				p = p->next;
-			}
-			if ( !found )
-			{
-				tempBufPos = Copy( tempBuf, tempBufPos, array[ i ], 0, strlen( array[i] ) );
-			}
-		}
-		else
-		{
-			tempBuf[ tempBufPos++ ] = KDelimiter;
-			tempBuf[ tempBufPos ] = 0;
-		}
-	}
-
-	FreeArray( array, count );
-
-	return replaced ? tempBuf : NULL;
-	// --
+	return NULL;
 }
-
-void CMacroDefineTable::SplitToArray( const char* aName, char**& aArray, int& aCount, int* aPositions ) const
-{
-	int nameLen = strlen( aName );
-	aCount = 0;
-	int itemSizes[ KTotalJoinedParams ];
-	int currentItemsize = 0;
-	bool newLex = false;
-	int prevLexPos = 0;
-	for ( int i = 0; i<nameLen; i++, currentItemsize++ )
-	{
-		if ( aName[ i ] == KDelimiter || aName[ prevLexPos ] == KDelimiter )
-		{
-			newLex = true;
-		}
-
-		if ( newLex && currentItemsize )
-		{
-			itemSizes[ aCount ] = currentItemsize;
-			currentItemsize = 0;
-			aPositions[ aCount ] = prevLexPos;
-			prevLexPos = i;
-			aCount++;
-			newLex = false;
-		}
-
-		if ( aCount == KTotalJoinedParams )
-		{
-			Error("Too much joined params!", NULL, FATAL);
-		}
-	}
-
-	if ( currentItemsize )
-	{
-		itemSizes[ aCount ] = currentItemsize;
-		aPositions[ aCount ] = prevLexPos;
-		aCount++;
-	}
-
-	if ( aCount )
-	{
-		aArray = new char*[ aCount ];
-		for ( int i = 0; i<aCount; i++ )
-		{
-			int itemSize = itemSizes[ i ];
-			if ( itemSize )
-			{
-				aArray[ i ] = new char[ itemSize + 1 ];
-				Copy( aArray[ i ], 0, &aName[ aPositions[ i ] ], 0, itemSize );
-			}
-			else
-			{
-				Error("Internal error. SplitToArray()", NULL, FATAL);
-			}
-		}
-	}
-}
-
-int CMacroDefineTable::Copy( char* aDest, int aDestPos, const char* aSource, int aSourcePos, int aBytes ) const
-{
-	int i = 0;
-    for ( i = 0; i < aBytes; i++ )
-    {
-        aDest[ i + aDestPos ] = aSource[ i + aSourcePos ];
-    }
-	aDest[ i + aDestPos ] = 0;
-	return i + aDestPos;
-}
-
-void CMacroDefineTable::FreeArray( char** aArray, int aCount )
-{
-	if ( aArray )
-	{
-		for ( int i = 0; i<aCount; i++ )
-		{
-			delete[] aArray[ i ];
-		}
-	}
-	delete aArray;
-}
-// --
 
 int CMacroDefineTable::FindDuplicate(char* name) {
 	CDefineTableEntry* p = defs;
-	if (!used[(unsigned char)*name]) {
+	if (!used[(*name)&127]) {
 		return 0;
 	}
 	while (p) {
@@ -929,14 +804,12 @@ CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
 
 void CMacroTable::Init() {
 	macs = NULL;
-	for (int i = 0; i < 128; used[i++] = 0) {
-		;
-	}
+	for (int i = 0; i < 128; ) used[i++] = 0;
 }
 
 int CMacroTable::FindDuplicate(char* naam) {
 	CMacroTableEntry* p = macs;
-	if (!used[(unsigned char)*naam]) {
+	if (!used[(*naam)&127]) {
 		return 0;
 	}
 	while (p) {
@@ -960,7 +833,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 		Error("No enough memory!", NULL, FATAL);
 	}
 	macs = new CMacroTableEntry(macroname, macs);
-	used[(unsigned char)*macroname] = 1;
+	used[(*macroname)&127] = 1;
 	SkipBlanks(p);
 	while (*p) {
 		if (!(n = GetID(p))) {
@@ -989,7 +862,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 
 int CMacroTable::Emit(char* naam, char*& p) {
 	// search for the desired macro
-	if (!used[(unsigned char)*naam]) return 0;
+	if (!used[(*naam)&127]) return 0;
 	CMacroTableEntry* m = macs;
 	while (m && strcmp(naam, m->naam)) m = m->next;
 	if (!m) return 0;
@@ -1308,11 +1181,11 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 	if (FindDuplicate(sp)) {
 		Error("Duplicate structure name", naam, EARLY);
 	}
-	strs[(unsigned char)*sp] = new CStructure(naam, sp, idx, 0, gl, strs[(unsigned char)*sp]);
+	strs[(*sp)&127] = new CStructure(naam, sp, idx, 0, gl, strs[(*sp)&127]);
 	if (no) {
-		strs[(unsigned char)*sp]->AddMember(new CStructureEntry2(0, no, -1, SMEMBBLOCK));
+		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, SMEMBBLOCK));
 	}
-	return strs[(unsigned char)*sp];
+	return strs[(*sp)&127];
 }
 
 CStructure* CStructureTable::zoek(const char* naam, int gl) {
@@ -1324,13 +1197,13 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
-	CStructure* p = strs[(unsigned char)*sp];
+	CStructure* p = strs[(*sp)&127];
 	while (p) {
 		if (!strcmp(sp, p->id)) return p;
 		p = p->next;
 	}
 	if (gl || !ModuleName) return NULL;
-	sp += 1 + strlen(ModuleName); p = strs[(unsigned char)*sp];
+	sp += 1 + strlen(ModuleName); p = strs[(*sp)&127];
 	while (p) {
 		if (!strcmp(sp, p->id)) return p;
 		p = p->next;
@@ -1339,7 +1212,7 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 }
 
 int CStructureTable::FindDuplicate(char* naam) {
-	CStructure* p = strs[(unsigned char)*naam];
+	CStructure* p = strs[(*naam)&127];
 	while (p) {
 		if (!strcmp(naam, p->naam)) return 1;
 		p = p->next;

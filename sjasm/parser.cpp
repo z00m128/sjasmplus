@@ -61,11 +61,11 @@ int ParseExpPrim(char*& p, aint& nval) {
 	  	nval = (aint) (MemGetByte(nval) + (MemGetByte(nval + 1) << 8));
 
 	  	return 1;
-	} else if (isdigit((unsigned char) * p) || (*p == '#' && isalnum((unsigned char) * (p + 1))) || (*p == '$' && isalnum((unsigned char) * (p + 1))) || *p == '%') {
+	} else if (isdigit(*p) || (*p == '#' && isalnum(*(p + 1))) || (*p == '$' && isalnum(*(p + 1))) || *p == '%') {
 	  	res = GetConstant(p, nval);
-	} else if (isalpha((unsigned char) * p) || *p == '_' || *p == '.' || *p == '@') {
+	} else if (isalpha(*p) || *p == '_' || *p == '.' || *p == '@') {
 	  	res = GetLabelValue(p, nval);
-	} else if (*p == '?' && (isalpha((unsigned char) * (p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
+	} else if (*p == '?' && (isalpha(*(p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
 	  	++p;
 		res = GetLabelValue(p, nval);
 	} else if (DeviceID && *p == '$' && *(p + 1) == '$') {
@@ -441,7 +441,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			continue;
 		}
 
-		if (!isalpha((unsigned char) * lp) && *lp != '_') {
+		if (!isalpha(*lp) && *lp != '_') {
 			*rp++ = *lp++;
 			continue;
 		}
@@ -452,51 +452,66 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		isCurrDefDir = cmphstr(kp, "define") || cmphstr(kp, "undefine")
 			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef");
 
-		nid = GetID(lp); dr = 1;
+		// The following loop is recursive-like macro/define substitution, the `*lp` here points
+		// at alphabet/underscore char, marking start of "id" string, and it will be parsed by
+		// sub-id parts, delimited by underscores, each combination of consecutive sub-ids may
+		// be substituted by some macro argument or define.
 
-		if (!(ver = DefineTable.Get(nid))) {
-			if (!macrolabp || !(ver = MacroDefineTable.getverv(nid))) {
-				dr = 0;
-				ver = nid;
+		//TODO - maybe consider the substitution search to go downward, from longest term to shortest subterm
+		ResetGrowSubId();
+		char* nextSubIdLp = lp, * wholeIdLp = lp;
+		do { //while(islabchar(*lp));
+			nid = GrowSubId(lp);		// grow the current sub-id part by part, checking each combination for substitution
+			// defines/macro arguments can substitute in the middle of ID only if they don't start with underscore
+			const bool canSubstituteInside = '_' != nid[0] || nextSubIdLp == wholeIdLp;
+			if (macrolabp && canSubstituteInside && (ver = MacroDefineTable.getverv(nid))) {
+				dr = 2;			// macro argument substitution is possible
+			} else if (!isPrevDefDir && canSubstituteInside && (ver = DefineTable.Get(nid))) {
+				dr = 1;			// DEFINE substitution is possible
+				//handle DEFARRAY case
+				if (DefineTable.DefArrayList) {
+					ver = nid;	// in case of some error, just copy the array id "as is"
+					CStringsList* a = DefineTable.DefArrayList;
+					while (White(*lp)) GrowSubIdByExtraChar(lp);
+					aint val;
+					if ('[' != *lp) Error("[ARRAY] Expression error", nextSubIdLp, SUPPRESS);
+					if ('[' == *lp && GrowSubIdByExtraChar(lp) && ParseExpressionNoSyntaxError(lp, val) && ']' == *lp) {
+						++lp;
+						while (0 < val && a) {
+							a = a->next;
+							--val;
+						}
+						if (val < 0 || NULL == a) {
+							*ver = 0;			// substitute with empty string
+							Error("[ARRAY] index not in 0..<Size-1> range");
+						} else {
+							ver = a->string;	// substitute with array value
+						}
+					} else {	// no substition of array possible at this time (index eval / syntax error)
+						dr = -1;// write into output, but don't count as replacement
+					}
+				}
 			} else {
-				dr = 2;		// this is macro argument, substitute it more aggressively
+				dr = 0;			// no possible substitution found
+				ver = nid;
 			}
-		}
-
-		if (DefineTable.DefArrayList) {
-			CStringsList* a = DefineTable.DefArrayList;
-			aint val;
-			while (White(*lp) || '[' == *lp) ++lp;
-			if (!ParseExpression(lp, val)) {
-				Error("[ARRAY] Expression error", lp, IF_FIRST);break;
+			// check if no substition was found, and there's no more chars to extend SubId
+			if (0 == dr && !islabchar(*lp)) {
+				lp = nextSubIdLp;		// was fully extended, no match, "eat" first subId
+				ResetGrowSubId();
+				ver = GrowSubId(lp);	// find the first SubId again, for the copy
+				dr = -1;				// write into output, but don't count as replacement
 			}
-			while (*lp == ']' && *(lp++));
-			if (val < 0) {
-				Error("Number of cell must be positive", NULL, IF_FIRST);break;
+			if (0 < dr) definegereplaced = 1;		// above zero => count as replacement
+			if (0 != dr) {				// any non-zero dr => write to the output
+				while (*ver) *rp++ = *ver++;		// replace the string into target buffer
+				// reset subId parser to catch second+ subId in current Id
+				ResetGrowSubId();
+				nextSubIdLp = lp;
 			}
-			val++;
-			while (a && val) {
-				STRCPY(ver, LINEMAX, a->string); // very danger!
-				a = a->next;
-				val--;
-			}
-			if (val && !a) {
-				Error("Cell of array not found", NULL, IF_FIRST);break;
-			}
-		}
-
-		if ((1 == dr) && isPrevDefDir) {	// do not substitute after ifdef/ifndef/define/...
-			dr = 0;							// if the "id" is already pure define
-			ver = nid;						// but (dr == 2) are macro arguments => substitute those!
-		}
-
-		if (dr) {
-			definegereplaced = 1;
-		}
-		while ((*rp = *ver)) {
-			++rp; ++ver;
-		}
-	}
+			// continue with extending the subId, if there's still something to parse
+		} while(islabchar(*lp));
+	} // while(*lp)
 	// add line terminator to the output buffer
 	*rp = 0;
 	if (strlen(nl) > LINEMAX - 1) {
@@ -541,7 +556,7 @@ void ParseLabel() {
 	tp = temp;
 	SkipBlanks();
 	IsLabelNotFound = 0;
-	if (isdigit((unsigned char) * tp)) {
+	if (isdigit(*tp)) {
 		if (NeedEQU() || NeedDEFL() || NeedField()) {
 			Error("Number labels only allowed as address labels");
 			return;
@@ -780,7 +795,7 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 			 	++lp;
 			 }
 	tp = temp; SkipBlanks();
-	if (isdigit((unsigned char) * tp)) {
+	if (isdigit(*tp)) {
 		Error("[STRUCT] Number labels not allowed within structs"); return;
 	}
 	PreviousIsLabel = STRDUP(tp);

@@ -1775,7 +1775,7 @@ void dirDEFARRAY() {
 	if (NULL == a) {
 		Error("DEFARRAY must have at least one entry"); return;
 	}
-	DefineTable.Add(id, (char *)"\n", a);
+	DefineTable.Add(id, "", a);
 }
 
 #ifdef USE_LUA
