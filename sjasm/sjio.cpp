@@ -719,6 +719,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 		if (colonSubline) {			// starting from colon (creating new fake "line")
 			colonSubline = false;	// (can't happen inside block comment)
 			*(rlppos++) = ' ';
+			IsLabel = false;
 		} else {					// starting real new line
 			++CurrentSourceLine;
 			IsLabel = (0 == blockComment);
@@ -1324,11 +1325,11 @@ int ReadLine(bool SplitByColon) {
 int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	// f itself should be already NULL, not resetting it here
 	CStringsList** s = &f;
-	while (ReadLine(true)) {
+	while (ReadLine()) {
 		char* p = line;
 		SkipBlanks(p);
 		if ('.' == *p) ++p;
-		if (cmphstr(p, end)) {
+		if (cmphstr(p, end)) {		// finished, read rest after end marker into line buffers
 			lp = ReplaceDefine(p);
 			return 1;
 		}
