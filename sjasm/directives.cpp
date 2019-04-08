@@ -258,7 +258,7 @@ void dirBLOCK() {
 			Warning("Negative BLOCK?");
 		}
 		if (comma(lp)) {
-			ParseExpression(lp, val);
+			if (ParseExpression(lp, val)) check8(val);
 		}
 		EmitBlock(val, teller);
 	} else {
@@ -1775,7 +1775,7 @@ void dirDEFARRAY() {
 	if (NULL == a) {
 		Error("DEFARRAY must have at least one entry"); return;
 	}
-	DefineTable.Add(id, (char *)"\n", a);
+	DefineTable.Add(id, "", a);
 }
 
 #ifdef USE_LUA

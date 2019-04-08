@@ -43,6 +43,9 @@ int NeedEQU();
 int NeedDEFL();
 int NeedField();
 char* GetID(char*& p);
+void ResetGrowSubId();
+char* GrowSubId(char* & p);
+char* GrowSubIdByExtraChar(char* & p);	// force grow even by non-label char
 char* getinstr(char*& p);
 int comma(char*& p);
 EBracketType OpenBracket(char*& p);

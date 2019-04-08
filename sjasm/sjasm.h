@@ -50,7 +50,7 @@ namespace Options {
 	extern bool AddLabelListing;
 	extern bool NoDestinationFile;
 	extern bool FakeInstructions;
-	extern bool IsNextEnabled;
+	extern int IsNextEnabled;
 	extern bool SourceStdIn;
 
 	extern CStringsList* IncludeDirsList;

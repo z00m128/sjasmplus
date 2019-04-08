@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.11.1 Documentation [2019-04-01]</title>
+  <title>SjASMPlus 1.12.0 Documentation [2019-04-07]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -178,6 +178,27 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>07.04.2019 - 1.12.0</term>
+
+            <listitem>
+              <para><programlisting>- Fixed parsing of expressions starting with string literal
+- Fixed listing of DS directive with negative values, added value check warning
+- Fixed possible wrong indexing of some arrays internally
+- Fixed parsing of single-word instructions in colon-packed-no-space macros
+- Making macro arguments substitution a bit more aggressive, to work also with
+  DEFINE/IFDEF/IFNDEF/DEFARRAY directives inside macro (this gives the coder
+  more macro power and freedom, but the error reporting may get lot more confused)
+- Refactoring substring substitution for macro-arguments and defines, now it
+  should work always. To prohibit some macro/define to substitute into middle
+  of the string, start its name with underscore, like "_VERSION".
+- THIS MAY BREAK SOME OLDER SOURCES, SORRY. Also the rules for substitutions
+  will be in the future further modified and documented, to make them more
+  intuitive and predictable, so there may be more breakage even later.
+- Adding fake instructions break and exit for CSpect emulator (--zxnext=cspect)</programlisting></para>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>01.04.2019 - 1.11.1</term>
@@ -482,7 +503,8 @@
       <para>Option flags as follows:</para>
 
       <para><programlisting>  -h or --help             Help information
-  --zxnext                 Enable SpecNext Z80 extensions
+  --zxnext[=cspect]        Enable SpecNext Z80 extensions (CSpect emulator has
+  extra "exit" DD00 and "break" DD01 fake instructions)
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)
@@ -2726,7 +2748,7 @@ Main
       <title>Using</title>
 
       <para>A structure definition starts with: <code>STRUCT
-      &lt;name&gt;,[&lt;initial offset&gt;]</code> and ends with
+      &lt;name&gt;[,&lt;initial offset&gt;]</code> and ends with
       <code>ENDS</code>. Structure definitions are local to the current
       module, but, as with labels, '@' can be used to override this.</para>
 

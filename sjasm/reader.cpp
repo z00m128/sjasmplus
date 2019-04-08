@@ -208,18 +208,18 @@ char* getparen(char* p) {
 	return 0;
 }
 
-char nidtemp[LINEMAX];
+char nidtemp[LINEMAX], *nidsubp = nidtemp;
 
 char* GetID(char*& p) {
 	/*char nid[LINEMAX],*/ char* np;
 	np = nidtemp;
 	SkipBlanks(p);
 	//if (!isalpha(*p) && *p!='_') return 0;
-	if (*p && !isalpha((unsigned char) * p) && *p != '_' && *p != '.') {
+	if (*p && !isalpha(*p) && *p != '_' && *p != '.') {
 		return 0;
 	}
 	while (*p) {
-		if (!isalnum((unsigned char) * p) && *p != '_' && *p != '.' && *p != '?' && *p != '!' && *p != '#' && *p != '@') {
+		if (!isalnum(*p) && *p != '_' && *p != '.' && *p != '?' && *p != '!' && *p != '#' && *p != '@') {
 			break;
 		}
 		*np = *p; ++p; ++np;
@@ -229,19 +229,49 @@ char* GetID(char*& p) {
 	return nidtemp;
 }
 
+void ResetGrowSubId() {
+	nidsubp = nidtemp;			// reset temporary ID, starting new one
+	*nidsubp = 0;
+}
+
+char* GrowSubId(char* & p) {	// appends next part of ID
+	// The caller function ReplaceDefineInternal already assures the first char of ID is (isalpha() || '_')
+	// so there are no extra tests here to verify validity of first character (like GetID(..) must do)
+	if ('_' == *p) {
+		// add sub-parts delimiter in separate step (i.e. new ID grows like: "a", "a_", "a_b", ...
+		while ('_' == *p) *nidsubp++ = *p++;
+	} else while (*p && (isalnum(*p) || '.' == *p || '?' == *p || '!' == *p || '#' == *p || '@' == *p)) {
+		// add sub-part of id till next underscore
+		*nidsubp++ = *p++;
+	}
+	if (nidtemp+LINEMAX <= nidsubp) Error("ID too long, buffer overflow detected.", NULL, FATAL);
+	*nidsubp = 0;
+	if (!nidtemp[0]) return NULL;	// result is empty string, return NULL rather
+	return nidtemp;
+}
+
+char* GrowSubIdByExtraChar(char* & p) {	// append the next char even if not a legal label/ID char
+	// the caller function is responsible for all the validation, this just adds single char
+	*nidsubp++ = *p++;
+	if (nidtemp+LINEMAX <= nidsubp) Error("ID too long, buffer overflow detected.", NULL, FATAL);
+	*nidsubp = 0;
+	if (!nidtemp[0]) return NULL;	// result is empty string, return NULL rather
+	return nidtemp;
+}
+
 char instrtemp[LINEMAX];
 
 char* getinstr(char*& p) {
 	/*char nid[LINEMAX],*/ char* np;
 	np = instrtemp;
 	SkipBlanks(p);
-	if (!isalpha((unsigned char) * p) && *p != '.') {
+	if (!isalpha(*p) && *p != '.') {
 		return 0;
 	} else {
 		*np = *p; ++p; ++np;
 	}
 	while (*p) {
-		if (!isalnum((unsigned char) * p) && *p != '_') {
+		if (!isalnum(*p) && *p != '_') {
 			break;
 		} /////////////////////////////////////
 		*np = *p; ++p; ++np;
@@ -301,7 +331,7 @@ int need(char*& p, char c) {
 
 int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3) {
 	//  SkipBlanks(p);
-	if (!isalpha((unsigned char) * p)) {
+	if (!isalpha(*p)) {
 		return 0;
 	}
 	if (cmphstr(p, c1)) {
@@ -351,10 +381,10 @@ int getval(int p) {
 	case '9':
 		return p - '0';
 	default:
-		if (isupper((unsigned char)p)) {
+		if (isupper(p)) {
 			return p - 'A' + 10;
 		}
-		if (islower((unsigned char)p)) {
+		if (islower(p)) {
 			return p - 'a' + 10;
 		}
 		return 200;
@@ -601,35 +631,35 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 	int t = 0, strRes;
 	do {
 		const int oldT = t;
+		char* const oldP = p;
 		if (SkipBlanks(p)) {
 			Error("Expression expected", NULL, SUPPRESS);
+			break;
 		} else if (0 != (strRes = GetCharConstAsString(p, e, t, 128, add))) {
 			// string literal parsed (both types)
-			if (-1 == strRes) break;
-			if (oldT == t) Warning("Empty string", p-2);
-			else {
-				// single byte "strings" may have further part of expression, handle it *here* :/
-				if (1 == t - oldT) {
-					SkipBlanks(p);
-					if (*p && ',' != *p) {
-						ParseExpression(p, val);
-						val += (e[t - 1] - add) & 255;	// restore "char" value back and add to expr.
-						check8(val);
-						e[t-1] = (val + add) & 255;
-					}
+			if (-1 == strRes) break;		// syntax error happened
+			// single byte "strings" may have further part of expression, detect it here
+			if (1 == t - oldT && !SkipBlanks(p) && ',' != *p) {
+				// expression with single char detected (like 'a'|128), revert the string parsing
+				t = oldT;
+				p = oldP;		// and continue with the last code-path trying to parse expression
+			} else {	// string literal (not expression), handle the extra string literal logic
+				if (oldT == t) {
+					Warning("Empty string", p-2);
+				} else {
+					// mark last "string" byte with |128: single char in "" *is* string
+					// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
+					if (dc && ((1 == strRes) < (t - oldT))) e[t - 1] |= 128;
 				}
-				// mark last "string" byte with |128: single char in "" *is* string
-				// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
-				if (dc && ((1 == strRes) < (t - oldT))) e[t - 1] |= 128;
+				continue;
 			}
+		}
+		if (ParseExpression(p, val)) {
+			check8(val);
+			e[t++] = (val + add) & 255;
 		} else {
-			if (ParseExpression(p, val)) {
-				check8(val);
-				e[t++] = (val + add) & 255;
-			} else {
-				Error("Syntax error", p, SUPPRESS);
-				break;
-			}
+			Error("Syntax error", p, SUPPRESS);
+			break;
 		}
 	} while(comma(p) && t < 128);
 	e[t] = -1;
@@ -756,7 +786,7 @@ EDelimiterType GetDelimiterOfLastFileName() {
 }
 
 int islabchar(char p) {
-	if (isalnum((unsigned char)p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
+	if (isalnum(p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
 		return 1;
 	}
 	return 0;

@@ -30,7 +30,7 @@
     ABYTE   64 1, 2, 3          ; +64
     ABYTEC  3 "ABC", 4, "EF"    ; +3, last char of each substring |128
     ABYTEZ  9 "ABC", 4, "EF"    ; +9, extra 0 after last byte
-    DC      10, "a"-32, "BC", "DEF" ; last char of each substring |128
+    DC      10, "A", "BC", "DEF" ; last char of each substring |128
     DZ      10, "abc", "def"    ; extra 0 after last byte
 
     ; block/ds directive
