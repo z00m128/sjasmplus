@@ -584,12 +584,11 @@ void dirINCHOB() {
 
 void dirINCTRD() {
 	aint val;
-	char* fnaam, * fnaamh, * fnaamh2;
 	char hobeta[12], hdr[17];
-	int offset = -1,length = -1,res,i;
+	int offset = 0, length = INT_MAX, res, i;
 	FILE* ff;
 
-	fnaam = GetFileName(lp);
+	char* fnaam = GetFileName(lp), * fnaamh;
 	if (comma(lp)) {
 		if (!comma(lp)) {
 			fnaamh = GetFileName(lp);
@@ -610,8 +609,8 @@ void dirINCTRD() {
 			if (val < 0) {
 				Error("[INCTRD] Negative values are not allowed", bp); return;
 			}
-			offset += val;
-		}
+			offset = val;
+		} else --lp;		// there was second comma right after, reread it
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
@@ -641,7 +640,7 @@ void dirINCTRD() {
 		break;
 	}
 	// open TRD
-	fnaamh2 = GetPath(fnaam);
+	char* fnaamh2 = GetPath(fnaam);
 	if (!FOPEN_ISOK(ff, fnaamh2, "rb")) {
 		Error("[INCTRD] Error opening file", fnaam, FATAL);
 	}
@@ -660,19 +659,9 @@ void dirINCTRD() {
 	if (i) {
 		Error("[INCTRD] File not found in TRD image", fnaamh, IF_FIRST); return;
 	}
-	if (length > 0) {
-		if (offset == -1) {
-			offset = 0;
-		}
-	} else {
-		if (length == -1) {
-	  		length = ((unsigned char)hdr[0x0b]) + (((unsigned char)hdr[0x0c]) << 8);
-		}
-		if (offset == -1) {
-			offset = 0;
-		} else {
-			length -= offset;
-		}
+	if (INT_MAX == length) {
+		length = ((unsigned char)hdr[0x0b]) + (((unsigned char)hdr[0x0c]) << 8);
+		length -= offset;
 	}
 	offset += (((unsigned char)hdr[0x0f]) << 12) + (((unsigned char)hdr[0x0e]) << 8);
 	fclose(ff);
