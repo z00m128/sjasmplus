@@ -477,7 +477,7 @@ void BinIncFile(char* fname, int offset, int length) {
 	free(fullFilePath);
 
 	// Get length of file
-	int totlen;
+	int totlen = 0;
 	if (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0) Error("telling file length", fname, FATAL);
 
 	// process arguments (extra features like negative offset/length or INT_MAX length)
