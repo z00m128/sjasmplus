@@ -82,7 +82,7 @@ void PrintHex(char* & dest, aint value, int nibbles);
 void PrintHex32(char* & dest, aint value);
 void PrintHexAlt(char* & dest, aint value);
 char* GetPath(char* fname, char** filenamebegin = NULL, bool systemPathsBeforeCurrent = false);
-void BinIncFile(char* fname, int offset, int length);
+void BinIncFile(char* fname, int offset = 0, int length = INT_MAX);
 int SaveRAM(FILE*, int, int);
 unsigned char MemGetByte(unsigned int address);
 unsigned int MemGetWord(unsigned int address);

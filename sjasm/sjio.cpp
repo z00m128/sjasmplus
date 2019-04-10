@@ -467,90 +467,70 @@ char* GetPath(char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
 	return kip;
 }
 
-void BinIncFile(char* fname, int offset, int len) {
+// if offset is negative, it functions as "how many bytes from end of file"
+// if length is negative, it functions as "how many bytes from end of file to not load"
+void BinIncFile(char* fname, int offset, int length) {
+	// open the desired file
 	FILE* bif;
-	int res;
-	int totlen = 0;
-	char* fullFilePath;
-
-	fullFilePath = GetPath(fname);
-	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) {
-		Error("Error opening file", fname, FATAL);
-	}
+	char* fullFilePath = GetPath(fname);
+	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("Error opening file", fname, FATAL);
 	free(fullFilePath);
 
-	if (offset == -1) offset = 0;
+	// Get length of file
+	int totlen;
+	if (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0) Error("telling file length", fname, FATAL);
 
-	// Get length of file //
-	if (fseek(bif, 0, SEEK_END))
-		Error("Error seeking file (len)", fname, FATAL);
-	totlen = ftell(bif);
-	if (totlen < 0)
-		Error("Error telling file (len)", fname, FATAL);
-
-	if (len == -1) len = totlen - offset;
-	// Getting final length of included data //
-	if (0 == len) {
-		Warning("INCBIN: requested to include no data (len=0)");
+	// process arguments (extra features like negative offset/length or INT_MAX length)
+	// negative offset means "from the end of file"
+	if (offset < 0) offset += totlen;
+	// negative length means "except that many from end of file"
+	if (length < 0) length += totlen - offset;
+	// default length INT_MAX is "till the end of file"
+	if (INT_MAX == length) length = totlen - offset;
+	// verbose output of final values (before validation may terminate assembler)
+	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
+		char diagnosticTxt[MAX_PATH];
+		SPRINTF4(diagnosticTxt, MAX_PATH, "include data: name=%s (%d bytes) Offset=%d  Len=%d", fname, totlen, offset, length);
+		_CERR diagnosticTxt _ENDL;
+	}
+	// limit requested length to maximum of 64kiB
+	if (length > 0x10000) {
+		length = 0x10000;
+		Warning("include data: requested length truncated to maximum 64kiB");
+	}
+	// validate the resulting [offset, length]
+	if (offset < 0 || length < 0 || totlen < offset + length) {
+		Error("file too short", fname, FATAL);
+	}
+	if (0 == length) {
+		Warning("include data: requested to include no data (length=0)");
 		fclose(bif);
 		return;
 	}
 
-	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
-		char diagnosticTxt[MAX_PATH];
-		SPRINTF3(diagnosticTxt, MAX_PATH, "INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
-		_CERR diagnosticTxt _ENDL;
-	}
-
-	// Check requested data //
-	if (offset + len > totlen)
-		Error("Error file too short", fname, FATAL);
-
-	// Seek to begin of including part //
-	if (offset > totlen)
-		Error("Offset overflows file length", fname, FATAL);
-	if (fseek(bif, offset, SEEK_SET))
-		Error("Error seeking file (offs)", fname, FATAL);
-	if (ftell(bif) != offset)
-		Error("Error telling file (offs)", fname, FATAL);
-
-	// Getting final length of included data //
-	if (len > 0x10000) {
-		len = 0x10000;
-		Warning("Included data truncated to 64kB from");
+	// Seek to the beginning of part to include
+	if (fseek(bif, offset, SEEK_SET) || ftell(bif) != offset) {
+		Error("seeking in file to offset", fname, FATAL);
 	}
 
 	if (pass != LASTPASS) {
-		CurAddress = (CurAddress + len) & 0xFFFF;
-		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
+		CurAddress = (CurAddress + length) & 0xFFFF;
+		if (PseudoORG) adrdisp = (adrdisp + length) & 0xFFFF;
 	} else {
-		// Reading data from file //
-		char* data = new char[len + 1];
-		char *bp = data;
+		// Reading data from file
+		char* data = new char[length + 1], * bp = data;
+		if (NULL == data) ErrorInt("No enough memory for file", (length + 1), FATAL);
+		size_t res = fread(bp, 1, length, bif);
+		if (res != (size_t)length) Error("reading data from file failed", fname, FATAL);
 
-		if (bp == NULL)
-			ErrorInt("No enough memory for file", (len + 1), FATAL);
-
-		res = fread(bp, 1, len, bif);
-
-		if (res == -1)
-			Error("Can't read file (read error)", fname, FATAL);
-		if (res != len)
-			Error("Can't read file (no enough data)", fname, FATAL);
-
-		while (len--) {
+		while (length--) {
 			CheckRamLimitExceeded();
 
-			if (pass == LASTPASS) {
-				WriteBuffer[WBLength++] = *bp;
-				if (WBLength == DESTBUFLEN) WriteDest();
-
-				if (DeviceID) {
-					if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
-					*MemoryPointer = *bp;
-
-					MemoryPointer++;
-				}
+			WriteBuffer[WBLength++] = *bp;
+			if (WBLength == DESTBUFLEN) WriteDest();
+			if (DeviceID) {
+				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
+				*MemoryPointer++ = *bp;
 			}
 			++bp;
 			++CurAddress;

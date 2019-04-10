@@ -180,6 +180,14 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>work in progress - 1.12.1</term>
+
+            <listitem>
+              <para><programlisting>- INCBIN: added support for negative offset/length values</programlisting></para>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>07.04.2019 - 1.12.0</term>
 
             <listitem>
@@ -1910,12 +1918,14 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
 
             <listitem>
               <para>To include a binary file into the outputfile. The offset
-              and length are optional.<example>
+              and length are optional. Added in v1.12.1: if negative offset or length is provided,
+              it counts relatively from the end of the file.<example>
                   <title></title>
 
                   <para><programlisting>    INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
     INCBIN "rantab.com",3,256 ; include 256 bytes from offset 3
-    INCBIN gfx.scc ,7         ; note the space between the filename and the ',7' here :)</programlisting></para>
+    INCBIN gfx.scc ,,7        ; 7 bytes from offset 0 (unquoted filename must end with space)
+    INCBIN "48.rom",-768,-256 ; include (from 16kiB file) 512 bytes 15616..16127</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>

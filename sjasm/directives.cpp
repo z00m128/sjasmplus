@@ -512,27 +512,21 @@ void dirSIZE() {
 }
 
 void dirINCBIN() {
-	aint val;
-	char* fnaam;
-	int offset = -1,length = -1;
-
-	fnaam = GetFileName(lp);
+	int offset = 0, length = INT_MAX;
+	char* fnaam = GetFileName(lp);
 	if (comma(lp)) {
+		aint val;
 		if (!comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCBIN] Syntax error", bp, IF_FIRST); return;
-			}
-			if (val < 0) {
-				Error("[INCBIN] Negative values are not allowed", bp); return;
+				Error("[INCBIN] Syntax error", bp, SUPPRESS);
+				return;
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCBIN] Syntax error", bp, IF_FIRST); return;
-			}
-			if (val < 0) {
-				Error("[INCBIN] Negative values are not allowed", bp); return;
+				Error("[INCBIN] Syntax error", bp, SUPPRESS);
+				return;
 			}
 			length = val;
 		}

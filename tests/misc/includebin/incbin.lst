@@ -13,22 +13,20 @@
 12    0200                  INCBIN "incbin/incbin.bin"  ,  ,  128
 13    0280                  INCBIN "incbin/incbin.bin"  ,  128  ,  64
 14    02C0                  INCBIN "incbin/incbin.bin"  ,  192
-15    0300                  ; = 3x256 = 768B output
+15    0300                  ; = 3x256 = 768B output so far
 16    0300
-17    0300                  ; Exercise (some) error/warning states of INCBIN (others are type FATAL, PITA to test)
-incbin.asm(18): error: [INCBIN] Negative values are not allowed: INCBIN "incbin/incbin.bin",-1
-18    0300                  INCBIN "incbin/incbin.bin",-1
-incbin.asm(19): error: [INCBIN] Negative values are not allowed: INCBIN "incbin/incbin.bin",,-1
-19    0300                  INCBIN "incbin/incbin.bin",,-1
-incbin.asm(20): warning: INCBIN: requested to include no data (len=0)
-20    0300                  INCBIN "incbin/incbin.bin",,0
-incbin.asm(21): warning: INCBIN: requested to include no data (len=0)
-21    0300                  INCBIN "incbin/incbin.bin",256
-incbin.asm(22): warning: INCBIN: requested to include no data (len=0)
-22    0300                  INCBIN "incbin/incbin.bin",123,0
-23    0300
-24    0300                  OUTEND
-25    0300
+17    0300                  ; Exercise the new negative offset/length functionality
+18    0300                  INCBIN "incbin/incbin.bin", -256, -64   ; first 192B
+19    03C0                  INCBIN "incbin/incbin.bin", -64         ; remaining 64B
+20    0400                  ; = 4x256 = 1024B output so far
+21    0400                  OUTEND
+22    0400
+23    0400                  ; Exercise (some) error/warning states of INCBIN
+incbin.asm(24): warning: include data: requested to include no data (length=0)
+24    0400                  INCBIN "incbin/incbin.bin",,0           ; warning length=0
+25    0400                  ;INCBIN "incbin/incbin.bin",,65537       ; warning max 64kiB - too short file to test this
+26    0400                  // rest of errors are FATAL type, PITA to test
+27    0400
 # file closed: incbin.asm
 
 Value    Label
