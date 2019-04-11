@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ## script init + helper functions
-shopt -s globstar nullglob
 PROJECT_DIR=$PWD
 exitCode=0
 totalAsmFiles=0        # +1 per ASM
@@ -37,9 +36,13 @@ rm -rf "$BUILD_DIR"
 # terminate in case the create+cd will fail, this is vital
 mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 echo -e "Searching directory \033[96m${PROJECT_DIR}/examples/\033[0m for '.asm' files..."
+OLD_IFS=$IFS
+IFS=$'\n'
+EXAMPLE_FILES=($(find "$PROJECT_DIR/examples/" -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
+IFS=$OLD_IFS
 
 ## go through all asm files in examples directory and try to assemble them
-for f in "${PROJECT_DIR}/examples/"**/*.asm; do
+for f in "${EXAMPLE_FILES[@]}"; do
     ## ignore files in the ignore list
     for ignoreFile in "${ignoreAsmFiles[@]}"; do
         [[ "$ignoreFile" == "${f#${PROJECT_DIR}/examples/}" ]] && f='ignore.i.asm'

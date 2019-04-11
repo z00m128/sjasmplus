@@ -40,6 +40,7 @@ v Makefile? ... na to by som dal ale druhu premennu "SJASMPLUSFLAGS"
 
 Macro world issues:
 - macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
+- more operators, capable of some string manipulation and maybe some type/expression checks (islabel)
 - ability to issue real instruction (ignoring possible macro of same name)
 
 Input file without extension does produce wrong default output filename
@@ -52,6 +53,7 @@ Input file without extension does produce wrong default output filename
 (can substitute only at beginning)
 ? extend that rule to underscore at end sealing also the tail?
 - lock some keywords for define/etc... at least put them under warning
+- inhibitor of substitutions/macros happening (like `@djnz` always assembled as djnz inst.
 ** Current refactored implementation:
 - doesn't play priorities as proposed above
 - evaluation of defarray index is still flaky and doesn't work correctly inside macro/etc

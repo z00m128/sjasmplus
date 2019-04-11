@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ## script init + helper functions
-shopt -s globstar nullglob
 HELP_STRING="Run the script from \033[96mproject root\033[0m directory."
 HELP_STRING+="\nYou can provide one argument to specify particular sub-directory in \033[96mtests\033[0m directory, example:"
 HELP_STRING+="\n  $ \033[96mContinuousIntegration/test_folder_tests.sh z80/\033[0m \t\t# to run only tests from \033[96mtests/z80/\033[0m directory"
@@ -30,11 +29,14 @@ source ContinuousIntegration/common_fn.sh
 # seek for files to be processed (either provided by user argument, or default tests/ dir)
 if [[ $# -gt 0 ]]; then
     [[ "-h" == "$1" || "--help" == "$1" ]] && echo -e $HELP_STRING && exit 0
-    TEST_FILES=("${PROJECT_DIR}/tests/$1"**/*.asm)
 else
     echo -e "Searching directory \033[96m${PROJECT_DIR}/tests/\033[0m for '.asm' files..."
-    TEST_FILES=("${PROJECT_DIR}/tests/"**/*.asm)  # try default test dir
 fi
+OLD_IFS=$IFS
+IFS=$'\n'
+TEST_FILES=($(find "$PROJECT_DIR/tests/$1"* -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
+IFS=$OLD_IFS
+
 # check if some files were found, print help message if search failed
 [[ -z $TEST_FILES ]] && echo -e "\033[91mno files found\033[0m\n$HELP_STRING" && exit 1
 
@@ -46,10 +48,6 @@ mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 
 ## go through all asm files in tests directory and verify results
 for f in "${TEST_FILES[@]}"; do
-    ## ignore directories themselves (which have "*.asm" name)
-    [[ -d $f ]] && continue
-    ## ignore "include" files (must have ".i.asm" extension)
-    [[ ".i.asm" == ${f:(-6)} ]] && continue
     ## standalone .asm file was found, try to build it
     rm -rf *        # clear the temporary build directory
     totalTests=$((totalTests + 1))
@@ -65,7 +63,7 @@ for f in "${TEST_FILES[@]}"; do
     MSG_LIST_FILE="${CFG_BASE}.msglst"
     # copy "src_dir/basename*.(asm|lua|cli)" file(s) into working directory
     for subf in "$src_base"*.{asm,lua,cli}; do
-        [[ -d "$subf" ]] && continue
+        [[ ! -e "$subf" || -d "$subf" ]] && continue
         cp "$subf" ".${subf#$src_dir}"
     done
     # copy "src_dir/basename*" sub-directories into working directory (ALL files in them)

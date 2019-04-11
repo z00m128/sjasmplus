@@ -1,12 +1,12 @@
 #!/bin/bash
 
-echo -e "\033[91mThis script will try to build all tests 'in place' => may and will overwrite files used to verify test results.\n\033[96m"
+echo -e "\033[91mThis script will try to build all tests 'in place' => may and will overwrite files used to verify test results."
+echo -e "\033[93mTo just run the tests use the \"runner\" script '\033[96mtest_folder_tests.sh\033[93m'.\n\033[96m"
 read -p "Are you sure? (y/n) " -n 1 -r
 echo -e "\033[0m"
 [[ ! $REPLY == "y" ]] && exit 0
 
 ## script init + helper functions
-shopt -s globstar nullglob
 PROJECT_DIR=$PWD
 exitCode=0
 totalTests=0        # +1 per ASM
@@ -26,21 +26,16 @@ source ContinuousIntegration/common_fn.sh
 [[ -z "$EXE" ]] && EXE=sjasmplus
 
 # seek for files to be processed (either provided by user argument, or default tests/ dir)
-if [[ $# -gt 0 ]]; then
-    TEST_FILES=("${PROJECT_DIR}/tests/$1"**/*.asm)
-else
-    echo -e "Searching directory \033[96m${PROJECT_DIR}/tests/\033[0m for '.asm' files..."
-    TEST_FILES=("${PROJECT_DIR}/tests/"**/*.asm)  # try default test dir
-fi
+echo -e "Searching directory \033[96m${PROJECT_DIR}/tests/\033[0m for '.asm' files..."
+OLD_IFS=$IFS
+IFS=$'\n'
+TEST_FILES=($(find "$PROJECT_DIR/tests/$1"* -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
+IFS=$OLD_IFS
 # check if some files were found, print help message if search failed
 [[ -z $TEST_FILES ]] && echo -e "\033[91mno files found\033[0m\n" && exit 1
 
 ## go through all asm files in tests directory and build them "in place" (rewriting result files)
 for f in "${TEST_FILES[@]}"; do
-    ## ignore directories themselves (which have "*.asm" name)
-    [[ -d $f ]] && continue
-    ## ignore "include" files (must have ".i.asm" extension)
-    [[ ".i.asm" == ${f:(-6)} ]] && continue
     ## standalone .asm file was found, try to build it
     totalTests=$((totalTests + 1))
     # set up various "test-name" variables for file operations
@@ -80,4 +75,5 @@ done # end of FOR (go through all asm files)
     && exit 0
 # display error summary and exit with error code
 echo -e "\033[91mFINISHED: $exitCode/$totalTests tests failed to build \033[91m■\033[93m■\033[32m■\033[96m■\033[0m"
+echo "(few tests are expected to fail to build by this script, they need manual build using extra options)"
 exit $exitCode
