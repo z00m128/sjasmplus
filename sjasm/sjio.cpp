@@ -871,7 +871,11 @@ void OpenDest(int mode) {
 		Error("Error opening file", Options::DestinationFName, FATAL);
 	}
 	Options::NoDestinationFile = false;
-	if (NULL == FP_RAW && '-' == Options::RAWFName[0] && 0 == Options::RAWFName[1]) FP_RAW = stdout;
+	if (NULL == FP_RAW && '-' == Options::RAWFName[0] && 0 == Options::RAWFName[1]) {
+		FP_RAW = stdout;
+		fflush(stdout);
+		switchStdOutIntoBinaryMode();
+	}
 	if (FP_RAW == NULL && Options::RAWFName[0] && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {
 		Error("Error opening file", Options::RAWFName);
 	}

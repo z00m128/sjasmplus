@@ -74,6 +74,8 @@ long GetTickCount();
 
 #endif
 
+void switchStdOutIntoBinaryMode();
+
 #ifdef USE_LUA
 void LuaShellExec(char *command);
 #endif //USE_LUA
