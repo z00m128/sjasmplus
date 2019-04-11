@@ -183,7 +183,8 @@
             <term>work in progress - 1.12.1</term>
 
             <listitem>
-              <para><programlisting>- INCBIN: added support for negative offset/length values</programlisting></para>
+              <para><programlisting>- INCBIN: added support for negative offset/length values
+- Fixed: INCTRD offset, LUA inside macros</programlisting></para>
             </listitem>
           </varlistentry>
 
@@ -3022,7 +3023,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.parse_code("label")</term>
+            <term>[void] sj.parse_code("code")</term>
 
             <listitem>
               <para>See <link linkend="lua__pc">_pc</link></para>
@@ -3054,7 +3055,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.file_exists("message")</term>
+            <term>[boolean] sj.file_exists("filename")</term>
 
             <listitem>
               <para>Check for file exists.</para>

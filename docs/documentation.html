@@ -121,7 +121,8 @@
       
 
       <div class="variablelist"><dl class="variablelist"><dt><span class="term">work in progress - 1.12.1</span></dt><dd>
-              <pre class="programlisting">- INCBIN: added support for negative offset/length values</pre>
+              <pre class="programlisting">- INCBIN: added support for negative offset/length values
+- Fixed: INCTRD offset, LUA inside macros</pre>
             </dd><dt><span class="term">07.04.2019 - 1.12.0</span></dt><dd>
               <pre class="programlisting">- Fixed parsing of expressions starting with string literal
 - Fixed listing of DS directive with negative values, added value check warning
@@ -2104,7 +2105,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
               ADD A,B")</code></p>
             </dd><dt><span class="term">[integer] sj.calc("expression")</span></dt><dd>
               <p>See <a class="link" href="#lua__c">_c</a></p>
-            </dd><dt><span class="term">[void] sj.parse_code("label")</span></dt><dd>
+            </dd><dt><span class="term">[void] sj.parse_code("code")</span></dt><dd>
               <p>See <a class="link" href="#lua__pc">_pc</a></p>
             </dd><dt><span class="term">[void] sj.parse_line("label code")</span></dt><dd>
               <p>See <a class="link" href="#lua__pl">_pl</a></p>
@@ -2112,7 +2113,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</pre><p>Only
               <p>Print error message.</p>
             </dd><dt><span class="term">[void] sj.warning("message")</span></dt><dd>
               <p>Print warning message.</p>
-            </dd><dt><span class="term">[boolean] sj.file_exists("message")</span></dt><dd>
+            </dd><dt><span class="term">[boolean] sj.file_exists("filename")</span></dt><dd>
               <p>Check for file exists.</p>
             </dd><dt><span class="term">[string] sj.get_define("name")</span></dt><dd>
               <p>Get define value.</p>
