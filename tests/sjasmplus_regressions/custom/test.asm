@@ -1,7 +1,4 @@
         device zxspectrum128
-; options were modified to save --sym=test.tap as TAP to get binary diff in CI tests
-; the BIN is also tested. Remaining outputs are NOT tested.
-; TODO modify CI script to handle even these more exotic tests with custom checks
         OUTPUT test.bin
 
         org #0

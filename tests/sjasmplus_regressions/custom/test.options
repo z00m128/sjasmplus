@@ -1,1 +1,1 @@
---nologo --sym=test.tap --exp=test.exp --raw=test.raw
+--nologo --sym=test.sym --exp=test.exp --raw=test.raw
