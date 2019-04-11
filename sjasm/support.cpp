@@ -69,6 +69,11 @@ long GetTickCount() {
 
 #endif	// #if !defined (_MSC_VER)
 
+#ifdef _WIN32
+#include <fcntl.h>
+#include <io.h>
+#endif
+
 void switchStdOutIntoBinaryMode() {
 #ifdef __CYGWIN__
 	setmode(1, O_BINARY);
