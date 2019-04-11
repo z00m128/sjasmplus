@@ -29,9 +29,15 @@ Keep include paths (for `-I` option) relative to base test file (`some.asm`) pos
 
 ## But I also want to check if the produced file is binary identical
 
-Add `some.tap` and/or `some.bin` files next to the test.
+Add `some.tap`, `some.bin` and/or `some.raw` files next to the test.
 
-Make sure the basename of binary files are identical with asm file basename (only one TAP and one BIN supported at this moment, for multi-bin output verification the current test script must be extended, prepare such test and raise the issue on github).
+Make sure the basename of binary files are identical with asm file basename (only one TAP, one BIN and one RAW are supported at this moment, for multi-bin output verification the current test script must be extended, prepare such test and raise the issue on github).
+
+## But I also want to check symbol/export/label files are identical
+
+Add `some.sym`, `some.exp` and/or `some.lbl` files next to the test and add those outputs into `some.options` file or use directives in source to produce them.
+
+Make sure the basename of files are identical with asm file basename.
 
 ## And I want a space in the test file name or sub-directory
 
@@ -41,7 +47,7 @@ Well, ok? Go ahead.
 
 ## There's too much clutter around the original `some.asm` file
 
-If you add directory with `some.config` name, you can move `some.options`, `some.lst`, `some.tap` and `some.bin` files into it (this directory content is not copied into temporary build directory, so these files are not available to the test itself while being assembled).
+If you add directory with `some.config` name, you can move `some.options`, `some.lst` and `some.tap|bin|raw|sym|exp|lbl` files into it (this directory content is not copied into temporary build directory, so these files are not available to the test itself while being assembled).
 
 ## And I want to carelessly mix upper/lower case letters in file names, having different name in source and different on disk
 
