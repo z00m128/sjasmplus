@@ -1227,13 +1227,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 }
 
 EReturn ReadFile() {
-	while (IsRunning && (lijst || ReadLine())) {
-		if (lijst) {
-			if (!lijstp) return END;
-			STRCPY(line, LINEMAX, lijstp->string);
-			substitutedLine = line;		// reset substituted listing
-			lijstp = lijstp->next;
-		}
+	while (ReadLine()) {
 		const bool isInsideDupCollectingLines = !RepeatStack.empty() && !RepeatStack.top().IsInWork;
 		if (!isInsideDupCollectingLines) {
 			char* p = line;
@@ -1262,13 +1256,7 @@ EReturn ReadFile() {
 
 EReturn SkipFile() {
 	int iflevel = 0;
-	while (IsRunning && (lijst || ReadLine())) {
-		if (lijst) {
-			if (!lijstp) return END;
-			STRCPY(line, LINEMAX, lijstp->string);
-			substitutedLine = line;		// reset substituted listing
-			lijstp = lijstp->next;
-		}
+	while (ReadLine()) {
 		char* p = line;
 		SkipBlanks(p);
 		if ('.' == *p) ++p;
@@ -1296,16 +1284,27 @@ EReturn SkipFile() {
 	return END;
 }
 
-int ReadLine(bool SplitByColon) {
+int ReadLineNoMacro(bool SplitByColon) {
 	if (!IsRunning || !ReadBufData()) return 0;
 	ReadBufLine(false, SplitByColon);
 	return 1;
 }
 
+int ReadLine(bool SplitByColon) {
+	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
+		if (!lijstp) return 0;
+		STRCPY(line, LINEMAX, lijstp->string);
+		substitutedLine = line;		// reset substituted listing
+		lijstp = lijstp->next;
+		return 1;
+	}
+	return ReadLineNoMacro(SplitByColon);
+}
+
 int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	// f itself should be already NULL, not resetting it here
 	CStringsList** s = &f;
-	while (ReadLine()) {
+	while (ReadLineNoMacro()) {
 		char* p = line;
 		SkipBlanks(p);
 		if ('.' == *p) ++p;

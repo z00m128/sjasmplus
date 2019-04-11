@@ -88,6 +88,7 @@ unsigned char MemGetByte(unsigned int address);
 unsigned int MemGetWord(unsigned int address);
 int SaveBinary(char* fname, int start, int length);
 int SaveHobeta(char* fname, char* fhobname, int start, int length);
+int ReadLineNoMacro(bool SplitByColon = true);
 int ReadLine(bool SplitByColon = true);
 EReturn ReadFile();
 EReturn SkipFile();

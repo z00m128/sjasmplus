@@ -1610,20 +1610,20 @@ void dirSTRUCT() {
 	}
 	st = StructureTable.Add(naam, offset, bind, global);
 	ListFile();
-	while ('o') {
-		if (!ReadLine()) {
-			Error("[STRUCT] Unexpected end of structure"); break;
-		}
+	while (ReadLine()) {
 		lp = line; /*if (White()) { SkipBlanks(lp); if (*lp=='.') ++lp; if (cmphstr(lp,"ends")) break; }*/
 		SkipBlanks(lp);
 		if (*lp == '.') {
 			++lp;
-		} if (cmphstr(lp, "ends")) {
-			break;
-		 }
+		}
+		if (cmphstr(lp, "ends")) {
+			st->deflab();
+			return;
+		}
 		ParseStructLine(st);
 		ListFile(true);
 	}
+	Error("[STRUCT] Unexpected end of structure");
 	st->deflab();
 }
 
