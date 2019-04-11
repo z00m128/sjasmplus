@@ -100,7 +100,7 @@ for f in "${TEST_FILES[@]}"; do
     ## validate results
     # LST file overrides assembling exit code (new exit code is from diff between lst files)
     if [[ -s "${LIST_FILE}" ]]; then
-        diff --strip-trailing-cr "${LIST_FILE}" "${dst_base}.lst"
+        diff -a --strip-trailing-cr "${LIST_FILE}" "${dst_base}.lst"
         last_result=$?
         last_result_origin="diff"
     fi
@@ -111,16 +111,26 @@ for f in "${TEST_FILES[@]}"; do
     else
         echo -e "\033[92mOK: assembling or listing\033[0m"
     fi
-    # check binary results, if TAP or BIN are present in source directory
-    for binext in {'tap','bin'}; do
+    # check binary results, if TAP, BIN or RAW are present in source directory
+    for binext in {'tap','bin','raw'}; do
         if [[ -f "${CFG_BASE}.${binext}" ]]; then
             upExt=`echo $binext | tr '[:lower:]' '[:upper:]'`
             totalChecks=$((totalChecks + 1))        # +1 for each binary check
             echo -n -e "\033[91m"
             ! diff "${CFG_BASE}.${binext}" "${dst_base}.${binext}" \
-                && exitCode=$((exitCode + 1)) \
+                && exitCode=$((exitCode + 1)) && echo -e "Error: $upExt differs\033[0m" \
                 || echo -e "\033[92mOK: $upExt is identical\033[0m"
-            echo -n -e "\033[0m"
+        fi
+    done
+    # check other text results (not LST), if they are present in source directory
+    for txtext in {'sym','exp','lbl'}; do
+        if [[ -f "${CFG_BASE}.${txtext}" ]]; then
+            upExt=`echo $txtext | tr '[:lower:]' '[:upper:]'`
+            totalChecks=$((totalChecks + 1))        # +1 for each text check
+            echo -n -e "\033[91m"
+            ! diff -a --strip-trailing-cr "${CFG_BASE}.${txtext}" "${dst_base}.${txtext}" \
+                && exitCode=$((exitCode + 1)) && echo -e "Error: $upExt differs\033[0m" \
+                || echo -e "\033[92mOK: $upExt is identical\033[0m"
         fi
     done
     #read -p "press..."      # DEBUG helper to examine produced files
