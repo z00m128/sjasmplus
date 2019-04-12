@@ -74,7 +74,6 @@ new_apostrophe.asm(39): warning: Bytes lost (0x5C45)
 41    0091 3E 27            LD A,"'"    ; A = 0x27
 42    0093 3E 27            LD A,''''   ; A = 0x27 ; since v1.11
 43    0095
-44    0095                  END     ; scratch for some experiments
 # file closed: new_apostrophe.asm
 
 Value    Label
