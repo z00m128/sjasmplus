@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<!--
+  Z80 assembly Kate SYNTAX HIGHLIGHTING RULES for SJASMPLUS assembler
+  sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
+
+  Created: Peter Helcmanovsky <ped@7gods.org>
+  Version: 0.7 12/04/2019
+
+  To install locally for your KDE5 desktop environment, copy the XML file into:
+    ~/.local/share/org.kde.syntax-highlighting/syntax/
+  (and restart the editors)
+
+Changelog:
+  // dd/mm/yyyy: version x.y (keep changelog in descending order)
+  //   what was modified
+
+  12/04/2019: version 0.7
+    Forked from my other asm-z80.xml syntax file, which is trying to support multiple
+    Z80 assemblers at the same time. But I'm spending more time with sjasmplus lately.
+
+  08/02/2019: version 0.6
+    + fix: "out (c), 0" was not highlighted as unofficial instruction (space ahead 0)
+
+  19/01/2019: version 0.5
+    + "error" context added to report unexpected arguments on remaining line (only *FEW*
+        cases are detected at the moment, it's nowhere near checking syntax properly)
+    + Unofficial Z80 instructions highlighted as different category (dsExtension)
+    + extra category for Z80N instructions (and Z80N control-flow instruction)
+        (highlights as ordinary instructions by default, user can manually adjust colors)
+    + string highlight separated for apostrophe and quotes (other will be part of string)
+    + "hex" directive - improved check marking extra digit/non-digit as error
+    + couple of instructions detection improved (adding "error" context for arguments,etc)
+
+    This is probably one of last versions trying to stay "universal", as it works
+    considerably well for me (after about one month of using it actively), future
+    revisions will probably focus to narrow down syntax into more strict mode,
+    preferring my desired code style, and particular assembler ("pasmoNext" probably).
+
+  06/01/2019: version 0.2
+    + instructions split into general group and control-flow group
+    + comments now have TODO/FIXME/FIX ME highlighting support
+
+  30/12/2018: version 0.1
+    Initial version, released as part of ZXNextTests project (as "work in progress")
+
+TODO missing things:
+    - argument highlighting (symbols, operators, ...) and validation of expected number
+        of arguments, etc... = of little importance to me personally, probably never
+    - arguments-end turning back to instruction/error context
+    - macro/equ/label symbols differentiation = I would *love* these, but they are not
+        possible with current Kate highlighting, as it would require extra input injected
+        by editor through some new API, to provide list of various (type) symbols.
+    - "repeater" directive ".expression" support
+    - non-label identifiers (i.e. which are not valid labels (ignored by Label rules),
+      but they are valid identifiers for DEFINE or macro argument names
+    - Lua syntax highlighting for LUA-ENDLUA blocks?
+    - check other FIXME/TODO comments (this is work-in-progress, far from finished)
+    - Label identifiers rules into some xml macro (entities were in docs?).
+    - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
+
+-->
+<language name="Z80 (sjasmplus)" section="Assembler" version="5" kateversion="5.0" extensions="*.asm;*.a80" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+  <highlighting>
+    <list name="registers">
+      <!-- General purpose registers -->
+      <item>a</item>
+      <item>b</item>
+      <item>c</item>
+      <item>d</item>
+      <item>e</item>
+      <item>h</item>
+      <item>l</item>
+      <item>ixh</item>
+      <item>ixl</item>
+      <item>iyh</item>
+      <item>iyl</item>
+      <item>af</item>
+      <item>bc</item>
+      <item>de</item>
+      <item>hl</item>
+      <item>ix</item>
+      <item>iy</item>
+      <item>sp</item>
+      <!-- Shadow registers (only af' can be used directly in instruction) -->
+      <item>af'</item>
+      <item>bc'</item>
+      <item>de'</item>
+      <item>hl'</item>
+      <!-- Special registers -->
+      <item>i</item>
+      <item>r</item>
+    </list>
+    <list name="flow-instructions">
+      <item>call</item>
+      <item>djnz</item>
+      <item>halt</item>
+      <item>jp</item>
+      <item>jr</item>
+      <item>ret</item>
+      <item>reti</item>
+      <item>retn</item>
+      <item>rst</item>
+    </list>
+    <list name="instructions">
+      <item>adc</item>
+      <item>add</item>
+      <item>and</item>
+      <item>bit</item>
+      <item>ccf</item>
+      <item>cp</item>
+      <item>cpd</item>
+      <item>cpdr</item>
+      <item>cpi</item>
+      <item>cpir</item>
+      <item>cpl</item>
+      <item>daa</item>
+      <item>dec</item>
+      <item>di</item>
+      <item>ei</item>
+      <item>ex</item>
+      <item>exx</item>
+      <item>im</item>
+      <item>in</item>
+      <item>inc</item>
+      <item>ind</item>
+      <item>indr</item>
+      <item>ini</item>
+      <item>inir</item>
+      <item>ld</item>
+      <item>ldd</item>
+      <item>lddr</item>
+      <item>ldi</item>
+      <item>ldir</item>
+      <item>neg</item>
+      <item>nop</item>
+      <item>or</item>
+      <item>otdr</item>
+      <item>otir</item>
+      <item>out</item>
+      <item>outd</item>
+      <item>outi</item>
+      <item>pop</item>
+      <item>push</item>
+      <item>res</item>
+      <item>rl</item>
+      <item>rla</item>
+      <item>rlc</item>
+      <item>rlca</item>
+      <item>rld</item>
+      <item>rr</item>
+      <item>rra</item>
+      <item>rrc</item>
+      <item>rrca</item>
+      <item>rrd</item>
+      <item>sbc</item>
+      <item>scf</item>
+      <item>set</item>
+      <item>sla</item>
+      <item>sra</item>
+      <item>srl</item>
+      <item>sub</item>
+      <item>xor</item>
+    </list>
+    <list name="instructions-unofficial">
+      <!-- Unofficial instructions -->
+      <item>sli</item>
+    </list>
+    <list name="instructions-z80n">
+      <!-- ZX Spectrum Next (Z80N) extra instructions -->
+      <item>brlc</item>
+      <item>bsla</item>
+      <item>bsra</item>
+      <item>bsrf</item>
+      <item>bsrl</item>
+      <item>lddrx</item>
+      <item>lddx</item>
+      <item>ldirx</item>
+      <item>ldix</item>
+      <item>ldpirx</item>
+      <item>ldws</item>
+      <item>mirror</item>
+      <item>mul</item>
+      <item>nextreg</item>
+      <item>outinb</item>
+      <item>pixelad</item>
+      <item>pixeldn</item>
+      <item>setae</item>
+      <item>swapnib</item>
+      <item>test</item>
+    </list>
+    <list name="data">
+      <!-- Initialized data -->
+      <item>abyte</item>
+      <item>abytec</item>
+      <item>abytez</item>
+      <item>block</item>
+      <item>byte</item>
+      <item>d24</item>
+      <item>db</item>
+      <item>dc</item>
+      <item>dd</item>
+      <item>defb</item>
+      <item>defd</item>
+      <item>defg</item>
+      <item>defh</item>
+      <item>defm</item>
+      <item>defs</item>
+      <item>defw</item>
+      <item>dg</item>
+      <item>dh</item>
+      <item>dm</item>
+      <item>ds</item>
+      <item>dw</item>
+      <item>dword</item>
+      <item>dz</item>
+      <item>hex</item>
+      <item>word</item>
+      </list>
+    <list name="directives">
+      <item>align</item>
+      <item>assert</item>
+      <item>binary</item>
+      <item>defarray</item>
+      <item>defdevice</item>
+      <item>define</item>
+      <item>defl</item>
+      <item>dephase</item>
+      <item>device</item>
+      <item>disp</item>
+      <item>display</item>
+      <item>dup</item>
+      <item>edup</item>
+      <item>else</item>
+      <item>emptytap</item>
+      <item>emptytrd</item>
+      <item>encoding</item>
+      <item>end</item>
+      <item>endif</item>
+      <item>endlua</item>
+      <item>endm</item>
+      <item>endmap</item>
+      <item>endmod</item>
+      <item>endmodule</item>
+      <item>endr</item>
+      <item>ends</item>
+      <item>endt</item>
+      <item>ent</item>
+      <item>equ</item>
+      <item>export</item>
+      <item>field</item>
+      <item>fpos</item>
+      <item>if</item>
+      <item>ifdef</item>
+      <item>ifn</item>
+      <item>ifndef</item>
+      <item>ifused</item>
+      <item>ifnused</item>
+      <item>incbin</item>
+      <item>inchob</item>
+      <item>include</item>
+      <item>includelua</item>
+      <item>inctrd</item>
+      <item>insert</item>
+      <item>labelslist</item>
+      <item>lua</item>
+      <item>macro</item>
+      <item>map</item>
+      <item>memorymap</item>
+      <item>module</item>
+      <item>org</item>
+      <item>outend</item>
+      <item>output</item>
+      <item>page</item>
+      <item>phase</item>
+      <item>rept</item>
+      <item>savebin</item>
+      <item>savehob</item>
+      <item>savenex</item>
+      <item>savesna</item>
+      <item>savetap</item>
+      <item>savetrd</item>
+      <item>shellexec</item>
+      <item>size</item>
+      <item>slot</item>
+      <item>struct</item>
+      <item>tapend</item>
+      <item>tapout</item>
+      <item>textarea</item>
+      <item>undefine</item>
+      <item>unphase</item>
+    </list>
+    <list name="operators"> <!-- TODO implement all of this -->
+      <!-- Predefined values by assembler (not really an operator) -->
+      <item>_SJASMPLUS</item>
+      <item>_VERSION</item>
+      <item>_RELEASE</item>
+      <item>_ERRORS</item>
+      <item>_WARNINGS</item>
+      <!-- Operators -->
+      <item>and</item>
+      <item>high</item>
+      <item>low</item>
+      <item>mod</item>
+      <item>not</item>
+      <item>or</item>
+      <item>shl</item>
+      <item>shr</item>
+      <item>xor</item>
+      <!-- other operators/symbols:
+      $ $$ ! ~ + - * / % << >> >>> <? >? < > <= >= = == != & ^ | && || [ ] ( ) { }
+      -->
+      </list>
+    <contexts>
+      <context name="LabelLine" attribute="Normal Text" lineEndContext="#stay" lineEmptyContext="#stay"
+               fallthrough="true" fallthroughContext="Error">
+        <!-- Labels can start only at the beginning of the line, if not at beginning, the "Normal" context follows -->
+        <DetectSpaces attribute="Normal Text" context="#pop!Normal"/>
+        <DetectChar attribute="Comment" context="#pop!Normal" char=";" lookAhead="true"/>
+        <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="/" lookAhead="true"/>
+        <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
+        <RegExpr attribute="Label" context="#pop!Normal" firstNonSpace="true"
+                 String="^(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*:?"/>
+        <RegExpr attribute="Label" context="#pop!Normal" String="^[0-9]+:?(\s+|$)"/>
+      </context>
+      <context name="Normal" attribute="Normal Text" lineEndContext="LabelLine"
+               lineEmptyContext="LabelLine" fallthrough="true" fallthroughContext="Arguments">
+        <!-- "normal" line, but without the label at beginning -->
+        <DetectSpaces attribute="Normal Text" context="#stay"/>
+        <IncludeRules context="BeginComment" />
+        <!-- TODO add ".RepeatAmountExpression" directive handler here, to recognize instruction after it -->
+        <WordDetect attribute="Data" context="Hexastring" insensitive="true" String="hex"/>
+        <WordDetect attribute="Data" context="Hexastring" insensitive="true" String="dh"/>
+        <WordDetect attribute="Data" context="Hexastring" insensitive="true" String="defh"/>
+        <WordDetect attribute="Data" context="Bitstring" insensitive="true" String="dg"/>
+        <WordDetect attribute="Data" context="Bitstring" insensitive="true" String="defg"/>
+        <RegExpr attribute="Z80N Flow ins." context="Error" insensitive="true"
+                 String="jp\s+\(c\)\s*"/>
+        <RegExpr attribute="Control Flow ins." context="Arguments" insensitive="true"
+                 String="(call|jp)\s+(nz|z|nc|c|po|pe|p|m|ns|s)\s*,"/>
+        <RegExpr attribute="Control Flow ins." context="Arguments" insensitive="true"
+                 String="jr\s+(nz|z|nc|c)\s*,"/>
+        <RegExpr attribute="Control Flow ins." context="Error" insensitive="true"
+                 String="ret\s+(nz|z|nc|c|po|pe|p|m|ns|s)\b\s*"/>
+        <RegExpr attribute="Unofficial ins." context="Error" insensitive="true"
+                 String="(in\s+(f,\s*|)\(c\)|out\s+\(c\),\s*0\b)\s*"/>
+        <RegExpr attribute="Unofficial ins." context="Error" insensitive="true"
+                 String="(rlc|rrc|rl|rr|sla|sll|sra|sli|sl1|srl)\s+\(\s*(ix|iy)\s*(\+|\-)[^;]*\),\s*[a-ehl]\b\s*"/>
+        <RegExpr attribute="Unofficial ins." context="Error" insensitive="true"
+                 String="(res|set)\s+[0-7],\s*\(\s*(ix|iy)\s*(\+|\-)[^;]*\),\s*[a-ehl]\b\s*"/>
+        <RegExpr attribute="Unofficial ins." context="Error" insensitive="true"
+                 String="(inc|dec|sub|and|or|xor|cp)\s+i[xy][lh]\b\s*"/>
+        <RegExpr attribute="Unofficial ins." context="Error" insensitive="true"
+                 String="(add|adc|sub|and|or|xor|cp)\s+a,\s*i[xy][lh]\b\s*"/>
+        <RegExpr attribute="Unofficial ins." context="Arguments" insensitive="true"
+                 String="ld\s+i[xy][lh],\s*"/>
+        <RegExpr attribute="Unofficial ins." context="Error" insensitive="true"
+                 String="ld\s+[a-e],\s*i[xy][lh]\b\s*"/>
+        <keyword attribute="Control Flow ins." context="Arguments" String="flow-instructions"/>
+        <keyword attribute="Unofficial ins." context="Arguments" String="instructions-unofficial"/>
+        <keyword attribute="Z80N Instructions" context="Arguments" String="instructions-z80n"/>
+        <keyword attribute="Instructions" context="Arguments" String="instructions"/>
+        <keyword attribute="Data" context="Arguments" String="data"/>
+        <!-- end is defined twice (not "insensitive"), b/c "End" is label!, only all-up/all-low is -->
+        <WordDetect attribute="Directives" context="sourceEnd" String="end"/>
+        <WordDetect attribute="Directives" context="sourceEnd" String="END"/>
+        <keyword attribute="Directives" context="Arguments" String="directives"/>
+      </context>
+
+      <!-- After "END" directive show everything as comment -->
+      <context name="sourceEnd" attribute="Comment" lineEndContext="#stay" />
+
+      <context name="Error" attribute="Error" lineEndContext="#pop">
+        <DetectChar attribute="Comment" context="Comment" char=";"/>
+        <Detect2Chars attribute="Comment" context="Comment" char="/" char1="/"/>
+      </context>
+
+      <!-- "Hexastring" highlight for DEFH/DH/HEX directive -->
+      <context name="Hexastring" attribute="Normal Text" lineEndContext="#pop"
+               fallthrough="true" fallthroughContext="#pop!Error">
+        <DetectChar attribute="Comment" context="HexastringQuoted" char="&quot;"/>
+        <DetectChar attribute="Comment" context="HexastringQuoted" char="'"/>
+        <DetectChar attribute="Comment" context="#stay" char=","/>
+        <DetectSpaces attribute="Normal Text" context="#stay"/>
+        <IncludeRules context="BeginComment" />
+        <RegExpr attribute="BaseN" context="#stay" String="([0-9A-Fa-f]{2})+"/>
+      </context>
+      <context name="HexastringQuoted" attribute="Normal Text" lineEndContext="#pop"
+               fallthrough="true" fallthroughContext="#pop#pop!Error">
+        <DetectChar attribute="Comment" context="#pop" char="&quot;"/>
+        <DetectChar attribute="Comment" context="#pop" char="'"/>
+        <DetectSpaces attribute="Normal Text" context="#stay"/>
+        <RegExpr attribute="BaseN" context="#stay" String="([0-9A-Fa-f]{2})+"/>
+      </context>
+
+      <!-- "Bitstring" highlight for DEFG/DG directive -->
+      <context name="Bitstring" attribute="Data" lineEndContext="#pop"
+               fallthrough="true" fallthroughContext="#pop!Error">
+        <DetectChar attribute="Comment" context="#stay" char="&quot;"/>
+        <DetectChar attribute="Comment" context="#stay" char="'"/>
+        <DetectChar attribute="Data" context="#stay" char=" "/>
+        <DetectChar attribute="Data" context="#stay" char="\t"/>
+        <RegExpr attribute="Data" context="BitstringBits" lookAhead="true" String="(([^\s&quot;';][ \t]*){7}[^\s&quot;';])(.*)$"/>
+      </context>
+      <context name="BitstringBits" attribute="Data" lineEndContext="#pop#pop" dynamic="true">
+        <RegExpr attribute="Data" context="#pop" String="%3$" lookAhead="true" dynamic="true" />
+        <RegExpr String="[-._ \t]" attribute="Data" context="#stay" />
+        <RegExpr String="." attribute="Number" context="#stay" />
+      </context>
+
+      <!-- "arguments" = generally anything what is not detected as instruction/directive or is comming after instruction -->
+      <context name="Arguments" attribute="Normal Text" lineEndContext="#pop">
+        <IncludeRules context="BeginComment" />
+        <DetectChar attribute="Normal Text" context="#pop" char=":"/>
+        <DetectChar attribute="String" context="StringApostrophe" char="'"/>
+        <DetectChar attribute="String" context="String" char="&quot;"/>
+        <keyword attribute="Registers" context="#stay" String="registers"/>
+        <RegExpr attribute="Label" context="#stay" String="(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*"/>
+        <RegExpr attribute="Label" context="#stay" String="[0-9]+[bBfF]\b"/>
+        <!-- TODO but some DEFINE/macro-arg identifiers can avoid labels rules, like ".._" is valid! -->
+        <!-- hexadecimal numbers -->
+        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="((\$|0x|#)[a-f0-9]([a-f0-9']*[a-f0-9]|)|\b[0-9]([a-f0-9']*[a-f0-9]|)h)\b"/>
+        <!-- octal numbers -->
+        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="[0-7]([0-7']*[0-7]|)(q|o)\b"/>
+        <!-- binary numbers -->
+        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="(%[01]([01']*[01]|)|[01]([01']*[01]|)b)\b"/>
+        <Int attribute="Number" context="#stay"/>
+        <Detect2Chars attribute="Number" context="#stay" char="$" char1="$"/>
+        <DetectChar attribute="Number" context="#stay" char="$"/>
+      </context>
+
+      <!-- Comments, rules and contexts -->
+      <context name="BeginComment" attribute="Comment" lineEndContext="#pop">
+        <!-- this context just hold rules for starting comment, shouldn't be switched to -->
+        <DetectChar attribute="Comment" context="Comment" char=";"/>
+        <Detect2Chars attribute="Comment" context="Comment" char="/" char1="/"/>
+        <Detect2Chars attribute="Comment" context="CommentB" char="/" char1="*" beginRegion="Comment"/>
+        <Detect2Chars attribute="Error" context="Error" char="*" char1="/"/>
+      </context>
+      <context name="Comment" attribute="Comment" lineEndContext="#pop">
+          <DetectSpaces />
+          <RegExpr attribute="Alert" context="#stay" String="\b(TODO|FIX\s?ME|DEBUG)\b"/>
+      </context>
+      <context name="CommentB" attribute="Comment" lineEndContext="#stay">  <!-- block multiline comment /* */ -->
+          <IncludeRules context="Comment" />
+          <Detect2Chars attribute="Comment" context="#pop" char="*" char1="/" endRegion="Comment" />
+          <!-- in sjasmplus the block comments actually can be nested! -->
+          <Detect2Chars attribute="Comment" context="CommentB" char="/" char1="*" beginRegion="Comment"/>
+      </context>
+
+      <!-- Strings -->
+      <context name="StringEscape" attribute="Char" fallthrough="true" fallthroughContext="#pop#pop!Error">
+          <AnyChar String="\?'&quot;0AaBbDdEeFfNnRrTtVv" attribute="Char" context="#pop"/>
+      </context>
+      <context name="String" attribute="String" lineEndContext="#pop">
+        <DetectChar attribute="Char" context="StringEscape" char="\"/>
+        <DetectChar attribute="String" context="#pop" char="&quot;"/>
+      </context>
+      <context name="StringApostrophe" attribute="String" lineEndContext="#pop">
+        <Detect2Chars attribute="Char" context="#stay" char="'" char1="'"/>
+        <DetectChar attribute="String" context="#pop" char="'"/>
+      </context>
+    </contexts>
+
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal"/>
+      <itemData name="Error" defStyleNum="dsError"/>
+      <itemData name="Registers" defStyleNum="dsVariable"/>
+      <itemData name="Instructions" defStyleNum="dsKeyword"/>
+      <itemData name="Unofficial ins." defStyleNum="dsExtension"/>
+      <itemData name="Z80N Instructions" defStyleNum="dsKeyword"/>
+      <itemData name="Z80N Flow ins." defStyleNum="dsControlFlow"/>
+      <itemData name="Control Flow ins." defStyleNum="dsControlFlow"/>
+      <itemData name="Directives" defStyleNum="dsPreprocessor"/>
+      <itemData name="Comment" defStyleNum="dsComment"/>
+      <itemData name="Alert" defStyleNum="dsAlert"/>
+      <itemData name="Label" defStyleNum="dsFunction"/>
+      <itemData name="Data" defStyleNum="dsDataType"/>
+      <itemData name="BaseN" defStyleNum="dsBaseN"/>
+      <itemData name="Float" defStyleNum="dsFloat"/>
+      <itemData name="Number" defStyleNum="dsDecVal"/>
+      <itemData name="Char" defStyleNum="dsChar"/>
+      <itemData name="String" defStyleNum="dsString"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <keywords casesensitive="0"/>
+    <comments>
+      <comment name="singleLine" start=";" />
+      <comment name="multiLine" start="/*" end="*/" />
+    </comments>
+  </general>
+</language>
+<!-- kate: space-indent on; indent-width 4; replace-tabs on; -->

@@ -1,0 +1,69 @@
+# file opened: KateSyntaxHighLightTest.asm
+ 1    0000              ;; This is not test of sjasmplus itself, but this is used to check Kate-syntax-highlight
+ 2    0000              ;; The syntax highlight rules are in "asm-z80-sj.xml" file in the project root directory
+ 3    0000
+ 4    0000                  device zxspectrum48     ; directive of sjasmplus
+ 5    0000                  org     $A800           ; hexa, also: 0xA800, 0A800h
+ 6    A800                  disp    43008           ; decimal (forgot to add 33d, but who uses *that*?)
+KateSyntaxHighLightTest.asm(7): error: Unrecognized instruction: relaxed syntax of Z80 assemblers, "label" is usually default result of anything
+ 7    A800              With relaxed syntax of Z80 assemblers, "label" is usually default result of anything
+ 8    A800
+ 9    A800 21 3F 9C         ld      hl, %1001110000111111   ; binary, also: 0011b
+10    A803 11 FF 0F         ld      de, 7777o       ; octal, also: 77q
+KateSyntaxHighLightTest.asm(11): error: Unexpected: '0000  ; wishing for C++ num-group separator (not in sjasmplus yet!)
+11    A806 01 0F 00         ld      bc, %1111'0000  ; wishing for C++ num-group separator (not in sjasmplus yet!)
+12    A809 61 70 6F 73      db      'apostrophe''s "text"', "quotes\'\\\"\? 'text'", 0
+12    A80D 74 72 6F 70
+12    A811 68 65 27 73
+12    A815 20 22 74 65
+12    A819 78 74 22 71
+12    A81D 75 6F 74 65
+12    A821 73 27 5C 22
+12    A825 3F 20 27 74
+12    A829 65 78 74 27
+12    A82D 00
+KateSyntaxHighLightTest.asm(13): error: Unrecognized instruction: ldirx
+13    A82E                  ldirx
+KateSyntaxHighLightTest.asm(14): error: Unrecognized instruction: bsra    de,b            
+14    A82E                  bsra    de,b            ; NEXT opcodes of course added (can have different colour)
+15    A82E BF FE 27         cp      a,''''          ;"TODO" in comments exists (also FIXME and FIX ME).
+16    A831              s:  ; some label
+17    A831              // also C line comments supported
+18    A831 FC 31 A8         call    s, s            ; conditional call/jp/jr/ret highlights also condition
+19    A834                      ; "s" is actually unofficial alias for "m" supported by some assembler ("ns"=p)
+20    A834 C0               ret     nz              ; control-flow instructions are extra colour
+21    A835 DD CB 80 03      rlc     (ix-128),e      ; unofficial Z80 instructions are highlighted extra
+22    A839 DD CB 06 AF      res     5,(ix+6),a      ; (but it goes also over arguments, maybe shouldn't, TODO)
+23    A83D DD CB 1E AE      res     5,(ix+30)       ; compared to official instruction
+24    A841
+25    A841 A7 E6 0D         and     a, 7+(3<<1)
+26    A844 E6 48            and     low .localLab   ; FIXME: operators are mostly defined, but rules are missing
+27    A846
+28    A846                  MACRO leMacron _arg0?
+29    A846 ~                    defb    $DD, 1
+30    A846 ~                    nextreg $15, $0
+31    A846                  ENDM
+32    A846
+33    A846                  ; in case you accidentally write non-instruction, it will highlight as label! :D
+KateSyntaxHighLightTest.asm(34): error: Unrecognized instruction: jnz     s               
+34    A846                  jnz     s               ; still makes it easier to catch
+35    A846                  leMacron arg0           ; but so do also correctly used macros
+35    A846 DD 01       >        defb    $DD, 1; but so do also correctly used macros
+KateSyntaxHighLightTest.asm(35): error: Unrecognized instruction: nextreg $15, $0
+35    A848             >        nextreg $15, $0; but so do also correctly used macros
+36    A848              .localLab:
+KateSyntaxHighLightTest.asm(37): error: Missing next digit: 1   
+37    A848                  hex     F32712bcd3561   ; unpaired digit or non-digit is highlighted as "error"
+KateSyntaxHighLightTest.asm(38): error: Invalid labelname: !alsoThisInvalidLabel
+38    A848              !alsoThisInvalidLabel
+KateSyntaxHighLightTest.asm(39): warning: [DG] multiple characters used for 'ones'
+KateSyntaxHighLightTest.asm(39): warning: [DG] character '0' in DG works as value 1
+39    A848 33 F8            dg      ..##..##  #$01!-._  ; DG bit map is highlights as "data" (0) vs "number" (1)
+40    A84A
+# file closed: KateSyntaxHighLightTest.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xA800 X With
+0xA831   s
+0xA848   s.localLab
