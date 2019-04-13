@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.7 12/04/2019
+  Version: 0.8 13/04/2019
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,9 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  13/04/2019: version 0.8
+    + Numeric literals highlight rules extended with new C++ like rules
 
   12/04/2019: version 0.7
     Forked from my other asm-z80.xml syntax file, which is trying to support multiple
@@ -60,7 +63,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="5" kateversion="5.0" extensions="*.asm;*.a80" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="6" kateversion="5.0" extensions="*.asm;*.a80" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -416,15 +419,17 @@ TODO missing things:
         <DetectChar attribute="String" context="String" char="&quot;"/>
         <keyword attribute="Registers" context="#stay" String="registers"/>
         <RegExpr attribute="Label" context="#stay" String="(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*"/>
-        <RegExpr attribute="Label" context="#stay" String="[0-9]+[bBfF]\b"/>
+        <!-- temporary labels may be mistaken for binary number ("1b"), for 1-3 digits it's local label -->
+        <RegExpr attribute="Label" context="#stay" String="\d{1,3}[bBfF]\b"/>
         <!-- TODO but some DEFINE/macro-arg identifiers can avoid labels rules, like ".._" is valid! -->
         <!-- hexadecimal numbers -->
-        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="((\$|0x|#)[a-f0-9]([a-f0-9']*[a-f0-9]|)|\b[0-9]([a-f0-9']*[a-f0-9]|)h)\b"/>
+        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="((\$|0x|#)[a-f0-9]('?[a-f0-9]+)*|[0-9]('?[a-f0-9]+)*h)\b"/>
         <!-- octal numbers -->
-        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="[0-7]([0-7']*[0-7]|)(q|o)\b"/>
+        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="(0q[0-7]('?[0-7]+)*|[0-7]('?[0-7]+)*(q|o))\b"/>
         <!-- binary numbers -->
-        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="(%[01]([01']*[01]|)|[01]([01']*[01]|)b)\b"/>
-        <Int attribute="Number" context="#stay"/>
+        <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="((%|0b)[01]('?[01]+)*|[01]('?[01]+)*b)\b"/>
+        <!-- decimal numbers -->
+        <RegExpr attribute="Number" context="#stay" insensitive="true" String="\d('?\d+)*d?\b"/>
         <Detect2Chars attribute="Number" context="#stay" char="$" char1="$"/>
         <DetectChar attribute="Number" context="#stay" char="$"/>
       </context>
