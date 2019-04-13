@@ -416,17 +416,18 @@ bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const
 	const int base = 1<<shiftBase;
 	const aint overflowMask = (~0UL)<<(32-shiftBase);
 	while (p < pend) {
-		if (0 == *p || !isalnum(*p)) {
+		const char charDigit = *p++;
+		if ('\'' == charDigit && isalnum(*p)) continue;
+		if (0 == charDigit || !isalnum(charDigit)) {
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
 		}
-		if (base <= (digit = getval(*p))) {
+		if (base <= (digit = getval(charDigit))) {
 			getNumericValueLastErr = getNumericValueErr_digit;
 			break;
 		}
 		if (val & overflowMask) getNumericValueLastErr = getNumericValueErr_overflow;
 		val = (val<<shiftBase) + digit;
-		++p;
 	}
 	val &= 0xFFFFFFFFUL;
 	return (NULL == getNumericValueLastErr);
@@ -442,18 +443,19 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 	}
 	aint digit;
 	while (p < pend) {
-		if (0 == *p || !isalnum(*p)) {
+		const char charDigit = *p++;
+		if ('\'' == charDigit && isalnum(*p)) continue;
+		if (0 == charDigit || !isalnum(charDigit)) {
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
 		}
-		if (base <= (digit = getval(*p))) {
+		if (base <= (digit = getval(charDigit))) {
 			getNumericValueLastErr = getNumericValueErr_digit;
 			break;
 		}
 		const unsigned long oval = static_cast<unsigned long>(val)&0xFFFFFFFFUL;
 		val = (val * base) + digit;
 		if (static_cast<unsigned long>(val&0xFFFFFFFFUL) < oval) getNumericValueLastErr = getNumericValueErr_overflow;
-		++p;
 	}
 	val &= 0xFFFFFFFFUL;
 	return (NULL == getNumericValueLastErr);
@@ -466,7 +468,7 @@ int GetConstant(char*& op, aint& val) {
 	// the input string has been already detected as numeric literal by ParseExpPrim (assert)
 	if (!isdigit(*op) && '#' != *op && '$' != *op && '%' != *op) ExitASM(32);
 #endif
-	// check if the format is defined by prefix (#, $, %, 0x, 0X)
+	// check if the format is defined by prefix (#, $, %, 0x, 0X, 0b, 0B, 0q, 0Q)
 	char* p = op;
 	int shiftBase = 0, base = 0;
 	if ('#' == *p || '$' == *p) {
@@ -475,13 +477,19 @@ int GetConstant(char*& op, aint& val) {
 	} else if ('0' == p[0] && 'x' == (p[1]|0x20)) {
 		shiftBase = 4;
 		p += 2;
+	} else if ('0' == p[0] && 'b' == (p[1]|0x20)) {
+		shiftBase = 1;
+		p += 2;
+	} else if ('0' == p[0] && 'q' == (p[1]|0x20)) {
+		shiftBase = 3;
+		p += 2;
 	} else if ('%' == *p) {
 		shiftBase = 1;
 		++p;
 	}
 	// find end of the numeric literal (pointer is beyond last alfa/digit character
 	char* pend = p;
-	while (isalnum(*pend)) ++pend;
+	while (isalnum(*pend) || ('\'' == *pend && isalnum(pend[1]))) ++pend;
 	char* const hardEnd = pend;
 	// if the base is still undecided, check for suffix format specifier
 	if (0 == shiftBase) {
@@ -495,6 +503,10 @@ int GetConstant(char*& op, aint& val) {
 				base = 10;
 				break;
 		}
+	}
+	if ('\'' == *p || '\'' == pend[-1]) {	// digit-group tick can't be first/last digit
+		Error(getNumericValueErr_no_digit, op, SUPPRESS);
+		return 0;
 	}
 	// parse the number into value
 	if (0 < shiftBase) {

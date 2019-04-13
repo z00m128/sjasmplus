@@ -391,8 +391,11 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
 	char* rp = nl,* nid,* kp,* ver;
 	bool isPrevDefDir, isCurrDefDir = false;	// to remember if one of DEFINE-related directives was previous word
+	bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 	while (*lp) {
 		const char c1 = lp[0], c2 = lp[1];
+		afterNonAlphaNum = afterNonAlphaNumNext;
+		afterNonAlphaNumNext = !isalnum(c1);
 		if (c1 == '/' && c2 == '*') {	// block-comment local beginning (++block_nesting)
 			lp += 2;
 			++comlin;
@@ -416,17 +419,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		// single line comments -> finish
 		if (c1 == ';' || (c1 == '/' && c2 == '/')) break;
 
-		// detect "af'" register, as that hurts string parsing
-		if (cmphstr(lp, "af'")) {		// convert it into plain "AF" (it's enough)
-			isPrevDefDir = isCurrDefDir;
-			isCurrDefDir = false;
-			*rp++ = 'a';
-			*rp++ = 'f';
-			continue;
-		}
-
 		// strings parsing
-		if (c1 == '"' || c1 == '\'') {
+		if (afterNonAlphaNum && (c1 == '"' || c1 == '\'')) {
 			isPrevDefDir = isCurrDefDir;
 			isCurrDefDir = false;
 			*rp++ = *lp++;				// copy the string delimiter (" or ')
@@ -434,7 +428,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			// which sort of "accidentally" leads to correct final results
 			while (*lp && c1 != *lp) {	// until end of current string is reached (or line ends)
 				// inside double quotes the backslash should escape (anything after it)
-				if ('"' == c1 && '\\' == *lp) *rp++ = *lp++;	// copy escaping backslash extra
+				if ('"' == c1 && '\\' == *lp && lp[1]) *rp++ = *lp++;	// copy escaping backslash extra
 				*rp++ = *lp++;			// copy string character
 			}
 			if (*lp) *rp++ = *lp++;		// copy the ending string delimiter (" or ')
@@ -449,8 +443,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		// update previous/current word is define-related directive
 		isPrevDefDir = isCurrDefDir;
 		kp = lp;
-		isCurrDefDir = cmphstr(kp, "define") || cmphstr(kp, "undefine")
-			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef");
+		isCurrDefDir = afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine")
+			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
 
 		// The following loop is recursive-like macro/define substitution, the `*lp` here points
 		// at alphabet/underscore char, marking start of "id" string, and it will be parsed by

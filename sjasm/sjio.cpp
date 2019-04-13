@@ -704,6 +704,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			++CurrentSourceLine;
 			IsLabel = (0 == blockComment);
 		}
+		bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 		// copy data from read buffer into `line` buffer until EOL/colon is found
 		while (
 				ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf &&	// split by EOL
@@ -711,6 +712,8 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				(blockComment || !SplitByColon || rlppos == line || ':' != *rlpbuf)) {
 			// copy the new character to new line
 			*rlppos = *rlpbuf++;
+			afterNonAlphaNum = afterNonAlphaNumNext;
+			afterNonAlphaNumNext = !isalnum(*rlppos);
 			// Block comments logic first (anything serious may happen only "outside" of block comment
 			if ('*' == *rlppos && ReadBufData() && '/' == *rlpbuf) {
 				if (0 < blockComment) --blockComment;	// block comment ends here, -1 from nesting
@@ -743,7 +746,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				continue;
 			}
 			// check for string literals - double/single quotes
-			if ('"' == *rlppos || '\'' == *rlppos) {
+			if (afterNonAlphaNum && ('"' == *rlppos || '\'' == *rlppos)) {
 				const bool quotes = '"' == *rlppos;
 				int escaped = 0;
 				do {
