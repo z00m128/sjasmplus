@@ -184,7 +184,8 @@
 
             <listitem>
               <para><programlisting>- INCBIN: added support for negative offset/length values
-- Fixed: INCTRD offset, LUA inside macros</programlisting></para>
+- Fixed: INCTRD offset, LUA inside macros
+- parser: added C++(like) numeric literals</programlisting></para>
             </listitem>
           </varlistentry>
 
@@ -679,14 +680,19 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
 
       <para><programlisting>12     decimal
 12d    decimal
-0ch    hexadecimal
 0xc    hexadecimal
 $c     hexadecimal
 #c     hexadecimal
-1100b  binary
+0ch    hexadecimal
+0b1100 binary (v1.12.1)
 %1100  binary
+1100b  binary
+0q14   octal (v1.12.1)
 14q    octal
 14o    octal</programlisting></para>
+
+      <para>(v1.12.1) Optional single quotes(') may be inserted between the digits as a separator.
+      They are ignored by the assembler.</para>
     </section>
 
     <section>
