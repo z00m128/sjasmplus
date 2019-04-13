@@ -468,6 +468,11 @@ int GetConstant(char*& op, aint& val) {
 	// the input string has been already detected as numeric literal by ParseExpPrim (assert)
 	if (!isdigit(*op) && '#' != *op && '$' != *op && '%' != *op) ExitASM(32);
 #endif
+	// find end of the numeric literal (pointer is beyond last alfa/digit character
+	char* pend = op;
+	if ('#' == *pend || '$' == *pend || '%' == *pend) ++pend;
+	while (isalnum(*pend) || ('\'' == *pend && isalnum(pend[1]))) ++pend;
+	char* const hardEnd = pend;
 	// check if the format is defined by prefix (#, $, %, 0x, 0X, 0b, 0B, 0q, 0Q)
 	char* p = op;
 	int shiftBase = 0, base = 0;
@@ -477,8 +482,8 @@ int GetConstant(char*& op, aint& val) {
 	} else if ('0' == p[0] && 'x' == (p[1]|0x20)) {
 		shiftBase = 4;
 		p += 2;
-	} else if ('0' == p[0] && 'b' == (p[1]|0x20)) {
-		shiftBase = 1;
+	} else if ('0' == p[0] && 'b' == (p[1]|0x20) && 'h' != (pend[-1]|0x20) ) {
+		shiftBase = 1;		// string 0b800h is hexadecimal, not binary (legacy compatibility)
 		p += 2;
 	} else if ('0' == p[0] && 'q' == (p[1]|0x20)) {
 		shiftBase = 3;
@@ -487,10 +492,6 @@ int GetConstant(char*& op, aint& val) {
 		shiftBase = 1;
 		++p;
 	}
-	// find end of the numeric literal (pointer is beyond last alfa/digit character
-	char* pend = p;
-	while (isalnum(*pend) || ('\'' == *pend && isalnum(pend[1]))) ++pend;
-	char* const hardEnd = pend;
 	// if the base is still undecided, check for suffix format specifier
 	if (0 == shiftBase) {
 		switch (pend[-1]|0x20) {

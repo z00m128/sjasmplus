@@ -1,3 +1,6 @@
+    ; new syntax did break legacy sources in specific case like "0b800h"
+    dw      0b100h, 0xb100
+
     ; new syntax to define: 0b..|0B.. = binary number (C++ rule), 0q..|0Q.. = octal number
     db      %01011101, 01011101b, 01011101B, 0b01011101, 0B01011101
     db      111q, 111Q, 111o, 111O, 0q111, 0Q111
