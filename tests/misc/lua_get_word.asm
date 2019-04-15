@@ -3,6 +3,6 @@
 test:   DEFW 0x4241
     OUTPUT "lua_get_word.bin"
     LUA
-        _pc("dw "..sj.get_word(_c("test"))..", ".._c("test")..", 0x0A0D")
-        _pc("dw "..sj.get_word(0x4443)..", "..0x4443..", 0x0A0D")
+        _pc("dw "..sj.get_word(_c("test"))..", ".._c("test"))
+        _pc("dw "..sj.get_word(0x4443)..", "..0x4443)
     ENDLUA
