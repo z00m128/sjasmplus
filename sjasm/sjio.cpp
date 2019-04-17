@@ -142,20 +142,15 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 	}
 }
 
-void CheckRamLimitExceeded()
-{
-	if (CurAddress >= 0x10000)
-	{
-		char buf[64];
-		SPRINTF2(buf, 1024, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
+void CheckRamLimitExceeded() {
+	char buf[64];
+	if (CurAddress >= 0x10000) {
+		SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
 		Warning(buf);
 		CurAddress &= 0xFFFF;
 	}
-
-	if (PseudoORG) if (adrdisp >= 0x10000)
-	{
-		char buf[64];
-		SPRINTF1(buf, 1024, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
+	if (PseudoORG && adrdisp >= 0x10000) {
+		SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
 		Warning(buf);
 		adrdisp &= 0xFFFF;
 	}
@@ -296,98 +291,43 @@ void ListFile(bool showAsSkipped) {
 }
 
 void CheckPage() {
-	if (!DeviceID) {
-		return;
-	}
-	/*
-	int addadr = 0;
-	switch (Slot->Number) {
-	case 0:
-		addadr = 0x8000;
-		break;
-	case 1:
-		addadr = 0xc000;
-		break;
-	case 2:
-		addadr = 0x4000;
-		break;
-	case 3:
-		addadr = 0x10000;
-		break;
-	case 4:
-		addadr = 0x14000;
-		break;
-	case 5:
-		addadr = 0x0000;
-		break;
-	case 6:
-		addadr = 0x18000;
-		break;
-	case 7:
-		addadr = 0x1c000;
-		break;
-	}
-	if (MemoryCPage > 7) {
-		addadr = 0x4000 * MemoryCPage;
-	}
-	if (PseudoORG) {
-		if (adrdisp < 0xC000) {
-			addadr = adrdisp - 0x4000;
-		} else {
-			addadr += adrdisp - 0xC000;
-		}
-	} else {
-		if (CurAddress < 0xC000) {
-			addadr = CurAddress - 0x4000;
-		} else {
-			addadr += CurAddress - 0xC000;
-		}
-	}
-	MemoryPointer = MemoryRAM + addadr;*/
-
-	for (int i=0;i<Device->SlotsCount;i++) {
+	if (!DeviceID) return;
+	const int realAddr = PseudoORG ? adrdisp : CurAddress;
+	for (int i=Device->SlotsCount; i--; ) {
 		CDeviceSlot* S = Device->GetSlot(i);
-		int realAddr = PseudoORG ? adrdisp : CurAddress;
-		if (realAddr >= S->Address && ((realAddr < 65536 && realAddr < S->Address + S->Size) \
-										|| (realAddr >= 65536 && realAddr <= S->Address + S->Size))) {
-			MemoryPointer = S->Page->RAM + (realAddr - S->Address);
+		if (S->Address <= realAddr) {
 			Page = S->Page;
+			MemoryPointer = Page->RAM + (realAddr - S->Address);
 			return;
 		}
 	}
-
 	Error("CheckPage(): please, contact the author of this program.", NULL, FATAL);
 }
 
-void Emit(int byte)
-{
-	EB[nEB++] = byte;
-
+static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 	CheckRamLimitExceeded();
-
-	if (pass == LASTPASS)
-	{
+	if (LASTPASS == pass) {
 		WriteBuffer[WBLength++] = (char)byte;
-		if (WBLength == DESTBUFLEN) WriteDest();
-
-		if (DeviceID)
-		{
+		if (DESTBUFLEN == WBLength) WriteDest();
+		if (DeviceID) {
 			if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
-			*(MemoryPointer++) = (char)byte;
+			if (!preserveDeviceMemory) *MemoryPointer = (char)byte;
+			++MemoryPointer;
 		}
 	}
-
 	++CurAddress;
 	if (PseudoORG) ++adrdisp;
 }
 
 void EmitByte(int byte) {
-	Emit(byte);
+	byte &= 0xFF;
+	EB[nEB++] = byte;		// write also into listing
+	EmitByteNoListing(byte);
 }
 
 void EmitWord(int word) {
-	Emit(word % 256);
-	Emit(word / 256);
+	EmitByte(word % 256);
+	EmitByte(word / 256);
 }
 
 void EmitBytes(int* bytes) {
@@ -395,16 +335,11 @@ void EmitBytes(int* bytes) {
 		Error("Illegal instruction", line, IF_FIRST);
 		SkipToEol(lp);
 	}
-	while (*bytes != -1) {
-		Emit(*bytes++);
-	}
+	while (*bytes != -1) EmitByte(*bytes++);
 }
 
 void EmitWords(int* words) {
-	while (*words != -1) {
-		Emit((*words) % 256);
-		Emit((*words++) / 256);
-	}
+	while (*words != -1) EmitWord(*words++);
 }
 
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
@@ -415,26 +350,12 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 		return;
 	}
 	while (len--) {
-		CheckRamLimitExceeded();
-		if (pass == LASTPASS) {
-			WriteBuffer[WBLength++] = (char)byte;
-			if (WBLength == DESTBUFLEN) WriteDest();
-
-			if (DeviceID)
-			{
-				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
-				if (!preserveDeviceMemory) *MemoryPointer = (char)byte;
-
-				MemoryPointer++;
-			}
-			if (emitMaxToListing) {
-				// put "..." marker into listing if some more bytes are emitted after last listed
-				if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
-				else EB[nEB++] = (DeviceID ? MemoryPointer[-1] : byte)&0xFF;
-			}
+		EmitByteNoListing(byte, preserveDeviceMemory);
+		if (LASTPASS == pass && emitMaxToListing) {
+			// put "..." marker into listing if some more bytes are emitted after last listed
+			if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
+			else EB[nEB++] = (DeviceID ? MemoryPointer[-1] : byte)&0xFF;
 		}
-		++CurAddress;
-		if (PseudoORG) ++adrdisp;
 	}
 }
 
@@ -522,21 +443,7 @@ void BinIncFile(char* fname, int offset, int length) {
 		if (NULL == data) ErrorInt("No enough memory for file", (length + 1), FATAL);
 		size_t res = fread(bp, 1, length, bif);
 		if (res != (size_t)length) Error("reading data from file failed", fname, FATAL);
-
-		while (length--) {
-			CheckRamLimitExceeded();
-
-			WriteBuffer[WBLength++] = *bp;
-			if (WBLength == DESTBUFLEN) WriteDest();
-			if (DeviceID) {
-				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
-				*MemoryPointer++ = *bp;
-			}
-			++bp;
-			++CurAddress;
-			if (PseudoORG) ++adrdisp;
-		}
-		CheckRamLimitExceeded();
+		while (length--) EmitByteNoListing(*bp++);
 		delete[] data;
 	}
 	fclose(bif);
