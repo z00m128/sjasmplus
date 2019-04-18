@@ -1,17 +1,17 @@
 # file opened: zx128_default_pages.asm
  1    0000                  DEVICE ZXSPECTRUM128
- 2    0000                  ; expected default is SLOT 3, ORG 0, pages: 0, 5, 2, 7
- 3    0000 30 30            DB "00"
+ 2    0000                  ; expected default is SLOT 3, ORG 0, pages: 7, 5, 2, 0
+ 3    0000 37 37            DB "77"
  3    0002                ORG 0x4000
  3    4000 35 35          DB "55"
  3    4002                ORG 0x8000
  3    8000 32 32          DB "22"
  3    8002                ORG 0xC000
- 3    C000 37 37          DB "77"
- 4    C002                  ASSERT {0x0000} == "00"
+ 3    C000 30 30          DB "00"
+ 4    C002                  ASSERT {0x0000} == "77"
  4    C002                ASSERT {0x4000} == "55"
  4    C002                ASSERT {0x8000} == "22"
- 4    C002                ASSERT {0xC000} == "77"
+ 4    C002                ASSERT {0xC000} == "00"
  5    C002                  ; test default slot == 3 (does test also default mapping - difficult to test only slot :/ )
  6    C002                  PAGE 0
  6    C002                ASSERT {0xC000} == "00"
@@ -21,7 +21,7 @@
  6    C002                ASSERT {0xC000} == "22"
  6    C002                PAGE 7
  6    C002                ASSERT {0xC000} == "77"
- 7    C002                  ; test other pages = done
+ 7    C002                  ; test remaining pages for writing, and final test by reading all
  8    C002                  SLOT 0
  9    C002                  PAGE 1
  9    C002                ASSERT {0} == 0

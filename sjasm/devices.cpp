@@ -50,45 +50,41 @@ static void initZxLikeDevice(CDevice* const device, aint slotSize, int pageCount
 		device->GetSlot(i)->Page = device->GetPage(initialPages[i]);
 	}
 	device->CurrentSlot = device->SlotsCount - 1;
+	// set memory to "USR 0"-like state (for snapshot saving) (works also for ZXN 0x2000 slotSize)
+	int vramPage = (0x4000 == slotSize) ? initialPages[1] : initialPages[2];
+	char* const vramRAM = device->GetPage(vramPage)->RAM;
+	memset(vramRAM + 0x1800, 7*8, 768);
+	memcpy(vramRAM + 0x1C00, BASin48Vars, sizeof(BASin48Vars));
+	char* const stackRAM = device->GetSlot(device->CurrentSlot)->Page->RAM;
+	memcpy(stackRAM + slotSize - sizeof(BASin48SP), BASin48SP, sizeof(BASin48SP));
 }
 
 void DeviceZXSpectrum48(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM48", parent);
 	const int initialPages[] = {0, 1, 2, 3};
 	initZxLikeDevice(*dev, 0x4000, 4, initialPages);
-	memcpy((*dev)->GetPage(1)->RAM + 0x1C00, BASin48Vars, sizeof(BASin48Vars));
-	memset((*dev)->GetPage(1)->RAM + 6144, 7*8, 768);
-	memcpy((*dev)->GetPage(3)->RAM + 0x4000-sizeof(BASin48SP), BASin48SP, sizeof(BASin48SP));
 }
 
-const static int initialPagesZx128[] = {0, 5, 2, 7};
+const static int initialPagesZx128[] = {7, 5, 2, 0};
 
 void DeviceZXSpectrum128(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM128", parent);
 	initZxLikeDevice(*dev, 0x4000, 8, initialPagesZx128);
-	memcpy((*dev)->GetPage(5)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	memset((*dev)->GetPage(5)->RAM + 6144, 7*8, 768);
 }
 
 void DeviceZXSpectrum256(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM256", parent);
 	initZxLikeDevice(*dev, 0x4000, 16, initialPagesZx128);
-	memcpy((*dev)->GetPage(5)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	memset((*dev)->GetPage(5)->RAM + 6144, 7*8, 768);
 }
 
 void DeviceZXSpectrum512(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM512", parent);
 	initZxLikeDevice(*dev, 0x4000, 32, initialPagesZx128);
-	memcpy((*dev)->GetPage(5)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	memset((*dev)->GetPage(5)->RAM + 6144, 7*8, 768);
 }
 
 void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM1024", parent);
 	initZxLikeDevice(*dev, 0x4000, 64, initialPagesZx128);
-	memcpy((*dev)->GetPage(5)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	memset((*dev)->GetPage(5)->RAM + 6144, 7*8, 768);
 }
 
 int SetDevice(char *id) {

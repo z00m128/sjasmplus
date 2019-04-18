@@ -46,52 +46,49 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	}
 
 	memset(snbuf, 0, sizeof(snbuf));
-
+	snbuf[0] = 0x3F; //i
 	snbuf[1] = 0x58; //hl'
 	snbuf[2] = 0x27; //hl'
+	snbuf[3] = 0x9B; //de'
+	snbuf[4] = 0x36; //de'
+	snbuf[5] = 0x00; //bc'
+	snbuf[6] = 0x00; //bc'
+	snbuf[7] = 0x44; //af'
+	snbuf[8] = 0x00; //af'
+	snbuf[9] = 0x2B; //hl
+	snbuf[10] = 0x2D; //hl
+	snbuf[11] = 0xDC; //de
+	snbuf[12] = 0x5C; //de
+	snbuf[13] = 0x00; //bc
+	snbuf[14] = 0x80; //bc
 	snbuf[15] = 0x3a; //iy
 	snbuf[16] = 0x5c; //iy
-	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
-		snbuf[0] = 0x3F; //i
-		snbuf[3] = 0x9B; //de'
-		snbuf[4] = 0x36; //de'
-		snbuf[5] = 0x00; //bc'
-		snbuf[6] = 0x00; //bc'
-		snbuf[7] = 0x44; //af'
-		snbuf[8] = 0x00; //af'
-		snbuf[9] = 0x2B; //hl
-		snbuf[10] = 0x2D; //hl
-		snbuf[11] = 0xDC; //de
-		snbuf[12] = 0x5C; //de
-		snbuf[13] = 0x00; //bc
-		snbuf[14] = 0x80; //bc
-		snbuf[17] = 0x3C; //ix
-		snbuf[18] = 0xFF; //ix
-		snbuf[21] = 0x54; //af
-		snbuf[22] = 0x00; //af
-
-		if (Device->GetPage(3)->RAM[0x3F2D] == (char)0xb1 &&
-			Device->GetPage(3)->RAM[0x3F2E] == (char)0x33 &&
-			Device->GetPage(3)->RAM[0x3F2F] == (char)0xe0 &&
-			Device->GetPage(3)->RAM[0x3F30] == (char)0x5c) {
-
-			snbuf[23] = 0x2D;// + 16; //sp
-			snbuf[24] = 0xFF; //sp
-
-			Device->GetPage(3)->RAM[0x3F2D + 16] = char(start & 0x00FF); //pc
-			Device->GetPage(3)->RAM[0x3F2E + 16] = char(start >> 8); //pc
-		} else {
+	snbuf[17] = 0x3C; //ix
+	snbuf[18] = 0xFF; //ix
+	snbuf[21] = 0x54; //af
+	snbuf[22] = 0x00; //af
+	CDevicePage* stackPage = Device->GetSlot(Device->SlotsCount-1)->Page;
+	char* const stackRAM = stackPage->RAM + stackPage->Size - sizeof(BASin48SP);
+	bool defaultZx48Stack = true;
+	for (unsigned ii = 0; defaultZx48Stack && ii < sizeof(BASin48SP); ++ii) {
+		if (stackRAM[ii] != BASin48SP[ii]) defaultZx48Stack = false;
+	}
+	if (defaultZx48Stack) {
+		snbuf[23] = 0x2D;	//sp (+16 into BASin48SP)
+		snbuf[24] = 0xFF;	//sp
+		stackRAM[16] = start & 0xFF;	// pc into default stack
+		stackRAM[17] = start >> 8;		// pc
+	} else {
+		if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
 			Warning("[SAVESNA] RAM <0x4000-0x4001> will be overriden due to 48k snapshot imperfect format.");
-
 			snbuf[23] = 0x00; //sp
 			snbuf[24] = 0x40; //sp
-
-			Device->GetPage(1)->RAM[0] = char(start & 0x00FF); //pc
-			Device->GetPage(1)->RAM[1] = char(start >> 8); //pc
+			Device->GetPage(1)->RAM[0] = start & 0xFF;	//pc
+			Device->GetPage(1)->RAM[1] = start >> 8;	//pc
+		} else {
+			snbuf[23] = 0X00; //sp
+			snbuf[24] = 0x60; //sp
 		}
-	} else {
-		snbuf[23] = 0X00; //sp
-		snbuf[24] = 0x60; //sp
 	}
 	snbuf[25] = 1; //im 1
 	snbuf[26] = 7; //border 7
