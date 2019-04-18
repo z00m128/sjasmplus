@@ -1,0 +1,35 @@
+# file opened: disp.asm
+ 1    0000                  DEVICE ZXSPECTRUM128
+ 2    0000                  SLOT 0
+ 2    0000                PAGE 0
+ 2    0000                SLOT 1
+ 2    0000                PAGE 1
+ 2    0000                 SLOT 2
+ 2    0000                PAGE 2
+ 2    0000                SLOT 3
+ 2    0000                PAGE 3
+ 3    0000                  ORG     0x4000-2
+ 4    3FFE              orgLabel:
+ 5    3FFE                  DISP    0xC000-1
+ 6    BFFF              dispLabel:
+ 7    BFFF DD CB 41 EE      set     5,(ix+0x41)     ; 4B opcode across both ORG and DISP boundaries
+ 8    C003                  ENT
+ 9    4002                  ORG     0x8000-2
+10    7FFE              orgLabel2:
+11    7FFE                  DISP    0xC000-3
+12    BFFD              dispLabel2:
+13    BFFD DD CB 41 EE      set     5,(ix+0x41)
+14    C001                  ENT
+15    8002                  ; verification of results
+16    8002 DD CB 41 EE      DW      {0x4000-2}, {0x4000}, {0x8000-2}, {0x8000}, {0xC000-2}, {0xC000}
+16    8006 DD CB 41 EE
+16    800A 00 00 00 00
+17    800E
+# file closed: disp.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x3FFE X orgLabel
+0xBFFF X dispLabel
+0x7FFE X orgLabel2
+0xBFFD X dispLabel2

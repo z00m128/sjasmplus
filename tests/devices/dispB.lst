@@ -1,0 +1,42 @@
+# file opened: dispB.asm
+ 1    0000              ; same test as disp.asm, but with 1B opcode instructions
+ 2    0000                  DEVICE ZXSPECTRUM128
+ 3    0000                  SLOT 0
+ 3    0000                PAGE 0
+ 3    0000                SLOT 1
+ 3    0000                PAGE 1
+ 3    0000                 SLOT 2
+ 3    0000                PAGE 2
+ 3    0000                SLOT 3
+ 3    0000                PAGE 3
+ 4    0000                  ORG     0x4000-2
+ 5    3FFE              orgLabel:
+ 6    3FFE                  DISP    0xC000-1
+ 7    BFFF              dispLabel:
+ 8    BFFF 41               ld b,c
+ 8    C000 42             ld b,d
+ 8    C001 43             ld b,e
+ 8    C002 44             ld b,h
+ 9    C003                  ENT
+10    4002                  ORG     0x8000-2
+11    7FFE              orgLabel2:
+12    7FFE                  DISP    0xC000-3
+13    BFFD              dispLabel2:
+14    BFFD 41               ld b,c
+14    BFFE 42             ld b,d
+14    BFFF 43             ld b,e
+14    C000 44             ld b,h
+15    C001                  ENT
+16    8002                  ; verification of results
+17    8002 41 42 43 44      DW      {0x4000-2}, {0x4000}, {0x8000-2}, {0x8000}, {0xC000-2}, {0xC000}
+17    8006 41 42 43 44
+17    800A 00 00 00 00
+18    800E
+# file closed: dispB.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x3FFE X orgLabel
+0xBFFF X dispLabel
+0x7FFE X orgLabel2
+0xBFFD X dispLabel2
