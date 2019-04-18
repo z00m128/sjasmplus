@@ -62,6 +62,8 @@ Input file without extension does produce wrong default output filename
 - needs lot more testing and cleanup
 + should be already a bit more intuitive than 1.08+ (although it may break legacy source)
 
+ZX128 snapshot default state and mapping - still doesn't survive simple `ret` into BASIC
+
 ====================
 Docs:
 
