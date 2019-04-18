@@ -173,19 +173,12 @@ int SetDevice(char *id) {
 		dev = &Devices;
 		parent = 0;
 		// search for device
-		while ((*dev)) {
-			if (!strcmp((*dev)->ID, id)) {
-				Device = (*dev);
-				DeviceID = Device->ID;
-				Slot = Device->GetSlot(Device->CurrentSlot);
-				//Page = Slot->Page;
-				CheckPage();
-				break;
-			}
-			parent = (*dev);
-			dev = &((*dev)->Next);
+		while (*dev) {
+			parent = *dev;
+			if (!strcmp(parent->ID, id)) break;
+			dev = &(parent->Next);
 		}
-		if (!DeviceID) {
+		if (NULL == *dev) {		// device not found
 			if (cmphstr(id, "zxspectrum48")) {
 				DeviceZXSpectrum48(dev, parent);
 			} else if (cmphstr(id, "zxspectrum128")) {
@@ -199,15 +192,12 @@ int SetDevice(char *id) {
 			} else {
 				return false;
 			}
-
-			Slot = (*dev)->GetSlot((*dev)->CurrentSlot);
-			Page = Slot->Page;
-
-			DeviceID = (*dev)->ID;
-			Device = (*dev);
-
-			CheckPage();
 		}
+		// set up the found/new device
+		Device = (*dev);
+		DeviceID = Device->ID;
+		Slot = Device->GetSlot(Device->CurrentSlot);
+		CheckPage();
 	}
 
 	return true;

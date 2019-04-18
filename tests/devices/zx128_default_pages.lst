@@ -1,0 +1,63 @@
+# file opened: zx128_default_pages.asm
+ 1    0000                  DEVICE ZXSPECTRUM128
+ 2    0000                  ; expected default is SLOT 3, ORG 0, pages: 0, 5, 2, 7
+ 3    0000 30 30            DB "00"
+ 3    0002                ORG 0x4000
+ 3    4000 35 35          DB "55"
+ 3    4002                ORG 0x8000
+ 3    8000 32 32          DB "22"
+ 3    8002                ORG 0xC000
+ 3    C000 37 37          DB "77"
+ 4    C002                  ASSERT {0x0000} == "00"
+ 4    C002                ASSERT {0x4000} == "55"
+ 4    C002                ASSERT {0x8000} == "22"
+ 4    C002                ASSERT {0xC000} == "77"
+ 5    C002                  ; test default slot == 3 (does test also default mapping - difficult to test only slot :/ )
+ 6    C002                  PAGE 0
+ 6    C002                ASSERT {0xC000} == "00"
+ 6    C002                PAGE 5
+ 6    C002                ASSERT {0xC000} == "55"
+ 6    C002                PAGE 2
+ 6    C002                ASSERT {0xC000} == "22"
+ 6    C002                PAGE 7
+ 6    C002                ASSERT {0xC000} == "77"
+ 7    C002                  ; test other pages = done
+ 8    C002                  SLOT 0
+ 9    C002                  PAGE 1
+ 9    C002                ASSERT {0} == 0
+ 9    C002                ORG 0
+ 9    0000 31 31          DB "11"
+10    0002                  PAGE 3
+10    0002                ASSERT {0} == 0
+10    0002                ORG 0
+10    0000 33 33          DB "33"
+11    0002                  PAGE 4
+11    0002                ASSERT {0} == 0
+11    0002                ORG 0
+11    0000 34 34          DB "44"
+12    0002                  PAGE 6
+12    0002                ASSERT {0} == 0
+12    0002                ORG 0
+12    0000 36 36          DB "66"
+13    0002
+14    0002                  PAGE 0
+14    0002                ASSERT {0} == "00"
+14    0002                PAGE 1
+14    0002                ASSERT {0} == "11"
+15    0002                  PAGE 2
+15    0002                ASSERT {0} == "22"
+15    0002                PAGE 3
+15    0002                ASSERT {0} == "33"
+16    0002                  PAGE 4
+16    0002                ASSERT {0} == "44"
+16    0002                PAGE 5
+16    0002                ASSERT {0} == "55"
+17    0002                  PAGE 6
+17    0002                ASSERT {0} == "66"
+17    0002                PAGE 7
+17    0002                ASSERT {0} == "77"
+18    0002
+# file closed: zx128_default_pages.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -20,7 +20,7 @@ luainc.asm(19): warning: Pass updated to 1, device: NONE
 18    0000 ~                    if pass == 1 or pass == 3 then
 19    0000 ~                      sj.warning('Pass updated to ' .. pass .. ', device: ' .. sj.get_device())
 20    0000 ~                    end
-luainc.asm(19): warning: Pass updated to 3, device: ZXSPECTRUM1024
+luainc.asm(19): warning: Pass updated to 3, device: NONE
 21    0000                  ENDLUA
 22    0000
 23    0000                  DEVICE ZXSPECTRUM1024

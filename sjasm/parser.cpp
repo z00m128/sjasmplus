@@ -52,7 +52,7 @@ int ParseExpPrim(char*& p, aint& nval) {
 			Error("Address in {..} must be more than 4000h"); return 0;
 		} */
 		if (nval > 0xFFFE) {
-			Error("Address in {..} must be less than FFFEh"); return 0;
+			Error("Address in {..} must be less than FFFFh"); return 0;
 		}
 		if (!need(p, '}')) {
 			Error("'}' expected"); return 0;

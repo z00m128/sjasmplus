@@ -166,7 +166,6 @@ void InitPass() {
 		free(LastParsedLabel);
 		LastParsedLabel = NULL;
 	}
-	LastParsedLabel = NULL;
 	vorlabp = (char *)malloc(2);
 	STRCPY(vorlabp, sizeof("_"), "_");
 	macrolabp = NULL;
@@ -182,6 +181,10 @@ void InitPass() {
 	DefineTable = Options::CmdDefineTable;
 	MacroDefineTable.Init();
 	LocalLabelTable.InitPass();
+	// reset "device" stuff
+	if (Devices) delete Devices;
+	Devices = Device = NULL;
+	DeviceID = NULL;
 
 	// predefined
 	DefineTable.Replace("_SJASMPLUS", "1");
@@ -193,18 +196,18 @@ void InitPass() {
 
 void FreeRAM() {
 	if (Devices) {
-		delete Devices;
+		delete Devices;		Devices = NULL;
 	}
 	if (AddressList) {
-		delete AddressList;
+		delete AddressList;	AddressList = NULL;
 	}
 	if (ModuleList) {
-		delete ModuleList;
+		delete ModuleList;	ModuleList = NULL;
 	}
 	if (lijstp) {
-		delete lijstp;
+		delete lijstp;		lijstp = NULL;
 	}
-	free(vorlabp);
+	free(vorlabp);		vorlabp = NULL;
 }
 
 
@@ -503,9 +506,7 @@ int main(int argc, char **argv) {
 	cout << flush;
 
 	// free RAM
-	if (Devices) {
-		delete Devices;
-	}
+	FreeRAM();
 
 #ifdef USE_LUA
 
