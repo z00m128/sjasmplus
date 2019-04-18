@@ -2,6 +2,7 @@
 ;; Busy soft ;; 26.11.2018 ;; Tape generating library usage example    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+	DEVICE ZXSPECTRUM48
 	org	#8000
 
 start	ld	hl,#0000
@@ -12,4 +13,4 @@ start	ld	hl,#0000
 length	=	$-start
 
 	include	 TapLib.asm
-	MakeTape ZXSPECTRUM48, "Example.tap", "Example", start, length, start
+	MakeTape "Example.tap", "Example", start, length, start
