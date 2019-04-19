@@ -196,6 +196,7 @@
 - Fixed: INCTRD offset, binary STDOUT on windows
 - Fixed: LUA used inside macros, LUA get_word
 - parser: added C++(like) numeric literals
+- ZXSPECTRUMNEXT device added
 - new MACRO examples, syntax-highlight file for KDE5 editors (Kate)</programlisting></para>
             </listitem>
           </varlistentry>
@@ -1168,6 +1169,19 @@ StartProg:
             <listitem>
               <para>Same as russian clones ATM Turbo 2 and Pentagon 1024 SL.
               Has 64 RAM pages (0-63) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ZXSPECTRUMNEXT</term>
+
+            <listitem>
+              <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
+              RAM pages (0-223) totalling at 1.75MiB of memory. The default mapping
+              is similar to ZX128, paging in: {14, 15, 10, 11, 4, 5, 0, 1} pages.
+              The page 10 (bank 5) contains also ZX48 sysvars ("USR 0" mode) and
+              clear ULA screen. (SAVESNA works only in ZX48 and ZX128 modes, in
+              NEXT mode only SAVEBIN or saving specific TAP blocks work)</para>
             </listitem>
           </varlistentry>
         </variablelist></para>
