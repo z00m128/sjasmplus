@@ -4169,8 +4169,13 @@ namespace Z80 {
 		OpCodeTable.Insert("sub", OpCode_SUB);
 		OpCodeTable.Insert("xor", OpCode_XOR);
 
-		if(!Options::IsNextEnabled) return;
+		InitNextExtensions();
+	}
 
+	void InitNextExtensions() {
+		static bool nextWasInitialized = false;
+		if(!Options::IsNextEnabled || nextWasInitialized) return;
+		nextWasInitialized = true;
 		// Next extended opcodes
 		OpCodeTable.Insert("brlc",		OpCode_Next_BRLC);
 		OpCodeTable.Insert("bsla",		OpCode_Next_BSLA);

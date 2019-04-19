@@ -29,6 +29,7 @@
 namespace Z80 {
 	void GetOpCode();
 	void Init();
+	void InitNextExtensions();
 } //eof namespace Z80
 
 void InitCPU();

@@ -87,6 +87,18 @@ void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {		// add new device
 	initZxLikeDevice(*dev, 0x4000, 64, initialPagesZx128);
 }
 
+void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
+	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
+	const int initialPages[] = {14, 15, 10, 11, 4, 5, 0, 1};	// basically same as ZX128, but 8k
+	initZxLikeDevice(*dev, 0x2000, 224, initialPages);
+	// auto-enable ZX Next instruction extensions
+	if (0 == Options::IsNextEnabled) {
+		Options::IsNextEnabled = 1;
+		Z80::InitNextExtensions();		// add the special opcodes here (they were not added)
+				// this is a bit late, but it should work as well as `--zxnext` option I believe
+	}
+}
+
 int SetDevice(char *id) {
 	CDevice** dev;
 	CDevice* parent;
@@ -106,7 +118,7 @@ int SetDevice(char *id) {
 			dev = &(parent->Next);
 		}
 		if (NULL == *dev) {		// device not found
-			if (cmphstr(id, "zxspectrum48")) {
+			if (cmphstr(id, "zxspectrum48")) {			// must be lowercase to catch both cases
 				DeviceZXSpectrum48(dev, parent);
 			} else if (cmphstr(id, "zxspectrum128")) {
 				DeviceZXSpectrum128(dev, parent);
@@ -116,6 +128,8 @@ int SetDevice(char *id) {
 				DeviceZXSpectrum512(dev, parent);
 			} else if (cmphstr(id, "zxspectrum1024")) {
 				DeviceZXSpectrum1024(dev, parent);
+			} else if (cmphstr(id, "zxspectrumnext")) {
+				DeviceZxSpectrumNext(dev, parent);
 			} else {
 				return false;
 			}
@@ -126,7 +140,6 @@ int SetDevice(char *id) {
 		Slot = Device->GetSlot(Device->CurrentSlot);
 		CheckPage();
 	}
-
 	return true;
 }
 
