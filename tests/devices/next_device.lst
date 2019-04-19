@@ -1,0 +1,71 @@
+# file opened: next_device.asm
+ 1    0000                  DEVICE ZXSPECTRUMNEXT
+ 2    0000                  ; check default page mapping 14, 15, 10, 11, 4, 5, 0, 1 (and ORG 0) - write markers
+ 3    0000 45 45                         DB  "EE"
+ 3    0002                ORG 0x2000
+ 3    2000 46 46          DB "FF"
+ 3    2002                ORG 0x4000
+ 3    4000 41 41          DB  "AA"
+ 3    4002                ORG 0x6000
+ 3    6000 42 42          DB  "BB"
+ 4    6002                  ORG 0x8000
+ 4    8000 34 34          DB  "44"
+ 4    8002                ORG 0xA000
+ 4    A000 35 35          DB "55"
+ 4    A002                ORG 0xC000
+ 4    C000 30 30          DB  "00"
+ 4    C002                ORG 0xE000
+ 4    E000 31 31          DB  "11"
+ 5    E002                  ; verify defaut is slot 7
+ 6    E002                  PAGE 2
+ 6    E002                ASSERT {0xE000} == 0
+ 6    E002                ORG 0xE000
+ 6    E000 32 32          DB "22"
+ 7    E002                  PAGE 3
+ 7    E002                ASSERT {0xE000} == 0
+ 7    E002                ORG 0xE000
+ 7    E000 33 33          DB "33"
+ 8    E002                  ; verify there are 8 slots and 224 pages
+next_device.asm(9): error: [SLOT] Slot number must be in range 0..7
+ 9    E002                  SLOT 8      ; error
+next_device.asm(10): error: [PAGE] Page number must be in range 0..223
+10    E002                  PAGE 224    ; error
+11    E002                  ; do few more verifications with other slots, reading previously modified pages
+12    E002                  SLOT 1
+12    E002                PAGE 0
+12    E002                ASSERT {0x2000} == "00"
+12    E002                SLOT 2
+12    E002                PAGE 1
+12    E002                ASSERT {0x4000} == "11"
+13    E002                  SLOT 1
+13    E002                PAGE 2
+13    E002                ASSERT {0x2000} == "22"
+13    E002                SLOT 2
+13    E002                PAGE 3
+13    E002                ASSERT {0x4000} == "33"
+14    E002                  SLOT 1
+14    E002                PAGE 4
+14    E002                ASSERT {0x2000} == "44"
+14    E002                SLOT 2
+14    E002                PAGE 5
+14    E002                ASSERT {0x4000} == "55"
+15    E002                  SLOT 1
+15    E002                PAGE 10
+15    E002                ASSERT {0x2000} == "AA"
+15    E002                SLOT 2
+15    E002                PAGE 11
+15    E002                ASSERT {0x4000} == "BB"
+16    E002                  SLOT 1
+16    E002                PAGE 14
+16    E002                ASSERT {0x2000} == "EE"
+16    E002                SLOT 2
+16    E002                PAGE 15
+16    E002                ASSERT {0x4000} == "FF"
+17    E002
+18    E002                  ; check the Z80N instructions are enabled by the device selection
+19    E002 ED 91 07 02      nextreg $07,2
+20    E006
+# file closed: next_device.asm
+
+Value    Label
+------ - -----------------------------------------------------------
