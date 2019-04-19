@@ -1229,35 +1229,18 @@ int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 }
 
 
-CDevice::CDevice(const char *name, CDevice *n) {
+CDevice::CDevice(const char *name, CDevice *parent)
+	: Next(NULL), CurrentSlot(0), CurrentPage(0), SlotsCount(0), PagesCount(0) {
 	ID = STRDUP(name);
-	Next = NULL;
-	if (n) {
-	   	n->Next = this;
-    }
-	CurrentSlot = 0;
-	CurrentPage = 0;
-	SlotsCount = 0;
-	PagesCount = 0;
-
-	for (int i=0;i<256;i++) {
-		Slots[i] = 0;
-		Pages[i] = 0;
-	}
+	if (parent) parent->Next = this;
+	for (auto & slot : Slots) slot = NULL;
+	for (auto & page : Pages) page = NULL;
 }
 
 CDevice::~CDevice() {
-	for (int i=0;i<256;i++) {
-		if (Slots[i]) delete Slots[i];
-	}
-
-	for (int i=0;i<256;i++) {
-		if (Pages[i]) delete Pages[i];
-	}
-
-	if (Next) {
-		delete Next;
-	}
+	for (auto & slot : Slots) if (slot) delete slot;
+	for (auto & page : Pages) if (page) delete page;
+	if (Next) delete Next;
 }
 
 void CDevice::AddSlot(aint adr, aint size) {
@@ -1271,19 +1254,13 @@ void CDevice::AddPage(aint size) {
 }
 
 CDeviceSlot* CDevice::GetSlot(aint num) {
-	if (Slots[num]) {
-		return Slots[num];
-	}
-
+	if (Slots[num]) return Slots[num];
 	Error("Wrong slot number", lp);
 	return Slots[0];
 }
 
 CDevicePage* CDevice::GetPage(aint num) {
-	if (Pages[num]) {
-		return Pages[num];
-	}
-
+	if (Pages[num]) return Pages[num];
 	Error("Wrong page number", lp);
 	return Pages[0];
 }
