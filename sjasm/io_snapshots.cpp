@@ -67,8 +67,8 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	snbuf[18] = 0xFF; //ix
 	snbuf[21] = 0x54; //af
 	snbuf[22] = 0x00; //af
-	CDevicePage* stackPage = Device->GetSlot(Device->SlotsCount-1)->Page;
-	char* const stackRAM = stackPage->RAM + stackPage->Size - sizeof(BASin48SP);
+	const CDevicePage* stackPage = Device->GetSlot(Device->SlotsCount-1)->Page;
+	unsigned char* const stackRAM = (unsigned char*)stackPage->RAM + stackPage->Size - sizeof(BASin48SP);
 	bool defaultZx48Stack = true;
 	for (unsigned ii = 0; defaultZx48Stack && ii < sizeof(BASin48SP); ++ii) {
 		if (stackRAM[ii] != BASin48SP[ii]) defaultZx48Stack = false;

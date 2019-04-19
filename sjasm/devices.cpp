@@ -51,11 +51,11 @@ static void initZxLikeDevice(CDevice* const device, aint slotSize, int pageCount
 	}
 	device->CurrentSlot = device->SlotsCount - 1;
 	// set memory to "USR 0"-like state (for snapshot saving) (works also for ZXN 0x2000 slotSize)
-	int vramPage = (0x4000 == slotSize) ? initialPages[1] : initialPages[2];
+	int vramPage = (0x2000 == slotSize) ? initialPages[2] : initialPages[1];	// default = second slot page
 	char* const vramRAM = device->GetPage(vramPage)->RAM;
 	memset(vramRAM + 0x1800, 7*8, 768);
 	memcpy(vramRAM + 0x1C00, BASin48Vars, sizeof(BASin48Vars));
-	char* const stackRAM = device->GetSlot(device->CurrentSlot)->Page->RAM;
+	char* const stackRAM = device->GetSlot(device->CurrentSlot)->Page->RAM;		// last slot page is default "stack"
 	memcpy(stackRAM + slotSize - sizeof(BASin48SP), BASin48SP, sizeof(BASin48SP));
 }
 
