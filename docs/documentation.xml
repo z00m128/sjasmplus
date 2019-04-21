@@ -2142,10 +2142,13 @@ Kip                ; label Kip</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_org" />ORG &lt;address&gt;</term>
+            <term><anchor id="po_org" />ORG &lt;address&gt;[,&lt;page_number&gt;]</term>
 
             <listitem>
-              <para>Set the program counter to a specific address.<example>
+              <para>Set the program counter to a specific address. If the second argument is
+              provided, it will change memory page in the current slot, see
+              <link linkend="po_page">PAGE</link>.
+                  <example>
                   <title></title>
 
                   <para><programlisting>    ORG 100h ; or 0x100, or $100, or #100
