@@ -266,36 +266,33 @@ void dirBLOCK() {
 	}
 }
 
+static void dirPageImpl(const char* const dirName) {
+	//DeviceID should have been checked by caller - no code here
+	aint val;
+	if (!ParseExpression(lp, val)) {
+		Error("Syntax error", lp, IF_FIRST);
+		return;
+	}
+	if (val < 0 || Device->PagesCount <= val) {
+		char buf[LINEMAX];
+		SPRINTF2(buf, LINEMAX, "[%s] Page number must be in range 0..%u", dirName, Device->PagesCount - 1);
+		Error(buf, NULL, IF_FIRST);
+		return;
+	}
+	Slot->Page = Device->GetPage(val);
+	CheckPage();
+}
+
 void dirORG() {
 	aint val;
-	if (DeviceID) {
-		if (ParseExpression(lp, val)) {
-			CurAddress = val;
-		} else {
-			Error("[ORG] Syntax error", lp, IF_FIRST); return;
-		}
-		if (comma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[ORG] Syntax error", lp, IF_FIRST); return;
-			}
-			if (val < 0) {
-				Error("[ORG] Negative page number are not allowed", lp); return;
-			} else if (Device->PagesCount <= val) {
-				char buf[LINEMAX];
-				SPRINTF1(buf, LINEMAX, "[ORG] Page number must be in range 0..%u", Device->PagesCount - 1);
-			  	Error(buf, NULL, IF_FIRST); return;
-			}
-			Slot->Page = Device->GetPage(val);
-			//Page = Slot->Page;
-		}
-		CheckPage();
-	} else {
-		if (ParseExpression(lp, val)) {
-			CurAddress = val;
-		} else {
-			Error("[ORG] Syntax error", lp, IF_FIRST);
-		}
+	if (!ParseExpression(lp, val)) {
+		Error("[ORG] Syntax error", lp, IF_FIRST);
+		return;
 	}
+	CurAddress = val;
+	if (!DeviceID) return;
+	if (comma(lp)) dirPageImpl("ORG");
+	CheckPage();
 }
 
 void dirDISP() {
@@ -317,26 +314,12 @@ void dirENT() {
 }
 
 void dirPAGE() {
-	aint val;
 	if (!DeviceID) {
 		Warning("PAGE only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
-		return;
+	} else {
+		dirPageImpl("PAGE");
 	}
-	if (!ParseExpression(lp, val)) {
-		Error("Syntax error", lp, IF_FIRST);
-		return;
-	}
-	if (val < 0) {
-		Error("[PAGE] Negative page number are not allowed", lp); return;
-	} else if (Device->PagesCount <= val) {
-		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "[PAGE] Page number must be in range 0..%u", Device->PagesCount - 1);
-		Error(buf, NULL, IF_FIRST); return;
-	}
-
-	Slot->Page = Device->GetPage(val);
-	CheckPage();
 }
 
 void dirSLOT() {

@@ -29,7 +29,6 @@
 #ifndef __SJASM
 #define __SJASM
 
-enum EMemoryType { MT_NONE, MT_SIZE };
 enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR, OV_NONE, OV_LST };
 
 namespace Options {
@@ -55,8 +54,6 @@ namespace Options {
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;
-
-	//extern EMemoryType MemoryType;
 } // eof namespace Options
 
 extern CDevice *Devices;

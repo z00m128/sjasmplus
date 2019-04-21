@@ -102,7 +102,6 @@ namespace Options {
 
 } // eof namespace Options
 
-//EMemoryType MemoryType = MT_NONE;
 CDevice *Devices = 0;
 CDevice *Device = 0;
 CDeviceSlot *Slot = 0;

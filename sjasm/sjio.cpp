@@ -310,7 +310,12 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 		WriteBuffer[WBLength++] = (char)byte;
 		if (DESTBUFLEN == WBLength) WriteDest();
 		if (DeviceID) {
-			if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
+			if (Page->Size <= (MemoryPointer - Page->RAM)) {
+				CheckPage();
+				if (Page->Size <= (MemoryPointer - Page->RAM)) {	// Should never happen on ZX devices
+					Error("Trying to write into device memory out of slot range", NULL, FATAL);
+				}
+			}
 			if (!preserveDeviceMemory) *MemoryPointer = (char)byte;
 			++MemoryPointer;
 		}
