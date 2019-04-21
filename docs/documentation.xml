@@ -1577,6 +1577,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
  ZXSPECTRUM256 ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
  ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
  ZXSPECTRUM1024
+ ZXSPECTRUMNEXT ; ZX Spectrum Next (eight 8192B slots, 224 memory pages = 1.75MiB RAM)
 
  ;disable:
    DEVICE NONE
