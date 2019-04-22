@@ -120,10 +120,8 @@ int ConvertEncoding = ENCWIN;
 
 int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, donotlist = 0, listmacro = 0;
-int adrdisp = 0,PseudoORG = 0;
-char* MemoryRAM=NULL, * MemoryPointer=NULL;
-int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;
-aint MemorySize = 0;
+int adrdisp = 0, PseudoORG = 0, StartAddress = -1;
+char* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
 aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
 aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;

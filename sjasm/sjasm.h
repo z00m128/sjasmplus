@@ -72,10 +72,8 @@ extern std::vector<char> stdin_log;	// buffer for Options::SourceStdIn, to repla
 
 extern int ConvertEncoding;
 extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
-extern int adrdisp, PseudoORG;
-extern char* MemoryRAM, * MemoryPointer;
-extern int MemoryCPage, MemoryPagesCount, StartAddress;
-extern aint MemorySize;
+extern int adrdisp, PseudoORG, StartAddress;
+extern char* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
 extern aint CurAddress, AddressOfMAP, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
 

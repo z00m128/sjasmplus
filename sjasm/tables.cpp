@@ -222,7 +222,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			} else {
 				//if label already added (as used, or in previous pass), just refresh values
 				LabelTable[htr].value = nvalue;
-				LabelTable[htr].page = MemoryCPage;
+				LabelTable[htr].page = Page ? Page->Number : 0;
 				LabelTable[htr].IsDEFL = IsDEFL;
 				LabelTable[htr].updatePass = pass;
 				return 1;
@@ -241,7 +241,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	LabelTable[NextLocation].value = nvalue;
 	if (!undefined) {
 		LabelTable[NextLocation].used = -1;
-		LabelTable[NextLocation].page = MemoryCPage;
+		LabelTable[NextLocation].page = Page ? Page->Number : 0;
 	} else {
 		LabelTable[NextLocation].used = 1;
 		LabelTable[NextLocation].page = -1;
@@ -353,7 +353,7 @@ int CLabelTable::Remove(char* nname) {
 			*LabelTable[htr].name = 0;
 			LabelTable[htr].value = 0;
 			LabelTable[htr].used = 0;
-			LabelTable[htr].page = 0;
+			LabelTable[htr].page = -1;
 			LabelTable[htr].forwardref = 0;
 
 			return 1;
@@ -373,7 +373,7 @@ void CLabelTable::RemoveAll() {
 		*LabelTable[i].name = 0;
 		LabelTable[i].value = 0;
 		LabelTable[i].used = 0;
-		LabelTable[i].page = 0;
+		LabelTable[i].page = -1;
 		LabelTable[i].forwardref = 0;
 	}
 	NextLocation = 0;
@@ -424,8 +424,14 @@ void CLabelTable::DumpForUnreal() {
 	}
 	for (int i = 1; i < NextLocation; ++i) {
 		if (-1 == LabelTable[i].page) continue;
-		const int pages48k[] = { -1, 5, 2, LabelTable[i].page };
-		int page = pages48k[(LabelTable[i].value>>14) & 3];
+		int page = LabelTable[i].page;
+		if (!strcmp(DeviceID, "ZXSPECTRUM48") && page < 4) {	//TODO fix this properly?
+			// convert pages {0, 1, 2, 3} of ZX48 into ZX128-like {-1, 5, 2, 0}
+			// this can be fooled when there were multiple devices used, Label doesn't know into
+			// which device it does belong, so even ZX128 labels will be converted.
+			const int fakeZx128Pages[] = {-1, 5, 2, 0};
+			page = fakeZx128Pages[page];
+		}
 		int lvalue = LabelTable[i].value & 0x3FFF;
 		ep = ln;
 		//TODO Ped7g: undecipherable intent of old code (it's unclear for page > 9, the code doesn't make sense)
