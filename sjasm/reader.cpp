@@ -211,21 +211,10 @@ char* getparen(char* p) {
 char nidtemp[LINEMAX], *nidsubp = nidtemp;
 
 char* GetID(char*& p) {
-	/*char nid[LINEMAX],*/ char* np;
-	np = nidtemp;
-	SkipBlanks(p);
-	//if (!isalpha(*p) && *p!='_') return 0;
-	if (*p && !isalpha(*p) && *p != '_' && *p != '.') {
-		return 0;
-	}
-	while (*p) {
-		if (!isalnum(*p) && *p != '_' && *p != '.' && *p != '?' && *p != '!' && *p != '#' && *p != '@') {
-			break;
-		}
-		*np = *p; ++p; ++np;
-	}
+	char* np = nidtemp;
+	if (SkipBlanks(p) || (!isalpha(*p) && *p != '_' && *p != '.')) return NULL;
+	while (islabchar(*p)) *np++ = *p++;
 	*np = 0;
-	/*return STRDUP(nid);*/
 	return nidtemp;
 }
 

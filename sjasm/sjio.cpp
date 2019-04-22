@@ -908,75 +908,6 @@ int SaveRAM(FILE* ff, int start, int length) {
 	}
 
 	return 1;
-/*
-	// $4000-$7FFF
-	if (start < 0x8000) {
-		save = length;
-		addadr = start - 0x4000;
-		if (save + start > 0x8000) {
-			save = 0x8000 - start;
-			length -= save;
-			start = 0x8000;
-		} else {
-			length = 0;
-		}
-		if (fwrite(MemoryRAM + addadr, 1, save, ff) != save) {
-			return 0;
-		}
-	}
-
-	// $8000-$BFFF
-	if (length > 0 && start < 0xC000) {
-		save = length;
-		addadr = start - 0x4000;
-		if (save + start > 0xC000) {
-			save = 0xC000 - start;
-			length -= save;
-			start = 0xC000;
-		} else {
-			length = 0;
-		}
-		if (fwrite(MemoryRAM + addadr, 1, save, ff) != save) {
-			return 0;
-		}
-	}
-
-	// $C000-$FFFF
-	if (length > 0) {
-		if (Options::MemoryType == MT_ZX48) {
-			addadr = start;
-		} else {
-			switch (MemoryCPage) {
-			case 0:
-				addadr = 0x8000;
-				break;
-			case 1:
-				addadr = 0xc000;
-				break;
-			case 2:
-				addadr = 0x4000;
-				break;
-			case 3:
-				addadr = 0x10000;
-				break;
-			case 4:
-				addadr = 0x14000;
-				break;
-			case 5:
-				addadr = 0x0000;
-				break;
-			default:
-				addadr = 0x4000*MemoryCPage;
-				break;
-			}
-			addadr += start - 0xC000;
-		}
-		save = length;
-		if (fwrite(MemoryRAM + addadr, 1, save, ff) != save) {
-			return 0;
-		}
-	}
-	return 1;*/
 }
 
 unsigned int MemGetWord(unsigned int address) {
@@ -1002,51 +933,6 @@ unsigned char MemGetByte(unsigned int address) {
 
 	Error("Error with MemGetByte!", NULL, FATAL);
 	return 0;
-
-	/*// $4000-$7FFF
-	if (address < 0x8000) {
-		return MemoryRAM[address - 0x4000];
-	}
-	// $8000-$BFFF
-	else if (address < 0xC000) {
-		return MemoryRAM[address - 0x8000];
-	}
-		// $C000-$FFFF
-	else {*/
-		/*unsigned int addadr = 0;
-		if (Options::MemoryType == MT_ZX48) {
-			return MemoryRAM[address];
-		} else {
-			switch (MemoryCPage) {
-			case 0:
-				addadr = 0x8000;
-				break;
-			case 1:
-				addadr = 0xc000;
-				break;
-			case 2:
-				addadr = 0x4000;
-				break;
-			case 3:
-				addadr = 0x10000;
-				break;
-			case 4:
-				addadr = 0x14000;
-				break;
-			case 5:
-				addadr = 0x0000;
-				break;
-			default:
-				addadr = 0x4000*MemoryCPage;
-				break;
-			}
-			addadr += address - 0xC000;*/
-			/*if (MemoryRAM[addadr]) {
-				return 0;
-			}*/
-			//return MemoryRAM[addadr];
-		//}
-	//}
 }
 
 
