@@ -2026,7 +2026,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".dephase", dirENT);
 	DirectivesTable.insertd(".page", dirPAGE);
 	DirectivesTable.insertd(".slot", dirSLOT);
-	DirectivesTable.insertd(".mmu", dirMMU);
+	//DirectivesTable.insertd(".mmu", dirMMU);
 	DirectivesTable.insertd(".encoding", dirENCODING);
 	DirectivesTable.insertd(".labelslist", dirLABELSLIST);
 	//  DirectivesTable.insertd(".bind",dirBIND); /* i didn't comment this */
