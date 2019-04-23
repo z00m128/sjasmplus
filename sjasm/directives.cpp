@@ -1209,13 +1209,20 @@ static bool dirIfusedIfnused(char* & id) {
 	bool global = ('@' == *lp) && ++lp;		// if global marker, remember it + skip it
 	if ( (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) || !SkipBlanks()) {
 		Error("[IFUSED] Syntax error", bp, SUPPRESS);
+		id = NULL;
 		return false;
 	}
 	if (id == NULL || *id == 0) {
-		id = LastParsedLabel;
+		id = STRDUP(LastParsedLabel);
 	} else {
-		id = ValidateLabel(id, global ? VALIDATE_LABEL_AS_GLOBAL : 0);
-		if (id == NULL) Error("[IFUSED] Invalid label name", bp, IF_FIRST);
+		char* validLabel = ValidateLabel(id, global ? VALIDATE_LABEL_AS_GLOBAL : 0);
+		if (validLabel) {
+			id = STRDUP(validLabel);
+			delete[] validLabel;
+		} else {
+			id = NULL;
+			Error("[IFUSED] Invalid label name", bp, IF_FIRST);
+		}
 	}
 	return NULL != id;
 }
@@ -1223,11 +1230,13 @@ static bool dirIfusedIfnused(char* & id) {
 static void dirIFUSED() {
 	char* id;
 	if (dirIfusedIfnused(id)) dirIfInternal("IFUSED", LabelTable.IsUsed(id));
+	if (id) free(id);
 }
 
 static void dirIFNUSED() {
 	char* id;
 	if (dirIfusedIfnused(id)) dirIfInternal("IFNUSED", !LabelTable.IsUsed(id));
+	if (id) free(id);
 }
 
 static void dirIFDEF() {
@@ -1350,7 +1359,7 @@ void dirUNDEFINE() {
 		DefineTable.RemoveAll();
 	} else if (DefineTable.FindDuplicate(id)) {
 		DefineTable.Remove(id);
-	} else if (LabelTable.Find(id)) {
+	} else if (LabelTable.Find(id, true)) {
 		LabelTable.Remove(id);
 	} else {
 		Warning("[UNDEFINE] Identifier not found", id); return;
@@ -1669,7 +1678,9 @@ void dirEDUP() {
 		return;
 	}
 	dup.IsInWork = true;
-	dup.Pointer->string = NULL;	// kill the EDUP inside DUP-list (also works as "while" terminator)
+	// kill the "EDUP" inside DUP-list (also works as "while" terminator)
+	if (dup.Pointer->string) free(dup.Pointer->string);
+	dup.Pointer->string = NULL;
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
@@ -1688,6 +1699,7 @@ void dirEDUP() {
 			++CurrentSourceLine;
 		}
 	}
+	delete dup.Lines;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;
@@ -1932,112 +1944,113 @@ void dirDEVICE() {
 }
 
 void InsertDirectives() {
-	DirectivesTable.insertd("assert", dirASSERT);
-	DirectivesTable.insertd("byte", dirBYTE);
-	DirectivesTable.insertd("abyte", dirABYTE);
-	DirectivesTable.insertd("abytec", dirABYTEC);
-	DirectivesTable.insertd("abytez", dirABYTEZ);
-	DirectivesTable.insertd("word", dirWORD);
-	DirectivesTable.insertd("block", dirBLOCK);
-	DirectivesTable.insertd("dword", dirDWORD);
-	DirectivesTable.insertd("d24", dirD24);
-	DirectivesTable.insertd("dg", dirDG);
-	DirectivesTable.insertd("defg", dirDG);
-	DirectivesTable.insertd("dh", dirDH);
-	DirectivesTable.insertd("defh", dirDH);
-	DirectivesTable.insertd("hex", dirDH);
-	DirectivesTable.insertd("org", dirORG);
-	DirectivesTable.insertd("fpos",dirFORG);
-	DirectivesTable.insertd("map", dirMAP);
-	DirectivesTable.insertd("align", dirALIGN);
-	DirectivesTable.insertd("module", dirMODULE);
-	DirectivesTable.insertd("size", dirSIZE);
-	//DirectivesTable.insertd("textarea",dirTEXTAREA);
-	DirectivesTable.insertd("textarea", dirDISP);
-	DirectivesTable.insertd("else", dirELSE);
-	DirectivesTable.insertd("export", dirEXPORT);
-	DirectivesTable.insertd("display", dirDISPLAY);
-	DirectivesTable.insertd("end", dirEND);
-	DirectivesTable.insertd("include", dirINCLUDE);
-	DirectivesTable.insertd("incbin", dirINCBIN);
-	DirectivesTable.insertd("binary", dirINCBIN);
-	DirectivesTable.insertd("inchob", dirINCHOB);
-	DirectivesTable.insertd("inctrd", dirINCTRD);
-	DirectivesTable.insertd("insert", dirINCBIN);
-	DirectivesTable.insertd("savesna", dirSAVESNA);
-	DirectivesTable.insertd("savehob", dirSAVEHOB);
-	DirectivesTable.insertd("savebin", dirSAVEBIN);
-	DirectivesTable.insertd("emptytap", dirEMPTYTAP);
-	DirectivesTable.insertd("savetap", dirSAVETAP);
-	DirectivesTable.insertd("emptytrd", dirEMPTYTRD);
-	DirectivesTable.insertd("savetrd", dirSAVETRD);
-	DirectivesTable.insertd("shellexec", dirSHELLEXEC);
+	DirectivesTable.insertd(".assert", dirASSERT);
+	DirectivesTable.insertd(".byte", dirBYTE);
+	DirectivesTable.insertd(".abyte", dirABYTE);
+	DirectivesTable.insertd(".abytec", dirABYTEC);
+	DirectivesTable.insertd(".abytez", dirABYTEZ);
+	DirectivesTable.insertd(".word", dirWORD);
+	DirectivesTable.insertd(".block", dirBLOCK);
+	DirectivesTable.insertd(".dword", dirDWORD);
+	DirectivesTable.insertd(".d24", dirD24);
+	DirectivesTable.insertd(".dg", dirDG);
+	DirectivesTable.insertd(".defg", dirDG);
+	DirectivesTable.insertd(".dh", dirDH);
+	DirectivesTable.insertd(".defh", dirDH);
+	DirectivesTable.insertd(".hex", dirDH);
+	DirectivesTable.insertd(".org", dirORG);
+	DirectivesTable.insertd(".fpos",dirFORG);
+	DirectivesTable.insertd(".map", dirMAP);
+	DirectivesTable.insertd(".align", dirALIGN);
+	DirectivesTable.insertd(".module", dirMODULE);
+	DirectivesTable.insertd(".size", dirSIZE);
+	//DirectivesTable.insertd(".textarea",dirTEXTAREA);
+	DirectivesTable.insertd(".textarea", dirDISP);
+	DirectivesTable.insertd(".else", dirELSE);
+	DirectivesTable.insertd(".export", dirEXPORT);
+	DirectivesTable.insertd(".display", dirDISPLAY);
+	DirectivesTable.insertd(".end", dirEND);
+	DirectivesTable.insertd(".include", dirINCLUDE);
+	DirectivesTable.insertd(".incbin", dirINCBIN);
+	DirectivesTable.insertd(".binary", dirINCBIN);
+	DirectivesTable.insertd(".inchob", dirINCHOB);
+	DirectivesTable.insertd(".inctrd", dirINCTRD);
+	DirectivesTable.insertd(".insert", dirINCBIN);
+	DirectivesTable.insertd(".savesna", dirSAVESNA);
+	DirectivesTable.insertd(".savehob", dirSAVEHOB);
+	DirectivesTable.insertd(".savebin", dirSAVEBIN);
+	DirectivesTable.insertd(".emptytap", dirEMPTYTAP);
+	DirectivesTable.insertd(".savetap", dirSAVETAP);
+	DirectivesTable.insertd(".emptytrd", dirEMPTYTRD);
+	DirectivesTable.insertd(".savetrd", dirSAVETRD);
+	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
-	DirectivesTable.insertd("winexec", dirWINEXEC);
+	DirectivesTable.insertd(".winexec", dirWINEXEC);
 #endif*/
-	DirectivesTable.insertd("if", dirIF);
-	DirectivesTable.insertd("ifn", dirIFN);
-	DirectivesTable.insertd("ifused", dirIFUSED);
-	DirectivesTable.insertd("ifnused", dirIFNUSED);
-	DirectivesTable.insertd("ifdef", dirIFDEF);
-	DirectivesTable.insertd("ifndef", dirIFNDEF);
-	DirectivesTable.insertd("output", dirOUTPUT);
-	DirectivesTable.insertd("outend", dirOUTEND);
-	DirectivesTable.insertd("tapout", dirTAPOUT);
-	DirectivesTable.insertd("tapend", dirTAPEND);
-	DirectivesTable.insertd("define", dirDEFINE);
-	DirectivesTable.insertd("undefine", dirUNDEFINE);
-	DirectivesTable.insertd("defarray", dirDEFARRAY);
-	DirectivesTable.insertd("macro", dirMACRO);
-	DirectivesTable.insertd("struct", dirSTRUCT);
-	DirectivesTable.insertd("dc", dirDC);
-	DirectivesTable.insertd("dz", dirDZ);
-	DirectivesTable.insertd("db", dirBYTE);
-	DirectivesTable.insertd("dm", dirBYTE);
-	DirectivesTable.insertd("dw", dirWORD);
-	DirectivesTable.insertd("ds", dirBLOCK);
-	DirectivesTable.insertd("dd", dirDWORD);
-	DirectivesTable.insertd("defb", dirBYTE);
-	DirectivesTable.insertd("defw", dirWORD);
-	DirectivesTable.insertd("defs", dirBLOCK);
-	DirectivesTable.insertd("defd", dirDWORD);
-	DirectivesTable.insertd("defm", dirBYTE);
-	DirectivesTable.insertd("endmod", dirENDMODULE);
-	DirectivesTable.insertd("endmodule", dirENDMODULE);
-	DirectivesTable.insertd("endmap", dirENDMAP);
-	DirectivesTable.insertd("rept", dirDUP);
-	DirectivesTable.insertd("dup", dirDUP);
-	DirectivesTable.insertd("disp", dirDISP);
-	DirectivesTable.insertd("phase", dirDISP);
-	DirectivesTable.insertd("ent", dirENT);
-	DirectivesTable.insertd("unphase", dirENT);
-	DirectivesTable.insertd("dephase", dirENT);
-	DirectivesTable.insertd("page", dirPAGE);
-	DirectivesTable.insertd("slot", dirSLOT);
-	DirectivesTable.insertd("encoding", dirENCODING);
-	DirectivesTable.insertd("labelslist", dirLABELSLIST);
-	//  DirectivesTable.insertd("bind",dirBIND); /* i didn't comment this */
-	DirectivesTable.insertd("endif", dirENDIF);
-	//DirectivesTable.insertd("endt",dirENDTEXTAREA);
-	DirectivesTable.insertd("endt", dirENT);
-	DirectivesTable.insertd("endm", dirENDM);
-	DirectivesTable.insertd("edup", dirEDUP);
-	DirectivesTable.insertd("endr", dirEDUP);
-	DirectivesTable.insertd("ends", dirENDS);
+	DirectivesTable.insertd(".if", dirIF);
+	DirectivesTable.insertd(".ifn", dirIFN);
+	DirectivesTable.insertd(".ifused", dirIFUSED);
+	DirectivesTable.insertd(".ifnused", dirIFNUSED);
+	DirectivesTable.insertd(".ifdef", dirIFDEF);
+	DirectivesTable.insertd(".ifndef", dirIFNDEF);
+	DirectivesTable.insertd(".output", dirOUTPUT);
+	DirectivesTable.insertd(".outend", dirOUTEND);
+	DirectivesTable.insertd(".tapout", dirTAPOUT);
+	DirectivesTable.insertd(".tapend", dirTAPEND);
+	DirectivesTable.insertd(".define", dirDEFINE);
+	DirectivesTable.insertd(".undefine", dirUNDEFINE);
+	DirectivesTable.insertd(".defarray", dirDEFARRAY);
+	DirectivesTable.insertd(".macro", dirMACRO);
+	DirectivesTable.insertd(".struct", dirSTRUCT);
+	DirectivesTable.insertd(".dc", dirDC);
+	DirectivesTable.insertd(".dz", dirDZ);
+	DirectivesTable.insertd(".db", dirBYTE);
+	DirectivesTable.insertd(".dm", dirBYTE);
+	DirectivesTable.insertd(".dw", dirWORD);
+	DirectivesTable.insertd(".ds", dirBLOCK);
+	DirectivesTable.insertd(".dd", dirDWORD);
+	DirectivesTable.insertd(".defb", dirBYTE);
+	DirectivesTable.insertd(".defw", dirWORD);
+	DirectivesTable.insertd(".defs", dirBLOCK);
+	DirectivesTable.insertd(".defd", dirDWORD);
+	DirectivesTable.insertd(".defm", dirBYTE);
+	DirectivesTable.insertd(".endmod", dirENDMODULE);
+	DirectivesTable.insertd(".endmodule", dirENDMODULE);
+	DirectivesTable.insertd(".endmap", dirENDMAP);
+	DirectivesTable.insertd(".rept", dirDUP);
+	DirectivesTable.insertd(".dup", dirDUP);
+	DirectivesTable.insertd(".disp", dirDISP);
+	DirectivesTable.insertd(".phase", dirDISP);
+	DirectivesTable.insertd(".ent", dirENT);
+	DirectivesTable.insertd(".unphase", dirENT);
+	DirectivesTable.insertd(".dephase", dirENT);
+	DirectivesTable.insertd(".page", dirPAGE);
+	DirectivesTable.insertd(".slot", dirSLOT);
+	DirectivesTable.insertd(".mmu", dirMMU);
+	DirectivesTable.insertd(".encoding", dirENCODING);
+	DirectivesTable.insertd(".labelslist", dirLABELSLIST);
+	//  DirectivesTable.insertd(".bind",dirBIND); /* i didn't comment this */
+	DirectivesTable.insertd(".endif", dirENDIF);
+	//DirectivesTable.insertd(".endt",dirENDTEXTAREA);
+	DirectivesTable.insertd(".endt", dirENT);
+	DirectivesTable.insertd(".endm", dirENDM);
+	DirectivesTable.insertd(".edup", dirEDUP);
+	DirectivesTable.insertd(".endr", dirEDUP);
+	DirectivesTable.insertd(".ends", dirENDS);
 
-	DirectivesTable.insertd("device", dirDEVICE);
+	DirectivesTable.insertd(".device", dirDEVICE);
 
 #ifdef USE_LUA
-	DirectivesTable.insertd("lua", dirLUA);
-	DirectivesTable.insertd("endlua", dirENDLUA);
-	DirectivesTable.insertd("includelua", dirINCLUDELUA);
+	DirectivesTable.insertd(".lua", dirLUA);
+	DirectivesTable.insertd(".endlua", dirENDLUA);
+	DirectivesTable.insertd(".includelua", dirINCLUDELUA);
 #endif //USE_LUA
 
-	DirectivesTable_dup.insertd("dup", dirDUP);
-	DirectivesTable_dup.insertd("edup", dirEDUP);
-	DirectivesTable_dup.insertd("endm", dirENDM);
-	DirectivesTable_dup.insertd("endr", dirEDUP);
-	DirectivesTable_dup.insertd("rept", dirDUP);
+	DirectivesTable_dup.insertd(".dup", dirDUP);
+	DirectivesTable_dup.insertd(".edup", dirEDUP);
+	DirectivesTable_dup.insertd(".endm", dirENDM);
+	DirectivesTable_dup.insertd(".endr", dirEDUP);
+	DirectivesTable_dup.insertd(".rept", dirDUP);
 }
 
 #ifdef USE_LUA

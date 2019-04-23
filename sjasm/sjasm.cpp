@@ -163,8 +163,8 @@ void InitPass() {
 		free(LastParsedLabel);
 		LastParsedLabel = NULL;
 	}
-	vorlabp = (char *)malloc(2);
-	STRCPY(vorlabp, sizeof("_"), "_");
+	if (vorlabp) free(vorlabp);
+	vorlabp = STRDUP("_");
 	macrolabp = NULL;
 	listmacro = 0;
 	CurAddress = AddressOfMAP = 0;
@@ -205,6 +205,8 @@ void FreeRAM() {
 		delete lijstp;		lijstp = NULL;
 	}
 	free(vorlabp);		vorlabp = NULL;
+	LabelTable.RemoveAll();
+	DefineTable.RemoveAll();
 }
 
 

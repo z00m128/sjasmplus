@@ -533,13 +533,10 @@ char* ReplaceDefine(char* lp) {
 }
 
 void ParseLabel() {
-	char* tp, temp[LINEMAX], * ttp;
-	aint val, oval;
-	if (White()) {
-		return;
-	}
+	if (White()) return;
 	if (Options::IsPseudoOpBOF && ParseDirective(true)) return;
-	tp = temp;
+	char temp[LINEMAX], * tp = temp, * ttp;
+	aint val, oval;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
 		*tp = *lp; ++tp; ++lp;
 	}
@@ -560,22 +557,13 @@ void ParseLabel() {
 			Error("Local-labels flow differs in this pass (missing/new local label or final pass source difference)");
 		}
 	} else {
-		bool IsDEFL = 0;
-		if (NeedEQU()) {
+		bool IsDEFL = false;
+		if ((IsDEFL = NeedDEFL()) || NeedEQU()) {
 			if (!ParseExpression(lp, val)) {
-				Error("Expression error", lp); val = 0;
+				Error("Expression error", lp);
+				val = 0;
 			}
-			if (IsLabelNotFound) {
-				Error("Forward reference", NULL, EARLY);
-			}
-		} else if (NeedDEFL()) {
-			if (!ParseExpression(lp, val)) {
-				Error("Expression error", lp); val = 0;
-			}
-			if (IsLabelNotFound) {
-				Error("Forward reference", NULL, EARLY);
-			}
-			IsDEFL = 1;
+			if (IsLabelNotFound) Error("Forward reference", NULL, EARLY);
 		} else if (NeedField()) {
 			aint nv;
 			val = AddressOfMAP;
@@ -602,10 +590,7 @@ void ParseLabel() {
 		}
 		// Copy label name to last parsed label variable
 		if (!IsDEFL) {
-			if (LastParsedLabel != NULL) {
-				free(LastParsedLabel);
-				LastParsedLabel = NULL;
-			}
+			if (LastParsedLabel != NULL) free(LastParsedLabel);
 			LastParsedLabel = STRDUP(tp);
 			if (LastParsedLabel == NULL) {
 				Error("No enough memory!", NULL, FATAL);
@@ -632,7 +617,6 @@ void ParseLabel() {
 		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL)) {
 			Error("Duplicate label", tp, EARLY);
 		}
-
 		delete[] tp;
 	}
 }
@@ -676,7 +660,6 @@ void ParseLine(bool parselabels) {
 		if (!dup.IsInWork) {
 			lp = line;
 			CStringsList* f = new CStringsList(lp);
-			f->sourceLine = CurrentSourceLine;
 			dup.Pointer->next = f;
 			dup.Pointer = f;
 #ifdef DEBUG_COUT_PARSE_LINE
