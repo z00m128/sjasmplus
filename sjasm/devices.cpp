@@ -59,7 +59,7 @@ static void initZxLikeDevice(CDevice* const device, aint slotSize, int pageCount
 	memcpy(stackRAM + slotSize - sizeof(BASin48SP), BASin48SP, sizeof(BASin48SP));
 }
 
-void DeviceZXSpectrum48(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum48(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM48", parent);
 	const int initialPages[] = {0, 1, 2, 3};
 	initZxLikeDevice(*dev, 0x4000, 4, initialPages);
@@ -67,27 +67,27 @@ void DeviceZXSpectrum48(CDevice **dev, CDevice *parent) {		// add new device
 
 const static int initialPagesZx128[] = {7, 5, 2, 0};
 
-void DeviceZXSpectrum128(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum128(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM128", parent);
 	initZxLikeDevice(*dev, 0x4000, 8, initialPagesZx128);
 }
 
-void DeviceZXSpectrum256(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum256(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM256", parent);
 	initZxLikeDevice(*dev, 0x4000, 16, initialPagesZx128);
 }
 
-void DeviceZXSpectrum512(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum512(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM512", parent);
 	initZxLikeDevice(*dev, 0x4000, 32, initialPagesZx128);
 }
 
-void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM1024", parent);
 	initZxLikeDevice(*dev, 0x4000, 64, initialPagesZx128);
 }
 
-void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
+static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
 	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
 	const int initialPages[] = {14, 15, 10, 11, 4, 5, 0, 1};	// basically same as ZX128, but 8k
 	initZxLikeDevice(*dev, 0x2000, 224, initialPages);
@@ -138,7 +138,7 @@ int SetDevice(char *id) {
 		Device = (*dev);
 		DeviceID = Device->ID;
 		Slot = Device->GetSlot(Device->CurrentSlot);
-		CheckPage();
+		Device->CheckPage(CDevice::CHECK_RESET);
 	}
 	return true;
 }

@@ -280,7 +280,7 @@ static void dirPageImpl(const char* const dirName) {
 		return;
 	}
 	Slot->Page = Device->GetPage(val);
-	CheckPage();
+	Device->CheckPage(CDevice::CHECK_RESET);
 }
 
 void dirORG() {
@@ -291,8 +291,8 @@ void dirORG() {
 	}
 	CurAddress = val;
 	if (!DeviceID) return;
-	if (comma(lp)) dirPageImpl("ORG");
-	CheckPage();
+	if (comma(lp))	dirPageImpl("ORG");
+	else 			Device->CheckPage(CDevice::CHECK_RESET);
 }
 
 void dirDISP() {
@@ -322,6 +322,70 @@ void dirPAGE() {
 	}
 }
 
+void dirMMU() {
+	if (!DeviceID) {
+		Warning("MMU is allowed only in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
+		return;
+	}
+	aint slot1, slot2, pageN = -1;
+	ESlotOptions slotOpt = SLTOPT_NONE;
+	if (!ParseExpression(lp, slot1)) {
+		Error("[MMU] First slot number parsing failed", bp, SUPPRESS);
+		return;
+	}
+	slot2 = slot1;
+	if (!comma(lp)) {	// second slot or slot-option should follow (if not comma)
+		// see if there is slot1-only with option-char (e/w/n options)
+		const char slotOptChar = (*lp)|0x20;	// primitive ASCII tolower
+		if ('a' <= slotOptChar && slotOptChar <= 'z' && (',' == lp[1] || White(lp[1]))) {
+			if ('e' == slotOptChar) slotOpt = SLTOPT_ERROR;
+			else if ('w' == slotOptChar) slotOpt = SLTOPT_WARNING;
+			else if ('n' == slotOptChar) slotOpt = SLTOPT_NEXT;
+			else {
+				Warning("[MMU] Unknown slot option (legal: e, w, n)", lp);
+			}
+			++lp;
+		} else {	// there was no option char, check if there was slot2 number to define range
+			if (!ParseExpression(lp, slot2)) {
+				Error("[MMU] Second slot number parsing failed", bp, SUPPRESS);
+				return;
+			}
+		}
+		if (!comma(lp)) {
+			Error("[MMU] Comma and page number expected after slot info", bp, SUPPRESS);
+			return;
+		}
+	}
+	if (!ParseExpression(lp, pageN)) {
+		Error("[MMU] Page number parsing failed", bp, SUPPRESS);
+		return;
+	}
+	// validate argument values
+	if (slot1 < 0 || slot2 < slot1 || Device->SlotsCount <= slot2) {
+		char buf[LINEMAX];
+		SPRINTF1(buf, LINEMAX, "[MMU] Slot number(s) must be in range 0..%u and form a range",
+				 Device->SlotsCount - 1);
+		Error(buf, NULL, SUPPRESS);
+		return;
+	}
+	if (pageN < 0 || Device->PagesCount <= pageN + (slot2 - slot1)) {
+		char buf[LINEMAX];
+		SPRINTF1(buf, LINEMAX, "[MMU] Requested page(s) must be in range 0..%u", Device->PagesCount - 1);
+		Error(buf, NULL, SUPPRESS);
+		return;
+	}
+	// all valid, set it up
+	for (aint slotN = slot1; slotN <= slot2; ++slotN, ++pageN) {
+		Device->GetSlot(slotN)->Page = Device->GetPage(pageN);
+		// this ^ is also enough to keep global "Slot" up to date (it's a pointer)
+		Device->GetSlot(slotN)->Option = slotOpt;	// resets whole range to NONE when range
+	}
+	// wrap output addresses back into 64ki address space, it's essential for MMU functionality
+	if (PseudoORG) adrdisp &= 0xFFFF; else CurAddress &= 0xFFFF;
+	Device->CheckPage(CDevice::CHECK_RESET);
+}
+
 void dirSLOT() {
 	aint val;
 	if (!DeviceID) {
@@ -342,7 +406,6 @@ void dirSLOT() {
 	}
 	Slot = Device->GetSlot(val);
 	Device->CurrentSlot = Slot->Number;
-	CheckPage();
 }
 
 void dirMAP() {
@@ -2026,7 +2089,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".dephase", dirENT);
 	DirectivesTable.insertd(".page", dirPAGE);
 	DirectivesTable.insertd(".slot", dirSLOT);
-	//DirectivesTable.insertd(".mmu", dirMMU);
+	DirectivesTable.insertd(".mmu", dirMMU);
 	DirectivesTable.insertd(".encoding", dirENCODING);
 	DirectivesTable.insertd(".labelslist", dirLABELSLIST);
 	//  DirectivesTable.insertd(".bind",dirBIND); /* i didn't comment this */
@@ -2064,7 +2127,7 @@ bool LuaSetPage(aint n) {
 		Error(buf, NULL, IF_FIRST); return false;
 	}
 	Slot->Page = Device->GetPage(n);
-	CheckPage();
+	Device->CheckPage(CDevice::CHECK_RESET);
 	return true;
 }
 
@@ -2078,7 +2141,6 @@ bool LuaSetSlot(aint n) {
 	}
 	Slot = Device->GetSlot(n);
 	Device->CurrentSlot = Slot->Number;
-	CheckPage();
 	return true;
 }
 

@@ -64,6 +64,27 @@ Input file without extension does produce wrong default output filename
 
 ZX128 snapshot default state and mapping - still doesn't survive simple `ret` into BASIC
 
+DISP inside DISP bugs => documented. Correct solution = nesting DISPs?!
+
+single device -> whole source is such device + revert TapLib
+
+NEXT device -> unreal symbols dump should be 0x2000 truncating?
+
+$$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
+
+MMU:
+- fix listing address after it gets adjusted by CheckPage
+- make 80kiB incbin work! (and verify shorter incbin, probably doesn't work now)
+- custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
+- err/warn/warp option for slot range?
+
+sjasmplus 2.x/fork:
+
+address space of labels -> 2|3:30|29 bits, the top bits being default slot number,
+remaining bits being physical address into global chip address space
+-> then producing machine code using the particular label would "format" physical
+label value for particular "slot" (view of value).
+
 ====================
 Docs:
 

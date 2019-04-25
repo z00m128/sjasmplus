@@ -143,17 +143,24 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 }
 
 void CheckRamLimitExceeded() {
+	static bool notWarnedCurAdr = true;
+	static bool notWarnedDisp = true;
 	char buf[64];
 	if (CurAddress >= 0x10000) {
-		SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
-		Warning(buf);
-		CurAddress &= 0xFFFF;
-	}
+		if (notWarnedCurAdr) {
+			SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
+			Warning(buf);
+			notWarnedCurAdr = false;
+		}
+		if (PseudoORG) CurAddress &= 0xFFFF;	// fake DISP address gets auto-wrapped FFFF->0
+	} else notWarnedCurAdr = true;
 	if (PseudoORG && adrdisp >= 0x10000) {
-		SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
-		Warning(buf);
-		adrdisp &= 0xFFFF;
-	}
+		if (notWarnedDisp) {
+			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
+			Warning(buf);
+			notWarnedDisp = false;
+		}
+	} else notWarnedDisp = true;
 }
 
 void WriteDest() {
@@ -290,33 +297,16 @@ void ListFile(bool showAsSkipped) {
 	nEB = 0;
 }
 
-void CheckPage() {
-	if (!DeviceID) return;
-	const int realAddr = PseudoORG ? adrdisp : CurAddress;
-	for (int i=Device->SlotsCount; i--; ) {
-		CDeviceSlot* S = Device->GetSlot(i);
-		if (S->Address <= realAddr) {
-			Page = S->Page;
-			MemoryPointer = Page->RAM + (realAddr - S->Address);
-			return;
-		}
-	}
-	Error("CheckPage(): please, contact the author of this program.", NULL, FATAL);
-}
-
 static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
-	CheckRamLimitExceeded();
 	if (LASTPASS == pass) {
 		WriteBuffer[WBLength++] = (char)byte;
 		if (DESTBUFLEN == WBLength) WriteDest();
-		if (DeviceID) {
-			if (Page->Size <= (MemoryPointer - Page->RAM)) {
-				CheckPage();
-				if (Page->Size <= (MemoryPointer - Page->RAM)) {	// Should never happen on ZX devices
-					Error("Trying to write into device memory out of slot range", NULL, FATAL);
-				}
-			}
-			if (!preserveDeviceMemory) *MemoryPointer = (char)byte;
+	}
+	// the page-checking in device mode must be done in all passes, the slot can have "wrap" option
+	if (DeviceID) {
+		Device->CheckPage(CDevice::CHECK_EMIT);
+		if (MemoryPointer) {
+			if (LASTPASS == pass && !preserveDeviceMemory) *MemoryPointer = (char)byte;
 			++MemoryPointer;
 		}
 	}
@@ -351,15 +341,17 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 	if (len <= 0) {
 		CurAddress = (CurAddress + len) & 0xFFFF;
 		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
-		CheckPage();
+		if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
+		else			CheckRamLimitExceeded();
 		return;
 	}
 	while (len--) {
+		int dVal = (preserveDeviceMemory && DeviceID && MemoryPointer) ? MemoryPointer[0] : byte;
 		EmitByteNoListing(byte, preserveDeviceMemory);
 		if (LASTPASS == pass && emitMaxToListing) {
 			// put "..." marker into listing if some more bytes are emitted after last listed
 			if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
-			else EB[nEB++] = (DeviceID ? MemoryPointer[-1] : byte)&0xFF;
+			else EB[nEB++] = dVal&0xFF;
 		}
 	}
 }
