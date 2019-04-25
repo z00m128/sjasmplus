@@ -960,6 +960,7 @@ int SaveBinary(char* fname, int start, int length) {
 int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	unsigned char header[0x11];
 	int i;
+/*
 	for (i = 0; i != 8; header[i++] = 0x20) {
 		;
 	}
@@ -997,6 +998,34 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 			header[0x0a] = (unsigned char)(start >> 8);
 		}
 	}
+*/
+	if (length + start > 0x10000) {	// io_trd.cpp/TRD_AddFile doesn't have this..?
+		length = -1;
+	}
+	if (length <= 0) {
+		length = 0x10000 - start;
+	}
+
+	memset(header,' ',9);
+	i = strlen(fhobname);
+	if (fhobname[i-2] == '.')
+	{
+		header[8] = fhobname[i-1];
+		i -= 2;
+	}
+	if (i > 8) {
+			Error("TR-DOS filename too long", fhobname, IF_FIRST); return 0;
+		}
+	memcpy(header, fhobname, i);
+
+	if (header[8] == 'B')	{
+		header[0x09] = (unsigned char)(length & 0xff);
+		header[0x0a] = (unsigned char)(length >> 8);
+	} else	{
+		header[0x09] = (unsigned char)(start & 0xff);
+		header[0x0a] = (unsigned char)(start >> 8);
+	}
+
 
 	header[0x0b] = (unsigned char)(length & 0xff);
 	header[0x0c] = (unsigned char)(length >> 8);
