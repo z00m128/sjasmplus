@@ -167,6 +167,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	}
 
 	//header of file
+/*
 	for (i = 0; i != 9; hdr[i++] = 0x20) {
 		;
 	}
@@ -195,7 +196,28 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 			hdr[0x09] = (unsigned char)(start & 0xff);
 			hdr[0x0a] = (unsigned char)(start >> 8);
 		}
+}
+*/
+	memset(hdr,' ',9);
+	i = strlen(fhobname);
+	if (fhobname[i-2] == '.')
+	{
+		hdr[8] = fhobname[i-1];
+		i -= 2;
 	}
+	if (i > 8) {
+			Error("TR-DOS filename too long", fhobname, IF_FIRST); return 0;
+		}
+	memcpy(hdr, fhobname, i);
+
+	if (hdr[8] == 'B')	{
+		hdr[0x09] = (unsigned char)(length & 0xff);
+		hdr[0x0a] = (unsigned char)(length >> 8);
+	} else	{
+		hdr[0x09] = (unsigned char)(start & 0xff);
+		hdr[0x0a] = (unsigned char)(start >> 8);
+	}
+
 
 	hdr[0x0b] = (unsigned char)(length & 0xff);
 	hdr[0x0c] = (unsigned char)(length >> 8);
