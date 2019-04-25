@@ -198,9 +198,10 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		}
 }
 */
+
 	memset(hdr,' ',9);
 	i = strlen(fhobname);
-	if (i > 2)
+	if (i > 1)
 	{
 		char *ext = strrchr(fhobname, '.');
 		if (ext && ext[1])
@@ -210,10 +211,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 			i = strlen(fhobname);
 		}
 	}
-	if (i > 8) {
-			Error("TR-DOS filename too long", fhobname, IF_FIRST); return 0;
-		}
-	memcpy(hdr, fhobname, i);
+	memcpy(hdr, fhobname, std::min(i,8));
 
 	if (hdr[8] == 'B')	{
 		hdr[0x09] = (unsigned char)(length & 0xff);
