@@ -987,7 +987,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 		}
 	}
 */
-	if (length + start > 0x10000) {	// io_trd.cpp/TRD_AddFile doesn't have this..?
+	if (length + start > 0x10000) {
 		length = -1;
 	}
 	if (length <= 0) {
@@ -996,7 +996,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 
 	memset(header,' ',9);
 	i = strlen(fhobname);
-	if (i > 2)
+	if (i > 1)
 	{
 		char *ext = strrchr(fhobname, '.');
 		if (ext && ext[1])
@@ -1006,10 +1006,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 			i = strlen(fhobname);
 		}
 	}
-	if (i > 8) {
-			Error("TR-DOS filename too long", fhobname, IF_FIRST); return 0;
-		}
-	memcpy(header, fhobname, i);
+	memcpy(header, fhobname, std::min(i,8));
 
 	if (header[8] == 'B')	{
 		header[0x09] = (unsigned char)(length & 0xff);
