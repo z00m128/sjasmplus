@@ -200,7 +200,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 */
 	memset(hdr,' ',9);
 	i = strlen(fhobname);
-	if (fhobname[i-2] == '.')
+	if (i > 2 && fhobname[i-2] == '.')
 	{
 		hdr[8] = fhobname[i-1];
 		i -= 2;
