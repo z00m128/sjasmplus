@@ -22,8 +22,8 @@
     ASSERT {0x4000} == "BB"
 
     ORG 0xFFFE
-    DB  "CCDD"  ; "DD" wraps over 0x10000  => "warning"
-    ASSERT {0} == "DD"
+    DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
+    ASSERT {0} == "33"          ; still page 3 there
 
     ; now try the 128 classic (should be not affected by the 48 device above)
     DEVICE ZXSPECTRUM128
@@ -54,5 +54,5 @@
     ASSERT {0x4000} == "BB"
 
     ORG 0xFFFE
-    DB  "CCDD"  ; "DD" wraps over 0x10000  => "warning"
-    ASSERT {0} == "DD"
+    DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
+    ASSERT {0} == "77"          ; still page 7 there

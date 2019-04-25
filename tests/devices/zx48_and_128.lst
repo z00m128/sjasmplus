@@ -45,9 +45,9 @@ zx48_and_128.asm(16): error: [SLOT] Slot number must be in range 0..3
 22    C002                  ASSERT {0x4000} == "BB"
 23    C002
 24    C002                  ORG 0xFFFE
-zx48_and_128.asm(25): warning: RAM limit exceeded 0x10000 by ORG
-25    FFFE 43 43 44 44      DB  "CCDD"  ; "DD" wraps over 0x10000  => "warning"
-26    0002                  ASSERT {0} == "DD"
+zx48_and_128.asm(25): error: Write outside of device memory at: 65536
+25    FFFE 43 43 44 44      DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
+26    0002                  ASSERT {0} == "33"          ; still page 3 there
 27    0002
 28    0002                  ; now try the 128 classic (should be not affected by the 48 device above)
 29    0002                  DEVICE ZXSPECTRUM128
@@ -116,9 +116,9 @@ zx48_and_128.asm(48): error: [SLOT] Slot number must be in range 0..3
 54    C002                  ASSERT {0x4000} == "BB"
 55    C002
 56    C002                  ORG 0xFFFE
-zx48_and_128.asm(57): warning: RAM limit exceeded 0x10000 by ORG
-57    FFFE 43 43 44 44      DB  "CCDD"  ; "DD" wraps over 0x10000  => "warning"
-58    0002                  ASSERT {0} == "DD"
+zx48_and_128.asm(57): error: Write outside of device memory at: 65536
+57    FFFE 43 43 44 44      DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
+58    0002                  ASSERT {0} == "77"          ; still page 7 there
 59    0002
 # file closed: zx48_and_128.asm
 
