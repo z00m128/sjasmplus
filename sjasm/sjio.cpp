@@ -996,7 +996,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 
 	memset(header,' ',9);
 	i = strlen(fhobname);
-	if (fhobname[i-2] == '.')
+	if (i > 2 && fhobname[i-2] == '.')
 	{
 		header[8] = fhobname[i-1];
 		i -= 2;
