@@ -1,4 +1,7 @@
 
+body {
+  background-color: #CFD;
+}
 
 /********************************/
 /* start of styles in block.xsl */
@@ -83,17 +86,26 @@ div.sidebar-title {
 /********************************/
 /* start of styles in verbatim.xsl */
 
-div.programlisting {
+pre.programlisting {
+  font-family: monospace;
+  font-size: 1.1em;
+  white-space: pre;
+  background: #EEE;
+  border: 1px solid gray;
+  padding: 1em;
+  margin: 1em;
+
+  max-width: 80em;
+  overflow: auto; /* add scrollbar if the listing doesn't fit on screen*/
+}
+
+pre.synopsis {
   white-space: pre;
   font-family: monospace;
+  overflow: auto; /* add scrollbar if the listing doesn't fit on screen*/
 }
 
 div.screen {
-  white-space: pre;
-  font-family: monospace;
-}
-
-div.synopsis {
   white-space: pre;
   font-family: monospace;
 }
@@ -105,4 +117,3 @@ div.synopsis {
 hr.footnote-hr {
   width: 100;
 }
-

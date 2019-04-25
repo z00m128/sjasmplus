@@ -183,7 +183,7 @@
             <term>work in progress - 1.12.1</term>
 
             <listitem>
-              <para><programlisting>- [may break old sources] DEVICE: each assembling pass resets also
+              <synopsis>- [may break old sources] DEVICE: each assembling pass resets also
   "device". To work with "device" memory (savesna/savetap/...) you
   must select the device (and slot and pages) before producing machine
   code which you want to work with (SAVESNA/SAVETAP/...).
@@ -192,12 +192,13 @@
 - [may break old sources] ZXSPECTRUM128 based devices have sysvars and
   stack set up as in "USR 0" mode (ZXSPECTRUM48 system variables and
   default stack content).
+- <link linkend="po_mmu">MMU</link> directive (fusing SLOT + PAGE and extending them)
 - INCBIN: added support for negative offset/length values
 - Fixed: INCTRD offset, binary STDOUT on windows
 - Fixed: LUA used inside macros, LUA get_word
-- parser: added C++(like) numeric literals
-- ZXSPECTRUMNEXT device added
-- new MACRO examples, syntax-highlight file for KDE5 editors (Kate)</programlisting></para>
+- parser: added C++(like) <link linkend="s_numeric">numeric literals</link>
+- <link linkend="s_realdevice">ZXSPECTRUMNEXT device</link> added
+- new MACRO examples, syntax-highlight file for KDE5 editors (Kate)</synopsis>
             </listitem>
           </varlistentry>
 
@@ -205,7 +206,7 @@
             <term>07.04.2019 - 1.12.0</term>
 
             <listitem>
-              <para><programlisting>- Fixed parsing of expressions starting with string literal
+              <synopsis>- Fixed parsing of expressions starting with string literal
 - Fixed listing of DS directive with negative values, added value check warning
 - Fixed possible wrong indexing of some arrays internally
 - Fixed parsing of single-word instructions in colon-packed-no-space macros
@@ -218,7 +219,7 @@
 - THIS MAY BREAK SOME OLDER SOURCES, SORRY. Also the rules for substitutions
   will be in the future further modified and documented, to make them more
   intuitive and predictable, so there may be more breakage even later.
-- Adding fake instructions break and exit for CSpect emulator (--zxnext=cspect)</programlisting></para>
+- Adding fake instructions break and exit for CSpect emulator (--zxnext=cspect)</synopsis>
             </listitem>
           </varlistentry>
 
@@ -226,13 +227,13 @@
             <term>01.04.2019 - 1.11.1</term>
 
             <listitem>
-              <para><programlisting>- Fixed global labels in MACRO and in IFUSED/IFNUSED
+              <synopsis>- Fixed global labels in MACRO and in IFUSED/IFNUSED
 - Fixed nested IF-DUP-IF
 - Fixed local labels fail when amount of lines did change between passes
 - Fixed Makefile to build when path to project contains space
 - Added macro-example: turn "DJNZ ." into "DJNZ $" (to fix Zeus syntax source)
 - Added --msg=lst and --msg=lstlab options to produce listing file to STDERR
-- Added options to read input file from STDIN and output "raw" binary to STDOUT</programlisting></para>
+- Added options to read input file from STDIN and output "raw" binary to STDOUT</synopsis>
             </listitem>
           </varlistentry>
 
@@ -240,7 +241,7 @@
             <term>22.03.2019 - 1.11.0</term>
 
             <listitem>
-              <para><programlisting>- Added ZX Spectrum Next instructions support
+              <synopsis>- Added ZX Spectrum Next instructions support
 - Added --msg option, directives DG and DH
 - Changed listing layout to fixed-width type
 - Errors, Warnings and similar are now channeled to STDERR
@@ -264,7 +265,7 @@
 - Refactored options parser, instruction parser and Warning/Error system
 - C++14 standard is now required minimum (to compile sjasmplus sources)
 - Added automated-testing scripts, with 50+ tests
-- GitHub connected with <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus">Cirrus Continuous Integration</ulink> service</programlisting></para>
+- GitHub connected with <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus">Cirrus Continuous Integration</ulink> service</synopsis>
             </listitem>
           </varlistentry>
 
@@ -272,10 +273,10 @@
             <term>09.01.2019 - 1.10.4</term>
 
             <listitem>
-              <para><programlisting>- "Bytes lost" error reworked (and changed to warning)
+              <synopsis>- "Bytes lost" error reworked (and changed to warning)
 - Error/warning messages are displayed in last pass only (where possible)
 - Fixed 64k limit warnigs
-- BinIncFile reworked</programlisting></para>
+- BinIncFile reworked</synopsis>
             </listitem>
           </varlistentry>
 
@@ -283,10 +284,10 @@
             <term>26.11.2018 - 1.10.3</term>
 
             <listitem>
-              <para><programlisting>- Fixed macro issue with commas inside quotes
+              <synopsis>- Fixed macro issue with commas inside quotes
 - Fixed IFUSED and IFNUSED directives
 - Fixed STRUCT directive
-- Added support of register operands for operators HIGH and LOW</programlisting></para>
+- Added support of register operands for operators HIGH and LOW</synopsis>
             </listitem>
           </varlistentry>
 	      
@@ -294,8 +295,8 @@
             <term>09.08.2018 - 1.10.2</term>
 
             <listitem>
-              <para><programlisting>- Corrected bug in UNDEFINE directive
-- Corrected bug in parser line wrapping.</programlisting></para>
+              <synopsis>- Corrected bug in UNDEFINE directive
+- Corrected bug in parser line wrapping.</synopsis>
             </listitem>
           </varlistentry>	      
 
@@ -303,8 +304,8 @@
             <term>15.05.2018 - 1.10.1</term>
 
             <listitem>
-              <para><programlisting>- Corrected bug of OUTPUT directive (bugfix of flushing buffer).
-- Implemented TAPOUT/TAPEND and OUTEND directives.</programlisting></para>
+              <synopsis>- Corrected bug of OUTPUT directive (bugfix of flushing buffer).
+- Implemented TAPOUT/TAPEND and OUTEND directives.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -312,7 +313,7 @@
             <term>06.05.2018 - 1.10.0</term>
 
             <listitem>
-              <para><programlisting>- Implemented full featured SAVETAP and EMPTYTAP directives.</programlisting></para>
+              <synopsis>- Implemented full featured SAVETAP and EMPTYTAP directives.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -320,7 +321,7 @@
             <term>07.09.2017 - 1.09</term>
 
             <listitem>
-              <para><programlisting>- -D commandline parameter added, inchob / incbin bugfix.</programlisting></para>
+              <synopsis>- -D commandline parameter added, inchob / incbin bugfix.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -328,7 +329,7 @@
             <term>23.12.2016 - 1.08</term>
 
             <listitem>
-              <para><programlisting>- compilation warnings cleanup, CMake installation method added.</programlisting></para>
+              <synopsis>- compilation warnings cleanup, CMake installation method added.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -336,7 +337,7 @@
             <term>11.10.2016 - 1.07 RC9</term>
 
             <listitem>
-              <para><programlisting>- some docs added and compilation warnings cleanup.</programlisting></para>
+              <synopsis>- some docs added and compilation warnings cleanup.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -344,7 +345,7 @@
             <term>05.05.2016 - 1.07 RC8</term>
 
             <listitem>
-              <para><programlisting>- new makefile, compilation errors fixed and some warnings cleanup.</programlisting></para>
+              <synopsis>- new makefile, compilation errors fixed and some warnings cleanup.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -352,8 +353,8 @@
             <term>03.04.2008 - 1.07 Stable</term>
 
             <listitem>
-              <para><programlisting>- Added new SAVETAP pseudo-op. It's support up to 1024kb ZX-Spectrum's RAM.
-- Added new --nofakes commandline parameter.</programlisting></para>
+              <synopsis>- Added new SAVETAP pseudo-op. It's support up to 1024kb ZX-Spectrum's RAM.
+- Added new --nofakes commandline parameter.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -361,10 +362,10 @@
             <term>02.04.2008 - 1.07 RC7</term>
 
             <listitem>
-              <para><programlisting>- Another fix of 48k SNA snapshots saving routine.
+              <synopsis>- Another fix of 48k SNA snapshots saving routine.
 - Added new UNDEFINE pseudo-op.
 - Added new IFUSED/IFNUSED pseudo-ops for labels (such IFDEF for defines).
-- Fixed labels list dump rountine (--lstlab command line parameter).</programlisting></para>
+- Fixed labels list dump rountine (--lstlab command line parameter).</synopsis>
             </listitem>
           </varlistentry>
 
@@ -372,11 +373,11 @@
             <term>27.03.2008 - 1.07 RC6</term>
 
             <listitem>
-              <para><programlisting>- Applied bugfix patches for SAVEHOB/SAVETRD pseudo-ops by Breeze.
+              <synopsis>- Applied bugfix patches for SAVEHOB/SAVETRD pseudo-ops by Breeze.
 - Fixed memory leak in line parsing routine.
 - Fixed 48k SNA snapshots saving routine.
 - Added missing INF instruction.
-- Fixed code parser's invalid addressing of temporary labels in macros.</programlisting></para>
+- Fixed code parser's invalid addressing of temporary labels in macros.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -384,11 +385,11 @@
             <term>31.05.2007 - 1.07 RC5bf</term>
 
             <listitem>
-              <para><programlisting>- Bugfix patches by Ric Hohne.
+              <synopsis>- Bugfix patches by Ric Hohne.
 - Important bugfix of memory leak.
 - Bugfix of strange crashes at several machines.
 - Added yet another sample for built-in LUA engine. See end of this file.
-- Added sources of CosmoCubes demo to the "examples" directory.</programlisting></para>
+- Added sources of CosmoCubes demo to the "examples" directory.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -396,9 +397,9 @@
             <term>13.05.2007 - 1.07 RC5</term>
 
             <listitem>
-              <para><programlisting>- ALIGN has new optional parameter.
+              <synopsis>- ALIGN has new optional parameter.
 - Corrected bug of RAM sizing.
-- Corrected bug of structures naming.</programlisting></para>
+- Corrected bug of structures naming.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -406,7 +407,7 @@
             <term>02.12.2006 - 1.07 RC4bf</term>
 
             <listitem>
-              <para><programlisting>- Corrected important bug in code generation functions of SjASMPlus.</programlisting></para>
+              <synopsis>- Corrected important bug in code generation functions of SjASMPlus.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -414,9 +415,9 @@
             <term>28.11.2006 - 1.07 RC4</term>
 
             <listitem>
-              <para><programlisting>- Corrected bug with SAVEBIN, SAVETRD and possible SAVESNA.
+              <synopsis>- Corrected bug with SAVEBIN, SAVETRD and possible SAVESNA.
 - Add Makefile to build under Linux, FreeBSD etc.
-</programlisting></para>
+</synopsis>
             </listitem>
           </varlistentry>
 
@@ -424,10 +425,9 @@
             <term>12.10.2006 - 1.07 RC3</term>
 
             <listitem>
-              <para><programlisting>- SAVESNA can save 48kb snapshots
+              <synopsis>- SAVESNA can save 48kb snapshots
 - Corrected DEFINE's bug.
-- Corrected bug of incorrect line numbering.
-</programlisting></para>
+- Corrected bug of incorrect line numbering.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -435,9 +435,9 @@
             <term>28.09.2006 - 1.07 RC2</term>
 
             <listitem>
-              <para><programlisting>- SAVESNA works and with device ZXSPECTRUM48
+              <synopsis>- SAVESNA works and with device ZXSPECTRUM48
 - Added new device PENTAGON128
-- In ZXSPECTRUM48 device and others attributes has black ink and white paper by default.</programlisting></para>
+- In ZXSPECTRUM48 device and others attributes has black ink and white paper by default.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -445,8 +445,8 @@
             <term>23.09.2006 - 1.07 RC1bf</term>
 
             <listitem>
-              <para><programlisting>- Corrected bug with _ERRORS and _WARNINGS constants
-- Added error message, when SHELLEXEC program execution failed</programlisting></para>
+              <synopsis>- Corrected bug with _ERRORS and _WARNINGS constants
+- Added error message, when SHELLEXEC program execution failed</synopsis>
             </listitem>
           </varlistentry>
 
@@ -454,14 +454,14 @@
             <term>17.09.2006 - 1.07 RC1</term>
 
             <listitem>
-              <para><programlisting>- 3-pass design
+              <synopsis>- 3-pass design
 - Built-in Lua scripting engine
 - Changed command line keys
 - Documentation converted to HTML.
 - Added new directives: DEVICE, SLOT, SHELLEXEC
 - Added predefined constanst: _SJASMPLUS=1, _ERRORS and other
 - Changed output log format.
-- And many many more.</programlisting></para>
+- And many many more.</synopsis>
             </listitem>
           </varlistentry>
         </variablelist></para>
@@ -520,11 +520,11 @@
 
       <para>Usage:</para>
 
-      <para><emphasis>sjasmplus [options] sourcefile(s)</emphasis></para>
+      <synopsis>sjasmplus [options] sourcefile(s)</synopsis>
 
       <para>Option flags as follows:</para>
 
-      <para><programlisting>  -h or --help             Help information
+      <para><synopsis>  -h or --help             Help information
   --zxnext[=cspect]        Enable SpecNext Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
@@ -548,7 +548,7 @@
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions
-  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</programlisting></para>
+  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</synopsis></para>
     </section>
 
     <section>
@@ -685,7 +685,7 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
     <title>Constants, expressions and other features</title>
 
     <section>
-      <title>Numeric constants</title>
+      <title><anchor id="s_numeric" />Numeric constants</title>
 
       <para>Numeric constants should always start with a digit or $, # or %.
       The following formats are supported:</para>
@@ -703,7 +703,8 @@ $c     hexadecimal
 14q    octal
 14o    octal</programlisting></para>
 
-      <para>(v1.12.1) Optional single quotes(') may be inserted between the digits as a separator.
+      <para>(v1.12.1) Optional single quotes(') may be inserted between the digits as a separator
+      (example: <computeroutput> ld a,%11'01'11'00 </computeroutput>).
       They are ignored by the assembler.</para>
     </section>
 
@@ -1571,18 +1572,19 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
 
               <para>Predefined devices' identifiers list:</para>
 
-              <para><programlisting> NONE ; off real device emulation mode
- ZXSPECTRUM48 ; ZX-Spectrum 48
- ZXSPECTRUM128 ; ZX-Spectrum 128
+              <synopsis> NONE ; off real device emulation mode
+ ZXSPECTRUM48  ; ZX-Spectrum 48 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
+ ZXSPECTRUM128 ; ZX-Spectrum 128 (like 48 with 8 pages, default map: 7, 5, 2, 0)
  ZXSPECTRUM256 ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
  ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
  ZXSPECTRUM1024
- ZXSPECTRUMNEXT ; ZX Spectrum Next (eight 8192B slots, 224 memory pages = 1.75MiB RAM)
+ ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
+                ;                  (default map: 14, 15, 10, 11, 4, 5, 0, 1)
 
  ;disable:
    DEVICE NONE
  ;enable:
-   DEVICE ZXSPECTRUM128</programlisting></para>
+   DEVICE ZXSPECTRUM128</synopsis>
             </listitem>
           </varlistentry>
 
@@ -1610,7 +1612,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               a byte value. You can add spaces between pairs as you like. (since v1.11)<example>
                   <title></title>
                   <para><programlisting>    DH "0123456789ABCDEF"   ; eight bytes #01 #23 ...
-    DH "01 23  45 67"        ; four bytes #01 #23 #45 #67</programlisting></para>
+    DH "01 23  45 67"       ; four bytes #01 #23 #45 #67</programlisting></para>
               </example></para>
             </listitem>
           </varlistentry>
@@ -1626,7 +1628,9 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               <link linkend="po_unphase">UNPHASE</link>, <link
               linkend="po_dephase">DEPHASE</link> and <link
               linkend="po_endt">ENDT</link> are synonyms of <link
-              linkend="po_ent">ENT</link><example>
+              linkend="po_ent">ENT</link>. DISP blocks can NOT be nested, and to change
+              the displacement address within current DISP block use the ordinary ORG.
+              <example>
                   <title></title>
 
                   <para><programlisting>SCREEN EQU $4000
@@ -1658,9 +1662,10 @@ ENDOFPROG</programlisting></para>
 
               <para>Out to console a string of bytes. Each value should be
               between -129 and 256. Keys /D, /H and /A set format of output of
-              numbers:<programlisting>/D - out only in Decimal
+              numbers:<synopsis>/D - out only in Decimal
 /H - out only in Hexadecimal
-/A - out both in Hexadecimal and Decimal</programlisting><example>
+/A - out both in Hexadecimal and Decimal</synopsis>
+              <example>
                   <title></title>
 
                   <para><programlisting>    ORG 100h
@@ -1802,8 +1807,7 @@ will output to the console strings:
 
             <listitem>
               <para>The assembler will stop at this point. The pseudo-op
-              doesn't work in the beginning of line(with and without key
-              --dirbol).</para>
+              END doesn't work in the beginning of line (even with --dirbol).</para>
             </listitem>
           </varlistentry>
 
@@ -2053,8 +2057,8 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
 
               <para>Save labels list in format:</para>
 
-              <para><programlisting>NN:ADDRESS LABELNAME</programlisting>
-              ,where NN is number of page of RAM</para>
+              <para><synopsis>NN:ADDRESS LABELNAME</synopsis>
+              where NN is number of RAM page and ADDRESS is truncated to 0000..3FFF range</para>
 
               <para><example>
                   <title></title>
@@ -2072,10 +2076,10 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
               scripts. See more in the chapter "<link
               linkend="c_lua_scripting">Lua scripting</link>".</para>
 
-              <para>Parameter is optional. It may be:<programlisting>PASS1  -  interpret Lua script in first pass only.
-PASS2  -  interpret Lua script in second pass only.
-PASS3  -  interpret Lua script in third pass only. By default.
-ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</programlisting></para>
+              <para>Parameter is optional. It may be:<synopsis>PASS1   -  interpret Lua script in first pass only.
+PASS2   -  interpret Lua script in second pass only.
+PASS3   -  interpret Lua script in third pass only. By default.
+ALLPASS -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</synopsis></para>
 
               <para><example>
                   <title></title>
@@ -2111,6 +2115,42 @@ ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some
 
             <listitem>
               <para>Not available yet.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_mmu" />MMU &lt;first slot number&gt; [&lt;last slot number&gt;|&lt;single slot option&gt;], &lt;page number&gt;</term>
+
+            <listitem>
+              <para>Maps memory page(s) to slot(s), similar to SLOT + PAGE combination, but allows
+              to set up whole range of consecutive slots (with consecutive memory pages). Or when
+              only single slot is specified, extra option can be used to extend particular slot
+              functionality. The slot behaviour will stay set in the current DEVICE until reset
+              by another MMU specifying same slot (even as part of range, that will clear the option
+              to "default").</para>
+
+              <para>Single slot option (default state is: no error/warning and no wrap = nothing special):
+                <synopsis>e = error on writing beyond last byte of slot
+w = warning on writing beyond last byte of slot
+n = wrap address back to start of slot, map next page</synopsis>
+                <example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM128 : LABELSLIST "po_mmu.lbl"  ; to check label pages
+    MMU 1 3, 5      ; maps slots 1, 2, 3 with pages 5, 6, 7
+    ORG 0xBFFF
+label1_p6: scf      ; last byte of page 6 (in slot 2)
+label2_p7: scf      ; first byte of page 7 (in slot 3)
+
+    MMU 3 e, 0      ; page 0 into slot 3, write beyond slot will cause error
+    ORG 0xFFFF
+    ld  a,1         ; error: Write outside of memory slot: 65536 (65536 = address outside)
+
+    MMU 3 n, 1      ; page 1 into slot 3, make it wrap + map next page automatically
+    ORG 0xFFFF      ; ! also the $ address was truncated by MMU from $10001 to $0001 !
+label3_p1: scf      ; last byte of page 1, then wrapping back to 0xC000 with page 2
+label4_p2: scf      ; first byte of page 2 at 0xC000</programlisting></para>
+                </example></para>
             </listitem>
           </varlistentry>
 
@@ -2200,9 +2240,10 @@ Kip                ; label Kip</programlisting></para>
               <para>There are three possible output modes: truncate (overwrite
               existing files, this is the default), rewind (open and execute
               FPOS 0) and append (open and leave the file pointer at the end
-              of the file).<programlisting>OUTPUT &lt;filename&gt;,t  ; truncate (default)
+              of the file).<synopsis>OUTPUT &lt;filename&gt;,t  ; truncate (default)
 OUTPUT &lt;filename&gt;,r  ; rewind
-OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
+OUTPUT &lt;filename&gt;,a  ; append</synopsis>
+              <example>
                   <title>bigfile.asm</title>
 
                   <para><programlisting>    OUTPUT loader.com
@@ -2908,10 +2949,10 @@ BLUE	BYTE 6
 
           <para>This is identical to:</para>
 
-          <para><programlisting>SCOLOR		EQU 3 ; lenght
+          <synopsis>SCOLOR		EQU 3 ; lenght
 SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
-SCOLOR.BLUE	EQU 2 ; offset</programlisting></para>
+SCOLOR.BLUE	EQU 2 ; offset</synopsis>
         </example><example>
           <title></title>
 
@@ -2924,14 +2965,14 @@ C	SCOLOR 0,0,0 ; use new default values
 
           <para>This is identical to:</para>
 
-          <para><programlisting>SDOT		EQU 5 ; length
+          <synopsis>SDOT		EQU 5 ; length
 SDOT.X		EQU 0 ; offset
 SDOT.Y		EQU 1 ; offset
 SDOT.C		EQU 2 ; offset
 SDOT.C.RED	EQU 2 ; offset
 SDOT.C.GREEN	EQU 3 ; offset
 SDOT.C.BLUE	EQU 4 ; offset
-</programlisting></para>
+</synopsis>
         </example><example>
           <title></title>
 
@@ -2944,32 +2985,32 @@ AD	WORD
 
           <para>This is identical to:</para>
 
-          <para><programlisting>SPOS	EQU 10 ; length
+          <synopsis>SPOS	EQU 10 ; length
 SPOS.X	EQU  4 ; offset
 SPOS.Y	EQU  6 ; offset
-SPOS.AD	EQU  8 ; offset</programlisting></para>
+SPOS.AD	EQU  8 ; offset</synopsis>
         </example><example>
           <title></title>
 
           <para>When a structure is defined it is possible to declare labels
           with it<programlisting>COLOR SCOLOR</programlisting>This is
-          identical to:<programlisting>COLOR
+          identical to:<synopsis>COLOR
 COLOR.RED   BYTE 4
 COLOR.GREEN BYTE 5
 COLOR.BLUE  BYTE 6
-</programlisting>Note the default values.</para>
+</synopsis>Note the default values.</para>
 
           <para>Or without label:<programlisting>COLORTABLE
   SCOLOR 0,0,0
   SCOLOR 1,2,3
   SCOLOR ,2
-  ; etc.</programlisting>This is identical to:<programlisting>COLORTABLE
+  ; etc.</programlisting>This is identical to:<synopsis>COLORTABLE
   BYTE 0,0,0
   BYTE 1,2,3
   BYTE 4,2,6
-  ; etc.
+  ; etc.</synopsis>
 
-DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
+<programlisting>DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
           BYTE and WORD members can be initialised.</para>
 
           <para>The resulting labels can be used as any other

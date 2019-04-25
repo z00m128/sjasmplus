@@ -109,6 +109,7 @@ docs: $(SUBDIR_DOCS)/documentation.html ;
 
 $(SUBDIR_DOCS)/documentation.html: Makefile $(wildcard $(SUBDIR_DOCS)/*.xml) $(wildcard $(SUBDIR_DOCS)/*.xsl)
 	$(DOCBOOKGEN) \
+		--stringparam html.stylesheet docbook.css \
 		--stringparam generate.toc "book toc" \
 		-o $(SUBDIR_DOCS)/documentation.html \
 		$(SUBDIR_DOCS)/docbook-xsl-ns-html-customization-linux.xsl \
