@@ -1,3 +1,6 @@
+;Note: the input TR-DOS filenames in this test are incorrect, and will be currently truncated as 'label1.txt' -> 'label1.t'. Change this if needed.
+;A TR-DOS filename is max. 8 characters, with a single-character extension. http://zx-modules.de/fileformats/hobetaformat.html
+
         device zxspectrum128
         
         org #8000
