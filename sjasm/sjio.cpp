@@ -391,7 +391,7 @@ void BinIncFile(char* fname, int offset, int length) {
 	free(fullFilePath);
 
 	// Get length of file
-	int totlen = 0;
+	int totlen = 0, advanceLength;
 	if (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0) Error("telling file length", fname, FATAL);
 
 	// process arguments (extra features like negative offset/length or INT_MAX length)
@@ -428,8 +428,20 @@ void BinIncFile(char* fname, int offset, int length) {
 	}
 
 	if (pass != LASTPASS) {
-		CurAddress = (CurAddress + length) & 0xFFFF;
-		if (PseudoORG) adrdisp = (adrdisp + length) & 0xFFFF;
+		while (length) {
+			advanceLength = length;		// maximum possible to advance in address space
+			if (DeviceID) {				// particular device may adjust that to less
+				Device->CheckPage(CDevice::CHECK_EMIT);
+				if (MemoryPointer) {	// fill up current memory page if possible
+					advanceLength = Page->RAM + Page->Size - MemoryPointer;
+					if (length < advanceLength) advanceLength = length;
+				}
+			}
+			length -= advanceLength;
+			if (length <= 0 && 0 == advanceLength) Error("BinIncFile internal error", NULL, FATAL);
+			if (PseudoORG) adrdisp = adrdisp + advanceLength;
+			CurAddress = CurAddress + advanceLength;
+		}
 	} else {
 		// Reading data from file
 		char* data = new char[length + 1], * bp = data;

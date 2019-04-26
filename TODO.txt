@@ -47,6 +47,9 @@ Macro world issues:
 
 Input file without extension does produce wrong default output filename
 
+SAVEHOB/SAVETRD/SAVETAP/... global review of filename handling, adding warnings/errors
+where filename modification happens or filename is invalid.
+
 ** Macro/define substitution rules and implementation (proposal):
 - macro arguments substitute with priority, from the longest ones
 - macro arguments substitute even in define related directives
@@ -73,7 +76,7 @@ NEXT device -> unreal symbols dump should be 0x2000 truncating?
 $$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
 
 MMU:
-- make 80kiB incbin work! (and verify shorter incbin, probably doesn't work now)
+- make 80kiB incbin work!
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
 - err/warn/warp option for slot range?
 
