@@ -1,0 +1,6 @@
+#decompress the BIN file for inclusion
+#(it's ~80kiB file of letters from 'a' to 't' from offset 2 with some newlines)
+gunzip incbin80k/incbin80k.bin.gz
+# use normal way of assembling
+$MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+last_result=$?

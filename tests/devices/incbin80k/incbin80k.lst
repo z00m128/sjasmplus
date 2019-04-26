@@ -1,0 +1,95 @@
+# file opened: incbin80k.asm
+ 1    0000                  DEVICE ZXSPECTRUMNEXT
+ 1    0000                SLOT 7
+ 1    0000                LABELSLIST "incbin80k.lbl"
+ 2    0000                  ; incbin80k.bin is from offset 2 letters 'a' to 't' with linux newlines (byte 10)
+ 3    0000                  ; for each letter, there's 80 of them + newline, repeated 51 times
+ 4    0000                  ; such one letter block = 51*81 = 4131 bytes (just over 4ki), there's 20 letters
+ 5    0000                  ; = 82620 bytes (plus 2 bytes at beginning making it "binary" file for git)
+ 6    0000
+ 7    0000                  ; try short incbin (no paging) first into page 20
+ 8    0000                  ORG 0xE000
+ 9    E000                  MMU 7 n, 20
+10    E000              short_start:
+11    E000                  INCBIN "incbin80k/incbin80k.bin",2,81
+12    E051              short_end:
+13    E051                  ASSERT $$ == 20 && $ == 0xE000 + 81
+14    E051                  ASSERT {0xE000} == "aa" && {0xE000+79} == "\na"
+15    E051
+16    E051                  ; try 3-page long incbin into pages 21, 22, 23
+17    E051                  MMU 7 n, 21
+18    E051                  ORG 0xE000
+19    E000              p3_start:
+20    E000                  INCBIN "incbin80k/incbin80k.bin",2,81*51*4      ; include four letters (16524 bytes)
+21    E08C              p3_end:
+22    E08C                  PAGE 21
+22    E08C                ASSERT {0xE000} == "aa" && {0xE000+79} == "\na" && {0xE000+81*51} == "bb" && {0xFFFE} == "bb"
+23    E08C                  PAGE 22
+23    E08C                ASSERT {0xE000} == "bb" && {0xE000+81*102-0x2000-2} == "\nb"
+24    E08C                  ASSERT {0xE000+81*102-0x2000} == "cc" && {0xE000+81*153-0x2000-2} == "\nc"
+25    E08C                  ASSERT {0xE000+81*153-0x2000} == "dd" && {0xFFFE} == "dd"
+26    E08C                  PAGE 23
+26    E08C                ASSERT {0xE000} == "dd" && {0xE000+81*204-0x4000-2} == "\nd"
+27    E08C                  ASSERT {0xE000+81*204-0x4000} == 0
+28    E08C
+29    E08C                  ; try error by including beyond device RAM range
+30    E08C                  MMU 7, 23       ; reset wrapping behaviour for slot 7, keep page 23
+31    E08C              err_start:
+incbin80k.asm(32): error: Write outside of device memory at: 65536
+32    E08C                  INCBIN "incbin80k/incbin80k.bin",2,81*51*2      ; include two letters (8+ki)
+33    00D2              err_end:
+34    00D2
+35    00D2                  ; try full length 80+ki binary include
+36    00D2                  MMU 7 n, 30     ; map pages 30, 31, 32, .., 40 (11 pages long)
+37    00D2                  ORG 0xE000
+38    E000              long_start:
+incbin80k.asm(39): warning: include data: requested length truncated to maximum 64kiB
+39    E000                  INCBIN "incbin80k/incbin80k.bin",2          ; include 20 letters from offset 2
+40    E000              long_end:
+41    E000                  PAGE 30
+41    E000                ASSERT {0xE000} == "aa" && {0xE000+79} == "\na" && {0xE000+81*51} == "bb" && {0xFFFE} == "bb"
+42    E000                  PAGE 31
+42    E000                ASSERT {0xE000} == "bb" && {0xE000+81*102-0x2000-2} == "\nb"
+43    E000                  ASSERT {0xE000+81*102-0x2000} == "cc" && {0xE000+81*153-0x2000-2} == "\nc"
+44    E000                  ASSERT {0xE000+81*153-0x2000} == "dd" && {0xFFFE} == "dd"
+45    E000                  PAGE 32
+45    E000                ASSERT {0xE000} == "dd" && {0xE000+81*204-0x4000-2} == "\nd"
+46    E000                  ASSERT {0xE000+81*204-0x4000} == "ee" && {0xE000+81*255-0x4000-2} == "\ne"
+47    E000                  PAGE 37
+47    E000                ASSERT {0xE000} == "nn" && {0xE000+81*51*14-0xE000-2} == "\nn"
+48    E000                  ASSERT {0xE000+81*51*14-0xE000} == "oo" && {0xE000+81*51*15-0xE000-2} == "\no"
+49    E000                  ASSERT {0xE000+81*51*15-0xE000} == "pp" && {0xFFFE} == "pp"
+50    E000
+51    E000                  ; ERROR -> this part is currently cut out, because INCBIN has hard limit to 64ki
+52    E000                  PAGE 38
+incbin80k.asm(52): error: [ASSERT] Assertion failed:  {0xE000} == "pp"
+52    E000                ASSERT {0xE000} == "pp"
+53    E000
+54    E000                  ; incbin in no-device mode: includes whole file, addressing goes into 16+ bit realm
+55    E000                  DEVICE NONE
+56    E000                  ORG 0xE000
+57    E000              nodevice_start:
+incbin80k.asm(58): warning: include data: requested length truncated to maximum 64kiB
+58    E000                  INCBIN "incbin80k/incbin80k.bin",2          ; include 20 letters from offset 2
+incbin80k.asm(59): warning: RAM limit exceeded 0x1E000 by ORG
+59    E000              nodevice_end:
+60    E000                  ; ERROR -> again only 64kiB is included
+61    E000
+62    E000                  ; switch back to ZX Next to produce labels list
+63    E000                  ORG 0
+63    0000                DEVICE ZXSPECTRUMNEXT   ; slot 7 is still in "wrap", but $ is beyond (error) => org 0 needed
+64    0000
+# file closed: incbin80k.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xE000 X short_start
+0xE051 X short_end
+0xE000 X p3_start
+0xE08C X p3_end
+0xE08C X err_start
+0x100D2 X err_end
+0xE000 X long_start
+0xE000 X long_end
+0xE000 X nodevice_start
+0x1E000 X nodevice_end
