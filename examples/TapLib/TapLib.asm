@@ -8,9 +8,10 @@
 ;;   ...your...code...
 ;;   .................
 ;;   include "TapLib.asm"
-;;   MakeTape <tape_file>, <program_name>, <start_address>, <code_length>, <call_address>
+;;   MakeTape <speccy_model>, <tape_file>, <program_name>, <start_address>, <code_length>, <call_address>
 
-	MACRO	MakeTape tape_file, prog_name, start_add, code_len, call_add
+	MACRO	MakeTape speccy_model, tape_file, prog_name, start_add, code_len, call_add
+	DEVICE	speccy_model
 
 CODE	=	#AF
 USR	=	#C0
