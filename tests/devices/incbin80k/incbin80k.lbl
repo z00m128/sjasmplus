@@ -5,6 +5,8 @@
 23:208C err_start
 23:00D2 err_end
 30:2000 long_start
-38:2000 long_end
-38:2000 nodevice_start
-38:2000 nodevice_end
+40:22BC long_end
+40:2000 nodevice_start
+40:22BC nodevice_end
+222:2000 noram_start
+223:008C noram_end

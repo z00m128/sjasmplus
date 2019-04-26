@@ -407,11 +407,6 @@ void BinIncFile(char* fname, int offset, int length) {
 		SPRINTF4(diagnosticTxt, MAX_PATH, "include data: name=%s (%d bytes) Offset=%d  Len=%d", fname, totlen, offset, length);
 		_CERR diagnosticTxt _ENDL;
 	}
-	// limit requested length to maximum of 64kiB
-	if (length > 0x10000) {
-		length = 0x10000;
-		Warning("include data: requested length truncated to maximum 64kiB");
-	}
 	// validate the resulting [offset, length]
 	if (offset < 0 || length < 0 || totlen < offset + length) {
 		Error("file too short", fname, FATAL);

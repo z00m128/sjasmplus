@@ -76,7 +76,16 @@ void PrintHex(char* & dest, aint value, int nibbles);
 void PrintHex32(char* & dest, aint value);
 void PrintHexAlt(char* & dest, aint value);
 char* GetPath(char* fname, char** filenamebegin = NULL, bool systemPathsBeforeCurrent = false);
+
+/**
+ * @brief Includes bytes of particular file into output (and virtual device memory).
+ *
+ * @param fname file name to open (include paths will be searched, order depends on syntax "" vs <>)
+ * @param offset positive: bytes to skip / negative: bytes to rewind back from end
+ * @param length positive: bytes to include / negative: bytes to skip from end / INT_MAX: all remaining
+ */
 void BinIncFile(char* fname, int offset = 0, int length = INT_MAX);
+
 int SaveRAM(FILE*, int, int);
 unsigned char MemGetByte(unsigned int address);
 unsigned int MemGetWord(unsigned int address);

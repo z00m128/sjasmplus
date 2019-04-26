@@ -76,7 +76,6 @@ NEXT device -> unreal symbols dump should be 0x2000 truncating?
 $$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
 
 MMU:
-- make 80kiB incbin work!
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
 - err/warn/warp option for slot range?
 

@@ -1251,7 +1251,9 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 				CDeviceSlot* const prevS = Slots[previousSlotI];
 				const aint nextPageN = prevS->Page->Number + 1;
 				if (PagesCount <= nextPageN) {
-					ErrorInt("No more memory pages to map next one into slot", previousSlotI);
+					ErrorInt("No more memory pages to map next one into slot", previousSlotI, SUPPRESS);
+					// disable the option on the overflowing slot
+					prevS->Option = SLTOPT_NONE;
 					break;		// continue into next slot, don't wrap any more
 				}
 				if (realAddr != (prevS->Address + prevS->Size)) {	// should be equal
