@@ -167,38 +167,6 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	}
 
 	//header of file
-/*
-	for (i = 0; i != 9; hdr[i++] = 0x20) {
-		;
-	}
-	//for (i = 0; i != 9; ++i) {
-	for (i = 0; i < 9; ++i) {
-
-		if (*(fhobname + i) == 0) {
-			break;
-		}
-		if (*(fhobname + i) != '.') {
-			hdr[i] = *(fhobname + i); continue;
-		} else if (*(fhobname + i + 1)) {
-			hdr[8] = *(fhobname + i + 1);
-		}
-		break;
-	}
-
-	if (*(fhobname + i + 2) != 0 && *(fhobname + i + 3) != 0) {
-		hdr[0x09] = *(fhobname + i + 2);
-		hdr[0x0a] = *(fhobname + i + 3);
-	} else {
-		if (hdr[8] == 'B') {
-			hdr[0x09] = (unsigned char)(length & 0xff);
-			hdr[0x0a] = (unsigned char)(length >> 8);
-		} else {
-			hdr[0x09] = (unsigned char)(start & 0xff);
-			hdr[0x0a] = (unsigned char)(start >> 8);
-		}
-}
-*/
-
 	memset(hdr,' ',9);
 	i = strlen(fhobname);
 	if (i > 1)
@@ -207,8 +175,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		if (ext && ext[1])
 		{
 			hdr[8] = ext[1];
-			*ext = '\0';
-			i = strlen(fhobname);
+			i = ext-fhobname;
 		}
 	}
 	memcpy(hdr, fhobname, std::min(i,8));
@@ -220,7 +187,6 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		hdr[0x09] = (unsigned char)(start & 0xff);
 		hdr[0x0a] = (unsigned char)(start >> 8);
 	}
-
 
 	hdr[0x0b] = (unsigned char)(length & 0xff);
 	hdr[0x0c] = (unsigned char)(length >> 8);

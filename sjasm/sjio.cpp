@@ -948,45 +948,7 @@ int SaveBinary(char* fname, int start, int length) {
 int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	unsigned char header[0x11];
 	int i;
-/*
-	for (i = 0; i != 8; header[i++] = 0x20) {
-		;
-	}
-	//for (i = 0; i != 8; ++i) {
-	for (i = 0; i < 9; ++i) {
 
-		if (*(fhobname + i) == 0) {
-			break;
-		}
-		if (*(fhobname + i) != '.') {
-			header[i] = *(fhobname + i);continue;
-		} else if (*(fhobname + i + 1)) {
-			header[8] = *(fhobname + i + 1);
-		}
-		break;
-	}
-
-
-	if (length + start > 0x10000) {
-		length = -1;
-	}
-	if (length <= 0) {
-		length = 0x10000 - start;
-	}
-
-	if (*(fhobname + i + 2) != 0 && *(fhobname + i + 3) != 0) {
-		header[0x09] = *(fhobname + i + 2);
-		header[0x0a] = *(fhobname + i + 3);
-	} else {
-		if (header[8] == 'B') {
-			header[0x09] = (unsigned char)(length & 0xff);
-			header[0x0a] = (unsigned char)(length >> 8);
-		} else {
-			header[0x09] = (unsigned char)(start & 0xff);
-			header[0x0a] = (unsigned char)(start >> 8);
-		}
-	}
-*/
 	if (length + start > 0x10000) {
 		length = -1;
 	}
@@ -1002,8 +964,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 		if (ext && ext[1])
 		{
 			header[8] = ext[1];
-			*ext = '\0';
-			i = strlen(fhobname);
+			i = ext-fhobname;
 		}
 	}
 	memcpy(header, fhobname, std::min(i,8));
