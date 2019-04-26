@@ -146,6 +146,9 @@ int LuaLine=-1;
 
 #endif //USE_LUA
 
+int deviceDirectivesCounter = 0;
+static char* globalDeviceID = NULL;
+
 void InitPass() {
 	aint pow10 = 1;
 	reglenwidth = 0;
@@ -179,9 +182,13 @@ void InitPass() {
 	MacroDefineTable.Init();
 	LocalLabelTable.InitPass();
 	// reset "device" stuff
+	if (2 == pass && Devices && 1 == deviceDirectivesCounter) {	// only single device detected
+		globalDeviceID = STRDUP(Devices->ID);		// make it global for remaining passes
+	}
 	if (Devices) delete Devices;
 	Devices = Device = NULL;
 	DeviceID = NULL;
+	deviceDirectivesCounter = 0;
 
 	// predefined
 	DefineTable.Replace("_SJASMPLUS", "1");
@@ -189,11 +196,18 @@ void InitPass() {
 	DefineTable.Replace("_RELEASE", "0");
 	DefineTable.Replace("_ERRORS", "0");
 	DefineTable.Replace("_WARNINGS", "0");
+	// resurrect "global" device here
+	if (globalDeviceID && !SetDevice(globalDeviceID)) {
+		Error("Failed to re-initialize global device", globalDeviceID, FATAL);
+	}
 }
 
 void FreeRAM() {
 	if (Devices) {
 		delete Devices;		Devices = NULL;
+	}
+	if (globalDeviceID) {
+		free(globalDeviceID);	globalDeviceID = NULL;
 	}
 	if (AddressList) {
 		delete AddressList;	AddressList = NULL;

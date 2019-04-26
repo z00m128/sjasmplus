@@ -69,8 +69,6 @@ ZX128 snapshot default state and mapping - still doesn't survive simple `ret` in
 
 DISP inside DISP bugs => documented. Correct solution = nesting DISPs?!
 
-single device -> whole source is such device + revert TapLib
-
 NEXT device -> unreal symbols dump should be 0x2000 truncating?
 
 $$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
@@ -78,6 +76,8 @@ $$label operator to get label page. (and fix pages for defl/equ/expression/... l
 MMU:
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
 - err/warn/warp option for slot range?
+
+SAVEBIN - support for dumping 64+kiB of memory (in tandem with MMU)
 
 sjasmplus 2.x/fork:
 

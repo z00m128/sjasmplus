@@ -14,8 +14,8 @@
 ;     n = wrap address back to start of slot, map next page
 ;
 
-    ;; warning about non-device mode
-    MMU
+    DEVICE NONE         ; set "none" explicitly, to avoid "global device" feature
+    MMU                 ;; warning about non-device mode
     DEVICE ZXSPECTRUM128
 
     ;; error messages (parsing test)

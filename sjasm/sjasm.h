@@ -61,6 +61,7 @@ extern CDevice *Device;
 extern CDeviceSlot *Slot;
 extern CDevicePage *Page;
 extern char* DeviceID;
+extern int deviceDirectivesCounter;
 
 // extend
 extern char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;

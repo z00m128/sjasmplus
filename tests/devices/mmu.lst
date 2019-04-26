@@ -15,9 +15,9 @@
  14   0000              ;     n = wrap address back to start of slot, map next page
  15   0000              ;
  16   0000
- 17   0000                  ;; warning about non-device mode
+ 17   0000                  DEVICE NONE         ; set "none" explicitly, to avoid "global device" feature
 mmu.asm(18): warning: MMU is allowed only in real device emulation mode (See DEVICE)
- 18   0000                  MMU
+ 18   0000                  MMU                 ;; warning about non-device mode
  19   0000                  DEVICE ZXSPECTRUM128
  20   0000
  21   0000                  ;; error messages (parsing test)

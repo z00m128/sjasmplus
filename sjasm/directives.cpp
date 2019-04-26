@@ -1993,6 +1993,7 @@ void dirINCLUDELUA() {
 #endif //USE_LUA
 
 void dirDEVICE() {
+	++deviceDirectivesCounter;		// any usage counts, even invalid
 	char* id;
 
 	if ((id = GetID(lp))) {
