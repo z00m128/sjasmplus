@@ -684,6 +684,11 @@ void ParseLine(bool parselabels) {
 	fprintf(stderr,"rdOut [%s]->[%s] %ld\n", line, lp, comlin);
 #endif
 
+	// update current address by memory wrapping, current page, etc... (before the label is defined)
+	if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
+	else			CheckRamLimitExceeded();
+	ListAddress = CurAddress;
+
 	if (!ConvertEncoding) {
 		unsigned char* lp2 = (unsigned char*) lp;
 		while (*(lp2++)) {
@@ -705,10 +710,6 @@ void ParseLine(bool parselabels) {
 		}
 		return;
 	}
-	// update current address by memory wrapping, current page, etc... (before the label is defined)
-	if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
-	else			CheckRamLimitExceeded();
-
 	if (parselabels) {
 		ParseLabel();
 	}

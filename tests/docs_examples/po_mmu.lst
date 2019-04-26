@@ -14,7 +14,7 @@ po_mmu.asm(9): error: Write outside of memory slot: 65536
 11    0001                  MMU 3 n, 1      ; page 1 into slot 3, make it wrap + map next page automatically
 12    0001                  ORG 0xFFFF      ; ! also the $ address was truncated by MMU from $10001 to $0001 !
 13    FFFF 37           label3_p1: scf      ; last byte of page 1, then wrapping back to 0xC000 with page 2
-14    0000 37           label4_p2: scf      ; first byte of page 2 at 0xC000
+14    C000 37           label4_p2: scf      ; first byte of page 2 at 0xC000
 15    C001
 # file closed: po_mmu.asm
 

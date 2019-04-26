@@ -145,7 +145,7 @@ mmu.asm(74): warning: Write outside of memory slot
  81   8001                  MMU 1 n, 2
  82   8001                  ORG 0x4000
  82   4000 6E 6E 6E...    BLOCK 3*16384, 'n' ; fill pages 2, 3 and 4 with 'n'
- 83   8000                  ASSERT {0x4000} == "55" && {0x8000} == "77" ; page 5 is mapped in after that block
+ 83   4000                  ASSERT {0x4000} == "55" && {0x8000} == "77" ; page 5 is mapped in after that block
  84   4000                  SLOT 1                      ; verify the block write
  85   4000                  PAGE 2
  85   4000                ASSERT {0x4000} == "nn"
@@ -159,7 +159,7 @@ mmu.asm(74): warning: Write outside of memory slot
  91   4000                  ORG 0x7FFE
  92   7FFE 37           label0_p4:  scf
  93   7FFF 37           label1_p4:  scf
- 94   8000 35 35        label2_p5:  db "55"     ; "55"      ; first two bytes of page 5
+ 94   4000 35 35        label2_p5:  db "55"     ; "55"      ; first two bytes of page 5
  95   4002 73 73 73...      BLOCK   16381, 's'  ; leaves last byte of page 5 unfilled
  96   7FFF 31 36 36     label3_p5:  ld sp,"66"  ; '166'     ; last byte of page 5, first two bytes of page 6
  97   4002                  ASSERT $ == 0x4002 && $$ == 6

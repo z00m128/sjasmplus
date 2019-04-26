@@ -41,13 +41,7 @@ enum EStatus { ALL, FATAL, EARLY, PASS3, IF_FIRST, SUPPRESS };
 enum EWStatus { W_ALL, W_EARLY, W_PASS3 };
 enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM };
 
-#ifdef PAGESIZE
-#undef PAGESIZE
-#endif
-
-#define PAGESIZE 0x4000
-
-extern aint PreviousAddress, epadres;
+extern int ListAddress;
 
 #define OUTPUT_TRUNCATE 0
 #define OUTPUT_REWIND 1

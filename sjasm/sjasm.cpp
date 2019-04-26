@@ -170,7 +170,7 @@ void InitPass() {
 	CurAddress = AddressOfMAP = 0;
 	CurrentSourceLine = CompiledCurrentLine = 0;
 	PseudoORG = 0; adrdisp = 0;
-	PreviousAddress = 0; epadres = 0; macronummer = 0; lijst = 0; comlin = 0;
+	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
 	ModuleList = NULL;
 	StructureTable.Init();

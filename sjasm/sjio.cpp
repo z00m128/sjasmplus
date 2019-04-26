@@ -50,8 +50,9 @@ int tape_parity = 0x55;
 FILE* FP_tapout = NULL;
 FILE* FP_Input = NULL, * FP_Output = NULL, * FP_RAW = NULL;
 FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
-aint PreviousAddress,epadres,IsSkipErrors = 0;
+int ListAddress;
 aint WBLength = 0;
+bool IsSkipErrors = false;
 
 void Error(const char* message, const char* badValueMessage, EStatus type) {
 	// check if it is correct pass by the type of error
@@ -270,13 +271,10 @@ void ListFile(bool showAsSkipped) {
 	if (LASTPASS != pass || NULL == GetListingFile() || donotlist) {
 		donotlist = nEB = 0; return;
 	}
-	aint pad = PreviousAddress;
-	if (pad == -1L) pad = epadres;
-
 	int pos = 0;
 	do {
 		if (showAsSkipped) substitutedLine = line;	// override substituted lines in skipped mode
-		PrepareListLine(pad);
+		PrepareListLine(ListAddress);
 		if (pos) pline[24] = 0;		// remove source line on sub-sequent list-lines
 		char* pp = pline + 10;
 		int BtoList = (nEB < 4) ? nEB : 4;
@@ -289,11 +287,9 @@ void ListFile(bool showAsSkipped) {
 		ListFileStringRtrim();
 		fputs(pline, GetListingFile());
 		nEB -= BtoList;
-		pad += BtoList;
+		ListAddress += BtoList;
 		pos += BtoList;
 	} while (0 < nEB);
-	epadres = CurAddress;
-	PreviousAddress = -1L;
 	nEB = 0;
 }
 
