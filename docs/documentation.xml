@@ -187,6 +187,8 @@
   "device". To work with "device" memory (savesna/savetap/...) you
   must select the device (and slot and pages) before producing machine
   code which you want to work with (SAVESNA/SAVETAP/...).
+  Only if only-single DEVICE is used in whole source batch, then the setting
+  is "global" and will be applied to all lines of source (in 2nd+ pass).
 - [may break old sources] ZXSPECTRUM128 based devices map into slots
   by default banks {7, 5, 2, 0}. (was {0, 5, 2, 7} in older versions)
 - [may break old sources] ZXSPECTRUM128 based devices have sysvars and
@@ -194,6 +196,7 @@
   default stack content).
 - <link linkend="po_mmu">MMU</link> directive (fusing SLOT + PAGE and extending them)
 - INCBIN: support for negative offset/length values, support for MMU wrapping
+- INCBIN: support for file chunks of 64+ki size (usable with MMU)
 - Fixed: INCTRD offset, binary STDOUT on windows, SAVETRD/SAVEHOB filenames
 - Fixed: LUA used inside macros, LUA get_word
 - parser: added C++(like) <link linkend="s_numeric">numeric literals</link>
@@ -1100,7 +1103,9 @@ or    x or y   bitwise or
       SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST</link> and use special
       functions in <link linkend="c_lua_scripting">Lua scripts</link>.</para>
 
-      <para><example>
+      <para>If only single DEVICE is used in whole source batch, the device
+      becomes "global" and will affect also source before of the DEVICE.
+          <example>
           <title></title>
 
           <para><programlisting>    DEVICE ZXSPECTRUM128
@@ -1571,7 +1576,9 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
 
             <listitem>
               <para>Enables <link linkend="s_realdevice">real device emulation
-              mode</link> by it identifier.</para>
+              mode</link> by it identifier. If there is only single DEVICE directive
+              in whole source batch, it becomes "global" and the device affects all
+              lines of source, otherwise the DEVICE is applied for lines following it.</para>
 
               <para>Predefined devices' identifiers list:</para>
 
