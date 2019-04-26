@@ -149,7 +149,7 @@
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy</emphasis> -
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
 
@@ -193,11 +193,14 @@
   stack set up as in "USR 0" mode (ZXSPECTRUM48 system variables and
   default stack content).
 - <link linkend="po_mmu">MMU</link> directive (fusing SLOT + PAGE and extending them)
-- INCBIN: added support for negative offset/length values
-- Fixed: INCTRD offset, binary STDOUT on windows
+- INCBIN: support for negative offset/length values, support for MMU wrapping
+- Fixed: INCTRD offset, binary STDOUT on windows, SAVETRD/SAVEHOB filenames
 - Fixed: LUA used inside macros, LUA get_word
 - parser: added C++(like) <link linkend="s_numeric">numeric literals</link>
 - <link linkend="s_realdevice">ZXSPECTRUMNEXT device</link> added
+- refactoring of label/define implementation = less memory leaks, more correct
+  "label.mem_page" values, "Unreal" labels dump is more correct too
+- docs: now the CSS file is actually used, and default style modified a bit
 - new MACRO examples, syntax-highlight file for KDE5 editors (Kate)</synopsis>
             </listitem>
           </varlistentry>

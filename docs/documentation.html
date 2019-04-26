@@ -96,7 +96,7 @@
             <p><span class="emphasis"><em>Tygrys, UB880D, Cizo, mborik, z00m</em></span> -
             compilation errors and warnings clean up, makefiles, testing.</p>
           </li><li class="listitem">
-            <p><span class="emphasis"><em>Antipod, boo_boo, PulkoMandy, Busy</em></span> -
+            <p><span class="emphasis"><em>Antipod, boo_boo, PulkoMandy, Busy, Liniya</em></span> -
             bug fix patches, testing.</p>
           </li></ul></div>
 
@@ -131,11 +131,14 @@
   stack set up as in "USR 0" mode (ZXSPECTRUM48 system variables and
   default stack content).
 - <a class="link" href="#po_mmu">MMU</a> directive (fusing SLOT + PAGE and extending them)
-- INCBIN: added support for negative offset/length values
-- Fixed: INCTRD offset, binary STDOUT on windows
+- INCBIN: support for negative offset/length values, support for MMU wrapping
+- Fixed: INCTRD offset, binary STDOUT on windows, SAVETRD/SAVEHOB filenames
 - Fixed: LUA used inside macros, LUA get_word
 - parser: added C++(like) <a class="link" href="#s_numeric">numeric literals</a>
 - <a class="link" href="#s_realdevice">ZXSPECTRUMNEXT device</a> added
+- refactoring of label/define implementation = less memory leaks, more correct
+  "label.mem_page" values, "Unreal" labels dump is more correct too
+- docs: now the CSS file is actually used, and default style modified a bit
 - new MACRO examples, syntax-highlight file for KDE5 editors (Kate)</pre>
             </dd><dt><span class="term">07.04.2019 - 1.12.0</span></dt><dd>
               <pre class="synopsis">- Fixed parsing of expressions starting with string literal
