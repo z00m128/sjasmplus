@@ -26,18 +26,16 @@
 
 // devices.h
 
-enum ESlotOptions { SLTOPT_NONE, SLTOPT_ERROR, SLTOPT_WARNING, SLTOPT_NEXT };
-
 bool IsZXSpectrumDevice(char *name);
 int SetDevice(char *id);
 char* GetDeviceName();
 
 class CDevicePage {
 public:
-	CDevicePage(aint size, aint number);
+	CDevicePage(int32_t size, int number);
 	~CDevicePage();
-	aint Size;
-	aint Number;
+	int32_t Size;
+	int Number;
 	char *RAM;
 	//CDevicePage* Next;
 private:
@@ -45,12 +43,13 @@ private:
 
 class CDeviceSlot {
 public:
-	CDeviceSlot(aint adr, aint size, aint number);
+	enum ESlotOptions { O_NONE, O_ERROR, O_WARNING, O_NEXT };
+
+	CDeviceSlot(int32_t adr, int32_t size);
 	~CDeviceSlot();
-	aint Address;
-	aint Size;
+	int32_t Address;
+	int32_t Size;
 	CDevicePage* Page;
-	aint Number;
 	ESlotOptions Option;
 private:
 };
@@ -63,23 +62,25 @@ public:
 
 	CDevice(const char* name, CDevice* parent);
 	~CDevice();
-	void AddSlot(aint adr, aint size);
-	void AddPage(aint size);
-	CDevicePage* GetPage(aint);
-	CDeviceSlot* GetSlot(aint);
+	void AddSlot(int32_t adr, int32_t size);
+	void AddPage(int32_t size);
+	CDevicePage* GetPage(int);
+	CDeviceSlot* GetSlot(int);
 	void CheckPage(const ECheckPageLevel level);
+	bool SetSlot(int slotNumber);		// sets "current/active" slot
+	CDeviceSlot* GetCurrentSlot();		// returns "current/active" slot
 	char* ID;
 	CDevice* Next;
-	int CurrentSlot;
 	int SlotsCount;
 	int PagesCount;
 private:
+	int CurrentSlot;
 	CDeviceSlot* Slots[256];
 	CDevicePage* Pages[256];
 
 	// variables for CheckPage logic
 	int previousSlotI;				// previous machine code write happened into this slot
-	ESlotOptions previousSlotOpt;	// its option was
+	CDeviceSlot::ESlotOptions previousSlotOpt;	// its option was
 	bool limitExceeded;				// true if limit exceeded was already reported
 };
 

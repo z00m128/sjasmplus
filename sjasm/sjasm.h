@@ -58,7 +58,6 @@ namespace Options {
 
 extern CDevice *Devices;
 extern CDevice *Device;
-extern CDeviceSlot *Slot;
 extern CDevicePage *Page;
 extern char* DeviceID;
 extern int deviceDirectivesCounter;

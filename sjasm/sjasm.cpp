@@ -104,7 +104,6 @@ namespace Options {
 
 CDevice *Devices = 0;
 CDevice *Device = 0;
-CDeviceSlot *Slot = 0;
 CDevicePage *Page = 0;
 char* DeviceID = 0;
 

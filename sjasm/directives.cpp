@@ -279,7 +279,7 @@ static void dirPageImpl(const char* const dirName) {
 		Error(buf, NULL, IF_FIRST);
 		return;
 	}
-	Slot->Page = Device->GetPage(val);
+	Device->GetCurrentSlot()->Page = Device->GetPage(val);
 	Device->CheckPage(CDevice::CHECK_RESET);
 }
 
@@ -329,7 +329,7 @@ void dirMMU() {
 		return;
 	}
 	aint slot1, slot2, pageN = -1;
-	ESlotOptions slotOpt = SLTOPT_NONE;
+	CDeviceSlot::ESlotOptions slotOpt = CDeviceSlot::O_NONE;
 	if (!ParseExpression(lp, slot1)) {
 		Error("[MMU] First slot number parsing failed", bp, SUPPRESS);
 		return;
@@ -339,9 +339,9 @@ void dirMMU() {
 		// see if there is slot1-only with option-char (e/w/n options)
 		const char slotOptChar = (*lp)|0x20;	// primitive ASCII tolower
 		if ('a' <= slotOptChar && slotOptChar <= 'z' && (',' == lp[1] || White(lp[1]))) {
-			if ('e' == slotOptChar) slotOpt = SLTOPT_ERROR;
-			else if ('w' == slotOptChar) slotOpt = SLTOPT_WARNING;
-			else if ('n' == slotOptChar) slotOpt = SLTOPT_NEXT;
+			if ('e' == slotOptChar) slotOpt = CDeviceSlot::O_ERROR;
+			else if ('w' == slotOptChar) slotOpt = CDeviceSlot::O_WARNING;
+			else if ('n' == slotOptChar) slotOpt = CDeviceSlot::O_NEXT;
 			else {
 				Warning("[MMU] Unknown slot option (legal: e, w, n)", lp);
 			}
@@ -397,15 +397,11 @@ void dirSLOT() {
 		Error("Syntax error", lp, IF_FIRST);
 		return;
 	}
-	if (val < 0) {
-		Error("[SLOT] Negative slot number are not allowed", lp); return;
-	} else if (Device->SlotsCount <= val) {
+	if (!Device->SetSlot(val)) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%u", Device->SlotsCount - 1);
-		Error(buf, NULL, IF_FIRST); return;
+		Error(buf, NULL, IF_FIRST);
 	}
-	Slot = Device->GetSlot(val);
-	Device->CurrentSlot = Slot->Number;
 }
 
 void dirMAP() {
@@ -2127,21 +2123,22 @@ bool LuaSetPage(aint n) {
 		SPRINTF1(buf, LINEMAX, "sj.set_page: page number must be in range 0..%u", Device->PagesCount - 1);
 		Error(buf, NULL, IF_FIRST); return false;
 	}
-	Slot->Page = Device->GetPage(n);
+	Device->GetCurrentSlot()->Page = Device->GetPage(n);
 	Device->CheckPage(CDevice::CHECK_RESET);
 	return true;
 }
 
 bool LuaSetSlot(aint n) {
-	if (n < 0) {
-		Error("sj.set_slot: negative slot number are not allowed", lp); return false;
-	} else if (Device->SlotsCount <= n) {
-		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "sj.set_slot: slot number must be in range 0..%u", Device->SlotsCount - 1);
-		Error(buf, NULL, IF_FIRST); return false;
+	if (!DeviceID) {
+		Warning("sj.set_slot: only allowed in real device emulation mode (See DEVICE)");
+		return false;
 	}
-	Slot = Device->GetSlot(n);
-	Device->CurrentSlot = Slot->Number;
+	if (!Device->SetSlot(n)) {
+		char buf[LINEMAX];
+		SPRINTF1(buf, LINEMAX, "sj.set_slot: Slot number must be in range 0..%u", Device->SlotsCount - 1);
+		Error(buf, NULL, IF_FIRST);
+		return false;
+	}
 	return true;
 }
 
