@@ -150,3 +150,139 @@ char* GetDeviceName() {
 		return DeviceID;
 	}
 }
+
+CDevice::CDevice(const char *name, CDevice *parent)
+	: Next(NULL), CurrentSlot(0), SlotsCount(0), PagesCount(0) {
+	ID = STRDUP(name);
+	if (parent) parent->Next = this;
+	for (auto & slot : Slots) slot = NULL;
+	for (auto & page : Pages) page = NULL;
+}
+
+CDevice::~CDevice() {
+	for (auto & slot : Slots) if (slot) delete slot;
+	for (auto & page : Pages) if (page) delete page;
+	if (Next) delete Next;
+	free(ID);
+}
+
+void CDevice::AddSlot(aint adr, aint size) {
+	Slots[SlotsCount] = new CDeviceSlot(adr, size, SlotsCount);
+	SlotsCount++;
+}
+
+void CDevice::AddPage(aint size) {
+	Pages[PagesCount] = new CDevicePage(size, PagesCount);
+	PagesCount++;
+}
+
+CDeviceSlot* CDevice::GetSlot(aint num) {
+	if (Slots[num]) return Slots[num];
+	Error("Wrong slot number", lp);
+	return Slots[0];
+}
+
+CDevicePage* CDevice::GetPage(aint num) {
+	if (Pages[num]) return Pages[num];
+	Error("Wrong page number", lp);
+	return Pages[0];
+}
+
+void CDevice::CheckPage(const ECheckPageLevel level) {
+	// fake DISP address gets auto-wrapped FFFF->0 (with warning only)
+	// ("no emit" to catch before labels are defined, although "emit" sounds more logical)
+	if (PseudoORG && CHECK_NO_EMIT == level && 0x10000 <= CurAddress) {
+		if (LASTPASS == pass) {
+			char buf[64];
+			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by DISP", (unsigned int)CurAddress);
+			Warning(buf);
+		}
+		CurAddress &= 0xFFFF;
+	}
+	// check the emit address for bytecode
+	const int realAddr = PseudoORG ? adrdisp : CurAddress;
+	// quicker check to avoid scanning whole slots array every byte
+	if (CHECK_RESET != level
+		&& Slots[previousSlotI]->Address <= realAddr
+		&& realAddr < Slots[previousSlotI]->Address + Slots[previousSlotI]->Size) return;
+	for (int i=SlotsCount; i--; ) {
+		CDeviceSlot* const S = Slots[i];
+		if (realAddr < S->Address) continue;
+		Page = S->Page;
+		MemoryPointer = Page->RAM + (realAddr - S->Address);
+ 		if (CHECK_RESET == level) {
+			previousSlotOpt = S->Option;
+			previousSlotI = i;
+			limitExceeded = false;
+			return;
+		}
+		// if still in the same slot and within boundaries, we are done
+		if (i == previousSlotI && realAddr < S->Address + S->Size) return;
+		// crossing into other slot, check options for special functionality of old slot
+		if (S->Address + S->Size <= realAddr) MemoryPointer = NULL; // you're not writing there
+		switch (previousSlotOpt) {
+			case SLTOPT_ERROR:
+				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded) {
+					ErrorInt("Write outside of memory slot", realAddr, SUPPRESS);
+					limitExceeded = true;
+				}
+				break;
+			case SLTOPT_WARNING:
+				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded) {
+					Warning("Write outside of memory slot");
+					limitExceeded = true;
+				}
+				break;
+			case SLTOPT_NEXT:
+			{
+				CDeviceSlot* const prevS = Slots[previousSlotI];
+				const aint nextPageN = prevS->Page->Number + 1;
+				if (PagesCount <= nextPageN) {
+					ErrorInt("No more memory pages to map next one into slot", previousSlotI, SUPPRESS);
+					// disable the option on the overflowing slot
+					prevS->Option = SLTOPT_NONE;
+					break;		// continue into next slot, don't wrap any more
+				}
+				if (realAddr != (prevS->Address + prevS->Size)) {	// should be equal
+					ErrorInt("Write beyond memory slot in wrap-around slot catched too late by",
+								realAddr - prevS->Address - prevS->Size, FATAL);
+					break;
+				}
+				prevS->Page = Pages[nextPageN];		// map next page into the guarded slot
+				Page = prevS->Page;
+				if (PseudoORG) adrdisp -= prevS->Size;
+				else CurAddress -= prevS->Size;
+				MemoryPointer = Page->RAM;
+				return;		// preserve current option status
+			}
+			default:
+				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded && !MemoryPointer) {
+					ErrorInt("Write outside of device memory at", realAddr, SUPPRESS);
+					limitExceeded = true;
+				}
+				break;
+		}
+		// refresh check slot settings
+		limitExceeded &= (previousSlotI == i);	// reset limit flag if slot changed (in non check_reset mode)
+		previousSlotI = i;
+		previousSlotOpt = S->Option;
+		return;
+	}
+	Error("CheckPage(..): please, contact the author of this program.", NULL, FATAL);
+}
+
+CDevicePage::CDevicePage(aint size, aint number) : Size(size), Number(number) {
+	RAM = (char*) calloc(size, sizeof(char));
+	if (RAM == NULL) ErrorInt("No enough memory", size, FATAL);
+}
+
+CDevicePage::~CDevicePage() {
+	free(RAM);
+}
+
+CDeviceSlot::CDeviceSlot(aint adr, aint size, aint number)
+	: Address(adr), Size(size), Page(NULL), Number(number), Option(SLTOPT_NONE) {
+}
+
+CDeviceSlot::~CDeviceSlot() {
+}

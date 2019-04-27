@@ -32,7 +32,6 @@ using std::cerr;
 using std::endl;
 
 enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
-enum ESlotOptions { SLTOPT_NONE, SLTOPT_ERROR, SLTOPT_WARNING, SLTOPT_NEXT };
 
 // bit flags for ValidateLabel
 constexpr int VALIDATE_LABEL_SET_NAMESPACE = 0x01;
@@ -288,58 +287,6 @@ struct SConditionalStack {
 	bool IsInWork;
 	int Level;
 };
-
-class CDevicePage {
-public:
-	CDevicePage(aint, aint /*, CDevicePage **/);
-	~CDevicePage();
-	aint Size;
-	aint Number;
-	char *RAM;
-	//CDevicePage* Next;
-private:
-};
-
-class CDeviceSlot {
-public:
-	CDeviceSlot(aint, aint, aint /*, CDeviceSlot **/);
-	~CDeviceSlot();
-	aint Address;
-	aint Size;
-	CDevicePage* Page;
-	aint Number;
-	ESlotOptions Option;
-private:
-};
-
-class CDevice {
-public:
-	// reset will reinitialize checks, "no emit" will do wrap-only (no machine byte emitted)
-	// "emit" will also report error/warning upon boundary, as the machine byte emit is expected
-	enum ECheckPageLevel{ CHECK_RESET, CHECK_NO_EMIT, CHECK_EMIT };
-
-	CDevice(const char* name, CDevice* parent);
-	~CDevice();
-	void AddSlot(aint adr, aint size);
-	void AddPage(aint size);
-	CDevicePage* GetPage(aint);
-	CDeviceSlot* GetSlot(aint);
-	void CheckPage(const ECheckPageLevel level);
-	char* ID;
-	CDevice* Next;
-	int CurrentSlot;
-	int SlotsCount;
-	int PagesCount;
-private:
-	CDeviceSlot* Slots[256];
-	CDevicePage* Pages[256];
-
-	// variables for CheckPage logic
-	int previousSlotI;				// previous machine code write happened into this slot
-	ESlotOptions previousSlotOpt;	// its option was
-	bool limitExceeded;				// true if limit exceeded was already reported
-};
-
 
 int LuaGetLabel(char *name);
 

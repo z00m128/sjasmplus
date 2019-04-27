@@ -78,6 +78,8 @@ MMU:
 - err/warn/warp option for slot range?
 
 SAVEBIN - support for dumping 64+kiB of memory (in tandem with MMU)
+- impossible (no good syntax and behaviour). Probably internally move to 20+b address
+space and add SAVEMEM with new syntax, to stay backward compatible for as long as possible
 
 sjasmplus 2.x/fork:
 
