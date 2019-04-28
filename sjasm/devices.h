@@ -32,12 +32,10 @@ char* GetDeviceName();
 
 class CDevicePage {
 public:
-	CDevicePage(int32_t size, int number);
-	~CDevicePage();
+	CDevicePage(byte* memory, int32_t size, int number);
 	int32_t Size;
 	int Number;
-	char *RAM;
-	//CDevicePage* Next;
+	byte* RAM;
 private:
 };
 
@@ -63,7 +61,7 @@ public:
 	CDevice(const char* name, CDevice* parent);
 	~CDevice();
 	void AddSlot(int32_t adr, int32_t size);
-	void AddPage(int32_t size);
+	void AddPage(byte* memory, int32_t size);
 	CDevicePage* GetPage(int);
 	CDeviceSlot* GetSlot(int);
 	void CheckPage(const ECheckPageLevel level);
@@ -73,6 +71,7 @@ public:
 	CDevice* Next;
 	int SlotsCount;
 	int PagesCount;
+	byte* Memory;
 private:
 	int CurrentSlot;
 	CDeviceSlot* Slots[256];

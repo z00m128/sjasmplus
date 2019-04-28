@@ -43,8 +43,10 @@ static void initZxLikeDevice(CDevice* const device, int32_t slotSize, int pageCo
 	for (int32_t slotAddress = 0; slotAddress < 0x10000; slotAddress += slotSize) {
 		device->AddSlot(slotAddress, slotSize);
 	}
-	for (int i = 0; i < pageCount; ++i) {
-		device->AddPage(slotSize);
+	device->Memory = new byte[pageCount * slotSize]();
+	byte* memPtr = device->Memory;
+	for (int i = 0; i < pageCount; ++i, memPtr += slotSize) {
+		device->AddPage(memPtr, slotSize);
 	}
 	for (int i = 0; i < device->SlotsCount; ++i) {
 		device->GetSlot(i)->Page = device->GetPage(initialPages[i]);
@@ -52,10 +54,10 @@ static void initZxLikeDevice(CDevice* const device, int32_t slotSize, int pageCo
 	device->SetSlot(device->SlotsCount - 1);
 	// set memory to "USR 0"-like state (for snapshot saving) (works also for ZXN 0x2000 slotSize)
 	int vramPage = (0x2000 == slotSize) ? initialPages[2] : initialPages[1];	// default = second slot page
-	char* const vramRAM = device->GetPage(vramPage)->RAM;
+	byte* const vramRAM = device->GetPage(vramPage)->RAM;
 	memset(vramRAM + 0x1800, 7*8, 768);
 	memcpy(vramRAM + 0x1C00, BASin48Vars, sizeof(BASin48Vars));
-	char* const stackRAM = device->GetCurrentSlot()->Page->RAM;	// last slot page is default "stack"
+	byte* const stackRAM = device->GetCurrentSlot()->Page->RAM;	// last slot page is default "stack"
 	memcpy(stackRAM + slotSize - sizeof(BASin48SP), BASin48SP, sizeof(BASin48SP));
 }
 
@@ -151,7 +153,7 @@ char* GetDeviceName() {
 }
 
 CDevice::CDevice(const char *name, CDevice *parent)
-	: Next(NULL), SlotsCount(0), PagesCount(0), CurrentSlot(0) {
+	: Next(NULL), SlotsCount(0), PagesCount(0), Memory(nullptr), CurrentSlot(0) {
 	ID = STRDUP(name);
 	if (parent) parent->Next = this;
 	for (auto & slot : Slots) slot = NULL;
@@ -161,6 +163,7 @@ CDevice::CDevice(const char *name, CDevice *parent)
 CDevice::~CDevice() {
 	for (auto & slot : Slots) if (slot) delete slot;
 	for (auto & page : Pages) if (page) delete page;
+	if (Memory) delete[] Memory;
 	if (Next) delete Next;
 	free(ID);
 }
@@ -169,8 +172,8 @@ void CDevice::AddSlot(int32_t adr, int32_t size) {
 	Slots[SlotsCount++] = new CDeviceSlot(adr, size);
 }
 
-void CDevice::AddPage(int32_t size) {
-	Pages[PagesCount] = new CDevicePage(size, PagesCount);
+void CDevice::AddPage(byte* memory, int32_t size) {
+	Pages[PagesCount] = new CDevicePage(memory, size, PagesCount);
 	PagesCount++;
 }
 
@@ -279,13 +282,9 @@ CDeviceSlot* CDevice::GetCurrentSlot() {
 	return GetSlot(CurrentSlot);
 }
 
-CDevicePage::CDevicePage(int32_t size, int number) : Size(size), Number(number) {
-	RAM = (char*) calloc(size, sizeof(char));
-	if (RAM == NULL) ErrorInt("No enough memory", size, FATAL);
-}
-
-CDevicePage::~CDevicePage() {
-	free(RAM);
+CDevicePage::CDevicePage(byte* memory, int32_t size, int number)
+	: Size(size), Number(number), RAM(memory) {
+	if (nullptr == RAM) Error("No memory defined", nullptr, FATAL);
 }
 
 CDeviceSlot::CDeviceSlot(int32_t adr, int32_t size)

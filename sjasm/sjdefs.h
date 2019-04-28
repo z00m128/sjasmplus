@@ -85,7 +85,8 @@ extern "C" {
 #define LABTABSIZE 32768
 #define FUNTABSIZE 4096
 #endif
-#define aint long
+typedef long aint;
+typedef uint8_t byte;
 
 #ifndef PATH_MAX
 #define PATH_MAX	4096

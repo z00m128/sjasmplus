@@ -81,12 +81,19 @@ SAVEBIN - support for dumping 64+kiB of memory (in tandem with MMU)
 - impossible (no good syntax and behaviour). Probably internally move to 20+b address
 space and add SAVEMEM with new syntax, to stay backward compatible for as long as possible
 
+SAVENEX - autodetection of banks? just trivial, make <5, 2, 0> manual and rest is
+"if non zero => save"?? Sounds simple to create.
+
 sjasmplus 2.x/fork:
 
 address space of labels -> 2|3:30|29 bits, the top bits being default slot number,
 remaining bits being physical address into global chip address space
 -> then producing machine code using the particular label would "format" physical
 label value for particular "slot" (view of value).
+
+To stay backward compatible/similar, one would have to support also 0000-FFFF range as if
+going through the mapped pages.. but that does collide with early pages 0..n ...
+How about abusing "@" or "." or something to distinguish between?
 
 ====================
 Docs:
