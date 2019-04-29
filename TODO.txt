@@ -70,6 +70,20 @@ ZX128 snapshot default state and mapping - still doesn't survive simple `ret` in
 DISP inside DISP bugs => documented. Correct solution = nesting DISPs?!
 
 $$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
+//// syntax summary:
+    labels (\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*
+    , argument-separator    : instruction-separator     ; // comment
+    # $ hexnums, % binary, "' strings, () parentheses or memcell, [] memcell, {} device mem
+    operators-unary: ! ~ + - low high not
+    operators-binary: * / % mod + - << >> >>> shl shr <? >? < > <= >= = == != & and ^ xor | or && ||
+    us keyboard: ~!@#$%^&*()_+`-=[]{};':"<>?,./\|
+    $$label - hexa are single $ only, so this looks fine (unary operator)
+    ?label - 5<?label => ambiguous
+    \label - looks weird, no syntax clash
+Needs more syntax:
+    - reformat label into different slot... <slot>$$expression ? (binary operator)
+    - differentiate 16+b address space from 16b slot-mapped address space.
+        &label/expression? Similar to C/C++? &0x1231241 ? (5123 + &1234)
 
 MMU:
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
