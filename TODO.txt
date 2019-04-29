@@ -69,17 +69,11 @@ ZX128 snapshot default state and mapping - still doesn't survive simple `ret` in
 
 DISP inside DISP bugs => documented. Correct solution = nesting DISPs?!
 
-NEXT device -> unreal symbols dump should be 0x2000 truncating?
-
 $$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
 
 MMU:
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
 - err/warn/warp option for slot range?
-
-SAVEBIN - support for dumping 64+kiB of memory (in tandem with MMU)
-- impossible (no good syntax and behaviour). Probably internally move to 20+b address
-space and add SAVEMEM with new syntax, to stay backward compatible for as long as possible
 
 SAVENEX - autodetection of banks? just trivial, make <5, 2, 0> manual and rest is
 "if non zero => save"?? Sounds simple to create.

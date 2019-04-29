@@ -355,6 +355,7 @@ void CLabelTable::DumpForUnreal() {
 	if (FP_UnrealList == NULL && !FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
 		Error("Error opening file", Options::UnrealLabelListFName, FATAL);
 	}
+	const int PAGE_MASK = DeviceID ? Device->GetPage(0)->Size - 1 : 0x3FFF;
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
 		int page = LabelTable[i].page;
@@ -365,18 +366,8 @@ void CLabelTable::DumpForUnreal() {
 			const int fakeZx128Pages[] = {LABEL_PAGE_ROM, 5, 2, 0};
 			page = fakeZx128Pages[page];
 		}
-		int lvalue = LabelTable[i].value & 0x3FFF;
+		int lvalue = LabelTable[i].value & PAGE_MASK;
 		ep = ln;
-		//TODO Ped7g: undecipherable intent of old code (it's unclear for page > 9, the code doesn't make sense)
-// 		if (page != -1) {
-// 			*(ep++) = '0';
-// 			*(ep++) = page + '0';
-// 		} else if (page > 9) {
-// 			*(ep++) = ((int)fmod((float)page, 7)) + '0';
-// 			*(ep++) = ((int)floor((float)(page / 10))) + '0';
-// 		} else {
-// 			continue;
-// 		}
 		if (page < LABEL_PAGE_ROM) ep += sprintf(ep, "%02d", page&255);
 		*(ep++) = ':';
 		PrintHexAlt(ep, lvalue);
