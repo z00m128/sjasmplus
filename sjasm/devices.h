@@ -67,6 +67,7 @@ public:
 	void CheckPage(const ECheckPageLevel level);
 	bool SetSlot(int slotNumber);		// sets "current/active" slot
 	CDeviceSlot* GetCurrentSlot();		// returns "current/active" slot
+	int32_t GetMemoryOffset(int page, int32_t offset) const;
 	char* ID;
 	CDevice* Next;
 	int SlotsCount;

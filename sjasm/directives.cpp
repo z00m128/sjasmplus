@@ -997,7 +997,41 @@ void dirSAVEBIN() {
 	}
 
 	if (exec && !SaveBinary(fnaam, start, length)) {
-		Error("[SAVEBIN] Error writing file (Disk full?)", bp, IF_FIRST); return;
+		Error("[SAVEBIN] Error writing file (Disk full?)", bp, IF_FIRST);
+	}
+	delete[] fnaam;
+}
+
+void dirSAVEDEV() {
+	bool exec = DeviceID && LASTPASS == pass;
+	if (!exec && LASTPASS == pass) Error("SAVEDEV only allowed in real device emulation mode (See DEVICE)");
+
+	aint args[3]{-1, -1, -1};		// page, offset, length
+	char* fnaam = GetFileName(lp);
+	for (auto & arg : args) {
+		if (!comma(lp) || !ParseExpression(lp, arg)) {
+			exec = false;
+			Error("Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>", bp, SUPPRESS);
+		}
+	}
+	if (exec) {
+		// validate arguments
+		if (args[0] < 0 || Device->PagesCount <= args[0]) {
+			exec = false; ErrorInt("[SAVEDEV] page number is out of range", args[0]);
+		}
+		const int32_t start = Device->GetMemoryOffset(args[0], args[1]);
+		const int32_t totalRam = Device->GetMemoryOffset(Device->PagesCount, 0);
+		if (exec && (start < 0 || totalRam <= start)) {
+			exec = false; ErrorInt("[SAVEDEV] calculated start address is out of range", start);
+		}
+		if (exec && (args[2] <= 0 || totalRam < start + args[2])) {
+			exec = false;
+			if (args[2]) ErrorInt("[SAVEDEV] invalid end address (bad length?)", start + args[2]);
+			else Warning("[SAVEDEV] zero length requested");
+		}
+		if (exec && !SaveDeviceMemory(fnaam, (size_t)start, (size_t)args[2])) {
+			Error("[SAVEDEV] Error writing file (Disk full?)", bp, IF_FIRST);
+		}
 	}
 	delete[] fnaam;
 }
@@ -2039,6 +2073,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".savesna", dirSAVESNA);
 	DirectivesTable.insertd(".savehob", dirSAVEHOB);
 	DirectivesTable.insertd(".savebin", dirSAVEBIN);
+	DirectivesTable.insertd(".savedev", dirSAVEDEV);
 	DirectivesTable.insertd(".emptytap", dirEMPTYTAP);
 	DirectivesTable.insertd(".savetap", dirSAVETAP);
 	DirectivesTable.insertd(".emptytrd", dirEMPTYTRD);

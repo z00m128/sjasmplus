@@ -282,6 +282,12 @@ CDeviceSlot* CDevice::GetCurrentSlot() {
 	return GetSlot(CurrentSlot);
 }
 
+// Calling this with (PagesCount, 0) will return total memory size
+int32_t CDevice::GetMemoryOffset(int page, int32_t offset) const {
+	if (!Pages[0]) return 0;
+	return offset + page * Pages[0]->Size;
+}
+
 CDevicePage::CDevicePage(byte* memory, int32_t size, int number)
 	: Size(size), Number(number), RAM(memory) {
 	if (nullptr == RAM) Error("No memory defined", nullptr, FATAL);

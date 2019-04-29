@@ -952,6 +952,22 @@ int SaveBinary(char* fname, int start, int length) {
 }
 
 
+// all arguments must be sanitized by caller (this just writes data block into opened file)
+bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
+	return (length == fwrite(Device->Memory + start, 1, length, file));
+}
+
+
+// start and length must be sanitized by caller
+bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length) {
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("Error opening file", fname, FATAL);
+	bool res = SaveDeviceMemory(ff, start, length);
+	fclose(ff);
+	return res;
+}
+
+
 int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	unsigned char header[0x11];
 	int i;
