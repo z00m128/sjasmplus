@@ -47,14 +47,8 @@ int ParseDirective(bool beginningOfLine)
 	char* n;
 	aint val;
 	if (!(n = getinstr(lp))) {
-		if (*lp == '#' && *(lp + 1) == '#') {
-			lp += 2;
-			if (!ParseExpressionNoSyntaxError(lp, val)) val = 4;
-			AddressOfMAP += ((~AddressOfMAP + 1) & (val - 1));
-			return 1;
-		} else {
-			lp = olp;  return 0;
-		}
+		lp = olp;
+		return 0;
 	}
 
 	if (DirectivesTable.zoek(n)) return 1;
@@ -101,24 +95,8 @@ int ParseDirective(bool beginningOfLine)
 }
 
 int ParseDirective_REPT() {
-	char* olp = lp;
-	char* n;
-	bp = lp;
-	if (!(n = getinstr(lp))) {
-		if (*lp == '#' && *(lp + 1) == '#') {
-			lp += 2;
-			aint val;
-			if (!ParseExpressionNoSyntaxError(lp, val)) val = 4;
-			AddressOfMAP += ((~AddressOfMAP + 1) & (val - 1));
-			return 1;
-		} else {
-			lp = olp;  return 0;
-		}
-	}
-
-	if (DirectivesTable_dup.zoek(n)) {
-		return 1;
-	}
+	char* olp = bp = lp, * n;
+	if ((n = getinstr(lp)) && DirectivesTable_dup.zoek(n)) return 1;
 	lp = olp;
 	return 0;
 }
@@ -401,28 +379,6 @@ void dirSLOT() {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%u", Device->SlotsCount - 1);
 		Error(buf, NULL, IF_FIRST);
-	}
-}
-
-void dirMAP() {
-	AddressList = new CAddressList(AddressOfMAP, AddressList);
-	aint val;
-	IsLabelNotFound = 0;
-	if (ParseExpression(lp, val)) {
-		AddressOfMAP = val;
-	} else {
-		Error("[MAP] Syntax error", lp, IF_FIRST);
-	}
-	if (IsLabelNotFound) {
-		Error("[MAP] Forward reference", NULL, ALL);
-	}
-}
-
-void dirENDMAP() {
-	if (AddressList) {
-		AddressOfMAP = AddressList->val; AddressList = AddressList->next;
-	} else {
-		Error("ENDMAP without MAP");
 	}
 }
 
@@ -2054,7 +2010,6 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".hex", dirDH);
 	DirectivesTable.insertd(".org", dirORG);
 	DirectivesTable.insertd(".fpos",dirFORG);
-	DirectivesTable.insertd(".map", dirMAP);
 	DirectivesTable.insertd(".align", dirALIGN);
 	DirectivesTable.insertd(".module", dirMODULE);
 	DirectivesTable.insertd(".size", dirSIZE);
@@ -2111,7 +2066,6 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".defm", dirBYTE);
 	DirectivesTable.insertd(".endmod", dirENDMODULE);
 	DirectivesTable.insertd(".endmodule", dirENDMODULE);
-	DirectivesTable.insertd(".endmap", dirENDMAP);
 	DirectivesTable.insertd(".rept", dirDUP);
 	DirectivesTable.insertd(".dup", dirDUP);
 	DirectivesTable.insertd(".disp", dirDISP);

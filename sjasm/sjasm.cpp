@@ -122,7 +122,7 @@ int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0, PseudoORG = 0, StartAddress = -1;
 byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
-aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
+aint CurAddress = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
 aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
@@ -135,7 +135,6 @@ CDefineTable DefineTable;
 CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
 CStructureTable StructureTable;
-CAddressList* AddressList = 0;
 CStringsList* ModuleList = NULL;
 
 #ifdef USE_LUA
@@ -169,7 +168,7 @@ void InitPass() {
 	vorlabp = STRDUP("_");
 	macrolabp = NULL;
 	listmacro = 0;
-	CurAddress = AddressOfMAP = 0;
+	CurAddress = 0;
 	CurrentSourceLine = CompiledCurrentLine = 0;
 	PseudoORG = 0; adrdisp = 0;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
@@ -207,9 +206,6 @@ void FreeRAM() {
 	}
 	if (globalDeviceID) {
 		free(globalDeviceID);	globalDeviceID = NULL;
-	}
-	if (AddressList) {
-		delete AddressList;	AddressList = NULL;
 	}
 	if (ModuleList) {
 		delete ModuleList;	ModuleList = NULL;

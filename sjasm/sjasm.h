@@ -75,7 +75,7 @@ extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunn
 extern int adrdisp, PseudoORG, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
-extern aint CurAddress, AddressOfMAP, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
+extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
 
 extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
 
@@ -92,7 +92,6 @@ extern CDefineTable DefineTable;
 extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;
 extern CStructureTable StructureTable;
-extern CAddressList* AddressList;
 extern CStringsList* ModuleList;
 
 #ifdef USE_LUA

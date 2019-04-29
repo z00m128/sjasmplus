@@ -132,6 +132,7 @@
 - [may break old sources] ZXSPECTRUM128 based devices have sysvars and
   stack set up as in "USR 0" mode (ZXSPECTRUM48 system variables and
   default stack content).
+- [may break old sources] MAP+FIELD directives removed (STRUCT is better and working)
 - <a class="link" href="#po_mmu">MMU</a> directive (fusing SLOT + PAGE and extending them)
 - <a class="link" href="#po_savedev">SAVEDEV</a> directive (similar to SAVEBIN)
 - INCBIN: support for negative offset/length values, support for MMU wrapping
@@ -1316,22 +1317,6 @@ Kip=3</pre>
                   <pre class="programlisting">DRIE=3
     EXPORT DRIE</pre>
                 </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term"><a name="po_field"></a>FIELD</span></dt><dd>
-              <p>To give a label the value of the current map counter.
-              Afterwards the map counter is increment by the given amount. '#'
-              May be used instead of 'FIELD'. With map and field it is
-              possible to create structure-like data structures. With '##' it
-              is possible to align the map counter.</p><div class="example"><a name="idp812"></a><p class="title"><b>Example 5.24. </b></p><div class="example-contents">
-                  
-
-                  <pre class="programlisting">    MAP 8
-Label # 2     ; Label=8
-Kip   # 3     ; Kip=10
-Kop   #       ; Kop=13
-Kop2  # 1     ; Kop2=13
-     ##       ; align map address (align 4 is default)
-Kop3  # 6     ; Kop3=16</pre>
-                </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_fpos"></a>FPOS &lt;position&gt;</span></dt><dd>
               <p>The FPOS directive makes it possible to set the file
               position to anywhere in the output file.</p>
@@ -1339,7 +1324,7 @@ Kop3  # 6     ; Kop3=16</pre>
               <p>In combination with <a class="link" href="#po_output">OUTPUT</a> &lt;filename&gt;,r it is
               possible to update existing files.</p>
 
-              <div class="example"><a name="idp824"></a><p class="title"><b>Example 5.25. </b></p><div class="example-contents">
+              <div class="example"><a name="idp815"></a><p class="title"><b>Example 5.24. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">; This example will result in a file with a length of one byte:
@@ -1354,7 +1339,7 @@ Kop3  # 6     ; Kop3=16</pre>
             &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a binary file into the outputfile. The offset
               and length are optional. Added in v1.12.1: if negative offset or length is provided,
-              it counts relatively from the end of the file.</p><div class="example"><a name="idp839"></a><p class="title"><b>Example 5.26. </b></p><div class="example-contents">
+              it counts relatively from the end of the file.</p><div class="example"><a name="idp830"></a><p class="title"><b>Example 5.25. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
@@ -1364,7 +1349,7 @@ Kop3  # 6     ; Kop3=16</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_inchob"></a>INCHOB &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a data from a hobeta file into the outputfile.
-              The offset and length are optional.</p><div class="example"><a name="idp848"></a><p class="title"><b>Example 5.27. </b></p><div class="example-contents">
+              The offset and length are optional.</p><div class="example"><a name="idp839"></a><p class="title"><b>Example 5.26. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCHOB "gfx.$c",7        ; include gfx.scc, skip first 7 bytes
@@ -1378,7 +1363,7 @@ Kop3  # 6     ; Kop3=16</pre>
               directory the current file comes from) the file will be searched
               for in the directories specified at the commandline. When angle
               brackets are used, the commandline directories are searched
-              before the current directory.</p><div class="example"><a name="idp857"></a><p class="title"><b>Example 5.28. </b></p><div class="example-contents">
+              before the current directory.</p><div class="example"><a name="idp848"></a><p class="title"><b>Example 5.27. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCLUDE &lt;VDP.I&gt;
@@ -1391,7 +1376,7 @@ Kop3  # 6     ; Kop3=16</pre>
               directory is the directory the current file comes from) the file
               will be searched for in the directories specified at the
               commandline. When angle brackets are used, the commandline
-              directories are searched before the current directory.</p><div class="example"><a name="idp866"></a><p class="title"><b>Example 5.29. </b></p><div class="example-contents">
+              directories are searched before the current directory.</p><div class="example"><a name="idp857"></a><p class="title"><b>Example 5.28. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCLUDELUA &lt;mylibrary1.lua&gt;
@@ -1401,7 +1386,7 @@ Kop3  # 6     ; Kop3=16</pre>
             </dd><dt><span class="term"><a name="po_inctrd"></a>INCTRD
             &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a file from a TRD image into the outputfile.
-              The offset and length are optional.</p><div class="example"><a name="idp875"></a><p class="title"><b>Example 5.30. </b></p><div class="example-contents">
+              The offset and length are optional.</p><div class="example"><a name="idp866"></a><p class="title"><b>Example 5.29. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCTRD "test.trd","mygfx.C" ; include mygfx.C from test.trd
@@ -1421,7 +1406,7 @@ Kop3  # 6     ; Kop3=16</pre>
               <pre class="synopsis">NN:ADDRESS LABELNAME</pre><p>
               where NN is number of RAM page and ADDRESS is truncated to 0000..3FFF range</p>
 
-              <div class="example"><a name="idp898"></a><p class="title"><b>Example 5.31. </b></p><div class="example-contents">
+              <div class="example"><a name="idp889"></a><p class="title"><b>Example 5.30. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    LABELSLIST "x:/somepath/user.l"</pre>
@@ -1435,7 +1420,7 @@ PASS2   -  interpret Lua script in second pass only.
 PASS3   -  interpret Lua script in third pass only. By default.
 ALLPASS -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</pre>
 
-              <div class="example"><a name="idp911"></a><p class="title"><b>Example 5.32. </b></p><div class="example-contents">
+              <div class="example"><a name="idp902"></a><p class="title"><b>Example 5.31. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    LUA
@@ -1447,12 +1432,6 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
         _pl("LABEL LD A,10")
         _pc("RET")
     ENDLUA</pre>
-                </div></div><p><br class="example-break"></p>
-            </dd><dt><span class="term"><a name="po_map"></a>MAP &lt;address&gt;</span></dt><dd>
-              <p>Set the map counter to the specified value. See <a class="link" href="#po_field">FIELD</a> for an example.</p><div class="example"><a name="idp921"></a><p class="title"><b>Example 5.33. </b></p><div class="example-contents">
-                  
-
-                  <pre class="programlisting">    MAP 5</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_memorymap"></a>MEMORYMAP</span></dt><dd>
               <p>Not available yet.</p>
@@ -1468,7 +1447,7 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
                 </p><pre class="synopsis">e = error on writing beyond last byte of slot
 w = warning on writing beyond last byte of slot
 n = wrap address back to start of slot, map next page</pre><p>
-                </p><div class="example"><a name="idp937"></a><p class="title"><b>Example 5.34. </b></p><div class="example-contents">
+                </p><div class="example"><a name="idp918"></a><p class="title"><b>Example 5.32. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128 : LABELSLIST "po_mmu.lbl"  ; to check label pages
@@ -1489,7 +1468,7 @@ label4_p2: scf      ; first byte of page 2 at 0xC000</pre>
             </dd><dt><span class="term"><a name="po_module"></a>MODULE &lt;name&gt;</span></dt><dd>
               <p>Labels are to be unique only in the current module. Also
               note the use of '@' to suppress all this label-processing. (The
-              '@' is NOT part of the label name though!)</p><div class="example"><a name="idp946"></a><p class="title"><b>Example 5.35. </b></p><div class="example-contents">
+              '@' is NOT part of the label name though!)</p><div class="example"><a name="idp927"></a><p class="title"><b>Example 5.33. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    MODULE xxx
@@ -1512,7 +1491,7 @@ Kip                ; label Kip</pre>
               <p>Set the program counter to a specific address. If the second argument is
               provided, it will change memory page in the current slot, see
               <a class="link" href="#po_page">PAGE</a>.
-                  </p><div class="example"><a name="idp956"></a><p class="title"><b>Example 5.36. </b></p><div class="example-contents">
+                  </p><div class="example"><a name="idp937"></a><p class="title"><b>Example 5.34. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ORG 100h ; or 0x100, or $100, or #100
@@ -1554,7 +1533,7 @@ Kip                ; label Kip</pre>
               of the file).</p><pre class="synopsis">OUTPUT &lt;filename&gt;,t  ; truncate (default)
 OUTPUT &lt;filename&gt;,r  ; rewind
 OUTPUT &lt;filename&gt;,a  ; append</pre><p>
-              </p><div class="example"><a name="idp974"></a><p class="title"><b>Example 5.37. bigfile.asm</b></p><div class="example-contents">
+              </p><div class="example"><a name="idp955"></a><p class="title"><b>Example 5.35. bigfile.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT loader.com
@@ -1578,7 +1557,7 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
 
               <p>Set the current memory page to current slot.</p>
 
-              <div class="example"><a name="idp987"></a><p class="title"><b>Example 5.38. </b></p><div class="example-contents">
+              <div class="example"><a name="idp968"></a><p class="title"><b>Example 5.36. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page
@@ -1595,7 +1574,7 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
 
               <p>Save the block of RAM.</p>
 
-              <div class="example"><a name="idp1012"></a><p class="title"><b>Example 5.39. </b></p><div class="example-contents">
+              <div class="example"><a name="idp993"></a><p class="title"><b>Example 5.37. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page to current slot
@@ -1617,7 +1596,7 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
               <p>The offset is not limited to page size, i.e. arguments page=1,offset=0x500 are equal
               to arguments page=0,offset=0x4500 for ZXSPECTRUM128 device (has page size 0x4000).</p>
 
-              <div class="example"><a name="idp1027"></a><p class="title"><b>Example 5.40. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1008"></a><p class="title"><b>Example 5.38. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128 : SAVEDEV "fullram.bin",0,0,0x20000 ; save full 128kiB</pre>
@@ -1629,7 +1608,7 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
 
               <p>Save the block of RAM in Hobeta format.</p>
 
-              <div class="example"><a name="idp1039"></a><p class="title"><b>Example 5.41. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1020"></a><p class="title"><b>Example 5.39. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page to current slot
@@ -1640,7 +1619,7 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
               <p><span class="emphasis"><em>Work only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
-              <p>Save the snapshot for emulators of ZX-Spectrum. </p><div class="example"><a name="idp1051"></a><p class="title"><b>Example 5.42. </b></p><div class="example-contents">
+              <p>Save the snapshot for emulators of ZX-Spectrum. </p><div class="example"><a name="idp1032"></a><p class="title"><b>Example 5.40. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128
@@ -1658,7 +1637,7 @@ START  .... ;something code
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Append the tape header or block of data to the end of the
-              standard tape file for emulators of ZX-Spectrum.</p><div class="example"><a name="idp1068"></a><p class="title"><b>Example 5.43. </b></p><div class="example-contents">
+              standard tape file for emulators of ZX-Spectrum.</p><div class="example"><a name="idp1049"></a><p class="title"><b>Example 5.41. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM48
@@ -1682,7 +1661,7 @@ START  .... ;something code
 
               <p>Save the tape file for emulators of ZX-Spectrum as a
               "snapshot" of whole memory. Generated tape file supports the
-              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.</p><div class="example"><a name="idp1079"></a><p class="title"><b>Example 5.44. </b></p><div class="example-contents">
+              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.</p><div class="example"><a name="idp1060"></a><p class="title"><b>Example 5.42. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM48
@@ -1696,7 +1675,7 @@ START  .... ;something code
               <p><span class="emphasis"><em>Work only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
-              <p>Save the snapshot for emulators of ZX-Spectrum</p><div class="example"><a name="idp1091"></a><p class="title"><b>Example 5.45. </b></p><div class="example-contents">
+              <p>Save the snapshot for emulators of ZX-Spectrum</p><div class="example"><a name="idp1072"></a><p class="title"><b>Example 5.43. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    EMPTYTRD "test.trd" ;create empty TRD image
@@ -1706,7 +1685,7 @@ START  .... ;something code
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_shellexec"></a>SHELLEXEC &lt;filename&gt;[,&lt;parameters&gt;]</span></dt><dd>
               <p>Execute external program &lt;filename&gt; using optional
-              command line &lt;parameters&gt;.</p><div class="example"><a name="idp1100"></a><p class="title"><b>Example 5.46. </b></p><div class="example-contents">
+              command line &lt;parameters&gt;.</p><div class="example"><a name="idp1081"></a><p class="title"><b>Example 5.44. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT "mybin.bin"
@@ -1718,7 +1697,7 @@ START  .... ;something code
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_size"></a>SIZE &lt;filesize in bytes&gt;</span></dt><dd>
               <p>If the resulting file is less than the given length, as
-              many zero bytes are added as necessary. See <a class="link" href="#po_output">OUTPUT</a> for more.</p><div class="example"><a name="idp1110"></a><p class="title"><b>Example 5.47. </b></p><div class="example-contents">
+              many zero bytes are added as necessary. See <a class="link" href="#po_output">OUTPUT</a> for more.</p><div class="example"><a name="idp1091"></a><p class="title"><b>Example 5.45. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    SIZE 32768       ; make sure file will be 32K</pre>
@@ -1731,7 +1710,7 @@ START  .... ;something code
               Use pseudo-op <a class="link" href="#po_page">PAGE</a> to change page
               in the current slot.</p>
 
-              <div class="example"><a name="idp1124"></a><p class="title"><b>Example 5.48. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1105"></a><p class="title"><b>Example 5.46. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128
@@ -1749,7 +1728,7 @@ START  .... ;something code
               <p>Appends one tape block at the end of specified file.
               All following code will be assembled to this tape file block.</p>
 
-              <p>Default value of flagbyte is 255.</p><div class="example"><a name="idp1139"></a><p class="title"><b>Example 5.49. bigfile.asm</b></p><div class="example-contents">
+              <p>Default value of flagbyte is 255.</p><div class="example"><a name="idp1120"></a><p class="title"><b>Example 5.47. bigfile.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    EMPTYTAP screen.tap
@@ -1771,7 +1750,7 @@ START  .... ;something code
             </dd><dt><span class="term"><a name="po_undefine"></a>UNDEFINE &lt;id&gt;</span></dt><dd>
               <p>Removes the identifier defined by <a class="link" href="#po_define">DEFINE</a></p>
 
-              <div class="example"><a name="idp1156"></a><p class="title"><b>Example 5.50. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1137"></a><p class="title"><b>Example 5.48. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEFINE Release 1
@@ -1800,7 +1779,7 @@ START  .... ;something code
               <p>Synonym of <a class="link" href="#po_ent">ENT</a>.</p>
             </dd><dt><span class="term"><a name="po_word"></a>WORD &lt;words&gt;</span></dt><dd>
               <p>Defines a word. Values should be between -32787 and
-              65536.</p><div class="example"><a name="idp1171"></a><p class="title"><b>Example 5.51. </b></p><div class="example-contents">
+              65536.</p><div class="example"><a name="idp1152"></a><p class="title"><b>Example 5.49. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    WORD 4000h,0d000h
@@ -1825,7 +1804,7 @@ START  .... ;something code
               <p>The condition is true if there is an id defined. These are
               NOT labels.</p>
 
-              <div class="example"><a name="idp1195"></a><p class="title"><b>Example 5.52. Example</b></p><div class="example-contents">
+              <div class="example"><a name="idp1176"></a><p class="title"><b>Example 5.50. Example</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    IFDEF MSX_LEAN_AND_MEAN
@@ -1838,7 +1817,7 @@ START  .... ;something code
               <p>The condition is true if there isn't an id defined. These
               are NOT labels.</p>
 
-              <div class="example"><a name="idp1205"></a><p class="title"><b>Example 5.53. Example</b></p><div class="example-contents">
+              <div class="example"><a name="idp1186"></a><p class="title"><b>Example 5.51. Example</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">1   IN A,(0C4H)
@@ -1852,7 +1831,7 @@ START  .... ;something code
               in the code. You can create libraries of useful functions using
               IFUSED pseudo-op</p>
 
-              <div class="example"><a name="idp1215"></a><p class="title"><b>Example 5.54. Example</b></p><div class="example-contents">
+              <div class="example"><a name="idp1196"></a><p class="title"><b>Example 5.52. Example</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT "TEST.OUT"
@@ -1911,7 +1890,7 @@ LABEL5:
       <p>The MACRO pseudo-op defines a macro. It should be followed by the
       name of the macro, optionally followed by the parameters. The following
       lines will be stored as the macro-body until an ENDM pseudo-op is
-      encountered. Macro's have to be defined before their use.</p><div class="example"><a name="idp1239"></a><p class="title"><b>Example 5.55. Macro without parameters</b></p><div class="example-contents">
+      encountered. Macro's have to be defined before their use.</p><div class="example"><a name="idp1220"></a><p class="title"><b>Example 5.53. Macro without parameters</b></p><div class="example-contents">
           
 
           <pre class="programlisting">  MACRO ADD_HL_A
@@ -1924,7 +1903,7 @@ LABEL5:
         </div></div><p><br class="example-break"></p>
 
       <p>Labels in a macro starting with a dot are local to each macro
-      expansion.</p><div class="example"><a name="idp1244"></a><p class="title"><b>Example 5.56. A macro with parameters</b></p><div class="example-contents">
+      expansion.</p><div class="example"><a name="idp1225"></a><p class="title"><b>Example 5.54. A macro with parameters</b></p><div class="example-contents">
           
 
           <pre class="programlisting">  MACRO WAVEOUT reg, data
@@ -1940,7 +1919,7 @@ LABEL5:
   OUT (7EH),A
   LD A,17
   OUT (7FH),A</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1248"></a><p class="title"><b>Example 5.57. Another example</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1229"></a><p class="title"><b>Example 5.55. Another example</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    MACRO LOOP
@@ -1964,7 +1943,7 @@ Main
         </div></div><p><br class="example-break"></p>
 
       <p>Angle brackets can be used when the arguments contain
-      commas.</p><div class="example"><a name="idp1253"></a><p class="title"><b>Example 5.58. </b></p><div class="example-contents">
+      commas.</p><div class="example"><a name="idp1234"></a><p class="title"><b>Example 5.56. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">    MACRO UseLess data
@@ -2066,7 +2045,7 @@ Main
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp34"></a>Examples</h2></div></div></div>
       
 
-      <div class="example"><a name="idp1319"></a><p class="title"><b>Example 6.1. </b></p><div class="example-contents">
+      <div class="example"><a name="idp1300"></a><p class="title"><b>Example 6.1. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SCOLOR
@@ -2081,7 +2060,7 @@ BLUE	BYTE 6
 SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1325"></a><p class="title"><b>Example 6.2. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1306"></a><p class="title"><b>Example 6.2. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SDOT
@@ -2101,7 +2080,7 @@ SDOT.C.RED	EQU 2 ; offset
 SDOT.C.GREEN	EQU 3 ; offset
 SDOT.C.BLUE	EQU 4 ; offset
 </pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1331"></a><p class="title"><b>Example 6.3. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1312"></a><p class="title"><b>Example 6.3. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SPOS,4
@@ -2117,7 +2096,7 @@ AD	WORD
 SPOS.X	EQU  4 ; offset
 SPOS.Y	EQU  6 ; offset
 SPOS.AD	EQU  8 ; offset</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1337"></a><p class="title"><b>Example 6.4. </b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1318"></a><p class="title"><b>Example 6.4. </b></p><div class="example-contents">
           
 
           <p>When a structure is defined it is possible to declare labels
@@ -2174,7 +2153,7 @@ COLOR.BLUE  BYTE 6
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp37"></a>How to use?</h2></div></div></div>
       
 
-      <p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a name="idp1363"></a><p class="title"><b>Example 7.1. Hello World!</b></p><div class="example-contents">
+      <p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a name="idp1344"></a><p class="title"><b>Example 7.1. Hello World!</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    LUA
@@ -2350,7 +2329,7 @@ COLOR.BLUE  BYTE 6
 
       <p></p>
 
-      <div class="example"><a name="idp1595"></a><p class="title"><b>Example 7.2. Variables doesn't clear in new passes of the compiler</b></p><div class="example-contents">
+      <div class="example"><a name="idp1576"></a><p class="title"><b>Example 7.2. Variables doesn't clear in new passes of the compiler</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    LUA PASS1
@@ -2367,7 +2346,7 @@ COLOR.BLUE  BYTE 6
        print (v)
 -- out to console: 2
     ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1599"></a><p class="title"><b>Example 7.3. To generate some code you need to generate it in all
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1580"></a><p class="title"><b>Example 7.3. To generate some code you need to generate it in all
           passes</b></p><div class="example-contents">
           
 
@@ -2381,7 +2360,7 @@ COLOR.BLUE  BYTE 6
         _pl(".savesp: LD SP,0")
         _pc("RET")
     ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1603"></a><p class="title"><b>Example 7.4. Declare function and use it</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1584"></a><p class="title"><b>Example 7.4. Declare function and use it</b></p><div class="example-contents">
           
 
           <pre class="programlisting">     LUA
@@ -2404,7 +2383,7 @@ COLOR.BLUE  BYTE 6
      LUA
          savetape_mytype("tapefiles/myprogram.tape", _c("StartGameLabel"))
      ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1607"></a><p class="title"><b>Example 7.5. Simple sample :)</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp1588"></a><p class="title"><b>Example 7.5. Simple sample :)</b></p><div class="example-contents">
           
 
           <pre class="programlisting">	LUA

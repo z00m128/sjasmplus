@@ -112,22 +112,6 @@ int NeedDEFL() {
 	return 0;
 }
 
-int NeedField() {
-	char* olp = lp;
-	SkipBlanks();
-	if (*lp == '#') {
-		++lp; return 1;
-	}
-	if (*lp == '.') {
-		++lp;
-	}
-	if (cmphstr(lp, "field")) {
-		return 1;
-	}
-	lp = olp;
-	return 0;
-}
-
 int comma(char*& p) {
 	SkipBlanks(p);
 	if (*p != ',') return 0;

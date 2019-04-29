@@ -194,6 +194,7 @@
 - [may break old sources] ZXSPECTRUM128 based devices have sysvars and
   stack set up as in "USR 0" mode (ZXSPECTRUM48 system variables and
   default stack content).
+- [may break old sources] MAP+FIELD directives removed (STRUCT is better and working)
 - <link linkend="po_mmu">MMU</link> directive (fusing SLOT + PAGE and extending them)
 - <link linkend="po_savedev">SAVEDEV</link> directive (similar to SAVEBIN)
 - INCBIN: support for negative offset/length values, support for MMU wrapping
@@ -1908,28 +1909,6 @@ Kip=3</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_field" />FIELD</term>
-
-            <listitem>
-              <para>To give a label the value of the current map counter.
-              Afterwards the map counter is increment by the given amount. '#'
-              May be used instead of 'FIELD'. With map and field it is
-              possible to create structure-like data structures. With '##' it
-              is possible to align the map counter.<example>
-                  <title></title>
-
-                  <para><programlisting>    MAP 8
-Label # 2     ; Label=8
-Kip   # 3     ; Kip=10
-Kop   #       ; Kop=13
-Kop2  # 1     ; Kop2=13
-     ##       ; align map address (align 4 is default)
-Kop3  # 6     ; Kop3=16</programlisting></para>
-                </example></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><anchor id="po_fpos" />FPOS &lt;position&gt;</term>
 
             <listitem>
@@ -2104,19 +2083,6 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
         _pl("LABEL LD A,10")
         _pc("RET")
     ENDLUA</programlisting></para>
-                </example></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><anchor id="po_map" />MAP &lt;address&gt;</term>
-
-            <listitem>
-              <para>Set the map counter to the specified value. See <link
-              linkend="po_field">FIELD</link> for an example.<example>
-                  <title></title>
-
-                  <para><programlisting>    MAP 5</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>

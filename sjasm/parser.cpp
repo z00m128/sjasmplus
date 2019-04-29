@@ -548,7 +548,7 @@ void ParseLabel() {
 	SkipBlanks();
 	IsLabelNotFound = 0;
 	if (isdigit(*tp)) {
-		if (NeedEQU() || NeedDEFL() || NeedField()) {
+		if (NeedEQU() || NeedDEFL()) {
 			Error("Number labels only allowed as address labels");
 			return;
 		}
@@ -564,13 +564,6 @@ void ParseLabel() {
 				val = 0;
 			}
 			if (IsLabelNotFound) Error("Forward reference", NULL, EARLY);
-		} else if (NeedField()) {
-			aint nv;
-			val = AddressOfMAP;
-			if (ParseExpressionNoSyntaxError(lp, nv)) AddressOfMAP += nv;
-			if (IsLabelNotFound) {
-				Error("Forward reference", NULL, EARLY);
-			}
 		} else {
 			int gl = 0;
 			char* p = lp,* n;

@@ -41,7 +41,6 @@ int SkipBlanks();
 void SkipToEol(char*& p);
 int NeedEQU();
 int NeedDEFL();
-int NeedField();
 char* GetID(char*& p);
 void ResetGrowSubId();
 char* GrowSubId(char* & p);
