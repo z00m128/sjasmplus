@@ -187,7 +187,7 @@
   "device". To work with "device" memory (savesna/savetap/...) you
   must select the device (and slot and pages) before producing machine
   code which you want to work with (SAVESNA/SAVETAP/...).
-  Only if only-single DEVICE is used in whole source batch, then the setting
+  If only single DEVICE is used in whole source batch, then the setting
   is "global" and will be applied to all lines of source (in 2nd+ pass).
 - [may break old sources] ZXSPECTRUM128 based devices map into slots
   by default banks {7, 5, 2, 0}. (was {0, 5, 2, 7} in older versions)
@@ -195,6 +195,7 @@
   stack set up as in "USR 0" mode (ZXSPECTRUM48 system variables and
   default stack content).
 - <link linkend="po_mmu">MMU</link> directive (fusing SLOT + PAGE and extending them)
+- <link linkend="po_savedev">SAVEDEV</link> directive (similar to SAVEBIN)
 - INCBIN: support for negative offset/length values, support for MMU wrapping
 - INCBIN: support for file chunks of 64+ki size (usable with MMU)
 - Fixed: INCTRD offset, binary STDOUT on windows, SAVETRD/SAVEHOB filenames
@@ -2313,7 +2314,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the block of RAM.</para>
@@ -2325,6 +2326,32 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
     SAVEBIN "ram7.bin",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
     SAVEBIN "ram2.bin",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</programlisting></para>
                 </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_savedev" />SAVEDEV
+            &lt;filename&gt;,&lt;startPage&gt;,&lt;startOffset&gt;,&lt;length&gt;</term>
+
+            <listitem>
+              <para><emphasis>Works only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Like <link linkend="po_savebin">SAVEBIN</link>, saves the block of device RAM.</para>
+
+              <para>But it allows lengths over 64ki, and the offset value goes directly into device
+              virtual memory (where pages are allocated consecutively), ignoring current slot
+              "mapping". I.e. page=2,offset=0 will start saving data from page 2 at its beginning,
+              going through pages 3, 4, 5, ... until the requested length of data is saved.</para>
+
+              <para>The offset is not limited to page size, i.e. arguments page=1,offset=0x500 are equal
+              to arguments page=0,offset=0x4500 for ZXSPECTRUM128 device (has page size 0x4000).</para>
+
+              <example>
+                  <title></title>
+
+                  <programlisting>    DEVICE ZXSPECTRUM128 : SAVEDEV "fullram.bin",0,0,0x20000 ; save full 128kiB</programlisting>
+                </example>
             </listitem>
           </varlistentry>
 
