@@ -196,8 +196,8 @@ char nidtemp[LINEMAX], *nidsubp = nidtemp;
 
 char* GetID(char*& p) {
 	char* np = nidtemp;
-	if (SkipBlanks(p) || (!isalpha(*p) && *p != '_' && *p != '.')) return NULL;
-	while (islabchar(*p)) *np++ = *p++;
+	if (SkipBlanks(p) || (!isalpha((unsigned char) * p) && *p != '_' && *p != '.')) return NULL;
+	while (islabchar((unsigned char) * p)) *np++ = *p++;
 	*np = 0;
 	return nidtemp;
 }
@@ -238,13 +238,13 @@ char* getinstr(char*& p) {
 	/*char nid[LINEMAX],*/ char* np;
 	np = instrtemp;
 	SkipBlanks(p);
-	if (!isalpha(*p) && *p != '.') {
+	if (!isalpha((unsigned char) * p) && *p != '.') {
 		return 0;
 	} else {
 		*np = *p; ++p; ++np;
 	}
 	while (*p) {
-		if (!isalnum(*p) && *p != '_') {
+		if (!isalnum((unsigned char) * p) && *p != '_') {
 			break;
 		} /////////////////////////////////////
 		*np = *p; ++p; ++np;
@@ -304,7 +304,7 @@ int need(char*& p, char c) {
 
 int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3) {
 	//  SkipBlanks(p);
-	if (!isalpha(*p)) {
+	if (!isalpha((unsigned char) * p)) {
 		return 0;
 	}
 	if (cmphstr(p, c1)) {
@@ -354,10 +354,10 @@ int getval(int p) {
 	case '9':
 		return p - '0';
 	default:
-		if (isupper(p)) {
+		if (isupper((unsigned char)p)) {
 			return p - 'A' + 10;
 		}
-		if (islower(p)) {
+		if (islower((unsigned char)p)) {
 			return p - 'a' + 10;
 		}
 		return 200;
@@ -772,7 +772,7 @@ EDelimiterType GetDelimiterOfLastFileName() {
 }
 
 int islabchar(char p) {
-	if (isalnum(p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
+	if (isalnum((unsigned char)p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
 		return 1;
 	}
 	return 0;
