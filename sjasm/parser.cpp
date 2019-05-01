@@ -61,11 +61,11 @@ int ParseExpPrim(char*& p, aint& nval) {
 	  	nval = (aint) (MemGetByte(nval) + (MemGetByte(nval + 1) << 8));
 
 	  	return 1;
-	} else if (isdigit(*p) || (*p == '#' && isalnum(*(p + 1))) || (*p == '$' && isalnum(*(p + 1))) || *p == '%') {
+	} else if (isdigit((unsigned char) * p) || (*p == '#' && isalnum((unsigned char) * (p + 1))) || (*p == '$' && isalnum((unsigned char) * (p + 1))) || *p == '%') {
 	  	res = GetConstant(p, nval);
-	} else if (isalpha(*p) || *p == '_' || *p == '.' || *p == '@') {
+	} else if (isalpha((unsigned char) * p) || *p == '_' || *p == '.' || *p == '@') {
 	  	res = GetLabelValue(p, nval);
-	} else if (*p == '?' && (isalpha(*(p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
+	} else if (*p == '?' && (isalpha((unsigned char) * (p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
 	  	++p;
 		res = GetLabelValue(p, nval);
 	} else if (DeviceID && *p == '$' && *(p + 1) == '$') {
@@ -435,7 +435,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			continue;
 		}
 
-		if (!isalpha(*lp) && *lp != '_') {
+		if (!isalpha((unsigned char) * lp) && *lp != '_') {
 			*rp++ = *lp++;
 			continue;
 		}
@@ -547,7 +547,7 @@ void ParseLabel() {
 	tp = temp;
 	SkipBlanks();
 	IsLabelNotFound = 0;
-	if (isdigit(*tp)) {
+	if (isdigit((unsigned char) * tp)) {
 		if (NeedEQU() || NeedDEFL()) {
 			Error("Number labels only allowed as address labels");
 			return;
@@ -770,7 +770,7 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 			 	++lp;
 			 }
 	tp = temp; SkipBlanks();
-	if (isdigit(*tp)) {
+	if (isdigit((unsigned char) * tp)) {
 		Error("[STRUCT] Number labels not allowed within structs"); return;
 	}
 	PreviousIsLabel = STRDUP(tp);
