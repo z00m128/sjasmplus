@@ -598,11 +598,11 @@ void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	if (FindDuplicate(name)) {
 		Error("Duplicate define", name);
 	}
-	defs[((unsigned char)*name)&127] = new CDefineTableEntry(name, value, nss, defs[((unsigned char)*name)&127]);
+	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }
 
 char* CDefineTable::Get(const char* name) {
-	CDefineTableEntry* p = defs[((unsigned char)*name)&127];
+	CDefineTableEntry* p = defs[(*name)&127];
 	while (p) {
 		if (!strcmp(name, p->name)) {
 			DefArrayList = p->nss;
@@ -615,7 +615,7 @@ char* CDefineTable::Get(const char* name) {
 }
 
 int CDefineTable::FindDuplicate(const char* name) {
-	CDefineTableEntry* p = defs[((unsigned char)*name)&127];
+	CDefineTableEntry* p = defs[(*name)&127];
 	while (p) {
 		if (!strcmp(name, p->name)) {
 			return 1;
@@ -626,7 +626,7 @@ int CDefineTable::FindDuplicate(const char* name) {
 }
 
 int CDefineTable::Replace(const char* name, const char* value) {
-	CDefineTableEntry* p = defs[((unsigned char)*name)&127];
+	CDefineTableEntry* p = defs[(*name)&127];
 	while (p) {
 		if (!strcmp(name, p->name)) {
 			delete[](p->value);
@@ -636,7 +636,7 @@ int CDefineTable::Replace(const char* name, const char* value) {
 		}
 		p = p->next;
 	}
-	defs[((unsigned char)*name)&127] = new CDefineTableEntry(name, value, 0, defs[((unsigned char)*name)&127]);
+	defs[(*name)&127] = new CDefineTableEntry(name, value, 0, defs[(*name)&127]);
 	return 1;
 }
 
@@ -647,12 +647,12 @@ int CDefineTable::Replace(const char* name, const int value) {
 }
 
 int CDefineTable::Remove(const char* name) {
-	CDefineTableEntry* p = defs[((unsigned char)*name)&127];
+	CDefineTableEntry* p = defs[(*name)&127];
 	CDefineTableEntry* p2 = NULL;
 	while (p) {
 		if (!strcmp(name, p->name)) {
 			// unchain the particular item
-			if (NULL == p2) defs[((unsigned char)*name)&127] = p->next;
+			if (NULL == p2) defs[(*name)&127] = p->next;
 			else			p2->next = p->next;
 			p->next = NULL;
 			// delete it
@@ -696,7 +696,7 @@ void CMacroDefineTable::setdefs(CDefineTableEntry* ndefs) {
 
 char* CMacroDefineTable::getverv(char* name) {
 	CDefineTableEntry* p = defs;
-	if (!used[((unsigned char)*name)&127]) return NULL;
+	if (!used[(*name)&127]) return NULL;
 	while (p) {
 		if (!strcmp(name, p->name)) return p->value;
 		p = p->next;
@@ -706,7 +706,7 @@ char* CMacroDefineTable::getverv(char* name) {
 
 int CMacroDefineTable::FindDuplicate(char* name) {
 	CDefineTableEntry* p = defs;
-	if (!used[((unsigned char)*name)&127]) {
+	if (!used[(*name)&127]) {
 		return 0;
 	}
 	while (p) {
@@ -759,7 +759,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 		Error("No enough memory!", NULL, FATAL);
 	}
 	macs = new CMacroTableEntry(macroname, macs);
-	used[((unsigned char)*macroname)&127] = 1;
+	used[(*macroname)&127] = 1;
 	SkipBlanks(p);
 	while (*p) {
 		if (!(n = GetID(p))) {
@@ -788,7 +788,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 
 int CMacroTable::Emit(char* naam, char*& p) {
 	// search for the desired macro
-	if (!used[((unsigned char)*naam)&127]) return 0;
+	if (!used[(*naam)&127]) return 0;
 	CMacroTableEntry* m = macs;
 	while (m && strcmp(naam, m->naam)) m = m->next;
 	if (!m) return 0;
@@ -1108,11 +1108,11 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 	if (FindDuplicate(sp)) {
 		Error("Duplicate structure name", naam, EARLY);
 	}
-	strs[((unsigned char)*sp)&127] = new CStructure(naam, sp, idx, 0, gl, strs[((unsigned char)*sp)&127]);
+	strs[(*sp)&127] = new CStructure(naam, sp, idx, 0, gl, strs[(*sp)&127]);
 	if (no) {
-		strs[((unsigned char)*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, SMEMBBLOCK));
+		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, SMEMBBLOCK));
 	}
-	return strs[((unsigned char)*sp)&127];
+	return strs[(*sp)&127];
 }
 
 CStructure* CStructureTable::zoek(const char* naam, int gl) {
@@ -1124,13 +1124,13 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
-	CStructure* p = strs[((unsigned char)*sp)&127];
+	CStructure* p = strs[(*sp)&127];
 	while (p) {
 		if (!strcmp(sp, p->id)) return p;
 		p = p->next;
 	}
 	if (gl || !ModuleName) return NULL;
-	sp += 1 + strlen(ModuleName); p = strs[((unsigned char)*sp)&127];
+	sp += 1 + strlen(ModuleName); p = strs[(*sp)&127];
 	while (p) {
 		if (!strcmp(sp, p->id)) return p;
 		p = p->next;
