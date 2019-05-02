@@ -1801,21 +1801,21 @@ void _lua_showerror() {
 	int ln;
 
 	// part from Error(...)
-	char *err = STRDUP(lua_tostring(LUA, -1));
+	char *err = STRDUP(lua_tostring(LUA, -1)), *lnp = err;
 	if (err == NULL) {
 		Error("No enough memory!", NULL, FATAL);
 	}
-	err += 18;
-	char *pos = strstr(err, ":");
-	*(pos++) = 0;
-	ln = atoi(err) + LuaLine;
+	while (*lnp != ':' || !isdigit((unsigned char) *(lnp+1))) lnp++;
+	char *msgp = strchr(++lnp, ':');
+	*(msgp++) = '\0';
+	ln = atoi(lnp) + LuaLine;
 
 	// print error and other actions
-	err = ErrorLine;
-	SPRINTF3(err, LINEMAX2, "%s(%d): error: [LUA]%s", filename, ln, pos);
+	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA]%s", filename, ln, msgp);
+	free(err);
 
-	if (!strchr(err, '\n')) {
-		STRCAT(err, LINEMAX2, "\n");
+	if (!strchr(ErrorLine, '\n')) {
+		STRCAT(ErrorLine, LINEMAX2, "\n");
 	}
 
 	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
