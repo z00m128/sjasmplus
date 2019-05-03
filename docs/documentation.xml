@@ -1815,11 +1815,12 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_end" />END</term>
+            <term><anchor id="po_end" />END [&lt;startaddress&gt;]</term>
 
             <listitem>
               <para>The assembler will stop at this point. The pseudo-op
-              END doesn't work in the beginning of line (even with --dirbol).</para>
+              END does NOT work in the beginning of line (even with --dirbol).
+              The optional argument is used by SAVESNA, SAVETAP and SAVENEX.</para>
             </listitem>
           </varlistentry>
 
@@ -2342,13 +2343,25 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savesna" />SAVESNA &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
+            <term><anchor id="po_savenex" />SAVENEX &lt;command&gt; &lt;command arguments&gt;</term>
+
+            <listitem>
+              <para>Not available yet (work in progress).</para>
+
+              <para><emphasis>Works only in ZXSPECTRUMNEXT device emulation mode. See 
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_savesna" />SAVESNA &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the snapshot for emulators of ZX-Spectrum. <example>
+              <para>Save the snapshot for emulators of ZX-Spectrum. (If start address is omitted,
+              the one provided by <link linkend="po_end">END</link> is used)<example>
                   <title></title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM128
@@ -2394,7 +2407,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>SAVETAP &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
+            <term>SAVETAP &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
@@ -2402,7 +2415,9 @@ START  .... ;something code
 
               <para>Save the tape file for emulators of ZX-Spectrum as a
               "snapshot" of whole memory. Generated tape file supports the
-              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.<example>
+              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.
+              (If start address is omitted, the one provided by <link linkend=
+              "po_end">END</link> is used)<example>
                   <title></title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM48
