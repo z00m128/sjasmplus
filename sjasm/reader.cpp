@@ -112,22 +112,6 @@ int NeedDEFL() {
 	return 0;
 }
 
-int NeedField() {
-	char* olp = lp;
-	SkipBlanks();
-	if (*lp == '#') {
-		++lp; return 1;
-	}
-	if (*lp == '.') {
-		++lp;
-	}
-	if (cmphstr(lp, "field")) {
-		return 1;
-	}
-	lp = olp;
-	return 0;
-}
-
 int comma(char*& p) {
 	SkipBlanks(p);
 	if (*p != ',') return 0;
@@ -211,21 +195,10 @@ char* getparen(char* p) {
 char nidtemp[LINEMAX], *nidsubp = nidtemp;
 
 char* GetID(char*& p) {
-	/*char nid[LINEMAX],*/ char* np;
-	np = nidtemp;
-	SkipBlanks(p);
-	//if (!isalpha(*p) && *p!='_') return 0;
-	if (*p && !isalpha(*p) && *p != '_' && *p != '.') {
-		return 0;
-	}
-	while (*p) {
-		if (!isalnum(*p) && *p != '_' && *p != '.' && *p != '?' && *p != '!' && *p != '#' && *p != '@') {
-			break;
-		}
-		*np = *p; ++p; ++np;
-	}
+	char* np = nidtemp;
+	if (SkipBlanks(p) || (!isalpha((unsigned char) * p) && *p != '_' && *p != '.')) return NULL;
+	while (islabchar((unsigned char) * p)) *np++ = *p++;
 	*np = 0;
-	/*return STRDUP(nid);*/
 	return nidtemp;
 }
 
@@ -265,13 +238,13 @@ char* getinstr(char*& p) {
 	/*char nid[LINEMAX],*/ char* np;
 	np = instrtemp;
 	SkipBlanks(p);
-	if (!isalpha(*p) && *p != '.') {
+	if (!isalpha((unsigned char) * p) && *p != '.') {
 		return 0;
 	} else {
 		*np = *p; ++p; ++np;
 	}
 	while (*p) {
-		if (!isalnum(*p) && *p != '_') {
+		if (!isalnum((unsigned char) * p) && *p != '_') {
 			break;
 		} /////////////////////////////////////
 		*np = *p; ++p; ++np;
@@ -331,7 +304,7 @@ int need(char*& p, char c) {
 
 int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3) {
 	//  SkipBlanks(p);
-	if (!isalpha(*p)) {
+	if (!isalpha((unsigned char) * p)) {
 		return 0;
 	}
 	if (cmphstr(p, c1)) {
@@ -381,10 +354,10 @@ int getval(int p) {
 	case '9':
 		return p - '0';
 	default:
-		if (isupper(p)) {
+		if (isupper((unsigned char)p)) {
 			return p - 'A' + 10;
 		}
-		if (islower(p)) {
+		if (islower((unsigned char)p)) {
 			return p - 'a' + 10;
 		}
 		return 200;
@@ -416,17 +389,18 @@ bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const
 	const int base = 1<<shiftBase;
 	const aint overflowMask = (~0UL)<<(32-shiftBase);
 	while (p < pend) {
-		if (0 == *p || !isalnum(*p)) {
+		const char charDigit = *p++;
+		if ('\'' == charDigit && isalnum(*p)) continue;
+		if (0 == charDigit || !isalnum(charDigit)) {
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
 		}
-		if (base <= (digit = getval(*p))) {
+		if (base <= (digit = getval(charDigit))) {
 			getNumericValueLastErr = getNumericValueErr_digit;
 			break;
 		}
 		if (val & overflowMask) getNumericValueLastErr = getNumericValueErr_overflow;
 		val = (val<<shiftBase) + digit;
-		++p;
 	}
 	val &= 0xFFFFFFFFUL;
 	return (NULL == getNumericValueLastErr);
@@ -442,18 +416,19 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 	}
 	aint digit;
 	while (p < pend) {
-		if (0 == *p || !isalnum(*p)) {
+		const char charDigit = *p++;
+		if ('\'' == charDigit && isalnum(*p)) continue;
+		if (0 == charDigit || !isalnum(charDigit)) {
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
 		}
-		if (base <= (digit = getval(*p))) {
+		if (base <= (digit = getval(charDigit))) {
 			getNumericValueLastErr = getNumericValueErr_digit;
 			break;
 		}
 		const unsigned long oval = static_cast<unsigned long>(val)&0xFFFFFFFFUL;
 		val = (val * base) + digit;
 		if (static_cast<unsigned long>(val&0xFFFFFFFFUL) < oval) getNumericValueLastErr = getNumericValueErr_overflow;
-		++p;
 	}
 	val &= 0xFFFFFFFFUL;
 	return (NULL == getNumericValueLastErr);
@@ -466,7 +441,12 @@ int GetConstant(char*& op, aint& val) {
 	// the input string has been already detected as numeric literal by ParseExpPrim (assert)
 	if (!isdigit(*op) && '#' != *op && '$' != *op && '%' != *op) ExitASM(32);
 #endif
-	// check if the format is defined by prefix (#, $, %, 0x, 0X)
+	// find end of the numeric literal (pointer is beyond last alfa/digit character
+	char* pend = op;
+	if ('#' == *pend || '$' == *pend || '%' == *pend) ++pend;
+	while (isalnum(*pend) || ('\'' == *pend && isalnum(pend[1]))) ++pend;
+	char* const hardEnd = pend;
+	// check if the format is defined by prefix (#, $, %, 0x, 0X, 0b, 0B, 0q, 0Q)
 	char* p = op;
 	int shiftBase = 0, base = 0;
 	if ('#' == *p || '$' == *p) {
@@ -475,14 +455,16 @@ int GetConstant(char*& op, aint& val) {
 	} else if ('0' == p[0] && 'x' == (p[1]|0x20)) {
 		shiftBase = 4;
 		p += 2;
+	} else if ('0' == p[0] && 'b' == (p[1]|0x20) && 'h' != (pend[-1]|0x20) ) {
+		shiftBase = 1;		// string 0b800h is hexadecimal, not binary (legacy compatibility)
+		p += 2;
+	} else if ('0' == p[0] && 'q' == (p[1]|0x20)) {
+		shiftBase = 3;
+		p += 2;
 	} else if ('%' == *p) {
 		shiftBase = 1;
 		++p;
 	}
-	// find end of the numeric literal (pointer is beyond last alfa/digit character
-	char* pend = p;
-	while (isalnum(*pend)) ++pend;
-	char* const hardEnd = pend;
 	// if the base is still undecided, check for suffix format specifier
 	if (0 == shiftBase) {
 		switch (pend[-1]|0x20) {
@@ -495,6 +477,10 @@ int GetConstant(char*& op, aint& val) {
 				base = 10;
 				break;
 		}
+	}
+	if ('\'' == *p || '\'' == pend[-1]) {	// digit-group tick can't be first/last digit
+		Error(getNumericValueErr_no_digit, op, SUPPRESS);
+		return 0;
 	}
 	// parse the number into value
 	if (0 < shiftBase) {
@@ -773,7 +759,7 @@ char* GetFileName(char*& p, bool convertslashes) {
 			++p;
 		} else {
 			const char delimiterTxt[2] = { deliE, 0 };
-			Error("No closing delimiter", delimiterTxt, EARLY);
+			Error("No closing delimiter", delimiterTxt, SUPPRESS);
 		}
 	}
 	SkipBlanks(p);			// skip blanks any way
@@ -786,7 +772,7 @@ EDelimiterType GetDelimiterOfLastFileName() {
 }
 
 int islabchar(char p) {
-	if (isalnum(p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
+	if (isalnum((unsigned char)p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
 		return 1;
 	}
 	return 0;

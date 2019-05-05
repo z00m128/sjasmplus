@@ -64,9 +64,25 @@ long GetTickCount() {
 	gettimeofday(tv1, 0);
 	return tv1->tv_usec / 1000;
 }
+
+#endif	// #ifndef WIN32
+
+#endif	// #if !defined (_MSC_VER)
+
+#ifdef _WIN32
+#include <fcntl.h>
+#include <io.h>
 #endif
 
+void switchStdOutIntoBinaryMode() {
+#ifdef __CYGWIN__
+	setmode(1, O_BINARY);
+#elif _WIN32
+	_setmode(1, _O_BINARY);
+#else
+	// nothing on systems with no text-vs-binary mode
 #endif
+}
 
 #ifdef USE_LUA
 

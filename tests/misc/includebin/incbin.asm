@@ -12,13 +12,15 @@
     INCBIN "incbin/incbin.bin"  ,  ,  128
     INCBIN "incbin/incbin.bin"  ,  128  ,  64
     INCBIN "incbin/incbin.bin"  ,  192
-    ; = 3x256 = 768B output
+    ; = 3x256 = 768B output so far
 
-    ; Exercise (some) error/warning states of INCBIN (others are type FATAL, PITA to test)
-    INCBIN "incbin/incbin.bin",-1
-    INCBIN "incbin/incbin.bin",,-1
-    INCBIN "incbin/incbin.bin",,0
-    INCBIN "incbin/incbin.bin",256
-    INCBIN "incbin/incbin.bin",123,0
-
+    ; Exercise the new negative offset/length functionality
+    INCBIN "incbin/incbin.bin", -256, -64   ; first 192B
+    INCBIN "incbin/incbin.bin", -64         ; remaining 64B
+    ; = 4x256 = 1024B output so far
     OUTEND
+
+    ; Exercise (some) error/warning states of INCBIN
+    INCBIN "incbin/incbin.bin",,0           ; warning length=0
+    ;INCBIN "incbin/incbin.bin",,65537       ; warning max 64kiB - too short file to test this
+    // rest of errors are FATAL type, PITA to test

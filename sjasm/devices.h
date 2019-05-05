@@ -30,6 +30,60 @@ bool IsZXSpectrumDevice(char *name);
 int SetDevice(char *id);
 char* GetDeviceName();
 
+class CDevicePage {
+public:
+	CDevicePage(byte* memory, int32_t size, int number);
+	int32_t Size;
+	int Number;
+	byte* RAM;
+private:
+};
+
+class CDeviceSlot {
+public:
+	enum ESlotOptions { O_NONE, O_ERROR, O_WARNING, O_NEXT };
+
+	CDeviceSlot(int32_t adr, int32_t size);
+	~CDeviceSlot();
+	int32_t Address;
+	int32_t Size;
+	CDevicePage* Page;
+	ESlotOptions Option;
+private:
+};
+
+class CDevice {
+public:
+	// reset will reinitialize checks, "no emit" will do wrap-only (no machine byte emitted)
+	// "emit" will also report error/warning upon boundary, as the machine byte emit is expected
+	enum ECheckPageLevel{ CHECK_RESET, CHECK_NO_EMIT, CHECK_EMIT };
+
+	CDevice(const char* name, CDevice* parent);
+	~CDevice();
+	void AddSlot(int32_t adr, int32_t size);
+	void AddPage(byte* memory, int32_t size);
+	CDevicePage* GetPage(int);
+	CDeviceSlot* GetSlot(int);
+	void CheckPage(const ECheckPageLevel level);
+	bool SetSlot(int slotNumber);		// sets "current/active" slot
+	CDeviceSlot* GetCurrentSlot();		// returns "current/active" slot
+	int32_t GetMemoryOffset(int page, int32_t offset) const;
+	char* ID;
+	CDevice* Next;
+	int SlotsCount;
+	int PagesCount;
+	byte* Memory;
+private:
+	int CurrentSlot;
+	CDeviceSlot* Slots[256];
+	CDevicePage* Pages[256];
+
+	// variables for CheckPage logic
+	int previousSlotI;				// previous machine code write happened into this slot
+	CDeviceSlot::ESlotOptions previousSlotOpt;	// its option was
+	bool limitExceeded;				// true if limit exceeded was already reported
+};
+
 const unsigned char ZXSysVars[] = {
 	0x0D, 0x03, 0x20, 0x0D, 0xFF, 0x00, 0x1E, 0xF7, 
 	0x0D, 0x23, 0x02, 0x00, 0x00, 0x00, 0x16, 0x07, 

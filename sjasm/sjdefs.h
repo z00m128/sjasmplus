@@ -30,7 +30,7 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.12.0"
+#define VERSION "1.13.0"
 
 #define LASTPASS 3
 
@@ -85,7 +85,8 @@ extern "C" {
 #define LABTABSIZE 32768
 #define FUNTABSIZE 4096
 #endif
-#define aint long
+typedef long aint;
+typedef uint8_t byte;
 
 #ifndef PATH_MAX
 #define PATH_MAX	4096
@@ -106,6 +107,7 @@ extern "C" {
 #include "io_snapshots.h"
 #include "io_trd.h"
 #include "io_tape.h"
+#include "io_nex.h"
 #include "sjasm.h"
 
 #endif

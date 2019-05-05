@@ -1,0 +1,59 @@
+# file opened: savedevB.asm
+ 1    0000              ; future docs designed here:
+ 2    0000              ; SAVEDEV <filename>,<startPage>,<startOffset>,<length>
+ 3    0000              ;   Works only in real device emulation mode. See <link linkend="po_device">DEVICE</link>.
+ 4    0000              ;
+ 5    0000              ;   Like <link linkend="po_savebin">SAVEBIN</link>, saves the block of device RAM.
+ 6    0000              ;
+ 7    0000              ;   But it allows lengths over 64ki, and the offset value goes directly into device
+ 8    0000              ;   virtual memory (where pages are allocated consecutively), ignoring current slot
+ 9    0000              ;   "mapping". I.e. page=2,offset=0 will start saving data from page 2 at its beginning,
+10    0000              ;   going through pages 3, 4, 5, ... until the requested length of data is saved.
+11    0000              ;
+12    0000              ;   The offset is not limited to page size, i.e. arguments page=1,offset=0x500 are equal
+13    0000              ;   to arguments page=0,offset=0x4500 for ZXSPECTRUM128 device (has page size 0x4000).
+14    0000              ;
+15    0000                  DEVICE NONE
+savedevB.asm(16): error: SAVEDEV only allowed in real device emulation mode (See DEVICE)
+16    0000                  SAVEDEV "savedevB.bin",0,0,1
+17    0000                  DEVICE ZXSPECTRUM128
+18    0000                  ; test error messages of SAVEDEV - missing arguments
+savedevB.asm(19): error: Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>: SAVEDEV
+19    0000                  SAVEDEV
+savedevB.asm(20): error: Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>: SAVEDEV "savedevB.bin"
+20    0000                  SAVEDEV "savedevB.bin"
+savedevB.asm(21): error: Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>: SAVEDEV "savedevB.bin",
+21    0000                  SAVEDEV "savedevB.bin",
+savedevB.asm(22): error: Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>: SAVEDEV "savedevB.bin",0
+22    0000                  SAVEDEV "savedevB.bin",0
+savedevB.asm(23): error: Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>: SAVEDEV "savedevB.bin",0,
+23    0000                  SAVEDEV "savedevB.bin",0,
+savedevB.asm(24): error: Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>: SAVEDEV "savedevB.bin",0,0
+24    0000                  SAVEDEV "savedevB.bin",0,0
+savedevB.asm(25): error: Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>: SAVEDEV "savedevB.bin",0,0,
+25    0000                  SAVEDEV "savedevB.bin",0,0,
+26    0000
+27    0000                  ; test error messages of SAVEDEV - wrong arguments
+savedevB.asm(28): error: [SAVEDEV] page number is out of range: -1
+28    0000                  SAVEDEV "savedevB.bin",-1,0,1      ; wrong page
+savedevB.asm(29): error: [SAVEDEV] page number is out of range: 8
+29    0000                  SAVEDEV "savedevB.bin",8,0,1       ; wrong page
+savedevB.asm(30): warning: [SAVEDEV] zero length requested
+30    0000                  SAVEDEV "savedevB.bin",0,0,0       ; should be just warning about zero length (no file)
+savedevB.asm(31): error: [SAVEDEV] calculated start address is out of range: -1
+31    0000                  SAVEDEV "savedevB.bin",0,-1,0      ; negative offset
+savedevB.asm(32): error: [SAVEDEV] calculated start address is out of range: -1
+32    0000                  SAVEDEV "savedevB.bin",1,-0x4001,0 ; negative offset
+savedevB.asm(33): error: [SAVEDEV] calculated start address is out of range: 131072
+33    0000                  SAVEDEV "savedevB.bin",0,0x20000,0 ; offset beyond ZX128 memory
+savedevB.asm(34): error: [SAVEDEV] calculated start address is out of range: 131072
+34    0000                  SAVEDEV "savedevB.bin",7,0x4000,0  ; offset beyond ZX128 memory
+savedevB.asm(35): error: [SAVEDEV] invalid end address (bad length?): 8
+35    0000                  SAVEDEV "savedevB.bin",0,9,-1      ; negative length
+savedevB.asm(36): error: [SAVEDEV] invalid end address (bad length?): 131073
+36    0000                  SAVEDEV "savedevB.bin",7,0x3FFF,2  ; length is +1 byte more than possible
+37    0000
+# file closed: savedevB.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -52,7 +52,7 @@ int ParseExpPrim(char*& p, aint& nval) {
 			Error("Address in {..} must be more than 4000h"); return 0;
 		} */
 		if (nval > 0xFFFE) {
-			Error("Address in {..} must be less than FFFEh"); return 0;
+			Error("Address in {..} must be less than FFFFh"); return 0;
 		}
 		if (!need(p, '}')) {
 			Error("'}' expected"); return 0;
@@ -61,11 +61,11 @@ int ParseExpPrim(char*& p, aint& nval) {
 	  	nval = (aint) (MemGetByte(nval) + (MemGetByte(nval + 1) << 8));
 
 	  	return 1;
-	} else if (isdigit(*p) || (*p == '#' && isalnum(*(p + 1))) || (*p == '$' && isalnum(*(p + 1))) || *p == '%') {
+	} else if (isdigit((unsigned char) * p) || (*p == '#' && isalnum((unsigned char) * (p + 1))) || (*p == '$' && isalnum((unsigned char) * (p + 1))) || *p == '%') {
 	  	res = GetConstant(p, nval);
-	} else if (isalpha(*p) || *p == '_' || *p == '.' || *p == '@') {
+	} else if (isalpha((unsigned char) * p) || *p == '_' || *p == '.' || *p == '@') {
 	  	res = GetLabelValue(p, nval);
-	} else if (*p == '?' && (isalpha(*(p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
+	} else if (*p == '?' && (isalpha((unsigned char) * (p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
 	  	++p;
 		res = GetLabelValue(p, nval);
 	} else if (DeviceID && *p == '$' && *(p + 1) == '$') {
@@ -391,8 +391,11 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
 	char* rp = nl,* nid,* kp,* ver;
 	bool isPrevDefDir, isCurrDefDir = false;	// to remember if one of DEFINE-related directives was previous word
+	bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 	while (*lp) {
 		const char c1 = lp[0], c2 = lp[1];
+		afterNonAlphaNum = afterNonAlphaNumNext;
+		afterNonAlphaNumNext = !isalnum(c1);
 		if (c1 == '/' && c2 == '*') {	// block-comment local beginning (++block_nesting)
 			lp += 2;
 			++comlin;
@@ -416,17 +419,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		// single line comments -> finish
 		if (c1 == ';' || (c1 == '/' && c2 == '/')) break;
 
-		// detect "af'" register, as that hurts string parsing
-		if (cmphstr(lp, "af'")) {		// convert it into plain "AF" (it's enough)
-			isPrevDefDir = isCurrDefDir;
-			isCurrDefDir = false;
-			*rp++ = 'a';
-			*rp++ = 'f';
-			continue;
-		}
-
 		// strings parsing
-		if (c1 == '"' || c1 == '\'') {
+		if (afterNonAlphaNum && (c1 == '"' || c1 == '\'')) {
 			isPrevDefDir = isCurrDefDir;
 			isCurrDefDir = false;
 			*rp++ = *lp++;				// copy the string delimiter (" or ')
@@ -434,14 +428,14 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			// which sort of "accidentally" leads to correct final results
 			while (*lp && c1 != *lp) {	// until end of current string is reached (or line ends)
 				// inside double quotes the backslash should escape (anything after it)
-				if ('"' == c1 && '\\' == *lp) *rp++ = *lp++;	// copy escaping backslash extra
+				if ('"' == c1 && '\\' == *lp && lp[1]) *rp++ = *lp++;	// copy escaping backslash extra
 				*rp++ = *lp++;			// copy string character
 			}
 			if (*lp) *rp++ = *lp++;		// copy the ending string delimiter (" or ')
 			continue;
 		}
 
-		if (!isalpha(*lp) && *lp != '_') {
+		if (!isalpha((unsigned char) * lp) && *lp != '_') {
 			*rp++ = *lp++;
 			continue;
 		}
@@ -449,8 +443,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		// update previous/current word is define-related directive
 		isPrevDefDir = isCurrDefDir;
 		kp = lp;
-		isCurrDefDir = cmphstr(kp, "define") || cmphstr(kp, "undefine")
-			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef");
+		isCurrDefDir = afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine")
+			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
 
 		// The following loop is recursive-like macro/define substitution, the `*lp` here points
 		// at alphabet/underscore char, marking start of "id" string, and it will be parsed by
@@ -539,13 +533,10 @@ char* ReplaceDefine(char* lp) {
 }
 
 void ParseLabel() {
-	char* tp, temp[LINEMAX], * ttp;
-	aint val, oval;
-	if (White()) {
-		return;
-	}
+	if (White()) return;
 	if (Options::IsPseudoOpBOF && ParseDirective(true)) return;
-	tp = temp;
+	char temp[LINEMAX], * tp = temp, * ttp;
+	aint val, oval;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
 		*tp = *lp; ++tp; ++lp;
 	}
@@ -556,8 +547,8 @@ void ParseLabel() {
 	tp = temp;
 	SkipBlanks();
 	IsLabelNotFound = 0;
-	if (isdigit(*tp)) {
-		if (NeedEQU() || NeedDEFL() || NeedField()) {
+	if (isdigit((unsigned char) * tp)) {
+		if (NeedEQU() || NeedDEFL()) {
 			Error("Number labels only allowed as address labels");
 			return;
 		}
@@ -566,29 +557,13 @@ void ParseLabel() {
 			Error("Local-labels flow differs in this pass (missing/new local label or final pass source difference)");
 		}
 	} else {
-		bool IsDEFL = 0;
-		if (NeedEQU()) {
+		bool IsDEFL = false;
+		if ((IsDEFL = NeedDEFL()) || NeedEQU()) {
 			if (!ParseExpression(lp, val)) {
-				Error("Expression error", lp); val = 0;
+				Error("Expression error", lp);
+				val = 0;
 			}
-			if (IsLabelNotFound) {
-				Error("Forward reference", NULL, EARLY);
-			}
-		} else if (NeedDEFL()) {
-			if (!ParseExpression(lp, val)) {
-				Error("Expression error", lp); val = 0;
-			}
-			if (IsLabelNotFound) {
-				Error("Forward reference", NULL, EARLY);
-			}
-			IsDEFL = 1;
-		} else if (NeedField()) {
-			aint nv;
-			val = AddressOfMAP;
-			if (ParseExpressionNoSyntaxError(lp, nv)) AddressOfMAP += nv;
-			if (IsLabelNotFound) {
-				Error("Forward reference", NULL, EARLY);
-			}
+			if (IsLabelNotFound) Error("Forward reference", NULL, EARLY);
 		} else {
 			int gl = 0;
 			char* p = lp,* n;
@@ -608,10 +583,7 @@ void ParseLabel() {
 		}
 		// Copy label name to last parsed label variable
 		if (!IsDEFL) {
-			if (LastParsedLabel != NULL) {
-				free(LastParsedLabel);
-				LastParsedLabel = NULL;
-			}
+			if (LastParsedLabel != NULL) free(LastParsedLabel);
 			LastParsedLabel = STRDUP(tp);
 			if (LastParsedLabel == NULL) {
 				Error("No enough memory!", NULL, FATAL);
@@ -638,7 +610,6 @@ void ParseLabel() {
 		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL)) {
 			Error("Duplicate label", tp, EARLY);
 		}
-
 		delete[] tp;
 	}
 }
@@ -682,7 +653,6 @@ void ParseLine(bool parselabels) {
 		if (!dup.IsInWork) {
 			lp = line;
 			CStringsList* f = new CStringsList(lp);
-			f->sourceLine = CurrentSourceLine;
 			dup.Pointer->next = f;
 			dup.Pointer = f;
 #ifdef DEBUG_COUT_PARSE_LINE
@@ -706,6 +676,11 @@ void ParseLine(bool parselabels) {
 #ifdef DEBUG_COUT_PARSE_LINE
 	fprintf(stderr,"rdOut [%s]->[%s] %ld\n", line, lp, comlin);
 #endif
+
+	// update current address by memory wrapping, current page, etc... (before the label is defined)
+	if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
+	else			CheckRamLimitExceeded();
+	ListAddress = CurAddress;
 
 	if (!ConvertEncoding) {
 		unsigned char* lp2 = (unsigned char*) lp;
@@ -795,7 +770,7 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 			 	++lp;
 			 }
 	tp = temp; SkipBlanks();
-	if (isdigit(*tp)) {
+	if (isdigit((unsigned char) * tp)) {
 		Error("[STRUCT] Number labels not allowed within structs"); return;
 	}
 	PreviousIsLabel = STRDUP(tp);

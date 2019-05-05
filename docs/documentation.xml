@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.12.0 Documentation [2019-04-07]</title>
+  <title>SjASMPlus 1.13.0 Documentation [2019-05-05]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -149,7 +149,7 @@
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy</emphasis> -
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
 
@@ -180,10 +180,42 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>05.05.2019 - 1.13.0</term>
+
+            <listitem>
+              <synopsis>- [may break old sources] DEVICE: each assembling pass resets also
+  "device". To work with "device" memory (savesna/savetap/...) you
+  must select the device (and slot and pages) before producing machine
+  code which you want to work with (SAVESNA/SAVETAP/...).
+  If only single DEVICE is used in whole source batch, then the setting
+  is "global" and will be applied to all lines of source (in 2nd+ pass).
+- [may break old sources] ZXSPECTRUM128 based devices map into slots
+  by default banks {7, 5, 2, 0}. (was {0, 5, 2, 7} in older versions)
+- [may break old sources] ZXSPECTRUM128 based devices have sysvars and
+  stack set up as in "USR 0" mode (ZXSPECTRUM48 system variables and
+  default stack content).
+- [may break old sources] MAP+FIELD directives removed (STRUCT is better and working)
+- <link linkend="po_mmu">MMU</link> directive (fusing SLOT + PAGE and extending them)
+- <link linkend="po_savedev">SAVEDEV</link> directive (similar to SAVEBIN)
+- <link linkend="c_savenex">SAVENEX</link> directive (for ZX Spectrum Next)
+- INCBIN: support for negative offset/length values, support for MMU wrapping
+- INCBIN: support for file chunks of 64+ki size (usable with MMU)
+- Fixed: INCTRD offset, binary STDOUT on windows, SAVETRD/SAVEHOB filenames
+- Fixed: LUA used inside macros, LUA get_word, LUA error reporting
+- parser: added C++(like) <link linkend="s_numeric">numeric literals</link>
+- <link linkend="s_realdevice">ZXSPECTRUMNEXT device</link> added
+- refactoring of label/define implementation = less memory leaks, more correct
+  "label.mem_page" values, "Unreal" labels dump is more correct too
+- docs: now the CSS file is actually used, and default style modified a bit
+- new MACRO examples, syntax-highlight file for KDE5 editors (Kate)</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>07.04.2019 - 1.12.0</term>
 
             <listitem>
-              <para><programlisting>- Fixed parsing of expressions starting with string literal
+              <synopsis>- Fixed parsing of expressions starting with string literal
 - Fixed listing of DS directive with negative values, added value check warning
 - Fixed possible wrong indexing of some arrays internally
 - Fixed parsing of single-word instructions in colon-packed-no-space macros
@@ -196,7 +228,7 @@
 - THIS MAY BREAK SOME OLDER SOURCES, SORRY. Also the rules for substitutions
   will be in the future further modified and documented, to make them more
   intuitive and predictable, so there may be more breakage even later.
-- Adding fake instructions break and exit for CSpect emulator (--zxnext=cspect)</programlisting></para>
+- Adding fake instructions break and exit for CSpect emulator (--zxnext=cspect)</synopsis>
             </listitem>
           </varlistentry>
 
@@ -204,13 +236,13 @@
             <term>01.04.2019 - 1.11.1</term>
 
             <listitem>
-              <para><programlisting>- Fixed global labels in MACRO and in IFUSED/IFNUSED
+              <synopsis>- Fixed global labels in MACRO and in IFUSED/IFNUSED
 - Fixed nested IF-DUP-IF
 - Fixed local labels fail when amount of lines did change between passes
 - Fixed Makefile to build when path to project contains space
 - Added macro-example: turn "DJNZ ." into "DJNZ $" (to fix Zeus syntax source)
 - Added --msg=lst and --msg=lstlab options to produce listing file to STDERR
-- Added options to read input file from STDIN and output "raw" binary to STDOUT</programlisting></para>
+- Added options to read input file from STDIN and output "raw" binary to STDOUT</synopsis>
             </listitem>
           </varlistentry>
 
@@ -218,7 +250,7 @@
             <term>22.03.2019 - 1.11.0</term>
 
             <listitem>
-              <para><programlisting>- Added ZX Spectrum Next instructions support
+              <synopsis>- Added ZX Spectrum Next instructions support
 - Added --msg option, directives DG and DH
 - Changed listing layout to fixed-width type
 - Errors, Warnings and similar are now channeled to STDERR
@@ -242,7 +274,7 @@
 - Refactored options parser, instruction parser and Warning/Error system
 - C++14 standard is now required minimum (to compile sjasmplus sources)
 - Added automated-testing scripts, with 50+ tests
-- GitHub connected with <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus">Cirrus Continuous Integration</ulink> service</programlisting></para>
+- GitHub connected with <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus">Cirrus Continuous Integration</ulink> service</synopsis>
             </listitem>
           </varlistentry>
 
@@ -250,10 +282,10 @@
             <term>09.01.2019 - 1.10.4</term>
 
             <listitem>
-              <para><programlisting>- "Bytes lost" error reworked (and changed to warning)
+              <synopsis>- "Bytes lost" error reworked (and changed to warning)
 - Error/warning messages are displayed in last pass only (where possible)
 - Fixed 64k limit warnigs
-- BinIncFile reworked</programlisting></para>
+- BinIncFile reworked</synopsis>
             </listitem>
           </varlistentry>
 
@@ -261,10 +293,10 @@
             <term>26.11.2018 - 1.10.3</term>
 
             <listitem>
-              <para><programlisting>- Fixed macro issue with commas inside quotes
+              <synopsis>- Fixed macro issue with commas inside quotes
 - Fixed IFUSED and IFNUSED directives
 - Fixed STRUCT directive
-- Added support of register operands for operators HIGH and LOW</programlisting></para>
+- Added support of register operands for operators HIGH and LOW</synopsis>
             </listitem>
           </varlistentry>
 	      
@@ -272,8 +304,8 @@
             <term>09.08.2018 - 1.10.2</term>
 
             <listitem>
-              <para><programlisting>- Corrected bug in UNDEFINE directive
-- Corrected bug in parser line wrapping.</programlisting></para>
+              <synopsis>- Corrected bug in UNDEFINE directive
+- Corrected bug in parser line wrapping.</synopsis>
             </listitem>
           </varlistentry>	      
 
@@ -281,8 +313,8 @@
             <term>15.05.2018 - 1.10.1</term>
 
             <listitem>
-              <para><programlisting>- Corrected bug of OUTPUT directive (bugfix of flushing buffer).
-- Implemented TAPOUT/TAPEND and OUTEND directives.</programlisting></para>
+              <synopsis>- Corrected bug of OUTPUT directive (bugfix of flushing buffer).
+- Implemented TAPOUT/TAPEND and OUTEND directives.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -290,7 +322,7 @@
             <term>06.05.2018 - 1.10.0</term>
 
             <listitem>
-              <para><programlisting>- Implemented full featured SAVETAP and EMPTYTAP directives.</programlisting></para>
+              <synopsis>- Implemented full featured SAVETAP and EMPTYTAP directives.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -298,7 +330,7 @@
             <term>07.09.2017 - 1.09</term>
 
             <listitem>
-              <para><programlisting>- -D commandline parameter added, inchob / incbin bugfix.</programlisting></para>
+              <synopsis>- -D commandline parameter added, inchob / incbin bugfix.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -306,7 +338,7 @@
             <term>23.12.2016 - 1.08</term>
 
             <listitem>
-              <para><programlisting>- compilation warnings cleanup, CMake installation method added.</programlisting></para>
+              <synopsis>- compilation warnings cleanup, CMake installation method added.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -314,7 +346,7 @@
             <term>11.10.2016 - 1.07 RC9</term>
 
             <listitem>
-              <para><programlisting>- some docs added and compilation warnings cleanup.</programlisting></para>
+              <synopsis>- some docs added and compilation warnings cleanup.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -322,7 +354,7 @@
             <term>05.05.2016 - 1.07 RC8</term>
 
             <listitem>
-              <para><programlisting>- new makefile, compilation errors fixed and some warnings cleanup.</programlisting></para>
+              <synopsis>- new makefile, compilation errors fixed and some warnings cleanup.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -330,8 +362,8 @@
             <term>03.04.2008 - 1.07 Stable</term>
 
             <listitem>
-              <para><programlisting>- Added new SAVETAP pseudo-op. It's support up to 1024kb ZX-Spectrum's RAM.
-- Added new --nofakes commandline parameter.</programlisting></para>
+              <synopsis>- Added new SAVETAP pseudo-op. It's support up to 1024kb ZX-Spectrum's RAM.
+- Added new --nofakes commandline parameter.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -339,10 +371,10 @@
             <term>02.04.2008 - 1.07 RC7</term>
 
             <listitem>
-              <para><programlisting>- Another fix of 48k SNA snapshots saving routine.
+              <synopsis>- Another fix of 48k SNA snapshots saving routine.
 - Added new UNDEFINE pseudo-op.
 - Added new IFUSED/IFNUSED pseudo-ops for labels (such IFDEF for defines).
-- Fixed labels list dump rountine (--lstlab command line parameter).</programlisting></para>
+- Fixed labels list dump rountine (--lstlab command line parameter).</synopsis>
             </listitem>
           </varlistentry>
 
@@ -350,11 +382,11 @@
             <term>27.03.2008 - 1.07 RC6</term>
 
             <listitem>
-              <para><programlisting>- Applied bugfix patches for SAVEHOB/SAVETRD pseudo-ops by Breeze.
+              <synopsis>- Applied bugfix patches for SAVEHOB/SAVETRD pseudo-ops by Breeze.
 - Fixed memory leak in line parsing routine.
 - Fixed 48k SNA snapshots saving routine.
 - Added missing INF instruction.
-- Fixed code parser's invalid addressing of temporary labels in macros.</programlisting></para>
+- Fixed code parser's invalid addressing of temporary labels in macros.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -362,11 +394,11 @@
             <term>31.05.2007 - 1.07 RC5bf</term>
 
             <listitem>
-              <para><programlisting>- Bugfix patches by Ric Hohne.
+              <synopsis>- Bugfix patches by Ric Hohne.
 - Important bugfix of memory leak.
 - Bugfix of strange crashes at several machines.
 - Added yet another sample for built-in LUA engine. See end of this file.
-- Added sources of CosmoCubes demo to the "examples" directory.</programlisting></para>
+- Added sources of CosmoCubes demo to the "examples" directory.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -374,9 +406,9 @@
             <term>13.05.2007 - 1.07 RC5</term>
 
             <listitem>
-              <para><programlisting>- ALIGN has new optional parameter.
+              <synopsis>- ALIGN has new optional parameter.
 - Corrected bug of RAM sizing.
-- Corrected bug of structures naming.</programlisting></para>
+- Corrected bug of structures naming.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -384,7 +416,7 @@
             <term>02.12.2006 - 1.07 RC4bf</term>
 
             <listitem>
-              <para><programlisting>- Corrected important bug in code generation functions of SjASMPlus.</programlisting></para>
+              <synopsis>- Corrected important bug in code generation functions of SjASMPlus.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -392,9 +424,9 @@
             <term>28.11.2006 - 1.07 RC4</term>
 
             <listitem>
-              <para><programlisting>- Corrected bug with SAVEBIN, SAVETRD and possible SAVESNA.
+              <synopsis>- Corrected bug with SAVEBIN, SAVETRD and possible SAVESNA.
 - Add Makefile to build under Linux, FreeBSD etc.
-</programlisting></para>
+</synopsis>
             </listitem>
           </varlistentry>
 
@@ -402,10 +434,9 @@
             <term>12.10.2006 - 1.07 RC3</term>
 
             <listitem>
-              <para><programlisting>- SAVESNA can save 48kb snapshots
+              <synopsis>- SAVESNA can save 48kb snapshots
 - Corrected DEFINE's bug.
-- Corrected bug of incorrect line numbering.
-</programlisting></para>
+- Corrected bug of incorrect line numbering.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -413,9 +444,9 @@
             <term>28.09.2006 - 1.07 RC2</term>
 
             <listitem>
-              <para><programlisting>- SAVESNA works and with device ZXSPECTRUM48
+              <synopsis>- SAVESNA works and with device ZXSPECTRUM48
 - Added new device PENTAGON128
-- In ZXSPECTRUM48 device and others attributes has black ink and white paper by default.</programlisting></para>
+- In ZXSPECTRUM48 device and others attributes has black ink and white paper by default.</synopsis>
             </listitem>
           </varlistentry>
 
@@ -423,8 +454,8 @@
             <term>23.09.2006 - 1.07 RC1bf</term>
 
             <listitem>
-              <para><programlisting>- Corrected bug with _ERRORS and _WARNINGS constants
-- Added error message, when SHELLEXEC program execution failed</programlisting></para>
+              <synopsis>- Corrected bug with _ERRORS and _WARNINGS constants
+- Added error message, when SHELLEXEC program execution failed</synopsis>
             </listitem>
           </varlistentry>
 
@@ -432,14 +463,14 @@
             <term>17.09.2006 - 1.07 RC1</term>
 
             <listitem>
-              <para><programlisting>- 3-pass design
+              <synopsis>- 3-pass design
 - Built-in Lua scripting engine
 - Changed command line keys
 - Documentation converted to HTML.
 - Added new directives: DEVICE, SLOT, SHELLEXEC
 - Added predefined constanst: _SJASMPLUS=1, _ERRORS and other
 - Changed output log format.
-- And many many more.</programlisting></para>
+- And many many more.</synopsis>
             </listitem>
           </varlistentry>
         </variablelist></para>
@@ -498,11 +529,11 @@
 
       <para>Usage:</para>
 
-      <para><emphasis>sjasmplus [options] sourcefile(s)</emphasis></para>
+      <synopsis>sjasmplus [options] sourcefile(s)</synopsis>
 
       <para>Option flags as follows:</para>
 
-      <para><programlisting>  -h or --help             Help information
+      <para><synopsis>  -h or --help             Help information
   --zxnext[=cspect]        Enable SpecNext Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
@@ -526,7 +557,7 @@
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions
-  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</programlisting></para>
+  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</synopsis></para>
     </section>
 
     <section>
@@ -663,21 +694,27 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
     <title>Constants, expressions and other features</title>
 
     <section>
-      <title>Numeric constants</title>
+      <title><anchor id="s_numeric" />Numeric constants</title>
 
       <para>Numeric constants should always start with a digit or $, # or %.
       The following formats are supported:</para>
 
       <para><programlisting>12     decimal
 12d    decimal
-0ch    hexadecimal
 0xc    hexadecimal
 $c     hexadecimal
 #c     hexadecimal
-1100b  binary
+0ch    hexadecimal
+0b1100 binary (v1.12.1)
 %1100  binary
+1100b  binary
+0q14   octal (v1.12.1)
 14q    octal
 14o    octal</programlisting></para>
+
+      <para>(v1.12.1) Optional single quotes(') may be inserted between the digits as a separator
+      (example: <computeroutput> ld a,%11'01'11'00 </computeroutput>).
+      They are ignored by the assembler.</para>
     </section>
 
     <section>
@@ -1069,7 +1106,9 @@ or    x or y   bitwise or
       SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST</link> and use special
       functions in <link linkend="c_lua_scripting">Lua scripts</link>.</para>
 
-      <para><example>
+      <para>If only single DEVICE is used in whole source batch, the device
+      becomes "global" and will affect also source before of the DEVICE.
+          <example>
           <title></title>
 
           <para><programlisting>    DEVICE ZXSPECTRUM128
@@ -1142,6 +1181,19 @@ StartProg:
             <listitem>
               <para>Same as russian clones ATM Turbo 2 and Pentagon 1024 SL.
               Has 64 RAM pages (0-63) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ZXSPECTRUMNEXT</term>
+
+            <listitem>
+              <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
+              RAM pages (0-223) totalling at 1.75MiB of memory. The default mapping
+              is similar to ZX128, paging in: {14, 15, 10, 11, 4, 5, 0, 1} pages.
+              The page 10 (bank 5) contains also ZX48 sysvars ("USR 0" mode) and
+              clear ULA screen. (SAVESNA works only in ZX48 and ZX128 modes, in
+              NEXT mode only SAVEBIN or saving specific TAP blocks work)</para>
             </listitem>
           </varlistentry>
         </variablelist></para>
@@ -1527,21 +1579,25 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
 
             <listitem>
               <para>Enables <link linkend="s_realdevice">real device emulation
-              mode</link> by it identifier.</para>
+              mode</link> by it identifier. If there is only single DEVICE directive
+              in whole source batch, it becomes "global" and the device affects all
+              lines of source, otherwise the DEVICE is applied for lines following it.</para>
 
               <para>Predefined devices' identifiers list:</para>
 
-              <para><programlisting> NONE ; off real device emulation mode
- ZXSPECTRUM48 ; ZX-Spectrum 48
- ZXSPECTRUM128 ; ZX-Spectrum 128
+              <synopsis> NONE ; off real device emulation mode
+ ZXSPECTRUM48  ; ZX-Spectrum 48 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
+ ZXSPECTRUM128 ; ZX-Spectrum 128 (like 48 with 8 pages, default map: 7, 5, 2, 0)
  ZXSPECTRUM256 ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
  ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
  ZXSPECTRUM1024
+ ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
+                ;                  (default map: 14, 15, 10, 11, 4, 5, 0, 1)
 
  ;disable:
    DEVICE NONE
  ;enable:
-   DEVICE ZXSPECTRUM128</programlisting></para>
+   DEVICE ZXSPECTRUM128</synopsis>
             </listitem>
           </varlistentry>
 
@@ -1569,7 +1625,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               a byte value. You can add spaces between pairs as you like. (since v1.11)<example>
                   <title></title>
                   <para><programlisting>    DH "0123456789ABCDEF"   ; eight bytes #01 #23 ...
-    DH "01 23  45 67"        ; four bytes #01 #23 #45 #67</programlisting></para>
+    DH "01 23  45 67"       ; four bytes #01 #23 #45 #67</programlisting></para>
               </example></para>
             </listitem>
           </varlistentry>
@@ -1585,7 +1641,9 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               <link linkend="po_unphase">UNPHASE</link>, <link
               linkend="po_dephase">DEPHASE</link> and <link
               linkend="po_endt">ENDT</link> are synonyms of <link
-              linkend="po_ent">ENT</link><example>
+              linkend="po_ent">ENT</link>. DISP blocks can NOT be nested, and to change
+              the displacement address within current DISP block use the ordinary ORG.
+              <example>
                   <title></title>
 
                   <para><programlisting>SCREEN EQU $4000
@@ -1617,9 +1675,10 @@ ENDOFPROG</programlisting></para>
 
               <para>Out to console a string of bytes. Each value should be
               between -129 and 256. Keys /D, /H and /A set format of output of
-              numbers:<programlisting>/D - out only in Decimal
+              numbers:<synopsis>/D - out only in Decimal
 /H - out only in Hexadecimal
-/A - out both in Hexadecimal and Decimal</programlisting><example>
+/A - out both in Hexadecimal and Decimal</synopsis>
+              <example>
                   <title></title>
 
                   <para><programlisting>    ORG 100h
@@ -1757,12 +1816,12 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_end" />END</term>
+            <term><anchor id="po_end" />END [&lt;startaddress&gt;]</term>
 
             <listitem>
               <para>The assembler will stop at this point. The pseudo-op
-              doesn't work in the beginning of line(with and without key
-              --dirbol).</para>
+              END does NOT work in the beginning of line (even with --dirbol).
+              The optional argument is used by SAVESNA, SAVETAP and SAVENEX.</para>
             </listitem>
           </varlistentry>
 
@@ -1852,28 +1911,6 @@ Kip=3</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_field" />FIELD</term>
-
-            <listitem>
-              <para>To give a label the value of the current map counter.
-              Afterwards the map counter is increment by the given amount. '#'
-              May be used instead of 'FIELD'. With map and field it is
-              possible to create structure-like data structures. With '##' it
-              is possible to align the map counter.<example>
-                  <title></title>
-
-                  <para><programlisting>    MAP 8
-Label # 2     ; Label=8
-Kip   # 3     ; Kip=10
-Kop   #       ; Kop=13
-Kop2  # 1     ; Kop2=13
-     ##       ; align map address (align 4 is default)
-Kop3  # 6     ; Kop3=16</programlisting></para>
-                </example></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><anchor id="po_fpos" />FPOS &lt;position&gt;</term>
 
             <listitem>
@@ -1910,12 +1947,14 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
 
             <listitem>
               <para>To include a binary file into the outputfile. The offset
-              and length are optional.<example>
+              and length are optional. Added in v1.12.1: if negative offset or length is provided,
+              it counts relatively from the end of the file.<example>
                   <title></title>
 
                   <para><programlisting>    INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
     INCBIN "rantab.com",3,256 ; include 256 bytes from offset 3
-    INCBIN gfx.scc ,7         ; note the space between the filename and the ',7' here :)</programlisting></para>
+    INCBIN gfx.scc ,,7        ; 7 bytes from offset 0 (unquoted filename must end with space)
+    INCBIN "48.rom",-768,-256 ; include (from 16kiB file) 512 bytes 15616..16127</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -2010,8 +2049,8 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
 
               <para>Save labels list in format:</para>
 
-              <para><programlisting>NN:ADDRESS LABELNAME</programlisting>
-              ,where NN is number of page of RAM</para>
+              <para><synopsis>NN:ADDRESS LABELNAME</synopsis>
+              where NN is number of RAM page and ADDRESS is truncated to 0000..3FFF range</para>
 
               <para><example>
                   <title></title>
@@ -2029,10 +2068,10 @@ Kop3  # 6     ; Kop3=16</programlisting></para>
               scripts. See more in the chapter "<link
               linkend="c_lua_scripting">Lua scripting</link>".</para>
 
-              <para>Parameter is optional. It may be:<programlisting>PASS1  -  interpret Lua script in first pass only.
-PASS2  -  interpret Lua script in second pass only.
-PASS3  -  interpret Lua script in third pass only. By default.
-ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</programlisting></para>
+              <para>Parameter is optional. It may be:<synopsis>PASS1   -  interpret Lua script in first pass only.
+PASS2   -  interpret Lua script in second pass only.
+PASS3   -  interpret Lua script in third pass only. By default.
+ALLPASS -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</synopsis></para>
 
               <para><example>
                   <title></title>
@@ -2051,23 +2090,46 @@ ALLPASS  -  interpret Lua script in all passes. It is need, if you generate some
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_map" />MAP &lt;address&gt;</term>
-
-            <listitem>
-              <para>Set the map counter to the specified value. See <link
-              linkend="po_field">FIELD</link> for an example.<example>
-                  <title></title>
-
-                  <para><programlisting>    MAP 5</programlisting></para>
-                </example></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><anchor id="po_memorymap" />MEMORYMAP</term>
 
             <listitem>
               <para>Not available yet.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_mmu" />MMU &lt;first slot number&gt; [&lt;last slot number&gt;|&lt;single slot option&gt;], &lt;page number&gt;</term>
+
+            <listitem>
+              <para>Maps memory page(s) to slot(s), similar to SLOT + PAGE combination, but allows
+              to set up whole range of consecutive slots (with consecutive memory pages). Or when
+              only single slot is specified, extra option can be used to extend particular slot
+              functionality. The slot behaviour will stay set in the current DEVICE until reset
+              by another MMU specifying same slot (even as part of range, that will clear the option
+              to "default").</para>
+
+              <para>Single slot option (default state is: no error/warning and no wrap = nothing special):
+                <synopsis>e = error on writing beyond last byte of slot
+w = warning on writing beyond last byte of slot
+n = wrap address back to start of slot, map next page</synopsis>
+                <example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM128 : LABELSLIST "po_mmu.lbl"  ; to check label pages
+    MMU 1 3, 5      ; maps slots 1, 2, 3 with pages 5, 6, 7
+    ORG 0xBFFF
+label1_p6: scf      ; last byte of page 6 (in slot 2)
+label2_p7: scf      ; first byte of page 7 (in slot 3)
+
+    MMU 3 e, 0      ; page 0 into slot 3, write beyond slot will cause error
+    ORG 0xFFFF
+    ld  a,1         ; error: Write outside of memory slot: 65536 (65536 = address outside)
+
+    MMU 3 n, 1      ; page 1 into slot 3, make it wrap + map next page automatically
+    ORG 0xFFFF      ; ! also the $ address was truncated by MMU from $10001 to $0001 !
+label3_p1: scf      ; last byte of page 1, then wrapping back to 0xC000 with page 2
+label4_p2: scf      ; first byte of page 2 at 0xC000</programlisting></para>
+                </example></para>
             </listitem>
           </varlistentry>
 
@@ -2100,10 +2162,13 @@ Kip                ; label Kip</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_org" />ORG &lt;address&gt;</term>
+            <term><anchor id="po_org" />ORG &lt;address&gt;[,&lt;page_number&gt;]</term>
 
             <listitem>
-              <para>Set the program counter to a specific address.<example>
+              <para>Set the program counter to a specific address. If the second argument is
+              provided, it will change memory page in the current slot, see
+              <link linkend="po_page">PAGE</link>.
+                  <example>
                   <title></title>
 
                   <para><programlisting>    ORG 100h ; or 0x100, or $100, or #100
@@ -2154,9 +2219,10 @@ Kip                ; label Kip</programlisting></para>
               <para>There are three possible output modes: truncate (overwrite
               existing files, this is the default), rewind (open and execute
               FPOS 0) and append (open and leave the file pointer at the end
-              of the file).<programlisting>OUTPUT &lt;filename&gt;,t  ; truncate (default)
+              of the file).<synopsis>OUTPUT &lt;filename&gt;,t  ; truncate (default)
 OUTPUT &lt;filename&gt;,r  ; rewind
-OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
+OUTPUT &lt;filename&gt;,a  ; append</synopsis>
+              <example>
                   <title>bigfile.asm</title>
 
                   <para><programlisting>    OUTPUT loader.com
@@ -2216,7 +2282,7 @@ OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
             &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the block of RAM.</para>
@@ -2228,6 +2294,32 @@ OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
     SAVEBIN "ram7.bin",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
     SAVEBIN "ram2.bin",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</programlisting></para>
                 </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_savedev" />SAVEDEV
+            &lt;filename&gt;,&lt;startPage&gt;,&lt;startOffset&gt;,&lt;length&gt;</term>
+
+            <listitem>
+              <para><emphasis>Works only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Like <link linkend="po_savebin">SAVEBIN</link>, saves the block of device RAM.</para>
+
+              <para>But it allows lengths over 64ki, and the offset value goes directly into device
+              virtual memory (where pages are allocated consecutively), ignoring current slot
+              "mapping". I.e. page=2,offset=0 will start saving data from page 2 at its beginning,
+              going through pages 3, 4, 5, ... until the requested length of data is saved.</para>
+
+              <para>The offset is not limited to page size, i.e. arguments page=1,offset=0x500 are equal
+              to arguments page=0,offset=0x4500 for ZXSPECTRUM128 device (has page size 0x4000).</para>
+
+              <example>
+                  <title></title>
+
+                  <programlisting>    DEVICE ZXSPECTRUM128 : SAVEDEV "fullram.bin",0,0,0x20000 ; save full 128kiB</programlisting>
+                </example>
             </listitem>
           </varlistentry>
 
@@ -2252,13 +2344,26 @@ OUTPUT &lt;filename&gt;,a  ; append</programlisting><example>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savesna" />SAVESNA &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
+            <term><anchor id="po_savenex" />SAVENEX &lt;command&gt; &lt;command arguments&gt;</term>
+
+            <listitem>
+              <para>Commands to build NEX file, for details check <link linkend="c_savenex">SAVENEX
+              </link> chapter.</para>
+
+              <para><emphasis>Works only in ZXSPECTRUMNEXT device emulation mode. See 
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_savesna" />SAVESNA &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the snapshot for emulators of ZX-Spectrum. <example>
+              <para>Save the snapshot for emulators of ZX-Spectrum. (If start address is omitted,
+              the one provided by <link linkend="po_end">END</link> is used)<example>
                   <title></title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM128
@@ -2304,7 +2409,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>SAVETAP &lt;filename&gt;,&lt;startadressofprogram&gt;</term>
+            <term>SAVETAP &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
@@ -2312,7 +2417,9 @@ START  .... ;something code
 
               <para>Save the tape file for emulators of ZX-Spectrum as a
               "snapshot" of whole memory. Generated tape file supports the
-              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.<example>
+              ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.
+              (If start address is omitted, the one provided by <link linkend=
+              "po_end">END</link> is used)<example>
                   <title></title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM48
@@ -2862,10 +2969,10 @@ BLUE	BYTE 6
 
           <para>This is identical to:</para>
 
-          <para><programlisting>SCOLOR		EQU 3 ; lenght
+          <synopsis>SCOLOR		EQU 3 ; lenght
 SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
-SCOLOR.BLUE	EQU 2 ; offset</programlisting></para>
+SCOLOR.BLUE	EQU 2 ; offset</synopsis>
         </example><example>
           <title></title>
 
@@ -2878,14 +2985,14 @@ C	SCOLOR 0,0,0 ; use new default values
 
           <para>This is identical to:</para>
 
-          <para><programlisting>SDOT		EQU 5 ; length
+          <synopsis>SDOT		EQU 5 ; length
 SDOT.X		EQU 0 ; offset
 SDOT.Y		EQU 1 ; offset
 SDOT.C		EQU 2 ; offset
 SDOT.C.RED	EQU 2 ; offset
 SDOT.C.GREEN	EQU 3 ; offset
 SDOT.C.BLUE	EQU 4 ; offset
-</programlisting></para>
+</synopsis>
         </example><example>
           <title></title>
 
@@ -2898,32 +3005,32 @@ AD	WORD
 
           <para>This is identical to:</para>
 
-          <para><programlisting>SPOS	EQU 10 ; length
+          <synopsis>SPOS	EQU 10 ; length
 SPOS.X	EQU  4 ; offset
 SPOS.Y	EQU  6 ; offset
-SPOS.AD	EQU  8 ; offset</programlisting></para>
+SPOS.AD	EQU  8 ; offset</synopsis>
         </example><example>
           <title></title>
 
           <para>When a structure is defined it is possible to declare labels
           with it<programlisting>COLOR SCOLOR</programlisting>This is
-          identical to:<programlisting>COLOR
+          identical to:<synopsis>COLOR
 COLOR.RED   BYTE 4
 COLOR.GREEN BYTE 5
 COLOR.BLUE  BYTE 6
-</programlisting>Note the default values.</para>
+</synopsis>Note the default values.</para>
 
           <para>Or without label:<programlisting>COLORTABLE
   SCOLOR 0,0,0
   SCOLOR 1,2,3
   SCOLOR ,2
-  ; etc.</programlisting>This is identical to:<programlisting>COLORTABLE
+  ; etc.</programlisting>This is identical to:<synopsis>COLORTABLE
   BYTE 0,0,0
   BYTE 1,2,3
   BYTE 4,2,6
-  ; etc.
+  ; etc.</synopsis>
 
-DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
+<programlisting>DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
           BYTE and WORD members can be initialised.</para>
 
           <para>The resulting labels can be used as any other
@@ -3012,7 +3119,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.parse_code("label")</term>
+            <term>[void] sj.parse_code("code")</term>
 
             <listitem>
               <para>See <link linkend="lua__pc">_pc</link></para>
@@ -3044,7 +3151,7 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.file_exists("message")</term>
+            <term>[boolean] sj.file_exists("filename")</term>
 
             <listitem>
               <para>Check for file exists.</para>
@@ -3519,5 +3626,259 @@ DOT1 SDOT 0,0, 0,0,0     ; or 0,0,0,0,0 or {0,0,{0,0,0}}</programlisting>Only
 
       <para></para>
     </section>
+  </chapter>
+
+  <chapter>
+    <title><anchor id="c_savenex" />SAVENEX guide</title>
+	
+    <section>
+      <title><anchor id="s_savenex_file_format" />NEX File Format</title>
+
+      <para>NEX is binary format for ZX Spectrum Next, aiming to provide simple delivery of software
+      for the platform. For file format details check <ulink url="https://specnext.dev/wiki/NEX_file_format">
+      https://specnext.dev/wiki/NEX_file_format</ulink>. In short it is header + loading screen +
+      like-snapshot binary and remaining resources appended after.</para>
+
+  <para>As such, the SAVENEX commands are available only in ZXSPECTRUMNEXT device emulation mode,
+	  see <link linkend="po_device">DEVICE</link>.</para>
+  
+  <para>As the file is designed for self-contained distribution of whole applications/games, 
+	  its configuration and assembling is a bit too complex for single directive, and the
+	  configuration is instead divided into multiple commands, and the assembling goes
+	  through multiple stages, so some commands must be used in correct sequence.</para>
+  
+  <para>While the format technically allows to include multiple screen types data, they are all
+	  loaded at the beginning over each other, so it makes sense to provide only single loading
+	  screen (sjasmplus enforces that).</para>
+  </section>
+  
+  <section>
+	  <title><anchor id="s_savenex_commands" />Detailed description of each SAVENEX command</title>
+	  <variablelist>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_open" />
+				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank 0..111&gt;]]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Opens a NEX file, defines start address, stack address and 16k bank to be mapped
+					  at 0xC000 before code is executed (if values are omitted, start address is zero
+					  = no start, stack address is 0xFF2D, entryBank is zero).
+				  </para>
+				  <para>
+					  Only single NEX file can be open at the same time, and to finalize the header
+					  content the command CLOSE has to be used (does auto-close if source ends).
+				  </para>
+				  <para>
+					  Entry bank is number of 16k bank (0..111), not native 8k page, default is zero,
+					  i.e. the default memory map is identical to ZX 128 (ROM, RAM banks 5, 2 and 0).
+				  </para>
+				  <para>
+					  Make sure your new stack has at least tens of bytes available as those will be
+					  used already by the NEX loader before executing your entry point (although
+					  released back).
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_core" />
+				  SAVENEX CORE &lt;major 0..15&gt;,&lt;minor 0..15&gt;,&lt;subminor 0..255&gt;
+			  </term>
+			  <listitem>
+				  <para>
+					  Set minimum required Next core version, can be set any time before <link
+						  linkend="nex_close">CLOSE</link>.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_cfg" />
+				  SAVENEX CFG &lt;border 0..7&gt;[,&lt;fileHandle 0/1/$4000+&gt;[,&lt;PreserveNextRegs 0/1&gt;[,&lt;2MbRamReq 0/1&gt;]]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Set border colour (during loading), whether the machine should be set to default
+					  state (PreserveNextRegs = 0 = default), if the app requires extended RAM
+					  (224 8k pages) and how the file handle of the NEX file should be treated:
+					  0 = default = close, 1 = keep open and pass in BC, $4000..$FFFE = keep open,
+					  and write into memory at provided address (after entry bank is paged in). This
+					  can be set any time before <link linkend="nex_close">CLOSE</link>.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_bar" />
+				  SAVENEX BAR &lt;loadBar 0/1&gt;,&lt;barColour 0..255&gt;[,&lt;startDelay 0..255&gt;[,&lt;bankDelay 0..255&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Loading-bar related setup ("colour" usage depends on screen mode), can be set
+					  any time before <link linkend="nex_close">CLOSE</link>.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_screen" />
+				  SAVENEX SCREEN L2 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Layer 2 loading screen, can be used between <link linkend="nex_open">OPEN</link>
+					  and first <link linkend="nex_auto">AUTO</link>/<link linkend="nex_bank">BANK</link> command.
+				  </para>
+				  <para>
+					  Palette consists of 512 bytes (256 palette items from index 0), in 9b colour
+					  format: first byte is %RRRGGGBB, second byte is %P000000B (P is priority flag
+					  for Layer 2 colours).
+				  </para>
+				  <para>
+					  Image data are 48kiB block of memory, the loader will use always banks 9..11 to display
+					  it (8k pages 18..23), but if you will prepare the data there, it will be also re-saved
+					  by <link linkend="nex_auto">AUTO</link> command, so either use other banks, and overwrite
+					  them with valid data/code after using the SCREEN command, or reset pages 18..23 to zero
+					  after SCREEN.
+				  </para>
+				  <para>
+					  If no memory address is specified, the pages 18..23 are stored in file, and if
+					  no palette address is specified, no-palette flag is set in NEX file.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term>
+				  SAVENEX SCREEN LR [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  LoRes (128x96) loading screen, can be used between <link linkend="nex_open">OPEN</link>
+					  and first <link linkend="nex_auto">AUTO</link>/<link linkend="nex_bank">BANK</link> command.
+				  </para>
+				  <para>
+					  Palette is similar to Layer 2 mode, just LoRes mode doesn't have priority bit.
+				  </para>
+				  <para>
+					  Image data are 12288 bytes memory block - either consecutive block if specific
+					  address is provided, or without address the actual bank 5 memory is stored
+					  (taking 6144 bytes from address 0x4000 and 6144 bytes from address 0x6000).
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term>
+				  SAVENEX SCREEN (SCR|SHC|SHR) [&lt;hiResColour 0..7&gt;]
+			  </term>
+			  <listitem>
+				  <para>
+					  ULA/Timex modes loading screen, can be used between <link linkend="nex_open">OPEN</link>
+					  and first <link linkend="nex_auto">AUTO</link>/<link linkend="nex_bank">BANK</link> command.
+				  </para>
+				  <para>
+					  The actual bank 5 memory (pages 10..11) is stored as if the image is displayed,
+					  in these modes the palette can't be specified.
+				  </para>
+				  <para>
+					  SCR is classic ZX 6912 bytes long screen from address 0x4000 (page 10 is used,
+					  even if the slot 1 is modified to other page, so you must prepare the image "in place").
+				  </para>
+				  <para>
+					  SHC and SHR are Timex HiColor (8x1 attribute) and HiRes (512x192 bitmap) modes,
+					  prepare data "in place", i.e. 6144 bytes into page 10 and 6144 bytes into page
+					  11 (0x4000 and 0x6000 addresses in default memory setup). For HiRes mode you
+					  should specify ink colour (the paper is complement of ink).
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_bank" />
+				  SAVENEX BANK &lt;bank 0..111&gt;[,...]
+			  </term>
+			  <listitem>
+				  <para>
+					  Can be used after <link linkend="nex_open">OPEN</link> or <link linkend="nex_screen">
+						  SCREEN</link> and before <link linkend="nex_close">CLOSE</link>, but the 16ki
+					  banks must be saved in correct order: 5, 2, 0, 1, 3, 4, 6, 7, 8, 9, 10, ..., 111
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_auto" />
+				  SAVENEX AUTO [&lt;fromBank 0..111&gt;[,&lt;toBank 0..111&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Can be used after <link linkend="nex_open">OPEN</link> or <link linkend="nex_screen">
+						  SCREEN</link> and before <link linkend="nex_close">CLOSE</link>. The sjasmplus
+					  will save every non-zero 16k bank detected in the correct order (automatically
+					  starting from first possible bank after previous BANK/AUTO commands, or from
+					  provided "fromBank").
+				  </para>
+				  <para>
+					  For "fromBank" value use the specified order above in <link linkend="nex_bank">BANK
+						  </link> command, i.e. 5, 2, 0, ...
+				  </para>
+				  <para>
+					  Keep in mind the <link linkend="po_device">DEVICE</link> ZXSPECTRUMNEXT will
+					  automatically adjust content of banks 5 and 0 (ULA screen, sysvars and fake ZX48
+					  stack), so unless you clear those banks to zero, or skip saving them by saving
+					  first set of banks explicitly with <link linkend="nex_bank">BANK</link> command,
+					  they will be saved by AUTO.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_close" />
+				  SAVENEX CLOSE [&lt;fileToAppend&gt;]
+			  </term>
+			  <listitem>
+				  <para>
+					  Can be used after <link linkend="nex_open">OPEN</link>. The currently open NEX
+					  file will be finalized (header adjusted), and optional extra file just appended
+					  to the end of NEX file.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+	  </variablelist>
+
+  </section>
+	  
+  <section>
+	  <title><anchor id="s_savenex_examples" />Examples</title>
+
+	  <example>
+          <title></title>
+		  <para>
+			  Creating NEX file which will have Layer2 loading screen (stripes), progress bar, and will
+			  enter infinite loop with calling stack (used by IM 1 interrupt handler) visible on the
+			  Layer 2 screen.
+		  </para>
+		  <programlisting>    DEVICE ZXSPECTRUMNEXT
+    ORG $7E00
+start:  ei : jr $           ; app code entry point, BC = NEX file handle
+    ; Layer2 screen (top 1/3 defined, bottom of it will be used also as "visible" stack)
+    ORG $C000 : DUP 64*32 : DB $90,$91,$92,$93,$94,$95,$96,$97 : EDUP
+
+    ; write everything into NEX file
+    SAVENEX OPEN "example.nex", start, $FFFE, 9  ; stack will go into Layer2
+    SAVENEX CORE 2, 0, 0        ; Next core 2.0.0 required as minimum
+    SAVENEX CFG 4, 1            ; green border, file handle in BC
+    SAVENEX BAR 1, $E0, 50, 25  ; do load bar, red colour, start/load delays 50/25 frames
+    SAVENEX SCREEN L2 0, 0      ; store the data from C000 (page 0, offset 0), no palette
+    SAVENEX BANK 5, 100, 101    ; store the 16ki banks 5 (contains the code at 0x7E00), 100, 101
+    SAVENEX CLOSE               ; (banks 100 and 101 are added just as example)
+		  </programlisting>
+	  </example>
+  </section>
+
   </chapter>
 </book>

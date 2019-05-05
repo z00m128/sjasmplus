@@ -47,14 +47,8 @@ int ParseDirective(bool beginningOfLine)
 	char* n;
 	aint val;
 	if (!(n = getinstr(lp))) {
-		if (*lp == '#' && *(lp + 1) == '#') {
-			lp += 2;
-			if (!ParseExpressionNoSyntaxError(lp, val)) val = 4;
-			AddressOfMAP += ((~AddressOfMAP + 1) & (val - 1));
-			return 1;
-		} else {
-			lp = olp;  return 0;
-		}
+		lp = olp;
+		return 0;
 	}
 
 	if (DirectivesTable.zoek(n)) return 1;
@@ -101,24 +95,8 @@ int ParseDirective(bool beginningOfLine)
 }
 
 int ParseDirective_REPT() {
-	char* olp = lp;
-	char* n;
-	bp = lp;
-	if (!(n = getinstr(lp))) {
-		if (*lp == '#' && *(lp + 1) == '#') {
-			lp += 2;
-			aint val;
-			if (!ParseExpressionNoSyntaxError(lp, val)) val = 4;
-			AddressOfMAP += ((~AddressOfMAP + 1) & (val - 1));
-			return 1;
-		} else {
-			lp = olp;  return 0;
-		}
-	}
-
-	if (DirectivesTable_dup.zoek(n)) {
-		return 1;
-	}
+	char* olp = bp = lp, * n;
+	if ((n = getinstr(lp)) && DirectivesTable_dup.zoek(n)) return 1;
 	lp = olp;
 	return 0;
 }
@@ -266,36 +244,33 @@ void dirBLOCK() {
 	}
 }
 
+static void dirPageImpl(const char* const dirName) {
+	//DeviceID should have been checked by caller - no code here
+	aint val;
+	if (!ParseExpression(lp, val)) {
+		Error("Syntax error", lp, IF_FIRST);
+		return;
+	}
+	if (val < 0 || Device->PagesCount <= val) {
+		char buf[LINEMAX];
+		SPRINTF2(buf, LINEMAX, "[%s] Page number must be in range 0..%u", dirName, Device->PagesCount - 1);
+		Error(buf, NULL, IF_FIRST);
+		return;
+	}
+	Device->GetCurrentSlot()->Page = Device->GetPage(val);
+	Device->CheckPage(CDevice::CHECK_RESET);
+}
+
 void dirORG() {
 	aint val;
-	if (DeviceID) {
-		if (ParseExpression(lp, val)) {
-			CurAddress = val;
-		} else {
-			Error("[ORG] Syntax error", lp, IF_FIRST); return;
-		}
-		if (comma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[ORG] Syntax error", lp, IF_FIRST); return;
-			}
-			if (val < 0) {
-				Error("[ORG] Negative page number are not allowed", lp); return;
-			} else if (Device->PagesCount <= val) {
-				char buf[LINEMAX];
-				SPRINTF1(buf, LINEMAX, "[ORG] Page number must be in range 0..%u", Device->PagesCount - 1);
-			  	Error(buf, NULL, IF_FIRST); return;
-			}
-			Slot->Page = Device->GetPage(val);
-			//Page = Slot->Page;
-		}
-		CheckPage();
-	} else {
-		if (ParseExpression(lp, val)) {
-			CurAddress = val;
-		} else {
-			Error("[ORG] Syntax error", lp, IF_FIRST);
-		}
+	if (!ParseExpression(lp, val)) {
+		Error("[ORG] Syntax error", lp, IF_FIRST);
+		return;
 	}
+	CurAddress = val;
+	if (!DeviceID) return;
+	if (comma(lp))	dirPageImpl("ORG");
+	else 			Device->CheckPage(CDevice::CHECK_RESET);
 }
 
 void dirDISP() {
@@ -317,26 +292,76 @@ void dirENT() {
 }
 
 void dirPAGE() {
-	aint val;
 	if (!DeviceID) {
 		Warning("PAGE only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
-		return;
+	} else {
+		dirPageImpl("PAGE");
 	}
-	if (!ParseExpression(lp, val)) {
-		Error("Syntax error", lp, IF_FIRST);
-		return;
-	}
-	if (val < 0) {
-		Error("[PAGE] Negative page number are not allowed", lp); return;
-	} else if (Device->PagesCount <= val) {
-		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "[PAGE] Page number must be in range 0..%u", Device->PagesCount - 1);
-		Error(buf, NULL, IF_FIRST); return;
-	}
+}
 
-	Slot->Page = Device->GetPage(val);
-	CheckPage();
+void dirMMU() {
+	if (!DeviceID) {
+		Warning("MMU is allowed only in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
+		return;
+	}
+	aint slot1, slot2, pageN = -1;
+	CDeviceSlot::ESlotOptions slotOpt = CDeviceSlot::O_NONE;
+	if (!ParseExpression(lp, slot1)) {
+		Error("[MMU] First slot number parsing failed", bp, SUPPRESS);
+		return;
+	}
+	slot2 = slot1;
+	if (!comma(lp)) {	// second slot or slot-option should follow (if not comma)
+		// see if there is slot1-only with option-char (e/w/n options)
+		const char slotOptChar = (*lp)|0x20;	// primitive ASCII tolower
+		if ('a' <= slotOptChar && slotOptChar <= 'z' && (',' == lp[1] || White(lp[1]))) {
+			if ('e' == slotOptChar) slotOpt = CDeviceSlot::O_ERROR;
+			else if ('w' == slotOptChar) slotOpt = CDeviceSlot::O_WARNING;
+			else if ('n' == slotOptChar) slotOpt = CDeviceSlot::O_NEXT;
+			else {
+				Warning("[MMU] Unknown slot option (legal: e, w, n)", lp);
+			}
+			++lp;
+		} else {	// there was no option char, check if there was slot2 number to define range
+			if (!ParseExpression(lp, slot2)) {
+				Error("[MMU] Second slot number parsing failed", bp, SUPPRESS);
+				return;
+			}
+		}
+		if (!comma(lp)) {
+			Error("[MMU] Comma and page number expected after slot info", bp, SUPPRESS);
+			return;
+		}
+	}
+	if (!ParseExpression(lp, pageN)) {
+		Error("[MMU] Page number parsing failed", bp, SUPPRESS);
+		return;
+	}
+	// validate argument values
+	if (slot1 < 0 || slot2 < slot1 || Device->SlotsCount <= slot2) {
+		char buf[LINEMAX];
+		SPRINTF1(buf, LINEMAX, "[MMU] Slot number(s) must be in range 0..%u and form a range",
+				 Device->SlotsCount - 1);
+		Error(buf, NULL, SUPPRESS);
+		return;
+	}
+	if (pageN < 0 || Device->PagesCount <= pageN + (slot2 - slot1)) {
+		char buf[LINEMAX];
+		SPRINTF1(buf, LINEMAX, "[MMU] Requested page(s) must be in range 0..%u", Device->PagesCount - 1);
+		Error(buf, NULL, SUPPRESS);
+		return;
+	}
+	// all valid, set it up
+	for (aint slotN = slot1; slotN <= slot2; ++slotN, ++pageN) {
+		Device->GetSlot(slotN)->Page = Device->GetPage(pageN);
+		// this ^ is also enough to keep global "Slot" up to date (it's a pointer)
+		Device->GetSlot(slotN)->Option = slotOpt;	// resets whole range to NONE when range
+	}
+	// wrap output addresses back into 64ki address space, it's essential for MMU functionality
+	if (PseudoORG) adrdisp &= 0xFFFF; else CurAddress &= 0xFFFF;
+	Device->CheckPage(CDevice::CHECK_RESET);
 }
 
 void dirSLOT() {
@@ -350,37 +375,10 @@ void dirSLOT() {
 		Error("Syntax error", lp, IF_FIRST);
 		return;
 	}
-	if (val < 0) {
-		Error("[SLOT] Negative slot number are not allowed", lp); return;
-	} else if (Device->SlotsCount <= val) {
+	if (!Device->SetSlot(val)) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%u", Device->SlotsCount - 1);
-		Error(buf, NULL, IF_FIRST); return;
-	}
-	Slot = Device->GetSlot(val);
-	Device->CurrentSlot = Slot->Number;
-	CheckPage();
-}
-
-void dirMAP() {
-	AddressList = new CAddressList(AddressOfMAP, AddressList);
-	aint val;
-	IsLabelNotFound = 0;
-	if (ParseExpression(lp, val)) {
-		AddressOfMAP = val;
-	} else {
-		Error("[MAP] Syntax error", lp, IF_FIRST);
-	}
-	if (IsLabelNotFound) {
-		Error("[MAP] Forward reference", NULL, ALL);
-	}
-}
-
-void dirENDMAP() {
-	if (AddressList) {
-		AddressOfMAP = AddressList->val; AddressList = AddressList->next;
-	} else {
-		Error("ENDMAP without MAP");
+		Error(buf, NULL, IF_FIRST);
 	}
 }
 
@@ -512,27 +510,21 @@ void dirSIZE() {
 }
 
 void dirINCBIN() {
-	aint val;
-	char* fnaam;
-	int offset = -1,length = -1;
-
-	fnaam = GetFileName(lp);
+	int offset = 0, length = INT_MAX;
+	char* fnaam = GetFileName(lp);
 	if (comma(lp)) {
+		aint val;
 		if (!comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCBIN] Syntax error", bp, IF_FIRST); return;
-			}
-			if (val < 0) {
-				Error("[INCBIN] Negative values are not allowed", bp); return;
+				Error("[INCBIN] Syntax error", bp, SUPPRESS);
+				return;
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				Error("[INCBIN] Syntax error", bp, IF_FIRST); return;
-			}
-			if (val < 0) {
-				Error("[INCBIN] Negative values are not allowed", bp); return;
+				Error("[INCBIN] Syntax error", bp, SUPPRESS);
+				return;
 			}
 			length = val;
 		}
@@ -590,12 +582,11 @@ void dirINCHOB() {
 
 void dirINCTRD() {
 	aint val;
-	char* fnaam, * fnaamh, * fnaamh2;
 	char hobeta[12], hdr[17];
-	int offset = -1,length = -1,res,i;
+	int offset = 0, length = INT_MAX, res, i;
 	FILE* ff;
 
-	fnaam = GetFileName(lp);
+	char* fnaam = GetFileName(lp), * fnaamh;
 	if (comma(lp)) {
 		if (!comma(lp)) {
 			fnaamh = GetFileName(lp);
@@ -616,8 +607,8 @@ void dirINCTRD() {
 			if (val < 0) {
 				Error("[INCTRD] Negative values are not allowed", bp); return;
 			}
-			offset += val;
-		}
+			offset = val;
+		} else --lp;		// there was second comma right after, reread it
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
@@ -647,7 +638,7 @@ void dirINCTRD() {
 		break;
 	}
 	// open TRD
-	fnaamh2 = GetPath(fnaam);
+	char* fnaamh2 = GetPath(fnaam);
 	if (!FOPEN_ISOK(ff, fnaamh2, "rb")) {
 		Error("[INCTRD] Error opening file", fnaam, FATAL);
 	}
@@ -666,19 +657,9 @@ void dirINCTRD() {
 	if (i) {
 		Error("[INCTRD] File not found in TRD image", fnaamh, IF_FIRST); return;
 	}
-	if (length > 0) {
-		if (offset == -1) {
-			offset = 0;
-		}
-	} else {
-		if (length == -1) {
-	  		length = ((unsigned char)hdr[0x0b]) + (((unsigned char)hdr[0x0c]) << 8);
-		}
-		if (offset == -1) {
-			offset = 0;
-		} else {
-			length -= offset;
-		}
+	if (INT_MAX == length) {
+		length = ((unsigned char)hdr[0x0b]) + (((unsigned char)hdr[0x0c]) << 8);
+		length -= offset;
 	}
 	offset += (((unsigned char)hdr[0x0f]) << 12) + (((unsigned char)hdr[0x0e]) << 8);
 	fclose(ff);
@@ -690,53 +671,38 @@ void dirINCTRD() {
 }
 
 void dirSAVESNA() {
-
-	if (pass != LASTPASS) {
-		SkipParam(lp);
-		return;
-	}
-
+	if (pass != LASTPASS) return;		// syntax error is not visible in early passes
 	bool exec = true;
 
 	if (!DeviceID) {
-		if (pass == LASTPASS) {
-			Error("SAVESNA only allowed in real device emulation mode (See DEVICE)");
-		}
+		Error("SAVESNA only allowed in real device emulation mode (See DEVICE)");
 		exec = false;
-	} else if (pass != LASTPASS) {
-		exec = false;
-	}
-
-	if (exec && !IsZXSpectrumDevice(DeviceID)) {
+	} else if (!IsZXSpectrumDevice(DeviceID)) {
 		Error("[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.");
 		exec = false;
 	}
 
-	aint val;
-	char* fnaam;
-	int start = -1;
-
-	fnaam = GetFileName(lp);
+	char* fnaam = GetFileName(lp);
+	int start = StartAddress;
 	if (comma(lp)) {
-		if (!comma(lp) && StartAddress < 0) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVESNA] Syntax error", bp, PASS3); return;
+		aint val;
+		if (ParseExpression(lp, val)) {
+			if (0 <= start) Warning("[SAVESNA] Start address was also defined by END, SAVESNA argument used instead");
+			if (0 <= val) {
+				start = val;
+			} else {
+				exec = false; Error("[SAVESNA] Negative values are not allowed", bp, SUPPRESS);
 			}
-			if (val < 0) {
-				Error("[SAVESNA] Negative values are not allowed", bp, PASS3); return;
-			}
-			start = val;
 		} else {
-			Error("[SAVESNA] Syntax error. No parameters", bp, PASS3); return;
+			exec = false;
 		}
-	} else if (StartAddress < 0) {
-		Error("[SAVESNA] Syntax error. No parameters", bp, PASS3); return;
-	} else {
-		start = StartAddress;
+	}
+	if (start < 0) {
+		exec = false; Error("[SAVESNA] No start address defined", bp, SUPPRESS);
 	}
 
 	if (exec && !SaveSNA_ZX(fnaam, start)) {
-		Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST); return;
+		Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
 	}
 
 	delete[] fnaam;
@@ -982,7 +948,41 @@ void dirSAVEBIN() {
 	}
 
 	if (exec && !SaveBinary(fnaam, start, length)) {
-		Error("[SAVEBIN] Error writing file (Disk full?)", bp, IF_FIRST); return;
+		Error("[SAVEBIN] Error writing file (Disk full?)", bp, IF_FIRST);
+	}
+	delete[] fnaam;
+}
+
+void dirSAVEDEV() {
+	bool exec = DeviceID && LASTPASS == pass;
+	if (!exec && LASTPASS == pass) Error("SAVEDEV only allowed in real device emulation mode (See DEVICE)");
+
+	aint args[3]{-1, -1, -1};		// page, offset, length
+	char* fnaam = GetFileName(lp);
+	for (auto & arg : args) {
+		if (!comma(lp) || !ParseExpression(lp, arg)) {
+			exec = false;
+			Error("Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>", bp, SUPPRESS);
+		}
+	}
+	if (exec) {
+		// validate arguments
+		if (args[0] < 0 || Device->PagesCount <= args[0]) {
+			exec = false; ErrorInt("[SAVEDEV] page number is out of range", args[0]);
+		}
+		const int32_t start = Device->GetMemoryOffset(args[0], args[1]);
+		const int32_t totalRam = Device->GetMemoryOffset(Device->PagesCount, 0);
+		if (exec && (start < 0 || totalRam <= start)) {
+			exec = false; ErrorInt("[SAVEDEV] calculated start address is out of range", start);
+		}
+		if (exec && (args[2] <= 0 || totalRam < start + args[2])) {
+			exec = false;
+			if (args[2]) ErrorInt("[SAVEDEV] invalid end address (bad length?)", start + args[2]);
+			else Warning("[SAVEDEV] zero length requested");
+		}
+		if (exec && !SaveDeviceMemory(fnaam, (size_t)start, (size_t)args[2])) {
+			Error("[SAVEDEV] Error writing file (Disk full?)", bp, IF_FIRST);
+		}
 	}
 	delete[] fnaam;
 }
@@ -1253,13 +1253,20 @@ static bool dirIfusedIfnused(char* & id) {
 	bool global = ('@' == *lp) && ++lp;		// if global marker, remember it + skip it
 	if ( (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) || !SkipBlanks()) {
 		Error("[IFUSED] Syntax error", bp, SUPPRESS);
+		id = NULL;
 		return false;
 	}
 	if (id == NULL || *id == 0) {
-		id = LastParsedLabel;
+		id = STRDUP(LastParsedLabel);
 	} else {
-		id = ValidateLabel(id, global ? VALIDATE_LABEL_AS_GLOBAL : 0);
-		if (id == NULL) Error("[IFUSED] Invalid label name", bp, IF_FIRST);
+		char* validLabel = ValidateLabel(id, global ? VALIDATE_LABEL_AS_GLOBAL : 0);
+		if (validLabel) {
+			id = STRDUP(validLabel);
+			delete[] validLabel;
+		} else {
+			id = NULL;
+			Error("[IFUSED] Invalid label name", bp, IF_FIRST);
+		}
 	}
 	return NULL != id;
 }
@@ -1267,11 +1274,13 @@ static bool dirIfusedIfnused(char* & id) {
 static void dirIFUSED() {
 	char* id;
 	if (dirIfusedIfnused(id)) dirIfInternal("IFUSED", LabelTable.IsUsed(id));
+	if (id) free(id);
 }
 
 static void dirIFNUSED() {
 	char* id;
 	if (dirIfusedIfnused(id)) dirIfInternal("IFNUSED", !LabelTable.IsUsed(id));
+	if (id) free(id);
 }
 
 static void dirIFDEF() {
@@ -1394,7 +1403,7 @@ void dirUNDEFINE() {
 		DefineTable.RemoveAll();
 	} else if (DefineTable.FindDuplicate(id)) {
 		DefineTable.Remove(id);
-	} else if (LabelTable.Find(id)) {
+	} else if (LabelTable.Find(id, true)) {
 		LabelTable.Remove(id);
 	} else {
 		Warning("[UNDEFINE] Identifier not found", id); return;
@@ -1627,20 +1636,20 @@ void dirSTRUCT() {
 	}
 	st = StructureTable.Add(naam, offset, bind, global);
 	ListFile();
-	while ('o') {
-		if (!ReadLine()) {
-			Error("[STRUCT] Unexpected end of structure"); break;
-		}
+	while (ReadLine()) {
 		lp = line; /*if (White()) { SkipBlanks(lp); if (*lp=='.') ++lp; if (cmphstr(lp,"ends")) break; }*/
 		SkipBlanks(lp);
 		if (*lp == '.') {
 			++lp;
-		} if (cmphstr(lp, "ends")) {
-			break;
-		 }
+		}
+		if (cmphstr(lp, "ends")) {
+			st->deflab();
+			return;
+		}
 		ParseStructLine(st);
 		ListFile(true);
 	}
+	Error("[STRUCT] Unexpected end of structure");
 	st->deflab();
 }
 
@@ -1713,7 +1722,9 @@ void dirEDUP() {
 		return;
 	}
 	dup.IsInWork = true;
-	dup.Pointer->string = NULL;	// kill the EDUP inside DUP-list (also works as "while" terminator)
+	// kill the "EDUP" inside DUP-list (also works as "while" terminator)
+	if (dup.Pointer->string) free(dup.Pointer->string);
+	dup.Pointer->string = NULL;
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
@@ -1732,6 +1743,7 @@ void dirEDUP() {
 			++CurrentSourceLine;
 		}
 	}
+	delete dup.Lines;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;
@@ -1780,25 +1792,42 @@ void dirDEFARRAY() {
 
 #ifdef USE_LUA
 
-void _lua_showerror() {
-	int ln;
-
-	// part from Error(...)
-	char *err = STRDUP(lua_tostring(LUA, -1));
-	if (err == NULL) {
-		Error("No enough memory!", NULL, FATAL);
+static int SplitLuaErrorMessage(const char*& LuaError)
+{
+	int ln = LuaLine;
+	if (LuaError && strstr(LuaError, "[string \"script\"]") == LuaError)
+	{
+		char *const err = STRDUP(LuaError), *lnp = err, *msgp = NULL;
+		if (err == NULL)
+			Error("No enough memory!", NULL, FATAL);
+		else
+		{
+			while (*lnp && (*lnp != ':' || !isdigit((unsigned char) *(lnp+1))) )
+				lnp++;
+			if (*lnp && (msgp = strchr(++lnp, ':')) )
+			{
+				*(msgp++) = '\0';
+				ln += atoi(lnp);
+				SkipBlanks(msgp);
+				if (*msgp)
+					LuaError += msgp - err;
+			}
+			free(err);
+		}
 	}
-	err += 18;
-	char *pos = strstr(err, ":");
-	*(pos++) = 0;
-	ln = atoi(err) + LuaLine;
+	return ln;
+}
+
+void _lua_showerror() {
+	// part from Error(...)
+	const char *msgp = lua_tostring(LUA, -1);
+	int ln = SplitLuaErrorMessage(msgp);
 
 	// print error and other actions
-	err = ErrorLine;
-	SPRINTF3(err, LINEMAX2, "%s(%d): error: [LUA]%s", filename, ln, pos);
+	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", filename, ln, msgp);
 
-	if (!strchr(err, '\n')) {
-		STRCAT(err, LINEMAX2, "\n");
+	if (!strchr(ErrorLine, '\n')) {
+		STRCAT(ErrorLine, LINEMAX2, "\n");
 	}
 
 	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
@@ -1962,6 +1991,7 @@ void dirINCLUDELUA() {
 #endif //USE_LUA
 
 void dirDEVICE() {
+	++deviceDirectivesCounter;		// any usage counts, even invalid
 	char* id;
 
 	if ((id = GetID(lp))) {
@@ -1976,112 +2006,113 @@ void dirDEVICE() {
 }
 
 void InsertDirectives() {
-	DirectivesTable.insertd("assert", dirASSERT);
-	DirectivesTable.insertd("byte", dirBYTE);
-	DirectivesTable.insertd("abyte", dirABYTE);
-	DirectivesTable.insertd("abytec", dirABYTEC);
-	DirectivesTable.insertd("abytez", dirABYTEZ);
-	DirectivesTable.insertd("word", dirWORD);
-	DirectivesTable.insertd("block", dirBLOCK);
-	DirectivesTable.insertd("dword", dirDWORD);
-	DirectivesTable.insertd("d24", dirD24);
-	DirectivesTable.insertd("dg", dirDG);
-	DirectivesTable.insertd("defg", dirDG);
-	DirectivesTable.insertd("dh", dirDH);
-	DirectivesTable.insertd("defh", dirDH);
-	DirectivesTable.insertd("hex", dirDH);
-	DirectivesTable.insertd("org", dirORG);
-	DirectivesTable.insertd("fpos",dirFORG);
-	DirectivesTable.insertd("map", dirMAP);
-	DirectivesTable.insertd("align", dirALIGN);
-	DirectivesTable.insertd("module", dirMODULE);
-	DirectivesTable.insertd("size", dirSIZE);
-	//DirectivesTable.insertd("textarea",dirTEXTAREA);
-	DirectivesTable.insertd("textarea", dirDISP);
-	DirectivesTable.insertd("else", dirELSE);
-	DirectivesTable.insertd("export", dirEXPORT);
-	DirectivesTable.insertd("display", dirDISPLAY);
-	DirectivesTable.insertd("end", dirEND);
-	DirectivesTable.insertd("include", dirINCLUDE);
-	DirectivesTable.insertd("incbin", dirINCBIN);
-	DirectivesTable.insertd("binary", dirINCBIN);
-	DirectivesTable.insertd("inchob", dirINCHOB);
-	DirectivesTable.insertd("inctrd", dirINCTRD);
-	DirectivesTable.insertd("insert", dirINCBIN);
-	DirectivesTable.insertd("savesna", dirSAVESNA);
-	DirectivesTable.insertd("savehob", dirSAVEHOB);
-	DirectivesTable.insertd("savebin", dirSAVEBIN);
-	DirectivesTable.insertd("emptytap", dirEMPTYTAP);
-	DirectivesTable.insertd("savetap", dirSAVETAP);
-	DirectivesTable.insertd("emptytrd", dirEMPTYTRD);
-	DirectivesTable.insertd("savetrd", dirSAVETRD);
-	DirectivesTable.insertd("shellexec", dirSHELLEXEC);
+	DirectivesTable.insertd(".assert", dirASSERT);
+	DirectivesTable.insertd(".byte", dirBYTE);
+	DirectivesTable.insertd(".abyte", dirABYTE);
+	DirectivesTable.insertd(".abytec", dirABYTEC);
+	DirectivesTable.insertd(".abytez", dirABYTEZ);
+	DirectivesTable.insertd(".word", dirWORD);
+	DirectivesTable.insertd(".block", dirBLOCK);
+	DirectivesTable.insertd(".dword", dirDWORD);
+	DirectivesTable.insertd(".d24", dirD24);
+	DirectivesTable.insertd(".dg", dirDG);
+	DirectivesTable.insertd(".defg", dirDG);
+	DirectivesTable.insertd(".dh", dirDH);
+	DirectivesTable.insertd(".defh", dirDH);
+	DirectivesTable.insertd(".hex", dirDH);
+	DirectivesTable.insertd(".org", dirORG);
+	DirectivesTable.insertd(".fpos",dirFORG);
+	DirectivesTable.insertd(".align", dirALIGN);
+	DirectivesTable.insertd(".module", dirMODULE);
+	DirectivesTable.insertd(".size", dirSIZE);
+	//DirectivesTable.insertd(".textarea",dirTEXTAREA);
+	DirectivesTable.insertd(".textarea", dirDISP);
+	DirectivesTable.insertd(".else", dirELSE);
+	DirectivesTable.insertd(".export", dirEXPORT);
+	DirectivesTable.insertd(".display", dirDISPLAY);
+	DirectivesTable.insertd(".end", dirEND);
+	DirectivesTable.insertd(".include", dirINCLUDE);
+	DirectivesTable.insertd(".incbin", dirINCBIN);
+	DirectivesTable.insertd(".binary", dirINCBIN);
+	DirectivesTable.insertd(".inchob", dirINCHOB);
+	DirectivesTable.insertd(".inctrd", dirINCTRD);
+	DirectivesTable.insertd(".insert", dirINCBIN);
+	DirectivesTable.insertd(".savenex", dirSAVENEX);
+	DirectivesTable.insertd(".savesna", dirSAVESNA);
+	DirectivesTable.insertd(".savehob", dirSAVEHOB);
+	DirectivesTable.insertd(".savebin", dirSAVEBIN);
+	DirectivesTable.insertd(".savedev", dirSAVEDEV);
+	DirectivesTable.insertd(".emptytap", dirEMPTYTAP);
+	DirectivesTable.insertd(".savetap", dirSAVETAP);
+	DirectivesTable.insertd(".emptytrd", dirEMPTYTRD);
+	DirectivesTable.insertd(".savetrd", dirSAVETRD);
+	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
-	DirectivesTable.insertd("winexec", dirWINEXEC);
+	DirectivesTable.insertd(".winexec", dirWINEXEC);
 #endif*/
-	DirectivesTable.insertd("if", dirIF);
-	DirectivesTable.insertd("ifn", dirIFN);
-	DirectivesTable.insertd("ifused", dirIFUSED);
-	DirectivesTable.insertd("ifnused", dirIFNUSED);
-	DirectivesTable.insertd("ifdef", dirIFDEF);
-	DirectivesTable.insertd("ifndef", dirIFNDEF);
-	DirectivesTable.insertd("output", dirOUTPUT);
-	DirectivesTable.insertd("outend", dirOUTEND);
-	DirectivesTable.insertd("tapout", dirTAPOUT);
-	DirectivesTable.insertd("tapend", dirTAPEND);
-	DirectivesTable.insertd("define", dirDEFINE);
-	DirectivesTable.insertd("undefine", dirUNDEFINE);
-	DirectivesTable.insertd("defarray", dirDEFARRAY);
-	DirectivesTable.insertd("macro", dirMACRO);
-	DirectivesTable.insertd("struct", dirSTRUCT);
-	DirectivesTable.insertd("dc", dirDC);
-	DirectivesTable.insertd("dz", dirDZ);
-	DirectivesTable.insertd("db", dirBYTE);
-	DirectivesTable.insertd("dm", dirBYTE);
-	DirectivesTable.insertd("dw", dirWORD);
-	DirectivesTable.insertd("ds", dirBLOCK);
-	DirectivesTable.insertd("dd", dirDWORD);
-	DirectivesTable.insertd("defb", dirBYTE);
-	DirectivesTable.insertd("defw", dirWORD);
-	DirectivesTable.insertd("defs", dirBLOCK);
-	DirectivesTable.insertd("defd", dirDWORD);
-	DirectivesTable.insertd("defm", dirBYTE);
-	DirectivesTable.insertd("endmod", dirENDMODULE);
-	DirectivesTable.insertd("endmodule", dirENDMODULE);
-	DirectivesTable.insertd("endmap", dirENDMAP);
-	DirectivesTable.insertd("rept", dirDUP);
-	DirectivesTable.insertd("dup", dirDUP);
-	DirectivesTable.insertd("disp", dirDISP);
-	DirectivesTable.insertd("phase", dirDISP);
-	DirectivesTable.insertd("ent", dirENT);
-	DirectivesTable.insertd("unphase", dirENT);
-	DirectivesTable.insertd("dephase", dirENT);
-	DirectivesTable.insertd("page", dirPAGE);
-	DirectivesTable.insertd("slot", dirSLOT);
-	DirectivesTable.insertd("encoding", dirENCODING);
-	DirectivesTable.insertd("labelslist", dirLABELSLIST);
-	//  DirectivesTable.insertd("bind",dirBIND); /* i didn't comment this */
-	DirectivesTable.insertd("endif", dirENDIF);
-	//DirectivesTable.insertd("endt",dirENDTEXTAREA);
-	DirectivesTable.insertd("endt", dirENT);
-	DirectivesTable.insertd("endm", dirENDM);
-	DirectivesTable.insertd("edup", dirEDUP);
-	DirectivesTable.insertd("endr", dirEDUP);
-	DirectivesTable.insertd("ends", dirENDS);
+	DirectivesTable.insertd(".if", dirIF);
+	DirectivesTable.insertd(".ifn", dirIFN);
+	DirectivesTable.insertd(".ifused", dirIFUSED);
+	DirectivesTable.insertd(".ifnused", dirIFNUSED);
+	DirectivesTable.insertd(".ifdef", dirIFDEF);
+	DirectivesTable.insertd(".ifndef", dirIFNDEF);
+	DirectivesTable.insertd(".output", dirOUTPUT);
+	DirectivesTable.insertd(".outend", dirOUTEND);
+	DirectivesTable.insertd(".tapout", dirTAPOUT);
+	DirectivesTable.insertd(".tapend", dirTAPEND);
+	DirectivesTable.insertd(".define", dirDEFINE);
+	DirectivesTable.insertd(".undefine", dirUNDEFINE);
+	DirectivesTable.insertd(".defarray", dirDEFARRAY);
+	DirectivesTable.insertd(".macro", dirMACRO);
+	DirectivesTable.insertd(".struct", dirSTRUCT);
+	DirectivesTable.insertd(".dc", dirDC);
+	DirectivesTable.insertd(".dz", dirDZ);
+	DirectivesTable.insertd(".db", dirBYTE);
+	DirectivesTable.insertd(".dm", dirBYTE);
+	DirectivesTable.insertd(".dw", dirWORD);
+	DirectivesTable.insertd(".ds", dirBLOCK);
+	DirectivesTable.insertd(".dd", dirDWORD);
+	DirectivesTable.insertd(".defb", dirBYTE);
+	DirectivesTable.insertd(".defw", dirWORD);
+	DirectivesTable.insertd(".defs", dirBLOCK);
+	DirectivesTable.insertd(".defd", dirDWORD);
+	DirectivesTable.insertd(".defm", dirBYTE);
+	DirectivesTable.insertd(".endmod", dirENDMODULE);
+	DirectivesTable.insertd(".endmodule", dirENDMODULE);
+	DirectivesTable.insertd(".rept", dirDUP);
+	DirectivesTable.insertd(".dup", dirDUP);
+	DirectivesTable.insertd(".disp", dirDISP);
+	DirectivesTable.insertd(".phase", dirDISP);
+	DirectivesTable.insertd(".ent", dirENT);
+	DirectivesTable.insertd(".unphase", dirENT);
+	DirectivesTable.insertd(".dephase", dirENT);
+	DirectivesTable.insertd(".page", dirPAGE);
+	DirectivesTable.insertd(".slot", dirSLOT);
+	DirectivesTable.insertd(".mmu", dirMMU);
+	DirectivesTable.insertd(".encoding", dirENCODING);
+	DirectivesTable.insertd(".labelslist", dirLABELSLIST);
+	//  DirectivesTable.insertd(".bind",dirBIND); /* i didn't comment this */
+	DirectivesTable.insertd(".endif", dirENDIF);
+	//DirectivesTable.insertd(".endt",dirENDTEXTAREA);
+	DirectivesTable.insertd(".endt", dirENT);
+	DirectivesTable.insertd(".endm", dirENDM);
+	DirectivesTable.insertd(".edup", dirEDUP);
+	DirectivesTable.insertd(".endr", dirEDUP);
+	DirectivesTable.insertd(".ends", dirENDS);
 
-	DirectivesTable.insertd("device", dirDEVICE);
+	DirectivesTable.insertd(".device", dirDEVICE);
 
 #ifdef USE_LUA
-	DirectivesTable.insertd("lua", dirLUA);
-	DirectivesTable.insertd("endlua", dirENDLUA);
-	DirectivesTable.insertd("includelua", dirINCLUDELUA);
+	DirectivesTable.insertd(".lua", dirLUA);
+	DirectivesTable.insertd(".endlua", dirENDLUA);
+	DirectivesTable.insertd(".includelua", dirINCLUDELUA);
 #endif //USE_LUA
 
-	DirectivesTable_dup.insertd("dup", dirDUP);
-	DirectivesTable_dup.insertd("edup", dirEDUP);
-	DirectivesTable_dup.insertd("endm", dirENDM);
-	DirectivesTable_dup.insertd("endr", dirEDUP);
-	DirectivesTable_dup.insertd("rept", dirDUP);
+	DirectivesTable_dup.insertd(".dup", dirDUP);
+	DirectivesTable_dup.insertd(".edup", dirEDUP);
+	DirectivesTable_dup.insertd(".endm", dirENDM);
+	DirectivesTable_dup.insertd(".endr", dirEDUP);
+	DirectivesTable_dup.insertd(".rept", dirDUP);
 }
 
 #ifdef USE_LUA
@@ -2094,22 +2125,22 @@ bool LuaSetPage(aint n) {
 		SPRINTF1(buf, LINEMAX, "sj.set_page: page number must be in range 0..%u", Device->PagesCount - 1);
 		Error(buf, NULL, IF_FIRST); return false;
 	}
-	Slot->Page = Device->GetPage(n);
-	CheckPage();
+	Device->GetCurrentSlot()->Page = Device->GetPage(n);
+	Device->CheckPage(CDevice::CHECK_RESET);
 	return true;
 }
 
 bool LuaSetSlot(aint n) {
-	if (n < 0) {
-		Error("sj.set_slot: negative slot number are not allowed", lp); return false;
-	} else if (Device->SlotsCount <= n) {
-		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "sj.set_slot: slot number must be in range 0..%u", Device->SlotsCount - 1);
-		Error(buf, NULL, IF_FIRST); return false;
+	if (!DeviceID) {
+		Warning("sj.set_slot: only allowed in real device emulation mode (See DEVICE)");
+		return false;
 	}
-	Slot = Device->GetSlot(n);
-	Device->CurrentSlot = Slot->Number;
-	CheckPage();
+	if (!Device->SetSlot(n)) {
+		char buf[LINEMAX];
+		SPRINTF1(buf, LINEMAX, "sj.set_slot: Slot number must be in range 0..%u", Device->SlotsCount - 1);
+		Error(buf, NULL, IF_FIRST);
+		return false;
+	}
 	return true;
 }
 

@@ -18,14 +18,14 @@ LUA quirks:
 
 Z80: multi-argument/strict: introduce the options
 
-FIXME in sources mark further points worth refactoring
+static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
 
-FIXME: wait a second, MAP is not synonym for STRUCT and they have separate parsing code?!?
-    BTW "##" parsing is EVERYWHERE ... :/
+FIXME in sources mark further points worth refactoring
 
 FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 (breaks ` .34 repeatX` directive probably? .. and END@beginningOfLine? .. actually not?)
-    == needs MAPS refactoring first (to get those ## under control ...
+
+SplitLuaErrorMessage - add some tests after Liniya fix, maybe review the code more.
 
 "--lst" bez hodnoty nech spravi default nazov sam
   ==> needs tests (badly, was bugged a lot during development)
@@ -40,9 +40,13 @@ v Makefile? ... na to by som dal ale druhu premennu "SJASMPLUSFLAGS"
 
 Macro world issues:
 - macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
+- more operators, capable of some string manipulation and maybe some type/expression checks (islabel)
 - ability to issue real instruction (ignoring possible macro of same name)
 
 Input file without extension does produce wrong default output filename
+
+SAVEHOB/SAVETRD/SAVETAP/... global review of filename handling, adding warnings/errors
+where filename modification happens or filename is invalid.
 
 ** Macro/define substitution rules and implementation (proposal):
 - macro arguments substitute with priority, from the longest ones
@@ -52,11 +56,47 @@ Input file without extension does produce wrong default output filename
 (can substitute only at beginning)
 ? extend that rule to underscore at end sealing also the tail?
 - lock some keywords for define/etc... at least put them under warning
+- inhibitor of substitutions/macros happening (like `@djnz` always assembled as djnz inst.
 ** Current refactored implementation:
 - doesn't play priorities as proposed above
 - evaluation of defarray index is still flaky and doesn't work correctly inside macro/etc
 - needs lot more testing and cleanup
 + should be already a bit more intuitive than 1.08+ (although it may break legacy source)
+
+ZX128 snapshot default state and mapping - still doesn't survive simple `ret` into BASIC
+
+DISP inside DISP bugs => documented. Correct solution = nesting DISPs?!
+
+$$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
+//// syntax summary:
+    labels (\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*
+    , argument-separator    : instruction-separator     ; // comment
+    # $ hexnums, % binary, "' strings, () parentheses or memcell, [] memcell, {} device mem
+    operators-unary: ! ~ + - low high not
+    operators-binary: * / % mod + - << >> >>> shl shr <? >? < > <= >= = == != & and ^ xor | or && ||
+    us keyboard: ~!@#$%^&*()_+`-=[]{};':"<>?,./\|
+    $$label - hexa are single $ only, so this looks fine (unary operator)
+    ?label - 5<?label => ambiguous
+    \label - looks weird, no syntax clash
+Needs more syntax:
+    - reformat label into different slot... <slot>$$expression ? (binary operator)
+    - differentiate 16+b address space from 16b slot-mapped address space.
+        &label/expression? Similar to C/C++? &0x1231241 ? (5123 + &1234)
+
+MMU:
+- custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
+- err/warn/warp option for slot range?
+
+sjasmplus 2.x/fork:
+
+address space of labels -> 2|3:30|29 bits, the top bits being default slot number,
+remaining bits being physical address into global chip address space
+-> then producing machine code using the particular label would "format" physical
+label value for particular "slot" (view of value).
+
+To stay backward compatible/similar, one would have to support also 0000-FFFF range as if
+going through the mapped pages.. but that does collide with early pages 0..n ...
+How about abusing "@" or "." or something to distinguish between? (& resembles C/C++!)
 
 ====================
 Docs:

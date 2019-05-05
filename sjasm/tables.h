@@ -41,16 +41,20 @@ extern char* PreviousIsLabel;
 int GetLabelValue(char*& p, aint& val);
 int GetLocalLabelValue(char*& op, aint& val);
 
+constexpr int LABEL_PAGE_UNDEFINED = -1;
+constexpr int LABEL_PAGE_EXPRESSION = 0x7F01;
+constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
+
 class CLabelTableEntry {
 public:
-	char* name;
-	char page;
-	bool IsDEFL;
-	unsigned char forwardref;
-	aint value;
-	char used;
-	int updatePass;	// last updated in pass
+	char*	name;
+	aint	value;
+	int		updatePass;	// last update was in pass
+	short	page;
+	bool	IsDEFL;
+	bool	used;
 	CLabelTableEntry();
+	void ClearData();
 };
 
 class CLabelTable {
@@ -59,9 +63,9 @@ public:
 	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false);
 	int Update(char*, aint);
 	int GetValue(char* nname, aint& nvalue);
-	int Find(char*);
-	int Remove(char*);
-	int IsUsed(char*);
+	CLabelTableEntry* Find(const char* name, bool onlyDefined = false);
+	bool Remove(const char* name);
+	bool IsUsed(const char* name);
 	void RemoveAll();
 	void Dump();
 	void DumpForUnreal();
@@ -133,11 +137,7 @@ public:
 	char* string;
 	CStringsList* next;
 	int sourceLine;
-	CStringsList() {
-		string = NULL;
-		next = NULL;
-		sourceLine = 0;
-	}
+	CStringsList() : string(NULL), next(NULL), sourceLine(0) {}
 	~CStringsList() {
 		if (string) free(string);
 		if (next) delete next;
@@ -151,6 +151,7 @@ public:
 	CStringsList* nss;
 	CDefineTableEntry* next;
 	CDefineTableEntry(const char*, const char*, CStringsList*, CDefineTableEntry*);
+	~CDefineTableEntry();
 };
 
 class CMacroDefineTable {
@@ -164,6 +165,8 @@ public:
 	CMacroDefineTable() {
 		Init();
 	}
+	CMacroDefineTable(const CMacroDefineTable&) = delete;
+	CMacroDefineTable& operator=(CMacroDefineTable const&) = delete;
 private:
 	int used[128];
 	CDefineTableEntry* defs;
@@ -183,6 +186,9 @@ public:
 	CDefineTable() {
 		Init();
 	}
+	~CDefineTable();
+	CDefineTable(const CDefineTable&) = delete;
+	CDefineTable& operator=(CDefineTable const & defTable);
 private:
 	CDefineTableEntry* defs[128];
 };
@@ -281,49 +287,6 @@ struct SConditionalStack {
 	bool IsInWork;
 	int Level;
 };
-
-class CDevicePage {
-public:
-	CDevicePage(aint, aint /*, CDevicePage **/);
-	~CDevicePage();
-	aint Size;
-	aint Number;
-	char *RAM;
-	//CDevicePage* Next;
-private:
-};
-
-class CDeviceSlot {
-public:
-	CDeviceSlot(aint, aint, aint /*, CDeviceSlot **/);
-	~CDeviceSlot();
-	aint Address;
-	aint Size;
-	CDevicePage* Page;
-	aint Number;
-	//CDeviceSlot* Next;
-private:
-};
-
-class CDevice {
-public:
-	CDevice(const char *, CDevice *);
-	~CDevice();
-	void AddSlot(aint adr, aint size);
-	void AddPage(aint size);
-	CDevicePage* GetPage(aint);
-	CDeviceSlot* GetSlot(aint);
-	char* ID;
-	CDevice* Next;
-	int CurrentSlot;
-	int CurrentPage;
-	int SlotsCount;
-	int PagesCount;
-private:
-	CDeviceSlot* Slots[256];
-	CDevicePage* Pages[256];
-};
-
 
 int LuaGetLabel(char *name);
 

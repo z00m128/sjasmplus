@@ -29,7 +29,6 @@
 #ifndef __SJASM
 #define __SJASM
 
-enum EMemoryType { MT_NONE, MT_SIZE };
 enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR, OV_NONE, OV_LST };
 
 namespace Options {
@@ -55,15 +54,13 @@ namespace Options {
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;
-
-	//extern EMemoryType MemoryType;
 } // eof namespace Options
 
 extern CDevice *Devices;
 extern CDevice *Device;
-extern CDeviceSlot *Slot;
 extern CDevicePage *Page;
 extern char* DeviceID;
+extern int deviceDirectivesCounter;
 
 // extend
 extern char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
@@ -75,12 +72,10 @@ extern std::vector<char> stdin_log;	// buffer for Options::SourceStdIn, to repla
 
 extern int ConvertEncoding;
 extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
-extern int adrdisp, PseudoORG;
-extern char* MemoryRAM, * MemoryPointer;
-extern int MemoryCPage, MemoryPagesCount, StartAddress;
-extern aint MemorySize;
+extern int adrdisp, PseudoORG, StartAddress;
+extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
-extern aint CurAddress, AddressOfMAP, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
+extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
 
 extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
 
@@ -97,7 +92,6 @@ extern CDefineTable DefineTable;
 extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;
 extern CStructureTable StructureTable;
-extern CAddressList* AddressList;
 extern CStringsList* ModuleList;
 
 #ifdef USE_LUA

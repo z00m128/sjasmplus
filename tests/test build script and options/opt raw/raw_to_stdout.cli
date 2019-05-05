@@ -2,6 +2,6 @@
 if [[ -z "${MSG_LIST_FILE}" ]]; then
     last_result=1
 else
-    $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 1> "${dst_base}.bin" 2> "${dst_base}.lst"
+    $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 1> "${dst_base}.raw" 2> "${dst_base}.lst"
     last_result=$?
 fi

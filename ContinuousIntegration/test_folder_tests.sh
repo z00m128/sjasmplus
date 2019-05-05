@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ## script init + helper functions
-shopt -s globstar nullglob
 HELP_STRING="Run the script from \033[96mproject root\033[0m directory."
 HELP_STRING+="\nYou can provide one argument to specify particular sub-directory in \033[96mtests\033[0m directory, example:"
 HELP_STRING+="\n  $ \033[96mContinuousIntegration/test_folder_tests.sh z80/\033[0m \t\t# to run only tests from \033[96mtests/z80/\033[0m directory"
@@ -30,11 +29,14 @@ source ContinuousIntegration/common_fn.sh
 # seek for files to be processed (either provided by user argument, or default tests/ dir)
 if [[ $# -gt 0 ]]; then
     [[ "-h" == "$1" || "--help" == "$1" ]] && echo -e $HELP_STRING && exit 0
-    TEST_FILES=("${PROJECT_DIR}/tests/$1"**/*.asm)
 else
     echo -e "Searching directory \033[96m${PROJECT_DIR}/tests/\033[0m for '.asm' files..."
-    TEST_FILES=("${PROJECT_DIR}/tests/"**/*.asm)  # try default test dir
 fi
+OLD_IFS=$IFS
+IFS=$'\n'
+TEST_FILES=($(find "$PROJECT_DIR/tests/$1"* -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
+IFS=$OLD_IFS
+
 # check if some files were found, print help message if search failed
 [[ -z $TEST_FILES ]] && echo -e "\033[91mno files found\033[0m\n$HELP_STRING" && exit 1
 
@@ -46,10 +48,6 @@ mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 
 ## go through all asm files in tests directory and verify results
 for f in "${TEST_FILES[@]}"; do
-    ## ignore directories themselves (which have "*.asm" name)
-    [[ -d $f ]] && continue
-    ## ignore "include" files (must have ".i.asm" extension)
-    [[ ".i.asm" == ${f:(-6)} ]] && continue
     ## standalone .asm file was found, try to build it
     rm -rf *        # clear the temporary build directory
     totalTests=$((totalTests + 1))
@@ -65,7 +63,7 @@ for f in "${TEST_FILES[@]}"; do
     MSG_LIST_FILE="${CFG_BASE}.msglst"
     # copy "src_dir/basename*.(asm|lua|cli)" file(s) into working directory
     for subf in "$src_base"*.{asm,lua,cli}; do
-        [[ -d "$subf" ]] && continue
+        [[ ! -e "$subf" || -d "$subf" ]] && continue
         cp "$subf" ".${subf#$src_dir}"
     done
     # copy "src_dir/basename*" sub-directories into working directory (ALL files in them)
@@ -102,7 +100,7 @@ for f in "${TEST_FILES[@]}"; do
     ## validate results
     # LST file overrides assembling exit code (new exit code is from diff between lst files)
     if [[ -s "${LIST_FILE}" ]]; then
-        diff --strip-trailing-cr "${LIST_FILE}" "${dst_base}.lst"
+        diff -a --strip-trailing-cr "${LIST_FILE}" "${dst_base}.lst"
         last_result=$?
         last_result_origin="diff"
     fi
@@ -113,16 +111,26 @@ for f in "${TEST_FILES[@]}"; do
     else
         echo -e "\033[92mOK: assembling or listing\033[0m"
     fi
-    # check binary results, if TAP or BIN are present in source directory
-    for binext in {'tap','bin'}; do
+    # check binary results, if TAP, BIN or RAW are present in source directory
+    for binext in {'tap','bin','raw'}; do
         if [[ -f "${CFG_BASE}.${binext}" ]]; then
             upExt=`echo $binext | tr '[:lower:]' '[:upper:]'`
             totalChecks=$((totalChecks + 1))        # +1 for each binary check
             echo -n -e "\033[91m"
             ! diff "${CFG_BASE}.${binext}" "${dst_base}.${binext}" \
-                && exitCode=$((exitCode + 1)) \
+                && exitCode=$((exitCode + 1)) && echo -e "Error: $upExt differs\033[0m" \
                 || echo -e "\033[92mOK: $upExt is identical\033[0m"
-            echo -n -e "\033[0m"
+        fi
+    done
+    # check other text results (not LST), if they are present in source directory
+    for txtext in {'sym','exp','lbl'}; do
+        if [[ -f "${CFG_BASE}.${txtext}" ]]; then
+            upExt=`echo $txtext | tr '[:lower:]' '[:upper:]'`
+            totalChecks=$((totalChecks + 1))        # +1 for each text check
+            echo -n -e "\033[91m"
+            ! diff -a --strip-trailing-cr "${CFG_BASE}.${txtext}" "${dst_base}.${txtext}" \
+                && exitCode=$((exitCode + 1)) && echo -e "Error: $upExt differs\033[0m" \
+                || echo -e "\033[92mOK: $upExt is identical\033[0m"
         fi
     done
     #read -p "press..."      # DEBUG helper to examine produced files

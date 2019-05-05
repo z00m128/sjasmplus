@@ -41,7 +41,6 @@ int SkipBlanks();
 void SkipToEol(char*& p);
 int NeedEQU();
 int NeedDEFL();
-int NeedField();
 char* GetID(char*& p);
 void ResetGrowSubId();
 char* GrowSubId(char* & p);
@@ -71,7 +70,7 @@ template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, in
 int GetBytes(char*& p, int e[], int add, int dc);
 int GetBits(char*& p, int e[]);
 int GetBytesHexaText(char*& p, int e[]);
-int cmphstr(char*& p1, const char* p2);
+int cmphstr(char*& p1, const char* p2);		// p2 must be lowercase to match both cases
 char* GetFileName(char*& p, bool convertslashes=false);
 EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called
 int islabchar(char p);

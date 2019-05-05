@@ -1,0 +1,26 @@
+# file opened: po_mmu.asm
+ 1    0000                  DEVICE ZXSPECTRUM128
+ 1    0000                LABELSLIST "po_mmu.lbl"  ; to check label pages
+ 2    0000                  MMU 1 3, 5      ; maps slots 1, 2, 3 with pages 5, 6, 7
+ 3    0000                  ORG 0xBFFF
+ 4    BFFF 37           label1_p6: scf      ; last byte of page 6 (in slot 2)
+ 5    C000 37           label2_p7: scf      ; first byte of page 7 (in slot 3)
+ 6    C001
+ 7    C001                  MMU 3 e, 0      ; page 0 into slot 3, write beyond slot will cause error
+ 8    C001                  ORG 0xFFFF
+po_mmu.asm(9): error: Write outside of memory slot: 65536
+ 9    FFFF 3E 01            ld  a,1         ; error: Write outside of memory slot: 65536 (65536 = address outside)
+10    0001
+11    0001                  MMU 3 n, 1      ; page 1 into slot 3, make it wrap + map next page automatically
+12    0001                  ORG 0xFFFF      ; ! also the $ address was truncated by MMU from $10001 to $0001 !
+13    FFFF 37           label3_p1: scf      ; last byte of page 1, then wrapping back to 0xC000 with page 2
+14    C000 37           label4_p2: scf      ; first byte of page 2 at 0xC000
+15    C001
+# file closed: po_mmu.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xBFFF X label1_p6
+0xC000 X label2_p7
+0xFFFF X label3_p1
+0xC000 X label4_p2

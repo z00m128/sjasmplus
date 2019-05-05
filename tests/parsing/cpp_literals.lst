@@ -1,0 +1,112 @@
+# file opened: cpp_literals.asm
+ 1    0000                  ; new syntax did break legacy sources in specific case like "0b800h"
+ 2    0000 00 B1 00 B1      dw      0b100h, 0xb100
+ 3    0004
+ 4    0004                  ; new syntax to define: 0b..|0B.. = binary number (C++ rule), 0q..|0Q.. = octal number
+ 5    0004 5D 5D 5D 5D      db      %01011101, 01011101b, 01011101B, 0b01011101, 0B01011101
+ 5    0008 5D
+ 6    0009 49 49 49 49      db      111q, 111Q, 111o, 111O, 0q111, 0Q111
+ 6    000D 49 49
+ 7    000F                  ; other old syntax, just verifying syntax highlight of editor and functionality
+ 8    000F 41 41 41         db      65, 65d, 65D
+ 9    0012 42 42 42 42      db      $42, #42, 0x42, 0X42, 42h, 42H
+ 9    0016 42 42
+10    0018              111:
+11    0018 18 FE            jr      111B        ; temporary labels will steal "binary" highlight up to 3 chars
+12    001A              1001:
+13    001A 18 FE            jr      1001B       ; four+ chars: the binary value highlight wins even for label
+14    001C
+15    001C                  ; digit-group ticks tests - fully valid ones
+16    001C 5D 5D 5D 5D      db      %01'01'11'01, 01'01'11'01b, 01'01'11'01B, 0b01'01'11'01, 0B01'01'11'01
+16    0020 5D
+17    0021 49 49 49 49      db      1'1'1q, 1'1'1Q, 1'1'1o, 1'1'1O, 0q1'1'1, 0Q1'1'1
+17    0025 49 49
+18    0027 41 42 41 42      dw      1'6'961, 1'6'961d, 1'6'961D
+18    002B 41 42
+19    002D 43 44 43 44      dw      $4'4'43, #4'4'43, 0x4'4'43, 0X4'4'43, 4'4'43h, 4'4'43H
+19    0031 43 44 43 44
+19    0035 43 44 43 44
+20    0039
+21    0039                  ; digit-group ticks tests - invalid beginning
+cpp_literals.asm(22): error: Missing next digit: %'01'01'11'01
+22    0039                  db      %'01'01'11'01
+cpp_literals.asm(23): error: Unexpected: 01'11'01B,
+23    0039 30 31            db      '01'01'11'01B,
+cpp_literals.asm(24): error: Missing next digit: 0B'01'01'11'01
+24    003B                  db      0B'01'01'11'01
+cpp_literals.asm(25): error: Unexpected: 1'1Q
+25    003B 31               db      '1'1'1Q
+cpp_literals.asm(26): error: Unexpected: 1'1O
+26    003C 31               db      '1'1'1O
+cpp_literals.asm(27): error: Missing next digit: 0Q'1'1'1
+27    003D                  db      0Q'1'1'1
+cpp_literals.asm(28): error: Unexpected: 6'961
+28    003D 31 00            dw      '1'6'961
+cpp_literals.asm(29): error: Unexpected: 6'961D
+29    003F 31 00            dw      '1'6'961D
+cpp_literals.asm(30): error: Unexpected: '4'4'43
+30    0041 41 00            dw      $'4'4'43
+cpp_literals.asm(31): error: Syntax error: #'4'4'43
+cpp_literals.asm(31): error: [DW/DEFW/WORD] Syntax error: #'4'4'43
+31    0043                  dw      #'4'4'43
+cpp_literals.asm(32): error: Missing next digit: 0X'4'4'43
+32    0043                  dw      0X'4'4'43
+cpp_literals.asm(33): error: Unexpected: 4'43H
+33    0043 34 00            dw      '4'4'43H
+34    0045
+35    0045                  ; digit-group ticks tests - invalid end
+cpp_literals.asm(36): error: Unexpected: '
+36    0045 5D               db      %01'01'11'01'
+cpp_literals.asm(37): error: Missing next digit: 01'01'11'01'B
+37    0046                  db      01'01'11'01'B
+cpp_literals.asm(38): error: Unexpected: '
+38    0046 5D               db      0B01'01'11'01'
+cpp_literals.asm(39): error: Missing next digit: 1'1'1'Q
+39    0047                  db      1'1'1'Q
+cpp_literals.asm(40): error: Missing next digit: 1'1'1'O
+40    0047                  db      1'1'1'O
+cpp_literals.asm(41): error: Unexpected: '
+41    0047 49               db      0Q1'1'1'
+cpp_literals.asm(42): error: Unexpected: '
+42    0048 41 42            dw      1'6'961'
+cpp_literals.asm(43): error: Missing next digit: 1'6'961'D
+43    004A                  dw      1'6'961'D
+cpp_literals.asm(44): error: Unexpected: '
+44    004A 43 44            dw      $4'4'43'
+cpp_literals.asm(45): error: Unexpected: '
+45    004C 43 44            dw      #4'4'43'
+cpp_literals.asm(46): error: Unexpected: '
+46    004E 43 44            dw      0X4'4'43'
+cpp_literals.asm(47): error: Missing next digit: 4'4'43'H
+47    0050                  dw      4'4'43'H
+48    0050
+49    0050                  ; digit-group ticks tests - two ticks are invalid too
+cpp_literals.asm(50): error: Unexpected: ''1101
+50    0050 05               db      %0101''1101
+cpp_literals.asm(51): error: Unexpected: ''1101B
+51    0051 65               db      0101''1101B
+cpp_literals.asm(52): error: Unexpected: ''1101
+52    0052 05               db      0B0101''1101
+cpp_literals.asm(53): error: Unexpected: ''1Q
+53    0053 0B               db      11''1Q
+cpp_literals.asm(54): error: Unexpected: ''1O
+54    0054 0B               db      11''1O
+cpp_literals.asm(55): error: Unexpected: ''1
+55    0055 09               db      0Q11''1
+cpp_literals.asm(56): error: Unexpected: ''961
+56    0056 10 00            dw      16''961
+cpp_literals.asm(57): error: Unexpected: ''961D
+57    0058 10 00            dw      16''961D
+cpp_literals.asm(58): error: Unexpected: ''43
+58    005A 44 00            dw      $44''43
+cpp_literals.asm(59): error: Unexpected: ''43
+59    005C 44 00            dw      #44''43
+cpp_literals.asm(60): error: Unexpected: ''43
+60    005E 44 00            dw      0X44''43
+cpp_literals.asm(61): error: Unexpected: ''43H
+61    0060 2C 00            dw      44''43H
+62    0062
+# file closed: cpp_literals.asm
+
+Value    Label
+------ - -----------------------------------------------------------

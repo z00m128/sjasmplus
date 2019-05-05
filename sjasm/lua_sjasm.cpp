@@ -617,8 +617,8 @@ static int tolua_sjasm_sj_get_word00(lua_State* tolua_S)
  {
   unsigned int address = ((unsigned int)  tolua_tonumber(tolua_S,1,0));
   {
-   unsigned char tolua_ret = (unsigned char)  MemGetWord(address);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+   lua_Number tolua_ret = 0xFFFF & MemGetWord(address);
+   tolua_pushnumber(tolua_S, tolua_ret);
   }
  }
  return 1;

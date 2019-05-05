@@ -16,6 +16,7 @@ set(MY_TOLUA++_LIBRARY "tolua++")
 set(SOURCES
 	sjasm/devices.cpp
 	sjasm/directives.cpp
+	sjasm/io_nex.cpp
 	sjasm/io_snapshots.cpp
 	sjasm/io_tape.cpp
 	sjasm/io_trd.cpp

@@ -41,13 +41,7 @@ enum EStatus { ALL, FATAL, EARLY, PASS3, IF_FIRST, SUPPRESS };
 enum EWStatus { W_ALL, W_EARLY, W_PASS3 };
 enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM };
 
-#ifdef PAGESIZE
-#undef PAGESIZE
-#endif
-
-#define PAGESIZE 0x4000
-
-extern aint PreviousAddress, epadres;
+extern int ListAddress;
 
 #define OUTPUT_TRUNCATE 0
 #define OUTPUT_REWIND 1
@@ -63,7 +57,7 @@ void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);
 void Warning(const char* message, const char* badValueMessage = NULL, EWStatus type = W_PASS3);
 FILE* GetListingFile();
 void ListFile(bool showAsSkipped = false);
-void CheckPage();
+void CheckRamLimitExceeded();
 void EmitByte(int byte);
 void EmitWord(int word);
 void EmitBytes(int* bytes);
@@ -82,12 +76,24 @@ void PrintHex(char* & dest, aint value, int nibbles);
 void PrintHex32(char* & dest, aint value);
 void PrintHexAlt(char* & dest, aint value);
 char* GetPath(char* fname, char** filenamebegin = NULL, bool systemPathsBeforeCurrent = false);
-void BinIncFile(char* fname, int offset, int length);
+
+/**
+ * @brief Includes bytes of particular file into output (and virtual device memory).
+ *
+ * @param fname file name to open (include paths will be searched, order depends on syntax "" vs <>)
+ * @param offset positive: bytes to skip / negative: bytes to rewind back from end
+ * @param length positive: bytes to include / negative: bytes to skip from end / INT_MAX: all remaining
+ */
+void BinIncFile(char* fname, int offset = 0, int length = INT_MAX);
+
 int SaveRAM(FILE*, int, int);
 unsigned char MemGetByte(unsigned int address);
 unsigned int MemGetWord(unsigned int address);
 int SaveBinary(char* fname, int start, int length);
+bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length);
+bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length);
 int SaveHobeta(char* fname, char* fhobname, int start, int length);
+int ReadLineNoMacro(bool SplitByColon = true);
 int ReadLine(bool SplitByColon = true);
 EReturn ReadFile();
 EReturn SkipFile();

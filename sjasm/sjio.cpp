@@ -50,8 +50,9 @@ int tape_parity = 0x55;
 FILE* FP_tapout = NULL;
 FILE* FP_Input = NULL, * FP_Output = NULL, * FP_RAW = NULL;
 FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
-aint PreviousAddress,epadres,IsSkipErrors = 0;
+int ListAddress;
 aint WBLength = 0;
+bool IsSkipErrors = false;
 
 void Error(const char* message, const char* badValueMessage, EStatus type) {
 	// check if it is correct pass by the type of error
@@ -142,23 +143,25 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 	}
 }
 
-void CheckRamLimitExceeded()
-{
-	if (CurAddress >= 0x10000)
-	{
-		char buf[64];
-		SPRINTF2(buf, 1024, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
-		Warning(buf);
-		CurAddress &= 0xFFFF;
-	}
-
-	if (PseudoORG) if (adrdisp >= 0x10000)
-	{
-		char buf[64];
-		SPRINTF1(buf, 1024, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
-		Warning(buf);
-		adrdisp &= 0xFFFF;
-	}
+void CheckRamLimitExceeded() {
+	static bool notWarnedCurAdr = true;
+	static bool notWarnedDisp = true;
+	char buf[64];
+	if (CurAddress >= 0x10000) {
+		if (notWarnedCurAdr) {
+			SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
+			Warning(buf);
+			notWarnedCurAdr = false;
+		}
+		if (PseudoORG) CurAddress &= 0xFFFF;	// fake DISP address gets auto-wrapped FFFF->0
+	} else notWarnedCurAdr = true;
+	if (PseudoORG && adrdisp >= 0x10000) {
+		if (notWarnedDisp) {
+			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
+			Warning(buf);
+			notWarnedDisp = false;
+		}
+	} else notWarnedDisp = true;
 }
 
 void WriteDest() {
@@ -268,13 +271,10 @@ void ListFile(bool showAsSkipped) {
 	if (LASTPASS != pass || NULL == GetListingFile() || donotlist) {
 		donotlist = nEB = 0; return;
 	}
-	aint pad = PreviousAddress;
-	if (pad == -1L) pad = epadres;
-
 	int pos = 0;
 	do {
 		if (showAsSkipped) substitutedLine = line;	// override substituted lines in skipped mode
-		PrepareListLine(pad);
+		PrepareListLine(ListAddress);
 		if (pos) pline[24] = 0;		// remove source line on sub-sequent list-lines
 		char* pp = pline + 10;
 		int BtoList = (nEB < 4) ? nEB : 4;
@@ -287,107 +287,38 @@ void ListFile(bool showAsSkipped) {
 		ListFileStringRtrim();
 		fputs(pline, GetListingFile());
 		nEB -= BtoList;
-		pad += BtoList;
+		ListAddress += BtoList;
 		pos += BtoList;
 	} while (0 < nEB);
-	epadres = CurAddress;
-	PreviousAddress = -1L;
 	nEB = 0;
 }
 
-void CheckPage() {
-	if (!DeviceID) {
-		return;
-	}
-	/*
-	int addadr = 0;
-	switch (Slot->Number) {
-	case 0:
-		addadr = 0x8000;
-		break;
-	case 1:
-		addadr = 0xc000;
-		break;
-	case 2:
-		addadr = 0x4000;
-		break;
-	case 3:
-		addadr = 0x10000;
-		break;
-	case 4:
-		addadr = 0x14000;
-		break;
-	case 5:
-		addadr = 0x0000;
-		break;
-	case 6:
-		addadr = 0x18000;
-		break;
-	case 7:
-		addadr = 0x1c000;
-		break;
-	}
-	if (MemoryCPage > 7) {
-		addadr = 0x4000 * MemoryCPage;
-	}
-	if (PseudoORG) {
-		if (adrdisp < 0xC000) {
-			addadr = adrdisp - 0x4000;
-		} else {
-			addadr += adrdisp - 0xC000;
-		}
-	} else {
-		if (CurAddress < 0xC000) {
-			addadr = CurAddress - 0x4000;
-		} else {
-			addadr += CurAddress - 0xC000;
-		}
-	}
-	MemoryPointer = MemoryRAM + addadr;*/
-
-	for (int i=0;i<Device->SlotsCount;i++) {
-		CDeviceSlot* S = Device->GetSlot(i);
-		int realAddr = PseudoORG ? adrdisp : CurAddress;
-		if (realAddr >= S->Address && ((realAddr < 65536 && realAddr < S->Address + S->Size) \
-										|| (realAddr >= 65536 && realAddr <= S->Address + S->Size))) {
-			MemoryPointer = S->Page->RAM + (realAddr - S->Address);
-			Page = S->Page;
-			return;
-		}
-	}
-
-	Error("CheckPage(): please, contact the author of this program.", NULL, FATAL);
-}
-
-void Emit(int byte)
-{
-	EB[nEB++] = byte;
-
-	CheckRamLimitExceeded();
-
-	if (pass == LASTPASS)
-	{
+static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
+	if (LASTPASS == pass) {
 		WriteBuffer[WBLength++] = (char)byte;
-		if (WBLength == DESTBUFLEN) WriteDest();
-
-		if (DeviceID)
-		{
-			if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
-			*(MemoryPointer++) = (char)byte;
+		if (DESTBUFLEN == WBLength) WriteDest();
+	}
+	// the page-checking in device mode must be done in all passes, the slot can have "wrap" option
+	if (DeviceID) {
+		Device->CheckPage(CDevice::CHECK_EMIT);
+		if (MemoryPointer) {
+			if (LASTPASS == pass && !preserveDeviceMemory) *MemoryPointer = (char)byte;
+			++MemoryPointer;
 		}
 	}
-
 	++CurAddress;
 	if (PseudoORG) ++adrdisp;
 }
 
 void EmitByte(int byte) {
-	Emit(byte);
+	byte &= 0xFF;
+	EB[nEB++] = byte;		// write also into listing
+	EmitByteNoListing(byte);
 }
 
 void EmitWord(int word) {
-	Emit(word % 256);
-	Emit(word / 256);
+	EmitByte(word % 256);
+	EmitByte(word / 256);
 }
 
 void EmitBytes(int* bytes) {
@@ -395,46 +326,29 @@ void EmitBytes(int* bytes) {
 		Error("Illegal instruction", line, IF_FIRST);
 		SkipToEol(lp);
 	}
-	while (*bytes != -1) {
-		Emit(*bytes++);
-	}
+	while (*bytes != -1) EmitByte(*bytes++);
 }
 
 void EmitWords(int* words) {
-	while (*words != -1) {
-		Emit((*words) % 256);
-		Emit((*words++) / 256);
-	}
+	while (*words != -1) EmitWord(*words++);
 }
 
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
 	if (len <= 0) {
 		CurAddress = (CurAddress + len) & 0xFFFF;
 		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
-		CheckPage();
+		if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
+		else			CheckRamLimitExceeded();
 		return;
 	}
 	while (len--) {
-		CheckRamLimitExceeded();
-		if (pass == LASTPASS) {
-			WriteBuffer[WBLength++] = (char)byte;
-			if (WBLength == DESTBUFLEN) WriteDest();
-
-			if (DeviceID)
-			{
-				if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
-				if (!preserveDeviceMemory) *MemoryPointer = (char)byte;
-
-				MemoryPointer++;
-			}
-			if (emitMaxToListing) {
-				// put "..." marker into listing if some more bytes are emitted after last listed
-				if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
-				else EB[nEB++] = (DeviceID ? MemoryPointer[-1] : byte)&0xFF;
-			}
+		int dVal = (preserveDeviceMemory && DeviceID && MemoryPointer) ? MemoryPointer[0] : byte;
+		EmitByteNoListing(byte, preserveDeviceMemory);
+		if (LASTPASS == pass && emitMaxToListing) {
+			// put "..." marker into listing if some more bytes are emitted after last listed
+			if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
+			else EB[nEB++] = dVal&0xFF;
 		}
-		++CurAddress;
-		if (PseudoORG) ++adrdisp;
 	}
 }
 
@@ -467,96 +381,69 @@ char* GetPath(char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
 	return kip;
 }
 
-void BinIncFile(char* fname, int offset, int len) {
+// if offset is negative, it functions as "how many bytes from end of file"
+// if length is negative, it functions as "how many bytes from end of file to not load"
+void BinIncFile(char* fname, int offset, int length) {
+	// open the desired file
 	FILE* bif;
-	int res;
-	int totlen = 0;
-	char* fullFilePath;
-
-	fullFilePath = GetPath(fname);
-	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) {
-		Error("Error opening file", fname, FATAL);
-	}
+	char* fullFilePath = GetPath(fname);
+	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("Error opening file", fname, FATAL);
 	free(fullFilePath);
 
-	if (offset == -1) offset = 0;
+	// Get length of file
+	int totlen = 0, advanceLength;
+	if (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0) Error("telling file length", fname, FATAL);
 
-	// Get length of file //
-	if (fseek(bif, 0, SEEK_END))
-		Error("Error seeking file (len)", fname, FATAL);
-	totlen = ftell(bif);
-	if (totlen < 0)
-		Error("Error telling file (len)", fname, FATAL);
-
-	if (len == -1) len = totlen - offset;
-	// Getting final length of included data //
-	if (0 == len) {
-		Warning("INCBIN: requested to include no data (len=0)");
+	// process arguments (extra features like negative offset/length or INT_MAX length)
+	// negative offset means "from the end of file"
+	if (offset < 0) offset += totlen;
+	// negative length means "except that many from end of file"
+	if (length < 0) length += totlen - offset;
+	// default length INT_MAX is "till the end of file"
+	if (INT_MAX == length) length = totlen - offset;
+	// verbose output of final values (before validation may terminate assembler)
+	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
+		char diagnosticTxt[MAX_PATH];
+		SPRINTF4(diagnosticTxt, MAX_PATH, "include data: name=%s (%d bytes) Offset=%d  Len=%d", fname, totlen, offset, length);
+		_CERR diagnosticTxt _ENDL;
+	}
+	// validate the resulting [offset, length]
+	if (offset < 0 || length < 0 || totlen < offset + length) {
+		Error("file too short", fname, FATAL);
+	}
+	if (0 == length) {
+		Warning("include data: requested to include no data (length=0)");
 		fclose(bif);
 		return;
 	}
 
-	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
-		char diagnosticTxt[MAX_PATH];
-		SPRINTF3(diagnosticTxt, MAX_PATH, "INCBIN: name=%s  Offset=%u  Len=%u\n", fname, offset, len);
-		_CERR diagnosticTxt _ENDL;
-	}
-
-	// Check requested data //
-	if (offset + len > totlen)
-		Error("Error file too short", fname, FATAL);
-
-	// Seek to begin of including part //
-	if (offset > totlen)
-		Error("Offset overflows file length", fname, FATAL);
-	if (fseek(bif, offset, SEEK_SET))
-		Error("Error seeking file (offs)", fname, FATAL);
-	if (ftell(bif) != offset)
-		Error("Error telling file (offs)", fname, FATAL);
-
-	// Getting final length of included data //
-	if (len > 0x10000) {
-		len = 0x10000;
-		Warning("Included data truncated to 64kB from");
+	// Seek to the beginning of part to include
+	if (fseek(bif, offset, SEEK_SET) || ftell(bif) != offset) {
+		Error("seeking in file to offset", fname, FATAL);
 	}
 
 	if (pass != LASTPASS) {
-		CurAddress = (CurAddress + len) & 0xFFFF;
-		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
-	} else {
-		// Reading data from file //
-		char* data = new char[len + 1];
-		char *bp = data;
-
-		if (bp == NULL)
-			ErrorInt("No enough memory for file", (len + 1), FATAL);
-
-		res = fread(bp, 1, len, bif);
-
-		if (res == -1)
-			Error("Can't read file (read error)", fname, FATAL);
-		if (res != len)
-			Error("Can't read file (no enough data)", fname, FATAL);
-
-		while (len--) {
-			CheckRamLimitExceeded();
-
-			if (pass == LASTPASS) {
-				WriteBuffer[WBLength++] = *bp;
-				if (WBLength == DESTBUFLEN) WriteDest();
-
-				if (DeviceID) {
-					if ((MemoryPointer - Page->RAM) >= (int)Page->Size) CheckPage();
-					*MemoryPointer = *bp;
-
-					MemoryPointer++;
+		while (length) {
+			advanceLength = length;		// maximum possible to advance in address space
+			if (DeviceID) {				// particular device may adjust that to less
+				Device->CheckPage(CDevice::CHECK_EMIT);
+				if (MemoryPointer) {	// fill up current memory page if possible
+					advanceLength = Page->RAM + Page->Size - MemoryPointer;
+					if (length < advanceLength) advanceLength = length;
 				}
 			}
-			++bp;
-			++CurAddress;
-			if (PseudoORG) ++adrdisp;
+			length -= advanceLength;
+			if (length <= 0 && 0 == advanceLength) Error("BinIncFile internal error", NULL, FATAL);
+			if (PseudoORG) adrdisp = adrdisp + advanceLength;
+			CurAddress = CurAddress + advanceLength;
 		}
-		CheckRamLimitExceeded();
+	} else {
+		// Reading data from file
+		char* data = new char[length + 1], * bp = data;
+		if (NULL == data) ErrorInt("No enough memory for file", (length + 1), FATAL);
+		size_t res = fread(bp, 1, length, bif);
+		if (res != (size_t)length) Error("reading data from file failed", fname, FATAL);
+		while (length--) EmitByteNoListing(*bp++);
 		delete[] data;
 	}
 	fclose(bif);
@@ -724,6 +611,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			++CurrentSourceLine;
 			IsLabel = (0 == blockComment);
 		}
+		bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 		// copy data from read buffer into `line` buffer until EOL/colon is found
 		while (
 				ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf &&	// split by EOL
@@ -731,6 +619,8 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				(blockComment || !SplitByColon || rlppos == line || ':' != *rlpbuf)) {
 			// copy the new character to new line
 			*rlppos = *rlpbuf++;
+			afterNonAlphaNum = afterNonAlphaNumNext;
+			afterNonAlphaNumNext = !isalnum(*rlppos);
 			// Block comments logic first (anything serious may happen only "outside" of block comment
 			if ('*' == *rlppos && ReadBufData() && '/' == *rlpbuf) {
 				if (0 < blockComment) --blockComment;	// block comment ends here, -1 from nesting
@@ -763,7 +653,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				continue;
 			}
 			// check for string literals - double/single quotes
-			if ('"' == *rlppos || '\'' == *rlppos) {
+			if (afterNonAlphaNum && ('"' == *rlppos || '\'' == *rlppos)) {
 				const bool quotes = '"' == *rlppos;
 				int escaped = 0;
 				do {
@@ -891,7 +781,11 @@ void OpenDest(int mode) {
 		Error("Error opening file", Options::DestinationFName, FATAL);
 	}
 	Options::NoDestinationFile = false;
-	if (NULL == FP_RAW && '-' == Options::RAWFName[0] && 0 == Options::RAWFName[1]) FP_RAW = stdout;
+	if (NULL == FP_RAW && '-' == Options::RAWFName[0] && 0 == Options::RAWFName[1]) {
+		FP_RAW = stdout;
+		fflush(stdout);
+		switchStdOutIntoBinaryMode();
+	}
 	if (FP_RAW == NULL && Options::RAWFName[0] && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {
 		Error("Error opening file", Options::RAWFName);
 	}
@@ -1009,75 +903,6 @@ int SaveRAM(FILE* ff, int start, int length) {
 	}
 
 	return 1;
-/*
-	// $4000-$7FFF
-	if (start < 0x8000) {
-		save = length;
-		addadr = start - 0x4000;
-		if (save + start > 0x8000) {
-			save = 0x8000 - start;
-			length -= save;
-			start = 0x8000;
-		} else {
-			length = 0;
-		}
-		if (fwrite(MemoryRAM + addadr, 1, save, ff) != save) {
-			return 0;
-		}
-	}
-
-	// $8000-$BFFF
-	if (length > 0 && start < 0xC000) {
-		save = length;
-		addadr = start - 0x4000;
-		if (save + start > 0xC000) {
-			save = 0xC000 - start;
-			length -= save;
-			start = 0xC000;
-		} else {
-			length = 0;
-		}
-		if (fwrite(MemoryRAM + addadr, 1, save, ff) != save) {
-			return 0;
-		}
-	}
-
-	// $C000-$FFFF
-	if (length > 0) {
-		if (Options::MemoryType == MT_ZX48) {
-			addadr = start;
-		} else {
-			switch (MemoryCPage) {
-			case 0:
-				addadr = 0x8000;
-				break;
-			case 1:
-				addadr = 0xc000;
-				break;
-			case 2:
-				addadr = 0x4000;
-				break;
-			case 3:
-				addadr = 0x10000;
-				break;
-			case 4:
-				addadr = 0x14000;
-				break;
-			case 5:
-				addadr = 0x0000;
-				break;
-			default:
-				addadr = 0x4000*MemoryCPage;
-				break;
-			}
-			addadr += start - 0xC000;
-		}
-		save = length;
-		if (fwrite(MemoryRAM + addadr, 1, save, ff) != save) {
-			return 0;
-		}
-	}
-	return 1;*/
 }
 
 unsigned int MemGetWord(unsigned int address) {
@@ -1103,51 +928,6 @@ unsigned char MemGetByte(unsigned int address) {
 
 	Error("Error with MemGetByte!", NULL, FATAL);
 	return 0;
-
-	/*// $4000-$7FFF
-	if (address < 0x8000) {
-		return MemoryRAM[address - 0x4000];
-	}
-	// $8000-$BFFF
-	else if (address < 0xC000) {
-		return MemoryRAM[address - 0x8000];
-	}
-		// $C000-$FFFF
-	else {*/
-		/*unsigned int addadr = 0;
-		if (Options::MemoryType == MT_ZX48) {
-			return MemoryRAM[address];
-		} else {
-			switch (MemoryCPage) {
-			case 0:
-				addadr = 0x8000;
-				break;
-			case 1:
-				addadr = 0xc000;
-				break;
-			case 2:
-				addadr = 0x4000;
-				break;
-			case 3:
-				addadr = 0x10000;
-				break;
-			case 4:
-				addadr = 0x14000;
-				break;
-			case 5:
-				addadr = 0x0000;
-				break;
-			default:
-				addadr = 0x4000*MemoryCPage;
-				break;
-			}
-			addadr += address - 0xC000;*/
-			/*if (MemoryRAM[addadr]) {
-				return 0;
-			}*/
-			//return MemoryRAM[addadr];
-		//}
-	//}
 }
 
 
@@ -1172,26 +952,25 @@ int SaveBinary(char* fname, int start, int length) {
 }
 
 
+// all arguments must be sanitized by caller (this just writes data block into opened file)
+bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
+	return (length == fwrite(Device->Memory + start, 1, length, file));
+}
+
+
+// start and length must be sanitized by caller
+bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length) {
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("Error opening file", fname, FATAL);
+	bool res = SaveDeviceMemory(ff, start, length);
+	fclose(ff);
+	return res;
+}
+
+
 int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	unsigned char header[0x11];
 	int i;
-	for (i = 0; i != 8; header[i++] = 0x20) {
-		;
-	}
-	//for (i = 0; i != 8; ++i) {
-	for (i = 0; i < 9; ++i) {
-
-		if (*(fhobname + i) == 0) {
-			break;
-		}
-		if (*(fhobname + i) != '.') {
-			header[i] = *(fhobname + i);continue;
-		} else if (*(fhobname + i + 1)) {
-			header[8] = *(fhobname + i + 1);
-		}
-		break;
-	}
-
 
 	if (length + start > 0x10000) {
 		length = -1;
@@ -1200,18 +979,27 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 		length = 0x10000 - start;
 	}
 
-	if (*(fhobname + i + 2) != 0 && *(fhobname + i + 3) != 0) {
-		header[0x09] = *(fhobname + i + 2);
-		header[0x0a] = *(fhobname + i + 3);
-	} else {
-		if (header[8] == 'B') {
-			header[0x09] = (unsigned char)(length & 0xff);
-			header[0x0a] = (unsigned char)(length >> 8);
-		} else {
-			header[0x09] = (unsigned char)(start & 0xff);
-			header[0x0a] = (unsigned char)(start >> 8);
+	memset(header,' ',9);
+	i = strlen(fhobname);
+	if (i > 1)
+	{
+		char *ext = strrchr(fhobname, '.');
+		if (ext && ext[1])
+		{
+			header[8] = ext[1];
+			i = ext-fhobname;
 		}
 	}
+	memcpy(header, fhobname, std::min(i,8));
+
+	if (header[8] == 'B')	{
+		header[0x09] = (unsigned char)(length & 0xff);
+		header[0x0a] = (unsigned char)(length >> 8);
+	} else	{
+		header[0x09] = (unsigned char)(start & 0xff);
+		header[0x0a] = (unsigned char)(start >> 8);
+	}
+
 
 	header[0x0b] = (unsigned char)(length & 0xff);
 	header[0x0c] = (unsigned char)(length >> 8);
@@ -1247,13 +1035,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 }
 
 EReturn ReadFile() {
-	while (IsRunning && (lijst || ReadLine())) {
-		if (lijst) {
-			if (!lijstp) return END;
-			STRCPY(line, LINEMAX, lijstp->string);
-			substitutedLine = line;		// reset substituted listing
-			lijstp = lijstp->next;
-		}
+	while (ReadLine()) {
 		const bool isInsideDupCollectingLines = !RepeatStack.empty() && !RepeatStack.top().IsInWork;
 		if (!isInsideDupCollectingLines) {
 			char* p = line;
@@ -1282,13 +1064,7 @@ EReturn ReadFile() {
 
 EReturn SkipFile() {
 	int iflevel = 0;
-	while (IsRunning && (lijst || ReadLine())) {
-		if (lijst) {
-			if (!lijstp) return END;
-			STRCPY(line, LINEMAX, lijstp->string);
-			substitutedLine = line;		// reset substituted listing
-			lijstp = lijstp->next;
-		}
+	while (ReadLine()) {
 		char* p = line;
 		SkipBlanks(p);
 		if ('.' == *p) ++p;
@@ -1316,16 +1092,27 @@ EReturn SkipFile() {
 	return END;
 }
 
-int ReadLine(bool SplitByColon) {
+int ReadLineNoMacro(bool SplitByColon) {
 	if (!IsRunning || !ReadBufData()) return 0;
 	ReadBufLine(false, SplitByColon);
 	return 1;
 }
 
+int ReadLine(bool SplitByColon) {
+	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
+		if (!lijstp) return 0;
+		STRCPY(line, LINEMAX, lijstp->string);
+		substitutedLine = line;		// reset substituted listing
+		lijstp = lijstp->next;
+		return 1;
+	}
+	return ReadLineNoMacro(SplitByColon);
+}
+
 int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	// f itself should be already NULL, not resetting it here
 	CStringsList** s = &f;
-	while (ReadLine()) {
+	while (ReadLineNoMacro()) {
 		char* p = line;
 		SkipBlanks(p);
 		if ('.' == *p) ++p;

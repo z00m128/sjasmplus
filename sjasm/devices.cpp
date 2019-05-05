@@ -36,128 +36,69 @@ bool IsZXSpectrumDevice(char *name){
 		strcmp(name, "ZXSPECTRUM1024")) {
 			return false;
 	}
-
 	return true;
 }
 
-void DeviceZXSpectrum48(CDevice **dev, CDevice *parent) {
-	// add new device
+static void initZxLikeDevice(CDevice* const device, int32_t slotSize, int pageCount, const int* const initialPages) {
+	for (int32_t slotAddress = 0; slotAddress < 0x10000; slotAddress += slotSize) {
+		device->AddSlot(slotAddress, slotSize);
+	}
+	device->Memory = new byte[pageCount * slotSize]();
+	byte* memPtr = device->Memory;
+	for (int i = 0; i < pageCount; ++i, memPtr += slotSize) {
+		device->AddPage(memPtr, slotSize);
+	}
+	for (int i = 0; i < device->SlotsCount; ++i) {
+		device->GetSlot(i)->Page = device->GetPage(initialPages[i]);
+	}
+	device->SetSlot(device->SlotsCount - 1);
+	// set memory to "USR 0"-like state (for snapshot saving) (works also for ZXN 0x2000 slotSize)
+	int vramPage = (0x2000 == slotSize) ? initialPages[2] : initialPages[1];	// default = second slot page
+	byte* const vramRAM = device->GetPage(vramPage)->RAM;
+	memset(vramRAM + 0x1800, 7*8, 768);
+	memcpy(vramRAM + 0x1C00, BASin48Vars, sizeof(BASin48Vars));
+	byte* const stackRAM = device->GetCurrentSlot()->Page->RAM;	// last slot page is default "stack"
+	memcpy(stackRAM + slotSize - sizeof(BASin48SP), BASin48SP, sizeof(BASin48SP));
+}
+
+static void DeviceZXSpectrum48(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM48", parent);
-	(*dev)->AddSlot(0x0000, 0x4000);
-	(*dev)->AddSlot(0x4000, 0x4000);
-	(*dev)->AddSlot(0x8000, 0x4000);
-	(*dev)->AddSlot(0xC000, 0x4000);
-
-	for (int i=0;i<4;i++) {
-		(*dev)->AddPage(0x4000);
-	}
-
-	(*dev)->GetSlot(0)->Page = (*dev)->GetPage(0);
-	(*dev)->GetSlot(1)->Page = (*dev)->GetPage(1);
-	(*dev)->GetSlot(2)->Page = (*dev)->GetPage(2);
-	(*dev)->GetSlot(3)->Page = (*dev)->GetPage(3);
-
-	//memcpy((*dev)->GetPage(1)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	//memset((*dev)->GetPage(1)->RAM + 6144, 7*8, 768);
-
-	memcpy((*dev)->GetPage(1)->RAM + 0x1C00, BASin48Vars, sizeof(BASin48Vars));
-	memset((*dev)->GetPage(1)->RAM + 6144, 7*8, 768);
-
-	memcpy((*dev)->GetPage(3)->RAM + 0x4000-sizeof(BASin48SP), BASin48SP, sizeof(BASin48SP));
-
-	(*dev)->CurrentSlot = 3;
+	const int initialPages[] = {0, 1, 2, 3};
+	initZxLikeDevice(*dev, 0x4000, 4, initialPages);
 }
 
-void DeviceZXSpectrum128(CDevice **dev, CDevice *parent) {
-	// add new device
+const static int initialPagesZx128[] = {7, 5, 2, 0};
+
+static void DeviceZXSpectrum128(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM128", parent);
-	(*dev)->AddSlot(0x0000, 0x4000);
-	(*dev)->AddSlot(0x4000, 0x4000);
-	(*dev)->AddSlot(0x8000, 0x4000);
-	(*dev)->AddSlot(0xC000, 0x4000);
-
-	for (int i=0;i<8;i++) {
-		(*dev)->AddPage(0x4000);
-	}
-
-	(*dev)->GetSlot(0)->Page = (*dev)->GetPage(0);
-	(*dev)->GetSlot(1)->Page = (*dev)->GetPage(5);
-	(*dev)->GetSlot(2)->Page = (*dev)->GetPage(2);
-	(*dev)->GetSlot(3)->Page = (*dev)->GetPage(7);
-
-	memcpy((*dev)->GetPage(5)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	memset((*dev)->GetPage(5)->RAM + 6144, 7*8, 768);
-
-	(*dev)->CurrentSlot = 3;
+	initZxLikeDevice(*dev, 0x4000, 8, initialPagesZx128);
 }
 
-void DeviceZXSpectrum256(CDevice **dev, CDevice *parent) {
-	// add new device
+static void DeviceZXSpectrum256(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM256", parent);
-	(*dev)->AddSlot(0x0000, 0x4000);
-	(*dev)->AddSlot(0x4000, 0x4000);
-	(*dev)->AddSlot(0x8000, 0x4000);
-	(*dev)->AddSlot(0xC000, 0x4000);
-
-	for (int i=0;i<16;i++) {
-		(*dev)->AddPage(0x4000);
-	}
-
-	(*dev)->GetSlot(0)->Page = (*dev)->GetPage(0);
-	(*dev)->GetSlot(1)->Page = (*dev)->GetPage(5);
-	(*dev)->GetSlot(2)->Page = (*dev)->GetPage(2);
-	(*dev)->GetSlot(3)->Page = (*dev)->GetPage(7);
-
-	memcpy((*dev)->GetPage(5)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	memset((*dev)->GetPage(5)->RAM + 6144, 7*8, 768);
-
-	(*dev)->CurrentSlot = 3;
+	initZxLikeDevice(*dev, 0x4000, 16, initialPagesZx128);
 }
 
-void DeviceZXSpectrum512(CDevice **dev, CDevice *parent) {
-	// add new device
+static void DeviceZXSpectrum512(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM512", parent);
-	(*dev)->AddSlot(0x0000, 0x4000);
-	(*dev)->AddSlot(0x4000, 0x4000);
-	(*dev)->AddSlot(0x8000, 0x4000);
-	(*dev)->AddSlot(0xC000, 0x4000);
-
-	for (int i=0;i<32;i++) {
-		(*dev)->AddPage(0x4000);
-	}
-
-	(*dev)->GetSlot(0)->Page = (*dev)->GetPage(0);
-	(*dev)->GetSlot(1)->Page = (*dev)->GetPage(5);
-	(*dev)->GetSlot(2)->Page = (*dev)->GetPage(2);
-	(*dev)->GetSlot(3)->Page = (*dev)->GetPage(7);
-
-	memcpy((*dev)->GetPage(5)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	memset((*dev)->GetPage(5)->RAM + 6144, 7*8, 768);
-
-	(*dev)->CurrentSlot = 3;
+	initZxLikeDevice(*dev, 0x4000, 32, initialPagesZx128);
 }
 
-void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {
-	// add new device
+static void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {		// add new device
 	*dev = new CDevice("ZXSPECTRUM1024", parent);
-	(*dev)->AddSlot(0x0000, 0x4000);
-	(*dev)->AddSlot(0x4000, 0x4000);
-	(*dev)->AddSlot(0x8000, 0x4000);
-	(*dev)->AddSlot(0xC000, 0x4000);
+	initZxLikeDevice(*dev, 0x4000, 64, initialPagesZx128);
+}
 
-	for (int i=0;i<64;i++) {
-		(*dev)->AddPage(0x4000);
+static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
+	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
+	const int initialPages[] = {14, 15, 10, 11, 4, 5, 0, 1};	// basically same as ZX128, but 8k
+	initZxLikeDevice(*dev, 0x2000, 224, initialPages);
+	// auto-enable ZX Next instruction extensions
+	if (0 == Options::IsNextEnabled) {
+		Options::IsNextEnabled = 1;
+		Z80::InitNextExtensions();		// add the special opcodes here (they were not added)
+				// this is a bit late, but it should work as well as `--zxnext` option I believe
 	}
-
-	(*dev)->GetSlot(0)->Page = (*dev)->GetPage(0);
-	(*dev)->GetSlot(1)->Page = (*dev)->GetPage(5);
-	(*dev)->GetSlot(2)->Page = (*dev)->GetPage(2);
-	(*dev)->GetSlot(3)->Page = (*dev)->GetPage(7);
-
-	memcpy((*dev)->GetPage(5)->RAM + 0x1C00, ZXSysVars, sizeof(ZXSysVars));
-	memset((*dev)->GetPage(5)->RAM + 6144, 7*8, 768);
-
-	(*dev)->CurrentSlot = 3;
 }
 
 int SetDevice(char *id) {
@@ -173,20 +114,13 @@ int SetDevice(char *id) {
 		dev = &Devices;
 		parent = 0;
 		// search for device
-		while ((*dev)) {
-			if (!strcmp((*dev)->ID, id)) {
-				Device = (*dev);
-				DeviceID = Device->ID;
-				Slot = Device->GetSlot(Device->CurrentSlot);
-				//Page = Slot->Page;
-				CheckPage();
-				break;
-			}
-			parent = (*dev);
-			dev = &((*dev)->Next);
+		while (*dev) {
+			parent = *dev;
+			if (!strcmp(parent->ID, id)) break;
+			dev = &(parent->Next);
 		}
-		if (!DeviceID) {
-			if (cmphstr(id, "zxspectrum48")) {
+		if (NULL == *dev) {		// device not found
+			if (cmphstr(id, "zxspectrum48")) {			// must be lowercase to catch both cases
 				DeviceZXSpectrum48(dev, parent);
 			} else if (cmphstr(id, "zxspectrum128")) {
 				DeviceZXSpectrum128(dev, parent);
@@ -196,20 +130,17 @@ int SetDevice(char *id) {
 				DeviceZXSpectrum512(dev, parent);
 			} else if (cmphstr(id, "zxspectrum1024")) {
 				DeviceZXSpectrum1024(dev, parent);
+			} else if (cmphstr(id, "zxspectrumnext")) {
+				DeviceZxSpectrumNext(dev, parent);
 			} else {
 				return false;
 			}
-
-			Slot = (*dev)->GetSlot((*dev)->CurrentSlot);
-			Page = Slot->Page;
-
-			DeviceID = (*dev)->ID;
-			Device = (*dev);
-
-			CheckPage();
 		}
+		// set up the found/new device
+		Device = (*dev);
+		DeviceID = Device->ID;
+		Device->CheckPage(CDevice::CHECK_RESET);
 	}
-
 	return true;
 }
 
@@ -219,4 +150,152 @@ char* GetDeviceName() {
 	} else {
 		return DeviceID;
 	}
+}
+
+CDevice::CDevice(const char *name, CDevice *parent)
+	: Next(NULL), SlotsCount(0), PagesCount(0), Memory(nullptr), CurrentSlot(0) {
+	ID = STRDUP(name);
+	if (parent) parent->Next = this;
+	for (auto & slot : Slots) slot = NULL;
+	for (auto & page : Pages) page = NULL;
+}
+
+CDevice::~CDevice() {
+	for (auto & slot : Slots) if (slot) delete slot;
+	for (auto & page : Pages) if (page) delete page;
+	if (Memory) delete[] Memory;
+	if (Next) delete Next;
+	free(ID);
+}
+
+void CDevice::AddSlot(int32_t adr, int32_t size) {
+	Slots[SlotsCount++] = new CDeviceSlot(adr, size);
+}
+
+void CDevice::AddPage(byte* memory, int32_t size) {
+	Pages[PagesCount] = new CDevicePage(memory, size, PagesCount);
+	PagesCount++;
+}
+
+CDeviceSlot* CDevice::GetSlot(int num) {
+	if (Slots[num]) return Slots[num];
+	Error("Wrong slot number", lp);
+	return Slots[0];
+}
+
+CDevicePage* CDevice::GetPage(int num) {
+	if (Pages[num]) return Pages[num];
+	Error("Wrong page number", lp);
+	return Pages[0];
+}
+
+void CDevice::CheckPage(const ECheckPageLevel level) {
+	// fake DISP address gets auto-wrapped FFFF->0 (with warning only)
+	// ("no emit" to catch before labels are defined, although "emit" sounds more logical)
+	if (PseudoORG && CHECK_NO_EMIT == level && 0x10000 <= CurAddress) {
+		if (LASTPASS == pass) {
+			char buf[64];
+			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by DISP", (unsigned int)CurAddress);
+			Warning(buf);
+		}
+		CurAddress &= 0xFFFF;
+	}
+	// check the emit address for bytecode
+	const int realAddr = PseudoORG ? adrdisp : CurAddress;
+	// quicker check to avoid scanning whole slots array every byte
+	if (CHECK_RESET != level
+		&& Slots[previousSlotI]->Address <= realAddr
+		&& realAddr < Slots[previousSlotI]->Address + Slots[previousSlotI]->Size) return;
+	for (int i=SlotsCount; i--; ) {
+		CDeviceSlot* const S = Slots[i];
+		if (realAddr < S->Address) continue;
+		Page = S->Page;
+		MemoryPointer = Page->RAM + (realAddr - S->Address);
+ 		if (CHECK_RESET == level) {
+			previousSlotOpt = S->Option;
+			previousSlotI = i;
+			limitExceeded = false;
+			return;
+		}
+		// if still in the same slot and within boundaries, we are done
+		if (i == previousSlotI && realAddr < S->Address + S->Size) return;
+		// crossing into other slot, check options for special functionality of old slot
+		if (S->Address + S->Size <= realAddr) MemoryPointer = NULL; // you're not writing there
+		switch (previousSlotOpt) {
+			case CDeviceSlot::O_ERROR:
+				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded) {
+					ErrorInt("Write outside of memory slot", realAddr, SUPPRESS);
+					limitExceeded = true;
+				}
+				break;
+			case CDeviceSlot::O_WARNING:
+				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded) {
+					Warning("Write outside of memory slot");
+					limitExceeded = true;
+				}
+				break;
+			case CDeviceSlot::O_NEXT:
+			{
+				CDeviceSlot* const prevS = Slots[previousSlotI];
+				const int nextPageN = prevS->Page->Number + 1;
+				if (PagesCount <= nextPageN) {
+					ErrorInt("No more memory pages to map next one into slot", previousSlotI, SUPPRESS);
+					// disable the option on the overflowing slot
+					prevS->Option = CDeviceSlot::O_NONE;
+					break;		// continue into next slot, don't wrap any more
+				}
+				if (realAddr != (prevS->Address + prevS->Size)) {	// should be equal
+					ErrorInt("Write beyond memory slot in wrap-around slot catched too late by",
+								realAddr - prevS->Address - prevS->Size, FATAL);
+					break;
+				}
+				prevS->Page = Pages[nextPageN];		// map next page into the guarded slot
+				Page = prevS->Page;
+				if (PseudoORG) adrdisp -= prevS->Size;
+				else CurAddress -= prevS->Size;
+				MemoryPointer = Page->RAM;
+				return;		// preserve current option status
+			}
+			default:
+				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded && !MemoryPointer) {
+					ErrorInt("Write outside of device memory at", realAddr, SUPPRESS);
+					limitExceeded = true;
+				}
+				break;
+		}
+		// refresh check slot settings
+		limitExceeded &= (previousSlotI == i);	// reset limit flag if slot changed (in non check_reset mode)
+		previousSlotI = i;
+		previousSlotOpt = S->Option;
+		return;
+	}
+	Error("CheckPage(..): please, contact the author of this program.", NULL, FATAL);
+}
+
+bool CDevice::SetSlot(int slotNumber) {
+	if (slotNumber < 0 || SlotsCount <= slotNumber || NULL == Slots[slotNumber]) return false;
+	CurrentSlot = slotNumber;
+	return true;
+}
+
+CDeviceSlot* CDevice::GetCurrentSlot() {
+	return GetSlot(CurrentSlot);
+}
+
+// Calling this with (PagesCount, 0) will return total memory size
+int32_t CDevice::GetMemoryOffset(int page, int32_t offset) const {
+	if (!Pages[0]) return 0;
+	return offset + page * Pages[0]->Size;
+}
+
+CDevicePage::CDevicePage(byte* memory, int32_t size, int number)
+	: Size(size), Number(number), RAM(memory) {
+	if (nullptr == RAM) Error("No memory defined", nullptr, FATAL);
+}
+
+CDeviceSlot::CDeviceSlot(int32_t adr, int32_t size)
+	: Address(adr), Size(size), Page(NULL), Option(O_NONE) {
+}
+
+CDeviceSlot::~CDeviceSlot() {
 }

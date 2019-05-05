@@ -102,10 +102,8 @@ namespace Options {
 
 } // eof namespace Options
 
-//EMemoryType MemoryType = MT_NONE;
 CDevice *Devices = 0;
 CDevice *Device = 0;
-CDeviceSlot *Slot = 0;
 CDevicePage *Page = 0;
 char* DeviceID = 0;
 
@@ -121,12 +119,10 @@ int ConvertEncoding = ENCWIN;
 
 int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, donotlist = 0, listmacro = 0;
-int adrdisp = 0,PseudoORG = 0;
-char* MemoryRAM=NULL, * MemoryPointer=NULL;
-int MemoryCPage = 0, MemoryPagesCount = 0, StartAddress = -1;
-aint MemorySize = 0;
+int adrdisp = 0, PseudoORG = 0, StartAddress = -1;
+byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
-aint CurAddress = 0, AddressOfMAP = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
+aint CurAddress = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
 aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
@@ -139,7 +135,6 @@ CDefineTable DefineTable;
 CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
 CStructureTable StructureTable;
-CAddressList* AddressList = 0;
 CStringsList* ModuleList = NULL;
 
 #ifdef USE_LUA
@@ -148,6 +143,9 @@ lua_State *LUA;
 int LuaLine=-1;
 
 #endif //USE_LUA
+
+int deviceDirectivesCounter = 0;
+static char* globalDeviceID = NULL;
 
 void InitPass() {
 	aint pow10 = 1;
@@ -166,15 +164,14 @@ void InitPass() {
 		free(LastParsedLabel);
 		LastParsedLabel = NULL;
 	}
-	LastParsedLabel = NULL;
-	vorlabp = (char *)malloc(2);
-	STRCPY(vorlabp, sizeof("_"), "_");
+	if (vorlabp) free(vorlabp);
+	vorlabp = STRDUP("_");
 	macrolabp = NULL;
 	listmacro = 0;
-	CurAddress = AddressOfMAP = 0;
+	CurAddress = 0;
 	CurrentSourceLine = CompiledCurrentLine = 0;
 	PseudoORG = 0; adrdisp = 0;
-	PreviousAddress = 0; epadres = 0; macronummer = 0; lijst = 0; comlin = 0;
+	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
 	ModuleList = NULL;
 	StructureTable.Init();
@@ -182,6 +179,14 @@ void InitPass() {
 	DefineTable = Options::CmdDefineTable;
 	MacroDefineTable.Init();
 	LocalLabelTable.InitPass();
+	// reset "device" stuff
+	if (2 == pass && Devices && 1 == deviceDirectivesCounter) {	// only single device detected
+		globalDeviceID = STRDUP(Devices->ID);		// make it global for remaining passes
+	}
+	if (Devices) delete Devices;
+	Devices = Device = NULL;
+	DeviceID = NULL;
+	deviceDirectivesCounter = 0;
 
 	// predefined
 	DefineTable.Replace("_SJASMPLUS", "1");
@@ -189,22 +194,28 @@ void InitPass() {
 	DefineTable.Replace("_RELEASE", "0");
 	DefineTable.Replace("_ERRORS", "0");
 	DefineTable.Replace("_WARNINGS", "0");
+	// resurrect "global" device here
+	if (globalDeviceID && !SetDevice(globalDeviceID)) {
+		Error("Failed to re-initialize global device", globalDeviceID, FATAL);
+	}
 }
 
 void FreeRAM() {
 	if (Devices) {
-		delete Devices;
+		delete Devices;		Devices = NULL;
 	}
-	if (AddressList) {
-		delete AddressList;
+	if (globalDeviceID) {
+		free(globalDeviceID);	globalDeviceID = NULL;
 	}
 	if (ModuleList) {
-		delete ModuleList;
+		delete ModuleList;	ModuleList = NULL;
 	}
 	if (lijstp) {
-		delete lijstp;
+		delete lijstp;		lijstp = NULL;
 	}
-	free(vorlabp);
+	free(vorlabp);		vorlabp = NULL;
+	LabelTable.RemoveAll();
+	DefineTable.RemoveAll();
 }
 
 
@@ -503,9 +514,7 @@ int main(int argc, char **argv) {
 	cout << flush;
 
 	// free RAM
-	if (Devices) {
-		delete Devices;
-	}
+	FreeRAM();
 
 #ifdef USE_LUA
 

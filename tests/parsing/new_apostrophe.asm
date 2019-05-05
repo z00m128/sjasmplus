@@ -40,13 +40,3 @@
     LD A,'"'    ; A = 0x22
     LD A,"'"    ; A = 0x27
     LD A,''''   ; A = 0x27 ; since v1.11
-
-    END     ; scratch for some experiments
-
-    ; following are C++ rules plus extra octal rule
-    ; C++ rules
-    dd  0x1234abcd, 0XE78F, 0x12'34'ab'cd
-    dd  1234, 1'234
-    dd  0b01010011010101, 0b0101'0011'0101
-    ; octals can't reasonably abide the C++ rules (leading zero), so let's make up `0q`
-    dd  0q1234, 0q12'34

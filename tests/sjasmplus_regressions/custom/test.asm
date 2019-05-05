@@ -1,12 +1,9 @@
         device zxspectrum128
-; options were modified to save --sym=test.tap as TAP to get binary diff in CI tests
-; the BIN is also tested. Remaining outputs are NOT tested.
-; TODO modify CI script to handle even these more exotic tests with custom checks
         OUTPUT test.bin
 
-        org #0
-label0  ld hl,$
-        jp label0
+        org #0          ; since v1.12.0 ROM area is by default mapped as Page 7
+label0  ld hl,$         ; so label0 will emit 07:0000 into labelslist file
+        jp label0       ; for old ":0000" output it would need some fake "ROM Page"
 
         org #4000
 label1  ld hl,$
