@@ -25,6 +25,8 @@ FIXME in sources mark further points worth refactoring
 FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 (breaks ` .34 repeatX` directive probably? .. and END@beginningOfLine? .. actually not?)
 
+SplitLuaErrorMessage - add some tests after Liniya fix, maybe review the code more.
+
 "--lst" bez hodnoty nech spravi default nazov sam
   ==> needs tests (badly, was bugged a lot during development)
 
@@ -97,7 +99,7 @@ label value for particular "slot" (view of value).
 
 To stay backward compatible/similar, one would have to support also 0000-FFFF range as if
 going through the mapped pages.. but that does collide with early pages 0..n ...
-How about abusing "@" or "." or something to distinguish between?
+How about abusing "@" or "." or something to distinguish between? (& resembles C/C++!)
 
 ====================
 Docs:

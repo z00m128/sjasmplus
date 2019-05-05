@@ -107,6 +107,7 @@ extern "C" {
 #include "io_snapshots.h"
 #include "io_trd.h"
 #include "io_tape.h"
+#include "io_nex.h"
 #include "sjasm.h"
 
 #endif

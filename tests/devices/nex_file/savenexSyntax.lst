@@ -1,0 +1,360 @@
+# file opened: savenexSyntax.asm
+  1   0000              ;;; docs design
+  2   0000              ;     SAVENEX <command> <command arguments>
+  3   0000              ;  Works only in ZXSPECTRUMNEXT device emulation mode. See DEVICE.
+  4   0000              ;
+  5   0000              ;  For file format details, check https://specnext.dev/wiki/NEX_file_format
+  6   0000              ;
+  7   0000              ;  As the file is designed for self-contained distribution of whole applications/games,
+  8   0000              ; its configuration and assembling is a bit too complex for single directive, and the
+  9   0000              ; configuration is instead divided into multiple commands, and the assembling goes
+ 10   0000              ; through multiple stages, so some commands must be used in correct sequence.
+ 11   0000              ;
+ 12   0000              ; While the format technically allows to include multiple screen types data, they are
+ 13   0000              ; all loaded at the beginning over each other, so it makes sense to provide only single
+ 14   0000              ; loading screen (sjasmplus enforces that).
+ 15   0000              ;
+ 16   0000              ; More detailed description of each command follows:
+ 17   0000              ;
+ 18   0000              ;     SAVENEX OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>]]]
+ 19   0000              ; Opens a NEX file, defines start address and stack address (if omitted, start address is
+ 20   0000              ; zero = no start, stack address is 0xFF2D, entryBank is zero), and 16k bank to be mapped
+ 21   0000              ; at 0xC000 before code is started.
+ 22   0000              ;
+ 23   0000              ; Only single NEX file can be open at the same time, and to finalize the header content
+ 24   0000              ; the command CLOSE has to be used (does auto-close if source ends).
+ 25   0000              ;
+ 26   0000              ; Entry bank is number of 16k bank (0..111), not native 8k page, default is zero, i.e.
+ 27   0000              ; the default memory map is identical to ZX 128 (ROM, RAM banks 5, 2 and 0).
+ 28   0000              ;
+ 29   0000              ; Make sure your new stack has at least tens of bytes available as those will be used
+ 30   0000              ; already by the NEX loader before executing your entry point (although released back).
+ 31   0000              ;
+ 32   0000              ;     SAVENEX CORE <major 0..15>,<minor 0..15>,<subminor 0..255>
+ 33   0000              ; Set minimum required Next core version, can be set any time before CLOSE.
+ 34   0000              ;
+ 35   0000              ;     SAVENEX CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]
+ 36   0000              ; Set border colour (during loading), whether the machine should be set to default state
+ 37   0000              ; (PreserveNextRegs = 0 = default), if the app requires extended RAM (224 8k pages) and
+ 38   0000              ; how the file handle of the NEX file should be treated: 0 = default = close, 1 = keep
+ 39   0000              ; open and pass in BC, $4000..$FFFE = keep open, and write into memory at provided address
+ 40   0000              ; (after entry bank is paged in). This can be set any time before CLOSE.
+ 41   0000              ;
+ 42   0000              ;     SAVENEX BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]
+ 43   0000              ; Loading-bar related setup ("colour" usage depends on screen mode), can be set any time
+ 44   0000              ; before CLOSE.
+ 45   0000              ;
+ 46   0000              ;     SAVENEX SCREEN L2 [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
+ 47   0000              ; Layer 2 loading screen, can be used between OPEN and first AUTO/BANK command.
+ 48   0000              ;
+ 49   0000              ; Palette consists of 512 bytes (256 palette items from index 0), in 9b colour format:
+ 50   0000              ; first byte is %RRRGGGBB, second byte is %P000000B (P is priority flag for Layer 2 colours).
+ 51   0000              ;
+ 52   0000              ; Image data are 48kiB block of memory, the loader will use always banks 9..11 to display
+ 53   0000              ; it (8k pages 18..23), but if you will prepare the data there, it will be also re-saved
+ 54   0000              ; by AUTO command, so either use other banks, and overwrite them with valid data/code
+ 55   0000              ; after using the SCREEN command, or reset pages 18..23 to zero after SCREEN.
+ 56   0000              ;
+ 57   0000              ; If no memory address is specified, the pages 18..23 are stored in file, and if no
+ 58   0000              ; palette address is specified, no-palette flag is set in NEX file.
+ 59   0000              ;
+ 60   0000              ;     SAVENEX SCREEN LR [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
+ 61   0000              ; LoRes (128x96) loading screen, can be used between OPEN and first AUTO/BANK command.
+ 62   0000              ;
+ 63   0000              ; Palette is similar to Layer 2 mode, just LoRes mode doesn't have priority bit.
+ 64   0000              ;
+ 65   0000              ; Image data are 12288 bytes memory block - either consecutive block if specific address
+ 66   0000              ; is provided, or without address the actual bank 5 memory is stored (taking 6144 bytes
+ 67   0000              ; from address 0x4000 and 6144 bytes from address 0x6000).
+ 68   0000              ;
+ 69   0000              ;     SAVENEX SCREEN (SCR|SHC|SHR) [<hiResColour 0..7>]
+ 70   0000              ; ULA/Timex modes loading screen, can be used between OPEN and first AUTO/BANK command.
+ 71   0000              ;
+ 72   0000              ; The actual bank 5 memory (pages 10..11) is stored as if the image is displayed, in
+ 73   0000              ; these modes the palette can't be specified.
+ 74   0000              ;
+ 75   0000              ; SCR is classic ZX 6912 bytes long screen from address 0x4000 (page 10 is used, even
+ 76   0000              ; if the slot 1 is modified to other page, so you must prepare the image "in place").
+ 77   0000              ;
+ 78   0000              ; SHC and SHR are Timex HiColor (8x1 attribute) and HiRes (512x192 bitmap) modes, prepare
+ 79   0000              ; data "in place", i.e. 6144 bytes into page 10 and 6144 bytes into page 11 (0x4000 and
+ 80   0000              ; 0x6000 addresses in default memory setup). For HiRes mode you should specify ink colour
+ 81   0000              ; (the paper is complement of ink).
+ 82   0000              ;
+ 83   0000              ;     SAVENEX BANK <bank 0..111>[,...]
+ 84   0000              ; Can be used after OPEN or SCREEN and before CLOSE, but the 16ki banks must be saved in
+ 85   0000              ; correct order: 5, 2, 0, 1, 3, 4, 6, 7, ..., 111
+ 86   0000              ;
+ 87   0000              ;     SAVENEX AUTO [<fromBank 0..111>[,<toBank 0..111>]]
+ 88   0000              ; Can be used after OPEN or SCREEN and before CLOSE. The sjasmplus will save every
+ 89   0000              ; non-zero 16k bank detected in the correct order (automatically starting from
+ 90   0000              ; first possible bank after previous BANK/AUTO commands, or from provided "fromBank").
+ 91   0000              ;
+ 92   0000              ; For "fromBank" value use the specified order above in BANK command, i.e. 5, 2, 0, ...
+ 93   0000              ;
+ 94   0000              ; Keep in mind the DEVICE ZXSPECTRUMNEXT will automatically adjust content of banks 5
+ 95   0000              ; and 0 (ULA screen, sysvars and fake ZX48 stack), so unless you clear those banks to
+ 96   0000              ; zero, or skip saving them by saving first set of banks explicitly with BANK command,
+ 97   0000              ; they will be saved by AUTO.
+ 98   0000              ;
+ 99   0000              ;     SAVENEX CLOSE [<fileToAppend>]
+100   0000              ; Can be used after OPEN. The currently open NEX file will be finalized (header adjusted),
+101   0000              ; and optional extra file just appended to the end of NEX file.
+102   0000
+103   0000                  DEVICE NONE     ; correct commands, but outside of NEXT device
+savenexSyntax.asm(104): error: [SAVENEX] is allowed only in ZXSPECTRUMNEXT device mode
+104   0000                  SAVENEX     OPEN    "savenexSyntax.nex",    $8000,$FFE0,    15  ; not in NEXT mode
+105   0000
+106   0000                  DEVICE ZXSPECTRUMNEXT
+savenexSyntax.asm(107): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE): NEPO    
+107   0000                  SAVENEX NEPO    ; wrong command
+108   0000
+109   0000              ;; OPEN <filename>[,<startAddress>,<stackAddress>[,<entryBank 0..111>]]
+110   0000                  ; errors - [un]expected arguments
+savenexSyntax.asm(111): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE): 
+111   0000                  SAVENEX
+savenexSyntax.asm(112): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE): 
+112   0000                  SAVENEX                 ; no command, but with comment
+savenexSyntax.asm(113): error: [SAVENEX] Error opening file: 
+113   0000                  SAVENEX     OPEN
+savenexSyntax.asm(114): error: [SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>]]]: SAVENEX     OPEN    "savenexSyntax.nex",
+114   0000                  SAVENEX     OPEN    "savenexSyntax.nex",
+savenexSyntax.asm(115): error: [SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>]]]: SAVENEX     OPEN    "savenexSyntax.nex",    $8000,
+115   0000                  SAVENEX     OPEN    "savenexSyntax.nex",    $8000,
+savenexSyntax.asm(116): error: [SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>]]]: SAVENEX     OPEN    "savenexSyntax.nex",    $8000,$FFE0,
+116   0000                  SAVENEX     OPEN    "savenexSyntax.nex",    $8000,$FFE0,
+savenexSyntax.asm(117): error: [SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>]]]: SAVENEX     OPEN    "savenexSyntax.nex",    $8000,$FFE0,    15,
+117   0000                  SAVENEX     OPEN    "savenexSyntax.nex",    $8000,$FFE0,    15,
+savenexSyntax.asm(118): error: [SAVENEX] entry bank can be 0..111 value only: 112
+118   0000                  SAVENEX OPEN "savenexSyntax.nex", $7170, $F1F0, 112 ; error entryBank
+119   0000
+120   0000                  ; one correct NEX file to verify simple case (but induce all sorts of warnings)
+savenexSyntax.asm(121): warning: [SAVESNA] Start address was also defined by END, OPEN argument used instead
+savenexSyntax.asm(121): warning: Bytes lost (0x18180)
+savenexSyntax.asm(121): warning: Bytes lost (0x1F1F0)
+121   0000                  SAVENEX     OPEN    "savenexSyntax.nex",    $18180,$1F1F0,  'B'
+122   0000
+123   0000                  ; error = NEX file is already open
+savenexSyntax.asm(124): error: [SAVENEX] NEX file is already open: SAVENEX     OPEN    "savenexSyntax.nex", $8180, $F1F0, 'B'
+124   0000                  SAVENEX     OPEN    "savenexSyntax.nex", $8180, $F1F0, 'B'
+125   0000
+126   0000              ;; CORE <major 0..15>,<minor 0..15>,<subminor 0..255>
+127   0000                  ; errors - [un]expected arguments
+savenexSyntax.asm(128): error: [SAVENEX] expected syntax is CORE <major 0..15>,<minor 0..15>,<subminor 0..255>: SAVENEX     CORE
+128   0000                  SAVENEX     CORE
+savenexSyntax.asm(129): error: [SAVENEX] expected syntax is CORE <major 0..15>,<minor 0..15>,<subminor 0..255>: SAVENEX     CORE    0
+129   0000                  SAVENEX     CORE    0
+savenexSyntax.asm(130): error: [SAVENEX] expected syntax is CORE <major 0..15>,<minor 0..15>,<subminor 0..255>: SAVENEX     CORE    0,
+130   0000                  SAVENEX     CORE    0,
+savenexSyntax.asm(131): error: [SAVENEX] expected syntax is CORE <major 0..15>,<minor 0..15>,<subminor 0..255>: SAVENEX     CORE    0,0
+131   0000                  SAVENEX     CORE    0,0
+savenexSyntax.asm(132): error: [SAVENEX] expected syntax is CORE <major 0..15>,<minor 0..15>,<subminor 0..255>: SAVENEX     CORE    0,0,
+132   0000                  SAVENEX     CORE    0,0,
+savenexSyntax.asm(133): error: [SAVENEX] expected syntax is CORE <major 0..15>,<minor 0..15>,<subminor 0..255>: SAVENEX     CORE    0,0,0,
+133   0000                  SAVENEX     CORE    0,0,0,
+134   0000
+135   0000                  ; one correct + one with warnings
+136   0000                  SAVENEX     CORE    15,15,255
+savenexSyntax.asm(137): warning: [SAVENEX] values are not within 0..15,0..15,0..255 ranges
+137   0000                  SAVENEX     CORE    'a','b',$100+'c'    ; warn about values
+138   0000
+139   0000              ;; CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]
+140   0000                  ; errors - [un]expected arguments
+savenexSyntax.asm(141): error: [SAVENEX] expected syntax is CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]: SAVENEX     CFG
+141   0000                  SAVENEX     CFG
+savenexSyntax.asm(142): error: [SAVENEX] expected syntax is CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]: SAVENEX     CFG     5,
+142   0000                  SAVENEX     CFG     5,
+savenexSyntax.asm(143): error: [SAVENEX] expected syntax is CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]: SAVENEX     CFG     5,  1,
+143   0000                  SAVENEX     CFG     5,  1,
+savenexSyntax.asm(144): error: [SAVENEX] expected syntax is CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]: SAVENEX     CFG     5,  1,  1,
+144   0000                  SAVENEX     CFG     5,  1,  1,
+savenexSyntax.asm(145): error: [SAVENEX] expected syntax is CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]: SAVENEX     CFG     5,  1,  1,  1,
+145   0000                  SAVENEX     CFG     5,  1,  1,  1,
+146   0000
+147   0000                  ; correct ones with value warnings, and omitting optional arguments
+savenexSyntax.asm(148): warning: [SAVENEX] values are not within 0..7,0..65534,0/1,0/1 ranges
+148   0000                  SAVENEX     CFG     9
+savenexSyntax.asm(149): warning: [SAVENEX] values are not within 0..7,0..65534,0/1,0/1 ranges
+149   0000                  SAVENEX     CFG     5,  -1
+savenexSyntax.asm(150): warning: [SAVENEX] values are not within 0..7,0..65534,0/1,0/1 ranges
+150   0000                  SAVENEX     CFG     5,  1,  2
+151   0000                  SAVENEX     CFG     5,  "hf",  1,  1    ; one completely correct (no warning)
+savenexSyntax.asm(152): warning: [SAVENEX] values are not within 0..7,0..65534,0/1,0/1 ranges
+152   0000                  SAVENEX     CFG     5,  "hf",  1,  'R'
+153   0000
+154   0000              ;; BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]
+155   0000                  ; errors - [un]expected arguments
+savenexSyntax.asm(156): error: [SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]: SAVENEX     BAR
+156   0000                  SAVENEX     BAR
+savenexSyntax.asm(157): error: [SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]: SAVENEX     BAR     1
+157   0000                  SAVENEX     BAR     1
+savenexSyntax.asm(158): error: [SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]: SAVENEX     BAR     1,
+158   0000                  SAVENEX     BAR     1,
+savenexSyntax.asm(159): error: [SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]: SAVENEX     BAR     1,  'L',
+159   0000                  SAVENEX     BAR     1,  'L',
+savenexSyntax.asm(160): error: [SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]: SAVENEX     BAR     1,  'L',    'D',
+160   0000                  SAVENEX     BAR     1,  'L',    'D',
+savenexSyntax.asm(161): error: [SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]: SAVENEX     BAR     1,  'L',    'D',    'd',
+161   0000                  SAVENEX     BAR     1,  'L',    'D',    'd',
+162   0000
+163   0000                  ; correct ones with value warnings, and omitting optional arguments
+savenexSyntax.asm(164): warning: [SAVENEX] values are not within 0/1,0..255,0..255,0..255 ranges
+164   0000                  SAVENEX     BAR     2,  255
+savenexSyntax.asm(165): warning: [SAVENEX] values are not within 0/1,0..255,0..255,0..255 ranges
+165   0000                  SAVENEX     BAR     1,  256
+savenexSyntax.asm(166): warning: [SAVENEX] values are not within 0/1,0..255,0..255,0..255 ranges
+166   0000                  SAVENEX     BAR     1,  255, 256
+savenexSyntax.asm(167): warning: [SAVENEX] values are not within 0/1,0..255,0..255,0..255 ranges
+167   0000                  SAVENEX     BAR     1,  255, 255, 256
+168   0000                  SAVENEX     BAR     1,  'L',    'D',    'd' ; one fully valid (no warning)
+169   0000
+170   0000              ;; SCREEN L2 [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
+171   0000                  ; errors - [un]expected arguments
+savenexSyntax.asm(172): error: [SAVENEX] unknown screen type (types: L2, LR, SCR, SHC, SHR): 
+172   0000                  SAVENEX     SCREEN
+savenexSyntax.asm(173): error: [SAVENEX] unknown screen type (types: L2, LR, SCR, SHC, SHR): NEERCS
+173   0000                  SAVENEX     SCREEN  NEERCS
+savenexSyntax.asm(174): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2  9
+174   0000                  SAVENEX     SCREEN  L2  9
+savenexSyntax.asm(175): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2  9 ,
+175   0000                  SAVENEX     SCREEN  L2  9 ,
+savenexSyntax.asm(176): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2  9 ,    $1FFF ,
+176   0000                  SAVENEX     SCREEN  L2  9 ,    $1FFF ,
+savenexSyntax.asm(177): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2  9 ,    $1FFF ,  10
+177   0000                  SAVENEX     SCREEN  L2  9 ,    $1FFF ,  10
+savenexSyntax.asm(178): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2  9 ,    $1FFF ,  10 ,
+178   0000                  SAVENEX     SCREEN  L2  9 ,    $1FFF ,  10 ,
+savenexSyntax.asm(179): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2  9 ,    $1FFF ,  10 ,    $1800,
+179   0000                  SAVENEX     SCREEN  L2  9 ,    $1FFF ,  10 ,    $1800,
+180   0000
+181   0000                  ; errors - wrong values
+savenexSyntax.asm(182): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2 224, 0, 0, 0     
+182   0000                  SAVENEX     SCREEN  L2 224, 0, 0, 0     ; pagenum outside of range
+savenexSyntax.asm(183): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2 0, 0, 224, 0     
+183   0000                  SAVENEX     SCREEN  L2 0, 0, 224, 0     ; pagenum outside of range
+savenexSyntax.asm(184): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 218, 1, 0, 0     
+184   0000                  SAVENEX     SCREEN  L2 218, 1, 0, 0     ; values in range, but leaks out of memory
+savenexSyntax.asm(185): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, $1B4001, 0, 0 
+185   0000                  SAVENEX     SCREEN  L2 0, $1B4001, 0, 0 ; values in range, but leaks out of memory
+savenexSyntax.asm(186): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, 0, 223, 7681  
+186   0000                  SAVENEX     SCREEN  L2 0, 0, 223, 7681  ; values in range, but leaks out of memory
+savenexSyntax.asm(187): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, 0, 0, $1BFE01 
+187   0000                  SAVENEX     SCREEN  L2 0, 0, 0, $1BFE01 ; values in range, but leaks out of memory
+savenexSyntax.asm(188): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 218, 1           
+188   0000                  SAVENEX     SCREEN  L2 218, 1           ; values in range, but leaks out of memory
+savenexSyntax.asm(189): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, $1B4001       
+189   0000                  SAVENEX     SCREEN  L2 0, $1B4001       ; values in range, but leaks out of memory
+190   0000                  ; not testing correct variants, because it would make impossible to test other types
+191   0000
+192   0000              ;; SCREEN LR [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
+193   0000                  ; errors - [un]expected arguments
+savenexSyntax.asm(194): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR  5
+194   0000                  SAVENEX     SCREEN  LR  5
+savenexSyntax.asm(195): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR  5 ,
+195   0000                  SAVENEX     SCREEN  LR  5 ,
+savenexSyntax.asm(196): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR  5 ,    $1FFF ,
+196   0000                  SAVENEX     SCREEN  LR  5 ,    $1FFF ,
+savenexSyntax.asm(197): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR  5 ,    $1FFF ,  10
+197   0000                  SAVENEX     SCREEN  LR  5 ,    $1FFF ,  10
+savenexSyntax.asm(198): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR  5 ,    $1FFF ,  10 ,
+198   0000                  SAVENEX     SCREEN  LR  5 ,    $1FFF ,  10 ,
+savenexSyntax.asm(199): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR  5 ,    $1FFF ,  10 ,    $1800,
+199   0000                  SAVENEX     SCREEN  LR  5 ,    $1FFF ,  10 ,    $1800,
+200   0000
+201   0000                  ; errors - wrong values
+savenexSyntax.asm(202): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR 224, 0, 0, 0     
+202   0000                  SAVENEX     SCREEN  LR 224, 0, 0, 0     ; pagenum outside of range
+savenexSyntax.asm(203): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR 0, 0, 224, 0     
+203   0000                  SAVENEX     SCREEN  LR 0, 0, 224, 0     ; pagenum outside of range
+savenexSyntax.asm(204): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 222, $1001, 0, 0 
+204   0000                  SAVENEX     SCREEN  LR 222, $1001, 0, 0 ; values in range, but leaks out of memory
+savenexSyntax.asm(205): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, $1BD001, 0, 0 
+205   0000                  SAVENEX     SCREEN  LR 0, $1BD001, 0, 0 ; values in range, but leaks out of memory
+savenexSyntax.asm(206): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, 0, 223, 7681  
+206   0000                  SAVENEX     SCREEN  LR 0, 0, 223, 7681  ; values in range, but leaks out of memory
+savenexSyntax.asm(207): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, 0, 0, $1BFE01 
+207   0000                  SAVENEX     SCREEN  LR 0, 0, 0, $1BFE01 ; values in range, but leaks out of memory
+savenexSyntax.asm(208): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 222, $1001       
+208   0000                  SAVENEX     SCREEN  LR 222, $1001       ; values in range, but leaks out of memory
+savenexSyntax.asm(209): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, $1BD001       
+209   0000                  SAVENEX     SCREEN  LR 0, $1BD001       ; values in range, but leaks out of memory
+210   0000                  ; not testing correct variants, because it would make impossible to test other types
+211   0000
+212   0000              ;; SCREEN (SCR|SHC|SHR) [<hiResColour 0..7>]
+213   0000                  ; there's basically no syntax error possible with these
+214   0000
+215   0000              ;; BANK <bank 0..111>[,...]
+216   0000                  ; errors - invalid/missing arguments (will eventually also save some banks correctly)
+savenexSyntax.asm(217): error: [SAVENEX] expected bank number 0..111:     ()
+217   0000                  SAVENEX     BANK    ()
+savenexSyntax.asm(218): error: [SAVENEX] expected bank number 0..111:     -1
+218   0000                  SAVENEX     BANK    -1
+savenexSyntax.asm(219): error: [SAVENEX] expected bank number 0..111:     112
+219   0000                  SAVENEX     BANK    112
+savenexSyntax.asm(220): error: [SAVENEX] expected bank number 0..111:                   
+220   0000                  SAVENEX     BANK    5,                  ; bank 5 will be stored
+savenexSyntax.asm(221): error: [SAVENEX] it's too late to save this bank (correct order: 5, 2, 0, 1, 3, 4, 6, ...): 2
+221   0000                  SAVENEX     BANK    0, 2, 3             ; bank 0 will be stored, 2 = wrong order
+222   0000
+223   0000                  ; revisit screen errors - here no screen should work because bank was written already
+savenexSyntax.asm(224): error: [SAVENEX] some bank was already stored (store screen first)
+224   0000                  SAVENEX     SCREEN  L2
+savenexSyntax.asm(225): error: [SAVENEX] some bank was already stored (store screen first)
+225   0000                  SAVENEX     SCREEN  LR
+savenexSyntax.asm(226): error: [SAVENEX] some bank was already stored (store screen first)
+226   0000                  SAVENEX     SCREEN  SCR
+savenexSyntax.asm(227): error: [SAVENEX] some bank was already stored (store screen first)
+227   0000                  SAVENEX     SCREEN  SHC
+savenexSyntax.asm(228): error: [SAVENEX] some bank was already stored (store screen first)
+228   0000                  SAVENEX     SCREEN  SHR 10
+229   0000
+230   0000              ;; AUTO [<fromBank 0..111>[,<toBank 0..111>]]
+savenexSyntax.asm(231): error: [SAVENEX] expected syntax is AUTO [<fromBank 0..111>[,<toBank 0..111>]]: SAVENEX     AUTO    21,
+231   0000                  SAVENEX     AUTO    21,
+savenexSyntax.asm(232): error: [SAVENEX] expected syntax is AUTO [<fromBank 0..111>[,<toBank 0..111>]]: SAVENEX     AUTO    21,     25,
+232   0000                  SAVENEX     AUTO    21,     25,
+savenexSyntax.asm(233): error: [SAVENEX] expected syntax is AUTO [<fromBank 0..111>[,<toBank 0..111>]]: SAVENEX     AUTO    -1, 20
+233   0000                  SAVENEX     AUTO    -1, 20
+savenexSyntax.asm(234): error: [SAVENEX] expected syntax is AUTO [<fromBank 0..111>[,<toBank 0..111>]]: SAVENEX     AUTO    112, 20
+234   0000                  SAVENEX     AUTO    112, 20
+savenexSyntax.asm(235): error: [SAVENEX] expected syntax is AUTO [<fromBank 0..111>[,<toBank 0..111>]]: SAVENEX     AUTO    21, -1
+235   0000                  SAVENEX     AUTO    21, -1
+savenexSyntax.asm(236): error: [SAVENEX] expected syntax is AUTO [<fromBank 0..111>[,<toBank 0..111>]]: SAVENEX     AUTO    21, 112
+236   0000                  SAVENEX     AUTO    21, 112
+savenexSyntax.asm(237): error: [SAVENEX] 'toBank' is less than 'fromBank': SAVENEX     AUTO    21, 20
+237   0000                  SAVENEX     AUTO    21, 20
+savenexSyntax.asm(238): error: [SAVENEX] it's too late to save this bank (correct order: 5, 2, 0, 1, 3, 4, 6, ...): 5
+238   0000                  SAVENEX     AUTO    5, 1                ; already stored by BANK above
+savenexSyntax.asm(239): error: [SAVENEX] it's too late to save this bank (correct order: 5, 2, 0, 1, 3, 4, 6, ...): 0
+239   0000                  SAVENEX     AUTO    0, 1
+240   0000                  SAVENEX     AUTO    1, 1                ; correct one (but bank is zeroed = no output)
+savenexSyntax.asm(241): error: [SAVENEX] it's too late to save this bank (correct order: 5, 2, 0, 1, 3, 4, 6, ...): 1
+241   0000                  SAVENEX     AUTO    1, 1                ; but disabled for second try
+242   0000                  SAVENEX     AUTO                        ; correct (but all zeroes = no output)
+savenexSyntax.asm(243): error: [SAVENEX] all banks are already stored
+243   0000                  SAVENEX     AUTO                        ; but all are disabled now
+244   0000
+245   0000              ;; CLOSE [<fileToAppend>]
+246   0000                  SAVENEX     CLOSE   "savenexSyntax.asm" ; correct one (there's not much to do wrong
+savenexSyntax.asm(247): error: [SAVENEX] NEX file is not open
+247   0000                  SAVENEX     CLOSE                       ; should be error (no NEX is open)
+248   0000
+249   0000              ;; create small NEX for BIN comparison, if the thing at least somewhat works
+250   0000              ;; also verify it works twice per source (in sequential order)
+savenexSyntax.asm(251): warning: [SAVESNA] Start address was also defined by END, OPEN argument used instead
+251   0000                  SAVENEX OPEN "savenexSyntax.bin", $5000
+252   0000                  SAVENEX CORE 2,0,28
+252   0000                SAVENEX CFG 4,0,0,1
+252   0000                SAVENEX BAR 0,0,100,0
+253   0000                  ORG $4800
+253   4800 45 5F F5 44    DB $45, $5F, $F5, $44
+254   4804                  ORG $5000
+254   5000 18 FE          jr $                        ; infinite JR loop
+255   5002                  SAVENEX AUTO 5, 5                       ; should store bank5
+256   5002                  ; let it close automatically by ending source
+257   5002
+258   5002                  END $7170       ; invoke warning about different start address
+# file closed: savenexSyntax.asm
+
+Value    Label
+------ - -----------------------------------------------------------

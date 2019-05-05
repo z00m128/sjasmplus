@@ -671,12 +671,7 @@ void dirINCTRD() {
 }
 
 void dirSAVESNA() {
-
-	if (pass != LASTPASS) {
-		SkipParam(lp);
-		return;
-	}
-
+	if (pass != LASTPASS) return;		// syntax error is not visible in early passes
 	bool exec = true;
 
 	if (!DeviceID) {
@@ -2042,6 +2037,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".inchob", dirINCHOB);
 	DirectivesTable.insertd(".inctrd", dirINCTRD);
 	DirectivesTable.insertd(".insert", dirINCBIN);
+	DirectivesTable.insertd(".savenex", dirSAVENEX);
 	DirectivesTable.insertd(".savesna", dirSAVESNA);
 	DirectivesTable.insertd(".savehob", dirSAVEHOB);
 	DirectivesTable.insertd(".savebin", dirSAVEBIN);

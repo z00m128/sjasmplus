@@ -179,6 +179,8 @@
 		<Unit filename="sjasm/devices.h" />
 		<Unit filename="sjasm/directives.cpp" />
 		<Unit filename="sjasm/directives.h" />
+		<Unit filename="sjasm/io_nex.cpp" />
+		<Unit filename="sjasm/io_nex.h" />
 		<Unit filename="sjasm/io_snapshots.cpp" />
 		<Unit filename="sjasm/io_snapshots.h" />
 		<Unit filename="sjasm/io_tape.cpp" />
