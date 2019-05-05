@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.12.0 Documentation [2019-04-07]</title>
+  <title>SjASMPlus 1.13.0 Documentation [2019-05-05]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -180,7 +180,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>work in progress - 1.12.1</term>
+            <term>05.05.2019 - 1.13.0</term>
 
             <listitem>
               <synopsis>- [may break old sources] DEVICE: each assembling pass resets also
@@ -197,10 +197,11 @@
 - [may break old sources] MAP+FIELD directives removed (STRUCT is better and working)
 - <link linkend="po_mmu">MMU</link> directive (fusing SLOT + PAGE and extending them)
 - <link linkend="po_savedev">SAVEDEV</link> directive (similar to SAVEBIN)
+- <link linkend="c_savenex">SAVENEX</link> directive (for ZX Spectrum Next)
 - INCBIN: support for negative offset/length values, support for MMU wrapping
 - INCBIN: support for file chunks of 64+ki size (usable with MMU)
 - Fixed: INCTRD offset, binary STDOUT on windows, SAVETRD/SAVEHOB filenames
-- Fixed: LUA used inside macros, LUA get_word
+- Fixed: LUA used inside macros, LUA get_word, LUA error reporting
 - parser: added C++(like) <link linkend="s_numeric">numeric literals</link>
 - <link linkend="s_realdevice">ZXSPECTRUMNEXT device</link> added
 - refactoring of label/define implementation = less memory leaks, more correct
@@ -2346,7 +2347,8 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             <term><anchor id="po_savenex" />SAVENEX &lt;command&gt; &lt;command arguments&gt;</term>
 
             <listitem>
-              <para>Not available yet (work in progress).</para>
+              <para>Commands to build NEX file, for details check <link linkend="c_savenex">SAVENEX
+              </link> chapter.</para>
 
               <para><emphasis>Works only in ZXSPECTRUMNEXT device emulation mode. See 
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
@@ -3624,5 +3626,259 @@ COLOR.BLUE  BYTE 6
 
       <para></para>
     </section>
+  </chapter>
+
+  <chapter>
+    <title><anchor id="c_savenex" />SAVENEX guide</title>
+	
+    <section>
+      <title><anchor id="s_savenex_file_format" />NEX File Format</title>
+
+      <para>NEX is binary format for ZX Spectrum Next, aiming to provide simple delivery of software
+      for the platform. For file format details check <ulink url="https://specnext.dev/wiki/NEX_file_format">
+      https://specnext.dev/wiki/NEX_file_format</ulink>. In short it is header + loading screen +
+      like-snapshot binary and remaining resources appended after.</para>
+
+  <para>As such, the SAVENEX commands are available only in ZXSPECTRUMNEXT device emulation mode,
+	  see <link linkend="po_device">DEVICE</link>.</para>
+  
+  <para>As the file is designed for self-contained distribution of whole applications/games, 
+	  its configuration and assembling is a bit too complex for single directive, and the
+	  configuration is instead divided into multiple commands, and the assembling goes
+	  through multiple stages, so some commands must be used in correct sequence.</para>
+  
+  <para>While the format technically allows to include multiple screen types data, they are all
+	  loaded at the beginning over each other, so it makes sense to provide only single loading
+	  screen (sjasmplus enforces that).</para>
+  </section>
+  
+  <section>
+	  <title><anchor id="s_savenex_commands" />Detailed description of each SAVENEX command</title>
+	  <variablelist>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_open" />
+				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank 0..111&gt;]]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Opens a NEX file, defines start address, stack address and 16k bank to be mapped
+					  at 0xC000 before code is executed (if values are omitted, start address is zero
+					  = no start, stack address is 0xFF2D, entryBank is zero).
+				  </para>
+				  <para>
+					  Only single NEX file can be open at the same time, and to finalize the header
+					  content the command CLOSE has to be used (does auto-close if source ends).
+				  </para>
+				  <para>
+					  Entry bank is number of 16k bank (0..111), not native 8k page, default is zero,
+					  i.e. the default memory map is identical to ZX 128 (ROM, RAM banks 5, 2 and 0).
+				  </para>
+				  <para>
+					  Make sure your new stack has at least tens of bytes available as those will be
+					  used already by the NEX loader before executing your entry point (although
+					  released back).
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_core" />
+				  SAVENEX CORE &lt;major 0..15&gt;,&lt;minor 0..15&gt;,&lt;subminor 0..255&gt;
+			  </term>
+			  <listitem>
+				  <para>
+					  Set minimum required Next core version, can be set any time before <link
+						  linkend="nex_close">CLOSE</link>.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_cfg" />
+				  SAVENEX CFG &lt;border 0..7&gt;[,&lt;fileHandle 0/1/$4000+&gt;[,&lt;PreserveNextRegs 0/1&gt;[,&lt;2MbRamReq 0/1&gt;]]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Set border colour (during loading), whether the machine should be set to default
+					  state (PreserveNextRegs = 0 = default), if the app requires extended RAM
+					  (224 8k pages) and how the file handle of the NEX file should be treated:
+					  0 = default = close, 1 = keep open and pass in BC, $4000..$FFFE = keep open,
+					  and write into memory at provided address (after entry bank is paged in). This
+					  can be set any time before <link linkend="nex_close">CLOSE</link>.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_bar" />
+				  SAVENEX BAR &lt;loadBar 0/1&gt;,&lt;barColour 0..255&gt;[,&lt;startDelay 0..255&gt;[,&lt;bankDelay 0..255&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Loading-bar related setup ("colour" usage depends on screen mode), can be set
+					  any time before <link linkend="nex_close">CLOSE</link>.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_screen" />
+				  SAVENEX SCREEN L2 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Layer 2 loading screen, can be used between <link linkend="nex_open">OPEN</link>
+					  and first <link linkend="nex_auto">AUTO</link>/<link linkend="nex_bank">BANK</link> command.
+				  </para>
+				  <para>
+					  Palette consists of 512 bytes (256 palette items from index 0), in 9b colour
+					  format: first byte is %RRRGGGBB, second byte is %P000000B (P is priority flag
+					  for Layer 2 colours).
+				  </para>
+				  <para>
+					  Image data are 48kiB block of memory, the loader will use always banks 9..11 to display
+					  it (8k pages 18..23), but if you will prepare the data there, it will be also re-saved
+					  by <link linkend="nex_auto">AUTO</link> command, so either use other banks, and overwrite
+					  them with valid data/code after using the SCREEN command, or reset pages 18..23 to zero
+					  after SCREEN.
+				  </para>
+				  <para>
+					  If no memory address is specified, the pages 18..23 are stored in file, and if
+					  no palette address is specified, no-palette flag is set in NEX file.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term>
+				  SAVENEX SCREEN LR [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  LoRes (128x96) loading screen, can be used between <link linkend="nex_open">OPEN</link>
+					  and first <link linkend="nex_auto">AUTO</link>/<link linkend="nex_bank">BANK</link> command.
+				  </para>
+				  <para>
+					  Palette is similar to Layer 2 mode, just LoRes mode doesn't have priority bit.
+				  </para>
+				  <para>
+					  Image data are 12288 bytes memory block - either consecutive block if specific
+					  address is provided, or without address the actual bank 5 memory is stored
+					  (taking 6144 bytes from address 0x4000 and 6144 bytes from address 0x6000).
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term>
+				  SAVENEX SCREEN (SCR|SHC|SHR) [&lt;hiResColour 0..7&gt;]
+			  </term>
+			  <listitem>
+				  <para>
+					  ULA/Timex modes loading screen, can be used between <link linkend="nex_open">OPEN</link>
+					  and first <link linkend="nex_auto">AUTO</link>/<link linkend="nex_bank">BANK</link> command.
+				  </para>
+				  <para>
+					  The actual bank 5 memory (pages 10..11) is stored as if the image is displayed,
+					  in these modes the palette can't be specified.
+				  </para>
+				  <para>
+					  SCR is classic ZX 6912 bytes long screen from address 0x4000 (page 10 is used,
+					  even if the slot 1 is modified to other page, so you must prepare the image "in place").
+				  </para>
+				  <para>
+					  SHC and SHR are Timex HiColor (8x1 attribute) and HiRes (512x192 bitmap) modes,
+					  prepare data "in place", i.e. 6144 bytes into page 10 and 6144 bytes into page
+					  11 (0x4000 and 0x6000 addresses in default memory setup). For HiRes mode you
+					  should specify ink colour (the paper is complement of ink).
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_bank" />
+				  SAVENEX BANK &lt;bank 0..111&gt;[,...]
+			  </term>
+			  <listitem>
+				  <para>
+					  Can be used after <link linkend="nex_open">OPEN</link> or <link linkend="nex_screen">
+						  SCREEN</link> and before <link linkend="nex_close">CLOSE</link>, but the 16ki
+					  banks must be saved in correct order: 5, 2, 0, 1, 3, 4, 6, 7, 8, 9, 10, ..., 111
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_auto" />
+				  SAVENEX AUTO [&lt;fromBank 0..111&gt;[,&lt;toBank 0..111&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  Can be used after <link linkend="nex_open">OPEN</link> or <link linkend="nex_screen">
+						  SCREEN</link> and before <link linkend="nex_close">CLOSE</link>. The sjasmplus
+					  will save every non-zero 16k bank detected in the correct order (automatically
+					  starting from first possible bank after previous BANK/AUTO commands, or from
+					  provided "fromBank").
+				  </para>
+				  <para>
+					  For "fromBank" value use the specified order above in <link linkend="nex_bank">BANK
+						  </link> command, i.e. 5, 2, 0, ...
+				  </para>
+				  <para>
+					  Keep in mind the <link linkend="po_device">DEVICE</link> ZXSPECTRUMNEXT will
+					  automatically adjust content of banks 5 and 0 (ULA screen, sysvars and fake ZX48
+					  stack), so unless you clear those banks to zero, or skip saving them by saving
+					  first set of banks explicitly with <link linkend="nex_bank">BANK</link> command,
+					  they will be saved by AUTO.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+		  <varlistentry>
+			  <term><anchor id="nex_close" />
+				  SAVENEX CLOSE [&lt;fileToAppend&gt;]
+			  </term>
+			  <listitem>
+				  <para>
+					  Can be used after <link linkend="nex_open">OPEN</link>. The currently open NEX
+					  file will be finalized (header adjusted), and optional extra file just appended
+					  to the end of NEX file.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+		  
+	  </variablelist>
+
+  </section>
+	  
+  <section>
+	  <title><anchor id="s_savenex_examples" />Examples</title>
+
+	  <example>
+          <title></title>
+		  <para>
+			  Creating NEX file which will have Layer2 loading screen (stripes), progress bar, and will
+			  enter infinite loop with calling stack (used by IM 1 interrupt handler) visible on the
+			  Layer 2 screen.
+		  </para>
+		  <programlisting>    DEVICE ZXSPECTRUMNEXT
+    ORG $7E00
+start:  ei : jr $           ; app code entry point, BC = NEX file handle
+    ; Layer2 screen (top 1/3 defined, bottom of it will be used also as "visible" stack)
+    ORG $C000 : DUP 64*32 : DB $90,$91,$92,$93,$94,$95,$96,$97 : EDUP
+
+    ; write everything into NEX file
+    SAVENEX OPEN "example.nex", start, $FFFE, 9  ; stack will go into Layer2
+    SAVENEX CORE 2, 0, 0        ; Next core 2.0.0 required as minimum
+    SAVENEX CFG 4, 1            ; green border, file handle in BC
+    SAVENEX BAR 1, $E0, 50, 25  ; do load bar, red colour, start/load delays 50/25 frames
+    SAVENEX SCREEN L2 0, 0      ; store the data from C000 (page 0, offset 0), no palette
+    SAVENEX BANK 5, 100, 101    ; store the 16ki banks 5 (contains the code at 0x7E00), 100, 101
+    SAVENEX CLOSE               ; (banks 100 and 101 are added just as example)
+		  </programlisting>
+	  </example>
+  </section>
+
   </chapter>
 </book>
