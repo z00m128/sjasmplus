@@ -1797,22 +1797,39 @@ void dirDEFARRAY() {
 
 #ifdef USE_LUA
 
-void _lua_showerror() {
-	int ln;
-
-	// part from Error(...)
-	char *err = STRDUP(lua_tostring(LUA, -1)), *lnp = err;
-	if (err == NULL) {
-		Error("No enough memory!", NULL, FATAL);
+static int SplitLuaErrorMessage(const char*& LuaError)
+{
+	int ln = LuaLine;
+	if (LuaError && strstr(LuaError, "[string \"script\"]") == LuaError)
+	{
+		char *const err = STRDUP(LuaError), *lnp = err, *msgp = NULL;
+		if (err == NULL)
+			Error("No enough memory!", NULL, FATAL);
+		else
+		{
+			while (*lnp && (*lnp != ':' || !isdigit((unsigned char) *(lnp+1))) )
+				lnp++;
+			if (*lnp && (msgp = strchr(++lnp, ':')) )
+			{
+				*(msgp++) = '\0';
+				ln += atoi(lnp);
+				SkipBlanks(msgp);
+				if (*msgp)
+					LuaError += msgp - err;
+			}
+			free(err);
+		}
 	}
-	while (*lnp != ':' || !isdigit((unsigned char) *(lnp+1))) lnp++;
-	char *msgp = strchr(++lnp, ':');
-	*(msgp++) = '\0';
-	ln = atoi(lnp) + LuaLine;
+	return ln;
+}
+
+void _lua_showerror() {
+	// part from Error(...)
+	const char *msgp = lua_tostring(LUA, -1);
+	int ln = SplitLuaErrorMessage(msgp);
 
 	// print error and other actions
-	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA]%s", filename, ln, msgp);
-	free(err);
+	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", filename, ln, msgp);
 
 	if (!strchr(ErrorLine, '\n')) {
 		STRCAT(ErrorLine, LINEMAX2, "\n");
