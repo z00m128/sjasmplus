@@ -19,7 +19,7 @@
 18    1234                  ; this will fail with "Label not found: test_result_1", because "string" sub-part is substitued with "1"
 19    1234                  MYMACRO1 test_result_string, 1, 0   ; this is feature, not bug (see "macro_test.asm")
 issue35.asm(19): error: Label not found: test_result_1
-19    1234 11 00 00    >        ld de,test_result_1; this is feature, not bug (see "macro_test.asm")
+19    1234 11 00 00    >        ld de,test_result_1
 20    1237
 21    1237                  ; this will fail with "Label not found: test_result_1", because "string" sub-part is substitued with "1"
 22    1237                  MYMACRO2 test_result_string, 1
