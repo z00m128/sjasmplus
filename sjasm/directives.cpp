@@ -1738,6 +1738,8 @@ void dirEDUP() {
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
 			if (lijstp->sourceLine) CurrentSourceLine = lijstp->sourceLine;
 			STRCPY(line, LINEMAX, lijstp->string);
+			substitutedLine = line;		// reset substituted listing
+			eolComment = NULL;			// reset end of line comment
 			lijstp = lijstp->next;
 			ParseLineSafe();
 			++CurrentSourceLine;

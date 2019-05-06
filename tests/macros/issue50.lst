@@ -1,0 +1,52 @@
+# file opened: issue50.asm
+ 1    0000                  MACRO m1
+ 2    0000 ~                    ; commentA
+ 3    0000 ~                    nop ; comment1
+ 4    0000 ~                    ; commentB
+ 5    0000 ~                    nop ; comment2
+ 6    0000 ~                    nop ; comment3
+ 7    0000                  ENDM
+ 8    0000
+ 9    0000                  MACRO m2
+10    0000 ~                    nop     ; with its own comment m2.nop
+11    0000                  ENDM
+12    0000
+13    0000                  MACRO m3    ; without comment on code line
+14    0000 ~                    nop
+15    0000                  ENDM
+16    0000
+17    0000                  m1
+17    0000             >        ; commentA
+17    0000 00          >        nop ; comment1
+17    0001             >        ; commentB
+17    0001 00          >        nop ; comment2
+17    0002 00          >        nop ; comment3
+18    0003
+19    0003 37               scf     ; main line m2_1 with comment
+20    0004                  m2
+20    0004 00          >        nop     ; with its own comment m2.nop
+21    0005
+22    0005 27               daa     ; main line m2_2 with comment
+23    0006                  m2      ; macro emit m2_2 with comment
+23    0006 00          >        nop     ; with its own comment m2.nop
+24    0007
+25    0007 3F               ccf
+26    0008                  m2      ; macro emit m2_3 with comment
+26    0008 00          >        nop     ; with its own comment m2.nop
+27    0009
+28    0009 37               scf     ; main line m3_1 with comment
+29    000A                  m3
+29    000A 00          >        nop
+30    000B
+31    000B 27               daa     ; main line m3_2 with comment
+32    000C                  m3      ; macro emit m3_2 with comment
+32    000C 00          >        nop
+33    000D
+34    000D 3F               ccf
+35    000E                  m3      ; macro emit m3_3 with comment
+35    000E 00          >        nop
+36    000F
+# file closed: issue50.asm
+
+Value    Label
+------ - -----------------------------------------------------------

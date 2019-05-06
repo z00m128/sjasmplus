@@ -1103,6 +1103,7 @@ int ReadLine(bool SplitByColon) {
 		if (!lijstp) return 0;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
+		eolComment = NULL;			// reset end of line comment
 		lijstp = lijstp->next;
 		return 1;
 	}
