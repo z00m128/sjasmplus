@@ -52,9 +52,9 @@ KateSyntaxHighLightTest.asm(14): error: Unrecognized instruction: bsra    de,b
 KateSyntaxHighLightTest.asm(34): error: Unrecognized instruction: jnz     s               
 34    A84A                  jnz     s               ; still makes it easier to catch
 35    A84A                  leMacron arg0           ; but so do also correctly used macros
-35    A84A DD 01       >        defb    $DD, 1; but so do also correctly used macros
+35    A84A DD 01       >        defb    $DD, 1
 KateSyntaxHighLightTest.asm(35): error: Unrecognized instruction: nextreg $15, $0
-35    A84C             >        nextreg $15, $0; but so do also correctly used macros
+35    A84C             >        nextreg $15, $0
 36    A84C              .localLab:
 KateSyntaxHighLightTest.asm(37): error: Missing next digit: 1   
 37    A84C                  hex     F32712bcd3561   ; unpaired digit or non-digit is highlighted as "error"

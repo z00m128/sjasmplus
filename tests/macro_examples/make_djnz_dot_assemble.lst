@@ -28,7 +28,7 @@
 23    0000             >        ELSE
 23    0000 10 FE       >            djnz OrdinaryLabelDjnz
 23    0002             >        ENDIF
-23    0002             >        IFDEF .._
+23    0002             >        IFDEF .._           ;; extra test for "$" argument, that one produces ".._" define
 23    0002 ~           >            UNDEFINE .._
 23    0002             >        ELSE
 23    0002             >            UNDEFINE .._OrdinaryLabelDjnz
@@ -36,28 +36,28 @@
 24    0002
 25    0002                      DJNZ    $           ;; sjasmplus syntax
 25    0002             >        DEFINE .._arg0?
-25    0002             >        IFDEF .._.;; sjasmplus syntax
+25    0002             >        IFDEF .._.
 25    0002 ~           >            djnz $
 25    0002             >        ELSE
-25    0002 10 FE       >            djnz $           ;; sjasmplus syntax
+25    0002 10 FE       >            djnz $
 25    0004             >        ENDIF
 25    0004             >        IFDEF .._           ;; extra test for "$" argument, that one produces ".._" define
-25    0004             >            UNDEFINE .._;; extra test for "$" argument, that one produces ".._" define
+25    0004             >            UNDEFINE .._
 25    0004             >        ELSE
 25    0004 ~           >            UNDEFINE .._arg0?
 25    0004             >        ENDIF
 26    0004
 27    0004                      DJNZ    .           ;; Zeus syntax, will be corrected by the macro "DJNZ"
 27    0004             >        DEFINE .._arg0?
-27    0004             >        IFDEF .._.;; Zeus syntax, will be corrected by the macro "DJNZ"
-27    0004 10 FE       >            djnz $;; Zeus syntax, will be corrected by the macro "DJNZ"
+27    0004             >        IFDEF .._.
+27    0004 10 FE       >            djnz $
 27    0006             >        ELSE
 27    0006 ~           >            djnz arg0?
 27    0006             >        ENDIF
 27    0006             >        IFDEF .._           ;; extra test for "$" argument, that one produces ".._" define
 27    0006 ~           >            UNDEFINE .._
 27    0006             >        ELSE
-27    0006             >            UNDEFINE .._.           ?
+27    0006             >            UNDEFINE .._.
 27    0006             >        ENDIF
 28    0006
 29    0006 10 FE                djnz    $           ;; avoid macro by using lowercase :D

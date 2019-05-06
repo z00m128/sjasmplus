@@ -49,7 +49,7 @@
 32    0011                  DUP 2
 33    0011 C9          >    ret
 34    0012 21 AB 56    >    ld  hl,0x56AB
-35    0015             >    xxx
+35    0015             >    xxx     ; emit macro
 35    0015             >        DUP 2
 35    0015             >1:
 35    0015 21 34 12    >        ld hl,0x1234
@@ -77,7 +77,7 @@ macro_args.asm(36): warning: Bytes lost (0x642766)
 36    002D             >.first_second:
 33    002D C9          >    ret
 34    002E 21 AB 56    >    ld  hl,0x56AB
-35    0031             >    xxx
+35    0031             >    xxx     ; emit macro
 35    0031             >        DUP 2
 35    0031             >1:
 35    0031 21 34 12    >        ld hl,0x1234

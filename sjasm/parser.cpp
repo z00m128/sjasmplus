@@ -417,7 +417,11 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		// for following code (0 == comlin) (unless it has its own parse loop)
 
 		// single line comments -> finish
-		if (c1 == ';' || (c1 == '/' && c2 == '/')) break;
+		if (c1 == ';' || (c1 == '/' && c2 == '/')) {
+			// set empty eol line comment, if the source of data is still the original "line" buffer
+			if (!eolComment && line <= lp && lp < line+LINEMAX) eolComment = lp;
+			break;
+		}
 
 		// strings parsing
 		if (afterNonAlphaNum && (c1 == '"' || c1 == '\'')) {
