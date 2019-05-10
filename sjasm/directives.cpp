@@ -54,7 +54,7 @@ int ParseDirective(bool beginningOfLine)
 	if (DirectivesTable.zoek(n)) return 1;
 
 	// Only "." repeat directive remains, but that one can't start at beginning of line (without --dirbol)
-	if ((beginningOfLine && !Options::IsPseudoOpBOF) || ('.' != *n) || (!isdigit(n[1]) && *lp != '(')) {
+	if ((beginningOfLine && !Options::syx.IsPseudoOpBOF) || ('.' != *n) || (!isdigit(n[1]) && *lp != '(')) {
 		lp = olp;		// alo "." must be followed by digit, or math expression in parentheses
 		return 0;		// otherwise just return
 	}

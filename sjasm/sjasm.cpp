@@ -82,17 +82,14 @@ namespace Options {
 	char ZX_TapeFName[LINEMAX] = {0};
 
 	EOutputVerbosity OutputVerbosity = OV_ALL;
-	bool IsPseudoOpBOF = 0;
-	bool IsAutoReloc = 0;
 	bool IsLabelTableInListing = 0;
 	bool IsDefaultListingName = false;
-	bool IsReversePOP = 0;
 	bool IsShowFullPath = 0;
 	bool AddLabelListing = false;
 	bool HideLogo = 0;
 	bool ShowHelp = 0;
 	bool NoDestinationFile = true;		// no *.out file by default
-	bool FakeInstructions = 1;
+	SSyntax syx;
 	int IsNextEnabled = 0;		// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
 	bool SourceStdIn = false;
 
@@ -100,6 +97,21 @@ namespace Options {
 	CStringsList* IncludeDirsList = new CStringsList((char *)".");
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
+	// returns true if fakes are completely disabled, false when they are enabled
+	// showMessage=true: will also display error/warning (use when fake ins. is emitted)
+	// showMessage=false: can be used to silently check if fake instructions are even possible
+	bool noFakes(bool showMessage) {
+		if (!showMessage) return !syx.FakeEnabled;
+		if (!syx.FakeEnabled) {
+			Error("Fake instructions are not enabled", bp, SUPPRESS);
+			return true;
+		}
+		if (syx.FakeWarning) {	// check end-of-line comment for mentioning "fake" to remove warning
+			bool inEolComment = eolComment ? nullptr != strstr(eolComment, "fake") : false;
+			if (!inEolComment) Warning("Fake instruction", bp);
+		}
+		return false;
+	}
 } // eof namespace Options
 
 CDevice *Devices = 0;
@@ -318,15 +330,15 @@ namespace Options {
 					IsNextEnabled = 1;
 					if (!strcmp(val, "cspect")) IsNextEnabled = 2;	// CSpect emulator extensions
 				} else if (!strcmp(opt, "reversepop")) {
-					IsReversePOP = 1;
+					syx.IsReversePOP = true;
 				} else if (!strcmp(opt, "nologo")) {
 					HideLogo = 1;
 				} else if (!strcmp(opt, "nofakes")) {
-					FakeInstructions = 0;
+					syx.FakeEnabled = false;
 				} else if (!strcmp(opt, "dos866")) {
 					ConvertEncoding = ENCDOS;
 				} else if (!strcmp(opt, "dirbol")) {
-					IsPseudoOpBOF = 1;
+					syx.IsPseudoOpBOF = true;
 				} else if (!strcmp(opt, "inc") || !strcmp(opt, "i") || !strcmp(opt, "I")) {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);

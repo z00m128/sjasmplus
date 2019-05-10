@@ -34,21 +34,7 @@ namespace Z80 {
 		Z80C_NZ = 0x00, Z80C_Z  = 0x08, Z80C_NC = 0x10, Z80C_C = 0x18,
 		Z80C_PO = 0x20, Z80C_PE = 0x28, Z80C_P  = 0x30, Z80C_M = 0x38, Z80C_UNK };
 
-#define ASSERT_FAKE_INSTRUCTIONS(operation) if (!Options::FakeInstructions) { \
-		operation; \
-	}
-	//char* my_p = lp;
-	//SkipBlanks(my_p);
-	//Warning("Fake instructions is disabled. The instruction was not compiled", my_p, LASTPASS);
-
 	CFunctionTable OpCodeTable;
-
-	/*char *GetRegister(Z80Reg reg){
-		switch (reg) {
-			case Z80_B:
-				return "BC"
-		}
-	}*/
 
 	void GetOpCode() {
 		char* n;
@@ -1940,19 +1926,19 @@ namespace Z80 {
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x40; e[1] = 0x49; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x42; e[1] = 0x4b; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x44; e[1] = 0x4d; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x44; e[3] = 0x4d; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x44; e[3] = 0x4d; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -1980,7 +1966,7 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (cparenOLD(lp)) {
 							e[0] = 0x4e;
 						}
@@ -1988,7 +1974,7 @@ namespace Z80 {
 						break;
 					case Z80_IX:
 					case Z80_IY:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							Error("Offset out of range1");
 						}
@@ -2007,19 +1993,19 @@ namespace Z80 {
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x50; e[1] = 0x59; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x52; e[1] = 0x5b; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x54; e[1] = 0x5d; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x54; e[3] = 0x5d; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x54; e[3] = 0x5d; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -2046,13 +2032,13 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (cparenOLD(lp)) {
 							e[0] = 0x5e;
 						} e[1] = 0x23; e[2] = 0x56; e[3] = 0x2b; break;
 					case Z80_IX:
 					case Z80_IY:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							Error("Offset out of range2");
 						}
@@ -2071,19 +2057,19 @@ namespace Z80 {
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x60; e[1] = 0x69; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x62; e[1] = 0x6b; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x64; e[1] = 0x6d; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xdd; e[1] = 0xe5; e[2] = 0xe1; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xfd; e[1] = 0xe5; e[2] = 0xe1; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -2112,7 +2098,7 @@ namespace Z80 {
 					switch (reg) {
 					case Z80_IX:
 					case Z80_IY:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							Error("Offset out of range3");
 						}
@@ -2153,19 +2139,19 @@ namespace Z80 {
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x69; e[3] = 0x60; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x6b; e[3] = 0x62; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xe5; e[1] = 0xdd; e[2] = 0xe1; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x6d; e[3] = 0x64; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xfd; e[1] = 0xe5; e[2] = 0xdd; e[3] = 0xe1; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -2193,19 +2179,19 @@ namespace Z80 {
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x69; e[3] = 0x60; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x6b; e[3] = 0x62; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xe5; e[1] = 0xfd; e[2] = 0xe1; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xdd; e[1] = 0xe5; e[2] = 0xfd; e[3] = 0xe1; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x6d; e[3] = 0x64; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -2276,10 +2262,10 @@ namespace Z80 {
 					case Z80_F:
 						break;
 					case Z80_BC:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						e[0] = 0x71; e[1] = 0x23; e[2] = 0x70; e[3] = 0x2b; break;
 					case Z80_DE:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						e[0] = 0x73; e[1] = 0x23; e[2] = 0x72; e[3] = 0x2b; break;
 					case Z80_HL:
 					case Z80_IX:
@@ -2320,19 +2306,19 @@ namespace Z80 {
 					case Z80_IYH:
 						break;
 					case Z80_BC:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
 						e[0] = e[3] = 0xdd; e[1] = 0x71; e[4] = 0x70; e[5] = e[2] + 1; break;
 					case Z80_DE:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
 						e[0] = e[3] = 0xdd; e[1] = 0x73; e[4] = 0x72; e[5] = e[2] + 1; break;
 					case Z80_HL:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
@@ -2372,19 +2358,19 @@ namespace Z80 {
 					case Z80_IYH:
 						break;
 					case Z80_BC:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
 						e[0] = e[3] = 0xfd; e[1] = 0x71; e[4] = 0x70; e[5] = e[2] + 1; break;
 					case Z80_DE:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
 						e[0] = e[3] = 0xfd; e[1] = 0x73; e[4] = 0x72; e[5] = e[2] + 1; break;
 					case Z80_HL:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
@@ -2432,7 +2418,7 @@ namespace Z80 {
 		Z80Reg reg, reg2;
 		int e[7], b;
 
-		if (!Options::FakeInstructions) {
+		if (Options::noFakes(false)) {
 			e[0] = 0xed;
 			e[1] = 0xa8;
 			e[2] = -1;
@@ -2442,12 +2428,9 @@ namespace Z80 {
 
 		do {
 			e[0] = e[1] = e[2] = e[3] = e[4] = e[5] = e[6] = -1;
-			//if (Options::FakeInstructions) {
 				switch (reg = GetRegister(lp)) {
 				case Z80_A:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2484,9 +2467,7 @@ namespace Z80 {
 				case Z80_E:
 				case Z80_H:
 				case Z80_L:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2508,10 +2489,9 @@ namespace Z80 {
 					break;
 				default:
 					if (oparenOLD(lp, '[') || oparenOLD(lp, '(')) {
+						if (Options::noFakes()) break;
 						reg = GetRegister(lp);
-
 						b = 0;
-
 						if (reg == Z80_IX || reg == Z80_IY) {
 							b = z80GetIDxoffset(lp);
 						}
@@ -2567,10 +2547,6 @@ namespace Z80 {
 						break;
 					}
 				}
-			/*} else {
-				e[0] = 0xed;
-				e[1] = 0xa8;
-			}*/
 			EmitBytes(e);
 		} while (comma(lp));
 	}
@@ -2594,7 +2570,7 @@ namespace Z80 {
 		Z80Reg reg, reg2;
 		int e[11], b;
 
-		if (!Options::FakeInstructions) {
+		if (Options::noFakes(false)) {
 			e[0] = 0xed;
 			e[1] = 0xa0;
 			e[2] = -1;
@@ -2607,9 +2583,7 @@ namespace Z80 {
 
 				switch (reg = GetRegister(lp)) {
 				case Z80_A:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2646,9 +2620,7 @@ namespace Z80 {
 				case Z80_E:
 				case Z80_H:
 				case Z80_L:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2669,9 +2641,7 @@ namespace Z80 {
 					}
 					break;
 				case Z80_BC:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2693,9 +2663,7 @@ namespace Z80 {
 					}
 					break;
 				case Z80_DE:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2716,9 +2684,7 @@ namespace Z80 {
 					}
 					break;
 				case Z80_HL:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2736,6 +2702,7 @@ namespace Z80 {
 					break;
 				default:
 					if (oparenOLD(lp, '[') || oparenOLD(lp, '(')) {
+						if (Options::noFakes()) break;
 						reg = GetRegister(lp);
 						b = 0;
 						if (reg == Z80_IX || reg == Z80_IY) {
@@ -3090,7 +3057,7 @@ namespace Z80 {
 		EmitBytes(&e[t]);
 	}
 
-	void OpCode_POP() {
+	void OpCode_POPnormal() {
 		Z80Reg reg;
 		do {
 			int e[5];
@@ -3112,6 +3079,11 @@ namespace Z80 {
 			}
 			EmitBytes(e);
 		} while (comma(lp));
+	}
+
+	void OpCode_POP() {
+		if (Options::syx.IsReversePOP) OpCode_POPreverse();
+		else OpCode_POPnormal();
 	}
 
 	void OpCode_PUSH() {
@@ -3241,19 +3213,19 @@ namespace Z80 {
 				e[1] = 0x10 + reg;
 				break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb;
 				e[1] = 0x11;
 				e[3] = 0x10;
 				break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb;
 				e[1] = 0x13;
 				e[3] = 0x12;
 				break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb;
 				e[1] = 0x15;
 				e[3] = 0x14;
@@ -3380,13 +3352,13 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x18 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x18; e[3] = 0x19; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x1a; e[3] = 0x1b; break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x1c; e[3] = 0x1d; break;
 			default:
 				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
@@ -3675,10 +3647,10 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x20 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x21; e[3] = 0x10; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x23; e[3] = 0x12; break;
 			case Z80_HL:
 				e[0] = 0x29; break;
@@ -3737,13 +3709,13 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x30 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x31; e[3] = 0x10; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x33; e[3] = 0x12; break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x35; e[3] = 0x14; break;
 			default:
 				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
@@ -3800,13 +3772,13 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x28 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x28; e[3] = 0x19; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x2a; e[3] = 0x1b; break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x2c; e[3] = 0x1d; break;
 			default:
 				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
@@ -3863,13 +3835,13 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x38 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x38; e[3] = 0x19; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x3a; e[3] = 0x1b; break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x3c; e[3] = 0x1d; break;
 			default:
 				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
@@ -3924,16 +3896,16 @@ namespace Z80 {
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x42; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x52; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x62; break;
 				case Z80_SP:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x72; break;
 				default:;
 				}
@@ -4130,11 +4102,7 @@ namespace Z80 {
 		OpCodeTable.Insert("out", OpCode_OUT);
 		OpCodeTable.Insert("outd", OpCode_OUTD);
 		OpCodeTable.Insert("outi", OpCode_OUTI);
-		if (Options::IsReversePOP) {
-			OpCodeTable.Insert("pop", OpCode_POPreverse);
-		} else {
-			OpCodeTable.Insert("pop", OpCode_POP);
-		}
+		OpCodeTable.Insert("pop", OpCode_POP);
 		OpCodeTable.Insert("push", OpCode_PUSH);
 		OpCodeTable.Insert("res", OpCode_RES);
 		OpCodeTable.Insert("ret", OpCode_RET);

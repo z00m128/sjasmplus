@@ -538,7 +538,7 @@ char* ReplaceDefine(char* lp) {
 
 void ParseLabel() {
 	if (White()) return;
-	if (Options::IsPseudoOpBOF && ParseDirective(true)) return;
+	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
 	char temp[LINEMAX], * tp = temp, * ttp;
 	aint val, oval;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
