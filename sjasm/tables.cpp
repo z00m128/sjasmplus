@@ -953,7 +953,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 		case SMEMBDWORD:
 			if (!ParseExpressionNoSyntaxError(lp, val)) val = ip->def;
 			CopyMember(ip, val);
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(lp);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
 			break;
 		case SMEMBPARENOPEN:
 			SkipBlanks(lp);
@@ -966,7 +966,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 			SkipBlanks(lp);
 			if (haakjes && *lp == '}') {
 				--haakjes; ++lp;
-				if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(lp);
+				if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
 			}
 			CopyMember(ip, 0);
 			break;
@@ -1052,23 +1052,23 @@ void CStructure::emitmembs(char*& p) {
 			break;
 		case SMEMBBYTE:
 			EmitByte(ip->ParseValue(p));
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBWORD:
 			EmitWord(ip->ParseValue(p));
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBD24:
 			val = ip->ParseValue(p);
 			EmitByte(val & 0xFF);
 			EmitWord((val>>8) & 0xFFFF);
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBDWORD:
 			val = ip->ParseValue(p);
 			EmitWord(val & 0xFFFF);
 			EmitWord((val>>16) & 0xFFFF);
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBPARENOPEN:
 			SkipBlanks(p);
@@ -1079,7 +1079,7 @@ void CStructure::emitmembs(char*& p) {
 			if (haakjes && *p == '}') {
 				--haakjes; ++p;
 			}
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		default:
 			ErrorInt("Internal Error CStructure::emitmembs", ip->type, FATAL);

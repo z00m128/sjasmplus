@@ -112,11 +112,32 @@ int NeedDEFL() {
 	return 0;
 }
 
-int comma(char*& p) {
+bool anyComma(char*& p) {
 	SkipBlanks(p);
-	if (*p != ',') return 0;
+	if (*p != ',') return false;
 	++p;
-	return 1;
+	return true;
+}
+
+bool comma(char*& p) {
+	SkipBlanks(p);
+	if (',' != p[0] || ',' == p[1]) return false;	// detect double-comma as FALSE state
+	++p;
+	return true;
+}
+
+bool doubleComma(char* & p) {
+	SkipBlanks(p);
+	if (',' != p[0] || ',' != p[1]) return false;
+	p += 2;
+	return true;
+}
+
+bool doubleBacktick(char* & p) {
+	SkipBlanks(p);
+	if ('`' != p[0] || '`' != p[1]) return false;
+	p += 2;
+	return true;
 }
 
 //enum EBracketType          { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };

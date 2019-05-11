@@ -522,7 +522,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_ADD() {
@@ -636,7 +636,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_AND() {
@@ -702,7 +702,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_BIT() {
@@ -748,7 +748,7 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_Next_BREAK() {	// this is fake instruction for CSpect emulator, not for real Z80N
@@ -799,7 +799,7 @@ namespace Z80 {
 			check16(callad);
 			e[1] = callad & 255; e[2] = (callad >> 8) & 255;
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_CCF() {
@@ -868,7 +868,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_CPD() {
@@ -946,7 +946,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_DI() {
@@ -970,7 +970,7 @@ namespace Z80 {
 			}
 			e[0] = 0x10; e[1] = jmp < 0 ? 256 + jmp : jmp;
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_EI() {
@@ -1140,7 +1140,7 @@ namespace Z80 {
 				e[1] = 0x70;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_INC() {
@@ -1178,7 +1178,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_IND() {
@@ -1260,7 +1260,7 @@ namespace Z80 {
 				e[1] = jpad & 255; e[2] = (jpad >> 8) & 255;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_JR() {
@@ -1283,7 +1283,7 @@ namespace Z80 {
 			}
 			e[1] = jrad & 0xFF;
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_LD() {
@@ -2411,7 +2411,7 @@ namespace Z80 {
 				break;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_LDD() {
@@ -2548,7 +2548,7 @@ namespace Z80 {
 					}
 				}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_LDDR() {
@@ -2772,7 +2772,7 @@ namespace Z80 {
 				}
 
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_LDIR() {
@@ -2898,7 +2898,7 @@ namespace Z80 {
 					break;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_NOP() {
@@ -2967,7 +2967,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_OTDR() {
@@ -3002,7 +3002,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_OUTD() {
@@ -3050,18 +3050,15 @@ namespace Z80 {
 			default:
 				c = 0; break;
 			}
-			if (!comma(lp) || t < 2) {
-				c = 0;
-			}
-		} while (c);
+		} while (c && 2 <= t && Options::syx.MultiArg(lp));
 		EmitBytes(&e[t]);
 	}
 
 	void OpCode_POPnormal() {
 		Z80Reg reg;
 		do {
-			int e[5];
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+			int e[3];
+			e[0] = e[1] = e[2] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_AF:
 				e[0] = 0xf1; break;
@@ -3078,7 +3075,7 @@ namespace Z80 {
 				break;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_POP() {
@@ -3115,7 +3112,7 @@ namespace Z80 {
 				break;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RES() {
@@ -3176,7 +3173,7 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RET() {
@@ -3267,7 +3264,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RLA() {
@@ -3325,7 +3322,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RLCA() {
@@ -3397,7 +3394,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RRA() {
@@ -3455,7 +3452,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RRCA() {
@@ -3476,7 +3473,7 @@ namespace Z80 {
 			} else {			// e == { $00, $08, $10, $18, $20, $28, $30, $38 }
 				EmitByte(0xC7 + e);
 			}
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SBC() {
@@ -3559,7 +3556,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SCF() {
@@ -3624,7 +3621,7 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_Next_SETAE() {
@@ -3691,7 +3688,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SLL() {
@@ -3754,7 +3751,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SRA() {
@@ -3817,7 +3814,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SRL() {
@@ -3880,7 +3877,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SUB() {
@@ -3965,7 +3962,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	//Swaps the high and low nibbles of the accumulator.
@@ -4051,7 +4048,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void Init() {

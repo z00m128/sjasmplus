@@ -512,16 +512,16 @@ void dirSIZE() {
 void dirINCBIN() {
 	int offset = 0, length = INT_MAX;
 	char* fnaam = GetFileName(lp);
-	if (comma(lp)) {
+	if (anyComma(lp)) {
 		aint val;
-		if (!comma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCBIN] Syntax error", bp, SUPPRESS);
 				return;
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCBIN] Syntax error", bp, SUPPRESS);
 				return;
@@ -541,8 +541,8 @@ void dirINCHOB() {
 	FILE* ff;
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
 			}
@@ -551,7 +551,7 @@ void dirINCHOB() {
 			}
 			offset += val;
 		} else --lp;		// there was second comma right after, reread it
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
 			}
@@ -587,8 +587,8 @@ void dirINCTRD() {
 	FILE* ff;
 
 	char* fnaam = GetFileName(lp), * fnaamh;
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
@@ -599,8 +599,8 @@ void dirINCTRD() {
 	} else {
 		Error("[INCTRD] Syntax error", bp, IF_FIRST); return; //is this ok?
 	}
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
 			}
@@ -609,7 +609,7 @@ void dirINCTRD() {
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
 			}
@@ -684,7 +684,7 @@ void dirSAVESNA() {
 
 	char* fnaam = GetFileName(lp);
 	int start = StartAddress;
-	if (comma(lp)) {
+	if (anyComma(lp)) {
 		aint val;
 		if (ParseExpression(lp, val)) {
 			if (0 <= start) Warning("[SAVESNA] Start address was also defined by END, SAVESNA argument used instead");
@@ -746,8 +746,8 @@ void dirSAVETAP() {
 	}
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			char *tlp = lp;
 			char *id;
 
@@ -771,9 +771,9 @@ void dirSAVETAP() {
 			}
 
 			if (realtapeMode) {
-				if (comma(lp)) {
+				if (anyComma(lp)) {
 					if (headerType == HEADLESS) {
-						if (!comma(lp)) {
+						if (!anyComma(lp)) {
 							if (!ParseExpression(lp, val)) {
 								Error("[SAVETAP] Syntax error", bp, PASS3); return;
 							}
@@ -786,7 +786,7 @@ void dirSAVETAP() {
 						} else {
 							Error("[SAVETAP] Syntax error. Missing start address", bp, PASS3); return;
 						}
-						if (comma(lp)) {
+						if (anyComma(lp)) {
 							if (!ParseExpression(lp, val)) {
 								Error("[SAVETAP] Syntax error", bp, PASS3); return;
 							}
@@ -797,7 +797,7 @@ void dirSAVETAP() {
 							}
 							length = val;
 						}
-						if (comma(lp)) {
+						if (anyComma(lp)) {
 							if (!ParseExpression(lp, val)) {
 								Error("[SAVETAP] Syntax error", bp, PASS3); return;
 							}
@@ -806,12 +806,12 @@ void dirSAVETAP() {
 							}
 							param3 = val;
 						}
-					} else if (!comma(lp)) {
+					} else if (!anyComma(lp)) {
 						fnaamh = GetFileName(lp);
 						if (!*fnaamh) {
 							Error("[SAVETAP] Syntax error in tape file name", bp, PASS3);
 							return;
-						} else if (comma(lp) && !comma(lp) && ParseExpression(lp, val)) {
+						} else if (anyComma(lp) && !anyComma(lp) && ParseExpression(lp, val)) {
 							if (val < 0) {
 								Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
 							} else if (val > 0xFFFF) {
@@ -819,7 +819,7 @@ void dirSAVETAP() {
 							}
 							start = val;
 
-							if (comma(lp) && !comma(lp) && ParseExpression(lp, val)) {
+							if (anyComma(lp) && !anyComma(lp) && ParseExpression(lp, val)) {
 								if (val < 0) {
 									Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
 								} else if (val > 0xFFFF) {
@@ -827,7 +827,7 @@ void dirSAVETAP() {
 								}
 								length = val;
 
-								if (comma(lp)) {
+								if (anyComma(lp)) {
 									if (!ParseExpression(lp, val)) {
 										Error("[SAVETAP] Syntax error", bp, IF_FIRST); return;
 									}
@@ -838,7 +838,7 @@ void dirSAVETAP() {
 									}
 									param2 = val;
 								}
-								if (comma(lp)) {
+								if (anyComma(lp)) {
 									if (!ParseExpression(lp, val)) {
 										Error("[SAVETAP] Syntax error", bp, IF_FIRST); return;
 									}
@@ -920,8 +920,8 @@ void dirSAVEBIN() {
 	int start = -1, length = -1;
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVEBIN] Syntax error", bp, PASS3); return;
 			}
@@ -934,7 +934,7 @@ void dirSAVEBIN() {
 		} else {
 		  	Error("[SAVEBIN] Syntax error. No parameters", bp, PASS3); return;
 		}
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVEBIN] Syntax error", bp, PASS3); return;
 			}
@@ -1008,8 +1008,8 @@ void dirSAVEHOB() {
 	}
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
@@ -1021,8 +1021,8 @@ void dirSAVEHOB() {
 		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return; //is this ok?
 	}
 
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
 			}
@@ -1035,7 +1035,7 @@ void dirSAVEHOB() {
 		} else {
 		  	Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
 		}
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
 			}
@@ -1092,8 +1092,8 @@ void dirSAVETRD() {
 	int start = -1,length = -1,autostart = -1; //autostart added by boo_boo 19_0ct_2008
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
@@ -1105,8 +1105,8 @@ void dirSAVETRD() {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return; //is this ok?
 	}
 
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
@@ -1117,8 +1117,8 @@ void dirSAVETRD() {
 		} else {
 		  	Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 		}
-		if (comma(lp)) {
-			if (!comma(lp)) {
+		if (anyComma(lp)) {
+			if (!anyComma(lp)) {
 				if (!ParseExpression(lp, val)) {
 					Error("[SAVETRD] Syntax error", bp, PASS3); return;
 				}
@@ -1130,7 +1130,7 @@ void dirSAVETRD() {
 		  		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 			}
 		}
-		if (comma(lp)) { //added by boo_boo 19_0ct_2008
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}

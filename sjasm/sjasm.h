@@ -39,9 +39,10 @@ namespace Options {
 		bool		IsReversePOP;
 		bool		FakeEnabled;
 		bool		FakeWarning;
-		//bool		multiArg;	//TODO
+		bool		(*MultiArg)(char*&);	// function checking if multi-arg delimiter is next
 
-		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false) {}
+		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
+					MultiArg(&comma) {}
 	} SSyntax;
 
 	extern char SymbolListFName[LINEMAX];
