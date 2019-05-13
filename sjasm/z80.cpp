@@ -765,6 +765,8 @@ namespace Z80 {
 		if (Z80_DE == GetRegister(lp) && comma(lp) && Z80_B == GetRegister(lp)) {
 			e[0]=0xED;
 			e[1]=mainOpcode;
+		} else {
+			Error("Z80N barrel shifts exist only with \"DE,B\" arguments", bp, SUPPRESS);
 		}
 		EmitBytes(e);
 	}
@@ -2813,7 +2815,7 @@ namespace Z80 {
 	void OpCode_Next_MIRROR() {
 		Z80Reg reg = GetRegister(lp);
 		if (Z80_UNK != reg && Z80_A != reg) {
-			Error("[MIRROR] Illegal operand", line);
+			Error("[MIRROR] Illegal operand (can be only register A)", line);
 			return;
 		}
 		EmitByte(0xED);
@@ -2826,6 +2828,8 @@ namespace Z80 {
 		if (GetRegister(lp)==Z80_D && comma(lp) && GetRegister(lp)==Z80_E){
 			e[0]=0xED;
 			e[1]=0x30;
+		} else {
+			Error("Z80N MUL exist only with \"D,E\" arguments", bp, SUPPRESS);
 		}
 		EmitBytes(e);
 	}
@@ -3977,7 +3981,7 @@ namespace Z80 {
 	void OpCode_Next_SWAPNIB() {
 		Z80Reg reg = GetRegister(lp);
 		if (Z80_UNK != reg && Z80_A != reg) {
-			Error("[SWAPNIB] Illegal operand", line);
+			Error("[SWAPNIB] Illegal operand (can be only register A)", line);
 			return;
 		}
 		EmitByte(0xED);
