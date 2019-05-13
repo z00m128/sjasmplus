@@ -43,6 +43,7 @@ namespace Options {
 
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
 					MultiArg(&comma) {}
+		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
 	} SSyntax;
 
 	extern char SymbolListFName[LINEMAX];

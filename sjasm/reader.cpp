@@ -140,6 +140,11 @@ bool doubleBacktick(char* & p) {
 	return true;
 }
 
+bool nonMaComma(char* & p) {
+	if (Options::syx.isMultiArgPlainComma()) return false;	// comma is also multi-arg => FALSE here
+	return comma(p);
+}
+
 //enum EBracketType          { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
 static const char brackets_b[] = { 0,      '(',      '{',      '[',       0 };
 static const char brackets_e[] = { 0,      ')',      '}',      ']',       0 };

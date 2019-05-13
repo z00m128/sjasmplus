@@ -647,9 +647,11 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0xa7; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0xa7; break;
+				if (!nonMaComma(lp)) {	// "AND a,b" is possible only when multi-arg is not-comma
+					e[0] = 0xa7;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -814,9 +816,11 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0xbf; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0xbf; break;
+				if (!nonMaComma(lp)) {	// "CP a,b" is possible only when multi-arg is not-comma
+					e[0] = 0xbf;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -2913,9 +2917,11 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0xb7; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0xb7; break;
+				if (!nonMaComma(lp)) {	// "OR a,b" is possible only when multi-arg is not-comma
+					e[0] = 0xb7;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -3908,9 +3914,11 @@ namespace Z80 {
 				}
 				break;
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0x97; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0x97; break;
+				if (!nonMaComma(lp)) {	// "SUB a,b" is possible only when multi-arg is not-comma
+					e[0] = 0x97;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -3993,9 +4001,11 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0xaf; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0xaf; break;
+				if (!nonMaComma(lp)) {	// "XOR a,b" is possible only when multi-arg is not-comma
+					e[0] = 0xaf;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
