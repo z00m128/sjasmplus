@@ -15,6 +15,10 @@ Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
 
+  14/05/2019: version 0.8.1
+    + adding backtick as word deliminator to cover new double-backtick multi-arg symbol
+    + "repeater" directive ".expression" support (not doing correctly nested parentheses)
+
   13/04/2019: version 0.8
     + Numeric literals highlight rules extended with new C++ like rules
 
@@ -54,7 +58,6 @@ TODO missing things:
     - macro/equ/label symbols differentiation = I would *love* these, but they are not
         possible with current Kate highlighting, as it would require extra input injected
         by editor through some new API, to provide list of various (type) symbols.
-    - "repeater" directive ".expression" support
     - non-label identifiers (i.e. which are not valid labels (ignored by Label rules),
       but they are valid identifiers for DEFINE or macro argument names
     - Lua syntax highlighting for LUA-ENDLUA blocks?
@@ -63,7 +66,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="6" kateversion="5.0" extensions="*.asm;*.a80" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="7" kateversion="5.0" extensions="*.asm;*.a80" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -318,13 +321,16 @@ TODO missing things:
       <context name="LabelLine" attribute="Normal Text" lineEndContext="#stay" lineEmptyContext="#stay"
                fallthrough="true" fallthroughContext="Error">
         <!-- Labels can start only at the beginning of the line, if not at beginning, the "Normal" context follows -->
-        <DetectSpaces attribute="Normal Text" context="#pop!Normal"/>
+        <DetectSpaces attribute="Normal Text" context="#pop!dotRepeat"/>
         <DetectChar attribute="Comment" context="#pop!Normal" char=";" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="/" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
-        <RegExpr attribute="Label" context="#pop!Normal" firstNonSpace="true"
+        <RegExpr attribute="Label" context="#pop!dotRepeat" firstNonSpace="true"
                  String="^(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*:?"/>
-        <RegExpr attribute="Label" context="#pop!Normal" String="^[0-9]+:?(\s+|$)"/>
+        <RegExpr attribute="Label" context="#pop!dotRepeat" String="^[0-9]+:?(\s+|$)"/>
+      </context>
+      <context name="dotRepeat" attribute="Directives" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="Normal">
+        <RegExpr attribute="Directives" context="#pop!Normal" String="\.(\d+|\(.*?\))\s"/>
       </context>
       <context name="Normal" attribute="Normal Text" lineEndContext="LabelLine"
                lineEmptyContext="LabelLine" fallthrough="true" fallthroughContext="Arguments">
@@ -489,7 +495,7 @@ TODO missing things:
     </itemDatas>
   </highlighting>
   <general>
-    <keywords casesensitive="0"/>
+    <keywords casesensitive="0" additionalDeliminator="`"/>
     <comments>
       <comment name="singleLine" start=";" />
       <comment name="multiLine" start="/*" end="*/" />
