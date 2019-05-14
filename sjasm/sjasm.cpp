@@ -68,6 +68,7 @@ void PrintHelp() {
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --nofakes                Disable fake instructions" _ENDL;
 	_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
+	_COUT "  --syntax=<...>           Adjust parsing syntax, check docs for details." _ENDL;
 }
 
 namespace Options {
@@ -276,6 +277,32 @@ namespace Options {
 			}
 		}
 
+		void parseSyntaxValue() {
+			// Options::syx is expected to be already in default state before entering this
+			for (const auto & syntaxOption : val) {
+				switch (syntaxOption) {
+				case 0:   return;
+				// f F - instructions: fake warning, no fakes (default = fake enabled)
+				case 'f': syx.FakeWarning = true; break;
+				case 'F': syx.FakeEnabled = false; break;
+				// a A - multi-argument delimiter: ",,", "``" (default = ",")
+				case 'a': syx.MultiArg = &doubleComma; break;
+				case 'A': syx.MultiArg = &doubleBacktick; break;
+				// b B - memory access brackets []: disabled, required (default = enabled)
+				case 'b':
+				case 'B':
+				// l L - warn/error about labels using keywords (default = no message)
+				case 'l':
+				case 'L':
+					_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
+					break;
+				default:
+					_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;
+					break;
+				}
+			}
+		}
+
 	public:
 		void GetOptions(char**& argv, int& i) {
 			while ((arg=argv[i]) && ('-' == arg[0])) {
@@ -339,6 +366,8 @@ namespace Options {
 					ConvertEncoding = ENCDOS;
 				} else if (!strcmp(opt, "dirbol")) {
 					syx.IsPseudoOpBOF = true;
+				} else if (!strcmp(opt, "syntax")) {
+					parseSyntaxValue();
 				} else if (!strcmp(opt, "inc") || !strcmp(opt, "i") || !strcmp(opt, "I")) {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);

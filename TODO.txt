@@ -16,7 +16,13 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
-Z80: multi-argument/strict: introduce the options
+Z80: multi-argument/strict:
+*** TODO: docs, B+L options implementation, OPT directive
+introduce the options: --syntax=fAB
+    f F         - instructions: fake warning, no fakes (default = fake enabled)
+    a A         - multi-argument delimiter: ",,", "``" (default = ",")
+    b B         - memory access brackets []: disabled, required (default = enabled)
+    l L         - warn/error about labels using keywords (default = no message)
 
 static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
 

@@ -1,0 +1,14 @@
+# file opened: syntax_EMPTY.asm
+1     0000              ; empty SYNTAX options should keep defaults
+2     0000 44 4D            ld      bc,hl       ; fake enabled, no warning
+3     0002 97 90            sub     a,b         ; sub a : sub b
+4     0004 44 4D            ld      b,h, c,l    ; ld b,h : ld c,l (same as first fake)
+5     0006              hl:                     ; no warning/error for using register name as label
+6     0006 7E               ld      a,(hl)      ; memory reference
+7     0007 7E               ld      a,[hl]      ; memory reference
+8     0008
+# file closed: syntax_EMPTY.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0006 X hl
