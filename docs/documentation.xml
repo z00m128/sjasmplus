@@ -582,7 +582,10 @@
   <programlisting>hl:  ld a,(hl),,de,hl</programlisting>
   in a way to produce warnings about keyword "hl" being used for label, about fake instruction
   being used (ld de,hl) and assemble <code>(hl)</code> as numeric expression, not memory access.
-  (currently only "aAfF" options are implemented, brackets and labels not yet - work in progress)
+  Warnings on fake instructions can be suppressed for particular line by adding any end-of-line
+  comment containing string "fake", i.e. "<code>ld de,hl ; fake DE=HL</code>" will assemble
+  without warning.
+  (work in progress: currently only "aAfF" options are implemented, brackets and labels not yet)
   </para>
     </section>
 
