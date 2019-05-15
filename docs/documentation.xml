@@ -557,7 +557,21 @@
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions
-  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</synopsis></para>
+  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)
+  --syntax=&lt;...&gt;           Adjust parsing syntax, read details below.</synopsis></para>
+
+  <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
+	for particular feature will use the default setting:
+	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
+  b B    Memory access brackets []: disabled / required (default = enabled)
+  f F    Fake instructions: warning / disabled (default = enabled)
+  l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</synopsis>
+  I.e. <code>--syntax=faBl</code> will modify parser to process source line
+  <programlisting>hl:  ld a,(hl),,de,hl</programlisting>
+  in a way to produce warnings about keyword "hl" being used for label, about fake instruction
+  being used (ld de,hl) and assemble <code>(hl)</code> as numeric expression, not memory access.
+  (currently only "aAfF" options are implemented, brackets and labels not yet - work in progress)
+  </para>
     </section>
 
     <section>
@@ -823,7 +837,7 @@ or    x or y   bitwise or
       <para>This version only accepts Z80 mnemonics. There are some additions
       to what I think is standard Z80: <itemizedlist>
           <listitem>
-            <para>'[' and ']' can be used in stead of '(' and ')' for
+            <para>'[' and ']' can be used instead of '(' and ')' for
             indirections. So LD A,[HL] is the same as LD A,(HL).</para>
           </listitem>
 
@@ -868,7 +882,7 @@ or    x or y   bitwise or
         </itemizedlist><programlisting>    PUSH AF,BC  ; push af / push bc
     POP  AF,BC  ; pop  af / pop  bc</programlisting><itemizedlist>
           <listitem>
-            <para>and all other commands support this.</para>
+            <para>and many other instructions support this "multi-argument" syntax:</para>
           </listitem>
         </itemizedlist><programlisting>    LD A,B,B,D,D,H
    /* this is:
