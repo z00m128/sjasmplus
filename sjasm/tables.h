@@ -90,7 +90,7 @@ public:
 	/*int zoek(char*);*/
 	int zoek(const char*);
 	int Find(char*);
-private:
+private:	//FIXME LABTABSIZE should be probably FUNTABSIZE here, but afraid to fix (rather use regular C++ facilities later)
 	int HashTable[LABTABSIZE], NextLocation;
 	CFunctionTableEntry funtab[LABTABSIZE];
 	int Hash(const char*);

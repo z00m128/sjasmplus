@@ -754,6 +754,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_BREAK() {	// this is fake instruction for CSpect emulator, not for real Z80N
+		if (Options::IsNextEnabled < 2) {
+			Error("[BREAK] fake instruction \"break\" must be specifically enabled by --zxnext=cspect option");
+			return;
+		}
 		EmitByte(0xDD);
 		EmitByte(0x01);
 	}
@@ -1049,6 +1053,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_EXIT() {	// this is fake instruction for CSpect emulator, not for real Z80N
+		if (Options::IsNextEnabled < 2) {
+			Error("[EXIT] fake instruction \"exit\" must be specifically enabled by --zxnext=cspect option");
+			return;
+		}
 		EmitByte(0xDD);
 		EmitByte(0x00);
 	}
@@ -4171,10 +4179,8 @@ namespace Z80 {
 		OpCodeTable.Insert("swapnib",	OpCode_Next_SWAPNIB);
 		OpCodeTable.Insert("test",		OpCode_Next_TEST);
 		// CSpect emulator extensions, fake instructions "exit" and "break"
-		if (2 == Options::IsNextEnabled) {
-			OpCodeTable.Insert("exit",		OpCode_Next_EXIT);
-			OpCodeTable.Insert("break",		OpCode_Next_BREAK);
-		}
+		OpCodeTable.Insert("exit",		OpCode_Next_EXIT);
+		OpCodeTable.Insert("break",		OpCode_Next_BREAK);
 	}
 } // eof namespace Z80
 
