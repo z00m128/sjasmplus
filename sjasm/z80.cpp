@@ -539,10 +539,10 @@ namespace Z80 {
 				case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
 					e[0] = 0x09 + reg2 - Z80_BC; break;
 				case Z80_A:
-					if(!Options::IsNextEnabled) break;
+					if(!Options::syx.IsNextEnabled) break;
 					e[0] = 0xED; e[1] = 0x31; break;
 				default:
-					if(!Options::IsNextEnabled) break;
+					if(!Options::syx.IsNextEnabled) break;
 					int b = GetWord(lp);
 					e[0] = 0xED; e[1] = 0x34 ;
 					e[2] = b & 255; e[3] = (b >> 8) & 255;
@@ -551,7 +551,7 @@ namespace Z80 {
 				break;
 			case Z80_DE:
 			case Z80_BC:
-				if (!Options::IsNextEnabled) break;   // DE|BC is valid first operand only for Z80N
+				if (!Options::syx.IsNextEnabled) break;   // DE|BC is valid first operand only for Z80N
 				if (!comma(lp)) {
 					Error("[ADD] Comma expected"); break;
 				}
@@ -754,7 +754,7 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_BREAK() {	// this is fake instruction for CSpect emulator, not for real Z80N
-		if (Options::IsNextEnabled < 2) {
+		if (Options::syx.IsNextEnabled < 2) {
 			Error("[BREAK] fake instruction \"break\" must be specifically enabled by --zxnext=cspect option");
 			return;
 		}
@@ -764,6 +764,10 @@ namespace Z80 {
 
 	// helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation
 	static void OpCode_Z80N_BarrelShifts(int mainOpcode) {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		int e[] = { -1, -1, -1 };
 		// verify the operands are "de,b" (only valid ones)
 		if (Z80_DE == GetRegister(lp) && comma(lp) && Z80_B == GetRegister(lp)) {
@@ -1053,7 +1057,7 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_EXIT() {	// this is fake instruction for CSpect emulator, not for real Z80N
-		if (Options::IsNextEnabled < 2) {
+		if (Options::syx.IsNextEnabled < 2) {
 			Error("[EXIT] fake instruction \"exit\" must be specifically enabled by --zxnext=cspect option");
 			return;
 		}
@@ -1245,7 +1249,7 @@ namespace Z80 {
 				switch (reg = GetRegister(lp)) {
 				case Z80_C:
 					// only "(C)" form with parentheses is legal syntax for Z80N "jp (C)"
-					if (BT_ROUND != bt || !CloseBracket(lp) || !Options::IsNextEnabled) break;
+					if (BT_ROUND != bt || !CloseBracket(lp) || !Options::syx.IsNextEnabled) break;
 					e[0] = 0xED; e[1] = 0x98;
 					break;
 				case Z80_HL:
@@ -2571,11 +2575,19 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_LDDRX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xBC);
 	}
 
 	void OpCode_Next_LDDX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xAC);
 	}
@@ -2796,31 +2808,55 @@ namespace Z80 {
 
 // LDIRSCALE is now very unlikely to happen, there's ~1% chance it may be introduced within the cased-Next release
 // 	void OpCode_Next_LDIRSCALE() {
+// 		if (Options::syx.IsNextEnabled < 1) {
+// 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+// 			return;
+// 		}
 // 		EmitByte(0xED);
 // 		EmitByte(0xB6);
 // 	}
 
 	void OpCode_Next_LDIRX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xB4);
 	}
 
 	void OpCode_Next_LDIX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xA4);
 	}
 
 	void OpCode_Next_LDPIRX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xB7);
 	}
 
 	void OpCode_Next_LDWS() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xA5);
 	}
 
 	void OpCode_Next_MIRROR() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		Z80Reg reg = GetRegister(lp);
 		if (Z80_UNK != reg && Z80_A != reg) {
 			Error("[MIRROR] Illegal operand (can be only register A)", line);
@@ -2831,6 +2867,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_MUL() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		int e[3];
 		e[0] = e[1] = e[2] = -1;
 		if (GetRegister(lp)==Z80_D && comma(lp) && GetRegister(lp)==Z80_E){
@@ -2888,6 +2928,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_NEXTREG() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		Z80Reg reg;
 		int e[5];
 		do {
@@ -3034,16 +3078,28 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_OUTINB() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0x90);
 	}
 
 	void OpCode_Next_PIXELAD() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0x94);
 	}
 
 	void OpCode_Next_PIXELDN() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0x93);
 	}
@@ -3120,7 +3176,7 @@ namespace Z80 {
 				e[0] = reg; e[1] = 0xe5; break;
 			case Z80_UNK:
 			{
-				if(!Options::IsNextEnabled) break;
+				if(!Options::syx.IsNextEnabled) break;
 				int imm16 = GetWord(lp);
 				e[0] = 0xED; e[1] = 0x8A;
 				e[2] = (imm16 >> 8) & 255;  // push opcode is big-endian!
@@ -3643,6 +3699,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_SETAE() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0x95);
 	}
@@ -3987,6 +4047,10 @@ namespace Z80 {
 
 	//Swaps the high and low nibbles of the accumulator.
 	void OpCode_Next_SWAPNIB() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		Z80Reg reg = GetRegister(lp);
 		if (Z80_UNK != reg && Z80_A != reg) {
 			Error("[SWAPNIB] Illegal operand (can be only register A)", line);
@@ -3997,6 +4061,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_TEST() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		int e[4];
 		e[0] = 0xED;
 		e[1] = 0x27;
@@ -4154,7 +4222,7 @@ namespace Z80 {
 
 	void InitNextExtensions() {
 		static bool nextWasInitialized = false;
-		if(!Options::IsNextEnabled || nextWasInitialized) return;
+		if (!Options::syx.IsNextEnabled || nextWasInitialized) return;
 		nextWasInitialized = true;
 		// Next extended opcodes
 		OpCodeTable.Insert("brlc",		OpCode_Next_BRLC);

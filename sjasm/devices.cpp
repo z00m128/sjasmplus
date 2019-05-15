@@ -94,8 +94,8 @@ static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
 	const int initialPages[] = {14, 15, 10, 11, 4, 5, 0, 1};	// basically same as ZX128, but 8k
 	initZxLikeDevice(*dev, 0x2000, 224, initialPages);
 	// auto-enable ZX Next instruction extensions
-	if (0 == Options::IsNextEnabled) {
-		Options::IsNextEnabled = 1;
+	if (0 == Options::syx.IsNextEnabled) {
+		Options::syx.IsNextEnabled = 1;
 		Z80::InitNextExtensions();		// add the special opcodes here (they were not added)
 				// this is a bit late, but it should work as well as `--zxnext` option I believe
 	}

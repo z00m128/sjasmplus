@@ -1172,6 +1172,32 @@ void dirENCODING() {
 	Error("[ENCODING] Syntax error. Bad parameter", bp, IF_FIRST); delete[] opt;return;
 }
 
+void dirOPT() {
+	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...>
+	if (SkipBlanks(lp)) {		// empty arguments mean "pop" previous syntax
+		if (!Options::SSyntax::popSyntax()) Warning("[OPT] no previous syntax found");
+		return;
+	}
+	// preserve current syntax status, before using arguments of OPT, and reset to defaults
+	Options::SSyntax::pushCurrentSyntax();
+	// split user arguments into "argc, argv" like variables (by white-space)
+	char parsedOpts[LINEMAX];
+	char* parsedOptsArray[17] {};	// there must be one more nullptr in the array (16+1)
+	int optI = 0, charI = 0, errI;
+	while (optI < 16 && !SkipBlanks(lp)) {
+		parsedOptsArray[optI++] = parsedOpts + charI;
+		while (*lp && !White()) parsedOpts[charI++] = *lp++;
+		parsedOpts[charI++] = 0;
+	}
+	if (!SkipBlanks(lp)) Warning("[OPT] too many options");
+	// parse user arguments and adjust current syntax setup
+	if (optI != (errI = Options::parseSyntaxOptions(optI, parsedOptsArray))) {
+		Error("[OPT] invalid/failed option", parsedOptsArray[errI]);
+	}
+	// init Z80N extensions if requested (the Init is safe to be called multiple times)
+	if (Options::syx.IsNextEnabled) Z80::InitNextExtensions();
+}
+
 void dirLABELSLIST() {
 	if (!DeviceID) {
 		Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)");
@@ -2092,6 +2118,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".slot", dirSLOT);
 	DirectivesTable.insertd(".mmu", dirMMU);
 	DirectivesTable.insertd(".encoding", dirENCODING);
+	DirectivesTable.insertd(".opt", dirOPT);
 	DirectivesTable.insertd(".labelslist", dirLABELSLIST);
 	//  DirectivesTable.insertd(".bind",dirBIND); /* i didn't comment this */
 	DirectivesTable.insertd(".endif", dirENDIF);

@@ -39,11 +39,19 @@ namespace Options {
 		bool		IsReversePOP;
 		bool		FakeEnabled;
 		bool		FakeWarning;
+		int			IsNextEnabled;	// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
 		bool		(*MultiArg)(char*&);	// function checking if multi-arg delimiter is next
 
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
-					MultiArg(&comma) {}
+					IsNextEnabled(0), MultiArg(&comma) {}
 		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
+
+	// preservation utils, the push will also reset current syntax to defaults
+		static void pushCurrentSyntax();	// will push current syntax and resets to defaults
+		static bool popSyntax();			// will restore the syntax from previous push
+		static void popAllSyntax();			// will restore the syntax like it was at start
+	private:
+		static std::stack<SSyntax> syxStack;	// previous syntax
 	} SSyntax;
 
 	extern char SymbolListFName[LINEMAX];
@@ -60,7 +68,6 @@ namespace Options {
 	extern bool AddLabelListing;
 	extern bool NoDestinationFile;
 	extern SSyntax syx;
-	extern int IsNextEnabled;
 	extern bool SourceStdIn;
 
 	extern CStringsList* IncludeDirsList;
@@ -70,6 +77,9 @@ namespace Options {
 	// showMessage=true: will also display error/warning (use when fake ins. is emitted)
 	// showMessage=false: can be used to silently check if fake instructions are even possible
 	bool noFakes(bool showMessage = true);
+
+	int parseSyntaxOptions(int n, char** options);	// returns index of failed option or "n"==OK
+		//options[n] must contain nullptr (and it must be valid index)
 } // eof namespace Options
 
 extern CDevice *Devices;
@@ -100,7 +110,7 @@ extern char* CurrentDirectory;
 
 void ExitASM(int p);
 extern CStringsList* lijstp;
-extern stack< SRepeatStack> RepeatStack;
+extern std::stack<SRepeatStack> RepeatStack;
 
 extern CLabelTable LabelTable;
 extern CLocalLabelTable LocalLabelTable;

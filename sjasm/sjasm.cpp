@@ -91,7 +91,6 @@ namespace Options {
 	bool ShowHelp = 0;
 	bool NoDestinationFile = true;		// no *.out file by default
 	SSyntax syx;
-	int IsNextEnabled = 0;		// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
 	bool SourceStdIn = false;
 
 	// Include directories list is initialized with "." directory
@@ -113,6 +112,27 @@ namespace Options {
 		}
 		return false;
 	}
+
+	std::stack<SSyntax> SSyntax::syxStack;
+
+	void SSyntax::pushCurrentSyntax() {
+		syxStack.push(syx);		// store current syntax options into stack
+		new (&syx) SSyntax();	// restore defaults in current syntax
+	}
+
+	bool SSyntax::popSyntax() {
+		if (syxStack.empty()) return false;	// no syntax stored in stack
+		syx = syxStack.top();	// copy the syntax values from stack
+		syxStack.pop();
+		return true;
+	}
+
+	void SSyntax::popAllSyntax() {
+		if (syxStack.empty()) return;
+		while (1 < syxStack.size()) syxStack.pop();
+		popSyntax();
+	}
+
 } // eof namespace Options
 
 CDevice *Devices = 0;
@@ -140,7 +160,7 @@ aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
 char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
-stack<SRepeatStack> RepeatStack;
+std::stack<SRepeatStack> RepeatStack;
 CStringsList* lijstp = NULL;
 CLabelTable LabelTable;
 CLocalLabelTable LocalLabelTable;
@@ -161,6 +181,7 @@ int deviceDirectivesCounter = 0;
 static char* globalDeviceID = NULL;
 
 void InitPass() {
+	Options::SSyntax::popAllSyntax();	// release all stored syntax variants and reset to initial
 	aint pow10 = 1;
 	reglenwidth = 0;
 	do {
@@ -244,7 +265,7 @@ namespace Options {
 
 	class COptionsParser {
 	private:
-		char* arg;
+		const char* arg;
 		char opt[LINEMAX];
 		char val[LINEMAX];
 
@@ -283,7 +304,7 @@ namespace Options {
 				switch (syntaxOption) {
 				case 0:   return;
 				// f F - instructions: fake warning, no fakes (default = fake enabled)
-				case 'f': syx.FakeWarning = true; break;
+				case 'f': syx.FakeEnabled = syx.FakeWarning = true; break;
 				case 'F': syx.FakeEnabled = false; break;
 				// a A - multi-argument delimiter: ",,", "``" (default = ",")
 				case 'a': syx.MultiArg = &doubleComma; break;
@@ -294,20 +315,22 @@ namespace Options {
 				// l L - warn/error about labels using keywords (default = no message)
 				case 'l':
 				case 'L':
-					_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
+					if (0 == pass || LASTPASS == pass) {
+						_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
+					}
 					break;
 				default:
-					_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;
+					if (0 == pass || LASTPASS == pass) {
+						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;
+					}
 					break;
 				}
 			}
 		}
 
 	public:
-		void GetOptions(char**& argv, int& i) {
+		void GetOptions(const char* const * const argv, int& i, bool onlySyntaxOptions = false) {
 			while ((arg=argv[i]) && ('-' == arg[0])) {
-				++i;					// next CLI argument
-
 				// copy "option" (up to '=' char) into `opt`, copy "value" (after '=') into `val`
 				if ('-' == arg[1]) {	// double-dash detected, value is expected after "="
 					splitByChar(arg + 2, '=', opt, LINEMAX, val, LINEMAX);
@@ -320,7 +343,22 @@ namespace Options {
 				}
 
 				// check for particular options and setup option value by it
-				if (!strcmp(opt,"h") || !strcmp(opt, "help")) {
+				// first check all syntax-only options which may be modified by OPT directive
+				if (!strcmp(opt, "zxnext")) {
+					syx.IsNextEnabled = 1;
+					if (!strcmp(val, "cspect")) syx.IsNextEnabled = 2;	// CSpect emulator extensions
+				} else if (!strcmp(opt, "reversepop")) {
+					syx.IsReversePOP = true;
+				} else if (!strcmp(opt, "dirbol")) {
+					syx.IsPseudoOpBOF = true;
+				} else if (!strcmp(opt, "nofakes")) {
+					syx.FakeEnabled = false;
+				} else if (!strcmp(opt, "syntax")) {
+					parseSyntaxValue();
+				} else if (onlySyntaxOptions) {
+					// rest of the options is available only when launching the sjasmplus
+					return;
+				} else if (!strcmp(opt,"h") || !strcmp(opt, "help")) {
 					ShowHelp = 1;
 				} else if (!strcmp(opt, "lstlab")) {
 					AddLabelListing = true;
@@ -353,21 +391,10 @@ namespace Options {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
 					IsShowFullPath = 1;
-				} else if (!strcmp(opt, "zxnext")) {
-					IsNextEnabled = 1;
-					if (!strcmp(val, "cspect")) IsNextEnabled = 2;	// CSpect emulator extensions
-				} else if (!strcmp(opt, "reversepop")) {
-					syx.IsReversePOP = true;
 				} else if (!strcmp(opt, "nologo")) {
 					HideLogo = 1;
-				} else if (!strcmp(opt, "nofakes")) {
-					syx.FakeEnabled = false;
 				} else if (!strcmp(opt, "dos866")) {
 					ConvertEncoding = ENCDOS;
-				} else if (!strcmp(opt, "dirbol")) {
-					syx.IsPseudoOpBOF = true;
-				} else if (!strcmp(opt, "syntax")) {
-					parseSyntaxValue();
 				} else if (!strcmp(opt, "inc") || !strcmp(opt, "i") || !strcmp(opt, "I")) {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
@@ -389,9 +416,19 @@ namespace Options {
 				} else {
 					_CERR "Unrecognized option: " _CMDL opt _ENDL;
 				}
-			}
+
+				++i;					// next CLI argument
+			} // end of while ((arg=argv[i]) && ('-' == arg[0]))
 		}
 	};
+
+	int parseSyntaxOptions(int n, char** options) {
+		if (n <= 0) return 0;
+		int i = 0;
+		Options::COptionsParser optParser;
+		optParser.GetOptions(options, i, true);
+		return i;
+	}
 }
 
 #ifdef USE_LUA
