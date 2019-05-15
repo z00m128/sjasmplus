@@ -17,7 +17,7 @@ LUA quirks:
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
 Z80: multi-argument/strict:
-*** TODO: B+L options implementation, OPT directive
+*** TODO: B+L options implementation
 introduce the options: --syntax=fAB
     f F         - instructions: fake warning, no fakes (default = fake enabled)
     a A         - multi-argument delimiter: ",,", "``" (default = ",")

@@ -537,7 +537,7 @@
     </section>
 
     <section>
-      <title>Command line</title>
+      <title><anchor id="s_cli"/>Command line</title>
 
       <para>Usage:</para>
 
@@ -568,7 +568,7 @@
   -                        Reads STDIN as source (no other sourcefile allowed)
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
-  --nofakes                Disable fake instructions
+  --nofakes                Disable fake instructions (obsolete, use --syntax=F)
   --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)
   --syntax=&lt;...&gt;           Adjust parsing syntax, read details below.</synopsis></para>
 
@@ -584,7 +584,7 @@
   being used (ld de,hl) and assemble <code>(hl)</code> as numeric expression, not memory access.
   Warnings on fake instructions can be suppressed for particular line by adding any end-of-line
   comment containing string "fake", i.e. "<code>ld de,hl ; fake DE=HL</code>" will assemble
-  without warning.
+  without warning. The "F" option is identical to "--nofakes" and preferred.
   (work in progress: currently only "aAfF" options are implemented, brackets and labels not yet)
   </para>
     </section>
@@ -2187,6 +2187,44 @@ Kip                ; label yyy.Kip
     MODULE           ; no modulename
 Kip                ; label Kip</programlisting></para>
                 </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_opt" />OPT [&lt;command line options&gt;]</term>
+
+            <listitem>
+              <para>Does reset and modify <link linkend="s_cli">options</link> affecting syntax and
+				  parsing (for lines of source following the OPT). The options allowed for OPT
+				  are: <code>--nofakes</code>, <code>--syntax</code>, <code>--zxnext</code>,
+				  <code>--reversepop</code> and <code>--dirbol</code>.
+			  </para>
+			  <para>When OPT with some option is encountered, the current state of these options is
+				  preserved, and all syntax options are reset to default values, then the provided
+				  options are applied on top of that. The default values are: fake instructions
+				  enabled (no warning), multi-argument delimiter is ",", both () and [] brackets
+				  can be used to access memory, labels can have any name, ZX Next instructions are OFF,
+				  POP with multiple arguments doesn't reverse them and pseudo-ops at beginning of
+				  line are OFF. (to reset to these defaults without modifying them, you can do
+				  <code>OPT --syntax=  ; empty syntax option</code>)
+              </para>
+			  <para>When OPT without any option is encountered, the previously preserved state of
+				  options is restored (states are preserved in "stack" way, so further OPT without
+				  arguments will restore even older states).
+			  </para>
+			  <example>
+                  <title></title>
+
+                  <programlisting>    POP bc, hl   ; pops BC first
+    OPT --reversepop --syntax=af
+    POP bc,,hl   ; pops HL first
+    LD  bc,hl    ; warning about Fake instruction
+    LD  bc,hl    ; warning supressed by lowercase "fake" in this comment
+    OPT --syntax=A
+    POP bc `` hl ; pop BC first (--reversepop was reset)
+    OPT : OPT    ; restoring syntax to original state (2x OPT without argument)
+	</programlisting>
+			  </example>
             </listitem>
           </varlistentry>
 
