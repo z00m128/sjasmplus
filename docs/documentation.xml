@@ -27,7 +27,7 @@
 
       <para><itemizedlist>
           <listitem>
-            <para>Z80/R800 documented and undocumented opcodes support</para>
+            <para>Z80/R800/Z80N documented and undocumented opcodes support</para>
           </listitem>
 
           <listitem>
@@ -66,7 +66,7 @@
           </listitem>
 
           <listitem>
-            <para>Special mode</para>
+            <para>Virtual device mode for common machines: ZX 128, ZX Next, ... (pseudo op DEVICE)</para>
           </listitem>
 
           <listitem>
@@ -74,8 +74,7 @@
           </listitem>
 
           <listitem>
-            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and
-            more</para>
+            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and more</para>
           </listitem>
 
           <listitem>
@@ -88,6 +87,19 @@
 
           <listitem>
             <para>Multi file output and file updating</para>
+          </listitem>
+
+          <listitem>
+            <para>ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD...)</para>
+          </listitem>
+
+          <listitem>
+            <para>ZX Spectrum Next specific features and directives (Z80N, 8ki memory paging, SAVENEX)</para>
+          </listitem>
+
+          <listitem>
+			  <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
+					  Cirrus-CI with 140+ automated tests</ulink> (report issues to grow it even more)</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -534,7 +546,7 @@
       <para>Option flags as follows:</para>
 
       <para><synopsis>  -h or --help             Help information
-  --zxnext[=cspect]        Enable SpecNext Z80 extensions (CSpect emulator has
+  --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
                            Include path (later defined have higher priority)
