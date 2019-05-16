@@ -575,9 +575,12 @@
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
 	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
-  b B    Memory access brackets []: disabled / required (default = enabled)
+&dagger; <emphasis>b B    Memory access brackets []: disabled / required (default = enabled)</emphasis>
   f F    Fake instructions: warning / disabled (default = enabled)
-  l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</synopsis>
+&dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis></synopsis>
+  &dagger; work in progress: currently only "aAfF" options are implemented, brackets and labels not yet, following description of functionality is then not fully correct either.
+  </para>
+  <para>
   I.e. <code>--syntax=faBl</code> will modify parser to process source line
   <programlisting>hl:  ld a,(hl),,de,hl</programlisting>
   in a way to produce warnings about keyword "hl" being used for label, about fake instruction
@@ -585,7 +588,6 @@
   Warnings on fake instructions can be suppressed for particular line by adding any end-of-line
   comment containing string "fake", i.e. "<code>ld de,hl ; fake DE=HL</code>" will assemble
   without warning. The "F" option is identical to "--nofakes" and preferred.
-  (work in progress: currently only "aAfF" options are implemented, brackets and labels not yet)
   </para>
     </section>
 
