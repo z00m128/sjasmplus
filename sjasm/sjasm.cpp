@@ -29,6 +29,7 @@
 // sjasm.cpp
 
 #include "sjdefs.h"
+#include <cstdlib>
 
 #ifdef USE_LUA
 
@@ -448,7 +449,6 @@ int main(int argc, char **argv) {
 	int base_encoding;
 	char* p;
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
-	int i = 1;
 
 	// start counter
 	long dwStart;
@@ -458,8 +458,31 @@ int main(int argc, char **argv) {
 	GetCurrentDirectory(MAX_PATH, buf);
 	CurrentDirectory = buf;
 
+	Options::COptionsParser optParser;
+	char* envFlags = std::getenv("SJASMFLAGS");
+	if (nullptr != envFlags) {
+		// split environment arguments into "argc, argv" like variables (by white-space)
+		char* parsedOptsArray[33] {};	// there must be one more nullptr in the array (32+1)
+		int optI = 0, charI = 0;
+		while (optI < 32 && !SkipBlanks(envFlags)) {
+			parsedOptsArray[optI++] = temp + charI;
+			while (*envFlags && !White(*envFlags) && charI < LINEMAX-1) temp[charI++] = *envFlags++;
+			temp[charI++] = 0;
+		}
+		if (!SkipBlanks(envFlags)) {
+			_CERR "SJASMFLAGS environment variable contains too many options (max is 32)" _ENDL;
+		}
+		// process environment variable ahead of command line options (in the same way)
+		int i = 0;
+		while (parsedOptsArray[i]) {
+			optParser.GetOptions(parsedOptsArray, i);
+			if (!parsedOptsArray[i] || 128 <= SourceFNamesCount) break;
+			STRCPY(SourceFNames[SourceFNamesCount++], MAX_PATH-32, parsedOptsArray[i++]);
+		}
+	}
+
+	int i = 1;
 	if (argc > 1) {
-		Options::COptionsParser optParser;
 		while (argv[i]) {
 			optParser.GetOptions(argv, i);
 			if (!argv[i] || 128 <= SourceFNamesCount) break;
