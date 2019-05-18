@@ -192,6 +192,17 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>work in progress - 1.13.1</term>
+
+            <listitem>
+              <synopsis>- added <link linkend="s_cli">--syntax</link> command line option
+- added <link linkend="po_opt">OPT</link> directive (modifies some command line options)
+- added support for <link linkend="s_cli">SJASMFLAGS</link> environment variable
+- updated syntax-highlight file for KDE5 editors (Kate)</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>05.05.2019 - 1.13.0</term>
 
             <listitem>
@@ -588,6 +599,18 @@
   Warnings on fake instructions can be suppressed for particular line by adding any end-of-line
   comment containing string "fake", i.e. "<code>ld de,hl ; fake DE=HL</code>" will assemble
   without warning. The "F" option is identical to "--nofakes" and preferred.
+  </para>
+
+  <para>
+	  The assembler will also read the environment variable <code>SJASMFLAGS</code> (if available),
+	  and process its content as part of command line options (before the actual options), so you
+	  can pre-configure certain options in your environment, for example:
+	  <programlisting>export SJASMFLAGS="--zxnext=cspect --msg=war"
+sjasmplus --lst --lstlab example.asm</programlisting>
+	will execute the assembling as if command line "<code>sjasmplus --zxnext=cspect --msg=war --lst --lstlab example.asm</code>"
+	was used. Known issue: parser of environment variable delimits each option on any white-space character, so
+	option containing space character will be incorrectly parsed (like "-Ifile-path with space" = fails and
+	there is no way to escape/quote the path in the SJASMFLAGS variable to make it work).
   </para>
     </section>
 

@@ -37,10 +37,6 @@ ReadBufLine parsing refactored. Now look for other parts of code trying to do si
 
 I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
 
-from env. variables disc: nie, myslel som ako "SJASMPLUSEXT" premennu ktora by tvorila priamo obsah pre
-ten `--ext` switch... pouzitie stylom ako "prilep k command line" mi nenapadlo... nieco ako CFLAGS
-v Makefile? ... na to by som dal ale druhu premennu "SJASMPLUSFLAGS"
-
 Macro world issues:
 - macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
 - more operators, capable of some string manipulation and maybe some type/expression checks (islabel)
