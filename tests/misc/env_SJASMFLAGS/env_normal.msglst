@@ -1,0 +1,17 @@
+# file opened: env_normal.asm
+1     0000 00               DB 0
+2     0001                  IFDEF FLAGSDEFINE
+3     0001 66 6C 61 67          DZ  "flagsdefine detected"
+3     0005 73 64 65 66
+3     0009 69 6E 65 20
+3     000D 64 65 74 65
+3     0011 63 74 65 64
+3     0015 00
+4     0016                  ENDIF
+5     0016 00 00        ALIGN
+6     0018 45               DB  "E"
+7     0019
+# file closed: env_normal.asm
+
+Value    Label
+------ - -----------------------------------------------------------
