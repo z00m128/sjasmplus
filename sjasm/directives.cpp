@@ -1649,16 +1649,21 @@ void dirSTRUCT() {
 	}
 
 	if (!(naam = GetID(lp)) || !strlen(naam)) {
-		Error("[STRUCT] Illegal structure name"); return;
+		Error("[STRUCT] Illegal structure name");
+		return;
 	}
 	if (comma(lp)) {
 		IsLabelNotFound = 0;
 		if (!ParseExpression(lp, offset)) {
-			Error("[STRUCT] Syntax error", lp, IF_FIRST); return;
+			Error("[STRUCT] Offset syntax error", lp, IF_FIRST);
+			return;
 		}
 		if (IsLabelNotFound) {
-			Error("[STRUCT] Forward reference", NULL, ALL);
+			Error("[STRUCT] Forward reference", NULL, EARLY);
 		}
+	}
+	if (!SkipBlanks()) {
+		Error("[STRUCT] syntax error, unexpected", lp);
 	}
 	st = StructureTable.Add(naam, offset, bind, global);
 	ListFile();
