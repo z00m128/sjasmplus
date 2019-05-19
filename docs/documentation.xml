@@ -2944,7 +2944,7 @@ Main
     </section>
 
     <section>
-      <title>Using</title>
+      <title>Defining structure</title>
 
       <para>A structure definition starts with: <code>STRUCT
       &lt;name&gt;[,&lt;initial offset&gt;]</code> and ends with
@@ -3048,9 +3048,27 @@ Main
     </section>
 
     <section>
+      <title>Usage of defined structure</title>
+
+      <para><code>[&lt;label&gt;] &lt;struct_name&gt; [&lt;initial values&gt;]</code> will emit full
+		structure into machine code, either using default values from structure definition,
+		or overriding them with explicit value from the &lt;initial values&gt; list. In initial
+		values you can use curly brackets {} to group particular initial values for particular
+		sub-structure, any missing values in particular sub-structure init-list are set up by
+		default values of particular field. See "SDOT" example below or tests/struct asm files
+		for more examples.</para>
+
+      <para><code>&lt;label&gt; &lt;struct_name&gt; = &lt;expression&gt;</code> will only set up
+		&lt;label&gt;.&lt;struct_field&gt; labels starting from designed address provided by
+		expression, but there will be no machine code emitted (and current address "$" will not
+		advance).</para>
+
+    </section>
+
+    <section>
       <title>Examples</title>
 
-      <para><example>
+      <example>
           <title></title>
 
           <para><programlisting>	STRUCT SCOLOR
@@ -3061,11 +3079,12 @@ BLUE	BYTE 6
 
           <para>This is identical to:</para>
 
-          <synopsis>SCOLOR		EQU 3 ; lenght
+          <synopsis>SCOLOR		EQU 3 ; length
 SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</synopsis>
-        </example><example>
+	  </example>
+	  <example>
           <title></title>
 
           <para><programlisting>	STRUCT SDOT
@@ -3085,7 +3104,8 @@ SDOT.C.RED	EQU 2 ; offset
 SDOT.C.GREEN	EQU 3 ; offset
 SDOT.C.BLUE	EQU 4 ; offset
 </synopsis>
-        </example><example>
+	  </example>
+	  <example>
           <title></title>
 
           <para><programlisting>	STRUCT SPOS,4
@@ -3101,7 +3121,8 @@ AD	WORD
 SPOS.X	EQU  4 ; offset
 SPOS.Y	EQU  6 ; offset
 SPOS.AD	EQU  8 ; offset</synopsis>
-        </example><example>
+	  </example>
+	  <example>
           <title></title>
 
           <para>When a structure is defined it is possible to declare labels
@@ -3131,15 +3152,42 @@ COLOR.BLUE  BYTE 6
   ld de,COLOR
   ; etc.</programlisting></para>
 
-          <para><warning>
-              <para>Do not use the offset labels in indirections
-              like:<programlisting>LD A,(SDOT.X)</programlisting>This will
-              conflict with futher 'improvements' ;-)</para>
+	  </example>
+      <example>
+          <title></title>
 
-              <para>If this is absolutely necessary (why?) use something like
-              this:<programlisting>LD A,(+SDOT.X)</programlisting></para>
-            </warning></para>
-        </example></para>
+          <para><programlisting>	STRUCT BIN_FILE_MAP, 256
+value1	BYTE
+value2	WORD
+	ENDS
+
+        ORG  0x8000
+binData BIN_FILE_MAP = $        ; set up label values only (no bytes)
+        INCBIN "some_data.bin"  ; load the bytes from file instead
+
+        ; using the data through struct definition
+        ld  a,(binData.value1)
+        ld  hl,(binData.value2)</programlisting></para>
+
+          <para>This is identical to:</para>
+
+          <synopsis>BIN_FILE_MAP            EQU 259      ; length
+BIN_FILE_MAP.value1     EQU 256      ; offset
+BIN_FILE_MAP.value2     EQU 257      ; offset
+; labels to access binary data loaded by INCBIN
+binData                 EQU 0x8000   ; address
+binData.value1          EQU 0x8100   ; address
+binData.value2          EQU 0x8101   ; address</synopsis>
+	  </example>
+
+	  <warning>
+		<para>Do not use the offset labels in indirections
+		like:<programlisting>LD A,(SDOT.X)</programlisting>This will
+		conflict with futher 'improvements' ;-)</para>
+
+		<para>If this is absolutely necessary (why?) use something like
+		this:<programlisting>LD A,(+SDOT.X)</programlisting></para>
+	  </warning>
     </section>
   </chapter>
 
