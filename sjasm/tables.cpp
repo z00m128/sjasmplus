@@ -1020,8 +1020,8 @@ void CStructure::deflab() {
 	InsertStructSubLabels(sn, mnf);
 }
 
-void CStructure::emitlab(char* iid) {
-	const aint misalignment = maxAlignment ? ((~CurAddress + 1) & (maxAlignment - 1)) : 0;
+void CStructure::emitlab(char* iid, aint address) {
+	const aint misalignment = maxAlignment ? ((-address) & (maxAlignment - 1)) : 0;
 	if (misalignment) {
 		// emitting in misaligned position (considering the ALIGN used to define this struct)
 		char warnTxt[LINEMAX];
@@ -1032,9 +1032,9 @@ void CStructure::emitlab(char* iid) {
 	}
 	char sn[LINEMAX];
 	STRCPY(sn, LINEMAX, iid);
-	InsertSingleStructLabel(sn, CurAddress);
+	InsertSingleStructLabel(sn, address);
 	STRCAT(sn, LINEMAX, ".");
-	InsertStructSubLabels(sn, mnf, CurAddress);
+	InsertStructSubLabels(sn, mnf, address);
 }
 
 void CStructure::emitmembs(char*& p) {
@@ -1149,11 +1149,25 @@ int CStructureTable::FindDuplicate(char* naam) {
 	return 0;
 }
 
+aint CStructureTable::ParseDesignedAddress(char* &p) {
+	if (!SkipBlanks(p) && ('=' == *p)) {
+		char* adrP = ++p;
+		aint resultAdr;
+		if (ParseExpressionNoSyntaxError(p, resultAdr)) return resultAdr;
+		Error("[STRUCT] Syntax error in designed address", adrP, SUPPRESS);
+		return 0;
+	}
+	return INT_MAX;		// no "designed address" provided, emit structure bytes
+}
+
 int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	CStructure* st = zoek(naam, gl);
 	if (!st) return 0;
-	if (l) st->emitlab(l);
-	st->emitmembs(p);
+	// create new labels corresponding to current/designed address
+	aint address = CStructureTable::ParseDesignedAddress(p);
+	if (l) st->emitlab(l, (INT_MAX == address) ? CurAddress : address);
+	if (INT_MAX == address) st->emitmembs(p);	// address was not designed, emit also bytes
+	else if (!l) Warning("[STRUCT] designed address without label = no effect");
 	return 1;
 }
 

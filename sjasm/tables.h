@@ -248,7 +248,7 @@ public:
 	void CopyMember(CStructureEntry2*, aint);
 	void CopyMembers(CStructure*, char*&);
 	void deflab();
-	void emitlab(char*);
+	void emitlab(char* iid, aint address);
 	void emitmembs(char*&);
 	CStructure* next;
 	CStructure(char*, char*, int, int, int, CStructure*);
@@ -268,6 +268,7 @@ public:
 	int FindDuplicate(char*);
 	int Emit(char*, char*, char*&, int);
 private:
+	static aint ParseDesignedAddress(char* &p);
 	CStructure* strs[128];
 };
 
