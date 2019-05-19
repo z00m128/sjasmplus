@@ -197,6 +197,7 @@
             <listitem>
               <synopsis>- added <link linkend="s_cli">--syntax</link> command line option
 - added <link linkend="po_opt">OPT</link> directive (modifies some command line options)
+- added way to use <link linkend="st_usage">structure</link> at designed address
 - added support for <link linkend="s_cli">SJASMFLAGS</link> environment variable
 - updated syntax-highlight file for KDE5 editors (Kate)</synopsis>
             </listitem>
@@ -3048,7 +3049,7 @@ Main
     </section>
 
     <section>
-      <title>Usage of defined structure</title>
+      <title><anchor id="st_usage" />Usage of defined structure</title>
 
       <para><code>[&lt;label&gt;] &lt;struct_name&gt; [&lt;initial values&gt;]</code> will emit full
 		structure into machine code, either using default values from structure definition,
