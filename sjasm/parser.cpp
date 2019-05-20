@@ -447,7 +447,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		// update previous/current word is define-related directive
 		isPrevDefDir = isCurrDefDir;
 		kp = lp;
-		isCurrDefDir = afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine")
+		isCurrDefDir = afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine") || cmphstr(kp, "defarray+")
 			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
 
 		// The following loop is recursive-like macro/define substitution, the `*lp` here points
@@ -481,7 +481,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 						}
 						if (val < 0 || NULL == a) {
 							*ver = 0;			// substitute with empty string
-							Error("[ARRAY] index not in 0..<Size-1> range");
+							Error("[ARRAY] index not in 0..<Size-1> range", nextSubIdLp, SUPPRESS);
 						} else {
 							ver = a->string;	// substitute with array value
 						}

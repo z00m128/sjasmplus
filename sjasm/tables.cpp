@@ -596,19 +596,21 @@ void CDefineTable::Init() {
 
 void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	if (FindDuplicate(name)) {
-		Error("Duplicate define", name);
+		Error("Duplicate define (replacing old value)", name);
 	}
 	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }
 
 char* CDefineTable::Get(const char* name) {
-	CDefineTableEntry* p = defs[(*name)&127];
-	while (p) {
-		if (!strcmp(name, p->name)) {
-			DefArrayList = p->nss;
-			return p->value;
+	if (NULL != name) {
+		CDefineTableEntry* p = defs[(*name)&127];
+		while (p) {
+			if (!strcmp(name, p->name)) {
+				DefArrayList = p->nss;
+				return p->value;
+			}
+			p = p->next;
 		}
-		p = p->next;
 	}
 	DefArrayList = NULL;
 	return NULL;

@@ -1797,28 +1797,53 @@ void dirENDM() {
 	}
 }
 
-void dirDEFARRAY() {
-	char* id;
-	if (!(id = GetID(lp))) {
-		Error("[DEFARRAY] Syntax error"); return;
-	}
-	CStringsList* a = NULL;
-	CStringsList** f = &a;
+static bool dirDEFARRAY_parseItems(CStringsList** nextPtr) {
 	char ml[LINEMAX];
 	while (!SkipBlanks()) {
 		const char* const itemLp = lp;
 		char* n = ml;
 		if (!GetMacroArgumentValue(lp, n)) {
-			Error("[DEFARRAY] Syntax error", itemLp);
-			return;
+			Error("[DEFARRAY] Syntax error", itemLp, SUPPRESS);
+			return false;
 		}
-		*f = new CStringsList(ml);
-		if ((*f)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
-		f = &((*f)->next);
+		*nextPtr = new CStringsList(ml);
+		if ((*nextPtr)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
+		nextPtr = &((*nextPtr)->next);
 		if (!comma(lp)) break;
 	}
-	if (NULL == a) {
-		Error("DEFARRAY must have at least one entry"); return;
+	return SkipBlanks();
+}
+
+static void dirDEFARRAY_add() {
+	char* oldP = ++lp;
+	DefineTable.Get(GetID(lp));
+	if (NULL == DefineTable.DefArrayList) {
+		Error("[DEFARRAY+] unknown array <id>", GetID(oldP), SUPPRESS);
+		return;
+	}
+	if (!White()) return;		// enforce whitespace between ID and first item
+	// array was already defined, seek to the last item in the list
+	while (DefineTable.DefArrayList->next) DefineTable.DefArrayList = DefineTable.DefArrayList->next;
+	if (!dirDEFARRAY_parseItems(&DefineTable.DefArrayList->next) || NULL == DefineTable.DefArrayList->next) {
+		Error("DEFARRAY+ must have at least one entry", oldP);	// suppressed by syntax error in non-empty case
+	}
+	return;
+}
+
+void dirDEFARRAY() {
+	if ('+' == *lp) {
+		dirDEFARRAY_add();
+		return;
+	}
+	char* id;
+	if (!(id = GetID(lp))) {
+		Error("[DEFARRAY] Syntax error"); return;
+	}
+	if (!White()) return;		// enforce whitespace between ID and first item
+	CStringsList* a = NULL;
+	if (!dirDEFARRAY_parseItems(&a) || NULL == a) {
+		Error("DEFARRAY must have at least one entry");	// suppressed by syntax error in non-empty case
+		return;
 	}
 	DefineTable.Add(id, "", a);
 }

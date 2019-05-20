@@ -1,6 +1,6 @@
 # file opened: duplicated_define.asm
 1     0000                      define label "value1"
-duplicated_define.asm(2): error: Duplicate define: label
+duplicated_define.asm(2): error: Duplicate define (replacing old value): label
 2     0000                      define label "value2"
 3     0000
 # file closed: duplicated_define.asm
