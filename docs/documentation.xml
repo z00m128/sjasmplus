@@ -198,6 +198,7 @@
               <synopsis>- added <link linkend="s_cli">--syntax</link> command line option
 - added <link linkend="po_opt">OPT</link> directive (modifies some command line options)
 - added way to use <link linkend="st_usage">structure</link> at designed address
+- added <link linkend="po_defarray_plus">DEFARRAY+</link> directive (for splitting long list of DEFARRAY values)
 - added support for <link linkend="s_cli">SJASMFLAGS</link> environment variable
 - updated syntax-highlight file for KDE5 editors (Kate)</synopsis>
             </listitem>
@@ -1533,6 +1534,20 @@ CNT DEFL 0 ;or CNT=0
     DISPLAY myarray[CNT]
 CNT DEFL CNT+1 ;or CNT=CNT+1
     EDUP</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_defarray_plus" />DEFARRAY+ &lt;id&gt; &lt;additional replacements&gt;</term>
+
+            <listitem>
+              <para>Appending more DEFINEs to already defined array<example>
+                  <title></title>
+
+                  <para><programlisting>    DEFARRAY   myarray 'A', 'B', 'C'
+    DEFARRAY+  myarray 'D', 'E'            ; now "myarray" has 5 items
+    DUP 3 : DEFARRAY+ myarray '!' : EDUP   ; "DEFARRAYFILL" adding 3x '!'</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
