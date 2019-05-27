@@ -2871,13 +2871,18 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		int e[3];
-		e[0] = e[1] = e[2] = -1;
-		if (GetRegister(lp)==Z80_D && comma(lp) && GetRegister(lp)==Z80_E){
+		int e[3] { -1, -1, -1 };
+		Z80Reg r1 = GetRegister(lp);
+		if (Z80_UNK == r1 && SkipBlanks(lp) && !Options::noFakes()) {
+			r1 = Z80_DE;	// "mul" without arguments is treated as "fake" "mul de"
+		}
+		// "mul de" and "mul d,e" are both valid syntax options
+		if ((Z80_DE==r1) || (Z80_D==r1 && comma(lp) && Z80_E==GetRegister(lp))) {
 			e[0]=0xED;
 			e[1]=0x30;
 		} else {
-			Error("Z80N MUL exist only with \"D,E\" arguments", bp, SUPPRESS);
+			Error("Z80N MUL exist only with \"D,E\" arguments", bp);
+			SkipToEol(lp);
 		}
 		EmitBytes(e);
 	}
@@ -3091,6 +3096,8 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
+		char *oldLp = lp;
+		if (Z80_HL != GetRegister(lp)) lp = oldLp;		// "eat" explicit HL argument
 		EmitByte(0xED);
 		EmitByte(0x94);
 	}
@@ -3100,6 +3107,8 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
+		char *oldLp = lp;
+		if (Z80_HL != GetRegister(lp)) lp = oldLp;		// "eat" explicit HL argument
 		EmitByte(0xED);
 		EmitByte(0x93);
 	}
