@@ -1906,7 +1906,7 @@ void _lua_showerror() {
 		_CERR ErrorLine _END;
 	}
 
-	PreviousErrorLine = ln;
+	PreviousErrorLine = CompiledCurrentLine;
 
 	ErrorCount++;
 

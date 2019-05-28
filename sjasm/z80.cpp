@@ -2881,8 +2881,8 @@ namespace Z80 {
 			e[0]=0xED;
 			e[1]=0x30;
 		} else {
-			Error("Z80N MUL exist only with \"D,E\" arguments", bp);
-			SkipToEol(lp);
+			Error("Z80N MUL exist only with \"D,E\" arguments", bp, SUPPRESS);
+			return;
 		}
 		EmitBytes(e);
 	}

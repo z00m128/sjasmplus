@@ -59,15 +59,14 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	if (type == EARLY && LASTPASS <= pass) return;
 	if ((type == SUPPRESS || type == IF_FIRST || type == PASS3) && pass < LASTPASS) return;
 	// check if this one should be skipped due to type constraints and current-error-state
-	if (FATAL != type && PreviousErrorLine == CurrentSourceLine) {
+	if (FATAL != type && PreviousErrorLine == CompiledCurrentLine) {
 		// non-fatal error, on the same line as previous, maybe skip?
 		if (IsSkipErrors || IF_FIRST == type) return;
 	}
-	// update current-error-state
-	if (PreviousErrorLine != CurrentSourceLine) IsSkipErrors = false;	// reset "skip" on new line
-	IsSkipErrors |= (SUPPRESS == type);		// keep it holding over the same line, raise it by SUPPRESS type
+	// update current-error-state (reset "skip" on new parsed-line, set "skip" by SUPPRESS type)
+	IsSkipErrors = (IsSkipErrors && (PreviousErrorLine == CompiledCurrentLine)) || (SUPPRESS == type);
+	PreviousErrorLine = CompiledCurrentLine;
 	++ErrorCount;							// number of non-skipped (!) errors
-	PreviousErrorLine = CurrentSourceLine;
 
 	DefineTable.Replace("_ERRORS", ErrorCount);
 

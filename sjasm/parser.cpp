@@ -652,6 +652,7 @@ unsigned char win2dos[] = //taken from HorrorWord %)))
 //#define DEBUG_COUT_PARSE_LINE
 
 void ParseLine(bool parselabels) {
+	++CompiledCurrentLine;
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
@@ -664,7 +665,6 @@ void ParseLine(bool parselabels) {
 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),
 					(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
-			++CompiledCurrentLine;
 			ParseDirective_REPT();
 			return;
 		}
@@ -674,7 +674,6 @@ void ParseLine(bool parselabels) {
 			(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'), RepeatStack.size(),
 			(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
-	++CompiledCurrentLine;
 	lp = ReplaceDefine(line);
 
 #ifdef DEBUG_COUT_PARSE_LINE
