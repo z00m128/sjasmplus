@@ -91,7 +91,7 @@ namespace Options {
 	bool HideLogo = 0;
 	bool ShowHelp = 0;
 	bool NoDestinationFile = true;		// no *.out file by default
-	SSyntax syx;
+	SSyntax syx, systemSyntax;
 	bool SourceStdIn = false;
 
 	// Include directories list is initialized with "." directory
@@ -116,9 +116,12 @@ namespace Options {
 
 	std::stack<SSyntax> SSyntax::syxStack;
 
+	void SSyntax::resetCurrentSyntax() {
+		new (&syx) SSyntax();	// restore defaults in current syntax
+	}
+
 	void SSyntax::pushCurrentSyntax() {
 		syxStack.push(syx);		// store current syntax options into stack
-		new (&syx) SSyntax();	// restore defaults in current syntax
 	}
 
 	bool SSyntax::popSyntax() {
@@ -128,10 +131,9 @@ namespace Options {
 		return true;
 	}
 
-	void SSyntax::popAllSyntax() {
-		if (syxStack.empty()) return;
-		while (1 < syxStack.size()) syxStack.pop();
-		popSyntax();
+	void SSyntax::restoreSystemSyntax() {
+		while (!syxStack.empty()) syxStack.pop();	// empty the syntax stack first
+		syx = systemSyntax;		// reset to original system syntax
 	}
 
 } // eof namespace Options
@@ -182,7 +184,7 @@ int deviceDirectivesCounter = 0;
 static char* globalDeviceID = NULL;
 
 void InitPass() {
-	Options::SSyntax::popAllSyntax();	// release all stored syntax variants and reset to initial
+	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
 	aint pow10 = 1;
 	reglenwidth = 0;
 	do {
@@ -495,6 +497,7 @@ int main(int argc, char **argv) {
 			Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
 		}
 	}
+	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
 
 	if (argc == 1 || Options::ShowHelp) {
 		_COUT logo _ENDL;

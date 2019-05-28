@@ -47,9 +47,10 @@ namespace Options {
 		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
 
 	// preservation utils, the push will also reset current syntax to defaults
-		static void pushCurrentSyntax();	// will push current syntax and resets to defaults
-		static bool popSyntax();			// will restore the syntax from previous push
-		static void popAllSyntax();			// will restore the syntax like it was at start
+		static void resetCurrentSyntax();	// resets current syntax to defaults
+		static void pushCurrentSyntax();	// pushes current syntax
+		static bool popSyntax();			// restores the syntax from previous push
+		static void restoreSystemSyntax();	// restores the syntax (ahead of pass), and empties the syntax stack
 	private:
 		static std::stack<SSyntax> syxStack;	// previous syntax
 	} SSyntax;

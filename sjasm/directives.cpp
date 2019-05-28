@@ -1174,12 +1174,25 @@ void dirENCODING() {
 
 void dirOPT() {
 	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...>
-	if (SkipBlanks(lp)) {		// empty arguments mean "pop" previous syntax
-		if (!Options::SSyntax::popSyntax()) Warning("[OPT] no previous syntax found");
-		return;
+	// process OPT specific keywords first: {push, pop, noreset}
+	bool resetCurrentSyntax = true;
+	while (!SkipBlanks(lp) && '-' != *lp) {
+		if (cmphstr(lp, "pop")) {	// "pop" previous syntax state
+			if (!Options::SSyntax::popSyntax()) Warning("[OPT] no previous syntax found");
+			return;
+		} else if (cmphstr(lp, "push")) {	// "push" previous syntax state
+			// preserve current syntax status, before using arguments of OPT, and reset to defaults
+			Options::SSyntax::pushCurrentSyntax();
+		} else if (cmphstr(lp, "noreset")) {	// keep current syntax state
+			resetCurrentSyntax = false;
+		} else {
+			Error("[OPT] invalid command (not \"push, pop, noreset\")", lp);
+			SkipToEol(lp);
+			return;
+		}
 	}
-	// preserve current syntax status, before using arguments of OPT, and reset to defaults
-	Options::SSyntax::pushCurrentSyntax();
+	// reset current syntax if not suppressed
+	if (resetCurrentSyntax) Options::SSyntax::resetCurrentSyntax();
 	// split user arguments into "argc, argv" like variables (by white-space)
 	char parsedOpts[LINEMAX];
 	char* parsedOptsArray[17] {};	// there must be one more nullptr in the array (16+1)
