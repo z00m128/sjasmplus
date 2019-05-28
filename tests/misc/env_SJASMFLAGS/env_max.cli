@@ -1,3 +1,0 @@
-# do the assembling with SJASMFLAGS environment variable set to some particular state
-SJASMFLAGS="--dirbol -Dd2 -Dd3 -Dd4 -Dd5 -Dd6 -Dd7 -Dd8 -Dd9 -Dd10 -Dd11 -Dd12 -Dd13 -Dd14 -Dd15 -Dd16 -Dd17 -Dd18 -Dd19 -Dd20 -Dd21 -Dd22 -Dd23 -Dd24 -Dd25 -Dd26 -Dd27 -Dd28 -Dd29 -Dd30 -Dd31 -Dd32 -DFLAGSDEFINE=defined" $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
-last_result=$?

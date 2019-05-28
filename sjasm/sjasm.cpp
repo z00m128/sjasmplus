@@ -459,7 +459,7 @@ int main(int argc, char **argv) {
 	CurrentDirectory = buf;
 
 	Options::COptionsParser optParser;
-	char* envFlags = std::getenv("SJASMFLAGS");
+	char* envFlags = std::getenv("SJASMPLUSOPTS");
 	if (nullptr != envFlags) {
 		// split environment arguments into "argc, argv" like variables (by white-space)
 		char* parsedOptsArray[33] {};	// there must be one more nullptr in the array (32+1)
@@ -470,7 +470,7 @@ int main(int argc, char **argv) {
 			temp[charI++] = 0;
 		}
 		if (!SkipBlanks(envFlags)) {
-			_CERR "SJASMFLAGS environment variable contains too many options (max is 32)" _ENDL;
+			_CERR "SJASMPLUSOPTS environment variable contains too many options (max is 32)" _ENDL;
 		}
 		// process environment variable ahead of command line options (in the same way)
 		int i = 0;
