@@ -1541,9 +1541,16 @@ void dirDISPLAY() {
 
 void dirMACRO() {
 	if (lijst) Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
-	char* n = GetID(lp);
-	if (n) MacroTable.Add(n, lp);
-	else   Error("[MACRO] Illegal macroname");
+	if (LastParsedLabelLine == CompiledCurrentLine) {	// A) name of macro is defined by label
+		// add macro with label used as name of it
+		MacroTable.Add(LastParsedLabel, lp);
+		// and remove the name from labels in the last pass
+		if (LASTPASS == pass) LabelTable.Remove(LastParsedLabel);
+	} else {											// B) name of macro follows directive (no label)
+		char* n = GetID(lp);
+		if (n) MacroTable.Add(n, lp);
+		else   Error("[MACRO] Illegal macroname");
+	}
 }
 
 void dirENDS() {

@@ -592,6 +592,7 @@ void ParseLabel() {
 			if (LastParsedLabel == NULL) {
 				Error("No enough memory!", NULL, FATAL);
 			}
+			LastParsedLabelLine = CompiledCurrentLine;
 		}
 		if (pass == LASTPASS) {
 			if (IsDEFL && !LabelTable.Insert(tp, val, false, IsDEFL)) {
