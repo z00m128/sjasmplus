@@ -131,7 +131,8 @@
 - added <a class="link" href="#po_opt">OPT</a> directive (modifies some command line options)
 - added way to use <a class="link" href="#st_usage">structure</a> at designed address
 - added <a class="link" href="#po_defarray_plus">DEFARRAY+</a> directive (for splitting long list of DEFARRAY values)
-- added support for <a class="link" href="#s_cli">SJASMFLAGS</a> environment variable
+- added support for <a class="link" href="#s_cli">SJASMPLUSOPTS</a> environment variable
+- Z80N new variants of syntax, now also "mul de : mul : pixelad hl : pixeldn hl" works
 - updated syntax-highlight file for KDE5 editors (Kate)</pre>
             </dd><dt><span class="term">05.05.2019 - 1.13.0</span></dt><dd>
               <pre class="synopsis">- [may break old sources] DEVICE: each assembling pass resets also
@@ -381,15 +382,15 @@
   </p>
 
   <p>
-	  The assembler will also read the environment variable <code class="code">SJASMFLAGS</code> (if available),
+	  The assembler will also read the environment variable <code class="code">SJASMPLUSOPTS</code> (if available),
 	  and process its content as part of command line options (before the actual options), so you
 	  can pre-configure certain options in your environment, for example:
-	  </p><pre class="programlisting">export SJASMFLAGS="--zxnext=cspect --msg=war"
+	  </p><pre class="programlisting">export SJASMPLUSOPTS="--zxnext=cspect --msg=war"
 sjasmplus --lst --lstlab example.asm</pre><p>
 	will execute the assembling as if command line "<code class="code">sjasmplus --zxnext=cspect --msg=war --lst --lstlab example.asm</code>"
 	was used. Known issue: parser of environment variable delimits each option on any white-space character, so
 	option containing space character will be incorrectly parsed (like "-Ifile-path with space" = fails and
-	there is no way to escape/quote the path in the SJASMFLAGS variable to make it work).
+	there is no way to escape/quote the path in the SJASMPLUSOPTS variable to make it work).
   </p>
     </div>
 

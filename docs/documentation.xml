@@ -199,7 +199,8 @@
 - added <link linkend="po_opt">OPT</link> directive (modifies some command line options)
 - added way to use <link linkend="st_usage">structure</link> at designed address
 - added <link linkend="po_defarray_plus">DEFARRAY+</link> directive (for splitting long list of DEFARRAY values)
-- added support for <link linkend="s_cli">SJASMFLAGS</link> environment variable
+- added support for <link linkend="s_cli">SJASMPLUSOPTS</link> environment variable
+- Z80N new variants of syntax, now also "mul de : mul : pixelad hl : pixeldn hl" works
 - updated syntax-highlight file for KDE5 editors (Kate)</synopsis>
             </listitem>
           </varlistentry>
@@ -604,15 +605,15 @@
   </para>
 
   <para>
-	  The assembler will also read the environment variable <code>SJASMFLAGS</code> (if available),
+	  The assembler will also read the environment variable <code>SJASMPLUSOPTS</code> (if available),
 	  and process its content as part of command line options (before the actual options), so you
 	  can pre-configure certain options in your environment, for example:
-	  <programlisting>export SJASMFLAGS="--zxnext=cspect --msg=war"
+	  <programlisting>export SJASMPLUSOPTS="--zxnext=cspect --msg=war"
 sjasmplus --lst --lstlab example.asm</programlisting>
 	will execute the assembling as if command line "<code>sjasmplus --zxnext=cspect --msg=war --lst --lstlab example.asm</code>"
 	was used. Known issue: parser of environment variable delimits each option on any white-space character, so
 	option containing space character will be incorrectly parsed (like "-Ifile-path with space" = fails and
-	there is no way to escape/quote the path in the SJASMFLAGS variable to make it work).
+	there is no way to escape/quote the path in the SJASMPLUSOPTS variable to make it work).
   </para>
     </section>
 
