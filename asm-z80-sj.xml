@@ -15,6 +15,9 @@ Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
 
+  28/05/2019: version 0.8.2
+    + changes for new features after v1.13.0 (OPT, DEFARRAY+, ...)
+
   14/05/2019: version 0.8.1
     + adding backtick as word deliminator to cover new double-backtick multi-arg symbol
     + "repeater" directive ".expression" support (not doing correctly nested parentheses)
@@ -66,7 +69,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="7" kateversion="5.0" extensions="*.asm;*.a80" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="8" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -227,6 +230,7 @@ TODO missing things:
       <item>align</item>
       <item>assert</item>
       <item>binary</item>
+      <item>defarray+</item>
       <item>defarray</item>
       <item>defdevice</item>
       <item>define</item>
@@ -274,6 +278,7 @@ TODO missing things:
       <item>map</item>
       <item>memorymap</item>
       <item>module</item>
+      <item>opt</item>
       <item>org</item>
       <item>outend</item>
       <item>output</item>
@@ -337,7 +342,6 @@ TODO missing things:
         <!-- "normal" line, but without the label at beginning -->
         <DetectSpaces attribute="Normal Text" context="#stay"/>
         <IncludeRules context="BeginComment" />
-        <!-- TODO add ".RepeatAmountExpression" directive handler here, to recognize instruction after it -->
         <WordDetect attribute="Data" context="Hexastring" insensitive="true" String="hex"/>
         <WordDetect attribute="Data" context="Hexastring" insensitive="true" String="dh"/>
         <WordDetect attribute="Data" context="Hexastring" insensitive="true" String="defh"/>
@@ -495,7 +499,7 @@ TODO missing things:
     </itemDatas>
   </highlighting>
   <general>
-    <keywords casesensitive="0" additionalDeliminator="`"/>
+    <keywords casesensitive="0" additionalDeliminator="`" weakDeliminator="+"/>
     <comments>
       <comment name="singleLine" start=";" />
       <comment name="multiLine" start="/*" end="*/" />
