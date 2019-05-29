@@ -1227,6 +1227,22 @@ void dirLABELSLIST() {
 	delete[] opt;
 }
 
+void dirCSPECTMAP() {
+	if (LASTPASS != pass || !DeviceID) {
+		if (!DeviceID) Error("CSPECTMAP only allowed in real device emulation mode (See DEVICE)");
+		SkipParam(lp);
+		return;
+	}
+	char* fName = GetFileName(lp);
+	if (fName[0]) {
+		STRCPY(Options::CSpectMapFName, LINEMAX, fName);
+	} else {		// create default map file name from current source file name (appends ".map")
+		STRCPY(Options::CSpectMapFName, LINEMAX-5, filename);
+		STRCAT(Options::CSpectMapFName, LINEMAX, ".map");
+	}
+	delete[] fName;
+}
+
 /*void dirTEXTAREA() {
 
 }*/
@@ -2170,6 +2186,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".encoding", dirENCODING);
 	DirectivesTable.insertd(".opt", dirOPT);
 	DirectivesTable.insertd(".labelslist", dirLABELSLIST);
+	DirectivesTable.insertd(".cspectmap", dirCSPECTMAP);
 	//  DirectivesTable.insertd(".bind",dirBIND); /* i didn't comment this */
 	DirectivesTable.insertd(".endif", dirENDIF);
 	//DirectivesTable.insertd(".endt",dirENDTEXTAREA);

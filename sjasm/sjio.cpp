@@ -40,8 +40,6 @@ char * rlpbuf, * rlpbuf_end, * rlppos;
 bool colonSubline;
 int blockComment;
 
-FILE* FP_UnrealList;
-
 int EB[1024 * 64],nEB = 0;
 char WriteBuffer[DESTBUFLEN];
 int tape_seek = 0;
@@ -728,12 +726,6 @@ static void OpenDefaultList(const char *fullpath) {
 	OpenListImp(tempListName);
 }
 
-void OpenUnrealList() {
-	/*if (!FP_UnrealList && Options::UnrealLabelListFName && !FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
-		Error("Error opening file", Options::UnrealLabelListFName, FATAL);
-	}*/
-}
-
 void CloseDest() {
 	// Flush buffer before any other operations
 	WriteDest();
@@ -861,9 +853,6 @@ void Close() {
 		fclose(FP_ListingFile);
 		FP_ListingFile = NULL;
 	}
-	//if (FP_UnrealList && pass == 9999) {
-	//	fclose(FP_UnrealList);
-	//}
 }
 
 int SaveRAM(FILE* ff, int start, int length) {

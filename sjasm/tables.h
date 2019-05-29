@@ -42,7 +42,6 @@ int GetLabelValue(char*& p, aint& val);
 int GetLocalLabelValue(char*& op, aint& val);
 
 constexpr int LABEL_PAGE_UNDEFINED = -1;
-constexpr int LABEL_PAGE_EXPRESSION = 0x7F01;
 constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
 
 class CLabelTableEntry {
@@ -52,6 +51,7 @@ public:
 	int		updatePass;	// last update was in pass
 	short	page;
 	bool	IsDEFL;
+	bool	IsEQU;
 	bool	used;
 	CLabelTableEntry();
 	void ClearData();
@@ -60,7 +60,7 @@ public:
 class CLabelTable {
 public:
 	CLabelTable();
-	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false);
+	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false, bool IsEQU = false);
 	int Update(char*, aint);
 	int GetValue(char* nname, aint& nvalue);
 	CLabelTableEntry* Find(const char* name, bool onlyDefined = false);
@@ -69,6 +69,7 @@ public:
 	void RemoveAll();
 	void Dump();
 	void DumpForUnreal();
+	void DumpForCSpect();
 	void DumpSymbols();
 private:
 	int HashTable[LABTABSIZE], NextLocation;

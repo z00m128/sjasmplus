@@ -79,6 +79,7 @@ namespace Options {
 	char DestinationFName[LINEMAX] = {0};
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
+	char CSpectMapFName[LINEMAX] = {0};
 
 	char ZX_SnapshotFName[LINEMAX] = {0};
 	char ZX_TapeFName[LINEMAX] = {0};
@@ -595,6 +596,10 @@ int main(int argc, char **argv) {
 
 	if (Options::UnrealLabelListFName[0]) {
 		LabelTable.DumpForUnreal();
+	}
+
+	if (Options::CSpectMapFName[0]) {
+		LabelTable.DumpForCSpect();
 	}
 
 	if (Options::SymbolListFName[0]) {

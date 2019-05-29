@@ -207,7 +207,7 @@ void CLabelTableEntry::ClearData() {
 	value = 0;
 	updatePass = 0;
 	page = LABEL_PAGE_UNDEFINED;
-	IsDEFL = used = false;
+	IsDEFL = IsEQU = used = false;
 }
 
 CLabelTableEntry::CLabelTableEntry() : name(NULL) {
@@ -218,7 +218,7 @@ CLabelTable::CLabelTable() {
 	NextLocation = 1;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL) {
+int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL, bool IsEQU) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", NULL, FATAL);
 	}
@@ -233,6 +233,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			label->value = nvalue;
 			label->page = Page ? Page->Number : LABEL_PAGE_ROM;
 			label->IsDEFL = IsDEFL;
+			label->IsEQU = IsEQU;
 			label->updatePass = pass;
 			return 1;
 		}
@@ -246,6 +247,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->name = STRDUP(nname);
 	if (label->name == NULL) Error("No enough memory!", NULL, FATAL);
 	label->IsDEFL = IsDEFL;
+	label->IsEQU = IsEQU;
 	label->updatePass = pass;
 	label->value = nvalue;
 	label->used = undefined;
@@ -352,7 +354,8 @@ void CLabelTable::Dump() {
 
 void CLabelTable::DumpForUnreal() {
 	char ln[LINEMAX], * ep;
-	if (FP_UnrealList == NULL && !FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
+	FILE* FP_UnrealList;
+	if (!FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
 		Error("Error opening file", Options::UnrealLabelListFName, FATAL);
 	}
 	const int PAGE_MASK = DeviceID ? Device->GetPage(0)->Size - 1 : 0x3FFF;
@@ -377,6 +380,43 @@ void CLabelTable::DumpForUnreal() {
 		fputs(ln, FP_UnrealList);
 	}
 	fclose(FP_UnrealList);
+}
+
+void CLabelTable::DumpForCSpect() {
+	FILE* file;
+	if (!FOPEN_ISOK(file, Options::CSpectMapFName, "w")) {
+		Error("Error opening file", Options::CSpectMapFName, FATAL);
+	}
+	const int PAGE_SIZE = DeviceID ? Device->GetPage(0)->Size : 0x4000;
+	const int PAGE_MASK = PAGE_SIZE - 1;
+	for (int i = 1; i < NextLocation; ++i) {
+		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
+		const int labelType =
+			LabelTable[i].IsEQU ? 1 :
+			LabelTable[i].IsDEFL ? 2 :
+			(LABEL_PAGE_ROM == LabelTable[i].page) ? 3 : 0;
+		const short page = labelType ? 0 : LabelTable[i].page;
+		const aint longAddress = (PAGE_MASK & LabelTable[i].value) + page * PAGE_SIZE;
+		fprintf(file, "%08lX %08lX %02X ", 0xFFFF & LabelTable[i].value, longAddress, labelType);
+		// convert primary+local label to be "@" delimited (not "." delimited)
+		STRCPY(temp, LINEMAX, LabelTable[i].name);
+		// look for "primary" label (where the local label starts)
+		char* localLabelStart = strrchr(temp, '.');
+		while (temp < localLabelStart) {	// the dot must be at least second character
+			*localLabelStart = 0;			// terminate the possible "primary" part
+			CLabelTableEntry* label = Find(temp);
+			if (label && LABEL_PAGE_UNDEFINED != label->page) {
+				*localLabelStart = '@';		// "primary" label exists, modify delimiter '.' -> '@'
+				break;
+			}
+			*localLabelStart = '.';			// "primary" label didn't work, restore dot
+			do {
+				--localLabelStart;			// and look for next dot
+			} while (temp < localLabelStart && '.' != *localLabelStart);
+		}
+		fprintf(file, "%s\n", temp);
+	}
+	fclose(file);
 }
 
 void CLabelTable::DumpSymbols() {
@@ -998,7 +1038,7 @@ static void InsertSingleStructLabel(char *name, const aint value) {
 			Error("Label has different value in pass 2", temp);
 		}
 	} else {
-		if (!LabelTable.Insert(p, value)) Error("Duplicate label", p, EARLY);
+		if (!LabelTable.Insert(p, value, false, false, true)) Error("Duplicate label", p, EARLY);
 	}
 	delete[] p;
 }

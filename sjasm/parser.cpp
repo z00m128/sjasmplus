@@ -561,8 +561,8 @@ void ParseLabel() {
 			Error("Local-labels flow differs in this pass (missing/new local label or final pass source difference)");
 		}
 	} else {
-		bool IsDEFL = false;
-		if ((IsDEFL = NeedDEFL()) || NeedEQU()) {
+		bool IsDEFL = NeedDEFL(), IsEQU = NeedEQU();
+		if (IsDEFL || IsEQU) {
 			if (!ParseExpression(lp, val)) {
 				Error("Expression error", lp);
 				val = 0;
@@ -595,7 +595,7 @@ void ParseLabel() {
 			LastParsedLabelLine = CompiledCurrentLine;
 		}
 		if (pass == LASTPASS) {
-			if (IsDEFL && !LabelTable.Insert(tp, val, false, IsDEFL)) {
+			if (IsDEFL && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
 				Error("Duplicate label", tp, PASS3);
 			}
 			if (!GetLabelValue(ttp, oval)) {
@@ -610,9 +610,9 @@ void ParseLabel() {
 
 				delete[] buf;
 			}
-		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL) && !LabelTable.Update(tp, val)) {
+		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU) && !LabelTable.Update(tp, val)) {
 			Error("Duplicate label", tp, EARLY);
-		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL)) {
+		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
 			Error("Duplicate label", tp, EARLY);
 		}
 		delete[] tp;

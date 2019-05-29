@@ -61,6 +61,7 @@ namespace Options {
 	extern char DestinationFName[LINEMAX];
 	extern char RAWFName[LINEMAX];
 	extern char UnrealLabelListFName[LINEMAX];
+	extern char CSpectMapFName[LINEMAX];
 
 	extern EOutputVerbosity OutputVerbosity;
 	extern bool IsLabelTableInListing;

@@ -47,7 +47,7 @@ extern int ListAddress;
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2
 
-extern FILE* FP_UnrealList, * FP_Input;
+extern FILE* FP_Input;
 
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void NewDest(char* newfilename, int mode = OUTPUT_TRUNCATE);
