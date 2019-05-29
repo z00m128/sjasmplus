@@ -200,6 +200,7 @@
 - added way to use <link linkend="st_usage">structure</link> at designed address
 - <link linkend="s_macros">MACRO</link> can be now named through label (optional syntax)
 - added <link linkend="po_defarray_plus">DEFARRAY+</link> directive (for splitting long list of DEFARRAY values)
+- added <link linkend="po_cspectmap">CSPECTMAP</link> directive for MAP files for CSpect emulator
 - added support for <link linkend="s_cli">SJASMPLUSOPTS</link> environment variable
 - Z80N new variants of syntax, now also "mul de : mul : pixelad hl : pixeldn hl" works
 - minor bugfixes, improvements and internal refactorings (error reporting)
@@ -1479,6 +1480,25 @@ END_OF_PROGRAM
     BYTE 1,-78,'@'
     BYTE "Format C:? ",0h</programlisting></para>
                 </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_cspectmap" />CSPECTMAP [&lt;filename&gt;]</term>
+
+            <listitem>
+              <para><emphasis>Useful for ZX-Spectrum Emulator
+              #CSpect by Mike Dailly.</emphasis></para>
+
+              <para><emphasis>Works only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Saves labels list in format:</para>
+
+              <para><synopsis>HEXA_16BIT_ADDRESS HEXA_LONG_ADDRESS TYPE LABELNAME</synopsis>
+              where TYPE is: 00 = regular label, 01 = EQU or struct defined, 02 = DEFL defined.</para>
+
+              <para>If no filename is provided, default is created by appending ".map" to source name.</para>
             </listitem>
           </varlistentry>
 
