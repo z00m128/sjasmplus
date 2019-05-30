@@ -12,6 +12,7 @@ CREATEDIR=mkdir -p
 INSTALL=cp
 UNINSTALL=rm -f
 WINDRES=windres.exe --preprocessor "cpp.exe"
+COMPRESS=upx.exe --best -vk --overlay=skip --compress-icons=0 
 
 EXE=sjasmplus.exe
 
@@ -77,6 +78,9 @@ install:
 
 uninstall:
 	$(UNINSTALL) $(PREFIX)/$(EXE)
+	
+compress:
+	$(COMPRESS) $(EXE)	
 
 .c.o:
 	$(GCC) $(CFLAGS) -o $@ -c $<
