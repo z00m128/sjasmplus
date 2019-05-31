@@ -658,10 +658,11 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			} else {	// string literal (not expression), handle the extra string literal logic
 				if (oldT == t) {
 					Warning("Empty string", p-2);
-				} else {
-					// mark last "string" byte with |128: single char in "" *is* string
-					// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
-					if (dc && ((1 == strRes) < (t - oldT))) e[t - 1] |= 128;
+				} else if (dc) {
+					// mark last "string" byte with |128: single char in quotes *is* string
+					// but single char in apostrophes *is not* (!) (no |128 then)
+					int maxLengthNotString = (1 == strRes);		// 0 for quotes, 1 for apostrophes
+					if (maxLengthNotString < (t - oldT)) e[t - 1] |= 128;
 				}
 				continue;
 			}
