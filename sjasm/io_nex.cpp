@@ -157,7 +157,7 @@ static void dirNexOpen() {
 	aint openArgs[3] = { (-1 == StartAddress ? 0 : StartAddress), 0xFF2D, 0 };
 	if (comma(lp)) {
 		const bool optionals[] = {false, true, true};	// start address is mandatory because comma
-		if (!getIntArguments(openArgs, optionals)) {
+		if (!getIntArguments<3>(openArgs, optionals)) {
 			Error("[SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>]]]", bp, SUPPRESS);
 			delete[] fname;
 			return;
@@ -192,7 +192,7 @@ static void dirNexCore() {
 	// parse arguments
 	aint coreArgs[3] = {0};
 	const bool optionals[] = {false, false, false};
-	if (!getIntArguments(coreArgs, optionals)) {
+	if (!getIntArguments<3>(coreArgs, optionals)) {
 		Error("[SAVENEX] expected syntax is CORE <major 0..15>,<minor 0..15>,<subminor 0..255>", bp, SUPPRESS);
 		return;
 	}
@@ -214,7 +214,7 @@ static void dirNexCfg() {
 	// parse arguments
 	aint cfgArgs[4] = {0};
 	const bool optionals[] = {false, true, true, true};
-	if (!getIntArguments(cfgArgs, optionals)) {
+	if (!getIntArguments<4>(cfgArgs, optionals)) {
 		Error("[SAVENEX] expected syntax is CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]", bp, SUPPRESS);
 		return;
 	}
@@ -238,7 +238,7 @@ static void dirNexBar() {
 	// parse arguments
 	aint barArgs[4] = {0};
 	const bool optionals[] = {false, false, true, true};
-	if (!getIntArguments(barArgs, optionals)) {
+	if (!getIntArguments<4>(barArgs, optionals)) {
 		Error("[SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]", bp, SUPPRESS);
 		return;
 	}
@@ -260,7 +260,7 @@ static void dirNexScreenLayer2andLowRes(bool Layer2) {
 	// parse arguments
 	aint screenArgs[4] = {-1, 0, -1, 0};
 	const bool optionals[] = {true, false, true, false};
-	if (!getIntArguments(screenArgs, optionals)
+	if (!getIntArguments<4>(screenArgs, optionals)
 			|| screenArgs[0] < -1 || SNexHeader::MAX_PAGE <= screenArgs[0]		// -1 for default pixel data
 			|| screenArgs[2] < -1 || SNexHeader::MAX_PAGE <= screenArgs[2]) {	// -1 for no-palette
 		Error("[SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]", bp, SUPPRESS);
@@ -416,7 +416,7 @@ static void dirNexAuto() {
 	// parse arguments
 	aint autoArgs[2] = { getNexBankNum(nex.lastBankIndex+1), SNexHeader::MAX_BANK-1 };
 	const bool optionals[] = {true, true};
-	if (!getIntArguments(autoArgs, optionals)
+	if (!getIntArguments<2>(autoArgs, optionals)
 			|| autoArgs[0] < 0 || SNexHeader::MAX_BANK <= autoArgs[0]
 			|| autoArgs[1] < 0 || SNexHeader::MAX_BANK <= autoArgs[1]) {
 		Error("[SAVENEX] expected syntax is AUTO [<fromBank 0..111>[,<toBank 0..111>]]", bp, SUPPRESS);
