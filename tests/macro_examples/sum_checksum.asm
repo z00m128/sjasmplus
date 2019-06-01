@@ -19,6 +19,17 @@
         DB      .SUM
     ENDM
 
+    ; similar as .CHK macro, but does use XOR to calculate checksum
+    MACRO .CHKXOR address?
+.CSUM = 0                        ; init values for checksumming
+.ADR = address? ASSERT address? < $   ; starting address must be below current
+        DUP $ - address?        ; do simple sum of all bytes
+.CSUM = (.CSUM ^ {.ADR})
+.ADR = .ADR + 1
+        EDUP
+        DB      .CSUM&$FF
+    ENDM
+
 ; Examples and verification (ZX Spectrum 48 virtual device is used for the test)
 
     DEVICE ZXSPECTRUM48 : OUTPUT "sum_checksum.bin"
@@ -32,3 +43,10 @@ TEST2   DS      300, 'b'
 TEST3   inc     hl              ; $23
         inc     h               ; $24
         .CHK    TEST3           ; expected 'G' ($47)
+
+TESTXOR
+        HEX           20 50 49 38 30 20
+        HEX     20 20 20 20 20 43 01 00
+        HEX     40 08 40 20 20 20 20 20
+        HEX     20 43 41
+        .CHKXOR TESTXOR         ; expected $79
