@@ -261,8 +261,7 @@ char* GrowSubIdByExtraChar(char* & p) {	// append the next char even if not a le
 char instrtemp[LINEMAX];
 
 char* getinstr(char*& p) {
-	/*char nid[LINEMAX],*/ char* np;
-	np = instrtemp;
+	char* np = instrtemp;
 	SkipBlanks(p);
 	if (!isalpha((unsigned char) * p) && *p != '.') {
 		return 0;
@@ -276,7 +275,11 @@ char* getinstr(char*& p) {
 		*np = *p; ++p; ++np;
 	}
 	*np = 0;
-	/*return STRDUP(nid);*/
+	if (!Options::syx.CaseInsensitiveInstructions) return instrtemp;
+	// lowercase the retrieved "instruction" string when option "--syntax=i" is used
+	while (instrtemp <= --np) {
+		*np = tolower(*np);
+	}
 	return instrtemp;
 }
 

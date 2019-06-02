@@ -88,7 +88,6 @@ public:
 	CFunctionTable();
 	int Insert(const char*, void(*) (void));
 	int insertd(const char*, void(*) (void));
-	/*int zoek(char*);*/
 	int zoek(const char*);
 	int Find(char*);
 private:	//FIXME LABTABSIZE should be probably FUNTABSIZE here, but afraid to fix (rather use regular C++ facilities later)

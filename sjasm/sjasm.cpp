@@ -323,6 +323,7 @@ namespace Options {
 						_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
 					}
 					break;
+				case 'i': syx.CaseInsensitiveInstructions = true; break;
 				default:
 					if (0 == pass || LASTPASS == pass) {
 						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;

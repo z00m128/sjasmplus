@@ -40,11 +40,13 @@ namespace Options {
 		bool		FakeEnabled;
 		bool		FakeWarning;
 		bool		IsListingSuspended;
+		bool		CaseInsensitiveInstructions;
 		int			IsNextEnabled;	// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
 		bool		(*MultiArg)(char*&);	// function checking if multi-arg delimiter is next
 
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
-					IsListingSuspended(false), IsNextEnabled(0), MultiArg(&comma) {}
+					IsListingSuspended(false), CaseInsensitiveInstructions(false), IsNextEnabled(0),
+					MultiArg(&comma) {}
 		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
 
 	// preservation utils, the push will also reset current syntax to defaults
