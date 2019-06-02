@@ -14,11 +14,11 @@
 .SUM = 0                        ; init values for checksumming
 .ADR = address? ASSERT address? < $   ; starting address must be below current
         DUP $ - address?        ; do simple sum of all bytes
-.SUM = (.SUM + {.ADR})&$FF
+.SUM = .SUM + {B .ADR}
 .ADR = .ADR + 1
         EDUP
         OPT pop
-        DB      .SUM
+        DB      low .SUM
     ENDM
 
     ; similar as .CHK macro, but does use XOR to calculate checksum
@@ -27,11 +27,11 @@
 .CSUM = 0                        ; init values for checksumming
 .ADR = address? ASSERT address? < $   ; starting address must be below current
         DUP $ - address?        ; do simple sum of all bytes
-.CSUM = (.CSUM ^ {.ADR})
+.CSUM = .CSUM ^ {B .ADR}
 .ADR = .ADR + 1
         EDUP
         OPT pop
-        DB      .CSUM&$FF
+        DB      .CSUM
     ENDM
 
 ; Examples and verification (ZX Spectrum 48 virtual device is used for the test)

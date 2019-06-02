@@ -899,7 +899,7 @@ unsigned int MemGetWord(unsigned int address) {
 		return 0;
 	}
 
-	return MemGetByte(address)+(MemGetByte(address+1)*256);
+	return MemGetByte(address)+(MemGetByte(address+1)<<8);
 }
 
 unsigned char MemGetByte(unsigned int address) {

@@ -46,21 +46,23 @@ int ParseExpPrim(char*& p, aint& nval) {
 				Error("')' expected");
 				return 0;
 		 }
-	} else if (DeviceID && *p == '{') {
-	  	++p; res = ParseExpression(p, nval);
-		/*if (nval < 0x4000) {
-			Error("Address in {..} must be more than 4000h"); return 0;
-		} */
-		if (nval > 0xFFFE) {
-			Error("Address in {..} must be less than FFFFh"); return 0;
-		}
+	} else if (DeviceID && *p == '{') {		// read WORD/BYTE from virtual device memory
+		char* const readMemP = p;
+		const int byteOnly = cmphstr(++p, "b");
+		ParseExpression(p, nval);
 		if (!need(p, '}')) {
-			Error("'}' expected"); return 0;
+			Error("'}' expected", readMemP, SUPPRESS);
+			return 0;
 		}
-
-	  	nval = (aint) (MemGetByte(nval) + (MemGetByte(nval + 1) << 8));
-
-	  	return 1;
+		if (nval < 0 || (0xFFFE + byteOnly) < nval) {
+			Error("Address in {..} must fetch bytes from 0x0000..0xFFFF range", readMemP);
+			nval = 0;
+			return 1;						// and return zero value as result (avoid "syntax error")
+		}
+		res = int(MemGetByte(nval));
+		if (!byteOnly) res += int(MemGetByte(nval + 1)) << 8;
+		nval = res;
+		return 1;
 	} else if (isdigit((unsigned char) * p) || (*p == '#' && isalnum((unsigned char) * (p + 1))) || (*p == '$' && isalnum((unsigned char) * (p + 1))) || *p == '%') {
 	  	res = GetConstant(p, nval);
 	} else if (isalpha((unsigned char) * p) || *p == '_' || *p == '.' || *p == '@') {
