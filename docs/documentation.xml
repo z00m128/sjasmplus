@@ -196,6 +196,7 @@
 
             <listitem>
               <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
+- added to --syntax option: case insensitive instructions
 - new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro examples</ulink>, minor fixes and refactoring
 - operators "{address}" and "{b address}" are now official and documented</synopsis>
             </listitem>
@@ -604,6 +605,7 @@
 	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
 &dagger; <emphasis>b B    Memory access brackets []: disabled / required (default = enabled)</emphasis>
   f F    Fake instructions: warning / disabled (default = enabled)
+  i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis></synopsis>
   &dagger; work in progress: currently only "aAfF" options are implemented, brackets and labels not yet, following description of functionality is then not fully correct either.
   </para>

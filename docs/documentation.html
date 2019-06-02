@@ -128,6 +128,7 @@
 
       <div class="variablelist"><dl class="variablelist"><dt><span class="term">work in progress - 1.13.2</span></dt><dd>
               <pre class="synopsis">- <a class="link" href="#po_opt">OPT</a> has now also "listoff" and "liston" commands
+- added to --syntax option: case insensitive instructions
 - new <a class="ulink" href="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples" target="_top">macro examples</a>, minor fixes and refactoring
 - operators "{address}" and "{b address}" are now official and documented</pre>
             </dd><dt><span class="term">30.05.2019 - 1.13.1</span></dt><dd>
@@ -375,6 +376,7 @@
 	</p><pre class="synopsis">  a A    Multi-argument delimiter: ",," / "``" (default = ",")
 † <span class="emphasis"><em>b B    Memory access brackets []: disabled / required (default = enabled)</em></span>
   f F    Fake instructions: warning / disabled (default = enabled)
+  i      Case insensitive instructions/directives (default = same case required)
 † <span class="emphasis"><em>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</em></span></pre><p>
   † work in progress: currently only "aAfF" options are implemented, brackets and labels not yet, following description of functionality is then not fully correct either.
   </p>
