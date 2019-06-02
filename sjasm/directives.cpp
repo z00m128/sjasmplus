@@ -1174,8 +1174,8 @@ void dirENCODING() {
 
 void dirOPT() {
 	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...>
-	// process OPT specific command keywords first: {push, pop, reset}
-	bool didReset = false;
+	// process OPT specific command keywords first: {push, pop, reset, listoff, liston}
+	bool didReset = false, didList = false;
 	while (!SkipBlanks(lp) && '-' != *lp) {
 		if (cmphstr(lp, "pop")) {	// "pop" previous syntax state
 			if (!Options::SSyntax::popSyntax()) Warning("[OPT] no previous syntax found");
@@ -1187,6 +1187,12 @@ void dirOPT() {
 		} else if (cmphstr(lp, "reset")) {	// keep current syntax state
 			Options::SSyntax::resetCurrentSyntax();
 			didReset = true;
+		} else if (cmphstr(lp, "listoff")) {
+			if (!didList) ListFile();		// *list* the OPT line suspending the listing
+			donotlist = 1;
+			Options::syx.IsListingSuspended = didList = true;
+		} else if (cmphstr(lp, "liston")) {
+			Options::syx.IsListingSuspended = false;
 		} else {
 			Error("[OPT] invalid command (not \"push, pop, reset\")", lp);
 			SkipToEol(lp);

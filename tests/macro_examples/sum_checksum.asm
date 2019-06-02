@@ -10,23 +10,27 @@
 
 ; CHK macro definition
     MACRO .CHK address?
+        OPT push listoff
 .SUM = 0                        ; init values for checksumming
 .ADR = address? ASSERT address? < $   ; starting address must be below current
         DUP $ - address?        ; do simple sum of all bytes
 .SUM = (.SUM + {.ADR})&$FF
 .ADR = .ADR + 1
         EDUP
+        OPT pop
         DB      .SUM
     ENDM
 
     ; similar as .CHK macro, but does use XOR to calculate checksum
     MACRO .CHKXOR address?
+        OPT push listoff
 .CSUM = 0                        ; init values for checksumming
 .ADR = address? ASSERT address? < $   ; starting address must be below current
         DUP $ - address?        ; do simple sum of all bytes
 .CSUM = (.CSUM ^ {.ADR})
 .ADR = .ADR + 1
         EDUP
+        OPT pop
         DB      .CSUM&$FF
     ENDM
 

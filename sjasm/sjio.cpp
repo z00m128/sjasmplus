@@ -265,8 +265,9 @@ FILE* GetListingFile() {
 }
 
 void ListFile(bool showAsSkipped) {
-	if (LASTPASS != pass || NULL == GetListingFile() || donotlist) {
-		donotlist = nEB = 0; return;
+	if (LASTPASS != pass || NULL == GetListingFile() || donotlist || Options::syx.IsListingSuspended) {
+		donotlist = nEB = 0;
+		return;
 	}
 	int pos = 0;
 	do {

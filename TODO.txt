@@ -16,6 +16,8 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
+--syntax: "i"? instructions case insensitive for legacy sources which didn't bother...
+
 --syntax: B+L options implementation
     add DOCS example test: "hl: ld a,(hl),,de,hl" when all is implemented
 
@@ -104,3 +106,5 @@ Docs:
 ^^ link each?
 
 DEVICE needs better description? Issue #55
+
+FORMALIZE undocumented {} operator finally.
