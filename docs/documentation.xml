@@ -192,6 +192,16 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>work in progress - 1.13.2</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
+- new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro examples</ulink>, minor fixes and refactoring
+- operators "{address}" and "{b address}" are now official and documented</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>30.05.2019 - 1.13.1</term>
 
             <listitem>
@@ -823,7 +833,9 @@ $c     hexadecimal
 
       <para>'$' represents the current program counter. '$$' represents the
       current page in the current slot in the <link
-      linkend="s_realdevice">real device emulation mode</link>.</para>
+      linkend="s_realdevice">real device emulation mode</link> and '{address}' can be used
+      to read WORD from virtual device memory (but zero is read before last pass
+      of assembling) ('{b address}' to read only BYTE).</para>
 
       <para>It is possible to use parenthesis '(' and ')' to override the
       precedence of the operators. The following operators may be used in
@@ -1162,9 +1174,10 @@ or    x or y   bitwise or
 
       <para>In this mode the compiler compiling program to virtual memory (as
       at MSX's WB-ASS2, ZX-Spectrum's GENS, ZEUS, ALASM etc). After this all
-      you can use new pseudo-ops as <link linkend="s_pseudoops">SAVEBIN,
-      SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST</link> and use special
-      functions in <link linkend="c_lua_scripting">Lua scripts</link>.</para>
+      you can use new pseudo-ops as <link linkend="s_pseudoops">SAVEBIN, SAVEDEV
+      SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, MMU, LABELSLIST</link>, use special
+      functions in <link linkend="c_lua_scripting">Lua scripts</link> and use operators
+      <code>{address}, {b address}</code> to read WORD/BYTE from the virtual memory.</para>
 
       <para>If only single DEVICE is used in whole source batch, the device
       becomes "global" and will affect also source before of the DEVICE.
@@ -2255,7 +2268,7 @@ Kip                ; label Kip</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_opt" /><para>OPT [push] [reset] [&lt;command line options&gt;]</para>
+            <term><anchor id="po_opt" /><para>OPT [push] [reset] [listoff] [liston] [&lt;command line options&gt;]</para>
 			<para>OPT pop</para></term>
 
             <listitem>
@@ -2265,9 +2278,12 @@ Kip                ; label Kip</programlisting></para>
 				  <code>--reversepop</code> and <code>--dirbol</code>.
 			  </para>
 			  <para>
-				  Ahead of options you can use OPT commands: push, pop, reset. The "push" command will
-				  make OPT to preserve current state of options. The "reset" command will reset
-				  OPT-related options to default state.
+				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston.
+				  The "push" command will make OPT to preserve current state of options. The "reset"
+				  command will reset OPT-related options to default state. The "listoff" command will
+				  suspend the listing for following lines until "liston" command is used (listing
+				  availibility is part of the push/pop state, so to "nest" listing-off you can use
+				  "OPT push listoff : ... code ... : OPT pop" code sequence.
 			  </para>
 			  <para>Then the provided options are applied. The default values are: fake instructions
 				  enabled (no warning), multi-argument delimiter is ",", both () and [] brackets

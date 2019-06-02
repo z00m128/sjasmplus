@@ -106,5 +106,3 @@ Docs:
 ^^ link each?
 
 DEVICE needs better description? Issue #55
-
-FORMALIZE undocumented {} operator finally.
