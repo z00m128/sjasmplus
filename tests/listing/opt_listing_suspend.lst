@@ -1,20 +1,31 @@
 # file opened: opt_listing_suspend.asm
  1    0000 37               scf     ; by default listing is ON
  2    0001                  OPT push listoff    ; remember current state, switch listing off
+# listing file suspended...
  4    000C                  OPT pop             ; restoring original state
  5    000C 4C 49 53 54      DZ  "LISTED"
  5    0010 45 44 00
  6    0013                  OPT listoff
+# listing file suspended...
  8    0020                  OPT liston          ; explicit ON
  9    0020 4C 49 53 54      DZ  "LISTED 2"
  9    0024 45 44 20 32
  9    0028 00
 10    0029                  OPT listoff
+# listing file suspended...
 10    0036                OPT liston
 10    0036 4C 49 53 54    DZ "LISTED 3"    ; single line OFF/ON
 10    003A 45 44 20 33
 10    003E 00
 11    003F
+12    003F                  ; nested listing OFF by suggested push+pop technique
+13    003F                  OPT push listoff    ; switch listing off twice
+# listing file suspended...
+18    0059                  OPT pop
+19    0059 4C 49 53 54      DZ  "LISTED 4+5"
+19    005D 45 44 20 34
+19    0061 2B 35 00
+20    0064
 # file closed: opt_listing_suspend.asm
 
 Value    Label
