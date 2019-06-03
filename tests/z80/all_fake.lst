@@ -1,0 +1,687 @@
+# file opened: all_fake.asm
+  1   0000                  ORG 0x8000
+  1   8000                OUTPUT "all_fake.bin"
+  2   8000                  OPT reset --zxnext=cspect --syntax=f   ; fakes warning ON
+  3   8000 DD 01            break   ; CSpect emulator breakpoint (was used to verify all fakes below in debugger)
+  4   8002
+all_fake.asm(5): warning: Fake instruction: rl bc
+  5   8002 CB 11 CB 10  rl_bc               rl bc
+all_fake.asm(6): warning: Fake instruction: rl de
+  6   8006 CB 13 CB 12  rl_de               rl de
+all_fake.asm(7): warning: Fake instruction: rl hl
+  7   800A CB 15 CB 14  rl_hl               rl hl
+all_fake.asm(8): warning: Fake instruction: rr bc
+  8   800E CB 18 CB 19  rr_bc               rr bc
+all_fake.asm(9): warning: Fake instruction: rr de
+  9   8012 CB 1A CB 1B  rr_de               rr de
+all_fake.asm(10): warning: Fake instruction: rr hl
+ 10   8016 CB 1C CB 1D  rr_hl               rr hl
+all_fake.asm(11): warning: Fake instruction: sla bc
+ 11   801A CB 21 CB 10  sla_bc              sla bc
+all_fake.asm(12): warning: Fake instruction: sla de
+ 12   801E CB 23 CB 12  sla_de              sla de
+ 13   8022 29           sla_hl              sla hl
+all_fake.asm(14): warning: Fake instruction: sll bc
+ 14   8023 CB 31 CB 10  sll_bc              sll bc
+all_fake.asm(15): warning: Fake instruction: sll de
+ 15   8027 CB 33 CB 12  sll_de              sll de
+all_fake.asm(16): warning: Fake instruction: sll hl
+ 16   802B CB 35 CB 14  sll_hl              sll hl
+all_fake.asm(17): warning: Fake instruction: sli bc
+ 17   802F CB 31 CB 10  sli_bc              sli bc
+all_fake.asm(18): warning: Fake instruction: sli de
+ 18   8033 CB 33 CB 12  sli_de              sli de
+all_fake.asm(19): warning: Fake instruction: sli hl
+ 19   8037 CB 35 CB 14  sli_hl              sli hl
+all_fake.asm(20): warning: Fake instruction: sra bc
+ 20   803B CB 28 CB 19  sra_bc              sra bc
+all_fake.asm(21): warning: Fake instruction: sra de
+ 21   803F CB 2A CB 1B  sra_de              sra de
+all_fake.asm(22): warning: Fake instruction: sra hl
+ 22   8043 CB 2C CB 1D  sra_hl              sra hl
+all_fake.asm(23): warning: Fake instruction: srl bc
+ 23   8047 CB 38 CB 19  srl_bc              srl bc
+all_fake.asm(24): warning: Fake instruction: srl de
+ 24   804B CB 3A CB 1B  srl_de              srl de
+all_fake.asm(25): warning: Fake instruction: srl hl
+ 25   804F CB 3C CB 1D  srl_hl              srl hl
+ 26   8053
+all_fake.asm(27): warning: Fake instruction: ld bc,bc
+ 27   8053 40 49        ld_bc_bc            ld bc,bc
+all_fake.asm(28): warning: Fake instruction: ld bc,de
+ 28   8055 42 4B        ld_bc_de            ld bc,de
+all_fake.asm(29): warning: Fake instruction: ld bc,hl
+ 29   8057 44 4D        ld_bc_hl            ld bc,hl
+all_fake.asm(30): warning: Fake instruction: ld bc,ix
+ 30   8059 DD 44 DD 4D  ld_bc_ix            ld bc,ix
+all_fake.asm(31): warning: Fake instruction: ld bc,iy
+ 31   805D FD 44 FD 4D  ld_bc_iy            ld bc,iy
+all_fake.asm(32): warning: Fake instruction: ld bc,(hl)
+ 32   8061 4E 23 46 2B  ld_bc_#hl#          ld bc,(hl)
+all_fake.asm(33): warning: Fake instruction: ld bc,(ix+$77)
+ 33   8065 DD 4E 77 DD  ld_bc_#ix_nn#       ld bc,(ix+$77)
+ 33   8069 46 78
+all_fake.asm(34): warning: Fake instruction: ld bc,(iy+$77)
+ 34   806B FD 4E 77 FD  ld_bc_#iy_nn#       ld bc,(iy+$77)
+ 34   806F 46 78
+ 35   8071
+all_fake.asm(36): warning: Fake instruction: ld de,bc
+ 36   8071 50 59        ld_de_bc            ld de,bc
+all_fake.asm(37): warning: Fake instruction: ld de,de
+ 37   8073 52 5B        ld_de_de            ld de,de
+all_fake.asm(38): warning: Fake instruction: ld de,hl
+ 38   8075 54 5D        ld_de_hl            ld de,hl
+all_fake.asm(39): warning: Fake instruction: ld de,ix
+ 39   8077 DD 54 DD 5D  ld_de_ix            ld de,ix
+all_fake.asm(40): warning: Fake instruction: ld de,iy
+ 40   807B FD 54 FD 5D  ld_de_iy            ld de,iy
+all_fake.asm(41): warning: Fake instruction: ld de,(hl)
+ 41   807F 5E 23 56 2B  ld_de_#hl#          ld de,(hl)
+all_fake.asm(42): warning: Fake instruction: ld de,(ix+$77)
+ 42   8083 DD 5E 77 DD  ld_de_#ix_nn#       ld de,(ix+$77)
+ 42   8087 56 78
+all_fake.asm(43): warning: Fake instruction: ld de,(iy+$77)
+ 43   8089 FD 5E 77 FD  ld_de_#iy_nn#       ld de,(iy+$77)
+ 43   808D 56 78
+ 44   808F
+all_fake.asm(45): warning: Fake instruction: ld hl,bc
+ 45   808F 60 69        ld_hl_bc            ld hl,bc
+all_fake.asm(46): warning: Fake instruction: ld hl,de
+ 46   8091 62 6B        ld_hl_de            ld hl,de
+all_fake.asm(47): warning: Fake instruction: ld hl,hl
+ 47   8093 64 6D        ld_hl_hl            ld hl,hl
+all_fake.asm(48): warning: Fake instruction: ld hl,ix
+ 48   8095 DD E5 E1     ld_hl_ix            ld hl,ix
+all_fake.asm(49): warning: Fake instruction: ld hl,iy
+ 49   8098 FD E5 E1     ld_hl_iy            ld hl,iy
+all_fake.asm(50): warning: Fake instruction: ld hl,(ix+$77)
+ 50   809B DD 6E 77 DD  ld_hl_#ix_nn#       ld hl,(ix+$77)
+ 50   809F 66 78
+all_fake.asm(51): warning: Fake instruction: ld hl,(iy+$77)
+ 51   80A1 FD 6E 77 FD  ld_hl_#iy_nn#       ld hl,(iy+$77)
+ 51   80A5 66 78
+ 52   80A7
+all_fake.asm(53): warning: Fake instruction: ld ix,bc
+ 53   80A7 DD 69 DD 60  ld_ix_bc            ld ix,bc
+all_fake.asm(54): warning: Fake instruction: ld ix,de
+ 54   80AB DD 6B DD 62  ld_ix_de            ld ix,de
+all_fake.asm(55): warning: Fake instruction: ld ix,hl
+ 55   80AF E5 DD E1     ld_ix_hl            ld ix,hl
+all_fake.asm(56): warning: Fake instruction: ld ix,ix
+ 56   80B2 DD 6D DD 64  ld_ix_ix            ld ix,ix
+all_fake.asm(57): warning: Fake instruction: ld ix,iy
+ 57   80B6 FD E5 DD E1  ld_ix_iy            ld ix,iy
+ 58   80BA
+all_fake.asm(59): warning: Fake instruction: ld iy,bc
+ 59   80BA FD 69 FD 60  ld_iy_bc            ld iy,bc
+all_fake.asm(60): warning: Fake instruction: ld iy,de
+ 60   80BE FD 6B FD 62  ld_iy_de            ld iy,de
+all_fake.asm(61): warning: Fake instruction: ld iy,hl
+ 61   80C2 E5 FD E1     ld_iy_hl            ld iy,hl
+all_fake.asm(62): warning: Fake instruction: ld iy,ix
+ 62   80C5 DD E5 FD E1  ld_iy_ix            ld iy,ix
+all_fake.asm(63): warning: Fake instruction: ld iy,iy
+ 63   80C9 FD 6D FD 64  ld_iy_iy            ld iy,iy
+ 64   80CD
+all_fake.asm(65): warning: Fake instruction: ld (hl),bc
+ 65   80CD 71 23 70 2B  ld_#hl#_bc          ld (hl),bc
+all_fake.asm(66): warning: Fake instruction: ld (hl),de
+ 66   80D1 73 23 72 2B  ld_#hl#_de          ld (hl),de
+ 67   80D5
+all_fake.asm(68): warning: Fake instruction: ld (ix+$77),bc
+ 68   80D5 DD 71 77 DD  ld_#ix_nn#_bc       ld (ix+$77),bc
+ 68   80D9 70 78
+all_fake.asm(69): warning: Fake instruction: ld (ix+$77),de
+ 69   80DB DD 73 77 DD  ld_#ix_nn#_de       ld (ix+$77),de
+ 69   80DF 72 78
+all_fake.asm(70): warning: Fake instruction: ld (ix+$77),hl
+ 70   80E1 DD 75 77 DD  ld_#ix_nn#_hl       ld (ix+$77),hl
+ 70   80E5 74 78
+ 71   80E7
+all_fake.asm(72): warning: Fake instruction: ld (iy+$77),bc
+ 72   80E7 FD 71 77 FD  ld_#iy_nn#_bc       ld (iy+$77),bc
+ 72   80EB 70 78
+all_fake.asm(73): warning: Fake instruction: ld (iy+$77),de
+ 73   80ED FD 73 77 FD  ld_#iy_nn#_de       ld (iy+$77),de
+ 73   80F1 72 78
+all_fake.asm(74): warning: Fake instruction: ld (iy+$77),hl
+ 74   80F3 FD 75 77 FD  ld_#iy_nn#_hl       ld (iy+$77),hl
+ 74   80F7 74 78
+ 75   80F9
+all_fake.asm(76): warning: Fake instruction: ldi bc,(hl)
+ 76   80F9 4E 23 46 23  ldi_bc_#hl#         ldi bc,(hl)
+all_fake.asm(77): warning: Fake instruction: ldi bc,(ix+$77)
+ 77   80FD DD 4E 77 DD  ldi_bc_#ix_nn#      ldi bc,(ix+$77)
+ 77   8101 23 DD 46 77
+ 77   8105 DD 23
+all_fake.asm(78): warning: Fake instruction: ldi bc,(iy+$77)
+ 78   8107 FD 4E 77 FD  ldi_bc_#iy_nn#      ldi bc,(iy+$77)
+ 78   810B 23 FD 46 77
+ 78   810F FD 23
+ 79   8111
+all_fake.asm(80): warning: Fake instruction: ldi de,(hl)
+ 80   8111 5E 23 56 23  ldi_de_#hl#         ldi de,(hl)
+all_fake.asm(81): warning: Fake instruction: ldi de,(ix+$77)
+ 81   8115 DD 5E 77 DD  ldi_de_#ix_nn#      ldi de,(ix+$77)
+ 81   8119 23 DD 56 77
+ 81   811D DD 23
+all_fake.asm(82): warning: Fake instruction: ldi de,(iy+$77)
+ 82   811F FD 5E 77 FD  ldi_de_#iy_nn#      ldi de,(iy+$77)
+ 82   8123 23 FD 56 77
+ 82   8127 FD 23
+ 83   8129
+all_fake.asm(84): warning: Fake instruction: ldi hl,(ix+$77)
+ 84   8129 DD 6E 77 DD  ldi_hl_#ix_nn#      ldi hl,(ix+$77)
+ 84   812D 23 DD 66 77
+ 84   8131 DD 23
+all_fake.asm(85): warning: Fake instruction: ldi hl,(iy+$77)
+ 85   8133 FD 6E 77 FD  ldi_hl_#iy_nn#      ldi hl,(iy+$77)
+ 85   8137 23 FD 66 77
+ 85   813B FD 23
+ 86   813D
+all_fake.asm(87): warning: Fake instruction: ldi (hl),bc
+ 87   813D 71 23 70 23  ldi_#hl#_bc         ldi (hl),bc
+all_fake.asm(88): warning: Fake instruction: ldi (hl),de
+ 88   8141 73 23 72 23  ldi_#hl#_de         ldi (hl),de
+ 89   8145
+all_fake.asm(90): warning: Fake instruction: ldi (ix+$77),bc
+ 90   8145 DD 71 77 DD  ldi_#ix_nn#_bc      ldi (ix+$77),bc
+ 90   8149 23 DD 70 77
+ 90   814D DD 23
+all_fake.asm(91): warning: Fake instruction: ldi (ix+$77),de
+ 91   814F DD 73 77 DD  ldi_#ix_nn#_de      ldi (ix+$77),de
+ 91   8153 23 DD 72 77
+ 91   8157 DD 23
+all_fake.asm(92): warning: Fake instruction: ldi (ix+$77),hl
+ 92   8159 DD 75 77 DD  ldi_#ix_nn#_hl      ldi (ix+$77),hl
+ 92   815D 23 DD 74 77
+ 92   8161 DD 23
+ 93   8163
+all_fake.asm(94): warning: Fake instruction: ldi (iy+$77),bc
+ 94   8163 FD 71 77 FD  ldi_#iy_nn#_bc      ldi (iy+$77),bc
+ 94   8167 23 FD 70 77
+ 94   816B FD 23
+all_fake.asm(95): warning: Fake instruction: ldi (iy+$77),de
+ 95   816D FD 73 77 FD  ldi_#iy_nn#_de      ldi (iy+$77),de
+ 95   8171 23 FD 72 77
+ 95   8175 FD 23
+all_fake.asm(96): warning: Fake instruction: ldi (iy+$77),hl
+ 96   8177 FD 75 77 FD  ldi_#iy_nn#_hl      ldi (iy+$77),hl
+ 96   817B 23 FD 74 77
+ 96   817F FD 23
+ 97   8181
+all_fake.asm(98): warning: Fake instruction: ldi a,(bc)
+ 98   8181 0A 03        ldi_a_#bc#          ldi a,(bc)
+all_fake.asm(99): warning: Fake instruction: ldi a,(de)
+ 99   8183 1A 13        ldi_a_#de#          ldi a,(de)
+all_fake.asm(100): warning: Fake instruction: ldi a,(hl)
+100   8185 7E 23        ldi_a_#hl#          ldi a,(hl)
+all_fake.asm(101): warning: Fake instruction: ldi b,(hl)
+101   8187 46 23        ldi_b_#hl#          ldi b,(hl)
+all_fake.asm(102): warning: Fake instruction: ldi c,(hl)
+102   8189 4E 23        ldi_c_#hl#          ldi c,(hl)
+all_fake.asm(103): warning: Fake instruction: ldi d,(hl)
+103   818B 56 23        ldi_d_#hl#          ldi d,(hl)
+all_fake.asm(104): warning: Fake instruction: ldi e,(hl)
+104   818D 5E 23        ldi_e_#hl#          ldi e,(hl)
+all_fake.asm(105): warning: Fake instruction: ldi h,(hl)
+105   818F 66 23        ldi_h_#hl#          ldi h,(hl)
+all_fake.asm(106): warning: Fake instruction: ldi l,(hl)
+106   8191 6E 23        ldi_l_#hl#          ldi l,(hl)
+all_fake.asm(107): warning: Fake instruction: ldi a,(ix+$77)
+107   8193 DD 7E 77 DD  ldi_a_#ix_nn#       ldi a,(ix+$77)
+107   8197 23
+all_fake.asm(108): warning: Fake instruction: ldi b,(ix+$77)
+108   8198 DD 46 77 DD  ldi_b_#ix_nn#       ldi b,(ix+$77)
+108   819C 23
+all_fake.asm(109): warning: Fake instruction: ldi c,(ix+$77)
+109   819D DD 4E 77 DD  ldi_c_#ix_nn#       ldi c,(ix+$77)
+109   81A1 23
+all_fake.asm(110): warning: Fake instruction: ldi d,(ix+$77)
+110   81A2 DD 56 77 DD  ldi_d_#ix_nn#       ldi d,(ix+$77)
+110   81A6 23
+all_fake.asm(111): warning: Fake instruction: ldi e,(ix+$77)
+111   81A7 DD 5E 77 DD  ldi_e_#ix_nn#       ldi e,(ix+$77)
+111   81AB 23
+all_fake.asm(112): warning: Fake instruction: ldi h,(ix+$77)
+112   81AC DD 66 77 DD  ldi_h_#ix_nn#       ldi h,(ix+$77)
+112   81B0 23
+all_fake.asm(113): warning: Fake instruction: ldi l,(ix+$77)
+113   81B1 DD 6E 77 DD  ldi_l_#ix_nn#       ldi l,(ix+$77)
+113   81B5 23
+all_fake.asm(114): warning: Fake instruction: ldi a,(iy+$77)
+114   81B6 FD 7E 77 FD  ldi_a_#iy_nn#       ldi a,(iy+$77)
+114   81BA 23
+all_fake.asm(115): warning: Fake instruction: ldi b,(iy+$77)
+115   81BB FD 46 77 FD  ldi_b_#iy_nn#       ldi b,(iy+$77)
+115   81BF 23
+all_fake.asm(116): warning: Fake instruction: ldi c,(iy+$77)
+116   81C0 FD 4E 77 FD  ldi_c_#iy_nn#       ldi c,(iy+$77)
+116   81C4 23
+all_fake.asm(117): warning: Fake instruction: ldi d,(iy+$77)
+117   81C5 FD 56 77 FD  ldi_d_#iy_nn#       ldi d,(iy+$77)
+117   81C9 23
+all_fake.asm(118): warning: Fake instruction: ldi e,(iy+$77)
+118   81CA FD 5E 77 FD  ldi_e_#iy_nn#       ldi e,(iy+$77)
+118   81CE 23
+all_fake.asm(119): warning: Fake instruction: ldi h,(iy+$77)
+119   81CF FD 66 77 FD  ldi_h_#iy_nn#       ldi h,(iy+$77)
+119   81D3 23
+all_fake.asm(120): warning: Fake instruction: ldi l,(iy+$77)
+120   81D4 FD 6E 77 FD  ldi_l_#iy_nn#       ldi l,(iy+$77)
+120   81D8 23
+121   81D9
+all_fake.asm(122): warning: Fake instruction: ldd a,(bc)
+122   81D9 0A 0B        ldd_a_#bc#          ldd a,(bc)
+all_fake.asm(123): warning: Fake instruction: ldd a,(de)
+123   81DB 1A 1B        ldd_a_#de#          ldd a,(de)
+all_fake.asm(124): warning: Fake instruction: ldd a,(hl)
+124   81DD 7E 2B        ldd_a_#hl#          ldd a,(hl)
+all_fake.asm(125): warning: Fake instruction: ldd b,(hl)
+125   81DF 46 2B        ldd_b_#hl#          ldd b,(hl)
+all_fake.asm(126): warning: Fake instruction: ldd c,(hl)
+126   81E1 4E 2B        ldd_c_#hl#          ldd c,(hl)
+all_fake.asm(127): warning: Fake instruction: ldd d,(hl)
+127   81E3 56 2B        ldd_d_#hl#          ldd d,(hl)
+all_fake.asm(128): warning: Fake instruction: ldd e,(hl)
+128   81E5 5E 2B        ldd_e_#hl#          ldd e,(hl)
+all_fake.asm(129): warning: Fake instruction: ldd h,(hl)
+129   81E7 66 2B        ldd_h_#hl#          ldd h,(hl)
+all_fake.asm(130): warning: Fake instruction: ldd l,(hl)
+130   81E9 6E 2B        ldd_l_#hl#          ldd l,(hl)
+all_fake.asm(131): warning: Fake instruction: ldd a,(ix+$77)
+131   81EB DD 7E 77 DD  ldd_a_#ix_nn#       ldd a,(ix+$77)
+131   81EF 2B
+all_fake.asm(132): warning: Fake instruction: ldd b,(ix+$77)
+132   81F0 DD 46 77 DD  ldd_b_#ix_nn#       ldd b,(ix+$77)
+132   81F4 2B
+all_fake.asm(133): warning: Fake instruction: ldd c,(ix+$77)
+133   81F5 DD 4E 77 DD  ldd_c_#ix_nn#       ldd c,(ix+$77)
+133   81F9 2B
+all_fake.asm(134): warning: Fake instruction: ldd d,(ix+$77)
+134   81FA DD 56 77 DD  ldd_d_#ix_nn#       ldd d,(ix+$77)
+134   81FE 2B
+all_fake.asm(135): warning: Fake instruction: ldd e,(ix+$77)
+135   81FF DD 5E 77 DD  ldd_e_#ix_nn#       ldd e,(ix+$77)
+135   8203 2B
+all_fake.asm(136): warning: Fake instruction: ldd h,(ix+$77)
+136   8204 DD 66 77 DD  ldd_h_#ix_nn#       ldd h,(ix+$77)
+136   8208 2B
+all_fake.asm(137): warning: Fake instruction: ldd l,(ix+$77)
+137   8209 DD 6E 77 DD  ldd_l_#ix_nn#       ldd l,(ix+$77)
+137   820D 2B
+all_fake.asm(138): warning: Fake instruction: ldd a,(iy+$77)
+138   820E FD 7E 77 FD  ldd_a_#iy_nn#       ldd a,(iy+$77)
+138   8212 2B
+all_fake.asm(139): warning: Fake instruction: ldd b,(iy+$77)
+139   8213 FD 46 77 FD  ldd_b_#iy_nn#       ldd b,(iy+$77)
+139   8217 2B
+all_fake.asm(140): warning: Fake instruction: ldd c,(iy+$77)
+140   8218 FD 4E 77 FD  ldd_c_#iy_nn#       ldd c,(iy+$77)
+140   821C 2B
+all_fake.asm(141): warning: Fake instruction: ldd d,(iy+$77)
+141   821D FD 56 77 FD  ldd_d_#iy_nn#       ldd d,(iy+$77)
+141   8221 2B
+all_fake.asm(142): warning: Fake instruction: ldd e,(iy+$77)
+142   8222 FD 5E 77 FD  ldd_e_#iy_nn#       ldd e,(iy+$77)
+142   8226 2B
+all_fake.asm(143): warning: Fake instruction: ldd h,(iy+$77)
+143   8227 FD 66 77 FD  ldd_h_#iy_nn#       ldd h,(iy+$77)
+143   822B 2B
+all_fake.asm(144): warning: Fake instruction: ldd l,(iy+$77)
+144   822C FD 6E 77 FD  ldd_l_#iy_nn#       ldd l,(iy+$77)
+144   8230 2B
+145   8231
+all_fake.asm(146): warning: Fake instruction: ldi (bc),a
+146   8231 02 03        ldi_#bc#_a          ldi (bc),a
+all_fake.asm(147): warning: Fake instruction: ldi (de),a
+147   8233 12 13        ldi_#de#_a          ldi (de),a
+all_fake.asm(148): warning: Fake instruction: ldi (hl),a
+148   8235 77 23        ldi_#hl#_a          ldi (hl),a
+all_fake.asm(149): warning: Fake instruction: ldi (hl),b
+149   8237 70 23        ldi_#hl#_b          ldi (hl),b
+all_fake.asm(150): warning: Fake instruction: ldi (hl),c
+150   8239 71 23        ldi_#hl#_c          ldi (hl),c
+all_fake.asm(151): warning: Fake instruction: ldi (hl),d
+151   823B 72 23        ldi_#hl#_d          ldi (hl),d
+all_fake.asm(152): warning: Fake instruction: ldi (hl),e
+152   823D 73 23        ldi_#hl#_e          ldi (hl),e
+all_fake.asm(153): warning: Fake instruction: ldi (hl),h
+153   823F 74 23        ldi_#hl#_h          ldi (hl),h
+all_fake.asm(154): warning: Fake instruction: ldi (hl),l
+154   8241 75 23        ldi_#hl#_l          ldi (hl),l
+all_fake.asm(155): warning: Fake instruction: ldi (ix+$77),a
+155   8243 DD 77 77 DD  ldi_#ix_nn#_a       ldi (ix+$77),a
+155   8247 23
+all_fake.asm(156): warning: Fake instruction: ldi (ix+$77),b
+156   8248 DD 70 77 DD  ldi_#ix_nn#_b       ldi (ix+$77),b
+156   824C 23
+all_fake.asm(157): warning: Fake instruction: ldi (ix+$77),c
+157   824D DD 71 77 DD  ldi_#ix_nn#_c       ldi (ix+$77),c
+157   8251 23
+all_fake.asm(158): warning: Fake instruction: ldi (ix+$77),d
+158   8252 DD 72 77 DD  ldi_#ix_nn#_d       ldi (ix+$77),d
+158   8256 23
+all_fake.asm(159): warning: Fake instruction: ldi (ix+$77),e
+159   8257 DD 73 77 DD  ldi_#ix_nn#_e       ldi (ix+$77),e
+159   825B 23
+all_fake.asm(160): warning: Fake instruction: ldi (ix+$77),h
+160   825C DD 74 77 DD  ldi_#ix_nn#_h       ldi (ix+$77),h
+160   8260 23
+all_fake.asm(161): warning: Fake instruction: ldi (ix+$77),l
+161   8261 DD 75 77 DD  ldi_#ix_nn#_l       ldi (ix+$77),l
+161   8265 23
+all_fake.asm(162): warning: Fake instruction: ldi (iy+$77),a
+162   8266 FD 77 77 FD  ldi_#iy_nn#_a       ldi (iy+$77),a
+162   826A 23
+all_fake.asm(163): warning: Fake instruction: ldi (iy+$77),b
+163   826B FD 70 77 FD  ldi_#iy_nn#_b       ldi (iy+$77),b
+163   826F 23
+all_fake.asm(164): warning: Fake instruction: ldi (iy+$77),c
+164   8270 FD 71 77 FD  ldi_#iy_nn#_c       ldi (iy+$77),c
+164   8274 23
+all_fake.asm(165): warning: Fake instruction: ldi (iy+$77),d
+165   8275 FD 72 77 FD  ldi_#iy_nn#_d       ldi (iy+$77),d
+165   8279 23
+all_fake.asm(166): warning: Fake instruction: ldi (iy+$77),e
+166   827A FD 73 77 FD  ldi_#iy_nn#_e       ldi (iy+$77),e
+166   827E 23
+all_fake.asm(167): warning: Fake instruction: ldi (iy+$77),h
+167   827F FD 74 77 FD  ldi_#iy_nn#_h       ldi (iy+$77),h
+167   8283 23
+all_fake.asm(168): warning: Fake instruction: ldi (iy+$77),l
+168   8284 FD 75 77 FD  ldi_#iy_nn#_l       ldi (iy+$77),l
+168   8288 23
+169   8289
+all_fake.asm(170): warning: Fake instruction: ldd (bc),a
+170   8289 02 0B        ldd_#bc#_a          ldd (bc),a
+all_fake.asm(171): warning: Fake instruction: ldd (de),a
+171   828B 12 1B        ldd_#de#_a          ldd (de),a
+all_fake.asm(172): warning: Fake instruction: ldd (hl),a
+172   828D 77 2B        ldd_#hl#_a          ldd (hl),a
+all_fake.asm(173): warning: Fake instruction: ldd (hl),b
+173   828F 70 2B        ldd_#hl#_b          ldd (hl),b
+all_fake.asm(174): warning: Fake instruction: ldd (hl),c
+174   8291 71 2B        ldd_#hl#_c          ldd (hl),c
+all_fake.asm(175): warning: Fake instruction: ldd (hl),d
+175   8293 72 2B        ldd_#hl#_d          ldd (hl),d
+all_fake.asm(176): warning: Fake instruction: ldd (hl),e
+176   8295 73 2B        ldd_#hl#_e          ldd (hl),e
+all_fake.asm(177): warning: Fake instruction: ldd (hl),h
+177   8297 74 2B        ldd_#hl#_h          ldd (hl),h
+all_fake.asm(178): warning: Fake instruction: ldd (hl),l
+178   8299 75 2B        ldd_#hl#_l          ldd (hl),l
+all_fake.asm(179): warning: Fake instruction: ldd (ix+$77),a
+179   829B DD 77 77 DD  ldd_#ix_nn#_a       ldd (ix+$77),a
+179   829F 2B
+all_fake.asm(180): warning: Fake instruction: ldd (ix+$77),b
+180   82A0 DD 70 77 DD  ldd_#ix_nn#_b       ldd (ix+$77),b
+180   82A4 2B
+all_fake.asm(181): warning: Fake instruction: ldd (ix+$77),c
+181   82A5 DD 71 77 DD  ldd_#ix_nn#_c       ldd (ix+$77),c
+181   82A9 2B
+all_fake.asm(182): warning: Fake instruction: ldd (ix+$77),d
+182   82AA DD 72 77 DD  ldd_#ix_nn#_d       ldd (ix+$77),d
+182   82AE 2B
+all_fake.asm(183): warning: Fake instruction: ldd (ix+$77),e
+183   82AF DD 73 77 DD  ldd_#ix_nn#_e       ldd (ix+$77),e
+183   82B3 2B
+all_fake.asm(184): warning: Fake instruction: ldd (ix+$77),h
+184   82B4 DD 74 77 DD  ldd_#ix_nn#_h       ldd (ix+$77),h
+184   82B8 2B
+all_fake.asm(185): warning: Fake instruction: ldd (ix+$77),l
+185   82B9 DD 75 77 DD  ldd_#ix_nn#_l       ldd (ix+$77),l
+185   82BD 2B
+all_fake.asm(186): warning: Fake instruction: ldd (iy+$77),a
+186   82BE FD 77 77 FD  ldd_#iy_nn#_a       ldd (iy+$77),a
+186   82C2 2B
+all_fake.asm(187): warning: Fake instruction: ldd (iy+$77),b
+187   82C3 FD 70 77 FD  ldd_#iy_nn#_b       ldd (iy+$77),b
+187   82C7 2B
+all_fake.asm(188): warning: Fake instruction: ldd (iy+$77),c
+188   82C8 FD 71 77 FD  ldd_#iy_nn#_c       ldd (iy+$77),c
+188   82CC 2B
+all_fake.asm(189): warning: Fake instruction: ldd (iy+$77),d
+189   82CD FD 72 77 FD  ldd_#iy_nn#_d       ldd (iy+$77),d
+189   82D1 2B
+all_fake.asm(190): warning: Fake instruction: ldd (iy+$77),e
+190   82D2 FD 73 77 FD  ldd_#iy_nn#_e       ldd (iy+$77),e
+190   82D6 2B
+all_fake.asm(191): warning: Fake instruction: ldd (iy+$77),h
+191   82D7 FD 74 77 FD  ldd_#iy_nn#_h       ldd (iy+$77),h
+191   82DB 2B
+all_fake.asm(192): warning: Fake instruction: ldd (iy+$77),l
+192   82DC FD 75 77 FD  ldd_#iy_nn#_l       ldd (iy+$77),l
+192   82E0 2B
+193   82E1
+all_fake.asm(194): warning: Fake instruction: ldi (hl),$44
+194   82E1 36 44 23     ldi_#hl#_nn         ldi (hl),$44
+all_fake.asm(195): warning: Fake instruction: ldi (ix+$77),$44
+195   82E4 DD 36 77 44  ldi_#ix_nn#_nn      ldi (ix+$77),$44
+195   82E8 DD 23
+all_fake.asm(196): warning: Fake instruction: ldi (iy+$77),$44
+196   82EA FD 36 77 44  ldi_#iy_nn#_nn      ldi (iy+$77),$44
+196   82EE FD 23
+197   82F0
+all_fake.asm(198): warning: Fake instruction: ldd (hl),$44
+198   82F0 36 44 2B     ldd_#hl#_nn         ldd (hl),$44
+all_fake.asm(199): warning: Fake instruction: ldd (ix+$77),$44
+199   82F3 DD 36 77 44  ldd_#ix_nn#_nn      ldd (ix+$77),$44
+199   82F7 DD 2B
+all_fake.asm(200): warning: Fake instruction: ldd (iy+$77),$44
+200   82F9 FD 36 77 44  ldd_#iy_nn#_nn      ldd (iy+$77),$44
+200   82FD FD 2B
+201   82FF
+all_fake.asm(202): warning: Fake instruction: sub hl,bc
+202   82FF B7 ED 42     sub_hl_bc           sub hl,bc
+all_fake.asm(203): warning: Fake instruction: sub hl,de
+203   8302 B7 ED 52     sub_hl_de           sub hl,de
+all_fake.asm(204): warning: Fake instruction: sub hl,hl
+204   8305 B7 ED 62     sub_hl_hl           sub hl,hl
+all_fake.asm(205): warning: Fake instruction: sub hl,sp
+205   8308 B7 ED 72     sub_hl_sp           sub hl,sp
+206   830B
+207   830B                  ; ZXNext section - there are no true regular fakes yet, but some specials
+all_fake.asm(208): warning: Fake instruction: mul         
+208   830B ED 30        zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
+209   830D                  ; no message when in --zxnext=cspect mode
+210   830D DD 01        zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
+211   830F DD 00        zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
+212   8311                  OPT --zxnext    ; do 2x error stating the requirement
+all_fake.asm(213): error: [BREAK] fake instruction "break" must be specifically enabled by --zxnext=cspect option
+213   8311              zxn_csp_break2      break
+all_fake.asm(214): error: [EXIT] fake instruction "exit" must be specifically enabled by --zxnext=cspect option
+214   8311              zxn_csp_exit2       exit
+215   8311
+216   8311                  ; debug snapshot for Cspect
+217   8311              ;     DEVICE ZXSPECTRUM48 : CSPECTMAP : SAVESNA "all_fake.sna", 0x8000
+218   8311
+# file closed: all_fake.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8002 X rl_bc
+0x8006 X rl_de
+0x800A X rl_hl
+0x800E X rr_bc
+0x8012 X rr_de
+0x8016 X rr_hl
+0x801A X sla_bc
+0x801E X sla_de
+0x8022 X sla_hl
+0x8023 X sll_bc
+0x8027 X sll_de
+0x802B X sll_hl
+0x802F X sli_bc
+0x8033 X sli_de
+0x8037 X sli_hl
+0x803B X sra_bc
+0x803F X sra_de
+0x8043 X sra_hl
+0x8047 X srl_bc
+0x804B X srl_de
+0x804F X srl_hl
+0x8053 X ld_bc_bc
+0x8055 X ld_bc_de
+0x8057 X ld_bc_hl
+0x8059 X ld_bc_ix
+0x805D X ld_bc_iy
+0x8061 X ld_bc_#hl#
+0x8065 X ld_bc_#ix_nn#
+0x806B X ld_bc_#iy_nn#
+0x8071 X ld_de_bc
+0x8073 X ld_de_de
+0x8075 X ld_de_hl
+0x8077 X ld_de_ix
+0x807B X ld_de_iy
+0x807F X ld_de_#hl#
+0x8083 X ld_de_#ix_nn#
+0x8089 X ld_de_#iy_nn#
+0x808F X ld_hl_bc
+0x8091 X ld_hl_de
+0x8093 X ld_hl_hl
+0x8095 X ld_hl_ix
+0x8098 X ld_hl_iy
+0x809B X ld_hl_#ix_nn#
+0x80A1 X ld_hl_#iy_nn#
+0x80A7 X ld_ix_bc
+0x80AB X ld_ix_de
+0x80AF X ld_ix_hl
+0x80B2 X ld_ix_ix
+0x80B6 X ld_ix_iy
+0x80BA X ld_iy_bc
+0x80BE X ld_iy_de
+0x80C2 X ld_iy_hl
+0x80C5 X ld_iy_ix
+0x80C9 X ld_iy_iy
+0x80CD X ld_#hl#_bc
+0x80D1 X ld_#hl#_de
+0x80D5 X ld_#ix_nn#_bc
+0x80DB X ld_#ix_nn#_de
+0x80E1 X ld_#ix_nn#_hl
+0x80E7 X ld_#iy_nn#_bc
+0x80ED X ld_#iy_nn#_de
+0x80F3 X ld_#iy_nn#_hl
+0x80F9 X ldi_bc_#hl#
+0x80FD X ldi_bc_#ix_nn#
+0x8107 X ldi_bc_#iy_nn#
+0x8111 X ldi_de_#hl#
+0x8115 X ldi_de_#ix_nn#
+0x811F X ldi_de_#iy_nn#
+0x8129 X ldi_hl_#ix_nn#
+0x8133 X ldi_hl_#iy_nn#
+0x813D X ldi_#hl#_bc
+0x8141 X ldi_#hl#_de
+0x8145 X ldi_#ix_nn#_bc
+0x814F X ldi_#ix_nn#_de
+0x8159 X ldi_#ix_nn#_hl
+0x8163 X ldi_#iy_nn#_bc
+0x816D X ldi_#iy_nn#_de
+0x8177 X ldi_#iy_nn#_hl
+0x8181 X ldi_a_#bc#
+0x8183 X ldi_a_#de#
+0x8185 X ldi_a_#hl#
+0x8187 X ldi_b_#hl#
+0x8189 X ldi_c_#hl#
+0x818B X ldi_d_#hl#
+0x818D X ldi_e_#hl#
+0x818F X ldi_h_#hl#
+0x8191 X ldi_l_#hl#
+0x8193 X ldi_a_#ix_nn#
+0x8198 X ldi_b_#ix_nn#
+0x819D X ldi_c_#ix_nn#
+0x81A2 X ldi_d_#ix_nn#
+0x81A7 X ldi_e_#ix_nn#
+0x81AC X ldi_h_#ix_nn#
+0x81B1 X ldi_l_#ix_nn#
+0x81B6 X ldi_a_#iy_nn#
+0x81BB X ldi_b_#iy_nn#
+0x81C0 X ldi_c_#iy_nn#
+0x81C5 X ldi_d_#iy_nn#
+0x81CA X ldi_e_#iy_nn#
+0x81CF X ldi_h_#iy_nn#
+0x81D4 X ldi_l_#iy_nn#
+0x81D9 X ldd_a_#bc#
+0x81DB X ldd_a_#de#
+0x81DD X ldd_a_#hl#
+0x81DF X ldd_b_#hl#
+0x81E1 X ldd_c_#hl#
+0x81E3 X ldd_d_#hl#
+0x81E5 X ldd_e_#hl#
+0x81E7 X ldd_h_#hl#
+0x81E9 X ldd_l_#hl#
+0x81EB X ldd_a_#ix_nn#
+0x81F0 X ldd_b_#ix_nn#
+0x81F5 X ldd_c_#ix_nn#
+0x81FA X ldd_d_#ix_nn#
+0x81FF X ldd_e_#ix_nn#
+0x8204 X ldd_h_#ix_nn#
+0x8209 X ldd_l_#ix_nn#
+0x820E X ldd_a_#iy_nn#
+0x8213 X ldd_b_#iy_nn#
+0x8218 X ldd_c_#iy_nn#
+0x821D X ldd_d_#iy_nn#
+0x8222 X ldd_e_#iy_nn#
+0x8227 X ldd_h_#iy_nn#
+0x822C X ldd_l_#iy_nn#
+0x8231 X ldi_#bc#_a
+0x8233 X ldi_#de#_a
+0x8235 X ldi_#hl#_a
+0x8237 X ldi_#hl#_b
+0x8239 X ldi_#hl#_c
+0x823B X ldi_#hl#_d
+0x823D X ldi_#hl#_e
+0x823F X ldi_#hl#_h
+0x8241 X ldi_#hl#_l
+0x8243 X ldi_#ix_nn#_a
+0x8248 X ldi_#ix_nn#_b
+0x824D X ldi_#ix_nn#_c
+0x8252 X ldi_#ix_nn#_d
+0x8257 X ldi_#ix_nn#_e
+0x825C X ldi_#ix_nn#_h
+0x8261 X ldi_#ix_nn#_l
+0x8266 X ldi_#iy_nn#_a
+0x826B X ldi_#iy_nn#_b
+0x8270 X ldi_#iy_nn#_c
+0x8275 X ldi_#iy_nn#_d
+0x827A X ldi_#iy_nn#_e
+0x827F X ldi_#iy_nn#_h
+0x8284 X ldi_#iy_nn#_l
+0x8289 X ldd_#bc#_a
+0x828B X ldd_#de#_a
+0x828D X ldd_#hl#_a
+0x828F X ldd_#hl#_b
+0x8291 X ldd_#hl#_c
+0x8293 X ldd_#hl#_d
+0x8295 X ldd_#hl#_e
+0x8297 X ldd_#hl#_h
+0x8299 X ldd_#hl#_l
+0x829B X ldd_#ix_nn#_a
+0x82A0 X ldd_#ix_nn#_b
+0x82A5 X ldd_#ix_nn#_c
+0x82AA X ldd_#ix_nn#_d
+0x82AF X ldd_#ix_nn#_e
+0x82B4 X ldd_#ix_nn#_h
+0x82B9 X ldd_#ix_nn#_l
+0x82BE X ldd_#iy_nn#_a
+0x82C3 X ldd_#iy_nn#_b
+0x82C8 X ldd_#iy_nn#_c
+0x82CD X ldd_#iy_nn#_d
+0x82D2 X ldd_#iy_nn#_e
+0x82D7 X ldd_#iy_nn#_h
+0x82DC X ldd_#iy_nn#_l
+0x82E1 X ldi_#hl#_nn
+0x82E4 X ldi_#ix_nn#_nn
+0x82EA X ldi_#iy_nn#_nn
+0x82F0 X ldd_#hl#_nn
+0x82F3 X ldd_#ix_nn#_nn
+0x82F9 X ldd_#iy_nn#_nn
+0x82FF X sub_hl_bc
+0x8302 X sub_hl_de
+0x8305 X sub_hl_hl
+0x8308 X sub_hl_sp
+0x830B X zxn_mul
+0x830D X zxn_csp_break
+0x830F X zxn_csp_exit
+0x8311 X zxn_csp_break2
+0x8311 X zxn_csp_exit2
