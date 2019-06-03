@@ -1,0 +1,3 @@
+# do the assembling with SJASMPLUSOPTS environment variable set to some particular state (none in this test)
+$MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
+last_result=$?

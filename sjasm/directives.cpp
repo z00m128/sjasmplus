@@ -54,7 +54,7 @@ int ParseDirective(bool beginningOfLine)
 	if (DirectivesTable.zoek(n)) return 1;
 
 	// Only "." repeat directive remains, but that one can't start at beginning of line (without --dirbol)
-	if ((beginningOfLine && !Options::IsPseudoOpBOF) || ('.' != *n) || (!isdigit(n[1]) && *lp != '(')) {
+	if ((beginningOfLine && !Options::syx.IsPseudoOpBOF) || ('.' != *n) || (!isdigit(n[1]) && *lp != '(')) {
 		lp = olp;		// alo "." must be followed by digit, or math expression in parentheses
 		return 0;		// otherwise just return
 	}
@@ -512,16 +512,16 @@ void dirSIZE() {
 void dirINCBIN() {
 	int offset = 0, length = INT_MAX;
 	char* fnaam = GetFileName(lp);
-	if (comma(lp)) {
+	if (anyComma(lp)) {
 		aint val;
-		if (!comma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCBIN] Syntax error", bp, SUPPRESS);
 				return;
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCBIN] Syntax error", bp, SUPPRESS);
 				return;
@@ -541,8 +541,8 @@ void dirINCHOB() {
 	FILE* ff;
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
 			}
@@ -551,7 +551,7 @@ void dirINCHOB() {
 			}
 			offset += val;
 		} else --lp;		// there was second comma right after, reread it
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
 			}
@@ -587,8 +587,8 @@ void dirINCTRD() {
 	FILE* ff;
 
 	char* fnaam = GetFileName(lp), * fnaamh;
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
@@ -599,8 +599,8 @@ void dirINCTRD() {
 	} else {
 		Error("[INCTRD] Syntax error", bp, IF_FIRST); return; //is this ok?
 	}
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
 			}
@@ -609,7 +609,7 @@ void dirINCTRD() {
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
 			}
@@ -684,7 +684,7 @@ void dirSAVESNA() {
 
 	char* fnaam = GetFileName(lp);
 	int start = StartAddress;
-	if (comma(lp)) {
+	if (anyComma(lp)) {
 		aint val;
 		if (ParseExpression(lp, val)) {
 			if (0 <= start) Warning("[SAVESNA] Start address was also defined by END, SAVESNA argument used instead");
@@ -746,8 +746,8 @@ void dirSAVETAP() {
 	}
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			char *tlp = lp;
 			char *id;
 
@@ -771,9 +771,9 @@ void dirSAVETAP() {
 			}
 
 			if (realtapeMode) {
-				if (comma(lp)) {
+				if (anyComma(lp)) {
 					if (headerType == HEADLESS) {
-						if (!comma(lp)) {
+						if (!anyComma(lp)) {
 							if (!ParseExpression(lp, val)) {
 								Error("[SAVETAP] Syntax error", bp, PASS3); return;
 							}
@@ -786,7 +786,7 @@ void dirSAVETAP() {
 						} else {
 							Error("[SAVETAP] Syntax error. Missing start address", bp, PASS3); return;
 						}
-						if (comma(lp)) {
+						if (anyComma(lp)) {
 							if (!ParseExpression(lp, val)) {
 								Error("[SAVETAP] Syntax error", bp, PASS3); return;
 							}
@@ -797,7 +797,7 @@ void dirSAVETAP() {
 							}
 							length = val;
 						}
-						if (comma(lp)) {
+						if (anyComma(lp)) {
 							if (!ParseExpression(lp, val)) {
 								Error("[SAVETAP] Syntax error", bp, PASS3); return;
 							}
@@ -806,12 +806,12 @@ void dirSAVETAP() {
 							}
 							param3 = val;
 						}
-					} else if (!comma(lp)) {
+					} else if (!anyComma(lp)) {
 						fnaamh = GetFileName(lp);
 						if (!*fnaamh) {
 							Error("[SAVETAP] Syntax error in tape file name", bp, PASS3);
 							return;
-						} else if (comma(lp) && !comma(lp) && ParseExpression(lp, val)) {
+						} else if (anyComma(lp) && !anyComma(lp) && ParseExpression(lp, val)) {
 							if (val < 0) {
 								Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
 							} else if (val > 0xFFFF) {
@@ -819,7 +819,7 @@ void dirSAVETAP() {
 							}
 							start = val;
 
-							if (comma(lp) && !comma(lp) && ParseExpression(lp, val)) {
+							if (anyComma(lp) && !anyComma(lp) && ParseExpression(lp, val)) {
 								if (val < 0) {
 									Error("[SAVETAP] Negative values are not allowed", bp, PASS3); return;
 								} else if (val > 0xFFFF) {
@@ -827,7 +827,7 @@ void dirSAVETAP() {
 								}
 								length = val;
 
-								if (comma(lp)) {
+								if (anyComma(lp)) {
 									if (!ParseExpression(lp, val)) {
 										Error("[SAVETAP] Syntax error", bp, IF_FIRST); return;
 									}
@@ -838,7 +838,7 @@ void dirSAVETAP() {
 									}
 									param2 = val;
 								}
-								if (comma(lp)) {
+								if (anyComma(lp)) {
 									if (!ParseExpression(lp, val)) {
 										Error("[SAVETAP] Syntax error", bp, IF_FIRST); return;
 									}
@@ -920,8 +920,8 @@ void dirSAVEBIN() {
 	int start = -1, length = -1;
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVEBIN] Syntax error", bp, PASS3); return;
 			}
@@ -934,7 +934,7 @@ void dirSAVEBIN() {
 		} else {
 		  	Error("[SAVEBIN] Syntax error. No parameters", bp, PASS3); return;
 		}
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVEBIN] Syntax error", bp, PASS3); return;
 			}
@@ -1008,8 +1008,8 @@ void dirSAVEHOB() {
 	}
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
@@ -1021,8 +1021,8 @@ void dirSAVEHOB() {
 		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return; //is this ok?
 	}
 
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
 			}
@@ -1035,7 +1035,7 @@ void dirSAVEHOB() {
 		} else {
 		  	Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
 		}
-		if (comma(lp)) {
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
 			}
@@ -1092,8 +1092,8 @@ void dirSAVETRD() {
 	int start = -1,length = -1,autostart = -1; //autostart added by boo_boo 19_0ct_2008
 
 	fnaam = GetFileName(lp);
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
@@ -1105,8 +1105,8 @@ void dirSAVETRD() {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return; //is this ok?
 	}
 
-	if (comma(lp)) {
-		if (!comma(lp)) {
+	if (anyComma(lp)) {
+		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
@@ -1117,8 +1117,8 @@ void dirSAVETRD() {
 		} else {
 		  	Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 		}
-		if (comma(lp)) {
-			if (!comma(lp)) {
+		if (anyComma(lp)) {
+			if (!anyComma(lp)) {
 				if (!ParseExpression(lp, val)) {
 					Error("[SAVETRD] Syntax error", bp, PASS3); return;
 				}
@@ -1130,7 +1130,7 @@ void dirSAVETRD() {
 		  		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 			}
 		}
-		if (comma(lp)) { //added by boo_boo 19_0ct_2008
+		if (anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
@@ -1172,6 +1172,56 @@ void dirENCODING() {
 	Error("[ENCODING] Syntax error. Bad parameter", bp, IF_FIRST); delete[] opt;return;
 }
 
+void dirOPT() {
+	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...>
+	// process OPT specific command keywords first: {push, pop, reset, listoff, liston}
+	bool didReset = false, didList = Options::syx.IsListingSuspended;
+	while (!SkipBlanks(lp) && '-' != *lp) {
+		if (cmphstr(lp, "pop")) {	// "pop" previous syntax state
+			if (!Options::SSyntax::popSyntax()) Warning("[OPT] no previous syntax found");
+			return;
+		} else if (cmphstr(lp, "push")) {	// "push" previous syntax state
+			if (didReset) Warning("[OPT] pushing syntax status after reset");
+			// preserve current syntax status, before using arguments of OPT
+			Options::SSyntax::pushCurrentSyntax();
+		} else if (cmphstr(lp, "reset")) {	// keep current syntax state
+			Options::SSyntax::resetCurrentSyntax();
+			didReset = true;
+		} else if (cmphstr(lp, "listoff")) {
+			if (!didList) {
+				ListFile();		// *list* the OPT line suspending the listing
+				// show in listing file that some part was suspended
+				FILE* listFile = GetListingFile();
+				if (LASTPASS == pass && listFile) fputs("# listing file suspended...\n", listFile);
+			}
+			donotlist = 1;
+			Options::syx.IsListingSuspended = didList = true;
+		} else if (cmphstr(lp, "liston")) {
+			Options::syx.IsListingSuspended = false;
+		} else {
+			Error("[OPT] invalid command (not \"push, pop, reset\")", lp);
+			SkipToEol(lp);
+			return;
+		}
+	}
+	// split user arguments into "argc, argv" like variables (by white-space)
+	char parsedOpts[LINEMAX];
+	char* parsedOptsArray[17] {};	// there must be one more nullptr in the array (16+1)
+	int optI = 0, charI = 0, errI;
+	while (optI < 16 && !SkipBlanks(lp)) {
+		parsedOptsArray[optI++] = parsedOpts + charI;
+		while (*lp && !White()) parsedOpts[charI++] = *lp++;
+		parsedOpts[charI++] = 0;
+	}
+	if (!SkipBlanks(lp)) Warning("[OPT] too many options");
+	// parse user arguments and adjust current syntax setup
+	if (optI != (errI = Options::parseSyntaxOptions(optI, parsedOptsArray))) {
+		Error("[OPT] invalid/failed option", parsedOptsArray[errI]);
+	}
+	// init Z80N extensions if requested (the Init is safe to be called multiple times)
+	if (Options::syx.IsNextEnabled) Z80::InitNextExtensions();
+}
+
 void dirLABELSLIST() {
 	if (!DeviceID) {
 		Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)");
@@ -1186,6 +1236,22 @@ void dirLABELSLIST() {
 	}
 	STRCPY(Options::UnrealLabelListFName, LINEMAX, opt);
 	delete[] opt;
+}
+
+void dirCSPECTMAP() {
+	if (LASTPASS != pass || !DeviceID) {
+		if (!DeviceID) Error("CSPECTMAP only allowed in real device emulation mode (See DEVICE)");
+		SkipParam(lp);
+		return;
+	}
+	char* fName = GetFileName(lp);
+	if (fName[0]) {
+		STRCPY(Options::CSpectMapFName, LINEMAX, fName);
+	} else {		// create default map file name from current source file name (appends ".map")
+		STRCPY(Options::CSpectMapFName, LINEMAX-5, filename);
+		STRCAT(Options::CSpectMapFName, LINEMAX, ".map");
+	}
+	delete[] fName;
 }
 
 /*void dirTEXTAREA() {
@@ -1502,9 +1568,16 @@ void dirDISPLAY() {
 
 void dirMACRO() {
 	if (lijst) Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
-	char* n = GetID(lp);
-	if (n) MacroTable.Add(n, lp);
-	else   Error("[MACRO] Illegal macroname");
+	if (LastParsedLabelLine == CompiledCurrentLine) {	// A) name of macro is defined by label
+		// add macro with label used as name of it
+		MacroTable.Add(LastParsedLabel, lp);
+		// and remove the name from labels in the last pass
+		if (LASTPASS == pass) LabelTable.Remove(LastParsedLabel);
+	} else {											// B) name of macro follows directive (no label)
+		char* n = GetID(lp);
+		if (n) MacroTable.Add(n, lp);
+		else   Error("[MACRO] Illegal macroname");
+	}
 }
 
 void dirENDS() {
@@ -1623,16 +1696,21 @@ void dirSTRUCT() {
 	}
 
 	if (!(naam = GetID(lp)) || !strlen(naam)) {
-		Error("[STRUCT] Illegal structure name"); return;
+		Error("[STRUCT] Illegal structure name");
+		return;
 	}
 	if (comma(lp)) {
 		IsLabelNotFound = 0;
 		if (!ParseExpression(lp, offset)) {
-			Error("[STRUCT] Syntax error", lp, IF_FIRST); return;
+			Error("[STRUCT] Offset syntax error", lp, IF_FIRST);
+			return;
 		}
 		if (IsLabelNotFound) {
-			Error("[STRUCT] Forward reference", NULL, ALL);
+			Error("[STRUCT] Forward reference", NULL, EARLY);
 		}
+	}
+	if (!SkipBlanks()) {
+		Error("[STRUCT] syntax error, unexpected", lp);
 	}
 	st = StructureTable.Add(naam, offset, bind, global);
 	ListFile();
@@ -1766,28 +1844,53 @@ void dirENDM() {
 	}
 }
 
-void dirDEFARRAY() {
-	char* id;
-	if (!(id = GetID(lp))) {
-		Error("[DEFARRAY] Syntax error"); return;
-	}
-	CStringsList* a = NULL;
-	CStringsList** f = &a;
+static bool dirDEFARRAY_parseItems(CStringsList** nextPtr) {
 	char ml[LINEMAX];
 	while (!SkipBlanks()) {
 		const char* const itemLp = lp;
 		char* n = ml;
 		if (!GetMacroArgumentValue(lp, n)) {
-			Error("[DEFARRAY] Syntax error", itemLp);
-			return;
+			Error("[DEFARRAY] Syntax error", itemLp, SUPPRESS);
+			return false;
 		}
-		*f = new CStringsList(ml);
-		if ((*f)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
-		f = &((*f)->next);
+		*nextPtr = new CStringsList(ml);
+		if ((*nextPtr)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
+		nextPtr = &((*nextPtr)->next);
 		if (!comma(lp)) break;
 	}
-	if (NULL == a) {
-		Error("DEFARRAY must have at least one entry"); return;
+	return SkipBlanks();
+}
+
+static void dirDEFARRAY_add() {
+	char* oldP = ++lp;
+	DefineTable.Get(GetID(lp));
+	if (NULL == DefineTable.DefArrayList) {
+		Error("[DEFARRAY+] unknown array <id>", GetID(oldP), SUPPRESS);
+		return;
+	}
+	if (!White()) return;		// enforce whitespace between ID and first item
+	// array was already defined, seek to the last item in the list
+	while (DefineTable.DefArrayList->next) DefineTable.DefArrayList = DefineTable.DefArrayList->next;
+	if (!dirDEFARRAY_parseItems(&DefineTable.DefArrayList->next) || NULL == DefineTable.DefArrayList->next) {
+		Error("DEFARRAY+ must have at least one entry", oldP);	// suppressed by syntax error in non-empty case
+	}
+	return;
+}
+
+void dirDEFARRAY() {
+	if ('+' == *lp) {
+		dirDEFARRAY_add();
+		return;
+	}
+	char* id;
+	if (!(id = GetID(lp))) {
+		Error("[DEFARRAY] Syntax error"); return;
+	}
+	if (!White()) return;		// enforce whitespace between ID and first item
+	CStringsList* a = NULL;
+	if (!dirDEFARRAY_parseItems(&a) || NULL == a) {
+		Error("DEFARRAY must have at least one entry");	// suppressed by syntax error in non-empty case
+		return;
 	}
 	DefineTable.Add(id, "", a);
 }
@@ -1837,7 +1940,7 @@ void _lua_showerror() {
 		_CERR ErrorLine _END;
 	}
 
-	PreviousErrorLine = ln;
+	PreviousErrorLine = CompiledCurrentLine;
 
 	ErrorCount++;
 
@@ -2092,7 +2195,9 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".slot", dirSLOT);
 	DirectivesTable.insertd(".mmu", dirMMU);
 	DirectivesTable.insertd(".encoding", dirENCODING);
+	DirectivesTable.insertd(".opt", dirOPT);
 	DirectivesTable.insertd(".labelslist", dirLABELSLIST);
+	DirectivesTable.insertd(".cspectmap", dirCSPECTMAP);
 	//  DirectivesTable.insertd(".bind",dirBIND); /* i didn't comment this */
 	DirectivesTable.insertd(".endif", dirENDIF);
 	//DirectivesTable.insertd(".endt",dirENDTEXTAREA);

@@ -132,8 +132,9 @@ static int tolua_sjasm_sj_insert_label00(lua_State* tolua_S)
   unsigned int tolua_var_6 = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
   bool tolua_var_7 = ((bool)  tolua_toboolean(tolua_S,3,false));
   bool tolua_var_8 = ((bool)  tolua_toboolean(tolua_S,4,false));
+  bool tolua_var_9 = ((bool)  tolua_toboolean(tolua_S,5,false));
   {
-   bool tolua_ret = (bool)  LabelTable.Insert(tolua_var_5,tolua_var_6,tolua_var_7,tolua_var_8);
+   bool tolua_ret = (bool)  LabelTable.Insert(tolua_var_5,tolua_var_6,tolua_var_7,tolua_var_8,tolua_var_9);
    tolua_pushboolean(tolua_S,(bool)tolua_ret);
   }
  }

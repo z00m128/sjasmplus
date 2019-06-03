@@ -112,11 +112,37 @@ int NeedDEFL() {
 	return 0;
 }
 
-int comma(char*& p) {
+bool anyComma(char*& p) {
 	SkipBlanks(p);
-	if (*p != ',') return 0;
+	if (*p != ',') return false;
 	++p;
-	return 1;
+	return true;
+}
+
+bool comma(char*& p) {
+	SkipBlanks(p);
+	if (',' != p[0] || ',' == p[1]) return false;	// detect double-comma as FALSE state
+	++p;
+	return true;
+}
+
+bool doubleComma(char* & p) {
+	SkipBlanks(p);
+	if (',' != p[0] || ',' != p[1]) return false;
+	p += 2;
+	return true;
+}
+
+bool doubleBacktick(char* & p) {
+	SkipBlanks(p);
+	if ('`' != p[0] || '`' != p[1]) return false;
+	p += 2;
+	return true;
+}
+
+bool nonMaComma(char* & p) {
+	if (Options::syx.isMultiArgPlainComma()) return false;	// comma is also multi-arg => FALSE here
+	return comma(p);
 }
 
 //enum EBracketType          { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
@@ -235,8 +261,7 @@ char* GrowSubIdByExtraChar(char* & p) {	// append the next char even if not a le
 char instrtemp[LINEMAX];
 
 char* getinstr(char*& p) {
-	/*char nid[LINEMAX],*/ char* np;
-	np = instrtemp;
+	char* np = instrtemp;
 	SkipBlanks(p);
 	if (!isalpha((unsigned char) * p) && *p != '.') {
 		return 0;
@@ -250,7 +275,11 @@ char* getinstr(char*& p) {
 		*np = *p; ++p; ++np;
 	}
 	*np = 0;
-	/*return STRDUP(nid);*/
+	if (!Options::syx.CaseInsensitiveInstructions) return instrtemp;
+	// lowercase the retrieved "instruction" string when option "--syntax=i" is used
+	while (instrtemp <= --np) {
+		*np = tolower(*np);
+	}
 	return instrtemp;
 }
 
@@ -632,10 +661,11 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			} else {	// string literal (not expression), handle the extra string literal logic
 				if (oldT == t) {
 					Warning("Empty string", p-2);
-				} else {
-					// mark last "string" byte with |128: single char in "" *is* string
-					// but single char in '' *is not* (!) (no |128 then) => a bit complex condition :)
-					if (dc && ((1 == strRes) < (t - oldT))) e[t - 1] |= 128;
+				} else if (dc) {
+					// mark last "string" byte with |128: single char in quotes *is* string
+					// but single char in apostrophes *is not* (!) (no |128 then)
+					int maxLengthNotString = (1 == strRes);		// 0 for quotes, 1 for apostrophes
+					if (maxLengthNotString < (t - oldT)) e[t - 1] |= 128;
 				}
 				continue;
 			}

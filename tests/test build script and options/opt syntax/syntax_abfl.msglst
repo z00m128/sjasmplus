@@ -1,0 +1,24 @@
+Syntax option not implemented yet: b
+Syntax option not implemented yet: l
+Unrecognized syntax option: @
+# file opened: syntax_abfl.asm
+ 1    0000              ; SYNTAX option "abfl@":
+ 2    0000              ;  @ is error "unrecognized" (but outside of list file!)
+ 3    0000              ;  b and l are "unimplemented yet" (comments below are for future implementation)
+syntax_abfl.asm(4): warning: Fake instruction: ld      bc,hl       
+ 4    0000 44 4D            ld      bc,hl       ; warning
+ 5    0002 44 4D            ld      bc,hl       ; warning removed by using "fake" in this comment
+ 6    0004 90               sub     a,b         ; sub b
+ 7    0005 97 90            sub     a,,b        ; sub a : sub b
+ 8    0007 44 4D            ld      b,h,,c,l    ; ld b,h : ld c,l (same as first fake)
+syntax_abfl.asm(9): error: Unexpected: , c,l    
+ 9    0009 44               ld      b,h, c,l    ; error
+10    000A              hl:                     ; warning
+11    000A 7E               ld      a,(hl)      ; memory reference
+12    000B 7E               ld      a,[hl]      ; error
+13    000C
+# file closed: syntax_abfl.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x000A X hl

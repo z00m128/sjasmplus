@@ -1,0 +1,87 @@
+# file opened: label_as_name.asm
+ 1    0000                  ;; classic syntax (name is after MACRO directive)
+ 2    0000                  MACRO   classicNameNoArg
+ 3    0000 ~                    dz  "classic-no-arg\n"
+ 4    0000                  ENDM
+ 5    0000                  MACRO   classicNameOneArg arg1?
+ 6    0000 ~                    db  "classic-1-arg: ", arg1?, "\n", 0
+ 7    0000                  ENDM
+ 8    0000                  MACRO   classicNameTwoArg arg1?, arg2?
+ 9    0000 ~                    db  "classic-2-arg: ", arg1?, arg2?, "\n", 0
+10    0000                  ENDM
+11    0000
+12    0000                  ;; new optional syntax (label on MACRO line is used as macro name)
+13    0000              newNameNoArg    MACRO
+14    0000 ~                                dz  "new-no-arg\n"
+15    0000                              ENDM
+16    0000              newNameOneArg   MACRO  arg1?
+17    0000 ~                                db  "new-1-arg: ", arg1?, "\n", 0
+18    0000                              ENDM
+19    0000              newNameTwoArg   MACRO  arg1?, arg2?
+20    0000 ~                                db  "new-1-arg: ", arg1?, arg2?, "\n", 0
+21    0000                              ENDM
+22    0000
+23    0000                  ;; but label doesn't work over colon separator
+24    0000              Label
+24    0000                  MACRO nameOrArg?
+25    0000 ~                                dz  "name-or-arg as name\n"
+26    0000                              ENDM
+27    0000
+28    0000                  ;; DEFL labels also don't work, even without colon
+29    0000              Babel = 2       MACRO nameOrArg2?
+30    0000 ~                                dz  "name-or-arg2 as name\n"
+31    0000                              ENDM
+32    0000
+33    0000                  OUTPUT "label_as_name.bin"      ; verify defined macros (by checking bin output)
+34    0000                  classicNameNoArg
+34    0000 63 6C 61 73 >        dz  "classic-no-arg\n"
+34    0004 73 69 63 2D >
+34    0008 6E 6F 2D 61 >
+34    000C 72 67 0A 00 >
+34    0010                classicNameOneArg 'a'
+34    0010 63 6C 61 73 >        db  "classic-1-arg: ", 'a' , "\n", 0
+34    0014 73 69 63 2D >
+34    0018 31 2D 61 72 >
+34    001C 67 3A 20 61 >
+34    0020 0A 00       >
+34    0022                classicNameTwoArg 'b', 'c'
+34    0022 63 6C 61 73 >        db  "classic-2-arg: ", 'b', 'c', "\n", 0
+34    0026 73 69 63 2D >
+34    002A 32 2D 61 72 >
+34    002E 67 3A 20 62 >
+34    0032 63 0A 00    >
+35    0035                  newNameNoArg
+35    0035 6E 65 77 2D >                    dz  "new-no-arg\n"
+35    0039 6E 6F 2D 61 >
+35    003D 72 67 0A 00 >
+35    0041                newNameOneArg 'a'
+35    0041 6E 65 77 2D >                    db  "new-1-arg: ", 'a' , "\n", 0
+35    0045 31 2D 61 72 >
+35    0049 67 3A 20 61 >
+35    004D 0A 00       >
+35    004F                newNameTwoArg 'b', 'c'
+35    004F 6E 65 77 2D >                    db  "new-1-arg: ", 'b', 'c', "\n", 0
+35    0053 31 2D 61 72 >
+35    0057 67 3A 20 62 >
+35    005B 63 0A 00    >
+36    005E                  nameOrArg?
+36    005E 6E 61 6D 65 >                    dz  "name-or-arg as name\n"
+36    0062 2D 6F 72 2D >
+36    0066 61 72 67 20 >
+36    006A 61 73 20 6E >
+36    006E 61 6D 65 0A >
+36    0072 00          >
+36    0073                nameOrArg2?
+36    0073 6E 61 6D 65 >                    dz  "name-or-arg2 as name\n"
+36    0077 2D 6F 72 2D >
+36    007B 61 72 67 32 >
+36    007F 20 61 73 20 >
+36    0083 6E 61 6D 65 >
+36    0087 0A 00       >
+37    0089
+# file closed: label_as_name.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X Label
+0x0002 X Babel

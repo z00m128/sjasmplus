@@ -16,7 +16,10 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
-Z80: multi-argument/strict: introduce the options
+--syntax: "i"? instructions case insensitive for legacy sources which didn't bother...
+
+--syntax: B+L options implementation
+    add DOCS example test: "hl: ld a,(hl),,de,hl" when all is implemented
 
 static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
 
@@ -24,6 +27,8 @@ FIXME in sources mark further points worth refactoring
 
 FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 (breaks ` .34 repeatX` directive probably? .. and END@beginningOfLine? .. actually not?)
+
+Add tests for ALL fake instructions
 
 SplitLuaErrorMessage - add some tests after Liniya fix, maybe review the code more.
 
@@ -33,10 +38,6 @@ SplitLuaErrorMessage - add some tests after Liniya fix, maybe review the code mo
 ReadBufLine parsing refactored. Now look for other parts of code trying to do similar things and refactor too..
 
 I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
-
-from env. variables disc: nie, myslel som ako "SJASMPLUSEXT" premennu ktora by tvorila priamo obsah pre
-ten `--ext` switch... pouzitie stylom ako "prilep k command line" mi nenapadlo... nieco ako CFLAGS
-v Makefile? ... na to by som dal ale druhu premennu "SJASMPLUSFLAGS"
 
 Macro world issues:
 - macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
@@ -103,3 +104,5 @@ Docs:
 
 "pseudo-ops as SAVEBIN, SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST and use special functions in Lua scripts."
 ^^ link each?
+
+DEVICE needs better description? Issue #55

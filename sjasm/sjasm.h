@@ -32,28 +32,59 @@
 enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR, OV_NONE, OV_LST };
 
 namespace Options {
+
+	// structure to group all options affecting parsing syntax
+	typedef struct SSyntax {
+		bool		IsPseudoOpBOF;
+		bool		IsReversePOP;
+		bool		FakeEnabled;
+		bool		FakeWarning;
+		bool		IsListingSuspended;
+		bool		CaseInsensitiveInstructions;
+		int			IsNextEnabled;	// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
+		bool		(*MultiArg)(char*&);	// function checking if multi-arg delimiter is next
+
+		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
+					IsListingSuspended(false), CaseInsensitiveInstructions(false), IsNextEnabled(0),
+					MultiArg(&comma) {}
+		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
+
+	// preservation utils, the push will also reset current syntax to defaults
+		static void resetCurrentSyntax();	// resets current syntax to defaults
+		static void pushCurrentSyntax();	// pushes current syntax
+		static bool popSyntax();			// restores the syntax from previous push
+		static void restoreSystemSyntax();	// restores the syntax (ahead of pass), and empties the syntax stack
+	private:
+		static std::stack<SSyntax> syxStack;	// previous syntax
+	} SSyntax;
+
 	extern char SymbolListFName[LINEMAX];
 	extern char ListingFName[LINEMAX];
 	extern char ExportFName[LINEMAX];
 	extern char DestinationFName[LINEMAX];
 	extern char RAWFName[LINEMAX];
 	extern char UnrealLabelListFName[LINEMAX];
+	extern char CSpectMapFName[LINEMAX];
 
 	extern EOutputVerbosity OutputVerbosity;
-	extern bool IsPseudoOpBOF;
-	extern bool IsAutoReloc;
 	extern bool IsLabelTableInListing;
 	extern bool IsDefaultListingName;
-	extern bool IsReversePOP;
 	extern bool IsShowFullPath;
 	extern bool AddLabelListing;
 	extern bool NoDestinationFile;
-	extern bool FakeInstructions;
-	extern int IsNextEnabled;
+	extern SSyntax syx;
 	extern bool SourceStdIn;
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;
+
+	// returns true if fakes are completely disabled, false when they are enabled
+	// showMessage=true: will also display error/warning (use when fake ins. is emitted)
+	// showMessage=false: can be used to silently check if fake instructions are even possible
+	bool noFakes(bool showMessage = true);
+
+	int parseSyntaxOptions(int n, char** options);	// returns index of failed option or "n"==OK
+		//options[n] must contain nullptr (and it must be valid index)
 } // eof namespace Options
 
 extern CDevice *Devices;
@@ -75,7 +106,8 @@ extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunn
 extern int adrdisp, PseudoORG, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
-extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, destlen, size, PreviousErrorLine, maxlin, comlin;
+extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, LastParsedLabelLine;
+extern aint destlen, size, PreviousErrorLine, maxlin, comlin;
 
 extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
 
@@ -84,7 +116,7 @@ extern char* CurrentDirectory;
 
 void ExitASM(int p);
 extern CStringsList* lijstp;
-extern stack< SRepeatStack> RepeatStack;
+extern std::stack<SRepeatStack> RepeatStack;
 
 extern CLabelTable LabelTable;
 extern CLocalLabelTable LocalLabelTable;

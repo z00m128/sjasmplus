@@ -1,0 +1,79 @@
+# file opened: cspectmap.asm
+ 1    0000                          DEVICE NONE         ; set "none" explicitly, to avoid "global device" feature
+cspectmap.asm(2): error: CSPECTMAP only allowed in real device emulation mode (See DEVICE)
+ 2    0000                          CSPECTMAP           ; error about non-device mode
+ 3    0000                          DEVICE ZXSPECTRUMNEXT
+ 3    0000                SLOT 6
+ 4    0000                          CSPECTMAP "cspectmap.sym"   ; default-name variant is tested only manually
+ 5    0000              ;             CSPECTMAP ; default-name is source name with ".map" appended (tested manually)
+ 6    0000                          LABELSLIST "cspectmap.lbl"
+ 7    0000
+ 8    0000                          ; create test labels in various areas of memory (and by various means)
+ 9    0000
+10    0000              EquLabel    EQU     $1234
+11    0000
+12    0000              DeflLabel   DEFL    $12+1
+13    0000
+14    0000                          STRUCT Struct
+15    0000 ~            Field1      BLOCK   5
+16    0000 ~            Field2      DW      $5678
+17    0000                          ENDS
+18    0000
+19    0000                          ORG $C000, $00
+20    C000 27           Page00:     daa
+21    C001              .local:
+22    C001                          ORG $C001, $01
+23    C001 37           Page01:     scf
+24    C002              .local:
+25    C002                          ORG $C00A, $0A
+26    C00A 3F           Page0A:     ccf
+27    C00B 07           .local:     rlca
+28    C00C              .codeEqu    EQU $+1             ; is like simple EQU => "wrong" physical address
+29    C00C
+30    C00C              .local.local:       ; TODO this will be incorrectly marked as local at second dot
+31    C00C                  ; but it will stay so, because A) not simple to fix B) works often better for UX
+32    C00C
+33    C00C                          ORG $DFFE, $0B      ; also raise difficulty by adding extra dots in labels
+34    DFFE 2F           Page0B.A:   cpl
+35    DFFF              .local.b:
+36    DFFF                          ORG $C0DF, $DF
+37    C0DF 1F           PageDF.A.B: rra
+38    C0E0              .local.c..d:
+39    C0E0
+40    C0E0                          ORG $C030, $30
+41    C030                  MODULE Module
+42    C030 17           Page30:     rla
+43    C031              .local:
+44    C031                  ENDMODULE
+45    C031
+46    C031                          ORG $C031, $31
+47    C031                  MODULE Module..two.
+48    C031 0F           Page31..A.: rrca
+49    C032              .local..c.:
+50    C032                  ENDMODULE
+51    C032
+# file closed: cspectmap.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x1234 X EquLabel
+0x0013 X DeflLabel
+0x0007 X Struct
+0x0000 X Struct.Field1
+0x0005 X Struct.Field2
+0xC000 X Page00
+0xC001 X Page00.local
+0xC001 X Page01
+0xC002 X Page01.local
+0xC00A X Page0A
+0xC00B X Page0A.local
+0xC00D X Page0A.codeEqu
+0xC00C X Page0A.local.local
+0xDFFE X Page0B.A
+0xDFFF X Page0B.A.local.b
+0xC0DF X PageDF.A.B
+0xC0E0 X PageDF.A.B.local.c..d
+0xC030 X Module.Page30
+0xC031 X Module.Page30.local
+0xC031 X Module..two..Page31..A.
+0xC032 X Module..two..Page31..A..local..c.

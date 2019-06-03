@@ -46,7 +46,11 @@ void ResetGrowSubId();
 char* GrowSubId(char* & p);
 char* GrowSubIdByExtraChar(char* & p);	// force grow even by non-label char
 char* getinstr(char*& p);
-int comma(char*& p);
+bool anyComma(char*& p);		// eats any comma (even one of double-commas)
+bool comma(char*& p);			// eats single comma, but not if double-comma is ahead
+bool doubleComma(char* & p);
+bool doubleBacktick(char* & p);
+bool nonMaComma(char* & p);		// eats single comma only if multi-arg is configured to non-comma
 EBracketType OpenBracket(char*& p);
 int CloseBracket(char*& p);
 int oparenOLD(char*& p, char c);

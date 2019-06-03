@@ -1,0 +1,34 @@
+# file opened: syntax_iI.asm
+ 1    0000              ; SYNTAX option "i":
+ 2    0000              ;   i      Case insensitive instructions/directives (default = same case required)
+ 3    0000
+ 4    0000              ; verify regular syntax works as expected with default options
+ 5    0000 C3 08 00         jp  Label1
+ 5    0003 C3 08 00       JP  Label1     ; regular syntax - instruction
+ 6    0006 00 00            align 4
+ 6    0008                ALIGN 4           ; regular syntax - directive
+syntax_iI.asm(7): error: Unrecognized instruction: Jp  Label1 
+ 7    0008                  Jp  Label1
+syntax_iI.asm(7): error: Unrecognized instruction: jP  Label1     
+ 7    0008                jP  Label1     ; 2x error - instruction
+syntax_iI.asm(8): error: Unrecognized instruction: Align 4 
+ 8    0008                  Align 4
+syntax_iI.asm(8): error: Unrecognized instruction: aLiGN 4           
+ 8    0008                aLiGN 4           ; 2x error - directive
+ 9    0008
+10    0008                  OPT --syntax=i      ; test the syntax options "i"
+11    0008              Label1:
+12    0008 C3 08 00         Jp  Label1
+12    000B C3 08 00       jP  Label1     ; instructions should be case insensitive
+13    000E 00 00            Align 4
+13    0010                aLiGN 4           ; directives too
+14    0010
+15    0010                  OPT reset           ; reset syntax to defaults
+syntax_iI.asm(16): error: Unrecognized instruction: Jp  Label1                  
+16    0010                  Jp  Label1                  ; error - instruction
+17    0010
+# file closed: syntax_iI.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0008   Label1

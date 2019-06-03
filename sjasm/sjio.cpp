@@ -40,8 +40,6 @@ char * rlpbuf, * rlpbuf_end, * rlppos;
 bool colonSubline;
 int blockComment;
 
-FILE* FP_UnrealList;
-
 int EB[1024 * 64],nEB = 0;
 char WriteBuffer[DESTBUFLEN];
 int tape_seek = 0;
@@ -59,15 +57,14 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	if (type == EARLY && LASTPASS <= pass) return;
 	if ((type == SUPPRESS || type == IF_FIRST || type == PASS3) && pass < LASTPASS) return;
 	// check if this one should be skipped due to type constraints and current-error-state
-	if (FATAL != type && PreviousErrorLine == CurrentSourceLine) {
+	if (FATAL != type && PreviousErrorLine == CompiledCurrentLine) {
 		// non-fatal error, on the same line as previous, maybe skip?
 		if (IsSkipErrors || IF_FIRST == type) return;
 	}
-	// update current-error-state
-	if (PreviousErrorLine != CurrentSourceLine) IsSkipErrors = false;	// reset "skip" on new line
-	IsSkipErrors |= (SUPPRESS == type);		// keep it holding over the same line, raise it by SUPPRESS type
+	// update current-error-state (reset "skip" on new parsed-line, set "skip" by SUPPRESS type)
+	IsSkipErrors = (IsSkipErrors && (PreviousErrorLine == CompiledCurrentLine)) || (SUPPRESS == type);
+	PreviousErrorLine = CompiledCurrentLine;
 	++ErrorCount;							// number of non-skipped (!) errors
-	PreviousErrorLine = CurrentSourceLine;
 
 	DefineTable.Replace("_ERRORS", ErrorCount);
 
@@ -268,8 +265,9 @@ FILE* GetListingFile() {
 }
 
 void ListFile(bool showAsSkipped) {
-	if (LASTPASS != pass || NULL == GetListingFile() || donotlist) {
-		donotlist = nEB = 0; return;
+	if (LASTPASS != pass || NULL == GetListingFile() || donotlist || Options::syx.IsListingSuspended) {
+		donotlist = nEB = 0;
+		return;
 	}
 	int pos = 0;
 	do {
@@ -729,12 +727,6 @@ static void OpenDefaultList(const char *fullpath) {
 	OpenListImp(tempListName);
 }
 
-void OpenUnrealList() {
-	/*if (!FP_UnrealList && Options::UnrealLabelListFName && !FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
-		Error("Error opening file", Options::UnrealLabelListFName, FATAL);
-	}*/
-}
-
 void CloseDest() {
 	// Flush buffer before any other operations
 	WriteDest();
@@ -862,9 +854,6 @@ void Close() {
 		fclose(FP_ListingFile);
 		FP_ListingFile = NULL;
 	}
-	//if (FP_UnrealList && pass == 9999) {
-	//	fclose(FP_UnrealList);
-	//}
 }
 
 int SaveRAM(FILE* ff, int start, int length) {
@@ -910,7 +899,7 @@ unsigned int MemGetWord(unsigned int address) {
 		return 0;
 	}
 
-	return MemGetByte(address)+(MemGetByte(address+1)*256);
+	return MemGetByte(address)+(MemGetByte(address+1)<<8);
 }
 
 unsigned char MemGetByte(unsigned int address) {

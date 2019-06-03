@@ -34,21 +34,7 @@ namespace Z80 {
 		Z80C_NZ = 0x00, Z80C_Z  = 0x08, Z80C_NC = 0x10, Z80C_C = 0x18,
 		Z80C_PO = 0x20, Z80C_PE = 0x28, Z80C_P  = 0x30, Z80C_M = 0x38, Z80C_UNK };
 
-#define ASSERT_FAKE_INSTRUCTIONS(operation) if (!Options::FakeInstructions) { \
-		operation; \
-	}
-	//char* my_p = lp;
-	//SkipBlanks(my_p);
-	//Warning("Fake instructions is disabled. The instruction was not compiled", my_p, LASTPASS);
-
 	CFunctionTable OpCodeTable;
-
-	/*char *GetRegister(Z80Reg reg){
-		switch (reg) {
-			case Z80_B:
-				return "BC"
-		}
-	}*/
 
 	void GetOpCode() {
 		char* n;
@@ -536,7 +522,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_ADD() {
@@ -553,10 +539,10 @@ namespace Z80 {
 				case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
 					e[0] = 0x09 + reg2 - Z80_BC; break;
 				case Z80_A:
-					if(!Options::IsNextEnabled) break;
+					if(!Options::syx.IsNextEnabled) break;
 					e[0] = 0xED; e[1] = 0x31; break;
 				default:
-					if(!Options::IsNextEnabled) break;
+					if(!Options::syx.IsNextEnabled) break;
 					int b = GetWord(lp);
 					e[0] = 0xED; e[1] = 0x34 ;
 					e[2] = b & 255; e[3] = (b >> 8) & 255;
@@ -565,7 +551,7 @@ namespace Z80 {
 				break;
 			case Z80_DE:
 			case Z80_BC:
-				if (!Options::IsNextEnabled) break;   // DE|BC is valid first operand only for Z80N
+				if (!Options::syx.IsNextEnabled) break;   // DE|BC is valid first operand only for Z80N
 				if (!comma(lp)) {
 					Error("[ADD] Comma expected"); break;
 				}
@@ -650,7 +636,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_AND() {
@@ -661,9 +647,11 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0xa7; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0xa7; break;
+				if (!nonMaComma(lp)) {	// "AND a,b" is possible only when multi-arg is not-comma
+					e[0] = 0xa7;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -716,7 +704,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_BIT() {
@@ -762,21 +750,31 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_Next_BREAK() {	// this is fake instruction for CSpect emulator, not for real Z80N
+		if (Options::syx.IsNextEnabled < 2) {
+			Error("[BREAK] fake instruction \"break\" must be specifically enabled by --zxnext=cspect option");
+			return;
+		}
 		EmitByte(0xDD);
 		EmitByte(0x01);
 	}
 
 	// helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation
 	static void OpCode_Z80N_BarrelShifts(int mainOpcode) {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		int e[] = { -1, -1, -1 };
 		// verify the operands are "de,b" (only valid ones)
 		if (Z80_DE == GetRegister(lp) && comma(lp) && Z80_B == GetRegister(lp)) {
 			e[0]=0xED;
 			e[1]=mainOpcode;
+		} else {
+			Error("Z80N barrel shifts exist only with \"DE,B\" arguments", bp, SUPPRESS);
 		}
 		EmitBytes(e);
 	}
@@ -813,7 +811,7 @@ namespace Z80 {
 			check16(callad);
 			e[1] = callad & 255; e[2] = (callad >> 8) & 255;
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_CCF() {
@@ -828,9 +826,11 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0xbf; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0xbf; break;
+				if (!nonMaComma(lp)) {	// "CP a,b" is possible only when multi-arg is not-comma
+					e[0] = 0xbf;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -882,7 +882,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_CPD() {
@@ -960,7 +960,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_DI() {
@@ -984,7 +984,7 @@ namespace Z80 {
 			}
 			e[0] = 0x10; e[1] = jmp < 0 ? 256 + jmp : jmp;
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_EI() {
@@ -1057,6 +1057,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_EXIT() {	// this is fake instruction for CSpect emulator, not for real Z80N
+		if (Options::syx.IsNextEnabled < 2) {
+			Error("[EXIT] fake instruction \"exit\" must be specifically enabled by --zxnext=cspect option");
+			return;
+		}
 		EmitByte(0xDD);
 		EmitByte(0x00);
 	}
@@ -1154,7 +1158,7 @@ namespace Z80 {
 				e[1] = 0x70;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_INC() {
@@ -1192,7 +1196,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_IND() {
@@ -1245,7 +1249,7 @@ namespace Z80 {
 				switch (reg = GetRegister(lp)) {
 				case Z80_C:
 					// only "(C)" form with parentheses is legal syntax for Z80N "jp (C)"
-					if (BT_ROUND != bt || !CloseBracket(lp) || !Options::IsNextEnabled) break;
+					if (BT_ROUND != bt || !CloseBracket(lp) || !Options::syx.IsNextEnabled) break;
 					e[0] = 0xED; e[1] = 0x98;
 					break;
 				case Z80_HL:
@@ -1274,7 +1278,7 @@ namespace Z80 {
 				e[1] = jpad & 255; e[2] = (jpad >> 8) & 255;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_JR() {
@@ -1297,7 +1301,7 @@ namespace Z80 {
 			}
 			e[1] = jrad & 0xFF;
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_LD() {
@@ -1940,19 +1944,19 @@ namespace Z80 {
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x40; e[1] = 0x49; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x42; e[1] = 0x4b; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x44; e[1] = 0x4d; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x44; e[3] = 0x4d; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x44; e[3] = 0x4d; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -1980,7 +1984,7 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (cparenOLD(lp)) {
 							e[0] = 0x4e;
 						}
@@ -1988,7 +1992,7 @@ namespace Z80 {
 						break;
 					case Z80_IX:
 					case Z80_IY:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							Error("Offset out of range1");
 						}
@@ -2007,19 +2011,19 @@ namespace Z80 {
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x50; e[1] = 0x59; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x52; e[1] = 0x5b; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x54; e[1] = 0x5d; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x54; e[3] = 0x5d; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x54; e[3] = 0x5d; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -2046,13 +2050,13 @@ namespace Z80 {
 					}
 					switch (reg) {
 					case Z80_HL:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (cparenOLD(lp)) {
 							e[0] = 0x5e;
 						} e[1] = 0x23; e[2] = 0x56; e[3] = 0x2b; break;
 					case Z80_IX:
 					case Z80_IY:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							Error("Offset out of range2");
 						}
@@ -2071,19 +2075,19 @@ namespace Z80 {
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x60; e[1] = 0x69; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x62; e[1] = 0x6b; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0x64; e[1] = 0x6d; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xdd; e[1] = 0xe5; e[2] = 0xe1; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xfd; e[1] = 0xe5; e[2] = 0xe1; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -2112,7 +2116,7 @@ namespace Z80 {
 					switch (reg) {
 					case Z80_IX:
 					case Z80_IY:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if ((b = z80GetIDxoffset(lp)) == 127) {
 							Error("Offset out of range3");
 						}
@@ -2153,19 +2157,19 @@ namespace Z80 {
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x69; e[3] = 0x60; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x6b; e[3] = 0x62; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xe5; e[1] = 0xdd; e[2] = 0xe1; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xdd; e[1] = 0x6d; e[3] = 0x64; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xfd; e[1] = 0xe5; e[2] = 0xdd; e[3] = 0xe1; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -2193,19 +2197,19 @@ namespace Z80 {
 				}
 				switch (reg = GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x69; e[3] = 0x60; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x6b; e[3] = 0x62; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xe5; e[1] = 0xfd; e[2] = 0xe1; break;
 				case Z80_IX:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xdd; e[1] = 0xe5; e[2] = 0xfd; e[3] = 0xe1; break;
 				case Z80_IY:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = e[2] = 0xfd; e[1] = 0x6d; e[3] = 0x64; break;
 				default:
 					if (oparenOLD(lp, '[')) {
@@ -2276,10 +2280,10 @@ namespace Z80 {
 					case Z80_F:
 						break;
 					case Z80_BC:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						e[0] = 0x71; e[1] = 0x23; e[2] = 0x70; e[3] = 0x2b; break;
 					case Z80_DE:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						e[0] = 0x73; e[1] = 0x23; e[2] = 0x72; e[3] = 0x2b; break;
 					case Z80_HL:
 					case Z80_IX:
@@ -2320,19 +2324,19 @@ namespace Z80 {
 					case Z80_IYH:
 						break;
 					case Z80_BC:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
 						e[0] = e[3] = 0xdd; e[1] = 0x71; e[4] = 0x70; e[5] = e[2] + 1; break;
 					case Z80_DE:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
 						e[0] = e[3] = 0xdd; e[1] = 0x73; e[4] = 0x72; e[5] = e[2] + 1; break;
 					case Z80_HL:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
@@ -2372,19 +2376,19 @@ namespace Z80 {
 					case Z80_IYH:
 						break;
 					case Z80_BC:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
 						e[0] = e[3] = 0xfd; e[1] = 0x71; e[4] = 0x70; e[5] = e[2] + 1; break;
 					case Z80_DE:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
 						e[0] = e[3] = 0xfd; e[1] = 0x73; e[4] = 0x72; e[5] = e[2] + 1; break;
 					case Z80_HL:
-						ASSERT_FAKE_INSTRUCTIONS(break);
+						if (Options::noFakes()) break;
 						if (e[2] == 127) {
 							Error("Offset out of range");
 						}
@@ -2425,14 +2429,14 @@ namespace Z80 {
 				break;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_LDD() {
 		Z80Reg reg, reg2;
 		int e[7], b;
 
-		if (!Options::FakeInstructions) {
+		if (Options::noFakes(false)) {
 			e[0] = 0xed;
 			e[1] = 0xa8;
 			e[2] = -1;
@@ -2442,12 +2446,9 @@ namespace Z80 {
 
 		do {
 			e[0] = e[1] = e[2] = e[3] = e[4] = e[5] = e[6] = -1;
-			//if (Options::FakeInstructions) {
 				switch (reg = GetRegister(lp)) {
 				case Z80_A:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2484,9 +2485,7 @@ namespace Z80 {
 				case Z80_E:
 				case Z80_H:
 				case Z80_L:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2508,10 +2507,9 @@ namespace Z80 {
 					break;
 				default:
 					if (oparenOLD(lp, '[') || oparenOLD(lp, '(')) {
+						if (Options::noFakes()) break;
 						reg = GetRegister(lp);
-
 						b = 0;
-
 						if (reg == Z80_IX || reg == Z80_IY) {
 							b = z80GetIDxoffset(lp);
 						}
@@ -2567,12 +2565,8 @@ namespace Z80 {
 						break;
 					}
 				}
-			/*} else {
-				e[0] = 0xed;
-				e[1] = 0xa8;
-			}*/
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_LDDR() {
@@ -2581,11 +2575,19 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_LDDRX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xBC);
 	}
 
 	void OpCode_Next_LDDX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xAC);
 	}
@@ -2594,7 +2596,7 @@ namespace Z80 {
 		Z80Reg reg, reg2;
 		int e[11], b;
 
-		if (!Options::FakeInstructions) {
+		if (Options::noFakes(false)) {
 			e[0] = 0xed;
 			e[1] = 0xa0;
 			e[2] = -1;
@@ -2607,9 +2609,7 @@ namespace Z80 {
 
 				switch (reg = GetRegister(lp)) {
 				case Z80_A:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2646,9 +2646,7 @@ namespace Z80 {
 				case Z80_E:
 				case Z80_H:
 				case Z80_L:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2669,9 +2667,7 @@ namespace Z80 {
 					}
 					break;
 				case Z80_BC:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2693,9 +2689,7 @@ namespace Z80 {
 					}
 					break;
 				case Z80_DE:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2716,9 +2710,7 @@ namespace Z80 {
 					}
 					break;
 				case Z80_HL:
-					if (!comma(lp)) {
-						break;
-					}
+					if (Options::noFakes() || !comma(lp)) break;
 					if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
 						break;
 					}
@@ -2736,6 +2728,7 @@ namespace Z80 {
 					break;
 				default:
 					if (oparenOLD(lp, '[') || oparenOLD(lp, '(')) {
+						if (Options::noFakes()) break;
 						reg = GetRegister(lp);
 						b = 0;
 						if (reg == Z80_IX || reg == Z80_IY) {
@@ -2805,7 +2798,7 @@ namespace Z80 {
 				}
 
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_LDIR() {
@@ -2815,34 +2808,58 @@ namespace Z80 {
 
 // LDIRSCALE is now very unlikely to happen, there's ~1% chance it may be introduced within the cased-Next release
 // 	void OpCode_Next_LDIRSCALE() {
+// 		if (Options::syx.IsNextEnabled < 1) {
+// 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+// 			return;
+// 		}
 // 		EmitByte(0xED);
 // 		EmitByte(0xB6);
 // 	}
 
 	void OpCode_Next_LDIRX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xB4);
 	}
 
 	void OpCode_Next_LDIX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xA4);
 	}
 
 	void OpCode_Next_LDPIRX() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xB7);
 	}
 
 	void OpCode_Next_LDWS() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0xA5);
 	}
 
 	void OpCode_Next_MIRROR() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		Z80Reg reg = GetRegister(lp);
 		if (Z80_UNK != reg && Z80_A != reg) {
-			Error("[MIRROR] Illegal operand", line);
+			Error("[MIRROR] Illegal operand (can be only register A)", line);
 			return;
 		}
 		EmitByte(0xED);
@@ -2850,11 +2867,22 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_MUL() {
-		int e[3];
-		e[0] = e[1] = e[2] = -1;
-		if (GetRegister(lp)==Z80_D && comma(lp) && GetRegister(lp)==Z80_E){
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
+		int e[3] { -1, -1, -1 };
+		Z80Reg r1 = GetRegister(lp);
+		if (Z80_UNK == r1 && SkipBlanks(lp) && !Options::noFakes()) {
+			r1 = Z80_DE;	// "mul" without arguments is treated as "fake" "mul de"
+		}
+		// "mul de" and "mul d,e" are both valid syntax options
+		if ((Z80_DE==r1) || (Z80_D==r1 && comma(lp) && Z80_E==GetRegister(lp))) {
 			e[0]=0xED;
 			e[1]=0x30;
+		} else {
+			Error("Z80N MUL exist only with \"D,E\" arguments", bp, SUPPRESS);
+			return;
 		}
 		EmitBytes(e);
 	}
@@ -2905,6 +2933,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_NEXTREG() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		Z80Reg reg;
 		int e[5];
 		do {
@@ -2931,7 +2963,7 @@ namespace Z80 {
 					break;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_NOP() {
@@ -2946,9 +2978,11 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0xb7; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0xb7; break;
+				if (!nonMaComma(lp)) {	// "OR a,b" is possible only when multi-arg is not-comma
+					e[0] = 0xb7;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -3000,7 +3034,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_OTDR() {
@@ -3035,7 +3069,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_OUTD() {
@@ -3049,16 +3083,32 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_OUTINB() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0x90);
 	}
 
 	void OpCode_Next_PIXELAD() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
+		char *oldLp = lp;
+		if (Z80_HL != GetRegister(lp)) lp = oldLp;		// "eat" explicit HL argument
 		EmitByte(0xED);
 		EmitByte(0x94);
 	}
 
 	void OpCode_Next_PIXELDN() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
+		char *oldLp = lp;
+		if (Z80_HL != GetRegister(lp)) lp = oldLp;		// "eat" explicit HL argument
 		EmitByte(0xED);
 		EmitByte(0x93);
 	}
@@ -3083,18 +3133,15 @@ namespace Z80 {
 			default:
 				c = 0; break;
 			}
-			if (!comma(lp) || t < 2) {
-				c = 0;
-			}
-		} while (c);
+		} while (c && 2 <= t && Options::syx.MultiArg(lp));
 		EmitBytes(&e[t]);
 	}
 
-	void OpCode_POP() {
+	void OpCode_POPnormal() {
 		Z80Reg reg;
 		do {
-			int e[5];
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
+			int e[3];
+			e[0] = e[1] = e[2] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_AF:
 				e[0] = 0xf1; break;
@@ -3111,7 +3158,12 @@ namespace Z80 {
 				break;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
+	}
+
+	void OpCode_POP() {
+		if (Options::syx.IsReversePOP) OpCode_POPreverse();
+		else OpCode_POPnormal();
 	}
 
 	void OpCode_PUSH() {
@@ -3133,7 +3185,7 @@ namespace Z80 {
 				e[0] = reg; e[1] = 0xe5; break;
 			case Z80_UNK:
 			{
-				if(!Options::IsNextEnabled) break;
+				if(!Options::syx.IsNextEnabled) break;
 				int imm16 = GetWord(lp);
 				e[0] = 0xED; e[1] = 0x8A;
 				e[2] = (imm16 >> 8) & 255;  // push opcode is big-endian!
@@ -3143,7 +3195,7 @@ namespace Z80 {
 				break;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RES() {
@@ -3204,7 +3256,7 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RET() {
@@ -3241,19 +3293,19 @@ namespace Z80 {
 				e[1] = 0x10 + reg;
 				break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb;
 				e[1] = 0x11;
 				e[3] = 0x10;
 				break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb;
 				e[1] = 0x13;
 				e[3] = 0x12;
 				break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb;
 				e[1] = 0x15;
 				e[3] = 0x14;
@@ -3295,7 +3347,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RLA() {
@@ -3353,7 +3405,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RLCA() {
@@ -3380,13 +3432,13 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x18 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x18; e[3] = 0x19; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x1a; e[3] = 0x1b; break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x1c; e[3] = 0x1d; break;
 			default:
 				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
@@ -3425,7 +3477,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RRA() {
@@ -3483,7 +3535,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_RRCA() {
@@ -3504,7 +3556,7 @@ namespace Z80 {
 			} else {			// e == { $00, $08, $10, $18, $20, $28, $30, $38 }
 				EmitByte(0xC7 + e);
 			}
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SBC() {
@@ -3587,7 +3639,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SCF() {
@@ -3652,10 +3704,14 @@ namespace Z80 {
 				e[0] = -1;
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_Next_SETAE() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		EmitByte(0xED);
 		EmitByte(0x95);
 	}
@@ -3675,10 +3731,10 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x20 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x21; e[3] = 0x10; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x23; e[3] = 0x12; break;
 			case Z80_HL:
 				e[0] = 0x29; break;
@@ -3719,7 +3775,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SLL() {
@@ -3737,13 +3793,13 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x30 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x31; e[3] = 0x10; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x33; e[3] = 0x12; break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x35; e[3] = 0x14; break;
 			default:
 				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
@@ -3782,7 +3838,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SRA() {
@@ -3800,13 +3856,13 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x28 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x28; e[3] = 0x19; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x2a; e[3] = 0x1b; break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x2c; e[3] = 0x1d; break;
 			default:
 				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
@@ -3845,7 +3901,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SRL() {
@@ -3863,13 +3919,13 @@ namespace Z80 {
 			case Z80_A:
 				e[0] = 0xcb; e[1] = 0x38 + reg ; break;
 			case Z80_BC:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x38; e[3] = 0x19; break;
 			case Z80_DE:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x3a; e[3] = 0x1b; break;
 			case Z80_HL:
-				ASSERT_FAKE_INSTRUCTIONS(break);
+				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb; e[1] = 0x3c; e[3] = 0x1d; break;
 			default:
 				if (!oparenOLD(lp, '[') && !oparenOLD(lp, '(')) {
@@ -3908,7 +3964,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_SUB() {
@@ -3924,24 +3980,26 @@ namespace Z80 {
 				}
 				switch (GetRegister(lp)) {
 				case Z80_BC:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x42; break;
 				case Z80_DE:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x52; break;
 				case Z80_HL:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x62; break;
 				case Z80_SP:
-					ASSERT_FAKE_INSTRUCTIONS(break);
+					if (Options::noFakes()) break;
 					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x72; break;
 				default:;
 				}
 				break;
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0x97; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0x97; break;
+				if (!nonMaComma(lp)) {	// "SUB a,b" is possible only when multi-arg is not-comma
+					e[0] = 0x97;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -3993,14 +4051,18 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	//Swaps the high and low nibbles of the accumulator.
 	void OpCode_Next_SWAPNIB() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		Z80Reg reg = GetRegister(lp);
 		if (Z80_UNK != reg && Z80_A != reg) {
-			Error("[SWAPNIB] Illegal operand", line);
+			Error("[SWAPNIB] Illegal operand (can be only register A)", line);
 			return;
 		}
 		EmitByte(0xED);
@@ -4008,6 +4070,10 @@ namespace Z80 {
 	}
 
 	void OpCode_Next_TEST() {
+		if (Options::syx.IsNextEnabled < 1) {
+			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
+			return;
+		}
 		int e[4];
 		e[0] = 0xED;
 		e[1] = 0x27;
@@ -4024,9 +4090,11 @@ namespace Z80 {
 			e[0] = e[1] = e[2] = e[3] = -1;
 			switch (reg = GetRegister(lp)) {
 			case Z80_A:
-				/*if (!comma(lp)) { e[0]=0xaf; break; }
-							reg=GetRegister(lp);*/
-				e[0] = 0xaf; break;
+				if (!nonMaComma(lp)) {	// "XOR a,b" is possible only when multi-arg is not-comma
+					e[0] = 0xaf;
+					break;
+				}
+				reg = GetRegister(lp);
 			default:
 				switch (reg) {
 				case Z80_IXH:
@@ -4079,7 +4147,7 @@ namespace Z80 {
 				}
 			}
 			EmitBytes(e);
-		} while (comma(lp));
+		} while (Options::syx.MultiArg(lp));
 	}
 
 	void Init() {
@@ -4130,11 +4198,7 @@ namespace Z80 {
 		OpCodeTable.Insert("out", OpCode_OUT);
 		OpCodeTable.Insert("outd", OpCode_OUTD);
 		OpCodeTable.Insert("outi", OpCode_OUTI);
-		if (Options::IsReversePOP) {
-			OpCodeTable.Insert("pop", OpCode_POPreverse);
-		} else {
-			OpCodeTable.Insert("pop", OpCode_POP);
-		}
+		OpCodeTable.Insert("pop", OpCode_POP);
 		OpCodeTable.Insert("push", OpCode_PUSH);
 		OpCodeTable.Insert("res", OpCode_RES);
 		OpCodeTable.Insert("ret", OpCode_RET);
@@ -4167,7 +4231,7 @@ namespace Z80 {
 
 	void InitNextExtensions() {
 		static bool nextWasInitialized = false;
-		if(!Options::IsNextEnabled || nextWasInitialized) return;
+		if (!Options::syx.IsNextEnabled || nextWasInitialized) return;
 		nextWasInitialized = true;
 		// Next extended opcodes
 		OpCodeTable.Insert("brlc",		OpCode_Next_BRLC);
@@ -4192,10 +4256,8 @@ namespace Z80 {
 		OpCodeTable.Insert("swapnib",	OpCode_Next_SWAPNIB);
 		OpCodeTable.Insert("test",		OpCode_Next_TEST);
 		// CSpect emulator extensions, fake instructions "exit" and "break"
-		if (2 == Options::IsNextEnabled) {
-			OpCodeTable.Insert("exit",		OpCode_Next_EXIT);
-			OpCodeTable.Insert("break",		OpCode_Next_BREAK);
-		}
+		OpCodeTable.Insert("exit",		OpCode_Next_EXIT);
+		OpCodeTable.Insert("break",		OpCode_Next_BREAK);
 	}
 } // eof namespace Z80
 

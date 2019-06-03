@@ -1,0 +1,51 @@
+# file opened: readWordFromMem.asm
+ 1    0000                  DEVICE ZXSPECTRUM48
+ 1    0000                ORG 0x8000
+ 1    8000 30 31 32 33    DB "0123456789ABCDEF"
+ 1    8004 34 35 36 37
+ 1    8008 38 39 41 42
+ 1    800C 43 44 45 46
+ 2    8010                  ASSERT '10' = {0x8000}
+ 2    8010                ASSERT '2' = {b 0x8002}
+ 2    8010                ASSERT '3' = {b 0x8003}
+ 3    8010 46               DB  {B 0x800F}          ; test big case "{B" (should work)
+ 4    8011                  ORG 0xFFFE
+ 4    FFFE FE FF          DB 254, 255
+ 5    0000                  ASSERT 254 = {b 0xFFFE}
+ 5    0000                ASSERT 255 = {b 0xFFFF}
+ 5    0000                ASSERT 0xFF'FE = { 0xFF'FE }
+ 6    0000                  ; address checking errors
+ 7    0000                  ORG 0
+ 7    0000 30 31          DB "01"
+readWordFromMem.asm(8): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {-1}
+ 8    0002 30 31 00 00      DW  {0}, {-1}
+readWordFromMem.asm(9): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {-1}, {0}
+ 9    0006 00 00 30 31      DW  {-1}, {0}
+readWordFromMem.asm(10): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {b -1}
+10    000A 30 00            DB  {b 0}, {b -1}
+readWordFromMem.asm(11): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {b -1}, {b 0}
+11    000C 00 30            DB  {b -1}, {b 0}
+readWordFromMem.asm(12): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {0xFFFF}            
+12    000E 00 00            DW  {0xFFFF}            ; FFFF is already too far for WORD fetch
+readWordFromMem.asm(13): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {b 0x10000}
+13    0010 00               DB  {b 0x10000}
+14    0011                  ; test other syntax errors
+readWordFromMem.asm(15): error: Syntax error: }
+15    0011 30 31            DW  {}
+readWordFromMem.asm(16): error: Syntax error: }
+16    0013 30 31            DW  {  }
+readWordFromMem.asm(17): error: '}' expected: {0x1234
+17    0015                  DW  {0x1234
+readWordFromMem.asm(18): error: Label not found: b
+18    0015 30 31            DW  {b}
+readWordFromMem.asm(19): error: Syntax error: }
+19    0017 30 00            DW  {b }
+readWordFromMem.asm(20): error: '}' expected: {b 0x1234
+20    0019                  DW  {b 0x1234
+readWordFromMem.asm(21): error: Label not found: b
+21    0019 00 00            DW  {b+0x1234}          ; needs whitespace after "{b" to be recognized as BYTE query
+22    001B
+# file closed: readWordFromMem.asm
+
+Value    Label
+------ - -----------------------------------------------------------

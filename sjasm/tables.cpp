@@ -207,7 +207,7 @@ void CLabelTableEntry::ClearData() {
 	value = 0;
 	updatePass = 0;
 	page = LABEL_PAGE_UNDEFINED;
-	IsDEFL = used = false;
+	IsDEFL = IsEQU = used = false;
 }
 
 CLabelTableEntry::CLabelTableEntry() : name(NULL) {
@@ -218,7 +218,7 @@ CLabelTable::CLabelTable() {
 	NextLocation = 1;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL) {
+int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL, bool IsEQU) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", NULL, FATAL);
 	}
@@ -233,6 +233,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			label->value = nvalue;
 			label->page = Page ? Page->Number : LABEL_PAGE_ROM;
 			label->IsDEFL = IsDEFL;
+			label->IsEQU = IsEQU;
 			label->updatePass = pass;
 			return 1;
 		}
@@ -246,6 +247,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->name = STRDUP(nname);
 	if (label->name == NULL) Error("No enough memory!", NULL, FATAL);
 	label->IsDEFL = IsDEFL;
+	label->IsEQU = IsEQU;
 	label->updatePass = pass;
 	label->value = nvalue;
 	label->used = undefined;
@@ -352,7 +354,8 @@ void CLabelTable::Dump() {
 
 void CLabelTable::DumpForUnreal() {
 	char ln[LINEMAX], * ep;
-	if (FP_UnrealList == NULL && !FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
+	FILE* FP_UnrealList;
+	if (!FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
 		Error("Error opening file", Options::UnrealLabelListFName, FATAL);
 	}
 	const int PAGE_MASK = DeviceID ? Device->GetPage(0)->Size - 1 : 0x3FFF;
@@ -377,6 +380,43 @@ void CLabelTable::DumpForUnreal() {
 		fputs(ln, FP_UnrealList);
 	}
 	fclose(FP_UnrealList);
+}
+
+void CLabelTable::DumpForCSpect() {
+	FILE* file;
+	if (!FOPEN_ISOK(file, Options::CSpectMapFName, "w")) {
+		Error("Error opening file", Options::CSpectMapFName, FATAL);
+	}
+	const int PAGE_SIZE = DeviceID ? Device->GetPage(0)->Size : 0x4000;
+	const int PAGE_MASK = PAGE_SIZE - 1;
+	for (int i = 1; i < NextLocation; ++i) {
+		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
+		const int labelType =
+			LabelTable[i].IsEQU ? 1 :
+			LabelTable[i].IsDEFL ? 2 :
+			(LABEL_PAGE_ROM == LabelTable[i].page) ? 3 : 0;
+		const short page = labelType ? 0 : LabelTable[i].page;
+		const aint longAddress = (PAGE_MASK & LabelTable[i].value) + page * PAGE_SIZE;
+		fprintf(file, "%08lX %08lX %02X ", 0xFFFF & LabelTable[i].value, longAddress, labelType);
+		// convert primary+local label to be "@" delimited (not "." delimited)
+		STRCPY(temp, LINEMAX, LabelTable[i].name);
+		// look for "primary" label (where the local label starts)
+		char* localLabelStart = strrchr(temp, '.');
+		while (temp < localLabelStart) {	// the dot must be at least second character
+			*localLabelStart = 0;			// terminate the possible "primary" part
+			CLabelTableEntry* label = Find(temp);
+			if (label && LABEL_PAGE_UNDEFINED != label->page) {
+				*localLabelStart = '@';		// "primary" label exists, modify delimiter '.' -> '@'
+				break;
+			}
+			*localLabelStart = '.';			// "primary" label didn't work, restore dot
+			do {
+				--localLabelStart;			// and look for next dot
+			} while (temp < localLabelStart && '.' != *localLabelStart);
+		}
+		fprintf(file, "%s\n", temp);
+	}
+	fclose(file);
 }
 
 void CLabelTable::DumpSymbols() {
@@ -596,19 +636,21 @@ void CDefineTable::Init() {
 
 void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	if (FindDuplicate(name)) {
-		Error("Duplicate define", name);
+		Error("Duplicate define (replacing old value)", name);
 	}
 	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }
 
 char* CDefineTable::Get(const char* name) {
-	CDefineTableEntry* p = defs[(*name)&127];
-	while (p) {
-		if (!strcmp(name, p->name)) {
-			DefArrayList = p->nss;
-			return p->value;
+	if (NULL != name) {
+		CDefineTableEntry* p = defs[(*name)&127];
+		while (p) {
+			if (!strcmp(name, p->name)) {
+				DefArrayList = p->nss;
+				return p->value;
+			}
+			p = p->next;
 		}
-		p = p->next;
 	}
 	DefArrayList = NULL;
 	return NULL;
@@ -953,7 +995,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 		case SMEMBDWORD:
 			if (!ParseExpressionNoSyntaxError(lp, val)) val = ip->def;
 			CopyMember(ip, val);
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(lp);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
 			break;
 		case SMEMBPARENOPEN:
 			SkipBlanks(lp);
@@ -966,7 +1008,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 			SkipBlanks(lp);
 			if (haakjes && *lp == '}') {
 				--haakjes; ++lp;
-				if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(lp);
+				if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
 			}
 			CopyMember(ip, 0);
 			break;
@@ -996,7 +1038,7 @@ static void InsertSingleStructLabel(char *name, const aint value) {
 			Error("Label has different value in pass 2", temp);
 		}
 	} else {
-		if (!LabelTable.Insert(p, value)) Error("Duplicate label", p, EARLY);
+		if (!LabelTable.Insert(p, value, false, false, true)) Error("Duplicate label", p, EARLY);
 	}
 	delete[] p;
 }
@@ -1020,8 +1062,8 @@ void CStructure::deflab() {
 	InsertStructSubLabels(sn, mnf);
 }
 
-void CStructure::emitlab(char* iid) {
-	const aint misalignment = maxAlignment ? ((~CurAddress + 1) & (maxAlignment - 1)) : 0;
+void CStructure::emitlab(char* iid, aint address) {
+	const aint misalignment = maxAlignment ? ((-address) & (maxAlignment - 1)) : 0;
 	if (misalignment) {
 		// emitting in misaligned position (considering the ALIGN used to define this struct)
 		char warnTxt[LINEMAX];
@@ -1032,9 +1074,9 @@ void CStructure::emitlab(char* iid) {
 	}
 	char sn[LINEMAX];
 	STRCPY(sn, LINEMAX, iid);
-	InsertSingleStructLabel(sn, CurAddress);
+	InsertSingleStructLabel(sn, address);
 	STRCAT(sn, LINEMAX, ".");
-	InsertStructSubLabels(sn, mnf, CurAddress);
+	InsertStructSubLabels(sn, mnf, address);
 }
 
 void CStructure::emitmembs(char*& p) {
@@ -1052,23 +1094,23 @@ void CStructure::emitmembs(char*& p) {
 			break;
 		case SMEMBBYTE:
 			EmitByte(ip->ParseValue(p));
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBWORD:
 			EmitWord(ip->ParseValue(p));
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBD24:
 			val = ip->ParseValue(p);
 			EmitByte(val & 0xFF);
 			EmitWord((val>>8) & 0xFFFF);
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBDWORD:
 			val = ip->ParseValue(p);
 			EmitWord(val & 0xFFFF);
 			EmitWord((val>>16) & 0xFFFF);
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBPARENOPEN:
 			SkipBlanks(p);
@@ -1079,7 +1121,7 @@ void CStructure::emitmembs(char*& p) {
 			if (haakjes && *p == '}') {
 				--haakjes; ++p;
 			}
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) comma(p);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		default:
 			ErrorInt("Internal Error CStructure::emitmembs", ip->type, FATAL);
@@ -1149,11 +1191,25 @@ int CStructureTable::FindDuplicate(char* naam) {
 	return 0;
 }
 
+aint CStructureTable::ParseDesignedAddress(char* &p) {
+	if (!SkipBlanks(p) && ('=' == *p)) {
+		char* adrP = ++p;
+		aint resultAdr;
+		if (ParseExpressionNoSyntaxError(p, resultAdr)) return resultAdr;
+		Error("[STRUCT] Syntax error in designed address", adrP, SUPPRESS);
+		return 0;
+	}
+	return INT_MAX;		// no "designed address" provided, emit structure bytes
+}
+
 int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	CStructure* st = zoek(naam, gl);
 	if (!st) return 0;
-	if (l) st->emitlab(l);
-	st->emitmembs(p);
+	// create new labels corresponding to current/designed address
+	aint address = CStructureTable::ParseDesignedAddress(p);
+	if (l) st->emitlab(l, (INT_MAX == address) ? CurAddress : address);
+	if (INT_MAX == address) st->emitmembs(p);	// address was not designed, emit also bytes
+	else if (!l) Warning("[STRUCT] designed address without label = no effect");
 	return 1;
 }
 

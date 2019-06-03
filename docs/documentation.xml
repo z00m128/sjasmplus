@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.13.0 Documentation [2019-05-05]</title>
+  <title>SjASMPlus 1.13.1 Documentation [2019-05-30]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -27,7 +27,7 @@
 
       <para><itemizedlist>
           <listitem>
-            <para>Z80/R800 documented and undocumented opcodes support</para>
+            <para>Z80/R800/Z80N documented and undocumented opcodes support</para>
           </listitem>
 
           <listitem>
@@ -66,7 +66,7 @@
           </listitem>
 
           <listitem>
-            <para>Special mode</para>
+            <para>Virtual device mode for common machines: ZX 128, ZX Next, ... (pseudo op DEVICE)</para>
           </listitem>
 
           <listitem>
@@ -74,8 +74,7 @@
           </listitem>
 
           <listitem>
-            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and
-            more</para>
+            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and more</para>
           </listitem>
 
           <listitem>
@@ -88,6 +87,19 @@
 
           <listitem>
             <para>Multi file output and file updating</para>
+          </listitem>
+
+          <listitem>
+            <para>ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD...)</para>
+          </listitem>
+
+          <listitem>
+            <para>ZX Spectrum Next specific features and directives (Z80N, 8ki memory paging, SAVENEX)</para>
+          </listitem>
+
+          <listitem>
+			  <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
+					  Cirrus-CI with 140+ automated tests</ulink> (report issues to grow it even more)</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -178,6 +190,34 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>work in progress - 1.13.2</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
+- added to --syntax option: case insensitive instructions
+- new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro examples</ulink>, minor fixes and refactoring
+- operators "{address}" and "{b address}" are now official and documented</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
+            <term>30.05.2019 - 1.13.1</term>
+
+            <listitem>
+              <synopsis>- added <link linkend="s_cli">--syntax</link> command line option
+- added <link linkend="po_opt">OPT</link> directive (modifies some command line options)
+- added way to use <link linkend="st_usage">structure</link> at designed address
+- <link linkend="s_macros">MACRO</link> can be now named through label (optional syntax)
+- added <link linkend="po_defarray_plus">DEFARRAY+</link> directive (for splitting long list of DEFARRAY values)
+- added <link linkend="po_cspectmap">CSPECTMAP</link> directive for MAP files for CSpect emulator
+- added support for <link linkend="s_cli">SJASMPLUSOPTS</link> environment variable
+- Z80N new variants of syntax, now also "mul de : mul : pixelad hl : pixeldn hl" works
+- minor bugfixes, improvements and internal refactorings (error reporting)
+- updated syntax-highlight file for KDE5 editors (Kate)</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>05.05.2019 - 1.13.0</term>
@@ -525,7 +565,7 @@
     </section>
 
     <section>
-      <title>Command line</title>
+      <title><anchor id="s_cli"/>Command line</title>
 
       <para>Usage:</para>
 
@@ -534,7 +574,7 @@
       <para>Option flags as follows:</para>
 
       <para><synopsis>  -h or --help             Help information
-  --zxnext[=cspect]        Enable SpecNext Z80 extensions (CSpect emulator has
+  --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
                            Include path (later defined have higher priority)
@@ -556,8 +596,40 @@
   -                        Reads STDIN as source (no other sourcefile allowed)
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
-  --nofakes                Disable fake instructions
-  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)</synopsis></para>
+  --nofakes                Disable fake instructions (obsolete, use --syntax=F)
+  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)
+  --syntax=&lt;...&gt;           Adjust parsing syntax, read details below.</synopsis></para>
+
+  <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
+	for particular feature will use the default setting:
+	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
+&dagger; <emphasis>b B    Memory access brackets []: disabled / required (default = enabled)</emphasis>
+  f F    Fake instructions: warning / disabled (default = enabled)
+  i      Case insensitive instructions/directives (default = same case required)
+&dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis></synopsis>
+  &dagger; work in progress: currently only "aAfF" options are implemented, brackets and labels not yet, following description of functionality is then not fully correct either.
+  </para>
+  <para>
+  I.e. <code>--syntax=faBl</code> will modify parser to process source line
+  <programlisting>hl:  ld a,(hl),,de,hl</programlisting>
+  in a way to produce warnings about keyword "hl" being used for label, about fake instruction
+  being used (ld de,hl) and assemble <code>(hl)</code> as numeric expression, not memory access.
+  Warnings on fake instructions can be suppressed for particular line by adding any end-of-line
+  comment containing string "fake", i.e. "<code>ld de,hl ; fake DE=HL</code>" will assemble
+  without warning. The "F" option is identical to "--nofakes" and preferred.
+  </para>
+
+  <para>
+	  The assembler will also read the environment variable <code>SJASMPLUSOPTS</code> (if available),
+	  and process its content as part of command line options (before the actual options), so you
+	  can pre-configure certain options in your environment, for example:
+	  <programlisting>export SJASMPLUSOPTS="--zxnext=cspect --msg=war"
+sjasmplus --lst --lstlab example.asm</programlisting>
+	will execute the assembling as if command line "<code>sjasmplus --zxnext=cspect --msg=war --lst --lstlab example.asm</code>"
+	was used. Known issue: parser of environment variable delimits each option on any white-space character, so
+	option containing space character will be incorrectly parsed (like "-Ifile-path with space" = fails and
+	there is no way to escape/quote the path in the SJASMPLUSOPTS variable to make it work).
+  </para>
     </section>
 
     <section>
@@ -763,7 +835,9 @@ $c     hexadecimal
 
       <para>'$' represents the current program counter. '$$' represents the
       current page in the current slot in the <link
-      linkend="s_realdevice">real device emulation mode</link>.</para>
+      linkend="s_realdevice">real device emulation mode</link> and '{address}' can be used
+      to read WORD from virtual device memory (but zero is read before last pass
+      of assembling) ('{b address}' to read only BYTE).</para>
 
       <para>It is possible to use parenthesis '(' and ')' to override the
       precedence of the operators. The following operators may be used in
@@ -823,7 +897,7 @@ or    x or y   bitwise or
       <para>This version only accepts Z80 mnemonics. There are some additions
       to what I think is standard Z80: <itemizedlist>
           <listitem>
-            <para>'[' and ']' can be used in stead of '(' and ')' for
+            <para>'[' and ']' can be used instead of '(' and ')' for
             indirections. So LD A,[HL] is the same as LD A,(HL).</para>
           </listitem>
 
@@ -868,7 +942,7 @@ or    x or y   bitwise or
         </itemizedlist><programlisting>    PUSH AF,BC  ; push af / push bc
     POP  AF,BC  ; pop  af / pop  bc</programlisting><itemizedlist>
           <listitem>
-            <para>and all other commands support this.</para>
+            <para>and many other instructions support this "multi-argument" syntax:</para>
           </listitem>
         </itemizedlist><programlisting>    LD A,B,B,D,D,H
    /* this is:
@@ -1102,9 +1176,10 @@ or    x or y   bitwise or
 
       <para>In this mode the compiler compiling program to virtual memory (as
       at MSX's WB-ASS2, ZX-Spectrum's GENS, ZEUS, ALASM etc). After this all
-      you can use new pseudo-ops as <link linkend="s_pseudoops">SAVEBIN,
-      SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST</link> and use special
-      functions in <link linkend="c_lua_scripting">Lua scripts</link>.</para>
+      you can use new pseudo-ops as <link linkend="s_pseudoops">SAVEBIN, SAVEDEV
+      SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, MMU, LABELSLIST</link>, use special
+      functions in <link linkend="c_lua_scripting">Lua scripts</link> and use operators
+      <code>{address}, {b address}</code> to read WORD/BYTE from the virtual memory.</para>
 
       <para>If only single DEVICE is used in whole source batch, the device
       becomes "global" and will affect also source before of the DEVICE.
@@ -1424,6 +1499,25 @@ END_OF_PROGRAM
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_cspectmap" />CSPECTMAP [&lt;filename&gt;]</term>
+
+            <listitem>
+              <para><emphasis>Useful for ZX-Spectrum Emulator
+              #CSpect by Mike Dailly.</emphasis></para>
+
+              <para><emphasis>Works only in real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Saves labels list in format:</para>
+
+              <para><synopsis>HEXA_16BIT_ADDRESS HEXA_LONG_ADDRESS TYPE LABELNAME</synopsis>
+              where TYPE is: 00 = regular label, 01 = EQU or struct defined, 02 = DEFL defined.</para>
+
+              <para>If no filename is provided, default is created by appending ".map" to source name.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_d24" />D24</term>
 
             <listitem>
@@ -1478,6 +1572,20 @@ CNT DEFL 0 ;or CNT=0
     DISPLAY myarray[CNT]
 CNT DEFL CNT+1 ;or CNT=CNT+1
     EDUP</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_defarray_plus" />DEFARRAY+ &lt;id&gt; &lt;additional replacements&gt;</term>
+
+            <listitem>
+              <para>Appending more DEFINEs to already defined array<example>
+                  <title></title>
+
+                  <para><programlisting>    DEFARRAY   myarray 'A', 'B', 'C'
+    DEFARRAY+  myarray 'D', 'E'            ; now "myarray" has 5 items
+    DUP 3 : DEFARRAY+ myarray '!' : EDUP   ; "DEFARRAYFILL" adding 3x '!'</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -2162,6 +2270,48 @@ Kip                ; label Kip</programlisting></para>
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_opt" /><para>OPT [push] [reset] [listoff] [liston] [&lt;command line options&gt;]</para>
+			<para>OPT pop</para></term>
+
+            <listitem>
+              <para>Allows to reset and modify <link linkend="s_cli">options</link> affecting syntax and
+				  parsing (for lines of source following the OPT). The options allowed for OPT
+				  are: <code>--nofakes</code>, <code>--syntax</code>, <code>--zxnext</code>,
+				  <code>--reversepop</code> and <code>--dirbol</code>.
+			  </para>
+			  <para>
+				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston.
+				  The "push" command will make OPT to preserve current state of options. The "reset"
+				  command will reset OPT-related options to default state. The "listoff" command will
+				  suspend the listing for following lines until "liston" command is used (listing
+				  availibility is part of the push/pop state, so to "nest" listing-off you can use
+				  "OPT push listoff : ... code ... : OPT pop" code sequence.
+			  </para>
+			  <para>Then the provided options are applied. The default values are: fake instructions
+				  enabled (no warning), multi-argument delimiter is ",", both () and [] brackets
+				  can be used to access memory, labels can have any name, ZX Next instructions are OFF,
+				  POP with multiple arguments doesn't reverse them and pseudo-ops at beginning of
+				  line are OFF (to just reset to these defaults you can use <code>OPT reset</code>).
+              </para>
+			  <para>The "pop" command: the previously preserved state of options is restored (states
+				  are preserved in "stack" way, so further OPT with "pop" will restore older states).
+			  </para>
+			  <example>
+                  <title></title>
+
+                  <programlisting>    POP bc, hl   ; pops BC first
+    OPT push reset --reversepop --syntax=af
+    POP bc,,hl   ; pops HL first
+    LD  bc,hl    ; warning about Fake instruction
+    LD  bc,hl    ; warning supressed by lowercase "fake" in this comment
+    OPT reset --syntax=A
+    POP bc `` hl ; pop BC first (--reversepop was reset)
+    OPT pop      ; restoring syntax to original state</programlisting>
+			  </example>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_org" />ORG &lt;address&gt;[,&lt;page_number&gt;]</term>
 
             <listitem>
@@ -2756,7 +2906,7 @@ LABEL5:
     </section>
 
     <section>
-      <title>Macro's</title>
+      <title><anchor id="s_macros"/>Macros</title>
 
       <para>The MACRO pseudo-op defines a macro. It should be followed by the
       name of the macro, optionally followed by the parameters. The following
@@ -2836,6 +2986,22 @@ Main
     DB "Kip!",3</programlisting></para>
         </example></para>
 
+		<para>If there is regular label defined on the line with MACRO pseudo-op, the label will
+			be used as macro name - this may collide with true label using the same name, so this
+			is NOT recommended syntax. It was added as compatibility convenience to make porting
+			from different assemblers somewhat easier.
+			<example><title></title>
+				<programlisting>LabelAsMacroName    MACRO  arg1?, arg2?
+                        ld  a,arg1?
+                        ld  hl,arg2?
+                    ENDM
+
+                LabelAsMacroName 1,$1234
+            ; expands to:
+                ld a,1 : ld hl,$1234</programlisting>
+			</example>
+		</para>
+
       <para></para>
     </section>
   </chapter>
@@ -2852,7 +3018,7 @@ Main
     </section>
 
     <section>
-      <title>Using</title>
+      <title>Defining structure</title>
 
       <para>A structure definition starts with: <code>STRUCT
       &lt;name&gt;[,&lt;initial offset&gt;]</code> and ends with
@@ -2956,9 +3122,27 @@ Main
     </section>
 
     <section>
+      <title><anchor id="st_usage" />Usage of defined structure</title>
+
+      <para><code>[&lt;label&gt;] &lt;struct_name&gt; [&lt;initial values&gt;]</code> will emit full
+		structure into machine code, either using default values from structure definition,
+		or overriding them with explicit value from the &lt;initial values&gt; list. In initial
+		values you can use curly brackets {} to group particular initial values for particular
+		sub-structure, any missing values in particular sub-structure init-list are set up by
+		default values of particular field. See "SDOT" example below or tests/struct asm files
+		for more examples.</para>
+
+      <para><code>&lt;label&gt; &lt;struct_name&gt; = &lt;expression&gt;</code> will only set up
+		&lt;label&gt;.&lt;struct_field&gt; labels starting from designed address provided by
+		expression, but there will be no machine code emitted (and current address "$" will not
+		advance).</para>
+
+    </section>
+
+    <section>
       <title>Examples</title>
 
-      <para><example>
+      <example>
           <title></title>
 
           <para><programlisting>	STRUCT SCOLOR
@@ -2969,11 +3153,12 @@ BLUE	BYTE 6
 
           <para>This is identical to:</para>
 
-          <synopsis>SCOLOR		EQU 3 ; lenght
+          <synopsis>SCOLOR		EQU 3 ; length
 SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</synopsis>
-        </example><example>
+	  </example>
+	  <example>
           <title></title>
 
           <para><programlisting>	STRUCT SDOT
@@ -2993,7 +3178,8 @@ SDOT.C.RED	EQU 2 ; offset
 SDOT.C.GREEN	EQU 3 ; offset
 SDOT.C.BLUE	EQU 4 ; offset
 </synopsis>
-        </example><example>
+	  </example>
+	  <example>
           <title></title>
 
           <para><programlisting>	STRUCT SPOS,4
@@ -3009,7 +3195,8 @@ AD	WORD
 SPOS.X	EQU  4 ; offset
 SPOS.Y	EQU  6 ; offset
 SPOS.AD	EQU  8 ; offset</synopsis>
-        </example><example>
+	  </example>
+	  <example>
           <title></title>
 
           <para>When a structure is defined it is possible to declare labels
@@ -3039,15 +3226,42 @@ COLOR.BLUE  BYTE 6
   ld de,COLOR
   ; etc.</programlisting></para>
 
-          <para><warning>
-              <para>Do not use the offset labels in indirections
-              like:<programlisting>LD A,(SDOT.X)</programlisting>This will
-              conflict with futher 'improvements' ;-)</para>
+	  </example>
+      <example>
+          <title></title>
 
-              <para>If this is absolutely necessary (why?) use something like
-              this:<programlisting>LD A,(+SDOT.X)</programlisting></para>
-            </warning></para>
-        </example></para>
+          <para><programlisting>	STRUCT BIN_FILE_MAP, 256
+value1	BYTE
+value2	WORD
+	ENDS
+
+        ORG  0x8000
+binData BIN_FILE_MAP = $        ; set up label values only (no bytes)
+        INCBIN "some_data.bin"  ; load the bytes from file instead
+
+        ; using the data through struct definition
+        ld  a,(binData.value1)
+        ld  hl,(binData.value2)</programlisting></para>
+
+          <para>This is identical to:</para>
+
+          <synopsis>BIN_FILE_MAP            EQU 259      ; length
+BIN_FILE_MAP.value1     EQU 256      ; offset
+BIN_FILE_MAP.value2     EQU 257      ; offset
+; labels to access binary data loaded by INCBIN
+binData                 EQU 0x8000   ; address
+binData.value1          EQU 0x8100   ; address
+binData.value2          EQU 0x8101   ; address</synopsis>
+	  </example>
+
+	  <warning>
+		<para>Do not use the offset labels in indirections
+		like:<programlisting>LD A,(SDOT.X)</programlisting>This will
+		conflict with futher 'improvements' ;-)</para>
+
+		<para>If this is absolutely necessary (why?) use something like
+		this:<programlisting>LD A,(+SDOT.X)</programlisting></para>
+	  </warning>
     </section>
   </chapter>
 

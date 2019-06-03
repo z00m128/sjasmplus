@@ -1,0 +1,13 @@
+# file opened: env_empty.asm
+1     0000 00               DB 0
+2     0001                  IFDEF FLAGSDEFINE
+3     0001 ~                    DZ  "flagsdefine detected"
+4     0001                  ENDIF
+5     0001              ALIGN
+6     0001 45               DB  "E"
+7     0002
+# file closed: env_empty.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X ALIGN

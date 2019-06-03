@@ -29,6 +29,7 @@
 // sjasm.cpp
 
 #include "sjdefs.h"
+#include <cstdlib>
 
 #ifdef USE_LUA
 
@@ -46,7 +47,7 @@ void PrintHelp() {
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 	_COUT "\nOption flags as follows:" _ENDL;
 	_COUT "  -h or --help             Help information (you see it)" _ENDL;
-	_COUT "  --zxnext[=cspect]        Enable SpecNext Z80 extensions" _ENDL;
+	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
@@ -68,6 +69,7 @@ void PrintHelp() {
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --nofakes                Disable fake instructions" _ENDL;
 	_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
+	_COUT "  --syntax=<...>           Adjust parsing syntax, check docs for details." _ENDL;
 }
 
 namespace Options {
@@ -77,28 +79,63 @@ namespace Options {
 	char DestinationFName[LINEMAX] = {0};
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
+	char CSpectMapFName[LINEMAX] = {0};
 
 	char ZX_SnapshotFName[LINEMAX] = {0};
 	char ZX_TapeFName[LINEMAX] = {0};
 
 	EOutputVerbosity OutputVerbosity = OV_ALL;
-	bool IsPseudoOpBOF = 0;
-	bool IsAutoReloc = 0;
 	bool IsLabelTableInListing = 0;
 	bool IsDefaultListingName = false;
-	bool IsReversePOP = 0;
 	bool IsShowFullPath = 0;
 	bool AddLabelListing = false;
 	bool HideLogo = 0;
 	bool ShowHelp = 0;
 	bool NoDestinationFile = true;		// no *.out file by default
-	bool FakeInstructions = 1;
-	int IsNextEnabled = 0;		// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
+	SSyntax syx, systemSyntax;
 	bool SourceStdIn = false;
 
 	// Include directories list is initialized with "." directory
 	CStringsList* IncludeDirsList = new CStringsList((char *)".");
 	CDefineTable CmdDefineTable;		// is initialized by constructor
+
+	// returns true if fakes are completely disabled, false when they are enabled
+	// showMessage=true: will also display error/warning (use when fake ins. is emitted)
+	// showMessage=false: can be used to silently check if fake instructions are even possible
+	bool noFakes(bool showMessage) {
+		if (!showMessage) return !syx.FakeEnabled;
+		if (!syx.FakeEnabled) {
+			Error("Fake instructions are not enabled", bp, SUPPRESS);
+			return true;
+		}
+		if (syx.FakeWarning) {	// check end-of-line comment for mentioning "fake" to remove warning
+			bool inEolComment = eolComment ? nullptr != strstr(eolComment, "fake") : false;
+			if (!inEolComment) Warning("Fake instruction", bp);
+		}
+		return false;
+	}
+
+	std::stack<SSyntax> SSyntax::syxStack;
+
+	void SSyntax::resetCurrentSyntax() {
+		new (&syx) SSyntax();	// restore defaults in current syntax
+	}
+
+	void SSyntax::pushCurrentSyntax() {
+		syxStack.push(syx);		// store current syntax options into stack
+	}
+
+	bool SSyntax::popSyntax() {
+		if (syxStack.empty()) return false;	// no syntax stored in stack
+		syx = syxStack.top();	// copy the syntax values from stack
+		syxStack.pop();
+		return true;
+	}
+
+	void SSyntax::restoreSystemSyntax() {
+		while (!syxStack.empty()) syxStack.pop();	// empty the syntax stack first
+		syx = systemSyntax;		// reset to original system syntax
+	}
 
 } // eof namespace Options
 
@@ -122,12 +159,12 @@ int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0, PseudoORG = 0, StartAddress = -1;
 byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
-aint CurAddress = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0;
+aint CurAddress = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0;
 aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
 char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
-stack<SRepeatStack> RepeatStack;
+std::stack<SRepeatStack> RepeatStack;
 CStringsList* lijstp = NULL;
 CLabelTable LabelTable;
 CLocalLabelTable LocalLabelTable;
@@ -148,6 +185,7 @@ int deviceDirectivesCounter = 0;
 static char* globalDeviceID = NULL;
 
 void InitPass() {
+	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
 	aint pow10 = 1;
 	reglenwidth = 0;
 	do {
@@ -231,7 +269,7 @@ namespace Options {
 
 	class COptionsParser {
 	private:
-		char* arg;
+		const char* arg;
 		char opt[LINEMAX];
 		char val[LINEMAX];
 
@@ -264,11 +302,40 @@ namespace Options {
 			}
 		}
 
-	public:
-		void GetOptions(char**& argv, int& i) {
-			while ((arg=argv[i]) && ('-' == arg[0])) {
-				++i;					// next CLI argument
+		void parseSyntaxValue() {
+			// Options::syx is expected to be already in default state before entering this
+			for (const auto & syntaxOption : val) {
+				switch (syntaxOption) {
+				case 0:   return;
+				// f F - instructions: fake warning, no fakes (default = fake enabled)
+				case 'f': syx.FakeEnabled = syx.FakeWarning = true; break;
+				case 'F': syx.FakeEnabled = false; break;
+				// a A - multi-argument delimiter: ",,", "``" (default = ",")
+				case 'a': syx.MultiArg = &doubleComma; break;
+				case 'A': syx.MultiArg = &doubleBacktick; break;
+				// b B - memory access brackets []: disabled, required (default = enabled)
+				case 'b':
+				case 'B':
+				// l L - warn/error about labels using keywords (default = no message)
+				case 'l':
+				case 'L':
+					if (0 == pass || LASTPASS == pass) {
+						_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
+					}
+					break;
+				case 'i': syx.CaseInsensitiveInstructions = true; break;
+				default:
+					if (0 == pass || LASTPASS == pass) {
+						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;
+					}
+					break;
+				}
+			}
+		}
 
+	public:
+		void GetOptions(const char* const * const argv, int& i, bool onlySyntaxOptions = false) {
+			while ((arg=argv[i]) && ('-' == arg[0])) {
 				// copy "option" (up to '=' char) into `opt`, copy "value" (after '=') into `val`
 				if ('-' == arg[1]) {	// double-dash detected, value is expected after "="
 					splitByChar(arg + 2, '=', opt, LINEMAX, val, LINEMAX);
@@ -281,7 +348,22 @@ namespace Options {
 				}
 
 				// check for particular options and setup option value by it
-				if (!strcmp(opt,"h") || !strcmp(opt, "help")) {
+				// first check all syntax-only options which may be modified by OPT directive
+				if (!strcmp(opt, "zxnext")) {
+					syx.IsNextEnabled = 1;
+					if (!strcmp(val, "cspect")) syx.IsNextEnabled = 2;	// CSpect emulator extensions
+				} else if (!strcmp(opt, "reversepop")) {
+					syx.IsReversePOP = true;
+				} else if (!strcmp(opt, "dirbol")) {
+					syx.IsPseudoOpBOF = true;
+				} else if (!strcmp(opt, "nofakes")) {
+					syx.FakeEnabled = false;
+				} else if (!strcmp(opt, "syntax")) {
+					parseSyntaxValue();
+				} else if (onlySyntaxOptions) {
+					// rest of the options is available only when launching the sjasmplus
+					return;
+				} else if (!strcmp(opt,"h") || !strcmp(opt, "help")) {
 					ShowHelp = 1;
 				} else if (!strcmp(opt, "lstlab")) {
 					AddLabelListing = true;
@@ -314,19 +396,10 @@ namespace Options {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
 					IsShowFullPath = 1;
-				} else if (!strcmp(opt, "zxnext")) {
-					IsNextEnabled = 1;
-					if (!strcmp(val, "cspect")) IsNextEnabled = 2;	// CSpect emulator extensions
-				} else if (!strcmp(opt, "reversepop")) {
-					IsReversePOP = 1;
 				} else if (!strcmp(opt, "nologo")) {
 					HideLogo = 1;
-				} else if (!strcmp(opt, "nofakes")) {
-					FakeInstructions = 0;
 				} else if (!strcmp(opt, "dos866")) {
 					ConvertEncoding = ENCDOS;
-				} else if (!strcmp(opt, "dirbol")) {
-					IsPseudoOpBOF = 1;
 				} else if (!strcmp(opt, "inc") || !strcmp(opt, "i") || !strcmp(opt, "I")) {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
@@ -348,9 +421,19 @@ namespace Options {
 				} else {
 					_CERR "Unrecognized option: " _CMDL opt _ENDL;
 				}
-			}
+
+				++i;					// next CLI argument
+			} // end of while ((arg=argv[i]) && ('-' == arg[0]))
 		}
 	};
+
+	int parseSyntaxOptions(int n, char** options) {
+		if (n <= 0) return 0;
+		int i = 0;
+		Options::COptionsParser optParser;
+		optParser.GetOptions(options, i, true);
+		return i;
+	}
 }
 
 #ifdef USE_LUA
@@ -370,7 +453,6 @@ int main(int argc, char **argv) {
 	int base_encoding;
 	char* p;
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
-	int i = 1;
 
 	// start counter
 	long dwStart;
@@ -380,8 +462,31 @@ int main(int argc, char **argv) {
 	GetCurrentDirectory(MAX_PATH, buf);
 	CurrentDirectory = buf;
 
+	Options::COptionsParser optParser;
+	char* envFlags = std::getenv("SJASMPLUSOPTS");
+	if (nullptr != envFlags) {
+		// split environment arguments into "argc, argv" like variables (by white-space)
+		char* parsedOptsArray[33] {};	// there must be one more nullptr in the array (32+1)
+		int optI = 0, charI = 0;
+		while (optI < 32 && !SkipBlanks(envFlags)) {
+			parsedOptsArray[optI++] = temp + charI;
+			while (*envFlags && !White(*envFlags) && charI < LINEMAX-1) temp[charI++] = *envFlags++;
+			temp[charI++] = 0;
+		}
+		if (!SkipBlanks(envFlags)) {
+			_CERR "SJASMPLUSOPTS environment variable contains too many options (max is 32)" _ENDL;
+		}
+		// process environment variable ahead of command line options (in the same way)
+		int i = 0;
+		while (parsedOptsArray[i]) {
+			optParser.GetOptions(parsedOptsArray, i);
+			if (!parsedOptsArray[i] || 128 <= SourceFNamesCount) break;
+			STRCPY(SourceFNames[SourceFNamesCount++], MAX_PATH-32, parsedOptsArray[i++]);
+		}
+	}
+
+	int i = 1;
 	if (argc > 1) {
-		Options::COptionsParser optParser;
 		while (argv[i]) {
 			optParser.GetOptions(argv, i);
 			if (!argv[i] || 128 <= SourceFNamesCount) break;
@@ -394,6 +499,7 @@ int main(int argc, char **argv) {
 			Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
 		}
 	}
+	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
 
 	if (argc == 1 || Options::ShowHelp) {
 		_COUT logo _ENDL;
@@ -491,6 +597,10 @@ int main(int argc, char **argv) {
 
 	if (Options::UnrealLabelListFName[0]) {
 		LabelTable.DumpForUnreal();
+	}
+
+	if (Options::CSpectMapFName[0]) {
+		LabelTable.DumpForCSpect();
 	}
 
 	if (Options::SymbolListFName[0]) {

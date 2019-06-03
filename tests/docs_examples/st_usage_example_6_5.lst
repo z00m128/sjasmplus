@@ -1,0 +1,25 @@
+# file opened: st_usage_example_6_5.asm
+ 1    0000                      STRUCT BIN_FILE_MAP, 256
+ 2    0000 ~            value1      BYTE
+ 3    0000 ~            value2      WORD
+ 4    0000                      ENDS
+ 5    0000
+ 6    0000                      ORG  0x8000
+ 7    8000              binData BIN_FILE_MAP = $        ; set up label values only (no bytes)
+ 8    8000                      ; INCBIN "some_data.bin"  ; load the bytes from file instead
+ 9    8000                      INCBIN "st_usage_example_6_5.asm"   ; include the source itself to not error out
+10    81BC
+11    81BC                      ; using the data through struct definition
+12    81BC 3A 00 81             ld  a,(binData.value1)
+13    81BF 2A 01 81             ld  hl,(binData.value2)
+14    81C2
+# file closed: st_usage_example_6_5.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0103 X BIN_FILE_MAP
+0x0100 X BIN_FILE_MAP.value1
+0x0101 X BIN_FILE_MAP.value2
+0x8000 X binData
+0x8100   binData.value1
+0x8101   binData.value2

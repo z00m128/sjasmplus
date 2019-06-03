@@ -30,7 +30,7 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.13.0"
+#define VERSION "1.13.1"
 
 #define LASTPASS 3
 
@@ -55,7 +55,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::flush;
-using std::stack;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -46,21 +46,23 @@ int ParseExpPrim(char*& p, aint& nval) {
 				Error("')' expected");
 				return 0;
 		 }
-	} else if (DeviceID && *p == '{') {
-	  	++p; res = ParseExpression(p, nval);
-		/*if (nval < 0x4000) {
-			Error("Address in {..} must be more than 4000h"); return 0;
-		} */
-		if (nval > 0xFFFE) {
-			Error("Address in {..} must be less than FFFFh"); return 0;
-		}
+	} else if (DeviceID && *p == '{') {		// read WORD/BYTE from virtual device memory
+		char* const readMemP = p;
+		const int byteOnly = cmphstr(++p, "b");
+		ParseExpression(p, nval);
 		if (!need(p, '}')) {
-			Error("'}' expected"); return 0;
+			Error("'}' expected", readMemP, SUPPRESS);
+			return 0;
 		}
-
-	  	nval = (aint) (MemGetByte(nval) + (MemGetByte(nval + 1) << 8));
-
-	  	return 1;
+		if (nval < 0 || (0xFFFE + byteOnly) < nval) {
+			Error("Address in {..} must fetch bytes from 0x0000..0xFFFF range", readMemP);
+			nval = 0;
+			return 1;						// and return zero value as result (avoid "syntax error")
+		}
+		res = int(MemGetByte(nval));
+		if (!byteOnly) res += int(MemGetByte(nval + 1)) << 8;
+		nval = res;
+		return 1;
 	} else if (isdigit((unsigned char) * p) || (*p == '#' && isalnum((unsigned char) * (p + 1))) || (*p == '$' && isalnum((unsigned char) * (p + 1))) || *p == '%') {
 	  	res = GetConstant(p, nval);
 	} else if (isalpha((unsigned char) * p) || *p == '_' || *p == '.' || *p == '@') {
@@ -447,7 +449,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		// update previous/current word is define-related directive
 		isPrevDefDir = isCurrDefDir;
 		kp = lp;
-		isCurrDefDir = afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine")
+		isCurrDefDir = afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine") || cmphstr(kp, "defarray+")
 			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
 
 		// The following loop is recursive-like macro/define substitution, the `*lp` here points
@@ -481,7 +483,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 						}
 						if (val < 0 || NULL == a) {
 							*ver = 0;			// substitute with empty string
-							Error("[ARRAY] index not in 0..<Size-1> range");
+							Error("[ARRAY] index not in 0..<Size-1> range", nextSubIdLp, SUPPRESS);
 						} else {
 							ver = a->string;	// substitute with array value
 						}
@@ -538,7 +540,7 @@ char* ReplaceDefine(char* lp) {
 
 void ParseLabel() {
 	if (White()) return;
-	if (Options::IsPseudoOpBOF && ParseDirective(true)) return;
+	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
 	char temp[LINEMAX], * tp = temp, * ttp;
 	aint val, oval;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
@@ -561,8 +563,8 @@ void ParseLabel() {
 			Error("Local-labels flow differs in this pass (missing/new local label or final pass source difference)");
 		}
 	} else {
-		bool IsDEFL = false;
-		if ((IsDEFL = NeedDEFL()) || NeedEQU()) {
+		bool IsDEFL = NeedDEFL(), IsEQU = NeedEQU();
+		if (IsDEFL || IsEQU) {
 			if (!ParseExpression(lp, val)) {
 				Error("Expression error", lp);
 				val = 0;
@@ -592,9 +594,10 @@ void ParseLabel() {
 			if (LastParsedLabel == NULL) {
 				Error("No enough memory!", NULL, FATAL);
 			}
+			LastParsedLabelLine = CompiledCurrentLine;
 		}
 		if (pass == LASTPASS) {
-			if (IsDEFL && !LabelTable.Insert(tp, val, false, IsDEFL)) {
+			if (IsDEFL && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
 				Error("Duplicate label", tp, PASS3);
 			}
 			if (!GetLabelValue(ttp, oval)) {
@@ -609,9 +612,9 @@ void ParseLabel() {
 
 				delete[] buf;
 			}
-		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL) && !LabelTable.Update(tp, val)) {
+		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU) && !LabelTable.Update(tp, val)) {
 			Error("Duplicate label", tp, EARLY);
-		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL)) {
+		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
 			Error("Duplicate label", tp, EARLY);
 		}
 		delete[] tp;
@@ -652,6 +655,7 @@ unsigned char win2dos[] = //taken from HorrorWord %)))
 //#define DEBUG_COUT_PARSE_LINE
 
 void ParseLine(bool parselabels) {
+	++CompiledCurrentLine;
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
@@ -664,7 +668,6 @@ void ParseLine(bool parselabels) {
 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),
 					(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
-			++CompiledCurrentLine;
 			ParseDirective_REPT();
 			return;
 		}
@@ -674,7 +677,6 @@ void ParseLine(bool parselabels) {
 			(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'), RepeatStack.size(),
 			(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
-	++CompiledCurrentLine;
 	lp = ReplaceDefine(line);
 
 #ifdef DEBUG_COUT_PARSE_LINE
