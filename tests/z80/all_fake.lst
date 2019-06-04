@@ -20,6 +20,7 @@ all_fake.asm(11): warning: Fake instruction: sla bc
  11   801A CB 21 CB 10  sla_bc              sla bc
 all_fake.asm(12): warning: Fake instruction: sla de
  12   801E CB 23 CB 12  sla_de              sla de
+all_fake.asm(13): warning: Fake instruction: sla hl
  13   8022 29           sla_hl              sla hl
 all_fake.asm(14): warning: Fake instruction: sll bc
  14   8023 CB 31 CB 10  sll_bc              sll bc
@@ -102,26 +103,26 @@ all_fake.asm(51): warning: Fake instruction: ld hl,(iy+$77)
  51   80A5 66 78
  52   80A7
 all_fake.asm(53): warning: Fake instruction: ld ix,bc
- 53   80A7 DD 69 DD 60  ld_ix_bc            ld ix,bc
+ 53   80A7 DD 60 DD 69  ld_ix_bc            ld ix,bc
 all_fake.asm(54): warning: Fake instruction: ld ix,de
- 54   80AB DD 6B DD 62  ld_ix_de            ld ix,de
+ 54   80AB DD 62 DD 6B  ld_ix_de            ld ix,de
 all_fake.asm(55): warning: Fake instruction: ld ix,hl
  55   80AF E5 DD E1     ld_ix_hl            ld ix,hl
 all_fake.asm(56): warning: Fake instruction: ld ix,ix
- 56   80B2 DD 6D DD 64  ld_ix_ix            ld ix,ix
+ 56   80B2 DD 64 DD 6D  ld_ix_ix            ld ix,ix
 all_fake.asm(57): warning: Fake instruction: ld ix,iy
  57   80B6 FD E5 DD E1  ld_ix_iy            ld ix,iy
  58   80BA
 all_fake.asm(59): warning: Fake instruction: ld iy,bc
- 59   80BA FD 69 FD 60  ld_iy_bc            ld iy,bc
+ 59   80BA FD 60 FD 69  ld_iy_bc            ld iy,bc
 all_fake.asm(60): warning: Fake instruction: ld iy,de
- 60   80BE FD 6B FD 62  ld_iy_de            ld iy,de
+ 60   80BE FD 62 FD 6B  ld_iy_de            ld iy,de
 all_fake.asm(61): warning: Fake instruction: ld iy,hl
  61   80C2 E5 FD E1     ld_iy_hl            ld iy,hl
 all_fake.asm(62): warning: Fake instruction: ld iy,ix
  62   80C5 DD E5 FD E1  ld_iy_ix            ld iy,ix
 all_fake.asm(63): warning: Fake instruction: ld iy,iy
- 63   80C9 FD 6D FD 64  ld_iy_iy            ld iy,iy
+ 63   80C9 FD 64 FD 6D  ld_iy_iy            ld iy,iy
  64   80CD
 all_fake.asm(65): warning: Fake instruction: ld (hl),bc
  65   80CD 71 23 70 2B  ld_#hl#_bc          ld (hl),bc
@@ -487,15 +488,17 @@ all_fake.asm(208): warning: Fake instruction: mul
 209   830D                  ; no message when in --zxnext=cspect mode
 210   830D DD 01        zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
 211   830F DD 00        zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
-212   8311                  OPT --zxnext    ; do 2x error stating the requirement
+212   8311                  OPT --zxnext    ; do 2x error stating the requirement (using nops to advance labels)
 all_fake.asm(213): error: [BREAK] fake instruction "break" must be specifically enabled by --zxnext=cspect option
 213   8311              zxn_csp_break2      break
+213   8311 00             nop
 all_fake.asm(214): error: [EXIT] fake instruction "exit" must be specifically enabled by --zxnext=cspect option
-214   8311              zxn_csp_exit2       exit
-215   8311
-216   8311                  ; debug snapshot for Cspect
-217   8311              ;     DEVICE ZXSPECTRUM48 : CSPECTMAP : SAVESNA "all_fake.sna", 0x8000
-218   8311
+214   8312              zxn_csp_exit2       exit
+214   8312 00             nop
+215   8313
+216   8313                  ; debug snapshot for Cspect
+217   8313              ;     DEVICE ZXSPECTRUM48 : CSPECTMAP : SAVESNA "all_fake.sna", 0x8000
+218   8313
 # file closed: all_fake.asm
 
 Value    Label
@@ -684,4 +687,4 @@ Value    Label
 0x830D X zxn_csp_break
 0x830F X zxn_csp_exit
 0x8311 X zxn_csp_break2
-0x8311 X zxn_csp_exit2
+0x8312 X zxn_csp_exit2

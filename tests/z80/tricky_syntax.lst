@@ -1,0 +1,50 @@
+# file opened: tricky_syntax.asm
+ 1    0000                  ; test various tricky cases of syntax
+ 2    0000 CE 07            adc     a , (   ( 3 ) + ( 4 )   )
+ 3    0002 3A 07 00         ld      a , (   ( 3 ) + ( 4 )   )
+ 4    0005 3E 07            ld      a ,     ( 3 ) + ( 4 )
+ 5    0007 3E 07            ld      a ,     ( 3 ) | ( 4 )
+ 6    0009 3A 07 00         ld      a ,       ( 3 | 4 )
+ 7    000C 3A 07 00         ld      a,((3|4))
+ 8    000F 3A 07 00         ld      a,(+(3|4))
+ 9    0012 3E 07            ld      a,+((3|4))
+10    0014
+11    0014                  ; test all IXY variants recognized by parser
+12    0014 DD 7C DD 7C      ld      a,hx, a,xh, a,ixh, a,HX, a,XH, a,IXH, a,high ix, a,high IX, a,HIGH ix, a,HIGH IX
+12    0018 DD 7C DD 7C
+12    001C DD 7C DD 7C
+12    0020 DD 7C DD 7C
+12    0024 DD 7C DD 7C
+13    0028 DD 7D DD 7D      ld      a,lx, a,xl, a,ixl, a,LX, a,XL, a,IXL, a,low  ix, a,low  IX, a,LOW  ix, a,LOW  IX
+13    002C DD 7D DD 7D
+13    0030 DD 7D DD 7D
+13    0034 DD 7D DD 7D
+13    0038 DD 7D DD 7D
+14    003C FD 7C FD 7C      ld      a,hy, a,yh, a,iyh, a,HY, a,YH, a,IYH, a,high iy, a,high IY, a,HIGH iy, a,HIGH IY
+14    0040 FD 7C FD 7C
+14    0044 FD 7C FD 7C
+14    0048 FD 7C FD 7C
+14    004C FD 7C FD 7C
+15    0050 FD 7D FD 7D      ld      a,ly, a,yl, a,iyl, a,LY, a,YL, a,IYL, a,low  iy, a,low  IY, a,LOW  iy, a,LOW  IY
+15    0054 FD 7D FD 7D
+15    0058 FD 7D FD 7D
+15    005C FD 7D FD 7D
+15    0060 FD 7D FD 7D
+16    0064 DD E5 DD E5      push    ix, IX
+17    0068 FD E5 FD E5      push    iy, IY
+18    006C
+19    006C E9 E9 DD E9      jp      (hl), hl, (ix), ix, (iy), iy        ; valid
+19    0070 DD E9 FD E9
+19    0074 FD E9
+20    0076                  ; invalid
+tricky_syntax.asm(21): error: Label not found: hl
+21    0076 C3 00 00         jp      ((hl))
+tricky_syntax.asm(22): error: Label not found: ix
+22    0079 C3 00 00         jp      ((ix))
+tricky_syntax.asm(23): error: Label not found: iy
+23    007C C3 00 00         jp      ((iy))
+24    007F
+# file closed: tricky_syntax.asm
+
+Value    Label
+------ - -----------------------------------------------------------
