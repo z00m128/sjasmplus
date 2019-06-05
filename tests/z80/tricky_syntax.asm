@@ -21,3 +21,41 @@
     jp      ((hl))
     jp      ((ix))
     jp      ((iy))
+
+    ; ld r16,nnnn vs ld r16,(nnnn) heuristics in default syntax mode
+    ld      bc, $1230 + 4  , bc, ($1230) + (4)  , bc,+($1230 + 4)
+    ld      bc,($1230 + 4) , bc,(($1230) + (4)) , bc, [$1230 + 4] , bc,[($1230  +  4)]
+
+    ld      de, $1230 + 4  , de, ($1230) + (4)  , de,+($1230 + 4)
+    ld      de,($1230 + 4) , de,(($1230) + (4)) , de, [$1230 + 4] , de,[($1230  +  4)]
+
+    ld      hl, $1230 + 4  , hl, ($1230) + (4)  , hl,+($1230 + 4)
+    ld      hl,($1230 + 4) , hl,(($1230) + (4)) , hl, [$1230 + 4] , hl,[($1230  +  4)]
+
+    ld      ix, $1230 + 4  , ix, ($1230) + (4)  , ix,+($1230 + 4)
+    ld      ix,($1230 + 4) , ix,(($1230) + (4)) , ix, [$1230 + 4] , ix,[($1230  +  4)]
+
+    ld      iy, $1230 + 4  , iy, ($1230) + (4)  , iy,+($1230 + 4)
+    ld      iy,($1230 + 4) , iy,(($1230) + (4)) , iy, [$1230 + 4] , iy,[($1230  +  4)]
+
+    ld      sp, $1230 + 4  , sp, ($1230) + (4)  , sp,+($1230 + 4)
+    ld      sp,($1230 + 4) , sp,(($1230) + (4)) , sp, [$1230 + 4] , sp,[($1230  +  4)]
+
+    ld      bc,(hl), de,(hl)                    ; valid fake instructions
+    ld      hl,(ix+1), hl,(ix-128), hl,(ix+126)
+    ld      hl,(iy+1), hl,(iy-128), hl,(iy+126)
+    ; invalid
+    ld      hl,(hl)
+    ld      sp,(hl)
+    ld      ix,(hl)
+    ld      iy,(hl)
+    ld      hl,(ix+127)
+    ld      hl,(ix-129)
+    ld      hl,(iy+127)
+    ld      hl,(iy-129)
+
+    ex      de,hl
+    ex      hl,de
+    ex      af
+    ex      af,af
+    ex      af,af'

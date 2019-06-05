@@ -143,531 +143,577 @@ invalid_LD.asm(31): error: Illegal instruction:         ld  i,reg8[R1]
 32    0000             >R1=R1+1
 33    0000                  EDUP
 34    0000
-35    0000                  ; ld r16,SP doesn't exist
+35    0000                  ; ld r16,SP , AF,r16, r16,AF doesn't exist
 36    0000              R1=0
 37    0000                  DUP 7
 invalid_LD.asm(38): error: Illegal instruction:         ld  reg16[R1],sp
 38    0000             >        ld  af,sp
-39    0000             >R1=R1+1
+invalid_LD.asm(39): error: Illegal instruction:         ld  af,reg16[R1]
+39    0000             >        ld  af,af
+invalid_LD.asm(40): error: Illegal instruction:         ld  reg16[R1],af
+40    0000             >        ld  af,af
+41    0000             >R1=R1+1
 invalid_LD.asm(38): error: Illegal instruction:         ld  reg16[R1],sp
 38    0000             >        ld  bc,sp
-39    0000             >R1=R1+1
+invalid_LD.asm(39): error: Illegal instruction:         ld  af,reg16[R1]
+39    0000             >        ld  af,bc
+invalid_LD.asm(40): error: Illegal instruction:         ld  reg16[R1],af
+40    0000             >        ld  bc,af
+41    0000             >R1=R1+1
 invalid_LD.asm(38): error: Illegal instruction:         ld  reg16[R1],sp
 38    0000             >        ld  de,sp
-39    0000             >R1=R1+1
+invalid_LD.asm(39): error: Illegal instruction:         ld  af,reg16[R1]
+39    0000             >        ld  af,de
+invalid_LD.asm(40): error: Illegal instruction:         ld  reg16[R1],af
+40    0000             >        ld  de,af
+41    0000             >R1=R1+1
 invalid_LD.asm(38): error: Illegal instruction:         ld  reg16[R1],sp
 38    0000             >        ld  hl,sp
-39    0000             >R1=R1+1
+invalid_LD.asm(39): error: Illegal instruction:         ld  af,reg16[R1]
+39    0000             >        ld  af,hl
+invalid_LD.asm(40): error: Illegal instruction:         ld  reg16[R1],af
+40    0000             >        ld  hl,af
+41    0000             >R1=R1+1
 invalid_LD.asm(38): error: Illegal instruction:         ld  reg16[R1],sp
 38    0000             >        ld  ix,sp
-39    0000             >R1=R1+1
+invalid_LD.asm(39): error: Illegal instruction:         ld  af,reg16[R1]
+39    0000             >        ld  af,ix
+invalid_LD.asm(40): error: Illegal instruction:         ld  reg16[R1],af
+40    0000             >        ld  ix,af
+41    0000             >R1=R1+1
 invalid_LD.asm(38): error: Illegal instruction:         ld  reg16[R1],sp
 38    0000             >        ld  iy,sp
-39    0000             >R1=R1+1
+invalid_LD.asm(39): error: Illegal instruction:         ld  af,reg16[R1]
+39    0000             >        ld  af,iy
+invalid_LD.asm(40): error: Illegal instruction:         ld  reg16[R1],af
+40    0000             >        ld  iy,af
+41    0000             >R1=R1+1
 invalid_LD.asm(38): error: Illegal instruction:         ld  reg16[R1],sp
 38    0000             >        ld  sp,sp
-39    0000             >R1=R1+1
-40    0000                  EDUP
-41    0000
-42    0000                  ; ld r8,r16 / ld r16,r8     ; will produce also valid fake ld de|bc,(hl) and similar
-43    0000              R1=0
-44    0000                  DUP 12
-45    0000             >R2=0
-46    0000             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  a,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  af,a
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  a,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  bc,a
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  a,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  de,a
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  a,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  hl,a
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  a,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  ix,a
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  a,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  iy,a
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  a,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  sp,a
-49    0000             >R2=R2+1
-50    0000             >        EDUP
-51    0000             >R1=R1+1
-45    0000             >R2=0
-46    0000             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  b,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  af,b
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  b,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  bc,b
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  b,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  de,b
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  b,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  hl,b
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  b,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  ix,b
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  b,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  iy,b
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  b,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  sp,b
-49    0000             >R2=R2+1
-50    0000             >        EDUP
-51    0000             >R1=R1+1
-45    0000             >R2=0
-46    0000             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  c,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  af,c
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  c,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  bc,c
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  c,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  de,c
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  c,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  hl,c
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  c,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  ix,c
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  c,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  iy,c
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  c,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  sp,c
-49    0000             >R2=R2+1
-50    0000             >        EDUP
-51    0000             >R1=R1+1
-45    0000             >R2=0
-46    0000             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  d,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  af,d
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  d,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  bc,d
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  d,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  de,d
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  d,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  hl,d
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  d,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  ix,d
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  d,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  iy,d
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  d,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  sp,d
-49    0000             >R2=R2+1
-50    0000             >        EDUP
-51    0000             >R1=R1+1
-45    0000             >R2=0
-46    0000             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  e,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  af,e
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  e,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  bc,e
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  e,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  de,e
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  e,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  hl,e
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  e,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  ix,e
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  e,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  iy,e
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  e,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  sp,e
-49    0000             >R2=R2+1
-50    0000             >        EDUP
-51    0000             >R1=R1+1
-45    0000             >R2=0
-46    0000             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  h,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  af,h
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  h,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  bc,h
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  h,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  de,h
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  h,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  hl,h
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  h,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  ix,h
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  h,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  iy,h
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  h,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  sp,h
-49    0000             >R2=R2+1
-50    0000             >        EDUP
-51    0000             >R1=R1+1
-45    0000             >R2=0
-46    0000             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  l,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  af,l
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  l,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  bc,l
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  l,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  de,l
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  l,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  hl,l
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  l,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  ix,l
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  l,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  iy,l
-49    0000             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  l,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  sp,l
-49    0000             >R2=R2+1
-50    0000             >        EDUP
-51    0000             >R1=R1+1
-45    0000             >R2=0
-46    0000             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0000             >            ld  (hl),af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0000             >            ld  af,(hl)
-49    0000             >R2=R2+1
-47    0000 71 23 70 2B >            ld  (hl),bc
-48    0004 4E 23 46 2B >            ld  bc,(hl)
-49    0008             >R2=R2+1
-47    0008 73 23 72 2B >            ld  (hl),de
-48    000C 5E 23 56 2B >            ld  de,(hl)
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  (hl),hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  hl,(hl)
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  (hl),ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  ix,(hl)
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  (hl),iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  iy,(hl)
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  (hl),sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  sp,(hl)
-49    0010             >R2=R2+1
-50    0010             >        EDUP
-51    0010             >R1=R1+1
-45    0010             >R2=0
-46    0010             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixh,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  af,ixh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixh,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  bc,ixh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixh,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  de,ixh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixh,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  hl,ixh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixh,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  ix,ixh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixh,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  iy,ixh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixh,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  sp,ixh
-49    0010             >R2=R2+1
-50    0010             >        EDUP
-51    0010             >R1=R1+1
-45    0010             >R2=0
-46    0010             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixl,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  af,ixl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixl,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  bc,ixl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixl,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  de,ixl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixl,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  hl,ixl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixl,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  ix,ixl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixl,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  iy,ixl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  ixl,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  sp,ixl
-49    0010             >R2=R2+1
-50    0010             >        EDUP
-51    0010             >R1=R1+1
-45    0010             >R2=0
-46    0010             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyh,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  af,iyh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyh,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  bc,iyh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyh,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  de,iyh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyh,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  hl,iyh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyh,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  ix,iyh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyh,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  iy,iyh
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyh,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  sp,iyh
-49    0010             >R2=R2+1
-50    0010             >        EDUP
-51    0010             >R1=R1+1
-45    0010             >R2=0
-46    0010             >        DUP 7
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyl,af
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  af,iyl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyl,bc
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  bc,iyl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyl,de
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  de,iyl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyl,hl
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  hl,iyl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyl,ix
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  ix,iyl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyl,iy
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  iy,iyl
-49    0010             >R2=R2+1
-invalid_LD.asm(47): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
-47    0010             >            ld  iyl,sp
-invalid_LD.asm(48): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
-48    0010             >            ld  sp,iyl
-49    0010             >R2=R2+1
-50    0010             >        EDUP
-51    0010             >R1=R1+1
-52    0010                  EDUP
-53    0010
-54    0010                  ; special cases for MEM_HL "register"
-55    0010              R1=7        ; skip A, .., L (start with "(hl)")
-56    0010                  DUP 5
-invalid_LD.asm(57): error: Illegal instruction:         ld  reg8[R1],(hl)
-57    0010             >        ld  (hl),(hl)
-invalid_LD.asm(58): error: Illegal instruction:         ld  (hl),reg8[R1]
-58    0010             >        ld  (hl),(hl)
-59    0010             >R1=R1+1
-invalid_LD.asm(57): error: Illegal instruction:         ld  reg8[R1],(hl)
-57    0010             >        ld  ixh,(hl)
-invalid_LD.asm(58): error: Illegal instruction:         ld  (hl),reg8[R1]
-58    0010             >        ld  (hl),ixh
-59    0010             >R1=R1+1
-invalid_LD.asm(57): error: Illegal instruction:         ld  reg8[R1],(hl)
-57    0010             >        ld  ixl,(hl)
-invalid_LD.asm(58): error: Illegal instruction:         ld  (hl),reg8[R1]
-58    0010             >        ld  (hl),ixl
-59    0010             >R1=R1+1
-invalid_LD.asm(57): error: Illegal instruction:         ld  reg8[R1],(hl)
-57    0010             >        ld  iyh,(hl)
-invalid_LD.asm(58): error: Illegal instruction:         ld  (hl),reg8[R1]
-58    0010             >        ld  (hl),iyh
-59    0010             >R1=R1+1
-invalid_LD.asm(57): error: Illegal instruction:         ld  reg8[R1],(hl)
-57    0010             >        ld  iyl,(hl)
-invalid_LD.asm(58): error: Illegal instruction:         ld  (hl),reg8[R1]
-58    0010             >        ld  (hl),iyl
-59    0010             >R1=R1+1
-60    0010                  EDUP
-61    0010
+invalid_LD.asm(39): error: Illegal instruction:         ld  af,reg16[R1]
+39    0000             >        ld  af,sp
+invalid_LD.asm(40): error: Illegal instruction:         ld  reg16[R1],af
+40    0000             >        ld  sp,af
+41    0000             >R1=R1+1
+42    0000                  EDUP
+43    0000
+44    0000                  ; ld r8,r16 / ld r16,r8     ; includes four valid fakes: ld bc|de,(hl) and (hl),bc|de
+45    0000              R1=0
+46    0000                  DUP 12
+47    0000             >R2=0
+48    0000             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  a,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  af,a
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  a,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  bc,a
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  a,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  de,a
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  a,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  hl,a
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  a,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  ix,a
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  a,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  iy,a
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  a,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  sp,a
+51    0000             >R2=R2+1
+52    0000             >        EDUP
+53    0000             >R1=R1+1
+47    0000             >R2=0
+48    0000             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  b,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  af,b
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  b,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  bc,b
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  b,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  de,b
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  b,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  hl,b
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  b,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  ix,b
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  b,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  iy,b
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  b,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  sp,b
+51    0000             >R2=R2+1
+52    0000             >        EDUP
+53    0000             >R1=R1+1
+47    0000             >R2=0
+48    0000             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  c,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  af,c
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  c,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  bc,c
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  c,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  de,c
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  c,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  hl,c
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  c,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  ix,c
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  c,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  iy,c
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  c,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  sp,c
+51    0000             >R2=R2+1
+52    0000             >        EDUP
+53    0000             >R1=R1+1
+47    0000             >R2=0
+48    0000             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  d,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  af,d
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  d,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  bc,d
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  d,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  de,d
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  d,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  hl,d
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  d,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  ix,d
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  d,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  iy,d
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  d,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  sp,d
+51    0000             >R2=R2+1
+52    0000             >        EDUP
+53    0000             >R1=R1+1
+47    0000             >R2=0
+48    0000             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  e,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  af,e
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  e,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  bc,e
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  e,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  de,e
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  e,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  hl,e
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  e,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  ix,e
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  e,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  iy,e
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  e,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  sp,e
+51    0000             >R2=R2+1
+52    0000             >        EDUP
+53    0000             >R1=R1+1
+47    0000             >R2=0
+48    0000             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  h,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  af,h
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  h,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  bc,h
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  h,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  de,h
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  h,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  hl,h
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  h,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  ix,h
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  h,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  iy,h
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  h,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  sp,h
+51    0000             >R2=R2+1
+52    0000             >        EDUP
+53    0000             >R1=R1+1
+47    0000             >R2=0
+48    0000             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  l,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  af,l
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  l,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  bc,l
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  l,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  de,l
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  l,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  hl,l
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  l,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  ix,l
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  l,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  iy,l
+51    0000             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  l,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  sp,l
+51    0000             >R2=R2+1
+52    0000             >        EDUP
+53    0000             >R1=R1+1
+47    0000             >R2=0
+48    0000             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0000             >            ld  (hl),af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0000             >            ld  af,(hl)
+51    0000             >R2=R2+1
+49    0000 71 23 70 2B >            ld  (hl),bc
+50    0004 4E 23 46 2B >            ld  bc,(hl)
+51    0008             >R2=R2+1
+49    0008 73 23 72 2B >            ld  (hl),de
+50    000C 5E 23 56 2B >            ld  de,(hl)
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  (hl),hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  hl,(hl)
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  (hl),ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  ix,(hl)
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  (hl),iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  iy,(hl)
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  (hl),sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  sp,(hl)
+51    0010             >R2=R2+1
+52    0010             >        EDUP
+53    0010             >R1=R1+1
+47    0010             >R2=0
+48    0010             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixh,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  af,ixh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixh,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  bc,ixh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixh,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  de,ixh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixh,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  hl,ixh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixh,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  ix,ixh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixh,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  iy,ixh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixh,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  sp,ixh
+51    0010             >R2=R2+1
+52    0010             >        EDUP
+53    0010             >R1=R1+1
+47    0010             >R2=0
+48    0010             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixl,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  af,ixl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixl,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  bc,ixl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixl,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  de,ixl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixl,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  hl,ixl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixl,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  ix,ixl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixl,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  iy,ixl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  ixl,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  sp,ixl
+51    0010             >R2=R2+1
+52    0010             >        EDUP
+53    0010             >R1=R1+1
+47    0010             >R2=0
+48    0010             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyh,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  af,iyh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyh,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  bc,iyh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyh,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  de,iyh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyh,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  hl,iyh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyh,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  ix,iyh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyh,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  iy,iyh
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyh,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  sp,iyh
+51    0010             >R2=R2+1
+52    0010             >        EDUP
+53    0010             >R1=R1+1
+47    0010             >R2=0
+48    0010             >        DUP 7
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyl,af
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  af,iyl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyl,bc
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  bc,iyl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyl,de
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  de,iyl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyl,hl
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  hl,iyl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyl,ix
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  ix,iyl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyl,iy
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  iy,iyl
+51    0010             >R2=R2+1
+invalid_LD.asm(49): error: Illegal instruction:             ld  reg8[R1],reg16[R2]
+49    0010             >            ld  iyl,sp
+invalid_LD.asm(50): error: Illegal instruction:             ld  reg16[R2],reg8[R1]
+50    0010             >            ld  sp,iyl
+51    0010             >R2=R2+1
+52    0010             >        EDUP
+53    0010             >R1=R1+1
+54    0010                  EDUP
+55    0010
+56    0010                  ; special cases for MEM_HL "register"
+57    0010              R1=7        ; skip A, .., L (start with "(hl)")
+58    0010                  DUP 5
+invalid_LD.asm(59): error: Illegal instruction:         ld  reg8[R1],(hl)
+59    0010             >        ld  (hl),(hl)
+invalid_LD.asm(60): error: Illegal instruction:         ld  (hl),reg8[R1]
+60    0010             >        ld  (hl),(hl)
+61    0010             >R1=R1+1
+invalid_LD.asm(59): error: Illegal instruction:         ld  reg8[R1],(hl)
+59    0010             >        ld  ixh,(hl)
+invalid_LD.asm(60): error: Illegal instruction:         ld  (hl),reg8[R1]
+60    0010             >        ld  (hl),ixh
+61    0010             >R1=R1+1
+invalid_LD.asm(59): error: Illegal instruction:         ld  reg8[R1],(hl)
+59    0010             >        ld  ixl,(hl)
+invalid_LD.asm(60): error: Illegal instruction:         ld  (hl),reg8[R1]
+60    0010             >        ld  (hl),ixl
+61    0010             >R1=R1+1
+invalid_LD.asm(59): error: Illegal instruction:         ld  reg8[R1],(hl)
+59    0010             >        ld  iyh,(hl)
+invalid_LD.asm(60): error: Illegal instruction:         ld  (hl),reg8[R1]
+60    0010             >        ld  (hl),iyh
+61    0010             >R1=R1+1
+invalid_LD.asm(59): error: Illegal instruction:         ld  reg8[R1],(hl)
+59    0010             >        ld  iyl,(hl)
+invalid_LD.asm(60): error: Illegal instruction:         ld  (hl),reg8[R1]
+60    0010             >        ld  (hl),iyl
+61    0010             >R1=R1+1
+62    0010                  EDUP
+63    0010
+64    0010                  ; some cases manually picked
+invalid_LD.asm(65): error: Illegal instruction:     ld      sp,bc
+65    0010                  ld      sp,bc
+invalid_LD.asm(66): error: Illegal instruction:     ld      sp,de
+66    0010                  ld      sp,de
+invalid_LD.asm(67): error: Illegal instruction:     ld      hl,sp
+67    0010                  ld      hl,sp
+invalid_LD.asm(68): error: Illegal instruction:     ld      sp,(hl)
+68    0010                  ld      sp,(hl)
+invalid_LD.asm(69): error: Illegal instruction:     ld      hl,(hl)
+69    0010                  ld      hl,(hl)
+invalid_LD.asm(70): error: Illegal instruction:     ld      sp,(ix+1)
+70    0010                  ld      sp,(ix+1)
+invalid_LD.asm(71): error: Illegal instruction:     ld      sp,(sp)
+71    0010                  ld      sp,(sp)
+invalid_LD.asm(72): error: Illegal instruction:     ld      hl,(sp)
+72    0010                  ld      hl,(sp)
+73    0010
 # file closed: invalid_LD.asm
 
 Value    Label

@@ -53,8 +53,6 @@ bool doubleBacktick(char* & p);
 bool nonMaComma(char* & p);		// eats single comma only if multi-arg is configured to non-comma
 EBracketType OpenBracket(char*& p);
 int CloseBracket(char*& p);
-int oparenOLD(char*& p, char c);
-int cparenOLD(char*& p);
 char* getparen(char* p);
 int check8(aint val, bool error=true);
 int check8o(long val);

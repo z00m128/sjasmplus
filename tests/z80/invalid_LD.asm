@@ -32,14 +32,16 @@ R1=1        ; skip A
 R1=R1+1
     EDUP
 
-    ; ld r16,SP doesn't exist
+    ; ld r16,SP , AF,r16, r16,AF doesn't exist
 R1=0
     DUP 7
         ld  reg16[R1],sp
+        ld  af,reg16[R1]
+        ld  reg16[R1],af
 R1=R1+1
     EDUP
 
-    ; ld r8,r16 / ld r16,r8     ; will produce also valid fake ld de|bc,(hl) and similar
+    ; ld r8,r16 / ld r16,r8     ; includes four valid fakes: ld bc|de,(hl) and (hl),bc|de
 R1=0
     DUP 12
 R2=0
@@ -58,3 +60,13 @@ R1=7        ; skip A, .., L (start with "(hl)")
         ld  (hl),reg8[R1]
 R1=R1+1
     EDUP
+
+    ; some cases manually picked
+    ld      sp,bc
+    ld      sp,de
+    ld      hl,sp
+    ld      sp,(hl)
+    ld      hl,(hl)
+    ld      sp,(ix+1)
+    ld      sp,(sp)
+    ld      hl,(sp)

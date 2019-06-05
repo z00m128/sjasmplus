@@ -172,34 +172,6 @@ int CloseBracket(char*& p) {
 	return 1;
 }
 
-int cpc = '4';
-
-/* not modified */
-int oparenOLD(char*& p, char c) {
-	SkipBlanks(p);
-	if (*p != c) {
-		return 0;
-	}
-	if (c == '[') {
-		cpc = ']';
-	}
-	if (c == '(') {
-		cpc = ')';
-	}
-	if (c == '{') {
-		cpc = '}';
-	}
-	++p; return 1;
-}
-
-int cparenOLD(char*& p) {
-	SkipBlanks(p);
-	if (*p != cpc) {
-		return 0;
-	}
-	++p; return 1;
-}
-
 char* getparen(char* p) {
 	int teller = 0;
 	SkipBlanks(p);
