@@ -2986,9 +2986,9 @@ Main
     DB "Kip!",3</programlisting></para>
         </example></para>
 
-		<para>If there is regular label defined on the line with MACRO pseudo-op, the label will
-			be used as macro name - this may collide with true label using the same name, so this
-			is NOT recommended syntax. It was added as compatibility convenience to make porting
+		<para>If there is label defined on the line with MACRO pseudo-op, the label will
+			be used as macro name (current MODULE is NOT applied to macro name).
+			It was added as compatibility convenience to make porting
 			from different assemblers somewhat easier.
 			<example><title></title>
 				<programlisting>LabelAsMacroName    MACRO  arg1?, arg2?

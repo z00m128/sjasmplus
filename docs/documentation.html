@@ -2089,9 +2089,9 @@ Main
     DB "Kip!",3</pre>
         </div></div><p><br class="example-break"></p>
 
-		<p>If there is regular label defined on the line with MACRO pseudo-op, the label will
-			be used as macro name - this may collide with true label using the same name, so this
-			is NOT recommended syntax. It was added as compatibility convenience to make porting
+		<p>If there is label defined on the line with MACRO pseudo-op, the label will
+			be used as macro name (current MODULE is NOT applied to macro name).
+			It was added as compatibility convenience to make porting
 			from different assemblers somewhat easier.
 			</p><div class="example"><a name="idp1339"></a><p class="title"><b>Example 5.59. </b></p><div class="example-contents">
 				<pre class="programlisting">LabelAsMacroName    MACRO  arg1?, arg2?
