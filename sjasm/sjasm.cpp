@@ -198,10 +198,7 @@ void InitPass() {
 		ModuleName = NULL;
 	}
 	ModuleName = NULL;
-	if (LastParsedLabel != NULL) {
-		free(LastParsedLabel);
-		LastParsedLabel = NULL;
-	}
+	SetLastParsedLabel(nullptr);
 	if (vorlabp) free(vorlabp);
 	vorlabp = STRDUP("_");
 	macrolabp = NULL;
@@ -254,6 +251,7 @@ void FreeRAM() {
 	free(vorlabp);		vorlabp = NULL;
 	LabelTable.RemoveAll();
 	DefineTable.RemoveAll();
+	SetLastParsedLabel(nullptr);
 }
 
 

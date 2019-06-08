@@ -41,6 +41,7 @@ int SkipBlanks();
 void SkipToEol(char*& p);
 int NeedEQU();
 int NeedDEFL();
+bool isMacroNext();				// checks if ".macro" directive is ahead (but doesn't consume it)
 char* GetID(char*& p);
 void ResetGrowSubId();
 char* GrowSubId(char* & p);

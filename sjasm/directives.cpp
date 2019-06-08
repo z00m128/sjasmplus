@@ -1568,15 +1568,13 @@ void dirDISPLAY() {
 
 void dirMACRO() {
 	if (lijst) Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
-	if (LastParsedLabelLine == CompiledCurrentLine) {	// A) name of macro is defined by label
-		// add macro with label used as name of it
-		MacroTable.Add(LastParsedLabel, lp);
-		// and remove the name from labels in the last pass
-		if (LASTPASS == pass) LabelTable.Remove(LastParsedLabel);
-	} else {											// B) name of macro follows directive (no label)
-		char* n = GetID(lp);
-		if (n) MacroTable.Add(n, lp);
-		else   Error("[MACRO] Illegal macroname");
+	char* lpLabel = LastParsedLabel;	// modifiable copy of global buffer pointer
+	// get+validate macro name either from label on same line or from following line
+	char* n = GetID(LastParsedLabelLine == CompiledCurrentLine ? lpLabel : lp);
+	if (n) MacroTable.Add(n, lp);
+	else {
+		Error("[MACRO] Illegal macroname");
+		SkipToEol(lp);
 	}
 }
 

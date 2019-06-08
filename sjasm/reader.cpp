@@ -112,6 +112,13 @@ int NeedDEFL() {
 	return 0;
 }
 
+bool isMacroNext() {	// checks if ".macro" directive is ahead (but doesn't consume it)
+	if (SkipBlanks()) return false;
+	char* p = lp;
+	if ('.' == *p) ++p;
+	return cmphstr(p, "macro");
+}
+
 bool anyComma(char*& p) {
 	SkipBlanks(p);
 	if (*p != ',') return false;
