@@ -368,6 +368,42 @@ namespace Z80 {
 		return true;
 	}
 
+	// returns "Z80_A" when successfully finished, otherwise returns result of "GetRegister(lp)"
+	static Z80Reg OpCode_CbFamily(const int baseOpcode, int* e, bool canHaveDstRegForIxy = true) {
+		Z80Reg reg;
+		switch (reg = GetRegister(lp)) {
+		case Z80_B: case Z80_C: case Z80_D: case Z80_E:
+		case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
+			e[0] = 0xcb;
+			e[1] = baseOpcode + reg;
+			return Z80_A;
+		case Z80_BC:	case Z80_DE:	case Z80_HL:
+			return reg;
+		case Z80_UNK:
+			if (BT_NONE == OpenBracket(lp)) break;
+			switch (reg = GetRegister(lp)) {
+			case Z80_IX:
+			case Z80_IY:
+				e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = baseOpcode + Z80_MEM_HL;
+				if (CloseBracket(lp)) e[0] = reg;
+				if (canHaveDstRegForIxy && comma(lp)) {
+					switch (reg = GetRegister(lp)) {
+					case Z80_B: case Z80_C: case Z80_D: case Z80_E:
+					case Z80_H: case Z80_L: case Z80_A:
+						e[3] = baseOpcode + reg;
+						break;
+					default:
+						Error("Illegal destination register", line);
+					}
+				}
+				return Z80_A;
+			default: break;
+			}
+		default: break;
+		}
+		return reg;
+	}
+
 	void OpCode_ADC() {
 		Z80Reg reg;
 		do {
@@ -458,32 +494,9 @@ namespace Z80 {
 	}
 
 	void OpCode_BIT() {
-		Z80Reg reg;
-		int e[5], bit;
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			bit = GetByte(lp);
-			if (!comma(lp)) {
-				bit = -1;
-			}
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 8 * bit + 0x40 + reg; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 8 * bit + 0x46;
-					if (CloseBracket(lp)) e[0] = reg;
-					break;
-				default:
-					break;
-				}
-				break;
-			}
-			if (bit < 0 || bit > 7) e[0] = -1;
+			int e[] { -1, -1, -1, -1, -1 }, bit = GetByte(lp);
+			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0x40, e, false);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -1829,47 +1842,9 @@ namespace Z80 {
 	}
 
 	void OpCode_RES() {
-		Z80Reg reg;
-		int e[5], bit;
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			bit = GetByte(lp);
-			if (!comma(lp)) {
-				bit = -1;
-			}
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 8 * bit + 0x80 + reg;
-				break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 8 * bit + 0x86;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 8 * bit + 0x80 + reg;
-							break;
-						default:
-							Error("[RES] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
-			}
-			if (bit < 0 || bit > 7) e[0] = -1;
+			int e[] { -1, -1, -1, -1, -1 }, bit = GetByte(lp);
+			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0x80, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -1891,47 +1866,11 @@ namespace Z80 {
 		EmitByte(0x45);
 	}
 
-	// returns "Z80_A" when successfully finished, otherwise returns result of "GetRegister(lp)"
-	static Z80Reg OpCode_8bRotate(const int baseOpcode, int* e) {
-		Z80Reg reg;
-		switch (reg = GetRegister(lp)) {
-		case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-		case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-			e[0] = 0xcb;
-			e[1] = baseOpcode + reg;
-			return Z80_A;
-		case Z80_BC:	case Z80_DE:	case Z80_HL:
-			return reg;
-		case Z80_UNK:
-			if (BT_NONE == OpenBracket(lp)) break;
-			switch (reg = GetRegister(lp)) {
-			case Z80_IX:
-			case Z80_IY:
-				e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = baseOpcode + Z80_MEM_HL;
-				if (CloseBracket(lp)) e[0] = reg;
-				if (comma(lp)) {
-					switch (reg = GetRegister(lp)) {
-					case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-					case Z80_H: case Z80_L: case Z80_A:
-						e[3] = baseOpcode + reg;
-						break;
-					default:
-						Error("Illegal destination register", line);
-					}
-				}
-				return Z80_A;
-			default: break;
-			}
-		default: break;
-		}
-		return reg;
-	}
-
 	void OpCode_RL() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
-			switch (reg = OpCode_8bRotate(0x10, e)) {
+			switch (reg = OpCode_CbFamily(0x10, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
@@ -1952,7 +1891,7 @@ namespace Z80 {
 	void OpCode_RLC() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
-			OpCode_8bRotate(0x00, e);
+			OpCode_CbFamily(0x00, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -1970,7 +1909,7 @@ namespace Z80 {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
-			switch (reg = OpCode_8bRotate(0x18, e)) {
+			switch (reg = OpCode_CbFamily(0x18, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
@@ -1991,7 +1930,7 @@ namespace Z80 {
 	void OpCode_RRC() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
-			OpCode_8bRotate(0x08, e);
+			OpCode_CbFamily(0x08, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -2043,48 +1982,9 @@ namespace Z80 {
 	}
 
 	void OpCode_SET() {
-		Z80Reg reg;
-		int e[5], bit;
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			bit = GetByte(lp);
-			if (!comma(lp)) {
-				bit = -1;
-			}
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 8 * bit + 0xc0 + reg ; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 8 * bit + 0xc6;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 8 * bit + 0xc0 + reg;
-							break;
-						default:
-							Error("[SET] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
-			}
-			if (bit < 0 || bit > 7) {
-				e[0] = -1;
-			}
+			int e[] { -1, -1, -1, -1, -1 }, bit = GetByte(lp);
+			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0xc0, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -2102,7 +2002,7 @@ namespace Z80 {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
-			switch (reg = OpCode_8bRotate(0x20, e)) {
+			switch (reg = OpCode_CbFamily(0x20, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_HL:
 				if (Options::noFakes()) break;
@@ -2123,7 +2023,7 @@ namespace Z80 {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
-			switch (reg = OpCode_8bRotate(0x30, e)) {
+			switch (reg = OpCode_CbFamily(0x30, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
@@ -2141,7 +2041,7 @@ namespace Z80 {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
-			switch (reg = OpCode_8bRotate(0x28, e)) {
+			switch (reg = OpCode_CbFamily(0x28, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
@@ -2159,7 +2059,7 @@ namespace Z80 {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
-			switch (reg = OpCode_8bRotate(0x38, e)) {
+			switch (reg = OpCode_CbFamily(0x38, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
