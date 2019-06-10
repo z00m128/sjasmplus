@@ -73,9 +73,9 @@ invalid.asm(36): error: [RST] Illegal operand:     rst     $40
 36    0006                  rst     $40
 invalid.asm(37): error: [RST] Illegal operand:     rst     $80
 37    0006                  rst     $80
-invalid.asm(38): error: [RLC] Illegal operand:     rlc     (ix+7),i
+invalid.asm(38): error: Illegal destination register:     rlc     (ix+7),i
 38    0006 DD CB 07 06      rlc     (ix+7),i
-invalid.asm(39): error: [RRC] Illegal operand:     rrc     (ix-7),r
+invalid.asm(39): error: Illegal destination register:     rrc     (ix-7),r
 39    000A DD CB F9 0E      rrc     (ix-7),r
 invalid.asm(40): error: Unrecognized instruction: nextreg $44,a
 40    000E                  nextreg $44,a

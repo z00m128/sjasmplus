@@ -1891,61 +1891,55 @@ namespace Z80 {
 		EmitByte(0x45);
 	}
 
+	// returns "Z80_A" when successfully finished, otherwise returns result of "GetRegister(lp)"
+	static Z80Reg OpCode_8bRotate(const int baseOpcode, int* e) {
+		Z80Reg reg;
+		switch (reg = GetRegister(lp)) {
+		case Z80_B: case Z80_C: case Z80_D: case Z80_E:
+		case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
+			e[0] = 0xcb;
+			e[1] = baseOpcode + reg;
+			return Z80_A;
+		case Z80_BC:	case Z80_DE:	case Z80_HL:
+			return reg;
+		case Z80_UNK:
+			if (BT_NONE == OpenBracket(lp)) break;
+			switch (reg = GetRegister(lp)) {
+			case Z80_IX:
+			case Z80_IY:
+				e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = baseOpcode + Z80_MEM_HL;
+				if (CloseBracket(lp)) e[0] = reg;
+				if (comma(lp)) {
+					switch (reg = GetRegister(lp)) {
+					case Z80_B: case Z80_C: case Z80_D: case Z80_E:
+					case Z80_H: case Z80_L: case Z80_A:
+						e[3] = baseOpcode + reg;
+						break;
+					default:
+						Error("Illegal destination register", line);
+					}
+				}
+				return Z80_A;
+			default: break;
+			}
+		default: break;
+		}
+		return reg;
+	}
+
 	void OpCode_RL() {
 		Z80Reg reg;
-		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb;
-				e[1] = 0x10 + reg;
-				break;
-			case Z80_BC:
+			int e[] { -1, -1, -1, -1, -1 };
+			switch (reg = OpCode_8bRotate(0x10, e)) {
+			case Z80_A:		break;			// fully processed by the helper function
+			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
 				e[0] = e[2] = 0xcb;
-				e[1] = 0x11;
-				e[3] = 0x10;
+				e[1] = 0x10 + GetRegister_r16Low(reg);
+				e[3] = 0x10 + GetRegister_r16High(reg);
 				break;
-			case Z80_DE:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb;
-				e[1] = 0x13;
-				e[3] = 0x12;
-				break;
-			case Z80_HL:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb;
-				e[1] = 0x15;
-				e[3] = 0x14;
-				break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x16;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 0x10 + reg;
-							break;
-						default:
-							Error("[RL] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
+			default:		break;
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -1956,42 +1950,9 @@ namespace Z80 {
 	}
 
 	void OpCode_RLC() {
-		Z80Reg reg;
-		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 0x0 + reg;
-				break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x6;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = reg;
-							break;
-						default:
-							Error("[RLC] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
-			}
+			int e[] { -1, -1, -1, -1, -1 };
+			OpCode_8bRotate(0x00, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -2007,48 +1968,17 @@ namespace Z80 {
 
 	void OpCode_RR() {
 		Z80Reg reg;
-		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 0x18 + reg ; break;
-			case Z80_BC:
+			int e[] { -1, -1, -1, -1, -1 };
+			switch (reg = OpCode_8bRotate(0x18, e)) {
+			case Z80_A:		break;			// fully processed by the helper function
+			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x18; e[3] = 0x19; break;
-			case Z80_DE:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x1a; e[3] = 0x1b; break;
-			case Z80_HL:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x1c; e[3] = 0x1d; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x1e;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 0x18 + reg;
-							break;
-						default:
-							Error("[RR] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
+				e[0] = e[2] = 0xcb;
+				e[1] = 0x18 + GetRegister_r16High(reg);
+				e[3] = 0x18 + GetRegister_r16Low(reg);
+				break;
+			default:		break;
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -2059,41 +1989,9 @@ namespace Z80 {
 	}
 
 	void OpCode_RRC() {
-		Z80Reg reg;
-		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 0x8 + reg ; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0xe;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 0x8 + reg;
-							break;
-						default:
-							Error("[RRC] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
-			}
+			int e[] { -1, -1, -1, -1, -1 };
+			OpCode_8bRotate(0x08, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -2202,48 +2100,20 @@ namespace Z80 {
 
 	void OpCode_SLA() {
 		Z80Reg reg;
-		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 0x20 + reg ; break;
-			case Z80_BC:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x21; e[3] = 0x10; break;
-			case Z80_DE:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x23; e[3] = 0x12; break;
+			int e[] { -1, -1, -1, -1, -1 };
+			switch (reg = OpCode_8bRotate(0x20, e)) {
+			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_HL:
 				if (Options::noFakes()) break;
 				e[0] = 0x29; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x26;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 0x20 + reg;
-							break;
-						default:
-							Error("[SLA] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
+			case Z80_BC:	case Z80_DE:
+				if (Options::noFakes()) break;
+				e[0] = e[2] = 0xcb;
+				e[1] = 0x20 + GetRegister_r16Low(reg);
+				e[3] = 0x10 + GetRegister_r16High(reg);
+				break;
+			default:		break;
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -2251,48 +2121,17 @@ namespace Z80 {
 
 	void OpCode_SLL() {
 		Z80Reg reg;
-		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 0x30 + reg ; break;
-			case Z80_BC:
+			int e[] { -1, -1, -1, -1, -1 };
+			switch (reg = OpCode_8bRotate(0x30, e)) {
+			case Z80_A:		break;			// fully processed by the helper function
+			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x31; e[3] = 0x10; break;
-			case Z80_DE:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x33; e[3] = 0x12; break;
-			case Z80_HL:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x35; e[3] = 0x14; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x36;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 0x30 + reg;
-							break;
-						default:
-							Error("[SLL] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
+				e[0] = e[2] = 0xcb;
+				e[1] = 0x30 + GetRegister_r16Low(reg);
+				e[3] = 0x10 + GetRegister_r16High(reg);
+				break;
+			default:		break;
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -2300,48 +2139,17 @@ namespace Z80 {
 
 	void OpCode_SRA() {
 		Z80Reg reg;
-		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 0x28 + reg ; break;
-			case Z80_BC:
+			int e[] { -1, -1, -1, -1, -1 };
+			switch (reg = OpCode_8bRotate(0x28, e)) {
+			case Z80_A:		break;			// fully processed by the helper function
+			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x28; e[3] = 0x19; break;
-			case Z80_DE:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x2a; e[3] = 0x1b; break;
-			case Z80_HL:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x2c; e[3] = 0x1d; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x2e;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 0x28 + reg;
-							break;
-						default:
-							Error("[SRA] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
+				e[0] = e[2] = 0xcb;
+				e[1] = 0x28 + GetRegister_r16High(reg);
+				e[3] = 0x18 + GetRegister_r16Low(reg);
+				break;
+			default:		break;
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -2349,48 +2157,17 @@ namespace Z80 {
 
 	void OpCode_SRL() {
 		Z80Reg reg;
-		int e[5];
 		do {
-			e[0] = e[1] = e[2] = e[3] = e[4] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0xcb; e[1] = 0x38 + reg ; break;
-			case Z80_BC:
+			int e[] { -1, -1, -1, -1, -1 };
+			switch (reg = OpCode_8bRotate(0x38, e)) {
+			case Z80_A:		break;			// fully processed by the helper function
+			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x38; e[3] = 0x19; break;
-			case Z80_DE:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x3a; e[3] = 0x1b; break;
-			case Z80_HL:
-				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb; e[1] = 0x3c; e[3] = 0x1d; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0xcb; e[2] = z80GetIDxoffset(lp); e[3] = 0x3e;
-					if (CloseBracket(lp)) e[0] = reg;
-					if (comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
-							e[3] = 0x38 + reg;
-							break;
-						default:
-							Error("[SRL] Illegal operand", line);
-						}
-					}
-					break;
-				default:
-					;
-				}
+				e[0] = e[2] = 0xcb;
+				e[1] = 0x38 + GetRegister_r16High(reg);
+				e[3] = 0x18 + GetRegister_r16Low(reg);
+				break;
+			default:		break;
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
