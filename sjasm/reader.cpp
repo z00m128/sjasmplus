@@ -179,22 +179,17 @@ int CloseBracket(char*& p) {
 	return 1;
 }
 
-char* getparen(char* p) {
-	int teller = 0;
-	SkipBlanks(p);
-	while (*p) {
-		if (*p == '(') {
-			++teller;
-		} else if (*p == ')') {
-			if (teller == 1) {
-				SkipBlanks(++p); return p;
-			} else {
-				--teller;
-			}
+char* ParenthesesEnd(char* p) {
+	int depth = 0;	char pc;
+	if (SkipBlanks(p) || '(' != *p) return nullptr;
+	while (0 != (pc = *p++)) {
+		if ('(' == pc) ++depth;
+		else if (')' == pc && 0 == --depth) {
+			SkipBlanks(p);
+			return p;
 		}
-		++p;
 	}
-	return 0;
+	return nullptr;
 }
 
 char nidtemp[LINEMAX], *nidsubp = nidtemp;

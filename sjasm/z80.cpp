@@ -1130,7 +1130,7 @@ namespace Z80 {
 					}
 					if (Z80_UNK != reg2) break;	//"(register": emit instruction || bug
 					// give non-register another chance to parse as value expression
-					if (BT_ROUND == bt) olp = getparen(--lp);	// test-ptr for whole-expression-in-()
+					if (BT_ROUND == bt) olp = ParenthesesEnd(--lp);	// test-ptr for whole-expression-in-()
 				}
 				if (!ParseExpression(lp, b)) break;
 				if (BT_SQUARE != bt && olp != lp) {	// LD a,imm8
@@ -1203,7 +1203,7 @@ namespace Z80 {
 					}
 					if (Z80_UNK != reg2) break;	//"(register": emit instruction || bug
 					// give non-register another chance to parse as value expression
-					if (BT_ROUND == bt) olp = getparen(--lp);	// test-ptr for whole-expression-in-()
+					if (BT_ROUND == bt) olp = ParenthesesEnd(--lp);	// test-ptr for whole-expression-in-()
 				}
 				b = GetWord(lp);
 				if (BT_SQUARE != bt && olp != lp) {	// ld bc|de|hl|sp,imm16
@@ -1220,7 +1220,7 @@ namespace Z80 {
 			case Z80_IX:
 			case Z80_IY:
 				bt = OpenBracket(lp);
-				if (BT_ROUND == bt) olp = getparen(--lp);	// test-ptr for whole-expression-in-()
+				if (BT_ROUND == bt) olp = ParenthesesEnd(--lp);	// test-ptr for whole-expression-in-()
 				b = GetWord(lp);
 				if (BT_SQUARE != bt && olp != lp) {	// ld ix|iy,imm16
 					e[0] = reg1; e[1] = 0x21; e[2] = b & 255; e[3] = (b >> 8) & 255;
