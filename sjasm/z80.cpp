@@ -165,7 +165,7 @@ namespace Z80 {
 		char* pp = p;
 		SkipBlanks(p);
 		// fast lookup table for single letters 'a'..'i' ('g','j','k' will produce Z80_UNK instantly)
-		constexpr Z80Reg r8[] = { Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L };
+		constexpr Z80Reg r8[] { Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L };
 		if ('a' <= *p && *p <= 'l' && !islabchar(p[1])) return r8[*p++ - 'a'];
 		if ('A' <= *p && *p <= 'L' && !islabchar(p[1])) return r8[*p++ - 'A'];
 		// high/low operators can be used on register pair
@@ -318,54 +318,71 @@ namespace Z80 {
 		return Z80_UNK;
 	}
 
-	void OpCode_ADC() {
-		Z80Reg reg, reg2;
+	bool CommonAluOpcode(const int opcodeBase, int* e, bool hasNonRegA = false, bool nonMultiArgComma = true) {
+		Z80Reg reg;
 		EBracketType bt;
-		do {
-			int e[] = { -1, -1, -1, -1 };
-			switch (reg = GetRegister(lp)) {
-			case Z80_HL:
-				if (!comma(lp)) {
-					Error("[ADC] Comma expected"); break;
-				}
-				switch (reg2 = GetRegister(lp)) {
-				case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
-					e[0] = 0xed; e[1] = 0x4a + reg2 - Z80_BC; break;
-				default:
-					;
-				}
-				break;
-			case Z80_A:
-				if (!comma(lp)) {
-					e[0] = 0x8f; break;
-				}
-				reg = GetRegister(lp);
-			default:
-				switch (reg) {
-				case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-					e[0] = reg&0xFF; e[1] = 0x88 + (reg>>8); break;
-				case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-				case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-					e[0] = 0x88 + reg; break;
-				case Z80_UNK:
-					if (BT_NONE != (bt = OpenBracket(lp))) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_IX:
-						case Z80_IY:
-							e[1] = 0x8e; e[2] = z80GetIDxoffset(lp);
-							if (CloseBracket(lp)) e[0] = reg;
-							break;
-						default:
-							break;
-						}
-						// give "(something..." another chance to parse as value expression
-						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
-						else break;		//"(register" or other bracket: emit instruction || bug
+		char* oldLp = lp;
+		switch (reg = GetRegister(lp)) {
+		case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_IX:	case Z80_IY:
+			if (hasNonRegA) lp = oldLp;	// try to parse it one more time if non-A variants exist
+			return !hasNonRegA;			// invalid first register if only "A" is allowed
+		case Z80_AF:	case Z80_SP:	case Z80_I:		case Z80_R:		case Z80_F:
+			return true;				// invalid first register
+		case Z80_A:		// deal with optional shortened/prolonged form "add a" vs "and a,a", etc..
+			if (nonMultiArgComma) {	// "AND|SUB|... a,b" is possible only when multi-arg is not-comma
+				if (nonMaComma(lp)) reg = GetRegister(lp);
+			} else {
+				if (comma(lp)) reg = GetRegister(lp);
+			}
+		default:
+			// with optional "a," dealt with, do the argument recognition and machine code emitting
+			switch (reg) {
+			case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
+				*e++ = reg&0xFF;		// add prefix
+				reg = Z80Reg(reg>>8);	// convert reg into H or L and continue
+			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
+			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
+				e[0] = opcodeBase + reg;
+				return true;			// successfully assembled
+			case Z80_UNK:
+				if (BT_NONE != (bt = OpenBracket(lp))) {	// (ixy+d) variants
+					switch (reg = GetRegister(lp)) {
+					case Z80_IX:
+					case Z80_IY:
+						e[1] = opcodeBase + Z80_MEM_HL; e[2] = z80GetIDxoffset(lp);
+						if (CloseBracket(lp)) e[0] = reg;
+						return true;
+					default:
+						break;
 					}
-					e[0] = 0xce; e[1] = GetByte(lp);
-					break;
-				default:
-					break;
+					// give "(something..." another chance to parse as value expression
+					if (Z80_UNK == reg && BT_ROUND == bt) --lp;
+					else return true;	//"(register" or other bracket: emit instruction || bug
+				}
+				e[0] = opcodeBase + 0x46; e[1] = GetByte(lp);	// imm8 variants
+				return true;
+			default:
+				break;
+			}
+		}
+		return true;
+	}
+
+	void OpCode_ADC() {
+		Z80Reg reg;
+		do {
+			int e[] { -1, -1, -1, -1 };
+			if (!CommonAluOpcode(0x88, e, true, false)) {	// handle common 8-bit variants
+				if (Z80_HL == GetRegister(lp)) {
+					if (!comma(lp)) {
+						Error("[ADC] Comma expected");
+					} else {
+						switch (reg = GetRegister(lp)) {
+						case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+							e[0] = 0xed; e[1] = 0x4a + reg - Z80_BC; break;
+						default: break;
+						}
+					}
 				}
 			}
 			EmitBytes(e);
@@ -374,86 +391,55 @@ namespace Z80 {
 
 	void OpCode_ADD() {
 		Z80Reg reg, reg2;
-		EBracketType bt;
 		do {
-			int e[] = { -1, -1, -1, -1, -1 };
-			switch (reg = GetRegister(lp)) {
-			case Z80_HL:
+			int e[] { -1, -1, -1, -1, -1 };
+			if (!CommonAluOpcode(0x80, e, true, false)) {	// handle common 8-bit variants
+				// add hl|ixy|bc|de,... variants
+				reg = GetRegister(lp);	if (Z80_UNK == reg) break;
 				if (!comma(lp)) {
-					Error("[ADD] Comma expected"); break;
-				}
-				switch (reg2 = GetRegister(lp)) {
-				case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
-					e[0] = 0x09 + reg2 - Z80_BC; break;
-				case Z80_A:
-					if(!Options::syx.IsNextEnabled) break;
-					e[0] = 0xED; e[1] = 0x31; break;
-				default:
-					if(!Options::syx.IsNextEnabled) break;
-					int b = GetWord(lp);
-					e[0] = 0xED; e[1] = 0x34 ;
-					e[2] = b & 255; e[3] = (b >> 8) & 255;
+					Error("[ADD] Comma expected");
 					break;
 				}
-				break;
-			case Z80_DE:
-			case Z80_BC:
-				if (!Options::syx.IsNextEnabled) break;   // DE|BC is valid first operand only for Z80N
-				if (!comma(lp)) {
-					Error("[ADD] Comma expected"); break;
-				}
-				if (Z80_A == GetRegister(lp)) {
-					e[0] = 0xED; e[1] = 0x32 + (Z80_BC == reg);
-				} else {
-					int b = GetWord(lp);
-					e[0] = 0xED; e[1] = 0x35 + (Z80_BC == reg);
-					e[2] = b & 255; e[3] = (b >> 8) & 255;
-				}
-				break;
-			case Z80_IX:
-			case Z80_IY:
-				if (!comma(lp)) {
-					Error("[ADD] Comma expected"); break;
-				}
-				switch (reg2 = GetRegister(lp)) {
-				case Z80_BC:	case Z80_DE:	case Z80_SP:
-					e[0] = reg; e[1] = 0x09 + reg2 - Z80_BC; break;
+				reg2 = GetRegister(lp);
+				switch (reg) {
+				case Z80_HL:
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+						e[0] = 0x09 + reg2 - Z80_BC; break;
+					case Z80_A:
+						if(!Options::syx.IsNextEnabled) break;
+						e[0] = 0xED; e[1] = 0x31; break;
+					default:
+						if(!Options::syx.IsNextEnabled) break;
+						int b = GetWord(lp);
+						e[0] = 0xED; e[1] = 0x34 ;
+						e[2] = b & 255; e[3] = (b >> 8) & 255;
+						break;
+					}
+					break;
 				case Z80_IX:
 				case Z80_IY:
-					if (reg != reg2) break;
-					e[0] = reg; e[1] = 0x29; break;
-				default:
-					break;
-				}
-				break;
-			case Z80_A:
-				if (!comma(lp)) {
-					e[0] = 0x87; break;
-				}
-				reg = GetRegister(lp);
-			default:
-				switch (reg) {
-				case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-					e[0] = reg&0xFF; e[1] = 0x80 + (reg>>8); break;
-				case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-				case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-					e[0] = 0x80 + reg; break;
-				case Z80_UNK:
-					if (BT_NONE != (bt = OpenBracket(lp))) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_IX:
-						case Z80_IY:
-							e[1] = 0x86; e[2] = z80GetIDxoffset(lp);
-							if (CloseBracket(lp)) e[0] = reg;
-							break;
-						default:
-							break;
-						}
-						// give "(something..." another chance to parse as value expression
-						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
-						else break;		//"(register" or other bracket: emit instruction || bug
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_SP:
+						e[0] = reg; e[1] = 0x09 + reg2 - Z80_BC; break;
+					case Z80_IX:
+					case Z80_IY:
+						if (reg != reg2) break;
+						e[0] = reg; e[1] = 0x29; break;
+					default:
+						break;
 					}
-					e[0] = 0xc6; e[1] = GetByte(lp);
+					break;
+				case Z80_DE:
+				case Z80_BC:
+					if (!Options::syx.IsNextEnabled) break;   // DE|BC is valid first operand only for Z80N
+					if (Z80_A == reg2) {
+						e[0] = 0xED; e[1] = 0x32 + (Z80_BC == reg);
+					} else if (Z80_UNK == reg2) {
+						int b = GetWord(lp);
+						e[0] = 0xED; e[1] = 0x35 + (Z80_BC == reg);
+						e[2] = b & 255; e[3] = (b >> 8) & 255;
+					}
 					break;
 				default:
 					break;
@@ -464,46 +450,9 @@ namespace Z80 {
 	}
 
 	void OpCode_AND() {
-		Z80Reg reg;
-		EBracketType bt;
-		int e[4];
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_A:
-				if (!nonMaComma(lp)) {	// "AND a,b" is possible only when multi-arg is not-comma
-					e[0] = 0xa7;
-					break;
-				}
-				reg = GetRegister(lp);
-			default:
-				switch (reg) {
-				case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-					e[0] = reg&0xFF; e[1] = 0xa0 + (reg>>8); break;
-				case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-				case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-					e[0] = 0xa0 + reg; break;
-				case Z80_UNK:
-					if (BT_NONE != (bt = OpenBracket(lp))) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_IX:
-						case Z80_IY:
-							e[1] = 0xa6; e[2] = z80GetIDxoffset(lp);
-							if (CloseBracket(lp)) e[0] = reg;
-							break;
-						default:
-							break;
-						}
-						// give "(something..." another chance to parse as value expression
-						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
-						else break;		//"(register" or other bracket: emit instruction || bug
-					}
-					e[0] = 0xe6; e[1] = GetByte(lp);
-					break;
-				default:
-					break;
-				}
-			}
+			int e[] { -1, -1, -1, -1};
+			CommonAluOpcode(0xa0, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -554,7 +503,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		int e[] = { -1, -1, -1 };
+		int e[] { -1, -1, -1 };
 		// verify the operands are "de,b" (only valid ones)
 		if (Z80_DE == GetRegister(lp) && comma(lp) && Z80_B == GetRegister(lp)) {
 			e[0]=0xED;
@@ -587,7 +536,7 @@ namespace Z80 {
 
 	void OpCode_CALL() {
 		do {
-			int e[] = { -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1 };
 			Z80Cond cc = getz80cond(lp);
 			if (Z80C_UNK == cc) e[0] = 0xcd;
 			else if (comma(lp)) e[0] = 0xC4 + cc;
@@ -605,80 +554,31 @@ namespace Z80 {
 	}
 
 	void OpCode_CP() {
-		Z80Reg reg;
-		EBracketType bt;
-		int e[4];
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_A:
-				if (!nonMaComma(lp)) {	// "CP a,b" is possible only when multi-arg is not-comma
-					e[0] = 0xbf;
-					break;
-				}
-				reg = GetRegister(lp);
-			default:
-				switch (reg) {
-				case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-					e[0] = reg&0xFF; e[1] = 0xb8 + (reg>>8); break;
-				case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-				case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-					e[0] = 0xb8 + reg; break;
-				case Z80_UNK:
-					if (BT_NONE != (bt = OpenBracket(lp))) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_IX:
-						case Z80_IY:
-							e[1] = 0xbe; e[2] = z80GetIDxoffset(lp);
-							if (CloseBracket(lp)) e[0] = reg;
-							break;
-						default:
-							break;
-						}
-						// give "(something..." another chance to parse as value expression
-						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
-						else break;		//"(register" or other bracket: emit instruction || bug
-					}
-					e[0] = 0xfe; e[1] = GetByte(lp);
-					break;
-				default:
-					break;
-				}
-			}
+			int e[] { -1, -1, -1, -1};
+			CommonAluOpcode(0xb8, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	void OpCode_CPD() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0xa9;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0xA9);
 	}
 
 	void OpCode_CPDR() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0xb9;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0xB9);
 	}
 
 	void OpCode_CPI() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0xa1;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0xA1);
 	}
 
 	void OpCode_CPIR() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0xb1;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0xB1);
 	}
 
 	void OpCode_CPL() {
@@ -692,7 +592,7 @@ namespace Z80 {
 	void OpCode_DEC() {
 		do {
 			Z80Reg reg;
-			int e[] = { -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1 };
 			switch (reg = GetRegister(lp)) {
 			case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
 				e[0] = reg&0xFF; e[1] = 0x05 + 8*(reg>>8); break;
@@ -811,7 +711,7 @@ namespace Z80 {
 	}
 
 	void OpCode_IM() {
-		int e[] = { -1, -1, -1 }, machineCode[] = { 0x46, 0x56, 0x5e };
+		int e[] { -1, -1, -1 }, machineCode[] { 0x46, 0x56, 0x5e };
 		int mode = GetByte(lp);
 		if (0 <= mode && mode <= 2) {
 			e[0] = 0xed;
@@ -821,11 +721,9 @@ namespace Z80 {
 	}
 
 	void OpCode_IN() {
-		Z80Reg reg;
-		int e[3];
 		do {
-			e[0] = e[1] = e[2] = -1;
-			reg = GetRegister(lp);
+			int e[] { -1, -1, -1 };
+			Z80Reg reg = GetRegister(lp);
 			if (Z80_UNK == reg || comma(lp)) {
 				if (Z80_UNK == reg) reg = Z80_F;	// if there was no register, it may be "IN (C)"
 				if (BT_NONE == OpenBracket(lp)) reg = Z80_UNK;
@@ -859,7 +757,7 @@ namespace Z80 {
 	void OpCode_INC() {
 		do {
 			Z80Reg reg;
-			int e[] = { -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1 };
 			switch (reg = GetRegister(lp)) {
 			case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
 				e[0] = reg&0xFF; e[1] = 0x04 + 8*(reg>>8); break;
@@ -887,48 +785,33 @@ namespace Z80 {
 	}
 
 	void OpCode_IND() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0xaa;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0xAA);
 	}
 
 	void OpCode_INDR() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0xba;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0xBA);
 	}
 
 	void OpCode_INI() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0xa2;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0xA2);
 	}
 
 	void OpCode_INIR() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0xb2;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0xB2);
 	}
 
 	void OpCode_INF() {
-		int e[3];
-		e[0] = 0xed;
-		e[1] = 0x70;
-		e[2] = -1;
-		EmitBytes(e);
+		EmitByte(0xED);
+		EmitByte(0x70);
 	}
 
 	void OpCode_JP() {
 		do {
-			int e[] = { -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1 };
 			Z80Reg reg = Z80_UNK;
 			Z80Cond cc = getz80cond(lp);
 			if (Z80C_UNK == cc) {	// no condition, check for: jp (hl),... and Z80N jp (c)
@@ -973,7 +856,7 @@ namespace Z80 {
 
 	void OpCode_JR() {
 		do {
-			int e[] = { -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1 };
 			Z80Cond cc = getz80cond(lp);
 			if (Z80C_UNK == cc) e[0] = 0x18;
 			else if (cc <= Z80C_C && comma(lp)) e[0] = 0x20 + cc;
@@ -1296,17 +1179,14 @@ namespace Z80 {
 	}
 
 	void OpCode_LDD() {
-		Z80Reg reg, reg2;
-		int e[7];
-
 		if (Options::noFakes(false)) {
-			e[0] = 0xed;
-			e[1] = 0xa8;
-			e[2] = -1;
-			EmitBytes(e);
+			EmitByte(0xED);
+			EmitByte(0xA8);
 			return;
 		}
 
+		Z80Reg reg, reg2;
+		int e[7];
 		do {
 			e[0] = e[1] = e[2] = e[3] = e[4] = e[5] = e[6] = -1;
 				switch (reg = GetRegister(lp)) {
@@ -1778,46 +1658,9 @@ namespace Z80 {
 	}
 
 	void OpCode_OR() {
-		Z80Reg reg;
-		EBracketType bt;
-		int e[4];
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_A:
-				if (!nonMaComma(lp)) {	// "OR a,b" is possible only when multi-arg is not-comma
-					e[0] = 0xb7;
-					break;
-				}
-				reg = GetRegister(lp);
-			default:
-				switch (reg) {
-				case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-					e[0] = reg&0xFF; e[1] = 0xb0 + (reg>>8); break;
-				case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-				case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-					e[0] = 0xb0 + reg; break;
-				case Z80_UNK:
-					if (BT_NONE != (bt = OpenBracket(lp))) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_IX:
-						case Z80_IY:
-							e[1] = 0xb6; e[2] = z80GetIDxoffset(lp);
-							if (CloseBracket(lp)) e[0] = reg;
-							break;
-						default:
-							break;
-						}
-						// give "(something..." another chance to parse as value expression
-						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
-						else break;		//"(register" or other bracket: emit instruction || bug
-					}
-					e[0] = 0xf6; e[1] = GetByte(lp);
-					break;
-				default:
-					break;
-				}
-			}
+			int e[] { -1, -1, -1, -1};
+			CommonAluOpcode(0xb0, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -2278,52 +2121,19 @@ namespace Z80 {
 
 	void OpCode_SBC() {
 		Z80Reg reg;
-		EBracketType bt;
-		int e[4];
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_HL:
-				if (!comma(lp)) {
-					Error("[SBC] Comma expected"); break;
-				}
-				switch (reg = GetRegister(lp)) {
-				case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
-					e[0] = 0xed; e[1] = 0x32 + reg; break;
-				default:
-					;
-				}
-				break;
-			case Z80_A:
-				if (!comma(lp)) {
-					e[0] = 0x9f; break;
-				}
-				reg = GetRegister(lp);
-			default:
-				switch (reg) {
-				case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-					e[0] = reg&0xFF; e[1] = 0x98 + (reg>>8); break;
-				case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-				case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-					e[0] = 0x98 + reg; break;
-				case Z80_UNK:
-					if (BT_NONE != (bt = OpenBracket(lp))) {
+			int e[] { -1, -1, -1, -1 };
+			if (!CommonAluOpcode(0x98, e, true, false)) {	// handle common 8-bit variants
+				if (Z80_HL == GetRegister(lp)) {
+					if (!comma(lp)) {
+						Error("[SUB] Comma expected");
+					} else {
 						switch (reg = GetRegister(lp)) {
-						case Z80_IX:
-						case Z80_IY:
-							e[1] = 0x9e; e[2] = z80GetIDxoffset(lp);
-							if (CloseBracket(lp)) e[0] = reg;
-							break;
-						default:
-							break;
+						case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
+							e[0] = 0xed; e[1] = 0x32 + reg; break;
+						default: break;
 						}
-						// give "(something..." another chance to parse as value expression
-						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
-						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					e[0] = 0xde; e[1] = GetByte(lp);
-				default:
-					break;
 				}
 			}
 			EmitBytes(e);
@@ -2588,54 +2398,20 @@ namespace Z80 {
 
 	void OpCode_SUB() {
 		Z80Reg reg;
-		EBracketType bt;
-		int e[4];
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_HL:
-				if (!comma(lp)) {
-					Error("[SUB] Comma expected"); break;
-				}
-				switch (reg = GetRegister(lp)) {
-				case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
-					if (Options::noFakes()) break;
-					e[0] = 0xb7; e[1] = 0xed; e[2] = 0x32+reg; break;
-				default:;
-				}
-				break;
-			case Z80_A:
-				if (!nonMaComma(lp)) {	// "SUB a,b" is possible only when multi-arg is not-comma
-					e[0] = 0x97;
-					break;
-				}
-				reg = GetRegister(lp);
-			default:
-				switch (reg) {
-				case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-					e[0] = reg&0xFF; e[1] = 0x90 + (reg>>8); break;
-				case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-				case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-					e[0] = 0x90 + reg; break;
-				case Z80_UNK:
-					if (BT_NONE != (bt = OpenBracket(lp))) {
+			int e[] { -1, -1, -1, -1 };
+			if (!CommonAluOpcode(0x90, e, true, true)) {	// handle common 8-bit variants
+				if (Z80_HL == GetRegister(lp)) {
+					if (!comma(lp)) {
+						Error("[SUB] Comma expected");
+					} else {
 						switch (reg = GetRegister(lp)) {
-						case Z80_IX:
-						case Z80_IY:
-							e[1] = 0x96; e[2] = z80GetIDxoffset(lp);
-							if (CloseBracket(lp)) e[0] = reg;
-							break;
-						default:
-							break;
+						case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
+							if (Options::noFakes()) break;
+							e[0] = 0xb7; e[1] = 0xed; e[2] = 0x32+reg; break;
+						default: break;
 						}
-						// give "(something..." another chance to parse as value expression
-						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
-						else break;		//"(register" or other bracket: emit instruction || bug
 					}
-					e[0] = 0xd6; e[1] = GetByte(lp);
-					break;
-				default:
-					break;
 				}
 			}
 			EmitBytes(e);
@@ -2662,55 +2438,14 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		int e[4];
-		e[0] = 0xED;
-		e[1] = 0x27;
-		e[2] = GetByte(lp);
-		e[3] = -1;
+		int e[] { 0xED, 0x27, GetByte(lp), -1 };
 		EmitBytes(e);
 	}
 
 	void OpCode_XOR() {
-		Z80Reg reg;
-		EBracketType bt;
-		int e[4];
 		do {
-			e[0] = e[1] = e[2] = e[3] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_A:
-				if (!nonMaComma(lp)) {	// "XOR a,b" is possible only when multi-arg is not-comma
-					e[0] = 0xaf;
-					break;
-				}
-				reg = GetRegister(lp);
-			default:
-				switch (reg) {
-				case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-					e[0] = reg&0xFF; e[1] = 0xa8 + (reg>>8); break;
-				case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-				case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-					e[0] = 0xa8 + reg; break;
-				case Z80_UNK:
-					if (BT_NONE != (bt = OpenBracket(lp))) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_IX:
-						case Z80_IY:
-							e[1] = 0xae; e[2] = z80GetIDxoffset(lp);
-							if (CloseBracket(lp)) e[0] = reg;
-							break;
-						default:
-							break;
-						}
-						// give "(something..." another chance to parse as value expression
-						if (Z80_UNK == reg && BT_ROUND == bt) --lp;
-						else break;		//"(register" or other bracket: emit instruction || bug
-					}
-					e[0] = 0xee; e[1] = GetByte(lp);
-					break;
-				default:
-					break;
-				}
-			}
+			int e[] { -1, -1, -1, -1};
+			CommonAluOpcode(0xa8, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}

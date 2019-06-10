@@ -319,7 +319,7 @@ void EmitWord(int word) {
 	EmitByte(word / 256);
 }
 
-void EmitBytes(int* bytes) {
+void EmitBytes(const int* bytes) {
 	if (*bytes == -1) {
 		Error("Illegal instruction", line, IF_FIRST);
 		SkipToEol(lp);

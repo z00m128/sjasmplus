@@ -60,7 +60,7 @@ void ListFile(bool showAsSkipped = false);
 void CheckRamLimitExceeded();
 void EmitByte(int byte);
 void EmitWord(int word);
-void EmitBytes(int* bytes);
+void EmitBytes(const int* bytes);
 void EmitWords(int* words);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
 void OpenFile(char* nfilename, bool systemPathsBeforeCurrent = false);
