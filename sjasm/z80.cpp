@@ -602,32 +602,38 @@ namespace Z80 {
 		EmitByte(0x27);
 	}
 
+	static void OpCode_DecInc(const int base8bOpcode, const int base16bOpcode, int* e) {
+		Z80Reg reg;
+		switch (reg = GetRegister(lp)) {
+		case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
+			*e++ = reg&0xFF;	reg = Z80Reg(reg>>8);
+		case Z80_B: case Z80_C: case Z80_D: case Z80_E:
+		case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
+			*e++ = base8bOpcode + 8 * reg;
+			break;
+		case Z80_IX: case Z80_IY:
+			*e++ = reg;	reg = Z80_HL;
+		case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
+			*e++ = base16bOpcode + reg - Z80_BC;
+			break;
+		default:
+			if (BT_NONE == OpenBracket(lp)) break;
+			switch (reg = GetRegister(lp)) {
+			case Z80_IX:
+			case Z80_IY:
+				e[1] = base8bOpcode + 8 * Z80_MEM_HL; e[2] = z80GetIDxoffset(lp);
+				if (CloseBracket(lp)) e[0] = reg;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
 	void OpCode_DEC() {
 		do {
-			Z80Reg reg;
 			int e[] { -1, -1, -1, -1 };
-			switch (reg = GetRegister(lp)) {
-			case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-				e[0] = reg&0xFF; e[1] = 0x05 + 8*(reg>>8); break;
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0x05 + 8 * reg; break;
-			case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
-				e[0] = 0x0b + reg - Z80_BC; break;
-			case Z80_IX: case Z80_IY:
-				e[0] = reg; e[1] = 0x2b; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0x35; e[2] = z80GetIDxoffset(lp);
-					if (CloseBracket(lp)) e[0] = reg;
-					break;
-				default:
-					break;
-				}
-			}
+			OpCode_DecInc(0x05, 0x0B, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -769,30 +775,8 @@ namespace Z80 {
 
 	void OpCode_INC() {
 		do {
-			Z80Reg reg;
 			int e[] { -1, -1, -1, -1 };
-			switch (reg = GetRegister(lp)) {
-			case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-				e[0] = reg&0xFF; e[1] = 0x04 + 8*(reg>>8); break;
-			case Z80_B: case Z80_C: case Z80_D: case Z80_E:
-			case Z80_H: case Z80_L: case Z80_MEM_HL: case Z80_A:
-				e[0] = 0x04 + 8 * reg; break;
-			case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
-				e[0] = 0x03 + reg - Z80_BC; break;
-			case Z80_IX: case Z80_IY:
-				e[0] = reg; e[1] = 0x23; break;
-			default:
-				if (BT_NONE == OpenBracket(lp)) break;
-				switch (reg = GetRegister(lp)) {
-				case Z80_IX:
-				case Z80_IY:
-					e[1] = 0x34; e[2] = z80GetIDxoffset(lp);
-					if (CloseBracket(lp)) e[0] = reg;
-					break;
-				default:
-					;
-				}
-			}
+			OpCode_DecInc(0x04, 0x03, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
