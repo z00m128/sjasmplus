@@ -41,7 +41,7 @@
     mirror  a
     ASSERT 0=_ERRORS        ; this assert should fail
 
-    ASSERT 42=_ERRORS       ; update this assert when editing the file, to make it pass
+    ASSERT 44=_ERRORS       ; update this assert when editing the file, to make it pass
 
 ;;; few labels/macros errors exercises
 

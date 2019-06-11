@@ -114,26 +114,20 @@ tricky_syntax.asm(50): error: Illegal instruction:     ld      ix,(hl)
 tricky_syntax.asm(51): error: Illegal instruction:     ld      iy,(hl)
 51    0143                  ld      iy,(hl)
 tricky_syntax.asm(52): error: Offset out of range
-52    0143 DD 6E 7F DD      ld      hl,(ix+127)
-52    0147 66 80
+52    0143                  ld      hl,(ix+127)
 tricky_syntax.asm(53): error: Offset out of range (-129)
-tricky_syntax.asm(53): error: Offset out of range
-53    0149 DD 6E 7F DD      ld      hl,(ix-129)
-53    014D 66 80
+53    0143                  ld      hl,(ix-129)
 tricky_syntax.asm(54): error: Offset out of range
-54    014F FD 6E 7F FD      ld      hl,(iy+127)
-54    0153 66 80
+54    0143                  ld      hl,(iy+127)
 tricky_syntax.asm(55): error: Offset out of range (-129)
-tricky_syntax.asm(55): error: Offset out of range
-55    0155 FD 6E 7F FD      ld      hl,(iy-129)
-55    0159 66 80
-56    015B
-57    015B EB               ex      de,hl
-58    015C EB               ex      hl,de
-59    015D 08               ex      af
-60    015E 08               ex      af,af
-61    015F 08               ex      af,af'
-62    0160
+55    0143                  ld      hl,(iy-129)
+56    0143
+57    0143 EB               ex      de,hl
+58    0144 EB               ex      hl,de
+59    0145 08               ex      af
+60    0146 08               ex      af,af
+61    0147 08               ex      af,af'
+62    0148
 # file closed: tricky_syntax.asm
 
 Value    Label

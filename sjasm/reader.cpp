@@ -271,7 +271,7 @@ int check8o(long val) {
 	if (val < -128 || val > 127) {
 		char buffer[32];
 		sprintf(buffer,"Offset out of range (%+li)", val);
-		Error(buffer);
+		Error(buffer, nullptr, IF_FIRST);
 		return 0;
 	}
 	return 1;
