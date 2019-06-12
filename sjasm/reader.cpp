@@ -112,6 +112,13 @@ int NeedDEFL() {
 	return 0;
 }
 
+bool NeedIoC() {
+	SkipBlanks();
+	if ('(' != lp[0] || 'c' != tolower(lp[1]) || ')' != lp[2]) return false;
+	lp += 3;
+	return true;
+}
+
 bool isMacroNext() {	// checks if ".macro" directive is ahead (but doesn't consume it)
 	if (SkipBlanks()) return false;
 	char* p = lp;
@@ -160,6 +167,8 @@ static int expectedAddressClosingBracket = -1;
 // memory-address bracket opener (only "(" and "[" types supported)
 EBracketType OpenBracket(char*& p) {
 	SkipBlanks(p);
+	if (2 == Options::syx.MemoryBrackets && brackets_b[BT_ROUND] == *p) return BT_NONE;		// disabled "()"
+	if (1 == Options::syx.MemoryBrackets && brackets_b[BT_SQUARE] == *p) return BT_NONE;	// disabled "[]"
 	for (const EBracketType bt : {BT_ROUND, BT_SQUARE}) {
 		if (brackets_b[bt] == *p) {
 			expectedAddressClosingBracket = brackets_e[bt];

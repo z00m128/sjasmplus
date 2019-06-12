@@ -1,6 +1,6 @@
 ; SYNTAX option "abfl@":
 ;  @ is error "unrecognized" (but outside of list file!)
-;  b and l are "unimplemented yet" (comments below are for future implementation)
+;  l is "unimplemented yet" (comments below are for future implementation)
     ld      bc,hl       ; warning
     ld      bc,hl       ; warning removed by using "fake" in this comment
     sub     a,b         ; sub b

@@ -101,6 +101,8 @@ How about abusing "@" or "." or something to distinguish between? (& resembles C
 
 Kate syntax: broken with LUA block containing "end" keyword (maybe even consider including Lua highlight rules from KDE defaults, if it's possible)
 
+AppVeyor CI for windows clang + mingw + MSVS2015 builds?
+
 ====================
 Docs:
 

@@ -300,8 +300,8 @@ namespace Z80 {
 		case 'S':
 			if (GetRegister_pair(p, 'P')) return Z80_SP;
 			break;
-		case '(':	memClose = ')';		break;
-		case '[':	memClose = ']';		break;
+		case '(': memClose = (2 != Options::syx.MemoryBrackets) ? ')' : 0;	break;
+		case '[': memClose = (1 != Options::syx.MemoryBrackets) ? ']' : 0;	break;
 		default:	break;
 		}
 		if (memClose) {
@@ -716,17 +716,10 @@ namespace Z80 {
 			Z80Reg reg = GetRegister(lp);
 			if (Z80_UNK == reg || comma(lp)) {
 				if (Z80_UNK == reg) reg = Z80_F;	// if there was no register, it may be "IN (C)"
-				if (BT_NONE == OpenBracket(lp)) reg = Z80_UNK;
-				if (Z80_C == GetRegister(lp)) {
+				if (NeedIoC()) {
 					e[0] = 0xed;
 					switch (reg) {
-						case Z80_B:
-						case Z80_C:
-						case Z80_D:
-						case Z80_E:
-						case Z80_H:
-						case Z80_L:
-						case Z80_A:
+						case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
 							e[1] = 0x40 + reg*8;	// regular IN reg,(C)
 							break;
 						case Z80_F:
@@ -738,7 +731,6 @@ namespace Z80 {
 					e[1] = GetByte(lp);
 					if (Z80_A == reg) e[0] = 0xdb;	// IN A,(n)
 				}
-				if (!CloseBracket(lp)) e[0] = -1;
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -784,29 +776,27 @@ namespace Z80 {
 			Z80Cond cc = getz80cond(lp);
 			if (Z80C_UNK == cc) {	// no condition, check for: jp (hl),... and Z80N jp (c)
 				char* expLp = lp;
-				EBracketType bt = OpenBracket(lp);
-				switch (reg = GetRegister(lp)) {
-				case Z80_C:
-					// only "(C)" form with parentheses is legal syntax for Z80N "jp (C)"
-					if (BT_ROUND != bt || !CloseBracket(lp) || !Options::syx.IsNextEnabled) break;
-					e[0] = 0xED; e[1] = 0x98;
-					break;
-				case Z80_HL:
-				case Z80_IX:
-				case Z80_IY:
-					if (BT_NONE != bt && !CloseBracket(lp)) break;	// check [optional] brackets
-					e[0] = reg;
-					e[Z80_IX <= reg] = 0xe9;	// e[1] for IX/IY, e[0] overwritten for HL/MEM_HL
-					break;
-				case Z80_MEM_HL: case Z80_MEM_IX: case Z80_MEM_IY:	// MEM_xx was handled manually, should NOT happen
-					reg = Z80_UNK;				// try to treat it like expression in following code
-				case Z80_UNK:
-					if (BT_SQUARE == bt) break;	// "[" has no chance, report it
-					if (BT_ROUND == bt) lp = expLp;	// give "(" another chance to evaluate as expression
-					e[0] = 0xc3;				// jp imm16
-					break;
-				default:						// any other register is illegal
-					break;
+				if (Options::syx.IsNextEnabled && NeedIoC()) {
+					e[0] = 0xED; e[1] = 0x98;	// only "(C)" form with parentheses is legal syntax for Z80N "jp (C)"
+					reg = Z80_C;	// suppress "jp imm16" parser
+				} else {
+					EBracketType bt = OpenBracket(lp);
+					switch (reg = GetRegister(lp)) {
+					case Z80_HL: case Z80_IX: case Z80_IY:
+						if (BT_NONE != bt && !CloseBracket(lp)) break;	// check [optional] brackets
+						e[0] = reg;
+						e[Z80_IX <= reg] = 0xe9;	// e[1] for IX/IY, e[0] overwritten for HL/MEM_HL
+						break;
+					case Z80_MEM_HL: case Z80_MEM_IX: case Z80_MEM_IY:	// MEM_xx was handled manually, should NOT happen
+						reg = Z80_UNK;				// try to treat it like expression in following code
+					case Z80_UNK:
+						if (BT_SQUARE == bt) break;	// "[" has no chance, report it
+						if (BT_ROUND == bt) lp = expLp;	// give "(" another chance to evaluate as expression
+						e[0] = 0xc3;				// jp imm16
+						break;
+					default:						// any other register is illegal
+						break;
+					}
 				}
 			} else {	// if (Z80C_UNK == cc)
 				if (comma(lp)) e[0] = 0xC2 + cc;	// jp cc,imm16
@@ -1506,26 +1496,23 @@ namespace Z80 {
 
 	void OpCode_OUT() {
 		Z80Reg reg;
-		int e[3];
 		do {
-			e[0] = e[1] = e[2] = -1;
-			if (BT_NONE != OpenBracket(lp)) {
-				if (GetRegister(lp) == Z80_C) {
-					if (CloseBracket(lp) && comma(lp)) {
-						switch (reg = GetRegister(lp)) {
-						case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
-							e[0] = 0xed; e[1] = 0x41 + 8 * reg; break;
-						case Z80_UNK:
-							if (0 == GetByte(lp)) e[0] = 0xed;	// out (c),0
-							e[1] = 0x71; break;
-						default:
-							break;
-						}
+			int e[] { -1, -1, -1 };
+			if (NeedIoC()) {
+				if (comma(lp)) {
+					switch (reg = GetRegister(lp)) {
+					case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
+						e[0] = 0xed; e[1] = 0x41 + 8 * reg; break;
+					case Z80_UNK:
+						if (0 == GetByte(lp)) e[0] = 0xed;	// out (c),0
+						e[1] = 0x71; break;
+					default:
+						break;
 					}
-				} else {
-					e[1] = GetByte(lp);		// out ($n),a
-					if (CloseBracket(lp) && comma(lp) && GetRegister(lp) == Z80_A) e[0] = 0xd3;
 				}
+			} else {
+				e[1] = GetByte(lp);		// out ($n),a
+				if (comma(lp) && GetRegister(lp) == Z80_A) e[0] = 0xd3;
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));

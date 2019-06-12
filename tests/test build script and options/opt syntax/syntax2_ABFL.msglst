@@ -1,8 +1,7 @@
-Syntax option not implemented yet: B
 Syntax option not implemented yet: L
 # file opened: syntax2_ABFL.asm
  1    0000              ; SYNTAX option "ABFL":
- 2    0000              ;  B and L are "unimplemented yet" (comments below are for future implementation)
+ 2    0000              ;  L is "unimplemented yet" (comments below are for future implementation)
 syntax2_ABFL.asm(3): error: Fake instructions are not enabled: ld      bc,hl       
  3    0000                  ld      bc,hl       ; error
 syntax2_ABFL.asm(4): error: Fake instructions are not enabled: ld      bc,hl       
@@ -17,11 +16,49 @@ syntax2_ABFL.asm(9): error: Unexpected: ,,c,l
 syntax2_ABFL.asm(10): error: Unexpected: , c,l    
 10    0007 44               ld      b,h, c,l    ; error
 11    0008              hl:                     ; error
-12    0008 7E               ld      a,(hl)      ; expression error
-13    0009 7E               ld      a,[hl]      ; memory reference
-14    000A
+12    0008 3E 08            ld      a,(hl)      ; expression error  ; with "L" unimplemented this actually works as LD a,8
+13    000A 7E               ld      a,[hl]      ; memory reference
+14    000B
+15    000B                  ; some specifics of B mode - I/O instructions still work only with round parentheses
+syntax2_ABFL.asm(16): error: Label not found: c
+16    000B C3 00 00         jp      (c)
+syntax2_ABFL.asm(17): error: Illegal instruction:     jp      [c]
+17    000E                  jp      [c]
+syntax2_ABFL.asm(18): error: Label not found: C
+18    000E C3 00 00         jp      (C)
+syntax2_ABFL.asm(19): error: Illegal instruction:     jp      [C]
+19    0011                  jp      [C]
+20    0011                  OPT --zxnext
+21    0011 ED 98            jp      (c)
+syntax2_ABFL.asm(22): error: Illegal instruction:     jp      [c]
+22    0013                  jp      [c]
+23    0013 ED 98            jp      (C)
+syntax2_ABFL.asm(24): error: Illegal instruction:     jp      [C]
+24    0015                  jp      [C]
+25    0015
+26    0015 ED 78            in      a,(c)
+27    0017 DB FE            in      a,(254)
+28    0019 ED 71            out     (c),0
+29    001B ED 41            out     (c),b
+30    001D D3 FE            out     (254),a
+31    001F
+32    001F DB FE            in      a,254       ; or without parentheses at all (new syntax variant)
+33    0021 D3 FE            out     254,a
+34    0023
+35    0023                  ; but square brackets will not work (errors)
+syntax2_ABFL.asm(36): error: Syntax error: [c]
+syntax2_ABFL.asm(36): error: Unexpected: [c]
+36    0023 DB 00            in      a,[c]
+syntax2_ABFL.asm(37): error: Syntax error: [254]
+syntax2_ABFL.asm(37): error: Unexpected: [254]
+37    0025 DB 00            in      a,[254]
+syntax2_ABFL.asm(38): error: Syntax error: [c],b
+38    0027                  out     [c],b
+syntax2_ABFL.asm(39): error: Syntax error: [254],a
+39    0027                  out     [254],a
+40    0027
 # file closed: syntax2_ABFL.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0008 X hl
+0x0008   hl

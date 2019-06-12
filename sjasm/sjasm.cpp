@@ -312,8 +312,8 @@ namespace Options {
 				case 'a': syx.MultiArg = &doubleComma; break;
 				case 'A': syx.MultiArg = &doubleBacktick; break;
 				// b B - memory access brackets []: disabled, required (default = enabled)
-				case 'b':
-				case 'B':
+				case 'b': syx.MemoryBrackets = 1; break;
+				case 'B': syx.MemoryBrackets = 2; break;
 				// l L - warn/error about labels using keywords (default = no message)
 				case 'l':
 				case 'L':
