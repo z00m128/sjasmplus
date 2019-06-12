@@ -19,9 +19,8 @@ LUA quirks:
 CSPECTMAP - needs better support for DISP and instances of STRUCT
 
 --syntax: "I" to uppercase all labels + usage (needs labels refactoring)
-
---syntax: B+L options implementation
-    add DOCS example test: "hl: ld a,(hl),,de,hl" when all is implemented
+--syntax: L options implementation
+    add DOCS example test: "hl: Ld a,(hl),,de,hl" when all is implemented
 
 static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
 

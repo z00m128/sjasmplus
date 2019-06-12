@@ -196,7 +196,7 @@
 
             <listitem>
               <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
-- added to --syntax option: case insensitive instructions
+- added to --syntax option: case insensitive instructions, "bB" implemented
 - new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro examples</ulink>, minor fixes and refactoring
 - operators "{address}" and "{b address}" are now official and documented</synopsis>
             </listitem>
@@ -603,15 +603,15 @@
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
 	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
-&dagger; <emphasis>b B    Memory access brackets []: disabled / required (default = enabled)</emphasis>
+  b B    Memory access brackets []: disabled / required (default = enabled)
   f F    Fake instructions: warning / disabled (default = enabled)
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis></synopsis>
-  &dagger; work in progress: currently only "aAfF" options are implemented, brackets and labels not yet, following description of functionality is then not fully correct either.
+  &dagger; work in progress: currently only "aAbBfFi" options are implemented, labels not yet, following description of functionality is then not fully correct either.
   </para>
   <para>
-  I.e. <code>--syntax=faBl</code> will modify parser to process source line
-  <programlisting>hl:  ld a,(hl),,de,hl</programlisting>
+  I.e. <code>--syntax=faBil</code> will modify parser to process source line
+  <programlisting>hl:  Ld a,(hl),,de,hl</programlisting>
   in a way to produce warnings about keyword "hl" being used for label, about fake instruction
   being used (ld de,hl) and assemble <code>(hl)</code> as numeric expression, not memory access.
   Warnings on fake instructions can be suppressed for particular line by adding any end-of-line
@@ -898,7 +898,8 @@ or    x or y   bitwise or
       to what I think is standard Z80: <itemizedlist>
           <listitem>
             <para>'[' and ']' can be used instead of '(' and ')' for
-            indirections. So LD A,[HL] is the same as LD A,(HL).</para>
+            indirections. So LD A,[HL] is the same as LD A,(HL) (does not apply to IN/OUT ports,
+            those must use '(...)' form)</para>
           </listitem>
 
           <listitem>
