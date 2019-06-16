@@ -773,6 +773,7 @@ char* GetFileName(char*& p, bool convertslashes) {
 		} else {
 			const char delimiterTxt[2] = { deliE, 0 };
 			Error("No closing delimiter", delimiterTxt, SUPPRESS);
+			result[0] = 0;	// return "empty" string filename
 		}
 	}
 	SkipBlanks(p);			// skip blanks any way

@@ -32,15 +32,7 @@
 #define __IO_TRD
 
 int TRD_SaveEmpty(char* fname);
-int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostart); //autostart added by boo_boo 19_0ct_2008
-struct STRDOSSectorHeader {
-	unsigned char c, s, n, l;
-	unsigned short crc;
-	unsigned char c1, c2; // correct CRCs in address and data
-	unsigned char* data, * id;
-	unsigned datlen; 
-	unsigned crcd;
-};
+int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostart, bool replace);
 
 #endif
 
