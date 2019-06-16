@@ -198,6 +198,7 @@
               <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
 - added to --syntax option: case insensitive instructions, "bB" implemented
 - new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro examples</ulink>, minor fixes and refactoring
+- <link linkend="po_savetrd">SAVETRD</link> implementation refactored (more checks, less bugs, "replace" file feature)
 - operators "{address}" and "{b address}" are now official and documented</synopsis>
             </listitem>
           </varlistentry>
@@ -2584,20 +2585,27 @@ START  .... ;something code
 
           <varlistentry>
             <term><anchor id="po_savetrd" />SAVETRD
-            &lt;filenameoftrdimage&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
+            &lt;filename_of_trd_image&gt;,[|]&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the snapshot for emulators of ZX-Spectrum<example>
-                  <title></title>
+              <para>Save the device memory into TRD disk image. Adding pipe character "|" ahead of file
+				  name will make sjasmplus to delete old file(s) with the same name, before writing
+				  the new one =&gt; replace-like functionality. If the deleted file did occupy all
+				  sectors till the free space position in disc info, sjasmplus will salvage those sectors
+				  back and save new file over them (but it will not do full reshuffle/defrag in more
+				  complex cases, sjasmplus is just assembler, not full featured TRD images manipulation tool).
 
+				<example><title></title>
                   <para><programlisting>    EMPTYTRD "test.trd" ;create empty TRD image
     PAGE 7 ;set 7 page to current slot
     SAVETRD "test.trd","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file to TRD image
-    SAVETRD "test.trd","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file to TRD image</programlisting></para>
-                </example></para>
+    SAVETRD "test.trd","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file to TRD image
+    SAVETRD "test.trd",|"myfile1.C",$B000,$400 ;- replace "myfile1.C" with new file</programlisting></para>
+                </example>
+			  </para>
             </listitem>
           </varlistentry>
 
@@ -3528,7 +3536,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 
           <varlistentry>
             <term>[void] zx.trdimage_add_file("filename", "somenameC",
-            startaddress, length, autostart)</term>
+            startaddress, length, autostart, replace)</term>
 
             <listitem>
               <para>Save block of memory to TRD image file. <emphasis>Work
