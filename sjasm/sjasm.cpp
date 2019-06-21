@@ -322,6 +322,7 @@ namespace Options {
 					}
 					break;
 				case 'i': syx.CaseInsensitiveInstructions = true; break;
+				case 'w': syx.WarningsAsErrors = true; break;
 				default:
 					if (0 == pass || LASTPASS == pass) {
 						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;
