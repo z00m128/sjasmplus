@@ -102,6 +102,8 @@ Kate syntax: broken with LUA block containing "end" keyword (maybe even consider
 
 AppVeyor CI for windows clang + mingw + MSVS2015 builds?
 
+Operators precendence: (2 == 3&2) = ((2 == 3)&2) = false in current sjasmplus... ????
+
 ====================
 Docs:
 
