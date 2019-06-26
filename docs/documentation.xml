@@ -196,7 +196,7 @@
 
             <listitem>
               <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
-- added to <link linkend="s_cli">--syntax</link> option: case insensitive instructions, "bB" implemented, "w" added
+- added to <link linkend="s_cli">--syntax</link> option: case insensitive instructions, "bBw" added/changed
 - new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro examples</ulink>, minor fixes and refactoring
 - <link linkend="po_savetrd">SAVETRD</link> implementation refactored (more checks, less bugs, "replace" file feature)
 - operators "{address}" and "{b address}" are now official and documented</synopsis>
@@ -604,7 +604,8 @@
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
 	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
-  b B    Memory access brackets []: disabled / required (default = enabled)
+  b      Whole expression parentheses are legal for memory access only (default = immediate or memory)
+  B      memory access brackets [] required (default = relaxed syntax, [] allowed as extra)
   f F    Fake instructions: warning / disabled (default = enabled)
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
@@ -620,6 +621,18 @@
   Warnings on fake instructions can be suppressed for particular line by adding any end-of-line
   comment containing string "fake", i.e. "<code>ld de,hl ; fake DE=HL</code>" will assemble
   without warning. The "F" option is identical to "--nofakes" and preferred.
+  </para>
+
+  <para>
+  The recommended setup for new projects is <code>--syntax=abfw</code> which makes syntax less relaxed,
+  so some typos and mistakes are easier to catch, for example:
+  <programlisting>        OPT reset --syntax=abfw
+label:  dw 15
+        ld b,(label)
+        sub a,b</programlisting> will produce "error: Illegal instruction
+  (can't access memory): (label)" message for the <code>ld b,(label)</code> and the <code>sub a,b</code>
+  will produce only the <code>sub b</code> instruction (to give the <code>sub</code> multi-argument
+  with syntax option "a" the line would have to be <code>sub a,,b</code>).
   </para>
 
   <para>
@@ -848,7 +861,7 @@ $c     hexadecimal
 
       <para><programlisting>!     !x       logical not
 ~     ~x       complement
-+     +x       does absolutely nothing :)
++     +x       does "nothing", can be used to make "+(...)" parse as value (not as memory)
 -     -x       minus
 low   low x    low 8 bits of 16 bit value or lower part of register pair
 high  high x   high 8 bits of 16 bit value or higher part of register pair

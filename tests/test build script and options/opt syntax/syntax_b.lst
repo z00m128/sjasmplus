@@ -348,8 +348,16 @@ syntax_b.asm(104): error: Illegal instruction (can't access memory):  [111]
 syntax_b.asm(107): error: Illegal instruction (can't access memory): (someLabel)       
 107   01E0 06 00            ld  b,(someLabel)       ; just make super sure it does catch the original real world annoyance
 108   01E2
+109   01E2                  ;; Docs example from command line options section
+110   01E2                      OPT reset --syntax=abfw
+111   01E2 0F 00        label:  dw 15
+syntax_b.asm(112): error: Illegal instruction (can't access memory): (label)
+112   01E4 06 00                ld b,(label)
+113   01E6 90                   sub a,b
+114   01E7
 # file closed: syntax_b.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
 0x01E0   someLabel
+0x01E2   label

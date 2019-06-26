@@ -105,3 +105,9 @@
 
 someLabel:
     ld  b,(someLabel)       ; just make super sure it does catch the original real world annoyance
+
+    ;; Docs example from command line options section
+        OPT reset --syntax=abfw
+label:  dw 15
+        ld b,(label)
+        sub a,b
