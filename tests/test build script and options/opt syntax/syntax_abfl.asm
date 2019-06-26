@@ -8,5 +8,11 @@
     ld      b,h,,c,l    ; ld b,h : ld c,l (same as first fake)
     ld      b,h, c,l    ; error
 hl:                     ; warning
-    ld      a,(hl)      ; memory reference
-    ld      a,[hl]      ; error
+    ld      a,(hl)      ; OK: memory reference
+    ld      a,[hl]      ; OK: memory reference
+    add     a,(5)       ; error (memory reference = illegal instruction)
+    add     a,[6]       ; error (memory reference = illegal instruction)
+    add     a,7         ; OK
+    ld      b,(8)       ; error (memory reference = illegal instruction)
+    ld      b,[9]       ; error (memory reference = illegal instruction)
+    ld      b,10        ; OK

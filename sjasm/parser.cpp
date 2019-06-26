@@ -366,6 +366,19 @@ int ParseExpressionNoSyntaxError(char*& lp, aint& val) {
 	return ret_val;
 }
 
+// returns 0 on syntax error, 1 on expression which is not enclosed in parentheses
+// 2 when whole expression is in [] or () (--syntax=b/B affects when "2" is reported)
+int ParseExpressionMemAccess(char*& p, aint& nval) {
+	const EBracketType bt = OpenBracket(p);
+	// if round parenthesis starts the expression, calculate pointer where it ends (and move "p" back on "(")
+	char* const expectedEndBracket = (BT_ROUND == bt) ? ParenthesesEnd(--p) : nullptr;
+	if (!ParseExpression(p, nval)) return 0;	// evaluate expression
+	if (BT_NONE == bt) return 1;				// no parentheses are always "value"
+	if (BT_ROUND == bt) return (expectedEndBracket == p) ? 2 : 1;	// round parentheses are "memory" when end is as expected
+	if (CloseBracket(p)) return 2;				// square brackets must be closed properly, then it is "memory"
+	return 0;	// curly brackets are not detect by OpenBracket, but if they would, it would work same as square here
+}
+
 void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 	SkipBlanks(src);
 	const char * const oldSrc = src;

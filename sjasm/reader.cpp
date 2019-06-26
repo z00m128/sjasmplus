@@ -168,7 +168,6 @@ static int expectedAddressClosingBracket = -1;
 EBracketType OpenBracket(char*& p) {
 	SkipBlanks(p);
 	if (2 == Options::syx.MemoryBrackets && brackets_b[BT_ROUND] == *p) return BT_NONE;		// disabled "()"
-	if (1 == Options::syx.MemoryBrackets && brackets_b[BT_SQUARE] == *p) return BT_NONE;	// disabled "[]"
 	for (const EBracketType bt : {BT_ROUND, BT_SQUARE}) {
 		if (brackets_b[bt] == *p) {
 			expectedAddressClosingBracket = brackets_e[bt];

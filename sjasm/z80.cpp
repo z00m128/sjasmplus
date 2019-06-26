@@ -60,6 +60,22 @@ namespace Z80 {
 		return val & 255;
 	}
 
+	int GetByteNoMem(char*& p) {
+		if (0 == Options::syx.MemoryBrackets) return GetByte(p); // legacy behaviour => don't care
+		aint val; char* const oldP = p;
+		switch (ParseExpressionMemAccess(p, val)) {
+		case 1:					// valid constant (not a memory access) => return value
+			check8(val);
+			return val & 255;
+		case 2:					// valid memory access => report error
+			Error("Illegal instruction (can't access memory)", oldP);
+			return 0;
+		default:				// parsing failed, report syntax error
+			Error("Operand expected", oldP, IF_FIRST);
+			return 0;
+		}
+	}
+
 	int GetWord(char*& p) {
 		aint val;
 		if (!ParseExpression(p, val)) {
@@ -67,6 +83,22 @@ namespace Z80 {
 		}
 		check16(val);
 		return val & 65535;
+	}
+
+	int GetWordNoMem(char*& p) {
+		if (0 == Options::syx.MemoryBrackets) return GetWord(p); // legacy behaviour => don't care
+		aint val; char* const oldP = p;
+		switch (ParseExpressionMemAccess(p, val)) {
+		case 1:					// valid constant (not a memory access) => return value
+			check16(val);
+			return val & 65535;
+		case 2:					// valid memory access => report error
+			Error("Illegal instruction (can't access memory)", oldP);
+			return 0;
+		default:				// parsing failed, report syntax error
+			Error("Operand expected", oldP, IF_FIRST);
+			return 0;
+		}
 	}
 
 	int z80GetIDxoffset(char*& p) {
@@ -84,7 +116,7 @@ namespace Z80 {
 	int GetAddress(char*& p, aint& ad) {
 		if (GetLocalLabelValue(p, ad) || ParseExpression(p, ad)) return 1;
 		Error("Operand expected", nullptr, IF_FIRST);
-		return (ad = 0);
+		return (ad = 0);	// set "ad" to zero and return zero
 	}
 
 	Z80Cond getz80cond(char*& p) {
@@ -301,7 +333,7 @@ namespace Z80 {
 			if (GetRegister_pair(p, 'P')) return Z80_SP;
 			break;
 		case '(': memClose = (2 != Options::syx.MemoryBrackets) ? ')' : 0;	break;
-		case '[': memClose = (1 != Options::syx.MemoryBrackets) ? ']' : 0;	break;
+		case '[': memClose = ']'; break;
 		default:	break;
 		}
 		if (memClose) {
@@ -348,7 +380,7 @@ namespace Z80 {
 				e[0] = opcodeBase + reg;
 				return true;			// successfully assembled
 			case Z80_UNK:
-				e[0] = opcodeBase + 0x46; e[1] = GetByte(lp);	// imm8 variants
+				e[0] = opcodeBase + 0x46; e[1] = GetByteNoMem(lp);	// imm8 variants
 				return true;
 			default:
 				break;
@@ -425,7 +457,7 @@ namespace Z80 {
 						e[0] = 0xED; e[1] = 0x31; break;
 					default:
 						if(!Options::syx.IsNextEnabled) break;
-						int b = GetWord(lp);
+						int b = GetWordNoMem(lp);
 						e[0] = 0xED; e[1] = 0x34 ;
 						e[2] = b & 255; e[3] = (b >> 8) & 255;
 						break;
@@ -450,7 +482,7 @@ namespace Z80 {
 					if (Z80_A == reg2) {
 						e[0] = 0xED; e[1] = 0x32 + (Z80_BC == reg);
 					} else if (Z80_UNK == reg2) {
-						int b = GetWord(lp);
+						int b = GetWordNoMem(lp);
 						e[0] = 0xED; e[1] = 0x35 + (Z80_BC == reg);
 						e[2] = b & 255; e[3] = (b >> 8) & 255;
 					}
@@ -473,7 +505,7 @@ namespace Z80 {
 
 	void OpCode_BIT() {
 		do {
-			int e[] { -1, -1, -1, -1, -1 }, bit = GetByte(lp);
+			int e[] { -1, -1, -1, -1, -1 }, bit = GetByteNoMem(lp);
 			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0x40, e, false);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -628,7 +660,7 @@ namespace Z80 {
 				SPRINTF1(el, LINEMAX, "[DJNZ] Target out of range (%+i)", jmp);
 				Error(el); jmp = 0;
 			}
-			e[0] = 0x10; e[1] = jmp < 0 ? 256 + jmp : jmp;
+			e[0] = 0x10; e[1] = jmp & 0xFF;
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -702,7 +734,7 @@ namespace Z80 {
 
 	void OpCode_IM() {
 		int e[] { -1, -1, -1 }, machineCode[] { 0x46, 0x56, 0x5e };
-		int mode = GetByte(lp);
+		int mode = GetByteNoMem(lp);
 		if (0 <= mode && mode <= 2) {
 			e[0] = 0xed;
 			e[1] = machineCode[mode];
@@ -947,8 +979,7 @@ namespace Z80 {
 		aint b;
 		EBracketType bt;
 		do {
-			char* olp = nullptr;
-			int e[] { -1, -1, -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1, -1 }, pemaRes;
 			Z80Reg reg2 = Z80_UNK, reg1 = GetRegister(lp);
 			// resolve all register to register cases (no memory or constant)
 			if (Z80_UNK != reg1 && LD_simple_r_r(e, reg1)) {	//but "(hl)|(ixy+d)" is sometimes like 8b register = resolved too
@@ -964,31 +995,28 @@ namespace Z80 {
 					if ((Z80_BC == reg2 || Z80_DE == reg2) && CloseBracket(lp)) e[0] = reg2-6;
 					if (Z80_UNK != reg2) break;	//"(register": emit instruction || bug
 					// give non-register another chance to parse as value expression
-					if (BT_ROUND == bt) olp = ParenthesesEnd(--lp);	// test-ptr for whole-expression-in-()
+					--lp;
 				}
-				if (!ParseExpression(lp, b)) break;
-				if (BT_SQUARE != bt && olp != lp) {	// LD a,imm8
-					check8(b); e[0] = 0x06 + 8*reg1; e[1] = b & 255;
-				} else {							// LD a,(mem8)
-					if (BT_SQUARE == bt && !CloseBracket(lp)) break; // ")" is closed by ParseExpression
-					check16(b); e[0] = 0x3a; e[1] = b & 255; e[2] = (b >> 8) & 255;
+				switch (ParseExpressionMemAccess(lp, b)) {
+					// LD a,imm8
+					case 1: check8(b); e[0] = 0x06 + 8*reg1; e[1] = b & 255; break;
+					// LD a,(mem8)
+					case 2: check16(b); e[0] = 0x3a; e[1] = b & 255; e[2] = (b >> 8) & 255; break;
 				}
 				break;
 
 			case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
-				e[0] = 0x06 + 8*reg1; e[1] = GetByte(lp);
+				e[0] = 0x06 + 8*reg1; e[1] = GetByteNoMem(lp);
 				break;
 
 			case Z80_MEM_HL:
 				switch (reg2 = GetRegister(lp)) {
-				case Z80_BC:
+				case Z80_BC: case Z80_DE:
 					if (Options::noFakes()) break;
-					e[0] = 0x71; e[1] = 0x23; e[2] = 0x70; e[3] = 0x2b; break;
-				case Z80_DE:
-					if (Options::noFakes()) break;
-					e[0] = 0x73; e[1] = 0x23; e[2] = 0x72; e[3] = 0x2b; break;
+					e[0] = 0x70 + GetRegister_r16Low(reg2); e[1] = 0x23;
+					e[2] = 0x70 + GetRegister_r16High(reg2); e[3] = 0x2b; break;
 				case Z80_UNK:
-					e[0] = 0x36; e[1] = GetByte(lp); break;
+					e[0] = 0x36; e[1] = GetByteNoMem(lp); break;
 				default:
 					break;
 				}
@@ -1004,14 +1032,14 @@ namespace Z80 {
 					e[4] = 0x70+GetRegister_r16High(reg2); e[5] = e[2] + 1;
 					break;
 				case Z80_UNK:
-					e[0] = reg1&0xFF; e[1] = 0x36; e[3] = GetByte(lp);	// LD (ixy+#),imm8
+					e[0] = reg1&0xFF; e[1] = 0x36; e[3] = GetByteNoMem(lp);	// LD (ixy+#),imm8
 				default:
 					break;
 				}
 				break;
 
 			case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
-				e[0] = reg1&0xFF; e[1] = 0x06 + 8*(reg1>>8); e[2] = GetByte(lp);
+				e[0] = reg1&0xFF; e[1] = 0x06 + 8*(reg1>>8); e[2] = GetByteNoMem(lp);
 				break;
 
 			case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
@@ -1030,31 +1058,25 @@ namespace Z80 {
 					break;
 				}
 				if (Z80_UNK != reg2) break;	//"(register": emit instruction || bug
-				if (BT_ROUND == (bt = OpenBracket(lp))) {
-					olp = ParenthesesEnd(--lp);	// test-ptr for whole-expression-in-()
-				}
-				b = GetWord(lp);
-				if (BT_SQUARE != bt && olp != lp) {	// ld bc|de|hl|sp,imm16
-					e[0] = reg1-0x0F; e[1] = b & 255; e[2] = (b >> 8) & 255;
-				} else if (Z80_HL == reg1) {		// ld hl,(mem16)
-					e[1] = b & 255; e[2] = (b >> 8) & 255;
-					if (BT_ROUND == bt || CloseBracket(lp)) e[0] = 0x2a;	// round were closed by GetWord(..)
-				} else {							// ld bc|de|sp,(mem16)
-					e[1] = reg1+0x3b; e[2] = b & 255; e[3] = (b >> 8) & 255;
-					if (BT_ROUND == bt || CloseBracket(lp)) e[0] = 0xed;	// round were closed by GetWord(..)
+				switch (ParseExpressionMemAccess(lp, b)) {
+					// ld bc|de|hl|sp,imm16
+					case 1: check16(b); e[0] = reg1-0x0F; e[1] = b & 255; e[2] = (b >> 8) & 255; break;
+					// LD r16,(mem16)
+					case 2:
+						check16(b);
+						if (Z80_HL == reg1) {		// ld hl,(mem16)
+							e[0] = 0x2a; e[1] = b & 255; e[2] = (b >> 8) & 255;
+						} else {					// ld bc|de|sp,(mem16)
+							e[0] = 0xed; e[1] = reg1+0x3b; e[2] = b & 255; e[3] = (b >> 8) & 255;
+						}
 				}
 				break;
 
 			case Z80_IX:
 			case Z80_IY:
-				bt = OpenBracket(lp);
-				if (BT_ROUND == bt) olp = ParenthesesEnd(--lp);	// test-ptr for whole-expression-in-()
-				b = GetWord(lp);
-				if (BT_SQUARE != bt && olp != lp) {	// ld ix|iy,imm16
-					e[0] = reg1; e[1] = 0x21; e[2] = b & 255; e[3] = (b >> 8) & 255;
-				} else {							// ld ix|iy,(mem16)
-					e[1] = 0x2a; e[2] = b & 255; e[3] = (b >> 8) & 255;
-					if (BT_ROUND == bt || CloseBracket(lp)) e[0] = reg1;	// round were closed by GetWord(..)
+				if (0 < (pemaRes = ParseExpressionMemAccess(lp, b))) {
+					e[0] = reg1; e[1] = (1 == pemaRes) ? 0x21 : 0x2a;	// ld ix|iy,imm16  ||  ld ix|iy,(mem16)
+					check16(b); e[2] = b & 255; e[3] = (b >> 8) & 255;
 				}
 				break;
 
@@ -1145,7 +1167,7 @@ namespace Z80 {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
 					e[0] = 0x70 + reg; e[1] = 0x2b; break;
 				case Z80_UNK:
-					e[0] = 0x36; e[1] = GetByte(lp); e[2] = 0x2b; break;
+					e[0] = 0x36; e[1] = GetByteNoMem(lp); e[2] = 0x2b; break;
 				default:
 					break;
 				}
@@ -1156,7 +1178,7 @@ namespace Z80 {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
 					e[0] = e[3] = reg&0xFF; e[2] = GetRegister_lastIxyD; e[1] = 0x70 + reg2; e[4] = 0x2b; break;
 				case Z80_UNK:
-					e[0] = e[4] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByte(lp); e[5] = 0x2b; break;
+					e[0] = e[4] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByteNoMem(lp); e[5] = 0x2b; break;
 				default:
 					break;
 				}
@@ -1272,7 +1294,7 @@ namespace Z80 {
 					e[0] = 0x70 + GetRegister_r16Low(reg); e[2] = 0x70 + GetRegister_r16High(reg);
 					e[1] = e[3] = 0x23; break;
 				case Z80_UNK:
-					e[0] = 0x36; e[1] = GetByte(lp); e[2] = 0x23; break;
+					e[0] = 0x36; e[1] = GetByteNoMem(lp); e[2] = 0x23; break;
 				default:
 					break;
 				}
@@ -1286,7 +1308,7 @@ namespace Z80 {
 					e[0] = e[3] = e[5] = e[8] = reg&0xFF; e[4] = e[9] = 0x23; e[2] = e[7] = GetRegister_lastIxyD;
 					e[1] = 0x70 + GetRegister_r16Low(reg2); e[6] = 0x70 + GetRegister_r16High(reg2); break;
 				case Z80_UNK:
-					e[0] = e[4] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByte(lp); e[5] = 0x23; break;
+					e[0] = e[4] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByteNoMem(lp); e[5] = 0x23; break;
 				default:
 					break;
 				}
@@ -1453,7 +1475,7 @@ namespace Z80 {
 				Error("[NEXTREG] first operand should be register number", line, SUPPRESS); break;
 			}
 			// this code would be enough to get correct assembling, the test above is "extra"
-			e[2] = GetByte(lp);
+			e[2] = GetByteNoMem(lp);
 			if (!comma(lp)) {
 				Error("[NEXTREG] Comma expected"); break;
 			}
@@ -1463,7 +1485,7 @@ namespace Z80 {
 					break;
 				case Z80_UNK:
 					e[0] = 0xED; e[1] = 0x91;
-					e[3] = GetByte(lp);
+					e[3] = GetByteNoMem(lp);
 					break;
 				default:
 					break;
@@ -1504,7 +1526,7 @@ namespace Z80 {
 					case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
 						e[0] = 0xed; e[1] = 0x41 + 8 * reg; break;
 					case Z80_UNK:
-						if (0 == GetByte(lp)) e[0] = 0xed;	// out (c),0
+						if (0 == GetByteNoMem(lp)) e[0] = 0xed;	// out (c),0
 						e[1] = 0x71; break;
 					default:
 						break;
@@ -1632,7 +1654,7 @@ namespace Z80 {
 			case Z80_UNK:
 			{
 				if(!Options::syx.IsNextEnabled) break;
-				int imm16 = GetWord(lp);
+				int imm16 = GetWordNoMem(lp);
 				e[0] = 0xED; e[1] = 0x8A;
 				e[2] = (imm16 >> 8) & 255;  // push opcode is big-endian!
 				e[3] = imm16 & 255;
@@ -1646,7 +1668,7 @@ namespace Z80 {
 
 	void OpCode_RES() {
 		do {
-			int e[] { -1, -1, -1, -1, -1 }, bit = GetByte(lp);
+			int e[] { -1, -1, -1, -1, -1 }, bit = GetByteNoMem(lp);
 			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0x80, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -1749,7 +1771,7 @@ namespace Z80 {
 
 	void OpCode_RST() {
 		do {
-			int e = GetByte(lp);
+			int e = GetByteNoMem(lp);
 			if (e&(~0x38)) {	// some bit is set which should be not
 				Error("[RST] Illegal operand", line); SkipToEol(lp);
 				return;
@@ -1786,7 +1808,7 @@ namespace Z80 {
 
 	void OpCode_SET() {
 		do {
-			int e[] { -1, -1, -1, -1, -1 }, bit = GetByte(lp);
+			int e[] { -1, -1, -1, -1, -1 }, bit = GetByteNoMem(lp);
 			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0xc0, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -1918,7 +1940,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		int e[] { 0xED, 0x27, GetByte(lp), -1 };
+		int e[] { 0xED, 0x27, GetByteNoMem(lp), -1 };
 		EmitBytes(e);
 	}
 
