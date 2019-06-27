@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.13.1 Documentation [2019-05-30]</title>
+  <title>SjASMPlus 1.13.2 Documentation [2019-06-28]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -192,7 +192,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>work in progress - 1.13.2</term>
+            <term>28.6.2019 - 1.13.2</term>
 
             <listitem>
               <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
