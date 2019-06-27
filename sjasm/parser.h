@@ -30,11 +30,17 @@
 
 int ParseExpression(char*& lp, aint& val);
 int ParseExpressionNoSyntaxError(char*& lp, aint& val);
+
+// returns 0 on syntax error, 1 on expression which is not enclosed in parentheses
+// 2 when whole expression is in [] or () (--syntax=b/B affects when "2" is reported)
+int ParseExpressionMemAccess(char*& p, aint& nval);
+
 void ParseAlignArguments(char* & src, aint & alignment, aint & fill);
 int ParseDirective(bool beginningOfLine = 0);
 int ParseDirective_REPT();
 void ParseInstruction();
 char* ReplaceDefine(char* lp);
+void SetLastParsedLabel(const char* label);
 void ParseLine(bool = true);
 void ParseLineSafe(bool = true);
 void ParseStructLine(CStructure* st);

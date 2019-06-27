@@ -243,7 +243,8 @@ static int tolua_sjasm_zx_trdimage_add_file00(lua_State* tolua_S)
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,6,&tolua_err)
+     !tolua_isboolean(tolua_S,6,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,7,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -254,8 +255,9 @@ static int tolua_sjasm_zx_trdimage_add_file00(lua_State* tolua_S)
   int start = ((int)  tolua_tonumber(tolua_S,3,0));
   int length = ((int)  tolua_tonumber(tolua_S,4,0));
   int autostart = ((int)  tolua_tonumber(tolua_S,5,0));
+  bool replace = ((int)  tolua_toboolean(tolua_S,6,0));
   {
-   int tolua_ret = (int)  TRD_AddFile(fname,fhobname,start,length,autostart);
+   int tolua_ret = (int)  TRD_AddFile(fname,fhobname,start,length,autostart,replace);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

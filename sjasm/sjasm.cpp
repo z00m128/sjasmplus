@@ -198,10 +198,7 @@ void InitPass() {
 		ModuleName = NULL;
 	}
 	ModuleName = NULL;
-	if (LastParsedLabel != NULL) {
-		free(LastParsedLabel);
-		LastParsedLabel = NULL;
-	}
+	SetLastParsedLabel(nullptr);
 	if (vorlabp) free(vorlabp);
 	vorlabp = STRDUP("_");
 	macrolabp = NULL;
@@ -254,6 +251,7 @@ void FreeRAM() {
 	free(vorlabp);		vorlabp = NULL;
 	LabelTable.RemoveAll();
 	DefineTable.RemoveAll();
+	SetLastParsedLabel(nullptr);
 }
 
 
@@ -313,9 +311,10 @@ namespace Options {
 				// a A - multi-argument delimiter: ",,", "``" (default = ",")
 				case 'a': syx.MultiArg = &doubleComma; break;
 				case 'A': syx.MultiArg = &doubleBacktick; break;
-				// b B - memory access brackets []: disabled, required (default = enabled)
-				case 'b':
-				case 'B':
+				// b - single parentheses enforce mem access (default = relaxed syntax)
+				case 'b': syx.MemoryBrackets = 1; break;
+				// B - memory access brackets [] required (default = relaxed syntax)
+				case 'B': syx.MemoryBrackets = 2; break;
 				// l L - warn/error about labels using keywords (default = no message)
 				case 'l':
 				case 'L':
@@ -324,6 +323,7 @@ namespace Options {
 					}
 					break;
 				case 'i': syx.CaseInsensitiveInstructions = true; break;
+				case 'w': syx.WarningsAsErrors = true; break;
 				default:
 					if (0 == pass || LASTPASS == pass) {
 						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;

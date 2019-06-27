@@ -110,6 +110,13 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 	if (type == W_EARLY && LASTPASS <= pass) return;
 	if (type == W_PASS3 && pass < LASTPASS) return;
 
+	// turn the warning into error if "Warnings as errors" is switched on
+	if (Options::syx.WarningsAsErrors) switch (type) {
+		case W_EARLY:	Error(message, badValueMessage, EARLY); return;
+		case W_PASS3:	Error(message, badValueMessage, PASS3); return;
+		case W_ALL:		Error(message, badValueMessage, ALL); return;
+	}
+
 	++WarningCount;
 
 	DefineTable.Replace("_WARNINGS", WarningCount);
@@ -319,7 +326,7 @@ void EmitWord(int word) {
 	EmitByte(word / 256);
 }
 
-void EmitBytes(int* bytes) {
+void EmitBytes(const int* bytes) {
 	if (*bytes == -1) {
 		Error("Illegal instruction", line, IF_FIRST);
 		SkipToEol(lp);

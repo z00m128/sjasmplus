@@ -425,7 +425,7 @@ void CLabelTable::DumpSymbols() {
 		Error("Error opening file", Options::SymbolListFName, FATAL);
 	}
 	for (int i = 1; i < NextLocation; ++i) {
-		if (isalpha(LabelTable[i].name[0])) {
+		if (LabelTable[i].name && isalpha(LabelTable[i].name[0])) {
 			STRCPY(ErrorLine, LINEMAX, LabelTable[i].name);
 			STRCAT(ErrorLine, LINEMAX2, ": equ ");
 			STRCAT(ErrorLine, LINEMAX2, "0x");

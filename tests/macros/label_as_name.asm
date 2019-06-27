@@ -30,7 +30,27 @@ Babel = 2       MACRO nameOrArg2?
                     dz  "name-or-arg2 as name\n"
                 ENDM
 
+    MODULE module1  ; first version did use "module1" as part of macro name - now fixed+tested
+
+newInModule     MACRO arg1?
+                    db "in-module-new-1-arg: ", arg1?, "\n", 0
+                ENDM
+
+                MACRO classicInModule arg1?
+                    db "in-module-classic-1-arg: ", arg1?, "\n", 0
+                ENDM
+
+    ENDMODULE
+
     OUTPUT "label_as_name.bin"      ; verify defined macros (by checking bin output)
     classicNameNoArg : classicNameOneArg 'a' : classicNameTwoArg 'b', 'c'
     newNameNoArg : newNameOneArg 'a' : newNameTwoArg 'b', 'c'
     nameOrArg? : nameOrArg2?
+    newInModule 'm' : classicInModule 'M'
+
+    ;; invalid macro names
+                MACRO @invalidClassic   ; no need for "ENDM" due to error
+@invalidNew     MACRO
+
+                MACRO #invalidClassic2 arg1?    ; no need for "ENDM" due to error
+#invalidNew2    MACRO arg1?

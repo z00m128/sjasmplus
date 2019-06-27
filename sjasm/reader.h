@@ -41,6 +41,8 @@ int SkipBlanks();
 void SkipToEol(char*& p);
 int NeedEQU();
 int NeedDEFL();
+bool NeedIoC();
+bool isMacroNext();				// checks if ".macro" directive is ahead (but doesn't consume it)
 char* GetID(char*& p);
 void ResetGrowSubId();
 char* GrowSubId(char* & p);
@@ -53,9 +55,7 @@ bool doubleBacktick(char* & p);
 bool nonMaComma(char* & p);		// eats single comma only if multi-arg is configured to non-comma
 EBracketType OpenBracket(char*& p);
 int CloseBracket(char*& p);
-int oparenOLD(char*& p, char c);
-int cparenOLD(char*& p);
-char* getparen(char* p);
+char* ParenthesesEnd(char* p);
 int check8(aint val, bool error=true);
 int check8o(long val);
 int check16(aint val, bool error=true);

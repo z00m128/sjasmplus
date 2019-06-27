@@ -15,99 +15,101 @@ invalid.asm(7): error: Illegal instruction:     add     a,hl
  7    0000                  add     a,hl
 invalid.asm(8): error: Illegal instruction:     add     a,de
  8    0000                  add     a,de
-invalid.asm(9): error: Label not found: ix
- 9    0000 FD 2E 00         ld      iyl,(ix+0)
-invalid.asm(10): error: Label not found: iy
-10    0003 FD 2E 00         ld      iyl,(iy+0)
-invalid.asm(11): error: Label not found: hl
-11    0006 FD 2E 00         ld      iyl,(hl)
+invalid.asm(9): error: Illegal instruction:     ld      iyl,(ix+0)
+ 9    0000                  ld      iyl,(ix+0)
+invalid.asm(10): error: Illegal instruction:     ld      iyl,(iy+0)
+10    0000                  ld      iyl,(iy+0)
+invalid.asm(11): error: Illegal instruction:     ld      iyl,(hl)
+11    0000                  ld      iyl,(hl)
 invalid.asm(12): error: Illegal instruction:     ld      iyl,l
-12    0009                  ld      iyl,l
+12    0000                  ld      iyl,l
 invalid.asm(13): error: Illegal instruction:     ld      iyl,h
-13    0009                  ld      iyl,h
+13    0000                  ld      iyl,h
 invalid.asm(14): error: Illegal instruction:     ld      (ix+0),iyl
-14    0009                  ld      (ix+0),iyl
+14    0000                  ld      (ix+0),iyl
 invalid.asm(15): error: Illegal instruction:     ld      (iy+0),iyl
-15    0009                  ld      (iy+0),iyl
-invalid.asm(16): error: Operand expected
-16    0009 36 00            ld      (hl),iyl
+15    0000                  ld      (iy+0),iyl
+invalid.asm(16): error: Illegal instruction:     ld      (hl),iyl
+16    0000                  ld      (hl),iyl
 invalid.asm(17): error: Illegal instruction:     ld      l,iyl
-17    000B                  ld      l,iyl
+17    0000                  ld      l,iyl
 invalid.asm(18): error: Illegal instruction:     ld      h,iyl
-18    000B                  ld      h,iyl
-invalid.asm(19): error: Illegal instruction:     xor     (e 5            ; did work as `xor 5` up to 1.10.4
-19    000B                  xor     (e 5            ; did work as `xor 5` up to 1.10.4
-invalid.asm(20): error: Illegal instruction:     xor     (ixl+0)
-20    000B                  xor     (ixl+0)
+18    0000                  ld      h,iyl
+invalid.asm(19): error: Label not found: e
+invalid.asm(19): error: ')' expected
+invalid.asm(19): error: Unexpected: 5            
+19    0000 EE 00            xor     (e 5            ; did work as `xor 5` up to 1.10.4
+invalid.asm(20): error: Label not found: ixl
+20    0002 EE 00            xor     (ixl+0)
 invalid.asm(21): error: Illegal instruction:     ex      ix,hl
-21    000B                  ex      ix,hl
+21    0004                  ex      ix,hl
 invalid.asm(22): error: Illegal instruction:     ex      de,ix
-22    000B                  ex      de,ix
+22    0004                  ex      de,ix
 invalid.asm(23): error: Illegal instruction:     ex      iy,hl
-23    000B                  ex      iy,hl
+23    0004                  ex      iy,hl
 invalid.asm(24): error: Illegal instruction:     ex      de,iy
-24    000B                  ex      de,iy
+24    0004                  ex      de,iy
 invalid.asm(25): error: Illegal instruction:     ex      bc,hl
-25    000B                  ex      bc,hl
+25    0004                  ex      bc,hl
 invalid.asm(26): error: Illegal instruction:     ex      hl,hl
-26    000B                  ex      hl,hl
+26    0004                  ex      hl,hl
 invalid.asm(27): error: Illegal instruction:     sbc     ix,bc
-27    000B                  sbc     ix,bc
+27    0004                  sbc     ix,bc
 invalid.asm(28): error: Illegal instruction:     sbc     ix,de
-28    000B                  sbc     ix,de
+28    0004                  sbc     ix,de
 invalid.asm(29): error: Illegal instruction:     sbc     ix,ix
-29    000B                  sbc     ix,ix
+29    0004                  sbc     ix,ix
 invalid.asm(30): error: Illegal instruction:     sbc     ix,sp
-30    000B                  sbc     ix,sp
-invalid.asm(31): error: Label not found: hl
-31    000B 36 00            ld      (hl),(hl)
+30    0004                  sbc     ix,sp
+invalid.asm(31): error: Illegal instruction:     ld      (hl),(hl)
+31    0004                  ld      (hl),(hl)
 invalid.asm(32): error: Illegal instruction:     ex      de,de
-32    000D                  ex      de,de
+32    0004                  ex      de,de
 invalid.asm(33): error: [RST] Illegal operand:     rst     1
-33    000D                  rst     1
+33    0004                  rst     1
 invalid.asm(34): error: [RST] Illegal operand:     rst     2
-34    000D                  rst     2
+34    0004                  rst     2
 invalid.asm(35): error: [RST] Illegal operand:     rst     4
-35    000D                  rst     4
+35    0004                  rst     4
 invalid.asm(36): error: [RST] Illegal operand:     rst     $40
-36    000D                  rst     $40
+36    0004                  rst     $40
 invalid.asm(37): error: [RST] Illegal operand:     rst     $80
-37    000D                  rst     $80
-invalid.asm(38): error: [RLC] Illegal operand:     rlc     (ix+7),i
-38    000D DD CB 07 06      rlc     (ix+7),i
-invalid.asm(39): error: [RRC] Illegal operand:     rrc     (ix-7),r
-39    0011 DD CB F9 0E      rrc     (ix-7),r
+37    0004                  rst     $80
+invalid.asm(38): error: Illegal destination register:     rlc     (ix+7),i
+38    0004 DD CB 07 06      rlc     (ix+7),i
+invalid.asm(39): error: Illegal destination register:     rrc     (ix-7),r
+39    0008 DD CB F9 0E      rrc     (ix-7),r
 invalid.asm(40): error: Unrecognized instruction: nextreg $44,a
-40    0015                  nextreg $44,a
+40    000C                  nextreg $44,a
 invalid.asm(41): error: Unrecognized instruction: mirror  a
-41    0015                  mirror  a
-invalid.asm(42): error: [ASSERT] Assertion failed:  0=41        
-42    0015                  ASSERT 0=41        ; this assert should fail
-43    0015
-44    0015                  ASSERT 42=42       ; update this assert when editing the file, to make it pass
-45    0015
-46    0015              ;;; few labels/macros errors exercises
-47    0015
-48    0015              a123456789a123456789a123456789a123456789a123456789a123456789:
+41    000C                  mirror  a
+invalid.asm(42): error: [ASSERT] Assertion failed:  0=43        
+42    000C                  ASSERT 0=43        ; this assert should fail
+43    000C
+44    000C                  ASSERT 44=44       ; update this assert when editing the file, to make it pass
+45    000C
+46    000C              ;;; few labels/macros errors exercises
+47    000C
+48    000C              a123456789a123456789a123456789a123456789a123456789a123456789:
 invalid.asm(49): error: Label too long: B123456789a123456789a123456789a123456789a123456789a123456789a123456789a123456789
-49    0015              B123456789a123456789a123456789a123456789a123456789a123456789a123456789a123456789:
-50    0015
-51    0015                  MACRO dupName
-52    0015 ~                    ld      a,0
-53    0015                  ENDM
-54    0015
+49    000C              B123456789a123456789a123456789a123456789a123456789a123456789a123456789a123456789:
+50    000C
+51    000C                  MACRO dupName
+52    000C ~                    ld      a,0
+53    000C                  ENDM
+54    000C
 invalid.asm(55): error: Duplicate macroname: dupName
-55    0015                  MACRO dupName
-56    0015 3E 00                ld      a,0
+55    000C                  MACRO dupName
+56    000C 3E 00                ld      a,0
 invalid.asm(57): error: [ENDM] End macro without macro
-57    0017                  ENDM
-58    0017
+57    000E                  ENDM
+58    000E
 invalid.asm(59): warning: [UNDEFINE] Identifier not found: nononooo
-59    0017                  undefine nononooo
-60    0017
+59    000E                  undefine nononooo
+60    000E
 # file closed: invalid.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0015 X a123456789a123456789a123456789a123456789a123456789a123456789
-0x0015 X B123456789a123456789a123456789a123456789a123456789a123456789a123
+0x000C X a123456789a123456789a123456789a123456789a123456789a123456789
+0x000C X B123456789a123456789a123456789a123456789a123456789a123456789a123

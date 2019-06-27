@@ -1,0 +1,134 @@
+# file opened: tricky_syntax.asm
+ 1    0000                  ; test various tricky cases of syntax
+ 2    0000 CE 07            adc     a , (   ( 3 ) + ( 4 )   )
+ 3    0002 3A 07 00         ld      a , (   ( 3 ) + ( 4 )   )
+ 4    0005 3E 07            ld      a ,     ( 3 ) + ( 4 )
+ 5    0007 3E 07            ld      a ,     ( 3 ) | ( 4 )
+ 6    0009 3A 07 00         ld      a ,       ( 3 | 4 )
+ 7    000C 3A 07 00         ld      a,((3|4))
+ 8    000F 3A 07 00         ld      a,(+(3|4))
+ 9    0012 3E 07            ld      a,+((3|4))
+10    0014
+11    0014                  ; test all IXY variants recognized by parser
+12    0014 DD 7C DD 7C      ld      a,hx, a,xh, a,ixh, a,HX, a,XH, a,IXH, a,high ix, a,high IX, a,HIGH ix, a,HIGH IX
+12    0018 DD 7C DD 7C
+12    001C DD 7C DD 7C
+12    0020 DD 7C DD 7C
+12    0024 DD 7C DD 7C
+13    0028 DD 7D DD 7D      ld      a,lx, a,xl, a,ixl, a,LX, a,XL, a,IXL, a,low  ix, a,low  IX, a,LOW  ix, a,LOW  IX
+13    002C DD 7D DD 7D
+13    0030 DD 7D DD 7D
+13    0034 DD 7D DD 7D
+13    0038 DD 7D DD 7D
+14    003C FD 7C FD 7C      ld      a,hy, a,yh, a,iyh, a,HY, a,YH, a,IYH, a,high iy, a,high IY, a,HIGH iy, a,HIGH IY
+14    0040 FD 7C FD 7C
+14    0044 FD 7C FD 7C
+14    0048 FD 7C FD 7C
+14    004C FD 7C FD 7C
+15    0050 FD 7D FD 7D      ld      a,ly, a,yl, a,iyl, a,LY, a,YL, a,IYL, a,low  iy, a,low  IY, a,LOW  iy, a,LOW  IY
+15    0054 FD 7D FD 7D
+15    0058 FD 7D FD 7D
+15    005C FD 7D FD 7D
+15    0060 FD 7D FD 7D
+16    0064 DD E5 DD E5      push    ix, IX
+17    0068 FD E5 FD E5      push    iy, IY
+18    006C
+19    006C E9 E9 DD E9      jp      (hl), hl, (ix), ix, (iy), iy        ; valid
+19    0070 DD E9 FD E9
+19    0074 FD E9
+20    0076                  ; invalid
+tricky_syntax.asm(21): error: Label not found: hl
+21    0076 C3 00 00         jp      ((hl))
+tricky_syntax.asm(22): error: Label not found: ix
+22    0079 C3 00 00         jp      ((ix))
+tricky_syntax.asm(23): error: Label not found: iy
+23    007C C3 00 00         jp      ((iy))
+24    007F
+25    007F                  ; ld r16,nnnn vs ld r16,(nnnn) heuristics in default syntax mode
+26    007F 01 34 12 01      ld      bc, $1230 + 4  , bc, ($1230) + (4)  , bc,+($1230 + 4)
+26    0083 34 12 01 34
+26    0087 12
+27    0088 ED 4B 34 12      ld      bc,($1230 + 4) , bc,(($1230) + (4)) , bc, [$1230 + 4] , bc,[($1230  +  4)]
+27    008C ED 4B 34 12
+27    0090 ED 4B 34 12
+27    0094 ED 4B 34 12
+28    0098
+29    0098 11 34 12 11      ld      de, $1230 + 4  , de, ($1230) + (4)  , de,+($1230 + 4)
+29    009C 34 12 11 34
+29    00A0 12
+30    00A1 ED 5B 34 12      ld      de,($1230 + 4) , de,(($1230) + (4)) , de, [$1230 + 4] , de,[($1230  +  4)]
+30    00A5 ED 5B 34 12
+30    00A9 ED 5B 34 12
+30    00AD ED 5B 34 12
+31    00B1
+32    00B1 21 34 12 21      ld      hl, $1230 + 4  , hl, ($1230) + (4)  , hl,+($1230 + 4)
+32    00B5 34 12 21 34
+32    00B9 12
+33    00BA 2A 34 12 2A      ld      hl,($1230 + 4) , hl,(($1230) + (4)) , hl, [$1230 + 4] , hl,[($1230  +  4)]
+33    00BE 34 12 2A 34
+33    00C2 12 2A 34 12
+34    00C6
+35    00C6 DD 21 34 12      ld      ix, $1230 + 4  , ix, ($1230) + (4)  , ix,+($1230 + 4)
+35    00CA DD 21 34 12
+35    00CE DD 21 34 12
+36    00D2 DD 2A 34 12      ld      ix,($1230 + 4) , ix,(($1230) + (4)) , ix, [$1230 + 4] , ix,[($1230  +  4)]
+36    00D6 DD 2A 34 12
+36    00DA DD 2A 34 12
+36    00DE DD 2A 34 12
+37    00E2
+38    00E2 FD 21 34 12      ld      iy, $1230 + 4  , iy, ($1230) + (4)  , iy,+($1230 + 4)
+38    00E6 FD 21 34 12
+38    00EA FD 21 34 12
+39    00EE FD 2A 34 12      ld      iy,($1230 + 4) , iy,(($1230) + (4)) , iy, [$1230 + 4] , iy,[($1230  +  4)]
+39    00F2 FD 2A 34 12
+39    00F6 FD 2A 34 12
+39    00FA FD 2A 34 12
+40    00FE
+41    00FE 31 34 12 31      ld      sp, $1230 + 4  , sp, ($1230) + (4)  , sp,+($1230 + 4)
+41    0102 34 12 31 34
+41    0106 12
+42    0107 ED 7B 34 12      ld      sp,($1230 + 4) , sp,(($1230) + (4)) , sp, [$1230 + 4] , sp,[($1230  +  4)]
+42    010B ED 7B 34 12
+42    010F ED 7B 34 12
+42    0113 ED 7B 34 12
+43    0117
+44    0117 4E 23 46 2B      ld      bc,(hl), de,(hl)                    ; valid fake instructions
+44    011B 5E 23 56 2B
+45    011F DD 6E 01 DD      ld      hl,(ix+1), hl,(ix-128), hl,(ix+126)
+45    0123 66 02 DD 6E
+45    0127 80 DD 66 81
+45    012B DD 6E 7E DD
+45    012F 66 7F
+46    0131 FD 6E 01 FD      ld      hl,(iy+1), hl,(iy-128), hl,(iy+126)
+46    0135 66 02 FD 6E
+46    0139 80 FD 66 81
+46    013D FD 6E 7E FD
+46    0141 66 7F
+47    0143                  ; invalid
+tricky_syntax.asm(48): error: Illegal instruction:     ld      hl,(hl)
+48    0143                  ld      hl,(hl)
+tricky_syntax.asm(49): error: Illegal instruction:     ld      sp,(hl)
+49    0143                  ld      sp,(hl)
+tricky_syntax.asm(50): error: Illegal instruction:     ld      ix,(hl)
+50    0143                  ld      ix,(hl)
+tricky_syntax.asm(51): error: Illegal instruction:     ld      iy,(hl)
+51    0143                  ld      iy,(hl)
+tricky_syntax.asm(52): error: Offset out of range
+52    0143                  ld      hl,(ix+127)
+tricky_syntax.asm(53): error: Offset out of range (-129)
+53    0143                  ld      hl,(ix-129)
+tricky_syntax.asm(54): error: Offset out of range
+54    0143                  ld      hl,(iy+127)
+tricky_syntax.asm(55): error: Offset out of range (-129)
+55    0143                  ld      hl,(iy-129)
+56    0143
+57    0143 EB               ex      de,hl
+58    0144 EB               ex      hl,de
+59    0145 08               ex      af
+60    0146 08               ex      af,af
+61    0147 08               ex      af,af'
+62    0148
+# file closed: tricky_syntax.asm
+
+Value    Label
+------ - -----------------------------------------------------------

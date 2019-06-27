@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.13.1 Documentation [2019-05-30]</title>
+  <title>SjASMPlus 1.13.2 Documentation [2019-06-28]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -192,12 +192,13 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>work in progress - 1.13.2</term>
+            <term>28.6.2019 - 1.13.2</term>
 
             <listitem>
               <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
-- added to --syntax option: case insensitive instructions
+- added to <link linkend="s_cli">--syntax</link> option: case insensitive instructions, "bBw" added/changed
 - new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro examples</ulink>, minor fixes and refactoring
+- <link linkend="po_savetrd">SAVETRD</link> implementation refactored (more checks, less bugs, "replace" file feature)
 - operators "{address}" and "{b address}" are now official and documented</synopsis>
             </listitem>
           </varlistentry>
@@ -603,20 +604,35 @@
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
 	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
-&dagger; <emphasis>b B    Memory access brackets []: disabled / required (default = enabled)</emphasis>
+  b      Whole expression parentheses are legal for memory access only (default = immediate or memory)
+  B      memory access brackets [] required (default = relaxed syntax, [] allowed as extra)
   f F    Fake instructions: warning / disabled (default = enabled)
   i      Case insensitive instructions/directives (default = same case required)
-&dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis></synopsis>
-  &dagger; work in progress: currently only "aAfF" options are implemented, brackets and labels not yet, following description of functionality is then not fully correct either.
+&dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
+  w      Warnings option: report warnings as errors</synopsis>
+  &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
+  not working correctly either.
   </para>
   <para>
-  I.e. <code>--syntax=faBl</code> will modify parser to process source line
-  <programlisting>hl:  ld a,(hl),,de,hl</programlisting>
+  I.e. <code>--syntax=faBil</code> will modify parser to process source line
+  <programlisting>hl:  Ld a,(hl),,de,hl</programlisting>
   in a way to produce warnings about keyword "hl" being used for label, about fake instruction
   being used (ld de,hl) and assemble <code>(hl)</code> as numeric expression, not memory access.
   Warnings on fake instructions can be suppressed for particular line by adding any end-of-line
   comment containing string "fake", i.e. "<code>ld de,hl ; fake DE=HL</code>" will assemble
   without warning. The "F" option is identical to "--nofakes" and preferred.
+  </para>
+
+  <para>
+  The recommended setup for new projects is <code>--syntax=abfw</code> which makes syntax less relaxed,
+  so some typos and mistakes are easier to catch, for example:
+  <programlisting>        OPT reset --syntax=abfw
+label:  dw 15
+        ld b,(label)
+        sub a,b</programlisting> will produce "error: Illegal instruction
+  (can't access memory): (label)" message for the <code>ld b,(label)</code> and the <code>sub a,b</code>
+  will produce only the <code>sub b</code> instruction (to give the <code>sub</code> multi-argument
+  with syntax option "a" the line would have to be <code>sub a,,b</code>).
   </para>
 
   <para>
@@ -845,7 +861,7 @@ $c     hexadecimal
 
       <para><programlisting>!     !x       logical not
 ~     ~x       complement
-+     +x       does absolutely nothing :)
++     +x       does "nothing", can be used to make "+(...)" parse as value (not as memory)
 -     -x       minus
 low   low x    low 8 bits of 16 bit value or lower part of register pair
 high  high x   high 8 bits of 16 bit value or higher part of register pair
@@ -898,7 +914,8 @@ or    x or y   bitwise or
       to what I think is standard Z80: <itemizedlist>
           <listitem>
             <para>'[' and ']' can be used instead of '(' and ')' for
-            indirections. So LD A,[HL] is the same as LD A,(HL).</para>
+            indirections. So LD A,[HL] is the same as LD A,(HL) (does not apply to IN/OUT ports,
+            those must use '(...)' form)</para>
           </listitem>
 
           <listitem>
@@ -2583,20 +2600,27 @@ START  .... ;something code
 
           <varlistentry>
             <term><anchor id="po_savetrd" />SAVETRD
-            &lt;filenameoftrdimage&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
+            &lt;filename_of_trd_image&gt;,[|]&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the snapshot for emulators of ZX-Spectrum<example>
-                  <title></title>
+              <para>Save the device memory into TRD disk image. Adding pipe character "|" ahead of file
+				  name will make sjasmplus to delete old file(s) with the same name, before writing
+				  the new one =&gt; replace-like functionality. If the deleted file did occupy all
+				  sectors till the free space position in disc info, sjasmplus will salvage those sectors
+				  back and save new file over them (but it will not do full reshuffle/defrag in more
+				  complex cases, sjasmplus is just assembler, not full featured TRD images manipulation tool).
 
+				<example><title></title>
                   <para><programlisting>    EMPTYTRD "test.trd" ;create empty TRD image
     PAGE 7 ;set 7 page to current slot
     SAVETRD "test.trd","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file to TRD image
-    SAVETRD "test.trd","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file to TRD image</programlisting></para>
-                </example></para>
+    SAVETRD "test.trd","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file to TRD image
+    SAVETRD "test.trd",|"myfile1.C",$B000,$400 ;- replace "myfile1.C" with new file</programlisting></para>
+                </example>
+			  </para>
             </listitem>
           </varlistentry>
 
@@ -2986,9 +3010,9 @@ Main
     DB "Kip!",3</programlisting></para>
         </example></para>
 
-		<para>If there is regular label defined on the line with MACRO pseudo-op, the label will
-			be used as macro name - this may collide with true label using the same name, so this
-			is NOT recommended syntax. It was added as compatibility convenience to make porting
+		<para>If there is label defined on the line with MACRO pseudo-op, the label will
+			be used as macro name (current MODULE is NOT applied to macro name).
+			It was added as compatibility convenience to make porting
 			from different assemblers somewhat easier.
 			<example><title></title>
 				<programlisting>LabelAsMacroName    MACRO  arg1?, arg2?
@@ -3527,7 +3551,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 
           <varlistentry>
             <term>[void] zx.trdimage_add_file("filename", "somenameC",
-            startaddress, length, autostart)</term>
+            startaddress, length, autostart, replace)</term>
 
             <listitem>
               <para>Save block of memory to TRD image file. <emphasis>Work

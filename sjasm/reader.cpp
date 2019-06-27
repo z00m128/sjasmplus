@@ -112,6 +112,20 @@ int NeedDEFL() {
 	return 0;
 }
 
+bool NeedIoC() {
+	SkipBlanks();
+	if ('(' != lp[0] || 'c' != tolower(lp[1]) || ')' != lp[2]) return false;
+	lp += 3;
+	return true;
+}
+
+bool isMacroNext() {	// checks if ".macro" directive is ahead (but doesn't consume it)
+	if (SkipBlanks()) return false;
+	char* p = lp;
+	if ('.' == *p) ++p;
+	return cmphstr(p, "macro");
+}
+
 bool anyComma(char*& p) {
 	SkipBlanks(p);
 	if (*p != ',') return false;
@@ -153,6 +167,7 @@ static int expectedAddressClosingBracket = -1;
 // memory-address bracket opener (only "(" and "[" types supported)
 EBracketType OpenBracket(char*& p) {
 	SkipBlanks(p);
+	if (2 == Options::syx.MemoryBrackets && brackets_b[BT_ROUND] == *p) return BT_NONE;		// disabled "()"
 	for (const EBracketType bt : {BT_ROUND, BT_SQUARE}) {
 		if (brackets_b[bt] == *p) {
 			expectedAddressClosingBracket = brackets_e[bt];
@@ -172,50 +187,17 @@ int CloseBracket(char*& p) {
 	return 1;
 }
 
-int cpc = '4';
-
-/* not modified */
-int oparenOLD(char*& p, char c) {
-	SkipBlanks(p);
-	if (*p != c) {
-		return 0;
-	}
-	if (c == '[') {
-		cpc = ']';
-	}
-	if (c == '(') {
-		cpc = ')';
-	}
-	if (c == '{') {
-		cpc = '}';
-	}
-	++p; return 1;
-}
-
-int cparenOLD(char*& p) {
-	SkipBlanks(p);
-	if (*p != cpc) {
-		return 0;
-	}
-	++p; return 1;
-}
-
-char* getparen(char* p) {
-	int teller = 0;
-	SkipBlanks(p);
-	while (*p) {
-		if (*p == '(') {
-			++teller;
-		} else if (*p == ')') {
-			if (teller == 1) {
-				SkipBlanks(++p); return p;
-			} else {
-				--teller;
-			}
+char* ParenthesesEnd(char* p) {
+	int depth = 0;	char pc;
+	if (SkipBlanks(p) || '(' != *p) return nullptr;
+	while (0 != (pc = *p++)) {
+		if ('(' == pc) ++depth;
+		else if (')' == pc && 0 == --depth) {
+			SkipBlanks(p);
+			return p;
 		}
-		++p;
 	}
-	return 0;
+	return nullptr;
 }
 
 char nidtemp[LINEMAX], *nidsubp = nidtemp;
@@ -297,7 +279,7 @@ int check8o(long val) {
 	if (val < -128 || val > 127) {
 		char buffer[32];
 		sprintf(buffer,"Offset out of range (%+li)", val);
-		Error(buffer);
+		Error(buffer, nullptr, IF_FIRST);
 		return 0;
 	}
 	return 1;
@@ -790,6 +772,7 @@ char* GetFileName(char*& p, bool convertslashes) {
 		} else {
 			const char delimiterTxt[2] = { deliE, 0 };
 			Error("No closing delimiter", delimiterTxt, SUPPRESS);
+			result[0] = 0;	// return "empty" string filename
 		}
 	}
 	SkipBlanks(p);			// skip blanks any way

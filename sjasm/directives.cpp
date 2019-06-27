@@ -1070,30 +1070,21 @@ void dirEMPTYTRD() {
 }
 
 void dirSAVETRD() {
-
-	if (pass != LASTPASS) {
+	if (pass != LASTPASS || !DeviceID) {
+		if (LASTPASS == pass) Error("SAVETRD only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
 		return;
 	}
 
-	bool exec = true;
-
-	if (!DeviceID) {
-		if (pass == LASTPASS) {
-			Error("SAVETRD only allowed in real device emulation mode (See DEVICE)");
-		}
-		exec = false;
-	} else if (pass != LASTPASS) {
-		exec = false;
-	}
-
+	bool exec = true, replace = false;
 	aint val;
 	char* fnaam, * fnaamh;
-	int start = -1,length = -1,autostart = -1; //autostart added by boo_boo 19_0ct_2008
+	int start = -1, length = -1, autostart = -1;
 
 	fnaam = GetFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
+			if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
@@ -1143,9 +1134,7 @@ void dirSAVETRD() {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
-	if (exec) {
-		TRD_AddFile(fnaam, fnaamh, start, length, autostart);
-	}
+	if (exec) TRD_AddFile(fnaam, fnaamh, start, length, autostart, replace);
 	delete[] fnaam;
 	delete[] fnaamh;
 }
@@ -1568,15 +1557,13 @@ void dirDISPLAY() {
 
 void dirMACRO() {
 	if (lijst) Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
-	if (LastParsedLabelLine == CompiledCurrentLine) {	// A) name of macro is defined by label
-		// add macro with label used as name of it
-		MacroTable.Add(LastParsedLabel, lp);
-		// and remove the name from labels in the last pass
-		if (LASTPASS == pass) LabelTable.Remove(LastParsedLabel);
-	} else {											// B) name of macro follows directive (no label)
-		char* n = GetID(lp);
-		if (n) MacroTable.Add(n, lp);
-		else   Error("[MACRO] Illegal macroname");
+	char* lpLabel = LastParsedLabel;	// modifiable copy of global buffer pointer
+	// get+validate macro name either from label on same line or from following line
+	char* n = GetID(LastParsedLabelLine == CompiledCurrentLine ? lpLabel : lp);
+	if (n) MacroTable.Add(n, lp);
+	else {
+		Error("[MACRO] Illegal macroname");
+		SkipToEol(lp);
 	}
 }
 
