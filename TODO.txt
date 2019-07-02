@@ -22,6 +22,11 @@ CSPECTMAP - needs better support for DISP and instances of STRUCT
 --syntax: L options implementation
     add DOCS example test: "hl: Ld a,(hl),,de,hl" when all is implemented
 
+LABELS - forward reference - v DEFL/=/EQU pripadoch??! = sux??
+
+SAVENEX - simplify it even more... probably keep memory zeroed, and make even zero bytes
+"tainting" pages for AUTO command, so only things produced by user will land into NEX file.
+
 static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
 
 FIXME in sources mark further points worth refactoring

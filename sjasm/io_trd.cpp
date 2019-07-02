@@ -86,7 +86,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	byte hobnamebin[9];			// prepare binary format of name (as on disc) (for replace search)
 	memset(hobnamebin,' ',9);
 	if (extLetter) hobnamebin[8] = extLetter;
-	memcpy(hobnamebin, fhobname, std::min(hobNameL, 8UL));	// binary form is 8+1 with spaces-padding
+	memcpy(hobnamebin, fhobname, std::min(hobNameL, size_t(8)));	// binary form is 8+1 with spaces-padding
 	if (0 <= autostart && ('B' != extLetter || 9999 < autostart)) {
 		Warning("zx.trdimage_add_file: autostart value is BASIC program line number (0..9999) (in lua use -1 otherwise).");
 		autostart = -1;
