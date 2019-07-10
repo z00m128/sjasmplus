@@ -16,6 +16,9 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
+DB will bail out at 129+ bytes per line with "too many arguments", but ordinary user
+has no chance to know it's 128 max.
+
 UTF8/16/32 - handle BOM markers! ... actually only UTF8, and panic at UTF16/32, because
 rest of the parser is done.
 

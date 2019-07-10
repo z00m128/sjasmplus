@@ -44,7 +44,7 @@
 
             function finishOpAllocate()
                 assert(_G.lastFreePage, "allocateOpMemory not called yet")
-                allocatedPages[_G.lastFreePage] = _c("low $")
+                allocatedPages[_G.lastFreePage] = _c("$ & $1FF")
             ;end
 
             function setOrgAfterLastAllocated()
@@ -108,8 +108,12 @@ opRoutines  equ     $8000               ; must be 256B aligned, size dynamic (N 
             db      11
             finishOpAllocate
 
-            allocateOpMemory 255
+            allocateOpMemory 253
             db      12, 13, 14, 15, "this goes over into page $8100..81FF"
+            finishOpAllocate
+
+            allocateOpMemory 255
+            db      255, 255, 255, 255, 255     ; another going into second half
             finishOpAllocate
 
             lua allpass

@@ -45,7 +45,7 @@
  44   C005 ~
  45   C005 ~                        function finishOpAllocate()
  46   C005 ~                            assert(_G.lastFreePage, "allocateOpMemory not called yet")
- 47   C005 ~                            allocatedPages[_G.lastFreePage] = _c("low $")
+ 47   C005 ~                            allocatedPages[_G.lastFreePage] = _c("$ & $1FF")
  48   C005 ~                        ;end
  49   C005 ~
  50   C005 ~                        function setOrgAfterLastAllocated()
@@ -164,40 +164,56 @@
 109   8205 ~           >                finishOpAllocate()
 109   8205             >            endlua
 110   8205
-111   8205                          allocateOpMemory 255
-111   8205             >@__allocateOpMemory_opcode = 255
+111   8205                          allocateOpMemory 253
+111   8205             >@__allocateOpMemory_opcode = 253
 111   8205             >            lua allpass
 111   8205 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
-111   8205             >org $7fff
-111   7FFF 80          >db $80
-111   8000             >org $80ff
-111   80FF             >opcode_ff_impl:
-111   80FF             >            endlua
-112   80FF 0C 0D 0E 0F              db      12, 13, 14, 15, "this goes over into page $8100..81FF"
-112   8103 74 68 69 73
-112   8107 20 67 6F 65
-112   810B 73 20 6F 76
-112   810F 65 72 20 69
-112   8113 6E 74 6F 20
-112   8117 70 61 67 65
-112   811B 20 24 38 31
-112   811F 30 30 2E 2E
-112   8123 38 31 46 46
-113   8127                          finishOpAllocate
-113   8127             >            lua allpass
-113   8127 ~           >                finishOpAllocate()
-113   8127             >            endlua
-114   8127
-115   8127                          lua allpass
-116   8127 ~                            setOrgAfterLastAllocated()
-117   8127              org $8405
-117   8127                          endlua
-118   8405
-119   8405                      ;-----------------------------------------------------------------
-120   8405                      ; store result as binary blob for simple verification in hexa editor
-121   8405 00 00 00...              align   512, 0              ; fill also last page to full 512B first
-122   8600                          savebin "lua_build_jp_table.bin", opJpTab, $ - opJpTab
-123   8600
+111   8205             >org $7ffd
+111   7FFD 80          >db $80
+111   7FFE             >org $80fd
+111   80FD             >opcode_fd_impl:
+111   80FD             >            endlua
+112   80FD 0C 0D 0E 0F              db      12, 13, 14, 15, "this goes over into page $8100..81FF"
+112   8101 74 68 69 73
+112   8105 20 67 6F 65
+112   8109 73 20 6F 76
+112   810D 65 72 20 69
+112   8111 6E 74 6F 20
+112   8115 70 61 67 65
+112   8119 20 24 38 31
+112   811D 30 30 2E 2E
+112   8121 38 31 46 46
+113   8125                          finishOpAllocate
+113   8125             >            lua allpass
+113   8125 ~           >                finishOpAllocate()
+113   8125             >            endlua
+114   8125
+115   8125                          allocateOpMemory 255
+115   8125             >@__allocateOpMemory_opcode = 255
+115   8125             >            lua allpass
+115   8125 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
+115   8125             >org $7fff
+115   7FFF 82          >db $82
+115   8000             >org $82ff
+115   82FF             >opcode_ff_impl:
+115   82FF             >            endlua
+116   82FF FF FF FF FF              db      255, 255, 255, 255, 255     ; another going into second half
+116   8303 FF
+117   8304                          finishOpAllocate
+117   8304             >            lua allpass
+117   8304 ~           >                finishOpAllocate()
+117   8304             >            endlua
+118   8304
+119   8304                          lua allpass
+120   8304 ~                            setOrgAfterLastAllocated()
+121   8304              org $8405
+121   8304                          endlua
+122   8405
+123   8405                      ;-----------------------------------------------------------------
+124   8405                      ; store result as binary blob for simple verification in hexa editor
+125   8405 00 00 00...              align   512, 0              ; fill also last page to full 512B first
+126   8600                          savebin "lua_build_jp_table.bin", opJpTab, $ - opJpTab
+127   8600
 # file closed: lua_build_jp_table.asm
 
 Value    Label
@@ -210,4 +226,5 @@ Value    Label
 0x8002 X opcode_02_impl
 0x8403 X opcode_03_impl
 0x8204 X opcode_04_impl
-0x80FF X opcode_ff_impl
+0x80FD X opcode_fd_impl
+0x82FF X opcode_ff_impl
