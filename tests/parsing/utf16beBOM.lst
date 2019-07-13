@@ -1,0 +1,1 @@
+utf16beBOM.asm(0): error: Invalid UTF encoding detected (only ASCII and UTF8 works): UTF16BE

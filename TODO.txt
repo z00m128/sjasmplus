@@ -16,22 +16,16 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
-DB will bail out at 129+ bytes per line with "too many arguments", but ordinary user
-has no chance to know it's 128 max.
+SAVENEX - simplify it even more... probably keep memory zeroed, and make even zero bytes
+"tainting" pages for AUTO command, so only things produced by user will land into NEX file.
 
-UTF8/16/32 - handle BOM markers! ... actually only UTF8, and panic at UTF16/32, because
-rest of the parser is done.
+LABELS - forward reference - v DEFL/=/EQU pripadoch??! = sux??
 
 CSPECTMAP - needs better support for DISP and instances of STRUCT
 
 --syntax: "I" to uppercase all labels + usage (needs labels refactoring)
 --syntax: L options implementation
     add DOCS example test: "hl: Ld a,(hl),,de,hl" when all is implemented
-
-LABELS - forward reference - v DEFL/=/EQU pripadoch??! = sux??
-
-SAVENEX - simplify it even more... probably keep memory zeroed, and make even zero bytes
-"tainting" pages for AUTO command, so only things produced by user will land into NEX file.
 
 static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
 

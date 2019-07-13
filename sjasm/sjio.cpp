@@ -565,6 +565,20 @@ void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
 	FP_Input = oFP_Input;
 }
 
+typedef struct {
+	char	name[12];
+	size_t	length;
+	byte	marker[16];
+} BOMmarkerDef;
+
+const BOMmarkerDef UtfBomMarkers[] = {
+	{ { "UTF8" }, 3, { 0xEF, 0xBB, 0xBF } },
+	{ { "UTF32BE" }, 4, { 0, 0, 0xFE, 0xFF } },
+	{ { "UTF32LE" }, 4, { 0xFF, 0xFE, 0, 0 } },		// must be detected *BEFORE* UTF16LE
+	{ { "UTF16BE" }, 2, { 0xFE, 0xFF } },
+	{ { "UTF16LE" }, 2, { 0xFF, 0xFE } }
+};
+
 static bool ReadBufData() {
 	// check here also if `line` buffer is not full
 	if ((LINEMAX-2) <= (rlppos - line)) Error("Line too long", NULL, FATAL);
@@ -594,6 +608,17 @@ static bool ReadBufData() {
 			}
 			*rlpbuf_end = 0;				// add zero terminator after new block
 		}
+	}
+	// check UTF BOM markers only at the beginning of the file (source line == 0)
+	if (CurrentSourceLine) return (rlpbuf < rlpbuf_end);			// return true if some data were read
+	//UTF BOM markers detector
+	for (const auto & bomMarkerData : UtfBomMarkers) {
+		if (rlpbuf_end < (rlpbuf + bomMarkerData.length)) continue;	// not enough bytes in buffer
+		if (memcmp(rlpbuf, bomMarkerData.marker, bomMarkerData.length)) continue;	// marker not found
+		if (&bomMarkerData != UtfBomMarkers) {	// UTF8 is first in the array, other markers show error
+			Error("Invalid UTF encoding detected (only ASCII and UTF8 works)", bomMarkerData.name, FATAL);
+		}
+		rlpbuf += bomMarkerData.length;	// skip the UTF8 BOM marker
 	}
 	return (rlpbuf < rlpbuf_end);			// return true if some data were read
 }

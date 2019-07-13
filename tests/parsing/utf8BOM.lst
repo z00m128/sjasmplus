@@ -1,0 +1,9 @@
+# file opened: utf8BOM.asm
+1     0000 C9           start   ret     ; there should be UTF8 BOM marker at the beginning of this file
+2     0001                  ; and it should compile just without any issues
+3     0001
+# file closed: utf8BOM.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X start
