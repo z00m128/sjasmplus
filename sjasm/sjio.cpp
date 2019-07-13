@@ -435,6 +435,7 @@ void BinIncFile(char* fname, int offset, int length) {
 				if (MemoryPointer) {	// fill up current memory page if possible
 					advanceLength = Page->RAM + Page->Size - MemoryPointer;
 					if (length < advanceLength) advanceLength = length;
+					MemoryPointer += advanceLength;		// also update it! Doh!
 				}
 			}
 			length -= advanceLength;
