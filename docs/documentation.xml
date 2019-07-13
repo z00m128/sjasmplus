@@ -192,6 +192,16 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>Work in progress - 1.13.3</term>
+
+            <listitem>
+              <synopsis>- bugfixes, new examples (check tests/lua_examples)
+- UTF BOM are now detected, UTF8 BOM is silently skipped, UTF16/32 BOMs cause fatal error
+- some error messages reworded to make them easier to comprehend</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>28.6.2019 - 1.13.2</term>
 
             <listitem>
@@ -1283,9 +1293,7 @@ StartProg:
               <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
               RAM pages (0-223) totalling at 1.75MiB of memory. The default mapping
               is similar to ZX128, paging in: {14, 15, 10, 11, 4, 5, 0, 1} pages.
-              The page 10 (bank 5) contains also ZX48 sysvars ("USR 0" mode) and
-              clear ULA screen. (SAVESNA works only in ZX48 and ZX128 modes, in
-              NEXT mode only SAVEBIN or saving specific TAP blocks work)</para>
+              All memory is zeroed during initialization.</para>
             </listitem>
           </varlistentry>
         </variablelist></para>
@@ -3902,7 +3910,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 				  <para>
 					  Opens a NEX file, defines start address, stack address and 16k bank to be mapped
 					  at 0xC000 before code is executed (if values are omitted, start address is zero
-					  = no start, stack address is 0xFF2D, entryBank is zero).
+					  = no start, stack address is 0xFFFE, entryBank is zero).
 				  </para>
 				  <para>
 					  Only single NEX file can be open at the same time, and to finalize the header
@@ -4055,6 +4063,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 				  <para>
 					  Can be used after <link linkend="nex_open">OPEN</link> or <link linkend="nex_screen">
 						  SCREEN</link> and before <link linkend="nex_close">CLOSE</link>. The sjasmplus
+					  will save every 16k bank containing at least one non-zero byte; detected in the correct order (automatically
 					  will save every non-zero 16k bank detected in the correct order (automatically
 					  starting from first possible bank after previous BANK/AUTO commands, or from
 					  provided "fromBank").
@@ -4062,13 +4071,6 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 				  <para>
 					  For "fromBank" value use the specified order above in <link linkend="nex_bank">BANK
 						  </link> command, i.e. 5, 2, 0, ...
-				  </para>
-				  <para>
-					  Keep in mind the <link linkend="po_device">DEVICE</link> ZXSPECTRUMNEXT will
-					  automatically adjust content of banks 5 and 0 (ULA screen, sysvars and fake ZX48
-					  stack), so unless you clear those banks to zero, or skip saving them by saving
-					  first set of banks explicitly with <link linkend="nex_bank">BANK</link> command,
-					  they will be saved by AUTO.
 				  </para>
 			  </listitem>
 		  </varlistentry>

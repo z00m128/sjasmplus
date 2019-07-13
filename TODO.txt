@@ -16,8 +16,7 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
-SAVENEX - simplify it even more... probably keep memory zeroed, and make even zero bytes
-"tainting" pages for AUTO command, so only things produced by user will land into NEX file.
+SAVENEX AUTO - make also user defined "zeroed" banks to be saved (not only non-zero ones)
 
 LABELS - forward reference - v DEFL/=/EQU pripadoch??! = sux??
 
