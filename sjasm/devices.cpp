@@ -39,19 +39,23 @@ bool IsZXSpectrumDevice(char *name){
 	return true;
 }
 
-static void initZxLikeDevice(CDevice* const device, int32_t slotSize, int pageCount, const int* const initialPages) {
-	for (int32_t slotAddress = 0; slotAddress < 0x10000; slotAddress += slotSize) {
+static void initRegularSlotDevice(CDevice* const device, const int32_t slotSize, const int32_t slotCount,
+								  const int pageCount, const int* const initialPages) {
+	for (int32_t slotAddress = 0; slotAddress < slotSize * slotCount; slotAddress += slotSize) {
 		device->AddSlot(slotAddress, slotSize);
 	}
-	device->Memory = new byte[pageCount * slotSize]();
-	byte* memPtr = device->Memory;
-	for (int i = 0; i < pageCount; ++i, memPtr += slotSize) {
+	device->Memory = new byte[slotSize * pageCount]();
+	for (byte* memPtr = device->Memory; memPtr < device->Memory + slotSize * pageCount; memPtr += slotSize) {
 		device->AddPage(memPtr, slotSize);
 	}
 	for (int i = 0; i < device->SlotsCount; ++i) {
 		device->GetSlot(i)->Page = device->GetPage(initialPages[i]);
 	}
 	device->SetSlot(device->SlotsCount - 1);
+}
+
+static void initZxLikeDevice(CDevice* const device, int32_t slotSize, int pageCount, const int* const initialPages) {
+	initRegularSlotDevice(device, slotSize, 0x10000/slotSize, pageCount, initialPages);
 	// set memory to "USR 0"-like state (for snapshot saving) (works also for ZXN 0x2000 slotSize)
 	int vramPage = (0x2000 == slotSize) ? initialPages[2] : initialPages[1];	// default = second slot page
 	byte* const vramRAM = device->GetPage(vramPage)->RAM;
@@ -92,7 +96,7 @@ static void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {		// add new d
 static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
 	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
 	const int initialPages[] = {14, 15, 10, 11, 4, 5, 0, 1};	// basically same as ZX128, but 8k
-	initZxLikeDevice(*dev, 0x2000, 224, initialPages);
+	initRegularSlotDevice(*dev, 0x2000, 8, 224, initialPages);
 	// auto-enable ZX Next instruction extensions
 	if (0 == Options::syx.IsNextEnabled) {
 		Options::syx.IsNextEnabled = 1;

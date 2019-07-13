@@ -17,7 +17,7 @@
 ;
 ;     SAVENEX OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>]]]
 ; Opens a NEX file, defines start address and stack address (if omitted, start address is
-; zero = no start, stack address is 0xFF2D, entryBank is zero), and 16k bank to be mapped
+; zero = no start, stack address is 0xFFFE, entryBank is zero), and 16k bank to be mapped
 ; at 0xC000 before code is started.
 ;
 ; Only single NEX file can be open at the same time, and to finalize the header content
@@ -86,15 +86,11 @@
 ;
 ;     SAVENEX AUTO [<fromBank 0..111>[,<toBank 0..111>]]
 ; Can be used after OPEN or SCREEN and before CLOSE. The sjasmplus will save every
-; non-zero 16k bank detected in the correct order (automatically starting from
-; first possible bank after previous BANK/AUTO commands, or from provided "fromBank").
+; 16k bank containing at least one non-zero byte; detected in the correct order
+; (automatically starting from first possible bank after previous BANK/AUTO commands,
+; or from provided "fromBank").
 ;
 ; For "fromBank" value use the specified order above in BANK command, i.e. 5, 2, 0, ...
-;
-; Keep in mind the DEVICE ZXSPECTRUMNEXT will automatically adjust content of banks 5
-; and 0 (ULA screen, sysvars and fake ZX48 stack), so unless you clear those banks to
-; zero, or skip saving them by saving first set of banks explicitly with BANK command,
-; they will be saved by AUTO.
 ;
 ;     SAVENEX CLOSE [<fileToAppend>]
 ; Can be used after OPEN. The currently open NEX file will be finalized (header adjusted),
