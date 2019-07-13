@@ -149,19 +149,16 @@ void dirWORD() {
 	do {
 		if (SkipBlanks()) {
 			Error("Expression expected", NULL, SUPPRESS);
-		} else if (ParseExpression(lp, val)) {
+		} else if (ParseExpressionNoSyntaxError(lp, val)) {
 			check16(val);
-			if (teller > 127) {
-				Error("Over 128 values in DW/DEFW/WORD", NULL, SUPPRESS);
-				break;
-			}
 			e[teller++] = val & 65535;
 		} else {
 			Error("[DW/DEFW/WORD] Syntax error", lp, SUPPRESS);
 			break;
 		}
-	} while (comma(lp));
+	} while (comma(lp) && teller < 128);
 	e[teller] = -1;
+	if (teller == 128 && *lp) Error("Over 128 values in DW/DEFW/WORD. Values over", lp, SUPPRESS);
 	if (teller) EmitWords(e);
 	else		Error("DW/DEFW/WORD with no arguments");
 }
@@ -172,18 +169,15 @@ void dirDWORD() {
 	do {
 		if (SkipBlanks()) {
 			Error("Expression expected", NULL, SUPPRESS);
-		} else if (ParseExpression(lp, val)) {
-			if (teller > 127) {
-				Error("Over 128 values in DWORD", NULL, SUPPRESS);
-				break;
-			}
+		} else if (ParseExpressionNoSyntaxError(lp, val)) {
 			e[teller * 2] = val & 65535; e[teller * 2 + 1] = (val >> 16) & 0xFFFF; ++teller;
 		} else {
 			Error("[DWORD] Syntax error", lp, SUPPRESS);
 			break;
 		}
-	} while (comma(lp));
+	} while (comma(lp) && teller < 128);
 	e[teller * 2] = -1;
+	if (teller == 128 && *lp) Error("Over 128 values in DWORD. Values over", lp, SUPPRESS);
 	if (teller) EmitWords(e);
 	else		Error("DWORD with no arguments");
 }
@@ -194,19 +188,16 @@ void dirD24() {
 	do {
 		if (SkipBlanks()) {
 			Error("Expression expected", NULL, SUPPRESS);
-		} else if (ParseExpression(lp, val)) {
+		} else if (ParseExpressionNoSyntaxError(lp, val)) {
 			check24(val);
-			if (teller > 127*3) {
-				Error("Over 128 values in D24", NULL, SUPPRESS);
-				break;
-			}
 			e[teller++] = val & 255; e[teller++] = (val >> 8) & 255; e[teller++] = (val >> 16) & 255;
 		} else {
 			Error("[D24] Syntax error", lp, SUPPRESS);
 			break;
 		}
-	} while (comma(lp));
+	} while (comma(lp) && teller < 128*3);
 	e[teller] = -1;
+	if (teller == 128*3 && *lp) Error("Over 128 values in D24. Values over", lp, SUPPRESS);
 	if (teller) EmitBytes(e);
 	else		Error("D24 with no arguments");
 }

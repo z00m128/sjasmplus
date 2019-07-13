@@ -151,7 +151,7 @@ numeric_constants_defX.asm(51): error: no arguments
 56    018E 38 39 41 42
 56    0192 43 44 45 46
 57    0196                  ; 3x error too many
-numeric_constants_defX.asm(58): error: Too many arguments: F"
+numeric_constants_defX.asm(58): error: Over 128 bytes defined in single DB/DC/... Values over: F"
 58    0196 0A 31 32 33      DB      "\n123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF",'!',"\n123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF","0123456789ABCDEF"
 58    019A 34 35 36 37
 58    019E 38 39 41 42
@@ -184,7 +184,7 @@ numeric_constants_defX.asm(58): error: Too many arguments: F"
 58    020A 33 34 35 36
 58    020E 37 38 39 41
 58    0212 42 43 44 45
-numeric_constants_defX.asm(59): error: Too many arguments:  1
+numeric_constants_defX.asm(59): error: Over 128 bytes defined in single DB/DC/... Values over:  1
 59    0216 0A 31 32 33      DB      "\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF", 1
 59    021A 34 35 36 37
 59    021E 38 39 41 42
@@ -217,7 +217,7 @@ numeric_constants_defX.asm(59): error: Too many arguments:  1
 59    028A 34 35 36 37
 59    028E 38 39 41 42
 59    0292 43 44 45 46
-numeric_constants_defX.asm(60): error: Too many arguments: !"
+numeric_constants_defX.asm(60): error: Over 128 bytes defined in single DB/DC/... Values over: !"
 60    0296 0A 31 32 33      DB      "\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF\n123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF!"
 60    029A 34 35 36 37
 60    029E 38 39 41 42
@@ -256,8 +256,8 @@ numeric_constants_defX.asm(60): error: Too many arguments: !"
 63    031A 43 43
 numeric_constants_defX.asm(64): error: Expression expected
 64    031C                  DW                              ; error: Expression expected
-numeric_constants_defX.asm(65): error: [DW/DEFW/WORD] Syntax error: 
-65    031C                  DW      +                       ; error: Syntax error
+numeric_constants_defX.asm(65): error: [DW/DEFW/WORD] Syntax error: &&$                     
+65    031C                  DW      &&$                     ; error: Syntax error
 66    031C                  ; 128 values = OK
 67    031C 01 00 02 00      DW      1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 67    0320 03 00 04 00
@@ -324,7 +324,7 @@ numeric_constants_defX.asm(65): error: [DW/DEFW/WORD] Syntax error:
 67    0414 0D 00 0E 00
 67    0418 0F 00 10 00
 68    041C                  ; 129 values = error too many
-numeric_constants_defX.asm(69): error: Over 128 values in DW/DEFW/WORD
+numeric_constants_defX.asm(69): error: Over 128 values in DW/DEFW/WORD. Values over: 16
 69    041C FF FF 01 00      DW      -1, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 69    0420 02 00 03 00
 69    0424 04 00 05 00
@@ -396,8 +396,8 @@ numeric_constants_defX.asm(69): error: Over 128 values in DW/DEFW/WORD
 72    0524 43 43 43 43
 numeric_constants_defX.asm(73): error: Expression expected
 73    0528                  DD                              ; error: Expression expected
-numeric_constants_defX.asm(74): error: [DWORD] Syntax error: 
-74    0528                  DD      +                       ; error: Syntax error
+numeric_constants_defX.asm(74): error: [DWORD] Syntax error: &&$                     
+74    0528                  DD      &&$                     ; error: Syntax error
 75    0528                  ; 128 values = OK
 76    0528 FF FF FF FF      DD      -1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 76    052C 02 00 00 00
@@ -528,7 +528,7 @@ numeric_constants_defX.asm(74): error: [DWORD] Syntax error:
 76    0720 0F 00 00 00
 76    0724 10 00 00 00
 77    0728                  ; 129 values = error too many
-numeric_constants_defX.asm(78): error: Over 128 values in DWORD
+numeric_constants_defX.asm(78): error: Over 128 values in DWORD. Values over: 16
 78    0728 FF FF FF FF      DD      -1, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 78    072C 01 00 00 00
 78    0730 02 00 00 00
@@ -670,8 +670,8 @@ numeric_constants_defX.asm(82): warning: Bytes lost (0x43434343)
 82    0939 43
 numeric_constants_defX.asm(83): error: Expression expected
 83    093A                  D24                             ; error: Expression expected
-numeric_constants_defX.asm(84): error: [D24] Syntax error: 
-84    093A                  D24     +                       ; error: Syntax error
+numeric_constants_defX.asm(84): error: [D24] Syntax error: &&$                     
+84    093A                  D24     &&$                     ; error: Syntax error
 85    093A                  ; 128 values = OK
 86    093A FF FF FF 02      D24     -1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 86    093E 00 00 03 00
@@ -770,7 +770,7 @@ numeric_constants_defX.asm(84): error: [D24] Syntax error:
 86    0AB2 00 00 0F 00
 86    0AB6 00 10 00 00
 87    0ABA                  ; 129 values = error too many
-numeric_constants_defX.asm(88): error: Over 128 values in D24
+numeric_constants_defX.asm(88): error: Over 128 values in D24. Values over: 16
 88    0ABA FF FF FF 01      D24     -1, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 88    0ABE 00 00 02 00
 88    0AC2 00 03 00 00
@@ -868,6 +868,12 @@ numeric_constants_defX.asm(88): error: Over 128 values in D24
 88    0C32 00 00 0E 00
 88    0C36 00 0F 00 00
 89    0C3A
+90    0C3A                  ; check if syntax errors are reported precisely *once* per (tricky) expression
+numeric_constants_defX.asm(91): error: Syntax error: 
+91    0C3A                  DB      +                       ; error: Syntax error
+numeric_constants_defX.asm(92): error: Syntax error: &&$                     
+92    0C3A                  DB      &&$                     ; error: Syntax error
+93    0C3A
 # file closed: numeric_constants_defX.asm
 
 Value    Label

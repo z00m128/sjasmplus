@@ -632,7 +632,8 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 		if (SkipBlanks(p)) {
 			Error("Expression expected", NULL, SUPPRESS);
 			break;
-		} else if (0 != (strRes = GetCharConstAsString(p, e, t, 128, add))) {
+		}
+		if (0 != (strRes = GetCharConstAsString(p, e, t, 128, add))) {
 			// string literal parsed (both types)
 			if (-1 == strRes) break;		// syntax error happened
 			// single byte "strings" may have further part of expression, detect it here
@@ -652,7 +653,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 				continue;
 			}
 		}
-		if (ParseExpression(p, val)) {
+		if (ParseExpressionNoSyntaxError(p, val)) {
 			check8(val);
 			e[t++] = (val + add) & 255;
 		} else {
@@ -661,7 +662,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 		}
 	} while(comma(p) && t < 128);
 	e[t] = -1;
-	if (t == 128 && *p) Error("Too many arguments", p, SUPPRESS);
+	if (t == 128 && *p) Error("Over 128 bytes defined in single DB/DC/... Values over", p, SUPPRESS);
 	return t;
 }
 
@@ -671,6 +672,10 @@ int GetBits(char*& p, int e[]) {
 	static bool zeroInDgWarning = false;
 	int bytes = 0;
 	while (*p && (dt == DT_NONE || delimiters_e[dt] != *p)) {
+		if (128 <= bytes) {
+			Error("Over 128 bytes defined in DG. Bits over", p, SUPPRESS);
+			break;
+		}
 		// collect whole byte (eight bits)
 		int value = 1, pch;
 		while (value < 256 && *p && (pch = 255 & (*p++))) {
@@ -691,10 +696,6 @@ int GetBits(char*& p, int e[]) {
 		if (value < 256) {		// there was not eight characters, ended prematurely
 			Error("[DG] byte needs eight characters", substitutedLine, SUPPRESS);
 		} else {
-			if (128 <= bytes) {
-				Error("Too many arguments", p, SUPPRESS);
-				break;
-			}
 			e[bytes++] = value & 255;
 		}
 		SkipBlanks(p);
@@ -721,7 +722,7 @@ int GetBytesHexaText(char*& p, int e[]) {
 				return 0;		// total failure, don't emit anything
 			}
 			if (128 <= bytes) {
-				Error("Too many arguments", NULL, SUPPRESS);
+				Error("Over 128 bytes defined in DH/DEFH/HEX. Values over", op, SUPPRESS);
 				break;
 			}
 			e[bytes++] = val & 255;

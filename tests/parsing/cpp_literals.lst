@@ -46,7 +46,6 @@ cpp_literals.asm(29): error: Unexpected: 6'961D
 29    003F 31 00            dw      '1'6'961D
 cpp_literals.asm(30): error: Unexpected: '4'4'43
 30    0041 41 00            dw      $'4'4'43
-cpp_literals.asm(31): error: Syntax error: #'4'4'43
 cpp_literals.asm(31): error: [DW/DEFW/WORD] Syntax error: #'4'4'43
 31    0043                  dw      #'4'4'43
 cpp_literals.asm(32): error: Missing next digit: 0X'4'4'43
