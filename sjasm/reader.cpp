@@ -267,8 +267,8 @@ char* getinstr(char*& p) {
 
 int check8(aint val, bool error) {
 	if ((val < -256 || val > 255) && error) {
-		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%lX)", val&0xFFFFFFFFUL);
+		char buffer[64];
+		sprintf(buffer, "value 0x%lX is truncated to 8bit value: 0x%02lX", val&0xFFFFFFFFUL, val&0xFFUL);
 		Warning(buffer);
 		return 0;
 	}
@@ -287,8 +287,8 @@ int check8o(long val) {
 
 int check16(aint val, bool error) {
 	if ((val < -65536 || val > 65535) && error) {
-		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%lX)", val&0xFFFFFFFFUL);
+		char buffer[64];
+		sprintf(buffer, "value 0x%lX is truncated to 16bit value: 0x%04lX", val&0xFFFFFFFFUL, val&0xFFFFUL);
 		Warning(buffer);
 		return 0;
 	}
@@ -297,8 +297,8 @@ int check16(aint val, bool error) {
 
 int check24(aint val, bool error) {
 	if ((val < -16777216 || val > 16777215) && error) {
-		char buffer[32];
-		sprintf(buffer, "Bytes lost (0x%lX)", val&0xFFFFFFFFUL);
+		char buffer[64];
+		sprintf(buffer, "value 0x%lX is truncated to 24bit value: 0x%06lX", val&0xFFFFFFFFUL, val&0xFFFFFFUL);
 		Warning(buffer);
 		return 0;
 	}

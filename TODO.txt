@@ -16,8 +16,6 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
-SAVENEX AUTO - make also user defined "zeroed" banks to be saved (not only non-zero ones)
-
 LABELS - forward reference - v DEFL/=/EQU pripadoch??! = sux??
 
 CSPECTMAP - needs better support for DISP and instances of STRUCT
@@ -92,6 +90,7 @@ MMU:
 - err/warn/warp option for slot range?
 
 Kate syntax: broken with LUA block containing "end" keyword (maybe even consider including Lua highlight rules from KDE defaults, if it's possible)
+    - also missing MMU ?
 
 AppVeyor CI for windows clang + mingw + MSVS2015 builds?
 

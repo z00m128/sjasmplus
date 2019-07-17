@@ -336,7 +336,7 @@
  95   83C0                  ; "_!BCDEFGHIJKLMNOPQRSTUVWXYZabcdd!3!56\n\n\n"
  96   83C0
  97   83C0              ;; value warnings
-fields_types.asm(98): warning: Bytes lost (0x2121)
+fields_types.asm(98): warning: value 0x2121 is truncated to 8bit value: 0x21
  98   83C0 5F 21 42 43  w0     str     '!!'
  98   83C4 44 45 46 47
  98   83C8 48 49 4A 4B

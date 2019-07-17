@@ -3,13 +3,13 @@
  2    0000              ;   w      Warnings options: report warnings as errors
  3    0000
  4    0000              ; verify regular syntax works as expected with default options
-syntax_w.asm(5): warning: Bytes lost (0x1234)
+syntax_w.asm(5): warning: value 0x1234 is truncated to 8bit value: 0x34
  5    0000 3E 34            ld      a,0x1234            ; warning about lost bytes
  6    0002                  OPT push --syntax=w ; test the syntax option "w"
-syntax_w.asm(7): error: Bytes lost (0x1234)
+syntax_w.asm(7): error: value 0x1234 is truncated to 8bit value: 0x34
  7    0002 3E 34            ld      a,0x1234            ; error about lost bytes
  8    0004                  OPT pop             ; test push+pop of new option
-syntax_w.asm(9): warning: Bytes lost (0x1234)
+syntax_w.asm(9): warning: value 0x1234 is truncated to 8bit value: 0x34
  9    0004 3E 34            ld      a,0x1234            ; warning about lost bytes
 10    0006                  ASSERT 2 == 2 && 1 == 1
 11    0006

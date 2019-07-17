@@ -197,6 +197,7 @@
             <listitem>
               <synopsis>- bugfixes, new examples (check tests/lua_examples)
 - UTF BOM are now detected, UTF8 BOM is silently skipped, UTF16/32 BOMs cause fatal error
+- ZXSPECTRUMNEXT device is now initialized with whole memory zeroed (no more ZX48 sysvars)
 - some error messages reworded to make them easier to comprehend</synopsis>
             </listitem>
           </varlistentry>

@@ -6,7 +6,7 @@
 address_wrap.asm(5): warning: RAM limit exceeded 0x10000 by ORG
  5    0000 18 FE        tb1 jr tb1
  6    0002 18 FE        tc1 jr tc1
-address_wrap.asm(7): warning: Bytes lost (0x10002)
+address_wrap.asm(7): warning: value 0x10002 is truncated to 16bit value: 0x0002
  7    0004 CD 02 00         call tc1
  8    0007
  9    0007                  ORG $FFFF
@@ -14,7 +14,7 @@ address_wrap.asm(7): warning: Bytes lost (0x10002)
 address_wrap.asm(11): warning: RAM limit exceeded 0x10001 by ORG
 11    0001 18 FE        tb2 jr tb2
 12    0003 18 FE        tc2 jr tc2
-address_wrap.asm(13): warning: Bytes lost (0x10003)
+address_wrap.asm(13): warning: value 0x10003 is truncated to 16bit value: 0x0003
 13    0005 CD 03 00         call tc2
 14    0008
 15    0008                  ; default with device will produce error (and leak into 0x10000+ address realm)
@@ -24,7 +24,7 @@ address_wrap.asm(13): warning: Bytes lost (0x10003)
 address_wrap.asm(19): error: Write outside of device memory at: 65536
 19    0000 18 FE        tb3 jr tb3      ; machine code is written only to OUTPUT, not to device-memory (SAVEBIN)
 20    0002 18 FE        tc3 jr tc3
-address_wrap.asm(21): warning: Bytes lost (0x10002)
+address_wrap.asm(21): warning: value 0x10002 is truncated to 16bit value: 0x0002
 21    0004 CD 02 00         call tc3
 22    0007
 23    0007                  ORG $FFFF
@@ -32,7 +32,7 @@ address_wrap.asm(24): error: Write outside of device memory at: 65536
 24    FFFF 3E 38        ta4 ld a,'8'
 25    0001 18 FE        tb4 jr tb4
 26    0003 18 FE        tc4 jr tc4
-address_wrap.asm(27): warning: Bytes lost (0x10003)
+address_wrap.asm(27): warning: value 0x10003 is truncated to 16bit value: 0x0003
 27    0005 CD 03 00         call tc4
 28    0008
 29    0008                  ; produce the same machine code at $8000 (recommended way how to FFFF->0000 wrap)

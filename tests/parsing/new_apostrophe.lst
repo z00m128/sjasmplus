@@ -36,13 +36,13 @@ new_apostrophe.asm(19): error: no arguments
 20    003D 27               db  ''''
 20    003E 04             db 4
 21    003F
-new_apostrophe.asm(22): warning: Bytes lost (0x41424344)
+new_apostrophe.asm(22): warning: value 0x41424344 is truncated to 16bit value: 0x4344
 new_apostrophe.asm(22): warning: String literal truncated to 0x47485858: 'ABCDEFGHXX'
-new_apostrophe.asm(22): warning: Bytes lost (0x47485858)
+new_apostrophe.asm(22): warning: value 0x47485858 is truncated to 16bit value: 0x5858
 22    003F 44 43 58 58      dw  'ABCD', 'ABCDEFGHXX'; regular value check warnings + string literal overflow
-new_apostrophe.asm(23): warning: Bytes lost (0x41424344)
+new_apostrophe.asm(23): warning: value 0x41424344 is truncated to 16bit value: 0x4344
 new_apostrophe.asm(23): warning: String literal truncated to 0x47485858: "ABCDEFGHXX"
-new_apostrophe.asm(23): warning: Bytes lost (0x47485858)
+new_apostrophe.asm(23): warning: value 0x47485858 is truncated to 16bit value: 0x5858
 23    0043 44 43 58 58      dw  "ABCD", "ABCDEFGHXX"; regular value check warnings + string literal overflow
 24    0047
 25    0047                  ;; exercise remaining escape sequences inside apostrophes (shouldn't be escaped)
@@ -68,7 +68,7 @@ new_apostrophe.asm(23): warning: Bytes lost (0x47485858)
 36    0086 21 6C 68         LD HL,"hl"  ; hl = 0x686C = 'l', 'h'
 37    0089 3E 37            LD A,"7"    ; not recommended (but works)
 38    008B 3E 38            LD A,'8'    ; recommended
-new_apostrophe.asm(39): warning: Bytes lost (0x5C45)
+new_apostrophe.asm(39): warning: value 0x5C45 is truncated to 8bit value: 0x45
 39    008D 3E 45            LD A,'\E'   ; warning + truncating value to 'E' (0x45)
 40    008F 3E 22            LD A,'"'    ; A = 0x22
 41    0091 3E 27            LD A,"'"    ; A = 0x27

@@ -25,7 +25,7 @@ op_next_syntax.asm(11): error: Unexpected: label
 op_next_syntax.asm(11): error: Unexpected: ,,a           
 11    0413 ED 24          mirror a,,a           ; syntax errors
 12    0415
-op_next_syntax.asm(13): warning: Bytes lost (0x405)
+op_next_syntax.asm(13): warning: value 0x405 is truncated to 8bit value: 0x05
 13    0415 ED 27 05         test label                      ; #ED2705
 op_next_syntax.asm(14): error: Operand expected
 14    0418 ED 27 00         test

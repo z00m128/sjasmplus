@@ -126,8 +126,8 @@ savenexSyntax.asm(114): error: [SAVENEX] entry bank can be 0..111 value only: 11
 115   0000
 116   0000                  ; one correct NEX file to verify simple case (but induce all sorts of warnings)
 savenexSyntax.asm(117): warning: [SAVESNA] Start address was also defined by END, OPEN argument used instead
-savenexSyntax.asm(117): warning: Bytes lost (0x18180)
-savenexSyntax.asm(117): warning: Bytes lost (0x1F1F0)
+savenexSyntax.asm(117): warning: value 0x18180 is truncated to 16bit value: 0x8180
+savenexSyntax.asm(117): warning: value 0x1F1F0 is truncated to 16bit value: 0xF1F0
 117   0000                  SAVENEX     OPEN    "savenexSyntax.nex",    $18180,$1F1F0,  'B'
 118   0000
 119   0000                  ; error = NEX file is already open

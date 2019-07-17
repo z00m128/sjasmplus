@@ -59,7 +59,7 @@
 46    9024
 stderr_as_listing.asm(47): error: Unrecognized instruction: some error and warning here
 47    9024                  some error and warning here
-stderr_as_listing.asm(48): warning: Bytes lost (0x7761726E)
+stderr_as_listing.asm(48): warning: value 0x7761726E is truncated to 8bit value: 0x6E
 48    9024 3E 6E            ld      a,'warn'
 49    9026
 50    9026              cnt = 0
