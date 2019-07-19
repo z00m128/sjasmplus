@@ -784,7 +784,7 @@ void CloseDest() {
 void SeekDest(long offset, int method) {
 	WriteDest();
 	if (FP_Output != NULL && fseek(FP_Output, offset, method)) {
-		Error("File seek error (FORG)", NULL, FATAL);
+		Error("File seek error (FPOS)", NULL, FATAL);
 	}
 }
 

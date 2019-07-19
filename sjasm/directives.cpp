@@ -1710,7 +1710,7 @@ void dirSTRUCT() {
 	st->deflab();
 }
 
-void dirFORG() {
+void dirFPOS() {
 	aint val;
 	int method = SEEK_SET;
 	SkipBlanks(lp);
@@ -1718,7 +1718,7 @@ void dirFORG() {
 		method = SEEK_CUR;
 	}
 	if (!ParseExpression(lp, val)) {
-		Error("[FORG] Syntax error", lp, IF_FIRST);
+		Error("[FPOS] Syntax error", lp, IF_FIRST);
 	}
 	if (pass == LASTPASS) {
 		SeekDest(val, method);
@@ -1752,7 +1752,7 @@ void dirDUP() {
 		Error("[DUP/REPT] Forward reference", NULL, ALL);
 	}
 	if ((int) val < 1) {
-		Error("[DUP/REPT] Illegal repeat value", NULL, IF_FIRST); return;
+		ErrorInt("[DUP/REPT] Repeat value must be positive", val, IF_FIRST); return;
 	}
 
 	SRepeatStack dup;
@@ -2105,7 +2105,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".defh", dirDH);
 	DirectivesTable.insertd(".hex", dirDH);
 	DirectivesTable.insertd(".org", dirORG);
-	DirectivesTable.insertd(".fpos",dirFORG);
+	DirectivesTable.insertd(".fpos",dirFPOS);
 	DirectivesTable.insertd(".align", dirALIGN);
 	DirectivesTable.insertd(".module", dirMODULE);
 	DirectivesTable.insertd(".size", dirSIZE);
