@@ -1180,7 +1180,7 @@ void dirOPT() {
 		} else if (cmphstr(lp, "liston")) {
 			Options::syx.IsListingSuspended = false;
 		} else {
-			Error("[OPT] invalid command (not \"push, pop, reset\")", lp);
+			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff)", lp);
 			SkipToEol(lp);
 			return;
 		}
