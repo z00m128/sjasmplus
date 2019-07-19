@@ -1280,7 +1280,7 @@ static bool dirIfIfn(aint & val) {
 		Error("[IF/IFN] Syntax error", lp, IF_FIRST);
 		return false;
 	}
-	if (IsLabelNotFound) Error("[IF/IFN] Forward reference");
+	if (IsLabelNotFound) Error("[IF/IFN] Forward reference", bp, EARLY);
 	return true;
 }
 
