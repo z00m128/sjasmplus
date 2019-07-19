@@ -1,0 +1,90 @@
+# file opened: dot_repeat.asm
+ 1    0000                  ; dot repeater is partially tested in docs_examples, here are more complex cases and errors
+ 2    0000 71          > ld  (hl),c                ; 16x 0x71
+ 2    0001 71          > ld  (hl),c
+ 2    0002 71          > ld  (hl),c
+ 2    0003 71          > ld  (hl),c
+ 2    0004 71          > ld  (hl),c
+ 2    0005 71          > ld  (hl),c
+ 2    0006 71          > ld  (hl),c
+ 2    0007 71          > ld  (hl),c
+ 2    0008 71          > ld  (hl),c
+ 2    0009 71          > ld  (hl),c
+ 2    000A 71          > ld  (hl),c
+ 2    000B 71          > ld  (hl),c
+ 2    000C 71          > ld  (hl),c
+ 2    000D 71          > ld  (hl),c
+ 2    000E 71          > ld  (hl),c
+ 2    000F 71          > ld  (hl),c
+ 3    0010              x:
+ 4    0010 C8          > ret z       ; 16x 0xC8
+ 4    0011 C8          > ret z
+ 4    0012 C8          > ret z
+ 4    0013 C8          > ret z
+ 4    0014 C8          > ret z
+ 4    0015 C8          > ret z
+ 4    0016 C8          > ret z
+ 4    0017 C8          > ret z
+ 4    0018 C8          > ret z
+ 4    0019 C8          > ret z
+ 4    001A C8          > ret z
+ 4    001B C8          > ret z
+ 4    001C C8          > ret z
+ 4    001D C8          > ret z
+ 4    001E C8          > ret z
+ 4    001F C8          > ret z
+ 5    0020 72          > ld  (hl),d              ; 16x 0x72
+ 5    0021 72          > ld  (hl),d
+ 5    0022 72          > ld  (hl),d
+ 5    0023 72          > ld  (hl),d
+ 5    0024 72          > ld  (hl),d
+ 5    0025 72          > ld  (hl),d
+ 5    0026 72          > ld  (hl),d
+ 5    0027 72          > ld  (hl),d
+ 5    0028 72          > ld  (hl),d
+ 5    0029 72          > ld  (hl),d
+ 5    002A 72          > ld  (hl),d
+ 5    002B 72          > ld  (hl),d
+ 5    002C 72          > ld  (hl),d
+ 5    002D 72          > ld  (hl),d
+ 5    002E 72          > ld  (hl),d
+ 5    002F 72          > ld  (hl),d
+ 6    0030
+ 7    0030                  ;; syntax errors
+dot_repeat.asm(8): error: Dot-repeater must be followed by number or parentheses: .2.3    nop     
+ 8    0030                  .2.3    nop     ; there must be space after repeat-counter
+dot_repeat.asm(9): error: Unrecognized instruction: . 16    nop     
+ 9    0030                  . 16    nop     ; but no space after dot
+dot_repeat.asm(10): error: Unrecognized instruction: . (16)  nop
+10    0030                  . (16)  nop
+dot_repeat.asm(11): error: Unrecognized instruction: .-1     nop
+11    0030                  .-1     nop
+dot_repeat.asm(12): error: Label not found: zz
+dot_repeat.asm(12): error: .N must be positive integer: 0
+12    0030                  .(zz)   nop     ; undefined label
+dot_repeat.asm(13): error: Dot-repeater must be followed by number or parentheses: .16+2   nop     
+13    0030                  .16+2   nop     ; expressions must be in parentheses
+dot_repeat.asm(14): error: Unrecognized instruction: +2   nop     
+dot_repeat.asm(14): error: Unexpected: +2   nop     
+14    0030             > +2   nop     ; expressions must be in parentheses (this one is ugly :/ )
+15    0030
+16    0030                  ;; value errors
+dot_repeat.asm(17): error: .N must be positive integer: 0
+17    0030                  .0      nop     ; counter must be positive value
+dot_repeat.asm(18): error: .N must be positive integer: -16
+18    0030                  .(x-32) nop     ; error should show calculated repeat-counter value
+19    0030
+20    0030                  ;; this unintentionally works (too difficult to prevent and seems harmless)
+21    0030 00          > nop    ; 7x nop
+21    0031 00          > nop
+21    0032 00          > nop
+21    0033 00          > nop
+21    0034 00          > nop
+21    0035 00          > nop
+21    0036 00          > nop
+22    0037
+# file closed: dot_repeat.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0010   x

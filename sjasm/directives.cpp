@@ -54,19 +54,20 @@ int ParseDirective(bool beginningOfLine)
 	if (DirectivesTable.zoek(n)) return 1;
 
 	// Only "." repeat directive remains, but that one can't start at beginning of line (without --dirbol)
-	if ((beginningOfLine && !Options::syx.IsPseudoOpBOF) || ('.' != *n) || (!isdigit(n[1]) && *lp != '(')) {
-		lp = olp;		// alo "." must be followed by digit, or math expression in parentheses
+	const bool isDigitDot = ('.' == *n) && isdigit(n[1]);
+	const bool isExprDot = ('.' == *n) && (0 == n[1]) && ('(' == *lp);
+	if ((beginningOfLine && !Options::syx.IsPseudoOpBOF) || (!isDigitDot && !isExprDot)) {
+		lp = olp;		// alone "." must be followed by digit, or math expression in parentheses
 		return 0;		// otherwise just return
 	}
 
-	// parse repeat-count either from n+1 (digits) or lp (parentheses)
-	++n;
-	if (!ParseExpression(isdigit(*n) ? n : lp, val)) {
-		lp = olp; Error("Syntax error", n, IF_FIRST);
+	// parse repeat-count either from n+1 (digits) or lp (parentheses) (if syntax is valid)
+	if ((isDigitDot && !White(*lp)) || !ParseExpression(isDigitDot ? ++n : lp, val)) {
+		lp = olp; Error("Dot-repeater must be followed by number or parentheses", olp, SUPPRESS);
 		return 0;
 	}
 	if (val < 1) {
-		lp = olp; ErrorInt(".X must be positive integer", val, IF_FIRST);
+		lp = olp; ErrorInt(".N must be positive integer", val, SUPPRESS);
 		return 0;
 	}
 

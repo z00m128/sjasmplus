@@ -5,20 +5,13 @@
 2     0003              len        EQU 10
 3     0003 00          > BYTE 0   ;will be compiled to BYTE 0,0
 3     0004 00          > BYTE 0
-4     0005
-5     0005 C9          > ret          ;will be compiled to 12x ret
-5     0006 C9          > ret
-5     0007 C9          > ret
-5     0008 C9          > ret
-5     0009 C9          > ret
-5     000A C9          > ret
-5     000B C9          > ret
-5     000C C9          > ret
-5     000D C9          > ret
-5     000E C9          > ret
-5     000F C9          > ret
-5     0010 C9          > ret
-6     0011
+4     0005 C9          > RET      ;will be compiled to 6x RET
+4     0006 C9          > RET
+4     0007 C9          > RET
+4     0008 C9          > RET
+4     0009 C9          > RET
+4     000A C9          > RET
+5     000B
 # file closed: po_dot_repeat.asm
 
 Value    Label
