@@ -16,7 +16,11 @@ LUA quirks:
     ENDLUA
 = no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
 
+--fullpath vs "/" vs "\" ... ("src\ed.s" in windows is not reduced to "ed.s" without --fullpath option)
+"--relpath"/gcc-like paths in errors/listings, by default for v2.0?
+
 LABELS - forward reference - v DEFL/=/EQU pripadoch??! = sux??
+ parser.cpp:599
 
 CSPECTMAP - needs better support for DISP and instances of STRUCT
 
