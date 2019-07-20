@@ -198,6 +198,7 @@
               <synopsis>- bugfixes, new examples (check tests/lua_examples)
 - UTF BOM are now detected, UTF8 BOM is silently skipped, UTF16/32 BOMs cause fatal error
 - ZXSPECTRUMNEXT device is now initialized with whole memory zeroed (no more ZX48 sysvars)
+- <link linkend="po_defl">DEFL</link> documented, "no forward reference" rule relaxed for <link linkend="po_equ">EQU</link>
 - some error messages reworded to make them easier to comprehend</synopsis>
             </listitem>
           </varlistentry>
@@ -1679,6 +1680,26 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_defl" />&lt;label&gt; DEFL &lt;expression&gt;</term>
+
+            <listitem>
+              <para>Assigns value of &lt;expression&gt; to symbol &lt;label&gt;. New label defined
+				  by DEFL is marked internally as "modifiable", allowing to re-assign new values to it with
+				  further DEFL statements (you can use also <code>=</code> instead of <code>DEFL</code>).
+				  <example>
+                  <title></title>
+
+                  <para><programlisting>counter DEFL 0
+    DUP 4
+        DB 0xAA, counter
+counter = counter + 1
+    EDUP
+; machine code produced: AA 00 AA 01 AA 02 AA 03</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_defm" />DEFM</term>
 
             <listitem>
@@ -2017,22 +2038,22 @@ B                 ; M1.B
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_equ" />EQU</term>
+            <term><anchor id="po_equ" />&lt;label&gt; EQU &lt;expression&gt;</term>
 
             <listitem>
-              <para>To give a label a value other than the current program
-              counter. '=' can be used instead of 'EQU'. The label should not
-              already exist.<example>
+              <para>To give the label a value other than the current program
+              counter. The label should not already exist (you can assign only one value to it).
+			  For modifiable labels holding temporary values use <link linkend="po_defl">DEFL</link>.<example>
                   <title></title>
 
                   <para><programlisting>Label EQU 3
-Kip=3</programlisting></para>
+Kip   EQU 0x23*256 + low $</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_export" />EXPORT label</term>
+            <term><anchor id="po_export" />EXPORT &lt;label&gt;</term>
 
             <listitem>
               <para>The named label will be written to the export-file, in the
