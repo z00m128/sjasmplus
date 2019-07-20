@@ -1,8 +1,9 @@
-        ; DEFL vs EQU difference
-defl_lab2   DEFL    0x1234
-equ_lab2    EQU     0x1234
-defl_lab2   DEFL    0x5678
-equ_lab2    EQU     0x5678
+        ;; DEFL vs EQU difference
+defl_lab2   DEFL    0x1234              ;; DEFL (and alias "=") are like "variables"
+defl_lab2   =       0x5678              ;; so modifying them is OK
+
+equ_lab2    EQU     0x1234              ;; EQU is like "const", should be defined only once
+equ_lab2    EQU     0x5678              ;; error, different value
 
         ;; valid forward reference
         call    normal_label
@@ -11,10 +12,10 @@ normal_label:
 
         ;; invalid forward references
 defl_lab    DEFL    defl_lab_fwd
-equ_lab     EQU     equ_lab_fwd
+equ_lab     EQU     equ_lab_fwd         ;; !! VALID since v1.13.3 !!
 
         IF 0 < normal_label2_fwd
-            ; nop - would move pass2 vs pass3
+            ; <some instruction> - would modify results of pass2 vs pass3
         ENDIF
 
         STRUCT test_struct, struct_lab_fwd

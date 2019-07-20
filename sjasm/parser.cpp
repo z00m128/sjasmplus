@@ -596,7 +596,7 @@ void ParseLabel() {
 				Error("Expression error", lp);
 				val = 0;
 			}
-			if (IsLabelNotFound) Error("Forward reference", NULL, EARLY);
+			if (IsLabelNotFound && IsDEFL) Error("Forward reference", NULL, EARLY);
 		} else {
 			int gl = 0;
 			char* p = lp,* n;

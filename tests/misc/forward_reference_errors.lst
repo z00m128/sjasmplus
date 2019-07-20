@@ -1,44 +1,44 @@
-forward_reference_errors.asm(5): error: Duplicate label: equ_lab2
-forward_reference_errors.asm(13): error: Forward reference
+forward_reference_errors.asm(6): error: Duplicate label: equ_lab2
 forward_reference_errors.asm(14): error: Forward reference
-forward_reference_errors.asm(16): error: [IF/IFN] Forward reference: IF 0 < normal_label2_fwd
-forward_reference_errors.asm(20): error: [STRUCT] Forward reference
-forward_reference_errors.asm(24): error: [DUP/REPT] Forward reference
+forward_reference_errors.asm(17): error: [IF/IFN] Forward reference: IF 0 < normal_label2_fwd
+forward_reference_errors.asm(21): error: [STRUCT] Forward reference
+forward_reference_errors.asm(25): error: [DUP/REPT] Forward reference
 # file opened: forward_reference_errors.asm
- 1    0000                      ; DEFL vs EQU difference
- 2    0000              defl_lab2   DEFL    0x1234
-forward_reference_errors.asm(3): warning: Label has different value in pass 3: previous value 22136 not equal 4660
- 3    0000              equ_lab2    EQU     0x1234
- 4    0000              defl_lab2   DEFL    0x5678
-forward_reference_errors.asm(5): warning: Label has different value in pass 3: previous value 4660 not equal 22136
- 5    0000              equ_lab2    EQU     0x5678
- 6    0000
- 7    0000                      ;; valid forward reference
- 8    0000 CD 03 00             call    normal_label
- 9    0003              normal_label:
-10    0003 C9                   ret
-11    0004
-12    0004                      ;; invalid forward references
-13    0004              defl_lab    DEFL    defl_lab_fwd
-14    0004              equ_lab     EQU     equ_lab_fwd
-15    0004
-16    0004                      IF 0 < normal_label2_fwd
-17    0004                          ; nop - would move pass2 vs pass3
-18    0004                      ENDIF
-19    0004
-20    0004                      STRUCT test_struct, struct_lab_fwd
-21    0004 ~            xyz         BYTE
-22    0004                      ENDS
-23    0004
-24    0004                      DUP dup_label_fwd
-25    0004                      EDUP
-26    0004
-27    0004              defl_lab_fwd:
-28    0004              equ_lab_fwd:
-29    0004              struct_lab_fwd:
-30    0004              normal_label2_fwd:
-31    0004              dup_label_fwd:
-32    0004
+ 1    0000                      ;; DEFL vs EQU difference
+ 2    0000              defl_lab2   DEFL    0x1234              ;; DEFL (and alias "=") are like "variables"
+ 3    0000              defl_lab2   =       0x5678              ;; so modifying them is OK
+ 4    0000
+forward_reference_errors.asm(5): warning: Label has different value in pass 3: previous value 22136 not equal 4660
+ 5    0000              equ_lab2    EQU     0x1234              ;; EQU is like "const", should be defined only once
+forward_reference_errors.asm(6): warning: Label has different value in pass 3: previous value 4660 not equal 22136
+ 6    0000              equ_lab2    EQU     0x5678              ;; error, different value
+ 7    0000
+ 8    0000                      ;; valid forward reference
+ 9    0000 CD 03 00             call    normal_label
+10    0003              normal_label:
+11    0003 C9                   ret
+12    0004
+13    0004                      ;; invalid forward references
+14    0004              defl_lab    DEFL    defl_lab_fwd
+15    0004              equ_lab     EQU     equ_lab_fwd         ;; !! VALID since v1.13.3 !!
+16    0004
+17    0004                      IF 0 < normal_label2_fwd
+18    0004                          ; <some instruction> - would modify results of pass2 vs pass3
+19    0004                      ENDIF
+20    0004
+21    0004                      STRUCT test_struct, struct_lab_fwd
+22    0004 ~            xyz         BYTE
+23    0004                      ENDS
+24    0004
+25    0004                      DUP dup_label_fwd
+26    0004                      EDUP
+27    0004
+28    0004              defl_lab_fwd:
+29    0004              equ_lab_fwd:
+30    0004              struct_lab_fwd:
+31    0004              normal_label2_fwd:
+32    0004              dup_label_fwd:
+33    0004
 # file closed: forward_reference_errors.asm
 
 Value    Label
