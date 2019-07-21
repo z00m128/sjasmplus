@@ -154,7 +154,7 @@ static void dirNexOpen() {
 	nex.lastBankIndex = -1;		// reset last bank index
 	// read OPEN command arguments
 	char* fname = GetFileName(lp);
-	aint openArgs[3] = { (-1 == StartAddress ? 0 : StartAddress), 0xFF2D, 0 };
+	aint openArgs[3] = { (-1 == StartAddress ? 0 : StartAddress), 0xFFFE, 0 };
 	if (comma(lp)) {
 		const bool optionals[] = {false, true, true};	// start address is mandatory because comma
 		if (!getIntArguments<3>(openArgs, optionals)) {

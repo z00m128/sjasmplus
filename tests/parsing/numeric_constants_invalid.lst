@@ -2,7 +2,6 @@
  1    0000                  ;; invalid numeric literals errors
  2    0000
  3    0000                  ;; missing digits
-numeric_constants_invalid.asm(4): error: Syntax error: #
 numeric_constants_invalid.asm(4): error: [DWORD] Syntax error: #
  4    0000                  DD      #
  5    0000                  ;DD $   => is actual valid syntax for current address pointer

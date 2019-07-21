@@ -54,19 +54,20 @@ int ParseDirective(bool beginningOfLine)
 	if (DirectivesTable.zoek(n)) return 1;
 
 	// Only "." repeat directive remains, but that one can't start at beginning of line (without --dirbol)
-	if ((beginningOfLine && !Options::syx.IsPseudoOpBOF) || ('.' != *n) || (!isdigit(n[1]) && *lp != '(')) {
-		lp = olp;		// alo "." must be followed by digit, or math expression in parentheses
+	const bool isDigitDot = ('.' == *n) && isdigit(n[1]);
+	const bool isExprDot = ('.' == *n) && (0 == n[1]) && ('(' == *lp);
+	if ((beginningOfLine && !Options::syx.IsPseudoOpBOF) || (!isDigitDot && !isExprDot)) {
+		lp = olp;		// alone "." must be followed by digit, or math expression in parentheses
 		return 0;		// otherwise just return
 	}
 
-	// parse repeat-count either from n+1 (digits) or lp (parentheses)
-	++n;
-	if (!ParseExpression(isdigit(*n) ? n : lp, val)) {
-		lp = olp; Error("Syntax error", n, IF_FIRST);
+	// parse repeat-count either from n+1 (digits) or lp (parentheses) (if syntax is valid)
+	if ((isDigitDot && !White(*lp)) || !ParseExpression(isDigitDot ? ++n : lp, val)) {
+		lp = olp; Error("Dot-repeater must be followed by number or parentheses", olp, SUPPRESS);
 		return 0;
 	}
 	if (val < 1) {
-		lp = olp; ErrorInt(".X must be positive integer", val, IF_FIRST);
+		lp = olp; ErrorInt(".N must be positive integer", val, SUPPRESS);
 		return 0;
 	}
 
@@ -149,19 +150,16 @@ void dirWORD() {
 	do {
 		if (SkipBlanks()) {
 			Error("Expression expected", NULL, SUPPRESS);
-		} else if (ParseExpression(lp, val)) {
+		} else if (ParseExpressionNoSyntaxError(lp, val)) {
 			check16(val);
-			if (teller > 127) {
-				Error("Over 128 values in DW/DEFW/WORD", NULL, SUPPRESS);
-				break;
-			}
 			e[teller++] = val & 65535;
 		} else {
 			Error("[DW/DEFW/WORD] Syntax error", lp, SUPPRESS);
 			break;
 		}
-	} while (comma(lp));
+	} while (comma(lp) && teller < 128);
 	e[teller] = -1;
+	if (teller == 128 && *lp) Error("Over 128 values in DW/DEFW/WORD. Values over", lp, SUPPRESS);
 	if (teller) EmitWords(e);
 	else		Error("DW/DEFW/WORD with no arguments");
 }
@@ -172,18 +170,15 @@ void dirDWORD() {
 	do {
 		if (SkipBlanks()) {
 			Error("Expression expected", NULL, SUPPRESS);
-		} else if (ParseExpression(lp, val)) {
-			if (teller > 127) {
-				Error("Over 128 values in DWORD", NULL, SUPPRESS);
-				break;
-			}
+		} else if (ParseExpressionNoSyntaxError(lp, val)) {
 			e[teller * 2] = val & 65535; e[teller * 2 + 1] = (val >> 16) & 0xFFFF; ++teller;
 		} else {
 			Error("[DWORD] Syntax error", lp, SUPPRESS);
 			break;
 		}
-	} while (comma(lp));
+	} while (comma(lp) && teller < 128);
 	e[teller * 2] = -1;
+	if (teller == 128 && *lp) Error("Over 128 values in DWORD. Values over", lp, SUPPRESS);
 	if (teller) EmitWords(e);
 	else		Error("DWORD with no arguments");
 }
@@ -194,19 +189,16 @@ void dirD24() {
 	do {
 		if (SkipBlanks()) {
 			Error("Expression expected", NULL, SUPPRESS);
-		} else if (ParseExpression(lp, val)) {
+		} else if (ParseExpressionNoSyntaxError(lp, val)) {
 			check24(val);
-			if (teller > 127*3) {
-				Error("Over 128 values in D24", NULL, SUPPRESS);
-				break;
-			}
 			e[teller++] = val & 255; e[teller++] = (val >> 8) & 255; e[teller++] = (val >> 16) & 255;
 		} else {
 			Error("[D24] Syntax error", lp, SUPPRESS);
 			break;
 		}
-	} while (comma(lp));
+	} while (comma(lp) && teller < 128*3);
 	e[teller] = -1;
+	if (teller == 128*3 && *lp) Error("Over 128 values in D24. Values over", lp, SUPPRESS);
 	if (teller) EmitBytes(e);
 	else		Error("D24 with no arguments");
 }
@@ -1188,7 +1180,7 @@ void dirOPT() {
 		} else if (cmphstr(lp, "liston")) {
 			Options::syx.IsListingSuspended = false;
 		} else {
-			Error("[OPT] invalid command (not \"push, pop, reset\")", lp);
+			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff)", lp);
 			SkipToEol(lp);
 			return;
 		}
@@ -1288,7 +1280,7 @@ static bool dirIfIfn(aint & val) {
 		Error("[IF/IFN] Syntax error", lp, IF_FIRST);
 		return false;
 	}
-	if (IsLabelNotFound) Error("[IF/IFN] Forward reference");
+	if (IsLabelNotFound) Error("[IF/IFN] Forward reference", bp, EARLY);
 	return true;
 }
 
@@ -1718,7 +1710,7 @@ void dirSTRUCT() {
 	st->deflab();
 }
 
-void dirFORG() {
+void dirFPOS() {
 	aint val;
 	int method = SEEK_SET;
 	SkipBlanks(lp);
@@ -1726,7 +1718,7 @@ void dirFORG() {
 		method = SEEK_CUR;
 	}
 	if (!ParseExpression(lp, val)) {
-		Error("[FORG] Syntax error", lp, IF_FIRST);
+		Error("[FPOS] Syntax error", lp, IF_FIRST);
 	}
 	if (pass == LASTPASS) {
 		SeekDest(val, method);
@@ -1760,7 +1752,7 @@ void dirDUP() {
 		Error("[DUP/REPT] Forward reference", NULL, ALL);
 	}
 	if ((int) val < 1) {
-		Error("[DUP/REPT] Illegal repeat value", NULL, IF_FIRST); return;
+		ErrorInt("[DUP/REPT] Repeat value must be positive", val, IF_FIRST); return;
 	}
 
 	SRepeatStack dup;
@@ -2113,7 +2105,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".defh", dirDH);
 	DirectivesTable.insertd(".hex", dirDH);
 	DirectivesTable.insertd(".org", dirORG);
-	DirectivesTable.insertd(".fpos",dirFORG);
+	DirectivesTable.insertd(".fpos",dirFPOS);
 	DirectivesTable.insertd(".align", dirALIGN);
 	DirectivesTable.insertd(".module", dirMODULE);
 	DirectivesTable.insertd(".size", dirSIZE);

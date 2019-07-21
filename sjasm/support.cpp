@@ -30,25 +30,43 @@
 
 #include "sjdefs.h"
 
+#if defined(WIN32)
+const char pathBadSlash = '/';
+const char pathGoodSlash = '\\';
+#else
+const char pathBadSlash = '\\';
+const char pathGoodSlash = '/';
+#endif
+
 #if !defined (_MSC_VER)
 
 void GetCurrentDirectory(int whatever, char* pad) {
 	pad[0] = 0;
 }
 
+static bool isAnySlash(const char c) {
+	return pathGoodSlash == c || pathBadSlash == c;
+}
+
 int SearchPath(char* oudzp, char* filename, char* whatever, int maxlen, char* nieuwzp, char** ach) {
 	FILE* fp;
-	if (filename[0] == '/') {
+	if (isAnySlash(filename[0])) {
 		STRCPY(nieuwzp, maxlen, filename);
 	} else {
 		STRCPY(nieuwzp, maxlen, oudzp);
-		if (*nieuwzp && nieuwzp[strlen(nieuwzp)-1] != '/') STRCAT(nieuwzp, maxlen, "/");
+		if (*nieuwzp) {
+			char *lastChar = nieuwzp + strlen(nieuwzp) - 1;
+			if (!isAnySlash(*lastChar)) {
+				lastChar[1] = pathGoodSlash;
+				lastChar[2] = 0;
+			}
+		}
 		STRCAT(nieuwzp, maxlen, filename);
 	}
 	if (ach) {
 		char* p = *ach = nieuwzp;
 		while (*p) {
-			if (*p++ == '/') *ach = p;
+			if (isAnySlash(*p++)) *ach = p;
 		}
 	}
 	if (FOPEN_ISOK(fp, nieuwzp, "r")) {

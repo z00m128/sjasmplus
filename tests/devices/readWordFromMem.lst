@@ -30,21 +30,21 @@ readWordFromMem.asm(12): error: Address in {..} must fetch bytes from 0x0000..0x
 readWordFromMem.asm(13): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {b 0x10000}
 13    0010 00               DB  {b 0x10000}
 14    0011                  ; test other syntax errors
-readWordFromMem.asm(15): error: Syntax error: }
-15    0011 30 31            DW  {}
-readWordFromMem.asm(16): error: Syntax error: }
-16    0013 30 31            DW  {  }
+readWordFromMem.asm(15): error: [DW/DEFW/WORD] Syntax error: }
+15    0011                  DW  {}
+readWordFromMem.asm(16): error: [DW/DEFW/WORD] Syntax error: }
+16    0011                  DW  {  }
 readWordFromMem.asm(17): error: '}' expected: {0x1234
-17    0015                  DW  {0x1234
+17    0011                  DW  {0x1234
 readWordFromMem.asm(18): error: Label not found: b
-18    0015 30 31            DW  {b}
-readWordFromMem.asm(19): error: Syntax error: }
-19    0017 30 00            DW  {b }
+18    0011 30 31            DW  {b}
+readWordFromMem.asm(19): error: [DW/DEFW/WORD] Syntax error: }
+19    0013                  DW  {b }
 readWordFromMem.asm(20): error: '}' expected: {b 0x1234
-20    0019                  DW  {b 0x1234
+20    0013                  DW  {b 0x1234
 readWordFromMem.asm(21): error: Label not found: b
-21    0019 00 00            DW  {b+0x1234}          ; needs whitespace after "{b" to be recognized as BYTE query
-22    001B
+21    0013 00 00            DW  {b+0x1234}          ; needs whitespace after "{b" to be recognized as BYTE query
+22    0015
 # file closed: readWordFromMem.asm
 
 Value    Label

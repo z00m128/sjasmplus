@@ -49,7 +49,7 @@ int ParseExpPrim(char*& p, aint& nval) {
 	} else if (DeviceID && *p == '{') {		// read WORD/BYTE from virtual device memory
 		char* const readMemP = p;
 		const int byteOnly = cmphstr(++p, "b");
-		ParseExpression(p, nval);
+		if (!ParseExpression(p, nval)) return 0;	// some syntax error inside the address expression
 		if (!need(p, '}')) {
 			Error("'}' expected", readMemP, SUPPRESS);
 			return 0;
@@ -596,7 +596,7 @@ void ParseLabel() {
 				Error("Expression error", lp);
 				val = 0;
 			}
-			if (IsLabelNotFound) Error("Forward reference", NULL, EARLY);
+			if (IsLabelNotFound && IsDEFL) Error("Forward reference", NULL, EARLY);
 		} else {
 			int gl = 0;
 			char* p = lp,* n;

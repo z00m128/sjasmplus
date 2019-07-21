@@ -7,9 +7,9 @@
  6    0050 80 80 80...          ds  16, -128
  7    0060 01 01 01...          ds  16, -255
  8    0070 00 00 00...          ds  16, -256
-ds_8b_fix.asm(9): warning: Bytes lost (0x100)
+ds_8b_fix.asm(9): warning: value 0x100 is truncated to 8bit value: 0x00
  9    0080 00 00 00...          ds  16, 256
-ds_8b_fix.asm(10): warning: Bytes lost (0xFFFFFEFF)
+ds_8b_fix.asm(10): warning: value 0xFFFFFEFF is truncated to 8bit value: 0xFF
 10    0090 FF FF FF...          ds  16, -257
 11    00A0
 # file closed: ds_8b_fix.asm

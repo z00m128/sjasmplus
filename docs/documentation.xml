@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.13.2 Documentation [2019-06-28]</title>
+  <title>SjASMPlus 1.13.3 Documentation [2019-07-21]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -188,8 +188,21 @@
 
     <section>
       <title>What's new?</title>
+<!--            <term>Work in progress - 1.13.4</term>-->
 
       <para><variablelist>
+
+<varlistentry>
+            <term>21.7.2019 - 1.13.3</term>
+
+            <listitem>
+              <synopsis>- bugfixes, new examples (check tests/lua_examples)
+- UTF BOM are now detected, UTF8 BOM is silently skipped, UTF16/32 BOMs cause fatal error
+- ZXSPECTRUMNEXT device is now initialized with whole memory zeroed (no more ZX48 sysvars)
+- <link linkend="po_defl">DEFL</link> documented, "no forward reference" rule relaxed for <link linkend="po_equ">EQU</link>
+- some error messages reworded to make them easier to comprehend</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>28.6.2019 - 1.13.2</term>
@@ -1283,9 +1296,7 @@ StartProg:
               <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
               RAM pages (0-223) totalling at 1.75MiB of memory. The default mapping
               is similar to ZX128, paging in: {14, 15, 10, 11, 4, 5, 0, 1} pages.
-              The page 10 (bank 5) contains also ZX48 sysvars ("USR 0" mode) and
-              clear ULA screen. (SAVESNA works only in ZX48 and ZX128 modes, in
-              NEXT mode only SAVEBIN or saving specific TAP blocks work)</para>
+              All memory is zeroed during initialization.</para>
             </listitem>
           </varlistentry>
         </variablelist></para>
@@ -1384,16 +1395,18 @@ StartProg:
 
       <para><variablelist>
           <varlistentry>
-            <term>.&lt;expression&gt; &lt;code&gt;</term>
+            <term><anchor id="po_dot_repeat" />.&lt;repeat-count&gt; &lt;single instruction&gt;</term>
 
             <listitem>
-              <para>Repeat &lt;code&gt; &lt;expression&gt; once. Doesn't work
-              in the beginning of line.<example>
+              <para>Repeat &lt;single instruction&gt; &lt;repeat-count&gt; many times. Doesn't work
+				  in the beginning of line. The &lt;repeat-count&gt; must be either simple integer
+				  number or expression fully enclosed in parentheses.<example>
                   <title></title>
 
                   <para><programlisting> .3        INC A    ;will be compiled to INC A:INC A:INC A
 len        EQU 10
- .(12-len) BYTE 0   ;will be compiled to BYTE 0,0</programlisting></para>
+ .(12-len) BYTE 0   ;will be compiled to BYTE 0,0
+ .2 .3     RET      ;will be compiled to 6x RET</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -1663,6 +1676,26 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
 
                   <para><programlisting>    DEFINE str_honderd "Honderd"
     BYTE str_honderd,0             ; BYTE "Honderd",0</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_defl" />&lt;label&gt; DEFL &lt;expression&gt;</term>
+
+            <listitem>
+              <para>Assigns value of &lt;expression&gt; to symbol &lt;label&gt;. New label defined
+				  by DEFL is marked internally as "modifiable", allowing to re-assign new values to it with
+				  further DEFL statements (you can use also <code>=</code> instead of <code>DEFL</code>).
+				  <example>
+                  <title></title>
+
+                  <para><programlisting>counter DEFL 0
+    DUP 4
+        DB 0xAA, counter
+counter = counter + 1
+    EDUP
+; machine code produced: AA 00 AA 01 AA 02 AA 03</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -2006,22 +2039,22 @@ B                 ; M1.B
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_equ" />EQU</term>
+            <term><anchor id="po_equ" />&lt;label&gt; EQU &lt;expression&gt;</term>
 
             <listitem>
-              <para>To give a label a value other than the current program
-              counter. '=' can be used instead of 'EQU'. The label should not
-              already exist.<example>
+              <para>To give the label a value other than the current program
+              counter. The label should not already exist (you can assign only one value to it).
+			  For modifiable labels holding temporary values use <link linkend="po_defl">DEFL</link>.<example>
                   <title></title>
 
                   <para><programlisting>Label EQU 3
-Kip=3</programlisting></para>
+Kip   EQU 0x23*256 + low $</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_export" />EXPORT label</term>
+            <term><anchor id="po_export" />EXPORT &lt;label&gt;</term>
 
             <listitem>
               <para>The named label will be written to the export-file, in the
@@ -3902,7 +3935,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 				  <para>
 					  Opens a NEX file, defines start address, stack address and 16k bank to be mapped
 					  at 0xC000 before code is executed (if values are omitted, start address is zero
-					  = no start, stack address is 0xFF2D, entryBank is zero).
+					  = no start, stack address is 0xFFFE, entryBank is zero).
 				  </para>
 				  <para>
 					  Only single NEX file can be open at the same time, and to finalize the header
@@ -4055,6 +4088,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 				  <para>
 					  Can be used after <link linkend="nex_open">OPEN</link> or <link linkend="nex_screen">
 						  SCREEN</link> and before <link linkend="nex_close">CLOSE</link>. The sjasmplus
+					  will save every 16k bank containing at least one non-zero byte; detected in the correct order (automatically
 					  will save every non-zero 16k bank detected in the correct order (automatically
 					  starting from first possible bank after previous BANK/AUTO commands, or from
 					  provided "fromBank").
@@ -4062,13 +4096,6 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 				  <para>
 					  For "fromBank" value use the specified order above in <link linkend="nex_bank">BANK
 						  </link> command, i.e. 5, 2, 0, ...
-				  </para>
-				  <para>
-					  Keep in mind the <link linkend="po_device">DEVICE</link> ZXSPECTRUMNEXT will
-					  automatically adjust content of banks 5 and 0 (ULA screen, sysvars and fake ZX48
-					  stack), so unless you clear those banks to zero, or skip saving them by saving
-					  first set of banks explicitly with <link linkend="nex_bank">BANK</link> command,
-					  they will be saved by AUTO.
 				  </para>
 			  </listitem>
 		  </varlistentry>

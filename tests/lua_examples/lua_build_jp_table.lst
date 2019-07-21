@@ -1,0 +1,230 @@
+# file opened: lua_build_jp_table.asm
+  1   0000                      ;-----------------------------------------------------------------
+  2   0000                      ; idea is from NEO SPECTRUMAN, who was trying to speed up "opcode" jumptable.
+  3   0000                      ; implementation of Lua scripts and macros for sjasmplus is from Ped7g
+  4   0000                          device zxspectrum48
+  5   0000
+  6   0000                      ;-----------------------------------------------------------------
+  7   0000                      ; example of usage of the produced table (code provided by NEO SPECTRUMAN)
+  8   0000                          org     $C000
+  9   C000                      ; A = operation (alias "opcode") number 0..255
+ 10   C000 6F                       ld      l,a                 ;4
+ 11   C001 26 7F                    ld      h,high opJpTab      ;7
+ 12   C003 66                       ld      h,(hl)              ;7
+ 13   C004 E9                       jp      (hl)                ;4
+ 14   C005                                                      ;=22t
+ 15   C005
+ 16   C005                      ;-----------------------------------------------------------------
+ 17   C005                      ; define LUA functions for memory allocations for opcodes functions
+ 18   C005                      ;
+ 19   C005                      ; (the ";" ahead of "end" and some "--" is not needed for Lua, but for my text
+ 20   C005                      ; editor sjasmplus syntax highlight, as it gets confused by lua source)
+ 21   C005                      ;
+ 22   C005                      ; Opcodes *must* be allocated in sequence (0,1,2 ...) to avoid large empty
+ 23   C005                      ; areas in memory, or even running out of memory completely. Also opcode
+ 24   C005                      ; implementation subroutines must be reasonably short (few bytes, not hundreds)
+ 25   C005
+ 26   C005                      lua pass1
+ 27   C005 ~                        function allocateOpMemory(opcode)
+ 28   C005 ~                            -- search for free "page" (512B pages starting at opRoutines address)
+ 29   C005 ~                            freePage = _c("high opRoutines")
+ 30   C005 ~                            while allocatedPages[freePage] and opcode < allocatedPages[freePage] do
+ 31   C005 ~                                freePage = freePage + 2
+ 32   C005 ~                                -- +2 to operate over 512 bytes, with 256B pages high opcodes like FE
+ 33   C005 ~                                -- may overwrite following page where early opcodes like 01 resides
+ 34   C005 ~                            ;end
+ 35   C005 ~                            ; -- remember it for "finishOpAllocate" function
+ 36   C005 ~                            _G.lastFreePage = freePage
+ 37   C005 ~                            ; -- free page found, emit it into jump table
+ 38   C005 ~                            _pc(string.format("org $%04x", _c("opJpTab") + opcode))
+ 39   C005 ~                            _pc(string.format("db $%02x", freePage))
+ 40   C005 ~                            ; -- and reset ORG to target memory for opcode function body
+ 41   C005 ~                            _pc(string.format("org $%04x", freePage*256 + opcode))
+ 42   C005 ~                            _pl(string.format("opcode_%02x_impl:", opcode))
+ 43   C005 ~                        ;end    -- ";" to make my Kate editor syntax highlight survive "end" in lua
+ 44   C005 ~
+ 45   C005 ~                        function finishOpAllocate()
+ 46   C005 ~                            assert(_G.lastFreePage, "allocateOpMemory not called yet")
+ 47   C005 ~                            allocatedPages[_G.lastFreePage] = _c("$ & $1FF")
+ 48   C005 ~                        ;end
+ 49   C005 ~
+ 50   C005 ~                        function setOrgAfterLastAllocated()
+ 51   C005 ~                            checkPage = _c("high opRoutines")
+ 52   C005 ~                            while allocatedPages[checkPage] do
+ 53   C005 ~                                lastAdr = checkPage*256 + allocatedPages[checkPage]
+ 54   C005 ~                                checkPage = checkPage + 2
+ 55   C005 ~                            ;end
+ 56   C005 ~                            assert(lastAdr, "no memory was allocated yet")
+ 57   C005 ~                            _pc(string.format("org $%04x", lastAdr))
+ 58   C005 ~                        ;end
+ 59   C005                      endlua
+ 60   C005
+ 61   C005                      ;-----------------------------------------------------------------
+ 62   C005                      ; helper macros to make the lua calls one-liners in asm
+ 63   C005                      macro allocateOpMemory _opcode?
+ 64   C005 ~            @__allocateOpMemory_opcode = _opcode?
+ 65   C005 ~                        lua allpass
+ 66   C005 ~                            allocateOpMemory(_c("__allocateOpMemory_opcode"))
+ 67   C005 ~                        endlua
+ 68   C005                      endm
+ 69   C005                      macro finishOpAllocate
+ 70   C005 ~                        lua allpass
+ 71   C005 ~                            finishOpAllocate()
+ 72   C005 ~                        endlua
+ 73   C005                      endm
+ 74   C005
+ 75   C005                      ;-----------------------------------------------------------------
+ 76   C005                      ; global definitions and variables used to generate jump table
+ 77   C005
+ 78   C005                      ; jump table with "high" bytes of opcode function addresses
+ 79   C005              opJpTab     equ     $7F00               ; must be 256B aligned, size 256B
+ 80   C005                      ; opcode functions will go into memory starting from $8000
+ 81   C005              opRoutines  equ     $8000               ; must be 256B aligned, size dynamic (N * 512)
+ 82   C005                      ; reset all Lua global variables ahead of each assembling pass
+ 83   C005                      lua allpass
+ 84   C005 ~                        allocatedPages = {}     -- reset allocated pages for every pass
+ 85   C005 ~                        lastFreePage = nil
+ 86   C005                      endlua
+ 87   C005
+ 88   C005                      ;-----------------------------------------------------------------
+ 89   C005                      ; define opcode functions (builds also jump table and labels like "opcode_a1_impl")
+ 90   C005
+ 91   C005                          allocateOpMemory 0
+ 91   C005             >@__allocateOpMemory_opcode = 0
+ 91   C005             >            lua allpass
+ 91   C005 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
+ 91   C005             >org $7f00
+ 91   7F00 80          >db $80
+ 91   7F01             >org $8000
+ 91   8000             >opcode_00_impl:
+ 91   8000             >            endlua
+ 92   8000 01 02                    db      1, 2            ; fake "implementation" (just 1,2,3,4,... byte values)
+ 93   8002                          finishOpAllocate
+ 93   8002             >            lua allpass
+ 93   8002 ~           >                finishOpAllocate()
+ 93   8002             >            endlua
+ 94   8002
+ 95   8002                          allocateOpMemory 1
+ 95   8002             >@__allocateOpMemory_opcode = 1
+ 95   8002             >            lua allpass
+ 95   8002 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
+ 95   8002             >org $7f01
+ 95   7F01 82          >db $82
+ 95   7F02             >org $8201
+ 95   8201             >opcode_01_impl:
+ 95   8201             >            endlua
+ 96   8201 03 04 05                 db      3, 4, 5
+ 97   8204                          finishOpAllocate
+ 97   8204             >            lua allpass
+ 97   8204 ~           >                finishOpAllocate()
+ 97   8204             >            endlua
+ 98   8204
+ 99   8204                          allocateOpMemory 2
+ 99   8204             >@__allocateOpMemory_opcode = 2
+ 99   8204             >            lua allpass
+ 99   8204 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
+ 99   8204             >org $7f02
+ 99   7F02 80          >db $80
+ 99   7F03             >org $8002
+ 99   8002             >opcode_02_impl:
+ 99   8002             >            endlua
+100   8002 06 07 08                 db      6, 7, 8
+101   8005                          finishOpAllocate
+101   8005             >            lua allpass
+101   8005 ~           >                finishOpAllocate()
+101   8005             >            endlua
+102   8005
+103   8005                          allocateOpMemory 3
+103   8005             >@__allocateOpMemory_opcode = 3
+103   8005             >            lua allpass
+103   8005 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
+103   8005             >org $7f03
+103   7F03 84          >db $84
+103   7F04             >org $8403
+103   8403             >opcode_03_impl:
+103   8403             >            endlua
+104   8403 09 0A                    db      9, 10
+105   8405                          finishOpAllocate
+105   8405             >            lua allpass
+105   8405 ~           >                finishOpAllocate()
+105   8405             >            endlua
+106   8405
+107   8405                          allocateOpMemory 4
+107   8405             >@__allocateOpMemory_opcode = 4
+107   8405             >            lua allpass
+107   8405 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
+107   8405             >org $7f04
+107   7F04 82          >db $82
+107   7F05             >org $8204
+107   8204             >opcode_04_impl:
+107   8204             >            endlua
+108   8204 0B                       db      11
+109   8205                          finishOpAllocate
+109   8205             >            lua allpass
+109   8205 ~           >                finishOpAllocate()
+109   8205             >            endlua
+110   8205
+111   8205                          allocateOpMemory 253
+111   8205             >@__allocateOpMemory_opcode = 253
+111   8205             >            lua allpass
+111   8205 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
+111   8205             >org $7ffd
+111   7FFD 80          >db $80
+111   7FFE             >org $80fd
+111   80FD             >opcode_fd_impl:
+111   80FD             >            endlua
+112   80FD 0C 0D 0E 0F              db      12, 13, 14, 15, "this goes over into page $8100..81FF"
+112   8101 74 68 69 73
+112   8105 20 67 6F 65
+112   8109 73 20 6F 76
+112   810D 65 72 20 69
+112   8111 6E 74 6F 20
+112   8115 70 61 67 65
+112   8119 20 24 38 31
+112   811D 30 30 2E 2E
+112   8121 38 31 46 46
+113   8125                          finishOpAllocate
+113   8125             >            lua allpass
+113   8125 ~           >                finishOpAllocate()
+113   8125             >            endlua
+114   8125
+115   8125                          allocateOpMemory 255
+115   8125             >@__allocateOpMemory_opcode = 255
+115   8125             >            lua allpass
+115   8125 ~           >                allocateOpMemory(_c("__allocateOpMemory_opcode"))
+115   8125             >org $7fff
+115   7FFF 82          >db $82
+115   8000             >org $82ff
+115   82FF             >opcode_ff_impl:
+115   82FF             >            endlua
+116   82FF FF FF FF FF              db      255, 255, 255, 255, 255     ; another going into second half
+116   8303 FF
+117   8304                          finishOpAllocate
+117   8304             >            lua allpass
+117   8304 ~           >                finishOpAllocate()
+117   8304             >            endlua
+118   8304
+119   8304                          lua allpass
+120   8304 ~                            setOrgAfterLastAllocated()
+121   8304              org $8405
+121   8304                          endlua
+122   8405
+123   8405                      ;-----------------------------------------------------------------
+124   8405                      ; store result as binary blob for simple verification in hexa editor
+125   8405 00 00 00...              align   512, 0              ; fill also last page to full 512B first
+126   8600                          savebin "lua_build_jp_table.bin", opJpTab, $ - opJpTab
+127   8600
+# file closed: lua_build_jp_table.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x7F00   opJpTab
+0x8000   opRoutines
+0x00FF   __allocateOpMemory_opcode
+0x8000 X opcode_00_impl
+0x8201 X opcode_01_impl
+0x8002 X opcode_02_impl
+0x8403 X opcode_03_impl
+0x8204 X opcode_04_impl
+0x80FD X opcode_fd_impl
+0x82FF X opcode_ff_impl

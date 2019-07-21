@@ -5,27 +5,11 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-LUA quirks:
-    -- v includelua:
-    function inc_ld(reg, val)
-        _pc('LD '..reg..','..val)
-    end
-    -- v kode:
-    LUA
-        inc_ld(A, pass)     -- bug, should be 'A'
-    ENDLUA
-= no output, no error, just dies. ... Seems like any LUA syntax error does that, just dies.
-
 CSPECTMAP - needs better support for DISP and instances of STRUCT
 
 --syntax: "I" to uppercase all labels + usage (needs labels refactoring)
 --syntax: L options implementation
     add DOCS example test: "hl: Ld a,(hl),,de,hl" when all is implemented
-
-LABELS - forward reference - v DEFL/=/EQU pripadoch??! = sux??
-
-SAVENEX - simplify it even more... probably keep memory zeroed, and make even zero bytes
-"tainting" pages for AUTO command, so only things produced by user will land into NEX file.
 
 static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
 
@@ -92,7 +76,18 @@ MMU:
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
 - err/warn/warp option for slot range?
 
-sjasmplus 2.x/fork:
+Kate syntax: broken with LUA block containing "end" keyword (maybe even consider including Lua highlight rules from KDE defaults, if it's possible)
+    - also missing MMU ?
+    - backward slashes in path strings are not working as escapes, single "\" there is OK, but syntax highlight thinks it's "DB" like string.
+
+AppVeyor CI for windows clang + mingw + MSVS2015 builds?
+
+##### sjasmplus 2.x/fork:
+
+EQU and DEFL to not affect local labels (not defining new "main" label)
+
+Operators precedence: (2 == 3&2) = ((2 == 3)&2) = false in current sjasmplus... ????
+    https://en.cppreference.com/w/cpp/language/operator_precedence
 
 address space of labels -> 2|3:30|29 bits, the top bits being default slot number,
 remaining bits being physical address into global chip address space
@@ -103,11 +98,17 @@ To stay backward compatible/similar, one would have to support also 0000-FFFF ra
 going through the mapped pages.. but that does collide with early pages 0..n ...
 How about abusing "@" or "." or something to distinguish between? (& resembles C/C++!)
 
-Kate syntax: broken with LUA block containing "end" keyword (maybe even consider including Lua highlight rules from KDE defaults, if it's possible)
+Make --syntax=abflL default for v2.x and check other defaults
+Maybe add support for escaped '\'' and other combinations back, to be more C++ compatible
 
-AppVeyor CI for windows clang + mingw + MSVS2015 builds?
+Check about other syntax ambiguities, what seems too much relaxed and could be stricter for v2.x
 
-Operators precendence: (2 == 3&2) = ((2 == 3)&2) = false in current sjasmplus... ????
+N-pass
+
+new lua + js support?
+
+Refactor filepath functions to deal with backward slashes systematically
+(or maybe just wait few more years, can't be that long now before windows are gone)
 
 ====================
 Docs:

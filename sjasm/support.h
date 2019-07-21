@@ -28,6 +28,9 @@
 
 // support.h
 
+extern const char pathBadSlash;
+extern const char pathGoodSlash;
+
 #if defined (_MSC_VER)
 
 #define STRDUP _strdup
