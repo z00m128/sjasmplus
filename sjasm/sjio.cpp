@@ -498,12 +498,7 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	aint oCurrentLocalLine = CurrentSourceLine;
 	CurrentSourceLine = 0;
 	STRCPY(ofilename, LINEMAX, filename);
-
-	if (Options::IsShowFullPath) {
-		STRCPY(filename, LINEMAX, fullpath);
-	} else {
-		STRCPY(filename, LINEMAX, filenamebegin);
-	}
+	STRCPY(filename, LINEMAX, Options::IsShowFullPath ? fullpath : filenamebegin);
 
 	oCurrentDirectory = CurrentDirectory;
 	*filenamebegin = 0;

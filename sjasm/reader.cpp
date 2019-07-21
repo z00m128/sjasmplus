@@ -740,14 +740,6 @@ int GetBytesHexaText(char*& p, int e[]) {
 	return bytes;
 }
 
-#if defined(WIN32)
-static const char badSlash = '/';
-static const char goodSlash = '\\';
-#else
-static const char badSlash = '\\';
-static const char goodSlash = '/';
-#endif
-
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
 char* GetFileName(char*& p, bool convertslashes) {
@@ -761,7 +753,7 @@ char* GetFileName(char*& p, bool convertslashes) {
 	// copy all characters until zero or delimiter-end character is reached
 	while (*p && deliE != *p) {
 		*newFn = *p;		// copy character
-		if (convertslashes && badSlash == *newFn) *newFn = goodSlash;	// convert slashes if enabled
+		if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;	// convert slashes if enabled
 		++newFn, ++p;
 		if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
 	}
