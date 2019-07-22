@@ -24,8 +24,6 @@ pipe:
     CIRRUS_CLONE_DEPTH: 1
     # coveralls plugin variables (access token + job ID)
     COVERALLS_REPO_TOKEN: ENCRYPTED[d8f3d878d91ea465e92170a7d46f471aec4a507813b6c31faa630dd1a1380420827ebc017baa2157bf17b3ed95437aae]
-    TRAVIS_JOB_ID: ${CIRRUS_BUILD_ID}
-    CI_SERVICE_NAME: 'cirrus-ci'
     # makefile variables affecting build options
     DEBUG: 1
     COVERALLS_SERVICE: 1
@@ -36,6 +34,6 @@ pipe:
     - image: gcc:7
       generate_gcov_script: make clean && make -j3 coverage
     - image: python:3.7
-      install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
+      install_coveralls_plugin_script: pip install cpp-coveralls
       # "-n" as the *.gcov files are already generated in the project root from previous step
-      upload_gcov_data_script: coveralls -n --dump coversall.json; cat coversall.json
+      upload_gcov_data_script: cpp-coveralls -n
