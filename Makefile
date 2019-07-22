@@ -2,6 +2,7 @@
 # install/uninstall features added, CFLAGS and LDFLAGS modification by z00m's hands. [05.05.2016]
 # overall optimization and beautification by mborik's hands. [05.05.2016]
 # overall rewrite by Ped7g [2019-03-21]
+# added code coverage targets and variables by Ped7g [2019-07-22]
 
 ## Some examples of my usage of this Makefile:
 # make DEBUG=1					- to get DEBUG build
@@ -9,7 +10,7 @@
 # make memcheck TEST=misc DEBUG=1		- to use valgrind on assembling sub-directory "misc" in tests
 # make PREFIX=~/.local install			- to install release version into ~/.local/bin/
 # make clean && make CC=gcc-8 CXX=g++-8		- to compile binary with gcc-8
-# make DEBUG=1 coverage				- to produce build/debug/coverage/* files by running the tests
+# make DEBUG=1 LUA_COVERAGE=1 coverage		- to produce build/debug/coverage/* files by running the tests
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
 
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
@@ -121,8 +122,12 @@ endif
 coverage:
 	make CFLAGS_EXTRA=--coverage tests
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_BASE) $(SRCS)
+ifdef LUA_COVERAGE
+# by default the "external" lua sources are excluded from coverage report, sjasmplus is not focusing to cover+fix lua itself
+# to get full coverage report, including the lua sources, use `make DEBUG=1 LUA_COVERAGE=1 coverage`
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_LUA) $(LUASRCS)
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_TOLUA) $(TOLUASRCS)
+endif
 ifndef COVERALLS_SERVICE
 # coversall.io is serviced by 3rd party plugin: https://github.com/eddyxu/cpp-coveralls
 # (from *.gcov files stored in project root directory, so not moving them here)

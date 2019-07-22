@@ -17,7 +17,7 @@ makefile_build_task:
 
 pipe:
   name: coveralls.io coverage report
-  depends_on: makefile_build_task
+  depends_on: makefile_build
   environment:
     COVERALLS_REPO_TOKEN: ENCRYPTED[84a87f67d61b85be01b63f6aec68a5fb644f02b2febff3d83a9af810f52a8e3023486286e1ac76c527fad3dc06fbc692]
   resources:
