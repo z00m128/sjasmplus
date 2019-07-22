@@ -120,7 +120,7 @@ else
 endif
 
 coverage:
-	make CFLAGS_EXTRA=--coverage tests
+	$(MAKE) CFLAGS_EXTRA=--coverage tests
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_BASE) $(SRCS)
 ifdef LUA_COVERAGE
 # by default the "external" lua sources are excluded from coverage report, sjasmplus is not focusing to cover+fix lua itself
