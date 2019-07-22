@@ -25,6 +25,7 @@ pipe:
     # coveralls plugin variables (access token + job ID)
     COVERALLS_REPO_TOKEN: ENCRYPTED[84a87f67d61b85be01b63f6aec68a5fb644f02b2febff3d83a9af810f52a8e3023486286e1ac76c527fad3dc06fbc692]
     TRAVIS_JOB_ID: ${CIRRUS_BUILD_ID}
+    CI_SERVICE_NAME: 'cirrus-ci'
     # makefile variables affecting build options
     DEBUG: 1
     COVERALLS_SERVICE: 1
