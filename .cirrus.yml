@@ -27,6 +27,6 @@ pipe:
     - image: gcc:7
       generate_gcov_script: make DEBUG=1 clean && make DEBUG=1 COVERALLS_SERVICE=1 coverage
     - image: python:3.7
-      install_coveralls_plugin_script: pip install --user cpp-coveralls
+      install_coveralls_plugin_script: pip install cpp-coveralls
       # "-n" as the *.gcov files are already generated in the project root from previous step
       upload_gcov_data_script: echo "1" && coveralls -n || echo "2" && cpp-coveralls -n || echo "3" && cpp_coveralls -n
