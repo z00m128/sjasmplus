@@ -38,4 +38,4 @@ pipe:
     - image: python:3.7
       install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
       # "-n" as the *.gcov files are already generated in the project root from previous step
-      upload_gcov_data_script: coveralls -n
+      upload_gcov_data_script: coveralls -n --dump coversall.json; cat coversall.json
