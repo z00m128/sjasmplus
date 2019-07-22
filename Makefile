@@ -123,11 +123,9 @@ coverage:
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_BASE) $(SRCS)
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_LUA) $(LUASRCS)
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_TOLUA) $(TOLUASRCS)
-ifdef COVERALLS_SERVICE
-# coveralls.io coverage is uploaded by 3rd party plugin: https://github.com/eddyxu/cpp-coveralls
-# from the already produced .gcov files in project_root, so "-n" to not run gcov by plugin
-	coveralls -n
-else
+ifndef COVERALLS_SERVICE
+# coversall.io is serviced by 3rd party plugin: https://github.com/eddyxu/cpp-coveralls
+# (from *.gcov files stored in project root directory, so not moving them here)
 # local coverage is just moved from project_root to build_dir/coverage/
 	@mkdir -p $(BUILD_DIR)/$(SUBDIR_COV)
 	mv *#*.gcov $(BUILD_DIR)/$(SUBDIR_COV)/
