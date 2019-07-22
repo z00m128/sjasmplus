@@ -14,3 +14,14 @@ makefile_build_task:
   # of sjasmplus in new container instance, so just do everything in one task
   assemble_tests_script: ContinuousIntegration/test_folder_tests.sh
   assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
+
+coveralls_io_task:
+  depends_on: makefile_build_task
+  container:
+    image: gcc:7
+    cpu: 1
+    memory: 500M
+  install_coveralls_plugin_script: pip install --user cpp-coveralls
+  environment:
+    COVERALLS_REPO_TOKEN: ENCRYPTED[84a87f67d61b85be01b63f6aec68a5fb644f02b2febff3d83a9af810f52a8e3023486286e1ac76c527fad3dc06fbc692]
+  coveralls_io_script: make DEBUG=1 clean && make DEBUG=1 COVERALLS_SERVICE=1 coverage
