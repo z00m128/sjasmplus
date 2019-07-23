@@ -1,16 +1,42 @@
 makefile_build_task:
+  env:
+    CIRRUS_CLONE_DEPTH: 1
   container:
     matrix:
       image: gcc:5
       image: gcc:6
       image: gcc:7
       image: gcc:8
-    cpu: 1
-    memory: 500M
-  build_script: make clean && make
+    cpu: 3
+    memory: 1G
+  build_script: make clean && make -j3
   install_script: make install && make clean
   ## now try the built+installed sjasmplus with some tests and examples
   # this is not separate task, because that would need again build
   # of sjasmplus in new container instance, so just do everything in one task
   assemble_tests_script: ContinuousIntegration/test_folder_tests.sh
   assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
+
+pipe:
+  name: coveralls.io coverage report
+  #depends_on: makefile_build  ## saves some resources in case regular build fails, but that's rare
+  env:
+    # needs full clone to calculate revision number from git
+    CIRRUS_CLONE_DEPTH: 0
+    # coveralls plugin variables (access token + job ID)
+    COVERALLS_REPO_TOKEN: ENCRYPTED[8b09887e95ef3aec93b9e31cbbca1f9090704ec9af432869c94d8d79dabdc95640bc061bbaaaf063e31dde112aa93729]
+    CI_SERVICE_NAME: 'cirrus-ci'
+    # makefile variables affecting build options
+    DEBUG: 1
+    COVERALLS_SERVICE: 1
+  resources:
+    cpu: 3
+    memory: 1G
+  steps:
+    - image: gcc:7
+      generate_gcov_script: make clean && make -j3 coverage
+    - image: python:3.7
+      # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
+      install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
+      # "-n" as the *.gcov files are already generated in the project root from previous step
+      upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/
