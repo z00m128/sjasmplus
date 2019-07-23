@@ -487,7 +487,7 @@ namespace Z80 {
 						e[2] = b & 255; e[3] = (b >> 8) & 255;
 					}
 					break;
-				default:
+				default:			// unreachable (already validated by `CommonAluOpcode` call)
 					break;
 				}
 			}
@@ -851,7 +851,8 @@ namespace Z80 {
 			if (Z80C_UNK == cc) e[0] = 0x18;
 			else if (cc <= Z80C_C && comma(lp)) e[0] = 0x20 + cc;
 			else {
-				Error("[JR] Illegal condition");
+				Error("[JR] Illegal condition", bp);
+				SkipToEol(lp);
 				break;
 			}
 			aint jrad=0;
