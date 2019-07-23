@@ -1,0 +1,51 @@
+# file opened: z80cover100.asm
+ 1    0000                  ;; few more test cases not covered by regular tests,
+ 2    0000                  ;; but were discovered by code coverage as code not executed in tests
+ 3    0000
+ 4    0000                  ; some tests need more strict syntax rules to hit specific code paths
+ 5    0000                  OPT reset --syntax=ab
+ 6    0000
+z80cover100.asm(7): error: Operand expected:      [1234   
+ 7    0000 EE 00            xor     [1234   ; "Operand expected" error when parsing of no-memory argument fails
+ 8    0002
+z80cover100.asm(9): error: Operand expected
+ 9    0002 CD 00 00         call            ; "Operand expected" error
+10    0005
+11    0005 7F               ld      a,high af           ; tricky way to write "ld a,a" :) ("high af" covered)
+12    0006
+13    0006 ED 70            in      low af,(c)          ; tricky way to write "in f,(c)" ("low af" covered)
+14    0008
+15    0008                  ; nonexistent register pairs (with possible match) in `GetRegister` function
+z80cover100.asm(16): error: Illegal instruction:     pop az 
+16    0008                  pop az
+z80cover100.asm(16): error: Illegal instruction:   pop ha 
+16    0008                pop ha
+z80cover100.asm(16): error: Illegal instruction:   pop xa 
+16    0008                pop xa
+z80cover100.asm(16): error: Illegal instruction:   pop ya 
+16    0008                pop ya
+z80cover100.asm(16): error: Illegal instruction:   pop YA
+16    0008                pop YA
+17    0008
+18    0008                  ; invalid registers in common ALU instructions
+z80cover100.asm(19): error: Illegal instruction:     xor af 
+19    0008                  xor af
+z80cover100.asm(19): error: Illegal instruction:   xor sp 
+19    0008                xor sp
+z80cover100.asm(19): error: Illegal instruction:   xor i 
+19    0008                xor i
+z80cover100.asm(19): error: Illegal instruction:   xor r 
+19    0008                xor r
+z80cover100.asm(19): error: Illegal instruction:   xor f
+19    0008                xor f
+20    0008
+z80cover100.asm(21): error: [ADC] Comma expected
+21    0008                  adc     hl      ; "Comma expected" error
+z80cover100.asm(22): error: Illegal instruction:     adc     hl,ix   ; invalid instr.
+22    0008                  adc     hl,ix   ; invalid instr.
+23    0008 88 89            adc     b ,, c  ; multiarg
+24    000A
+# file closed: z80cover100.asm
+
+Value    Label
+------ - -----------------------------------------------------------
