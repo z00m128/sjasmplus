@@ -2,6 +2,7 @@
 # install/uninstall features added, CFLAGS and LDFLAGS modification by z00m's hands. [05.05.2016]
 # overall optimization and beautification by mborik's hands. [05.05.2016]
 # overall rewrite by Ped7g [2019-03-21]
+# added code coverage targets and variables by Ped7g [2019-07-22]
 
 ## Some examples of my usage of this Makefile:
 # make DEBUG=1					- to get DEBUG build
@@ -9,6 +10,8 @@
 # make memcheck TEST=misc DEBUG=1		- to use valgrind on assembling sub-directory "misc" in tests
 # make PREFIX=~/.local install			- to install release version into ~/.local/bin/
 # make clean && make CC=gcc-8 CXX=g++-8		- to compile binary with gcc-8
+# make DEBUG=1 LUA_COVERAGE=1 coverage		- to produce build/debug/coverage/* files by running the tests
+# make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
 
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
 CC=gcc
@@ -29,8 +32,9 @@ SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.1
 SUBDIR_TOLUA=tolua++
 SUBDIR_DOCS=docs
+SUBDIR_COV=coverage
 
-CFLAGS := -Wall -pedantic -DUSE_LUA -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
+CFLAGS := -Wall -pedantic -DUSE_LUA -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) $(CFLAGS_EXTRA)
 LDFLAGS := -ldl
 
 ifdef DEBUG
@@ -65,6 +69,16 @@ LUAOBJS := $(call object_files,$(LUASRCS))
 TOLUASRCS := $(wildcard $(SUBDIR_TOLUA)/*.c)
 TOLUAOBJS := $(call object_files,$(TOLUASRCS))
 
+ALL_OBJS := $(OBJS) $(LUAOBJS) $(TOLUAOBJS)
+ALL_COVERAGE_RAW := $(patsubst %.o,%.gcno,$(ALL_OBJS)) $(patsubst %.o,%.gcda,$(ALL_OBJS))
+
+# GCOV options to generate coverage files
+ifdef COVERALLS_SERVICE
+GCOV_OPT := -rlp
+else
+GCOV_OPT := -rlpmab
+endif
+
 #implicit rules to compile C/CPP files into $(BUILD_DIR)
 $(BUILD_DIR)/%.o : %.c
 	@mkdir -p $(@D)
@@ -74,14 +88,14 @@ $(BUILD_DIR)/%.o : %.cpp
 	@mkdir -p $(@D)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-.PHONY: all install uninstall clean docs tests memcheck
+.PHONY: all install uninstall clean docs tests memcheck coverage
 
 # "all" will also copy the produced binary into project root directory (to mimick old makefile)
 all: $(EXE_FP)
 	cp $(EXE_FP) $(EXE)
 
-$(EXE_FP): $(LUAOBJS) $(TOLUAOBJS) $(OBJS)
-	$(CXX) -o $(EXE_FP) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS)
+$(EXE_FP): $(ALL_OBJS)
+	$(CXX) -o $(EXE_FP) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
 
 install: $(EXE_FP)
 	$(INSTALL) $(EXE_FP) $(PREFIX)/bin
@@ -105,6 +119,23 @@ else
 	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_examples.sh"
 endif
 
+coverage:
+	$(MAKE) CFLAGS_EXTRA=--coverage tests
+	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_BASE) $(SRCS)
+ifdef LUA_COVERAGE
+# by default the "external" lua sources are excluded from coverage report, sjasmplus is not focusing to cover+fix lua itself
+# to get full coverage report, including the lua sources, use `make DEBUG=1 LUA_COVERAGE=1 coverage`
+	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_LUA) $(LUASRCS)
+	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR)/$(SUBDIR_TOLUA) $(TOLUASRCS)
+endif
+ifndef COVERALLS_SERVICE
+# coversall.io is serviced by 3rd party plugin: https://github.com/eddyxu/cpp-coveralls
+# (from *.gcov files stored in project root directory, so not moving them here)
+# local coverage is just moved from project_root to build_dir/coverage/
+	@mkdir -p $(BUILD_DIR)/$(SUBDIR_COV)
+	mv *#*.gcov $(BUILD_DIR)/$(SUBDIR_COV)/
+endif
+
 docs: $(SUBDIR_DOCS)/documentation.html ;
 
 $(SUBDIR_DOCS)/documentation.html: Makefile $(wildcard $(SUBDIR_DOCS)/*.xml) $(wildcard $(SUBDIR_DOCS)/*.xsl)
@@ -119,11 +150,12 @@ clean:
 	$(UNINSTALL) \
 		$(EXE) \
 		$(BUILD_DIR)/$(EXE) \
-		$(LUAOBJS) \
-		$(TOLUAOBJS) \
-		$(OBJS)
+		$(ALL_OBJS) \
+		$(ALL_COVERAGE_RAW) \
+		$(BUILD_DIR)/$(SUBDIR_COV)/*.gcov
 	$(REMOVEDIR) \
 		$(BUILD_DIR)/$(SUBDIR_BASE) \
 		$(BUILD_DIR)/$(SUBDIR_LUA) \
 		$(BUILD_DIR)/$(SUBDIR_TOLUA) \
+		$(BUILD_DIR)/$(SUBDIR_COV) \
 		$(BUILD_DIR)
