@@ -19,7 +19,7 @@ makefile_build_task:
 
 pipe:
   name: coveralls.io coverage report
-  depends_on: makefile_build
+  #depends_on: makefile_build  ## saves some resources in case regular build fails, but that's rare
   env:
     CIRRUS_CLONE_DEPTH: 1
     # coveralls plugin variables (access token + job ID)
@@ -36,4 +36,4 @@ pipe:
     - image: python:3.7
       install_coveralls_plugin_script: pip install cpp-coveralls
       # "-n" as the *.gcov files are already generated in the project root from previous step
-      upload_gcov_data_script: cpp-coveralls -n
+      upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/
