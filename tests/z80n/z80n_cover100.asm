@@ -46,3 +46,18 @@
     add     hl,1234
     add     hl,a
     push    1234
+
+    ;; part 4 (more of the branching stuff, handpicked from local detailed coverage report)
+
+    OPT reset --syntax=ab --zxnext
+    add     de,b
+    bsra    de
+    bsra    de,a
+    brlc    de
+    brlc    de,
+    brlc    de,a
+
+    OPT reset --syntax=abF --zxnext
+    mul
+    mul     d
+    mul     d,c

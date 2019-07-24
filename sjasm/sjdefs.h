@@ -86,6 +86,7 @@ extern "C" {
 #endif
 typedef long aint;
 typedef uint8_t byte;
+typedef uint16_t word;
 
 #ifndef PATH_MAX
 #define PATH_MAX	4096

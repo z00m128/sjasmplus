@@ -226,3 +226,50 @@
     ldi     (de),a
     ldi     (de),b
     ldi     hl,(hl)
+
+    ;; part 4 (more of the branching stuff, handpicked from local detailed coverage report)
+    ld      a,[ix]
+    ex      (bc),hl
+    ex      (sp
+    in      b
+    in      (c)
+    jr      $+2-129
+    jr      $+2+128
+    xor     hl,0
+    adc     de,hl
+
+    OPT reset --syntax=abF
+    ld      de,(ix)
+
+    OPT reset --syntax=a
+    bit     -1,a
+    call    nz
+    ex      (sp),de
+    im      3
+    in      b,(254)
+    jp      nz
+    jr      nz
+    ld      a,(bc
+    ld      a,(de
+    ld      a,[1234
+    ld      (ix),ix
+    ld      sp,(iy+13)
+    ld      de,[1234
+    ld      ix,[1234
+    ldd     a,[de
+    ldd     a,[hl
+    ldd     a,[ix+3
+    ldd     [hl
+    ldd     [sp],a
+    ldi     a,[de
+    ldi     a,[hl
+    ldi     a,[ix+3
+    ldi     [hl
+    ldi     [sp],a
+    ldi     l,[hl
+    ldi     l,[ix+3
+    out     (c)
+    out     (c),1
+    out     (254),h
+    push    e
+    sub     de,de

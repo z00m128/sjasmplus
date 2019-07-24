@@ -400,6 +400,92 @@ z80cover100.asm(227): error: Illegal instruction:     ldi     (de),b
 z80cover100.asm(228): error: Illegal instruction:     ldi     hl,(hl)
 228   00E4                  ldi     hl,(hl)
 229   00E4
+230   00E4                  ;; part 4 (more of the branching stuff, handpicked from local detailed coverage report)
+231   00E4 DD 7E 00         ld      a,[ix]
+z80cover100.asm(232): error: Illegal instruction:     ex      (bc),hl
+232   00E7                  ex      (bc),hl
+z80cover100.asm(233): error: Illegal instruction:     ex      (sp
+233   00E7                  ex      (sp
+z80cover100.asm(234): error: Illegal instruction:     in      b
+234   00E7                  in      b
+235   00E7 ED 70            in      (c)
+z80cover100.asm(236): error: [JR] Target out of range (-129)
+236   00E9 18 00            jr      $+2-129
+z80cover100.asm(237): error: [JR] Target out of range (+128)
+237   00EB 18 00            jr      $+2+128
+z80cover100.asm(238): error: Illegal instruction:     xor     hl,0
+238   00ED                  xor     hl,0
+z80cover100.asm(239): error: Illegal instruction:     adc     de,hl
+239   00ED                  adc     de,hl
+240   00ED
+241   00ED                  OPT reset --syntax=abF
+z80cover100.asm(242): error: Fake instructions are not enabled: ld      de,(ix)
+242   00ED                  ld      de,(ix)
+243   00ED
+244   00ED                  OPT reset --syntax=a
+z80cover100.asm(245): error: Illegal instruction:     bit     -1,a
+245   00ED                  bit     -1,a
+z80cover100.asm(246): error: [CALL cc] Comma expected: call    nz
+246   00ED                  call    nz
+z80cover100.asm(247): error: Illegal instruction:     ex      (sp),de
+247   00ED                  ex      (sp),de
+z80cover100.asm(248): error: Illegal instruction:     im      3
+248   00ED                  im      3
+z80cover100.asm(249): error: Illegal instruction:     in      b,(254)
+249   00ED                  in      b,(254)
+z80cover100.asm(250): error: [JP cc] Comma expected: jp      nz
+250   00ED                  jp      nz
+z80cover100.asm(251): error: [JR cc] Comma expected: jr      nz
+251   00ED                  jr      nz
+z80cover100.asm(252): error: Illegal instruction:     ld      a,(bc
+252   00ED                  ld      a,(bc
+z80cover100.asm(253): error: Illegal instruction:     ld      a,(de
+253   00ED                  ld      a,(de
+z80cover100.asm(254): error: Illegal instruction:     ld      a,[1234
+254   00ED                  ld      a,[1234
+z80cover100.asm(255): error: Illegal instruction:     ld      (ix),ix
+255   00ED                  ld      (ix),ix
+z80cover100.asm(256): error: Illegal instruction:     ld      sp,(iy+13)
+256   00ED                  ld      sp,(iy+13)
+z80cover100.asm(257): error: Illegal instruction:     ld      de,[1234
+257   00ED                  ld      de,[1234
+z80cover100.asm(258): error: Illegal instruction:     ld      ix,[1234
+258   00ED                  ld      ix,[1234
+z80cover100.asm(259): error: Illegal instruction:     ldd     a,[de
+259   00ED                  ldd     a,[de
+z80cover100.asm(260): error: Illegal instruction:     ldd     a,[hl
+260   00ED                  ldd     a,[hl
+z80cover100.asm(261): error: Illegal instruction:     ldd     a,[ix+3
+261   00ED                  ldd     a,[ix+3
+z80cover100.asm(262): error: Illegal instruction:     ldd     [hl
+262   00ED                  ldd     [hl
+z80cover100.asm(263): error: Illegal instruction:     ldd     [sp],a
+263   00ED                  ldd     [sp],a
+z80cover100.asm(264): error: Illegal instruction:     ldi     a,[de
+264   00ED                  ldi     a,[de
+z80cover100.asm(265): error: Illegal instruction:     ldi     a,[hl
+265   00ED                  ldi     a,[hl
+z80cover100.asm(266): error: Illegal instruction:     ldi     a,[ix+3
+266   00ED                  ldi     a,[ix+3
+z80cover100.asm(267): error: Illegal instruction:     ldi     [hl
+267   00ED                  ldi     [hl
+z80cover100.asm(268): error: Illegal instruction:     ldi     [sp],a
+268   00ED                  ldi     [sp],a
+z80cover100.asm(269): error: Illegal instruction:     ldi     l,[hl
+269   00ED                  ldi     l,[hl
+z80cover100.asm(270): error: Illegal instruction:     ldi     l,[ix+3
+270   00ED                  ldi     l,[ix+3
+z80cover100.asm(271): error: Illegal instruction:     out     (c)
+271   00ED                  out     (c)
+z80cover100.asm(272): error: Illegal instruction:     out     (c),1
+272   00ED                  out     (c),1
+z80cover100.asm(273): error: Illegal instruction:     out     (254),h
+273   00ED                  out     (254),h
+z80cover100.asm(274): error: Illegal instruction:     push    e
+274   00ED                  push    e
+z80cover100.asm(275): error: Illegal instruction:     sub     de,de
+275   00ED                  sub     de,de
+276   00ED
 # file closed: z80cover100.asm
 
 Value    Label

@@ -82,6 +82,30 @@ z80n_cover100.asm(47): error: Illegal instruction:     add     hl,a
 z80n_cover100.asm(48): error: Illegal instruction:     push    1234
 48    0004                  push    1234
 49    0004
+50    0004                  ;; part 4 (more of the branching stuff, handpicked from local detailed coverage report)
+51    0004
+52    0004                  OPT reset --syntax=ab --zxnext
+z80n_cover100.asm(53): error: Illegal instruction:     add     de,b
+53    0004                  add     de,b
+z80n_cover100.asm(54): error: Z80N barrel shifts exist only with "DE,B" arguments: bsra    de
+54    0004                  bsra    de
+z80n_cover100.asm(55): error: Z80N barrel shifts exist only with "DE,B" arguments: bsra    de,a
+55    0004                  bsra    de,a
+z80n_cover100.asm(56): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    de
+56    0004                  brlc    de
+z80n_cover100.asm(57): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    de,
+57    0004                  brlc    de,
+z80n_cover100.asm(58): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    de,a
+58    0004                  brlc    de,a
+59    0004
+60    0004                  OPT reset --syntax=abF --zxnext
+z80n_cover100.asm(61): error: Fake instructions are not enabled: mul
+61    0004                  mul
+z80n_cover100.asm(62): error: Z80N MUL exist only with "D,E" arguments: mul     d
+62    0004                  mul     d
+z80n_cover100.asm(63): error: Z80N MUL exist only with "D,E" arguments: mul     d,c
+63    0004                  mul     d,c
+64    0004
 # file closed: z80n_cover100.asm
 
 Value    Label

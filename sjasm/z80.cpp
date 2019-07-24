@@ -51,7 +51,7 @@ namespace Z80 {
 		}
 	}
 
-	int GetByte(char*& p) {
+	byte GetByte(char*& p) {
 		aint val;
 		if (!ParseExpression(p, val)) {
 			Error("Operand expected", nullptr, IF_FIRST); return 0;
@@ -60,7 +60,7 @@ namespace Z80 {
 		return val & 255;
 	}
 
-	int GetByteNoMem(char*& p) {
+	byte GetByteNoMem(char*& p) {
 		if (0 == Options::syx.MemoryBrackets) return GetByte(p); // legacy behaviour => don't care
 		aint val; char* const oldP = p;
 		switch (ParseExpressionMemAccess(p, val)) {
@@ -76,7 +76,7 @@ namespace Z80 {
 		}
 	}
 
-	int GetWord(char*& p) {
+	word GetWord(char*& p) {
 		aint val;
 		if (!ParseExpression(p, val)) {
 			Error("Operand expected", nullptr, IF_FIRST); return 0;
@@ -85,7 +85,7 @@ namespace Z80 {
 		return val & 65535;
 	}
 
-	int GetWordNoMem(char*& p) {
+	word GetWordNoMem(char*& p) {
 		if (0 == Options::syx.MemoryBrackets) return GetWord(p); // legacy behaviour => don't care
 		aint val; char* const oldP = p;
 		switch (ParseExpressionMemAccess(p, val)) {
@@ -101,7 +101,7 @@ namespace Z80 {
 		}
 	}
 
-	int z80GetIDxoffset(char*& p) {
+	byte z80GetIDxoffset(char*& p) {
 		aint val;
 		char* pp = p;
 		SkipBlanks(pp);
@@ -457,9 +457,9 @@ namespace Z80 {
 						e[0] = 0xED; e[1] = 0x31; break;
 					default:
 						if(!Options::syx.IsNextEnabled) break;
-						int b = GetWordNoMem(lp);
+						word b = GetWordNoMem(lp);
 						e[0] = 0xED; e[1] = 0x34 ;
-						e[2] = b & 255; e[3] = (b >> 8) & 255;
+						e[2] = b & 255; e[3] = (b >> 8);
 						break;
 					}
 					break;
@@ -482,9 +482,9 @@ namespace Z80 {
 					if (Z80_A == reg2) {
 						e[0] = 0xED; e[1] = 0x32 + (Z80_BC == reg);
 					} else if (Z80_UNK == reg2) {
-						int b = GetWordNoMem(lp);
+						word b = GetWordNoMem(lp);
 						e[0] = 0xED; e[1] = 0x35 + (Z80_BC == reg);
-						e[2] = b & 255; e[3] = (b >> 8) & 255;
+						e[2] = b & 255; e[3] = (b >> 8);
 					}
 					break;
 				default:	break;		// unreachable (already validated by `CommonAluOpcode` call)
@@ -504,8 +504,9 @@ namespace Z80 {
 
 	void OpCode_BIT() {
 		do {
-			int e[] { -1, -1, -1, -1, -1 }, bit = GetByteNoMem(lp);
-			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0x40, e, false);
+			int e[] { -1, -1, -1, -1, -1 };
+			byte bit = GetByteNoMem(lp);
+			if (comma(lp) && bit <= 7) OpCode_CbFamily(8 * bit + 0x40, e, false);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -560,8 +561,13 @@ namespace Z80 {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			Z80Cond cc = getz80cond(lp);
-			if (Z80C_UNK == cc) e[0] = 0xcd;
-			else if (comma(lp)) e[0] = 0xC4 + cc;
+			if (Z80C_UNK == cc) {
+				e[0] = 0xcd;
+			} else if (comma(lp)) {
+				e[0] = 0xC4 + cc;
+			} else {
+				Error("[CALL cc] Comma expected", bp);
+			}
 			// UNK != cc + no-comma leaves e[0] == -1 (invalid instruction)
 			aint callad;
 			GetAddress(lp, callad);
@@ -733,8 +739,8 @@ namespace Z80 {
 
 	void OpCode_IM() {
 		int e[] { -1, -1, -1 }, machineCode[] { 0x46, 0x56, 0x5e };
-		int mode = GetByteNoMem(lp);
-		if (0 <= mode && mode <= 2) {
+		byte mode = GetByteNoMem(lp);
+		if (mode <= 2) {
 			e[0] = 0xed;
 			e[1] = machineCode[mode];
 		}
@@ -833,6 +839,7 @@ namespace Z80 {
 				}
 			} else {	// if (Z80C_UNK == cc)
 				if (comma(lp)) e[0] = 0xC2 + cc;	// jp cc,imm16
+				else Error("[JP cc] Comma expected", bp);
 			}
 			// calculate the imm16 data
 			if (Z80_UNK == reg) {
@@ -850,8 +857,10 @@ namespace Z80 {
 			int e[] { -1, -1, -1, -1 };
 			Z80Cond cc = getz80cond(lp);
 			if (Z80C_UNK == cc) e[0] = 0x18;
-			else if (cc <= Z80C_C && comma(lp)) e[0] = 0x20 + cc;
-			else {
+			else if (cc <= Z80C_C) {
+				if (comma(lp)) e[0] = 0x20 + cc;
+				else Error("[JR cc] Comma expected", bp);
+			} else {
 				Error("[JR] Illegal condition", bp);
 				SkipToEol(lp);
 				break;
@@ -1675,9 +1684,9 @@ namespace Z80 {
 			case Z80_UNK:
 			{
 				if(!Options::syx.IsNextEnabled) break;
-				int imm16 = GetWordNoMem(lp);
+				word imm16 = GetWordNoMem(lp);
 				e[0] = 0xED; e[1] = 0x8A;
-				e[2] = (imm16 >> 8) & 255;  // push opcode is big-endian!
+				e[2] = (imm16 >> 8);  // push opcode is big-endian!
 				e[3] = imm16 & 255;
 			}
 			default:
@@ -1689,8 +1698,9 @@ namespace Z80 {
 
 	void OpCode_RES() {
 		do {
-			int e[] { -1, -1, -1, -1, -1 }, bit = GetByteNoMem(lp);
-			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0x80, e);
+			int e[] { -1, -1, -1, -1, -1 };
+			byte bit = GetByteNoMem(lp);
+			if (comma(lp) && bit <= 7) OpCode_CbFamily(8 * bit + 0x80, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -1792,7 +1802,7 @@ namespace Z80 {
 
 	void OpCode_RST() {
 		do {
-			int e = GetByteNoMem(lp);
+			byte e = GetByteNoMem(lp);
 			if (e&(~0x38)) {	// some bit is set which should be not
 				Error("[RST] Illegal operand", line); SkipToEol(lp);
 				return;
@@ -1829,8 +1839,9 @@ namespace Z80 {
 
 	void OpCode_SET() {
 		do {
-			int e[] { -1, -1, -1, -1, -1 }, bit = GetByteNoMem(lp);
-			if (comma(lp) && 0 <= bit && bit <= 7) OpCode_CbFamily(8 * bit + 0xc0, e);
+			int e[] { -1, -1, -1, -1, -1 };
+			byte bit = GetByteNoMem(lp);
+			if (comma(lp) && bit <= 7) OpCode_CbFamily(8 * bit + 0xc0, e);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
