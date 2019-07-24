@@ -38,3 +38,11 @@
     swapnib
     swapnib a
     test    1
+
+    ;; part 3 (new commit, focusing on branching in the code, exercising more combinations and code paths)
+    ; these tests (whole this file) are unfortunately very implementation based, in case of major refactorings they may
+    ; quickly lose their functionality (the machine code produced should be the same, but code coverage may regress).
+
+    add     hl,1234
+    add     hl,a
+    push    1234

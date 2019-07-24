@@ -225,6 +225,181 @@ z80cover100.asm(132): error: [SUB] Comma expected
 z80cover100.asm(137): error: Illegal instruction:     pop     sp          ; illegal
 137   008C                  pop     sp          ; illegal
 138   008C
+139   008C                  ;; part 3 (new commit, focusing on branching in the code, exercising more combinations and code paths)
+140   008C                  ; these tests (whole this file) are unfortunately very implementation based, in case of major refactorings they may
+141   008C                  ; quickly lose their functionality (the machine code produced should be the same, but code coverage may regress).
+142   008C
+143   008C                  ; illegal instructions (exercising all code paths)
+z80cover100.asm(144): error: Illegal instruction:     sbc     hl,af
+144   008C                  sbc     hl,af
+z80cover100.asm(145): error: Illegal instruction:     sub     hl,af
+145   008C                  sub     hl,af
+146   008C
+147   008C                  ;; no fakes allowed
+148   008C                  OPT reset --syntax=abF
+z80cover100.asm(149): error: Fake instructions are not enabled: sub     hl,bc
+149   008C                  sub     hl,bc
+150   008C
+151   008C                  ;; branches extra coverage - not going to comment on each one, as these exercise very specific code paths
+152   008C                  ;; of current implementation (based on v1.13.3) and there's nothing special about them in general way
+153   008C
+z80cover100.asm(154): error: Unexpected: np
+154   008C C9               ret     np
+z80cover100.asm(155): error: Unexpected: px
+155   008D C9               ret     px
+z80cover100.asm(156): error: Label not found: ixn
+156   008E 3E 00            ld      a,ixn
+z80cover100.asm(157): error: Label not found: ixhn
+157   0090 3E 00            ld      a,ixhn
+z80cover100.asm(158): error: Label not found: ixln
+158   0092 3E 00            ld      a,ixln
+z80cover100.asm(159): error: Label not found: iyn
+159   0094 3E 00            ld      a,iyn
+z80cover100.asm(160): error: Label not found: iyhn
+160   0096 3E 00            ld      a,iyhn
+z80cover100.asm(161): error: Label not found: iyln
+161   0098 3E 00            ld      a,iyln
+z80cover100.asm(162): error: Label not found: IXN
+162   009A 3E 00            ld      a,IXN
+z80cover100.asm(163): error: Label not found: IXHN
+163   009C 3E 00            ld      a,IXHN
+z80cover100.asm(164): error: Label not found: IXLN
+164   009E 3E 00            ld      a,IXLN
+z80cover100.asm(165): error: Label not found: IYN
+165   00A0 3E 00            ld      a,IYN
+z80cover100.asm(166): error: Label not found: IYHN
+166   00A2 3E 00            ld      a,IYHN
+z80cover100.asm(167): error: Label not found: IYLN
+167   00A4 3E 00            ld      a,IYLN
+z80cover100.asm(168): error: Illegal instruction:     ex      af,bc
+168   00A6                  ex      af,bc
+z80cover100.asm(169): error: Illegal instruction:     jp      [hl
+169   00A6                  jp      [hl
+z80cover100.asm(170): error: Illegal instruction:     jp      [123]
+170   00A6                  jp      [123]
+z80cover100.asm(171): error: Illegal instruction:     ld      a
+171   00A6                  ld      a
+z80cover100.asm(172): error: Fake instructions are not enabled: ld      hl,bc
+172   00A6                  ld      hl,bc
+z80cover100.asm(173): error: Fake instructions are not enabled: ld      hl,de
+173   00A6                  ld      hl,de
+z80cover100.asm(174): error: Fake instructions are not enabled: ld      (ix),bc
+174   00A6                  ld      (ix),bc
+z80cover100.asm(175): error: Fake instructions are not enabled: ld      (ix),de
+175   00A6                  ld      (ix),de
+z80cover100.asm(176): error: Fake instructions are not enabled: ld      (ix),hl
+176   00A6                  ld      (ix),hl
+z80cover100.asm(177): error: Fake instructions are not enabled: ld      (hl),bc
+177   00A6                  ld      (hl),bc
+z80cover100.asm(178): error: Fake instructions are not enabled: ld      (hl),de
+178   00A6                  ld      (hl),de
+z80cover100.asm(179): error: Illegal instruction:     ld      (hl),hl
+179   00A6                  ld      (hl),hl
+z80cover100.asm(180): error: Fake instructions are not enabled: ld      bc,(hl)
+180   00A6                  ld      bc,(hl)
+z80cover100.asm(181): error: Fake instructions are not enabled: ld      bc,(ix)
+181   00A6                  ld      bc,(ix)
+z80cover100.asm(182): error: Illegal instruction:     ld      1,bc
+182   00A6                  ld      1,bc
+z80cover100.asm(183): error: Illegal instruction:     ld      (bc
+183   00A6                  ld      (bc
+z80cover100.asm(184): error: Illegal instruction:     ld      (bc)
+184   00A6                  ld      (bc)
+z80cover100.asm(185): error: Illegal instruction:     ld      (bc),b
+185   00A6                  ld      (bc),b
+186   00A6
+187   00A6                  OPT reset --syntax=ab
+z80cover100.asm(188): error: Offset out of range
+188   00A6 DD 71 7F DD      ld      (ix+127),bc
+188   00AA 70 80
+z80cover100.asm(189): error: Offset out of range
+189   00AC DD 73 7F DD      ld      (ix+127),de
+189   00B0 72 80
+z80cover100.asm(190): error: Offset out of range
+190   00B2 DD 75 7F DD      ld      (ix+127),hl
+190   00B6 74 80
+z80cover100.asm(191): error: Offset out of range
+191   00B8                  ld      bc,(ix+127)
+192   00B8
+193   00B8                  OPT reset --syntax=abf
+z80cover100.asm(194): error: Illegal instruction:     ldd     a
+194   00B8                  ldd     a
+z80cover100.asm(195): error: Illegal instruction:     ldd     a,
+195   00B8                  ldd     a,
+z80cover100.asm(196): warning: Fake instruction: ldd     a,(hl)
+196   00B8 7E 2B            ldd     a,(hl)
+z80cover100.asm(197): error: Illegal instruction:     ldd     b
+197   00BA                  ldd     b
+z80cover100.asm(198): error: Illegal instruction:     ldd     b,
+198   00BA                  ldd     b,
+z80cover100.asm(199): warning: Fake instruction: ldd     b,(hl)
+199   00BA 46 2B            ldd     b,(hl)
+z80cover100.asm(200): error: Illegal instruction:     ldd     (hl)
+200   00BC                  ldd     (hl)
+z80cover100.asm(201): warning: Fake instruction: ldd     (hl),
+z80cover100.asm(201): error: Operand expected: 
+201   00BC 36 00 2B         ldd     (hl),
+z80cover100.asm(202): warning: Fake instruction: ldd     (hl),a
+202   00BF 77 2B            ldd     (hl),a
+z80cover100.asm(203): error: Illegal instruction:     ldd     (iy)
+203   00C1                  ldd     (iy)
+z80cover100.asm(204): warning: Fake instruction: ldd     (iy),
+z80cover100.asm(204): error: Operand expected: 
+204   00C1 FD 36 00 00      ldd     (iy),
+204   00C5 FD 2B
+z80cover100.asm(205): warning: Fake instruction: ldd     (iy),a
+205   00C7 FD 77 00 FD      ldd     (iy),a
+205   00CB 2B
+z80cover100.asm(206): error: Illegal instruction:     ldd     (de)
+206   00CC                  ldd     (de)
+z80cover100.asm(207): error: Illegal instruction:     ldd     (de),
+207   00CC                  ldd     (de),
+z80cover100.asm(208): warning: Fake instruction: ldd     (de),a
+208   00CC 12 1B            ldd     (de),a
+z80cover100.asm(209): error: Illegal instruction:     ldd     (de),b
+209   00CE                  ldd     (de),b
+210   00CE
+z80cover100.asm(211): error: Illegal instruction:     ldi     a
+211   00CE                  ldi     a
+z80cover100.asm(212): error: Illegal instruction:     ldi     a,
+212   00CE                  ldi     a,
+z80cover100.asm(213): warning: Fake instruction: ldi     a,(hl)
+213   00CE 7E 23            ldi     a,(hl)
+z80cover100.asm(214): error: Illegal instruction:     ldi     b
+214   00D0                  ldi     b
+z80cover100.asm(215): error: Illegal instruction:     ldi     bc
+215   00D0                  ldi     bc
+z80cover100.asm(216): error: Illegal instruction:     ldi     b,
+216   00D0                  ldi     b,
+z80cover100.asm(217): warning: Fake instruction: ldi     b,(hl)
+217   00D0 46 23            ldi     b,(hl)
+z80cover100.asm(218): error: Illegal instruction:     ldi     (hl)
+218   00D2                  ldi     (hl)
+z80cover100.asm(219): warning: Fake instruction: ldi     (hl),
+z80cover100.asm(219): error: Operand expected: 
+219   00D2 36 00 23         ldi     (hl),
+z80cover100.asm(220): warning: Fake instruction: ldi     (hl),a
+220   00D5 77 23            ldi     (hl),a
+z80cover100.asm(221): error: Illegal instruction:     ldi     (iy)
+221   00D7                  ldi     (iy)
+z80cover100.asm(222): warning: Fake instruction: ldi     (iy),
+z80cover100.asm(222): error: Operand expected: 
+222   00D7 FD 36 00 00      ldi     (iy),
+222   00DB FD 23
+z80cover100.asm(223): warning: Fake instruction: ldi     (iy),a
+223   00DD FD 77 00 FD      ldi     (iy),a
+223   00E1 23
+z80cover100.asm(224): error: Illegal instruction:     ldi     (de)
+224   00E2                  ldi     (de)
+z80cover100.asm(225): error: Illegal instruction:     ldi     (de),
+225   00E2                  ldi     (de),
+z80cover100.asm(226): warning: Fake instruction: ldi     (de),a
+226   00E2 12 13            ldi     (de),a
+z80cover100.asm(227): error: Illegal instruction:     ldi     (de),b
+227   00E4                  ldi     (de),b
+z80cover100.asm(228): error: Illegal instruction:     ldi     hl,(hl)
+228   00E4                  ldi     hl,(hl)
+229   00E4
 # file closed: z80cover100.asm
 
 Value    Label

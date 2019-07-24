@@ -1127,13 +1127,15 @@ namespace Z80 {
 			return;
 		}
 
+		// only when fakes are enabled (but they may be silent/warning enabled, so extra checks needed)
 		do {
 			int e[] { -1, -1, -1, -1, -1, -1, -1};
 			Z80Reg reg2 = Z80_UNK, reg = GetRegister(lp);
 			switch (reg) {
 			case Z80_A:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				if (BT_NONE == OpenBracket(lp)) break;
+				Options::noFakes();		// to display warning if "-f"
 				switch (reg = GetRegister(lp)) {
 				case Z80_BC:	// 0x0A 0x0B
 				case Z80_DE:	// 0x1A 0x1B
@@ -1151,12 +1153,14 @@ namespace Z80 {
 				}
 				break;
 			case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_MEM_HL:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = 0x46 + reg * 8; e[1] = 0x2b;
 					break;
 				case Z80_MEM_IX: case Z80_MEM_IY:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = e[3] = reg2&0xFF; e[1] = 0x46 + reg * 8; e[2] = GetRegister_lastIxyD; e[4] = 0x2b;
 					break;
 				default:
@@ -1164,22 +1168,26 @@ namespace Z80 {
 				}
 				break;
 			case Z80_MEM_HL:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				switch (reg = GetRegister(lp)) {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = 0x70 + reg; e[1] = 0x2b; break;
 				case Z80_UNK:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = 0x36; e[1] = GetByteNoMem(lp); e[2] = 0x2b; break;
 				default:
 					break;
 				}
 				break;
 			case Z80_MEM_IX: case Z80_MEM_IY:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = e[3] = reg&0xFF; e[2] = GetRegister_lastIxyD; e[1] = 0x70 + reg2; e[4] = 0x2b; break;
 				case Z80_UNK:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = e[4] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByteNoMem(lp); e[5] = 0x2b; break;
 				default:
 					break;
@@ -1187,10 +1195,10 @@ namespace Z80 {
 				break;
 			default:
 				if (BT_NONE != OpenBracket(lp)) {
-					if (Options::noFakes()) break;
 					reg = GetRegister(lp);
 					if (!CloseBracket(lp) || !comma(lp)) break;
 					if ((Z80_BC != reg && Z80_DE != reg) || Z80_A != GetRegister(lp)) break;
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = reg - 14; e[1] = reg - 5;	// LDD (bc|de),a
 				} else {
 					e[0] = 0xed; e[1] = 0xa8;			// regular LDD
@@ -1230,13 +1238,15 @@ namespace Z80 {
 			return;
 		}
 
+		// only when fakes are enabled (but they may be silent/warning enabled, so extra checks needed)
 		do {
 			int e[] { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 			Z80Reg reg2 = Z80_UNK, reg = GetRegister(lp);
 			switch (reg) {
 			case Z80_A:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				if (BT_NONE == OpenBracket(lp)) break;
+				Options::noFakes();		// to display warning if "-f"
 				switch (reg = GetRegister(lp)) {
 				case Z80_BC:	// 0A 03
 				case Z80_DE:	// 1A 13
@@ -1256,8 +1266,9 @@ namespace Z80 {
 				}
 				break;
 			case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				if (BT_NONE == OpenBracket(lp)) break;
+				Options::noFakes();		// to display warning if "-f"
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_HL:
 					e[1] = 0x23; if (CloseBracket(lp)) e[0] = 0x46 + reg * 8;
@@ -1272,13 +1283,15 @@ namespace Z80 {
 				}
 				break;
 			case Z80_BC: case Z80_DE: case Z80_HL:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_MEM_HL:
 					if (Z80_HL == reg) break;
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = 0x3e + reg; e[1] = e[3] = 0x23; e[2] = 0x36 + reg;
 					break;
 				case Z80_MEM_IX: case Z80_MEM_IY:
+					Options::noFakes();		// to display warning if "-f"
 					e[2] = e[7] = GetRegister_lastIxyD;
 					e[0] = e[3] = e[5] = e[8] = reg2&0xFF;
 					e[1] = 0x3e + reg; e[6] = 0x36 + reg; e[4] = e[9] = 0x23;
@@ -1288,28 +1301,34 @@ namespace Z80 {
 				}
 				break;
 			case Z80_MEM_HL:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				switch (reg = GetRegister(lp)) {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = 0x70 + reg; e[1] = 0x23; break;
 				case Z80_BC: case Z80_DE:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = 0x70 + GetRegister_r16Low(reg); e[2] = 0x70 + GetRegister_r16High(reg);
 					e[1] = e[3] = 0x23; break;
 				case Z80_UNK:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = 0x36; e[1] = GetByteNoMem(lp); e[2] = 0x23; break;
 				default:
 					break;
 				}
 				break;
 			case Z80_MEM_IX: case Z80_MEM_IY:
-				if (Options::noFakes() || !comma(lp)) break;
+				if (!comma(lp)) break;
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = e[3] = reg&0xFF; e[2] = GetRegister_lastIxyD; e[1] = 0x70 + reg2; e[4] = 0x23; break;
 				case Z80_BC: case Z80_DE: case Z80_HL:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = e[3] = e[5] = e[8] = reg&0xFF; e[4] = e[9] = 0x23; e[2] = e[7] = GetRegister_lastIxyD;
 					e[1] = 0x70 + GetRegister_r16Low(reg2); e[6] = 0x70 + GetRegister_r16High(reg2); break;
 				case Z80_UNK:
+					Options::noFakes();		// to display warning if "-f"
 					e[0] = e[4] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByteNoMem(lp); e[5] = 0x23; break;
 				default:
 					break;
@@ -1317,10 +1336,10 @@ namespace Z80 {
 				break;
 			default:
 				if (BT_NONE != OpenBracket(lp)) {
-					if (Options::noFakes()) break;
 					reg = GetRegister(lp);
 					if (!CloseBracket(lp) || !comma(lp)) break;
 					if ((Z80_BC != reg && Z80_DE != reg) || Z80_A != GetRegister(lp)) break;
+					Options::noFakes();
 					e[0] = reg - 14; e[1] = reg - 13;	// LDI (bc|de),a
 				} else {
 					e[0] = 0xed; e[1] = 0xa0;			// regular LDI

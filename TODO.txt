@@ -110,6 +110,8 @@ new lua + js support?
 Refactor filepath functions to deal with backward slashes systematically
 (or maybe just wait few more years, can't be that long now before windows are gone)
 
+Big-text-block directive? (there's INCBIN workaround using separate file)
+
 ====================
 Docs:
 
@@ -117,3 +119,8 @@ Docs:
 ^^ link each?
 
 DEVICE needs better description? Issue #55
+
+1.13.4 changelog:
+- R800 MULUB was producing wrong opcode all those years... fixed.
+- several tests added to improve the code coverage: https://coveralls.io/github/z00m128/sjasmplus?branch=master
+- as tests were added, minor bugs were found and squashed (errors wording, etc)

@@ -135,3 +135,94 @@
     OPT reset --syntax=ab --reversepop
     pop     af,,bc,,de,,hl,,ix,,iy      ;; regular + multiarg
     pop     sp          ; illegal
+
+    ;; part 3 (new commit, focusing on branching in the code, exercising more combinations and code paths)
+    ; these tests (whole this file) are unfortunately very implementation based, in case of major refactorings they may
+    ; quickly lose their functionality (the machine code produced should be the same, but code coverage may regress).
+
+    ; illegal instructions (exercising all code paths)
+    sbc     hl,af
+    sub     hl,af
+
+    ;; no fakes allowed
+    OPT reset --syntax=abF
+    sub     hl,bc
+
+    ;; branches extra coverage - not going to comment on each one, as these exercise very specific code paths
+    ;; of current implementation (based on v1.13.3) and there's nothing special about them in general way
+
+    ret     np
+    ret     px
+    ld      a,ixn
+    ld      a,ixhn
+    ld      a,ixln
+    ld      a,iyn
+    ld      a,iyhn
+    ld      a,iyln
+    ld      a,IXN
+    ld      a,IXHN
+    ld      a,IXLN
+    ld      a,IYN
+    ld      a,IYHN
+    ld      a,IYLN
+    ex      af,bc
+    jp      [hl
+    jp      [123]
+    ld      a
+    ld      hl,bc
+    ld      hl,de
+    ld      (ix),bc
+    ld      (ix),de
+    ld      (ix),hl
+    ld      (hl),bc
+    ld      (hl),de
+    ld      (hl),hl
+    ld      bc,(hl)
+    ld      bc,(ix)
+    ld      1,bc
+    ld      (bc
+    ld      (bc)
+    ld      (bc),b
+
+    OPT reset --syntax=ab
+    ld      (ix+127),bc
+    ld      (ix+127),de
+    ld      (ix+127),hl
+    ld      bc,(ix+127)
+
+    OPT reset --syntax=abf
+    ldd     a
+    ldd     a,
+    ldd     a,(hl)
+    ldd     b
+    ldd     b,
+    ldd     b,(hl)
+    ldd     (hl)
+    ldd     (hl),
+    ldd     (hl),a
+    ldd     (iy)
+    ldd     (iy),
+    ldd     (iy),a
+    ldd     (de)
+    ldd     (de),
+    ldd     (de),a
+    ldd     (de),b
+
+    ldi     a
+    ldi     a,
+    ldi     a,(hl)
+    ldi     b
+    ldi     bc
+    ldi     b,
+    ldi     b,(hl)
+    ldi     (hl)
+    ldi     (hl),
+    ldi     (hl),a
+    ldi     (iy)
+    ldi     (iy),
+    ldi     (iy),a
+    ldi     (de)
+    ldi     (de),
+    ldi     (de),a
+    ldi     (de),b
+    ldi     hl,(hl)

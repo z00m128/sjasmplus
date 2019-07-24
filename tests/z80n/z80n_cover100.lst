@@ -71,6 +71,17 @@ z80n_cover100.asm(39): error: Z80N instructions are currently disabled: swapnib 
 z80n_cover100.asm(40): error: Z80N instructions are currently disabled: test    1
 40    0004                  test    1
 41    0004
+42    0004                  ;; part 3 (new commit, focusing on branching in the code, exercising more combinations and code paths)
+43    0004                  ; these tests (whole this file) are unfortunately very implementation based, in case of major refactorings they may
+44    0004                  ; quickly lose their functionality (the machine code produced should be the same, but code coverage may regress).
+45    0004
+z80n_cover100.asm(46): error: Illegal instruction:     add     hl,1234
+46    0004                  add     hl,1234
+z80n_cover100.asm(47): error: Illegal instruction:     add     hl,a
+47    0004                  add     hl,a
+z80n_cover100.asm(48): error: Illegal instruction:     push    1234
+48    0004                  push    1234
+49    0004
 # file closed: z80n_cover100.asm
 
 Value    Label
