@@ -1425,13 +1425,13 @@ namespace Z80 {
 		}
 		switch (reg) {
 		case Z80_B:
-			e[0] = 0xed; e[1] = 0xc5; break;
+			e[0] = 0xed; e[1] = 0xc1; break;
 		case Z80_C:
-			e[0] = 0xed; e[1] = 0xcd; break;
+			e[0] = 0xed; e[1] = 0xc9; break;
 		case Z80_D:
-			e[0] = 0xed; e[1] = 0xd5; break;
+			e[0] = 0xed; e[1] = 0xd1; break;
 		case Z80_E:
-			e[0] = 0xed; e[1] = 0xdd; break;
+			e[0] = 0xed; e[1] = 0xd9; break;
 		default:
 			;
 		}
