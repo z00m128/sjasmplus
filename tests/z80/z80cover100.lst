@@ -1,147 +1,230 @@
 # file opened: z80cover100.asm
- 1    0000                  ;; few more test cases not covered by regular tests,
- 2    0000                  ;; but were discovered by code coverage as code not executed in tests
- 3    0000
- 4    0000                  ; some tests need more strict syntax rules to hit specific code paths
- 5    0000                  OPT reset --syntax=ab
- 6    0000
+  1   0000                  ;; few more test cases not covered by regular tests,
+  2   0000                  ;; but were discovered by code coverage as code not executed in tests
+  3   0000
+  4   0000                  ; some tests need more strict syntax rules to hit specific code paths
+  5   0000                  OPT reset --syntax=ab
+  6   0000
 z80cover100.asm(7): error: Operand expected:      [1234   
- 7    0000 EE 00            xor     [1234   ; "Operand expected" error when parsing of no-memory argument fails
- 8    0002
+  7   0000 EE 00            xor     [1234   ; "Operand expected" error when parsing of no-memory argument fails
+  8   0002
 z80cover100.asm(9): error: Operand expected
- 9    0002 CD 00 00         call            ; "Operand expected" error
-10    0005
-11    0005 7F               ld      a,high af           ; tricky way to write "ld a,a" :) ("high af" covered)
-12    0006
-13    0006 ED 70            in      low af,(c)          ; tricky way to write "in f,(c)" ("low af" covered)
-14    0008
-15    0008                  ; nonexistent register pairs (with possible match) in `GetRegister` function
+  9   0002 CD 00 00         call            ; "Operand expected" error
+ 10   0005
+ 11   0005 7F               ld      a,high af           ; tricky way to write "ld a,a" :) ("high af" covered)
+ 12   0006
+ 13   0006 ED 70            in      low af,(c)          ; tricky way to write "in f,(c)" ("low af" covered)
+ 14   0008
+ 15   0008                  ; nonexistent register pairs (with possible match) in `GetRegister` function
 z80cover100.asm(16): error: Illegal instruction:     pop az 
-16    0008                  pop az
+ 16   0008                  pop az
 z80cover100.asm(16): error: Illegal instruction:   pop ha 
-16    0008                pop ha
+ 16   0008                pop ha
 z80cover100.asm(16): error: Illegal instruction:   pop xa 
-16    0008                pop xa
+ 16   0008                pop xa
 z80cover100.asm(16): error: Illegal instruction:   pop ya 
-16    0008                pop ya
+ 16   0008                pop ya
 z80cover100.asm(16): error: Illegal instruction:   pop YA
-16    0008                pop YA
-17    0008
-18    0008                  ; invalid registers in common ALU instructions
+ 16   0008                pop YA
+ 17   0008
+ 18   0008                  ; invalid registers in common ALU instructions
 z80cover100.asm(19): error: Illegal instruction:     xor af 
-19    0008                  xor af
+ 19   0008                  xor af
 z80cover100.asm(19): error: Illegal instruction:   xor sp 
-19    0008                xor sp
+ 19   0008                xor sp
 z80cover100.asm(19): error: Illegal instruction:   xor i 
-19    0008                xor i
+ 19   0008                xor i
 z80cover100.asm(19): error: Illegal instruction:   xor r 
-19    0008                xor r
+ 19   0008                xor r
 z80cover100.asm(19): error: Illegal instruction:   xor f
-19    0008                xor f
-20    0008
+ 19   0008                xor f
+ 20   0008
 z80cover100.asm(21): error: [ADC] Comma expected
-21    0008                  adc     hl      ; "Comma expected" error
+ 21   0008                  adc     hl      ; "Comma expected" error
 z80cover100.asm(22): error: Illegal instruction:     adc     hl,ix   ; invalid instr.
-22    0008                  adc     hl,ix   ; invalid instr.
-23    0008 88 89            adc     b ,, c  ; multiarg
-24    000A
+ 22   0008                  adc     hl,ix   ; invalid instr.
+ 23   0008 88 89            adc     b ,, c  ; multiarg
+ 24   000A
 z80cover100.asm(25): error: [ADD] Comma expected
-25    000A                  add     hl              ; "Comma expected" error
+ 25   000A                  add     hl              ; "Comma expected" error
 z80cover100.asm(26): error: [EX] Comma expected
-26    000A                  ex      hl              ; "Comma expected" error
+ 26   000A                  ex      hl              ; "Comma expected" error
 z80cover100.asm(27): error: [EX] Comma expected
-27    000A                  ex      (sp)            ; "Comma expected" error
-28    000A
-29    000A A0 A1            and     b ,, c          ; multiarg
-30    000C CB 69 DD CB      bit     5,c ,, 3,(ix+4) ; multiarg
-30    0010 04 5E
-31    0012 B8 B9            cp      b ,, c          ; multiarg
-32    0014 04 0C            inc     b ,, c          ; multiarg
-33    0016 DB 01 ED 50      in      a,(1) ,, d,(c)  ; multiarg
-34    001A 10 FE 10 FE      djnz    $ ,, $          ; multiarg
-35    001E 18 FE 18 FE      jr      $ ,, $          ; multiarg
-36    0022 7E 2B 46 2B      ldd     a,(hl) ,, b,(hl); multiarg
-37    0026 7E 23 46 23      ldi     a,(hl) ,, b,(hl); multiarg
-38    002A ED A8 ED A8      ldd     ,,              ; freaking multiarg syntax allows for this!
-39    002E ED A0 ED A0      ldi     ,,              ; freaking multiarg syntax allows for this!
-40    0032
+ 27   000A                  ex      (sp)            ; "Comma expected" error
+ 28   000A
+ 29   000A A0 A1            and     b ,, c          ; multiarg
+ 30   000C CB 69 DD CB      bit     5,c ,, 3,(ix+4) ; multiarg
+ 30   0010 04 5E
+ 31   0012 B8 B9            cp      b ,, c          ; multiarg
+ 32   0014 04 0C            inc     b ,, c          ; multiarg
+ 33   0016 DB 01 ED 50      in      a,(1) ,, d,(c)  ; multiarg
+ 34   001A 10 FE 10 FE      djnz    $ ,, $          ; multiarg
+ 35   001E 18 FE 18 FE      jr      $ ,, $          ; multiarg
+ 36   0022 7E 2B 46 2B      ldd     a,(hl) ,, b,(hl); multiarg
+ 37   0026 7E 23 46 23      ldi     a,(hl) ,, b,(hl); multiarg
+ 38   002A ED A8 ED A8      ldd     ,,              ; freaking multiarg syntax allows for this!
+ 39   002E ED A0 ED A0      ldi     ,,              ; freaking multiarg syntax allows for this!
+ 40   0032
 z80cover100.asm(41): error: Operand expected
-41    0032 10 00            djnz                    ; "Operand expected" error
+ 41   0032 10 00            djnz                    ; "Operand expected" error
 z80cover100.asm(42): error: [DJNZ] Target out of range (-129)
-42    0034 10 00            djnz    $+2-128-1       ; just outside of range
+ 42   0034 10 00            djnz    $+2-128-1       ; just outside of range
 z80cover100.asm(43): error: [DJNZ] Target out of range (+128)
-43    0036 10 00            djnz    $+2+127+1       ; just outside of range
-44    0038
+ 43   0036 10 00            djnz    $+2+127+1       ; just outside of range
+ 44   0038
 z80cover100.asm(45): error: Illegal instruction:     dec     r               ; illegal dec/inc instruction
-45    0038                  dec     r               ; illegal dec/inc instruction
+ 45   0038                  dec     r               ; illegal dec/inc instruction
 z80cover100.asm(46): error: Illegal instruction:     inc     r
-46    0038                  inc     r
+ 46   0038                  inc     r
 z80cover100.asm(47): error: Illegal instruction:     dec     af
-47    0038                  dec     af
+ 47   0038                  dec     af
 z80cover100.asm(48): error: Illegal instruction:     inc     af
-48    0038                  inc     af
-49    0038
+ 48   0038                  inc     af
+ 49   0038
 z80cover100.asm(50): error: [JR] Illegal condition: jr      p,$             
-50    0038                  jr      p,$             ; illegal JR conditions
+ 50   0038                  jr      p,$             ; illegal JR conditions
 z80cover100.asm(51): error: [JR] Illegal condition: jr      ns,$
-51    0038                  jr      ns,$
+ 51   0038                  jr      ns,$
 z80cover100.asm(52): error: [JR] Illegal condition: jr      m,$
-52    0038                  jr      m,$
+ 52   0038                  jr      m,$
 z80cover100.asm(53): error: [JR] Illegal condition: jr      s,$
-53    0038                  jr      s,$
+ 53   0038                  jr      s,$
 z80cover100.asm(54): error: [JR] Illegal condition: jr      po,$
-54    0038                  jr      po,$
+ 54   0038                  jr      po,$
 z80cover100.asm(55): error: [JR] Illegal condition: jr      pe,$
-55    0038                  jr      pe,$
-56    0038
-57    0038                  ; illegal instructions (exercising all code paths)
+ 55   0038                  jr      pe,$
+ 56   0038
+ 57   0038                  ; illegal instructions (exercising all code paths)
 z80cover100.asm(58): error: Illegal instruction:     ld      (1234),af
-58    0038                  ld      (1234),af
+ 58   0038                  ld      (1234),af
 z80cover100.asm(59): error: Illegal instruction:     ld      (1234),r
-59    0038                  ld      (1234),r
+ 59   0038                  ld      (1234),r
 z80cover100.asm(60): error: Illegal instruction:     ld      (af),a
-60    0038                  ld      (af),a
+ 60   0038                  ld      (af),a
 z80cover100.asm(61): error: Illegal instruction:     ldd     a,(af)
-61    0038                  ldd     a,(af)
+ 61   0038                  ldd     a,(af)
 z80cover100.asm(62): error: Illegal instruction:     ldi     a,(af)
-62    0038                  ldi     a,(af)
+ 62   0038                  ldi     a,(af)
 z80cover100.asm(63): error: Illegal instruction:     ldd     b,c
-63    0038                  ldd     b,c
+ 63   0038                  ldd     b,c
 z80cover100.asm(64): error: Illegal instruction:     ldi     b,c
-64    0038                  ldi     b,c
+ 64   0038                  ldi     b,c
 z80cover100.asm(65): error: Illegal instruction:     ldd     (hl),i
-65    0038                  ldd     (hl),i
+ 65   0038                  ldd     (hl),i
 z80cover100.asm(66): error: Illegal instruction:     ldi     (hl),i
-66    0038                  ldi     (hl),i
+ 66   0038                  ldi     (hl),i
 z80cover100.asm(67): error: Illegal instruction:     ldd     (ix),i
-67    0038                  ldd     (ix),i
+ 67   0038                  ldd     (ix),i
 z80cover100.asm(68): error: Illegal instruction:     ldi     (iy),i
-68    0038                  ldi     (iy),i
+ 68   0038                  ldi     (iy),i
 z80cover100.asm(69): error: Illegal instruction:     ldi     b,(af)
-69    0038                  ldi     b,(af)
+ 69   0038                  ldi     b,(af)
 z80cover100.asm(70): error: Illegal instruction:     ldi     bc,a
-70    0038                  ldi     bc,a
+ 70   0038                  ldi     bc,a
 z80cover100.asm(71): error: Illegal instruction:     ldi     de,a
-71    0038                  ldi     de,a
+ 71   0038                  ldi     de,a
 z80cover100.asm(72): error: Illegal instruction:     ldi     hl,a
-72    0038                  ldi     hl,a
-73    0038
-74    0038                  ; normal instructions, different syntax (not used yet by any test)
-75    0038 08               exa
-75    0039 08             ex af,af'     ; "ex af,af'" shortcut
-76    003A EB               exd
-76    003B EB             ex de,hl      ; "ex de,hl" shortcut
-77    003C ED 70            inf
-77    003E ED 70          in f,(c)      ; "in f,(c)" shortcut
-78    0040
-79    0040                  OPT reset --syntax=abF  ; no fakes allowed
-80    0040 ED A8            ldd                     ; regular ldd
-81    0042 ED A0            ldi                     ; regular ldi
+ 72   0038                  ldi     hl,a
+ 73   0038
+ 74   0038                  ; normal instructions, different syntax (not used yet by any test)
+ 75   0038 08               exa
+ 75   0039 08             ex af,af'     ; "ex af,af'" shortcut
+ 76   003A EB               exd
+ 76   003B EB             ex de,hl      ; "ex de,hl" shortcut
+ 77   003C ED 70            inf
+ 77   003E ED 70          in f,(c)      ; "in f,(c)" shortcut
+ 78   0040
+ 79   0040                  OPT reset --syntax=abF  ; no fakes allowed
+ 80   0040 ED A8            ldd                     ; regular ldd
+ 81   0042 ED A0            ldi                     ; regular ldi
 z80cover100.asm(82): error: Unexpected: a,(hl)          
-82    0044 ED A8            ldd     a,(hl)          ; regular ldd with "unexpected ...." error when fakes are OFF
+ 82   0044 ED A8            ldd     a,(hl)          ; regular ldd with "unexpected ...." error when fakes are OFF
 z80cover100.asm(83): error: Unexpected: a,(hl)          
-83    0046 ED A0            ldi     a,(hl)          ; regular ldi with "unexpected ...." error when fakes are OFF
-84    0048
+ 83   0046 ED A0            ldi     a,(hl)          ; regular ldi with "unexpected ...." error when fakes are OFF
+ 84   0048
+ 85   0048                  ;; part 2 (new commit)
+ 86   0048                  ; illegal instructions (exercising all code paths)
+z80cover100.asm(87): error: Illegal instruction:     in      hl,(c)
+ 87   0048                  in      hl,(c)
+z80cover100.asm(88): error: Illegal instruction:     out     (c),hl
+ 88   0048                  out     (c),hl
+z80cover100.asm(89): error: Illegal instruction:     bit     -1,a
+ 89   0048                  bit     -1,a
+z80cover100.asm(90): error: Illegal instruction:     bit     8,b
+ 90   0048                  bit     8,b
+z80cover100.asm(91): error: Illegal instruction:     res     -1,a
+ 91   0048                  res     -1,a
+z80cover100.asm(92): error: Illegal instruction:     res     8,b
+ 92   0048                  res     8,b
+z80cover100.asm(93): error: Illegal instruction:     set     -1,a
+ 93   0048                  set     -1,a
+z80cover100.asm(94): error: Illegal instruction:     set     8,b
+ 94   0048                  set     8,b
+z80cover100.asm(95): error: Illegal instruction:     rl      sp
+ 95   0048                  rl      sp
+z80cover100.asm(96): error: Illegal instruction:     rlc     sp
+ 96   0048                  rlc     sp
+z80cover100.asm(97): error: Illegal instruction:     rr      sp
+ 97   0048                  rr      sp
+z80cover100.asm(98): error: Illegal instruction:     rrc     sp
+ 98   0048                  rrc     sp
+z80cover100.asm(99): error: Illegal instruction:     sla     sp
+ 99   0048                  sla     sp
+z80cover100.asm(100): error: Illegal instruction:     sli     sp
+100   0048                  sli     sp
+z80cover100.asm(101): error: Illegal instruction:     sra     sp
+101   0048                  sra     sp
+z80cover100.asm(102): error: Illegal instruction:     srl     sp
+102   0048                  srl     sp
+103   0048
+104   0048                  ; multiarg
+105   0048 B0 B1 F6 7B      or      b ,, c ,, 123
+106   004C A8 A9 EE 7B      xor     b ,, c ,, 123
+107   0050 ED 41 D3 FE      out     (c),b ,, (254),a
+108   0054 CB A9 DD CB      res     5,c ,, 3,(ix+4),d
+108   0058 04 9A
+109   005A CB E9 DD CB      set     5,c ,, 3,(ix+4),d
+109   005E 04 DA
+110   0060 CB 17 CB 10      rl      a ,, b
+111   0064 CB 07 CB 00      rlc     a ,, b
+112   0068 CB 1F CB 18      rr      a ,, b
+113   006C CB 0F CB 08      rrc     a ,, b
+114   0070 CF FF            rst     $08 ,, $38
+115   0072 9F 98            sbc     a ,, b
+116   0074 CB 27 CB 20      sla     a ,, b
+117   0078 CB 37 CB 30      sli     a ,, b
+118   007C CB 2F CB 28      sra     a ,, b
+119   0080 CB 3F CB 38      srl     a ,, b
+120   0084
+121   0084                  ; no fakes allowed
+z80cover100.asm(122): error: Fake instructions are not enabled: rl      bc
+122   0084                  rl      bc
+z80cover100.asm(123): error: Fake instructions are not enabled: rr      bc
+123   0084                  rr      bc
+z80cover100.asm(124): error: Fake instructions are not enabled: sla     hl
+124   0084                  sla     hl
+z80cover100.asm(125): error: Fake instructions are not enabled: sla     bc
+125   0084                  sla     bc
+z80cover100.asm(126): error: Fake instructions are not enabled: sli     bc
+126   0084                  sli     bc
+z80cover100.asm(127): error: Fake instructions are not enabled: sra     bc
+127   0084                  sra     bc
+z80cover100.asm(128): error: Fake instructions are not enabled: srl     bc
+128   0084                  srl     bc
+129   0084
+130   0084                  ; "Comma expected" error
+z80cover100.asm(131): error: [SBC] Comma expected
+131   0084                  sbc     hl
+z80cover100.asm(132): error: [SUB] Comma expected
+132   0084                  sub     hl
+133   0084
+134   0084                  ; reverse pop code path exercise
+135   0084                  OPT reset --syntax=ab --reversepop
+136   0084 FD E1 DD E1      pop     af,,bc,,de,,hl,,ix,,iy      ;; regular + multiarg
+136   0088 E1 D1 C1 F1
+z80cover100.asm(137): error: Illegal instruction:     pop     sp          ; illegal
+137   008C                  pop     sp          ; illegal
+138   008C
 # file closed: z80cover100.asm
 
 Value    Label

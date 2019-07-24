@@ -487,8 +487,7 @@ namespace Z80 {
 						e[2] = b & 255; e[3] = (b >> 8) & 255;
 					}
 					break;
-				default:			// unreachable (already validated by `CommonAluOpcode` call)
-					break;
+				default:	break;		// unreachable (already validated by `CommonAluOpcode` call)
 				}
 			}
 			EmitBytes(e);
@@ -757,7 +756,9 @@ namespace Z80 {
 						case Z80_F:
 							e[1] = 0x70;			// unofficial IN F,(C)
 							break;
-						default:	e[0] = -1;		// invalid combination
+						default:
+							e[0] = -1;				// invalid combination
+							break;
 					}
 				} else {
 					e[1] = GetByte(lp);
@@ -1789,7 +1790,7 @@ namespace Z80 {
 			if (!CommonAluOpcode(0x98, e, true, false)) {	// handle common 8-bit variants
 				if (Z80_HL == GetRegister(lp)) {
 					if (!comma(lp)) {
-						Error("[SUB] Comma expected");
+						Error("[SBC] Comma expected");
 					} else {
 						switch (reg = GetRegister(lp)) {
 						case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:

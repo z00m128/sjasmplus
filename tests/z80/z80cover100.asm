@@ -81,3 +81,57 @@
     ldi                     ; regular ldi
     ldd     a,(hl)          ; regular ldd with "unexpected ...." error when fakes are OFF
     ldi     a,(hl)          ; regular ldi with "unexpected ...." error when fakes are OFF
+
+    ;; part 2 (new commit)
+    ; illegal instructions (exercising all code paths)
+    in      hl,(c)
+    out     (c),hl
+    bit     -1,a
+    bit     8,b
+    res     -1,a
+    res     8,b
+    set     -1,a
+    set     8,b
+    rl      sp
+    rlc     sp
+    rr      sp
+    rrc     sp
+    sla     sp
+    sli     sp
+    sra     sp
+    srl     sp
+
+    ; multiarg
+    or      b ,, c ,, 123
+    xor     b ,, c ,, 123
+    out     (c),b ,, (254),a
+    res     5,c ,, 3,(ix+4),d
+    set     5,c ,, 3,(ix+4),d
+    rl      a ,, b
+    rlc     a ,, b
+    rr      a ,, b
+    rrc     a ,, b
+    rst     $08 ,, $38
+    sbc     a ,, b
+    sla     a ,, b
+    sli     a ,, b
+    sra     a ,, b
+    srl     a ,, b
+
+    ; no fakes allowed
+    rl      bc
+    rr      bc
+    sla     hl
+    sla     bc
+    sli     bc
+    sra     bc
+    srl     bc
+
+    ; "Comma expected" error
+    sbc     hl
+    sub     hl
+
+    ; reverse pop code path exercise
+    OPT reset --syntax=ab --reversepop
+    pop     af,,bc,,de,,hl,,ix,,iy      ;; regular + multiarg
+    pop     sp          ; illegal
