@@ -1,0 +1,60 @@
+# file opened: operators.asm
+ 1    0000                  ; simple tests of each operator
+ 2    0000 34 12 CC ED      DW  +0x1234, -0x1234
+ 3    0004 CB ED            DW  ~0x1234
+ 4    0006 00 00 00 00      DW  !0x1234, not 0x1234
+ 5    000A 34 00 12 00      DW  low 0x1234, high 0x1234
+ 6    000E 83 46 C3 BB      DW  0x123 + 0x4560, 0x123 - 0x4560
+ 7    0012 A8 03 E8 02      DW  0x12 * 0x34, 0x3456 / 0x12
+ 8    0016 06 00 06 00      DW  0x3456 % 0x12, 0x3456 mod 0x12
+ 9    001A A0 91 A0 91      DW  0x1234 << 3, 0x1234 shl 3
+10    001E 53 F7 53 F7      DW  -17768 >> 3, -17768 shr 3   ; -17768 = 0xFFFFBA98
+11    0022 53 17 53 17      DW  0xBA98 >> 3, 0xBA98 shr 3   ; expressions are calculated in 32b! 0xBA98 => positive
+operators.asm(12): warning: value 0xFFFFF753 is truncated to 16bit value: 0xF753
+12    0026 53 F7 53 17      DW  -17768 >>> 3, 0xBA98 >>> 3  ; first is bug! should be 0x1F'FF'F7'53
+13    002A 30 12 30 12      DW  0x1234 & 0x5678, 0x5678 and 0x1234
+14    002E 4C 44 4C 44      DW  0x1234 ^ 0x5678, 0x5678 xor 0x1234
+15    0032 7C 56 7C 56      DW  0x1234 | 0x5678, 0x5678 or 0x1234
+16    0036 34 12 34 12      DW  0x1234 <? 0x5678, 0x5678 <? 0x1234
+17    003A 78 56 78 56      DW  0x1234 >? 0x5678, 0x5678 >? 0x1234
+18    003E FF 00 00         DB  0x1234 < 0x5678, 0x5678 < 0x1234, 0x1234 < 0x1234
+19    0041 00 FF 00         DB  0x1234 > 0x5678, 0x5678 > 0x1234, 0x1234 > 0x1234
+20    0044 FF 00 FF         DB  0x1234 <= 0x5678, 0x5678 <= 0x1234, 0x1234 <= 0x1234
+21    0047 00 FF FF         DB  0x1234 >= 0x5678, 0x5678 >= 0x1234, 0x1234 >= 0x1234
+22    004A 00 00 FF         DB  0x1234 = 0x5678, 0x5678 = 0x1234, 0x1234 = 0x1234
+23    004D 00 00 FF         DB  0x1234 == 0x5678, 0x5678 == 0x1234, 0x1234 == 0x1234
+24    0050 FF FF 00         DB  0x1234 != 0x5678, 0x5678 != 0x1234, 0x1234 != 0x1234
+25    0053 FF 00 00 00      DB  0x0012 && 0x3400, 0 && 0x3400, 0x0012 && 0, 0 && 0
+26    0057 FF FF FF 00      DB  0x0012 || 0x3400, 0 || 0x3400, 0x0012 || 0, 0 || 0
+27    005B 0A 00 0E 00      DW  (2 * 3) + 4, 2 * (3 + 4)
+28    005F 5F 00            DW  $
+29    0061
+30    0061                  ; shifts vs 32bit evaluator, more (tricky) tests:
+operators.asm(31): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
+operators.asm(31): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
+31    0061 A0 91 A0 91      DW  0xABCD1234 << 3, 0xABCD1234 shl 3
+32    0065 53 F7 53 F7      DW  -1164413356 >> 19, -1164413356 shr 19   ; -1164413356 = 0xBA987654
+33    0069 53 17 53 17      DW  0xBA987654 >> 19, 0xBA987654 shr 19
+operators.asm(34): warning: value 0xFFFFF753 is truncated to 16bit value: 0xF753
+34    006D 53 F7 53 17      DW  -1164413356 >>> 19, 0xBA987654 >>> 19
+35    0071
+36    0071                  DEVICE NONE
+37    0071                  ORG 0
+38    0000 34 12            DW  0x1234
+operators.asm(39): error: Unexpected: $      
+39    0002 02 00            DW  $$      ; error when not in device mode
+operators.asm(40): error: [DW/DEFW/WORD] Syntax error: { 0 }
+40    0004                  DW  { 0 }
+operators.asm(41): error: [DW/DEFW/WORD] Syntax error: {b 0 }
+41    0004                  DW  {b 0 }
+42    0004                  DEVICE ZXSPECTRUM48
+43    0004                  ORG 0
+44    0000 34 12            DW  0x1234
+45    0002 00 00            DW  $$      ; should be OK
+46    0004 34 12            DW  { 0 }
+47    0006 34 00            DW  {b 0 }
+48    0008
+# file closed: operators.asm
+
+Value    Label
+------ - -----------------------------------------------------------
