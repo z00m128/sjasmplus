@@ -29,6 +29,7 @@
 // reader.cpp
 
 #include "sjdefs.h"
+#include <cassert>
 
 //enum EDelimiterType          { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
 static const char delimiters_b[] = { ' ',    '"',       '\'',          '<',      0 };
@@ -352,27 +353,9 @@ int need(char*& p, const char* c) {
 }
 
 int getval(int p) {
-	switch (p) {
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-		return p - '0';
-	default:
-		if (isupper((unsigned char)p)) {
-			return p - 'A' + 10;
-		}
-		if (islower((unsigned char)p)) {
-			return p - 'a' + 10;
-		}
-		return 200;
-	}
+	assert(('0' <= p && p <= '9') || ('A' <= p && p <= 'Z') || ('a' <= p && p <= 'z'));
+	if (p <= '9') return p - '0';
+	return (p|0x20) - 'a' + 10;
 }
 
 const char* getNumericValueLastErr = NULL;
@@ -448,10 +431,8 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 // parses number literals, forces result to be confined into 32b (even on 64b platforms,
 // to have stable results in listings/tests across platforms).
 int GetConstant(char*& op, aint& val) {
-#ifndef NDEBUG
-	// the input string has been already detected as numeric literal by ParseExpPrim (assert)
-	if (!isdigit(*op) && '#' != *op && '$' != *op && '%' != *op) ExitASM(32);
-#endif
+	// the input string has been already detected as numeric literal by ParseExpPrim
+	assert(isdigit(*op) || '#' == *op || '$' == *op || '%' == *op);
 	// find end of the numeric literal (pointer is beyond last alfa/digit character
 	char* pend = op;
 	if ('#' == *pend || '$' == *pend || '%' == *pend) ++pend;
@@ -786,76 +767,58 @@ int islabchar(char p) {
 
 EStructureMembers GetStructMemberId(char*& p) {
 	if (*p == '#') {
-		++p; if (*p == '#') {
-			 	++p; return SMEMBALIGN;
-			 } return SMEMBBLOCK;
+		++p;
+		if (*p == '#') {
+			++p;
+			return SMEMBALIGN;
+		}
+		return SMEMBBLOCK;
 	}
 	//  if (*p=='.') ++p;
 	switch (*p * 2 + *(p + 1)) {
 	case 'b'*2+'y':
 	case 'B'*2+'Y':
-		if (cmphstr(p, "byte")) {
-			return SMEMBBYTE;
-		} break;
+		if (cmphstr(p, "byte")) return SMEMBBYTE;
+		break;
 	case 'w'*2+'o':
 	case 'W'*2+'O':
-		if (cmphstr(p, "word")) {
-			return SMEMBWORD;
-		} break;
+		if (cmphstr(p, "word")) return SMEMBWORD;
+		break;
 	case 'b'*2+'l':
 	case 'B'*2+'L':
-		if (cmphstr(p, "block")) {
-			return SMEMBBLOCK;
-		} break;
+		if (cmphstr(p, "block")) return SMEMBBLOCK;
+		break;
 	case 'd'*2+'b':
 	case 'D'*2+'B':
-		if (cmphstr(p, "db")) {
-			return SMEMBBYTE;
-		} break;
+		if (cmphstr(p, "db")) return SMEMBBYTE;
+		break;
 	case 'd'*2+'w':
 	case 'D'*2+'W':
-		if (cmphstr(p, "dw")) {
-			return SMEMBWORD;
-		}
-		if (cmphstr(p, "dword")) {
-			return SMEMBDWORD;
-		}
+		if (cmphstr(p, "dw")) return SMEMBWORD;
+		if (cmphstr(p, "dword")) return SMEMBDWORD;
 		break;
 	case 'd'*2+'s':
 	case 'D'*2+'S':
-		if (cmphstr(p, "ds")) {
-			return SMEMBBLOCK;
-		} break;
+		if (cmphstr(p, "ds")) return SMEMBBLOCK;
+		break;
 	case 'd'*2+'d':
 	case 'D'*2+'D':
-		if (cmphstr(p, "dd")) {
-			return SMEMBDWORD;
-		} break;
+		if (cmphstr(p, "dd")) return SMEMBDWORD;
+		break;
 	case 'a'*2+'l':
 	case 'A'*2+'L':
-		if (cmphstr(p, "align")) {
-			return SMEMBALIGN;
-		} break;
+		if (cmphstr(p, "align")) return SMEMBALIGN;
+		break;
 	case 'd'*2+'e':
 	case 'D'*2+'E':
-		if (cmphstr(p, "defs")) {
-			return SMEMBBLOCK;
-		}
-		if (cmphstr(p, "defb")) {
-			return SMEMBBYTE;
-		}
-		if (cmphstr(p, "defw")) {
-			return SMEMBWORD;
-		}
-		if (cmphstr(p, "defd")) {
-			return SMEMBDWORD;
-		}
+		if (cmphstr(p, "defs")) return SMEMBBLOCK;
+		if (cmphstr(p, "defb")) return SMEMBBYTE;
+		if (cmphstr(p, "defw")) return SMEMBWORD;
+		if (cmphstr(p, "defd")) return SMEMBDWORD;
 		break;
 	case 'd'*2+'2':
 	case 'D'*2+'2':
-		if (cmphstr(p, "d24")) {
-			return SMEMBD24;
-		}
+		if (cmphstr(p, "d24")) return SMEMBD24;
 		break;
 	default:
 		break;

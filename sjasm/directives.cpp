@@ -1363,10 +1363,14 @@ static void dirENDIF() {
 void dirINCLUDE() {
 	char* fnaam;
 	fnaam = GetFileName(lp);
-	EDelimiterType dt = GetDelimiterOfLastFileName();
-	ListFile();
-	IncludeFile(fnaam, DT_ANGLE == dt);
-	donotlist = 1;
+	if (fnaam[0]) {
+		EDelimiterType dt = GetDelimiterOfLastFileName();
+		ListFile();
+		IncludeFile(fnaam, DT_ANGLE == dt);
+		donotlist = 1;
+	} else {
+		Error("[INCLUDE] empty filename", bp);
+	}
 	delete[] fnaam;
 }
 

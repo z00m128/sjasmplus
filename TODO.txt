@@ -5,6 +5,9 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???)
+- write test trying all operators
+
 CSPECTMAP - needs better support for DISP and instances of STRUCT
 
 --syntax: "I" to uppercase all labels + usage (needs labels refactoring)
