@@ -55,7 +55,9 @@ reader_cpp_coverage.asm(28): error: [STRUCT] Unexpected: D255    A
 reader_cpp_coverage.asm(29): error: [STRUCT] Unexpected: d255    a
 29    0002 ~            lla d255    a
 30    0002                  .ENDS
-31    0002
+reader_cpp_coverage.asm(31): error: Syntax error: "
+31    0002                  .DW     2+"
+32    0002
 # file closed: reader_cpp_coverage.asm
 
 Value    Label
