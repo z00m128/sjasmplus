@@ -1,0 +1,92 @@
+# file opened: savenexCoverage.asm
+ 1    0000                  DEVICE ZXSPECTRUMNEXT
+ 2    0000                  ; do various config commands without any NEX file being opened => errors
+savenexCoverage.asm(3): error: [SAVENEX] NEX file is not open
+ 3    0000                  SAVENEX     CORE    15,15,255
+savenexCoverage.asm(4): error: [SAVENEX] NEX file is not open
+ 4    0000                  SAVENEX     CFG     5,"hf",1,1
+savenexCoverage.asm(5): error: [SAVENEX] NEX file is not open
+ 5    0000                  SAVENEX     BAR     1,'L','D','d'
+savenexCoverage.asm(6): error: [SAVENEX] NEX file is not open
+ 6    0000                  SAVENEX     SCREEN  L2 0, 0, 0, 0
+savenexCoverage.asm(7): error: [SAVENEX] NEX file is not open
+ 7    0000                  SAVENEX     SCREEN  LR 0, 0, 0, 0
+savenexCoverage.asm(8): error: [SAVENEX] NEX file is not open
+ 8    0000                  SAVENEX     SCREEN  SCR
+savenexCoverage.asm(9): error: [SAVENEX] NEX file is not open
+ 9    0000                  SAVENEX     SCREEN  SHC
+savenexCoverage.asm(10): error: [SAVENEX] NEX file is not open
+10    0000                  SAVENEX     SCREEN  SHR 5
+savenexCoverage.asm(11): error: [SAVENEX] NEX file is not open
+11    0000                  SAVENEX     BANK    5, 0
+savenexCoverage.asm(12): error: [SAVENEX] NEX file is not open
+12    0000                  SAVENEX     SCREEN  SCR
+savenexCoverage.asm(13): error: [SAVENEX] NEX file is not open
+13    0000                  SAVENEX     AUTO
+14    0000
+15    0000                  ; create empty NEX file with empty default LR screen
+16    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+17    0000                  SAVENEX     SCREEN  LR
+savenexCoverage.asm(18): error: [SAVENEX] screen for this NEX file was already stored
+18    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+savenexCoverage.asm(19): error: [SAVENEX] Error opening append file: nonExistentFile.bin
+19    0000                  SAVENEX     CLOSE   "nonExistentFile.bin"   ; error, file not found
+20    0000                  ; some palette defined
+21    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+22    0000                  SAVENEX     SCREEN  LR 5*2, 0, 200, 0
+savenexCoverage.asm(23): error: [SAVENEX] screen for this NEX file was already stored
+23    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+24    0000                  SAVENEX     CLOSE
+25    0000
+26    0000                  ; create empty NEX file with empty default L2 screen
+27    0000                  SAVENEX     OPEN    "savenexCoverageL2.nex" ; this will be 48+kiB source for later
+28    0000                  SAVENEX     SCREEN  L2
+savenexCoverage.asm(29): error: [SAVENEX] screen for this NEX file was already stored
+29    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+30    0000                  SAVENEX     CLOSE
+31    0000
+32    0000                  ; create empty NEX file with empty default SCR screen
+33    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+34    0000                  SAVENEX     SCREEN  SCR
+savenexCoverage.asm(35): error: [SAVENEX] screen for this NEX file was already stored
+35    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+36    0000                  SAVENEX     CLOSE   "savenexCoverageL2.nex" ; exercise append of binary file
+37    0000
+38    0000                  ; create empty NEX file with empty default SHC screen
+39    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+40    0000                  SAVENEX     SCREEN  SHC
+savenexCoverage.asm(41): error: [SAVENEX] screen for this NEX file was already stored
+41    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+42    0000                  SAVENEX     CLOSE
+43    0000
+44    0000                  ; create empty NEX file with empty default SHR screen
+45    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+46    0000                  SAVENEX     SCREEN  SHR 5
+savenexCoverage.asm(47): error: [SAVENEX] screen for this NEX file was already stored
+47    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+48    0000                  SAVENEX     CLOSE
+49    0000                  ; no hiRes colour defined, default = 0
+50    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+51    0000                  SAVENEX     SCREEN  SHR
+savenexCoverage.asm(52): error: [SAVENEX] screen for this NEX file was already stored
+52    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+53    0000                  SAVENEX     CLOSE
+54    0000                  ; hiRes colour defined wrongly => warning
+55    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+savenexCoverage.asm(56): warning: [SAVENEX] value is not in 0..7 range: SAVENEX     SCREEN  SHR 8
+56    0000                  SAVENEX     SCREEN  SHR 8
+savenexCoverage.asm(57): error: [SAVENEX] screen for this NEX file was already stored
+57    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+58    0000                  SAVENEX     CLOSE
+59    0000                  ; hiRes colour defined wrongly => warning
+60    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+savenexCoverage.asm(61): warning: [SAVENEX] value is not in 0..7 range: SAVENEX     SCREEN  SHR -1
+61    0000                  SAVENEX     SCREEN  SHR -1
+savenexCoverage.asm(62): error: [SAVENEX] screen for this NEX file was already stored
+62    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
+63    0000                  SAVENEX     CLOSE
+64    0000
+# file closed: savenexCoverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------
