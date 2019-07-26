@@ -1,0 +1,172 @@
+# file opened: labels_extra_checks.asm
+ 1    0000                          ORG     0x1000
+ 2    1000
+ 3    1000 00           nop:        nop
+ 4    1001 21 00 10                 ld      hl,nop
+ 5    1004 21 00 10                 ld      hl,@nop
+labels_extra_checks.asm(6): warning: ?<symbol> operator is deprecated and will be removed in v2.x: ?nop
+ 6    1007 21 00 10                 ld      hl,?nop
+ 7    100A 21 00 10                 ld      hl,+nop
+ 8    100D
+ 9    100D 2F           not:        cpl
+labels_extra_checks.asm(10): error: Illegal instruction:             ld      hl,not      ; error, collides with "not" operator
+10    100E                          ld      hl,not      ; error, collides with "not" operator
+11    100E 21 0D 10                 ld      hl,@not
+labels_extra_checks.asm(12): warning: ?<symbol> operator is deprecated and will be removed in v2.x: ?not
+12    1011 21 0D 10                 ld      hl,?not
+labels_extra_checks.asm(13): error: Illegal instruction:             ld      hl,+not     ; error, collides with "not" operator
+13    1014                          ld      hl,+not     ; error, collides with "not" operator
+14    1014
+15    1014              ; all of the following should be valid
+labels_extra_checks.asm(16): warning: Label has different value in pass 3: previous value 4117 not equal 4116
+16    1014              symbol_22
+17    1014              symbol_23   DEFL    23
+18    1014              symbol_24   =       24
+19    1014              symbol_25   EQU     25
+20    1014
+21    1014              ; make pass2 differ from pass1, reporting broken flow of local numeric labels
+22    1014                          IFUSED symbol_22
+labels_extra_checks.asm(23): error: Local-labels flow differs in this pass (missing/new local label or final pass source difference)
+23    1014 00           404         nop
+labels_extra_checks.asm(24): warning: Label has different value in pass 3: previous value 4116 not equal 4117
+24    1015              symbol_22                       ; also duplicate label in pass2 error
+25    1015                                              ; ^^^ seems to be bugged currently, only warnings happens
+26    1015                          ENDIF
+27    1015 18 FE                    jr      symbol_22
+28    1017
+29    1017              ; local numeric labels are more limited
+30    1017              22
+labels_extra_checks.asm(31): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 23
+31    1017              23          DEFL    23
+labels_extra_checks.asm(32): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 24
+32    1017              24          =       24
+labels_extra_checks.asm(33): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 25
+33    1017              25          EQU     25
+34    1017 18 FE                    jr      22B
+35    1019
+labels_extra_checks.asm(36): error: Expression error: 
+36    1019              errSymbol1  DEFL    !
+labels_extra_checks.asm(37): error: Expression error: 
+37    1019              errSymbol2  =       !
+labels_extra_checks.asm(38): error: Expression error: 
+38    1019              errSymbol3  EQU     !
+39    1019
+40    1019                  STRUCT TEST_STRUCT
+41    1019 ~            X       BYTE    1
+42    1019 ~            Y       WORD    0x0302
+43    1019 ~                    ALIGN
+44    1019 ~                    ALIGN
+45    1019                  ENDS
+46    1019
+47    1019                  STRUCT TEST_STRUCT_2
+48    1019 ~            .X:     BYTE    8
+labels_extra_checks.asm(49): error: [STRUCT] Number labels not allowed within structs
+49    1019 ~            3       BYTE    -8
+labels_extra_checks.asm(50): error: [STRUCT] Expression expected
+50    1019 ~                    BLOCK   !
+labels_extra_checks.asm(51): error: [STRUCT] Expression expected
+51    1019 ~                    BLOCK   1,!
+52    1019 ~                    BYTE    0xFF
+53    1019 ~                    D24     !
+54    1019 ~                    BYTE    0xFF
+55    1019 ~                    DWORD   !
+56    1019                  ENDS
+57    1019
+58    1019                  MODULE Module1
+59    1019
+60    1019                      STRUCT TEST_STRUCT
+61    1019 ~            Z           BYTE    0xFF
+62    1019 ~                        ALIGN
+63    1019 ~                        ALIGN
+64    1019                      ENDS
+65    1019
+labels_extra_checks.asm(66): warning: Struct TEST_STRUCT did use ALIGN 4 in definition, but here it is misaligned by 3 bytes
+66    1019 FF 00 00 00  instanceModule  TEST_STRUCT
+67    101D
+labels_extra_checks.asm(68): warning: Struct TEST_STRUCT did use ALIGN 4 in definition, but here it is misaligned by 3 bytes
+68    101D 01 02 03 00  instanceGlobal  @TEST_STRUCT
+69    1021
+70    1021 FF 00 00 00              TEST_STRUCT
+71    1025
+72    1025 01 02 03 00              @TEST_STRUCT
+73    1029
+74    1029                      STRUCT TEST_STRUCT_2
+75    1029 ~            .Z:         BYTE    4
+labels_extra_checks.asm(76): error: [STRUCT] Number labels not allowed within structs
+76    1029 ~            5           BYTE    -4
+labels_extra_checks.asm(77): error: [STRUCT] Expression expected
+77    1029 ~                        BLOCK   !
+labels_extra_checks.asm(78): error: [STRUCT] Expression expected
+78    1029 ~                        BLOCK   1,!
+79    1029 ~                        BYTE    0xFF
+80    1029 ~                        D24     !
+81    1029 ~                        BYTE    0xFF
+82    1029 ~                        DWORD   !
+83    1029                      ENDS
+84    1029 04 FC 00 00  instanceMod2    TEST_STRUCT_2
+84    102D FF 00 00 00
+84    1031 FF 00 00 00
+84    1035 00
+85    1036 08 F8 00 00  instanceglob2   @TEST_STRUCT_2
+85    103A FF 00 00 00
+85    103E FF 00 00 00
+85    1042 00
+86    1043 04 FC 00 00                  TEST_STRUCT_2
+86    1047 FF 00 00 00
+86    104B FF 00 00 00
+86    104F 00
+87    1050 08 F8 00 00                  @TEST_STRUCT_2
+87    1054 FF 00 00 00
+87    1058 FF 00 00 00
+87    105C 00
+88    105D
+89    105D                      STRUCT TEST_STRUCT_3
+90    105D ~            .S2Mod:     TEST_STRUCT_2
+91    105D ~
+92    105D ~                ; empty line above is intentional to exercise certain code path in parser.cpp
+93    105D ~            .Empty      ; skipBlank(..) exercise
+94    105D ~            .S2Glob:    @TEST_STRUCT_2
+labels_extra_checks.asm(95): error: [STRUCT] Can't include itself
+95    105D ~            .Self:      TEST_STRUCT_3
+96    105D                      ENDS
+97    105D
+98    105D                  ENDMODULE
+99    105D
+# file closed: labels_extra_checks.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x1000   nop
+0x100D   not
+0x1015   symbol_22
+0x0017 X symbol_23
+0x0018 X symbol_24
+0x0019 X symbol_25
+0x0000 X errSymbol1
+0x0000 X errSymbol2
+0x0000 X errSymbol3
+0x0004 X TEST_STRUCT
+0x0000 X TEST_STRUCT.X
+0x0001 X TEST_STRUCT.Y
+0x000D X TEST_STRUCT_2
+0x0000 X TEST_STRUCT_2.X
+0x0004 X Module1.TEST_STRUCT
+0x0000 X Module1.TEST_STRUCT.Z
+0x1019 X Module1.instanceModule
+0x1019 X Module1.instanceModule.Z
+0x101D X Module1.instanceGlobal
+0x101D X Module1.instanceGlobal.X
+0x101E X Module1.instanceGlobal.Y
+0x000D X Module1.TEST_STRUCT_2
+0x0000 X Module1.TEST_STRUCT_2.Z
+0x1029 X Module1.instanceMod2
+0x1029 X Module1.instanceMod2.Z
+0x1036 X Module1.instanceglob2
+0x1036 X Module1.instanceglob2.X
+0x001A X Module1.TEST_STRUCT_3
+0x0000 X Module1.TEST_STRUCT_3.S2Mod
+0x0000 X Module1.TEST_STRUCT_3.S2Mod.Z
+0x000D X Module1.TEST_STRUCT_3.Empty
+0x000D X Module1.TEST_STRUCT_3.S2Glob
+0x000D X Module1.TEST_STRUCT_3.S2Glob.X
+0x001A X Module1.TEST_STRUCT_3.Self

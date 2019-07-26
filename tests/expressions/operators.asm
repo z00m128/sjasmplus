@@ -33,6 +33,17 @@
     DW  0xBA987654 >> 19, 0xBA987654 shr 19
     DW  -1164413356 >>> 19, 0xBA987654 >>> 19
 
+    ; simple error states
+    DB ! : DB not : DB ~ : DB + : DB - : DB low : DB high
+    DB 4 * : DB 5 / : DB 6 % : DB 7 mod
+    DB 8 / 0 : DB 9 % 0 : DB 10 mod 0
+    DB 11 + : DB 12 -
+    DB 13 << : DB 14 shl : DB 15 >> : DB 16 shr : DB 17 >>>
+    DB 18 & : DB 19 and : DB 20 ^ : DB 21 xor : DB 22 | : DB 23 or
+    DB 24 <? : DB 25 >?
+    DB 26 < : DB 27 > : DB 28 <= : DB 29 >= : DB 30 = : DB 31 == : DB 32 !=
+    DB 33 && : DB 34 || : DB ( : DB )
+
     DEVICE NONE
     ORG 0
     DW  0x1234
@@ -45,3 +56,6 @@
     DW  $$      ; should be OK
     DW  { 0 }
     DW  {b 0 }
+
+not
+    ld  hl,?not     ; deprecated, use "@not" with full global name, or don't use keywords for label names at all

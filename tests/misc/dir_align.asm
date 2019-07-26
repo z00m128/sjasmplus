@@ -25,3 +25,5 @@
     ; the final result should be "aBbbEFGHccccccccZ"
 
     SAVEBIN "dir_align.bin", $8000, 17  ; modified area is saved into BIN file
+
+    ALIGN   1,      ; error

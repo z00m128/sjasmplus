@@ -125,5 +125,6 @@ DEVICE needs better description? Issue #55
 
 1.13.4 changelog:
 - R800 MULUB was producing wrong opcode all those years... fixed.
+- expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
 - several tests added to improve the code coverage: https://coveralls.io/github/z00m128/sjasmplus?branch=master
 - as tests were added, minor bugs were found and squashed (errors wording, etc)

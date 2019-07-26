@@ -68,7 +68,11 @@ int ParseExpPrim(char*& p, aint& nval) {
 	} else if (isalpha((unsigned char) * p) || *p == '_' || *p == '.' || *p == '@') {
 	  	res = GetLabelValue(p, nval);
 	} else if (*p == '?' && (isalpha((unsigned char) * (p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
-	  	++p;
+		// this is undocumented "?<symbol>" operator, seems as workaround for labels like "not"
+		// This is deprecated and will be removed in v2.x of sjasmplus
+		// (where keywords will be reserved and such label would be invalid any way)
+		Warning("?<symbol> operator is deprecated and will be removed in v2.x", p);
+		++p;
 		res = GetLabelValue(p, nval);
 	} else if (DeviceID && *p == '$' && *(p + 1) == '$') {
 		++p;
@@ -94,31 +98,30 @@ int ParseExpUnair(char*& p, aint& nval) {
 	if ((oper = need(p, "! ~ + - ")) || (oper = needa(p, "not", '!', "low", 'l', "high", 'h'))) {
 		switch (oper) {
 		case '!':
-			if (!ParseExpUnair(p, right)) {
-				return 0;
-			} nval = -!right; break;
+			if (!ParseExpUnair(p, right)) return 0;
+			nval = -!right;
+			break;
 		case '~':
-			if (!ParseExpUnair(p, right)) {
-				return 0;
-			} nval = ~right; break;
+			if (!ParseExpUnair(p, right)) return 0;
+			nval = ~right;
+			break;
 		case '+':
-			if (!ParseExpUnair(p, right)) {
-				return 0;
-			} nval = right; break;
+			if (!ParseExpUnair(p, right)) return 0;
+			nval = right;
+			break;
 		case '-':
-			if (!ParseExpUnair(p, right)) {
-				return 0;
-			} nval = ~right + 1; break;
+			if (!ParseExpUnair(p, right)) return 0;
+			nval = ~right + 1;
+			break;
 		case 'l':
-			if (!ParseExpUnair(p, right)) {
-				return 0;
-			} nval = right & 255; break;
+			if (!ParseExpUnair(p, right)) return 0;
+			nval = right & 255;
+			break;
 		case 'h':
-			if (!ParseExpUnair(p, right)) {
-				return 0;
-			} nval = (right >> 8) & 255; break;
-		default:
-			Error("Parser error"); break;
+			if (!ParseExpUnair(p, right)) return 0;
+			nval = (right >> 8) & 255;
+			break;
+		default: Error("internal error", nullptr, FATAL); break;	// unreachable
 		}
 		return 1;
 	} else {
@@ -129,64 +132,45 @@ int ParseExpUnair(char*& p, aint& nval) {
 int ParseExpMul(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
-	if (!ParseExpUnair(p, left)) {
-		return 0;
-	}
+	if (!ParseExpUnair(p, left)) return 0;
 	while ((oper = need(p, "* / % ")) || (oper = needa(p, "mod", '%'))) {
-		if (!ParseExpUnair(p, right)) {
-			return 0;
-		}
+		if (!ParseExpUnair(p, right)) return 0;
 		switch (oper) {
 		case '*':
 			left *= right; break;
 		case '/':
-			if (right) {
-				left /= right;
-			} else {
-				Error("Division by zero"); left = 0;
-			} break;
+			left = right ? left / right : 0;
+			if (!right) Error("Division by zero");
+			break;
 		case '%':
-			if (right) {
-				left %= right;
-			} else {
-				Error("Division by zero"); left = 0;
-			} break;
-		default:
-			Error("Parser error"); break;
+			left = right ? left % right : 0;
+			if (!right) Error("Division by zero");
+			break;
+		default: Error("internal error", nullptr, FATAL); break;	// unreachable
 		}
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpAdd(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
-	if (!ParseExpMul(p, left)) {
-		return 0;
-	}
+	if (!ParseExpMul(p, left)) return 0;
 	while ((oper = need(p, "+ - "))) {
-		if (!ParseExpMul(p, right)) {
-			return 0;
-		}
-		switch (oper) {
-		case '+':
-			left += right; break;
-		case '-':
-			left -= right; break;
-		default:
-			Error("Parser error"); break;
-		}
+		if (!ParseExpMul(p, right)) return 0;
+		if ('-' == oper) right = -right;
+		left += right;
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpShift(char*& p, aint& nval) {
 	aint left, right;
 	uint32_t l;
 	int oper;
-	if (!ParseExpAdd(p, left)) {
-		return 0;
-	}
+	if (!ParseExpAdd(p, left)) return 0;
 	while ((oper = need(p, "<<>>")) || (oper = needa(p, "shl", '<' + '<', "shr", '>' + '>'))) {
 		if (oper == '>' + '>' && *p == '>') {
 			++p;
@@ -200,45 +184,37 @@ int ParseExpShift(char*& p, aint& nval) {
 			left >>= right; break;
 		case '>'+'>'+'>':
 			l = left; l >>= right; left = l; break;
-		default:
-			Error("Parser error"); break;
+		default: Error("internal error", nullptr, FATAL); break;	// unreachable
 		}
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpMinMax(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
-	if (!ParseExpShift(p, left)) {
-		return 0;
-	}
+	if (!ParseExpShift(p, left)) return 0;
 	while ((oper = need(p, "<?>?"))) {
-		if (!ParseExpShift(p, right)) {
-			return 0;
-		}
+		if (!ParseExpShift(p, right)) return 0;
 		switch (oper) {
 		case '<'+'?':
 			left = left < right ? left : right; break;
 		case '>'+'?':
 			left = left > right ? left : right; break;
-		default:
-			Error("Parser error"); break;
+		default: Error("internal error", nullptr, FATAL); break;	// unreachable
 		}
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpCmp(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
-	if (!ParseExpMinMax(p, left)) {
-		return 0;
-	}
+	if (!ParseExpMinMax(p, left)) return 0;
 	while ((oper = need(p, "<=>=< > "))) {
-		if (!ParseExpMinMax(p, right)) {
-			return 0;
-		}
+		if (!ParseExpMinMax(p, right)) return 0;
 		switch (oper) {
 		case '<':
 			left = -(left < right); break;
@@ -248,110 +224,82 @@ int ParseExpCmp(char*& p, aint& nval) {
 			left = -(left <= right); break;
 		case '>'+'=':
 			left = -(left >= right); break;
-		default:
-			Error("Parser error"); break;
+		default: Error("internal error", nullptr, FATAL); break;	// unreachable
 		}
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpEqu(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
-	if (!ParseExpCmp(p, left)) {
-		return 0;
-	}
+	if (!ParseExpCmp(p, left)) return 0;
 	while ((oper = need(p, "=_==!="))) {
-		if (!ParseExpCmp(p, right)) {
-			return 0;
-		}
-		switch (oper) {
-		case '=':
-		case '='+'=':
-			left = -(left == right); break;
-		case '!'+'=':
-			left = -(left != right); break;
-		default:
-			Error("Parser error"); break;
-		}
+		if (!ParseExpCmp(p, right)) return 0;
+		left = (('!'+'=') == oper) ? -(left != right) : -(left == right);
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpBitAnd(char*& p, aint& nval) {
 	aint left, right;
-	if (!ParseExpEqu(p, left)) {
-		return 0;
-	}
+	if (!ParseExpEqu(p, left)) return 0;
 	while (need(p, "&_") || needa(p, "and", '&')) {
-		if (!ParseExpEqu(p, right)) {
-			return 0;
-		}
+		if (!ParseExpEqu(p, right)) return 0;
 		left &= right;
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpBitXor(char*& p, aint& nval) {
 	aint left, right;
-	if (!ParseExpBitAnd(p, left)) {
-		return 0;
-	}
+	if (!ParseExpBitAnd(p, left)) return 0;
 	while (need(p, "^ ") || needa(p, "xor", '^')) {
-		if (!ParseExpBitAnd(p, right)) {
-			return 0;
-		}
+		if (!ParseExpBitAnd(p, right)) return 0;
 		left ^= right;
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpBitOr(char*& p, aint& nval) {
 	aint left, right;
-	if (!ParseExpBitXor(p, left)) {
-		return 0;
-	}
+	if (!ParseExpBitXor(p, left)) return 0;
 	while (need(p, "|_") || needa(p, "or", '|')) {
-		if (!ParseExpBitXor(p, right)) {
-			return 0;
-		}
+		if (!ParseExpBitXor(p, right)) return 0;
 		left |= right;
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpLogAnd(char*& p, aint& nval) {
 	aint left, right;
-	if (!ParseExpBitOr(p, left)) {
-		return 0;
-	}
+	if (!ParseExpBitOr(p, left)) return 0;
 	while (need(p, "&&")) {
-		if (!ParseExpBitOr(p, right)) {
-			return 0;
-		}
+		if (!ParseExpBitOr(p, right)) return 0;
 		left = -(left && right);
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpLogOr(char*& p, aint& nval) {
 	aint left, right;
-	if (!ParseExpLogAnd(p, left)) {
-		return 0;
-	}
+	if (!ParseExpLogAnd(p, left)) return 0;
 	while (need(p, "||")) {
-		if (!ParseExpLogAnd(p, right)) {
-			return 0;
-		}
+		if (!ParseExpLogAnd(p, right)) return 0;
 		left = -(left || right);
 	}
-	nval = left; return 1;
+	nval = left;
+	return 1;
 }
 
 int ParseExpression(char*& p, aint& nval) {
-	if (ParseExpLogOr(p, nval)) {
-		return 1;
-	}
+	if (ParseExpLogOr(p, nval)) return 1;
 	nval = 0;
 	return 0;
 }
@@ -393,6 +341,7 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 	}
 	if (!comma(src)) return;
 	if (!ParseExpression(lp, fill)) {
+		Error("[ALIGN] fill-byte expected after comma", bp, IF_FIRST);
 		fill = -1;
 	} else if (fill < 0 || 255 < fill) {
 		Error("[ALIGN] Illegal align fill-byte", oldSrc, SUPPRESS);
@@ -546,7 +495,7 @@ char* ReplaceDefine(char* lp) {
 		if (!ReplaceDefineInternal(sline2, sline)) return sline;
 	}
 	Error("Over 20 defines nested", NULL, FATAL);
-	return NULL;
+	return NULL;	//unreachable
 }
 
 void SetLastParsedLabel(const char* label) {
@@ -576,7 +525,7 @@ void ParseLabel() {
 	IsLabelNotFound = 0;
 	if (isdigit((unsigned char) * tp)) {
 		if (NeedEQU() || NeedDEFL()) {
-			Error("Number labels only allowed as address labels");
+			Error("Number labels are allowed as address labels only, not for DEFL/=/EQU", temp, SUPPRESS);
 			return;
 		}
 		val = atoi(tp);
@@ -615,8 +564,8 @@ void ParseLabel() {
 		// Copy label name to last parsed label variable
 		if (!IsDEFL) SetLastParsedLabel(tp);
 		if (pass == LASTPASS) {
-			if (IsDEFL && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
-				Error("Duplicate label", tp, PASS3);
+			if (IsDEFL) {		//re-set DEFL value
+				LabelTable.Insert(tp, val, false, true, false);
 			}
 			if (!GetLabelValue(ttp, oval)) {
 				Error("Internal error. ParseLabel()", NULL, FATAL);
@@ -784,15 +733,17 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 	if (White()) {
 		return;
 	}
-	tp = temp; if (*lp == '.') {
-			   	++lp;
-			   }
+	tp = temp;
+	if (*lp == '.') {
+		++lp;
+	}
 	while (*lp && islabchar(*lp)) {
 		*tp = *lp; ++tp; ++lp;
 	}
-	*tp = 0; if (*lp == ':') {
-			 	++lp;
-			 }
+	*tp = 0;
+	if (*lp == ':') {
+		++lp;
+	}
 	tp = temp; SkipBlanks();
 	if (isdigit((unsigned char) * tp)) {
 		Error("[STRUCT] Number labels not allowed within structs"); return;
@@ -863,12 +814,15 @@ void ParseStructMember(CStructure* st) {
 		char* pp = lp,* n;
 		int gl = 0;
 		CStructure* s;
-		SkipBlanks(pp); if (*pp == '@') {
-							++pp; gl = 1;
-						}
+		SkipBlanks(pp);
+		if (*pp == '@') {
+			++pp; gl = 1;
+		}
 		if ((n = GetID(pp)) && (s = StructureTable.zoek(n, gl))) {
 			if (cmphstr(st->naam, n)) {
-				Error("[STRUCT] Use structure itself", NULL, IF_FIRST);
+				Error("[STRUCT] Can't include itself", NULL);
+				SkipToEol(pp);
+				lp = pp;
 				break;
 			}
 			if (s->maxAlignment && ((~st->noffset + 1) & (s->maxAlignment - 1))) {

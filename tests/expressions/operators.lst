@@ -37,23 +37,111 @@ operators.asm(31): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
 33    0069 53 F7 53 F7      DW  0xBA987654 >> 19, 0xBA987654 shr 19
 34    006D 53 17 53 17      DW  -1164413356 >>> 19, 0xBA987654 >>> 19
 35    0071
-36    0071                  DEVICE NONE
-37    0071                  ORG 0
-38    0000 34 12            DW  0x1234
-operators.asm(39): error: Unexpected: $      
-39    0002 02 00            DW  $$      ; error when not in device mode
-operators.asm(40): error: [DW/DEFW/WORD] Syntax error: { 0 }
-40    0004                  DW  { 0 }
-operators.asm(41): error: [DW/DEFW/WORD] Syntax error: {b 0 }
-41    0004                  DW  {b 0 }
-42    0004                  DEVICE ZXSPECTRUM48
-43    0004                  ORG 0
-44    0000 34 12            DW  0x1234
-45    0002 00 00            DW  $$      ; should be OK
-46    0004 34 12            DW  { 0 }
-47    0006 34 00            DW  {b 0 }
-48    0008
+36    0071                  ; simple error states
+operators.asm(37): error: Syntax error: 
+37    0071                  DB !
+operators.asm(37): error: Syntax error: 
+37    0071                DB not
+operators.asm(37): error: Syntax error: 
+37    0071                DB ~
+operators.asm(37): error: Syntax error: 
+37    0071                DB +
+operators.asm(37): error: Syntax error: 
+37    0071                DB -
+operators.asm(37): error: Syntax error: 
+37    0071                DB low
+operators.asm(37): error: Syntax error: 
+37    0071                DB high
+operators.asm(38): error: Syntax error: 
+38    0071                  DB 4 *
+operators.asm(38): error: Syntax error: 
+38    0071                DB 5 /
+operators.asm(38): error: Syntax error: 
+38    0071                DB 6 %
+operators.asm(38): error: Syntax error: 
+38    0071                DB 7 mod
+operators.asm(39): error: Division by zero
+39    0071 00               DB 8 / 0
+operators.asm(39): error: Division by zero
+39    0072 00             DB 9 % 0
+operators.asm(39): error: Division by zero
+39    0073 00             DB 10 mod 0
+operators.asm(40): error: Syntax error: 
+40    0074                  DB 11 +
+operators.asm(40): error: Syntax error: 
+40    0074                DB 12 -
+operators.asm(41): error: Syntax error: 
+41    0074                  DB 13 <<
+operators.asm(41): error: Syntax error: 
+41    0074                DB 14 shl
+operators.asm(41): error: Syntax error: 
+41    0074                DB 15 >>
+operators.asm(41): error: Syntax error: 
+41    0074                DB 16 shr
+operators.asm(41): error: Syntax error: 
+41    0074                DB 17 >>>
+operators.asm(42): error: Syntax error: 
+42    0074                  DB 18 &
+operators.asm(42): error: Syntax error: 
+42    0074                DB 19 and
+operators.asm(42): error: Syntax error: 
+42    0074                DB 20 ^
+operators.asm(42): error: Syntax error: 
+42    0074                DB 21 xor
+operators.asm(42): error: Syntax error: 
+42    0074                DB 22 |
+operators.asm(42): error: Syntax error: 
+42    0074                DB 23 or
+operators.asm(43): error: Syntax error: 
+43    0074                  DB 24 <?
+operators.asm(43): error: Syntax error: 
+43    0074                DB 25 >?
+operators.asm(44): error: Syntax error: 
+44    0074                  DB 26 <
+operators.asm(44): error: Syntax error: 
+44    0074                DB 27 >
+operators.asm(44): error: Syntax error: 
+44    0074                DB 28 <=
+operators.asm(44): error: Syntax error: 
+44    0074                DB 29 >=
+operators.asm(44): error: Syntax error: 
+44    0074                DB 30 =
+operators.asm(44): error: Syntax error: 
+44    0074                DB 31 ==
+operators.asm(44): error: Syntax error: 
+44    0074                DB 32 !=
+operators.asm(45): error: Syntax error: 
+45    0074                  DB 33 &&
+operators.asm(45): error: Syntax error: 
+45    0074                DB 34 ||
+operators.asm(45): error: ')' expected
+operators.asm(45): error: Syntax error: 
+45    0074                DB (
+operators.asm(45): error: Syntax error: )
+45    0074                DB )
+46    0074
+47    0074                  DEVICE NONE
+48    0074                  ORG 0
+49    0000 34 12            DW  0x1234
+operators.asm(50): error: Unexpected: $      
+50    0002 02 00            DW  $$      ; error when not in device mode
+operators.asm(51): error: [DW/DEFW/WORD] Syntax error: { 0 }
+51    0004                  DW  { 0 }
+operators.asm(52): error: [DW/DEFW/WORD] Syntax error: {b 0 }
+52    0004                  DW  {b 0 }
+53    0004                  DEVICE ZXSPECTRUM48
+54    0004                  ORG 0
+55    0000 34 12            DW  0x1234
+56    0002 00 00            DW  $$      ; should be OK
+57    0004 34 12            DW  { 0 }
+58    0006 34 00            DW  {b 0 }
+59    0008
+60    0008              not
+operators.asm(61): warning: ?<symbol> operator is deprecated and will be removed in v2.x: ?not     
+61    0008 21 08 00         ld  hl,?not     ; deprecated, use "@not" with full global name, or don't use keywords for label names at all
+62    000B
 # file closed: operators.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x0008   not
