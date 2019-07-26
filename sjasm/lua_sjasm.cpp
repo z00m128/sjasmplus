@@ -705,8 +705,8 @@ static int tolua_sjasm_sj_calc00(lua_State* tolua_S)
  {
   char* str = ((char*)  tolua_tostring(tolua_S,1,0));
   {
-   unsigned long tolua_ret = (unsigned long)  LuaCalculate(str);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+   lua_Number tolua_ret = LuaCalculate(str);
+   tolua_pushnumber(tolua_S, tolua_ret);
   }
  }
  return 1;
@@ -790,8 +790,8 @@ static int tolua_sjasm__c00(lua_State* tolua_S)
  {
   char* str = ((char*)  tolua_tostring(tolua_S,1,0));
   {
-   unsigned long tolua_ret = (unsigned long)  LuaCalculate(str);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+   lua_Number tolua_ret = LuaCalculate(str);
+   tolua_pushnumber(tolua_S, tolua_ret);
   }
  }
  return 1;

@@ -499,8 +499,9 @@ $c     hexadecimal
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp20"></a>Expressions</h2></div></div></div>
       
 
-      <p>Expressions are evaluated in 32 bits in this version of
-      SjASMPlus.</p>
+      <p>Expressions are evaluated in signed 32 bits in this version of SjASMPlus (unless explicitly
+		  specified as unsigned, like "&gt;&gt;&gt;" operator), so intermediate values have range -2147483648
+		  to +2147483647.</p>
 
       <p>'$' represents the current program counter. '$$' represents the
       current page in the current slot in the <a class="link" href="#s_realdevice">real device emulation mode</a> and '{address}' can be used

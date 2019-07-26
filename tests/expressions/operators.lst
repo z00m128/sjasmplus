@@ -10,8 +10,8 @@
  9    001A A0 91 A0 91      DW  0x1234 << 3, 0x1234 shl 3
 10    001E 53 F7 53 F7      DW  -17768 >> 3, -17768 shr 3   ; -17768 = 0xFFFFBA98
 11    0022 53 17 53 17      DW  0xBA98 >> 3, 0xBA98 shr 3   ; expressions are calculated in 32b! 0xBA98 => positive
-operators.asm(12): warning: value 0xFFFFF753 is truncated to 16bit value: 0xF753
-12    0026 53 F7 53 17      DW  -17768 >>> 3, 0xBA98 >>> 3  ; first is bug! should be 0x1F'FF'F7'53
+operators.asm(12): warning: value 0x1FFFF753 is truncated to 16bit value: 0xF753
+12    0026 53 F7 53 17      DW  -17768 >>> 3, 0xBA98 >>> 3  ; first is 0xFFFFBA98u>>3 (warning!)
 13    002A 30 12 30 12      DW  0x1234 & 0x5678, 0x5678 and 0x1234
 14    002E 4C 44 4C 44      DW  0x1234 ^ 0x5678, 0x5678 xor 0x1234
 15    0032 7C 56 7C 56      DW  0x1234 | 0x5678, 0x5678 or 0x1234
@@ -34,9 +34,8 @@ operators.asm(31): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
 operators.asm(31): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
 31    0061 A0 91 A0 91      DW  0xABCD1234 << 3, 0xABCD1234 shl 3
 32    0065 53 F7 53 F7      DW  -1164413356 >> 19, -1164413356 shr 19   ; -1164413356 = 0xBA987654
-33    0069 53 17 53 17      DW  0xBA987654 >> 19, 0xBA987654 shr 19
-operators.asm(34): warning: value 0xFFFFF753 is truncated to 16bit value: 0xF753
-34    006D 53 F7 53 17      DW  -1164413356 >>> 19, 0xBA987654 >>> 19
+33    0069 53 F7 53 F7      DW  0xBA987654 >> 19, 0xBA987654 shr 19
+34    006D 53 17 53 17      DW  -1164413356 >>> 19, 0xBA987654 >>> 19
 35    0071
 36    0071                  DEVICE NONE
 37    0071                  ORG 0

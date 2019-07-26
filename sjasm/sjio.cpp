@@ -100,7 +100,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 
 void ErrorInt(const char* message, aint badValue, EStatus type) {
 	char numBuf[24];
-	SPRINTF1(numBuf, 24, "%ld", badValue);
+	SPRINTF1(numBuf, 24, "%d", badValue);
 	Error(message, numBuf, type);
 }
 
@@ -200,10 +200,10 @@ void WriteDest() {
 }
 
 void PrintHex(char* & dest, aint value, int nibbles) {
-	if (nibbles < 1 || 16 < nibbles) ExitASM(33);	// invalid argument
+	if (nibbles < 1 || 8 < nibbles) ExitASM(33);	// invalid argument
 	const char oldChAfter = dest[nibbles];
-	const aint mask = (int(sizeof(aint)*2) <= nibbles) ? ~0UL : (1UL<<(nibbles*4))-1UL;
-	if (nibbles != sprintf(dest, "%0*lX", nibbles, value&mask)) ExitASM(33);
+	const aint mask = (int(sizeof(aint)*2) <= nibbles) ? ~0L : (1L<<(nibbles*4))-1L;
+	if (nibbles != sprintf(dest, "%0*X", nibbles, value&mask)) ExitASM(33);
 	dest += nibbles;
 	*dest = oldChAfter;
 }
@@ -214,9 +214,8 @@ void PrintHex32(char*& dest, aint value) {
 
 void PrintHexAlt(char*& dest, aint value)
 {
-	value &= 0xFFFFFFFFUL;
 	char buffer[24] = { 0 }, * bp = buffer;
-	sprintf(buffer, "%04lX", value & 0xFFFFFFFFUL);
+	sprintf(buffer, "%04X", value);
 	while (*bp) *dest++ = *bp++;
 }
 
@@ -231,7 +230,7 @@ void PrepareListLine(aint hexadd)
 
 	int digit = ' ';
 	int linewidth = reglenwidth;
-	long linenumber = CurrentSourceLine % 10000;
+	aint linenumber = CurrentSourceLine % 10000;
 	if (linewidth > 5)
 	{
 		linewidth = 5;
@@ -241,9 +240,9 @@ void PrepareListLine(aint hexadd)
 	}
 	memset(pline, ' ', 24);
 	if (listmacro) pline[23] = '>';
-	sprintf(pline, "%*lu", linewidth, linenumber); pline[linewidth] = ' ';
+	sprintf(pline, "%*u", linewidth, linenumber); pline[linewidth] = ' ';
 	memcpy(pline + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
-	sprintf(pline + 6, "%04lX", hexadd & 0xFFFF); pline[10] = ' ';
+	sprintf(pline + 6, "%04X", hexadd & 0xFFFF); pline[10] = ' ';
 	if (digit > '0') *pline = digit & 0xFF;
 	// if substitutedLine is completely empty, list rather source line any way
 	if (!*substitutedLine) substitutedLine = line;

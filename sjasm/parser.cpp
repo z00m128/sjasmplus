@@ -182,25 +182,23 @@ int ParseExpAdd(char*& p, aint& nval) {
 
 int ParseExpShift(char*& p, aint& nval) {
 	aint left, right;
-	unsigned long l;
+	uint32_t l;
 	int oper;
 	if (!ParseExpAdd(p, left)) {
 		return 0;
 	}
-	while ((oper = need(p, "<<>>")) || (oper = needa(p, "shl", '<' + '<', "shr", '>'))) {
+	while ((oper = need(p, "<<>>")) || (oper = needa(p, "shl", '<' + '<', "shr", '>' + '>'))) {
 		if (oper == '>' + '>' && *p == '>') {
-			++p; oper = '>' + '@';
+			++p;
+			oper += '>';
 		}
-		if (!ParseExpAdd(p, right)) {
-			return 0;
-		}
+		if (!ParseExpAdd(p, right)) return 0;
 		switch (oper) {
 		case '<'+'<':
 			left <<= right; break;
-		case '>':
 		case '>'+'>':
 			left >>= right; break;
-		case '>'+'@':
+		case '>'+'>'+'>':
 			l = left; l >>= right; left = l; break;
 		default:
 			Error("Parser error"); break;
@@ -626,7 +624,7 @@ void ParseLabel() {
 			if (!IsDEFL && val != oval) {
 				char* buf = new char[LINEMAX];
 
-				SPRINTF2(buf, LINEMAX, "previous value %lu not equal %lu", oval, val);
+				SPRINTF2(buf, LINEMAX, "previous value %u not equal %u", oval, val);
 				Warning("Label has different value in pass 3", buf);
 				LabelTable.Update(tp, val);
 
@@ -877,7 +875,7 @@ void ParseStructMember(CStructure* st) {
 				// Inserted structure did use ALIGN in definition and it is misaligned here
 				char warnTxt[LINEMAX];
 				SPRINTF3(warnTxt, LINEMAX,
-						 "Struct %s did use ALIGN %d in definition, but here it is misaligned by %ld bytes",
+						 "Struct %s did use ALIGN %d in definition, but here it is misaligned by %d bytes",
 						 s->naam, s->maxAlignment, ((~st->noffset + 1) & (s->maxAlignment - 1)));
 				Warning(warnTxt);
 			}
@@ -899,7 +897,7 @@ void ParseStructLine(CStructure* st) {
 	if (*lp) Error("[STRUCT] Unexpected", lp);
 }
 
-unsigned long LuaCalculate(char *str) {
+uint32_t LuaCalculate(char *str) {
 	aint val;
 	if (!ParseExpression(str, val)) {
 		return 0;

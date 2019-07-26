@@ -57,7 +57,7 @@ EBracketType OpenBracket(char*& p);
 int CloseBracket(char*& p);
 char* ParenthesesEnd(char* p);
 int check8(aint val, bool error=true);
-int check8o(long val);
+int check8o(aint val);
 int check16(aint val, bool error=true);
 int check24(aint val, bool error=true);
 int need(char*& p, char c);

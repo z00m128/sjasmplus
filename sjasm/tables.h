@@ -100,7 +100,7 @@ class CLocalLabelTableEntry {
 public:
 	aint nummer, value;
 	CLocalLabelTableEntry* next, * prev;
-	CLocalLabelTableEntry(long int number, long int address, CLocalLabelTableEntry* previous);
+	CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous);
 };
 
 class CLocalLabelTable {
@@ -274,7 +274,7 @@ private:
 
 struct SRepeatStack {
 	int RepeatCount;
-	long CurrentSourceLine;
+	aint CurrentSourceLine;
 	CStringsList* Lines;
 	CStringsList* Pointer;
 	bool IsInWork;
@@ -282,7 +282,7 @@ struct SRepeatStack {
 };
 
 struct SConditionalStack {
-	long CurrentSourceLine;
+	aint CurrentSourceLine;
 	CStringsList* Lines;
 	CStringsList* Pointer;
 	bool IsInWork;

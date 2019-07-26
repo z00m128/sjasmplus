@@ -869,7 +869,7 @@ namespace Z80 {
 			if (GetAddress(lp, jrad)) jrad -= CurAddress + 2;
 			if (jrad < -128 || jrad > 127) {
 				char el[LINEMAX];
-				SPRINTF1(el, LINEMAX, "[JR] Target out of range (%+li)", jrad);
+				SPRINTF1(el, LINEMAX, "[JR] Target out of range (%+i)", jrad);
 				Error(el);
 				jrad = 0;
 			}

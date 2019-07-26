@@ -597,8 +597,9 @@ $c     hexadecimal
     <section>
       <title>Expressions</title>
 
-      <para>Expressions are evaluated in 32 bits in this version of
-      SjASMPlus.</para>
+      <para>Expressions are evaluated in signed 32 bits in this version of SjASMPlus (unless explicitly
+		  specified as unsigned, like ">>>" operator), so intermediate values have range -2147483648
+		  to +2147483647.</para>
 
       <para>'$' represents the current program counter. '$$' represents the
       current page in the current slot in the <link

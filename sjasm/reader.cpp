@@ -269,17 +269,18 @@ char* getinstr(char*& p) {
 int check8(aint val, bool error) {
 	if ((val < -256 || val > 255) && error) {
 		char buffer[64];
-		sprintf(buffer, "value 0x%lX is truncated to 8bit value: 0x%02lX", val&0xFFFFFFFFUL, val&0xFFUL);
+		sprintf(buffer, "value 0x%X is truncated to 8bit value: 0x%02X", val, val&0xFF);
 		Warning(buffer);
 		return 0;
 	}
 	return 1;
 }
 
-int check8o(long val) {
+int check8o(aint val)
+{
 	if (val < -128 || val > 127) {
 		char buffer[32];
-		sprintf(buffer,"Offset out of range (%+li)", val);
+		sprintf(buffer,"Offset out of range (%+i)", val);
 		Error(buffer, nullptr, IF_FIRST);
 		return 0;
 	}
@@ -289,7 +290,7 @@ int check8o(long val) {
 int check16(aint val, bool error) {
 	if ((val < -65536 || val > 65535) && error) {
 		char buffer[64];
-		sprintf(buffer, "value 0x%lX is truncated to 16bit value: 0x%04lX", val&0xFFFFFFFFUL, val&0xFFFFUL);
+		sprintf(buffer, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
 		Warning(buffer);
 		return 0;
 	}
@@ -299,7 +300,7 @@ int check16(aint val, bool error) {
 int check24(aint val, bool error) {
 	if ((val < -16777216 || val > 16777215) && error) {
 		char buffer[64];
-		sprintf(buffer, "value 0x%lX is truncated to 24bit value: 0x%06lX", val&0xFFFFFFFFUL, val&0xFFFFFFUL);
+		sprintf(buffer, "value 0x%X is truncated to 24bit value: 0x%06X", val, val&0xFFFFFF);
 		Warning(buffer);
 		return 0;
 	}
@@ -381,7 +382,7 @@ bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const
 	}
 	aint digit;
 	const int base = 1<<shiftBase;
-	const aint overflowMask = (~0UL)<<(32-shiftBase);
+	const aint overflowMask = (~0L)<<(32-shiftBase);
 	while (p < pend) {
 		const char charDigit = *p++;
 		if ('\'' == charDigit && isalnum(*p)) continue;
@@ -396,7 +397,6 @@ bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const
 		if (val & overflowMask) getNumericValueLastErr = getNumericValueErr_overflow;
 		val = (val<<shiftBase) + digit;
 	}
-	val &= 0xFFFFFFFFUL;
 	return (NULL == getNumericValueLastErr);
 }
 
@@ -420,11 +420,10 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 			getNumericValueLastErr = getNumericValueErr_digit;
 			break;
 		}
-		const unsigned long oval = static_cast<unsigned long>(val)&0xFFFFFFFFUL;
+		const uint32_t oval = static_cast<uint32_t>(val);
 		val = (val * base) + digit;
-		if (static_cast<unsigned long>(val&0xFFFFFFFFUL) < oval) getNumericValueLastErr = getNumericValueErr_overflow;
+		if (static_cast<uint32_t>(val) < oval) getNumericValueLastErr = getNumericValueErr_overflow;
 	}
-	val &= 0xFFFFFFFFUL;
 	return (NULL == getNumericValueLastErr);
 }
 
@@ -483,7 +482,6 @@ int GetConstant(char*& op, aint& val) {
 			return 0;
 	}
 	op = hardEnd;
-	val &= 0xFFFFFFFFUL;
 	return 1;
 }
 
@@ -569,10 +567,9 @@ int GetCharConst(char*& p, aint& val) {
 	if (0 == bytes) {
 		Warning("Empty string literal converted to value 0!", op);
 	} else if (4 < bytes) {
-		val &= 0xFFFFFFFFUL;		// make sure it's 32b truncated even on 64b platforms
 		const char oldCh = *p;
 		*p = 0;						// shorten the string literal for warning display
-		sprintf(buffer, "String literal truncated to 0x%lX", val);
+		sprintf(buffer, "String literal truncated to 0x%X", val);
 		Warning(buffer, op);
 		*p = oldCh;					// restore it
 	}

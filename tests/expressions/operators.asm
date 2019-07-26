@@ -9,7 +9,7 @@
     DW  0x1234 << 3, 0x1234 shl 3
     DW  -17768 >> 3, -17768 shr 3   ; -17768 = 0xFFFFBA98
     DW  0xBA98 >> 3, 0xBA98 shr 3   ; expressions are calculated in 32b! 0xBA98 => positive
-    DW  -17768 >>> 3, 0xBA98 >>> 3  ; first is bug! should be 0x1F'FF'F7'53
+    DW  -17768 >>> 3, 0xBA98 >>> 3  ; first is 0xFFFFBA98u>>3 (warning!)
     DW  0x1234 & 0x5678, 0x5678 and 0x1234
     DW  0x1234 ^ 0x5678, 0x5678 xor 0x1234
     DW  0x1234 | 0x5678, 0x5678 or 0x1234

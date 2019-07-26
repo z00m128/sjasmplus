@@ -455,8 +455,7 @@ int main(int argc, char **argv) {
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
 	// start counter
-	long dwStart;
-	dwStart = GetTickCount();
+	long dwStart = GetTickCount();
 
 	// get current directory
 	GetCurrentDirectory(MAX_PATH, buf);

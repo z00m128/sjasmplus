@@ -397,7 +397,7 @@ void CLabelTable::DumpForCSpect() {
 			(LABEL_PAGE_ROM == LabelTable[i].page) ? 3 : 0;
 		const short page = labelType ? 0 : LabelTable[i].page;
 		const aint longAddress = (PAGE_MASK & LabelTable[i].value) + page * PAGE_SIZE;
-		fprintf(file, "%08lX %08lX %02X ", 0xFFFF & LabelTable[i].value, longAddress, labelType);
+		fprintf(file, "%08X %08X %02X ", 0xFFFF & LabelTable[i].value, longAddress, labelType);
 		// convert primary+local label to be "@" delimited (not "." delimited)
 		STRCPY(temp, LINEMAX, LabelTable[i].name);
 		// look for "primary" label (where the local label starts)
@@ -537,7 +537,7 @@ int CFunctionTable::Hash(const char* s) {
 	return h % FUNTABSIZE;
 }
 
-CLocalLabelTableEntry::CLocalLabelTableEntry(long int number, long int address, CLocalLabelTableEntry* previous) {
+CLocalLabelTableEntry::CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous) {
 	nummer = number;
 	value = address;
 	prev = previous; next = NULL;
@@ -919,7 +919,7 @@ aint CStructureEntry2::ParseValue(char* & p) {
 			check24(val);
 			return(val & 0xFFFFFF);
 		case SMEMBDWORD:
-			return(val & 0xFFFFFFFFL);
+			return val;
 		default:
 			return def;
 	}
@@ -1068,7 +1068,7 @@ void CStructure::emitlab(char* iid, aint address) {
 		// emitting in misaligned position (considering the ALIGN used to define this struct)
 		char warnTxt[LINEMAX];
 		SPRINTF3(warnTxt, LINEMAX,
-					"Struct %s did use ALIGN %d in definition, but here it is misaligned by %ld bytes",
+					"Struct %s did use ALIGN %d in definition, but here it is misaligned by %d bytes",
 					naam, maxAlignment, misalignment);
 		Warning(warnTxt);
 	}

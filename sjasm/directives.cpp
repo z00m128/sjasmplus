@@ -1525,7 +1525,6 @@ void dirDISPLAY() {
 		} else {
 			// string literal was not there, how about expression?
 			if (ParseExpressionNoSyntaxError(lp, val)) {
-				val &= 0xFFFFFFFFUL;
 				if (decprint == 'H' || decprint == 'A') {
 					*(ep++) = '0';
 					*(ep++) = 'x';
@@ -1535,7 +1534,7 @@ void dirDISPLAY() {
 					if (decprint == 'A') {
 						*(ep++) = ','; *(ep++) = ' ';
 					}
-					ep += SPRINTF1(ep, (int)(&e[0] + LINEMAX - ep), "%lu", val);
+					ep += SPRINTF1(ep, (int)(&e[0] + LINEMAX - ep), "%u", val);
 				}
 				decprint = 'H';
 			} else {
@@ -1789,7 +1788,7 @@ void dirEDUP() {
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
-	long lcurln = CurrentSourceLine;
+	aint lcurln = CurrentSourceLine;
 	CStringsList* olijstp = lijstp;
 	++lijst;
 	while (dup.RepeatCount--) {
