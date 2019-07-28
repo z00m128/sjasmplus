@@ -1,0 +1,11 @@
+# run sjasmplus without any `--msg=`, and run it with `--msg=all` and compare output (without "time")
+# the source file contains one error, but grep will return value OK
+$MEMCHECK "$EXE" --nologo --fullpath "$file_asm" 2>&1 |\
+sed -e 's/work\ time:.*seconds/<some work time>/' > default.txt && \
+$MEMCHECK "$EXE" --nologo --fullpath --msg=all "$file_asm" 2>&1 |\
+sed -e 's/work\ time:.*seconds/<some work time>/' > all.txt && \
+diff default.txt all.txt && \
+out_lines=`wc -l < default.txt` &&\
+echo "Output lines count: ${out_lines} (must be at least 6 to pass the test)" &&\
+[[ 6 -le ${out_lines} ]] ;
+last_result=$?
