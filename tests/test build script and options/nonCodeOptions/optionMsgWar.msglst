@@ -1,0 +1,2 @@
+optionMsgWar.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+optionMsgWar.asm(3): error: Unrecognized instruction: some_error line
