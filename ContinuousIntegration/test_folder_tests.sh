@@ -84,8 +84,8 @@ for f in "${TEST_FILES[@]}"; do
         # custom test-runner detected, run it... WARNING, this acts as part of main script (do not exit(..), etc)
         echo -e "\033[95mRunning\033[0m file \033[96m${CLI_FILE}\033[0m in test \033[96m${src_dir}\033[0m"
         last_result=126         # custom script must override this
-        source ${CLI_FILE}
-        last_result_origin="custom test script ${CLI_FILE}"
+        source "${CLI_FILE}"
+        last_result_origin="custom test script '${CLI_FILE}'"
     else
         echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
         if [[ -z "${MSG_LIST_FILE}" ]]; then
