@@ -1,0 +1,7 @@
+# do the assembling with SJASMPLUSOPTS environment variable set to some particular state
+# this variant of "normal" test has a twist, it puts the ASM source also into ENVVAR (twice!)
+# and doubles also the regular line, so the same source is assembled four times in total
+# There are also multiple invalid/unused options just to exercise option parsing in sjasm.cpp
+SJASMPLUSOPTS="-DFLAGSDEFINE=defined $file_asm --dirbol $file_asm --unknownOptionToTestError -i --dos866" \
+$MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" "$file_asm" 2> "${dst_base}.lst"
+last_result=$?

@@ -1,0 +1,61 @@
+Unrecognized option: unknownOptionToTestError
+No include path found in -i
+# file opened: env_normal2.asm
+1     0000 00               DB 0
+2     0001                  IFDEF FLAGSDEFINE
+3     0001 66 6C 61 67          DZ  "flagsdefine detected"
+3     0005 73 64 65 66
+3     0009 69 6E 65 20
+3     000D 64 65 74 65
+3     0011 63 74 65 64
+3     0015 00
+4     0016                  ENDIF
+5     0016 00 00        ALIGN
+6     0018 45               DB  "E"
+7     0019
+# file closed: env_normal2.asm
+# file opened: env_normal2.asm
+1     0019 00               DB 0
+2     001A                  IFDEF FLAGSDEFINE
+3     001A 66 6C 61 67          DZ  "flagsdefine detected"
+3     001E 73 64 65 66
+3     0022 69 6E 65 20
+3     0026 64 65 74 65
+3     002A 63 74 65 64
+3     002E 00
+4     002F                  ENDIF
+5     002F 00           ALIGN
+6     0030 45               DB  "E"
+7     0031
+# file closed: env_normal2.asm
+# file opened: env_normal2.asm
+1     0031 00               DB 0
+2     0032                  IFDEF FLAGSDEFINE
+3     0032 66 6C 61 67          DZ  "flagsdefine detected"
+3     0036 73 64 65 66
+3     003A 69 6E 65 20
+3     003E 64 65 74 65
+3     0042 63 74 65 64
+3     0046 00
+4     0047                  ENDIF
+5     0047 00           ALIGN
+6     0048 45               DB  "E"
+7     0049
+# file closed: env_normal2.asm
+# file opened: env_normal2.asm
+1     0049 00               DB 0
+2     004A                  IFDEF FLAGSDEFINE
+3     004A 66 6C 61 67          DZ  "flagsdefine detected"
+3     004E 73 64 65 66
+3     0052 69 6E 65 20
+3     0056 64 65 74 65
+3     005A 63 74 65 64
+3     005E 00
+4     005F                  ENDIF
+5     005F 00           ALIGN
+6     0060 45               DB  "E"
+7     0061
+# file closed: env_normal2.asm
+
+Value    Label
+------ - -----------------------------------------------------------
