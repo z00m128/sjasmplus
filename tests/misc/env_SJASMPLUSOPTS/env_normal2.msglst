@@ -1,5 +1,6 @@
 Unrecognized option: unknownOptionToTestError
 No include path found in -i
+No parameters found in -D
 # file opened: env_normal2.asm
 1     0000 00               DB 0
 2     0001                  IFDEF FLAGSDEFINE
