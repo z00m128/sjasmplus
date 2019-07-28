@@ -1,0 +1,6 @@
+# copy test ASM file to the same file, but without any extension
+# assemble the no-extension file instead, to check default output name, and rename output to ".bin"
+cp "$file_asm" "${dst_base}" &&\
+$MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "${dst_base}" &&\
+mv "${dst_base}.out" "${dst_base}.bin"
+last_result=$?
