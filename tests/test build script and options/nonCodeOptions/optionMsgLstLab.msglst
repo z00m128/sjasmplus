@@ -1,0 +1,12 @@
+# file opened: optionMsgLstLab.asm
+1     0000 00           nn: nop
+optionMsgLstLab.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+2     0001 3E 6E            ld      a,'warn'
+optionMsgLstLab.asm(3): error: Unrecognized instruction: some_error line
+3     0003                  some_error line
+4     0003
+# file closed: optionMsgLstLab.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X nn
