@@ -1,0 +1,2 @@
+$MEMCHECK "$EXE" --nologo --msg=none --fullpath --lst "$file_asm"
+last_result=$?

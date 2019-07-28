@@ -23,9 +23,6 @@ FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 
 SplitLuaErrorMessage - add some tests after Liniya fix, maybe review the code more.
 
-"--lst" bez hodnoty nech spravi default nazov sam
-  ==> needs tests (badly, was bugged a lot during development)
-
 ReadBufLine parsing refactored. Now look for other parts of code trying to do similar things and refactor too..
 
 I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...

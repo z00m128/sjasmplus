@@ -1,0 +1,8 @@
+# file opened: optionLst_defaultName.asm
+1     0000 00           nn: nop
+optionLst_defaultName.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+2     0001 3E 6E            ld      a,'warn'
+optionLst_defaultName.asm(3): error: Unrecognized instruction: some_error line
+3     0003                  some_error line
+4     0003
+# file closed: optionLst_defaultName.asm
