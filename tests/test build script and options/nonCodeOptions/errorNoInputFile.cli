@@ -1,0 +1,2 @@
+$MEMCHECK "$EXE" --nologo --fullpath "${options[@]}" 2> "${dst_base}.lst"
+last_result=$?
