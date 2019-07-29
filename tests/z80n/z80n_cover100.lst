@@ -1,0 +1,112 @@
+# file opened: z80n_cover100.asm
+ 1    0000                  ;; few more test cases not covered by regular tests,
+ 2    0000                  ;; but were discovered by code coverage as code not executed in tests
+ 3    0000
+ 4    0000                  ; some tests need more strict syntax rules to hit specific code paths
+ 5    0000                  OPT reset --syntax=ab --zxnext
+ 6    0000
+z80n_cover100.asm(7): error: Operand expected: [1234        
+ 7    0000 ED 34 00 00      add     hl,[1234        ; "Operand expected" error
+ 8    0004
+z80n_cover100.asm(9): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    hl,b            
+ 9    0004                  brlc    hl,b            ; "only DE,B arguments" error
+z80n_cover100.asm(10): error: Z80N barrel shifts exist only with "DE,B" arguments: bsla    hl,b
+10    0004                  bsla    hl,b
+z80n_cover100.asm(11): error: Z80N barrel shifts exist only with "DE,B" arguments: bsra    hl,b
+11    0004                  bsra    hl,b
+z80n_cover100.asm(12): error: Z80N barrel shifts exist only with "DE,B" arguments: bsrl    hl,b
+12    0004                  bsrl    hl,b
+z80n_cover100.asm(13): error: Z80N barrel shifts exist only with "DE,B" arguments: bsrf    hl,b
+13    0004                  bsrf    hl,b
+z80n_cover100.asm(14): error: [NEXTREG] first operand should be register number:     nextreg a,$1            ; "first operand should be register number" error
+14    0004                  nextreg a,$1            ; "first operand should be register number" error
+15    0004
+16    0004                  OPT reset --syntax=ab   ; disable Z80N extensions for "Z80N disabled" error
+z80n_cover100.asm(17): error: Z80N instructions are currently disabled: brlc    de,b
+17    0004                  brlc    de,b
+z80n_cover100.asm(18): error: Z80N instructions are currently disabled: bsla    de,b
+18    0004                  bsla    de,b
+z80n_cover100.asm(19): error: Z80N instructions are currently disabled: bsra    de,b
+19    0004                  bsra    de,b
+z80n_cover100.asm(20): error: Z80N instructions are currently disabled: bsrl    de,b
+20    0004                  bsrl    de,b
+z80n_cover100.asm(21): error: Z80N instructions are currently disabled: bsrf    de,b
+21    0004                  bsrf    de,b
+z80n_cover100.asm(22): error: Z80N instructions are currently disabled: lddrx
+22    0004                  lddrx
+z80n_cover100.asm(23): error: Z80N instructions are currently disabled: lddx
+23    0004                  lddx
+z80n_cover100.asm(24): error: Z80N instructions are currently disabled: ldirx
+24    0004                  ldirx
+z80n_cover100.asm(25): error: Z80N instructions are currently disabled: ldix
+25    0004                  ldix
+z80n_cover100.asm(26): error: Z80N instructions are currently disabled: ldpirx
+26    0004                  ldpirx
+z80n_cover100.asm(27): error: Z80N instructions are currently disabled: ldws
+27    0004                  ldws
+z80n_cover100.asm(28): error: Z80N instructions are currently disabled: mul     de
+28    0004                  mul     de
+z80n_cover100.asm(29): error: Z80N instructions are currently disabled: nextreg $1,$2
+29    0004                  nextreg $1,$2
+z80n_cover100.asm(30): error: Z80N instructions are currently disabled: nextreg $3,a
+30    0004                  nextreg $3,a
+z80n_cover100.asm(31): error: Z80N instructions are currently disabled: outinb
+31    0004                  outinb
+z80n_cover100.asm(32): error: Z80N instructions are currently disabled: pixelad
+32    0004                  pixelad
+z80n_cover100.asm(33): error: Z80N instructions are currently disabled: pixelad hl
+33    0004                  pixelad hl
+z80n_cover100.asm(34): error: Z80N instructions are currently disabled: pixeldn
+34    0004                  pixeldn
+z80n_cover100.asm(35): error: Z80N instructions are currently disabled: pixeldn hl
+35    0004                  pixeldn hl
+z80n_cover100.asm(36): error: Z80N instructions are currently disabled: setae
+36    0004                  setae
+z80n_cover100.asm(37): error: Z80N instructions are currently disabled: setae   a
+37    0004                  setae   a
+z80n_cover100.asm(38): error: Z80N instructions are currently disabled: swapnib
+38    0004                  swapnib
+z80n_cover100.asm(39): error: Z80N instructions are currently disabled: swapnib a
+39    0004                  swapnib a
+z80n_cover100.asm(40): error: Z80N instructions are currently disabled: test    1
+40    0004                  test    1
+41    0004
+42    0004                  ;; part 3 (new commit, focusing on branching in the code, exercising more combinations and code paths)
+43    0004                  ; these tests (whole this file) are unfortunately very implementation based, in case of major refactorings they may
+44    0004                  ; quickly lose their functionality (the machine code produced should be the same, but code coverage may regress).
+45    0004
+z80n_cover100.asm(46): error: Illegal instruction:     add     hl,1234
+46    0004                  add     hl,1234
+z80n_cover100.asm(47): error: Illegal instruction:     add     hl,a
+47    0004                  add     hl,a
+z80n_cover100.asm(48): error: Illegal instruction:     push    1234
+48    0004                  push    1234
+49    0004
+50    0004                  ;; part 4 (more of the branching stuff, handpicked from local detailed coverage report)
+51    0004
+52    0004                  OPT reset --syntax=ab --zxnext
+z80n_cover100.asm(53): error: Illegal instruction:     add     de,b
+53    0004                  add     de,b
+z80n_cover100.asm(54): error: Z80N barrel shifts exist only with "DE,B" arguments: bsra    de
+54    0004                  bsra    de
+z80n_cover100.asm(55): error: Z80N barrel shifts exist only with "DE,B" arguments: bsra    de,a
+55    0004                  bsra    de,a
+z80n_cover100.asm(56): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    de
+56    0004                  brlc    de
+z80n_cover100.asm(57): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    de,
+57    0004                  brlc    de,
+z80n_cover100.asm(58): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    de,a
+58    0004                  brlc    de,a
+59    0004
+60    0004                  OPT reset --syntax=abF --zxnext
+z80n_cover100.asm(61): error: Fake instructions are not enabled: mul
+61    0004                  mul
+z80n_cover100.asm(62): error: Z80N MUL exist only with "D,E" arguments: mul     d
+62    0004                  mul     d
+z80n_cover100.asm(63): error: Z80N MUL exist only with "D,E" arguments: mul     d,c
+63    0004                  mul     d,c
+64    0004
+# file closed: z80n_cover100.asm
+
+Value    Label
+------ - -----------------------------------------------------------

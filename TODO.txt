@@ -5,6 +5,10 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???)
+- write tests trying those "while" loops for groups of operators
+- write tests testing operator precedence
+
 CSPECTMAP - needs better support for DISP and instances of STRUCT
 
 --syntax: "I" to uppercase all labels + usage (needs labels refactoring)
@@ -20,9 +24,6 @@ FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 
 SplitLuaErrorMessage - add some tests after Liniya fix, maybe review the code more.
 
-"--lst" bez hodnoty nech spravi default nazov sam
-  ==> needs tests (badly, was bugged a lot during development)
-
 ReadBufLine parsing refactored. Now look for other parts of code trying to do similar things and refactor too..
 
 I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
@@ -31,8 +32,6 @@ Macro world issues:
 - macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
 - more operators, capable of some string manipulation and maybe some type/expression checks (islabel)
 - ability to issue real instruction (ignoring possible macro of same name)
-
-Input file without extension does produce wrong default output filename
 
 SAVEHOB/SAVETRD/SAVETAP/... global review of filename handling, adding warnings/errors
 where filename modification happens or filename is invalid.
@@ -110,6 +109,8 @@ new lua + js support?
 Refactor filepath functions to deal with backward slashes systematically
 (or maybe just wait few more years, can't be that long now before windows are gone)
 
+Big-text-block directive? (there's INCBIN workaround using separate file)
+
 ====================
 Docs:
 
@@ -117,3 +118,9 @@ Docs:
 ^^ link each?
 
 DEVICE needs better description? Issue #55
+
+1.13.4 changelog:
+- R800 MULUB was producing wrong opcode all those years... fixed.
+- expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
+- several tests added to improve the code coverage: https://coveralls.io/github/z00m128/sjasmplus?branch=master
+- as tests were added, minor bugs were found and squashed (errors wording, etc)

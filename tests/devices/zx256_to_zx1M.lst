@@ -1,0 +1,733 @@
+# file opened: zx256_to_zx1M.asm
+  1   0000                  ;;;;;;;;;;;;;;;;;;;;;;;;;;
+  2   0000                  ;;;;; ZXSPECTRUM256 ;;;;;;
+  3   0000                  DEVICE ZXSPECTRUM256
+  4   0000
+  5   0000                  SLOT 0
+  6   0000              pageNum = 0
+  7   0000                  DUP 16
+  8   0000             >        PAGE pageNum
+  8   0000             >  ASSERT {0} == 0
+  8   0000             >  ORG 0x0000
+  8   0000 30 30       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 31 31       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 32 32       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 33 33       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 34 34       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 35 35       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 36 36       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 37 37       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 38 38       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 39 39       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 3A 3A       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 3B 3B       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 3C 3C       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 3D 3D       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 3E 3E       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+  8   0002             >        PAGE pageNum
+  8   0002             >  ASSERT {0} == 0
+  8   0002             >  ORG 0x0000
+  8   0000 3F 3F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+  9   0002             >pageNum = pageNum+1
+ 10   0002                  EDUP
+zx256_to_zx1M.asm(11): error: [PAGE] Page number must be in range 0..15
+ 11   0002                  PAGE 16         ; error - non-existing page
+ 12   0002                  ASSERT {0} == "??"  ; page 15 should be still there
+ 13   0002
+ 14   0002                  SLOT 0
+ 14   0002                PAGE 10
+ 14   0002                ASSERT {0x0000} == "::"
+ 14   0002                PAGE 7
+ 14   0002                ASSERT {0x0000} == "77"
+ 15   0002                  SLOT 1
+ 15   0002                PAGE 4
+ 15   0002                ASSERT {0x4000} == "44"
+ 15   0002                PAGE 15
+ 15   0002                ASSERT {0x4000} == "??"
+ 16   0002                  SLOT 2
+ 16   0002                PAGE 6
+ 16   0002                ASSERT {0x8000} == "66"
+ 16   0002                PAGE 7
+ 16   0002                ASSERT {0x8000} == "77"
+ 17   0002                  SLOT 3
+ 17   0002                PAGE 14
+ 17   0002                ASSERT {0xC000} == ">>"
+ 17   0002                PAGE 15
+ 17   0002                ASSERT {0xC000} == "??"
+ 18   0002
+zx256_to_zx1M.asm(19): error: [SLOT] Slot number must be in range 0..3
+ 19   0002                  SLOT 4      ; error
+ 20   0002
+ 21   0002                  ; pages: 7:15:7:15
+ 22   0002                  ORG 0xC000-2
+ 23   BFFE 41 41 42 42      DB  "AABB"
+ 24   C002                  ASSERT {0x4000-2} == "AA"   ; should be visible also at these addresses
+ 25   C002                  ASSERT {0x4000} == "BB"
+ 26   C002
+ 27   C002                  ORG 0xFFFE
+zx256_to_zx1M.asm(28): error: Write outside of device memory at: 65536
+ 28   FFFE 43 43 44 44      DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
+ 29   0002                  ASSERT {0} == "77"          ; still page 7 there
+ 30   0002                  ASSERT {0xFFFE} == "CC"
+ 31   0002
+zx256_to_zx1M.asm(32): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     
+ 32   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     ;; will error out
+ 33   0002
+ 34   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 35   0002                  ;;;;; ZXSPECTRUM512 ;;;;;;
+ 36   0002                  DEVICE ZXSPECTRUM512
+ 37   0002
+ 38   0002                  SLOT 0
+ 39   0002              pageNum = 0
+ 40   0002                  DUP 32
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 30 30       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 31 31       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 32 32       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 33 33       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 34 34       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 35 35       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 36 36       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 37 37       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 38 38       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 39 39       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 3A 3A       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 3B 3B       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 3C 3C       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 3D 3D       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 3E 3E       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 3F 3F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 40 40       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 41 41       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 42 42       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 43 43       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 44 44       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 45 45       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 46 46       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 47 47       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 48 48       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 49 49       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 4A 4A       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 4B 4B       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 4C 4C       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 4D 4D       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 4E 4E       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 41   0002             >        PAGE pageNum
+ 41   0002             >  ASSERT {0} == 0
+ 41   0002             >  ORG 0x0000
+ 41   0000 4F 4F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 42   0002             >pageNum = pageNum+1
+ 43   0002                  EDUP
+zx256_to_zx1M.asm(44): error: [PAGE] Page number must be in range 0..31
+ 44   0002                  PAGE 32         ; error - non-existing page
+ 45   0002                  ASSERT {0} == "OO"  ; page 31 should be still there
+ 46   0002
+ 47   0002                  SLOT 0
+ 47   0002                PAGE 10
+ 47   0002                ASSERT {0x0000} == "::"
+ 47   0002                PAGE 7
+ 47   0002                ASSERT {0x0000} == "77"
+ 48   0002                  SLOT 1
+ 48   0002                PAGE 4
+ 48   0002                ASSERT {0x4000} == "44"
+ 48   0002                PAGE 31
+ 48   0002                ASSERT {0x4000} == "OO"
+ 49   0002                  SLOT 2
+ 49   0002                PAGE 6
+ 49   0002                ASSERT {0x8000} == "66"
+ 49   0002                PAGE 7
+ 49   0002                ASSERT {0x8000} == "77"
+ 50   0002                  SLOT 3
+ 50   0002                PAGE 14
+ 50   0002                ASSERT {0xC000} == ">>"
+ 50   0002                PAGE 31
+ 50   0002                ASSERT {0xC000} == "OO"
+ 51   0002
+zx256_to_zx1M.asm(52): error: [SLOT] Slot number must be in range 0..3
+ 52   0002                  SLOT 4      ; error
+ 53   0002
+ 54   0002                  ; pages: 7:31:7:31
+ 55   0002                  ORG 0xC000-2
+ 56   BFFE 41 41 42 42      DB  "AABB"
+ 57   C002                  ASSERT {0x4000-2} == "AA"   ; should be visible also at these addresses
+ 58   C002                  ASSERT {0x4000} == "BB"
+ 59   C002
+ 60   C002                  ORG 0xFFFE
+zx256_to_zx1M.asm(61): error: Write outside of device memory at: 65536
+ 61   FFFE 43 43 44 44      DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
+ 62   0002                  ASSERT {0} == "77"          ; still page 7 there
+ 63   0002                  ASSERT {0xFFFE} == "CC"
+ 64   0002
+zx256_to_zx1M.asm(65): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     
+ 65   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     ;; will error out
+ 66   0002
+ 67   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 68   0002                  ;;;;; ZXSPECTRUM1024 ;;;;;;
+ 69   0002                  DEVICE ZXSPECTRUM1024
+ 70   0002
+ 71   0002                  SLOT 0
+ 72   0002              pageNum = 0
+ 73   0002                  DUP 64
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 30 30       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 31 31       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 32 32       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 33 33       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 34 34       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 35 35       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 36 36       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 37 37       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 38 38       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 39 39       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 3A 3A       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 3B 3B       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 3C 3C       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 3D 3D       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 3E 3E       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 3F 3F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 40 40       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 41 41       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 42 42       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 43 43       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 44 44       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 45 45       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 46 46       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 47 47       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 48 48       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 49 49       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 4A 4A       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 4B 4B       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 4C 4C       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 4D 4D       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 4E 4E       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 4F 4F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 50 50       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 51 51       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 52 52       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 53 53       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 54 54       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 55 55       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 56 56       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 57 57       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 58 58       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 59 59       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 5A 5A       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 5B 5B       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 5C 5C       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 5D 5D       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 5E 5E       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 5F 5F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 60 60       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 61 61       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 62 62       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 63 63       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 64 64       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 65 65       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 66 66       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 67 67       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 68 68       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 69 69       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 6A 6A       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 6B 6B       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 6C 6C       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 6D 6D       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 6E 6E       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 74   0002             >        PAGE pageNum
+ 74   0002             >  ASSERT {0} == 0
+ 74   0002             >  ORG 0x0000
+ 74   0000 6F 6F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
+ 75   0002             >pageNum = pageNum+1
+ 76   0002                  EDUP
+zx256_to_zx1M.asm(77): error: [PAGE] Page number must be in range 0..63
+ 77   0002                  PAGE 64         ; error - non-existing page
+ 78   0002                  ASSERT {0} == $6F6F ; page 63 should be still there
+ 79   0002
+ 80   0002                  SLOT 0
+ 80   0002                PAGE 10
+ 80   0002                ASSERT {0x0000} == "::"
+ 80   0002                PAGE 7
+ 80   0002                ASSERT {0x0000} == "77"
+ 81   0002                  SLOT 1
+ 81   0002                PAGE 4
+ 81   0002                ASSERT {0x4000} == "44"
+ 81   0002                PAGE 63
+ 81   0002                ASSERT {0x4000} == $6F6F
+ 82   0002                  SLOT 2
+ 82   0002                PAGE 6
+ 82   0002                ASSERT {0x8000} == "66"
+ 82   0002                PAGE 7
+ 82   0002                ASSERT {0x8000} == "77"
+ 83   0002                  SLOT 3
+ 83   0002                PAGE 14
+ 83   0002                ASSERT {0xC000} == ">>"
+ 83   0002                PAGE 63
+ 83   0002                ASSERT {0xC000} == $6F6F
+ 84   0002
+zx256_to_zx1M.asm(85): error: [SLOT] Slot number must be in range 0..3
+ 85   0002                  SLOT 4      ; error
+ 86   0002
+ 87   0002                  ; pages: 7:63:7:63
+ 88   0002                  ORG 0xC000-2
+ 89   BFFE 41 41 42 42      DB  "AABB"
+ 90   C002                  ASSERT {0x4000-2} == "AA"   ; should be visible also at these addresses
+ 91   C002                  ASSERT {0x4000} == "BB"
+ 92   C002
+ 93   C002                  ORG 0xFFFE
+zx256_to_zx1M.asm(94): error: Write outside of device memory at: 65536
+ 94   FFFE 43 43 44 44      DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
+ 95   0002                  ASSERT {0} == "77"          ; still page 7 there
+ 96   0002                  ASSERT {0xFFFE} == "CC"
+ 97   0002
+zx256_to_zx1M.asm(98): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     
+ 98   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     ;; will error out
+ 99   0002
+100   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;
+101   0002                  ;;;;; non ZX device ;;;;;;
+102   0002                  DEVICE ZXSPECTRUMNEXT
+zx256_to_zx1M.asm(103): error: [SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.
+103   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", 0      ;; will error out
+104   0002
+105   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+106   0002                  ;;;;; non-existent device ;;;;;;
+zx256_to_zx1M.asm(107): error: [DEVICE] Invalid parameter
+107   0002                  DEVICE COMMODORE08
+zx256_to_zx1M.asm(108): warning: RAM limit exceeded 0x10002 by ORG
+zx256_to_zx1M.asm(108): error: SAVESNA only allowed in real device emulation mode (See DEVICE)
+108   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", 0      ;; will error out
+109   0002
+# file closed: zx256_to_zx1M.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0040   pageNum

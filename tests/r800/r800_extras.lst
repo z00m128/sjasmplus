@@ -1,0 +1,27 @@
+# file opened: r800_extras.asm
+ 1    0000                  ;mulub   a,a         ; #EDF9    - not guaranteed to work properly, sjasmplus doesn't support it
+ 2    0000 ED C1            mulub   a,b         ; #EDC1
+ 3    0002 ED C9            mulub   a,c         ; #EDC9
+ 4    0004 ED D1            mulub   a,d         ; #EDD1
+ 5    0006 ED D9            mulub   a,e         ; #EDD9
+ 6    0008                  ;mulub   a,h         ; #EDE1    - not guaranteed
+ 7    0008                  ;mulub   a,l         ; #EDE9    - not guaranteed
+ 8    0008 ED C3            muluw   hl,bc       ; #EDC3
+ 9    000A                  ;muluw   hl,de       ; #EDD3    - not guaranteed
+10    000A                  ;muluw   hl,hl       ; #EDE3    - not guaranteed
+11    000A ED F3            muluw   hl,sp       ; #EDF3
+12    000C
+13    000C                  ;; syntax variants
+14    000C ED C1            mulub   b
+15    000E ED C3            muluw   bc
+16    0010
+17    0010                  ;; invalid instr. variants
+r800_extras.asm(18): error: Illegal instruction:     mulub   a
+18    0010                  mulub   a
+r800_extras.asm(19): error: Illegal instruction:     muluw   hl
+19    0010                  muluw   hl
+20    0010
+# file closed: r800_extras.asm
+
+Value    Label
+------ - -----------------------------------------------------------

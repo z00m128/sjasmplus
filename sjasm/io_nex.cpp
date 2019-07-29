@@ -28,14 +28,14 @@
 #include "sjdefs.h"
 
 // Banks in file are ordered in SNA way (but array "banks" in header is in numeric order instead)
-static constexpr int nexBankOrder[8] = {5, 2, 0, 1, 3, 4, 6, 7};
+static constexpr aint nexBankOrder[8] = {5, 2, 0, 1, 3, 4, 6, 7};
 
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
 struct SNexHeader {
-	constexpr static int MAX_BANK = 112;
-	constexpr static int MAX_PAGE = MAX_BANK * 2;
+	constexpr static aint MAX_BANK = 112;
+	constexpr static aint MAX_PAGE = MAX_BANK * 2;
 	constexpr static byte SCR_LAYER2	= 0x01;
 	constexpr static byte SCR_ULA		= 0x02;
 	constexpr static byte SCR_LORES		= 0x04;
@@ -48,9 +48,9 @@ struct SNexHeader {
 	byte		numBanks;			// number of 16k banks to load: 0..112
 	byte		screen;				// loading screen flags
 	byte		border;				// border colour 0..7
-	uint16_t	sp;					// stack pointer
-	uint16_t	pc;					// start address (0 = no start)
-	uint16_t	_obsolete_numfiles;
+	word		sp;					// stack pointer
+	word		pc;					// start address (0 = no start)
+	word		_obsolete_numfiles;
 	byte		banks[MAX_BANK];	// 112 16ki banks (1.75MiB) - non-zero value = in file
 	// this array is ordinary order 0, 1, 2, ..., but banks in file are in order: 5, 2, 0, 1, ...
 	byte		loadbar;			// 0/1 show progress bar
@@ -61,7 +61,7 @@ struct SNexHeader {
 	byte		coreVersion[3];
 	byte		hiResColour;		// bits 5-3 for port 255 (ASM source provides 0..7 value, needs shift)
 	byte		entryBank;			// 16ki bank 0..111 to be mapped into C000..FFFF range
-	uint16_t	fileHandleCfg;		// 0 = close NEX file, 1 = pass handle in BC, 0x4000+ = address to write handle
+	word		fileHandleCfg;		// 0 = close NEX file, 1 = pass handle in BC, 0x4000+ = address to write handle
 	byte		_reserved[370];
 
 	void init();
@@ -78,7 +78,7 @@ struct SNexFile {
 	SNexHeader	h;
 	FILE*		f = nullptr;		// NEX file handle, stay opened, fseek stays at <EOF>
 		// file is build sequentially, adding further blocks, only finalize does refresh the header
-	int			lastBankIndex;		// numeric order (0, 1, ...) value, -1 is init value
+	aint		lastBankIndex;		// numeric order (0, 1, ...) value, -1 is init value
 
 	~SNexFile();
 	void writeHeader();
@@ -120,16 +120,15 @@ void SNexFile::finalizeFile() {
 	return;
 }
 
-int getNexBankIndex(const aint bank16kNum) {
-	if (bank16kNum < 0 || SNexHeader::MAX_BANK <= bank16kNum) return -2;
-	if (8 <= bank16kNum) return (int)bank16kNum;
-	for (int i = 0; i < 8; ++i) {
+static aint getNexBankIndex(const aint bank16kNum) {
+	if (8 <= bank16kNum && bank16kNum < SNexHeader::MAX_BANK) return bank16kNum;
+	for (aint i = 0; i < 8; ++i) {
 		if (nexBankOrder[i] == bank16kNum) return i;
 	}
 	return -2;
 }
 
-int getNexBankNum(const int bankIndex) {
+aint getNexBankNum(const aint bankIndex) {
 	if (0 <= bankIndex && bankIndex < 8) return nexBankOrder[bankIndex];
 	if (8 <= bankIndex && bankIndex < SNexHeader::MAX_BANK) return bankIndex;
 	return -1;
@@ -357,7 +356,7 @@ static void dirNexScreen() {
 	else Error("[SAVENEX] unknown screen type (types: L2, LR, SCR, SHC, SHR)", lp, SUPPRESS);
 }
 
-static bool saveBank(int bankIndex, aint bankNum, bool onlyNonZero = false) {
+static bool saveBank(aint bankIndex, aint bankNum, bool onlyNonZero = false) {
 	if (bankNum < 0 || SNexHeader::MAX_BANK <= bankNum) return false;
 	if (bankIndex <= nex.lastBankIndex) {
 		ErrorInt("[SAVENEX] it's too late to save this bank (correct order: 5, 2, 0, 1, 3, 4, 6, ...)",
@@ -392,8 +391,7 @@ static void dirNexBank() {
 		return;
 	}
 	do {
-		aint bankNum;
-		int bankIndex;
+		aint bankNum, bankIndex;
 		char *nextLp = lp;
 		if (!ParseExpressionNoSyntaxError(lp, bankNum)
 			|| (bankIndex = getNexBankIndex(bankNum)) < 0) {
@@ -423,7 +421,7 @@ static void dirNexAuto() {
 		return;
 	}
 	// validate arguments
-	int fromI = getNexBankIndex(autoArgs[0]), toI = getNexBankIndex(autoArgs[1]);
+	aint fromI = getNexBankIndex(autoArgs[0]), toI = getNexBankIndex(autoArgs[1]);
 	if (toI < fromI) {
 		Error("[SAVENEX] 'toBank' is less than 'fromBank'", bp, SUPPRESS);
 		return;

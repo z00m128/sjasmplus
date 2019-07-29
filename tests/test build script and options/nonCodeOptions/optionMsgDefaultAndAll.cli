@@ -1,0 +1,12 @@
+# run sjasmplus without any `--msg=`, and run it with `--msg=all` and compare output (without "time")
+# the source file contains one error, but sed will return value OK, so still "&&" used to chain it
+# Also "--nologo" is NOT used in this test, so this will actually exercise the logo-display as well
+$MEMCHECK "$EXE" --fullpath "$file_asm" 2>&1 |\
+sed -e 's/work\ time:.*seconds/<some work time>/' > default.txt && \
+$MEMCHECK "$EXE" --fullpath --msg=all "$file_asm" 2>&1 |\
+sed -e 's/work\ time:.*seconds/<some work time>/' > all.txt && \
+diff default.txt all.txt && \
+out_lines=`wc -l < default.txt` &&\
+echo "Output lines count: ${out_lines} (must be at least 6 to pass the test)" &&\
+[[ 6 -le ${out_lines} ]] ;
+last_result=$?

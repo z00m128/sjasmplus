@@ -38,6 +38,9 @@ dir_align.asm(20): error: [ALIGN] Illegal align: 7, '!'
 26    8010
 27    8010                  SAVEBIN "dir_align.bin", $8000, 17  ; modified area is saved into BIN file
 28    8010
+dir_align.asm(29): error: [ALIGN] fill-byte expected after comma: ALIGN   1,      
+29    8010                  ALIGN   1,      ; error
+30    8010
 # file closed: dir_align.asm
 
 Value    Label
