@@ -9,18 +9,22 @@
  8    0009              ENDM
  9    0009                      xxx
  9    0009 00          >    nop
-10    000A                      END End.end
+dir_end/dir_end1.a80(10): error: Unrecognized instruction: some_error to check file paths output
+10    000A                  some_error to check file paths output
+11    000A                      END End.end
 # file closed: dir_end/dir_end1.a80
 # file opened: dir_end/dir_end2.a80
  1    000A              // has single include dir_end/dir_end2.i.asm (which ENDs)
  2    000A 21 22 00             ld      hl,End.end
- 3    000D              INCLUDE "dir_end/dir_end2.i.asm"
-# file opened: ./dir_end/dir_end2.i.asm
+ 3    000D              INCLUDE "dir_end2.i.asm"    ; INCLUDE works relatively to current dir!
+# file opened: dir_end/dir_end2.i.asm
  1+   000D              // include file for dir_end2.a80
  2+   000D 21 26 00             ld      hl,verifyLabel      ; label from first file
  3+   0010 11 1F 00             ld      de,verifyLabelFrom_dir_end3.a80
- 4+   0013                      END
-# file closed: ./dir_end/dir_end2.i.asm
+dir_end/dir_end2.i.asm(4): error: Unrecognized instruction: some_error to check file paths output
+ 4+   0013                  some_error to check file paths output
+ 5+   0013                      END
+# file closed: dir_end/dir_end2.i.asm
 # file closed: dir_end/dir_end2.a80
 # file opened: dir_end/dir_end3.a80
  1    0013              // has single include dir_end/dir_end3.i.asm (which does not END)
@@ -33,14 +37,16 @@
  1+   0016              // include file for dir_end3.a80
  2+   0016 01 26 00             ld      bc,verifyLabel      ; label from first file
  3+   0019 11 1F 00             ld      de,verifyLabelFrom_dir_end3.a80
- 4+   001C
- 5+   001C                      ; do not END here : END : not here */ : END
- 6+   001C 37                    scf
- 6+   001D 3F            ccf ; these are LIVE
- 7+   001E                  // : /* END : END : */ : END // END : END
- 8+   001E                      xxx     ; MACRO from dir_end1.a80
- 8+   001E 00          >    nop
- 9+   001F
+./dir_end/dir_end3.i.asm(4): error: Unrecognized instruction: some_error to check file paths output
+ 4+   001C                  some_error to check file paths output
+ 5+   001C
+ 6+   001C                      ; do not END here : END : not here */ : END
+ 7+   001C 37                    scf
+ 7+   001D 3F            ccf ; these are LIVE
+ 8+   001E                  // : /* END : END : */ : END // END : END
+ 9+   001E                      xxx     ; MACRO from dir_end1.a80
+ 9+   001E 00          >    nop
+10+   001F
 # file closed: ./dir_end/dir_end3.i.asm
  7    001F              verifyLabelFrom_dir_end3.a80:
  8    001F                  E_in_macro
@@ -59,7 +65,9 @@
  8    0028 06 01       > ld      b,1
  9    002A 0E FF       > ld      c,-1        ; Taiwan number dash one!
  9    002C 0E FF       > ld      c,-1
-10    002E                      END
+dir_end.asm(10): error: Unrecognized instruction: some_error to check file paths output
+10    002E                  some_error to check file paths output
+11    002E                      END
 # file closed: dir_end.asm
 
 Value    Label

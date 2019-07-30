@@ -358,24 +358,28 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 
 char* GetPath(char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
 {
-	// temporary "head" with CurrentDirectory as first item in list
-	CStringsList includesWithCurrent(CurrentDirectory, Options::IncludeDirsList);
-	// start search either with the temporary head, or with the list of system include-paths
-	CStringsList* dir = systemPathsBeforeCurrent ? Options::IncludeDirsList : &includesWithCurrent;
-	char fullFilePath[MAX_PATH];
+	char fullFilePath[MAX_PATH] = { 0 };
+	CStringsList* dir = Options::IncludeDirsList;	// include-paths to search
+	// search current directory first (unless "systemPathsBeforeCurrent")
+	if (!systemPathsBeforeCurrent) {
+		// if found, just skip the `while (dir)` loop
+		if (SearchPath(CurrentDirectory, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
+		else fullFilePath[0] = 0;	// clear fullFilePath every time when not found
+	}
 	while (dir) {
-		if (SearchPath(dir->string, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) break;
+		if (SearchPath(dir->string, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) break;
+		fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 		dir = dir->next;
 	}
-	// disconnect temporary head from real include list (prevents destructor from releasing it all)
-	includesWithCurrent.next = NULL;
-	// if the file was not found in the list
-	if (NULL == dir) {
+	// if the file was not found in the list, and current directory was not searched yet
+	if (!fullFilePath[0] && systemPathsBeforeCurrent) {
 		//and the current directory was not searched yet, do it now, set empty string if nothing
-		if (systemPathsBeforeCurrent ||
-			!SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
-			fullFilePath[0] = 0;
+		if (!SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
+			fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 		}
+	}
+	if (!fullFilePath[0] && filenamebegin) {	// if still not found, reset also *filenamebegin
+		*filenamebegin = fullFilePath;
 	}
 	// copy the result into new memory
 	char* kip = STRDUP(fullFilePath);

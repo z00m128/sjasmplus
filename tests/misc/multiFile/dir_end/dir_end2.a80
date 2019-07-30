@@ -1,6 +1,6 @@
 // has single include dir_end/dir_end2.i.asm (which ENDs)
         ld      hl,End.end
-INCLUDE "dir_end/dir_end2.i.asm"
+INCLUDE "dir_end2.i.asm"    ; INCLUDE works relatively to current dir!
         This has been ended in the include file
         ld      af,5    ; AF is invalid here anyway, but cool AF.
     END ; to be sure it's over even if include END malfunctions

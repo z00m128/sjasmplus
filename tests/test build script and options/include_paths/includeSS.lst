@@ -23,6 +23,22 @@ includeSSSS_i/includeSSSS_all.i.asm(2): error: Unrecognized instruction: retretr
 11    0001
 12    0001 C7               rst 0
 13    0002
+14    0002                  ; these will be not found through system paths, but should be found in current dir
+15    0002                  INCLUDE <includeSSSS_v/includeSSSS_all.i.asm>
+# file opened: includeSSSS_v/includeSSSS_all.i.asm
+ 1+   0002              ; valid Z80 source
+ 2+   0002 BF               cp      a
+ 3+   0003 C8               ret     z
+ 4+   0004
+# file closed: includeSSSS_v/includeSSSS_all.i.asm
+16    0004                  INCLUDE <includeSSSS_i/includeSSSS_all.i.asm>
+# file opened: includeSSSS_i/includeSSSS_all.i.asm
+ 1+   0004              ; invalid Z80 source
+includeSSSS_i/includeSSSS_all.i.asm(2): error: Unrecognized instruction: retretret
+ 2+   0004                  retretret
+ 3+   0004
+# file closed: includeSSSS_i/includeSSSS_all.i.asm
+17    0004
 # file closed: includeSS.asm
 
 Value    Label

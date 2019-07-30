@@ -10,3 +10,7 @@
     INCLUDE <includeSSSS_all.i.asm>
 
     rst 0
+
+    ; these will be not found through system paths, but should be found in current dir
+    INCLUDE <includeSSSS_v/includeSSSS_all.i.asm>
+    INCLUDE <includeSSSS_i/includeSSSS_all.i.asm>
