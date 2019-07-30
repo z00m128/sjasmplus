@@ -120,7 +120,19 @@ Docs:
 DEVICE needs better description? Issue #55
 
 1.13.4 changelog:
+- INCLUDE bugfix, now searching paths according to original documentation (may break some projects)
 - R800 MULUB was producing wrong opcode all those years... fixed.
 - expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
 - several tests added to improve the code coverage: https://coveralls.io/github/z00m128/sjasmplus?branch=master
 - as tests were added, minor bugs were found and squashed (errors wording, etc)
+
+INCLUDE bugfix note:
+
+If you have project like:
+src/a.asm
+src/b.asm
+
+and you are assembling it with `sjasmplus src/a.asm` and `src/a.asm`
+is doing `INCLUDE "src/b.asm"`, you need either fix the relative path
+to `INCLUDE "b.asm"` or add `-i.` option: `sjasmplus -i. src/a.asm` to
+give "src/b.asm" path chance to be found from that include path.
