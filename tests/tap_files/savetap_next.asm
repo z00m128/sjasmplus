@@ -14,8 +14,8 @@ line10:		db	0, 10
 		db	#DA, #C3, #A7, ':'
 		; INK VAL "7":
 		db	#D9, #B0, '"7":'
-		; CLEAR VAL "32767"
-		db	#FD, #B0, '"32767"', #0D
+		; CLEAR VAL "32763" : REM demo-1 address
+		db	#FD, #B0, '"32763"', #0D
 .len = $ - .cmds
 
 line20:		db	0, 20
@@ -28,8 +28,8 @@ line20:		db	0, 20
 
 line30:		db	0, 30
 		dw	.len
-.cmds		; RANDOMIZE USR VAL "32768"
-		db	#F9, #C0, #B0, '"32768"', #0D
+.cmds		; RANDOMIZE USR VAL "32764" : REM demo address
+		db	#F9, #C0, #B0, '"32764"', #0D
 .len = $ - .cmds
 
 total = $ - line10
@@ -66,7 +66,7 @@ screen:
 
 
 ; CODE block
-		org	#8000
+		org	#7FFC     ; to cross the slot-boundary
 
 demo:		ei
 		halt
@@ -107,7 +107,7 @@ demo:		ei
 		ld	(.rnd+1),a
 		ret
 .len = $ - demo
-
+        db      "XXXX"
 
 ; Clear output tap file
 		emptytap "savetap_next.tap"

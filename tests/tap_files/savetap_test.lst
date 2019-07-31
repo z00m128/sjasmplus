@@ -16,9 +16,9 @@
  15   000C              		; INK VAL "7":
  16   000C D9 B0 22 37  		db	#D9, #B0, '"7":'
  16   0010 22 3A
- 17   0012              		; CLEAR VAL "32767"
- 18   0012 FD B0 22 33  		db	#FD, #B0, '"32767"', #0D
- 18   0016 32 37 36 37
+ 17   0012              		; CLEAR VAL "32763" : REM demo-1 address
+ 18   0012 FD B0 22 33  		db	#FD, #B0, '"32763"', #0D
+ 18   0016 32 37 36 33
  18   001A 22 0D
  19   001C              .len = $ - .cmds
  20   001C
@@ -37,10 +37,10 @@
  28   0039
  29   0039 00 1E        line30:		db	0, 30
  30   003B 0B 00        		dw	.len
- 31   003D              .cmds		; RANDOMIZE USR VAL "32768"
- 32   003D F9 C0 B0 22  		db	#F9, #C0, #B0, '"32768"', #0D
+ 31   003D              .cmds		; RANDOMIZE USR VAL "32764" : REM demo address
+ 32   003D F9 C0 B0 22  		db	#F9, #C0, #B0, '"32764"', #0D
  32   0041 33 32 37 36
- 32   0045 38 22 0D
+ 32   0045 34 22 0D
  33   0048              .len = $ - .cmds
  34   0048
  35   0048              total = $ - line10
@@ -297,48 +297,48 @@
  66   5B00
  67   5B00
  68   5B00              ; CODE block
- 69   5B00              		org	#8000
- 70   8000
- 71   8000 FB           demo:		ei
- 72   8001 76           		halt
- 73   8002 10 FC        		djnz	demo
- 74   8004 FB           .loop		ei
- 75   8005 76           		halt
- 76   8006 21 01 58     		ld	hl,#5801
- 77   8009 11 00 58     		ld	de,#5800
- 78   800C 01 00 03     		ld	bc,#300
- 79   800F 1A           		ld	a,(de)
- 80   8010 32 00 5B     		ld	(#5B00),a
- 81   8013 ED B0        		ldir
- 82   8015 CD 31 80     		call	.rnd
- 83   8018 4F           		ld	c,a
- 84   8019 E6 0C        		and	#0C
- 85   801B D6 0B        		sub	#0B
- 86   801D 30 02        		jr	nc,.not12
- 87   801F 3E 02        		ld	a,2
- 88   8021 57           .not12		ld	d,a
- 89   8022 CD 31 80     		call	.rnd
- 90   8025 5F           		ld	e,a
- 91   8026 21 00 58     		ld	hl,#5800
- 92   8029 19           		add	hl,de
- 93   802A 79           		ld	a,c
- 94   802B E6 7F        		and	#7F
- 95   802D AE           		xor	(hl)
- 96   802E 77           		ld	(hl),a
- 97   802F 18 D3        		jr	.loop
- 98   8031
- 99   8031 3E 29        .rnd		ld	a,#29
-100   8033 47           		ld	b,a
-101   8034 0F           		rrca
-102   8035 0F           		rrca
-103   8036 0F           		rrca
-104   8037 EE 1F        		xor	#1F
-105   8039 80           		add	a,b
-106   803A DE FF        		sbc	a,#FF
-107   803C 32 32 80     		ld	(.rnd+1),a
-108   803F C9           		ret
-109   8040              .len = $ - demo
-110   8040
+ 69   5B00              		org	#7FFC     ; to cross the slot-boundary
+ 70   7FFC
+ 71   7FFC FB           demo:		ei
+ 72   7FFD 76           		halt
+ 73   7FFE 10 FC        		djnz	demo
+ 74   8000 FB           .loop		ei
+ 75   8001 76           		halt
+ 76   8002 21 01 58     		ld	hl,#5801
+ 77   8005 11 00 58     		ld	de,#5800
+ 78   8008 01 00 03     		ld	bc,#300
+ 79   800B 1A           		ld	a,(de)
+ 80   800C 32 00 5B     		ld	(#5B00),a
+ 81   800F ED B0        		ldir
+ 82   8011 CD 2D 80     		call	.rnd
+ 83   8014 4F           		ld	c,a
+ 84   8015 E6 0C        		and	#0C
+ 85   8017 D6 0B        		sub	#0B
+ 86   8019 30 02        		jr	nc,.not12
+ 87   801B 3E 02        		ld	a,2
+ 88   801D 57           .not12		ld	d,a
+ 89   801E CD 2D 80     		call	.rnd
+ 90   8021 5F           		ld	e,a
+ 91   8022 21 00 58     		ld	hl,#5800
+ 92   8025 19           		add	hl,de
+ 93   8026 79           		ld	a,c
+ 94   8027 E6 7F        		and	#7F
+ 95   8029 AE           		xor	(hl)
+ 96   802A 77           		ld	(hl),a
+ 97   802B 18 D3        		jr	.loop
+ 98   802D
+ 99   802D 3E 29        .rnd		ld	a,#29
+100   802F 47           		ld	b,a
+101   8030 0F           		rrca
+102   8031 0F           		rrca
+103   8032 0F           		rrca
+104   8033 EE 1F        		xor	#1F
+105   8035 80           		add	a,b
+106   8036 DE FF        		sbc	a,#FF
+107   8038 32 2E 80     		ld	(.rnd+1),a
+108   803B C9           		ret
+109   803C              .len = $ - demo
+110   803C 58 58 58 58          db      "XXXX"
 111   8040
 112   8040              ; Clear output tap file
 113   8040              		emptytap "savetap_test.tap"
@@ -474,8 +474,8 @@ Value    Label
 0x0022 X chars.savelen
 0x4000   screen
 0x1B00 X screen.len
-0x8000   demo
-0x8004   demo.loop
-0x8031   demo.rnd
-0x8021   demo.not12
+0x7FFC   demo
+0x8000   demo.loop
+0x802D   demo.rnd
+0x801D   demo.not12
 0x0040 X demo.len
