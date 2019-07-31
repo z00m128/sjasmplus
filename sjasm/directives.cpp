@@ -852,7 +852,8 @@ void dirSAVETAP() {
 			}
 			if (!realtapeMode) {
 				lp = tlp;
-				if (!ParseExpression(lp, val)) {
+				IsLabelNotFound = 0;
+				if (!ParseExpression(lp, val) || IsLabelNotFound) {
 					Error("[SAVETAP] Syntax error", bp, PASS3); return;
 				}
 				if (val < 0) {

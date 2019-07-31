@@ -438,6 +438,7 @@ savetap_test.asm(176): error: [SAVETAP] Variable name out of range
 176   8040              		savetap	"error",NUMBERS,"Err",0,0,'?'	;; Variable name out of range
 177   8040
 savetap_test.asm(178): error: Label not found: HEADLESS
+savetap_test.asm(178): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS	
 178   8040              		savetap	"error",HEADLESS	;; Will try to use HEADLESS as label for start of tap-snapshot
 savetap_test.asm(179): error: Label not found: HEADLESS
 savetap_test.asm(179): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS+!	
