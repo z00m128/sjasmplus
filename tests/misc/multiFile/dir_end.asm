@@ -7,6 +7,7 @@ end     DUP 2   ; END should not work at first column, not even with --dirbol en
 verifyLabel:
 .2      ld      b,1         ; China number one!
  .2     ld      c,-1        ; Taiwan number dash one!
+    some_error to check file paths output
         END : no start address provided, and this text should be NOT parsed either
 
 This is basically identical to tests/misc/dir_end.asm, but this is using .options

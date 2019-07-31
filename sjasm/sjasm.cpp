@@ -95,8 +95,13 @@ namespace Options {
 	SSyntax syx, systemSyntax;
 	bool SourceStdIn = false;
 
+/*
 	// Include directories list is initialized with "." directory
 	CStringsList* IncludeDirsList = new CStringsList((char *)".");
+*/
+	// Include directories list is empty initially (since v1.13.4)
+	CStringsList* IncludeDirsList = nullptr;
+
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
 	// returns true if fakes are completely disabled, false when they are enabled

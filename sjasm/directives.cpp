@@ -729,11 +729,7 @@ void dirSAVETAP() {
 	int start = -1, length = -1, param2 = -1, param3 = -1;
 
 	if (!DeviceID) {
-		if (pass == LASTPASS) {
-			Error("SAVETAP only allowed in real device emulation mode (See DEVICE)");
-		}
-		exec = false;
-	} else if (pass != LASTPASS) {
+		Error("SAVETAP only allowed in real device emulation mode (See DEVICE)");
 		exec = false;
 	}
 
@@ -856,7 +852,8 @@ void dirSAVETAP() {
 			}
 			if (!realtapeMode) {
 				lp = tlp;
-				if (!ParseExpression(lp, val)) {
+				IsLabelNotFound = 0;
+				if (!ParseExpression(lp, val) || IsLabelNotFound) {
 					Error("[SAVETAP] Syntax error", bp, PASS3); return;
 				}
 				if (val < 0) {
@@ -873,20 +870,22 @@ void dirSAVETAP() {
 		start = StartAddress;
 	}
 
-	if (exec && IsZXSpectrumDevice(DeviceID)) {
+	if (exec) {
 		int done = 0;
 
 		if (realtapeMode) {
 			done = TAP_SaveBlock(fnaam, headerType, fnaamh, start, length, param2, param3);
 		} else {
-			done = TAP_SaveSnapshot(fnaam, start);
+			if (!IsZXSpectrumDevice(DeviceID)) {
+				Error("[SAVETAP snapshot] Device is not of ZX Spectrum type.", Device->ID, SUPPRESS);
+			} else {
+				done = TAP_SaveSnapshot(fnaam, start);
+			}
 		}
 
 		if (!done) {
 			Error("[SAVETAP] Error writing file", bp, IF_FIRST);
 		}
-	} else if (exec) {
-		Error("[SAVETAP] Device must be defined.");
 	}
 
 	if (fnaamh) {

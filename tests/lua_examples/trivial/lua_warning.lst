@@ -1,0 +1,60 @@
+lua_warning.asm(10): warning: [pass 1] warning emitted from lua
+lua_warning.asm(12): error: [pass 1] second warning emitted from lua
+lua_warning.asm(31): warning: [pass all] warning emitted from lua
+lua_warning.asm(33): error: [pass all] second warning emitted from lua
+lua_warning.asm(17): warning: [pass 2] warning emitted from lua
+lua_warning.asm(19): error: [pass 2] second warning emitted from lua
+lua_warning.asm(31): warning: [pass all] warning emitted from lua
+lua_warning.asm(33): error: [pass all] second warning emitted from lua
+# file opened: lua_warning.asm
+ 1    0000                  lua
+ 2    0000 ~                    _pc("OPT reset")
+ 3    0000 ~                    sj.warning("[pass default] warning emitted from lua")
+ 4    0000 ~                    _pc("OPT --syntax=w")   ; -- treat warnings as errors
+ 5    0000 ~                    sj.warning("[pass default] second warning emitted from lua")
+ 6    0000              OPT reset
+lua_warning.asm(3): warning: [pass default] warning emitted from lua
+ 6    0000              OPT --syntax=w
+lua_warning.asm(5): error: [pass default] second warning emitted from lua
+ 6    0000                  endlua
+ 7    0000
+ 8    0000                  lua pass1
+ 9    0000 ~                    _pc("OPT reset")
+10    0000 ~                    sj.warning("[pass 1] warning emitted from lua")
+11    0000 ~                    _pc("OPT --syntax=w")   ; -- treat warnings as errors
+12    0000 ~                    sj.warning("[pass 1] second warning emitted from lua")
+13    0000                  endlua
+14    0000
+15    0000                  lua pass2
+16    0000 ~                    _pc("OPT reset")
+17    0000 ~                    sj.warning("[pass 2] warning emitted from lua")
+18    0000 ~                    _pc("OPT --syntax=w")   ; -- treat warnings as errors
+19    0000 ~                    sj.warning("[pass 2] second warning emitted from lua")
+20    0000                  endlua
+21    0000
+22    0000                  lua pass3
+23    0000 ~                    _pc("OPT reset")
+24    0000 ~                    sj.warning("[pass 3] warning emitted from lua")
+25    0000 ~                    _pc("OPT --syntax=w")   ; -- treat warnings as errors
+26    0000 ~                    sj.warning("[pass 3] second warning emitted from lua")
+27    0000              OPT reset
+lua_warning.asm(24): warning: [pass 3] warning emitted from lua
+27    0000              OPT --syntax=w
+lua_warning.asm(26): error: [pass 3] second warning emitted from lua
+27    0000                  endlua
+28    0000
+29    0000                  lua allpass
+30    0000 ~                    _pc("OPT reset")
+31    0000 ~                    sj.warning("[pass all] warning emitted from lua")
+32    0000 ~                    _pc("OPT --syntax=w")   ; -- treat warnings as errors
+33    0000 ~                    sj.warning("[pass all] second warning emitted from lua")
+34    0000              OPT reset
+lua_warning.asm(31): warning: [pass all] warning emitted from lua
+34    0000              OPT --syntax=w
+lua_warning.asm(33): error: [pass all] second warning emitted from lua
+34    0000                  endlua
+35    0000
+# file closed: lua_warning.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -1,0 +1,7 @@
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=incbin_diagnostic_output.asm (318 bytes) Offset=4  Len=7
+include data: name=incbin_diagnostic_output.asm (318 bytes) Offset=308  Len=7
+include data: name=incbin_diagnostic_output.asm (318 bytes) Offset=308  Len=7
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 7 lines, <some work time>

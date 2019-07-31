@@ -93,3 +93,12 @@ codlen	=	$-start
 	TAPEND				;; End of tape block
 
 	db	6,6,6,6
+
+;; Error cases
+
+	SAVETAP	"nothing",start		;; No DEVICE defined
+
+	TAPOUT	tape_file,		;; No flagbyte
+	TAPOUT				;; No parameters
+
+;; End of test file

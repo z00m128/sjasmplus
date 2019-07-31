@@ -1,0 +1,481 @@
+# file opened: savetap_test.asm
+  1   0000              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  2   0000              ;; Test source for EMPTYTAP / SAVETAP ;;
+  3   0000              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  4   0000
+  5   0000              		device	zxspectrum48
+  6   0000
+  7   0000              ; BASIC block
+  8   0000              	module bas
+  9   0000 00 0A        line10:		db	0, 10
+ 10   0002 18 00        		dw	.len
+ 11   0004              .cmds		; BORDER NOT PI:
+ 12   0004 E7 C3 A7 3A  		db	#E7, #C3, #A7, ':'
+ 13   0008              		; PAPER NOT PI:
+ 14   0008 DA C3 A7 3A  		db	#DA, #C3, #A7, ':'
+ 15   000C              		; INK VAL "7":
+ 16   000C D9 B0 22 37  		db	#D9, #B0, '"7":'
+ 16   0010 22 3A
+ 17   0012              		; CLEAR VAL "32763" : REM demo-1 address
+ 18   0012 FD B0 22 33  		db	#FD, #B0, '"32763"', #0D
+ 18   0016 32 37 36 33
+ 18   001A 22 0D
+ 19   001C              .len = $ - .cmds
+ 20   001C
+ 21   001C 00 14        line20:		db	0, 20
+ 22   001E 19 00        		dw	.len
+ 23   0020              .cmds		; POKE VAL "23739",CODE "o":
+ 24   0020 F4 B0 22 32  		db	#F4, #B0, '"23739",', #AF, '"o":'
+ 24   0024 33 37 33 39
+ 24   0028 22 2C AF 22
+ 24   002C 6F 22 3A
+ 25   002F              		; LOAD ""SCREEN#: LOAD ""CODE
+ 26   002F EF 22 22 AA  		db	#EF, '""', #AA, ':', #EF, '""', #AF, #0D
+ 26   0033 3A EF 22 22
+ 26   0037 AF 0D
+ 27   0039              .len = $ - .cmds
+ 28   0039
+ 29   0039 00 1E        line30:		db	0, 30
+ 30   003B 0B 00        		dw	.len
+ 31   003D              .cmds		; RANDOMIZE USR VAL "32764" : REM demo address
+ 32   003D F9 C0 B0 22  		db	#F9, #C0, #B0, '"32764"', #0D
+ 32   0041 33 32 37 36
+ 32   0045 34 22 0D
+ 33   0048              .len = $ - .cmds
+ 34   0048
+ 35   0048              total = $ - line10
+ 36   0048              	endmodule
+ 37   0048
+ 38   0048
+ 39   0048              ; NUMS block
+ 40   0048 01           nums		db	1
+ 41   0049 05 00        		dw	.datalen
+ 42   004B 82 49 0F DA  .data		db	#82,#49,#0F,#DA,#A2	;; Value 3.1415927
+ 42   004F A2
+ 43   0050              .datalen = $ - .data
+ 44   0050              .savelen = $ - nums
+ 45   0050
+ 46   0050              ; CHARS block
+ 47   0050 01           chars		db	1
+ 48   0051 1F 00        		dw	.datalen
+ 49   0053 53 41 56 45  .data		db	"SAVETAP testing character array"
+ 49   0057 54 41 50 20
+ 49   005B 74 65 73 74
+ 49   005F 69 6E 67 20
+ 49   0063 63 68 61 72
+ 49   0067 61 63 74 65
+ 49   006B 72 20 61 72
+ 49   006F 72 61 79
+ 50   0072              .datalen = $ - .data
+ 51   0072              .savelen = $ - chars
+ 52   0072
+ 53   0072
+ 54   0072              ; SCREEN$ block
+ 55   0072              		org	#4000
+ 56   4000              screen:
+ 57   4000              	dup 12
+ 58   4000 AA AA AA... >		block	256,#AA
+ 59   4100 55 55 55... >		block	256,#55
+ 58   4200 AA AA AA... >		block	256,#AA
+ 59   4300 55 55 55... >		block	256,#55
+ 58   4400 AA AA AA... >		block	256,#AA
+ 59   4500 55 55 55... >		block	256,#55
+ 58   4600 AA AA AA... >		block	256,#AA
+ 59   4700 55 55 55... >		block	256,#55
+ 58   4800 AA AA AA... >		block	256,#AA
+ 59   4900 55 55 55... >		block	256,#55
+ 58   4A00 AA AA AA... >		block	256,#AA
+ 59   4B00 55 55 55... >		block	256,#55
+ 58   4C00 AA AA AA... >		block	256,#AA
+ 59   4D00 55 55 55... >		block	256,#55
+ 58   4E00 AA AA AA... >		block	256,#AA
+ 59   4F00 55 55 55... >		block	256,#55
+ 58   5000 AA AA AA... >		block	256,#AA
+ 59   5100 55 55 55... >		block	256,#55
+ 58   5200 AA AA AA... >		block	256,#AA
+ 59   5300 55 55 55... >		block	256,#55
+ 58   5400 AA AA AA... >		block	256,#AA
+ 59   5500 55 55 55... >		block	256,#55
+ 58   5600 AA AA AA... >		block	256,#AA
+ 59   5700 55 55 55... >		block	256,#55
+ 60   5704              	edup
+ 61   5800              	dup 24
+ 62   5800 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5804 05 05 0D 04 >
+ 62   5808 04 14 03 03 >
+ 62   580C 11 02 02 29 >
+ 63   5810 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5814 03 03 14 04 >
+ 63   5818 04 0D 05 05 >
+ 63   581C 16 06 06 07 >
+ 62   5820 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5824 05 05 0D 04 >
+ 62   5828 04 14 03 03 >
+ 62   582C 11 02 02 29 >
+ 63   5830 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5834 03 03 14 04 >
+ 63   5838 04 0D 05 05 >
+ 63   583C 16 06 06 07 >
+ 62   5840 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5844 05 05 0D 04 >
+ 62   5848 04 14 03 03 >
+ 62   584C 11 02 02 29 >
+ 63   5850 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5854 03 03 14 04 >
+ 63   5858 04 0D 05 05 >
+ 63   585C 16 06 06 07 >
+ 62   5860 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5864 05 05 0D 04 >
+ 62   5868 04 14 03 03 >
+ 62   586C 11 02 02 29 >
+ 63   5870 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5874 03 03 14 04 >
+ 63   5878 04 0D 05 05 >
+ 63   587C 16 06 06 07 >
+ 62   5880 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5884 05 05 0D 04 >
+ 62   5888 04 14 03 03 >
+ 62   588C 11 02 02 29 >
+ 63   5890 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5894 03 03 14 04 >
+ 63   5898 04 0D 05 05 >
+ 63   589C 16 06 06 07 >
+ 62   58A0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   58A4 05 05 0D 04 >
+ 62   58A8 04 14 03 03 >
+ 62   58AC 11 02 02 29 >
+ 63   58B0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   58B4 03 03 14 04 >
+ 63   58B8 04 0D 05 05 >
+ 63   58BC 16 06 06 07 >
+ 62   58C0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   58C4 05 05 0D 04 >
+ 62   58C8 04 14 03 03 >
+ 62   58CC 11 02 02 29 >
+ 63   58D0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   58D4 03 03 14 04 >
+ 63   58D8 04 0D 05 05 >
+ 63   58DC 16 06 06 07 >
+ 62   58E0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   58E4 05 05 0D 04 >
+ 62   58E8 04 14 03 03 >
+ 62   58EC 11 02 02 29 >
+ 63   58F0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   58F4 03 03 14 04 >
+ 63   58F8 04 0D 05 05 >
+ 63   58FC 16 06 06 07 >
+ 62   5900 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5904 05 05 0D 04 >
+ 62   5908 04 14 03 03 >
+ 62   590C 11 02 02 29 >
+ 63   5910 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5914 03 03 14 04 >
+ 63   5918 04 0D 05 05 >
+ 63   591C 16 06 06 07 >
+ 62   5920 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5924 05 05 0D 04 >
+ 62   5928 04 14 03 03 >
+ 62   592C 11 02 02 29 >
+ 63   5930 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5934 03 03 14 04 >
+ 63   5938 04 0D 05 05 >
+ 63   593C 16 06 06 07 >
+ 62   5940 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5944 05 05 0D 04 >
+ 62   5948 04 14 03 03 >
+ 62   594C 11 02 02 29 >
+ 63   5950 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5954 03 03 14 04 >
+ 63   5958 04 0D 05 05 >
+ 63   595C 16 06 06 07 >
+ 62   5960 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5964 05 05 0D 04 >
+ 62   5968 04 14 03 03 >
+ 62   596C 11 02 02 29 >
+ 63   5970 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5974 03 03 14 04 >
+ 63   5978 04 0D 05 05 >
+ 63   597C 16 06 06 07 >
+ 62   5980 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5984 05 05 0D 04 >
+ 62   5988 04 14 03 03 >
+ 62   598C 11 02 02 29 >
+ 63   5990 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5994 03 03 14 04 >
+ 63   5998 04 0D 05 05 >
+ 63   599C 16 06 06 07 >
+ 62   59A0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   59A4 05 05 0D 04 >
+ 62   59A8 04 14 03 03 >
+ 62   59AC 11 02 02 29 >
+ 63   59B0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   59B4 03 03 14 04 >
+ 63   59B8 04 0D 05 05 >
+ 63   59BC 16 06 06 07 >
+ 62   59C0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   59C4 05 05 0D 04 >
+ 62   59C8 04 14 03 03 >
+ 62   59CC 11 02 02 29 >
+ 63   59D0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   59D4 03 03 14 04 >
+ 63   59D8 04 0D 05 05 >
+ 63   59DC 16 06 06 07 >
+ 62   59E0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   59E4 05 05 0D 04 >
+ 62   59E8 04 14 03 03 >
+ 62   59EC 11 02 02 29 >
+ 63   59F0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   59F4 03 03 14 04 >
+ 63   59F8 04 0D 05 05 >
+ 63   59FC 16 06 06 07 >
+ 62   5A00 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5A04 05 05 0D 04 >
+ 62   5A08 04 14 03 03 >
+ 62   5A0C 11 02 02 29 >
+ 63   5A10 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5A14 03 03 14 04 >
+ 63   5A18 04 0D 05 05 >
+ 63   5A1C 16 06 06 07 >
+ 62   5A20 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5A24 05 05 0D 04 >
+ 62   5A28 04 14 03 03 >
+ 62   5A2C 11 02 02 29 >
+ 63   5A30 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5A34 03 03 14 04 >
+ 63   5A38 04 0D 05 05 >
+ 63   5A3C 16 06 06 07 >
+ 62   5A40 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5A44 05 05 0D 04 >
+ 62   5A48 04 14 03 03 >
+ 62   5A4C 11 02 02 29 >
+ 63   5A50 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5A54 03 03 14 04 >
+ 63   5A58 04 0D 05 05 >
+ 63   5A5C 16 06 06 07 >
+ 62   5A60 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5A64 05 05 0D 04 >
+ 62   5A68 04 14 03 03 >
+ 62   5A6C 11 02 02 29 >
+ 63   5A70 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5A74 03 03 14 04 >
+ 63   5A78 04 0D 05 05 >
+ 63   5A7C 16 06 06 07 >
+ 62   5A80 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5A84 05 05 0D 04 >
+ 62   5A88 04 14 03 03 >
+ 62   5A8C 11 02 02 29 >
+ 63   5A90 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5A94 03 03 14 04 >
+ 63   5A98 04 0D 05 05 >
+ 63   5A9C 16 06 06 07 >
+ 62   5AA0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5AA4 05 05 0D 04 >
+ 62   5AA8 04 14 03 03 >
+ 62   5AAC 11 02 02 29 >
+ 63   5AB0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5AB4 03 03 14 04 >
+ 63   5AB8 04 0D 05 05 >
+ 63   5ABC 16 06 06 07 >
+ 62   5AC0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5AC4 05 05 0D 04 >
+ 62   5AC8 04 14 03 03 >
+ 62   5ACC 11 02 02 29 >
+ 63   5AD0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5AD4 03 03 14 04 >
+ 63   5AD8 04 0D 05 05 >
+ 63   5ADC 16 06 06 07 >
+ 62   5AE0 07 06 06 16 >		db	#07, #06, #06, #16, #05, #05, #0D, #04, #04, #14, #03, #03, #11, #02, #02, #29
+ 62   5AE4 05 05 0D 04 >
+ 62   5AE8 04 14 03 03 >
+ 62   5AEC 11 02 02 29 >
+ 63   5AF0 29 02 02 11 >		db	#29, #02, #02, #11, #03, #03, #14, #04, #04, #0D, #05, #05, #16, #06, #06, #07
+ 63   5AF4 03 03 14 04 >
+ 63   5AF8 04 0D 05 05 >
+ 63   5AFC 16 06 06 07 >
+ 64   5B00              	edup
+ 65   5B00              .len = $ - screen
+ 66   5B00
+ 67   5B00
+ 68   5B00              ; CODE block
+ 69   5B00              		org	#7FFC     ; to cross the slot-boundary
+ 70   7FFC
+ 71   7FFC FB           demo:		ei
+ 72   7FFD 76           		halt
+ 73   7FFE 10 FC        		djnz	demo
+ 74   8000 FB           .loop		ei
+ 75   8001 76           		halt
+ 76   8002 21 01 58     		ld	hl,#5801
+ 77   8005 11 00 58     		ld	de,#5800
+ 78   8008 01 00 03     		ld	bc,#300
+ 79   800B 1A           		ld	a,(de)
+ 80   800C 32 00 5B     		ld	(#5B00),a
+ 81   800F ED B0        		ldir
+ 82   8011 CD 2D 80     		call	.rnd
+ 83   8014 4F           		ld	c,a
+ 84   8015 E6 0C        		and	#0C
+ 85   8017 D6 0B        		sub	#0B
+ 86   8019 30 02        		jr	nc,.not12
+ 87   801B 3E 02        		ld	a,2
+ 88   801D 57           .not12		ld	d,a
+ 89   801E CD 2D 80     		call	.rnd
+ 90   8021 5F           		ld	e,a
+ 91   8022 21 00 58     		ld	hl,#5800
+ 92   8025 19           		add	hl,de
+ 93   8026 79           		ld	a,c
+ 94   8027 E6 7F        		and	#7F
+ 95   8029 AE           		xor	(hl)
+ 96   802A 77           		ld	(hl),a
+ 97   802B 18 D3        		jr	.loop
+ 98   802D
+ 99   802D 3E 29        .rnd		ld	a,#29
+100   802F 47           		ld	b,a
+101   8030 0F           		rrca
+102   8031 0F           		rrca
+103   8032 0F           		rrca
+104   8033 EE 1F        		xor	#1F
+105   8035 80           		add	a,b
+106   8036 DE FF        		sbc	a,#FF
+107   8038 32 2E 80     		ld	(.rnd+1),a
+108   803B C9           		ret
+109   803C              .len = $ - demo
+110   803C 58 58 58 58          db      "XXXX"
+111   8040
+112   8040              ; Clear output tap file
+113   8040              		emptytap "savetap_test.tap"
+114   8040              ; Store BASIC
+115   8040              		savetap	"savetap_test.tap",BASIC,"tstSAVETAP", bas.line10, bas.total, 10
+116   8040              ; Store SCREEN#
+117   8040              		savetap	"savetap_test.tap",CODE,"intro", screen, screen.len
+118   8040              ; Store CODE
+119   8040              		savetap	"savetap_test.tap",CODE,"demo", demo, demo.len
+120   8040              ; Store NUMBERS
+121   8040              		savetap "savetap_test.tap",NUMBERS,"n", nums, nums.savelen, 'n'
+122   8040              ; Store CHARS
+123   8040              		savetap "savetap_test.tap",CHARS,"t$", chars, chars.savelen, 't'
+124   8040              ; Store HEADLESS
+125   8040              		savetap "savetap_test.tap",HEADLESS, (screen + #1800), 32, 66 ; custom flag
+126   8040
+127   8040
+128   8040              ; No autostart (#8000 is used)
+129   8040              		savetap	"savetap_test.tap",BASIC,"No start", bas.line10, bas.total
+130   8040              ; Default letter ('A' is used)
+131   8040              		savetap "savetap_test.tap",NUMBERS,"n", nums, nums.savelen
+132   8040              ; Address + length > #10000 (block to the end of memory will be saved)
+133   8040              		savetap "savetap_test.tap",HEADLESS, #FFFF, 2
+134   8040
+135   8040              ; Extra variants of valid commands to exercise all code paths
+136   8040              		savetap	"savetap_test.tap",CODE,"_extra1", demo, 1, 0x8000, 0x1234
+137   8040
+138   8040
+139   8040              ;;;;;;;;;;;;;;;;;
+140   8040              ;; Error cases ;;
+141   8040              ;;;;;;;;;;;;;;;;;
+142   8040
+savetap_test.asm(143): error: [EMPTYTAP] Syntax error: emptytap ""				
+143   8040              		emptytap ""				;; Syntax error
+savetap_test.asm(144): error: [SAVETAP] Syntax error. No parameters: savetap	""				
+144   8040              		savetap	""				;; Syntax error. No parameters
+savetap_test.asm(145): error: [SAVETAP] Syntax error. No parameters: savetap	"error"				
+145   8040              		savetap	"error"				;; Syntax error. No parameters
+savetap_test.asm(146): error: [SAVETAP] Negative values are not allowed: savetap	"error",-1			
+146   8040              		savetap	"error",-1			;; Negative values are not allowed
+147   8040
+savetap_test.asm(148): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,		
+148   8040              		savetap	"error",HEADLESS,		;; Syntax error
+savetap_test.asm(149): error: [SAVETAP] Syntax error. Missing start address: savetap	"error",HEADLESS,,		
+149   8040              		savetap	"error",HEADLESS,,		;; Missing start address
+savetap_test.asm(150): error: [SAVETAP] Negative values are not allowed: savetap	"error",HEADLESS,-1		
+150   8040              		savetap	"error",HEADLESS,-1		;; Negative values are not allowed
+savetap_test.asm(151): error: [SAVETAP] Negative values are not allowed: savetap	"error",HEADLESS,0,-1		
+151   8040              		savetap	"error",HEADLESS,0,-1		;; Negative values are not allowed
+savetap_test.asm(152): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",HEADLESS,#10000		
+152   8040              		savetap	"error",HEADLESS,#10000		;; Values higher than FFFFh are not allowed
+savetap_test.asm(153): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",HEADLESS,0,#10000	
+153   8040              		savetap	"error",HEADLESS,0,#10000	;; Values higher than FFFFh are not allowed
+savetap_test.asm(154): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,0,		
+154   8040              		savetap	"error",HEADLESS,0,		;; Syntax error
+savetap_test.asm(155): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,0,0,		
+155   8040              		savetap	"error",HEADLESS,0,0,		;; Syntax error
+savetap_test.asm(156): error: [SAVETAP] Invalid flag byte: savetap	"error",HEADLESS,0,0,-1		
+156   8040              		savetap	"error",HEADLESS,0,0,-1		;; Invalid flag byte
+savetap_test.asm(157): error: [SAVETAP] Invalid flag byte: savetap	"error",HEADLESS,0,0,0x100	
+157   8040              		savetap	"error",HEADLESS,0,0,0x100	;; Invalid flag byte
+158   8040
+savetap_test.asm(159): error: [SAVETAP] Syntax error in tape file name: savetap	"error",CODE,			
+159   8040              		savetap	"error",CODE,			;; Syntax error
+savetap_test.asm(160): error: [SAVETAP] Syntax error. Missing tape block file name: savetap	"error",CODE,,			
+160   8040              		savetap	"error",CODE,,			;; Missing tape block file name
+savetap_test.asm(161): error: [SAVETAP] Syntax error. Missing start address: savetap	"error",CODE,"Err",		
+161   8040              		savetap	"error",CODE,"Err",		;; Missing start address
+savetap_test.asm(162): error: [SAVETAP] Syntax error. Missing block length: savetap	"error",CODE,"Err",0,		
+162   8040              		savetap	"error",CODE,"Err",0,		;; Missing block length
+savetap_test.asm(163): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",-1		
+163   8040              		savetap	"error",CODE,"Err",-1		;; Negative values are not allowed
+savetap_test.asm(164): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,-1		
+164   8040              		savetap	"error",CODE,"Err",0,-1		;; Negative values are not allowed
+savetap_test.asm(165): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,0,-1	
+165   8040              		savetap	"error",CODE,"Err",0,0,-1	;; Negative values are not allowed
+savetap_test.asm(166): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,0,0,-1	
+166   8040              		savetap	"error",CODE,"Err",0,0,0,-1	;; Negative values are not allowed
+savetap_test.asm(167): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",CODE,"Err",#10000	
+167   8040              		savetap	"error",CODE,"Err",#10000	;; Values higher than FFFFh are not allowed
+savetap_test.asm(168): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",CODE,"Err",0,#10000	
+168   8040              		savetap	"error",CODE,"Err",0,#10000	;; Values higher than FFFFh are not allowed
+savetap_test.asm(169): error: [SAVETAP] Values more than FFFFh are not allowed: savetap	"error",CODE,"Err",0,0,#10000	
+169   8040              		savetap	"error",CODE,"Err",0,0,#10000	;; Values higher than FFFFh are not allowed
+savetap_test.asm(170): error: [SAVETAP] Values more than FFFFh are not allowed: savetap	"error",CODE,"Err",0,0,0,#10000	
+170   8040              		savetap	"error",CODE,"Err",0,0,0,#10000	;; Values higher than FFFFh are not allowed
+savetap_test.asm(171): error: [SAVETAP] Syntax error: savetap	"error",CODE,"Err",0,0,0,	
+171   8040              		savetap	"error",CODE,"Err",0,0,0,	;; Syntax error
+savetap_test.asm(172): error: [SAVETAP] Syntax error: savetap	"error",CODE,"Err",0,0,		
+172   8040              		savetap	"error",CODE,"Err",0,0,		;; Syntax error
+173   8040
+savetap_test.asm(174): error: [SAVETAP] Autostart LINE out of range: 16384
+174   8040              		savetap	"error",BASIC,"Err",0,0,#4000	;; Autostart LINE out of range
+savetap_test.asm(175): error: [SAVETAP] Variable name out of range
+175   8040              		savetap	"error",NUMBERS,"Err",0,0,'@'	;; Variable name out of range
+savetap_test.asm(176): error: [SAVETAP] Variable name out of range
+176   8040              		savetap	"error",NUMBERS,"Err",0,0,'?'	;; Variable name out of range
+177   8040
+savetap_test.asm(178): error: Label not found: HEADLESS
+savetap_test.asm(178): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS	
+178   8040              		savetap	"error",HEADLESS	;; Will try to use HEADLESS as label for start of tap-snapshot
+savetap_test.asm(179): error: Label not found: HEADLESS
+savetap_test.asm(179): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS+!	
+179   8040              		savetap	"error",HEADLESS+!	;; causing to fail in other part of implementation
+savetap_test.asm(180): error: [SAVETAP] Syntax error. No parameters: savetap	"error",,	        
+180   8040              		savetap	"error",,	        ;; syntax error, no type parameter
+181   8040
+182   8040              		device zxspectrumnext
+savetap_test.asm(183): error: [SAVETAP snapshot] Device is not of ZX Spectrum type.: ZXSPECTRUMNEXT
+183   8040              		savetap	"error",0x1234	        ;; SAVETAP snapshot is "ZX Spectrum devices" only
+184   8040
+# file closed: savetap_test.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   bas.line10
+0x0018   bas.line10.len
+0x0004   bas.line10.cmds
+0x001C X bas.line20
+0x0019   bas.line20.len
+0x0020   bas.line20.cmds
+0x0039 X bas.line30
+0x000B   bas.line30.len
+0x003D   bas.line30.cmds
+0x0048 X bas.total
+0x0048   nums
+0x0005   nums.datalen
+0x004B   nums.data
+0x0008 X nums.savelen
+0x0050   chars
+0x001F   chars.datalen
+0x0053   chars.data
+0x0022 X chars.savelen
+0x4000   screen
+0x1B00 X screen.len
+0x7FFC   demo
+0x8000   demo.loop
+0x802D   demo.rnd
+0x801D   demo.not12
+0x0040 X demo.len

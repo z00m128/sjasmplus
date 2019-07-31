@@ -1,0 +1,27 @@
+lua_file_exists.asm(12): error: bogus.file does not exist.
+lua_file_exists.asm(12): error: bogus.file does not exist.
+# file opened: lua_file_exists.asm
+ 1    0000                  lua pass1
+ 2    0000 ~                    pass = 0
+ 3    0000                  endlua
+ 4    0000
+ 5    0000                  lua allpass
+ 6    0000 ~                    pass = pass + 1
+ 7    0000 ~                    sj.parse_code("DISPLAY \"lua pass: \", /D, "..pass)
+ 8    0000 ~                    if sj.file_exists("lua_file_exists.asm") then
+ 9    0000 ~                        sj.parse_line(" DISPLAY \"lua_file_exists.asm does exist.\"")
+10    0000 ~                    ; end
+11    0000 ~                    if not sj.file_exists("bogus.file") then
+12    0000 ~                        sj.error("bogus.file does not exist.")  -- show this one as error for fun
+13    0000 ~                    ; end
+> lua pass: 3
+14    0000              DISPLAY "lua pass: ", /D, 3
+> lua_file_exists.asm does exist.
+14    0000               DISPLAY "lua_file_exists.asm does exist."
+lua_file_exists.asm(12): error: bogus.file does not exist.
+14    0000                  endlua
+15    0000
+# file closed: lua_file_exists.asm
+
+Value    Label
+------ - -----------------------------------------------------------
