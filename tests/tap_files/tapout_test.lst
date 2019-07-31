@@ -1,0 +1,114 @@
+# file opened: tapout_test.asm
+  1   0000              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  2   0000              ;; Test source for TAPOUT / TAPEND / OUTPUT / OUTEND ;;
+  3   0000              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  4   0000
+  5   0000              	DEFINE	tape_file "tapout_test.tap"
+  6   0000              	DEFINE	pure_code "tapout_test.bin"
+  7   0000
+  8   0000 01 01 01 01  	db	1,1,1,1
+  9   0004
+ 10   0004              	EMPTYTAP "tapout_test.tap"		;; Create empty TAP file
+ 11   0004
+ 12   0004 02 02 02 02  	db	2,2,2,2
+ 13   0008
+ 14   0008              	TAPOUT	"tapout_test.tap",0		;; Basic header
+ 15   0008
+ 16   0008 00           	db	0x00			;; Header type = basic
+ 17   0009 48 65 6C 6C  	db	'HelloWorld'		;; File name
+ 17   000D 6F 57 6F 72
+ 17   0011 6C 64
+ 18   0013 1B 00        	dw	baslen			;; Total length
+ 19   0015 01 00        	dw	1			;; Start line
+ 20   0017 1B 00        	dw	baslen			;; Length of pure basic
+ 21   0019
+ 22   0019              	TAPEND				;; End of tape block
+ 23   0019
+ 24   0019 03 03 03 03  	db	3,3,3,3
+ 25   001D
+ 26   001D              	TAPOUT	"tapout_test.tap"		;; Basic body
+ 27   001D
+ 28   001D              CODE	=	0xAF
+ 29   001D              USR	=	0xC0
+ 30   001D              LOAD	=	0xEF
+ 31   001D              RANDOMIZE =	0xF9
+ 32   001D
+ 33   001D 00 01        basic	db	0,1			;; Line 1
+ 34   001F 05 00        	dw	l1len			;; Length of line 1
+ 35   0021 EF 22 22 AF  line1	db	LOAD,'""',CODE		;; LOAD "" CODE
+ 36   0025 0D           	db	0x0D			;; End of line 1
+ 37   0026
+ 38   0026              l1len	=	$-line1
+ 39   0026
+ 40   0026 00 02        	db	0,2			;; Line 2
+ 41   0028 0E 00        	dw	l2len			;; Length of line 2
+ 42   002A F9 C0        line2	db	RANDOMIZE,USR		;; RANDOMIZE USR
+ 43   002C
+ 44   002C              	LUA ALLPASS			;; Digits of number
+ 45   002C ~            	_pc('db	"' .. tostring(_c("start")) .. '"')
+ 46   002C 33 32 37 36  db	"32768"
+ 46   0030 38
+ 46   0031              	ENDLUA
+ 47   0031
+ 48   0031 0E           	db	0x0E			;; Number follows
+ 49   0032 00 00        	db	0x00,0x00		;; 5 bytes of internal
+ 50   0034 00 80        	dw	start			;; number representation
+ 51   0036 00           	db	0x00
+ 52   0037 0D           	db	0x0D			;; End of line 2
+ 53   0038
+ 54   0038              l2len	=	$-line2
+ 55   0038              baslen	=	$-basic
+ 56   0038
+ 57   0038              	TAPEND				;; End of tape block
+ 58   0038
+ 59   0038 04 04 04 04  	db	4,4,4,4
+ 60   003C
+ 61   003C              	TAPOUT	"tapout_test.tap",0		;; Bytes header
+ 62   003C
+ 63   003C 03           	db	0x03			;; Header type = bytes
+ 64   003D 48 65 6C 6C  	db	'HelloWorld'		;; File name
+ 64   0041 6F 57 6F 72
+ 64   0045 6C 64
+ 65   0047 20 00        	dw	codlen			;; Total length
+ 66   0049 00 80        	dw	start			;; Start address
+ 67   004B 00 80        	dw	0x8000
+ 68   004D
+ 69   004D              	TAPEND				;; End of tape block
+ 70   004D
+ 71   004D 05 05 05 05  	db	5,5,5,5
+ 72   0051
+ 73   0051              	TAPOUT	"tapout_test.tap"		;; Bytes body
+ 74   0051              	OUTPUT	"tapout_test.bin"		;; Pure data file
+ 75   0051
+ 76   0051              	org	0x8000			;; Start address of code
+ 77   8000
+ 78   8000 3E 02        start	ld	a,0x02			;; Channel 2
+ 79   8002 CD 01 16     	call	0x1601			;; is opened
+ 80   8005 11 0E 80     	ld	de,text			;; Address of text
+ 81   8008 01 12 00     	ld	bc,txtlen		;; Length of text
+ 82   800B C3 3C 20     	jp	0x203C			;; Jump to print text
+ 83   800E
+ 84   800E 0D           text	db	13			;; Cursor to next line
+ 85   800F 13 01        	db	19,1			;; BRIGHT 1
+ 86   8011 12 01        	db	18,1			;; FLASH 1
+ 87   8013 48 65 6C 6C  	db	'Hello world !'		;; Text
+ 87   8017 6F 20 77 6F
+ 87   801B 72 6C 64 20
+ 87   801F 21
+ 88   8020
+ 89   8020              txtlen	=	$-text
+ 90   8020              codlen	=	$-start
+ 91   8020
+ 92   8020              	OUTEND				;; End of pure data file
+ 93   8020              	TAPEND				;; End of tape block
+ 94   8020
+ 95   8020 06 06 06 06  	db	6,6,6,6
+ 96   8024
+ 97   8024              ;; Error cases
+ 98   8024
+tapout_test.asm(99): error: SAVETAP only allowed in real device emulation mode (See DEVICE)
+ 99   8024              	SAVETAP	"nothing",start		;; No DEVICE defined
+100   8024
+tapout_test.asm(101): error: [TAPOUT] Missing flagbyte value: TAPOUT	"tapout_test.tap",		
+101   8024              	TAPOUT	"tapout_test.tap",		;; No flagbyte
+tapout_test.asm(102): error: Error opening file in TAPOUT: 
