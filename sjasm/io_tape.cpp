@@ -28,6 +28,7 @@ misrepresented as being the original software.
 
 #include "sjdefs.h"
 #include "io_tape_ldrs.h"
+#include <cassert>
 
 unsigned char parity;
 unsigned char blocknum=1;
@@ -114,29 +115,19 @@ int TAP_SaveBlock(char* fname, unsigned char flag, const char *ftapname, int sta
 	writebyte(flag, fpout);
 
 	CDeviceSlot *S;
-	for (aint i = 0, save = 0, ptr; i < Device->SlotsCount; i++) {
+	for (aint i = 0, ptr; i < Device->SlotsCount; i++) {
 	    S = Device->GetSlot(i);
-	    if (start >= (int) S->Address && start < (int) (S->Address + S->Size)) {
-			ptr = (start - S->Address);
-			if (length < (int) (S->Size - ptr)) {
-				save = length;
-			} else {
-				save = S->Size - ptr;
-			}
+		if (S->Address + S->Size <= start) continue;
+		if (length <= 0) break;
+		assert(S->Address <= start && start < S->Address + S->Size);
+		ptr = (start - S->Address);
 
-			while (save > 0) {
-				writebyte(S->Page->RAM[ptr], fpout);
-
-				length--;
-				start++;
-				save--;
-				ptr++;
-			}
-
-			if (length <= 0) {
-				break;
-			}
-	    }
+		while (length && ptr < S->Size) {
+			writebyte(S->Page->RAM[ptr], fpout);
+			++start;
+			++ptr;
+			--length;
+		}
 	}
 
 	writebyte(parity, fpout);

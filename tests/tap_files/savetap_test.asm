@@ -132,6 +132,9 @@ demo:		ei
 ; Address + length > #10000 (block to the end of memory will be saved)
 		savetap "savetap_test.tap",HEADLESS, #FFFF, 2
 
+; Extra variants of valid commands to exercise all code paths
+		savetap	"savetap_test.tap",CODE,"_extra1", demo, 1, 0x8000, 0x1234
+
 
 ;;;;;;;;;;;;;;;;;
 ;; Error cases ;;
@@ -148,6 +151,7 @@ demo:		ei
 		savetap	"error",HEADLESS,0,-1		;; Negative values are not allowed
 		savetap	"error",HEADLESS,#10000		;; Values higher than FFFFh are not allowed
 		savetap	"error",HEADLESS,0,#10000	;; Values higher than FFFFh are not allowed
+		savetap	"error",HEADLESS,0,		;; Syntax error
 		savetap	"error",HEADLESS,0,0,		;; Syntax error
 		savetap	"error",HEADLESS,0,0,-1		;; Invalid flag byte
 		savetap	"error",HEADLESS,0,0,0x100	;; Invalid flag byte
@@ -170,3 +174,10 @@ demo:		ei
 		savetap	"error",BASIC,"Err",0,0,#4000	;; Autostart LINE out of range
 		savetap	"error",NUMBERS,"Err",0,0,'@'	;; Variable name out of range
 		savetap	"error",NUMBERS,"Err",0,0,'?'	;; Variable name out of range
+
+		savetap	"error",HEADLESS	;; Will try to use HEADLESS as label for start of tap-snapshot
+		savetap	"error",HEADLESS+!	;; causing to fail in other part of implementation
+		savetap	"error",,	        ;; syntax error, no type parameter
+
+		device zxspectrumnext
+		savetap	"error",0x1234	        ;; SAVETAP snapshot is "ZX Spectrum devices" only
