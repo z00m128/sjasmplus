@@ -1,0 +1,11 @@
+fwdRefNormal: EQU 0x00001234
+fwdRefNormal.fwdRefLocal: EQU 0x00001235
+fwdRefEqu: EQU 0x00002345
+fwdRefDefl: EQU 0x00003456
+LabelNormal: EQU 0x00001237
+LabelNormal.LabelLocal: EQU 0x00001238
+LabelEqu: EQU 0x00002346
+LabelDefl: EQU 0x00003457
+LabelNormal: EQU 0x00001237
+aha.hehe.hihi: EQU 0x0000123A
+aha.hehe.hoho: EQU 0x0000123A

@@ -1,0 +1,10 @@
+dir_exp_default_file.asm(2): warning: [EXPORT] Filename for exportfile was not indicated. Output will be in: dir_exp_default_file.exp
+# file opened: dir_exp_default_file.asm
+1     0000              someLabel:  equ     0x1234
+2     0000                          export  someLabel   ; warning about default EXP filename
+3     0000
+# file closed: dir_exp_default_file.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x1234 X someLabel

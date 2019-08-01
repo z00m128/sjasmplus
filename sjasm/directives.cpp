@@ -1472,21 +1472,16 @@ void dirEXPORT() {
 			*p = 0;
 		}
 		STRCAT(p, LINEMAX, ".exp");
-		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName);
+		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName, W_EARLY);
 	}
 	if (!(n = p = GetID(lp))) {
-		Error("[EXPORT] Syntax error", lp, IF_FIRST); return;
-	}
-	if (pass != LASTPASS) {
+		Error("[EXPORT] Syntax error", lp, SUPPRESS);
 		return;
 	}
+	if (pass != LASTPASS) return;
 	IsLabelNotFound = 0;
-
 	GetLabelValue(n, val);
-	if (IsLabelNotFound) {
-		Error("[EXPORT] Label not found", p, SUPPRESS); return;
-	}
-	WriteExp(p, val);
+	if (!IsLabelNotFound) WriteExp(p, val);
 }
 
 void dirDISPLAY() {

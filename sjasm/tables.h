@@ -27,9 +27,6 @@
 */
 
 // tables.h
-using std::cout;
-using std::cerr;
-using std::endl;
 
 enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
 

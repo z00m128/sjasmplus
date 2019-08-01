@@ -1,0 +1,57 @@
+# file opened: dir_export.asm
+dir_export.asm(1): error: [EXPORT] Syntax error: 
+ 1    0000                  EXPORT                      ; syntax error
+dir_export.asm(2): error: [EXPORT] Syntax error: !                   
+ 2    0000                  EXPORT  !                   ; syntax error 2
+dir_export.asm(3): error: Label not found: nonExistentLabel
+ 3    0000                  EXPORT  nonExistentLabel    ; label not found error
+ 4    0000                  EXPORT  fwdRefNormal
+dir_export.asm(5): error: Label not found: _.fwdRefLocal
+ 5    0000                  EXPORT  .fwdRefLocal        ; this is error, the main label here is undefined ("_")
+ 6    0000                  EXPORT  fwdRefNormal.fwdRefLocal
+dir_export.asm(7): error: [EXPORT] Syntax error: @fwdRefNormal.fwdRefLocal   
+ 7    0000                  EXPORT  @fwdRefNormal.fwdRefLocal   ; "@" is not supported in EXPORT ???!?!
+ 8    0000                  EXPORT  fwdRefEqu
+ 9    0000                  EXPORT  fwdRefDefl
+10    0000                  ORG     0x1234
+11    1234 00           fwdRefNormal:   nop
+12    1235 ED B0        .fwdRefLocal:   ldir
+13    1237              fwdRefEqu:      EQU     0x2345
+14    1237              fwdRefDefl:     DEFL    0x3456
+15    1237 00           LabelNormal:    nop
+16    1238 ED B0        .LabelLocal:    ldir
+17    123A              LabelEqu:       EQU     0x2345+1
+18    123A              LabelDefl:      DEFL    0x3456+1
+19    123A                  .EXPORT LabelNormal
+dir_export.asm(20): error: Label not found: LabelDefl.LabelLocal
+20    123A                  .EXPORT .LabelLocal         ; this is error, it will try to find LabelDefl.LabelLocal
+21    123A                  .EXPORT LabelNormal.LabelLocal
+dir_export.asm(22): error: [EXPORT] Syntax error: @LabelNormal.LabelLocal
+22    123A                  .EXPORT @LabelNormal.LabelLocal
+23    123A                  export  LabelEqu
+24    123A                  .export LabelDefl
+25    123A                  EXPORT  LabelNormal         ; double export is not problem of sjasmplus, but coder
+26    123A
+27    123A                  ; check if the exports are always global
+28    123A                  EXPORT  aha.hehe.hihi
+29    123A                  MODULE  aha
+30    123A                  EXPORT  aha.hehe.hoho
+31    123A              hehe
+32    123A              .hihi
+33    123A              .hoho
+34    123A                  ENDMODULE
+# file closed: dir_export.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x1234 X fwdRefNormal
+0x1235 X fwdRefNormal.fwdRefLocal
+0x2345 X fwdRefEqu
+0x3456 X fwdRefDefl
+0x1237 X LabelNormal
+0x1238 X LabelNormal.LabelLocal
+0x2346 X LabelEqu
+0x3457 X LabelDefl
+0x123A X aha.hehe
+0x123A X aha.hehe.hihi
+0x123A X aha.hehe.hoho

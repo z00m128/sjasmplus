@@ -123,7 +123,9 @@ int GetLabelValue(char*& p, aint& val) {
 		}
 		np = temp;
 		while (*np && '>' != *np) {
-			if (LabelTable.GetValue(np, val)) return 1;
+			if (LabelTable.GetValue(np, val)) {
+				return 1;
+			}
 			IsLabelNotFound = oIsLabelNotFound;
 			while (*np && '>' != *np && '.' != *np) ++np;
 			if ('.' == *np) ++np;
@@ -167,15 +169,16 @@ int GetLabelValue(char*& p, aint& val) {
 		temp[LABMAX + len] = 0;
 	}
 	if (LabelTable.GetValue(temp, val)) return 1;
-	bool undefinedInTable = (2 == IsLabelNotFound);
-	IsLabelNotFound = oIsLabelNotFound;
-	if (!l && !g && LabelTable.GetValue(temp + len, val)) return 1;
-	undefinedInTable |= (2 == IsLabelNotFound);
-	if (!undefinedInTable) LabelTable.Insert(temp, 0, true);
-	if (pass == LASTPASS) {
-		Error("Label not found", temp); return 1;
+	bool inTableAlready = (2 == IsLabelNotFound);
+	if (!l && !g) {
+		IsLabelNotFound = oIsLabelNotFound;
+		if (LabelTable.GetValue(temp + len, val)) {
+			return 1;
+		}
+		inTableAlready |= (2 == IsLabelNotFound);
 	}
-	val = 0;
+	if (!inTableAlready) LabelTable.Insert(temp, 0, true);
+	Error("Label not found", temp);
 	return 1;
 }
 
