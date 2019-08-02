@@ -1,14 +1,21 @@
 # file opened: sjio_coverage2.asm
-1     0000                  DEVICE ZXSPECTRUM48
-2     0000                  LUA
-3     0000 ~                    sj.get_word(0)
-4     0000 ~                    sj.get_word(0xFFFF)
-5     0000 ~                    sj.get_byte(0x2000)
-6     0000 ~                    sj.get_byte(0x20000)
+ 1    0000                  DEVICE ZXSPECTRUM48
+ 2    0000                  LUA
+ 3    0000 ~                    sj.get_word(0)
+ 4    0000 ~                    sj.get_word(0xFFFF)
+ 5    0000 ~                    sj.get_byte(0x2000)
+ 6    0000 ~                    sj.get_byte(0x20000)
 sjio_coverage2.asm(4): error: MemGetByte: Error reading address: 65536
 sjio_coverage2.asm(6): error: MemGetByte: Error reading address: 131072
-7     0000                  ENDLUA
-8     0000
+ 7    0000                  ENDLUA
+ 8    0000
+ 9    0000                  EMPTYTAP "sjio_coverage2_ignore.tap"
+10    0000                  TAPOUT "sjio_coverage2_ignore.tap"
+11    0000 01 01 01...          DS  0x8000,1
+sjio_coverage2.asm(12): error: Tape block exceeds maximal size
+12    8000 02 02 02...          DS  0x8000,2
+13    0000                  TAPEND
+14    0000
 # file closed: sjio_coverage2.asm
 
 Value    Label
