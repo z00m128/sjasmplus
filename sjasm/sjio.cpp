@@ -946,7 +946,7 @@ unsigned char MemGetByte(unsigned int address) {
 		}
 	}
 
-	Error("Error with MemGetByte!", NULL, FATAL);
+	ErrorInt("MemGetByte: Error reading address", address);
 	return 0;
 }
 
@@ -1070,10 +1070,6 @@ EReturn ReadFile() {
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;
-			} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
-				lp = ReplaceDefine(p);
-				substitutedLine = line;		// override substituted listing for ENDT
-				return ENDTEXTAREA;
 			}
 		}
 		ParseLineSafe();
