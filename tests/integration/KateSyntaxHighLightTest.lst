@@ -3,7 +3,7 @@
  2    0000              ;; The syntax highlight rules are in "asm-z80-sj.xml" file in the project root directory
  3    0000
  4    0000                  device zxspectrum48     ; directive of sjasmplus
-KateSyntaxHighLightTest.asm(5): error: [ORG] Page number must be in range 0..3
+KateSyntaxHighLightTest.asm(5): error: [ORG] Page number must be in range 0..3: 168
 KateSyntaxHighLightTest.asm(5): error: Unexpected: , #A8  
  5    0000                  org     $A8, 0xA8, #A8  ; hexa, also: 0A8h
 KateSyntaxHighLightTest.asm(6): error: Unexpected: , 43008d   

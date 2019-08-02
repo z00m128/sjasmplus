@@ -87,7 +87,7 @@
   8   0000 3F 3F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
   9   0002             >pageNum = pageNum+1
  10   0002                  EDUP
-zx256_to_zx1M.asm(11): error: [PAGE] Page number must be in range 0..15
+zx256_to_zx1M.asm(11): error: [PAGE] Page number must be in range 0..15: 16
  11   0002                  PAGE 16         ; error - non-existing page
  12   0002                  ASSERT {0} == "??"  ; page 15 should be still there
  13   0002
@@ -298,7 +298,7 @@ zx256_to_zx1M.asm(32): error: [SAVESNA] Negative values are not allowed: SAVESNA
  41   0000 4F 4F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
  42   0002             >pageNum = pageNum+1
  43   0002                  EDUP
-zx256_to_zx1M.asm(44): error: [PAGE] Page number must be in range 0..31
+zx256_to_zx1M.asm(44): error: [PAGE] Page number must be in range 0..31: 32
  44   0002                  PAGE 32         ; error - non-existing page
  45   0002                  ASSERT {0} == "OO"  ; page 31 should be still there
  46   0002
@@ -669,7 +669,7 @@ zx256_to_zx1M.asm(65): error: [SAVESNA] Negative values are not allowed: SAVESNA
  74   0000 6F 6F       >  DW pageNum+'0' + ((pageNum+'0')<<8)
  75   0002             >pageNum = pageNum+1
  76   0002                  EDUP
-zx256_to_zx1M.asm(77): error: [PAGE] Page number must be in range 0..63
+zx256_to_zx1M.asm(77): error: [PAGE] Page number must be in range 0..63: 64
  77   0002                  PAGE 64         ; error - non-existing page
  78   0002                  ASSERT {0} == $6F6F ; page 63 should be still there
  79   0002

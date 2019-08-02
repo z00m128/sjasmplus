@@ -236,21 +236,26 @@ void dirBLOCK() {
 	}
 }
 
-static void dirPageImpl(const char* const dirName) {
-	//DeviceID should have been checked by caller - no code here
-	aint val;
-	if (!ParseExpression(lp, val)) {
-		Error("Syntax error", lp, IF_FIRST);
-		return;
-	}
-	if (val < 0 || Device->PagesCount <= val) {
+static bool dirPageImpl(const char* const dirName, int pageNumber) {
+	if (!Device) return false;
+	if (pageNumber < 0 || Device->PagesCount <= pageNumber) {
 		char buf[LINEMAX];
-		SPRINTF2(buf, LINEMAX, "[%s] Page number must be in range 0..%u", dirName, Device->PagesCount - 1);
-		Error(buf, NULL, IF_FIRST);
-		return;
+		SPRINTF2(buf, LINEMAX, "[%s] Page number must be in range 0..%d", dirName, Device->PagesCount - 1);
+		ErrorInt(buf, pageNumber);
+		return false;
 	}
-	Device->GetCurrentSlot()->Page = Device->GetPage(val);
+	Device->GetCurrentSlot()->Page = Device->GetPage(pageNumber);
 	Device->CheckPage(CDevice::CHECK_RESET);
+	return true;
+}
+
+static void dirPageImpl(const char* const dirName) {
+	aint pageNum;
+	if (ParseExpression(lp, pageNum)) {
+		dirPageImpl(dirName, pageNum);
+	} else {
+		Error("Syntax error", lp, IF_FIRST);
+	}
 }
 
 void dirORG() {
@@ -2201,16 +2206,7 @@ void InsertDirectives() {
 #ifdef USE_LUA
 
 bool LuaSetPage(aint n) {
-	if (n < 0) {
-		Error("sj.set_page: negative page number are not allowed", lp); return false;
-	} else if (Device->PagesCount <= n) {
-		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "sj.set_page: page number must be in range 0..%u", Device->PagesCount - 1);
-		Error(buf, NULL, IF_FIRST); return false;
-	}
-	Device->GetCurrentSlot()->Page = Device->GetPage(n);
-	Device->CheckPage(CDevice::CHECK_RESET);
-	return true;
+	return dirPageImpl("sj.set_page", n);
 }
 
 bool LuaSetSlot(aint n) {

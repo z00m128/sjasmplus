@@ -17,3 +17,5 @@
 
     ; check the Z80N instructions are enabled by the device selection
     nextreg $07,2
+
+    PAGE -1     ; error

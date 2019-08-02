@@ -15,7 +15,7 @@
  7    0002                ORG 0x0000
  7    0000 33 33          DB "33"
  8    0002
-zx48_and_128.asm(9): error: [PAGE] Page number must be in range 0..3
+zx48_and_128.asm(9): error: [PAGE] Page number must be in range 0..3: 4
  9    0002                  PAGE 4      ; error - non-existing page (page 3 should be still visible in slot 0)
 10    0002                  ASSERT {0} == "33"
 11    0002
@@ -86,7 +86,7 @@ zx48_and_128.asm(25): error: Write outside of device memory at: 65536
 39    0002                ORG 0x0000
 39    0000 37 37          DB "77"
 40    0002
-zx48_and_128.asm(41): error: [PAGE] Page number must be in range 0..7
+zx48_and_128.asm(41): error: [PAGE] Page number must be in range 0..7: 8
 41    0002                  PAGE 8      ; error - non-existing page (page 7 should be still visible in slot 0)
 42    0002                  ASSERT {0} == "77"
 43    0002

@@ -926,11 +926,7 @@ int SaveRAM(FILE* ff, int start, int length) {
 }
 
 unsigned int MemGetWord(unsigned int address) {
-	if (pass != LASTPASS) {
-		return 0;
-	}
-
-	return MemGetByte(address)+(MemGetByte(address+1)<<8);
+	return MemGetByte(address) + (MemGetByte(address+1)<<8);
 }
 
 unsigned char MemGetByte(unsigned int address) {

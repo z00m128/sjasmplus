@@ -1,0 +1,26 @@
+# file opened: lua_set_page.asm
+ 1    0000                  DEVICE none
+ 2    0000
+ 3    0000                  lua
+ 4    0000 ~                    -- should fail, because no device is set (but it fails silently :/ )
+ 5    0000 ~                    assert(not sj.set_page(1))
+ 6    0000                  endlua
+ 7    0000
+ 8    0000                  DEVICE zxspectrum128
+ 9    0000
+10    0000                  lua
+11    0000 ~                    assert(not sj.set_page(233))
+12    0000 ~                    assert(not sj.set_page(-1))
+13    0000 ~                    assert(sj.set_page(6))
+lua_set_page.asm(11): error: [sj.set_page] Page number must be in range 0..7: 233
+lua_set_page.asm(12): error: [sj.set_page] Page number must be in range 0..7: -1
+14    0000                  endlua
+15    0000
+16    0000                  ASSERT(7 == $$)     ; slot 0 should be still default page 7
+17    0000                  ORG 0xC000
+18    C000                  ASSERT(6 == $$)     ; default slot 3 should be page 6 set by lua
+19    C000
+# file closed: lua_set_page.asm
+
+Value    Label
+------ - -----------------------------------------------------------
