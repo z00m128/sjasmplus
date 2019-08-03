@@ -850,47 +850,40 @@ void dirSAVETAP() {
 }
 
 void dirSAVEBIN() {
-	bool exec = true;
-
 	if (!DeviceID) {
-		if (pass == LASTPASS) {
-			Error("SAVEBIN only allowed in real device emulation mode (See DEVICE)");
-		}
-		exec = false;
-	} else if (pass != LASTPASS) {
-		exec = false;
+		Error("SAVEBIN only allowed in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
+		return;
 	}
-
+	bool exec = (LASTPASS == pass);
 	aint val;
-	char* fnaam;
 	int start = -1, length = -1;
-
-	fnaam = GetFileName(lp);
+	char* fnaam = GetFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVEBIN] Syntax error", bp, PASS3); return;
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[SAVEBIN] Syntax error", bp, SUPPRESS); return;
 			}
 			if (val < 0) {
-				Error("[SAVEBIN] Values less than 0000h are not allowed", bp, PASS3); return;
+				Error("[SAVEBIN] Values less than 0000h are not allowed", bp); return;
 			} else if (val > 0xFFFF) {
-			  	Error("[SAVEBIN] Values more than FFFFh are not allowed", bp, PASS3); return;
+			  	Error("[SAVEBIN] Values more than FFFFh are not allowed", bp); return;
 			}
 			start = val;
 		} else {
 		  	Error("[SAVEBIN] Syntax error. No parameters", bp, PASS3); return;
 		}
 		if (anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVEBIN] Syntax error", bp, PASS3); return;
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[SAVEBIN] Syntax error", bp, SUPPRESS); return;
 			}
 			if (val < 0) {
-				Error("[SAVEBIN] Negative values are not allowed", bp, PASS3); return;
+				Error("[SAVEBIN] Negative values are not allowed", bp); return;
 			}
 			length = val;
 		}
 	} else {
-		Error("[SAVEBIN] Syntax error. No parameters", bp, PASS3); return;
+		Error("[SAVEBIN] Syntax error. No parameters", bp); return;
 	}
 
 	if (exec && !SaveBinary(fnaam, start, length)) {

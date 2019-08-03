@@ -1,0 +1,30 @@
+# file opened: savebin.asm
+ 1    0000                  DEVICE NONE
+savebin.asm(2): error: SAVEBIN only allowed in real device emulation mode (See DEVICE)
+ 2    0000                  SAVEBIN "fname",0,1     ; error because no device...
+ 3    0000
+ 4    0000                  DEVICE ZXSPECTRUM48
+ 5    0000                  ; syntax errors
+savebin.asm(6): error: [SAVEBIN] Syntax error. No parameters: SAVEBIN "fname"
+ 6    0000                  SAVEBIN "fname"
+savebin.asm(7): error: [SAVEBIN] Syntax error: SAVEBIN "fname",
+ 7    0000                  SAVEBIN "fname",
+savebin.asm(8): error: [SAVEBIN] Syntax error: SAVEBIN "fname",&
+ 8    0000                  SAVEBIN "fname",&
+savebin.asm(9): error: [SAVEBIN] Values less than 0000h are not allowed: SAVEBIN "fname",-1
+ 9    0000                  SAVEBIN "fname",-1
+savebin.asm(10): error: [SAVEBIN] Values more than FFFFh are not allowed: SAVEBIN "fname",0x10000
+10    0000                  SAVEBIN "fname",0x10000
+savebin.asm(11): error: [SAVEBIN] Syntax error. No parameters: SAVEBIN "fname",,
+11    0000                  SAVEBIN "fname",,
+savebin.asm(12): error: [SAVEBIN] Syntax error: SAVEBIN "fname",0xC000,
+12    0000                  SAVEBIN "fname",0xC000,
+savebin.asm(13): error: [SAVEBIN] Syntax error: SAVEBIN "fname",0xC000,&
+13    0000                  SAVEBIN "fname",0xC000,&
+savebin.asm(14): error: [SAVEBIN] Negative values are not allowed: SAVEBIN "fname",0xC000,-1
+14    0000                  SAVEBIN "fname",0xC000,-1
+15    0000
+# file closed: savebin.asm
+
+Value    Label
+------ - -----------------------------------------------------------
