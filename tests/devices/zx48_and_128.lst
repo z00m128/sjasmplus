@@ -120,6 +120,26 @@ zx48_and_128.asm(57): error: Write outside of device memory at: 65536
 57    FFFE 43 43 44 44      DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
 58    0002                  ASSERT {0} == "77"          ; still page 7 there
 59    0002
+60    0002                  ; some more error states
+zx48_and_128.asm(61): error: [ORG] Syntax error in <address>: & 
+61    0002                  ORG &
+zx48_and_128.asm(61): error: Syntax error in <page_number>: & 
+61    0002                PAGE &
+zx48_and_128.asm(61): error: Syntax error in <page_number>: & 
+61    0002                ORG 0x1234, &
+zx48_and_128.asm(61): error: [DISP] Syntax error in <address>: & 
+61    1234                DISP &
+zx48_and_128.asm(61): error: [SLOT] Syntax error in <slot_number>: & 
+61    1234                SLOT & ; syntax errors
+zx48_and_128.asm(62): error: ENT should be after DISP
+62    1234                  ENT
+63    1234
+64    1234                  DEVICE none
+zx48_and_128.asm(65): warning: PAGE only allowed in real device emulation mode (See DEVICE)
+65    1234                  PAGE 1
+zx48_and_128.asm(65): warning: SLOT only allowed in real device emulation mode (See DEVICE)
+65    1234                SLOT 1
+66    1234
 # file closed: zx48_and_128.asm
 
 Value    Label

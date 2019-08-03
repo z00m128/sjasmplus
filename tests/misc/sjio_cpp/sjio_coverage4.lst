@@ -12,11 +12,16 @@ sjio_coverage4.asm(6): error: SAVEBIN only allowed in real device emulation mode
  8    C180                  DEVICE zxspectrum48
 sjio_coverage4.asm(9): warning: Negative BLOCK?
  9    C180                  BLOCK   -8000,13
-10    A240                  ORG     0xFFFC
-11    FFFC 41 48 4F 59      DB      "AHOY"
-12    0000                  SAVEBIN "sjio_coverage4.bin", 0xFFFC        ; no length argument
-13    0000                  SAVEBIN "sjio_coverage4.tap", 0xFFFC, 1000  ; length beyond end of RAM
-14    0000
+sjio_coverage4.asm(10): error: [BLOCK] Syntax Error in <length>: &, & 
+10    A240                  BLOCK   &, &
+sjio_coverage4.asm(10): error: Syntax error: &       
+sjio_coverage4.asm(10): error: Unexpected: &       
+10    A240 00 00 00...    BLOCK   20,&       ; syntax errors
+11    A254                  ORG     0xFFFC
+12    FFFC 41 48 4F 59      DB      "AHOY"
+13    0000                  SAVEBIN "sjio_coverage4.bin", 0xFFFC        ; no length argument
+14    0000                  SAVEBIN "sjio_coverage4.tap", 0xFFFC, 1000  ; length beyond end of RAM
+15    0000
 # file closed: sjio_coverage4.asm
 
 Value    Label

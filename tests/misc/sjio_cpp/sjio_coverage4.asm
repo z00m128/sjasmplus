@@ -7,6 +7,7 @@
 
     DEVICE zxspectrum48
     BLOCK   -8000,13
+    BLOCK   &, & : BLOCK   20,&       ; syntax errors
     ORG     0xFFFC
     DB      "AHOY"
     SAVEBIN "sjio_coverage4.bin", 0xFFFC        ; no length argument

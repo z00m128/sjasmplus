@@ -128,20 +128,29 @@ void dirDZ() {
 
 void dirABYTE() {
 	aint add;
-	if (ParseExpression(lp, add))	getBytesWithCheck(add);
-	else							Error("[ABYTE] Expression expected");
+	if (ParseExpressionNoSyntaxError(lp, add)) {
+		getBytesWithCheck(add);
+	} else {
+		Error("ABYTE <offset> <bytes>: parsing <offset> failed", bp, SUPPRESS);
+	}
 }
 
 void dirABYTEC() {
 	aint add;
-	if (ParseExpression(lp, add))	getBytesWithCheck(add, 1);
-	else							Error("[ABYTEC] Expression expected");
+	if (ParseExpressionNoSyntaxError(lp, add)) {
+		getBytesWithCheck(add, 1);
+	} else {
+		Error("ABYTEC <offset> <bytes>: parsing <offset> failed", bp, SUPPRESS);
+	}
 }
 
 void dirABYTEZ() {
 	aint add;
-	if (ParseExpression(lp, add))	getBytesWithCheck(add, 0, true);
-	else							Error("[ABYTEZ] Expression expected");
+	if (ParseExpressionNoSyntaxError(lp, add)) {
+		getBytesWithCheck(add, 0, true);
+	} else {
+		Error("ABYTEZ <offset> <bytes>: parsing <offset> failed", bp, SUPPRESS);
+	}
 }
 
 void dirWORD() {
@@ -223,7 +232,7 @@ void dirDH() {
 
 void dirBLOCK() {
 	aint teller,val = 0;
-	if (ParseExpression(lp, teller)) {
+	if (ParseExpressionNoSyntaxError(lp, teller)) {
 		if ((signed) teller < 0) {
 			Warning("Negative BLOCK?");
 		}
@@ -232,7 +241,7 @@ void dirBLOCK() {
 		}
 		EmitBlock(val, teller);
 	} else {
-		Error("[BLOCK] Syntax Error", lp, IF_FIRST);
+		Error("[BLOCK] Syntax Error in <length>", lp, SUPPRESS);
 	}
 }
 
@@ -251,17 +260,17 @@ static bool dirPageImpl(const char* const dirName, int pageNumber) {
 
 static void dirPageImpl(const char* const dirName) {
 	aint pageNum;
-	if (ParseExpression(lp, pageNum)) {
+	if (ParseExpressionNoSyntaxError(lp, pageNum)) {
 		dirPageImpl(dirName, pageNum);
 	} else {
-		Error("Syntax error", lp, IF_FIRST);
+		Error("Syntax error in <page_number>", lp, SUPPRESS);
 	}
 }
 
 void dirORG() {
 	aint val;
-	if (!ParseExpression(lp, val)) {
-		Error("[ORG] Syntax error", lp, IF_FIRST);
+	if (!ParseExpressionNoSyntaxError(lp, val)) {
+		Error("[ORG] Syntax error in <address>", lp, SUPPRESS);
 		return;
 	}
 	CurAddress = val;
@@ -272,12 +281,13 @@ void dirORG() {
 
 void dirDISP() {
 	aint val;
-	if (ParseExpression(lp, val)) {
-		adrdisp = CurAddress;CurAddress = val;
+	if (ParseExpressionNoSyntaxError(lp, val)) {
+		adrdisp = CurAddress;
+		CurAddress = val;
+		PseudoORG = 1;
 	} else {
-		Error("[DISP] Syntax error", lp, IF_FIRST); return;
+		Error("[DISP] Syntax error in <address>", lp, SUPPRESS);
 	}
-	PseudoORG = 1;
 }
 
 void dirENT() {
@@ -368,8 +378,8 @@ void dirSLOT() {
 		SkipParam(lp);
 		return;
 	}
-	if (!ParseExpression(lp, val)) {
-		Error("Syntax error", lp, IF_FIRST);
+	if (!ParseExpressionNoSyntaxError(lp, val)) {
+		Error("[SLOT] Syntax error in <slot_number>", lp, SUPPRESS);
 		return;
 	}
 	if (!Device->SetSlot(val)) {

@@ -56,3 +56,10 @@
     ORG 0xFFFE
     DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
     ASSERT {0} == "77"          ; still page 7 there
+
+    ; some more error states
+    ORG & : PAGE & : ORG 0x1234, & : DISP & : SLOT & ; syntax errors
+    ENT
+
+    DEVICE none
+    PAGE 1 : SLOT 1

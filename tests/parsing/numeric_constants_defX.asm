@@ -90,3 +90,5 @@
     ; check if syntax errors are reported precisely *once* per (tricky) expression
     DB      +                       ; error: Syntax error
     DB      &&$                     ; error: Syntax error
+
+    ABYTE & 1 : ABYTEC & 2 : ABYTEZ & 3 ; error: Syntax error

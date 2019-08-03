@@ -874,6 +874,13 @@ numeric_constants_defX.asm(91): error: Syntax error:
 numeric_constants_defX.asm(92): error: Syntax error: &&$                     
 92    0C3A                  DB      &&$                     ; error: Syntax error
 93    0C3A
+numeric_constants_defX.asm(94): error: ABYTE <offset> <bytes>: parsing <offset> failed: ABYTE & 1 
+94    0C3A                  ABYTE & 1
+numeric_constants_defX.asm(94): error: ABYTEC <offset> <bytes>: parsing <offset> failed: ABYTEC & 2 
+94    0C3A                ABYTEC & 2
+numeric_constants_defX.asm(94): error: ABYTEZ <offset> <bytes>: parsing <offset> failed: ABYTEZ & 3 
+94    0C3A                ABYTEZ & 3 ; error: Syntax error
+95    0C3A
 # file closed: numeric_constants_defX.asm
 
 Value    Label
