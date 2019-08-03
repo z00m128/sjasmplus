@@ -385,9 +385,11 @@ namespace Options {
 					} else if (!strcmp("lst", val)) {
 						OutputVerbosity = OV_LST;
 						AddLabelListing = false;
+						HideLogo = true;
 					} else if (!strcmp("lstlab", val)) {
 						OutputVerbosity = OV_LST;
 						AddLabelListing = true;
+						HideLogo = true;
 					} else {
 						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
 					}

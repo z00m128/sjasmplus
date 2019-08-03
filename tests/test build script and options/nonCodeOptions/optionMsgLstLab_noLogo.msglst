@@ -1,0 +1,14 @@
+# file opened: optionMsgLstLab_noLogo.asm
+1     0000              ; original test runner script does use `--nologo` always, so it went unnoticed
+2     0000              ; the `--msg=lstlab` does actually show the logo ahead of listing.
+3     0000 00           nn: nop
+optionMsgLstLab_noLogo.asm(4): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+4     0001 3E 6E            ld      a,'warn'
+optionMsgLstLab_noLogo.asm(5): error: Unrecognized instruction: some_error line
+5     0003                  some_error line
+6     0003
+# file closed: optionMsgLstLab_noLogo.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X nn

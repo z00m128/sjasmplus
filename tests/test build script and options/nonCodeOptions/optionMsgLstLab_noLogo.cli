@@ -1,0 +1,2 @@
+$MEMCHECK "$EXE" --msg=lstlab --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
+last_result=$?

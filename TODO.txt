@@ -5,8 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-bug: --msg=lstlab in default configuration does output also "logo" into the listing.
-
 parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???)
 - write tests trying those "while" loops for groups of operators
 - write tests testing operator precedence
