@@ -447,8 +447,8 @@ void dirEND() {
 
 void dirSIZE() {
 	aint val;
-	if (!ParseExpression(lp, val)) {
-		Error("[SIZE] Syntax error", bp, IF_FIRST);
+	if (!ParseExpressionNoSyntaxError(lp, val)) {
+		Error("[SIZE] Syntax error in <filesize>", bp, SUPPRESS);
 		return;
 	}
 	if (LASTPASS != pass) return;	// only active during final pass
@@ -462,15 +462,15 @@ void dirINCBIN() {
 	if (anyComma(lp)) {
 		aint val;
 		if (!anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[INCBIN] Syntax error", bp, SUPPRESS);
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[INCBIN] Syntax error in <offset>", bp, SUPPRESS);
 				return;
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
 		if (anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[INCBIN] Syntax error", bp, SUPPRESS);
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[INCBIN] Syntax error in <length>", bp, SUPPRESS);
 				return;
 			}
 			length = val;
