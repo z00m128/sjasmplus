@@ -1,0 +1,23 @@
+# file opened: sjio_coverage4.asm
+ 1    0000                  DEVICE none
+sjio_coverage4.asm(2): warning: Negative BLOCK?
+ 2    0000                  BLOCK   -8000,11
+ 3    E0C0                  DISP    0x1234
+sjio_coverage4.asm(4): warning: Negative BLOCK?
+ 4    1234                  BLOCK   -8000,12
+ 5    F2F4                  ENDT
+sjio_coverage4.asm(6): error: SAVEBIN only allowed in real device emulation mode (See DEVICE)
+ 6    C180                  SAVEBIN "sjio_coverage4.bin", 1, 2  ; no device error
+ 7    C180
+ 8    C180                  DEVICE zxspectrum48
+sjio_coverage4.asm(9): warning: Negative BLOCK?
+ 9    C180                  BLOCK   -8000,13
+10    A240                  ORG     0xFFFC
+11    FFFC 41 48 4F 59      DB      "AHOY"
+12    0000                  SAVEBIN "sjio_coverage4.bin", 0xFFFC        ; no length argument
+13    0000                  SAVEBIN "sjio_coverage4.tap", 0xFFFC, 1000  ; length beyond end of RAM
+14    0000
+# file closed: sjio_coverage4.asm
+
+Value    Label
+------ - -----------------------------------------------------------

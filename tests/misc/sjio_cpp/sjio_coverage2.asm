@@ -11,3 +11,5 @@
         DS  0x8000,1
         DS  0x8000,2
     TAPEND
+
+    MACRO   MacroWithoutENDM

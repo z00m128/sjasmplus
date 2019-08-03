@@ -1,3 +1,5 @@
+sjio_coverage2.asm(16): error: Unexpected end of macro
+sjio_coverage2.asm(16): error: Unexpected end of macro
 # file opened: sjio_coverage2.asm
  1    0000                  DEVICE ZXSPECTRUM48
  2    0000                  LUA
@@ -16,6 +18,9 @@ sjio_coverage2.asm(12): error: Tape block exceeds maximal size
 12    8000 02 02 02...          DS  0x8000,2
 13    0000                  TAPEND
 14    0000
+15    0000                  MACRO   MacroWithoutENDM
+16    0000 ~
+16    0000
 # file closed: sjio_coverage2.asm
 
 Value    Label
