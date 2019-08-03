@@ -72,11 +72,9 @@ char* ValidateLabel(char* naam, int flags) {
 	if (mlp && l) {
 		STRCAT(lp, LINEMAX, macrolabp); STRCAT(lp, LINEMAX, ">");
 	} else {
-		if (!p && ModuleName) {
-			//int len1=strlen(lp);
-			//int len2=strlen(ModuleName);
-			STRCAT(lp, LINEMAX, ModuleName);
-			STRCAT(lp, LINEMAX, ".");
+		if (!p && *ModuleName) {
+			STRCAT(lp, LINEMAX-2, ModuleName);
+			STRCAT(lp, 1, ".");
 		}
 		if (l) {
 			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
@@ -146,9 +144,9 @@ int GetLabelValue(char*& p, aint& val) {
 		break;
 	}
 	temp[0] = 0;
-	if (!g && ModuleName) {
-		STRCAT(temp, LINEMAX, ModuleName);
-		STRCAT(temp, LINEMAX, ".");
+	if (!g && *ModuleName) {
+		STRCAT(temp, LINEMAX-2, ModuleName);
+		STRCAT(temp, 1, ".");
 	}
 	if (l) {
 		STRCAT(temp, LINEMAX, vorlabp);
@@ -1146,9 +1144,9 @@ void CStructureTable::Init() {
 CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 	char sn[LINEMAX], * sp;
 	sn[0] = 0;
-	if (!gl && ModuleName) {
-		STRCPY(sn, LINEMAX, ModuleName);
-		STRCAT(sn, LINEMAX, ".");
+	if (!gl && *ModuleName) {
+		STRCPY(sn, LINEMAX-2, ModuleName);
+		STRCAT(sn, 1, ".");
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
@@ -1165,9 +1163,9 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	char sn[LINEMAX], * sp;
 	sn[0] = 0;
-	if (!gl && ModuleName) {
-		STRCPY(sn, LINEMAX, ModuleName);
-		STRCAT(sn, LINEMAX, ".");
+	if (!gl && *ModuleName) {
+		STRCPY(sn, LINEMAX-2, ModuleName);
+		STRCAT(sn, 1, ".");
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
@@ -1176,7 +1174,7 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 		if (!strcmp(sp, p->id)) return p;
 		p = p->next;
 	}
-	if (gl || !ModuleName) return NULL;
+	if (gl || ! *ModuleName) return NULL;
 	sp += 1 + strlen(ModuleName); p = strs[(*sp)&127];
 	while (p) {
 		if (!strcmp(sp, p->id)) return p;

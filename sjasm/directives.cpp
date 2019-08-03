@@ -401,95 +401,35 @@ void dirALIGN() {
 	else			EmitBlock(fill, len, false);
 }
 
-/*void dirMODULE() {
-	char* n;
-	ModuleList = new CStringsList(ModuleName, ModuleList);
-	if (ModuleName != NULL) {
-		delete[] ModuleName;
-	}
-	if (n = GetID(lp)) {
-		ModuleName = STRDUP(n);
-		if (ModuleName == NULL) {
-			Error("No enough memory!", 0, FATAL);
-		}
-	} else {
-		Error("[MODULE] Syntax error", 0, CATCHALL);
-	}
-}
-
-void dirENDMODULE() {
-	if (ModuleList) {
-		if (ModuleName != NULL) {
-			delete[] ModuleName;
-		}
-		if (ModuleList->string != NULL) {
-			ModuleName = STRDUP(ModuleList->string);
-			if (ModuleName == NULL) {
-				Error("No enough memory!", 0, FATAL);
-			}
-		} else {
-			ModuleName = NULL;
-		}
-		ModuleList = ModuleList->next;
-	} else {
-		Error("ENDMODULE without MODULE", 0);
-	}
-}*/
-
 void dirMODULE() {
-	char* n;
-	if ((n = GetID(lp))) {
-		if(ModuleName == NULL)
-		{
-			ModuleName = STRDUP(n);
-			if (ModuleName == NULL) {
-				Error("Not enough memory!", NULL, FATAL);
-			}
-		}
-		else
-		{
-			ModuleName = (char*)realloc(ModuleName,strlen(n)+strlen(ModuleName)+2);
-			if (ModuleName == NULL) {
-				Error("Not enough memory!", NULL, FATAL);
-			}
-			STRCAT(ModuleName, sizeof("."), ".");
-			STRCAT(ModuleName, sizeof(n), n);
-		}
+	char* n = GetID(lp);
+	if (n && (nullptr == STRCHR(n, '.'))) {
+		if (*ModuleName) STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), ".");
+		STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), n);
+		// reset non-local label to default "_"
+		if (vorlabp) free(vorlabp);
+		vorlabp = STRDUP("_");
 	} else {
-		Error("[MODULE] Syntax error", lp, IF_FIRST);
-	}
-
-	if (ModuleName != NULL) {
-		ModuleList = new CStringsList(ModuleName, ModuleList);
+		if (n) {
+			Error("[MODULE] Dots not allowed in <module_name>", n, SUPPRESS);
+		} else {
+			Error("[MODULE] Syntax error in <name>", bp, SUPPRESS);
+		}
 	}
 }
 
 void dirENDMODULE() {
-	CStringsList* tmp;
-
-	if (ModuleList) {
-		if (ModuleName != NULL) {
-			free(ModuleName);
-			ModuleName = NULL;
-		}
-		tmp = ModuleList->next;
-		if(tmp!=NULL)
-		{
-			ModuleList->next = NULL;
-			delete ModuleList;
-		}
-		ModuleList = tmp;
-		if (ModuleList != NULL && ModuleList->string != NULL) {
-			ModuleName = STRDUP(ModuleList->string);
-			if (ModuleName == NULL) {
-				Error("No enough memory!", NULL, FATAL);
-			}
-		} else {
-			ModuleName = NULL;
-		}
-	} else {
+	if (! *ModuleName) {
 		Error("ENDMODULE without MODULE");
+		return;
 	}
+	// remove last part of composite modules name
+	char* lastDot = strrchr(ModuleName, '.');
+	if (lastDot)	*lastDot = 0;
+	else			*ModuleName = 0;
+	// reset non-local label to default "_"
+	if (vorlabp) free(vorlabp);
+	vorlabp = STRDUP("_");
 }
 
 void dirEND() {

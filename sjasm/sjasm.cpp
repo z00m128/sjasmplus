@@ -151,7 +151,7 @@ char* DeviceID = 0;
 
 // extend
 char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
-char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
+char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 char SourceFNames[128][MAX_PATH];
 static int SourceFNamesCount = 0;
@@ -168,7 +168,7 @@ aint CurAddress = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0, LastParsedL
 aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
-char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
+char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
 CStringsList* lijstp = NULL;
 CLabelTable LabelTable;
@@ -177,7 +177,6 @@ CDefineTable DefineTable;
 CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
 CStructureTable StructureTable;
-CStringsList* ModuleList = NULL;
 
 #ifdef USE_LUA
 
@@ -198,11 +197,7 @@ void InitPass() {
 		pow10 *= 10;
 		if (pow10 < 10) ExitASM(1);	// 32b overflow
 	} while (pow10 <= maxlin);
-	if (ModuleName != NULL) {
-		free(ModuleName);
-		ModuleName = NULL;
-	}
-	ModuleName = NULL;
+	*ModuleName = 0;
 	SetLastParsedLabel(nullptr);
 	if (vorlabp) free(vorlabp);
 	vorlabp = STRDUP("_");
@@ -213,7 +208,6 @@ void InitPass() {
 	PseudoORG = 0; adrdisp = 0;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
-	ModuleList = NULL;
 	StructureTable.Init();
 	MacroTable.Init();
 	DefineTable = Options::CmdDefineTable;
@@ -246,9 +240,6 @@ void FreeRAM() {
 	}
 	if (globalDeviceID) {
 		free(globalDeviceID);	globalDeviceID = NULL;
-	}
-	if (ModuleList) {
-		delete ModuleList;	ModuleList = NULL;
 	}
 	if (lijstp) {
 		delete lijstp;		lijstp = NULL;

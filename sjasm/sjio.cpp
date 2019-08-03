@@ -870,6 +870,10 @@ int FileExists(char* file_name) {
 }
 
 void Close() {
+	if (*ModuleName) {
+		Warning("ENDMODULE missing for module", ModuleName, W_ALL);
+	}
+
 	CloseDest();
 	CloseTapFile();
 	if (FP_ExportFile != NULL) {

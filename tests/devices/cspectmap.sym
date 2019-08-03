@@ -17,5 +17,5 @@
 0000C0E0 001BE0E0 00 PageDF.A.B@local.c..d
 0000C030 00060030 00 Module.Page30
 0000C031 00060031 00 Module.Page30@local
-0000C031 00062031 00 Module..two..Page31..A.
-0000C032 00062032 00 Module..two..Page31..A.@local..c.
+0000C031 00062031 00 Module_two_.Page31..A.
+0000C032 00062032 00 Module_two_.Page31..A.@local..c.

@@ -97,7 +97,7 @@ extern int deviceDirectivesCounter;
 
 // extend
 extern char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
-extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
+extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 // the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
 extern char SourceFNames[128][MAX_PATH];
@@ -111,7 +111,7 @@ extern int macronummer, lijst, reglenwidth;
 extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, LastParsedLabelLine;
 extern aint destlen, size, PreviousErrorLine, maxlin, comlin;
 
-extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
+extern char* vorlabp, * macrolabp, * LastParsedLabel;
 
 enum EEncoding { ENCDOS, ENCWIN };
 extern char* CurrentDirectory;
@@ -126,7 +126,6 @@ extern CDefineTable DefineTable;
 extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;
 extern CStructureTable StructureTable;
-extern CStringsList* ModuleList;
 
 #ifdef USE_LUA
 

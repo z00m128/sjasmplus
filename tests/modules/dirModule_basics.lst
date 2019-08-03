@@ -1,0 +1,53 @@
+# file opened: dirModule_basics.asm
+ 1    0000                  OPT --syntax=abfw
+ 2    0000                      MODULE module1
+ 3    0000 C9           Fn1:        ret
+ 4    0001
+ 5    0001                          MODULE nestedModule
+ 6    0001              ; check labels composing after MODULE
+ 7    0001              .localWithoutNonLocal1:
+ 8    0001 ED B0        Fn1.n:          ldir
+ 9    0003              .local1:
+10    0003              @GlobalLabel1:
+11    0003              .localAfterGlobal1:     ; should be <modules>.Global... according to docs (a bit illogical)
+12    0003                          ENDMODULE
+13    0003
+dirModule_basics.asm(14): error: [MODULE] Dots not allowed in <module_name>: nested.Invalid.Name
+14    0003                          MODULE nested.Invalid.Name
+15    0003 2F           Fn1.nin         cpl
+16    0004                          ; ENDMODULE  (not needed, because the module was not created)
+17    0004
+18    0004                      ENDMODULE
+19    0004
+20    0004              ; check labels composing after ENDMODULE
+21    0004              .localWithoutNonLocal2:
+22    0004              NonLocal2:
+23    0004              .local2:
+24    0004
+25    0004                      ; some error states
+dirModule_basics.asm(26): error: [MODULE] Syntax error in <name>: MODULE 1nvalid name
+26    0004                      MODULE 1nvalid name
+27    0004 27           Fn1nvalid:  daa
+dirModule_basics.asm(28): error: ENDMODULE without MODULE
+28    0005                      ENDMODULE
+29    0005
+30    0005                      MODULE missingEndModule
+31    0005 00           Fn2:        nop
+32    0006
+# file closed: dirModule_basics.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X module1.Fn1
+0x0001 X module1.nestedModule._.localWithoutNonLocal1
+0x0001 X module1.nestedModule.Fn1.n
+0x0003 X module1.nestedModule.Fn1.n.local1
+0x0003 X GlobalLabel1
+0x0003 X module1.nestedModule.GlobalLabel1.localAfterGlobal1
+0x0003 X module1.Fn1.nin
+0x0004 X _.localWithoutNonLocal2
+0x0004 X NonLocal2
+0x0004 X NonLocal2.local2
+0x0004 X Fn1nvalid
+0x0005 X missingEndModule.Fn2
+error: ENDMODULE missing for module: missingEndModule

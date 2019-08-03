@@ -119,9 +119,10 @@ Docs:
 
 DEVICE needs better description? Issue #55
 
-1.13.4 changelog:
+1.14.0 changelog:
 - INCLUDE bugfix, now searching paths according to original documentation (may break some projects)
 - R800 MULUB was producing wrong opcode all those years... fixed.
+- MODULE names can't contain dot any more, MODULE/ENDMODULE resets non-local label to "_"
 - expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
 - several tests added to improve the code coverage: https://coveralls.io/github/z00m128/sjasmplus?branch=master
 - as tests were added, minor bugs were found and squashed (errors wording, etc)
