@@ -405,8 +405,8 @@ void CLabelTable::DumpForCSpect() {
 		char* localLabelStart = strrchr(temp, '.');
 		while (temp < localLabelStart) {	// the dot must be at least second character
 			*localLabelStart = 0;			// terminate the possible "primary" part
-			CLabelTableEntry* label = Find(temp);
-			if (label && LABEL_PAGE_UNDEFINED != label->page) {
+			CLabelTableEntry* label = Find(temp, true);
+			if (label) {
 				*localLabelStart = '@';		// "primary" label exists, modify delimiter '.' -> '@'
 				break;
 			}

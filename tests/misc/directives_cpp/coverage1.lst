@@ -1,0 +1,49 @@
+coverage1.asm(2): error: [IF/IFN] Forward reference: IF 0 < fwdLabel 
+coverage1.asm(3): error: [IF/IFN] Forward reference: IFN 0 < fwdLabel 
+# file opened: coverage1.asm
+coverage1.asm(1): error: Syntax error: & 
+coverage1.asm(1): error: Unexpected: & 
+ 1    0000                  IF &
+coverage1.asm(1): error: Syntax error: &    
+coverage1.asm(1): error: Unexpected: &    
+ 1    0000                IFN &    ; syntax errors
+ 2    0000                  IF 0 < fwdLabel
+ 2    0000                ENDIF
+ 3    0000                  IFN 0 < fwdLabel
+ 3    0000                ENDIF
+ 4    0000              fwdLabel:
+ 5    0000
+coverage1.asm(6): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF
+ 6    0000                  ELSE
+coverage1.asm(7): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF
+ 7    0000                  ENDIF
+ 8    0000
+ 9    0000                  ; create "AHOY!" in "coverage1.bin" by using all output modes
+10    0000                  OUTPUT "coverage1.bin",T
+10    0000 78 78          DB "xx"
+11    0002                  OUTPUT "coverage1.bin",A
+11    0002 78 59          DB "xY"
+12    0004                  OUTPUT "coverage1.bin",R
+13    0004 79               DB "y"
+13    0005                FPOS 2
+13    0005 4F             DB  "O"
+13    0006                FPOS -2
+13    0006 48             DB  "H"
+13    0007                FPOS +2
+13    0007 21             DB  "!"
+14    0008                  OUTPUT "coverage1.bin", R   ; try with space after comma (new bugfix)
+15    0008 41               DB "A"
+16    0009                  ; syntax errors (should not fallback to "truncate", would destroy current output)
+coverage1.asm(17): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",
+17    0009                  OUTPUT "coverage1.bin",
+coverage1.asm(18): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",     
+18    0009                  OUTPUT "coverage1.bin",     ; with spaces after comma
+coverage1.asm(19): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",&
+19    0009                  OUTPUT "coverage1.bin",&
+20    0009                  OUTEND
+21    0009
+# file closed: coverage1.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   fwdLabel

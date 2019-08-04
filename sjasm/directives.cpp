@@ -928,23 +928,15 @@ void dirSAVEDEV() {
 
 void dirSAVEHOB() {
 
-	if (pass != LASTPASS) {
-		SkipParam(lp);
+	if (!DeviceID || pass != LASTPASS) {
+		if (!DeviceID) Error("SAVEHOB only allowed in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
 		return;
 	}
 	aint val;
 	char* fnaam, * fnaamh;
 	int start = -1,length = -1;
 	bool exec = true;
-
-	if (!DeviceID) {
-		if (pass == LASTPASS) {
-			Error("SAVEHOB only allowed in real device emulation mode (See DEVICE)");
-		}
-		exec = false;
-	} else if (pass != LASTPASS) {
-		exec = false;
-	}
 
 	fnaam = GetFileName(lp);
 	if (anyComma(lp)) {
@@ -1009,9 +1001,9 @@ void dirEMPTYTRD() {
 }
 
 void dirSAVETRD() {
-	if (pass != LASTPASS || !DeviceID) {
-		if (LASTPASS == pass) Error("SAVETRD only allowed in real device emulation mode (See DEVICE)");
-		SkipParam(lp);
+	if (!DeviceID || pass != LASTPASS) {
+		if (!DeviceID) Error("SAVETRD only allowed in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
 		return;
 	}
 
@@ -1151,18 +1143,17 @@ void dirOPT() {
 }
 
 void dirLABELSLIST() {
-	if (!DeviceID) {
-		Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)");
-	}
-
 	if (pass != 1 || !DeviceID) {
-		SkipParam(lp);return;
+		if (!DeviceID) Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)");
+		SkipParam(lp);
+		return;
 	}
 	char* opt = GetFileName(lp);
-	if (!(*opt)) {
-		Error("[LABELSLIST] Syntax error. No parameters", bp, IF_FIRST); return;
+	if (*opt) {
+		STRCPY(Options::UnrealLabelListFName, LINEMAX, opt);
+	} else {
+		Error("[LABELSLIST] No filename", bp, EARLY);	// pass == 1 -> EARLY
 	}
-	STRCPY(Options::UnrealLabelListFName, LINEMAX, opt);
 	delete[] opt;
 }
 
@@ -1257,7 +1248,7 @@ static bool dirIfusedIfnused(char* & id) {
 		if (validLabel) {
 			id = STRDUP(validLabel);
 			delete[] validLabel;
-		} else {
+		} else {	// unreachable, GetID filters all out
 			id = NULL;
 			Error("[IFUSED] Invalid label name", bp, IF_FIRST);
 		}
@@ -1322,25 +1313,26 @@ void dirINCLUDE() {
 }
 
 void dirOUTPUT() {
-	char* fnaam = GetFileName(lp);
+	if (LASTPASS != pass) {
+		SkipToEol(lp);
+		return;
+	}
+	char* fnaam = GetFileName(lp), modechar = 0;
 	int mode = OUTPUT_TRUNCATE;
 	if (comma(lp)) {
-		char modechar = (*lp) | 0x20;
-		lp++;
-		if (modechar == 't') {
-			mode = OUTPUT_TRUNCATE;
-		} else if (modechar == 'r') {
-			mode = OUTPUT_REWIND;
-		} else if (modechar == 'a') {
-			mode = OUTPUT_APPEND;
-		} else {
-			Error("Syntax error", bp, IF_FIRST);
+		if (!SkipBlanks(lp)) modechar = (*lp++) | 0x20;
+		switch (modechar) {
+			case 't': mode = OUTPUT_TRUNCATE;	break;
+			case 'r': mode = OUTPUT_REWIND;		break;
+			case 'a': mode = OUTPUT_APPEND;		break;
+			default:
+				Error("[OUTPUT] Invalid <mode> (valid modes: t, a, r)", bp);
+				delete[] fnaam;
+				return;
 		}
 	}
 	//Options::NoDestinationFile = false;
-	if (pass == LASTPASS) {
-		NewDest(fnaam, mode);
-	}
+	NewDest(fnaam, mode);
 	delete[] fnaam;
 }
 
@@ -1379,20 +1371,21 @@ void dirDEFINE() {
 	char* id;
 
 	if (!(id = GetID(lp))) {
-		Error("[DEFINE] Illegal syntax"); return;
+		Error("[DEFINE] Illegal <id>", lp, SUPPRESS);
+		return;
 	}
 
 	DefineTable.Add(id, lp, 0);
+	SkipToEol(lp);
 	substitutedLine = line;		// override substituted listing for DEFINE
-
-	*(lp) = 0;
 }
 
 void dirUNDEFINE() {
 	char* id;
 
 	if (!(id = GetID(lp)) && *lp != '*') {
-		Error("[UNDEFINE] Illegal syntax"); return;
+		Error("[UNDEFINE] Illegal <id>", lp, SUPPRESS);
+		return;
 	}
 
 	if (*lp == '*') {

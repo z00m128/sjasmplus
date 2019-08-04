@@ -1,0 +1,17 @@
+misc_device_directives.asm(8): error: [LABELSLIST] No filename: LABELSLIST
+# file opened: misc_device_directives.asm
+ 1    0000              ; various syntax errors and minor things, to increase code coverage in tests
+ 2    0000              ; (but too minor to get precisely named dedicated test)
+ 3    0000
+ 4    0000                  DEVICE none
+misc_device_directives.asm(5): error: LABELSLIST only allowed in real device emulation mode (See DEVICE)
+ 5    0000                      LABELSLIST "misc_device_directives.lbl"
+ 6    0000
+ 7    0000                  DEVICE zxspectrum48
+ 8    0000                      LABELSLIST
+ 9    0000                      CSPECTMAP   ; default map file name (just coverage, not truly verified by this test)
+10    0000
+# file closed: misc_device_directives.asm
+
+Value    Label
+------ - -----------------------------------------------------------
