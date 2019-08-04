@@ -40,3 +40,13 @@ fwdLabel:
     IFNDEF _SJASMPLUS   ; and it's gone
         DB 2
     ENDIF
+
+    ENDS
+    ASSERT 1            ; valid
+    ASSERT &            ; syntax err
+
+    DISPLAY "DISPLAY", /L, " ", /T, "has silently skipped options /L and /T. ", 15, " ", /D, 15
+    DISPLAY "
+
+    SHELLEXEC "echo Ahoy!"
+    SHELLEXEC "echo from SHELLEXEC", ""    ; just to exercise code paths (parameters are not processed in NIX version)

@@ -114,6 +114,8 @@ Big-text-block directive? (there's INCBIN workaround using separate file)
 ====================
 Docs:
 
+SHELLEXEC "if (... + ...)" ??? WTF? LOL.
+
 "pseudo-ops as SAVEBIN, SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST and use special functions in Lua scripts."
 ^^ link each?
 

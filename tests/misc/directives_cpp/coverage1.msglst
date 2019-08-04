@@ -70,6 +70,20 @@ coverage1.asm(31): warning: [UNDEFINE] Identifier not found: fwdLabel
 41    000A 02                   DB 2
 42    000B                  ENDIF
 43    000B
+coverage1.asm(44): error: [ENDS] End structure without structure
+44    000B                  ENDS
+45    000B                  ASSERT 1            ; valid
+coverage1.asm(46): error: [ASSERT] Syntax error
+46    000B                  ASSERT &            ; syntax err
+47    000B
+> DISPLAY has silently skipped options /L and /T. 0x000F 15
+48    000B                  DISPLAY "DISPLAY", /L, " ", /T, "has silently skipped options /L and /T. ", 15, " ", /D, 15
+coverage1.asm(49): error: Syntax error: "
+49    000B                  DISPLAY "
+50    000B
+51    000B                  SHELLEXEC "echo Ahoy!"
+52    000B                  SHELLEXEC "echo from SHELLEXEC", ""    ; just to exercise code paths (parameters are not processed in NIX version)
+53    000B
 # file closed: coverage1.asm
 
 Value    Label

@@ -1508,8 +1508,9 @@ void dirASSERT() {
 	aint val;
 	/*if (!ParseExpression(lp,val)) { Error("Syntax error",0,CATCHALL); return; }
 	if (pass==2 && !val) Error("Assertion failed",p);*/
-	if (!ParseExpression(lp, val)) {
-		Error("[ASSERT] Syntax error", NULL, IF_FIRST); return;
+	if (!ParseExpressionNoSyntaxError(lp, val)) {
+		Error("[ASSERT] Syntax error", NULL, SUPPRESS);
+		return;
 	}
 	if (pass == LASTPASS && !val) {
 		Error("[ASSERT] Assertion failed", p);
