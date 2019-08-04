@@ -12,36 +12,64 @@ coverage1.asm(1): error: Unexpected: &
  3    0000                  IFN 0 < fwdLabel
  3    0000                ENDIF
  4    0000              fwdLabel:
- 5    0000
-coverage1.asm(6): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF
- 6    0000                  ELSE
-coverage1.asm(7): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF
- 7    0000                  ENDIF
- 8    0000
- 9    0000                  ; create "AHOY!" in "coverage1.bin" by using all output modes
-10    0000                  OUTPUT "coverage1.bin",T
-10    0000 78 78          DB "xx"
-11    0002                  OUTPUT "coverage1.bin",A
-11    0002 78 59          DB "xY"
-12    0004                  OUTPUT "coverage1.bin",R
-13    0004 79               DB "y"
-13    0005                FPOS 2
-13    0005 4F             DB  "O"
-13    0006                FPOS -2
-13    0006 48             DB  "H"
-13    0007                FPOS +2
-13    0007 21             DB  "!"
-14    0008                  OUTPUT "coverage1.bin", R   ; try with space after comma (new bugfix)
-15    0008 41               DB "A"
-16    0009                  ; syntax errors (should not fallback to "truncate", would destroy current output)
-coverage1.asm(17): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",
-17    0009                  OUTPUT "coverage1.bin",
-coverage1.asm(18): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",     
-18    0009                  OUTPUT "coverage1.bin",     ; with spaces after comma
-coverage1.asm(19): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",&
-19    0009                  OUTPUT "coverage1.bin",&
-20    0009                  OUTEND
-21    0009
+ 5    0000                  IF 0 < fwdLabel
+ 5    0000                ENDIF     ; should be OK here
+ 6    0000                  IFN 0 < fwdLabel
+ 6    0000                ENDIF    ; should be OK here
+ 7    0000
+coverage1.asm(8): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF
+ 8    0000                  ELSE
+coverage1.asm(9): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF
+ 9    0000                  ENDIF
+10    0000
+11    0000                  ; create "AHOY!" in "coverage1.bin" by using all output modes
+12    0000                  OUTPUT "coverage1.bin",T
+12    0000 78 78          DB "xx"
+13    0002                  OUTPUT "coverage1.bin",A
+13    0002 78 59          DB "xY"
+14    0004                  OUTPUT "coverage1.bin",R
+15    0004 79               DB "y"
+15    0005                FPOS 2
+15    0005 4F             DB  "O"
+15    0006                FPOS -2
+15    0006 48             DB  "H"
+15    0007                FPOS +2
+15    0007 21             DB  "!"
+16    0008                  OUTPUT "coverage1.bin", R   ; try with space after comma (new bugfix)
+17    0008 41               DB "A"
+18    0009                  ; syntax errors (should not fallback to "truncate", would destroy current output)
+coverage1.asm(19): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",
+19    0009                  OUTPUT "coverage1.bin",
+coverage1.asm(20): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",     
+20    0009                  OUTPUT "coverage1.bin",     ; with spaces after comma
+coverage1.asm(21): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",&
+21    0009                  OUTPUT "coverage1.bin",&
+22    0009                  OUTEND
+23    0009
+coverage1.asm(24): error: [DEFINE] Illegal <id>: 1nvalidId value
+24    0009                  DEFINE 1nvalidId value
+coverage1.asm(25): error: [UNDEFINE] Illegal <id>: 1nvalidId
+25    0009                  UNDEFINE 1nvalidId
+26    0009
+27    0009                  DEFINE validDefine 1nvalidId
+28    0009                  UNDEFINE validDefine
+coverage1.asm(29): warning: [UNDEFINE] Identifier not found: validDefine
+29    0009                  UNDEFINE validDefine        ; warning not found (second undefine)
+30    0009
+coverage1.asm(31): warning: [UNDEFINE] Identifier not found: fwdLabel
+31    0009                  UNDEFINE fwdLabel           ; labels can't be removed any more (since v1.14.0)
+32    0009                      ; not that it worked correctly before?? (removed because IMO broken beyond repair + undocumented!)
+33    0009                      ; makes little sense in 3-pass, fix the source to not rely on such weird feature
+34    0009
+35    0009                  ; bomb everything with "UNDEFINE *"
+36    0009                  IFDEF _SJASMPLUS    ; still defined
+37    0009 01                   DB 1
+38    000A                  ENDIF
+39    000A                  UNDEFINE *
+40    000A                  IFNDEF _SJASMPLUS   ; and it's gone
+41    000A 02                   DB 2
+42    000B                  ENDIF
+43    000B
 # file closed: coverage1.asm
 
 Value    Label

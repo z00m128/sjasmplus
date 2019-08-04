@@ -2,6 +2,8 @@
     IF 0 < fwdLabel : ENDIF
     IFN 0 < fwdLabel : ENDIF
 fwdLabel:
+    IF 0 < fwdLabel : ENDIF     ; should be OK here
+    IFN 0 < fwdLabel : ENDIF    ; should be OK here
 
     ELSE
     ENDIF
@@ -18,3 +20,23 @@ fwdLabel:
     OUTPUT "coverage1.bin",     ; with spaces after comma
     OUTPUT "coverage1.bin",&
     OUTEND
+
+    DEFINE 1nvalidId value
+    UNDEFINE 1nvalidId
+
+    DEFINE validDefine 1nvalidId
+    UNDEFINE validDefine
+    UNDEFINE validDefine        ; warning not found (second undefine)
+
+    UNDEFINE fwdLabel           ; labels can't be removed any more (since v1.14.0)
+        ; not that it worked correctly before?? (removed because IMO broken beyond repair + undocumented!)
+        ; makes little sense in 3-pass, fix the source to not rely on such weird feature
+
+    ; bomb everything with "UNDEFINE *"
+    IFDEF _SJASMPLUS    ; still defined
+        DB 1
+    ENDIF
+    UNDEFINE *
+    IFNDEF _SJASMPLUS   ; and it's gone
+        DB 2
+    ENDIF

@@ -1390,12 +1390,14 @@ void dirUNDEFINE() {
 
 	if (*lp == '*') {
 		lp++;
-		LabelTable.RemoveAll();
+// Label removal removed because it seems to be broken beyond repair
+//		LabelTable.RemoveAll();
 		DefineTable.RemoveAll();
 	} else if (DefineTable.FindDuplicate(id)) {
 		DefineTable.Remove(id);
-	} else if (LabelTable.Find(id, true)) {
-		LabelTable.Remove(id);
+// Label removal removed because it seems to be broken beyond repair
+// 	} else if (LabelTable.Find(id)) {
+// 		LabelTable.Remove(id);
 	} else {
 		Warning("[UNDEFINE] Identifier not found", id); return;
 	}
