@@ -86,6 +86,9 @@ coverage2.asm(45): error: Expression expected
 coverage2.asm(48): error: [ARRAY] index not in 0..<Size-1> range: syntaxErrArr2[13]
 48    000D                  DB
 49    000D
+coverage2.asm(50): error: [DEVICE] Syntax error in <deviceid>: &syntaxErrorName
+50    000D                  DEVICE &syntaxErrorName
+51    000D
 # file closed: coverage2.asm
 
 Value    Label

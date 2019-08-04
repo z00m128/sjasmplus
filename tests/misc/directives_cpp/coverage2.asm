@@ -46,3 +46,5 @@
     DB syntaxErrArr2[11]
     DB syntaxErrArr2[12]
     DB syntaxErrArr2[13]
+
+    DEVICE &syntaxErrorName

@@ -2013,17 +2013,15 @@ void dirINCLUDELUA() {
 
 void dirDEVICE() {
 	++deviceDirectivesCounter;		// any usage counts, even invalid
-	char* id;
+	char* id = GetID(lp);
 
-	if ((id = GetID(lp))) {
+	if (id) {
 		if (!SetDevice(id)) {
 			Error("[DEVICE] Invalid parameter", NULL, IF_FIRST);
 		}
 	} else {
-		Error("[DEVICE] Syntax error", NULL, IF_FIRST);
+		Error("[DEVICE] Syntax error in <deviceid>", lp, SUPPRESS);
 	}
-
-
 }
 
 void InsertDirectives() {
