@@ -1608,7 +1608,7 @@ void dirSHELLEXEC() {
 void dirSTRUCT() {
 	CStructure* st;
 	int global = 0;
-	aint offset = 0,bind = 0;
+	aint offset = 0;
 	char* naam;
 	SkipBlanks();
 	if (*lp == '@') {
@@ -1616,13 +1616,13 @@ void dirSTRUCT() {
 	}
 
 	if (!(naam = GetID(lp)) || !strlen(naam)) {
-		Error("[STRUCT] Illegal structure name");
+		Error("[STRUCT] Illegal structure name", lp, SUPPRESS);
 		return;
 	}
 	if (comma(lp)) {
 		IsLabelNotFound = 0;
-		if (!ParseExpression(lp, offset)) {
-			Error("[STRUCT] Offset syntax error", lp, IF_FIRST);
+		if (!ParseExpressionNoSyntaxError(lp, offset)) {
+			Error("[STRUCT] Offset syntax error", lp, SUPPRESS);
 			return;
 		}
 		if (IsLabelNotFound) {
@@ -1632,7 +1632,7 @@ void dirSTRUCT() {
 	if (!SkipBlanks()) {
 		Error("[STRUCT] syntax error, unexpected", lp);
 	}
-	st = StructureTable.Add(naam, offset, bind, global);
+	st = StructureTable.Add(naam, offset, global);
 	ListFile();
 	while (ReadLine()) {
 		lp = line; /*if (White()) { SkipBlanks(lp); if (*lp=='.') ++lp; if (cmphstr(lp,"ends")) break; }*/
@@ -1658,19 +1658,12 @@ void dirFPOS() {
 	if ((*lp == '+') || (*lp == '-')) {
 		method = SEEK_CUR;
 	}
-	if (!ParseExpression(lp, val)) {
-		Error("[FPOS] Syntax error", lp, IF_FIRST);
-	}
-	if (pass == LASTPASS) {
+	if (!ParseExpressionNoSyntaxError(lp, val)) {
+		Error("[FPOS] Syntax error", lp, SUPPRESS);
+	} else if (pass == LASTPASS) {
 		SeekDest(val, method);
 	}
 }
-
-/* i didn't modify it */
-/*
-void dirBIND() {
-}
-*/
 
 void dirDUP() {
 	aint val;
@@ -2118,9 +2111,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".opt", dirOPT);
 	DirectivesTable.insertd(".labelslist", dirLABELSLIST);
 	DirectivesTable.insertd(".cspectmap", dirCSPECTMAP);
-	//  DirectivesTable.insertd(".bind",dirBIND); /* i didn't comment this */
 	DirectivesTable.insertd(".endif", dirENDIF);
-	//DirectivesTable.insertd(".endt",dirENDTEXTAREA);
 	DirectivesTable.insertd(".endt", dirENT);
 	DirectivesTable.insertd(".endm", dirENDM);
 	DirectivesTable.insertd(".edup", dirEDUP);

@@ -35,6 +35,8 @@ coverage1.asm(9): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF
 15    0006 48             DB  "H"
 15    0007                FPOS +2
 15    0007 21             DB  "!"
+coverage1.asm(15): error: [FPOS] Syntax error: &
+15    0008                FPOS &
 16    0008                  OUTPUT "coverage1.bin", R   ; try with space after comma (new bugfix)
 17    0008 41               DB "A"
 18    0009                  ; syntax errors (should not fallback to "truncate", would destroy current output)

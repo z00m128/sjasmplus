@@ -926,7 +926,7 @@ aint CStructureEntry2::ParseValue(char* & p) {
 	}
 }
 
-CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStructure* p) {
+CStructure::CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p) {
 	mnf = mnl = NULL; mbf = mbl = NULL;
 	naam = STRDUP(nnaam);
 	if (naam == NULL) {
@@ -936,7 +936,7 @@ CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStruct
 	if (id == NULL) {
 		Error("No enough memory!", NULL, FATAL);
 	}
-	binding = idx; next = p; noffset = no; global = ngl;
+	next = p; noffset = no; global = ngl;
 	maxAlignment = 0;
 }
 
@@ -1141,7 +1141,7 @@ void CStructureTable::Init() {
 	}
 }
 
-CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
+CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 	char sn[LINEMAX], * sp;
 	sn[0] = 0;
 	if (!gl && *ModuleName) {
@@ -1153,7 +1153,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 	if (FindDuplicate(sp)) {
 		Error("Duplicate structure name", naam, EARLY);
 	}
-	strs[(*sp)&127] = new CStructure(naam, sp, idx, 0, gl, strs[(*sp)&127]);
+	strs[(*sp)&127] = new CStructure(naam, sp, 0, gl, strs[(*sp)&127]);
 	if (no) {
 		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, SMEMBBLOCK));
 	}

@@ -1,0 +1,111 @@
+struct_misc.asm(30): error: Illegal labelname: @.
+struct_misc.asm(30): error: Illegal labelname: @.
+# file opened: struct_misc.asm
+ 1    0000                  IFNDEF INCLUDED_ONCE
+ 2    0000                      DEFINE INCLUDED_ONCE
+ 3    0000                      INCLUDE "struct_misc.asm"
+# file opened: struct_misc.asm
+ 1+   0000                  IFNDEF INCLUDED_ONCE
+ 2+   0000 ~                    DEFINE INCLUDED_ONCE
+ 3+   0000 ~                    INCLUDE "struct_misc.asm"
+ 4+   0000 ~
+ 5+   0000 ~                ; instance defined structures (those which exist, which includes notEndedOne?!)
+ 6+   0000 ~            i1      name1
+ 7+   0000 ~            imod1   @mod1.name1
+ 8+   0000 ~            i2      name2
+ 9+   0000 ~            ie      notEndedOne
+10+   0000                  ELSE
+11+   0000
+12+   0000                      STRUCT  name1
+13+   0000 ~            x           BYTE    100
+14+   0000                      ENDS
+15+   0000
+16+   0000                      MODULE mod1
+17+   0000                          STRUCT  name1
+18+   0000 ~            x               BYTE    101
+19+   0000                          ENDS
+20+   0000
+21+   0000                          STRUCT  @name2
+22+   0000 ~            x               BYTE    102
+23+   0000                          ENDS
+24+   0000                      ENDMODULE
+25+   0000
+struct_misc.asm(26): error: [STRUCT] Illegal structure name: 1llegal name
+26+   0000                      STRUCT 1llegal name
+struct_misc.asm(27): error: [ENDS] End structure without structure
+27+   0000                      ENDS
+28+   0000
+29+   0000                      STRUCT @.
+struct_misc.asm(30): error: Invalid labelname: .
+30+   0000                      ENDS
+31+   0000
+struct_misc.asm(32): error: [STRUCT] Offset syntax error: &
+32+   0000                      STRUCT name3, &
+struct_misc.asm(33): error: [ENDS] End structure without structure
+33+   0000                      ENDS
+34+   0000
+35+   0000                      STRUCT notEndedOne
+36+   0000 ~            x           BYTE    103
+struct_misc.asm(37): error: [STRUCT] Unexpected: ENDIF
+37+   0000 ~                ENDIF
+38+   0000 ~
+struct_misc.asm(38): error: [STRUCT] Unexpected end of structure
+38+   0000
+struct_misc.asm(38): error: [IFNDEF] No ENDIF
+38+   0000
+# file closed: struct_misc.asm
+ 4    0000
+ 5    0000                  ; instance defined structures (those which exist, which includes notEndedOne?!)
+ 6    0000 64           i1      name1
+ 7    0001 65           imod1   @mod1.name1
+ 8    0002 66           i2      name2
+ 9    0003 67           ie      notEndedOne
+10    0004                  ELSE
+11    0004 ~
+12    0004 ~                    STRUCT  name1
+13    0004 ~            x           BYTE    100
+14    0004 ~                    ENDS
+15    0004 ~
+16    0004 ~                    MODULE mod1
+17    0004 ~                        STRUCT  name1
+18    0004 ~            x               BYTE    101
+19    0004 ~                        ENDS
+20    0004 ~
+21    0004 ~                        STRUCT  @name2
+22    0004 ~            x               BYTE    102
+23    0004 ~                        ENDS
+24    0004 ~                    ENDMODULE
+25    0004 ~
+26    0004 ~                    STRUCT 1llegal name
+27    0004 ~                    ENDS
+28    0004 ~
+29    0004 ~                    STRUCT @.
+30    0004 ~                    ENDS
+31    0004 ~
+32    0004 ~                    STRUCT name3, &
+33    0004 ~                    ENDS
+34    0004 ~
+35    0004 ~                    STRUCT notEndedOne
+36    0004 ~            x           BYTE    103
+37    0004                  ENDIF
+38    0004
+# file closed: struct_misc.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X name1
+0x0000 X name1.x
+0x0001 X mod1.name1
+0x0000 X mod1.name1.x
+0x0001 X name2
+0x0000 X name2.x
+0x0001 X notEndedOne
+0x0000 X notEndedOne.x
+0x0000 X i1
+0x0000 X i1.x
+0x0001 X imod1
+0x0001 X imod1.x
+0x0002 X i2
+0x0002 X i2.x
+0x0003 X ie
+0x0003 X ie.x

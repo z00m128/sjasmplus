@@ -12,7 +12,7 @@ fwdLabel:
     OUTPUT "coverage1.bin",T    : DB "xx"
     OUTPUT "coverage1.bin",A    : DB "xY"
     OUTPUT "coverage1.bin",R
-    DB "y" : FPOS 2 : DB  "O" : FPOS -2 : DB  "H" : FPOS +2 : DB  "!"
+    DB "y" : FPOS 2 : DB  "O" : FPOS -2 : DB  "H" : FPOS +2 : DB  "!" : FPOS &
     OUTPUT "coverage1.bin", R   ; try with space after comma (new bugfix)
     DB "A"
     ; syntax errors (should not fallback to "truncate", would destroy current output)
