@@ -866,15 +866,17 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 			*dst++ = *src++;					// just copy character
 		}
 		// ending delimiter must be identical to endCh
-		if (endCh != *src) return 0;
+		if (endCh != *src) {
+			*dst = 0;							// zero terminator of resulting string value
+			return 0;
+		}
 		// set ending delimiter for quotes and apostrophe (angles are stripped from value)
 		if (DT_QUOTES == delI || DT_APOSTROPHE == delI) *dst++ = endCh;
 		++src;									// advance over delimiter
 	}
 	*dst = 0;									// zero terminator of resulting string value
-	int returnValue = *dstOrig || ',' == *src;	// return 1 if value is not empty or comma follows
-	if (!*dstOrig && returnValue) Warning("[Macro argument parser] empty value", srcOrig);
-	return (returnValue);		// but empty value will at least display warning
+	if (! *dstOrig) Warning("[Macro argument parser] empty value", srcOrig);
+	return 1;
 }
 
 EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> delimiters, bool advanceSrc) {

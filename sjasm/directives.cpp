@@ -1672,15 +1672,15 @@ void dirDUP() {
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
-			// Just skip the expression to the end of line, don't try to evaluate yet
-			while (*lp) ++lp;
+			SkipToEol(lp);		// Just skip the expression to the end of line, don't evaluate yet
 			++dup.Level;
 			return;
 		}
 	}
 
-	if (!ParseExpression(lp, val)) {
-		Error("[DUP/REPT] Syntax error", lp, IF_FIRST); return;
+	if (!ParseExpressionNoSyntaxError(lp, val)) {
+		Error("[DUP/REPT] Syntax error in <count>", lp, SUPPRESS);
+		return;
 	}
 	if (IsLabelNotFound) {
 		Error("[DUP/REPT] Forward reference", NULL, ALL);
@@ -1759,7 +1759,7 @@ void dirENDM() {
 
 static bool dirDEFARRAY_parseItems(CStringsList** nextPtr) {
 	char ml[LINEMAX];
-	while (!SkipBlanks()) {
+	do {
 		const char* const itemLp = lp;
 		char* n = ml;
 		if (!GetMacroArgumentValue(lp, n)) {
@@ -1769,43 +1769,46 @@ static bool dirDEFARRAY_parseItems(CStringsList** nextPtr) {
 		*nextPtr = new CStringsList(ml);
 		if ((*nextPtr)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
 		nextPtr = &((*nextPtr)->next);
-		if (!comma(lp)) break;
-	}
+	} while (anyComma(lp));
 	return SkipBlanks();
 }
 
-static void dirDEFARRAY_add() {
-	char* oldP = ++lp;
-	DefineTable.Get(GetID(lp));
+static void dirDEFARRAY_add(const char* id) {
+	DefineTable.Get(id);
 	if (NULL == DefineTable.DefArrayList) {
-		Error("[DEFARRAY+] unknown array <id>", GetID(oldP), SUPPRESS);
+		Error("[DEFARRAY+] unknown array <id>", id);
+		SkipToEol(lp);
 		return;
 	}
-	if (!White()) return;		// enforce whitespace between ID and first item
 	// array was already defined, seek to the last item in the list
 	while (DefineTable.DefArrayList->next) DefineTable.DefArrayList = DefineTable.DefArrayList->next;
-	if (!dirDEFARRAY_parseItems(&DefineTable.DefArrayList->next) || NULL == DefineTable.DefArrayList->next) {
-		Error("DEFARRAY+ must have at least one entry", oldP);	// suppressed by syntax error in non-empty case
-	}
+	dirDEFARRAY_parseItems(&DefineTable.DefArrayList->next);
 	return;
 }
 
 void dirDEFARRAY() {
-	if ('+' == *lp) {
-		dirDEFARRAY_add();
+	bool plus = ('+' == *lp) ? ++lp, true : false;
+	const char* id = White() ? GetID(lp) : nullptr;
+	if (!id) {
+		Error("[DEFARRAY] Syntax error in <id>", lp);
+		SkipToEol(lp);
 		return;
 	}
-	char* id;
-	if (!(id = GetID(lp))) {
-		Error("[DEFARRAY] Syntax error"); return;
-	}
-	if (!White()) return;		// enforce whitespace between ID and first item
-	CStringsList* a = NULL;
-	if (!dirDEFARRAY_parseItems(&a) || NULL == a) {
-		Error("DEFARRAY must have at least one entry");	// suppressed by syntax error in non-empty case
+	if (!White() || SkipBlanks()) {	// enforce whitespace between ID and first item and detect empty ones
+		if (SkipBlanks()) Error("[DEFARRAY] must have at least one entry");
+		else Error("[DEFARRAY] missing space between <id> and first <item>", lp);
+		SkipToEol(lp);
 		return;
 	}
-	DefineTable.Add(id, "", a);
+	if (plus) {
+		dirDEFARRAY_add(id);
+	} else {
+		CStringsList* a = NULL;
+		if (!dirDEFARRAY_parseItems(&a) || NULL == a) {
+			return;
+		}
+		DefineTable.Add(id, "", a);
+	}
 }
 
 #ifdef USE_LUA

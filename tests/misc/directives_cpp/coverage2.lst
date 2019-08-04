@@ -1,0 +1,92 @@
+# file opened: coverage2.asm
+coverage2.asm(1): error: [DUP/REPT] Syntax error in <count>: &
+ 1    0000                  DUP &
+ 2    0000 00                   nop
+coverage2.asm(3): error: [EDUP/ENDR] End repeat without repeat
+ 3    0001                  EDUP
+ 4    0001
+ 5    0001                  DUP 3
+coverage2.asm(7): warning: ENDM used as DUP/REPT block terminator, this is deprecated (and bugged when used inside macro), change to EDUP or ENDR
+ 6    0001 00          >        nop
+ 6    0002 00          >        nop
+ 6    0003 00          >        nop
+ 7    0004                  ENDM    ; warning about deprecation
+ 8    0004
+coverage2.asm(9): error: [DEFARRAY] Syntax error in <id>: 1nvalidName 1, 2, 3
+ 9    0004                  DEFARRAY 1nvalidName 1, 2, 3
+coverage2.asm(10): error: [DEFARRAY] Syntax error in <id>: ,InvalidSyntax 1, 2, 3
+10    0004                  DEFARRAY,InvalidSyntax 1, 2, 3
+coverage2.asm(11): error: [DEFARRAY] missing space between <id> and first <item>: +1, 2, 3
+11    0004                  DEFARRAY InvalidSyntax+1, 2, 3
+coverage2.asm(12): error: [DEFARRAY] Syntax error in <id>: 1nvalidName 1, 2, 3
+12    0004                  DEFARRAY+ 1nvalidName 1, 2, 3
+coverage2.asm(13): error: [DEFARRAY] Syntax error in <id>: InvalidSyntax 1, 2, 3
+13    0004                  DEFARRAY+InvalidSyntax 1, 2, 3
+coverage2.asm(14): error: [DEFARRAY+] unknown array <id>: UnknownId
+14    0004                  DEFARRAY+ UnknownId 1, 2, 3
+coverage2.asm(15): error: [DEFARRAY] missing space between <id> and first <item>: +1, 2, 3
+15    0004                  DEFARRAY+ InvalidSyntax+1, 2, 3
+16    0004
+coverage2.asm(17): error: [DEFARRAY] Syntax error:  "3
+17    0004                  DEFARRAY syntaxErrArr  1, 2, "3
+coverage2.asm(18): error: [DEFARRAY] Syntax error:  "3'
+18    0004                  DEFARRAY syntaxErrArr  1, 2, "3'
+coverage2.asm(19): error: [DEFARRAY] Syntax error:  '3
+19    0004                  DEFARRAY syntaxErrArr  1, 2, '3
+coverage2.asm(20): error: [DEFARRAY] Syntax error:  <3
+20    0004                  DEFARRAY syntaxErrArr  1, 2, <3
+coverage2.asm(21): error: [DEFARRAY] Syntax error:  3"
+21    0004                  DEFARRAY syntaxErrArr  1, 2, 3"
+coverage2.asm(22): warning: [Macro argument parser] empty value: ,4
+22    0004                  DEFARRAY syntaxErrArr  1, 2, ,4
+coverage2.asm(23): error: Expression expected
+23    0004                  DB
+24    0004 04               DB 4
+coverage2.asm(25): error: [ARRAY] index not in 0..<Size-1> range: syntaxErrArr[4]
+25    0005                  DB
+coverage2.asm(26): error: [DEFARRAY] must have at least one entry
+26    0005                  DEFARRAY syntaxErrArr2
+coverage2.asm(27): error: [DEFARRAY] must have at least one entry
+27    0005                  DEFARRAY syntaxErrArr2  ; empty
+coverage2.asm(28): warning: [Macro argument parser] empty value: 
+28    0005                  DEFARRAY syntaxErrArr2  1, 2,
+coverage2.asm(29): warning: [Macro argument parser] empty value: ,
+coverage2.asm(29): warning: [Macro argument parser] empty value: 
+coverage2.asm(29): error: Duplicate define (replacing old value): syntaxErrArr2
+29    0005                  DEFARRAY syntaxErrArr2  1, 2,,
+coverage2.asm(30): warning: [Macro argument parser] empty value: 
+30    0005                  DEFARRAY+ syntaxErrArr2  3, 4,
+coverage2.asm(31): error: [DEFARRAY] must have at least one entry
+31    0005                  DEFARRAY+ syntaxErrArr2
+coverage2.asm(32): error: [DEFARRAY] must have at least one entry
+32    0005                  DEFARRAY+ syntaxErrArr2    ; empty
+coverage2.asm(33): warning: [Macro argument parser] empty value: ,
+coverage2.asm(33): warning: [Macro argument parser] empty value: 
+33    0005                  DEFARRAY+ syntaxErrArr2  5, 6,,
+coverage2.asm(34): error: [DEFARRAY] Syntax error:  "3
+34    0005                  DEFARRAY+ syntaxErrArr2  7, 8, "3
+35    0005 01               DB 1
+36    0006 02               DB 2
+coverage2.asm(37): error: Expression expected
+37    0007                  DB
+coverage2.asm(38): error: Expression expected
+38    0007                  DB
+39    0007 03               DB 3
+40    0008 04               DB 4
+coverage2.asm(41): error: Expression expected
+41    0009                  DB
+42    0009 05               DB 5
+43    000A 06               DB 6
+coverage2.asm(44): error: Expression expected
+44    000B                  DB
+coverage2.asm(45): error: Expression expected
+45    000B                  DB
+46    000B 07               DB 7
+47    000C 08               DB 8
+coverage2.asm(48): error: [ARRAY] index not in 0..<Size-1> range: syntaxErrArr2[13]
+48    000D                  DB
+49    000D
+# file closed: coverage2.asm
+
+Value    Label
+------ - -----------------------------------------------------------

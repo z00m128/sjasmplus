@@ -4,7 +4,7 @@
  3    0000                      org #8000
  4    8000
  5    8000                      DEFINE Scalar db 1
-define.asm(6): error: Unexpected: ,db 2,db 3,db 4
+define.asm(6): error: [DEFARRAY] missing space between <id> and first <item>: ,db 2,db 3,db 4
  6    8000                      DEFARRAY Array,db 2,db 3,db 4
  7    8000
  8    8000 01                   db 1
