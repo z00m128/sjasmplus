@@ -16,3 +16,5 @@ hl:                     ; warning
     ld      b,(8)       ; error (memory reference = illegal instruction)
     ld      b,[9]       ; error (memory reference = illegal instruction)
     ld      b,10        ; OK
+
+    ld      bc,hl       ;ok (warning suppressed by "ok")

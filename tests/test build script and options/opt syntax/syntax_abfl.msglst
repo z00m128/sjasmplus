@@ -26,6 +26,8 @@ syntax_abfl.asm(17): error: Illegal instruction (can't access memory): [9]
 17    0014 06 00            ld      b,[9]       ; error (memory reference = illegal instruction)
 18    0016 06 0A            ld      b,10        ; OK
 19    0018
+20    0018 44 4D            ld      bc,hl       ;ok (warning suppressed by "ok")
+21    001A
 # file closed: syntax_abfl.asm
 
 Value    Label

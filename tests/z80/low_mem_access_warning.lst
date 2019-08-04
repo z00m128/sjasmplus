@@ -1,0 +1,199 @@
+# file opened: low_mem_access_warning.asm
+  1   0000              ;;;;;;; warning emitting test (for all affected instructions) ;;;;;;;;;;
+  2   0000                  OPT reset       ; default syntax
+  3   0000                  ; round parentheses memory access to low address 0..255 emits warning
+low_mem_access_warning.asm(4): warning: Accessing low memory address 0x0001, is it ok?: ld  a,(1)
+  4   0000 3A 01 00         ld  a,(1)
+low_mem_access_warning.asm(5): warning: Accessing low memory address 0x0002, is it ok?: ld  hl,(2)
+  5   0003 2A 02 00         ld  hl,(2)
+low_mem_access_warning.asm(6): warning: Accessing low memory address 0x0003, is it ok?: ld  bc,(3)
+  6   0006 ED 4B 03 00      ld  bc,(3)
+low_mem_access_warning.asm(7): warning: Accessing low memory address 0x0004, is it ok?: ld  de,(4)
+  7   000A ED 5B 04 00      ld  de,(4)
+low_mem_access_warning.asm(8): warning: Accessing low memory address 0x0005, is it ok?: ld  sp,(5)
+  8   000E ED 7B 05 00      ld  sp,(5)
+low_mem_access_warning.asm(9): warning: Accessing low memory address 0x0006, is it ok?: ld  ix,(6)
+  9   0012 DD 2A 06 00      ld  ix,(6)
+low_mem_access_warning.asm(10): warning: Accessing low memory address 0x0007, is it ok?: ld  iy,(7)
+ 10   0016 FD 2A 07 00      ld  iy,(7)
+ 11   001A                  ; addresses 256+ are of course OK by default
+ 12   001A 3A 01 01         ld  a,(0x101)
+ 13   001D 2A 02 01         ld  hl,(0x102)
+ 14   0020 ED 4B 03 01      ld  bc,(0x103)
+ 15   0024 ED 5B 04 01      ld  de,(0x104)
+ 16   0028 ED 7B 05 01      ld  sp,(0x105)
+ 17   002C DD 2A 06 01      ld  ix,(0x106)
+ 18   0030 FD 2A 07 01      ld  iy,(0x107)
+ 19   0034                  ; square brackets are without warning
+ 20   0034 3A 01 00         ld  a,[1]
+ 21   0037 2A 02 00         ld  hl,[2]
+ 22   003A ED 4B 03 00      ld  bc,[3]
+ 23   003E ED 5B 04 00      ld  de,[4]
+ 24   0042 ED 7B 05 00      ld  sp,[5]
+ 25   0046 DD 2A 06 00      ld  ix,[6]
+ 26   004A FD 2A 07 00      ld  iy,[7]
+ 27   004E                  ; immediates are also ok
+ 28   004E 3E 01            ld  a,1
+ 29   0050 21 02 00         ld  hl,2
+ 30   0053 01 03 00         ld  bc,3
+ 31   0056 11 04 00         ld  de,4
+ 32   0059 31 05 00         ld  sp,5
+ 33   005C DD 21 06 00      ld  ix,6
+ 34   0060 FD 21 07 00      ld  iy,7
+ 35   0064
+ 36   0064                  OPT reset --syntax=b    ; syntax "b" (round parentheses mark memory access only)
+ 37   0064                                          ; should behave identically to default ("b" doesn't affect these)
+ 38   0064                  ; round parentheses memory access to low address 0..255 emits warning
+low_mem_access_warning.asm(39): warning: Accessing low memory address 0x0001, is it ok?: ld  a,(1)
+ 39   0064 3A 01 00         ld  a,(1)
+low_mem_access_warning.asm(40): warning: Accessing low memory address 0x0002, is it ok?: ld  hl,(2)
+ 40   0067 2A 02 00         ld  hl,(2)
+low_mem_access_warning.asm(41): warning: Accessing low memory address 0x0003, is it ok?: ld  bc,(3)
+ 41   006A ED 4B 03 00      ld  bc,(3)
+low_mem_access_warning.asm(42): warning: Accessing low memory address 0x0004, is it ok?: ld  de,(4)
+ 42   006E ED 5B 04 00      ld  de,(4)
+low_mem_access_warning.asm(43): warning: Accessing low memory address 0x0005, is it ok?: ld  sp,(5)
+ 43   0072 ED 7B 05 00      ld  sp,(5)
+low_mem_access_warning.asm(44): warning: Accessing low memory address 0x0006, is it ok?: ld  ix,(6)
+ 44   0076 DD 2A 06 00      ld  ix,(6)
+low_mem_access_warning.asm(45): warning: Accessing low memory address 0x0007, is it ok?: ld  iy,(7)
+ 45   007A FD 2A 07 00      ld  iy,(7)
+ 46   007E                  ; addresses 256+ are of course OK by default
+ 47   007E 3A 01 01         ld  a,(0x101)
+ 48   0081 2A 02 01         ld  hl,(0x102)
+ 49   0084 ED 4B 03 01      ld  bc,(0x103)
+ 50   0088 ED 5B 04 01      ld  de,(0x104)
+ 51   008C ED 7B 05 01      ld  sp,(0x105)
+ 52   0090 DD 2A 06 01      ld  ix,(0x106)
+ 53   0094 FD 2A 07 01      ld  iy,(0x107)
+ 54   0098                  ; square brackets are without warning
+ 55   0098 3A 01 00         ld  a,[1]
+ 56   009B 2A 02 00         ld  hl,[2]
+ 57   009E ED 4B 03 00      ld  bc,[3]
+ 58   00A2 ED 5B 04 00      ld  de,[4]
+ 59   00A6 ED 7B 05 00      ld  sp,[5]
+ 60   00AA DD 2A 06 00      ld  ix,[6]
+ 61   00AE FD 2A 07 00      ld  iy,[7]
+ 62   00B2                  ; immediates are also ok
+ 63   00B2 3E 01            ld  a,1
+ 64   00B4 21 02 00         ld  hl,2
+ 65   00B7 01 03 00         ld  bc,3
+ 66   00BA 11 04 00         ld  de,4
+ 67   00BD 31 05 00         ld  sp,5
+ 68   00C0 DD 21 06 00      ld  ix,6
+ 69   00C4 FD 21 07 00      ld  iy,7
+ 70   00C8
+ 71   00C8                  OPT reset --syntax=B    ; syntax "B" (square brackets only for memory access)
+ 72   00C8                                          ; should turn round parentheses into immediates = no warning
+ 73   00C8                  ; immediates in round parentheses
+ 74   00C8 3E 01            ld  a,(1)
+ 75   00CA 21 02 00         ld  hl,(2)
+ 76   00CD 01 03 00         ld  bc,(3)
+ 77   00D0 11 04 00         ld  de,(4)
+ 78   00D3 31 05 00         ld  sp,(5)
+ 79   00D6 DD 21 06 00      ld  ix,(6)
+ 80   00DA FD 21 07 00      ld  iy,(7)
+ 81   00DE                  ; still immediates
+low_mem_access_warning.asm(82): warning: value 0x101 is truncated to 8bit value: 0x01
+ 82   00DE 3E 01            ld  a,(0x101)           ; correct warning about truncating value
+ 83   00E0 21 02 01         ld  hl,(0x102)
+ 84   00E3 01 03 01         ld  bc,(0x103)
+ 85   00E6 11 04 01         ld  de,(0x104)
+ 86   00E9 31 05 01         ld  sp,(0x105)
+ 87   00EC DD 21 06 01      ld  ix,(0x106)
+ 88   00F0 FD 21 07 01      ld  iy,(0x107)
+ 89   00F4                  ; square brackets are without warning
+ 90   00F4 3A 01 00         ld  a,[1]
+ 91   00F7 2A 02 00         ld  hl,[2]
+ 92   00FA ED 4B 03 00      ld  bc,[3]
+ 93   00FE ED 5B 04 00      ld  de,[4]
+ 94   0102 ED 7B 05 00      ld  sp,[5]
+ 95   0106 DD 2A 06 00      ld  ix,[6]
+ 96   010A FD 2A 07 00      ld  iy,[7]
+ 97   010E                  ; immediates are also ok
+ 98   010E 3E 01            ld  a,1
+ 99   0110 21 02 00         ld  hl,2
+100   0113 01 03 00         ld  bc,3
+101   0116 11 04 00         ld  de,4
+102   0119 31 05 00         ld  sp,5
+103   011C DD 21 06 00      ld  ix,6
+104   0120 FD 21 07 00      ld  iy,7
+105   0124
+106   0124
+107   0124              ;;;;;;; warning suppression mechanisms ;;;;;;;;;;
+108   0124                  OPT reset --syntax=abfw
+109   0124                  ; warning not suppressed or wrongly suppressed -> emit warning
+low_mem_access_warning.asm(110): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)
+110   0124 3A 01 00         ld  a,(1)
+low_mem_access_warning.asm(111): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+111   0127 3A 01 00         ld  a,(1)   ; it's ok
+low_mem_access_warning.asm(112): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+112   012A 3A 01 00         ld  a,(1)   ; fake
+low_mem_access_warning.asm(113): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+113   012D 3A 01 00         ld  a,(1)   ; "ok"
+low_mem_access_warning.asm(114): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+114   0130 3A 01 00         ld  a,(1)   ; OK (big capitals don't work!)
+low_mem_access_warning.asm(115): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+115   0133 3A 01 00         ld  a,(1)   ;ok123 (it's not just "ok" word)
+low_mem_access_warning.asm(116): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+116   0136 3A 01 00         ld  a,(1)   ;okay (it's not just "ok" word)
+low_mem_access_warning.asm(117): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+117   0139 3A 01 00         ld  a,(1)   ; ;ok (not a first word, the second semicolon ruins it)
+low_mem_access_warning.asm(118): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+118   013C 3A 01 00         ld  a,(1)   ;
+low_mem_access_warning.asm(119): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+119   013F 3A 01 00         ld  a,(1)   ;
+low_mem_access_warning.asm(120): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+120   0142 3A 01 00         ld  a,(1)   ;o
+low_mem_access_warning.asm(121): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+121   0145 3A 01 00         ld  a,(1)   ;Ok
+low_mem_access_warning.asm(122): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+122   0148 3A 01 00         ld  a,(1)   ;0k
+low_mem_access_warning.asm(123): error: Accessing low memory address 0x0001, is it ok?: ld  a,(1)   
+123   014B 3A 01 00         ld  a,(1)   ;oK
+124   014E
+125   014E                  ; warning suppressed correctly
+126   014E 3A 01 00         ld  a,(1)   ;ok
+127   0151 3A 01 00         ld  a,(1)   ;;;;;;;;;;;ok
+128   0154 3A 01 00         ld  a,(1)   //ok
+129   0157 3A 01 00         ld  a,(1)   /////ok
+130   015A
+131   015A                  ; with whitespace between first word
+132   015A 3A 01 00         ld  a,(1)   ;    ok
+133   015D 3A 01 00         ld  a,(1)   ;;;;;;;;;;;    ok
+134   0160 3A 01 00         ld  a,(1)   //   ok
+135   0163 3A 01 00         ld  a,(1)   /////   ok
+136   0166
+137   0166                  ; following include TABs (mixed with spaces)! (make sure they stay there)
+138   0166 3A 01 00         ld  a,(1)   ;	  	ok
+139   0169 3A 01 00         ld  a,(1)   ;;;;;;;;;;;	  	ok
+140   016C 3A 01 00         ld  a,(1)   //	  	ok
+141   016F 3A 01 00         ld  a,(1)   /////	  	ok
+142   0172
+143   0172 3A 01 00         ld  a,(1)   ;ok.
+144   0175 3A 01 00         ld  a,(1)   ;ok?
+145   0178 3A 01 00         ld  a,(1)   ;ok!
+146   017B 3A 01 00         ld  a,(1)   ;ok+
+147   017E 3A 01 00         ld  a,(1)   ;ok blabla
+148   0181
+149   0181
+150   0181              ;;;;;;; test new "ok" suppression also with fake instructions ;;;;;;;;;;
+151   0181                  OPT reset --syntax=abf
+low_mem_access_warning.asm(152): warning: Fake instruction: ldi a,(hl)  
+152   0181 7E 23            ldi a,(hl)  ; warning
+153   0183 7E 23            ldi a,(hl)  ; this is "fake" instruction (warning suppressed by "fake")
+154   0185 7E 23            ldi a,(hl)  ; iz fakeish instruztione (substring can be anywhere)
+155   0187 7E 23            ldi a,(hl)  ; ok - suppressed with the new method
+156   0189
+157   0189              ;;;;;;; docs-grade example ;;;;;;;;;;
+158   0189
+low_mem_access_warning.asm(159): warning: Accessing low memory address 0x0014, is it ok?: ld      a,(16|4)    
+159   0189 3A 14 00         ld      a,(16|4)    ;warning when accidentally using parentheses around 0..255 value
+160   018C
+161   018C 3A C8 00         ld      a,(200)     ;ok Intentionally accessing ROM data at address 200
+162   018F                      ; the ";ok" as first word of end-of-line-comment does suppress the warning
+163   018F
+# file closed: low_mem_access_warning.asm
+
+Value    Label
+------ - -----------------------------------------------------------

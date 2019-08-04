@@ -710,8 +710,10 @@ invalid_LD.asm(69): error: Illegal instruction:     ld      hl,(hl)
 invalid_LD.asm(70): error: Illegal instruction:     ld      sp,(ix+1)
 70    0010                  ld      sp,(ix+1)
 invalid_LD.asm(71): error: Label not found: sp
+invalid_LD.asm(71): warning: Accessing low memory address 0x0000, is it ok?: ld      sp,(sp)
 71    0010 ED 7B 00 00      ld      sp,(sp)
 invalid_LD.asm(72): error: Label not found: sp
+invalid_LD.asm(72): warning: Accessing low memory address 0x0000, is it ok?: ld      hl,(sp)
 72    0014 2A 00 00         ld      hl,(sp)
 73    0017
 # file closed: invalid_LD.asm

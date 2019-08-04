@@ -1012,7 +1012,15 @@ namespace Z80 {
 					// LD a,imm8
 					case 1: check8(b); e[0] = 0x06 + 8*reg1; e[1] = b & 255; break;
 					// LD a,(mem8)
-					case 2: check16(b); e[0] = 0x3a; e[1] = b & 255; e[2] = (b >> 8) & 255; break;
+					case 2:
+						check16(b); e[0] = 0x3a; e[1] = b & 255; e[2] = (b >> 8) & 255;
+						// for addresses 0..255 in "()" issue warning
+						if (0 == e[2] && BT_ROUND == bt && warningNotSuppressed()) {
+							char buf[64];
+							SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", e[1]);
+							Warning(buf, bp);
+						}
+						break;
 				}
 				break;
 
@@ -1080,6 +1088,12 @@ namespace Z80 {
 						} else {					// ld bc|de|sp,(mem16)
 							e[0] = 0xed; e[1] = reg1+0x3b; e[2] = b & 255; e[3] = (b >> 8) & 255;
 						}
+						// for addresses 0..255 in "()" issue warning
+						if (0 == ((b >> 8) & 255) && ')' == lp[-1] && warningNotSuppressed()) {
+							char buf[64];
+							SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", b & 255);
+							Warning(buf, bp);
+						}
 				}
 				break;
 
@@ -1088,6 +1102,12 @@ namespace Z80 {
 				if (0 < (pemaRes = ParseExpressionMemAccess(lp, b))) {
 					e[0] = reg1; e[1] = (1 == pemaRes) ? 0x21 : 0x2a;	// ld ix|iy,imm16  ||  ld ix|iy,(mem16)
 					check16(b); e[2] = b & 255; e[3] = (b >> 8) & 255;
+					// for addresses 0..255 in "()" issue warning
+					if ((2 == pemaRes) && 0 == e[3] && ')' == lp[-1] && warningNotSuppressed()) {
+						char buf[64];
+						SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", e[2]);
+						Warning(buf, bp);
+					}
 				}
 				break;
 

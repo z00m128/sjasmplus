@@ -113,9 +113,9 @@ namespace Options {
 			Error("Fake instructions are not enabled", bp, SUPPRESS);
 			return true;
 		}
-		if (syx.FakeWarning) {	// check end-of-line comment for mentioning "fake" to remove warning
-			bool inEolComment = eolComment ? nullptr != strstr(eolComment, "fake") : false;
-			if (!inEolComment) Warning("Fake instruction", bp);
+		// check end-of-line comment for mentioning "fake" to remove warning, or beginning with "ok"
+		if (syx.FakeWarning && warningNotSuppressed(true)) {
+			Warning("Fake instruction", bp);
 		}
 		return false;
 	}

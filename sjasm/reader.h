@@ -82,3 +82,4 @@ EStructureMembers GetStructMemberId(char*& p);
 EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> delimiters, bool advanceSrc = true);
 EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc = true);
 int GetMacroArgumentValue(char* & src, char* & dst);
+bool warningNotSuppressed(bool alsoFake = false);	// checks for "ok" ("fake") in EOL comment

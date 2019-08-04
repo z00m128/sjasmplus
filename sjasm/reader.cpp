@@ -893,4 +893,16 @@ EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc) {
 	return DelimiterBegins(src, delimiters_all, advanceSrc);
 }
 
+// checks for "ok" (or also "fake") in EOL comment
+// "ok" must follow the comment start, "fake" can be anywhere inside
+bool warningNotSuppressed(bool alsoFake) {
+	if (nullptr == eolComment) return true;
+	char* comment = eolComment;
+	while (';' == *comment || '/' == *comment) ++comment;
+	while (' ' == *comment || '\t' == *comment) ++comment;
+	// check if "ok" is first word
+	if ('o' == comment[0] && 'k' == comment[1] && !isalnum(comment[2])) return false;
+	return alsoFake ? (nullptr == strstr(eolComment, "fake")) : true;
+}
+
 //eof reader.cpp

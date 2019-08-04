@@ -1,12 +1,14 @@
 # file opened: tricky_syntax.asm
  1    0000                  ; test various tricky cases of syntax
  2    0000 CE 07            adc     a , (   ( 3 ) + ( 4 )   )
- 3    0002 3A 07 00         ld      a , (   ( 3 ) + ( 4 )   )
+tricky_syntax.asm(3): warning: Accessing low memory address 0x0007, is it ok?: ld      a , (   ( 3 ) + ( 4 )   )   
+ 3    0002 3A 07 00         ld      a , (   ( 3 ) + ( 4 )   )   // extra warning about if low address is ok
  4    0005 3E 07            ld      a ,     ( 3 ) + ( 4 )
  5    0007 3E 07            ld      a ,     ( 3 ) | ( 4 )
- 6    0009 3A 07 00         ld      a ,       ( 3 | 4 )
- 7    000C 3A 07 00         ld      a,((3|4))
- 8    000F 3A 07 00         ld      a,(+(3|4))
+ 6    0009 3A 07 00         ld      a ,       ( 3 | 4 )         // ok. (warning suppressed by comment)
+tricky_syntax.asm(7): warning: Accessing low memory address 0x0007, is it ok?: ld      a,((3|4))       
+ 7    000C 3A 07 00         ld      a,((3|4))       // fake (should NOT suppress warning about low address)
+ 8    000F 3A 07 00         ld      a,(+(3|4))      //ok (should suppress)
  9    0012 3E 07            ld      a,+((3|4))
 10    0014
 11    0014                  ; test all IXY variants recognized by parser
