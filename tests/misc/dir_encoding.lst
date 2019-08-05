@@ -1,0 +1,32 @@
+# file opened: dir_encoding.asm
+ 1    0000                  ENCODING "WIN"
+ 2    0000 F2 E5 EA F1      DZ "тексттекст" ;will remain in cp1251 (ANSI) = encoding of this source file
+ 2    0004 F2 F2 E5 EA
+ 2    0008 F1 F2 00
+ 3    000B                  ENCODING "DOS"
+ 4    000B E2 A5 AA E1      DZ "вҐЄбввҐЄбв" ;will be converted to IBM866 from cp1251
+ 4    000F E2 E2 A5 AA
+ 4    0013 E1 E2 00
+ 5    0016                  ENCODING win
+ 6    0016 F1 00            DZ "с"
+ 7    0018                  ENCODING dos
+ 8    0018 E1 00            DZ "б"
+ 9    001A
+10    001A                  ; syntax errors
+dir_encoding.asm(11): error: [ENCODING] Invalid argument (valid values: "dos" and "win"): 
+11    001A                  ENCODING
+dir_encoding.asm(12): error: No closing delimiter: "
+12    001A                  ENCODING "
+dir_encoding.asm(13): error: [ENCODING] Invalid argument (valid values: "dos" and "win"): &
+13    001A                  ENCODING &
+dir_encoding.asm(14): error: [ENCODING] Invalid argument (valid values: "dos" and "win"): windows
+14    001A                  ENCODING "windows"
+dir_encoding.asm(15): error: [ENCODING] Invalid argument (valid values: "dos" and "win"): WINDOWS
+15    001A                  ENCODING "WINDOWS"
+dir_encoding.asm(16): error: [ENCODING] Invalid argument (valid values: "dos" and "win"): utf8
+16    001A                  ENCODING "utf8"     ; nope, sorry... :)
+17    001A
+# file closed: dir_encoding.asm
+
+Value    Label
+------ - -----------------------------------------------------------

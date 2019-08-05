@@ -1072,24 +1072,15 @@ void dirSAVETRD() {
 
 void dirENCODING() {
 	char* opt = GetFileName(lp);
-	char* opt2 = opt;
-	if (!(*opt)) {
-		Error("[ENCODING] Syntax error. No parameters", bp, IF_FIRST); return;
-	}
-	do {
-		*opt2 = (char) tolower(*opt2);
-	} while (*(opt2++));
-	if (!strcmp(opt, "dos")) {
+	char* comparePtr = opt;
+	if (cmphstr(comparePtr, "dos")) {
 		ConvertEncoding = ENCDOS;
-		delete[] opt;
-		return;
-	}
-	if (!strcmp(opt, "win")) {
+	} else if (cmphstr(comparePtr, "win")) {
 		ConvertEncoding = ENCWIN;
-		delete[] opt;
-		return;
+	} else {
+		Error("[ENCODING] Invalid argument (valid values: \"dos\" and \"win\")", opt, IF_FIRST);
 	}
-	Error("[ENCODING] Syntax error. Bad parameter", bp, IF_FIRST); delete[] opt;return;
+	delete[] opt;
 }
 
 void dirOPT() {
