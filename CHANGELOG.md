@@ -1,3 +1,13 @@
+## [1.14.0](https://github.com/z00m128/sjasmplus/releases/) - WIP (11.8.2019?)
+- `INCLUDE` bugfix, now searching paths according to original documentation (may break some projects)
+- `UNDEFINE` had undocumented feature of removing also labels, cancelled (was broken beyond repair)
+- R800 `MULUB` was producing wrong opcode all those years... fixed
+- `MODULE` names can't contain dot any more, `MODULE` and `ENDMODULE` resets non-local label to `_`
+- expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
+- reading memory addresses 0..255 directly emits warning, use `; ok` comment after to suppress it.
+- several tests added to improve the code coverage: [coveralls.io/github/z00m128/sjasmplus](https://coveralls.io/github/z00m128/sjasmplus?branch=master)
+- as tests were added, minor bugs were found and squashed (errors wording, etc)
+
 ## [1.13.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.13.3) - 21.7.2019
 - bugfixes, new examples (check tests/lua_examples)
 - UTF BOM are now detected, UTF8 BOM is silently skipped, UTF16/32 BOMs cause fatal error

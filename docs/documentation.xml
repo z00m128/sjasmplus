@@ -193,12 +193,27 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP (11.8.2019?) - 1.14.0</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_include">INCLUDE</link> bugfix, now searching paths according to original documentation (may break some projects)
+- <link linkend="po_undefine">UNDEFINE</link> had undocumented feature of removing also labels, cancelled (was broken beyond repair)
+- R800 `MULUB` was producing wrong opcode all those years... fixed
+- <link linkend="po_module">MODULE</link> names can't contain dot any more! MODULE and ENDMODULE resets non-local label to "_"
+- expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
+- reading memory addresses 0..255 directly emits warning, use "; ok" comment after to suppress it.
+- several tests added to improve the code coverage: <ulink url="https://coveralls.io/github/z00m128/sjasmplus?branch=master">coveralls.io/github/z00m128/sjasmplus</ulink>
+- as tests were added, minor bugs were found and squashed (errors wording, etc)</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>21.7.2019 - 1.13.3</term>
 
             <listitem>
-              <synopsis>- bugfixes, new examples (check tests/lua_examples)
+				<synopsis>- bugfixes, new examples (check <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/lua_examples">tests/lua_examples</ulink>)
 - UTF BOM are now detected, UTF8 BOM is silently skipped, UTF16/32 BOMs cause fatal error
-- ZXSPECTRUMNEXT device is now initialized with whole memory zeroed (no more ZX48 sysvars)
+- <link linkend="po_device">ZXSPECTRUMNEXT device</link> is now initialized with whole memory zeroed (no more ZX48 sysvars)
 - <link linkend="po_defl">DEFL</link> documented, "no forward reference" rule relaxed for <link linkend="po_equ">EQU</link>
 - some error messages reworded to make them easier to comprehend</synopsis>
             </listitem>
@@ -2034,27 +2049,58 @@ label4_p2: scf      ; first byte of page 2 at 0xC000</programlisting></para>
             <term><anchor id="po_module" />MODULE &lt;name&gt;</term>
 
             <listitem>
-              <para>Labels are to be unique only in the current module. Also
-              note the use of '@' to suppress all this label-processing. (The
-              '@' is NOT part of the label name though!)<example>
+              <para>
+				  Labels has to be unique only whithin the current module (module is added as prefix to them).
+				  Also note the use of '@' operator to suppress all this label-processing. Modules can
+				  be nested, and module has to be ended by <link linkend="po_endmodule">ENDMODULE</link>.
+			  <example>
                   <title></title>
 
-                  <para><programlisting>    MODULE xxx
-Kip                ; label xxx.Kip
-    CALL Kip         ; call xxx.Kip
-    CALL yyy.Kip     ; call yyy.Kip
-    CALL Kop         ; call xxx.Kop
-    CALL @Kop        ; call Kop
-    Call @Kip        ; call Kip
+                  <programlisting>    MODULE xxx
+Kip:                ; label xxx.Kip
+    ld  hl,@Kip     ; global Kip
+    ld  hl,@Kop     ; global Kop
+    ld  hl,Kop      ; xxx.Kop
+Kop:                ; label xxx.Kop
+    ld  hl,Kip      ; xxx.Kip
+    ld  hl,yyy.Kip  ; yyy.Kip
+    ld  hl,nested.Kip   ; xxx.nested.Kip
+        MODULE nested
+Kip:        ret     ; label xxx.nested.Kip
+        ENDMODULE
+    ENDMODULE
 
     MODULE yyy
-Kip                ; label yyy.Kip
-@Kop               ; label Kop
-@xxx.Kop           ; label xxx.Kop
+Kip:    ret         ; label yyy.Kip
+@Kop:   ret         ; label Kop (global one, no module prefix)
+@xxx.Kop: nop       ; ERROR: duplicate: label xxx.Kop
+    ENDMODULE
 
-    MODULE           ; no modulename
-Kip                ; label Kip</programlisting></para>
-                </example></para>
+Kip     ret         ; global label Kip</programlisting>
+                </example>
+				Since v1.14.0 the module <code>&lt;name&gt;</code> can NOT contain dot character. You can
+				use nested modules to get identical identifier as in older versions, or please rename with
+				underscores/etc:
+				<programlisting>    ; invalid since v1.14.0
+        MODULE older.version
+fn1:        ret        ; final label: @older.version.fn1
+        ENDMODULE
+    ; can be replaced in v1.14.0 with
+        MODULE new
+            MODULE version
+fn1:            ret    ; final label: @new.version.fn1
+            ENDMODULE
+        ENDMODULE</programlisting>
+	Since v1.14.0 the <code>MODULE</code> and <code>ENDMODULE</code> also resets the current "non-local"
+label prefix back to "_":
+<programlisting>Kep:    ; "Kep" label (global one), and also works as "non-local" prefix for local labels
+    MODULE zzz
+.local: ; in v1.14.0 this will be "zzz._.local" label, previously it was "zzz.Kep.local"
+Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
+.local  ; this is "zzz.Kup.local"
+    ENDMODULE
+.local: ; in v1.14.0 this will be "_.local" label, previously it was "Kup.local"</programlisting>
+				</para>
             </listitem>
           </varlistentry>
 

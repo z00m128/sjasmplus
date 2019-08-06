@@ -1,0 +1,65 @@
+po_module.asm(18): error: Duplicate label: xxx.Kop
+# file opened: po_module.asm
+ 1    0000                  MODULE xxx
+ 2    0000              Kip:                ; label xxx.Kip
+ 3    0000 21 16 00         ld  hl,@Kip     ; global Kip
+ 4    0003 21 14 00         ld  hl,@Kop     ; global Kop
+ 5    0006 21 15 00         ld  hl,Kop      ; xxx.Kop
+po_module.asm(6): warning: Label has different value in pass 3: previous value 21 not equal 9
+ 6    0009              Kop:                ; label xxx.Kop
+ 7    0009 21 00 00         ld  hl,Kip      ; xxx.Kip
+ 8    000C 21 13 00         ld  hl,yyy.Kip  ; yyy.Kip
+ 9    000F 21 12 00         ld  hl,nested.Kip   ; xxx.nested.Kip
+10    0012                      MODULE nested
+11    0012 C9           Kip:        ret     ; label xxx.nested.Kip
+12    0013                      ENDMODULE
+13    0013                  ENDMODULE
+14    0013
+15    0013                  MODULE yyy
+16    0013 C9           Kip:    ret         ; label yyy.Kip
+17    0014 C9           @Kop:   ret         ; label Kop (global one, no module prefix)
+po_module.asm(18): warning: Label has different value in pass 3: previous value 9 not equal 21
+18    0015 00           @xxx.Kop: nop       ; ERROR: duplicate: label xxx.Kop
+19    0016                  ENDMODULE
+20    0016
+21    0016 C9           Kip     ret         ; global label Kip
+22    0017
+23    0017                  ; invalid since v1.14.0
+po_module.asm(24): error: [MODULE] Dots not allowed in <module_name>: older.version
+24    0017                      MODULE older.version
+25    0017 C9           fn1:        ret        ; final label: @older.version.fn1
+po_module.asm(26): error: ENDMODULE without MODULE
+26    0018                      ENDMODULE
+27    0018                  ; can be replaced in v1.14.0 with
+28    0018                      MODULE new
+29    0018                          MODULE version
+30    0018 C9           fn1:            ret    ; final label: @new.version.fn1
+31    0019                          ENDMODULE
+32    0019                      ENDMODULE
+33    0019                  ; or you can just rename "older.version" to something like "older_version" instead
+34    0019
+35    0019              Kep:    ; "Kep" label (global one), and also works as "non-local" prefix for local labels
+36    0019                  MODULE zzz
+37    0019              .local: ; in v1.14.0 this will be "zzz._.local" label, previously it was "zzz.Kep.local"
+38    0019              Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
+39    0019              .local  ; this is "zzz.Kup.local"
+40    0019                  ENDMODULE
+41    0019              .local: ; in v1.14.0 this will be "_.local" label, previously it was "Kup.local"
+42    0019
+# file closed: po_module.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   xxx.Kip
+0x0016   Kip
+0x0014   Kop
+0x0015   xxx.Kop
+0x0012   xxx.nested.Kip
+0x0013   yyy.Kip
+0x0017 X fn1
+0x0018 X new.version.fn1
+0x0019 X Kep
+0x0019 X zzz._.local
+0x0019 X zzz.Kup
+0x0019 X zzz.Kup.local
+0x0019 X _.local
