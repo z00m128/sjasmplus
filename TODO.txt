@@ -135,3 +135,5 @@ give "src/b.asm" path chance to be found from that include path.
 *** add "Low memory warning note"
 
 *** update release link in CHANGELOG.md right ahead of release
+
+readjust README bullet points

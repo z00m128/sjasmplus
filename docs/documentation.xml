@@ -1760,18 +1760,7 @@ will output to the console strings:
 
             <listitem>
               <para>To indicate the end of a module (see <link
-              linkend="po_module">MODULE</link>), and use the previous
-              modulename.<example>
-                  <title></title>
-
-                  <para><programlisting>    MODULE M1
-A                 ; M1.A
-    MODULE M2
-A                 ; M2.A
-    ENDMODULE
-B                 ; M1.B
-    ENDMODULE</programlisting></para>
-                </example></para>
+              linkend="po_module">MODULE</link>).</para>
             </listitem>
           </varlistentry>
 
