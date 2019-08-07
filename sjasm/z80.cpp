@@ -197,25 +197,28 @@ namespace Z80 {
 		// fast lookup table for single letters 'a'..'m' ('g','j','k' will produce Z80_UNK instantly)
 		Z80Reg r8[] { Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L, Z80_UNK };
 		r8['m'-'a'] = Options::syx.Is_M_Memory ? Z80_MEM_HL : Z80_UNK;	// extra alias "M" for "(HL)" enabled?
-		if ('a' <= *p && *p <= 'm' && !islabchar(p[1])) {
-			const Z80Reg lutResult = r8[*p - 'a'];
-			if (Z80_UNK != lutResult) return ++p, lutResult;	// reg8 found, advance and return it
-		}
-		if ('A' <= *p && *p <= 'M' && !islabchar(p[1])) {
-			const Z80Reg lutResult = r8[*p - 'A'];
-			if (Z80_UNK != lutResult) return ++p, lutResult;	// reg8 found, advance and return it
+		char oneLetter = p[0] | 0x20;		// force it lowercase, in case it's ASCII letter
+		if ('a' <= oneLetter && oneLetter <= 'm' && !islabchar(p[1])) {
+			const Z80Reg lutResult = r8[oneLetter - 'a'];
+			if (Z80_UNK == lutResult) p = pp;	// not a register, restore "p"
+			else ++p;	// reg8 found, advance pointer
+			return lutResult;
 		}
 		// high/low operators can be used on register pair
-		if(memcmp(p, "high ", 5) == 0 || memcmp(p, "HIGH ", 5) == 0) {
-			p += 5;
+		if (cmphstr(p, "high")) {
 			const Z80Reg reg = GetRegister(p);
-			if (Z80_UNK == reg) p -= 5;
+			if (Z80_UNK == reg) {
+				p = pp;
+				return Z80_UNK;
+			}
 			return GetRegister_r16High(reg);
 		}
-		if(memcmp(p, "low ", 4) == 0 || memcmp(p, "LOW ", 4) == 0) {
-			p += 4;
+		if (cmphstr(p, "low")) {
 			const Z80Reg reg = GetRegister(p);
-			if (Z80_UNK == reg) p -= 4;
+			if (Z80_UNK == reg) {
+				p = pp;
+				return Z80_UNK;
+			}
 			return GetRegister_r16Low(reg);
 		}
 		// remaining "R" register and two+ letter registers

@@ -59,3 +59,13 @@
     ex      af
     ex      af,af
     ex      af,af'
+
+    ld      a  ,  low  hl   : ld a,l
+    ld      e  ,  high  bc  : ld e,b
+    ld      a  ,  LOW  hl   : ld a,l
+    ld      e  ,  HIGH  bc  : ld e,b
+    ld      a  ,  low  h
+h:
+    ld      a  ,  low  label
+label:
+    ld      a  ,  Low  hl   ; error

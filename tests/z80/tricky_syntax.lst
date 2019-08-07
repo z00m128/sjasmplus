@@ -130,7 +130,25 @@ tricky_syntax.asm(55): error: Offset out of range (-129)
 60    0146 08               ex      af,af
 61    0147 08               ex      af,af'
 62    0148
+63    0148 7D               ld      a  ,  low  hl
+63    0149 7D             ld a,l
+64    014A 58               ld      e  ,  high  bc
+64    014B 58             ld e,b
+65    014C 7D               ld      a  ,  LOW  hl
+65    014D 7D             ld a,l
+66    014E 58               ld      e  ,  HIGH  bc
+66    014F 58             ld e,b
+67    0150 3E 52            ld      a  ,  low  h
+68    0152              h:
+69    0152 3E 54            ld      a  ,  low  label
+70    0154              label:
+tricky_syntax.asm(71): error: Label not found: Low
+tricky_syntax.asm(71): error: Unexpected: hl   
+71    0154 3E 00            ld      a  ,  Low  hl   ; error
+72    0156
 # file closed: tricky_syntax.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x0152   h
+0x0154   label
