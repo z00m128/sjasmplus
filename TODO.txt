@@ -116,27 +116,14 @@ Big-text-block directive? (there's INCBIN workaround using separate file)
 ====================
 Docs:
 
-SHELLEXEC "if (... + ...)" ??? WTF? LOL.
-
 "pseudo-ops as SAVEBIN, SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST and use special functions in Lua scripts."
 ^^ link each?
 
 DEVICE needs better description? Issue #55
 ... and also SAVENEX and default ZXNEXT device... again...
 
-*** add "INCLUDE bugfix note":
-
-If you have project like:
-src/a.asm
-src/b.asm
-
-and you are assembling it with `sjasmplus src/a.asm` and `src/a.asm`
-is doing `INCLUDE "src/b.asm"`, you need either fix the relative path
-to `INCLUDE "b.asm"` or add `-i.` option: `sjasmplus -i. src/a.asm` to
-give "src/b.asm" path chance to be found from that include path.
-
-*** add "Low memory warning note"
+*** add "Low memory warning note" (considering extending the "ok" mechanism as general thing - wait with this)
 
 *** update release link in CHANGELOG.md right ahead of release
 
-readjust README bullet points
+readjust README bullet points - readjusted in the documentation, collect feedback, then README...

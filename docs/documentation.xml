@@ -27,70 +27,47 @@
 
       <para><itemizedlist>
           <listitem>
+            <para>Full source of assembler available under BSD license, modify and extend as you wish</para>
+          </listitem>
+
+          <listitem>
             <para>Z80/R800/Z80N documented and undocumented opcodes support</para>
           </listitem>
 
           <listitem>
-            <para>Very fast compilation: 1 million lines by 2-3 seconds on
-            modern computer</para>
+            <para>Macro language, defines, array of defines</para>
           </listitem>
 
           <listitem>
-            <para>Code inlining through colon (LD A,C:INC A:PUSH AF:IFDEF
-            FX:LD A,D:ENDIF…)</para>
+            <para>Built-in Lua scripting engine</para>
           </listitem>
 
           <listitem>
-            <para>Structures to define data structures in memory more easily
-            (use STRUCT pseudo-op)</para>
+            <para>Conditional assembly, block repeating</para>
           </listitem>
 
           <listitem>
-            <para>Conditional assembly</para>
+            <para>Modules (namespaces), local and temporary labels</para>
           </listitem>
 
           <listitem>
-            <para>Macro definitions</para>
+            <para>Source and binary file inclusion, include paths</para>
           </listitem>
 
           <listitem>
-            <para>Local labels</para>
+            <para>Multi file output, file updating, various types of exports</para>
           </listitem>
 
           <listitem>
-            <para>User’s messages</para>
+            <para>Structures to work easily with structured data in memory</para>
           </listitem>
 
           <listitem>
-            <para>Temporary labels</para>
+            <para>Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op DEVICE)</para>
           </listitem>
 
           <listitem>
-            <para>Virtual device mode for common machines: ZX 128, ZX Next, ... (pseudo op DEVICE)</para>
-          </listitem>
-
-          <listitem>
-            <para>Defines and array of defines</para>
-          </listitem>
-
-          <listitem>
-            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and more</para>
-          </listitem>
-
-          <listitem>
-            <para>Source and binary file inclusion</para>
-          </listitem>
-
-          <listitem>
-            <para>Multiline block comments</para>
-          </listitem>
-
-          <listitem>
-            <para>Multi file output and file updating</para>
-          </listitem>
-
-          <listitem>
-            <para>ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD...)</para>
+            <para>ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD…)</para>
           </listitem>
 
           <listitem>
@@ -98,8 +75,24 @@
           </listitem>
 
           <listitem>
-			  <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
-					  Cirrus-CI with 140+ automated tests</ulink> (report issues to grow it even more)</para>
+            <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
+            Cirrus-CI with 240+ automated tests</ulink> (that's also 240+ examples of usage!)</para>
+          </listitem>
+
+          <listitem>
+            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and more</para>
+          </listitem>
+
+          <listitem>
+            <para>Code inlining through colon (LD A,C:INC A:PUSH AF:IFDEF FX:LD A,D:ENDIF…)</para>
+          </listitem>
+
+          <listitem>
+            <para>Very fast compilation: 1 million lines by 2-3 seconds on modern computer</para>
+          </listitem>
+
+          <listitem>
+            <para>Multiline block comments and user’s messages</para>
           </listitem>
         </itemizedlist></para>
     </section>
