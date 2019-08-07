@@ -1,0 +1,31 @@
+# file opened: syntax_mM.asm
+ 1    0000              ; SYNTAX options "mM":
+ 2    0000              ;   m      Switch off "Accessing low memory" warning globally
+ 3    0000              ;   M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
+ 4    0000
+ 5    0000              ; verify regular syntax works as expected with default options
+syntax_mM.asm(6): warning: Accessing low memory address 0x007B, is it ok?: ld      a,(123)             
+ 6    0000 3A 7B 00         ld      a,(123)             ; warning about low memory access
+ 7    0003 3A 7B 00         ld      a,(123)             ; ok ; warning suppressed
+syntax_mM.asm(8): error: Label not found: m
+ 8    0006 C6 00            add     a,m                 ; label not found
+ 9    0008 86               add     a,(hl)              ; regular add instruction
+10    0009                  OPT push --syntax=mM    ; test the syntax options "mM"
+11    0009 3A 7B 00         ld      a,(123)
+12    000C 3A 7B 00         ld      a,(123)             ; ok
+13    000F 86               add     a,m                 ; (hl) used
+14    0010 86               add     a,M                 ; (hl) used
+15    0011 86               add     a,(hl)              ; regular add instruction
+16    0012                  OPT pop                 ; test push+pop of new options
+syntax_mM.asm(17): warning: Accessing low memory address 0x007B, is it ok?: ld      a,(123)             
+17    0012 3A 7B 00         ld      a,(123)             ; warning about low memory access
+18    0015 3A 7B 00         ld      a,(123)             ; ok ; warning suppressed
+syntax_mM.asm(19): error: Label not found: M
+19    0018 C6 00            add     a,M                 ; label not found
+20    001A 86               add     a,(hl)              ; regular add instruction
+21    001B                  ASSERT 2 == 2 && 2 == 2
+22    001B
+# file closed: syntax_mM.asm
+
+Value    Label
+------ - -----------------------------------------------------------
