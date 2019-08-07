@@ -1,0 +1,28 @@
+# file opened: ld_de_k__illegal.asm
+ 1    0000              k       = 1
+ 2    0000              kk      = 2
+ 3    0000              kiki    = 3
+ 4    0000              n       = 4
+ 5    0000              nn      = 5
+ 6    0000              nini    = 6
+ 7    0000 11 01 00             ld      de,k
+ 8    0003 11 02 00             ld      de,kk
+ 9    0006 11 03 00             ld      de,kiki
+ld_de_k__illegal.asm(10): error: Label not found: g
+10    0009 01 00 00             ld      bc,g        ; should be "error label not found"
+ld_de_k__illegal.asm(11): error: Label not found: m
+11    000C 01 00 00             ld      bc,m        ; should be "error label not found"
+12    000F 01 04 00             ld      bc,n
+13    0012 31 05 00             ld      sp,nn
+14    0015 21 06 00             ld      hl,nini
+15    0018
+# file closed: ld_de_k__illegal.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001   k
+0x0002   kk
+0x0003   kiki
+0x0004   n
+0x0005   nn
+0x0006   nini

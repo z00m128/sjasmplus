@@ -196,8 +196,14 @@ namespace Z80 {
 		SkipBlanks(p);
 		// fast lookup table for single letters 'a'..'i' ('g','j','k' will produce Z80_UNK instantly)
 		constexpr Z80Reg r8[] { Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L };
-		if ('a' <= *p && *p <= 'l' && !islabchar(p[1])) return r8[*p++ - 'a'];
-		if ('A' <= *p && *p <= 'L' && !islabchar(p[1])) return r8[*p++ - 'A'];
+		if ('a' <= *p && *p <= 'l' && !islabchar(p[1])) {
+			const Z80Reg lutResult = r8[*p - 'a'];
+			if (Z80_UNK != lutResult) return ++p, lutResult;	// reg8 found, advance and return it
+		}
+		if ('A' <= *p && *p <= 'L' && !islabchar(p[1])) {
+			const Z80Reg lutResult = r8[*p - 'A'];
+			if (Z80_UNK != lutResult) return ++p, lutResult;	// reg8 found, advance and return it
+		}
 		// high/low operators can be used on register pair
 		if(memcmp(p, "high ", 5) == 0 || memcmp(p, "HIGH ", 5) == 0) {
 			p += 5;
