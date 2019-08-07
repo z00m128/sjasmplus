@@ -2450,7 +2450,7 @@ START  .... ;something code
 
                   <para><programlisting>    OUTPUT "mybin.bin"
     ;some code
-    IF ((_ERRORS = 0) + (_WARNINGS = 0))
+    IF ((_ERRORS = 0) &amp;&amp; (_WARNINGS = 0))
         SHELLEXEC "x:/somepath/bin2tap.exe mybin.bin mytap.tap"
        ; or SHELLEXEC "x:/somepath/bin2tap.exe","mybin.bin mytap.tap"
     ENDIF</programlisting></para>
