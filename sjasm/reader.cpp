@@ -148,13 +148,6 @@ bool doubleComma(char* & p) {
 	return true;
 }
 
-bool doubleBacktick(char* & p) {
-	SkipBlanks(p);
-	if ('`' != p[0] || '`' != p[1]) return false;
-	p += 2;
-	return true;
-}
-
 bool nonMaComma(char* & p) {
 	if (Options::syx.isMultiArgPlainComma()) return false;	// comma is also multi-arg => FALSE here
 	return comma(p);

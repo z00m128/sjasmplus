@@ -51,7 +51,6 @@ char* getinstr(char*& p);
 bool anyComma(char*& p);		// eats any comma (even one of double-commas)
 bool comma(char*& p);			// eats single comma, but not if double-comma is ahead
 bool doubleComma(char* & p);
-bool doubleBacktick(char* & p);
 bool nonMaComma(char* & p);		// eats single comma only if multi-arg is configured to non-comma
 EBracketType OpenBracket(char*& p);
 int CloseBracket(char*& p);

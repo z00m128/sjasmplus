@@ -1,12 +1,12 @@
-; SYNTAX option "ABFL":
+; SYNTAX option "aBFL":     (used to be "ABFL", but "A" was removed)
 ;  L is "unimplemented yet" (comments below are for future implementation)
     ld      bc,hl       ; error
     ld      bc,hl       ; still error even with "fake" in this comment
     sub     a,b         ; sub b
-    sub     a``b        ; sub a : sub b
-    sub     a,,b        ; error
-    ld      b,h``c,l    ; ld b,h : ld c,l
-    ld      b,h,,c,l    ; error
+    sub     a,,b        ; sub a : sub b
+    sub     a``b        ; error
+    ld      b,h,,c,l    ; ld b,h : ld c,l
+    ld      b,h``c,l    ; error
     ld      b,h, c,l    ; error
 hl:                     ; error
     ld      a,(hl)      ; expression error  ; with "L" unimplemented this actually works as LD a,8

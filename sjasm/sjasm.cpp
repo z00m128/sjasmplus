@@ -304,9 +304,8 @@ namespace Options {
 				// f F - instructions: fake warning, no fakes (default = fake enabled)
 				case 'f': syx.FakeEnabled = syx.FakeWarning = true; break;
 				case 'F': syx.FakeEnabled = false; break;
-				// a A - multi-argument delimiter: ",,", "``" (default = ",")
+				// a - multi-argument delimiter ",," (default is ",")
 				case 'a': syx.MultiArg = &doubleComma; break;
-				case 'A': syx.MultiArg = &doubleBacktick; break;
 				// b - single parentheses enforce mem access (default = relaxed syntax)
 				case 'b': syx.MemoryBrackets = 1; break;
 				// B - memory access brackets [] required (default = relaxed syntax)

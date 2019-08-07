@@ -7,13 +7,13 @@ dir_opt.asm(4): error: Z80N instructions are currently disabled: mirror  a
  4    0004                  mirror  a               ; error (Z80N instruction)
  5    0004
  6    0004                  ; try all possible options
- 7    0004              OPT push reset --nofakes --syntax=A --zxnext=cspect --reversepop --dirbol
-dir_opt.asm(8): error: Fake instructions are not enabled: ld      hl,bc``de,bc    
- 8    0004                  ld      hl,bc``de,bc    ; error because --nofakes (!)
- 9    0004 90 91            sub     a,b``c
+ 7    0004              OPT push reset --nofakes --syntax=a --zxnext=cspect --reversepop --dirbol
+dir_opt.asm(8): error: Fake instructions are not enabled: ld      hl,bc,,de,bc    
+ 8    0004                  ld      hl,bc,,de,bc    ; error because --nofakes (!)
+ 9    0004 90 91            sub     a,b,,c
 10    0006 ED 24            mirror  a
 10    0008 DD 01          break       ; next enabled, including CSpect emulator extras
-11    000A C1 E1            pop     hl``bc          ; pop bc : pop hl (--reversepop)
+11    000A C1 E1            pop     hl,,bc          ; pop bc : pop hl (--reversepop)
 12    000C C1               pop     bc  ; validation
 Syntax option not implemented yet: l
 13    000D              OPT push reset --syntax=aBfl    ; this one can be at beggining of line (--dirbol)

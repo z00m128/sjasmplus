@@ -369,7 +369,7 @@
 
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
-	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
+	<synopsis>  a      Multi-argument delimiter ",," (default is ",")
   b      Whole expression parentheses are legal for memory access only (default = immediate or memory)
   B      memory access brackets [] required (default = relaxed syntax, [] allowed as extra)
   f F    Fake instructions: warning / disabled (default = enabled)
@@ -2129,8 +2129,8 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
     POP bc,,hl   ; pops HL first
     LD  bc,hl    ; warning about Fake instruction
     LD  bc,hl    ; warning supressed by lowercase "fake" in this comment
-    OPT reset --syntax=A
-    POP bc `` hl ; pop BC first (--reversepop was reset)
+    OPT reset --syntax=a
+    POP bc,,hl   ; pop BC first (--reversepop was reset)
     OPT pop      ; restoring syntax to original state</programlisting>
 			  </example>
             </listitem>
