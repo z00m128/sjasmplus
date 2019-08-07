@@ -188,7 +188,6 @@
 
     <section>
       <title>What's new?</title>
-<!--            <term>Work in progress - 1.13.4</term>-->
 
       <para><variablelist>
 
@@ -200,8 +199,9 @@
 - <link linkend="po_undefine">UNDEFINE</link> had undocumented feature of removing also labels, cancelled (was broken beyond repair)
 - R800 `MULUB` was producing wrong opcode all those years... fixed
 - <link linkend="po_module">MODULE</link> names can't contain dot any more! MODULE and ENDMODULE resets non-local label to "_"
+- <link linkend="s_cli">--syntax</link> option: "m" (switch off low-mem access warning) and "M" added, "A" removed
 - expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
-- reading memory addresses 0..255 directly emits warning, use "; ok" comment after to suppress it.
+- reading memory addresses 0..255 directly emits warning, use "; ok" comment to suppress it.
 - several tests added to improve the code coverage: <ulink url="https://coveralls.io/github/z00m128/sjasmplus?branch=master">coveralls.io/github/z00m128/sjasmplus</ulink>
 - as tests were added, minor bugs were found and squashed (errors wording, etc)</synopsis>
             </listitem>
@@ -1888,11 +1888,17 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               directory the current file comes from) the file will be searched
               for in the directories specified at the commandline. When angle
               brackets are used, the commandline directories are searched
-              before the current directory.<example>
+              before the current directory.</para>
+              <para>Before v1.14.0 the directory used to launch the assembling process was
+              automatically added to the list (undocumented), this was removed. If your project
+              build is failing with v1.14.0 and you don't want to modify the include paths in
+              sources, add "<code>-i.</code>" to the command line options when launching sjasmplus,
+              to simulate the previous behaviour.
+              <example>
                   <title></title>
 
-                  <para><programlisting>    INCLUDE &lt;VDP.I&gt;
-    INCLUDE MORE.I
+                  <para><programlisting>    INCLUDE &lt;VDP.I&gt;     ; search for file "VDP.I" in the include directories, then in current
+    INCLUDE MORE.I      ; search for "MORE.I" in current directory, then in include directories
     INCLUDE "MORE.I"</programlisting></para>
                 </example></para>
             </listitem>

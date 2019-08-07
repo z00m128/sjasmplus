@@ -3,8 +3,9 @@
 - `UNDEFINE` had undocumented feature of removing also labels, cancelled (was broken beyond repair)
 - R800 `MULUB` was producing wrong opcode all those years... fixed
 - `MODULE` names can't contain dot any more, `MODULE` and `ENDMODULE` resets non-local label to `_`
+- `--syntax` option: `m` (switch off low-mem access warning) and `M` added, `A` removed
 - expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
-- reading memory addresses 0..255 directly emits warning, use `; ok` comment after to suppress it.
+- reading memory addresses 0..255 directly emits warning, use `; ok` comment to suppress it.
 - several tests added to improve the code coverage: [coveralls.io/github/z00m128/sjasmplus](https://coveralls.io/github/z00m128/sjasmplus?branch=master)
 - as tests were added, minor bugs were found and squashed (errors wording, etc)
 
