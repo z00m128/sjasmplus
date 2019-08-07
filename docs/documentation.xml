@@ -375,6 +375,8 @@
   f F    Fake instructions: warning / disabled (default = enabled)
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
+  m      Switch off "Accessing low memory" warning globally
+  M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
   w      Warnings option: report warnings as errors</synopsis>
   &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
   not working correctly either.

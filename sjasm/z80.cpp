@@ -194,13 +194,14 @@ namespace Z80 {
 	static Z80Reg GetRegister(char*& p) {
 		char* pp = p;
 		SkipBlanks(p);
-		// fast lookup table for single letters 'a'..'i' ('g','j','k' will produce Z80_UNK instantly)
-		constexpr Z80Reg r8[] { Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L };
-		if ('a' <= *p && *p <= 'l' && !islabchar(p[1])) {
+		// fast lookup table for single letters 'a'..'m' ('g','j','k' will produce Z80_UNK instantly)
+		Z80Reg r8[] { Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L, Z80_UNK };
+		r8['m'-'a'] = Options::syx.Is_M_Memory ? Z80_MEM_HL : Z80_UNK;	// extra alias "M" for "(HL)" enabled?
+		if ('a' <= *p && *p <= 'm' && !islabchar(p[1])) {
 			const Z80Reg lutResult = r8[*p - 'a'];
 			if (Z80_UNK != lutResult) return ++p, lutResult;	// reg8 found, advance and return it
 		}
-		if ('A' <= *p && *p <= 'L' && !islabchar(p[1])) {
+		if ('A' <= *p && *p <= 'M' && !islabchar(p[1])) {
 			const Z80Reg lutResult = r8[*p - 'A'];
 			if (Z80_UNK != lutResult) return ++p, lutResult;	// reg8 found, advance and return it
 		}
@@ -1020,12 +1021,7 @@ namespace Z80 {
 					// LD a,(mem8)
 					case 2:
 						check16(b); e[0] = 0x3a; e[1] = b & 255; e[2] = (b >> 8) & 255;
-						// for addresses 0..255 in "()" issue warning
-						if (0 == e[2] && BT_ROUND == bt && warningNotSuppressed()) {
-							char buf[64];
-							SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", e[1]);
-							Warning(buf, bp);
-						}
+						if (BT_ROUND == bt) checkLowMemory(e[2], e[1]);
 						break;
 				}
 				break;
@@ -1094,12 +1090,7 @@ namespace Z80 {
 						} else {					// ld bc|de|sp,(mem16)
 							e[0] = 0xed; e[1] = reg1+0x3b; e[2] = b & 255; e[3] = (b >> 8) & 255;
 						}
-						// for addresses 0..255 in "()" issue warning
-						if (0 == ((b >> 8) & 255) && ')' == lp[-1] && warningNotSuppressed()) {
-							char buf[64];
-							SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", b & 255);
-							Warning(buf, bp);
-						}
+						if (')' == lp[-1]) checkLowMemory(b>>8, b);
 				}
 				break;
 
@@ -1108,12 +1099,7 @@ namespace Z80 {
 				if (0 < (pemaRes = ParseExpressionMemAccess(lp, b))) {
 					e[0] = reg1; e[1] = (1 == pemaRes) ? 0x21 : 0x2a;	// ld ix|iy,imm16  ||  ld ix|iy,(mem16)
 					check16(b); e[2] = b & 255; e[3] = (b >> 8) & 255;
-					// for addresses 0..255 in "()" issue warning
-					if ((2 == pemaRes) && 0 == e[3] && ')' == lp[-1] && warningNotSuppressed()) {
-						char buf[64];
-						SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", e[2]);
-						Warning(buf, bp);
-					}
+					if ((2 == pemaRes) && ')' == lp[-1]) checkLowMemory(e[3], e[2]);
 				}
 				break;
 

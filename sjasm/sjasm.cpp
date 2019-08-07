@@ -317,8 +317,15 @@ namespace Options {
 						_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
 					}
 					break;
+				// i - case insensitive instructions/directives (default = same case required)
 				case 'i': syx.CaseInsensitiveInstructions = true; break;
+				// w - warnings option: report warnings as errors
 				case 'w': syx.WarningsAsErrors = true; break;
+				// m - switch off "Accessing low memory" warning globally
+				case 'm': syx.IsLowMemWarningEnabled = false; break;
+				// M - alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
+				case 'M': syx.Is_M_Memory = true; break;
+				// unrecognized option
 				default:
 					if (0 == pass || LASTPASS == pass) {
 						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;

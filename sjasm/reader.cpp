@@ -259,8 +259,8 @@ char* getinstr(char*& p) {
 	return instrtemp;
 }
 
-int check8(aint val, bool error) {
-	if ((val < -256 || val > 255) && error) {
+int check8(aint val) {
+	if (val < -256 || val > 255) {
 		char buffer[64];
 		sprintf(buffer, "value 0x%X is truncated to 8bit value: 0x%02X", val, val&0xFF);
 		Warning(buffer);
@@ -280,8 +280,8 @@ int check8o(aint val)
 	return 1;
 }
 
-int check16(aint val, bool error) {
-	if ((val < -65536 || val > 65535) && error) {
+int check16(aint val) {
+	if (val < -65536 || val > 65535) {
 		char buffer[64];
 		sprintf(buffer, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
 		Warning(buffer);
@@ -290,14 +290,24 @@ int check16(aint val, bool error) {
 	return 1;
 }
 
-int check24(aint val, bool error) {
-	if ((val < -16777216 || val > 16777215) && error) {
+int check24(aint val) {
+	if (val < -16777216 || val > 16777215) {
 		char buffer[64];
 		sprintf(buffer, "value 0x%X is truncated to 24bit value: 0x%06X", val, val&0xFFFFFF);
 		Warning(buffer);
 		return 0;
 	}
 	return 1;
+}
+
+void checkLowMemory(byte hiByte, byte lowByte) {
+	if (hiByte || !warningNotSuppressed() || !Options::syx.IsLowMemWarningEnabled) {
+		return;			// address is >= 256 or warning is suppressed
+	}
+	// for addresses 0..255 issue warning
+	char buf[64];
+	SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", lowByte);
+	Warning(buf, bp);
 }
 
 int need(char*& p, char c) {

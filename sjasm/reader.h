@@ -55,10 +55,11 @@ bool nonMaComma(char* & p);		// eats single comma only if multi-arg is configure
 EBracketType OpenBracket(char*& p);
 int CloseBracket(char*& p);
 char* ParenthesesEnd(char* p);
-int check8(aint val, bool error=true);
+int check8(aint val);
 int check8o(aint val);
-int check16(aint val, bool error=true);
-int check24(aint val, bool error=true);
+int check16(aint val);
+int check24(aint val);
+void checkLowMemory(byte lowByte, byte hiByte);
 int need(char*& p, char c);
 int need(char*& p, const char* c);
 int needa(char*& p, const char* c1, int r1, const char* c2 = 0, int r2 = 0, const char* c3 = 0, int r3 = 0);
