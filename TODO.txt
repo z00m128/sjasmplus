@@ -5,6 +5,8 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+consider the "low memory access" warning locked to only ZX-like devices?
+
 parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???)
 - write tests trying those "while" loops for groups of operators
 - write tests testing operator precedence
