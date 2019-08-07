@@ -69,3 +69,5 @@ h:
     ld      a  ,  low  label
 label:
     ld      a  ,  Low  hl   ; error
+    ld      a  ,  high  d
+d:
