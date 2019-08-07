@@ -120,6 +120,7 @@ SHELLEXEC "if (... + ...)" ??? WTF? LOL.
 ^^ link each?
 
 DEVICE needs better description? Issue #55
+... and also SAVENEX and default ZXNEXT device... again...
 
 *** add "INCLUDE bugfix note":
 

@@ -966,7 +966,7 @@ or    x or y   bitwise or
       <code>{address}, {b address}</code> to read WORD/BYTE from the virtual memory.</para>
 
       <para>If only single DEVICE is used in whole source batch, the device
-      becomes "global" and will affect also source before of the DEVICE.
+      becomes "global" and will affect also source ahead of the DEVICE line.
           <example>
           <title></title>
 
@@ -991,7 +991,7 @@ StartProg:
  </programlisting></para>
         </example>Predefined devices:<variablelist>
           <varlistentry>
-            <term>NONE</term>
+            <term><anchor id="device_none" />NONE</term>
 
             <listitem>
               <para>Disable real device emulation mode. By default.</para>
@@ -999,7 +999,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM48</term>
+            <term><anchor id="device_zx48" />ZXSPECTRUM48</term>
 
             <listitem>
               <para>Has 4 slots (0-3) with size 4000h, 4 pages (0-3) with size
@@ -1009,15 +1009,15 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM128</term>
+            <term><anchor id="device_zx128" />ZXSPECTRUM128</term>
 
             <listitem>
-              <para>Has 8 RAM pages (0-7) with size 4000h.</para>
+              <para>Has 8 RAM pages (0-7) with size 4000h. Default slot is 3.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM256</term>
+            <term><anchor id="device_zx256" />ZXSPECTRUM256</term>
 
             <listitem>
               <para>Same as russian clone Scorption 256. Has 16 RAM pages
@@ -1026,7 +1026,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM512</term>
+            <term><anchor id="device_zx512" />ZXSPECTRUM512</term>
 
             <listitem>
               <para>Same as russian clones ATM Turbo 512 and Pentagon 512. Has
@@ -1035,7 +1035,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM1024</term>
+            <term><anchor id="device_zx1024" />ZXSPECTRUM1024</term>
 
             <listitem>
               <para>Same as russian clones ATM Turbo 2 and Pentagon 1024 SL.
@@ -1044,12 +1044,13 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUMNEXT</term>
+            <term><anchor id="device_zxn" />ZXSPECTRUMNEXT</term>
 
             <listitem>
               <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
               RAM pages (0-223) totalling at 1.75MiB of memory. The default mapping
               is similar to ZX128, paging in: {14, 15, 10, 11, 4, 5, 0, 1} pages.
+              Default slot is 7 (memory range 0xE000..0xFFFF).
               All memory is zeroed during initialization.</para>
             </listitem>
           </varlistentry>
@@ -1504,7 +1505,7 @@ counter = counter + 1
  ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
  ZXSPECTRUM1024
  ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
-                ;                  (default map: 14, 15, 10, 11, 4, 5, 0, 1)
+                ; (default pages map: 14, 15, 10, 11, 4, 5, 0, 1) (default slot: 7 (0xE000..0xFFFF))
 
  ;disable:
    DEVICE NONE
