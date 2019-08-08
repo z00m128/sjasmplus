@@ -21,6 +21,12 @@ lua_file_exists.asm(12): error: bogus.file does not exist.
 lua_file_exists.asm(12): error: bogus.file does not exist.
 14    0000                  endlua
 15    0000
+16    0000                  lua pass3   ; wrong arguments
+17    0000 ~                    sj.file_exists("lua_file_exists.asm", 2)
+lua_file_exists.asm(17): error: [LUA] error in function 'file_exists'.
+     argument #2 is 'number'; '[no object]' expected.
+18    0000                  endlua
+19    0000
 # file closed: lua_file_exists.asm
 
 Value    Label

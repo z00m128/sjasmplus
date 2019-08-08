@@ -11,3 +11,7 @@ test:   DEFW 0x4241
         x = _c("test + ~ ")    -- invalid syntax for expression evaluation, returns 0
         _pc("db 'e'+"..x)
     ENDLUA
+
+    LUA pass3 ; wrong arguments
+        sj.get_word(0x1234, 2)
+    ENDLUA

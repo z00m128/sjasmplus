@@ -24,3 +24,7 @@
 
     PAGE 6
     ASSERT 6 == $$  ; slot 2 should be active by lua script => page 6 there
+
+    lua pass3 ; wrong arguments
+        sj.set_slot(1, 2)
+    endlua

@@ -54,6 +54,11 @@ lua_warning.asm(31): warning: [pass all] warning emitted from lua
 lua_warning.asm(33): error: [pass all] second warning emitted from lua
 34    0000                  endlua
 35    0000
+36    0000                  lua pass3 ; wrong arguments
+37    0000 ~                    sj.warning("[nope!]", 2)
+lua_warning.asm(37): error: [nope!]: 2
+38    0000                  endlua
+39    0000
 # file closed: lua_warning.asm
 
 Value    Label

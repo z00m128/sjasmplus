@@ -20,6 +20,12 @@ lua_set_page.asm(12): error: [sj.set_page] Page number must be in range 0..7: -1
 17    0000                  ORG 0xC000
 18    C000                  ASSERT(6 == $$)     ; default slot 3 should be page 6 set by lua
 19    C000
+20    C000                  lua pass3 ; wrong arguments
+21    C000 ~                    sj.set_page(233, 2)
+lua_set_page.asm(21): error: [LUA] error in function 'set_page'.
+     argument #2 is 'number'; '[no object]' expected.
+22    C000                  endlua
+23    C000
 # file closed: lua_set_page.asm
 
 Value    Label
