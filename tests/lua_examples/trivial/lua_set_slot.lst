@@ -1,0 +1,35 @@
+# file opened: lua_set_slot.asm
+ 1    0000                  DEVICE none
+ 2    0000
+ 3    0000                  lua
+ 4    0000 ~                    -- warning because no device is set
+ 5    0000 ~                    assert(not sj.set_slot(1))
+lua_set_slot.asm(5): warning: sj.set_slot: only allowed in real device emulation mode (See DEVICE)
+ 6    0000                  endlua
+ 7    0000
+ 8    0000                  DEVICE zxspectrum128
+ 9    0000
+10    0000                  ORG 0x8000
+11    8000                  ASSERT 2 == $$  ; slot 2 should be at default page 2
+12    8000
+13    8000                  lua
+14    8000 ~                    assert(not sj.set_slot(4))
+lua_set_slot.asm(14): error: sj.set_slot: Slot number must be in range 0..3
+15    8000                  endlua
+16    8000
+17    8000                  lua
+18    8000 ~                    assert(not sj.set_slot(-1))
+lua_set_slot.asm(18): error: sj.set_slot: Slot number must be in range 0..3
+19    8000                  endlua
+20    8000
+21    8000                  lua allpass
+22    8000 ~                    assert(sj.set_slot(2))
+23    8000                  endlua
+24    8000
+25    8000                  PAGE 6
+26    8000                  ASSERT 6 == $$  ; slot 2 should be active by lua script => page 6 there
+27    8000
+# file closed: lua_set_slot.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -1,0 +1,27 @@
+lua_coverage.asm(7): error: [INCLUDELUA] File doesn't exist: neverfile.lua
+# file opened: lua_coverage.asm
+ 1    0000              ; various error states, etc... (not a good fit elsewhere)
+lua_coverage.asm(2): error: [ENDLUA] End of lua script without script
+ 2    0000                  ENDLUA
+ 3    0000
+lua_coverage.asm(4): error: [LUA] Syntax error: neverpass
+ 4    0000                  LUA neverpass
+ 5    0000                  ENDLUA
+ 6    0000
+ 7    0000                  INCLUDELUA neverfile.lua
+ 8    0000
+ 9    0000                  LUA pass3
+10    0000 ~                    % $ & ?
+lua_coverage.asm(10): error: [LUA] unexpected symbol near '%'
+11    0000                  ENDLUA
+12    0000
+13    0000                  LUA pass3
+14    0000 ~                    someErrorInLua(1, 2, 3)
+15    0000 ~
+lua_coverage.asm(15): error: [LUA] Unexpected end of lua script
+lua_coverage.asm(14): error: [LUA] attempt to call global 'someErrorInLua' (a nil value)
+15    0000
+# file closed: lua_coverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------
