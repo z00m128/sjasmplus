@@ -91,6 +91,7 @@ namespace Options {
 	bool AddLabelListing = false;
 	bool HideLogo = 0;
 	bool ShowHelp = 0;
+	bool ShowVersion = false;
 	bool NoDestinationFile = true;		// no *.out file by default
 	SSyntax syx, systemSyntax;
 	bool SourceStdIn = false;
@@ -338,8 +339,10 @@ namespace Options {
 	public:
 		void GetOptions(const char* const * const argv, int& i, bool onlySyntaxOptions = false) {
 			while ((arg=argv[i]) && ('-' == arg[0])) {
+				bool doubleDash = false;
 				// copy "option" (up to '=' char) into `opt`, copy "value" (after '=') into `val`
 				if ('-' == arg[1]) {	// double-dash detected, value is expected after "="
+					doubleDash = true;
 					splitByChar(arg + 2, '=', opt, LINEMAX, val, LINEMAX);
 				} else {				// single dash, parse value from second character onward
 					opt[0] = arg[1];	// copy only single letter into `opt`
@@ -365,8 +368,10 @@ namespace Options {
 				} else if (onlySyntaxOptions) {
 					// rest of the options is available only when launching the sjasmplus
 					return;
-				} else if (!strcmp(opt,"h") || !strcmp(opt, "help")) {
+				} else if ((!doubleDash && !strcmp(opt,"h") && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
 					ShowHelp = 1;
+				} else if (doubleDash && !strcmp(opt, "version")) {
+					ShowVersion = true;
 				} else if (!strcmp(opt, "lstlab")) {
 					AddLabelListing = true;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
@@ -404,13 +409,15 @@ namespace Options {
 					HideLogo = 1;
 				} else if (!strcmp(opt, "dos866")) {
 					ConvertEncoding = ENCDOS;
-				} else if (!strcmp(opt, "inc") || !strcmp(opt, "i") || !strcmp(opt, "I")) {
+				} else if ((doubleDash && !strcmp(opt, "inc")) ||
+							(!doubleDash && !strcmp(opt, "i")) ||
+							(!doubleDash && !strcmp(opt, "I"))) {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
 					} else {
 						_CERR "No include path found in " _CMDL arg _ENDL;
 					}
-				} else if (opt[0] == 'D') {
+				} else if (!doubleDash && opt[0] == 'D') {
 					char defN[LINEMAX], defV[LINEMAX];
 					if (*val) {		// for -Dname=value the `val` contains "name=value" string
 						//TODO the `Error("Duplicate name"..)` is not shown while parsing CLI options
@@ -419,11 +426,11 @@ namespace Options {
 					} else {
 						_CERR "No parameters found in " _CMDL arg _ENDL;
 					}
-				} else if (0 == opt[0]) {
+				} else if (!doubleDash && 0 == opt[0]) {
 					SourceStdIn = true;		// only single "-" was on command line = source STDIN
 					stdin_log.reserve(100000);	// reserve 100k bytes for a start
 				} else {
-					_CERR "Unrecognized option: " _CMDL opt _ENDL;
+					_CERR "Unrecognized option: " _CMDL arg _ENDL;
 				}
 
 				++i;					// next CLI argument
@@ -507,11 +514,20 @@ int main(int argc, char **argv) {
 	if (argc == 1 || Options::ShowHelp) {
 		_COUT logo _ENDL;
 		PrintHelp();
-		exit(1);
+		exit(argc == 1);
 	}
 
 	if (!Options::HideLogo) {
 		_CERR logo _ENDL;
+	}
+
+	if (Options::ShowVersion) {
+		if (Options::HideLogo) {	// if "sjasmplus --version --nologo", emit only the raw VERSION
+			_CERR VERSION _ENDL;
+		}
+		// otherwise the full logo was already printed
+		// now check if there were some sources to assemble, if NOT, exit with "OK"!
+		if (!SourceFNames[0][0] && !Options::SourceStdIn) exit(0);
 	}
 
 #ifdef USE_LUA

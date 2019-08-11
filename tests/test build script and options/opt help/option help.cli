@@ -1,9 +1,10 @@
 # run sjasmplus in a ways to display help page, check output to be at least 10 lines long in each case
-# sjasmplus in help mode sets exit code to "1", so the "||" is correct for sjasmplus lines
-# but after that the diff and other tests should be run
+# sjasmplus sets exit code to "1" when no option was used, but when "-h" or "--help"
+# was used, then exit code is "0", so the "||" and "&&" are mixed to correctly catch these
+# but after that the diff and other tests should be run with "&&" of course
 $MEMCHECK "$EXE" > noopt.msglst ||\
-$MEMCHECK "$EXE" -h> h.msglst ||\
-$MEMCHECK "$EXE" --help > help.msglst ||\
+$MEMCHECK "$EXE" -h> h.msglst &&\
+$MEMCHECK "$EXE" --help > help.msglst &&\
 diff help.msglst noopt.msglst &&\
 diff help.msglst h.msglst &&\
 help_lines=`wc -l < help.msglst` &&\

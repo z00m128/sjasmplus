@@ -1,4 +1,4 @@
-Unrecognized option: unknownOptionToTestError
+Unrecognized option: --unknownOptionToTestError
 No include path found in -i
 No parameters found in -D
 # file opened: env_normal2.asm
