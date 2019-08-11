@@ -760,7 +760,7 @@ or    x or y   bitwise or
     </section>
 
     <section>
-      <title>Fake instructions</title>
+      <title><anchor id="s_fake_instructions" />Fake instructions</title>
 
       <para>Of course the Z80 is only an 8 bit cpu, but sometimes <code>ld hl,de</code>
       would be nice. SjASMPlus now 'fakes' some instructions like that. This
