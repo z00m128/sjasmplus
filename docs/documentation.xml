@@ -10,16 +10,17 @@
     <section>
       <title>License</title>
 
-      <para>SjASMPlus licensed under BSD license.</para>
+      <para>SjASMPlus is licensed under BSD license.</para>
     </section>
 
     <section>
       <title>What is it?</title>
 
-      <para>SjASMPlus is Z80 Assembly Language Cross Compiler. It is available
-      for Win32, DOS and FreeBSD(mainly 5.x) systems. It is based on SjASM
-      source code by Sjoerd Mastijn (<ulink
-      url="http://xl2s.tk">http://xl2s.tk</ulink>)</para>
+      <para>
+		SjASMPlus is Z80 Assembly Language Cross Compiler. It is available
+		for Win32, Linux and FreeBSD (mainly 5.x) systems. It is based on SjASM
+		source code by Sjoerd Mastijn (<ulink url="http://xl2s.tk">http://xl2s.tk</ulink>).
+	  </para>
     </section>
 
     <section>
@@ -100,11 +101,9 @@
     <section>
       <title>Credits</title>
 
-      <para>Special thanks to <emphasis>Sjoerd Mastijn</emphasis>, the author
-      of SjASM.</para>
+      <para>Special thanks to <emphasis>Sjoerd Mastijn</emphasis>, the author of SjASM.</para>
 
-      <para><emphasis>Aprisobal </emphasis>- main programming, documentation,
-      etc.</para>
+      <para><emphasis>Aprisobal </emphasis>- main programming, documentation, etc.</para>
 
       <para>Thanks to:<itemizedlist>
           <listitem>
@@ -160,23 +159,21 @@
 
         </itemizedlist></para>
 
-      <para>Big thanks to all people, who helped on development of the
-      compiler!</para>
+      <para>Big thanks to all people, who helped on development of the compiler!</para>
     </section>
 
     <section>
       <title><anchor id="feedback" />Feedback</title>
 
       <para>WWW: <ulink
-      url="https://sourceforge.net/projects/sjasmplus/">https://sourceforge.net/projects/sjasmplus/</ulink>
-      (original Aprisobal's source)</para>
-
-      <para>WWW: <ulink
       url="https://github.com/z00m128/sjasmplus">https://github.com/z00m128/sjasmplus</ulink>
       (newer versions maintained by z00m and others)</para>
 
+      <para>WWW: <ulink
+      url="https://sourceforge.net/projects/sjasmplus/">https://sourceforge.net/projects/sjasmplus/</ulink>
+      (original Aprisobal's source)</para>
 
-      <para>E-Mail: my@aprisobal.by, zoom@centrum.sk</para>
+      <para>E-Mail: zoom@centrum.sk, my@aprisobal.by</para>
     </section>
 
     <section>
@@ -286,11 +283,16 @@
     <section>
       <title>Packages</title>
 
-      <para>You can grab older (up to v1.07) binaries and sources at SourceForge project page:
-      <ulink
-      url="https://sourceforge.net/projects/sjasmplus/">https://sourceforge.net/projects/sjasmplus/</ulink></para>
+	<para>
+		The <emphasis role="strong">latest release</emphasis> of this sjasmplus variant is
+		<emphasis role="strong">available at <ulink url="https://github.com/z00m128/sjasmplus/releases/latest">
+				https://github.com/z00m128/sjasmplus/releases/latest</ulink></emphasis>
+		- there is available zip archive with <emphasis role="strong">windows binary</emphasis>
+		(toward <emphasis role="strong">bottom of the page</emphasis>), and zip archives with
+		<emphasis role="strong">full source code</emphasis> of the sjasmplus.
+	</para>
 
-      <para>Win32 package has:<itemizedlist>
+	<para>Win32 package has:<itemizedlist>
           <listitem>
             <para>sjasmplus.exe - the Win32 executable.</para>
           </listitem>
@@ -303,26 +305,30 @@
             <para>documentation directory - documentation in various
             formats</para>
           </listitem>
-        </itemizedlist></para>
+        </itemizedlist>
+	</para>
 
-      <para>DOS and FreeBSD versions has same files in their packages.</para>
+	<para>
+		You may want to download also the full source package, as it contains more than 240
+		<emphasis role="strong">automated tests</emphasis> used to verify correctness of executable,
+		and these can be often helpful to better understand how specific feature of sjasmplus works,
+		and <emphasis role="strong">how to use it</emphasis> effectively.
+	</para>
 
-      <para>Newer sources (v1.08 onwards) you can get on github project page:
-      <ulink
-      url="https://github.com/z00m128/sjasmplus/">https://github.com/z00m128/sjasmplus/</ulink></para>
+	<para>
+		<emphasis role="strong">Linux, Unix, MacOS</emphasis> and <emphasis role="strong">BSD</emphasis>
+		version can be built from the full source archive. You can compile it using <emphasis>GCC</emphasis>
+		and included <emphasis>Makefile</emphasis>. There is an option to use <emphasis>CMake</emphasis>
+		for compilation. See
+		<ulink url="https://github.com/z00m128/sjasmplus/blob/master/INSTALL.md">INSTALL.md</ulink> for details.
+	</para>
 
-      <para><emphasis>Linux, Unix, MacOS and BSD version</emphasis> you can compile using
-      <emphasis>GCC</emphasis> and <emphasis>Makefile</emphasis> from sources
-      package.</para>
+      <para>Windows binaries are compiled with <emphasis>MinGW</emphasis> environment and included
+		  <emphasis>Makefile.win</emphasis> file.</para>
 
-      <para>Windows binaries you can compile with <emphasis>MinGW</emphasis>
-      environment and included <emphasis>Makefile.win</emphasis>. Precompiled
-      win32 binary is available on
-      <ulink
-      url="https://github.com/z00m128/sjasmplus/releases">https://github.com/z00m128/sjasmplus/releases</ulink></para>
+      <para>You can grab older (up to v1.07) binaries and sources at SourceForge project page:
+      <ulink url="https://sourceforge.net/projects/sjasmplus/">https://sourceforge.net/projects/sjasmplus/</ulink></para>
 
-      <para>There is an option to use CMake for compilation.
-      See <emphasis>INSTALL.md</emphasis> file for details.</para>
     </section>
 
     <section>
@@ -690,12 +696,13 @@ or    x or y   bitwise or
       to what I think is standard Z80: <itemizedlist>
           <listitem>
             <para>'[' and ']' can be used instead of '(' and ')' for
-            indirections. So LD A,[HL] is the same as LD A,(HL) (does not apply to IN/OUT ports,
-            those must use '(...)' form)</para>
+            indirection. So <code>LD A,[HL]</code> is the same as <code>LD A,(HL)</code> (does not
+            apply to IN/OUT ports, those must use '(...)' form)</para>
           </listitem>
 
           <listitem>
-            <para>IN F,(C) and OUT (C),0 and SLL/SLI can be used.</para>
+            <para><code>IN F,(C)</code> and <code>OUT (C),0</code> and <code>SLL/SLI</code> can be used
+				(warning: on some CPU versions of Z80 the OUT (C),0 is working as OUT (C),255).</para>
           </listitem>
 
           <listitem>
@@ -743,17 +750,24 @@ or    x or y   bitwise or
      LD B,D
      LD D,H
    */
-   ;or you can write  LD A,B:LD B,D:LD D,H</programlisting></para>
+   ;or you can write  LD A,B:LD B,D:LD D,H
+
+   ; since v1.13.1 it is possible and *recommended* to change the multi-arg delimiter
+   ; into ",,", to avoid some ambiguities with certain instructions.
+   OPT --syntax=a
+   LD A,B,,B,D,,D,H ; same as example above in default syntax
+   SUB A,B,,C  ; = SUB B, SUB C (the default syntax does for SUB A,B two SUBs!)</programlisting></para>
     </section>
 
     <section>
       <title>Fake instructions</title>
 
-      <para>Of course the Z80 is only an 8 bit cpu, but sometimes ld hl,de
+      <para>Of course the Z80 is only an 8 bit cpu, but sometimes <code>ld hl,de</code>
       would be nice. SjASMPlus now 'fakes' some instructions like that. This
       improves the readability of the source, but it might not be the fastest
       way to get the result. Also possibly some 'new' load instructions do
-      affect the flags in ways you wouldn't expect. Anyway, here's the
+      affect the flags in ways you wouldn't expect. You can use option <code>--syntax=f</code>
+      to get warnings when fake instruction is used, to avoid using them by accident. Here's the
       list:</para>
 
       <para><programlisting>  rl bc
@@ -956,9 +970,13 @@ or    x or y   bitwise or
   sub hl,bc
   sub hl,de
   sub hl,hl
-  sub hl,sp</programlisting>ldi increases the data pointer after the data
-      access, so LDI A,(HL) is the same as LD A,(HL):INC HL. likewise, LDD
-      A,(DE) is LD A,(DE):DEC DE.</para>
+  sub hl,sp
+
+  ; Z80N only
+  mul     ; to avoid warning specify register, like "mul de" or "mul d,e"</programlisting>
+      <code>LDI</code> increases the data pointer after the data
+      access, so <code>LDI A,(HL)</code> is the same as <code>LD A,(HL):INC HL</code>.
+      Likewise, <code>LDD A,(DE)</code> is <code>LD A,(DE):DEC DE</code>.</para>
     </section>
 
     <section>
@@ -1029,7 +1047,7 @@ StartProg:
             <term><anchor id="device_zx256" />ZXSPECTRUM256</term>
 
             <listitem>
-              <para>Same as russian clone Scorption 256. Has 16 RAM pages
+              <para>Same as Russian clone Scorption 256. Has 16 RAM pages
               (0-15) with size 4000h.</para>
             </listitem>
           </varlistentry>
@@ -1038,7 +1056,7 @@ StartProg:
             <term><anchor id="device_zx512" />ZXSPECTRUM512</term>
 
             <listitem>
-              <para>Same as russian clones ATM Turbo 512 and Pentagon 512. Has
+              <para>Same as Russian clones ATM Turbo 512 and Pentagon 512. Has
               32 RAM pages (0-31) with size 4000h.</para>
             </listitem>
           </varlistentry>
@@ -1047,7 +1065,7 @@ StartProg:
             <term><anchor id="device_zx1024" />ZXSPECTRUM1024</term>
 
             <listitem>
-              <para>Same as russian clones ATM Turbo 2 and Pentagon 1024 SL.
+              <para>Same as Russian clones ATM Turbo 2 and Pentagon 1024 SL.
               Has 64 RAM pages (0-63) with size 4000h.</para>
             </listitem>
           </varlistentry>
