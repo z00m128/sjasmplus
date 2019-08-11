@@ -123,5 +123,3 @@ Docs:
 
 DEVICE needs better description? Issue #55
 ... and also SAVENEX and default ZXNEXT device... again...
-
-*** update release link in CHANGELOG.md right ahead of release
