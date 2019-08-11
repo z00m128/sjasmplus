@@ -1,7 +1,7 @@
 # sjasmplus
-[![Build Status](https://api.cirrus-ci.com/github/z00m128/sjasmplus.svg)](https://cirrus-ci.com/github/z00m128/sjasmplus)
-![GitHub repo size in bytes](https://img.shields.io/github/repo-size/z00m128/sjasmplus.svg)
-![GitHub](https://img.shields.io/github/license/z00m128/sjasmplus.svg)
+[![Build Status](https://api.cirrus-ci.com/github/z00m128/sjasmplus.svg)](https://cirrus-ci.com/github/z00m128/sjasmplus/master)
+[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/)
+[![BSD 3-Clause License](https://img.shields.io/github/license/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/blob/master/LICENSE.md)
 [![Coverage Status](https://coveralls.io/repos/github/z00m128/sjasmplus/badge.svg?branch=master)](https://coveralls.io/github/z00m128/sjasmplus?branch=master)
 
 Command-line cross-compiler of assembly language for Z80 CPU. 
