@@ -1,7 +1,7 @@
 # sjasmplus
 [![Build Status](https://api.cirrus-ci.com/github/ped7g/sjasmplus.svg)](https://cirrus-ci.com/github/ped7g/sjasmplus)
-![GitHub repo size in bytes](https://img.shields.io/github/repo-size/ped7g/sjasmplus.svg)
-![GitHub](https://img.shields.io/github/license/ped7g/sjasmplus.svg)
+[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/ped7g/sjasmplus.svg)](https://github.com/ped7g/sjasmplus/)
+[![BSD 3-Clause License](https://img.shields.io/github/license/ped7g/sjasmplus.svg)](https://github.com/ped7g/sjasmplus/blob/master/LICENSE.md)
 [![Coverage Status](https://coveralls.io/repos/github/ped7g/sjasmplus/badge.svg?branch=ped-master)](https://coveralls.io/github/ped7g/sjasmplus?branch=ped-master)
 
 Command-line cross-compiler of assembly language for Z80 CPU. 
