@@ -28,7 +28,7 @@
  8    E002                  ; verify there are 8 slots and 224 pages
 next_device.asm(9): error: [SLOT] Slot number must be in range 0..7
  9    E002                  SLOT 8      ; error
-next_device.asm(10): error: [PAGE] Page number must be in range 0..223
+next_device.asm(10): error: [PAGE] Page number must be in range 0..223: 224
 10    E002                  PAGE 224    ; error
 11    E002                  ; do few more verifications with other slots, reading previously modified pages
 12    E002                  SLOT 1
@@ -65,6 +65,9 @@ next_device.asm(10): error: [PAGE] Page number must be in range 0..223
 18    E002                  ; check the Z80N instructions are enabled by the device selection
 19    E002 ED 91 07 02      nextreg $07,2
 20    E006
+next_device.asm(21): error: [PAGE] Page number must be in range 0..223: -1
+21    E006                  PAGE -1     ; error
+22    E006
 # file closed: next_device.asm
 
 Value    Label

@@ -42,12 +42,15 @@ namespace Options {
 		bool		IsListingSuspended;
 		bool		CaseInsensitiveInstructions;
 		bool		WarningsAsErrors;
+		bool		Is_M_Memory;
+		bool		IsLowMemWarningEnabled;
 		int			MemoryBrackets;	// 0 = [] enabled (default), 1 = [] disabled, 2 = [] required
 		int			IsNextEnabled;	// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
 		bool		(*MultiArg)(char*&);	// function checking if multi-arg delimiter is next
 
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
 					IsListingSuspended(false), CaseInsensitiveInstructions(false), WarningsAsErrors(false),
+					Is_M_Memory(false), IsLowMemWarningEnabled(true),
 					MemoryBrackets(0), IsNextEnabled(0), MultiArg(&comma) {}
 		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
 
@@ -97,7 +100,7 @@ extern int deviceDirectivesCounter;
 
 // extend
 extern char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
-extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
+extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 // the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
 extern char SourceFNames[128][MAX_PATH];
@@ -111,7 +114,7 @@ extern int macronummer, lijst, reglenwidth;
 extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, LastParsedLabelLine;
 extern aint destlen, size, PreviousErrorLine, maxlin, comlin;
 
-extern char* ModuleName, * vorlabp, * macrolabp, * LastParsedLabel;
+extern char* vorlabp, * macrolabp, * LastParsedLabel;
 
 enum EEncoding { ENCDOS, ENCWIN };
 extern char* CurrentDirectory;
@@ -126,7 +129,6 @@ extern CDefineTable DefineTable;
 extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;
 extern CStructureTable StructureTable;
-extern CStringsList* ModuleList;
 
 #ifdef USE_LUA
 

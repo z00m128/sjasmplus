@@ -1,11 +1,11 @@
     ; test various tricky cases of syntax
     adc     a , (   ( 3 ) + ( 4 )   )
-    ld      a , (   ( 3 ) + ( 4 )   )
+    ld      a , (   ( 3 ) + ( 4 )   )   // extra warning about if low address is ok
     ld      a ,     ( 3 ) + ( 4 )
     ld      a ,     ( 3 ) | ( 4 )
-    ld      a ,       ( 3 | 4 )
-    ld      a,((3|4))
-    ld      a,(+(3|4))
+    ld      a ,       ( 3 | 4 )         // ok. (warning suppressed by comment)
+    ld      a,((3|4))       // fake (should NOT suppress warning about low address)
+    ld      a,(+(3|4))      //ok (should suppress)
     ld      a,+((3|4))
 
     ; test all IXY variants recognized by parser
@@ -59,3 +59,15 @@
     ex      af
     ex      af,af
     ex      af,af'
+
+    ld      a  ,  low  hl   : ld a,l
+    ld      e  ,  high  bc  : ld e,b
+    ld      a  ,  LOW  hl   : ld a,l
+    ld      e  ,  HIGH  bc  : ld e,b
+    ld      a  ,  low  h
+h:
+    ld      a  ,  low  label
+label:
+    ld      a  ,  Low  hl   ; error
+    ld      a  ,  high  d
+d:

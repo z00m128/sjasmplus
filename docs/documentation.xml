@@ -27,70 +27,47 @@
 
       <para><itemizedlist>
           <listitem>
+            <para>Full source of assembler available under BSD license, modify and extend as you wish</para>
+          </listitem>
+
+          <listitem>
             <para>Z80/R800/Z80N documented and undocumented opcodes support</para>
           </listitem>
 
           <listitem>
-            <para>Very fast compilation: 1 million lines by 2-3 seconds on
-            modern computer</para>
+            <para>Macro language, defines, array of defines</para>
           </listitem>
 
           <listitem>
-            <para>Code inlining through colon (LD A,C:INC A:PUSH AF:IFDEF
-            FX:LD A,D:ENDIF…)</para>
+            <para>Built-in Lua scripting engine</para>
           </listitem>
 
           <listitem>
-            <para>Structures to define data structures in memory more easily
-            (use STRUCT pseudo-op)</para>
+            <para>Conditional assembly, block repeating</para>
           </listitem>
 
           <listitem>
-            <para>Conditional assembly</para>
+            <para>Modules (namespaces), local and temporary labels</para>
           </listitem>
 
           <listitem>
-            <para>Macro definitions</para>
+            <para>Source and binary file inclusion, include paths</para>
           </listitem>
 
           <listitem>
-            <para>Local labels</para>
+            <para>Multi file output, file updating, various types of exports</para>
           </listitem>
 
           <listitem>
-            <para>User’s messages</para>
+            <para>Structures to work easily with structured data in memory</para>
           </listitem>
 
           <listitem>
-            <para>Temporary labels</para>
+            <para>Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op DEVICE)</para>
           </listitem>
 
           <listitem>
-            <para>Virtual device mode for common machines: ZX 128, ZX Next, ... (pseudo op DEVICE)</para>
-          </listitem>
-
-          <listitem>
-            <para>Defines and array of defines</para>
-          </listitem>
-
-          <listitem>
-            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and more</para>
-          </listitem>
-
-          <listitem>
-            <para>Source and binary file inclusion</para>
-          </listitem>
-
-          <listitem>
-            <para>Multiline block comments</para>
-          </listitem>
-
-          <listitem>
-            <para>Multi file output and file updating</para>
-          </listitem>
-
-          <listitem>
-            <para>ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD...)</para>
+            <para>ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD…)</para>
           </listitem>
 
           <listitem>
@@ -98,8 +75,24 @@
           </listitem>
 
           <listitem>
-			  <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
-					  Cirrus-CI with 140+ automated tests</ulink> (report issues to grow it even more)</para>
+            <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
+            Cirrus-CI with 240+ automated tests</ulink> (that's also 240+ examples of usage!)</para>
+          </listitem>
+
+          <listitem>
+            <para>Fake instructions as LD HL,DE (LD H,D:LD L,E) and more</para>
+          </listitem>
+
+          <listitem>
+            <para>Code inlining through colon (LD A,C:INC A:PUSH AF:IFDEF FX:LD A,D:ENDIF…)</para>
+          </listitem>
+
+          <listitem>
+            <para>Very fast compilation: 1 million lines by 2-3 seconds on modern computer</para>
+          </listitem>
+
+          <listitem>
+            <para>Multiline block comments and user’s messages</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -188,17 +181,32 @@
 
     <section>
       <title>What's new?</title>
-<!--            <term>Work in progress - 1.13.4</term>-->
 
       <para><variablelist>
+
+<varlistentry>
+            <term>WIP (11.8.2019?) - 1.14.0</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_include">INCLUDE</link> bugfix, now searching paths according to original documentation (may break some projects)
+- <link linkend="po_undefine">UNDEFINE</link> had undocumented feature of removing also labels, cancelled (was broken beyond repair)
+- R800 `MULUB` was producing wrong opcode all those years... fixed
+- <link linkend="po_module">MODULE</link> names can't contain dot any more! MODULE and ENDMODULE resets non-local label to "_"
+- <link linkend="s_cli">--syntax</link> option: "m" (switch off low-mem access warning) and "M" added, "A" removed
+- expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
+- reading memory addresses 0..255 directly emits warning, use "; ok" comment to suppress it.
+- several tests added to improve the code coverage: <ulink url="https://coveralls.io/github/z00m128/sjasmplus?branch=master">coveralls.io/github/z00m128/sjasmplus</ulink>
+- as tests were added, minor bugs were found and squashed (errors wording, etc)</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>21.7.2019 - 1.13.3</term>
 
             <listitem>
-              <synopsis>- bugfixes, new examples (check tests/lua_examples)
+				<synopsis>- bugfixes, new examples (check <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/lua_examples">tests/lua_examples</ulink>)
 - UTF BOM are now detected, UTF8 BOM is silently skipped, UTF16/32 BOMs cause fatal error
-- ZXSPECTRUMNEXT device is now initialized with whole memory zeroed (no more ZX48 sysvars)
+- <link linkend="po_device">ZXSPECTRUMNEXT device</link> is now initialized with whole memory zeroed (no more ZX48 sysvars)
 - <link linkend="po_defl">DEFL</link> documented, "no forward reference" rule relaxed for <link linkend="po_equ">EQU</link>
 - some error messages reworded to make them easier to comprehend</synopsis>
             </listitem>
@@ -354,12 +362,14 @@
 
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
-	<synopsis>  a A    Multi-argument delimiter: ",," / "``" (default = ",")
+	<synopsis>  a      Multi-argument delimiter ",," (default is ",")
   b      Whole expression parentheses are legal for memory access only (default = immediate or memory)
   B      memory access brackets [] required (default = relaxed syntax, [] allowed as extra)
   f F    Fake instructions: warning / disabled (default = enabled)
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
+  m      Switch off "Accessing low memory" warning globally
+  M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
   w      Warnings option: report warnings as errors</synopsis>
   &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
   not working correctly either.
@@ -951,7 +961,7 @@ or    x or y   bitwise or
       <code>{address}, {b address}</code> to read WORD/BYTE from the virtual memory.</para>
 
       <para>If only single DEVICE is used in whole source batch, the device
-      becomes "global" and will affect also source before of the DEVICE.
+      becomes "global" and will affect also source ahead of the DEVICE line.
           <example>
           <title></title>
 
@@ -976,7 +986,7 @@ StartProg:
  </programlisting></para>
         </example>Predefined devices:<variablelist>
           <varlistentry>
-            <term>NONE</term>
+            <term><anchor id="device_none" />NONE</term>
 
             <listitem>
               <para>Disable real device emulation mode. By default.</para>
@@ -984,7 +994,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM48</term>
+            <term><anchor id="device_zx48" />ZXSPECTRUM48</term>
 
             <listitem>
               <para>Has 4 slots (0-3) with size 4000h, 4 pages (0-3) with size
@@ -994,15 +1004,15 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM128</term>
+            <term><anchor id="device_zx128" />ZXSPECTRUM128</term>
 
             <listitem>
-              <para>Has 8 RAM pages (0-7) with size 4000h.</para>
+              <para>Has 8 RAM pages (0-7) with size 4000h. Default slot is 3.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM256</term>
+            <term><anchor id="device_zx256" />ZXSPECTRUM256</term>
 
             <listitem>
               <para>Same as russian clone Scorption 256. Has 16 RAM pages
@@ -1011,7 +1021,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM512</term>
+            <term><anchor id="device_zx512" />ZXSPECTRUM512</term>
 
             <listitem>
               <para>Same as russian clones ATM Turbo 512 and Pentagon 512. Has
@@ -1020,7 +1030,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUM1024</term>
+            <term><anchor id="device_zx1024" />ZXSPECTRUM1024</term>
 
             <listitem>
               <para>Same as russian clones ATM Turbo 2 and Pentagon 1024 SL.
@@ -1029,12 +1039,13 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>ZXSPECTRUMNEXT</term>
+            <term><anchor id="device_zxn" />ZXSPECTRUMNEXT</term>
 
             <listitem>
               <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
               RAM pages (0-223) totalling at 1.75MiB of memory. The default mapping
               is similar to ZX128, paging in: {14, 15, 10, 11, 4, 5, 0, 1} pages.
+              Default slot is 7 (memory range 0xE000..0xFFFF).
               All memory is zeroed during initialization.</para>
             </listitem>
           </varlistentry>
@@ -1489,7 +1500,7 @@ counter = counter + 1
  ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
  ZXSPECTRUM1024
  ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
-                ;                  (default map: 14, 15, 10, 11, 4, 5, 0, 1)
+                ; (default pages map: 14, 15, 10, 11, 4, 5, 0, 1) (default slot: 7 (0xE000..0xFFFF))
 
  ;disable:
    DEVICE NONE
@@ -1745,18 +1756,7 @@ will output to the console strings:
 
             <listitem>
               <para>To indicate the end of a module (see <link
-              linkend="po_module">MODULE</link>), and use the previous
-              modulename.<example>
-                  <title></title>
-
-                  <para><programlisting>    MODULE M1
-A                 ; M1.A
-    MODULE M2
-A                 ; M2.A
-    ENDMODULE
-B                 ; M1.B
-    ENDMODULE</programlisting></para>
-                </example></para>
+              linkend="po_module">MODULE</link>).</para>
             </listitem>
           </varlistentry>
 
@@ -1881,11 +1881,17 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               directory the current file comes from) the file will be searched
               for in the directories specified at the commandline. When angle
               brackets are used, the commandline directories are searched
-              before the current directory.<example>
+              before the current directory.</para>
+              <para>Before v1.14.0 the directory used to launch the assembling process was
+              automatically added to the list (undocumented), this was removed. If your project
+              build is failing with v1.14.0 and you don't want to modify the include paths in
+              sources, add "<code>-i.</code>" to the command line options when launching sjasmplus,
+              to simulate the previous behaviour.
+              <example>
                   <title></title>
 
-                  <para><programlisting>    INCLUDE &lt;VDP.I&gt;
-    INCLUDE MORE.I
+                  <para><programlisting>    INCLUDE &lt;VDP.I&gt;     ; search for file "VDP.I" in the include directories, then in current
+    INCLUDE MORE.I      ; search for "MORE.I" in current directory, then in include directories
     INCLUDE "MORE.I"</programlisting></para>
                 </example></para>
             </listitem>
@@ -2034,27 +2040,58 @@ label4_p2: scf      ; first byte of page 2 at 0xC000</programlisting></para>
             <term><anchor id="po_module" />MODULE &lt;name&gt;</term>
 
             <listitem>
-              <para>Labels are to be unique only in the current module. Also
-              note the use of '@' to suppress all this label-processing. (The
-              '@' is NOT part of the label name though!)<example>
+              <para>
+				  Labels has to be unique only whithin the current module (module is added as prefix to them).
+				  Also note the use of '@' operator to suppress all this label-processing. Modules can
+				  be nested, and module has to be ended by <link linkend="po_endmodule">ENDMODULE</link>.
+			  <example>
                   <title></title>
 
-                  <para><programlisting>    MODULE xxx
-Kip                ; label xxx.Kip
-    CALL Kip         ; call xxx.Kip
-    CALL yyy.Kip     ; call yyy.Kip
-    CALL Kop         ; call xxx.Kop
-    CALL @Kop        ; call Kop
-    Call @Kip        ; call Kip
+                  <programlisting>    MODULE xxx
+Kip:                ; label xxx.Kip
+    ld  hl,@Kip     ; global Kip
+    ld  hl,@Kop     ; global Kop
+    ld  hl,Kop      ; xxx.Kop
+Kop:                ; label xxx.Kop
+    ld  hl,Kip      ; xxx.Kip
+    ld  hl,yyy.Kip  ; yyy.Kip
+    ld  hl,nested.Kip   ; xxx.nested.Kip
+        MODULE nested
+Kip:        ret     ; label xxx.nested.Kip
+        ENDMODULE
+    ENDMODULE
 
     MODULE yyy
-Kip                ; label yyy.Kip
-@Kop               ; label Kop
-@xxx.Kop           ; label xxx.Kop
+Kip:    ret         ; label yyy.Kip
+@Kop:   ret         ; label Kop (global one, no module prefix)
+@xxx.Kop: nop       ; ERROR: duplicate: label xxx.Kop
+    ENDMODULE
 
-    MODULE           ; no modulename
-Kip                ; label Kip</programlisting></para>
-                </example></para>
+Kip     ret         ; global label Kip</programlisting>
+                </example>
+				Since v1.14.0 the module <code>&lt;name&gt;</code> can NOT contain dot character. You can
+				use nested modules to get identical identifier as in older versions, or please rename with
+				underscores/etc:
+				<programlisting>    ; invalid since v1.14.0
+        MODULE older.version
+fn1:        ret        ; final label: @older.version.fn1
+        ENDMODULE
+    ; can be replaced in v1.14.0 with
+        MODULE new
+            MODULE version
+fn1:            ret    ; final label: @new.version.fn1
+            ENDMODULE
+        ENDMODULE</programlisting>
+	Since v1.14.0 the <code>MODULE</code> and <code>ENDMODULE</code> also resets the current "non-local"
+label prefix back to "_":
+<programlisting>Kep:    ; "Kep" label (global one), and also works as "non-local" prefix for local labels
+    MODULE zzz
+.local: ; in v1.14.0 this will be "zzz._.local" label, previously it was "zzz.Kep.local"
+Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
+.local  ; this is "zzz.Kup.local"
+    ENDMODULE
+.local: ; in v1.14.0 this will be "_.local" label, previously it was "Kup.local"</programlisting>
+				</para>
             </listitem>
           </varlistentry>
 
@@ -2093,8 +2130,8 @@ Kip                ; label Kip</programlisting></para>
     POP bc,,hl   ; pops HL first
     LD  bc,hl    ; warning about Fake instruction
     LD  bc,hl    ; warning supressed by lowercase "fake" in this comment
-    OPT reset --syntax=A
-    POP bc `` hl ; pop BC first (--reversepop was reset)
+    OPT reset --syntax=a
+    POP bc,,hl   ; pop BC first (--reversepop was reset)
     OPT pop      ; restoring syntax to original state</programlisting>
 			  </example>
             </listitem>
@@ -2406,7 +2443,7 @@ START  .... ;something code
 
                   <para><programlisting>    OUTPUT "mybin.bin"
     ;some code
-    IF ((_ERRORS = 0) + (_WARNINGS = 0))
+    IF ((_ERRORS = 0) &amp;&amp; (_WARNINGS = 0))
         SHELLEXEC "x:/somepath/bin2tap.exe mybin.bin mytap.tap"
        ; or SHELLEXEC "x:/somepath/bin2tap.exe","mybin.bin mytap.tap"
     ENDIF</programlisting></para>

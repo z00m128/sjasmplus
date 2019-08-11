@@ -4,11 +4,11 @@ OPT pop                     ; warn about no previous syntax in stack
     mirror  a               ; error (Z80N instruction)
 
     ; try all possible options
-OPT push reset --nofakes --syntax=A --zxnext=cspect --reversepop --dirbol
-    ld      hl,bc``de,bc    ; error because --nofakes (!)
-    sub     a,b``c
+OPT push reset --nofakes --syntax=a --zxnext=cspect --reversepop --dirbol
+    ld      hl,bc,,de,bc    ; error because --nofakes (!)
+    sub     a,b,,c
     mirror  a : break       ; next enabled, including CSpect emulator extras
-    pop     hl``bc          ; pop bc : pop hl (--reversepop)
+    pop     hl,,bc          ; pop bc : pop hl (--reversepop)
     pop     bc  ; validation
 OPT push reset --syntax=aBfl    ; this one can be at beggining of line (--dirbol)
 OPT = 1 nop : OPT --dirbol  ; first is label, instruction, adding --dirbol back (no push/reset)

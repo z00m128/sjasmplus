@@ -44,7 +44,7 @@ Page30:     rla
     ENDMODULE
 
             ORG $C031, $31
-    MODULE Module..two.
+    MODULE Module_two_
 Page31..A.: rrca
 .local..c.:
     ENDMODULE

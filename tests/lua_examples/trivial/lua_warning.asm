@@ -32,3 +32,7 @@
         _pc("OPT --syntax=w")   ; -- treat warnings as errors
         sj.warning("[pass all] second warning emitted from lua")
     endlua
+
+    lua pass3 ; wrong arguments
+        sj.warning("[nope!]", 2)
+    endlua

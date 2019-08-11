@@ -1,5 +1,5 @@
     CALL LABEL3 ; LABEL3 - yes
-    LD A,(LABEL1) ; LABEL1 - yes
+    LD A,(LABEL1) ;ok low mem; LABEL1 - yes
 
     jr  1B      ;; error
     jr  1F

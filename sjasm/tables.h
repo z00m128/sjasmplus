@@ -27,9 +27,6 @@
 */
 
 // tables.h
-using std::cout;
-using std::cerr;
-using std::endl;
 
 enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
 
@@ -237,7 +234,6 @@ public:
 class CStructure {
 public:
 	char* naam, * id;
-	int binding;
 	int global;
 	int maxAlignment;
 	aint noffset;
@@ -251,7 +247,7 @@ public:
 	void emitlab(char* iid, aint address);
 	void emitmembs(char*&);
 	CStructure* next;
-	CStructure(char*, char*, int, int, int, CStructure*);
+	CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p);
 private:
 	CStructureEntry1* mnf, * mnl;
 	CStructureEntry2* mbf, * mbl;
@@ -259,7 +255,7 @@ private:
 
 class CStructureTable {
 public:
-	CStructure* Add(char*, int, int, int);
+	CStructure* Add(char* naam, int no, int gl);
 	void Init();
 	CStructureTable() {
 		Init();

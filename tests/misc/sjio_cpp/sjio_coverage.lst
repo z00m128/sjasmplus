@@ -1,0 +1,33 @@
+sjio_coverage.asm(5): error: [EXPORT] Filename for exportfile was not indicated. Output will be in: sjio_coverage.exp
+# file opened: sjio_coverage.asm
+ 1    0000                  FPOS 1
+ 2    0000                  OUTPUT "ignore.bin",r
+ 3    0000                  SIZE 1              ; will cause error about exceeeding output size
+ 4    0000                  OPT --syntax=w      ; warnings as errors
+sjio_coverage.asm(5): error: Label not found: error_about_default_file
+ 5    0000                  EXPORT error_about_default_file
+sjio_coverage.asm(6): error: ENDMODULE without MODULE
+ 6    0000                  ENDMODULE   ; error: without beginning of module
+ 7    0000                  IF 1
+ 8    0000                      DISP        0x1234
+ 9    1234 00                       nop
+10    1235                      ENDT
+11    0001                      FPOS 0
+12    0001                      TEXTAREA    0x2345
+13    2345 C9                       ret
+14    2346                      DEPHASE
+15    0002                      PHASE       0x3456
+16    3456 2F                       cpl
+17    3457                      UNPHASE
+18    0003 27                   daa
+sjio_coverage.asm(19): error: File exceeds 'size' by: 3
+19    0004                      OUTEND
+20    0004                  ELSE
+21    0004 ~                    ; no endif to fall through the <EOF>
+22    0004 ~
+sjio_coverage.asm(22): error: [IF] No ENDIF
+22    0004
+# file closed: sjio_coverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------

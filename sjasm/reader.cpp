@@ -148,13 +148,6 @@ bool doubleComma(char* & p) {
 	return true;
 }
 
-bool doubleBacktick(char* & p) {
-	SkipBlanks(p);
-	if ('`' != p[0] || '`' != p[1]) return false;
-	p += 2;
-	return true;
-}
-
 bool nonMaComma(char* & p) {
 	if (Options::syx.isMultiArgPlainComma()) return false;	// comma is also multi-arg => FALSE here
 	return comma(p);
@@ -266,8 +259,8 @@ char* getinstr(char*& p) {
 	return instrtemp;
 }
 
-int check8(aint val, bool error) {
-	if ((val < -256 || val > 255) && error) {
+int check8(aint val) {
+	if (val < -256 || val > 255) {
 		char buffer[64];
 		sprintf(buffer, "value 0x%X is truncated to 8bit value: 0x%02X", val, val&0xFF);
 		Warning(buffer);
@@ -287,8 +280,8 @@ int check8o(aint val)
 	return 1;
 }
 
-int check16(aint val, bool error) {
-	if ((val < -65536 || val > 65535) && error) {
+int check16(aint val) {
+	if (val < -65536 || val > 65535) {
 		char buffer[64];
 		sprintf(buffer, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
 		Warning(buffer);
@@ -297,14 +290,24 @@ int check16(aint val, bool error) {
 	return 1;
 }
 
-int check24(aint val, bool error) {
-	if ((val < -16777216 || val > 16777215) && error) {
+int check24(aint val) {
+	if (val < -16777216 || val > 16777215) {
 		char buffer[64];
 		sprintf(buffer, "value 0x%X is truncated to 24bit value: 0x%06X", val, val&0xFFFFFF);
 		Warning(buffer);
 		return 0;
 	}
 	return 1;
+}
+
+void checkLowMemory(byte hiByte, byte lowByte) {
+	if (hiByte || !warningNotSuppressed() || !Options::syx.IsLowMemWarningEnabled) {
+		return;			// address is >= 256 or warning is suppressed
+	}
+	// for addresses 0..255 issue warning
+	char buf[64];
+	SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", lowByte);
+	Warning(buf, bp);
 }
 
 int need(char*& p, char c) {
@@ -866,15 +869,17 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 			*dst++ = *src++;					// just copy character
 		}
 		// ending delimiter must be identical to endCh
-		if (endCh != *src) return 0;
+		if (endCh != *src) {
+			*dst = 0;							// zero terminator of resulting string value
+			return 0;
+		}
 		// set ending delimiter for quotes and apostrophe (angles are stripped from value)
 		if (DT_QUOTES == delI || DT_APOSTROPHE == delI) *dst++ = endCh;
 		++src;									// advance over delimiter
 	}
 	*dst = 0;									// zero terminator of resulting string value
-	int returnValue = *dstOrig || ',' == *src;	// return 1 if value is not empty or comma follows
-	if (!*dstOrig && returnValue) Warning("[Macro argument parser] empty value", srcOrig);
-	return (returnValue);		// but empty value will at least display warning
+	if (! *dstOrig) Warning("[Macro argument parser] empty value", srcOrig);
+	return 1;
 }
 
 EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> delimiters, bool advanceSrc) {
@@ -889,6 +894,18 @@ EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> d
 
 EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc) {
 	return DelimiterBegins(src, delimiters_all, advanceSrc);
+}
+
+// checks for "ok" (or also "fake") in EOL comment
+// "ok" must follow the comment start, "fake" can be anywhere inside
+bool warningNotSuppressed(bool alsoFake) {
+	if (nullptr == eolComment) return true;
+	char* comment = eolComment;
+	while (';' == *comment || '/' == *comment) ++comment;
+	while (' ' == *comment || '\t' == *comment) ++comment;
+	// check if "ok" is first word
+	if ('o' == comment[0] && 'k' == comment[1] && !isalnum(comment[2])) return false;
+	return alsoFake ? (nullptr == strstr(eolComment, "fake")) : true;
 }
 
 //eof reader.cpp

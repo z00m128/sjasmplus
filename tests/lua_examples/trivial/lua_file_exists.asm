@@ -12,3 +12,7 @@
             sj.error("bogus.file does not exist.")  -- show this one as error for fun
         ; end
     endlua
+
+    lua pass3   ; wrong arguments
+        sj.file_exists("lua_file_exists.asm", 2)
+    endlua

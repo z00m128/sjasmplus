@@ -72,11 +72,9 @@ char* ValidateLabel(char* naam, int flags) {
 	if (mlp && l) {
 		STRCAT(lp, LINEMAX, macrolabp); STRCAT(lp, LINEMAX, ">");
 	} else {
-		if (!p && ModuleName) {
-			//int len1=strlen(lp);
-			//int len2=strlen(ModuleName);
-			STRCAT(lp, LINEMAX, ModuleName);
-			STRCAT(lp, LINEMAX, ".");
+		if (!p && *ModuleName) {
+			STRCAT(lp, LINEMAX-2, ModuleName);
+			STRCAT(lp, 1, ".");
 		}
 		if (l) {
 			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
@@ -123,7 +121,9 @@ int GetLabelValue(char*& p, aint& val) {
 		}
 		np = temp;
 		while (*np && '>' != *np) {
-			if (LabelTable.GetValue(np, val)) return 1;
+			if (LabelTable.GetValue(np, val)) {
+				return 1;
+			}
 			IsLabelNotFound = oIsLabelNotFound;
 			while (*np && '>' != *np && '.' != *np) ++np;
 			if ('.' == *np) ++np;
@@ -144,9 +144,9 @@ int GetLabelValue(char*& p, aint& val) {
 		break;
 	}
 	temp[0] = 0;
-	if (!g && ModuleName) {
-		STRCAT(temp, LINEMAX, ModuleName);
-		STRCAT(temp, LINEMAX, ".");
+	if (!g && *ModuleName) {
+		STRCAT(temp, LINEMAX-2, ModuleName);
+		STRCAT(temp, 1, ".");
 	}
 	if (l) {
 		STRCAT(temp, LINEMAX, vorlabp);
@@ -167,15 +167,16 @@ int GetLabelValue(char*& p, aint& val) {
 		temp[LABMAX + len] = 0;
 	}
 	if (LabelTable.GetValue(temp, val)) return 1;
-	bool undefinedInTable = (2 == IsLabelNotFound);
-	IsLabelNotFound = oIsLabelNotFound;
-	if (!l && !g && LabelTable.GetValue(temp + len, val)) return 1;
-	undefinedInTable |= (2 == IsLabelNotFound);
-	if (!undefinedInTable) LabelTable.Insert(temp, 0, true);
-	if (pass == LASTPASS) {
-		Error("Label not found", temp); return 1;
+	bool inTableAlready = (2 == IsLabelNotFound);
+	if (!l && !g) {
+		IsLabelNotFound = oIsLabelNotFound;
+		if (LabelTable.GetValue(temp + len, val)) {
+			return 1;
+		}
+		inTableAlready |= (2 == IsLabelNotFound);
 	}
-	val = 0;
+	if (!inTableAlready) LabelTable.Insert(temp, 0, true);
+	Error("Label not found", temp);
 	return 1;
 }
 
@@ -404,8 +405,8 @@ void CLabelTable::DumpForCSpect() {
 		char* localLabelStart = strrchr(temp, '.');
 		while (temp < localLabelStart) {	// the dot must be at least second character
 			*localLabelStart = 0;			// terminate the possible "primary" part
-			CLabelTableEntry* label = Find(temp);
-			if (label && LABEL_PAGE_UNDEFINED != label->page) {
+			CLabelTableEntry* label = Find(temp, true);
+			if (label) {
 				*localLabelStart = '@';		// "primary" label exists, modify delimiter '.' -> '@'
 				break;
 			}
@@ -925,7 +926,7 @@ aint CStructureEntry2::ParseValue(char* & p) {
 	}
 }
 
-CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStructure* p) {
+CStructure::CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p) {
 	mnf = mnl = NULL; mbf = mbl = NULL;
 	naam = STRDUP(nnaam);
 	if (naam == NULL) {
@@ -935,7 +936,7 @@ CStructure::CStructure(char* nnaam, char* nid, int idx, int no, int ngl, CStruct
 	if (id == NULL) {
 		Error("No enough memory!", NULL, FATAL);
 	}
-	binding = idx; next = p; noffset = no; global = ngl;
+	next = p; noffset = no; global = ngl;
 	maxAlignment = 0;
 }
 
@@ -1140,19 +1141,19 @@ void CStructureTable::Init() {
 	}
 }
 
-CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
+CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 	char sn[LINEMAX], * sp;
 	sn[0] = 0;
-	if (!gl && ModuleName) {
-		STRCPY(sn, LINEMAX, ModuleName);
-		STRCAT(sn, LINEMAX, ".");
+	if (!gl && *ModuleName) {
+		STRCPY(sn, LINEMAX-2, ModuleName);
+		STRCAT(sn, 1, ".");
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
 	if (FindDuplicate(sp)) {
 		Error("Duplicate structure name", naam, EARLY);
 	}
-	strs[(*sp)&127] = new CStructure(naam, sp, idx, 0, gl, strs[(*sp)&127]);
+	strs[(*sp)&127] = new CStructure(naam, sp, 0, gl, strs[(*sp)&127]);
 	if (no) {
 		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, SMEMBBLOCK));
 	}
@@ -1162,9 +1163,9 @@ CStructure* CStructureTable::Add(char* naam, int no, int idx, int gl) {
 CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	char sn[LINEMAX], * sp;
 	sn[0] = 0;
-	if (!gl && ModuleName) {
-		STRCPY(sn, LINEMAX, ModuleName);
-		STRCAT(sn, LINEMAX, ".");
+	if (!gl && *ModuleName) {
+		STRCPY(sn, LINEMAX-2, ModuleName);
+		STRCAT(sn, 1, ".");
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
@@ -1173,7 +1174,7 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 		if (!strcmp(sp, p->id)) return p;
 		p = p->next;
 	}
-	if (gl || !ModuleName) return NULL;
+	if (gl || ! *ModuleName) return NULL;
 	sp += 1 + strlen(ModuleName); p = strs[(*sp)&127];
 	while (p) {
 		if (!strcmp(sp, p->id)) return p;

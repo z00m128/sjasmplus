@@ -853,8 +853,7 @@ void OpenTapFile(char * tapename, int flagbyte)
 	char tap_data[4] = { 0,0,0,0 };
 	tap_data[2] = (char)flagbyte;
 	
-	if (fwrite(tap_data, 1, 3, FP_tapout) != 3)
-	{
+	if (fwrite(tap_data, 1, 3, FP_tapout) != 3) {
 		fclose(FP_tapout);
 		Error("Write error (disk full?)", NULL, FATAL);
 	}
@@ -871,6 +870,10 @@ int FileExists(char* file_name) {
 }
 
 void Close() {
+	if (*ModuleName) {
+		Warning("ENDMODULE missing for module", ModuleName, W_ALL);
+	}
+
 	CloseDest();
 	CloseTapFile();
 	if (FP_ExportFile != NULL) {
@@ -890,11 +893,7 @@ void Close() {
 int SaveRAM(FILE* ff, int start, int length) {
 	//unsigned int addadr = 0,save = 0;
 	aint save = 0;
-
-	if (!DeviceID) {
-		return 0;
-	}
-
+	if (!DeviceID) return 0;		// unreachable currently
 	if (length + start > 0x10000) {
 		length = -1;
 	}
@@ -921,16 +920,11 @@ int SaveRAM(FILE* ff, int start, int length) {
 			}
 		}
 	}
-
-	return 1;
+	return 0;		// unreachable (with current devices)
 }
 
 unsigned int MemGetWord(unsigned int address) {
-	if (pass != LASTPASS) {
-		return 0;
-	}
-
-	return MemGetByte(address)+(MemGetByte(address+1)<<8);
+	return MemGetByte(address) + (MemGetByte(address+1)<<8);
 }
 
 unsigned char MemGetByte(unsigned int address) {
@@ -946,7 +940,7 @@ unsigned char MemGetByte(unsigned int address) {
 		}
 	}
 
-	Error("Error with MemGetByte!", NULL, FATAL);
+	ErrorInt("MemGetByte: Error reading address", address);
 	return 0;
 }
 
@@ -956,19 +950,9 @@ int SaveBinary(char* fname, int start, int length) {
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("Error opening file", fname, FATAL);
 	}
-
-	if (length + start > 0x10000) {
-		length = -1;
-	}
-	if (length <= 0) {
-		length = 0x10000 - start;
-	}
-	if (!SaveRAM(ff, start, length)) {
-		fclose(ff);return 0;
-	}
-
+	int result = SaveRAM(ff, start, length);
 	fclose(ff);
-	return 1;
+	return result;
 }
 
 
@@ -1020,7 +1004,6 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 		header[0x0a] = (unsigned char)(start >> 8);
 	}
 
-
 	header[0x0b] = (unsigned char)(length & 0xff);
 	header[0x0c] = (unsigned char)(length >> 8);
 	header[0x0d] = 0;
@@ -1042,16 +1025,9 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 		Error("Error opening file", fname, FATAL);
 	}
 
-	if (fwrite(header, 1, 17, ff) != 17) {
-		fclose(ff);return 0;
-	}
-
-	if (!SaveRAM(ff, start, length)) {
-		fclose(ff);return 0;
-	}
-
+	int result = (17 == fwrite(header, 1, 17, ff)) && SaveRAM(ff, start, length);
 	fclose(ff);
-	return 1;
+	return result;
 }
 
 EReturn ReadFile() {
@@ -1070,10 +1046,6 @@ EReturn ReadFile() {
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;
-			} else if (cmphstr(p, "endt") || cmphstr(p, "dephase") || cmphstr(p, "unphase")) {
-				lp = ReplaceDefine(p);
-				substitutedLine = line;		// override substituted listing for ENDT
-				return ENDTEXTAREA;
 			}
 		}
 		ParseLineSafe();

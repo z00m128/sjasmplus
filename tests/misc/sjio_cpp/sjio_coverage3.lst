@@ -1,0 +1,3 @@
+# file opened: sjio_coverage3.asm
+1     0000                  DEVICE ZXSPECTRUM48
+sjio_coverage3.asm(2): error: Error opening file in TAPOUT: sjio_coverage3_ignore.tap

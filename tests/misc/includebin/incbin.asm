@@ -24,3 +24,9 @@
     INCBIN "incbin/incbin.bin",,0           ; warning length=0
     ;INCBIN "incbin/incbin.bin",,65537       ; warning max 64kiB - too short file to test this
     // rest of errors are FATAL type, PITA to test
+
+    INCBIN "incbin/incbin.bin",
+    INCBIN "incbin/incbin.bin",,
+    INCBIN "incbin/incbin.bin",+
+    INCBIN "incbin/incbin.bin",0,
+    INCBIN "incbin/incbin.bin",0,+

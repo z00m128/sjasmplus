@@ -1,0 +1,29 @@
+# file opened: lua_get_word.asm
+ 1    0000                  DEVICE ZXSPECTRUM48
+ 2    0000                  ORG 0x4443
+ 3    4443 41 42        test:   DEFW 0x4241
+ 4    4445                  OUTPUT "lua_get_word.bin"
+ 5    4445                  LUA
+ 6    4445 ~                    _pc("dw "..sj.get_word(_c("test"))..", ".._c("test"))
+ 7    4445 ~                    _pc("dw "..sj.get_word(0x4443)..", "..0x4443)
+ 8    4445 41 42 43 44  dw 16961, 17475
+ 8    4449 41 42 43 44  dw 16961, 17475
+ 8    444D                  ENDLUA
+ 9    444D
+10    444D                  LUA
+11    444D ~                    x = _c("test + ~ ")    -- invalid syntax for expression evaluation, returns 0
+12    444D ~                    _pc("db 'e'+"..x)
+13    444D 65           db 'e'+0
+13    444E                  ENDLUA
+14    444E
+15    444E                  LUA pass3 ; wrong arguments
+16    444E ~                    sj.get_word(0x1234, 2)
+lua_get_word.asm(16): error: [LUA] error in function 'get_word'.
+     argument #2 is 'number'; '[no object]' expected.
+17    444E                  ENDLUA
+18    444E
+# file closed: lua_get_word.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x4443 X test

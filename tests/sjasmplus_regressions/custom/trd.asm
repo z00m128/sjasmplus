@@ -20,3 +20,12 @@ end
         SAVEHOB "trd.$t","labels.txt",label1,end-label1
 
 ; TODO add some check to validate resulting files
+
+    ; some more syntax error tests for better code coverage
+        SAVEHOB "trd.$t"
+        SAVEHOB "trd.$t",
+        SAVEHOB "trd.$t",,
+        DEVICE NONE
+        SAVEHOB "trd.$t","labels.txt",label1,end-label1
+        EMPTYTRD
+        SAVETRD "trd.trd","label1.txt",label1,5

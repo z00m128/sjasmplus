@@ -20,3 +20,5 @@
 
     ; try to end + close OUTPUT by specifying new one
     OUTPUT  "justToEndTap.bin"
+
+    SIZE &      ; parsing error

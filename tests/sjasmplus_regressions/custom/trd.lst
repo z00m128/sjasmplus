@@ -1,0 +1,54 @@
+# file opened: trd.asm
+ 1    0000              ;Note: the input TR-DOS filenames in this test are incorrect, and will be currently truncated as 'label1.txt' -> 'label1.t'. Change this if needed.
+ 2    0000              ;A TR-DOS filename is max. 8 characters, with a single-character extension. http://zx-modules.de/fileformats/hobetaformat.html
+ 3    0000
+ 4    0000                      device zxspectrum128
+ 5    0000
+ 6    0000                      org #8000
+ 7    8000 74 65 78 74  label1  db 'text1'
+ 7    8004 31
+ 8    8005                      org #8100
+ 9    8100 74 65 78 74  label2  db 'text2'
+ 9    8104 32
+10    8105                      org #8200
+11    8200 74 65 78 74  label3  db 'text3'
+11    8204 33
+12    8205              end
+13    8205
+14    8205                      EMPTYTRD trd.trd
+trd.asm(15): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label1.txt
+15    8205                      SAVETRD "trd.trd","label1.txt",label1,5
+trd.asm(16): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.txt
+16    8205                      SAVETRD "trd.trd","label2.txt",label2,5
+trd.asm(17): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label3.txt
+17    8205                      SAVETRD "trd.trd","label3.txt",label3,5
+trd.asm(18): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.txt
+18    8205                      SAVETRD "trd.trd","label2.txt",label2,5
+19    8205
+20    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
+21    8205
+22    8205              ; TODO add some check to validate resulting files
+23    8205
+24    8205                  ; some more syntax error tests for better code coverage
+trd.asm(25): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t"
+25    8205                      SAVEHOB "trd.$t"
+trd.asm(26): error: [SAVEHOB] Syntax error: SAVEHOB "trd.$t",
+26    8205                      SAVEHOB "trd.$t",
+trd.asm(27): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t",,
+27    8205                      SAVEHOB "trd.$t",,
+28    8205                      DEVICE NONE
+trd.asm(29): error: SAVEHOB only allowed in real device emulation mode (See DEVICE)
+29    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
+trd.asm(30): error: [EMPTYTRD] Syntax error: EMPTYTRD
+30    8205                      EMPTYTRD
+trd.asm(31): error: SAVETRD only allowed in real device emulation mode (See DEVICE)
+31    8205                      SAVETRD "trd.trd","label1.txt",label1,5
+32    8205
+# file closed: trd.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000 X label1
+0x8100 X label2
+0x8200 X label3
+0x8205 X end

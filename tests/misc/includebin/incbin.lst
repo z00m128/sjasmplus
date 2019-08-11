@@ -27,6 +27,17 @@ incbin.asm(24): warning: include data: requested to include no data (length=0)
 25    0400                  ;INCBIN "incbin/incbin.bin",,65537       ; warning max 64kiB - too short file to test this
 26    0400                  // rest of errors are FATAL type, PITA to test
 27    0400
+incbin.asm(28): error: [INCBIN] Syntax error in <offset>: INCBIN "incbin/incbin.bin",
+28    0400                  INCBIN "incbin/incbin.bin",
+incbin.asm(29): error: [INCBIN] Syntax error in <length>: INCBIN "incbin/incbin.bin",,
+29    0400                  INCBIN "incbin/incbin.bin",,
+incbin.asm(30): error: [INCBIN] Syntax error in <offset>: INCBIN "incbin/incbin.bin",+
+30    0400                  INCBIN "incbin/incbin.bin",+
+incbin.asm(31): error: [INCBIN] Syntax error in <length>: INCBIN "incbin/incbin.bin",0,
+31    0400                  INCBIN "incbin/incbin.bin",0,
+incbin.asm(32): error: [INCBIN] Syntax error in <length>: INCBIN "incbin/incbin.bin",0,+
+32    0400                  INCBIN "incbin/incbin.bin",0,+
+33    0400
 # file closed: incbin.asm
 
 Value    Label

@@ -113,9 +113,9 @@ namespace Options {
 			Error("Fake instructions are not enabled", bp, SUPPRESS);
 			return true;
 		}
-		if (syx.FakeWarning) {	// check end-of-line comment for mentioning "fake" to remove warning
-			bool inEolComment = eolComment ? nullptr != strstr(eolComment, "fake") : false;
-			if (!inEolComment) Warning("Fake instruction", bp);
+		// check end-of-line comment for mentioning "fake" to remove warning, or beginning with "ok"
+		if (syx.FakeWarning && warningNotSuppressed(true)) {
+			Warning("Fake instruction", bp);
 		}
 		return false;
 	}
@@ -151,7 +151,7 @@ char* DeviceID = 0;
 
 // extend
 char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
-char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment;
+char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 char SourceFNames[128][MAX_PATH];
 static int SourceFNamesCount = 0;
@@ -168,7 +168,7 @@ aint CurAddress = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0, LastParsedL
 aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
-char* ModuleName=NULL, * vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
+char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
 CStringsList* lijstp = NULL;
 CLabelTable LabelTable;
@@ -177,7 +177,6 @@ CDefineTable DefineTable;
 CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
 CStructureTable StructureTable;
-CStringsList* ModuleList = NULL;
 
 #ifdef USE_LUA
 
@@ -198,11 +197,7 @@ void InitPass() {
 		pow10 *= 10;
 		if (pow10 < 10) ExitASM(1);	// 32b overflow
 	} while (pow10 <= maxlin);
-	if (ModuleName != NULL) {
-		free(ModuleName);
-		ModuleName = NULL;
-	}
-	ModuleName = NULL;
+	*ModuleName = 0;
 	SetLastParsedLabel(nullptr);
 	if (vorlabp) free(vorlabp);
 	vorlabp = STRDUP("_");
@@ -213,7 +208,6 @@ void InitPass() {
 	PseudoORG = 0; adrdisp = 0;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
-	ModuleList = NULL;
 	StructureTable.Init();
 	MacroTable.Init();
 	DefineTable = Options::CmdDefineTable;
@@ -246,9 +240,6 @@ void FreeRAM() {
 	}
 	if (globalDeviceID) {
 		free(globalDeviceID);	globalDeviceID = NULL;
-	}
-	if (ModuleList) {
-		delete ModuleList;	ModuleList = NULL;
 	}
 	if (lijstp) {
 		delete lijstp;		lijstp = NULL;
@@ -313,9 +304,8 @@ namespace Options {
 				// f F - instructions: fake warning, no fakes (default = fake enabled)
 				case 'f': syx.FakeEnabled = syx.FakeWarning = true; break;
 				case 'F': syx.FakeEnabled = false; break;
-				// a A - multi-argument delimiter: ",,", "``" (default = ",")
+				// a - multi-argument delimiter ",," (default is ",")
 				case 'a': syx.MultiArg = &doubleComma; break;
-				case 'A': syx.MultiArg = &doubleBacktick; break;
 				// b - single parentheses enforce mem access (default = relaxed syntax)
 				case 'b': syx.MemoryBrackets = 1; break;
 				// B - memory access brackets [] required (default = relaxed syntax)
@@ -327,8 +317,15 @@ namespace Options {
 						_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
 					}
 					break;
+				// i - case insensitive instructions/directives (default = same case required)
 				case 'i': syx.CaseInsensitiveInstructions = true; break;
+				// w - warnings option: report warnings as errors
 				case 'w': syx.WarningsAsErrors = true; break;
+				// m - switch off "Accessing low memory" warning globally
+				case 'm': syx.IsLowMemWarningEnabled = false; break;
+				// M - alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
+				case 'M': syx.Is_M_Memory = true; break;
+				// unrecognized option
 				default:
 					if (0 == pass || LASTPASS == pass) {
 						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;
@@ -385,9 +382,11 @@ namespace Options {
 					} else if (!strcmp("lst", val)) {
 						OutputVerbosity = OV_LST;
 						AddLabelListing = false;
+						HideLogo = true;
 					} else if (!strcmp("lstlab", val)) {
 						OutputVerbosity = OV_LST;
 						AddLabelListing = true;
+						HideLogo = true;
 					} else {
 						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
 					}

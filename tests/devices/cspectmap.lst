@@ -47,7 +47,7 @@ cspectmap.asm(2): error: CSPECTMAP only allowed in real device emulation mode (S
 44    C031                  ENDMODULE
 45    C031
 46    C031                          ORG $C031, $31
-47    C031                  MODULE Module..two.
+47    C031                  MODULE Module_two_
 48    C031 0F           Page31..A.: rrca
 49    C032              .local..c.:
 50    C032                  ENDMODULE
@@ -75,5 +75,5 @@ Value    Label
 0xC0E0 X PageDF.A.B.local.c..d
 0xC030 X Module.Page30
 0xC031 X Module.Page30.local
-0xC031 X Module..two..Page31..A.
-0xC032 X Module..two..Page31..A..local..c.
+0xC031 X Module_two_.Page31..A.
+0xC032 X Module_two_.Page31..A..local..c.
