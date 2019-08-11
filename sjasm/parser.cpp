@@ -589,7 +589,7 @@ void ParseLabel() {
 }
 
 int ParseMacro() {
-	int gl = 0, r;
+	int gl = 0, r = 0;
 	char* p = lp, *n;
 	SkipBlanks(p);
 	if (*p == '@') {
@@ -599,15 +599,24 @@ int ParseMacro() {
 		return 0;
 	}
 
-	r = MacroTable.Emit(n, p);
-	if (r == 2) return 1;
-	if (r == 1) return 0;
-	if (StructureTable.Emit(n, 0, p, gl)) { lp = p; return 1; }
+	if (!gl) r = MacroTable.Emit(n, p);		// global '@' operator inhibits macros
+	if (r == 2) return 1;	// successfully emitted
+	if (r == 1) {			// error reported
+		lp = p;
+		return 0;
+	}
+
+	// not a macro, see if it's structure
+	if (StructureTable.Emit(n, 0, p, gl)) {
+		lp = p;
+		return 1;
+	}
 
 	return 0;
 }
 
 void ParseInstruction() {
+	if ('@' == *lp) ++lp;		// skip single '@', if it was used to inhibit macro expansion
 	if (ParseDirective()) {
 		return;
 	}
@@ -684,22 +693,10 @@ void ParseLine(bool parselabels) {
 		}
 		return;
 	}
-	if (parselabels) {
-		ParseLabel();
-	}
-	if (SkipBlanks()) {
-		ListFile();
-		return;
-	}
-	ParseMacro();
-	if (SkipBlanks()) {
-		ListFile(); return;
-	}
-	ParseInstruction();
-	if (SkipBlanks()) {
-		ListFile(); return;
-	}
-	if (*lp) Error("Unexpected", lp);
+	if (parselabels) ParseLabel();
+	if (!SkipBlanks()) ParseMacro();
+	if (!SkipBlanks()) ParseInstruction();
+	if (!SkipBlanks()) Error("Unexpected", lp);
 	ListFile();
 }
 

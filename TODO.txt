@@ -46,7 +46,7 @@ where filename modification happens or filename is invalid.
 (can substitute only at beginning)
 ? extend that rule to underscore at end sealing also the tail?
 - lock some keywords for define/etc... at least put them under warning
-- inhibitor of substitutions/macros happening (like `@djnz` always assembled as djnz inst.
+- inhibitor of substitutions happening (like `@djnz` inhibits macro replacement).
 ** Current refactored implementation:
 - doesn't play priorities as proposed above
 - evaluation of defarray index is still flaky and doesn't work correctly inside macro/etc
