@@ -3,12 +3,12 @@
 djnz    MACRO   arg1?
             dec c
             jr  nz,arg1?
+            @djnz arg1? ; avoid self-reference and use real instruction
         ENDM
 
-1:
-        djnz    1B      ; macro replacement
-        @djnz   1B      ; original djnz instruction
-        @ djnz  1B      ; can be space separated
+1:      djnz    1B      ; macro replacement
+1:      @djnz   1B      ; original djnz instruction
+1:      @ djnz  1B      ; can be space separated
 @label  djnz    label   ; this "@" belongs to the label, macro expanded
         djnz    @label
 @label2 @djnz   label2  ; this is original djnz instruction
