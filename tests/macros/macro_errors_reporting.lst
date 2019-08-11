@@ -1,0 +1,91 @@
+# file opened: macro_errors_reporting.asm
+macro_errors_reporting.asm(1): error: [MACRO] Illegal macroname
+ 1    0000                      MACRO
+ 2    0000
+ 3    0000              ; label-named macros
+ 4    0000              LmP0    MACRO
+ 5    0000 ~                        nop
+ 6    0000                      ENDM
+ 7    0000
+ 8    0000              LmP1    MACRO   arg1?
+ 9    0000 ~                        DB arg1?
+10    0000                      ENDM
+11    0000
+12    0000              LmP2    MACRO   arg1?, arg2?
+13    0000 ~                        DB arg1?, arg2?
+14    0000                      ENDM
+15    0000
+16    0000              ; regular macro name syntax
+17    0000                      MACRO   mP0
+18    0000 ~                        daa
+19    0000                      ENDM
+20    0000
+21    0000                      MACRO   mP1 arg1?
+22    0000 ~                        DW arg1?
+23    0000                      ENDM
+24    0000
+25    0000                      MACRO   mP2 arg1?, arg2?
+26    0000 ~                        DW arg1?, arg2?
+27    0000                      ENDM
+28    0000
+29    0000              ; try to emit macros (also with wrong syntax/error cases)
+30    0000                      LmP0                    ; correct
+30    0000 00          >            nop
+31    0001                      LmP1 111                ; correct
+31    0001 6F          >            DB 111
+32    0002                      LmP1 <112, 113, 114>    ; correct
+32    0002 70 71 72    >            DB 112, 113, 114
+33    0005                      LmP2 121, 122           ; correct
+33    0005 79 7A       >            DB 121, 122
+34    0007                      LmP2 123, <124, 125>    ; correct
+34    0007 7B 7C 7D    >            DB 123, 124, 125
+35    000A
+36    000A                      mP0                     ; correct
+36    000A 27          >            daa
+37    000B                      mP1  161                ; correct
+37    000B A1 00       >            DW 161
+38    000D                      mP1  <162, 163, 164>    ; correct
+38    000D A2 00 A3 00 >            DW 162, 163, 164
+38    0011 A4 00       >
+39    0013                      mP2  171, 172           ; correct
+39    0013 AB 00 AC 00 >            DW 171, 172
+40    0017                      mP2  173, <174, 175>    ; correct
+40    0017 AD 00 AE 00 >            DW 173, 174, 175
+40    001B AF 00       >
+41    001D
+macro_errors_reporting.asm(42): error: Too many arguments for macro: LmP0
+42    001D                      LmP0 201
+macro_errors_reporting.asm(43): warning: [Macro argument parser] empty value: 
+43    001D                      LmP1
+macro_errors_reporting.asm(43): error: Expression expected
+43    001D             >            DB
+macro_errors_reporting.asm(44): error: Too many arguments for macro: LmP1
+44    001D                      LmP1 211, 212
+macro_errors_reporting.asm(45): warning: [Macro argument parser] empty value: 
+macro_errors_reporting.asm(45): error: Not enough arguments for macro: LmP2
+45    001D                      LmP2
+macro_errors_reporting.asm(46): error: Not enough arguments for macro: LmP2
+46    001D                      LmP2 221
+macro_errors_reporting.asm(47): error: Too many arguments for macro: LmP2
+47    001D                      LmP2 222, 223, 224
+48    001D
+macro_errors_reporting.asm(49): error: Too many arguments for macro: mP0
+49    001D                      mP0  251
+macro_errors_reporting.asm(50): warning: [Macro argument parser] empty value: 
+50    001D                      mP1
+macro_errors_reporting.asm(50): error: Expression expected
+50    001D             >            DW
+macro_errors_reporting.asm(51): error: Too many arguments for macro: mP1
+51    001D                      mP1  261, 262
+macro_errors_reporting.asm(52): warning: [Macro argument parser] empty value: 
+macro_errors_reporting.asm(52): error: Not enough arguments for macro: mP2
+52    001D                      mP2
+macro_errors_reporting.asm(53): error: Not enough arguments for macro: mP2
+53    001D                      mP2  271
+macro_errors_reporting.asm(54): error: Too many arguments for macro: mP2
+54    001D                      mP2  272, 273, 274
+55    001D
+# file closed: macro_errors_reporting.asm
+
+Value    Label
+------ - -----------------------------------------------------------

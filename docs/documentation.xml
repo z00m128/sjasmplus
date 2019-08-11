@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.13.3 Documentation [2019-07-21]</title>
+  <title>SjASMPlus 1.14.0 Documentation [2019-08-11]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -185,7 +185,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP (11.8.2019?) - 1.14.0</term>
+            <term>11.8.2019 - 1.14.0</term>
 
             <listitem>
               <synopsis>- <link linkend="po_include">INCLUDE</link> bugfix, now searching paths according to original documentation (may break some projects)
@@ -193,6 +193,7 @@
 - R800 `MULUB` was producing wrong opcode all those years... fixed
 - <link linkend="po_module">MODULE</link> names can't contain dot any more! MODULE and ENDMODULE resets non-local label to "_"
 - <link linkend="s_cli">--syntax</link> option: "m" (switch off low-mem access warning) and "M" added, "A" removed
+- <link linkend="s_macros">macro</link> expansion can be inhibited by using "@" in front of instruction
 - expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
 - reading memory addresses 0..255 directly emits warning, use "; ok" comment to suppress it.
 - several tests added to improve the code coverage: <ulink url="https://coveralls.io/github/z00m128/sjasmplus?branch=master">coveralls.io/github/z00m128/sjasmplus</ulink>
@@ -412,28 +413,41 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     <section>
       <title>Source file format</title>
 
-      <para>Lines in the source file should have the following
-      form:<programlisting>Label Operator Operand Comment</programlisting>All
-      fields are optional. Lines without label should start with whitespace.
-      Operators and operands can be inlined:</para>
+		<para>
+		  Lines in the source file should have the following form:
+		  <programlisting>Label Operator Operand Comment</programlisting>
+		  All fields are optional.
+		  <emphasis role="strong">Lines without label should start with whitespace.</emphasis>
+		  Operators and operands can be inlined with colon:
+		  <programlisting>      Operator Operand:Operator Operand:Operator Operand... Comment</programlisting>
+		  Comments should start with '<code>;</code>' or '<code>//</code>'.
+		  Comment blocks start with '<code>/*</code>' and end with '<code>*/</code>' (work in "nested" way,
+		  i.e. comment block started inside comment block must be also ended, before main block ends).
 
-      <para><programlisting>      Operator Operand:Operator Operand:Operator Operand... Comment</programlisting>Comments
-      should start with ';' or '//'. Comment blocks start with '/*' and end
-      with '*/'.</para>
+			<example>
+				<title></title>
 
-      <para><example>
-          <title></title>
-
-          <para><programlisting>; comment
+				<programlisting>; comment
 // comment
  ld /* comment */ a,80
 /*
- comment
+ comment /* nested comment block */
 */
  ld /*
  but this won't be ld a,3!
- */ a,3</programlisting></para>
-        </example></para>
+ */ a,3</programlisting>
+			</example>
+
+			Some warnings (low memory-access and fake instruction) can be suppressed for particular
+			line by adding end-of-line type of comment starting with "ok":
+			<example>
+				<title></title>
+
+				<programlisting>        OPT --syntax=f  ; warning on accidental fake instructions
+        ld  hl,de    ; warning here
+        ld  hl,de    ; ok (warning will be suppressed by this comment)</programlisting>
+			</example>
+		</para>
     </section>
   </chapter>
 
@@ -2835,7 +2849,21 @@ Main
 			</example>
 		</para>
 
-      <para></para>
+		<para>
+			If some macro over-shadows regular instruction or directive name, the <code>@</code>
+			character in front of instruction/directive name can be used to ihibit macro expansion.
+			<example><title></title>
+				<programlisting>djnz    MACRO   arg1?
+            dec c
+            jr  nz,arg1?
+            @djnz arg1? ; avoid self-reference and use real instruction
+        ENDM
+
+1:      djnz    1B      ; macro replacement will be used here
+1:      @djnz   1B      ; original djnz instruction here</programlisting>
+			</example>
+		</para>
+
     </section>
   </chapter>
 

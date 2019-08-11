@@ -48,3 +48,5 @@
     DB syntaxErrArr2[13]
 
     DEVICE &syntaxErrorName
+
+    SAVESNA "coverage2.sna", &
