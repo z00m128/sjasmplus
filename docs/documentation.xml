@@ -2848,7 +2848,21 @@ Main
 			</example>
 		</para>
 
-      <para></para>
+		<para>
+			If some macro over-shadows regular instruction or directive name, the <code>@</code>
+			character in front of instruction/directive name can be used to ihibit macro expansion.
+			<example><title></title>
+				<programlisting>djnz    MACRO   arg1?
+            dec c
+            jr  nz,arg1?
+            @djnz arg1? ; avoid self-reference and use real instruction
+        ENDM
+
+1:      djnz    1B      ; macro replacement will be used here
+1:      @djnz   1B      ; original djnz instruction here</programlisting>
+			</example>
+		</para>
+
     </section>
   </chapter>
 
