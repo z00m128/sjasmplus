@@ -412,28 +412,41 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     <section>
       <title>Source file format</title>
 
-      <para>Lines in the source file should have the following
-      form:<programlisting>Label Operator Operand Comment</programlisting>All
-      fields are optional. Lines without label should start with whitespace.
-      Operators and operands can be inlined:</para>
+		<para>
+		  Lines in the source file should have the following form:
+		  <programlisting>Label Operator Operand Comment</programlisting>
+		  All fields are optional.
+		  <emphasis role="strong">Lines without label should start with whitespace.</emphasis>
+		  Operators and operands can be inlined with colon:
+		  <programlisting>      Operator Operand:Operator Operand:Operator Operand... Comment</programlisting>
+		  Comments should start with '<code>;</code>' or '<code>//</code>'.
+		  Comment blocks start with '<code>/*</code>' and end with '<code>*/</code>' (work in "nested" way,
+		  i.e. comment block started inside comment block must be also ended, before main block ends).
 
-      <para><programlisting>      Operator Operand:Operator Operand:Operator Operand... Comment</programlisting>Comments
-      should start with ';' or '//'. Comment blocks start with '/*' and end
-      with '*/'.</para>
+			<example>
+				<title></title>
 
-      <para><example>
-          <title></title>
-
-          <para><programlisting>; comment
+				<programlisting>; comment
 // comment
  ld /* comment */ a,80
 /*
- comment
+ comment /* nested comment block */
 */
  ld /*
  but this won't be ld a,3!
- */ a,3</programlisting></para>
-        </example></para>
+ */ a,3</programlisting>
+			</example>
+
+			Some warnings (low memory-access and fake instruction) can be suppressed for particular
+			line by adding end-of-line type of comment starting with "ok":
+			<example>
+				<title></title>
+
+				<programlisting>        OPT --syntax=f  ; warning on accidental fake instructions
+        ld  hl,de    ; warning here
+        ld  hl,de    ; ok (warning will be suppressed by this comment)</programlisting>
+			</example>
+		</para>
     </section>
   </chapter>
 

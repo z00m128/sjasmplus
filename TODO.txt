@@ -24,7 +24,7 @@ FIXME in sources mark further points worth refactoring
 FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 (breaks ` .34 repeatX` directive probably? .. and END@beginningOfLine? .. actually not?)
 
-SplitLuaErrorMessage - add some tests after Liniya fix, maybe review the code more.
+SplitLuaErrorMessage - review the code one more time
 
 ReadBufLine parsing refactored. Now look for other parts of code trying to do similar things and refactor too..
 
@@ -85,6 +85,8 @@ AppVeyor CI for windows clang + mingw + MSVS2015 builds?
 
 ##### sjasmplus 2.x/fork:
 
+"ok" warning suppressing mechanism for ALL warnings?
+
 EQU and DEFL to not affect local labels (not defining new "main" label)
 
 Operators precedence: (2 == 3&2) = ((2 == 3)&2) = false in current sjasmplus... ????
@@ -122,8 +124,4 @@ Docs:
 DEVICE needs better description? Issue #55
 ... and also SAVENEX and default ZXNEXT device... again...
 
-*** add "Low memory warning note" (considering extending the "ok" mechanism as general thing - wait with this)
-
 *** update release link in CHANGELOG.md right ahead of release
-
-readjust README bullet points - readjusted in the documentation, collect feedback, then README...
