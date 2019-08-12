@@ -30,7 +30,8 @@ pipe:
     # makefile variables affecting build options
     DEBUG: 1
     COVERALLS_SERVICE: 1
-  only_if: !( $COVERALLS_REPO_TOKEN =~ ENCRYPTED.* )
+  # avoid building "master" in repositories where default branch is different
+  only_if: $CIRRUS_BRANCH != 'master' || $CIRRUS_DEFAULT_BRANCH == 'master'
   resources:
     cpu: 3
     memory: 1G
