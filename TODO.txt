@@ -5,6 +5,11 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+STDIN needs MANY Ctrl+D to finish, when used by actual interactive console and not
+input redirection... (and it's lot more many than just 3-pass 3x). Seems like there
+should be some regular clib API way to detect it first time, and be done with it,
+the current behaviour is wrong.
+
 consider the "low memory access" warning locked to only ZX-like devices?
 
 parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???)

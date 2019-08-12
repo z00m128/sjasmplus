@@ -724,8 +724,8 @@ int GetBytesHexaText(char*& p, int e[]) {
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
 char* GetFileName(char*& p, bool convertslashes) {
-	char* newFn = new char[LINEMAX];
-	if (NULL == newFn) ErrorInt("No enough memory!", LINEMAX, FATAL);
+	char* newFn = new char[LINEMAX+1];
+	if (NULL == newFn) ErrorInt("No enough memory!", LINEMAX+1, FATAL);
 	char* result = newFn;
 	// check if some and which delimiter is used for this filename (does advance over white chars)
 	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
@@ -883,7 +883,7 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 }
 
 EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> delimiters, bool advanceSrc) {
-	if (advanceSrc && SkipBlanks(src)) return DT_NONE;
+	if ((0 == *src) || (advanceSrc && SkipBlanks(src))) return DT_NONE;
 	for (const auto dt : delimiters) {
 		if (delimiters_b[dt] != *src) continue;
 		if (advanceSrc) ++src;
