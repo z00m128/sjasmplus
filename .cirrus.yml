@@ -29,7 +29,7 @@ pipe:
     # makefile variables affecting build options
     DEBUG: 1
     COVERALLS_SERVICE: 1
-  only_if: $COVERALLS_REPO_TOKEN != ''
+  only_if: \"$COVERALLS_REPO_TOKEN\" != ''
   resources:
     cpu: 3
     memory: 1G
