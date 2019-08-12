@@ -1,5 +1,4 @@
 makefile_build_task:
-  only_if: 0
   env:
     CIRRUS_CLONE_DEPTH: 1
   container:
