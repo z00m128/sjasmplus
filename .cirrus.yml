@@ -19,6 +19,8 @@ makefile_build_task:
 
 pipe:
   name: coveralls.io coverage report
+  # check if this is z00m's repository (the encrypted token belongs to original repo)
+  only_if: $CIRRUS_REPO_OWNER == 'z00m128'
   #depends_on: makefile_build  ## saves some resources in case regular build fails, but that's rare
   env:
     # needs full clone to calculate revision number from git
