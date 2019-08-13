@@ -42,3 +42,20 @@ pipe:
       install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
       # "-n" as the *.gcov files are already generated in the project root from previous step
       upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/
+
+win_build_task:
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+  windows_container:
+    image: cirrusci/windowsservercore:2019
+    os_version: 2019
+  build_script: make -f Makefile.win clean && make -j2 -f Makefile.win
+  install_script: make -f Makefile.win install
+  # let's see first if the make build works, before even trying to run the tests somehow
+
+  ## now try the built+installed sjasmplus with some tests and examples
+  # this is not separate task, because that would need again build
+  # of sjasmplus in new container instance, so just do everything in one task
+  #assemble_tests_script: ContinuousIntegration/test_folder_tests.sh
+  #assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
+
