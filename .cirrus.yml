@@ -49,16 +49,7 @@ win_build_task:
   windows_container:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
-  build_script:
-    - path
-    - dir /w
-    - del Makefile
-    - ren Makefile.win Makefile
-    - mkdir build
-    - cd build
-    - cmake /?
-    - cmake --help
-    - cmake -DCMAKE_BUILD_TYPE=Release ..
+  build_script: ContinuousIntegration\winbuild.bat
 #  install_script: make -f Makefile.win install
   # let's see first if the make build works, before even trying to run the tests somehow
 
