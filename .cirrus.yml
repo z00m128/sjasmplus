@@ -50,7 +50,7 @@ win_build_task:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
   build_script: ContinuousIntegration\winbuild.bat
-  check_installed_sj: c:\tools\sjasmplus\sjasmplus --help
+  check_installed_sj: \tools\sjasmplus\sjasmplus --help
 #  install_script: make -f Makefile.win install
   # let's see first if the make build works, before even trying to run the tests somehow
 
