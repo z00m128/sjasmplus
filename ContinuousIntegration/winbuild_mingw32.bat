@@ -3,10 +3,10 @@ choco install -y --no-progress diffutils
 rem MinGW build
 mingw32-make -f Makefile.win clean
 mingw32-make -f Makefile.win -j3
-dir /B /4 sjasmplus.exe
+dir /N sjasmplus.exe
 rem sjasmplus install
 mingw32-make -f Makefile.win PREFIX=c:/tools/sjasmplus/ install
 mingw32-make -f Makefile.win clean
 rem check
-dir /B /4 c:\tools\sjasmplus
+dir /N c:\tools\sjasmplus
 sjasmplus --version
