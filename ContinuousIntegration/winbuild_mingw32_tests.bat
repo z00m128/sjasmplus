@@ -1,3 +1,3 @@
-pwd
-@call winbuild_set_msys2_path.bat
+cd
+@call ContinuousIntegration\winbuild_set_msys2_path.bat
 bash ContinuousIntegration/test_folder_tests.sh
