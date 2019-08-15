@@ -1,4 +1,5 @@
-makefile_build_task:
+task:
+  name: Linux gcc 5/6/7/8 builds
   env:
     CIRRUS_CLONE_DEPTH: 1
   container:
@@ -18,7 +19,7 @@ makefile_build_task:
   assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
 
 pipe:
-  name: coveralls.io coverage report
+  name: coveralls.io coverage report (linux gcc6)
   # check if this is z00m's repository (the encrypted token belongs to original repo)
   only_if: $CIRRUS_REPO_OWNER == 'z00m128'
   #depends_on: makefile_build  ## saves some resources in case regular build fails, but that's rare
@@ -42,3 +43,29 @@ pipe:
       install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
       # "-n" as the *.gcov files are already generated in the project root from previous step
       upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/
+
+task:
+  name: windows mingw32 build
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+  windows_container:
+    image: cirrusci/windowsservercore:cmake
+    os_version: 2019
+  build_script: ContinuousIntegration\winbuild_mingw32.bat
+  sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
+  assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
+  assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat
+
+task:
+  name: windows Visual Studio 15 2017 build
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+  windows_container:
+    image: cirrusci/windowsservercore:cmake
+    os_version: 2019
+  build_script: ContinuousIntegration\winbuild_vs15_2017.bat
+  # exe is installed at the same location as the MinGW build does
+  sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
+  # this mingw32 bat should work for just-building-examples even with exe from MSCC
+  assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
+  # not going to even try to run the tests with this thing...
