@@ -64,13 +64,5 @@ task:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
   build_script: ContinuousIntegration\winbuild_vs15_2017.bat
-#  check_installed_sj_script: c:\tools\sjasmplus\sjasmplus --help
-#  install_script: make -f Makefile.win install
-  # let's see first if the make build works, before even trying to run the tests somehow
-
-  ## now try the built+installed sjasmplus with some tests and examples
-  # this is not separate task, because that would need again build
-  # of sjasmplus in new container instance, so just do everything in one task
-  #assemble_tests_script: ContinuousIntegration/test_folder_tests.sh
-  #assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
-
+  check_exe_existence_script: sjasmplus.exe --help
+  # not going to even try to run the tests with this thing...

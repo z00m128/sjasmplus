@@ -1,24 +1,22 @@
 rem Exploring the VM image and what is available
-cd
 path
 
-rem CMAKE experiments
+rem CMAKE windows build with MS compiler
 del Makefile
 ren Makefile.win Makefile
 mkdir build
 cd build
-cmake --help
-cmake -DCMAKE_BUILD_TYPE=Release ..
+@rem cmake --help
+cmake --config Release ..
 dir /w
-C:\tools\msys64\usr\bin\find "C:/Program Files (x86)/Microsoft Visual Studio" -iname vcvars64.bat -type f
-C:\tools\msys64\usr\bin\find "C:/Program Files (x86)/Microsoft Visual Studio" -iname msbuild.exe -type f
+@rem C:\tools\msys64\usr\bin\find "C:/Program Files (x86)/Microsoft Visual Studio" -iname vcvars64.bat -type f
+@rem C:\tools\msys64\usr\bin\find "C:/Program Files (x86)/Microsoft Visual Studio" -iname msbuild.exe -type f
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 path
-echo "
+echo "Starting build by running msbuild.exe"
 msbuild sjasmplus.vcxproj
-dir /w
-dir /w sjasmplus.dir\Debug\
-dir /w Win32\Debug\
-dir /w Debug\
+copy Debug\sjasmplus.exe sjasmplus.exe
+copy Release\sjasmplus.exe sjasmplus.exe
 dir Debug\sjasmplus.exe
-Debug\sjasmplus.exe --version
+dir Release\sjasmplus.exe
+dir sjasmplus.exe

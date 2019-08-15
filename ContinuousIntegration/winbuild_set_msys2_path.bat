@@ -4,3 +4,4 @@ path
 bash --version
 find --version
 mingw32-make --version
+diff --version
