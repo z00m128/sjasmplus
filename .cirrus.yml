@@ -1,4 +1,5 @@
-makefile_build_task:
+task:
+  name: Linux gcc 5/6/7/8 builds
   env:
     CIRRUS_CLONE_DEPTH: 1
   container:
@@ -18,7 +19,7 @@ makefile_build_task:
   assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
 
 pipe:
-  name: coveralls.io coverage report
+  name: coveralls.io coverage report (linux gcc6)
   # check if this is ped's repository (the encrypted token belongs to his repo)
   only_if: $CIRRUS_REPO_OWNER == 'ped7g'
   #depends_on: makefile_build  ## saves some resources in case regular build fails, but that's rare
@@ -43,6 +44,19 @@ pipe:
       # "-n" as the *.gcov files are already generated in the project root from previous step
       upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/
 
+task:
+  name: windows mingw32 build
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+  windows_container:
+    image: cirrusci/windowsservercore:cmake
+    os_version: 2019
+  build_script: ContinuousIntegration\winbuild_mingw32.bat
+  check_installed_sj_script: c:\tools\sjasmplus\sjasmplus --help
+#TODO: run tests in separate script, if the build turns out well
+
+task:
+  name: windows Visual Studio 15 2017 build
 win_build_task:
   env:
     CIRRUS_CLONE_DEPTH: 1
@@ -50,7 +64,7 @@ win_build_task:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
   build_script: ContinuousIntegration\winbuild.bat
-  check_installed_sj_script: c:\tools\sjasmplus\sjasmplus --help
+#  check_installed_sj_script: c:\tools\sjasmplus\sjasmplus --help
 #  install_script: make -f Makefile.win install
   # let's see first if the make build works, before even trying to run the tests somehow
 
