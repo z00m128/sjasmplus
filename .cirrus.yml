@@ -52,7 +52,7 @@ task:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
   build_script: ContinuousIntegration\winbuild_mingw32.bat
-  check_installed_sj_script: c:\tools\sjasmplus\sjasmplus --help
+  sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
   assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
   assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat
 
@@ -64,5 +64,7 @@ task:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
   build_script: ContinuousIntegration\winbuild_vs15_2017.bat
-  check_exe_existence_script: sjasmplus.exe --help
+  sjasmplus_exe_existence_script: sjasmplus.exe --help
+  # this mingw32 bat should actually "find" exe in project directory, and build examples?
+  assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
   # not going to even try to run the tests with this thing...

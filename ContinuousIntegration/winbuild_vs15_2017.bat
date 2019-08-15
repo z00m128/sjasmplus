@@ -14,9 +14,10 @@ dir /w
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 path
 echo "Starting build by running msbuild.exe"
-msbuild sjasmplus.vcxproj
-copy Debug\sjasmplus.exe sjasmplus.exe
-copy Release\sjasmplus.exe sjasmplus.exe
-dir Debug\sjasmplus.exe
-dir Release\sjasmplus.exe
-dir sjasmplus.exe
+msbuild sjasmplus.vcxproj /property:Configuration=Release
+@echo on
+dir /B /4 Debug\sjasmplus.exe
+dir /B /4 Release\sjasmplus.exe
+copy Debug\sjasmplus.exe ..\sjasmplus.exe
+copy Release\sjasmplus.exe ..\sjasmplus.exe
+dir /B /4 ..\sjasmplus.exe
