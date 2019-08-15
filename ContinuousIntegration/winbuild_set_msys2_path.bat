@@ -3,4 +3,5 @@ set PATH=C:\tools\msys64\usr\bin\;%PATH%;c:\tools\sjasmplus
 bash --version
 diff --version
 find --version
+gcc --version
 mingw32-make --version
