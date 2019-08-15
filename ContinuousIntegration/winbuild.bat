@@ -9,13 +9,10 @@ path
 @rem dir /w C:\tools\msys64\usr
 @rem dir /w C:\tools\msys64\usr\bin
 @rem type C:\tools\msys64\msys2_shell.cmd
-dir /w C:\tools\msys64\clang64\bin
-dir /w C:\tools\msys64\mingw64\bin
-mingw64.exe gcc --version
-msys2_shell bash --version
-msys2 bash --version
-usr\bin\bash --version
+@rem (does terminate the script completely?!) msys2_shell bash --version
 C:\tools\msys64\usr\bin\bash --version
+usr\bin\bash --version
+msys2 bash --version
 rem MinGW make experiments
 mingw32-make -f Makefile.win UNINSTALL='C:\tools\msys64\usr\bin\rm -f' clean
 mingw32-make -f Makefile.win
