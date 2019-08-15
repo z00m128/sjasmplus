@@ -53,8 +53,8 @@ task:
     os_version: 2019
   build_script: ContinuousIntegration\winbuild_mingw32.bat
   check_installed_sj_script: c:\tools\sjasmplus\sjasmplus --help
-  assemble_examples_script: bash ContinuousIntegration/test_folder_examples.sh
-  #TODO: run tests in separate script, if the build turns out well
+  assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
+  assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat
 
 task:
   name: windows Visual Studio 15 2017 build
