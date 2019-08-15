@@ -38,7 +38,6 @@ I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious sour
 Macro world issues:
 - macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
 - more operators, capable of some string manipulation and maybe some type/expression checks (islabel)
-- ability to issue real instruction (ignoring possible macro of same name)
 
 SAVEHOB/SAVETRD/SAVETAP/... global review of filename handling, adding warnings/errors
 where filename modification happens or filename is invalid.
@@ -128,3 +127,27 @@ Docs:
 
 DEVICE needs better description? Issue #55
 ... and also SAVENEX and default ZXNEXT device... again...
+
+===== github milestone v2.x: => create issues (cleanup this TODO as much as reasonable)
+v2.x of sjasmplus, changing some default settings (making it mildly incompatible with old sources, considerably more than v1.07 vs v1.14 incompatibilities), and refactoring some implementation even further, to make it hopefully a bit cleaner C++ source, simpler to maintain and modify.
+
+Major changes on my mind:
+* n-pass assembling
+* syntax by default similar to `--syntax=abflL`
+* GNU/GCC/clang-ification of assembler, mimicking the general tools as much as possible, like formatting of error reports, options with identical syntax where it makes sense, etc.. (should help with other tools unaware of sjasmplus specifically, but capable to process gcc/clang stuff)
+* `define` substitution formalized even more (and refactored)
+* C++ification of syntax and language, i.e. changing operator precedence, probably apostrophe enclosed string/char literals escaping rules, etc.
+* new operators (string and device-memory/labels related, type/checks, maybe var-arg-like stuff)
+* macro-defined-operators (not only "instructions")
+* nesting DISPs?
+* better support for Maziac's tools (label type export, whatever else is needed)
+* fresher version of lua, revisit integration
+* maybe also JavaScript scripting support
+* filepath stuff through POSIX/clib API to make it cross-platform without hacks (normal slashes everywhere)
+
+RELEASE spam:
+Next wiki assemblers
+Next discord
+zx-pk.ru forum
+Next FB
+(maybe once per year or two: next forum, linkedin)
