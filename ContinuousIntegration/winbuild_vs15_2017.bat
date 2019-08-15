@@ -18,7 +18,7 @@ msbuild sjasmplus.vcxproj /property:Configuration=Release
 echo "installing to c:\tools\sjasmplus"
 @echo on
 mkdir c:\tools\sjasmplus
-dir Debug\sjasmplus.exe Release\sjasmplus.exe
 copy Debug\sjasmplus.exe c:\tools\sjasmplus\sjasmplus.exe
 copy Release\sjasmplus.exe c:\tools\sjasmplus\sjasmplus.exe
 dir /N c:\tools\sjasmplus\sjasmplus.exe
+c:\tools\sjasmplus\sjasmplus.exe --version
