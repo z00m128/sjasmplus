@@ -17,7 +17,9 @@ path
 echo "
 msbuild sjasmplus.vcxproj
 dir /w
-dir /w build\
-dir /w build\Debug\
-dir sjasmplus.exe
-dir build\Debug\sjasmplus.exe
+dir /w sjasmplus.dir
+dir /w Debug\
+dir /w Win32\
+dir sjasmplus.dir\sjasmplus.exe
+dir Debug\sjasmplus.exe
+dir Win32\sjasmplus.exe
