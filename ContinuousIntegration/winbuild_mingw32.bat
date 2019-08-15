@@ -1,11 +1,11 @@
 rem Borrow bash and other tools from MSYS2
-set PATH=%PATH%;C:\tools\msys64\usr\bin\
+set PATH=C:\tools\msys64\usr\bin\;%PATH%
 path
 bash --version
 mingw32-make --version
 rem MinGW build
 mingw32-make -f Makefile.win clean
-mingw32-make -f Makefile.win
+mingw32-make -f Makefile.win -j3
 mingw32-make -f Makefile.win PREFIX=c:/tools/sjasmplus/ install
 mingw32-make -f Makefile.win clean
 dir c:\tools\sjasmplus
