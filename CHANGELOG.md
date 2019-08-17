@@ -1,4 +1,4 @@
-## [1.14.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.0) - 11.8.2019
+## [1.14.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.0) - 17.8.2019
 - `INCLUDE` bugfix, now searching paths according to original documentation (may break some projects)
 - `UNDEFINE` had undocumented feature of removing also labels, cancelled (was broken beyond repair)
 - R800 `MULUB` was producing wrong opcode all those years... fixed
