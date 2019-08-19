@@ -1532,9 +1532,13 @@ void dirSHELLEXEC() {
 			if (Options::OutputVerbosity <= OV_ALL) {
 				_CERR "Executing <" _CMDL temp _CMDL ">" _ENDL;
 			}
+			// flush both stdout and stderr before trying to execute anything externally
+			_COUT flush;
+			_CERR flush;
+			// execute the requested command
 			int exitCode = system(temp);
 			if (exitCode) {
-				ErrorInt("[SHELLEXEC] non-zero exit code", exitCode);
+				ErrorInt("[SHELLEXEC] non-zero exit code", WEXITSTATUS(exitCode));
 			}
 		}
 	}
