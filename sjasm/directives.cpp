@@ -1524,10 +1524,10 @@ void dirSHELLEXEC() {
 			Error("[SHELLEXEC] clib command processor is not available on this platform!");
 		} else {
 			temp[0] = 0;
-			STRNCPY(temp, LINEMAX, command, LINEMAX);
+			STRNCPY(temp, LINEMAX, command, LINEMAX-1);
 			if (parameters) {
 				STRNCAT(temp, LINEMAX, " ", 2);
-				STRNCAT(temp, LINEMAX, parameters, LINEMAX);
+				STRNCAT(temp, LINEMAX, parameters, LINEMAX-1);
 			}
 			if (Options::OutputVerbosity <= OV_ALL) {
 				_CERR "Executing <" _CMDL temp _CMDL ">" _ENDL;
