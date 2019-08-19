@@ -1,3 +1,4 @@
+@call ContinuousIntegration\winbuild_set_msys2_path.bat
 @rem call with first argument being "1" if the ERRORLEVEL should be ignored (set to 0)
 bash ContinuousIntegration/test_folder_tests.sh
 
