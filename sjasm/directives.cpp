@@ -1510,81 +1510,38 @@ void dirASSERT() {
 }
 
 void dirSHELLEXEC() {
+	//FIXME for v2.x change the "SHELLEXEC <command>[, <params>]" syntax to "SHELLEXEC <whatever>"
+	// (and add good examples how to deal with quotes/colons/long file names with spaces)
 	char* command = NULL;
 	char* parameters = NULL;
 
 	command = GetFileName(lp, false);
 	if (comma(lp)) {
 		parameters = GetFileName(lp, false);
-	} else {
-		parameters = 0;
 	}
 	if (pass == LASTPASS) {
-		if (Options::OutputVerbosity <= OV_ALL) {
-			if (parameters) {
-				_CERR "Executing " _CMDL command _CMDL " " _CMDL parameters _ENDL;
-			} else {
-				_CERR "Executing " _CMDL command _ENDL;
-			}
-		}
-#if defined(WIN32)
-		STARTUPINFO si;
-		PROCESS_INFORMATION pi;
-		ZeroMemory( &si, sizeof(si) );
-		si.cb = sizeof(si);
-		ZeroMemory( &pi, sizeof(pi) );
-
-		// Start the child process.
-		if (parameters) {
-			if( !CreateProcess( command,   // No module name (use command line).
-				parameters, // Command line.
-				NULL,             // Process handle not inheritable.
-				NULL,             // Thread handle not inheritable.
-				TRUE,            // Set handle inheritance to FALSE.
-				0,                // No creation flags.
-				NULL,             // Use parent's environment block.
-				NULL,             // Use parent's starting directory.
-				&si,              // Pointer to STARTUPINFO structure.
-				&pi )             // Pointer to PROCESS_INFORMATION structure.
-				) {
-				temp[0] = 0;
-				STRCAT(temp, LINEMAX, command);
-				STRCAT(temp, LINEMAX, " ");
-				STRCAT(temp, LINEMAX, parameters);
-				Error( "[SHELLEXEC] Execution of command failed", temp, PASS3 );
-			} else {
-				CloseHandle(pi.hThread);
-				WaitForSingleObject(pi.hProcess, 500);
-				CloseHandle(pi.hProcess);
-			}
+		if (!system(nullptr)) {
+			Error("[SHELLEXEC] clib command processor is not available on this platform!");
 		} else {
-			if( !CreateProcess( NULL,   // No module name (use command line).
-				command, // Command line.
-				NULL,             // Process handle not inheritable.
-				NULL,             // Thread handle not inheritable.
-				FALSE,            // Set handle inheritance to FALSE.
-				0,                // No creation flags.
-				NULL,             // Use parent's environment block.
-				NULL,             // Use parent's starting directory.
-				&si,              // Pointer to STARTUPINFO structure.
-				&pi )             // Pointer to PROCESS_INFORMATION structure.
-				) {
-				Error( "[SHELLEXEC] Execution of command failed", command, PASS3 );
-			} else {
-				CloseHandle(pi.hThread);
-				WaitForSingleObject(pi.hProcess, 500);
-				CloseHandle(pi.hProcess);
+			temp[0] = 0;
+			STRNCPY(temp, LINEMAX, command, LINEMAX);
+			if (parameters) {
+				STRNCAT(temp, LINEMAX, " ", 1);
+				STRNCAT(temp, LINEMAX, parameters, LINEMAX);
+			}
+			if (Options::OutputVerbosity <= OV_ALL) {
+				_CERR "Executing <" _CMDL temp _CMDL ">" _ENDL;
+			}
+			int exitCode = system(temp);
+			if (exitCode) {
+				ErrorInt("[SHELLEXEC] non-zero exit code", exitCode);
 			}
 		}
-		//system(command);
-		///WinExec ( command, SW_SHOWNORMAL );
-#else
-		if (system(command) == -1) {
-			Error("[SHELLEXEC] Execution of command failed", command);
-		}
-#endif
 	}
 	delete[] command;
+	if (NULL != parameters) {
+		delete[] parameters;
+	}
 }
 
 /*void dirWINEXEC() {

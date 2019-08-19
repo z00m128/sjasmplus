@@ -89,6 +89,8 @@ AppVeyor CI for windows clang + mingw + MSVS2015 builds?
 
 ##### sjasmplus 2.x/fork:
 
+SHELLEXEC change syntax
+
 "ok" warning suppressing mechanism for ALL warnings?
 
 EQU and DEFL to not affect local labels (not defining new "main" label)

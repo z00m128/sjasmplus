@@ -84,8 +84,11 @@ coverage1.asm(49): error: Syntax error: "
 49    000B                  DISPLAY "
 50    000B
 51    000B                  SHELLEXEC "echo Ahoy!"
-52    000B                  SHELLEXEC "echo from SHELLEXEC", ""    ; just to exercise code paths (parameters are not processed in NIX version)
-53    000B
+52    000B                  SHELLEXEC '"echo"', "from SHELLEXEC"
+bash: invalidfilename: No such file or directory
+coverage1.asm(53): error: [SHELLEXEC] non-zero exit code: 32512
+53    000B                  SHELLEXEC "bash", "invalidfilename"
+54    000B
 # file closed: coverage1.asm
 
 Value    Label

@@ -49,4 +49,5 @@ fwdLabel:
     DISPLAY "
 
     SHELLEXEC "echo Ahoy!"
-    SHELLEXEC "echo from SHELLEXEC", ""    ; just to exercise code paths (parameters are not processed in NIX version)
+    SHELLEXEC '"echo"', "from SHELLEXEC"
+    SHELLEXEC "bash", "invalidfilename"
