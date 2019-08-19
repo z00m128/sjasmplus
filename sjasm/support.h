@@ -83,4 +83,8 @@ void switchStdOutIntoBinaryMode();
 void LuaShellExec(char *command);
 #endif //USE_LUA
 
+#ifndef WEXITSTATUS
+# define WEXITSTATUS(exitstatus) (exitstatus)
+#endif
+
 //eof support.h

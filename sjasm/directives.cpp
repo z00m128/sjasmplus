@@ -1526,7 +1526,7 @@ void dirSHELLEXEC() {
 			temp[0] = 0;
 			STRNCPY(temp, LINEMAX, command, LINEMAX);
 			if (parameters) {
-				STRNCAT(temp, LINEMAX, " ", 1);
+				STRNCAT(temp, LINEMAX, " ", 2);
 				STRNCAT(temp, LINEMAX, parameters, LINEMAX);
 			}
 			if (Options::OutputVerbosity <= OV_ALL) {
