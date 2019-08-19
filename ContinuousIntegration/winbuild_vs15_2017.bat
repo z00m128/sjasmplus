@@ -22,3 +22,7 @@ copy Debug\sjasmplus.exe c:\tools\sjasmplus\sjasmplus.exe
 copy Release\sjasmplus.exe c:\tools\sjasmplus\sjasmplus.exe
 dir /N c:\tools\sjasmplus\sjasmplus.exe
 c:\tools\sjasmplus\sjasmplus.exe --version
+
+rem Install diffutils for tests runner script, and setup paths to prefer MSYS2 tools
+choco install -y --no-progress diffutils
+@call ContinuousIntegration\winbuild_set_msys2_path.bat
