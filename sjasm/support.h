@@ -62,8 +62,8 @@ long GetTickCount();
 #endif
 
 #define STRDUP strdup
-#define STRCAT(strDestination, sizeInBytes, strSource) strcat(strDestination, strSource)
-#define STRCPY(strDestination, sizeInBytes, strSource) strcpy(strDestination, strSource)
+#define STRCAT(strDestination, sizeInBytes, strSource) strncat(strDestination, strSource, sizeInBytes)
+#define STRCPY(strDestination, sizeInBytes, strSource) strncpy(strDestination, strSource, sizeInBytes)
 #define STRNCPY(strDestination, sizeInBytes, strSource, count) strncpy(strDestination, strSource, count)
 #define FOPEN(pFile, filename, mode) (pFile = fopen(filename, mode))
 #define FOPEN_ISOK(pFile, filename, mode) ((pFile = fopen(filename, mode)) != NULL)

@@ -344,7 +344,7 @@ void CLabelTable::Dump() {
 			*(ep++) = ' ';
 			*(ep++) = LabelTable[i].used ? ' ' : 'X';
 			*(ep++) = ' ';
-			STRCPY(ep, LINEMAX - (ep - &line[0]), LabelTable[i].name);
+			STRCPY(ep, LINEMAX - (ep - line), LabelTable[i].name);
 			ep += strlen(LabelTable[i].name);
 			*(ep++) = '\n';
 			*(ep) = 0;
@@ -1045,11 +1045,11 @@ static void InsertSingleStructLabel(char *name, const aint value) {
 }
 
 static void InsertStructSubLabels(const char* mainName, const CStructureEntry1* members, const aint address = 0) {
-	char ln[LINEMAX];
+	char ln[LINEMAX+1];
 	STRCPY(ln, LINEMAX, mainName);
 	char * const lnsubw = ln + strlen(ln);
 	while (members) {
-		STRCPY(lnsubw, LINEMAX, members->naam);		// overwrite sub-label part
+		STRCPY(lnsubw, LINEMAX-strlen(ln), members->naam);		// overwrite sub-label part
 		InsertSingleStructLabel(ln, members->offset + address);
 		members = members->next;
 	}
