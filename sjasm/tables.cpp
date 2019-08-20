@@ -74,7 +74,7 @@ char* ValidateLabel(char* naam, int flags) {
 	} else {
 		if (!p && *ModuleName) {
 			STRCAT(lp, LINEMAX-2, ModuleName);
-			STRCAT(lp, 1, ".");
+			STRCAT(lp, 2, ".");
 		}
 		if (l) {
 			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
@@ -146,11 +146,11 @@ int GetLabelValue(char*& p, aint& val) {
 	temp[0] = 0;
 	if (!g && *ModuleName) {
 		STRCAT(temp, LINEMAX-2, ModuleName);
-		STRCAT(temp, 1, ".");
+		STRCAT(temp, 2, ".");
 	}
 	if (l) {
-		STRCAT(temp, LINEMAX, vorlabp);
-		STRCAT(temp, LINEMAX, ".");
+		STRCAT(temp, LINEMAX-2, vorlabp);
+		STRCAT(temp, 2, ".");
 	}
 	len = strlen(temp); np = temp + len;
 	if (!isalpha((unsigned char) *p) && *p != '_') {
@@ -1146,7 +1146,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 	sn[0] = 0;
 	if (!gl && *ModuleName) {
 		STRCPY(sn, LINEMAX-2, ModuleName);
-		STRCAT(sn, 1, ".");
+		STRCAT(sn, 2, ".");
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
@@ -1165,7 +1165,7 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	sn[0] = 0;
 	if (!gl && *ModuleName) {
 		STRCPY(sn, LINEMAX-2, ModuleName);
-		STRCAT(sn, 1, ".");
+		STRCAT(sn, 2, ".");
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;

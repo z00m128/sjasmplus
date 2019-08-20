@@ -69,4 +69,11 @@ Click `Browse Source...` button, select extracted tarball folder. Click `Browse 
 	make
 	make install	
 
+The CMake can generage also VS project files, and sources should compile with VS compiler, but currently
+(v1.14.0 for sure, but also very likely earlier versions) the source contains major bugs and the
+resulting exe will be lot less stable than MinGW version (which is the official binary distributed).
+
+If you have VS environment and you are interested into fixing this situation, you can join
+the effort (Issues #77 and #78).
+
 Enjoy!

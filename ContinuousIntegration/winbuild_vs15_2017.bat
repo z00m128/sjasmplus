@@ -24,4 +24,4 @@ dir /N c:\tools\sjasmplus\sjasmplus.exe
 c:\tools\sjasmplus\sjasmplus.exe --version
 
 rem Install diffutils for tests runner script
-rem choco install -y --no-progress diffutils
+choco install -y --no-progress diffutils
