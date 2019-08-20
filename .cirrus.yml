@@ -52,7 +52,7 @@ task:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
     cpu: 3
-    memory: 1G
+    memory: 2G
   build_script: ContinuousIntegration\winbuild_mingw32.bat
   sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
   assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
@@ -66,7 +66,7 @@ task:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
     cpu: 3
-    memory: 1G
+    memory: 2G
   build_script: ContinuousIntegration\winbuild_vs15_2017.bat
   # exe is installed at the same location as the MinGW build does
   sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
