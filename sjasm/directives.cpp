@@ -75,23 +75,22 @@ int ParseDirective(bool beginningOfLine)
 	char* ml = STRDUP(line);
 	SkipBlanks();
 	char* pp = STRDUP(lp);
-	if (eolComment) eolComment = STRDUP(eolComment);	// create new copy of eolComment
-		// because original "line" content will be destroyed, and eolComment pointed just there
+	// create new copy of eolComment because original "line" content will be destroyed
+	char* eolCommCopy = eolComment ? STRDUP(eolComment) : nullptr;
+	eolComment = eolCommCopy;
 	if (NULL == ml || NULL == pp) Error("Not enough memory!", NULL, FATAL);
 	++listmacro;
 	do {
 		line[0] = ' ';
 		STRCPY(line+1, LINEMAX-1, pp);	// reset `line` to the content which should be repeated
 		ParseLineSafe();			// and parse it
-		if (eolComment) {			// switch OFF EOL-comment after first line
-			free(eolComment);
-			eolComment = NULL;
-		}
+		eolComment = NULL;			// switch OFF EOL-comment after first line
 	} while (--val);
 	// restore everything
 	STRCPY(line, LINEMAX, ml);
 	--listmacro;
 	donotlist = 1;
+	if (eolCommCopy) free(eolCommCopy);
 	free(pp);
 	free(ml);
 	// make lp point at \0, as the repeating line was processed fully
