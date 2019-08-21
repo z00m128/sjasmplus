@@ -45,6 +45,7 @@ echo -e "Creating temporary \033[96m$BUILD_DIR\033[0m directory..."
 rm -rf "$BUILD_DIR"
 # terminate in case the create+cd will fail, this is vital
 mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
+chmod 700 ../"$BUILD_DIR"       # make sure the build dir has all required permissions
 
 ## go through all asm files in tests directory and verify results
 for f in "${TEST_FILES[@]}"; do
@@ -65,12 +66,14 @@ for f in "${TEST_FILES[@]}"; do
     for subf in "$src_base"*.{asm,lua,cli}; do
         [[ ! -e "$subf" || -d "$subf" ]] && continue
         cp "$subf" ".${subf#$src_dir}"
+        chmod 700 ".${subf#$src_dir}"   # force 700 permissions to copied file
     done
     # copy "src_dir/basename*" sub-directories into working directory (ALL files in them)
     for subf in "$src_base"*; do
         [[ ! -d "$subf" ]] && continue
         [[ "${src_base}.config" == "$subf" ]] && continue   # some.config directory is not copied
         cp -r "$subf" ".${subf#$src_dir}"
+        chmod 700 -R ".${subf#$src_dir}"   # force 700 permissions to copied files (recursively)
     done
     # see if there are extra options defined (and read them into array)
     options=()
