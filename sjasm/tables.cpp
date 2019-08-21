@@ -74,7 +74,7 @@ char* ValidateLabel(char* naam, int flags) {
 	} else {
 		if (!p && *ModuleName) {
 			STRCAT(lp, LINEMAX-2, ModuleName);
-			STRCAT(lp, 1, ".");
+			STRCAT(lp, 2, ".");
 		}
 		if (l) {
 			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
@@ -146,11 +146,11 @@ int GetLabelValue(char*& p, aint& val) {
 	temp[0] = 0;
 	if (!g && *ModuleName) {
 		STRCAT(temp, LINEMAX-2, ModuleName);
-		STRCAT(temp, 1, ".");
+		STRCAT(temp, 2, ".");
 	}
 	if (l) {
-		STRCAT(temp, LINEMAX, vorlabp);
-		STRCAT(temp, LINEMAX, ".");
+		STRCAT(temp, LINEMAX-2, vorlabp);
+		STRCAT(temp, 2, ".");
 	}
 	len = strlen(temp); np = temp + len;
 	if (!isalpha((unsigned char) *p) && *p != '_') {
@@ -344,7 +344,7 @@ void CLabelTable::Dump() {
 			*(ep++) = ' ';
 			*(ep++) = LabelTable[i].used ? ' ' : 'X';
 			*(ep++) = ' ';
-			STRCPY(ep, LINEMAX - (ep - &line[0]), LabelTable[i].name);
+			STRCPY(ep, LINEMAX - (ep - line), LabelTable[i].name);
 			ep += strlen(LabelTable[i].name);
 			*(ep++) = '\n';
 			*(ep) = 0;
@@ -1045,11 +1045,11 @@ static void InsertSingleStructLabel(char *name, const aint value) {
 }
 
 static void InsertStructSubLabels(const char* mainName, const CStructureEntry1* members, const aint address = 0) {
-	char ln[LINEMAX];
+	char ln[LINEMAX+1];
 	STRCPY(ln, LINEMAX, mainName);
 	char * const lnsubw = ln + strlen(ln);
 	while (members) {
-		STRCPY(lnsubw, LINEMAX, members->naam);		// overwrite sub-label part
+		STRCPY(lnsubw, LINEMAX-strlen(ln), members->naam);		// overwrite sub-label part
 		InsertSingleStructLabel(ln, members->offset + address);
 		members = members->next;
 	}
@@ -1146,7 +1146,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 	sn[0] = 0;
 	if (!gl && *ModuleName) {
 		STRCPY(sn, LINEMAX-2, ModuleName);
-		STRCAT(sn, 1, ".");
+		STRCAT(sn, 2, ".");
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;
@@ -1165,7 +1165,7 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	sn[0] = 0;
 	if (!gl && *ModuleName) {
 		STRCPY(sn, LINEMAX-2, ModuleName);
-		STRCAT(sn, 1, ".");
+		STRCAT(sn, 2, ".");
 	}
 	STRCAT(sn, LINEMAX, naam);
 	sp = sn;

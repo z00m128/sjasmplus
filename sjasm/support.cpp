@@ -30,7 +30,7 @@
 
 #include "sjdefs.h"
 
-#if defined(WIN32)
+#if defined (_MSC_VER)
 const char pathBadSlash = '/';
 const char pathGoodSlash = '\\';
 #else
