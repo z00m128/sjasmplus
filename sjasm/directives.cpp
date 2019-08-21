@@ -528,7 +528,7 @@ void dirINCHOB() {
 	offset += 17;		// adjust offset (skip HOB header)
 	BinIncFile(fnaam, offset, length);
 	delete[] fnaam;
-	delete[] fnaamh;
+	free(fnaamh);
 }
 
 void dirINCTRD() {
@@ -618,7 +618,7 @@ void dirINCTRD() {
 	BinIncFile(fnaam, offset, length);
 	delete[] fnaam;
 	delete[] fnaamh;
-	delete[] fnaamh2;
+	free(fnaamh2);
 }
 
 void dirSAVESNA() {
