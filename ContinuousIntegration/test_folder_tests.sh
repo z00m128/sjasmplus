@@ -135,10 +135,10 @@ for f in "${TEST_FILES[@]}"; do
     done
     #read -p "press..."      # DEBUG helper to examine produced files
 done # end of FOR (go through all asm files)
-# display OK message if no error was detected
+# display OK message if no error was detected ("\u25A0" is UTF big fat filled rectangle/square)
 [[ $exitCode -eq 0 ]] \
-    && echo -e "\033[92mFINISHED: OK, $totalChecks checks passed ($totalTests tests) \033[91m■\033[93m■\033[32m■\033[96m■\033[0m" \
+    && echo -e "\033[92mFINISHED: OK, $totalChecks checks passed ($totalTests tests) \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m" \
     && exit 0
 # display error summary and exit with error code
-echo -e "\033[91mFINISHED: $exitCode/$totalChecks checks failed ($totalTests tests) \033[91m■\033[93m■\033[32m■\033[96m■\033[0m"
+echo -e "\033[91mFINISHED: $exitCode/$totalChecks checks failed ($totalTests tests) \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m"
 exit $exitCode

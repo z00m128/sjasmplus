@@ -74,8 +74,8 @@ for f in "${EXAMPLE_FILES[@]}"; do
 done
 # display OK message if no error was detected
 [[ $exitCode -eq 0 ]] \
-    && echo -e "\033[92mFINISHED: OK, $totalAsmFiles examples built \033[91m■\033[93m■\033[32m■\033[96m■\033[0m" \
+    && echo -e "\033[92mFINISHED: OK, $totalAsmFiles examples built \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m" \
     && exit 0
 # display error summary and exit with error code
-echo -e "\033[91mFINISHED: $exitCode/$totalAsmFiles examples failed \033[91m■\033[93m■\033[32m■\033[96m■\033[0m"
+echo -e "\033[91mFINISHED: $exitCode/$totalAsmFiles examples failed \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m"
 exit $exitCode
