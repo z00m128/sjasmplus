@@ -181,7 +181,7 @@ CStructureTable StructureTable;
 
 #ifdef USE_LUA
 
-lua_State *LUA;
+lua_State *LUA;			// lgtm[cpp/short-global-name] .. name seems barely ok (especially considering rest of code)
 int LuaLine=-1;
 
 #endif //USE_LUA

@@ -134,7 +134,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	}
 
 	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
-
+		// nothing more to do for ZX48
 	} else {
 		snbuf[27] = char(start & 0x00FF); //pc
 		snbuf[28] = char(start >> 8); //pc
