@@ -3,6 +3,7 @@
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/)
 [![BSD 3-Clause License](https://img.shields.io/github/license/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/blob/master/LICENSE.md)
 [![Coverage Status](https://coveralls.io/repos/github/z00m128/sjasmplus/badge.svg?branch=master)](https://coveralls.io/github/z00m128/sjasmplus?branch=master)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/z00m128/sjasmplus.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/z00m128/sjasmplus/context:cpp)
 
 Command-line cross-compiler of assembly language for [Z80 CPU](https://en.wikipedia.org/wiki/Zilog_Z80).
 
