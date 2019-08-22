@@ -63,11 +63,11 @@ int ParseExpPrim(char*& p, aint& nval) {
 		if (!byteOnly) res += int(MemGetByte(nval + 1)) << 8;
 		nval = res;
 		return 1;
-	} else if (isdigit((unsigned char) * p) || (*p == '#' && isalnum((unsigned char) * (p + 1))) || (*p == '$' && isalnum((unsigned char) * (p + 1))) || *p == '%') {
+	} else if (isdigit((byte)*p) || (*p == '#' && isalnum((byte)*(p + 1))) || (*p == '$' && isalnum((byte)*(p + 1))) || *p == '%') {
 	  	res = GetConstant(p, nval);
-	} else if (isalpha((unsigned char) * p) || *p == '_' || *p == '.' || *p == '@') {
+	} else if (isalpha((byte)*p) || *p == '_' || *p == '.' || *p == '@') {
 	  	res = GetLabelValue(p, nval);
-	} else if (*p == '?' && (isalpha((unsigned char) * (p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
+	} else if (*p == '?' && (isalpha((byte)*(p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
 		// this is undocumented "?<symbol>" operator, seems as workaround for labels like "not"
 		// This is deprecated and will be removed in v2.x of sjasmplus
 		// (where keywords will be reserved and such label would be invalid any way)
@@ -357,7 +357,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	while (*lp) {
 		const char c1 = lp[0], c2 = lp[1];
 		afterNonAlphaNum = afterNonAlphaNumNext;
-		afterNonAlphaNumNext = !isalnum(c1);
+		afterNonAlphaNumNext = !isalnum((byte)c1);
 		if (c1 == '/' && c2 == '*') {	// block-comment local beginning (++block_nesting)
 			lp += 2;
 			++comlin;
@@ -401,7 +401,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			continue;
 		}
 
-		if (!isalpha((unsigned char) * lp) && *lp != '_') {
+		if (!isalpha((byte)*lp) && *lp != '_') {
 			*rp++ = *lp++;
 			continue;
 		}
@@ -523,7 +523,7 @@ void ParseLabel() {
 	tp = temp;
 	SkipBlanks();
 	IsLabelNotFound = 0;
-	if (isdigit((unsigned char) * tp)) {
+	if (isdigit((byte)*tp)) {
 		if (NeedEQU() || NeedDEFL()) {
 			Error("Number labels are allowed as address labels only, not for DEFL/=/EQU", temp, SUPPRESS);
 			return;
@@ -750,7 +750,7 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 		++lp;
 	}
 	tp = temp; SkipBlanks();
-	if (isdigit((unsigned char) * tp)) {
+	if (isdigit((byte)*tp)) {
 		Error("[STRUCT] Number labels not allowed within structs"); return;
 	}
 	PreviousIsLabel = STRDUP(tp);

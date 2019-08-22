@@ -649,7 +649,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			// copy the new character to new line
 			*rlppos = *rlpbuf++;
 			afterNonAlphaNum = afterNonAlphaNumNext;
-			afterNonAlphaNumNext = !isalnum(*rlppos);
+			afterNonAlphaNumNext = !isalnum((byte)*rlppos);
 			// Block comments logic first (anything serious may happen only "outside" of block comment
 			if ('*' == *rlppos && ReadBufData() && '/' == *rlpbuf) {
 				if (0 < blockComment) --blockComment;	// block comment ends here, -1 from nesting

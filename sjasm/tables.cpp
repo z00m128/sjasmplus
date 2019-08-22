@@ -51,13 +51,13 @@ char* ValidateLabel(char* naam, int flags) {
 		break;
 	}
 	naam = np;
-	if (!isalpha((unsigned char) * np) && *np != '_') {
+	if (!isalpha((byte)*np) && *np != '_') {
 		Error("Invalid labelname", naam);
 		delete[] label;
 		return NULL;
 	}
 	while (*np) {
-		if (isalnum((unsigned char) * np) || *np == '_' || *np == '.' || *np == '?' || *np == '!' || *np == '#' || *np == '@') {
+		if (isalnum((byte)*np) || *np == '_' || *np == '.' || *np == '?' || *np == '!' || *np == '#' || *np == '@') {
 			++np;
 		} else {
 			Error("Invalid labelname", naam);
@@ -105,7 +105,7 @@ int GetLabelValue(char*& p, aint& val) {
 		STRCAT(temp, LINEMAX, ">");
 		len = strlen(temp);
 		np = temp + len;
-		if (!isalpha((unsigned char) * p) && *p != '_') {
+		if (!isalpha((byte)*p) && *p != '_') {
 			Error("Invalid labelname", temp);
 			return 0;
 		}
@@ -153,7 +153,7 @@ int GetLabelValue(char*& p, aint& val) {
 		STRCAT(temp, 2, ".");
 	}
 	len = strlen(temp); np = temp + len;
-	if (!isalpha((unsigned char) *p) && *p != '_') {
+	if (!isalpha((byte)*p) && *p != '_') {
 		Error("Invalid labelname", temp); return 0;
 	}
 	while (islabchar(*p)) *np++ = *p++;
@@ -182,9 +182,9 @@ int GetLabelValue(char*& p, aint& val) {
 
 int GetLocalLabelValue(char*& op, aint& val) {
 	char* p = op;
-	if (SkipBlanks(p) || !isdigit(*p)) return 0;
+	if (SkipBlanks(p) || !isdigit((byte)*p)) return 0;
 	char* const numberB = p;
-	while (isdigit(*p)) ++p;
+	while (isdigit((byte)*p)) ++p;
 	const char type = *p|0x20;		// [bB] => 'b', [fF] => 'f'
 	if ('b' != type && 'f' != type) return 0;	// local label must have "b" or "f" after number
 	const char following = p[1];	// should be EOL, colon or whitespace
@@ -426,7 +426,7 @@ void CLabelTable::DumpSymbols() {
 		Error("Error opening file", Options::SymbolListFName, FATAL);
 	}
 	for (int i = 1; i < NextLocation; ++i) {
-		if (LabelTable[i].name && isalpha(LabelTable[i].name[0])) {
+		if (LabelTable[i].name && isalpha((byte)LabelTable[i].name[0])) {
 			STRCPY(ErrorLine, LINEMAX, LabelTable[i].name);
 			STRCAT(ErrorLine, LINEMAX2, ": equ ");
 			STRCAT(ErrorLine, LINEMAX2, "0x");
@@ -468,7 +468,7 @@ int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
 	++NextLocation;
 
 	STRCPY(p = temp, LINEMAX, nname);
-	while ((*p = (char) toupper(*p))) { ++p; }
+	while ((*p = (char) toupper((byte)*p))) { ++p; }
 
 	if (NextLocation >= FUNTABSIZE * 2 / 3) {
 		Error("Functions Table is full", NULL, FATAL);
