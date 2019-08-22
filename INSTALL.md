@@ -74,6 +74,7 @@ The CMake can generage also VS project files, and sources should compile with VS
 resulting exe will be lot less stable than MinGW version (which is the official binary distributed).
 
 If you have VS environment and you are interested into fixing this situation, you can join
-the effort (Issues #77 and #78).
+the effort (Issues #77 and #78) (current `HEAD` of `master` branch in github seems to almost
+on par with the MinGW version, so VS build is now probably usable, but still not recommended).
 
 Enjoy!
