@@ -44,8 +44,8 @@ IFS=$OLD_IFS
 echo -e "Creating temporary \033[96m$BUILD_DIR\033[0m directory..."
 rm -rf "$BUILD_DIR"
 # terminate in case the create+cd will fail, this is vital
-mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
-chmod 700 ../"$BUILD_DIR"       # make sure the build dir has all required permissions
+# also make sure the build dir has all required permissions
+mkdir -p "$BUILD_DIR" && chmod 700 "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 
 ## go through all asm files in tests directory and verify results
 for f in "${TEST_FILES[@]}"; do

@@ -92,20 +92,20 @@ $(BUILD_DIR)/%.o : %.cpp
 
 # "all" will also copy the produced binary into project root directory (to mimick old makefile)
 all: $(EXE_FP)
-	cp $(EXE_FP) $(EXE)
+	cp $(EXE_FP) "$(EXE)"
 
 $(EXE_FP): $(ALL_OBJS)
 	$(CXX) -o $(EXE_FP) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
 
 install: $(EXE_FP)
-	$(INSTALL) $(EXE_FP) $(PREFIX)/bin
+	$(INSTALL) $(EXE_FP) "$(PREFIX)/bin"
 
 uninstall:
-	$(UNINSTALL) $(PREFIX)/bin/$(EXE)
+	$(UNINSTALL) "$(PREFIX)/bin/$(EXE)"
 
 tests: $(EXE_FP)
 ifdef TEST
-	EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh" $(TEST)
+	EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh" "$(TEST)"
 else
 	EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh"
 	@EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_examples.sh"
@@ -148,8 +148,8 @@ $(SUBDIR_DOCS)/documentation.html: Makefile $(wildcard $(SUBDIR_DOCS)/*.xml) $(w
 
 clean:
 	$(UNINSTALL) \
-		$(EXE) \
-		$(BUILD_DIR)/$(EXE) \
+		"$(EXE)" \
+		"$(BUILD_DIR)/$(EXE)" \
 		$(ALL_OBJS) \
 		$(ALL_COVERAGE_RAW) \
 		$(BUILD_DIR)/$(SUBDIR_COV)/*.gcov
