@@ -455,6 +455,15 @@ void LuaFatalError(lua_State *L) {
 
 #endif //USE_LUA
 
+#ifdef ADD_UNIT_TESTS
+static void checkForUnitTestMode(const char* logo, const char* arg1) {
+	if (strcmp("--unittest", arg1)) return;
+	_COUT logo _CMDL " ! running unit tests:" _ENDL _END
+	//FIXME all (prepare UnitTest++ environment and run the test runner, collect results, exit
+	exit(0);
+}
+#endif
+
 #ifdef WIN32
 int main(int argc, char* argv[]) {
 #else
@@ -464,6 +473,10 @@ int main(int argc, char **argv) {
 	int base_encoding;
 	char* p;
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
+
+#ifdef ADD_UNIT_TESTS
+	if (2 == argc) checkForUnitTestMode(logo, argv[1]);
+#endif
 
 	// start counter
 	long dwStart = GetTickCount();
