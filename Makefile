@@ -27,9 +27,6 @@ MEMCHECK=valgrind --leak-check=yes
 
 EXE := sjasmplus
 BUILD_DIR := build
-# Unit Test exe (checks for "--unittest" and runs unit tests then)
-EXE_UT := sjasm+ut
-BUILD_DIR_UT := $(BUILD_DIR)/ut
 
 SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.1
@@ -54,6 +51,12 @@ endif
 CXXFLAGS = -std=gnu++14 $(CFLAGS)
 #full path to executable
 EXE_FP := "$(CURDIR)/$(BUILD_DIR)/$(EXE)"
+
+# UnitTest++ related values (slightly modified defaults)
+# Unit Test exe (checks for "--unittest" and runs unit tests then)
+EXE_UT := sjasm+ut
+BUILD_DIR_UT := $(BUILD_DIR)+ut
+SUBDIR_UT=unittest-cpp
 EXE_UT_FP := "$(CURDIR)/$(BUILD_DIR_UT)/$(EXE_UT)"
 
 # turns list of %.c/%.cpp files into $BUILD_DIR/%.o list
@@ -79,8 +82,12 @@ TOLUASRCS := $(wildcard $(SUBDIR_TOLUA)/*.c)
 TOLUAOBJS := $(call object_files,$(TOLUASRCS))
 TOLUAOBJS_UT := $(call object_files_ut,$(TOLUASRCS))
 
+# UnitTest++ files
+UTPPSRCS := $(wildcard $(SUBDIR_UT)/UnitTest++/*.cpp) $(wildcard $(SUBDIR_UT)/UnitTest++/Posix/*.cpp)
+UTPPOBJS := $(call object_files,$(UTPPSRCS))
+
 ALL_OBJS := $(OBJS) $(LUAOBJS) $(TOLUAOBJS)
-ALL_OBJS_UT := $(OBJS_UT) $(LUAOBJS_UT) $(TOLUAOBJS_UT)
+ALL_OBJS_UT := $(OBJS_UT) $(LUAOBJS_UT) $(TOLUAOBJS_UT) $(UTPPOBJS)
 ALL_COVERAGE_RAW := $(patsubst %.o,%.gcno,$(ALL_OBJS_UT)) $(patsubst %.o,%.gcda,$(ALL_OBJS_UT))
 
 # GCOV options to generate coverage files
@@ -102,11 +109,11 @@ $(BUILD_DIR)/%.o : %.cpp
 #implicit rules to compile C/CPP files into $(BUILD_DIR_UT) (with unit tests enabled)
 $(BUILD_DIR_UT)/%.o : %.c
 	@mkdir -p $(@D)
-	$(COMPILE.c) -DADD_UNIT_TESTS $(OUTPUT_OPTION) $<
+	$(COMPILE.c) -DADD_UNIT_TESTS -I$(SUBDIR_UT) $(OUTPUT_OPTION) $<
 
 $(BUILD_DIR_UT)/%.o : %.cpp
 	@mkdir -p $(@D)
-	$(COMPILE.cc) -DADD_UNIT_TESTS $(OUTPUT_OPTION) $<
+	$(COMPILE.cc) -DADD_UNIT_TESTS -I$(SUBDIR_UT) $(OUTPUT_OPTION) $<
 
 .PHONY: all install uninstall clean docs tests memcheck coverage
 
@@ -184,6 +191,9 @@ clean:
 		$(BUILD_DIR)/$(SUBDIR_BASE) \
 		$(BUILD_DIR)/$(SUBDIR_LUA) \
 		$(BUILD_DIR)/$(SUBDIR_TOLUA) \
+		$(BUILD_DIR)/$(SUBDIR_UT)/UnitTest++/Posix \
+		$(BUILD_DIR)/$(SUBDIR_UT)/UnitTest++ \
+		$(BUILD_DIR)/$(SUBDIR_UT) \
 		$(BUILD_DIR) \
 		$(BUILD_DIR_UT)/$(SUBDIR_BASE) \
 		$(BUILD_DIR_UT)/$(SUBDIR_LUA) \
