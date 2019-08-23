@@ -46,7 +46,7 @@ pipe:
       # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
       install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
       # "-n" as the *.gcov files are already generated in the project root from previous step
-      upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/
+      upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/ -e unittest-cpp/ -e cpp-src-tests/
 
 task:
   name: windows mingw32 build
