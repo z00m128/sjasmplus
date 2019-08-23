@@ -56,7 +56,8 @@ EXE_FP := "$(CURDIR)/$(BUILD_DIR)/$(EXE)"
 # Unit Test exe (checks for "--unittest" and runs unit tests then)
 EXE_UT := sjasm+ut
 BUILD_DIR_UT := $(BUILD_DIR)+ut
-SUBDIR_UT=unittest-cpp
+SUBDIR_UT := unittest-cpp
+SUBDIR_TESTS := cpp-src-tests
 EXE_UT_FP := "$(CURDIR)/$(BUILD_DIR_UT)/$(EXE_UT)"
 
 # turns list of %.c/%.cpp files into $BUILD_DIR/%.o list
@@ -85,9 +86,11 @@ TOLUAOBJS_UT := $(call object_files_ut,$(TOLUASRCS))
 # UnitTest++ files
 UTPPSRCS := $(wildcard $(SUBDIR_UT)/UnitTest++/*.cpp) $(wildcard $(SUBDIR_UT)/UnitTest++/Posix/*.cpp)
 UTPPOBJS := $(call object_files,$(UTPPSRCS))
+TESTSSRCS := $(wildcard $(SUBDIR_TESTS)/*.cpp)
+TESTSOBJS := $(call object_files_ut,$(TESTSSRCS))
 
 ALL_OBJS := $(OBJS) $(LUAOBJS) $(TOLUAOBJS)
-ALL_OBJS_UT := $(OBJS_UT) $(LUAOBJS_UT) $(TOLUAOBJS_UT) $(UTPPOBJS)
+ALL_OBJS_UT := $(OBJS_UT) $(LUAOBJS_UT) $(TOLUAOBJS_UT) $(UTPPOBJS) $(TESTSOBJS)
 ALL_COVERAGE_RAW := $(patsubst %.o,%.gcno,$(ALL_OBJS_UT)) $(patsubst %.o,%.gcda,$(ALL_OBJS_UT))
 
 # GCOV options to generate coverage files

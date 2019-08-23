@@ -862,8 +862,7 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 					continue;					// copy two apostrophes (escaped apostrophe)
 				}
 				break;
-			default:
-				break;
+			default:	Error("Internal error. GetMacroArgumentValue()", NULL, FATAL);
 			}
 			if (endCh == *src) break;			// ending delimiter found
 			*dst++ = *src++;					// just copy character
