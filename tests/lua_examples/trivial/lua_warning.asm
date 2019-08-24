@@ -36,3 +36,8 @@
     lua pass3 ; wrong arguments
         sj.warning("[nope!]", 2)
     endlua
+
+    lua pass3
+        sj.add_word(sj.error_count)     -- ; should be 0x0008
+        sj.add_byte(sj.warning_count)   -- ; should be 0x07
+    endlua
