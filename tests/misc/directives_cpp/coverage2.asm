@@ -50,3 +50,5 @@
     DEVICE &syntaxErrorName
 
     SAVESNA "coverage2.sna", &
+
+    IFUSED ..InvalidName
