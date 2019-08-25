@@ -298,6 +298,16 @@ void ListFile(bool showAsSkipped) {
 	nEB = 0;
 }
 
+void ListSilentOrExternalEmits() {
+	// catch silent/external emits like "sj.add_byte(0x123)" from Lua script
+	if (0 == nEB) return;		// no silent/external emit happened
+	char silentOrExternalBytes[] = "; these bytes were emitted silently/externally (lua script?)";
+	substitutedLine = silentOrExternalBytes;
+	eolComment = nullptr;
+	ListFile();
+	substitutedLine = line;
+}
+
 static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 	if (LASTPASS == pass) {
 		WriteBuffer[WBLength++] = (char)byte;

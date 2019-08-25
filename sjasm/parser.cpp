@@ -638,6 +638,8 @@ static const byte win2dos[] = //taken from HorrorWord %)))
 //#define DEBUG_COUT_PARSE_LINE
 
 void ParseLine(bool parselabels) {
+	ListSilentOrExternalEmits();
+
 	++CompiledCurrentLine;
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();

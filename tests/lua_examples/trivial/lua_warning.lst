@@ -62,8 +62,13 @@ lua_warning.asm(37): error: [nope!]: 2
 40    0000                  lua pass3
 41    0000 ~                    sj.add_word(sj.error_count)     -- ; should be 0x0008
 42    0000 ~                    sj.add_byte(sj.warning_count)   -- ; should be 0x07
-43    0000 08 00 07         endlua
-44    0003
+43    0000 ~                    sj.add_word(0)
+44    0000 ~                    _pl("")         -- ; force emitted bytes in listing as silent/external
+45    0000 08 00 07 00  ; these bytes were emitted silently/externally (lua script?)
+45    0004 00
+45    0005
+45    0005                  endlua
+46    0005
 # file closed: lua_warning.asm
 
 Value    Label
