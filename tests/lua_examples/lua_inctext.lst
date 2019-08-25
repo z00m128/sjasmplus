@@ -17,8 +17,8 @@
 16    8010 ~                        inc_text("lua_inctext/test2.txt", "!!", 10) -- test non-default parameters
 17    8010 ~                        inc_text("missing file")                    -- test error handling
 18    8010              ;; inc_text ;; file "lua_inctext/test.txt", asm_marker ">>", eol_byte 13
-18    8010              Text1Text1
-18    802F 48 65 6C 6C  	DB 0     	DB 0     ; turn it into zero-terminated string by adding zero
+18    8010              Text1
+18    802F 48 65 6C 6C  	DB 0     ; turn it into zero-terminated string by adding zero
 18    8033 6F 21 21 0D
 18    8037 52 65 61 64
 18    803B 79 3F 0D 22
@@ -26,34 +26,34 @@
 18    8043 32 3C 0D 27
 18    8047 31 27 0D 47
 18    804B 6F 21 0D 00
-18    8030              Text2      Text2      ; the ASCII art begins with space, the ">>" is not marker, but data!
-18    8041 53 4F 53 21  Text3Text3
+18    8030              Text2      ; the ASCII art begins with space, the ">>" is not marker, but data!
+18    8041 53 4F 53 21  Text3
 18    8045 21 21 0D 20
 18    8049 3E 3E 20 5C
 18    804D 5F 6F 5F 2F
 18    8051 0D
-18    8059 47 41 4D 45  FinalFinal
+18    8059 47 41 4D 45  Final
 18    805D 20 4F 56 45
 18    8061 52 0D 50 52
 18    8065 45 53 53 20
 18    8069 41 4E 59 20
 18    806D 4B 45 59 0D
 18    8059
-18    8059 3E 3E        	LD A, '>' 	LD A, '>' ; binary ">>"
-18    805B 07           	RLCA	RLCA
-18    805C C3 59 80     	JP Final	JP Final
-18    805F 53 45 56 45  	BYTE "SEVER",0,"BURAN",0	BYTE "SEVER",0,"BURAN",0
+18    8059 3E 3E        	LD A, '>' ; binary ">>"
+18    805B 07           	RLCA
+18    805C C3 59 80     	JP Final
+18    805F 53 45 56 45  	BYTE "SEVER",0,"BURAN",0
 18    8063 52 00 42 55
 18    8067 52 41 4E 00
 18    806B              ;; inc_text ;; end of file "lua_inctext/test.txt"
 18    806B              ;; inc_text ;; file "lua_inctext/test2.txt", asm_marker "!!", eol_byte 10
-18    806B              Test2_Text1Test2_Text1
-18    807B 48 65 6C 6C  	DB 0     	DB 0     ; line above has "wrong" marker and will be added as text
+18    806B              Test2_Text1
+18    807B 48 65 6C 6C  	DB 0     ; line above has "wrong" marker and will be added as text
 18    807F 6F 21 21 0A
 18    8083 3E 3E 09 44
 18    8087 42 20 30 0A
 18    808B 00
-18    807C C3 7C 80     Test2_Final	jp    Test2_FinalTest2_Final	jp    Test2_Final
+18    807C C3 7C 80     Test2_Final	jp    Test2_Final
 18    807F              ;; inc_text ;; end of file "lua_inctext/test2.txt"
 lua_inctext.asm(35): error: lua [inc_text]: file not found: missing file
 18    807F                      ENDLUA

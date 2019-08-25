@@ -866,17 +866,21 @@ uint32_t LuaCalculate(char *str) {
 }
 
 void LuaParseLine(char *str) {
-	char *ml;
-
-	ml = STRDUP(line);
-	if (ml == NULL) {
+	// preserve current actual line which will be parsed next
+	char *oldLine = STRDUP(line);
+	char *oldEolComment = eolComment;
+	if (oldLine == NULL) {
 		Error("No enough memory!", NULL, FATAL);
 	}
 
+	// inject new line from Lua call and assemble it
 	STRCPY(line, LINEMAX, str);
 	ParseLineSafe();
 
-	STRCPY(line, LINEMAX, ml);
+	// restore the original line
+	STRCPY(line, LINEMAX, oldLine);
+	eolComment = oldEolComment;
+	free(oldLine);
 }
 
 void LuaParseCode(char *str) {
