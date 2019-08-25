@@ -1,3 +1,13 @@
+## [1.14.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.1) - 25.8.2019
+- refactored `SHELLEXEC` to use clib `system(..)` on all platforms (also MS VS), minor fixes
+- [lua example `inc_text`](https://github.com/z00m128/sjasmplus/blob/master/tests/lua_examples/lua_inctext.lua) (result of specific request from sjasmplus user)
+- listing fixed when Lua was used to emit bytes and also parsed lines of assembly source
+- MinGW windows exe prefers "/" file system delimiter ("\" should still work on windows (only))
+- lot of small bugfixes and Cirrus CI infrastructure adjustments (windows MinGW build does run full tests)
+- MS VS builds stabilized and fixed, should now work mostly on par with MinGW builds (99.5%)
+- Using [lgtm.com](https://lgtm.com/projects/g/z00m128/sjasmplus/) code analysis (did help to find new bugs and memory leaks)
+- [UnitTest++](https://github.com/unittest-cpp/unittest-cpp) framework added for regular C++ unit tests, first few tests added
+
 ## [1.14.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.0) - 17.8.2019
 - `INCLUDE` bugfix, now searching paths according to original documentation (may break some projects)
 - `UNDEFINE` had undocumented feature of removing also labels, cancelled (was broken beyond repair)
@@ -5,7 +15,7 @@
 - `MODULE` names can't contain dot any more, `MODULE` and `ENDMODULE` resets non-local label to `_`
 - `--syntax` option: `m` (switch off low-mem access warning) and `M` added, `A` removed
 - macro expansion can be inhibited by using `@` in front of instruction
-- expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
+- expression evaluator was not strictly 32 bit (64b binaries could have produced different results than 32b binaries)
 - reading memory addresses 0..255 directly emits warning, use `; ok` comment to suppress it.
 - several tests added to improve the code coverage: [coveralls.io/github/z00m128/sjasmplus](https://coveralls.io/github/z00m128/sjasmplus?branch=master)
 - as tests were added, minor bugs were found and squashed (errors wording, etc)

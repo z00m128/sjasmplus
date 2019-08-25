@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.14.0 Documentation [2019-08-17]</title>
+  <title>SjASMPlus 1.14.1 Documentation [2019-08-25]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -182,6 +182,22 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>25.8.2019 - 1.14.1</term>
+
+            <listitem>
+              <synopsis>- refactored <link linkend="po_shellexec">SHELLEXEC</link> to use clib "system(..)" on all platforms (also MS VS), minor fixes
+- <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lua_examples/lua_inctext.lua">lua example "inc_text"</ulink> (result of specific request from sjasmplus user)
+- listing fixed when Lua was used to emit bytes and also parsed lines of assembly source
+- MinGW windows exe prefers "/" file system delimiter ("\" should still work on windows (only))
+- lot of small bugfixes and Cirrus CI infrastructure adjustments (windows MinGW build does run full tests)
+- MS VS builds stabilized and fixed, should now work mostly on par with MinGW builds (99.5%)
+- Using <ulink url="https://lgtm.com/projects/g/z00m128/sjasmplus/">lgtm.com</ulink> code analysis (did help to find new bugs and memory leaks)
+- <ulink url="https://github.com/unittest-cpp/unittest-cpp">UnitTest++</ulink> framework added for regular C++ unit tests, first few tests added
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>17.8.2019 - 1.14.0</term>
 
             <listitem>
@@ -191,7 +207,7 @@
 - <link linkend="po_module">MODULE</link> names can't contain dot any more! MODULE and ENDMODULE resets non-local label to "_"
 - <link linkend="s_cli">--syntax</link> option: "m" (switch off low-mem access warning) and "M" added, "A" removed
 - <link linkend="s_macros">macro</link> expansion can be inhibited by using "@" in front of instruction
-- expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
+- expression evaluator was not strictly 32 bit (64b binaries could have produced different results than 32b binaries)
 - reading memory addresses 0..255 directly emits warning, use "; ok" comment to suppress it.
 - several tests added to improve the code coverage: <ulink url="https://coveralls.io/github/z00m128/sjasmplus?branch=master">coveralls.io/github/z00m128/sjasmplus</ulink>
 - as tests were added, minor bugs were found and squashed (errors wording, etc)</synopsis>
