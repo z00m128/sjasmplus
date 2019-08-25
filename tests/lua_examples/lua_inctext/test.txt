@@ -1,0 +1,20 @@
+>>Text1
+Hello!!
+Ready?
+"3"
+>2<
+'1'
+Go!
+>>	DB 0     ; turn it into zero-terminated string by adding zero
+>>Text2      ; the ASCII art begins with space, the ">>" is not marker, but data!
+SOS!!!
+ >> \_o_/
+>>Text3
+GAME OVER
+PRESS ANY KEY
+>>Final
+>>
+>>	LD A, '>' ; binary ">>"
+>>	RLCA
+>>	JP Final
+>>	BYTE "SEVER",0,"BURAN",0
