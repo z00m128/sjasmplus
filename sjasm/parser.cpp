@@ -877,6 +877,7 @@ void LuaParseLine(char *str) {
 
 	// inject new line from Lua call and assemble it
 	STRCPY(line, LINEMAX, str);
+	eolComment = NULL;
 	ParseLineSafe();
 
 	// restore the original line
