@@ -1024,7 +1024,7 @@ or    x or y   bitwise or
           <title></title>
 
           <para><programlisting>    DEVICE ZXSPECTRUM128
-    ;in this device, SLOT 3 enables to current by default.
+    ; in this device the default slot is SLOT 3 with PAGE 0 paged in.
 
     ORG 32768
 StartProg:
@@ -1038,10 +1038,7 @@ StartProg:
     ;return to our virtual device:
     DEVICE ZXSPECTRUM128
 
-    SAVESNA "snapshotname.sna",StartProg
-
-    SAVETAP "tapefile.tap",StartProg
- </programlisting></para>
+    SAVESNA "snapshotname.sna", StartProg</programlisting></para>
         </example>Predefined devices:<variablelist>
           <varlistentry>
             <term><anchor id="device_none" />NONE</term>
