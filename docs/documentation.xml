@@ -478,7 +478,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     <title>Labels</title>
 
     <section>
-      <title>Labels</title>
+      <title><anchor id="s_labels" />Labels</title>
 
       <para>Labels are case-sensitive and may be of any reasonable length,
       that is: up to about 70 characters. Label definitions should start on
@@ -498,9 +498,9 @@ MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
     </section>
 
     <section>
-      <title>Local labels</title>
+      <title><anchor id="s_local_labels" />Local labels</title>
 
-      <para>When there is a module definition (see module pseudo-op) all
+      <para>When there is a <link linkend="po_module">module definition</link> all
       labels (except those starting with a '@') are local to that module. To
       use a label from outside the module use modulename.labelname, in this
       example: 'vdp.Cls' Labels starting with a '.' are also local to the
@@ -509,32 +509,31 @@ MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
       <para><example>
           <title></title>
 
-          <para><programlisting>MODULE main
-Main:                           ; main.Main
-        CALL SetScreen          ; SetScreen
-        CALL vdp.Cls            ; vdp.Cls
-.loop:                          ; main.Main.loop
-        LD A,(.event)           ; main.Main.event
-        CALL ProcesEvent        ; label not found: main.ProcesEvent
-        DJNZ .loop              ; main.Main.loop
+          <para><programlisting>    MODULE main             ; module "main"
+Main:                       ; main.Main
+        CALL SetScreen      ; SetScreen
+        CALL vdp.Cls        ; main.vdp.Cls
+.loop:                      ; main.Main.loop
+        LD A,(.event)       ; main.Main.event
+        CALL ProcessEvent   ; label not found: main.ProcessEvent
+        DJNZ .loop          ; main.Main.loop
 
-    MODULE vdp
-@SetScreen:               ; SetScreen
-.loop                     ; vdp.SetScreen.loop
-        RET
-Cls:                      ; vdp.Cls
-.loop                     ; vdp.Cls.loop
-        DJNZ .loop        ; vdp.Cls.loop
-        RET
+        MODULE vdp          ; module "main.vdp"
+@SetScreen:                 ; SetScreen
+.loop:                      ; main.vdp.SetScreen.loop
+            RET
+Cls:                        ; main.vdp.Cls
+.loop:      DJNZ .loop      ; main.vdp.Cls.loop
+            RET
+        ENDMODULE
 
-    ENDMODULE
-Main.event                ; main.Main.event
-    BYTE 0</programlisting></para>
+Main.event DB 0             ; main.Main.event
+    ENDMODULE</programlisting></para>
         </example></para>
     </section>
 
     <section>
-      <title>@ Labels</title>
+      <title><anchor id="s_at_labels" />@ Labels</title>
 
       <para>Labels starting with a '@' are not touched by the label processing
       and used 'as-is'. See 'SetScreen' in the previous example code. <example>
@@ -553,7 +552,7 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
     </section>
 
     <section>
-      <title>Temporary labels</title>
+      <title><anchor id="s_temp_labels" />Temporary labels</title>
 
       <para>To keep the number of used labels reasonable it is possible to use
       numbers as labels. These labels can only be used as labels to jump to.
