@@ -1859,7 +1859,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
                   <title></title>
 
                   <para><programlisting>DRIE=3
-    EXPORT DRIE</programlisting></para>
+    EXPORT DRIE  ; adds into export file line: "DRIE: EQU 0x00000003"</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
