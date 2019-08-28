@@ -557,8 +557,9 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
       <para>To keep the number of used labels reasonable it is possible to use
       numbers as labels. These labels can only be used as labels to jump to.
       To jump to these labels, use the number followed by an 'F' for forward
-      branches or a 'B' for backward branches. Temporary labels should not be
-      used within macro's.</para>
+      branches or a 'B' for backward branches. Temporary labels should be defined
+      in the same order during every pass of assembling, but they can be used
+      within macro, or repeating blocks (old sjasmplus versions didn't allow usage within macro).</para>
 
       <para><example>
           <title></title>
@@ -570,7 +571,16 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
 2       LD B,4
         LD A,(DE)
         OUT (152),A
-        DJNZ 2B</programlisting></para>
+        DJNZ 2B
+
+        MACRO zing
+            DUP 2
+                JR 1F
+1               DJNZ    1B
+            EDUP
+        ENDM
+
+        .4 zing</programlisting></para>
         </example></para>
     </section>
   </chapter>
