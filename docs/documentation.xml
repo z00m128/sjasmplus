@@ -507,7 +507,7 @@ MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
       previous non-local label.</para>
 
       <para><example>
-          <title></title>
+          <title>docs_examples/s_local_labels.asm</title>
 
           <para><programlisting>    MODULE main             ; module "main"
 Main:                       ; main.Main
@@ -537,7 +537,7 @@ Main.event DB 0             ; main.Main.event
 
       <para>Labels starting with a '@' are not touched by the label processing
       and used 'as-is'. See 'SetScreen' in the previous example code. <example>
-          <title></title>
+          <title>docs_examples/s_at_labels.asm</title>
 
           <para><programlisting>    MODULE xxx
 Label      ; xxx.Label
@@ -562,7 +562,7 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
       within macro, or repeating blocks (old sjasmplus versions didn't allow usage within macro).</para>
 
       <para><example>
-          <title></title>
+          <title>docs_examples/s_temp_labels.asm</title>
 
           <para><programlisting>        ADD A,E
         JR NC,1F
@@ -1021,7 +1021,7 @@ or    x or y   bitwise or
       <para>If only single DEVICE is used in whole source batch, the device
       becomes "global" and will affect also source ahead of the DEVICE line.
           <example>
-          <title></title>
+          <title>docs_examples/s_realdevice.asm</title>
 
           <para><programlisting>    DEVICE ZXSPECTRUM128
     ; in this device the default slot is SLOT 3 with PAGE 0 paged in.
@@ -1206,7 +1206,7 @@ StartProg:
               <para>Repeat &lt;single instruction&gt; &lt;repeat-count&gt; many times. Doesn't work
 				  in the beginning of line. The &lt;repeat-count&gt; must be either simple integer
 				  number or expression fully enclosed in parentheses.<example>
-                  <title></title>
+                  <title>docs_examples/po_dot_repeat.asm</title>
 
                   <para><programlisting> .3        INC A    ;will be compiled to INC A:INC A:INC A
 len        EQU 10
@@ -1398,7 +1398,7 @@ END_OF_PROGRAM</programlisting></para>
 
             <listitem>
               <para>Array of DEFINEs<example>
-                  <title></title>
+                  <title>docs_examples/po_defarray.asm</title>
 
                   <para><programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
 CNT DEFL 0 ;or CNT=0
@@ -1606,7 +1606,7 @@ counter = counter + 1
               linkend="po_ent">ENT</link>. DISP blocks can NOT be nested, and to change
               the displacement address within current DISP block use the ordinary ORG.
               <example>
-                  <title></title>
+                  <title>docs_examples/po_disp.asm</title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM48
 SCREEN  EQU $4000
@@ -1644,7 +1644,7 @@ ENDOFPROG
 /H - out only in Hexadecimal
 /A - out both in Hexadecimal and Decimal</synopsis>
               <example>
-                  <title></title>
+                  <title>docs_examples/po_display.asm</title>
 
                   <para><programlisting>    ORG 100h
 TESTLABEL:
@@ -2073,7 +2073,7 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
 w = warning on writing beyond last byte of slot
 n = wrap address back to start of slot, map next page</synopsis>
                 <example>
-                  <title></title>
+                  <title>docs_examples/po_mmu.asm</title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM128 : LABELSLIST "po_mmu.lbl"  ; to check label pages
     MMU 1 3, 5      ; maps slots 1, 2, 3 with pages 5, 6, 7
@@ -2102,7 +2102,7 @@ label4_p2: scf      ; first byte of page 2 at 0xC000</programlisting></para>
 				  Also note the use of '@' operator to suppress all this label-processing. Modules can
 				  be nested, and module has to be ended by <link linkend="po_endmodule">ENDMODULE</link>.
 			  <example>
-                  <title></title>
+                  <title>docs_examples/po_module.asm</title>
 
                   <programlisting>    MODULE xxx
 Kip:                ; label xxx.Kip
@@ -2180,7 +2180,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
 				  are preserved in "stack" way, so further OPT with "pop" will restore older states).
 			  </para>
 			  <example>
-                  <title></title>
+                  <title>docs_examples/po_opt.asm</title>
 
                   <programlisting>    POP bc, hl   ; pops BC first
     OPT push reset --reversepop --syntax=af
@@ -2202,7 +2202,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               provided, it will change memory page in the current slot, see
               <link linkend="po_page">PAGE</link>.
                   <example>
-                  <title></title>
+                  <title>docs_examples/po_org.asm</title>
 
                   <para><programlisting>    ORG 100h ; or 0x100, or $100, or #100
 
@@ -3047,7 +3047,7 @@ Main
       <title>Examples</title>
 
       <example>
-          <title></title>
+          <title>docs_examples/c_structures.asm</title>
 
           <para><programlisting>	STRUCT SCOLOR
 RED	BYTE 4
@@ -3063,7 +3063,7 @@ SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</synopsis>
 	  </example>
 	  <example>
-          <title></title>
+          <title>docs_examples/c_structures.asm</title>
 
           <para><programlisting>	STRUCT SDOT
 X	BYTE
@@ -3084,7 +3084,7 @@ SDOT.C.BLUE	EQU 4 ; offset
 </synopsis>
 	  </example>
 	  <example>
-          <title></title>
+          <title>docs_examples/c_structures.asm</title>
 
           <para><programlisting>	STRUCT SPOS,4
 X	WORD
@@ -3101,7 +3101,7 @@ SPOS.Y	EQU  6 ; offset
 SPOS.AD	EQU  8 ; offset</synopsis>
 	  </example>
 	  <example>
-          <title></title>
+          <title>docs_examples/c_structures.asm</title>
 
           <para>When a structure is defined it is possible to declare labels
           with it<programlisting>COLOR SCOLOR</programlisting>This is
@@ -3132,7 +3132,7 @@ COLOR.BLUE  BYTE 6
 
 	  </example>
       <example>
-          <title></title>
+          <title>docs_examples/st_usage_example.asm</title>
 
           <para><programlisting>	STRUCT BIN_FILE_MAP, 256
 value1	BYTE
@@ -3968,7 +3968,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 	  <title><anchor id="s_savenex_examples" />Examples</title>
 
 	  <example>
-          <title></title>
+          <title>docs_examples/s_savenex_examples.asm</title>
 		  <para>
 			  Creating NEX file which will have Layer2 loading screen (stripes), progress bar, and will
 			  enter infinite loop with calling stack (used by IM 1 interrupt handler) visible on the
