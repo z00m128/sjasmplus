@@ -1,0 +1,68 @@
+# file opened: po_org.asm
+ 1    0000                  ORG 100h ; or 0x100, or $100, or #100
+ 2    0100
+ 3    0100                  ; useful macro that padding code
+ 4    0100                  MACRO PADORG addr
+ 5    0100 ~                     ; add padding
+ 6    0100 ~                     IF $ < addr
+ 7    0100 ~                     BLOCK addr-$
+ 8    0100 ~                     ENDIF
+ 9    0100 ~                     ORG addr
+10    0100                  ENDM
+11    0100
+12    0100                  MACRO PADORG2 addr
+13    0100 ~                     ; add padding + display warning
+14    0100 ~                     IF $ > addr
+15    0100 ~                       ; no padding
+16    0100 ~                       DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", addr
+17    0100 ~                     ELSE
+18    0100 ~                       ; add padding
+19    0100 ~                       BLOCK addr-$
+20    0100 ~                     ENDIF
+21    0100 ~                     ORG addr
+22    0100                  ENDM
+23    0100
+24    0100                  ; try the macros defined in documentation
+25    0100                  PADORG $104
+25    0100             >         ; add padding
+25    0100             >         IF $ < $104
+25    0100 00 00 00 00 >         BLOCK $104-$
+25    0104             >         ENDIF
+25    0104             >         ORG $104
+26    0104                  PADORG2 $106
+26    0104             >         ; add padding + display warning
+26    0104             >         IF $ > $106
+26    0104 ~           >           ; no padding
+26    0104 ~           >           DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", addr
+26    0104             >         ELSE
+26    0104             >           ; add padding
+26    0104 00 00       >           BLOCK $106-$
+26    0106             >         ENDIF
+26    0106             >         ORG $106
+27    0106                  PADORG2 $102
+27    0106             >         ; add padding + display warning
+27    0106             >         IF $ > $102
+27    0106             >           ; no padding
+> Warning! PADORG failed! 0x0106 is more than 0x0102
+27    0106             >           DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", $102
+27    0106             >         ELSE
+27    0106 ~           >           ; add padding
+27    0106 ~           >           BLOCK addr-$
+27    0106             >         ENDIF
+27    0106             >         ORG $102
+28    0102 00               nop
+29    0103                  PADORG2 $103
+29    0103             >         ; add padding + display warning
+29    0103             >         IF $ > $103
+29    0103 ~           >           ; no padding
+29    0103 ~           >           DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", addr
+29    0103             >         ELSE
+29    0103             >           ; add padding
+29    0103             >           BLOCK $103-$
+29    0103             >         ENDIF
+29    0103             >         ORG $103
+30    0103
+# file closed: po_org.asm
+
+Value    Label
+------ - -----------------------------------------------------------
