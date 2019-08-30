@@ -1,4 +1,4 @@
-## [1.14.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.1) - 25.8.2019
+## [1.14.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.1) - 30.8.2019
 - refactored `SHELLEXEC` to use clib `system(..)` on all platforms (also MS VS), minor fixes
 - [lua example `inc_text`](https://github.com/z00m128/sjasmplus/blob/master/tests/lua_examples/lua_inctext.lua) (result of specific request from sjasmplus user)
 - listing fixed when Lua was used to emit bytes and also parsed lines of assembly source
