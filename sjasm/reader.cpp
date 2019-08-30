@@ -39,9 +39,9 @@ static const std::array<EDelimiterType, 3> delimiters_noAngle = {DT_QUOTES, DT_A
 
 int cmphstr(char*& p1, const char* p2) {
 	unsigned int i = 0;
-	if (isupper(*p1)) {
+	if (isupper((byte)*p1)) {
 		while (p2[i]) {
-			if (p1[i] != toupper(p2[i])) return 0;
+			if (p1[i] != toupper((byte)p2[i])) return 0;
 			++i;
 		}
 	} else {
@@ -115,7 +115,7 @@ int NeedDEFL() {
 
 bool NeedIoC() {
 	SkipBlanks();
-	if ('(' != lp[0] || 'c' != tolower(lp[1]) || ')' != lp[2]) return false;
+	if ('(' != lp[0] || 'c' != tolower((byte)lp[1]) || ')' != lp[2]) return false;
 	lp += 3;
 	return true;
 }
@@ -198,8 +198,8 @@ char nidtemp[LINEMAX], *nidsubp = nidtemp;
 
 char* GetID(char*& p) {
 	char* np = nidtemp;
-	if (SkipBlanks(p) || (!isalpha((unsigned char) * p) && *p != '_' && *p != '.')) return NULL;
-	while (islabchar((unsigned char) * p)) *np++ = *p++;
+	if (SkipBlanks(p) || (!isalpha((byte)*p) && *p != '_' && *p != '.')) return NULL;
+	while (islabchar((byte)*p)) *np++ = *p++;
 	*np = 0;
 	return nidtemp;
 }
@@ -215,7 +215,7 @@ char* GrowSubId(char* & p) {	// appends next part of ID
 	if ('_' == *p) {
 		// add sub-parts delimiter in separate step (i.e. new ID grows like: "a", "a_", "a_b", ...
 		while ('_' == *p) *nidsubp++ = *p++;
-	} else while (*p && (isalnum(*p) || '.' == *p || '?' == *p || '!' == *p || '#' == *p || '@' == *p)) {
+	} else while (*p && (isalnum((byte)*p) || '.' == *p || '?' == *p || '!' == *p || '#' == *p || '@' == *p)) {
 		// add sub-part of id till next underscore
 		*nidsubp++ = *p++;
 	}
@@ -239,13 +239,13 @@ char instrtemp[LINEMAX];
 char* getinstr(char*& p) {
 	char* np = instrtemp;
 	SkipBlanks(p);
-	if (!isalpha((unsigned char) * p) && *p != '.') {
+	if (!isalpha((byte)*p) && *p != '.') {
 		return 0;
 	} else {
 		*np = *p; ++p; ++np;
 	}
 	while (*p) {
-		if (!isalnum((unsigned char) * p) && *p != '_') {
+		if (!isalnum((byte)*p) && *p != '_') {
 			break;
 		} /////////////////////////////////////
 		*np = *p; ++p; ++np;
@@ -254,7 +254,7 @@ char* getinstr(char*& p) {
 	if (!Options::syx.CaseInsensitiveInstructions) return instrtemp;
 	// lowercase the retrieved "instruction" string when option "--syntax=i" is used
 	while (instrtemp <= --np) {
-		*np = tolower(*np);
+		*np = tolower((byte)*np);
 	}
 	return instrtemp;
 }
@@ -320,7 +320,7 @@ int need(char*& p, char c) {
 
 int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3) {
 	//  SkipBlanks(p);
-	if (!isalpha((unsigned char) * p)) {
+	if (!isalpha((byte)*p)) {
 		return 0;
 	}
 	if (cmphstr(p, c1)) {
@@ -387,8 +387,8 @@ bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const
 	const int base = 1<<shiftBase;
 	const aint overflowMask = (~0L)<<(32-shiftBase);
 	while (p < pend) {
-		const char charDigit = *p++;
-		if ('\'' == charDigit && isalnum(*p)) continue;
+		const byte charDigit = *p++;
+		if ('\'' == charDigit && isalnum((byte)*p)) continue;
 		if (0 == charDigit || !isalnum(charDigit)) {
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
@@ -413,8 +413,8 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 	}
 	aint digit;
 	while (p < pend) {
-		const char charDigit = *p++;
-		if ('\'' == charDigit && isalnum(*p)) continue;
+		const byte charDigit = *p++;
+		if ('\'' == charDigit && isalnum((byte)*p)) continue;
 		if (0 == charDigit || !isalnum(charDigit)) {
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
@@ -434,11 +434,11 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 // to have stable results in listings/tests across platforms).
 int GetConstant(char*& op, aint& val) {
 	// the input string has been already detected as numeric literal by ParseExpPrim
-	assert(isdigit(*op) || '#' == *op || '$' == *op || '%' == *op);
+	assert(isdigit((byte)*op) || '#' == *op || '$' == *op || '%' == *op);
 	// find end of the numeric literal (pointer is beyond last alfa/digit character
 	char* pend = op;
 	if ('#' == *pend || '$' == *pend || '%' == *pend) ++pend;
-	while (isalnum(*pend) || ('\'' == *pend && isalnum(pend[1]))) ++pend;
+	while (isalnum((byte)*pend) || ('\'' == *pend && isalnum((byte)pend[1]))) ++pend;
 	char* const hardEnd = pend;
 	// check if the format is defined by prefix (#, $, %, 0x, 0X, 0b, 0B, 0q, 0Q)
 	char* p = op;
@@ -759,7 +759,7 @@ EDelimiterType GetDelimiterOfLastFileName() {
 }
 
 int islabchar(char p) {
-	if (isalnum((unsigned char)p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
+	if (isalnum((byte)p) || p == '_' || p == '.' || p == '?' || p == '!' || p == '#' || p == '@') {
 		return 1;
 	}
 	return 0;
@@ -862,8 +862,7 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 					continue;					// copy two apostrophes (escaped apostrophe)
 				}
 				break;
-			default:
-				break;
+			default:	Error("Internal error. GetMacroArgumentValue()", NULL, FATAL);
 			}
 			if (endCh == *src) break;			// ending delimiter found
 			*dst++ = *src++;					// just copy character
@@ -904,7 +903,7 @@ bool warningNotSuppressed(bool alsoFake) {
 	while (';' == *comment || '/' == *comment) ++comment;
 	while (' ' == *comment || '\t' == *comment) ++comment;
 	// check if "ok" is first word
-	if ('o' == comment[0] && 'k' == comment[1] && !isalnum(comment[2])) return false;
+	if ('o' == comment[0] && 'k' == comment[1] && !isalnum((byte)comment[2])) return false;
 	return alsoFake ? (nullptr == strstr(eolComment, "fake")) : true;
 }
 

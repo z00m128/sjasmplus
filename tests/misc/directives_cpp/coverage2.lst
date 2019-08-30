@@ -93,6 +93,9 @@ coverage2.asm(52): error: SAVESNA only allowed in real device emulation mode (Se
 coverage2.asm(52): error: [SAVESNA] No start address defined: SAVESNA "coverage2.sna", &
 52    000D                  SAVESNA "coverage2.sna", &
 53    000D
+coverage2.asm(54): error: Invalid labelname: .InvalidName
+54    000D                  IFUSED ..InvalidName
+55    000D
 # file closed: coverage2.asm
 
 Value    Label

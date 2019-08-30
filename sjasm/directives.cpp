@@ -54,7 +54,7 @@ int ParseDirective(bool beginningOfLine)
 	if (DirectivesTable.zoek(n)) return 1;
 
 	// Only "." repeat directive remains, but that one can't start at beginning of line (without --dirbol)
-	const bool isDigitDot = ('.' == *n) && isdigit(n[1]);
+	const bool isDigitDot = ('.' == *n) && isdigit((byte)n[1]);
 	const bool isExprDot = ('.' == *n) && (0 == n[1]) && ('(' == *lp);
 	if ((beginningOfLine && !Options::syx.IsPseudoOpBOF) || (!isDigitDot && !isExprDot)) {
 		lp = olp;		// alone "." must be followed by digit, or math expression in parentheses
@@ -528,7 +528,7 @@ void dirINCHOB() {
 	offset += 17;		// adjust offset (skip HOB header)
 	BinIncFile(fnaam, offset, length);
 	delete[] fnaam;
-	delete[] fnaamh;
+	free(fnaamh);
 }
 
 void dirINCTRD() {
@@ -618,7 +618,7 @@ void dirINCTRD() {
 	BinIncFile(fnaam, offset, length);
 	delete[] fnaam;
 	delete[] fnaamh;
-	delete[] fnaamh2;
+	free(fnaamh2);
 }
 
 void dirSAVESNA() {
@@ -1433,7 +1433,7 @@ void dirDISPLAY() {
 			break;
 		}
 		if (*lp == '/') {
-			switch (optionChar = toupper(lp[1])) {
+			switch (optionChar = toupper((byte)lp[1])) {
 			case 'A': case 'D': case 'H':	// known options, switching hex+dec / dec / hex mode
 				decprint = optionChar;
 				break;
@@ -1779,7 +1779,7 @@ static int SplitLuaErrorMessage(const char*& LuaError)
 			Error("No enough memory!", NULL, FATAL);
 		else
 		{
-			while (*lnp && (*lnp != ':' || !isdigit((unsigned char) *(lnp+1))) )
+			while (*lnp && (*lnp != ':' || !isdigit((byte)*(lnp+1))) )
 				lnp++;
 			if (*lnp && (msgp = strchr(++lnp, ':')) )
 			{

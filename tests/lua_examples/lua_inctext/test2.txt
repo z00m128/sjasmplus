@@ -1,0 +1,5 @@
+!!Test2_Text1
+Hello!!
+>>	DB 0
+!!	DB 0     ; line above has "wrong" marker and will be added as text
+!!Test2_Final	jp    Test2_Final

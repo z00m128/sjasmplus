@@ -221,7 +221,8 @@ void PrintHexAlt(char*& dest, aint value)
 
 static char pline[4*LINEMAX];
 
-void PrepareListLine(aint hexadd)
+// buffer must be at least 4*LINEMAX chars long
+void PrepareListLine(char* buffer, aint hexadd)
 {
 	////////////////////////////////////////////////////
 	// Line numbers to 1 to 99999 are supported only  //
@@ -238,17 +239,17 @@ void PrepareListLine(aint hexadd)
 		if (digit > '~') digit = '~';
 		if (CurrentSourceLine >= 10000) linenumber += 10000;
 	}
-	memset(pline, ' ', 24);
-	if (listmacro) pline[23] = '>';
-	sprintf(pline, "%*u", linewidth, linenumber); pline[linewidth] = ' ';
-	memcpy(pline + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
-	sprintf(pline + 6, "%04X", hexadd & 0xFFFF); pline[10] = ' ';
-	if (digit > '0') *pline = digit & 0xFF;
+	memset(buffer, ' ', 24);
+	if (listmacro) buffer[23] = '>';
+	sprintf(buffer, "%*u", linewidth, linenumber); buffer[linewidth] = ' ';
+	memcpy(buffer + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
+	sprintf(buffer + 6, "%04X", hexadd & 0xFFFF); buffer[10] = ' ';
+	if (digit > '0') *buffer = digit & 0xFF;
 	// if substitutedLine is completely empty, list rather source line any way
 	if (!*substitutedLine) substitutedLine = line;
-	STRCPY(pline + 24, LINEMAX2-24, substitutedLine);
+	STRCPY(buffer + 24, LINEMAX2-24, substitutedLine);
 	// add EOL comment if substituted was used and EOL comment is available
-	if (substitutedLine != line && eolComment) STRCAT(pline, LINEMAX2, eolComment);
+	if (substitutedLine != line && eolComment) STRCAT(buffer, LINEMAX2, eolComment);
 }
 
 static void ListFileStringRtrim() {
@@ -278,7 +279,7 @@ void ListFile(bool showAsSkipped) {
 	int pos = 0;
 	do {
 		if (showAsSkipped) substitutedLine = line;	// override substituted lines in skipped mode
-		PrepareListLine(ListAddress);
+		PrepareListLine(pline, ListAddress);
 		if (pos) pline[24] = 0;		// remove source line on sub-sequent list-lines
 		char* pp = pline + 10;
 		int BtoList = (nEB < 4) ? nEB : 4;
@@ -295,6 +296,16 @@ void ListFile(bool showAsSkipped) {
 		pos += BtoList;
 	} while (0 < nEB);
 	nEB = 0;
+}
+
+void ListSilentOrExternalEmits() {
+	// catch silent/external emits like "sj.add_byte(0x123)" from Lua script
+	if (0 == nEB) return;		// no silent/external emit happened
+	char silentOrExternalBytes[] = "; these bytes were emitted silently/externally (lua script?)";
+	substitutedLine = silentOrExternalBytes;
+	eolComment = nullptr;
+	ListFile();
+	substitutedLine = line;
 }
 
 static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
@@ -649,7 +660,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			// copy the new character to new line
 			*rlppos = *rlpbuf++;
 			afterNonAlphaNum = afterNonAlphaNumNext;
-			afterNonAlphaNumNext = !isalnum(*rlppos);
+			afterNonAlphaNumNext = !isalnum((byte)*rlppos);
 			// Block comments logic first (anything serious may happen only "outside" of block comment
 			if ('*' == *rlppos && ReadBufData() && '/' == *rlpbuf) {
 				if (0 < blockComment) --blockComment;	// block comment ends here, -1 from nesting

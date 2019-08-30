@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.14.0 Documentation [2019-08-17]</title>
+  <title>SjASMPlus 1.14.1 Documentation [2019-08-30]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -182,6 +182,22 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>30.8.2019 - 1.14.1</term>
+
+            <listitem>
+              <synopsis>- refactored <link linkend="po_shellexec">SHELLEXEC</link> to use clib "system(..)" on all platforms (also MS VS), minor fixes
+- <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lua_examples/lua_inctext.lua">lua example "inc_text"</ulink> (result of specific request from sjasmplus user)
+- listing fixed when Lua was used to emit bytes and also parsed lines of assembly source
+- MinGW windows exe prefers "/" file system delimiter ("\" should still work on windows (only))
+- lot of small bugfixes and Cirrus CI infrastructure adjustments (windows MinGW build does run full tests)
+- MS VS builds stabilized and fixed, should now work mostly on par with MinGW builds (99.5%)
+- Using <ulink url="https://lgtm.com/projects/g/z00m128/sjasmplus/">lgtm.com</ulink> code analysis (did help to find new bugs and memory leaks)
+- <ulink url="https://github.com/unittest-cpp/unittest-cpp">UnitTest++</ulink> framework added for regular C++ unit tests, first few tests added
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>17.8.2019 - 1.14.0</term>
 
             <listitem>
@@ -191,83 +207,10 @@
 - <link linkend="po_module">MODULE</link> names can't contain dot any more! MODULE and ENDMODULE resets non-local label to "_"
 - <link linkend="s_cli">--syntax</link> option: "m" (switch off low-mem access warning) and "M" added, "A" removed
 - <link linkend="s_macros">macro</link> expansion can be inhibited by using "@" in front of instruction
-- expression evaluator was not stricly 32 bit (64b binaries could have produced different results than 32b binaries)
+- expression evaluator was not strictly 32 bit (64b binaries could have produced different results than 32b binaries)
 - reading memory addresses 0..255 directly emits warning, use "; ok" comment to suppress it.
 - several tests added to improve the code coverage: <ulink url="https://coveralls.io/github/z00m128/sjasmplus?branch=master">coveralls.io/github/z00m128/sjasmplus</ulink>
 - as tests were added, minor bugs were found and squashed (errors wording, etc)</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>21.7.2019 - 1.13.3</term>
-
-            <listitem>
-				<synopsis>- bugfixes, new examples (check <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/lua_examples">tests/lua_examples</ulink>)
-- UTF BOM are now detected, UTF8 BOM is silently skipped, UTF16/32 BOMs cause fatal error
-- <link linkend="po_device">ZXSPECTRUMNEXT device</link> is now initialized with whole memory zeroed (no more ZX48 sysvars)
-- <link linkend="po_defl">DEFL</link> documented, "no forward reference" rule relaxed for <link linkend="po_equ">EQU</link>
-- some error messages reworded to make them easier to comprehend</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>28.6.2019 - 1.13.2</term>
-
-            <listitem>
-              <synopsis>- <link linkend="po_opt">OPT</link> has now also "listoff" and "liston" commands
-- added to <link linkend="s_cli">--syntax</link> option: case insensitive instructions, "bBw" added/changed
-- new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro examples</ulink>, minor fixes and refactoring
-- <link linkend="po_savetrd">SAVETRD</link> implementation refactored (more checks, less bugs, "replace" file feature)
-- operators "{address}" and "{b address}" are now official and documented</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>30.05.2019 - 1.13.1</term>
-
-            <listitem>
-              <synopsis>- added <link linkend="s_cli">--syntax</link> command line option
-- added <link linkend="po_opt">OPT</link> directive (modifies some command line options)
-- added way to use <link linkend="st_usage">structure</link> at designed address
-- <link linkend="s_macros">MACRO</link> can be now named through label (optional syntax)
-- added <link linkend="po_defarray_plus">DEFARRAY+</link> directive (for splitting long list of DEFARRAY values)
-- added <link linkend="po_cspectmap">CSPECTMAP</link> directive for MAP files for CSpect emulator
-- added support for <link linkend="s_cli">SJASMPLUSOPTS</link> environment variable
-- Z80N new variants of syntax, now also "mul de : mul : pixelad hl : pixeldn hl" works
-- minor bugfixes, improvements and internal refactorings (error reporting)
-- updated syntax-highlight file for KDE5 editors (Kate)</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>05.05.2019 - 1.13.0</term>
-
-            <listitem>
-              <synopsis>- [may break old sources] DEVICE: each assembling pass resets also
-  "device". To work with "device" memory (savesna/savetap/...) you
-  must select the device (and slot and pages) before producing machine
-  code which you want to work with (SAVESNA/SAVETAP/...).
-  If only single DEVICE is used in whole source batch, then the setting
-  is "global" and will be applied to all lines of source (in 2nd+ pass).
-- [may break old sources] ZXSPECTRUM128 based devices map into slots
-  by default banks {7, 5, 2, 0}. (was {0, 5, 2, 7} in older versions)
-- [may break old sources] ZXSPECTRUM128 based devices have sysvars and
-  stack set up as in "USR 0" mode (ZXSPECTRUM48 system variables and
-  default stack content).
-- [may break old sources] MAP+FIELD directives removed (STRUCT is better and working)
-- <link linkend="po_mmu">MMU</link> directive (fusing SLOT + PAGE and extending them)
-- <link linkend="po_savedev">SAVEDEV</link> directive (similar to SAVEBIN)
-- <link linkend="c_savenex">SAVENEX</link> directive (for ZX Spectrum Next)
-- INCBIN: support for negative offset/length values, support for MMU wrapping
-- INCBIN: support for file chunks of 64+ki size (usable with MMU)
-- Fixed: INCTRD offset, binary STDOUT on windows, SAVETRD/SAVEHOB filenames
-- Fixed: LUA used inside macros, LUA get_word, LUA error reporting
-- parser: added C++(like) <link linkend="s_numeric">numeric literals</link>
-- <link linkend="s_realdevice">ZXSPECTRUMNEXT device</link> added
-- refactoring of label/define implementation = less memory leaks, more correct
-  "label.mem_page" values, "Unreal" labels dump is more correct too
-- docs: now the CSS file is actually used, and default style modified a bit
-- new MACRO examples, syntax-highlight file for KDE5 editors (Kate)</synopsis>
             </listitem>
           </varlistentry>
 
@@ -462,7 +405,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     <title>Labels</title>
 
     <section>
-      <title>Labels</title>
+      <title><anchor id="s_labels" />Labels</title>
 
       <para>Labels are case-sensitive and may be of any reasonable length,
       that is: up to about 70 characters. Label definitions should start on
@@ -482,47 +425,46 @@ MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
     </section>
 
     <section>
-      <title>Local labels</title>
+      <title><anchor id="s_local_labels" />Local labels</title>
 
-      <para>When there is a module definition (see module pseudo-op) all
+      <para>When there is a <link linkend="po_module">module definition</link> all
       labels (except those starting with a '@') are local to that module. To
       use a label from outside the module use modulename.labelname, in this
       example: 'vdp.Cls' Labels starting with a '.' are also local to the
       previous non-local label.</para>
 
       <para><example>
-          <title></title>
+          <title>docs_examples/s_local_labels.asm</title>
 
-          <para><programlisting>MODULE main
-Main:                           ; main.Main
-        CALL SetScreen          ; SetScreen
-        CALL vdp.Cls            ; vdp.Cls
-.loop:                          ; main.Main.loop
-        LD A,(.event)           ; main.Main.event
-        CALL ProcesEvent        ; label not found: main.ProcesEvent
-        DJNZ .loop              ; main.Main.loop
+          <para><programlisting>    MODULE main             ; module "main"
+Main:                       ; main.Main
+        CALL SetScreen      ; SetScreen
+        CALL vdp.Cls        ; main.vdp.Cls
+.loop:                      ; main.Main.loop
+        LD A,(.event)       ; main.Main.event
+        CALL ProcessEvent   ; label not found: main.ProcessEvent
+        DJNZ .loop          ; main.Main.loop
 
-    MODULE vdp
-@SetScreen:               ; SetScreen
-.loop                     ; vdp.SetScreen.loop
-        RET
-Cls:                      ; vdp.Cls
-.loop                     ; vdp.Cls.loop
-        DJNZ .loop        ; vdp.Cls.loop
-        RET
+        MODULE vdp          ; module "main.vdp"
+@SetScreen:                 ; SetScreen
+.loop:                      ; main.vdp.SetScreen.loop
+            RET
+Cls:                        ; main.vdp.Cls
+.loop:      DJNZ .loop      ; main.vdp.Cls.loop
+            RET
+        ENDMODULE
 
-    ENDMODULE
-Main.event                ; main.Main.event
-    BYTE 0</programlisting></para>
+Main.event DB 0             ; main.Main.event
+    ENDMODULE</programlisting></para>
         </example></para>
     </section>
 
     <section>
-      <title>@ Labels</title>
+      <title><anchor id="s_at_labels" />@ Labels</title>
 
       <para>Labels starting with a '@' are not touched by the label processing
       and used 'as-is'. See 'SetScreen' in the previous example code. <example>
-          <title></title>
+          <title>docs_examples/s_at_labels.asm</title>
 
           <para><programlisting>    MODULE xxx
 Label      ; xxx.Label
@@ -537,16 +479,17 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
     </section>
 
     <section>
-      <title>Temporary labels</title>
+      <title><anchor id="s_temp_labels" />Temporary labels</title>
 
       <para>To keep the number of used labels reasonable it is possible to use
       numbers as labels. These labels can only be used as labels to jump to.
       To jump to these labels, use the number followed by an 'F' for forward
-      branches or a 'B' for backward branches. Temporary labels should not be
-      used within macro's.</para>
+      branches or a 'B' for backward branches. Temporary labels should be defined
+      in the same order during every pass of assembling, but they can be used
+      within macro, or repeating blocks (old sjasmplus versions didn't allow usage within macro).</para>
 
       <para><example>
-          <title></title>
+          <title>docs_examples/s_temp_labels.asm</title>
 
           <para><programlisting>        ADD A,E
         JR NC,1F
@@ -555,7 +498,16 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
 2       LD B,4
         LD A,(DE)
         OUT (152),A
-        DJNZ 2B</programlisting></para>
+        DJNZ 2B
+
+        MACRO zing
+            DUP 2
+                JR 1F
+1               DJNZ    1B
+            EDUP
+        ENDM
+
+        .4 zing</programlisting></para>
         </example></para>
     </section>
   </chapter>
@@ -996,10 +948,10 @@ or    x or y   bitwise or
       <para>If only single DEVICE is used in whole source batch, the device
       becomes "global" and will affect also source ahead of the DEVICE line.
           <example>
-          <title></title>
+          <title>docs_examples/s_realdevice.asm</title>
 
           <para><programlisting>    DEVICE ZXSPECTRUM128
-    ;in this device, SLOT 3 enables to current by default.
+    ; in this device the default slot is SLOT 3 with PAGE 0 paged in.
 
     ORG 32768
 StartProg:
@@ -1013,10 +965,7 @@ StartProg:
     ;return to our virtual device:
     DEVICE ZXSPECTRUM128
 
-    SAVESNA "snapshotname.sna",StartProg
-
-    SAVETAP "tapefile.tap",StartProg
- </programlisting></para>
+    SAVESNA "snapshotname.sna", StartProg</programlisting></para>
         </example>Predefined devices:<variablelist>
           <varlistentry>
             <term><anchor id="device_none" />NONE</term>
@@ -1184,7 +1133,7 @@ StartProg:
               <para>Repeat &lt;single instruction&gt; &lt;repeat-count&gt; many times. Doesn't work
 				  in the beginning of line. The &lt;repeat-count&gt; must be either simple integer
 				  number or expression fully enclosed in parentheses.<example>
-                  <title></title>
+                  <title>docs_examples/po_dot_repeat.asm</title>
 
                   <para><programlisting> .3        INC A    ;will be compiled to INC A:INC A:INC A
 len        EQU 10
@@ -1265,8 +1214,7 @@ len        EQU 10
 
                   <para><programlisting>STACKPOINTER=0D500H
     ASSERT END_OF_PROGRAM &lt; STACKPOINTER
-END_OF_PROGRAM
-    END</programlisting></para>
+END_OF_PROGRAM</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -1377,7 +1325,7 @@ END_OF_PROGRAM
 
             <listitem>
               <para>Array of DEFINEs<example>
-                  <title></title>
+                  <title>docs_examples/po_defarray.asm</title>
 
                   <para><programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
 CNT DEFL 0 ;or CNT=0
@@ -1585,24 +1533,27 @@ counter = counter + 1
               linkend="po_ent">ENT</link>. DISP blocks can NOT be nested, and to change
               the displacement address within current DISP block use the ordinary ORG.
               <example>
-                  <title></title>
+                  <title>docs_examples/po_disp.asm</title>
 
-                  <para><programlisting>SCREEN EQU $4000
-    ORG $8000
-    LD HL,BEGIN
-    LD DE,SCREEN
-    LD BC,ENDOFPROG-BEGIN
-    LDIR
-    CALL SCREEN
-    DI
-    HALT
-BEGIN  DISP SCREEN ;code will compile for address $4000, but to the current ORG
-MARKA  DEC A
-    HALT
-    JP NZ,MARKA
-    RET
-       ENT
-ENDOFPROG</programlisting></para>
+                  <para><programlisting>    DEVICE ZXSPECTRUM48
+SCREEN  EQU $4000
+        ORG $8000
+        LD HL,BEGIN
+        LD DE,SCREEN
+        LD BC,ENDOFPROG-BEGIN
+        LDIR
+        JP SCREEN
+BEGIN   DISP SCREEN ;code will compile for address $4000, but to the current ORG
+MARKA       DEC A
+            HALT
+            JP NZ,MARKA
+            DI
+            HALT
+        ENT
+ENDOFPROG
+
+    ASSERT $800E == BEGIN &amp;&amp; $8015 == ENDOFPROG &amp;&amp; $4000 == MARKA
+    ASSERT $76 == {B $800F}     ; HALT instruction lands at $800F (BEGIN+1)</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -1620,7 +1571,7 @@ ENDOFPROG</programlisting></para>
 /H - out only in Hexadecimal
 /A - out both in Hexadecimal and Decimal</synopsis>
               <example>
-                  <title></title>
+                  <title>docs_examples/po_display.asm</title>
 
                   <para><programlisting>    ORG 100h
 TESTLABEL:
@@ -1835,7 +1786,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
                   <title></title>
 
                   <para><programlisting>DRIE=3
-    EXPORT DRIE</programlisting></para>
+    EXPORT DRIE  ; adds into export file line: "DRIE: EQU 0x00000003"</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -2049,7 +2000,7 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
 w = warning on writing beyond last byte of slot
 n = wrap address back to start of slot, map next page</synopsis>
                 <example>
-                  <title></title>
+                  <title>docs_examples/po_mmu.asm</title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM128 : LABELSLIST "po_mmu.lbl"  ; to check label pages
     MMU 1 3, 5      ; maps slots 1, 2, 3 with pages 5, 6, 7
@@ -2078,7 +2029,7 @@ label4_p2: scf      ; first byte of page 2 at 0xC000</programlisting></para>
 				  Also note the use of '@' operator to suppress all this label-processing. Modules can
 				  be nested, and module has to be ended by <link linkend="po_endmodule">ENDMODULE</link>.
 			  <example>
-                  <title></title>
+                  <title>docs_examples/po_module.asm</title>
 
                   <programlisting>    MODULE xxx
 Kip:                ; label xxx.Kip
@@ -2156,7 +2107,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
 				  are preserved in "stack" way, so further OPT with "pop" will restore older states).
 			  </para>
 			  <example>
-                  <title></title>
+                  <title>docs_examples/po_opt.asm</title>
 
                   <programlisting>    POP bc, hl   ; pops BC first
     OPT push reset --reversepop --syntax=af
@@ -2178,7 +2129,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               provided, it will change memory page in the current slot, see
               <link linkend="po_page">PAGE</link>.
                   <example>
-                  <title></title>
+                  <title>docs_examples/po_org.asm</title>
 
                   <para><programlisting>    ORG 100h ; or 0x100, or $100, or #100
 
@@ -3023,7 +2974,7 @@ Main
       <title>Examples</title>
 
       <example>
-          <title></title>
+          <title>docs_examples/c_structures.asm</title>
 
           <para><programlisting>	STRUCT SCOLOR
 RED	BYTE 4
@@ -3039,7 +2990,7 @@ SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</synopsis>
 	  </example>
 	  <example>
-          <title></title>
+          <title>docs_examples/c_structures.asm</title>
 
           <para><programlisting>	STRUCT SDOT
 X	BYTE
@@ -3060,7 +3011,7 @@ SDOT.C.BLUE	EQU 4 ; offset
 </synopsis>
 	  </example>
 	  <example>
-          <title></title>
+          <title>docs_examples/c_structures.asm</title>
 
           <para><programlisting>	STRUCT SPOS,4
 X	WORD
@@ -3077,7 +3028,7 @@ SPOS.Y	EQU  6 ; offset
 SPOS.AD	EQU  8 ; offset</synopsis>
 	  </example>
 	  <example>
-          <title></title>
+          <title>docs_examples/c_structures.asm</title>
 
           <para>When a structure is defined it is possible to declare labels
           with it<programlisting>COLOR SCOLOR</programlisting>This is
@@ -3108,7 +3059,7 @@ COLOR.BLUE  BYTE 6
 
 	  </example>
       <example>
-          <title></title>
+          <title>docs_examples/st_usage_example.asm</title>
 
           <para><programlisting>	STRUCT BIN_FILE_MAP, 256
 value1	BYTE
@@ -3944,7 +3895,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 	  <title><anchor id="s_savenex_examples" />Examples</title>
 
 	  <example>
-          <title></title>
+          <title>docs_examples/s_savenex_examples.asm</title>
 		  <para>
 			  Creating NEX file which will have Layer2 loading screen (stripes), progress bar, and will
 			  enter infinite loop with calling stack (used by IM 1 interrupt handler) visible on the

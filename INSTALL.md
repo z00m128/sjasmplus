@@ -1,5 +1,6 @@
 ## Installation Instructions
 Requirements:
+
 - Linux / Unix / MacOS / BSD with bash compatible shell 
 - all common system progs (grep, cat, etc...)
 - all common build requirements (libc, libstdc++, g++, make, etc...)
@@ -7,24 +8,23 @@ Requirements:
 
 or
 
-- complete MinGW environment for MS Windows, with MinGW bin directories added in PATH variable (typically C:\MinGW\bin; C:\MinGW\msys\1.0\bin)
+- complete MinGW environment for MS Windows, with MinGW bin directories added in `PATH` variable (typically `C:\MinGW\bin;` `C:\MinGW\msys\1.0\bin`)
 - CMake installed into MinGW bin directory (optionally)
 
 Compilation is tested with GCC 5.5.0, it should run also with older 5.x versions. It will not work with GCC 4.x and older.
 
 ## Default method for Linux / Unix / MacOS / BSD
-Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile` according your preferences (default /usr/local). Run following commands:
-```
+Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile` according your preferences (default `/usr/local`). Run following commands:
+
 	make clean
 	make
-```
+
 Then run as root or use sudo:
-```
+
 	make install
-```
 
 ## Default method for MS Windows
-Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile.win` according your preferences (default c:\mingw\usr\local\bin). Remove `-static` parameter in `CFLAGS` if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Run following commands:
+Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile.win` according your preferences (default `c:\mingw\usr\local\bin`). Remove `-static` parameter in `CFLAGS` if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Run following commands:
 
 	make -f Makefile.win clean
 	make -f Makefile.win
@@ -41,39 +41,47 @@ Extract tarball archive, go to extracted folder and run following set of command
 
 You can have external Lua and ToLua, it is detected automatically. If not, internal version is used.
 
-For disabling of LUA scripting support add following option:
-```
-	-DENABLE_LUA=OFF 
-```
-E.g:
-```
-cmake -DENABLE_LUA=OFF ..
-```
+For disabling of LUA scripting support add `-DENABLE_LUA=OFF` option:
 
-Binary sjasmplus file will be placed in /usr/bin by default.
+	cmake -DENABLE_LUA=OFF ..
 
-To change install directory prefix add following option with specified prefix:
+Binary sjasmplus file will be placed in `/usr/bin` by default.
 
-	-DCMAKE_INSTALL_PREFIX:PATH=/usr/local
+To change install directory prefix add `-DCMAKE_INSTALL_PREFIX:PATH` option with specified prefix:
 
-	e.g: cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
-
+	cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
 
 ## CMake method for MS Windows
 Extract tarball archive and go to the extracted folder. Delete or rename file `Makefile`. Rename file `Makefile.win` to `Makefile`. Create `build` subdirectory and enter to it. Run following command:
 
 	cmake-gui
 	
-Click `Browse Source...` button, select extracted tarball folder. Click `Browse Build...` button, select the `build` folder. Click `Configure` button, select `MinGW Makefiles`, select `Use default native compilers`. Click `Finish` and wait until configuration is done. Change `CMAKE_INSTALL_PREFIX` install path according your peferences (click on path). Click `Generate`. Run `cmd.exe`, enter the build directory and run following commands:
+Click `Browse Source...` button, select extracted tarball folder. Click `Browse Build...` button, select the `build` folder. Click `Configure` button, select `MinGW Makefiles`, select `Use default native compilers`. Click `Finish` and wait until configuration is done. Change `CMAKE_INSTALL_PREFIX` install path according your preferences (click on path). Click `Generate`. Run `cmd.exe`, enter the build directory and run following commands:
 
 	make
 	make install	
 
-The CMake can generage also VS project files, and sources should compile with VS compiler, but currently
-(v1.14.0 for sure, but also very likely earlier versions) the source contains major bugs and the
-resulting exe will be lot less stable than MinGW version (which is the official binary distributed).
+The CMake can generate also VS project files, and sources should compile with VS compiler, since
+v1.14.1 the VS built executable should mostly work as well as MinGW, although there are still
+corner-case bugs which need to be fixed, see issues #77 and #78 for details/progress and to help.
 
-If you have VS environment and you are interested into fixing this situation, you can join
-the effort (Issues #77 and #78).
+The official binary "exe" is built with MinGW toolchain and that's recommended option.
+
+## Helping with sjasmplus development
+There are few extra recommendations if you want to join sjasmplus development and use all the features:
+
+- work with git clone of repository ideally, so you can easily update to latest source base, track your changes or review changes of other developers
+- withing the git repository init and update the submodules too, this will clone the UnitTest++ repository which is required to build unit tests (`git submodule init`,  `git submodule update`)
+- linux + gcc + Makefile is the config of Ped7g, having access to the same config to re-create his workflow locally may be of help (when troubleshooting some issue or comparing results with different platform)
+- but having different local configuration would be very helpful to keep the source base cross-platform and in good shape
+- you can check `.cirrus.yml` file and accompanying scripts/batch-files in `ContinuousIntegration` folder to see how different environments and different build tasks are prepared and executed. If you are not familiar with CI setup and configuration yet, you should take at least a brief glimpse on it, even if you want just to contribute small patch to the sjasmplus, because any pull request will be scrutinized by the CI build system automatically.
+
+My (Ped7g) local workflow is:
+
+1. KDevelop IDE set up to use CMake import of project to build+install debug binary in my `~/.local/bin` folder, which is the first binary found by my search path (to build + install the sjasmplus I use Project/Install Selection [Shift+F8]).
+1. with new debug binary locally installed, I run in terminal `ContinuousIntegration/test_folder_tests.sh` to verify if it works (adding new tests exercising the feature/change which I am working at). Sometimes I limit the scope of tests being run by adding argument to the script like "module" to run only `tests/modules/*` tests.
+1. when I'm finished with a change, and I'm preparing commit, I use `make clean && make` to verify the release can be built too, and `make DEBUG=1 clean && make DEBUG=1 coverage` to run full test suite, C++ unit tests and create coverage report (text files in build directory) so I can manually check if everything did change as expected.
+1. after this review I commit + push the changes to the repository, where the Cirrus CI setup will try to replicate my local experience in different environments of the CI, if some of these fails, I check the Cirrus logs to see why build failed, and work on the fix commit.
+1. when working on small/medium change where I'm sure I can get main repository into "green" state whenever I push changes to github, I tend to work directly on `master` branch, but when experimenting with things with unclear outcome, I use experimental branches, later merging them into `master` when they are ready (or even my fork of the main repository, if the experiment is really just experiment, and I am not even sure if it will ever land in the main repository).
 
 Enjoy!

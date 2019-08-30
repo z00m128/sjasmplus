@@ -87,9 +87,9 @@ public:
 	int insertd(const char*, void(*) (void));
 	int zoek(const char*);
 	int Find(char*);
-private:	//FIXME LABTABSIZE should be probably FUNTABSIZE here, but afraid to fix (rather use regular C++ facilities later)
-	int HashTable[LABTABSIZE], NextLocation;
-	CFunctionTableEntry funtab[LABTABSIZE];
+private:
+	int HashTable[FUNTABSIZE], NextLocation;
+	CFunctionTableEntry funtab[FUNTABSIZE];
 	int Hash(const char*);
 };
 
@@ -220,6 +220,7 @@ public:
 	aint offset;
 	CStructureEntry1* next;
 	CStructureEntry1(char*, aint);
+	~CStructureEntry1() { free(naam); }
 };
 
 class CStructureEntry2 {
@@ -248,6 +249,7 @@ public:
 	void emitmembs(char*&);
 	CStructure* next;
 	CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p);
+	~CStructure() { free(naam); free(id); }
 private:
 	CStructureEntry1* mnf, * mnl;
 	CStructureEntry2* mbf, * mbl;

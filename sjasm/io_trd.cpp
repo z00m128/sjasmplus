@@ -205,7 +205,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 
 	SaveRAM(ff, start, length);
 
-	if (0 <= autostart && autostart <= 9999) {
+	if (0 <= autostart) {
 		byte abin[] {0x80, 0xAA, static_cast<byte>(autostart), static_cast<byte>(autostart>>8)};
 		if (4 != fwrite(abin, 1, 4, ff)) {
 			Error("Write error", fname, IF_FIRST);

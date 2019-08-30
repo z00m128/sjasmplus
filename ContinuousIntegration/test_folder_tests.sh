@@ -44,7 +44,8 @@ IFS=$OLD_IFS
 echo -e "Creating temporary \033[96m$BUILD_DIR\033[0m directory..."
 rm -rf "$BUILD_DIR"
 # terminate in case the create+cd will fail, this is vital
-mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
+# also make sure the build dir has all required permissions
+mkdir -p "$BUILD_DIR" && chmod 700 "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 
 ## go through all asm files in tests directory and verify results
 for f in "${TEST_FILES[@]}"; do
@@ -65,12 +66,14 @@ for f in "${TEST_FILES[@]}"; do
     for subf in "$src_base"*.{asm,lua,cli}; do
         [[ ! -e "$subf" || -d "$subf" ]] && continue
         cp "$subf" ".${subf#$src_dir}"
+        chmod 700 ".${subf#$src_dir}"   # force 700 permissions to copied file
     done
     # copy "src_dir/basename*" sub-directories into working directory (ALL files in them)
     for subf in "$src_base"*; do
         [[ ! -d "$subf" ]] && continue
         [[ "${src_base}.config" == "$subf" ]] && continue   # some.config directory is not copied
         cp -r "$subf" ".${subf#$src_dir}"
+        chmod 700 -R ".${subf#$src_dir}"   # force 700 permissions to copied files (recursively)
     done
     # see if there are extra options defined (and read them into array)
     options=()
@@ -135,10 +138,10 @@ for f in "${TEST_FILES[@]}"; do
     done
     #read -p "press..."      # DEBUG helper to examine produced files
 done # end of FOR (go through all asm files)
-# display OK message if no error was detected
+# display OK message if no error was detected ("\u25A0" is UTF big fat filled rectangle/square)
 [[ $exitCode -eq 0 ]] \
-    && echo -e "\033[92mFINISHED: OK, $totalChecks checks passed ($totalTests tests) \033[91m■\033[93m■\033[32m■\033[96m■\033[0m" \
+    && echo -e "\033[92mFINISHED: OK, $totalChecks checks passed ($totalTests tests) \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m" \
     && exit 0
 # display error summary and exit with error code
-echo -e "\033[91mFINISHED: $exitCode/$totalChecks checks failed ($totalTests tests) \033[91m■\033[93m■\033[32m■\033[96m■\033[0m"
+echo -e "\033[91mFINISHED: $exitCode/$totalChecks checks failed ($totalTests tests) \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m"
 exit $exitCode

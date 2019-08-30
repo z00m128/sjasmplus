@@ -181,7 +181,7 @@ CStructureTable StructureTable;
 
 #ifdef USE_LUA
 
-lua_State *LUA;
+lua_State *LUA;			// lgtm[cpp/short-global-name] .. name seems barely ok (especially considering rest of code)
 int LuaLine=-1;
 
 #endif //USE_LUA
@@ -455,6 +455,34 @@ void LuaFatalError(lua_State *L) {
 
 #endif //USE_LUA
 
+// ==============================================================================================
+// == UnitTest++ part, checking if unit tests are requested and does launch test-runner then   ==
+// ==============================================================================================
+#ifdef ADD_UNIT_TESTS
+
+# include "UnitTest++/UnitTest++.h"
+
+# define STOP_MAKE_BY_NON_ZERO_EXIT_CODE 0
+
+//detect "--unittest" switch, prepare UnitTest++, run the test runner, collect results, exit
+# define CHECK_UNIT_TESTS \
+	{ \
+		if (2 == argc && !strcmp("--unittest", argv[1])) { \
+			_COUT "SjASMPlus \033[96mv" VERSION "\033[0m | \033[95mrunning unit tests:\033[0m" _ENDL _END \
+			int exitCode = STOP_MAKE_BY_NON_ZERO_EXIT_CODE + UnitTest::RunAllTests(); \
+			if (exitCode) _COUT "\033[91mNon-zero result from test runner!\033[0m" _ENDL _END \
+			else _COUT "\033[92mOK: 0 UnitTest++ tests failed.\033[0m" _ENDL _END \
+			exit(exitCode); \
+		} \
+	}
+#else
+
+# define CHECK_UNIT_TESTS { /* no unit tests in this build */ }
+
+#endif
+
+// == end of UnitTest++ part ====================================================================
+
 #ifdef WIN32
 int main(int argc, char* argv[]) {
 #else
@@ -464,6 +492,8 @@ int main(int argc, char **argv) {
 	int base_encoding;
 	char* p;
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
+
+	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
 
 	// start counter
 	long dwStart = GetTickCount();

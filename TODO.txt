@@ -23,6 +23,8 @@ CSPECTMAP - needs better support for DISP and instances of STRUCT
     add DOCS example test: "hl: Ld a,(hl),,de,hl" when all is implemented
 
 static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
+ * https://scan.coverity.com/projects/z00m128-sjasmplus
+    (needs build according to their tool or Travis CI)
 
 FIXME in sources mark further points worth refactoring
 

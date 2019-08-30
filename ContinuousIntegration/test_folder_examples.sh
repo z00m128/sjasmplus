@@ -35,6 +35,7 @@ echo -e "Creating temporary \033[96m$BUILD_DIR\033[0m directory..."
 rm -rf "$BUILD_DIR"
 # terminate in case the create+cd will fail, this is vital
 mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
+chmod 700 ../"$BUILD_DIR"       # make sure the build dir has all required permissions
 echo -e "Searching directory \033[96m${PROJECT_DIR}/examples/\033[0m for '.asm' files..."
 OLD_IFS=$IFS
 IFS=$'\n'
@@ -74,8 +75,8 @@ for f in "${EXAMPLE_FILES[@]}"; do
 done
 # display OK message if no error was detected
 [[ $exitCode -eq 0 ]] \
-    && echo -e "\033[92mFINISHED: OK, $totalAsmFiles examples built \033[91m■\033[93m■\033[32m■\033[96m■\033[0m" \
+    && echo -e "\033[92mFINISHED: OK, $totalAsmFiles examples built \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m" \
     && exit 0
 # display error summary and exit with error code
-echo -e "\033[91mFINISHED: $exitCode/$totalAsmFiles examples failed \033[91m■\033[93m■\033[32m■\033[96m■\033[0m"
+echo -e "\033[91mFINISHED: $exitCode/$totalAsmFiles examples failed \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m"
 exit $exitCode

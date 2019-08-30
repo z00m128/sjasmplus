@@ -1,0 +1,44 @@
+# file opened: lua_parse_line.asm
+ 1    0000
+ 2    0000                  org     0x1234          ; eol comment belong to ORG
+ 3    1234                  lua allpass ; machine code needs to be emitted in *every* pass (and the same one)
+ 4    1234 ~                    sj.parse_line("allpass_1: rrca")    -- try without EOL comment first
+ 5    1234 ~                    sj.parse_line("allpass_2: rra      ; with eol comment") -- *with*
+ 6    1234 ~                    sj.parse_line("allpass_3: cpl")     -- *without*
+ 7    1234 ~                    _pl("allpass_4: inc bc")
+ 8    1234 ~                    _pl("allpass_5: inc de      ; with eol comment 2")
+ 9    1234 ~                    _pl("allpass_6: inc hl")
+10    1234 0F           allpass_1: rrca
+10    1235 1F           allpass_2: rra      ; with eol comment
+10    1236 2F           allpass_3: cpl
+10    1237 03           allpass_4: inc bc
+10    1238 13           allpass_5: inc de      ; with eol comment 2
+10    1239 23           allpass_6: inc hl
+10    123A                  endlua
+11    123A                  lua         ; [pass default] == pass3 - this is not good for ASM parsing lines!
+12    123A ~                    sj.parse_line("pass_default: rlca      ; this will cause problems")
+13    123A ~                    _pl("pass_default_2: rla      ; same with _pl alias")
+lua_parse_line.asm(12): error: Label not found: pass_default
+lua_parse_line.asm(12): warning: Label has different value in pass 3: previous value 0 not equal 4666
+14    123A 07           pass_default: rlca      ; this will cause problems
+lua_parse_line.asm(13): error: Label not found: pass_default_2
+lua_parse_line.asm(13): warning: Label has different value in pass 3: previous value 0 not equal 4667
+14    123B 17           pass_default_2: rla      ; same with _pl alias
+14    123C                  endlua
+15    123C                  lua pass1   ; pass1 this is also insufficient to generate valid machine code
+16    123C ~                    sj.parse_line("pass1: daa      ; will define label, but machine code will be missing")
+17    123C ~                    _pl("pass1_2: scf      ; same with _pl alias")
+18    123C                  endlua
+19    123C
+# file closed: lua_parse_line.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x1234 X allpass_1
+0x1235 X allpass_2
+0x1236 X allpass_3
+0x1237 X allpass_4
+0x1238 X allpass_5
+0x1239 X allpass_6
+0x123A X pass1
+0x123B X pass1_2

@@ -1,0 +1,35 @@
+# file opened: s_local_labels.asm
+ 1    0000                  ORG 0x8000
+ 2    8000                  MODULE main             ; module "main"
+ 3    8000              Main:                       ; main.Main
+ 4    8000 CD 0E 80             CALL SetScreen      ; SetScreen
+ 5    8003 CD 0F 80             CALL vdp.Cls        ; main.vdp.Cls
+ 6    8006              .loop:                      ; main.Main.loop
+ 7    8006 3A 12 80             LD A,(.event)       ; main.Main.event
+s_local_labels.asm(8): error: Label not found: main.ProcessEvent
+ 8    8009 CD 00 00             CALL ProcessEvent   ; label not found: main.ProcessEvent
+ 9    800C 10 F8                DJNZ .loop          ; main.Main.loop
+10    800E
+11    800E                      MODULE vdp          ; module "main.vdp"
+12    800E              @SetScreen:                 ; SetScreen
+13    800E              .loop:                      ; main.vdp.SetScreen.loop
+14    800E C9                       RET
+15    800F              Cls:                        ; main.vdp.Cls
+16    800F 10 FE        .loop:      DJNZ .loop      ; main.vdp.Cls.loop
+17    8011 C9                       RET
+18    8012                      ENDMODULE
+19    8012
+20    8012 00           Main.event DB 0             ; main.Main.event
+21    8013                  ENDMODULE
+22    8013
+# file closed: s_local_labels.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000 X main.Main
+0x800F   main.vdp.Cls
+0x8006   main.Main.loop
+0x8012   main.Main.event
+0x800E   SetScreen
+0x800E X main.vdp.SetScreen.loop
+0x800F   main.vdp.Cls.loop
