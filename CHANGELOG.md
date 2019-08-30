@@ -2,7 +2,7 @@
 - refactored `SHELLEXEC` to use clib `system(..)` on all platforms (also MS VS), minor fixes
 - [lua example `inc_text`](https://github.com/z00m128/sjasmplus/blob/master/tests/lua_examples/lua_inctext.lua) (result of specific request from sjasmplus user)
 - listing fixed when Lua was used to emit bytes and also parsed lines of assembly source
-- MinGW windows exe prefers "/" file system delimiter ("\" should still work on windows (only))
+- MinGW windows exe prefers "/" file system delimiter ("\\" should still work on windows (only))
 - lot of small bugfixes and Cirrus CI infrastructure adjustments (windows MinGW build does run full tests)
 - MS VS builds stabilized and fixed, should now work mostly on par with MinGW builds (99.5%)
 - Using [lgtm.com](https://lgtm.com/projects/g/z00m128/sjasmplus/) code analysis (did help to find new bugs and memory leaks)
