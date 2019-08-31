@@ -13,8 +13,8 @@ task:
         memory: 1G
     - freebsd_instance:
         image: freebsd-12-0-release-amd64
-        cpu: 3
-        memory: 1G
+        cpu: 2
+        memory: 3G
   build_script: make clean && make -j3 || ls /usr/local/bin /sbin /bin /usr/sbin /usr/bin
   install_script: make install && make clean
   ## now try the built+installed sjasmplus with some tests and examples
