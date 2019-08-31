@@ -132,6 +132,11 @@ Docs:
 DEVICE needs better description? Issue #55
 ... and also SAVENEX and default ZXNEXT device... again...
 
+When printed into PDF from browser on my local system, some of the program listings don't
+fit into their box and the end of line is cut out, check how many chars work and review
+all code listings in docs to fit into default A4 pdf print.
+(already changelog is trimmed ... seems like 88 chars is max, 80 is probably reasonable)
+
 ===== github milestone v2.x: => create issues (cleanup this TODO as much as reasonable)
 v2.x of sjasmplus, changing some default settings (making it mildly incompatible with old sources, considerably more than v1.07 vs v1.14 incompatibilities), and refactoring some implementation even further, to make it hopefully a bit cleaner C++ source, simpler to maintain and modify.
 
