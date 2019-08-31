@@ -76,11 +76,15 @@ ifused_test.asm(14): error: [IFUSED] Syntax error: IFNUSED
 73    0016                      ENDIF                   ;; End of IFUSED Wait
 74    0016
 75    0016              ;; ADDENDUM: different code path to generate some more syntax errors
-ifused_test.asm(76): error: [IFUSED] Syntax error: IFUSED  Invalid&Label   
-76    0016                      IFUSED  Invalid&Label   ; there's no obvious way how to hit "invalid label"
-ifused_test.asm(77): error: [IFUSED] Syntax error: IFNUSED Invalid%Label   
-77    0016                      IFNUSED Invalid%Label   ; error message, the GetID is too much foolproof.
-78    0016
+ifused_test.asm(76): error: [IFUSED] Syntax error: IFUSED  Invalid&Label
+76    0016                      IFUSED  Invalid&Label
+ifused_test.asm(77): error: [IFUSED] Syntax error: IFNUSED Invalid%Label
+77    0016                      IFNUSED Invalid%Label
+ifused_test.asm(78): error: Invalid labelname: .InvalidLabel
+78    0016                      IFUSED  ..InvalidLabel
+ifused_test.asm(79): error: Invalid labelname: .InvalidLabel
+79    0016                      IFNUSED  ..InvalidLabel
+80    0016
 # file closed: ifused_test.asm
 
 Value    Label

@@ -1243,7 +1243,7 @@ static bool dirIfusedIfnused(char* & id) {
 		if (validLabel) {
 			id = STRDUP(validLabel);
 			delete[] validLabel;
-		} else {	// unreachable, GetID filters all out
+		} else {
 			id = NULL;
 			Error("[IFUSED] Invalid label name", bp, IF_FIRST);
 		}

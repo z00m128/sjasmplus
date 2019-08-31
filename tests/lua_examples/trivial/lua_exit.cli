@@ -1,4 +1,4 @@
-$MEMCHECK "$EXE" --nologo --msg=war --fullpath "${options[@]}" "$file_asm"
+$MEMCHECK "$EXE" --nologo --msg=war --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
 # check if exit code is as expected
 [[ 13 -eq $? ]]
 last_result=$?

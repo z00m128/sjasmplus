@@ -1,0 +1,114 @@
+# file opened: s_macros.asm
+ 1    0000              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 2    0000              ;;; see listing file for resulting macro expansion
+ 3    0000              ;;; in each example
+ 4    0000
+ 5    0000              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 6    0000              ;;; Macro without parameters
+ 7    0000
+ 8    0000                MACRO ADD_HL_A
+ 9    0000 ~                ADD A,L
+10    0000 ~                JR NC,.hup
+11    0000 ~                INC H
+12    0000 ~            .hup
+13    0000 ~                LD L,A
+14    0000                ENDM
+15    0000
+16    0000                ADD_HL_A
+16    0000 85          >    ADD A,L
+16    0001 30 01       >    JR NC,.hup
+16    0003 24          >    INC H
+16    0004             >.hup
+16    0004 6F          >    LD L,A
+17    0005
+18    0005              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+19    0005              ;;; A macro with parameters
+20    0005
+21    0005                MACRO WAVEOUT reg, data
+22    0005 ~                LD A,reg
+23    0005 ~                OUT (7EH),A
+24    0005 ~                LD A,data
+25    0005 ~                OUT (7FH),A
+26    0005                ENDM
+27    0005
+28    0005                WAVEOUT 2,17
+28    0005 3E 02       >    LD A,2
+28    0007 D3 7E       >    OUT (7EH),A
+28    0009 3E 11       >    LD A,17
+28    000B D3 7F       >    OUT (7FH),A
+29    000D
+30    000D              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+31    000D              ;;; Another example
+32    000D
+33    000D                  MACRO LOOP
+34    000D ~                  IF $-.lus<127
+35    000D ~                    DJNZ .lus
+36    000D ~                  ELSE
+37    000D ~                    DEC B
+38    000D ~                    JP NZ,.lus
+39    000D ~                  ENDIF
+40    000D                  ENDM
+41    000D
+42    000D              Main
+43    000D              .lus
+44    000D CD 12 00         CALL DoALot
+45    0010                  LOOP
+45    0010             >      IF $-.lus<127
+45    0010 10 FB       >        DJNZ .lus
+45    0012             >      ELSE
+45    0012 ~           >        DEC B
+45    0012 ~           >        JP NZ,.lus
+45    0012             >      ENDIF
+46    0012              DoALot:
+47    0012
+48    0012              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+49    0012              ;;; Argument in angle brackets
+50    0012
+51    0012                  MACRO UseLess data
+52    0012 ~                  DB data
+53    0012                  ENDM
+54    0012
+55    0012                  UseLess <10,12,13,0>
+55    0012 0A 0C 0D 00 >      DB 10,12,13,0
+56    0016              ; use '!' to include '!' and '>' in those strings.
+57    0016                  UseLess <5, 6 !> 3>
+57    0016 05 FF       >      DB 5, 6 > 3
+58    0018                  UseLess <"Kip!!",3>
+58    0018 4B 69 70 21 >      DB "Kip!",3
+58    001C 03          >
+59    001D
+60    001D              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+61    001D              ;;; Macro name at beginning of line
+62    001D
+63    001D              LabelAsMacroName    MACRO  arg1?, arg2?
+64    001D ~                                    ld  a,arg1?
+65    001D ~                                    ld  hl,arg2?
+66    001D                                  ENDM
+67    001D
+68    001D                              LabelAsMacroName 1,$1234
+68    001D 3E 01       >                        ld  a,1
+68    001F 21 34 12    >                        ld  hl,$1234
+69    0022
+70    0022              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+71    0022              ;;; Inhibit macro expansion operator
+72    0022
+73    0022              djnz    MACRO   arg1?
+74    0022 ~                        dec c
+75    0022 ~                        jr  nz,arg1?
+76    0022 ~                        @djnz arg1? ; avoid self-reference and use real instruction
+77    0022                      ENDM
+78    0022
+79    0022              1:      djnz    1B      ; macro replacement will be used here
+79    0022 0D          >            dec c
+79    0023 20 FD       >            jr  nz,1B
+79    0025 10 FB       >            @djnz 1B       ; avoid self-reference and use real instruction
+80    0027 10 FE        1:      @djnz   1B      ; original djnz instruction here
+81    0029
+# file closed: s_macros.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0004   0>hup
+0x000D X Main
+0x000D   Main.lus
+0x0012   DoALot

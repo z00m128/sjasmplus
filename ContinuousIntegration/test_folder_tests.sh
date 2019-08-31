@@ -12,6 +12,8 @@ exitCode=0
 totalTests=0        # +1 per ASM
 totalChecks=0       # +1 per diff/check
 
+echo -n -e "Project dir \"\033[96m${PROJECT_DIR}\033[0m\". "
+
 # verify the directory structure is set up as expected and the working directory is project root
 [[ ! -f "${PROJECT_DIR}/ContinuousIntegration/test_folder_tests.sh" ]] && echo -e "\033[91munexpected working directory\033[0m\n$HELP_STRING" && exit 1
 
@@ -29,9 +31,8 @@ source ContinuousIntegration/common_fn.sh
 # seek for files to be processed (either provided by user argument, or default tests/ dir)
 if [[ $# -gt 0 ]]; then
     [[ "-h" == "$1" || "--help" == "$1" ]] && echo -e $HELP_STRING && exit 0
-else
-    echo -e "Searching directory \033[96m${PROJECT_DIR}/tests/\033[0m for '.asm' files..."
 fi
+echo -n -e "Searching \033[96mtests/$1**\033[0m for '*.asm'. "
 OLD_IFS=$IFS
 IFS=$'\n'
 TEST_FILES=($(find "$PROJECT_DIR/tests/$1"* -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
@@ -41,7 +42,7 @@ IFS=$OLD_IFS
 [[ -z $TEST_FILES ]] && echo -e "\033[91mno files found\033[0m\n$HELP_STRING" && exit 1
 
 ## create temporary build directory for output
-echo -e "Creating temporary \033[96m$BUILD_DIR\033[0m directory..."
+echo -e "Creating temporary: \033[96m$BUILD_DIR\033[0m"
 rm -rf "$BUILD_DIR"
 # terminate in case the create+cd will fail, this is vital
 # also make sure the build dir has all required permissions
@@ -83,20 +84,24 @@ for f in "${TEST_FILES[@]}"; do
     [[ ! -s "${MSG_LIST_FILE}" ]] && MSG_LIST_FILE="" || LIST_FILE="${MSG_LIST_FILE}"
     ## built it with sjasmplus (remember exit code)
     totalChecks=$((totalChecks + 1))    # assembling is one check
+    ok_tick_text="???"
     if [[ -s "${CLI_FILE}" ]]; then
         # custom test-runner detected, run it... WARNING, this acts as part of main script (do not exit(..), etc)
-        echo -e "\033[95mRunning\033[0m file \033[96m${CLI_FILE}\033[0m in test \033[96m${src_dir}\033[0m"
+        echo -e "\033[95mRunning\033[0m \"\033[96m${CLI_FILE}\033[0m\" in \"\033[96m${src_dir##$PROJECT_DIR/}\033[0m\""
         last_result=126         # custom script must override this
         source "${CLI_FILE}"
         last_result_origin="custom test script '${CLI_FILE}'"
+        ok_tick_text="run"
     else
-        echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
+        echo -e "\033[95mAssembling\033[0m \"\033[96m${file_asm}\033[0m\" in \"\033[96m${src_dir##$PROJECT_DIR/}\033[0m\", options [\033[96m${options[@]}\033[0m]"
         if [[ -z "${MSG_LIST_FILE}" ]]; then
             $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
             last_result=$?
+            [[ -s "${LIST_FILE}" ]] && ok_tick_text="lst" || ok_tick_text="asm"
         else
             $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
             last_result=$?
+            ok_tick_text="msg"
         fi
         last_result_origin="sjasmplus"
     fi
@@ -109,33 +114,30 @@ for f in "${TEST_FILES[@]}"; do
     fi
     # report assembling exit code problem here (ahead of binary result tests)
     if [[ $last_result -ne 0 ]]; then
-        echo -e "\033[91mError status $last_result returned by $last_result_origin\033[0m"
+        echo -n -e "\033[91mError status $last_result returned by $last_result_origin\033[0m\n "
         exitCode=$((exitCode + 1))
     else
-        echo -e "\033[92mOK: assembling or listing\033[0m"
+        echo -n -e "  \\  \033[92m$ok_tick_text OK\033[0m "
     fi
     # check binary results, if TAP, BIN or RAW are present in source directory
     for binext in {'tap','bin','raw'}; do
         if [[ -f "${CFG_BASE}.${binext}" ]]; then
-            upExt=`echo $binext | tr '[:lower:]' '[:upper:]'`
             totalChecks=$((totalChecks + 1))        # +1 for each binary check
-            echo -n -e "\033[91m"
             ! diff "${CFG_BASE}.${binext}" "${dst_base}.${binext}" \
-                && exitCode=$((exitCode + 1)) && echo -e "Error: $upExt differs\033[0m" \
-                || echo -e "\033[92mOK: $upExt is identical\033[0m"
+                && exitCode=$((exitCode + 1)) && echo -n -e "\033[91mError: $binext DIFFERS\033[0m " \
+                || echo -n -e "\033[0m \\  \033[92m$binext OK\033[0m "
         fi
     done
     # check other text results (not LST), if they are present in source directory
     for txtext in {'sym','exp','lbl'}; do
         if [[ -f "${CFG_BASE}.${txtext}" ]]; then
-            upExt=`echo $txtext | tr '[:lower:]' '[:upper:]'`
             totalChecks=$((totalChecks + 1))        # +1 for each text check
-            echo -n -e "\033[91m"
             ! diff -a --strip-trailing-cr "${CFG_BASE}.${txtext}" "${dst_base}.${txtext}" \
-                && exitCode=$((exitCode + 1)) && echo -e "Error: $upExt differs\033[0m" \
-                || echo -e "\033[92mOK: $upExt is identical\033[0m"
+                && exitCode=$((exitCode + 1)) && echo -n -e "\033[91mError: $txtext DIFFERS\033[0m " \
+                || echo -n -e "\033[0m \\  \033[92m$txtext OK\033[0m "
         fi
     done
+    echo ""     # add new line after each test
     #read -p "press..."      # DEBUG helper to examine produced files
 done # end of FOR (go through all asm files)
 # display OK message if no error was detected ("\u25A0" is UTF big fat filled rectangle/square)
