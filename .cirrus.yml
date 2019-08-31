@@ -6,7 +6,16 @@ task:
     image: freebsd-12-0-release-amd64
     cpu: 1
     memory: 2G
-  sw_versions_script: make --version; pkg --version; bash --version; diff --version; cc --version; c++ --version
+  sw_versions_script:
+    - mkdir zz; cd zz; make --version
+    - cd ..
+    - gmake --version
+    - pkg --version
+    - bash --version
+    - diff --version
+    - cc --version
+    - c++ --version
+    - echo "versions ^^^"
   sw_install_script: pkg install -y gmake bash
   build_script: gmake clean && gmake -j3
   install_script: gmake install && gmake clean
