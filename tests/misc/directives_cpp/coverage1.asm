@@ -48,6 +48,6 @@ fwdLabel:
     DISPLAY "DISPLAY", /L, " ", /T, "has silently skipped options /L and /T. ", 15, " ", /D, 15
     DISPLAY "
 
-    SHELLEXEC "echo Ahoy!"
-    SHELLEXEC '"echo"', "from SHELLEXEC"
+    SHELLEXEC "echo -n Ahoy! "
+    SHELLEXEC '"echo"', "\ from SHELLEXEC"
     SHELLEXEC "bash", "my_invalid_filename"
