@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # $1 = EXE_NAME, $2 = PROJECT_DIR, result is set into global $EXE
 function find_newest_binary() {

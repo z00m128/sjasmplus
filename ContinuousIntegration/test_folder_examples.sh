@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## script init + helper functions
 PROJECT_DIR=$PWD

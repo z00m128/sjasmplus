@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo -e "\033[91mThis script will try to build all tests 'in place' => may and will overwrite files used to verify test results."
 echo -e "\033[93mTo just run the tests use the \"runner\" script '\033[96mtest_folder_tests.sh\033[93m'.\n\033[96m"
