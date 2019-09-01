@@ -50,6 +50,7 @@ extern const char pathGoodSlash;
 #else
 
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #ifndef TCHAR
