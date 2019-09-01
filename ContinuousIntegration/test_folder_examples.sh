@@ -65,7 +65,6 @@ mkdir -p "$BUILD_DIR" && chmod 700 "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 for f in "${EXAMPLE_FILES[@]}"; do
     ## ignore files in the ignore list
     for ignoreFile in "${ignoreAsmFiles[@]}"; do
-        echo "testing [$ignoreFile] vs [${f#${PROJECT_DIR}/examples/}]"
         [[ "$ignoreFile" == "${f#${PROJECT_DIR}/examples/}" ]] && f='IGNORE' && break
     done
     [[ 'IGNORE' == $f ]] && continue
