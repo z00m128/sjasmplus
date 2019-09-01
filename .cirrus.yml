@@ -6,17 +6,18 @@ task:
     image: freebsd-12-0-release-amd64
     cpu: 4
     memory: 4G
-  submodules_script:
-    - git submodule init
-    - git submodule update
-  sw_install_script: pkg lock pkg && pkg install -y gmake bash
+  sw_install_script: pkg lock pkg && pkg install -y git gmake bash
   sw_versions2_script:
     - pkg --version || echo "no pkg"
+    - git --version || echo "no git"
     - bash --version || echo "no bash"
     - gmake --version || echo "no gmake"
     - diff --help || echo "no diff"
     - cc --version || echo "no cc"
     - c++ --version || echo "no c++"
+  submodules_script:
+    - git submodule init
+    - git submodule update
   # regular binary build (will be not run, just testing the build process)
   build_script: gmake clean && gmake -j4 CC=cc CXX=c++
   # build only the unit test binary, and run unit-tests + tests through make
