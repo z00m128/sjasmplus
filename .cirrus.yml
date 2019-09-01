@@ -19,17 +19,16 @@ task:
     CIRRUS_CLONE_DEPTH: 1
   osx_instance:
     image: mojave-base
-  sw_versions2_script:
-    - git --version || echo "no git"
-    - bash --version || echo "no bash"
-    - make --version || echo "no make"
-    - gmake --version || echo "no gmake"
-    - cc --version || echo "no cc"
-    - c++ --version || echo "no c++"
-  build_script: make clean && make -j4 CC=cc CXX=c++
-  install_script: make install && make clean
-  ## now try the built+installed sjasmplus with some tests and examples
-  # this is not separate task, because that would need again build
-  # of sjasmplus in new container instance, so just do everything in one task
-  assemble_tests_script: ContinuousIntegration/test_folder_tests.sh
-  assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
+  #sw_versions2_script:
+    #- git --version || echo "no git"
+    #- bash --version || echo "no bash"
+    #- make --version || echo "no make"
+    #- cc --version || echo "no cc"
+    #- c++ --version || echo "no c++"
+  submodules_script:
+    - git submodule init
+    - git submodule update
+  build_script:
+    - date
+    - make clean && make -j4 CC=cc CXX=c++
+  test_script: make clean && make -j4 CC=cc CXX=c++ tests

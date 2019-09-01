@@ -12,12 +12,12 @@ exitCode=0
 totalTests=0        # +1 per ASM
 totalChecks=0       # +1 per diff/check
 
+source ContinuousIntegration/common_fn.sh
+
 echo -n -e "Project dir \"\033[96m${PROJECT_DIR}\033[0m\". "
 
 # verify the directory structure is set up as expected and the working directory is project root
 [[ ! -f "${PROJECT_DIR}/ContinuousIntegration/test_folder_tests.sh" ]] && echo -e "\033[91munexpected working directory\033[0m\n$HELP_STRING" && exit 1
-
-source ContinuousIntegration/common_fn.sh
 
 [[ -n "$EXE" ]] && echo -e "Using EXE=\033[96m$EXE\033[0m as assembler binary"
 
@@ -74,7 +74,7 @@ for f in "${TEST_FILES[@]}"; do
         [[ ! -d "$subf" ]] && continue
         [[ "${src_base}.config" == "$subf" ]] && continue   # some.config directory is not copied
         cp -r "$subf" ".${subf#$src_dir}"
-        chmod 700 -R ".${subf#$src_dir}"   # force 700 permissions to copied files (recursively)
+        chmod -R 700 ".${subf#$src_dir}"   # force 700 permissions to copied files (recursively)
     done
     # see if there are extra options defined (and read them into array)
     options=()
