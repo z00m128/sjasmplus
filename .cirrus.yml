@@ -79,7 +79,7 @@ task:
   #assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat 1
 
 task:
-  name: FreeBSD clang-6 build
+  name: FreeBSD clang-6 build (with unit tests)
   env:
     CIRRUS_CLONE_DEPTH: 1
   freebsd_instance:
@@ -103,3 +103,23 @@ task:
   build_script: gmake clean && gmake -j4 CC=cc CXX=c++
   # build+test the unit test binary
   test_script: gmake clean && gmake -j4 CC=cc CXX=c++ tests
+
+task:
+  name: MacOS default CC build (with unit tests)
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+  osx_instance:
+    image: mojave-base
+  #sw_versions2_script:
+    #- git --version || echo "no git"
+    #- bash --version || echo "no bash"
+    #- make --version || echo "no make"
+    #- cc --version || echo "no cc"
+    #- c++ --version || echo "no c++"
+  submodules_script:
+    - git submodule init
+    - git submodule update
+  build_script:
+    - date
+    - make clean && make -j4 CC=cc CXX=c++
+  test_script: make clean && make -j4 CC=cc CXX=c++ tests

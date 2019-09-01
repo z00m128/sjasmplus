@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
 ## script init + helper functions
+HELP_STRING="Run the script from \033[96mproject root\033[0m directory without arguments."
 PROJECT_DIR=$PWD
+BUILD_DIR="$PROJECT_DIR/build/examples"
 exitCode=0
 totalAsmFiles=0        # +1 per ASM
+
+source ContinuousIntegration/common_fn.sh
+
 # read list of files to ignore, preserve spaces in file names, ignore comments
 ignoreAsmFiles=()
 if [[ -s ContinuousIntegration/examples_ignore.txt ]]; then
@@ -12,13 +17,23 @@ if [[ -s ContinuousIntegration/examples_ignore.txt ]]; then
     while read line; do
         [[ -z "$line" ]] && continue            # skip empty lines
         [[ "#" == ${line::1} ]] && continue     # skip comments
-        [[ '"' == ${line::1} && '"' == ${line:(-1)} ]] && line=${line:1:(-1)}
+        lineLen=${#line}
+        [[ '"' == ${line::1} && '"' == ${line:${lineLen}-1} ]] && line=${line:1:${lineLen}-2}
         ignoreAsmFiles+=("${line}")
     done < ContinuousIntegration/examples_ignore.txt
     IFS=$OLD_IFS
 fi
+echo -e "Files to ignore: \033[93m${ignoreAsmFiles[@]}\033[0m"
 
-source ContinuousIntegration/common_fn.sh
+echo -n -e "Project dir \"\033[96m${PROJECT_DIR}\033[0m\". "
+
+# verify the directory structure is set up as expected and the working directory is project root
+[[ ! -f "${PROJECT_DIR}/ContinuousIntegration/test_folder_examples.sh" ]] && \
+echo -e "\033[91munexpected working directory\033[0m\n$HELP_STRING" && exit 1
+# check for unexpected arguments, bail out
+if [[ $# -gt 0 ]]; then
+    echo -e $HELP_STRING && exit 0
+fi
 
 [[ -n "$EXE" ]] && echo -e "Using EXE=\033[96m$EXE\033[0m as assembler binary"
 
@@ -29,29 +44,30 @@ source ContinuousIntegration/common_fn.sh
 
 [[ -z "$EXE" ]] && EXE=sjasmplus
 
-## create temporary build directory for output
-BUILD_DIR="$PROJECT_DIR/build/examples"
-echo -e "Creating temporary \033[96m$BUILD_DIR\033[0m directory..."
-rm -rf "$BUILD_DIR"
-# terminate in case the create+cd will fail, this is vital
-mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
-chmod 700 ../"$BUILD_DIR"       # make sure the build dir has all required permissions
-echo -e "Searching directory \033[96m${PROJECT_DIR}/examples/\033[0m for '.asm' files..."
+# seek for files to be processed
+echo -n -e "Searching \033[96mexamples/**\033[0m for '*.asm'. "
 OLD_IFS=$IFS
 IFS=$'\n'
-EXAMPLE_FILES=($(find "$PROJECT_DIR/examples/" -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
+EXAMPLE_FILES=($(find "$PROJECT_DIR/examples/"* -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
 IFS=$OLD_IFS
+
+# check if some files were found, print help message if search failed
+[[ -z $EXAMPLE_FILES ]] && echo -e "\033[91mno files found\033[0m\n$HELP_STRING" && exit 1
+
+## create temporary build directory for output
+echo -e "Creating temporary: \033[96m$BUILD_DIR\033[0m"
+rm -rf "$BUILD_DIR"
+# terminate in case the create+cd will fail, this is vital
+# also make sure the build dir has all required permissions
+mkdir -p "$BUILD_DIR" && chmod 700 "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 
 ## go through all asm files in examples directory and try to assemble them
 for f in "${EXAMPLE_FILES[@]}"; do
     ## ignore files in the ignore list
     for ignoreFile in "${ignoreAsmFiles[@]}"; do
-        [[ "$ignoreFile" == "${f#${PROJECT_DIR}/examples/}" ]] && f='ignore.i.asm'
+        [[ "$ignoreFile" == "${f#${PROJECT_DIR}/examples/}" ]] && f='IGNORE' && break
     done
-    ## ignore "include" files (must have ".i.asm" extension)
-    if [[ ".i.asm" == ${f:(-6)} ]]; then
-        continue
-    fi
+    [[ 'IGNORE' == $f ]] && continue
     ## standalone .asm file was found, try to build it
     totalAsmFiles=$((totalAsmFiles + 1))
     dirpath=`dirname "$f"`
@@ -62,7 +78,7 @@ for f in "${EXAMPLE_FILES[@]}"; do
     options=()
     [[ -s "$optionsF" ]] && options=(`cat "${optionsF}"`)
     ## built it with sjasmplus (remember exit code)
-    echo -e "\033[95mAssembling\033[0m example file \033[96m${asmname}\033[0m in \033[96m${dirpath}\033[0m, options [\033[96m${options[@]}\033[0m]"
+    echo -e "\033[95mAssembling\033[0m \"\033[96m${asmname}\033[0m\" in \"\033[96m${dirpath##$PROJECT_DIR/}\033[0m\", options [\033[96m${options[@]}\033[0m]"
     $MEMCHECK "$EXE" --nologo --msg=war --fullpath --inc="${dirpath}" "${options[@]}" "$f"
     last_result=$?
     ## report assembling exit code problem
