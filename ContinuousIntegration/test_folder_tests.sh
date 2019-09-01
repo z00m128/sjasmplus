@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## script init + helper functions
 HELP_STRING="Run the script from \033[96mproject root\033[0m directory."

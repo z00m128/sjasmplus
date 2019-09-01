@@ -50,6 +50,9 @@ extern const char pathGoodSlash;
 #else
 
 #include <sys/time.h>
+#if !defined(__MINGW32__)
+#include <sys/wait.h>
+#endif
 #include <unistd.h>
 
 #ifndef TCHAR

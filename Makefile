@@ -16,7 +16,7 @@
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
 CC=gcc
 CXX=g++
-BASH=/bin/bash
+BASH=/usr/bin/env bash
 
 PREFIX=/usr/local
 INSTALL=install -c
