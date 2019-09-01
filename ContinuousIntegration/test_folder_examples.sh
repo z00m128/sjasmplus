@@ -48,7 +48,7 @@ fi
 echo -n -e "Searching \033[96mexamples/**\033[0m for '*.asm'. "
 OLD_IFS=$IFS
 IFS=$'\n'
-EXAMPLE_FILES=($(find "$PROJECT_DIR/examples/" -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
+EXAMPLE_FILES=($(find "$PROJECT_DIR/examples/"* -type f | grep -v -E '\.i\.asm$' | grep -E '\.asm$'))
 IFS=$OLD_IFS
 
 # check if some files were found, print help message if search failed
@@ -65,7 +65,8 @@ mkdir -p "$BUILD_DIR" && chmod 700 "$BUILD_DIR" && cd "$BUILD_DIR" || exit 1
 for f in "${EXAMPLE_FILES[@]}"; do
     ## ignore files in the ignore list
     for ignoreFile in "${ignoreAsmFiles[@]}"; do
-        [[ "$ignoreFile" == "${f#${PROJECT_DIR}/examples/}" ]] && f='IGNORE'
+        echo "testing [$ignoreFile] vs [${f#${PROJECT_DIR}/examples/}]"
+        [[ "$ignoreFile" == "${f#${PROJECT_DIR}/examples/}" ]] && f='IGNORE' && break
     done
     [[ 'IGNORE' == $f ]] && continue
     ## standalone .asm file was found, try to build it
