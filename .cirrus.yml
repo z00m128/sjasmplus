@@ -4,29 +4,20 @@ task:
     CIRRUS_CLONE_DEPTH: 1
   freebsd_instance:
     image: freebsd-12-0-release-amd64
-    cpu: 1
-    memory: 2G
-  sw_versions_script:
-    - gmake --version || echo "no gmake"
-    - pkg --version || echo "no pkg"
-    - bash --version || echo "no bash"
-    - diff --version || echo "no diff"
-    - cc --version || echo "no cc"
-    - c++ --version || echo "no c++"
-    - echo "versions ^^^"
-  sw_install_script: pkg install -y gmake bash
+    cpu: 4
+    memory: 4G
+  submodules_script:
+    - git submodule init
+    - git submodule update
+  sw_install_script: pkg lock pkg && pkg install -y gmake bash
   sw_versions2_script:
-    - gmake --version || echo "no gmake"
     - pkg --version || echo "no pkg"
     - bash --version || echo "no bash"
-    - diff --version || echo "no diff"
+    - gmake --version || echo "no gmake"
+    - diff --help || echo "no diff"
     - cc --version || echo "no cc"
     - c++ --version || echo "no c++"
-    - echo "versions ^^^"
-  build_script: gmake clean && gmake -j3
-  install_script: gmake install && gmake clean
-  ## now try the built+installed sjasmplus with some tests and examples
-  # this is not separate task, because that would need again build
-  # of sjasmplus in new container instance, so just do everything in one task
-  assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
-  assemble_tests_script: ContinuousIntegration/test_folder_tests.sh
+  # regular binary build (will be not run, just testing the build process)
+  build_script: gmake clean && gmake -j4 CC=cc CXX=c++
+  # build only the unit test binary, and run unit-tests + tests through make
+  test_script: gmake clean && gmake -j4 CC=cc CXX=c++ tests
