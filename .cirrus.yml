@@ -1,105 +1,37 @@
+#task:
+  #name: FreeBSD clang-6 build
+  #env:
+    #CIRRUS_CLONE_DEPTH: 1
+  #freebsd_instance:
+    #image: freebsd-12-0-release-amd64
+    #cpu: 4
+    #memory: 4G
+  #sw_install_script: pkg lock -y pkg && pkg install -y git-lite gmake bash
+  #submodules_script:
+    #- git submodule init
+    #- git submodule update
+  #build_script: gmake clean && gmake -j4 CC=cc CXX=c++
+  #test_script: gmake clean && gmake -j4 CC=cc CXX=c++ tests
+
 task:
-  name: Linux gcc 5/6/7/8 builds
+  name: MacOS default CC build
   env:
     CIRRUS_CLONE_DEPTH: 1
-  container:
-    matrix:
-      image: gcc:5
-      image: gcc:6
-      image: gcc:7
-      image: gcc:8
-    cpu: 3
-    memory: 1G
-  build_script: make clean && make -j3
+  osx_instance:
+    image: mojave-base
+    cpu: 2
+    memory: 2G
+  sw_versions2_script:
+    - git --version || echo "no git"
+    - bash --version || echo "no bash"
+    - make --version || echo "no make"
+    - gmake --version || echo "no gmake"
+    - cc --version || echo "no cc"
+    - c++ --version || echo "no c++"
+  build_script: make clean && make -j4 CC=cc CXX=c++
   install_script: make install && make clean
   ## now try the built+installed sjasmplus with some tests and examples
   # this is not separate task, because that would need again build
   # of sjasmplus in new container instance, so just do everything in one task
   assemble_tests_script: ContinuousIntegration/test_folder_tests.sh
   assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
-
-pipe:
-  name: coveralls.io coverage report (linux gcc6)
-  # check if this is ped's repository (the encrypted token belongs to his repo)
-  only_if: $CIRRUS_REPO_OWNER == 'ped7g'
-  #depends_on: makefile_build  ## saves some resources in case regular build fails, but that's rare
-  env:
-    # needs full clone to calculate revision number from git
-    CIRRUS_CLONE_DEPTH: 0
-    # coveralls plugin variables (access token + job ID)
-    COVERALLS_REPO_TOKEN: ENCRYPTED[d8f3d878d91ea465e92170a7d46f471aec4a507813b6c31faa630dd1a1380420827ebc017baa2157bf17b3ed95437aae]
-    CI_SERVICE_NAME: 'cirrus-ci'
-    # makefile variables affecting build options
-    DEBUG: 1
-    COVERALLS_SERVICE: 1
-  resources:
-    cpu: 3
-    memory: 1G
-  steps:
-    - image: gcc:7
-      # git-clone also submodule for UnitTest++ sources
-      submodules_script:
-        - git submodule init
-        - git submodule update
-      generate_gcov_script: make clean && make -j3 coverage
-    - image: python:3.7
-      # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
-      install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
-      # "-n" as the *.gcov files are already generated in the project root from previous step
-      upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/ -e unittest-cpp/ -e cpp-src-tests/
-
-task:
-  name: windows mingw32 build
-  env:
-    CIRRUS_CLONE_DEPTH: 1
-  windows_container:
-    image: cirrusci/windowsservercore:cmake
-    os_version: 2019
-  build_script: ContinuousIntegration\winbuild_mingw32.bat
-  sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
-  assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
-  assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat
-
-task:
-  name: windows Visual Studio 15 2017 build
-  env:
-    CIRRUS_CLONE_DEPTH: 1
-  windows_container:
-    image: cirrusci/windowsservercore:cmake
-    os_version: 2019
-  build_script: ContinuousIntegration\winbuild_vs15_2017.bat
-  # exe is installed at the same location as the MinGW build does
-  sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
-  # this mingw32 bat should work for just-building-examples even with exe from MSCC
-  assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
-
-  # (commented out for the moment, until `--fullpath` produces identical results)
-  # try to run tests, but ignore the end result (some tests are expected to fail)
-  # (needs manual review from time to time, if the failures are as expected)
-  #assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat 1
-
-task:
-  name: FreeBSD clang-6 build
-  env:
-    CIRRUS_CLONE_DEPTH: 1
-  freebsd_instance:
-    image: freebsd-12-0-release-amd64
-    cpu: 4
-    memory: 4G
-  # lock pkg on current version (sjasmplus does not care as long as it can install ...)
-  # install git (lite), GNU make and bash
-  # (FreeBSD make can't handle current Makefile, git is needed for UnitTest++ submodule)
-  sw_install_script: pkg lock -y pkg && pkg install -y git-lite gmake bash
-  #sw_versions2_script:
-    #- git --version || echo "no git"
-    #- bash --version || echo "no bash"
-    #- gmake --version || echo "no gmake"
-    #- cc --version || echo "no cc"
-    #- c++ --version || echo "no c++"
-  submodules_script:
-    - git submodule init
-    - git submodule update
-  # regular binary build (will be not run, just testing the build process)
-  build_script: gmake clean && gmake -j4 CC=cc CXX=c++
-  # build+test the unit test binary
-  test_script: gmake clean && gmake -j4 CC=cc CXX=c++ tests
