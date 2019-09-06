@@ -718,22 +718,32 @@ void CDefineTable::RemoveAll() {
 	}
 }
 
-void CMacroDefineTable::Init() {
-	defs = NULL;
-	for (int i = 0; i < 128; ) used[i++] = 0;
+void CMacroDefineTable::ReInit() {
+	if (defs) delete defs;
+	defs = nullptr;
+	for (auto & usedX : used) usedX = false;
 }
 
 void CMacroDefineTable::AddMacro(char* naam, char* vervanger) {
 	CDefineTableEntry* tmpdefs = new CDefineTableEntry(naam, vervanger, 0, defs);
 	defs = tmpdefs;
-	used[(*naam)&127] = 1;
+	used[(*naam)&127] = true;
 }
 
 CDefineTableEntry* CMacroDefineTable::getdefs() {
 	return defs;
 }
 
-void CMacroDefineTable::setdefs(CDefineTableEntry* ndefs) {
+void CMacroDefineTable::setdefs(CDefineTableEntry* const ndefs) {
+	while (defs) {		// search for original head of macro arguments
+		if (ndefs == defs) return;		// original head is now new head, "set" is done
+		// something new on top of the original one found, unchain it and release
+		CDefineTableEntry* next = defs->next;
+		defs->next = nullptr;	// unchain first, to not release whole chain!
+		delete defs;
+		defs = next;
+	}
+	// if the newly provided chain was not tail of the current, the previous while did release it all
 	defs = ndefs;
 }
 
@@ -771,9 +781,10 @@ CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
 	naam = nnaam; next = nnext; args = body = NULL;
 }
 
-void CMacroTable::Init() {
-	macs = NULL;
-	for (int i = 0; i < 128; ) used[i++] = 0;
+void CMacroTable::ReInit() {
+	if (macs) delete macs;
+	macs = nullptr;
+	for (auto & usedX : used) usedX = false;
 }
 
 int CMacroTable::FindDuplicate(char* naam) {
@@ -796,13 +807,12 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	if (FindDuplicate(nnaam)) {
 		Error("Duplicate macroname", nnaam);return;
 	}
-	char* macroname;
-	macroname = STRDUP(nnaam);
+	char* macroname = STRDUP(nnaam);
 	if (macroname == NULL) {
 		Error("No enough memory!", NULL, FATAL);
 	}
 	macs = new CMacroTableEntry(macroname, macs);
-	used[(*macroname)&127] = 1;
+	used[(*macroname)&127] = true;
 	SkipBlanks(p);
 	while (*p) {
 		if (!(n = GetID(p))) {
@@ -843,7 +853,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	if (omacrolabp) {
 		STRCAT(macrolabp, LINEMAX, "."); STRCAT(macrolabp, LINEMAX, omacrolabp);
 	} else {
-		MacroDefineTable.Init();
+		MacroDefineTable.ReInit();
 	}
 	// parse argument values
 	CDefineTableEntry* odefs = MacroDefineTable.getdefs();

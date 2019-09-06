@@ -210,9 +210,9 @@ void InitPass() {
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
 	StructureTable.Init();
-	MacroTable.Init();
+	MacroTable.ReInit();
+	MacroDefineTable.ReInit();
 	DefineTable = Options::CmdDefineTable;
-	MacroDefineTable.Init();
 	LocalLabelTable.InitPass();
 	// reset "device" stuff
 	if (2 == pass && Devices && 1 == deviceDirectivesCounter) {	// only single device detected

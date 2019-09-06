@@ -898,6 +898,7 @@ void LuaParseCode(char *str) {
 	ParseLineSafe(false);
 
 	STRCPY(line, LINEMAX, ml);
+	free(ml);
 }
 
 //eof parser.cpp

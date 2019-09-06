@@ -153,19 +153,20 @@ public:
 
 class CMacroDefineTable {
 public:
-	void Init();
+	void ReInit();
 	void AddMacro(char*, char*);
 	CDefineTableEntry* getdefs();
 	void setdefs(CDefineTableEntry*);
 	char* getverv(char*);
 	int FindDuplicate(char*);
-	CMacroDefineTable() {
-		Init();
+	CMacroDefineTable() : defs(nullptr) {
+		for (auto & usedX : used) usedX = false;
 	}
 	CMacroDefineTable(const CMacroDefineTable&) = delete;
 	CMacroDefineTable& operator=(CMacroDefineTable const&) = delete;
+	~CMacroDefineTable() { if(defs) delete defs; };
 private:
-	int used[128];
+	bool used[128];
 	CDefineTableEntry* defs;
 };
 
@@ -196,7 +197,12 @@ public:
 	CStringsList* args, * body;
 	CMacroTableEntry* next;
 	CMacroTableEntry(char*, CMacroTableEntry*);
-	~CMacroTableEntry(){if (next)delete next;};
+	~CMacroTableEntry() {
+		if (naam) free(naam);	// must be of STRDUP origin!
+		if (args) delete args;
+		if (body) delete body;
+		if (next) delete next;
+	};
 };
 
 class CMacroTable {
@@ -204,13 +210,13 @@ public:
 	void Add(char*, char*&);
 	int Emit(char*, char*&);
 	int FindDuplicate(char*);
-	void Init();
-	CMacroTable() {
-		Init();
+	void ReInit();
+	CMacroTable() : macs(nullptr) {
+		for (auto & usedX : used) usedX = false;
 	}
 	~CMacroTable(){if(macs) delete macs;};
 private:
-	int used[128];
+	bool used[128];
 	CMacroTableEntry* macs;
 };
 
