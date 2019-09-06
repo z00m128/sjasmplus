@@ -5,6 +5,13 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+`make install` doesn't refresh binary???
+(does link, but doesn't use the new library, but old)
+ --- not sure what was this varmfskii report about, the Makefile is now tuned a bit any way
+ -- maybe dependencies? (but it did sound like after clean the `make install` alone doesn't
+ work properly, and that should now work) Dependencies are borked, needs `make clean` when
+ headers are modified (known bug, too lazy to build dependencies in universal makefile).
+
 STDIN needs MANY Ctrl+D to finish, when used by actual interactive console and not
 input redirection... (and it's lot more many than just 3-pass 3x). Seems like there
 should be some regular clib API way to detect it first time, and be done with it,
