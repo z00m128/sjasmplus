@@ -30,7 +30,7 @@
 
 #include "sjdefs.h"
 
-char* PreviousIsLabel;
+char* PreviousIsLabel = nullptr;
 
 char* ValidateLabel(char* naam, int flags) {
 	char* np = naam,* lp,* label,* mlp = macrolabp;
@@ -1142,9 +1142,10 @@ void CStructure::emitmembs(char*& p) {
 	if (!SkipBlanks(p)) Error("[STRUCT] Syntax error - too many arguments?");
 }
 
-void CStructureTable::Init() {
-	for (int i = 0; i < 128; strs[i++] = 0) {
-		;
+void CStructureTable::ReInit() {
+	for (auto & structPtr : strs) {
+		if (structPtr) delete structPtr;
+		structPtr = nullptr;
 	}
 }
 

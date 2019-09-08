@@ -170,6 +170,7 @@ static void dirNexOpen() {
 	check16(openArgs[1]);
 	if (openArgs[2] < 0 || SNexHeader::MAX_BANK <= openArgs[2]) {
 		ErrorInt("[SAVENEX] entry bank can be 0..111 value only", openArgs[2], SUPPRESS);
+		delete[] fname;
 		return;
 	}
 	// try to open the actual file

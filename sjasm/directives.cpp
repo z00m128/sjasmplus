@@ -468,6 +468,7 @@ void dirINCBIN() {
 		if (!anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("[INCBIN] Syntax error in <offset>", bp, SUPPRESS);
+				delete[] fnaam;
 				return;
 			}
 			offset = val;
@@ -475,6 +476,7 @@ void dirINCBIN() {
 		if (anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("[INCBIN] Syntax error in <length>", bp, SUPPRESS);
+				delete[] fnaam;
 				return;
 			}
 			length = val;
@@ -1761,6 +1763,7 @@ void dirDEFARRAY() {
 	} else {
 		CStringsList* a = NULL;
 		if (!dirDEFARRAY_parseItems(&a) || NULL == a) {
+			if (a) delete a;	// release already parsed items, if there was syntax error
 			return;
 		}
 		DefineTable.Add(id, "", a);

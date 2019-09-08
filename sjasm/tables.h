@@ -226,7 +226,7 @@ public:
 	aint offset;
 	CStructureEntry1* next;
 	CStructureEntry1(char*, aint);
-	~CStructureEntry1() { free(naam); }
+	~CStructureEntry1() { free(naam); if (next) delete next; }
 };
 
 class CStructureEntry2 {
@@ -235,6 +235,7 @@ public:
 	EStructureMembers type;
 	CStructureEntry2* next;
 	CStructureEntry2(aint noffset, aint nlen, aint ndef, EStructureMembers ntype);
+	~CStructureEntry2() { if (next) delete next; }
 	aint ParseValue(char* & p);
 };
 
@@ -255,7 +256,13 @@ public:
 	void emitmembs(char*&);
 	CStructure* next;
 	CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p);
-	~CStructure() { free(naam); free(id); }
+	~CStructure() {
+		free(naam);
+		free(id);
+		if (mnf) delete mnf;
+		if (mbf) delete mbf;
+		if (next) delete next;
+	}
 private:
 	CStructureEntry1* mnf, * mnl;
 	CStructureEntry2* mbf, * mbl;
@@ -264,9 +271,12 @@ private:
 class CStructureTable {
 public:
 	CStructure* Add(char* naam, int no, int gl);
-	void Init();
+	void ReInit();
 	CStructureTable() {
-		Init();
+		for (auto & structPtr : strs) structPtr = nullptr;
+	}
+	~CStructureTable() {
+		for (auto structPtr : strs) if (structPtr) delete structPtr;
 	}
 	CStructure* zoek(const char*, int);
 	int FindDuplicate(char*);

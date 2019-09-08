@@ -209,7 +209,7 @@ void InitPass() {
 	PseudoORG = 0; adrdisp = 0;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
-	StructureTable.Init();
+	StructureTable.ReInit();
 	MacroTable.ReInit();
 	MacroDefineTable.ReInit();
 	DefineTable = Options::CmdDefineTable;
@@ -248,6 +248,10 @@ void FreeRAM() {
 	LabelTable.RemoveAll();
 	DefineTable.RemoveAll();
 	SetLastParsedLabel(nullptr);
+	if (PreviousIsLabel) {
+		free(PreviousIsLabel);
+		PreviousIsLabel = nullptr;
+	}
 }
 
 

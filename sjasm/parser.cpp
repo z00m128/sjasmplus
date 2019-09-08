@@ -736,7 +736,10 @@ void ParseLineSafe(bool parselabels) {
 
 void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabel()?
 	char* tp, temp[LINEMAX];
-	PreviousIsLabel = 0;
+	if (PreviousIsLabel) {
+		free(PreviousIsLabel);
+		PreviousIsLabel = nullptr;
+	}
 	if (White()) {
 		return;
 	}
@@ -826,7 +829,8 @@ void ParseStructMember(CStructure* st) {
 			++pp; gl = 1;
 		}
 		if ((n = GetID(pp)) && (s = StructureTable.zoek(n, gl))) {
-			if (cmphstr(st->naam, n)) {
+			char* structName = st->naam;	// need copy of pointer so cmphstr can advance it in case of match
+			if (cmphstr(structName, n)) {
 				Error("[STRUCT] Can't include itself", NULL);
 				SkipToEol(pp);
 				lp = pp;
