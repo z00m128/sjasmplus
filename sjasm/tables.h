@@ -114,31 +114,13 @@ private:
 	CLocalLabelTableEntry* first, * last, * refresh;
 };
 
-class CAddressList {
-public:
-	aint val;
-	CAddressList* next;
-	CAddressList() {
-		next = 0;
-	}
-	~CAddressList() {
-		if (next) delete next;
-	}
-	CAddressList(aint nval, CAddressList* nnext) {
-		val = nval; next = nnext;
-	}
-};
-
 class CStringsList {
 public:
 	char* string;
 	CStringsList* next;
 	int sourceLine;
-	CStringsList() : string(NULL), next(NULL), sourceLine(0) {}
-	~CStringsList() {
-		if (string) free(string);
-		if (next) delete next;
-	}
+	CStringsList();
+	~CStringsList();
 	CStringsList(const char* stringSource, CStringsList* next = NULL);
 };
 
@@ -159,12 +141,10 @@ public:
 	void setdefs(CDefineTableEntry*);
 	char* getverv(char*);
 	int FindDuplicate(char*);
-	CMacroDefineTable() : defs(nullptr) {
-		for (auto & usedX : used) usedX = false;
-	}
+	CMacroDefineTable();
 	CMacroDefineTable(const CMacroDefineTable&) = delete;
 	CMacroDefineTable& operator=(CMacroDefineTable const&) = delete;
-	~CMacroDefineTable() { if(defs) delete defs; };
+	~CMacroDefineTable();
 private:
 	bool used[128];
 	CDefineTableEntry* defs;
@@ -197,12 +177,7 @@ public:
 	CStringsList* args, * body;
 	CMacroTableEntry* next;
 	CMacroTableEntry(char*, CMacroTableEntry*);
-	~CMacroTableEntry() {
-		if (naam) free(naam);	// must be of STRDUP origin!
-		if (args) delete args;
-		if (body) delete body;
-		if (next) delete next;
-	};
+	~CMacroTableEntry();
 };
 
 class CMacroTable {
@@ -211,10 +186,8 @@ public:
 	int Emit(char*, char*&);
 	int FindDuplicate(char*);
 	void ReInit();
-	CMacroTable() : macs(nullptr) {
-		for (auto & usedX : used) usedX = false;
-	}
-	~CMacroTable(){if(macs) delete macs;};
+	CMacroTable();
+	~CMacroTable();
 private:
 	bool used[128];
 	CMacroTableEntry* macs;
@@ -226,7 +199,7 @@ public:
 	aint offset;
 	CStructureEntry1* next;
 	CStructureEntry1(char*, aint);
-	~CStructureEntry1() { free(naam); if (next) delete next; }
+	~CStructureEntry1();
 };
 
 class CStructureEntry2 {
@@ -235,7 +208,7 @@ public:
 	EStructureMembers type;
 	CStructureEntry2* next;
 	CStructureEntry2(aint noffset, aint nlen, aint ndef, EStructureMembers ntype);
-	~CStructureEntry2() { if (next) delete next; }
+	~CStructureEntry2();
 	aint ParseValue(char* & p);
 };
 
@@ -256,13 +229,7 @@ public:
 	void emitmembs(char*&);
 	CStructure* next;
 	CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p);
-	~CStructure() {
-		free(naam);
-		free(id);
-		if (mnf) delete mnf;
-		if (mbf) delete mbf;
-		if (next) delete next;
-	}
+	~CStructure();
 private:
 	CStructureEntry1* mnf, * mnl;
 	CStructureEntry2* mbf, * mbl;
@@ -272,12 +239,8 @@ class CStructureTable {
 public:
 	CStructure* Add(char* naam, int no, int gl);
 	void ReInit();
-	CStructureTable() {
-		for (auto & structPtr : strs) structPtr = nullptr;
-	}
-	~CStructureTable() {
-		for (auto structPtr : strs) if (structPtr) delete structPtr;
-	}
+	CStructureTable();
+	~CStructureTable();
 	CStructure* zoek(const char*, int);
 	int FindDuplicate(char*);
 	int Emit(char*, char*, char*&, int);

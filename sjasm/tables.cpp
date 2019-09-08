@@ -594,6 +594,16 @@ aint CLocalLabelTable::seekBack(const aint labelNumber) const {
 	return l ? l->value : -1L;
 }
 
+CStringsList::CStringsList() : string(NULL), next(NULL), sourceLine(0) {
+	// all initialized already
+}
+
+CStringsList::~CStringsList() {
+	if (string) free(string);
+	if (next) delete next;
+}
+
+
 CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStringsList* nnss, CDefineTableEntry* nnext)
 		: name(NULL), value(NULL) {
 	name = STRDUP(nname);
@@ -718,6 +728,14 @@ void CDefineTable::RemoveAll() {
 	}
 }
 
+CMacroDefineTable::CMacroDefineTable() : defs(nullptr) {
+	for (auto & usedX : used) usedX = false;
+}
+
+CMacroDefineTable::~CMacroDefineTable() {
+	if (defs) delete defs;
+}
+
 void CMacroDefineTable::ReInit() {
 	if (defs) delete defs;
 	defs = nullptr;
@@ -776,6 +794,21 @@ CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
 
 CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
 	naam = nnaam; next = nnext; args = body = NULL;
+}
+
+CMacroTableEntry::~CMacroTableEntry() {
+	if (naam) free(naam);	// must be of STRDUP origin!
+	if (args) delete args;
+	if (body) delete body;
+	if (next) delete next;
+}
+
+CMacroTable::CMacroTable() : macs(nullptr) {
+	for (auto & usedX : used) usedX = false;
+}
+
+CMacroTable::~CMacroTable() {
+	if (macs) delete macs;
 }
 
 void CMacroTable::ReInit() {
@@ -905,8 +938,18 @@ CStructureEntry1::CStructureEntry1(char* nnaam, aint noffset) {
 	offset = noffset;
 }
 
+CStructureEntry1::~CStructureEntry1() {
+	free(naam);
+	if (next) delete next;
+}
+
+
 CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, EStructureMembers ntype) {
 	next = 0; offset = noffset; len = nlen; def = ndef; type = ntype;
+}
+
+CStructureEntry2::~CStructureEntry2() {
+	if (next) delete next;
 }
 
 // Parses source input for types: BYTE, WORD, DWORD, D24
@@ -945,6 +988,14 @@ CStructure::CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure
 	}
 	next = p; noffset = no; global = ngl;
 	maxAlignment = 0;
+}
+
+CStructure::~CStructure() {
+	free(naam);
+	free(id);
+	if (mnf) delete mnf;
+	if (mbf) delete mbf;
+	if (next) delete next;
 }
 
 void CStructure::AddLabel(char* nnaam) {
@@ -1140,6 +1191,14 @@ void CStructure::emitmembs(char*& p) {
 		if (!need(p, '}')) Error("closing } missing");
 	}
 	if (!SkipBlanks(p)) Error("[STRUCT] Syntax error - too many arguments?");
+}
+
+CStructureTable::CStructureTable() {
+	for (auto & structPtr : strs) structPtr = nullptr;
+}
+
+CStructureTable::~CStructureTable() {
+	for (auto structPtr : strs) if (structPtr) delete structPtr;
 }
 
 void CStructureTable::ReInit() {
