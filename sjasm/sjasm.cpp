@@ -221,6 +221,7 @@ void InitPass() {
 	if (Devices) delete Devices;
 	Devices = Device = NULL;
 	DeviceID = NULL;
+	Page = NULL;
 	deviceDirectivesCounter = 0;
 
 	// predefined
@@ -242,9 +243,7 @@ void FreeRAM() {
 	if (globalDeviceID) {
 		free(globalDeviceID);	globalDeviceID = NULL;
 	}
-	if (lijstp) {
-		delete lijstp;		lijstp = NULL;
-	}
+	lijstp = NULL;		// do not delete this, should be released by owners of DUP/regular macros
 	free(vorlabp);		vorlabp = NULL;
 	LabelTable.RemoveAll();
 	DefineTable.RemoveAll();

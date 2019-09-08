@@ -735,16 +735,13 @@ CDefineTableEntry* CMacroDefineTable::getdefs() {
 }
 
 void CMacroDefineTable::setdefs(CDefineTableEntry* const ndefs) {
-	while (defs) {		// search for original head of macro arguments
-		if (ndefs == defs) return;		// original head is now new head, "set" is done
-		// something new on top of the original one found, unchain it and release
-		CDefineTableEntry* next = defs->next;
-		defs->next = nullptr;	// unchain first, to not release whole chain!
-		delete defs;
-		defs = next;
-	}
-	// if the newly provided chain was not tail of the current, the previous while did release it all
-	defs = ndefs;
+	if (ndefs == defs) return;			// the current HEAD of defines is already same as requested one
+	// traverse through current HEAD until the requested chain is found, unchain the HEAD from it
+	CDefineTableEntry* entry = defs;
+	while (entry && ndefs != entry->next) entry = entry->next;
+	if (entry) entry->next = nullptr;	// if "ndefs" is chained to current HEAD, unchain
+	if (defs) delete defs;				// release front part of current chain from memory
+	defs = ndefs;						// the requested chain is new current HEAD
 }
 
 char* CMacroDefineTable::getverv(char* name) {
