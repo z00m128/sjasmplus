@@ -25,7 +25,11 @@ REMOVEDIR=rm -vdf
 DOCBOOKGEN=xsltproc
 MEMCHECK=valgrind --leak-check=yes
 
-EXE := sjasmplus
+# all internal file names (sources, module subdirs, build dirs, ...) must be WITHOUT space!
+# (i.e. every relative path from project-dir must be space-less ...)
+# the project-dir itself can contain space, or any path leading up to it
+
+EXE_BASE_NAME := sjasmplus
 BUILD_DIR := build
 
 SUBDIR_BASE=sjasm
@@ -50,15 +54,18 @@ endif
 # C++ flags (the CPPFLAGS are for preprocessor BTW, if you always wonder, like me...)
 CXXFLAGS = -std=gnu++14 $(CFLAGS)
 #full path to executable
-EXE_FP := "$(CURDIR)/$(BUILD_DIR)/$(EXE)"
+BUILD_EXE := $(BUILD_DIR)/$(EXE_BASE_NAME)
 
 # UnitTest++ related values (slightly modified defaults)
 # Unit Test exe (checks for "--unittest" and runs unit tests then)
-EXE_UT := sjasm+ut
+EXE_UT_BASE_NAME := sjasm+ut
 BUILD_DIR_UT := $(BUILD_DIR)+ut
 SUBDIR_UT := unittest-cpp
 SUBDIR_TESTS := cpp-src-tests
-EXE_UT_FP := "$(CURDIR)/$(BUILD_DIR_UT)/$(EXE_UT)"
+BUILD_EXE_UT := $(BUILD_DIR_UT)/$(EXE_UT_BASE_NAME)
+
+EXE_FP := "$(abspath $(BUILD_EXE))"
+EXE_UT_FP := "$(abspath $(BUILD_EXE_UT))"
 
 # turns list of %.c/%.cpp files into $BUILD_DIR/%.o list
 define object_files
@@ -121,36 +128,36 @@ $(BUILD_DIR_UT)/%.o : %.cpp
 .PHONY: all install uninstall clean docs tests memcheck coverage
 
 # "all" will also copy the produced binary into project root directory (to mimick old makefile)
-all: $(EXE_FP)
-	cp $(EXE_FP) "$(EXE)"
+all: $(BUILD_EXE)
+	cp $(BUILD_EXE) $(EXE_BASE_NAME)
 
-$(EXE_FP): $(ALL_OBJS)
-	$(CXX) -o $(EXE_FP) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
+$(BUILD_EXE): $(ALL_OBJS)
+	$(CXX) -o $(BUILD_EXE) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
 
-$(EXE_UT_FP): $(ALL_OBJS_UT)
-	$(CXX) -o $(EXE_UT_FP) $(CXXFLAGS) $(ALL_OBJS_UT) $(LDFLAGS)
+$(BUILD_EXE_UT): $(ALL_OBJS_UT)
+	$(CXX) -o $(BUILD_EXE_UT) $(CXXFLAGS) $(ALL_OBJS_UT) $(LDFLAGS)
 
-install: $(EXE_FP)
-	$(INSTALL) $(EXE_FP) "$(PREFIX)/bin"
+install: $(BUILD_EXE)
+	$(INSTALL) $(BUILD_EXE) "$(PREFIX)/bin"
 
 uninstall:
-	$(UNINSTALL) "$(PREFIX)/bin/$(EXE)"
+	$(UNINSTALL) "$(PREFIX)/bin/$(EXE_BASE_NAME)"
 
-tests: $(EXE_UT_FP)
+tests: $(BUILD_EXE_UT)
 ifdef TEST
-	EXE=$(EXE_UT_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh" "$(TEST)"
+	EXE=$(EXE_UT_FP) $(BASH) ContinuousIntegration/test_folder_tests.sh "$(TEST)"
 else
-	$(EXE_UT_FP) --unittest
-	EXE=$(EXE_UT_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh"
-	@EXE=$(EXE_UT_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_examples.sh"
+	$(BUILD_EXE_UT) --unittest
+	EXE=$(EXE_UT_FP) $(BASH) ContinuousIntegration/test_folder_tests.sh
+	EXE=$(EXE_UT_FP) $(BASH) ContinuousIntegration/test_folder_examples.sh
 endif
 
-memcheck: $(EXE_FP)
+memcheck: $(BUILD_EXE)
 ifdef TEST
-	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh" $(TEST)
+	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) ContinuousIntegration/test_folder_tests.sh "$(TEST)"
 else
-	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_tests.sh"
-	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) "$(CURDIR)/ContinuousIntegration/test_folder_examples.sh"
+	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) ContinuousIntegration/test_folder_tests.sh
+	MEMCHECK="$(MEMCHECK)" EXE=$(EXE_FP) $(BASH) ContinuousIntegration/test_folder_examples.sh
 endif
 
 coverage:
@@ -182,10 +189,9 @@ $(SUBDIR_DOCS)/documentation.html: Makefile $(wildcard $(SUBDIR_DOCS)/*.xml) $(w
 
 clean:
 	$(UNINSTALL) \
-		"$(EXE)" \
-		"$(EXE_UT)" \
-		"$(BUILD_DIR)/$(EXE)" \
-		"$(BUILD_DIR_UT)/$(EXE_UT)" \
+		$(EXE_BASE_NAME) \
+		$(BUILD_EXE) \
+		$(BUILD_EXE_UT) \
 		$(ALL_OBJS) \
 		$(ALL_COVERAGE_RAW) \
 		$(ALL_OBJS_UT) \
@@ -203,4 +209,4 @@ clean:
 		$(BUILD_DIR_UT)/$(SUBDIR_TOLUA) \
 		$(BUILD_DIR_UT)/$(SUBDIR_TESTS) \
 		$(BUILD_DIR_UT)/$(SUBDIR_COV) \
-		$(BUILD_DIR_UT)/
+		$(BUILD_DIR_UT)

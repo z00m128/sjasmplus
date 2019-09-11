@@ -724,9 +724,8 @@ int GetBytesHexaText(char*& p, int e[]) {
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
 char* GetFileName(char*& p, bool convertslashes) {
-	char* newFn = new char[LINEMAX+1];
+	char* newFn = new char[LINEMAX+1], * result = newFn;
 	if (NULL == newFn) ErrorInt("No enough memory!", LINEMAX+1, FATAL);
-	char* result = newFn;
 	// check if some and which delimiter is used for this filename (does advance over white chars)
 	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
 	delimiterOfLastFileName = DelimiterAnyBegins(p);

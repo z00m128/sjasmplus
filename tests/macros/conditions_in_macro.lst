@@ -1,0 +1,75 @@
+# file opened: conditions_in_macro.asm
+ 1    0000              testCond    MACRO arg1?, arg2?, arg3?
+ 2    0000 ~                            IF arg1?
+ 3    0000 ~                                DB  arg2?
+ 4    0000 ~                                IF !arg1?
+ 5    0000 ~                                    never happens
+ 6    0000 ~                                ENDIF
+ 7    0000 ~                            ELSE
+ 8    0000 ~                                DB  arg3?
+ 9    0000 ~                                IF $8004 <= $
+10    0000 ~                                    DB  "..."
+11    0000 ~                                ELSE
+12    0000 ~                                    jr  nc,.localLabelInCondition + '!'
+13    0000 ~                                ENDIF
+14    0000 ~            .localLabelInCondition
+15    0000 ~                            ENDIF
+16    0000                          ENDM
+17    0000
+18    0000                      DEVICE ZXSPECTRUM48
+18    0000                ORG $8000
+19    8000                      OUTPUT "conditions_in_macro.bin"
+20    8000                      testCond 1, 'A', 'B'    ; A
+20    8000             >                IF 1
+20    8000 41          >                    DB  'A'
+20    8001             >                    IF !1
+20    8001 ~           >                        never happens
+20    8001             >                    ENDIF
+20    8001             >                ELSE
+20    8001 ~           >                    DB  arg3?
+20    8001 ~           >                    IF $8004 <= $
+20    8001 ~           >                        DB  "..."
+20    8001 ~           >                    ELSE
+20    8001 ~           >                        jr  nc,.localLabelInCondition + '!'
+20    8001 ~           >                    ENDIF
+20    8001 ~           >.localLabelInCondition
+20    8001             >                ENDIF
+21    8001                      testCond 0, 'A', 'B'    ; B0!
+21    8001             >                IF 0
+21    8001 ~           >                    DB  arg2?
+21    8001 ~           >                    IF !arg1?
+21    8001 ~           >                        never happens
+21    8001 ~           >                    ENDIF
+21    8001             >                ELSE
+21    8001 42          >                    DB  'B'
+21    8002             >                    IF $8004 <= $
+21    8002 ~           >                        DB  "..."
+21    8002             >                    ELSE
+21    8002 30 21       >                        jr  nc,.localLabelInCondition + '!'
+21    8004             >                    ENDIF
+21    8004             >.localLabelInCondition
+21    8004             >                ENDIF
+22    8004 20                   DB " "                  ; " "
+23    8005                      testCond 0, 'C', 'D'    ; D...
+23    8005             >                IF 0
+23    8005 ~           >                    DB  arg2?
+23    8005 ~           >                    IF !arg1?
+23    8005 ~           >                        never happens
+23    8005 ~           >                    ENDIF
+23    8005             >                ELSE
+23    8005 44          >                    DB  'D'
+23    8006             >                    IF $8004 <= $
+23    8006 2E 2E 2E    >                        DB  "..."
+23    8009             >                    ELSE
+23    8009 ~           >                        jr  nc,.localLabelInCondition + '!'
+23    8009             >                    ENDIF
+23    8009             >.localLabelInCondition
+23    8009             >                ENDIF
+24    8009                      OUTEND
+25    8009
+# file closed: conditions_in_macro.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8004   1>localLabelInCondition
+0x8009 X 2>localLabelInCondition

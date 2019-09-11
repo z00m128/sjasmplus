@@ -209,10 +209,10 @@ void InitPass() {
 	PseudoORG = 0; adrdisp = 0;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
-	StructureTable.Init();
-	MacroTable.Init();
+	StructureTable.ReInit();
+	MacroTable.ReInit();
+	MacroDefineTable.ReInit();
 	DefineTable = Options::CmdDefineTable;
-	MacroDefineTable.Init();
 	LocalLabelTable.InitPass();
 	// reset "device" stuff
 	if (2 == pass && Devices && 1 == deviceDirectivesCounter) {	// only single device detected
@@ -221,6 +221,7 @@ void InitPass() {
 	if (Devices) delete Devices;
 	Devices = Device = NULL;
 	DeviceID = NULL;
+	Page = NULL;
 	deviceDirectivesCounter = 0;
 
 	// predefined
@@ -242,13 +243,15 @@ void FreeRAM() {
 	if (globalDeviceID) {
 		free(globalDeviceID);	globalDeviceID = NULL;
 	}
-	if (lijstp) {
-		delete lijstp;		lijstp = NULL;
-	}
+	lijstp = NULL;		// do not delete this, should be released by owners of DUP/regular macros
 	free(vorlabp);		vorlabp = NULL;
 	LabelTable.RemoveAll();
 	DefineTable.RemoveAll();
 	SetLastParsedLabel(nullptr);
+	if (PreviousIsLabel) {
+		free(PreviousIsLabel);
+		PreviousIsLabel = nullptr;
+	}
 }
 
 
