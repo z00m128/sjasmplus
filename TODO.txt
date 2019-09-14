@@ -94,8 +94,6 @@ Kate syntax: broken with LUA block containing "end" keyword (maybe even consider
     - also missing MMU ?
     - backward slashes in path strings are not working as escapes, single "\" there is OK, but syntax highlight thinks it's "DB" like string.
 
-AppVeyor CI for windows clang + mingw + MSVS2015 builds?
-
 ##### sjasmplus 2.x/fork:
 
 SHELLEXEC change syntax
@@ -129,6 +127,12 @@ Refactor filepath functions to deal with backward slashes systematically
 (or maybe just wait few more years, can't be that long now before windows are gone)
 
 Big-text-block directive? (there's INCBIN workaround using separate file)
+
+====================
+Debian packaging:
+
+cmake used to enforce (and test) system libs:
+cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LUA=ON -DCMAKE_INSTALL_PREFIX:PATH=~/.local2/ ..
 
 ====================
 Docs:
