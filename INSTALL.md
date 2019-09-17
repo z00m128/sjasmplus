@@ -1,9 +1,9 @@
 ## Installation Instructions
 Requirements:
 
-- Linux / Unix / MacOS / BSD with bash compatible shell 
+- GNU/Linux / Unix / macOS / BSD with bash compatible shell
 - all common system progs (grep, cat, etc...)
-- all common build requirements (libc, libstdc++, g++, make, etc...)
+- all common build requirements (libc, libstdc++, g++, GNU make, etc...)
 - optionally CMake
 
 or
@@ -13,7 +13,7 @@ or
 
 Compilation is tested with GCC 5.5.0, it should run also with older 5.x versions. It will not work with GCC 4.x and older.
 
-## Default method for Linux / Unix / MacOS / BSD
+## Default method for GNU/Linux / Unix / macOS / BSD
 Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile` according your preferences (default `/usr/local`). Run following commands:
 
 	make clean
@@ -23,6 +23,9 @@ Then run as root or use sudo:
 
 	make install
 
+### Gentoo GNU/Linux
+Check [cizo2000's github gentoo-overlay/dev-util/sjasmplus](https://github.com/cizo2000/gentoo-overlay/tree/master/dev-util/sjasmplus) for ebuild files.
+
 ## Default method for MS Windows
 Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile.win` according your preferences (default `c:\mingw\usr\local\bin`). Remove `-static` parameter in `CFLAGS` if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Run following commands:
 
@@ -30,7 +33,7 @@ Extract tarball archive and go to extracted folder. Edit install path `PREFIX` i
 	make -f Makefile.win
 	make -f Makefile.win install
 
-## CMAKE method for Linux / Unix / MacOS / BSD
+## CMAKE method for Linux / Unix / macOS / BSD
 Extract tarball archive, go to extracted folder and run following set of commands:
 
 	mkdir build 
