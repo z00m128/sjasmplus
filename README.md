@@ -6,7 +6,7 @@
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/z00m128/sjasmplus.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/z00m128/sjasmplus/context:cpp)
 Platforms:
 [![Linux](docs/img/linux-logo-24px.png)](https://www.linux.org/)
-[![FreeBSD](docs/img/freeBSD-logo-24px)](https://www.freebsd.org/)
+[![FreeBSD](docs/img/freeBSD-logo-24px.png)](https://www.freebsd.org/)
 [![NetBSD](docs/img/NetBSD-logo-24px.png)](https://www.netbsd.org/)
 [![Raspberry Pi](docs/img/raspberry-pi-logo-24px.png)](https://www.raspberrypi.org/)
 [![MacOS](docs/img/apple-logo-24px.png)](https://www.apple.com/lae/macos/)
