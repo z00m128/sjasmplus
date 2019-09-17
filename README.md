@@ -4,12 +4,21 @@
 [![BSD 3-Clause License](https://img.shields.io/github/license/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/blob/master/LICENSE.md)
 [![Coverage Status](https://coveralls.io/repos/github/z00m128/sjasmplus/badge.svg?branch=master)](https://coveralls.io/github/z00m128/sjasmplus?branch=master)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/z00m128/sjasmplus.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/z00m128/sjasmplus/context:cpp)
+Platforms:
+[![GNU/Linux](docs/img/linux-logo-24px.png)](https://www.linux.org/)
+[![FreeBSD](docs/img/freeBSD-logo-24px.png)](https://www.freebsd.org/)
+[![NetBSD](docs/img/NetBSD-logo-24px.png)](https://www.netbsd.org/)
+[![Raspberry Pi](docs/img/raspberry-pi-logo-24px.png)](https://www.raspberrypi.org/)
+[![macOS](docs/img/apple-logo-24px.png)](https://www.apple.com/lae/macos/)
+[![Windows](docs/img/microsoft-windows-logo-24px.png)](https://www.microsoft.com/en-us/windows)
 
 Command-line cross-compiler of assembly language for [Z80 CPU](https://en.wikipedia.org/wiki/Zilog_Z80).
 
 Supports many [ZX-Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum) specific directives, has built-in Lua scripting engine and 3-pass design.
 
-For Linux, BSD and [Windows (click for exe)](https://github.com/z00m128/sjasmplus/releases/latest). Make/Make Install or CMake [installation methods](INSTALL.md) for your convenience.
+For GNU/Linux, BSD, Raspberry Pi, macOS and [Windows (click for exe)](https://github.com/z00m128/sjasmplus/releases/latest).
+
+GNU make or CMake [installation methods](INSTALL.md) for your convenience.
 
 Online [documentation](http://z00m128.github.io/sjasmplus/documentation.html) (it is also included in the binary-release zip for offline viewing).
 
