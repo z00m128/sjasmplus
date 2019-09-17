@@ -4,7 +4,13 @@
 [![BSD 3-Clause License](https://img.shields.io/github/license/ped7g/sjasmplus.svg)](https://github.com/ped7g/sjasmplus/blob/master/LICENSE.md)
 [![Coverage Status](https://coveralls.io/repos/github/ped7g/sjasmplus/badge.svg?branch=ped-master)](https://coveralls.io/github/ped7g/sjasmplus?branch=ped-master)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/z00m128/sjasmplus.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/z00m128/sjasmplus/context:cpp)
-Platforms: [![FreeBSD](docs/img/freeBSD-logo-48x48.png)](https://www.freebsd.org/)
+Platforms:
+[![Linux](docs/img/linux-logo-24px.png)](https://www.linux.org/)
+[![FreeBSD](docs/img/freeBSD-logo-24px)](https://www.freebsd.org/)
+[![NetBSD](docs/img/NetBSD-logo-24px.png)](https://www.netbsd.org/)
+[![Raspberry Pi](docs/img/raspberry-pi-logo-24px.png)](https://www.raspberrypi.org/)
+[![MacOS](docs/img/apple-logo-24px.png)](https://www.apple.com/lae/macos/)
+[![Windows](docs/img/microsoft-windows-logo-24px.png)](https://www.microsoft.com/en-us/windows)
 
 Command-line cross-compiler of assembly language for [Z80 CPU](https://en.wikipedia.org/wiki/Zilog_Z80).
 
