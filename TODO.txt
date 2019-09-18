@@ -134,6 +134,9 @@ Debian packaging:
 cmake used to enforce (and test) system libs:
 cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LUA=ON -DCMAKE_INSTALL_PREFIX:PATH=~/.local2/ ..
 
+https://www.debian.org/doc/manuals/distribute-deb/distribute-deb.html
+
+
 ====================
 Docs:
 
