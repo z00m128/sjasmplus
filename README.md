@@ -38,7 +38,7 @@ Main Features
 * Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op `DEVICE`)
 * ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD…)
 * ZX Spectrum Next specific features and directives (Z80N, 8ki memory paging, `SAVENEX`)
-* Correctness is assured by Cirrus-CI with 240+ automated tests (that's also 240+ examples of usage!)
+* Correctness is assured by Cirrus-CI with 256+ automated tests (that's also 256+ examples of usage!)
 * Fake instructions as `LD HL,DE` (`LD H,D:LD L,E`) and more
 * Code inlining through colon (`LD A,C:INC A:PUSH AF:IFDEF FX:LD A,D:ENDIF`…)
 * Very fast compilation: 1 million lines by 2-3 seconds on modern computer

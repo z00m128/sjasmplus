@@ -5,6 +5,28 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+Debian stretch-minimal = produce sh script to download src from github and build binary
+bonus points for running also tests (prepare + verify in VM?) => for Xalior and his
+Raspberry Pi CI machine.
+
+https://github.com/mborik/regression/blob/master/alternatape/maketap.a80#L12
+^^ emptytap was failing with define symbol?! (can't reproduce with small example,
+try full "regression" source pack)
+
++3DOS podpora do sjasmplus:
+    z00m:
+    uz sme to tu sto razy rozoberali
+    Elliotova utilitka to vie
+    lepit tie hlavicky
+    http://www.seasip.info/ZX/unix.html
+    specform a unspecform
+    a ma tam aj priamo patchnuty zmakebas
+    a ma k tym taptools aj zdrojaky
+    aha tak na zmakebas je len patch
+    a teraz som si spomenul, ze u mna je to cele uz patchnute
+    https://github.com/z00m128/zmakebas (edited)
+
+
 `make install` doesn't refresh binary???
 (does link, but doesn't use the new library, but old)
  --- not sure what was this varmfskii report about, the Makefile is now tuned a bit any way
