@@ -1,0 +1,279 @@
+# file opened: struct_in_files.asm
+ 1    0000              ;; options used to assemble this test:
+ 2    0000              ;; sjasmplus --fullpath --nologo --lst="struct_in_files.lst" --lstlab --msg=war "struct_in_files.asm" --zxnext=cspect
+ 3    0000                      INCLUDE "struct_in_files.def.s1.i.asm"
+# file opened: struct_in_files.def.s1.i.asm
+ 1+   0000                  MODULE  mod1
+ 2+   0000                      STRUCT @struct_1
+ 3+   0000 ~            state:          BYTE        0
+ 4+   0000 ~            SpriteAddress:  WORD        0
+ 5+   0000 ~            AnimationIndex: BYTE        0
+ 6+   0000 ~            LinkList:       WORD        0
+ 7+   0000                      ENDS
+ 8+   0000                  ENDMODULE
+ 9+   0000
+# file closed: struct_in_files.def.s1.i.asm
+ 4    0000                      INCLUDE "struct_in_files.def.s2.i.asm"
+# file opened: struct_in_files.def.s2.i.asm
+ 1+   0000                  MODULE  mod2
+ 2+   0000                      STRUCT struct_2
+ 3+   0000 ~            x           BYTE    2
+ 4+   0000 ~            y           BYTE    3
+ 5+   0000 ~            z           BYTE    4
+ 6+   0000                      ENDS
+ 7+   0000                  ENDMODULE
+ 8+   0000
+# file closed: struct_in_files.def.s2.i.asm
+ 5    0000                      INCLUDE "struct_in_files.def.s12.i.asm"
+# file opened: struct_in_files.def.s12.i.asm
+ 1+   0000                  MODULE  mod12
+ 2+   0000                      STRUCT @struct_12
+ 3+   0000 ~            myS1:           struct_1        { $50, $51, $52, $53 }
+ 4+   0000 ~            myS2:           mod2.struct_2   { $54, $55, $56 }
+ 5+   0000                      ENDS
+ 6+   0000                  ENDMODULE
+ 7+   0000
+# file closed: struct_in_files.def.s12.i.asm
+ 6    0000
+ 7    0000                      DEVICE ZXSPECTRUMNEXT
+ 8    0000                      ORG $4000
+ 9    4000
+10    4000                      INCLUDE "struct_in_files.use.s1.i.asm"
+# file opened: struct_in_files.use.s1.i.asm
+ 1+   4000                  MODULE  mod_u_1
+ 2+   4000 10 11 00 12  myS1    struct_1    { 16, 17, 18, 19 }
+ 2+   4004 13 00
+ 3+   4006                  ENDMODULE
+ 4+   4006
+# file closed: struct_in_files.use.s1.i.asm
+11    4006                      INCLUDE "struct_in_files.use.s2.i.asm"
+# file opened: struct_in_files.use.s2.i.asm
+ 1+   4006                  MODULE  mod_u_2
+ 2+   4006 20 21 22     myS2    mod2.struct_2   { 32, 33, 34 }
+ 3+   4009                  ENDMODULE
+ 4+   4009
+# file closed: struct_in_files.use.s2.i.asm
+12    4009                      INCLUDE "struct_in_files.use.s12.i.asm"
+# file opened: struct_in_files.use.s12.i.asm
+ 1+   4009                  MODULE  mod_u_12
+ 2+   4009 50 51 00 52  myS12:      struct_12
+ 2+   400D 53 00 54 55
+ 2+   4011 56
+ 3+   4012              myS12_at:   struct_12 = 0x8100
+ 4+   4012 80 81 00 52  myS12_init: struct_12   { $80, $81, { $82, $83 } }
+ 4+   4016 53 00 82 83
+ 4+   401A 56
+ 5+   401B                  ENDMODULE
+ 6+   401B
+# file closed: struct_in_files.use.s12.i.asm
+13    401B
+14    401B                  MODULE  modMain
+15    401B                      STRUCT @struct_1_2_12
+16    401B ~            s1          struct_1    { 0, 0 }
+17    401B ~            s2:         @mod2.struct_2   { $A4, $A5, $A6 }
+18    401B ~            s12:        struct_12
+19    401B                      ENDS
+20    401B                  ENDMODULE
+21    401B
+22    401B                  MODULE modNonMain
+23    401B 00 00 00 00  xyz:    struct_1_2_12
+23    401F 00 00 A4 A5
+23    4023 A6 50 51 00
+23    4027 52 53 00 54
+23    402B 55 56
+24    402D              abc:    struct_1_2_12 = $9000
+25    402D 00 00 00 00  def:    @struct_1_2_12
+25    4031 00 00 A4 A5
+25    4035 A6 50 51 00
+25    4039 52 53 00 54
+25    403D 55 56
+26    403F              ghi:    @struct_1_2_12 = $9100
+27    403F 01 02 00 00  jkl:    @struct_1_2_12 { 1, 2 { 3, 4 } }
+27    4043 00 00 03 04
+27    4047 A6 50 51 00
+27    404B 52 53 00 54
+27    404F 55 56
+28    4051                  ENDMODULE
+29    4051
+# file closed: struct_in_files.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0006 X struct_1
+0x0000 X struct_1.state
+0x0001 X struct_1.SpriteAddress
+0x0003 X struct_1.AnimationIndex
+0x0004 X struct_1.LinkList
+0x0003 X mod2.struct_2
+0x0000 X mod2.struct_2.x
+0x0001 X mod2.struct_2.y
+0x0002 X mod2.struct_2.z
+0x0009 X struct_12
+0x0000 X struct_12.myS1
+0x0000 X struct_12.myS1.state
+0x0001 X struct_12.myS1.SpriteAddress
+0x0003 X struct_12.myS1.AnimationIndex
+0x0004 X struct_12.myS1.LinkList
+0x0006 X struct_12.myS2
+0x0006 X struct_12.myS2.x
+0x0007 X struct_12.myS2.y
+0x0008 X struct_12.myS2.z
+0x4000 X mod_u_1.myS1
+0x4000 X mod_u_1.myS1.state
+0x4001 X mod_u_1.myS1.SpriteAddress
+0x4003 X mod_u_1.myS1.AnimationIndex
+0x4004 X mod_u_1.myS1.LinkList
+0x4006 X mod_u_2.myS2
+0x4006 X mod_u_2.myS2.x
+0x4007 X mod_u_2.myS2.y
+0x4008 X mod_u_2.myS2.z
+0x4009 X mod_u_12.myS12
+0x4009 X mod_u_12.myS12.myS1
+0x4009 X mod_u_12.myS12.myS1.state
+0x400A X mod_u_12.myS12.myS1.SpriteAddress
+0x400C X mod_u_12.myS12.myS1.AnimationIndex
+0x400D X mod_u_12.myS12.myS1.LinkList
+0x400F X mod_u_12.myS12.myS2
+0x400F X mod_u_12.myS12.myS2.x
+0x4010 X mod_u_12.myS12.myS2.y
+0x4011 X mod_u_12.myS12.myS2.z
+0x8100 X mod_u_12.myS12_at
+0x8100 X mod_u_12.myS12_at.myS1
+0x8100 X mod_u_12.myS12_at.myS1.state
+0x8101 X mod_u_12.myS12_at.myS1.SpriteAddress
+0x8103 X mod_u_12.myS12_at.myS1.AnimationIndex
+0x8104 X mod_u_12.myS12_at.myS1.LinkList
+0x8106 X mod_u_12.myS12_at.myS2
+0x8106 X mod_u_12.myS12_at.myS2.x
+0x8107 X mod_u_12.myS12_at.myS2.y
+0x8108 X mod_u_12.myS12_at.myS2.z
+0x4012 X mod_u_12.myS12_init
+0x4012 X mod_u_12.myS12_init.myS1
+0x4012 X mod_u_12.myS12_init.myS1.state
+0x4013 X mod_u_12.myS12_init.myS1.SpriteAddress
+0x4015 X mod_u_12.myS12_init.myS1.AnimationIndex
+0x4016 X mod_u_12.myS12_init.myS1.LinkList
+0x4018 X mod_u_12.myS12_init.myS2
+0x4018 X mod_u_12.myS12_init.myS2.x
+0x4019 X mod_u_12.myS12_init.myS2.y
+0x401A X mod_u_12.myS12_init.myS2.z
+0x0012 X struct_1_2_12
+0x0000 X struct_1_2_12.s1
+0x0000 X struct_1_2_12.s1.state
+0x0001 X struct_1_2_12.s1.SpriteAddress
+0x0003 X struct_1_2_12.s1.AnimationIndex
+0x0004 X struct_1_2_12.s1.LinkList
+0x0006 X struct_1_2_12.s2
+0x0006 X struct_1_2_12.s2.x
+0x0007 X struct_1_2_12.s2.y
+0x0008 X struct_1_2_12.s2.z
+0x0009 X struct_1_2_12.s12
+0x0009 X struct_1_2_12.s12.myS1
+0x0009 X struct_1_2_12.s12.myS1.state
+0x000A X struct_1_2_12.s12.myS1.SpriteAddress
+0x000C X struct_1_2_12.s12.myS1.AnimationIndex
+0x000D X struct_1_2_12.s12.myS1.LinkList
+0x000F X struct_1_2_12.s12.myS2
+0x000F X struct_1_2_12.s12.myS2.x
+0x0010 X struct_1_2_12.s12.myS2.y
+0x0011 X struct_1_2_12.s12.myS2.z
+0x401B X modNonMain.xyz
+0x401B X modNonMain.xyz.s1
+0x401B X modNonMain.xyz.s1.state
+0x401C X modNonMain.xyz.s1.SpriteAddress
+0x401E X modNonMain.xyz.s1.AnimationIndex
+0x401F X modNonMain.xyz.s1.LinkList
+0x4021 X modNonMain.xyz.s2
+0x4021 X modNonMain.xyz.s2.x
+0x4022 X modNonMain.xyz.s2.y
+0x4023 X modNonMain.xyz.s2.z
+0x4024 X modNonMain.xyz.s12
+0x4024 X modNonMain.xyz.s12.myS1
+0x4024 X modNonMain.xyz.s12.myS1.state
+0x4025 X modNonMain.xyz.s12.myS1.SpriteAddress
+0x4027 X modNonMain.xyz.s12.myS1.AnimationIndex
+0x4028 X modNonMain.xyz.s12.myS1.LinkList
+0x402A X modNonMain.xyz.s12.myS2
+0x402A X modNonMain.xyz.s12.myS2.x
+0x402B X modNonMain.xyz.s12.myS2.y
+0x402C X modNonMain.xyz.s12.myS2.z
+0x9000 X modNonMain.abc
+0x9000 X modNonMain.abc.s1
+0x9000 X modNonMain.abc.s1.state
+0x9001 X modNonMain.abc.s1.SpriteAddress
+0x9003 X modNonMain.abc.s1.AnimationIndex
+0x9004 X modNonMain.abc.s1.LinkList
+0x9006 X modNonMain.abc.s2
+0x9006 X modNonMain.abc.s2.x
+0x9007 X modNonMain.abc.s2.y
+0x9008 X modNonMain.abc.s2.z
+0x9009 X modNonMain.abc.s12
+0x9009 X modNonMain.abc.s12.myS1
+0x9009 X modNonMain.abc.s12.myS1.state
+0x900A X modNonMain.abc.s12.myS1.SpriteAddress
+0x900C X modNonMain.abc.s12.myS1.AnimationIndex
+0x900D X modNonMain.abc.s12.myS1.LinkList
+0x900F X modNonMain.abc.s12.myS2
+0x900F X modNonMain.abc.s12.myS2.x
+0x9010 X modNonMain.abc.s12.myS2.y
+0x9011 X modNonMain.abc.s12.myS2.z
+0x402D X modNonMain.def
+0x402D X modNonMain.def.s1
+0x402D X modNonMain.def.s1.state
+0x402E X modNonMain.def.s1.SpriteAddress
+0x4030 X modNonMain.def.s1.AnimationIndex
+0x4031 X modNonMain.def.s1.LinkList
+0x4033 X modNonMain.def.s2
+0x4033 X modNonMain.def.s2.x
+0x4034 X modNonMain.def.s2.y
+0x4035 X modNonMain.def.s2.z
+0x4036 X modNonMain.def.s12
+0x4036 X modNonMain.def.s12.myS1
+0x4036 X modNonMain.def.s12.myS1.state
+0x4037 X modNonMain.def.s12.myS1.SpriteAddress
+0x4039 X modNonMain.def.s12.myS1.AnimationIndex
+0x403A X modNonMain.def.s12.myS1.LinkList
+0x403C X modNonMain.def.s12.myS2
+0x403C X modNonMain.def.s12.myS2.x
+0x403D X modNonMain.def.s12.myS2.y
+0x403E X modNonMain.def.s12.myS2.z
+0x9100 X modNonMain.ghi
+0x9100 X modNonMain.ghi.s1
+0x9100 X modNonMain.ghi.s1.state
+0x9101 X modNonMain.ghi.s1.SpriteAddress
+0x9103 X modNonMain.ghi.s1.AnimationIndex
+0x9104 X modNonMain.ghi.s1.LinkList
+0x9106 X modNonMain.ghi.s2
+0x9106 X modNonMain.ghi.s2.x
+0x9107 X modNonMain.ghi.s2.y
+0x9108 X modNonMain.ghi.s2.z
+0x9109 X modNonMain.ghi.s12
+0x9109 X modNonMain.ghi.s12.myS1
+0x9109 X modNonMain.ghi.s12.myS1.state
+0x910A X modNonMain.ghi.s12.myS1.SpriteAddress
+0x910C X modNonMain.ghi.s12.myS1.AnimationIndex
+0x910D X modNonMain.ghi.s12.myS1.LinkList
+0x910F X modNonMain.ghi.s12.myS2
+0x910F X modNonMain.ghi.s12.myS2.x
+0x9110 X modNonMain.ghi.s12.myS2.y
+0x9111 X modNonMain.ghi.s12.myS2.z
+0x403F X modNonMain.jkl
+0x403F X modNonMain.jkl.s1
+0x403F X modNonMain.jkl.s1.state
+0x4040 X modNonMain.jkl.s1.SpriteAddress
+0x4042 X modNonMain.jkl.s1.AnimationIndex
+0x4043 X modNonMain.jkl.s1.LinkList
+0x4045 X modNonMain.jkl.s2
+0x4045 X modNonMain.jkl.s2.x
+0x4046 X modNonMain.jkl.s2.y
+0x4047 X modNonMain.jkl.s2.z
+0x4048 X modNonMain.jkl.s12
+0x4048 X modNonMain.jkl.s12.myS1
+0x4048 X modNonMain.jkl.s12.myS1.state
+0x4049 X modNonMain.jkl.s12.myS1.SpriteAddress
+0x404B X modNonMain.jkl.s12.myS1.AnimationIndex
+0x404C X modNonMain.jkl.s12.myS1.LinkList
+0x404E X modNonMain.jkl.s12.myS2
+0x404E X modNonMain.jkl.s12.myS2.x
+0x404F X modNonMain.jkl.s12.myS2.y
+0x4050 X modNonMain.jkl.s12.myS2.z
