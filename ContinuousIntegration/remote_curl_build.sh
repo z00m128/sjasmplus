@@ -16,7 +16,7 @@
 # expected usage (something like this):
 #  mkdir -p /tmp/sjasmplus
 #  cd /tmp/sjasmplus
-#  curl https://github.com/z00m128/sjasmplus/blob/master/ContinuousIntegration/remote_curl_build.sh | sh -
+#  curl https://raw.githubusercontent.com/z00m128/sjasmplus/master/ContinuousIntegration/remote_curl_build.sh | sh -
 
 # expected output:
 #  /usr/bin/sjasmplus
