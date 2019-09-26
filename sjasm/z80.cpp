@@ -442,7 +442,7 @@ namespace Z80 {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x88, e, true, false)) {	// handle common 8-bit variants
-				if (Z80_HL == GetRegister(lp)) {
+				if ((!Options::IsI8080) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
 						Error("[ADC] Comma expected");
 					} else {
@@ -777,7 +777,7 @@ namespace Z80 {
 			Z80Reg reg = GetRegister(lp);
 			if (Z80_UNK == reg || comma(lp)) {
 				if (Z80_UNK == reg) reg = Z80_F;	// if there was no register, it may be "IN (C)"
-				if (NeedIoC()) {
+				if ((!Options::IsI8080) && NeedIoC()) {
 					e[0] = 0xed;
 					switch (reg) {
 						case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
@@ -1105,6 +1105,7 @@ namespace Z80 {
 						if (Z80_HL == reg1) {		// ld hl,(mem16)
 							e[0] = 0x2a; e[1] = b & 255; e[2] = (b >> 8) & 255;
 						} else {					// ld bc|de|sp,(mem16)
+							if (Options::IsI8080) break;
 							e[0] = 0xed; e[1] = reg1+0x3b; e[2] = b & 255; e[3] = (b >> 8) & 255;
 						}
 						if (')' == lp[-1]) checkLowMemory(b>>8, b);
@@ -1139,6 +1140,7 @@ namespace Z80 {
 					case Z80_BC:	// LD (nnnn),bc|de|sp
 					case Z80_DE:
 					case Z80_SP:
+						if (Options::IsI8080) break;
 						e[0] = 0xed; e[1] = 0x33+reg2; e[2] = b & 255; e[3] = (b >> 8) & 255; break;
 					case Z80_IX:	// LD (nnnn),ix|iy
 					case Z80_IY:
@@ -1579,7 +1581,7 @@ namespace Z80 {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1 };
-			if (NeedIoC()) {
+			if ((!Options::IsI8080) && NeedIoC()) {
 				if (comma(lp)) {
 					switch (reg = GetRegister(lp)) {
 					case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
@@ -1846,7 +1848,7 @@ namespace Z80 {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x98, e, true, false)) {	// handle common 8-bit variants
-				if (Z80_HL == GetRegister(lp)) {
+				if ((!Options::IsI8080) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
 						Error("[SBC] Comma expected");
 					} else {
@@ -1964,7 +1966,7 @@ namespace Z80 {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x90, e, true, true)) {	// handle common 8-bit variants
-				if (Z80_HL == GetRegister(lp)) {
+				if ((!Options::IsI8080) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
 						Error("[SUB] Comma expected");
 					} else {
