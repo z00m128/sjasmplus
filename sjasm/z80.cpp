@@ -197,6 +197,7 @@ namespace Z80 {
 		// fast lookup table for single letters 'a'..'m' ('g','j','k' will produce Z80_UNK instantly)
 		Z80Reg r8[] { Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L, Z80_UNK };
 		r8['m'-'a'] = Options::syx.Is_M_Memory ? Z80_MEM_HL : Z80_UNK;	// extra alias "M" for "(HL)" enabled?
+		r8['i'-'a'] = Options::IsI8080 ? Z80_UNK : Z80_I;		// i8080 doesn't have I
 		char oneLetter = p[0] | 0x20;		// force it lowercase, in case it's ASCII letter
 		if ('a' <= oneLetter && oneLetter <= 'm' && !islabchar(p[1])) {
 			const Z80Reg lutResult = r8[oneLetter - 'a'];
@@ -235,10 +236,12 @@ namespace Z80 {
 			break;
 		case 'h':
 			if (GetRegister_pair(p, 'l')) return Z80_HL;
+			if (Options::IsI8080) break;
 			if (GetRegister_pair(p, 'x')) return Z80_IXH;
 			if (GetRegister_pair(p, 'y')) return Z80_IYH;
 			break;
 		case 'i':
+			if (Options::IsI8080) break;
 			if (*p == 'x') {
 				if (!islabchar(*(p + 1))) {
 					++p;
@@ -269,18 +272,22 @@ namespace Z80 {
 			}
 			break;
 		case 'x':
+			if (Options::IsI8080) break;
 			if (GetRegister_pair(p, 'h')) return Z80_IXH;
 			if (GetRegister_pair(p, 'l')) return Z80_IXL;
 			break;
 		case 'y':
+			if (Options::IsI8080) break;
 			if (GetRegister_pair(p, 'h')) return Z80_IYH;
 			if (GetRegister_pair(p, 'l')) return Z80_IYL;
 			break;
 		case 'l':
+			if (Options::IsI8080) break;
 			if (GetRegister_pair(p, 'x')) return Z80_IXL;
 			if (GetRegister_pair(p, 'y')) return Z80_IYL;
 			break;
 		case 'r':
+			if (Options::IsI8080) break;
 			if (!islabchar(*p)) return Z80_R;
 			break;
 		case 's':
@@ -297,10 +304,12 @@ namespace Z80 {
 			break;
 		case 'H':
 			if (GetRegister_pair(p, 'L')) return Z80_HL;
+			if (Options::IsI8080) break;
 			if (GetRegister_pair(p, 'X')) return Z80_IXH;
 			if (GetRegister_pair(p, 'Y')) return Z80_IYH;
 			break;
 		case 'I':
+			if (Options::IsI8080) break;
 			if (*p == 'X') {
 				if (!islabchar(*(p + 1))) {
 					++p; return Z80_IX;
@@ -325,18 +334,22 @@ namespace Z80 {
 			}
 			break;
 		case 'X':
+			if (Options::IsI8080) break;
 			if (GetRegister_pair(p, 'H')) return Z80_IXH;
 			if (GetRegister_pair(p, 'L')) return Z80_IXL;
 			break;
 		case 'Y':
+			if (Options::IsI8080) break;
 			if (GetRegister_pair(p, 'H')) return Z80_IYH;
 			if (GetRegister_pair(p, 'L')) return Z80_IYL;
 			break;
 		case 'L':
+			if (Options::IsI8080) break;
 			if (GetRegister_pair(p, 'X')) return Z80_IXL;
 			if (GetRegister_pair(p, 'Y')) return Z80_IYL;
 			break;
 		case 'R':
+			if (Options::IsI8080) break;
 			if (!islabchar(*p)) return Z80_R;
 			break;
 		case 'S':
@@ -689,6 +702,7 @@ namespace Z80 {
 		Z80Reg reg = GetRegister(lp);
 		switch (reg) {
 		case Z80_AF:
+			if (Options::IsI8080) break;
 			if (comma(lp)) {
 				if (Z80_AF != GetRegister(lp)) break;
 				if (*lp == '\'') ++lp;
@@ -2000,39 +2014,59 @@ namespace Z80 {
 	}
 
 	void Init() {
+		// Z80 and i8080 shared instructions first
 		OpCodeTable.Insert("adc", OpCode_ADC);
 		OpCodeTable.Insert("add", OpCode_ADD);
 		OpCodeTable.Insert("and", OpCode_AND);
-		OpCodeTable.Insert("bit", OpCode_BIT);
 		OpCodeTable.Insert("call", OpCode_CALL);
 		OpCodeTable.Insert("ccf", OpCode_CCF);
 		OpCodeTable.Insert("cp", OpCode_CP);
-		OpCodeTable.Insert("cpd", OpCode_CPD);
-		OpCodeTable.Insert("cpdr", OpCode_CPDR);
-		OpCodeTable.Insert("cpi", OpCode_CPI);
-		OpCodeTable.Insert("cpir", OpCode_CPIR);
 		OpCodeTable.Insert("cpl", OpCode_CPL);
 		OpCodeTable.Insert("daa", OpCode_DAA);
 		OpCodeTable.Insert("dec", OpCode_DEC);
 		OpCodeTable.Insert("di", OpCode_DI);
-		OpCodeTable.Insert("djnz", OpCode_DJNZ);
 		OpCodeTable.Insert("ei", OpCode_EI);
 		OpCodeTable.Insert("ex", OpCode_EX);
-		OpCodeTable.Insert("exa", OpCode_EXA);
 		OpCodeTable.Insert("exd", OpCode_EXD);
-		OpCodeTable.Insert("exx", OpCode_EXX);
 		OpCodeTable.Insert("halt", OpCode_HALT);
-		OpCodeTable.Insert("im", OpCode_IM);
 		OpCodeTable.Insert("in", OpCode_IN);
 		OpCodeTable.Insert("inc", OpCode_INC);
+		OpCodeTable.Insert("jp", OpCode_JP);
+		OpCodeTable.Insert("ld", OpCode_LD);
+		OpCodeTable.Insert("nop", OpCode_NOP);
+		OpCodeTable.Insert("or", OpCode_OR);
+		OpCodeTable.Insert("out", OpCode_OUT);
+		OpCodeTable.Insert("pop", OpCode_POP);
+		OpCodeTable.Insert("push", OpCode_PUSH);
+		OpCodeTable.Insert("ret", OpCode_RET);
+		OpCodeTable.Insert("rla", OpCode_RLA);
+		OpCodeTable.Insert("rlca", OpCode_RLCA);
+		OpCodeTable.Insert("rra", OpCode_RRA);
+		OpCodeTable.Insert("rrca", OpCode_RRCA);
+		OpCodeTable.Insert("rst", OpCode_RST);
+		OpCodeTable.Insert("sbc", OpCode_SBC);
+		OpCodeTable.Insert("scf", OpCode_SCF);
+		OpCodeTable.Insert("sub", OpCode_SUB);
+		OpCodeTable.Insert("xor", OpCode_XOR);
+
+		if (Options::IsI8080) return;	// all i8080 instructions defined
+
+		// Z80 instructions
+		OpCodeTable.Insert("bit", OpCode_BIT);
+		OpCodeTable.Insert("cpd", OpCode_CPD);
+		OpCodeTable.Insert("cpdr", OpCode_CPDR);
+		OpCodeTable.Insert("cpi", OpCode_CPI);
+		OpCodeTable.Insert("cpir", OpCode_CPIR);
+		OpCodeTable.Insert("djnz", OpCode_DJNZ);
+		OpCodeTable.Insert("exa", OpCode_EXA);
+		OpCodeTable.Insert("exx", OpCode_EXX);
+		OpCodeTable.Insert("im", OpCode_IM);
 		OpCodeTable.Insert("ind", OpCode_IND);
 		OpCodeTable.Insert("indr", OpCode_INDR);
+		OpCodeTable.Insert("inf", OpCode_INF); // thanks to BREEZE
 		OpCodeTable.Insert("ini", OpCode_INI);
 		OpCodeTable.Insert("inir", OpCode_INIR);
-		OpCodeTable.Insert("inf", OpCode_INF); // thanks to BREEZE
-		OpCodeTable.Insert("jp", OpCode_JP);
 		OpCodeTable.Insert("jr", OpCode_JR);
-		OpCodeTable.Insert("ld", OpCode_LD);
 		OpCodeTable.Insert("ldd", OpCode_LDD);
 		OpCodeTable.Insert("lddr", OpCode_LDDR);
 		OpCodeTable.Insert("ldi", OpCode_LDI);
@@ -2040,40 +2074,25 @@ namespace Z80 {
 		OpCodeTable.Insert("mulub", OpCode_MULUB);
 		OpCodeTable.Insert("muluw", OpCode_MULUW);
 		OpCodeTable.Insert("neg", OpCode_NEG);
-		OpCodeTable.Insert("nop", OpCode_NOP);
-		OpCodeTable.Insert("or", OpCode_OR);
 		OpCodeTable.Insert("otdr", OpCode_OTDR);
 		OpCodeTable.Insert("otir", OpCode_OTIR);
-		OpCodeTable.Insert("out", OpCode_OUT);
 		OpCodeTable.Insert("outd", OpCode_OUTD);
 		OpCodeTable.Insert("outi", OpCode_OUTI);
-		OpCodeTable.Insert("pop", OpCode_POP);
-		OpCodeTable.Insert("push", OpCode_PUSH);
 		OpCodeTable.Insert("res", OpCode_RES);
-		OpCodeTable.Insert("ret", OpCode_RET);
 		OpCodeTable.Insert("reti", OpCode_RETI);
 		OpCodeTable.Insert("retn", OpCode_RETN);
 		OpCodeTable.Insert("rl", OpCode_RL);
-		OpCodeTable.Insert("rla", OpCode_RLA);
 		OpCodeTable.Insert("rlc", OpCode_RLC);
-		OpCodeTable.Insert("rlca", OpCode_RLCA);
 		OpCodeTable.Insert("rld", OpCode_RLD);
 		OpCodeTable.Insert("rr", OpCode_RR);
-		OpCodeTable.Insert("rra", OpCode_RRA);
 		OpCodeTable.Insert("rrc", OpCode_RRC);
-		OpCodeTable.Insert("rrca", OpCode_RRCA);
 		OpCodeTable.Insert("rrd", OpCode_RRD);
-		OpCodeTable.Insert("rst", OpCode_RST);
-		OpCodeTable.Insert("sbc", OpCode_SBC);
-		OpCodeTable.Insert("scf", OpCode_SCF);
 		OpCodeTable.Insert("set", OpCode_SET);
 		OpCodeTable.Insert("sla", OpCode_SLA);
 		OpCodeTable.Insert("sli", OpCode_SLL);
 		OpCodeTable.Insert("sll", OpCode_SLL);
 		OpCodeTable.Insert("sra", OpCode_SRA);
 		OpCodeTable.Insert("srl", OpCode_SRL);
-		OpCodeTable.Insert("sub", OpCode_SUB);
-		OpCodeTable.Insert("xor", OpCode_XOR);
 
 		InitNextExtensions();
 	}

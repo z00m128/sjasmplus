@@ -48,6 +48,7 @@ void PrintHelp() {
 	_COUT "\nOption flags as follows:" _ENDL;
 	_COUT "  -h or --help             Help information (you see it)" _ENDL;
 	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions" _ENDL;
+	_COUT "  --i8080                  Limit valid instructions to i8080 only" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
@@ -95,6 +96,7 @@ namespace Options {
 	bool NoDestinationFile = true;		// no *.out file by default
 	SSyntax syx, systemSyntax;
 	bool SourceStdIn = false;
+	bool IsI8080 = false;
 
 /*
 	// Include directories list is initialized with "." directory
@@ -371,6 +373,8 @@ namespace Options {
 				} else if (onlySyntaxOptions) {
 					// rest of the options is available only when launching the sjasmplus
 					return;
+				} else if (!strcmp(opt, "i8080")) {
+					IsI8080 = true;
 				} else if ((!doubleDash && !strcmp(opt,"h") && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
 					ShowHelp = 1;
 				} else if (doubleDash && !strcmp(opt, "version")) {

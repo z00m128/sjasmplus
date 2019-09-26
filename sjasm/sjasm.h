@@ -79,6 +79,7 @@ namespace Options {
 	extern bool NoDestinationFile;
 	extern SSyntax syx;
 	extern bool SourceStdIn;
+	extern bool IsI8080;			// only valid instructions for i8080 are legal in this mode
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;

@@ -1,0 +1,735 @@
+# file opened: op_IX_BIT_DDCB.asm
+ 1    0000                  ; all of these should fail on i8080
+ 2    0000
+ 3    0000                  ;;; generate shift instructions: #DDCBFF00 .. #DDCBFF3F ("ix-1" = FF index byte)
+ 4    0000                  DEFARRAY instructions rlc, rrc, rl, rr, sla, sra, sli, srl
+ 5    0000                  DEFARRAY registers <(ix-1),b>, <(ix-1),c>, <(ix-1),d>, <(ix-1),e>, <(ix-1),h>, <(ix-1),l>, <(ix-1)>, <(ix-1),a>
+ 6    0000
+ 7    0000              INS_I=0
+ 8    0000                  DUP 8
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rlc (ix-1),b
+11    0000             >            rlc (ix-1),b
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rlc (ix-1),c
+11    0000             >            rlc (ix-1),c
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rlc (ix-1),d
+11    0000             >            rlc (ix-1),d
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rlc (ix-1),e
+11    0000             >            rlc (ix-1),e
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rlc (ix-1),h
+11    0000             >            rlc (ix-1),h
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rlc (ix-1),l
+11    0000             >            rlc (ix-1),l
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rlc (ix-1)
+11    0000             >            rlc (ix-1)
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rlc (ix-1),a
+11    0000             >            rlc (ix-1),a
+12    0000             >REG_I=REG_I+1
+13    0000             >        EDUP
+14    0000             >INS_I=INS_I+1
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rrc (ix-1),b
+11    0000             >            rrc (ix-1),b
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rrc (ix-1),c
+11    0000             >            rrc (ix-1),c
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rrc (ix-1),d
+11    0000             >            rrc (ix-1),d
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rrc (ix-1),e
+11    0000             >            rrc (ix-1),e
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rrc (ix-1),h
+11    0000             >            rrc (ix-1),h
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rrc (ix-1),l
+11    0000             >            rrc (ix-1),l
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rrc (ix-1)
+11    0000             >            rrc (ix-1)
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rrc (ix-1),a
+11    0000             >            rrc (ix-1),a
+12    0000             >REG_I=REG_I+1
+13    0000             >        EDUP
+14    0000             >INS_I=INS_I+1
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rl (ix-1),b
+11    0000             >            rl (ix-1),b
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rl (ix-1),c
+11    0000             >            rl (ix-1),c
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rl (ix-1),d
+11    0000             >            rl (ix-1),d
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rl (ix-1),e
+11    0000             >            rl (ix-1),e
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rl (ix-1),h
+11    0000             >            rl (ix-1),h
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rl (ix-1),l
+11    0000             >            rl (ix-1),l
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rl (ix-1)
+11    0000             >            rl (ix-1)
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rl (ix-1),a
+11    0000             >            rl (ix-1),a
+12    0000             >REG_I=REG_I+1
+13    0000             >        EDUP
+14    0000             >INS_I=INS_I+1
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rr (ix-1),b
+11    0000             >            rr (ix-1),b
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rr (ix-1),c
+11    0000             >            rr (ix-1),c
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rr (ix-1),d
+11    0000             >            rr (ix-1),d
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rr (ix-1),e
+11    0000             >            rr (ix-1),e
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rr (ix-1),h
+11    0000             >            rr (ix-1),h
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rr (ix-1),l
+11    0000             >            rr (ix-1),l
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rr (ix-1)
+11    0000             >            rr (ix-1)
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: rr (ix-1),a
+11    0000             >            rr (ix-1),a
+12    0000             >REG_I=REG_I+1
+13    0000             >        EDUP
+14    0000             >INS_I=INS_I+1
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sla (ix-1),b
+11    0000             >            sla (ix-1),b
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sla (ix-1),c
+11    0000             >            sla (ix-1),c
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sla (ix-1),d
+11    0000             >            sla (ix-1),d
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sla (ix-1),e
+11    0000             >            sla (ix-1),e
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sla (ix-1),h
+11    0000             >            sla (ix-1),h
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sla (ix-1),l
+11    0000             >            sla (ix-1),l
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sla (ix-1)
+11    0000             >            sla (ix-1)
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sla (ix-1),a
+11    0000             >            sla (ix-1),a
+12    0000             >REG_I=REG_I+1
+13    0000             >        EDUP
+14    0000             >INS_I=INS_I+1
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sra (ix-1),b
+11    0000             >            sra (ix-1),b
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sra (ix-1),c
+11    0000             >            sra (ix-1),c
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sra (ix-1),d
+11    0000             >            sra (ix-1),d
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sra (ix-1),e
+11    0000             >            sra (ix-1),e
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sra (ix-1),h
+11    0000             >            sra (ix-1),h
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sra (ix-1),l
+11    0000             >            sra (ix-1),l
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sra (ix-1)
+11    0000             >            sra (ix-1)
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sra (ix-1),a
+11    0000             >            sra (ix-1),a
+12    0000             >REG_I=REG_I+1
+13    0000             >        EDUP
+14    0000             >INS_I=INS_I+1
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sli (ix-1),b
+11    0000             >            sli (ix-1),b
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sli (ix-1),c
+11    0000             >            sli (ix-1),c
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sli (ix-1),d
+11    0000             >            sli (ix-1),d
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sli (ix-1),e
+11    0000             >            sli (ix-1),e
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sli (ix-1),h
+11    0000             >            sli (ix-1),h
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sli (ix-1),l
+11    0000             >            sli (ix-1),l
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sli (ix-1)
+11    0000             >            sli (ix-1)
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: sli (ix-1),a
+11    0000             >            sli (ix-1),a
+12    0000             >REG_I=REG_I+1
+13    0000             >        EDUP
+14    0000             >INS_I=INS_I+1
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: srl (ix-1),b
+11    0000             >            srl (ix-1),b
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: srl (ix-1),c
+11    0000             >            srl (ix-1),c
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: srl (ix-1),d
+11    0000             >            srl (ix-1),d
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: srl (ix-1),e
+11    0000             >            srl (ix-1),e
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: srl (ix-1),h
+11    0000             >            srl (ix-1),h
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: srl (ix-1),l
+11    0000             >            srl (ix-1),l
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: srl (ix-1)
+11    0000             >            srl (ix-1)
+12    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(11): error: Unrecognized instruction: srl (ix-1),a
+11    0000             >            srl (ix-1),a
+12    0000             >REG_I=REG_I+1
+13    0000             >        EDUP
+14    0000             >INS_I=INS_I+1
+15    0000                  EDUP
+16    0000
+17    0000                  ;;; generate `bit` instructions: #DDCBFF46 .. #DDCBFF7E (two: {#x6, #xE})
+18    0000              REG_BIT=0
+19    0000                  DUP 8
+op_IX_BIT_DDCB.asm(20): error: Unrecognized instruction: bit REG_BIT,(ix-1)
+20    0000             >        bit REG_BIT,(ix-1)
+21    0000             >REG_BIT=REG_BIT+1
+op_IX_BIT_DDCB.asm(20): error: Unrecognized instruction: bit REG_BIT,(ix-1)
+20    0000             >        bit REG_BIT,(ix-1)
+21    0000             >REG_BIT=REG_BIT+1
+op_IX_BIT_DDCB.asm(20): error: Unrecognized instruction: bit REG_BIT,(ix-1)
+20    0000             >        bit REG_BIT,(ix-1)
+21    0000             >REG_BIT=REG_BIT+1
+op_IX_BIT_DDCB.asm(20): error: Unrecognized instruction: bit REG_BIT,(ix-1)
+20    0000             >        bit REG_BIT,(ix-1)
+21    0000             >REG_BIT=REG_BIT+1
+op_IX_BIT_DDCB.asm(20): error: Unrecognized instruction: bit REG_BIT,(ix-1)
+20    0000             >        bit REG_BIT,(ix-1)
+21    0000             >REG_BIT=REG_BIT+1
+op_IX_BIT_DDCB.asm(20): error: Unrecognized instruction: bit REG_BIT,(ix-1)
+20    0000             >        bit REG_BIT,(ix-1)
+21    0000             >REG_BIT=REG_BIT+1
+op_IX_BIT_DDCB.asm(20): error: Unrecognized instruction: bit REG_BIT,(ix-1)
+20    0000             >        bit REG_BIT,(ix-1)
+21    0000             >REG_BIT=REG_BIT+1
+op_IX_BIT_DDCB.asm(20): error: Unrecognized instruction: bit REG_BIT,(ix-1)
+20    0000             >        bit REG_BIT,(ix-1)
+21    0000             >REG_BIT=REG_BIT+1
+22    0000                  EDUP
+23    0000
+24    0000                  ;;; generate `res` + `set` instructions: #DDCB1180 .. #DDCB11FF ("ix+17" = 11 index byte)
+25    0000                  DEFARRAY instructions2 res, set
+26    0000                  DEFARRAY registers2 <(ix+17),b>, <(ix+17),c>, <(ix+17),d>, <(ix+17),e>, <(ix+17),h>, <(ix+17),l>, <(ix+17)>, <(ix+17),a>
+27    0000
+28    0000              INS_I=0
+29    0000                  DUP 2
+30    0000             >REG_BIT=0
+31    0000             >        DUP 8
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),b
+34    0000             >                res REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),c
+34    0000             >                res REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),d
+34    0000             >                res REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),e
+34    0000             >                res REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),h
+34    0000             >                res REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),l
+34    0000             >                res REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17)
+34    0000             >                res REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),a
+34    0000             >                res REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),b
+34    0000             >                res REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),c
+34    0000             >                res REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),d
+34    0000             >                res REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),e
+34    0000             >                res REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),h
+34    0000             >                res REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),l
+34    0000             >                res REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17)
+34    0000             >                res REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),a
+34    0000             >                res REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),b
+34    0000             >                res REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),c
+34    0000             >                res REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),d
+34    0000             >                res REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),e
+34    0000             >                res REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),h
+34    0000             >                res REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),l
+34    0000             >                res REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17)
+34    0000             >                res REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),a
+34    0000             >                res REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),b
+34    0000             >                res REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),c
+34    0000             >                res REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),d
+34    0000             >                res REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),e
+34    0000             >                res REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),h
+34    0000             >                res REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),l
+34    0000             >                res REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17)
+34    0000             >                res REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),a
+34    0000             >                res REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),b
+34    0000             >                res REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),c
+34    0000             >                res REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),d
+34    0000             >                res REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),e
+34    0000             >                res REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),h
+34    0000             >                res REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),l
+34    0000             >                res REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17)
+34    0000             >                res REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),a
+34    0000             >                res REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),b
+34    0000             >                res REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),c
+34    0000             >                res REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),d
+34    0000             >                res REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),e
+34    0000             >                res REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),h
+34    0000             >                res REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),l
+34    0000             >                res REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17)
+34    0000             >                res REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),a
+34    0000             >                res REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),b
+34    0000             >                res REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),c
+34    0000             >                res REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),d
+34    0000             >                res REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),e
+34    0000             >                res REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),h
+34    0000             >                res REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),l
+34    0000             >                res REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17)
+34    0000             >                res REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),a
+34    0000             >                res REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),b
+34    0000             >                res REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),c
+34    0000             >                res REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),d
+34    0000             >                res REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),e
+34    0000             >                res REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),h
+34    0000             >                res REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),l
+34    0000             >                res REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17)
+34    0000             >                res REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: res REG_BIT,(ix+17),a
+34    0000             >                res REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+38    0000             >        EDUP
+39    0000             >INS_I=INS_I+1
+30    0000             >REG_BIT=0
+31    0000             >        DUP 8
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),b
+34    0000             >                set REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),c
+34    0000             >                set REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),d
+34    0000             >                set REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),e
+34    0000             >                set REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),h
+34    0000             >                set REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),l
+34    0000             >                set REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17)
+34    0000             >                set REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
+34    0000             >                set REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),b
+34    0000             >                set REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),c
+34    0000             >                set REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),d
+34    0000             >                set REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),e
+34    0000             >                set REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),h
+34    0000             >                set REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),l
+34    0000             >                set REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17)
+34    0000             >                set REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
+34    0000             >                set REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),b
+34    0000             >                set REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),c
+34    0000             >                set REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),d
+34    0000             >                set REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),e
+34    0000             >                set REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),h
+34    0000             >                set REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),l
+34    0000             >                set REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17)
+34    0000             >                set REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
+34    0000             >                set REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),b
+34    0000             >                set REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),c
+34    0000             >                set REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),d
+34    0000             >                set REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),e
+34    0000             >                set REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),h
+34    0000             >                set REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),l
+34    0000             >                set REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17)
+34    0000             >                set REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
+34    0000             >                set REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),b
+34    0000             >                set REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),c
+34    0000             >                set REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),d
+34    0000             >                set REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),e
+34    0000             >                set REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),h
+34    0000             >                set REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),l
+34    0000             >                set REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17)
+34    0000             >                set REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
+34    0000             >                set REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),b
+34    0000             >                set REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),c
+34    0000             >                set REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),d
+34    0000             >                set REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),e
+34    0000             >                set REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),h
+34    0000             >                set REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),l
+34    0000             >                set REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17)
+34    0000             >                set REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
+34    0000             >                set REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),b
+34    0000             >                set REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),c
+34    0000             >                set REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),d
+34    0000             >                set REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),e
+34    0000             >                set REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),h
+34    0000             >                set REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),l
+34    0000             >                set REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17)
+34    0000             >                set REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
+34    0000             >                set REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+32    0000             >REG_I=0
+33    0000             >            DUP 8
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),b
+34    0000             >                set REG_BIT,(ix+17),b
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),c
+34    0000             >                set REG_BIT,(ix+17),c
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),d
+34    0000             >                set REG_BIT,(ix+17),d
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),e
+34    0000             >                set REG_BIT,(ix+17),e
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),h
+34    0000             >                set REG_BIT,(ix+17),h
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),l
+34    0000             >                set REG_BIT,(ix+17),l
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17)
+34    0000             >                set REG_BIT,(ix+17)
+35    0000             >REG_I=REG_I+1
+op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
+34    0000             >                set REG_BIT,(ix+17),a
+35    0000             >REG_I=REG_I+1
+36    0000             >            EDUP
+37    0000             >REG_BIT=REG_BIT+1
+38    0000             >        EDUP
+39    0000             >INS_I=INS_I+1
+40    0000                  EDUP
+41    0000
+# file closed: op_IX_BIT_DDCB.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002   INS_I
+0x0008   REG_I
+0x0008   REG_BIT
