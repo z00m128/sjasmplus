@@ -9,6 +9,8 @@ Debian stretch-minimal = produce sh script to download src from github and build
 bonus points for running also tests (prepare + verify in VM?) => for Xalior and his
 Raspberry Pi CI machine.
 
+ARM emulation on x86: https://github.com/nongiach/arm_now  ???
+
 https://github.com/mborik/regression/blob/master/alternatape/maketap.a80#L12
 ^^ emptytap was failing with define symbol?! (can't reproduce with small example,
 try full "regression" source pack)

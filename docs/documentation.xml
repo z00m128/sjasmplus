@@ -182,6 +182,18 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.14.2</term>
+
+            <listitem>
+              <synopsis>- added i8080 mode (--i8080 CLI option) (it's still Z80 Zilog syntax, just limited instruction set)
+- small improvements/polish/extra-info in docs, INSTALL, README, few new tests added
+- cmake script fix of SYSTEM_LUA=ON option, <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">CirrusCI</ulink> configs added for macOS and FreeBSD
+- few fixes of memory leaks, invalid memory access, double free/delete, ...
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>30.8.2019 - 1.14.1</term>
 
             <listitem>
