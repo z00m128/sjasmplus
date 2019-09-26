@@ -1,0 +1,1 @@
+device_zx_spectrum_next.asm(8): error: Can't use ZXN device while in i8080 assembling mode.:     DEVICE ZXSPECTRUMNEXT
