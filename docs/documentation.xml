@@ -287,6 +287,7 @@
   --version                Basic info (with --nologo only raw version string)
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
+  --i8080                  Limit valid instructions to i8080 only (+ no fakes)
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)

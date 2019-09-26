@@ -48,7 +48,7 @@ void PrintHelp() {
 	_COUT "\nOption flags as follows:" _ENDL;
 	_COUT "  -h or --help             Help information (you see it)" _ENDL;
 	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions" _ENDL;
-	_COUT "  --i8080                  Limit valid instructions to i8080 only" _ENDL;
+	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
