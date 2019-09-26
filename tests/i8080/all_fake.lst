@@ -48,45 +48,45 @@ all_fake.asm(26): error: Unrecognized instruction: srl de
 all_fake.asm(27): error: Unrecognized instruction: srl hl
  27   8000              srl_hl              srl hl
  28   8000
-all_fake.asm(29): error: Fake instructions are not possible in i8080 mode: ld bc,bc
+all_fake.asm(29): error: Fake instructions are not implemented in i8080 mode: ld bc,bc
  29   8000              ld_bc_bc            ld bc,bc
-all_fake.asm(30): error: Fake instructions are not possible in i8080 mode: ld bc,de
+all_fake.asm(30): error: Fake instructions are not implemented in i8080 mode: ld bc,de
  30   8000              ld_bc_de            ld bc,de
-all_fake.asm(31): error: Fake instructions are not possible in i8080 mode: ld bc,hl
+all_fake.asm(31): error: Fake instructions are not implemented in i8080 mode: ld bc,hl
  31   8000              ld_bc_hl            ld bc,hl
 all_fake.asm(32): error: Label not found: ix
  32   8000 01 00 00     ld_bc_ix            ld bc,ix
 all_fake.asm(33): error: Label not found: iy
  33   8003 01 00 00     ld_bc_iy            ld bc,iy
-all_fake.asm(34): error: Fake instructions are not possible in i8080 mode: ld bc,(hl)
+all_fake.asm(34): error: Fake instructions are not implemented in i8080 mode: ld bc,(hl)
  34   8006              ld_bc_#hl#          ld bc,(hl)
 all_fake.asm(35): error: Label not found: ix
  35   8006              ld_bc_#ix_nn#       ld bc,(ix+$77)
 all_fake.asm(36): error: Label not found: iy
  36   8006              ld_bc_#iy_nn#       ld bc,(iy+$77)
  37   8006
-all_fake.asm(38): error: Fake instructions are not possible in i8080 mode: ld de,bc
+all_fake.asm(38): error: Fake instructions are not implemented in i8080 mode: ld de,bc
  38   8006              ld_de_bc            ld de,bc
-all_fake.asm(39): error: Fake instructions are not possible in i8080 mode: ld de,de
+all_fake.asm(39): error: Fake instructions are not implemented in i8080 mode: ld de,de
  39   8006              ld_de_de            ld de,de
-all_fake.asm(40): error: Fake instructions are not possible in i8080 mode: ld de,hl
+all_fake.asm(40): error: Fake instructions are not implemented in i8080 mode: ld de,hl
  40   8006              ld_de_hl            ld de,hl
 all_fake.asm(41): error: Label not found: ix
  41   8006 11 00 00     ld_de_ix            ld de,ix
 all_fake.asm(42): error: Label not found: iy
  42   8009 11 00 00     ld_de_iy            ld de,iy
-all_fake.asm(43): error: Fake instructions are not possible in i8080 mode: ld de,(hl)
+all_fake.asm(43): error: Fake instructions are not implemented in i8080 mode: ld de,(hl)
  43   800C              ld_de_#hl#          ld de,(hl)
 all_fake.asm(44): error: Label not found: ix
  44   800C              ld_de_#ix_nn#       ld de,(ix+$77)
 all_fake.asm(45): error: Label not found: iy
  45   800C              ld_de_#iy_nn#       ld de,(iy+$77)
  46   800C
-all_fake.asm(47): error: Fake instructions are not possible in i8080 mode: ld hl,bc
+all_fake.asm(47): error: Fake instructions are not implemented in i8080 mode: ld hl,bc
  47   800C              ld_hl_bc            ld hl,bc
-all_fake.asm(48): error: Fake instructions are not possible in i8080 mode: ld hl,de
+all_fake.asm(48): error: Fake instructions are not implemented in i8080 mode: ld hl,de
  48   800C              ld_hl_de            ld hl,de
-all_fake.asm(49): error: Fake instructions are not possible in i8080 mode: ld hl,hl
+all_fake.asm(49): error: Fake instructions are not implemented in i8080 mode: ld hl,hl
  49   800C              ld_hl_hl            ld hl,hl
 all_fake.asm(50): error: Label not found: ix
  50   800C 21 00 00     ld_hl_ix            ld hl,ix
@@ -121,9 +121,9 @@ all_fake.asm(64): error: Illegal instruction: ld_iy_ix            ld iy,ix
 all_fake.asm(65): error: Illegal instruction: ld_iy_iy            ld iy,iy
  65   8018              ld_iy_iy            ld iy,iy
  66   8018
-all_fake.asm(67): error: Fake instructions are not possible in i8080 mode: ld (hl),bc
+all_fake.asm(67): error: Fake instructions are not implemented in i8080 mode: ld (hl),bc
  67   8018              ld_#hl#_bc          ld (hl),bc
-all_fake.asm(68): error: Fake instructions are not possible in i8080 mode: ld (hl),de
+all_fake.asm(68): error: Fake instructions are not implemented in i8080 mode: ld (hl),de
  68   8018              ld_#hl#_de          ld (hl),de
  69   8018
 all_fake.asm(70): error: Label not found: ix

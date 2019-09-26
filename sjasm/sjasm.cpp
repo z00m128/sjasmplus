@@ -108,7 +108,7 @@ namespace Options {
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
 	static const char* fakes_disabled_txt_error = "Fake instructions are not enabled";
-	static const char* fakes_in_i8080_txt_error = "Fake instructions are not possible in i8080 mode";
+	static const char* fakes_in_i8080_txt_error = "Fake instructions are not implemented in i8080 mode";
 
 	// returns true if fakes are completely disabled, false when they are enabled
 	// showMessage=true: will also display error/warning (use when fake ins. is emitted)
