@@ -107,13 +107,17 @@ namespace Options {
 
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
+	static const char* fakes_disabled_txt_error = "Fake instructions are not enabled";
+	static const char* fakes_in_i8080_txt_error = "Fake instructions are not possible in i8080 mode";
+
 	// returns true if fakes are completely disabled, false when they are enabled
 	// showMessage=true: will also display error/warning (use when fake ins. is emitted)
 	// showMessage=false: can be used to silently check if fake instructions are even possible
 	bool noFakes(bool showMessage) {
-		if (!showMessage) return !syx.FakeEnabled;
-		if (!syx.FakeEnabled) {
-			Error("Fake instructions are not enabled", bp, SUPPRESS);
+		bool fakesDisabled = Options::IsI8080 || (!syx.FakeEnabled);
+		if (!showMessage) return fakesDisabled;
+		if (fakesDisabled) {
+			Error(Options::IsI8080 ? fakes_in_i8080_txt_error : fakes_disabled_txt_error, bp, SUPPRESS);
 			return true;
 		}
 		// check end-of-line comment for mentioning "fake" to remove warning, or beginning with "ok"
@@ -360,6 +364,7 @@ namespace Options {
 				// check for particular options and setup option value by it
 				// first check all syntax-only options which may be modified by OPT directive
 				if (!strcmp(opt, "zxnext")) {
+					if (IsI8080) Error("Can't enable Next extensions while in i8080 mode", nullptr, FATAL);
 					syx.IsNextEnabled = 1;
 					if (!strcmp(val, "cspect")) syx.IsNextEnabled = 2;	// CSpect emulator extensions
 				} else if (!strcmp(opt, "reversepop")) {
@@ -375,6 +380,7 @@ namespace Options {
 					return;
 				} else if (!strcmp(opt, "i8080")) {
 					IsI8080 = true;
+					syx.IsNextEnabled = 0;	// force (silently) Z80N off when i8080 is requested
 				} else if ((!doubleDash && !strcmp(opt,"h") && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
 					ShowHelp = 1;
 				} else if (doubleDash && !strcmp(opt, "version")) {
