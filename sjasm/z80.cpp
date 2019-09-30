@@ -1174,7 +1174,7 @@ namespace Z80 {
 					if (Options::IsLR35902 && Z80_HL == reg1) {		// "ld hl,sp+r8" syntax = "F8 r8"
 						b = 0;
 						// "sp" must be followed by + or - (or nothing: "ld hl,sp" = +0)
-						if (!SkipBlanks(lp)) {
+						if (!SkipBlanks(lp) && ',' != *lp ) {		// comma is probably multi-arg
 							if ('+' != *lp && '-' != *lp) {
 								Error("[LD] `ld hl,sp+r8` expects + or - after sp, found", lp);
 								break;
@@ -1223,7 +1223,7 @@ namespace Z80 {
 				reg2 = GetRegister(lp);
 				switch (reg1) {
 				case Z80_C:
-					if (Options::IsLR35902) {	// Sharp LR35902 `ld (c),a` (targetting [$ff00+c])
+					if (Options::IsLR35902 && Z80_A == reg2) {	// Sharp LR35902 `ld (c),a` (targetting [$ff00+c])
 						e[0] = 0xE2;
 					}
 					break;
