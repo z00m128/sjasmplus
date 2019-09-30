@@ -1,5 +1,6 @@
 ## [1.14.2](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.2) - *not released yet*
 - added i8080 mode (`--i8080` CLI option) (it's still Z80 Zilog syntax, just limited instruction set)
+- added Sharp LR35902 mode (`--lr35902` CLI option) (100% syntax compatibility with IDA, 95% bgb)
 - small improvements/polish/extra-info in docs, INSTALL, README, few new tests added
 - cmake script fix of `SYSTEM_LUA=ON` option, [CirrusCI](https://cirrus-ci.com/github/z00m128/sjasmplus/master) configs added for macOS and FreeBSD
 - few fixes of memory leaks, invalid memory access, double free/delete
