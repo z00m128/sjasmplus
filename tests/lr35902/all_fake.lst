@@ -1,0 +1,582 @@
+# file opened: all_fake.asm
+  1   0000                  ; all of these should fail on LR35902
+  2   0000                  ; (some will emit damaged machine code of legit LR35902 instruction, like LD bc,ix)
+  3   0000
+  4   0000                  ORG 0x8000
+  5   8000                  ; VALID LR35902 instructions (not fake!)
+  6   8000 22           ldi_#hl#_a          ldi (hl),a      ; #22
+  7   8001 2A           ldi_a_#hl#          ldi a,(hl)      ; #2A
+  8   8002 32           ldd_#hl#_a          ldd (hl),a      ; #32
+  9   8003 3A           ldd_a_#hl#          ldd a,(hl)      ; #3A
+ 10   8004
+ 11   8004                  ; Z80 fake instructions
+all_fake.asm(12): error: Fake instructions are not implemented in Sharp LR35902 mode: rl bc
+ 12   8004              rl_bc               rl bc
+all_fake.asm(13): error: Fake instructions are not implemented in Sharp LR35902 mode: rl de
+ 13   8004              rl_de               rl de
+all_fake.asm(14): error: Fake instructions are not implemented in Sharp LR35902 mode: rl hl
+ 14   8004              rl_hl               rl hl
+all_fake.asm(15): error: Fake instructions are not implemented in Sharp LR35902 mode: rr bc
+ 15   8004              rr_bc               rr bc
+all_fake.asm(16): error: Fake instructions are not implemented in Sharp LR35902 mode: rr de
+ 16   8004              rr_de               rr de
+all_fake.asm(17): error: Fake instructions are not implemented in Sharp LR35902 mode: rr hl
+ 17   8004              rr_hl               rr hl
+all_fake.asm(18): error: Fake instructions are not implemented in Sharp LR35902 mode: sla bc
+ 18   8004              sla_bc              sla bc
+all_fake.asm(19): error: Fake instructions are not implemented in Sharp LR35902 mode: sla de
+ 19   8004              sla_de              sla de
+all_fake.asm(20): error: Fake instructions are not implemented in Sharp LR35902 mode: sla hl
+ 20   8004              sla_hl              sla hl
+all_fake.asm(21): error: Unrecognized instruction: sll bc
+ 21   8004              sll_bc              sll bc
+all_fake.asm(22): error: Unrecognized instruction: sll de
+ 22   8004              sll_de              sll de
+all_fake.asm(23): error: Unrecognized instruction: sll hl
+ 23   8004              sll_hl              sll hl
+all_fake.asm(24): error: Unrecognized instruction: sli bc
+ 24   8004              sli_bc              sli bc
+all_fake.asm(25): error: Unrecognized instruction: sli de
+ 25   8004              sli_de              sli de
+all_fake.asm(26): error: Unrecognized instruction: sli hl
+ 26   8004              sli_hl              sli hl
+all_fake.asm(27): error: Fake instructions are not implemented in Sharp LR35902 mode: sra bc
+ 27   8004              sra_bc              sra bc
+all_fake.asm(28): error: Fake instructions are not implemented in Sharp LR35902 mode: sra de
+ 28   8004              sra_de              sra de
+all_fake.asm(29): error: Fake instructions are not implemented in Sharp LR35902 mode: sra hl
+ 29   8004              sra_hl              sra hl
+all_fake.asm(30): error: Fake instructions are not implemented in Sharp LR35902 mode: srl bc
+ 30   8004              srl_bc              srl bc
+all_fake.asm(31): error: Fake instructions are not implemented in Sharp LR35902 mode: srl de
+ 31   8004              srl_de              srl de
+all_fake.asm(32): error: Fake instructions are not implemented in Sharp LR35902 mode: srl hl
+ 32   8004              srl_hl              srl hl
+ 33   8004
+all_fake.asm(34): error: Fake instructions are not implemented in Sharp LR35902 mode: ld bc,bc
+ 34   8004              ld_bc_bc            ld bc,bc
+all_fake.asm(35): error: Fake instructions are not implemented in Sharp LR35902 mode: ld bc,de
+ 35   8004              ld_bc_de            ld bc,de
+all_fake.asm(36): error: Fake instructions are not implemented in Sharp LR35902 mode: ld bc,hl
+ 36   8004              ld_bc_hl            ld bc,hl
+all_fake.asm(37): error: Label not found: ix
+ 37   8004 01 00 00     ld_bc_ix            ld bc,ix
+all_fake.asm(38): error: Label not found: iy
+ 38   8007 01 00 00     ld_bc_iy            ld bc,iy
+all_fake.asm(39): error: Fake instructions are not implemented in Sharp LR35902 mode: ld bc,(hl)
+ 39   800A              ld_bc_#hl#          ld bc,(hl)
+all_fake.asm(40): error: Label not found: ix
+ 40   800A              ld_bc_#ix_nn#       ld bc,(ix+$77)
+all_fake.asm(41): error: Label not found: iy
+ 41   800A              ld_bc_#iy_nn#       ld bc,(iy+$77)
+ 42   800A
+all_fake.asm(43): error: Fake instructions are not implemented in Sharp LR35902 mode: ld de,bc
+ 43   800A              ld_de_bc            ld de,bc
+all_fake.asm(44): error: Fake instructions are not implemented in Sharp LR35902 mode: ld de,de
+ 44   800A              ld_de_de            ld de,de
+all_fake.asm(45): error: Fake instructions are not implemented in Sharp LR35902 mode: ld de,hl
+ 45   800A              ld_de_hl            ld de,hl
+all_fake.asm(46): error: Label not found: ix
+ 46   800A 11 00 00     ld_de_ix            ld de,ix
+all_fake.asm(47): error: Label not found: iy
+ 47   800D 11 00 00     ld_de_iy            ld de,iy
+all_fake.asm(48): error: Fake instructions are not implemented in Sharp LR35902 mode: ld de,(hl)
+ 48   8010              ld_de_#hl#          ld de,(hl)
+all_fake.asm(49): error: Label not found: ix
+ 49   8010              ld_de_#ix_nn#       ld de,(ix+$77)
+all_fake.asm(50): error: Label not found: iy
+ 50   8010              ld_de_#iy_nn#       ld de,(iy+$77)
+ 51   8010
+all_fake.asm(52): error: Fake instructions are not implemented in Sharp LR35902 mode: ld hl,bc
+ 52   8010              ld_hl_bc            ld hl,bc
+all_fake.asm(53): error: Fake instructions are not implemented in Sharp LR35902 mode: ld hl,de
+ 53   8010              ld_hl_de            ld hl,de
+all_fake.asm(54): error: Fake instructions are not implemented in Sharp LR35902 mode: ld hl,hl
+ 54   8010              ld_hl_hl            ld hl,hl
+all_fake.asm(55): error: Label not found: ix
+ 55   8010 21 00 00     ld_hl_ix            ld hl,ix
+all_fake.asm(56): error: Label not found: iy
+ 56   8013 21 00 00     ld_hl_iy            ld hl,iy
+all_fake.asm(57): error: Label not found: ix
+ 57   8016              ld_hl_#ix_nn#       ld hl,(ix+$77)
+all_fake.asm(58): error: Label not found: iy
+ 58   8016              ld_hl_#iy_nn#       ld hl,(iy+$77)
+ 59   8016
+all_fake.asm(60): error: Illegal instruction: ld_ix_bc            ld ix,bc
+ 60   8016              ld_ix_bc            ld ix,bc
+all_fake.asm(61): error: Illegal instruction: ld_ix_de            ld ix,de
+ 61   8016              ld_ix_de            ld ix,de
+all_fake.asm(62): error: Illegal instruction: ld_ix_hl            ld ix,hl
+ 62   8016              ld_ix_hl            ld ix,hl
+all_fake.asm(63): error: Illegal instruction: ld_ix_ix            ld ix,ix
+ 63   8016              ld_ix_ix            ld ix,ix
+all_fake.asm(64): error: Illegal instruction: ld_ix_iy            ld ix,iy
+ 64   8016              ld_ix_iy            ld ix,iy
+ 65   8016
+all_fake.asm(66): error: Illegal instruction: ld_iy_bc            ld iy,bc
+ 66   8016              ld_iy_bc            ld iy,bc
+all_fake.asm(67): error: Illegal instruction: ld_iy_de            ld iy,de
+ 67   8016              ld_iy_de            ld iy,de
+all_fake.asm(68): error: Illegal instruction: ld_iy_hl            ld iy,hl
+ 68   8016              ld_iy_hl            ld iy,hl
+all_fake.asm(69): error: Illegal instruction: ld_iy_ix            ld iy,ix
+ 69   8016              ld_iy_ix            ld iy,ix
+all_fake.asm(70): error: Illegal instruction: ld_iy_iy            ld iy,iy
+ 70   8016              ld_iy_iy            ld iy,iy
+ 71   8016
+all_fake.asm(72): error: Fake instructions are not implemented in Sharp LR35902 mode: ld (hl),bc
+ 72   8016              ld_#hl#_bc          ld (hl),bc
+all_fake.asm(73): error: Fake instructions are not implemented in Sharp LR35902 mode: ld (hl),de
+ 73   8016              ld_#hl#_de          ld (hl),de
+ 74   8016
+all_fake.asm(75): error: Label not found: ix
+ 75   8016              ld_#ix_nn#_bc       ld (ix+$77),bc
+all_fake.asm(76): error: Label not found: ix
+ 76   8016              ld_#ix_nn#_de       ld (ix+$77),de
+all_fake.asm(77): error: Label not found: ix
+ 77   8016              ld_#ix_nn#_hl       ld (ix+$77),hl
+ 78   8016
+all_fake.asm(79): error: Label not found: iy
+ 79   8016              ld_#iy_nn#_bc       ld (iy+$77),bc
+all_fake.asm(80): error: Label not found: iy
+ 80   8016              ld_#iy_nn#_de       ld (iy+$77),de
+all_fake.asm(81): error: Label not found: iy
+ 81   8016              ld_#iy_nn#_hl       ld (iy+$77),hl
+ 82   8016
+all_fake.asm(83): error: Illegal instruction: ldi_bc_#hl#         ldi bc,(hl)
+ 83   8016              ldi_bc_#hl#         ldi bc,(hl)
+all_fake.asm(84): error: Illegal instruction: ldi_bc_#ix_nn#      ldi bc,(ix+$77)
+ 84   8016              ldi_bc_#ix_nn#      ldi bc,(ix+$77)
+all_fake.asm(85): error: Illegal instruction: ldi_bc_#iy_nn#      ldi bc,(iy+$77)
+ 85   8016              ldi_bc_#iy_nn#      ldi bc,(iy+$77)
+ 86   8016
+all_fake.asm(87): error: Illegal instruction: ldi_de_#hl#         ldi de,(hl)
+ 87   8016              ldi_de_#hl#         ldi de,(hl)
+all_fake.asm(88): error: Illegal instruction: ldi_de_#ix_nn#      ldi de,(ix+$77)
+ 88   8016              ldi_de_#ix_nn#      ldi de,(ix+$77)
+all_fake.asm(89): error: Illegal instruction: ldi_de_#iy_nn#      ldi de,(iy+$77)
+ 89   8016              ldi_de_#iy_nn#      ldi de,(iy+$77)
+ 90   8016
+all_fake.asm(91): error: Illegal instruction: ldi_hl_#ix_nn#      ldi hl,(ix+$77)
+ 91   8016              ldi_hl_#ix_nn#      ldi hl,(ix+$77)
+all_fake.asm(92): error: Illegal instruction: ldi_hl_#iy_nn#      ldi hl,(iy+$77)
+ 92   8016              ldi_hl_#iy_nn#      ldi hl,(iy+$77)
+ 93   8016
+all_fake.asm(94): error: Illegal instruction: ldi_#hl#_bc         ldi (hl),bc
+ 94   8016              ldi_#hl#_bc         ldi (hl),bc
+all_fake.asm(95): error: Illegal instruction: ldi_#hl#_de         ldi (hl),de
+ 95   8016              ldi_#hl#_de         ldi (hl),de
+ 96   8016
+all_fake.asm(97): error: Illegal instruction: ldi_#ix_nn#_bc      ldi (ix+$77),bc
+ 97   8016              ldi_#ix_nn#_bc      ldi (ix+$77),bc
+all_fake.asm(98): error: Illegal instruction: ldi_#ix_nn#_de      ldi (ix+$77),de
+ 98   8016              ldi_#ix_nn#_de      ldi (ix+$77),de
+all_fake.asm(99): error: Illegal instruction: ldi_#ix_nn#_hl      ldi (ix+$77),hl
+ 99   8016              ldi_#ix_nn#_hl      ldi (ix+$77),hl
+100   8016
+all_fake.asm(101): error: Illegal instruction: ldi_#iy_nn#_bc      ldi (iy+$77),bc
+101   8016              ldi_#iy_nn#_bc      ldi (iy+$77),bc
+all_fake.asm(102): error: Illegal instruction: ldi_#iy_nn#_de      ldi (iy+$77),de
+102   8016              ldi_#iy_nn#_de      ldi (iy+$77),de
+all_fake.asm(103): error: Illegal instruction: ldi_#iy_nn#_hl      ldi (iy+$77),hl
+103   8016              ldi_#iy_nn#_hl      ldi (iy+$77),hl
+104   8016
+all_fake.asm(105): error: Illegal instruction: ldi_a_#bc#          ldi a,(bc)
+105   8016              ldi_a_#bc#          ldi a,(bc)
+all_fake.asm(106): error: Illegal instruction: ldi_a_#de#          ldi a,(de)
+106   8016              ldi_a_#de#          ldi a,(de)
+all_fake.asm(107): error: Illegal instruction: ldi_b_#hl#          ldi b,(hl)
+107   8016              ldi_b_#hl#          ldi b,(hl)
+all_fake.asm(108): error: Illegal instruction: ldi_c_#hl#          ldi c,(hl)
+108   8016              ldi_c_#hl#          ldi c,(hl)
+all_fake.asm(109): error: Illegal instruction: ldi_d_#hl#          ldi d,(hl)
+109   8016              ldi_d_#hl#          ldi d,(hl)
+all_fake.asm(110): error: Illegal instruction: ldi_e_#hl#          ldi e,(hl)
+110   8016              ldi_e_#hl#          ldi e,(hl)
+all_fake.asm(111): error: Illegal instruction: ldi_h_#hl#          ldi h,(hl)
+111   8016              ldi_h_#hl#          ldi h,(hl)
+all_fake.asm(112): error: Illegal instruction: ldi_l_#hl#          ldi l,(hl)
+112   8016              ldi_l_#hl#          ldi l,(hl)
+all_fake.asm(113): error: Illegal instruction: ldi_a_#ix_nn#       ldi a,(ix+$77)
+113   8016              ldi_a_#ix_nn#       ldi a,(ix+$77)
+all_fake.asm(114): error: Illegal instruction: ldi_b_#ix_nn#       ldi b,(ix+$77)
+114   8016              ldi_b_#ix_nn#       ldi b,(ix+$77)
+all_fake.asm(115): error: Illegal instruction: ldi_c_#ix_nn#       ldi c,(ix+$77)
+115   8016              ldi_c_#ix_nn#       ldi c,(ix+$77)
+all_fake.asm(116): error: Illegal instruction: ldi_d_#ix_nn#       ldi d,(ix+$77)
+116   8016              ldi_d_#ix_nn#       ldi d,(ix+$77)
+all_fake.asm(117): error: Illegal instruction: ldi_e_#ix_nn#       ldi e,(ix+$77)
+117   8016              ldi_e_#ix_nn#       ldi e,(ix+$77)
+all_fake.asm(118): error: Illegal instruction: ldi_h_#ix_nn#       ldi h,(ix+$77)
+118   8016              ldi_h_#ix_nn#       ldi h,(ix+$77)
+all_fake.asm(119): error: Illegal instruction: ldi_l_#ix_nn#       ldi l,(ix+$77)
+119   8016              ldi_l_#ix_nn#       ldi l,(ix+$77)
+all_fake.asm(120): error: Illegal instruction: ldi_a_#iy_nn#       ldi a,(iy+$77)
+120   8016              ldi_a_#iy_nn#       ldi a,(iy+$77)
+all_fake.asm(121): error: Illegal instruction: ldi_b_#iy_nn#       ldi b,(iy+$77)
+121   8016              ldi_b_#iy_nn#       ldi b,(iy+$77)
+all_fake.asm(122): error: Illegal instruction: ldi_c_#iy_nn#       ldi c,(iy+$77)
+122   8016              ldi_c_#iy_nn#       ldi c,(iy+$77)
+all_fake.asm(123): error: Illegal instruction: ldi_d_#iy_nn#       ldi d,(iy+$77)
+123   8016              ldi_d_#iy_nn#       ldi d,(iy+$77)
+all_fake.asm(124): error: Illegal instruction: ldi_e_#iy_nn#       ldi e,(iy+$77)
+124   8016              ldi_e_#iy_nn#       ldi e,(iy+$77)
+all_fake.asm(125): error: Illegal instruction: ldi_h_#iy_nn#       ldi h,(iy+$77)
+125   8016              ldi_h_#iy_nn#       ldi h,(iy+$77)
+all_fake.asm(126): error: Illegal instruction: ldi_l_#iy_nn#       ldi l,(iy+$77)
+126   8016              ldi_l_#iy_nn#       ldi l,(iy+$77)
+127   8016
+all_fake.asm(128): error: Illegal instruction: ldd_a_#bc#          ldd a,(bc)
+128   8016              ldd_a_#bc#          ldd a,(bc)
+all_fake.asm(129): error: Illegal instruction: ldd_a_#de#          ldd a,(de)
+129   8016              ldd_a_#de#          ldd a,(de)
+all_fake.asm(130): error: Illegal instruction: ldd_b_#hl#          ldd b,(hl)
+130   8016              ldd_b_#hl#          ldd b,(hl)
+all_fake.asm(131): error: Illegal instruction: ldd_c_#hl#          ldd c,(hl)
+131   8016              ldd_c_#hl#          ldd c,(hl)
+all_fake.asm(132): error: Illegal instruction: ldd_d_#hl#          ldd d,(hl)
+132   8016              ldd_d_#hl#          ldd d,(hl)
+all_fake.asm(133): error: Illegal instruction: ldd_e_#hl#          ldd e,(hl)
+133   8016              ldd_e_#hl#          ldd e,(hl)
+all_fake.asm(134): error: Illegal instruction: ldd_h_#hl#          ldd h,(hl)
+134   8016              ldd_h_#hl#          ldd h,(hl)
+all_fake.asm(135): error: Illegal instruction: ldd_l_#hl#          ldd l,(hl)
+135   8016              ldd_l_#hl#          ldd l,(hl)
+all_fake.asm(136): error: Illegal instruction: ldd_a_#ix_nn#       ldd a,(ix+$77)
+136   8016              ldd_a_#ix_nn#       ldd a,(ix+$77)
+all_fake.asm(137): error: Illegal instruction: ldd_b_#ix_nn#       ldd b,(ix+$77)
+137   8016              ldd_b_#ix_nn#       ldd b,(ix+$77)
+all_fake.asm(138): error: Illegal instruction: ldd_c_#ix_nn#       ldd c,(ix+$77)
+138   8016              ldd_c_#ix_nn#       ldd c,(ix+$77)
+all_fake.asm(139): error: Illegal instruction: ldd_d_#ix_nn#       ldd d,(ix+$77)
+139   8016              ldd_d_#ix_nn#       ldd d,(ix+$77)
+all_fake.asm(140): error: Illegal instruction: ldd_e_#ix_nn#       ldd e,(ix+$77)
+140   8016              ldd_e_#ix_nn#       ldd e,(ix+$77)
+all_fake.asm(141): error: Illegal instruction: ldd_h_#ix_nn#       ldd h,(ix+$77)
+141   8016              ldd_h_#ix_nn#       ldd h,(ix+$77)
+all_fake.asm(142): error: Illegal instruction: ldd_l_#ix_nn#       ldd l,(ix+$77)
+142   8016              ldd_l_#ix_nn#       ldd l,(ix+$77)
+all_fake.asm(143): error: Illegal instruction: ldd_a_#iy_nn#       ldd a,(iy+$77)
+143   8016              ldd_a_#iy_nn#       ldd a,(iy+$77)
+all_fake.asm(144): error: Illegal instruction: ldd_b_#iy_nn#       ldd b,(iy+$77)
+144   8016              ldd_b_#iy_nn#       ldd b,(iy+$77)
+all_fake.asm(145): error: Illegal instruction: ldd_c_#iy_nn#       ldd c,(iy+$77)
+145   8016              ldd_c_#iy_nn#       ldd c,(iy+$77)
+all_fake.asm(146): error: Illegal instruction: ldd_d_#iy_nn#       ldd d,(iy+$77)
+146   8016              ldd_d_#iy_nn#       ldd d,(iy+$77)
+all_fake.asm(147): error: Illegal instruction: ldd_e_#iy_nn#       ldd e,(iy+$77)
+147   8016              ldd_e_#iy_nn#       ldd e,(iy+$77)
+all_fake.asm(148): error: Illegal instruction: ldd_h_#iy_nn#       ldd h,(iy+$77)
+148   8016              ldd_h_#iy_nn#       ldd h,(iy+$77)
+all_fake.asm(149): error: Illegal instruction: ldd_l_#iy_nn#       ldd l,(iy+$77)
+149   8016              ldd_l_#iy_nn#       ldd l,(iy+$77)
+150   8016
+all_fake.asm(151): error: Illegal instruction: ldi_#bc#_a          ldi (bc),a
+151   8016              ldi_#bc#_a          ldi (bc),a
+all_fake.asm(152): error: Illegal instruction: ldi_#de#_a          ldi (de),a
+152   8016              ldi_#de#_a          ldi (de),a
+all_fake.asm(153): error: Illegal instruction: ldi_#hl#_b          ldi (hl),b
+153   8016              ldi_#hl#_b          ldi (hl),b
+all_fake.asm(154): error: Illegal instruction: ldi_#hl#_c          ldi (hl),c
+154   8016              ldi_#hl#_c          ldi (hl),c
+all_fake.asm(155): error: Illegal instruction: ldi_#hl#_d          ldi (hl),d
+155   8016              ldi_#hl#_d          ldi (hl),d
+all_fake.asm(156): error: Illegal instruction: ldi_#hl#_e          ldi (hl),e
+156   8016              ldi_#hl#_e          ldi (hl),e
+all_fake.asm(157): error: Illegal instruction: ldi_#hl#_h          ldi (hl),h
+157   8016              ldi_#hl#_h          ldi (hl),h
+all_fake.asm(158): error: Illegal instruction: ldi_#hl#_l          ldi (hl),l
+158   8016              ldi_#hl#_l          ldi (hl),l
+all_fake.asm(159): error: Illegal instruction: ldi_#ix_nn#_a       ldi (ix+$77),a
+159   8016              ldi_#ix_nn#_a       ldi (ix+$77),a
+all_fake.asm(160): error: Illegal instruction: ldi_#ix_nn#_b       ldi (ix+$77),b
+160   8016              ldi_#ix_nn#_b       ldi (ix+$77),b
+all_fake.asm(161): error: Illegal instruction: ldi_#ix_nn#_c       ldi (ix+$77),c
+161   8016              ldi_#ix_nn#_c       ldi (ix+$77),c
+all_fake.asm(162): error: Illegal instruction: ldi_#ix_nn#_d       ldi (ix+$77),d
+162   8016              ldi_#ix_nn#_d       ldi (ix+$77),d
+all_fake.asm(163): error: Illegal instruction: ldi_#ix_nn#_e       ldi (ix+$77),e
+163   8016              ldi_#ix_nn#_e       ldi (ix+$77),e
+all_fake.asm(164): error: Illegal instruction: ldi_#ix_nn#_h       ldi (ix+$77),h
+164   8016              ldi_#ix_nn#_h       ldi (ix+$77),h
+all_fake.asm(165): error: Illegal instruction: ldi_#ix_nn#_l       ldi (ix+$77),l
+165   8016              ldi_#ix_nn#_l       ldi (ix+$77),l
+all_fake.asm(166): error: Illegal instruction: ldi_#iy_nn#_a       ldi (iy+$77),a
+166   8016              ldi_#iy_nn#_a       ldi (iy+$77),a
+all_fake.asm(167): error: Illegal instruction: ldi_#iy_nn#_b       ldi (iy+$77),b
+167   8016              ldi_#iy_nn#_b       ldi (iy+$77),b
+all_fake.asm(168): error: Illegal instruction: ldi_#iy_nn#_c       ldi (iy+$77),c
+168   8016              ldi_#iy_nn#_c       ldi (iy+$77),c
+all_fake.asm(169): error: Illegal instruction: ldi_#iy_nn#_d       ldi (iy+$77),d
+169   8016              ldi_#iy_nn#_d       ldi (iy+$77),d
+all_fake.asm(170): error: Illegal instruction: ldi_#iy_nn#_e       ldi (iy+$77),e
+170   8016              ldi_#iy_nn#_e       ldi (iy+$77),e
+all_fake.asm(171): error: Illegal instruction: ldi_#iy_nn#_h       ldi (iy+$77),h
+171   8016              ldi_#iy_nn#_h       ldi (iy+$77),h
+all_fake.asm(172): error: Illegal instruction: ldi_#iy_nn#_l       ldi (iy+$77),l
+172   8016              ldi_#iy_nn#_l       ldi (iy+$77),l
+173   8016
+all_fake.asm(174): error: Illegal instruction: ldd_#bc#_a          ldd (bc),a
+174   8016              ldd_#bc#_a          ldd (bc),a
+all_fake.asm(175): error: Illegal instruction: ldd_#de#_a          ldd (de),a
+175   8016              ldd_#de#_a          ldd (de),a
+all_fake.asm(176): error: Illegal instruction: ldd_#hl#_b          ldd (hl),b
+176   8016              ldd_#hl#_b          ldd (hl),b
+all_fake.asm(177): error: Illegal instruction: ldd_#hl#_c          ldd (hl),c
+177   8016              ldd_#hl#_c          ldd (hl),c
+all_fake.asm(178): error: Illegal instruction: ldd_#hl#_d          ldd (hl),d
+178   8016              ldd_#hl#_d          ldd (hl),d
+all_fake.asm(179): error: Illegal instruction: ldd_#hl#_e          ldd (hl),e
+179   8016              ldd_#hl#_e          ldd (hl),e
+all_fake.asm(180): error: Illegal instruction: ldd_#hl#_h          ldd (hl),h
+180   8016              ldd_#hl#_h          ldd (hl),h
+all_fake.asm(181): error: Illegal instruction: ldd_#hl#_l          ldd (hl),l
+181   8016              ldd_#hl#_l          ldd (hl),l
+all_fake.asm(182): error: Illegal instruction: ldd_#ix_nn#_a       ldd (ix+$77),a
+182   8016              ldd_#ix_nn#_a       ldd (ix+$77),a
+all_fake.asm(183): error: Illegal instruction: ldd_#ix_nn#_b       ldd (ix+$77),b
+183   8016              ldd_#ix_nn#_b       ldd (ix+$77),b
+all_fake.asm(184): error: Illegal instruction: ldd_#ix_nn#_c       ldd (ix+$77),c
+184   8016              ldd_#ix_nn#_c       ldd (ix+$77),c
+all_fake.asm(185): error: Illegal instruction: ldd_#ix_nn#_d       ldd (ix+$77),d
+185   8016              ldd_#ix_nn#_d       ldd (ix+$77),d
+all_fake.asm(186): error: Illegal instruction: ldd_#ix_nn#_e       ldd (ix+$77),e
+186   8016              ldd_#ix_nn#_e       ldd (ix+$77),e
+all_fake.asm(187): error: Illegal instruction: ldd_#ix_nn#_h       ldd (ix+$77),h
+187   8016              ldd_#ix_nn#_h       ldd (ix+$77),h
+all_fake.asm(188): error: Illegal instruction: ldd_#ix_nn#_l       ldd (ix+$77),l
+188   8016              ldd_#ix_nn#_l       ldd (ix+$77),l
+all_fake.asm(189): error: Illegal instruction: ldd_#iy_nn#_a       ldd (iy+$77),a
+189   8016              ldd_#iy_nn#_a       ldd (iy+$77),a
+all_fake.asm(190): error: Illegal instruction: ldd_#iy_nn#_b       ldd (iy+$77),b
+190   8016              ldd_#iy_nn#_b       ldd (iy+$77),b
+all_fake.asm(191): error: Illegal instruction: ldd_#iy_nn#_c       ldd (iy+$77),c
+191   8016              ldd_#iy_nn#_c       ldd (iy+$77),c
+all_fake.asm(192): error: Illegal instruction: ldd_#iy_nn#_d       ldd (iy+$77),d
+192   8016              ldd_#iy_nn#_d       ldd (iy+$77),d
+all_fake.asm(193): error: Illegal instruction: ldd_#iy_nn#_e       ldd (iy+$77),e
+193   8016              ldd_#iy_nn#_e       ldd (iy+$77),e
+all_fake.asm(194): error: Illegal instruction: ldd_#iy_nn#_h       ldd (iy+$77),h
+194   8016              ldd_#iy_nn#_h       ldd (iy+$77),h
+all_fake.asm(195): error: Illegal instruction: ldd_#iy_nn#_l       ldd (iy+$77),l
+195   8016              ldd_#iy_nn#_l       ldd (iy+$77),l
+196   8016
+all_fake.asm(197): error: Illegal instruction: ldi_#hl#_nn         ldi (hl),$44
+197   8016              ldi_#hl#_nn         ldi (hl),$44
+all_fake.asm(198): error: Illegal instruction: ldi_#ix_nn#_nn      ldi (ix+$77),$44
+198   8016              ldi_#ix_nn#_nn      ldi (ix+$77),$44
+all_fake.asm(199): error: Illegal instruction: ldi_#iy_nn#_nn      ldi (iy+$77),$44
+199   8016              ldi_#iy_nn#_nn      ldi (iy+$77),$44
+200   8016
+all_fake.asm(201): error: Illegal instruction: ldd_#hl#_nn         ldd (hl),$44
+201   8016              ldd_#hl#_nn         ldd (hl),$44
+all_fake.asm(202): error: Illegal instruction: ldd_#ix_nn#_nn      ldd (ix+$77),$44
+202   8016              ldd_#ix_nn#_nn      ldd (ix+$77),$44
+all_fake.asm(203): error: Illegal instruction: ldd_#iy_nn#_nn      ldd (iy+$77),$44
+203   8016              ldd_#iy_nn#_nn      ldd (iy+$77),$44
+204   8016
+all_fake.asm(205): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,bc
+205   8016              sub_hl_bc           sub hl,bc
+all_fake.asm(206): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,de
+206   8016              sub_hl_de           sub hl,de
+all_fake.asm(207): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,hl
+207   8016              sub_hl_hl           sub hl,hl
+all_fake.asm(208): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,sp
+208   8016              sub_hl_sp           sub hl,sp
+209   8016
+210   8016                  ; ZXNext section - there are no true regular fakes yet, but some specials
+all_fake.asm(211): error: Unrecognized instruction: mul         
+211   8016              zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
+212   8016                  ; these definitely should not work in LR35902 mode (trying to switch --zxnext is fatal error)
+all_fake.asm(213): error: Unrecognized instruction: break       
+213   8016              zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
+all_fake.asm(214): error: Unrecognized instruction: exit        
+214   8016              zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
+215   8016
+# file closed: all_fake.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000 X ldi_#hl#_a
+0x8001 X ldi_a_#hl#
+0x8002 X ldd_#hl#_a
+0x8003 X ldd_a_#hl#
+0x8004 X rl_bc
+0x8004 X rl_de
+0x8004 X rl_hl
+0x8004 X rr_bc
+0x8004 X rr_de
+0x8004 X rr_hl
+0x8004 X sla_bc
+0x8004 X sla_de
+0x8004 X sla_hl
+0x8004 X sll_bc
+0x8004 X sll_de
+0x8004 X sll_hl
+0x8004 X sli_bc
+0x8004 X sli_de
+0x8004 X sli_hl
+0x8004 X sra_bc
+0x8004 X sra_de
+0x8004 X sra_hl
+0x8004 X srl_bc
+0x8004 X srl_de
+0x8004 X srl_hl
+0x8004 X ld_bc_bc
+0x8004 X ld_bc_de
+0x8004 X ld_bc_hl
+0x8004 X ld_bc_ix
+0x8007 X ld_bc_iy
+0x800A X ld_bc_#hl#
+0x800A X ld_bc_#ix_nn#
+0x800A X ld_bc_#iy_nn#
+0x800A X ld_de_bc
+0x800A X ld_de_de
+0x800A X ld_de_hl
+0x800A X ld_de_ix
+0x800D X ld_de_iy
+0x8010 X ld_de_#hl#
+0x8010 X ld_de_#ix_nn#
+0x8010 X ld_de_#iy_nn#
+0x8010 X ld_hl_bc
+0x8010 X ld_hl_de
+0x8010 X ld_hl_hl
+0x8010 X ld_hl_ix
+0x8013 X ld_hl_iy
+0x8016 X ld_hl_#ix_nn#
+0x8016 X ld_hl_#iy_nn#
+0x8016 X ld_ix_bc
+0x8016 X ld_ix_de
+0x8016 X ld_ix_hl
+0x8016 X ld_ix_ix
+0x8016 X ld_ix_iy
+0x8016 X ld_iy_bc
+0x8016 X ld_iy_de
+0x8016 X ld_iy_hl
+0x8016 X ld_iy_ix
+0x8016 X ld_iy_iy
+0x8016 X ld_#hl#_bc
+0x8016 X ld_#hl#_de
+0x8016 X ld_#ix_nn#_bc
+0x8016 X ld_#ix_nn#_de
+0x8016 X ld_#ix_nn#_hl
+0x8016 X ld_#iy_nn#_bc
+0x8016 X ld_#iy_nn#_de
+0x8016 X ld_#iy_nn#_hl
+0x8016 X ldi_bc_#hl#
+0x8016 X ldi_bc_#ix_nn#
+0x8016 X ldi_bc_#iy_nn#
+0x8016 X ldi_de_#hl#
+0x8016 X ldi_de_#ix_nn#
+0x8016 X ldi_de_#iy_nn#
+0x8016 X ldi_hl_#ix_nn#
+0x8016 X ldi_hl_#iy_nn#
+0x8016 X ldi_#hl#_bc
+0x8016 X ldi_#hl#_de
+0x8016 X ldi_#ix_nn#_bc
+0x8016 X ldi_#ix_nn#_de
+0x8016 X ldi_#ix_nn#_hl
+0x8016 X ldi_#iy_nn#_bc
+0x8016 X ldi_#iy_nn#_de
+0x8016 X ldi_#iy_nn#_hl
+0x8016 X ldi_a_#bc#
+0x8016 X ldi_a_#de#
+0x8016 X ldi_b_#hl#
+0x8016 X ldi_c_#hl#
+0x8016 X ldi_d_#hl#
+0x8016 X ldi_e_#hl#
+0x8016 X ldi_h_#hl#
+0x8016 X ldi_l_#hl#
+0x8016 X ldi_a_#ix_nn#
+0x8016 X ldi_b_#ix_nn#
+0x8016 X ldi_c_#ix_nn#
+0x8016 X ldi_d_#ix_nn#
+0x8016 X ldi_e_#ix_nn#
+0x8016 X ldi_h_#ix_nn#
+0x8016 X ldi_l_#ix_nn#
+0x8016 X ldi_a_#iy_nn#
+0x8016 X ldi_b_#iy_nn#
+0x8016 X ldi_c_#iy_nn#
+0x8016 X ldi_d_#iy_nn#
+0x8016 X ldi_e_#iy_nn#
+0x8016 X ldi_h_#iy_nn#
+0x8016 X ldi_l_#iy_nn#
+0x8016 X ldd_a_#bc#
+0x8016 X ldd_a_#de#
+0x8016 X ldd_b_#hl#
+0x8016 X ldd_c_#hl#
+0x8016 X ldd_d_#hl#
+0x8016 X ldd_e_#hl#
+0x8016 X ldd_h_#hl#
+0x8016 X ldd_l_#hl#
+0x8016 X ldd_a_#ix_nn#
+0x8016 X ldd_b_#ix_nn#
+0x8016 X ldd_c_#ix_nn#
+0x8016 X ldd_d_#ix_nn#
+0x8016 X ldd_e_#ix_nn#
+0x8016 X ldd_h_#ix_nn#
+0x8016 X ldd_l_#ix_nn#
+0x8016 X ldd_a_#iy_nn#
+0x8016 X ldd_b_#iy_nn#
+0x8016 X ldd_c_#iy_nn#
+0x8016 X ldd_d_#iy_nn#
+0x8016 X ldd_e_#iy_nn#
+0x8016 X ldd_h_#iy_nn#
+0x8016 X ldd_l_#iy_nn#
+0x8016 X ldi_#bc#_a
+0x8016 X ldi_#de#_a
+0x8016 X ldi_#hl#_b
+0x8016 X ldi_#hl#_c
+0x8016 X ldi_#hl#_d
+0x8016 X ldi_#hl#_e
+0x8016 X ldi_#hl#_h
+0x8016 X ldi_#hl#_l
+0x8016 X ldi_#ix_nn#_a
+0x8016 X ldi_#ix_nn#_b
+0x8016 X ldi_#ix_nn#_c
+0x8016 X ldi_#ix_nn#_d
+0x8016 X ldi_#ix_nn#_e
+0x8016 X ldi_#ix_nn#_h
+0x8016 X ldi_#ix_nn#_l
+0x8016 X ldi_#iy_nn#_a
+0x8016 X ldi_#iy_nn#_b
+0x8016 X ldi_#iy_nn#_c
+0x8016 X ldi_#iy_nn#_d
+0x8016 X ldi_#iy_nn#_e
+0x8016 X ldi_#iy_nn#_h
+0x8016 X ldi_#iy_nn#_l
+0x8016 X ldd_#bc#_a
+0x8016 X ldd_#de#_a
+0x8016 X ldd_#hl#_b
+0x8016 X ldd_#hl#_c
+0x8016 X ldd_#hl#_d
+0x8016 X ldd_#hl#_e
+0x8016 X ldd_#hl#_h
+0x8016 X ldd_#hl#_l
+0x8016 X ldd_#ix_nn#_a
+0x8016 X ldd_#ix_nn#_b
+0x8016 X ldd_#ix_nn#_c
+0x8016 X ldd_#ix_nn#_d
+0x8016 X ldd_#ix_nn#_e
+0x8016 X ldd_#ix_nn#_h
+0x8016 X ldd_#ix_nn#_l
+0x8016 X ldd_#iy_nn#_a
+0x8016 X ldd_#iy_nn#_b
+0x8016 X ldd_#iy_nn#_c
+0x8016 X ldd_#iy_nn#_d
+0x8016 X ldd_#iy_nn#_e
+0x8016 X ldd_#iy_nn#_h
+0x8016 X ldd_#iy_nn#_l
+0x8016 X ldi_#hl#_nn
+0x8016 X ldi_#ix_nn#_nn
+0x8016 X ldi_#iy_nn#_nn
+0x8016 X ldd_#hl#_nn
+0x8016 X ldd_#ix_nn#_nn
+0x8016 X ldd_#iy_nn#_nn
+0x8016 X sub_hl_bc
+0x8016 X sub_hl_de
+0x8016 X sub_hl_hl
+0x8016 X sub_hl_sp
+0x8016 X zxn_mul
+0x8016 X zxn_csp_break
+0x8016 X zxn_csp_exit
