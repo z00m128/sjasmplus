@@ -91,7 +91,7 @@ LR35902_specifics_exercise.asm(73): error: Label not found: c
 LR35902_specifics_exercise.asm(74): error: Illegal instruction:             ld      (c),hl
  74   804C                          ld      (c),hl
  75   804C
- 76   804C FA 7B 00                 ld      a,(123)         ; check if low-memory warning is off in LR35902 mode
+ 76   804C FA 7B 00                 ld      a,(123)         ; check if low-memory warning is off in LR35902 mode (good idea?? not sure)
  77   804F
 LR35902_specifics_exercise.asm(78): error: Illegal instruction:             ldi     a,(hl+)         ; error, mixed invalid syntax
  78   804F                          ldi     a,(hl+)         ; error, mixed invalid syntax
@@ -194,8 +194,8 @@ LR35902_specifics_exercise.asm(139): error: Illegal instruction:             ld 
 139   8071                          ld      de , sp + 1         ; invalid
 140   8071
 141   8071 08 03 FF                 ld      ( var2 + 4 ) , sp
-LR35902_specifics_exercise.asm(142): error: Illegal instruction:             ld      ( var2 + 4 ) , hl
-142   8074                          ld      ( var2 + 4 ) , hl
+LR35902_specifics_exercise.asm(142): error: Illegal instruction:             ld      ( var2 + 4 ) , hl   ; invalid
+142   8074                          ld      ( var2 + 4 ) , hl   ; invalid
 143   8074
 144   8074                          ; illegal "add sp,r8" variants
 LR35902_specifics_exercise.asm(145): error: [ADD] Comma expected
@@ -308,7 +308,21 @@ LR35902_specifics_exercise.asm(197): error: Unexpected: ,,1
 210   80B7 F8 00 F8 05              ld      hl,sp,,hl,sp+5,,hl,sp+6
 210   80BB F8 06
 211   80BD
-212   80BD                  END     ; scratcharea
+212   80BD                          ;;;; more extra tests after pushing the commit (as always)
+213   80BD
+214   80BD                          ; LDH automagic in LD - range checks
+215   80BD FA FF FE                 ld      a,(0xFEFF+0)        ; outside
+216   80C0 F0 00                    ld      a,(0xFEFF+1)        ; LDH
+217   80C2 F0 FF                    ld      a,(0xFEFF+256)      ; LDH
+LR35902_specifics_exercise.asm(218): warning: value 0x10000 is truncated to 16bit value: 0x0000
+218   80C4 FA 00 00                 ld      a,(0xFEFF+257)      ; outside + warning
+219   80C7 EA FF FE                 ld      (0xFEFF+0),a        ; outside
+220   80CA E0 00                    ld      (0xFEFF+1),a        ; LDH
+221   80CC E0 FF                    ld      (0xFEFF+256),a      ; LDH
+LR35902_specifics_exercise.asm(222): warning: value 0x10000 is truncated to 16bit value: 0x0000
+222   80CE EA 00 00                 ld      (0xFEFF+257),a      ; outside + warning
+223   80D1
+224   80D1                  END     ; scratcharea
 # file closed: LR35902_specifics_exercise.asm
 
 Value    Label

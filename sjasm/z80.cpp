@@ -472,11 +472,12 @@ namespace Z80 {
 	}
 
 	void OpCode_ADC() {
+		const bool nonZ80CPU = Options::IsI8080 || Options::IsLR35902;
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x88, e, true, false)) {	// handle common 8-bit variants
-				if ((!Options::IsI8080) && (Z80_HL == GetRegister(lp))) {
+				if ((!nonZ80CPU) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
 						Error("[ADC] Comma expected");
 					} else {
@@ -2006,11 +2007,12 @@ namespace Z80 {
 	}
 
 	void OpCode_SBC() {
+		const bool nonZ80CPU = Options::IsI8080 || Options::IsLR35902;
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x98, e, true, false)) {	// handle common 8-bit variants
-				if ((!Options::IsI8080) && (Z80_HL == GetRegister(lp))) {
+				if ((!nonZ80CPU) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
 						Error("[SBC] Comma expected");
 					} else {
@@ -2199,16 +2201,16 @@ namespace Z80 {
 		OpCodeTable.Insert("dec", OpCode_DEC);
 		OpCodeTable.Insert("di", OpCode_DI);
 		OpCodeTable.Insert("ei", OpCode_EI);
-		OpCodeTable.Insert("ex", OpCode_EX);
+		if (!Options::IsLR35902) OpCodeTable.Insert("ex", OpCode_EX);
 		OpCodeTable.Insert("exd", OpCode_EXD);
 		OpCodeTable.Insert("halt", OpCode_HALT);
-		OpCodeTable.Insert("in", OpCode_IN);
+		if (!Options::IsLR35902) OpCodeTable.Insert("in", OpCode_IN);
 		OpCodeTable.Insert("inc", OpCode_INC);
 		OpCodeTable.Insert("jp", OpCode_JP);
 		OpCodeTable.Insert("ld", OpCode_LD);
 		OpCodeTable.Insert("nop", OpCode_NOP);
 		OpCodeTable.Insert("or", OpCode_OR);
-		OpCodeTable.Insert("out", OpCode_OUT);
+		if (!Options::IsLR35902) OpCodeTable.Insert("out", OpCode_OUT);
 		OpCodeTable.Insert("pop", OpCode_POP);
 		OpCodeTable.Insert("push", OpCode_PUSH);
 		OpCodeTable.Insert("ret", OpCode_RET);

@@ -1,0 +1,683 @@
+# file opened: op_BIT_CB.asm
+ 1    0000                  OUTPUT "op_BIT_CB.bin"      ; all of these should pass except "sli" (= swap)
+ 2    0000
+ 3    0000                  ;;; generate shift instructions: #CB00 .. #CB3F
+ 4    0000                  DEFARRAY instructions rlc, rrc, rl, rr, sla, sra, sli, srl
+ 5    0000                  DEFARRAY registers b, c, d, e, h, l, (hl), a
+ 6    0000
+ 7    0000              INS_I=0
+ 8    0000                  DUP 8
+ 9    0000             >REG_I=0
+10    0000             >        DUP 8
+11    0000 CB 00       >            rlc b
+12    0002             >REG_I=REG_I+1
+11    0002 CB 01       >            rlc c
+12    0004             >REG_I=REG_I+1
+11    0004 CB 02       >            rlc d
+12    0006             >REG_I=REG_I+1
+11    0006 CB 03       >            rlc e
+12    0008             >REG_I=REG_I+1
+11    0008 CB 04       >            rlc h
+12    000A             >REG_I=REG_I+1
+11    000A CB 05       >            rlc l
+12    000C             >REG_I=REG_I+1
+11    000C CB 06       >            rlc (hl)
+12    000E             >REG_I=REG_I+1
+11    000E CB 07       >            rlc a
+12    0010             >REG_I=REG_I+1
+13    0010             >        EDUP
+14    0010             >INS_I=INS_I+1
+ 9    0010             >REG_I=0
+10    0010             >        DUP 8
+11    0010 CB 08       >            rrc b
+12    0012             >REG_I=REG_I+1
+11    0012 CB 09       >            rrc c
+12    0014             >REG_I=REG_I+1
+11    0014 CB 0A       >            rrc d
+12    0016             >REG_I=REG_I+1
+11    0016 CB 0B       >            rrc e
+12    0018             >REG_I=REG_I+1
+11    0018 CB 0C       >            rrc h
+12    001A             >REG_I=REG_I+1
+11    001A CB 0D       >            rrc l
+12    001C             >REG_I=REG_I+1
+11    001C CB 0E       >            rrc (hl)
+12    001E             >REG_I=REG_I+1
+11    001E CB 0F       >            rrc a
+12    0020             >REG_I=REG_I+1
+13    0020             >        EDUP
+14    0020             >INS_I=INS_I+1
+ 9    0020             >REG_I=0
+10    0020             >        DUP 8
+11    0020 CB 10       >            rl b
+12    0022             >REG_I=REG_I+1
+11    0022 CB 11       >            rl c
+12    0024             >REG_I=REG_I+1
+11    0024 CB 12       >            rl d
+12    0026             >REG_I=REG_I+1
+11    0026 CB 13       >            rl e
+12    0028             >REG_I=REG_I+1
+11    0028 CB 14       >            rl h
+12    002A             >REG_I=REG_I+1
+11    002A CB 15       >            rl l
+12    002C             >REG_I=REG_I+1
+11    002C CB 16       >            rl (hl)
+12    002E             >REG_I=REG_I+1
+11    002E CB 17       >            rl a
+12    0030             >REG_I=REG_I+1
+13    0030             >        EDUP
+14    0030             >INS_I=INS_I+1
+ 9    0030             >REG_I=0
+10    0030             >        DUP 8
+11    0030 CB 18       >            rr b
+12    0032             >REG_I=REG_I+1
+11    0032 CB 19       >            rr c
+12    0034             >REG_I=REG_I+1
+11    0034 CB 1A       >            rr d
+12    0036             >REG_I=REG_I+1
+11    0036 CB 1B       >            rr e
+12    0038             >REG_I=REG_I+1
+11    0038 CB 1C       >            rr h
+12    003A             >REG_I=REG_I+1
+11    003A CB 1D       >            rr l
+12    003C             >REG_I=REG_I+1
+11    003C CB 1E       >            rr (hl)
+12    003E             >REG_I=REG_I+1
+11    003E CB 1F       >            rr a
+12    0040             >REG_I=REG_I+1
+13    0040             >        EDUP
+14    0040             >INS_I=INS_I+1
+ 9    0040             >REG_I=0
+10    0040             >        DUP 8
+11    0040 CB 20       >            sla b
+12    0042             >REG_I=REG_I+1
+11    0042 CB 21       >            sla c
+12    0044             >REG_I=REG_I+1
+11    0044 CB 22       >            sla d
+12    0046             >REG_I=REG_I+1
+11    0046 CB 23       >            sla e
+12    0048             >REG_I=REG_I+1
+11    0048 CB 24       >            sla h
+12    004A             >REG_I=REG_I+1
+11    004A CB 25       >            sla l
+12    004C             >REG_I=REG_I+1
+11    004C CB 26       >            sla (hl)
+12    004E             >REG_I=REG_I+1
+11    004E CB 27       >            sla a
+12    0050             >REG_I=REG_I+1
+13    0050             >        EDUP
+14    0050             >INS_I=INS_I+1
+ 9    0050             >REG_I=0
+10    0050             >        DUP 8
+11    0050 CB 28       >            sra b
+12    0052             >REG_I=REG_I+1
+11    0052 CB 29       >            sra c
+12    0054             >REG_I=REG_I+1
+11    0054 CB 2A       >            sra d
+12    0056             >REG_I=REG_I+1
+11    0056 CB 2B       >            sra e
+12    0058             >REG_I=REG_I+1
+11    0058 CB 2C       >            sra h
+12    005A             >REG_I=REG_I+1
+11    005A CB 2D       >            sra l
+12    005C             >REG_I=REG_I+1
+11    005C CB 2E       >            sra (hl)
+12    005E             >REG_I=REG_I+1
+11    005E CB 2F       >            sra a
+12    0060             >REG_I=REG_I+1
+13    0060             >        EDUP
+14    0060             >INS_I=INS_I+1
+ 9    0060             >REG_I=0
+10    0060             >        DUP 8
+op_BIT_CB.asm(11): error: Unrecognized instruction: sli b
+11    0060             >            sli b
+12    0060             >REG_I=REG_I+1
+op_BIT_CB.asm(11): error: Unrecognized instruction: sli c
+11    0060             >            sli c
+12    0060             >REG_I=REG_I+1
+op_BIT_CB.asm(11): error: Unrecognized instruction: sli d
+11    0060             >            sli d
+12    0060             >REG_I=REG_I+1
+op_BIT_CB.asm(11): error: Unrecognized instruction: sli e
+11    0060             >            sli e
+12    0060             >REG_I=REG_I+1
+op_BIT_CB.asm(11): error: Unrecognized instruction: sli h
+11    0060             >            sli h
+12    0060             >REG_I=REG_I+1
+op_BIT_CB.asm(11): error: Unrecognized instruction: sli l
+11    0060             >            sli l
+12    0060             >REG_I=REG_I+1
+op_BIT_CB.asm(11): error: Unrecognized instruction: sli (hl)
+11    0060             >            sli (hl)
+12    0060             >REG_I=REG_I+1
+op_BIT_CB.asm(11): error: Unrecognized instruction: sli a
+11    0060             >            sli a
+12    0060             >REG_I=REG_I+1
+13    0060             >        EDUP
+14    0060             >INS_I=INS_I+1
+ 9    0060             >REG_I=0
+10    0060             >        DUP 8
+11    0060 CB 38       >            srl b
+12    0062             >REG_I=REG_I+1
+11    0062 CB 39       >            srl c
+12    0064             >REG_I=REG_I+1
+11    0064 CB 3A       >            srl d
+12    0066             >REG_I=REG_I+1
+11    0066 CB 3B       >            srl e
+12    0068             >REG_I=REG_I+1
+11    0068 CB 3C       >            srl h
+12    006A             >REG_I=REG_I+1
+11    006A CB 3D       >            srl l
+12    006C             >REG_I=REG_I+1
+11    006C CB 3E       >            srl (hl)
+12    006E             >REG_I=REG_I+1
+11    006E CB 3F       >            srl a
+12    0070             >REG_I=REG_I+1
+13    0070             >        EDUP
+14    0070             >INS_I=INS_I+1
+15    0070                  EDUP
+16    0070
+17    0070                  ;;; generate bit-manipulation instructions: #CB40 .. #CBFF
+18    0070                  DEFARRAY instructions2 bit, res, set
+19    0070              INS_I=0
+20    0070                  DUP 3
+21    0070             >REG_BIT=0
+22    0070             >        DUP 8
+23    0070             >REG_I=0
+24    0070             >            DUP 8
+25    0070 CB 40       >                bit REG_BIT,b
+26    0072             >REG_I=REG_I+1
+25    0072 CB 41       >                bit REG_BIT,c
+26    0074             >REG_I=REG_I+1
+25    0074 CB 42       >                bit REG_BIT,d
+26    0076             >REG_I=REG_I+1
+25    0076 CB 43       >                bit REG_BIT,e
+26    0078             >REG_I=REG_I+1
+25    0078 CB 44       >                bit REG_BIT,h
+26    007A             >REG_I=REG_I+1
+25    007A CB 45       >                bit REG_BIT,l
+26    007C             >REG_I=REG_I+1
+25    007C CB 46       >                bit REG_BIT,(hl)
+26    007E             >REG_I=REG_I+1
+25    007E CB 47       >                bit REG_BIT,a
+26    0080             >REG_I=REG_I+1
+27    0080             >            EDUP
+28    0080             >REG_BIT=REG_BIT+1
+23    0080             >REG_I=0
+24    0080             >            DUP 8
+25    0080 CB 48       >                bit REG_BIT,b
+26    0082             >REG_I=REG_I+1
+25    0082 CB 49       >                bit REG_BIT,c
+26    0084             >REG_I=REG_I+1
+25    0084 CB 4A       >                bit REG_BIT,d
+26    0086             >REG_I=REG_I+1
+25    0086 CB 4B       >                bit REG_BIT,e
+26    0088             >REG_I=REG_I+1
+25    0088 CB 4C       >                bit REG_BIT,h
+26    008A             >REG_I=REG_I+1
+25    008A CB 4D       >                bit REG_BIT,l
+26    008C             >REG_I=REG_I+1
+25    008C CB 4E       >                bit REG_BIT,(hl)
+26    008E             >REG_I=REG_I+1
+25    008E CB 4F       >                bit REG_BIT,a
+26    0090             >REG_I=REG_I+1
+27    0090             >            EDUP
+28    0090             >REG_BIT=REG_BIT+1
+23    0090             >REG_I=0
+24    0090             >            DUP 8
+25    0090 CB 50       >                bit REG_BIT,b
+26    0092             >REG_I=REG_I+1
+25    0092 CB 51       >                bit REG_BIT,c
+26    0094             >REG_I=REG_I+1
+25    0094 CB 52       >                bit REG_BIT,d
+26    0096             >REG_I=REG_I+1
+25    0096 CB 53       >                bit REG_BIT,e
+26    0098             >REG_I=REG_I+1
+25    0098 CB 54       >                bit REG_BIT,h
+26    009A             >REG_I=REG_I+1
+25    009A CB 55       >                bit REG_BIT,l
+26    009C             >REG_I=REG_I+1
+25    009C CB 56       >                bit REG_BIT,(hl)
+26    009E             >REG_I=REG_I+1
+25    009E CB 57       >                bit REG_BIT,a
+26    00A0             >REG_I=REG_I+1
+27    00A0             >            EDUP
+28    00A0             >REG_BIT=REG_BIT+1
+23    00A0             >REG_I=0
+24    00A0             >            DUP 8
+25    00A0 CB 58       >                bit REG_BIT,b
+26    00A2             >REG_I=REG_I+1
+25    00A2 CB 59       >                bit REG_BIT,c
+26    00A4             >REG_I=REG_I+1
+25    00A4 CB 5A       >                bit REG_BIT,d
+26    00A6             >REG_I=REG_I+1
+25    00A6 CB 5B       >                bit REG_BIT,e
+26    00A8             >REG_I=REG_I+1
+25    00A8 CB 5C       >                bit REG_BIT,h
+26    00AA             >REG_I=REG_I+1
+25    00AA CB 5D       >                bit REG_BIT,l
+26    00AC             >REG_I=REG_I+1
+25    00AC CB 5E       >                bit REG_BIT,(hl)
+26    00AE             >REG_I=REG_I+1
+25    00AE CB 5F       >                bit REG_BIT,a
+26    00B0             >REG_I=REG_I+1
+27    00B0             >            EDUP
+28    00B0             >REG_BIT=REG_BIT+1
+23    00B0             >REG_I=0
+24    00B0             >            DUP 8
+25    00B0 CB 60       >                bit REG_BIT,b
+26    00B2             >REG_I=REG_I+1
+25    00B2 CB 61       >                bit REG_BIT,c
+26    00B4             >REG_I=REG_I+1
+25    00B4 CB 62       >                bit REG_BIT,d
+26    00B6             >REG_I=REG_I+1
+25    00B6 CB 63       >                bit REG_BIT,e
+26    00B8             >REG_I=REG_I+1
+25    00B8 CB 64       >                bit REG_BIT,h
+26    00BA             >REG_I=REG_I+1
+25    00BA CB 65       >                bit REG_BIT,l
+26    00BC             >REG_I=REG_I+1
+25    00BC CB 66       >                bit REG_BIT,(hl)
+26    00BE             >REG_I=REG_I+1
+25    00BE CB 67       >                bit REG_BIT,a
+26    00C0             >REG_I=REG_I+1
+27    00C0             >            EDUP
+28    00C0             >REG_BIT=REG_BIT+1
+23    00C0             >REG_I=0
+24    00C0             >            DUP 8
+25    00C0 CB 68       >                bit REG_BIT,b
+26    00C2             >REG_I=REG_I+1
+25    00C2 CB 69       >                bit REG_BIT,c
+26    00C4             >REG_I=REG_I+1
+25    00C4 CB 6A       >                bit REG_BIT,d
+26    00C6             >REG_I=REG_I+1
+25    00C6 CB 6B       >                bit REG_BIT,e
+26    00C8             >REG_I=REG_I+1
+25    00C8 CB 6C       >                bit REG_BIT,h
+26    00CA             >REG_I=REG_I+1
+25    00CA CB 6D       >                bit REG_BIT,l
+26    00CC             >REG_I=REG_I+1
+25    00CC CB 6E       >                bit REG_BIT,(hl)
+26    00CE             >REG_I=REG_I+1
+25    00CE CB 6F       >                bit REG_BIT,a
+26    00D0             >REG_I=REG_I+1
+27    00D0             >            EDUP
+28    00D0             >REG_BIT=REG_BIT+1
+23    00D0             >REG_I=0
+24    00D0             >            DUP 8
+25    00D0 CB 70       >                bit REG_BIT,b
+26    00D2             >REG_I=REG_I+1
+25    00D2 CB 71       >                bit REG_BIT,c
+26    00D4             >REG_I=REG_I+1
+25    00D4 CB 72       >                bit REG_BIT,d
+26    00D6             >REG_I=REG_I+1
+25    00D6 CB 73       >                bit REG_BIT,e
+26    00D8             >REG_I=REG_I+1
+25    00D8 CB 74       >                bit REG_BIT,h
+26    00DA             >REG_I=REG_I+1
+25    00DA CB 75       >                bit REG_BIT,l
+26    00DC             >REG_I=REG_I+1
+25    00DC CB 76       >                bit REG_BIT,(hl)
+26    00DE             >REG_I=REG_I+1
+25    00DE CB 77       >                bit REG_BIT,a
+26    00E0             >REG_I=REG_I+1
+27    00E0             >            EDUP
+28    00E0             >REG_BIT=REG_BIT+1
+23    00E0             >REG_I=0
+24    00E0             >            DUP 8
+25    00E0 CB 78       >                bit REG_BIT,b
+26    00E2             >REG_I=REG_I+1
+25    00E2 CB 79       >                bit REG_BIT,c
+26    00E4             >REG_I=REG_I+1
+25    00E4 CB 7A       >                bit REG_BIT,d
+26    00E6             >REG_I=REG_I+1
+25    00E6 CB 7B       >                bit REG_BIT,e
+26    00E8             >REG_I=REG_I+1
+25    00E8 CB 7C       >                bit REG_BIT,h
+26    00EA             >REG_I=REG_I+1
+25    00EA CB 7D       >                bit REG_BIT,l
+26    00EC             >REG_I=REG_I+1
+25    00EC CB 7E       >                bit REG_BIT,(hl)
+26    00EE             >REG_I=REG_I+1
+25    00EE CB 7F       >                bit REG_BIT,a
+26    00F0             >REG_I=REG_I+1
+27    00F0             >            EDUP
+28    00F0             >REG_BIT=REG_BIT+1
+29    00F0             >        EDUP
+30    00F0             >INS_I=INS_I+1
+21    00F0             >REG_BIT=0
+22    00F0             >        DUP 8
+23    00F0             >REG_I=0
+24    00F0             >            DUP 8
+25    00F0 CB 80       >                res REG_BIT,b
+26    00F2             >REG_I=REG_I+1
+25    00F2 CB 81       >                res REG_BIT,c
+26    00F4             >REG_I=REG_I+1
+25    00F4 CB 82       >                res REG_BIT,d
+26    00F6             >REG_I=REG_I+1
+25    00F6 CB 83       >                res REG_BIT,e
+26    00F8             >REG_I=REG_I+1
+25    00F8 CB 84       >                res REG_BIT,h
+26    00FA             >REG_I=REG_I+1
+25    00FA CB 85       >                res REG_BIT,l
+26    00FC             >REG_I=REG_I+1
+25    00FC CB 86       >                res REG_BIT,(hl)
+26    00FE             >REG_I=REG_I+1
+25    00FE CB 87       >                res REG_BIT,a
+26    0100             >REG_I=REG_I+1
+27    0100             >            EDUP
+28    0100             >REG_BIT=REG_BIT+1
+23    0100             >REG_I=0
+24    0100             >            DUP 8
+25    0100 CB 88       >                res REG_BIT,b
+26    0102             >REG_I=REG_I+1
+25    0102 CB 89       >                res REG_BIT,c
+26    0104             >REG_I=REG_I+1
+25    0104 CB 8A       >                res REG_BIT,d
+26    0106             >REG_I=REG_I+1
+25    0106 CB 8B       >                res REG_BIT,e
+26    0108             >REG_I=REG_I+1
+25    0108 CB 8C       >                res REG_BIT,h
+26    010A             >REG_I=REG_I+1
+25    010A CB 8D       >                res REG_BIT,l
+26    010C             >REG_I=REG_I+1
+25    010C CB 8E       >                res REG_BIT,(hl)
+26    010E             >REG_I=REG_I+1
+25    010E CB 8F       >                res REG_BIT,a
+26    0110             >REG_I=REG_I+1
+27    0110             >            EDUP
+28    0110             >REG_BIT=REG_BIT+1
+23    0110             >REG_I=0
+24    0110             >            DUP 8
+25    0110 CB 90       >                res REG_BIT,b
+26    0112             >REG_I=REG_I+1
+25    0112 CB 91       >                res REG_BIT,c
+26    0114             >REG_I=REG_I+1
+25    0114 CB 92       >                res REG_BIT,d
+26    0116             >REG_I=REG_I+1
+25    0116 CB 93       >                res REG_BIT,e
+26    0118             >REG_I=REG_I+1
+25    0118 CB 94       >                res REG_BIT,h
+26    011A             >REG_I=REG_I+1
+25    011A CB 95       >                res REG_BIT,l
+26    011C             >REG_I=REG_I+1
+25    011C CB 96       >                res REG_BIT,(hl)
+26    011E             >REG_I=REG_I+1
+25    011E CB 97       >                res REG_BIT,a
+26    0120             >REG_I=REG_I+1
+27    0120             >            EDUP
+28    0120             >REG_BIT=REG_BIT+1
+23    0120             >REG_I=0
+24    0120             >            DUP 8
+25    0120 CB 98       >                res REG_BIT,b
+26    0122             >REG_I=REG_I+1
+25    0122 CB 99       >                res REG_BIT,c
+26    0124             >REG_I=REG_I+1
+25    0124 CB 9A       >                res REG_BIT,d
+26    0126             >REG_I=REG_I+1
+25    0126 CB 9B       >                res REG_BIT,e
+26    0128             >REG_I=REG_I+1
+25    0128 CB 9C       >                res REG_BIT,h
+26    012A             >REG_I=REG_I+1
+25    012A CB 9D       >                res REG_BIT,l
+26    012C             >REG_I=REG_I+1
+25    012C CB 9E       >                res REG_BIT,(hl)
+26    012E             >REG_I=REG_I+1
+25    012E CB 9F       >                res REG_BIT,a
+26    0130             >REG_I=REG_I+1
+27    0130             >            EDUP
+28    0130             >REG_BIT=REG_BIT+1
+23    0130             >REG_I=0
+24    0130             >            DUP 8
+25    0130 CB A0       >                res REG_BIT,b
+26    0132             >REG_I=REG_I+1
+25    0132 CB A1       >                res REG_BIT,c
+26    0134             >REG_I=REG_I+1
+25    0134 CB A2       >                res REG_BIT,d
+26    0136             >REG_I=REG_I+1
+25    0136 CB A3       >                res REG_BIT,e
+26    0138             >REG_I=REG_I+1
+25    0138 CB A4       >                res REG_BIT,h
+26    013A             >REG_I=REG_I+1
+25    013A CB A5       >                res REG_BIT,l
+26    013C             >REG_I=REG_I+1
+25    013C CB A6       >                res REG_BIT,(hl)
+26    013E             >REG_I=REG_I+1
+25    013E CB A7       >                res REG_BIT,a
+26    0140             >REG_I=REG_I+1
+27    0140             >            EDUP
+28    0140             >REG_BIT=REG_BIT+1
+23    0140             >REG_I=0
+24    0140             >            DUP 8
+25    0140 CB A8       >                res REG_BIT,b
+26    0142             >REG_I=REG_I+1
+25    0142 CB A9       >                res REG_BIT,c
+26    0144             >REG_I=REG_I+1
+25    0144 CB AA       >                res REG_BIT,d
+26    0146             >REG_I=REG_I+1
+25    0146 CB AB       >                res REG_BIT,e
+26    0148             >REG_I=REG_I+1
+25    0148 CB AC       >                res REG_BIT,h
+26    014A             >REG_I=REG_I+1
+25    014A CB AD       >                res REG_BIT,l
+26    014C             >REG_I=REG_I+1
+25    014C CB AE       >                res REG_BIT,(hl)
+26    014E             >REG_I=REG_I+1
+25    014E CB AF       >                res REG_BIT,a
+26    0150             >REG_I=REG_I+1
+27    0150             >            EDUP
+28    0150             >REG_BIT=REG_BIT+1
+23    0150             >REG_I=0
+24    0150             >            DUP 8
+25    0150 CB B0       >                res REG_BIT,b
+26    0152             >REG_I=REG_I+1
+25    0152 CB B1       >                res REG_BIT,c
+26    0154             >REG_I=REG_I+1
+25    0154 CB B2       >                res REG_BIT,d
+26    0156             >REG_I=REG_I+1
+25    0156 CB B3       >                res REG_BIT,e
+26    0158             >REG_I=REG_I+1
+25    0158 CB B4       >                res REG_BIT,h
+26    015A             >REG_I=REG_I+1
+25    015A CB B5       >                res REG_BIT,l
+26    015C             >REG_I=REG_I+1
+25    015C CB B6       >                res REG_BIT,(hl)
+26    015E             >REG_I=REG_I+1
+25    015E CB B7       >                res REG_BIT,a
+26    0160             >REG_I=REG_I+1
+27    0160             >            EDUP
+28    0160             >REG_BIT=REG_BIT+1
+23    0160             >REG_I=0
+24    0160             >            DUP 8
+25    0160 CB B8       >                res REG_BIT,b
+26    0162             >REG_I=REG_I+1
+25    0162 CB B9       >                res REG_BIT,c
+26    0164             >REG_I=REG_I+1
+25    0164 CB BA       >                res REG_BIT,d
+26    0166             >REG_I=REG_I+1
+25    0166 CB BB       >                res REG_BIT,e
+26    0168             >REG_I=REG_I+1
+25    0168 CB BC       >                res REG_BIT,h
+26    016A             >REG_I=REG_I+1
+25    016A CB BD       >                res REG_BIT,l
+26    016C             >REG_I=REG_I+1
+25    016C CB BE       >                res REG_BIT,(hl)
+26    016E             >REG_I=REG_I+1
+25    016E CB BF       >                res REG_BIT,a
+26    0170             >REG_I=REG_I+1
+27    0170             >            EDUP
+28    0170             >REG_BIT=REG_BIT+1
+29    0170             >        EDUP
+30    0170             >INS_I=INS_I+1
+21    0170             >REG_BIT=0
+22    0170             >        DUP 8
+23    0170             >REG_I=0
+24    0170             >            DUP 8
+25    0170 CB C0       >                set REG_BIT,b
+26    0172             >REG_I=REG_I+1
+25    0172 CB C1       >                set REG_BIT,c
+26    0174             >REG_I=REG_I+1
+25    0174 CB C2       >                set REG_BIT,d
+26    0176             >REG_I=REG_I+1
+25    0176 CB C3       >                set REG_BIT,e
+26    0178             >REG_I=REG_I+1
+25    0178 CB C4       >                set REG_BIT,h
+26    017A             >REG_I=REG_I+1
+25    017A CB C5       >                set REG_BIT,l
+26    017C             >REG_I=REG_I+1
+25    017C CB C6       >                set REG_BIT,(hl)
+26    017E             >REG_I=REG_I+1
+25    017E CB C7       >                set REG_BIT,a
+26    0180             >REG_I=REG_I+1
+27    0180             >            EDUP
+28    0180             >REG_BIT=REG_BIT+1
+23    0180             >REG_I=0
+24    0180             >            DUP 8
+25    0180 CB C8       >                set REG_BIT,b
+26    0182             >REG_I=REG_I+1
+25    0182 CB C9       >                set REG_BIT,c
+26    0184             >REG_I=REG_I+1
+25    0184 CB CA       >                set REG_BIT,d
+26    0186             >REG_I=REG_I+1
+25    0186 CB CB       >                set REG_BIT,e
+26    0188             >REG_I=REG_I+1
+25    0188 CB CC       >                set REG_BIT,h
+26    018A             >REG_I=REG_I+1
+25    018A CB CD       >                set REG_BIT,l
+26    018C             >REG_I=REG_I+1
+25    018C CB CE       >                set REG_BIT,(hl)
+26    018E             >REG_I=REG_I+1
+25    018E CB CF       >                set REG_BIT,a
+26    0190             >REG_I=REG_I+1
+27    0190             >            EDUP
+28    0190             >REG_BIT=REG_BIT+1
+23    0190             >REG_I=0
+24    0190             >            DUP 8
+25    0190 CB D0       >                set REG_BIT,b
+26    0192             >REG_I=REG_I+1
+25    0192 CB D1       >                set REG_BIT,c
+26    0194             >REG_I=REG_I+1
+25    0194 CB D2       >                set REG_BIT,d
+26    0196             >REG_I=REG_I+1
+25    0196 CB D3       >                set REG_BIT,e
+26    0198             >REG_I=REG_I+1
+25    0198 CB D4       >                set REG_BIT,h
+26    019A             >REG_I=REG_I+1
+25    019A CB D5       >                set REG_BIT,l
+26    019C             >REG_I=REG_I+1
+25    019C CB D6       >                set REG_BIT,(hl)
+26    019E             >REG_I=REG_I+1
+25    019E CB D7       >                set REG_BIT,a
+26    01A0             >REG_I=REG_I+1
+27    01A0             >            EDUP
+28    01A0             >REG_BIT=REG_BIT+1
+23    01A0             >REG_I=0
+24    01A0             >            DUP 8
+25    01A0 CB D8       >                set REG_BIT,b
+26    01A2             >REG_I=REG_I+1
+25    01A2 CB D9       >                set REG_BIT,c
+26    01A4             >REG_I=REG_I+1
+25    01A4 CB DA       >                set REG_BIT,d
+26    01A6             >REG_I=REG_I+1
+25    01A6 CB DB       >                set REG_BIT,e
+26    01A8             >REG_I=REG_I+1
+25    01A8 CB DC       >                set REG_BIT,h
+26    01AA             >REG_I=REG_I+1
+25    01AA CB DD       >                set REG_BIT,l
+26    01AC             >REG_I=REG_I+1
+25    01AC CB DE       >                set REG_BIT,(hl)
+26    01AE             >REG_I=REG_I+1
+25    01AE CB DF       >                set REG_BIT,a
+26    01B0             >REG_I=REG_I+1
+27    01B0             >            EDUP
+28    01B0             >REG_BIT=REG_BIT+1
+23    01B0             >REG_I=0
+24    01B0             >            DUP 8
+25    01B0 CB E0       >                set REG_BIT,b
+26    01B2             >REG_I=REG_I+1
+25    01B2 CB E1       >                set REG_BIT,c
+26    01B4             >REG_I=REG_I+1
+25    01B4 CB E2       >                set REG_BIT,d
+26    01B6             >REG_I=REG_I+1
+25    01B6 CB E3       >                set REG_BIT,e
+26    01B8             >REG_I=REG_I+1
+25    01B8 CB E4       >                set REG_BIT,h
+26    01BA             >REG_I=REG_I+1
+25    01BA CB E5       >                set REG_BIT,l
+26    01BC             >REG_I=REG_I+1
+25    01BC CB E6       >                set REG_BIT,(hl)
+26    01BE             >REG_I=REG_I+1
+25    01BE CB E7       >                set REG_BIT,a
+26    01C0             >REG_I=REG_I+1
+27    01C0             >            EDUP
+28    01C0             >REG_BIT=REG_BIT+1
+23    01C0             >REG_I=0
+24    01C0             >            DUP 8
+25    01C0 CB E8       >                set REG_BIT,b
+26    01C2             >REG_I=REG_I+1
+25    01C2 CB E9       >                set REG_BIT,c
+26    01C4             >REG_I=REG_I+1
+25    01C4 CB EA       >                set REG_BIT,d
+26    01C6             >REG_I=REG_I+1
+25    01C6 CB EB       >                set REG_BIT,e
+26    01C8             >REG_I=REG_I+1
+25    01C8 CB EC       >                set REG_BIT,h
+26    01CA             >REG_I=REG_I+1
+25    01CA CB ED       >                set REG_BIT,l
+26    01CC             >REG_I=REG_I+1
+25    01CC CB EE       >                set REG_BIT,(hl)
+26    01CE             >REG_I=REG_I+1
+25    01CE CB EF       >                set REG_BIT,a
+26    01D0             >REG_I=REG_I+1
+27    01D0             >            EDUP
+28    01D0             >REG_BIT=REG_BIT+1
+23    01D0             >REG_I=0
+24    01D0             >            DUP 8
+25    01D0 CB F0       >                set REG_BIT,b
+26    01D2             >REG_I=REG_I+1
+25    01D2 CB F1       >                set REG_BIT,c
+26    01D4             >REG_I=REG_I+1
+25    01D4 CB F2       >                set REG_BIT,d
+26    01D6             >REG_I=REG_I+1
+25    01D6 CB F3       >                set REG_BIT,e
+26    01D8             >REG_I=REG_I+1
+25    01D8 CB F4       >                set REG_BIT,h
+26    01DA             >REG_I=REG_I+1
+25    01DA CB F5       >                set REG_BIT,l
+26    01DC             >REG_I=REG_I+1
+25    01DC CB F6       >                set REG_BIT,(hl)
+26    01DE             >REG_I=REG_I+1
+25    01DE CB F7       >                set REG_BIT,a
+26    01E0             >REG_I=REG_I+1
+27    01E0             >            EDUP
+28    01E0             >REG_BIT=REG_BIT+1
+23    01E0             >REG_I=0
+24    01E0             >            DUP 8
+25    01E0 CB F8       >                set REG_BIT,b
+26    01E2             >REG_I=REG_I+1
+25    01E2 CB F9       >                set REG_BIT,c
+26    01E4             >REG_I=REG_I+1
+25    01E4 CB FA       >                set REG_BIT,d
+26    01E6             >REG_I=REG_I+1
+25    01E6 CB FB       >                set REG_BIT,e
+26    01E8             >REG_I=REG_I+1
+25    01E8 CB FC       >                set REG_BIT,h
+26    01EA             >REG_I=REG_I+1
+25    01EA CB FD       >                set REG_BIT,l
+26    01EC             >REG_I=REG_I+1
+25    01EC CB FE       >                set REG_BIT,(hl)
+26    01EE             >REG_I=REG_I+1
+25    01EE CB FF       >                set REG_BIT,a
+26    01F0             >REG_I=REG_I+1
+27    01F0             >            EDUP
+28    01F0             >REG_BIT=REG_BIT+1
+29    01F0             >        EDUP
+30    01F0             >INS_I=INS_I+1
+31    01F0                  EDUP
+# file closed: op_BIT_CB.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0003   INS_I
+0x0008   REG_I
+0x0008   REG_BIT

@@ -73,7 +73,7 @@ varS        struct1
             ld      hl,(c)
             ld      (c),hl
 
-            ld      a,(123)         ; check if low-memory warning is off in LR35902 mode
+            ld      a,(123)         ; check if low-memory warning is off in LR35902 mode (good idea?? not sure)
 
             ldi     a,(hl+)         ; error, mixed invalid syntax
             ldi     a , ( hl )
@@ -139,7 +139,7 @@ varS        struct1
             ld      de , sp + 1         ; invalid
 
             ld      ( var2 + 4 ) , sp
-            ld      ( var2 + 4 ) , hl
+            ld      ( var2 + 4 ) , hl   ; invalid
 
             ; illegal "add sp,r8" variants
             add     sp
@@ -208,5 +208,17 @@ varS        struct1
             ldh     a,[varS.a],,[varS.b],a,,a,(varS.a),,(varS.b),a
             add     sp,3,,sp,4
             ld      hl,sp,,hl,sp+5,,hl,sp+6
+
+            ;;;; more extra tests after pushing the commit (as always)
+
+            ; LDH automagic in LD - range checks
+            ld      a,(0xFEFF+0)        ; outside
+            ld      a,(0xFEFF+1)        ; LDH
+            ld      a,(0xFEFF+256)      ; LDH
+            ld      a,(0xFEFF+257)      ; outside + warning
+            ld      (0xFEFF+0),a        ; outside
+            ld      (0xFEFF+1),a        ; LDH
+            ld      (0xFEFF+256),a      ; LDH
+            ld      (0xFEFF+257),a      ; outside + warning
 
     END     ; scratcharea
