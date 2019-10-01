@@ -51,13 +51,13 @@ char* ValidateLabel(char* naam, int flags) {
 		break;
 	}
 	naam = np;
-	if (!isalpha((byte)*np) && *np != '_') {
+	if (!isLabelStart(np, false)) {
 		Error("Invalid labelname", naam);
 		delete[] label;
 		return NULL;
 	}
 	while (*np) {
-		if (isalnum((byte)*np) || *np == '_' || *np == '.' || *np == '?' || *np == '!' || *np == '#' || *np == '@') {
+		if (islabchar(*np)) {
 			++np;
 		} else {
 			Error("Invalid labelname", naam);
@@ -105,7 +105,7 @@ int GetLabelValue(char*& p, aint& val) {
 		STRCAT(temp, LINEMAX, ">");
 		len = strlen(temp);
 		np = temp + len;
-		if (!isalpha((byte)*p) && *p != '_') {
+		if (!isLabelStart(p, false)) {
 			Error("Invalid labelname", temp);
 			return 0;
 		}
@@ -153,7 +153,7 @@ int GetLabelValue(char*& p, aint& val) {
 		STRCAT(temp, 2, ".");
 	}
 	len = strlen(temp); np = temp + len;
-	if (!isalpha((byte)*p) && *p != '_') {
+	if (!isLabelStart(p, false)) {
 		Error("Invalid labelname", temp); return 0;
 	}
 	while (islabchar(*p)) *np++ = *p++;

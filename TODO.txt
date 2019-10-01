@@ -5,10 +5,7 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-LR35902:
-- tests to confirm all valid Z80 instructions are reported as illegal (where the CPUs don't share the same opcodes/registers/conditions)
-- tests to verify new instructions implementation (checks, error messages, opcodes generation, endianness, condition codes, multi-args)
-- tests to verify CLI/device behaviour, that CPU modes can't be mixed in unsupported way
+update README with new CPUs supported upon v1.14.2 release
 
 z80.cpp: make OpCode_ functions static?
 

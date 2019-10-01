@@ -65,9 +65,9 @@ int ParseExpPrim(char*& p, aint& nval) {
 		return 1;
 	} else if (isdigit((byte)*p) || (*p == '#' && isalnum((byte)*(p + 1))) || (*p == '$' && isalnum((byte)*(p + 1))) || *p == '%') {
 	  	res = GetConstant(p, nval);
-	} else if (isalpha((byte)*p) || *p == '_' || *p == '.' || *p == '@') {
+	} else if (isLabelStart(p)) {
 	  	res = GetLabelValue(p, nval);
-	} else if (*p == '?' && (isalpha((byte)*(p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
+	} else if (*p == '?' && isLabelStart(p+1)) {
 		// this is undocumented "?<symbol>" operator, seems as workaround for labels like "not"
 		// This is deprecated and will be removed in v2.x of sjasmplus
 		// (where keywords will be reserved and such label would be invalid any way)
@@ -401,7 +401,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			continue;
 		}
 
-		if (!isalpha((byte)*lp) && *lp != '_') {
+		if (!isLabelStart(lp, false)) {
 			*rp++ = *lp++;
 			continue;
 		}
