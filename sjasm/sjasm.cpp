@@ -50,7 +50,7 @@ void PrintHelp() {
 	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions" _ENDL;
 	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
 	_COUT "  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)" _ENDL;
-	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
+	_COUT "  -i<path> or -I<path> or --inc=<path> ( --inc without \"=\" to empty the list)" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
 	_COUT "  --lstlab                 Enable label table in listing" _ENDL;
@@ -100,12 +100,8 @@ namespace Options {
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
 
-/*
 	// Include directories list is initialized with "." directory
-	CStringsList* IncludeDirsList = new CStringsList((char *)".");
-*/
-	// Include directories list is empty initially (since v1.13.4)
-	CStringsList* IncludeDirsList = nullptr;
+	CStringsList* IncludeDirsList = new CStringsList(".");
 
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
@@ -442,7 +438,12 @@ namespace Options {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
 					} else {
-						_CERR "No include path found in " _CMDL arg _ENDL;
+						if (!doubleDash || '=' == arg[5]) {
+							_CERR "No include path found in " _CMDL arg _ENDL;
+						} else {	// individual `--inc` without "=path" will RESET include dirs
+							if (IncludeDirsList) delete IncludeDirsList;
+							IncludeDirsList = nullptr;
+						}
 					}
 				} else if (!doubleDash && opt[0] == 'D') {
 					char defN[LINEMAX], defV[LINEMAX];
