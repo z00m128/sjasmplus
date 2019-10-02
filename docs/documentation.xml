@@ -187,6 +187,7 @@
             <listitem>
               <synopsis>- added i8080 mode (--i8080 CLI option) (it's still Z80 Zilog syntax, just limited instruction set)
 - added Sharp LR35902 mode (--lr35902 CLI option) (100% syntax compatibility with IDA, 95% bgb)
+- new <link linkend="s_expressions">$$label operator</link> to retrieve page of label
 - small improvements/polish/extra-info in docs, INSTALL, README, few new tests added
 - cmake script fix of SYSTEM_LUA=ON option, <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">CirrusCI</ulink> configs added for macOS and FreeBSD
 - few fixes of memory leaks, invalid memory access, double free/delete, ...
@@ -593,7 +594,7 @@ $c     hexadecimal
     </section>
 
     <section>
-      <title>Expressions</title>
+      <title><anchor id="s_expressions" />Expressions</title>
 
       <para>Expressions are evaluated in signed 32 bits in this version of SjASMPlus (unless explicitly
 		  specified as unsigned, like ">>>" operator), so intermediate values have range -2147483648
@@ -601,9 +602,11 @@ $c     hexadecimal
 
       <para>'$' represents the current program counter. '$$' represents the
       current page in the current slot in the <link
-      linkend="s_realdevice">real device emulation mode</link> and '{address}' can be used
-      to read WORD from virtual device memory (but zero is read before last pass
-      of assembling) ('{b address}' to read only BYTE).</para>
+      linkend="s_realdevice">real device emulation mode</link>, '$$label' evaluates to number of page
+	  where the "label" was defined (only regular labels have meaningful value, labels defined
+	  under DISP mode or EQU/DEFL/... will produce irrelevant values) and '{address}' can be used
+      to read WORD from virtual device memory (correct value is read only in last pass of assembling,
+	  in early passes the zero value is always returned), '{b address}' reads only BYTE.</para>
 
       <para>It is possible to use parenthesis '(' and ')' to override the
       precedence of the operators. The following operators may be used in
@@ -654,7 +657,15 @@ or    x or y   bitwise or
 
 &amp;&amp;    x&amp;&amp;y     logical and
 
-||    x||y     logical or</programlisting></para>
+||    x||y     logical or
+
+$     $        current program counter
+$$    $$       current page at program counter (in virtual device mode)
+label label    value of label (aka symbol), usually memory address
+$$lab $$lab    page of "lab" label (in virtual device mode)
+{}    {x}      reads WORD from address x (in virtual device mode, in last pass)
+{b}   {b x}    reads BYTE from address x (in virtual device mode, in last pass)
+</programlisting></para>
     </section>
 
     <section>
