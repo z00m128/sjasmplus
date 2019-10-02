@@ -64,26 +64,24 @@ int ParseExpPrim(char*& p, aint& nval) {
 		nval = res;
 		return 1;
 	} else if (isdigit((byte)*p) || (*p == '#' && isalnum((byte)*(p + 1))) || (*p == '$' && isalnum((byte)*(p + 1))) || *p == '%') {
-	  	res = GetConstant(p, nval);
+		return GetConstant(p, nval);
 	} else if (isLabelStart(p)) {
-	  	res = GetLabelValue(p, nval);
+		return GetLabelValue(p, nval);
 	} else if (*p == '?' && isLabelStart(p+1)) {
 		// this is undocumented "?<symbol>" operator, seems as workaround for labels like "not"
 		// This is deprecated and will be removed in v2.x of sjasmplus
 		// (where keywords will be reserved and such label would be invalid any way)
 		Warning("?<symbol> operator is deprecated and will be removed in v2.x", p);
 		++p;
-		res = GetLabelValue(p, nval);
+		return GetLabelValue(p, nval);
 	} else if (DeviceID && *p == '$' && *(p + 1) == '$') {
-		++p;
-		++p;
+		p += 2;
+		if (isLabelStart(p)) return GetLabelPage(p, nval);
 		nval = Page->Number;
-
 		return 1;
 	} else if (*p == '$') {
 		++p;
 		nval = CurAddress;
-
 		return 1;
 	} else if (!(res = GetCharConst(p, nval))) {
 		if (synerr) Error("Syntax error", p, IF_FIRST);
@@ -524,6 +522,12 @@ void ParseLabel() {
 	SkipBlanks();
 	IsLabelNotFound = 0;
 	if (isdigit((byte)*tp)) {
+		ttp = tp;
+		while (*ttp && isdigit((byte)*ttp)) ++ttp;
+		if (*ttp) {
+			Error("Invalid temporary label (not a number)", temp);
+			return;
+		}
 		if (NeedEQU() || NeedDEFL()) {
 			Error("Number labels are allowed as address labels only, not for DEFL/=/EQU", temp, SUPPRESS);
 			return;
@@ -558,7 +562,7 @@ void ParseLabel() {
 			val = CurAddress;
 		}
 		ttp = tp;
-		if (!(tp = ValidateLabel(tp, VALIDATE_LABEL_SET_NAMESPACE))) {
+		if (!(tp = ValidateLabel(tp, true))) {
 			return;
 		}
 		// Copy label name to last parsed label variable

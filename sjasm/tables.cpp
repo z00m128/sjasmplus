@@ -32,152 +32,137 @@
 
 char* PreviousIsLabel = nullptr;
 
-char* ValidateLabel(char* naam, int flags) {
-	char* np = naam,* lp,* label,* mlp = macrolabp;
-	int p = (flags&VALIDATE_LABEL_AS_GLOBAL), l = 0;
-	label = new char[LINEMAX];
-	if (label == NULL) {
-		ErrorInt("No enough memory!", LINEMAX, FATAL);
-	}
-	lp = label;
-	label[0] = 0;
-	switch (*np) {
-	case '@':
-		if (mlp) mlp = NULL;
-		p = 1; ++np; break;
-	case '.':
-		l = 1; ++np; break;
-	default:
-		break;
-	}
-	naam = np;
-	if (!isLabelStart(np, false)) {
+// since v1.14.2:
+// When "setNameSpace == true" the naam is parsed as whole, reporting invalid labelname error
+// When "setNameSpace == false" the naam is parsed only through valid label chars (early exit)
+// => the labels can be evaluated straight from the expression string without copying them out!
+char* ValidateLabel(const char* naam, bool setNameSpace) {
+	const bool global = '@' == *naam;
+	const bool local = '.' == *naam;
+	if (!isLabelStart(naam)) {		// isLabelStart assures that only single modifier exist
+		if (global || local) ++naam;// single modifier is parsed (even when invalid name)
 		Error("Invalid labelname", naam);
-		delete[] label;
-		return NULL;
+		return nullptr;
 	}
-	while (*np) {
-		if (islabchar(*np)) {
-			++np;
-		} else {
-			Error("Invalid labelname", naam);
-			delete[] label;
-			return NULL;
-		}
+	if (global || local) ++naam;	// single modifier is parsed
+	const bool inMacro = local && macrolabp;
+	const bool inModule = !inMacro && !global && ModuleName[0];
+	// check all chars of label
+	const char* np = naam;
+	while (islabchar(*np)) ++np;
+	if ('[' == *np) return nullptr;	// this is DEFARRAY name, do not process it as label (silent exit)
+	if (setNameSpace && *np) {
+		// if this is supposed to be new label, there shoulnd't be anything else after it
+		Error("Invalid labelname", naam);
+		return nullptr;
 	}
-	if (strlen(naam) > LABMAX) {
-		Error("Label too long", naam);
-		naam[LABMAX] = 0;
+	// calculate expected length of fully qualified label name
+	int labelLen = (np - naam), truncateAt = LABMAX;
+	if (LABMAX < labelLen) Error("Label too long", naam, IF_FIRST);	// non-fatal error, will truncate it
+	if (inMacro) labelLen += 1 + strlen(macrolabp);
+	else if (local) labelLen += 1 + strlen(vorlabp);
+	if (inModule) labelLen += 1 + strlen(ModuleName);
+	// build fully qualified label name (in newly allocated memory buffer, with precise length)
+	char* label = new char[1+labelLen];
+	if (nullptr == label) ErrorInt("No enough memory!", 1+labelLen, FATAL);
+	label[0] = 0;
+	if (inModule) {
+		STRCAT(label, labelLen, ModuleName);	STRCAT(label, 2, ".");
 	}
-	if (mlp && l) {
-		STRCAT(lp, LINEMAX, macrolabp); STRCAT(lp, LINEMAX, ">");
-	} else {
-		if (!p && *ModuleName) {
-			STRCAT(lp, LINEMAX-2, ModuleName);
-			STRCAT(lp, 2, ".");
-		}
-		if (l) {
-			STRCAT(lp, LINEMAX, vorlabp); STRCAT(lp, LINEMAX, ".");
-		} else if (flags&VALIDATE_LABEL_SET_NAMESPACE) {
-			free(vorlabp);
-			vorlabp = STRDUP(naam);
-			if (vorlabp == NULL) {
-				Error("No enough memory!", NULL, FATAL);
-			}
-		}
+	if (inMacro) {
+		STRCAT(label, labelLen, macrolabp);		STRCAT(label, 2, ">");
+	} else if (local) {
+		STRCAT(label, labelLen, vorlabp);		STRCAT(label, 2, ".");
 	}
-	STRCAT(lp, LINEMAX, naam);
+	char* lp = label + strlen(label), * newVorlabP = nullptr;
+	if (setNameSpace && !local) newVorlabP = lp;	// here will start new non-local label prefix
+	while (truncateAt-- && islabchar(*naam)) *lp++ = *naam++;	// add the new label (truncated if needed)
+	*lp = 0;
+	if (labelLen < lp - label) Error("internal error", nullptr, FATAL);		// should never happen :)
+	if (newVorlabP) {
+		free(vorlabp);
+		vorlabp = STRDUP(newVorlabP);
+		if (vorlabp == NULL) Error("No enough memory!", NULL, FATAL);
+	}
 	return label;
 }
 
-int GetLabelValue(char*& p, aint& val) {
-	val = 0;
-	char* mlp = macrolabp, *op = p;
-	int g = 0, l = 0, oIsLabelNotFound = IsLabelNotFound;
-	unsigned int len;
-	char* np;
-	if (mlp && *p == '@') {
-		mlp = 0;
-	}
-	if (mlp && '.' == *p) {
-		++p;
-		STRCPY(temp, LINEMAX, macrolabp);
-		STRCAT(temp, LINEMAX, ">");
-		len = strlen(temp);
-		np = temp + len;
-		if (!isLabelStart(p, false)) {
-			Error("Invalid labelname", temp);
-			return 0;
-		}
-		while (islabchar(*p)) *np++ = *p++;
-		*np = 0;
-		if (need(p, '[')) {		// check if this is DEFARRAY name, refuse to parse as label then
-			p = op;
-			return 0;
-		}
-		if (strlen(temp) > LABMAX + len) {
-			Error("Label too long", temp + len);
-			temp[LABMAX + len] = 0;
-		}
-		np = temp;
-		while (*np && '>' != *np) {
-			if (LabelTable.GetValue(np, val)) {
-				return 1;
-			}
-			IsLabelNotFound = oIsLabelNotFound;
-			while (*np && '>' != *np && '.' != *np) ++np;
-			if ('.' == *np) ++np;
-		}
-	}
+static bool getLabel_invalidName = false;
 
-	p = op;
-	switch (*p) {
-	case '@':
-		g = 1;
-		++p;
-		break;
-	case '.':
-		l = 1;
-		++p;
-		break;
-	default:
-		break;
-	}
+static CLabelTableEntry* GetLabel(char*& p) {
+	getLabel_invalidName = true;
+	char* fullName = ValidateLabel(p, false);
+	if (nullptr == fullName) return nullptr;
+	getLabel_invalidName = false;
+	const bool global = '@' == *p;
+	const bool local = '.' == *p;
+	bool inMacro = local && macrolabp;		// not just inside macro, but should be prefixed
+	while (islabchar(*p)) ++p;		// advance pointer beyond the parsed label
+	const int modNameLen = strlen(ModuleName);
+	// find the label entry in the label table (for local macro labels it has to try all sub-parts!)
+	// then regular full label has to be tried
+	// and if it's regular non-local in module, then variant w/o current module has to be tried
+	char *findName = fullName;
+	bool inTableAlready = false;
+	CLabelTableEntry* labelEntry = nullptr;
 	temp[0] = 0;
-	if (!g && *ModuleName) {
-		STRCAT(temp, LINEMAX-2, ModuleName);
-		STRCAT(temp, 2, ".");
-	}
-	if (l) {
-		STRCAT(temp, LINEMAX-2, vorlabp);
-		STRCAT(temp, 2, ".");
-	}
-	len = strlen(temp); np = temp + len;
-	if (!isLabelStart(p, false)) {
-		Error("Invalid labelname", temp); return 0;
-	}
-	while (islabchar(*p)) *np++ = *p++;
-	*np = 0;
-	if (need(p, '[')) {		// check if this is DEFARRAY name, refuse to parse as label then
-		p = op;
-		return 0;
-	}
-	if (strlen(temp) > LABMAX + len) {
-		Error("Label too long", temp + len);
-		temp[LABMAX + len] = 0;
-	}
-	if (LabelTable.GetValue(temp, val)) return 1;
-	bool inTableAlready = (2 == IsLabelNotFound);
-	if (!l && !g) {
-		IsLabelNotFound = oIsLabelNotFound;
-		if (LabelTable.GetValue(temp + len, val)) {
-			return 1;
+	do {
+		labelEntry = LabelTable.Find(findName);
+		if (labelEntry) {
+			inTableAlready = true;
+			if (LASTPASS != pass) labelEntry->used = true;
+			if (LABEL_PAGE_UNDEFINED != labelEntry->page) break;
+			labelEntry = nullptr;
+			IsLabelNotFound = 2;
 		}
-		inTableAlready |= (2 == IsLabelNotFound);
+		// not found (the defined one, try more variants)
+		if (inMacro) {				// try outer macro (if there is one)
+			while ('>' != *findName && '.' != *findName) ++findName;
+			// if no more outer macros, try module+non-local prefix with the original local label
+			if ('>' == *findName++) {
+				inMacro = false;
+				if (modNameLen) {
+					STRCAT(temp, LINEMAX-2, ModuleName); STRCAT(temp, 2, ".");
+				}
+				STRCAT(temp, LABMAX, vorlabp); STRCAT(temp, 2, ".");
+				STRCAT(temp, LABMAX, findName);
+				findName = temp;
+			}
+		} else {
+			if (!global && !local && fullName == findName && modNameLen) {
+				// this still may be global label without current module (but author didn't use "@")
+				findName = fullName + modNameLen + 1;
+			} else {
+				findName = nullptr;	// all options exhausted
+			}
+		}
+	} while (findName);
+	if (nullptr == findName) {		// not found, check if it needs to be inserted into table
+		// canonical name is either in "temp" (when in-macro) or in "fullName" (outside macro)
+		findName = temp[0] ? temp : fullName;
+		if (!inTableAlready) {
+			LabelTable.Insert(findName, 0, true);
+			IsLabelNotFound = 1;
+		}
+		Error("Label not found", findName);
 	}
-	if (!inTableAlready) LabelTable.Insert(temp, 0, true);
-	Error("Label not found", temp);
-	return 1;
+	delete[] fullName;
+	return labelEntry;
+}
+
+
+bool GetLabelPage(char*& p, aint& val) {
+	CLabelTableEntry* labelEntry = GetLabel(p);
+	val = labelEntry ? labelEntry->page : LABEL_PAGE_UNDEFINED;
+	// true even when not found, but valid label name (neeed for expression-eval logic)
+	return !getLabel_invalidName;
+}
+
+bool GetLabelValue(char*& p, aint& val) {
+	CLabelTableEntry* labelEntry = GetLabel(p);
+	val = labelEntry ? labelEntry->value : 0;
+	// true even when not found, but valid label name (neeed for expression-eval logic)
+	return !getLabel_invalidName;
 }
 
 int GetLocalLabelValue(char*& op, aint& val) {
@@ -264,23 +249,6 @@ int CLabelTable::Update(char* nname, aint nvalue) {
 	CLabelTableEntry* label = Find(nname);
 	if (label) label->value = nvalue;
 	return NULL != label;
-}
-
-int CLabelTable::GetValue(char* nname, aint& nvalue) {
-	nvalue = 0;
-	CLabelTableEntry* label = Find(nname);
-	if (label) {
-		if (LASTPASS != pass) label->used = true;
-		if (LABEL_PAGE_UNDEFINED == label->page) {
-			IsLabelNotFound = 2;
-			return 0;
-		} else {
-			nvalue = label->value;
-			return 1;
-		}
-	}
-	IsLabelNotFound = 1;
-	return 0;
 }
 
 CLabelTableEntry* CLabelTable::Find(const char* name, bool onlyDefined)
@@ -1084,7 +1052,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 
 static void InsertSingleStructLabel(char *name, const aint value) {
 	char *op = name, *p;
-	if (!(p = ValidateLabel(op, VALIDATE_LABEL_SET_NAMESPACE))) {
+	if (!(p = ValidateLabel(op, true))) {
 		Error("Illegal labelname", op, EARLY);
 		return;
 	}
@@ -1094,7 +1062,7 @@ static void InsertSingleStructLabel(char *name, const aint value) {
 			Error("Internal error. ParseLabel()", op, FATAL);
 		}
 		if (value != oval) {
-			Error("Label has different value in pass 2", temp);
+			Error("Label has different value in pass 2", p);
 		}
 	} else {
 		if (!LabelTable.Insert(p, value, false, false, true)) Error("Duplicate label", p, EARLY);
@@ -1282,13 +1250,10 @@ int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 }
 
 int LuaGetLabel(char *name) {
+	//TODO v2.0: deprecated, use default "calculate" feature to get identical results as asm line
 	aint val;
-
-	if (!LabelTable.GetValue(name, val)) {
-		return -1;
-	} else {
-		return val;
-	}
+	if (!GetLabelValue(name, val)) val = -1;
+	return val;
 }
 
 //eof tables.cpp

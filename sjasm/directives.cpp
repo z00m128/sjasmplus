@@ -1231,26 +1231,25 @@ static void dirIFN() {
 
 // IFUSED and IFNUSED internal helper, to parse label
 static bool dirIfusedIfnused(char* & id) {
-	SkipBlanks();
-	bool global = ('@' == *lp) && ++lp;		// if global marker, remember it + skip it
-	if ( (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) || !SkipBlanks()) {
-		Error("[IFUSED] Syntax error", bp, SUPPRESS);
-		id = NULL;
-		return false;
-	}
-	if (id == NULL || *id == 0) {
-		id = STRDUP(LastParsedLabel);
+	id = NULL;
+	if (SkipBlanks()) {						// no argument (use last parsed label)
+		if (LastParsedLabel) {
+			id = STRDUP(LastParsedLabel);
+		} else {
+			Error("[IFUSED/IFNUSED] no label defined ahead");
+			return false;
+		}
 	} else {
-		char* validLabel = ValidateLabel(id, global ? VALIDATE_LABEL_AS_GLOBAL : 0);
+		char* validLabel = ValidateLabel(lp, false);
 		if (validLabel) {
 			id = STRDUP(validLabel);
 			delete[] validLabel;
+			while (islabchar(*lp)) ++lp;	// advance lp beyond parsed label (valid chars only)
 		} else {
-			id = NULL;
-			Error("[IFUSED] Invalid label name", bp, IF_FIRST);
+			SkipToEol(lp);					// ValidateLabel aready reported some error, skip rest
 		}
 	}
-	return NULL != id;
+	return id && SkipBlanks();				// valid "id" and no extra characters = OK
 }
 
 static void dirIFUSED() {

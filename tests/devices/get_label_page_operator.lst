@@ -1,0 +1,81 @@
+# file opened: get_label_page_operator.asm
+ 1    0000                  DEVICE ZXSPECTRUM128
+ 2    0000                  MMU 0 3, 4
+ 3    0000                  ORG     0x4000-2
+ 4    3FFE              orgL1:
+ 5    3FFE              .local:
+ 6    3FFE                  ASSERT  4 == $$.local
+ 7    3FFE                  DISP    0xC000-1
+ 8    BFFF              dispL1:
+ 9    BFFF                  ASSERT  4 == $$orgL1 && 4 == $$     ; label and page in 0000-3FFF is 4
+10    BFFF                  ; the page of DISP displaced label dispL1 is also 4 which is sort of useless value
+11    BFFF                  ; also the CSpect export of displaced labels is sort of "bogus", affected by this
+12    BFFF DD CB 41 EE      set     5,(ix+0x41)     ; 4B opcode across both ORG and DISP boundaries
+13    C003                  ENT
+14    4002              orgL1end:
+15    4002                  ASSERT  5 == $$orgL1end && 5 == $$  ; label and page in 4000-7FFF is 5
+16    4002
+17    4002                  ; exercise the label parsing/evaluation, line parsin
+18    4002                  ASSERT  4 == $$orgL1.local && 4 == $$@orgL1.local && 1
+get_label_page_operator.asm(19): error: Label not found: MissingLabel
+19    4002                  ASSERT  -1 == $$MissingLabel && 1
+get_label_page_operator.asm(20): error: Unexpected: ..invalidLabelName  
+20    4002                  ASSERT  $$ == $$..invalidLabelName  ; parsing breaks completely, evaluating only first part
+21    4002
+22    4002                  ;; exercise macro nesting and reaching out for labels
+23    4002              TM  MACRO   expPageOuter?, expPage1?, expPage2?, recursion?
+24    4002 ~                    ASSERT  expPageOuter? == $$.outer
+25    4002 ~                    ASSERT  expPageOuter? == $$MacroNestingAndReaching.outer
+26    4002 ~                    ASSERT  expPageOuter? == $$@MacroNestingAndReaching.outer
+27    4002 ~                    IF recursion?
+28    4002 ~                        ASSERT  expPage1? == $$.inner
+29    4002 ~                        TM expPageOuter?, expPage1?, expPage2?, 0
+30    4002 ~                    ELSE
+31    4002 ~                        ASSERT  expPage2? == $$.inner
+32    4002 ~                    ENDIF
+33    4002 ~            .inner:
+34    4002 ~                    nop
+35    4002                  ENDM
+36    4002
+37    4002                  ORG $7FFF
+38    7FFF              MacroNestingAndReaching:
+39    7FFF                  ; MacroNestingAndReaching.outer = $8001, 0>inner = $8000, 1.0>inner = $7FFF
+40    7FFF                  TM      6, 6, 5, 1
+40    7FFF             >        ASSERT  6 == $$.outer
+40    7FFF             >        ASSERT  6 == $$MacroNestingAndReaching.outer
+40    7FFF             >        ASSERT  6 == $$@MacroNestingAndReaching.outer
+40    7FFF             >        IF 1
+40    7FFF             >            ASSERT  6 == $$.inner
+40    7FFF             >            TM 6, 6, 5, 0
+40    7FFF             >        ASSERT  6 == $$.outer
+40    7FFF             >        ASSERT  6 == $$MacroNestingAndReaching.outer
+40    7FFF             >        ASSERT  6 == $$@MacroNestingAndReaching.outer
+40    7FFF             >        IF 0
+40    7FFF ~           >            ASSERT  expPage1? == $$.inner
+40    7FFF ~           >            TM expPageOuter?, expPage1?, expPage2?, 0
+40    7FFF             >        ELSE
+40    7FFF             >            ASSERT  5 == $$.inner
+40    7FFF             >        ENDIF
+40    7FFF             >.inner:
+40    7FFF 00          >        nop
+40    8000             >        ELSE
+40    8000 ~           >            ASSERT  expPage2? == $$.inner
+40    8000             >        ENDIF
+40    8000             >.inner:
+40    8000 00          >        nop
+41    8001              .outer:
+42    8001
+43    8001                  CSPECTMAP "get_label_page_operator.sym"
+44    8001
+# file closed: get_label_page_operator.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x3FFE   orgL1
+0x3FFE   orgL1.local
+0xBFFF X dispL1
+0x4002   orgL1end
+0x7FFF X MacroNestingAndReaching
+0x8001   MacroNestingAndReaching.outer
+0x7FFF   1.0>inner
+0x8000   0>inner
