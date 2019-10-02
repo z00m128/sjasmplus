@@ -2,6 +2,7 @@
 - added i8080 mode (`--i8080` CLI option) (it's still Z80 Zilog syntax, just limited instruction set)
 - added Sharp LR35902 mode (`--lr35902` CLI option) (100% syntax compatibility with IDA, 95% bgb)
 - new `$$label` operator to retrieve page of label
+- 1.14.0 include-path bugfix reverted, the "." is again automatically added (*did* break projects)
 - small improvements/polish/extra-info in docs, INSTALL, README, few new tests added
 - cmake script fix of `SYSTEM_LUA=ON` option, [CirrusCI](https://cirrus-ci.com/github/z00m128/sjasmplus/master) configs added for macOS and FreeBSD
 - few fixes of memory leaks, invalid memory access, double free/delete

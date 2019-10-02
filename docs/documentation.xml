@@ -188,6 +188,7 @@
               <synopsis>- added i8080 mode (--i8080 CLI option) (it's still Z80 Zilog syntax, just limited instruction set)
 - added Sharp LR35902 mode (--lr35902 CLI option) (100% syntax compatibility with IDA, 95% bgb)
 - new <link linkend="s_expressions">$$label operator</link> to retrieve page of label
+- 1.14.0 include-path bugfix reverted, the "." is again <link linkend="po_include">automatically added</link> (*did* break projects)
 - small improvements/polish/extra-info in docs, INSTALL, README, few new tests added
 - cmake script fix of SYSTEM_LUA=ON option, <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">CirrusCI</ulink> configs added for macOS and FreeBSD
 - few fixes of memory leaks, invalid memory access, double free/delete, ...
@@ -303,7 +304,7 @@
   extra "exit" DD00 and "break" DD01 fake instructions)
   --i8080                  Limit valid instructions to i8080 only (+ no fakes)
   --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)
-  -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
+  -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt; ( --inc without "=" to empty the list)
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)
   --lstlab                 Enable label table in listing
@@ -1889,15 +1890,16 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               <para>To include another sourcefile into the current.
               Sourcefiles can be nested 20 levels deep. If the file cannot be
               found in the current directory (the current directory is the
-              directory the current file comes from) the file will be searched
+              directory the current asm file comes from!) the file will be searched
               for in the directories specified at the commandline. When angle
               brackets are used, the commandline directories are searched
               before the current directory.</para>
-              <para>Before v1.14.0 the directory used to launch the assembling process was
-              automatically added to the list (undocumented), this was removed. If your project
-              build is failing with v1.14.0 and you don't want to modify the include paths in
-              sources, add "<code>-i.</code>" to the command line options when launching sjasmplus,
-              to simulate the previous behaviour.
+              <para>The directory used to launch the assembling process is automatically added
+              to the list (as if "<code>-i.</code>" was added to command line manually)
+              (v1.14.0 and v1.14.1 don't add it, reverted back for v1.14.2). If you want to start
+              with completely empty include-path list, use "<code>--inc</code>" option
+              early (order matters) without the "=" to empty the current list, like:
+              <code>sjasmplus --inc --inc=path1 --inc=path2 file.asm</code>
               <example>
                   <title></title>
 
