@@ -5,11 +5,8 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-update README with new CPUs supported upon v1.14.2 release
-
-z80.cpp: make OpCode_ functions static?
-
-Z80N: add new core3.0 instructions
+update README with new CPUs supported upon v1.14.2 release (search for R800 through all files)
+(also update test numbers?)
 
 "No enough memory!" -> fix the grammar + create global string
 
