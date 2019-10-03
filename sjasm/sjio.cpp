@@ -598,7 +598,8 @@ static bool ReadBufData() {
 	if ((LINEMAX-2) <= (rlppos - line)) Error("Line too long", NULL, FATAL);
 	// now check for read data
 	if (rlpbuf < rlpbuf_end) return 1;		// some data still in buffer
-	if (stdin != FP_Input && feof(FP_Input)) return 0;	// no more data in file
+	// check EOF on files in every pass, stdin only in first, following will starve the stdin_log
+	if ((stdin != FP_Input || 1 == pass) && feof(FP_Input)) return 0;	// no more data in file
 	// read next block of data
 	rlpbuf = rlbuf;
 	// handle STDIN file differently (pass1 = read it, pass2+ replay "log" variable)

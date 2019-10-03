@@ -12,10 +12,6 @@ remote build script - "done" ATM, waiting for feedback/improvements suggestions/
 
 ARM emulation on x86: https://github.com/nongiach/arm_now  ???
 
-https://github.com/mborik/regression/blob/master/alternatape/maketap.a80#L12
-^^ emptytap was failing with define symbol?! (can't reproduce with small example,
-try full "regression" source pack)
-
 +3DOS podpora do sjasmplus:
     z00m:
     uz sme to tu sto razy rozoberali
@@ -36,11 +32,6 @@ try full "regression" source pack)
  -- maybe dependencies? (but it did sound like after clean the `make install` alone doesn't
  work properly, and that should now work) Dependencies are borked, needs `make clean` when
  headers are modified (known bug, too lazy to build dependencies in universal makefile).
-
-STDIN needs MANY Ctrl+D to finish, when used by actual interactive console and not
-input redirection... (and it's lot more many than just 3-pass 3x). Seems like there
-should be some regular clib API way to detect it first time, and be done with it,
-the current behaviour is wrong.
 
 consider the "low memory access" warning locked to only ZX-like devices?
 
