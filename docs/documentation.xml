@@ -32,7 +32,7 @@
           </listitem>
 
           <listitem>
-            <para>Z80/R800/Z80N documented and undocumented opcodes support</para>
+            <para>Z80/R800/Z80N/i8080/LR35902 documented and undocumented opcodes support</para>
           </listitem>
 
           <listitem>
@@ -708,6 +708,18 @@ $$lab $$lab    page of "lab" label (in virtual device mode)
           <listitem>
             <para>R800's MULUB and MULUW are recognised (but won't work on
             Z80, of course:)</para>
+          </listitem>
+
+          <listitem>
+            <para>Z80N, i8080 and LR35902 modes use the identical Z80 sjasmplus syntax (!), for the
+				correct (and incorrect) syntax examples of extended opcodes, please check the test files:
+				Z80N <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_zx_spectrum_next_2_00_26.asm">test 1</ulink>
+				<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_next_syntax.lst">test 2</ulink>
+				and LR35902 <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_syntax_by_neo.lst">test 1</ulink>
+				<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_specifics_exercise.lst">test 2</ulink>
+				(also for the Z80 syntax examples you can check <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/z80">
+					Z80 tests</ulink>).
+				</para>
           </listitem>
 
           <listitem>
