@@ -3,7 +3,7 @@
 $MEMCHECK "$EXE" -h | head -n 1 > help_line1.out &&\
 $MEMCHECK "$EXE" --version 2> version.out &&\
 $MEMCHECK "$EXE" --nologo --version 2> raw_version.out &&\
-echo "1.14.1" > raw.expected &&\
+echo "1.14.2" > raw.expected &&\
 diff -a --strip-trailing-cr help_line1.out version.out &&\
 diff -a --strip-trailing-cr raw.expected raw_version.out
 last_result=$?

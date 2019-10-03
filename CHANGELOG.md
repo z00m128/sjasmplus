@@ -1,4 +1,4 @@
-## [1.14.2](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.2) - *not released yet*
+## [1.14.2](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.2) - 3.10.2019
 - added i8080 mode (`--i8080` CLI option) (it's still Z80 Zilog syntax, just limited instruction set)
 - added Sharp LR35902 mode (`--lr35902` CLI option) (100% syntax compatibility with IDA, 95% bgb)
 - new `$$label` operator to retrieve page of label
