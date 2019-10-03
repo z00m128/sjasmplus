@@ -211,9 +211,7 @@ int TAP_SaveSnapshot(char* fname, unsigned short start) {
 		aint ram_length = 0xA200;
 		aint ram_start = 0x0000;
 		unsigned char* ram = (unsigned char*)malloc(ram_length);
-		if (ram == NULL) {
-			Error("No enough memory", NULL, FATAL);
-		}
+		if (ram == NULL) ErrorOOM();
 		memcpy(ram, (unsigned char*)Device->GetSlot(1)->Page->RAM + 0x1E00, 0x2200);
 		memcpy(ram + 0x2200, (unsigned char*)Device->GetSlot(2)->Page->RAM, 0x4000);
 		memcpy(ram + 0x6200, (unsigned char*)Device->GetSlot(3)->Page->RAM, 0x4000);
@@ -230,9 +228,7 @@ int TAP_SaveSnapshot(char* fname, unsigned short start) {
 		// write loader
 		unsigned char *loader = new unsigned char[SaveTAP_ZX_Spectrum_48K_SZ];
 		memcpy(loader, (char*)&SaveTAP_ZX_Spectrum_48K[0], SaveTAP_ZX_Spectrum_48K_SZ);
-		if (loader == NULL) {
-			Error("No enough memory!", NULL, FATAL);
-		}
+		if (loader == NULL) ErrorOOM();
 		// Settings.LoadScreen
 		loader[SaveTAP_ZX_Spectrum_48K_SZ - 7] = char(has_screen_changes());
 		loader[SaveTAP_ZX_Spectrum_48K_SZ - 6] = char(start & 0x00FF);
@@ -258,9 +254,7 @@ int TAP_SaveSnapshot(char* fname, unsigned short start) {
 		// prepare main code block
 		aint ram_length = 0x6200, ram_start = 0x0000;
 		unsigned char* ram = (unsigned char*)malloc(ram_length);
-		if (ram == NULL) {
-			Error("No enough memory", NULL, FATAL);
-		}
+		if (ram == NULL) ErrorOOM();
 		memcpy(ram, (unsigned char*)Device->GetSlot(1)->Page->RAM + 0x1E00, 0x2200);
 		memcpy(ram + 0x2200, (unsigned char*)Device->GetSlot(2)->Page->RAM, 0x4000);
 
@@ -281,9 +275,7 @@ int TAP_SaveSnapshot(char* fname, unsigned short start) {
 		aint loader_len = loader_defsize + (Device->PagesCount - 2)*5;
 		unsigned char *loader = new unsigned char[loader_len];
 		memcpy(loader, loader_code, loader_defsize);
-		if (loader == NULL) {
-			Error("No enough memory!", NULL, FATAL);
-		}
+		if (loader == NULL) ErrorOOM();
 		// Settings.Start
 		loader[loader_defsize - 8] = char(start & 0x00FF);
 		loader[loader_defsize - 7] = char(start >> 8);

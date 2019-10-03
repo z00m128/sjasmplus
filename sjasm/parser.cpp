@@ -500,7 +500,7 @@ void SetLastParsedLabel(const char* label) {
 	if (LastParsedLabel) free(LastParsedLabel);
 	if (nullptr != label) {
 		LastParsedLabel = STRDUP(label);
-		if (nullptr == LastParsedLabel) Error("No enough memory!", NULL, FATAL);
+		if (nullptr == LastParsedLabel) ErrorOOM();
 		LastParsedLabelLine = CompiledCurrentLine;
 	} else {
 		LastParsedLabel = nullptr;
@@ -711,15 +711,11 @@ void ParseLineSafe(bool parselabels) {
 	char* rp = lp;
 	if (sline[0] > 0) {
 		tmp = STRDUP(sline);
-		if (tmp == NULL) {
-			Error("No enough memory!", NULL, FATAL);
-		}
+		if (tmp == NULL) ErrorOOM();
 	}
 	if (sline2[0] > 0) {
 		tmp2 = STRDUP(sline2);
-		if (tmp2 == NULL) {
-			Error("No enough memory!", NULL, FATAL);
-		}
+		if (tmp2 == NULL) ErrorOOM();
 	}
 
 	ParseLine(parselabels);
@@ -763,9 +759,7 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 		Error("[STRUCT] Number labels not allowed within structs"); return;
 	}
 	PreviousIsLabel = STRDUP(tp);
-	if (PreviousIsLabel == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (PreviousIsLabel == NULL) ErrorOOM();
 	st->AddLabel(tp);
 }
 
@@ -879,9 +873,7 @@ void LuaParseLine(char *str) {
 	// preserve current actual line which will be parsed next
 	char *oldLine = STRDUP(line);
 	char *oldEolComment = eolComment;
-	if (oldLine == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (oldLine == NULL) ErrorOOM();
 
 	// inject new line from Lua call and assemble it
 	STRCPY(line, LINEMAX, str);
@@ -898,9 +890,7 @@ void LuaParseCode(char *str) {
 	char *ml;
 
 	ml = STRDUP(line);
-	if (ml == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (ml == NULL) ErrorOOM();
 
 	STRCPY(line, LINEMAX, str);
 	ParseLineSafe(false);

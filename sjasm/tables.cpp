@@ -64,7 +64,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace) {
 	if (inModule) labelLen += 1 + strlen(ModuleName);
 	// build fully qualified label name (in newly allocated memory buffer, with precise length)
 	char* label = new char[1+labelLen];
-	if (nullptr == label) ErrorInt("No enough memory!", 1+labelLen, FATAL);
+	if (nullptr == label) ErrorOOM();
 	label[0] = 0;
 	if (inModule) {
 		STRCAT(label, labelLen, ModuleName);	STRCAT(label, 2, ".");
@@ -82,7 +82,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace) {
 	if (newVorlabP) {
 		free(vorlabp);
 		vorlabp = STRDUP(newVorlabP);
-		if (vorlabp == NULL) Error("No enough memory!", NULL, FATAL);
+		if (vorlabp == NULL) ErrorOOM();
 	}
 	return label;
 }
@@ -231,7 +231,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	HashTable[tr] = NextLocation;
 	label = LabelTable + NextLocation++;
 	label->name = STRDUP(nname);
-	if (label->name == NULL) Error("No enough memory!", NULL, FATAL);
+	if (label->name == NULL) ErrorOOM();
 	label->IsDEFL = IsDEFL;
 	label->IsEQU = IsEQU;
 	label->updatePass = pass;
@@ -429,9 +429,7 @@ int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
 	}
 	HashTable[tr] = NextLocation;
 	funtab[NextLocation].name = STRDUP(nname);
-	if (funtab[NextLocation].name == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (funtab[NextLocation].name == NULL) ErrorOOM();
 	funtab[NextLocation].funp = nfunp;
 	++NextLocation;
 
@@ -451,9 +449,7 @@ int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
 	}
 	HashTable[tr] = NextLocation;
 	funtab[NextLocation].name = STRDUP(temp);
-	if (funtab[NextLocation].name == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (funtab[NextLocation].name == NULL) ErrorOOM();
 	funtab[NextLocation].funp = nfunp;
 	++NextLocation;
 
@@ -576,7 +572,7 @@ CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStr
 		: name(NULL), value(NULL) {
 	name = STRDUP(nname);
 	value = new char[strlen(nvalue) + 1];
-	if (NULL == name || NULL == value) Error("No enough memory!", NULL, FATAL);
+	if (NULL == name || NULL == value) ErrorOOM();
 	char* s1 = value;
 	while (White(*nvalue)) ++nvalue;
 	while (*nvalue && *nvalue != '\n' && *nvalue != '\r') *s1++ = *nvalue++;
@@ -806,9 +802,7 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 		Error("Duplicate macroname", nnaam);return;
 	}
 	char* macroname = STRDUP(nnaam);
-	if (macroname == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (macroname == NULL) ErrorOOM();
 	macs = new CMacroTableEntry(macroname, macs);
 	used[(*macroname)&127] = true;
 	SkipBlanks(p);
@@ -900,9 +894,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 CStructureEntry1::CStructureEntry1(char* nnaam, aint noffset) {
 	next = 0;
 	naam = STRDUP(nnaam);
-	if (naam == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (naam == NULL) ErrorOOM();
 	offset = noffset;
 }
 
@@ -947,13 +939,9 @@ aint CStructureEntry2::ParseValue(char* & p) {
 CStructure::CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p) {
 	mnf = mnl = NULL; mbf = mbl = NULL;
 	naam = STRDUP(nnaam);
-	if (naam == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (naam == NULL) ErrorOOM();
 	id = STRDUP(nid);
-	if (id == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (id == NULL) ErrorOOM();
 	next = p; noffset = no; global = ngl;
 	maxAlignment = 0;
 }

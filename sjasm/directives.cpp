@@ -78,7 +78,7 @@ int ParseDirective(bool beginningOfLine)
 	// create new copy of eolComment because original "line" content will be destroyed
 	char* eolCommCopy = eolComment ? STRDUP(eolComment) : nullptr;
 	eolComment = eolCommCopy;
-	if (NULL == ml || NULL == pp) Error("Not enough memory!", NULL, FATAL);
+	if (NULL == ml || NULL == pp) ErrorOOM();
 	++listmacro;
 	do {
 		line[0] = ' ';
@@ -1675,7 +1675,7 @@ void dirEDUP() {
 	dup.Pointer->string = NULL;
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
-	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
+	if (ml == NULL) ErrorOOM();
 	aint lcurln = CurrentSourceLine;
 	CStringsList* olijstp = lijstp;
 	++lijst;
@@ -1724,7 +1724,7 @@ static bool dirDEFARRAY_parseItems(CStringsList** nextPtr) {
 			return false;
 		}
 		*nextPtr = new CStringsList(ml);
-		if ((*nextPtr)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
+		if ((*nextPtr)->string == NULL) ErrorOOM();
 		nextPtr = &((*nextPtr)->next);
 	} while (anyComma(lp));
 	return SkipBlanks();
@@ -1777,10 +1777,9 @@ static int SplitLuaErrorMessage(const char*& LuaError)
 	if (LuaError && strstr(LuaError, "[string \"script\"]") == LuaError)
 	{
 		char *const err = STRDUP(LuaError), *lnp = err, *msgp = NULL;
-		if (err == NULL)
-			Error("No enough memory!", NULL, FATAL);
-		else
-		{
+		if (err == NULL) {
+			ErrorOOM();
+		} else {
 			while (*lnp && (*lnp != ':' || !isdigit((byte)*(lnp+1))) )
 				lnp++;
 			if (*lnp && (msgp = strchr(++lnp, ':')) )

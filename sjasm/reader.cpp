@@ -727,7 +727,7 @@ static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
 char* GetFileName(char*& p, bool convertslashes) {
 	char* newFn = new char[LINEMAX+1], * result = newFn;
-	if (NULL == newFn) ErrorInt("No enough memory!", LINEMAX+1, FATAL);
+	if (NULL == newFn) ErrorOOM();
 	// check if some and which delimiter is used for this filename (does advance over white chars)
 	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
 	delimiterOfLastFileName = DelimiterAnyBegins(p);
