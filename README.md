@@ -4,7 +4,6 @@
 [![BSD 3-Clause License](https://img.shields.io/github/license/ped7g/sjasmplus.svg)](https://github.com/ped7g/sjasmplus/blob/master/LICENSE.md)
 [![Coverage Status](https://coveralls.io/repos/github/ped7g/sjasmplus/badge.svg?branch=ped-master)](https://coveralls.io/github/ped7g/sjasmplus?branch=ped-master)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/z00m128/sjasmplus.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/z00m128/sjasmplus/context:cpp)
-Platforms:
 [![GNU/Linux](docs/img/linux-logo-24px.png)](https://www.linux.org/)
 [![FreeBSD](docs/img/freeBSD-logo-24px.png)](https://www.freebsd.org/)
 [![NetBSD](docs/img/NetBSD-logo-24px.png)](https://www.netbsd.org/)
@@ -28,7 +27,7 @@ Main Features
 =============
 
 * Full source of assembler available under BSD license, modify and extend as you wish
-* Z80/R800/Z80N documented and undocumented opcodes support
+* Z80/R800/Z80N/i8080/LR35902 documented and undocumented opcodes support
 * Macro language, defines, array of defines
 * Built-in Lua scripting engine
 * Conditional assembly, block repeating
@@ -39,7 +38,7 @@ Main Features
 * Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op `DEVICE`)
 * ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD…)
 * ZX Spectrum Next specific features and directives (Z80N, 8ki memory paging, `SAVENEX`)
-* Correctness is assured by Cirrus-CI with 240+ automated tests (that's also 240+ examples of usage!)
+* Correctness is assured by Cirrus-CI with 256+ automated tests (that's also 256+ examples of usage!)
 * Fake instructions as `LD HL,DE` (`LD H,D:LD L,E`) and more
 * Code inlining through colon (`LD A,C:INC A:PUSH AF:IFDEF FX:LD A,D:ENDIF`…)
 * Very fast compilation: 1 million lines by 2-3 seconds on modern computer

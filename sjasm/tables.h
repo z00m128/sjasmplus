@@ -30,12 +30,10 @@
 
 enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
 
-// bit flags for ValidateLabel
-constexpr int VALIDATE_LABEL_SET_NAMESPACE = 0x01;
-constexpr int VALIDATE_LABEL_AS_GLOBAL = 0x02;
-char* ValidateLabel(char* naam, int flags);
+char* ValidateLabel(const char* naam, bool setNameSpace);
 extern char* PreviousIsLabel;
-int GetLabelValue(char*& p, aint& val);
+bool GetLabelPage(char*& p, aint& val);
+bool GetLabelValue(char*& p, aint& val);
 int GetLocalLabelValue(char*& op, aint& val);
 
 constexpr int LABEL_PAGE_UNDEFINED = -1;
@@ -59,7 +57,6 @@ public:
 	CLabelTable();
 	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false, bool IsEQU = false);
 	int Update(char*, aint);
-	int GetValue(char* nname, aint& nvalue);
 	CLabelTableEntry* Find(const char* name, bool onlyDefined = false);
 	bool Remove(const char* name);
 	bool IsUsed(const char* name);

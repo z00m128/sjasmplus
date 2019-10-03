@@ -79,6 +79,8 @@ namespace Options {
 	extern bool NoDestinationFile;
 	extern SSyntax syx;
 	extern bool SourceStdIn;
+	extern bool IsI8080;			// "i8080" CPU mode (must be set at CLI, blocks others)
+	extern bool IsLR35902;			// "Sharp LR35902" CPU mode (must be set at CLI, blocks others)
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;

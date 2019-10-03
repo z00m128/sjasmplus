@@ -1,0 +1,66 @@
+# file opened: op_zx_spectrum_next_2_00_26.asm
+ 1    0000                  ; all of these should fail on LR35902
+ 2    0000
+op_zx_spectrum_next_2_00_26.asm(3): error: Unrecognized instruction: swapnib                         
+ 3    0000                  swapnib                         ; #ED23
+op_zx_spectrum_next_2_00_26.asm(4): error: Unrecognized instruction: mirror                          
+ 4    0000                  mirror                          ; #ED24
+op_zx_spectrum_next_2_00_26.asm(5): error: Unrecognized instruction: test    $03                     
+ 5    0000                  test    $03                     ; #ED2703
+op_zx_spectrum_next_2_00_26.asm(6): error: Unrecognized instruction: bsla    de,b                    
+ 6    0000                  bsla    de,b                    ; #ED28
+op_zx_spectrum_next_2_00_26.asm(7): error: Unrecognized instruction: bsra    de,b                    
+ 7    0000                  bsra    de,b                    ; #ED29
+op_zx_spectrum_next_2_00_26.asm(8): error: Unrecognized instruction: bsrl    de,b                    
+ 8    0000                  bsrl    de,b                    ; #ED2A
+op_zx_spectrum_next_2_00_26.asm(9): error: Unrecognized instruction: bsrf    de,b                    
+ 9    0000                  bsrf    de,b                    ; #ED2B
+op_zx_spectrum_next_2_00_26.asm(10): error: Unrecognized instruction: brlc    de,b                    
+10    0000                  brlc    de,b                    ; #ED2C
+op_zx_spectrum_next_2_00_26.asm(11): error: Unrecognized instruction: mul     d,e                     
+11    0000                  mul     d,e                     ; #ED30
+op_zx_spectrum_next_2_00_26.asm(12): error: Illegal instruction:     add     hl,a                    ; #ED31
+12    0000                  add     hl,a                    ; #ED31
+op_zx_spectrum_next_2_00_26.asm(13): error: Illegal instruction:     add     de,a                    ; #ED32
+13    0000                  add     de,a                    ; #ED32
+op_zx_spectrum_next_2_00_26.asm(14): error: Illegal instruction:     add     bc,a                    ; #ED33
+14    0000                  add     bc,a                    ; #ED33
+op_zx_spectrum_next_2_00_26.asm(15): error: Illegal instruction:     add     hl,$102                 ; #ED340201
+15    0000                  add     hl,$102                 ; #ED340201
+op_zx_spectrum_next_2_00_26.asm(16): error: Illegal instruction:     add     de,$102                 ; #ED350201
+16    0000                  add     de,$102                 ; #ED350201
+op_zx_spectrum_next_2_00_26.asm(17): error: Illegal instruction:     add     bc,$102                 ; #ED360201
+17    0000                  add     bc,$102                 ; #ED360201
+op_zx_spectrum_next_2_00_26.asm(18): error: Illegal instruction:     push    $102                    ; #ED8A0102
+18    0000                  push    $102                    ; #ED8A0102
+op_zx_spectrum_next_2_00_26.asm(19): error: Unrecognized instruction: outinb                          
+19    0000                  outinb                          ; #ED90
+op_zx_spectrum_next_2_00_26.asm(20): error: Unrecognized instruction: nextreg $04,$05                 
+20    0000                  nextreg $04,$05                 ; #ED910405
+op_zx_spectrum_next_2_00_26.asm(21): error: Unrecognized instruction: nextreg $03,a                   
+21    0000                  nextreg $03,a                   ; #ED9203
+op_zx_spectrum_next_2_00_26.asm(22): error: Unrecognized instruction: pixeldn                         
+22    0000                  pixeldn                         ; #ED93
+op_zx_spectrum_next_2_00_26.asm(23): error: Unrecognized instruction: pixelad                         
+23    0000                  pixelad                         ; #ED94
+op_zx_spectrum_next_2_00_26.asm(24): error: Unrecognized instruction: setae                           
+24    0000                  setae                           ; #ED95
+op_zx_spectrum_next_2_00_26.asm(25): error: Illegal instruction:     jp      (c)                     ; #ED98
+25    0000                  jp      (c)                     ; #ED98
+op_zx_spectrum_next_2_00_26.asm(26): error: Unrecognized instruction: ldix                            
+26    0000                  ldix                            ; #EDA4
+op_zx_spectrum_next_2_00_26.asm(27): error: Unrecognized instruction: ldws                            
+27    0000                  ldws                            ; #EDA5
+op_zx_spectrum_next_2_00_26.asm(28): error: Unrecognized instruction: lddx                            
+28    0000                  lddx                            ; #EDAC
+op_zx_spectrum_next_2_00_26.asm(29): error: Unrecognized instruction: ldirx                           
+29    0000                  ldirx                           ; #EDB4
+op_zx_spectrum_next_2_00_26.asm(30): error: Unrecognized instruction: ldpirx                          
+30    0000                  ldpirx                          ; #EDB7
+op_zx_spectrum_next_2_00_26.asm(31): error: Unrecognized instruction: lddrx                           
+31    0000                  lddrx                           ; #EDBC
+32    0000
+# file closed: op_zx_spectrum_next_2_00_26.asm
+
+Value    Label
+------ - -----------------------------------------------------------

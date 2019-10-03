@@ -1,0 +1,195 @@
+# file opened: op_IX_DD.asm
+  1   0000                  ; all of these should fail on LR35902
+  2   0000
+op_IX_DD.asm(3): error: Label not found: ix
+op_IX_DD.asm(3): error: Unexpected: ,bc       
+  3   0000 C6 00            add     ix,bc       ; #DD09
+  4   0002
+op_IX_DD.asm(5): error: Label not found: ix
+op_IX_DD.asm(5): error: Unexpected: ,de       
+  5   0002 C6 00            add     ix,de       ; #DD19
+  6   0004
+op_IX_DD.asm(7): error: Illegal instruction:     ld      ix,#100     ; #DD210001
+  7   0004                  ld      ix,#100     ; #DD210001
+op_IX_DD.asm(8): error: Illegal instruction:     ld      (#100),ix   ; #DD220001
+  8   0004                  ld      (#100),ix   ; #DD220001
+op_IX_DD.asm(9): error: Illegal instruction:     inc     ix          ; #DD23
+  9   0004                  inc     ix          ; #DD23
+op_IX_DD.asm(10): error: Illegal instruction:     inc     ixh         ; #DD24
+ 10   0004                  inc     ixh         ; #DD24
+op_IX_DD.asm(11): error: Illegal instruction:     dec     ixh         ; #DD25
+ 11   0004                  dec     ixh         ; #DD25
+op_IX_DD.asm(12): error: Illegal instruction:     ld      ixh,0       ; #DD2600
+ 12   0004                  ld      ixh,0       ; #DD2600
+op_IX_DD.asm(13): error: Label not found: ix
+op_IX_DD.asm(13): error: Unexpected: ,ix       
+ 13   0004 C6 00            add     ix,ix       ; #DD29
+op_IX_DD.asm(14): error: Illegal instruction:     ld      ix,(#100)   ; #DD2A0001
+ 14   0006                  ld      ix,(#100)   ; #DD2A0001
+op_IX_DD.asm(15): error: Illegal instruction:     dec     ix          ; #DD2B
+ 15   0006                  dec     ix          ; #DD2B
+op_IX_DD.asm(16): error: Illegal instruction:     inc     ixl         ; #DD2C
+ 16   0006                  inc     ixl         ; #DD2C
+op_IX_DD.asm(17): error: Illegal instruction:     dec     ixl         ; #DD2D
+ 17   0006                  dec     ixl         ; #DD2D
+op_IX_DD.asm(18): error: Illegal instruction:     ld      ixl,0       ; #DD2E00
+ 18   0006                  ld      ixl,0       ; #DD2E00
+ 19   0006
+op_IX_DD.asm(20): error: Illegal instruction:     inc     (ix+17)     ; #DD3411
+ 20   0006                  inc     (ix+17)     ; #DD3411
+op_IX_DD.asm(21): error: Illegal instruction:     dec     (ix+17)     ; #DD3511
+ 21   0006                  dec     (ix+17)     ; #DD3511
+op_IX_DD.asm(22): error: Label not found: ix
+ 22   0006                  ld      (ix+17),0   ; #DD361100
+op_IX_DD.asm(23): error: Label not found: ix
+op_IX_DD.asm(23): error: Unexpected: ,sp       
+ 23   0006 C6 00            add     ix,sp       ; #DD39
+ 24   0008
+op_IX_DD.asm(25): error: Label not found: ixh
+ 25   0008 06 00            ld      b,ixh       ; #DD44
+op_IX_DD.asm(26): error: Label not found: ixl
+ 26   000A 06 00            ld      b,ixl       ; #DD45
+op_IX_DD.asm(27): error: Label not found: ix
+ 27   000C 06 11            ld      b,(ix+17)   ; #DD4611
+op_IX_DD.asm(28): error: Label not found: ixh
+ 28   000E 0E 00            ld      c,ixh       ; #DD4C
+op_IX_DD.asm(29): error: Label not found: ixl
+ 29   0010 0E 00            ld      c,ixl       ; #DD4D
+op_IX_DD.asm(30): error: Label not found: ix
+ 30   0012 0E 11            ld      c,(ix+17)   ; #DD4E11
+ 31   0014
+op_IX_DD.asm(32): error: Label not found: ixh
+ 32   0014 16 00            ld      d,ixh       ; #DD54
+op_IX_DD.asm(33): error: Label not found: ixl
+ 33   0016 16 00            ld      d,ixl       ; #DD55
+op_IX_DD.asm(34): error: Label not found: ix
+ 34   0018 16 11            ld      d,(ix+17)   ; #DD5611
+op_IX_DD.asm(35): error: Label not found: ixh
+ 35   001A 1E 00            ld      e,ixh       ; #DD5C
+op_IX_DD.asm(36): error: Label not found: ixl
+ 36   001C 1E 00            ld      e,ixl       ; #DD5D
+op_IX_DD.asm(37): error: Label not found: ix
+ 37   001E 1E 11            ld      e,(ix+17)   ; #DD5E11
+ 38   0020
+op_IX_DD.asm(39): error: Illegal instruction:     ld      ixh,b       ; #DD60
+ 39   0020                  ld      ixh,b       ; #DD60
+op_IX_DD.asm(40): error: Illegal instruction:     ld      ixh,c       ; #DD61
+ 40   0020                  ld      ixh,c       ; #DD61
+op_IX_DD.asm(41): error: Illegal instruction:     ld      ixh,d       ; #DD62
+ 41   0020                  ld      ixh,d       ; #DD62
+op_IX_DD.asm(42): error: Illegal instruction:     ld      ixh,e       ; #DD63
+ 42   0020                  ld      ixh,e       ; #DD63
+op_IX_DD.asm(43): error: Illegal instruction:     ld      ixh,ixh     ; #DD64
+ 43   0020                  ld      ixh,ixh     ; #DD64
+op_IX_DD.asm(44): error: Illegal instruction:     ld      ixh,ixl     ; #DD65
+ 44   0020                  ld      ixh,ixl     ; #DD65
+op_IX_DD.asm(45): error: Label not found: ix
+ 45   0020 26 11            ld      h,(ix+17)   ; #DD6611
+op_IX_DD.asm(46): error: Illegal instruction:     ld      ixh,a       ; #DD67
+ 46   0022                  ld      ixh,a       ; #DD67
+op_IX_DD.asm(47): error: Illegal instruction:     ld      ixl,b       ; #DD68
+ 47   0022                  ld      ixl,b       ; #DD68
+op_IX_DD.asm(48): error: Illegal instruction:     ld      ixl,c       ; #DD69
+ 48   0022                  ld      ixl,c       ; #DD69
+op_IX_DD.asm(49): error: Illegal instruction:     ld      ixl,d       ; #DD6A
+ 49   0022                  ld      ixl,d       ; #DD6A
+op_IX_DD.asm(50): error: Illegal instruction:     ld      ixl,e       ; #DD6B
+ 50   0022                  ld      ixl,e       ; #DD6B
+op_IX_DD.asm(51): error: Illegal instruction:     ld      ixl,ixh     ; #DD6C
+ 51   0022                  ld      ixl,ixh     ; #DD6C
+op_IX_DD.asm(52): error: Illegal instruction:     ld      ixl,ixl     ; #DD6D
+ 52   0022                  ld      ixl,ixl     ; #DD6D
+op_IX_DD.asm(53): error: Label not found: ix
+ 53   0022 2E 11            ld      l,(ix+17)   ; #DD6E11
+op_IX_DD.asm(54): error: Illegal instruction:     ld      ixl,a       ; #DD6F
+ 54   0024                  ld      ixl,a       ; #DD6F
+ 55   0024
+op_IX_DD.asm(56): error: Label not found: ix
+ 56   0024                  ld      (ix+17),b   ; #DD7011
+op_IX_DD.asm(57): error: Label not found: ix
+ 57   0024                  ld      (ix+17),c   ; #DD7111
+op_IX_DD.asm(58): error: Label not found: ix
+ 58   0024                  ld      (ix+17),d   ; #DD7211
+op_IX_DD.asm(59): error: Label not found: ix
+ 59   0024                  ld      (ix+17),e   ; #DD7311
+op_IX_DD.asm(60): error: Label not found: ix
+ 60   0024                  ld      (ix+17),h   ; #DD7411
+op_IX_DD.asm(61): error: Label not found: ix
+ 61   0024                  ld      (ix+17),l   ; #DD7511
+op_IX_DD.asm(62): error: Label not found: ix
+ 62   0024 EA 11 00         ld      (ix+17),a   ; #DD7711
+op_IX_DD.asm(63): error: Label not found: ixh
+ 63   0027 3E 00            ld      a,ixh       ; #DD7C
+op_IX_DD.asm(64): error: Label not found: ixl
+ 64   0029 3E 00            ld      a,ixl       ; #DD7D
+op_IX_DD.asm(65): error: Label not found: ix
+ 65   002B FA 11 00         ld      a,(ix+17)   ; #DD7E11
+ 66   002E
+op_IX_DD.asm(67): error: Label not found: ixh
+ 67   002E C6 00            add     a,ixh       ; #DD84
+op_IX_DD.asm(68): error: Label not found: ixl
+ 68   0030 C6 00            add     a,ixl       ; #DD85
+op_IX_DD.asm(69): error: Label not found: ix
+ 69   0032 C6 11            add     a,(ix+17)   ; #DD8611
+op_IX_DD.asm(70): error: Label not found: ixh
+ 70   0034 CE 00            adc     a,ixh       ; #DD8C
+op_IX_DD.asm(71): error: Label not found: ixl
+ 71   0036 CE 00            adc     a,ixl       ; #DD8D
+op_IX_DD.asm(72): error: Label not found: ix
+ 72   0038 CE 11            adc     a,(ix+17)   ; #DD8E11
+ 73   003A
+op_IX_DD.asm(74): error: Label not found: ixh
+ 74   003A D6 00            sub     ixh         ; #DD94
+op_IX_DD.asm(75): error: Label not found: ixl
+ 75   003C D6 00            sub     ixl         ; #DD95
+op_IX_DD.asm(76): error: Label not found: ix
+ 76   003E D6 11            sub     (ix+17)     ; #DD9611
+op_IX_DD.asm(77): error: Label not found: ixh
+ 77   0040 DE 00            sbc     a,ixh       ; #DD9C
+op_IX_DD.asm(78): error: Label not found: ixl
+ 78   0042 DE 00            sbc     a,ixl       ; #DD9D
+op_IX_DD.asm(79): error: Label not found: ix
+ 79   0044 DE 11            sbc     a,(ix+17)   ; #DD9E11
+ 80   0046
+op_IX_DD.asm(81): error: Label not found: ixh
+ 81   0046 E6 00            and     ixh         ; #DDA4
+op_IX_DD.asm(82): error: Label not found: ixl
+ 82   0048 E6 00            and     ixl         ; #DDA5
+op_IX_DD.asm(83): error: Label not found: ix
+ 83   004A E6 11            and     (ix+17)     ; #DDA611
+op_IX_DD.asm(84): error: Label not found: ixh
+ 84   004C EE 00            xor     ixh         ; #DDAC
+op_IX_DD.asm(85): error: Label not found: ixl
+ 85   004E EE 00            xor     ixl         ; #DDAD
+op_IX_DD.asm(86): error: Label not found: ix
+ 86   0050 EE 11            xor     (ix+17)     ; #DDAE11
+ 87   0052
+op_IX_DD.asm(88): error: Label not found: ixh
+ 88   0052 F6 00            or      ixh         ; #DDB4
+op_IX_DD.asm(89): error: Label not found: ixl
+ 89   0054 F6 00            or      ixl         ; #DDB5
+op_IX_DD.asm(90): error: Label not found: ix
+ 90   0056 F6 11            or      (ix+17)     ; #DDB611
+op_IX_DD.asm(91): error: Label not found: ixh
+ 91   0058 FE 00            cp      ixh         ; #DDBC
+op_IX_DD.asm(92): error: Label not found: ixl
+ 92   005A FE 00            cp      ixl         ; #DDBD
+op_IX_DD.asm(93): error: Label not found: ix
+ 93   005C FE 11            cp      (ix+17)     ; #DDBE11
+ 94   005E
+op_IX_DD.asm(95): error: Illegal instruction:     pop     ix          ; #DDE1
+ 95   005E                  pop     ix          ; #DDE1
+op_IX_DD.asm(96): error: Unrecognized instruction: ex      (sp),ix     
+ 96   005E                  ex      (sp),ix     ; #DDE3
+op_IX_DD.asm(97): error: Illegal instruction:     push    ix          ; #DDE5
+ 97   005E                  push    ix          ; #DDE5
+op_IX_DD.asm(98): error: Label not found: ix
+ 98   005E C3 00 00         jp      (ix)        ; #DDE9
+ 99   0061
+op_IX_DD.asm(100): error: Label not found: ix
+100   0061 31 00 00         ld      sp,ix       ; #DDF9
+101   0064
+# file closed: op_IX_DD.asm
+
+Value    Label
+------ - -----------------------------------------------------------

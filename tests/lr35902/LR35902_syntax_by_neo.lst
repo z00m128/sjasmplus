@@ -1,0 +1,2141 @@
+# file opened: LR35902_syntax_by_neo.asm
+  1   0000              ;; Sharp LR35902 - various syntax variants provided by NEO SPECTRUMAN
+  2   0000              ;; https://zx-pk.ru/threads/30314-sjasmplus-ot-z00m.html?p=1028186&viewfull=1#post1028186
+  3   0000              ;; Syntax examples are from IDA (disassembler), bgb (emulator) and GameBoy CPU Manual
+  4   0000              ;; also cross-checked with http://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
+  5   0000
+  6   0000              ;; 10 errors are expected! These syntax variants are *NOT* compatible with sjasmplus:
+  7   0000              ; 4x "($FF00+c)" to emit `ld a,(c)` or `ld (c),a`; use "(c)" or "[c]" without $FF00 constant
+  8   0000              ; 4x "HLI"/"HLD" as "HL+"/"HL-"; use HL+/HL- (or LDI/LDD with HL only)
+  9   0000              ; "ld hl,[sp+n]"; use logical syntax `ld hl,sp+rel8`, it's not accessing memory
+ 10   0000              ; "ldhl" alias; same as above, use the `ld hl,sp+rel8` syntax
+ 11   0000
+ 12   0000              ;; these are intentionally left out. don't expect sjasmplus to support any of these.
+ 13   0000              ; reasons: either the syntax is atrocious like "ld hl,[sp+0]" or the extra syntax adds
+ 14   0000              ; too much complexity and/or possible accidental collisions, like "hli" label, etc.
+ 15   0000
+ 16   0000              ; in the end the sjasmplus is 100% compatible with IDA disassembler syntax and supports
+ 17   0000              ; at least one variant from CPU Manual (if not all of them).
+ 18   0000              ; Only bgb compatibility is not 100%, and sources from bgb may need syntax fixing.
+ 19   0000
+ 20   0000              n:      OPT --syntax=ab         ; "a" = multiarg is ",," to support "sub a,n" syntax
+ 21   0000              nn:                             ; "b" = "(expr.)" is legit only for memory access
+ 22   0000
+ 23   0000              ;			:IDA		:bgb		:GBCPUman.pdf
+ 24   0000 06 00          defb $06,0
+ 24   0002 06 00         ld b,0
+ 24   0004 06 00         ld b,$00
+ 24   0006 06 00         LD B,n
+ 25   0008 0E 00          defb $0E,0
+ 25   000A 0E 00         ld c,0
+ 25   000C 0E 00         ld c,$00
+ 25   000E 0E 00         LD C,n
+ 26   0010 16 00          defb $16,0
+ 26   0012 16 00         ld d,0
+ 26   0014 16 00         ld d,$00
+ 26   0016 16 00         LD D,n
+ 27   0018 1E 00          defb $1E,0
+ 27   001A 1E 00         ld e,0
+ 27   001C 1E 00         ld e,$00
+ 27   001E 1E 00         LD E,n
+ 28   0020 26 00          defb $26,0
+ 28   0022 26 00         ld h,0
+ 28   0024 26 00         ld h,$00
+ 28   0026 26 00         LD H,n
+ 29   0028 2E 00          defb $2E,0
+ 29   002A 2E 00         ld l,0
+ 29   002C 2E 00         ld l,$00
+ 29   002E 2E 00         LD L,n
+ 30   0030 36 00          defb $36,0
+ 30   0032 36 00         ld [hl],0
+ 30   0034 36 00         ld [hl],$00
+ 30   0036 36 00         LD (HL),n
+ 31   0038 3E 00          defb $3E,0
+ 31   003A 3E 00         ld a,0
+ 31   003C 3E 00         ld a,$00
+ 31   003E 3E 00         LD A,n
+ 32   0040
+ 33   0040 40             defb $40
+ 33   0041 40            ld b,b
+ 33   0042 40            ld b,b
+ 33   0043 40            LD B,B
+ 34   0044 41             defb $41
+ 34   0045 41            ld b,c
+ 34   0046 41            ld b,c
+ 34   0047 41            LD B,C
+ 35   0048 42             defb $42
+ 35   0049 42            ld b,d
+ 35   004A 42            ld b,d
+ 35   004B 42            LD B,D
+ 36   004C 43             defb $43
+ 36   004D 43            ld b,e
+ 36   004E 43            ld b,e
+ 36   004F 43            LD B,E
+ 37   0050 44             defb $44
+ 37   0051 44            ld b,h
+ 37   0052 44            ld b,h
+ 37   0053 44            LD B,H
+ 38   0054 45             defb $45
+ 38   0055 45            ld b,l
+ 38   0056 45            ld b,l
+ 38   0057 45            LD B,L
+ 39   0058 46             defb $46
+ 39   0059 46            ld b,[hl]
+ 39   005A 46            ld b,[hl]
+ 39   005B 46            LD B,(HL)
+ 40   005C 47             defb $47
+ 40   005D 47            ld b,a
+ 40   005E 47            ld b,a
+ 40   005F 47            LD B,A
+ 41   0060
+ 42   0060 48             defb $48
+ 42   0061 48            ld c,b
+ 42   0062 48            ld c,b
+ 42   0063 48            LD C,B
+ 43   0064 49             defb $49
+ 43   0065 49            ld c,c
+ 43   0066 49            ld c,c
+ 43   0067 49            LD C,C
+ 44   0068 4A             defb $4A
+ 44   0069 4A            ld c,d
+ 44   006A 4A            ld c,d
+ 44   006B 4A            LD C,D
+ 45   006C 4B             defb $4B
+ 45   006D 4B            ld c,e
+ 45   006E 4B            ld c,e
+ 45   006F 4B            LD C,E
+ 46   0070 4C             defb $4C
+ 46   0071 4C            ld c,h
+ 46   0072 4C            ld c,h
+ 46   0073 4C            LD C,H
+ 47   0074 4D             defb $4D
+ 47   0075 4D            ld c,l
+ 47   0076 4D            ld c,l
+ 47   0077 4D            LD C,L
+ 48   0078 4E             defb $4E
+ 48   0079 4E            ld c,[hl]
+ 48   007A 4E            ld c,[hl]
+ 48   007B 4E            LD C,(HL)
+ 49   007C 4F             defb $4F
+ 49   007D 4F            ld c,a
+ 49   007E 4F            ld c,a
+ 49   007F 4F            LD C,A
+ 50   0080
+ 51   0080 50             defb $50
+ 51   0081 50            ld d,b
+ 51   0082 50            ld d,b
+ 51   0083 50            LD D,B
+ 52   0084 51             defb $51
+ 52   0085 51            ld d,c
+ 52   0086 51            ld d,c
+ 52   0087 51            LD D,C
+ 53   0088 52             defb $52
+ 53   0089 52            ld d,d
+ 53   008A 52            ld d,d
+ 53   008B 52            LD D,D
+ 54   008C 53             defb $53
+ 54   008D 53            ld d,e
+ 54   008E 53            ld d,e
+ 54   008F 53            LD D,E
+ 55   0090 54             defb $54
+ 55   0091 54            ld d,h
+ 55   0092 54            ld d,h
+ 55   0093 54            LD D,H
+ 56   0094 55             defb $55
+ 56   0095 55            ld d,l
+ 56   0096 55            ld d,l
+ 56   0097 55            LD D,L
+ 57   0098 56             defb $56
+ 57   0099 56            ld d,[hl]
+ 57   009A 56            ld d,[hl]
+ 57   009B 56            LD D,(HL)
+ 58   009C 57             defb $57
+ 58   009D 57            ld d,a
+ 58   009E 57            ld d,a
+ 58   009F 57            LD D,A
+ 59   00A0
+ 60   00A0 58             defb $58
+ 60   00A1 58            ld e,b
+ 60   00A2 58            ld e,b
+ 60   00A3 58            LD E,B
+ 61   00A4 59             defb $59
+ 61   00A5 59            ld e,c
+ 61   00A6 59            ld e,c
+ 61   00A7 59            LD E,C
+ 62   00A8 5A             defb $5A
+ 62   00A9 5A            ld e,d
+ 62   00AA 5A            ld e,d
+ 62   00AB 5A            LD E,D
+ 63   00AC 5B             defb $5B
+ 63   00AD 5B            ld e,e
+ 63   00AE 5B            ld e,e
+ 63   00AF 5B            LD E,E
+ 64   00B0 5C             defb $5C
+ 64   00B1 5C            ld e,h
+ 64   00B2 5C            ld e,h
+ 64   00B3 5C            LD E,H
+ 65   00B4 5D             defb $5D
+ 65   00B5 5D            ld e,l
+ 65   00B6 5D            ld e,l
+ 65   00B7 5D            LD E,L
+ 66   00B8 5E             defb $5E
+ 66   00B9 5E            ld e,[hl]
+ 66   00BA 5E            ld e,[hl]
+ 66   00BB 5E            LD E,(HL)
+ 67   00BC 5F             defb $5F
+ 67   00BD 5F            ld e,a
+ 67   00BE 5F            ld e,a
+ 67   00BF 5F            LD E,A
+ 68   00C0
+ 69   00C0 60             defb $60
+ 69   00C1 60            ld h,b
+ 69   00C2 60            ld h,b
+ 69   00C3 60            LD H,B
+ 70   00C4 61             defb $61
+ 70   00C5 61            ld h,c
+ 70   00C6 61            ld h,c
+ 70   00C7 61            LD H,C
+ 71   00C8 62             defb $62
+ 71   00C9 62            ld h,d
+ 71   00CA 62            ld h,d
+ 71   00CB 62            LD H,D
+ 72   00CC 63             defb $63
+ 72   00CD 63            ld h,e
+ 72   00CE 63            ld h,e
+ 72   00CF 63            LD H,E
+ 73   00D0 64             defb $64
+ 73   00D1 64            ld h,h
+ 73   00D2 64            ld h,h
+ 73   00D3 64            LD H,H
+ 74   00D4 65             defb $65
+ 74   00D5 65            ld h,l
+ 74   00D6 65            ld h,l
+ 74   00D7 65            LD H,L
+ 75   00D8 66             defb $66
+ 75   00D9 66            ld h,[hl]
+ 75   00DA 66            ld h,[hl]
+ 75   00DB 66            LD H,(HL)
+ 76   00DC 67             defb $67
+ 76   00DD 67            ld h,a
+ 76   00DE 67            ld h,a
+ 76   00DF 67            LD H,A
+ 77   00E0
+ 78   00E0 68             defb $68
+ 78   00E1 68            ld l,b
+ 78   00E2 68            ld l,b
+ 78   00E3 68            LD L,B
+ 79   00E4 69             defb $69
+ 79   00E5 69            ld l,c
+ 79   00E6 69            ld l,c
+ 79   00E7 69            LD L,C
+ 80   00E8 6A             defb $6A
+ 80   00E9 6A            ld l,d
+ 80   00EA 6A            ld l,d
+ 80   00EB 6A            LD L,D
+ 81   00EC 6B             defb $6B
+ 81   00ED 6B            ld l,e
+ 81   00EE 6B            ld l,e
+ 81   00EF 6B            LD L,E
+ 82   00F0 6C             defb $6C
+ 82   00F1 6C            ld l,h
+ 82   00F2 6C            ld l,h
+ 82   00F3 6C            LD L,H
+ 83   00F4 6D             defb $6D
+ 83   00F5 6D            ld l,l
+ 83   00F6 6D            ld l,l
+ 83   00F7 6D            LD L,L
+ 84   00F8 6E             defb $6E
+ 84   00F9 6E            ld l,[hl]
+ 84   00FA 6E            ld l,[hl]
+ 84   00FB 6E            LD L,(HL)
+ 85   00FC 6F             defb $6F
+ 85   00FD 6F            ld l,a
+ 85   00FE 6F            ld l,a
+ 85   00FF 6F            LD L,A
+ 86   0100
+ 87   0100 70             defb $70
+ 87   0101 70            ld [hl],b
+ 87   0102 70            ld [hl],b
+ 87   0103 70            LD (HL),B
+ 88   0104 71             defb $71
+ 88   0105 71            ld [hl],c
+ 88   0106 71            ld [hl],c
+ 88   0107 71            LD (HL),C
+ 89   0108 72             defb $72
+ 89   0109 72            ld [hl],d
+ 89   010A 72            ld [hl],d
+ 89   010B 72            LD (HL),D
+ 90   010C 73             defb $73
+ 90   010D 73            ld [hl],e
+ 90   010E 73            ld [hl],e
+ 90   010F 73            LD (HL),E
+ 91   0110 74             defb $74
+ 91   0111 74            ld [hl],h
+ 91   0112 74            ld [hl],h
+ 91   0113 74            LD (HL),H
+ 92   0114 75             defb $75
+ 92   0115 75            ld [hl],l
+ 92   0116 75            ld [hl],l
+ 92   0117 75            LD (HL),L
+ 93   0118 76             defb $76
+ 93   0119 76            halt
+ 93   011A 76            halt
+ 93   011B 76            HALT
+ 94   011C 77             defb $77
+ 94   011D 77            ld [hl],a
+ 94   011E 77            ld [hl],a
+ 94   011F 77            LD (HL),A
+ 95   0120
+ 96   0120 78             defb $78
+ 96   0121 78            ld a,b
+ 96   0122 78            ld a,b
+ 96   0123 78            LD A,B
+ 97   0124 79             defb $79
+ 97   0125 79            ld a,c
+ 97   0126 79            ld a,c
+ 97   0127 79            LD A,C
+ 98   0128 7A             defb $7A
+ 98   0129 7A            ld a,d
+ 98   012A 7A            ld a,d
+ 98   012B 7A            LD A,D
+ 99   012C 7B             defb $7B
+ 99   012D 7B            ld a,e
+ 99   012E 7B            ld a,e
+ 99   012F 7B            LD A,E
+100   0130 7C             defb $7C
+100   0131 7C            ld a,h
+100   0132 7C            ld a,h
+100   0133 7C            LD A,H
+101   0134 7D             defb $7D
+101   0135 7D            ld a,l
+101   0136 7D            ld a,l
+101   0137 7D            LD A,L
+102   0138 7E             defb $7E
+102   0139 7E            ld a,[hl]
+102   013A 7E            ld a,[hl]
+102   013B 7E            LD A,(HL)
+103   013C 7F             defb $7F
+103   013D 7F            ld a,a
+103   013E 7F            ld a,a
+103   013F 7F            LD A,A
+104   0140
+105   0140 0A             defb $0A
+105   0141 0A            ld a,[bc]
+105   0142 0A            ld a,[bc]
+105   0143 0A            LD A,(BC)
+106   0144 1A             defb $1A
+106   0145 1A            ld a,[de]
+106   0146 1A            ld a,[de]
+106   0147 1A            LD A,(DE)
+107   0148
+108   0148 02             defb $02
+108   0149 02            ld [bc],a
+108   014A 02            ld [bc],a
+108   014B 02            LD (BC),A
+109   014C 12             defb $12
+109   014D 12            ld [de],a
+109   014E 12            ld [de],a
+109   014F 12            LD (DE),A
+110   0150
+111   0150 F0 00          defb $F0,0
+111   0152 F0 00         ld a,[$FF00]
+111   0154 F0 00         ldh a,[$FF00]
+111   0156 F0 00         LDH A,(n)
+111   0158 F0 00          LD A,($FF00+n)
+112   015A E0 00          defb $E0,0
+112   015C E0 00         ld [$FF00],a
+112   015E E0 00         ldh [$FF00],a
+112   0160 E0 00         LDH (n),A
+112   0162 E0 00          LD ($FF00+n),A
+113   0164                ; syntax "ld a,($ff00+c)" is not accepted by sjasmplus, only "(c)" argument works: 2x error
+114   0164 F2             defb $F2
+114   0165 F2            ld a,[c]
+LR35902_syntax_by_neo.asm(114): error: Label not found: c
+114   0166 F0 00         ld a,[$ff00+c]
+114   0168 F2            LD A,(C)
+LR35902_syntax_by_neo.asm(114): error: Label not found: C
+114   0169 F0 00          LD A,($FF00+C)
+115   016B                ; syntax "ld ($ff00+c),a" is not accepted by sjasmplus, only "(c)" argument works: 2x error
+116   016B E2             defb $E2
+116   016C E2            ld [c], a
+LR35902_syntax_by_neo.asm(116): error: Label not found: c
+116   016D E0 00         ld [$ff00+c],a
+116   016F E2            ld (C),A
+LR35902_syntax_by_neo.asm(116): error: Label not found: C
+116   0170 E0 00          LD ($FF00+C),A
+117   0172
+118   0172 FA 00 00       defb $FA,0,0
+118   0175 FA 00 00      ld a,[0]
+118   0178 FA 00 00      ld a,[$0000]
+118   017B FA 00 00      LD A,(nn)
+119   017E EA 00 00       defb $EA,0,0
+119   0181 EA 00 00      ld [0],a
+119   0184 EA 00 00      ld [$0000],a
+119   0187 EA 00 00      LD (nn),A
+120   018A
+121   018A                ; syntax with HLI and HLD is not accepted by sjasmplus: 4x error
+122   018A 22             defb $22
+122   018B 22            ldi [hl],a
+122   018C 22            ldi [hl],a
+LR35902_syntax_by_neo.asm(122): error: Label not found: HLI
+122   018D EA 00 00      LD (HLI),A
+122   0190 22             LDI (HL),A
+122   0191 22             LD (HL+),A
+123   0192 32             defb $32
+123   0193 32            ldd [hl],a
+123   0194 32            ldd [hl],a
+LR35902_syntax_by_neo.asm(123): error: Label not found: HLD
+123   0195 EA 00 00      LD (HLD),A
+123   0198 32             LDD (HL),A
+123   0199 32             LD (HL-),A
+124   019A 2A             defb $2A
+124   019B 2A            ldi a,[hl]
+124   019C 2A            ldi a,[hl]
+LR35902_syntax_by_neo.asm(124): error: Label not found: HLI
+124   019D FA 00 00      LD A,(HLI)
+124   01A0 2A             LDI A,(HL)
+124   01A1 2A             LD A,(HL+)
+125   01A2 3A             defb $3A
+125   01A3 3A            ldd a,[hl]
+125   01A4 3A            ldd a,[hl]
+LR35902_syntax_by_neo.asm(125): error: Label not found: HLD
+125   01A5 FA 00 00      LD A,(HLD)
+125   01A8 3A             LDD A,(HL)
+125   01A9 3A             LD A,(HL-)
+126   01AA
+127   01AA 01 00 00       defb $01,0,0
+127   01AD 01 00 00      ld bc,0
+127   01B0 01 00 00      ld bc,$0000
+127   01B3 01 00 00      LD BC,nn
+128   01B6 11 00 00       defb $11,0,0
+128   01B9 11 00 00      ld de,0
+128   01BC 11 00 00      ld de,$0000
+128   01BF 11 00 00      LD DE,nn
+129   01C2 21 00 00       defb $21,0,0
+129   01C5 21 00 00      ld hl,0
+129   01C8 21 00 00      ld hl,$0000
+129   01CB 21 00 00      LD HL,nn
+130   01CE 31 00 00       defb $31,0,0
+130   01D1 31 00 00      ld sp,0
+130   01D4 31 00 00      ld sp,$0000
+130   01D7 31 00 00      LD SP,nn
+131   01DA
+132   01DA F9             defb $F9
+132   01DB F9            ld sp,hl
+132   01DC F9            ld sp,hl
+132   01DD F9            LD SP,HL
+133   01DE
+134   01DE                ; syntax "ld hl,[sp+$00]" and "LDHL" is not accepted by sjasmplus: 2x error
+135   01DE F8 00          defb $F8,0
+135   01E0 F8 00         ld hl,sp+0
+LR35902_syntax_by_neo.asm(135): error: Label not found: sp
+135   01E2               ld hl,[sp+$00]
+135   01E2 F8 00         LD HL,SP+n
+LR35902_syntax_by_neo.asm(135): error: Unrecognized instruction: LDHL SP,n
+135   01E4                LDHL SP,n
+136   01E4
+137   01E4 08 00 00       defb $08,0,0
+137   01E7 08 00 00      ld [0],sp
+137   01EA 08 00 00      ld [$0000],sp
+137   01ED 08 00 00      LD (nn),SP
+138   01F0
+139   01F0 F5             defb $F5
+139   01F1 F5            push af
+139   01F2 F5            push af
+139   01F3 F5            PUSH AF
+140   01F4 C5             defb $C5
+140   01F5 C5            push bc
+140   01F6 C5            push bc
+140   01F7 C5            PUSH BC
+141   01F8 D5             defb $D5
+141   01F9 D5            push de
+141   01FA D5            push de
+141   01FB D5            PUSH DE
+142   01FC E5             defb $E5
+142   01FD E5            push hl
+142   01FE E5            push hl
+142   01FF E5            PUSH HL
+143   0200
+144   0200 F1             defb $F1
+144   0201 F1            pop af
+144   0202 F1            pop af
+144   0203 F1            POP AF
+145   0204 C1             defb $C1
+145   0205 C1            pop bc
+145   0206 C1            pop bc
+145   0207 C1            POP BC
+146   0208 D1             defb $D1
+146   0209 D1            pop de
+146   020A D1            pop de
+146   020B D1            POP DE
+147   020C E1             defb $E1
+147   020D E1            pop hl
+147   020E E1            pop hl
+147   020F E1            POP HL
+148   0210
+149   0210 80             defb $80
+149   0211 80            add a,b
+149   0212 80            add b
+149   0213 80            ADD A,B
+150   0214 81             defb $81
+150   0215 81            add a,c
+150   0216 81            add c
+150   0217 81            ADD A,C
+151   0218 82             defb $82
+151   0219 82            add a,d
+151   021A 82            add d
+151   021B 82            ADD A,D
+152   021C 83             defb $83
+152   021D 83            add a,e
+152   021E 83            add e
+152   021F 83            ADD A,E
+153   0220 84             defb $84
+153   0221 84            add a,h
+153   0222 84            add h
+153   0223 84            ADD A,H
+154   0224 85             defb $85
+154   0225 85            add a,l
+154   0226 85            add l
+154   0227 85            ADD A,L
+155   0228 86             defb $86
+155   0229 86            add a,[hl]
+155   022A 86            add [hl]
+155   022B 86            ADD A,(HL)
+156   022C 87             defb $87
+156   022D 87            add a,a
+156   022E 87            add a
+156   022F 87            ADD A,A
+157   0230
+158   0230 88             defb $88
+158   0231 88            adc a,b
+158   0232 88            adc b
+158   0233 88            ADC A,B
+159   0234 89             defb $89
+159   0235 89            adc a,c
+159   0236 89            adc c
+159   0237 89            ADC A,C
+160   0238 8A             defb $8A
+160   0239 8A            adc a,d
+160   023A 8A            adc d
+160   023B 8A            ADC A,D
+161   023C 8B             defb $8B
+161   023D 8B            adc a,e
+161   023E 8B            adc e
+161   023F 8B            ADC A,E
+162   0240 8C             defb $8C
+162   0241 8C            adc a,h
+162   0242 8C            adc h
+162   0243 8C            ADC A,H
+163   0244 8D             defb $8D
+163   0245 8D            adc a,l
+163   0246 8D            adc l
+163   0247 8D            ADC A,L
+164   0248 8E             defb $8E
+164   0249 8E            adc a,[hl]
+164   024A 8E            adc [hl]
+164   024B 8E            ADC A,(HL)
+165   024C 8F             defb $8F
+165   024D 8F            adc a,a
+165   024E 8F            adc a
+165   024F 8F            ADC A,A
+166   0250
+167   0250 90             defb $90
+167   0251 90            sub b
+167   0252 90            sub b
+167   0253 90            SUB B
+168   0254 91             defb $91
+168   0255 91            sub c
+168   0256 91            sub c
+168   0257 91            SUB C
+169   0258 92             defb $92
+169   0259 92            sub d
+169   025A 92            sub d
+169   025B 92            SUB D
+170   025C 93             defb $93
+170   025D 93            sub e
+170   025E 93            sub e
+170   025F 93            SUB E
+171   0260 94             defb $94
+171   0261 94            sub h
+171   0262 94            sub h
+171   0263 94            SUB H
+172   0264 95             defb $95
+172   0265 95            sub l
+172   0266 95            sub l
+172   0267 95            SUB L
+173   0268 96             defb $96
+173   0269 96            sub [hl]
+173   026A 96            sub [hl]
+173   026B 96            SUB (HL)
+174   026C 97             defb $97
+174   026D 97            sub a
+174   026E 97            sub a
+174   026F 97            SUB A
+175   0270
+176   0270 98             defb $98
+176   0271 98            sbc a,b
+176   0272 98            sbc b
+176   0273 98            SBC A,B
+177   0274 99             defb $99
+177   0275 99            sbc a,c
+177   0276 99            sbc c
+177   0277 99            SBC A,C
+178   0278 9A             defb $9A
+178   0279 9A            sbc a,d
+178   027A 9A            sbc d
+178   027B 9A            SBC A,D
+179   027C 9B             defb $9B
+179   027D 9B            sbc a,e
+179   027E 9B            sbc e
+179   027F 9B            SBC A,E
+180   0280 9C             defb $9C
+180   0281 9C            sbc a,h
+180   0282 9C            sbc h
+180   0283 9C            SBC A,H
+181   0284 9D             defb $9D
+181   0285 9D            sbc a,l
+181   0286 9D            sbc l
+181   0287 9D            SBC A,L
+182   0288 9E             defb $9E
+182   0289 9E            sbc a,[hl]
+182   028A 9E            sbc [hl]
+182   028B 9E            SBC A,(HL)
+183   028C 9F             defb $9F
+183   028D 9F            sbc a,a
+183   028E 9F            sbc a
+183   028F 9F            SBC A,A
+184   0290
+185   0290 A0             defb $A0
+185   0291 A0            and b
+185   0292 A0            and b
+185   0293 A0            AND B
+186   0294 A1             defb $A1
+186   0295 A1            and c
+186   0296 A1            and c
+186   0297 A1            AND C
+187   0298 A2             defb $A2
+187   0299 A2            and d
+187   029A A2            and d
+187   029B A2            AND D
+188   029C A3             defb $A3
+188   029D A3            and e
+188   029E A3            and e
+188   029F A3            AND E
+189   02A0 A4             defb $A4
+189   02A1 A4            and h
+189   02A2 A4            and h
+189   02A3 A4            AND H
+190   02A4 A5             defb $A5
+190   02A5 A5            and l
+190   02A6 A5            and l
+190   02A7 A5            AND L
+191   02A8 A6             defb $A6
+191   02A9 A6            and [hl]
+191   02AA A6            and [hl]
+191   02AB A6            AND (HL)
+192   02AC A7             defb $A7
+192   02AD A7            and a
+192   02AE A7            and a
+192   02AF A7            AND A
+193   02B0
+194   02B0 B0             defb $B0
+194   02B1 B0            or b
+194   02B2 B0            or b
+194   02B3 B0            OR B
+195   02B4 B1             defb $B1
+195   02B5 B1            or c
+195   02B6 B1            or c
+195   02B7 B1            OR C
+196   02B8 B2             defb $B2
+196   02B9 B2            or d
+196   02BA B2            or d
+196   02BB B2            OR D
+197   02BC B3             defb $B3
+197   02BD B3            or e
+197   02BE B3            or e
+197   02BF B3            OR E
+198   02C0 B4             defb $B4
+198   02C1 B4            or h
+198   02C2 B4            or h
+198   02C3 B4            OR H
+199   02C4 B5             defb $B5
+199   02C5 B5            or l
+199   02C6 B5            or l
+199   02C7 B5            OR L
+200   02C8 B6             defb $B6
+200   02C9 B6            or [hl]
+200   02CA B6            or [hl]
+200   02CB B6            OR (HL)
+201   02CC B7             defb $B7
+201   02CD B7            or a
+201   02CE B7            or a
+201   02CF B7            OR A
+202   02D0
+203   02D0 A8             defb $A8
+203   02D1 A8            xor b
+203   02D2 A8            xor b
+203   02D3 A8            XOR B
+204   02D4 A9             defb $A9
+204   02D5 A9            xor c
+204   02D6 A9            xor c
+204   02D7 A9            XOR C
+205   02D8 AA             defb $AA
+205   02D9 AA            xor d
+205   02DA AA            xor d
+205   02DB AA            XOR D
+206   02DC AB             defb $AB
+206   02DD AB            xor e
+206   02DE AB            xor e
+206   02DF AB            XOR E
+207   02E0 AC             defb $AC
+207   02E1 AC            xor h
+207   02E2 AC            xor h
+207   02E3 AC            XOR H
+208   02E4 AD             defb $AD
+208   02E5 AD            xor l
+208   02E6 AD            xor l
+208   02E7 AD            XOR L
+209   02E8 AE             defb $AE
+209   02E9 AE            xor [hl]
+209   02EA AE            xor [hl]
+209   02EB AE            XOR (HL)
+210   02EC AF             defb $AF
+210   02ED AF            xor a
+210   02EE AF            xor a
+210   02EF AF            XOR A
+211   02F0
+212   02F0 B8             defb $B8
+212   02F1 B8            cp b
+212   02F2 B8            cp b
+212   02F3 B8            CP B
+213   02F4 B9             defb $B9
+213   02F5 B9            cp c
+213   02F6 B9            cp c
+213   02F7 B9            CP C
+214   02F8 BA             defb $BA
+214   02F9 BA            cp d
+214   02FA BA            cp d
+214   02FB BA            CP D
+215   02FC BB             defb $BB
+215   02FD BB            cp e
+215   02FE BB            cp e
+215   02FF BB            CP E
+216   0300 BC             defb $BC
+216   0301 BC            cp h
+216   0302 BC            cp h
+216   0303 BC            CP H
+217   0304 BD             defb $BD
+217   0305 BD            cp l
+217   0306 BD            cp l
+217   0307 BD            CP L
+218   0308 BE             defb $BE
+218   0309 BE            cp [hl]
+218   030A BE            cp [hl]
+218   030B BE            CP (HL)
+219   030C BF             defb $BF
+219   030D BF            cp a
+219   030E BF            cp a
+219   030F BF            CP A
+220   0310
+221   0310 04             defb $04
+221   0311 04            inc b
+221   0312 04            inc b
+221   0313 04            INC B
+222   0314 0C             defb $0C
+222   0315 0C            inc c
+222   0316 0C            inc c
+222   0317 0C            INC C
+223   0318 14             defb $14
+223   0319 14            inc d
+223   031A 14            inc d
+223   031B 14            INC D
+224   031C 1C             defb $1C
+224   031D 1C            inc e
+224   031E 1C            inc e
+224   031F 1C            INC E
+225   0320 24             defb $24
+225   0321 24            inc h
+225   0322 24            inc h
+225   0323 24            INC H
+226   0324 2C             defb $2C
+226   0325 2C            inc l
+226   0326 2C            inc l
+226   0327 2C            INC L
+227   0328 34             defb $34
+227   0329 34            inc [hl]
+227   032A 34            inc [hl]
+227   032B 34            INC (HL)
+228   032C 3C             defb $3C
+228   032D 3C            inc a
+228   032E 3C            inc a
+228   032F 3C            INC A
+229   0330
+230   0330 05             defb $05
+230   0331 05            dec b
+230   0332 05            dec b
+230   0333 05            DEC B
+231   0334 0D             defb $0D
+231   0335 0D            dec c
+231   0336 0D            dec c
+231   0337 0D            DEC C
+232   0338 15             defb $15
+232   0339 15            dec d
+232   033A 15            dec d
+232   033B 15            DEC D
+233   033C 1D             defb $1D
+233   033D 1D            dec e
+233   033E 1D            dec e
+233   033F 1D            DEC E
+234   0340 25             defb $25
+234   0341 25            dec h
+234   0342 25            dec h
+234   0343 25            DEC H
+235   0344 2D             defb $2D
+235   0345 2D            dec l
+235   0346 2D            dec l
+235   0347 2D            DEC L
+236   0348 35             defb $35
+236   0349 35            dec [hl]
+236   034A 35            dec [hl]
+236   034B 35            DEC (HL)
+237   034C 3D             defb $3D
+237   034D 3D            dec a
+237   034E 3D            dec a
+237   034F 3D            DEC A
+238   0350
+239   0350                ; the sub/and/xor/or/cp needs "--syntax=a" in sjasmplus for "a," recognition like this
+240   0350                ; by default the sjasmplus understands "a," as multi-arg: "sub a,0" = "sub a : sub 0" (!)
+241   0350 C6 00          defb $C6,0
+241   0352 C6 00         add a,0
+241   0354 C6 00         add a,$00
+241   0356 C6 00         ADD A,n
+242   0358 CE 00          defb $CE,0
+242   035A CE 00         adc a,0
+242   035C CE 00         adc a,$00
+242   035E CE 00         ADC A,n
+243   0360 D6 00          defb $D6,0
+243   0362 D6 00         sub 0
+243   0364 D6 00         sub a,$00
+243   0366 D6 00         SUB n         ; "sub a,*" needs `--syntax=a` in sjasmplus
+244   0368 DE 00          defb $DE,0
+244   036A DE 00         sbc a,0
+244   036C DE 00         sbc a,$00
+244   036E DE 00         SBC A,n
+245   0370 E6 00          defb $E6,0
+245   0372 E6 00         and 0
+245   0374 E6 00         and a,$00
+245   0376 E6 00         AND n         ; "and a,*" needs `--syntax=a` in sjasmplus
+246   0378 EE 00          defb $EE,0
+246   037A EE 00         xor 0
+246   037C EE 00         xor a,$00
+246   037E EE 00         XOR n         ; "xor a,*" needs `--syntax=a` in sjasmplus
+247   0380 F6 00          defb $F6,0
+247   0382 F6 00         or 0
+247   0384 F6 00         or a,$00
+247   0386 F6 00         OR n          ; "or a,*" needs `--syntax=a` in sjasmplus
+248   0388 FE 00          defb $FE,0
+248   038A FE 00         cp 0
+248   038C FE 00         cp a,$00
+248   038E FE 00         CP n          ; "cp a,*" needs `--syntax=a` in sjasmplus
+249   0390
+250   0390 09             defb $09
+250   0391 09            add hl,bc
+250   0392 09            add hl,bc
+250   0393 09            ADD HL,BC
+251   0394 19             defb $19
+251   0395 19            add hl,de
+251   0396 19            add hl,de
+251   0397 19            ADD HL,DE
+252   0398 29             defb $29
+252   0399 29            add hl,hl
+252   039A 29            add hl,hl
+252   039B 29            ADD HL,HL
+253   039C 39             defb $39
+253   039D 39            add hl,sp
+253   039E 39            add hl,sp
+253   039F 39            ADD HL,SP
+254   03A0
+255   03A0 E8 00          defb $E8,0
+255   03A2 E8 00         add sp,0
+255   03A4 E8 00         add sp,$00
+255   03A6 E8 00         ADD SP,n
+256   03A8
+257   03A8 03             defb $03
+257   03A9 03            inc bc
+257   03AA 03            inc bc
+257   03AB 03            INC BC
+258   03AC 13             defb $13
+258   03AD 13            inc de
+258   03AE 13            inc de
+258   03AF 13            INC DE
+259   03B0 23             defb $23
+259   03B1 23            inc hl
+259   03B2 23            inc hl
+259   03B3 23            INC HL
+260   03B4 33             defb $33
+260   03B5 33            inc sp
+260   03B6 33            inc sp
+260   03B7 33            INC SP
+261   03B8
+262   03B8 0B             defb $0B
+262   03B9 0B            dec bc
+262   03BA 0B            dec bc
+262   03BB 0B            DEC BC
+263   03BC 1B             defb $1B
+263   03BD 1B            dec de
+263   03BE 1B            dec de
+263   03BF 1B            DEC DE
+264   03C0 2B             defb $2B
+264   03C1 2B            dec hl
+264   03C2 2B            dec hl
+264   03C3 2B            DEC HL
+265   03C4 3B             defb $3B
+265   03C5 3B            dec sp
+265   03C6 3B            dec sp
+265   03C7 3B            DEC SP
+266   03C8
+267   03C8 CB 30          defb $CB,$30
+267   03CA CB 30         swap b
+267   03CC CB 30         swap b
+267   03CE CB 30         SWAP B
+268   03D0 CB 31          defb $CB,$31
+268   03D2 CB 31         swap c
+268   03D4 CB 31         swap c
+268   03D6 CB 31         SWAP C
+269   03D8 CB 32          defb $CB,$32
+269   03DA CB 32         swap d
+269   03DC CB 32         swap d
+269   03DE CB 32         SWAP D
+270   03E0 CB 33          defb $CB,$33
+270   03E2 CB 33         swap e
+270   03E4 CB 33         swap e
+270   03E6 CB 33         SWAP E
+271   03E8 CB 34          defb $CB,$34
+271   03EA CB 34         swap h
+271   03EC CB 34         swap h
+271   03EE CB 34         SWAP H
+272   03F0 CB 35          defb $CB,$35
+272   03F2 CB 35         swap l
+272   03F4 CB 35         swap l
+272   03F6 CB 35         SWAP L
+273   03F8 CB 36          defb $CB,$36
+273   03FA CB 36         swap [hl]
+273   03FC CB 36         swap [hl]
+273   03FE CB 36         SWAP (HL)
+274   0400 CB 37          defb $CB,$37
+274   0402 CB 37         swap a
+274   0404 CB 37         swap a
+274   0406 CB 37         SWAP A
+275   0408
+276   0408 27             defb $27
+276   0409 27            daa
+276   040A 27            daa
+276   040B 27            DAA
+277   040C 2F             defb $2F
+277   040D 2F            cpl
+277   040E 2F            cpl
+277   040F 2F            CPL
+278   0410 3F             defb $3F
+278   0411 3F            ccf
+278   0412 3F            ccf
+278   0413 3F            CCF
+279   0414 37             defb $37
+279   0415 37            scf
+279   0416 37            scf
+279   0417 37            SCF
+280   0418
+281   0418 00             defb $00
+281   0419 00            nop
+281   041A 00            nop
+281   041B 00            NOP
+282   041C
+283   041C 10 00          defb $10,$00
+283   041E 10 00         stop
+283   0420 10 00         stop
+283   0422 10 00         STOP
+284   0424 F3             defb $F3
+284   0425 F3            di
+284   0426 F3            di
+284   0427 F3            DI
+285   0428 FB             defb $FB
+285   0429 FB            ei
+285   042A FB            ei
+285   042B FB            EI
+286   042C
+287   042C 07             defb $07
+287   042D 07            rlca
+287   042E 07            rlca
+287   042F 07            RLCA
+288   0430 17             defb $17
+288   0431 17            rla
+288   0432 17            rla
+288   0433 17            RLA
+289   0434 0F             defb $0F
+289   0435 0F            rrca
+289   0436 0F            rrca
+289   0437 0F            RRCA
+290   0438 1F             defb $1F
+290   0439 1F            rra
+290   043A 1F            rra
+290   043B 1F            RRA
+291   043C
+292   043C CB 00          defb $CB,$00
+292   043E CB 00         rlc b
+292   0440 CB 00         rlc b
+292   0442 CB 00         RLC B
+293   0444 CB 01          defb $CB,$01
+293   0446 CB 01         rlc c
+293   0448 CB 01         rlc c
+293   044A CB 01         RLC C
+294   044C CB 02          defb $CB,$02
+294   044E CB 02         rlc d
+294   0450 CB 02         rlc d
+294   0452 CB 02         RLC D
+295   0454 CB 03          defb $CB,$03
+295   0456 CB 03         rlc e
+295   0458 CB 03         rlc e
+295   045A CB 03         RLC E
+296   045C CB 04          defb $CB,$04
+296   045E CB 04         rlc h
+296   0460 CB 04         rlc h
+296   0462 CB 04         RLC H
+297   0464 CB 05          defb $CB,$05
+297   0466 CB 05         rlc l
+297   0468 CB 05         rlc l
+297   046A CB 05         RLC L
+298   046C CB 06          defb $CB,$06
+298   046E CB 06         rlc [hl]
+298   0470 CB 06         rlc [hl]
+298   0472 CB 06         RLC (HL)
+299   0474 CB 07          defb $CB,$07
+299   0476 CB 07         rlc a
+299   0478 CB 07         rlc a
+299   047A CB 07         RLC A
+300   047C
+301   047C CB 10          defb $CB,$10
+301   047E CB 10         rl b
+301   0480 CB 10         rl b
+301   0482 CB 10         RL B
+302   0484 CB 11          defb $CB,$11
+302   0486 CB 11         rl c
+302   0488 CB 11         rl c
+302   048A CB 11         RL C
+303   048C CB 12          defb $CB,$12
+303   048E CB 12         rl d
+303   0490 CB 12         rl d
+303   0492 CB 12         RL D
+304   0494 CB 13          defb $CB,$13
+304   0496 CB 13         rl e
+304   0498 CB 13         rl e
+304   049A CB 13         RL E
+305   049C CB 14          defb $CB,$14
+305   049E CB 14         rl h
+305   04A0 CB 14         rl h
+305   04A2 CB 14         RL H
+306   04A4 CB 15          defb $CB,$15
+306   04A6 CB 15         rl l
+306   04A8 CB 15         rl l
+306   04AA CB 15         RL L
+307   04AC CB 16          defb $CB,$16
+307   04AE CB 16         rl [hl]
+307   04B0 CB 16         rl [hl]
+307   04B2 CB 16         RL (HL)
+308   04B4 CB 17          defb $CB,$17
+308   04B6 CB 17         rl a
+308   04B8 CB 17         rl a
+308   04BA CB 17         RL A
+309   04BC
+310   04BC CB 08          defb $CB,$08
+310   04BE CB 08         rrc b
+310   04C0 CB 08         rrc b
+310   04C2 CB 08         RRC B
+311   04C4 CB 09          defb $CB,$09
+311   04C6 CB 09         rrc c
+311   04C8 CB 09         rrc c
+311   04CA CB 09         RRC C
+312   04CC CB 0A          defb $CB,$0A
+312   04CE CB 0A         rrc d
+312   04D0 CB 0A         rrc d
+312   04D2 CB 0A         RRC D
+313   04D4 CB 0B          defb $CB,$0B
+313   04D6 CB 0B         rrc e
+313   04D8 CB 0B         rrc e
+313   04DA CB 0B         RRC E
+314   04DC CB 0C          defb $CB,$0C
+314   04DE CB 0C         rrc h
+314   04E0 CB 0C         rrc h
+314   04E2 CB 0C         RRC H
+315   04E4 CB 0D          defb $CB,$0D
+315   04E6 CB 0D         rrc l
+315   04E8 CB 0D         rrc l
+315   04EA CB 0D         RRC L
+316   04EC CB 0E          defb $CB,$0E
+316   04EE CB 0E         rrc [hl]
+316   04F0 CB 0E         rrc [hl]
+316   04F2 CB 0E         RRC (HL)
+317   04F4 CB 0F          defb $CB,$0F
+317   04F6 CB 0F         rrc a
+317   04F8 CB 0F         rrc a
+317   04FA CB 0F         RRC A
+318   04FC
+319   04FC CB 18          defb $CB,$18
+319   04FE CB 18         rr b
+319   0500 CB 18         rr b
+319   0502 CB 18         RR B
+320   0504 CB 19          defb $CB,$19
+320   0506 CB 19         rr c
+320   0508 CB 19         rr c
+320   050A CB 19         RR C
+321   050C CB 1A          defb $CB,$1A
+321   050E CB 1A         rr d
+321   0510 CB 1A         rr d
+321   0512 CB 1A         RR D
+322   0514 CB 1B          defb $CB,$1B
+322   0516 CB 1B         rr e
+322   0518 CB 1B         rr e
+322   051A CB 1B         RR E
+323   051C CB 1C          defb $CB,$1C
+323   051E CB 1C         rr h
+323   0520 CB 1C         rr h
+323   0522 CB 1C         RR H
+324   0524 CB 1D          defb $CB,$1D
+324   0526 CB 1D         rr l
+324   0528 CB 1D         rr l
+324   052A CB 1D         RR L
+325   052C CB 1E          defb $CB,$1E
+325   052E CB 1E         rr [hl]
+325   0530 CB 1E         rr [hl]
+325   0532 CB 1E         RR (HL)
+326   0534 CB 1F          defb $CB,$1F
+326   0536 CB 1F         rr a
+326   0538 CB 1F         rr a
+326   053A CB 1F         RR A
+327   053C
+328   053C CB 20          defb $CB,$20
+328   053E CB 20         sla b
+328   0540 CB 20         sla b
+328   0542 CB 20         SLA B
+329   0544 CB 21          defb $CB,$21
+329   0546 CB 21         sla c
+329   0548 CB 21         sla c
+329   054A CB 21         SLA C
+330   054C CB 22          defb $CB,$22
+330   054E CB 22         sla d
+330   0550 CB 22         sla d
+330   0552 CB 22         SLA D
+331   0554 CB 23          defb $CB,$23
+331   0556 CB 23         sla e
+331   0558 CB 23         sla e
+331   055A CB 23         SLA E
+332   055C CB 24          defb $CB,$24
+332   055E CB 24         sla h
+332   0560 CB 24         sla h
+332   0562 CB 24         SLA H
+333   0564 CB 25          defb $CB,$25
+333   0566 CB 25         sla l
+333   0568 CB 25         sla l
+333   056A CB 25         SLA L
+334   056C CB 26          defb $CB,$26
+334   056E CB 26         sla [hl]
+334   0570 CB 26         sla [hl]
+334   0572 CB 26         SLA (HL)
+335   0574 CB 27          defb $CB,$27
+335   0576 CB 27         sla a
+335   0578 CB 27         sla a
+335   057A CB 27         SLA A
+336   057C
+337   057C CB 28          defb $CB,$28
+337   057E CB 28         sra b
+337   0580 CB 28         sra b
+337   0582 CB 28         SRA B
+338   0584 CB 29          defb $CB,$29
+338   0586 CB 29         sra c
+338   0588 CB 29         sra c
+338   058A CB 29         SRA C
+339   058C CB 2A          defb $CB,$2A
+339   058E CB 2A         sra d
+339   0590 CB 2A         sra d
+339   0592 CB 2A         SRA D
+340   0594 CB 2B          defb $CB,$2B
+340   0596 CB 2B         sra e
+340   0598 CB 2B         sra e
+340   059A CB 2B         SRA E
+341   059C CB 2C          defb $CB,$2C
+341   059E CB 2C         sra h
+341   05A0 CB 2C         sra h
+341   05A2 CB 2C         SRA H
+342   05A4 CB 2D          defb $CB,$2D
+342   05A6 CB 2D         sra l
+342   05A8 CB 2D         sra l
+342   05AA CB 2D         SRA L
+343   05AC CB 2E          defb $CB,$2E
+343   05AE CB 2E         sra [hl]
+343   05B0 CB 2E         sra [hl]
+343   05B2 CB 2E         SRA (HL)
+344   05B4 CB 2F          defb $CB,$2F
+344   05B6 CB 2F         sra a
+344   05B8 CB 2F         sra a
+344   05BA CB 2F         SRA A
+345   05BC
+346   05BC CB 38          defb $CB,$38
+346   05BE CB 38         srl b
+346   05C0 CB 38         srl b
+346   05C2 CB 38         SRL B
+347   05C4 CB 39          defb $CB,$39
+347   05C6 CB 39         srl c
+347   05C8 CB 39         srl c
+347   05CA CB 39         SRL C
+348   05CC CB 3A          defb $CB,$3A
+348   05CE CB 3A         srl d
+348   05D0 CB 3A         srl d
+348   05D2 CB 3A         SRL D
+349   05D4 CB 3B          defb $CB,$3B
+349   05D6 CB 3B         srl e
+349   05D8 CB 3B         srl e
+349   05DA CB 3B         SRL E
+350   05DC CB 3C          defb $CB,$3C
+350   05DE CB 3C         srl h
+350   05E0 CB 3C         srl h
+350   05E2 CB 3C         SRL H
+351   05E4 CB 3D          defb $CB,$3D
+351   05E6 CB 3D         srl l
+351   05E8 CB 3D         srl l
+351   05EA CB 3D         SRL L
+352   05EC CB 3E          defb $CB,$3E
+352   05EE CB 3E         srl [hl]
+352   05F0 CB 3E         srl [hl]
+352   05F2 CB 3E         SRL (HL)
+353   05F4 CB 3F          defb $CB,$3F
+353   05F6 CB 3F         srl a
+353   05F8 CB 3F         srl a
+353   05FA CB 3F         SRL A
+354   05FC
+355   05FC CB 40          defb $CB,$40
+355   05FE CB 40         bit 0,b
+355   0600 CB 40         bit 0,b
+355   0602 CB 40         BIT 0,B
+356   0604 CB 41          defb $CB,$41
+356   0606 CB 41         bit 0,c
+356   0608 CB 41         bit 0,c
+356   060A CB 41         BIT 0,C
+357   060C CB 42          defb $CB,$42
+357   060E CB 42         bit 0,d
+357   0610 CB 42         bit 0,d
+357   0612 CB 42         BIT 0,D
+358   0614 CB 43          defb $CB,$43
+358   0616 CB 43         bit 0,e
+358   0618 CB 43         bit 0,e
+358   061A CB 43         BIT 0,E
+359   061C CB 44          defb $CB,$44
+359   061E CB 44         bit 0,h
+359   0620 CB 44         bit 0,h
+359   0622 CB 44         BIT 0,H
+360   0624 CB 45          defb $CB,$45
+360   0626 CB 45         bit 0,l
+360   0628 CB 45         bit 0,l
+360   062A CB 45         BIT 0,L
+361   062C CB 46          defb $CB,$46
+361   062E CB 46         bit 0,[hl]
+361   0630 CB 46         bit 0,[hl]
+361   0632 CB 46         BIT 0,(HL)
+362   0634 CB 47          defb $CB,$47
+362   0636 CB 47         bit 0,a
+362   0638 CB 47         bit 0,a
+362   063A CB 47         BIT 0,A
+363   063C
+364   063C CB 48          defb $CB,$40+$08
+364   063E CB 48         bit 1,b
+364   0640 CB 48         bit 1,b
+364   0642 CB 48         BIT 1,B
+365   0644 CB 49          defb $CB,$41+$08
+365   0646 CB 49         bit 1,c
+365   0648 CB 49         bit 1,c
+365   064A CB 49         BIT 1,C
+366   064C CB 4A          defb $CB,$42+$08
+366   064E CB 4A         bit 1,d
+366   0650 CB 4A         bit 1,d
+366   0652 CB 4A         BIT 1,D
+367   0654 CB 4B          defb $CB,$43+$08
+367   0656 CB 4B         bit 1,e
+367   0658 CB 4B         bit 1,e
+367   065A CB 4B         BIT 1,E
+368   065C CB 4C          defb $CB,$44+$08
+368   065E CB 4C         bit 1,h
+368   0660 CB 4C         bit 1,h
+368   0662 CB 4C         BIT 1,H
+369   0664 CB 4D          defb $CB,$45+$08
+369   0666 CB 4D         bit 1,l
+369   0668 CB 4D         bit 1,l
+369   066A CB 4D         BIT 1,L
+370   066C CB 4E          defb $CB,$46+$08
+370   066E CB 4E         bit 1,[hl]
+370   0670 CB 4E         bit 1,[hl]
+370   0672 CB 4E         BIT 1,(HL)
+371   0674 CB 4F          defb $CB,$47+$08
+371   0676 CB 4F         bit 1,a
+371   0678 CB 4F         bit 1,a
+371   067A CB 4F         BIT 1,A
+372   067C
+373   067C CB 50          defb $CB,$40+$10
+373   067E CB 50         bit 2,b
+373   0680 CB 50         bit 2,b
+373   0682 CB 50         BIT 2,B
+374   0684 CB 51          defb $CB,$41+$10
+374   0686 CB 51         bit 2,c
+374   0688 CB 51         bit 2,c
+374   068A CB 51         BIT 2,C
+375   068C CB 52          defb $CB,$42+$10
+375   068E CB 52         bit 2,d
+375   0690 CB 52         bit 2,d
+375   0692 CB 52         BIT 2,D
+376   0694 CB 53          defb $CB,$43+$10
+376   0696 CB 53         bit 2,e
+376   0698 CB 53         bit 2,e
+376   069A CB 53         BIT 2,E
+377   069C CB 54          defb $CB,$44+$10
+377   069E CB 54         bit 2,h
+377   06A0 CB 54         bit 2,h
+377   06A2 CB 54         BIT 2,H
+378   06A4 CB 55          defb $CB,$45+$10
+378   06A6 CB 55         bit 2,l
+378   06A8 CB 55         bit 2,l
+378   06AA CB 55         BIT 2,L
+379   06AC CB 56          defb $CB,$46+$10
+379   06AE CB 56         bit 2,[hl]
+379   06B0 CB 56         bit 2,[hl]
+379   06B2 CB 56         BIT 2,(HL)
+380   06B4 CB 57          defb $CB,$47+$10
+380   06B6 CB 57         bit 2,a
+380   06B8 CB 57         bit 2,a
+380   06BA CB 57         BIT 2,A
+381   06BC
+382   06BC CB 58          defb $CB,$40+$18
+382   06BE CB 58         bit 3,b
+382   06C0 CB 58         bit 3,b
+382   06C2 CB 58         BIT 3,B
+383   06C4 CB 59          defb $CB,$41+$18
+383   06C6 CB 59         bit 3,c
+383   06C8 CB 59         bit 3,c
+383   06CA CB 59         BIT 3,C
+384   06CC CB 5A          defb $CB,$42+$18
+384   06CE CB 5A         bit 3,d
+384   06D0 CB 5A         bit 3,d
+384   06D2 CB 5A         BIT 3,D
+385   06D4 CB 5B          defb $CB,$43+$18
+385   06D6 CB 5B         bit 3,e
+385   06D8 CB 5B         bit 3,e
+385   06DA CB 5B         BIT 3,E
+386   06DC CB 5C          defb $CB,$44+$18
+386   06DE CB 5C         bit 3,h
+386   06E0 CB 5C         bit 3,h
+386   06E2 CB 5C         BIT 3,H
+387   06E4 CB 5D          defb $CB,$45+$18
+387   06E6 CB 5D         bit 3,l
+387   06E8 CB 5D         bit 3,l
+387   06EA CB 5D         BIT 3,L
+388   06EC CB 5E          defb $CB,$46+$18
+388   06EE CB 5E         bit 3,[hl]
+388   06F0 CB 5E         bit 3,[hl]
+388   06F2 CB 5E         BIT 3,(HL)
+389   06F4 CB 5F          defb $CB,$47+$18
+389   06F6 CB 5F         bit 3,a
+389   06F8 CB 5F         bit 3,a
+389   06FA CB 5F         BIT 3,A
+390   06FC
+391   06FC CB 60          defb $CB,$40+$20
+391   06FE CB 60         bit 4,b
+391   0700 CB 60         bit 4,b
+391   0702 CB 60         BIT 4,B
+392   0704 CB 61          defb $CB,$41+$20
+392   0706 CB 61         bit 4,c
+392   0708 CB 61         bit 4,c
+392   070A CB 61         BIT 4,C
+393   070C CB 62          defb $CB,$42+$20
+393   070E CB 62         bit 4,d
+393   0710 CB 62         bit 4,d
+393   0712 CB 62         BIT 4,D
+394   0714 CB 63          defb $CB,$43+$20
+394   0716 CB 63         bit 4,e
+394   0718 CB 63         bit 4,e
+394   071A CB 63         BIT 4,E
+395   071C CB 64          defb $CB,$44+$20
+395   071E CB 64         bit 4,h
+395   0720 CB 64         bit 4,h
+395   0722 CB 64         BIT 4,H
+396   0724 CB 65          defb $CB,$45+$20
+396   0726 CB 65         bit 4,l
+396   0728 CB 65         bit 4,l
+396   072A CB 65         BIT 4,L
+397   072C CB 66          defb $CB,$46+$20
+397   072E CB 66         bit 4,[hl]
+397   0730 CB 66         bit 4,[hl]
+397   0732 CB 66         BIT 4,(HL)
+398   0734 CB 67          defb $CB,$47+$20
+398   0736 CB 67         bit 4,a
+398   0738 CB 67         bit 4,a
+398   073A CB 67         BIT 4,A
+399   073C
+400   073C CB 68          defb $CB,$40+$28
+400   073E CB 68         bit 5,b
+400   0740 CB 68         bit 5,b
+400   0742 CB 68         BIT 5,B
+401   0744 CB 69          defb $CB,$41+$28
+401   0746 CB 69         bit 5,c
+401   0748 CB 69         bit 5,c
+401   074A CB 69         BIT 5,C
+402   074C CB 6A          defb $CB,$42+$28
+402   074E CB 6A         bit 5,d
+402   0750 CB 6A         bit 5,d
+402   0752 CB 6A         BIT 5,D
+403   0754 CB 6B          defb $CB,$43+$28
+403   0756 CB 6B         bit 5,e
+403   0758 CB 6B         bit 5,e
+403   075A CB 6B         BIT 5,E
+404   075C CB 6C          defb $CB,$44+$28
+404   075E CB 6C         bit 5,h
+404   0760 CB 6C         bit 5,h
+404   0762 CB 6C         BIT 5,H
+405   0764 CB 6D          defb $CB,$45+$28
+405   0766 CB 6D         bit 5,l
+405   0768 CB 6D         bit 5,l
+405   076A CB 6D         BIT 5,L
+406   076C CB 6E          defb $CB,$46+$28
+406   076E CB 6E         bit 5,[hl]
+406   0770 CB 6E         bit 5,[hl]
+406   0772 CB 6E         BIT 5,(HL)
+407   0774 CB 6F          defb $CB,$47+$28
+407   0776 CB 6F         bit 5,a
+407   0778 CB 6F         bit 5,a
+407   077A CB 6F         BIT 5,A
+408   077C
+409   077C CB 70          defb $CB,$40+$30
+409   077E CB 70         bit 6,b
+409   0780 CB 70         bit 6,b
+409   0782 CB 70         BIT 6,B
+410   0784 CB 71          defb $CB,$41+$30
+410   0786 CB 71         bit 6,c
+410   0788 CB 71         bit 6,c
+410   078A CB 71         BIT 6,C
+411   078C CB 72          defb $CB,$42+$30
+411   078E CB 72         bit 6,d
+411   0790 CB 72         bit 6,d
+411   0792 CB 72         BIT 6,D
+412   0794 CB 73          defb $CB,$43+$30
+412   0796 CB 73         bit 6,e
+412   0798 CB 73         bit 6,e
+412   079A CB 73         BIT 6,E
+413   079C CB 74          defb $CB,$44+$30
+413   079E CB 74         bit 6,h
+413   07A0 CB 74         bit 6,h
+413   07A2 CB 74         BIT 6,H
+414   07A4 CB 75          defb $CB,$45+$30
+414   07A6 CB 75         bit 6,l
+414   07A8 CB 75         bit 6,l
+414   07AA CB 75         BIT 6,L
+415   07AC CB 76          defb $CB,$46+$30
+415   07AE CB 76         bit 6,[hl]
+415   07B0 CB 76         bit 6,[hl]
+415   07B2 CB 76         BIT 6,(HL)
+416   07B4 CB 77          defb $CB,$47+$30
+416   07B6 CB 77         bit 6,a
+416   07B8 CB 77         bit 6,a
+416   07BA CB 77         BIT 6,A
+417   07BC
+418   07BC CB 78          defb $CB,$40+$38
+418   07BE CB 78         bit 7,b
+418   07C0 CB 78         bit 7,b
+418   07C2 CB 78         BIT 7,B
+419   07C4 CB 79          defb $CB,$41+$38
+419   07C6 CB 79         bit 7,c
+419   07C8 CB 79         bit 7,c
+419   07CA CB 79         BIT 7,C
+420   07CC CB 7A          defb $CB,$42+$38
+420   07CE CB 7A         bit 7,d
+420   07D0 CB 7A         bit 7,d
+420   07D2 CB 7A         BIT 7,D
+421   07D4 CB 7B          defb $CB,$43+$38
+421   07D6 CB 7B         bit 7,e
+421   07D8 CB 7B         bit 7,e
+421   07DA CB 7B         BIT 7,E
+422   07DC CB 7C          defb $CB,$44+$38
+422   07DE CB 7C         bit 7,h
+422   07E0 CB 7C         bit 7,h
+422   07E2 CB 7C         BIT 7,H
+423   07E4 CB 7D          defb $CB,$45+$38
+423   07E6 CB 7D         bit 7,l
+423   07E8 CB 7D         bit 7,l
+423   07EA CB 7D         BIT 7,L
+424   07EC CB 7E          defb $CB,$46+$38
+424   07EE CB 7E         bit 7,[hl]
+424   07F0 CB 7E         bit 7,[hl]
+424   07F2 CB 7E         BIT 7,(HL)
+425   07F4 CB 7F          defb $CB,$47+$38
+425   07F6 CB 7F         bit 7,a
+425   07F8 CB 7F         bit 7,a
+425   07FA CB 7F         BIT 7,A
+426   07FC
+427   07FC CB C0          defb $CB,$C0
+427   07FE CB C0         set 0,b
+427   0800 CB C0         set 0,b
+427   0802 CB C0         SET 0,B
+428   0804 CB C1          defb $CB,$C1
+428   0806 CB C1         set 0,c
+428   0808 CB C1         set 0,c
+428   080A CB C1         SET 0,C
+429   080C CB C2          defb $CB,$C2
+429   080E CB C2         set 0,d
+429   0810 CB C2         set 0,d
+429   0812 CB C2         SET 0,D
+430   0814 CB C3          defb $CB,$C3
+430   0816 CB C3         set 0,e
+430   0818 CB C3         set 0,e
+430   081A CB C3         SET 0,E
+431   081C CB C4          defb $CB,$C4
+431   081E CB C4         set 0,h
+431   0820 CB C4         set 0,h
+431   0822 CB C4         SET 0,H
+432   0824 CB C5          defb $CB,$C5
+432   0826 CB C5         set 0,l
+432   0828 CB C5         set 0,l
+432   082A CB C5         SET 0,L
+433   082C CB C6          defb $CB,$C6
+433   082E CB C6         set 0,[hl]
+433   0830 CB C6         set 0,[hl]
+433   0832 CB C6         SET 0,(HL)
+434   0834 CB C7          defb $CB,$C7
+434   0836 CB C7         set 0,a
+434   0838 CB C7         set 0,a
+434   083A CB C7         SET 0,A
+435   083C
+436   083C CB C8          defb $CB,$C0+$08
+436   083E CB C8         set 1,b
+436   0840 CB C8         set 1,b
+436   0842 CB C8         SET 1,B
+437   0844 CB C9          defb $CB,$C1+$08
+437   0846 CB C9         set 1,c
+437   0848 CB C9         set 1,c
+437   084A CB C9         SET 1,C
+438   084C CB CA          defb $CB,$C2+$08
+438   084E CB CA         set 1,d
+438   0850 CB CA         set 1,d
+438   0852 CB CA         SET 1,D
+439   0854 CB CB          defb $CB,$C3+$08
+439   0856 CB CB         set 1,e
+439   0858 CB CB         set 1,e
+439   085A CB CB         SET 1,E
+440   085C CB CC          defb $CB,$C4+$08
+440   085E CB CC         set 1,h
+440   0860 CB CC         set 1,h
+440   0862 CB CC         SET 1,H
+441   0864 CB CD          defb $CB,$C5+$08
+441   0866 CB CD         set 1,l
+441   0868 CB CD         set 1,l
+441   086A CB CD         SET 1,L
+442   086C CB CE          defb $CB,$C6+$08
+442   086E CB CE         set 1,[hl]
+442   0870 CB CE         set 1,[hl]
+442   0872 CB CE         SET 1,(HL)
+443   0874 CB CF          defb $CB,$C7+$08
+443   0876 CB CF         set 1,a
+443   0878 CB CF         set 1,a
+443   087A CB CF         SET 1,A
+444   087C
+445   087C CB D0          defb $CB,$C0+$10
+445   087E CB D0         set 2,b
+445   0880 CB D0         set 2,b
+445   0882 CB D0         SET 2,B
+446   0884 CB D1          defb $CB,$C1+$10
+446   0886 CB D1         set 2,c
+446   0888 CB D1         set 2,c
+446   088A CB D1         SET 2,C
+447   088C CB D2          defb $CB,$C2+$10
+447   088E CB D2         set 2,d
+447   0890 CB D2         set 2,d
+447   0892 CB D2         SET 2,D
+448   0894 CB D3          defb $CB,$C3+$10
+448   0896 CB D3         set 2,e
+448   0898 CB D3         set 2,e
+448   089A CB D3         SET 2,E
+449   089C CB D4          defb $CB,$C4+$10
+449   089E CB D4         set 2,h
+449   08A0 CB D4         set 2,h
+449   08A2 CB D4         SET 2,H
+450   08A4 CB D5          defb $CB,$C5+$10
+450   08A6 CB D5         set 2,l
+450   08A8 CB D5         set 2,l
+450   08AA CB D5         SET 2,L
+451   08AC CB D6          defb $CB,$C6+$10
+451   08AE CB D6         set 2,[hl]
+451   08B0 CB D6         set 2,[hl]
+451   08B2 CB D6         SET 2,(HL)
+452   08B4 CB D7          defb $CB,$C7+$10
+452   08B6 CB D7         set 2,a
+452   08B8 CB D7         set 2,a
+452   08BA CB D7         SET 2,A
+453   08BC
+454   08BC CB D8          defb $CB,$C0+$18
+454   08BE CB D8         set 3,b
+454   08C0 CB D8         set 3,b
+454   08C2 CB D8         SET 3,B
+455   08C4 CB D9          defb $CB,$C1+$18
+455   08C6 CB D9         set 3,c
+455   08C8 CB D9         set 3,c
+455   08CA CB D9         SET 3,C
+456   08CC CB DA          defb $CB,$C2+$18
+456   08CE CB DA         set 3,d
+456   08D0 CB DA         set 3,d
+456   08D2 CB DA         SET 3,D
+457   08D4 CB DB          defb $CB,$C3+$18
+457   08D6 CB DB         set 3,e
+457   08D8 CB DB         set 3,e
+457   08DA CB DB         SET 3,E
+458   08DC CB DC          defb $CB,$C4+$18
+458   08DE CB DC         set 3,h
+458   08E0 CB DC         set 3,h
+458   08E2 CB DC         SET 3,H
+459   08E4 CB DD          defb $CB,$C5+$18
+459   08E6 CB DD         set 3,l
+459   08E8 CB DD         set 3,l
+459   08EA CB DD         SET 3,L
+460   08EC CB DE          defb $CB,$C6+$18
+460   08EE CB DE         set 3,[hl]
+460   08F0 CB DE         set 3,[hl]
+460   08F2 CB DE         SET 3,(HL)
+461   08F4 CB DF          defb $CB,$C7+$18
+461   08F6 CB DF         set 3,a
+461   08F8 CB DF         set 3,a
+461   08FA CB DF         SET 3,A
+462   08FC
+463   08FC CB E0          defb $CB,$C0+$20
+463   08FE CB E0         set 4,b
+463   0900 CB E0         set 4,b
+463   0902 CB E0         SET 4,B
+464   0904 CB E1          defb $CB,$C1+$20
+464   0906 CB E1         set 4,c
+464   0908 CB E1         set 4,c
+464   090A CB E1         SET 4,C
+465   090C CB E2          defb $CB,$C2+$20
+465   090E CB E2         set 4,d
+465   0910 CB E2         set 4,d
+465   0912 CB E2         SET 4,D
+466   0914 CB E3          defb $CB,$C3+$20
+466   0916 CB E3         set 4,e
+466   0918 CB E3         set 4,e
+466   091A CB E3         SET 4,E
+467   091C CB E4          defb $CB,$C4+$20
+467   091E CB E4         set 4,h
+467   0920 CB E4         set 4,h
+467   0922 CB E4         SET 4,H
+468   0924 CB E5          defb $CB,$C5+$20
+468   0926 CB E5         set 4,l
+468   0928 CB E5         set 4,l
+468   092A CB E5         SET 4,L
+469   092C CB E6          defb $CB,$C6+$20
+469   092E CB E6         set 4,[hl]
+469   0930 CB E6         set 4,[hl]
+469   0932 CB E6         SET 4,(HL)
+470   0934 CB E7          defb $CB,$C7+$20
+470   0936 CB E7         set 4,a
+470   0938 CB E7         set 4,a
+470   093A CB E7         SET 4,A
+471   093C
+472   093C CB E8          defb $CB,$C0+$28
+472   093E CB E8         set 5,b
+472   0940 CB E8         set 5,b
+472   0942 CB E8         SET 5,B
+473   0944 CB E9          defb $CB,$C1+$28
+473   0946 CB E9         set 5,c
+473   0948 CB E9         set 5,c
+473   094A CB E9         SET 5,C
+474   094C CB EA          defb $CB,$C2+$28
+474   094E CB EA         set 5,d
+474   0950 CB EA         set 5,d
+474   0952 CB EA         SET 5,D
+475   0954 CB EB          defb $CB,$C3+$28
+475   0956 CB EB         set 5,e
+475   0958 CB EB         set 5,e
+475   095A CB EB         SET 5,E
+476   095C CB EC          defb $CB,$C4+$28
+476   095E CB EC         set 5,h
+476   0960 CB EC         set 5,h
+476   0962 CB EC         SET 5,H
+477   0964 CB ED          defb $CB,$C5+$28
+477   0966 CB ED         set 5,l
+477   0968 CB ED         set 5,l
+477   096A CB ED         SET 5,L
+478   096C CB EE          defb $CB,$C6+$28
+478   096E CB EE         set 5,[hl]
+478   0970 CB EE         set 5,[hl]
+478   0972 CB EE         SET 5,(HL)
+479   0974 CB EF          defb $CB,$C7+$28
+479   0976 CB EF         set 5,a
+479   0978 CB EF         set 5,a
+479   097A CB EF         SET 5,A
+480   097C
+481   097C CB F0          defb $CB,$C0+$30
+481   097E CB F0         set 6,b
+481   0980 CB F0         set 6,b
+481   0982 CB F0         SET 6,B
+482   0984 CB F1          defb $CB,$C1+$30
+482   0986 CB F1         set 6,c
+482   0988 CB F1         set 6,c
+482   098A CB F1         SET 6,C
+483   098C CB F2          defb $CB,$C2+$30
+483   098E CB F2         set 6,d
+483   0990 CB F2         set 6,d
+483   0992 CB F2         SET 6,D
+484   0994 CB F3          defb $CB,$C3+$30
+484   0996 CB F3         set 6,e
+484   0998 CB F3         set 6,e
+484   099A CB F3         SET 6,E
+485   099C CB F4          defb $CB,$C4+$30
+485   099E CB F4         set 6,h
+485   09A0 CB F4         set 6,h
+485   09A2 CB F4         SET 6,H
+486   09A4 CB F5          defb $CB,$C5+$30
+486   09A6 CB F5         set 6,l
+486   09A8 CB F5         set 6,l
+486   09AA CB F5         SET 6,L
+487   09AC CB F6          defb $CB,$C6+$30
+487   09AE CB F6         set 6,[hl]
+487   09B0 CB F6         set 6,[hl]
+487   09B2 CB F6         SET 6,(HL)
+488   09B4 CB F7          defb $CB,$C7+$30
+488   09B6 CB F7         set 6,a
+488   09B8 CB F7         set 6,a
+488   09BA CB F7         SET 6,A
+489   09BC
+490   09BC CB F8          defb $CB,$C0+$38
+490   09BE CB F8         set 7,b
+490   09C0 CB F8         set 7,b
+490   09C2 CB F8         SET 7,B
+491   09C4 CB F9          defb $CB,$C1+$38
+491   09C6 CB F9         set 7,c
+491   09C8 CB F9         set 7,c
+491   09CA CB F9         SET 7,C
+492   09CC CB FA          defb $CB,$C2+$38
+492   09CE CB FA         set 7,d
+492   09D0 CB FA         set 7,d
+492   09D2 CB FA         SET 7,D
+493   09D4 CB FB          defb $CB,$C3+$38
+493   09D6 CB FB         set 7,e
+493   09D8 CB FB         set 7,e
+493   09DA CB FB         SET 7,E
+494   09DC CB FC          defb $CB,$C4+$38
+494   09DE CB FC         set 7,h
+494   09E0 CB FC         set 7,h
+494   09E2 CB FC         SET 7,H
+495   09E4 CB FD          defb $CB,$C5+$38
+495   09E6 CB FD         set 7,l
+495   09E8 CB FD         set 7,l
+495   09EA CB FD         SET 7,L
+496   09EC CB FE          defb $CB,$C6+$38
+496   09EE CB FE         set 7,[hl]
+496   09F0 CB FE         set 7,[hl]
+496   09F2 CB FE         SET 7,(HL)
+497   09F4 CB FF          defb $CB,$C7+$38
+497   09F6 CB FF         set 7,a
+497   09F8 CB FF         set 7,a
+497   09FA CB FF         SET 7,A
+498   09FC
+499   09FC CB 80          defb $CB,$80
+499   09FE CB 80         res 0,b
+499   0A00 CB 80         res 0,b
+499   0A02 CB 80         RES 0,B
+500   0A04 CB 81          defb $CB,$81
+500   0A06 CB 81         res 0,c
+500   0A08 CB 81         res 0,c
+500   0A0A CB 81         RES 0,C
+501   0A0C CB 82          defb $CB,$82
+501   0A0E CB 82         res 0,d
+501   0A10 CB 82         res 0,d
+501   0A12 CB 82         RES 0,D
+502   0A14 CB 83          defb $CB,$83
+502   0A16 CB 83         res 0,e
+502   0A18 CB 83         res 0,e
+502   0A1A CB 83         RES 0,E
+503   0A1C CB 84          defb $CB,$84
+503   0A1E CB 84         res 0,h
+503   0A20 CB 84         res 0,h
+503   0A22 CB 84         RES 0,H
+504   0A24 CB 85          defb $CB,$85
+504   0A26 CB 85         res 0,l
+504   0A28 CB 85         res 0,l
+504   0A2A CB 85         RES 0,L
+505   0A2C CB 86          defb $CB,$86
+505   0A2E CB 86         res 0,[hl]
+505   0A30 CB 86         res 0,[hl]
+505   0A32 CB 86         RES 0,(HL)
+506   0A34 CB 87          defb $CB,$87
+506   0A36 CB 87         res 0,a
+506   0A38 CB 87         res 0,a
+506   0A3A CB 87         RES 0,A
+507   0A3C
+508   0A3C CB 88          defb $CB,$80+$08
+508   0A3E CB 88         res 1,b
+508   0A40 CB 88         res 1,b
+508   0A42 CB 88         RES 1,B
+509   0A44 CB 89          defb $CB,$81+$08
+509   0A46 CB 89         res 1,c
+509   0A48 CB 89         res 1,c
+509   0A4A CB 89         RES 1,C
+510   0A4C CB 8A          defb $CB,$82+$08
+510   0A4E CB 8A         res 1,d
+510   0A50 CB 8A         res 1,d
+510   0A52 CB 8A         RES 1,D
+511   0A54 CB 8B          defb $CB,$83+$08
+511   0A56 CB 8B         res 1,e
+511   0A58 CB 8B         res 1,e
+511   0A5A CB 8B         RES 1,E
+512   0A5C CB 8C          defb $CB,$84+$08
+512   0A5E CB 8C         res 1,h
+512   0A60 CB 8C         res 1,h
+512   0A62 CB 8C         RES 1,H
+513   0A64 CB 8D          defb $CB,$85+$08
+513   0A66 CB 8D         res 1,l
+513   0A68 CB 8D         res 1,l
+513   0A6A CB 8D         RES 1,L
+514   0A6C CB 8E          defb $CB,$86+$08
+514   0A6E CB 8E         res 1,[hl]
+514   0A70 CB 8E         res 1,[hl]
+514   0A72 CB 8E         RES 1,(HL)
+515   0A74 CB 8F          defb $CB,$87+$08
+515   0A76 CB 8F         res 1,a
+515   0A78 CB 8F         res 1,a
+515   0A7A CB 8F         RES 1,A
+516   0A7C
+517   0A7C CB 90          defb $CB,$80+$10
+517   0A7E CB 90         res 2,b
+517   0A80 CB 90         res 2,b
+517   0A82 CB 90         RES 2,B
+518   0A84 CB 91          defb $CB,$81+$10
+518   0A86 CB 91         res 2,c
+518   0A88 CB 91         res 2,c
+518   0A8A CB 91         RES 2,C
+519   0A8C CB 92          defb $CB,$82+$10
+519   0A8E CB 92         res 2,d
+519   0A90 CB 92         res 2,d
+519   0A92 CB 92         RES 2,D
+520   0A94 CB 93          defb $CB,$83+$10
+520   0A96 CB 93         res 2,e
+520   0A98 CB 93         res 2,e
+520   0A9A CB 93         RES 2,E
+521   0A9C CB 94          defb $CB,$84+$10
+521   0A9E CB 94         res 2,h
+521   0AA0 CB 94         res 2,h
+521   0AA2 CB 94         RES 2,H
+522   0AA4 CB 95          defb $CB,$85+$10
+522   0AA6 CB 95         res 2,l
+522   0AA8 CB 95         res 2,l
+522   0AAA CB 95         RES 2,L
+523   0AAC CB 96          defb $CB,$86+$10
+523   0AAE CB 96         res 2,[hl]
+523   0AB0 CB 96         res 2,[hl]
+523   0AB2 CB 96         RES 2,(HL)
+524   0AB4 CB 97          defb $CB,$87+$10
+524   0AB6 CB 97         res 2,a
+524   0AB8 CB 97         res 2,a
+524   0ABA CB 97         RES 2,A
+525   0ABC
+526   0ABC CB 98          defb $CB,$80+$18
+526   0ABE CB 98         res 3,b
+526   0AC0 CB 98         res 3,b
+526   0AC2 CB 98         RES 3,B
+527   0AC4 CB 99          defb $CB,$81+$18
+527   0AC6 CB 99         res 3,c
+527   0AC8 CB 99         res 3,c
+527   0ACA CB 99         RES 3,C
+528   0ACC CB 9A          defb $CB,$82+$18
+528   0ACE CB 9A         res 3,d
+528   0AD0 CB 9A         res 3,d
+528   0AD2 CB 9A         RES 3,D
+529   0AD4 CB 9B          defb $CB,$83+$18
+529   0AD6 CB 9B         res 3,e
+529   0AD8 CB 9B         res 3,e
+529   0ADA CB 9B         RES 3,E
+530   0ADC CB 9C          defb $CB,$84+$18
+530   0ADE CB 9C         res 3,h
+530   0AE0 CB 9C         res 3,h
+530   0AE2 CB 9C         RES 3,H
+531   0AE4 CB 9D          defb $CB,$85+$18
+531   0AE6 CB 9D         res 3,l
+531   0AE8 CB 9D         res 3,l
+531   0AEA CB 9D         RES 3,L
+532   0AEC CB 9E          defb $CB,$86+$18
+532   0AEE CB 9E         res 3,[hl]
+532   0AF0 CB 9E         res 3,[hl]
+532   0AF2 CB 9E         RES 3,(HL)
+533   0AF4 CB 9F          defb $CB,$87+$18
+533   0AF6 CB 9F         res 3,a
+533   0AF8 CB 9F         res 3,a
+533   0AFA CB 9F         RES 3,A
+534   0AFC
+535   0AFC CB A0          defb $CB,$80+$20
+535   0AFE CB A0         res 4,b
+535   0B00 CB A0         res 4,b
+535   0B02 CB A0         RES 4,B
+536   0B04 CB A1          defb $CB,$81+$20
+536   0B06 CB A1         res 4,c
+536   0B08 CB A1         res 4,c
+536   0B0A CB A1         RES 4,C
+537   0B0C CB A2          defb $CB,$82+$20
+537   0B0E CB A2         res 4,d
+537   0B10 CB A2         res 4,d
+537   0B12 CB A2         RES 4,D
+538   0B14 CB A3          defb $CB,$83+$20
+538   0B16 CB A3         res 4,e
+538   0B18 CB A3         res 4,e
+538   0B1A CB A3         RES 4,E
+539   0B1C CB A4          defb $CB,$84+$20
+539   0B1E CB A4         res 4,h
+539   0B20 CB A4         res 4,h
+539   0B22 CB A4         RES 4,H
+540   0B24 CB A5          defb $CB,$85+$20
+540   0B26 CB A5         res 4,l
+540   0B28 CB A5         res 4,l
+540   0B2A CB A5         RES 4,L
+541   0B2C CB A6          defb $CB,$86+$20
+541   0B2E CB A6         res 4,[hl]
+541   0B30 CB A6         res 4,[hl]
+541   0B32 CB A6         RES 4,(HL)
+542   0B34 CB A7          defb $CB,$87+$20
+542   0B36 CB A7         res 4,a
+542   0B38 CB A7         res 4,a
+542   0B3A CB A7         RES 4,A
+543   0B3C
+544   0B3C CB A8          defb $CB,$80+$28
+544   0B3E CB A8         res 5,b
+544   0B40 CB A8         res 5,b
+544   0B42 CB A8         RES 5,B
+545   0B44 CB A9          defb $CB,$81+$28
+545   0B46 CB A9         res 5,c
+545   0B48 CB A9         res 5,c
+545   0B4A CB A9         RES 5,C
+546   0B4C CB AA          defb $CB,$82+$28
+546   0B4E CB AA         res 5,d
+546   0B50 CB AA         res 5,d
+546   0B52 CB AA         RES 5,D
+547   0B54 CB AB          defb $CB,$83+$28
+547   0B56 CB AB         res 5,e
+547   0B58 CB AB         res 5,e
+547   0B5A CB AB         RES 5,E
+548   0B5C CB AC          defb $CB,$84+$28
+548   0B5E CB AC         res 5,h
+548   0B60 CB AC         res 5,h
+548   0B62 CB AC         RES 5,H
+549   0B64 CB AD          defb $CB,$85+$28
+549   0B66 CB AD         res 5,l
+549   0B68 CB AD         res 5,l
+549   0B6A CB AD         RES 5,L
+550   0B6C CB AE          defb $CB,$86+$28
+550   0B6E CB AE         res 5,[hl]
+550   0B70 CB AE         res 5,[hl]
+550   0B72 CB AE         RES 5,(HL)
+551   0B74 CB AF          defb $CB,$87+$28
+551   0B76 CB AF         res 5,a
+551   0B78 CB AF         res 5,a
+551   0B7A CB AF         RES 5,A
+552   0B7C
+553   0B7C CB B0          defb $CB,$80+$30
+553   0B7E CB B0         res 6,b
+553   0B80 CB B0         res 6,b
+553   0B82 CB B0         RES 6,B
+554   0B84 CB B1          defb $CB,$81+$30
+554   0B86 CB B1         res 6,c
+554   0B88 CB B1         res 6,c
+554   0B8A CB B1         RES 6,C
+555   0B8C CB B2          defb $CB,$82+$30
+555   0B8E CB B2         res 6,d
+555   0B90 CB B2         res 6,d
+555   0B92 CB B2         RES 6,D
+556   0B94 CB B3          defb $CB,$83+$30
+556   0B96 CB B3         res 6,e
+556   0B98 CB B3         res 6,e
+556   0B9A CB B3         RES 6,E
+557   0B9C CB B4          defb $CB,$84+$30
+557   0B9E CB B4         res 6,h
+557   0BA0 CB B4         res 6,h
+557   0BA2 CB B4         RES 6,H
+558   0BA4 CB B5          defb $CB,$85+$30
+558   0BA6 CB B5         res 6,l
+558   0BA8 CB B5         res 6,l
+558   0BAA CB B5         RES 6,L
+559   0BAC CB B6          defb $CB,$86+$30
+559   0BAE CB B6         res 6,[hl]
+559   0BB0 CB B6         res 6,[hl]
+559   0BB2 CB B6         RES 6,(HL)
+560   0BB4 CB B7          defb $CB,$87+$30
+560   0BB6 CB B7         res 6,a
+560   0BB8 CB B7         res 6,a
+560   0BBA CB B7         RES 6,A
+561   0BBC
+562   0BBC CB B8          defb $CB,$80+$38
+562   0BBE CB B8         res 7,b
+562   0BC0 CB B8         res 7,b
+562   0BC2 CB B8         RES 7,B
+563   0BC4 CB B9          defb $CB,$81+$38
+563   0BC6 CB B9         res 7,c
+563   0BC8 CB B9         res 7,c
+563   0BCA CB B9         RES 7,C
+564   0BCC CB BA          defb $CB,$82+$38
+564   0BCE CB BA         res 7,d
+564   0BD0 CB BA         res 7,d
+564   0BD2 CB BA         RES 7,D
+565   0BD4 CB BB          defb $CB,$83+$38
+565   0BD6 CB BB         res 7,e
+565   0BD8 CB BB         res 7,e
+565   0BDA CB BB         RES 7,E
+566   0BDC CB BC          defb $CB,$84+$38
+566   0BDE CB BC         res 7,h
+566   0BE0 CB BC         res 7,h
+566   0BE2 CB BC         RES 7,H
+567   0BE4 CB BD          defb $CB,$85+$38
+567   0BE6 CB BD         res 7,l
+567   0BE8 CB BD         res 7,l
+567   0BEA CB BD         RES 7,L
+568   0BEC CB BE          defb $CB,$86+$38
+568   0BEE CB BE         res 7,[hl]
+568   0BF0 CB BE         res 7,[hl]
+568   0BF2 CB BE         RES 7,(HL)
+569   0BF4 CB BF          defb $CB,$87+$38
+569   0BF6 CB BF         res 7,a
+569   0BF8 CB BF         res 7,a
+569   0BFA CB BF         RES 7,A
+570   0BFC
+571   0BFC C3 00 00       defb $C3,0,0
+571   0BFF C3 00 00      jp 0
+571   0C02 C3 00 00      jp $0000
+571   0C05 C3 00 00      JP nn
+572   0C08
+573   0C08 C2 00 00       defb $C2,0,0
+573   0C0B C2 00 00      jp nz,0
+573   0C0E C2 00 00      jp nz,$0000
+573   0C11 C2 00 00      JP NZ,nn
+574   0C14 CA 00 00       defb $CA,0,0
+574   0C17 CA 00 00      jp z,0
+574   0C1A CA 00 00      jp z,$0000
+574   0C1D CA 00 00      JP Z,nn
+575   0C20 D2 00 00       defb $D2,0,0
+575   0C23 D2 00 00      jp nc,0
+575   0C26 D2 00 00      jp nc,$0000
+575   0C29 D2 00 00      JP NC,nn
+576   0C2C DA 00 00       defb $DA,0,0
+576   0C2F DA 00 00      jp c,0
+576   0C32 DA 00 00      jp c,$0000
+576   0C35 DA 00 00      JP C,nn
+577   0C38
+578   0C38 E9             defb $E9
+578   0C39 E9            jp [hl]
+578   0C3A E9            jp [hl]
+578   0C3B E9            JP (HL)
+579   0C3C
+580   0C3C 18 00          defb $18,0
+580   0C3E 18 00         jr $+2
+580   0C40 18 00         jr $+2
+580   0C42 18 00         JR $+2
+581   0C44
+582   0C44 20 00          defb $20,0
+582   0C46 20 00         jr nz,$+2
+582   0C48 20 00         jr nz,$+2
+582   0C4A 20 00         JR NZ,$+2  ; was literal "n", but needs "$+2" for tests
+583   0C4C 28 00          defb $28,0
+583   0C4E 28 00         jr z,$+2
+583   0C50 28 00         jr z,$+2
+583   0C52 28 00         JR Z,$+2
+584   0C54 30 00          defb $30,0
+584   0C56 30 00         jr nc,$+2
+584   0C58 30 00         jr nc,$+2
+584   0C5A 30 00         JR NC,$+2
+585   0C5C 38 00          defb $38,0
+585   0C5E 38 00         jr c,$+2
+585   0C60 38 00         jr c,$+2
+585   0C62 38 00         JR C,$+2
+586   0C64
+587   0C64 CD 00 00       defb $CD,0,0
+587   0C67 CD 00 00      call 0
+587   0C6A CD 00 00      call $0000
+587   0C6D CD 00 00      CALL nn
+588   0C70
+589   0C70 C4 00 00       defb $C4,0,0
+589   0C73 C4 00 00      call nz,0
+589   0C76 C4 00 00      call nz,$0000
+589   0C79 C4 00 00      CALL NZ,nn
+590   0C7C CC 00 00       defb $CC,0,0
+590   0C7F CC 00 00      call z,0
+590   0C82 CC 00 00      call z,$0000
+590   0C85 CC 00 00      CALL Z,nn
+591   0C88 D4 00 00       defb $D4,0,0
+591   0C8B D4 00 00      call nc,0
+591   0C8E D4 00 00      call nc,$0000
+591   0C91 D4 00 00      CALL NC,nn
+592   0C94 DC 00 00       defb $DC,0,0
+592   0C97 DC 00 00      call c,0
+592   0C9A DC 00 00      call c,$0000
+592   0C9D DC 00 00      CALL C,nn
+593   0CA0
+594   0CA0 C7             defb $C7
+594   0CA1 C7            rst 0
+594   0CA2 C7            rst $00
+594   0CA3 C7            RST 00H
+595   0CA4 CF             defb $CF
+595   0CA5 CF            rst 8
+595   0CA6 CF            rst $08
+595   0CA7 CF            RST 08H
+596   0CA8 D7             defb $D7
+596   0CA9 D7            rst $10
+596   0CAA D7            rst $10
+596   0CAB D7            RST 10H
+597   0CAC DF             defb $DF
+597   0CAD DF            rst $18
+597   0CAE DF            rst $18
+597   0CAF DF            RST 18H
+598   0CB0 E7             defb $E7
+598   0CB1 E7            rst $20
+598   0CB2 E7            rst $20
+598   0CB3 E7            RST 20H
+599   0CB4 EF             defb $EF
+599   0CB5 EF            rst $28
+599   0CB6 EF            rst $28
+599   0CB7 EF            RST 28H
+600   0CB8 F7             defb $F7
+600   0CB9 F7            rst $30
+600   0CBA F7            rst $30
+600   0CBB F7            RST 30H
+601   0CBC FF             defb $FF
+601   0CBD FF            rst $38
+601   0CBE FF            rst $38
+601   0CBF FF            RST 38H
+602   0CC0
+603   0CC0 C9             defb $C9
+603   0CC1 C9            ret
+603   0CC2 C9            ret
+603   0CC3 C9            RET
+604   0CC4
+605   0CC4 C0             defb $C0
+605   0CC5 C0            ret nz
+605   0CC6 C0            ret nz
+605   0CC7 C0            RET NZ
+606   0CC8 C8             defb $C8
+606   0CC9 C8            ret z
+606   0CCA C8            ret z
+606   0CCB C8            RET Z
+607   0CCC D0             defb $D0
+607   0CCD D0            ret nc
+607   0CCE D0            ret nc
+607   0CCF D0            RET NC
+608   0CD0 D8             defb $D8
+608   0CD1 D8            ret c
+608   0CD2 D8            ret c
+608   0CD3 D8            RET C
+609   0CD4
+610   0CD4 D9             defb $D9
+610   0CD5 D9            reti
+610   0CD6 D9            reti
+610   0CD7 D9            RETI
+611   0CD8
+# file closed: LR35902_syntax_by_neo.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   n
+0x0000   nn

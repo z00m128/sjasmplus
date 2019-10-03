@@ -78,7 +78,7 @@ int ParseDirective(bool beginningOfLine)
 	// create new copy of eolComment because original "line" content will be destroyed
 	char* eolCommCopy = eolComment ? STRDUP(eolComment) : nullptr;
 	eolComment = eolCommCopy;
-	if (NULL == ml || NULL == pp) Error("Not enough memory!", NULL, FATAL);
+	if (NULL == ml || NULL == pp) ErrorOOM();
 	++listmacro;
 	do {
 		line[0] = ' ';
@@ -1231,26 +1231,25 @@ static void dirIFN() {
 
 // IFUSED and IFNUSED internal helper, to parse label
 static bool dirIfusedIfnused(char* & id) {
-	SkipBlanks();
-	bool global = ('@' == *lp) && ++lp;		// if global marker, remember it + skip it
-	if ( (((id = GetID(lp)) == NULL || *id == 0) && LastParsedLabel == NULL) || !SkipBlanks()) {
-		Error("[IFUSED] Syntax error", bp, SUPPRESS);
-		id = NULL;
-		return false;
-	}
-	if (id == NULL || *id == 0) {
-		id = STRDUP(LastParsedLabel);
+	id = NULL;
+	if (SkipBlanks()) {						// no argument (use last parsed label)
+		if (LastParsedLabel) {
+			id = STRDUP(LastParsedLabel);
+		} else {
+			Error("[IFUSED/IFNUSED] no label defined ahead");
+			return false;
+		}
 	} else {
-		char* validLabel = ValidateLabel(id, global ? VALIDATE_LABEL_AS_GLOBAL : 0);
+		char* validLabel = ValidateLabel(lp, false);
 		if (validLabel) {
 			id = STRDUP(validLabel);
 			delete[] validLabel;
+			while (islabchar(*lp)) ++lp;	// advance lp beyond parsed label (valid chars only)
 		} else {
-			id = NULL;
-			Error("[IFUSED] Invalid label name", bp, IF_FIRST);
+			SkipToEol(lp);					// ValidateLabel aready reported some error, skip rest
 		}
 	}
-	return NULL != id;
+	return id && SkipBlanks();				// valid "id" and no extra characters = OK
 }
 
 static void dirIFUSED() {
@@ -1676,7 +1675,7 @@ void dirEDUP() {
 	dup.Pointer->string = NULL;
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
-	if (ml == NULL) Error("[EDUP/ENDR] No enough memory", NULL, FATAL);
+	if (ml == NULL) ErrorOOM();
 	aint lcurln = CurrentSourceLine;
 	CStringsList* olijstp = lijstp;
 	++lijst;
@@ -1725,7 +1724,7 @@ static bool dirDEFARRAY_parseItems(CStringsList** nextPtr) {
 			return false;
 		}
 		*nextPtr = new CStringsList(ml);
-		if ((*nextPtr)->string == NULL) Error("[DEFARRAY] No enough memory", NULL, FATAL);
+		if ((*nextPtr)->string == NULL) ErrorOOM();
 		nextPtr = &((*nextPtr)->next);
 	} while (anyComma(lp));
 	return SkipBlanks();
@@ -1778,10 +1777,9 @@ static int SplitLuaErrorMessage(const char*& LuaError)
 	if (LuaError && strstr(LuaError, "[string \"script\"]") == LuaError)
 	{
 		char *const err = STRDUP(LuaError), *lnp = err, *msgp = NULL;
-		if (err == NULL)
-			Error("No enough memory!", NULL, FATAL);
-		else
-		{
+		if (err == NULL) {
+			ErrorOOM();
+		} else {
 			while (*lnp && (*lnp != ':' || !isdigit((byte)*(lnp+1))) )
 				lnp++;
 			if (*lnp && (msgp = strchr(++lnp, ':')) )

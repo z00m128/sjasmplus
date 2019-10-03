@@ -1,0 +1,125 @@
+# file opened: op_C0_FF.asm
+ 1    0000                  OUTPUT "op_C0_FF.bin"
+ 1    0000                OPT --syntax=a
+ 2    0000
+ 3    0000 C0               ret     nz
+ 4    0001 C1               pop     bc
+ 5    0002 C2 41 42         jp      nz,$4241
+ 6    0005 C3 41 42         jp      $4241
+ 7    0008 C4 41 42         call    nz,$4241
+ 8    000B C5               push    bc
+ 9    000C C6 43            add     a,$43
+10    000E C7               rst     00h
+11    000F C8               ret     z
+12    0010 C9               ret
+13    0011 CA 41 42         jp      z,$4241
+14    0014 CB 44            bit     0,h     ; BITS 0xCB prefix + 0x44
+15    0016 CC 41 42         call    z,$4241
+16    0019 CD 41 42         call    $4241
+17    001C CE 43            adc     a,$43
+18    001E CF               rst     0x08
+19    001F D0               ret     nc
+20    0020 D1               pop     de
+21    0021 D2 41 42         jp      nc,$4241
+22    0024                  ;; D3 = *nothing*
+23    0024 D4 41 42         call    nc,$4241
+24    0027 D5               push    de
+25    0028 D6 43            sub     $43
+26    002A D7               rst     $10
+27    002B D8               ret     c
+28    002C                  ;; D9 = reti
+29    002C DA 41 42         jp      c,$4241
+30    002F                  ;; DB = *nothing*
+31    002F DC 41 42         call    c,$4241
+32    0032                  ;; DD = *nothing*
+33    0032 DE 43            sbc     a,$43
+34    0034 DF               rst     #18
+35    0035                  ;; E0 = ldh (a8),a
+36    0035 E1               pop     hl
+37    0036                  ;; E2 = ld (c),a
+38    0036                  ;; E3 = *nothing*
+39    0036                  ;; E4 = *nothing*
+40    0036 E5               push    hl
+41    0037 E6 43            and     $43
+42    0039 E7               rst     32
+43    003A                  ;; E8 = add sp,r8
+44    003A E9               jp      (hl)
+45    003B                  ;; EA = ld (a16),a
+46    003B                  ;; EB = *nothing*
+47    003B                  ;; EC = *nothing*
+48    003B                  ;; ED = *nothing*
+49    003B EE 43            xor     $43
+50    003D EF               rst     28h
+51    003E                  ;; F0 = ldh a,(a8)
+52    003E F1               pop     af
+53    003F                  ;; F2 = ld a,(c)
+54    003F F3               di
+55    0040                  ;; F4 = *nothing*
+56    0040 F5               push    af
+57    0041 F6 43            or      $43
+58    0043 F7               rst     #30
+59    0044                  ;; F8 = ld hl,sp+r8
+60    0044 F9               ld      sp,hl
+61    0045                  ;; FA = ld a,(a16)
+62    0045 FB               ei
+63    0046                  ;; FC = *nothing*
+64    0046                  ;; FD = *nothing*
+65    0046 FE 43            cp      $43
+66    0048 FF               rst     $38
+67    0049
+68    0049                  ; illegal on LR35902
+op_C0_FF.asm(69): error: Unrecognized instruction: out     ($43),a
+69    0049                  out     ($43),a
+op_C0_FF.asm(70): error: Unrecognized instruction: exx
+70    0049                  exx
+op_C0_FF.asm(71): error: Unrecognized instruction: in      a,($43)
+71    0049                  in      a,($43)
+op_C0_FF.asm(72): error: Illegal instruction:     inc     ix  ; IX 0xDD prefix + 0x44
+72    0049                  inc     ix  ; IX 0xDD prefix + 0x44
+op_C0_FF.asm(73): error: Unexpected: po
+73    0049 C9               ret     po
+op_C0_FF.asm(74): error: Label not found: po
+op_C0_FF.asm(74): error: Unexpected: ,$4241
+74    004A C3 00 00         jp      po,$4241
+op_C0_FF.asm(75): error: Unrecognized instruction: ex      (sp),hl
+75    004D                  ex      (sp),hl
+op_C0_FF.asm(76): error: Label not found: po
+op_C0_FF.asm(76): error: Unexpected: ,$4241
+76    004D CD 00 00         call    po,$4241
+op_C0_FF.asm(77): error: Unexpected: pe
+77    0050 C9               ret     pe
+op_C0_FF.asm(78): error: Label not found: pe
+op_C0_FF.asm(78): error: Unexpected: ,$4241
+78    0051 C3 00 00         jp      pe,$4241
+op_C0_FF.asm(79): error: Unrecognized instruction: ex      de,hl
+79    0054                  ex      de,hl
+op_C0_FF.asm(80): error: Label not found: pe
+op_C0_FF.asm(80): error: Unexpected: ,$4241
+80    0054 CD 00 00         call    pe,$4241
+op_C0_FF.asm(81): error: Unrecognized instruction: neg         
+81    0057                  neg         ; EXTD 0xED prefix + 0x44
+op_C0_FF.asm(82): error: Unexpected: p
+82    0057 C9               ret     p
+op_C0_FF.asm(83): error: Label not found: p
+op_C0_FF.asm(83): error: Unexpected: ,$4241
+83    0058 C3 00 00         jp      p,$4241
+op_C0_FF.asm(84): error: Label not found: p
+op_C0_FF.asm(84): error: Unexpected: ,$4241
+84    005B CD 00 00         call    p,$4241
+op_C0_FF.asm(85): error: Unexpected: m
+85    005E C9               ret     m
+op_C0_FF.asm(86): error: Label not found: m
+op_C0_FF.asm(86): error: Unexpected: ,$4241
+86    005F C3 00 00         jp      m,$4241
+op_C0_FF.asm(87): error: Label not found: m
+op_C0_FF.asm(87): error: Unexpected: ,$4241
+87    0062 CD 00 00         call    m,$4241
+op_C0_FF.asm(88): error: Illegal instruction:     dec     iy  ; IY 0xFD prefix + 0x44
+88    0065                  dec     iy  ; IY 0xFD prefix + 0x44
+89    0065
+90    0065                  ; different opcode on LR35902
+91    0065
+# file closed: op_C0_FF.asm
+
+Value    Label
+------ - -----------------------------------------------------------

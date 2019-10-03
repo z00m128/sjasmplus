@@ -11,10 +11,10 @@
 10    0000
 11    0000              ;; This must generate syntax errors
 12    0000
-ifused_test.asm(13): error: [IFUSED] Syntax error: IFUSED
-13    0000                      IFUSED
-ifused_test.asm(14): error: [IFUSED] Syntax error: IFNUSED
-14    0000                      IFNUSED
+ifused_test.asm(13): error: [IFUSED/IFNUSED] no label defined ahead
+13    0000                      IFUSED                        ; in comments
+ifused_test.asm(14): error: [IFUSED/IFNUSED] no label defined ahead
+14    0000                      IFNUSED                       ; in comments
 15    0000
 16    0000              ;; All rest of code must be compiled without errors
 17    0000
@@ -28,63 +28,83 @@ ifused_test.asm(14): error: [IFUSED] Syntax error: IFNUSED
 25    0008
 26    0008              ;; Some little direct tests
 27    0008
-28    0008                      IFUSED
-29    0008 6F 6B                db      'ok'
+28    0008                      IFUSED                        ; in comments
+29    0008 6F 6B                    db      'ok'
 30    000A                      ELSE
-31    000A ~                    db      'fail'
+31    000A ~                        fail
 32    000A                      ENDIF
 33    000A
-34    000A                      IFNUSED
-35    000A ~                    db      'fail'
+34    000A                      IFNUSED                       ; in comments
+35    000A ~                        fail
 36    000A                      ELSE
-37    000A 6F 6B                db      'ok'
+37    000A 6F 6B                    db      'ok'
 38    000C                      ENDIF
 39    000C
-40    000C                      IFUSED  .used
-41    000C 6F 6B                db      'ok'
-42    000E                      ENDIF
-43    000E
-44    000E                      IFUSED  .noused
-45    000E ~                    db      'fail'
-46    000E                      ENDIF
-47    000E
-48    000E                      IFUSED  not_defined_label
-49    000E ~                    db      'fail'
-50    000E                      ENDIF
-51    000E
-52    000E              ;; Some little library :)
-53    000E
-54    000E              EnableInt
-55    000E                      IFUSED  EnableInt
-56    000E FB                   ei
-57    000F C9                   ret
-58    0010                      ENDIF
-59    0010
-60    0010              Wait    IFUSED
-61    0010 06 FF                ld      b,#FF
-62    0012              .loop
-63    0012                      IFUSED  EnableInt
-64    0012 76           .halter halt
-65    0013                      ELSE
-66    0013 ~                    ld      c,#FF           ;; When the "call EnableInt" is commented out,
-67    0013 ~            .cycle  dec     c               ;; this branch after ELSE must be generated.
-68    0013 ~                    jr      nz,.cycle
-69    0013                      ENDIF                   ;; End of IFUSED EnableInt
-70    0013
-71    0013 10 FD                djnz    .loop
-72    0015 C9                   ret
-73    0016                      ENDIF                   ;; End of IFUSED Wait
-74    0016
-75    0016              ;; ADDENDUM: different code path to generate some more syntax errors
-ifused_test.asm(76): error: [IFUSED] Syntax error: IFUSED  Invalid&Label
-76    0016                      IFUSED  Invalid&Label
-ifused_test.asm(77): error: [IFUSED] Syntax error: IFNUSED Invalid%Label
-77    0016                      IFNUSED Invalid%Label
-ifused_test.asm(78): error: Invalid labelname: .InvalidLabel
-78    0016                      IFUSED  ..InvalidLabel
-ifused_test.asm(79): error: Invalid labelname: .InvalidLabel
-79    0016                      IFNUSED  ..InvalidLabel
-80    0016
+40    000C                      IFUSED  .used                 ; in comments
+41    000C 6F 6B                    db      'ok'
+42    000E                      ELSE
+43    000E ~                        fail
+44    000E                      ENDIF
+45    000E                      IFUSED  start.used            ; in comments
+46    000E                          org $-2
+46    000C 6F 6B          db      'ok'
+47    000E                      ELSE
+48    000E ~                        fail
+49    000E                      ENDIF
+50    000E                      IFUSED  @start.used           ; in comments
+51    000E                          org $-2
+51    000C 6F 6B          db      'ok'
+52    000E                      ELSE
+53    000E ~                        fail
+54    000E                      ENDIF
+55    000E
+56    000E                      IFUSED  .noused               ; in comments
+57    000E ~                        fail
+58    000E                      ENDIF
+59    000E                      IFUSED  start.noused          ; in comments
+60    000E ~                        fail
+61    000E                      ENDIF
+62    000E                      IFUSED  @start.noused         ; in comments
+63    000E ~                        fail
+64    000E                      ENDIF
+65    000E
+66    000E                      IFUSED  not_defined_label     ; in comments
+67    000E ~                        fail
+68    000E                      ENDIF
+69    000E
+70    000E              ;; Some little library :)
+71    000E
+72    000E              EnableInt
+73    000E                      IFUSED  EnableInt
+74    000E FB                   ei
+75    000F C9                   ret
+76    0010                      ENDIF
+77    0010
+78    0010              Wait    IFUSED
+79    0010 06 FF                ld      b,#FF
+80    0012              .loop
+81    0012                      IFUSED  EnableInt
+82    0012 76           .halter halt
+83    0013                      ELSE
+84    0013 ~                    ld      c,#FF           ;; When the "call EnableInt" is commented out,
+85    0013 ~            .cycle  dec     c               ;; this branch after ELSE must be generated.
+86    0013 ~                    jr      nz,.cycle
+87    0013                      ENDIF                   ;; End of IFUSED EnableInt
+88    0013
+89    0013 10 FD                djnz    .loop
+90    0015 C9                   ret
+91    0016                      ENDIF                   ;; End of IFUSED Wait
+92    0016
+93    0016              ;; ADDENDUM: different code path to generate some more syntax errors
+ifused_test.asm(94): error: Unexpected: &Label
+94    0016                      IFUSED  Invalid&Label
+ifused_test.asm(95): error: Unexpected: %Label
+95    0016                      IFNUSED Invalid%Label
+ifused_test.asm(96): error: Invalid labelname: .InvalidLabel
+96    0016                      IFUSED  ..InvalidLabel
+ifused_test.asm(97): error: Invalid labelname: .InvalidLabel
+97    0016                      IFNUSED  ..InvalidLabel
+98    0016
 # file closed: ifused_test.asm
 
 Value    Label

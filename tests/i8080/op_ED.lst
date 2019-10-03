@@ -1,0 +1,128 @@
+# file opened: op_ED.asm
+ 1    0000                  ; all of these should fail on i8080
+ 2    0000                  ; (some will emit damaged machine code of legit i8080 instruction, like LD A,R)
+ 3    0000
+op_ED.asm(4): error: Label not found: c
+ 4    0000                  in      b,(c)       ; #ED40
+op_ED.asm(5): error: Label not found: c
+ 5    0000                  out     (c),b       ; #ED41
+op_ED.asm(6): error: Illegal instruction:     sbc     hl,bc       ; #ED42
+ 6    0000                  sbc     hl,bc       ; #ED42
+op_ED.asm(7): error: Illegal instruction:     ld      (#100),bc   ; #ED430001
+ 7    0000                  ld      (#100),bc   ; #ED430001
+op_ED.asm(8): error: Unrecognized instruction: neg                 
+ 8    0000                  neg                 ; #ED44
+op_ED.asm(9): error: Unrecognized instruction: retn                
+ 9    0000                  retn                ; #ED45
+op_ED.asm(10): error: Unrecognized instruction: im 0                
+10    0000                  im 0                ; #ED46
+op_ED.asm(11): error: Illegal instruction:     ld      i,a         ; #ED47
+11    0000                  ld      i,a         ; #ED47
+op_ED.asm(12): error: Label not found: c
+12    0000                  in      c,(c)       ; #ED48
+op_ED.asm(13): error: Label not found: c
+13    0000                  out     (c),c       ; #ED49
+op_ED.asm(14): error: Illegal instruction:     adc     hl,bc       ; #ED4A
+14    0000                  adc     hl,bc       ; #ED4A
+op_ED.asm(15): error: Illegal instruction:     ld      bc,(#100)   ; #ED4B0001
+15    0000                  ld      bc,(#100)   ; #ED4B0001
+op_ED.asm(16): error: Unrecognized instruction: reti                
+16    0000                  reti                ; #ED4D
+op_ED.asm(17): error: Illegal instruction:     ld      r,a         ; #ED4F
+17    0000                  ld      r,a         ; #ED4F
+18    0000
+op_ED.asm(19): error: Label not found: c
+19    0000                  in      d,(c)       ; #ED50
+op_ED.asm(20): error: Label not found: c
+20    0000                  out     (c),d       ; #ED51
+op_ED.asm(21): error: Illegal instruction:     sbc     hl,de       ; #ED52
+21    0000                  sbc     hl,de       ; #ED52
+op_ED.asm(22): error: Illegal instruction:     ld      (#100),de   ; #ED530001
+22    0000                  ld      (#100),de   ; #ED530001
+op_ED.asm(23): error: Unrecognized instruction: im 1                
+23    0000                  im 1                ; #ED56
+op_ED.asm(24): error: Label not found: i
+24    0000 3E 00            ld      a,i         ; #ED57
+op_ED.asm(25): error: Label not found: c
+25    0002                  in      e,(c)       ; #ED58
+op_ED.asm(26): error: Label not found: c
+26    0002                  out     (c),e       ; #ED59
+op_ED.asm(27): error: Illegal instruction:     adc     hl,de       ; #ED5A
+27    0002                  adc     hl,de       ; #ED5A
+op_ED.asm(28): error: Illegal instruction:     ld      de,(#100)   ; #ED5B0001
+28    0002                  ld      de,(#100)   ; #ED5B0001
+op_ED.asm(29): error: Label not found: r
+29    0002 3E 00            ld      a,r         ; #ED5F
+30    0004
+op_ED.asm(31): error: Label not found: c
+31    0004                  in      h,(c)       ; #ED60
+op_ED.asm(32): error: Label not found: c
+32    0004                  out     (c),h       ; #ED61
+op_ED.asm(33): error: Illegal instruction:     sbc     hl,hl       ; #ED62
+33    0004                  sbc     hl,hl       ; #ED62
+op_ED.asm(34): error: Unrecognized instruction: rrd                 
+34    0004                  rrd                 ; #ED67
+op_ED.asm(35): error: Label not found: c
+35    0004                  in      l,(c)       ; #ED68
+op_ED.asm(36): error: Label not found: c
+36    0004                  out     (c),l       ; #ED69
+op_ED.asm(37): error: Illegal instruction:     adc     hl,hl       ; #ED6A
+37    0004                  adc     hl,hl       ; #ED6A
+op_ED.asm(38): error: Unrecognized instruction: rld                 
+38    0004                  rld                 ; #ED6F
+39    0004
+op_ED.asm(40): error: Label not found: c
+40    0004                  in      f,(c)       ; #ED70
+op_ED.asm(41): error: Label not found: c
+41    0004                  out     (c),0       ; #ED71
+op_ED.asm(42): error: Illegal instruction:     sbc     hl,sp       ; #ED72
+42    0004                  sbc     hl,sp       ; #ED72
+op_ED.asm(43): error: Illegal instruction:     ld      (#100),sp   ; #ED730001
+43    0004                  ld      (#100),sp   ; #ED730001
+op_ED.asm(44): error: Label not found: c
+44    0004 DB 00            in      a,(c)       ; #ED78
+op_ED.asm(45): error: Label not found: c
+45    0006 D3 00            out     (c),a       ; #ED79
+op_ED.asm(46): error: Illegal instruction:     adc     hl,sp       ; #ED7A
+46    0008                  adc     hl,sp       ; #ED7A
+op_ED.asm(47): error: Illegal instruction:     ld      sp,(#100)   ; #ED7B0001
+47    0008                  ld      sp,(#100)   ; #ED7B0001
+48    0008
+op_ED.asm(49): error: Unrecognized instruction: ldi                 
+49    0008                  ldi                 ; #EDA0
+op_ED.asm(50): error: Unrecognized instruction: cpi                 
+50    0008                  cpi                 ; #EDA1
+op_ED.asm(51): error: Unrecognized instruction: ini                 
+51    0008                  ini                 ; #EDA2
+op_ED.asm(52): error: Unrecognized instruction: outi                
+52    0008                  outi                ; #EDA3
+op_ED.asm(53): error: Unrecognized instruction: ldd                 
+53    0008                  ldd                 ; #EDA8
+op_ED.asm(54): error: Unrecognized instruction: cpd                 
+54    0008                  cpd                 ; #EDA9
+op_ED.asm(55): error: Unrecognized instruction: ind                 
+55    0008                  ind                 ; #EDAA
+op_ED.asm(56): error: Unrecognized instruction: outd                
+56    0008                  outd                ; #EDAB
+57    0008
+op_ED.asm(58): error: Unrecognized instruction: ldir                
+58    0008                  ldir                ; #EDB0
+op_ED.asm(59): error: Unrecognized instruction: cpir                
+59    0008                  cpir                ; #EDB1
+op_ED.asm(60): error: Unrecognized instruction: inir                
+60    0008                  inir                ; #EDB2
+op_ED.asm(61): error: Unrecognized instruction: otir                
+61    0008                  otir                ; #EDB3
+op_ED.asm(62): error: Unrecognized instruction: lddr                
+62    0008                  lddr                ; #EDB8
+op_ED.asm(63): error: Unrecognized instruction: cpdr                
+63    0008                  cpdr                ; #EDB9
+op_ED.asm(64): error: Unrecognized instruction: indr                
+64    0008                  indr                ; #EDBA
+op_ED.asm(65): error: Unrecognized instruction: otdr                
+65    0008                  otdr                ; #EDBB
+66    0008
+# file closed: op_ED.asm
+
+Value    Label
+------ - -----------------------------------------------------------

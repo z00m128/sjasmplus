@@ -1,0 +1,79 @@
+# file opened: op_C0_FF.asm
+ 1    0000                  OUTPUT "op_C0_FF.bin"
+ 2    0000                  ;; solid formatting, just to get C0..FF sequence (interleaved by $41..$43 where needed)
+ 3    0000 C0               ret     nz
+ 4    0001 C1               pop     bc
+ 5    0002 C2 41 42         jp      nz,$4241
+ 6    0005 C3 41 42         jp      $4241
+ 7    0008 C4 41 42         call    nz,$4241
+ 8    000B C5               push    bc
+ 9    000C C6 43            add     a,$43
+10    000E C7               rst     00h
+11    000F C8               ret     z
+12    0010 C9               ret
+13    0011 CA 41 42         jp      z,$4241
+14    0014 CC 41 42         call    z,$4241
+15    0017 CD 41 42         call    $4241
+16    001A CE 43            adc     a,$43
+17    001C CF               rst     0x08
+18    001D D0               ret     nc
+19    001E D1               pop     de
+20    001F D2 41 42         jp      nc,$4241
+21    0022 D3 43            out     ($43),a
+22    0024 D4 41 42         call    nc,$4241
+23    0027 D5               push    de
+24    0028 D6 43            sub     $43
+25    002A D7               rst     $10
+26    002B D8               ret     c
+27    002C DA 41 42         jp      c,$4241
+28    002F DB 43            in      a,($43)
+29    0031 DC 41 42         call    c,$4241
+30    0034 DE 43            sbc     a,$43
+31    0036 DF               rst     #18
+32    0037 E0               ret     po
+33    0038 E1               pop     hl
+34    0039 E2 41 42         jp      po,$4241
+35    003C E3               ex      (sp),hl
+36    003D E4 41 42         call    po,$4241
+37    0040 E5               push    hl
+38    0041 E6 43            and     $43
+39    0043 E7               rst     32
+40    0044 E8               ret     pe
+41    0045 E9               jp      (hl)
+42    0046 EA 41 42         jp      pe,$4241
+43    0049 EB               ex      de,hl
+44    004A EC 41 42         call    pe,$4241
+45    004D EE 43            xor     $43
+46    004F EF               rst     28h
+47    0050 F0               ret     p
+48    0051 F1               pop     af
+49    0052 F2 41 42         jp      p,$4241
+50    0055 F3               di
+51    0056 F4 41 42         call    p,$4241
+52    0059 F5               push    af
+53    005A F6 43            or      $43
+54    005C F7               rst     #30
+55    005D F8               ret     m
+56    005E F9               ld      sp,hl
+57    005F FA 41 42         jp      m,$4241
+58    0062 FB               ei
+59    0063 FC 41 42         call    m,$4241
+60    0066 FE 43            cp      $43
+61    0068 FF               rst     $38
+62    0069
+63    0069                  ; illegal on i8080
+op_C0_FF.asm(64): error: Unrecognized instruction: bit     0,h     
+64    0069                  bit     0,h     ; BITS 0xCB prefix + 0x44
+op_C0_FF.asm(65): error: Unrecognized instruction: exx
+65    0069                  exx
+op_C0_FF.asm(66): error: Illegal instruction:     inc     ix      ; IX 0xDD prefix + 0x44
+66    0069                  inc     ix      ; IX 0xDD prefix + 0x44
+op_C0_FF.asm(67): error: Unrecognized instruction: neg             
+67    0069                  neg             ; EXTD 0xED prefix + 0x44
+op_C0_FF.asm(68): error: Illegal instruction:     dec     iy      ; IY 0xFD prefix + 0x44
+68    0069                  dec     iy      ; IY 0xFD prefix + 0x44
+69    0069
+# file closed: op_C0_FF.asm
+
+Value    Label
+------ - -----------------------------------------------------------

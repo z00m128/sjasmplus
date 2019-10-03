@@ -171,7 +171,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	/* else {
 		char *buf = (char*) calloc(0x14000, sizeof(char));
 		if (buf == NULL) {
-			Error("No enough memory", 0, FATAL);
+			ErrorOOM();
 		}
 		memset(buf, 0, 0x14000);
 		if (fwrite(buf, 1, 0x14000, ff) != 0x14000) {

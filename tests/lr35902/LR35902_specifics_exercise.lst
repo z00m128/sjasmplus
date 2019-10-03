@@ -1,0 +1,342 @@
+# file opened: LR35902_specifics_exercise.asm
+  1   0000              ;; test to exercise instructions which are not Z80-identical into greater depth
+  2   0000              ;; focus is mostly on IDA syntax variants, the goal is to have it thoroughly tested
+  3   0000                  OPT --syntax=abf    ; but this is expected "default" mode of syntax for new sources
+  4   0000
+  5   0000              ;; example macro to get "halt" which emits automatically halt+nop like rgbasm does
+  6   0000              halt    MACRO
+  7   0000 ~                        @halt
+  8   0000 ~                        nop
+  9   0000                      ENDM
+ 10   0000                  halt    ; = halt+nop
+ 10   0000 76          >            @halt
+ 10   0001 00          >            nop
+ 11   0002 76               @halt   ; = halt (only)
+ 12   0003
+ 13   0003                  ; "variables" crossing into the $FF00 area, so some of them can be accessed with LDH
+ 14   0003                      STRUCT struct1
+ 15   0003 ~            a           BYTE    1
+ 16   0003 ~            b           BYTE    2
+ 17   0003                      ENDS
+ 18   0003
+ 19   0003                      ORG     $FF00-4
+ 20   FEFC 01 02        varSX       struct1
+ 21   FEFE 34           var1        db      0x34
+ 22   FEFF 78 56        var2        dw      0x5678
+ 23   FF01 AB           var3        db      0xAB
+ 24   FF02 EF CD        var4        dw      0xCDEF
+ 25   FF04 01 02        varS        struct1
+ 26   FF06
+ 27   FF06                      ORG     $8000
+ 28   8000 FA FE FE                 ld      a,[var1]        ; like LD a,(a16) on Z80
+ 29   8003 F0 01                    ld      a,[var3]
+ 30   8005 F0 01                    ldh     a,[low var3]
+ 31   8007 F0 01                    ldh     a,[var3]
+LR35902_specifics_exercise.asm(32): warning: value 0xFEFE is truncated to 8bit value: 0xFE
+ 32   8009 F0 FE                    ldh     a,[var1]        ; should warn about truncating value (bug in source)
+ 33   800B EA FE FE                 ld      [var1],a        ; like LD (a16),a on Z80
+ 34   800E E0 01                    ld      [var3],a
+ 35   8010 E0 01                    ldh     [low var3],a
+ 36   8012 E0 01                    ldh     [var3],a
+LR35902_specifics_exercise.asm(37): warning: value 0xFEFE is truncated to 8bit value: 0xFE
+ 37   8014 E0 FE                    ldh     [var1],a        ; should warn about truncating value (bug in source)
+ 38   8016                          ; repeat the same exercise, but with parentheses
+ 39   8016 FA FE FE                 ld      a,(var1)
+ 40   8019 F0 01                    ld      a,(var3)
+ 41   801B F0 01                    ldh     a,(low var3)
+ 42   801D F0 01                    ldh     a,(var3)
+LR35902_specifics_exercise.asm(43): warning: value 0xFEFE is truncated to 8bit value: 0xFE
+ 43   801F F0 FE                    ldh     a,(var1)
+ 44   8021 EA FE FE                 ld      (var1),a
+ 45   8024 E0 01                    ld      (var3),a
+ 46   8026 E0 01                    ldh     (low var3),a
+ 47   8028 E0 01                    ldh     (var3),a
+LR35902_specifics_exercise.asm(48): warning: value 0xFEFE is truncated to 8bit value: 0xFE
+ 48   802A E0 FE                    ldh     (var1),a
+ 49   802C                          ; the uselessly more explicit syntax (but should work)
+ 50   802C F0 01                    ld      a,[$ff00 + low var3]
+ 51   802E E0 01                    ld      [$ff00 + low var3],a
+ 52   8030                          ; these should warn, this is not correct way of writing it (bug in source)
+LR35902_specifics_exercise.asm(53): warning: value 0x1FE01 is truncated to 16bit value: 0xFE01
+ 53   8030 FA 01 FE                 ld      a,[$ff00 + var3]
+LR35902_specifics_exercise.asm(54): warning: value 0x1FE01 is truncated to 16bit value: 0xFE01
+ 54   8033 EA 01 FE                 ld      [$ff00 + var3],a
+ 55   8036                          ; accessing the structure members
+ 56   8036 F0 04                    ldh     a,[varS.a]
+ 57   8038 E0 05                    ldh     [varS.b],a
+LR35902_specifics_exercise.asm(58): warning: value 0xFEFC is truncated to 8bit value: 0xFC
+ 58   803A F0 FC                    ldh     a,[varSX.a]     ; warning, outside of $FFxx area
+LR35902_specifics_exercise.asm(59): warning: value 0xFEFD is truncated to 8bit value: 0xFD
+ 59   803C E0 FD                    ldh     [varSX.b],a     ; warning, outside of $FFxx area
+ 60   803E F0 04                    ld      a,[varS.a]      ; regular LD is optimized if possible
+ 61   8040 E0 05                    ld      [varS.b],a      ; regular LD is optimized if possible
+ 62   8042 FA FC FE                 ld      a,[varSX.a]
+ 63   8045 EA FD FE                 ld      [varSX.b],a
+ 64   8048
+ 65   8048                          ; whitespace parsing in "(c)" operand (not much else to test)
+ 66   8048 F2                       ld      a , ( c )
+ 67   8049 E2                       ld      ( c ) , a
+ 68   804A                          ; illegal register combinations, all should produce some error (mostly "illegal instruction")
+LR35902_specifics_exercise.asm(69): error: Illegal instruction:             ld      a , ( b )
+ 69   804A                          ld      a , ( b )
+LR35902_specifics_exercise.asm(70): error: Illegal instruction:             ld      ( b ) , a
+ 70   804A                          ld      ( b ) , a
+LR35902_specifics_exercise.asm(71): error: Label not found: c
+LR35902_specifics_exercise.asm(71): error: Illegal instruction (can't access memory):  ( c )       
+ 71   804A 06 00                    ld      b , ( c )       ; error, illegal instruction; --syntax=b reports "ld b,(mem)"
+LR35902_specifics_exercise.asm(72): error: Illegal instruction:             ld      ( c ) , b
+ 72   804C                          ld      ( c ) , b
+LR35902_specifics_exercise.asm(73): error: Label not found: c
+ 73   804C                          ld      hl,(c)
+LR35902_specifics_exercise.asm(74): error: Illegal instruction:             ld      (c),hl
+ 74   804C                          ld      (c),hl
+ 75   804C
+ 76   804C FA 7B 00                 ld      a,(123)         ; check if low-memory warning is off in LR35902 mode (good idea?? not sure)
+ 77   804F
+LR35902_specifics_exercise.asm(78): error: Illegal instruction:             ldi     a,(hl+)         ; error, mixed invalid syntax
+ 78   804F                          ldi     a,(hl+)         ; error, mixed invalid syntax
+ 79   804F 2A                       ldi     a , ( hl )
+ 80   8050 2A                       ld      a , [ hl+ ]
+LR35902_specifics_exercise.asm(81): error: Illegal instruction:             ld      a , [ hl + ]    ; error, the "hl+" must be together
+ 81   8051                          ld      a , [ hl + ]    ; error, the "hl+" must be together
+LR35902_specifics_exercise.asm(82): error: Illegal instruction:             ld      a,(hl+0)        ; error, there's no such thing
+ 82   8051                          ld      a,(hl+0)        ; error, there's no such thing
+ 83   8051
+LR35902_specifics_exercise.asm(84): error: Illegal instruction:             ldd     a,(hl-)         ; error, mixed invalid syntax
+ 84   8051                          ldd     a,(hl-)         ; error, mixed invalid syntax
+ 85   8051 3A                       ldd     a , ( hl )
+ 86   8052 3A                       ld      a , [ hl- ]
+LR35902_specifics_exercise.asm(87): error: Illegal instruction:             ld      a , [ hl - ]    ; error, the "hl-" must be together
+ 87   8053                          ld      a , [ hl - ]    ; error, the "hl-" must be together
+LR35902_specifics_exercise.asm(88): error: Illegal instruction:             ld      a,(hl-0)        ; error, there's no such thing
+ 88   8053                          ld      a,(hl-0)        ; error, there's no such thing
+ 89   8053
+LR35902_specifics_exercise.asm(90): error: Illegal instruction:             ldi     (hl+),a         ; error, mixed invalid syntax
+ 90   8053                          ldi     (hl+),a         ; error, mixed invalid syntax
+ 91   8053 22                       ldi     ( hl ) , a
+ 92   8054 22                       ld      [ hl+ ] , a
+LR35902_specifics_exercise.asm(93): error: Illegal instruction:             ld      [ hl + ] , a    ; error, the "hl+" must be together
+ 93   8055                          ld      [ hl + ] , a    ; error, the "hl+" must be together
+LR35902_specifics_exercise.asm(94): error: Illegal instruction:             ld      (hl+0),a        ; error, there's no such thing
+ 94   8055                          ld      (hl+0),a        ; error, there's no such thing
+ 95   8055
+LR35902_specifics_exercise.asm(96): error: Illegal instruction:             ldd     (hl-),a         ; error, mixed invalid syntax
+ 96   8055                          ldd     (hl-),a         ; error, mixed invalid syntax
+ 97   8055 32                       ldd     ( hl ) , a
+ 98   8056 32                       ld      [ hl- ] , a
+LR35902_specifics_exercise.asm(99): error: Illegal instruction:             ld      [ hl - ] , a    ; error, the "hl-" must be together
+ 99   8057                          ld      [ hl - ] , a    ; error, the "hl-" must be together
+LR35902_specifics_exercise.asm(100): error: Illegal instruction:             ld      (hl-0),a        ; error, there's no such thing
+100   8057                          ld      (hl-0),a        ; error, there's no such thing
+101   8057
+102   8057                          ; wrong registers => errors
+LR35902_specifics_exercise.asm(103): error: Illegal instruction:             ldi     a,(de)
+103   8057                          ldi     a,(de)
+LR35902_specifics_exercise.asm(104): error: Illegal instruction:             ldd     a,(de)
+104   8057                          ldd     a,(de)
+LR35902_specifics_exercise.asm(105): error: Illegal instruction:             ld      a,(de+)
+105   8057                          ld      a,(de+)
+LR35902_specifics_exercise.asm(106): error: Illegal instruction:             ld      a,(de-)
+106   8057                          ld      a,(de-)
+LR35902_specifics_exercise.asm(107): error: Illegal instruction:             ldi     l,(hl)
+107   8057                          ldi     l,(hl)
+LR35902_specifics_exercise.asm(108): error: Illegal instruction:             ldd     l,(hl)
+108   8057                          ldd     l,(hl)
+LR35902_specifics_exercise.asm(109): error: Illegal instruction:             ld      l,(hl+)
+109   8057                          ld      l,(hl+)
+LR35902_specifics_exercise.asm(110): error: Illegal instruction:             ld      l,(hl-)
+110   8057                          ld      l,(hl-)
+LR35902_specifics_exercise.asm(111): error: Illegal instruction:             ldi     (de),a
+111   8057                          ldi     (de),a
+LR35902_specifics_exercise.asm(112): error: Illegal instruction:             ldd     (de),a
+112   8057                          ldd     (de),a
+LR35902_specifics_exercise.asm(113): error: Illegal instruction:             ld      (de+),a
+113   8057                          ld      (de+),a
+LR35902_specifics_exercise.asm(114): error: Illegal instruction:             ld      (de-),a
+114   8057                          ld      (de-),a
+LR35902_specifics_exercise.asm(115): error: Illegal instruction:             ldi     (hl),l
+115   8057                          ldi     (hl),l
+LR35902_specifics_exercise.asm(116): error: Illegal instruction:             ldd     (hl),l
+116   8057                          ldd     (hl),l
+LR35902_specifics_exercise.asm(117): error: Illegal instruction:             ld      (hl+),l
+117   8057                          ld      (hl+),l
+LR35902_specifics_exercise.asm(118): error: Illegal instruction:             ld      (hl-),l
+118   8057                          ld      (hl-),l
+LR35902_specifics_exercise.asm(119): error: Illegal instruction:             ldi     (hl),1
+119   8057                          ldi     (hl),1
+LR35902_specifics_exercise.asm(120): error: Illegal instruction:             ldd     (hl),2
+120   8057                          ldd     (hl),2
+LR35902_specifics_exercise.asm(121): error: Illegal instruction:             ld      (hl+),3
+121   8057                          ld      (hl+),3
+LR35902_specifics_exercise.asm(122): error: Illegal instruction:             ld      (hl-),4
+122   8057                          ld      (hl-),4
+123   8057
+124   8057 F8 00                    ld      hl,sp               ; implicit +0
+125   8059 F8 00                    ld      hl , sp + 0
+126   805B F8 00                    ld      hl , sp - 0
+127   805D F8 01                    ld      hl , sp + 1
+128   805F F8 FF                    ld      hl , sp - 1
+129   8061 F8 01                    ld      hl , sp + +1
+130   8063 F8 FF                    ld      hl , sp + -1
+131   8065 F8 01                    ld      hl , sp + +1
+LR35902_specifics_exercise.asm(132): error: [LD] `ld hl,sp+r8` expects + or - after sp, found: (+1)        
+132   8067                          ld      hl , sp (+1)        ; error, there must be + or - right after "sp"
+133   8067 F8 02                    ld      hl , sp + struct1   ; hl = sp + sizeof(struct1)
+134   8069 F8 7F                    ld      hl , sp + 127
+LR35902_specifics_exercise.asm(135): error: Offset out of range (+128)
+135   806B F8 80                    ld      hl , sp + 128       ; error, value is beyond range
+136   806D F8 80                    ld      hl , sp - 128
+LR35902_specifics_exercise.asm(137): error: Offset out of range (-129)
+137   806F F8 7F                    ld      hl , sp - 129       ; error, value is beyond range
+LR35902_specifics_exercise.asm(138): error: Fake instructions are not implemented in Sharp LR35902 mode: ld      hl , de + 1         
+138   8071                          ld      hl , de + 1         ; invalid
+LR35902_specifics_exercise.asm(139): error: Illegal instruction:             ld      de , sp + 1         ; invalid
+139   8071                          ld      de , sp + 1         ; invalid
+140   8071
+141   8071 08 03 FF                 ld      ( var2 + 4 ) , sp
+LR35902_specifics_exercise.asm(142): error: Illegal instruction:             ld      ( var2 + 4 ) , hl   ; invalid
+142   8074                          ld      ( var2 + 4 ) , hl   ; invalid
+143   8074
+144   8074                          ; illegal "add sp,r8" variants
+LR35902_specifics_exercise.asm(145): error: [ADD] Comma expected
+145   8074                          add     sp
+LR35902_specifics_exercise.asm(146): error: Operand expected: 
+146   8074 E8 00                    add     sp ,
+LR35902_specifics_exercise.asm(147): error: Illegal instruction:             add     sp , hl
+147   8076                          add     sp , hl
+LR35902_specifics_exercise.asm(148): error: Offset out of range (+128)
+148   8076 E8 80                    add     sp , +128
+LR35902_specifics_exercise.asm(149): error: Offset out of range (-129)
+149   8078 E8 7F                    add     sp , -129
+150   807A                          ; legit "add sp,r8"
+151   807A E8 00                    add     sp , 0
+152   807C E8 7F                    add     sp , +127
+153   807E E8 80                    add     sp , -128
+154   8080 E8 02                    add     sp , struct1        ; sp += sizeof(struct1)
+155   8082
+156   8082                          ; some more malformed lines (intermezzo ... getting back to opcodes already above)
+LR35902_specifics_exercise.asm(157): error: Illegal instruction:             ld      (hl+)
+157   8082                          ld      (hl+)
+LR35902_specifics_exercise.asm(158): error: Illegal instruction:             ld      [hl+]
+158   8082                          ld      [hl+]
+LR35902_specifics_exercise.asm(159): error: Illegal instruction:             ld      (hl+),
+159   8082                          ld      (hl+),
+LR35902_specifics_exercise.asm(160): error: Illegal instruction:             ld      [hl+],
+160   8082                          ld      [hl+],
+LR35902_specifics_exercise.asm(161): error: Illegal instruction:             ld      [hl+),a
+161   8082                          ld      [hl+),a
+LR35902_specifics_exercise.asm(162): error: Illegal instruction:             ld      (hl+],a
+162   8082                          ld      (hl+],a
+LR35902_specifics_exercise.asm(163): error: Illegal instruction:             ldi     (hl)
+163   8082                          ldi     (hl)
+LR35902_specifics_exercise.asm(164): error: Illegal instruction:             ldi     [hl]
+164   8082                          ldi     [hl]
+LR35902_specifics_exercise.asm(165): error: Illegal instruction:             ldd     (hl)
+165   8082                          ldd     (hl)
+LR35902_specifics_exercise.asm(166): error: Illegal instruction:             ldd     [hl]
+166   8082                          ldd     [hl]
+LR35902_specifics_exercise.asm(167): error: Illegal instruction:             ldi     (hl),
+167   8082                          ldi     (hl),
+LR35902_specifics_exercise.asm(168): error: Illegal instruction:             ldi     [hl],
+168   8082                          ldi     [hl],
+LR35902_specifics_exercise.asm(169): error: Illegal instruction:             ldd     (hl),
+169   8082                          ldd     (hl),
+LR35902_specifics_exercise.asm(170): error: Illegal instruction:             ldd     [hl],
+170   8082                          ldd     [hl],
+LR35902_specifics_exercise.asm(171): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+171   8082                          ldh     a
+LR35902_specifics_exercise.asm(172): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+172   8082                          ldh     a,
+LR35902_specifics_exercise.asm(173): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+173   8082                          ldh     (var3)
+LR35902_specifics_exercise.asm(174): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+174   8082                          ldh     (var3),
+LR35902_specifics_exercise.asm(175): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+175   8082                          ldh     [var3]
+LR35902_specifics_exercise.asm(176): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+176   8082                          ldh     [var3],
+LR35902_specifics_exercise.asm(177): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: ),a
+177   8082                          ldh     [var3),a
+LR35902_specifics_exercise.asm(178): error: ')' expected
+LR35902_specifics_exercise.asm(178): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: ],a
+178   8082                          ldh     (var3],a
+LR35902_specifics_exercise.asm(179): error: Label not found: s
+179   8082 21 00 00                 ld      hl,s
+180   8085
+181   8085                          ; illegal syntax of swap
+LR35902_specifics_exercise.asm(182): error: Illegal instruction:             swap
+182   8085                          swap
+LR35902_specifics_exercise.asm(183): error: Illegal instruction:             swap    (var3)
+183   8085                          swap    (var3)
+LR35902_specifics_exercise.asm(184): error: Illegal instruction:             swap    var3
+184   8085                          swap    var3
+LR35902_specifics_exercise.asm(185): error: Fake instructions are not implemented in Sharp LR35902 mode: swap    de
+185   8085                          swap    de
+LR35902_specifics_exercise.asm(186): error: Illegal instruction:             swap    [de]
+186   8085                          swap    [de]
+LR35902_specifics_exercise.asm(187): error: Illegal instruction:             swap    (a)
+187   8085                          swap    (a)
+LR35902_specifics_exercise.asm(188): error: Unexpected: ,b
+188   8085 CB 37                    swap    a,b
+189   8087                          ; legit ones
+190   8087 CB 37                    swap    a
+191   8089 CB 37 CB 30              swap    a,,b        ; multi-arg
+192   808D
+193   808D                          ; illegal syntax of stop
+LR35902_specifics_exercise.asm(194): error: Label not found: a
+194   808D 10 00                    stop    a
+LR35902_specifics_exercise.asm(195): error: Illegal instruction (can't access memory): [0]
+195   808F 10 00                    stop    [0]
+LR35902_specifics_exercise.asm(196): error: Label not found: hl
+LR35902_specifics_exercise.asm(196): error: Illegal instruction (can't access memory): (hl)
+196   8091 10 00                    stop    (hl)
+LR35902_specifics_exercise.asm(197): error: Unexpected: ,,1        
+197   8093 10 00                    stop    0,,1        ; no multi-arg for STOP implemented
+198   8095                          ; legit ones
+199   8095 10 00                    stop                ; implicit 0
+200   8097 10 00                    stop    0
+201   8099 10 E0                    stop    0xE0
+202   809B
+203   809B                          ; more multi-args exercised (only in "--syntax=a" mode)
+204   809B 2A 2A 22 22              ldi     a,[hl],,a,(hl),,[hl],a,,(hl),a
+205   809F 3A 3A 32 32              ldd     a,[hl],,a,(hl),,[hl],a,,(hl),a
+206   80A3 2A 2A 22 22              ld      a,[hl+],,a,(hl+),,[hl+],a,,(hl+),a
+207   80A7 3A 3A 32 32              ld      a,[hl-],,a,(hl-),,[hl-],a,,(hl-),a
+208   80AB F0 04 E0 05              ldh     a,[varS.a],,[varS.b],a,,a,(varS.a),,(varS.b),a
+208   80AF F0 04 E0 05
+209   80B3 E8 03 E8 04              add     sp,3,,sp,4
+210   80B7 F8 00 F8 05              ld      hl,sp,,hl,sp+5,,hl,sp+6
+210   80BB F8 06
+211   80BD
+212   80BD                          ;;;; more extra tests after pushing the commit (as always)
+213   80BD
+214   80BD                          ; LDH automagic in LD - range checks
+215   80BD FA FF FE                 ld      a,(0xFEFF+0)        ; outside
+216   80C0 F0 00                    ld      a,(0xFEFF+1)        ; LDH
+217   80C2 F0 FF                    ld      a,(0xFEFF+256)      ; LDH
+LR35902_specifics_exercise.asm(218): warning: value 0x10000 is truncated to 16bit value: 0x0000
+218   80C4 FA 00 00                 ld      a,(0xFEFF+257)      ; outside + warning
+219   80C7 EA FF FE                 ld      (0xFEFF+0),a        ; outside
+220   80CA E0 00                    ld      (0xFEFF+1),a        ; LDH
+221   80CC E0 FF                    ld      (0xFEFF+256),a      ; LDH
+LR35902_specifics_exercise.asm(222): warning: value 0x10000 is truncated to 16bit value: 0x0000
+222   80CE EA 00 00                 ld      (0xFEFF+257),a      ; outside + warning
+223   80D1
+224   80D1                  END     ; scratcharea
+# file closed: LR35902_specifics_exercise.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002   struct1
+0x0000 X struct1.a
+0x0001 X struct1.b
+0xFEFC X varSX
+0xFEFC   varSX.a
+0xFEFD   varSX.b
+0xFEFE   var1
+0xFEFF   var2
+0xFF01   var3
+0xFF02 X var4
+0xFF04 X varS
+0xFF04   varS.a
+0xFF05   varS.b

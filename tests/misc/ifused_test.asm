@@ -10,8 +10,8 @@
 
 ;; This must generate syntax errors
 
-        IFUSED
-        IFNUSED
+        IFUSED                      /* some white space */ ; in comments
+        IFNUSED                     /* some white space */ ; in comments
 
 ;; All rest of code must be compiled without errors
 
@@ -25,28 +25,46 @@ start
 
 ;; Some little direct tests
 
-        IFUSED
-        db      'ok'
+        IFUSED                      /* some white space */ ; in comments
+            db      'ok'
         ELSE
-        db      'fail'
+            fail
         ENDIF
 
-        IFNUSED
-        db      'fail'
+        IFNUSED                     /* some white space */ ; in comments
+            fail
         ELSE
-        db      'ok'
+            db      'ok'
         ENDIF
 
-        IFUSED  .used
-        db      'ok'
+        IFUSED  .used               /* some white space */ ; in comments
+            db      'ok'
+        ELSE
+            fail
+        ENDIF
+        IFUSED  start.used          /* some white space */ ; in comments
+            org $-2 : db      'ok'
+        ELSE
+            fail
+        ENDIF
+        IFUSED  @start.used         /* some white space */ ; in comments
+            org $-2 : db      'ok'
+        ELSE
+            fail
         ENDIF
 
-        IFUSED  .noused
-        db      'fail'
+        IFUSED  .noused             /* some white space */ ; in comments
+            fail
+        ENDIF
+        IFUSED  start.noused        /* some white space */ ; in comments
+            fail
+        ENDIF
+        IFUSED  @start.noused       /* some white space */ ; in comments
+            fail
         ENDIF
 
-        IFUSED  not_defined_label
-        db      'fail'
+        IFUSED  not_defined_label   /* some white space */ ; in comments
+            fail
         ENDIF
 
 ;; Some little library :)

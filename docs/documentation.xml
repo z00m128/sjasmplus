@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.14.1 Documentation [2019-08-30]</title>
+  <title>SjASMPlus 1.14.2 Documentation [2019-10-03]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -32,7 +32,7 @@
           </listitem>
 
           <listitem>
-            <para>Z80/R800/Z80N documented and undocumented opcodes support</para>
+            <para>Z80/R800/Z80N/i8080/LR35902 documented and undocumented opcodes support</para>
           </listitem>
 
           <listitem>
@@ -182,6 +182,21 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>3.10.2019 - 1.14.2</term>
+
+            <listitem>
+              <synopsis>- added i8080 mode (--i8080 CLI option) (it's still Z80 Zilog syntax, just limited instruction set)
+- added Sharp LR35902 mode (--lr35902 CLI option) (100% syntax compatibility with IDA, 95% bgb)
+- new <link linkend="s_expressions">$$label operator</link> to retrieve page of label
+- 1.14.0 include-path bugfix reverted, the "." is again <link linkend="po_include">automatically added</link> (*did* break projects)
+- small improvements/polish/extra-info in docs, INSTALL, README, few new tests added
+- cmake script fix of SYSTEM_LUA=ON option, <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">CirrusCI</ulink> configs added for macOS and FreeBSD
+- few fixes of memory leaks, invalid memory access, double free/delete, ...
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>30.8.2019 - 1.14.1</term>
 
             <listitem>
@@ -287,7 +302,9 @@
   --version                Basic info (with --nologo only raw version string)
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
-  -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt;
+  --i8080                  Limit valid instructions to i8080 only (+ no fakes)
+  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)
+  -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt; ( --inc without "=" to empty the list)
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)
   --lstlab                 Enable label table in listing
@@ -578,7 +595,7 @@ $c     hexadecimal
     </section>
 
     <section>
-      <title>Expressions</title>
+      <title><anchor id="s_expressions" />Expressions</title>
 
       <para>Expressions are evaluated in signed 32 bits in this version of SjASMPlus (unless explicitly
 		  specified as unsigned, like ">>>" operator), so intermediate values have range -2147483648
@@ -586,9 +603,11 @@ $c     hexadecimal
 
       <para>'$' represents the current program counter. '$$' represents the
       current page in the current slot in the <link
-      linkend="s_realdevice">real device emulation mode</link> and '{address}' can be used
-      to read WORD from virtual device memory (but zero is read before last pass
-      of assembling) ('{b address}' to read only BYTE).</para>
+      linkend="s_realdevice">real device emulation mode</link>, '$$label' evaluates to number of page
+	  where the "label" was defined (only regular labels have meaningful value, labels defined
+	  under DISP mode or EQU/DEFL/... will produce irrelevant values) and '{address}' can be used
+      to read WORD from virtual device memory (correct value is read only in last pass of assembling,
+	  in early passes the zero value is always returned), '{b address}' reads only BYTE.</para>
 
       <para>It is possible to use parenthesis '(' and ')' to override the
       precedence of the operators. The following operators may be used in
@@ -639,7 +658,15 @@ or    x or y   bitwise or
 
 &amp;&amp;    x&amp;&amp;y     logical and
 
-||    x||y     logical or</programlisting></para>
+||    x||y     logical or
+
+$     $        current program counter
+$$    $$       current page at program counter (in virtual device mode)
+label label    value of label (aka symbol), usually memory address
+$$lab $$lab    page of "lab" label (in virtual device mode)
+{}    {x}      reads WORD from address x (in virtual device mode, in last pass)
+{b}   {b x}    reads BYTE from address x (in virtual device mode, in last pass)
+</programlisting></para>
     </section>
 
     <section>
@@ -684,6 +711,18 @@ or    x or y   bitwise or
           </listitem>
 
           <listitem>
+            <para>Z80N, i8080 and LR35902 modes use the identical Z80 sjasmplus syntax (!), for the
+				correct (and incorrect) syntax examples of extended opcodes, please check the test files:
+				Z80N <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_zx_spectrum_next_2_00_26.asm">test 1</ulink>
+				<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_next_syntax.lst">test 2</ulink>
+				and LR35902 <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_syntax_by_neo.lst">test 1</ulink>
+				<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_specifics_exercise.lst">test 2</ulink>
+				(also for the Z80 syntax examples you can check <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/z80">
+					Z80 tests</ulink>).
+				</para>
+          </listitem>
+
+          <listitem>
             <para>RLC, RRC, RL, RR, SLA, SRA, SLL (SLI), RES, SET undocumented
             instructions added.</para>
           </listitem>
@@ -723,210 +762,211 @@ or    x or y   bitwise or
       to get warnings when fake instruction is used, to avoid using them by accident. Here's the
       list:</para>
 
-      <para><programlisting>  rl bc
-  rl de
-  rl hl
-  rr bc
-  rr de
-  rr hl
-  sla bc
-  sla de
-  sla hl
-  sll bc
-  sll de
-  sll hl
-  sli bc
-  sli de
-  sli hl
-  sra bc
-  sra de
-  sra hl
-  srl bc
-  srl de
-  srl hl
+      <para><programlisting>
+  rl bc           ; rl c : rl b
+  rl de           ; rl e : rl d
+  rl hl           ; rl l : rl h
+  rr bc           ; rr b : rr c
+  rr de           ; rr d : rr e
+  rr hl           ; rr h : rr l
+  sla bc          ; sla c : rl b
+  sla de          ; sla e : rl d
+  sla hl          ; add hl,hl
+  sll bc          ; sli c : rl b
+  sll de          ; sli e : rl d
+  sll hl          ; sli l : rl h
+  sli bc          ; sli c : rl b
+  sli de          ; sli e : rl d
+  sli hl          ; sli l : rl h
+  sra bc          ; sra b : rr c
+  sra de          ; sra d : rr e
+  sra hl          ; sra h : rr l
+  srl bc          ; srl b : rr c
+  srl de          ; srl d : rr e
+  srl hl          ; srl h : rr l
 
-  ld bc,bc
-  ld bc,de
-  ld bc,hl
-  ld bc,ix
-  ld bc,iy
-  ld bc,(hl)
-  ld bc,(ix+nn)
-  ld bc,(iy+nn)
+  ld bc,bc        ; ld b,b : ld c,c
+  ld bc,de        ; ld b,d : ld c,e
+  ld bc,hl        ; ld b,h : ld c,l
+  ld bc,ix        ; ld b,xh : ld c,xl
+  ld bc,iy        ; ld b,yh : ld c,yl
+  ld bc,(hl)      ; ld c,(hl) : inc hl : ld b,(hl) : dec hl
+  ld bc,(ix+nn)   ; ld c,(ix+nn) : ld b,(ix+nn+1)
+  ld bc,(iy+nn)   ; ld c,(iy+nn) : ld b,(iy+nn+1)
 
-  ld de,bc
-  ld de,de
-  ld de,hl
-  ld de,ix
-  ld de,iy
-  ld de,(hl)
-  ld de,(ix+nn)
-  ld de,(iy+nn)
+  ld de,bc        ; ld d,b : ld e,c
+  ld de,de        ; ld d,d : ld e,e
+  ld de,hl        ; ld d,h : ld e,l
+  ld de,ix        ; ld d,xh : ld e,xl
+  ld de,iy        ; ld d,yh : ld e,yl
+  ld de,(hl)      ; ld e,(hl) : inc hl : ld d,(hl) : dec hl
+  ld de,(ix+nn)   ; ld e,(ix+nn) : ld d,(ix+nn+1)
+  ld de,(iy+nn)   ; ld e,(iy+nn) : ld d,(iy+nn+1)
 
-  ld hl,bc
-  ld hl,de
-  ld hl,hl
-  ld hl,ix
-  ld hl,iy
-  ld hl,(ix+nn)
-  ld hl,(iy+nn)
+  ld hl,bc        ; ld h,b : ld l,c
+  ld hl,de        ; ld h,d : ld l,e
+  ld hl,hl        ; ld h,h : ld l,l
+  ld hl,ix        ; push ix : pop hl
+  ld hl,iy        ; push iy : pop hl
+  ld hl,(ix+nn)   ; ld l,(ix+nn) : ld h,(ix+nn+1)
+  ld hl,(iy+nn)   ; ld l,(iy+nn) : ld h,(iy+nn+1)
 
-  ld ix,bc
-  ld ix,de
-  ld ix,hl
-  ld ix,ix
-  ld ix,iy
+  ld ix,bc        ; ld xh,b : ld xl,c
+  ld ix,de        ; ld xh,d : ld xl,e
+  ld ix,hl        ; push hl : pop ix
+  ld ix,ix        ; ld xh,xh : ld xl,xl
+  ld ix,iy        ; push iy : pop ix
 
-  ld iy,bc
-  ld iy,de
-  ld iy,hl
-  ld iy,ix
-  ld iy,iy
+  ld iy,bc        ; ld yh,b : ld yl,c
+  ld iy,de        ; ld yh,d : ld yl,e
+  ld iy,hl        ; push hl : pop iy
+  ld iy,ix        ; push ix : pop iy
+  ld iy,iy        ; ld yh,yh : ld yl,yl
 
-  ld (hl),bc
-  ld (hl),de
+  ld (hl),bc      ; ld (hl),c : inc hl : ld (hl),b : dec hl
+  ld (hl),de      ; ld (hl),e : inc hl : ld (hl),d : dec hl
 
-  ld (ix+nn),bc
-  ld (ix+nn),de
-  ld (ix+nn),hl
+  ld (ix+nn),bc   ; ld (ix+nn),c : ld (ix+nn+1),b
+  ld (ix+nn),de   ; ld (ix+nn),e : ld (ix+nn+1),d
+  ld (ix+nn),hl   ; ld (ix+nn),l : ld (ix+nn+1),h
 
-  ld (iy+nn),bc
-  ld (iy+nn),de
-  ld (iy+nn),hl
+  ld (iy+nn),bc   ; ld (iy+nn),c : ld (iy+nn+1),b
+  ld (iy+nn),de   ; ld (iy+nn),e : ld (iy+nn+1),d
+  ld (iy+nn),hl   ; ld (iy+nn),l : ld (iy+nn+1),h
 
-  ldi bc,(hl)
-  ldi bc,(ix+nn)
-  ldi bc,(iy+nn)
+  ldi bc,(hl)     ; ld c,(hl) : inc hl : ld b,(hl) : inc hl
+  ldi bc,(ix+nn)  ; ld c,(ix+nn) : inc ix : ld b,(ix+nn) : inc ix
+  ldi bc,(iy+nn)  ; ld c,(iy+nn) : inc iy : ld b,(iy+nn) : inc iy
 
-  ldi de,(hl)
-  ldi de,(ix+nn)
-  ldi de,(iy+nn)
+  ldi de,(hl)     ; ld e,(hl) : inc hl : ld d,(hl) : inc hl
+  ldi de,(ix+nn)  ; ld e,(ix+nn) : inc ix : ld d,(ix+nn) : inc ix
+  ldi de,(iy+nn)  ; ld e,(iy+nn) : inc iy : ld d,(iy+nn) : inc iy
 
-  ldi hl,(ix+nn)
-  ldi hl,(iy+nn)
+  ldi hl,(ix+nn)  ; ld l,(ix+nn) : inc ix : ld h,(ix+nn) : inc ix
+  ldi hl,(iy+nn)  ; ld l,(iy+nn) : inc iy : ld h,(iy+nn) : inc iy
 
-  ldi (hl),bc
-  ldi (hl),de
+  ldi (hl),bc     ; ld (hl),c : inc hl : ld (hl),b : inc hl
+  ldi (hl),de     ; ld (hl),e : inc hl : ld (hl),d : inc hl
 
-  ldi (ix+nn),bc
-  ldi (ix+nn),de
-  ldi (ix+nn),hl
+  ldi (ix+nn),bc  ; ld (ix+nn),c : inc ix : ld (ix+nn),b : inc ix
+  ldi (ix+nn),de  ; ld (ix+nn),e : inc ix : ld (ix+nn),d : inc ix
+  ldi (ix+nn),hl  ; ld (ix+nn),l : inc ix : ld (ix+nn),h : inc ix
 
-  ldi (iy+nn),bc
-  ldi (iy+nn),de
-  ldi (iy+nn),hl
+  ldi (iy+nn),bc  ; ld (iy+nn),c : inc iy : ld (iy+nn),b : inc iy
+  ldi (iy+nn),de  ; ld (iy+nn),e : inc iy : ld (iy+nn),d : inc iy
+  ldi (iy+nn),hl  ; ld (iy+nn),l : inc iy : ld (iy+nn),h : inc iy
 
-  ldi a,(bc)
-  ldi a,(de)
-  ldi a,(hl)
-  ldi b,(hl)
-  ldi c,(hl)
-  ldi d,(hl)
-  ldi e,(hl)
-  ldi h,(hl)
-  ldi l,(hl)
-  ldi a,(ix+nn)
-  ldi b,(ix+nn)
-  ldi c,(ix+nn)
-  ldi d,(ix+nn)
-  ldi e,(ix+nn)
-  ldi h,(ix+nn)
-  ldi l,(ix+nn)
-  ldi a,(iy+nn)
-  ldi b,(iy+nn)
-  ldi c,(iy+nn)
-  ldi d,(iy+nn)
-  ldi e,(iy+nn)
-  ldi h,(iy+nn)
-  ldi l,(iy+nn)
+  ldi a,(bc)      ; ld a,(bc) : inc bc
+  ldi a,(de)      ; ld a,(de) : inc de
+  ldi a,(hl)      ; ld a,(hl) : inc hl
+  ldi b,(hl)      ; ld b,(hl) : inc hl
+  ldi c,(hl)      ; ld c,(hl) : inc hl
+  ldi d,(hl)      ; ld d,(hl) : inc hl
+  ldi e,(hl)      ; ld e,(hl) : inc hl
+  ldi h,(hl)      ; ld h,(hl) : inc hl
+  ldi l,(hl)      ; ld l,(hl) : inc hl
+  ldi a,(ix+nn)   ; ld a,(ix+nn) : inc ix
+  ldi b,(ix+nn)   ; ld b,(ix+nn) : inc ix
+  ldi c,(ix+nn)   ; ld c,(ix+nn) : inc ix
+  ldi d,(ix+nn)   ; ld d,(ix+nn) : inc ix
+  ldi e,(ix+nn)   ; ld e,(ix+nn) : inc ix
+  ldi h,(ix+nn)   ; ld h,(ix+nn) : inc ix
+  ldi l,(ix+nn)   ; ld l,(ix+nn) : inc ix
+  ldi a,(iy+nn)   ; ld a,(iy+nn) : inc iy
+  ldi b,(iy+nn)   ; ld b,(iy+nn) : inc iy
+  ldi c,(iy+nn)   ; ld c,(iy+nn) : inc iy
+  ldi d,(iy+nn)   ; ld d,(iy+nn) : inc iy
+  ldi e,(iy+nn)   ; ld e,(iy+nn) : inc iy
+  ldi h,(iy+nn)   ; ld h,(iy+nn) : inc iy
+  ldi l,(iy+nn)   ; ld l,(iy+nn) : inc iy
 
-  ldd a,(bc)
-  ldd a,(de)
-  ldd a,(hl)
-  ldd b,(hl)
-  ldd c,(hl)
-  ldd d,(hl)
-  ldd e,(hl)
-  ldd h,(hl)
-  ldd l,(hl)
-  ldd a,(ix+nn)
-  ldd b,(ix+nn)
-  ldd c,(ix+nn)
-  ldd d,(ix+nn)
-  ldd e,(ix+nn)
-  ldd h,(ix+nn)
-  ldd l,(ix+nn)
-  ldd a,(iy+nn)
-  ldd b,(iy+nn)
-  ldd c,(iy+nn)
-  ldd d,(iy+nn)
-  ldd e,(iy+nn)
-  ldd h,(iy+nn)
-  ldd l,(iy+nn)
+  ldd a,(bc)      ; ld a,(bc) : dec bc
+  ldd a,(de)      ; ld a,(de) : dec de
+  ldd a,(hl)      ; ld a,(hl) : dec hl
+  ldd b,(hl)      ; ld b,(hl) : dec hl
+  ldd c,(hl)      ; ld c,(hl) : dec hl
+  ldd d,(hl)      ; ld d,(hl) : dec hl
+  ldd e,(hl)      ; ld e,(hl) : dec hl
+  ldd h,(hl)      ; ld h,(hl) : dec hl
+  ldd l,(hl)      ; ld l,(hl) : dec hl
+  ldd a,(ix+nn)   ; ld a,(ix+nn) : dec ix
+  ldd b,(ix+nn)   ; ld b,(ix+nn) : dec ix
+  ldd c,(ix+nn)   ; ld c,(ix+nn) : dec ix
+  ldd d,(ix+nn)   ; ld d,(ix+nn) : dec ix
+  ldd e,(ix+nn)   ; ld e,(ix+nn) : dec ix
+  ldd h,(ix+nn)   ; ld h,(ix+nn) : dec ix
+  ldd l,(ix+nn)   ; ld l,(ix+nn) : dec ix
+  ldd a,(iy+nn)   ; ld a,(iy+nn) : dec iy
+  ldd b,(iy+nn)   ; ld b,(iy+nn) : dec iy
+  ldd c,(iy+nn)   ; ld c,(iy+nn) : dec iy
+  ldd d,(iy+nn)   ; ld d,(iy+nn) : dec iy
+  ldd e,(iy+nn)   ; ld e,(iy+nn) : dec iy
+  ldd h,(iy+nn)   ; ld h,(iy+nn) : dec iy
+  ldd l,(iy+nn)   ; ld l,(iy+nn) : dec iy
 
-  ldi (bc),a
-  ldi (de),a
-  ldi (hl),a
-  ldi (hl),b
-  ldi (hl),c
-  ldi (hl),d
-  ldi (hl),e
-  ldi (hl),h
-  ldi (hl),l
-  ldi (ix+nn),a
-  ldi (ix+nn),b
-  ldi (ix+nn),c
-  ldi (ix+nn),d
-  ldi (ix+nn),e
-  ldi (ix+nn),h
-  ldi (ix+nn),l
-  ldi (iy+nn),a
-  ldi (iy+nn),b
-  ldi (iy+nn),c
-  ldi (iy+nn),d
-  ldi (iy+nn),e
-  ldi (iy+nn),h
-  ldi (iy+nn),l
+  ldi (bc),a      ; ld (bc),a : inc bc
+  ldi (de),a      ; ld (de),a : inc de
+  ldi (hl),a      ; ld (hl),a : inc hl
+  ldi (hl),b      ; ld (hl),b : inc hl
+  ldi (hl),c      ; ld (hl),c : inc hl
+  ldi (hl),d      ; ld (hl),d : inc hl
+  ldi (hl),e      ; ld (hl),e : inc hl
+  ldi (hl),h      ; ld (hl),h : inc hl
+  ldi (hl),l      ; ld (hl),l : inc hl
+  ldi (ix+nn),a   ; ld (ix+nn),a : inc ix
+  ldi (ix+nn),b   ; ld (ix+nn),b : inc ix
+  ldi (ix+nn),c   ; ld (ix+nn),c : inc ix
+  ldi (ix+nn),d   ; ld (ix+nn),d : inc ix
+  ldi (ix+nn),e   ; ld (ix+nn),e : inc ix
+  ldi (ix+nn),h   ; ld (ix+nn),h : inc ix
+  ldi (ix+nn),l   ; ld (ix+nn),l : inc ix
+  ldi (iy+nn),a   ; ld (iy+nn),a : inc iy
+  ldi (iy+nn),b   ; ld (iy+nn),b : inc iy
+  ldi (iy+nn),c   ; ld (iy+nn),c : inc iy
+  ldi (iy+nn),d   ; ld (iy+nn),d : inc iy
+  ldi (iy+nn),e   ; ld (iy+nn),e : inc iy
+  ldi (iy+nn),h   ; ld (iy+nn),h : inc iy
+  ldi (iy+nn),l   ; ld (iy+nn),l : inc iy
 
-  ldd (bc),a
-  ldd (de),a
-  ldd (hl),a
-  ldd (hl),b
-  ldd (hl),c
-  ldd (hl),d
-  ldd (hl),e
-  ldd (hl),h
-  ldd (hl),l
-  ldd (ix+nn),a
-  ldd (ix+nn),b
-  ldd (ix+nn),c
-  ldd (ix+nn),d
-  ldd (ix+nn),e
-  ldd (ix+nn),h
-  ldd (ix+nn),l
-  ldd (iy+nn),a
-  ldd (iy+nn),b
-  ldd (iy+nn),c
-  ldd (iy+nn),d
-  ldd (iy+nn),e
-  ldd (iy+nn),h
-  ldd (iy+nn),l
+  ldd (bc),a      ; ld (bc),a : dec bc
+  ldd (de),a      ; ld (de),a : dec de
+  ldd (hl),a      ; ld (hl),a : dec hl
+  ldd (hl),b      ; ld (hl),b : dec hl
+  ldd (hl),c      ; ld (hl),c : dec hl
+  ldd (hl),d      ; ld (hl),d : dec hl
+  ldd (hl),e      ; ld (hl),e : dec hl
+  ldd (hl),h      ; ld (hl),h : dec hl
+  ldd (hl),l      ; ld (hl),l : dec hl
+  ldd (ix+nn),a   ; ld (ix+nn),a : dec ix
+  ldd (ix+nn),b   ; ld (ix+nn),b : dec ix
+  ldd (ix+nn),c   ; ld (ix+nn),c : dec ix
+  ldd (ix+nn),d   ; ld (ix+nn),d : dec ix
+  ldd (ix+nn),e   ; ld (ix+nn),e : dec ix
+  ldd (ix+nn),h   ; ld (ix+nn),h : dec ix
+  ldd (ix+nn),l   ; ld (ix+nn),l : dec ix
+  ldd (iy+nn),a   ; ld (iy+nn),a : dec iy
+  ldd (iy+nn),b   ; ld (iy+nn),b : dec iy
+  ldd (iy+nn),c   ; ld (iy+nn),c : dec iy
+  ldd (iy+nn),d   ; ld (iy+nn),d : dec iy
+  ldd (iy+nn),e   ; ld (iy+nn),e : dec iy
+  ldd (iy+nn),h   ; ld (iy+nn),h : dec iy
+  ldd (iy+nn),l   ; ld (iy+nn),l : dec iy
 
-  ldi (hl),nn
-  ldi (ix+nn),nn
-  ldi (iy+nn),nn
+  ldi (hl),mm     ; ld (hl),mm : inc hl
+  ldi (ix+nn),mm  ; ld (ix+nn),mm : inc ix
+  ldi (iy+nn),mm  ; ld (iy+nn),mm : inc iy
 
-  ldd (hl),nn
-  ldd (ix+nn),nn
-  ldd (iy+nn),nn
+  ldd (hl),nn     ; ld (hl),mm : dec hl
+  ldd (ix+nn),nn  ; ld (ix+nn),mm : dec ix
+  ldd (iy+nn),nn  ; ld (iy+nn),mm : dec iy
 
-  sub hl,bc
-  sub hl,de
-  sub hl,hl
-  sub hl,sp
+  sub hl,bc       ; or a : sbc hl,bc
+  sub hl,de       ; or a : sbc hl,de
+  sub hl,hl       ; or a : sbc hl,hl
+  sub hl,sp       ; or a : sbc hl,sp
 
   ; Z80N only
-  mul     ; to avoid warning specify register, like "mul de" or "mul d,e"</programlisting>
+  mul             ; mul de ; to avoid warning specify registers</programlisting>
       <code>LDI</code> increases the data pointer after the data
       access, so <code>LDI A,(HL)</code> is the same as <code>LD A,(HL):INC HL</code>.
       Likewise, <code>LDD A,(DE)</code> is <code>LD A,(DE):DEC DE</code>.</para>
@@ -1862,15 +1902,16 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               <para>To include another sourcefile into the current.
               Sourcefiles can be nested 20 levels deep. If the file cannot be
               found in the current directory (the current directory is the
-              directory the current file comes from) the file will be searched
+              directory the current asm file comes from!) the file will be searched
               for in the directories specified at the commandline. When angle
               brackets are used, the commandline directories are searched
               before the current directory.</para>
-              <para>Before v1.14.0 the directory used to launch the assembling process was
-              automatically added to the list (undocumented), this was removed. If your project
-              build is failing with v1.14.0 and you don't want to modify the include paths in
-              sources, add "<code>-i.</code>" to the command line options when launching sjasmplus,
-              to simulate the previous behaviour.
+              <para>The directory used to launch the assembling process is automatically added
+              to the list (as if "<code>-i.</code>" was added to command line manually)
+              (v1.14.0 and v1.14.1 don't add it, reverted back for v1.14.2). If you want to start
+              with completely empty include-path list, use "<code>--inc</code>" option
+              early (order matters) without the "=" to empty the current list, like:
+              <code>sjasmplus --inc --inc=path1 --inc=path2 file.asm</code>
               <example>
                   <title></title>
 

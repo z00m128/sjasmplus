@@ -64,26 +64,24 @@ int ParseExpPrim(char*& p, aint& nval) {
 		nval = res;
 		return 1;
 	} else if (isdigit((byte)*p) || (*p == '#' && isalnum((byte)*(p + 1))) || (*p == '$' && isalnum((byte)*(p + 1))) || *p == '%') {
-	  	res = GetConstant(p, nval);
-	} else if (isalpha((byte)*p) || *p == '_' || *p == '.' || *p == '@') {
-	  	res = GetLabelValue(p, nval);
-	} else if (*p == '?' && (isalpha((byte)*(p + 1)) || *(p + 1) == '_' || *(p + 1) == '.' || *(p + 1) == '@')) {
+		return GetConstant(p, nval);
+	} else if (isLabelStart(p)) {
+		return GetLabelValue(p, nval);
+	} else if (*p == '?' && isLabelStart(p+1)) {
 		// this is undocumented "?<symbol>" operator, seems as workaround for labels like "not"
 		// This is deprecated and will be removed in v2.x of sjasmplus
 		// (where keywords will be reserved and such label would be invalid any way)
 		Warning("?<symbol> operator is deprecated and will be removed in v2.x", p);
 		++p;
-		res = GetLabelValue(p, nval);
+		return GetLabelValue(p, nval);
 	} else if (DeviceID && *p == '$' && *(p + 1) == '$') {
-		++p;
-		++p;
+		p += 2;
+		if (isLabelStart(p)) return GetLabelPage(p, nval);
 		nval = Page->Number;
-
 		return 1;
 	} else if (*p == '$') {
 		++p;
 		nval = CurAddress;
-
 		return 1;
 	} else if (!(res = GetCharConst(p, nval))) {
 		if (synerr) Error("Syntax error", p, IF_FIRST);
@@ -401,7 +399,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			continue;
 		}
 
-		if (!isalpha((byte)*lp) && *lp != '_') {
+		if (!isLabelStart(lp, false)) {
 			*rp++ = *lp++;
 			continue;
 		}
@@ -502,7 +500,7 @@ void SetLastParsedLabel(const char* label) {
 	if (LastParsedLabel) free(LastParsedLabel);
 	if (nullptr != label) {
 		LastParsedLabel = STRDUP(label);
-		if (nullptr == LastParsedLabel) Error("No enough memory!", NULL, FATAL);
+		if (nullptr == LastParsedLabel) ErrorOOM();
 		LastParsedLabelLine = CompiledCurrentLine;
 	} else {
 		LastParsedLabel = nullptr;
@@ -524,6 +522,12 @@ void ParseLabel() {
 	SkipBlanks();
 	IsLabelNotFound = 0;
 	if (isdigit((byte)*tp)) {
+		ttp = tp;
+		while (*ttp && isdigit((byte)*ttp)) ++ttp;
+		if (*ttp) {
+			Error("Invalid temporary label (not a number)", temp);
+			return;
+		}
 		if (NeedEQU() || NeedDEFL()) {
 			Error("Number labels are allowed as address labels only, not for DEFL/=/EQU", temp, SUPPRESS);
 			return;
@@ -558,7 +562,7 @@ void ParseLabel() {
 			val = CurAddress;
 		}
 		ttp = tp;
-		if (!(tp = ValidateLabel(tp, VALIDATE_LABEL_SET_NAMESPACE))) {
+		if (!(tp = ValidateLabel(tp, true))) {
 			return;
 		}
 		// Copy label name to last parsed label variable
@@ -707,15 +711,11 @@ void ParseLineSafe(bool parselabels) {
 	char* rp = lp;
 	if (sline[0] > 0) {
 		tmp = STRDUP(sline);
-		if (tmp == NULL) {
-			Error("No enough memory!", NULL, FATAL);
-		}
+		if (tmp == NULL) ErrorOOM();
 	}
 	if (sline2[0] > 0) {
 		tmp2 = STRDUP(sline2);
-		if (tmp2 == NULL) {
-			Error("No enough memory!", NULL, FATAL);
-		}
+		if (tmp2 == NULL) ErrorOOM();
 	}
 
 	ParseLine(parselabels);
@@ -759,9 +759,7 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 		Error("[STRUCT] Number labels not allowed within structs"); return;
 	}
 	PreviousIsLabel = STRDUP(tp);
-	if (PreviousIsLabel == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (PreviousIsLabel == NULL) ErrorOOM();
 	st->AddLabel(tp);
 }
 
@@ -875,9 +873,7 @@ void LuaParseLine(char *str) {
 	// preserve current actual line which will be parsed next
 	char *oldLine = STRDUP(line);
 	char *oldEolComment = eolComment;
-	if (oldLine == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (oldLine == NULL) ErrorOOM();
 
 	// inject new line from Lua call and assemble it
 	STRCPY(line, LINEMAX, str);
@@ -894,9 +890,7 @@ void LuaParseCode(char *str) {
 	char *ml;
 
 	ml = STRDUP(line);
-	if (ml == NULL) {
-		Error("No enough memory!", NULL, FATAL);
-	}
+	if (ml == NULL) ErrorOOM();
 
 	STRCPY(line, LINEMAX, str);
 	ParseLineSafe(false);

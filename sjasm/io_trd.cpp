@@ -63,7 +63,7 @@ int TRD_SaveEmpty(char* fname) {	//TODO add disc label maybe? Type as well?
 		return 0;
 	}
 	byte* buf = (byte*) calloc(1024, sizeof(byte));
-	if (buf == NULL) Error("No enough memory", NULL, FATAL);
+	if (buf == NULL) ErrorOOM();
 	int result = saveEmptyWrite(ff, buf);
 	free(buf);
 	fclose(ff);
