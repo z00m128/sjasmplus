@@ -542,8 +542,11 @@ int GetCharConstInDoubleQuotes(char*& op, aint& val) {
 	default:
 		break;
 	}
-	// keep "val" equal to the second character
-	Error("Unknown escape", op-2);
+	// return backslash as char value in case of unknown escape sequence
+	// (to mimick older versions of sjasmplus like 1.07-1.10 behaviour)
+	--op;
+	val = '\\';
+	Warning("Unknown escape", op-1);
 	return 1;
 }
 
