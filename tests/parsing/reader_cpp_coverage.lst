@@ -5,59 +5,59 @@
 reader_cpp_coverage.asm(3): error: ')' expected
  3    0000                ld a,(
  4    0000                  .ASSERT(0 == not 1)
-reader_cpp_coverage.asm(5): error: Unknown escape: \x"
- 5    0000 78               .DB  "\x"
+reader_cpp_coverage.asm(5): warning: Unknown escape: \x"
+ 5    0000 5C 78            .DB  "\x"
 reader_cpp_coverage.asm(6): warning: Empty string literal converted to value 0!: ""
- 6    0001 01               .DB  1+""
+ 6    0002 01               .DB  1+""
 reader_cpp_coverage.asm(7): error: No closing delimiter: "
- 7    0002                  .INCLUDE "missing_delimiter
+ 7    0003                  .INCLUDE "missing_delimiter
 reader_cpp_coverage.asm(8): error: [INCLUDE] empty filename: .INCLUDE ""
- 8    0002                  .INCLUDE ""
- 9    0002                  .STRUCT coverageStruct
+ 8    0003                  .INCLUDE ""
+ 9    0003                  .STRUCT coverageStruct
 reader_cpp_coverage.asm(10): error: [STRUCT] Unexpected: BYME    1
-10    0002 ~            LL1 BYME    1
+10    0003 ~            LL1 BYME    1
 reader_cpp_coverage.asm(11): error: [STRUCT] Unexpected: byme    1
-11    0002 ~            ll1 byme    1
+11    0003 ~            ll1 byme    1
 reader_cpp_coverage.asm(12): error: [STRUCT] Unexpected: WORR    2
-12    0002 ~            LL2 WORR    2
+12    0003 ~            LL2 WORR    2
 reader_cpp_coverage.asm(13): error: [STRUCT] Unexpected: worr    2
-13    0002 ~            ll2 worr    2
+13    0003 ~            ll2 worr    2
 reader_cpp_coverage.asm(14): error: [STRUCT] Unexpected: BLICK   3
-14    0002 ~            LL3 BLICK   3
+14    0003 ~            LL3 BLICK   3
 reader_cpp_coverage.asm(15): error: [STRUCT] Unexpected: blick   3
-15    0002 ~            ll3 blick   3
+15    0003 ~            ll3 blick   3
 reader_cpp_coverage.asm(16): error: [STRUCT] Unexpected: DBBB    4
-16    0002 ~            LL4 DBBB    4
+16    0003 ~            LL4 DBBB    4
 reader_cpp_coverage.asm(17): error: [STRUCT] Unexpected: dbbb    4
-17    0002 ~            ll4 dbbb    4
+17    0003 ~            ll4 dbbb    4
 reader_cpp_coverage.asm(18): error: [STRUCT] Unexpected: DWWW    5
-18    0002 ~            LL5 DWWW    5
+18    0003 ~            LL5 DWWW    5
 reader_cpp_coverage.asm(19): error: [STRUCT] Unexpected: dwww    5
-19    0002 ~            ll5 dwww    5
+19    0003 ~            ll5 dwww    5
 reader_cpp_coverage.asm(20): error: [STRUCT] Unexpected: DSSS    6
-20    0002 ~            LL6 DSSS    6
+20    0003 ~            LL6 DSSS    6
 reader_cpp_coverage.asm(21): error: [STRUCT] Unexpected: dsss    6
-21    0002 ~            ll6 dsss    6
+21    0003 ~            ll6 dsss    6
 reader_cpp_coverage.asm(22): error: [STRUCT] Unexpected: DDDD    7
-22    0002 ~            LL7 DDDD    7
+22    0003 ~            LL7 DDDD    7
 reader_cpp_coverage.asm(23): error: [STRUCT] Unexpected: dddd    7
-23    0002 ~            ll7 dddd    7
+23    0003 ~            ll7 dddd    7
 reader_cpp_coverage.asm(24): error: [STRUCT] Unexpected: ALONG   8
-24    0002 ~            LL8 ALONG   8
+24    0003 ~            LL8 ALONG   8
 reader_cpp_coverage.asm(25): error: [STRUCT] Unexpected: along   8
-25    0002 ~            ll8 along   8
+25    0003 ~            ll8 along   8
 reader_cpp_coverage.asm(26): error: [STRUCT] Unexpected: DEDE    9
-26    0002 ~            LL9 DEDE    9
+26    0003 ~            LL9 DEDE    9
 reader_cpp_coverage.asm(27): error: [STRUCT] Unexpected: dede    9
-27    0002 ~            ll9 dede    9
+27    0003 ~            ll9 dede    9
 reader_cpp_coverage.asm(28): error: [STRUCT] Unexpected: D255    A
-28    0002 ~            LLA D255    A
+28    0003 ~            LLA D255    A
 reader_cpp_coverage.asm(29): error: [STRUCT] Unexpected: d255    a
-29    0002 ~            lla d255    a
-30    0002                  .ENDS
+29    0003 ~            lla d255    a
+30    0003                  .ENDS
 reader_cpp_coverage.asm(31): error: Syntax error: "
-31    0002                  .DW     2+"
-32    0002
+31    0003                  .DW     2+"
+32    0003
 # file closed: reader_cpp_coverage.asm
 
 Value    Label

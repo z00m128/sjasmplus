@@ -137,6 +137,7 @@ How about abusing "@" or "." or something to distinguish between? (& resembles C
 
 Make --syntax=abflL default for v2.x and check other defaults
 Maybe add support for escaped '\'' and other combinations back, to be more C++ compatible
+(escape sequences in C/C++ are case sensitive => adopt to sjasmplus (insensitive currently))
 
 Check about other syntax ambiguities, what seems too much relaxed and could be stricter for v2.x
 

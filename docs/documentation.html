@@ -847,9 +847,9 @@ $$lab $$lab    page of "lab" label (in virtual device mode)
   ldi (ix+nn),mm  ; ld (ix+nn),mm : inc ix
   ldi (iy+nn),mm  ; ld (iy+nn),mm : inc iy
 
-  ldd (hl),nn     ; ld (hl),mm : dec hl
-  ldd (ix+nn),nn  ; ld (ix+nn),mm : dec ix
-  ldd (iy+nn),nn  ; ld (iy+nn),mm : dec iy
+  ldd (hl),mm     ; ld (hl),mm : dec hl
+  ldd (ix+nn),mm  ; ld (ix+nn),mm : dec ix
+  ldd (iy+nn),mm  ; ld (iy+nn),mm : dec iy
 
   sub hl,bc       ; or a : sbc hl,bc
   sub hl,de       ; or a : sbc hl,de
