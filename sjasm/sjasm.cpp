@@ -56,6 +56,7 @@ void PrintHelp() {
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
 	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
 	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
+	_COUT "  --sld=<filename>         Write Source Level Debugging data to <filename> (- is STDOUT)" _ENDL;
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
@@ -80,6 +81,7 @@ namespace Options {
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
 	char CSpectMapFName[LINEMAX] = {0};
+	char SourceLevelDebugFName[LINEMAX] = { "out.txt" };
 
 	char ZX_SnapshotFName[LINEMAX] = {0};
 	char ZX_TapeFName[LINEMAX] = {0};
@@ -155,7 +157,7 @@ char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2],
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 char SourceFNames[128][MAX_PATH];
-static int SourceFNamesCount = 0;
+int SourceFNamesCount = 0;
 std::vector<char> stdin_log;
 
 int ConvertEncoding = ENCWIN;
@@ -404,6 +406,7 @@ namespace Options {
 					CheckAssignmentOption("sym", SymbolListFName, LINEMAX) ||
 					CheckAssignmentOption("lst", ListingFName, LINEMAX) ||
 					CheckAssignmentOption("exp", ExportFName, LINEMAX) ||
+					CheckAssignmentOption("sld", SourceLevelDebugFName, LINEMAX) ||
 					CheckAssignmentOption("raw", RAWFName, LINEMAX) ) {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
@@ -615,6 +618,9 @@ int main(int argc, char **argv) {
 	// open lists (if not set to "default" file name, then the OpenFile will handle it)
 	OpenList();
 
+	//open source level debugging file
+	OpenSLD();
+	
 	do {
 		++pass;
 		InitPass();

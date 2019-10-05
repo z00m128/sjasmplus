@@ -48,6 +48,7 @@ int tape_parity = 0x55;
 FILE* FP_tapout = NULL;
 FILE* FP_Input = NULL, * FP_Output = NULL, * FP_RAW = NULL;
 FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
+FILE* FP_SourceLevelDebugging = NULL;
 int ListAddress;
 aint WBLength = 0;
 bool IsSkipErrors = false;
@@ -263,6 +264,26 @@ static void ListFileStringRtrim() {
 	*beyondLine = 0;
 }
 
+
+
+FILE* GetSLDFile() {
+	if (NULL != FP_SourceLevelDebugging) return FP_SourceLevelDebugging;
+	if (OV_LST == Options::OutputVerbosity) return stderr;
+	return NULL;
+}
+
+
+void WriteToSLDFile(char * message)
+{
+	if (LASTPASS != pass || NULL == GetSLDFile())
+	{
+		return;
+	}
+
+	fputs(message, GetSLDFile());
+}
+
+
 // returns FILE* handle to either actual file defined by --lst=xxx, or stderr if --msg=lst, or NULL
 // ! do not fclose this handle, for fclose logic use the FP_ListingFile variable itself !
 FILE* GetListingFile() {
@@ -471,6 +492,7 @@ void BinIncFile(char* fname, int offset, int length) {
 
 static void OpenDefaultList(const char *fullpath);
 
+
 static auto stdin_log_it = stdin_log.cbegin();
 
 void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
@@ -500,6 +522,10 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
 		OpenDefaultList(fullpath);			// explicit listing file is already opened
 	}
+
+
+	
+	
 	// show in listing file which file was opened
 	FILE* listFile = GetListingFile();
 	if (LASTPASS == pass && listFile) {
@@ -728,6 +754,33 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	} // while (IsRunning && ReadBufData())
 }
 
+
+
+
+static void OpenSLDImp(const char* sldFilename) {
+	// if STDERR is configured to contain listing, disable other listing files
+	if (OV_LST == Options::OutputVerbosity) return;
+	if (NULL == sldFilename || !sldFilename[0]) return;
+	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
+		Error("Error opening file", sldFilename, FATAL);
+	}
+}
+
+void OpenSLD() {	
+	// if STDERR is configured to contain listing, disable other listing files
+	if (OV_LST == Options::OutputVerbosity) return;
+	// check if listing file is already opened, or it is set to "default" file names
+	if (NULL != FP_SourceLevelDebugging) return;
+	// Only explicit listing files are opened here
+	OpenSLDImp(Options::SourceLevelDebugFName);
+}
+
+
+
+
+
+
+
 static void OpenListImp(const char* listFilename) {
 	// if STDERR is configured to contain listing, disable other listing files
 	if (OV_LST == Options::OutputVerbosity) return;
@@ -898,6 +951,14 @@ void Close() {
 	if (FP_ListingFile != NULL) {
 		fclose(FP_ListingFile);
 		FP_ListingFile = NULL;
+	}
+
+	if (FP_SourceLevelDebugging != NULL) {
+		fclose(FP_SourceLevelDebugging);
+		FP_SourceLevelDebugging = NULL;
+
+		Warning("closing SLD file");
+
 	}
 }
 

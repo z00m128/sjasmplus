@@ -564,6 +564,33 @@ void ParseLabel() {
 		// Copy label name to last parsed label variable
 		if (!IsDEFL) SetLastParsedLabel(tp);
 		if (pass == LASTPASS) {
+
+
+			
+			if (IsEQU)
+			{
+				CDeviceSlot *slot = Device->GetSlot(((val & 0xE000) >> 13));
+				char* buf = new char[LINEMAX];
+				SPRINTF4(buf, LINEMAX, "%s|%d|%d|%d|D\n", tp, CurrentSourceLine, -1,val);
+				WriteToSLDFile(buf);
+			}
+			else
+			{
+				if (!IsDEFL)
+				{
+					CDeviceSlot *slot = Device->GetSlot(((val & 0xE000) >> 13));
+
+					char* buf = new char[LINEMAX];
+
+					//SPRINTF3(buf, LINEMAX, "Label %s bank %u address %u F", tp, slot->Page->Number, val);
+					//Warning(">>>>> Function", buf);
+
+					SPRINTF4(buf, LINEMAX, "%s|%d|%d|%d|F\n", tp, CurrentSourceLine, slot->Page->Number, CurAddress);
+					WriteToSLDFile(buf);
+				}
+			}
+
+			
 			if (IsDEFL) {		//re-set DEFL value
 				LabelTable.Insert(tp, val, false, true, false);
 			}
@@ -620,7 +647,25 @@ void ParseInstruction() {
 	if (ParseDirective()) {
 		return;
 	}
+
+	if (pass == LASTPASS)
+	{
+		CDeviceSlot *slot = Device->GetSlot(((CurAddress & 0xE000) >> 13));
+
+
+		
+		char* buf = new char[LINEMAX];
+
+		SPRINTF4(buf, LINEMAX, "%s|%d|%d|%d|T\n", filename , CurrentSourceLine,slot->Page->Number, CurAddress);
+		WriteToSLDFile(buf);
+		
+		//Warning(">>>>> OPCODE", buf);
+
+	}
+	
 	Z80::GetOpCode();
+
+	//_COUT "GET OPCODE" +  CurAddress _ENDL;
 }
 
 static const byte win2dos[] = //taken from HorrorWord %)))
@@ -683,10 +728,12 @@ void ParseLine(bool parselabels) {
 		}
 	}
 	if (!*lp) {
+
+
 		char *srcNonWhiteChar = line;
 		SkipBlanks(srcNonWhiteChar);
 		// check if only "end-line" comment remained, treat that one as "empty" line too
-		if (';' == *srcNonWhiteChar || ('/' == srcNonWhiteChar[0] && '/' == srcNonWhiteChar[1]))
+		if (';' == srcNonWhiteChar[0] || ('/' == srcNonWhiteChar[0] && '/' == srcNonWhiteChar[1]))
 			srcNonWhiteChar = lp;			// force srcNonWhiteChar to point to 0
 		if (*srcNonWhiteChar || comlin) {	// non-empty source line turned into nothing
 			ListFile(true);					// or empty source inside comment-block -> "skipped"

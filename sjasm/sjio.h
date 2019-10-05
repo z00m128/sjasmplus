@@ -68,6 +68,8 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent = false);
 void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent);
 void Close();
 void OpenList();
+void OpenSLD();
+
 void OpenUnrealList();
 void ReadBufLine(bool Parse = true, bool SplitByColon = true);
 void CloseDest();
