@@ -1,0 +1,81 @@
+# file opened: op_00_3F.asm
+ 1    0000                  OUTPUT "op_00_3F.bin"
+ 2    0000
+ 3    0000 00               nop
+ 4    0001 01 41 42         ld      bc,$4241
+ 5    0004 02               ld      (bc),a
+ 6    0005 03               inc     bc
+ 7    0006 04               inc     b
+ 8    0007 05               dec     b
+ 9    0008 06 43            ld      b,$43
+10    000A 07               rlca
+11    000B 09               add     hl,bc
+12    000C 0A               ld      a,(bc)
+13    000D 0B               dec     bc
+14    000E 0C               inc     c
+15    000F 0D               dec     c
+16    0010 0E 43            ld      c,$43
+17    0012 0F               rrca
+18    0013 11 41 42         ld      de,$4241
+19    0016 12               ld      (de),a
+20    0017 13               inc     de
+21    0018 14               inc     d
+22    0019 15               dec     d
+23    001A 16 43            ld      d,$43
+24    001C 17               rla
+25    001D 19               add     hl,de
+26    001E 1A               ld      a,(de)
+27    001F 1B               dec     de
+28    0020 1C               inc     e
+29    0021 1D               dec     e
+30    0022 1E 43            ld      e,$43
+31    0024 1F               rra
+32    0025 21 41 42         ld      hl,$4241
+33    0028 22 41 42         ld      ($4241),hl
+34    002B 23               inc     hl
+35    002C 24               inc     h
+36    002D 25               dec     h
+37    002E 26 43            ld      h,$43
+38    0030 27               daa
+39    0031 29               add     hl,hl
+40    0032 2A 41 42         ld      hl,($4241)
+41    0035 2B               dec     hl
+42    0036 2C               inc     l
+43    0037 2D               dec     l
+44    0038 2E 43            ld      l,$43
+45    003A 2F               cpl
+46    003B 31 41 42         ld      sp,$4241
+47    003E 32 41 42         ld      ($4241),a
+48    0041 33               inc     sp
+49    0042 34               inc     (hl)
+50    0043 35               dec     (hl)
+51    0044 36 43            ld      (hl),$43
+52    0046 37               scf
+53    0047 39               add     hl,sp
+54    0048 3A 41 42         ld      a,($4241)
+55    004B 3B               dec     sp
+56    004C 3C               inc     a
+57    004D 3D               dec     a
+58    004E 3E 43            ld      a,$43
+59    0050 3F               ccf
+60    0051
+61    0051                  ; illegal on i8080
+op_00_3F.asm(62): error: Illegal instruction:     ex      af,af'
+62    0051                  ex      af,af'
+op_00_3F.asm(63): error: Unrecognized instruction: djnz    $
+63    0051                  djnz    $
+op_00_3F.asm(64): error: Unrecognized instruction: jr      $
+64    0051                  jr      $
+op_00_3F.asm(65): error: Unrecognized instruction: jr      nz,$
+65    0051                  jr      nz,$
+op_00_3F.asm(66): error: Unrecognized instruction: jr      z,$
+66    0051                  jr      z,$
+op_00_3F.asm(67): error: Unrecognized instruction: jr      nc,$
+67    0051                  jr      nc,$
+op_00_3F.asm(68): error: Unrecognized instruction: jr      c,$
+68    0051                  jr      c,$
+69    0051
+# file closed: op_00_3F.asm
+
+Value    Label
+------ - -----------------------------------------------------------

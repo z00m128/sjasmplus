@@ -48,7 +48,9 @@ void PrintHelp() {
 	_COUT "\nOption flags as follows:" _ENDL;
 	_COUT "  -h or --help             Help information (you see it)" _ENDL;
 	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions" _ENDL;
-	_COUT "  -i<path> or -I<path> or --inc=<path>" _ENDL;
+	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
+	_COUT "  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)" _ENDL;
+	_COUT "  -i<path> or -I<path> or --inc=<path> ( --inc without \"=\" to empty the list)" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
 	_COUT "  --lstlab                 Enable label table in listing" _ENDL;
@@ -97,23 +99,29 @@ namespace Options {
 	bool NoDestinationFile = true;		// no *.out file by default
 	SSyntax syx, systemSyntax;
 	bool SourceStdIn = false;
+	bool IsI8080 = false;
+	bool IsLR35902 = false;
 
-/*
 	// Include directories list is initialized with "." directory
-	CStringsList* IncludeDirsList = new CStringsList((char *)".");
-*/
-	// Include directories list is empty initially (since v1.13.4)
-	CStringsList* IncludeDirsList = nullptr;
+	CStringsList* IncludeDirsList = new CStringsList(".");
 
 	CDefineTable CmdDefineTable;		// is initialized by constructor
+
+	static const char* fakes_disabled_txt_error = "Fake instructions are not enabled";
+	static const char* fakes_in_i8080_txt_error = "Fake instructions are not implemented in i8080 mode";
+	static const char* fakes_in_lr35902_txt_error = "Fake instructions are not implemented in Sharp LR35902 mode";
 
 	// returns true if fakes are completely disabled, false when they are enabled
 	// showMessage=true: will also display error/warning (use when fake ins. is emitted)
 	// showMessage=false: can be used to silently check if fake instructions are even possible
 	bool noFakes(bool showMessage) {
-		if (!showMessage) return !syx.FakeEnabled;
-		if (!syx.FakeEnabled) {
-			Error("Fake instructions are not enabled", bp, SUPPRESS);
+		bool fakesDisabled = Options::IsI8080 || Options::IsLR35902 || (!syx.FakeEnabled);
+		if (!showMessage) return fakesDisabled;
+		if (fakesDisabled) {
+			const char* errorTxt = fakes_disabled_txt_error;
+			if (Options::IsI8080) errorTxt = fakes_in_i8080_txt_error;
+			if (Options::IsLR35902) errorTxt = fakes_in_lr35902_txt_error;
+			Error(errorTxt, bp, SUPPRESS);
 			return true;
 		}
 		// check end-of-line comment for mentioning "fake" to remove warning, or beginning with "ok"
@@ -360,6 +368,8 @@ namespace Options {
 				// check for particular options and setup option value by it
 				// first check all syntax-only options which may be modified by OPT directive
 				if (!strcmp(opt, "zxnext")) {
+					if (IsI8080) Error("Can't enable Next extensions while in i8080 mode", nullptr, FATAL);
+					if (IsLR35902) Error("Can't enable Next extensions while in Sharp LR35902 mode", nullptr, FATAL);
 					syx.IsNextEnabled = 1;
 					if (!strcmp(val, "cspect")) syx.IsNextEnabled = 2;	// CSpect emulator extensions
 				} else if (!strcmp(opt, "reversepop")) {
@@ -373,6 +383,16 @@ namespace Options {
 				} else if (onlySyntaxOptions) {
 					// rest of the options is available only when launching the sjasmplus
 					return;
+				} else if (!strcmp(opt, "lr35902")) {
+					IsLR35902 = true;
+					// force (silently) other CPU modes OFF
+					IsI8080 = false;
+					syx.IsNextEnabled = 0;
+				} else if (!strcmp(opt, "i8080")) {
+					IsI8080 = true;
+					// force (silently) other CPU modes OFF
+					IsLR35902 = false;
+					syx.IsNextEnabled = 0;
 				} else if ((!doubleDash && !strcmp(opt,"h") && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
 					ShowHelp = 1;
 				} else if (doubleDash && !strcmp(opt, "version")) {
@@ -421,7 +441,12 @@ namespace Options {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
 					} else {
-						_CERR "No include path found in " _CMDL arg _ENDL;
+						if (!doubleDash || '=' == arg[5]) {
+							_CERR "No include path found in " _CMDL arg _ENDL;
+						} else {	// individual `--inc` without "=path" will RESET include dirs
+							if (IncludeDirsList) delete IncludeDirsList;
+							IncludeDirsList = nullptr;
+						}
 					}
 				} else if (!doubleDash && opt[0] == 'D') {
 					char defN[LINEMAX], defV[LINEMAX];

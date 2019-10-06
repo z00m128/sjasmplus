@@ -32,7 +32,7 @@ Main Features
 =============
 
 * Full source of assembler available under BSD license, modify and extend as you wish
-* Z80/R800/Z80N documented and undocumented opcodes support
+* Z80/R800/Z80N/i8080/LR35902 documented and undocumented opcodes support
 * Macro language, defines, array of defines
 * Built-in Lua scripting engine
 * Conditional assembly, block repeating

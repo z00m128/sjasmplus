@@ -29,6 +29,7 @@
 namespace Z80 {
 	enum Z80Reg { Z80_B = 0, Z80_C, Z80_D, Z80_E, Z80_H, Z80_L, Z80_MEM_HL, Z80_A, Z80_I, Z80_R, Z80_F,
 		Z80_BC = 0x10, Z80_DE = 0x20, Z80_HL = 0x30, Z80_SP = 0x40, Z80_AF = 0x50,
+		LR35902_MEM_HL_I = 0x22, LR35902_MEM_HL_D = 0x32,
 		Z80_IX = 0xdd, Z80_IY = 0xfd, Z80_MEM_IX = Z80_IX|(Z80_MEM_HL<<8), Z80_MEM_IY = Z80_IY|(Z80_MEM_HL<<8),
 		Z80_IXH = Z80_IX|(Z80_H<<8), Z80_IXL = Z80_IX|(Z80_L<<8),
 		Z80_IYH = Z80_IY|(Z80_H<<8), Z80_IYL = Z80_IY|(Z80_L<<8), Z80_UNK = -1 };
@@ -36,7 +37,7 @@ namespace Z80 {
 		Z80C_NZ = 0x00, Z80C_Z  = 0x08, Z80C_NC = 0x10, Z80C_C = 0x18,
 		Z80C_PO = 0x20, Z80C_PE = 0x28, Z80C_P  = 0x30, Z80C_M = 0x38, Z80C_UNK };
 
-	CFunctionTable OpCodeTable;
+	static CFunctionTable OpCodeTable;
 
 	void GetOpCode() {
 		char* n;
@@ -51,21 +52,23 @@ namespace Z80 {
 		}
 	}
 
-	byte GetByte(char*& p) {
+	static byte GetByte(char*& p, bool signedCheck = false) {
 		aint val;
 		if (!ParseExpression(p, val)) {
 			Error("Operand expected", nullptr, IF_FIRST); return 0;
 		}
-		check8(val);
+		if (signedCheck) check8o(val);
+		else check8(val);
 		return val & 255;
 	}
 
-	byte GetByteNoMem(char*& p) {
-		if (0 == Options::syx.MemoryBrackets) return GetByte(p); // legacy behaviour => don't care
+	static byte GetByteNoMem(char*& p, bool signedCheck = false) {
+		if (0 == Options::syx.MemoryBrackets) return GetByte(p, signedCheck); // legacy behaviour => don't care
 		aint val; char* const oldP = p;
 		switch (ParseExpressionMemAccess(p, val)) {
 		case 1:					// valid constant (not a memory access) => return value
-			check8(val);
+			if (signedCheck) check8o(val);
+			else check8(val);
 			return val & 255;
 		case 2:					// valid memory access => report error
 			Error("Illegal instruction (can't access memory)", oldP);
@@ -76,7 +79,7 @@ namespace Z80 {
 		}
 	}
 
-	word GetWord(char*& p) {
+	static word GetWord(char*& p) {
 		aint val;
 		if (!ParseExpression(p, val)) {
 			Error("Operand expected", nullptr, IF_FIRST); return 0;
@@ -85,7 +88,7 @@ namespace Z80 {
 		return val & 65535;
 	}
 
-	word GetWordNoMem(char*& p) {
+	static word GetWordNoMem(char*& p) {
 		if (0 == Options::syx.MemoryBrackets) return GetWord(p); // legacy behaviour => don't care
 		aint val; char* const oldP = p;
 		switch (ParseExpressionMemAccess(p, val)) {
@@ -101,7 +104,7 @@ namespace Z80 {
 		}
 	}
 
-	byte z80GetIDxoffset(char*& p) {
+	static byte z80GetIDxoffset(char*& p) {
 		aint val;
 		char* pp = p;
 		SkipBlanks(pp);
@@ -113,16 +116,15 @@ namespace Z80 {
 		return val & 255;
 	}
 
-	int GetAddress(char*& p, aint& ad) {
+	static int GetAddress(char*& p, aint& ad) {
 		if (GetLocalLabelValue(p, ad) || ParseExpression(p, ad)) return 1;
 		Error("Operand expected", nullptr, IF_FIRST);
 		return (ad = 0);	// set "ad" to zero and return zero
 	}
 
-	Z80Cond getz80cond(char*& p) {
-		SkipBlanks(p);
+	static Z80Cond getz80cond_Z80(char*& p) {
+		if (SkipBlanks(p)) return Z80C_UNK;	// EOL detected
 		char * const pp = p;
-		if (0 == p[0]) return Z80C_UNK;	// EOL detected
 		const char p0 = 0x20|p[0];		// lowercase ASCII conversion
 		if (!islabchar(p[1])) {			// can be only single letter condition at most
 			++p;
@@ -155,6 +157,21 @@ namespace Z80 {
 		}
 		p = pp;
 		return Z80C_UNK;
+	}
+
+	static Z80Cond getz80cond(char*& p) {
+		if (!Options::IsLR35902) return getz80cond_Z80(p);
+		// Sharp LR35902 has only nz|z|nc|c condition variants of ret|jp|jr|call
+		char * const pp = p;
+		Z80Cond cc = getz80cond_Z80(p);
+		switch (cc) {
+		case Z80C_NZ:	case Z80C_Z:
+		case Z80C_NC:	case Z80C_C:
+			return cc;
+		default:
+			p = pp;			// restore source ptr
+			return Z80C_UNK;
+		}
 	}
 
 	static Z80Reg GetRegister_r16High(const Z80Reg r16) {
@@ -191,14 +208,24 @@ namespace Z80 {
 
 	static int GetRegister_lastIxyD = 0;	//z80GetIDxoffset(lp)
 
+	// fast lookup table for single letters 'a'..'r' ('gjkmnopq' will produce Z80_UNK instantly)
+	static Z80Reg r8[] {
+		// a   b      c      d      e      f      g        h      i      j        k        l
+		Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L,
+		// m     n        o        p        q        r
+		Z80_UNK, Z80_UNK, Z80_UNK, Z80_UNK, Z80_UNK, Z80_R
+	};
+
 	static Z80Reg GetRegister(char*& p) {
+		const bool nonZ80CPU = Options::IsI8080 || Options::IsLR35902;
 		char* pp = p;
 		SkipBlanks(p);
-		// fast lookup table for single letters 'a'..'m' ('g','j','k' will produce Z80_UNK instantly)
-		Z80Reg r8[] { Z80_A, Z80_B, Z80_C, Z80_D, Z80_E, Z80_F, Z80_UNK, Z80_H, Z80_I, Z80_UNK, Z80_UNK, Z80_L, Z80_UNK };
+		// adjust the single letter look-up-table by current options (CPU modes and syntax modes)
 		r8['m'-'a'] = Options::syx.Is_M_Memory ? Z80_MEM_HL : Z80_UNK;	// extra alias "M" for "(HL)" enabled?
+		r8['i'-'a'] = nonZ80CPU ? Z80_UNK : Z80_I;	// i8080/LR35902 doesn't have I
+		r8['r'-'a'] = nonZ80CPU ? Z80_UNK : Z80_R;	// i8080/LR35902 doesn't have R
 		char oneLetter = p[0] | 0x20;		// force it lowercase, in case it's ASCII letter
-		if ('a' <= oneLetter && oneLetter <= 'm' && !islabchar(p[1])) {
+		if ('a' <= oneLetter && oneLetter <= 'r' && !islabchar(p[1])) {
 			const Z80Reg lutResult = r8[oneLetter - 'a'];
 			if (Z80_UNK == lutResult) p = pp;	// not a register, restore "p"
 			else ++p;	// reg8 found, advance pointer
@@ -221,7 +248,7 @@ namespace Z80 {
 			}
 			return GetRegister_r16Low(reg);
 		}
-		// remaining "R" register and two+ letter registers
+		// remaining two+ letter registers
 		char memClose = 0;
 		switch (*(p++)) {
 		case 'a':
@@ -235,10 +262,12 @@ namespace Z80 {
 			break;
 		case 'h':
 			if (GetRegister_pair(p, 'l')) return Z80_HL;
+			if (nonZ80CPU) break;
 			if (GetRegister_pair(p, 'x')) return Z80_IXH;
 			if (GetRegister_pair(p, 'y')) return Z80_IYH;
 			break;
 		case 'i':
+			if (nonZ80CPU) break;
 			if (*p == 'x') {
 				if (!islabchar(*(p + 1))) {
 					++p;
@@ -269,19 +298,19 @@ namespace Z80 {
 			}
 			break;
 		case 'x':
+			if (nonZ80CPU) break;
 			if (GetRegister_pair(p, 'h')) return Z80_IXH;
 			if (GetRegister_pair(p, 'l')) return Z80_IXL;
 			break;
 		case 'y':
+			if (nonZ80CPU) break;
 			if (GetRegister_pair(p, 'h')) return Z80_IYH;
 			if (GetRegister_pair(p, 'l')) return Z80_IYL;
 			break;
 		case 'l':
+			if (nonZ80CPU) break;
 			if (GetRegister_pair(p, 'x')) return Z80_IXL;
 			if (GetRegister_pair(p, 'y')) return Z80_IYL;
-			break;
-		case 'r':
-			if (!islabchar(*p)) return Z80_R;
 			break;
 		case 's':
 			if (GetRegister_pair(p, 'p')) return Z80_SP;
@@ -297,10 +326,12 @@ namespace Z80 {
 			break;
 		case 'H':
 			if (GetRegister_pair(p, 'L')) return Z80_HL;
+			if (nonZ80CPU) break;
 			if (GetRegister_pair(p, 'X')) return Z80_IXH;
 			if (GetRegister_pair(p, 'Y')) return Z80_IYH;
 			break;
 		case 'I':
+			if (nonZ80CPU) break;
 			if (*p == 'X') {
 				if (!islabchar(*(p + 1))) {
 					++p; return Z80_IX;
@@ -325,19 +356,19 @@ namespace Z80 {
 			}
 			break;
 		case 'X':
+			if (nonZ80CPU) break;
 			if (GetRegister_pair(p, 'H')) return Z80_IXH;
 			if (GetRegister_pair(p, 'L')) return Z80_IXL;
 			break;
 		case 'Y':
+			if (nonZ80CPU) break;
 			if (GetRegister_pair(p, 'H')) return Z80_IYH;
 			if (GetRegister_pair(p, 'L')) return Z80_IYL;
 			break;
 		case 'L':
+			if (nonZ80CPU) break;
 			if (GetRegister_pair(p, 'X')) return Z80_IXL;
 			if (GetRegister_pair(p, 'Y')) return Z80_IYL;
-			break;
-		case 'R':
-			if (!islabchar(*p)) return Z80_R;
 			break;
 		case 'S':
 			if (GetRegister_pair(p, 'P')) return Z80_SP;
@@ -347,7 +378,16 @@ namespace Z80 {
 		default:	break;
 		}
 		if (memClose) {
-			const Z80Reg memReg = GetRegister(p);
+			Z80Reg memReg = GetRegister(p);
+			if (Options::IsLR35902 && Z80_HL == memReg) {
+				if ('+' == *p) {
+					memReg = LR35902_MEM_HL_I;
+					++p;
+				} else if ('-' == *p) {
+					memReg = LR35902_MEM_HL_D;
+					++p;
+				}
+			}
 			if (Z80_IX == memReg || Z80_IY == memReg) GetRegister_lastIxyD = z80GetIDxoffset(p);
 			SkipBlanks(p);
 			if (memClose == *p++) {
@@ -355,6 +395,9 @@ namespace Z80 {
 				case Z80_HL:	return Z80_MEM_HL;
 				case Z80_IX:	return Z80_MEM_IX;
 				case Z80_IY:	return Z80_MEM_IY;
+				case LR35902_MEM_HL_I:
+				case LR35902_MEM_HL_D:
+					return memReg;
 				default: 		break;
 				}
 			}
@@ -363,14 +406,18 @@ namespace Z80 {
 		return Z80_UNK;
 	}
 
-	bool CommonAluOpcode(const int opcodeBase, int* e, bool hasNonRegA = false, bool nonMultiArgComma = true) {
+	static bool CommonAluOpcode(const int opcodeBase, int* e, bool hasNonRegA = false, bool nonMultiArgComma = true) {
 		Z80Reg reg;
 		char* oldLp = lp;
 		switch (reg = GetRegister(lp)) {
 		case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_IX:	case Z80_IY:
 			if (hasNonRegA) lp = oldLp;	// try to parse it one more time if non-A variants exist
 			return !hasNonRegA;			// invalid first register if only "A" is allowed
-		case Z80_AF:	case Z80_SP:	case Z80_I:		case Z80_R:		case Z80_F:
+		case Z80_SP:
+			if (Options::IsLR35902) lp = oldLp;
+			return !Options::IsLR35902;	// LR35902 has "add sp,r8"
+		case Z80_AF:	case Z80_I:		case Z80_R:		case Z80_F:
+		case LR35902_MEM_HL_I:	case LR35902_MEM_HL_D:
 			return true;				// invalid first register
 		case Z80_A:		// deal with optional shortened/prolonged form "add a" vs "and a,a", etc..
 			if (nonMultiArgComma) {	// "AND|SUB|... a,b" is possible only when multi-arg is not-comma
@@ -424,12 +471,13 @@ namespace Z80 {
 		return reg;
 	}
 
-	void OpCode_ADC() {
+	static void OpCode_ADC() {
+		const bool nonZ80CPU = Options::IsI8080 || Options::IsLR35902;
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x88, e, true, false)) {	// handle common 8-bit variants
-				if (Z80_HL == GetRegister(lp)) {
+				if ((!nonZ80CPU) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
 						Error("[ADC] Comma expected");
 					} else {
@@ -445,12 +493,12 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_ADD() {
+	static void OpCode_ADD() {
 		Z80Reg reg, reg2;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x80, e, true, false)) {	// handle common 8-bit variants
-				// add hl|ixy|bc|de,... variants
+				// add hl|ixy|bc|de|sp,... variants
 				reg = GetRegister(lp);	if (Z80_UNK == reg) break;
 				if (!comma(lp)) {
 					Error("[ADD] Comma expected");
@@ -497,6 +545,11 @@ namespace Z80 {
 						e[2] = b & 255; e[3] = (b >> 8);
 					}
 					break;
+				case Z80_SP:			// Sharp LR35902 "add sp,r8"
+					if (!Options::IsLR35902 || Z80_UNK != reg2) break;
+					e[0] = 0xE8;
+					e[1] = GetByteNoMem(lp, true);
+					break;
 				default:	break;		// unreachable (already validated by `CommonAluOpcode` call)
 				}
 			}
@@ -504,7 +557,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_AND() {
+	static void OpCode_AND() {
 		do {
 			int e[] { -1, -1, -1, -1};
 			CommonAluOpcode(0xa0, e);
@@ -512,7 +565,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_BIT() {
+	static void OpCode_BIT() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
 			byte bit = GetByteNoMem(lp);
@@ -521,7 +574,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_Next_BREAK() {	// this is fake instruction for CSpect emulator, not for real Z80N
+	static void OpCode_Next_BREAK() {	// this is fake instruction for CSpect emulator, not for real Z80N
 		if (Options::syx.IsNextEnabled < 2) {
 			Error("[BREAK] fake instruction \"break\" must be specifically enabled by --zxnext=cspect option");
 			return;
@@ -547,27 +600,27 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	void OpCode_Next_BRLC() {
+	static void OpCode_Next_BRLC() {
 		OpCode_Z80N_BarrelShifts(0x2C);
 	}
 
-	void OpCode_Next_BSLA() {
+	static void OpCode_Next_BSLA() {
 		OpCode_Z80N_BarrelShifts(0x28);
 	}
 
-	void OpCode_Next_BSRA() {
+	static void OpCode_Next_BSRA() {
 		OpCode_Z80N_BarrelShifts(0x29);
 	}
 
-	void OpCode_Next_BSRF() {
+	static void OpCode_Next_BSRF() {
 		OpCode_Z80N_BarrelShifts(0x2B);
 	}
 
-	void OpCode_Next_BSRL() {
+	static void OpCode_Next_BSRL() {
 		OpCode_Z80N_BarrelShifts(0x2A);
 	}
 
-	void OpCode_CALL() {
+	static void OpCode_CALL() {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			Z80Cond cc = getz80cond(lp);
@@ -587,11 +640,11 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_CCF() {
+	static void OpCode_CCF() {
 		EmitByte(0x3f);
 	}
 
-	void OpCode_CP() {
+	static void OpCode_CP() {
 		do {
 			int e[] { -1, -1, -1, -1};
 			CommonAluOpcode(0xb8, e);
@@ -599,31 +652,31 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_CPD() {
+	static void OpCode_CPD() {
 		EmitByte(0xED);
 		EmitByte(0xA9);
 	}
 
-	void OpCode_CPDR() {
+	static void OpCode_CPDR() {
 		EmitByte(0xED);
 		EmitByte(0xB9);
 	}
 
-	void OpCode_CPI() {
+	static void OpCode_CPI() {
 		EmitByte(0xED);
 		EmitByte(0xA1);
 	}
 
-	void OpCode_CPIR() {
+	static void OpCode_CPIR() {
 		EmitByte(0xED);
 		EmitByte(0xB1);
 	}
 
-	void OpCode_CPL() {
+	static void OpCode_CPL() {
 		EmitByte(0x2f);
 	}
 
-	void OpCode_DAA() {
+	static void OpCode_DAA() {
 		EmitByte(0x27);
 	}
 
@@ -648,7 +701,7 @@ namespace Z80 {
 		}
 	}
 
-	void OpCode_DEC() {
+	static void OpCode_DEC() {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			OpCode_DecInc(0x05, 0x0B, e);
@@ -656,11 +709,11 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_DI() {
+	static void OpCode_DI() {
 		EmitByte(0xf3);
 	}
 
-	void OpCode_DJNZ() {
+	static void OpCode_DJNZ() {
 		int jmp;
 		aint nad;
 		int e[3];
@@ -680,15 +733,16 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_EI() {
+	static void OpCode_EI() {
 		EmitByte(0xfb);
 	}
 
-	void OpCode_EX() {
+	static void OpCode_EX() {
 		int e[] { -1, -1, -1, -1 };
 		Z80Reg reg = GetRegister(lp);
 		switch (reg) {
 		case Z80_AF:
+			if (Options::IsI8080) break;
 			if (comma(lp)) {
 				if (Z80_AF != GetRegister(lp)) break;
 				if (*lp == '\'') ++lp;
@@ -722,15 +776,15 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	void OpCode_EXA() {
+	static void OpCode_EXA() {
 		EmitByte(0x08);
 	}
 
-	void OpCode_EXD() {
+	static void OpCode_EXD() {
 		EmitByte(0xeb);
 	}
 
-	void OpCode_Next_EXIT() {	// this is fake instruction for CSpect emulator, not for real Z80N
+	static void OpCode_Next_EXIT() {	// this is fake instruction for CSpect emulator, not for real Z80N
 		if (Options::syx.IsNextEnabled < 2) {
 			Error("[EXIT] fake instruction \"exit\" must be specifically enabled by --zxnext=cspect option");
 			return;
@@ -739,15 +793,15 @@ namespace Z80 {
 		EmitByte(0x00);
 	}
 
-	void OpCode_EXX() {
+	static void OpCode_EXX() {
 		EmitByte(0xd9);
 	}
 
-	void OpCode_HALT() {
+	static void OpCode_HALT() {
 		EmitByte(0x76);
 	}
 
-	void OpCode_IM() {
+	static void OpCode_IM() {
 		int e[] { -1, -1, -1 }, machineCode[] { 0x46, 0x56, 0x5e };
 		byte mode = GetByteNoMem(lp);
 		if (mode <= 2) {
@@ -757,13 +811,13 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	void OpCode_IN() {
+	static void OpCode_IN() {
 		do {
 			int e[] { -1, -1, -1 };
 			Z80Reg reg = GetRegister(lp);
 			if (Z80_UNK == reg || comma(lp)) {
 				if (Z80_UNK == reg) reg = Z80_F;	// if there was no register, it may be "IN (C)"
-				if (NeedIoC()) {
+				if ((!Options::IsI8080) && NeedIoC()) {
 					e[0] = 0xed;
 					switch (reg) {
 						case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
@@ -785,7 +839,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_INC() {
+	static void OpCode_INC() {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			OpCode_DecInc(0x04, 0x03, e);
@@ -793,32 +847,32 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_IND() {
+	static void OpCode_IND() {
 		EmitByte(0xED);
 		EmitByte(0xAA);
 	}
 
-	void OpCode_INDR() {
+	static void OpCode_INDR() {
 		EmitByte(0xED);
 		EmitByte(0xBA);
 	}
 
-	void OpCode_INI() {
+	static void OpCode_INI() {
 		EmitByte(0xED);
 		EmitByte(0xA2);
 	}
 
-	void OpCode_INIR() {
+	static void OpCode_INIR() {
 		EmitByte(0xED);
 		EmitByte(0xB2);
 	}
 
-	void OpCode_INF() {
+	static void OpCode_INF() {
 		EmitByte(0xED);
 		EmitByte(0x70);
 	}
 
-	void OpCode_JP() {
+	static void OpCode_JP() {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			Z80Reg reg = Z80_UNK;
@@ -862,7 +916,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_JR() {
+	static void OpCode_JR() {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			Z80Cond cc = getz80cond(lp);
@@ -897,6 +951,7 @@ namespace Z80 {
 			r1 = Z80Reg(r1>>8);
 		case Z80_I:		case Z80_R:		case Z80_A:		case Z80_MEM_HL:
 		case Z80_B:		case Z80_C:		case Z80_D:		case Z80_E:		case Z80_H:		case Z80_L:
+		case LR35902_MEM_HL_I:	case LR35902_MEM_HL_D:
 			break;
 		case Z80_IY:	case Z80_IX:
 			prefix1 = r1;
@@ -932,6 +987,10 @@ namespace Z80 {
 		case Z80_A:
 		case Z80_B:		case Z80_C:		case Z80_D:		case Z80_E:		case Z80_H:		case Z80_L:
 			if (!eightBit) return true; // invalid combination
+			if (LR35902_MEM_HL_I == r1 || LR35902_MEM_HL_D == r1) {
+				if (Z80_A == r2) *e = r1;	// `ld (hl+),a` or `ld (hl-),a`
+				return true;
+			}
 			break;
 		case Z80_IY:	case Z80_IX:
 			prefix2 = r2;
@@ -946,8 +1005,17 @@ namespace Z80 {
 				return false;			// ld (ixy),hl is possible fake instruction
 			}
 			if (!eightBit) break;		// ld r16, r16 -> resolve it
-		case Z80_SP:	case Z80_AF: case Z80_F:
-			return true;				// no simple "ld r,SP|AF|F" (all invalid)
+		case Z80_SP:
+			if (Options::IsLR35902 && Z80_HL == r1) {
+				lp = olp;
+				return false;			// LR35902 has "ld hl,sp+r8" syntax = check!
+			}
+			return true;				// no other "ld r,SP" is valid (on other CPUs)
+		case Z80_AF: case Z80_F:
+			return true;				// no simple "ld r,AF|F" (all invalid)
+		case LR35902_MEM_HL_I:	case LR35902_MEM_HL_D:
+			if (Z80_A == r1) *e = r2 + 0x08;
+			return true;
 		case Z80_UNK:		// source is not simple register
 			lp = olp;
 			return false;
@@ -996,14 +1064,27 @@ namespace Z80 {
 		return true;
 	}
 
-	void OpCode_LD() {
+	static void LD_LR35902(int *e, const Z80Reg r2, const aint a16) {
+		// ld (a16),a|sp cases
+		e[1] = a16 & 255;			// in any valid case this is correct
+		if (Z80_A == r2 && 0xFF00 <= a16 && a16 <= 0xFFFF) {	// "ldh a,(a8)" auto-magic detection
+			e[0] = 0xE0;
+			return;
+		}
+		e[2] = (a16 >> 8) & 255;	// in any remaining valid case this is correct
+		if (Z80_SP == r2) e[0] = 0x08;
+		else if (Z80_A == r2) e[0] = 0xEA;
+	}
+
+	static void OpCode_LD() {
 		aint b;
 		EBracketType bt;
 		do {
 			int e[] { -1, -1, -1, -1, -1, -1, -1 }, pemaRes;
 			Z80Reg reg2 = Z80_UNK, reg1 = GetRegister(lp);
-			// resolve all register to register cases (no memory or constant)
-			if (Z80_UNK != reg1 && LD_simple_r_r(e, reg1)) {	//but "(hl)|(ixy+d)" is sometimes like 8b register = resolved too
+			// resolve all register to register cases or fixed memory literals
+			// "(hl)|(ixy+d)|(hl+)|(hl-)" (but not other memory or constant)
+			if (Z80_UNK != reg1 && LD_simple_r_r(e, reg1)) {
 				EmitBytes(e);
 				continue;
 			}
@@ -1014,6 +1095,9 @@ namespace Z80 {
 				if (BT_NONE != (bt = OpenBracket(lp))) {
 					reg2 = GetRegister(lp);
 					if ((Z80_BC == reg2 || Z80_DE == reg2) && CloseBracket(lp)) e[0] = reg2-6;
+					else if (Z80_C == reg2 && Options::IsLR35902 && CloseBracket(lp)) {
+						e[0] = 0xF2;	// Sharp LR35902 `ld a,(c)` (targetting [$ff00+c])
+					}
 					if (Z80_UNK != reg2) break;	//"(register": emit instruction || bug
 					// give non-register another chance to parse as value expression
 					--lp;
@@ -1023,7 +1107,16 @@ namespace Z80 {
 					case 1: check8(b); e[0] = 0x06 + 8*reg1; e[1] = b & 255; break;
 					// LD a,(mem8)
 					case 2:
-						check16(b); e[0] = 0x3a; e[1] = b & 255; e[2] = (b >> 8) & 255;
+						check16(b);
+						if (Options::IsLR35902) {
+							if (0xFF00 <= b && b <= 0xFFFF) {
+								e[0] = 0xF0; e[1] = b & 255;
+							} else {
+								e[0] = 0xFA; e[1] = b & 255; e[2] = (b >> 8) & 255;
+							}
+							break;
+						}
+						e[0] = 0x3a; e[1] = b & 255; e[2] = (b >> 8) & 255;
 						if (BT_ROUND == bt) checkLowMemory(e[2], e[1]);
 						break;
 				}
@@ -1078,6 +1171,21 @@ namespace Z80 {
 					if (e[2] == 127) Error("Offset out of range", nullptr, IF_FIRST);
 					else e[0] = e[3] = reg2&0xFF;
 					break;
+				case Z80_SP:
+					if (Options::IsLR35902 && Z80_HL == reg1) {		// "ld hl,sp+r8" syntax = "F8 r8"
+						b = 0;
+						// "sp" must be followed by + or - (or nothing: "ld hl,sp" = +0)
+						if (!SkipBlanks(lp) && ',' != *lp ) {		// comma is probably multi-arg
+							if ('+' != *lp && '-' != *lp) {
+								Error("[LD] `ld hl,sp+r8` expects + or - after sp, found", lp);
+								break;
+							}
+							b = GetByteNoMem(lp, true);
+						}
+						e[0] = 0xF8;
+						e[1] = b;
+					}
+					break;
 				default:
 					break;
 				}
@@ -1087,10 +1195,12 @@ namespace Z80 {
 					case 1: check16(b); e[0] = reg1-0x0F; e[1] = b & 255; e[2] = (b >> 8) & 255; break;
 					// LD r16,(mem16)
 					case 2:
+						if (Options::IsLR35902) break;	// no "ld r16,(a16)" instruction on LR35902
 						check16(b);
 						if (Z80_HL == reg1) {		// ld hl,(mem16)
 							e[0] = 0x2a; e[1] = b & 255; e[2] = (b >> 8) & 255;
 						} else {					// ld bc|de|sp,(mem16)
+							if (Options::IsI8080) break;
 							e[0] = 0xed; e[1] = reg1+0x3b; e[2] = b & 255; e[3] = (b >> 8) & 255;
 						}
 						if (')' == lp[-1]) checkLowMemory(b>>8, b);
@@ -1113,11 +1223,21 @@ namespace Z80 {
 				if (!CloseBracket(lp) || !comma(lp)) break;
 				reg2 = GetRegister(lp);
 				switch (reg1) {
+				case Z80_C:
+					if (Options::IsLR35902 && Z80_A == reg2) {	// Sharp LR35902 `ld (c),a` (targetting [$ff00+c])
+						e[0] = 0xE2;
+					}
+					break;
 				case Z80_BC:
 				case Z80_DE:
 					if (Z80_A == reg2) e[0] = reg1-14;	// LD (bc|de),a
 					break;
 				case Z80_UNK:
+					if (Options::IsLR35902) {	// Sharp LR35902 has quite different opcodes for these
+						LD_LR35902(e, reg2, b);
+						break;
+					}
+					// Standard Z80 and i8080 opcodes for ld (nn),reg
 					switch (reg2) {
 					case Z80_A:		// LD (nnnn),a|hl
 					case Z80_HL:
@@ -1125,6 +1245,7 @@ namespace Z80 {
 					case Z80_BC:	// LD (nnnn),bc|de|sp
 					case Z80_DE:
 					case Z80_SP:
+						if (Options::IsI8080) break;
 						e[0] = 0xed; e[1] = 0x33+reg2; e[2] = b & 255; e[3] = (b >> 8) & 255; break;
 					case Z80_IX:	// LD (nnnn),ix|iy
 					case Z80_IY:
@@ -1144,7 +1265,21 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_LDD() {
+	static void OpCode_LR35902_LDD() {
+		// ldd (hl),a = ld (hl-),a = 0x32
+		// ldd a,(hl) = ld a,(hl-) = 0x3A
+		do {
+			int e[] { -1, -1 };
+			const Z80Reg r1 = GetRegister(lp);
+			const bool comma_ok = comma(lp);
+			const Z80Reg r2 = comma_ok ? GetRegister(lp) : Z80_UNK;
+			if (Z80_MEM_HL == r1 && Z80_A == r2) e[0] = 0x32;
+			if (Z80_A == r1 && Z80_MEM_HL == r2) e[0] = 0x3A;
+			EmitBytes(e);
+		} while (Options::syx.MultiArg(lp));
+	}
+
+	static void OpCode_LDD() {
 		if (Options::noFakes(false)) {
 			EmitByte(0xED);
 			EmitByte(0xA8);
@@ -1232,12 +1367,12 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_LDDR() {
+	static void OpCode_LDDR() {
 		EmitByte(0xED);
 		EmitByte(0xB8);
 	}
 
-	void OpCode_Next_LDDRX() {
+	static void OpCode_Next_LDDRX() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1246,7 +1381,7 @@ namespace Z80 {
 		EmitByte(0xBC);
 	}
 
-	void OpCode_Next_LDDX() {
+	static void OpCode_Next_LDDX() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1255,7 +1390,51 @@ namespace Z80 {
 		EmitByte(0xAC);
 	}
 
-	void OpCode_LDI() {
+	static void OpCode_LR35902_LDH() {
+		// ldh (a8),a = ld ($FF00+a8),a = "E0 a8"
+		// ldh a,(a8) = ld a,($FF00+a8) = "F0 a8"
+		do {
+			int e[] { -1, -1, -1 }, pemaRes = 0;
+			aint a8 = -1;
+			// parse two arguments, expected are "a,(n)" or "(n),a", others will fail in some stage
+			const Z80Reg r1 = GetRegister(lp);
+			if (Z80_UNK == r1) pemaRes = ParseExpressionMemAccess(lp, a8);
+			const bool comma_ok = (Z80_A == r1 || 0 < pemaRes) && comma(lp);
+			const Z80Reg r2 = comma_ok ? GetRegister(lp) : Z80_F;	// "F" as fail (UNK is legit result)
+			if (Z80_UNK == r2 && Z80_A == r1) pemaRes = ParseExpressionMemAccess(lp, a8);
+			else if (Z80_A != r2) pemaRes = 0;
+			// here pemaRes must be non-zero when valid combination was parsed
+			switch (pemaRes) {
+				case 0:		// syntax error, or wrong registers combined with "ldh"
+				case 1:		// immediate is also error, should have been memory
+					Error("[LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`", lp, SUPPRESS);
+					break;
+				case 2:
+					if (0xFF00 <= a8 && a8 <= 0xFFFF) a8 -= 0xFF00;	// normalize a8 if "ldh a,($FFxx)" was used
+					check8(a8);
+					e[0] = (Z80_A == r2) ? 0xE0 : 0xF0;
+					e[1] = a8 & 0xFF;
+					break;
+			}
+			EmitBytes(e);
+		} while (Options::syx.MultiArg(lp));
+	}
+
+	static void OpCode_LR35902_LDI() {
+		// ldi (hl),a = ld (hl+),a = 0x22
+		// ldi a,(hl) = ld a,(hl+) = 0x2A
+		do {
+			int e[] { -1, -1 };
+			const Z80Reg r1 = GetRegister(lp);
+			const bool comma_ok = comma(lp);
+			const Z80Reg r2 = comma_ok ? GetRegister(lp) : Z80_UNK;
+			if (Z80_MEM_HL == r1 && Z80_A == r2) e[0] = 0x22;
+			if (Z80_A == r1 && Z80_MEM_HL == r2) e[0] = 0x2A;
+			EmitBytes(e);
+		} while (Options::syx.MultiArg(lp));
+	}
+
+	static void OpCode_LDI() {
 		if (Options::noFakes(false)) {
 			EmitByte(0xED);
 			EmitByte(0xA0);
@@ -1374,13 +1553,13 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_LDIR() {
+	static void OpCode_LDIR() {
 		EmitByte(0xED);
 		EmitByte(0xB0);
 	}
 
 // LDIRSCALE is now very unlikely to happen, there's ~1% chance it may be introduced within the cased-Next release
-// 	void OpCode_Next_LDIRSCALE() {
+// 	static void OpCode_Next_LDIRSCALE() {
 // 		if (Options::syx.IsNextEnabled < 1) {
 // 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 // 			return;
@@ -1389,7 +1568,7 @@ namespace Z80 {
 // 		EmitByte(0xB6);
 // 	}
 
-	void OpCode_Next_LDIRX() {
+	static void OpCode_Next_LDIRX() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1398,7 +1577,7 @@ namespace Z80 {
 		EmitByte(0xB4);
 	}
 
-	void OpCode_Next_LDIX() {
+	static void OpCode_Next_LDIX() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1407,7 +1586,7 @@ namespace Z80 {
 		EmitByte(0xA4);
 	}
 
-	void OpCode_Next_LDPIRX() {
+	static void OpCode_Next_LDPIRX() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1416,7 +1595,7 @@ namespace Z80 {
 		EmitByte(0xB7);
 	}
 
-	void OpCode_Next_LDWS() {
+	static void OpCode_Next_LDWS() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1425,7 +1604,7 @@ namespace Z80 {
 		EmitByte(0xA5);
 	}
 
-	void OpCode_Next_MIRROR() {
+	static void OpCode_Next_MIRROR() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1439,7 +1618,7 @@ namespace Z80 {
 		EmitByte(0x24);
 	}
 
-	void OpCode_Next_MUL() {
+	static void OpCode_Next_MUL() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1460,7 +1639,7 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	void OpCode_MULUB() {
+	static void OpCode_MULUB() {
 		Z80Reg reg;
 		int e[3];
 		e[0] = e[1] = e[2] = -1;
@@ -1482,7 +1661,7 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	void OpCode_MULUW() {
+	static void OpCode_MULUW() {
 		Z80Reg reg;
 		int e[3];
 		e[0] = e[1] = e[2] = -1;
@@ -1500,12 +1679,12 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	void OpCode_NEG() {
+	static void OpCode_NEG() {
 		EmitByte(0xED);
 		EmitByte(0x44);
 	}
 
-	void OpCode_Next_NEXTREG() {
+	static void OpCode_Next_NEXTREG() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1539,11 +1718,11 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_NOP() {
+	static void OpCode_NOP() {
 		EmitByte(0x0);
 	}
 
-	void OpCode_OR() {
+	static void OpCode_OR() {
 		do {
 			int e[] { -1, -1, -1, -1};
 			CommonAluOpcode(0xb0, e);
@@ -1551,21 +1730,21 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_OTDR() {
+	static void OpCode_OTDR() {
 		EmitByte(0xED);
 		EmitByte(0xBB);
 	}
 
-	void OpCode_OTIR() {
+	static void OpCode_OTIR() {
 		EmitByte(0xED);
 		EmitByte(0xB3);
 	}
 
-	void OpCode_OUT() {
+	static void OpCode_OUT() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1 };
-			if (NeedIoC()) {
+			if ((!Options::IsI8080) && NeedIoC()) {
 				if (comma(lp)) {
 					switch (reg = GetRegister(lp)) {
 					case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
@@ -1585,17 +1764,17 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_OUTD() {
+	static void OpCode_OUTD() {
 		EmitByte(0xED);
 		EmitByte(0xAB);
 	}
 
-	void OpCode_OUTI() {
+	static void OpCode_OUTI() {
 		EmitByte(0xED);
 		EmitByte(0xA3);
 	}
 
-	void OpCode_Next_OUTINB() {
+	static void OpCode_Next_OUTINB() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1604,7 +1783,7 @@ namespace Z80 {
 		EmitByte(0x90);
 	}
 
-	void OpCode_Next_PIXELAD() {
+	static void OpCode_Next_PIXELAD() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1615,7 +1794,7 @@ namespace Z80 {
 		EmitByte(0x94);
 	}
 
-	void OpCode_Next_PIXELDN() {
+	static void OpCode_Next_PIXELDN() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1626,7 +1805,7 @@ namespace Z80 {
 		EmitByte(0x93);
 	}
 
-	void OpCode_POPreverse() {
+	static void OpCode_POPreverse() {
 		int e[30],t = 29,c = 1;
 		e[t] = -1;
 		do {
@@ -1650,7 +1829,7 @@ namespace Z80 {
 		EmitBytes(&e[t]);
 	}
 
-	void OpCode_POPnormal() {
+	static void OpCode_POPnormal() {
 		Z80Reg reg;
 		do {
 			int e[3];
@@ -1674,12 +1853,12 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_POP() {
+	static void OpCode_POP() {
 		if (Options::syx.IsReversePOP) OpCode_POPreverse();
 		else OpCode_POPnormal();
 	}
 
-	void OpCode_PUSH() {
+	static void OpCode_PUSH() {
 		Z80Reg reg;
 		do {
 			int e[5];
@@ -1711,7 +1890,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_RES() {
+	static void OpCode_RES() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
 			byte bit = GetByteNoMem(lp);
@@ -1720,24 +1899,24 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_RET() {
+	static void OpCode_RET() {
 		Z80Cond cc = getz80cond(lp);
 		if (Z80C_UNK == cc) EmitByte(0xc9);
 		else 				EmitByte(0xc0 + cc);
 		// multi-argument was intetionally removed by Ped7g (explain in issue why you want *that*?)
 	}
 
-	void OpCode_RETI() {
+	static void OpCode_RETI() {
 		EmitByte(0xED);
 		EmitByte(0x4D);
 	}
 
-	void OpCode_RETN() {
+	static void OpCode_RETN() {
 		EmitByte(0xED);
 		EmitByte(0x45);
 	}
 
-	void OpCode_RL() {
+	static void OpCode_RL() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
@@ -1755,11 +1934,11 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_RLA() {
+	static void OpCode_RLA() {
 		EmitByte(0x17);
 	}
 
-	void OpCode_RLC() {
+	static void OpCode_RLC() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
 			OpCode_CbFamily(0x00, e);
@@ -1767,16 +1946,16 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_RLCA() {
+	static void OpCode_RLCA() {
 		EmitByte(0x7);
 	}
 
-	void OpCode_RLD() {
+	static void OpCode_RLD() {
 		EmitByte(0xED);
 		EmitByte(0x6F);
 	}
 
-	void OpCode_RR() {
+	static void OpCode_RR() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
@@ -1794,11 +1973,11 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_RRA() {
+	static void OpCode_RRA() {
 		EmitByte(0x1f);
 	}
 
-	void OpCode_RRC() {
+	static void OpCode_RRC() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
 			OpCode_CbFamily(0x08, e);
@@ -1806,16 +1985,16 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_RRCA() {
+	static void OpCode_RRCA() {
 		EmitByte(0xf);
 	}
 
-	void OpCode_RRD() {
+	static void OpCode_RRD() {
 		EmitByte(0xED);
 		EmitByte(0x67);
 	}
 
-	void OpCode_RST() {
+	static void OpCode_RST() {
 		do {
 			byte e = GetByteNoMem(lp);
 			if (e&(~0x38)) {	// some bit is set which should be not
@@ -1827,12 +2006,13 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_SBC() {
+	static void OpCode_SBC() {
+		const bool nonZ80CPU = Options::IsI8080 || Options::IsLR35902;
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x98, e, true, false)) {	// handle common 8-bit variants
-				if (Z80_HL == GetRegister(lp)) {
+				if ((!nonZ80CPU) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
 						Error("[SBC] Comma expected");
 					} else {
@@ -1848,11 +2028,11 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_SCF() {
+	static void OpCode_SCF() {
 		EmitByte(0x37);
 	}
 
-	void OpCode_SET() {
+	static void OpCode_SET() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
 			byte bit = GetByteNoMem(lp);
@@ -1861,7 +2041,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_Next_SETAE() {
+	static void OpCode_Next_SETAE() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1870,7 +2050,7 @@ namespace Z80 {
 		EmitByte(0x95);
 	}
 
-	void OpCode_SLA() {
+	static void OpCode_SLA() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
@@ -1891,7 +2071,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_SLL() {
+	static void OpCode_SLL() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
@@ -1909,7 +2089,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_SRA() {
+	static void OpCode_SRA() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
@@ -1927,7 +2107,7 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_SRL() {
+	static void OpCode_SRL() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
@@ -1945,12 +2125,21 @@ namespace Z80 {
 		} while (Options::syx.MultiArg(lp));
 	}
 
-	void OpCode_SUB() {
+	static void OpCode_LR35902_STOP() {	// syntax: STOP [byte_value = 0] = opcode "10 byte_value"
+		EmitByte(0x10);
+		if (SkipBlanks(lp)) {		// is optional byte provided? (if not, default value is zero)
+			EmitByte(0x00);
+		} else {
+			EmitByte(GetByteNoMem(lp));
+		}
+	}
+
+	static void OpCode_SUB() {
 		Z80Reg reg;
 		do {
 			int e[] { -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x90, e, true, true)) {	// handle common 8-bit variants
-				if (Z80_HL == GetRegister(lp)) {
+				if ((!Options::IsI8080) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
 						Error("[SUB] Comma expected");
 					} else {
@@ -1968,7 +2157,7 @@ namespace Z80 {
 	}
 
 	//Swaps the high and low nibbles of the accumulator.
-	void OpCode_Next_SWAPNIB() {
+	static void OpCode_Next_SWAPNIB() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1982,7 +2171,7 @@ namespace Z80 {
 		EmitByte(0x23);
 	}
 
-	void OpCode_Next_TEST() {
+	static void OpCode_Next_TEST() {
 		if (Options::syx.IsNextEnabled < 1) {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
@@ -1991,7 +2180,7 @@ namespace Z80 {
 		EmitBytes(e);
 	}
 
-	void OpCode_XOR() {
+	static void OpCode_XOR() {
 		do {
 			int e[] { -1, -1, -1, -1};
 			CommonAluOpcode(0xa8, e);
@@ -2000,39 +2189,81 @@ namespace Z80 {
 	}
 
 	void Init() {
+		// Z80, i8080 and LR35902 shared instructions first
 		OpCodeTable.Insert("adc", OpCode_ADC);
 		OpCodeTable.Insert("add", OpCode_ADD);
 		OpCodeTable.Insert("and", OpCode_AND);
-		OpCodeTable.Insert("bit", OpCode_BIT);
 		OpCodeTable.Insert("call", OpCode_CALL);
 		OpCodeTable.Insert("ccf", OpCode_CCF);
 		OpCodeTable.Insert("cp", OpCode_CP);
-		OpCodeTable.Insert("cpd", OpCode_CPD);
-		OpCodeTable.Insert("cpdr", OpCode_CPDR);
-		OpCodeTable.Insert("cpi", OpCode_CPI);
-		OpCodeTable.Insert("cpir", OpCode_CPIR);
 		OpCodeTable.Insert("cpl", OpCode_CPL);
 		OpCodeTable.Insert("daa", OpCode_DAA);
 		OpCodeTable.Insert("dec", OpCode_DEC);
 		OpCodeTable.Insert("di", OpCode_DI);
-		OpCodeTable.Insert("djnz", OpCode_DJNZ);
 		OpCodeTable.Insert("ei", OpCode_EI);
-		OpCodeTable.Insert("ex", OpCode_EX);
-		OpCodeTable.Insert("exa", OpCode_EXA);
+		if (!Options::IsLR35902) OpCodeTable.Insert("ex", OpCode_EX);
 		OpCodeTable.Insert("exd", OpCode_EXD);
-		OpCodeTable.Insert("exx", OpCode_EXX);
 		OpCodeTable.Insert("halt", OpCode_HALT);
-		OpCodeTable.Insert("im", OpCode_IM);
-		OpCodeTable.Insert("in", OpCode_IN);
+		if (!Options::IsLR35902) OpCodeTable.Insert("in", OpCode_IN);
 		OpCodeTable.Insert("inc", OpCode_INC);
+		OpCodeTable.Insert("jp", OpCode_JP);
+		OpCodeTable.Insert("ld", OpCode_LD);
+		OpCodeTable.Insert("nop", OpCode_NOP);
+		OpCodeTable.Insert("or", OpCode_OR);
+		if (!Options::IsLR35902) OpCodeTable.Insert("out", OpCode_OUT);
+		OpCodeTable.Insert("pop", OpCode_POP);
+		OpCodeTable.Insert("push", OpCode_PUSH);
+		OpCodeTable.Insert("ret", OpCode_RET);
+		OpCodeTable.Insert("rla", OpCode_RLA);
+		OpCodeTable.Insert("rlca", OpCode_RLCA);
+		OpCodeTable.Insert("rra", OpCode_RRA);
+		OpCodeTable.Insert("rrca", OpCode_RRCA);
+		OpCodeTable.Insert("rst", OpCode_RST);
+		OpCodeTable.Insert("sbc", OpCode_SBC);
+		OpCodeTable.Insert("scf", OpCode_SCF);
+		OpCodeTable.Insert("sub", OpCode_SUB);
+		OpCodeTable.Insert("xor", OpCode_XOR);
+
+		if (Options::IsI8080) return;	// all i8080 instructions defined
+
+		// Z80 and LR35902 shared instructions
+		OpCodeTable.Insert("bit", OpCode_BIT);
+		OpCodeTable.Insert("jr", OpCode_JR);
+		OpCodeTable.Insert("res", OpCode_RES);
+		OpCodeTable.Insert("rl", OpCode_RL);
+		OpCodeTable.Insert("rlc", OpCode_RLC);
+		OpCodeTable.Insert("rr", OpCode_RR);
+		OpCodeTable.Insert("rrc", OpCode_RRC);
+		OpCodeTable.Insert("set", OpCode_SET);
+		OpCodeTable.Insert("sla", OpCode_SLA);
+		OpCodeTable.Insert("sra", OpCode_SRA);
+		OpCodeTable.Insert("srl", OpCode_SRL);
+
+		if (Options::IsLR35902) {
+			//INIT LR35902 extras
+			OpCodeTable.Insert("ldd", OpCode_LR35902_LDD);
+			OpCodeTable.Insert("ldh", OpCode_LR35902_LDH);
+			OpCodeTable.Insert("ldi", OpCode_LR35902_LDI);
+			OpCodeTable.Insert("reti", OpCode_EXX);		// RETI has same opcode as EXX on Z80
+ 			OpCodeTable.Insert("stop", OpCode_LR35902_STOP);
+			OpCodeTable.Insert("swap", OpCode_SLL);		// SWAP has same opcodes as SLI on Z80
+			return;						// all LR35902 instructions defined
+		}
+
+		// Z80 instructions
+		OpCodeTable.Insert("cpd", OpCode_CPD);
+		OpCodeTable.Insert("cpdr", OpCode_CPDR);
+		OpCodeTable.Insert("cpi", OpCode_CPI);
+		OpCodeTable.Insert("cpir", OpCode_CPIR);
+		OpCodeTable.Insert("djnz", OpCode_DJNZ);
+		OpCodeTable.Insert("exa", OpCode_EXA);
+		OpCodeTable.Insert("exx", OpCode_EXX);
+		OpCodeTable.Insert("im", OpCode_IM);
 		OpCodeTable.Insert("ind", OpCode_IND);
 		OpCodeTable.Insert("indr", OpCode_INDR);
+		OpCodeTable.Insert("inf", OpCode_INF); // thanks to BREEZE
 		OpCodeTable.Insert("ini", OpCode_INI);
 		OpCodeTable.Insert("inir", OpCode_INIR);
-		OpCodeTable.Insert("inf", OpCode_INF); // thanks to BREEZE
-		OpCodeTable.Insert("jp", OpCode_JP);
-		OpCodeTable.Insert("jr", OpCode_JR);
-		OpCodeTable.Insert("ld", OpCode_LD);
 		OpCodeTable.Insert("ldd", OpCode_LDD);
 		OpCodeTable.Insert("lddr", OpCode_LDDR);
 		OpCodeTable.Insert("ldi", OpCode_LDI);
@@ -2040,40 +2271,16 @@ namespace Z80 {
 		OpCodeTable.Insert("mulub", OpCode_MULUB);
 		OpCodeTable.Insert("muluw", OpCode_MULUW);
 		OpCodeTable.Insert("neg", OpCode_NEG);
-		OpCodeTable.Insert("nop", OpCode_NOP);
-		OpCodeTable.Insert("or", OpCode_OR);
 		OpCodeTable.Insert("otdr", OpCode_OTDR);
 		OpCodeTable.Insert("otir", OpCode_OTIR);
-		OpCodeTable.Insert("out", OpCode_OUT);
 		OpCodeTable.Insert("outd", OpCode_OUTD);
 		OpCodeTable.Insert("outi", OpCode_OUTI);
-		OpCodeTable.Insert("pop", OpCode_POP);
-		OpCodeTable.Insert("push", OpCode_PUSH);
-		OpCodeTable.Insert("res", OpCode_RES);
-		OpCodeTable.Insert("ret", OpCode_RET);
 		OpCodeTable.Insert("reti", OpCode_RETI);
 		OpCodeTable.Insert("retn", OpCode_RETN);
-		OpCodeTable.Insert("rl", OpCode_RL);
-		OpCodeTable.Insert("rla", OpCode_RLA);
-		OpCodeTable.Insert("rlc", OpCode_RLC);
-		OpCodeTable.Insert("rlca", OpCode_RLCA);
 		OpCodeTable.Insert("rld", OpCode_RLD);
-		OpCodeTable.Insert("rr", OpCode_RR);
-		OpCodeTable.Insert("rra", OpCode_RRA);
-		OpCodeTable.Insert("rrc", OpCode_RRC);
-		OpCodeTable.Insert("rrca", OpCode_RRCA);
 		OpCodeTable.Insert("rrd", OpCode_RRD);
-		OpCodeTable.Insert("rst", OpCode_RST);
-		OpCodeTable.Insert("sbc", OpCode_SBC);
-		OpCodeTable.Insert("scf", OpCode_SCF);
-		OpCodeTable.Insert("set", OpCode_SET);
-		OpCodeTable.Insert("sla", OpCode_SLA);
 		OpCodeTable.Insert("sli", OpCode_SLL);
 		OpCodeTable.Insert("sll", OpCode_SLL);
-		OpCodeTable.Insert("sra", OpCode_SRA);
-		OpCodeTable.Insert("srl", OpCode_SRL);
-		OpCodeTable.Insert("sub", OpCode_SUB);
-		OpCodeTable.Insert("xor", OpCode_XOR);
 
 		InitNextExtensions();
 	}

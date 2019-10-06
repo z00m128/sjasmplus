@@ -5,13 +5,12 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-Debian stretch-minimal = produce sh script to download src from github and build binary
-bonus points for running also tests (prepare + verify in VM?) => for Xalior and his
-Raspberry Pi CI machine.
+update README with new CPUs supported upon v1.14.2 release (search for R800 through all files)
+(also update test numbers?)
 
-https://github.com/mborik/regression/blob/master/alternatape/maketap.a80#L12
-^^ emptytap was failing with define symbol?! (can't reproduce with small example,
-try full "regression" source pack)
+remote build script - "done" ATM, waiting for feedback/improvements suggestions/logs
+
+ARM emulation on x86: https://github.com/nongiach/arm_now  ???
 
 +3DOS podpora do sjasmplus:
     z00m:
@@ -34,11 +33,6 @@ try full "regression" source pack)
  work properly, and that should now work) Dependencies are borked, needs `make clean` when
  headers are modified (known bug, too lazy to build dependencies in universal makefile).
 
-STDIN needs MANY Ctrl+D to finish, when used by actual interactive console and not
-input redirection... (and it's lot more many than just 3-pass 3x). Seems like there
-should be some regular clib API way to detect it first time, and be done with it,
-the current behaviour is wrong.
-
 consider the "low memory access" warning locked to only ZX-like devices?
 
 parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???)
@@ -46,6 +40,8 @@ parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???
 - write tests testing operator precedence
 
 CSPECTMAP - needs better support for DISP and instances of STRUCT
+- also reported to be not as good as external tool, but seems that is due to not-using DEVICE directive by author
+(can't help that)
 
 --syntax: "I" to uppercase all labels + usage (needs labels refactoring)
 --syntax: L options implementation
@@ -93,6 +89,8 @@ ZX128 snapshot default state and mapping - still doesn't survive simple `ret` in
 DISP inside DISP bugs => documented. Correct solution = nesting DISPs?!
 
 $$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
+    ^^ done, also whole label parsing and validation refactored, the syntax "$$label" is winner
+    ^^ TODO: remove this note maybe after some time, when everything will prove to be stable
 //// syntax summary:
     labels (\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*
     , argument-separator    : instruction-separator     ; // comment
@@ -101,7 +99,7 @@ $$label operator to get label page. (and fix pages for defl/equ/expression/... l
     operators-binary: * / % mod + - << >> >>> shl shr <? >? < > <= >= = == != & and ^ xor | or && ||
     us keyboard: ~!@#$%^&*()_+`-=[]{};':"<>?,./\|
     $$label - hexa are single $ only, so this looks fine (unary operator)
-    ?label - 5<?label => ambiguous
+    ?label - 5<?label => ambiguous (there is already unary "?" for labels, undocummented, deprecated)
     \label - looks weird, no syntax clash
 Needs more syntax:
     - reformat label into different slot... <slot>$$expression ? (binary operator)
@@ -115,6 +113,7 @@ MMU:
 Kate syntax: broken with LUA block containing "end" keyword (maybe even consider including Lua highlight rules from KDE defaults, if it's possible)
     - also missing MMU ?
     - backward slashes in path strings are not working as escapes, single "\" there is OK, but syntax highlight thinks it's "DB" like string.
+    - ret nz : ret z => all after condition is in "error" mode wrongly.
 
 ##### sjasmplus 2.x/fork:
 
@@ -138,6 +137,7 @@ How about abusing "@" or "." or something to distinguish between? (& resembles C
 
 Make --syntax=abflL default for v2.x and check other defaults
 Maybe add support for escaped '\'' and other combinations back, to be more C++ compatible
+(escape sequences in C/C++ are case sensitive => adopt to sjasmplus (insensitive currently))
 
 Check about other syntax ambiguities, what seems too much relaxed and could be stricter for v2.x
 
@@ -147,8 +147,6 @@ new lua + js support?
 
 Refactor filepath functions to deal with backward slashes systematically
 (or maybe just wait few more years, can't be that long now before windows are gone)
-
-Big-text-block directive? (there's INCBIN workaround using separate file)
 
 ====================
 Debian packaging:
@@ -172,6 +170,8 @@ When printed into PDF from browser on my local system, some of the program listi
 fit into their box and the end of line is cut out, check how many chars work and review
 all code listings in docs to fit into default A4 pdf print.
 (already changelog is trimmed ... seems like 88 chars is max, 80 is probably reasonable)
+
+Add chapter about usefult test-examples (library-like functions), like INC_TEXT, etc.
 
 ===== github milestone v2.x: => create issues (cleanup this TODO as much as reasonable)
 v2.x of sjasmplus, changing some default settings (making it mildly incompatible with old sources, considerably more than v1.07 vs v1.14 incompatibilities), and refactoring some implementation even further, to make it hopefully a bit cleaner C++ source, simpler to maintain and modify.

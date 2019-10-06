@@ -1,0 +1,86 @@
+# file opened: op_00_3F.asm
+ 1    0000                  OUTPUT "op_00_3F.bin"
+ 2    0000
+ 3    0000 00               nop
+ 4    0001 01 41 42         ld      bc,$4241
+ 5    0004 02               ld      (bc),a
+ 6    0005 03               inc     bc
+ 7    0006 04               inc     b
+ 8    0007 05               dec     b
+ 9    0008 06 43            ld      b,$43
+10    000A 07               rlca
+11    000B                  ;; 08 = ld (a16),sp
+12    000B 09               add     hl,bc
+13    000C 0A               ld      a,(bc)
+14    000D 0B               dec     bc
+15    000E 0C               inc     c
+16    000F 0D               dec     c
+17    0010 0E 43            ld      c,$43
+18    0012 0F               rrca
+19    0013                  ;; 10 = stop
+20    0013 11 41 42         ld      de,$4241
+21    0016 12               ld      (de),a
+22    0017 13               inc     de
+23    0018 14               inc     d
+24    0019 15               dec     d
+25    001A 16 43            ld      d,$43
+26    001C 17               rla
+27    001D 18 44            jr      $+2+$44
+28    001F 19               add     hl,de
+29    0020 1A               ld      a,(de)
+30    0021 1B               dec     de
+31    0022 1C               inc     e
+32    0023 1D               dec     e
+33    0024 1E 43            ld      e,$43
+34    0026 1F               rra
+35    0027 20 44            jr      nz,$+2+$44
+36    0029 21 41 42         ld      hl,$4241
+37    002C                  ;; 22 = ld (hl+),a
+38    002C 23               inc     hl
+39    002D 24               inc     h
+40    002E 25               dec     h
+41    002F 26 43            ld      h,$43
+42    0031 27               daa
+43    0032 28 44            jr      z,$+2+$44
+44    0034 29               add     hl,hl
+45    0035                  ;; 2A = ld a,(hl+)
+46    0035 2B               dec     hl
+47    0036 2C               inc     l
+48    0037 2D               dec     l
+49    0038 2E 43            ld      l,$43
+50    003A 2F               cpl
+51    003B 30 44            jr      nc,$+2+$44
+52    003D 31 41 42         ld      sp,$4241
+53    0040                  ;; 32 = ld (hl-),a
+54    0040 33               inc     sp
+55    0041 34               inc     (hl)
+56    0042 35               dec     (hl)
+57    0043 36 43            ld      (hl),$43
+58    0045 37               scf
+59    0046 38 44            jr      c,$+2+$44
+60    0048 39               add     hl,sp
+61    0049                  ;; 3A = ld a,(hl-)
+62    0049 3B               dec     sp
+63    004A 3C               inc     a
+64    004B 3D               dec     a
+65    004C 3E 43            ld      a,$43
+66    004E 3F               ccf
+67    004F
+68    004F                  ; illegal on LR35902
+op_00_3F.asm(69): error: Unrecognized instruction: ex      af,af'
+69    004F                  ex      af,af'
+op_00_3F.asm(70): error: Unrecognized instruction: djnz    $
+70    004F                  djnz    $
+op_00_3F.asm(71): error: Illegal instruction:     ld      ($4241),hl
+71    004F                  ld      ($4241),hl
+op_00_3F.asm(72): error: Illegal instruction:     ld      hl,($4241)
+72    004F                  ld      hl,($4241)
+73    004F
+74    004F                  ; different opcode on LR35902
+75    004F EA 41 42         ld      ($4241),a       ; EA
+76    0052 FA 41 42         ld      a,($4241)       ; FA
+77    0055
+# file closed: op_00_3F.asm
+
+Value    Label
+------ - -----------------------------------------------------------

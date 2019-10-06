@@ -196,9 +196,11 @@ char* ParenthesesEnd(char* p) {
 
 char nidtemp[LINEMAX], *nidsubp = nidtemp;
 
+//TODO v2.x: review GetID usage and make it more clear where are which characters legal
+// add GetLabel where appropriate, handle "@" + "." modifiers more consistently and transparently)
 char* GetID(char*& p) {
 	char* np = nidtemp;
-	if (SkipBlanks(p) || (!isalpha((byte)*p) && *p != '_' && *p != '.')) return NULL;
+	if (SkipBlanks(p) || (!isLabelStart(p, false) && *p != '.')) return NULL;
 	while (islabchar((byte)*p)) *np++ = *p++;
 	*np = 0;
 	return nidtemp;
@@ -540,8 +542,11 @@ int GetCharConstInDoubleQuotes(char*& op, aint& val) {
 	default:
 		break;
 	}
-	// keep "val" equal to the second character
-	Error("Unknown escape", op-2);
+	// return backslash as char value in case of unknown escape sequence
+	// (to mimick older versions of sjasmplus like 1.07-1.10 behaviour)
+	--op;
+	val = '\\';
+	Warning("Unknown escape", op-1);
 	return 1;
 }
 
@@ -725,7 +730,7 @@ static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
 char* GetFileName(char*& p, bool convertslashes) {
 	char* newFn = new char[LINEMAX+1], * result = newFn;
-	if (NULL == newFn) ErrorInt("No enough memory!", LINEMAX+1, FATAL);
+	if (NULL == newFn) ErrorOOM();
 	// check if some and which delimiter is used for this filename (does advance over white chars)
 	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
 	delimiterOfLastFileName = DelimiterAnyBegins(p);
@@ -755,6 +760,13 @@ char* GetFileName(char*& p, bool convertslashes) {
 EDelimiterType GetDelimiterOfLastFileName() {
 	// DT_NONE if no GetFileName was called
 	return delimiterOfLastFileName;
+}
+
+bool isLabelStart(const char *p, bool modifiersAllowed) {
+	if (modifiersAllowed) {
+		if ('.' == *p || '@' == *p) return isLabelStart(p + 1, false);
+	}
+	return *p && (isalpha((byte)*p) || '_' == *p);
 }
 
 int islabchar(char p) {

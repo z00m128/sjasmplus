@@ -448,7 +448,7 @@ static void dirNexClose() {
 		} else {
 			static constexpr int copyBufSize = 0x4000;
 			byte* copyBuffer = new byte[copyBufSize];
-			if (nullptr == copyBuffer) Error("[SAVENEX] not enough memory to copy append file", NULL, FATAL);
+			if (nullptr == copyBuffer) ErrorOOM();
 			do {
 				const size_t read = fread(copyBuffer, 1, copyBufSize, appendF);
 				if (read) {

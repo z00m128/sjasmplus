@@ -104,6 +104,10 @@ void ErrorInt(const char* message, aint badValue, EStatus type) {
 	Error(message, numBuf, type);
 }
 
+void ErrorOOM() {		// out of memory
+	Error("Not enough memory!", nullptr, FATAL);
+}
+
 void Warning(const char* message, const char* badValueMessage, EWStatus type)
 {
 	// check if it is correct pass by the type of error
@@ -394,7 +398,7 @@ char* GetPath(char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
 	}
 	// copy the result into new memory
 	char* kip = STRDUP(fullFilePath);
-	if (kip == NULL) Error("No enough memory!", NULL, FATAL);
+	if (kip == NULL) ErrorOOM();
 	// convert filenamebegin pointer into the copied string (from temporary buffer pointer)
 	if (filenamebegin) *filenamebegin += (kip - fullFilePath);
 	return kip;
@@ -460,7 +464,7 @@ void BinIncFile(char* fname, int offset, int length) {
 	} else {
 		// Reading data from file
 		char* data = new char[length + 1], * bp = data;
-		if (NULL == data) ErrorInt("No enough memory for file", (length + 1), FATAL);
+		if (NULL == data) ErrorOOM();
 		size_t res = fread(bp, 1, length, bif);
 		if (res != (size_t)length) Error("reading data from file failed", fname, FATAL);
 		while (length--) EmitByteNoListing(*bp++);
@@ -561,7 +565,7 @@ void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
 	FP_Input = 0;
 
 	char* pbuf = rlpbuf, * pbuf_end = rlpbuf_end, * buf = STRDUP(rlbuf);
-	if (buf == NULL) Error("No enough memory!", NULL, FATAL);
+	if (buf == NULL) ErrorOOM();
 	bool oColonSubline = colonSubline;
 	if (blockComment) Error("Internal error 'block comment'", NULL, FATAL);	// comment can't INCLUDE
 
@@ -594,7 +598,8 @@ static bool ReadBufData() {
 	if ((LINEMAX-2) <= (rlppos - line)) Error("Line too long", NULL, FATAL);
 	// now check for read data
 	if (rlpbuf < rlpbuf_end) return 1;		// some data still in buffer
-	if (stdin != FP_Input && feof(FP_Input)) return 0;	// no more data in file
+	// check EOF on files in every pass, stdin only in first, following will starve the stdin_log
+	if ((stdin != FP_Input || 1 == pass) && feof(FP_Input)) return 0;	// no more data in file
 	// read next block of data
 	rlpbuf = rlbuf;
 	// handle STDIN file differently (pass1 = read it, pass2+ replay "log" variable)

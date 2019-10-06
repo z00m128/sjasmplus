@@ -1,10 +1,10 @@
 # file opened: include.asm
  1    0000              ; test include paths on command line and their priorities, there are multiple steps:
  2    0000              ; include.asm       = no extra include path, should include from working directory
- 3    0000              ; includeS.asm      = +include paths "includeSSSS_v"
- 4    0000              ; includeSS.asm     = +include paths "includeSSSS_i"
- 5    0000              ; includeSSS.asm    = +include paths "includeSSSS_v", "includeSSSS_i"
- 6    0000              ; includeSSSS.asm   = +include paths "includeSSSS_i", "includeSSSS_v"
+ 3    0000              ; includeS.asm      = +include paths reset + "includeSSSS_v"
+ 4    0000              ; includeSS.asm     = +include paths reset + "includeSSSS_i"
+ 5    0000              ; includeSSS.asm    = +include paths reset + "includeSSSS_v", "includeSSSS_i"
+ 6    0000              ; includeSSSS.asm   = +include paths reset + "includeSSSS_i", "includeSSSS_v"
  7    0000
  8    0000                  INCLUDE includeSSSS_all.i.asm
 # file opened: includeSSSS_all.i.asm
@@ -14,11 +14,11 @@
 # file closed: includeSSSS_all.i.asm
  9    0001
 10    0001                  INCLUDE <includeSSSS_all.i.asm>
-# file opened: includeSSSS_all.i.asm
+# file opened: ./includeSSSS_all.i.asm
  1+   0001              ; valid Z80 source
  2+   0001 C9               ret
  3+   0002
-# file closed: includeSSSS_all.i.asm
+# file closed: ./includeSSSS_all.i.asm
 11    0002
 12    0002 C7               rst 0
 13    0003

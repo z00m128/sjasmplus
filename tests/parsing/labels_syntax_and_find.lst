@@ -1,0 +1,211 @@
+# file opened: labels_syntax_and_find.asm
+  1   0000                  OUTPUT "labels_syntax_and_find.bin"
+  2   0000
+  3   0000                  MODULE mod1
+  3   0000                ORG $3130
+  4   3130              label:
+  5   3130 2B                   dec hl
+  6   3131              .local:
+  7   3131 2C                   inc l
+  8   3132
+  9   3132 30 31                dw  label
+ 10   3134 31 31                dw  .local
+ 11   3136 31 31                dw  label.local
+ 12   3138 31 31                dw  mod1.label.local
+ 13   313A 31 31                dw  @mod1.label.local
+ 14   313C                      ; global one!
+ 15   313C 34 35                dw  @label
+ 16   313E 35 35                dw  @label.local
+ 17   3140 6A 35                dw  @unique
+ 18   3142 6A 35                dw  unique
+ 19   3144                      ; mod1 unique
+ 20   3144 4A 31                dw  mod1unique
+ 21   3146 4A 31                dw  mod1.mod1unique
+ 22   3148 4A 31                dw  @mod1.mod1unique
+ 23   314A              mod1unique:
+ 24   314A                      ; mod2 unique
+labels_syntax_and_find.asm(25): error: Label not found: mod1.mod2unique
+ 25   314A 21 21                dw  '!!'+mod2unique ; should be error, searching only: mod1.mod2unique, @mod2unique
+ 26   314C 4C 33                dw  mod2.mod2unique
+ 27   314E 4C 33                dw  @mod2.mod2unique
+ 28   3150                      ; mod1 nested
+ 29   3150 6E 31                dw  nested.label
+ 30   3152 6F 31                dw  nested.label.local
+ 31   3154 6F 31                dw  mod1.nested.label.local
+ 32   3156 6F 31                dw  @mod1.nested.label.local
+labels_syntax_and_find.asm(33): error: Label not found: mod1.nest1unique
+ 33   3158 21 21                dw  '!!'+nest1unique    ; should be error
+ 34   315A 70 31                dw  nested.nest1unique
+ 35   315C 70 31                dw  mod1.nested.nest1unique
+ 36   315E 70 31                dw  @mod1.nested.nest1unique
+ 37   3160                      ; mod2 nested
+ 38   3160 70 33                dw  mod2.nested.label
+ 39   3162 70 33                dw  @mod2.nested.label
+ 40   3164 71 33                dw  mod2.nested.label.local
+ 41   3166 71 33                dw  @mod2.nested.label.local
+labels_syntax_and_find.asm(42): error: Label not found: mod1.nested.nest2unique
+ 42   3168 21 21                dw  '!!'+nested.nest2unique ; should be error
+ 43   316A 72 33                dw  mod2.nested.nest2unique
+ 44   316C 72 33                dw  @mod2.nested.nest2unique
+ 45   316E
+ 46   316E                      MODULE nested
+ 47   316E              label:
+ 48   316E 2D                       dec l
+ 49   316F              .local:
+ 50   316F 2F                       cpl
+ 51   3170              nest1unique:
+ 52   3170                      ENDMODULE
+ 53   3170
+ 54   3170                  ENDMODULE
+ 55   3170
+ 56   3170                  MODULE mod2
+ 56   3170                ORG $3332
+ 57   3332              label:
+ 58   3332 29                   add hl,hl
+ 59   3333              .local:
+ 60   3333 27                   daa
+ 61   3334
+ 62   3334 32 33                dw  label
+ 63   3336 33 33                dw  .local
+ 64   3338 33 33                dw  label.local
+ 65   333A 33 33                dw  mod2.label.local
+ 66   333C 33 33                dw  @mod2.label.local
+ 67   333E                      ; global one!
+ 68   333E 34 35                dw  @label
+ 69   3340 35 35                dw  @label.local
+ 70   3342 6A 35                dw  @unique
+ 71   3344 6A 35                dw  unique
+ 72   3346                      ; mod2 unique
+ 73   3346 4C 33                dw  mod2unique
+ 74   3348 4C 33                dw  mod2.mod2unique
+ 75   334A 4C 33                dw  @mod2.mod2unique
+ 76   334C              mod2unique:
+ 77   334C                      ; mod1 unique
+labels_syntax_and_find.asm(78): error: Label not found: mod2.mod1unique
+ 78   334C 21 21                dw  '!!'+mod1unique ; should be error, searching only: mod2.mod1unique, @mod1unique
+ 79   334E 4A 31                dw  mod1.mod1unique
+ 80   3350 4A 31                dw  @mod1.mod1unique
+ 81   3352                      ; mod2 nested
+ 82   3352 70 33                dw  nested.label
+ 83   3354 71 33                dw  nested.label.local
+ 84   3356 71 33                dw  mod2.nested.label.local
+ 85   3358 71 33                dw  @mod2.nested.label.local
+labels_syntax_and_find.asm(86): error: Label not found: mod2.nest2unique
+ 86   335A 21 21                dw  '!!'+nest2unique    ; should be error
+ 87   335C 72 33                dw  nested.nest2unique
+ 88   335E 72 33                dw  mod2.nested.nest2unique
+ 89   3360 72 33                dw  @mod2.nested.nest2unique
+ 90   3362                      ; mod1 nested
+ 91   3362 6E 31                dw  mod1.nested.label
+ 92   3364 6E 31                dw  @mod1.nested.label
+ 93   3366 6F 31                dw  mod1.nested.label.local
+ 94   3368 6F 31                dw  @mod1.nested.label.local
+labels_syntax_and_find.asm(95): error: Label not found: mod2.nested.nest1unique
+ 95   336A 21 21                dw  '!!'+nested.nest1unique ; should be error
+ 96   336C 70 31                dw  mod1.nested.nest1unique
+ 97   336E 70 31                dw  @mod1.nested.nest1unique
+ 98   3370
+ 99   3370                      MODULE nested
+100   3370              label:
+101   3370 24                       inc h
+102   3371              .local:
+103   3371 25                       dec h
+104   3372              nest2unique:
+105   3372                      ENDMODULE
+106   3372
+107   3372                  ENDMODULE
+108   3372
+109   3372                  ORG $3534
+110   3534              label:
+111   3534 2B               dec hl
+112   3535              .local:
+113   3535 2C               inc l
+114   3536
+115   3536 34 35            dw  label
+116   3538 35 35            dw  .local
+117   353A 35 35            dw  label.local
+118   353C 35 35            dw  @label.local
+119   353E 31 31            dw  mod1.label.local
+120   3540 31 31            dw  @mod1.label.local
+121   3542 33 33            dw  mod2.label.local
+122   3544 33 33            dw  @mod2.label.local
+123   3546                  ; uniques
+124   3546 6A 35            dw  unique
+125   3548 6A 35            dw  @unique
+labels_syntax_and_find.asm(126): error: Label not found: mod1unique
+126   354A 21 21            dw  '!!'+mod1unique ; should be error
+127   354C 4A 31            dw  mod1.mod1unique
+128   354E 4A 31            dw  @mod1.mod1unique
+129   3550 70 31            dw  mod1.nested.nest1unique
+130   3552 70 31            dw  @mod1.nested.nest1unique
+labels_syntax_and_find.asm(131): error: Label not found: mod2unique
+131   3554 21 21            dw  '!!'+mod2unique ; should be error
+132   3556 4C 33            dw  mod2.mod2unique
+133   3558 4C 33            dw  @mod2.mod2unique
+134   355A 72 33            dw  mod2.nested.nest2unique
+135   355C 72 33            dw  @mod2.nested.nest2unique
+136   355E                  ; nested
+labels_syntax_and_find.asm(137): error: Label not found: nested.label
+137   355E 21 21            dw  '!!'+nested.label       ; should be error
+labels_syntax_and_find.asm(138): error: Label not found: nested.label.local
+138   3560 21 21            dw  '!!'+nested.label.local ; should be error
+139   3562 6E 31            dw  mod1.nested.label
+140   3564 6E 31            dw  @mod1.nested.label
+141   3566 71 33            dw  mod2.nested.label.local
+142   3568 71 33            dw  @mod2.nested.label.local
+143   356A
+144   356A              unique:
+145   356A 2D               dec l
+146   356B
+labels_syntax_and_find.asm(147): error: Invalid labelname: .invalidLabelName
+147   356B              ..invalidLabelName:
+labels_syntax_and_find.asm(148): error: Invalid labelname: .invalidLabelName
+148   356B              @.invalidLabelName:
+labels_syntax_and_find.asm(149): error: Invalid labelname: @invalidLabelName
+149   356B              .@invalidLabelName:
+labels_syntax_and_find.asm(150): error: Invalid labelname: 1nvalidLabelName
+150   356B              .1nvalidLabelName:
+labels_syntax_and_find.asm(151): error: Invalid labelname: 1nvalidLabelName
+151   356B              @1nvalidLabelName:
+labels_syntax_and_find.asm(152): error: Invalid labelname: @1nvalidLabelName
+152   356B              .@1nvalidLabelName:
+labels_syntax_and_find.asm(153): error: Invalid labelname: .1nvalidLabelName
+153   356B              @.1nvalidLabelName:
+labels_syntax_and_find.asm(154): error: Invalid temporary label (not a number): 1nvalidLabelName
+labels_syntax_and_find.asm(154): error: Local label not found: 1B
+154   356B 20 00        1nvalidLabelName: jr  nz,1B
+labels_syntax_and_find.asm(155): error: Invalid labelname: Inv&lidL&belN&me
+155   356D              Inv&lidL&belN&me
+155   356D
+labels_syntax_and_find.asm(156): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 100
+156   356D              100     equ     should not work
+labels_syntax_and_find.asm(157): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 101
+157   356D              101     =       should not work
+labels_syntax_and_find.asm(158): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 102
+158   356D              102     defl    should not work
+labels_syntax_and_find.asm(159): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 103
+159   356D              103:    equ     should not work
+labels_syntax_and_find.asm(160): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 104
+160   356D              104:    =       should not work
+labels_syntax_and_find.asm(161): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 105
+161   356D              105:    defl    should not work
+162   356D
+# file closed: labels_syntax_and_find.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x3130   mod1.label
+0x3131   mod1.label.local
+0x3534   label
+0x3535   label.local
+0x356A   unique
+0x314A   mod1.mod1unique
+0x334C   mod2.mod2unique
+0x316E   mod1.nested.label
+0x316F   mod1.nested.label.local
+0x3170   mod1.nested.nest1unique
+0x3370   mod2.nested.label
+0x3371   mod2.nested.label.local
+0x3372   mod2.nested.nest2unique
+0x3332   mod2.label
+0x3333   mod2.label.local

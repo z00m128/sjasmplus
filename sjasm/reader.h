@@ -77,6 +77,7 @@ int GetBytesHexaText(char*& p, int e[]);
 int cmphstr(char*& p1, const char* p2);		// p2 must be lowercase to match both cases
 char* GetFileName(char*& p, bool convertslashes=false);
 EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called
+bool isLabelStart(const char *p, bool modifiersAllowed = true);
 int islabchar(char p);
 EStructureMembers GetStructMemberId(char*& p);
 EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> delimiters, bool advanceSrc = true);
