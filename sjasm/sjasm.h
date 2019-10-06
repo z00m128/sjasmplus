@@ -70,10 +70,7 @@ namespace Options {
 	extern char RAWFName[LINEMAX];
 	extern char UnrealLabelListFName[LINEMAX];
 	extern char CSpectMapFName[LINEMAX];
-	extern char CSpectMapFName[LINEMAX];
 	extern char SourceLevelDebugFName[LINEMAX];
-
-
 
 	extern EOutputVerbosity OutputVerbosity;
 	extern bool IsLabelTableInListing;
@@ -108,7 +105,6 @@ extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, 
 // the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
 extern char SourceFNames[128][MAX_PATH];
-extern int SourceFNamesCount;
 extern std::vector<char> stdin_log;	// buffer for Options::SourceStdIn, to replay input in 2nd+ pass
 
 extern int ConvertEncoding;
@@ -134,8 +130,6 @@ extern CDefineTable DefineTable;
 extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;
 extern CStructureTable StructureTable;
-
-extern void WriteToSLDFile(char * message);
 
 #ifdef USE_LUA
 

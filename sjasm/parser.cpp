@@ -566,31 +566,15 @@ void ParseLabel() {
 		if (pass == LASTPASS) {
 
 
-			
-			if (IsEQU)
-			{
-				CDeviceSlot *slot = Device->GetSlot(((val & 0xE000) >> 13));
-				char* buf = new char[LINEMAX];
-				SPRINTF4(buf, LINEMAX, "%s|%d|%d|%d|D\n", tp, CurrentSourceLine, -1,val);
-				WriteToSLDFile(buf);
+//CKirby BEGIN
+			int pageNum = DeviceID ? Device->GetPageOfA16(val) : -1;
+			char typeChar = IsEQU ? 'D' : !IsDEFL ? 'F' : 0;
+			if (typeChar) {
+				snprintf(sldMessage, LINEMAX, "%s|%d|%d|%d|%c\n", tp, CurrentSourceLine, pageNum, val, typeChar);
+				WriteToSLDFile();
 			}
-			else
-			{
-				if (!IsDEFL)
-				{
-					CDeviceSlot *slot = Device->GetSlot(((val & 0xE000) >> 13));
+//CKirby END
 
-					char* buf = new char[LINEMAX];
-
-					//SPRINTF3(buf, LINEMAX, "Label %s bank %u address %u F", tp, slot->Page->Number, val);
-					//Warning(">>>>> Function", buf);
-
-					SPRINTF4(buf, LINEMAX, "%s|%d|%d|%d|F\n", tp, CurrentSourceLine, slot->Page->Number, CurAddress);
-					WriteToSLDFile(buf);
-				}
-			}
-
-			
 			if (IsDEFL) {		//re-set DEFL value
 				LabelTable.Insert(tp, val, false, true, false);
 			}
@@ -648,24 +632,15 @@ void ParseInstruction() {
 		return;
 	}
 
-	if (pass == LASTPASS)
-	{
-		CDeviceSlot *slot = Device->GetSlot(((CurAddress & 0xE000) >> 13));
-
-
-		
-		char* buf = new char[LINEMAX];
-
-		SPRINTF4(buf, LINEMAX, "%s|%d|%d|%d|T\n", filename , CurrentSourceLine,slot->Page->Number, CurAddress);
-		WriteToSLDFile(buf);
-		
-		//Warning(">>>>> OPCODE", buf);
-
+//CKirby BEGIN
+	if (LASTPASS == pass) {
+		int pageNum = DeviceID ? Device->GetPageOfA16(CurAddress) : -1;
+		SPRINTF4(sldMessage, LINEMAX, "%s|%d|%d|%d|T\n", filename , CurrentSourceLine, pageNum, CurAddress);
+		WriteToSLDFile();
 	}
-	
-	Z80::GetOpCode();
+//CKirby END
 
-	//_COUT "GET OPCODE" +  CurAddress _ENDL;
+	Z80::GetOpCode();
 }
 
 static const byte win2dos[] = //taken from HorrorWord %)))

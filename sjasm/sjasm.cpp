@@ -157,7 +157,7 @@ char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2],
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 char SourceFNames[128][MAX_PATH];
-int SourceFNamesCount = 0;
+static int SourceFNamesCount = 0;
 std::vector<char> stdin_log;
 
 int ConvertEncoding = ENCWIN;
@@ -618,14 +618,15 @@ int main(int argc, char **argv) {
 	// open lists (if not set to "default" file name, then the OpenFile will handle it)
 	OpenList();
 
-	//open source level debugging file
-	OpenSLD();
-	
 	do {
 		++pass;
 		InitPass();
 
-		if (pass == LASTPASS) OpenDest();
+		if (pass == LASTPASS) {
+			OpenDest();
+			//open source level debugging file
+			OpenSLD();
+		}
 
 		for (i = 0; i < SourceFNamesCount; i++) {
 			IsRunning = 1;

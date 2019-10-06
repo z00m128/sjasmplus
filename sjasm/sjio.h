@@ -68,7 +68,6 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent = false);
 void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent);
 void Close();
 void OpenList();
-void OpenSLD();
 
 void OpenUnrealList();
 void ReadBufLine(bool Parse = true, bool SplitByColon = true);
@@ -103,6 +102,12 @@ EReturn SkipFile();
 void SeekDest(long, int);
 int ReadFileToCStringsList(CStringsList*& f, const char* end);
 void WriteExp(char* n, aint v);
+
+/////// source-level-debugging support by Ckirby
+extern char sldMessage[LINEMAX];
+void OpenSLD();
+void CloseSLD();
+void WriteToSLDFile();
 
 //eof sjio.h
 
