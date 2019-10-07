@@ -571,7 +571,7 @@ void ParseLabel() {
 
 
 //CKirby BEGIN
-			int pageNum = DeviceID ? Device->GetPageOfA16(val) : -1;
+			int pageNum = IsEQU ? -1 : DeviceID ? Device->GetPageOfA16(val) : -1;
 			char typeChar = IsEQU ? 'D' : !IsDEFL ? 'F' : 0;
 			if (typeChar) {
 				snprintf(sldMessage, LINEMAX, "%s|%d|%d|%d|%c\n", tp, CurrentSourceLine, pageNum, val, typeChar);
