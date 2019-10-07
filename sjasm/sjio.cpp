@@ -1174,6 +1174,7 @@ static void OpenSLDImp(const char* sldFilename) {
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
 		Error("Error opening file", sldFilename, FATAL);
 	}
+	fputs("SLD.data.version|0\n", FP_SourceLevelDebugging);
 }
 
 // will write directly into Options::SourceLevelDebugFName array
