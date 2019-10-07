@@ -151,6 +151,26 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 	}
 }
 
+// find position of extension in filename (points at dot char or beyond filename if no extension)
+// filename is pointer to writeable format containing file name (can be full path) (NOT NULL)
+// if initWithName and filenameBufferSize are explicitly provided, filename will be first overwritten with those
+char* FilenameExtPos(char* filename, const char* initWithName, size_t initNameMaxLength) {
+	// if the init value is provided with positive buffer size, init the buffer first
+	if (0 < initNameMaxLength && initWithName) {
+		STRCPY(filename, initNameMaxLength, initWithName);
+	}
+	// find start of the base filename
+	char* const filenameEnd = filename + strlen(filename);
+	char* baseName = filenameEnd;
+	while (filename < baseName && '/' != baseName[-1] && '\\' != baseName[-1]) --baseName;
+	// find extension of the filename and return position of it
+	char* extPos = filenameEnd;
+	while (baseName < extPos && '.' != *extPos) --extPos;
+	if (baseName < extPos) return extPos;
+	// no extension found (empty filename, or "name", or ".name"), return end of filename
+	return filenameEnd;
+}
+
 void CheckRamLimitExceeded() {
 	static bool notWarnedCurAdr = true;
 	static bool notWarnedDisp = true;
@@ -759,17 +779,8 @@ static void OpenDefaultList(const char *fullpath) {
 	if (NULL == fullpath || !*fullpath) return;		// no filename provided
 	// Create default listing name, and try to open it
 	char tempListName[LINEMAX+10];		// make sure there is enough room for new extension
-	STRCPY(tempListName, LINEMAX, fullpath);
-	// find extension of that file and overwrite it with ".lst"
-	char* extPos = tempListName + strlen(tempListName);
-	while (tempListName < extPos && '.' != *extPos) {
-		--extPos;
-		if ('/' == *extPos || '\\' == *extPos || tempListName == extPos) {	// no extension found
-			extPos = tempListName + strlen(tempListName);	// just append it then to the fullname
-			break;
-		}
-	}
-	STRCPY(extPos, 5, ".lst");
+	char* extPos = FilenameExtPos(tempListName, fullpath, LINEMAX);	// find extension position
+	STRCPY(extPos, 5, ".lst");			// overwrite it with ".lst"
 	// list filename prepared, open it
 	OpenListImp(tempListName);
 }
@@ -1165,10 +1176,22 @@ static void OpenSLDImp(const char* sldFilename) {
 	}
 }
 
+// will write directly into Options::SourceLevelDebugFName array
+static void OpenSLD_buildDefaultNameIfNeeded() {
+	// check if SLD file name is already explicitly defined, or default is wanted
+	if (Options::SourceLevelDebugFName[0] || !Options::IsDefaultSldName) return;
+	// name is still empty, and default is wanted, create one (start with "out" or first source name)
+	char* extPos = FilenameExtPos(
+		Options::SourceLevelDebugFName, Options::SourceStdIn ? "out" : SourceFNames[0], LINEMAX-10);
+	STRCPY(extPos, 10, ".sld.txt");		// overwrite extension
+}
+
 void OpenSLD() {
 	// check if source-level-debug file is already opened
 	if (nullptr != FP_SourceLevelDebugging) return;
-	// try to open it if not
+	// build default filename if not explicitly provided, and default was requested
+	OpenSLD_buildDefaultNameIfNeeded();
+	// try to open it if not opened yet
 	OpenSLDImp(Options::SourceLevelDebugFName);
 }
 

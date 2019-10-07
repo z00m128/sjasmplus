@@ -49,6 +49,7 @@ extern int ListAddress;
 
 extern FILE* FP_Input;
 
+char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void NewDest(char* newfilename, int mode = OUTPUT_TRUNCATE);
 int FileExists(char* filename);

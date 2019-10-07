@@ -58,7 +58,7 @@ void PrintHelp() {
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
 	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
 	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
-	_COUT "  --sld=<filename>         Write Source Level Debugging data to <filename> (- is STDOUT)" _ENDL;
+	_COUT "  --sld[=<filename>]       Save Source Level Debugging data to <filename>" _ENDL;
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
@@ -83,7 +83,8 @@ namespace Options {
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
 	char CSpectMapFName[LINEMAX] = {0};
-	char SourceLevelDebugFName[LINEMAX] = { "out.txt" };
+	char SourceLevelDebugFName[LINEMAX] = {0};
+	bool IsDefaultSldName = false;
 
 	char ZX_SnapshotFName[LINEMAX] = {0};
 	char ZX_TapeFName[LINEMAX] = {0};
@@ -422,6 +423,8 @@ namespace Options {
 					}
 				} else if (!strcmp(opt, "lst") && !val[0]) {
 					IsDefaultListingName = true;
+				} else if (!strcmp(opt, "sld") && !val[0]) {
+					IsDefaultSldName = true;
 				} else if (
 					CheckAssignmentOption("sym", SymbolListFName, LINEMAX) ||
 					CheckAssignmentOption("lst", ListingFName, LINEMAX) ||
@@ -568,6 +571,9 @@ int main(int argc, char **argv) {
 		}
 		if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
 			Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
+		}
+		if (Options::IsDefaultSldName && Options::SourceLevelDebugFName[0]) {
+			Error("Using both  --sld  and  --sld=<filename>  is not possible.", NULL, FATAL);
 		}
 	}
 	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax

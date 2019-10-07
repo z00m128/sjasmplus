@@ -71,6 +71,7 @@ namespace Options {
 	extern char UnrealLabelListFName[LINEMAX];
 	extern char CSpectMapFName[LINEMAX];
 	extern char SourceLevelDebugFName[LINEMAX];
+	extern bool IsDefaultSldName;
 
 	extern EOutputVerbosity OutputVerbosity;
 	extern bool IsLabelTableInListing;
