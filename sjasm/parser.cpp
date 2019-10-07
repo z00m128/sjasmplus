@@ -574,7 +574,8 @@ void ParseLabel() {
 			int pageNum = IsEQU ? -1 : DeviceID ? Device->GetPageOfA16(val) : -1;
 			char typeChar = IsEQU ? 'D' : !IsDEFL ? 'F' : 0;
 			if (typeChar) {
-				snprintf(sldMessage, LINEMAX, "%s|%d|%d|%d|%c\n", tp, CurrentSourceLine, pageNum, val, typeChar);
+				snprintf(sldMessage, LINEMAX, "%s|%d|%d|%d|%c|%s\n",
+						 filename, CurrentSourceLine, pageNum, val, typeChar, tp);
 				WriteToSLDFile();
 			}
 //CKirby END
