@@ -656,7 +656,7 @@ int main(int argc, char **argv) {
 		if (pass == LASTPASS) {
 			OpenDest();
 			//open source level debugging file
-			OpenSLD();
+			OpenSld();
 		}
 
 		for (i = 0; i < SourceFNamesCount; i++) {

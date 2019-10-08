@@ -571,7 +571,7 @@ void ParseLabel() {
 
 
 			// SLD (Source Level Debugging) tracing-data logging
-			if (!IsDEFL) {
+			if (!IsDEFL && IsSldExportActive()) {
 				int pageNum = (!IsEQU && DeviceID) ? Device->GetPageOfA16(val) : -1;
 				WriteToSldFile(pageNum, val, IsEQU ? 'D' : 'F', tp);
 			}
@@ -634,7 +634,7 @@ void ParseInstruction() {
 	}
 
 	// SLD (Source Level Debugging) tracing-data logging
-	if (LASTPASS == pass) {
+	if (IsSldExportActive()) {
 		// Page->Number is not affected by DISP, while GetPageOfA16 will calculate page from current mapping
 		// => to get correct source-level-debugging trace data => you must page-in also *target* region!
 		//TODO document this!! (in DISP docs)

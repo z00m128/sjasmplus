@@ -915,7 +915,7 @@ void Close() {
 		fclose(FP_ListingFile);
 		FP_ListingFile = NULL;
 	}
-	CloseSLD();
+	CloseSld();
 }
 
 int SaveRAM(FILE* ff, int start, int length) {
@@ -1172,7 +1172,7 @@ static FILE* FP_SourceLevelDebugging = NULL;
 static char sldMessage[LINEMAX];
 static const char* WriteToSld_noSymbol = "";
 
-static void OpenSLDImp(const char* sldFilename) {
+static void OpenSldImp(const char* sldFilename) {
 	if (nullptr == sldFilename || !sldFilename[0]) return;
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
 		Error("Error opening file", sldFilename, FATAL);
@@ -1181,7 +1181,7 @@ static void OpenSLDImp(const char* sldFilename) {
 }
 
 // will write directly into Options::SourceLevelDebugFName array
-static void OpenSLD_buildDefaultNameIfNeeded() {
+static void OpenSld_buildDefaultNameIfNeeded() {
 	// check if SLD file name is already explicitly defined, or default is wanted
 	if (Options::SourceLevelDebugFName[0] || !Options::IsDefaultSldName) return;
 	// name is still empty, and default is wanted, create one (start with "out" or first source name)
@@ -1190,16 +1190,21 @@ static void OpenSLD_buildDefaultNameIfNeeded() {
 	STRCPY(extPos, 10, ".sld.txt");		// overwrite extension
 }
 
-void OpenSLD() {
+// returns true only in the LASTPASS and only when "sld" file was specified by user
+bool IsSldExportActive() {
+	return (nullptr != FP_SourceLevelDebugging);
+}
+
+void OpenSld() {
 	// check if source-level-debug file is already opened
 	if (nullptr != FP_SourceLevelDebugging) return;
 	// build default filename if not explicitly provided, and default was requested
-	OpenSLD_buildDefaultNameIfNeeded();
+	OpenSld_buildDefaultNameIfNeeded();
 	// try to open it if not opened yet
-	OpenSLDImp(Options::SourceLevelDebugFName);
+	OpenSldImp(Options::SourceLevelDebugFName);
 }
 
-void CloseSLD() {
+void CloseSld() {
 	if (!FP_SourceLevelDebugging) return;
 	fclose(FP_SourceLevelDebugging);
 	FP_SourceLevelDebugging = nullptr;
