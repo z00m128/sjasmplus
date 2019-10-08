@@ -1119,8 +1119,10 @@ int ReadLineNoMacro(bool SplitByColon) {
 }
 
 int ReadLine(bool SplitByColon) {
+	MacroSourceLine = 0;
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
 		if (!lijstp) return 0;
+		MacroSourceLine = lijstp->sourceLine;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
@@ -1166,15 +1168,16 @@ void WriteExp(char* n, aint v) {
 
 /////// source-level-debugging support by Ckirby
 
-FILE* FP_SourceLevelDebugging = NULL;
-char sldMessage[LINEMAX];
+static FILE* FP_SourceLevelDebugging = NULL;
+static char sldMessage[LINEMAX];
+static const char* WriteToSld_noSymbol = "";
 
 static void OpenSLDImp(const char* sldFilename) {
 	if (nullptr == sldFilename || !sldFilename[0]) return;
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
 		Error("Error opening file", sldFilename, FATAL);
 	}
-	fputs("SLD.data.version|0\n", FP_SourceLevelDebugging);
+	fputs("|SLD.data.version|0\n", FP_SourceLevelDebugging);
 }
 
 // will write directly into Options::SourceLevelDebugFName array
@@ -1202,9 +1205,28 @@ void CloseSLD() {
 	FP_SourceLevelDebugging = nullptr;
 }
 
-void WriteToSLDFile() {
-	// file is opened only in last pass, so this is also checking for (LASTPASS == pass) condition
-	if (nullptr == FP_SourceLevelDebugging) return;
+void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
+	// SLD line format:
+	// <file name>|<source line>|<macro/definition line>|<page number>|<value>|<type>|<data>\n
+	//
+	// * <file name> can't be empty (empty is for specific "control lines" with different format)
+	//
+	// * <macro/definition line> explicit zero value in regular source, but inside macros
+	// the <source line> keeps pointing at line emitting the macro, while this value points
+	// to source with actual definitions of instructions/etc (nested macro in macro <source line>
+	// still points at the top level source which initiated it).
+	//
+	// * <value> is not truncated to page range, but full 16b Z80 address or even 32b value (equ)
+	//
+	// * <data> content depends on <type>:
+	// 'T' = instruction Trace, empty data
+	// 'D' = EQU symbol, <data> is the symbol name ("label")
+	// 'F' = function label, <data> is the symbol name
+	// 'Z' = device (memory model) changed, <data> has special custom formatting (TBD)
+	if (nullptr == FP_SourceLevelDebugging || !type) return;
+	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
+	snprintf(sldMessage, LINEMAX, "%s|%d|%d|%d|%d|%c|%s\n",
+				filename, CurrentSourceLine, MacroSourceLine, pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
 }
 

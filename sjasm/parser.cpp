@@ -570,15 +570,11 @@ void ParseLabel() {
 		if (pass == LASTPASS) {
 
 
-//CKirby BEGIN
-			int pageNum = IsEQU ? -1 : DeviceID ? Device->GetPageOfA16(val) : -1;
-			char typeChar = IsEQU ? 'D' : !IsDEFL ? 'F' : 0;
-			if (typeChar) {
-				snprintf(sldMessage, LINEMAX, "%s|%d|%d|%d|%c|%s\n",
-						 filename, CurrentSourceLine, pageNum, val, typeChar, tp);
-				WriteToSLDFile();
+			// SLD (Source Level Debugging) tracing-data logging
+			if (!IsDEFL) {
+				int pageNum = (!IsEQU && DeviceID) ? Device->GetPageOfA16(val) : -1;
+				WriteToSldFile(pageNum, val, IsEQU ? 'D' : 'F', tp);
 			}
-//CKirby END
 
 			if (IsDEFL) {		//re-set DEFL value
 				LabelTable.Insert(tp, val, false, true, false);
@@ -637,13 +633,14 @@ void ParseInstruction() {
 		return;
 	}
 
-//CKirby BEGIN
+	// SLD (Source Level Debugging) tracing-data logging
 	if (LASTPASS == pass) {
+		// Page->Number is not affected by DISP, while GetPageOfA16 will calculate page from current mapping
+		// => to get correct source-level-debugging trace data => you must page-in also *target* region!
+		//TODO document this!! (in DISP docs)
 		int pageNum = DeviceID ? Device->GetPageOfA16(CurAddress) : -1;
-		SPRINTF4(sldMessage, LINEMAX, "%s|%d|%d|%d|T\n", filename , CurrentSourceLine, pageNum, CurAddress);
-		WriteToSLDFile();
+		WriteToSldFile(pageNum, CurAddress);
 	}
-//CKirby END
 
 	Z80::GetOpCode();
 }

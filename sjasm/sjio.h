@@ -106,10 +106,9 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end);
 void WriteExp(char* n, aint v);
 
 /////// source-level-debugging support by Ckirby
-extern char sldMessage[LINEMAX];
 void OpenSLD();
 void CloseSLD();
-void WriteToSLDFile();
+void WriteToSldFile(int pageNum, int value, char type = 'T', const char* symbol = nullptr);
 
 //eof sjio.h
 

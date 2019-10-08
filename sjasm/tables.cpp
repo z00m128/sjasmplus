@@ -876,12 +876,14 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
 	while (lijstp) {
+		MacroSourceLine = lijstp->sourceLine;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
 		lijstp = lijstp->next;
 		ParseLineSafe();
 	}
+	MacroSourceLine = 0;
 	STRCPY(line, LINEMAX, ml);
 	lijstp = olijstp;
 	--lijst;

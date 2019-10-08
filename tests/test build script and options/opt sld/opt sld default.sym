@@ -1,3 +1,3 @@
-SLD.data.version|0
-opt sld default.asm|1|-1|0|T
-2.asm|1|-1|1|T
+|SLD.data.version|0
+opt sld default.asm|1|0|-1|0|T|
+2.asm|1|0|-1|1|T|

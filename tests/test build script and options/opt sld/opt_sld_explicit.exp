@@ -1,5 +1,5 @@
-SLD.data.version|0
-opt_sld_explicit.asm|1|-1|0|T
-opt_sld_explicit.asm|2|-1|1|T
-opt_sld_explicit.asm|1|-1|2|T
-opt_sld_explicit.asm|2|-1|3|T
+|SLD.data.version|0
+opt_sld_explicit.asm|1|0|-1|0|T|
+opt_sld_explicit.asm|2|0|-1|1|T|
+opt_sld_explicit.asm|1|0|-1|2|T|
+opt_sld_explicit.asm|2|0|-1|3|T|

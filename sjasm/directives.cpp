@@ -1680,11 +1680,11 @@ void dirEDUP() {
 	CStringsList* olijstp = lijstp;
 	++lijst;
 	while (dup.RepeatCount--) {
-		CurrentSourceLine = dup.CurrentSourceLine;
+		MacroSourceLine = CurrentSourceLine = dup.CurrentSourceLine;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
-			if (lijstp->sourceLine) CurrentSourceLine = lijstp->sourceLine;
+			if (lijstp->sourceLine) MacroSourceLine = CurrentSourceLine = lijstp->sourceLine;
 			STRCPY(line, LINEMAX, lijstp->string);
 			substitutedLine = line;		// reset substituted listing
 			eolComment = NULL;			// reset end of line comment
@@ -1698,6 +1698,7 @@ void dirEDUP() {
 	lijstp = olijstp;
 	--lijst;
 	CurrentSourceLine = lcurln;
+	MacroSourceLine = 0;
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	free(ml);

@@ -115,7 +115,7 @@ extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunn
 extern int adrdisp, PseudoORG, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
-extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, LastParsedLabelLine;
+extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, LastParsedLabelLine, MacroSourceLine;
 extern aint destlen, size, PreviousErrorLine, maxlin, comlin;
 
 extern char* vorlabp, * macrolabp, * LastParsedLabel;
