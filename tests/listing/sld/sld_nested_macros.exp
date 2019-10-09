@@ -1,4 +1,5 @@
 |SLD.data.version|0
+sld_nested_macros.asm|26|0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
 sld_nested_macros.asm|30|0|14|32768|F|main
 sld_nested_macros.asm|31|0|14|32768|F|main.start
 sld_nested_macros.asm|32|0|14|32768|T|

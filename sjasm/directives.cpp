@@ -1976,6 +1976,24 @@ void dirDEVICE() {
 	if (id) {
 		if (!SetDevice(id)) {
 			Error("[DEVICE] Invalid parameter", NULL, IF_FIRST);
+		} else if (IsSldExportActive()) {
+			// SLD tracing data are being exported, export the device data
+			int pageSize = DeviceID ? Device->GetCurrentSlot()->Size : 1<<16;
+			int pageCount = DeviceID ? Device->PagesCount : 1;
+			int slotsCount = DeviceID ? Device->SlotsCount : 0;
+			char buf[LINEMAX];
+			snprintf(buf, LINEMAX, "pages.size:%d,pages.count:%d,slots.count:%d",
+				pageSize, pageCount, slotsCount
+			);
+			for (int slotI = 0; slotI < slotsCount; ++slotI) {
+				size_t bufLen = strlen(buf);
+				char* bufAppend = buf + bufLen;
+				snprintf(bufAppend, LINEMAX-bufLen,
+						 (0 == slotI) ? ",slots.adr:%d" : ",%d",
+						 Device->GetSlot(slotI)->Address);
+			}
+			// pagesize
+			WriteToSldFile(-1,-1,'Z',buf);
 		}
 	} else {
 		Error("[DEVICE] Syntax error in <deviceid>", lp, SUPPRESS);

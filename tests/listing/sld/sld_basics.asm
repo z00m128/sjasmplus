@@ -38,6 +38,8 @@ DeviceNoneLabel:        scf             ; both should produce page -1
 .someDbBytes            DZ      "Hello 1337!"
         ENDMODULE
 
+    DEVICE ZXSPECTRUM48                 ; just to test device data
+
     DEVICE ZXSPECTRUM128
         MODULE zx128
                     ORG $BFFF,4         ; page 4 into C000..FFFF region (slot 3 active)
