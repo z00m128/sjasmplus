@@ -10,12 +10,6 @@ sld_basics.asm|26|21|63|57345|F|0>localFromMacro
 sld_basics.asm|27|0|63|57345|F|next._.localLabel3
 sld_basics.asm|27|0|63|57345|T|
 sld_basics.asm|28|0|63|57346|F|next._.someDbBytes
-sld_basics.asm|31|0|-1|-1|Z|pages.size:65536,pages.count:1,slots.count:0
-sld_basics.asm|34|0|-1|57600|F|no_device.DeviceNoneLabel
-sld_basics.asm|34|0|-1|57600|T|
-sld_basics.asm|35|0|-1|61167|D|no_device.DeviceNoneLabel.localEqu2
-sld_basics.asm|37|21|-1|57601|F|1>localFromMacro
-sld_basics.asm|38|0|-1|57601|F|no_device.DeviceNoneLabel.someDbBytes
 sld_basics.asm|41|0|-1|-1|Z|pages.size:16384,pages.count:4,slots.count:4,slots.adr:0,16384,32768,49152
 sld_basics.asm|43|0|-1|-1|Z|pages.size:16384,pages.count:8,slots.count:4,slots.adr:0,16384,32768,49152
 sld_basics.asm|46|0|2|49151|F|zx128.DeviceZx128Label1

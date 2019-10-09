@@ -1978,9 +1978,9 @@ void dirDEVICE() {
 			Error("[DEVICE] Invalid parameter", NULL, IF_FIRST);
 		} else if (IsSldExportActive()) {
 			// SLD tracing data are being exported, export the device data
-			int pageSize = DeviceID ? Device->GetCurrentSlot()->Size : 1<<16;
-			int pageCount = DeviceID ? Device->PagesCount : 1;
-			int slotsCount = DeviceID ? Device->SlotsCount : 0;
+			int pageSize = Device->GetCurrentSlot()->Size;
+			int pageCount = Device->PagesCount;
+			int slotsCount = Device->SlotsCount;
 			char buf[LINEMAX];
 			snprintf(buf, LINEMAX, "pages.size:%d,pages.count:%d,slots.count:%d",
 				pageSize, pageCount, slotsCount

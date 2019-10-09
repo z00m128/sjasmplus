@@ -1191,8 +1191,9 @@ static void OpenSld_buildDefaultNameIfNeeded() {
 }
 
 // returns true only in the LASTPASS and only when "sld" file was specified by user
+// and only when assembling is in "virtual DEVICE" mode (for "none" device no tracing is emitted)
 bool IsSldExportActive() {
-	return (nullptr != FP_SourceLevelDebugging);
+	return (nullptr != FP_SourceLevelDebugging && DeviceID);
 }
 
 void OpenSld() {
