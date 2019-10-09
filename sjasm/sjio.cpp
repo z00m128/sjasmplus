@@ -1122,7 +1122,7 @@ int ReadLine(bool SplitByColon) {
 	MacroSourceLine = 0;
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
 		if (!lijstp) return 0;
-		MacroSourceLine = lijstp->sourceLine;
+		MacroSourceLine = lijstp->macroLine;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment

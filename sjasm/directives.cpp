@@ -1676,6 +1676,11 @@ void dirEDUP() {
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) ErrorOOM();
+
+	// To achieve the state when SourceLine for DUP-EDUP block is constant EDUP line,
+	// and MacroLine is pointing to source of particular line in block, basically just kill all
+	// lines with CurrentSourceLine in remaining code. (TODO v2.x listing with src+macro lines?!)
+
 	aint lcurln = CurrentSourceLine;
 	CStringsList* olijstp = lijstp;
 	++lijst;
@@ -1684,7 +1689,8 @@ void dirEDUP() {
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
-			if (lijstp->sourceLine) MacroSourceLine = CurrentSourceLine = lijstp->sourceLine;
+			if (lijstp->sourceLine) CurrentSourceLine = lijstp->sourceLine;
+			MacroSourceLine = lijstp->macroLine;
 			STRCPY(line, LINEMAX, lijstp->string);
 			substitutedLine = line;		// reset substituted listing
 			eolComment = NULL;			// reset end of line comment

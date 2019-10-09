@@ -558,7 +558,7 @@ aint CLocalLabelTable::seekBack(const aint labelNumber) const {
 	return l ? l->value : -1L;
 }
 
-CStringsList::CStringsList() : string(NULL), next(NULL), sourceLine(0) {
+CStringsList::CStringsList() : string(NULL), next(NULL), sourceLine(0), macroLine(0) {
 	// all initialized already
 }
 
@@ -754,6 +754,7 @@ CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
 	string = STRDUP(stringSource);
 	next = nnext;
 	sourceLine = CurrentSourceLine;
+	macroLine = MacroSourceLine ? MacroSourceLine : CurrentSourceLine;
 }
 
 CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
@@ -876,7 +877,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
 	while (lijstp) {
-		MacroSourceLine = lijstp->sourceLine;
+		MacroSourceLine = lijstp->macroLine;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment

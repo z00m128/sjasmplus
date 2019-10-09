@@ -115,7 +115,7 @@ class CStringsList {
 public:
 	char* string;
 	CStringsList* next;
-	int sourceLine;
+	int sourceLine, macroLine;
 	CStringsList();
 	~CStringsList();
 	CStringsList(const char* stringSource, CStringsList* next = NULL);
