@@ -80,12 +80,12 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 #endif //USE_LUA
 		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", filename, ln);
 	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
-	STRCAT(ErrorLine, LINEMAX2, "error: ");
-	STRCAT(ErrorLine, LINEMAX2, message);
+	STRCAT(ErrorLine, LINEMAX2-1, "error: ");
+	STRCAT(ErrorLine, LINEMAX2-1, message);
 	if (badValueMessage) {
-		STRCAT(ErrorLine, LINEMAX2, ": "); STRCAT(ErrorLine, LINEMAX2, badValueMessage);
+		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
-	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2, "\n");	// append EOL if needed
+	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2-1, "\n");	// append EOL if needed
 	// print the error into listing file always (the OutputVerbosity does not apply to listing)
 	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
 	// print the error into stderr if OutputVerbosity allows errors
@@ -137,12 +137,12 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 #endif //USE_LUA
 		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", filename, ln);
 	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
-	STRCAT(ErrorLine, LINEMAX2, "warning: ");
-	STRCAT(ErrorLine, LINEMAX2, message);
+	STRCAT(ErrorLine, LINEMAX2-1, "warning: ");
+	STRCAT(ErrorLine, LINEMAX2-1, message);
 	if (badValueMessage) {
-		STRCAT(ErrorLine, LINEMAX2, ": "); STRCAT(ErrorLine, LINEMAX2, badValueMessage);
+		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
-	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2, "\n");	// append EOL if needed
+	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2-1, "\n");	// append EOL if needed
 	// print the warning into listing file always (the OutputVerbosity does not apply to listing)
 	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
 	// print the warning into stderr if OutputVerbosity allows warnings
@@ -861,14 +861,14 @@ void OpenTapFile(char * tapename, int flagbyte)
 
 	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b"))	Error( "Error opening file in TAPOUT", tapename, FATAL);
 	if (fseek(FP_tapout, 0, SEEK_END))			Error("File seek end error in TAPOUT", tapename, FATAL);
-	
+
 	tape_seek = ftell(FP_tapout);
 	tape_parity = flagbyte;
 	tape_length = 2;
-	
+
 	char tap_data[4] = { 0,0,0,0 };
 	tap_data[2] = (char)flagbyte;
-	
+
 	if (fwrite(tap_data, 1, 3, FP_tapout) != 3) {
 		fclose(FP_tapout);
 		Error("Write error (disk full?)", NULL, FATAL);
@@ -1144,11 +1144,11 @@ void WriteExp(char* n, aint v) {
 		}
 	}
 	STRCPY(ErrorLine, LINEMAX2, n);
-	STRCAT(ErrorLine, LINEMAX2, ": EQU ");
-	STRCAT(ErrorLine, LINEMAX2, "0x");
+	STRCAT(ErrorLine, LINEMAX2-1, ": EQU ");
+	STRCAT(ErrorLine, LINEMAX2-1, "0x");
 	PrintHex32(l, v); *l = 0;
-	STRCAT(ErrorLine, LINEMAX2, lnrs);
-	STRCAT(ErrorLine, LINEMAX2, "\n");
+	STRCAT(ErrorLine, LINEMAX2-1, lnrs);
+	STRCAT(ErrorLine, LINEMAX2-1, "\n");
 	fputs(ErrorLine, FP_ExportFile);
 }
 
