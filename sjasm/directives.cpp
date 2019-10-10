@@ -1164,7 +1164,7 @@ void dirCSPECTMAP() {
 	if (fName[0]) {
 		STRCPY(Options::CSpectMapFName, LINEMAX, fName);
 	} else {		// create default map file name from current source file name (appends ".map")
-		STRCPY(Options::CSpectMapFName, LINEMAX-5, fileName);
+		STRCPY(Options::CSpectMapFName, LINEMAX-5, CurSourcePos.filename);
 		STRCAT(Options::CSpectMapFName, LINEMAX, ".map");
 	}
 	delete[] fName;
@@ -1404,7 +1404,7 @@ void dirEXPORT() {
 	char* n, * p;
 
 	if (!Options::ExportFName[0]) {
-		STRCPY(Options::ExportFName, LINEMAX, fileName);
+		STRCPY(Options::ExportFName, LINEMAX, CurSourcePos.filename);
 		if (!(p = strchr(Options::ExportFName, '.'))) {
 			p = Options::ExportFName;
 		} else {
@@ -1653,7 +1653,7 @@ void dirDUP() {
 	dup.Lines = new CStringsList(lp);
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
 	dup.Pointer = dup.Lines;
-	dup.CurrentSourceLine = CurrentSourceLine;
+	dup.sourcePos = CurSourcePos;
 	dup.IsInWork = false;
 	RepeatStack.push(dup);
 }
@@ -1681,33 +1681,31 @@ void dirEDUP() {
 	// and MacroLine is pointing to source of particular line in block, basically just kill all
 	// lines with CurrentSourceLine in remaining code. (TODO v2.x listing with src+macro lines?!)
 
-	aint lcurln = CurrentSourceLine;
+	TextFilePos oldPos = CurSourcePos;
 	CStringsList* olijstp = lijstp;
 	++lijst;
 	while (dup.RepeatCount--) {
-		MacroSourceLine = CurrentSourceLine = dup.CurrentSourceLine;
-		MacroFileName = fileName;
+		CurSourcePos = dup.sourcePos;
+		DefinitionPos = dup.sourcePos;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
-			if (lijstp->sourceLine) CurrentSourceLine = lijstp->sourceLine;
-			MacroSourceLine = lijstp->macroLine;
-			MacroFileName = lijstp->macroFileName;
+			if (lijstp->source.line) CurSourcePos = lijstp->source;
+			DefinitionPos = lijstp->definition;
 			STRCPY(line, LINEMAX, lijstp->string);
 			substitutedLine = line;		// reset substituted listing
 			eolComment = NULL;			// reset end of line comment
 			lijstp = lijstp->next;
 			ParseLineSafe();
-			++CurrentSourceLine;
+			CurSourcePos.nextLine();
 		}
 	}
 	delete dup.Lines;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;
-	CurrentSourceLine = lcurln;
-	MacroSourceLine = 0;
-	MacroFileName = nullptr;
+	CurSourcePos = oldPos;
+	DefinitionPos = TextFilePos();
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	free(ml);
@@ -1812,7 +1810,7 @@ void _lua_showerror() {
 	int ln = SplitLuaErrorMessage(msgp);
 
 	// print error and other actions
-	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", fileName, ln, msgp);
+	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", CurSourcePos.filename, ln, msgp);
 
 	if (!strchr(ErrorLine, '\n')) {
 		STRCAT(ErrorLine, LINEMAX2, "\n");
@@ -1894,7 +1892,7 @@ void dirLUA() {
 		execute = true;
 	}
 
-	ln = CurrentSourceLine;
+	ln = CurSourcePos.line;
 	ListFile();
 	while (1) {
 		if (!ReadLine(false)) {
@@ -1965,7 +1963,7 @@ void dirINCLUDELUA() {
 	if (!fullpath[0]) {
 		Error("[INCLUDELUA] File doesn't exist", fnaam, EARLY);
 	} else {
-		LuaLine = CurrentSourceLine;
+		LuaLine = CurSourcePos.line;
 		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
 			_lua_showerror();

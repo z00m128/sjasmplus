@@ -30,6 +30,19 @@
 
 #include "sjdefs.h"
 
+TextFilePos::TextFilePos() : filename(nullptr), line(0), colBegin(0), colEnd(0) {
+}
+
+void TextFilePos::newFile(const char* fileNamePtr) {
+	filename = fileNamePtr;
+	line = colBegin = colEnd = 0;
+}
+
+void TextFilePos::nextLine() {
+	++line;
+	colBegin = colEnd = 0;
+}
+
 char* PreviousIsLabel = nullptr;
 
 // since v1.14.2:
@@ -558,9 +571,7 @@ aint CLocalLabelTable::seekBack(const aint labelNumber) const {
 	return l ? l->value : -1L;
 }
 
-CStringsList::CStringsList() :
-	string(NULL), next(NULL), sourceLine(0),
-	macroLine(0), macroFileName(nullptr)
+CStringsList::CStringsList() : string(NULL), next(NULL)
 {
 	// all initialized already
 }
@@ -756,9 +767,8 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
 	string = STRDUP(stringSource);
 	next = nnext;
-	sourceLine = CurrentSourceLine;
-	macroLine = MacroSourceLine ? MacroSourceLine : CurrentSourceLine;
-	macroFileName = MacroFileName ? MacroFileName : fileName;
+	source = CurSourcePos;
+	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 }
 
 CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
@@ -881,16 +891,14 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
 	while (lijstp) {
-		MacroSourceLine = lijstp->macroLine;
-		MacroFileName = lijstp->macroFileName;
+		DefinitionPos = lijstp->definition;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
 		lijstp = lijstp->next;
 		ParseLineSafe();
 	}
-	MacroSourceLine = 0;
-	MacroFileName = nullptr;
+	DefinitionPos = TextFilePos();
 	STRCPY(line, LINEMAX, ml);
 	lijstp = olijstp;
 	--lijst;

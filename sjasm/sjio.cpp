@@ -69,7 +69,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	DefineTable.Replace("_ERRORS", ErrorCount);
 
 	if (1 <= pass && pass <= LASTPASS) {	// during assembling, show also file+line info
-		int ln = CurrentSourceLine;
+		int ln = CurSourcePos.line;
 #ifdef USE_LUA
 		if (LuaLine >= 0) {
 			lua_Debug ar;
@@ -78,7 +78,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 			ln = LuaLine + ar.currentline;
 		}
 #endif //USE_LUA
-		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", fileName, ln);
+		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", CurSourcePos.filename, ln);
 	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
 	STRCAT(ErrorLine, LINEMAX2, "error: ");
 	STRCAT(ErrorLine, LINEMAX2, message);
@@ -126,7 +126,7 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 	DefineTable.Replace("_WARNINGS", WarningCount);
 
 	if (pass <= LASTPASS) {					// during assembling, show also file+line info
-		int ln = CurrentSourceLine;
+		int ln = CurSourcePos.line;
 #ifdef USE_LUA
 		if (LuaLine >= 0) {
 			lua_Debug ar;
@@ -135,7 +135,7 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 			ln = LuaLine + ar.currentline;
 		}
 #endif //USE_LUA
-		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", fileName, ln);
+		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", CurSourcePos.filename, ln);
 	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
 	STRCAT(ErrorLine, LINEMAX2, "warning: ");
 	STRCAT(ErrorLine, LINEMAX2, message);
@@ -261,13 +261,13 @@ void PrepareListLine(char* buffer, aint hexadd)
 
 	int digit = ' ';
 	int linewidth = reglenwidth;
-	aint linenumber = CurrentSourceLine % 10000;
+	aint linenumber = CurSourcePos.line % 10000;
 	if (linewidth > 5)
 	{
 		linewidth = 5;
-		digit = CurrentSourceLine / 10000 + '0';
+		digit = CurSourcePos.line / 10000 + '0';
 		if (digit > '~') digit = '~';
-		if (CurrentSourceLine >= 10000) linenumber += 10000;
+		if (CurSourcePos.line >= 10000) linenumber += 10000;
 	}
 	memset(buffer, ' ', 24);
 	if (listmacro) buffer[23] = '>';
@@ -505,7 +505,8 @@ static auto stdin_log_it = stdin_log.cbegin();
 
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 {
-	const char* oFileName = fileName, * oFileNameFull = fileNameFull;
+	const char* oFileNameFull = fileNameFull;
+	TextFilePos oSourcePos = CurSourcePos;
 	char* oCurrentDirectory, * fullpath, * listFullName = NULL;
 	TCHAR* filenamebegin;
 
@@ -532,7 +533,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 		ofnIt = --openedFileNames.cend();
 	}
 	fileNameFull = ofnIt->c_str();				// get const pointer into archive
-	fileName = Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull);
+	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 
 	// open default listing file for each new source file (if default listing is ON)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
@@ -546,9 +547,6 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 		fputs(listFullName, listFile);
 		fputs("\n", listFile);
 	}
-
-	aint oCurrentLocalLine = CurrentSourceLine;
-	CurrentSourceLine = 0;
 
 	oCurrentDirectory = CurrentDirectory;
 	*filenamebegin = 0;
@@ -584,12 +582,11 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 	// Free memory
 	free(fullpath);
 
-	fileNameFull = oFileNameFull;
-	fileName = oFileName;
-	if (CurrentSourceLine > maxlin) {
-		maxlin = CurrentSourceLine;
+	if (CurSourcePos.line > maxlin) {
+		maxlin = CurSourcePos.line;
 	}
-	CurrentSourceLine = oCurrentLocalLine;
+	fileNameFull = oFileNameFull;
+	CurSourcePos = oSourcePos;
 }
 
 void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)
@@ -658,7 +655,7 @@ static bool ReadBufData() {
 		}
 	}
 	// check UTF BOM markers only at the beginning of the file (source line == 0)
-	if (CurrentSourceLine) return (rlpbuf < rlpbuf_end);			// return true if some data were read
+	if (CurSourcePos.line) return (rlpbuf < rlpbuf_end);	// return true if some data were read
 	//UTF BOM markers detector
 	for (const auto & bomMarkerData : UtfBomMarkers) {
 		if (rlpbuf_end < (rlpbuf + bomMarkerData.length)) continue;	// not enough bytes in buffer
@@ -686,7 +683,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			*(rlppos++) = ' ';
 			IsLabel = false;
 		} else {					// starting real new line
-			++CurrentSourceLine;
+			CurSourcePos.nextLine();
 			IsLabel = (0 == blockComment);
 		}
 		bool afterNonAlphaNum, afterNonAlphaNumNext = true;
@@ -1132,12 +1129,10 @@ int ReadLineNoMacro(bool SplitByColon) {
 }
 
 int ReadLine(bool SplitByColon) {
-	MacroSourceLine = 0;
-	MacroFileName = nullptr;
+	DefinitionPos = TextFilePos();
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
 		if (!lijstp) return 0;
-		MacroSourceLine = lijstp->macroLine;
-		MacroFileName = lijstp->macroFileName;
+		DefinitionPos = lijstp->definition;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
@@ -1262,9 +1257,11 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	// comment line, not to be parsed
 	if (nullptr == FP_SourceLevelDebugging || !type) return;
 	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
-	const char* macroFN = MacroFileName && strcmp(MacroFileName, fileName) ? MacroFileName : "";
+	const char* macroFN = DefinitionPos.filename && strcmp(DefinitionPos.filename, CurSourcePos.filename) ?
+							DefinitionPos.filename : "";
 	snprintf(sldMessage, LINEMAX, "%s|%d|%s|%d|%d|%d|%c|%s\n",
-				fileName, CurrentSourceLine, macroFN, MacroSourceLine, pageNum, value, type, symbol);
+				CurSourcePos.filename, CurSourcePos.line, macroFN, DefinitionPos.line,
+				pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
 }
 
