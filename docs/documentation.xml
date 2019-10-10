@@ -3964,4 +3964,258 @@ start:  ei : jr $           ; app code entry point, BC = NEX file handle
   </section>
 
   </chapter>
+
+  <chapter>
+    <title><anchor id="c_sld_data" />Source Level Debugging (SLD) data</title>
+
+    <section>
+		<title><anchor id="s_sld_intro" />What is it?</title>
+
+		<para>
+			SLD data are extra "tracing" data produced during assembling for debuggers and IDEs,
+			similar to "map" files already supported by sjasmplus (<link linkend="po_labelslist">
+			LABELSLIST</link> and <link linkend="po_cspectmap">CSPECTMAP</link>).
+		</para>
+
+		<para>
+			The debugger can read these data, and with non-tricky source producing machine code
+			with correct device memory mapping, the debugger can trace the origins of every
+			instruction back to the original source code line, and display the source instead/along
+			the disassembly view (the "map" files mentioned above provide only list of labels
+			which is usually already super helpful, but can't track the source origins of each
+			instruction).
+		</para>
+
+		<para>
+			The original impulse and working patch for this feature came from Chris Kirby, adding the
+			single-instruction-step feature to his development tools: <ulink url="https://github.com/Ckirby101/NDS-NextDevSystem">
+				Next Development System</ulink> (currently at 2019 under heavy development).
+		</para>
+	</section>
+
+    <section>
+		<title><anchor id="s_sld_cli" />Usage</title>
+
+		<para>
+			On the sjasmplus side all you need is to add another command line option when starting
+			the assembler.
+			<synopsis>prompt$ sjasmplus --sld=project.sld.txt file1.asm file2.asm</synopsis>
+			This will produce along regular files also file `project.sld.txt` containing the
+			tracing data. The file format is text-like, so the content can be viewed
+			in any text editor, but it's supposed to be processed by the debugger.
+		</para>
+
+		<para>
+			The SLD data are being exported <emphasis role="strong">only</emphasis> for machine code produced
+			within one of the virtual devices (see <link linkend="s_realdevice">DEVICE</link>).
+			And the accuracy of the data directly depends on the state of the virtual device at
+			the moment when the particular instruction is assembled, see next section for further
+			advice how to get best tracing data.
+		</para>
+
+		<para>
+			If the option `--sld` without explicit filename is used, the first input source filename
+			will be copied and its extension changed to `.sld.txt`, which should work well for
+			single-main file type of projects.
+		</para>
+
+	</section>
+
+	<section>
+		<title><anchor id="s_sld_source_advice" />How to write "non tricky" source</title>
+
+		<para>
+			For best results (tracing data covering all your instructions and making source-level
+			debugging available all the time):
+		</para>
+
+		<para>
+			Generate machine code only with instructions, i.e. while `db 0` in source will produce
+			`nop` instruction, the tracing data for such `nop` will be missing. Only source line
+			containing the "nop" will emit both the zero byte into machine code and tracing data.
+		</para>
+
+		<para>
+			Keep the memory map of the virtual device as it will be set at run-time when writing
+			particular code. While using only regular <link linkend="po_org">ORG</link> to place
+			the code in desired memory area, keeping only the modified area with memory pages
+			mapped-in is enough to get correct SLD data - but when using <link linkend="po_disp">DISP</link>
+			directive to generate code in displaced way, you need to map-in correct pages in both
+			memory areas (where the code is currently assembled, and where it is supposed to be
+			operational at run-time - currently impossible if the two areas share the same SLOT area).
+		</para>
+
+		<para>
+			To map-in correct pages you can use directives:
+			<link linkend="po_slot">SLOT</link>, <link linkend="po_page">PAGE</link>,
+			<link linkend="po_mmu">MMU</link> and <link linkend="po_org">ORG</link>
+		</para>
+
+		<para>
+			Only labels defined in regular way get also the memory-page data in SLD file, EQU
+			values are exported without the page information, even if they represent memory
+			address:
+			<programlisting>
+regularLabel:   nop             ; current page exported to SLD data
+equLabel        EQU   $8000     ; only value without page is exported
+varSymbol       =     14        ; =/DEFL labels are omitted completely</programlisting>
+		</para>
+
+		<para>
+			Re-using the same memory area (page + address) for two different pieces of code (for
+			example by having multiple routines targeting the same address with DISP, and run-time
+			code uploading the correct variant dynamically at the destination) will highly likely
+			confuse the debugger, producing two source-origins data for the identical address.
+			You may want to avoid this, especially with early version of tools not being able to
+			resolve such ambiguity in reasonable way (the sjasmplus will generate tracing data ok
+			even in this case, but they are tricky to interpret).
+		</para>
+
+		<para>
+			If you are using the colons to put multiple instructions on single line, verify the
+			debugger can cope with the tracing data containing full line + column begin/end
+			information, the simple/early tools will likely highlight only whole line of source.
+			For a start keeping single instruction per line may keep things simple.
+		</para>
+
+		<para>
+			The multi-arg instructions produce the tracing data only for the first instruction,
+			which will probably cause problems with single-stepping through such code. Rather
+			avoid multi-arg syntax when you are planning to debug the code.
+		</para>
+
+		<para>
+			The various code generators written in macros or Lua scripts will produce accurate
+			tracing data in case of macros, and condensed (pointing at "ENDLUA" line) data for
+			Lua generators, but it still depends on the debugger if it can display both top
+			level source code triggering the generator and source lines containing definitions
+			of particular instructions.
+		</para>
+
+	</section>
+
+    <section>
+		<title><anchor id="s_sld_file_format" />SLD File Format definition (version "0")</title>
+
+		<para>The SLD data is text-file (sjasmplus is using UNIX-like newlines 0x0A, but parsers
+			should rather cope with any of common EOL scheme). The general format is CSV-like
+			using pipe character as delimiter between fields.
+		</para>
+
+		<para>
+			If the first field is empty, the line is one of the special control lines - the second
+			field selects type of control line. If also the second field is empty, the remaining
+			part of line should be ignored (comment line).
+			Currently only one type of "control line" exists, the "SLD.data.version" (third
+			field is integer number):
+<programlisting>|SLD.data.version|0
+||anything ... comment-like line</programlisting>
+			The file format version line should be always first line of the SLD data file.
+		</para>
+
+		<para>
+			The regular tracing data lines have fixed amount of fields: eight. The seventh field
+			contains single uppercase letter defining type of the line, which affects sub-variants
+			of format for eight field, but first six fields share the same formatting and meaning
+			across all types of regular lines:
+<programlisting>
+&lt;source file&gt;|&lt;src line&gt;|&lt;definition file&gt;|&lt;def line&gt;|&lt;page&gt;|&lt;value&gt;|&lt;type&gt;|&lt;data&gt;
+</programlisting>
+		</para>
+
+		<para>
+			<code>&lt;source file&gt;</code> - file name of top-level source emitting the
+			instruction/label/device.
+		</para>
+
+		<para>
+			<code>&lt;src line&gt;</code> - line and characters in top-level source file, the precise
+			format is "<code>&lt;line&gt;[:&lt;column begin&gt;[:&lt;column end&gt;]]</code>" where
+			first number is line number (starting at 1). The two following numbers delimited by colon
+			are optional, representing the column where the segment starts/ends at the line. The
+			column values are starting from 1 too, the "end" column is pointing beyond the current
+			segment. The columns are in "bytes", i.e. tabulator does increase the column value by +1
+			only, and the "end" may actually point well beyond "strlen(line)".
+		</para>
+
+		<para>
+			<code>&lt;definition file&gt;</code> - file name of the source defining the particular
+			instruction (for example where the instruction inside MACRO was originally defined).
+			If empty, the definition-file name is identical to <code>&lt;source file&gt;</code>
+			(common case for single-source projects).
+		</para>
+
+
+		<para>
+			<code>&lt;def line&gt;</code> - zero when there is no extra "definition" of instruction
+			involved. When non-zero, the format is identical to <code>&lt;src line&gt;</code>, but
+			with regard to the file specified in <code>&lt;definition file&gt;</code> field.
+		</para>
+
+		<para>
+			<code>&lt;page&gt;</code> - number of memory page where the <code>&lt;value&gt;</code>
+			address points to, or -1 when value is not memory address.
+		</para>
+
+		<para>
+			<code>&lt;value&gt;</code> - any 32 bit integer value (EQU), but when representing memory
+			address, it is full 16 bit value from Z80 address space (the top bits beyond the memory
+			page size contains the number of "slot" where the instruction/label resides).
+		</para>
+
+		<para>
+			<code>&lt;type&gt;</code> - single uppercase letter representing type of line, current
+			types: T (instruction Trace), F (Function), D (equ Data), Z (device memory model)
+		</para>
+
+		<para>
+			<code>&lt;data&gt;</code> - extra data specific for particular line type. Empty for
+			"T" lines, contains label/symbol name for types "F" and "D". The "D" values usually
+			don't have page defined (equals -1), but the tools should accept also valid page
+			value for "D" type too, just like for "F" lines.
+		</para>
+
+		<para>
+			For type "Z" the data field contains string describing the device memory model which
+			is being selected in source and should be applied for following SLD data lines. The
+			memory model string format is:
+<programlisting>
+pages.size:&lt;page size&gt;,pages.count:&lt;page count&gt;,slots.count:&lt;slots count&gt;[,slots.adr:&lt;slot0 adr&gt;,...,&lt;slotLast adr&gt;]
+// unsigned &lt;page size&gt; is also any-slot size in current version.
+// unsigned &lt;page count&gt; and &lt;slots count&gt; define how many pages/slots there are
+// uint16_t &lt;slotX adr&gt; is starting address of slot memory region in Z80 16b addressing
+</programlisting>
+		</para>
+
+		<example>
+			<title>Example of SLD file</title>
+
+<programlisting>
+|SLD.data.version|0
+|| ZX Spectrum Next device description:
+toplevel.asm|59||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
+|| label "main" points to 32768, with page 14 mapped-in (defined in toplevel.asm:62)
+toplevel.asm|62||0|14|32768|F|main
+|| instruction opcode at 32768 (page 14) was created by toplevel.asm:64
+toplevel.asm|64||0|14|32768|T|
+|| instruction opcode at 32769 (p 14) was created by toplevel.asm:67
+|| (but it is a line using macro, the instruction was defined by toplevel.asm:52)
+toplevel.asm|67||52|14|32769|T|
+|| instruction opcode at 32770 (p 18) was created by toplevel.asm:68:12-24
+toplevel.asm|68:12:24||0|18|32770|T|
+|| instruction opcode at 32771 (p 18) was created by toplevel.asm:68:24 (till EOL)
+toplevel.asm|68:24||0|18|32771|T|
+|| "PORT_NUMBER EQU 254" defined at toplevel.asm:69
+toplevel.asm|69||0|-1|254|D|PORT_NUMBER
+|| label+instruction emitted from tolevel.asm:70, but defined in include.asm:3
+toplevel.asm|70|include.asm|3|37|40976|F|0>macro_defined_in_include_asm
+toplevel.asm|70|include.asm|3|37|40976|T|
+</programlisting>
+
+		</example>
+
+</section>
+
+  </chapter>
+
 </book>
