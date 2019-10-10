@@ -391,7 +391,7 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 	}
 }
 
-char* GetPath(char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
+char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
 {
 	char fullFilePath[MAX_PATH] = { 0 };
 	CStringsList* dir = Options::IncludeDirsList;	// include-paths to search
@@ -497,7 +497,7 @@ static void OpenDefaultList(const char *fullpath);
 
 static auto stdin_log_it = stdin_log.cbegin();
 
-void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
+void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 {
 	char ofilename[LINEMAX];
 	char* oCurrentDirectory, * fullpath, * listFullName = NULL;
@@ -579,7 +579,7 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	CurrentSourceLine = oCurrentLocalLine;
 }
 
-void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
+void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)
 {
 	FILE* oFP_Input = FP_Input;
 	FP_Input = 0;

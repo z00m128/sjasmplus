@@ -48,7 +48,7 @@ static bool isAnySlash(const char c) {
 	return pathGoodSlash == c || pathBadSlash == c;
 }
 
-int SearchPath(char* oudzp, char* filename, char* whatever, int maxlen, char* nieuwzp, char** ach) {
+int SearchPath(const char* oudzp, const char* filename, const char*, int maxlen, char* nieuwzp, char** ach) {
 	FILE* fp;
 	if (isAnySlash(filename[0])) {
 		STRCPY(nieuwzp, maxlen, filename);
