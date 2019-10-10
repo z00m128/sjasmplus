@@ -102,12 +102,17 @@ extern CDevicePage *Page;
 extern char* DeviceID;
 extern int deviceDirectivesCounter;
 
+//*current* fullname and filename (full when `--fullpath` is used)
+//content on these pointers is immutable (only pointers change), so you can archive them/reuse
+extern const char* fileNameFull, * fileName;
+
 // extend
-extern char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
+extern char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
 extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 // the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
 extern char SourceFNames[128][MAX_PATH];
+extern std::vector<std::string> openedFileNames;	// archive of all files opened (also includes!) (fullname!)
 extern std::vector<char> stdin_log;	// buffer for Options::SourceStdIn, to replay input in 2nd+ pass
 
 extern int ConvertEncoding;

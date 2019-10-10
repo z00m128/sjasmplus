@@ -162,11 +162,13 @@ CDevicePage *Page = 0;
 char* DeviceID = 0;
 
 // extend
-char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
+const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either full or basename (--fullpath)
+char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 char SourceFNames[128][MAX_PATH];
 static int SourceFNamesCount = 0;
+std::vector<std::string> openedFileNames(256);
 std::vector<char> stdin_log;
 
 int ConvertEncoding = ENCWIN;

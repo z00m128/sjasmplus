@@ -1164,7 +1164,7 @@ void dirCSPECTMAP() {
 	if (fName[0]) {
 		STRCPY(Options::CSpectMapFName, LINEMAX, fName);
 	} else {		// create default map file name from current source file name (appends ".map")
-		STRCPY(Options::CSpectMapFName, LINEMAX-5, filename);
+		STRCPY(Options::CSpectMapFName, LINEMAX-5, fileName);
 		STRCAT(Options::CSpectMapFName, LINEMAX, ".map");
 	}
 	delete[] fName;
@@ -1404,7 +1404,7 @@ void dirEXPORT() {
 	char* n, * p;
 
 	if (!Options::ExportFName[0]) {
-		STRCPY(Options::ExportFName, LINEMAX, filename);
+		STRCPY(Options::ExportFName, LINEMAX, fileName);
 		if (!(p = strchr(Options::ExportFName, '.'))) {
 			p = Options::ExportFName;
 		} else {
@@ -1809,7 +1809,7 @@ void _lua_showerror() {
 	int ln = SplitLuaErrorMessage(msgp);
 
 	// print error and other actions
-	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", filename, ln, msgp);
+	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", fileName, ln, msgp);
 
 	if (!strchr(ErrorLine, '\n')) {
 		STRCAT(ErrorLine, LINEMAX2, "\n");

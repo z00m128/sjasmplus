@@ -78,7 +78,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 			ln = LuaLine + ar.currentline;
 		}
 #endif //USE_LUA
-		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", filename, ln);
+		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", fileName, ln);
 	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
 	STRCAT(ErrorLine, LINEMAX2, "error: ");
 	STRCAT(ErrorLine, LINEMAX2, message);
@@ -135,7 +135,7 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 			ln = LuaLine + ar.currentline;
 		}
 #endif //USE_LUA
-		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", filename, ln);
+		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", fileName, ln);
 	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
 	STRCAT(ErrorLine, LINEMAX2, "warning: ");
 	STRCAT(ErrorLine, LINEMAX2, message);
@@ -160,15 +160,21 @@ char* FilenameExtPos(char* filename, const char* initWithName, size_t initNameMa
 		STRCPY(filename, initNameMaxLength, initWithName);
 	}
 	// find start of the base filename
-	char* const filenameEnd = filename + strlen(filename);
-	char* baseName = filenameEnd;
-	while (filename < baseName && '/' != baseName[-1] && '\\' != baseName[-1]) --baseName;
+	const char* baseName = FilenameBasePos(filename);
 	// find extension of the filename and return position of it
+	char* const filenameEnd = filename + strlen(filename);
 	char* extPos = filenameEnd;
 	while (baseName < extPos && '.' != *extPos) --extPos;
 	if (baseName < extPos) return extPos;
 	// no extension found (empty filename, or "name", or ".name"), return end of filename
 	return filenameEnd;
+}
+
+const char* FilenameBasePos(const char* fullname) {
+	const char* const filenameEnd = fullname + strlen(fullname);
+	const char* baseName = filenameEnd;
+	while (fullname < baseName && '/' != baseName[-1] && '\\' != baseName[-1]) --baseName;
+	return baseName;
 }
 
 void CheckRamLimitExceeded() {
@@ -499,7 +505,7 @@ static auto stdin_log_it = stdin_log.cbegin();
 
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 {
-	char ofilename[LINEMAX];
+	const char* oFileName = fileName, * oFileNameFull = fileNameFull;
 	char* oCurrentDirectory, * fullpath, * listFullName = NULL;
 	TCHAR* filenamebegin;
 
@@ -519,6 +525,14 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 			Error("Error opening file", nfilename, FATAL);
 		}
 	}
+	// archive the filename (for referencing it in SLD tracing data or listing/errors)
+	auto ofnIt = std::find(openedFileNames.cbegin(), openedFileNames.cend(), fullpath);
+	if (ofnIt == openedFileNames.cend()) {		// new filename, add it to archive
+		openedFileNames.push_back(fullpath);
+		ofnIt = --openedFileNames.cend();
+	}
+	fileNameFull = ofnIt->c_str();				// get const pointer into archive
+	fileName = Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull);
 
 	// open default listing file for each new source file (if default listing is ON)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
@@ -535,8 +549,6 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 
 	aint oCurrentLocalLine = CurrentSourceLine;
 	CurrentSourceLine = 0;
-	STRCPY(ofilename, LINEMAX, filename);
-	STRCPY(filename, LINEMAX, Options::IsShowFullPath ? fullpath : filenamebegin);
 
 	oCurrentDirectory = CurrentDirectory;
 	*filenamebegin = 0;
@@ -572,7 +584,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 	// Free memory
 	free(fullpath);
 
-	STRCPY(filename, LINEMAX, ofilename);
+	fileNameFull = oFileNameFull;
+	fileName = oFileName;
 	if (CurrentSourceLine > maxlin) {
 		maxlin = CurrentSourceLine;
 	}
@@ -1232,7 +1245,7 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	if (nullptr == FP_SourceLevelDebugging || !type) return;
 	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
 	snprintf(sldMessage, LINEMAX, "%s|%d|%d|%d|%d|%c|%s\n",
-				filename, CurrentSourceLine, MacroSourceLine, pageNum, value, type, symbol);
+				fileName, CurrentSourceLine, MacroSourceLine, pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
 }
 
