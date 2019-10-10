@@ -35,7 +35,10 @@ struct TextFilePos {
 
 	TextFilePos();
 	void newFile(const char* fileNamePtr);	// requires stable immutable pointer (until sjasmplus exits)
-	void nextLine();
+
+	// advanceColumns are valid only when true == endsWithColon (else advanceColumns == 0)
+	// default arguments are basically "next line"
+	void nextSegment(bool endsWithColon = false, size_t advanceColumns = 0);
 };
 
 enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };

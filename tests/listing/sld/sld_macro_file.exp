@@ -1,5 +1,5 @@
 |SLD.data.version|0
-sld_macro_file.asm|26||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
+sld_macro_file.asm|26:1:30||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
 sld_macro_file.asm|27||0|37|40976|F|NextEmit1
 sld_macro_file.asm|27|sld_macro_file.i.asm|3|37|40976|F|6>mac1Start
 sld_macro_file.asm|27|sld_macro_file.i.asm|4|37|40976|T|

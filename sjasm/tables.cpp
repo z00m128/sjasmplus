@@ -38,9 +38,14 @@ void TextFilePos::newFile(const char* fileNamePtr) {
 	line = colBegin = colEnd = 0;
 }
 
-void TextFilePos::nextLine() {
-	++line;
-	colBegin = colEnd = 0;
+// advanceColumns are valid only when true == endsWithColon (else advanceColumns == 0)
+// default arguments are basically "next line"
+void TextFilePos::nextSegment(bool endsWithColon, size_t advanceColumns) {
+	if (endsWithColon && 0 == colEnd) colEnd = 1;	// first segment of "colonized" line (do +1,+1)
+	colBegin = colEnd;
+	if (colBegin <= 1) ++line;		// first segment of any line, increment also line number
+	if (endsWithColon)	colEnd += advanceColumns;
+	else				colEnd = 0;
 }
 
 char* PreviousIsLabel = nullptr;

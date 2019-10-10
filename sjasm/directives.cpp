@@ -1697,7 +1697,7 @@ void dirEDUP() {
 			eolComment = NULL;			// reset end of line comment
 			lijstp = lijstp->next;
 			ParseLineSafe();
-			CurSourcePos.nextLine();
+			CurSourcePos.nextSegment();
 		}
 	}
 	delete dup.Lines;

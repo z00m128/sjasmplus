@@ -683,7 +683,6 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			*(rlppos++) = ' ';
 			IsLabel = false;
 		} else {					// starting real new line
-			CurSourcePos.nextLine();
 			IsLabel = (0 == blockComment);
 		}
 		bool afterNonAlphaNum, afterNonAlphaNumNext = true;
@@ -757,6 +756,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			// advance over single colon if that was the reason to terminate line parsing
 			colonSubline = SplitByColon && ReadBufData() && (':' == *rlpbuf) && ++rlpbuf;
 		}
+		// do +1 for very first colon-segment only (rest is +1 due to artificial space at beginning)
+		size_t advanceColumns = colonSubline ? (0 == CurSourcePos.colEnd) + strlen(line) : 0;
+		CurSourcePos.nextSegment(colonSubline, advanceColumns);
 		// line is parsed and ready to be processed
 		if (Parse) 	ParseLine();	// processed here in loop
 		else 		return;			// processed externally
@@ -1181,6 +1183,14 @@ void WriteExp(char* n, aint v) {
 static FILE* FP_SourceLevelDebugging = NULL;
 static char sldMessage[LINEMAX];
 static const char* WriteToSld_noSymbol = "";
+static char sldMessage_sourcePos[80];
+static char sldMessage_definitionPos[80];
+static const char* sldMessage_posFormat = "%d:%d:%d";	// at +3 is "%d:%d" and at +6 is "%d"
+
+static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
+	int offsetFormat = !pos.colBegin ? 6 : !pos.colEnd ? 3 : 0;
+	snprintf(buffer, 79, sldMessage_posFormat + offsetFormat, pos.line, pos.colBegin, pos.colEnd);
+}
 
 static void OpenSldImp(const char* sldFilename) {
 	if (nullptr == sldFilename || !sldFilename[0]) return;
@@ -1228,6 +1238,8 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	// * string <file name> can't be empty (empty is for specific "control lines" with different format)
 	//
 	// * unsigned <source line> when <file name> is not empty, line number (in human way starting at 1)
+	// The actual format is "%d[:%d[:%d]]", first number is always line. If second number is present,
+	// that's the start column (in bytes), and if also third number is present, that's end column.
 	//
 	// * string <definition file> where the <definition line> was defined, if empty, it's equal to <file name>
 	//
@@ -1235,6 +1247,7 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	// the <source line> keeps pointing at line emitting the macro, while this value points
 	// to source with actual definitions of instructions/etc (nested macro in macro <source line>
 	// still points at the top level source which initiated it).
+	// The format is again "%d[:%d[:%d]]" same as <source line>, optionally including the columns data.
 	//
 	// * int <value> is not truncated to page range, but full 16b Z80 address or even 32b value (equ)
 	//
@@ -1259,8 +1272,10 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
 	const char* macroFN = DefinitionPos.filename && strcmp(DefinitionPos.filename, CurSourcePos.filename) ?
 							DefinitionPos.filename : "";
-	snprintf(sldMessage, LINEMAX, "%s|%d|%s|%d|%d|%d|%c|%s\n",
-				CurSourcePos.filename, CurSourcePos.line, macroFN, DefinitionPos.line,
+	WriteToSldFile_TextFilePos(sldMessage_sourcePos, CurSourcePos);
+	WriteToSldFile_TextFilePos(sldMessage_definitionPos, DefinitionPos);
+	snprintf(sldMessage, LINEMAX, "%s|%s|%s|%s|%d|%d|%c|%s\n",
+				CurSourcePos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
 				pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
 }
