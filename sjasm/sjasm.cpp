@@ -179,6 +179,7 @@ int adrdisp = 0, PseudoORG = 0, StartAddress = -1;
 byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
 aint CurAddress = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, MacroSourceLine = 0;
+const char* MacroFileName = nullptr;
 aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
 char* CurrentDirectory=NULL;
 
@@ -219,6 +220,7 @@ void InitPass() {
 	listmacro = 0;
 	CurAddress = 0;
 	CurrentSourceLine = CompiledCurrentLine = MacroSourceLine = 0;
+	MacroFileName = nullptr;
 	PseudoORG = 0; adrdisp = 0;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;

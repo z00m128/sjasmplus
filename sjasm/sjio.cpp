@@ -1133,9 +1133,11 @@ int ReadLineNoMacro(bool SplitByColon) {
 
 int ReadLine(bool SplitByColon) {
 	MacroSourceLine = 0;
+	MacroFileName = nullptr;
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
 		if (!lijstp) return 0;
 		MacroSourceLine = lijstp->macroLine;
+		MacroFileName = lijstp->macroFileName;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
@@ -1226,26 +1228,43 @@ void CloseSld() {
 
 void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	// SLD line format:
-	// <file name>|<source line>|<macro/definition line>|<page number>|<value>|<type>|<data>\n
+	// <file name>|<source line>|<definition file>|<definition line>|<page number>|<value>|<type>|<data>\n
 	//
-	// * <file name> can't be empty (empty is for specific "control lines" with different format)
+	// * string <file name> can't be empty (empty is for specific "control lines" with different format)
 	//
-	// * <macro/definition line> explicit zero value in regular source, but inside macros
+	// * unsigned <source line> when <file name> is not empty, line number (in human way starting at 1)
+	//
+	// * string <definition file> where the <definition line> was defined, if empty, it's equal to <file name>
+	//
+	// * unsigned <definition line> explicit zero value in regular source, but inside macros
 	// the <source line> keeps pointing at line emitting the macro, while this value points
 	// to source with actual definitions of instructions/etc (nested macro in macro <source line>
 	// still points at the top level source which initiated it).
 	//
-	// * <value> is not truncated to page range, but full 16b Z80 address or even 32b value (equ)
+	// * int <value> is not truncated to page range, but full 16b Z80 address or even 32b value (equ)
 	//
-	// * <data> content depends on <type>:
+	// * string <data> content depends on char <type>:
 	// 'T' = instruction Trace, empty data
 	// 'D' = EQU symbol, <data> is the symbol name ("label")
 	// 'F' = function label, <data> is the symbol name
-	// 'Z' = device (memory model) changed, <data> has special custom formatting (TBD)
+	// 'Z' = device (memory model) changed, <data> has special custom formatting
+	//
+	// 'Z' device <data> format:
+	// pages.size:<page size>,pages.count:<page count>,slots.count:<slots count>[,slots.adr:<slot0 adr>,...,<slotLast adr>]
+	// unsigned <page size> is also any-slot size in current version.
+	// unsigned <page count> and <slots count> define how many pages/slots there are
+	// uint16_t <slotX adr> is starting address of slot memory region in Z80 16b addressing
+	//
+	// specific lines (<file name> string was empty):
+	// |SLD.data.version|<version number>
+	// <version number> is SLD file format version, currently should be 0
+	// ||<anything till EOL>
+	// comment line, not to be parsed
 	if (nullptr == FP_SourceLevelDebugging || !type) return;
 	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
-	snprintf(sldMessage, LINEMAX, "%s|%d|%d|%d|%d|%c|%s\n",
-				fileName, CurrentSourceLine, MacroSourceLine, pageNum, value, type, symbol);
+	const char* macroFN = MacroFileName && strcmp(MacroFileName, fileName) ? MacroFileName : "";
+	snprintf(sldMessage, LINEMAX, "%s|%d|%s|%d|%d|%d|%c|%s\n",
+				fileName, CurrentSourceLine, macroFN, MacroSourceLine, pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
 }
 

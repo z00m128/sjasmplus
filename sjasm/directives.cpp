@@ -1686,11 +1686,13 @@ void dirEDUP() {
 	++lijst;
 	while (dup.RepeatCount--) {
 		MacroSourceLine = CurrentSourceLine = dup.CurrentSourceLine;
+		MacroFileName = fileName;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
 			if (lijstp->sourceLine) CurrentSourceLine = lijstp->sourceLine;
 			MacroSourceLine = lijstp->macroLine;
+			MacroFileName = lijstp->macroFileName;
 			STRCPY(line, LINEMAX, lijstp->string);
 			substitutedLine = line;		// reset substituted listing
 			eolComment = NULL;			// reset end of line comment
@@ -1705,6 +1707,7 @@ void dirEDUP() {
 	--lijst;
 	CurrentSourceLine = lcurln;
 	MacroSourceLine = 0;
+	MacroFileName = nullptr;
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	free(ml);

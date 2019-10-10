@@ -116,6 +116,7 @@ public:
 	char* string;
 	CStringsList* next;
 	int sourceLine, macroLine;
+	const char* macroFileName;
 	CStringsList();
 	~CStringsList();
 	CStringsList(const char* stringSource, CStringsList* next = NULL);

@@ -104,6 +104,7 @@ extern int deviceDirectivesCounter;
 
 //*current* fullname and filename (full when `--fullpath` is used)
 //content on these pointers is immutable (only pointers change), so you can archive them/reuse
+//for example SLD tracing remembers original file where macro was defined
 extern const char* fileNameFull, * fileName;
 
 // extend
@@ -121,6 +122,7 @@ extern int adrdisp, PseudoORG, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
 extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, LastParsedLabelLine, MacroSourceLine;
+extern const char* MacroFileName;
 extern aint destlen, size, PreviousErrorLine, maxlin, comlin;
 
 extern char* vorlabp, * macrolabp, * LastParsedLabel;
