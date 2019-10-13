@@ -596,6 +596,29 @@ void ParseLabel() {
 		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
 			Error("Duplicate label", tp, EARLY);
 		}
+
+// TODO v2.x: currently DEFL+EQU label can be followed with instruction => remove this syntax
+// TODO v2.x: this is too complicated in current version: Unreal/Cspect already expect
+// EQU/DEFL to be current page or "ROM" = not a big deal as they did change in v1.x course already.
+// But also struct labels are set as EQU ones, so this has to split, and many other details.
+// (will also need more than LABEL_PAGE_UNDEFINED value to deal with more states)
+// 		if (IsEQU && comma(lp)) {	// Device extension: "<label> EQU <address>,<page number>"
+// 			if (!DeviceID) {
+// 				Error("EQU can set page to label only in device mode", line);
+// 				SkipToEol(lp);
+// 			} else if (!ParseExpression(lp, oval)) {	// try to read page number into "oval"
+// 				Error("Expression error", lp);
+// 				oval = -1;
+// 			} else if (oval < 0 || Device->PagesCount <= oval) {
+// 				ErrorInt("Invalid page number", oval);
+// 				oval = -1;
+// 			} else {
+// 				if (val < 0 || 0xFFFF < val) Warning("The EQU address is outside of 16bit range", line);
+// 				CLabelTableEntry* equLabel = LabelTable.Find(tp, true);	// must be already defined + found
+// 				equLabel->page = oval;			// set it's page number
+// 			}
+// 		}
+
 		delete[] tp;
 	}
 }
