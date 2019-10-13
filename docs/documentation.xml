@@ -3989,7 +3989,7 @@ start:  ei : jr $           ; app code entry point, BC = NEX file handle
 		<para>
 			The original impulse and working patch for this feature came from Chris Kirby, adding the
 			single-instruction-step feature to his development tools: <ulink url="https://github.com/Ckirby101/NDS-NextDevSystem">
-				Next Development System</ulink> (currently at 2019 under heavy development).
+				Next Development System</ulink> (currently in 2019 under heavy development).
 		</para>
 	</section>
 
@@ -4116,7 +4116,7 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 		<para>
 			The regular tracing data lines have fixed amount of fields: eight. The seventh field
 			contains single uppercase letter defining type of the line, which affects sub-variants
-			of format for eight field, but first six fields share the same formatting and meaning
+			of format for eighth field, but first six fields share the same formatting and meaning
 			across all types of regular lines:
 <programlisting>
 &lt;source file&gt;|&lt;src line&gt;|&lt;definition file&gt;|&lt;def line&gt;|&lt;page&gt;|&lt;value&gt;|&lt;type&gt;|&lt;data&gt;
@@ -4207,7 +4207,7 @@ toplevel.asm|68:12:24||0|18|32770|T|
 toplevel.asm|68:24||0|18|32771|T|
 || "PORT_NUMBER EQU 254" defined at toplevel.asm:69
 toplevel.asm|69||0|-1|254|D|PORT_NUMBER
-|| label+instruction emitted from tolevel.asm:70, but defined in include.asm:3
+|| label+instruction emitted from toplevel.asm:70, but defined in include.asm:3
 toplevel.asm|70|include.asm|3|37|40976|F|0>macro_defined_in_include_asm
 toplevel.asm|70|include.asm|3|37|40976|T|
 </programlisting>
