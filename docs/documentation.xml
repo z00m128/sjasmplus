@@ -1562,7 +1562,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_disp" />DISP &lt;address&gt;</term>
+            <term><anchor id="po_disp" />DISP &lt;address&gt;[,&lt;page_number&gt;]</term>
 
             <listitem>
               <para>Set the address in which the part of code should work.
@@ -1574,6 +1574,10 @@ counter = counter + 1
               linkend="po_endt">ENDT</link> are synonyms of <link
               linkend="po_ent">ENT</link>. DISP blocks can NOT be nested, and to change
               the displacement address within current DISP block use the ordinary ORG.
+              When in device mode, you can specify fixed value for "fake" page of emitted
+              instructions and regular labels, but to avoid warning, you must also map-in
+              the target page into the target memory slot (<link linkend="po_mmu">MMU</link>).
+              When no fixed page in DISP is specified, the current mapping of memory pages is used.
               <example>
                   <title>docs_examples/po_disp.asm</title>
 
