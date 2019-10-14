@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# "remote curl build" bash script to build latest stable release v1.14.1
+# "remote curl build" bash script to build latest stable release v1.14.2
 # Designed for the ZX Spectrum Next community, for the Raspberry Pi Zero
 # "accelerator" distro maintainer.
 
@@ -25,8 +25,8 @@
 #  /tmp/sjasmplus/examples.log
 
 # download+extract the source tar.gz with curl:
-echo "# Downloading + extracing sjasmplus sources (stable release v1.14.1) from github..."
-curl -O -L https://github.com/z00m128/sjasmplus/archive/v1.14.1.tar.gz && \
+echo "# Downloading + extracing sjasmplus sources (stable release v1.14.2) from github..."
+curl -O -L https://github.com/z00m128/sjasmplus/archive/v1.14.2.tar.gz && \
 tar xf v*.tar.gz && \
 cd sjasmplus*
 SRC_RESULT=$?
