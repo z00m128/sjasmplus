@@ -289,6 +289,22 @@ void dirDISP() {
 		adrdisp = CurAddress;
 		CurAddress = val;
 		PseudoORG = 1;
+		dispPageNum = LABEL_PAGE_UNDEFINED;
+		if (comma(lp)) {
+			if (!ParseExpressionNoSyntaxError(lp, dispPageNum)) {
+				dispPageNum = LABEL_PAGE_UNDEFINED;
+				Error("[DISP] Syntax error in <page number>", lp);
+			} else {
+				if (DeviceID) {
+					if (dispPageNum < 0 || Device->PagesCount <= dispPageNum) {
+						ErrorInt("[DISP] <page number> is out of range", dispPageNum);
+						dispPageNum = LABEL_PAGE_UNDEFINED;
+					}
+				} else {
+					Error("[DISP] <page number> is accepted only in device mode", line);
+				}
+			}
+		}
 	} else {
 		Error("[DISP] Syntax error in <address>", lp, SUPPRESS);
 	}
@@ -300,6 +316,7 @@ void dirENT() {
 	}
 	CurAddress = adrdisp;
 	PseudoORG = 0;
+	dispPageNum = LABEL_PAGE_UNDEFINED;
 }
 
 void dirPAGE() {

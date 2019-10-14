@@ -1,0 +1,57 @@
+# file opened: sld_disp.asm
+ 1    0000                  DEVICE ZXSPECTRUMNEXT
+ 2    0000                  ORG $E000,32
+ 3    E000                  DISP $8000,1        ; fake page "1" for everything here
+ 4    8000              DispLabel:              ; sh*t, labels emit no warning about different mapping.
+ 5    8000                          MMU 4, 1
+ 6    8000 00                       nop         ; no warning, mapping is identical
+ 7    8001                          MMU 4, 4    ; emit warning
+ 8    8001              DispLabel2:
+sld_disp.asm(9): warning: DISP memory page differs from current mapping
+ 9    8001 00                       nop         ; warning about DISP page being different from current mapping
+10    8002 00                       nop         ; no warning (warning is emitted only once per whole assembling
+11    8003                  ENT
+12    E003                  DISP $8010
+13    8010              DispLabel3:             ; should derive page number from current mapping
+14    8010 00                       nop
+15    8011                  ENT
+16    E004              NormalLabel:
+17    E004 C9                       ret
+18    E005                  ASSERT 32 == $$NormalLabel
+19    E005                  ASSERT 1 == $$DispLabel
+20    E005                  ASSERT 1 == $$DispLabel2
+21    E005                  ASSERT 4 == $$DispLabel3
+22    E005
+23    E005                  ; just in the valid range values
+24    E005                  DISP $8000,0
+25    8000                  DISP $8000,223
+26    8000
+27    8000                  ; syntax errors of DISP parser (first in DEVICE mode)
+sld_disp.asm(28): error: [DISP] Syntax error in <page number>: 
+28    8000                  DISP $8000,         ; syntax error
+sld_disp.asm(29): error: ')' expected
+sld_disp.asm(29): error: [DISP] Syntax error in <page number>: 
+29    8000                  DISP $8000,(        ; syntax error
+sld_disp.asm(30): error: [DISP] <page number> is out of range: 512
+30    8000                  DISP $8000,512      ; error outside of valid pages
+sld_disp.asm(31): error: [DISP] <page number> is out of range: -1
+31    8000                  DISP $8000,-1       ; error outside of valid pages
+32    8000
+33    8000                  DEVICE NONE
+34    8000                  ORG $8000
+sld_disp.asm(35): error: [DISP] Syntax error in <page number>: 
+35    8000                  DISP $C000,         ; error, only in device mode
+sld_disp.asm(36): error: [DISP] <page number> is accepted only in device mode:     DISP $C000,-1       ; error, only in device mode
+36    C000                  DISP $C000,-1       ; error, only in device mode
+37    C000
+38    C000                  DEVICE ZXSPECTRUMNEXT
+39    C000                  CSPECTMAP "sld_disp.sym"
+40    C000
+# file closed: sld_disp.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000   DispLabel
+0x8001   DispLabel2
+0x8010   DispLabel3
+0xE004   NormalLabel

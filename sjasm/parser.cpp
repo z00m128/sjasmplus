@@ -512,7 +512,7 @@ void ParseLabel() {
 	if (White()) return;
 	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
 	char temp[LINEMAX], * tp = temp, * ttp;
-	aint val, oval;
+	aint val;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
 		*tp = *lp; ++tp; ++lp;
 	}
@@ -569,23 +569,22 @@ void ParseLabel() {
 		if (!IsDEFL) SetLastParsedLabel(tp);
 		if (pass == LASTPASS) {
 
-
-			// SLD (Source Level Debugging) tracing-data logging
-			if (!IsDEFL && IsSldExportActive()) {
-				int pageNum = IsEQU ? -1 : Device->GetPageOfA16(val);
-				WriteToSldFile(pageNum, val, IsEQU ? 'D' : 'F', tp);
+			CLabelTableEntry* label = LabelTable.Find(tp, true);
+			if (nullptr == label) {		// should have been already defined before last pass
+				Error("Label not found", tp);
+				return;
 			}
-
 			if (IsDEFL) {		//re-set DEFL value
 				LabelTable.Insert(tp, val, false, true, false);
+			} else if (IsSldExportActive()) {
+				// SLD (Source Level Debugging) tracing-data logging
+				WriteToSldFile(IsEQU ? -1 : label->page, val, IsEQU ? 'D' : 'F', tp);
 			}
-			if (!GetLabelValue(ttp, oval)) {
-				Error("Internal error. ParseLabel()", NULL, FATAL);
-			}
-			if (!IsDEFL && val != oval) {
+
+			if (val != label->value) {
 				char* buf = new char[LINEMAX];
 
-				SPRINTF2(buf, LINEMAX, "previous value %u not equal %u", oval, val);
+				SPRINTF2(buf, LINEMAX, "previous value %u not equal %u", label->value, val);
 				Warning("Label has different value in pass 3", buf);
 				LabelTable.Update(tp, val);
 
@@ -650,6 +649,8 @@ int ParseMacro() {
 	return 0;
 }
 
+static bool PageDiffersWarningShown = false;
+
 void ParseInstruction() {
 	if ('@' == *lp) ++lp;		// skip single '@', if it was used to inhibit macro expansion
 	if (ParseDirective()) {
@@ -658,10 +659,19 @@ void ParseInstruction() {
 
 	// SLD (Source Level Debugging) tracing-data logging
 	if (IsSldExportActive()) {
-		// Page->Number is not affected by DISP, while GetPageOfA16 will calculate page from current mapping
-		// => to get correct source-level-debugging trace data => you must page-in also *target* region!
-		//TODO document this!! (in DISP docs)
-		int pageNum = Device->GetPageOfA16(CurAddress);
+		int pageNum = Page->Number;
+		if (PseudoORG) {
+			int mappingPageNum = Device->GetPageOfA16(CurAddress);
+			if (LABEL_PAGE_UNDEFINED == dispPageNum) {	// special DISP page is not set, use mapped
+				pageNum = mappingPageNum;
+			} else {
+				pageNum = dispPageNum;					// special DISP page is set, use it instead
+				if (pageNum != mappingPageNum && !PageDiffersWarningShown) {
+					Warning("DISP memory page differs from current mapping");
+					PageDiffersWarningShown = true;		// show warning about different mapping only once
+				}
+			}
+		}
 		WriteToSldFile(pageNum, CurAddress);
 	}
 

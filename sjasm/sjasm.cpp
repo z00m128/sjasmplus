@@ -175,7 +175,7 @@ int ConvertEncoding = ENCWIN;
 
 int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, donotlist = 0, listmacro = 0;
-int adrdisp = 0, PseudoORG = 0, StartAddress = -1;
+int adrdisp = 0, PseudoORG = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;
 byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
 TextFilePos CurSourcePos, DefinitionPos;
@@ -222,7 +222,7 @@ void InitPass() {
 	CurAddress = 0;
 	CurSourcePos = DefinitionPos = TextFilePos();	// reset current source/definition positions
 	CompiledCurrentLine = 0;
-	PseudoORG = 0; adrdisp = 0;
+	PseudoORG = 0; adrdisp = 0; dispPageNum = LABEL_PAGE_UNDEFINED;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
 	StructureTable.ReInit();

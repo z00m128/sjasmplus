@@ -236,6 +236,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			//if label already added (as used, or in previous pass), just refresh values
 			label->value = nvalue;
 			label->page = Page ? Page->Number : LABEL_PAGE_ROM;
+			// in DISP mode set the page number by DISP page_number, or current device mapping
+			if (PseudoORG) {
+				label->page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
+								DeviceID ? Device->GetPageOfA16(nvalue) : LABEL_PAGE_ROM;
+			}
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
 			label->updatePass = pass;
@@ -257,6 +262,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->used = undefined;
 	if (!undefined) {
 		label->page = Page ? Page->Number : LABEL_PAGE_ROM;
+		// in DISP mode set the page number by DISP page_number, or current device mapping
+		if (PseudoORG) {
+			label->page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
+							DeviceID ? Device->GetPageOfA16(nvalue) : LABEL_PAGE_ROM;
+		}
 	} else {
 		label->page = LABEL_PAGE_UNDEFINED;
 	}

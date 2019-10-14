@@ -19,10 +19,8 @@
 12    123A ~                    sj.parse_line("pass_default: rlca      ; this will cause problems")
 13    123A ~                    _pl("pass_default_2: rla      ; same with _pl alias")
 lua_parse_line.asm(12): error: Label not found: pass_default
-lua_parse_line.asm(12): warning: Label has different value in pass 3: previous value 0 not equal 4666
 14    123A 07           pass_default: rlca      ; this will cause problems
 lua_parse_line.asm(13): error: Label not found: pass_default_2
-lua_parse_line.asm(13): warning: Label has different value in pass 3: previous value 0 not equal 4667
 14    123B 17           pass_default_2: rla      ; same with _pl alias
 14    123C                  endlua
 15    123C                  lua pass1   ; pass1 this is also insufficient to generate valid machine code

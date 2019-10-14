@@ -6,7 +6,7 @@
 KateSyntaxHighLightTest.asm(5): error: [ORG] Page number must be in range 0..3: 168
 KateSyntaxHighLightTest.asm(5): error: Unexpected: , #A8  
  5    0000                  org     $A8, 0xA8, #A8  ; hexa, also: 0A8h
-KateSyntaxHighLightTest.asm(6): error: Unexpected: , 43008d   
+KateSyntaxHighLightTest.asm(6): error: [DISP] <page number> is out of range: 43008
  6    00A8                  disp    43008, 43008d   ; decimal
 KateSyntaxHighLightTest.asm(7): error: Unrecognized instruction: relaxed syntax of Z80 assemblers, "label" is usually default result of anything
  7    A800              With relaxed syntax of Z80 assemblers, "label" is usually default result of anything
