@@ -142,8 +142,8 @@ static CLabelTableEntry* GetLabel(char*& p) {
 				if (modNameLen) {
 					STRCAT(temp, LINEMAX-2, ModuleName); STRCAT(temp, 2, ".");
 				}
-				STRCAT(temp, LABMAX, vorlabp); STRCAT(temp, 2, ".");
-				STRCAT(temp, LABMAX, findName);
+				STRCAT(temp, LABMAX-1, vorlabp); STRCAT(temp, 2, ".");
+				STRCAT(temp, LABMAX-1, findName);
 				findName = temp;
 			}
 		} else {
@@ -424,13 +424,13 @@ void CLabelTable::DumpSymbols() {
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LabelTable[i].name && isalpha((byte)LabelTable[i].name[0])) {
 			STRCPY(ErrorLine, LINEMAX, LabelTable[i].name);
-			STRCAT(ErrorLine, LINEMAX2, ": equ ");
-			STRCAT(ErrorLine, LINEMAX2, "0x");
+			STRCAT(ErrorLine, LINEMAX2-1, ": equ ");
+			STRCAT(ErrorLine, LINEMAX2-1, "0x");
 			char lnrs[16], * l = lnrs;
 			PrintHex32(l, LabelTable[i].value);
 			*l = 0;
-			STRCAT(ErrorLine, LINEMAX2, lnrs);
-			STRCAT(ErrorLine, LINEMAX2, "\n");
+			STRCAT(ErrorLine, LINEMAX2-1, lnrs);
+			STRCAT(ErrorLine, LINEMAX2-1, "\n");
 			fputs(ErrorLine, symfp);
 		}
 	}
@@ -873,7 +873,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	SPRINTF1(labnr, LINEMAX, "%d", macronummer++);
 	macrolabp = labnr;
 	if (omacrolabp) {
-		STRCAT(macrolabp, LINEMAX, "."); STRCAT(macrolabp, LINEMAX, omacrolabp);
+		STRCAT(macrolabp, LINEMAX-1, "."); STRCAT(macrolabp, LINEMAX-1, omacrolabp);
 	} else {
 		MacroDefineTable.ReInit();
 	}
@@ -1008,8 +1008,8 @@ void CStructure::CopyLabels(CStructure* st) {
 	CStructureEntry1* np = st->mnf;
 	if (!np || !PreviousIsLabel) return;
 	char str[LINEMAX];
-	STRCPY(str, LINEMAX, PreviousIsLabel);
-	STRCAT(str, LINEMAX, ".");
+	STRCPY(str, LINEMAX-1, PreviousIsLabel);
+	STRCAT(str, LINEMAX-1, ".");
 	char * const stw = str + strlen(str);
 	while (np) {
 		STRCPY(stw, LINEMAX, np->naam);	// overwrite the second part of label
@@ -1103,9 +1103,9 @@ static void InsertStructSubLabels(const char* mainName, const CStructureEntry1* 
 
 void CStructure::deflab() {
 	char sn[LINEMAX] = { '@' };
-	STRCPY(sn+1, LINEMAX, id);
+	STRCPY(sn+1, LINEMAX-1, id);
 	InsertSingleStructLabel(sn, noffset);
-	STRCAT(sn, LINEMAX, ".");
+	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, mnf);
 }
 
@@ -1120,9 +1120,9 @@ void CStructure::emitlab(char* iid, aint address) {
 		Warning(warnTxt);
 	}
 	char sn[LINEMAX];
-	STRCPY(sn, LINEMAX, iid);
+	STRCPY(sn, LINEMAX-1, iid);
 	InsertSingleStructLabel(sn, address);
-	STRCAT(sn, LINEMAX, ".");
+	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, mnf, address);
 }
 
@@ -1203,7 +1203,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 		STRCPY(sn, LINEMAX-2, ModuleName);
 		STRCAT(sn, 2, ".");
 	}
-	STRCAT(sn, LINEMAX, naam);
+	STRCAT(sn, LINEMAX-1, naam);
 	sp = sn;
 	if (FindDuplicate(sp)) {
 		Error("Duplicate structure name", naam, EARLY);
@@ -1222,7 +1222,7 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 		STRCPY(sn, LINEMAX-2, ModuleName);
 		STRCAT(sn, 2, ".");
 	}
-	STRCAT(sn, LINEMAX, naam);
+	STRCAT(sn, LINEMAX-1, naam);
 	sp = sn;
 	CStructure* p = strs[(*sp)&127];
 	while (p) {
