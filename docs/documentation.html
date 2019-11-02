@@ -1769,16 +1769,26 @@ START  .... ;something code
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Save the tape file for emulators of ZX-Spectrum as a
-              "snapshot" of whole memory. Generated tape file supports the
+              "snapshot" of almost-whole memory. Generated tape file supports the
               ZX-Spectrum clones with extended RAM such as ATM Turbo 512, etc.
-              (If start address is omitted, the one provided by <a class="link" href="#po_end">END</a> is used)</p><div class="example"><a name="idp1134"></a><p class="title"><b>Example 5.44. </b></p><div class="example-contents">
+              (If start address is omitted, the one provided by <a class="link" href="#po_end">END</a> is used)</p>
+
+              <p>The stored memory starts at $5E00 (with screen data at $4000 auto-detected
+				  and optionally stored into the TAP file). The stored memory is automatically
+				  trimmed of zero values at start and end of the region (put non-zero byte markers
+				  around region you want to store, if you have zero-ed bytes at beginning or end
+				  of your code).
+
+              </p><div class="example"><a name="idp1135"></a><p class="title"><b>Example 5.44. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM48
-    ORG $8000
-START  .... ;something code
+    ORG $7FFF
+    DB $01      ; non-zero marker to store the following zero-ed data
+DAT DS 1024, 0  ; zero-ed data at $8000 (1024 bytes)
+START  ....     ; some code
     RET
-    SAVETAP "game.tap",START ; save tape-snapshot to file game.tap. Start address is START ($8000)</pre>
+    SAVETAP "game.tap", START ; save tape-snapshot to file game.tap. Start address is $8400</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term"><a name="po_savetrd"></a>SAVETRD
             &lt;filename_of_trd_image&gt;,[|]&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</span></dt><dd>
