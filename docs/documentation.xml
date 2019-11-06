@@ -2741,6 +2741,18 @@ LABEL5:
     ENDIF
     </programlisting></para>
                 </example></para>
+		<para>Known bug: when code is using label inside module "moduleX",
+			like <code>call labelY</code>, only usage of <code>moduleX.labelY</code> label is noted.
+			Then if you define "labelY" outside of module and hide it inside <code>IFUSED labelY</code>
+			block, the call from module will be unable to find the routine.
+		</para>
+		<para>
+			Workaround: you can use the global-label operator @: "<code>call @labelY</code>" to
+			trigger usage of the global "labelY", or you can use the alternative IFUSED syntax
+			"<code>labelY: IFUSED</code>" which does not only check condition, but also does define the label.
+			Once the label is defined, the "call labelY" line inside module will find the global
+			variant and mark it as "used" correctly.
+		</para>
             </listitem>
           </varlistentry>
 
