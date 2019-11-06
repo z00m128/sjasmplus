@@ -80,7 +80,7 @@ int SearchPath(char* oudzp, char* filename, char* whatever, int maxlen, char* ni
 long GetTickCount() {
 	struct timeval tv1[1];
 	gettimeofday(tv1, 0);
-	return tv1->tv_usec / 1000;
+	return tv1->tv_sec * 1000 + tv1->tv_usec / 1000;
 }
 
 #endif	// #ifndef WIN32

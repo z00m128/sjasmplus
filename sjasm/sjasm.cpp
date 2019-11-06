@@ -689,9 +689,7 @@ int main(int argc, char **argv) {
 
 		double dwCount;
 		dwCount = GetTickCount() - dwStart;
-		if (dwCount < 0) {
-			dwCount = 0;
-		}
+		if (dwCount < 0) dwCount = 0;
 		char workTimeTxt[200] = "";
 		SPRINTF1(workTimeTxt, 200, ", work time: %.3f seconds", dwCount / 1000);
 
