@@ -46,7 +46,7 @@ int ParseDirective(bool beginningOfLine)
 	bp = lp;
 	char* n;
 	aint val;
-	if (!(n = getinstr(lp))) {
+	if (!(n = getinstr(lp))) {	// will also reject any instruction followed by colon char (label)
 		lp = olp;
 		return 0;
 	}

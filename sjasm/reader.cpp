@@ -39,7 +39,13 @@ static const std::array<EDelimiterType, 3> delimiters_noAngle = {DT_QUOTES, DT_A
 
 int cmphstr(char*& p1, const char* p2) {
 	unsigned int i = 0;
-	if (isupper((byte)*p1)) {
+	// check initial non-alpha chars without deciding the upper/lower case of test
+	while (p2[i] && !isalpha((byte)p2[i])) {
+		if (p1[i] != p2[i]) return 0;
+		++i;
+	}
+	// now the first alpha char will make whole test upper or lower case like.
+	if (isupper((byte)p1[i])) {
 		while (p2[i]) {
 			if (p1[i] != toupper((byte)p2[i])) return 0;
 			++i;
@@ -253,6 +259,8 @@ char* getinstr(char*& p) {
 		*np = *p; ++p; ++np;
 	}
 	*np = 0;
+	// colon after instruction can't happen, only if it was meant as label at beginning of line
+	if (':' == *p) return nullptr;
 	if (!Options::syx.CaseInsensitiveInstructions) return instrtemp;
 	// lowercase the retrieved "instruction" string when option "--syntax=i" is used
 	while (instrtemp <= --np) {
