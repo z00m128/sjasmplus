@@ -4,6 +4,8 @@ End             ; mixed case = label (not directive)
 end     DUP 2   ; END should not work at first column, not even with --dirbol enabled
         nop     ; but other directive on the same line (ALIGN, DUP above) must work!
         EDUP
+.END    scf
+END     ccf
 .2      ld      b,1         ; China number one!
  .2     ld      c,-1        ; Taiwan number dash one!
         END : no start address provided, and this text should be NOT parsed either

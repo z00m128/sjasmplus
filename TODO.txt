@@ -5,8 +5,10 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-update README with new CPUs supported upon v1.14.2 release (search for R800 through all files)
-(also update test numbers?)
+backslash in include vs incbin ... weird?
+
+CSPECTMAP is exporting with page size of current device, maybe it should do it with page size
+of active device at the point where the CSPECTMAP directive was used?!
 
 remote build script - "done" ATM, waiting for feedback/improvements suggestions/logs
 

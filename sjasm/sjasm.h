@@ -70,6 +70,8 @@ namespace Options {
 	extern char RAWFName[LINEMAX];
 	extern char UnrealLabelListFName[LINEMAX];
 	extern char CSpectMapFName[LINEMAX];
+	extern char SourceLevelDebugFName[LINEMAX];
+	extern bool IsDefaultSldName;
 
 	extern EOutputVerbosity OutputVerbosity;
 	extern bool IsLabelTableInListing;
@@ -100,21 +102,29 @@ extern CDevicePage *Page;
 extern char* DeviceID;
 extern int deviceDirectivesCounter;
 
+//*current* full file name (used as full for CurSourcePos when `--fullpath`)
+//content at this pointer is immutable and valid till assembler exits, so you can archive/reuse it
+//for example SLD tracing remembers original file where macro was defined by using pointer into this
+extern const char* fileNameFull;
+
 // extend
-extern char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
+extern char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
 extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 // the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
 extern char SourceFNames[128][MAX_PATH];
+extern std::vector<std::string> openedFileNames;	// archive of all files opened (also includes!) (fullname!)
 extern std::vector<char> stdin_log;	// buffer for Options::SourceStdIn, to replay input in 2nd+ pass
 
 extern int ConvertEncoding;
 extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
-extern int adrdisp, PseudoORG, StartAddress;
+extern int adrdisp, PseudoORG, dispPageNum, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
-extern aint CurAddress, CurrentSourceLine, CompiledCurrentLine, LastParsedLabelLine;
-extern aint destlen, size, PreviousErrorLine, maxlin, comlin;
+extern TextFilePos CurSourcePos, DefinitionPos;
+extern uint32_t maxlin;
+extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine;
+extern aint destlen, size, PreviousErrorLine, comlin;
 
 extern char* vorlabp, * macrolabp, * LastParsedLabel;
 

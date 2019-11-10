@@ -1,0 +1,5 @@
+|SLD.data.version|0
+opt sld default.asm|1||0|-1|-1|Z|pages.size:16384,pages.count:4,slots.count:4,slots.adr:0,16384,32768,49152
+opt sld default.asm|2||0|0|0|T|
+2.asm|1||0|-1|-1|Z|pages.size:16384,pages.count:4,slots.count:4,slots.adr:0,16384,32768,49152
+2.asm|2||0|0|1|T|

@@ -1,0 +1,13 @@
+## run sjasmplus with "--sld" and check if the default file name is correct
+# stdin input should produce non-empty "out.sld.txt"
+# two files should produce ".sld.txt" name based on the first one
+# (test file is copied to "2.asm" for second input file)
+# and rename the files to the exp/sym extensions to let test script check content of them
+cp "$file_asm" 2.asm && \
+cat "$file_asm" | "$EXE" --nologo --msg=none --fullpath - --sld && \
+[[ -s "out.sld.txt" ]] && \
+"$EXE" --nologo --msg=none --fullpath --sld "$file_asm" 2.asm && \
+[[ -s "${dst_base}.sld.txt" ]] && \
+mv out.sld.txt "opt sld default.exp" && \
+mv "${dst_base}.sld.txt" "${dst_base}.sym"
+last_result=$?

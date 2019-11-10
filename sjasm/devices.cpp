@@ -195,6 +195,25 @@ CDevicePage* CDevice::GetPage(int num) {
 	return Pages[0];
 }
 
+// returns slot belonging to the Z80-address (16bit)
+int CDevice::GetSlotOfA16(int32_t address) {
+	for (int i=SlotsCount; i--; ) {
+		CDeviceSlot* const S = Slots[i];
+		if (address < S->Address) continue;
+		if (S->Address + S->Size <= address) return -1;		// outside of slot
+		return i;
+	}
+	return -1;
+}
+
+// returns currently mapped page for the Z80-address (16bit)
+int CDevice::GetPageOfA16(int32_t address) {
+	int slotNum = GetSlotOfA16(address);
+	if (-1 == slotNum) return -1;
+	if (nullptr == Slots[slotNum]->Page) return -1;
+	return Slots[slotNum]->Page->Number;
+}
+
 void CDevice::CheckPage(const ECheckPageLevel level) {
 	// fake DISP address gets auto-wrapped FFFF->0 (with warning only)
 	// ("no emit" to catch before labels are defined, although "emit" sounds more logical)

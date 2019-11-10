@@ -46,7 +46,7 @@ int ParseDirective(bool beginningOfLine)
 	bp = lp;
 	char* n;
 	aint val;
-	if (!(n = getinstr(lp))) {
+	if (!(n = getinstr(lp))) {	// will also reject any instruction followed by colon char (label)
 		lp = olp;
 		return 0;
 	}
@@ -289,6 +289,22 @@ void dirDISP() {
 		adrdisp = CurAddress;
 		CurAddress = val;
 		PseudoORG = 1;
+		dispPageNum = LABEL_PAGE_UNDEFINED;
+		if (comma(lp)) {
+			if (!ParseExpressionNoSyntaxError(lp, dispPageNum)) {
+				dispPageNum = LABEL_PAGE_UNDEFINED;
+				Error("[DISP] Syntax error in <page number>", lp);
+			} else {
+				if (DeviceID) {
+					if (dispPageNum < 0 || Device->PagesCount <= dispPageNum) {
+						ErrorInt("[DISP] <page number> is out of range", dispPageNum);
+						dispPageNum = LABEL_PAGE_UNDEFINED;
+					}
+				} else {
+					Error("[DISP] <page number> is accepted only in device mode", line);
+				}
+			}
+		}
 	} else {
 		Error("[DISP] Syntax error in <address>", lp, SUPPRESS);
 	}
@@ -300,6 +316,7 @@ void dirENT() {
 	}
 	CurAddress = adrdisp;
 	PseudoORG = 0;
+	dispPageNum = LABEL_PAGE_UNDEFINED;
 }
 
 void dirPAGE() {
@@ -1164,8 +1181,8 @@ void dirCSPECTMAP() {
 	if (fName[0]) {
 		STRCPY(Options::CSpectMapFName, LINEMAX, fName);
 	} else {		// create default map file name from current source file name (appends ".map")
-		STRCPY(Options::CSpectMapFName, LINEMAX-5, filename);
-		STRCAT(Options::CSpectMapFName, LINEMAX, ".map");
+		STRCPY(Options::CSpectMapFName, LINEMAX-5, CurSourcePos.filename);
+		STRCAT(Options::CSpectMapFName, LINEMAX-1, ".map");
 	}
 	delete[] fName;
 }
@@ -1404,7 +1421,7 @@ void dirEXPORT() {
 	char* n, * p;
 
 	if (!Options::ExportFName[0]) {
-		STRCPY(Options::ExportFName, LINEMAX, filename);
+		STRCPY(Options::ExportFName, LINEMAX, CurSourcePos.filename);
 		if (!(p = strchr(Options::ExportFName, '.'))) {
 			p = Options::ExportFName;
 		} else {
@@ -1653,7 +1670,7 @@ void dirDUP() {
 	dup.Lines = new CStringsList(lp);
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
 	dup.Pointer = dup.Lines;
-	dup.CurrentSourceLine = CurrentSourceLine;
+	dup.sourcePos = CurSourcePos;
 	dup.IsInWork = false;
 	RepeatStack.push(dup);
 }
@@ -1676,28 +1693,36 @@ void dirEDUP() {
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) ErrorOOM();
-	aint lcurln = CurrentSourceLine;
+
+	// To achieve the state when SourceLine for DUP-EDUP block is constant EDUP line,
+	// and MacroLine is pointing to source of particular line in block, basically just kill all
+	// lines with CurrentSourceLine in remaining code. (TODO v2.x listing with src+macro lines?!)
+
+	TextFilePos oldPos = CurSourcePos;
 	CStringsList* olijstp = lijstp;
 	++lijst;
 	while (dup.RepeatCount--) {
-		CurrentSourceLine = dup.CurrentSourceLine;
+		CurSourcePos = dup.sourcePos;
+		DefinitionPos = dup.sourcePos;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
-			if (lijstp->sourceLine) CurrentSourceLine = lijstp->sourceLine;
+			if (lijstp->source.line) CurSourcePos = lijstp->source;
+			DefinitionPos = lijstp->definition;
 			STRCPY(line, LINEMAX, lijstp->string);
 			substitutedLine = line;		// reset substituted listing
 			eolComment = NULL;			// reset end of line comment
 			lijstp = lijstp->next;
 			ParseLineSafe();
-			++CurrentSourceLine;
+			CurSourcePos.nextSegment();
 		}
 	}
 	delete dup.Lines;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;
-	CurrentSourceLine = lcurln;
+	CurSourcePos = oldPos;
+	DefinitionPos = TextFilePos();
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	free(ml);
@@ -1802,10 +1827,10 @@ void _lua_showerror() {
 	int ln = SplitLuaErrorMessage(msgp);
 
 	// print error and other actions
-	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", filename, ln, msgp);
+	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", CurSourcePos.filename, ln, msgp);
 
 	if (!strchr(ErrorLine, '\n')) {
-		STRCAT(ErrorLine, LINEMAX2, "\n");
+		STRCAT(ErrorLine, LINEMAX2-1, "\n");
 	}
 
 	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
@@ -1884,7 +1909,7 @@ void dirLUA() {
 		execute = true;
 	}
 
-	ln = CurrentSourceLine;
+	ln = CurSourcePos.line;
 	ListFile();
 	while (1) {
 		if (!ReadLine(false)) {
@@ -1955,7 +1980,7 @@ void dirINCLUDELUA() {
 	if (!fullpath[0]) {
 		Error("[INCLUDELUA] File doesn't exist", fnaam, EARLY);
 	} else {
-		LuaLine = CurrentSourceLine;
+		LuaLine = CurSourcePos.line;
 		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
 			_lua_showerror();
@@ -1975,6 +2000,24 @@ void dirDEVICE() {
 	if (id) {
 		if (!SetDevice(id)) {
 			Error("[DEVICE] Invalid parameter", NULL, IF_FIRST);
+		} else if (IsSldExportActive()) {
+			// SLD tracing data are being exported, export the device data
+			int pageSize = Device->GetCurrentSlot()->Size;
+			int pageCount = Device->PagesCount;
+			int slotsCount = Device->SlotsCount;
+			char buf[LINEMAX];
+			snprintf(buf, LINEMAX, "pages.size:%d,pages.count:%d,slots.count:%d",
+				pageSize, pageCount, slotsCount
+			);
+			for (int slotI = 0; slotI < slotsCount; ++slotI) {
+				size_t bufLen = strlen(buf);
+				char* bufAppend = buf + bufLen;
+				snprintf(bufAppend, LINEMAX-bufLen,
+						 (0 == slotI) ? ",slots.adr:%d" : ",%d",
+						 Device->GetSlot(slotI)->Address);
+			}
+			// pagesize
+			WriteToSldFile(-1,-1,'Z',buf);
 		}
 	} else {
 		Error("[DEVICE] Syntax error in <deviceid>", lp, SUPPRESS);

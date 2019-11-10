@@ -45,4 +45,18 @@ TEST_FIXTURE(DeviceFixture, Device_GetInvalidPage) {
 	CHECK(testDev.GetPage(0) == testDev.GetPage(3));	// actual test
 }
 
+TEST_FIXTURE(DeviceFixture, Device_GetSlotOfA16) {
+	CHECK(-1 == testDev.GetSlotOfA16(0x8000));
+	CHECK(-1 == testDev.GetSlotOfA16(-1));
+	CHECK(0 == testDev.GetSlotOfA16(0x0123));
+	CHECK(1 == testDev.GetSlotOfA16(0x4123));
+}
+
+TEST_FIXTURE(DeviceFixture, Device_GetPageOfA16) {
+	CHECK(-1 == testDev.GetPageOfA16(0x8000));
+	CHECK(-1 == testDev.GetPageOfA16(-1));
+	CHECK(0 == testDev.GetPageOfA16(0x0123));
+	CHECK(1 == testDev.GetPageOfA16(0x4123));
+}
+
 #endif

@@ -1,0 +1,7 @@
+|SLD.data.version|0
+opt_sld_explicit.asm|1||0|-1|-1|Z|pages.size:16384,pages.count:8,slots.count:4,slots.adr:0,16384,32768,49152
+opt_sld_explicit.asm|2||0|7|0|T|
+opt_sld_explicit.asm|3||0|7|1|T|
+opt_sld_explicit.asm|1||0|-1|-1|Z|pages.size:16384,pages.count:8,slots.count:4,slots.adr:0,16384,32768,49152
+opt_sld_explicit.asm|2||0|7|2|T|
+opt_sld_explicit.asm|3||0|7|3|T|

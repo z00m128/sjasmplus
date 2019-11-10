@@ -30,6 +30,24 @@
 
 #include "sjdefs.h"
 
+TextFilePos::TextFilePos() : filename(nullptr), line(0), colBegin(0), colEnd(0) {
+}
+
+void TextFilePos::newFile(const char* fileNamePtr) {
+	filename = fileNamePtr;
+	line = colBegin = colEnd = 0;
+}
+
+// advanceColumns are valid only when true == endsWithColon (else advanceColumns == 0)
+// default arguments are basically "next line"
+void TextFilePos::nextSegment(bool endsWithColon, size_t advanceColumns) {
+	if (endsWithColon && 0 == colEnd) colEnd = 1;	// first segment of "colonized" line (do +1,+1)
+	colBegin = colEnd;
+	if (colBegin <= 1) ++line;		// first segment of any line, increment also line number
+	if (endsWithColon)	colEnd += advanceColumns;
+	else				colEnd = 0;
+}
+
 char* PreviousIsLabel = nullptr;
 
 // since v1.14.2:
@@ -124,8 +142,8 @@ static CLabelTableEntry* GetLabel(char*& p) {
 				if (modNameLen) {
 					STRCAT(temp, LINEMAX-2, ModuleName); STRCAT(temp, 2, ".");
 				}
-				STRCAT(temp, LABMAX, vorlabp); STRCAT(temp, 2, ".");
-				STRCAT(temp, LABMAX, findName);
+				STRCAT(temp, LABMAX-1, vorlabp); STRCAT(temp, 2, ".");
+				STRCAT(temp, LABMAX-1, findName);
 				findName = temp;
 			}
 		} else {
@@ -218,6 +236,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			//if label already added (as used, or in previous pass), just refresh values
 			label->value = nvalue;
 			label->page = Page ? Page->Number : LABEL_PAGE_ROM;
+			// in DISP mode set the page number by DISP page_number, or current device mapping
+			if (PseudoORG) {
+				label->page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
+								DeviceID ? Device->GetPageOfA16(nvalue) : LABEL_PAGE_ROM;
+			}
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
 			label->updatePass = pass;
@@ -239,6 +262,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->used = undefined;
 	if (!undefined) {
 		label->page = Page ? Page->Number : LABEL_PAGE_ROM;
+		// in DISP mode set the page number by DISP page_number, or current device mapping
+		if (PseudoORG) {
+			label->page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
+							DeviceID ? Device->GetPageOfA16(nvalue) : LABEL_PAGE_ROM;
+		}
 	} else {
 		label->page = LABEL_PAGE_UNDEFINED;
 	}
@@ -396,13 +424,13 @@ void CLabelTable::DumpSymbols() {
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LabelTable[i].name && isalpha((byte)LabelTable[i].name[0])) {
 			STRCPY(ErrorLine, LINEMAX, LabelTable[i].name);
-			STRCAT(ErrorLine, LINEMAX2, ": equ ");
-			STRCAT(ErrorLine, LINEMAX2, "0x");
+			STRCAT(ErrorLine, LINEMAX2-1, ": equ ");
+			STRCAT(ErrorLine, LINEMAX2-1, "0x");
 			char lnrs[16], * l = lnrs;
 			PrintHex32(l, LabelTable[i].value);
 			*l = 0;
-			STRCAT(ErrorLine, LINEMAX2, lnrs);
-			STRCAT(ErrorLine, LINEMAX2, "\n");
+			STRCAT(ErrorLine, LINEMAX2-1, lnrs);
+			STRCAT(ErrorLine, LINEMAX2-1, "\n");
 			fputs(ErrorLine, symfp);
 		}
 	}
@@ -558,7 +586,8 @@ aint CLocalLabelTable::seekBack(const aint labelNumber) const {
 	return l ? l->value : -1L;
 }
 
-CStringsList::CStringsList() : string(NULL), next(NULL), sourceLine(0) {
+CStringsList::CStringsList() : string(NULL), next(NULL)
+{
 	// all initialized already
 }
 
@@ -753,7 +782,8 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
 	string = STRDUP(stringSource);
 	next = nnext;
-	sourceLine = CurrentSourceLine;
+	source = CurSourcePos;
+	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 }
 
 CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
@@ -843,7 +873,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	SPRINTF1(labnr, LINEMAX, "%d", macronummer++);
 	macrolabp = labnr;
 	if (omacrolabp) {
-		STRCAT(macrolabp, LINEMAX, "."); STRCAT(macrolabp, LINEMAX, omacrolabp);
+		STRCAT(macrolabp, LINEMAX-1, "."); STRCAT(macrolabp, LINEMAX-1, omacrolabp);
 	} else {
 		MacroDefineTable.ReInit();
 	}
@@ -876,12 +906,14 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
 	while (lijstp) {
+		DefinitionPos = lijstp->definition;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
 		lijstp = lijstp->next;
 		ParseLineSafe();
 	}
+	DefinitionPos = TextFilePos();
 	STRCPY(line, LINEMAX, ml);
 	lijstp = olijstp;
 	--lijst;
@@ -976,8 +1008,8 @@ void CStructure::CopyLabels(CStructure* st) {
 	CStructureEntry1* np = st->mnf;
 	if (!np || !PreviousIsLabel) return;
 	char str[LINEMAX];
-	STRCPY(str, LINEMAX, PreviousIsLabel);
-	STRCAT(str, LINEMAX, ".");
+	STRCPY(str, LINEMAX-1, PreviousIsLabel);
+	STRCAT(str, LINEMAX-1, ".");
 	char * const stw = str + strlen(str);
 	while (np) {
 		STRCPY(stw, LINEMAX, np->naam);	// overwrite the second part of label
@@ -1071,9 +1103,9 @@ static void InsertStructSubLabels(const char* mainName, const CStructureEntry1* 
 
 void CStructure::deflab() {
 	char sn[LINEMAX] = { '@' };
-	STRCPY(sn+1, LINEMAX, id);
+	STRCPY(sn+1, LINEMAX-1, id);
 	InsertSingleStructLabel(sn, noffset);
-	STRCAT(sn, LINEMAX, ".");
+	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, mnf);
 }
 
@@ -1088,9 +1120,9 @@ void CStructure::emitlab(char* iid, aint address) {
 		Warning(warnTxt);
 	}
 	char sn[LINEMAX];
-	STRCPY(sn, LINEMAX, iid);
+	STRCPY(sn, LINEMAX-1, iid);
 	InsertSingleStructLabel(sn, address);
-	STRCAT(sn, LINEMAX, ".");
+	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, mnf, address);
 }
 
@@ -1171,7 +1203,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 		STRCPY(sn, LINEMAX-2, ModuleName);
 		STRCAT(sn, 2, ".");
 	}
-	STRCAT(sn, LINEMAX, naam);
+	STRCAT(sn, LINEMAX-1, naam);
 	sp = sn;
 	if (FindDuplicate(sp)) {
 		Error("Duplicate structure name", naam, EARLY);
@@ -1190,7 +1222,7 @@ CStructure* CStructureTable::zoek(const char* naam, int gl) {
 		STRCPY(sn, LINEMAX-2, ModuleName);
 		STRCAT(sn, 2, ".");
 	}
-	STRCAT(sn, LINEMAX, naam);
+	STRCAT(sn, LINEMAX-1, naam);
 	sp = sn;
 	CStructure* p = strs[(*sp)&127];
 	while (p) {

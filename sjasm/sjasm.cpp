@@ -58,6 +58,7 @@ void PrintHelp() {
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
 	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
 	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
+	_COUT "  --sld[=<filename>]       Save Source Level Debugging data to <filename>" _ENDL;
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
@@ -82,6 +83,8 @@ namespace Options {
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
 	char CSpectMapFName[LINEMAX] = {0};
+	char SourceLevelDebugFName[LINEMAX] = {0};
+	bool IsDefaultSldName = false;
 
 	char ZX_SnapshotFName[LINEMAX] = {0};
 	char ZX_TapeFName[LINEMAX] = {0};
@@ -159,22 +162,26 @@ CDevicePage *Page = 0;
 char* DeviceID = 0;
 
 // extend
-char filename[LINEMAX], * lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
+const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either full or basename (--fullpath)
+char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 char SourceFNames[128][MAX_PATH];
 static int SourceFNamesCount = 0;
+std::vector<std::string> openedFileNames(256);
 std::vector<char> stdin_log;
 
 int ConvertEncoding = ENCWIN;
 
 int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, donotlist = 0, listmacro = 0;
-int adrdisp = 0, PseudoORG = 0, StartAddress = -1;
+int adrdisp = 0, PseudoORG = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;
 byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
-aint CurAddress = 0, CurrentSourceLine = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0;
-aint destlen = 0, size = -1L,PreviousErrorLine = -1L, maxlin = 0, comlin = 0;
+TextFilePos CurSourcePos, DefinitionPos;
+uint32_t maxlin = 0;
+aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0;
+aint destlen = 0, size = -1L,PreviousErrorLine = -1L, comlin = 0;
 char* CurrentDirectory=NULL;
 
 char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
@@ -199,13 +206,13 @@ static char* globalDeviceID = NULL;
 
 void InitPass() {
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
-	aint pow10 = 1;
+	uint32_t maxpow10 = 1;
 	reglenwidth = 0;
 	do {
 		++reglenwidth;
-		pow10 *= 10;
-		if (pow10 < 10) ExitASM(1);	// 32b overflow
-	} while (pow10 <= maxlin);
+		maxpow10 *= 10;
+		if (maxpow10 < 10) ExitASM(1);	// 32b overflow
+	} while (maxpow10 <= maxlin);
 	*ModuleName = 0;
 	SetLastParsedLabel(nullptr);
 	if (vorlabp) free(vorlabp);
@@ -213,8 +220,9 @@ void InitPass() {
 	macrolabp = NULL;
 	listmacro = 0;
 	CurAddress = 0;
-	CurrentSourceLine = CompiledCurrentLine = 0;
-	PseudoORG = 0; adrdisp = 0;
+	CurSourcePos = DefinitionPos = TextFilePos();	// reset current source/definition positions
+	CompiledCurrentLine = 0;
+	PseudoORG = 0; adrdisp = 0; dispPageNum = LABEL_PAGE_UNDEFINED;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
 	StructureTable.ReInit();
@@ -420,10 +428,13 @@ namespace Options {
 					}
 				} else if (!strcmp(opt, "lst") && !val[0]) {
 					IsDefaultListingName = true;
+				} else if (!strcmp(opt, "sld") && !val[0]) {
+					IsDefaultSldName = true;
 				} else if (
 					CheckAssignmentOption("sym", SymbolListFName, LINEMAX) ||
 					CheckAssignmentOption("lst", ListingFName, LINEMAX) ||
 					CheckAssignmentOption("exp", ExportFName, LINEMAX) ||
+					CheckAssignmentOption("sld", SourceLevelDebugFName, LINEMAX) ||
 					CheckAssignmentOption("raw", RAWFName, LINEMAX) ) {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
@@ -566,6 +577,9 @@ int main(int argc, char **argv) {
 		if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
 			Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
 		}
+		if (Options::IsDefaultSldName && Options::SourceLevelDebugFName[0]) {
+			Error("Using both  --sld  and  --sld=<filename>  is not possible.", NULL, FATAL);
+		}
 	}
 	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
 
@@ -644,7 +658,11 @@ int main(int argc, char **argv) {
 		++pass;
 		InitPass();
 
-		if (pass == LASTPASS) OpenDest();
+		if (pass == LASTPASS) {
+			OpenDest();
+			//open source level debugging file
+			OpenSld();
+		}
 
 		for (i = 0; i < SourceFNamesCount; i++) {
 			IsRunning = 1;
@@ -689,9 +707,7 @@ int main(int argc, char **argv) {
 
 		double dwCount;
 		dwCount = GetTickCount() - dwStart;
-		if (dwCount < 0) {
-			dwCount = 0;
-		}
+		if (dwCount < 0) dwCount = 0;
 		char workTimeTxt[200] = "";
 		SPRINTF1(workTimeTxt, 200, ", work time: %.3f seconds", dwCount / 1000);
 

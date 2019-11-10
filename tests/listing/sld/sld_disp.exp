@@ -1,0 +1,12 @@
+|SLD.data.version|0
+sld_disp.asm|1||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
+sld_disp.asm|4||0|1|32768|F|DispLabel
+sld_disp.asm|6||0|1|32768|T|
+sld_disp.asm|8||0|1|32769|F|DispLabel2
+sld_disp.asm|9||0|1|32769|T|
+sld_disp.asm|10||0|1|32770|T|
+sld_disp.asm|13||0|4|32784|F|DispLabel3
+sld_disp.asm|14||0|4|32784|T|
+sld_disp.asm|16||0|32|57348|F|NormalLabel
+sld_disp.asm|17||0|32|57348|T|
+sld_disp.asm|38||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344

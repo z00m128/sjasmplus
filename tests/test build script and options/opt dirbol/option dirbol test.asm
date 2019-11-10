@@ -2,3 +2,4 @@
 ; tests --dirbol option (directives like INCLUDE may start at beginning of line)
 
 include "option dirbol test.i.asm"
+    TEST_EMPTY_MACRO_IN_INCLUDE
