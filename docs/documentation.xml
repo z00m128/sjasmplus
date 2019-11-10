@@ -1836,7 +1836,9 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
 
             <listitem>
               <para>The FPOS directive makes it possible to set the file
-              position to anywhere in the output file.</para>
+              position to anywhere in the output file. Position value without sign
+              is used as absolute one to be set, position starting with + or - sign will be
+              used as relative position.</para>
 
               <para>In combination with <link
               linkend="po_output">OUTPUT</link> &lt;filename&gt;,r it is
