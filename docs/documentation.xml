@@ -157,6 +157,10 @@
             bug fix patches, testing.</para>
           </listitem>
 
+          <listitem>
+            <para><emphasis>CKirby</emphasis> - SLD export and support in his tools.</para>
+          </listitem>
+
         </itemizedlist></para>
 
       <para>Big thanks to all people, who helped on development of the compiler!</para>
@@ -186,7 +190,7 @@
 
             <listitem>
               <synopsis>- fix detection of `.end:` and `.END` labels when `--dirbol` is used
-- added export of <link linkend="c_sld_data">SLD (Source Level Debugging) data</link>
+- added export of <link linkend="c_sld_data">SLD (Source Level Debugging) data</link>, see also <ulink url="https://github.com/Ckirby101/NDS-NextDevSystem">NDS (NextDevSystem)</ulink>
 - docs: added small details about <link linkend="po_fpos">FPOS</link>, <link linkend="po_savetap">SAVETAP</link>, <link linkend="ca_ifused">IFUSED</link>
 - fix assembling-time reported in linux</synopsis>
             </listitem>

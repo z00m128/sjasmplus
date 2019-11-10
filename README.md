@@ -1,9 +1,4 @@
 # sjasmplus
-
-Added Tracefile output to support NDS remote debugging system
-
-https://github.com/Ckirby101/NDS-NextDevSystem
-
 [![Build Status](https://api.cirrus-ci.com/github/z00m128/sjasmplus.svg)](https://cirrus-ci.com/github/z00m128/sjasmplus/master)
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/)
 [![BSD 3-Clause License](https://img.shields.io/github/license/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/blob/master/LICENSE.md)
