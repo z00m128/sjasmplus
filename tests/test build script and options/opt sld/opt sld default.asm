@@ -1,0 +1,2 @@
+    DEVICE ZXSPECTRUM48
+    nop

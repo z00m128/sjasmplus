@@ -28,6 +28,19 @@
 
 // tables.h
 
+struct TextFilePos {
+	const char*		filename;
+	uint32_t		line;				// line numbering start at 1 (human way) 0 = invalid/init value
+	uint32_t 		colBegin, colEnd;	// columns coordinates are unused at this moment
+
+	TextFilePos();
+	void newFile(const char* fileNamePtr);	// requires stable immutable pointer (until sjasmplus exits)
+
+	// advanceColumns are valid only when true == endsWithColon (else advanceColumns == 0)
+	// default arguments are basically "next line"
+	void nextSegment(bool endsWithColon = false, size_t advanceColumns = 0);
+};
+
 enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
 
 char* ValidateLabel(const char* naam, bool setNameSpace);
@@ -115,7 +128,8 @@ class CStringsList {
 public:
 	char* string;
 	CStringsList* next;
-	int sourceLine;
+	TextFilePos source;
+	TextFilePos definition;
 	CStringsList();
 	~CStringsList();
 	CStringsList(const char* stringSource, CStringsList* next = NULL);
@@ -248,6 +262,7 @@ private:
 
 struct SRepeatStack {
 	int RepeatCount;
+	TextFilePos sourcePos;
 	aint CurrentSourceLine;
 	CStringsList* Lines;
 	CStringsList* Pointer;

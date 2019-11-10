@@ -59,11 +59,13 @@ public:
 	enum ECheckPageLevel{ CHECK_RESET, CHECK_NO_EMIT, CHECK_EMIT };
 
 	CDevice(const char* name, CDevice* parent);
-	~CDevice();
+	virtual ~CDevice();
 	void AddSlot(int32_t adr, int32_t size);
 	void AddPage(byte* memory, int32_t size);
 	CDevicePage* GetPage(int);
 	CDeviceSlot* GetSlot(int);
+	virtual int GetSlotOfA16(int32_t address);
+	int GetPageOfA16(int32_t address);
 	void CheckPage(const ECheckPageLevel level);
 	bool SetSlot(int slotNumber);		// sets "current/active" slot
 	CDeviceSlot* GetCurrentSlot();		// returns "current/active" slot

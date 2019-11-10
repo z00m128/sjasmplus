@@ -59,7 +59,7 @@ extern const char pathGoodSlash;
 #define TCHAR char
 #endif
 void GetCurrentDirectory(int, char*);
-int SearchPath(char*, char*, char*, int, char*, char**);
+int SearchPath(const char* oudzp, const char* filename, const char* /*extension*/, int maxlen, char* nieuwzp, char** ach);
 #ifndef WIN32
 long GetTickCount();
 #endif

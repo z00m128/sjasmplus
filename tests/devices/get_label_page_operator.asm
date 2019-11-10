@@ -7,7 +7,7 @@ orgL1:
     DISP    0xC000-1
 dispL1:
     ASSERT  4 == $$orgL1 && 4 == $$     ; label and page in 0000-3FFF is 4
-    ; the page of DISP displaced label dispL1 is also 4 which is sort of useless value
+    ASSERT  6 == $$dispL1               ; dispL1 page is taken from current mapping
     ; also the CSpect export of displaced labels is sort of "bogus", affected by this
     set     5,(ix+0x41)     ; 4B opcode across both ORG and DISP boundaries
     ENT

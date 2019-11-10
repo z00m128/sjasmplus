@@ -512,7 +512,7 @@ void ParseLabel() {
 	if (White()) return;
 	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
 	char temp[LINEMAX], * tp = temp, * ttp;
-	aint val, oval;
+	aint val;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
 		*tp = *lp; ++tp; ++lp;
 	}
@@ -568,16 +568,23 @@ void ParseLabel() {
 		// Copy label name to last parsed label variable
 		if (!IsDEFL) SetLastParsedLabel(tp);
 		if (pass == LASTPASS) {
+
+			CLabelTableEntry* label = LabelTable.Find(tp, true);
+			if (nullptr == label) {		// should have been already defined before last pass
+				Error("Label not found", tp);
+				return;
+			}
 			if (IsDEFL) {		//re-set DEFL value
 				LabelTable.Insert(tp, val, false, true, false);
+			} else if (IsSldExportActive()) {
+				// SLD (Source Level Debugging) tracing-data logging
+				WriteToSldFile(IsEQU ? -1 : label->page, val, IsEQU ? 'D' : 'F', tp);
 			}
-			if (!GetLabelValue(ttp, oval)) {
-				Error("Internal error. ParseLabel()", NULL, FATAL);
-			}
-			if (!IsDEFL && val != oval) {
+
+			if (val != label->value) {
 				char* buf = new char[LINEMAX];
 
-				SPRINTF2(buf, LINEMAX, "previous value %u not equal %u", oval, val);
+				SPRINTF2(buf, LINEMAX, "previous value %u not equal %u", label->value, val);
 				Warning("Label has different value in pass 3", buf);
 				LabelTable.Update(tp, val);
 
@@ -588,6 +595,29 @@ void ParseLabel() {
 		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
 			Error("Duplicate label", tp, EARLY);
 		}
+
+// TODO v2.x: currently DEFL+EQU label can be followed with instruction => remove this syntax
+// TODO v2.x: this is too complicated in current version: Unreal/Cspect already expect
+// EQU/DEFL to be current page or "ROM" = not a big deal as they did change in v1.x course already.
+// But also struct labels are set as EQU ones, so this has to split, and many other details.
+// (will also need more than LABEL_PAGE_UNDEFINED value to deal with more states)
+// 		if (IsEQU && comma(lp)) {	// Device extension: "<label> EQU <address>,<page number>"
+// 			if (!DeviceID) {
+// 				Error("EQU can set page to label only in device mode", line);
+// 				SkipToEol(lp);
+// 			} else if (!ParseExpression(lp, oval)) {	// try to read page number into "oval"
+// 				Error("Expression error", lp);
+// 				oval = -1;
+// 			} else if (oval < 0 || Device->PagesCount <= oval) {
+// 				ErrorInt("Invalid page number", oval);
+// 				oval = -1;
+// 			} else {
+// 				if (val < 0 || 0xFFFF < val) Warning("The EQU address is outside of 16bit range", line);
+// 				CLabelTableEntry* equLabel = LabelTable.Find(tp, true);	// must be already defined + found
+// 				equLabel->page = oval;			// set it's page number
+// 			}
+// 		}
+
 		delete[] tp;
 	}
 }
@@ -619,11 +649,32 @@ int ParseMacro() {
 	return 0;
 }
 
+static bool PageDiffersWarningShown = false;
+
 void ParseInstruction() {
 	if ('@' == *lp) ++lp;		// skip single '@', if it was used to inhibit macro expansion
 	if (ParseDirective()) {
 		return;
 	}
+
+	// SLD (Source Level Debugging) tracing-data logging
+	if (IsSldExportActive()) {
+		int pageNum = Page->Number;
+		if (PseudoORG) {
+			int mappingPageNum = Device->GetPageOfA16(CurAddress);
+			if (LABEL_PAGE_UNDEFINED == dispPageNum) {	// special DISP page is not set, use mapped
+				pageNum = mappingPageNum;
+			} else {
+				pageNum = dispPageNum;					// special DISP page is set, use it instead
+				if (pageNum != mappingPageNum && !PageDiffersWarningShown) {
+					Warning("DISP memory page differs from current mapping");
+					PageDiffersWarningShown = true;		// show warning about different mapping only once
+				}
+			}
+		}
+		WriteToSldFile(pageNum, CurAddress);
+	}
+
 	Z80::GetOpCode();
 }
 
@@ -687,10 +738,12 @@ void ParseLine(bool parselabels) {
 		}
 	}
 	if (!*lp) {
+
+
 		char *srcNonWhiteChar = line;
 		SkipBlanks(srcNonWhiteChar);
 		// check if only "end-line" comment remained, treat that one as "empty" line too
-		if (';' == *srcNonWhiteChar || ('/' == srcNonWhiteChar[0] && '/' == srcNonWhiteChar[1]))
+		if (';' == srcNonWhiteChar[0] || ('/' == srcNonWhiteChar[0] && '/' == srcNonWhiteChar[1]))
 			srcNonWhiteChar = lp;			// force srcNonWhiteChar to point to 0
 		if (*srcNonWhiteChar || comlin) {	// non-empty source line turned into nothing
 			ListFile(true);					// or empty source inside comment-block -> "skipped"

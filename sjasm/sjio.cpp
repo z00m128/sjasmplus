@@ -69,7 +69,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	DefineTable.Replace("_ERRORS", ErrorCount);
 
 	if (1 <= pass && pass <= LASTPASS) {	// during assembling, show also file+line info
-		int ln = CurrentSourceLine;
+		int ln = CurSourcePos.line;
 #ifdef USE_LUA
 		if (LuaLine >= 0) {
 			lua_Debug ar;
@@ -78,7 +78,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 			ln = LuaLine + ar.currentline;
 		}
 #endif //USE_LUA
-		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", filename, ln);
+		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", CurSourcePos.filename, ln);
 	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
 	STRCAT(ErrorLine, LINEMAX2-1, "error: ");
 	STRCAT(ErrorLine, LINEMAX2-1, message);
@@ -126,7 +126,7 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 	DefineTable.Replace("_WARNINGS", WarningCount);
 
 	if (pass <= LASTPASS) {					// during assembling, show also file+line info
-		int ln = CurrentSourceLine;
+		int ln = CurSourcePos.line;
 #ifdef USE_LUA
 		if (LuaLine >= 0) {
 			lua_Debug ar;
@@ -135,7 +135,7 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 			ln = LuaLine + ar.currentline;
 		}
 #endif //USE_LUA
-		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", filename, ln);
+		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", CurSourcePos.filename, ln);
 	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
 	STRCAT(ErrorLine, LINEMAX2-1, "warning: ");
 	STRCAT(ErrorLine, LINEMAX2-1, message);
@@ -149,6 +149,32 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 	if (Options::OutputVerbosity <= OV_WARNING) {
 		_CERR ErrorLine _END;
 	}
+}
+
+// find position of extension in filename (points at dot char or beyond filename if no extension)
+// filename is pointer to writeable format containing file name (can be full path) (NOT NULL)
+// if initWithName and filenameBufferSize are explicitly provided, filename will be first overwritten with those
+char* FilenameExtPos(char* filename, const char* initWithName, size_t initNameMaxLength) {
+	// if the init value is provided with positive buffer size, init the buffer first
+	if (0 < initNameMaxLength && initWithName) {
+		STRCPY(filename, initNameMaxLength, initWithName);
+	}
+	// find start of the base filename
+	const char* baseName = FilenameBasePos(filename);
+	// find extension of the filename and return position of it
+	char* const filenameEnd = filename + strlen(filename);
+	char* extPos = filenameEnd;
+	while (baseName < extPos && '.' != *extPos) --extPos;
+	if (baseName < extPos) return extPos;
+	// no extension found (empty filename, or "name", or ".name"), return end of filename
+	return filenameEnd;
+}
+
+const char* FilenameBasePos(const char* fullname) {
+	const char* const filenameEnd = fullname + strlen(fullname);
+	const char* baseName = filenameEnd;
+	while (fullname < baseName && '/' != baseName[-1] && '\\' != baseName[-1]) --baseName;
+	return baseName;
 }
 
 void CheckRamLimitExceeded() {
@@ -235,13 +261,13 @@ void PrepareListLine(char* buffer, aint hexadd)
 
 	int digit = ' ';
 	int linewidth = reglenwidth;
-	aint linenumber = CurrentSourceLine % 10000;
+	aint linenumber = CurSourcePos.line % 10000;
 	if (linewidth > 5)
 	{
 		linewidth = 5;
-		digit = CurrentSourceLine / 10000 + '0';
+		digit = CurSourcePos.line / 10000 + '0';
 		if (digit > '~') digit = '~';
-		if (CurrentSourceLine >= 10000) linenumber += 10000;
+		if (CurSourcePos.line >= 10000) linenumber += 10000;
 	}
 	memset(buffer, ' ', 24);
 	if (listmacro) buffer[23] = '>';
@@ -371,7 +397,7 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 	}
 }
 
-char* GetPath(char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
+char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
 {
 	char fullFilePath[MAX_PATH] = { 0 };
 	CStringsList* dir = Options::IncludeDirsList;	// include-paths to search
@@ -477,9 +503,10 @@ static void OpenDefaultList(const char *fullpath);
 
 static auto stdin_log_it = stdin_log.cbegin();
 
-void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
+void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 {
-	char ofilename[LINEMAX];
+	const char* oFileNameFull = fileNameFull;
+	TextFilePos oSourcePos = CurSourcePos;
 	char* oCurrentDirectory, * fullpath, * listFullName = NULL;
 	TCHAR* filenamebegin;
 
@@ -499,6 +526,14 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 			Error("Error opening file", nfilename, FATAL);
 		}
 	}
+	// archive the filename (for referencing it in SLD tracing data or listing/errors)
+	auto ofnIt = std::find(openedFileNames.cbegin(), openedFileNames.cend(), fullpath);
+	if (ofnIt == openedFileNames.cend()) {		// new filename, add it to archive
+		openedFileNames.push_back(fullpath);
+		ofnIt = --openedFileNames.cend();
+	}
+	fileNameFull = ofnIt->c_str();				// get const pointer into archive
+	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 
 	// open default listing file for each new source file (if default listing is ON)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
@@ -512,11 +547,6 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 		fputs(listFullName, listFile);
 		fputs("\n", listFile);
 	}
-
-	aint oCurrentLocalLine = CurrentSourceLine;
-	CurrentSourceLine = 0;
-	STRCPY(ofilename, LINEMAX, filename);
-	STRCPY(filename, LINEMAX, Options::IsShowFullPath ? fullpath : filenamebegin);
 
 	oCurrentDirectory = CurrentDirectory;
 	*filenamebegin = 0;
@@ -552,14 +582,14 @@ void OpenFile(char* nfilename, bool systemPathsBeforeCurrent)
 	// Free memory
 	free(fullpath);
 
-	STRCPY(filename, LINEMAX, ofilename);
-	if (CurrentSourceLine > maxlin) {
-		maxlin = CurrentSourceLine;
+	if (CurSourcePos.line > maxlin) {
+		maxlin = CurSourcePos.line;
 	}
-	CurrentSourceLine = oCurrentLocalLine;
+	fileNameFull = oFileNameFull;
+	CurSourcePos = oSourcePos;
 }
 
-void IncludeFile(char* nfilename, bool systemPathsBeforeCurrent)
+void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)
 {
 	FILE* oFP_Input = FP_Input;
 	FP_Input = 0;
@@ -625,7 +655,7 @@ static bool ReadBufData() {
 		}
 	}
 	// check UTF BOM markers only at the beginning of the file (source line == 0)
-	if (CurrentSourceLine) return (rlpbuf < rlpbuf_end);			// return true if some data were read
+	if (CurSourcePos.line) return (rlpbuf < rlpbuf_end);	// return true if some data were read
 	//UTF BOM markers detector
 	for (const auto & bomMarkerData : UtfBomMarkers) {
 		if (rlpbuf_end < (rlpbuf + bomMarkerData.length)) continue;	// not enough bytes in buffer
@@ -653,7 +683,6 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			*(rlppos++) = ' ';
 			IsLabel = false;
 		} else {					// starting real new line
-			++CurrentSourceLine;
 			IsLabel = (0 == blockComment);
 		}
 		bool afterNonAlphaNum, afterNonAlphaNumNext = true;
@@ -727,6 +756,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			// advance over single colon if that was the reason to terminate line parsing
 			colonSubline = SplitByColon && ReadBufData() && (':' == *rlpbuf) && ++rlpbuf;
 		}
+		// do +1 for very first colon-segment only (rest is +1 due to artificial space at beginning)
+		size_t advanceColumns = colonSubline ? (0 == CurSourcePos.colEnd) + strlen(line) : 0;
+		CurSourcePos.nextSegment(colonSubline, advanceColumns);
 		// line is parsed and ready to be processed
 		if (Parse) 	ParseLine();	// processed here in loop
 		else 		return;			// processed externally
@@ -759,17 +791,8 @@ static void OpenDefaultList(const char *fullpath) {
 	if (NULL == fullpath || !*fullpath) return;		// no filename provided
 	// Create default listing name, and try to open it
 	char tempListName[LINEMAX+10];		// make sure there is enough room for new extension
-	STRCPY(tempListName, LINEMAX, fullpath);
-	// find extension of that file and overwrite it with ".lst"
-	char* extPos = tempListName + strlen(tempListName);
-	while (tempListName < extPos && '.' != *extPos) {
-		--extPos;
-		if ('/' == *extPos || '\\' == *extPos || tempListName == extPos) {	// no extension found
-			extPos = tempListName + strlen(tempListName);	// just append it then to the fullname
-			break;
-		}
-	}
-	STRCPY(extPos, 5, ".lst");
+	char* extPos = FilenameExtPos(tempListName, fullpath, LINEMAX);	// find extension position
+	STRCPY(extPos, 5, ".lst");			// overwrite it with ".lst"
 	// list filename prepared, open it
 	OpenListImp(tempListName);
 }
@@ -904,6 +927,7 @@ void Close() {
 		fclose(FP_ListingFile);
 		FP_ListingFile = NULL;
 	}
+	CloseSld();
 }
 
 int SaveRAM(FILE* ff, int start, int length) {
@@ -1107,8 +1131,10 @@ int ReadLineNoMacro(bool SplitByColon) {
 }
 
 int ReadLine(bool SplitByColon) {
+	DefinitionPos = TextFilePos();
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
 		if (!lijstp) return 0;
+		DefinitionPos = lijstp->definition;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
@@ -1150,6 +1176,108 @@ void WriteExp(char* n, aint v) {
 	STRCAT(ErrorLine, LINEMAX2-1, lnrs);
 	STRCAT(ErrorLine, LINEMAX2-1, "\n");
 	fputs(ErrorLine, FP_ExportFile);
+}
+
+/////// source-level-debugging support by Ckirby
+
+static FILE* FP_SourceLevelDebugging = NULL;
+static char sldMessage[LINEMAX];
+static const char* WriteToSld_noSymbol = "";
+static char sldMessage_sourcePos[80];
+static char sldMessage_definitionPos[80];
+static const char* sldMessage_posFormat = "%d:%d:%d";	// at +3 is "%d:%d" and at +6 is "%d"
+
+static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
+	int offsetFormat = !pos.colBegin ? 6 : !pos.colEnd ? 3 : 0;
+	snprintf(buffer, 79, sldMessage_posFormat + offsetFormat, pos.line, pos.colBegin, pos.colEnd);
+}
+
+static void OpenSldImp(const char* sldFilename) {
+	if (nullptr == sldFilename || !sldFilename[0]) return;
+	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
+		Error("Error opening file", sldFilename, FATAL);
+	}
+	fputs("|SLD.data.version|0\n", FP_SourceLevelDebugging);
+}
+
+// will write directly into Options::SourceLevelDebugFName array
+static void OpenSld_buildDefaultNameIfNeeded() {
+	// check if SLD file name is already explicitly defined, or default is wanted
+	if (Options::SourceLevelDebugFName[0] || !Options::IsDefaultSldName) return;
+	// name is still empty, and default is wanted, create one (start with "out" or first source name)
+	char* extPos = FilenameExtPos(
+		Options::SourceLevelDebugFName, Options::SourceStdIn ? "out" : SourceFNames[0], LINEMAX-10);
+	STRCPY(extPos, 10, ".sld.txt");		// overwrite extension
+}
+
+// returns true only in the LASTPASS and only when "sld" file was specified by user
+// and only when assembling is in "virtual DEVICE" mode (for "none" device no tracing is emitted)
+bool IsSldExportActive() {
+	return (nullptr != FP_SourceLevelDebugging && DeviceID);
+}
+
+void OpenSld() {
+	// check if source-level-debug file is already opened
+	if (nullptr != FP_SourceLevelDebugging) return;
+	// build default filename if not explicitly provided, and default was requested
+	OpenSld_buildDefaultNameIfNeeded();
+	// try to open it if not opened yet
+	OpenSldImp(Options::SourceLevelDebugFName);
+}
+
+void CloseSld() {
+	if (!FP_SourceLevelDebugging) return;
+	fclose(FP_SourceLevelDebugging);
+	FP_SourceLevelDebugging = nullptr;
+}
+
+void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
+	// SLD line format:
+	// <file name>|<source line>|<definition file>|<definition line>|<page number>|<value>|<type>|<data>\n
+	//
+	// * string <file name> can't be empty (empty is for specific "control lines" with different format)
+	//
+	// * unsigned <source line> when <file name> is not empty, line number (in human way starting at 1)
+	// The actual format is "%d[:%d[:%d]]", first number is always line. If second number is present,
+	// that's the start column (in bytes), and if also third number is present, that's end column.
+	//
+	// * string <definition file> where the <definition line> was defined, if empty, it's equal to <file name>
+	//
+	// * unsigned <definition line> explicit zero value in regular source, but inside macros
+	// the <source line> keeps pointing at line emitting the macro, while this value points
+	// to source with actual definitions of instructions/etc (nested macro in macro <source line>
+	// still points at the top level source which initiated it).
+	// The format is again "%d[:%d[:%d]]" same as <source line>, optionally including the columns data.
+	//
+	// * int <value> is not truncated to page range, but full 16b Z80 address or even 32b value (equ)
+	//
+	// * string <data> content depends on char <type>:
+	// 'T' = instruction Trace, empty data
+	// 'D' = EQU symbol, <data> is the symbol name ("label")
+	// 'F' = function label, <data> is the symbol name
+	// 'Z' = device (memory model) changed, <data> has special custom formatting
+	//
+	// 'Z' device <data> format:
+	// pages.size:<page size>,pages.count:<page count>,slots.count:<slots count>[,slots.adr:<slot0 adr>,...,<slotLast adr>]
+	// unsigned <page size> is also any-slot size in current version.
+	// unsigned <page count> and <slots count> define how many pages/slots there are
+	// uint16_t <slotX adr> is starting address of slot memory region in Z80 16b addressing
+	//
+	// specific lines (<file name> string was empty):
+	// |SLD.data.version|<version number>
+	// <version number> is SLD file format version, currently should be 0
+	// ||<anything till EOL>
+	// comment line, not to be parsed
+	if (nullptr == FP_SourceLevelDebugging || !type) return;
+	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
+	const char* macroFN = DefinitionPos.filename && strcmp(DefinitionPos.filename, CurSourcePos.filename) ?
+							DefinitionPos.filename : "";
+	WriteToSldFile_TextFilePos(sldMessage_sourcePos, CurSourcePos);
+	WriteToSldFile_TextFilePos(sldMessage_definitionPos, DefinitionPos);
+	snprintf(sldMessage, LINEMAX, "%s|%s|%s|%s|%d|%d|%c|%s\n",
+				CurSourcePos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
+				pageNum, value, type, symbol);
+	fputs(sldMessage, FP_SourceLevelDebugging);
 }
 
 //eof sjio.cpp

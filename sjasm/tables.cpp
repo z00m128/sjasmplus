@@ -30,6 +30,24 @@
 
 #include "sjdefs.h"
 
+TextFilePos::TextFilePos() : filename(nullptr), line(0), colBegin(0), colEnd(0) {
+}
+
+void TextFilePos::newFile(const char* fileNamePtr) {
+	filename = fileNamePtr;
+	line = colBegin = colEnd = 0;
+}
+
+// advanceColumns are valid only when true == endsWithColon (else advanceColumns == 0)
+// default arguments are basically "next line"
+void TextFilePos::nextSegment(bool endsWithColon, size_t advanceColumns) {
+	if (endsWithColon && 0 == colEnd) colEnd = 1;	// first segment of "colonized" line (do +1,+1)
+	colBegin = colEnd;
+	if (colBegin <= 1) ++line;		// first segment of any line, increment also line number
+	if (endsWithColon)	colEnd += advanceColumns;
+	else				colEnd = 0;
+}
+
 char* PreviousIsLabel = nullptr;
 
 // since v1.14.2:
@@ -218,6 +236,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			//if label already added (as used, or in previous pass), just refresh values
 			label->value = nvalue;
 			label->page = Page ? Page->Number : LABEL_PAGE_ROM;
+			// in DISP mode set the page number by DISP page_number, or current device mapping
+			if (PseudoORG) {
+				label->page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
+								DeviceID ? Device->GetPageOfA16(nvalue) : LABEL_PAGE_ROM;
+			}
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
 			label->updatePass = pass;
@@ -239,6 +262,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->used = undefined;
 	if (!undefined) {
 		label->page = Page ? Page->Number : LABEL_PAGE_ROM;
+		// in DISP mode set the page number by DISP page_number, or current device mapping
+		if (PseudoORG) {
+			label->page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
+							DeviceID ? Device->GetPageOfA16(nvalue) : LABEL_PAGE_ROM;
+		}
 	} else {
 		label->page = LABEL_PAGE_UNDEFINED;
 	}
@@ -558,7 +586,8 @@ aint CLocalLabelTable::seekBack(const aint labelNumber) const {
 	return l ? l->value : -1L;
 }
 
-CStringsList::CStringsList() : string(NULL), next(NULL), sourceLine(0) {
+CStringsList::CStringsList() : string(NULL), next(NULL)
+{
 	// all initialized already
 }
 
@@ -753,7 +782,8 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
 	string = STRDUP(stringSource);
 	next = nnext;
-	sourceLine = CurrentSourceLine;
+	source = CurSourcePos;
+	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 }
 
 CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
@@ -876,12 +906,14 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
 	while (lijstp) {
+		DefinitionPos = lijstp->definition;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
 		lijstp = lijstp->next;
 		ParseLineSafe();
 	}
+	DefinitionPos = TextFilePos();
 	STRCPY(line, LINEMAX, ml);
 	lijstp = olijstp;
 	--lijst;
