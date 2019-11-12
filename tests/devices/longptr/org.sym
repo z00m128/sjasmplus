@@ -1,0 +1,6 @@
+longptr1: equ 0x0000FFFF
+longptr2: equ 0x00010000
+longptr3: equ 0x00010001
+devbyte1: equ 0x0000FFFF
+devbyte2: equ 0x00010000
+devbyte3: equ 0x00010001
