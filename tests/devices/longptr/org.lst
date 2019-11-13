@@ -1,0 +1,28 @@
+# file opened: org.asm
+ 1    0000                  OUTPUT "org.bin"
+ 2    0000
+ 3    0000                  DEVICE NONE
+ 4    0000                  ; no errors/warnings expected because of the --longptr option
+ 5    0000                  ORG $FFFF
+ 6    FFFF 41           longptr1:   DB      'A'
+ 7    0000 42           longptr2:   DB      'B'
+ 8    0001 43           longptr3:   DB      'C'
+ 9    0002
+10    0002                  DEVICE ZXSPECTRUM48
+11    0002                  ; the --longptr should NOT affect actual devices => errors will be reported
+12    0002                  ORG $FFFF
+13    FFFF 61           devbyte1:   DB      'a'
+org.asm(14): error: Write outside of device memory at: 65536
+14    0000 62           devbyte2:   DB      'b'     ; error crossing $10000 address boundary
+15    0001 63           devbyte3:   DB      'c'     ; silent after first error reported
+16    0002
+# file closed: org.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xFFFF X longptr1
+0x10000 X longptr2
+0x10001 X longptr3
+0xFFFF X devbyte1
+0x10000 X devbyte2
+0x10001 X devbyte3

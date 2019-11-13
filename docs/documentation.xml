@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.14.2 Documentation [2019-10-03]</title>
+  <title>SjASMPlus 1.14.3 Documentation [2019-11-15]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -186,11 +186,12 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.14.3</term>
+            <term>15.11.2019 - 1.14.3</term>
 
             <listitem>
               <synopsis>- fix detection of `.end:` and `.END` labels when `--dirbol` is used
 - added export of <link linkend="c_sld_data">SLD (Source Level Debugging) data</link>, see also <ulink url="https://github.com/Ckirby101/NDS-NextDevSystem">NDS (NextDevSystem)</ulink>
+- added <link linkend="s_cli">`--longptr`</link> option to allow labels outside of 16b address space
 - docs: added small details about <link linkend="po_fpos">FPOS</link>, <link linkend="po_savetap">SAVETAP</link>, <link linkend="ca_ifused">IFUSED</link>
 - fix assembling-time reported in linux</synopsis>
             </listitem>
@@ -339,6 +340,7 @@
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
   -                        Reads STDIN as source (no other sourcefile allowed)
+  --longptr                No device: program counter $ can go beyond 0x10000
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions (obsolete, use --syntax=F)

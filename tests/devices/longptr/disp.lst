@@ -1,0 +1,64 @@
+# file opened: disp.asm
+ 1    0000                  OUTPUT "disp.bin"
+ 2    0000
+ 3    0000                  ORG $8000
+ 4    8000              phase1_start:
+ 5    8000                  PHASE $FFFF
+ 6    FFFF 41           longptr1:   DB      'A'
+ 7    0000 42           longptr2:   DB      'B'
+ 8    0001 43           longptr3:   DB      'C'
+ 9    0002                  UNPHASE
+10    8003              phase1_end:
+11    8003
+12    8003 5F           normalmem:  DB      '_'
+13    8004
+14    8004                  ORG $FFFF
+15    FFFF              phase2_start:
+16    FFFF                  PHASE $FFFE
+17    FFFE 2E 44        longptr4:   DB      '.D'    ; disp FFFE..FFFF, but crossing real memory $10000
+18    0000 45           longptr5:   DB      'E'     ; crossing also disp $10000
+19    0001 46           longptr6:   DB      'F'
+20    0002                  UNPHASE
+21    0003              phase2_end:
+22    0003
+23    0003 5F           longmem:    DB      '_'
+24    0004
+25    0004                  ORG $240000
+26    0000              phase3_start:
+27    0000                  PHASE $FFFFFF
+28    FFFF 47           longptr7:   DB      'G'
+29    0000 48           longptr8:   DB      'H'
+30    0001 49           longptr9:   DB      'I'
+31    0002                  UNPHASE
+32    0003              phase3_end:
+33    0003
+34    0003                  ; but using the long pointers still emits the truncation warning
+disp.asm(35): warning: value 0xFFFFFF is truncated to 16bit value: 0xFFFF
+35    0003 21 FF FF         ld      hl,longptr7
+disp.asm(36): warning: value 0x1000000 is truncated to 16bit value: 0x0000
+36    0006 00 00            dw      longptr8
+37    0008                  ; no warning when explicit truncation is used
+38    0008 21 FF FF         ld      hl,longptr7&$FFFF
+39    000B 00 00            dw      longptr8&$FFFF
+40    000D
+# file closed: disp.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000 X phase1_start
+0xFFFF X longptr1
+0x10000 X longptr2
+0x10001 X longptr3
+0x8003 X phase1_end
+0x8003 X normalmem
+0xFFFF X phase2_start
+0xFFFE X longptr4
+0x10000 X longptr5
+0x10001 X longptr6
+0x10003 X phase2_end
+0x10003 X longmem
+0x240000 X phase3_start
+0xFFFFFF   longptr7
+0x1000000   longptr8
+0x1000001 X longptr9
+0x240003 X phase3_end

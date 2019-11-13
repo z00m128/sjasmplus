@@ -47,7 +47,7 @@ void PrintHelp() {
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 	_COUT "\nOption flags as follows:" _ENDL;
 	_COUT "  -h or --help             Help information (you see it)" _ENDL;
-	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions" _ENDL;
+	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions (Z80N)" _ENDL;
 	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
 	_COUT "  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path> ( --inc without \"=\" to empty the list)" _ENDL;
@@ -68,6 +68,7 @@ void PrintHelp() {
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
 	_COUT "  -                        Reads STDIN as source (no other sourcefile allowed)" _ENDL;
+	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --nofakes                Disable fake instructions" _ENDL;
@@ -102,6 +103,7 @@ namespace Options {
 	bool SourceStdIn = false;
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
+	bool IsLongPtr = false;
 
 	// Include directories list is initialized with "." directory
 	CStringsList* IncludeDirsList = new CStringsList(".");
@@ -405,6 +407,8 @@ namespace Options {
 					ShowVersion = true;
 				} else if (!strcmp(opt, "lstlab")) {
 					AddLabelListing = true;
+				} else if (!strcmp(opt, "longptr")) {
+					IsLongPtr = true;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
 					if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;

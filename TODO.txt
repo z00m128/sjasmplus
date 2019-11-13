@@ -127,6 +127,7 @@ EQU and DEFL to not affect local labels (not defining new "main" label)
 
 Operators precedence: (2 == 3&2) = ((2 == 3)&2) = false in current sjasmplus... ????
     https://en.cppreference.com/w/cpp/language/operator_precedence
+Operator "word" or "w16/i16" to truncate big value (similar to "low")
 
 address space of labels -> 2|3:30|29 bits, the top bits being default slot number,
 remaining bits being physical address into global chip address space

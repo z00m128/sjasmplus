@@ -178,6 +178,7 @@ const char* FilenameBasePos(const char* fullname) {
 }
 
 void CheckRamLimitExceeded() {
+	if (Options::IsLongPtr) return;		// in "longptr" mode with no device keep the address as is
 	static bool notWarnedCurAdr = true;
 	static bool notWarnedDisp = true;
 	char buf[64];
