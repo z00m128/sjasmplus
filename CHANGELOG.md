@@ -1,4 +1,4 @@
-## [1.14.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.3) - to be released
+## [1.14.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.3) - 15.11.2019
 - fix detection of `.end:` and `.END` labels when `--dirbol` is used
 - added export of [SLD (Source Level Debugging) data](http://z00m128.github.io/sjasmplus/documentation.html#c_sld_data), see also [NDS (NextDevSystem)](https://github.com/Ckirby101/NDS-NextDevSystem)
 - added `--longptr` option to allow labels outside of 16b address space
