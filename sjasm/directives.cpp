@@ -1094,7 +1094,7 @@ void dirSAVETRD() {
 }
 
 void dirENCODING() {
-	char* opt = GetFileName(lp);
+	char* opt = GetFileName(lp, false);
 	char* comparePtr = opt;
 	if (cmphstr(comparePtr, "dos")) {
 		ConvertEncoding = ENCDOS;
