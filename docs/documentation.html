@@ -1624,7 +1624,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
          ORG addr
     ENDM
 
-    MACRO PADORG2 addr
+    MACRO PADORG2 addr ; z80asm "FORG" replacement
          ; add padding + display warning
          IF $ &gt; addr
            ; no padding

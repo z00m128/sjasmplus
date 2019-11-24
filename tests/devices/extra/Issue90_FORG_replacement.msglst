@@ -1,0 +1,73 @@
+# file opened: Issue90_FORG_replacement.asm
+ 1    0000                  MACRO FORG addr?
+ 2    0000 ~                     ; add padding + display warning
+ 3    0000 ~                     IF $ > addr?
+ 4    0000 ~                       ; no padding
+ 5    0000 ~                       DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", addr?
+ 6    0000 ~                     ELSE
+ 7    0000 ~                       ; add padding
+ 8    0000 ~                       BLOCK addr?-$
+ 9    0000 ~                     ENDIF
+10    0000 ~                     ORG addr?
+11    0000                  ENDM
+12    0000
+13    0000                      OUTPUT  "Issue90_FORG_replacement.bin"
+14    0000                      SIZE    $140
+15    0000                      DEVICE  ZXSPECTRUM48
+16    0000              ;--------------------------------
+17    0000                      ORG	$0000
+18    0000
+19    0000 C3 00 01             JP  START
+20    0003              ;--------------------------------
+21    0003
+22    0003                      FORG 0x0066
+22    0003             >         ; add padding + display warning
+22    0003             >         IF $ > 0x0066
+22    0003 ~           >           ; no padding
+22    0003 ~           >           DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", addr?
+22    0003             >         ELSE
+22    0003             >           ; add padding
+22    0003 00 00 00... >           BLOCK 0x0066-$
+22    0007             >         ENDIF
+22    0066             >         ORG 0x0066
+23    0066
+24    0066 C3 00 01             JP  START
+25    0069              ;--------------------------------
+26    0069                      FORG 0x0100
+26    0069             >         ; add padding + display warning
+26    0069             >         IF $ > 0x0100
+26    0069 ~           >           ; no padding
+26    0069 ~           >           DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", addr?
+26    0069             >         ELSE
+26    0069             >           ; add padding
+26    0069 00 00 00... >           BLOCK 0x0100-$
+26    006D             >         ENDIF
+26    0100             >         ORG 0x0100
+27    0100
+28    0100 F3           START:	DI
+29    0101 3E 10                LD  a, 0x10
+30    0103 32 10 40             LD  (0x4010), a
+31    0106
+32    0106 3A 10 40             LD  a, (0x4010)
+33    0109 D3 54                OUT (54H), a
+34    010B
+35    010B 76                   HALT
+36    010C              ;--------------------------------
+37    010C
+38    010C                      FORG 0x40   ; verify the warning message works
+38    010C             >         ; add padding + display warning
+38    010C             >         IF $ > 0x40
+38    010C             >           ; no padding
+> Warning! PADORG failed! 0x010C is more than 0x0040
+38    010C             >           DISPLAY /L, "Warning! PADORG failed! ", $, " is more than ", 0x40
+38    010C             >         ELSE
+38    010C ~           >           ; add padding
+38    010C ~           >           BLOCK addr?-$
+38    010C             >         ENDIF
+38    010C             >         ORG 0x40
+39    0040
+# file closed: Issue90_FORG_replacement.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0100   START
