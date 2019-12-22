@@ -164,7 +164,7 @@ static void dirNexOpen() {
 	}
 	// validate argument values
 	if (-1 != StartAddress && StartAddress != openArgs[0]) {
-		Warning("[SAVESNA] Start address was also defined by END, OPEN argument used instead");
+		Warning("[SAVENEX] Start address was also defined by END, OPEN argument used instead");
 	}
 	check16(openArgs[0]);
 	check16(openArgs[1]);

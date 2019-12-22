@@ -5,6 +5,8 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+MACRO arguments can't parse C++ numeric literals with digits grouping!
+
 CSPECTMAP is exporting with page size of current device, maybe it should do it with page size
 of active device at the point where the CSPECTMAP directive was used?!
 

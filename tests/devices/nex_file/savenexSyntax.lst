@@ -125,7 +125,7 @@ savenexSyntax.asm(114): error: [SAVENEX] entry bank can be 0..111 value only: 11
 114   0000                  SAVENEX OPEN "savenexSyntax.nex", $7170, $F1F0, 112 ; error entryBank
 115   0000
 116   0000                  ; one correct NEX file to verify simple case (but induce all sorts of warnings)
-savenexSyntax.asm(117): warning: [SAVESNA] Start address was also defined by END, OPEN argument used instead
+savenexSyntax.asm(117): warning: [SAVENEX] Start address was also defined by END, OPEN argument used instead
 savenexSyntax.asm(117): warning: value 0x18180 is truncated to 16bit value: 0x8180
 savenexSyntax.asm(117): warning: value 0x1F1F0 is truncated to 16bit value: 0xF1F0
 117   0000                  SAVENEX     OPEN    "savenexSyntax.nex",    $18180,$1F1F0,  'B'
@@ -337,7 +337,7 @@ savenexSyntax.asm(243): error: [SAVENEX] NEX file is not open
 244   0000
 245   0000              ;; create small NEX for BIN comparison, if the thing at least somewhat works
 246   0000              ;; also verify it works twice per source (in sequential order)
-savenexSyntax.asm(247): warning: [SAVESNA] Start address was also defined by END, OPEN argument used instead
+savenexSyntax.asm(247): warning: [SAVENEX] Start address was also defined by END, OPEN argument used instead
 247   0000                  SAVENEX OPEN "savenexSyntax.bin", $5000
 248   0000                  SAVENEX CORE 2,0,28
 248   0000                SAVENEX CFG 4,0,0,1
