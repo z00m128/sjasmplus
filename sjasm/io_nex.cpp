@@ -308,6 +308,102 @@ static void dirNexScreenLayer2andLowRes(bool Layer2) {
 	}
 }
 
+static void dirNexScreenBmp() {
+// ;; SAVENEX SCREEN BMP <filename>[,<savePalette 0/1>]
+	const char* const bmpname = GetFileName(lp);
+	aint bmpArgs[1] = { 1 };
+	if (comma(lp)) {	// empty filename will fall here too, causing syntax error
+		const bool optionals[] = {false};	// savePalette is mandatory after comma
+		if (!getIntArguments<1>(bmpArgs, optionals)) {
+			Error("[SAVENEX] expected syntax is ... BMP <filename>[,<savePalette 0/1>]", bp, SUPPRESS);
+			delete[] bmpname;
+			return;
+		}
+	}
+	// validate argument values
+	if (bmpArgs[0] < 0 || 1 < bmpArgs[0]) {
+		Warning("[SAVENEX] savePalette should be 0 or 1 (defaulting to 1)");
+		bmpArgs[0] = 1;
+	}
+	// try to open the actual BMP file
+	FILE* bmp;
+	byte tempHeader[0x36];		// 14B header + BITMAPINFOHEADER 40B header
+	byte buffer[4*256];			// buffer to read palette and pixel data
+	int32_t width = 0, height = 0;
+	bool upsideDown = true, layer2 = false, lores = false;
+	if (!FOPEN_ISOK(bmp, bmpname, "rb")) Error("[SAVENEX] Error opening file", bmpname, SUPPRESS);
+	else {
+		// read header of BMP and verify the file is of expected format
+		const size_t readElements = fread(tempHeader, 1, 0x36, bmp) + fread(buffer, 4, 256, bmp);
+		const uint32_t header2Size = *reinterpret_cast<uint32_t*>(tempHeader + 14);
+		const uint16_t colorPlanes = *reinterpret_cast<uint16_t*>(tempHeader + 26);
+		const uint16_t bpp = *reinterpret_cast<uint16_t*>(tempHeader + 28);
+		const uint32_t compressionType = *reinterpret_cast<uint32_t*>(tempHeader + 30);
+		const uint32_t palNumOfColors = *reinterpret_cast<uint32_t*>(tempHeader + 46);
+		// check "BM", BITMAPINFOHEADER type (size 40), 8bpp, no compression
+		if (0x36+256 != readElements || 'B' != tempHeader[0] || 'M' != tempHeader[1] ||
+			40 != header2Size || 1 != colorPlanes || 8 != bpp || 0 != compressionType)
+		{
+			Error("[SAVENEX] BMP file is not in expected format (uncompressed, 8bpp, 40B BITMAPINFOHEADER header)",
+				  bmpname, SUPPRESS);
+			fclose(bmp);
+			bmp = nullptr;
+		} else {
+			// check if the size is 256x192 (Layer 2) or 128x96 (LoRes)
+			width = *reinterpret_cast<int32_t*>(tempHeader + 18);
+			height = *reinterpret_cast<int32_t*>(tempHeader + 22);
+			upsideDown = 0 < height;
+			if (height < 0) height = -height;
+			layer2 = (256 == width && 192 == height);
+			lores = (128 == width && 96 == height);
+			if (!layer2 && !lores) {
+				Error("[SAVENEX] BMP file is not 256x192 or 128x96", bmpname, SUPPRESS);
+				fclose(bmp);
+				bmp = nullptr;
+			}
+			if (bmpArgs[0] && 0 != palNumOfColors && 256 != palNumOfColors && warningNotSuppressed()) {
+				char buf[128];
+				SPRINTF1(buf, 128, "[SAVENEX] BMP has only %d colors in palette (expect \"any\" values in remaining colors).", palNumOfColors);
+				Warning(buf);
+			}
+		}
+	}
+	delete[] bmpname;
+	if (nullptr == bmp) return;
+	// palette is written first into file
+	if (0 == bmpArgs[0]) nex.h.screen = SNexHeader::SCR_NOPAL;		// no palette data
+	else {
+		constexpr size_t palDataSize = 256;
+		word palData[palDataSize];
+		for (size_t i = 0; i < palDataSize; ++i) {
+			const byte B = buffer[i * 4 + 0] >> 5;
+			const byte G = buffer[i * 4 + 1] >> 5;
+			const byte R = buffer[i * 4 + 2] >> 5;
+			palData[i] = ((B&1) << 8) | (B >> 1) | (G << 2) | (R << 5);
+		}
+		if (palDataSize != fwrite(palData, 2, palDataSize, nex.f)) {
+			Error("[SAVENEX] writing palette data failed", NULL, FATAL);
+		}
+	}
+	// update header loading screen status
+	nex.h.screen |= layer2 ? SNexHeader::SCR_LAYER2 : SNexHeader::SCR_LORES;
+	// write pixel data into file - reading BMP line by line
+	const uint32_t offset = *reinterpret_cast<uint32_t*>(tempHeader + 10);
+	const size_t uwidth = static_cast<size_t>(width);
+	for (int32_t y = 0; y < height; ++y) {
+		const int32_t fileY = upsideDown ? (height - y - 1) : y;
+		fseek(bmp, offset + (width * fileY), SEEK_SET);
+		if (uwidth != fread(buffer, 1, uwidth, bmp)) {
+			Error("[SAVENEX] reading BMP pixel data failed", NULL, FATAL);
+		}
+		if (uwidth != fwrite(buffer, 1, uwidth, nex.f)) {
+			Error("[SAVENEX] writing pixel data failed", NULL, FATAL);
+		}
+	}
+	// close bmpfile
+	fclose(bmp);
+}
+
 static void dirNexScreenUlaTimex(byte scrType) {
 // ;; SCREEN (SCR|SHC|SHR) [<hiResColour 0..7>]
 	// parse argument (only HiRes screen type)
@@ -351,6 +447,7 @@ static void dirNexScreen() {
 	SkipBlanks(lp);
 	if (cmphstr(lp, "l2")) dirNexScreenLayer2andLowRes(true);
 	else if (cmphstr(lp, "lr")) dirNexScreenLayer2andLowRes(false);
+	else if (cmphstr(lp, "bmp")) dirNexScreenBmp();
 	else if (cmphstr(lp, "scr")) dirNexScreenUlaTimex(SNexHeader::SCR_ULA);
 	else if (cmphstr(lp, "shc")) dirNexScreenUlaTimex(SNexHeader::SCR_HICOL);
 	else if (cmphstr(lp, "shr")) dirNexScreenUlaTimex(SNexHeader::SCR_HIRES);
