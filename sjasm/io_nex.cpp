@@ -335,6 +335,8 @@ static void dirNexScreenBmp() {
 	else {
 		// read header of BMP and verify the file is of expected format
 		const size_t readElements = fread(tempHeader, 1, 0x36, bmp) + fread(buffer, 4, 256, bmp);
+		// these following casts assume the sjasmplus itself is running at little-endian platform
+		// if you are using big-endian, report the issue, so this can be fixed in more universal way
 		const uint32_t header2Size = *reinterpret_cast<uint32_t*>(tempHeader + 14);
 		const uint16_t colorPlanes = *reinterpret_cast<uint16_t*>(tempHeader + 26);
 		const uint16_t bpp = *reinterpret_cast<uint16_t*>(tempHeader + 28);
