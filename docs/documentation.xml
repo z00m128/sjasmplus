@@ -186,6 +186,15 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.14.4</term>
+
+            <listitem>
+              <synopsis>- added few example utility macros in tests/macro_examples/sj_library.asm (neg r16)
+- added <link linkend="nex_screen">`SAVENEX SCREEN BMP`</link> sub-command to include BMP loading-screen</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>15.11.2019 - 1.14.3</term>
 
             <listitem>
@@ -3904,6 +3913,29 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 			  </listitem>
 		  </varlistentry>
 		  
+		  <varlistentry>
+			  <term>
+				  SAVENEX SCREEN BMP &lt;filename&gt;[,&lt;savePalette 0/1&gt;]
+			  </term>
+			  <listitem>
+				  <para>
+					  Only small subset of BMP files can be used: 256x192 (Layer 2) or 128x96 (LoRes),
+					  indexed (8bit image data with palette) and palette data will be truncated
+					  to 3:3:3 color space directly (no smart color quantization or dithering is applied).
+					  And the file must be uncompressed.
+				  </para>
+				  <para>
+					  The BMP will be included as loading screen, can be used between <link linkend="nex_open">OPEN</link>
+					  and first <link linkend="nex_auto">AUTO</link>/<link linkend="nex_bank">BANK</link> command.
+				  </para>
+				  <para>
+					  By default the palette from BMP file is used, but you can override that by savePalette = 0.
+					  The warning about palette containing less than 256 colors can be suppressed by end-of-line
+					  OK comment like: <code>SAVENEX SCREEN BMP ... ; ok ...your comment</code>.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+
 		  <varlistentry>
 			  <term>
 				  SAVENEX SCREEN (SCR|SHC|SHR) [&lt;hiResColour 0..7&gt;]
