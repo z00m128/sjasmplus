@@ -7,6 +7,11 @@ Ped:
 
 MACRO arguments can't parse C++ numeric literals with digits grouping!
 
+Lua can't easily access macro arguments (add "sj.get_define"-like ("sj.get_macro_arg"?))
+Added test lua_examples/lua_macro_arg.asm for currently possible workaround
+ - also maybe consider doing substitutions in "_c"?? Can't think of any con right now,
+ seems like it would be more logical, especially considering the "_pl"/"_pc" does...
+
 CSPECTMAP is exporting with page size of current device, maybe it should do it with page size
 of active device at the point where the CSPECTMAP directive was used?!
 
