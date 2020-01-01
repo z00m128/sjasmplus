@@ -10,11 +10,14 @@
  9    0000              	endm
 10    0000
 11    0000              	MyMacro abc, def
-macro_test.asm(11): error: Label not found: abc_f
+macro_test.asm(6): error: Label not found: abc_f
+macro_test.asm(11): ^ emitted from here
 11    0000 CD 00 00    >		call abc_f
-macro_test.asm(11): error: Label not found: abc_def
+macro_test.asm(7): error: Label not found: abc_def
+macro_test.asm(11): ^ emitted from here
 11    0003 CD 00 00    >		call abc_def
-macro_test.asm(11): error: Label not found: def_abc
+macro_test.asm(8): error: Label not found: def_abc
+macro_test.asm(11): ^ emitted from here
 11    0006 CD 00 00    >		call def_abc
 12    0009
 13    0009              ;should be expanded to:
@@ -59,30 +62,39 @@ macro_test.asm(11): error: Label not found: def_abc
 52    0009              	endm
 53    0009
 54    0009              	a0a1 abc, def
-macro_test.asm(54): error: Label not found: abc_def__yyy
+macro_test.asm(22): error: Label not found: abc_def__yyy
+macro_test.asm(54): ^ emitted from here
 54    0009 CD 00 00    >	call abc_def__yyy
 55    000C              	a1a0 abc, def
-macro_test.asm(55): error: Label not found: def_abc___yyy
+macro_test.asm(26): error: Label not found: def_abc___yyy
+macro_test.asm(55): ^ emitted from here
 55    000C CD 00 00    >	call def_abc___yyy
 56    000F              	a1a0a1 abc, def
-macro_test.asm(56): error: Label not found: def____abc__def
+macro_test.asm(30): error: Label not found: def____abc__def
+macro_test.asm(56): ^ emitted from here
 56    000F CD 00 00    >	call def____abc__def
 57    0012              	a0_a abc
-macro_test.asm(57): error: Label not found: abc_
+macro_test.asm(34): error: Label not found: abc_
+macro_test.asm(57): ^ emitted from here
 57    0012 CD 00 00    >	call abc_
 58    0015              	a0_b abc
-macro_test.asm(58): error: Label not found: __abc
+macro_test.asm(38): error: Label not found: __abc
+macro_test.asm(58): ^ emitted from here
 58    0015 CD 00 00    >	call __abc
 59    0018              	a0_c abc
-macro_test.asm(59): error: Label not found: _abc_
+macro_test.asm(42): error: Label not found: _abc_
+macro_test.asm(59): ^ emitted from here
 59    0018 CD 00 00    >	call _abc_
 60    001B              	a0a1_a abc, def
-macro_test.asm(60): error: Label not found: abc____def_
+macro_test.asm(46): error: Label not found: abc____def_
+macro_test.asm(60): ^ emitted from here
 60    001B CD 00 00    >	call abc____def_
 61    001E              	a0a1_b abc, def
-macro_test.asm(61): error: Label not found: abc____yy_def
+macro_test.asm(50): error: Label not found: abc____yy_def
+macro_test.asm(61): ^ emitted from here
 61    001E CD 00 00    >	call abc____yy_def
-macro_test.asm(61): error: Label not found: _my___yyyyy____yy__call
+macro_test.asm(51): error: Label not found: _my___yyyyy____yy__call
+macro_test.asm(61): ^ emitted from here
 61    0021 CD 00 00    >	call _my___yyyyy____yy__call
 62    0024
 63    0024              ;should be expanded as

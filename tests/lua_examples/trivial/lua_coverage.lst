@@ -1,5 +1,5 @@
 lua_coverage.asm(7): error: [INCLUDELUA] File doesn't exist: neverfile.lua
-lua_coverage.asm(8): error: [LUA] lua_coverage.asm:1: unexpected symbol near ';'
+lua_coverage.asm(1): error: [LUA] unexpected symbol near ';'
 # file opened: lua_coverage.asm
  1    0000              ; various error states, etc... (not a good fit elsewhere)
 lua_coverage.asm(2): error: [ENDLUA] End of lua script without script
@@ -32,7 +32,7 @@ lua_coverage.asm(19): error: [LUA] error in function 'insert_define'.
 22    0000                  LUA pass3
 23    0000 ~                    someErrorInLua(1, 2, 3)
 24    0000 ~
-lua_coverage.asm(24): error: [LUA] Unexpected end of lua script
+lua_coverage.asm(22): error: [LUA] Unexpected end of lua script
 lua_coverage.asm(23): error: [LUA] attempt to call global 'someErrorInLua' (a nil value)
 24    0000
 # file closed: lua_coverage.asm

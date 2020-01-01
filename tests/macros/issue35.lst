@@ -18,12 +18,14 @@
 17    0000                  ORG 0x1234
 18    1234                  ; this will fail with "Label not found: test_result_1", because "string" sub-part is substitued with "1"
 19    1234                  MYMACRO1 test_result_string, 1, 0   ; this is feature, not bug (see "macro_test.asm")
-issue35.asm(19): error: Label not found: test_result_1
+issue35.asm(2): error: Label not found: test_result_1
+issue35.asm(19): ^ emitted from here
 19    1234 11 00 00    >        ld de,test_result_1
 20    1237
 21    1237                  ; this will fail with "Label not found: test_result_1", because "string" sub-part is substitued with "1"
 22    1237                  MYMACRO2 test_result_string, 1
-issue35.asm(22): error: Label not found: test_result_1
+issue35.asm(6): error: Label not found: test_result_1
+issue35.asm(22): ^ emitted from here
 22    1237 11 00 00    >        ld de,test_result_1
 23    123A
 24    123A                  ; this will not fail, since v1.11.2 the sjasmplus substitution rules were modified.

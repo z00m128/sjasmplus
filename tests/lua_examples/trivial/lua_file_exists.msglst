@@ -1,5 +1,5 @@
-lua_file_exists.asm(12): error: bogus.file does not exist.
-lua_file_exists.asm(12): error: bogus.file does not exist.
+lua_file_exists.asm(12): error: [LUA] bogus.file does not exist.
+lua_file_exists.asm(12): error: [LUA] bogus.file does not exist.
 # file opened: lua_file_exists.asm
  1    0000                  lua pass1
  2    0000 ~                    pass = 0
@@ -18,7 +18,7 @@ lua_file_exists.asm(12): error: bogus.file does not exist.
 14    0000              DISPLAY "lua pass: ", /D, 3
 > lua_file_exists.asm does exist.
 14    0000               DISPLAY "lua_file_exists.asm does exist."
-lua_file_exists.asm(12): error: bogus.file does not exist.
+lua_file_exists.asm(12): error: [LUA] bogus.file does not exist.
 14    0000                  endlua
 15    0000
 16    0000                  lua pass3   ; wrong arguments

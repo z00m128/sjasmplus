@@ -1,4 +1,4 @@
-luaincS.asm(19): warning: Pass updated to 1, device: NONE
+luaincS.asm(19): warning: [LUA] Pass updated to 1, device: NONE
 # file opened: luaincS.asm
  1    0000              ; test include paths on command line and their priorities, there are multiple steps:
  2    0000              ; luainc.asm       = no extra include path, should include from working directory
@@ -20,7 +20,7 @@ luaincS.asm(19): warning: Pass updated to 1, device: NONE
 18    0000 ~                    if pass == 1 or pass == 3 then
 19    0000 ~                      sj.warning('Pass updated to ' .. pass .. ', device: ' .. sj.get_device())
 20    0000 ~                    end
-luaincS.asm(19): warning: Pass updated to 3, device: ZXSPECTRUM1024
+luaincS.asm(19): warning: [LUA] Pass updated to 3, device: ZXSPECTRUM1024
 21    0000                  ENDLUA
 22    0000
 23    0000                  DEVICE ZXSPECTRUM1024
@@ -44,7 +44,8 @@ luaincS.asm(19): warning: Pass updated to 3, device: ZXSPECTRUM1024
 38    8009
 39    8009                  LUA ALLPASS
 40    8009 ~                inc_ld_system('A', pass)        -- defined in all includes, the one with priority wins
-luaincS.asm(42): warning: Accessing low memory address 0x0003, is it ok?: LD A,(3) 
+luaincSSSS_v/luaincSSSS.lua(3): warning: [LUA] Accessing low memory address 0x0003, is it ok?: LD A,(3) 
+luaincS.asm(41): ^ emitted from here
 41    8009 3A 03 00     LD A,(3) ; overloaded funcion (system-valid variant)
 41    800C                  ENDLUA
 42    800C

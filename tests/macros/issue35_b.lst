@@ -1,1 +1,2 @@
-issue35_b.asm(6): error: Over 20 defines nested
+issue35_b.asm(2): error: Over 20 defines nested
+issue35_b.asm(6): ^ emitted from here

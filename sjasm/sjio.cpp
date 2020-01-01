@@ -52,6 +52,61 @@ int ListAddress;
 aint WBLength = 0;
 bool IsSkipErrors = false;
 
+static void initErrorLine() {		// adds filename + line of definition if possible
+	*ErrorLine = 0;
+	*ErrorLine2 = 0;
+	if (pass < 1 || LASTPASS < pass) return;
+	// during assembling, show also file+line info
+	TextFilePos errorPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+	bool isEmittedMsgEnabled = true;
+#ifdef USE_LUA
+	if (LuaStartPos.line) {
+		errorPos = LuaStartPos;
+		lua_Debug ar;
+
+		// find either top level of lua stack, or standalone file, otherwise it's impossible
+		// to precisely report location of error (ASM can have 2+ LUA blocks defining functions)
+		int level = 1;			// level 0 is "C" space, ignore that always
+		// suppress "is emitted here" when directly inlined in current code
+		isEmittedMsgEnabled = (0 < listmacro);
+		while (true) {
+			if (!lua_getstack(LUA, level, &ar)) break;	// no more lua stack levels
+			if (!lua_getinfo(LUA, "Sl", &ar)) break;	// no more info about current level
+			if (strcmp("[string \"script\"]", ar.short_src)) {
+				// standalone definition in external file found, pinpoint it precisely
+				errorPos.filename = ar.short_src;
+				errorPos.line = ar.currentline;
+				isEmittedMsgEnabled = true;				// and add "emitted here" in any case
+				break;	// no more lua-stack traversing, stop here
+			}
+			// if source was inlined script, update the possible source line
+			errorPos.line = LuaStartPos.line + ar.currentline;
+			// and keep traversing stack until top level is found (to make the line meaningful)
+			++level;
+		}
+	}
+#endif //USE_LUA
+	SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", errorPos.filename, errorPos.line);
+	// if the error filename:line is not identical with current source line, add ErrorLine2 about emit
+	if (isEmittedMsgEnabled &&
+		(strcmp(errorPos.filename, CurSourcePos.filename) || errorPos.line != CurSourcePos.line)) {
+		SPRINTF2(ErrorLine2, LINEMAX2, "%s(%d): ^ emitted from here\n", CurSourcePos.filename, CurSourcePos.line);
+	}
+}
+
+static void outputErrorLine(const EOutputVerbosity errorLevel) {
+	// always print the message into listing file (the OutputVerbosity does not apply to listing)
+	if (GetListingFile()) {
+		fputs(ErrorLine, GetListingFile());
+		if (*ErrorLine2) fputs(ErrorLine2, GetListingFile());
+	}
+	// print the error into stderr if OutputVerbosity allows this type of message
+	if (Options::OutputVerbosity <= errorLevel) {
+		_CERR ErrorLine _END;
+		if (*ErrorLine2) _CERR ErrorLine2 _END;
+	}
+}
+
 void Error(const char* message, const char* badValueMessage, EStatus type) {
 	// check if it is correct pass by the type of error
 	if (type == EARLY && LASTPASS <= pass) return;
@@ -68,30 +123,17 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 
 	DefineTable.Replace("_ERRORS", ErrorCount);
 
-	if (1 <= pass && pass <= LASTPASS) {	// during assembling, show also file+line info
-		int ln = CurSourcePos.line;
-#ifdef USE_LUA
-		if (LuaLine >= 0) {
-			lua_Debug ar;
-			lua_getstack(LUA, 1, &ar) ;
-			lua_getinfo(LUA, "l", &ar);
-			ln = LuaLine + ar.currentline;
-		}
-#endif //USE_LUA
-		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", CurSourcePos.filename, ln);
-	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
+	initErrorLine();
 	STRCAT(ErrorLine, LINEMAX2-1, "error: ");
+#ifdef USE_LUA
+	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
+#endif
 	STRCAT(ErrorLine, LINEMAX2-1, message);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
 	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2-1, "\n");	// append EOL if needed
-	// print the error into listing file always (the OutputVerbosity does not apply to listing)
-	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
-	// print the error into stderr if OutputVerbosity allows errors
-	if (Options::OutputVerbosity <= OV_ERROR) {
-		_CERR ErrorLine _END;
-	}
+	outputErrorLine(OV_ERROR);
 	// terminate whole assembler in case of fatal error
 	if (type == FATAL) {
 		ExitASM(1);
@@ -125,30 +167,17 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 
 	DefineTable.Replace("_WARNINGS", WarningCount);
 
-	if (pass <= LASTPASS) {					// during assembling, show also file+line info
-		int ln = CurSourcePos.line;
-#ifdef USE_LUA
-		if (LuaLine >= 0) {
-			lua_Debug ar;
-			lua_getstack(LUA, 1, &ar) ;
-			lua_getinfo(LUA, "l", &ar);
-			ln = LuaLine + ar.currentline;
-		}
-#endif //USE_LUA
-		SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", CurSourcePos.filename, ln);
-	} else ErrorLine[0] = 0;				// reset ErrorLine for STRCAT
+	initErrorLine();
 	STRCAT(ErrorLine, LINEMAX2-1, "warning: ");
+#ifdef USE_LUA
+	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
+#endif
 	STRCAT(ErrorLine, LINEMAX2-1, message);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
 	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2-1, "\n");	// append EOL if needed
-	// print the warning into listing file always (the OutputVerbosity does not apply to listing)
-	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
-	// print the warning into stderr if OutputVerbosity allows warnings
-	if (Options::OutputVerbosity <= OV_WARNING) {
-		_CERR ErrorLine _END;
-	}
+	outputErrorLine(OV_WARNING);
 }
 
 // find position of extension in filename (points at dot char or beyond filename if no extension)

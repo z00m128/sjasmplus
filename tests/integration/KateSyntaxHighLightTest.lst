@@ -53,7 +53,8 @@ KateSyntaxHighLightTest.asm(34): error: Unrecognized instruction: jnz     s
 34    A84A                  jnz     s               ; still makes it easier to catch
 35    A84A                  leMacron arg0           ; but so do also correctly used macros
 35    A84A DD 01       >        defb    $DD, 1
-KateSyntaxHighLightTest.asm(35): error: Unrecognized instruction: nextreg $15, $0
+KateSyntaxHighLightTest.asm(30): error: Unrecognized instruction: nextreg $15, $0
+KateSyntaxHighLightTest.asm(35): ^ emitted from here
 35    A84C             >        nextreg $15, $0
 36    A84C              .localLab:
 KateSyntaxHighLightTest.asm(37): error: Missing next digit: 1   

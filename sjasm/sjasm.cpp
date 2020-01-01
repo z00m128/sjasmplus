@@ -165,7 +165,7 @@ char* DeviceID = 0;
 
 // extend
 const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either full or basename (--fullpath)
-char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
+char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2], * bp;
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 char SourceFNames[128][MAX_PATH];
@@ -199,7 +199,7 @@ CStructureTable StructureTable;
 #ifdef USE_LUA
 
 lua_State *LUA;			// lgtm[cpp/short-global-name] .. name seems barely ok (especially considering rest of code)
-int LuaLine=-1;
+TextFilePos LuaStartPos;
 
 #endif //USE_LUA
 
