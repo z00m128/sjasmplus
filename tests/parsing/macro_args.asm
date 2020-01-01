@@ -46,3 +46,11 @@
     // too few/many argument errors
     ccc  5, 6
     ccc  7, 8, 9, 10
+
+    // C++ numeric literal should not throw off the apostrophe-string heuristic parsing
+    MACRO cpp_literals num1?, num2?
+        db  num1?, num2?
+    ENDM
+
+    cpp_literals %0'110'1010, $F'E      // fixed in v1.14.4
+    cpp_literals $9'A, $F'0
