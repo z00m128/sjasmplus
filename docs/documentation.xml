@@ -190,11 +190,11 @@
 
             <listitem>
               <synopsis>- added few example utility macros in tests/macro_examples/sj_library.asm (neg r16)
-- added <link linkend="nex_screen">`SAVENEX SCREEN BMP`</link> sub-command to include BMP loading-screen</synopsis>
+- added <link linkend="nex_screen">`SAVENEX SCREEN BMP`</link> sub-command to include BMP loading-screen
 - in lua scripts: `sj.calc(..)` (alias `_c(..)`) now substitutes defines and macro arguments
 - error reporting inside LUA and MACRO refactored to give better info about origin of error
 - macro-arguments parser now recognizes C++ numeric literals with apostrophe as digits-group separator
-- the assembler will instantly exit when run at Big-Endian platform (the rest of code is broken on BE)
+- the assembler will instantly exit when run at Big-Endian platform (the rest of code is broken on BE)</synopsis>
             </listitem>
           </varlistentry>
 
