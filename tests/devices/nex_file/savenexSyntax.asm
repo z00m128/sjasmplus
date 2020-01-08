@@ -1,4 +1,4 @@
-;;; docs design
+;;; docs design (missing the changes after V1.3 introduction, added directly in docs.xml)
 ;     SAVENEX <command> <command arguments>
 ;  Works only in ZXSPECTRUMNEXT device emulation mode. See DEVICE.
 ;

@@ -22,7 +22,7 @@ savenexBmpL2.asm(20): error: [SAVENEX] Error opening file:
 20    C003                  SAVENEX     SCREEN  BMP
 savenexBmpL2.asm(21): error: [SAVENEX] Error opening file: ,
 21    C003                  SAVENEX     SCREEN  BMP , 0
-savenexBmpL2.asm(22): error: [SAVENEX] expected syntax is ... BMP <filename>[,<savePalette 0/1>]: SAVENEX     SCREEN  BMP 9 ,
+savenexBmpL2.asm(22): error: [SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]: SAVENEX     SCREEN  BMP 9 ,
 22    C003                  SAVENEX     SCREEN  BMP 9 ,
 23    C003
 24    C003                  ; errors - missing file / invalid files
@@ -30,9 +30,9 @@ savenexBmpL2.asm(25): error: [SAVENEX] Error opening file: missing file . bmp
 25    C003                  SAVENEX     SCREEN  BMP "missing file . bmp"
 savenexBmpL2.asm(26): error: [SAVENEX] BMP file is not in expected format (uncompressed, 8bpp, 40B BITMAPINFOHEADER header): savenexBmpL2/savenexBmpL2_16color.bmp
 26    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2_16color.bmp", 0
-savenexBmpL2.asm(27): error: [SAVENEX] BMP file is not 256x192 or 128x96: savenexBmpL2/savenexBmpL2_256x8.bmp
+savenexBmpL2.asm(27): error: [SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256: savenexBmpL2/savenexBmpL2_256x8.bmp
 27    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2_256x8.bmp", 0    ;.. shouldn't warn about colors because savePalette = 0
-savenexBmpL2.asm(28): error: [SAVENEX] BMP file is not 256x192 or 128x96: savenexBmpL2/savenexBmpL2_256x8.bmp
+savenexBmpL2.asm(28): error: [SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256: savenexBmpL2/savenexBmpL2_256x8.bmp
 28    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2_256x8.bmp", 1    ; ok - to suppres "only 10 color" warning
 29    C003
 30    C003                  ; correct one (with two warnings
