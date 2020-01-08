@@ -188,6 +188,7 @@ void SNexFile::finalizeFile() {
 		h.magicAndVersion[7] = '3';				// modify file version to "V1.3" string
 		if (h.hasChecksum) {
 			h.crc32c = 0;		//FIXME calculate checksum CRC-32C (Castagnoli)
+			h.hasChecksum = 0;	// REMOVE THIS AFTER CRC is calculated
 			Warning("[SAVENEX] V1.3 CRC feature is not implemented yet");
 		}
 	}

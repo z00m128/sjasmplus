@@ -1,0 +1,339 @@
+# file opened: savenexSyntaxV_1_3.asm
+  1   0000              ; only changes with V1.3 are tested here, the basic test is savenexSyntax.asm
+  2   0000
+  3   0000                  DEVICE ZXSPECTRUMNEXT
+  4   0000
+  5   0000              ;; OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]
+  6   0000                  ; errors - [un]expected arguments
+savenexSyntaxV_1_3.asm(7): error: [SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]: SAVENEX OPEN "savenexSyntaxV_1_3.nex", $8000, $FFE0,15,  2,
+  7   0000                  SAVENEX OPEN "savenexSyntaxV_1_3.nex", $8000, $FFE0,15,  2,
+savenexSyntaxV_1_3.asm(8): error: [SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]: SAVENEX OPEN "savenexSyntaxV_1_3.nex", $8000, $FFE0,15,  2, 2
+  8   0000                  SAVENEX OPEN "savenexSyntaxV_1_3.nex", $8000, $FFE0,15,  2, 2
+savenexSyntaxV_1_3.asm(9): error: [SAVENEX] only file version 2 (V1.2) or 3 (V1.3) can be enforced: 1
+  9   0000                  SAVENEX OPEN "savenexSyntaxV_1_3.nex", $7170, $F1F0, 0,  1 ; error fileVersion
+savenexSyntaxV_1_3.asm(10): error: [SAVENEX] only file version 2 (V1.2) or 3 (V1.3) can be enforced: 4
+ 10   0000                  SAVENEX OPEN "savenexSyntaxV_1_3.nex", $7170, $F1F0, 0,  4 ; error fileVersion
+ 11   0000
+ 12   0000                  ; one correct NEX file to verify simple case (but induce all sorts of warnings)
+savenexSyntaxV_1_3.asm(13): warning: [SAVENEX] Start address was also defined by END, OPEN argument used instead
+savenexSyntaxV_1_3.asm(13): warning: value 0x18180 is truncated to 16bit value: 0x8180
+savenexSyntaxV_1_3.asm(13): warning: value 0x1F1F0 is truncated to 16bit value: 0xF1F0
+ 13   0000                  SAVENEX OPEN "savenexSyntaxV_1_3.nex", $18180, $1F1F0, 'B', 2   ; force V1.2 version
+ 14   0000
+ 15   0000                  ; error = NEX file is already open
+savenexSyntaxV_1_3.asm(16): error: [SAVENEX] NEX file is already open: SAVENEX     OPEN    "savenexSyntaxV_1_3.nex", $8180, $F1F0, 'B', 3
+ 16   0000                  SAVENEX     OPEN    "savenexSyntaxV_1_3.nex", $8180, $F1F0, 'B', 3
+ 17   0000
+ 18   0000                  ; few correct commands which didn't change with V1.3 support
+ 19   0000                  SAVENEX     CORE    3,0,6
+ 20   0000                  SAVENEX     CFG     5,  0,  1,  1
+ 21   0000
+ 22   0000              ;; CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]
+ 23   0000                  ; error because V1.2 file is enforced
+savenexSyntaxV_1_3.asm(24): error: [SAVENEX] V1.2 was requested with OPEN, but CFG3 is V1.3 feature.
+ 24   0000                  SAVENEX     CFG3    0,  1,  $DF00, 2048
+ 25   0000
+ 26   0000              ;; BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>[,<posY 0..255>]]]
+ 27   0000                  ; errors - [un]expected arguments
+savenexSyntaxV_1_3.asm(28): error: [SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>[,<posY 0..255>]]]: SAVENEX     BAR     1,  'L',    'D',    'd', 0,
+ 28   0000                  SAVENEX     BAR     1,  'L',    'D',    'd', 0,
+savenexSyntaxV_1_3.asm(29): error: [SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>[,<posY 0..255>]]]: SAVENEX     BAR     1,  'L',    'D',    'd', 0, 0
+ 29   0000                  SAVENEX     BAR     1,  'L',    'D',    'd', 0, 0
+ 30   0000
+ 31   0000                  ; correct ones with value warnings, and omitting optional arguments
+savenexSyntaxV_1_3.asm(32): warning: [SAVENEX] values are not within 0/1 or 0..255 ranges
+ 32   0000                  SAVENEX     BAR     1,  255, 255, 255, 256
+ 33   0000                  SAVENEX     BAR     1,  'L',    'D',    'd', 123 ; one fully valid (no warning)
+ 34   0000
+ 35   0000              ;; PALETTE NONE
+ 36   0000              ;; PALETTE DEFAULT
+ 37   0000              ;; PALETTE MEM <palPage8kNum 0..223>,<palOffset>
+ 38   0000              ;; PALETTE BMP <filename>
+ 39   0000                  ; errors - [un]expected arguments
+savenexSyntaxV_1_3.asm(40): error: [SAVENEX] unknown palette command (commands: NONE, DEFAULT, MEM, BMP): ETTELAP
+ 40   0000                  SAVENEX     PALETTE ETTELAP
+savenexSyntaxV_1_3.asm(41): error: [SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>: SAVENEX     PALETTE MEM
+ 41   0000                  SAVENEX     PALETTE MEM
+savenexSyntaxV_1_3.asm(42): error: [SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>: SAVENEX     PALETTE MEM 100
+ 42   0000                  SAVENEX     PALETTE MEM 100
+savenexSyntaxV_1_3.asm(43): error: [SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>: SAVENEX     PALETTE MEM 100,
+ 43   0000                  SAVENEX     PALETTE MEM 100,
+savenexSyntaxV_1_3.asm(44): error: [SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>: SAVENEX     PALETTE MEM 100, 0,
+ 44   0000                  SAVENEX     PALETTE MEM 100, 0,
+savenexSyntaxV_1_3.asm(45): error: [SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>: SAVENEX     PALETTE MEM 100, 0, 0
+ 45   0000                  SAVENEX     PALETTE MEM 100, 0, 0
+savenexSyntaxV_1_3.asm(46): error: [SAVENEX] expected syntax is BMP <filename>: SAVENEX     PALETTE BMP
+ 46   0000                  SAVENEX     PALETTE BMP
+savenexSyntaxV_1_3.asm(47): error: [SAVENEX] expected syntax is BMP <filename>: SAVENEX     PALETTE BMP "pal.bmp",
+ 47   0000                  SAVENEX     PALETTE BMP "pal.bmp",
+ 48   0000
+ 49   0000                  ; errors - wrong values
+savenexSyntaxV_1_3.asm(50): error: [SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>: SAVENEX     PALETTE MEM -1, 0
+ 50   0000                  SAVENEX     PALETTE MEM -1, 0
+savenexSyntaxV_1_3.asm(51): error: [SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>: SAVENEX     PALETTE MEM 224, 0
+ 51   0000                  SAVENEX     PALETTE MEM 224, 0
+savenexSyntaxV_1_3.asm(52): error: [SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>: SAVENEX     PALETTE MEM 10, -1
+ 52   0000                  SAVENEX     PALETTE MEM 10, -1
+savenexSyntaxV_1_3.asm(53): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     PALETTE MEM 0, 1792*1024-511
+ 53   0000                  SAVENEX     PALETTE MEM 0, 1792*1024-511
+savenexSyntaxV_1_3.asm(54): error: [SAVENEX] expected syntax is BMP <filename>: SAVENEX     PALETTE BMP ""
+ 54   0000                  SAVENEX     PALETTE BMP ""
+savenexSyntaxV_1_3.asm(55): error: [SAVENEX] Error opening file: pal.bmp
+ 55   0000                  SAVENEX     PALETTE BMP "pal.bmp"
+savenexSyntaxV_1_3.asm(56): error: [SAVENEX] BMP file is not in expected format (uncompressed, 8bpp, 40B BITMAPINFOHEADER header): savenexSyntaxV_1_3.asm
+ 56   0000                  SAVENEX     PALETTE BMP "savenexSyntaxV_1_3.asm"
+ 57   0000
+ 58   0000                  ; one correct (setting up DEFAULT palette type)
+ 59   0000                  SAVENEX     PALETTE DEFAULT
+ 60   0000
+ 61   0000                  ; verify that any one-more reports error
+savenexSyntaxV_1_3.asm(62): error: [SAVENEX] some palette/screen was already defined (define palette once and ahead)
+ 62   0000                  SAVENEX     PALETTE NONE
+savenexSyntaxV_1_3.asm(63): error: [SAVENEX] some palette/screen was already defined (define palette once and ahead)
+ 63   0000                  SAVENEX     PALETTE DEFAULT
+savenexSyntaxV_1_3.asm(64): error: [SAVENEX] some palette/screen was already defined (define palette once and ahead)
+ 64   0000                  SAVENEX     PALETTE MEM 10, 0
+savenexSyntaxV_1_3.asm(65): error: [SAVENEX] some palette/screen was already defined (define palette once and ahead)
+ 65   0000                  SAVENEX     PALETTE BMP "pal.bmp"
+ 66   0000
+ 67   0000              ;; SCREEN L2_320 [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
+ 68   0000              ;; SCREEN L2_640 [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
+ 69   0000              ;; SCREEN TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]
+ 70   0000                  ; errors - because V1.2 is enforced
+savenexSyntaxV_1_3.asm(71): error: [SAVENEX] V1.2 was requested with OPEN, but 320x256 or 640x256 screen is V1.3 feature.
+ 71   0000                  SAVENEX     SCREEN  L2_320
+savenexSyntaxV_1_3.asm(72): error: [SAVENEX] V1.2 was requested with OPEN, but 320x256 or 640x256 screen is V1.3 feature.
+ 72   0000                  SAVENEX     SCREEN  L2_640
+savenexSyntaxV_1_3.asm(73): error: [SAVENEX] V1.2 was requested with OPEN, but tilemap screen is V1.3 feature.
+ 73   0000                  SAVENEX     SCREEN  TILE 0, 1, 2, 3, 0
+ 74   0000
+ 75   0000                  ; errors - [un]expected arguments - possible to test for TILE screen (ahead V1.2 check)
+savenexSyntaxV_1_3.asm(76): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE
+ 76   0000                  SAVENEX     SCREEN  TILE
+savenexSyntaxV_1_3.asm(77): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0
+ 77   0000                  SAVENEX     SCREEN  TILE    0
+savenexSyntaxV_1_3.asm(78): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,
+ 78   0000                  SAVENEX     SCREEN  TILE    0,
+savenexSyntaxV_1_3.asm(79): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1
+ 79   0000                  SAVENEX     SCREEN  TILE    0,  1
+savenexSyntaxV_1_3.asm(80): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,
+ 80   0000                  SAVENEX     SCREEN  TILE    0,  1,
+savenexSyntaxV_1_3.asm(81): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2 
+ 81   0000                  SAVENEX     SCREEN  TILE    0,  1,  2
+savenexSyntaxV_1_3.asm(82): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2,
+ 82   0000                  SAVENEX     SCREEN  TILE    0,  1,  2,
+savenexSyntaxV_1_3.asm(83): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2,  3,
+ 83   0000                  SAVENEX     SCREEN  TILE    0,  1,  2,  3,
+savenexSyntaxV_1_3.asm(84): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2,  3, 0,
+ 84   0000                  SAVENEX     SCREEN  TILE    0,  1,  2,  3, 0,
+ 85   0000
+ 86   0000                  ; errors - wrong values
+savenexSyntaxV_1_3.asm(87): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2,  3, -1
+ 87   0000                  SAVENEX     SCREEN  TILE    0,  1,  2,  3, -1
+savenexSyntaxV_1_3.asm(88): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2,  3, 2
+ 88   0000                  SAVENEX     SCREEN  TILE    0,  1,  2,  3, 2
+savenexSyntaxV_1_3.asm(89): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    256,  1,  2,  3, 0
+ 89   0000                  SAVENEX     SCREEN  TILE    256,  1,  2,  3, 0
+savenexSyntaxV_1_3.asm(90): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  256,  2,  3, 0
+ 90   0000                  SAVENEX     SCREEN  TILE    0,  256,  2,  3, 0
+savenexSyntaxV_1_3.asm(91): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  256,  3, 0
+ 91   0000                  SAVENEX     SCREEN  TILE    0,  1,  256,  3, 0
+savenexSyntaxV_1_3.asm(92): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2,  256, 0
+ 92   0000                  SAVENEX     SCREEN  TILE    0,  1,  2,  256, 0
+savenexSyntaxV_1_3.asm(93): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    -1,  1,  2,  3, 0
+ 93   0000                  SAVENEX     SCREEN  TILE    -1,  1,  2,  3, 0
+savenexSyntaxV_1_3.asm(94): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  -1,  2,  3, 0
+ 94   0000                  SAVENEX     SCREEN  TILE    0,  -1,  2,  3, 0
+savenexSyntaxV_1_3.asm(95): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  -1,  3, 0
+ 95   0000                  SAVENEX     SCREEN  TILE    0,  1,  -1,  3, 0
+savenexSyntaxV_1_3.asm(96): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2,  -1, 0
+ 96   0000                  SAVENEX     SCREEN  TILE    0,  1,  2,  -1, 0
+ 97   0000
+ 98   0000              ;; SCREEN BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]
+ 99   0000                  ; errors - [un]expected arguments
+savenexSyntaxV_1_3.asm(100): error: [SAVENEX] Error opening file: 
+100   0000                  SAVENEX     SCREEN  BMP
+savenexSyntaxV_1_3.asm(101): error: [SAVENEX] Error opening file: 
+101   0000                  SAVENEX     SCREEN  BMP     ""
+savenexSyntaxV_1_3.asm(102): error: [SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]: SAVENEX     SCREEN  BMP     "",
+102   0000                  SAVENEX     SCREEN  BMP     "",
+savenexSyntaxV_1_3.asm(103): error: [SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]: SAVENEX     SCREEN  BMP     "",     1,
+103   0000                  SAVENEX     SCREEN  BMP     "",     1,
+savenexSyntaxV_1_3.asm(104): error: [SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]: SAVENEX     SCREEN  BMP     "",     1,  0,
+104   0000                  SAVENEX     SCREEN  BMP     "",     1,  0,
+105   0000
+106   0000                  ; errors - wrong values
+savenexSyntaxV_1_3.asm(107): warning: [SAVENEX] savePalette should be 0 or 1 (defaulting to 1)
+savenexSyntaxV_1_3.asm(107): error: [SAVENEX] Error opening file: 
+107   0000                  SAVENEX     SCREEN  BMP     "",     2
+savenexSyntaxV_1_3.asm(108): warning: [SAVENEX] paletteOffset should be in 0..15 range
+savenexSyntaxV_1_3.asm(108): error: [SAVENEX] Error opening file: 
+108   0000                  SAVENEX     SCREEN  BMP     "",     0,  -2  ; -1 is internal value for "missing" palOfs => legal
+savenexSyntaxV_1_3.asm(109): warning: [SAVENEX] paletteOffset should be in 0..15 range
+savenexSyntaxV_1_3.asm(109): error: [SAVENEX] Error opening file: 
+109   0000                  SAVENEX     SCREEN  BMP     "",     0,  16
+110   0000
+111   0000                  ; not testing correct variants, because it would make impossible to test other types
+112   0000
+113   0000              ;; COPPER <Page8kNum 0..223>,<offset>
+114   0000                  ; errors - because V1.2 is enforced
+savenexSyntaxV_1_3.asm(115): error: [SAVENEX] V1.2 was requested with OPEN, but COPPER is V1.3 feature.
+115   0000                  SAVENEX     COPPER 0, 0
+116   0000
+savenexSyntaxV_1_3.asm(117): warning: [SAVENEX] some palette was defined, but without screen it is ignored.
+117   0000                  SAVENEX     CLOSE       ; warning about palette defined, but no screen
+118   0000
+119   0000              ;; further syntax tests, this time with V1.3 enabled in OPEN
+120   0000
+121   0000              ;; OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]
+122   0000                  ; one correct NEX file to verify simple case
+123   0000                  SAVENEX OPEN "savenexSyntaxV_1_3.nex"   ; start with V1.2, enable V1.3
+124   0000
+125   0000              ;; CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]
+126   0000                  ; errors - [un]expected arguments
+savenexSyntaxV_1_3.asm(127): error: [SAVENEX] expected syntax is CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]: SAVENEX     CFG3
+127   0000                  SAVENEX     CFG3
+savenexSyntaxV_1_3.asm(128): error: [SAVENEX] expected syntax is CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]: SAVENEX     CFG3    0,
+128   0000                  SAVENEX     CFG3    0,
+savenexSyntaxV_1_3.asm(129): error: [SAVENEX] expected syntax is CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]: SAVENEX     CFG3    0,  1,
+129   0000                  SAVENEX     CFG3    0,  1,
+savenexSyntaxV_1_3.asm(130): error: [SAVENEX] expected syntax is CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]: SAVENEX     CFG3    0,  1,  $DF00
+130   0000                  SAVENEX     CFG3    0,  1,  $DF00
+savenexSyntaxV_1_3.asm(131): error: [SAVENEX] expected syntax is CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]: SAVENEX     CFG3    0,  1,  $DF00,
+131   0000                  SAVENEX     CFG3    0,  1,  $DF00,
+savenexSyntaxV_1_3.asm(132): error: [SAVENEX] expected syntax is CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]: SAVENEX     CFG3    0,  1,  $DF00, 2048,
+132   0000                  SAVENEX     CFG3    0,  1,  $DF00, 2048,
+133   0000
+134   0000                  ; correct ones with value warnings, and omitting optional arguments
+savenexSyntaxV_1_3.asm(135): warning: [SAVENEX] crc/preserve values are not 0/1 or CLI buffer doesn't fit into $4000..$FFFF range (size can be 2048 max)
+135   0000                  SAVENEX     CFG3    2
+savenexSyntaxV_1_3.asm(136): warning: [SAVENEX] crc/preserve values are not 0/1 or CLI buffer doesn't fit into $4000..$FFFF range (size can be 2048 max)
+136   0000                  SAVENEX     CFG3    1,  2
+savenexSyntaxV_1_3.asm(137): warning: [SAVENEX] crc/preserve values are not 0/1 or CLI buffer doesn't fit into $4000..$FFFF range (size can be 2048 max)
+137   0000                  SAVENEX     CFG3    1,  0,  $3FFF, 1
+savenexSyntaxV_1_3.asm(138): warning: [SAVENEX] crc/preserve values are not 0/1 or CLI buffer doesn't fit into $4000..$FFFF range (size can be 2048 max)
+138   0000                  SAVENEX     CFG3    1,  0,  $FFFF, 2
+savenexSyntaxV_1_3.asm(139): warning: [SAVENEX] crc/preserve values are not 0/1 or CLI buffer doesn't fit into $4000..$FFFF range (size can be 2048 max)
+139   0000                  SAVENEX     CFG3    1,  0,  $FF00, 0
+savenexSyntaxV_1_3.asm(140): warning: [SAVENEX] crc/preserve values are not 0/1 or CLI buffer doesn't fit into $4000..$FFFF range (size can be 2048 max)
+140   0000                  SAVENEX     CFG3    1,  0,  $E000, 2049
+141   0000                  SAVENEX     CFG3    1,  1,  0,  0    ; one completely correct (no warning) (+CRC)
+142   0000
+143   0000              ;; SCREEN L2_320 [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
+144   0000              ;; SCREEN L2_640 [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
+145   0000                  ; errors - [un]expected arguments - possible to test for TILE screen (ahead V1.2 check)
+savenexSyntaxV_1_3.asm(146): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_320  0
+146   0000                  SAVENEX     SCREEN  L2_320  0
+savenexSyntaxV_1_3.asm(147): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_320  0,
+147   0000                  SAVENEX     SCREEN  L2_320  0,
+savenexSyntaxV_1_3.asm(148): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_320  0,  0,
+148   0000                  SAVENEX     SCREEN  L2_320  0,  0,
+savenexSyntaxV_1_3.asm(149): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_320  0,  0,  0
+149   0000                  SAVENEX     SCREEN  L2_320  0,  0,  0
+savenexSyntaxV_1_3.asm(150): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_320  0,  0,  0,
+150   0000                  SAVENEX     SCREEN  L2_320  0,  0,  0,
+savenexSyntaxV_1_3.asm(151): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_320  0,  0,  0,  0,
+151   0000                  SAVENEX     SCREEN  L2_320  0,  0,  0,  0,
+152   0000
+savenexSyntaxV_1_3.asm(153): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_640  0
+153   0000                  SAVENEX     SCREEN  L2_640  0
+savenexSyntaxV_1_3.asm(154): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_640  0,
+154   0000                  SAVENEX     SCREEN  L2_640  0,
+savenexSyntaxV_1_3.asm(155): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_640  0,  0,
+155   0000                  SAVENEX     SCREEN  L2_640  0,  0,
+savenexSyntaxV_1_3.asm(156): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_640  0,  0,  0
+156   0000                  SAVENEX     SCREEN  L2_640  0,  0,  0
+savenexSyntaxV_1_3.asm(157): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_640  0,  0,  0,
+157   0000                  SAVENEX     SCREEN  L2_640  0,  0,  0,
+savenexSyntaxV_1_3.asm(158): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_640  0,  0,  0,  0,
+158   0000                  SAVENEX     SCREEN  L2_640  0,  0,  0,  0,
+159   0000
+160   0000                  ; errors - wrong values
+savenexSyntaxV_1_3.asm(161): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_320  224,    0,      0,      0
+161   0000                  SAVENEX     SCREEN  L2_320  224,    0,      0,      0
+savenexSyntaxV_1_3.asm(162): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_320    0,    0,    224,      0
+162   0000                  SAVENEX     SCREEN  L2_320    0,    0,    224,      0
+savenexSyntaxV_1_3.asm(163): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2_320    0, 1792*1024 - 80*1024 + 1,  0,  0
+163   0000                  SAVENEX     SCREEN  L2_320    0, 1792*1024 - 80*1024 + 1,  0,  0
+savenexSyntaxV_1_3.asm(164): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  L2_320    0,    0,  0,  1792*1024 - 512 + 1
+164   0000                  SAVENEX     SCREEN  L2_320    0,    0,  0,  1792*1024 - 512 + 1
+savenexSyntaxV_1_3.asm(165): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2_320  223,    0
+165   0000                  SAVENEX     SCREEN  L2_320  223,    0
+savenexSyntaxV_1_3.asm(166): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2_320    0, 1792*1024 - 80*1024 + 1
+166   0000                  SAVENEX     SCREEN  L2_320    0, 1792*1024 - 80*1024 + 1
+167   0000
+savenexSyntaxV_1_3.asm(168): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_640  224,    0,      0,      0
+168   0000                  SAVENEX     SCREEN  L2_640  224,    0,      0,      0
+savenexSyntaxV_1_3.asm(169): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2_640    0,    0,    224,      0
+169   0000                  SAVENEX     SCREEN  L2_640    0,    0,    224,      0
+savenexSyntaxV_1_3.asm(170): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2_640    0, 1792*1024 - 80*1024 + 1,  0,  0
+170   0000                  SAVENEX     SCREEN  L2_640    0, 1792*1024 - 80*1024 + 1,  0,  0
+savenexSyntaxV_1_3.asm(171): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  L2_640    0,    0,  0,  1792*1024 - 512 + 1
+171   0000                  SAVENEX     SCREEN  L2_640    0,    0,  0,  1792*1024 - 512 + 1
+savenexSyntaxV_1_3.asm(172): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2_640  223,    0
+172   0000                  SAVENEX     SCREEN  L2_640  223,    0
+savenexSyntaxV_1_3.asm(173): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2_640    0, 1792*1024 - 80*1024 + 1
+173   0000                  SAVENEX     SCREEN  L2_640    0, 1792*1024 - 80*1024 + 1
+174   0000
+175   0000              ;; COPPER <Page8kNum 0..223>,<offset>
+176   0000                  ; errors - [un]expected arguments
+savenexSyntaxV_1_3.asm(177): error: [SAVENEX] expected syntax is COPPER <Page8kNum 0..223>,<offset>: SAVENEX     COPPER
+177   0000                  SAVENEX     COPPER
+savenexSyntaxV_1_3.asm(178): error: [SAVENEX] expected syntax is COPPER <Page8kNum 0..223>,<offset>: SAVENEX     COPPER 0
+178   0000                  SAVENEX     COPPER 0
+savenexSyntaxV_1_3.asm(179): error: [SAVENEX] expected syntax is COPPER <Page8kNum 0..223>,<offset>: SAVENEX     COPPER 0,
+179   0000                  SAVENEX     COPPER 0,
+savenexSyntaxV_1_3.asm(180): error: [SAVENEX] expected syntax is COPPER <Page8kNum 0..223>,<offset>: SAVENEX     COPPER 0, 0,
+180   0000                  SAVENEX     COPPER 0, 0,
+181   0000
+182   0000                  ; errors - wrong values
+savenexSyntaxV_1_3.asm(183): error: [SAVENEX] expected syntax is COPPER <Page8kNum 0..223>,<offset>: SAVENEX     COPPER 224, 0
+183   0000                  SAVENEX     COPPER 224, 0
+savenexSyntaxV_1_3.asm(184): error: [SAVENEX] copper data address range is outside of Next memory: SAVENEX     COPPER 0, 1792*1024 - 2048 + 1
+184   0000                  SAVENEX     COPPER 0, 1792*1024 - 2048 + 1
+185   0000
+186   0000                  ; valid copper commands
+187   0000                  SAVENEX     COPPER 0, 0
+188   0000                  SAVENEX     COPPER 0, 0     ; can be used multiple times, it will simple overwrite old code (silently)
+189   0000
+190   0000              ;; SCREEN TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]
+191   0000                  ; testing single correct variant (will block all other screens and palette)
+192   0000                  SAVENEX     SCREEN  TILE    0, 1, 2, 3, 1      ; will also store Bank 5
+193   0000
+savenexSyntaxV_1_3.asm(194): error: [SAVENEX] some palette/screen was already defined (define palette once and ahead)
+194   0000                  SAVENEX     PALETTE DEFAULT     ; fails because after screen
+195   0000
+savenexSyntaxV_1_3.asm(196): error: [SAVENEX] some bank was already stored (store copper ahead)
+196   0000                  SAVENEX     COPPER 0, 0         ; fails because bank is already saved
+197   0000
+198   0000                  ;; current work-in-progress sjasmplus will report unimplemented CRC feature
+savenexSyntaxV_1_3.asm(199): warning: [SAVENEX] V1.3 CRC feature is not implemented yet
+199   0000                  SAVENEX     CLOSE
+200   0000
+201   0000
+202   0000              ;; create small NEX for BIN comparison, if the thing at least somewhat works
+203   0000              ;; also verify it works twice per source (in sequential order)
+savenexSyntaxV_1_3.asm(204): warning: [SAVENEX] Start address was also defined by END, OPEN argument used instead
+204   0000                  SAVENEX OPEN "savenexSyntaxV_1_3.bin", $5000, $FE00, 0, 3
+205   0000                  SAVENEX CORE 3,0,6
+205   0000                SAVENEX CFG 4,0,0,0
+206   0000                  SAVENEX CFG3 1,0,$E000,1234
+206   0000                SAVENEX BAR 1,100,99,13,222
+207   0000                  ORG $4800
+207   4800 45 5F F5 44    DB $45, $5F, $F5, $44
+208   4804                  ORG $5000
+209   5000 ED 91 69 00      nextreg $69,0               ; hide Layer 2, ULA screen
+210   5004 18 FE            jr $                        ; infinite JR loop
+211   5006                  MMU 7, 18
+212   5006                  org $E000
+212   E000 1C 1C 1C...    DS $2000, %000'111'00   ; green top 32px strip
+213   0000                  SAVENEX PALETTE DEFAULT
+214   0000                  SAVENEX SCREEN L2_320
+215   0000                  SAVENEX AUTO 5, 5                       ; should store bank5
+216   0000                  ; let it close automatically by ending source
+217   0000
+218   0000                  END $7170       ; invoke warning about different start address
+# file closed: savenexSyntaxV_1_3.asm
+
+Value    Label
+------ - -----------------------------------------------------------
