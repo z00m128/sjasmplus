@@ -191,6 +191,7 @@
             <listitem>
               <synopsis>- added few example utility macros in tests/macro_examples/sj_library.asm (neg r16)
 - added <link linkend="nex_screen">`SAVENEX SCREEN BMP`</link> sub-command to include BMP loading-screen
+- added support for V1.3 of <link linkend="c_savenex">`NEX file format`</link> (new commands: CFG3, PALETTE, COPPER, new screen modes)
 - in lua scripts: `sj.calc(..)` (alias `_c(..)`) now substitutes defines and macro arguments
 - error reporting inside LUA and MACRO refactored to give better info about origin of error
 - macro-arguments parser now recognizes C++ numeric literals with apostrophe as digits-group separator
@@ -2173,7 +2174,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
 				  The "push" command will make OPT to preserve current state of options. The "reset"
 				  command will reset OPT-related options to default state. The "listoff" command will
 				  suspend the listing for following lines until "liston" command is used (listing
-				  availibility is part of the push/pop state, so to "nest" listing-off you can use
+				  availability is part of the push/pop state, so to "nest" listing-off you can use
 				  "OPT push listoff : ... code ... : OPT pop" code sequence.
 			  </para>
 			  <para>Then the provided options are applied. The default values are: fake instructions
@@ -3786,6 +3787,8 @@ binData.value2          EQU 0x8101   ; address</synopsis>
       https://specnext.dev/wiki/NEX_file_format</ulink>. In short it is header + loading screen +
       like-snapshot binary and remaining resources appended after.</para>
 
+  <para>Sjasmplus currently supports V1.2 and V1.3 of NEX file format (see wiki for details).</para>
+
   <para>As such, the SAVENEX commands are available only in ZXSPECTRUMNEXT device emulation mode,
 	  see <link linkend="po_device">DEVICE</link>.</para>
   
@@ -3805,13 +3808,13 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 		  
 		  <varlistentry>
 			  <term><anchor id="nex_open" />
-				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank 0..111&gt;]]]
+				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank 0..111&gt;[,&lt;fileVersion 2..3&gt;]]]]
 			  </term>
 			  <listitem>
 				  <para>
 					  Opens a NEX file, defines start address, stack address and 16k bank to be mapped
 					  at 0xC000 before code is executed (if values are omitted, start address is zero
-					  = no start, stack address is 0xFFFE, entryBank is zero).
+					  = no start, stack address is 0xFFFE, entryBank is zero, fileVersion is 2).
 				  </para>
 				  <para>
 					  Only single NEX file can be open at the same time, and to finalize the header
@@ -3825,6 +3828,12 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 					  Make sure your new stack has at least tens of bytes available as those will be
 					  used already by the NEX loader before executing your entry point (although
 					  released back).
+				  </para>
+				  <para>
+					  The fileVersion can be 2 (NEX V1.2) or 3 (NEX V1.3), which will enforce the
+					  specified version of file. Otherwise the file is V1.2 by default and will
+					  auto-switch to V1.3 when some V1.3 feature is configured/used. When version 2
+					  is enforced, any usage of V1.3 feature will emit error.
 				  </para>
 			  </listitem>
 		  </varlistentry>
@@ -3858,17 +3867,83 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 		  </varlistentry>
 		  
 		  <varlistentry>
+			  <term><anchor id="nex_cfg3" />
+				  SAVENEX CFG3 &lt;DoCRC 0/1&gt;[,&lt;PreserveExpansionBus 0/1&gt;[,&lt;CLIbufferAdr&gt;,&lt;CLIbufferSize&gt;]]
+			  </term>
+			  <listitem>
+				  <para>
+					  All of these are NEX format V1.3 features and using "CFG3" command will change
+					  the version to V1.3 automatically (if not specified by <link linkend="nex_open">OPEN</link>).
+				  </para>
+				  <para>
+					  DoCRC: default = 1, sjasmplus will checksum the file (if you know you will be
+					  further patching file afterwards, switch it off, otherwise keep 1).
+				  </para>
+				  <para>
+					  PreserveExpansionBus: default = 0, 0 = the NEX loader will disable expansion
+					  bus through NextReg $80 / 1 = the NEX loader will not do anything.
+				  </para>
+				  <para>
+					  CLIbufferAdr, CLIbufferSize: default = [0, 0], address and size of buffer for
+					  NEX loader to copy the arguments line into. The buffer is copied after the
+					  "entryBank" is mapped, so you can allocate buffer in your entryBank. The
+					  loader/format has hard limit 2048 bytes, the argument line will be truncated
+					  if longer. If your reserved buffer is shorter than 2048 bytes, the copy will
+					  be also truncated to your buffer size only. If not truncated, the argument line
+					  can end with any of these: Enter (13), colon or zero byte (truncated has no
+					  terminator character, just fills the full buffer).
+				  </para>
+			  </listitem>
+		  </varlistentry>
+
+		  <varlistentry>
 			  <term><anchor id="nex_bar" />
-				  SAVENEX BAR &lt;loadBar 0/1&gt;,&lt;barColour 0..255&gt;[,&lt;startDelay 0..255&gt;[,&lt;bankDelay 0..255&gt;]]
+				  SAVENEX BAR &lt;loadBar 0/1&gt;,&lt;barColour 0..255&gt;[,&lt;startDelay 0..255&gt;[,&lt;bankDelay 0..255&gt;[,&lt;posY 0..255&gt;]]]
 			  </term>
 			  <listitem>
 				  <para>
 					  Loading-bar related setup ("colour" usage depends on screen mode), can be set
 					  any time before <link linkend="nex_close">CLOSE</link>.
 				  </para>
+				  <para>
+					  The posY argument will apply only to V1.3 Layer2 screens in 320x256 and
+					  640x256 resolution (then defaults to 254 = bottom of screen, 2px tall bar).
+				  </para>
 			  </listitem>
 		  </varlistentry>
 		  
+		  <varlistentry>
+			  <term><anchor id="nex_palette" />
+				  <para>SAVENEX PALETTE NONE</para>
+				  <para>SAVENEX PALETTE DEFAULT</para>
+				  <para>SAVENEX PALETTE MEM &lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;</para>
+				  <para>SAVENEX PALETTE BMP &lt;filename&gt;</para>
+			  </term>
+			  <listitem>
+				  <para>
+					  This is optional command to set palette in alternative way ahead of SCREEN
+					  command, with higher priority (if the PALETTE command is used, following
+					  SCREEN commands will ignore the palette arguments and keep the palette defined
+					  by this command). You can be use it between <link linkend="nex_open">OPEN</link>
+					  and <link linkend="nex_auto">SCREEN</link> command. But appropriate SCREEN
+					  type supporting palette must be defined by SCREEN command too.
+				  </para>
+				  <para>
+					  Palette consists of 512 bytes (256 palette items from index 0), in 9b colour
+					  format: first byte is %RRRGGGBB, second byte is %P000000B (P is priority flag
+					  for Layer 2 colours).
+				  </para>
+				  <para>
+					  The DEFAULT palette will generate colour values from the colour index, the same
+					  way how default Layer 2 palette is initialized on the ZX Spectrum Next.
+				  </para>
+				  <para>
+					  The NONE palette will force the "no palette" flag even if SCREEN command later
+					  does specify some palette (it will be still ignored).
+				  </para>
+			  </listitem>
+		  </varlistentry>
+
 		  <varlistentry>
 			  <term><anchor id="nex_screen" />
 				  SAVENEX SCREEN L2 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]
@@ -3899,6 +3974,45 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 		  
 		  <varlistentry>
 			  <term>
+				  <para>SAVENEX SCREEN L2_320 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]</para>
+				  <para>SAVENEX SCREEN L2_640 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]</para>
+			  </term>
+			  <listitem>
+				  <para>
+					  Works same way as "L2" variant, but will set up screen for new resolutions 320x256x8
+					  and 640x256x4. The difference is that the required image data are 80kiB (five 16kiB
+					  banks; equals ten 8kiB pages), the banks used to show the screen in loader are
+					  9..13 (8k pages 18..27 - that's also the default address of data if not specified)
+					  - avoid these in regular banks stored in the file.
+				  </para>
+				  <para>
+					  These are NEX format V1.3 features and using them will change the version to V1.3
+					  automatically (if not specified by <link linkend="nex_open">OPEN</link>). This
+					  command doesn't allow to set specific palette offset value (too lazy to add it,
+					  use BMP variant if you really need it).
+				  </para>
+				  <para>
+					  The data has to be already in correct format and organized as if displayed (the
+					  "transposed" bitmap where +1 address goes to pixel below, and +256 goes to pixel
+					  on the right (or pair of pixels in case of 640x256x4bpp mode), this command will
+					  just dump them into file "as is".
+				  </para>
+				  <para>
+					  The loading bar colour byte will be also used "as is", which in 4bpp mode means
+					  the byte does define pair of 4 bit pixels, i.e. if you want solid-colour "3"
+					  loading bar in 4bpp mode, define it as value $33. Keep also in mind the default
+					  loading bar position is Y=254, which on most of the TV/LCD displays is outside
+					  of visible range, the reasonably "safe" (visible on almost all of the screens)
+					  resolution is about 288x224 (+16px around PAPER area, +24px is visible on many
+					  displays too), you may want to organize your screen in a way to show all important
+					  information within this area, and make the rest "unimportant" so it can hide
+					  beyond the edge of screen.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+
+		  <varlistentry>
+			  <term>
 				  SAVENEX SCREEN LR [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]
 			  </term>
 			  <listitem>
@@ -3919,14 +4033,21 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 		  
 		  <varlistentry>
 			  <term>
-				  SAVENEX SCREEN BMP &lt;filename&gt;[,&lt;savePalette 0/1&gt;]
+				  SAVENEX SCREEN BMP &lt;filename&gt;[,&lt;savePalette 0/1&gt;[,&lt;paletteOffset 0..15&gt;]]
 			  </term>
 			  <listitem>
 				  <para>
 					  Only small subset of BMP files can be used: 256x192 (Layer 2) or 128x96 (LoRes),
 					  indexed (8bit image data with palette) and palette data will be truncated
-					  to 3:3:3 color space directly (no smart color quantization or dithering is applied).
+					  to 3:3:3 color space directly (no smart colour quantization or dithering is applied).
 					  And the file must be uncompressed.
+				  </para>
+				  <para>
+					  For V1.3 NEX files you can include also 320x256 and 640x256 files (Layer 2), the
+					  640x256 should be also 8bit indexed, but only 4 bits of pixel data will be used
+					  (256 colour palette is legitimate and will be stored "as is" in NEX file).
+					  These two new modes can also include paletteOffset argument 0..15 (does not apply
+					  to V1.2 BMP files above), the offset is added to top four bits of pixel value.
 				  </para>
 				  <para>
 					  The BMP will be included as loading screen, can be used between <link linkend="nex_open">OPEN</link>
@@ -3934,7 +4055,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 				  </para>
 				  <para>
 					  By default the palette from BMP file is used, but you can override that by savePalette = 0.
-					  The warning about palette containing less than 256 colors can be suppressed by end-of-line
+					  The warning about palette containing less than 256 colours can be suppressed by end-of-line
 					  OK comment like: <code>SAVENEX SCREEN BMP ... ; ok ...your comment</code>.
 				  </para>
 			  </listitem>
@@ -3966,6 +4087,57 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 			  </listitem>
 		  </varlistentry>
 		  
+		  <varlistentry>
+			  <term>
+				  SAVENEX SCREEN TILE &lt;NextReg $6B&gt;,&lt;NextReg $6C&gt;,&lt;NextReg $6E&gt;,&lt;NextReg $6F&gt;[,&lt;AlsoStoreBank5 0/1 = 1&gt;]
+			  </term>
+			  <listitem>
+				  <para>
+					  NEX V1.3 tilemap loading screen, can be used between <link linkend="nex_open">OPEN</link>
+					  and first <link linkend="nex_auto">AUTO</link>/<link linkend="nex_bank">BANK</link> command.
+				  </para>
+				  <para>
+					  To define palette use the <link linkend="nex_palette">PALETTE</link> command.
+				  </para>
+				  <para>
+					  The image data are stored as regular Bank 5 of the NEX file (which is the first bank
+					  to be loaded by loader), depending on AlsoStoreBank5 value (default 1), this SCREEN
+					  command will also execute <link linkend="nex_bank">BANK  5</link> command to store
+					  the image data.
+				  </para>
+				  <para>
+					  The NextRegisters $6B, $6C, $6E and $6F should be enough to specify any variant
+					  of tilemap mode, so the precise sub-type and image data layout is under control
+					  of user, the sjasmplus doesn't enforce any particular configuration.
+				  </para>
+				  <para>
+					  If you want to use also <link linkend="nex_copper">COPPER</link> command, use it
+					  either ahead of the SCREEN TILE command, or use "AlsoStoreBank5 = 0" to delay the
+					  storage of Bank 5 data. In such case you must then later explicitly store
+					  the Bank 5 as regular bank, either with BANK or AUTO command.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+
+		  <varlistentry>
+			  <term><anchor id="nex_copper" />
+				  SAVENEX COPPER &lt;Page8kNum 0..223&gt;,&lt;offset&gt;
+			  </term>
+			  <listitem>
+				  <para>
+					  Can be used after <link linkend="nex_open">OPEN</link> and before first <link
+						  linkend="nex_auto">AUTO</link> or <link linkend="nex_bank">BANK</link>
+					  command (the copper data are stored between screen and bank data).
+				  </para>
+				  <para>
+					  Exactly 2048 bytes are stored (full Copper memory), and the loader will start
+					  the copper code in mode %01 (reset CPC to 0, then starts the copper), so the
+					  copper code will wrap around infinitely after the 1024th instruction executed.
+					  The copper is started after the screen block is loaded and displayed.
+				  </para>
+			  </listitem>
+		  </varlistentry>
+
 		  <varlistentry>
 			  <term><anchor id="nex_bank" />
 				  SAVENEX BANK &lt;bank 0..111&gt;[,...]
