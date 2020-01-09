@@ -86,6 +86,24 @@ savenexCoverage.asm(62): error: [SAVENEX] screen for this NEX file was already s
 62    0000                  SAVENEX     SCREEN  SCR     ; error "screen was already stored"
 63    0000                  SAVENEX     CLOSE
 64    0000
+65    0000              ;; adding coverage tests after NEX file format V1.3 changes:
+savenexCoverage.asm(66): error: [SAVENEX] NEX file is not open
+66    0000                  SAVENEX     CFG3    0, 0
+savenexCoverage.asm(67): error: [SAVENEX] NEX file is not open
+67    0000                  SAVENEX     PALETTE   DEFAULT
+savenexCoverage.asm(68): error: [SAVENEX] NEX file is not open
+68    0000                  SAVENEX     COPPER  0, 0
+69    0000                  ; palette after some bank is stored
+70    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+71    0000                  SAVENEX     BANK    5
+savenexCoverage.asm(72): error: [SAVENEX] some bank was already stored (define palette ahead)
+72    0000                  SAVENEX     PALETTE   DEFAULT
+73    0000                  SAVENEX     CLOSE
+74    0000                  ; valid L2 640x256 case from memory
+75    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+76    0000                  SAVENEX     SCREEN  L2_640
+77    0000                  SAVENEX     CLOSE
+78    0000
 # file closed: savenexCoverage.asm
 
 Value    Label

@@ -1,0 +1,6 @@
+#decompress the BMP files for test
+gunzip savenexBmpL_x256/airplane.bmp.gz
+gunzip savenexBmpL_x256/bg320x256.bmp.gz
+# use normal way of assembling
+$MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+last_result=$?
