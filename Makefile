@@ -12,7 +12,7 @@
 # make clean && make CC=gcc-8 CXX=g++-8		- to compile binary with gcc-8
 # make DEBUG=1 LUA_COVERAGE=1 coverage		- to produce build/debug/coverage/* files by running the tests
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
-# make CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS='-DNDEBUG -O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)' LDFLAGS=''	- to cross compile win exe on my linux box with the linux Makefile
+# make CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS='-DNDEBUG -O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) -I$(SUBDIR_CRC32C)' LDFLAGS=''	- to cross compile win exe on my linux box with the linux Makefile
 
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
 CC=gcc
@@ -36,10 +36,11 @@ BUILD_DIR := build
 SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.1
 SUBDIR_TOLUA=tolua++
+SUBDIR_CRC32C=crc32c
 SUBDIR_DOCS=docs
 SUBDIR_COV=coverage
 
-CFLAGS := -Wall -pedantic -DUSE_LUA -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) $(CFLAGS_EXTRA)
+CFLAGS := -Wall -pedantic -DUSE_LUA -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) -I$(SUBDIR_CRC32C) $(CFLAGS_EXTRA)
 LDFLAGS := -ldl
 
 ifdef DEBUG
@@ -91,14 +92,19 @@ TOLUASRCS := $(wildcard $(SUBDIR_TOLUA)/*.c)
 TOLUAOBJS := $(call object_files,$(TOLUASRCS))
 TOLUAOBJS_UT := $(call object_files_ut,$(TOLUASRCS))
 
+# crc32c files
+CRC32CSRCS := $(wildcard $(SUBDIR_CRC32C)/*.cpp)
+CRC32COBJS := $(call object_files,$(CRC32CSRCS))
+CRC32COBJS_UT := $(call object_files_ut,$(CRC32CSRCS))
+
 # UnitTest++ files
 UTPPSRCS := $(wildcard $(SUBDIR_UT)/UnitTest++/*.cpp) $(wildcard $(SUBDIR_UT)/UnitTest++/Posix/*.cpp)
 UTPPOBJS := $(call object_files,$(UTPPSRCS))
 TESTSSRCS := $(wildcard $(SUBDIR_TESTS)/*.cpp)
 TESTSOBJS := $(call object_files_ut,$(TESTSSRCS))
 
-ALL_OBJS := $(OBJS) $(LUAOBJS) $(TOLUAOBJS)
-ALL_OBJS_UT := $(OBJS_UT) $(LUAOBJS_UT) $(TOLUAOBJS_UT) $(UTPPOBJS) $(TESTSOBJS)
+ALL_OBJS := $(OBJS) $(CRC32COBJS) $(LUAOBJS) $(TOLUAOBJS)
+ALL_OBJS_UT := $(OBJS_UT) $(CRC32COBJS_UT) $(LUAOBJS_UT) $(TOLUAOBJS_UT) $(UTPPOBJS) $(TESTSOBJS)
 ALL_COVERAGE_RAW := $(patsubst %.o,%.gcno,$(ALL_OBJS_UT)) $(patsubst %.o,%.gcda,$(ALL_OBJS_UT))
 
 # GCOV options to generate coverage files
@@ -164,6 +170,7 @@ endif
 coverage:
 	$(MAKE) CFLAGS_EXTRA=--coverage tests
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_BASE) $(SRCS)
+	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_CRC32C) $(CRC32CSRCS)
 ifdef LUA_COVERAGE
 # by default the "external" lua sources are excluded from coverage report, sjasmplus is not focusing to cover+fix lua itself
 # to get full coverage report, including the lua sources, use `make DEBUG=1 LUA_COVERAGE=1 coverage`
@@ -199,6 +206,7 @@ clean:
 		$(BUILD_DIR_UT)/$(SUBDIR_COV)/*.gcov
 	$(REMOVEDIR) \
 		$(BUILD_DIR)/$(SUBDIR_BASE) \
+		$(BUILD_DIR)/$(SUBDIR_CRC32C) \
 		$(BUILD_DIR)/$(SUBDIR_LUA) \
 		$(BUILD_DIR)/$(SUBDIR_TOLUA) \
 		$(BUILD_DIR)/$(SUBDIR_UT)/UnitTest++/Posix \
@@ -206,6 +214,7 @@ clean:
 		$(BUILD_DIR)/$(SUBDIR_UT) \
 		$(BUILD_DIR) \
 		$(BUILD_DIR_UT)/$(SUBDIR_BASE) \
+		$(BUILD_DIR_UT)/$(SUBDIR_CRC32C) \
 		$(BUILD_DIR_UT)/$(SUBDIR_LUA) \
 		$(BUILD_DIR_UT)/$(SUBDIR_TOLUA) \
 		$(BUILD_DIR_UT)/$(SUBDIR_TESTS) \

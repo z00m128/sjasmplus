@@ -306,8 +306,7 @@ savenexSyntaxV_1_3.asm(194): error: [SAVENEX] some palette/screen was already de
 savenexSyntaxV_1_3.asm(196): error: [SAVENEX] some bank was already stored (store copper ahead)
 196   0000                  SAVENEX     COPPER 0, 0         ; fails because bank is already saved
 197   0000
-198   0000                  ;; current work-in-progress sjasmplus will report unimplemented CRC feature
-savenexSyntaxV_1_3.asm(199): warning: [SAVENEX] V1.3 CRC feature is not implemented yet
+198   0000                  ;; sjasmplus should calculate also CRC-32C value here
 199   0000                  SAVENEX     CLOSE
 200   0000
 201   0000

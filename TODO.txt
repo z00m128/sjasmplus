@@ -1,8 +1,6 @@
 scratch area + TODO keeper for sjasmplus developers:
 ====================================================
 
-NEX V1.3:
-CRC implementation
 
 ====================
 Ped:

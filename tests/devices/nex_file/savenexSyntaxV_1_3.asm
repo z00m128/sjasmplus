@@ -195,7 +195,7 @@
 
     SAVENEX     COPPER 0, 0         ; fails because bank is already saved
 
-    ;; current work-in-progress sjasmplus will report unimplemented CRC feature
+    ;; sjasmplus should calculate also CRC-32C value here
     SAVENEX     CLOSE
 
 

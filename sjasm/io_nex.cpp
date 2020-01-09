@@ -26,8 +26,7 @@
 */
 
 #include "sjdefs.h"
-
-//FIXME V1.3: calculate CRC-32C
+#include "crc32c.h"
 
 // Banks in file are ordered in SNA way (but array "banks" in header is in numeric order instead)
 static constexpr aint nexBankOrder[8] = {5, 2, 0, 1, 3, 4, 6, 7};
@@ -108,6 +107,7 @@ struct SNexFile {
 	void init();
 	void writeHeader();
 	void writePalette();
+	void calculateCrc32C();
 	void updateIfAheadFirstBankSave();
 	void finalizeFile();
 };
@@ -175,6 +175,35 @@ void SNexFile::writePalette() {
 	}
 }
 
+void SNexFile::calculateCrc32C() {
+	if (!h.hasChecksum) return;
+	if (nullptr == f) return;
+	// calculate checksum CRC-32C (Castagnoli)
+	crc32_init();
+	constexpr size_t BUFFER_SIZE = 128 * 1024;	// 128kiB buffer to read file (must be 512+ !!)
+	uint8_t *buffer = new uint8_t[BUFFER_SIZE];
+	if (nullptr == buffer) ErrorOOM();
+	uint32_t crc = 0;
+	// calculate CRC of the file part after header (offset 512)
+	fseek(f, 512, SEEK_SET);
+	size_t bytes_read = 0;
+	do {
+		bytes_read = fread(buffer, 1, BUFFER_SIZE, f);
+		if (0 == bytes_read) break;
+		crc = crc32c_append_sw(crc, buffer, bytes_read);
+	} while (BUFFER_SIZE == bytes_read);
+	// calculate CRC of the header part (first 508 bytes of header)
+	fseek(f, 0, SEEK_SET);
+	bytes_read = fread(buffer, 1, 508, f);
+	h.hasChecksum = (508 == bytes_read);
+	if (h.hasChecksum) {
+		h.crc32c = crc32c_append_sw(crc, buffer, bytes_read);
+	} else {
+		Error("[SAVENEX] reading file for CRC calculation failed");
+	}
+	delete[] buffer;
+}
+
 void SNexFile::finalizeFile() {
 	if (nullptr == f) return;
 	// do the final V1.2 / V1.3 updates to the header fields
@@ -186,11 +215,7 @@ void SNexFile::finalizeFile() {
 		h.bigL2barPosY = 0;		// clear big Layer 2 loading-bar posY for V1.2 files
 	} else {
 		h.magicAndVersion[7] = '3';				// modify file version to "V1.3" string
-		if (h.hasChecksum) {
-			h.crc32c = 0;		//FIXME calculate checksum CRC-32C (Castagnoli)
-			h.hasChecksum = 0;	// REMOVE THIS AFTER CRC is calculated
-			Warning("[SAVENEX] V1.3 CRC feature is not implemented yet");
-		}
+		calculateCrc32C();
 	}
 	// refresh the file header to final state
 	writeHeader();
@@ -353,7 +378,7 @@ static void dirNexOpen() {
 		return;
 	}
 	// try to open the actual file
-	if (!FOPEN_ISOK(nex.f, fname, "wb")) Error("[SAVENEX] Error opening file", fname, SUPPRESS);
+	if (!FOPEN_ISOK(nex.f, fname, "w+b")) Error("[SAVENEX] Error opening file", fname, SUPPRESS);
 	delete[] fname;
 	if (nullptr == nex.f) return;
 	// set the argument values into header, and write the initial version of header into file
