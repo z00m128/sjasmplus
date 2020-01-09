@@ -5,9 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-CSPECTMAP is exporting with page size of current device, maybe it should do it with page size
-of active device at the point where the CSPECTMAP directive was used?!
-
 remote build script - "done" ATM, waiting for feedback/improvements suggestions/logs
 
 ARM emulation on x86: https://github.com/nongiach/arm_now  ???
@@ -115,7 +112,7 @@ MMU:
 - err/warn/warp option for slot range?
 
 Kate syntax: broken with LUA block containing "end" keyword (maybe even consider including Lua highlight rules from KDE defaults, if it's possible)
-    - also missing MMU ?
+    - also missing MMU ? CSPECTMAP ?
     - backward slashes in path strings are not working as escapes, single "\" there is OK, but syntax highlight thinks it's "DB" like string.
     - ret nz : ret z => all after condition is in "error" mode wrongly.
 

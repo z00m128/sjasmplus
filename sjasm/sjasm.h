@@ -70,6 +70,7 @@ namespace Options {
 	extern char RAWFName[LINEMAX];
 	extern char UnrealLabelListFName[LINEMAX];
 	extern char CSpectMapFName[LINEMAX];
+	extern int CSpectMapPageSize;
 	extern char SourceLevelDebugFName[LINEMAX];
 	extern bool IsDefaultSldName;
 

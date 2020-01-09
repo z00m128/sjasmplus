@@ -1185,6 +1185,8 @@ void dirCSPECTMAP() {
 		STRCAT(Options::CSpectMapFName, LINEMAX-1, ".map");
 	}
 	delete[] fName;
+	// remember page size of current device (in case the source is multi-device later)
+	Options::CSpectMapPageSize = Device->GetPage(0)->Size;
 }
 
 /*void dirTEXTAREA() {

@@ -84,6 +84,7 @@ namespace Options {
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
 	char CSpectMapFName[LINEMAX] = {0};
+	int CSpectMapPageSize = 0x4000;
 	char SourceLevelDebugFName[LINEMAX] = {0};
 	bool IsDefaultSldName = false;
 
