@@ -276,7 +276,7 @@ bool SBmpFile::open(const char* bmpname) {
 }
 
 word SBmpFile::getColor(uint32_t index) {
-	if (nullptr == bmp || nullptr == palBuffer || index < 0 || colorsCount <= index) return 0;
+	if (nullptr == bmp || nullptr == palBuffer || colorsCount <= index) return 0;
 	const byte B = palBuffer[index * 4 + 0] >> 5;
 	const byte G = palBuffer[index * 4 + 1] >> 5;
 	const byte R = palBuffer[index * 4 + 2] >> 5;
@@ -723,7 +723,7 @@ static void dirNexScreenBmp() {
 	bmp.loadPixelData(buffer);
 	// write pixel data into file - do transformation for 320/640 x 256 modes
 	if (Layer2 == bmp.type || LoRes == bmp.type) {
-		const size_t pixelBlockSize = bmp.width * bmp.height;
+		const size_t pixelBlockSize = static_cast<size_t>(bmp.width) * static_cast<size_t>(bmp.height);
 		if (pixelBlockSize != fwrite(buffer, 1, pixelBlockSize, nex.f)) {
 			Error("[SAVENEX] writing pixel data failed", NULL, FATAL);
 		}
@@ -861,7 +861,7 @@ static void dirNexCopper() {
 	// warn about invalid values
 	const size_t totalRam = Device->GetMemoryOffset(Device->PagesCount, 0);
 	size_t adrCopperData = Device->GetMemoryOffset(screenArgs[0], screenArgs[1]);
-	if (adrCopperData < 0 || totalRam < adrCopperData + SNexHeader::COPPER_SIZE) {
+	if (totalRam < adrCopperData + SNexHeader::COPPER_SIZE) {
 		Error("[SAVENEX] copper data address range is outside of Next memory", bp, SUPPRESS);
 		return;
 	}
