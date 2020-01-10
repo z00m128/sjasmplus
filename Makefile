@@ -13,6 +13,7 @@
 # make DEBUG=1 LUA_COVERAGE=1 coverage		- to produce build/debug/coverage/* files by running the tests
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
 # make CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS='-DNDEBUG -O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) -I$(SUBDIR_CRC32C)' LDFLAGS=''	- to cross compile win exe on my linux box with the linux Makefile
+# make CFLAGS_EXTRA='-m32' LDFLAGS='-ldl -m32'  - to builds 32b linux executable
 
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
 CC=gcc
@@ -132,11 +133,16 @@ $(BUILD_DIR_UT)/%.o : %.cpp
 	@mkdir -p $(@D)
 	$(COMPILE.cc) -DADD_UNIT_TESTS -I$(SUBDIR_UT) $(OUTPUT_OPTION) $<
 
-.PHONY: all install uninstall clean docs tests memcheck coverage
+.PHONY: all install uninstall clean docs tests memcheck coverage upx
 
 # "all" will also copy the produced binary into project root directory (to mimick old makefile)
 all: $(BUILD_EXE)
 	cp $(BUILD_EXE) $(EXE_BASE_NAME)
+
+upx: $(BUILD_EXE)
+	cp $(BUILD_EXE) $(EXE_BASE_NAME)
+	upx --best $(EXE_BASE_NAME)
+	EXE=$(EXE_BASE_NAME) $(BASH) ContinuousIntegration/test_folder_tests.sh
 
 $(BUILD_EXE): $(ALL_OBJS)
 	$(CXX) -o $(BUILD_EXE) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
