@@ -142,7 +142,7 @@ all: $(BUILD_EXE)
 upx: $(BUILD_EXE)
 	cp $(BUILD_EXE) $(EXE_BASE_NAME)
 	upx --best $(EXE_BASE_NAME)
-	EXE=$(EXE_BASE_NAME) $(BASH) ContinuousIntegration/test_folder_tests.sh
+	EXE="$(CURDIR)/$(EXE_BASE_NAME)" $(BASH) ContinuousIntegration/test_folder_tests.sh
 
 $(BUILD_EXE): $(ALL_OBJS)
 	$(CXX) -o $(BUILD_EXE) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
