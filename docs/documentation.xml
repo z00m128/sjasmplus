@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.14.3 Documentation [2019-11-15]</title>
+  <title>SjASMPlus 1.14.4 Documentation [2020-01-13]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -186,7 +186,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.14.4</term>
+            <term>13.1.2020 - 1.14.4</term>
 
             <listitem>
               <synopsis>- added few example utility macros in tests/macro_examples/sj_library.asm (neg r16)
@@ -195,7 +195,8 @@
 - in lua scripts: `sj.calc(..)` (alias `_c(..)`) now substitutes defines and macro arguments
 - error reporting inside LUA and MACRO refactored to give better info about origin of error
 - macro-arguments parser now recognizes C++ numeric literals with apostrophe as digits-group separator
-- the assembler will instantly exit when run at Big-Endian platform (the rest of code is broken on BE)</synopsis>
+- the assembler will instantly exit when run at Big-Endian platform (the rest of code is broken on BE)
+- updated syntax-highlight file for KDE5 editors (Kate)</synopsis>
             </listitem>
           </varlistentry>
 
