@@ -111,10 +111,8 @@ MMU:
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
 - err/warn/warp option for slot range?
 
-Kate syntax: broken with LUA block containing "end" keyword (maybe even consider including Lua highlight rules from KDE defaults, if it's possible)
-    - also missing MMU ? CSPECTMAP ?
+Kate syntax:
     - backward slashes in path strings are not working as escapes, single "\" there is OK, but syntax highlight thinks it's "DB" like string.
-    - ret nz : ret z => all after condition is in "error" mode wrongly.
 
 * maybe create extra syntax rules for listing files? (especially if it's possible to include asm syntax for half of line)
 
