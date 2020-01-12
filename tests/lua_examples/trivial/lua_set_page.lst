@@ -12,8 +12,8 @@
 11    0000 ~                    assert(not sj.set_page(233))
 12    0000 ~                    assert(not sj.set_page(-1))
 13    0000 ~                    assert(sj.set_page(6))
-lua_set_page.asm(11): error: [sj.set_page] Page number must be in range 0..7: 233
-lua_set_page.asm(12): error: [sj.set_page] Page number must be in range 0..7: -1
+lua_set_page.asm(11): error: [LUA] [sj.set_page] Page number must be in range 0..7: 233
+lua_set_page.asm(12): error: [LUA] [sj.set_page] Page number must be in range 0..7: -1
 14    0000                  endlua
 15    0000
 16    0000                  ASSERT(7 == $$)     ; slot 0 should be still default page 7

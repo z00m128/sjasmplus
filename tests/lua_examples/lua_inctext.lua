@@ -19,7 +19,7 @@ function inc_text(file_name, asm_marker, eol_byte)
     asm_marker = asm_marker or ">>"
     eol_byte = eol_byte or 13
     if not sj.file_exists(file_name) then
-        sj.error("lua [inc_text]: file not found", file_name, 3)
+        sj.error("[inc_text]: file not found", file_name, 3)
         return
     end
     marker_len = string.len(asm_marker)

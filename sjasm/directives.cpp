@@ -1094,7 +1094,7 @@ void dirSAVETRD() {
 }
 
 void dirENCODING() {
-	char* opt = GetFileName(lp);
+	char* opt = GetFileName(lp, false);
 	char* comparePtr = opt;
 	if (cmphstr(comparePtr, "dos")) {
 		ConvertEncoding = ENCDOS;
@@ -1185,6 +1185,8 @@ void dirCSPECTMAP() {
 		STRCAT(Options::CSpectMapFName, LINEMAX-1, ".map");
 	}
 	delete[] fName;
+	// remember page size of current device (in case the source is multi-device later)
+	Options::CSpectMapPageSize = Device->GetPage(0)->Size;
 }
 
 /*void dirTEXTAREA() {
@@ -1796,57 +1798,29 @@ void dirDEFARRAY() {
 
 #ifdef USE_LUA
 
-static int SplitLuaErrorMessage(const char*& LuaError)
+// skips file+line_number info (but will adjust global LuaStartPos data for Error output)
+static void SplitLuaErrorMessage(const char*& LuaError)
 {
-	int ln = LuaLine;
-	if (LuaError && strstr(LuaError, "[string \"script\"]") == LuaError)
-	{
-		char *const err = STRDUP(LuaError), *lnp = err, *msgp = NULL;
-		if (err == NULL) {
-			ErrorOOM();
-		} else {
-			while (*lnp && (*lnp != ':' || !isdigit((byte)*(lnp+1))) )
-				lnp++;
-			if (*lnp && (msgp = strchr(++lnp, ':')) )
-			{
-				*(msgp++) = '\0';
-				ln += atoi(lnp);
-				SkipBlanks(msgp);
-				if (*msgp)
-					LuaError += msgp - err;
-			}
-			free(err);
-		}
+	if (nullptr == LuaError) return;
+	const char* colonPos = strchr(LuaError, ':');
+	const char* colon2Pos = nullptr != colonPos ? strchr(colonPos+1, ':') : nullptr;
+	if (nullptr == colonPos || nullptr == colon2Pos) return;	// error, format not recognized
+	int lineNumber = atoi(colonPos + 1);
+	if (strstr(LuaError, "[string \"script\"]") == LuaError) {
+		// inlined script, add to start pos
+		LuaStartPos.line += lineNumber;
+	} else {
+		// standalone script, use line number as is (if provided by lua error)
+		if (lineNumber) LuaStartPos.line = lineNumber;
 	}
-	return ln;
+	LuaError = colon2Pos + 1;
+	while (White(*LuaError)) ++LuaError;
 }
 
-void _lua_showerror() {
-	// part from Error(...)
+static void _lua_showLoadError(const EStatus type) {
 	const char *msgp = lua_tostring(LUA, -1);
-	int ln = SplitLuaErrorMessage(msgp);
-
-	// print error and other actions
-	SPRINTF3(ErrorLine, LINEMAX2, "%s(%d): error: [LUA] %s", CurSourcePos.filename, ln, msgp);
-
-	if (!strchr(ErrorLine, '\n')) {
-		STRCAT(ErrorLine, LINEMAX2-1, "\n");
-	}
-
-	if (GetListingFile()) fputs(ErrorLine, GetListingFile());
-	if (Options::OutputVerbosity <= OV_ERROR) {
-		_CERR ErrorLine _END;
-	}
-
-	PreviousErrorLine = CompiledCurrentLine;
-
-	ErrorCount++;
-
-	char count[25];
-	SPRINTF1(count, 25, "%d", ErrorCount);
-	DefineTable.Replace("_ERRORS", count);
-	// end Error(...)
-
+	SplitLuaErrorMessage(msgp);
+	Error(msgp, nullptr, type);
 	lua_pop(LUA, 1);
 }
 
@@ -1880,8 +1854,8 @@ void dirLUA() {
 	char *buff = new char[32768];
 	char *bp=buff;
 //	char size=0;
-	int ln=0;
 	bool execute=false;
+	EStatus errorType = PASS3;
 
 	luaMemFile luaMF;
 
@@ -1891,10 +1865,12 @@ void dirLUA() {
 		if (cmphstr(id, "pass1")) {
 			if (pass == 1) {
 				execute = true;
+				errorType = EARLY;
 			}
 		} else if (cmphstr(id, "pass2")) {
 			if (pass == 2) {
 				execute = true;
+				errorType = EARLY;
 			}
 		} else if (cmphstr(id, "pass3")) {
 			if (pass == 3) {
@@ -1909,11 +1885,11 @@ void dirLUA() {
 		execute = true;
 	}
 
-	ln = CurSourcePos.line;
+	if (execute) LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 	ListFile();
 	while (1) {
 		if (!ReadLine(false)) {
-			Error("[LUA] Unexpected end of lua script"); break;
+			Error("Unexpected end of lua script"); break;
 		}
 		lp = line;
 		rp = line;
@@ -1949,16 +1925,15 @@ void dirLUA() {
 	}
 
 	if (execute) {
-		LuaLine = ln;
 		luaMF.text = buff;
 		luaMF.size = strlen(luaMF.text);
 		error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
 		//error = luaL_loadbuffer(LUA, (char*)buff, sizeof(buff), "script") || lua_pcall(LUA, 0, 0, 0);
 		//error = luaL_loadstring(LUA, buff) || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
-			_lua_showerror();
+			_lua_showLoadError(errorType);
 		}
-		LuaLine = -1;
+		LuaStartPos = TextFilePos();
 	}
 
 	delete[] buff;
@@ -1971,7 +1946,7 @@ void dirENDLUA() {
 
 void dirINCLUDELUA() {
 	if (1 != pass) {
-		while (*lp) ++lp;	// skip till EOL (colon), to avoid parsing file name
+		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
 		return;
 	}
 	char* fnaam = GetFileName(lp);
@@ -1980,12 +1955,20 @@ void dirINCLUDELUA() {
 	if (!fullpath[0]) {
 		Error("[INCLUDELUA] File doesn't exist", fnaam, EARLY);
 	} else {
-		LuaLine = CurSourcePos.line;
+		// archive the filename (for referencing it in SLD tracing data or listing/errors)
+		auto ofnIt = std::find(openedFileNames.cbegin(), openedFileNames.cend(), fullpath);
+		if (ofnIt == openedFileNames.cend()) {		// new filename, add it to archive
+			openedFileNames.push_back(fullpath);
+			ofnIt = --openedFileNames.cend();
+		}
+		fileNameFull = ofnIt->c_str();				// get const pointer into archive
+		LuaStartPos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
+		LuaStartPos.line = 1;
 		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
-			_lua_showerror();
+			_lua_showLoadError(EARLY);
 		}
-		LuaLine = -1;
+		LuaStartPos = TextFilePos();
 	}
 	free(fullpath);
 	delete[] fnaam;

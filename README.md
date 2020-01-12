@@ -45,3 +45,21 @@ Main Features
 * Multiline block comments and user’s messages
 
 This repository was created by import from original Aprisobal's repository @ https://sourceforge.net/projects/sjasmplus/.
+
+### Other useful tools for sjasmplus users
+
+Some of these may be useful for sjasmplus users (depending on the platform and tools you are using):
+
+[Support for Z80 macro-assemblers in Visual Studio Code](https://github.com/mborik/z80-macroasm-vscode) - syntax highlighting, "problem matcher" for assembler output, on hover info about labels, symbols, completion proposals,
+renaming provider, macro documenter and arguments definitions.
+
+This can be further complemented by [Z80 Assembly meter](https://github.com/theNestruo/z80-asm-meter-vscode) plugin for Visual Studio Code.
+
+[#CSpect](http://cspect.org/) is ZX Spectrum Next emulator with built-in debugger and map-files support to show labels from source code.
+
+[ZEsarUX](https://github.com/chernandezba/zesarux) is multi-machine emulator focusing on ZX Spectrum family of machines, including also ZX Spectrum Next, having many many options, lot of menus, and lot debugging capabilities - if you are particularly interested into ZX Spectrum Next SW development, the #CSpect is often a bit ahead in overall emulation fidelity, but ZEsarUX is often more accurate in subtle edge-case details, so you may want to have both of them around for different occasions. Also you may want to have ZEsarUX around for:
+
+[VS Code Z80 Debug Adapter](https://github.com/maziac/z80-debug) for debugging ZX Spectrum code, writing unit tests for it, time the execution, etc.
+
+(if you are not excited about using VSC as IDE and want to try some alternative) Syntax highlight (only) for [Kate editor](https://kate-editor.org/) is included directly in sjasmplus [sources](https://github.com/z00m128/sjasmplus/blob/master/asm-z80-sj.xml).
+

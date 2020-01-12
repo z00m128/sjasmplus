@@ -68,9 +68,11 @@
 35    0026             >.yyy_hl:
 36    0026             >    ccc 'd''d' | 0x2, first, second
 36    0026             >        DUP ('d''d' | 0x2) & 0x03
-macro_args.asm(36): warning: value 0x642766 is truncated to 8bit value: 0x66
+macro_args.asm(10): warning: value 0x642766 is truncated to 8bit value: 0x66
+macro_args.asm(36): ^ emitted from here
 36    0026 3E 66       >        ld  a,'d''d' | 0x2
-macro_args.asm(36): warning: value 0x642766 is truncated to 8bit value: 0x66
+macro_args.asm(10): warning: value 0x642766 is truncated to 8bit value: 0x66
+macro_args.asm(36): ^ emitted from here
 36    0028 3E 66       >        ld  a,'d''d' | 0x2
 36    002A             >        EDUP
 36    002A CD 2D 00    >        call .first_second
@@ -96,9 +98,11 @@ macro_args.asm(36): warning: value 0x642766 is truncated to 8bit value: 0x66
 35    0042             >.yyy_hl:
 36    0042             >    ccc 'd''d' | 0x2, first, second
 36    0042             >        DUP ('d''d' | 0x2) & 0x03
-macro_args.asm(36): warning: value 0x642766 is truncated to 8bit value: 0x66
+macro_args.asm(10): warning: value 0x642766 is truncated to 8bit value: 0x66
+macro_args.asm(36): ^ emitted from here
 36    0042 3E 66       >        ld  a,'d''d' | 0x2
-macro_args.asm(36): warning: value 0x642766 is truncated to 8bit value: 0x66
+macro_args.asm(10): warning: value 0x642766 is truncated to 8bit value: 0x66
+macro_args.asm(36): ^ emitted from here
 36    0044 3E 66       >        ld  a,'d''d' | 0x2
 36    0046             >        EDUP
 36    0046 CD 49 00    >        call .first_second
@@ -131,6 +135,16 @@ macro_args.asm(47): error: Not enough arguments for macro: ccc
 macro_args.asm(48): error: Too many arguments for macro: ccc
 48    006E                  ccc  7, 8, 9, 10
 49    006E
+50    006E                  // C++ numeric literal should not throw off the apostrophe-string heuristic parsing
+51    006E                  MACRO cpp_literals num1?, num2?
+52    006E ~                    db  num1?, num2?
+53    006E                  ENDM
+54    006E
+55    006E                  cpp_literals %0'110'1010, $F'E      // fixed in v1.14.4
+55    006E 6A FE       >        db  %0'110'1010, $F'E
+56    0070                  cpp_literals $9'A, $F'0
+56    0070 9A F0       >        db  $9'A, $F'0
+57    0072
 # file closed: macro_args.asm
 
 Value    Label

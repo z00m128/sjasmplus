@@ -27,6 +27,7 @@ set(SOURCES
 	sjasm/support.cpp
 	sjasm/tables.cpp
 	sjasm/z80.cpp
+	crc32c/crc32c.cpp
 )
 
 add_definitions(-DMAX_PATH=PATH_MAX)
@@ -103,6 +104,7 @@ if(ENABLE_LUA)
 endif(ENABLE_LUA)
 
 include_directories(sjasm)
+include_directories(crc32c)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 

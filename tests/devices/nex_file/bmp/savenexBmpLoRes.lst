@@ -1,0 +1,40 @@
+# file opened: savenexBmpLoRes.asm
+ 1    0000
+ 2    0000                  DEVICE ZXSPECTRUMNEXT
+ 3    0000              ; 18 FE
+ 4    0000                  ;; OPEN <filename>[,<startAddress>,<stackAddress>[,<entryBank 0..111>]]
+ 5    0000                  SAVENEX     OPEN    "savenexBmpLoRes.nex", $6000+128*47, $F000
+ 6    0000                  ;; CORE <major 0..15>,<minor 0..15>,<subminor 0..255>
+ 7    0000                  SAVENEX     CORE    2,0,0
+ 8    0000                  ;; CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]
+ 9    0000                  SAVENEX     CFG     0, 0, 0, 0
+10    0000                  ;; BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]
+11    0000                  SAVENEX     BAR     0,  0
+12    0000
+13    0000                  ;; SAVENEX SCREEN BMP <filename>[,<savePalette 0/1>]
+14    0000                  ; errors - [un]expected arguments
+savenexBmpLoRes.asm(15): error: [SAVENEX] Error opening file: 
+15    0000                  SAVENEX     SCREEN  BMP
+savenexBmpLoRes.asm(16): error: [SAVENEX] Error opening file: ,
+16    0000                  SAVENEX     SCREEN  BMP , 0
+savenexBmpLoRes.asm(17): error: [SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]: SAVENEX     SCREEN  BMP 9 ,
+17    0000                  SAVENEX     SCREEN  BMP 9 ,
+18    0000
+19    0000                  ; errors - missing file
+savenexBmpLoRes.asm(20): error: [SAVENEX] Error opening file: missing file . bmp
+20    0000                  SAVENEX     SCREEN  BMP "missing file . bmp"
+21    0000
+22    0000                  ; correct one
+savenexBmpLoRes.asm(23): warning: [SAVENEX] BMP has only 255 colors in palette (expect "any" values in remaining colors).
+23    0000                  SAVENEX     SCREEN  BMP "savenexBmpLoRes/savenexBmpLoRes.bmp"
+24    0000
+25    0000                  ; revisit screen errors - here no screen should work because bank was written already
+savenexBmpLoRes.asm(26): error: [SAVENEX] screen for this NEX file was already stored
+26    0000                  SAVENEX     SCREEN  BMP "savenexBmpLoRes/savenexBmpLoRes.bmp"
+27    0000
+28    0000                  SAVENEX     CLOSE
+29    0000
+# file closed: savenexBmpLoRes.asm
+
+Value    Label
+------ - -----------------------------------------------------------

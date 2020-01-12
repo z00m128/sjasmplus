@@ -61,3 +61,17 @@
     SAVENEX     SCREEN  SHR -1
     SAVENEX     SCREEN  SCR     ; error "screen was already stored"
     SAVENEX     CLOSE
+
+;; adding coverage tests after NEX file format V1.3 changes:
+    SAVENEX     CFG3    0, 0
+    SAVENEX     PALETTE   DEFAULT
+    SAVENEX     COPPER  0, 0
+    ; palette after some bank is stored
+    SAVENEX     OPEN    "savenexCoverage.nex"
+    SAVENEX     BANK    5
+    SAVENEX     PALETTE   DEFAULT
+    SAVENEX     CLOSE
+    ; valid L2 640x256 case from memory
+    SAVENEX     OPEN    "savenexCoverage.nex"
+    SAVENEX     SCREEN  L2_640
+    SAVENEX     CLOSE

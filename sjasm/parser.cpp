@@ -914,12 +914,40 @@ void ParseStructLine(CStructure* st) {
 }
 
 uint32_t LuaCalculate(char *str) {
-	aint val;
-	if (!ParseExpression(str, val)) {
-		return 0;
-	} else {
-		return val;
+	// substitute defines + macro_args in the `str` first (preserve original global variables)
+	char* const oldSubstitutedLine = substitutedLine;
+	const int oldComlin = comlin;
+	comlin = 0;
+	char* tmp = NULL, * tmp2 = NULL;
+	if (sline[0]) {
+		tmp = STRDUP(sline);
+		if (tmp == NULL) ErrorOOM();
 	}
+	if (sline2[0]) {
+		tmp2 = STRDUP(sline2);
+		if (tmp2 == NULL) ErrorOOM();
+	}
+	char* substitutedStr = ReplaceDefine(str);
+
+	// evaluate the expression
+	aint val;
+	int parseResult = ParseExpression(substitutedStr, val);
+
+	// restore any global values affected by substitution
+	substitutedLine = oldSubstitutedLine;
+	comlin = oldComlin;
+	*sline = 0;
+	*sline2 = 0;
+	if (tmp2 != NULL) {
+		STRCPY(sline2, LINEMAX2, tmp2);
+		free(tmp2);
+	}
+	if (tmp != NULL) {
+		STRCPY(sline, LINEMAX2, tmp);
+		free(tmp);
+	}
+
+	return parseResult ? val : 0;
 }
 
 void LuaParseLine(char *str) {

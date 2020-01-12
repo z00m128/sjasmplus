@@ -1,3 +1,13 @@
+## [1.14.4](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.4) - 13.1.2020
+- added few example utility macros in tests/macro_examples/sj_library.asm (`neg r16`)
+- added [SAVENEX SCREEN BMP](http://z00m128.github.io/sjasmplus/documentation.html#nex_screen) sub-command to include BMP loading-screen
+- added support for V1.3 of [NEX file format](http://z00m128.github.io/sjasmplus/documentation.html#c_savenex) (new commands: `CFG3`, `PALETTE`, `COPPER`, new screen modes)
+- in lua scripts: `sj.calc(..)` (alias `_c(..)`) now substitutes defines and macro arguments
+- error reporting inside LUA and MACRO refactored to give better info about origin of error
+- macro-arguments parser now recognizes C++ numeric literals with apostrophe as digits-group separator
+- the assembler will instantly exit when run at Big-Endian platform (the rest of code is broken on BE)
+- updated syntax-highlight file for KDE5 editors (Kate)
+
 ## [1.14.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.3) - 15.11.2019
 - fix detection of `.end:` and `.END` labels when `--dirbol` is used
 - added export of [SLD (Source Level Debugging) data](http://z00m128.github.io/sjasmplus/documentation.html#c_sld_data), see also [NDS (NextDevSystem)](https://github.com/Ckirby101/NDS-NextDevSystem)

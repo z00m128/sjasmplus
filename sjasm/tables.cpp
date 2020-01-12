@@ -384,7 +384,7 @@ void CLabelTable::DumpForCSpect() {
 	if (!FOPEN_ISOK(file, Options::CSpectMapFName, "w")) {
 		Error("Error opening file", Options::CSpectMapFName, FATAL);
 	}
-	const int PAGE_SIZE = DeviceID ? Device->GetPage(0)->Size : 0x4000;
+	const int PAGE_SIZE = Options::CSpectMapPageSize;
 	const int PAGE_MASK = PAGE_SIZE - 1;
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;

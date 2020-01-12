@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.8 13/04/2019
+  Version: 0.9.1 12/01/2020
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,18 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  12/01/2020: version 0.9.1
+    +  fix after-label argument order of rules to work better with numeric constants
+
+  11/01/2020: version 0.9
+    + new directives added (MMU, CSPECTMAP, SAVEDEV)
+    + new logic to deal with "label defl/=/equ expression" start of line (not perfect)
+    + dot-repeater is now detected also after colon (second+ time on line)
+    + dot-repeater is detected also after label=... expression
+    + inlined Lua scripts gets now regular Lua syntax highlight (included from system)
+    + fix: ".directive" (starting with dot) is highlighted as directive
+    + fix: Error context ends with colon (`ret z : nop` was displaying `: nop` as error)
 
   28/05/2019: version 0.8.2
     + changes for new features after v1.13.0 (OPT, DEFARRAY+, ...)
@@ -58,18 +70,20 @@ TODO missing things:
     - argument highlighting (symbols, operators, ...) and validation of expected number
         of arguments, etc... = of little importance to me personally, probably never
     - arguments-end turning back to instruction/error context
+        This partially works, but doesn't try to fully validate expression, like
+        parentheses nesting and operators having expected arguments (unary/binary/...)
+        - needs rewrite from scratch to also parse label value expressions and do full analysis
     - macro/equ/label symbols differentiation = I would *love* these, but they are not
         possible with current Kate highlighting, as it would require extra input injected
         by editor through some new API, to provide list of various (type) symbols.
     - non-label identifiers (i.e. which are not valid labels (ignored by Label rules),
       but they are valid identifiers for DEFINE or macro argument names
-    - Lua syntax highlighting for LUA-ENDLUA blocks?
     - check other FIXME/TODO comments (this is work-in-progress, far from finished)
     - Label identifiers rules into some xml macro (entities were in docs?).
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="8" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="10" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -230,11 +244,10 @@ TODO missing things:
       <item>align</item>
       <item>assert</item>
       <item>binary</item>
-      <item>defarray+</item>
+      <item>cspectmap</item>
       <item>defarray</item>
       <item>defdevice</item>
       <item>define</item>
-      <item>defl</item>
       <item>dephase</item>
       <item>device</item>
       <item>disp</item>
@@ -247,7 +260,6 @@ TODO missing things:
       <item>encoding</item>
       <item>end</item>
       <item>endif</item>
-      <item>endlua</item>
       <item>endm</item>
       <item>endmap</item>
       <item>endmod</item>
@@ -256,7 +268,6 @@ TODO missing things:
       <item>ends</item>
       <item>endt</item>
       <item>ent</item>
-      <item>equ</item>
       <item>export</item>
       <item>field</item>
       <item>fpos</item>
@@ -264,8 +275,8 @@ TODO missing things:
       <item>ifdef</item>
       <item>ifn</item>
       <item>ifndef</item>
-      <item>ifused</item>
       <item>ifnused</item>
+      <item>ifused</item>
       <item>incbin</item>
       <item>inchob</item>
       <item>include</item>
@@ -273,10 +284,10 @@ TODO missing things:
       <item>inctrd</item>
       <item>insert</item>
       <item>labelslist</item>
-      <item>lua</item>
       <item>macro</item>
       <item>map</item>
       <item>memorymap</item>
+      <item>mmu</item>
       <item>module</item>
       <item>opt</item>
       <item>org</item>
@@ -286,6 +297,7 @@ TODO missing things:
       <item>phase</item>
       <item>rept</item>
       <item>savebin</item>
+      <item>savedev</item>
       <item>savehob</item>
       <item>savenex</item>
       <item>savesna</item>
@@ -330,11 +342,43 @@ TODO missing things:
         <DetectChar attribute="Comment" context="#pop!Normal" char=";" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="/" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
-        <RegExpr attribute="Label" context="#pop!dotRepeat" firstNonSpace="true"
+        <RegExpr attribute="Label" context="#pop!afterLabel" firstNonSpace="true"
                  String="^(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*:?"/>
-        <RegExpr attribute="Label" context="#pop!dotRepeat" String="^[0-9]+:?(\s+|$)"/>
+        <RegExpr attribute="Label" context="#pop!afterLabel" String="^[0-9]+:?(\s+|$)"/>
       </context>
+
+      <!-- Detect EQU/DEFL/= expressions and try to guess where the expression ends and instruction may start (weak heuristic) -->
+      <context name="afterLabel" attribute="Normal Text" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="dotRepeat">
+        <DetectSpaces attribute="Normal Text" context="#stay"/>
+        <DetectChar attribute="Directives" context="#pop!labelArgument" char="=" />
+        <WordDetect attribute="Directives" context="#pop!labelArgument" String="DEFL"/>
+        <WordDetect attribute="Directives" context="#pop!labelArgument" String="defl"/>
+        <WordDetect attribute="Directives" context="#pop!labelArgument" String="EQU"/>
+        <WordDetect attribute="Directives" context="#pop!labelArgument" String="equ"/>
+      </context>
+      <context name="labelArgument" attribute="Normal Text" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="Error">
+        <DetectSpaces attribute="Normal Text" context="#stay"/>
+        <DetectChar attribute="Normal Text" context="#pop!dotRepeat" char=":"/>
+        <!-- exit label argument context on detected keyword, not doing proper expression parsing to guess end of expression -->
+        <DetectChar attribute="Comment" context="#pop!Normal" char=";" lookAhead="true"/>
+        <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="/" lookAhead="true"/>
+        <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
+        <keyword attribute="Comment" context="#pop!Normal" String="flow-instructions" lookAhead="true"/>
+        <keyword attribute="Comment" context="#pop!Normal" String="instructions-unofficial" lookAhead="true"/>
+        <keyword attribute="Comment" context="#pop!Normal" String="instructions-z80n" lookAhead="true"/>
+        <keyword attribute="Comment" context="#pop!Normal" String="instructions" lookAhead="true"/>
+        <keyword attribute="Comment" context="#pop!Normal" String="data" lookAhead="true"/>
+        <keyword attribute="Comment" context="#pop!Normal" String="directives" lookAhead="true"/>
+        <!-- dotRepeat context resolved here too after label arg (duplicity of context definition :/ ) -->
+        <RegExpr attribute="Directives" context="#pop!Normal" String="\.(\d+|\(.*?\))\s"/>
+        <!-- operators in expression (do word operators before "Arguments", symbols after -->
+        <keyword attribute="Normal Text" context="#stay" String="operators"/>
+        <IncludeRules context="Arguments" />
+        <AnyChar String="!~+-*/%&lt;>?=&amp;^|[]()" attribute="Normal Text" context="#stay"/>
+      </context>
+
       <context name="dotRepeat" attribute="Directives" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="Normal">
+        <DetectSpaces attribute="Normal Text" context="#stay"/>
         <RegExpr attribute="Directives" context="#pop!Normal" String="\.(\d+|\(.*?\))\s"/>
       </context>
       <context name="Normal" attribute="Normal Text" lineEndContext="LabelLine"
@@ -374,9 +418,23 @@ TODO missing things:
         <keyword attribute="Z80N Instructions" context="Arguments" String="instructions-z80n"/>
         <keyword attribute="Instructions" context="Arguments" String="instructions"/>
         <keyword attribute="Data" context="Arguments" String="data"/>
+        <!-- inlined LUA script block detection -->
+        <RegExpr attribute="Directives" context="LuaInlinedScript_Enter"
+                 String="\.?(lua|LUA)\b(\s+(PASS[123]|pass[123]|ALLPASS|allpass)|)\s*"/>
+        <!-- directives detection is defined twice, to detect the directives starting with dot -->
+        <DetectChar attribute="Directives" char=".">
+            <WordDetect context="sourceEnd" String="end"/>
+            <WordDetect context="sourceEnd" String="END"/>
+            <WordDetect context="Arguments" String="defarray+"/>
+            <WordDetect context="Arguments" String="DEFARRAY+"/>
+            <keyword context="Arguments" String="directives"/>
+        </DetectChar>
         <!-- end is defined twice (not "insensitive"), b/c "End" is label!, only all-up/all-low is -->
         <WordDetect attribute="Directives" context="sourceEnd" String="end"/>
         <WordDetect attribute="Directives" context="sourceEnd" String="END"/>
+        <!-- defarray+ can't be found by keyword because of "+" being delimiter, when weak delimiter, then "(ix+1)" is not register :/ -->
+        <WordDetect attribute="Directives" context="Arguments" String="defarray+"/>
+        <WordDetect attribute="Directives" context="Arguments" String="DEFARRAY+"/>
         <keyword attribute="Directives" context="Arguments" String="directives"/>
       </context>
 
@@ -384,6 +442,7 @@ TODO missing things:
       <context name="sourceEnd" attribute="Comment" lineEndContext="#stay" />
 
       <context name="Error" attribute="Error" lineEndContext="#pop">
+        <DetectChar attribute="Normal Text" context="#pop#pop!dotRepeat" char=":"/>
         <DetectChar attribute="Comment" context="Comment" char=";"/>
         <Detect2Chars attribute="Comment" context="Comment" char="/" char1="/"/>
       </context>
@@ -424,7 +483,7 @@ TODO missing things:
       <!-- "arguments" = generally anything what is not detected as instruction/directive or is comming after instruction -->
       <context name="Arguments" attribute="Normal Text" lineEndContext="#pop">
         <IncludeRules context="BeginComment" />
-        <DetectChar attribute="Normal Text" context="#pop" char=":"/>
+        <DetectChar attribute="Normal Text" context="#pop#pop!dotRepeat" char=":"/>
         <DetectChar attribute="String" context="StringApostrophe" char="'"/>
         <DetectChar attribute="String" context="String" char="&quot;"/>
         <keyword attribute="Registers" context="#stay" String="registers"/>
@@ -475,6 +534,21 @@ TODO missing things:
         <Detect2Chars attribute="Char" context="#stay" char="'" char1="'"/>
         <DetectChar attribute="String" context="#pop" char="'"/>
       </context>
+
+        <context name="LuaInlinedScript_Enter" attribute="Error" lineEndContext="#pop!LuaInlinedScript">
+            <DetectChar attribute="Comment" context="Comment" char=";"/>
+            <Detect2Chars attribute="Comment" context="Comment" char="/" char1="/"/>
+        </context>
+        <context name="LuaInlinedScript" attribute="Normal Text" lineEndContext="#stay">
+            <DetectChar attribute="Directives" char=".">
+                <WordDetect context="#pop!Error" String="endlua"/>
+                <WordDetect context="#pop!Error" String="ENDLUA"/>
+            </DetectChar>
+            <WordDetect attribute="Directives" context="#pop!Error" String="endlua"/>
+            <WordDetect attribute="Directives" context="#pop!Error" String="ENDLUA"/>
+            <IncludeRules context="Normal##Lua"/>
+        </context>
+
     </contexts>
 
     <itemDatas>
@@ -499,7 +573,7 @@ TODO missing things:
     </itemDatas>
   </highlighting>
   <general>
-    <keywords casesensitive="0" additionalDeliminator="`" weakDeliminator="+"/>
+    <keywords casesensitive="0" additionalDeliminator="`"/>
     <comments>
       <comment name="singleLine" start=";" />
       <comment name="multiLine" start="/*" end="*/" />

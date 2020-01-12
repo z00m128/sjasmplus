@@ -70,6 +70,7 @@ namespace Options {
 	extern char RAWFName[LINEMAX];
 	extern char UnrealLabelListFName[LINEMAX];
 	extern char CSpectMapFName[LINEMAX];
+	extern int CSpectMapPageSize;
 	extern char SourceLevelDebugFName[LINEMAX];
 	extern bool IsDefaultSldName;
 
@@ -109,7 +110,7 @@ extern int deviceDirectivesCounter;
 extern const char* fileNameFull;
 
 // extend
-extern char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
+extern char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2], * bp;
 extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 // the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
@@ -146,7 +147,7 @@ extern CStructureTable StructureTable;
 #ifdef USE_LUA
 
 extern lua_State *LUA;
-extern int LuaLine;
+extern TextFilePos LuaStartPos;
 
 #endif //USE_LUA
 

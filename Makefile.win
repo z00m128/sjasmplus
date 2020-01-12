@@ -19,8 +19,9 @@ EXE=sjasmplus.exe
 SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.1
 SUBDIR_TOLUA=tolua++
+SUBDIR_CRC32C=crc32c
 
-CFLAGS=-DNDEBUG -O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA)
+CFLAGS=-DNDEBUG -O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) -I$(SUBDIR_CRC32C)
 CXXFLAGS=-std=gnu++14 $(CFLAGS)
 
 LDFLAGS= -s
@@ -41,7 +42,8 @@ OBJS=\
 	$(SUBDIR_BASE)/sjio.o \
 	$(SUBDIR_BASE)/support.o \
 	$(SUBDIR_BASE)/tables.o \
-	$(SUBDIR_BASE)/z80.o
+	$(SUBDIR_BASE)/z80.o \
+	$(SUBDIR_CRC32C)/crc32c.o
 
 #liblua objects
 LUAOBJS= \
@@ -96,4 +98,5 @@ clean:
 		$(SUBDIR_BASE)/*.o \
 		$(SUBDIR_LUA)/*.o \
 		$(SUBDIR_TOLUA)/*.o \
+		$(SUBDIR_CRC32C)/*.o \
 		$(RES) $(EXE) *~

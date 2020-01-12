@@ -5,11 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-backslash in include vs incbin ... weird?
-
-CSPECTMAP is exporting with page size of current device, maybe it should do it with page size
-of active device at the point where the CSPECTMAP directive was used?!
-
 remote build script - "done" ATM, waiting for feedback/improvements suggestions/logs
 
 ARM emulation on x86: https://github.com/nongiach/arm_now  ???
@@ -53,12 +48,16 @@ static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
  * https://scan.coverity.com/projects/z00m128-sjasmplus
     (needs build according to their tool or Travis CI)
 
+Lua error reporting: if function is defined in different anonymous block, only the emit
+line is reported in error message. If each anonymous block would get unique name, and
+track the starting position of the definition, then it would be possible to report even
+errors from inside lua functions defined in current asm file with the definition-line of
+error + "emitted here" line.
+
 FIXME in sources mark further points worth refactoring
 
 FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 (breaks ` .34 repeatX` directive probably? .. and END@beginningOfLine? .. actually not?)
-
-SplitLuaErrorMessage - review the code one more time
 
 ReadBufLine parsing refactored. Now look for other parts of code trying to do similar things and refactor too..
 
@@ -112,10 +111,10 @@ MMU:
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
 - err/warn/warp option for slot range?
 
-Kate syntax: broken with LUA block containing "end" keyword (maybe even consider including Lua highlight rules from KDE defaults, if it's possible)
-    - also missing MMU ?
+Kate syntax:
     - backward slashes in path strings are not working as escapes, single "\" there is OK, but syntax highlight thinks it's "DB" like string.
-    - ret nz : ret z => all after condition is in "error" mode wrongly.
+
+* maybe create extra syntax rules for listing files? (especially if it's possible to include asm syntax for half of line)
 
 ##### sjasmplus 2.x/fork:
 

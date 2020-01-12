@@ -41,7 +41,7 @@ void PrintHelp() {
 	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
 	//     |<-- ...8901234567890123456789012345678901234567890123456789012... 80 chars -->|
 	_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
-	_COUT "Copyright 2004-2019 by Aprisobal and all other participants" _ENDL;
+	_COUT "Copyright 2004-2020 by Aprisobal and all other participants" _ENDL;
 	//_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
 	//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
@@ -84,6 +84,7 @@ namespace Options {
 	char RAWFName[LINEMAX] = {0};
 	char UnrealLabelListFName[LINEMAX] = {0};
 	char CSpectMapFName[LINEMAX] = {0};
+	int CSpectMapPageSize = 0x4000;
 	char SourceLevelDebugFName[LINEMAX] = {0};
 	bool IsDefaultSldName = false;
 
@@ -165,7 +166,7 @@ char* DeviceID = 0;
 
 // extend
 const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either full or basename (--fullpath)
-char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], * bp;
+char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2], * bp;
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 char SourceFNames[128][MAX_PATH];
@@ -199,7 +200,7 @@ CStructureTable StructureTable;
 #ifdef USE_LUA
 
 lua_State *LUA;			// lgtm[cpp/short-global-name] .. name seems barely ok (especially considering rest of code)
-int LuaLine=-1;
+TextFilePos LuaStartPos;
 
 #endif //USE_LUA
 
@@ -537,6 +538,17 @@ int main(int argc, char **argv) {
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
 	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
+
+	// verify that I'm running on little-endian platform (the reinterpret word casts will break on BE platform)
+	// The new source is easy to locate through reinterpret_cast keywords, but I have strong
+	// suspicion there is also old sjasmplus code which is not endianness-agnostic.
+	// To fix it would need major testing with some BE platform and deep code review.
+	const byte little_endian_test[] = { 0x34, 0x12 };
+	const word le_test_word = *reinterpret_cast<const word*>(little_endian_test);
+	if (0x1234 != le_test_word) {
+		ErrorInt("Big-endian platform detected, unfortunately sjasmplus" \
+		" is currently LE-only, please report the issue.", le_test_word, FATAL);
+	}
 
 	// start counter
 	long dwStart = GetTickCount();

@@ -58,7 +58,8 @@
 18    807B 00           	DB 0     ; line above has "wrong" marker and will be added as text
 18    807C C3 7C 80     Test2_Final	jp    Test2_Final
 18    807F              ;; inc_text ;; end of file "lua_inctext/test2.txt"
-lua_inctext.asm(35): error: lua [inc_text]: file not found: missing file
+lua_inctext.lua(22): error: [LUA] [inc_text]: file not found: missing file
+lua_inctext.asm(18): ^ emitted from here
 18    807F                      ENDLUA
 19    807F
 20    807F                      OUTEND

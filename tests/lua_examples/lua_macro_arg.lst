@@ -1,0 +1,82 @@
+# file opened: lua_macro_arg.asm
+ 1    0000                  ; OBSOLETE, define/macro_arg substitution is added to `_c`/`sj.calc` in v1.14.4
+ 2    0000                  ; check new test lua_macro_arg2.asm
+ 3    0000
+ 4    0000                  ; this test shows possible workaround for:
+ 5    0000                  ; 1) extracting macro arg through regular DEFINE (to not tamper with current
+ 6    0000                  ;   "big" label from outside the macro, otherwise one can also set global label)
+ 7    0000                  ; 2) how to store intermediate values into global labels from inside Lua script
+ 8    0000                  ;   with sj.insert_label, and it's extra undocumented optional arguments to keep
+ 9    0000                  ;   that global symbol of "DEFL" type (like "=" in asm source), so it can be
+10    0000                  ;   redefined over and over with new values
+11    0000                  ; Also macro arguments are substituted inside Lua `_pl()` and `_pc()` (parse line,
+12    0000                  ;   parse code), but not inside `_c` (calculate expression)
+13    0000
+14    0000                  MACRO testM arg1?
+15    0000 ~                    ; convert macro-define "arg1?" to global define (makes it visible to Lua)
+16    0000 ~                    DEFINE __testM_arg1_tmp arg1?
+17    0000 ~                    LUA ALLPASS
+18    0000 ~                        x = sj.get_define("__testM_arg1_tmp")
+19    0000 ~                        sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+20    0000 ~                        _pc("ld de,arg1?")      -- _pc does the substitution
+21    0000 ~                        sj.add_word(x)          -- parsed value from lua variable
+22    0000 ~                        sj.add_word(_c("x"))    -- _c will at least recognize the inserted label
+23    0000 ~                        z = _c("arg1?")         -- does NOT work. Should it?
+24    0000 ~                            -- now substitution in `_c` WORKS in v1.14.4
+25    0000 ~                    ENDLUA
+26    0000 ~            .localMacroLabel:
+27    0000 ~                    UNDEFINE __testM_arg1_tmp     ; release the global define
+28    0000                  ENDM
+29    0000
+30    0000              x   = 88
+31    0000              BigLabel1:
+32    0000                  testM 0x1234
+32    0000             >        ; convert macro-define "arg1?" to global define (makes it visible to Lua)
+32    0000             >        DEFINE __testM_arg1_tmp arg1?
+32    0000             >        LUA ALLPASS
+32    0000 ~           >            x = sj.get_define("__testM_arg1_tmp")
+32    0000 ~           >            sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+32    0000 ~           >            _pc("ld de,arg1?")      -- _pc does the substitution
+32    0000 ~           >            sj.add_word(x)          -- parsed value from lua variable
+32    0000 ~           >            sj.add_word(_c("x"))    -- _c will at least recognize the inserted label
+32    0000 ~           >            z = _c("arg1?")         -- does NOT work. Should it?
+32    0000 ~           >                -- now substitution in `_c` WORKS in v1.14.4
+32    0000 11 34 12    >ld de,0x1234
+32    0003 34 12 34 12 >        ENDLUA
+32    0007             >.localMacroLabel:
+32    0007             >        UNDEFINE __testM_arg1_tmp     ; release the global define
+33    0007              .local1:
+34    0007 34 12            DW  x                       ; check that symbol "x" was set by sj.insert_label
+35    0009 18 FC            jr      BigLabel1.local1    ; check "big" label was not modified by sj.insert_label
+36    000B              x   = 77
+37    000B              BigLabel2:
+38    000B                  testM 0x3456
+38    000B             >        ; convert macro-define "arg1?" to global define (makes it visible to Lua)
+38    000B             >        DEFINE __testM_arg1_tmp arg1?
+38    000B             >        LUA ALLPASS
+38    000B ~           >            x = sj.get_define("__testM_arg1_tmp")
+38    000B ~           >            sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+38    000B ~           >            _pc("ld de,arg1?")      -- _pc does the substitution
+38    000B ~           >            sj.add_word(x)          -- parsed value from lua variable
+38    000B ~           >            sj.add_word(_c("x"))    -- _c will at least recognize the inserted label
+38    000B ~           >            z = _c("arg1?")         -- does NOT work. Should it?
+38    000B ~           >                -- now substitution in `_c` WORKS in v1.14.4
+38    000B 11 56 34    >ld de,0x3456
+38    000E 56 34 56 34 >        ENDLUA
+38    0012             >.localMacroLabel:
+38    0012             >        UNDEFINE __testM_arg1_tmp     ; release the global define
+39    0012              .local2:
+40    0012 56 34            DW  x
+41    0014 18 FC            jr      BigLabel2.local2    ; same checks as above, but second value
+42    0016
+# file closed: lua_macro_arg.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x3456   x
+0x0000 X BigLabel1
+0x0007 X 0>localMacroLabel
+0x0007   BigLabel1.local1
+0x000B X BigLabel2
+0x0012 X 1>localMacroLabel
+0x0012   BigLabel2.local2

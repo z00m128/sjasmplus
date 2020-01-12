@@ -30,13 +30,8 @@
 
 #include "sjdefs.h"
 
-#if defined (_MSC_VER)
-const char pathBadSlash = '/';
-const char pathGoodSlash = '\\';
-#else
 const char pathBadSlash = '\\';
 const char pathGoodSlash = '/';
-#endif
 
 #if !defined (_MSC_VER)
 

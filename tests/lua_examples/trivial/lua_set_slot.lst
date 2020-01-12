@@ -4,7 +4,7 @@
  3    0000                  lua
  4    0000 ~                    -- warning because no device is set
  5    0000 ~                    assert(not sj.set_slot(1))
-lua_set_slot.asm(5): warning: sj.set_slot: only allowed in real device emulation mode (See DEVICE)
+lua_set_slot.asm(5): warning: [LUA] sj.set_slot: only allowed in real device emulation mode (See DEVICE)
  6    0000                  endlua
  7    0000
  8    0000                  DEVICE zxspectrum128
@@ -14,12 +14,12 @@ lua_set_slot.asm(5): warning: sj.set_slot: only allowed in real device emulation
 12    8000
 13    8000                  lua
 14    8000 ~                    assert(not sj.set_slot(4))
-lua_set_slot.asm(14): error: sj.set_slot: Slot number must be in range 0..3
+lua_set_slot.asm(14): error: [LUA] sj.set_slot: Slot number must be in range 0..3
 15    8000                  endlua
 16    8000
 17    8000                  lua
 18    8000 ~                    assert(not sj.set_slot(-1))
-lua_set_slot.asm(18): error: sj.set_slot: Slot number must be in range 0..3
+lua_set_slot.asm(18): error: [LUA] sj.set_slot: Slot number must be in range 0..3
 19    8000                  endlua
 20    8000
 21    8000                  lua allpass

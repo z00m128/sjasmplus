@@ -7,8 +7,8 @@ sjio_coverage2.asm(16): error: Unexpected end of macro
  4    0000 ~                    sj.get_word(0xFFFF)
  5    0000 ~                    sj.get_byte(0x2000)
  6    0000 ~                    sj.get_byte(0x20000)
-sjio_coverage2.asm(4): error: MemGetByte: Error reading address: 65536
-sjio_coverage2.asm(6): error: MemGetByte: Error reading address: 131072
+sjio_coverage2.asm(4): error: [LUA] MemGetByte: Error reading address: 65536
+sjio_coverage2.asm(6): error: [LUA] MemGetByte: Error reading address: 131072
  7    0000                  ENDLUA
  8    0000
  9    0000                  EMPTYTAP "sjio_coverage2_ignore.tap"

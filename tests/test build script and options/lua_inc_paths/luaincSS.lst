@@ -1,4 +1,4 @@
-luaincSS.asm(19): warning: Pass updated to 1, device: NONE
+luaincSS.asm(19): warning: [LUA] Pass updated to 1, device: NONE
 # file opened: luaincSS.asm
  1    0000              ; test include paths on command line and their priorities, there are multiple steps:
  2    0000              ; luainc.asm       = no extra include path, should include from working directory
@@ -20,7 +20,7 @@ luaincSS.asm(19): warning: Pass updated to 1, device: NONE
 18    0000 ~                    if pass == 1 or pass == 3 then
 19    0000 ~                      sj.warning('Pass updated to ' .. pass .. ', device: ' .. sj.get_device())
 20    0000 ~                    end
-luaincSS.asm(19): warning: Pass updated to 3, device: ZXSPECTRUM1024
+luaincSS.asm(19): warning: [LUA] Pass updated to 3, device: ZXSPECTRUM1024
 21    0000                  ENDLUA
 22    0000
 23    0000                  DEVICE ZXSPECTRUM1024
@@ -44,7 +44,8 @@ luaincSS.asm(19): warning: Pass updated to 3, device: ZXSPECTRUM1024
 38    8009
 39    8009                  LUA ALLPASS
 40    8009 ~                inc_ld_system('A', pass)        -- defined in all includes, the one with priority wins
-luaincSS.asm(42): error: Unrecognized instruction: LDINVALID A,3 
+luaincSSSS_i/luaincSSSS.lua(3): error: [LUA] Unrecognized instruction: LDINVALID A,3 
+luaincSS.asm(41): ^ emitted from here
 41    8009              LDINVALID A,3 ; overloaded funcion (system-invalid variant)
 41    8009                  ENDLUA
 42    8009

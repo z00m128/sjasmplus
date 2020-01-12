@@ -1,0 +1,54 @@
+# file opened: savenexBmpL2.asm
+ 1    0000
+ 2    0000                  DEVICE ZXSPECTRUMNEXT
+ 3    0000
+ 4    0000                  ; empty infinite loop as code
+ 5    0000                  ORG $C000
+ 6    C000 F3               di
+ 7    C001 18 FE            jr  $
+ 8    C003
+ 9    C003                  ;; OPEN <filename>[,<startAddress>,<stackAddress>[,<entryBank 0..111>]]
+10    C003                  SAVENEX     OPEN    "savenexBmpL2.nex", $C000, $F000
+11    C003                  ;; CORE <major 0..15>,<minor 0..15>,<subminor 0..255>
+12    C003                  SAVENEX     CORE    2,0,0
+13    C003                  ;; CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]
+14    C003                  SAVENEX     CFG     0, 0, 0, 0
+15    C003                  ;; BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>]]
+16    C003                  SAVENEX     BAR     0,  0
+17    C003
+18    C003                  ;; SAVENEX SCREEN BMP <filename>[,<savePalette 0/1>]
+19    C003                  ; errors - [un]expected arguments
+savenexBmpL2.asm(20): error: [SAVENEX] Error opening file: 
+20    C003                  SAVENEX     SCREEN  BMP
+savenexBmpL2.asm(21): error: [SAVENEX] Error opening file: ,
+21    C003                  SAVENEX     SCREEN  BMP , 0
+savenexBmpL2.asm(22): error: [SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]: SAVENEX     SCREEN  BMP 9 ,
+22    C003                  SAVENEX     SCREEN  BMP 9 ,
+23    C003
+24    C003                  ; errors - missing file / invalid files
+savenexBmpL2.asm(25): error: [SAVENEX] Error opening file: missing file . bmp
+25    C003                  SAVENEX     SCREEN  BMP "missing file . bmp"
+savenexBmpL2.asm(26): error: [SAVENEX] BMP file is not in expected format (uncompressed, 8bpp, 40B BITMAPINFOHEADER header): savenexBmpL2/savenexBmpL2_16color.bmp
+26    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2_16color.bmp", 0
+savenexBmpL2.asm(27): error: [SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256: savenexBmpL2/savenexBmpL2_256x8.bmp
+27    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2_256x8.bmp", 0    ;.. shouldn't warn about colors because savePalette = 0
+savenexBmpL2.asm(28): error: [SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256: savenexBmpL2/savenexBmpL2_256x8.bmp
+28    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2_256x8.bmp", 1    ; ok - to suppres "only 10 color" warning
+29    C003
+30    C003                  ; correct one (with two warnings
+savenexBmpL2.asm(31): warning: [SAVENEX] savePalette should be 0 or 1 (defaulting to 1)
+savenexBmpL2.asm(31): warning: [SAVENEX] BMP has only 10 colors in palette (expect "any" values in remaining colors).
+31    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2.bmp", 2  ; will warn: savePalette=2, and "only 10 color"
+32    C003
+33    C003                  SAVENEX     BANK    0
+34    C003
+35    C003                  ; revisit screen errors - here no screen should work because bank was written already
+savenexBmpL2.asm(36): error: [SAVENEX] screen for this NEX file was already stored
+36    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2.bmp"
+37    C003
+38    C003                  SAVENEX     CLOSE
+39    C003
+# file closed: savenexBmpL2.asm
+
+Value    Label
+------ - -----------------------------------------------------------

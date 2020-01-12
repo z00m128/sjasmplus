@@ -1,0 +1,94 @@
+# file opened: lua_macro_arg2.asm
+ 1    0000                  ; test the new way of lua `_c`/`sj.calc` function to do the define/macro_arg
+ 2    0000                  ; substitution before the expression is evaluated, so using macro arguments
+ 3    0000                  ; inside lua script should be now trivial, no more workaround through DEFINE.
+ 4    0000
+ 5    0000                  ; this still shows extra options of `sj.insert_label`, which are not shown in
+ 6    0000                  ; official documentation. I'm not sure if these will stay for v2.x, so I'm
+ 7    0000                  ; not adding them to docs, but you can learn about any hidden optional arguments
+ 8    0000                  ; in sjasm/lua_sjasm.cpp file, tracking down the particular lua stub, and checking
+ 9    0000                  ; how many arguments and types are parsed, and how they are used in the call
+10    0000                  ; of internal sjasm function.
+11    0000                  ; These are to stay in v1.x forever like this, unless there will be really serious
+12    0000                  ; reason to modify them. For v2.x the main goal is to mostly keep them and make
+13    0000                  ; them official, but som pruning/reorganization may happen, plus newer Lua version..
+14    0000
+15    0000                  MACRO testM arg1?
+16    0000 ~                    LUA ALLPASS
+17    0000 ~                        x = _c("arg1?")     -- get value of evaluated macro argument
+18    0000 ~                            -- if you want the macro argument without evaluation
+19    0000 ~                            -- check "lua_macro_arg.asm" test for DEFINE workaround
+20    0000 ~                        sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+21    0000 ~                        _pc("dw arg1?, x, "..x) -- check all three sources of input value
+22    0000 ~                            -- _pc does it's own substitution, the label "x" should be set and lua "x"
+23    0000 ~                        -- test _c a bit more for handling weird things...
+24    0000 ~                        e1 = _c("/* ehm")
+25    0000 ~                        e2 = _c("define arg1? xx")  -- will emit error "Label not found: define" = OK
+26    0000 ~                        e3 = _c("$FF&".._c("arg1?"))
+27    0000 ~                        _pc("db /* e1, e2, e3 */ "..e1..","..e2..","..e3)
+28    0000 ~                    ENDLUA
+29    0000 ~            .localMacroLabel:   ; check which root the macro local label gets (should be per emit)
+30    0000                  ENDM
+31    0000
+32    0000              x   = 88
+33    0000              BigLabel1:
+34    0000                  testM 0x1234
+34    0000             >        LUA ALLPASS
+34    0000 ~           >            x = _c("arg1?")     -- get value of evaluated macro argument
+34    0000 ~           >                -- if you want the macro argument without evaluation
+34    0000 ~           >                -- check "lua_macro_arg.asm" test for DEFINE workaround
+34    0000 ~           >            sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+34    0000 ~           >            _pc("dw arg1?, x, "..x) -- check all three sources of input value
+34    0000 ~           >                -- _pc does it's own substitution, the label "x" should be set and lua "x"
+34    0000 ~           >            -- test _c a bit more for handling weird things...
+34    0000 ~           >            e1 = _c("/* ehm")
+34    0000 ~           >            e2 = _c("define arg1? xx")  -- will emit error "Label not found: define" = OK
+34    0000 ~           >            e3 = _c("$FF&".._c("arg1?"))
+34    0000 ~           >            _pc("db /* e1, e2, e3 */ "..e1..","..e2..","..e3)
+34    0000 34 12 34 12 >dw 0x1234, x, 4660
+34    0004 34 12       >
+lua_macro_arg2.asm(25): error: [LUA] Label not found: define
+lua_macro_arg2.asm(34): ^ emitted from here
+34    0006 00 00 34    >db   0,0,52
+34    0009             >        ENDLUA
+34    0009             >.localMacroLabel:   ; check which root the macro local label gets (should be per emit)
+35    0009              .local1:
+36    0009 34 12            DW  x                       ; check that symbol "x" was set by sj.insert_label
+37    000B 18 FC            jr      BigLabel1.local1    ; check "big" label was not modified by sj.insert_label
+38    000D              x   = 77
+39    000D              BigLabel2:
+40    000D                  testM 0x3456
+40    000D             >        LUA ALLPASS
+40    000D ~           >            x = _c("arg1?")     -- get value of evaluated macro argument
+40    000D ~           >                -- if you want the macro argument without evaluation
+40    000D ~           >                -- check "lua_macro_arg.asm" test for DEFINE workaround
+40    000D ~           >            sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+40    000D ~           >            _pc("dw arg1?, x, "..x) -- check all three sources of input value
+40    000D ~           >                -- _pc does it's own substitution, the label "x" should be set and lua "x"
+40    000D ~           >            -- test _c a bit more for handling weird things...
+40    000D ~           >            e1 = _c("/* ehm")
+40    000D ~           >            e2 = _c("define arg1? xx")  -- will emit error "Label not found: define" = OK
+40    000D ~           >            e3 = _c("$FF&".._c("arg1?"))
+40    000D ~           >            _pc("db /* e1, e2, e3 */ "..e1..","..e2..","..e3)
+40    000D 56 34 56 34 >dw 0x3456, x, 13398
+40    0011 56 34       >
+lua_macro_arg2.asm(25): error: [LUA] Label not found: define
+lua_macro_arg2.asm(40): ^ emitted from here
+40    0013 00 00 56    >db   0,0,86
+40    0016             >        ENDLUA
+40    0016             >.localMacroLabel:   ; check which root the macro local label gets (should be per emit)
+41    0016              .local2:
+42    0016 56 34            DW  x
+43    0018 18 FC            jr      BigLabel2.local2    ; same checks as above, but second value
+44    001A
+# file closed: lua_macro_arg2.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x3456   x
+0x0000 X BigLabel1
+0x0009 X 0>localMacroLabel
+0x0009   BigLabel1.local1
+0x000D X BigLabel2
+0x0016 X 1>localMacroLabel
+0x0016   BigLabel2.local2

@@ -852,6 +852,21 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 		// check if there is some kind of delimiter next (string literal or angle brackets expression)
 		// the angle-bracket can only be used around whole argument (i.e. '<' must be first char)
 		EDelimiterType delI = DelimiterBegins(src, srcOrig==src ? delimiters_all : delimiters_noAngle, false);
+		// CPP numeric literals heuristic (eating digit-group apostrophes as regular digit char)
+		if (DT_APOSTROPHE == delI && srcOrig < src) {
+			const char prevC = 0x20 | src[-1];	// also lowercase any ASCII letter
+			if (('0' <= prevC && prevC <= '9') || ('a' <= prevC && prevC <= 'f')) {
+				// ahead of apostrophe is character which can work as digit (up to hexa system)
+				// this heuristic doesn't bother to be super precise, because string-apostrophe
+				// should be on word boundary any way, not preceded by *any* digit of any base.
+				const char nextC = 0x20 | src[1];
+				if (('0' <= nextC && nextC <= '9') || ('a' <= nextC && nextC <= 'f')) {
+					// by same logic, if also char after the apostrophe is any digit (up to base16)
+					// turn the apostrophe from delimiter into digit-grouping char
+					delI = DT_NONE;
+				}
+			}
+		}
 		if (DT_NONE == delI) {		// no delimiter found, ordinary expression, copy char by char
 			*dst++ = *src++;
 			continue;

@@ -1,1 +1,2 @@
-sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(1): ^ emitted from here
