@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9 11/01/2020
+  Version: 0.9.1 12/01/2020
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,9 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  12/01/2020: version 0.9.1
+    +  fix after-label argument order of rules to work better with numeric constants
 
   11/01/2020: version 0.9
     + new directives added (MMU, CSPECTMAP, SAVEDEV)
@@ -80,7 +83,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="9" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="10" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -368,10 +371,10 @@ TODO missing things:
         <keyword attribute="Comment" context="#pop!Normal" String="directives" lookAhead="true"/>
         <!-- dotRepeat context resolved here too after label arg (duplicity of context definition :/ ) -->
         <RegExpr attribute="Directives" context="#pop!Normal" String="\.(\d+|\(.*?\))\s"/>
-        <!-- operators in expression -->
+        <!-- operators in expression (do word operators before "Arguments", symbols after -->
         <keyword attribute="Normal Text" context="#stay" String="operators"/>
-        <AnyChar String="!~+-*/%&lt;>?=&amp;^|[]()" attribute="Normal Text" context="#stay"/>
         <IncludeRules context="Arguments" />
+        <AnyChar String="!~+-*/%&lt;>?=&amp;^|[]()" attribute="Normal Text" context="#stay"/>
       </context>
 
       <context name="dotRepeat" attribute="Directives" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="Normal">
