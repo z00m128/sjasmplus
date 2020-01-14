@@ -543,11 +543,11 @@ int main(int argc, char **argv) {
 	// The new source is easy to locate through reinterpret_cast keywords, but I have strong
 	// suspicion there is also old sjasmplus code which is not endianness-agnostic.
 	// To fix it would need major testing with some BE platform and deep code review.
-	const byte little_endian_test[] = { 0x34, 0x12 };
-	const word le_test_word = *reinterpret_cast<const word*>(little_endian_test);
-	if (0x1234 != le_test_word) {
+	const word little_endian_test[] = { 0x1234 };
+	const byte le_test_byte = *reinterpret_cast<const byte*>(little_endian_test);
+	if (0x34 != le_test_byte) {
 		ErrorInt("Big-endian platform detected, unfortunately sjasmplus" \
-		" is currently LE-only, please report the issue.", le_test_word, FATAL);
+		" is currently LE-only, please report the issue.", le_test_byte, FATAL);
 	}
 
 	// start counter
