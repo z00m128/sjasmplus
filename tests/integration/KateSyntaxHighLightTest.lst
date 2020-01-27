@@ -9,66 +9,66 @@ KateSyntaxHighLightTest.asm(5): error: Unexpected: , #A8
 KateSyntaxHighLightTest.asm(6): error: [DISP] <page number> is out of range: 43008
  6    00A8                  disp    43008, 43008d   ; decimal
 KateSyntaxHighLightTest.asm(7): error: Unrecognized instruction: relaxed syntax of Z80 assemblers, "label" is usually default result of anything
- 7    A800              With relaxed syntax of Z80 assemblers, "label" is usually default result of anything
- 8    A800
- 9    A800 21 9C 00 11      ld      hl, %10011100, de, 0b10011100   ; binary, also: 0011b
- 9    A804 9C 00
-10    A806 11 FF 0F 01      ld      de, 7777o, bc, 0q7777           ; octal, also: 77q
-10    A80A FF 0F
-11    A80C 01 F0 00         ld      bc, %1111'0000  ; C++ num-group separator
-12    A80F 61 70 6F 73      db      'apostrophe''s "text"', "quotes\'\\\"\? 'text'", 0
-12    A813 74 72 6F 70
-12    A817 68 65 27 73
-12    A81B 20 22 74 65
-12    A81F 78 74 22 71
-12    A823 75 6F 74 65
-12    A827 73 27 5C 22
-12    A82B 3F 20 27 74
-12    A82F 65 78 74 27
-12    A833 00
+ 7    00A8              With relaxed syntax of Z80 assemblers, "label" is usually default result of anything
+ 8    00A8
+ 9    00A8 21 9C 00 11      ld      hl, %10011100, de, 0b10011100   ; binary, also: 0011b
+ 9    00AC 9C 00
+10    00AE 11 FF 0F 01      ld      de, 7777o, bc, 0q7777           ; octal, also: 77q
+10    00B2 FF 0F
+11    00B4 01 F0 00         ld      bc, %1111'0000  ; C++ num-group separator
+12    00B7 61 70 6F 73      db      'apostrophe''s "text"', "quotes\'\\\"\? 'text'", 0
+12    00BB 74 72 6F 70
+12    00BF 68 65 27 73
+12    00C3 20 22 74 65
+12    00C7 78 74 22 71
+12    00CB 75 6F 74 65
+12    00CF 73 27 5C 22
+12    00D3 3F 20 27 74
+12    00D7 65 78 74 27
+12    00DB 00
 KateSyntaxHighLightTest.asm(13): error: Unrecognized instruction: ldirx
-13    A834                  ldirx
+13    00DC                  ldirx
 KateSyntaxHighLightTest.asm(14): error: Unrecognized instruction: bsra    de,b            
-14    A834                  bsra    de,b            ; NEXT opcodes of course added (can have different colour)
-15    A834 FE 27            cp      ''''            ;"TODO" in comments exists (also FIXME and FIX ME).
-16    A836              s:  ; some label
-17    A836              // also C line comments supported
-18    A836 FC 36 A8         call    s, s            ; conditional call/jp/jr/ret highlights also condition
-19    A839                      ; "s" is actually unofficial alias for "m" supported by some assembler ("ns"=p)
-20    A839 C0               ret     nz              ; control-flow instructions are extra colour
-21    A83A DD CB 80 03      rlc     (ix-128),e      ; unofficial Z80 instructions are highlighted extra
-22    A83E DD CB 06 AF      res     5,(ix+6),a      ; (but it goes also over arguments, maybe shouldn't, TODO)
-23    A842 DD CB 1E AE      res     5,(ix+30)       ; compared to official instruction
-24    A846
-25    A846 E6 0D            and     7+(3<<1)
-26    A848 E6 4C            and     low .localLab   ; FIXME: operators are mostly defined, but rules are missing
-27    A84A
-28    A84A                  MACRO leMacron _arg0?
-29    A84A ~                    defb    $DD, 1
-30    A84A ~                    nextreg $15, $0
-31    A84A                  ENDM
-32    A84A
-33    A84A                  ; in case you accidentally write non-instruction, it will highlight as label! :D
+14    00DC                  bsra    de,b            ; NEXT opcodes of course added (can have different colour)
+15    00DC FE 27            cp      ''''            ;"TODO" in comments exists (also FIXME and FIX ME).
+16    00DE              s:  ; some label
+17    00DE              // also C line comments supported
+18    00DE FC DE 00         call    s, s            ; conditional call/jp/jr/ret highlights also condition
+19    00E1                      ; "s" is actually unofficial alias for "m" supported by some assembler ("ns"=p)
+20    00E1 C0               ret     nz              ; control-flow instructions are extra colour
+21    00E2 DD CB 80 03      rlc     (ix-128),e      ; unofficial Z80 instructions are highlighted extra
+22    00E6 DD CB 06 AF      res     5,(ix+6),a      ; (but it goes also over arguments, maybe shouldn't, TODO)
+23    00EA DD CB 1E AE      res     5,(ix+30)       ; compared to official instruction
+24    00EE
+25    00EE E6 0D            and     7+(3<<1)
+26    00F0 E6 F4            and     low .localLab   ; FIXME: operators are mostly defined, but rules are missing
+27    00F2
+28    00F2                  MACRO leMacron _arg0?
+29    00F2 ~                    defb    $DD, 1
+30    00F2 ~                    nextreg $15, $0
+31    00F2                  ENDM
+32    00F2
+33    00F2                  ; in case you accidentally write non-instruction, it will highlight as label! :D
 KateSyntaxHighLightTest.asm(34): error: Unrecognized instruction: jnz     s               
-34    A84A                  jnz     s               ; still makes it easier to catch
-35    A84A                  leMacron arg0           ; but so do also correctly used macros
-35    A84A DD 01       >        defb    $DD, 1
+34    00F2                  jnz     s               ; still makes it easier to catch
+35    00F2                  leMacron arg0           ; but so do also correctly used macros
+35    00F2 DD 01       >        defb    $DD, 1
 KateSyntaxHighLightTest.asm(30): error: Unrecognized instruction: nextreg $15, $0
 KateSyntaxHighLightTest.asm(35): ^ emitted from here
-35    A84C             >        nextreg $15, $0
-36    A84C              .localLab:
+35    00F4             >        nextreg $15, $0
+36    00F4              .localLab:
 KateSyntaxHighLightTest.asm(37): error: Missing next digit: 1   
-37    A84C                  hex     F32712bcd3561   ; unpaired digit or non-digit is highlighted as "error"
+37    00F4                  hex     F32712bcd3561   ; unpaired digit or non-digit is highlighted as "error"
 KateSyntaxHighLightTest.asm(38): error: Invalid labelname: !alsoThisInvalidLabel
-38    A84C              !alsoThisInvalidLabel
+38    00F4              !alsoThisInvalidLabel
 KateSyntaxHighLightTest.asm(39): warning: [DG] multiple characters used for 'ones'
 KateSyntaxHighLightTest.asm(39): warning: [DG] character '0' in DG works as value 1
-39    A84C 33 F8            dg      ..##..##  #$01!-._  ; DG bit map is highlights as "data" (0) vs "number" (1)
-40    A84E
+39    00F4 33 F8            dg      ..##..##  #$01!-._  ; DG bit map is highlights as "data" (0) vs "number" (1)
+40    00F6
 # file closed: KateSyntaxHighLightTest.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0xA800 X With
-0xA836   s
-0xA84C   s.localLab
+0x00A8 X With
+0x00DE   s
+0x00F4   s.localLab

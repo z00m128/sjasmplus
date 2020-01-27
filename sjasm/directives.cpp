@@ -284,30 +284,33 @@ void dirORG() {
 }
 
 void dirDISP() {
-	aint val;
-	if (ParseExpressionNoSyntaxError(lp, val)) {
-		adrdisp = CurAddress;
-		CurAddress = val;
-		PseudoORG = 1;
-		dispPageNum = LABEL_PAGE_UNDEFINED;
-		if (comma(lp)) {
-			if (!ParseExpressionNoSyntaxError(lp, dispPageNum)) {
-				dispPageNum = LABEL_PAGE_UNDEFINED;
-				Error("[DISP] Syntax error in <page number>", lp);
-			} else {
-				if (DeviceID) {
-					if (dispPageNum < 0 || Device->PagesCount <= dispPageNum) {
-						ErrorInt("[DISP] <page number> is out of range", dispPageNum);
-						dispPageNum = LABEL_PAGE_UNDEFINED;
-					}
-				} else {
-					Error("[DISP] <page number> is accepted only in device mode", line);
-				}
-			}
-		}
-	} else {
+	aint valAdr, valPageNum;
+	// parse+validate values first, don't even switch into DISP mode in case of any error
+	if (!ParseExpressionNoSyntaxError(lp, valAdr)) {
 		Error("[DISP] Syntax error in <address>", lp, SUPPRESS);
+		return;
 	}
+	if (comma(lp)) {
+		if (!ParseExpressionNoSyntaxError(lp, valPageNum)) {
+			Error("[DISP] Syntax error in <page number>", lp);
+			return;
+		}
+		if (!DeviceID) {
+			Error("[DISP] <page number> is accepted only in device mode", line);
+			return;
+		}
+		if (valPageNum < 0 || Device->PagesCount <= valPageNum) {
+			ErrorInt("[DISP] <page number> is out of range", valPageNum);
+			return;
+		}
+		dispPageNum = valPageNum;
+	} else {
+		dispPageNum = LABEL_PAGE_UNDEFINED;
+	}
+	// everything is valid, switch to DISP mode (dispPageNum is already set above)
+	adrdisp = CurAddress;
+	CurAddress = valAdr;
+	PseudoORG = 1;
 }
 
 void dirENT() {
