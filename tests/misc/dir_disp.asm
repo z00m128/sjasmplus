@@ -15,3 +15,5 @@ l4:     rra
 
     ENT
     cpl
+
+    DISP    $CCCC           ; leave DISP open to test next pass behaviour (should auto-end)

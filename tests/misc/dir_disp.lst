@@ -19,6 +19,8 @@ dir_disp.asm(11): warning: [ORG] inside displaced block, the physical address is
 16    F004                  ENT
 17    8004 2F               cpl
 18    8005
+19    8005                  DISP    $CCCC           ; leave DISP open to test next pass behaviour (should auto-end)
+20    CCCC
 # file closed: dir_disp.asm
 
 Value    Label
