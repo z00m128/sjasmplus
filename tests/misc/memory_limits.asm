@@ -12,8 +12,8 @@
             DISP    0xFFFF
             ldir
             ldir
-            ORG     0       ; does reset the DISP part only, not real address
-            ORG     0xFFFF
+            ORG     0       ; ok ; does reset the DISP part only, not real address
+            ORG     0xFFFF  ; ok
             ldir            ; (again) warning about memory limit
             ldir            ; no warning (not doubling)
             ENDT
@@ -23,7 +23,7 @@
             DISP    0x2000
             ldir
             ldir
-            ORG     0x3000  ; does NOT reset physical one, only DISP one
+            ORG     0x3000  ; ok ; does NOT reset physical one, only DISP one
             ldir
             ldir
             ENDT
@@ -53,8 +53,8 @@
             DISP    0xFFF0
             block   100,0xCC
             nop
-            ORG     0       ; does reset the DISP part only, not real address
-            ORG     0xFFF0
+            ORG     0       ; ok ; does reset the DISP part only, not real address
+            ORG     0xFFF0  ; ok
             block   100,0xDD
             nop
             ENDT
@@ -64,7 +64,7 @@
             DISP    0x2000
             block   100,0xEE
             nop
-            ORG     0x3000  ; does NOT reset physical one, only DISP one
+            ORG     0x3000  ; ok ; does NOT reset physical one, only DISP one
             block   100,0xFF
             nop
             ENDT

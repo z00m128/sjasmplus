@@ -278,12 +278,20 @@ void dirORG() {
 		return;
 	}
 	CurAddress = val;
+	if (PseudoORG && warningNotSuppressed()) {
+		Warning("[ORG] inside displaced block, the physical address is not modified, only virtual displacement address will change");
+	}
 	if (!DeviceID) return;
 	if (comma(lp))	dirPageImpl("ORG");
 	else 			Device->CheckPage(CDevice::CHECK_RESET);
 }
 
 void dirDISP() {
+	if (PseudoORG) {
+		Warning("[DISP] displacement inside another displacement block, ignoring it.");
+		SkipToEol(lp);
+		return;
+	}
 	aint valAdr, valPageNum;
 	// parse+validate values first, don't even switch into DISP mode in case of any error
 	if (!ParseExpressionNoSyntaxError(lp, valAdr)) {
