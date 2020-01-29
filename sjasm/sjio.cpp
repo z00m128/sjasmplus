@@ -55,7 +55,8 @@ bool IsSkipErrors = false;
 static void initErrorLine() {		// adds filename + line of definition if possible
 	*ErrorLine = 0;
 	*ErrorLine2 = 0;
-	if (pass < 1 || LASTPASS < pass) return;
+	// when OpenFile is reporting error, the filename is still nullptr, but pass==1 already
+	if (pass < 1 || LASTPASS < pass || nullptr == CurSourcePos.filename) return;
 	// during assembling, show also file+line info
 	TextFilePos errorPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 	bool isEmittedMsgEnabled = true;
