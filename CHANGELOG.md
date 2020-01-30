@@ -1,3 +1,7 @@
+## 1.14.5 - work in progress
+- fix crash when opening source file fails
+- [DISP](http://z00m128.github.io/sjasmplus/documentation.html#po_disp)/[ORG](http://z00m128.github.io/sjasmplus/documentation.html#po_org) warns about being used inside DISP block (also docs extended)
+
 ## [1.14.4](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.4) - 13.1.2020
 - added few example utility macros in tests/macro_examples/sj_library.asm (`neg r16`)
 - added [SAVENEX SCREEN BMP](http://z00m128.github.io/sjasmplus/documentation.html#nex_screen) sub-command to include BMP loading-screen

@@ -186,6 +186,16 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.14.5</term>
+
+            <listitem>
+              <synopsis>- fix crash when opening source file fails
+- <link linkend="po_disp">`DISP`</link>/<link linkend="po_org">`ORG`</link> warns about being used inside DISP block (also docs extended)
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>13.1.2020 - 1.14.4</term>
 
             <listitem>
