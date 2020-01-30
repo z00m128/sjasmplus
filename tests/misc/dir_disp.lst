@@ -1,0 +1,31 @@
+# file opened: dir_disp.asm
+ 1    0000              ; test warnings about DISP and ORG inside DISP block
+ 2    0000
+ 3    0000                  ORG     $8000
+ 4    8000                  DISP    $C000
+ 5    C000
+ 6    C000 37           l1:     scf
+dir_disp.asm(7): warning: [DISP] displacement inside another displacement block, ignoring it.
+ 7    C001                      DISP    $1234, 4    ; warning about being ignored, because DISP inside DISP
+ 8    C001 00           l2:     nop
+ 9    C002                      ASSERT $C001 == l2  ; not $1234
+10    C002
+dir_disp.asm(11): warning: [ORG] inside displaced block, the physical address is not modified, only virtual displacement address will change
+11    C002                      ORG     $E002       ; warning: only virtual address being modified inside DISP
+12    E002 3F           l3:     ccf
+13    E003                      ORG     $F003       ; ok ; warning suppressed
+14    F003 1F           l4:     rra
+15    F004
+16    F004                  ENT
+17    8004 2F               cpl
+18    8005
+19    8005                  DISP    $CCCC           ; leave DISP open to test next pass behaviour (should auto-end)
+20    CCCC
+# file closed: dir_disp.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xC000 X l1
+0xC001   l2
+0xE002 X l3
+0xF003 X l4

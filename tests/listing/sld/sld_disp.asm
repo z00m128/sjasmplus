@@ -21,8 +21,8 @@ NormalLabel:
     ASSERT 4 == $$DispLabel3
 
     ; just in the valid range values
-    DISP $8000,0
-    DISP $8000,223
+    DISP $8000,0    : ENT
+    DISP $8000,223  : ENT
 
     ; syntax errors of DISP parser (first in DEVICE mode)
     DISP $8000,         ; syntax error

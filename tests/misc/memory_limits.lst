@@ -16,8 +16,8 @@ memory_limits.asm(8): warning: RAM limit exceeded 0x10001 by ORG
 13    FFFF ED B0                    ldir
 memory_limits.asm(14): warning: RAM limit exceeded 0x10001 by DISP
 14    0001 ED B0                    ldir
-15    0003                          ORG     0       ; does reset the DISP part only, not real address
-16    0000                          ORG     0xFFFF
+15    0003                          ORG     0       ; ok ; does reset the DISP part only, not real address
+16    0000                          ORG     0xFFFF  ; ok
 17    FFFF ED B0                    ldir            ; (again) warning about memory limit
 memory_limits.asm(18): warning: RAM limit exceeded 0x10001 by DISP
 18    0001 ED B0                    ldir            ; no warning (not doubling)
@@ -29,7 +29,7 @@ memory_limits.asm(18): warning: RAM limit exceeded 0x10001 by DISP
 24    2000 ED B0                    ldir
 memory_limits.asm(25): warning: RAM limit exceeded 0x10001 by ORG
 25    2002 ED B0                    ldir
-26    2004                          ORG     0x3000  ; does NOT reset physical one, only DISP one
+26    2004                          ORG     0x3000  ; ok ; does NOT reset physical one, only DISP one
 27    3000 ED B0                    ldir
 28    3002 ED B0                    ldir
 29    3004                          ENDT
@@ -66,8 +66,8 @@ memory_limits.asm(49): warning: RAM limit exceeded 0x10054 by ORG
 54    FFF0 CC CC CC...              block   100,0xCC
 memory_limits.asm(55): warning: RAM limit exceeded 0x10054 by DISP
 55    0054 00                       nop
-56    0055                          ORG     0       ; does reset the DISP part only, not real address
-57    0000                          ORG     0xFFF0
+56    0055                          ORG     0       ; ok ; does reset the DISP part only, not real address
+57    0000                          ORG     0xFFF0  ; ok
 58    FFF0 DD DD DD...              block   100,0xDD
 memory_limits.asm(59): warning: RAM limit exceeded 0x10054 by DISP
 59    0054 00                       nop
@@ -79,7 +79,7 @@ memory_limits.asm(59): warning: RAM limit exceeded 0x10054 by DISP
 65    2000 EE EE EE...              block   100,0xEE
 memory_limits.asm(66): warning: RAM limit exceeded 0x10054 by ORG
 66    2064 00                       nop
-67    2065                          ORG     0x3000  ; does NOT reset physical one, only DISP one
+67    2065                          ORG     0x3000  ; ok ; does NOT reset physical one, only DISP one
 68    3000 FF FF FF...              block   100,0xFF
 69    3064 00                       nop
 70    3065                          ENDT

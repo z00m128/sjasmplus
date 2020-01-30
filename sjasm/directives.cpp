@@ -278,36 +278,47 @@ void dirORG() {
 		return;
 	}
 	CurAddress = val;
+	if (PseudoORG && warningNotSuppressed()) {
+		Warning("[ORG] inside displaced block, the physical address is not modified, only virtual displacement address will change");
+	}
 	if (!DeviceID) return;
 	if (comma(lp))	dirPageImpl("ORG");
 	else 			Device->CheckPage(CDevice::CHECK_RESET);
 }
 
 void dirDISP() {
-	aint val;
-	if (ParseExpressionNoSyntaxError(lp, val)) {
-		adrdisp = CurAddress;
-		CurAddress = val;
-		PseudoORG = 1;
-		dispPageNum = LABEL_PAGE_UNDEFINED;
-		if (comma(lp)) {
-			if (!ParseExpressionNoSyntaxError(lp, dispPageNum)) {
-				dispPageNum = LABEL_PAGE_UNDEFINED;
-				Error("[DISP] Syntax error in <page number>", lp);
-			} else {
-				if (DeviceID) {
-					if (dispPageNum < 0 || Device->PagesCount <= dispPageNum) {
-						ErrorInt("[DISP] <page number> is out of range", dispPageNum);
-						dispPageNum = LABEL_PAGE_UNDEFINED;
-					}
-				} else {
-					Error("[DISP] <page number> is accepted only in device mode", line);
-				}
-			}
-		}
-	} else {
-		Error("[DISP] Syntax error in <address>", lp, SUPPRESS);
+	if (PseudoORG) {
+		Warning("[DISP] displacement inside another displacement block, ignoring it.");
+		SkipToEol(lp);
+		return;
 	}
+	aint valAdr, valPageNum;
+	// parse+validate values first, don't even switch into DISP mode in case of any error
+	if (!ParseExpressionNoSyntaxError(lp, valAdr)) {
+		Error("[DISP] Syntax error in <address>", lp, SUPPRESS);
+		return;
+	}
+	if (comma(lp)) {
+		if (!ParseExpressionNoSyntaxError(lp, valPageNum)) {
+			Error("[DISP] Syntax error in <page number>", lp);
+			return;
+		}
+		if (!DeviceID) {
+			Error("[DISP] <page number> is accepted only in device mode", line);
+			return;
+		}
+		if (valPageNum < 0 || Device->PagesCount <= valPageNum) {
+			ErrorInt("[DISP] <page number> is out of range", valPageNum);
+			return;
+		}
+		dispPageNum = valPageNum;
+	} else {
+		dispPageNum = LABEL_PAGE_UNDEFINED;
+	}
+	// everything is valid, switch to DISP mode (dispPageNum is already set above)
+	adrdisp = CurAddress;
+	CurAddress = valAdr;
+	PseudoORG = 1;
 }
 
 void dirENT() {

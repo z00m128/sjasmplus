@@ -30,7 +30,7 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.14.4"
+#define VERSION "1.14.5"
 
 #define LASTPASS 3
 

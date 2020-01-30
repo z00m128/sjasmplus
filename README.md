@@ -61,5 +61,10 @@ This can be further complemented by [Z80 Assembly meter](https://github.com/theN
 
 [VS Code Z80 Debug Adapter](https://github.com/maziac/z80-debug) for debugging ZX Spectrum code, writing unit tests for it, time the execution, etc.
 
-(if you are not excited about using VSC as IDE and want to try some alternative) Syntax highlight (only) for [Kate editor](https://kate-editor.org/) is included directly in sjasmplus [sources](https://github.com/z00m128/sjasmplus/blob/master/asm-z80-sj.xml).
+(if you are not excited about using VSC as IDE and want to try some alternative) Syntax highlight (only)
+for [![Kate icon](docs/img/kate-logo-24px.png)Kate editor](https://kate-editor.org/) is
+included directly in sjasmplus [sources](https://github.com/z00m128/sjasmplus/blob/master/asm-z80-sj.xml).
 
+--------------------
+
+_All product names, trademarks and registered trademarks are property of their respective owners. All company, product and service names used in this website are for identification purposes only. Use of these names,trademarks and brands does not imply endorsement._

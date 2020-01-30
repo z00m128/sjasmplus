@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.14.4 Documentation [2020-01-13]</title>
+  <title>SjASMPlus 1.14.5 Documentation [2020-01-30]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -184,6 +184,16 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>30.1.2020 - 1.14.5</term>
+
+            <listitem>
+              <synopsis>- fix crash when opening source file fails
+- <link linkend="po_disp">`DISP`</link>/<link linkend="po_org">`ORG`</link> warns about being used inside DISP block (also docs extended)
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>13.1.2020 - 1.14.4</term>
@@ -1600,7 +1610,7 @@ counter = counter + 1
               <para>Set the address in which the part of code should work.
               <link linkend="po_phase">PHASE</link> and <link
               linkend="po_textarea">TEXTAREA</link> are synonyms of DISP.
-              <link linkend="po_ent">ENT</link> is restore current address.
+              <link linkend="po_ent">ENT</link> will restore current address.
               <link linkend="po_unphase">UNPHASE</link>, <link
               linkend="po_dephase">DEPHASE</link> and <link
               linkend="po_endt">ENDT</link> are synonyms of <link
@@ -2208,7 +2218,12 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
             <listitem>
               <para>Set the program counter to a specific address. If the second argument is
               provided, it will change memory page in the current slot, see
-              <link linkend="po_page">PAGE</link>.
+              <link linkend="po_page">PAGE</link>.</para>
+              <para>When used inside <link linkend="po_disp">DISP</link> block, only the virtual
+				  "displaced" program counter is affected, but the machine code will be still
+				  sequentially emitted in the original physical location and warning is emitted
+				  (you can suppress the warning with ";ok" comment, if you want to use ORG
+				  intentionally in this way).
                   <example>
                   <title>docs_examples/po_org.asm</title>
 
