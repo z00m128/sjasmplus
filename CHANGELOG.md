@@ -1,4 +1,4 @@
-## 1.14.5 - work in progress
+## [1.14.5](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.5) - 30.1.2020
 - fix crash when opening source file fails
 - [DISP](http://z00m128.github.io/sjasmplus/documentation.html#po_disp)/[ORG](http://z00m128.github.io/sjasmplus/documentation.html#po_org) warns about being used inside DISP block (also docs extended)
 
