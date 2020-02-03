@@ -1,0 +1,1 @@
+ --enable-breakpoints --set-breakpoint 1 "PC=4660" --set-breakpoint 2 "PC=48350" --set-breakpoint 3 "PC=9029" --set-breakpoint 4 "PC=0" --set-breakpoint 5 "PC=65535" 

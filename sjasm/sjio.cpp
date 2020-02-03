@@ -34,6 +34,8 @@
 
 #define DESTBUFLEN 8192
 
+static void CloseBreakpointsFile();
+
 // ReadLine buffer and variables around
 char rlbuf[4096 * 2]; //x2 to prevent errors
 char * rlpbuf, * rlpbuf_end, * rlppos;
@@ -959,6 +961,7 @@ void Close() {
 		FP_ListingFile = NULL;
 	}
 	CloseSld();
+	CloseBreakpointsFile();
 }
 
 int SaveRAM(FILE* ff, int start, int length) {
@@ -1309,6 +1312,56 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 				CurSourcePos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
 				pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
+}
+
+/////// Breakpoints list (for different emulators)
+static FILE* FP_BreakpointsFile = nullptr;
+static EBreakpointsFile breakpointsType;
+static int breakpointsCounter;
+
+void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type) {
+	if (nullptr == filename || !filename[0]) {
+		Error("empty filename", filename, EARLY);
+		return;
+	}
+	if (FP_BreakpointsFile) {
+		Error("breakpoints file was already opened", nullptr, EARLY);
+		return;
+	}
+	if (!FOPEN_ISOK(FP_BreakpointsFile, filename, "w")) {
+		Error("Error opening file", filename, FATAL);
+	}
+	breakpointsCounter = 0;
+	breakpointsType = type;
+}
+
+static void CloseBreakpointsFile() {
+	if (!FP_BreakpointsFile) return;
+	fclose(FP_BreakpointsFile);
+	FP_BreakpointsFile = nullptr;
+}
+
+void WriteBreakpoint(const aint val) {
+	if (!FP_BreakpointsFile) {
+		if (warningNotSuppressed()) Warning("breakpoints file was not specified");
+		return;
+	}
+	++breakpointsCounter;
+	switch (breakpointsType) {
+		case BPSF_UNREAL:
+			check16u(val);
+			fprintf(FP_BreakpointsFile, "x0=0x%04X\n", val&0xFFFF);
+			break;
+		case BPSF_ZESARUX:
+			if (1 == breakpointsCounter) fputs(" --enable-breakpoints ", FP_BreakpointsFile);
+			if (100 < breakpointsCounter) {
+				Warning("Maximum amount of 100 breakpoints has been already reached, this one is ignored");
+				break;
+			}
+			check16u(val);
+			fprintf(FP_BreakpointsFile, "--set-breakpoint %d \"PC=%d\" ", breakpointsCounter, val&0xFFFF);
+			break;
+	}
 }
 
 //eof sjio.cpp

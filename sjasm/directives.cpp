@@ -1200,6 +1200,42 @@ void dirCSPECTMAP() {
 	Options::CSpectMapPageSize = Device->GetPage(0)->Size;
 }
 
+void dirBPLIST() {
+	if (2 != pass || !DeviceID) {	// nothing to do in first or last pass, second will open the file
+		if (2 == pass) {	// !Device is true -> no device in second pass -> error
+			Error("BPLIST only allowed in real device emulation mode (See DEVICE)", nullptr, EARLY);
+		}
+		SkipToEol(lp);
+		return;
+	}
+	char* fname = GetFileName(lp);
+	EBreakpointsFile type = BPSF_UNREAL;
+	if (cmphstr(lp, "unreal")) {
+		type = BPSF_UNREAL;
+	} else if (cmphstr(lp, "zesarux")) {
+		type = BPSF_ZESARUX;
+	} else if (!SkipBlanks()) {
+		Warning("[BPLIST] invalid breakpoints file type (use \"unreal\" or \"zesarux\")", lp, W_EARLY);
+	}
+	OpenBreakpointsFile(fname, type);
+	delete[] fname;
+}
+
+void dirSETBREAKPOINT() {
+	if (LASTPASS != pass) {
+		SkipToEol(lp);
+		return;
+	}
+	aint val = 0;
+	if (SkipBlanks(lp)) {		// without any expression do the "$" breakpoint
+		WriteBreakpoint(CurAddress);
+	} else if (ParseExpression(lp, val)) {
+		WriteBreakpoint(val);
+	} else {
+		Error("[SETBREAKPOINT] Syntax error", bp);
+	}
+}
+
 /*void dirTEXTAREA() {
 
 }*/
@@ -2114,6 +2150,10 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".ends", dirENDS);
 
 	DirectivesTable.insertd(".device", dirDEVICE);
+
+	DirectivesTable.insertd(".bplist", dirBPLIST);
+	DirectivesTable.insertd(".setbreakpoint", dirSETBREAKPOINT);
+	DirectivesTable.insertd(".setbp", dirSETBREAKPOINT);
 
 #ifdef USE_LUA
 	DirectivesTable.insertd(".lua", dirLUA);

@@ -1,0 +1,4 @@
+dir_setbp_emptyFn.asm(1): warning: [BPLIST] invalid breakpoints file type (use "unreal" or "zesarux"): invalid_type
+dir_setbp_emptyFn.asm(1): error: empty filename: 
+dir_setbp_emptyFn.asm(2): error: empty filename: 
+dir_setbp_emptyFn.asm(3): error: Error opening file: .

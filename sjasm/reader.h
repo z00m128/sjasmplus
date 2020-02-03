@@ -58,6 +58,7 @@ char* ParenthesesEnd(char* p);
 int check8(aint val);
 int check8o(aint val);
 int check16(aint val);
+int check16u(aint val);
 int check24(aint val);
 void checkLowMemory(byte lowByte, byte hiByte);
 int need(char*& p, char c);

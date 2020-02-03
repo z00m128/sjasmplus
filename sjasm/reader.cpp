@@ -300,6 +300,16 @@ int check16(aint val) {
 	return 1;
 }
 
+int check16u(aint val) {
+	if (val < 0 || val > 65535) {
+		char buffer[64];
+		sprintf(buffer, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
+		Warning(buffer);
+		return 0;
+	}
+	return 1;
+}
+
 int check24(aint val) {
 	if (val < -16777216 || val > 16777215) {
 		char buffer[64];

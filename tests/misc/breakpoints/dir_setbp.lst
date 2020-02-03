@@ -1,0 +1,22 @@
+dir_setbp.asm(9): error: breakpoints file was already opened
+# file opened: dir_setbp.asm
+ 1    0000                  DEVICE ZXSPECTRUM48
+ 2    0000                  BPLIST "dir_setbp.exp" zesarux  ; valid breakpoints file
+ 3    0000
+ 4    0000                  SETBP 0x1234
+ 5    0000                  setbp 0xBCDE
+ 6    0000                  ORG $2345
+ 7    2345                  SETBP       ; default = "$"
+ 8    2345
+ 9    2345                  BPLIST "dir_setbp.exp" unreal
+10    2345
+11    2345                  ; value truncating warnings
+dir_setbp.asm(12): warning: value 0x10000 is truncated to 16bit value: 0x0000
+12    2345                  .SETBP 0x10000
+dir_setbp.asm(13): warning: value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
+13    2345                  .setbp -1
+14    2345
+# file closed: dir_setbp.asm
+
+Value    Label
+------ - -----------------------------------------------------------
