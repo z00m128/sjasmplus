@@ -186,6 +186,15 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.14.6</term>
+
+            <listitem>
+              <synopsis>- added <link linkend="po_bplist">`BPLIST`</link> and <link linkend="po_setbp">`SETBP`</link> to export breakpoints info from asm for Unreal and ZEsarUX emulators
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>30.1.2020 - 1.14.5</term>
 
             <listitem>
@@ -1325,6 +1334,35 @@ END_OF_PROGRAM</programlisting></para>
     BLOCK 500,0   ; define a block of 500 bytes of zero
     BLOCK 400,-1  ; define a block of 400 bytes of 255</programlisting></para>
                 </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_bplist" />BPLIST &lt;filename&gt; [unreal|zesarux]</term>
+
+            <listitem>
+				<para>
+					<emphasis>Works only in real device emulation mode. See
+						<link linkend="po_device">DEVICE</link>.</emphasis>
+				</para>
+				<para>Opens file to export breakpoints info directly from ASM source, currently two
+					flavours of export are supported: <code>unreal</code> (default) and
+					<code>zesarux</code>. For latest Unreal emulators use filename "bpx.ini", you
+					can then load the file from the emulator UI. For ZEsarUX the file will contain
+					command-line options, which you can add to the command when launching the emulator.
+				</para>
+				<para>(current version of ZEsarUX will not catch the very first instruction of freshly
+					loaded snapshot/NEX/... file, or it will even disable breakpoints when changing
+					machine parameters and ignore the <code>--enable-breakpoints</code> option - will
+					be hopefully improved in the future)
+				  <example>
+                  <title></title>
+
+                  <programlisting>    BPLIST "bpx.ini" unreal  ; open breakpoints list in "Unreal" format
+    ; or (only one file per assembling-unit can be specified)
+    BPLIST "cmd_line_options.txt" zesarux ; open breakpoints list in "ZEsarUX" format</programlisting>
+				  </example>
+				</para>
             </listitem>
           </varlistentry>
 
@@ -2520,6 +2558,37 @@ START  ....     ; some code
     SAVETRD "test.trd",|"myfile1.C",$B000,$400 ;- replace "myfile1.C" with new file</programlisting></para>
                 </example>
 			  </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_setbp" />SETBP [&lt;expression&gt;]</term>
+          </varlistentry>
+          <varlistentry>
+            <term><anchor id="po_setbreakpoint" />SETBREAKPOINT [&lt;expression&gt;]</term>
+
+            <listitem>
+				<para>
+					<emphasis>Works only in real device emulation mode. See
+						<link linkend="po_device">DEVICE</link>.</emphasis>
+				</para>
+				<para>Will add execution-type breakpoint at address &lt;expression&gt; to the
+					<link linkend="po_bplist">BPLIST</link> export file. If no expression is specified,
+					the current program counter will be used.
+				  <example>
+                  <title></title>
+
+                  <programlisting>    BPLIST "cmd_line.options.txt" zesarux ; open breakpoints list in "ZEsarUX" format
+start:
+        nop     ; ZEsarUX will not catch very first instruction of snapshot file loaded
+        SETBP   ; so breakpoint ahead of the second instruction (after first "nop")
+        xor  a
+        SETBP some_routine_label  ; set also some breakpoint to other code by its label
+        SETBREAKPOINT $0D6B       ; alias of SETBP, works identically
+        ; ... your code of app
+					  </programlisting>
+				  </example>
+				</para>
             </listitem>
           </varlistentry>
 
