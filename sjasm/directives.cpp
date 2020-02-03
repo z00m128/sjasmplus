@@ -1229,10 +1229,10 @@ void dirSETBREAKPOINT() {
 	aint val = 0;
 	if (SkipBlanks(lp)) {		// without any expression do the "$" breakpoint
 		WriteBreakpoint(CurAddress);
-	} else if (ParseExpression(lp, val)) {
+	} else if (ParseExpressionNoSyntaxError(lp, val)) {
 		WriteBreakpoint(val);
 	} else {
-		Error("[SETBREAKPOINT] Syntax error", bp);
+		Error("[SETBREAKPOINT] Syntax error", bp, SUPPRESS);
 	}
 }
 

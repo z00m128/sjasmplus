@@ -16,6 +16,10 @@ dir_setbp.asm(12): warning: value 0x10000 is truncated to 16bit value: 0x0000
 dir_setbp.asm(13): warning: value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
 13    2345                  .setbp -1
 14    2345
+15    2345                  ; syntax error test
+dir_setbp.asm(16): error: [SETBREAKPOINT] Syntax error: SETBP &
+16    2345                  SETBP &
+17    2345
 # file closed: dir_setbp.asm
 
 Value    Label

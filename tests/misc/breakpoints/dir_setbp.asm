@@ -11,3 +11,6 @@
     ; value truncating warnings
     .SETBP 0x10000
     .setbp -1
+
+    ; syntax error test
+    SETBP &
