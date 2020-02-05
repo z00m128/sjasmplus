@@ -69,7 +69,9 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	snbuf[22] = 0x00; //af
 	const CDevicePage* stackPage = Device->GetSlot(Device->SlotsCount-1)->Page;
 	unsigned char* const stackRAM = (unsigned char*)stackPage->RAM + stackPage->Size - sizeof(BASin48SP);
-	bool defaultZx48Stack = true;
+	bool defaultZx48Stack = !strcmp(DeviceID, "ZXSPECTRUM48");	// only use "smart" detection stack in 48k device
+	// when it's used in zx128, it ruined for example frost4k snapshot, because SP was $FFxx, and
+	// frost did bank memory without caring about SP (expecting it to be under $6300 start of code)
 	for (unsigned ii = 0; defaultZx48Stack && ii < sizeof(BASin48SP); ++ii) {
 		if (stackRAM[ii] != BASin48SP[ii]) defaultZx48Stack = false;
 	}
