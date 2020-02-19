@@ -1,0 +1,48 @@
+; .ASMZ80 extension to avoid the automated tests, this is manual test of functionality
+; of sj_library.asm functions
+; requires manual config + build + run in emulator/HW to verify results
+
+    OPT --syntax=abfw --zxnext=cspect
+    DEFINE SJ_LIBRARY_USE_Z80N
+
+    INCLUDE "sj_library.asm"
+
+alignMask=8192
+testValue=0
+addValue=alignMask/90 >? 1      ; either mask/90, or at least 1 ( ">?" is "max" operator)
+
+    DEVICE ZXSPECTRUM48
+
+    ORG     $8000
+
+;     break
+    DUP     300
+        ld      hl,testValue
+        ld      de,((testValue+(alignMask-1))&(-alignMask))&0xFFFF
+        alignHl alignMask : call assertHLisDE
+testValue=testValue+addValue
+    EDUP
+testValue=65536-(301*addValue)
+    DUP     300
+        ld      hl,testValue
+        ld      de,((testValue+(alignMask-1))&(-alignMask))&0xFFFF
+        alignHl alignMask : call assertHLisDE
+testValue=testValue+addValue
+    EDUP
+    ld      a,4
+    out     (254),a
+    jr  $
+    .8 nop
+
+assertHLisDE:
+        or      a
+        sbc     hl,de
+        add     hl,de
+        ret     z
+        ld      a,2
+        out     (254),a
+        jr  $
+
+    ASSERT $ < $FE00
+
+    SAVESNA "test_sj_lib.sna", $8000
