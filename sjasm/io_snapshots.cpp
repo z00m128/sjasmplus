@@ -67,28 +67,40 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	snbuf[18] = 0xFF; //ix
 	snbuf[21] = 0x54; //af
 	snbuf[22] = 0x00; //af
-	const CDevicePage* stackPage = Device->GetSlot(Device->SlotsCount-1)->Page;
-	unsigned char* const stackRAM = (unsigned char*)stackPage->RAM + stackPage->Size - sizeof(BASin48SP);
-	bool defaultZx48Stack = !strcmp(DeviceID, "ZXSPECTRUM48");	// only use "smart" detection stack in 48k device
-	// when it's used in zx128, it ruined for example frost4k snapshot, because SP was $FFxx, and
-	// frost did bank memory without caring about SP (expecting it to be under $6300 start of code)
-	for (unsigned ii = 0; defaultZx48Stack && ii < sizeof(BASin48SP); ++ii) {
-		if (stackRAM[ii] != BASin48SP[ii]) defaultZx48Stack = false;
+	// check if default ZX-like stack was modified - if not, it will be used for snapshot
+	bool is48kSnap = !strcmp(DeviceID, "ZXSPECTRUM48");
+	bool defaultStack = true;
+	aint stackAdr = Device->ZxRamTop + 1 - sizeof(ZX_STACK_DATA);
+	for (aint ii = is48kSnap ? -2 : 0; ii < aint(sizeof(ZX_STACK_DATA)); ++ii) {
+		// will check for 48k snap if there is `00 00` ahead of fake stack data
+		const byte cmpValue = (0 <= ii) ? ZX_STACK_DATA[ii] : 0;
+		CDeviceSlot* slot = Device->GetSlot(Device->GetSlotOfA16(stackAdr + ii));
+		CDevicePage* page = Device->GetPage(slot->InitialPage);
+		defaultStack &= (cmpValue == page->RAM[(stackAdr + ii) & (page->Size-1)]);
 	}
-	if (defaultZx48Stack) {
-		snbuf[23] = 0x2D;	//sp (+16 into BASin48SP)
-		snbuf[24] = 0xFF;	//sp
-		stackRAM[16] = start & 0xFF;	// pc into default stack
-		stackRAM[17] = start >> 8;		// pc
+	if (defaultStack) {
+		if (is48kSnap) stackAdr -= 2;
+		snbuf[23] = (stackAdr) & 0xFF;	// SP (may point to injected start address for 48k snap)
+		snbuf[24] = (stackAdr>>8) & 0xFF;
+		if (is48kSnap) {
+			// inject PC under default stack
+			CDeviceSlot* slot = Device->GetSlot(Device->GetSlotOfA16(stackAdr));
+			CDevicePage* page = Device->GetPage(slot->InitialPage);
+			page->RAM[stackAdr & (page->Size-1)] = start & 0xFF;
+			++stackAdr;
+			slot = Device->GetSlot(Device->GetSlotOfA16(stackAdr));
+			page = Device->GetPage(slot->InitialPage);
+			page->RAM[stackAdr & (page->Size-1)] = (start>>8) & 0xFF;
+		}
 	} else {
-		if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
+		if (is48kSnap) {
 			Warning("[SAVESNA] RAM <0x4000-0x4001> will be overriden due to 48k snapshot imperfect format.");
 			snbuf[23] = 0x00; //sp
 			snbuf[24] = 0x40; //sp
 			Device->GetPage(1)->RAM[0] = start & 0xFF;	//pc
 			Device->GetPage(1)->RAM[1] = start >> 8;	//pc
 		} else {
-			snbuf[23] = 0X00; //sp
+			snbuf[23] = 0x00; //sp
 			snbuf[24] = 0x60; //sp
 		}
 	}
@@ -101,7 +113,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 		return 0;
 	}
 
-	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
+	if (is48kSnap) {
 		if ((aint) fwrite(Device->GetPage(1)->RAM, 1, Device->GetPage(1)->Size, ff) != Device->GetPage(1)->Size) {
 			Error("Write error (disk full?)", fname, IF_FIRST);
 			fclose(ff);
@@ -133,11 +145,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 			fclose(ff);
 			return 0;
 		}
-	}
-
-	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
-		// nothing more to do for ZX48
-	} else {
+		// 128k snapshot extra header fields
 		snbuf[27] = char(start & 0x00FF); //pc
 		snbuf[28] = char(start >> 8); //pc
 		snbuf[29] = 0x10 + Device->GetSlot(3)->Page->Number; //7ffd
@@ -147,18 +155,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 			fclose(ff);
 			return 0;
 		}
-	}
-
-	//if (DeviceID) {
-	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
-		/*for (int i = 0; i < 5; i++) {
-			if (fwrite(Device->GetPage(0)->RAM, 1, Device->GetPage(0)->Size, ff) != Device->GetPage(0)->Size) {
-				Error("Write error (disk full?)", fname, CATCHALL);
-				fclose(ff);
-				return 0;
-			}
-		}*/
-	} else {
+		// 128k banks
 		for (aint i = 0; i < 8; i++) {
 			if (i != Device->GetSlot(3)->Page->Number && i != 2 && i != 5) {
 				if ((aint) fwrite(Device->GetPage(i)->RAM, 1, Device->GetPage(i)->Size, ff) != Device->GetPage(i)->Size) {
@@ -169,19 +166,6 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 			}
 		}
 	}
-	//}
-	/* else {
-		char *buf = (char*) calloc(0x14000, sizeof(char));
-		if (buf == NULL) {
-			ErrorOOM();
-		}
-		memset(buf, 0, 0x14000);
-		if (fwrite(buf, 1, 0x14000, ff) != 0x14000) {
-			Error("Write error (disk full?)", fname, CATCHALL);
-			fclose(ff);
-			return 0;
-		}
-	}*/
 
 	if (128*1024 < Device->PagesCount * Device->GetPage(0)->Size) {
 		Warning("Only 128kb will be written to snapshot", fname);

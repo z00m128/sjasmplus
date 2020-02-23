@@ -217,7 +217,7 @@ int TAP_SaveSnapshot(char* fname, unsigned short start) {
 		memcpy(ram + 0x6200, (unsigned char*)Device->GetSlot(3)->Page->RAM, 0x4000);
 
 		// remove basic vars
-		remove_basic_sp(ram + ram_length - sizeof(BASin48SP));
+		remove_basic_sp(ram + ram_length - sizeof(ZX_STACK_DATA));
 
 		detect_vars_changes();
 
@@ -411,13 +411,13 @@ void writecode(unsigned char* block, aint length, unsigned short loadaddr, bool 
 
 void remove_basic_sp(unsigned char* ram) {
 	bool remove = true;
-	for (size_t i=0; i < sizeof(BASin48SP);i++) {
-		if (BASin48SP[i] != ram[i]) {
+	for (size_t i=0; i < sizeof(ZX_STACK_DATA);i++) {
+		if (ZX_STACK_DATA[i] != ram[i]) {
 			remove = false;
 		}
 	}
 	if (remove) {
-		for (size_t i=0; i < sizeof(BASin48SP);i++) {
+		for (size_t i=0; i < sizeof(ZX_STACK_DATA);i++) {
 			ram[i] = 0;
 		}
 	}
@@ -427,20 +427,13 @@ void detect_vars_changes() {
 	unsigned char *psys = (unsigned char*)Device->GetSlot(1)->Page->RAM + 0x1C00;
 
 	bool nobas48 = false;
-	for (size_t i=0; i < sizeof(BASin48Vars);i++) {
-		if (BASin48Vars[i] != psys[i]) {
+	for (size_t i=0; i < sizeof(ZX_SYSVARS_DATA);i++) {
+		if (ZX_SYSVARS_DATA[i] != psys[i]) {
 			nobas48 = true;
 		}
 	}
 
-	bool nosys = false;
-	for (size_t i=0; i < sizeof(ZXSysVars);i++) {
-		if (ZXSysVars[i] != psys[i]) {
-			nosys = true;
-		}
-	}
-
-	if (nosys && nobas48) {
+	if (nobas48) {
 		Warning("[SAVETAP] Tape file will not contains data from 0x5B00 to 0x5E00");
 	}
 }
