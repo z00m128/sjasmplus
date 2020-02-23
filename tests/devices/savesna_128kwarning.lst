@@ -1,0 +1,34 @@
+# file opened: savesna_128kwarning.asm
+ 1    0000              ; check if warning about only-128k save to snapshot is emitted
+ 2    0000
+ 3    0000                  ; no warning for regular zx48 and zx128
+ 4    0000                  DEVICE ZXSPECTRUM48
+ 5    0000                  SAVESNA "zx48.sna", $8000
+ 6    0000                  DEVICE ZXSPECTRUM128
+ 7    0000                  SAVESNA "zx128.sna", $8000
+ 8    0000
+ 9    0000                  ; the larger ZX-like devices should emit warning when SAVESNA is used
+10    0000                  DEVICE ZXSPECTRUM256
+savesna_128kwarning.asm(11): warning: Only 128kb will be written to snapshot: zx256.sna
+11    0000                  SAVESNA "zx256.sna", $8000
+12    0000                  DEVICE ZXSPECTRUM512
+savesna_128kwarning.asm(13): warning: Only 128kb will be written to snapshot: zx512.sna
+13    0000                  SAVESNA "zx512.sna", $8000
+14    0000                  DEVICE ZXSPECTRUM1024
+savesna_128kwarning.asm(15): warning: Only 128kb will be written to snapshot: zx1024.sna
+15    0000                  SAVESNA "zx1024.sna", $8000
+16    0000                  ; not implemented yet (2MiB and 4MiB spectrum-like devices) - errors
+17    0000                  ; (probably going to be added soon, so I'm leaving it here in the test)
+savesna_128kwarning.asm(18): error: [DEVICE] Invalid parameter
+18    0000                  DEVICE ZXSPECTRUM2048
+savesna_128kwarning.asm(19): error: SAVESNA only allowed in real device emulation mode (See DEVICE)
+19    0000                  SAVESNA "zx2048.sna", $8000
+savesna_128kwarning.asm(20): error: [DEVICE] Invalid parameter
+20    0000                  DEVICE ZXSPECTRUM4096
+savesna_128kwarning.asm(21): error: SAVESNA only allowed in real device emulation mode (See DEVICE)
+21    0000                  SAVESNA "zx4096.sna", $8000
+22    0000
+# file closed: savesna_128kwarning.asm
+
+Value    Label
+------ - -----------------------------------------------------------

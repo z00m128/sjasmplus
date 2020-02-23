@@ -183,10 +183,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 		}
 	}*/
 
-	if (!strcmp(DeviceID, "SCORPION256") || 
-		!strcmp(DeviceID, "ATMTURBO512") || 
-		!strcmp(DeviceID, "PENTAGON1024") || 
-		!strcmp(DeviceID, "ATMTURBO1024")) {
+	if (128*1024 < Device->PagesCount * Device->GetPage(0)->Size) {
 		Warning("Only 128kb will be written to snapshot", fname);
 	}
 
