@@ -1,5 +1,5 @@
 /*
-** $Id: lzio.h,v 1.21 2005/05/17 19:49:15 roberto Exp $
+** $Id: lzio.h,v 1.21.1.1 2007/12/27 13:02:25 roberto Exp $
 ** Buffered streams
 ** See Copyright Notice in lua.h
 */
@@ -59,6 +59,7 @@ struct Zio {
   lua_Reader reader;
   void* data;			/* additional data */
   lua_State *L;			/* Lua state (for reader) */
+  int eoz;			/* true if reader has no more data */
 };
 
 
