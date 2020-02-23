@@ -13,9 +13,25 @@
     SAVESNA "zx512.sna", $8000
     DEVICE ZXSPECTRUM1024
     SAVESNA "zx1024.sna", $8000
-    ; not implemented yet (2MiB and 4MiB spectrum-like devices) - errors
-    ; (probably going to be added soon, so I'm leaving it here in the test)
+
+    ; newly added devices, exercise also the new mem-page limits, etc..
     DEVICE ZXSPECTRUM2048
+    PAGE 127    ; good
+    PAGE 128    ; error
     SAVESNA "zx2048.sna", $8000
+    SAVEDEV "m2048_end.bin", 127, 0, 0x4000 ; good
+    SAVEDEV "m2048_end.bin", 127, 0, 0x4001 ; error
+
     DEVICE ZXSPECTRUM4096
+    PAGE 255    ; good
+    PAGE 256    ; error
     SAVESNA "zx4096.sna", $8000
+    SAVEDEV "m4096_end.bin", 255, 0, 0x4000 ; good
+    SAVEDEV "m4096_end.bin", 255, 0, 0x4001 ; error
+
+    DEVICE ZXSPECTRUM8192
+    PAGE 511    ; good
+    PAGE 512    ; error
+    SAVESNA "zx8192.sna", $8000
+    SAVEDEV "m8192_end.bin", 511, 0, 0x4000 ; good
+    SAVEDEV "m8192_end.bin", 511, 0, 0x4001 ; error

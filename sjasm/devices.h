@@ -54,6 +54,10 @@ private:
 
 class CDevice {
 public:
+
+	constexpr static size_t MAX_SLOT_N = 32;
+	constexpr static size_t MAX_PAGE_N = 512;
+
 	// reset will reinitialize checks, "no emit" will do wrap-only (no machine byte emitted)
 	// "emit" will also report error/warning upon boundary, as the machine byte emit is expected
 	enum ECheckPageLevel{ CHECK_RESET, CHECK_NO_EMIT, CHECK_EMIT };
@@ -77,8 +81,8 @@ public:
 	byte* Memory;
 private:
 	int CurrentSlot;
-	CDeviceSlot* Slots[256];
-	CDevicePage* Pages[256];
+	CDeviceSlot* Slots[MAX_SLOT_N];
+	CDevicePage* Pages[MAX_PAGE_N];
 
 	// variables for CheckPage logic
 	int previousSlotI;				// previous machine code write happened into this slot

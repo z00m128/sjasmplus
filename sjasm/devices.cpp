@@ -28,13 +28,17 @@
 
 #include "sjdefs.h"
 
-bool IsZXSpectrumDevice(char *name){
-	if (strcmp(name, "ZXSPECTRUM48") && 
-		strcmp(name, "ZXSPECTRUM128") && 
-		strcmp(name, "ZXSPECTRUM256") && 
-		strcmp(name, "ZXSPECTRUM512") && 
-		strcmp(name, "ZXSPECTRUM1024")) {
-			return false;
+bool IsZXSpectrumDevice(char *name) {
+	if (strcmp(name, "ZXSPECTRUM48") &&
+		strcmp(name, "ZXSPECTRUM128") &&
+		strcmp(name, "ZXSPECTRUM256") &&
+		strcmp(name, "ZXSPECTRUM512") &&
+		strcmp(name, "ZXSPECTRUM1024") &&
+		strcmp(name, "ZXSPECTRUM2048") &&
+		strcmp(name, "ZXSPECTRUM4096") &&
+		strcmp(name, "ZXSPECTRUM8192"))
+	{
+		return false;
 	}
 	return true;
 }
@@ -93,6 +97,21 @@ static void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {		// add new d
 	initZxLikeDevice(*dev, 0x4000, 64, initialPagesZx128);
 }
 
+static void DeviceZXSpectrum2048(CDevice **dev, CDevice *parent) {		// add new device
+	*dev = new CDevice("ZXSPECTRUM2048", parent);
+	initZxLikeDevice(*dev, 0x4000, 128, initialPagesZx128);
+}
+
+static void DeviceZXSpectrum4096(CDevice **dev, CDevice *parent) {		// add new device
+	*dev = new CDevice("ZXSPECTRUM4096", parent);
+	initZxLikeDevice(*dev, 0x4000, 256, initialPagesZx128);
+}
+
+static void DeviceZXSpectrum8192(CDevice **dev, CDevice *parent) {		// add new device
+	*dev = new CDevice("ZXSPECTRUM8192", parent);
+	initZxLikeDevice(*dev, 0x4000, 512, initialPagesZx128);
+}
+
 static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
 	if (Options::IsI8080) Error("Can't use ZXN device while in i8080 assembling mode.", line, FATAL);
 	if (Options::IsLR35902) Error("Can't use ZXN device while in Sharp LR35902 assembling mode.", line, FATAL);
@@ -136,6 +155,12 @@ int SetDevice(char *id) {
 				DeviceZXSpectrum512(dev, parent);
 			} else if (cmphstr(id, "zxspectrum1024")) {
 				DeviceZXSpectrum1024(dev, parent);
+			} else if (cmphstr(id, "zxspectrum2048")) {
+				DeviceZXSpectrum2048(dev, parent);
+			} else if (cmphstr(id, "zxspectrum4096")) {
+				DeviceZXSpectrum4096(dev, parent);
+			} else if (cmphstr(id, "zxspectrum8192")) {
+				DeviceZXSpectrum8192(dev, parent);
 			} else if (cmphstr(id, "zxspectrumnext")) {
 				DeviceZxSpectrumNext(dev, parent);
 			} else {
@@ -175,10 +200,12 @@ CDevice::~CDevice() {
 }
 
 void CDevice::AddSlot(int32_t adr, int32_t size) {
+	if (MAX_SLOT_N == SlotsCount) ErrorInt("Can't add more slots, already at max", MAX_SLOT_N, FATAL);
 	Slots[SlotsCount++] = new CDeviceSlot(adr, size);
 }
 
 void CDevice::AddPage(byte* memory, int32_t size) {
+	if (MAX_PAGE_N == PagesCount) ErrorInt("Can't add more pages, already at max", MAX_PAGE_N, FATAL);
 	Pages[PagesCount] = new CDevicePage(memory, size, PagesCount);
 	PagesCount++;
 }

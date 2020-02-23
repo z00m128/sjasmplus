@@ -17,17 +17,38 @@ savesna_128kwarning.asm(13): warning: Only 128kb will be written to snapshot: zx
 14    0000                  DEVICE ZXSPECTRUM1024
 savesna_128kwarning.asm(15): warning: Only 128kb will be written to snapshot: zx1024.sna
 15    0000                  SAVESNA "zx1024.sna", $8000
-16    0000                  ; not implemented yet (2MiB and 4MiB spectrum-like devices) - errors
-17    0000                  ; (probably going to be added soon, so I'm leaving it here in the test)
-savesna_128kwarning.asm(18): error: [DEVICE] Invalid parameter
+16    0000
+17    0000                  ; newly added devices, exercise also the new mem-page limits, etc..
 18    0000                  DEVICE ZXSPECTRUM2048
-savesna_128kwarning.asm(19): error: SAVESNA only allowed in real device emulation mode (See DEVICE)
-19    0000                  SAVESNA "zx2048.sna", $8000
-savesna_128kwarning.asm(20): error: [DEVICE] Invalid parameter
-20    0000                  DEVICE ZXSPECTRUM4096
-savesna_128kwarning.asm(21): error: SAVESNA only allowed in real device emulation mode (See DEVICE)
-21    0000                  SAVESNA "zx4096.sna", $8000
-22    0000
+19    0000                  PAGE 127    ; good
+savesna_128kwarning.asm(20): error: [PAGE] Page number must be in range 0..127: 128
+20    0000                  PAGE 128    ; error
+savesna_128kwarning.asm(21): warning: Only 128kb will be written to snapshot: zx2048.sna
+21    0000                  SAVESNA "zx2048.sna", $8000
+22    0000                  SAVEDEV "m2048_end.bin", 127, 0, 0x4000 ; good
+savesna_128kwarning.asm(23): error: [SAVEDEV] invalid end address (bad length?): 2097153
+23    0000                  SAVEDEV "m2048_end.bin", 127, 0, 0x4001 ; error
+24    0000
+25    0000                  DEVICE ZXSPECTRUM4096
+26    0000                  PAGE 255    ; good
+savesna_128kwarning.asm(27): error: [PAGE] Page number must be in range 0..255: 256
+27    0000                  PAGE 256    ; error
+savesna_128kwarning.asm(28): warning: Only 128kb will be written to snapshot: zx4096.sna
+28    0000                  SAVESNA "zx4096.sna", $8000
+29    0000                  SAVEDEV "m4096_end.bin", 255, 0, 0x4000 ; good
+savesna_128kwarning.asm(30): error: [SAVEDEV] invalid end address (bad length?): 4194305
+30    0000                  SAVEDEV "m4096_end.bin", 255, 0, 0x4001 ; error
+31    0000
+32    0000                  DEVICE ZXSPECTRUM8192
+33    0000                  PAGE 511    ; good
+savesna_128kwarning.asm(34): error: [PAGE] Page number must be in range 0..511: 512
+34    0000                  PAGE 512    ; error
+savesna_128kwarning.asm(35): warning: Only 128kb will be written to snapshot: zx8192.sna
+35    0000                  SAVESNA "zx8192.sna", $8000
+36    0000                  SAVEDEV "m8192_end.bin", 511, 0, 0x4000 ; good
+savesna_128kwarning.asm(37): error: [SAVEDEV] invalid end address (bad length?): 8388609
+37    0000                  SAVEDEV "m8192_end.bin", 511, 0, 0x4001 ; error
+38    0000
 # file closed: savesna_128kwarning.asm
 
 Value    Label
