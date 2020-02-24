@@ -59,8 +59,8 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	snbuf[10] = 0x2D; //hl
 	snbuf[11] = 0xDC; //de
 	snbuf[12] = 0x5C; //de
-	snbuf[13] = 0x00; //bc
-	snbuf[14] = 0x80; //bc
+	snbuf[13] = start & 0xFF;		//bc
+	snbuf[14] = (start>>8) & 0xFF;	//bc
 	snbuf[15] = 0x3a; //iy
 	snbuf[16] = 0x5c; //iy
 	snbuf[17] = 0x3C; //ix
