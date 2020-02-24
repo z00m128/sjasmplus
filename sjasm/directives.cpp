@@ -2028,8 +2028,17 @@ void dirDEVICE() {
 	char* id = GetID(lp);
 
 	if (id) {
-		if (!SetDevice(id)) {
-			Error("[DEVICE] Invalid parameter", NULL, IF_FIRST);
+		aint ramtop = 0;
+		if (anyComma(lp)) {
+			if (!ParseExpressionNoSyntaxError(lp, ramtop)) {
+				Error("[DEVICE] Syntax error", bp); return;
+			}
+			if (ramtop < 0x5D00 || 0xFFFF < ramtop) {
+			  	ErrorInt("[DEVICE] valid range for RAMTOP is $5D00..$FFFF", ramtop); return;
+			}
+		}
+		if (!SetDevice(id, ramtop)) {
+			Error("[DEVICE] Invalid parameter", id, IF_FIRST);
 		} else if (IsSldExportActive()) {
 			// SLD tracing data are being exported, export the device data
 			int pageSize = Device->GetCurrentSlot()->Size;

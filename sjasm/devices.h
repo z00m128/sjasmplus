@@ -27,7 +27,7 @@
 // devices.h
 
 bool IsZXSpectrumDevice(char *name);
-int SetDevice(char *id);
+int SetDevice(char *id, const aint ramtop = 0);
 char* GetDeviceName();
 
 class CDevicePage {

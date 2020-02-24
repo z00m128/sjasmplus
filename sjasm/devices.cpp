@@ -60,12 +60,14 @@ static void initRegularSlotDevice(CDevice* const device, const int32_t slotSize,
 	device->SetSlot(device->SlotsCount - 1);
 }
 
-static void initZxLikeDevice(CDevice* const device, int32_t slotSize, int pageCount, const int* const initialPages) {
-	device->ZxRamTop = ZX_RAMTOP_DEFAULT;		//FIXME make it argument
+static void initZxLikeDevice(
+	CDevice* const device, int32_t slotSize, int pageCount, const int* const initialPages, aint ramtop)
+{
 	initRegularSlotDevice(device, slotSize, 0x10000/slotSize, pageCount, initialPages);
+	device->ZxRamTop = (0x5D00 <= ramtop && ramtop <= 0xFFFF) ? ramtop : ZX_RAMTOP_DEFAULT;
 
 	// set memory to state like if (for snapshot saving):
-	// CLEAR ZxRamTop (#5D00 default) : LOAD "bin" CODE : ... USR start_adr
+		// CLEAR ZxRamTop (0x5D5B default) : LOAD "bin" CODE : ... USR start_adr
 	aint adr;
 	// ULA attributes: INK 0 : PAPER 7 : FLASH 0 : BRIGTH 0
 	for (adr = 0x5800; adr < 0x5B00; ++adr) device->Poke(adr, 7*8);
@@ -89,50 +91,51 @@ static void initZxLikeDevice(CDevice* const device, int32_t slotSize, int pageCo
 	for (byte value : ZX_STACK_DATA) device->Poke(adr++, value);
 }
 
-static void DeviceZXSpectrum48(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum48(CDevice **dev, CDevice *parent, aint ramtop) {
 	*dev = new CDevice("ZXSPECTRUM48", parent);
 	const int initialPages[] = {0, 1, 2, 3};
-	initZxLikeDevice(*dev, 0x4000, 4, initialPages);
+	initZxLikeDevice(*dev, 0x4000, 4, initialPages, ramtop);
 }
 
 const static int initialPagesZx128[] = {7, 5, 2, 0};
 
-static void DeviceZXSpectrum128(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum128(CDevice **dev, CDevice *parent, aint ramtop) {
 	*dev = new CDevice("ZXSPECTRUM128", parent);
-	initZxLikeDevice(*dev, 0x4000, 8, initialPagesZx128);
+	initZxLikeDevice(*dev, 0x4000, 8, initialPagesZx128, ramtop);
 }
 
-static void DeviceZXSpectrum256(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum256(CDevice **dev, CDevice *parent, aint ramtop) {
 	*dev = new CDevice("ZXSPECTRUM256", parent);
-	initZxLikeDevice(*dev, 0x4000, 16, initialPagesZx128);
+	initZxLikeDevice(*dev, 0x4000, 16, initialPagesZx128, ramtop);
 }
 
-static void DeviceZXSpectrum512(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum512(CDevice **dev, CDevice *parent, aint ramtop) {
 	*dev = new CDevice("ZXSPECTRUM512", parent);
-	initZxLikeDevice(*dev, 0x4000, 32, initialPagesZx128);
+	initZxLikeDevice(*dev, 0x4000, 32, initialPagesZx128, ramtop);
 }
 
-static void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum1024(CDevice **dev, CDevice *parent, aint ramtop) {
 	*dev = new CDevice("ZXSPECTRUM1024", parent);
-	initZxLikeDevice(*dev, 0x4000, 64, initialPagesZx128);
+	initZxLikeDevice(*dev, 0x4000, 64, initialPagesZx128, ramtop);
 }
 
-static void DeviceZXSpectrum2048(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum2048(CDevice **dev, CDevice *parent, aint ramtop) {
 	*dev = new CDevice("ZXSPECTRUM2048", parent);
-	initZxLikeDevice(*dev, 0x4000, 128, initialPagesZx128);
+	initZxLikeDevice(*dev, 0x4000, 128, initialPagesZx128, ramtop);
 }
 
-static void DeviceZXSpectrum4096(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum4096(CDevice **dev, CDevice *parent, aint ramtop) {
 	*dev = new CDevice("ZXSPECTRUM4096", parent);
-	initZxLikeDevice(*dev, 0x4000, 256, initialPagesZx128);
+	initZxLikeDevice(*dev, 0x4000, 256, initialPagesZx128, ramtop);
 }
 
-static void DeviceZXSpectrum8192(CDevice **dev, CDevice *parent) {		// add new device
+static void DeviceZXSpectrum8192(CDevice **dev, CDevice *parent, aint ramtop) {
 	*dev = new CDevice("ZXSPECTRUM8192", parent);
-	initZxLikeDevice(*dev, 0x4000, 512, initialPagesZx128);
+	initZxLikeDevice(*dev, 0x4000, 512, initialPagesZx128, ramtop);
 }
 
-static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
+static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
+	if (ramtop) Warning("ZXN device doesn't init memory in any way (RAMTOP is ignored)");
 	if (Options::IsI8080) Error("Can't use ZXN device while in i8080 assembling mode.", line, FATAL);
 	if (Options::IsLR35902) Error("Can't use ZXN device while in Sharp LR35902 assembling mode.", line, FATAL);
 	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
@@ -146,43 +149,42 @@ static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent) {
 	}
 }
 
-int SetDevice(char *id) {
+int SetDevice(char *id, const aint ramtop) {
 	CDevice** dev;
-	CDevice* parent;
+	CDevice* parent = nullptr;
 
 	if (!id || cmphstr(id, "none")) {
 		DeviceID = 0; return true;
 	}
 
-	if (!DeviceID || strcmp(DeviceID, id)) {
+	if (!DeviceID || strcmp(DeviceID, id)) {	// different device than current, change to it
 		DeviceID = 0;
 		dev = &Devices;
-		parent = 0;
 		// search for device
 		while (*dev) {
 			parent = *dev;
 			if (!strcmp(parent->ID, id)) break;
 			dev = &(parent->Next);
 		}
-		if (NULL == *dev) {		// device not found
+		if (nullptr == (*dev)) {	// device not found
 			if (cmphstr(id, "zxspectrum48")) {			// must be lowercase to catch both cases
-				DeviceZXSpectrum48(dev, parent);
+				DeviceZXSpectrum48(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrum128")) {
-				DeviceZXSpectrum128(dev, parent);
+				DeviceZXSpectrum128(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrum256")) {
-				DeviceZXSpectrum256(dev, parent);
+				DeviceZXSpectrum256(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrum512")) {
-				DeviceZXSpectrum512(dev, parent);
+				DeviceZXSpectrum512(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrum1024")) {
-				DeviceZXSpectrum1024(dev, parent);
+				DeviceZXSpectrum1024(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrum2048")) {
-				DeviceZXSpectrum2048(dev, parent);
+				DeviceZXSpectrum2048(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrum4096")) {
-				DeviceZXSpectrum4096(dev, parent);
+				DeviceZXSpectrum4096(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrum8192")) {
-				DeviceZXSpectrum8192(dev, parent);
+				DeviceZXSpectrum8192(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrumnext")) {
-				DeviceZxSpectrumNext(dev, parent);
+				DeviceZxSpectrumNext(dev, parent, ramtop);
 			} else {
 				return false;
 			}
@@ -191,6 +193,9 @@ int SetDevice(char *id) {
 		Device = (*dev);
 		DeviceID = Device->ID;
 		Device->CheckPage(CDevice::CHECK_RESET);
+	}
+	if (ramtop && Device->ZxRamTop && ramtop != Device->ZxRamTop) {
+		Warning("[DEVICE] this device was already opened with different RAMTOP value");
 	}
 	return true;
 }

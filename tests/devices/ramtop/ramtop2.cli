@@ -1,0 +1,10 @@
+#decompress the BIN files for result validation
+gunzip ramtop2/rt5D00.bin.OK.gz
+gunzip ramtop2/rt8000.bin.OK.gz
+gunzip ramtop2/rtFFFF.bin.OK.gz
+# use normal way of assembling and diff the binary results
+$MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm" && \
+diff ramtop2/rt5D00.bin.OK rt5D00.bin && \
+diff ramtop2/rt8000.bin.OK rt8000.bin && \
+diff ramtop2/rtFFFF.bin.OK rtFFFF.bin
+last_result=$?
