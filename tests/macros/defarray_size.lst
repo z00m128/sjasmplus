@@ -1,0 +1,21 @@
+# file opened: defarray_size.asm
+ 1    0000                  DEFARRAY    myarray 'A', 'B', 'C'
+ 2    0000 03 41 43         DB 3, 'A', 'C'
+ 3    0003                  DEFARRAY+   myarray 'D', 'E', 'F'
+ 4    0003 06 44 46         DB 6, 'D', 'F'
+ 5    0006
+ 6    0006              iii = 0
+ 7    0006                  DUP 6
+ 8    0006 41          >iii = iii + 1   DB  'A'    ; substitution happens first (before label++ parsing)
+ 8    0007 42          >iii = iii + 1   DB  'B'    ; substitution happens first (before label++ parsing)
+ 8    0008 43          >iii = iii + 1   DB  'C'    ; substitution happens first (before label++ parsing)
+ 8    0009 44          >iii = iii + 1   DB  'D'    ; substitution happens first (before label++ parsing)
+ 8    000A 45          >iii = iii + 1   DB  'E'    ; substitution happens first (before label++ parsing)
+ 8    000B 46          >iii = iii + 1   DB  'F'    ; substitution happens first (before label++ parsing)
+ 9    000C                  EDUP
+10    000C
+# file closed: defarray_size.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0006   iii
