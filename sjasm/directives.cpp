@@ -345,7 +345,7 @@ void dirMMU() {
 		SkipToEol(lp);
 		return;
 	}
-	aint slot1, slot2, pageN = -1;
+	aint slot1, slot2, pageN = -1, address = -1;
 	CDeviceSlot::ESlotOptions slotOpt = CDeviceSlot::O_NONE;
 	if (!ParseExpression(lp, slot1)) {
 		Error("[MMU] First slot number parsing failed", bp, SUPPRESS);
@@ -378,6 +378,14 @@ void dirMMU() {
 		Error("[MMU] Page number parsing failed", bp, SUPPRESS);
 		return;
 	}
+	if (comma(lp)) {
+		if (!ParseExpressionNoSyntaxError(lp, address)) {
+			Error("[MMU] address parsing failed", bp, SUPPRESS);
+			return;
+		}
+		check16(address);
+		address &= 0xFFFF;
+	}
 	// validate argument values
 	if (slot1 < 0 || slot2 < slot1 || Device->SlotsCount <= slot2) {
 		char buf[LINEMAX];
@@ -400,6 +408,13 @@ void dirMMU() {
 	}
 	// wrap output addresses back into 64ki address space, it's essential for MMU functionality
 	if (PseudoORG) adrdisp &= 0xFFFF; else CurAddress &= 0xFFFF;
+	// set explicit ORG address if the third argument was provided
+	if (0 <= address) {
+		CurAddress = address;
+		if (PseudoORG && warningNotSuppressed()) {
+			Warning("[MMU] ORG address inside displaced block");
+		}
+	}
 	Device->CheckPage(CDevice::CHECK_RESET);
 }
 
