@@ -28,6 +28,13 @@
 
 #include "sjdefs.h"
 
+// report error and close the file
+static int writeError(char* fname, FILE* & fileToClose) {
+	Error("Write error (disk full?)", fname, IF_FIRST);
+	fclose(fileToClose);
+	return 0;
+}
+
 int SaveSNA_ZX(char* fname, unsigned short start) {
 	unsigned char snbuf[31];
 
@@ -108,42 +115,28 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	snbuf[26] = 7; //border 7
 
 	if (fwrite(snbuf, 1, sizeof(snbuf) - 4, ff) != sizeof(snbuf) - 4) {
-		Error("Write error (disk full?)", fname, IF_FIRST);
-		fclose(ff);
-		return 0;
+		return writeError(fname, ff);
 	}
 
 	if (is48kSnap) {
 		if ((aint) fwrite(Device->GetPage(1)->RAM, 1, Device->GetPage(1)->Size, ff) != Device->GetPage(1)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		if ((aint) fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		if ((aint) fwrite(Device->GetPage(3)->RAM, 1, Device->GetPage(3)->Size, ff) != Device->GetPage(3)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 	} else {
 		if ((aint) fwrite(Device->GetPage(5)->RAM, 1, Device->GetPage(5)->Size, ff) != Device->GetPage(5)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		if ((aint) fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		if ((aint) fwrite(Device->GetPage(Device->GetSlot(3)->Page->Number)->RAM, 1, Device->GetPage(0)->Size, ff) != Device->GetPage(0)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		// 128k snapshot extra header fields
 		snbuf[27] = char(start & 0x00FF); //pc
@@ -151,17 +144,13 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 		snbuf[29] = 0x10 + Device->GetSlot(3)->Page->Number; //7ffd
 		snbuf[30] = 0; //tr-dos
 		if (fwrite(snbuf + 27, 1, 4, ff) != 4) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		// 128k banks
 		for (aint i = 0; i < 8; i++) {
 			if (i != Device->GetSlot(3)->Page->Number && i != 2 && i != 5) {
 				if ((aint) fwrite(Device->GetPage(i)->RAM, 1, Device->GetPage(i)->Size, ff) != Device->GetPage(i)->Size) {
-					Error("Write error (disk full?)", fname, IF_FIRST);
-					fclose(ff);
-					return 0;
+					return writeError(fname, ff);
 				}
 			}
 		}
