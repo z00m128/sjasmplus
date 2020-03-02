@@ -192,6 +192,9 @@
               <synopsis>- added <link linkend="po_bplist">`BPLIST`</link> and <link linkend="po_setbp">`SETBP`</link> to export breakpoints info from asm for Unreal and ZEsarUX emulators
 - added ZX-like <link linkend="po_device">devices</link> with 2/4/8 MiB of virtual memory
 - the fake-sysvars/state of ZXSPECTRUM48/128/... devices reworked, moving stack down by default
+- <link linkend="po_defarray">`DEFARRAY`</link> has new operator `[#]` to retrieve current size of array.
+- <link linkend="po_mmu">MMU</link> has new optional third argument to set also address (like ORG)
+- internal Lua updated to 5.1.5 (last official 5.1 version), STDIN can be read multiple times
 </synopsis>
             </listitem>
           </varlistentry>
@@ -375,7 +378,7 @@
   --fullpath               Show full path to error file
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
-  -                        Reads STDIN as source (no other sourcefile allowed)
+  -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
@@ -1472,12 +1475,12 @@ END_OF_PROGRAM</programlisting></para>
             <term><anchor id="po_defarray" />DEFARRAY &lt;id&gt; &lt;replacements&gt;</term>
 
             <listitem>
-              <para>Array of DEFINEs<example>
+				<para>Array of DEFINEs. Use <code>id[#]</code> to retrieve current size of array.<example>
                   <title>docs_examples/po_defarray.asm</title>
 
                   <para><programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
 CNT DEFL 0 ;or CNT=0
-    DUP 6
+    DUP myarray[#]      ; 6
     DISPLAY myarray[CNT]
 CNT DEFL CNT+1 ;or CNT=CNT+1
     EDUP</programlisting></para>
@@ -2148,7 +2151,7 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_mmu" />MMU &lt;first slot number&gt; [&lt;last slot number&gt;|&lt;single slot option&gt;], &lt;page number&gt;</term>
+            <term><anchor id="po_mmu" />MMU &lt;first slot number&gt; [&lt;last slot number&gt;|&lt;single slot option&gt;], &lt;page number&gt;[,&lt;address&gt;]</term>
 
             <listitem>
               <para>Maps memory page(s) to slot(s), similar to SLOT + PAGE combination, but allows
@@ -2157,6 +2160,9 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
               functionality. The slot behaviour will stay set in the current DEVICE until reset
               by another MMU specifying same slot (even as part of range, that will clear the option
               to "default").</para>
+
+		  <para>The optional third argument is address for <link linkend="po_org">ORG</link>
+			  functionality.</para>
 
               <para>Single slot option (default state is: no error/warning and no wrap = nothing special):
                 <synopsis>e = error on writing beyond last byte of slot
@@ -3927,7 +3933,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 		  
 		  <varlistentry>
 			  <term><anchor id="nex_open" />
-				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank 0..111&gt;[,&lt;fileVersion 2..3&gt;]]]]
+				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank16k 0..111&gt;[,&lt;fileVersion 2..3&gt;]]]]
 			  </term>
 			  <listitem>
 				  <para>
@@ -4259,7 +4265,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 
 		  <varlistentry>
 			  <term><anchor id="nex_bank" />
-				  SAVENEX BANK &lt;bank 0..111&gt;[,...]
+				  SAVENEX BANK &lt;bank16k 0..111&gt;[,...]
 			  </term>
 			  <listitem>
 				  <para>
@@ -4272,7 +4278,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 		  
 		  <varlistentry>
 			  <term><anchor id="nex_auto" />
-				  SAVENEX AUTO [&lt;fromBank 0..111&gt;[,&lt;toBank 0..111&gt;]]
+				  SAVENEX AUTO [&lt;fromBank16k 0..111&gt;[,&lt;toBank16k 0..111&gt;]]
 			  </term>
 			  <listitem>
 				  <para>
