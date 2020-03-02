@@ -1,0 +1,130 @@
+# file opened: stdinWithAsm.asm
+ 1    0000              ; this source will be assembled twice, once coming from STDIN, second time as regular file
+ 2    0000              ; and each time it will also include itself as include file (so 6x times assembled)
+ 3    0000
+ 4    0000                  IFNDEF  __ALREADY_INITIALIZED__
+ 5    0000                      DEFINE __ALREADY_INITIALIZED__
+ 6    0000                      OUTPUT "stdinWithAsm.bin"
+ 7    0000              x = 0
+ 8    0000                  ENDIF
+ 9    0000
+10    0000                  IFNDEF __INCLUDED__
+11    0000                      DEFINE __INCLUDED__
+12    0000                      INCLUDE "stdinWithAsm.asm"
+# file opened: stdinWithAsm.asm
+ 1+   0000              ; this source will be assembled twice, once coming from STDIN, second time as regular file
+ 2+   0000              ; and each time it will also include itself as include file (so 6x times assembled)
+ 3+   0000
+ 4+   0000                  IFNDEF  __ALREADY_INITIALIZED__
+ 5+   0000 ~                    DEFINE __ALREADY_INITIALIZED__
+ 6+   0000 ~                    OUTPUT "stdinWithAsm.bin"
+ 7+   0000 ~            x = 0
+ 8+   0000                  ENDIF
+ 9+   0000
+10+   0000                  IFNDEF __INCLUDED__
+11+   0000 ~                    DEFINE __INCLUDED__
+12+   0000 ~                    INCLUDE "stdinWithAsm.asm"
+13+   0000 ~                    UNDEFINE __INCLUDED__
+14+   0000                  ENDIF
+15+   0000
+16+   0000              x = x+1
+17+   0000
+18+   0000 01               DB x
+19+   0001
+# file closed: stdinWithAsm.asm
+13    0001                      UNDEFINE __INCLUDED__
+14    0001                  ENDIF
+15    0001
+16    0001              x = x+1
+17    0001
+18    0001 02               DB x
+19    0002
+# file closed: stdinWithAsm.asm
+# file opened: console_input
+ 1    0002              ; this source will be assembled twice, once coming from STDIN, second time as regular file
+ 2    0002              ; and each time it will also include itself as include file (so 6x times assembled)
+ 3    0002
+ 4    0002                  IFNDEF  __ALREADY_INITIALIZED__
+ 5    0002 ~                    DEFINE __ALREADY_INITIALIZED__
+ 6    0002 ~                    OUTPUT "stdinWithAsm.bin"
+ 7    0002 ~            x = 0
+ 8    0002                  ENDIF
+ 9    0002
+10    0002                  IFNDEF __INCLUDED__
+11    0002                      DEFINE __INCLUDED__
+12    0002                      INCLUDE "stdinWithAsm.asm"
+# file opened: stdinWithAsm.asm
+ 1+   0002              ; this source will be assembled twice, once coming from STDIN, second time as regular file
+ 2+   0002              ; and each time it will also include itself as include file (so 6x times assembled)
+ 3+   0002
+ 4+   0002                  IFNDEF  __ALREADY_INITIALIZED__
+ 5+   0002 ~                    DEFINE __ALREADY_INITIALIZED__
+ 6+   0002 ~                    OUTPUT "stdinWithAsm.bin"
+ 7+   0002 ~            x = 0
+ 8+   0002                  ENDIF
+ 9+   0002
+10+   0002                  IFNDEF __INCLUDED__
+11+   0002 ~                    DEFINE __INCLUDED__
+12+   0002 ~                    INCLUDE "stdinWithAsm.asm"
+13+   0002 ~                    UNDEFINE __INCLUDED__
+14+   0002                  ENDIF
+15+   0002
+16+   0002              x = x+1
+17+   0002
+18+   0002 03               DB x
+19+   0003
+# file closed: stdinWithAsm.asm
+13    0003                      UNDEFINE __INCLUDED__
+14    0003                  ENDIF
+15    0003
+16    0003              x = x+1
+17    0003
+18    0003 04               DB x
+19    0004
+# file closed: console_input
+# file opened: stdinWithAsm.asm
+ 1    0004              ; this source will be assembled twice, once coming from STDIN, second time as regular file
+ 2    0004              ; and each time it will also include itself as include file (so 6x times assembled)
+ 3    0004
+ 4    0004                  IFNDEF  __ALREADY_INITIALIZED__
+ 5    0004 ~                    DEFINE __ALREADY_INITIALIZED__
+ 6    0004 ~                    OUTPUT "stdinWithAsm.bin"
+ 7    0004 ~            x = 0
+ 8    0004                  ENDIF
+ 9    0004
+10    0004                  IFNDEF __INCLUDED__
+11    0004                      DEFINE __INCLUDED__
+12    0004                      INCLUDE "stdinWithAsm.asm"
+# file opened: stdinWithAsm.asm
+ 1+   0004              ; this source will be assembled twice, once coming from STDIN, second time as regular file
+ 2+   0004              ; and each time it will also include itself as include file (so 6x times assembled)
+ 3+   0004
+ 4+   0004                  IFNDEF  __ALREADY_INITIALIZED__
+ 5+   0004 ~                    DEFINE __ALREADY_INITIALIZED__
+ 6+   0004 ~                    OUTPUT "stdinWithAsm.bin"
+ 7+   0004 ~            x = 0
+ 8+   0004                  ENDIF
+ 9+   0004
+10+   0004                  IFNDEF __INCLUDED__
+11+   0004 ~                    DEFINE __INCLUDED__
+12+   0004 ~                    INCLUDE "stdinWithAsm.asm"
+13+   0004 ~                    UNDEFINE __INCLUDED__
+14+   0004                  ENDIF
+15+   0004
+16+   0004              x = x+1
+17+   0004
+18+   0004 05               DB x
+19+   0005
+# file closed: stdinWithAsm.asm
+13    0005                      UNDEFINE __INCLUDED__
+14    0005                  ENDIF
+15    0005
+16    0005              x = x+1
+17    0005
+18    0005 06               DB x
+19    0006
+# file closed: stdinWithAsm.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0006   x

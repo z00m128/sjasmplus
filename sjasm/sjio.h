@@ -51,6 +51,7 @@ extern FILE* FP_Input;
 
 char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0);
 const char* FilenameBasePos(const char* fullname);
+void ConstructDefaultFilename(char* dest, size_t dest_size, const char* ext, bool checkIfDestIsEmpty = true);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void NewDest(char* newfilename, int mode = OUTPUT_TRUNCATE);
 int FileExists(char* filename);
@@ -67,7 +68,7 @@ void EmitWord(int word);
 void EmitBytes(const int* bytes);
 void EmitWords(int* words);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
-void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false);
+void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false, stdin_log_t* fStdinLog = nullptr);
 void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent);
 void Close();
 void OpenList();

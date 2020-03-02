@@ -67,7 +67,7 @@ void PrintHelp() {
 	_COUT "  --fullpath               Show full path to error file" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
-	_COUT "  -                        Reads STDIN as source (no other sourcefile allowed)" _ENDL;
+	_COUT "  -                        Reads STDIN as source (even in between regular files)" _ENDL;
 	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
@@ -101,7 +101,6 @@ namespace Options {
 	bool ShowVersion = false;
 	bool NoDestinationFile = true;		// no *.out file by default
 	SSyntax syx, systemSyntax;
-	bool SourceStdIn = false;
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
 	bool IsLongPtr = false;
@@ -169,10 +168,30 @@ const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either f
 char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2], * bp;
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
-char SourceFNames[128][MAX_PATH];
-static int SourceFNamesCount = 0;
-std::vector<std::string> openedFileNames(256);
-std::vector<char> stdin_log;
+SSource::SSource(SSource && src) {	// move constructor, "pick" the stdin pointer
+	memcpy(fname, src.fname, MAX_PATH);
+	stdin_log = src.stdin_log;
+	src.fname[0] = 0;
+	src.stdin_log = nullptr;
+}
+
+SSource::SSource(const char* newfname) : stdin_log(nullptr) {
+	STRNCPY(fname, MAX_PATH, newfname, MAX_PATH-1);
+	fname[MAX_PATH-1] = 0;
+}
+
+SSource::SSource(int) {
+	fname[0] = 0;
+	stdin_log = new stdin_log_t();
+	stdin_log->reserve(50*1024);
+}
+
+SSource::~SSource() {
+	if (stdin_log) delete stdin_log;
+}
+
+std::vector<SSource> sourceFiles;
+std::vector<std::string> openedFileNames;
 
 int ConvertEncoding = ENCWIN;
 
@@ -471,8 +490,8 @@ namespace Options {
 						_CERR "No parameters found in " _CMDL arg _ENDL;
 					}
 				} else if (!doubleDash && 0 == opt[0]) {
-					SourceStdIn = true;		// only single "-" was on command line = source STDIN
-					stdin_log.reserve(100000);	// reserve 100k bytes for a start
+					// only single "-" was on command line = source STDIN
+					sourceFiles.push_back(SSource(1));		// special constructor for stdin input
 				} else {
 					_CERR "Unrecognized option: " _CMDL arg _ENDL;
 				}
@@ -534,8 +553,10 @@ int main(int argc, char **argv) {
 #endif
 	char buf[MAX_PATH];
 	int base_encoding;
-	char* p;
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
+
+	sourceFiles.reserve(32);
+	openedFileNames.reserve(64);
 
 	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
 
@@ -575,8 +596,8 @@ int main(int argc, char **argv) {
 		int i = 0;
 		while (parsedOptsArray[i]) {
 			optParser.GetOptions(parsedOptsArray, i);
-			if (!parsedOptsArray[i] || 128 <= SourceFNamesCount) break;
-			STRCPY(SourceFNames[SourceFNamesCount++], MAX_PATH-32, parsedOptsArray[i++]);
+			if (!parsedOptsArray[i]) break;
+			sourceFiles.push_back(SSource(parsedOptsArray[i++]));
 		}
 	}
 
@@ -584,8 +605,8 @@ int main(int argc, char **argv) {
 	if (argc > 1) {
 		while (argv[i]) {
 			optParser.GetOptions(argv, i);
-			if (!argv[i] || 128 <= SourceFNamesCount) break;
-			STRCPY(SourceFNames[SourceFNamesCount++], MAX_PATH-32, argv[i++]);
+			if (!argv[i]) break;
+			sourceFiles.push_back(SSource(argv[i++]));
 		}
 		if (Options::IsDefaultListingName && Options::ListingFName[0]) {
 			Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
@@ -615,7 +636,7 @@ int main(int argc, char **argv) {
 		}
 		// otherwise the full logo was already printed
 		// now check if there were some sources to assemble, if NOT, exit with "OK"!
-		if (!SourceFNames[0][0] && !Options::SourceStdIn) exit(0);
+		if (0 == sourceFiles.size()) exit(0);
 	}
 
 #ifdef USE_LUA
@@ -631,37 +652,15 @@ int main(int argc, char **argv) {
 #endif //USE_LUA
 
 	// exit with error if no input file were specified
-	if (!SourceFNames[0][0] && !Options::SourceStdIn) {
+	if (0 == sourceFiles.size()) {
 		if (Options::OutputVerbosity <= OV_ERROR) {
 			_CERR "No inputfile(s)" _ENDL;
 		}
 		exit(1);
 	}
-	// verify for STDIN input there is no other file specified + create empty name signaling STDIN
-	if (Options::SourceStdIn) {
-		if (0 < SourceFNamesCount) {	// list of explicit input files must be empty with `-` option
-			if (Options::OutputVerbosity <= OV_ERROR) {
-				_CERR "Don't add input file when STDIN option is specified." _ENDL;
-			}
-			exit(1);
-		}
-		// stdin itself has empty filename
-		SourceFNames[SourceFNamesCount++][0] = 0;
-		// but fake output name if not selected explicitly
-		if (!Options::DestinationFName[0]) STRCPY(Options::DestinationFName, LINEMAX, "asm.out");
-	}
 
 	// create default output name, if not specified
-	if (!Options::DestinationFName[0]) {
-		STRCPY(Options::DestinationFName, LINEMAX, SourceFNames[0]);
-		if (!(p = strchr(Options::DestinationFName, '.'))) {
-			p = Options::DestinationFName;
-		} else {
-			*p = 0;
-		}
-		STRCAT(p, LINEMAX-(p-Options::DestinationFName), ".out");
-	}
-
+	ConstructDefaultFilename(Options::DestinationFName, LINEMAX, ".out");
 	base_encoding = ConvertEncoding;
 
 	// init some vars
@@ -680,10 +679,10 @@ int main(int argc, char **argv) {
 			OpenSld();
 		}
 
-		for (i = 0; i < SourceFNamesCount; i++) {
+		for (SSource & src : sourceFiles) {
 			IsRunning = 1;
 			ConvertEncoding = base_encoding;
-			OpenFile(SourceFNames[i]);
+			OpenFile(src.fname, false, src.stdin_log);
 		}
 
 		if (PseudoORG) {
