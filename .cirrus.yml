@@ -109,7 +109,7 @@ task:
   env:
     CIRRUS_CLONE_DEPTH: 1
   osx_instance:
-    image: mojave-base
+    image: catalina-base
   #sw_versions2_script:
     #- git --version || echo "no git"
     #- bash --version || echo "no bash"
