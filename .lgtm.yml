@@ -1,15 +1,15 @@
 path_classifiers:
   test:
-    - "cpp-src-tests/**"
-    - "ContinuousIntegration/**"
-    - "tests/**"
-    - "examples/**"
+    - "cpp-src-tests/"
+    - "ContinuousIntegration/"
+    - "tests/"
+    - "examples/"
   library:
-    - "lua5.1/**"
-    - "tolua++/**"
-    - "unittest-cpp/**"
+    - "lua5.1/"
+    - "tolua++/"
+    - "unittest-cpp/"
   docs:
-    - "docs/**"
+    - "docs/"
 
 queries:
   #- exclude: cpp/use-of-goto
