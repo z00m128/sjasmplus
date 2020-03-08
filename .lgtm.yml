@@ -18,7 +18,7 @@ extraction:
   cpp:
     prepare:    # Customizable step used by all languages.
       packages:
-        - g++-6
+        - g++-8
     after_prepare:    # Customizable step used by all languages.
       - export GNU_MAKE=make
       - export GIT=true
