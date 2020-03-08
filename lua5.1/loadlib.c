@@ -73,7 +73,12 @@ static void *ll_load (lua_State *L, const char *path) {
 
 
 static lua_CFunction ll_sym (lua_State *L, void *lib, const char *sym) {
+#if defined(__GNUC__)
+  // silence the warning about pointer-to-functionptr conversion being forbidden in ISO C
+  lua_CFunction f = __extension__ (lua_CFunction)dlsym(lib, sym);
+#else
   lua_CFunction f = (lua_CFunction)dlsym(lib, sym);
+#endif
   if (f == NULL) lua_pushstring(L, dlerror());
   return f;
 }
