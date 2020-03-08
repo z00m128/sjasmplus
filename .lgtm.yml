@@ -26,6 +26,7 @@ extraction:
       command:
         #- ./prepare_deps
     before_index:    # Customizable step used by all languages.
+        # nothing to do for sjasmplus? (needs at least comment to be not "null"
     index:    # Customizable step used by all languages.
       build_command:
         - $GNU_MAKE -j2 -s
