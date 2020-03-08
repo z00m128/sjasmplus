@@ -11,7 +11,7 @@ path_classifiers:
   docs:
     - "docs/"
 
-queries:
+#queries:
   #- exclude: cpp/use-of-goto
 
 extraction:
@@ -22,11 +22,6 @@ extraction:
     after_prepare:    # Customizable step used by all languages.
       - export GNU_MAKE=make
       - export GIT=true
-    configure:    # Customizable step used only by C/C++ extraction.
-      command:
-        #- ./prepare_deps
-    before_index:    # Customizable step used by all languages.
-        # nothing to do for sjasmplus? (needs at least comment to be not "null"
     index:    # Customizable step used by all languages.
       build_command:
         - $GNU_MAKE -j2 -s
