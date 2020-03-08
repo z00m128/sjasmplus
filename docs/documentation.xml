@@ -194,6 +194,7 @@
 - the fake-sysvars/state of ZXSPECTRUM48/128/... devices reworked, moving stack down by default
 - <link linkend="po_defarray">`DEFARRAY`</link> has new operator `[#]` to retrieve current size of array.
 - <link linkend="po_mmu">MMU</link> has new optional third argument to set also address (like ORG)
+- use of forward reference in <link linkend="ca_if">IF/IFN</link> emits only warning, and can be suppressed
 - internal Lua updated to 5.1.5 (last official 5.1 version), STDIN can be read multiple times
 </synopsis>
             </listitem>
@@ -2796,7 +2797,7 @@ start:
     <section>
       <title><anchor id="s_conditional_assembly" />Conditional assembly</title>
 
-      <para>It may be useful to assemble a part or not based on a certain
+      <para>It may be useful to assemble a part (or not) based on a certain
       condition.</para>
 
       <para><variablelist>
@@ -2806,6 +2807,12 @@ start:
             <listitem>
               <para>If &lt;expression&gt; is non-zero the following lines are
               assembled until an ELSE or ENDIF.</para>
+
+              <para>Forward reference of label will cause warning - as any machine code emitted inside
+				  the IF/IFN block with such expression can lead to unstable results. If you are sure
+				  the late definition of label will not affect resulting machine code (the IF block
+				  does not emit any machine code and does not define any label), you can suppress the
+				  warning with end-of-line comment "ok".</para>
             </listitem>
           </varlistentry>
 
