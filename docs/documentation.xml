@@ -1148,7 +1148,8 @@ StartProg:
 
             <listitem>
               <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
-              RAM pages (0-223) totalling at 1.75MiB of memory. The default mapping
+              RAM pages (0-223) totalling at 1.75MiB of memory. The <ulink
+                url="https://wiki.specnext.dev/Memory_map#Z80_Visible_Memory_map">default mapping</ulink>
               is similar to ZX128, paging in: {14, 15, 10, 11, 4, 5, 0, 1} pages.
               Default slot is 7 (memory range 0xE000..0xFFFF).
               All memory is zeroed during initialization.</para>
