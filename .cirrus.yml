@@ -79,23 +79,23 @@ task:
   #assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat 1
 
 task:
-  name: FreeBSD clang-6 build (with unit tests)
+  name: FreeBSD clang build (with unit tests)
   env:
     CIRRUS_CLONE_DEPTH: 1
   freebsd_instance:
-    image: freebsd-12-0-release-amd64
+    image_family: freebsd-13-0-snap
     cpu: 4
     memory: 4G
   # lock pkg on current version (sjasmplus does not care as long as it can install ...)
   # install git (lite), GNU make and bash
   # (FreeBSD make can't handle current Makefile, git is needed for UnitTest++ submodule)
   sw_install_script: pkg lock -y pkg && pkg install -y git-lite gmake bash
-  #sw_versions2_script:
-    #- git --version || echo "no git"
-    #- bash --version || echo "no bash"
-    #- gmake --version || echo "no gmake"
-    #- cc --version || echo "no cc"
-    #- c++ --version || echo "no c++"
+  sw_versions2_script:
+    - git --version || echo "no git"
+    - bash --version || echo "no bash"
+    - gmake --version || echo "no gmake"
+    - cc --version || echo "no cc"
+    - c++ --version || echo "no c++"
   submodules_script:
     - git submodule init
     - git submodule update
