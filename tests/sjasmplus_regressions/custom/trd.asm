@@ -16,6 +16,10 @@ end
         SAVETRD "trd.trd","label2.txt",label2,5
         SAVETRD "trd.trd","label3.txt",label3,5
         SAVETRD "trd.trd","label2.txt",label2,5
+    ; test the "invalid extension warning" and if it can be suppressed
+        SAVETRD "trd.trd","label2.B",label2,5       ; no warning
+        SAVETRD "trd.trd","label2.J",label2,5       ; warning
+        SAVETRD "trd.trd","label2.J",label2,5       ; ok ; warning suppressed
 
         SAVEHOB "trd.$t","labels.txt",label1,end-label1
 

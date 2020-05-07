@@ -91,10 +91,12 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		Warning("zx.trdimage_add_file: autostart value is BASIC program line number (0..9999) (in lua use -1 otherwise).");
 		autostart = -1;
 	}
-	switch (extLetter) {
-		case 'B': case 'C': case 'D': case '#': break;
-		default:
-			Warning("zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.", fhobname);
+	if (warningNotSuppressed()) {
+		switch (extLetter) {
+			case 'B': case 'C': case 'D': case '#': break;
+			default:
+				Warning("zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.", fhobname);
+		}
 	}
 	// more validations - for Lua (or SAVETRD letting wrong values go through)
 	const int secsLength = (length + 255 + (0 <= autostart ? 4 : 0))>>8;
