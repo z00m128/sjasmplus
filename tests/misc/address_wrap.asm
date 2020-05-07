@@ -32,7 +32,7 @@ tc4 jr tc4
 binStart5
     DISP $FFFF
 ta5 scf
-tb5 jr tb5
+tb5 jr tb5          ; the "tb5" label will equal 0x10000 since v1.15.0 (was 0x0000 before)
 tc5 jr tc5
     call tc5
 

@@ -735,7 +735,6 @@ void ParseLine(bool parselabels) {
 
 	// update current address by memory wrapping, current page, etc... (before the label is defined)
 	if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
-	else			CheckRamLimitExceeded();
 	ListAddress = CurAddress;
 
 	if (!ConvertEncoding) {

@@ -722,7 +722,6 @@ zx256_to_zx1M.asm(103): error: [SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTR
 106   0002                  ;;;;; non-existent device ;;;;;;
 zx256_to_zx1M.asm(107): error: [DEVICE] Invalid parameter: COMMODORE08
 107   0002                  DEVICE COMMODORE08
-zx256_to_zx1M.asm(108): warning: RAM limit exceeded 0x10002 by ORG
 zx256_to_zx1M.asm(108): error: SAVESNA only allowed in real device emulation mode (See DEVICE)
 108   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", 0      ;; will error out
 109   0002

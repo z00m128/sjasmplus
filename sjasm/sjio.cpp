@@ -233,7 +233,7 @@ void CheckRamLimitExceeded() {
 	static bool notWarnedDisp = true;
 	char buf[64];
 	if (CurAddress >= 0x10000) {
-		if (notWarnedCurAdr) {
+		if (LASTPASS == pass && notWarnedCurAdr) {
 			SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
 			Warning(buf);
 			notWarnedCurAdr = false;
@@ -241,7 +241,7 @@ void CheckRamLimitExceeded() {
 		if (PseudoORG) CurAddress &= 0xFFFF;	// fake DISP address gets auto-wrapped FFFF->0
 	} else notWarnedCurAdr = true;
 	if (PseudoORG && adrdisp >= 0x10000) {
-		if (notWarnedDisp) {
+		if (LASTPASS == pass && notWarnedDisp) {
 			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
 			Warning(buf);
 			notWarnedDisp = false;
@@ -401,6 +401,8 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 			if (LASTPASS == pass && !preserveDeviceMemory) *MemoryPointer = (char)byte;
 			++MemoryPointer;
 		}
+	} else {
+		CheckRamLimitExceeded();
 	}
 	++CurAddress;
 	if (PseudoORG) ++adrdisp;
