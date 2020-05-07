@@ -222,6 +222,18 @@ CLabelTable::CLabelTable() {
 	NextLocation = 1;
 }
 
+static short getAddressPageNumber(aint address) {
+	short page = Page ? Page->Number : LABEL_PAGE_ROM;
+	// in DISP mode set the page number by DISP page_number, or current device mapping
+	if (PseudoORG) {
+		page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
+				DeviceID ? Device->GetPageOfA16(address) : LABEL_PAGE_ROM;
+		// if no valid page was found, mark it as out_of_bounds label (but defined)
+		if (LABEL_PAGE_UNDEFINED == page) page = LABEL_PAGE_OUT_OF_BOUNDS;
+	}
+	return page;
+}
+
 int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL, bool IsEQU) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", NULL, FATAL);
@@ -235,12 +247,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 		} else {
 			//if label already added (as used, or in previous pass), just refresh values
 			label->value = nvalue;
-			label->page = Page ? Page->Number : LABEL_PAGE_ROM;
-			// in DISP mode set the page number by DISP page_number, or current device mapping
-			if (PseudoORG) {
-				label->page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
-								DeviceID ? Device->GetPageOfA16(nvalue) : LABEL_PAGE_ROM;
-			}
+			label->page = getAddressPageNumber(nvalue);
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
 			label->updatePass = pass;
@@ -260,16 +267,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->updatePass = pass;
 	label->value = nvalue;
 	label->used = undefined;
-	if (!undefined) {
-		label->page = Page ? Page->Number : LABEL_PAGE_ROM;
-		// in DISP mode set the page number by DISP page_number, or current device mapping
-		if (PseudoORG) {
-			label->page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
-							DeviceID ? Device->GetPageOfA16(nvalue) : LABEL_PAGE_ROM;
-		}
-	} else {
-		label->page = LABEL_PAGE_UNDEFINED;
-	}
+	label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue);
 	return 1;
 }
 
@@ -391,7 +389,7 @@ void CLabelTable::DumpForCSpect() {
 		const int labelType =
 			LabelTable[i].IsEQU ? 1 :
 			LabelTable[i].IsDEFL ? 2 :
-			(LABEL_PAGE_ROM == LabelTable[i].page) ? 3 : 0;
+			(LABEL_PAGE_ROM <= LabelTable[i].page) ? 3 : 0;
 		const short page = labelType ? 0 : LabelTable[i].page;
 		const aint longAddress = (PAGE_MASK & LabelTable[i].value) + page * PAGE_SIZE;
 		fprintf(file, "%08X %08X %02X ", 0xFFFF & LabelTable[i].value, longAddress, labelType);

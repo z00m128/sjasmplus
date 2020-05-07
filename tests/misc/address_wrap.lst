@@ -66,8 +66,8 @@ address_wrap.asm(52): warning: RAM limit exceeded 0x10000 by DISP
 54    0004 CD 02 00         call tc7
 55    0007
 56    0007                  ORG $FFFF       ; ok
+address_wrap.asm(57): warning: RAM limit exceeded 0x10000 by DISP
 57    FFFF 3E 38        ta8 ld a,'8'
-address_wrap.asm(58): warning: RAM limit exceeded 0x10001 by DISP
 58    0001 18 FE        tb8 jr tb8
 59    0003 18 FE        tc8 jr tc8
 60    0005 CD 03 00         call tc8
@@ -100,7 +100,7 @@ Value    Label
 0x8011 X binEnd6
 0x8011 X binStart7
 0xFFFF X ta7
-0x0000   tb7
+0x10000   tb7
 0x0002   tc7
 0xFFFF X ta8
 0x0001   tb8

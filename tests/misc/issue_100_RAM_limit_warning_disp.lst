@@ -7,7 +7,6 @@
  6    0000                   org  #8000
  7    8000                   disp #FFFF
  8    FFFF C9                ret
-issue_100_RAM_limit_warning_disp.asm(9): warning: RAM limit exceeded 0x10000 by DISP
  9    0000                   ent
 10    8001
 11    8001                   device none

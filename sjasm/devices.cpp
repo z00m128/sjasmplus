@@ -268,8 +268,8 @@ int CDevice::GetPageOfA16(int32_t address) {
 
 void CDevice::CheckPage(const ECheckPageLevel level) {
 	// fake DISP address gets auto-wrapped FFFF->0 (with warning only)
-	// ("no emit" to catch before labels are defined, although "emit" sounds more logical)
-	if (PseudoORG && CHECK_NO_EMIT == level && 0x10000 <= CurAddress) {
+	// only with "emit" mode, labels may get the value 0x10000 before the address gets truncated
+	if (PseudoORG && CHECK_NO_EMIT != level && 0x10000 <= CurAddress) {
 		if (LASTPASS == pass) {
 			char buf[64];
 			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by DISP", (unsigned int)CurAddress);
