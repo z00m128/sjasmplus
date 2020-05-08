@@ -59,7 +59,7 @@ This can be further complemented by [Z80 Assembly meter](https://github.com/theN
 
 [ZEsarUX](https://github.com/chernandezba/zesarux) is multi-machine emulator focusing on ZX Spectrum family of machines, including also ZX Spectrum Next, having many many options, lot of menus, and lot debugging capabilities - if you are particularly interested into ZX Spectrum Next SW development, the #CSpect is often a bit ahead in overall emulation fidelity, but ZEsarUX is often more accurate in subtle edge-case details, so you may want to have both of them around for different occasions. Also you may want to have ZEsarUX around for:
 
-[VS Code Z80 Debug Adapter](https://github.com/maziac/z80-debug) for debugging ZX Spectrum code, writing unit tests for it, time the execution, etc.
+[DeZog - Z80 Debugger (for Visual Studio Code)](https://github.com/maziac/DeZog) for debugging ZX Spectrum code, writing unit tests for it, time the execution, etc.
 
 (if you are not excited about using VSC as IDE and want to try some alternative) Syntax highlight (only)
 for [![Kate icon](docs/img/kate-logo-24px.png)Kate editor](https://kate-editor.org/) is
