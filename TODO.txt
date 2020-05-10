@@ -29,6 +29,8 @@ ARM emulation on x86: https://github.com/nongiach/arm_now  ???
     a teraz som si spomenul, ze u mna je to cele uz patchnute
     https://github.com/z00m128/zmakebas (edited)
 
++3DOS v pythone: https://github.com/shred/nextskeleton/blob/master/skeleton/tools/makeautoexec.py
+
 
 `make install` doesn't refresh binary???
 (does link, but doesn't use the new library, but old)

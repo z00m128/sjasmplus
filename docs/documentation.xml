@@ -196,6 +196,10 @@
 - <link linkend="po_mmu">MMU</link> has new optional third argument to set also address (like ORG)
 - use of forward reference in <link linkend="ca_if">IF/IFN</link> emits only warning, and can be suppressed
 - internal Lua updated to 5.1.5 (last official 5.1 version), STDIN can be read multiple times
+- new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro_examples</ulink>: `sj_sysvars.i.asm` and `section.asm`, new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/lua_examples">lua_examples</ulink>: `lua_sin_table.asm`
+- RAM limit exceeded warning/error reworked to report with more sense, fixed bug with missing labels
+- <link linkend="po_savetrd">SAVETRD</link> warning about invalid extension can be suppressed by "; ok"
+
 </synopsis>
             </listitem>
           </varlistentry>
