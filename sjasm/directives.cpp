@@ -1036,16 +1036,33 @@ void dirSAVEHOB() {
 
 void dirEMPTYTRD() {
 	if (pass != LASTPASS) {
-		SkipParam(lp);
+		SkipToEol(lp);
 		return;
 	}
-	char* fnaam;
+	char* fnaam, diskLabel[9] = "        ";
 
 	fnaam = GetFileName(lp);
 	if (!*fnaam) {
-		Error("[EMPTYTRD] Syntax error", bp, IF_FIRST); return;
+		Error("[EMPTYTRD] Syntax error", bp, IF_FIRST);
+		delete[] fnaam;
+		return;
 	}
-	TRD_SaveEmpty(fnaam);
+	if (anyComma(lp)) {
+		char* srcLabel = GetFileName(lp, false);
+		if (!*srcLabel) {
+			Error("[EMPTYTRD] Syntax error, empty label", bp, IF_FIRST);
+		} else {
+			for (int i = 0; i < 8; ++i) {
+				if (!srcLabel[i]) break;
+				diskLabel[i] = srcLabel[i];
+			}
+			if (8 < strlen(srcLabel)) {
+				Warning("[EMPTYTRD] label will be truncated to 8 characters", diskLabel);
+			}
+		}
+		delete[] srcLabel;
+	}
+	TRD_SaveEmpty(fnaam, diskLabel);
 	delete[] fnaam;
 }
 

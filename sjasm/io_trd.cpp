@@ -28,7 +28,7 @@
 
 #include "sjdefs.h"
 
-static int saveEmptyWrite(FILE* ff, byte* buf) {
+static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 	int i;
 	//catalog (8 zeroed sectors)
 	if (fwrite(buf, 1, 1024, ff) < 1024) return 0;
@@ -45,7 +45,8 @@ static int saveEmptyWrite(FILE* ff, byte* buf) {
 	for (i = 0; i < 9; ++i) buf[0xea + i] = 0x20;	// spaces fill or disk protecting password
 	buf[0xf3] = 0;		// unused = 0
 	buf[0xf4] = 0;		// number of deleted files on disk
-	for (i = 0; i < 8; ++i) buf[0xf5 + i] = 0x20;	// disc label + end of disk info (8x 20h, 3x 0)
+	// disc label + end of disk info (8x 20h, 3x 0)
+	for (i = 0; i < 8; ++i) buf[0xf5 + i] = (nullptr != label) ? label[i] : 0x20;
 	if (fwrite(buf, 1, 256, ff) < 256) return 0;
 	for (i = 0xe1; i < 0x100; ++i) buf[i] = 0;		// clear the buffer back to all zeroes
 	// remaining sectors in image contains all zeroes
@@ -56,7 +57,7 @@ static int saveEmptyWrite(FILE* ff, byte* buf) {
 	return 1;
 }
 
-int TRD_SaveEmpty(char* fname) {	//TODO add disc label maybe? Type as well?
+int TRD_SaveEmpty(char* fname, const char label[8]) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("Error opening file", fname, IF_FIRST);
@@ -64,7 +65,7 @@ int TRD_SaveEmpty(char* fname) {	//TODO add disc label maybe? Type as well?
 	}
 	byte* buf = (byte*) calloc(1024, sizeof(byte));
 	if (buf == NULL) ErrorOOM();
-	int result = saveEmptyWrite(ff, buf);
+	int result = saveEmptyWrite(ff, buf, label);
 	free(buf);
 	fclose(ff);
 	if (!result) Error("Write error (disk full?)", fname, IF_FIRST);

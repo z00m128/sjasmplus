@@ -31,7 +31,7 @@
 #ifndef __IO_TRD
 #define __IO_TRD
 
-int TRD_SaveEmpty(char* fname);
+int TRD_SaveEmpty(char* fname, const char label[8]);
 int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostart, bool replace);
 
 #endif
