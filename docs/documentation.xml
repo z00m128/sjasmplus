@@ -199,7 +199,8 @@
 - new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro_examples</ulink>: `sj_sysvars.i.asm` and `section.asm`, new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/lua_examples">lua_examples</ulink>: `lua_sin_table.asm`
 - RAM limit exceeded warning/error reworked to report with more sense, fixed bug with missing labels
 - <link linkend="po_savetrd">`SAVETRD`</link> warning about invalid extension can be suppressed by "; ok"
-- <link linkend="po_emptytrd">`EMPTYTRD`</link> takes as second argument disc label</synopsis>
+- <link linkend="po_emptytrd">`EMPTYTRD`</link> takes as second argument disc label
+- added <link linkend="s_cli">`--outprefix`</link> option to prefix any output-directive filename (<ulink url="https://github.com/z00m128/sjasmplus/issues/102">issue #102</ulink>)</synopsis>
             </listitem>
           </varlistentry>
 
@@ -363,6 +364,9 @@
   extra "exit" DD00 and "break" DD01 fake instructions)
   --i8080                  Limit valid instructions to i8080 only (+ no fakes)
   --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)
+  --outprefix=&lt;path&gt;       Prefix for save/output/.. filenames in directives
+  Note: if the prefix is folder, the folder must exist before assembling. Prefix
+        is applied only to filenames defined in source (not to CLI arguments).
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt; ( --inc without "=" to empty the list)
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)
