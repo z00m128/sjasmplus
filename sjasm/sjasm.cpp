@@ -50,6 +50,7 @@ void PrintHelp() {
 	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions (Z80N)" _ENDL;
 	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
 	_COUT "  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)" _ENDL;
+	_COUT "  --outprefix=<path>       Prefix to use for any save/export/listing files" _ENDL;
 	_COUT "  -i<path> or -I<path> or --inc=<path> ( --inc without \"=\" to empty the list)" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
@@ -77,6 +78,7 @@ void PrintHelp() {
 }
 
 namespace Options {
+	char OutPrefix[LINEMAX] = {0};
 	char SymbolListFName[LINEMAX] = {0};
 	char ListingFName[LINEMAX] = {0};
 	char ExportFName[LINEMAX] = {0};
@@ -455,6 +457,7 @@ namespace Options {
 				} else if (!strcmp(opt, "sld") && !val[0]) {
 					IsDefaultSldName = true;
 				} else if (
+					CheckAssignmentOption("outprefix", OutPrefix, LINEMAX) ||
 					CheckAssignmentOption("sym", SymbolListFName, LINEMAX) ||
 					CheckAssignmentOption("lst", ListingFName, LINEMAX) ||
 					CheckAssignmentOption("exp", ExportFName, LINEMAX) ||

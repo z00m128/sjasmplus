@@ -678,7 +678,7 @@ void dirSAVESNA() {
 		exec = false;
 	}
 
-	char* fnaam = GetFileName(lp);
+	char* fnaam = GetOutputFileName(lp);
 	int start = StartAddress;
 	if (anyComma(lp)) {
 		aint val;
@@ -711,7 +711,7 @@ void dirEMPTYTAP() {
 	}
 	char* fnaam;
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (!*fnaam) {
 		Error("[EMPTYTAP] Syntax error", bp, IF_FIRST); return;
 	}
@@ -737,7 +737,7 @@ void dirSAVETAP() {
 		exec = false;
 	}
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			char *tlp = lp;
@@ -907,7 +907,7 @@ void dirSAVEBIN() {
 	bool exec = (LASTPASS == pass);
 	aint val;
 	int start = -1, length = -1;
-	char* fnaam = GetFileName(lp);
+	char* fnaam = GetOutputFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
@@ -946,7 +946,7 @@ void dirSAVEDEV() {
 	if (!exec && LASTPASS == pass) Error("SAVEDEV only allowed in real device emulation mode (See DEVICE)");
 
 	aint args[3]{-1, -1, -1};		// page, offset, length
-	char* fnaam = GetFileName(lp);
+	char* fnaam = GetOutputFileName(lp);
 	for (auto & arg : args) {
 		if (!comma(lp) || !ParseExpression(lp, arg)) {
 			exec = false;
@@ -987,7 +987,7 @@ void dirSAVEHOB() {
 	int start = -1,length = -1;
 	bool exec = true;
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
@@ -1041,7 +1041,7 @@ void dirEMPTYTRD() {
 	}
 	char* fnaam, diskLabel[9] = "        ";
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (!*fnaam) {
 		Error("[EMPTYTRD] Syntax error", bp, IF_FIRST);
 		delete[] fnaam;
@@ -1078,7 +1078,7 @@ void dirSAVETRD() {
 	char* fnaam, * fnaamh;
 	int start = -1, length = -1, autostart = -1;
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
@@ -1205,7 +1205,7 @@ void dirLABELSLIST() {
 		SkipParam(lp);
 		return;
 	}
-	char* opt = GetFileName(lp);
+	char* opt = GetOutputFileName(lp);
 	if (*opt) {
 		STRCPY(Options::UnrealLabelListFName, LINEMAX, opt);
 	} else {
@@ -1220,7 +1220,7 @@ void dirCSPECTMAP() {
 		SkipParam(lp);
 		return;
 	}
-	char* fName = GetFileName(lp);
+	char* fName = GetOutputFileName(lp);
 	if (fName[0]) {
 		STRCPY(Options::CSpectMapFName, LINEMAX, fName);
 	} else {		// create default map file name from current source file name (appends ".map")
@@ -1240,7 +1240,7 @@ void dirBPLIST() {
 		SkipToEol(lp);
 		return;
 	}
-	char* fname = GetFileName(lp);
+	char* fname = GetOutputFileName(lp);
 	EBreakpointsFile type = BPSF_UNREAL;
 	if (cmphstr(lp, "unreal")) {
 		type = BPSF_UNREAL;
@@ -1413,7 +1413,7 @@ void dirOUTPUT() {
 		SkipToEol(lp);
 		return;
 	}
-	char* fnaam = GetFileName(lp), modechar = 0;
+	char* fnaam = GetOutputFileName(lp), modechar = 0;
 	int mode = OUTPUT_TRUNCATE;
 	if (comma(lp)) {
 		if (!SkipBlanks(lp)) modechar = (*lp++) | 0x20;
@@ -1442,7 +1442,7 @@ void dirTAPOUT()
 	aint val;
 	char* fnaam;
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	int tape_flag = 255;
 	if (comma(lp))
 	{

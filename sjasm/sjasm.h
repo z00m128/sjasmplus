@@ -63,6 +63,7 @@ namespace Options {
 		static std::stack<SSyntax> syxStack;	// previous syntax
 	} SSyntax;
 
+	extern char OutPrefix[LINEMAX];
 	extern char SymbolListFName[LINEMAX];
 	extern char ListingFName[LINEMAX];
 	extern char ExportFName[LINEMAX];
