@@ -1,0 +1,113 @@
+# file opened: union_like_structures.asm
+ 1    0000              ; This example shows one of possible ways to use multiple STRUCT definitions
+ 2    0000              ; as some kind of C-language-like "union"
+ 3    0000              ;
+ 4    0000              ; The "receive_buffer" is single block of memory large enough to accomodate
+ 5    0000              ; any of the specific "commands"
+ 6    0000              ;
+ 7    0000              ; RECEIVE_BUFFER_HEADER struct defines the initial header shared across all "commands"
+ 8    0000              ; RECEIVE_BUFFER_CMD_READ_REGS, RECEIVE_BUFFER_CMD_CONTINUE, RECEIVE_BUFFER_CMD_PED_TEST
+ 9    0000              ; then define the specific "commands" with their extended fields
+10    0000              ;
+11    0000              ; finally there is small fake process-like subroutine to show usage of the defined fields
+12    0000
+13    0000              ; define the command structures
+14    0000                  STRUCT RECEIVE_BUFFER_HEADER
+15    0000 ~            length              DWORD   0
+16    0000 ~            seq_no              BYTE    0
+17    0000 ~            command             BYTE    0
+18    0000                  ENDS
+19    0000
+20    0000                  STRUCT RECEIVE_BUFFER_CMD_READ_REGS, RECEIVE_BUFFER_HEADER
+21    0000 ~            register_number     BYTE    0
+22    0000                  ENDS
+23    0000
+24    0000                  STRUCT RECEIVE_BUFFER_CMD_CONTINUE, RECEIVE_BUFFER_HEADER
+25    0000 ~            bp1_enable          BYTE    0
+26    0000 ~            bp1_address         WORD    0
+27    0000 ~            bp2_enable          BYTE    0
+28    0000 ~            bp2_address         WORD    0
+29    0000                  ENDS
+30    0000
+31    0000                  STRUCT RECEIVE_BUFFER_CMD_PED_TEST, RECEIVE_BUFFER_HEADER
+32    0000 ~            pattern             BLOCK   256
+33    0000                  ENDS
+34    0000
+35    0000              ; find the structure with maximum size to define how long the receive_buffer should be
+36    0000              RB_MAX_SIZE         = RECEIVE_BUFFER_HEADER
+37    0000              RB_MAX_SIZE         = RB_MAX_SIZE >? RECEIVE_BUFFER_CMD_READ_REGS
+38    0000              RB_MAX_SIZE         = RB_MAX_SIZE >? RECEIVE_BUFFER_CMD_CONTINUE
+39    0000              RB_MAX_SIZE         = RB_MAX_SIZE >? RECEIVE_BUFFER_CMD_PED_TEST
+40    0000
+41    0000              ; reserve the memory for the receive_buffer (one buffer for all)
+42    0000                  ORG     $8000
+43    8000 00 00 00 00  receive_buffer      RECEIVE_BUFFER_HEADER
+43    8004 00 00
+44    8006 00 00 00...  .data               BLOCK   RB_MAX_SIZE - RECEIVE_BUFFER_HEADER, 0
+45    8106
+46    8106              ; definie alias labels for "receive_buffer" to access specific-command fields
+47    8106              rb_read_regs    RECEIVE_BUFFER_CMD_READ_REGS = receive_buffer
+48    8106              rb_continue     RECEIVE_BUFFER_CMD_CONTINUE = receive_buffer
+49    8106              rb_ped_test     RECEIVE_BUFFER_CMD_PED_TEST = receive_buffer
+50    8106
+51    8106              ; example of usage in code
+52    8106                  ORG     $C000
+53    C000              process_command:
+54    C000 3A 05 80         ld      a,(receive_buffer.command)
+55    C003 FE 01            cp      1
+56    C005 20 04            jr      nz,.not_read_regs
+57    C007                  ; CMD_READ_REGS specific code
+58    C007 3A 06 80         ld      a,(rb_read_regs.register_number)
+59    C00A C7               rst     0
+60    C00B              .not_read_regs:
+61    C00B FE 02            cp      2
+62    C00D 20 10            jr      nz,.not_continue
+63    C00F                  ; CMD_CONTINUE specific code
+64    C00F 2A 07 80         ld      hl,(rb_continue.bp1_address)
+65    C012 ED 5B 0A 80      ld      de,(rb_continue.bp2_address)
+66    C016 ED 4B 06 80      ld      bc,(rb_continue.bp1_enable) ; C = bp1_enable
+67    C01A 3A 09 80         ld      a,(rb_continue.bp2_enable)
+68    C01D 47               ld      b,a                         ; B = bp2_enable
+69    C01E C7               rst     0
+70    C01F              .not_continue:
+71    C01F                  ; must be RECEIVE_BUFFER_CMD_PED_TEST then
+72    C01F 21 06 80         ld      hl,rb_ped_test.pattern
+73    C022 01 5B 00         ld      bc,$5B          ; C = ZX Next sprite pattern upload port, B = 0 (256x)
+74    C025 ED B3            otir                    ; upload pattern to active pattern slot
+75    C027 C7               rst     0
+76    C028
+# file closed: union_like_structures.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0006   RECEIVE_BUFFER_HEADER
+0x0000 X RECEIVE_BUFFER_HEADER.length
+0x0004 X RECEIVE_BUFFER_HEADER.seq_no
+0x0005 X RECEIVE_BUFFER_HEADER.command
+0x0007   RECEIVE_BUFFER_CMD_READ_REGS
+0x0006 X RECEIVE_BUFFER_CMD_READ_REGS.register_number
+0x000C   RECEIVE_BUFFER_CMD_CONTINUE
+0x0006 X RECEIVE_BUFFER_CMD_CONTINUE.bp1_enable
+0x0007 X RECEIVE_BUFFER_CMD_CONTINUE.bp1_address
+0x0009 X RECEIVE_BUFFER_CMD_CONTINUE.bp2_enable
+0x000A X RECEIVE_BUFFER_CMD_CONTINUE.bp2_address
+0x0106   RECEIVE_BUFFER_CMD_PED_TEST
+0x0006 X RECEIVE_BUFFER_CMD_PED_TEST.pattern
+0x0106   RB_MAX_SIZE
+0x8000   receive_buffer
+0x8000 X receive_buffer.length
+0x8004 X receive_buffer.seq_no
+0x8005   receive_buffer.command
+0x8006 X receive_buffer.command.data
+0x8000 X rb_read_regs
+0x8006   rb_read_regs.register_number
+0x8000 X rb_continue
+0x8006   rb_continue.bp1_enable
+0x8007   rb_continue.bp1_address
+0x8009   rb_continue.bp2_enable
+0x800A   rb_continue.bp2_address
+0x8000 X rb_ped_test
+0x8006   rb_ped_test.pattern
+0xC000 X process_command
+0xC00B   process_command.not_read_regs
+0xC01F   process_command.not_continue
