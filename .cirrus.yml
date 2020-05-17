@@ -70,13 +70,8 @@ task:
   build_script: ContinuousIntegration\winbuild_vs15_2017.bat
   # exe is installed at the same location as the MinGW build does
   sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
-  # this mingw32 bat should work for just-building-examples even with exe from MSCC
   assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
-
-  # (commented out for the moment, until `--fullpath` produces identical results)
-  # try to run tests, but ignore the end result (some tests are expected to fail)
-  # (needs manual review from time to time, if the failures are as expected)
-  #assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat 1
+  assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat
 
 task:
   name: FreeBSD clang build (with unit tests)
