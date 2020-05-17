@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.14.5 Documentation [2020-01-30]</title>
+  <title>SjASMPlus 1.15.0 Documentation [2020-05-18]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -186,7 +186,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.15.0</term>
+            <term>18.5.2020 - 1.15.0</term>
 
             <listitem>
               <synopsis>- added <link linkend="po_bplist">`BPLIST`</link> and <link linkend="po_setbp">`SETBP`</link> to export breakpoints info from asm for Unreal and ZEsarUX emulators
