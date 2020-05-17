@@ -65,7 +65,7 @@ void PrintHelp() {
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
 	_COUT "  --msg=[all|war|err|none|lst|lstlab]" _ENDL;
 	_COUT "                           Stderr messages verbosity (\"all\" is default)" _ENDL;
-	_COUT "  --fullpath               Show full path to error file" _ENDL;
+	_COUT "  --fullpath               Show full path to file in errors" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
 	_COUT "  -                        Reads STDIN as source (even in between regular files)" _ENDL;

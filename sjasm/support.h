@@ -33,7 +33,7 @@ extern const char pathGoodSlash;
 
 #if defined (_MSC_VER)
 
-#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS 1
 
 // #define FOPEN(pFile, filename, mode) fopen_s(&pFile, filename, mode)
 // #define FOPEN_ISOK(pFile, filename, mode) (fopen_s(&pFile, filename, mode) == 0)
