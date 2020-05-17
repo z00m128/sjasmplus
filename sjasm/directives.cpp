@@ -1525,8 +1525,8 @@ void dirEXPORT() {
 
 void dirDISPLAY() {
 	char decprint = 'H';
-	char e[LINEMAX], optionChar;
-	char* ep = e;
+	char e[LINEMAX + 32], optionChar;		// put extra buffer at end for particular H/A/D number printout
+	char* ep = e, * const endOfE = e + LINEMAX;
 	aint val;
 	do {
 		if (SkipBlanks()) {
@@ -1548,8 +1548,13 @@ void dirDISPLAY() {
 			continue;
 		}
 		// try to parse some string literal
+		const int remainingBufferSize = endOfE - ep;
+		if (remainingBufferSize <= 0) {
+			Error("[DISPLAY] internal buffer overflow, resulting text is too long", line);
+			return;
+		}
 		int ei = 0;
-		val = GetCharConstAsString(lp, ep, ei, LINEMAX - (ep-e));
+		val = GetCharConstAsString(lp, ep, ei, remainingBufferSize);
 		if (-1 == val) {
 			Error("[DISPLAY] Syntax error", line);
 			return;
@@ -1567,7 +1572,12 @@ void dirDISPLAY() {
 					if (decprint == 'A') {
 						*(ep++) = ','; *(ep++) = ' ';
 					}
-					ep += SPRINTF1(ep, (int)(&e[0] + LINEMAX - ep), "%u", val);
+					int charsToPrint = SPRINTF1(ep, remainingBufferSize, "%u", val);
+					if (remainingBufferSize <= charsToPrint) {
+						Error("[DISPLAY] internal buffer overflow, resulting text is too long", line);
+						return;
+					}
+					ep += charsToPrint;
 				}
 				decprint = 'H';
 			} else {
