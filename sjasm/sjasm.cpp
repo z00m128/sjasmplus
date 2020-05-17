@@ -578,7 +578,7 @@ int main(int argc, char **argv) {
 	long dwStart = GetTickCount();
 
 	// get current directory
-	GetCurrentDirectory(MAX_PATH, buf);
+	SJ_GetCurrentDirectory(MAX_PATH, buf);
 	CurrentDirectory = buf;
 
 	Options::COptionsParser optParser;

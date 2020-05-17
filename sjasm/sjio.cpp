@@ -457,18 +457,18 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 	// search current directory first (unless "systemPathsBeforeCurrent")
 	if (!systemPathsBeforeCurrent) {
 		// if found, just skip the `while (dir)` loop
-		if (SearchPath(CurrentDirectory, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
+		if (SJ_SearchPath(CurrentDirectory, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
 		else fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 	}
 	while (dir) {
-		if (SearchPath(dir->string, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) break;
+		if (SJ_SearchPath(dir->string, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) break;
 		fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 		dir = dir->next;
 	}
 	// if the file was not found in the list, and current directory was not searched yet
 	if (!fullFilePath[0] && systemPathsBeforeCurrent) {
 		//and the current directory was not searched yet, do it now, set empty string if nothing
-		if (!SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
+		if (!SJ_SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
 			fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 		}
 	}

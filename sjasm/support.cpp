@@ -33,17 +33,17 @@
 const char pathBadSlash = '\\';
 const char pathGoodSlash = '/';
 
-#if !defined (_MSC_VER)
-
-void GetCurrentDirectory(int whatever, char* pad) {
+void SJ_GetCurrentDirectory(int whatever, char* pad) {
 	pad[0] = 0;
+	//TODO implement this one? And decide what to do with it?
+	// Will affect "--fullpath" paths if implemented correctly (as GetCurrentDirectory on windows)
 }
 
 static bool isAnySlash(const char c) {
 	return pathGoodSlash == c || pathBadSlash == c;
 }
 
-int SearchPath(const char* oudzp, const char* filename, const char*, int maxlen, char* nieuwzp, char** ach) {
+int SJ_SearchPath(const char* oudzp, const char* filename, const char*, int maxlen, char* nieuwzp, char** ach) {
 	FILE* fp;
 	if (isAnySlash(filename[0])) {
 		STRCPY(nieuwzp, maxlen, filename);
@@ -72,6 +72,7 @@ int SearchPath(const char* oudzp, const char* filename, const char*, int maxlen,
 }
 
 #ifndef WIN32
+
 long GetTickCount() {
 	struct timeval tv1[1];
 	gettimeofday(tv1, 0);
@@ -79,8 +80,6 @@ long GetTickCount() {
 }
 
 #endif	// #ifndef WIN32
-
-#endif	// #if !defined (_MSC_VER)
 
 #ifdef _WIN32
 #include <fcntl.h>
