@@ -98,7 +98,7 @@ Value    Label
 0x8000 X receive_buffer.length
 0x8004 X receive_buffer.seq_no
 0x8005   receive_buffer.command
-0x8006 X receive_buffer.command.data
+0x8006 X receive_buffer.data
 0x8000 X rb_read_regs
 0x8006   rb_read_regs.register_number
 0x8000 X rb_continue

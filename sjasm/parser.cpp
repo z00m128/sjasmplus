@@ -567,6 +567,9 @@ void ParseLabel() {
 			}
 			if ((n = GetID(p)) && StructureTable.Emit(n, tp, p, gl)) {
 				lp = p;
+				// this was instancing STRUCT, make it also define "main" label for future "local" ones
+				tp = ValidateLabel(tp, true);
+				if (tp) delete[] tp;
 				return;
 			}
 			val = CurAddress;
