@@ -1,3 +1,19 @@
+## [1.15.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.15.0) - 18.5.2020
+- added `BPLIST` and `SETBP` to export breakpoints info from asm for Unreal and ZEsarUX emulators
+- added ZX-like devices with 2/4/8 MiB of virtual memory
+- the fake-sysvars/state of ZXSPECTRUM48/128/... devices reworked, moving stack down by default
+- behaviour of `--fullpath` option unified across all platforms and compilers
+- `DEFARRAY` has new operator `[#]` to retrieve current size of array.
+- `MMU` has new optional third argument to set also address (like `ORG`)
+- use of forward reference in `IF`/`IFN` emits only warning, and can be suppressed
+- internal Lua updated to 5.1.5 (last official 5.1 version)
+- STDIN can be read multiple times (per each "-" argument)
+- new macro/lua examples: `sj_sysvars.i.asm`, `section.asm`, `lua_sin_table.asm`, `union_like_structures.asm`
+- RAM limit exceeded warning/error reworked to report with more sense, fixed bug with missing labels
+- `SAVETRD` warning about invalid extension can be suppressed by "; ok"
+- `EMPTYTRD` takes as second argument disc label
+- added `--outprefix` option to prefix any output-directive filename (issue #102)
+
 ## [1.14.5](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.5) - 30.1.2020
 - fix crash when opening source file fails
 - [DISP](http://z00m128.github.io/sjasmplus/documentation.html#po_disp)/[ORG](http://z00m128.github.io/sjasmplus/documentation.html#po_org) warns about being used inside DISP block (also docs extended)

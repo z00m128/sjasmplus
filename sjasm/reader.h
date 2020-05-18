@@ -58,6 +58,7 @@ char* ParenthesesEnd(char* p);
 int check8(aint val);
 int check8o(aint val);
 int check16(aint val);
+int check16u(aint val);
 int check24(aint val);
 void checkLowMemory(byte lowByte, byte hiByte);
 int need(char*& p, char c);
@@ -76,6 +77,7 @@ int GetBits(char*& p, int e[]);
 int GetBytesHexaText(char*& p, int e[]);
 int cmphstr(char*& p1, const char* p2);		// p2 must be lowercase to match both cases
 char* GetFileName(char*& p, bool convertslashes=true);
+char* GetOutputFileName(char*& p, bool convertslashes=true);	// prepends the filename with OutPrefix
 EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called
 bool isLabelStart(const char *p, bool modifiersAllowed = true);
 int islabchar(char p);

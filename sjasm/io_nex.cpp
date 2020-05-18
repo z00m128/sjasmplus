@@ -351,7 +351,7 @@ static void dirNexOpen() {
 	}
 	nex.init();			// reset everything around NEX file data
 	// read OPEN command arguments
-	char* fname = GetFileName(lp);
+	char* fname = GetOutputFileName(lp);
 	aint openArgs[4] = { (-1 == StartAddress ? 0 : StartAddress), 0xFFFE, 0, 0 };
 	if (comma(lp)) {
 		const bool optionals[] = {false, true, true, true};	// start address is mandatory because comma

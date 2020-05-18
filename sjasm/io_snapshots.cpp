@@ -28,6 +28,13 @@
 
 #include "sjdefs.h"
 
+// report error and close the file
+static int writeError(char* fname, FILE* & fileToClose) {
+	Error("Write error (disk full?)", fname, IF_FIRST);
+	fclose(fileToClose);
+	return 0;
+}
+
 int SaveSNA_ZX(char* fname, unsigned short start) {
 	unsigned char snbuf[31];
 
@@ -59,34 +66,48 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	snbuf[10] = 0x2D; //hl
 	snbuf[11] = 0xDC; //de
 	snbuf[12] = 0x5C; //de
-	snbuf[13] = 0x00; //bc
-	snbuf[14] = 0x80; //bc
+	snbuf[13] = start & 0xFF;		//bc
+	snbuf[14] = (start>>8) & 0xFF;	//bc
 	snbuf[15] = 0x3a; //iy
 	snbuf[16] = 0x5c; //iy
 	snbuf[17] = 0x3C; //ix
 	snbuf[18] = 0xFF; //ix
 	snbuf[21] = 0x54; //af
 	snbuf[22] = 0x00; //af
-	const CDevicePage* stackPage = Device->GetSlot(Device->SlotsCount-1)->Page;
-	unsigned char* const stackRAM = (unsigned char*)stackPage->RAM + stackPage->Size - sizeof(BASin48SP);
-	bool defaultZx48Stack = true;
-	for (unsigned ii = 0; defaultZx48Stack && ii < sizeof(BASin48SP); ++ii) {
-		if (stackRAM[ii] != BASin48SP[ii]) defaultZx48Stack = false;
+	// check if default ZX-like stack was modified - if not, it will be used for snapshot
+	bool is48kSnap = !strcmp(DeviceID, "ZXSPECTRUM48");
+	bool defaultStack = true;
+	aint stackAdr = Device->ZxRamTop + 1 - sizeof(ZX_STACK_DATA);
+	for (aint ii = is48kSnap ? -2 : 0; ii < aint(sizeof(ZX_STACK_DATA)); ++ii) {
+		// will check for 48k snap if there is `00 00` ahead of fake stack data
+		const byte cmpValue = (0 <= ii) ? ZX_STACK_DATA[ii] : 0;
+		CDeviceSlot* slot = Device->GetSlot(Device->GetSlotOfA16(stackAdr + ii));
+		CDevicePage* page = Device->GetPage(slot->InitialPage);
+		defaultStack &= (cmpValue == page->RAM[(stackAdr + ii) & (page->Size-1)]);
 	}
-	if (defaultZx48Stack) {
-		snbuf[23] = 0x2D;	//sp (+16 into BASin48SP)
-		snbuf[24] = 0xFF;	//sp
-		stackRAM[16] = start & 0xFF;	// pc into default stack
-		stackRAM[17] = start >> 8;		// pc
+	if (defaultStack) {
+		if (is48kSnap) stackAdr -= 2;
+		snbuf[23] = (stackAdr) & 0xFF;	// SP (may point to injected start address for 48k snap)
+		snbuf[24] = (stackAdr>>8) & 0xFF;
+		if (is48kSnap) {
+			// inject PC under default stack
+			CDeviceSlot* slot = Device->GetSlot(Device->GetSlotOfA16(stackAdr));
+			CDevicePage* page = Device->GetPage(slot->InitialPage);
+			page->RAM[stackAdr & (page->Size-1)] = start & 0xFF;
+			++stackAdr;
+			slot = Device->GetSlot(Device->GetSlotOfA16(stackAdr));
+			page = Device->GetPage(slot->InitialPage);
+			page->RAM[stackAdr & (page->Size-1)] = (start>>8) & 0xFF;
+		}
 	} else {
-		if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
+		if (is48kSnap) {
 			Warning("[SAVESNA] RAM <0x4000-0x4001> will be overriden due to 48k snapshot imperfect format.");
 			snbuf[23] = 0x00; //sp
 			snbuf[24] = 0x40; //sp
 			Device->GetPage(1)->RAM[0] = start & 0xFF;	//pc
 			Device->GetPage(1)->RAM[1] = start >> 8;	//pc
 		} else {
-			snbuf[23] = 0X00; //sp
+			snbuf[23] = 0x00; //sp
 			snbuf[24] = 0x60; //sp
 		}
 	}
@@ -94,97 +115,48 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	snbuf[26] = 7; //border 7
 
 	if (fwrite(snbuf, 1, sizeof(snbuf) - 4, ff) != sizeof(snbuf) - 4) {
-		Error("Write error (disk full?)", fname, IF_FIRST);
-		fclose(ff);
-		return 0;
+		return writeError(fname, ff);
 	}
 
-	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
+	if (is48kSnap) {
 		if ((aint) fwrite(Device->GetPage(1)->RAM, 1, Device->GetPage(1)->Size, ff) != Device->GetPage(1)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		if ((aint) fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		if ((aint) fwrite(Device->GetPage(3)->RAM, 1, Device->GetPage(3)->Size, ff) != Device->GetPage(3)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 	} else {
 		if ((aint) fwrite(Device->GetPage(5)->RAM, 1, Device->GetPage(5)->Size, ff) != Device->GetPage(5)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		if ((aint) fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
 		if ((aint) fwrite(Device->GetPage(Device->GetSlot(3)->Page->Number)->RAM, 1, Device->GetPage(0)->Size, ff) != Device->GetPage(0)->Size) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
-	}
-
-	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
-		// nothing more to do for ZX48
-	} else {
+		// 128k snapshot extra header fields
 		snbuf[27] = char(start & 0x00FF); //pc
 		snbuf[28] = char(start >> 8); //pc
 		snbuf[29] = 0x10 + Device->GetSlot(3)->Page->Number; //7ffd
 		snbuf[30] = 0; //tr-dos
 		if (fwrite(snbuf + 27, 1, 4, ff) != 4) {
-			Error("Write error (disk full?)", fname, IF_FIRST);
-			fclose(ff);
-			return 0;
+			return writeError(fname, ff);
 		}
-	}
-
-	//if (DeviceID) {
-	if (!strcmp(DeviceID, "ZXSPECTRUM48")) {
-		/*for (int i = 0; i < 5; i++) {
-			if (fwrite(Device->GetPage(0)->RAM, 1, Device->GetPage(0)->Size, ff) != Device->GetPage(0)->Size) {
-				Error("Write error (disk full?)", fname, CATCHALL);
-				fclose(ff);
-				return 0;
-			}
-		}*/
-	} else {
+		// 128k banks
 		for (aint i = 0; i < 8; i++) {
 			if (i != Device->GetSlot(3)->Page->Number && i != 2 && i != 5) {
 				if ((aint) fwrite(Device->GetPage(i)->RAM, 1, Device->GetPage(i)->Size, ff) != Device->GetPage(i)->Size) {
-					Error("Write error (disk full?)", fname, IF_FIRST);
-					fclose(ff);
-					return 0;
+					return writeError(fname, ff);
 				}
 			}
 		}
 	}
-	//}
-	/* else {
-		char *buf = (char*) calloc(0x14000, sizeof(char));
-		if (buf == NULL) {
-			ErrorOOM();
-		}
-		memset(buf, 0, 0x14000);
-		if (fwrite(buf, 1, 0x14000, ff) != 0x14000) {
-			Error("Write error (disk full?)", fname, CATCHALL);
-			fclose(ff);
-			return 0;
-		}
-	}*/
 
-	if (!strcmp(DeviceID, "SCORPION256") || 
-		!strcmp(DeviceID, "ATMTURBO512") || 
-		!strcmp(DeviceID, "PENTAGON1024") || 
-		!strcmp(DeviceID, "ATMTURBO1024")) {
+	if (128*1024 < Device->PagesCount * Device->GetPage(0)->Size) {
 		Warning("Only 128kb will be written to snapshot", fname);
 	}
 

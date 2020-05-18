@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.14.5 Documentation [2020-01-30]</title>
+  <title>SjASMPlus 1.15.0 Documentation [2020-05-18]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -186,6 +186,26 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>18.5.2020 - 1.15.0</term>
+
+            <listitem>
+              <synopsis>- added <link linkend="po_bplist">`BPLIST`</link> and <link linkend="po_setbp">`SETBP`</link> to export breakpoints info from asm for Unreal and ZEsarUX emulators
+- added ZX-like <link linkend="po_device">devices</link> with 2/4/8 MiB of virtual memory
+- the fake-sysvars/state of ZXSPECTRUM48/128/... devices reworked, moving stack down by default
+- behaviour of <link linkend="s_cli">`--fullpath`</link> option unified across all platforms and compilers
+- <link linkend="po_defarray">`DEFARRAY`</link> has new operator `[#]` to retrieve current size of array.
+- <link linkend="po_mmu">`MMU`</link> has new optional third argument to set also address (like ORG)
+- use of forward reference in <link linkend="ca_if">IF/IFN</link> emits only warning, and can be suppressed
+- internal Lua updated to 5.1.5 (last official 5.1 version), STDIN can be read multiple times
+- new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro_examples</ulink>: `sj_sysvars.i.asm` and `section.asm`, new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/lua_examples">lua_examples</ulink>: `lua_sin_table.asm`
+- RAM limit exceeded warning/error reworked to report with more sense, fixed bug with missing labels
+- <link linkend="po_savetrd">`SAVETRD`</link> warning about invalid extension can be suppressed by "; ok"
+- <link linkend="po_emptytrd">`EMPTYTRD`</link> takes as second argument disc label
+- added <link linkend="s_cli">`--outprefix`</link> option to prefix any output-directive filename (<ulink url="https://github.com/z00m128/sjasmplus/issues/102">issue #102</ulink>)</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>30.1.2020 - 1.14.5</term>
 
             <listitem>
@@ -345,6 +365,9 @@
   extra "exit" DD00 and "break" DD01 fake instructions)
   --i8080                  Limit valid instructions to i8080 only (+ no fakes)
   --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)
+  --outprefix=&lt;path&gt;       Prefix for save/output/.. filenames in directives
+  Note: if the prefix is folder, the folder must exist before assembling. Prefix
+        is applied only to filenames defined in source (not to CLI arguments).
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt; ( --inc without "=" to empty the list)
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)
@@ -361,10 +384,12 @@
   Note: "lst" or "lstlab" will turn STDERR into listing file (this will clash with
   `--lst`, use only one of the options) and some diagnostic messages of "all"
   are omitted, as they are not part of listing files.
-  --fullpath               Show full path to error file
+  --fullpath               Show full path to file in errors
+  Note: the "fullpath" starts from current working directory, not from file system
+		root (the MS_VS build was fixed to behave this way since v1.15.0)
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
-  -                        Reads STDIN as source (no other sourcefile allowed)
+  -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
@@ -1105,11 +1130,36 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="device_zx2048" />ZXSPECTRUM2048</term>
+
+            <listitem>
+              <para>Similar to other spectrum devices, has 128 RAM pages (0-127) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="device_zx4096" />ZXSPECTRUM4096</term>
+
+            <listitem>
+              <para>Similar to other spectrum devices, has 256 RAM pages (0-255) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="device_zx8192" />ZXSPECTRUM8192</term>
+
+            <listitem>
+              <para>Similar to other spectrum devices, has 512 RAM pages (0-511) with size 4000h.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="device_zxn" />ZXSPECTRUMNEXT</term>
 
             <listitem>
               <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
-              RAM pages (0-223) totalling at 1.75MiB of memory. The default mapping
+              RAM pages (0-223) totalling at 1.75MiB of memory. The <ulink
+                url="https://wiki.specnext.dev/Memory_map#Z80_Visible_Memory_map">default mapping</ulink>
               is similar to ZX128, paging in: {14, 15, 10, 11, 4, 5, 0, 1} pages.
               Default slot is 7 (memory range 0xE000..0xFFFF).
               All memory is zeroed during initialization.</para>
@@ -1329,6 +1379,35 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_bplist" />BPLIST &lt;filename&gt; [unreal|zesarux]</term>
+
+            <listitem>
+				<para>
+					<emphasis>Works only in real device emulation mode. See
+						<link linkend="po_device">DEVICE</link>.</emphasis>
+				</para>
+				<para>Opens file to export breakpoints info directly from ASM source, currently two
+					flavours of export are supported: <code>unreal</code> (default) and
+					<code>zesarux</code>. For latest Unreal emulators use filename "bpx.ini", you
+					can then load the file from the emulator UI. For ZEsarUX the file will contain
+					command-line options, which you can add to the command when launching the emulator.
+				</para>
+				<para>(current version of ZEsarUX will not catch the very first instruction of freshly
+					loaded snapshot/NEX/... file, or it will even disable breakpoints when changing
+					machine parameters and ignore the <code>--enable-breakpoints</code> option - will
+					be hopefully improved in the future)
+				  <example>
+                  <title></title>
+
+                  <programlisting>    BPLIST "bpx.ini" unreal  ; open breakpoints list in "Unreal" format
+    ; or (only one file per assembling-unit can be specified)
+    BPLIST "cmd_line_options.txt" zesarux ; open breakpoints list in "ZEsarUX" format</programlisting>
+				  </example>
+				</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_byte" />BYTE &lt;bytes&gt;</term>
 
             <listitem>
@@ -1408,12 +1487,12 @@ END_OF_PROGRAM</programlisting></para>
             <term><anchor id="po_defarray" />DEFARRAY &lt;id&gt; &lt;replacements&gt;</term>
 
             <listitem>
-              <para>Array of DEFINEs<example>
+				<para>Array of DEFINEs. Use <code>id[#]</code> to retrieve current size of array.<example>
                   <title>docs_examples/po_defarray.asm</title>
 
                   <para><programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
 CNT DEFL 0 ;or CNT=0
-    DUP 6
+    DUP myarray[#]      ; 6
     DISPLAY myarray[CNT]
 CNT DEFL CNT+1 ;or CNT=CNT+1
     EDUP</programlisting></para>
@@ -1548,13 +1627,18 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_device" />DEVICE &lt;deviceid&gt;</term>
+            <term><anchor id="po_device" />DEVICE &lt;deviceid&gt;[, &lt;RAMTOP&gt;]</term>
 
             <listitem>
               <para>Enables <link linkend="s_realdevice">real device emulation
               mode</link> by it identifier. If there is only single DEVICE directive
               in whole source batch, it becomes "global" and the device affects all
               lines of source, otherwise the DEVICE is applied for lines following it.</para>
+
+              <para>For ZXSPECTRUM-like devices (except ZX Next) you can provide RAMTOP value,
+				  which will init the device memory in similar way as "<code>CLEAR &lt;RAMTOP&gt;</code>"
+				  in BASIC would do, putting top of the fake-stack at the RAMTOP address. The
+				  default RAMTOP is since v1.15.0 0x5D5B (it was 0xFF57 before).</para>
 
               <para>Predefined devices' identifiers list:</para>
 
@@ -1564,6 +1648,9 @@ counter = counter + 1
  ZXSPECTRUM256 ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
  ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
  ZXSPECTRUM1024
+ ZXSPECTRUM2048
+ ZXSPECTRUM4096
+ ZXSPECTRUM8192
  ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
                 ; (default pages map: 14, 15, 10, 11, 4, 5, 0, 1) (default slot: 7 (0xE000..0xFFFF))
 
@@ -1763,11 +1850,10 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_emptytrd" />EMPTYTRD &lt;filenameoftrdimage&gt;</term>
+            <term><anchor id="po_emptytrd" />EMPTYTRD &lt;filenameoftrdimage&gt;[,&lt;disclabel&gt;]</term>
 
             <listitem>
-              <para><emphasis>Useful only for ZX-Spectrum
-              users</emphasis></para>
+              <para><emphasis>Useful only for ZX-Spectrum users</emphasis></para>
 
               <para>Create the empty TRD image for emulators of ZX-Spectrum.
               See example of <link linkend="po_savetrd">SAVETRD</link>.</para>
@@ -2076,7 +2162,7 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_mmu" />MMU &lt;first slot number&gt; [&lt;last slot number&gt;|&lt;single slot option&gt;], &lt;page number&gt;</term>
+            <term><anchor id="po_mmu" />MMU &lt;first slot number&gt; [&lt;last slot number&gt;|&lt;single slot option&gt;], &lt;page number&gt;[,&lt;address&gt;]</term>
 
             <listitem>
               <para>Maps memory page(s) to slot(s), similar to SLOT + PAGE combination, but allows
@@ -2085,6 +2171,9 @@ ALLPASS -  interpret Lua script in all passes. It is need, if you generate some 
               functionality. The slot behaviour will stay set in the current DEVICE until reset
               by another MMU specifying same slot (even as part of range, that will clear the option
               to "default").</para>
+
+		  <para>The optional third argument is address for <link linkend="po_org">ORG</link>
+			  functionality.</para>
 
               <para>Single slot option (default state is: no error/warning and no wrap = nothing special):
                 <synopsis>e = error on writing beyond last byte of slot
@@ -2524,6 +2613,37 @@ START  ....     ; some code
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_setbp" />SETBP [&lt;expression&gt;]</term>
+          </varlistentry>
+          <varlistentry>
+            <term><anchor id="po_setbreakpoint" />SETBREAKPOINT [&lt;expression&gt;]</term>
+
+            <listitem>
+				<para>
+					<emphasis>Works only in real device emulation mode. See
+						<link linkend="po_device">DEVICE</link>.</emphasis>
+				</para>
+				<para>Will add execution-type breakpoint at address &lt;expression&gt; to the
+					<link linkend="po_bplist">BPLIST</link> export file. If no expression is specified,
+					the current program counter will be used.
+				  <example>
+                  <title></title>
+
+                  <programlisting>    BPLIST "cmd_line.options.txt" zesarux ; open breakpoints list in "ZEsarUX" format
+start:
+        nop     ; ZEsarUX will not catch very first instruction of snapshot file loaded
+        SETBP   ; so breakpoint ahead of the second instruction (after first "nop")
+        xor  a
+        SETBP some_routine_label  ; set also some breakpoint to other code by its label
+        SETBREAKPOINT $0D6B       ; alias of SETBP, works identically
+        ; ... your code of app
+					  </programlisting>
+				  </example>
+				</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_shellexec" />SHELLEXEC &lt;filename&gt;[,&lt;parameters&gt;]</term>
 
             <listitem>
@@ -2687,7 +2807,7 @@ START  ....     ; some code
     <section>
       <title><anchor id="s_conditional_assembly" />Conditional assembly</title>
 
-      <para>It may be useful to assemble a part or not based on a certain
+      <para>It may be useful to assemble a part (or not) based on a certain
       condition.</para>
 
       <para><variablelist>
@@ -2697,6 +2817,12 @@ START  ....     ; some code
             <listitem>
               <para>If &lt;expression&gt; is non-zero the following lines are
               assembled until an ELSE or ENDIF.</para>
+
+              <para>Forward reference of label will cause warning - as any machine code emitted inside
+				  the IF/IFN block with such expression can lead to unstable results. If you are sure
+				  the late definition of label will not affect resulting machine code (the IF block
+				  does not emit any machine code and does not define any label), you can suppress the
+				  warning with end-of-line comment "ok".</para>
             </listitem>
           </varlistentry>
 
@@ -3824,7 +3950,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 		  
 		  <varlistentry>
 			  <term><anchor id="nex_open" />
-				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank 0..111&gt;[,&lt;fileVersion 2..3&gt;]]]]
+				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank16k 0..111&gt;[,&lt;fileVersion 2..3&gt;]]]]
 			  </term>
 			  <listitem>
 				  <para>
@@ -4156,7 +4282,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 
 		  <varlistentry>
 			  <term><anchor id="nex_bank" />
-				  SAVENEX BANK &lt;bank 0..111&gt;[,...]
+				  SAVENEX BANK &lt;bank16k 0..111&gt;[,...]
 			  </term>
 			  <listitem>
 				  <para>
@@ -4169,7 +4295,7 @@ binData.value2          EQU 0x8101   ; address</synopsis>
 		  
 		  <varlistentry>
 			  <term><anchor id="nex_auto" />
-				  SAVENEX AUTO [&lt;fromBank 0..111&gt;[,&lt;toBank 0..111&gt;]]
+				  SAVENEX AUTO [&lt;fromBank16k 0..111&gt;[,&lt;toBank16k 0..111&gt;]]
 			  </term>
 			  <listitem>
 				  <para>

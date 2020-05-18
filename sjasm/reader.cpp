@@ -300,6 +300,16 @@ int check16(aint val) {
 	return 1;
 }
 
+int check16u(aint val) {
+	if (val < 0 || val > 65535) {
+		char buffer[64];
+		sprintf(buffer, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
+		Warning(buffer);
+		return 0;
+	}
+	return 1;
+}
+
 int check24(aint val) {
 	if (val < -16777216 || val > 16777215) {
 		char buffer[64];
@@ -736,9 +746,18 @@ int GetBytesHexaText(char*& p, int e[]) {
 
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
-char* GetFileName(char*& p, bool convertslashes) {
+static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) {
 	char* newFn = new char[LINEMAX+1], * result = newFn;
 	if (NULL == newFn) ErrorOOM();
+	// prepend the filename with path-prefix, if some was requested
+	if (pathPrefix) {
+		while (*pathPrefix) {
+			*newFn = *pathPrefix;
+			if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;	// convert slashes if enabled
+			++newFn, ++pathPrefix;
+			if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
+		}
+	}
 	// check if some and which delimiter is used for this filename (does advance over white chars)
 	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
 	delimiterOfLastFileName = DelimiterAnyBegins(p);
@@ -763,6 +782,14 @@ char* GetFileName(char*& p, bool convertslashes) {
 	}
 	SkipBlanks(p);			// skip blanks any way
 	return result;
+}
+
+char* GetOutputFileName(char*& p, bool convertslashes) {
+	return GetFileName(p, Options::OutPrefix, convertslashes);
+}
+
+char* GetFileName(char*& p, bool convertslashes) {
+	return GetFileName(p, nullptr, convertslashes);
 }
 
 EDelimiterType GetDelimiterOfLastFileName() {

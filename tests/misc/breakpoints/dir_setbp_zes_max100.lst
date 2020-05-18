@@ -1,0 +1,17 @@
+# file opened: dir_setbp_zes_max100.asm
+ 1    0000                  DEVICE ZXSPECTRUM48
+ 2    0000                  BPLIST "somefile.exp" zesarux
+ 3    0000
+ 4    0000                  ; test the "maximum 100 breakpoints" warning for ZEsarUX type of file
+ 5    0000                  OPT listoff
+# listing file suspended...
+11    0000                  OPT liston
+12    0000
+dir_setbp_zes_max100.asm(13): warning: Maximum amount of 100 breakpoints has been already reached, this one is ignored
+13    0000                  SETBP   $EEEE   ; ok ; should do warning (can't be suppressed)
+14    0000
+# file closed: dir_setbp_zes_max100.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0064   val_i

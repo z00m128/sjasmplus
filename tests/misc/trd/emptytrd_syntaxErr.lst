@@ -1,0 +1,12 @@
+# file opened: emptytrd_syntaxErr.asm
+emptytrd_syntaxErr.asm(1): error: [EMPTYTRD] Syntax error: EMPTYTRD        
+1     0000                  EMPTYTRD        ; no filename
+emptytrd_syntaxErr.asm(2): error: [EMPTYTRD] Syntax error, empty label: EMPTYTRD "emptytrd.trd" ,       
+2     0000                  EMPTYTRD "emptytrd.trd" ,       ; missing label
+emptytrd_syntaxErr.asm(3): warning: [EMPTYTRD] label will be truncated to 8 characters: ABCDEFGH
+3     0000                  EMPTYTRD "emptytrd.trd" , ABCDEFGHI    ; label truncated
+4     0000
+# file closed: emptytrd_syntaxErr.asm
+
+Value    Label
+------ - -----------------------------------------------------------

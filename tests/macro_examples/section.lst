@@ -1,0 +1,131 @@
+# file opened: section.asm
+ 1    0000                  MACRO SECTION sectionName?
+ 2    0000 ~                    ; init new section to ORG 0
+ 3    0000 ~                    IFNDEF SECTION_MACRO_KNOWN_SECTION_sectionName?
+ 4    0000 ~                        DEFINE SECTION_MACRO_KNOWN_SECTION_sectionName?
+ 5    0000 ~            SECTION_MACRO_LAST_ADR_sectionName? = 0
+ 6    0000 ~                    ENDIF
+ 7    0000 ~                    ; if sections are switching, remember position of previous
+ 8    0000 ~                    IFDEF SECTION_MACRO_PREVIOUS_SECTION
+ 9    0000 ~            SECTION_MACRO_LAST_ADR_SECTION_MACRO_PREVIOUS_SECTION = $
+10    0000 ~                        UNDEFINE SECTION_MACRO_PREVIOUS_SECTION
+11    0000 ~                    ENDIF
+12    0000 ~                    DEFINE SECTION_MACRO_PREVIOUS_SECTION sectionName?
+13    0000 ~                    ; and set/restore the position of requested section
+14    0000 ~                    ORG SECTION_MACRO_LAST_ADR_sectionName?
+15    0000                  ENDM
+16    0000
+17    0000                  DEVICE ZXSPECTRUM48
+18    0000              ; WARNING - the SECTION macro makes sense only with DEVICE virtual memory
+19    0000              ; if you do just simple `OUTPUT "section.bin"`, the output will mix all
+20    0000              ; sections together.
+21    0000              ; To output separate sections without mixing you have to save each section
+22    0000              ; separately at the end of assembling from the virtual-device memory.
+23    0000
+24    0000                  SECTION @code       ; use reasonable section names which can form part of label name
+24    0000             >        ; init new section to ORG 0
+24    0000             >        IFNDEF SECTION_MACRO_KNOWN_SECTION_@code
+24    0000             >            DEFINE SECTION_MACRO_KNOWN_SECTION_sectionName?
+24    0000             >SECTION_MACRO_LAST_ADR_@code        = 0
+24    0000             >        ENDIF
+24    0000             >        ; if sections are switching, remember position of previous
+24    0000             >        IFDEF SECTION_MACRO_PREVIOUS_SECTION
+24    0000 ~           >SECTION_MACRO_LAST_ADR_SECTION_MACRO_PREVIOUS_SECTION = $
+24    0000 ~           >            UNDEFINE SECTION_MACRO_PREVIOUS_SECTION
+24    0000             >        ENDIF
+24    0000             >        DEFINE SECTION_MACRO_PREVIOUS_SECTION sectionName?
+24    0000             >        ; and set/restore the position of requested section
+24    0000             >        ORG SECTION_MACRO_LAST_ADR_@code
+25    0000 C7                   rst     0       ; this will land to address $0000, because no ORG was done
+26    0001                      ORG     $8000   ; at the first usage of SECTION, use ORG to set initial address
+27    8000              @code_start equ   $
+28    8000 00                   nop             ; `nop` at $8000
+29    8001
+30    8001                  SECTION @data
+30    8001             >        ; init new section to ORG 0
+30    8001             >        IFNDEF SECTION_MACRO_KNOWN_SECTION_@data
+30    8001             >            DEFINE SECTION_MACRO_KNOWN_SECTION_sectionName?
+30    8001             >SECTION_MACRO_LAST_ADR_@data = 0
+30    8001             >        ENDIF
+30    8001             >        ; if sections are switching, remember position of previous
+30    8001             >        IFDEF SECTION_MACRO_PREVIOUS_SECTION
+30    8001             >SECTION_MACRO_LAST_ADR_@code        = $
+30    8001             >            UNDEFINE SECTION_MACRO_PREVIOUS_SECTION
+30    8001             >        ENDIF
+30    8001             >        DEFINE SECTION_MACRO_PREVIOUS_SECTION sectionName?
+30    8001             >        ; and set/restore the position of requested section
+30    8001             >        ORG SECTION_MACRO_LAST_ADR_@data
+31    0000                      ORG     $D000
+32    D000              @data_start equ   $
+33    D000 61 62 63 00  s1:     DZ      "abc"
+34    D004
+35    D004                  SECTION @code
+35    D004             >        ; init new section to ORG 0
+35    D004             >        IFNDEF SECTION_MACRO_KNOWN_SECTION_@code
+35    D004 ~           >            DEFINE SECTION_MACRO_KNOWN_SECTION_sectionName?
+35    D004 ~           >SECTION_MACRO_LAST_ADR_sectionName? = 0
+35    D004             >        ENDIF
+35    D004             >        ; if sections are switching, remember position of previous
+35    D004             >        IFDEF SECTION_MACRO_PREVIOUS_SECTION
+35    D004             >SECTION_MACRO_LAST_ADR_@data = $
+35    D004             >            UNDEFINE SECTION_MACRO_PREVIOUS_SECTION
+35    D004             >        ENDIF
+35    D004             >        DEFINE SECTION_MACRO_PREVIOUS_SECTION sectionName?
+35    D004             >        ; and set/restore the position of requested section
+35    D004             >        ORG SECTION_MACRO_LAST_ADR_@code
+36    8001 21 00 D0             ld      hl,s1   ; `ld hl,..` at $8001, s1 = $D000
+37    8004 01 04 D0             ld      bc,s2   ; s2 = $D004
+38    8007
+39    8007                  SECTION @data
+39    8007             >        ; init new section to ORG 0
+39    8007             >        IFNDEF SECTION_MACRO_KNOWN_SECTION_@data
+39    8007 ~           >            DEFINE SECTION_MACRO_KNOWN_SECTION_sectionName?
+39    8007 ~           >SECTION_MACRO_LAST_ADR_sectionName? = 0
+39    8007             >        ENDIF
+39    8007             >        ; if sections are switching, remember position of previous
+39    8007             >        IFDEF SECTION_MACRO_PREVIOUS_SECTION
+39    8007             >SECTION_MACRO_LAST_ADR_@code = $
+39    8007             >            UNDEFINE SECTION_MACRO_PREVIOUS_SECTION
+39    8007             >        ENDIF
+39    8007             >        DEFINE SECTION_MACRO_PREVIOUS_SECTION sectionName?
+39    8007             >        ; and set/restore the position of requested section
+39    8007             >        ORG SECTION_MACRO_LAST_ADR_@data
+40    D004 65 66 67 00  s2:     DZ      "efg"
+41    D008              @data_end equ   $
+42    D008
+43    D008                  SECTION @code
+43    D008             >        ; init new section to ORG 0
+43    D008             >        IFNDEF SECTION_MACRO_KNOWN_SECTION_@code
+43    D008 ~           >            DEFINE SECTION_MACRO_KNOWN_SECTION_sectionName?
+43    D008 ~           >SECTION_MACRO_LAST_ADR_sectionName? = 0
+43    D008             >        ENDIF
+43    D008             >        ; if sections are switching, remember position of previous
+43    D008             >        IFDEF SECTION_MACRO_PREVIOUS_SECTION
+43    D008             >SECTION_MACRO_LAST_ADR_@data = $
+43    D008             >            UNDEFINE SECTION_MACRO_PREVIOUS_SECTION
+43    D008             >        ENDIF
+43    D008             >        DEFINE SECTION_MACRO_PREVIOUS_SECTION sectionName?
+43    D008             >        ; and set/restore the position of requested section
+43    D008             >        ORG SECTION_MACRO_LAST_ADR_@code
+44    8007 18 FE                jr      $       ; `jr` at $8007 after `ld bc,..`
+45    8009              @code_end equ   $
+46    8009
+47    8009                  ; save the binary result of sections
+48    8009
+49    8009                  ; saving code (except that `rst 0`)
+50    8009                  SAVEBIN "section.bin", code_start, code_end-code_start
+51    8009                  ; saving strings
+52    8009                  SAVEBIN "section.raw", data_start, data_end-data_start
+53    8009
+# file closed: section.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8007   SECTION_MACRO_LAST_ADR_@code
+0x8000   code_start
+0xD008   SECTION_MACRO_LAST_ADR_@data
+0xD000   data_start
+0xD000   s1
+0xD004   s2
+0xD008   data_end
+0x8009   code_end

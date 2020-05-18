@@ -25,6 +25,7 @@
     out     (c),e       ; #ED59
     adc     hl,de       ; #ED5A
     ld      de,(#100)   ; #ED5B0001
+    im 2                ; #ED5E
     ld      a,r         ; #ED5F
 
     in      h,(c)       ; #ED60

@@ -34,6 +34,8 @@
 
 #define DESTBUFLEN 8192
 
+static void CloseBreakpointsFile();
+
 // ReadLine buffer and variables around
 char rlbuf[4096 * 2]; //x2 to prevent errors
 char * rlpbuf, * rlpbuf_end, * rlppos;
@@ -207,13 +209,31 @@ const char* FilenameBasePos(const char* fullname) {
 	return baseName;
 }
 
+void ConstructDefaultFilename(char* dest, size_t dest_size, const char* ext, bool checkIfDestIsEmpty) {
+	if (nullptr == dest || nullptr == ext || !ext[0]) exit(1);	// invalid arguments
+	// if the destination buffer has already some content and check is requested, exit
+	if (checkIfDestIsEmpty && dest[0]) return;
+	size_t extSz = strlen(ext);
+	dest[0] = 0;
+	// construct the new default name - search for explicit name in sourcefiles
+	for (SSource & src : sourceFiles) {
+		if (!src.fname[0]) continue;
+		STRNCPY(dest, dest_size, src.fname, dest_size-1-extSz);
+		dest[dest_size-1-extSz] = 0;
+		break;
+	}
+	if (!dest[0]) STRNCPY(dest, dest_size, "asm", dest_size-1);		// no explicit, use "asm" base
+	// replace the extension
+	STRCPY(FilenameExtPos(dest), dest_size, ext);
+}
+
 void CheckRamLimitExceeded() {
 	if (Options::IsLongPtr) return;		// in "longptr" mode with no device keep the address as is
 	static bool notWarnedCurAdr = true;
 	static bool notWarnedDisp = true;
 	char buf[64];
 	if (CurAddress >= 0x10000) {
-		if (notWarnedCurAdr) {
+		if (LASTPASS == pass && notWarnedCurAdr) {
 			SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
 			Warning(buf);
 			notWarnedCurAdr = false;
@@ -221,7 +241,7 @@ void CheckRamLimitExceeded() {
 		if (PseudoORG) CurAddress &= 0xFFFF;	// fake DISP address gets auto-wrapped FFFF->0
 	} else notWarnedCurAdr = true;
 	if (PseudoORG && adrdisp >= 0x10000) {
-		if (notWarnedDisp) {
+		if (LASTPASS == pass && notWarnedDisp) {
 			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
 			Warning(buf);
 			notWarnedDisp = false;
@@ -381,6 +401,8 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 			if (LASTPASS == pass && !preserveDeviceMemory) *MemoryPointer = (char)byte;
 			++MemoryPointer;
 		}
+	} else {
+		CheckRamLimitExceeded();
 	}
 	++CurAddress;
 	if (PseudoORG) ++adrdisp;
@@ -435,18 +457,18 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 	// search current directory first (unless "systemPathsBeforeCurrent")
 	if (!systemPathsBeforeCurrent) {
 		// if found, just skip the `while (dir)` loop
-		if (SearchPath(CurrentDirectory, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
+		if (SJ_SearchPath(CurrentDirectory, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
 		else fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 	}
 	while (dir) {
-		if (SearchPath(dir->string, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) break;
+		if (SJ_SearchPath(dir->string, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) break;
 		fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 		dir = dir->next;
 	}
 	// if the file was not found in the list, and current directory was not searched yet
 	if (!fullFilePath[0] && systemPathsBeforeCurrent) {
 		//and the current directory was not searched yet, do it now, set empty string if nothing
-		if (!SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
+		if (!SJ_SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
 			fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 		}
 	}
@@ -532,9 +554,10 @@ void BinIncFile(char* fname, int offset, int length) {
 
 static void OpenDefaultList(const char *fullpath);
 
-static auto stdin_log_it = stdin_log.cbegin();
+static stdin_log_t::const_iterator stdin_read_it;
+static stdin_log_t* stdin_log = nullptr;
 
-void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
+void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t* fStdinLog)
 {
 	const char* oFileNameFull = fileNameFull;
 	TextFilePos oSourcePos = CurSourcePos;
@@ -544,11 +567,12 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 	if (++IncludeLevel > 20) {
 		Error("Over 20 files nested", NULL, FATAL);
 	}
-	if (!*nfilename) {
+	if (!*nfilename && fStdinLog) {
 		fullpath = STRDUP("console_input");
 		filenamebegin = fullpath;
 		FP_Input = stdin;
-		stdin_log_it = stdin_log.cbegin();	// reset read iterator (for 2nd+ pass)
+		stdin_log = fStdinLog;
+		stdin_read_it = stdin_log->cbegin();	// reset read iterator (for 2nd+ pass)
 	} else {
 		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
 
@@ -590,7 +614,12 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 	ReadBufLine();
 
 	if (stdin != FP_Input) fclose(FP_Input);
-	else if (1 == pass) stdin_log.push_back(0);		// add extra zero terminator
+	else {
+		if (1 == pass) {
+			stdin_log->push_back(0);	// add extra zero terminator
+			clearerr(stdin);			// reset EOF on the stdin for another round of input
+		}
+	}
 	CurrentDirectory = oCurrentDirectory;
 
 	// show in listing file which file was closed
@@ -622,6 +651,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent)
 
 void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)
 {
+	auto oStdin_log = stdin_log;
+	auto oStdin_read_it = stdin_read_it;
 	FILE* oFP_Input = FP_Input;
 	FP_Input = 0;
 
@@ -638,6 +669,8 @@ void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)
 	free(buf);
 
 	FP_Input = oFP_Input;
+	stdin_log = oStdin_log;
+	stdin_read_it = oStdin_read_it;
 }
 
 typedef struct {
@@ -671,15 +704,15 @@ static bool ReadBufData() {
 	if (stdin == FP_Input) {
 		// store copy of stdin into stdin_log during pass 1
 		if (1 == pass && rlpbuf < rlpbuf_end) {
-			stdin_log.insert(stdin_log.end(), rlpbuf, rlpbuf_end);
+			stdin_log->insert(stdin_log->end(), rlpbuf, rlpbuf_end);
 		}
 		// replay the log in 2nd+ pass
 		if (1 < pass) {
 			rlpbuf_end = rlpbuf;
-			long toCopy = std::min(8000L, (long)std::distance(stdin_log_it, stdin_log.cend()));
+			long toCopy = std::min(8000L, (long)std::distance(stdin_read_it, stdin_log->cend()));
 			if (0 < toCopy) {
-				memcpy(rlbuf, &(*stdin_log_it), toCopy);
-				stdin_log_it += toCopy;
+				memcpy(rlbuf, &(*stdin_read_it), toCopy);
+				stdin_read_it += toCopy;
 				rlpbuf_end += toCopy;
 			}
 			*rlpbuf_end = 0;				// add zero terminator after new block
@@ -959,6 +992,7 @@ void Close() {
 		FP_ListingFile = NULL;
 	}
 	CloseSld();
+	CloseBreakpointsFile();
 }
 
 int SaveRAM(FILE* ff, int start, int length) {
@@ -1236,9 +1270,7 @@ static void OpenSld_buildDefaultNameIfNeeded() {
 	// check if SLD file name is already explicitly defined, or default is wanted
 	if (Options::SourceLevelDebugFName[0] || !Options::IsDefaultSldName) return;
 	// name is still empty, and default is wanted, create one (start with "out" or first source name)
-	char* extPos = FilenameExtPos(
-		Options::SourceLevelDebugFName, Options::SourceStdIn ? "out" : SourceFNames[0], LINEMAX-10);
-	STRCPY(extPos, 10, ".sld.txt");		// overwrite extension
+	ConstructDefaultFilename(Options::SourceLevelDebugFName, LINEMAX, ".sld.txt", false);
 }
 
 // returns true only in the LASTPASS and only when "sld" file was specified by user
@@ -1309,6 +1341,56 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 				CurSourcePos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
 				pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
+}
+
+/////// Breakpoints list (for different emulators)
+static FILE* FP_BreakpointsFile = nullptr;
+static EBreakpointsFile breakpointsType;
+static int breakpointsCounter;
+
+void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type) {
+	if (nullptr == filename || !filename[0]) {
+		Error("empty filename", filename, EARLY);
+		return;
+	}
+	if (FP_BreakpointsFile) {
+		Error("breakpoints file was already opened", nullptr, EARLY);
+		return;
+	}
+	if (!FOPEN_ISOK(FP_BreakpointsFile, filename, "w")) {
+		Error("Error opening file", filename, FATAL);
+	}
+	breakpointsCounter = 0;
+	breakpointsType = type;
+}
+
+static void CloseBreakpointsFile() {
+	if (!FP_BreakpointsFile) return;
+	fclose(FP_BreakpointsFile);
+	FP_BreakpointsFile = nullptr;
+}
+
+void WriteBreakpoint(const aint val) {
+	if (!FP_BreakpointsFile) {
+		if (warningNotSuppressed()) Warning("breakpoints file was not specified");
+		return;
+	}
+	++breakpointsCounter;
+	switch (breakpointsType) {
+		case BPSF_UNREAL:
+			check16u(val);
+			fprintf(FP_BreakpointsFile, "x0=0x%04X\n", val&0xFFFF);
+			break;
+		case BPSF_ZESARUX:
+			if (1 == breakpointsCounter) fputs(" --enable-breakpoints ", FP_BreakpointsFile);
+			if (100 < breakpointsCounter) {
+				Warning("Maximum amount of 100 breakpoints has been already reached, this one is ignored");
+				break;
+			}
+			check16u(val);
+			fprintf(FP_BreakpointsFile, "--set-breakpoint %d \"PC=%d\" ", breakpointsCounter, val&0xFFFF);
+			break;
+	}
 }
 
 //eof sjio.cpp

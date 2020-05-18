@@ -100,3 +100,24 @@ label3_p5:  ld sp,"66"  ; '166'     ; last byte of page 5, first two bytes of pa
     PAGE 6 : ASSERT {0x4000} == "66"
 
     LABELSLIST "mmu.lbl"
+
+;-----------------------------------------------------------
+; new part to test the optional third <address> argument
+    ; syntax errors
+    MMU 0 e,0,
+    MMU 0 e,0,!
+    MMU 0 e,0,0,
+
+    ; valid syntax with address -exercise different code-paths
+    ORG 0x1234
+    MMU 0, 0, 0x4000
+    ASSERT 0x4000 == $ && 6 == $$ && {0x0000} == "00" && {$} == "66"
+    MMU 0, 5, 0x12345   ; warning about truncating the address
+    ASSERT 0x2345 == $ && 5 == $$
+    DISP 0x8765
+    MMU 0, 7, 0x1234
+    ASSERT 0x1234 == $ && 7 ==  $$
+    MMU 0, 6, 0x3456    ; ok - suppress warning about ORG inside DISP
+    ASSERT 0x3456 == $ && 6 ==  $$
+    ENT
+    ASSERT 0x2345 == $ && 6 ==  $$

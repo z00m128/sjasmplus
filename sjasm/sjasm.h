@@ -63,6 +63,7 @@ namespace Options {
 		static std::stack<SSyntax> syxStack;	// previous syntax
 	} SSyntax;
 
+	extern char OutPrefix[LINEMAX];
 	extern char SymbolListFName[LINEMAX];
 	extern char ListingFName[LINEMAX];
 	extern char ExportFName[LINEMAX];
@@ -81,7 +82,6 @@ namespace Options {
 	extern bool AddLabelListing;
 	extern bool NoDestinationFile;
 	extern SSyntax syx;
-	extern bool SourceStdIn;
 	extern bool IsI8080;			// "i8080" CPU mode (must be set at CLI, blocks others)
 	extern bool IsLR35902;			// "Sharp LR35902" CPU mode (must be set at CLI, blocks others)
 	extern bool IsLongPtr;
@@ -114,9 +114,20 @@ extern char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], ErrorLine2[L
 extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 // the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
-extern char SourceFNames[128][MAX_PATH];
+typedef struct SSource {
+	char fname[MAX_PATH];
+	stdin_log_t* stdin_log;	// buffer for STDIN option, to replay input in 2nd+ pass
+
+// 	SSource();
+	SSource() = delete;
+	SSource(SSource && src);
+	SSource(const char* fname);
+	SSource(int);		// constructor for "stdin" type of source ("int" just to distinct it)
+	~SSource();
+} SSource;
+
+extern std::vector<SSource> sourceFiles;
 extern std::vector<std::string> openedFileNames;	// archive of all files opened (also includes!) (fullname!)
-extern std::vector<char> stdin_log;	// buffer for Options::SourceStdIn, to replay input in 2nd+ pass
 
 extern int ConvertEncoding;
 extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;

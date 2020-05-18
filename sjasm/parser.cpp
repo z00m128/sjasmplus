@@ -352,6 +352,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	char* rp = nl,* nid,* kp,* ver;
 	bool isPrevDefDir, isCurrDefDir = false;	// to remember if one of DEFINE-related directives was previous word
 	bool afterNonAlphaNum, afterNonAlphaNumNext = true;
+	char defarrayCountTxt[16] = { 0 };
 	while (*lp) {
 		const char c1 = lp[0], c2 = lp[1];
 		afterNonAlphaNum = afterNonAlphaNumNext;
@@ -433,7 +434,16 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 					while (White(*lp)) GrowSubIdByExtraChar(lp);
 					aint val;
 					if ('[' != *lp) Error("[ARRAY] Expression error", nextSubIdLp, SUPPRESS);
-					if ('[' == *lp && GrowSubIdByExtraChar(lp) && ParseExpressionNoSyntaxError(lp, val) && ']' == *lp) {
+					if ('[' == *lp && '#' == lp[1] && ']' == lp[2]) {	// calculate size of defarray
+						lp += 3;
+						val = 0;
+						while (a) {
+							++val;
+							a = a->next;
+						}
+						sprintf(defarrayCountTxt, "%d", val);
+						ver = defarrayCountTxt;
+					} else if ('[' == *lp && GrowSubIdByExtraChar(lp) && ParseExpressionNoSyntaxError(lp, val) && ']' == *lp) {
 						++lp;
 						while (0 < val && a) {
 							a = a->next;
@@ -557,6 +567,9 @@ void ParseLabel() {
 			}
 			if ((n = GetID(p)) && StructureTable.Emit(n, tp, p, gl)) {
 				lp = p;
+				// this was instancing STRUCT, make it also define "main" label for future "local" ones
+				tp = ValidateLabel(tp, true);
+				if (tp) delete[] tp;
 				return;
 			}
 			val = CurAddress;
@@ -725,7 +738,6 @@ void ParseLine(bool parselabels) {
 
 	// update current address by memory wrapping, current page, etc... (before the label is defined)
 	if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
-	else			CheckRamLimitExceeded();
 	ListAddress = CurAddress;
 
 	if (!ConvertEncoding) {

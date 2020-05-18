@@ -70,32 +70,27 @@ task:
   build_script: ContinuousIntegration\winbuild_vs15_2017.bat
   # exe is installed at the same location as the MinGW build does
   sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
-  # this mingw32 bat should work for just-building-examples even with exe from MSCC
   assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
-
-  # (commented out for the moment, until `--fullpath` produces identical results)
-  # try to run tests, but ignore the end result (some tests are expected to fail)
-  # (needs manual review from time to time, if the failures are as expected)
-  #assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat 1
+  assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat
 
 task:
-  name: FreeBSD clang-6 build (with unit tests)
+  name: FreeBSD clang build (with unit tests)
   env:
     CIRRUS_CLONE_DEPTH: 1
   freebsd_instance:
-    image: freebsd-12-0-release-amd64
+    image_family: freebsd-13-0-snap
     cpu: 4
     memory: 4G
   # lock pkg on current version (sjasmplus does not care as long as it can install ...)
   # install git (lite), GNU make and bash
   # (FreeBSD make can't handle current Makefile, git is needed for UnitTest++ submodule)
   sw_install_script: pkg lock -y pkg && pkg install -y git-lite gmake bash
-  #sw_versions2_script:
-    #- git --version || echo "no git"
-    #- bash --version || echo "no bash"
-    #- gmake --version || echo "no gmake"
-    #- cc --version || echo "no cc"
-    #- c++ --version || echo "no c++"
+  sw_versions2_script:
+    - git --version || echo "no git"
+    - bash --version || echo "no bash"
+    - gmake --version || echo "no gmake"
+    - cc --version || echo "no cc"
+    - c++ --version || echo "no c++"
   submodules_script:
     - git submodule init
     - git submodule update
@@ -109,7 +104,7 @@ task:
   env:
     CIRRUS_CLONE_DEPTH: 1
   osx_instance:
-    image: mojave-base
+    image: catalina-base
   #sw_versions2_script:
     #- git --version || echo "no git"
     #- bash --version || echo "no bash"

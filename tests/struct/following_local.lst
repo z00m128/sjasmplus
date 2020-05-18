@@ -1,0 +1,29 @@
+# file opened: following_local.asm
+ 1    0000                  STRUCT abc
+ 2    0000 ~            def     BYTE    0
+ 3    0000                  ENDS
+ 4    0000
+ 5    0000 01           test    abc     1
+ 6    0001 02           .local  DB      2       ; expected label is "test.local"
+ 7    0002
+ 8    0002 21 01 00         ld      hl,@test.local
+ 9    0005
+10    0005              zz:
+11    0005 03           .ls     abc     3       ; should become "zz.ls.*"
+12    0006 04           .local2 DB      4       ; should become "zz.local2"
+13    0007 11 05 00         ld      de,@zz.ls.def
+14    000A 21 06 00         ld      hl,@zz.local2
+15    000D
+# file closed: following_local.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X abc
+0x0000 X abc.def
+0x0000 X test
+0x0000 X test.def
+0x0001   test.local
+0x0005 X zz
+0x0005 X zz.ls
+0x0005   zz.ls.def
+0x0006   zz.local2

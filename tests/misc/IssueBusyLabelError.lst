@@ -1,0 +1,53 @@
+# file opened: IssueBusyLabelError.asm
+ 1    0000                  MODULE t1
+ 2    0000                  DEVICE  ZXSPECTRUM48
+ 3    0000                  org     #4000
+ 4    4000                  disp    #FFFF
+ 5    FFFF 11           zac     db      #11
+IssueBusyLabelError.asm(6): warning: RAM limit exceeded 0x10000 by DISP
+ 6    0000 22                   db      #22
+ 7    0001              len = $-zac
+ 8    0001                  ENT
+ 9    4002                  ENDMODULE
+10    4002
+11    4002                  MODULE t2
+12    4002                  DEVICE  NONE
+13    4002                  org     #4000
+14    4000                  disp    #FFFF
+15    FFFF 11           zac     db      #11
+IssueBusyLabelError.asm(16): warning: RAM limit exceeded 0x10000 by DISP
+16    0000 22                   db      #22
+17    0001              len = $-zac
+18    0001                  ENT
+19    4002                  ENDMODULE
+20    4002
+21    4002                  MODULE t3
+22    4002                  DEVICE  ZXSPECTRUM48
+23    4002                  org     #FFFF
+24    FFFF 11           zac     db      #11
+IssueBusyLabelError.asm(25): error: Write outside of device memory at: 65536
+25    0000 22                   db      #22
+26    0001              len = $-zac
+27    0001                  ENDMODULE
+28    0001
+29    0001                  MODULE t4
+30    0001                  DEVICE  NONE
+31    0001                  org     #FFFF
+32    FFFF 33           zac     db      #33
+IssueBusyLabelError.asm(33): warning: RAM limit exceeded 0x10000 by ORG
+33    0000 44                   db      #44
+34    0001              len = $-zac
+35    0001                  ENDMODULE
+36    0001
+# file closed: IssueBusyLabelError.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xFFFF   t1.zac
+0xFFFF0002 X t1.len
+0xFFFF   t2.zac
+0xFFFF0002 X t2.len
+0xFFFF   t3.zac
+0x0002 X t3.len
+0xFFFF   t4.zac
+0x0002 X t4.len

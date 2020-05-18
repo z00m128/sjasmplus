@@ -1,0 +1,25 @@
+# file opened: issue_100_RAM_limit_warning_disp.asm
+ 1    0000                   device zxspectrum48
+ 2    0000
+ 3    0000                   org  #FFFF
+ 4    FFFF C9                ret
+ 5    0000
+ 6    0000                   org  #8000
+ 7    8000                   disp #FFFF
+ 8    FFFF C9                ret
+ 9    0000                   ent
+10    8001
+11    8001                   device none
+12    8001
+13    8001                   org  #FFFF
+14    FFFF C9                ret
+15    0000
+16    0000                   org  #8000
+17    8000                   disp #FFFF
+18    FFFF C9                ret
+19    0000                   ent
+20    8001
+# file closed: issue_100_RAM_limit_warning_disp.asm
+
+Value    Label
+------ - -----------------------------------------------------------

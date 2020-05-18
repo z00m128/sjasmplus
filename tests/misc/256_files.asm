@@ -1,0 +1,5 @@
+    IFNDEF  __ALREADY_INITIALIZED__ : DEFINE __ALREADY_INITIALIZED__
+    OUTPUT "256_files.bin"
+x = 0
+    ENDIF
+x = x+1     DB  x

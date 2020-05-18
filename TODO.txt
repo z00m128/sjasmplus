@@ -8,6 +8,10 @@ Ped:
 add block/reserve which does really preserve the device memory content (currently only the
 structure block+align does preserve memory, and standalone ALIGN, but not DS/BLOCK)
 
+"emitted from here" error should maybe show original line, as people not using error parsing
+claim it's confusing/useless.
+ -> turned out to be lot more difficult than expected (macros + lua inlining)
+
 remote build script - "done" ATM, waiting for feedback/improvements suggestions/logs
 
 ARM emulation on x86: https://github.com/nongiach/arm_now  ???
@@ -24,6 +28,8 @@ ARM emulation on x86: https://github.com/nongiach/arm_now  ???
     aha tak na zmakebas je len patch
     a teraz som si spomenul, ze u mna je to cele uz patchnute
     https://github.com/z00m128/zmakebas (edited)
+
++3DOS v pythone: https://github.com/shred/nextskeleton/blob/master/skeleton/tools/makeautoexec.py
 
 
 `make install` doesn't refresh binary???

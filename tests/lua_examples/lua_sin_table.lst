@@ -1,0 +1,93 @@
+# file opened: lua_sin_table.asm
+ 1    0000
+ 2    0000                  ; Sinus table generator - using lua script, because sjasmplus itself does not have
+ 3    0000                  ; floating point arithmetics and sin/cos/... functions.
+ 4    0000
+ 5    0000                  org $8000
+ 6    8000
+ 7    8000              sin_table:  ; check listing file to see resulting table bytes
+ 8    8000                  lua
+ 9    8000 ~                    -- 256 bytes (index 0..255):
+10    8000 ~                    for i = 0, 255, 1 do
+11    8000 ~
+12    8000 ~                        -- index 0..255 will cover angle range < 0, 2Pi )
+13    8000 ~                        -- i.e. going in sinus values 0 -> +1 -> 0 -> -1 -> 0
+14    8000 ~                        -- For different range, the /128.0 must be modified:
+15    8000 ~                        --     /256.0 is 0..Pi, /512.0 is 0..Pi/2, etc
+16    8000 ~
+17    8000 ~                        -- The *15.5 is amplitude of final values
+18    8000 ~                        -- to be -15 .. +15 (+0.5 for "floor" compensation)
+19    8000 ~                        -- in this example values are signed byte (-15 == 241 == 0xF1)
+20    8000 ~
+21    8000 ~                        sj.add_byte(math.floor(math.sin(math.pi * i / 128.0) * 15.5))
+22    8000 ~                    end
+23    8000 00 00 00 01      endlua
+23    8004 01 01 02 02
+23    8008 03 03 03 04
+23    800C 04 04 05 05
+23    8010 05 06 06 06
+23    8014 07 07 07 08
+23    8018 08 08 09 09
+23    801C 09 0A 0A 0A
+23    8020 0A 0B 0B 0B
+23    8024 0B 0C 0C 0C
+23    8028 0C 0D 0D 0D
+23    802C 0D 0D 0E 0E
+23    8030 0E 0E 0E 0E
+23    8034 0E 0E 0F 0F
+23    8038 0F 0F 0F 0F
+23    803C 0F 0F 0F 0F
+23    8040 0F 0F 0F 0F
+23    8044 0F 0F 0F 0F
+23    8048 0F 0F 0F 0E
+23    804C 0E 0E 0E 0E
+23    8050 0E 0E 0E 0D
+23    8054 0D 0D 0D 0D
+23    8058 0C 0C 0C 0C
+23    805C 0B 0B 0B 0B
+23    8060 0A 0A 0A 0A
+23    8064 09 09 09 08
+23    8068 08 08 07 07
+23    806C 07 06 06 06
+23    8070 05 05 05 04
+23    8074 04 04 03 03
+23    8078 03 02 02 01
+23    807C 01 01 00 00
+23    8080 00 FF FF FE
+23    8084 FE FE FD FD
+23    8088 FC FC FC FB
+23    808C FB FB FA FA
+23    8090 FA F9 F9 F9
+23    8094 F8 F8 F8 F7
+23    8098 F7 F7 F6 F6
+23    809C F6 F5 F5 F5
+23    80A0 F5 F4 F4 F4
+23    80A4 F4 F3 F3 F3
+23    80A8 F3 F2 F2 F2
+23    80AC F2 F2 F1 F1
+23    80B0 F1 F1 F1 F1
+23    80B4 F1 F1 F0 F0
+23    80B8 F0 F0 F0 F0
+23    80BC F0 F0 F0 F0
+23    80C0 F0 F0 F0 F0
+23    80C4 F0 F0 F0 F0
+23    80C8 F0 F0 F0 F1
+23    80CC F1 F1 F1 F1
+23    80D0 F1 F1 F1 F2
+23    80D4 F2 F2 F2 F2
+23    80D8 F3 F3 F3 F3
+23    80DC F4 F4 F4 F4
+23    80E0 F5 F5 F5 F5
+23    80E4 F6 F6 F6 F7
+23    80E8 F7 F7 F8 F8
+23    80EC F8 F9 F9 F9
+23    80F0 FA FA FA FB
+23    80F4 FB FB FC FC
+23    80F8 FC FD FD FE
+23    80FC FE FE FF FF
+24    8100
+# file closed: lua_sin_table.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000 X sin_table

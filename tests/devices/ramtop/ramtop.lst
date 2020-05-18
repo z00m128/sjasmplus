@@ -1,0 +1,47 @@
+# file opened: ramtop.asm
+ 1    0000                  ; various syntax errors
+ramtop.asm(2): error: Unexpected: x
+ 2    0000                  DEVICE  NONE x
+ramtop.asm(3): error: [DEVICE] Syntax error: DEVICE  NONE,
+ 3    0000                  DEVICE  NONE,
+ramtop.asm(4): error: [DEVICE] Syntax error: DEVICE  NONE,,
+ramtop.asm(4): error: Unexpected: ,
+ 4    0000                  DEVICE  NONE,,
+ramtop.asm(5): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 0
+ 5    0000                  DEVICE  NONE, 0     ; error valid range (ZX-like expected)
+ramtop.asm(6): error: Unexpected: ,    
+ 6    0000                  DEVICE  NONE, $8000,    ; error for extra argument
+ramtop.asm(7): error: Unexpected: , 0  
+ 7    0000                  DEVICE  NONE, $8000, 0  ; error for extra argument
+ 8    0000                  ; following two are "good", because NONE ignores any ramtop value
+ 9    0000                  DEVICE  NONE, $5D00
+10    0000                  DEVICE  NONE, $5D01
+11    0000
+12    0000                  ; more checks exercised
+ramtop.asm(13): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 0
+13    0000                  DEVICE  ZXSPECTRUMNEXT, 0
+ramtop.asm(14): warning: ZXN device doesn't init memory in any way (RAMTOP is ignored)
+14    0000                  DEVICE  ZXSPECTRUMNEXT, $5D00   ; warning about ignoring ramtop
+15    0000                  DEVICE  ZXSPECTRUMNEXT, $5D01   ; device was already initialized, silent line (still ignoring ramtop)
+16    0000                  DEVICE  ZXSPECTRUMNEXT          ; no warning (just switching)
+17    0000
+ramtop.asm(18): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 0
+18    0000                  DEVICE  ZXSPECTRUM256, 0
+19    0000                  DEVICE  ZXSPECTRUM256
+ramtop.asm(20): warning: [DEVICE] this device was already opened with different RAMTOP value
+20    0000                  DEVICE  ZXSPECTRUM256, $5D00    ; was already opened with default RAMTOP
+21    0000                  DEVICE  ZXSPECTRUM256           ; no warning (same ramtop)
+22    0000
+ramtop.asm(23): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 23807
+23    0000                  DEVICE  ZXSPECTRUM128, $5D00-1  ; error value
+ramtop.asm(24): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 65536
+24    0000                  DEVICE  ZXSPECTRUM128, $FFFF+1  ; error value
+25    0000                  DEVICE  ZXSPECTRUM128, $FFFF
+26    0000                  DEVICE  ZXSPECTRUM128           ; no warning (just switching device to zx128)
+ramtop.asm(27): warning: [DEVICE] this device was already opened with different RAMTOP value
+27    0000                  DEVICE  ZXSPECTRUM128, $FFFE    ; warning about different RAMTOP
+28    0000
+# file closed: ramtop.asm
+
+Value    Label
+------ - -----------------------------------------------------------

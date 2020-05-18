@@ -33,19 +33,10 @@ extern const char pathGoodSlash;
 
 #if defined (_MSC_VER)
 
-#define STRDUP _strdup
-#define STRCAT(strDestination, sizeInBytes, strSource) strncat(strDestination, strSource, sizeInBytes)
-#define STRCPY(strDestination, sizeInBytes, strSource) strcpy(strDestination, strSource)
-#define STRNCPY(strDestination, sizeInBytes, strSource, count) strncpy(strDestination, strSource, count)
-#define FOPEN(pFile, filename, mode) fopen_s(&pFile, filename, mode)
-#define FOPEN_ISOK(pFile, filename, mode) (fopen_s(&pFile, filename, mode) == 0)
-#define SPRINTF1(buffer, sizeOfBuffer, format, arg1) sprintf_s(buffer, sizeOfBuffer, format, arg1)
-#define SPRINTF2(buffer, sizeOfBuffer, format, arg1, arg2) sprintf_s(buffer, sizeOfBuffer, format, arg1, arg2)
-#define SPRINTF3(buffer, sizeOfBuffer, format, arg1, arg2, arg3) sprintf_s(buffer, sizeOfBuffer, format, arg1, arg2, arg3)
-#define SPRINTF4(buffer, sizeOfBuffer, format, arg1, arg2, arg3, arg4) sprintf_s(buffer, sizeOfBuffer, format, arg1, arg2, arg3, arg4)
-#define STRNCAT(strDest, bufferSizeInBytes, strSource, count) strncat(strDest, strSource, count)
-#define STRSTR(str, strSearch) strstr(str, strSearch)
-#define STRCHR(str, charToSearch) strchr(str, charToSearch)
+#define _CRT_SECURE_NO_WARNINGS 1
+
+// #define FOPEN(pFile, filename, mode) fopen_s(&pFile, filename, mode)
+// #define FOPEN_ISOK(pFile, filename, mode) (fopen_s(&pFile, filename, mode) == 0)
 
 #else
 
@@ -55,30 +46,32 @@ extern const char pathGoodSlash;
 #endif
 #include <unistd.h>
 
+#endif
+
 #ifndef TCHAR
 #define TCHAR char
 #endif
-void GetCurrentDirectory(int, char*);
-int SearchPath(const char* oudzp, const char* filename, const char* /*extension*/, int maxlen, char* nieuwzp, char** ach);
 #ifndef WIN32
 long GetTickCount();
 #endif
+
+void SJ_GetCurrentDirectory(int, char*);
+int SJ_SearchPath(const char* oudzp, const char* filename, const char* /*extension*/, int maxlen, char* nieuwzp, char** ach);
+
+#define FOPEN(pFile, filename, mode) (pFile = fopen(filename, mode))
+#define FOPEN_ISOK(pFile, filename, mode) ((pFile = fopen(filename, mode)) != NULL)
 
 #define STRDUP strdup
 #define STRCAT(strDestination, sizeInBytes, strSource) strncat(strDestination, strSource, sizeInBytes)
 #define STRCPY(strDestination, sizeInBytes, strSource) strcpy(strDestination, strSource)
 #define STRNCPY(strDestination, sizeInBytes, strSource, count) strncpy(strDestination, strSource, count)
-#define FOPEN(pFile, filename, mode) (pFile = fopen(filename, mode))
-#define FOPEN_ISOK(pFile, filename, mode) ((pFile = fopen(filename, mode)) != NULL)
-#define SPRINTF1(buffer, sizeOfBuffer, format, arg1) sprintf(buffer, format, arg1)
-#define SPRINTF2(buffer, sizeOfBuffer, format, arg1, arg2) sprintf(buffer, format, arg1, arg2)
-#define SPRINTF3(buffer, sizeOfBuffer, format, arg1, arg2, arg3) sprintf(buffer, format, arg1, arg2, arg3)
-#define SPRINTF4(buffer, sizeOfBuffer, format, arg1, arg2, arg3, arg4) sprintf(buffer, format, arg1, arg2, arg3, arg4)
+#define SPRINTF1(buffer, sizeOfBuffer, format, arg1) snprintf(buffer, sizeOfBuffer, format, arg1)
+#define SPRINTF2(buffer, sizeOfBuffer, format, arg1, arg2) snprintf(buffer, sizeOfBuffer, format, arg1, arg2)
+#define SPRINTF3(buffer, sizeOfBuffer, format, arg1, arg2, arg3) snprintf(buffer, sizeOfBuffer, format, arg1, arg2, arg3)
+#define SPRINTF4(buffer, sizeOfBuffer, format, arg1, arg2, arg3, arg4) snprintf(buffer, sizeOfBuffer, format, arg1, arg2, arg3, arg4)
 #define STRNCAT(strDest, bufferSizeInBytes, strSource, count) strncat(strDest, strSource, count)
 #define STRSTR(str, strSearch) strstr(str, strSearch)
 #define STRCHR(str, charToSearch) strchr(str, charToSearch)
-
-#endif
 
 void switchStdOutIntoBinaryMode();
 

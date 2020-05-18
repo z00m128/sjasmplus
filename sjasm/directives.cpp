@@ -345,7 +345,7 @@ void dirMMU() {
 		SkipToEol(lp);
 		return;
 	}
-	aint slot1, slot2, pageN = -1;
+	aint slot1, slot2, pageN = -1, address = -1;
 	CDeviceSlot::ESlotOptions slotOpt = CDeviceSlot::O_NONE;
 	if (!ParseExpression(lp, slot1)) {
 		Error("[MMU] First slot number parsing failed", bp, SUPPRESS);
@@ -378,6 +378,14 @@ void dirMMU() {
 		Error("[MMU] Page number parsing failed", bp, SUPPRESS);
 		return;
 	}
+	if (comma(lp)) {
+		if (!ParseExpressionNoSyntaxError(lp, address)) {
+			Error("[MMU] address parsing failed", bp, SUPPRESS);
+			return;
+		}
+		check16(address);
+		address &= 0xFFFF;
+	}
 	// validate argument values
 	if (slot1 < 0 || slot2 < slot1 || Device->SlotsCount <= slot2) {
 		char buf[LINEMAX];
@@ -400,6 +408,13 @@ void dirMMU() {
 	}
 	// wrap output addresses back into 64ki address space, it's essential for MMU functionality
 	if (PseudoORG) adrdisp &= 0xFFFF; else CurAddress &= 0xFFFF;
+	// set explicit ORG address if the third argument was provided
+	if (0 <= address) {
+		CurAddress = address;
+		if (PseudoORG && warningNotSuppressed()) {
+			Warning("[MMU] ORG address inside displaced block");
+		}
+	}
 	Device->CheckPage(CDevice::CHECK_RESET);
 }
 
@@ -663,7 +678,7 @@ void dirSAVESNA() {
 		exec = false;
 	}
 
-	char* fnaam = GetFileName(lp);
+	char* fnaam = GetOutputFileName(lp);
 	int start = StartAddress;
 	if (anyComma(lp)) {
 		aint val;
@@ -696,7 +711,7 @@ void dirEMPTYTAP() {
 	}
 	char* fnaam;
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (!*fnaam) {
 		Error("[EMPTYTAP] Syntax error", bp, IF_FIRST); return;
 	}
@@ -722,7 +737,7 @@ void dirSAVETAP() {
 		exec = false;
 	}
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			char *tlp = lp;
@@ -892,7 +907,7 @@ void dirSAVEBIN() {
 	bool exec = (LASTPASS == pass);
 	aint val;
 	int start = -1, length = -1;
-	char* fnaam = GetFileName(lp);
+	char* fnaam = GetOutputFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
@@ -931,7 +946,7 @@ void dirSAVEDEV() {
 	if (!exec && LASTPASS == pass) Error("SAVEDEV only allowed in real device emulation mode (See DEVICE)");
 
 	aint args[3]{-1, -1, -1};		// page, offset, length
-	char* fnaam = GetFileName(lp);
+	char* fnaam = GetOutputFileName(lp);
 	for (auto & arg : args) {
 		if (!comma(lp) || !ParseExpression(lp, arg)) {
 			exec = false;
@@ -972,7 +987,7 @@ void dirSAVEHOB() {
 	int start = -1,length = -1;
 	bool exec = true;
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
@@ -1021,16 +1036,33 @@ void dirSAVEHOB() {
 
 void dirEMPTYTRD() {
 	if (pass != LASTPASS) {
-		SkipParam(lp);
+		SkipToEol(lp);
 		return;
 	}
-	char* fnaam;
+	char* fnaam, diskLabel[9] = "        ";
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (!*fnaam) {
-		Error("[EMPTYTRD] Syntax error", bp, IF_FIRST); return;
+		Error("[EMPTYTRD] Syntax error", bp, IF_FIRST);
+		delete[] fnaam;
+		return;
 	}
-	TRD_SaveEmpty(fnaam);
+	if (anyComma(lp)) {
+		char* srcLabel = GetFileName(lp, false);
+		if (!*srcLabel) {
+			Error("[EMPTYTRD] Syntax error, empty label", bp, IF_FIRST);
+		} else {
+			for (int i = 0; i < 8; ++i) {
+				if (!srcLabel[i]) break;
+				diskLabel[i] = srcLabel[i];
+			}
+			if (8 < strlen(srcLabel)) {
+				Warning("[EMPTYTRD] label will be truncated to 8 characters", diskLabel);
+			}
+		}
+		delete[] srcLabel;
+	}
+	TRD_SaveEmpty(fnaam, diskLabel);
 	delete[] fnaam;
 }
 
@@ -1046,7 +1078,7 @@ void dirSAVETRD() {
 	char* fnaam, * fnaamh;
 	int start = -1, length = -1, autostart = -1;
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
@@ -1173,7 +1205,7 @@ void dirLABELSLIST() {
 		SkipParam(lp);
 		return;
 	}
-	char* opt = GetFileName(lp);
+	char* opt = GetOutputFileName(lp);
 	if (*opt) {
 		STRCPY(Options::UnrealLabelListFName, LINEMAX, opt);
 	} else {
@@ -1188,7 +1220,7 @@ void dirCSPECTMAP() {
 		SkipParam(lp);
 		return;
 	}
-	char* fName = GetFileName(lp);
+	char* fName = GetOutputFileName(lp);
 	if (fName[0]) {
 		STRCPY(Options::CSpectMapFName, LINEMAX, fName);
 	} else {		// create default map file name from current source file name (appends ".map")
@@ -1198,6 +1230,42 @@ void dirCSPECTMAP() {
 	delete[] fName;
 	// remember page size of current device (in case the source is multi-device later)
 	Options::CSpectMapPageSize = Device->GetPage(0)->Size;
+}
+
+void dirBPLIST() {
+	if (2 != pass || !DeviceID) {	// nothing to do in first or last pass, second will open the file
+		if (2 == pass) {	// !Device is true -> no device in second pass -> error
+			Error("BPLIST only allowed in real device emulation mode (See DEVICE)", nullptr, EARLY);
+		}
+		SkipToEol(lp);
+		return;
+	}
+	char* fname = GetOutputFileName(lp);
+	EBreakpointsFile type = BPSF_UNREAL;
+	if (cmphstr(lp, "unreal")) {
+		type = BPSF_UNREAL;
+	} else if (cmphstr(lp, "zesarux")) {
+		type = BPSF_ZESARUX;
+	} else if (!SkipBlanks()) {
+		Warning("[BPLIST] invalid breakpoints file type (use \"unreal\" or \"zesarux\")", lp, W_EARLY);
+	}
+	OpenBreakpointsFile(fname, type);
+	delete[] fname;
+}
+
+void dirSETBREAKPOINT() {
+	if (LASTPASS != pass) {
+		SkipToEol(lp);
+		return;
+	}
+	aint val = 0;
+	if (SkipBlanks(lp)) {		// without any expression do the "$" breakpoint
+		WriteBreakpoint(CurAddress);
+	} else if (ParseExpressionNoSyntaxError(lp, val)) {
+		WriteBreakpoint(val);
+	} else {
+		Error("[SETBREAKPOINT] Syntax error", bp, SUPPRESS);
+	}
 }
 
 /*void dirTEXTAREA() {
@@ -1245,7 +1313,9 @@ static bool dirIfIfn(aint & val) {
 		Error("[IF/IFN] Syntax error", lp, IF_FIRST);
 		return false;
 	}
-	if (IsLabelNotFound) Error("[IF/IFN] Forward reference", bp, EARLY);
+	if (IsLabelNotFound && warningNotSuppressed()) {
+		Warning("[IF/IFN] Forward reference", bp, W_EARLY);
+	}
 	return true;
 }
 
@@ -1343,7 +1413,7 @@ void dirOUTPUT() {
 		SkipToEol(lp);
 		return;
 	}
-	char* fnaam = GetFileName(lp), modechar = 0;
+	char* fnaam = GetOutputFileName(lp), modechar = 0;
 	int mode = OUTPUT_TRUNCATE;
 	if (comma(lp)) {
 		if (!SkipBlanks(lp)) modechar = (*lp++) | 0x20;
@@ -1372,7 +1442,7 @@ void dirTAPOUT()
 	aint val;
 	char* fnaam;
 
-	fnaam = GetFileName(lp);
+	fnaam = GetOutputFileName(lp);
 	int tape_flag = 255;
 	if (comma(lp))
 	{
@@ -1455,8 +1525,8 @@ void dirEXPORT() {
 
 void dirDISPLAY() {
 	char decprint = 'H';
-	char e[LINEMAX], optionChar;
-	char* ep = e;
+	char e[LINEMAX + 32], optionChar;		// put extra buffer at end for particular H/A/D number printout
+	char* ep = e, * const endOfE = e + LINEMAX;
 	aint val;
 	do {
 		if (SkipBlanks()) {
@@ -1478,8 +1548,13 @@ void dirDISPLAY() {
 			continue;
 		}
 		// try to parse some string literal
+		const int remainingBufferSize = endOfE - ep;
+		if (remainingBufferSize <= 0) {
+			Error("[DISPLAY] internal buffer overflow, resulting text is too long", line);
+			return;
+		}
 		int ei = 0;
-		val = GetCharConstAsString(lp, ep, ei, LINEMAX - (ep-e));
+		val = GetCharConstAsString(lp, ep, ei, remainingBufferSize);
 		if (-1 == val) {
 			Error("[DISPLAY] Syntax error", line);
 			return;
@@ -1497,7 +1572,12 @@ void dirDISPLAY() {
 					if (decprint == 'A') {
 						*(ep++) = ','; *(ep++) = ' ';
 					}
-					ep += SPRINTF1(ep, (int)(&e[0] + LINEMAX - ep), "%u", val);
+					int charsToPrint = SPRINTF1(ep, remainingBufferSize, "%u", val);
+					if (remainingBufferSize <= charsToPrint) {
+						Error("[DISPLAY] internal buffer overflow, resulting text is too long", line);
+						return;
+					}
+					ep += charsToPrint;
 				}
 				decprint = 'H';
 			} else {
@@ -1992,8 +2072,17 @@ void dirDEVICE() {
 	char* id = GetID(lp);
 
 	if (id) {
-		if (!SetDevice(id)) {
-			Error("[DEVICE] Invalid parameter", NULL, IF_FIRST);
+		aint ramtop = 0;
+		if (anyComma(lp)) {
+			if (!ParseExpressionNoSyntaxError(lp, ramtop)) {
+				Error("[DEVICE] Syntax error", bp); return;
+			}
+			if (ramtop < 0x5D00 || 0xFFFF < ramtop) {
+			  	ErrorInt("[DEVICE] valid range for RAMTOP is $5D00..$FFFF", ramtop); return;
+			}
+		}
+		if (!SetDevice(id, ramtop)) {
+			Error("[DEVICE] Invalid parameter", id, IF_FIRST);
 		} else if (IsSldExportActive()) {
 			// SLD tracing data are being exported, export the device data
 			int pageSize = Device->GetCurrentSlot()->Size;
@@ -2114,6 +2203,10 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".ends", dirENDS);
 
 	DirectivesTable.insertd(".device", dirDEVICE);
+
+	DirectivesTable.insertd(".bplist", dirBPLIST);
+	DirectivesTable.insertd(".setbreakpoint", dirSETBREAKPOINT);
+	DirectivesTable.insertd(".setbp", dirSETBREAKPOINT);
 
 #ifdef USE_LUA
 	DirectivesTable.insertd(".lua", dirLUA);

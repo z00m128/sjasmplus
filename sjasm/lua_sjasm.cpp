@@ -218,7 +218,7 @@ static int tolua_sjasm_zx_trdimage_create00(lua_State* tolua_S)
  {
   char* fname = ((char*)  tolua_tostring(tolua_S,1,0));
   {
-   int tolua_ret = (int)  TRD_SaveEmpty(fname);
+   int tolua_ret = (int)  TRD_SaveEmpty(fname, nullptr);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

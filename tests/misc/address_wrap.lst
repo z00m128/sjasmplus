@@ -10,8 +10,8 @@ address_wrap.asm(7): warning: value 0x10002 is truncated to 16bit value: 0x0002
  7    0004 CD 02 00         call tc1
  8    0007
  9    0007                  ORG $FFFF
+address_wrap.asm(10): warning: RAM limit exceeded 0x10000 by ORG
 10    FFFF 3E 37        ta2 ld a,'7'    ; will reset warning-displayed flag => warnings again
-address_wrap.asm(11): warning: RAM limit exceeded 0x10001 by ORG
 11    0001 18 FE        tb2 jr tb2
 12    0003 18 FE        tc2 jr tc2
 address_wrap.asm(13): warning: value 0x10003 is truncated to 16bit value: 0x0003
@@ -42,13 +42,13 @@ address_wrap.asm(27): warning: value 0x10003 is truncated to 16bit value: 0x0003
 33    8000                  DISP $FFFF
 34    FFFF 37           ta5 scf
 address_wrap.asm(35): warning: RAM limit exceeded 0x10000 by DISP
-35    0000 18 FE        tb5 jr tb5
+35    0000 18 FE        tb5 jr tb5          ; the "tb5" label will equal 0x10000 since v1.15.0 (was 0x0000 before)
 36    0002 18 FE        tc5 jr tc5
 37    0004 CD 02 00         call tc5
 38    0007
 39    0007                  ORG $FFFF       ; ok ; while already inside DISP<->ENT block, use ORG for further changes
+address_wrap.asm(40): warning: RAM limit exceeded 0x10000 by DISP
 40    FFFF 3E 38        ta6 ld a,'8'
-address_wrap.asm(41): warning: RAM limit exceeded 0x10001 by DISP
 41    0001 18 FE        tb6 jr tb6
 42    0003 18 FE        tc6 jr tc6
 43    0005 CD 03 00         call tc6
@@ -66,8 +66,8 @@ address_wrap.asm(52): warning: RAM limit exceeded 0x10000 by DISP
 54    0004 CD 02 00         call tc7
 55    0007
 56    0007                  ORG $FFFF       ; ok
+address_wrap.asm(57): warning: RAM limit exceeded 0x10000 by DISP
 57    FFFF 3E 38        ta8 ld a,'8'
-address_wrap.asm(58): warning: RAM limit exceeded 0x10001 by DISP
 58    0001 18 FE        tb8 jr tb8
 59    0003 18 FE        tc8 jr tc8
 60    0005 CD 03 00         call tc8
@@ -92,7 +92,7 @@ Value    Label
 0x10003   tc4
 0x8000 X binStart5
 0xFFFF X ta5
-0x0000   tb5
+0x10000   tb5
 0x0002   tc5
 0xFFFF X ta6
 0x0001   tb6
@@ -100,7 +100,7 @@ Value    Label
 0x8011 X binEnd6
 0x8011 X binStart7
 0xFFFF X ta7
-0x0000   tb7
+0x10000   tb7
 0x0002   tc7
 0xFFFF X ta8
 0x0001   tb8
