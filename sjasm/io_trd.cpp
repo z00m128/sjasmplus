@@ -142,8 +142,8 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	// will be recovered, but overall this feature is very primitive (not defragging fat or disc)
 	if (replace) {
 		bool discInfoModified = false;
-		fseek(ff, 0, SEEK_SET);
 		for (fatPos = 0; fatPos < FAT_END_POS; fatPos += 16) {
+			fseek(ff, fatPos, SEEK_SET);
 			if (16UL != fread(hdr, 1, 16, ff)) {
 				Error("Read error", fname, IF_FIRST); return 0;
 			}
@@ -165,6 +165,8 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 				trd[0] = hdr[0x0e];
 				trd[1] = hdr[0x0f];
 				freeSecs += secsLengthDel;
+				trd[4] = byte(freeSecs & 0xff);
+				trd[5] = byte(freeSecs >> 8);
 				// delete the file (wipe catalog entry completely as if it was not written)
 				--trd[3];
 				hdr[0] = 0;
@@ -184,8 +186,6 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		// if some files were deleted, update disc info sector too to make image "valid" before writing file
 		if (discInfoModified) {
 			// update remaining free sectors
-			trd[4] = (unsigned char)(freeSecs & 0xff);
-			trd[5] = (unsigned char)(freeSecs >> 8);
 			if (fseek(ff, 0x8e1, SEEK_SET)) {
 				Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 			}
@@ -215,10 +215,11 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	//TODO debug - remove
 	{
 		printf("DEBUG SAVETRD: [%s] [%s] %d %d\n", fname, fhobname, start, length);
-		byte dbg_buffer[128];
+		constexpr size_t SZ = 80UL;
+		byte dbg_buffer[SZ];
 		fseek(ff, 0, SEEK_SET);
-		if (128UL != fread(dbg_buffer, 1, 128, ff)) Error("Read error", fname, IF_FIRST);
-		for (int ii = 0; ii < 128; ii+=16) {
+		if (SZ != fread(dbg_buffer, 1, SZ, ff)) Error("Read error", fname, IF_FIRST);
+		for (int ii = 0; ii < SZ; ii+=16) {
 			printf("0x%02X:", ii);
 			for (int jj = ii; jj < ii+16; ++jj) {
 				printf(" %02X", dbg_buffer[jj]);
@@ -278,6 +279,22 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	}
 	if (31UL != fwrite(trd, 1, 31, ff)) {
 		Error("Disc info write error", fname, IF_FIRST); return 0;
+	}
+
+	//TODO debug - remove
+	{
+		printf("(end) DEBUG SAVETRD: [%s] [%s] %d %d\n", fname, fhobname, start, length);
+		constexpr size_t SZ = 80UL;
+		byte dbg_buffer[SZ];
+		fseek(ff, 0, SEEK_SET);
+		if (SZ != fread(dbg_buffer, 1, SZ, ff)) Error("Read error", fname, IF_FIRST);
+		for (int ii = 0; ii < SZ; ii+=16) {
+			printf("0x%02X:", ii);
+			for (int jj = ii; jj < ii+16; ++jj) {
+				printf(" %02X", dbg_buffer[jj]);
+			}
+			printf("\n");
+		}
 	}
 
 	fclose(ff);
