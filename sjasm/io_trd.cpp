@@ -212,8 +212,23 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		Error("TRD inconsistent catalog data", fname, IF_FIRST); return 0;
 	}
 
+	//TODO debug - remove
+	{
+		printf("DEBUG SAVETRD: [%s] [%s] %d %d\n", fname, fhobname, start, length);
+		byte dbg_buffer[128];
+		fseek(ff, 0, SEEK_SET);
+		if (128UL != fread(dbg_buffer, 1, 128, ff)) Error("Read error", fname, IF_FIRST);
+		for (int ii = 0; ii < 128; ii+=16) {
+			printf("0x%02X:", ii);
+			for (int jj = ii; jj < ii+16; ++jj) {
+				printf(" %02X", dbg_buffer[jj]);
+			}
+			printf("\n");
+		}
+	}
+
 	// save the file content first
-	if (fseek(ff, (trd[1] << 12) + (trd[0] << 8), SEEK_SET)) {
+	if (fseek(ff, (long(trd[1]) << 12) + (long(trd[0]) << 8), SEEK_SET)) {
 		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
 
