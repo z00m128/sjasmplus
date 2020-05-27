@@ -123,7 +123,7 @@ for f in "${TEST_FILES[@]}"; do
     for binext in {'tap','bin','raw'}; do
         if [[ -f "${CFG_BASE}.${binext}" ]]; then
             totalChecks=$((totalChecks + 1))        # +1 for each binary check
-            ! diff "${CFG_BASE}.${binext}" "${dst_base}.${binext}" \
+            ! cmp "${CFG_BASE}.${binext}" "${dst_base}.${binext}" \
                 && exitCode=$((exitCode + 1)) && echo -n -e "\033[91mError: $binext DIFFERS\033[0m " \
                 || echo -n -e "\033[0m \\  \033[92m$binext OK\033[0m "
         fi
