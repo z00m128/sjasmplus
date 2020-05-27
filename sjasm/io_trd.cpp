@@ -142,8 +142,9 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	// will be recovered, but overall this feature is very primitive (not defragging fat or disc)
 	if (replace) {
 		bool discInfoModified = false;
+		fseek(ff, 0, SEEK_SET);
 		for (fatPos = 0; fatPos < FAT_END_POS; fatPos += 16) {
-			fseek(ff, fatPos, SEEK_SET);
+// 			fseek(ff, fatPos, SEEK_SET);
 			if (16UL != fread(hdr, 1, 16, ff)) {
 				Error("Read error", fname, IF_FIRST); return 0;
 			}
