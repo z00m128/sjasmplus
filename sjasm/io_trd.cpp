@@ -142,9 +142,8 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	// will be recovered, but overall this feature is very primitive (not defragging fat or disc)
 	if (replace) {
 		bool discInfoModified = false;
-		fseek(ff, 0, SEEK_SET);
 		for (fatPos = 0; fatPos < FAT_END_POS; fatPos += 16) {
-// 			fseek(ff, fatPos, SEEK_SET);
+			fseek(ff, fatPos, SEEK_SET);
 			if (16UL != fread(hdr, 1, 16, ff)) {
 				Error("Read error", fname, IF_FIRST); return 0;
 			}
@@ -213,27 +212,10 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		Error("TRD inconsistent catalog data", fname, IF_FIRST); return 0;
 	}
 
-	//TODO debug - remove
-	{
-		printf("DEBUG SAVETRD: [%s] [%s] %d %d\n", fname, fhobname, start, length);
-		constexpr size_t SZ = 80UL;
-		byte dbg_buffer[SZ];
-		fseek(ff, 0, SEEK_SET);
-		if (SZ != fread(dbg_buffer, 1, SZ, ff)) Error("Read error", fname, IF_FIRST);
-		for (int ii = 0; ii < SZ; ii+=16) {
-			printf("0x%02X:", ii);
-			for (int jj = ii; jj < ii+16; ++jj) {
-				printf(" %02X", dbg_buffer[jj]);
-			}
-			printf("\n");
-		}
-	}
-
 	// save the file content first
 	if (fseek(ff, (long(trd[1]) << 12) + (long(trd[0]) << 8), SEEK_SET)) {
 		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
-
 	SaveRAM(ff, start, length);
 
 	if (0 <= autostart) {
@@ -280,22 +262,6 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	}
 	if (31UL != fwrite(trd, 1, 31, ff)) {
 		Error("Disc info write error", fname, IF_FIRST); return 0;
-	}
-
-	//TODO debug - remove
-	{
-		printf("(end) DEBUG SAVETRD: [%s] [%s] %d %d\n", fname, fhobname, start, length);
-		constexpr size_t SZ = 80UL;
-		byte dbg_buffer[SZ];
-		fseek(ff, 0, SEEK_SET);
-		if (SZ != fread(dbg_buffer, 1, SZ, ff)) Error("Read error", fname, IF_FIRST);
-		for (int ii = 0; ii < SZ; ii+=16) {
-			printf("0x%02X:", ii);
-			for (int jj = ii; jj < ii+16; ++jj) {
-				printf(" %02X", dbg_buffer[jj]);
-			}
-			printf("\n");
-		}
 	}
 
 	fclose(ff);
