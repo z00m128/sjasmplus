@@ -10,7 +10,7 @@
     SAVETRD "savetrd2.trd","s15bug.C",0,$F200   ; next free should be [1,18]
 
     ; test new "replace" functionality (it will salvage the disc space in the most trivial case)
-    SAVETRD "savetrd2.trd",|"s15.C",$8000,$8000  ; area 8000+C000 in file (allocating new sectors after s15bug.C)
+    SAVETRD "savetrd2.trd",|"s15.C",$8000,$4100  ; area 8000+C000 in file (allocating new sectors after s15bug.C)
     ; one more time
     SAVETRD "savetrd2.trd",|"s15.C",$4000,$C000  ; area 4000+8000+C000 in file (should overwrite previous replace)
     ; and one more time

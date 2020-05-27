@@ -150,9 +150,9 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 			if (0 == hdr[0]) break;		// beyond last FAT record, finish the loop
 			if (memcmp(hdr, hobnamebin, 9)) continue;	// different file name -> continue
 			// try to get freed sectors back (works only if there was no other file written after this one)
-			int secsLengthDel = hdr[0x0d];
+			const int secsLengthDel = hdr[0x0d];
 			byte nextTrack = ((secsLengthDel+hdr[0x0e])>>4) + hdr[0x0f];
-			byte nextSector = (secsLength+hdr[0x0e])&0x0F;
+			byte nextSector = (secsLengthDel+hdr[0x0e])&0x0F;
 			// if file connects to first free sector, salvage the space back
 			if (trd[0] == nextSector && trd[1] == nextTrack) {
 				trd[0] = hdr[0x0e];
