@@ -1,4 +1,4 @@
-/* 
+/*
 
   SjASMPlus Z80 Cross Compiler
 
@@ -31,8 +31,11 @@
 #ifndef __IO_TRD
 #define __IO_TRD
 
-int TRD_SaveEmpty(char* fname, const char label[8]);
-int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostart, bool replace);
+enum ETrdFileName { OK, INVALID_EXTENSION, THREE_LETTER_EXTENSION };
+
+int TRD_SaveEmpty(const char* fname, const char label[8]);
+ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & nameL);
+int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace);
 
 #endif
 

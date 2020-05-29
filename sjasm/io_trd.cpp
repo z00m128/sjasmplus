@@ -57,7 +57,7 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 	return 1;
 }
 
-int TRD_SaveEmpty(char* fname, const char label[8]) {
+int TRD_SaveEmpty(const char* fname, const char label[8]) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("Error opening file", fname, IF_FIRST);
@@ -72,33 +72,50 @@ int TRD_SaveEmpty(char* fname, const char label[8]) {
 	return result;
 }
 
+ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & nameL) {
+	nameL = 0;
+	while (inputName[nameL] && ('.' != inputName[nameL]) && nameL < 8) {
+		binName[nameL] = inputName[nameL];
+		++nameL;
+	}
+	while (nameL < 8) binName[nameL++] = ' ';
+	const char* ext = strrchr(inputName, '.');
+	while (ext && ext[nameL-7] && nameL < 11) {
+		binName[nameL] = ext[nameL-7];
+		++nameL;
+	}
+	while (9 != nameL && 11 != nameL) binName[nameL++] = ' ';	// the file name is either 8+1 or 8+3 (not 8+2)
+	int fillIdx = nameL;
+	while (fillIdx < 12) binName[fillIdx++] = 0;
+	if (9 < nameL) return THREE_LETTER_EXTENSION;
+	switch (binName[8]) {
+		case 'B': case 'C': case 'D': case '#':
+			return OK;
+	}
+	return INVALID_EXTENSION;
+}
+
 // use autostart == -1 to disable it (the valid autostart is 0..9999 as line number of BASIC program)
-int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostart, bool replace) {
+int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace) {
+
 	// do some preliminary checks with file name and autostart
-	size_t hobNameL = strlen(fhobname), fatPos;
-	char extLetter = 0;
-	if (hobNameL > 1) {
-		char* ext = strrchr(fhobname, '.');
-		if (ext) {
-			extLetter = ext[1];
-			hobNameL = ext - fhobname;
+	byte hobnamebin[16];
+	int Lname = 0;
+	ETrdFileName nameWarning = TRD_FileNameToBytes(fhobname, hobnamebin, Lname);
+	if (warningNotSuppressed()) {
+		if (INVALID_EXTENSION == nameWarning) {
+			Warning("zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.", fhobname);
+		}
+		if (THREE_LETTER_EXTENSION == nameWarning) {
+			Warning("zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters", fhobname);
+			if ('B' == hobnamebin[8]) Warning("SAVETRD: the \"B\" extension is always single letter.", fhobname);
 		}
 	}
-	byte hobnamebin[9];			// prepare binary format of name (as on disc) (for replace search)
-	memset(hobnamebin,' ',9);
-	if (extLetter) hobnamebin[8] = extLetter;
-	memcpy(hobnamebin, fhobname, std::min(hobNameL, size_t(8)));	// binary form is 8+1 with spaces-padding
-	if (0 <= autostart && ('B' != extLetter || 9999 < autostart)) {
+	if (0 <= autostart && ('B' != hobnamebin[8] || 9999 < autostart)) {
 		Warning("zx.trdimage_add_file: autostart value is BASIC program line number (0..9999) (in lua use -1 otherwise).");
 		autostart = -1;
 	}
-	if (warningNotSuppressed()) {
-		switch (extLetter) {
-			case 'B': case 'C': case 'D': case '#': break;
-			default:
-				Warning("zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.", fhobname);
-		}
-	}
+
 	// more validations - for Lua (or SAVETRD letting wrong values go through)
 	const int secsLength = (length + 255 + (0 <= autostart ? 4 : 0))>>8;
 	if (!DeviceID) {
@@ -124,6 +141,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 		return 0;
 	}
 
+	// read disc info into "trd" array
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "r+b")) Error("Error opening file", fname, FATAL);
 
@@ -134,11 +152,13 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	if (31UL != fread(trd, 1, 31, ff) && 0x10 != trd[6]) {	// verify also TR-DOS ID
 		Error("TRD image read error", fname, IF_FIRST); return 0;
 	}
+
 	constexpr size_t FAT_END_POS = 128*16;
+	size_t fatPos;
 	int freeSecs = trd[4] + (trd[5] << 8);
 
 	// "replace" feature, goes through whole FAT and deletes all files with identical name
-	// In special case one of the files connects to current first free sector the disc space
+	// In special case when last file connects to current first free sector => the disc space
 	// will be recovered, but overall this feature is very primitive (not defragging fat or disc)
 	if (replace) {
 		bool discInfoModified = false;
@@ -148,7 +168,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 				Error("Read error", fname, IF_FIRST); return 0;
 			}
 			if (0 == hdr[0]) break;		// beyond last FAT record, finish the loop
-			if (memcmp(hdr, hobnamebin, 9)) continue;	// different file name -> continue
+			if (memcmp(hdr, hobnamebin, Lname)) continue;	// different file name -> continue
 			discInfoModified = true;
 			const bool isLastFile = ((fatPos>>4) + 1) == trd[3];
 			if (isLastFile) {
@@ -193,7 +213,7 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 				Error("Disc info write error", fname, IF_FIRST); return 0;
 			}
 		}
-	}
+	} // end of "if (replace)"
 
 	if (freeSecs < secsLength) {
 		Error("TRD image has not enough free space", fname, IF_FIRST); return 0;
@@ -216,8 +236,8 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	if (fseek(ff, (long(trd[1]) << 12) + (long(trd[0]) << 8), SEEK_SET)) {
 		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
-	SaveRAM(ff, start, length);
 
+	SaveRAM(ff, start, length);
 	if (0 <= autostart) {
 		byte abin[] {0x80, 0xAA, static_cast<byte>(autostart), static_cast<byte>(autostart>>8)};
 		if (4 != fwrite(abin, 1, 4, ff)) {
@@ -227,13 +247,15 @@ int TRD_AddFile(char* fname, char* fhobname, int start, int length, int autostar
 	}
 
 	//header of file
-	memcpy(hdr, hobnamebin, 9);
-	if ('B' == extLetter)	{
+	memcpy(hdr, hobnamebin, Lname);
+	if ('B' == hobnamebin[8]) {
 		hdr[0x09] = (unsigned char)(length & 0xff);
 		hdr[0x0a] = (unsigned char)(length >> 8);
-	} else	{
-		hdr[0x09] = (unsigned char)(start & 0xff);
-		hdr[0x0a] = (unsigned char)(start >> 8);
+	} else {
+		if (Lname <= 9) {	// single letter extension => "start" field is used for start value
+			hdr[0x09] = (unsigned char)(start & 0xff);
+			hdr[0x0a] = (unsigned char)(start >> 8);
+		}
 	}
 	hdr[0x0b] = (unsigned char)(length & 0xff);
 	hdr[0x0c] = (unsigned char)(length >> 8);

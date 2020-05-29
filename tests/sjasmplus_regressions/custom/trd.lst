@@ -1,5 +1,5 @@
 # file opened: trd.asm
- 1    0000              ;Note: the input TR-DOS filenames in this test are incorrect, and will be currently truncated as 'label1.txt' -> 'label1.t'. Change this if needed.
+ 1    0000              ;Note: the sjasmplus now supports the unofficial 3 letter extensions as described by Dart_Alver
  2    0000              ;A TR-DOS filename is max. 8 characters, with a single-character extension. http://zx-modules.de/fileformats/hobetaformat.html
  3    0000
  4    0000                      device zxspectrum128
@@ -16,14 +16,13 @@
 12    8205              end
 13    8205
 14    8205                      EMPTYTRD trd.trd
-trd.asm(15): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label1.txt
-15    8205                      SAVETRD "trd.trd","label1.txt",label1,5
-trd.asm(16): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.txt
+trd.asm(15): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label1.txt
+15    8205                      SAVETRD "trd.trd","label1.txt",label1,5     ; new warnings about 3-letter extension
+trd.asm(16): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label2.txt
 16    8205                      SAVETRD "trd.trd","label2.txt",label2,5
-trd.asm(17): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label3.txt
+trd.asm(17): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label3.txt
 17    8205                      SAVETRD "trd.trd","label3.txt",label3,5
-trd.asm(18): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.txt
-18    8205                      SAVETRD "trd.trd","label2.txt",label2,5
+18    8205                      SAVETRD "trd.trd","label2.txt",label2,5     ; ok ; warning suppressed
 19    8205                  ; test the "invalid extension warning" and if it can be suppressed
 20    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; no warning
 trd.asm(21): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.J
