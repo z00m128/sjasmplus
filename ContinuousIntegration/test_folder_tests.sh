@@ -119,11 +119,18 @@ for f in "${TEST_FILES[@]}"; do
     else
         echo -n -e "  \\  \033[92m$ok_tick_text OK\033[0m "
     fi
-    # check binary results, if TAP, BIN or RAW are present in source directory
-    for binext in {'tap','bin','raw'}; do
+    # check binary results, if TAP, BIN, RAW or TRD are present in source directory
+    for binext in {'tap','bin','raw','trd'}; do
         if [[ -f "${CFG_BASE}.${binext}" ]]; then
             totalChecks=$((totalChecks + 1))        # +1 for each binary check
             ! cmp "${CFG_BASE}.${binext}" "${dst_base}.${binext}" \
+                && exitCode=$((exitCode + 1)) && echo -n -e "\033[91mError: $binext DIFFERS\033[0m " \
+                || echo -n -e "\033[0m \\  \033[92m$binext OK\033[0m "
+        fi
+        # or see if compressed ".gz" binary was provided and compare that
+        if [[ -f "${CFG_BASE}.${binext}.gz" ]]; then
+            totalChecks=$((totalChecks + 1))        # +1 for each binary check
+            ! gunzip -c "${CFG_BASE}.${binext}.gz" | cmp "${dst_base}.${binext}" \
                 && exitCode=$((exitCode + 1)) && echo -n -e "\033[91mError: $binext DIFFERS\033[0m " \
                 || echo -n -e "\033[0m \\  \033[92m$binext OK\033[0m "
         fi

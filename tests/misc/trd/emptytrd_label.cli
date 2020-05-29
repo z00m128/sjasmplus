@@ -1,7 +1,0 @@
-#decompress the TRD file for diffing
-# use normal way of assembling
-# do the binary compare of new image
-gunzip emptytrd_label/emptytrd.trd.gz && \
-$MEMCHECK "$EXE" --nologo --msg=war --fullpath "${options[@]}" "$file_asm" && \
-cmp emptytrd_label/emptytrd.trd emptytrd.trd
-last_result=$?
