@@ -96,13 +96,13 @@ ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & 
 }
 
 // use autostart == -1 to disable it (the valid autostart is 0..9999 as line number of BASIC program)
-int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace) {
+int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace) {
 
 	// do some preliminary checks with file name and autostart
 	byte hobnamebin[16];
 	int Lname = 0;
 	ETrdFileName nameWarning = TRD_FileNameToBytes(fhobname, hobnamebin, Lname);
-	if (warningNotSuppressed()) {
+	if (!addplace && warningNotSuppressed()) {
 		if (INVALID_EXTENSION == nameWarning) {
 			Warning("zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.", fhobname);
 		}
@@ -212,6 +212,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 			if (31UL != fwrite(trd, 1, 31, ff)) {
 				Error("Disc info write error", fname, IF_FIRST); return 0;
 			}
+			fflush(ff);
 		}
 	} // end of "if (replace)"
 
@@ -219,55 +220,131 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		Error("TRD image has not enough free space", fname, IF_FIRST); return 0;
 	}
 
-	// Use the last catalog position and verify it's free
-	fatPos = size_t(trd[3]) * 16;
-	if (FAT_END_POS <= fatPos) {
-		Error("TRD image is full of files", fname, IF_FIRST); return 0;
-	}
-	fseek(ff, fatPos, SEEK_SET);
-	if (16UL != fread(hdr, 1, 16, ff)) {
-		Error("Read error", fname, IF_FIRST); return 0;
-	}
-	if (hdr[0] != 0) {
-		Error("TRD inconsistent catalog data", fname, IF_FIRST); return 0;
-	}
+	if (addplace) {
+		for (fatPos = 0; fatPos < FAT_END_POS; fatPos += 16) {
+			fseek(ff, fatPos, SEEK_SET);
+			if (16UL != fread(hdr, 1, 16, ff)) {
+				Error("Read error", fname, IF_FIRST); return 0;
+			}
+			if (hdr[0] == 0) {
+				// if not file for add data
+				Error("TRD image does not have a specified file to add data", fname, IF_FIRST); return 0;
 
-	// save the file content first
-	if (fseek(ff, (long(trd[1]) << 12) + (long(trd[0]) << 8), SEEK_SET)) {
-		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
-	}
+			}
+			if (!memcmp(hdr, hobnamebin, Lname)) break;	// equal file name -> break
+		}
 
-	SaveRAM(ff, start, length);
-	if (0 <= autostart) {
-		byte abin[] {0x80, 0xAA, static_cast<byte>(autostart), static_cast<byte>(autostart>>8)};
-		if (4 != fwrite(abin, 1, 4, ff)) {
-			Error("Write error", fname, IF_FIRST);
+		size_t currpos = (trd[1] << 12) + (trd[0] << 8) - 16 , filepos = (hdr[0x0F] << 12) + (hdr[0x0E] << 8);
+
+		size_t lastpos = currpos + (secsLength << 8) , finpos = filepos + (hdr[0x0D] << 8);
+
+		// save file new sector length
+		if (fseek(ff, fatPos, SEEK_SET)) {
+			Error("TRD image has wrong format", fname, IF_FIRST); return 0;
+		}
+		if (0xFF < (hdr[0x0d] + secsLength)) {
+			Error("zx.trdimage_add_file: new sector length over 0xFF max",  fname, IF_FIRST);
 			return 0;
 		}
-	}
-
-	//header of file
-	memcpy(hdr, hobnamebin, Lname);
-	if ('B' == hobnamebin[8]) {
-		hdr[0x09] = (unsigned char)(length & 0xff);
-		hdr[0x0a] = (unsigned char)(length >> 8);
-	} else {
-		if (Lname <= 9) {	// single letter extension => "start" field is used for start value
-			hdr[0x09] = (unsigned char)(start & 0xff);
-			hdr[0x0a] = (unsigned char)(start >> 8);
+		hdr[0x0d] += secsLength;
+		if (16UL != fwrite(hdr, 1, 16, ff)) {
+			Error("FAT write error", fname, IF_FIRST); return 0;
 		}
-	}
-	hdr[0x0b] = (unsigned char)(length & 0xff);
-	hdr[0x0c] = (unsigned char)(length >> 8);
-	hdr[0x0d] = secsLength;
-	hdr[0x0e] = trd[0];
-	hdr[0x0f] = trd[1];
 
-	if (fseek(ff, fatPos, SEEK_SET)) {
-		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
-	}
-	if (16UL != fwrite(hdr, 1, 16, ff)) {
-		Error("TRD FAT Write error (file damaged)", fname, IF_FIRST); return 0;
+		// move files data (of other files which are after the currently enlarged file)
+		while (currpos >= finpos) {
+			if (fseek(ff, currpos, SEEK_SET)) {
+				Error("TRD image has wrong format", fname, IF_FIRST); return 0;
+			}
+			if (16UL != fread(hdr, 1, 16, ff)) {
+				Error("Read error", fname, IF_FIRST); return 0;
+			}
+			if (fseek(ff, lastpos, SEEK_SET)) {
+				Error("TRD image has wrong format", fname, IF_FIRST); return 0;
+			}
+			if (16UL != fwrite(hdr, 1, 16, ff)) {
+				Error("FAT write error", fname, IF_FIRST); return 0;
+			}
+			lastpos -=16; currpos -=16;
+		}
+		// save data to end of file
+		if (fseek(ff, finpos, SEEK_SET)) {
+			Error("TRD image has wrong format", fname, IF_FIRST); return 0;
+		}
+		SaveRAM(ff, start, length);
+
+		// catalogue correction
+		for (currpos = 0; currpos < FAT_END_POS; currpos += 16) {
+		        if (fseek(ff, currpos, SEEK_SET)) {
+				Error("TRD image has wrong format", fname, IF_FIRST); return 0;
+			}
+			if (16UL != fread(hdr, 1, 16, ff)) {
+				Error("Read error", fname, IF_FIRST); return 0;
+			}
+			if (hdr[0] == 0) break; // end of files
+			if ((lastpos = (hdr[0x0F] << 12) + (hdr[0x0E] << 8)) > filepos) {
+				lastpos += (secsLength << 8);
+				hdr[0x0F] = lastpos >> 12;
+				hdr[0x0E] = (lastpos >> 8) & 0x0F;
+				if (fseek(ff, currpos, SEEK_SET)) {
+					Error("TRD image has wrong format", fname, IF_FIRST); return 0;
+				}
+				if (16UL != fwrite(hdr, 1, 16, ff)) {
+					Error("FAT write error", fname, IF_FIRST); return 0;
+				}
+			}
+		}
+	} else {
+		// Use the last catalog position and verify it's free
+		fatPos = size_t(trd[3]) * 16;
+		if (FAT_END_POS <= fatPos) {
+			Error("TRD image is full of files", fname, IF_FIRST); return 0;
+		}
+		fseek(ff, fatPos, SEEK_SET);
+		if (16UL != fread(hdr, 1, 16, ff)) {
+			Error("Read error", fname, IF_FIRST); return 0;
+		}
+		if (hdr[0] != 0) {
+			Error("TRD inconsistent catalog data", fname, IF_FIRST); return 0;
+		}
+
+		// save the file content first
+		if (fseek(ff, (long(trd[1]) << 12) + (long(trd[0]) << 8), SEEK_SET)) {
+			Error("TRD image has wrong format", fname, IF_FIRST); return 0;
+		}
+
+		SaveRAM(ff, start, length);
+		if (0 <= autostart) {
+			byte abin[] {0x80, 0xAA, static_cast<byte>(autostart), static_cast<byte>(autostart>>8)};
+			if (4 != fwrite(abin, 1, 4, ff)) {
+				Error("Write error", fname, IF_FIRST);
+				return 0;
+			}
+		}
+
+		//header of file
+		memcpy(hdr, hobnamebin, Lname);
+		if ('B' == hobnamebin[8]) {
+			hdr[0x09] = (unsigned char)(length & 0xff);
+			hdr[0x0a] = (unsigned char)(length >> 8);
+		} else {
+			if (Lname <= 9) {	// single letter extension => "start" field is used for start value
+				hdr[0x09] = (unsigned char)(start & 0xff);
+				hdr[0x0a] = (unsigned char)(start >> 8);
+			}
+		}
+		hdr[0x0b] = (unsigned char)(length & 0xff);
+		hdr[0x0c] = (unsigned char)(length >> 8);
+		hdr[0x0d] = secsLength;
+		hdr[0x0e] = trd[0];
+		hdr[0x0f] = trd[1];
+
+		if (fseek(ff, fatPos, SEEK_SET)) {
+			Error("TRD image has wrong format", fname, IF_FIRST); return 0;
+		}
+		if (16UL != fwrite(hdr, 1, 16, ff)) {
+			Error("TRD FAT Write error (file damaged)", fname, IF_FIRST); return 0;
+		}
 	}
 
 	// update next free sector/track position
@@ -277,7 +354,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	freeSecs -= secsLength;
 	trd[4] = (unsigned char)(freeSecs & 0xff);
 	trd[5] = (unsigned char)(freeSecs >> 8);
-	++trd[3];		// count of total files (including deleted)
+	if (!addplace) ++trd[3];	// count of total files (including deleted)
 	// write disc info
 	if (fseek(ff, 0x8e1, SEEK_SET)) {
 		Error("TRD image has wrong format", fname, IF_FIRST); return 0;

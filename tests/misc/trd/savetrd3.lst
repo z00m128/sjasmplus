@@ -1,0 +1,40 @@
+# file opened: savetrd3.asm
+ 1    0000                  ; test data SAVETRD <TRDname>,&<Filename>,<start>,<lenght>
+ 2    0000                  DEVICE ZXSPECTRUM128
+ 2    0000                ORG $C000, 7
+ 2    C000 70 61 67 65    db "page 7"
+ 2    C004 20 37
+ 2    C006                ORG $C000, 6
+ 2    C000 70 61 67 65    db "page 6"
+ 2    C004 20 36
+ 2    C006                ORG $C000, 3
+ 2    C000 70 61 67 65    db "page 3"
+ 2    C004 20 33
+ 3    C006
+ 4    C006                  EMPTYTRD "savetrd3.trd"      ;create empty TRD image
+ 5    C006
+ 6    C006                  PAGE 7 ;set 7 page to current slot
+savetrd3.asm(7): error: TRD image does not have a specified file to add data: savetrd3.trd
+ 7    C006                  SAVETRD "savetrd3.trd",&"file0.C",$C000,$4000  ; error - not file for addition data
+ 8    C006
+ 9    C006                  SAVETRD "savetrd3.trd","file1.C",$C000,$4000   ; save file 1
+10    C006                  PAGE 6 ;set 6 page to current slot
+11    C006                  SAVETRD "savetrd3.trd","file2.C",$C000,$4000   ; save file 2
+12    C006                  PAGE 3 ;set 3 page to current slot
+13    C006                  SAVETRD "savetrd3.trd","file3.C",$C000,$4000   ; save file 3
+14    C006
+15    C006                  SAVETRD "savetrd3.trd",&"file1.C",$C000,8     ; add 1 sector to file 1
+16    C006                  PAGE 7 ;set 7 page to current slot
+17    C006                  SAVETRD "savetrd3.trd",&"file2.C",$C000,380   ; add 2 sector to file 2
+18    C006                  PAGE 6 ;set 6 page to current slot
+19    C006                  SAVETRD "savetrd3.trd",&"file3.C",$C000,$4000   ; add 64 sector to file 3
+20    C006
+savetrd3.asm(21): error: [SAVETRD] Autostart is not used here: SAVETRD "savetrd3.trd",&"file1.C",$C000,$4000,10     
+savetrd3.asm(21): error: Unexpected: 10     
+21    C006                  SAVETRD "savetrd3.trd",&"file1.C",$C000,$4000,10     ; error - not autostart used here
+22    C006
+23    C006                  ; on trd: file1.C = 65 sec. , file2.C = 66 sec. , file3.C = 128 sec.
+# file closed: savetrd3.asm
+
+Value    Label
+------ - -----------------------------------------------------------
