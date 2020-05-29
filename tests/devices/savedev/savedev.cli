@@ -1,9 +1,9 @@
 #decompress the BIN files for result validation
 gunzip savedev/savedev1.bin.OK.gz
 gunzip savedev/savedev2and3.bin.OK.gz
-# use normal way of assembling and cmp the binary results
+# use normal way of assembling and CMP the binary results
 $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm" && \
-cmp savedev/savedev1.bin.OK savedev1.bin && \
-cmp savedev/savedev2and3.bin.OK savedev2.bin && \
-cmp savedev/savedev2and3.bin.OK savedev3.bin
+$CMP savedev/savedev1.bin.OK savedev1.bin && \
+$CMP savedev/savedev2and3.bin.OK savedev2.bin && \
+$CMP savedev/savedev2and3.bin.OK savedev3.bin
 last_result=$?
