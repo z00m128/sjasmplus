@@ -81,10 +81,12 @@ task:
     image_family: freebsd-13-0-snap
     cpu: 4
     memory: 4G
-  # lock pkg on current version (sjasmplus does not care as long as it can install ...)
+  ## lock pkg on current version (sjasmplus does not care as long as it can install ...)
+  ##pkg lock -y pkg &&
+  ## - locking disabled after second incident recommending "Consider running 'pkg update -f'"
   # install git (lite), GNU make and bash
   # (FreeBSD make can't handle current Makefile, git is needed for UnitTest++ submodule)
-  sw_install_script: pkg lock -y pkg && pkg install -y git-lite gmake bash
+  sw_install_script: pkg install -y git-lite gmake bash
   sw_versions2_script:
     - git --version || echo "no git"
     - bash --version || echo "no bash"
