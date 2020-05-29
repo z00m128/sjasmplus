@@ -257,7 +257,7 @@ static int tolua_sjasm_zx_trdimage_add_file00(lua_State* tolua_S)
   int autostart = ((int)  tolua_tonumber(tolua_S,5,0));
   bool replace = ((int)  tolua_toboolean(tolua_S,6,0));
   {
-   int tolua_ret = (int)  TRD_AddFile(fname,fhobname,start,length,autostart,replace);
+   int tolua_ret = (int)  TRD_AddFile(fname,fhobname,start,length,autostart,replace,false);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

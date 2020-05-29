@@ -1073,7 +1073,7 @@ void dirSAVETRD() {
 		return;
 	}
 
-	bool exec = true, replace = false;
+	bool exec = true, replace = false, addplace = false;
 	aint val;
 	char* fnaam, * fnaamh;
 	int start = -1, length = -1, autostart = -1;
@@ -1082,6 +1082,7 @@ void dirSAVETRD() {
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
+			else if ((addplace = ('&' == *lp))) SkipBlanks(++lp); // detect "&" for "addplace" feature
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
@@ -1115,23 +1116,27 @@ void dirSAVETRD() {
 				}
 				length = val;
 			} else {
-		  		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
+				Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 			}
 		}
 		if (anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVETRD] Syntax error", bp, PASS3); return;
+			if (addplace) {
+				Error("[SAVETRD] Autostart is not used here", bp, PASS3); return;
+			} else {
+				if (!ParseExpression(lp, val)) {
+					Error("[SAVETRD] Syntax error", bp, PASS3); return;
+				}
+				if (val < 0) {
+					Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
+				}
+				autostart = val;
 			}
-			if (val < 0) {
-				Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
-			}
-			autostart = val;
 		}
 	} else {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
-	if (exec) TRD_AddFile(fnaam, fnaamh, start, length, autostart, replace);
+	if (exec) TRD_AddFile(fnaam, fnaamh, start, length, autostart, replace, addplace);
 	delete[] fnaam;
 	delete[] fnaamh;
 }
