@@ -8,7 +8,7 @@ task:
       image: gcc:6
       image: gcc:7
       image: gcc:8
-    cpu: 3
+    cpu: 2
     memory: 1G
   build_script: make clean && make -j3
   install_script: make install && make clean
@@ -33,7 +33,7 @@ pipe:
     DEBUG: 1
     COVERALLS_SERVICE: 1
   resources:
-    cpu: 3
+    cpu: 2
     memory: 1G
   steps:
     - image: gcc:7
@@ -55,6 +55,7 @@ task:
   windows_container:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
+    cpu: 2
   build_script: ContinuousIntegration\winbuild_mingw32.bat
   sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
   assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
@@ -67,6 +68,7 @@ task:
   windows_container:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
+    cpu: 2
   build_script: ContinuousIntegration\winbuild_vs15_2017.bat
   # exe is installed at the same location as the MinGW build does
   sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
@@ -79,8 +81,8 @@ task:
     CIRRUS_CLONE_DEPTH: 1
   freebsd_instance:
     image_family: freebsd-13-0-snap
-    cpu: 4
-    memory: 4G
+    cpu: 2
+    memory: 3G
   ## lock pkg on current version (sjasmplus does not care as long as it can install ...)
   ##pkg lock -y pkg &&
   ## - locking disabled after second incident recommending "Consider running 'pkg update -f'"
@@ -107,6 +109,8 @@ task:
     CIRRUS_CLONE_DEPTH: 1
   osx_instance:
     image: catalina-base
+    cpu: 2
+    memory: 4G
   #sw_versions2_script:
     #- git --version || echo "no git"
     #- bash --version || echo "no bash"
