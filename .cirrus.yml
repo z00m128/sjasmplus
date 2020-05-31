@@ -109,8 +109,6 @@ task:
     CIRRUS_CLONE_DEPTH: 1
   osx_instance:
     image: catalina-base
-    cpu: 2
-    memory: 4G
   #sw_versions2_script:
     #- git --version || echo "no git"
     #- bash --version || echo "no bash"
