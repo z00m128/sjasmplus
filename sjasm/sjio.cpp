@@ -557,6 +557,12 @@ static void OpenDefaultList(const char *fullpath);
 static stdin_log_t::const_iterator stdin_read_it;
 static stdin_log_t* stdin_log = nullptr;
 
+FILE* dbg_fopen(const char* fname, const char* modes) {
+	FILE* f = fopen(fname, modes);
+	printf("fopen = %p modes [%s]\tname (%lu) [%s]\n", (void*)f, modes, strlen(fname), fname);
+	return f;
+}
+
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t* fStdinLog)
 {
 	const char* oFileNameFull = fileNameFull;
