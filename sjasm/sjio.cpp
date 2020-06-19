@@ -561,7 +561,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 {
 	const char* oFileNameFull = fileNameFull;
 	TextFilePos oSourcePos = CurSourcePos;
-	char* oCurrentDirectory, * fullpath, * listFullName = NULL;
+	char* oCurrentDirectory, * fullpath;
 	TCHAR* filenamebegin;
 
 	if (++IncludeLevel > 20) {
@@ -597,9 +597,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	// show in listing file which file was opened
 	FILE* listFile = GetListingFile();
 	if (LASTPASS == pass && listFile) {
-		listFullName = STRDUP(fullpath);	// create copy of full filename for listing file
 		fputs("# file opened: ", listFile);
-		fputs(listFullName, listFile);
+		fputs(fileNameFull, listFile);
 		fputs("\n", listFile);
 	}
 
@@ -625,9 +624,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	// show in listing file which file was closed
 	if (LASTPASS == pass && listFile) {
 		fputs("# file closed: ", listFile);
-		fputs(listFullName, listFile);
+		fputs(fileNameFull, listFile);
 		fputs("\n", listFile);
-		free(listFullName);
 
 		// close listing file (if "default" listing filename is used)
 		if (FP_ListingFile && 0 == IncludeLevel && Options::IsDefaultListingName) {
