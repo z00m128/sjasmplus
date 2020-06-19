@@ -61,7 +61,7 @@ int SJ_SearchPath(const char* oudzp, const char* filename, const char* /*extensi
 FILE* dbg_fopen(const char* fname, const char* modes);
 
 #define FOPEN(pFile, filename, mode) (pFile = fopen(filename, mode))
-#define FOPEN_ISOK(pFile, filename, mode) ((pFile = dbg_fopen(filename, mode)) != NULL)
+#define FOPEN_ISOK(pFile, filename, mode) ((pFile = fopen(filename, mode)) != NULL)
 
 #define STRDUP strdup
 #define STRCAT(strDestination, sizeInBytes, strSource) strncat(strDestination, strSource, sizeInBytes)
