@@ -80,7 +80,7 @@ task:
   env:
     CIRRUS_CLONE_DEPTH: 1
   freebsd_instance:
-    image: freebsd-13-0-current-amd64-v20200220
+    image_family: freebsd-13-0-snap
     cpu: 2
     memory: 3G
   ## lock pkg on current version (sjasmplus does not care as long as it can install ...)
@@ -88,7 +88,7 @@ task:
   ## - locking disabled after second incident recommending "Consider running 'pkg update -f'"
   # install git (lite), GNU make and bash
   # (FreeBSD make can't handle current Makefile, git is needed for UnitTest++ submodule)
-  sw_install_script: pkg update -f && pkg install -y git-lite gmake bash diffutils
+  sw_install_script: IGNORE_OSVERSION=yes pkg update -f && pkg install -y git-lite gmake bash diffutils
   sw_versions2_script:
     - git --version || echo "no git"
     - bash --version || echo "no bash"
