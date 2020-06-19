@@ -80,7 +80,7 @@ task:
   env:
     CIRRUS_CLONE_DEPTH: 1
   freebsd_instance:
-    image_family: freebsd-13-0-snap
+    image: freebsd-13-0-current-amd64-v20200220
     cpu: 2
     memory: 3G
   ## lock pkg on current version (sjasmplus does not care as long as it can install ...)
