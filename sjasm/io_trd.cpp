@@ -28,31 +28,91 @@
 
 #include "sjdefs.h"
 
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+#endif
+struct STrdFile {
+	constexpr static size_t NAME_BASE_SZ = 8;
+	constexpr static size_t NAME_EXT_SZ = 1;
+	constexpr static size_t NAME_ALT_EXT_SZ = 3;	// 3-letter extensions are sometimes used instead of "address" field
+
+	byte		filename[NAME_BASE_SZ];
+	byte		ext;
+	word		address;		// sometimes: other two extension letters for 8.3 naming scheme
+	word		length;
+	byte		sectorLength;
+	byte		startSector;
+	byte		startTrack;
+}
+#ifndef _MSC_VER
+	__attribute__((packed));
+#else
+	;
+#pragma pack(pop)
+#endif
+static_assert(16 == sizeof(STrdFile), "TRD file header is expected to be 16 bytes long!");
+
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+#endif
+struct STrdDisc {
+	constexpr static byte TRDOS_DISC_ID = 0x10;
+	constexpr static size_t SECTOR_SZ = 256;
+	constexpr static size_t SECTORS_PER_TRACK = 16;
+	constexpr static size_t PASSWORD_SZ = 9;
+	constexpr static size_t LABEL_SZ = 8;
+	constexpr static byte DISK_TYPE_T80_S2 = 0x16;		// 80 tracks, double sided
+	constexpr static byte DISK_TYPE_T40_S2 = 0x17;		// 40 tracks, double sided
+	constexpr static byte DISK_TYPE_T80_S1 = 0x18;		// 80 tracks, single sided
+	constexpr static byte DISK_TYPE_T40_S1 = 0x19;		// 40 tracks, single sided
+
+	byte		_endOfRootDirectory		= 0x00;
+	byte		_unused[224]			= {};
+	byte		freeSector				= 0;
+	byte		freeTrack				= 1;
+	byte		diskType				= DISK_TYPE_T80_S2;
+	byte		numOfFiles				= 0;
+	word		numOfFreeSectors		= (79+80)*SECTORS_PER_TRACK;	// 0x09F0 for T80_S2 empty disc
+	byte		trDosId					= TRDOS_DISC_ID;
+	byte		_unused2[2]				= {};
+	byte		password[PASSWORD_SZ]	= {' ',' ',' ',' ',' ',' ',' ',' ',' '};
+	byte		_unused3[1]				= {};
+	byte		numOfDeleted			= 0;
+	byte		label[LABEL_SZ]			= {' ',' ',' ',' ',' ',' ',' ',' '};
+	byte		_unused4[3]				= {};
+}
+#ifndef _MSC_VER
+	__attribute__((packed));
+#else
+	;
+#pragma pack(pop)
+#endif
+static_assert(STrdDisc::SECTOR_SZ == sizeof(STrdDisc), "TRD disc info is expected to be 256 bytes long!");
+
+/**
+ * @brief Write empty TRD file (80 tracks, 2 sides) into file
+ *
+ * @param ff file handle to write content into
+ * @param buf 4096 bytes long buffer (must be zeroed by caller) (16 sectors = 1 track)
+ * @param label nullptr or 8 characters long disc label
+ * @return int 1 if OK, 0 in case of write error
+ */
 static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
-	int i;
 	//catalog (8 zeroed sectors)
-	if (fwrite(buf, 1, 1024, ff) < 1024) return 0;
-	if (fwrite(buf, 1, 1024, ff) < 1024) return 0;
+	if (8 != fwrite(buf, STrdDisc::SECTOR_SZ, 8, ff)) return 0;
 	// disc info in sector 8
-	buf[0xe1] = 0;		// first free sector
-	buf[0xe2] = 1;		// track of first free sector
-	buf[0xe3] = 0x16;	// disk type (80 tracks, double sided)
-	buf[0xe4] = 0;		// number of used catalog entries (including deleted!) (number of files)
-	buf[0xe5] = 0xf0;	// number of free sectors (WORD)
-	buf[0xe6] = 0x09;	// ^^
-	buf[0xe7] = 0x10;	// TR-DOS ID (0x10)
-	buf[0xe8] = buf[0xe9] = 0;		// unused WORD = 0
-	for (i = 0; i < 9; ++i) buf[0xea + i] = 0x20;	// spaces fill or disk protecting password
-	buf[0xf3] = 0;		// unused = 0
-	buf[0xf4] = 0;		// number of deleted files on disk
-	// disc label + end of disk info (8x 20h, 3x 0)
-	for (i = 0; i < 8; ++i) buf[0xf5 + i] = (nullptr != label) ? label[i] : 0x20;
-	if (fwrite(buf, 1, 256, ff) < 256) return 0;
-	for (i = 0xe1; i < 0x100; ++i) buf[i] = 0;		// clear the buffer back to all zeroes
-	// remaining sectors in image contains all zeroes
-	if (fwrite(buf, 1, 768, ff) < 768) return 0;
-	for (i = 0; i < 640 - 3; i++) {
-		if (fwrite(buf, 1, 1024, ff) < 1024) return 0;
+	{
+		// the default 80 track two sided disc info initialized
+		STrdDisc discInfo{};
+		// replace label data if requested
+		if (label) memcpy(discInfo.label, label, STrdDisc::LABEL_SZ);
+		if (1 != fwrite(&discInfo, sizeof(STrdDisc), 1, ff)) return 0;
+	}
+	// zeroes till end of first track
+	if (7 != fwrite(buf, STrdDisc::SECTOR_SZ, 7, ff)) return 0;
+	// remaining tracks in image contains all zeroes
+	for (int i = 0; i < (79 + 80); ++i) {		// 80 tracks, two sides, one track is already done
+		if (STrdDisc::SECTORS_PER_TRACK != fwrite(buf, STrdDisc::SECTOR_SZ, STrdDisc::SECTORS_PER_TRACK, ff)) return 0;
 	}
 	return 1;
 }
@@ -63,7 +123,7 @@ int TRD_SaveEmpty(const char* fname, const char label[8]) {
 		Error("Error opening file", fname, IF_FIRST);
 		return 0;
 	}
-	byte* buf = (byte*) calloc(1024, sizeof(byte));
+	byte* buf = (byte*) calloc(STrdDisc::SECTORS_PER_TRACK*STrdDisc::SECTOR_SZ, sizeof(byte));
 	if (buf == NULL) ErrorOOM();
 	int result = saveEmptyWrite(ff, buf, label);
 	free(buf);
