@@ -35,6 +35,8 @@ struct STrdFile {
 	constexpr static size_t NAME_BASE_SZ = 8;
 	constexpr static size_t NAME_EXT_SZ = 1;
 	constexpr static size_t NAME_ALT_EXT_SZ = 3;	// 3-letter extensions are sometimes used instead of "address" field
+	constexpr static size_t NAME_FULL_SZ = NAME_BASE_SZ + NAME_EXT_SZ;
+	constexpr static size_t NAME_ALT_FULL_SZ = NAME_BASE_SZ + NAME_ALT_EXT_SZ;
 
 	byte		filename[NAME_BASE_SZ];
 	byte		ext;
@@ -134,21 +136,24 @@ int TRD_SaveEmpty(const char* fname, const char label[8]) {
 
 ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & nameL) {
 	nameL = 0;
-	while (inputName[nameL] && ('.' != inputName[nameL]) && nameL < 8) {
+	while (inputName[nameL] && ('.' != inputName[nameL]) && nameL < int(STrdFile::NAME_BASE_SZ)) {
 		binName[nameL] = inputName[nameL];
 		++nameL;
 	}
-	while (nameL < 8) binName[nameL++] = ' ';
+	while (nameL < int(STrdFile::NAME_BASE_SZ)) binName[nameL++] = ' ';
 	const char* ext = strrchr(inputName, '.');
-	while (ext && ext[nameL-7] && nameL < 11) {
-		binName[nameL] = ext[nameL-7];
+	while (ext && ext[1] && nameL < int(STrdFile::NAME_ALT_FULL_SZ)) {
+		binName[nameL] = ext[1];
 		++nameL;
+		++ext;
 	}
-	while (9 != nameL && 11 != nameL) binName[nameL++] = ' ';	// the file name is either 8+1 or 8+3 (not 8+2)
+	while (STrdFile::NAME_FULL_SZ != nameL && STrdFile::NAME_ALT_FULL_SZ != nameL) {
+		binName[nameL++] = ' ';		// the file name is either 8+1 or 8+3 (not 8+2)
+	}
 	int fillIdx = nameL;
 	while (fillIdx < 12) binName[fillIdx++] = 0;
-	if (9 < nameL) return THREE_LETTER_EXTENSION;
-	switch (binName[8]) {
+	if (int(STrdFile::NAME_FULL_SZ) < nameL) return THREE_LETTER_EXTENSION;
+	switch (binName[STrdFile::NAME_BASE_SZ]) {
 		case 'B': case 'C': case 'D': case '#':
 			return OK;
 	}
