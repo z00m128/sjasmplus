@@ -143,6 +143,7 @@
     SAVETRD "savetrd4.trd","124.C",#4000,4600
     SAVETRD "savetrd4.trd","125.C",#4000,4600
     SAVETRD "savetrd4.trd","126.C",#4000,4600
+    SAVETRD "savetrd4.trd",&"333.C",#4000,12032 ; error: file not found (before full catalog)
     SAVETRD "savetrd4.trd","127.C",#4000,4600
 
 ; 128 files
@@ -154,9 +155,10 @@
     SAVETRD "savetrd4.trd",&"126.C",#4000,16384 ; add 64 sec. = 210 sec.
     SAVETRD "savetrd4.trd",&"126.C",#4000,12032 ; add 64 sec. = error max 255 sec.
 
-    SAVETRD "savetrd4.trd",|"125.C",#4000,10240 ; error catalogue full / marked file as deleted
-    SAVETRD "savetrd4.trd",|"127.C",#4000,16880 ; resave 66 sec /  0 free sectors on trd
-    SAVETRD "savetrd4.trd",|"127.C",#4000,17000 ; error: no space on the disk / deleted a file as the last one
+    SAVETRD "savetrd4.trd",|"125.C",#4000,10240 ; error catalogue full / no change to TRD
+    SAVETRD "savetrd4.trd",|"127.C",#4000,16880 ; resave 66 sec / 0 free sectors on trd
+    SAVETRD "savetrd4.trd",|"127.C",#4000,17000 ; error: no space on the disk / no change to TRD
 
-    ; disk free 66 sec. , 1 erased file
+    SAVETRD "savetrd4.trd",&"333.C",#4000,12032 ; error: file not found (even in full catalog)
+    ; disk free 0 sec., 0 erased files
 
