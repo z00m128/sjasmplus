@@ -82,6 +82,10 @@ struct STrdDisc {
 	byte		numOfDeleted			= 0;
 	byte		label[LABEL_SZ]			= {' ',' ',' ',' ',' ',' ',' ',' '};
 	byte		_unused4[3]				= {};
+
+	bool isTrdInfo() const {
+		return (TRDOS_DISC_ID == trDosId);
+	}
 }
 #ifndef _MSC_VER
 	__attribute__((packed));
@@ -90,6 +94,23 @@ struct STrdDisc {
 #pragma pack(pop)
 #endif
 static_assert(STrdDisc::SECTOR_SZ == sizeof(STrdDisc), "TRD disc info is expected to be 256 bytes long!");
+
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+#endif
+struct STrdHead {
+	constexpr static size_t NUM_OF_FILES_MAX = 128;		// 8 sectors with 16B records
+
+	STrdFile	catalog[NUM_OF_FILES_MAX];
+	STrdDisc	info;
+}
+#ifndef _MSC_VER
+	__attribute__((packed));
+#else
+	;
+#pragma pack(pop)
+#endif
+static_assert(9 * STrdDisc::SECTOR_SZ == sizeof(STrdHead), "TRD catalog and info area should be 9 sectors long!");
 
 /**
  * @brief Write empty TRD file (80 tracks, 2 sides) into file
@@ -166,17 +187,18 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	// do some preliminary checks with file name and autostart
 	byte hobnamebin[16];
 	int Lname = 0;
-	ETrdFileName nameWarning = TRD_FileNameToBytes(fhobname, hobnamebin, Lname);
+	const ETrdFileName nameWarning = TRD_FileNameToBytes(fhobname, hobnamebin, Lname);
+	const bool isExtensionB = ('B' == hobnamebin[STrdFile::NAME_BASE_SZ]);
 	if (!addplace && warningNotSuppressed()) {
 		if (INVALID_EXTENSION == nameWarning) {
 			Warning("zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.", fhobname);
 		}
 		if (THREE_LETTER_EXTENSION == nameWarning) {
 			Warning("zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters", fhobname);
-			if ('B' == hobnamebin[8]) Warning("SAVETRD: the \"B\" extension is always single letter.", fhobname);
+			if (isExtensionB) Warning("SAVETRD: the \"B\" extension is always single letter.", fhobname);
 		}
 	}
-	if (0 <= autostart && ('B' != hobnamebin[8] || 9999 < autostart)) {
+	if (0 <= autostart && (!isExtensionB || 9999 < autostart)) {
 		Warning("zx.trdimage_add_file: autostart value is BASIC program line number (0..9999) (in lua use -1 otherwise).");
 		autostart = -1;
 	}
@@ -208,80 +230,62 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 
 	// read disc info into "trd" array
 	FILE* ff;
+	STrdHead trdHead;
 	if (!FOPEN_ISOK(ff, fname, "r+b")) Error("Error opening file", fname, FATAL);
-
-	byte hdr[16], trd[31];
-	if (fseek(ff, 0x8e1, SEEK_SET)) {
-		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
-	}
-	if (31UL != fread(trd, 1, 31, ff) && 0x10 != trd[6]) {	// verify also TR-DOS ID
+	if (1 != fread(&trdHead, sizeof(STrdHead), 1, ff) || !trdHead.info.isTrdInfo()) {
 		Error("TRD image read error", fname, IF_FIRST); return 0;
 	}
-
-	constexpr size_t FAT_END_POS = 128*16;
-	size_t fatPos;
-	int freeSecs = trd[4] + (trd[5] << 8);
 
 	// "replace" feature, goes through whole FAT and deletes all files with identical name
 	// In special case when last file connects to current first free sector => the disc space
 	// will be recovered, but overall this feature is very primitive (not defragging fat or disc)
 	if (replace) {
 		bool discInfoModified = false;
-		for (fatPos = 0; fatPos < FAT_END_POS; fatPos += 16) {
-			fseek(ff, fatPos, SEEK_SET);
-			if (16UL != fread(hdr, 1, 16, ff)) {
-				Error("Read error", fname, IF_FIRST); return 0;
-			}
-			if (0 == hdr[0]) break;		// beyond last FAT record, finish the loop
-			if (memcmp(hdr, hobnamebin, Lname)) continue;	// different file name -> continue
+		for (unsigned i = 0; i < STrdHead::NUM_OF_FILES_MAX; ++i) {
+			auto & entry = trdHead.catalog[i];
+			if (0 == entry.filename[0]) break;		// beyond last FAT record, finish the loop
+			if (memcmp(entry.filename, hobnamebin, Lname)) continue;	// different file name -> continue
 			discInfoModified = true;
-			const bool isLastFile = ((fatPos>>4) + 1) == trd[3];
-			if (isLastFile) {
+			if (i + 1 == trdHead.info.numOfFiles) {		// if last file in the catalog
 				// It's last file of catalog, erase it as if it was not on disc at all
 				// verify if the free space starts just where last file ends (integrity of TRD image)
-				const int secsLengthDel = hdr[0x0d];
-				const byte nextTrack = ((secsLengthDel+hdr[0x0e])>>4) + hdr[0x0f];
-				const byte nextSector = (secsLengthDel+hdr[0x0e])&0x0F;
+				const byte nextTrack = ((entry.sectorLength + entry.startSector) >> 4) + entry.startTrack;
+				const byte nextSector = (entry.sectorLength + entry.startSector) & 0x0F;
 				// if file connects to first free sector, salvage the space back
-				if (nextSector != trd[0] || nextTrack != trd[1]) {
+				if (nextSector != trdHead.info.freeSector || nextTrack != trdHead.info.freeTrack) {
 					Error("TRD free sector was not connected to last file", fname, IF_FIRST); return 0;
 				}
 				// return the sectors used by file back to "free sectors" pool
-				trd[0] = hdr[0x0e];
-				trd[1] = hdr[0x0f];
-				freeSecs += secsLengthDel;
-				trd[4] = byte(freeSecs & 0xff);
-				trd[5] = byte(freeSecs >> 8);
+				trdHead.info.freeSector = entry.startSector;
+				trdHead.info.freeTrack = entry.startTrack;
+				trdHead.info.numOfFreeSectors += entry.sectorLength;
 				// delete the file (wipe catalog entry completely as if it was not written)
-				--trd[3];
-				hdr[0] = 0;
+				--trdHead.info.numOfFiles;
+				entry.filename[0] = 0;
 			} else {
 				// delete the file (but it stays in catalog as deleted file)
-				hdr[0] = 1;
-				++trd[19];
-			}
-			// write modified FAT entry
-			if (fseek(ff, fatPos, SEEK_SET)) {
-				Error("TRD image has wrong format", fname, IF_FIRST); return 0;
-			}
-			if (16UL != fwrite(hdr, 1, 16, ff)) {
-				Error("FAT write error", fname, IF_FIRST); return 0;
+				entry.filename[0] = 1;
+				++trdHead.info.numOfDeleted;
 			}
 		}
 		// if some files were deleted, update disc info sector too to make image "valid" before writing file
 		if (discInfoModified) {
-			// update remaining free sectors
-			if (fseek(ff, 0x8e1, SEEK_SET)) {
+			// update whole catalog and disc info with modified data
+			if (fseek(ff, 0, SEEK_SET)) {
 				Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 			}
-			if (31UL != fwrite(trd, 1, 31, ff)) {
+			if (1 != fwrite(&trdHead, sizeof(STrdHead), 1, ff)) {
 				Error("Disc info write error", fname, IF_FIRST); return 0;
 			}
 			fflush(ff);
 		}
 	} // end of "if (replace)"
 
-	if (freeSecs < secsLength) {
+	byte hdr[16];
+	constexpr size_t FAT_END_POS = 128*16;
+	size_t fatPos;
+
+	if (trdHead.info.numOfFreeSectors < secsLength) {
 		Error("TRD image has not enough free space", fname, IF_FIRST); return 0;
 	}
 
@@ -299,9 +303,10 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 			if (!memcmp(hdr, hobnamebin, Lname)) break;	// equal file name -> break
 		}
 
-		size_t currpos = (trd[1] << 12) + (trd[0] << 8) - 16 , filepos = (hdr[0x0F] << 12) + (hdr[0x0E] << 8);
-
-		size_t lastpos = currpos + (secsLength << 8) , finpos = filepos + (hdr[0x0D] << 8);
+		size_t currpos = (trdHead.info.freeTrack << 12) + (trdHead.info.freeSector << 8) - 16;
+		size_t filepos = (hdr[0x0F] << 12) + (hdr[0x0E] << 8);
+		size_t lastpos = currpos + (secsLength << 8);
+		size_t finpos = filepos + (hdr[0x0D] << 8);
 
 		// save file new sector length
 		if (fseek(ff, fatPos, SEEK_SET)) {
@@ -361,7 +366,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		}
 	} else {
 		// Use the last catalog position and verify it's free
-		fatPos = size_t(trd[3]) * 16;
+		fatPos = size_t(trdHead.info.numOfFiles) * 16;
 		if (FAT_END_POS <= fatPos) {
 			Error("TRD image is full of files", fname, IF_FIRST); return 0;
 		}
@@ -374,7 +379,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		}
 
 		// save the file content first
-		if (fseek(ff, (long(trd[1]) << 12) + (long(trd[0]) << 8), SEEK_SET)) {
+		if (fseek(ff, (long(trdHead.info.freeTrack) << 12) + (long(trdHead.info.freeSector) << 8), SEEK_SET)) {
 			Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 		}
 
@@ -389,7 +394,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 
 		//header of file
 		memcpy(hdr, hobnamebin, Lname);
-		if ('B' == hobnamebin[8]) {
+		if (isExtensionB) {
 			hdr[0x09] = (unsigned char)(length & 0xff);
 			hdr[0x0a] = (unsigned char)(length >> 8);
 		} else {
@@ -401,8 +406,8 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		hdr[0x0b] = (unsigned char)(length & 0xff);
 		hdr[0x0c] = (unsigned char)(length >> 8);
 		hdr[0x0d] = secsLength;
-		hdr[0x0e] = trd[0];
-		hdr[0x0f] = trd[1];
+		hdr[0x0e] = trdHead.info.freeSector;
+		hdr[0x0f] = trdHead.info.freeTrack;
 
 		if (fseek(ff, fatPos, SEEK_SET)) {
 			Error("TRD image has wrong format", fname, IF_FIRST); return 0;
@@ -413,18 +418,16 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	}
 
 	// update next free sector/track position
-	trd[1] += (secsLength+trd[0])>>4;
-	trd[0] = (secsLength+trd[0])&0x0F;
+	trdHead.info.freeTrack += (secsLength + trdHead.info.freeSector)>>4;
+	trdHead.info.freeSector = (secsLength + trdHead.info.freeSector) & 0x0F;
 	// update remaining free sectors
-	freeSecs -= secsLength;
-	trd[4] = (unsigned char)(freeSecs & 0xff);
-	trd[5] = (unsigned char)(freeSecs >> 8);
-	if (!addplace) ++trd[3];	// count of total files (including deleted)
+	trdHead.info.numOfFreeSectors -= secsLength;
+	if (!addplace) ++trdHead.info.numOfFiles;
 	// write disc info
-	if (fseek(ff, 0x8e1, SEEK_SET)) {
+	if (fseek(ff, 8 * STrdDisc::SECTOR_SZ, SEEK_SET)) {
 		Error("TRD image has wrong format", fname, IF_FIRST); return 0;
 	}
-	if (31UL != fwrite(trd, 1, 31, ff)) {
+	if (1 != fwrite(&trdHead.info, sizeof(STrdDisc), 1, ff)) {
 		Error("Disc info write error", fname, IF_FIRST); return 0;
 	}
 
