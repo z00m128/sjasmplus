@@ -144,27 +144,31 @@
 143   4000                  SAVETRD "savetrd4.trd","124.C",#4000,4600
 144   4000                  SAVETRD "savetrd4.trd","125.C",#4000,4600
 145   4000                  SAVETRD "savetrd4.trd","126.C",#4000,4600
-146   4000                  SAVETRD "savetrd4.trd","127.C",#4000,4600
-147   4000
-148   4000              ; 128 files
-149   4000
-savetrd4.asm(150): error: TRD image is full of files: savetrd4.trd
-150   4000                  SAVETRD "savetrd4.trd","128_.C",#4000,100  ; error catalogue full
-151   4000
-152   4000                  SAVETRD "savetrd4.trd",&"126.C",#4000,16384 ; add 64 sec. = 82 sec.
-153   4000                  SAVETRD "savetrd4.trd",&"126.C",#4000,16384 ; add 64 sec. = 146 sec.
-154   4000                  SAVETRD "savetrd4.trd",&"126.C",#4000,16384 ; add 64 sec. = 210 sec.
-savetrd4.asm(155): error: zx.trdimage_add_file: new sector length over 0xFF max: savetrd4.trd
-155   4000                  SAVETRD "savetrd4.trd",&"126.C",#4000,12032 ; add 64 sec. = error max 255 sec.
-156   4000
-savetrd4.asm(157): error: TRD image is full of files: savetrd4.trd
-157   4000                  SAVETRD "savetrd4.trd",|"125.C",#4000,10240 ; error catalogue full / marked file as deleted
-158   4000                  SAVETRD "savetrd4.trd",|"127.C",#4000,16880 ; resave 66 sec /  0 free sectors on trd
-savetrd4.asm(159): error: TRD image has not enough free space: savetrd4.trd
-159   4000                  SAVETRD "savetrd4.trd",|"127.C",#4000,17000 ; error: no space on the disk / deleted a file as the last one
-160   4000
-161   4000                  ; disk free 66 sec. , 1 erased file
-162   4000
+savetrd4.asm(146): error: TRD image does not have a specified file to add data: savetrd4.trd
+146   4000                  SAVETRD "savetrd4.trd",&"333.C",#4000,12032 ; error: file not found (before full catalog)
+147   4000                  SAVETRD "savetrd4.trd","127.C",#4000,4600
+148   4000
+149   4000              ; 128 files
+150   4000
+savetrd4.asm(151): error: TRD image is full of files: savetrd4.trd
+151   4000                  SAVETRD "savetrd4.trd","128_.C",#4000,100  ; error catalogue full
+152   4000
+153   4000                  SAVETRD "savetrd4.trd",&"126.C",#4000,16384 ; add 64 sec. = 82 sec.
+154   4000                  SAVETRD "savetrd4.trd",&"126.C",#4000,16384 ; add 64 sec. = 146 sec.
+155   4000                  SAVETRD "savetrd4.trd",&"126.C",#4000,16384 ; add 64 sec. = 210 sec.
+savetrd4.asm(156): error: zx.trdimage_add_file: new sector length over 0xFF max: savetrd4.trd
+156   4000                  SAVETRD "savetrd4.trd",&"126.C",#4000,12032 ; add 64 sec. = error max 255 sec.
+157   4000
+savetrd4.asm(158): error: TRD image is full of files: savetrd4.trd
+158   4000                  SAVETRD "savetrd4.trd",|"125.C",#4000,10240 ; error catalogue full / no change to TRD
+159   4000                  SAVETRD "savetrd4.trd",|"127.C",#4000,16880 ; resave 66 sec / 0 free sectors on trd
+savetrd4.asm(160): error: TRD image has not enough free space: savetrd4.trd
+160   4000                  SAVETRD "savetrd4.trd",|"127.C",#4000,17000 ; error: no space on the disk / no change to TRD
+161   4000
+savetrd4.asm(162): error: TRD image does not have a specified file to add data: savetrd4.trd
+162   4000                  SAVETRD "savetrd4.trd",&"333.C",#4000,12032 ; error: file not found (even in full catalog)
+163   4000                  ; disk free 0 sec., 0 erased files
+164   4000
 # file closed: savetrd4.asm
 
 Value    Label
