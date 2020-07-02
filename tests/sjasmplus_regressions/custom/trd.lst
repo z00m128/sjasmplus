@@ -32,26 +32,36 @@ trd.asm(21): warning: zx.trdimage_add_file: invalid file extension, TRDOS extens
 trd.asm(24): warning: TRD file already exists, creating one more!: trd.trd
 24    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; warning
 25    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; ok ; warning suppressed
-26    8205
-27    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
-28    8205
-29    8205              ; TODO add some check to validate resulting files
-30    8205
-31    8205                  ; some more syntax error tests for better code coverage
-trd.asm(32): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t"
-32    8205                      SAVEHOB "trd.$t"
-trd.asm(33): error: [SAVEHOB] Syntax error: SAVEHOB "trd.$t",
-33    8205                      SAVEHOB "trd.$t",
-trd.asm(34): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t",,
-34    8205                      SAVEHOB "trd.$t",,
-35    8205                      DEVICE NONE
-trd.asm(36): error: SAVEHOB only allowed in real device emulation mode (See DEVICE)
-36    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
-trd.asm(37): error: [EMPTYTRD] Syntax error: EMPTYTRD
-37    8205                      EMPTYTRD
-trd.asm(38): error: SAVETRD only allowed in real device emulation mode (See DEVICE)
-38    8205                      SAVETRD "trd.trd","label1.txt",label1,5
-39    8205
+26    8205                  ; test the new warnings about "B" extension allowing only single letter
+trd.asm(27): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label2.BAS
+trd.asm(27): warning: SAVETRD: the "B" extension is always single letter: label2.BAS
+trd.asm(27): warning: TRD file already exists, creating one more!: trd.trd
+27    8205                      SAVETRD "trd.trd","label2.BAS",label1,5     ; 3x warning (3 letter ext, ".B" enforces 1 letter, duplicate file)
+28    8205                      SAVETRD "trd.trd","label2.BAS",label1,5     ; ok ; warnings suppressed
+29    8205                  ; test deletion of duplicate files when in replace/add modes
+30    8205                      SAVETRD "trd.trd",|"label2.B",label2,5
+31    8205                      SAVETRD "trd.trd","label3.J",label2,5       ; ok
+32    8205                      SAVETRD "trd.trd",&"label3.J",label2,5
+33    8205
+34    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
+35    8205
+36    8205              ; TODO add some check to validate resulting files
+37    8205
+38    8205                  ; some more syntax error tests for better code coverage
+trd.asm(39): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t"
+39    8205                      SAVEHOB "trd.$t"
+trd.asm(40): error: [SAVEHOB] Syntax error: SAVEHOB "trd.$t",
+40    8205                      SAVEHOB "trd.$t",
+trd.asm(41): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t",,
+41    8205                      SAVEHOB "trd.$t",,
+42    8205                      DEVICE NONE
+trd.asm(43): error: SAVEHOB only allowed in real device emulation mode (See DEVICE)
+43    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
+trd.asm(44): error: [EMPTYTRD] Syntax error: EMPTYTRD
+44    8205                      EMPTYTRD
+trd.asm(45): error: SAVETRD only allowed in real device emulation mode (See DEVICE)
+45    8205                      SAVETRD "trd.trd","label1.txt",label1,5
+46    8205
 # file closed: trd.asm
 
 Value    Label

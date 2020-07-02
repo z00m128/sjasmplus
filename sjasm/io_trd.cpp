@@ -195,10 +195,13 @@ static int ReturnWithError(const char* errorText, const char* fname, FILE* fileT
 int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace) {
 
 	// do some preliminary checks with file name and autostart - prepare final catalog entry data
-	STrdFile trdf;			// structure to hold future form of catalog record about new file
+	union {
+		STrdFile trdf;			// structure to hold future form of catalog record about new file
+		byte longFname[12];		// 12 byte access for TRD_FileNameToBytes (to avoid LGTM alert)
+	};
 	int Lname = 0;
-	// this will overwrite also first byte of "trd.length" (12 bytes affected)
-	const ETrdFileName nameWarning = TRD_FileNameToBytes(fhobname, trdf.filename, Lname);
+	// this will overwrite also first byte of "trd.length" (12 bytes are affected, not just 11)
+	const ETrdFileName nameWarning = TRD_FileNameToBytes(fhobname, longFname, Lname);
 	const bool isExtensionB = ('B' == trdf.ext);
 	if (!addplace && warningNotSuppressed()) {
 		if (INVALID_EXTENSION == nameWarning) {
@@ -207,7 +210,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		if (THREE_LETTER_EXTENSION == nameWarning) {
 			Warning("zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters", fhobname);
 			if (isExtensionB) {
-				Warning("SAVETRD: the \"B\" extension is always single letter.", fhobname);
+				Warning("SAVETRD: the \"B\" extension is always single letter", fhobname);
 				Lname = STrdFile::NAME_FULL_SZ;
 			}
 		}

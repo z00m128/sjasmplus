@@ -23,6 +23,13 @@ end
     ; test the new warning about saving same file second time (v1.15.1+)
         SAVETRD "trd.trd","label2.B",label2,5       ; warning
         SAVETRD "trd.trd","label2.B",label2,5       ; ok ; warning suppressed
+    ; test the new warnings about "B" extension allowing only single letter
+        SAVETRD "trd.trd","label2.BAS",label1,5     ; 3x warning (3 letter ext, ".B" enforces 1 letter, duplicate file)
+        SAVETRD "trd.trd","label2.BAS",label1,5     ; ok ; warnings suppressed
+    ; test deletion of duplicate files when in replace/add modes
+        SAVETRD "trd.trd",|"label2.B",label2,5
+        SAVETRD "trd.trd","label3.J",label2,5       ; ok
+        SAVETRD "trd.trd",&"label3.J",label2,5
 
         SAVEHOB "trd.$t","labels.txt",label1,end-label1
 
