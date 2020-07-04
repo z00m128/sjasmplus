@@ -1945,94 +1945,68 @@ const char *readMemFile(lua_State *, void *ud, size_t *size)
 }
 
 void dirLUA() {
-	int error;
-	char *rp, *id;
-	char *buff = new char[32768];
-	char *bp=buff;
-//	char size=0;
-	bool execute=false;
-	EStatus errorType = PASS3;
-
+	constexpr size_t luaBufferSize = 32768;
 	luaMemFile luaMF;
+	char* id, * buff, * bp;
 
-	SkipBlanks();
-
+	int passToExec = LASTPASS;
 	if ((id = GetID(lp)) && strlen(id) > 0) {
 		if (cmphstr(id, "pass1")) {
-			if (pass == 1) {
-				execute = true;
-				errorType = EARLY;
-			}
+			passToExec = 1;
 		} else if (cmphstr(id, "pass2")) {
-			if (pass == 2) {
-				execute = true;
-				errorType = EARLY;
-			}
+			passToExec = 2;
 		} else if (cmphstr(id, "pass3")) {
-			if (pass == 3) {
-				execute = true;
-			}
+			passToExec = LASTPASS;
 		} else if (cmphstr(id, "allpass")) {
-			execute = true;
+			passToExec = -1;
 		} else {
 			Error("[LUA] Syntax error", id);
 		}
-	} else if (pass == LASTPASS) {
-		execute = true;
 	}
 
-	if (execute) LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
+	const bool execute = (-1 == passToExec) || (passToExec == pass);
+
+	if (execute) {
+		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+		buff = new char[luaBufferSize];
+		bp = buff;
+	}
 	ListFile();
+
 	while (1) {
 		if (!ReadLine(false)) {
-			Error("Unexpected end of lua script"); break;
-		}
-		lp = line;
-		rp = line;
-		SkipBlanks(rp);
-		if (cmphstr(rp, "endlua")) {
-			if (execute) {
-				if ((bp-buff) + (rp-lp-6) < 32760 && (rp-lp-6) > 0) {
-					STRNCPY(bp, 32768-(bp-buff)+1, lp, rp-lp-6);
-					bp += rp-lp-6;
-					*(bp++) = '\n';
-					*(bp) = 0;
-				} else {
-					Error("[LUA] Maximum size of Lua script is 32768 bytes", NULL, FATAL);
-					return;
-				}
-			}
-			lp = rp;
+			Error("Unexpected end of lua script");
 			break;
 		}
+		lp = line;
+		SkipBlanks(lp);
+		const int isEndLua = cmphstr(lp, "endlua");
+		const size_t lineLen = isEndLua ? (lp - 6 - line) : strlen(line);
 		if (execute) {
-			if ((bp-buff) + strlen(lp) < 32760) {
-				STRCPY(bp, 32768-(bp-buff)+1, lp);
-				bp += strlen(lp);
-				*(bp++) = '\n';
-				*(bp) = 0;
-			} else {
-				Error("[LUA] Maximum size of Lua script is 32768 bytes", NULL, FATAL);
-				return;
+			if (luaBufferSize < (bp - buff) + lineLen + 4) {
+				ErrorInt("[LUA] Maximum byte-size of Lua script is", luaBufferSize-4, FATAL);
 			}
+			STRNCPY(bp, (luaBufferSize - (bp - buff)), line, lineLen);
+			bp += lineLen;
+			*bp++ = '\n';
 		}
-
+		if (isEndLua) break;
 		ListFile(true);
 	}
 
 	if (execute) {
+		*bp = 0;
 		luaMF.text = buff;
 		luaMF.size = strlen(luaMF.text);
-		error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
-		//error = luaL_loadbuffer(LUA, (char*)buff, sizeof(buff), "script") || lua_pcall(LUA, 0, 0, 0);
-		//error = luaL_loadstring(LUA, buff) || lua_pcall(LUA, 0, 0, 0);
+		int error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
 			_lua_showLoadError(errorType);
 		}
 		LuaStartPos = TextFilePos();
+		delete[] buff;
 	}
 
-	delete[] buff;
 	substitutedLine = line;		// override substituted list line for ENDLUA
 }
 
