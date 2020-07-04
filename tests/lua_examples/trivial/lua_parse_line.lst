@@ -1,3 +1,4 @@
+lua_parse_line.asm(18): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
 # file opened: lua_parse_line.asm
  1    0000
  2    0000                  org     0x1234          ; eol comment belong to ORG
@@ -22,6 +23,7 @@ lua_parse_line.asm(12): error: [LUA] Label not found: pass_default
 14    123A 07           pass_default: rlca      ; this will cause problems
 lua_parse_line.asm(13): error: [LUA] Label not found: pass_default_2
 14    123B 17           pass_default_2: rla      ; same with _pl alias
+lua_parse_line.asm(14): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
 14    123C                  endlua
 15    123C                  lua pass1   ; pass1 this is also insufficient to generate valid machine code
 16    123C ~                    sj.parse_line("pass1: daa      ; will define label, but machine code will be missing")

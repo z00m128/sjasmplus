@@ -2,12 +2,12 @@
     ORG 0x7842
 test:   DEFB 0x41, 0x78
     OUTPUT "lua_get_byte.bin"
-    LUA
+    LUA ALLPASS
         _pc("db "..sj.get_byte(sj.calc("test"))..", "..sj.calc("low test"))
         _pc("db "..sj.get_byte(0x7842)..", "..0x42)
     ENDLUA
 
-    LUA
+    LUA ALLPASS
         x = sj.calc("test + ~ ")    -- invalid syntax for expression evaluation, returns 0
         _pc("db 'e'+"..x)
     ENDLUA

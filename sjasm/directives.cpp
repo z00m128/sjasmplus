@@ -1999,12 +1999,17 @@ void dirLUA() {
 		*bp = 0;
 		luaMF.text = buff;
 		luaMF.size = strlen(luaMF.text);
+		DidEmitByte();			// reset the flag before running lua script
 		int error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
 			_lua_showLoadError(errorType);
 		}
 		LuaStartPos = TextFilePos();
 		delete[] buff;
+		if (DidEmitByte() && (-1 != passToExec)) {
+			EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
+			Warning("When lua script emits machine code bytes, use \"ALLPASS\" modifier", NULL, warningType);
+		}
 	}
 
 	substitutedLine = line;		// override substituted list line for ENDLUA

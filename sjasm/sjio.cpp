@@ -390,7 +390,16 @@ void ListSilentOrExternalEmits() {
 	substitutedLine = line;
 }
 
+static bool someByteEmitted = false;
+
+bool DidEmitByte() {	// returns true if some byte was emitted since last call to this function
+	bool didEmit = someByteEmitted;		// value to return
+	someByteEmitted = false;			// reset the flag
+	return didEmit;
+}
+
 static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
+	someByteEmitted = true;
 	if (LASTPASS == pass) {
 		WriteBuffer[WBLength++] = (char)byte;
 		if (DESTBUFLEN == WBLength) WriteDest();

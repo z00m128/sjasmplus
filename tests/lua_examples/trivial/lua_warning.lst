@@ -67,6 +67,7 @@ lua_warning.asm(37): error: [LUA] [nope!]: 2
 45    0000 08 00 07 00  ; these bytes were emitted silently/externally (lua script?)
 45    0004 00
 45    0005
+lua_warning.asm(45): error: When lua script emits machine code bytes, use "ALLPASS" modifier
 45    0005                  endlua
 46    0005
 # file closed: lua_warning.asm
