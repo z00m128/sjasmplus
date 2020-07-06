@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.15.0 Documentation [2020-05-18]</title>
+  <title>SjASMPlus 1.15.1 Documentation [2020-07-07]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -184,6 +184,21 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>7.7.2020 - 1.15.1</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_equ">`EQU`</link> now assigns memory page to symbol based on the symbol value and current memory mapping
+- this does affect also results of <link linkend="po_labelslist">`LABELSLIST`</link> (<ulink url="https://github.com/z00m128/sjasmplus/issues/111">Issue #111</ulink>)
+- <link linkend="po_lua">`LUA`</link> emits warning when some machine code is emitted without "ALLPASS" modifier
+- <link linkend="po_savetrd">`SAVETRD`</link> refactored: fix couple of bugs and make TRD files conform the actual TR-DOS practice
+- `SAVETRD`: new "&amp;" modifier to produce "mono-loaders" with extra files appended
+- `SAVETRD`: added support for the unofficial 3-letter extensions ("; ok" to suppress warnings)
+- fix <ulink url="https://github.com/z00m128/sjasmplus/issues/108">issue #108</ulink> to detect windows drive letters at beginning of file names with full windows paths
+- bugfixes: RAMTOP w/ global device, "r+w" file operations code review, memory buffer overrun in LUA</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>18.5.2020 - 1.15.0</term>
@@ -2842,7 +2857,18 @@ start:
 				  the late definition of label will not affect resulting machine code (the IF block
 				  does not emit any machine code and does not define any label), you can suppress the
 				  warning with end-of-line comment "ok".</para>
-            </listitem>
+
+			  <example>
+				  <title></title>
+
+				  <para><programlisting>    IF (aaa == 0) || (2 = aaa &amp;&amp; ((bbb % 13) &amp; 0x01))
+        ; some code to assemble only if the symbol `aaa` is zero
+        ; or (logical OR) when symbol `aaa` is two
+        ; and (logical AND) modulo 13 of `bbb` is odd number
+    ENDIF</programlisting>
+				  </para>
+			  </example>
+		  </listitem>
           </varlistentry>
 
           <varlistentry>

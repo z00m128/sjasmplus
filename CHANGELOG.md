@@ -1,3 +1,13 @@
+## [1.15.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.15.1) - 7.7.2020
+- `EQU` now assigns memory page to symbol based on the symbol value and current memory mapping
+- this does affect also results of `LABELSLIST` (Issue #111)
+- `LUA` emits warning when some machine code is emitted without "ALLPASS" modifier
+- `SAVETRD` refactored: fix couple of bugs and make TRD files conform the actual TR-DOS practice
+- `SAVETRD`: new "&" modifier to produce "mono-loaders" with extra files appended
+- `SAVETRD`: added support for the unofficial 3-letter extensions ("; ok" to suppress warnings)
+- fix issue #108 to detect windows drive letters at beginning of file names with full windows paths
+- bugfixes: RAMTOP w/ global device, "r+w" file operations code review, memory buffer overrun in LUA
+
 ## [1.15.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.15.0) - 18.5.2020
 - added `BPLIST` and `SETBP` to export breakpoints info from asm for Unreal and ZEsarUX emulators
 - added ZX-like devices with 2/4/8 MiB of virtual memory
