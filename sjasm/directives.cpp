@@ -583,34 +583,36 @@ void dirINCTRD() {
 	FILE* ff;
 
 	char* fnaam = GetFileName(lp), * fnaamh;
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			fnaamh = GetFileName(lp);
-			if (!*fnaamh) {
-				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
-			}
-		} else {
-			Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
-		}
-	} else {
-		Error("[INCTRD] Syntax error", bp, IF_FIRST); return; //is this ok?
+	if ( ! (anyComma(lp) && !anyComma(lp) && (fnaamh = GetFileName(lp)) && fnaamh[0]) ) {
+		// file-in-disk syntax error
+		Error("[INCTRD] Syntax error", bp, IF_FIRST);
+		SkipToEol(lp);
+		return;
 	}
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[INCTRD] Syntax error", bp, IF_FIRST);
+				SkipToEol(lp);
+				return;
 			}
 			if (val < 0) {
-				Error("[INCTRD] Negative values are not allowed", bp); return;
+				ErrorInt("[INCTRD] Negative offset value is not allowed", val);
+				SkipToEol(lp);
+				return;
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
 		if (anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[INCTRD] Syntax error", bp, IF_FIRST);
+				SkipToEol(lp);
+				return;
 			}
 			if (val < 0) {
-				Error("[INCTRD] Negative values are not allowed", bp); return;
+				ErrorInt("[INCTRD] Negative length value is not allowed", val);
+				SkipToEol(lp);
+				return;
 			}
 			length = val;
 		}
