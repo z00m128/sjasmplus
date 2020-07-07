@@ -460,6 +460,7 @@ int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset,
 		const auto & entry = trdHead.catalog[fileIndex];
 		if (0 == entry.filename[0]) {	// beyond last FAT record, finish the loop
 			fileIndex = STrdHead::NUM_OF_FILES_MAX;
+			break;
 		} else {
 			if (!memcmp(entry.filename, trdFormName, Lname)) break;	// found!
 		}

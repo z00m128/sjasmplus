@@ -1,0 +1,18 @@
+# file opened: inc_3let_extension.asm
+ 1    0000                  OUTPUT "inc_3let_extension.bin"
+inc_3let_extension.asm(2): error: [INCTRD] File not found in TRD image: data.bin
+ 2    0000                  INCTRD "inc_3let_extension/test.trd", "data.bin"            ; file not found
+ 3    0000                  INCTRD "inc_3let_extension/test.trd", "data.bi"             ; full 288 bytes
+ 4    0120                  INCTRD "inc_3let_extension/test.trd", "data.bi", 8, 7       ; just "address" chars
+ 5    0127                  INCTRD "inc_3let_extension/test.trd", "data.bi", 287, 1     ; just last "a" byte
+inc_3let_extension.asm(6): error: [INCTRD] File too short to cover requested offset and length: INCTRD "inc_3let_extension/test.trd", "data.bi", 287, 2     
+ 6    0128                  INCTRD "inc_3let_extension/test.trd", "data.bi", 287, 2     ; err: length after offset OOB
+ 7    0128                  INCTRD "inc_3let_extension/test.trd", "data.bi", 286        ; just last "ta" bytes
+inc_3let_extension.asm(8): error: [INCTRD] File too short to cover requested offset and length: INCTRD "inc_3let_extension/test.trd", "data.bi", 288        
+ 8    012A                  INCTRD "inc_3let_extension/test.trd", "data.bi", 288        ; err: offset after the file
+ 9    012A                  OUTEND
+10    012A
+# file closed: inc_3let_extension.asm
+
+Value    Label
+------ - -----------------------------------------------------------
