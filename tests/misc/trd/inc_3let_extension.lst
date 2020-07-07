@@ -10,8 +10,9 @@ inc_3let_extension.asm(6): error: [INCTRD] File too short to cover requested off
  7    0128                  INCTRD "inc_3let_extension/test.trd", "data.bi", 286        ; just last "ta" bytes
 inc_3let_extension.asm(8): error: [INCTRD] File too short to cover requested offset and length: INCTRD "inc_3let_extension/test.trd", "data.bi", 288        
  8    012A                  INCTRD "inc_3let_extension/test.trd", "data.bi", 288        ; err: offset after the file
- 9    012A                  OUTEND
-10    012A
+ 9    012A                  INCTRD "inc_3let_extension/test.trd", "data.bi", , 4        ; add first 4 "Data" bytes
+10    012E                  OUTEND
+11    012E
 # file closed: inc_3let_extension.asm
 
 Value    Label

@@ -6,4 +6,5 @@
     INCTRD "inc_3let_extension/test.trd", "data.bi", 287, 2     ; err: length after offset OOB
     INCTRD "inc_3let_extension/test.trd", "data.bi", 286        ; just last "ta" bytes
     INCTRD "inc_3let_extension/test.trd", "data.bi", 288        ; err: offset after the file
+    INCTRD "inc_3let_extension/test.trd", "data.bi", , 4        ; add first 4 "Data" bytes
     OUTEND
