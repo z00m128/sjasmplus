@@ -577,13 +577,9 @@ void dirINCHOB() {
 }
 
 void dirINCTRD() {
-	aint val;
-	char hobeta[12], hdr[17];
-	int offset = 0, length = INT_MAX, res, i;
-	FILE* ff;
-
-	char* fnaam = GetFileName(lp), * fnaamh;
-	if ( ! (anyComma(lp) && !anyComma(lp) && (fnaamh = GetFileName(lp)) && fnaamh[0]) ) {
+	aint val, offset = 0, length = INT_MAX;
+	char* filename, * trdname = GetFileName(lp);
+	if ( ! (anyComma(lp) && !anyComma(lp) && (filename = GetFileName(lp)) && filename[0]) ) {
 		// file-in-disk syntax error
 		Error("[INCTRD] Syntax error", bp, IF_FIRST);
 		SkipToEol(lp);
@@ -617,55 +613,11 @@ void dirINCTRD() {
 			length = val;
 		}
 	}
-	// get spectrum filename
-	for (i = 0; i != 8; hobeta[i++] = 0x20) {
-		;
+	if (TRD_PrepareIncFile(trdname, filename, offset, length)) {
+		BinIncFile(trdname, offset, length);
 	}
-	for (i = 8; i != 11; hobeta[i++] = 0) {
-		;
-	}
-	for (i = 0; i != 9; i++) {
-		if (!*(fnaamh + i)) {
-			break;
-		}
-		if (*(fnaamh + i) != '.') {
-			hobeta[i] = *(fnaamh + i); continue;
-		} else if (*(fnaamh + i + 1)) {
-			hobeta[8] = *(fnaamh + i + 1);
-		}
-		break;
-	}
-	// open TRD
-	char* fnaamh2 = GetPath(fnaam);
-	if (!FOPEN_ISOK(ff, fnaamh2, "rb")) {
-		Error("[INCTRD] Error opening file", fnaam, FATAL);
-	}
-	// Find file
-	fseek(ff, 0, SEEK_SET);
-	for (i = 0; i < 128; i++) {
-		res = fread(hdr, 1, 16, ff);
-		hdr[16] = 0;
-		if (res != 16) {
-			Error("[INCTRD] Read error", fnaam, IF_FIRST); return;
-		}
-		if (strstr(hdr, hobeta) != NULL) {
-			i = 0; break;
-		}
-	}
-	if (i) {
-		Error("[INCTRD] File not found in TRD image", fnaamh, IF_FIRST); return;
-	}
-	if (INT_MAX == length) {
-		length = ((unsigned char)hdr[0x0b]) + (((unsigned char)hdr[0x0c]) << 8);
-		length -= offset;
-	}
-	offset += (((unsigned char)hdr[0x0f]) << 12) + (((unsigned char)hdr[0x0e]) << 8);
-	fclose(ff);
-
-	BinIncFile(fnaam, offset, length);
-	delete[] fnaam;
-	delete[] fnaamh;
-	free(fnaamh2);
+	delete[] trdname;
+	delete[] filename;
 }
 
 void dirSAVESNA() {

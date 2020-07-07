@@ -434,3 +434,52 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	fclose(ff);
 	return 1;
 }
+
+int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset, aint & length) {
+	// parse filename into TRD file form (max 8+3, don't warn about 3-letter extension)
+	byte trdFormName[12];
+	int Lname = 0;
+	TRD_FileNameToBytes(filename, trdFormName, Lname);	// ignore diagnostic info about extension
+
+	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
+	FILE* ff;
+	STrdHead trdHead;
+	char* fullTrdName = GetPath(trdname);
+	if (!FOPEN_ISOK(ff, fullTrdName, "rb")) Error("[INCTRD] Error opening file", trdname, FATAL);
+	free(fullTrdName);
+	fullTrdName = nullptr;
+	if (1 != fread(&trdHead, sizeof(STrdHead), 1, ff) || !trdHead.info.isTrdInfo()) {
+		return ReturnWithError("TRD image read error", trdname, ff);
+	}
+	fclose(ff);
+	ff = nullptr;
+
+	// find the requested file
+	unsigned fileIndex = 0;
+	for (fileIndex = 0; fileIndex < STrdHead::NUM_OF_FILES_MAX; ++fileIndex) {
+		const auto & entry = trdHead.catalog[fileIndex];
+		if (0 == entry.filename[0]) {	// beyond last FAT record, finish the loop
+			fileIndex = STrdHead::NUM_OF_FILES_MAX;
+		} else {
+			if (!memcmp(entry.filename, trdFormName, Lname)) break;	// found!
+		}
+	}
+	if (STrdHead::NUM_OF_FILES_MAX == fileIndex) {
+		return ReturnWithError("[INCTRD] File not found in TRD image", filename, ff);
+	}
+
+	// calculate absolute file offset and length + validate input values
+	const auto & entry = trdHead.catalog[fileIndex];
+	if (INT_MAX == length) {
+		length = entry.length;
+		length -= offset;
+	}
+	const aint fileOffset = STrdDisc::fileOffset(entry.startTrack, entry.startSector);
+	const aint fileEnd = fileOffset + entry.length;
+	offset += fileOffset;
+
+	// report success when resulting offset + length fits into the file definition
+	if (fileOffset <= offset && (offset + length) <= fileEnd && 0 < length) return 1;
+
+	return ReturnWithError("[INCTRD] File too short to cover requested offset and length", bp, ff);
+}
