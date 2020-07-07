@@ -5,6 +5,7 @@
 - `SAVETRD` refactored: fix couple of bugs and make TRD files conform the actual TR-DOS practice
 - `SAVETRD`: new "&" modifier to produce "mono-loaders" with extra files appended
 - `SAVETRD`: added support for the unofficial 3-letter extensions ("; ok" to suppress warnings)
+- `INCTRD` refactored and added support for unofficial 3-letter extensions
 - fix issue #108 to detect windows drive letters at beginning of file names with full windows paths
 - bugfixes: RAMTOP w/ global device, "r+w" file operations code review, memory buffer overrun in LUA
 
