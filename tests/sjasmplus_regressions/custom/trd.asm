@@ -1,4 +1,4 @@
-;Note: the input TR-DOS filenames in this test are incorrect, and will be currently truncated as 'label1.txt' -> 'label1.t'. Change this if needed.
+;Note: the sjasmplus now supports the unofficial 3 letter extensions as described by Dart_Alver
 ;A TR-DOS filename is max. 8 characters, with a single-character extension. http://zx-modules.de/fileformats/hobetaformat.html
 
         device zxspectrum128
@@ -12,14 +12,24 @@ label3  db 'text3'
 end
 
         EMPTYTRD trd.trd
-        SAVETRD "trd.trd","label1.txt",label1,5
+        SAVETRD "trd.trd","label1.txt",label1,5     ; new warnings about 3-letter extension
         SAVETRD "trd.trd","label2.txt",label2,5
         SAVETRD "trd.trd","label3.txt",label3,5
-        SAVETRD "trd.trd","label2.txt",label2,5
+        SAVETRD "trd.trd","label4.txt",label2,5     ; ok ; warning suppressed
     ; test the "invalid extension warning" and if it can be suppressed
         SAVETRD "trd.trd","label2.B",label2,5       ; no warning
         SAVETRD "trd.trd","label2.J",label2,5       ; warning
-        SAVETRD "trd.trd","label2.J",label2,5       ; ok ; warning suppressed
+        SAVETRD "trd.trd","label3.J",label2,5       ; ok ; warning suppressed
+    ; test the new warning about saving same file second time (v1.15.1+)
+        SAVETRD "trd.trd","label2.B",label2,5       ; warning
+        SAVETRD "trd.trd","label2.B",label2,5       ; ok ; warning suppressed
+    ; test the new warnings about "B" extension allowing only single letter
+        SAVETRD "trd.trd","label2.BAS",label1,5     ; 3x warning (3 letter ext, ".B" enforces 1 letter, duplicate file)
+        SAVETRD "trd.trd","label2.BAS",label1,5     ; ok ; warnings suppressed
+    ; test deletion of duplicate files when in replace/add modes
+        SAVETRD "trd.trd",|"label2.B",label2,5
+        SAVETRD "trd.trd","label3.J",label2,5       ; ok
+        SAVETRD "trd.trd",&"label3.J",label2,5
 
         SAVEHOB "trd.$t","labels.txt",label1,end-label1
 

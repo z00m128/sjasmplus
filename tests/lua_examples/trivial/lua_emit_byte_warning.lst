@@ -1,0 +1,124 @@
+lua_emit_byte_warning.asm(25): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+lua_emit_byte_warning.asm(29): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+lua_emit_byte_warning.asm(33): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+lua_emit_byte_warning.asm(37): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+lua_emit_byte_warning.asm(43): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+lua_emit_byte_warning.asm(47): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+lua_emit_byte_warning.asm(51): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+lua_emit_byte_warning.asm(55): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+# file opened: lua_emit_byte_warning.asm
+ 1    0000              ; warnings about emitting bytes with wrong LUA block modifier (should be "allpass")
+ 2    0000
+ 3    0000              ; no warnings variants (correct ones)
+ 4    0000
+ 5    0000                  lua allpass
+ 6    0000 ~                    sj.add_byte(0)
+ 7    0000 00               endlua
+ 8    0001
+ 9    0001                  lua allpass
+10    0001 ~                    sj.add_word(0)
+11    0001 00 00            endlua
+12    0003
+13    0003                  lua allpass
+14    0003 ~                    _pc("nop")
+15    0003 00           nop
+15    0004                  endlua
+16    0004
+17    0004                  lua allpass
+18    0004 ~                    _pl("pl_allpass: nop")
+19    0004 00           pl_allpass: nop
+19    0005                  endlua
+20    0005
+21    0005              ; PASS1
+22    0005
+23    0005                  lua pass1
+24    0005 ~                    sj.add_byte(0)
+25    0005                  endlua
+26    0005
+27    0005                  lua pass1
+28    0005 ~                    sj.add_word(0)
+29    0005                  endlua
+30    0005
+31    0005                  lua pass1
+32    0005 ~                    _pc("nop")
+33    0005                  endlua
+34    0005
+35    0005                  lua pass1
+36    0005 ~                    _pl("pl_pass1: nop")
+37    0005                  endlua
+38    0005
+39    0005              ; PASS2
+40    0005
+41    0005                  lua pass2
+42    0005 ~                    sj.add_byte(0)
+43    0005                  endlua
+44    0005
+45    0005                  lua pass2
+46    0005 ~                    sj.add_word(0)
+47    0005                  endlua
+48    0005
+49    0005                  lua pass2
+50    0005 ~                    _pc("nop")
+51    0005                  endlua
+52    0005
+53    0005                  lua pass2
+54    0005 ~                    _pl("pl_pass2: nop")
+55    0005                  endlua
+56    0005
+57    0005              ; PASS3
+58    0005
+59    0005                  lua pass3
+60    0005 ~                    sj.add_byte(0)
+lua_emit_byte_warning.asm(61): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+61    0005 00               endlua
+62    0006
+63    0006                  lua pass3
+64    0006 ~                    sj.add_word(0)
+lua_emit_byte_warning.asm(65): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+65    0006 00 00            endlua
+66    0008
+67    0008                  lua pass3
+68    0008 ~                    _pc("nop")
+69    0008 00           nop
+lua_emit_byte_warning.asm(69): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+69    0009                  endlua
+70    0009
+71    0009                  lua pass3
+72    0009 ~                    _pl("pl_pass3: nop")
+lua_emit_byte_warning.asm(72): error: [LUA] Label not found: pl_pass3
+73    0009 00           pl_pass3: nop
+lua_emit_byte_warning.asm(73): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+73    000A                  endlua
+74    000A
+75    000A              ; default (PASS3)
+76    000A
+77    000A                  lua
+78    000A ~                    sj.add_byte(0)
+lua_emit_byte_warning.asm(79): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+79    000A 00               endlua
+80    000B
+81    000B                  lua
+82    000B ~                    sj.add_word(0)
+lua_emit_byte_warning.asm(83): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+83    000B 00 00            endlua
+84    000D
+85    000D                  lua
+86    000D ~                    _pc("nop")
+87    000D 00           nop
+lua_emit_byte_warning.asm(87): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+87    000E                  endlua
+88    000E
+89    000E                  lua
+90    000E ~                    _pl("pl_default: nop")
+lua_emit_byte_warning.asm(90): error: [LUA] Label not found: pl_default
+91    000E 00           pl_default: nop
+lua_emit_byte_warning.asm(91): warning: When lua script emits machine code bytes, use "ALLPASS" modifier
+91    000F                  endlua
+92    000F
+# file closed: lua_emit_byte_warning.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0004 X pl_allpass
+0x0009 X pl_pass1
+0x0009 X pl_pass2

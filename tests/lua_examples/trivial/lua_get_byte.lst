@@ -3,14 +3,14 @@
  2    0000                  ORG 0x7842
  3    7842 41 78        test:   DEFB 0x41, 0x78
  4    7844                  OUTPUT "lua_get_byte.bin"
- 5    7844                  LUA
+ 5    7844                  LUA ALLPASS
  6    7844 ~                    _pc("db "..sj.get_byte(sj.calc("test"))..", "..sj.calc("low test"))
  7    7844 ~                    _pc("db "..sj.get_byte(0x7842)..", "..0x42)
  8    7844 41 42        db 65, 66
  8    7846 41 42        db 65, 66
  8    7848                  ENDLUA
  9    7848
-10    7848                  LUA
+10    7848                  LUA ALLPASS
 11    7848 ~                    x = sj.calc("test + ~ ")    -- invalid syntax for expression evaluation, returns 0
 12    7848 ~                    _pc("db 'e'+"..x)
 13    7848 65           db 'e'+0
@@ -26,4 +26,4 @@ lua_get_byte.asm(16): error: [LUA] error in function 'get_byte'.
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x7842 X test
+0x7842   test

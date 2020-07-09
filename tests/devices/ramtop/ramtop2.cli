@@ -4,11 +4,11 @@ gunzip ramtop2/rt8000.bin.OK.gz
 gunzip ramtop2/rtFFFF.bin.OK.gz
 gunzip ramtop2/snapDefStack.sna.gz
 gunzip ramtop2/snapModStack.sna.gz
-# use normal way of assembling and diff the binary results
+# use normal way of assembling and CMP the binary results
 $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm" && \
-diff ramtop2/rt5D00.bin.OK rt5D00.bin && \
-diff ramtop2/rt8000.bin.OK rt8000.bin && \
-diff ramtop2/rtFFFF.bin.OK rtFFFF.bin && \
-diff ramtop2/snapDefStack.sna snapDefStack.sna && \
-diff ramtop2/snapModStack.sna snapModStack.sna
+$CMP ramtop2/rt5D00.bin.OK rt5D00.bin && \
+$CMP ramtop2/rt8000.bin.OK rt8000.bin && \
+$CMP ramtop2/rtFFFF.bin.OK rtFFFF.bin && \
+$CMP ramtop2/snapDefStack.sna snapDefStack.sna && \
+$CMP ramtop2/snapModStack.sna snapModStack.sna
 last_result=$?

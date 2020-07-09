@@ -68,6 +68,7 @@ void EmitWord(int word);
 void EmitBytes(const int* bytes);
 void EmitWords(int* words);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
+bool DidEmitByte();		// returns true if some byte was emitted since last call to this function
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false, stdin_log_t* fStdinLog = nullptr);
 void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent);
 void Close();

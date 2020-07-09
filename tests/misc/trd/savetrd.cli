@@ -1,7 +1,0 @@
-#decompress the TRD file for diffing
-gunzip savetrd/savetrd.trd.gz
-# use normal way of assembling
-$MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
-# do the binary compare of new image
-diff savetrd/savetrd.trd savetrd.trd
-last_result=$?

@@ -3,10 +3,10 @@
 21:0000 p3_start
 23:008C p3_end
 23:008C err_start
-23:00D2 err_end
+:00D2 err_end
 30:0000 long_start
 40:02BC long_end
-40:0000 nodevice_start
-40:02BC nodevice_end
+:0000 nodevice_start
+:02BC nodevice_end
 222:0000 noram_start
-223:008C noram_end
+:008C noram_end

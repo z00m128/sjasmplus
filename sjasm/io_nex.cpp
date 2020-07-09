@@ -102,6 +102,8 @@ struct SNexFile {
 	byte*		copper = nullptr;	// temporary storage of copper code (add it ahead of first bank)
 	byte*		palette = nullptr;	// final palette (will override the one stored upon finalize)
 	bool		palDefined;			// whether the palette data/type was enforced by PALETTE command
+	bool		canAppend = false;	// true when `fwrite(..., f)` can be used in "append like" way
+	// set `canAppend` to false whenever you do fseek/fread, it cancels validity of "next fwrite"
 
 	~SNexFile();
 	void init();
@@ -138,8 +140,8 @@ void SNexFile::init() {
 }
 
 void SNexFile::updateIfAheadFirstBankSave() {
-	// check if already updated or no file at all
-	if (h.banksOffset || nullptr == f) return;
+	// check if already updated or file is not ready for appending (no file, or finalizing)
+	if (h.banksOffset || !canAppend) return;
 	// updating bank offset after some bank was already stored -> should never happen
 	if (-1 != lastBankIndex) Error("[SAVENEX] V1.3?!", NULL, FATAL);	// unreachable
 	if (palDefined && 0 == h.screen) {
@@ -157,6 +159,7 @@ void SNexFile::updateIfAheadFirstBankSave() {
 
 void SNexFile::writeHeader() {
 	if (nullptr == f) return;
+	canAppend = false;							// does fseek, cancel the "append" mode
 	// refresh/write the file header
 	fseek(f, 0, SEEK_SET);
 	if (sizeof(SNexHeader) != fwrite(&h, 1, sizeof(SNexHeader), f)) {
@@ -165,7 +168,7 @@ void SNexFile::writeHeader() {
 }
 
 void SNexFile::writePalette() {
-	if (nullptr == f) return;
+	if (!canAppend) return;
 	if (!palDefined || nullptr == palette) {	// palette is completely undefined or
 		h.screen = SNexHeader::SCR_NOPAL;		// "no palette" was defined
 	} else {
@@ -178,6 +181,7 @@ void SNexFile::writePalette() {
 void SNexFile::calculateCrc32C() {
 	if (!h.hasChecksum) return;
 	if (nullptr == f) return;
+	canAppend = false;							// does fseek+fread, cancel the "append" mode
 	// calculate checksum CRC-32C (Castagnoli)
 	crc32_init();
 	constexpr size_t BUFFER_SIZE = 128 * 1024;	// 128kiB buffer to read file (must be 512+ !!)
@@ -222,6 +226,7 @@ void SNexFile::finalizeFile() {
 	// close the file
 	fclose(f);
 	f = nullptr;
+	canAppend = false;
 	if (nullptr != copper) delete[] copper;
 	copper = nullptr;
 	if (nullptr != palette) delete[] palette;
@@ -328,7 +333,7 @@ static aint getNexBankIndex(const aint bank16kNum) {
 	return -2;
 }
 
-aint getNexBankNum(const aint bankIndex) {
+static aint getNexBankNum(const aint bankIndex) {
 	if (0 <= bankIndex && bankIndex < 8) return nexBankOrder[bankIndex];
 	if (8 <= bankIndex && bankIndex < SNexHeader::MAX_BANK) return bankIndex;
 	return -1;
@@ -388,6 +393,8 @@ static void dirNexOpen() {
 	nex.reqFileVersion = openArgs[3];
 	nex.minFileVersion = (3 == nex.reqFileVersion) ? 3 : 2;	// reset auto-detected file version
 	nex.writeHeader();
+	// After writing header first time, the file is ready for "append like" usage
+	nex.canAppend = true;
 }
 
 static void dirNexCore() {
@@ -835,7 +842,7 @@ static void dirNexScreenTile() {
 }
 
 static void dirNexScreen() {
-	if (nullptr == nex.f) {
+	if (!nex.canAppend) {
 		Error("[SAVENEX] NEX file is not open", NULL, SUPPRESS);
 		return;
 	}
@@ -862,7 +869,7 @@ static void dirNexScreen() {
 
 static void dirNexCopper() {
 // ;; SAVENEX COPPER <Page8kNum 0..223>,<offset>
-	if (nullptr == nex.f) {
+	if (!nex.canAppend) {
 		Error("[SAVENEX] NEX file is not open", NULL, SUPPRESS);
 		return;
 	}
@@ -927,7 +934,7 @@ static bool saveBank(aint bankIndex, aint bankNum, bool onlyNonZero) {
 }
 
 static void dirNexBank() {
-	if (nullptr == nex.f) {
+	if (!nex.canAppend) {
 		Error("[SAVENEX] NEX file is not open", NULL, SUPPRESS);
 		return;
 	}
@@ -944,7 +951,7 @@ static void dirNexBank() {
 }
 
 static void dirNexAuto() {
-	if (nullptr == nex.f) {
+	if (!nex.canAppend) {
 		Error("[SAVENEX] NEX file is not open", NULL, SUPPRESS);
 		return;
 	}
@@ -974,7 +981,7 @@ static void dirNexAuto() {
 }
 
 static void dirNexClose() {
-	if (nullptr == nex.f) {
+	if (!nex.canAppend) {
 		Error("[SAVENEX] NEX file is not open", NULL, SUPPRESS);
 		return;
 	}

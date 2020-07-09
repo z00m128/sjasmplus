@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.15.0 Documentation [2020-05-18]</title>
+  <title>SjASMPlus 1.15.1 Documentation [2020-07-07]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -153,7 +153,7 @@
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya</emphasis> -
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, Dart Alver</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
 
@@ -184,6 +184,22 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>7.7.2020 - 1.15.1</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_equ">`EQU`</link> now assigns memory page to symbol based on the symbol value and current memory mapping
+- this does affect also results of <link linkend="po_labelslist">`LABELSLIST`</link> (<ulink url="https://github.com/z00m128/sjasmplus/issues/111">Issue #111</ulink>)
+- <link linkend="po_lua">`LUA`</link> emits warning when some machine code is emitted without "ALLPASS" modifier
+- <link linkend="po_savetrd">`SAVETRD`</link> refactored: fix couple of bugs and make TRD files conform the actual TR-DOS practice
+- `SAVETRD`: new "&amp;" modifier to produce "mono-loaders" with extra files appended
+- `SAVETRD`: added support for the unofficial 3-letter extensions ("; ok" to suppress warnings)
+- <link linkend="po_inctrd">`INCTRD`</link> refactored and added support for unofficial 3-letter extensions
+- fix <ulink url="https://github.com/z00m128/sjasmplus/issues/108">issue #108</ulink> to detect windows drive letters at beginning of file names with full windows paths
+- bugfixes: RAMTOP w/ global device, "r+w" file operations code review, memory buffer overrun in LUA</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>18.5.2020 - 1.15.0</term>
@@ -2587,26 +2603,45 @@ START  ....     ; some code
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savetrd" />SAVETRD
-            &lt;filename_of_trd_image&gt;,[|]&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
+            <term><anchor id="po_savetrd" />SAVETRD &lt;filename_of_trd_image&gt;,&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
+          </varlistentry>
+          <varlistentry>
+            <term><anchor />SAVETRD &lt;filename_of_trd_image&gt;,|&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
+          </varlistentry>
+          <varlistentry>
+            <term><anchor />SAVETRD &lt;filename_of_trd_image&gt;,&amp;&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;</term>
 
             <listitem>
               <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the device memory into TRD disk image. Adding pipe character "|" ahead of file
-				  name will make sjasmplus to delete old file(s) with the same name, before writing
+			  <para>Save the device memory into TRD disk image. Saving two files with same filename will
+				  emit warning which can be suppressed by "; ok" comment, but two files (with same name)
+				  will be created in the disk directory.</para>
+
+			  <para>Adding pipe character "|" ahead of file
+				  name will make sjasmplus to delete old file(s) with the same name before writing
 				  the new one =&gt; replace-like functionality. If the deleted file did occupy all
 				  sectors till the free space position in disc info, sjasmplus will salvage those sectors
 				  back and save new file over them (but it will not do full reshuffle/defrag in more
-				  complex cases, sjasmplus is just assembler, not full featured TRD images manipulation tool).
+				  complex cases, sjasmplus is just assembler, not full featured TRD images manipulation tool).</para>
+
+			  <para>Adding ampersand character "&amp;" ahead of file name will make sjasmplus to look
+				  for existing file with the requested name (last of them, any earlier duplicates are deleted).
+				  The new content is appended to the file (sector aligned append) and the catalog entry gets
+				  only number of sectors patched, up to 255 sectors at most. This is special mode for
+				  single-file big-loaders.</para>
+
+			  <para>The unofficial three-letter extensions are supported, use "; ok" comment to suppress
+				  warning about unofficial extension (official extensions are only: B, C, D and #).
 
 				<example><title></title>
                   <para><programlisting>    EMPTYTRD "test.trd" ;create empty TRD image
     PAGE 7 ;set 7 page to current slot
     SAVETRD "test.trd","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file to TRD image
     SAVETRD "test.trd","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file to TRD image
-    SAVETRD "test.trd",|"myfile1.C",$B000,$400 ;- replace "myfile1.C" with new file</programlisting></para>
+    SAVETRD "test.trd",|"myfile1.C",$B000,$400 ;- replace "myfile1.C" with new file
+    SAVETRD "test.trd",&amp;"myfile1.C",$9000,$734 ;- sector-append new data to "myfile1.C"</programlisting></para>
                 </example>
 			  </para>
             </listitem>
@@ -2823,7 +2858,18 @@ start:
 				  the late definition of label will not affect resulting machine code (the IF block
 				  does not emit any machine code and does not define any label), you can suppress the
 				  warning with end-of-line comment "ok".</para>
-            </listitem>
+
+			  <example>
+				  <title></title>
+
+				  <para><programlisting>    IF (aaa == 0) || (2 = aaa &amp;&amp; ((bbb % 13) &amp; 0x01))
+        ; some code to assemble only if the symbol `aaa` is zero
+        ; or (logical OR) when symbol `aaa` is two
+        ; and (logical AND) modulo 13 of `bbb` is odd number
+    ENDIF</programlisting>
+				  </para>
+			  </example>
+		  </listitem>
           </varlistentry>
 
           <varlistentry>

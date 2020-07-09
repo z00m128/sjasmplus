@@ -6,7 +6,7 @@
  5    0000                  org $8000
  6    8000
  7    8000              sin_table:  ; check listing file to see resulting table bytes
- 8    8000                  lua
+ 8    8000                  lua allpass ; EVERY pass must emit the machine code to not affect following labels
  9    8000 ~                    -- 256 bytes (index 0..255):
 10    8000 ~                    for i = 0, 255, 1 do
 11    8000 ~
@@ -86,8 +86,12 @@
 23    80F8 FC FD FD FE
 23    80FC FE FE FF FF
 24    8100
+25    8100 18 00            jr  start
+26    8102              start:
+27    8102
 # file closed: lua_sin_table.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
 0x8000 X sin_table
+0x8102   start

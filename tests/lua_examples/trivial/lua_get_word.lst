@@ -3,14 +3,14 @@
  2    0000                  ORG 0x4443
  3    4443 41 42        test:   DEFW 0x4241
  4    4445                  OUTPUT "lua_get_word.bin"
- 5    4445                  LUA
+ 5    4445                  LUA ALLPASS
  6    4445 ~                    _pc("dw "..sj.get_word(_c("test"))..", ".._c("test"))
  7    4445 ~                    _pc("dw "..sj.get_word(0x4443)..", "..0x4443)
  8    4445 41 42 43 44  dw 16961, 17475
  8    4449 41 42 43 44  dw 16961, 17475
  8    444D                  ENDLUA
  9    444D
-10    444D                  LUA
+10    444D                  LUA ALLPASS
 11    444D ~                    x = _c("test + ~ ")    -- invalid syntax for expression evaluation, returns 0
 12    444D ~                    _pc("db 'e'+"..x)
 13    444D 65           db 'e'+0
@@ -26,4 +26,4 @@ lua_get_word.asm(16): error: [LUA] error in function 'get_word'.
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x4443 X test
+0x4443   test

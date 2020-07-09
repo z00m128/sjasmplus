@@ -1,1 +1,1 @@
-    EMPTYTRD "emptytrd.trd", "ABCDEFG"
+    EMPTYTRD "emptytrd_label.trd", "ABCDEFG"

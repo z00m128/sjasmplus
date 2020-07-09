@@ -5,7 +5,7 @@
     org $8000
 
 sin_table:  ; check listing file to see resulting table bytes
-    lua
+    lua allpass ; EVERY pass must emit the machine code to not affect following labels
         -- 256 bytes (index 0..255):
         for i = 0, 255, 1 do
 
@@ -22,3 +22,5 @@ sin_table:  ; check listing file to see resulting table bytes
         end
     endlua
 
+    jr  start
+start:

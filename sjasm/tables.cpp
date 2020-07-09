@@ -28,6 +28,7 @@
 
 // tables.cpp
 
+#include <assert.h>
 #include "sjdefs.h"
 
 TextFilePos::TextFilePos() : filename(nullptr), line(0), colBegin(0), colEnd(0) {
@@ -222,15 +223,25 @@ CLabelTable::CLabelTable() {
 	NextLocation = 1;
 }
 
-static short getAddressPageNumber(aint address) {
-	short page = Page ? Page->Number : LABEL_PAGE_ROM;
-	// in DISP mode set the page number by DISP page_number, or current device mapping
-	if (PseudoORG) {
-		page = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum :
-				DeviceID ? Device->GetPageOfA16(address) : LABEL_PAGE_ROM;
-		// if no valid page was found, mark it as out_of_bounds label (but defined)
-		if (LABEL_PAGE_UNDEFINED == page) page = LABEL_PAGE_OUT_OF_BOUNDS;
+static short getAddressPageNumber(const aint address, bool forceRecalculateByAddress) {
+	// everything is "ROM" based when device is NONE
+	if (!DeviceID) return LABEL_PAGE_ROM;
+	// fast-shortcut for regular labels in current slot (if they fit into it)
+	auto slot = Device->GetCurrentSlot();
+	assert(Page && slot);
+	if (!forceRecalculateByAddress && !PseudoORG) {
+		if (slot->Address <= address && address < slot->Address + slot->Size) {
+			return Page->Number;
+		}
 	}
+	// enforce explicit request of fake DISP page
+	if (PseudoORG && LABEL_PAGE_UNDEFINED != dispPageNum) {
+		return dispPageNum;
+	}
+	// in other case (implicit DISP, out-of-slot-bounds or forceRecalculateByAddress)
+	// track down the page num from current memory mapping
+	const short page = Device->GetPageOfA16(address);
+	if (LABEL_PAGE_UNDEFINED == page) return LABEL_PAGE_OUT_OF_BOUNDS;
 	return page;
 }
 
@@ -247,7 +258,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 		} else {
 			//if label already added (as used, or in previous pass), just refresh values
 			label->value = nvalue;
-			label->page = getAddressPageNumber(nvalue);
+			label->page = getAddressPageNumber(nvalue, IsDEFL|IsEQU);
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
 			label->updatePass = pass;
@@ -267,7 +278,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->updatePass = pass;
 	label->value = nvalue;
 	label->used = undefined;
-	label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue);
+	label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
 	return 1;
 }
 

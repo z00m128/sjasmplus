@@ -58,7 +58,8 @@ long GetTickCount();
 void SJ_GetCurrentDirectory(int, char*);
 int SJ_SearchPath(const char* oudzp, const char* filename, const char* /*extension*/, int maxlen, char* nieuwzp, char** ach);
 
-#define FOPEN(pFile, filename, mode) (pFile = fopen(filename, mode))
+FILE* dbg_fopen(const char* fname, const char* modes);
+
 #define FOPEN_ISOK(pFile, filename, mode) ((pFile = fopen(filename, mode)) != NULL)
 
 #define STRDUP strdup

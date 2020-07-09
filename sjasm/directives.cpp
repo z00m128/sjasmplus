@@ -577,93 +577,47 @@ void dirINCHOB() {
 }
 
 void dirINCTRD() {
-	aint val;
-	char hobeta[12], hdr[17];
-	int offset = 0, length = INT_MAX, res, i;
-	FILE* ff;
-
-	char* fnaam = GetFileName(lp), * fnaamh;
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			fnaamh = GetFileName(lp);
-			if (!*fnaamh) {
-				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
-			}
-		} else {
-			Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
-		}
-	} else {
-		Error("[INCTRD] Syntax error", bp, IF_FIRST); return; //is this ok?
+	aint val, offset = 0, length = INT_MAX;
+	char* filename, * trdname = GetFileName(lp);
+	if ( ! (anyComma(lp) && !anyComma(lp) && (filename = GetFileName(lp)) && filename[0]) ) {
+		// file-in-disk syntax error
+		Error("[INCTRD] Syntax error", bp, IF_FIRST);
+		SkipToEol(lp);
+		return;
 	}
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[INCTRD] Syntax error", bp, IF_FIRST);
+				SkipToEol(lp);
+				return;
 			}
 			if (val < 0) {
-				Error("[INCTRD] Negative values are not allowed", bp); return;
+				ErrorInt("[INCTRD] Negative offset value is not allowed", val);
+				SkipToEol(lp);
+				return;
 			}
 			offset = val;
 		} else --lp;		// there was second comma right after, reread it
 		if (anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[INCTRD] Syntax error", bp, IF_FIRST); return;
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[INCTRD] Syntax error", bp, IF_FIRST);
+				SkipToEol(lp);
+				return;
 			}
 			if (val < 0) {
-				Error("[INCTRD] Negative values are not allowed", bp); return;
+				ErrorInt("[INCTRD] Negative length value is not allowed", val);
+				SkipToEol(lp);
+				return;
 			}
 			length = val;
 		}
 	}
-	// get spectrum filename
-	for (i = 0; i != 8; hobeta[i++] = 0x20) {
-		;
+	if (TRD_PrepareIncFile(trdname, filename, offset, length)) {
+		BinIncFile(trdname, offset, length);
 	}
-	for (i = 8; i != 11; hobeta[i++] = 0) {
-		;
-	}
-	for (i = 0; i != 9; i++) {
-		if (!*(fnaamh + i)) {
-			break;
-		}
-		if (*(fnaamh + i) != '.') {
-			hobeta[i] = *(fnaamh + i); continue;
-		} else if (*(fnaamh + i + 1)) {
-			hobeta[8] = *(fnaamh + i + 1);
-		}
-		break;
-	}
-	// open TRD
-	char* fnaamh2 = GetPath(fnaam);
-	if (!FOPEN_ISOK(ff, fnaamh2, "rb")) {
-		Error("[INCTRD] Error opening file", fnaam, FATAL);
-	}
-	// Find file
-	fseek(ff, 0, SEEK_SET);
-	for (i = 0; i < 128; i++) {
-		res = fread(hdr, 1, 16, ff);
-		hdr[16] = 0;
-		if (res != 16) {
-			Error("[INCTRD] Read error", fnaam, IF_FIRST); return;
-		}
-		if (strstr(hdr, hobeta) != NULL) {
-			i = 0; break;
-		}
-	}
-	if (i) {
-		Error("[INCTRD] File not found in TRD image", fnaamh, IF_FIRST); return;
-	}
-	if (INT_MAX == length) {
-		length = ((unsigned char)hdr[0x0b]) + (((unsigned char)hdr[0x0c]) << 8);
-		length -= offset;
-	}
-	offset += (((unsigned char)hdr[0x0f]) << 12) + (((unsigned char)hdr[0x0e]) << 8);
-	fclose(ff);
-
-	BinIncFile(fnaam, offset, length);
-	delete[] fnaam;
-	delete[] fnaamh;
-	free(fnaamh2);
+	delete[] trdname;
+	delete[] filename;
 }
 
 void dirSAVESNA() {
@@ -1073,7 +1027,7 @@ void dirSAVETRD() {
 		return;
 	}
 
-	bool exec = true, replace = false;
+	bool exec = true, replace = false, addplace = false;
 	aint val;
 	char* fnaam, * fnaamh;
 	int start = -1, length = -1, autostart = -1;
@@ -1082,6 +1036,7 @@ void dirSAVETRD() {
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
+			else if ((addplace = ('&' == *lp))) SkipBlanks(++lp); // detect "&" for "addplace" feature
 			fnaamh = GetFileName(lp);
 			if (!*fnaamh) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
@@ -1115,23 +1070,27 @@ void dirSAVETRD() {
 				}
 				length = val;
 			} else {
-		  		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
+				Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 			}
 		}
 		if (anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVETRD] Syntax error", bp, PASS3); return;
+			if (addplace) {
+				Error("[SAVETRD] Autostart is not used here", bp, PASS3); return;
+			} else {
+				if (!ParseExpression(lp, val)) {
+					Error("[SAVETRD] Syntax error", bp, PASS3); return;
+				}
+				if (val < 0) {
+					Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
+				}
+				autostart = val;
 			}
-			if (val < 0) {
-				Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
-			}
-			autostart = val;
 		}
 	} else {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
-	if (exec) TRD_AddFile(fnaam, fnaamh, start, length, autostart, replace);
+	if (exec) TRD_AddFile(fnaam, fnaamh, start, length, autostart, replace, addplace);
 	delete[] fnaam;
 	delete[] fnaamh;
 }
@@ -1940,94 +1899,73 @@ const char *readMemFile(lua_State *, void *ud, size_t *size)
 }
 
 void dirLUA() {
-	int error;
-	char *rp, *id;
-	char *buff = new char[32768];
-	char *bp=buff;
-//	char size=0;
-	bool execute=false;
-	EStatus errorType = PASS3;
-
+	constexpr size_t luaBufferSize = 32768;
 	luaMemFile luaMF;
+	char* id, * buff, * bp;
 
-	SkipBlanks();
-
+	int passToExec = LASTPASS;
 	if ((id = GetID(lp)) && strlen(id) > 0) {
 		if (cmphstr(id, "pass1")) {
-			if (pass == 1) {
-				execute = true;
-				errorType = EARLY;
-			}
+			passToExec = 1;
 		} else if (cmphstr(id, "pass2")) {
-			if (pass == 2) {
-				execute = true;
-				errorType = EARLY;
-			}
+			passToExec = 2;
 		} else if (cmphstr(id, "pass3")) {
-			if (pass == 3) {
-				execute = true;
-			}
+			passToExec = LASTPASS;
 		} else if (cmphstr(id, "allpass")) {
-			execute = true;
+			passToExec = -1;
 		} else {
 			Error("[LUA] Syntax error", id);
 		}
-	} else if (pass == LASTPASS) {
-		execute = true;
 	}
 
-	if (execute) LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
+	const bool execute = (-1 == passToExec) || (passToExec == pass);
+
+	if (execute) {
+		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+		buff = new char[luaBufferSize];
+		bp = buff;
+	}
 	ListFile();
+
 	while (1) {
 		if (!ReadLine(false)) {
-			Error("Unexpected end of lua script"); break;
-		}
-		lp = line;
-		rp = line;
-		SkipBlanks(rp);
-		if (cmphstr(rp, "endlua")) {
-			if (execute) {
-				if ((bp-buff) + (rp-lp-6) < 32760 && (rp-lp-6) > 0) {
-					STRNCPY(bp, 32768-(bp-buff)+1, lp, rp-lp-6);
-					bp += rp-lp-6;
-					*(bp++) = '\n';
-					*(bp) = 0;
-				} else {
-					Error("[LUA] Maximum size of Lua script is 32768 bytes", NULL, FATAL);
-					return;
-				}
-			}
-			lp = rp;
+			Error("Unexpected end of lua script");
 			break;
 		}
+		lp = line;
+		SkipBlanks(lp);
+		const int isEndLua = cmphstr(lp, "endlua");
+		const size_t lineLen = isEndLua ? (lp - 6 - line) : strlen(line);
 		if (execute) {
-			if ((bp-buff) + strlen(lp) < 32760) {
-				STRCPY(bp, 32768-(bp-buff)+1, lp);
-				bp += strlen(lp);
-				*(bp++) = '\n';
-				*(bp) = 0;
-			} else {
-				Error("[LUA] Maximum size of Lua script is 32768 bytes", NULL, FATAL);
-				return;
+			if (luaBufferSize < (bp - buff) + lineLen + 4) {
+				ErrorInt("[LUA] Maximum byte-size of Lua script is", luaBufferSize-4, FATAL);
 			}
+			STRNCPY(bp, (luaBufferSize - (bp - buff)), line, lineLen);
+			bp += lineLen;
+			*bp++ = '\n';
 		}
-
+		if (isEndLua) break;
 		ListFile(true);
 	}
 
 	if (execute) {
+		*bp = 0;
 		luaMF.text = buff;
 		luaMF.size = strlen(luaMF.text);
-		error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
-		//error = luaL_loadbuffer(LUA, (char*)buff, sizeof(buff), "script") || lua_pcall(LUA, 0, 0, 0);
-		//error = luaL_loadstring(LUA, buff) || lua_pcall(LUA, 0, 0, 0);
+		DidEmitByte();			// reset the flag before running lua script
+		int error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
 			_lua_showLoadError(errorType);
 		}
 		LuaStartPos = TextFilePos();
+		delete[] buff;
+		if (DidEmitByte() && (-1 != passToExec)) {
+			EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
+			Warning("When lua script emits machine code bytes, use \"ALLPASS\" modifier", NULL, warningType);
+		}
 	}
 
-	delete[] buff;
 	substitutedLine = line;		// override substituted list line for ENDLUA
 }
 

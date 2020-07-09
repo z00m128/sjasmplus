@@ -227,6 +227,7 @@ TextFilePos LuaStartPos;
 
 int deviceDirectivesCounter = 0;
 static char* globalDeviceID = NULL;
+static aint globalDeviceZxRamTop = 0;
 
 void InitPass() {
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
@@ -249,6 +250,7 @@ void InitPass() {
 	PseudoORG = 0; adrdisp = 0; dispPageNum = LABEL_PAGE_UNDEFINED;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
+	DidEmitByte();				// reset the emitted flag
 	StructureTable.ReInit();
 	MacroTable.ReInit();
 	MacroDefineTable.ReInit();
@@ -257,6 +259,7 @@ void InitPass() {
 	// reset "device" stuff
 	if (2 == pass && Devices && 1 == deviceDirectivesCounter) {	// only single device detected
 		globalDeviceID = STRDUP(Devices->ID);		// make it global for remaining passes
+		globalDeviceZxRamTop = Devices->ZxRamTop;
 	}
 	if (Devices) delete Devices;
 	Devices = Device = NULL;
@@ -271,7 +274,7 @@ void InitPass() {
 	DefineTable.Replace("_ERRORS", "0");
 	DefineTable.Replace("_WARNINGS", "0");
 	// resurrect "global" device here
-	if (globalDeviceID && !SetDevice(globalDeviceID)) {
+	if (globalDeviceID && !SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
 		Error("Failed to re-initialize global device", globalDeviceID, FATAL);
 	}
 }

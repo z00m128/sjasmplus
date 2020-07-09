@@ -42,7 +42,8 @@ char * rlpbuf, * rlpbuf_end, * rlppos;
 bool colonSubline;
 int blockComment;
 
-int EB[1024 * 64],nEB = 0;
+constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;
+int ListEmittedBytes[LIST_EMIT_BYTES_BUFFER_SIZE], nListBytes = 0;
 char WriteBuffer[DESTBUFLEN];
 int tape_seek = 0;
 int tape_length = 0;
@@ -354,7 +355,7 @@ FILE* GetListingFile() {
 
 void ListFile(bool showAsSkipped) {
 	if (LASTPASS != pass || NULL == GetListingFile() || donotlist || Options::syx.IsListingSuspended) {
-		donotlist = nEB = 0;
+		donotlist = nListBytes = 0;
 		return;
 	}
 	int pos = 0;
@@ -363,25 +364,25 @@ void ListFile(bool showAsSkipped) {
 		PrepareListLine(pline, ListAddress);
 		if (pos) pline[24] = 0;		// remove source line on sub-sequent list-lines
 		char* pp = pline + 10;
-		int BtoList = (nEB < 4) ? nEB : 4;
+		int BtoList = (nListBytes < 4) ? nListBytes : 4;
 		for (int i = 0; i < BtoList; ++i) {
-			if (-2 == EB[i + pos]) pp += sprintf(pp, "...");
-			else pp += sprintf(pp, " %02X", EB[i + pos]);
+			if (-2 == ListEmittedBytes[i + pos]) pp += sprintf(pp, "...");
+			else pp += sprintf(pp, " %02X", ListEmittedBytes[i + pos]);
 		}
 		*pp = ' ';
 		if (showAsSkipped) pline[11] = '~';
 		ListFileStringRtrim();
 		fputs(pline, GetListingFile());
-		nEB -= BtoList;
+		nListBytes -= BtoList;
 		ListAddress += BtoList;
 		pos += BtoList;
-	} while (0 < nEB);
-	nEB = 0;
+	} while (0 < nListBytes);
+	nListBytes = 0;
 }
 
 void ListSilentOrExternalEmits() {
 	// catch silent/external emits like "sj.add_byte(0x123)" from Lua script
-	if (0 == nEB) return;		// no silent/external emit happened
+	if (0 == nListBytes) return;		// no silent/external emit happened
 	char silentOrExternalBytes[] = "; these bytes were emitted silently/externally (lua script?)";
 	substitutedLine = silentOrExternalBytes;
 	eolComment = nullptr;
@@ -389,7 +390,16 @@ void ListSilentOrExternalEmits() {
 	substitutedLine = line;
 }
 
+static bool someByteEmitted = false;
+
+bool DidEmitByte() {	// returns true if some byte was emitted since last call to this function
+	bool didEmit = someByteEmitted;		// value to return
+	someByteEmitted = false;			// reset the flag
+	return didEmit;
+}
+
 static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
+	someByteEmitted = true;
 	if (LASTPASS == pass) {
 		WriteBuffer[WBLength++] = (char)byte;
 		if (DESTBUFLEN == WBLength) WriteDest();
@@ -410,7 +420,14 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 
 void EmitByte(int byte) {
 	byte &= 0xFF;
-	EB[nEB++] = byte;		// write also into listing
+	if (nListBytes < LIST_EMIT_BYTES_BUFFER_SIZE-1) {
+		ListEmittedBytes[nListBytes++] = byte;		// write also into listing
+	} else {
+		if (nListBytes < LIST_EMIT_BYTES_BUFFER_SIZE) {
+			// too many bytes, show it in listing as "..."
+			ListEmittedBytes[nListBytes++] = -2;
+		}
+	}
 	EmitByteNoListing(byte);
 }
 
@@ -439,13 +456,16 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 		else			CheckRamLimitExceeded();
 		return;
 	}
+	if (LIST_EMIT_BYTES_BUFFER_SIZE <= nListBytes + emitMaxToListing) {	// clamp emit to list buffer
+		emitMaxToListing = LIST_EMIT_BYTES_BUFFER_SIZE - nListBytes;
+	}
 	while (len--) {
 		int dVal = (preserveDeviceMemory && DeviceID && MemoryPointer) ? MemoryPointer[0] : byte;
 		EmitByteNoListing(byte, preserveDeviceMemory);
 		if (LASTPASS == pass && emitMaxToListing) {
 			// put "..." marker into listing if some more bytes are emitted after last listed
-			if ((0 == --emitMaxToListing) && len) EB[nEB++] = -2;
-			else EB[nEB++] = dVal&0xFF;
+			if ((0 == --emitMaxToListing) && len) ListEmittedBytes[nListBytes++] = -2;
+			else ListEmittedBytes[nListBytes++] = dVal&0xFF;
 		}
 	}
 }
@@ -561,7 +581,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 {
 	const char* oFileNameFull = fileNameFull;
 	TextFilePos oSourcePos = CurSourcePos;
-	char* oCurrentDirectory, * fullpath, * listFullName = NULL;
+	char* oCurrentDirectory, * fullpath;
 	TCHAR* filenamebegin;
 
 	if (++IncludeLevel > 20) {
@@ -576,7 +596,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	} else {
 		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
 
-		if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
+		if (!*fullpath || !FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 			free(fullpath);
 			Error("Error opening file", nfilename, FATAL);
 		}
@@ -597,9 +617,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	// show in listing file which file was opened
 	FILE* listFile = GetListingFile();
 	if (LASTPASS == pass && listFile) {
-		listFullName = STRDUP(fullpath);	// create copy of full filename for listing file
 		fputs("# file opened: ", listFile);
-		fputs(listFullName, listFile);
+		fputs(fileNameFull, listFile);
 		fputs("\n", listFile);
 	}
 
@@ -625,9 +644,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	// show in listing file which file was closed
 	if (LASTPASS == pass && listFile) {
 		fputs("# file closed: ", listFile);
-		fputs(listFullName, listFile);
+		fputs(fileNameFull, listFile);
 		fputs("\n", listFile);
-		free(listFullName);
 
 		// close listing file (if "default" listing filename is used)
 		if (FP_ListingFile && 0 == IncludeLevel && Options::IsDefaultListingName) {

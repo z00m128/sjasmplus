@@ -1,0 +1,5 @@
+#decompress the TRD file for inclusion
+gunzip inc_3let_extension/test.trd.gz
+# use normal way of assembling
+$MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+last_result=$?

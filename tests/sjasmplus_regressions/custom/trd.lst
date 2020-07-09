@@ -1,5 +1,5 @@
 # file opened: trd.asm
- 1    0000              ;Note: the input TR-DOS filenames in this test are incorrect, and will be currently truncated as 'label1.txt' -> 'label1.t'. Change this if needed.
+ 1    0000              ;Note: the sjasmplus now supports the unofficial 3 letter extensions as described by Dart_Alver
  2    0000              ;A TR-DOS filename is max. 8 characters, with a single-character extension. http://zx-modules.de/fileformats/hobetaformat.html
  3    0000
  4    0000                      device zxspectrum128
@@ -16,39 +16,52 @@
 12    8205              end
 13    8205
 14    8205                      EMPTYTRD trd.trd
-trd.asm(15): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label1.txt
-15    8205                      SAVETRD "trd.trd","label1.txt",label1,5
-trd.asm(16): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.txt
+trd.asm(15): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label1.txt
+15    8205                      SAVETRD "trd.trd","label1.txt",label1,5     ; new warnings about 3-letter extension
+trd.asm(16): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label2.txt
 16    8205                      SAVETRD "trd.trd","label2.txt",label2,5
-trd.asm(17): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label3.txt
+trd.asm(17): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label3.txt
 17    8205                      SAVETRD "trd.trd","label3.txt",label3,5
-trd.asm(18): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.txt
-18    8205                      SAVETRD "trd.trd","label2.txt",label2,5
+18    8205                      SAVETRD "trd.trd","label4.txt",label2,5     ; ok ; warning suppressed
 19    8205                  ; test the "invalid extension warning" and if it can be suppressed
 20    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; no warning
 trd.asm(21): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.J
 21    8205                      SAVETRD "trd.trd","label2.J",label2,5       ; warning
-22    8205                      SAVETRD "trd.trd","label2.J",label2,5       ; ok ; warning suppressed
-23    8205
-24    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
-25    8205
-26    8205              ; TODO add some check to validate resulting files
-27    8205
-28    8205                  ; some more syntax error tests for better code coverage
-trd.asm(29): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t"
-29    8205                      SAVEHOB "trd.$t"
-trd.asm(30): error: [SAVEHOB] Syntax error: SAVEHOB "trd.$t",
-30    8205                      SAVEHOB "trd.$t",
-trd.asm(31): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t",,
-31    8205                      SAVEHOB "trd.$t",,
-32    8205                      DEVICE NONE
-trd.asm(33): error: SAVEHOB only allowed in real device emulation mode (See DEVICE)
-33    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
-trd.asm(34): error: [EMPTYTRD] Syntax error: EMPTYTRD
-34    8205                      EMPTYTRD
-trd.asm(35): error: SAVETRD only allowed in real device emulation mode (See DEVICE)
-35    8205                      SAVETRD "trd.trd","label1.txt",label1,5
-36    8205
+22    8205                      SAVETRD "trd.trd","label3.J",label2,5       ; ok ; warning suppressed
+23    8205                  ; test the new warning about saving same file second time (v1.15.1+)
+trd.asm(24): warning: TRD file already exists, creating one more!: trd.trd
+24    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; warning
+25    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; ok ; warning suppressed
+26    8205                  ; test the new warnings about "B" extension allowing only single letter
+trd.asm(27): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label2.BAS
+trd.asm(27): warning: SAVETRD: the "B" extension is always single letter: label2.BAS
+trd.asm(27): warning: TRD file already exists, creating one more!: trd.trd
+27    8205                      SAVETRD "trd.trd","label2.BAS",label1,5     ; 3x warning (3 letter ext, ".B" enforces 1 letter, duplicate file)
+28    8205                      SAVETRD "trd.trd","label2.BAS",label1,5     ; ok ; warnings suppressed
+29    8205                  ; test deletion of duplicate files when in replace/add modes
+30    8205                      SAVETRD "trd.trd",|"label2.B",label2,5
+31    8205                      SAVETRD "trd.trd","label3.J",label2,5       ; ok
+32    8205                      SAVETRD "trd.trd",&"label3.J",label2,5
+33    8205
+34    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
+35    8205
+36    8205              ; TODO add some check to validate resulting files
+37    8205
+38    8205                  ; some more syntax error tests for better code coverage
+trd.asm(39): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t"
+39    8205                      SAVEHOB "trd.$t"
+trd.asm(40): error: [SAVEHOB] Syntax error: SAVEHOB "trd.$t",
+40    8205                      SAVEHOB "trd.$t",
+trd.asm(41): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t",,
+41    8205                      SAVEHOB "trd.$t",,
+42    8205                      DEVICE NONE
+trd.asm(43): error: SAVEHOB only allowed in real device emulation mode (See DEVICE)
+43    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
+trd.asm(44): error: [EMPTYTRD] Syntax error: EMPTYTRD
+44    8205                      EMPTYTRD
+trd.asm(45): error: SAVETRD only allowed in real device emulation mode (See DEVICE)
+45    8205                      SAVETRD "trd.trd","label1.txt",label1,5
+46    8205
 # file closed: trd.asm
 
 Value    Label
