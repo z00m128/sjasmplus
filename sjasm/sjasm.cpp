@@ -31,6 +31,7 @@
 #include "sjdefs.h"
 #include <cstdlib>
 #include <chrono>
+#include <ctime>
 
 #ifdef USE_LUA
 
