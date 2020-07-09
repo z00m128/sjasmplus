@@ -125,7 +125,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	PreviousErrorLine = CompiledCurrentLine;
 	++ErrorCount;							// number of non-skipped (!) errors
 
-	DefineTable.Replace("_ERRORS", ErrorCount);
+	DefineTable.Replace("__ERRORS__", ErrorCount);
 
 	initErrorLine();
 	STRCAT(ErrorLine, LINEMAX2-1, "error: ");
@@ -169,7 +169,7 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 
 	++WarningCount;
 
-	DefineTable.Replace("_WARNINGS", WarningCount);
+	DefineTable.Replace("__WARNINGS__", WarningCount);
 
 	initErrorLine();
 	STRCAT(ErrorLine, LINEMAX2-1, "warning: ");

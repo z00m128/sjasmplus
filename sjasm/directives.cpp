@@ -1901,7 +1901,7 @@ const char *readMemFile(lua_State *, void *ud, size_t *size)
 void dirLUA() {
 	constexpr size_t luaBufferSize = 32768;
 	luaMemFile luaMF;
-	char* id, * buff, * bp;
+	char* id, * buff = nullptr, * bp = nullptr;
 
 	int passToExec = LASTPASS;
 	if ((id = GetID(lp)) && strlen(id) > 0) {

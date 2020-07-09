@@ -31,6 +31,7 @@
 
 // version string
 #define VERSION "1.15.1"
+#define VERSION_NUM "0x00010F01"
 
 #define LASTPASS 3
 
