@@ -1920,6 +1920,7 @@ void dirLUA() {
 
 	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
 	const bool execute = (-1 == passToExec) || (passToExec == pass);
+	bool showWarning = warningNotSuppressed();	// remember warning suppression from block start
 
 	if (execute) {
 		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
@@ -1945,7 +1946,13 @@ void dirLUA() {
 			bp += lineLen;
 			*bp++ = '\n';
 		}
-		if (isEndLua) break;
+		if (isEndLua) {		// eat also any trailing eol-type of comment
+			SkipBlanks(lp);
+			if (eolComment && lp == eolComment) SkipToEol(lp);
+			// take into account also warning suppression used at end of block
+			showWarning = showWarning && warningNotSuppressed();
+			break;
+		}
 		ListFile(true);
 	}
 
@@ -1960,7 +1967,7 @@ void dirLUA() {
 		}
 		LuaStartPos = TextFilePos();
 		delete[] buff;
-		if (DidEmitByte() && (-1 != passToExec)) {
+		if (DidEmitByte() && (-1 != passToExec) && showWarning) {
 			EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
 			Warning("When lua script emits machine code bytes, use \"ALLPASS\" modifier", NULL, warningType);
 		}

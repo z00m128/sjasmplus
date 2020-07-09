@@ -186,6 +186,15 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.15.2</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_lua">`LUA`</link> thew new emit warning (v1.15.1) is now suppressible
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>7.7.2020 - 1.15.1</term>
 
             <listitem>
@@ -2141,7 +2150,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>LUA [pass]<anchor id="po_lua" /></term>
+            <term><anchor id="po_lua" />LUA [pass] [; ok comment to suppress "emit with allpass" warning]</term>
 
             <listitem>
               <para>Using pseudo-ops LUA and ENDLUA you can insert Lua
@@ -3899,7 +3908,11 @@ binData.value2          EQU 0x8101   ; address</synopsis>
         end
         _pl(".savesp: LD SP,0")
         _pc("RET")
-    ENDLUA</programlisting></para>
+    ENDLUA
+
+    LUA PASS2 ; if you fully understand what you are doing
+        sj.add_byte(123) -- and you need emit bytes in other mode
+    ENDLUA ; ok ; you can suppress warning here or at start of block</programlisting></para>
         </example><example>
           <title>Declare function and use it</title>
 
