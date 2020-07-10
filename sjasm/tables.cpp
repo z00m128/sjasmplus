@@ -654,8 +654,23 @@ void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }
 
+static char defineGet__Counter__Buffer[32] = {};
+static char defineGet__Line__Buffer[32] = {};
+
 char* CDefineTable::Get(const char* name) {
 	if (NULL != name) {
+		// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
+		if ('_' == name[1]) {
+			if (!strcmp(name, "__COUNTER__")) {
+				SPRINTF1(defineGet__Counter__Buffer, 30, "%d", PredefinedCounter);
+				++PredefinedCounter;
+				return defineGet__Counter__Buffer;
+			}
+			if (!strcmp(name, "__LINE__")) {
+				SPRINTF1(defineGet__Line__Buffer, 30, "%d", CurSourcePos.line);
+				return defineGet__Line__Buffer;
+			}
+		}
 		CDefineTableEntry* p = defs[(*name)&127];
 		while (p) {
 			if (!strcmp(name, p->name)) {

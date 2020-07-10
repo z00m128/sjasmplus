@@ -206,7 +206,7 @@ byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
 TextFilePos CurSourcePos, DefinitionPos;
 uint32_t maxlin = 0;
-aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0;
+aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L,PreviousErrorLine = -1L, comlin = 0;
 char* CurrentDirectory=NULL;
 
@@ -282,6 +282,13 @@ void InitPass() {
 	DefineTable.Replace("__ERRORS__", "0");					// migrated from _ERRORS
 	DefineTable.Replace("__WARNINGS__", "0");				// migrated from _WARNINGS
 	DefineTable.Replace("__PASS__", pass);					// current pass of assembler
+	DefineTable.Replace("__INCLUDE_LEVEL__", "-1");			// include nesting
+	DefineTable.Replace("__BASE_FILE__", "<none>");			// the include-level 0 file
+	DefineTable.Replace("__FILE__", "<none>");				// current file
+	DefineTable.Replace("__LINE__", "<dynamic value>");		// current line in current file
+	DefineTable.Replace("__COUNTER__", "<dynamic value>");	// gcc-like, incremented upon every use
+	PredefinedCounter = 0;
+
 	// resurrect "global" device here
 	if (globalDeviceID && !SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
 		Error("Failed to re-initialize global device", globalDeviceID, FATAL);

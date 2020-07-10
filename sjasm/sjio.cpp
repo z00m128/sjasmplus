@@ -610,6 +610,11 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	fileNameFull = ofnIt->c_str();				// get const pointer into archive
 	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 
+	// refresh pre-defined values related to file/include
+	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
+	DefineTable.Replace("__FILE__", fileNameFull);
+	if (0 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", fileNameFull);
+
 	// open default listing file for each new source file (if default listing is ON)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
 		OpenDefaultList(fullpath);			// explicit listing file is already opened
@@ -665,6 +670,11 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	}
 	fileNameFull = oFileNameFull;
 	CurSourcePos = oSourcePos;
+
+	// refresh pre-defined values related to file/include
+	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
+	DefineTable.Replace("__FILE__", fileNameFull ? fileNameFull : "<none>");
+	if (-1 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", "<none>");
 }
 
 void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)

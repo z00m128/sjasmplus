@@ -136,7 +136,7 @@ extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
 extern TextFilePos CurSourcePos, DefinitionPos;
 extern uint32_t maxlin;
-extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine;
+extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine, PredefinedCounter;
 extern aint destlen, size, PreviousErrorLine, comlin;
 
 extern char* vorlabp, * macrolabp, * LastParsedLabel;
