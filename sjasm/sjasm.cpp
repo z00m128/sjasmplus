@@ -281,7 +281,7 @@ void InitPass() {
 	DefineTable.Replace("__VERSION__", "\"" VERSION "\"");	// migrated from _VERSION
 	DefineTable.Replace("__ERRORS__", "0");					// migrated from _ERRORS
 	DefineTable.Replace("__WARNINGS__", "0");				// migrated from _WARNINGS
-	DefineTable.Replace("__PASS__", pass);
+	DefineTable.Replace("__PASS__", pass);					// current pass of assembler
 	// resurrect "global" device here
 	if (globalDeviceID && !SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
 		Error("Failed to re-initialize global device", globalDeviceID, FATAL);

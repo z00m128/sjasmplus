@@ -1,0 +1,38 @@
+# file opened: predefined_pass.asm
+ 1    0000                  LUA PASS1
+ 2    0000 ~                    asmpass = 0 + sj.get_define("__PASS__")
+ 3    0000 ~                    if (1 ~= asmpass) then sj.error("unexpected __PASS__ value", asmpass) end
+ 4    0000                  ENDLUA
+ 5    0000                  LUA PASS2
+ 6    0000 ~                    asmpass = 0 + sj.get_define("__PASS__")
+ 7    0000 ~                    if (2 ~= asmpass) then sj.error("unexpected __PASS__ value", asmpass) end
+ 8    0000                  ENDLUA
+ 9    0000                  LUA PASS3
+10    0000 ~                    asmpass = 0 + sj.get_define("__PASS__")
+11    0000 ~                    if (3 ~= asmpass) then sj.error("unexpected __PASS__ value", asmpass) end
+12    0000                  ENDLUA
+13    0000
+14    0000                  ASSERT $120 == myLab    ; assert is PASS3
+15    0000
+16    0000                  IF 3 == 3
+17    0000              myLab = myLab + $003
+18    0000 23 01                DW  myLab
+19    0002                  ENDIF
+20    0002                  IF 2 == 3
+21    0002 ~            myLab = myLab + $020
+22    0002                  ENDIF
+23    0002                  IF 1 == 3
+24    0002 ~            myLab = $100
+25    0002                  ENDIF
+26    0002
+27    0002                  ASSERT $123 == myLab    ; assert is PASS3
+28    0002              ; emitting machine code only in pass3 breaks the coherence of label system
+predefined_pass.asm(29): warning: Label has different value in pass 3: previous value 0 not equal 2
+29    0002              WarningOnLabelBecauseOfBreakingPassCoherence:
+30    0002
+# file closed: predefined_pass.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0123   myLab
+0x0002 X WarningOnLabelBecauseOfBreakingPassCoherence
