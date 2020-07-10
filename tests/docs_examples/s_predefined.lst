@@ -1,0 +1,18 @@
+# file opened: s_predefined.asm
+ 1    0000 00               DB 0   ; DB 0
+ 2    0001                  LUA ALLPASS
+ 3    0001 ~                    sj.insert_label("label_" .. sj.get_define("__COUNTER__"), sj.current_address)
+ 4    0001 ~                            -- creates "label_1" at "$" (0x0001)
+ 5    0001 ~                    sj.insert_label("label_" .. sj.get_define("__COUNTER__"), _c("$+10"))
+ 6    0001 ~                            -- creates "label_2" at "$+10" (0x000B)
+ 7    0001                  ENDLUA
+ 8    0001              label__COUNTER__: ; does *NOT* substitute in current sjasmplus, sorry
+ 9    0001 03               DB 3   ; DB 3
+10    0002
+# file closed: s_predefined.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X label_1
+0x000B X label_2
+0x0001 X label__COUNTER__
