@@ -353,7 +353,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	bool isDefDir = false;	// to remember if one of DEFINE-related directives was used
 	bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 	char defarrayCountTxt[16] = { 0 };
-	while (*lp) {
+	while (*lp && ((rp - nl) < LINEMAX)) {
 		const char c1 = lp[0], c2 = lp[1];
 		afterNonAlphaNum = afterNonAlphaNumNext;
 		afterNonAlphaNumNext = !isalnum((byte)c1);
@@ -471,7 +471,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			}
 			if (0 < dr) definegereplaced = 1;		// above zero => count as replacement
 			if (0 != dr) {				// any non-zero dr => write to the output
-				while (*ver) *rp++ = *ver++;		// replace the string into target buffer
+				while (*ver && ((rp - nl) < LINEMAX)) *rp++ = *ver++;		// replace the string into target buffer
 				// reset subId parser to catch second+ subId in current Id
 				ResetGrowSubId();
 				nextSubIdLp = lp;
@@ -480,8 +480,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		} while(islabchar(*lp));
 	} // while(*lp)
 	// add line terminator to the output buffer
-	*rp = 0;
-	if (strlen(nl) > LINEMAX - 1) {
+	*rp++ = 0;
+	if (LINEMAX <= (rp - nl)) {
 		Error("line too long after macro expansion", NULL, FATAL);
 	}
 	// check if whole line is just blanks, then return just empty one
