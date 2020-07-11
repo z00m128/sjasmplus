@@ -1,0 +1,16 @@
+# file opened: lua_coverage2.asm
+ 1    0000              ; force non-empty internal sline/sline2 arrays during `_c()` evaluation
+ 2    0000                  DEFINE  qwe xyz
+ 3    0000                  DEFINE  xyz abc
+ 4    0000                  DEFINE  abc
+ 5    0000                  LUA ALLPASS
+ 6    0000 ~                    sj.add_byte(_c("1+2"))
+ 7    0000 03               ENDLUA qwe  ; either sline or sline2 should be non-empty from substitution
+ 8    0001                  LUA ALLPASS
+ 9    0001 ~                    sj.add_byte(_c("2+3"))
+10    0001 05               ENDLUA xyz  ; either sline or sline2 should be non-empty from substitution
+11    0002
+# file closed: lua_coverage2.asm
+
+Value    Label
+------ - -----------------------------------------------------------
