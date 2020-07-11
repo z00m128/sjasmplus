@@ -124,6 +124,7 @@
       <div class="variablelist"><dl class="variablelist"><dt><span class="term">WIP - 1.15.2</span></dt><dd>
               <pre class="synopsis">- <a class="link" href="#po_lua">`LUA`</a> thew new emit warning (v1.15.1) is now suppressible
 - <a class="link" href="#s_predefined">Predefined defines</a> extended and renamed (following gcc/clang ones)
+- bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by "("
 </pre>
             </dd><dt><span class="term">7.7.2020 - 1.15.1</span></dt><dd>
               <pre class="synopsis">- <a class="link" href="#po_equ">`EQU`</a> now assigns memory page to symbol based on the symbol value and current memory mapping
@@ -1029,7 +1030,14 @@ StartProg:
                 -- creates "label_2" at "$+10" (0x000B)
     ENDLUA
 label__COUNTER__: ; does *NOT* substitute in current sjasmplus, sorry
-    DB __COUNTER__   ; DB 3</pre>
+    DB __COUNTER__   ; DB 3
+
+    ; also macro arguments substitution can be used
+    MACRO createLabelWithSuffix label?, suffix?
+label?_suffix? ; define global label
+    ENDM
+    createLabelWithSuffix label, __COUNTER__    ; label_4
+    createLabelWithSuffix label, __COUNTER__    ; label_5</pre>
                 </div></div><br class="example-break">
             </dd><dt><span class="term">Deprecated predefined values from sjasmplus till version 1.15.1:</span></dt><dd>
 				<p>The predefined values were renamed and extended to be more like gcc/clang pre-defines,

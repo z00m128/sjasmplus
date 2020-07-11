@@ -7,3 +7,10 @@
     ENDLUA
 label__COUNTER__: ; does *NOT* substitute in current sjasmplus, sorry
     DB __COUNTER__   ; DB 3
+
+    ; also macro arguments substitution can be used
+    MACRO createLabelWithSuffix label?, suffix?
+label?_suffix? ; define global label
+    ENDM
+    createLabelWithSuffix label, __COUNTER__    ; label_4
+    createLabelWithSuffix label, __COUNTER__    ; label_5
