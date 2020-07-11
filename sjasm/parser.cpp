@@ -93,7 +93,8 @@ int ParseExpPrim(char*& p, aint& nval) {
 int ParseExpUnair(char*& p, aint& nval) {
 	aint right;
 	int oper;
-	if ((oper = need(p, "! ~ + - ")) || (oper = needa(p, "not", '!', "low", 'l', "high", 'h'))) {
+	if ((oper = need(p, "! ~ + - ")) || \
+		(oper = needa(p, "not", '!', "low", 'l', "high", 'h', true)) ) {
 		switch (oper) {
 		case '!':
 			if (!ParseExpUnair(p, right)) return 0;

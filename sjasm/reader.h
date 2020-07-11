@@ -63,7 +63,7 @@ int check24(aint val);
 void checkLowMemory(byte lowByte, byte hiByte);
 int need(char*& p, char c);
 int need(char*& p, const char* c);
-int needa(char*& p, const char* c1, int r1, const char* c2 = 0, int r2 = 0, const char* c3 = 0, int r3 = 0);
+int needa(char*& p, const char* c1, int r1, const char* c2 = 0, int r2 = 0, const char* c3 = 0, int r3 = 0, bool allowParenthesisEnd = false);
 bool GetNumericValue_ProcessLastError(const char* const srcLine);
 bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const int shiftBase);
 bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const int base);
@@ -75,7 +75,7 @@ template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, in
 int GetBytes(char*& p, int e[], int add, int dc);
 int GetBits(char*& p, int e[]);
 int GetBytesHexaText(char*& p, int e[]);
-int cmphstr(char*& p1, const char* p2);		// p2 must be lowercase to match both cases
+int cmphstr(char*& p1, const char* p2, bool allowParenthesisEnd = false);		// p2 must be lowercase to match both cases
 char* GetFileName(char*& p, bool convertslashes=true);
 char* GetOutputFileName(char*& p, bool convertslashes=true);	// prepends the filename with OutPrefix
 EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called

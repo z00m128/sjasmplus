@@ -37,7 +37,7 @@ static const char delimiters_e[] = { ' ',    '"',       '\'',          '>',     
 static const std::array<EDelimiterType, 3> delimiters_all = {DT_QUOTES, DT_APOSTROPHE, DT_ANGLE};
 static const std::array<EDelimiterType, 3> delimiters_noAngle = {DT_QUOTES, DT_APOSTROPHE, DT_COUNT};
 
-int cmphstr(char*& p1, const char* p2) {
+int cmphstr(char*& p1, const char* p2, bool allowParenthesisEnd) {
 	unsigned int i = 0;
 	// check initial non-alpha chars without deciding the upper/lower case of test
 	while (p2[i] && !isalpha((byte)p2[i])) {
@@ -58,10 +58,14 @@ int cmphstr(char*& p1, const char* p2) {
 	}
 	if (p1[i]) {		// there is some character after the first word
 		// whitespace, EOL-comment and block-comment-start keep the match valid
-		if (!White(p1[i]) && \
+		// also starting parenthesis when allowParenthesisEnd
+		if (
+			!White(p1[i]) && \
 			!(';' == p1[i]) && \
 			!('/' == p1[i] && '/' == p1[i+1]) && \
-			!('/' == p1[i] && '*' == p1[i+1])) {
+			!('/' == p1[i] && '*' == p1[i+1]) && \
+			!(allowParenthesisEnd && '(' == p1[i])
+		) {
 			return 0;	// anything else invalidates the found match
 		}
 	}
@@ -346,18 +350,18 @@ int need(char*& p, char c) {
 	++p; return 1;
 }
 
-int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3) {
+int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3, bool allowParenthesisEnd) {
 	//  SkipBlanks(p);
 	if (!isalpha((byte)*p)) {
 		return 0;
 	}
-	if (cmphstr(p, c1)) {
+	if (cmphstr(p, c1, allowParenthesisEnd)) {
 		return r1;
 	}
-	if (c2 && cmphstr(p, c2)) {
+	if (c2 && cmphstr(p, c2, allowParenthesisEnd)) {
 		return r2;
 	}
-	if (c3 && cmphstr(p, c3)) {
+	if (c3 && cmphstr(p, c3, allowParenthesisEnd)) {
 		return r3;
 	}
 	return 0;
