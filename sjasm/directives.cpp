@@ -1668,6 +1668,8 @@ void dirSTRUCT() {
 		}
 		if (cmphstr(lp, "ends")) {
 			st->deflab();
+			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
+			substitutedLine = line;		// override substituted listing for ENDS
 			return;
 		}
 		ParseStructLine(st);
@@ -1947,8 +1949,8 @@ void dirLUA() {
 			*bp++ = '\n';
 		}
 		if (isEndLua) {		// eat also any trailing eol-type of comment
-			SkipBlanks(lp);
-			if (eolComment && lp == eolComment) SkipToEol(lp);
+			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
+			substitutedLine = line;		// override substituted listing for ENDLUA
 			// take into account also warning suppression used at end of block
 			showWarning = showWarning && warningNotSuppressed();
 			break;

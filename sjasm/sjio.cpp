@@ -1171,11 +1171,11 @@ EReturn ReadFile() {
 			SkipBlanks(p);
 			if ('.' == *p) ++p;
 			if (cmphstr(p, "endif")) {
-				lp = ReplaceDefine(p);
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ENDIF
 				return ENDIF;
 			} else if (cmphstr(p, "else")) {
-				lp = ReplaceDefine(p);
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;
@@ -1200,13 +1200,13 @@ EReturn SkipFile() {
 			if (iflevel) {
 				--iflevel;
 			} else {
-				lp = ReplaceDefine(p);
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ENDIF
 				return ENDIF;
 			}
 		} else if (cmphstr(p, "else")) {
 			if (!iflevel) {
-				lp = ReplaceDefine(p);
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;

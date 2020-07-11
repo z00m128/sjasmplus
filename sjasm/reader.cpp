@@ -56,7 +56,15 @@ int cmphstr(char*& p1, const char* p2) {
 			++i;
 		}
 	}
-	if (p1[i] && !White(p1[i])) return 0;		// any character above space means "no match"
+	if (p1[i]) {		// there is some character after the first word
+		// whitespace, EOL-comment and block-comment-start keep the match valid
+		if (!White(p1[i]) && \
+			!(';' == p1[i]) && \
+			!('/' == p1[i] && '/' == p1[i+1]) && \
+			!('/' == p1[i] && '*' == p1[i+1])) {
+			return 0;	// anything else invalidates the found match
+		}
+	}
 	// space, tab, enter, \0, ... => "match"
 	p1 += i;
 	return 1;
