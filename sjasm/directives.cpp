@@ -282,8 +282,20 @@ void dirORG() {
 		Warning("[ORG] inside displaced block, the physical address is not modified, only virtual displacement address will change");
 	}
 	if (!DeviceID) return;
-	if (comma(lp))	dirPageImpl("ORG");
-	else 			Device->CheckPage(CDevice::CHECK_RESET);
+	if (!comma(lp)) {
+		Device->CheckPage(CDevice::CHECK_RESET);
+		return;
+	}
+	// emit warning when current slot does not cover address used for ORG
+	auto slot = Device->GetCurrentSlot();
+	if ((CurAddress < slot->Address || slot->Address + slot->Size <= CurAddress) && warningNotSuppressed()) {
+		char warnTxt[LINEMAX];
+		SPRINTF3(warnTxt, LINEMAX,
+					"ORG address 0x%04X is outside of current slot 0x%04X..0x%04X (page argument affects *current* slot)",
+					CurAddress, slot->Address, slot->Address + slot->Size - 1);
+		Warning(warnTxt, bp);
+	}
+	dirPageImpl("ORG");
 }
 
 void dirDISP() {
