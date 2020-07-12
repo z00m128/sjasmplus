@@ -2452,7 +2452,9 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
             <listitem>
               <para>Set the program counter to a specific address. If the second argument is
               provided, it will change memory page in the current slot, see
-              <link linkend="po_page">PAGE</link>.</para>
+              <link linkend="po_page">PAGE</link> and <link linkend="po_slot">SLOT</link> (it will
+              warn you when &lt;address&gt; is outside of it, you can suppress the warning with
+              ";ok" comment).</para>
               <para>When used inside <link linkend="po_disp">DISP</link> block, only the virtual
 				  "displaced" program counter is affected, but the machine code will be still
 				  sequentially emitted in the original physical location and warning is emitted
