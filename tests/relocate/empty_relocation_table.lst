@@ -1,0 +1,27 @@
+# file opened: empty_relocation_table.asm
+ 1    0000 CD 0B 10         call    label_out_relocate  ; outside of relocation area
+ 2    0003
+ 3    0003                  ORG $1000
+ 4    1000                  RELOCATE_START
+ 5    1000 00 00            dw      relocate_count      ; should be zero
+ 6    1002 00 00            dw      relocate_size       ; should be zero
+ 7    1004 00               nop
+ 8    1005 CD 0B 10         call    label_out_relocate  ; should be absolute call (not in relocate data)
+ 9    1008              equ_label   equ     $1001
+10    1008 21 01 10         ld      hl,equ_label        ; should be absolute (equ) value (not in relocate data)
+11    100B              unused_label:                   ; should not produce any relocation data, just defines "relocatable" label
+12    100B                  RELOCATE_TABLE              ; should emit no relocation data
+13    100B                  RELOCATE_END
+14    100B                  ; outside of relocation area
+15    100B              label_out_relocate:
+16    100B C9               ret
+17    100C
+# file closed: empty_relocation_table.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x100B   label_out_relocate
+0x0000   relocate_count
+0x0000   relocate_size
+0x1001   equ_label
+0x100B X unused_label
