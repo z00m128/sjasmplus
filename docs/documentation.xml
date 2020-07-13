@@ -2562,6 +2562,45 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_relocate_end" />RELOCATE_END</term>
+
+            <listitem>
+              <para>Ends the block of code for which relocation data are produced (started by
+				  <link linkend="po_relocate_start">RELOCATE_START</link>). To get the relocation
+				  data themselves, use <link linkend="po_relocate_table">RELOCATE_TABLE</link> and
+				  related symbols.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_relocate_start" />RELOCATE_START</term>
+
+            <listitem>
+              <para>Marks start of block for which relocation data are produced. Any *regular* label
+				  (not EQU/DEFL symbols) defined inside the RELOCATE_START .. RELOCATE_END block will
+				  be treated as "relocatable" label. Any instruction/directive within the block which
+				  needs resulting opcode adjusted when relocated to different address will produce
+				  relocation-data for the <link linkend="po_relocate_table">RELOCATE_TABLE</link>.
+				  </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_relocate_table" />RELOCATE_TABLE</term>
+
+            <listitem>
+              <para>Emits relocation data gathered across all relocation blocks. There are also
+				  two built-in symbols <code>relocate_count</code> and <code>relocate_size</code>
+				  containing the size of the table (only word-type tables are supported in sjasmplus,
+				  so size is always doubled count).</para>
+              <para>The table is raw array of WORD (16 bit) values with memory offsets of machine
+				  code which should be adjusted (when the code is relocated to different than original
+				  base address). To base offsets from particular base address, use <link linkend="po_org">ORG</link>
+				  ahead of relocation block to land instructions and labels from there.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_rept" />REPT &lt;count&gt;</term>
 
             <listitem>
