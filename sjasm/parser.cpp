@@ -32,22 +32,25 @@
 
 static bool synerr = true;	// flag whether ParseExpression should report syntax error with Error()
 
-int ParseExpPrim(char*& p, aint& nval) {
+static int ParseExpressionEntry(char*& p, aint& nval);
+
+static int ParseExpPrim(char*& p, aint& nval) {
 	int res = 0;
 	if (SkipBlanks(p)) {
 		return 0;
 	}
 	if (*p == '(') {
 		++p;
-		res = ParseExpression(p, nval);
+		res = ParseExpressionEntry(p, nval);
 		if (!need(p, ')')) {
-				Error("')' expected");
-				return 0;
-		 }
+			Error("')' expected");
+			return 0;
+		}
 	} else if (DeviceID && *p == '{') {		// read WORD/BYTE from virtual device memory
+		//FIXME relocation?
 		char* const readMemP = p;
 		const int byteOnly = cmphstr(++p, "b");
-		if (!ParseExpression(p, nval)) return 0;	// some syntax error inside the address expression
+		if (!ParseExpressionEntry(p, nval)) return 0;	// some syntax error inside the address expression
 		if (!need(p, '}')) {
 			Error("'}' expected", readMemP, SUPPRESS);
 			return 0;
@@ -88,7 +91,7 @@ int ParseExpPrim(char*& p, aint& nval) {
 	return res;
 }
 
-int ParseExpUnair(char*& p, aint& nval) {
+static int ParseExpUnair(char*& p, aint& nval) {
 	aint right;
 	int oper;
 	if ((oper = need(p, "! ~ + - ")) || \
@@ -126,7 +129,7 @@ int ParseExpUnair(char*& p, aint& nval) {
 	}
 }
 
-int ParseExpMul(char*& p, aint& nval) {
+static int ParseExpMul(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpUnair(p, left)) return 0;
@@ -150,7 +153,7 @@ int ParseExpMul(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpAdd(char*& p, aint& nval) {
+static int ParseExpAdd(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpMul(p, left)) return 0;
@@ -163,7 +166,7 @@ int ParseExpAdd(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpShift(char*& p, aint& nval) {
+static int ParseExpShift(char*& p, aint& nval) {
 	aint left, right;
 	uint32_t l;
 	int oper;
@@ -188,7 +191,7 @@ int ParseExpShift(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpMinMax(char*& p, aint& nval) {
+static int ParseExpMinMax(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpShift(p, left)) return 0;
@@ -206,7 +209,7 @@ int ParseExpMinMax(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpCmp(char*& p, aint& nval) {
+static int ParseExpCmp(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpMinMax(p, left)) return 0;
@@ -228,7 +231,7 @@ int ParseExpCmp(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpEqu(char*& p, aint& nval) {
+static int ParseExpEqu(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpCmp(p, left)) return 0;
@@ -240,7 +243,7 @@ int ParseExpEqu(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpBitAnd(char*& p, aint& nval) {
+static int ParseExpBitAnd(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpEqu(p, left)) return 0;
 	while (need(p, "&_") || needa(p, "and", '&')) {
@@ -251,7 +254,7 @@ int ParseExpBitAnd(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpBitXor(char*& p, aint& nval) {
+static int ParseExpBitXor(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpBitAnd(p, left)) return 0;
 	while (need(p, "^ ") || needa(p, "xor", '^')) {
@@ -262,7 +265,7 @@ int ParseExpBitXor(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpBitOr(char*& p, aint& nval) {
+static int ParseExpBitOr(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpBitXor(p, left)) return 0;
 	while (need(p, "|_") || needa(p, "or", '|')) {
@@ -273,7 +276,7 @@ int ParseExpBitOr(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpLogAnd(char*& p, aint& nval) {
+static int ParseExpLogAnd(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpBitOr(p, left)) return 0;
 	while (need(p, "&&")) {
@@ -284,7 +287,7 @@ int ParseExpLogAnd(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpLogOr(char*& p, aint& nval) {
+static int ParseExpLogOr(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpLogAnd(p, left)) return 0;
 	while (need(p, "||")) {
@@ -295,10 +298,31 @@ int ParseExpLogOr(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpression(char*& p, aint& nval) {
+static int ParseExpressionEntry(char*& p, aint& nval) {
 	if (ParseExpLogOr(p, nval)) return 1;
 	nval = 0;
 	return 0;
+}
+
+int ParseExpression(char*& p, aint& nval) {
+	// if relocation is active, do the full evaluation in syntax-error-OFF mode with alternative
+	// label values, and remember the result (to compare it with regular evaluation afterward)
+	aint relocationVal = 0;
+	int relocationRes = 0;
+	if (Relocation::isActive) {
+		char* altP = p;
+		bool osynerr = synerr;
+		synerr = false;
+		Relocation::areLabelsOffset = true;
+		relocationRes = ParseExpressionEntry(altP, relocationVal);
+		Relocation::areLabelsOffset = false;
+		synerr = osynerr;
+	}
+	// if relocation is off, or the alternative run did finish already, do regular evaluation
+	int res = ParseExpressionEntry(p, nval);
+	// set the Relocation::isResultAffected if the two alternative results are different
+	if (res && relocationRes) Relocation::isResultAffected |= (relocationVal != nval);
+	return res;
 }
 
 int ParseExpressionNoSyntaxError(char*& lp, aint& val) {
@@ -330,6 +354,7 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 		alignment = -1;
 		return;
 	}
+	//FIXME relocation?!?
 	// check if alignment value is power of two (0..15-th power only)
 	if (alignment < 1 || (1<<15) < alignment || (alignment & (alignment-1))) {
 		Error("[ALIGN] Illegal align", oldSrc, SUPPRESS);
@@ -337,7 +362,7 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 		return;
 	}
 	if (!comma(src)) return;
-	if (!ParseExpression(lp, fill)) {
+	if (!ParseExpressionEntry(lp, fill)) {
 		Error("[ALIGN] fill-byte expected after comma", bp, IF_FIRST);
 		fill = -1;
 	} else if (fill < 0 || 255 < fill) {
@@ -541,6 +566,7 @@ void ParseLabel() {
 			return;
 		}
 		val = atoi(tp);
+		//FIXME relocation
 		if (!LocalLabelTable.InsertRefresh(val)) {
 			Error("Local-labels flow differs in this pass (missing/new local label or final pass source difference)");
 		}
@@ -551,7 +577,7 @@ void ParseLabel() {
 		}
 		bool IsDEFL = NeedDEFL(), IsEQU = NeedEQU();
 		if (IsDEFL || IsEQU) {
-			if (!ParseExpression(lp, val)) {
+			if (!ParseExpressionEntry(lp, val)) {
 				Error("Expression error", lp);
 				val = 0;
 			}

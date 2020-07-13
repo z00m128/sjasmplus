@@ -37,6 +37,8 @@ static std::vector<word> offsetsPrevious;	// offsets from pass2 (to be exported 
 static bool warnAboutContentChange = false;	// if any change in content between passes should be reported
 
 bool Relocation::isActive = false;			// when inside relocation block
+bool Relocation::areLabelsOffset = false;	// when the Labels should return the alternative value
+bool Relocation::isResultAffected = false;	// when one of previous expression results was affected by it
 
 // when some part of opcode needs relocation, add its offset to the relocation table
 void Relocation::addOffsetToRelocate(const aint offset) {

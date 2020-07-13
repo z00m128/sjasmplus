@@ -4,7 +4,7 @@
     ASSERT 2 * relocate_count == relocate_size
     ASSERT 3 == relocate_count
     RELOCATE_TABLE              ; should emit the three addresses of opcode data:
-        ; $1005, $1008, $100C
+        ; $100B, $100E, $1012
 
     dw      relocate_count
     dw      relocate_size

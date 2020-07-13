@@ -62,6 +62,7 @@ public:
 	bool	IsDEFL;
 	bool	IsEQU;
 	bool	used;
+	bool	isRelocatable;
 	CLabelTableEntry();
 	void ClearData();
 };

@@ -179,7 +179,12 @@ bool GetLabelPage(char*& p, aint& val) {
 
 bool GetLabelValue(char*& p, aint& val) {
 	CLabelTableEntry* labelEntry = GetLabel(p);
-	val = labelEntry ? labelEntry->value : 0;
+	if (labelEntry) {
+		val = labelEntry->value;
+		if (labelEntry->isRelocatable && Relocation::areLabelsOffset) val -= 0x0201;
+	} else {
+		val = 0;
+	}
 	// true even when not found, but valid label name (neeed for expression-eval logic)
 	return !getLabel_invalidName;
 }
@@ -212,7 +217,7 @@ void CLabelTableEntry::ClearData() {
 	value = 0;
 	updatePass = 0;
 	page = LABEL_PAGE_UNDEFINED;
-	IsDEFL = IsEQU = used = false;
+	IsDEFL = IsEQU = used = isRelocatable = false;
 }
 
 CLabelTableEntry::CLabelTableEntry() : name(NULL) {
@@ -279,6 +284,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->value = nvalue;
 	label->used = undefined;
 	label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+	label->isRelocatable = Relocation::isActive && !(IsDEFL || IsEQU);
 	return 1;
 }
 
