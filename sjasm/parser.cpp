@@ -30,8 +30,6 @@
 
 #include "sjdefs.h"
 
-char dirDEFl[] = "def", dirDEFu[] = "DEF";
-
 static bool synerr = true;	// flag whether ParseExpression should report syntax error with Error()
 
 int ParseExpPrim(char*& p, aint& nval) {

@@ -2066,17 +2066,6 @@ void dirDEVICE() {
 	}
 }
 
-void dirRELOCATE_START() {
-}
-
-void dirRELOCATE_END() {
-	LabelTable.Insert("relocate_count", 0, false, true, false);
-	LabelTable.Insert("relocate_size", 0, false, true, false);
-}
-
-void dirRELOCATE_TABLE() {
-}
-
 void InsertDirectives() {
 	DirectivesTable.insertd(".assert", dirASSERT);
 	DirectivesTable.insertd(".byte", dirBYTE);
@@ -2178,9 +2167,9 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".setbreakpoint", dirSETBREAKPOINT);
 	DirectivesTable.insertd(".setbp", dirSETBREAKPOINT);
 
-	DirectivesTable.insertd(".relocate_start", dirRELOCATE_START);
-	DirectivesTable.insertd(".relocate_end", dirRELOCATE_END);
-	DirectivesTable.insertd(".relocate_table", dirRELOCATE_TABLE);
+	DirectivesTable.insertd(".relocate_start", Relocation::dirRELOCATE_START);
+	DirectivesTable.insertd(".relocate_end", Relocation::dirRELOCATE_END);
+	DirectivesTable.insertd(".relocate_table", Relocation::dirRELOCATE_TABLE);
 
 #ifdef USE_LUA
 	DirectivesTable.insertd(".lua", dirLUA);

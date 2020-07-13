@@ -232,6 +232,7 @@ static char* globalDeviceID = NULL;
 static aint globalDeviceZxRamTop = 0;
 
 void InitPass() {
+	Relocation::InitPass();
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
 	uint32_t maxpow10 = 1;
 	reglenwidth = 0;

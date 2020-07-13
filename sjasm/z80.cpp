@@ -41,6 +41,10 @@ namespace Z80 {
 
 	void GetOpCode() {
 		char* n;
+		//FIXME ALL
+		if (Relocation::isActive) {
+			// reset alternate result flag in ParseExpression part of code
+		}
 		bp = lp;
 		if (!(n = getinstr(lp))) {
 			Error("Unrecognized instruction", lp);
@@ -49,6 +53,12 @@ namespace Z80 {
 		if (!OpCodeTable.zoek(n)) {
 			Error("Unrecognized instruction", bp);
 			SkipToEol(lp);
+		} else {
+			// recognized instruction
+			//FIXME ALL
+			if (Relocation::isActive) {
+				// check if alternate result flag was processed, if not, report usage of rel label!
+			}
 		}
 	}
 
@@ -636,6 +646,10 @@ namespace Z80 {
 			GetAddress(lp, callad);
 			check16(callad);
 			e[1] = callad & 255; e[2] = (callad >> 8) & 255;
+			//FIXME ALL
+			if (Relocation::isActive) {
+				//Relocation::addOffsetToRelocate(CurAddress + 1);
+			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -911,6 +925,10 @@ namespace Z80 {
 				GetAddress(lp, jpad);
 				check16(jpad);
 				e[1] = jpad & 255; e[2] = (jpad >> 8) & 255;
+				//FIXME ALL
+				if (Relocation::isActive) {
+					//Relocation::addOffsetToRelocate(CurAddress + 1);
+				}
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -1103,6 +1121,7 @@ namespace Z80 {
 					--lp;
 				}
 				switch (ParseExpressionMemAccess(lp, b)) {
+					//FIXME ALL Relocation
 					// LD a,imm8
 					case 1: check8(b); e[0] = 0x06 + 8*reg1; e[1] = b & 255; break;
 					// LD a,(mem8)
@@ -1191,6 +1210,7 @@ namespace Z80 {
 				}
 				if (Z80_UNK != reg2) break;	//"(register": emit instruction || bug
 				switch (ParseExpressionMemAccess(lp, b)) {
+					//FIXME ALL Relocation
 					// ld bc|de|hl|sp,imm16
 					case 1: check16(b); e[0] = reg1-0x0F; e[1] = b & 255; e[2] = (b >> 8) & 255; break;
 					// LD r16,(mem16)
@@ -1210,6 +1230,7 @@ namespace Z80 {
 			case Z80_IX:
 			case Z80_IY:
 				if (0 < (pemaRes = ParseExpressionMemAccess(lp, b))) {
+					//FIXME ALL Relocation
 					e[0] = reg1; e[1] = (1 == pemaRes) ? 0x21 : 0x2a;	// ld ix|iy,imm16  ||  ld ix|iy,(mem16)
 					check16(b); e[2] = b & 255; e[3] = (b >> 8) & 255;
 					if ((2 == pemaRes) && ')' == lp[-1]) checkLowMemory(e[3], e[2]);
@@ -1233,6 +1254,7 @@ namespace Z80 {
 					if (Z80_A == reg2) e[0] = reg1-14;	// LD (bc|de),a
 					break;
 				case Z80_UNK:
+					//FIXME ALL Relocation
 					if (Options::IsLR35902) {	// Sharp LR35902 has quite different opcodes for these
 						LD_LR35902(e, reg2, b);
 						break;

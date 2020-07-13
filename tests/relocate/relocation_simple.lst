@@ -1,0 +1,32 @@
+# file opened: relocation_simple.asm
+ 1    0000                  ORG $1000
+ 2    1000                  RELOCATE_START
+ 3    1000
+ 4    1000                  ASSERT 2 * relocate_count == relocate_size
+relocation_simple.asm(5): error: [ASSERT] Assertion failed:  3 == relocate_count
+ 5    1000                  ASSERT 3 == relocate_count
+ 6    1000                  RELOCATE_TABLE              ; should emit the three addresses of opcode data:
+ 7    1000                      ; $1005, $1008, $100C
+ 8    1000
+ 9    1000 00 00            dw      relocate_count
+10    1002 00 00            dw      relocate_size
+11    1004              relocatable_label:              ; usage of this label should trigger relocation
+12    1004 21 04 10         ld      hl,relocatable_label    ; opcode should be in relocation table
+13    1007 2A 04 10         ld      hl,(relocatable_label)  ; opcode should be in relocation table
+14    100A C9               ret
+15    100B C3 04 10         jp      relocatable_label   ; opcode should be in relocation table
+16    100E              equ_label   equ     $1001
+17    100E 21 01 10         ld      hl,equ_label        ; should be absolute (equ) value (not in relocate data)
+18    1011 2A 01 10         ld      hl,(equ_label)      ; should be absolute (equ) address (not in relocate data)
+19    1014 C3 01 10         jp      equ_label           ; jump to absolute address (not in relocate data)
+20    1017
+21    1017                  RELOCATE_END
+22    1017
+# file closed: relocation_simple.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   relocate_count
+0x0000   relocate_size
+0x1004   relocatable_label
+0x1001   equ_label

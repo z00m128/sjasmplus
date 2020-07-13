@@ -104,6 +104,7 @@ extern "C" {
 #include "io_trd.h"
 #include "io_tape.h"
 #include "io_nex.h"
+#include "relocate.h"
 #include "sjasm.h"
 
 #endif

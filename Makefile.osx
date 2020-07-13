@@ -39,6 +39,7 @@ OBJS=\
 	$(SUBDIR_BASE)/lua_sjasm.o \
 	$(SUBDIR_BASE)/parser.o \
 	$(SUBDIR_BASE)/reader.o \
+	$(SUBDIR_BASE)/relocate.o \
 	$(SUBDIR_BASE)/sjasm.o \
 	$(SUBDIR_BASE)/sjio.o \
 	$(SUBDIR_BASE)/support.o \
