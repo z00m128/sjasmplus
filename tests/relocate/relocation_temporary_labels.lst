@@ -1,0 +1,153 @@
+# file opened: relocation_temporary_labels.asm
+  1   0000                  ORG $1000
+  2   1000
+  3   1000              ; first section is not part of relocation table
+  4   1000              1:
+  5   1000
+  6   1000 18 FE            jr      1B                  ; opcode should be in relocation table
+  7   1002 20 FC            jr      nz,1B
+  8   1004 28 FA            jr      z,1B
+  9   1006 30 F8            jr      nc,1B
+ 10   1008 38 F6            jr      c,1B
+ 11   100A
+ 12   100A C2 00 10         jp      nz,1B
+ 13   100D C3 00 10         jp      1B                  ; opcode should be in relocation table
+ 14   1010 CA 00 10         jp      z,1B
+ 15   1013 D2 00 10         jp      nc,1B
+ 16   1016 DA 00 10         jp      c,1B
+ 17   1019 E2 00 10         jp      po,1B
+ 18   101C EA 00 10         jp      pe,1B
+ 19   101F F2 00 10         jp      p,1B
+ 20   1022 FA 00 10         jp      m,1B
+ 21   1025
+ 22   1025 C4 00 10         call    nz,1B
+ 23   1028 CC 00 10         call    z,1B
+ 24   102B CD 00 10         call    1B
+ 25   102E D4 00 10         call    nc,1B
+ 26   1031 DC 00 10         call    c,1B
+ 27   1034 E4 00 10         call    po,1B
+ 28   1037 EC 00 10         call    pe,1B
+ 29   103A F4 00 10         call    p,1B
+ 30   103D FC 00 10         call    m,1B
+ 31   1040
+ 32   1040 18 3E            jr      1F                  ; opcode should be in relocation table
+ 33   1042 20 3C            jr      nz,1F
+ 34   1044 28 3A            jr      z,1F
+ 35   1046 30 38            jr      nc,1F
+ 36   1048 38 36            jr      c,1F
+ 37   104A
+ 38   104A C2 80 10         jp      nz,1F
+ 39   104D C3 80 10         jp      1F                  ; opcode should be in relocation table
+ 40   1050 CA 80 10         jp      z,1F
+ 41   1053 D2 80 10         jp      nc,1F
+ 42   1056 DA 80 10         jp      c,1F
+ 43   1059 E2 80 10         jp      po,1F
+ 44   105C EA 80 10         jp      pe,1F
+ 45   105F F2 80 10         jp      p,1F
+ 46   1062 FA 80 10         jp      m,1F
+ 47   1065
+ 48   1065 C4 80 10         call    nz,1F
+ 49   1068 CC 80 10         call    z,1F
+ 50   106B CD 80 10         call    1F
+ 51   106E D4 80 10         call    nc,1F
+ 52   1071 DC 80 10         call    c,1F
+ 53   1074 E4 80 10         call    po,1F
+ 54   1077 EC 80 10         call    pe,1F
+ 55   107A F4 80 10         call    p,1F
+ 56   107D FC 80 10         call    m,1F
+ 57   1080
+ 58   1080              1:
+ 59   1080
+ 60   1080              ; second section does test relocation
+ 61   1080                  RELOCATE_START
+ 62   1080
+ 63   1080                  ASSERT 2 * relocate_count == relocate_size
+ 64   1080                  ASSERT 36 == relocate_count
+ 65   1080 24 00            dw      relocate_count
+ 66   1082 48 00            dw      relocate_size
+ 67   1084
+ 68   1084              1:                              ; usage of this label should trigger relocation
+ 69   1084                  ; relative jumps don't need relocation
+ 70   1084 18 FE            jr      1B
+ 71   1086 20 FC            jr      nz,1B
+ 72   1088 28 FA            jr      z,1B
+ 73   108A 30 F8            jr      nc,1B
+ 74   108C 38 F6            jr      c,1B
+ 75   108E                  ; absolute jumps need relocation
+ 76   108E C2 84 10         jp      nz,1B
+ 77   1091 C3 84 10         jp      1B
+ 78   1094 CA 84 10         jp      z,1B
+ 79   1097 D2 84 10         jp      nc,1B
+ 80   109A DA 84 10         jp      c,1B
+ 81   109D E2 84 10         jp      po,1B
+ 82   10A0 EA 84 10         jp      pe,1B
+ 83   10A3 F2 84 10         jp      p,1B
+ 84   10A6 FA 84 10         jp      m,1B
+ 85   10A9                  ; calls need relocation
+ 86   10A9 C4 84 10         call    nz,1B
+ 87   10AC CC 84 10         call    z,1B
+ 88   10AF CD 84 10         call    1B
+ 89   10B2 D4 84 10         call    nc,1B
+ 90   10B5 DC 84 10         call    c,1B
+ 91   10B8 E4 84 10         call    po,1B
+ 92   10BB EC 84 10         call    pe,1B
+ 93   10BE F4 84 10         call    p,1B
+ 94   10C1 FC 84 10         call    m,1B
+ 95   10C4                  ; again the same set, but this time using forward temporary label
+ 96   10C4 18 3E            jr      1F
+ 97   10C6 20 3C            jr      nz,1F
+ 98   10C8 28 3A            jr      z,1F
+ 99   10CA 30 38            jr      nc,1F
+100   10CC 38 36            jr      c,1F
+101   10CE
+102   10CE C2 04 11         jp      nz,1F
+103   10D1 C3 04 11         jp      1F
+104   10D4 CA 04 11         jp      z,1F
+105   10D7 D2 04 11         jp      nc,1F
+106   10DA DA 04 11         jp      c,1F
+107   10DD E2 04 11         jp      po,1F
+108   10E0 EA 04 11         jp      pe,1F
+109   10E3 F2 04 11         jp      p,1F
+110   10E6 FA 04 11         jp      m,1F
+111   10E9
+112   10E9 C4 04 11         call    nz,1F
+113   10EC CC 04 11         call    z,1F
+114   10EF CD 04 11         call    1F
+115   10F2 D4 04 11         call    nc,1F
+116   10F5 DC 04 11         call    c,1F
+117   10F8 E4 04 11         call    po,1F
+118   10FB EC 04 11         call    pe,1F
+119   10FE F4 04 11         call    p,1F
+120   1101 FC 04 11         call    m,1F
+121   1104              1:                              ; usage of this label should trigger relocation
+122   1104
+123   1104                  ; the relocation table must be after all temporary labels, as those don't manage
+124   1104                  ; to settle down within 3 passes if there's dynamic-size table ahead, and "forward"
+125   1104                  ; labels are referenced
+126   1104 8F 10 92 10      RELOCATE_TABLE              ; should emit the 36 addresses of opcode data
+126   1108 95 10 98 10
+126   110C 9B 10 9E 10
+126   1110 A1 10 A4 10
+126   1114 A7 10 AA 10
+126   1118 AD 10 B0 10
+126   111C B3 10 B6 10
+126   1120 B9 10 BC 10
+126   1124 BF 10 C2 10
+126   1128 CF 10 D2 10
+126   112C D5 10 D8 10
+126   1130 DB 10 DE 10
+126   1134 E1 10 E4 10
+126   1138 E7 10 EA 10
+126   113C ED 10 F0 10
+126   1140 F3 10 F6 10
+126   1144 F9 10 FC 10
+126   1148 FF 10 02 11
+127   114C
+128   114C                  RELOCATE_END
+129   114C
+# file closed: relocation_temporary_labels.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0024   relocate_count
+0x0048   relocate_size

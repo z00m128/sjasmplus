@@ -109,6 +109,7 @@ class CLocalLabelTableEntry {
 public:
 	aint nummer, value;
 	CLocalLabelTableEntry* next, * prev;
+	bool isRelocatable;
 	CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous);
 };
 
@@ -117,8 +118,8 @@ public:
 	CLocalLabelTable();
 	~CLocalLabelTable();
 	void InitPass();
-	aint seekForward(const aint labelNumber) const;
-	aint seekBack(const aint labelNumber) const;
+	CLocalLabelTableEntry* seekForward(const aint labelNumber) const;
+	CLocalLabelTableEntry* seekBack(const aint labelNumber) const;
 	bool InsertRefresh(const aint labelNumber);
 private:
 	bool insertImpl(const aint labelNumber);

@@ -202,11 +202,13 @@ int GetLocalLabelValue(char*& op, aint& val) {
 	if (!GetNumericValue_IntBased(op = numberB, p, val, 10)) return 0;
 	++op;
 	// ^^ advance main parsing pointer op beyond the local label (here it *is* local label)
-	val = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
-	if (-1L == val) {
-		Error("Local label not found", numberB, SUPPRESS);
+	auto label = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
+	if (label) {
+		val = label->value;
+		Relocation::isResultAffected = label->isRelocatable;
+	} else {
+		if (LASTPASS == pass) Error("Local label not found", numberB, SUPPRESS);
 		val = 0L;
-		return 1;
 	}
 	return 1;
 }
@@ -548,6 +550,7 @@ int CFunctionTable::Hash(const char* s) {
 CLocalLabelTableEntry::CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous) {
 	nummer = number;
 	value = address;
+	isRelocatable = Relocation::isActive;
 	prev = previous; next = NULL;
 	if (previous) previous->next = this;
 }
@@ -587,18 +590,18 @@ bool CLocalLabelTable::InsertRefresh(const aint nnummer) {
 	return (1 == pass) ? insertImpl(nnummer) : refreshImpl(nnummer);
 }
 
-aint CLocalLabelTable::seekForward(const aint labelNumber) const {
-	if (1 == pass) return 0;			// just building tables in first pass, no results yet
+CLocalLabelTableEntry* CLocalLabelTable::seekForward(const aint labelNumber) const {
+	if (1 == pass) return nullptr;		// just building tables in first pass, no results yet
 	CLocalLabelTableEntry* l = refresh;	// already points on first "forward" local label
 	while (l && l->nummer != labelNumber) l = l->next;
-	return l ? l->value : -1L;
+	return l;
 }
 
-aint CLocalLabelTable::seekBack(const aint labelNumber) const {
-	if (1 == pass) return 0;			// just building tables in first pass, no results yet
+CLocalLabelTableEntry* CLocalLabelTable::seekBack(const aint labelNumber) const {
+	if (1 == pass) return nullptr;		// just building tables in first pass, no results yet
 	CLocalLabelTableEntry* l = refresh ? refresh->prev : last;
 	while (l && l->nummer != labelNumber) l = l->prev;
-	return l ? l->value : -1L;
+	return l;
 }
 
 CStringsList::CStringsList() : string(NULL), next(NULL)
