@@ -1,0 +1,45 @@
+# file opened: relocation_temporary_labels_consistency.asm
+ 1    0000                  ORG $1000
+ 2    1000
+ 3    1000                  RELOCATE_START
+ 4    1000
+ 5    1000 08 00            dw      relocate_count
+ 6    1002 10 00            dw      relocate_size
+ 7    1004
+ 8    1004              ; these ahead of RELOCATE_TABLE will refresh the table content to keep it consistent
+ 9    1004              1:
+10    1004 C3 04 10         jp      1B
+11    1007 C3 04 10         jp      1B
+12    100A C3 10 10         jp      1F
+13    100D C3 10 10         jp      1F
+14    1010              1:
+15    1010
+16    1010              ; emit intetionally table ahead of labels "3B"/"3F" to break table consistency
+17    1010 05 10 08 10      RELOCATE_TABLE
+17    1014 0B 10 0E 10
+17    1018 19 10 1C 10
+17    101C 1F 10 22 10
+18    1020
+relocation_temporary_labels_consistency.asm(19): warning: Local label has different address
+19    1020              3:                      ; warning about different address (between pass2 and pass3)
+relocation_temporary_labels_consistency.asm(20): warning: Relocation table seems internally inconsistent: table content differs in last pass
+20    1020 C3 20 10         jp      3B          ; warning about inconsistent table (content differs)
+21    1023 C3 20 10         jp      3B          ; second warning is not issued (one only)
+22    1026 C3 24 10         jp      3F          ; forward label test (also two more opportunities to warn if not yet)
+23    1029 C3 24 10         jp      3F
+relocation_temporary_labels_consistency.asm(24): warning: Local label has different address
+24    102C              3:                      ; warning about different address (between pass2 and pass3)
+25    102C
+26    102C              ; emit final version of the table for comparison
+27    102C 05 10 08 10      RELOCATE_TABLE
+27    1030 0B 10 0E 10
+27    1034 21 10 24 10
+27    1038 27 10 2A 10
+28    103C                  RELOCATE_END
+29    103C
+# file closed: relocation_temporary_labels_consistency.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0008   relocate_count
+0x0010   relocate_size

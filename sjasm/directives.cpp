@@ -304,6 +304,11 @@ void dirDISP() {
 		SkipToEol(lp);
 		return;
 	}
+	if (Relocation::isActive) {
+		Error("[DISP] can't be used together with Relocation block");
+		SkipToEol(lp);
+		return;
+	}
 	aint valAdr, valPageNum;
 	// parse+validate values first, don't even switch into DISP mode in case of any error
 	if (!ParseExpressionNoSyntaxError(lp, valAdr)) {

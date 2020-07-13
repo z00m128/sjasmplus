@@ -75,12 +75,20 @@ void Relocation::dirRELOCATE_START() {
 		Error(errTxt);
 		return;
 	}
+	if (PseudoORG) {
+		Error("Relocation block can't be used together with DISP");
+		return;
+	}
 	isActive = true;
 	startPos = CurSourcePos;
 	refreshMaxTableCount();
 }
 
 void Relocation::dirRELOCATE_END() {
+	if (!isActive) {
+		Error("Relocation block start for this end is missing");
+		return;
+	}
 	isActive = false;
 	refreshMaxTableCount();
 }
