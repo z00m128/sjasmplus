@@ -670,9 +670,17 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 				continue;
 			}
 		}
+		// reset alternate result flag in ParseExpression part of code
+		Relocation::isResultAffected = false;
 		if (ParseExpressionNoSyntaxError(p, val)) {
 			check8(val);
 			e[t++] = (val + add) & 255;
+			if (Relocation::isResultAffected) {
+				// some result did set the "affected" flag, warn about it
+				if (warningNotSuppressed()) {
+					Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
+				}
+			}
 		} else {
 			Error("Syntax error", p, SUPPRESS);
 			break;

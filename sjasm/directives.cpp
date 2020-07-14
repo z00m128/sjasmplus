@@ -161,11 +161,15 @@ void dirWORD() {
 	aint val;
 	int teller = 0, e[130];
 	do {
+		// reset alternate result flag in ParseExpression part of code
+		Relocation::isResultAffected = false;
 		if (SkipBlanks()) {
 			Error("Expression expected", NULL, SUPPRESS);
 		} else if (ParseExpressionNoSyntaxError(lp, val)) {
 			check16(val);
-			e[teller++] = val & 65535;
+			e[teller] = val & 65535;
+			Relocation::resolveRelocationAffected(teller * 2);
+			++teller;
 		} else {
 			Error("[DW/DEFW/WORD] Syntax error", lp, SUPPRESS);
 			break;

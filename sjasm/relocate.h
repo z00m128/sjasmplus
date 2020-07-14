@@ -38,6 +38,9 @@ namespace Relocation {
 	// when some part of opcode needs relocation, add its offset to the relocation table
 	void addOffsetToRelocate(const aint offset);
 
+	//convenience method to add particular spot in incoming machine code + clear the flag
+	void resolveRelocationAffected(const int opcodeRelOffset);
+
 	// directives implementation
 	void dirRELOCATE_START();
 	void dirRELOCATE_END();

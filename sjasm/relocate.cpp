@@ -54,6 +54,13 @@ void Relocation::addOffsetToRelocate(const aint offset) {
 	offsets.push_back(offset);
 }
 
+void Relocation::resolveRelocationAffected(const int opcodeRelOffset) {
+	if (!isResultAffected) return;
+	// the machine code is affected by relocation, add the offset to relocation table
+	isResultAffected = false;				// mark as processed
+	addOffsetToRelocate(CurAddress + opcodeRelOffset);
+}
+
 // directives implementation
 
 static void refreshMaxTableCount() {

@@ -62,13 +62,6 @@ namespace Z80 {
 		}
 	}
 
-	static void ResolveRelocationAffected(const int opcodeRelOffset) {
-		if (!Relocation::isResultAffected) return;
-		// the opcode is affected by relocation, add the offset to relocation table
-		Relocation::isResultAffected = false;	// mark as processed
-		Relocation::addOffsetToRelocate(CurAddress + opcodeRelOffset);
-	}
-
 	static byte GetByte(char*& p, bool signedCheck = false) {
 		aint val;
 		if (!ParseExpression(p, val)) {
@@ -653,7 +646,7 @@ namespace Z80 {
 			GetAddress(lp, callad);
 			check16(callad);
 			e[1] = callad & 255; e[2] = (callad >> 8) & 255;
-			ResolveRelocationAffected(1);
+			Relocation::resolveRelocationAffected(1);
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -929,7 +922,7 @@ namespace Z80 {
 				GetAddress(lp, jpad);
 				check16(jpad);
 				e[1] = jpad & 255; e[2] = (jpad >> 8) & 255;
-				ResolveRelocationAffected(1);
+				Relocation::resolveRelocationAffected(1);
 			}
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
@@ -1133,12 +1126,12 @@ namespace Z80 {
 								e[0] = 0xF0; e[1] = b & 255;
 							} else {
 								e[0] = 0xFA; e[1] = b & 255; e[2] = (b >> 8) & 255;
-								ResolveRelocationAffected(1);
+								Relocation::resolveRelocationAffected(1);
 							}
 							break;
 						}
 						e[0] = 0x3a; e[1] = b & 255; e[2] = (b >> 8) & 255;
-						ResolveRelocationAffected(1);
+						Relocation::resolveRelocationAffected(1);
 						if (BT_ROUND == bt) checkLowMemory(e[2], e[1]);
 						break;
 				}
@@ -1215,7 +1208,7 @@ namespace Z80 {
 				switch (ParseExpressionMemAccess(lp, b)) {
 					// ld bc|de|hl|sp,imm16
 					case 1: check16(b); e[0] = reg1-0x0F; e[1] = b & 255; e[2] = (b >> 8) & 255;
-						ResolveRelocationAffected(1);
+						Relocation::resolveRelocationAffected(1);
 						break;
 					// LD r16,(mem16)
 					case 2:
@@ -1223,11 +1216,11 @@ namespace Z80 {
 						check16(b);
 						if (Z80_HL == reg1) {		// ld hl,(mem16)
 							e[0] = 0x2a; e[1] = b & 255; e[2] = (b >> 8) & 255;
-							ResolveRelocationAffected(1);
+							Relocation::resolveRelocationAffected(1);
 						} else {					// ld bc|de|sp,(mem16)
 							if (Options::IsI8080) break;
 							e[0] = 0xed; e[1] = reg1+0x3b; e[2] = b & 255; e[3] = (b >> 8) & 255;
-							ResolveRelocationAffected(2);
+							Relocation::resolveRelocationAffected(2);
 						}
 						if (')' == lp[-1]) checkLowMemory(b>>8, b);
 				}
@@ -1238,7 +1231,7 @@ namespace Z80 {
 				if (0 < (pemaRes = ParseExpressionMemAccess(lp, b))) {
 					e[0] = reg1; e[1] = (1 == pemaRes) ? 0x21 : 0x2a;	// ld ix|iy,imm16  ||  ld ix|iy,(mem16)
 					check16(b); e[2] = b & 255; e[3] = (b >> 8) & 255;
-					ResolveRelocationAffected(2);
+					Relocation::resolveRelocationAffected(2);
 					if ((2 == pemaRes) && ')' == lp[-1]) checkLowMemory(e[3], e[2]);
 				}
 				break;
@@ -1269,19 +1262,19 @@ namespace Z80 {
 					case Z80_A:		// LD (nnnn),a|hl
 					case Z80_HL:
 						e[0] = (Z80_A == reg2) ? 0x32 : 0x22; e[1] = b & 255; e[2] = (b >> 8) & 255;
-						ResolveRelocationAffected(1);
+						Relocation::resolveRelocationAffected(1);
 						break;
 					case Z80_BC:	// LD (nnnn),bc|de|sp
 					case Z80_DE:
 					case Z80_SP:
 						if (Options::IsI8080) break;
 						e[0] = 0xed; e[1] = 0x33+reg2; e[2] = b & 255; e[3] = (b >> 8) & 255;
-						ResolveRelocationAffected(2);
+						Relocation::resolveRelocationAffected(2);
 						break;
 					case Z80_IX:	// LD (nnnn),ix|iy
 					case Z80_IY:
 						e[0] = reg2; e[1] = 0x22; e[2] = b & 255; e[3] = (b >> 8) & 255;
-						ResolveRelocationAffected(2);
+						Relocation::resolveRelocationAffected(2);
 						break;
 					default:
 						break;
