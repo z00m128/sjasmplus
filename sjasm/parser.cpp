@@ -566,7 +566,6 @@ void ParseLabel() {
 			return;
 		}
 		val = atoi(tp);
-		//FIXME relocation
 		if (!LocalLabelTable.InsertRefresh(val)) {
 			Error("Local-labels flow differs in this pass (missing/new local label or final pass source difference)");
 		}

@@ -118,10 +118,10 @@ void Relocation::dirRELOCATE_TABLE() {
 void Relocation::InitPass() {
 	// check if the relocation block is still open (missing RELOCATION_END in source)
 	if (isActive) {
-		char errTxt[LINEMAX];
-		SPRINTF2(errTxt, LINEMAX, "Missing end of relocation block started at: %s(%d)",
-				 startPos.filename, startPos.line);
-		Error(errTxt);
+		TextFilePos oldCurSourcePos = CurSourcePos;
+		CurSourcePos = startPos;
+		Error("Missing end of relocation block started here");
+		CurSourcePos = oldCurSourcePos;
 	}
 	// keep copy of final offsets table from previous pass
 	offsetsPrevious = offsets;
