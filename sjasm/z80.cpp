@@ -528,6 +528,7 @@ namespace Z80 {
 						word b = GetWordNoMem(lp);
 						e[0] = 0xED; e[1] = 0x34 ;
 						e[2] = b & 255; e[3] = (b >> 8);
+						Relocation::resolveRelocationAffected(2);
 						break;
 					}
 					break;
@@ -553,6 +554,7 @@ namespace Z80 {
 						word b = GetWordNoMem(lp);
 						e[0] = 0xED; e[1] = 0x35 + (Z80_BC == reg);
 						e[2] = b & 255; e[3] = (b >> 8);
+						Relocation::resolveRelocationAffected(2);
 					}
 					break;
 				case Z80_SP:			// Sharp LR35902 "add sp,r8"
@@ -1909,6 +1911,11 @@ namespace Z80 {
 				e[0] = 0xED; e[1] = 0x8A;
 				e[2] = (imm16 >> 8);  // push opcode is big-endian!
 				e[3] = imm16 & 255;
+				if (Relocation::isResultAffected) {
+					// the `push imm16` of Z80N can't be relocated, because it's big-endian encoded
+					Error("PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE", bp);
+					Relocation::isResultAffected = false;
+				}
 			}
 			default:
 				break;
