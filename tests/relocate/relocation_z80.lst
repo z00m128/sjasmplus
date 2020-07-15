@@ -1,0 +1,1851 @@
+# file opened: relocation_z80.asm
+   1  0000                  ORG $1000
+   2  1000
+   3  1000                  RELOCATE_START
+   4  1000
+   5  1000                  ASSERT 2 * relocate_count == relocate_size
+   6  1000                  ASSERT 38 == relocate_count
+   7  1000 26 00            dw      relocate_count
+   8  1002 4C 00            dw      relocate_size
+   9  1004
+  10  1004              jr_jp_call:                     ; usage of this label should trigger relocation
+  11  1004                  ; relative jumps don't need relocation
+  12  1004 18 00            jr      1 + jr_jp_call + 1
+  13  1006 20 FE            jr      nz,1 + jr_jp_call + 1
+  14  1008 28 FC            jr      z,1 + jr_jp_call + 1
+  15  100A 30 FA            jr      nc,1 + jr_jp_call + 1
+  16  100C 38 F8            jr      c,1 + jr_jp_call + 1
+  17  100E 10 F6            djnz    1 + jr_jp_call + 1
+  18  1010                  ; absolute jumps need relocation
+  19  1010 C2 06 10         jp      nz,1 + jr_jp_call + 1
+  20  1013 C3 06 10         jp      1 + jr_jp_call + 1
+  21  1016 CA 06 10         jp      z,1 + jr_jp_call + 1
+  22  1019 D2 06 10         jp      nc,1 + jr_jp_call + 1
+  23  101C DA 06 10         jp      c,1 + jr_jp_call + 1
+  24  101F E2 06 10         jp      po,1 + jr_jp_call + 1
+  25  1022 EA 06 10         jp      pe,1 + jr_jp_call + 1
+  26  1025 F2 06 10         jp      p,1 + jr_jp_call + 1
+  27  1028 FA 06 10         jp      m,1 + jr_jp_call + 1
+  28  102B                  ; calls need relocation
+  29  102B C4 06 10         call    nz,1 + jr_jp_call + 1
+  30  102E CC 06 10         call    z,1 + jr_jp_call + 1
+  31  1031 CD 06 10         call    1 + jr_jp_call + 1
+  32  1034 D4 06 10         call    nc,1 + jr_jp_call + 1
+  33  1037 DC 06 10         call    c,1 + jr_jp_call + 1
+  34  103A E4 06 10         call    po,1 + jr_jp_call + 1
+  35  103D EC 06 10         call    pe,1 + jr_jp_call + 1
+  36  1040 F4 06 10         call    p,1 + jr_jp_call + 1
+  37  1043 FC 06 10         call    m,1 + jr_jp_call + 1
+  38  1046
+  39  1046              ld_a:
+relocation_z80.asm(40): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  40  1046 3E 10            ld      a,high ld_a     ; warning
+  41  1048 3A 46 10         ld      a,(ld_a)
+  42  104B 32 46 10         ld      (ld_a),a
+  43  104E              ld_r8:                      ; warning all
+relocation_z80.asm(44): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  44  104E 06 10            ld      b,high ld_r8
+relocation_z80.asm(45): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  45  1050 0E 10            ld      c,high ld_r8
+relocation_z80.asm(46): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  46  1052 16 10            ld      d,high ld_r8
+relocation_z80.asm(47): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  47  1054 1E 10            ld      e,high ld_r8
+relocation_z80.asm(48): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  48  1056 26 10            ld      h,high ld_r8
+relocation_z80.asm(49): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  49  1058 2E 10            ld      l,high ld_r8
+relocation_z80.asm(50): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  50  105A DD 26 10         ld      ixh,high ld_r8
+relocation_z80.asm(51): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  51  105D DD 2E 10         ld      ixl,high ld_r8
+relocation_z80.asm(52): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  52  1060 FD 26 10         ld      iyh,high ld_r8
+relocation_z80.asm(53): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  53  1063 FD 2E 10         ld      iyl,high ld_r8
+  54  1066              ld_r16:
+  55  1066 01 66 10         ld      bc,ld_r16
+  56  1069 11 66 10         ld      de,ld_r16
+  57  106C 21 66 10         ld      hl,ld_r16
+  58  106F DD 21 66 10      ld      ix,ld_r16
+  59  1073 FD 21 66 10      ld      iy,ld_r16
+  60  1077 31 66 10         ld      sp,ld_r16
+  61  107A ED 4B 66 10      ld      bc,(ld_r16)
+  62  107E ED 5B 66 10      ld      de,(ld_r16)
+  63  1082 2A 66 10         ld      hl,(ld_r16)
+  64  1085 DD 2A 66 10      ld      ix,(ld_r16)
+  65  1089 FD 2A 66 10      ld      iy,(ld_r16)
+  66  108D ED 7B 66 10      ld      sp,(ld_r16)
+  67  1091 ED 43 66 10      ld      (ld_r16),bc
+  68  1095 ED 53 66 10      ld      (ld_r16),de
+  69  1099 22 66 10         ld      (ld_r16),hl
+  70  109C DD 22 66 10      ld      (ld_r16),ix
+  71  10A0 FD 22 66 10      ld      (ld_r16),iy
+  72  10A4 ED 73 66 10      ld      (ld_r16),sp
+  73  10A8              ld_extras:                  ; warning all
+relocation_z80.asm(74): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  74  10A8 36 10            ld      (hl),high ld_extras
+relocation_z80.asm(75): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  75  10AA DD 36 10 7B      ld      (ix+high ld_extras),123
+relocation_z80.asm(76): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  76  10AE DD 36 7B 10      ld      (ix+123),high ld_extras
+relocation_z80.asm(77): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  77  10B2 FD 36 10 7B      ld      (iy+high ld_extras),123
+relocation_z80.asm(78): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  78  10B6 FD 36 7B 10      ld      (iy+123),high ld_extras
+  79  10BA              ld_ixy_r8:                  ; warning all
+relocation_z80.asm(80): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  80  10BA DD 46 10         ld      b,(ix+high ld_ixy_r8)
+relocation_z80.asm(81): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  81  10BD DD 4E 10         ld      c,(ix+high ld_ixy_r8)
+relocation_z80.asm(82): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  82  10C0 DD 56 10         ld      d,(ix+high ld_ixy_r8)
+relocation_z80.asm(83): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  83  10C3 DD 5E 10         ld      e,(ix+high ld_ixy_r8)
+relocation_z80.asm(84): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  84  10C6 DD 66 10         ld      h,(ix+high ld_ixy_r8)
+relocation_z80.asm(85): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  85  10C9 DD 6E 10         ld      l,(ix+high ld_ixy_r8)
+relocation_z80.asm(86): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  86  10CC DD 7E 10         ld      a,(ix+high ld_ixy_r8)
+  87  10CF
+relocation_z80.asm(88): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  88  10CF FD 46 10         ld      b,(iy+high ld_ixy_r8)
+relocation_z80.asm(89): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  89  10D2 FD 4E 10         ld      c,(iy+high ld_ixy_r8)
+relocation_z80.asm(90): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  90  10D5 FD 56 10         ld      d,(iy+high ld_ixy_r8)
+relocation_z80.asm(91): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  91  10D8 FD 5E 10         ld      e,(iy+high ld_ixy_r8)
+relocation_z80.asm(92): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  92  10DB FD 66 10         ld      h,(iy+high ld_ixy_r8)
+relocation_z80.asm(93): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  93  10DE FD 6E 10         ld      l,(iy+high ld_ixy_r8)
+relocation_z80.asm(94): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  94  10E1 FD 7E 10         ld      a,(iy+high ld_ixy_r8)
+  95  10E4
+relocation_z80.asm(96): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  96  10E4 DD 70 10         ld      (ix+high ld_ixy_r8),b
+relocation_z80.asm(97): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  97  10E7 DD 71 10         ld      (ix+high ld_ixy_r8),c
+relocation_z80.asm(98): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  98  10EA DD 72 10         ld      (ix+high ld_ixy_r8),d
+relocation_z80.asm(99): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+  99  10ED DD 73 10         ld      (ix+high ld_ixy_r8),e
+relocation_z80.asm(100): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 100  10F0 DD 74 10         ld      (ix+high ld_ixy_r8),h
+relocation_z80.asm(101): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 101  10F3 DD 75 10         ld      (ix+high ld_ixy_r8),l
+relocation_z80.asm(102): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 102  10F6 DD 77 10         ld      (ix+high ld_ixy_r8),a
+ 103  10F9
+relocation_z80.asm(104): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 104  10F9 FD 70 10         ld      (iy+high ld_ixy_r8),b
+relocation_z80.asm(105): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 105  10FC FD 71 10         ld      (iy+high ld_ixy_r8),c
+relocation_z80.asm(106): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 106  10FF FD 72 10         ld      (iy+high ld_ixy_r8),d
+relocation_z80.asm(107): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 107  1102 FD 73 10         ld      (iy+high ld_ixy_r8),e
+relocation_z80.asm(108): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 108  1105 FD 74 10         ld      (iy+high ld_ixy_r8),h
+relocation_z80.asm(109): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 109  1108 FD 75 10         ld      (iy+high ld_ixy_r8),l
+relocation_z80.asm(110): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 110  110B FD 77 10         ld      (iy+high ld_ixy_r8),a
+ 111  110E
+ 112  110E              alu_imm8:                   ; warning all
+relocation_z80.asm(113): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 113  110E C6 11            add     a,high alu_imm8
+relocation_z80.asm(114): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 114  1110 CE 11            adc     a,high alu_imm8
+relocation_z80.asm(115): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 115  1112 D6 11            sub     high alu_imm8
+relocation_z80.asm(116): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 116  1114 DE 11            sbc     a,high alu_imm8
+relocation_z80.asm(117): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 117  1116 E6 11            and     high alu_imm8
+relocation_z80.asm(118): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 118  1118 EE 11            xor     high alu_imm8
+relocation_z80.asm(119): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 119  111A F6 11            or      high alu_imm8
+relocation_z80.asm(120): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 120  111C FE 11            cp      high alu_imm8
+ 121  111E
+ 122  111E              imm8_extras:                ; warning all
+relocation_z80.asm(123): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 123  111E D3 11            out     (high imm8_extras),a
+relocation_z80.asm(124): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 124  1120 DB 11            in      a,(high imm8_extras)
+ 125  1122
+ 126  1122              alu_ixy:                    ; warning all
+relocation_z80.asm(127): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 127  1122 DD 86 11         add     a,(ix+high alu_ixy)
+relocation_z80.asm(128): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 128  1125 DD 8E 11         adc     a,(ix+high alu_ixy)
+relocation_z80.asm(129): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 129  1128 DD 96 11         sub     (ix+high alu_ixy)
+relocation_z80.asm(130): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 130  112B DD 9E 11         sbc     a,(ix+high alu_ixy)
+relocation_z80.asm(131): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 131  112E DD A6 11         and     (ix+high alu_ixy)
+relocation_z80.asm(132): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 132  1131 DD AE 11         xor     (ix+high alu_ixy)
+relocation_z80.asm(133): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 133  1134 DD B6 11         or      (ix+high alu_ixy)
+relocation_z80.asm(134): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 134  1137 DD BE 11         cp      (ix+high alu_ixy)
+relocation_z80.asm(135): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 135  113A FD 86 11         add     a,(iy+high alu_ixy)
+relocation_z80.asm(136): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 136  113D FD 8E 11         adc     a,(iy+high alu_ixy)
+relocation_z80.asm(137): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 137  1140 FD 96 11         sub     (iy+high alu_ixy)
+relocation_z80.asm(138): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 138  1143 FD 9E 11         sbc     a,(iy+high alu_ixy)
+relocation_z80.asm(139): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 139  1146 FD A6 11         and     (iy+high alu_ixy)
+relocation_z80.asm(140): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 140  1149 FD AE 11         xor     (iy+high alu_ixy)
+relocation_z80.asm(141): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 141  114C FD B6 11         or      (iy+high alu_ixy)
+relocation_z80.asm(142): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 142  114F FD BE 11         cp      (iy+high alu_ixy)
+ 143  1152
+ 144  1152              ixy_extras:                 ; warning all
+relocation_z80.asm(145): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 145  1152 DD 34 11         inc     (ix+high ixy_extras)
+relocation_z80.asm(146): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 146  1155 DD 35 11         dec     (ix+high ixy_extras)
+relocation_z80.asm(147): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 147  1158 FD 34 11         inc     (iy+high ixy_extras)
+relocation_z80.asm(148): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 148  115B FD 35 11         dec     (iy+high ixy_extras)
+ 149  115E
+ 150  115E              bit_imm8:                   ; warning all
+relocation_z80.asm(151): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 151  115E CB 70            bit     bit_imm8&7,b
+relocation_z80.asm(152): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 152  1160 CB 71            bit     bit_imm8&7,c
+relocation_z80.asm(153): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 153  1162 CB 72            bit     bit_imm8&7,d
+relocation_z80.asm(154): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 154  1164 CB 73            bit     bit_imm8&7,e
+relocation_z80.asm(155): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 155  1166 CB 74            bit     bit_imm8&7,h
+relocation_z80.asm(156): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 156  1168 CB 75            bit     bit_imm8&7,l
+relocation_z80.asm(157): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 157  116A CB 76            bit     bit_imm8&7,(hl)
+relocation_z80.asm(158): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 158  116C CB 77            bit     bit_imm8&7,a
+relocation_z80.asm(159): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 159  116E CB B0            res     bit_imm8&7,b
+relocation_z80.asm(160): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 160  1170 CB B1            res     bit_imm8&7,c
+relocation_z80.asm(161): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 161  1172 CB B2            res     bit_imm8&7,d
+relocation_z80.asm(162): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 162  1174 CB B3            res     bit_imm8&7,e
+relocation_z80.asm(163): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 163  1176 CB B4            res     bit_imm8&7,h
+relocation_z80.asm(164): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 164  1178 CB B5            res     bit_imm8&7,l
+relocation_z80.asm(165): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 165  117A CB B6            res     bit_imm8&7,(hl)
+relocation_z80.asm(166): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 166  117C CB B7            res     bit_imm8&7,a
+relocation_z80.asm(167): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 167  117E CB F0            set     bit_imm8&7,b
+relocation_z80.asm(168): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 168  1180 CB F1            set     bit_imm8&7,c
+relocation_z80.asm(169): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 169  1182 CB F2            set     bit_imm8&7,d
+relocation_z80.asm(170): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 170  1184 CB F3            set     bit_imm8&7,e
+relocation_z80.asm(171): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 171  1186 CB F4            set     bit_imm8&7,h
+relocation_z80.asm(172): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 172  1188 CB F5            set     bit_imm8&7,l
+relocation_z80.asm(173): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 173  118A CB F6            set     bit_imm8&7,(hl)
+relocation_z80.asm(174): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 174  118C CB F7            set     bit_imm8&7,a
+ 175  118E
+ 176  118E              ixy_bits:                   ; warning all
+ 177  118E                  ; IX (long list it is...)
+relocation_z80.asm(178): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 178  118E DD CB 11 00      rlc     (ix+high ixy_bits),b
+relocation_z80.asm(179): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 179  1192 DD CB 11 01      rlc     (ix+high ixy_bits),c
+relocation_z80.asm(180): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 180  1196 DD CB 11 02      rlc     (ix+high ixy_bits),d
+relocation_z80.asm(181): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 181  119A DD CB 11 03      rlc     (ix+high ixy_bits),e
+relocation_z80.asm(182): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 182  119E DD CB 11 04      rlc     (ix+high ixy_bits),h
+relocation_z80.asm(183): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 183  11A2 DD CB 11 05      rlc     (ix+high ixy_bits),l
+relocation_z80.asm(184): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 184  11A6 DD CB 11 06      rlc     (ix+high ixy_bits)
+relocation_z80.asm(185): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 185  11AA DD CB 11 07      rlc     (ix+high ixy_bits),a
+relocation_z80.asm(186): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 186  11AE DD CB 11 08      rrc     (ix+high ixy_bits),b
+relocation_z80.asm(187): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 187  11B2 DD CB 11 09      rrc     (ix+high ixy_bits),c
+relocation_z80.asm(188): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 188  11B6 DD CB 11 0A      rrc     (ix+high ixy_bits),d
+relocation_z80.asm(189): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 189  11BA DD CB 11 0B      rrc     (ix+high ixy_bits),e
+relocation_z80.asm(190): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 190  11BE DD CB 11 0C      rrc     (ix+high ixy_bits),h
+relocation_z80.asm(191): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 191  11C2 DD CB 11 0D      rrc     (ix+high ixy_bits),l
+relocation_z80.asm(192): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 192  11C6 DD CB 11 0E      rrc     (ix+high ixy_bits)
+relocation_z80.asm(193): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 193  11CA DD CB 11 0F      rrc     (ix+high ixy_bits),a
+relocation_z80.asm(194): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 194  11CE DD CB 11 10      rl      (ix+high ixy_bits),b
+relocation_z80.asm(195): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 195  11D2 DD CB 11 11      rl      (ix+high ixy_bits),c
+relocation_z80.asm(196): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 196  11D6 DD CB 11 12      rl      (ix+high ixy_bits),d
+relocation_z80.asm(197): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 197  11DA DD CB 11 13      rl      (ix+high ixy_bits),e
+relocation_z80.asm(198): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 198  11DE DD CB 11 14      rl      (ix+high ixy_bits),h
+relocation_z80.asm(199): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 199  11E2 DD CB 11 15      rl      (ix+high ixy_bits),l
+relocation_z80.asm(200): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 200  11E6 DD CB 11 16      rl      (ix+high ixy_bits)
+relocation_z80.asm(201): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 201  11EA DD CB 11 17      rl      (ix+high ixy_bits),a
+relocation_z80.asm(202): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 202  11EE DD CB 11 18      rr      (ix+high ixy_bits),b
+relocation_z80.asm(203): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 203  11F2 DD CB 11 19      rr      (ix+high ixy_bits),c
+relocation_z80.asm(204): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 204  11F6 DD CB 11 1A      rr      (ix+high ixy_bits),d
+relocation_z80.asm(205): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 205  11FA DD CB 11 1B      rr      (ix+high ixy_bits),e
+relocation_z80.asm(206): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 206  11FE DD CB 11 1C      rr      (ix+high ixy_bits),h
+relocation_z80.asm(207): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 207  1202 DD CB 11 1D      rr      (ix+high ixy_bits),l
+relocation_z80.asm(208): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 208  1206 DD CB 11 1E      rr      (ix+high ixy_bits)
+relocation_z80.asm(209): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 209  120A DD CB 11 1F      rr      (ix+high ixy_bits),a
+relocation_z80.asm(210): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 210  120E DD CB 11 20      sla     (ix+high ixy_bits),b
+relocation_z80.asm(211): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 211  1212 DD CB 11 21      sla     (ix+high ixy_bits),c
+relocation_z80.asm(212): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 212  1216 DD CB 11 22      sla     (ix+high ixy_bits),d
+relocation_z80.asm(213): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 213  121A DD CB 11 23      sla     (ix+high ixy_bits),e
+relocation_z80.asm(214): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 214  121E DD CB 11 24      sla     (ix+high ixy_bits),h
+relocation_z80.asm(215): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 215  1222 DD CB 11 25      sla     (ix+high ixy_bits),l
+relocation_z80.asm(216): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 216  1226 DD CB 11 26      sla     (ix+high ixy_bits)
+relocation_z80.asm(217): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 217  122A DD CB 11 27      sla     (ix+high ixy_bits),a
+relocation_z80.asm(218): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 218  122E DD CB 11 28      sra     (ix+high ixy_bits),b
+relocation_z80.asm(219): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 219  1232 DD CB 11 29      sra     (ix+high ixy_bits),c
+relocation_z80.asm(220): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 220  1236 DD CB 11 2A      sra     (ix+high ixy_bits),d
+relocation_z80.asm(221): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 221  123A DD CB 11 2B      sra     (ix+high ixy_bits),e
+relocation_z80.asm(222): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 222  123E DD CB 11 2C      sra     (ix+high ixy_bits),h
+relocation_z80.asm(223): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 223  1242 DD CB 11 2D      sra     (ix+high ixy_bits),l
+relocation_z80.asm(224): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 224  1246 DD CB 11 2E      sra     (ix+high ixy_bits)
+relocation_z80.asm(225): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 225  124A DD CB 11 2F      sra     (ix+high ixy_bits),a
+relocation_z80.asm(226): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 226  124E DD CB 11 30      sli     (ix+high ixy_bits),b
+relocation_z80.asm(227): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 227  1252 DD CB 11 31      sli     (ix+high ixy_bits),c
+relocation_z80.asm(228): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 228  1256 DD CB 11 32      sli     (ix+high ixy_bits),d
+relocation_z80.asm(229): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 229  125A DD CB 11 33      sli     (ix+high ixy_bits),e
+relocation_z80.asm(230): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 230  125E DD CB 11 34      sli     (ix+high ixy_bits),h
+relocation_z80.asm(231): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 231  1262 DD CB 11 35      sli     (ix+high ixy_bits),l
+relocation_z80.asm(232): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 232  1266 DD CB 11 36      sli     (ix+high ixy_bits)
+relocation_z80.asm(233): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 233  126A DD CB 11 37      sli     (ix+high ixy_bits),a
+relocation_z80.asm(234): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 234  126E DD CB 11 38      srl     (ix+high ixy_bits),b
+relocation_z80.asm(235): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 235  1272 DD CB 11 39      srl     (ix+high ixy_bits),c
+relocation_z80.asm(236): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 236  1276 DD CB 11 3A      srl     (ix+high ixy_bits),d
+relocation_z80.asm(237): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 237  127A DD CB 11 3B      srl     (ix+high ixy_bits),e
+relocation_z80.asm(238): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 238  127E DD CB 11 3C      srl     (ix+high ixy_bits),h
+relocation_z80.asm(239): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 239  1282 DD CB 11 3D      srl     (ix+high ixy_bits),l
+relocation_z80.asm(240): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 240  1286 DD CB 11 3E      srl     (ix+high ixy_bits)
+relocation_z80.asm(241): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 241  128A DD CB 11 3F      srl     (ix+high ixy_bits),a
+ 242  128E
+relocation_z80.asm(243): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 243  128E DD CB 00 76      bit     ixy_bits&7,(ix)
+relocation_z80.asm(244): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 244  1292 DD CB 00 B0      res     ixy_bits&7,(ix),b
+relocation_z80.asm(245): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 245  1296 DD CB 00 B1      res     ixy_bits&7,(ix),c
+relocation_z80.asm(246): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 246  129A DD CB 00 B2      res     ixy_bits&7,(ix),d
+relocation_z80.asm(247): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 247  129E DD CB 00 B3      res     ixy_bits&7,(ix),e
+relocation_z80.asm(248): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 248  12A2 DD CB 00 B4      res     ixy_bits&7,(ix),h
+relocation_z80.asm(249): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 249  12A6 DD CB 00 B5      res     ixy_bits&7,(ix),l
+relocation_z80.asm(250): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 250  12AA DD CB 00 B6      res     ixy_bits&7,(ix)
+relocation_z80.asm(251): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 251  12AE DD CB 00 B7      res     ixy_bits&7,(ix),a
+relocation_z80.asm(252): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 252  12B2 DD CB 00 F0      set     ixy_bits&7,(ix),b
+relocation_z80.asm(253): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 253  12B6 DD CB 00 F1      set     ixy_bits&7,(ix),c
+relocation_z80.asm(254): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 254  12BA DD CB 00 F2      set     ixy_bits&7,(ix),d
+relocation_z80.asm(255): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 255  12BE DD CB 00 F3      set     ixy_bits&7,(ix),e
+relocation_z80.asm(256): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 256  12C2 DD CB 00 F4      set     ixy_bits&7,(ix),h
+relocation_z80.asm(257): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 257  12C6 DD CB 00 F5      set     ixy_bits&7,(ix),l
+relocation_z80.asm(258): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 258  12CA DD CB 00 F6      set     ixy_bits&7,(ix)
+relocation_z80.asm(259): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 259  12CE DD CB 00 F7      set     ixy_bits&7,(ix),a
+ 260  12D2
+relocation_z80.asm(261): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 261  12D2 DD CB 11 46      bit     0,(ix+high ixy_bits)
+relocation_z80.asm(262): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 262  12D6 DD CB 11 4E      bit     1,(ix+high ixy_bits)
+relocation_z80.asm(263): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 263  12DA DD CB 11 56      bit     2,(ix+high ixy_bits)
+relocation_z80.asm(264): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 264  12DE DD CB 11 5E      bit     3,(ix+high ixy_bits)
+relocation_z80.asm(265): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 265  12E2 DD CB 11 66      bit     4,(ix+high ixy_bits)
+relocation_z80.asm(266): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 266  12E6 DD CB 11 6E      bit     5,(ix+high ixy_bits)
+relocation_z80.asm(267): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 267  12EA DD CB 11 76      bit     6,(ix+high ixy_bits)
+relocation_z80.asm(268): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 268  12EE DD CB 11 7E      bit     7,(ix+high ixy_bits)
+relocation_z80.asm(269): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 269  12F2 DD CB 11 86      res     0,(ix+high ixy_bits)
+relocation_z80.asm(270): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 270  12F6 DD CB 11 8E      res     1,(ix+high ixy_bits)
+relocation_z80.asm(271): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 271  12FA DD CB 11 96      res     2,(ix+high ixy_bits)
+relocation_z80.asm(272): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 272  12FE DD CB 11 9E      res     3,(ix+high ixy_bits)
+relocation_z80.asm(273): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 273  1302 DD CB 11 A6      res     4,(ix+high ixy_bits)
+relocation_z80.asm(274): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 274  1306 DD CB 11 AE      res     5,(ix+high ixy_bits)
+relocation_z80.asm(275): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 275  130A DD CB 11 B6      res     6,(ix+high ixy_bits)
+relocation_z80.asm(276): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 276  130E DD CB 11 BE      res     7,(ix+high ixy_bits)
+relocation_z80.asm(277): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 277  1312 DD CB 11 C6      set     0,(ix+high ixy_bits)
+relocation_z80.asm(278): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 278  1316 DD CB 11 CE      set     1,(ix+high ixy_bits)
+relocation_z80.asm(279): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 279  131A DD CB 11 D6      set     2,(ix+high ixy_bits)
+relocation_z80.asm(280): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 280  131E DD CB 11 DE      set     3,(ix+high ixy_bits)
+relocation_z80.asm(281): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 281  1322 DD CB 11 E6      set     4,(ix+high ixy_bits)
+relocation_z80.asm(282): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 282  1326 DD CB 11 EE      set     5,(ix+high ixy_bits)
+relocation_z80.asm(283): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 283  132A DD CB 11 F6      set     6,(ix+high ixy_bits)
+relocation_z80.asm(284): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 284  132E DD CB 11 FE      set     7,(ix+high ixy_bits)
+ 285  1332
+relocation_z80.asm(286): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 286  1332 DD CB 11 80      res     0,(ix+high ixy_bits),b
+relocation_z80.asm(287): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 287  1336 DD CB 11 88      res     1,(ix+high ixy_bits),b
+relocation_z80.asm(288): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 288  133A DD CB 11 90      res     2,(ix+high ixy_bits),b
+relocation_z80.asm(289): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 289  133E DD CB 11 98      res     3,(ix+high ixy_bits),b
+relocation_z80.asm(290): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 290  1342 DD CB 11 A0      res     4,(ix+high ixy_bits),b
+relocation_z80.asm(291): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 291  1346 DD CB 11 A8      res     5,(ix+high ixy_bits),b
+relocation_z80.asm(292): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 292  134A DD CB 11 B0      res     6,(ix+high ixy_bits),b
+relocation_z80.asm(293): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 293  134E DD CB 11 B8      res     7,(ix+high ixy_bits),b
+relocation_z80.asm(294): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 294  1352 DD CB 11 C0      set     0,(ix+high ixy_bits),b
+relocation_z80.asm(295): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 295  1356 DD CB 11 C8      set     1,(ix+high ixy_bits),b
+relocation_z80.asm(296): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 296  135A DD CB 11 D0      set     2,(ix+high ixy_bits),b
+relocation_z80.asm(297): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 297  135E DD CB 11 D8      set     3,(ix+high ixy_bits),b
+relocation_z80.asm(298): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 298  1362 DD CB 11 E0      set     4,(ix+high ixy_bits),b
+relocation_z80.asm(299): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 299  1366 DD CB 11 E8      set     5,(ix+high ixy_bits),b
+relocation_z80.asm(300): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 300  136A DD CB 11 F0      set     6,(ix+high ixy_bits),b
+relocation_z80.asm(301): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 301  136E DD CB 11 F8      set     7,(ix+high ixy_bits),b
+ 302  1372
+relocation_z80.asm(303): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 303  1372 DD CB 11 81      res     0,(ix+high ixy_bits),c
+relocation_z80.asm(304): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 304  1376 DD CB 11 89      res     1,(ix+high ixy_bits),c
+relocation_z80.asm(305): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 305  137A DD CB 11 91      res     2,(ix+high ixy_bits),c
+relocation_z80.asm(306): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 306  137E DD CB 11 99      res     3,(ix+high ixy_bits),c
+relocation_z80.asm(307): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 307  1382 DD CB 11 A1      res     4,(ix+high ixy_bits),c
+relocation_z80.asm(308): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 308  1386 DD CB 11 A9      res     5,(ix+high ixy_bits),c
+relocation_z80.asm(309): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 309  138A DD CB 11 B1      res     6,(ix+high ixy_bits),c
+relocation_z80.asm(310): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 310  138E DD CB 11 B9      res     7,(ix+high ixy_bits),c
+relocation_z80.asm(311): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 311  1392 DD CB 11 C1      set     0,(ix+high ixy_bits),c
+relocation_z80.asm(312): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 312  1396 DD CB 11 C9      set     1,(ix+high ixy_bits),c
+relocation_z80.asm(313): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 313  139A DD CB 11 D1      set     2,(ix+high ixy_bits),c
+relocation_z80.asm(314): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 314  139E DD CB 11 D9      set     3,(ix+high ixy_bits),c
+relocation_z80.asm(315): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 315  13A2 DD CB 11 E1      set     4,(ix+high ixy_bits),c
+relocation_z80.asm(316): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 316  13A6 DD CB 11 E9      set     5,(ix+high ixy_bits),c
+relocation_z80.asm(317): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 317  13AA DD CB 11 F1      set     6,(ix+high ixy_bits),c
+relocation_z80.asm(318): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 318  13AE DD CB 11 F9      set     7,(ix+high ixy_bits),c
+ 319  13B2
+relocation_z80.asm(320): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 320  13B2 DD CB 11 82      res     0,(ix+high ixy_bits),d
+relocation_z80.asm(321): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 321  13B6 DD CB 11 8A      res     1,(ix+high ixy_bits),d
+relocation_z80.asm(322): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 322  13BA DD CB 11 92      res     2,(ix+high ixy_bits),d
+relocation_z80.asm(323): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 323  13BE DD CB 11 9A      res     3,(ix+high ixy_bits),d
+relocation_z80.asm(324): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 324  13C2 DD CB 11 A2      res     4,(ix+high ixy_bits),d
+relocation_z80.asm(325): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 325  13C6 DD CB 11 AA      res     5,(ix+high ixy_bits),d
+relocation_z80.asm(326): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 326  13CA DD CB 11 B2      res     6,(ix+high ixy_bits),d
+relocation_z80.asm(327): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 327  13CE DD CB 11 BA      res     7,(ix+high ixy_bits),d
+relocation_z80.asm(328): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 328  13D2 DD CB 11 C2      set     0,(ix+high ixy_bits),d
+relocation_z80.asm(329): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 329  13D6 DD CB 11 CA      set     1,(ix+high ixy_bits),d
+relocation_z80.asm(330): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 330  13DA DD CB 11 D2      set     2,(ix+high ixy_bits),d
+relocation_z80.asm(331): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 331  13DE DD CB 11 DA      set     3,(ix+high ixy_bits),d
+relocation_z80.asm(332): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 332  13E2 DD CB 11 E2      set     4,(ix+high ixy_bits),d
+relocation_z80.asm(333): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 333  13E6 DD CB 11 EA      set     5,(ix+high ixy_bits),d
+relocation_z80.asm(334): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 334  13EA DD CB 11 F2      set     6,(ix+high ixy_bits),d
+relocation_z80.asm(335): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 335  13EE DD CB 11 FA      set     7,(ix+high ixy_bits),d
+ 336  13F2
+relocation_z80.asm(337): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 337  13F2 DD CB 11 83      res     0,(ix+high ixy_bits),e
+relocation_z80.asm(338): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 338  13F6 DD CB 11 8B      res     1,(ix+high ixy_bits),e
+relocation_z80.asm(339): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 339  13FA DD CB 11 93      res     2,(ix+high ixy_bits),e
+relocation_z80.asm(340): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 340  13FE DD CB 11 9B      res     3,(ix+high ixy_bits),e
+relocation_z80.asm(341): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 341  1402 DD CB 11 A3      res     4,(ix+high ixy_bits),e
+relocation_z80.asm(342): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 342  1406 DD CB 11 AB      res     5,(ix+high ixy_bits),e
+relocation_z80.asm(343): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 343  140A DD CB 11 B3      res     6,(ix+high ixy_bits),e
+relocation_z80.asm(344): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 344  140E DD CB 11 BB      res     7,(ix+high ixy_bits),e
+relocation_z80.asm(345): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 345  1412 DD CB 11 C3      set     0,(ix+high ixy_bits),e
+relocation_z80.asm(346): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 346  1416 DD CB 11 CB      set     1,(ix+high ixy_bits),e
+relocation_z80.asm(347): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 347  141A DD CB 11 D3      set     2,(ix+high ixy_bits),e
+relocation_z80.asm(348): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 348  141E DD CB 11 DB      set     3,(ix+high ixy_bits),e
+relocation_z80.asm(349): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 349  1422 DD CB 11 E3      set     4,(ix+high ixy_bits),e
+relocation_z80.asm(350): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 350  1426 DD CB 11 EB      set     5,(ix+high ixy_bits),e
+relocation_z80.asm(351): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 351  142A DD CB 11 F3      set     6,(ix+high ixy_bits),e
+relocation_z80.asm(352): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 352  142E DD CB 11 FB      set     7,(ix+high ixy_bits),e
+ 353  1432
+relocation_z80.asm(354): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 354  1432 DD CB 11 84      res     0,(ix+high ixy_bits),h
+relocation_z80.asm(355): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 355  1436 DD CB 11 8C      res     1,(ix+high ixy_bits),h
+relocation_z80.asm(356): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 356  143A DD CB 11 94      res     2,(ix+high ixy_bits),h
+relocation_z80.asm(357): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 357  143E DD CB 11 9C      res     3,(ix+high ixy_bits),h
+relocation_z80.asm(358): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 358  1442 DD CB 11 A4      res     4,(ix+high ixy_bits),h
+relocation_z80.asm(359): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 359  1446 DD CB 11 AC      res     5,(ix+high ixy_bits),h
+relocation_z80.asm(360): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 360  144A DD CB 11 B4      res     6,(ix+high ixy_bits),h
+relocation_z80.asm(361): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 361  144E DD CB 11 BC      res     7,(ix+high ixy_bits),h
+relocation_z80.asm(362): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 362  1452 DD CB 11 C4      set     0,(ix+high ixy_bits),h
+relocation_z80.asm(363): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 363  1456 DD CB 11 CC      set     1,(ix+high ixy_bits),h
+relocation_z80.asm(364): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 364  145A DD CB 11 D4      set     2,(ix+high ixy_bits),h
+relocation_z80.asm(365): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 365  145E DD CB 11 DC      set     3,(ix+high ixy_bits),h
+relocation_z80.asm(366): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 366  1462 DD CB 11 E4      set     4,(ix+high ixy_bits),h
+relocation_z80.asm(367): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 367  1466 DD CB 11 EC      set     5,(ix+high ixy_bits),h
+relocation_z80.asm(368): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 368  146A DD CB 11 F4      set     6,(ix+high ixy_bits),h
+relocation_z80.asm(369): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 369  146E DD CB 11 FC      set     7,(ix+high ixy_bits),h
+ 370  1472
+relocation_z80.asm(371): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 371  1472 DD CB 11 85      res     0,(ix+high ixy_bits),l
+relocation_z80.asm(372): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 372  1476 DD CB 11 8D      res     1,(ix+high ixy_bits),l
+relocation_z80.asm(373): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 373  147A DD CB 11 95      res     2,(ix+high ixy_bits),l
+relocation_z80.asm(374): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 374  147E DD CB 11 9D      res     3,(ix+high ixy_bits),l
+relocation_z80.asm(375): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 375  1482 DD CB 11 A5      res     4,(ix+high ixy_bits),l
+relocation_z80.asm(376): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 376  1486 DD CB 11 AD      res     5,(ix+high ixy_bits),l
+relocation_z80.asm(377): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 377  148A DD CB 11 B5      res     6,(ix+high ixy_bits),l
+relocation_z80.asm(378): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 378  148E DD CB 11 BD      res     7,(ix+high ixy_bits),l
+relocation_z80.asm(379): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 379  1492 DD CB 11 C5      set     0,(ix+high ixy_bits),l
+relocation_z80.asm(380): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 380  1496 DD CB 11 CD      set     1,(ix+high ixy_bits),l
+relocation_z80.asm(381): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 381  149A DD CB 11 D5      set     2,(ix+high ixy_bits),l
+relocation_z80.asm(382): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 382  149E DD CB 11 DD      set     3,(ix+high ixy_bits),l
+relocation_z80.asm(383): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 383  14A2 DD CB 11 E5      set     4,(ix+high ixy_bits),l
+relocation_z80.asm(384): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 384  14A6 DD CB 11 ED      set     5,(ix+high ixy_bits),l
+relocation_z80.asm(385): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 385  14AA DD CB 11 F5      set     6,(ix+high ixy_bits),l
+relocation_z80.asm(386): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 386  14AE DD CB 11 FD      set     7,(ix+high ixy_bits),l
+ 387  14B2
+relocation_z80.asm(388): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 388  14B2 DD CB 11 87      res     0,(ix+high ixy_bits),a
+relocation_z80.asm(389): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 389  14B6 DD CB 11 8F      res     1,(ix+high ixy_bits),a
+relocation_z80.asm(390): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 390  14BA DD CB 11 97      res     2,(ix+high ixy_bits),a
+relocation_z80.asm(391): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 391  14BE DD CB 11 9F      res     3,(ix+high ixy_bits),a
+relocation_z80.asm(392): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 392  14C2 DD CB 11 A7      res     4,(ix+high ixy_bits),a
+relocation_z80.asm(393): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 393  14C6 DD CB 11 AF      res     5,(ix+high ixy_bits),a
+relocation_z80.asm(394): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 394  14CA DD CB 11 B7      res     6,(ix+high ixy_bits),a
+relocation_z80.asm(395): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 395  14CE DD CB 11 BF      res     7,(ix+high ixy_bits),a
+relocation_z80.asm(396): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 396  14D2 DD CB 11 C7      set     0,(ix+high ixy_bits),a
+relocation_z80.asm(397): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 397  14D6 DD CB 11 CF      set     1,(ix+high ixy_bits),a
+relocation_z80.asm(398): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 398  14DA DD CB 11 D7      set     2,(ix+high ixy_bits),a
+relocation_z80.asm(399): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 399  14DE DD CB 11 DF      set     3,(ix+high ixy_bits),a
+relocation_z80.asm(400): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 400  14E2 DD CB 11 E7      set     4,(ix+high ixy_bits),a
+relocation_z80.asm(401): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 401  14E6 DD CB 11 EF      set     5,(ix+high ixy_bits),a
+relocation_z80.asm(402): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 402  14EA DD CB 11 F7      set     6,(ix+high ixy_bits),a
+relocation_z80.asm(403): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 403  14EE DD CB 11 FF      set     7,(ix+high ixy_bits),a
+ 404  14F2
+ 405  14F2                  ; IY (long list it is...)
+relocation_z80.asm(406): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 406  14F2 FD CB 11 00      rlc     (iy+high ixy_bits),b
+relocation_z80.asm(407): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 407  14F6 FD CB 11 01      rlc     (iy+high ixy_bits),c
+relocation_z80.asm(408): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 408  14FA FD CB 11 02      rlc     (iy+high ixy_bits),d
+relocation_z80.asm(409): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 409  14FE FD CB 11 03      rlc     (iy+high ixy_bits),e
+relocation_z80.asm(410): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 410  1502 FD CB 11 04      rlc     (iy+high ixy_bits),h
+relocation_z80.asm(411): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 411  1506 FD CB 11 05      rlc     (iy+high ixy_bits),l
+relocation_z80.asm(412): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 412  150A FD CB 11 06      rlc     (iy+high ixy_bits)
+relocation_z80.asm(413): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 413  150E FD CB 11 07      rlc     (iy+high ixy_bits),a
+relocation_z80.asm(414): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 414  1512 FD CB 11 08      rrc     (iy+high ixy_bits),b
+relocation_z80.asm(415): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 415  1516 FD CB 11 09      rrc     (iy+high ixy_bits),c
+relocation_z80.asm(416): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 416  151A FD CB 11 0A      rrc     (iy+high ixy_bits),d
+relocation_z80.asm(417): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 417  151E FD CB 11 0B      rrc     (iy+high ixy_bits),e
+relocation_z80.asm(418): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 418  1522 FD CB 11 0C      rrc     (iy+high ixy_bits),h
+relocation_z80.asm(419): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 419  1526 FD CB 11 0D      rrc     (iy+high ixy_bits),l
+relocation_z80.asm(420): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 420  152A FD CB 11 0E      rrc     (iy+high ixy_bits)
+relocation_z80.asm(421): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 421  152E FD CB 11 0F      rrc     (iy+high ixy_bits),a
+relocation_z80.asm(422): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 422  1532 FD CB 11 10      rl      (iy+high ixy_bits),b
+relocation_z80.asm(423): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 423  1536 FD CB 11 11      rl      (iy+high ixy_bits),c
+relocation_z80.asm(424): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 424  153A FD CB 11 12      rl      (iy+high ixy_bits),d
+relocation_z80.asm(425): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 425  153E FD CB 11 13      rl      (iy+high ixy_bits),e
+relocation_z80.asm(426): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 426  1542 FD CB 11 14      rl      (iy+high ixy_bits),h
+relocation_z80.asm(427): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 427  1546 FD CB 11 15      rl      (iy+high ixy_bits),l
+relocation_z80.asm(428): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 428  154A FD CB 11 16      rl      (iy+high ixy_bits)
+relocation_z80.asm(429): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 429  154E FD CB 11 17      rl      (iy+high ixy_bits),a
+relocation_z80.asm(430): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 430  1552 FD CB 11 18      rr      (iy+high ixy_bits),b
+relocation_z80.asm(431): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 431  1556 FD CB 11 19      rr      (iy+high ixy_bits),c
+relocation_z80.asm(432): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 432  155A FD CB 11 1A      rr      (iy+high ixy_bits),d
+relocation_z80.asm(433): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 433  155E FD CB 11 1B      rr      (iy+high ixy_bits),e
+relocation_z80.asm(434): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 434  1562 FD CB 11 1C      rr      (iy+high ixy_bits),h
+relocation_z80.asm(435): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 435  1566 FD CB 11 1D      rr      (iy+high ixy_bits),l
+relocation_z80.asm(436): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 436  156A FD CB 11 1E      rr      (iy+high ixy_bits)
+relocation_z80.asm(437): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 437  156E FD CB 11 1F      rr      (iy+high ixy_bits),a
+relocation_z80.asm(438): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 438  1572 FD CB 11 20      sla     (iy+high ixy_bits),b
+relocation_z80.asm(439): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 439  1576 FD CB 11 21      sla     (iy+high ixy_bits),c
+relocation_z80.asm(440): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 440  157A FD CB 11 22      sla     (iy+high ixy_bits),d
+relocation_z80.asm(441): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 441  157E FD CB 11 23      sla     (iy+high ixy_bits),e
+relocation_z80.asm(442): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 442  1582 FD CB 11 24      sla     (iy+high ixy_bits),h
+relocation_z80.asm(443): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 443  1586 FD CB 11 25      sla     (iy+high ixy_bits),l
+relocation_z80.asm(444): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 444  158A FD CB 11 26      sla     (iy+high ixy_bits)
+relocation_z80.asm(445): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 445  158E FD CB 11 27      sla     (iy+high ixy_bits),a
+relocation_z80.asm(446): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 446  1592 FD CB 11 28      sra     (iy+high ixy_bits),b
+relocation_z80.asm(447): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 447  1596 FD CB 11 29      sra     (iy+high ixy_bits),c
+relocation_z80.asm(448): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 448  159A FD CB 11 2A      sra     (iy+high ixy_bits),d
+relocation_z80.asm(449): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 449  159E FD CB 11 2B      sra     (iy+high ixy_bits),e
+relocation_z80.asm(450): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 450  15A2 FD CB 11 2C      sra     (iy+high ixy_bits),h
+relocation_z80.asm(451): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 451  15A6 FD CB 11 2D      sra     (iy+high ixy_bits),l
+relocation_z80.asm(452): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 452  15AA FD CB 11 2E      sra     (iy+high ixy_bits)
+relocation_z80.asm(453): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 453  15AE FD CB 11 2F      sra     (iy+high ixy_bits),a
+relocation_z80.asm(454): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 454  15B2 FD CB 11 30      sli     (iy+high ixy_bits),b
+relocation_z80.asm(455): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 455  15B6 FD CB 11 31      sli     (iy+high ixy_bits),c
+relocation_z80.asm(456): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 456  15BA FD CB 11 32      sli     (iy+high ixy_bits),d
+relocation_z80.asm(457): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 457  15BE FD CB 11 33      sli     (iy+high ixy_bits),e
+relocation_z80.asm(458): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 458  15C2 FD CB 11 34      sli     (iy+high ixy_bits),h
+relocation_z80.asm(459): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 459  15C6 FD CB 11 35      sli     (iy+high ixy_bits),l
+relocation_z80.asm(460): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 460  15CA FD CB 11 36      sli     (iy+high ixy_bits)
+relocation_z80.asm(461): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 461  15CE FD CB 11 37      sli     (iy+high ixy_bits),a
+relocation_z80.asm(462): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 462  15D2 FD CB 11 38      srl     (iy+high ixy_bits),b
+relocation_z80.asm(463): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 463  15D6 FD CB 11 39      srl     (iy+high ixy_bits),c
+relocation_z80.asm(464): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 464  15DA FD CB 11 3A      srl     (iy+high ixy_bits),d
+relocation_z80.asm(465): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 465  15DE FD CB 11 3B      srl     (iy+high ixy_bits),e
+relocation_z80.asm(466): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 466  15E2 FD CB 11 3C      srl     (iy+high ixy_bits),h
+relocation_z80.asm(467): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 467  15E6 FD CB 11 3D      srl     (iy+high ixy_bits),l
+relocation_z80.asm(468): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 468  15EA FD CB 11 3E      srl     (iy+high ixy_bits)
+relocation_z80.asm(469): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 469  15EE FD CB 11 3F      srl     (iy+high ixy_bits),a
+ 470  15F2
+relocation_z80.asm(471): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 471  15F2 FD CB 00 76      bit     ixy_bits&7,(iy)
+relocation_z80.asm(472): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 472  15F6 FD CB 00 B0      res     ixy_bits&7,(iy),b
+relocation_z80.asm(473): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 473  15FA FD CB 00 B1      res     ixy_bits&7,(iy),c
+relocation_z80.asm(474): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 474  15FE FD CB 00 B2      res     ixy_bits&7,(iy),d
+relocation_z80.asm(475): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 475  1602 FD CB 00 B3      res     ixy_bits&7,(iy),e
+relocation_z80.asm(476): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 476  1606 FD CB 00 B4      res     ixy_bits&7,(iy),h
+relocation_z80.asm(477): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 477  160A FD CB 00 B5      res     ixy_bits&7,(iy),l
+relocation_z80.asm(478): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 478  160E FD CB 00 B6      res     ixy_bits&7,(iy)
+relocation_z80.asm(479): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 479  1612 FD CB 00 B7      res     ixy_bits&7,(iy),a
+relocation_z80.asm(480): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 480  1616 FD CB 00 F0      set     ixy_bits&7,(iy),b
+relocation_z80.asm(481): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 481  161A FD CB 00 F1      set     ixy_bits&7,(iy),c
+relocation_z80.asm(482): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 482  161E FD CB 00 F2      set     ixy_bits&7,(iy),d
+relocation_z80.asm(483): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 483  1622 FD CB 00 F3      set     ixy_bits&7,(iy),e
+relocation_z80.asm(484): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 484  1626 FD CB 00 F4      set     ixy_bits&7,(iy),h
+relocation_z80.asm(485): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 485  162A FD CB 00 F5      set     ixy_bits&7,(iy),l
+relocation_z80.asm(486): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 486  162E FD CB 00 F6      set     ixy_bits&7,(iy)
+relocation_z80.asm(487): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 487  1632 FD CB 00 F7      set     ixy_bits&7,(iy),a
+ 488  1636
+relocation_z80.asm(489): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 489  1636 FD CB 11 46      bit     0,(iy+high ixy_bits)
+relocation_z80.asm(490): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 490  163A FD CB 11 4E      bit     1,(iy+high ixy_bits)
+relocation_z80.asm(491): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 491  163E FD CB 11 56      bit     2,(iy+high ixy_bits)
+relocation_z80.asm(492): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 492  1642 FD CB 11 5E      bit     3,(iy+high ixy_bits)
+relocation_z80.asm(493): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 493  1646 FD CB 11 66      bit     4,(iy+high ixy_bits)
+relocation_z80.asm(494): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 494  164A FD CB 11 6E      bit     5,(iy+high ixy_bits)
+relocation_z80.asm(495): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 495  164E FD CB 11 76      bit     6,(iy+high ixy_bits)
+relocation_z80.asm(496): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 496  1652 FD CB 11 7E      bit     7,(iy+high ixy_bits)
+relocation_z80.asm(497): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 497  1656 FD CB 11 86      res     0,(iy+high ixy_bits)
+relocation_z80.asm(498): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 498  165A FD CB 11 8E      res     1,(iy+high ixy_bits)
+relocation_z80.asm(499): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 499  165E FD CB 11 96      res     2,(iy+high ixy_bits)
+relocation_z80.asm(500): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 500  1662 FD CB 11 9E      res     3,(iy+high ixy_bits)
+relocation_z80.asm(501): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 501  1666 FD CB 11 A6      res     4,(iy+high ixy_bits)
+relocation_z80.asm(502): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 502  166A FD CB 11 AE      res     5,(iy+high ixy_bits)
+relocation_z80.asm(503): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 503  166E FD CB 11 B6      res     6,(iy+high ixy_bits)
+relocation_z80.asm(504): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 504  1672 FD CB 11 BE      res     7,(iy+high ixy_bits)
+relocation_z80.asm(505): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 505  1676 FD CB 11 C6      set     0,(iy+high ixy_bits)
+relocation_z80.asm(506): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 506  167A FD CB 11 CE      set     1,(iy+high ixy_bits)
+relocation_z80.asm(507): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 507  167E FD CB 11 D6      set     2,(iy+high ixy_bits)
+relocation_z80.asm(508): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 508  1682 FD CB 11 DE      set     3,(iy+high ixy_bits)
+relocation_z80.asm(509): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 509  1686 FD CB 11 E6      set     4,(iy+high ixy_bits)
+relocation_z80.asm(510): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 510  168A FD CB 11 EE      set     5,(iy+high ixy_bits)
+relocation_z80.asm(511): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 511  168E FD CB 11 F6      set     6,(iy+high ixy_bits)
+relocation_z80.asm(512): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 512  1692 FD CB 11 FE      set     7,(iy+high ixy_bits)
+ 513  1696
+relocation_z80.asm(514): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 514  1696 FD CB 11 80      res     0,(iy+high ixy_bits),b
+relocation_z80.asm(515): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 515  169A FD CB 11 88      res     1,(iy+high ixy_bits),b
+relocation_z80.asm(516): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 516  169E FD CB 11 90      res     2,(iy+high ixy_bits),b
+relocation_z80.asm(517): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 517  16A2 FD CB 11 98      res     3,(iy+high ixy_bits),b
+relocation_z80.asm(518): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 518  16A6 FD CB 11 A0      res     4,(iy+high ixy_bits),b
+relocation_z80.asm(519): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 519  16AA FD CB 11 A8      res     5,(iy+high ixy_bits),b
+relocation_z80.asm(520): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 520  16AE FD CB 11 B0      res     6,(iy+high ixy_bits),b
+relocation_z80.asm(521): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 521  16B2 FD CB 11 B8      res     7,(iy+high ixy_bits),b
+relocation_z80.asm(522): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 522  16B6 FD CB 11 C0      set     0,(iy+high ixy_bits),b
+relocation_z80.asm(523): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 523  16BA FD CB 11 C8      set     1,(iy+high ixy_bits),b
+relocation_z80.asm(524): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 524  16BE FD CB 11 D0      set     2,(iy+high ixy_bits),b
+relocation_z80.asm(525): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 525  16C2 FD CB 11 D8      set     3,(iy+high ixy_bits),b
+relocation_z80.asm(526): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 526  16C6 FD CB 11 E0      set     4,(iy+high ixy_bits),b
+relocation_z80.asm(527): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 527  16CA FD CB 11 E8      set     5,(iy+high ixy_bits),b
+relocation_z80.asm(528): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 528  16CE FD CB 11 F0      set     6,(iy+high ixy_bits),b
+relocation_z80.asm(529): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 529  16D2 FD CB 11 F8      set     7,(iy+high ixy_bits),b
+ 530  16D6
+relocation_z80.asm(531): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 531  16D6 FD CB 11 81      res     0,(iy+high ixy_bits),c
+relocation_z80.asm(532): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 532  16DA FD CB 11 89      res     1,(iy+high ixy_bits),c
+relocation_z80.asm(533): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 533  16DE FD CB 11 91      res     2,(iy+high ixy_bits),c
+relocation_z80.asm(534): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 534  16E2 FD CB 11 99      res     3,(iy+high ixy_bits),c
+relocation_z80.asm(535): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 535  16E6 FD CB 11 A1      res     4,(iy+high ixy_bits),c
+relocation_z80.asm(536): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 536  16EA FD CB 11 A9      res     5,(iy+high ixy_bits),c
+relocation_z80.asm(537): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 537  16EE FD CB 11 B1      res     6,(iy+high ixy_bits),c
+relocation_z80.asm(538): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 538  16F2 FD CB 11 B9      res     7,(iy+high ixy_bits),c
+relocation_z80.asm(539): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 539  16F6 FD CB 11 C1      set     0,(iy+high ixy_bits),c
+relocation_z80.asm(540): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 540  16FA FD CB 11 C9      set     1,(iy+high ixy_bits),c
+relocation_z80.asm(541): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 541  16FE FD CB 11 D1      set     2,(iy+high ixy_bits),c
+relocation_z80.asm(542): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 542  1702 FD CB 11 D9      set     3,(iy+high ixy_bits),c
+relocation_z80.asm(543): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 543  1706 FD CB 11 E1      set     4,(iy+high ixy_bits),c
+relocation_z80.asm(544): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 544  170A FD CB 11 E9      set     5,(iy+high ixy_bits),c
+relocation_z80.asm(545): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 545  170E FD CB 11 F1      set     6,(iy+high ixy_bits),c
+relocation_z80.asm(546): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 546  1712 FD CB 11 F9      set     7,(iy+high ixy_bits),c
+ 547  1716
+relocation_z80.asm(548): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 548  1716 FD CB 11 82      res     0,(iy+high ixy_bits),d
+relocation_z80.asm(549): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 549  171A FD CB 11 8A      res     1,(iy+high ixy_bits),d
+relocation_z80.asm(550): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 550  171E FD CB 11 92      res     2,(iy+high ixy_bits),d
+relocation_z80.asm(551): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 551  1722 FD CB 11 9A      res     3,(iy+high ixy_bits),d
+relocation_z80.asm(552): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 552  1726 FD CB 11 A2      res     4,(iy+high ixy_bits),d
+relocation_z80.asm(553): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 553  172A FD CB 11 AA      res     5,(iy+high ixy_bits),d
+relocation_z80.asm(554): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 554  172E FD CB 11 B2      res     6,(iy+high ixy_bits),d
+relocation_z80.asm(555): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 555  1732 FD CB 11 BA      res     7,(iy+high ixy_bits),d
+relocation_z80.asm(556): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 556  1736 FD CB 11 C2      set     0,(iy+high ixy_bits),d
+relocation_z80.asm(557): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 557  173A FD CB 11 CA      set     1,(iy+high ixy_bits),d
+relocation_z80.asm(558): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 558  173E FD CB 11 D2      set     2,(iy+high ixy_bits),d
+relocation_z80.asm(559): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 559  1742 FD CB 11 DA      set     3,(iy+high ixy_bits),d
+relocation_z80.asm(560): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 560  1746 FD CB 11 E2      set     4,(iy+high ixy_bits),d
+relocation_z80.asm(561): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 561  174A FD CB 11 EA      set     5,(iy+high ixy_bits),d
+relocation_z80.asm(562): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 562  174E FD CB 11 F2      set     6,(iy+high ixy_bits),d
+relocation_z80.asm(563): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 563  1752 FD CB 11 FA      set     7,(iy+high ixy_bits),d
+ 564  1756
+relocation_z80.asm(565): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 565  1756 FD CB 11 83      res     0,(iy+high ixy_bits),e
+relocation_z80.asm(566): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 566  175A FD CB 11 8B      res     1,(iy+high ixy_bits),e
+relocation_z80.asm(567): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 567  175E FD CB 11 93      res     2,(iy+high ixy_bits),e
+relocation_z80.asm(568): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 568  1762 FD CB 11 9B      res     3,(iy+high ixy_bits),e
+relocation_z80.asm(569): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 569  1766 FD CB 11 A3      res     4,(iy+high ixy_bits),e
+relocation_z80.asm(570): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 570  176A FD CB 11 AB      res     5,(iy+high ixy_bits),e
+relocation_z80.asm(571): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 571  176E FD CB 11 B3      res     6,(iy+high ixy_bits),e
+relocation_z80.asm(572): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 572  1772 FD CB 11 BB      res     7,(iy+high ixy_bits),e
+relocation_z80.asm(573): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 573  1776 FD CB 11 C3      set     0,(iy+high ixy_bits),e
+relocation_z80.asm(574): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 574  177A FD CB 11 CB      set     1,(iy+high ixy_bits),e
+relocation_z80.asm(575): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 575  177E FD CB 11 D3      set     2,(iy+high ixy_bits),e
+relocation_z80.asm(576): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 576  1782 FD CB 11 DB      set     3,(iy+high ixy_bits),e
+relocation_z80.asm(577): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 577  1786 FD CB 11 E3      set     4,(iy+high ixy_bits),e
+relocation_z80.asm(578): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 578  178A FD CB 11 EB      set     5,(iy+high ixy_bits),e
+relocation_z80.asm(579): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 579  178E FD CB 11 F3      set     6,(iy+high ixy_bits),e
+relocation_z80.asm(580): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 580  1792 FD CB 11 FB      set     7,(iy+high ixy_bits),e
+ 581  1796
+relocation_z80.asm(582): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 582  1796 FD CB 11 84      res     0,(iy+high ixy_bits),h
+relocation_z80.asm(583): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 583  179A FD CB 11 8C      res     1,(iy+high ixy_bits),h
+relocation_z80.asm(584): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 584  179E FD CB 11 94      res     2,(iy+high ixy_bits),h
+relocation_z80.asm(585): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 585  17A2 FD CB 11 9C      res     3,(iy+high ixy_bits),h
+relocation_z80.asm(586): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 586  17A6 FD CB 11 A4      res     4,(iy+high ixy_bits),h
+relocation_z80.asm(587): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 587  17AA FD CB 11 AC      res     5,(iy+high ixy_bits),h
+relocation_z80.asm(588): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 588  17AE FD CB 11 B4      res     6,(iy+high ixy_bits),h
+relocation_z80.asm(589): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 589  17B2 FD CB 11 BC      res     7,(iy+high ixy_bits),h
+relocation_z80.asm(590): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 590  17B6 FD CB 11 C4      set     0,(iy+high ixy_bits),h
+relocation_z80.asm(591): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 591  17BA FD CB 11 CC      set     1,(iy+high ixy_bits),h
+relocation_z80.asm(592): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 592  17BE FD CB 11 D4      set     2,(iy+high ixy_bits),h
+relocation_z80.asm(593): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 593  17C2 FD CB 11 DC      set     3,(iy+high ixy_bits),h
+relocation_z80.asm(594): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 594  17C6 FD CB 11 E4      set     4,(iy+high ixy_bits),h
+relocation_z80.asm(595): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 595  17CA FD CB 11 EC      set     5,(iy+high ixy_bits),h
+relocation_z80.asm(596): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 596  17CE FD CB 11 F4      set     6,(iy+high ixy_bits),h
+relocation_z80.asm(597): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 597  17D2 FD CB 11 FC      set     7,(iy+high ixy_bits),h
+ 598  17D6
+relocation_z80.asm(599): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 599  17D6 FD CB 11 85      res     0,(iy+high ixy_bits),l
+relocation_z80.asm(600): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 600  17DA FD CB 11 8D      res     1,(iy+high ixy_bits),l
+relocation_z80.asm(601): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 601  17DE FD CB 11 95      res     2,(iy+high ixy_bits),l
+relocation_z80.asm(602): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 602  17E2 FD CB 11 9D      res     3,(iy+high ixy_bits),l
+relocation_z80.asm(603): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 603  17E6 FD CB 11 A5      res     4,(iy+high ixy_bits),l
+relocation_z80.asm(604): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 604  17EA FD CB 11 AD      res     5,(iy+high ixy_bits),l
+relocation_z80.asm(605): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 605  17EE FD CB 11 B5      res     6,(iy+high ixy_bits),l
+relocation_z80.asm(606): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 606  17F2 FD CB 11 BD      res     7,(iy+high ixy_bits),l
+relocation_z80.asm(607): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 607  17F6 FD CB 11 C5      set     0,(iy+high ixy_bits),l
+relocation_z80.asm(608): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 608  17FA FD CB 11 CD      set     1,(iy+high ixy_bits),l
+relocation_z80.asm(609): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 609  17FE FD CB 11 D5      set     2,(iy+high ixy_bits),l
+relocation_z80.asm(610): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 610  1802 FD CB 11 DD      set     3,(iy+high ixy_bits),l
+relocation_z80.asm(611): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 611  1806 FD CB 11 E5      set     4,(iy+high ixy_bits),l
+relocation_z80.asm(612): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 612  180A FD CB 11 ED      set     5,(iy+high ixy_bits),l
+relocation_z80.asm(613): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 613  180E FD CB 11 F5      set     6,(iy+high ixy_bits),l
+relocation_z80.asm(614): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 614  1812 FD CB 11 FD      set     7,(iy+high ixy_bits),l
+ 615  1816
+relocation_z80.asm(616): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 616  1816 FD CB 11 87      res     0,(iy+high ixy_bits),a
+relocation_z80.asm(617): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 617  181A FD CB 11 8F      res     1,(iy+high ixy_bits),a
+relocation_z80.asm(618): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 618  181E FD CB 11 97      res     2,(iy+high ixy_bits),a
+relocation_z80.asm(619): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 619  1822 FD CB 11 9F      res     3,(iy+high ixy_bits),a
+relocation_z80.asm(620): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 620  1826 FD CB 11 A7      res     4,(iy+high ixy_bits),a
+relocation_z80.asm(621): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 621  182A FD CB 11 AF      res     5,(iy+high ixy_bits),a
+relocation_z80.asm(622): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 622  182E FD CB 11 B7      res     6,(iy+high ixy_bits),a
+relocation_z80.asm(623): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 623  1832 FD CB 11 BF      res     7,(iy+high ixy_bits),a
+relocation_z80.asm(624): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 624  1836 FD CB 11 C7      set     0,(iy+high ixy_bits),a
+relocation_z80.asm(625): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 625  183A FD CB 11 CF      set     1,(iy+high ixy_bits),a
+relocation_z80.asm(626): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 626  183E FD CB 11 D7      set     2,(iy+high ixy_bits),a
+relocation_z80.asm(627): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 627  1842 FD CB 11 DF      set     3,(iy+high ixy_bits),a
+relocation_z80.asm(628): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 628  1846 FD CB 11 E7      set     4,(iy+high ixy_bits),a
+relocation_z80.asm(629): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 629  184A FD CB 11 EF      set     5,(iy+high ixy_bits),a
+relocation_z80.asm(630): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 630  184E FD CB 11 F7      set     6,(iy+high ixy_bits),a
+relocation_z80.asm(631): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 631  1852 FD CB 11 FF      set     7,(iy+high ixy_bits),a
+ 632  1856
+ 633  1856                  RELOCATE_END
+ 634  1856
+ 635  1856 11 10 14 10      RELOCATE_TABLE
+ 635  185A 17 10 1A 10
+ 635  185E 1D 10 20 10
+ 635  1862 23 10 26 10
+ 635  1866 29 10 2C 10
+ 635  186A 2F 10 32 10
+ 635  186E 35 10 38 10
+ 635  1872 3B 10 3E 10
+ 635  1876 41 10 44 10
+ 635  187A 49 10 4C 10
+ 635  187E 67 10 6A 10
+ 635  1882 6D 10 71 10
+ 635  1886 75 10 78 10
+ 635  188A 7C 10 80 10
+ 635  188E 83 10 87 10
+ 635  1892 8B 10 8F 10
+ 635  1896 93 10 97 10
+ 635  189A 9A 10 9E 10
+ 635  189E A2 10 A6 10
+ 636  18A2
+ 637  18A2              ;===================================================================================
+ 638  18A2              ; here comes the copy of all the instructions, but outside of relocation block
+ 639  18A2              ; but using the labels which are affected by relocation (this should still *NOT*
+ 640  18A2              ; add to the relocation table, as instructions are outside of relocation block)
+ 641  18A2              ; and thus this should also *NOT* warn about unstable relocation.
+ 642  18A2              ;===================================================================================
+ 643  18A2
+ 644  18A2                  ; relative jumps will be too far plus they don't need extra test
+ 645  18A2                  ; absolute jumps need relocation
+ 646  18A2 C2 06 10         jp      nz,1 + jr_jp_call + 1
+ 647  18A5 C3 06 10         jp      1 + jr_jp_call + 1
+ 648  18A8 CA 06 10         jp      z,1 + jr_jp_call + 1
+ 649  18AB D2 06 10         jp      nc,1 + jr_jp_call + 1
+ 650  18AE DA 06 10         jp      c,1 + jr_jp_call + 1
+ 651  18B1 E2 06 10         jp      po,1 + jr_jp_call + 1
+ 652  18B4 EA 06 10         jp      pe,1 + jr_jp_call + 1
+ 653  18B7 F2 06 10         jp      p,1 + jr_jp_call + 1
+ 654  18BA FA 06 10         jp      m,1 + jr_jp_call + 1
+ 655  18BD                  ; calls need relocation
+ 656  18BD C4 06 10         call    nz,1 + jr_jp_call + 1
+ 657  18C0 CC 06 10         call    z,1 + jr_jp_call + 1
+ 658  18C3 CD 06 10         call    1 + jr_jp_call + 1
+ 659  18C6 D4 06 10         call    nc,1 + jr_jp_call + 1
+ 660  18C9 DC 06 10         call    c,1 + jr_jp_call + 1
+ 661  18CC E4 06 10         call    po,1 + jr_jp_call + 1
+ 662  18CF EC 06 10         call    pe,1 + jr_jp_call + 1
+ 663  18D2 F4 06 10         call    p,1 + jr_jp_call + 1
+ 664  18D5 FC 06 10         call    m,1 + jr_jp_call + 1
+ 665  18D8
+ 666  18D8              ;ld_a:
+ 667  18D8 3E 10            ld      a,high ld_a     ; warning
+ 668  18DA 3A 46 10         ld      a,(ld_a)
+ 669  18DD 32 46 10         ld      (ld_a),a
+ 670  18E0              ;ld_r8:                      ; warning all
+ 671  18E0 06 10            ld      b,high ld_r8
+ 672  18E2 0E 10            ld      c,high ld_r8
+ 673  18E4 16 10            ld      d,high ld_r8
+ 674  18E6 1E 10            ld      e,high ld_r8
+ 675  18E8 26 10            ld      h,high ld_r8
+ 676  18EA 2E 10            ld      l,high ld_r8
+ 677  18EC DD 26 10         ld      ixh,high ld_r8
+ 678  18EF DD 2E 10         ld      ixl,high ld_r8
+ 679  18F2 FD 26 10         ld      iyh,high ld_r8
+ 680  18F5 FD 2E 10         ld      iyl,high ld_r8
+ 681  18F8              ;ld_r16:
+ 682  18F8 01 66 10         ld      bc,ld_r16
+ 683  18FB 11 66 10         ld      de,ld_r16
+ 684  18FE 21 66 10         ld      hl,ld_r16
+ 685  1901 DD 21 66 10      ld      ix,ld_r16
+ 686  1905 FD 21 66 10      ld      iy,ld_r16
+ 687  1909 31 66 10         ld      sp,ld_r16
+ 688  190C ED 4B 66 10      ld      bc,(ld_r16)
+ 689  1910 ED 5B 66 10      ld      de,(ld_r16)
+ 690  1914 2A 66 10         ld      hl,(ld_r16)
+ 691  1917 DD 2A 66 10      ld      ix,(ld_r16)
+ 692  191B FD 2A 66 10      ld      iy,(ld_r16)
+ 693  191F ED 7B 66 10      ld      sp,(ld_r16)
+ 694  1923 ED 43 66 10      ld      (ld_r16),bc
+ 695  1927 ED 53 66 10      ld      (ld_r16),de
+ 696  192B 22 66 10         ld      (ld_r16),hl
+ 697  192E DD 22 66 10      ld      (ld_r16),ix
+ 698  1932 FD 22 66 10      ld      (ld_r16),iy
+ 699  1936 ED 73 66 10      ld      (ld_r16),sp
+ 700  193A              ;ld_extras:                  ; warning all
+ 701  193A 36 10            ld      (hl),high ld_extras
+ 702  193C DD 36 10 7B      ld      (ix+high ld_extras),123
+ 703  1940 DD 36 7B 10      ld      (ix+123),high ld_extras
+ 704  1944 FD 36 10 7B      ld      (iy+high ld_extras),123
+ 705  1948 FD 36 7B 10      ld      (iy+123),high ld_extras
+ 706  194C              ;ld_ixy_r8:                  ; warning all
+ 707  194C DD 46 10         ld      b,(ix+high ld_ixy_r8)
+ 708  194F DD 4E 10         ld      c,(ix+high ld_ixy_r8)
+ 709  1952 DD 56 10         ld      d,(ix+high ld_ixy_r8)
+ 710  1955 DD 5E 10         ld      e,(ix+high ld_ixy_r8)
+ 711  1958 DD 66 10         ld      h,(ix+high ld_ixy_r8)
+ 712  195B DD 6E 10         ld      l,(ix+high ld_ixy_r8)
+ 713  195E DD 7E 10         ld      a,(ix+high ld_ixy_r8)
+ 714  1961
+ 715  1961 FD 46 10         ld      b,(iy+high ld_ixy_r8)
+ 716  1964 FD 4E 10         ld      c,(iy+high ld_ixy_r8)
+ 717  1967 FD 56 10         ld      d,(iy+high ld_ixy_r8)
+ 718  196A FD 5E 10         ld      e,(iy+high ld_ixy_r8)
+ 719  196D FD 66 10         ld      h,(iy+high ld_ixy_r8)
+ 720  1970 FD 6E 10         ld      l,(iy+high ld_ixy_r8)
+ 721  1973 FD 7E 10         ld      a,(iy+high ld_ixy_r8)
+ 722  1976
+ 723  1976 DD 70 10         ld      (ix+high ld_ixy_r8),b
+ 724  1979 DD 71 10         ld      (ix+high ld_ixy_r8),c
+ 725  197C DD 72 10         ld      (ix+high ld_ixy_r8),d
+ 726  197F DD 73 10         ld      (ix+high ld_ixy_r8),e
+ 727  1982 DD 74 10         ld      (ix+high ld_ixy_r8),h
+ 728  1985 DD 75 10         ld      (ix+high ld_ixy_r8),l
+ 729  1988 DD 77 10         ld      (ix+high ld_ixy_r8),a
+ 730  198B
+ 731  198B FD 70 10         ld      (iy+high ld_ixy_r8),b
+ 732  198E FD 71 10         ld      (iy+high ld_ixy_r8),c
+ 733  1991 FD 72 10         ld      (iy+high ld_ixy_r8),d
+ 734  1994 FD 73 10         ld      (iy+high ld_ixy_r8),e
+ 735  1997 FD 74 10         ld      (iy+high ld_ixy_r8),h
+ 736  199A FD 75 10         ld      (iy+high ld_ixy_r8),l
+ 737  199D FD 77 10         ld      (iy+high ld_ixy_r8),a
+ 738  19A0
+ 739  19A0              ;alu_imm8:                   ; warning all
+ 740  19A0 C6 11            add     a,high alu_imm8
+ 741  19A2 CE 11            adc     a,high alu_imm8
+ 742  19A4 D6 11            sub     high alu_imm8
+ 743  19A6 DE 11            sbc     a,high alu_imm8
+ 744  19A8 E6 11            and     high alu_imm8
+ 745  19AA EE 11            xor     high alu_imm8
+ 746  19AC F6 11            or      high alu_imm8
+ 747  19AE FE 11            cp      high alu_imm8
+ 748  19B0
+ 749  19B0              ;imm8_extras:                ; warning all
+ 750  19B0 D3 11            out     (high imm8_extras),a
+ 751  19B2 DB 11            in      a,(high imm8_extras)
+ 752  19B4
+ 753  19B4              ;alu_ixy:                    ; warning all
+ 754  19B4 DD 86 11         add     a,(ix+high alu_ixy)
+ 755  19B7 DD 8E 11         adc     a,(ix+high alu_ixy)
+ 756  19BA DD 96 11         sub     (ix+high alu_ixy)
+ 757  19BD DD 9E 11         sbc     a,(ix+high alu_ixy)
+ 758  19C0 DD A6 11         and     (ix+high alu_ixy)
+ 759  19C3 DD AE 11         xor     (ix+high alu_ixy)
+ 760  19C6 DD B6 11         or      (ix+high alu_ixy)
+ 761  19C9 DD BE 11         cp      (ix+high alu_ixy)
+ 762  19CC FD 86 11         add     a,(iy+high alu_ixy)
+ 763  19CF FD 8E 11         adc     a,(iy+high alu_ixy)
+ 764  19D2 FD 96 11         sub     (iy+high alu_ixy)
+ 765  19D5 FD 9E 11         sbc     a,(iy+high alu_ixy)
+ 766  19D8 FD A6 11         and     (iy+high alu_ixy)
+ 767  19DB FD AE 11         xor     (iy+high alu_ixy)
+ 768  19DE FD B6 11         or      (iy+high alu_ixy)
+ 769  19E1 FD BE 11         cp      (iy+high alu_ixy)
+ 770  19E4
+ 771  19E4              ;ixy_extras:                 ; warning all
+ 772  19E4 DD 34 11         inc     (ix+high ixy_extras)
+ 773  19E7 DD 35 11         dec     (ix+high ixy_extras)
+ 774  19EA FD 34 11         inc     (iy+high ixy_extras)
+ 775  19ED FD 35 11         dec     (iy+high ixy_extras)
+ 776  19F0
+ 777  19F0              ;bit_imm8:                   ; warning all
+ 778  19F0 CB 70            bit     bit_imm8&7,b
+ 779  19F2 CB 71            bit     bit_imm8&7,c
+ 780  19F4 CB 72            bit     bit_imm8&7,d
+ 781  19F6 CB 73            bit     bit_imm8&7,e
+ 782  19F8 CB 74            bit     bit_imm8&7,h
+ 783  19FA CB 75            bit     bit_imm8&7,l
+ 784  19FC CB 76            bit     bit_imm8&7,(hl)
+ 785  19FE CB 77            bit     bit_imm8&7,a
+ 786  1A00 CB B0            res     bit_imm8&7,b
+ 787  1A02 CB B1            res     bit_imm8&7,c
+ 788  1A04 CB B2            res     bit_imm8&7,d
+ 789  1A06 CB B3            res     bit_imm8&7,e
+ 790  1A08 CB B4            res     bit_imm8&7,h
+ 791  1A0A CB B5            res     bit_imm8&7,l
+ 792  1A0C CB B6            res     bit_imm8&7,(hl)
+ 793  1A0E CB B7            res     bit_imm8&7,a
+ 794  1A10 CB F0            set     bit_imm8&7,b
+ 795  1A12 CB F1            set     bit_imm8&7,c
+ 796  1A14 CB F2            set     bit_imm8&7,d
+ 797  1A16 CB F3            set     bit_imm8&7,e
+ 798  1A18 CB F4            set     bit_imm8&7,h
+ 799  1A1A CB F5            set     bit_imm8&7,l
+ 800  1A1C CB F6            set     bit_imm8&7,(hl)
+ 801  1A1E CB F7            set     bit_imm8&7,a
+ 802  1A20
+ 803  1A20              ;ixy_bits:                   ; warning all
+ 804  1A20                  ; IX (long list it is...)
+ 805  1A20 DD CB 11 00      rlc     (ix+high ixy_bits),b
+ 806  1A24 DD CB 11 01      rlc     (ix+high ixy_bits),c
+ 807  1A28 DD CB 11 02      rlc     (ix+high ixy_bits),d
+ 808  1A2C DD CB 11 03      rlc     (ix+high ixy_bits),e
+ 809  1A30 DD CB 11 04      rlc     (ix+high ixy_bits),h
+ 810  1A34 DD CB 11 05      rlc     (ix+high ixy_bits),l
+ 811  1A38 DD CB 11 06      rlc     (ix+high ixy_bits)
+ 812  1A3C DD CB 11 07      rlc     (ix+high ixy_bits),a
+ 813  1A40 DD CB 11 08      rrc     (ix+high ixy_bits),b
+ 814  1A44 DD CB 11 09      rrc     (ix+high ixy_bits),c
+ 815  1A48 DD CB 11 0A      rrc     (ix+high ixy_bits),d
+ 816  1A4C DD CB 11 0B      rrc     (ix+high ixy_bits),e
+ 817  1A50 DD CB 11 0C      rrc     (ix+high ixy_bits),h
+ 818  1A54 DD CB 11 0D      rrc     (ix+high ixy_bits),l
+ 819  1A58 DD CB 11 0E      rrc     (ix+high ixy_bits)
+ 820  1A5C DD CB 11 0F      rrc     (ix+high ixy_bits),a
+ 821  1A60 DD CB 11 10      rl      (ix+high ixy_bits),b
+ 822  1A64 DD CB 11 11      rl      (ix+high ixy_bits),c
+ 823  1A68 DD CB 11 12      rl      (ix+high ixy_bits),d
+ 824  1A6C DD CB 11 13      rl      (ix+high ixy_bits),e
+ 825  1A70 DD CB 11 14      rl      (ix+high ixy_bits),h
+ 826  1A74 DD CB 11 15      rl      (ix+high ixy_bits),l
+ 827  1A78 DD CB 11 16      rl      (ix+high ixy_bits)
+ 828  1A7C DD CB 11 17      rl      (ix+high ixy_bits),a
+ 829  1A80 DD CB 11 18      rr      (ix+high ixy_bits),b
+ 830  1A84 DD CB 11 19      rr      (ix+high ixy_bits),c
+ 831  1A88 DD CB 11 1A      rr      (ix+high ixy_bits),d
+ 832  1A8C DD CB 11 1B      rr      (ix+high ixy_bits),e
+ 833  1A90 DD CB 11 1C      rr      (ix+high ixy_bits),h
+ 834  1A94 DD CB 11 1D      rr      (ix+high ixy_bits),l
+ 835  1A98 DD CB 11 1E      rr      (ix+high ixy_bits)
+ 836  1A9C DD CB 11 1F      rr      (ix+high ixy_bits),a
+ 837  1AA0 DD CB 11 20      sla     (ix+high ixy_bits),b
+ 838  1AA4 DD CB 11 21      sla     (ix+high ixy_bits),c
+ 839  1AA8 DD CB 11 22      sla     (ix+high ixy_bits),d
+ 840  1AAC DD CB 11 23      sla     (ix+high ixy_bits),e
+ 841  1AB0 DD CB 11 24      sla     (ix+high ixy_bits),h
+ 842  1AB4 DD CB 11 25      sla     (ix+high ixy_bits),l
+ 843  1AB8 DD CB 11 26      sla     (ix+high ixy_bits)
+ 844  1ABC DD CB 11 27      sla     (ix+high ixy_bits),a
+ 845  1AC0 DD CB 11 28      sra     (ix+high ixy_bits),b
+ 846  1AC4 DD CB 11 29      sra     (ix+high ixy_bits),c
+ 847  1AC8 DD CB 11 2A      sra     (ix+high ixy_bits),d
+ 848  1ACC DD CB 11 2B      sra     (ix+high ixy_bits),e
+ 849  1AD0 DD CB 11 2C      sra     (ix+high ixy_bits),h
+ 850  1AD4 DD CB 11 2D      sra     (ix+high ixy_bits),l
+ 851  1AD8 DD CB 11 2E      sra     (ix+high ixy_bits)
+ 852  1ADC DD CB 11 2F      sra     (ix+high ixy_bits),a
+ 853  1AE0 DD CB 11 30      sli     (ix+high ixy_bits),b
+ 854  1AE4 DD CB 11 31      sli     (ix+high ixy_bits),c
+ 855  1AE8 DD CB 11 32      sli     (ix+high ixy_bits),d
+ 856  1AEC DD CB 11 33      sli     (ix+high ixy_bits),e
+ 857  1AF0 DD CB 11 34      sli     (ix+high ixy_bits),h
+ 858  1AF4 DD CB 11 35      sli     (ix+high ixy_bits),l
+ 859  1AF8 DD CB 11 36      sli     (ix+high ixy_bits)
+ 860  1AFC DD CB 11 37      sli     (ix+high ixy_bits),a
+ 861  1B00 DD CB 11 38      srl     (ix+high ixy_bits),b
+ 862  1B04 DD CB 11 39      srl     (ix+high ixy_bits),c
+ 863  1B08 DD CB 11 3A      srl     (ix+high ixy_bits),d
+ 864  1B0C DD CB 11 3B      srl     (ix+high ixy_bits),e
+ 865  1B10 DD CB 11 3C      srl     (ix+high ixy_bits),h
+ 866  1B14 DD CB 11 3D      srl     (ix+high ixy_bits),l
+ 867  1B18 DD CB 11 3E      srl     (ix+high ixy_bits)
+ 868  1B1C DD CB 11 3F      srl     (ix+high ixy_bits),a
+ 869  1B20
+ 870  1B20 DD CB 00 76      bit     ixy_bits&7,(ix)
+ 871  1B24 DD CB 00 B0      res     ixy_bits&7,(ix),b
+ 872  1B28 DD CB 00 B1      res     ixy_bits&7,(ix),c
+ 873  1B2C DD CB 00 B2      res     ixy_bits&7,(ix),d
+ 874  1B30 DD CB 00 B3      res     ixy_bits&7,(ix),e
+ 875  1B34 DD CB 00 B4      res     ixy_bits&7,(ix),h
+ 876  1B38 DD CB 00 B5      res     ixy_bits&7,(ix),l
+ 877  1B3C DD CB 00 B6      res     ixy_bits&7,(ix)
+ 878  1B40 DD CB 00 B7      res     ixy_bits&7,(ix),a
+ 879  1B44 DD CB 00 F0      set     ixy_bits&7,(ix),b
+ 880  1B48 DD CB 00 F1      set     ixy_bits&7,(ix),c
+ 881  1B4C DD CB 00 F2      set     ixy_bits&7,(ix),d
+ 882  1B50 DD CB 00 F3      set     ixy_bits&7,(ix),e
+ 883  1B54 DD CB 00 F4      set     ixy_bits&7,(ix),h
+ 884  1B58 DD CB 00 F5      set     ixy_bits&7,(ix),l
+ 885  1B5C DD CB 00 F6      set     ixy_bits&7,(ix)
+ 886  1B60 DD CB 00 F7      set     ixy_bits&7,(ix),a
+ 887  1B64
+ 888  1B64 DD CB 11 46      bit     0,(ix+high ixy_bits)
+ 889  1B68 DD CB 11 4E      bit     1,(ix+high ixy_bits)
+ 890  1B6C DD CB 11 56      bit     2,(ix+high ixy_bits)
+ 891  1B70 DD CB 11 5E      bit     3,(ix+high ixy_bits)
+ 892  1B74 DD CB 11 66      bit     4,(ix+high ixy_bits)
+ 893  1B78 DD CB 11 6E      bit     5,(ix+high ixy_bits)
+ 894  1B7C DD CB 11 76      bit     6,(ix+high ixy_bits)
+ 895  1B80 DD CB 11 7E      bit     7,(ix+high ixy_bits)
+ 896  1B84 DD CB 11 86      res     0,(ix+high ixy_bits)
+ 897  1B88 DD CB 11 8E      res     1,(ix+high ixy_bits)
+ 898  1B8C DD CB 11 96      res     2,(ix+high ixy_bits)
+ 899  1B90 DD CB 11 9E      res     3,(ix+high ixy_bits)
+ 900  1B94 DD CB 11 A6      res     4,(ix+high ixy_bits)
+ 901  1B98 DD CB 11 AE      res     5,(ix+high ixy_bits)
+ 902  1B9C DD CB 11 B6      res     6,(ix+high ixy_bits)
+ 903  1BA0 DD CB 11 BE      res     7,(ix+high ixy_bits)
+ 904  1BA4 DD CB 11 C6      set     0,(ix+high ixy_bits)
+ 905  1BA8 DD CB 11 CE      set     1,(ix+high ixy_bits)
+ 906  1BAC DD CB 11 D6      set     2,(ix+high ixy_bits)
+ 907  1BB0 DD CB 11 DE      set     3,(ix+high ixy_bits)
+ 908  1BB4 DD CB 11 E6      set     4,(ix+high ixy_bits)
+ 909  1BB8 DD CB 11 EE      set     5,(ix+high ixy_bits)
+ 910  1BBC DD CB 11 F6      set     6,(ix+high ixy_bits)
+ 911  1BC0 DD CB 11 FE      set     7,(ix+high ixy_bits)
+ 912  1BC4
+ 913  1BC4 DD CB 11 80      res     0,(ix+high ixy_bits),b
+ 914  1BC8 DD CB 11 88      res     1,(ix+high ixy_bits),b
+ 915  1BCC DD CB 11 90      res     2,(ix+high ixy_bits),b
+ 916  1BD0 DD CB 11 98      res     3,(ix+high ixy_bits),b
+ 917  1BD4 DD CB 11 A0      res     4,(ix+high ixy_bits),b
+ 918  1BD8 DD CB 11 A8      res     5,(ix+high ixy_bits),b
+ 919  1BDC DD CB 11 B0      res     6,(ix+high ixy_bits),b
+ 920  1BE0 DD CB 11 B8      res     7,(ix+high ixy_bits),b
+ 921  1BE4 DD CB 11 C0      set     0,(ix+high ixy_bits),b
+ 922  1BE8 DD CB 11 C8      set     1,(ix+high ixy_bits),b
+ 923  1BEC DD CB 11 D0      set     2,(ix+high ixy_bits),b
+ 924  1BF0 DD CB 11 D8      set     3,(ix+high ixy_bits),b
+ 925  1BF4 DD CB 11 E0      set     4,(ix+high ixy_bits),b
+ 926  1BF8 DD CB 11 E8      set     5,(ix+high ixy_bits),b
+ 927  1BFC DD CB 11 F0      set     6,(ix+high ixy_bits),b
+ 928  1C00 DD CB 11 F8      set     7,(ix+high ixy_bits),b
+ 929  1C04
+ 930  1C04 DD CB 11 81      res     0,(ix+high ixy_bits),c
+ 931  1C08 DD CB 11 89      res     1,(ix+high ixy_bits),c
+ 932  1C0C DD CB 11 91      res     2,(ix+high ixy_bits),c
+ 933  1C10 DD CB 11 99      res     3,(ix+high ixy_bits),c
+ 934  1C14 DD CB 11 A1      res     4,(ix+high ixy_bits),c
+ 935  1C18 DD CB 11 A9      res     5,(ix+high ixy_bits),c
+ 936  1C1C DD CB 11 B1      res     6,(ix+high ixy_bits),c
+ 937  1C20 DD CB 11 B9      res     7,(ix+high ixy_bits),c
+ 938  1C24 DD CB 11 C1      set     0,(ix+high ixy_bits),c
+ 939  1C28 DD CB 11 C9      set     1,(ix+high ixy_bits),c
+ 940  1C2C DD CB 11 D1      set     2,(ix+high ixy_bits),c
+ 941  1C30 DD CB 11 D9      set     3,(ix+high ixy_bits),c
+ 942  1C34 DD CB 11 E1      set     4,(ix+high ixy_bits),c
+ 943  1C38 DD CB 11 E9      set     5,(ix+high ixy_bits),c
+ 944  1C3C DD CB 11 F1      set     6,(ix+high ixy_bits),c
+ 945  1C40 DD CB 11 F9      set     7,(ix+high ixy_bits),c
+ 946  1C44
+ 947  1C44 DD CB 11 82      res     0,(ix+high ixy_bits),d
+ 948  1C48 DD CB 11 8A      res     1,(ix+high ixy_bits),d
+ 949  1C4C DD CB 11 92      res     2,(ix+high ixy_bits),d
+ 950  1C50 DD CB 11 9A      res     3,(ix+high ixy_bits),d
+ 951  1C54 DD CB 11 A2      res     4,(ix+high ixy_bits),d
+ 952  1C58 DD CB 11 AA      res     5,(ix+high ixy_bits),d
+ 953  1C5C DD CB 11 B2      res     6,(ix+high ixy_bits),d
+ 954  1C60 DD CB 11 BA      res     7,(ix+high ixy_bits),d
+ 955  1C64 DD CB 11 C2      set     0,(ix+high ixy_bits),d
+ 956  1C68 DD CB 11 CA      set     1,(ix+high ixy_bits),d
+ 957  1C6C DD CB 11 D2      set     2,(ix+high ixy_bits),d
+ 958  1C70 DD CB 11 DA      set     3,(ix+high ixy_bits),d
+ 959  1C74 DD CB 11 E2      set     4,(ix+high ixy_bits),d
+ 960  1C78 DD CB 11 EA      set     5,(ix+high ixy_bits),d
+ 961  1C7C DD CB 11 F2      set     6,(ix+high ixy_bits),d
+ 962  1C80 DD CB 11 FA      set     7,(ix+high ixy_bits),d
+ 963  1C84
+ 964  1C84 DD CB 11 83      res     0,(ix+high ixy_bits),e
+ 965  1C88 DD CB 11 8B      res     1,(ix+high ixy_bits),e
+ 966  1C8C DD CB 11 93      res     2,(ix+high ixy_bits),e
+ 967  1C90 DD CB 11 9B      res     3,(ix+high ixy_bits),e
+ 968  1C94 DD CB 11 A3      res     4,(ix+high ixy_bits),e
+ 969  1C98 DD CB 11 AB      res     5,(ix+high ixy_bits),e
+ 970  1C9C DD CB 11 B3      res     6,(ix+high ixy_bits),e
+ 971  1CA0 DD CB 11 BB      res     7,(ix+high ixy_bits),e
+ 972  1CA4 DD CB 11 C3      set     0,(ix+high ixy_bits),e
+ 973  1CA8 DD CB 11 CB      set     1,(ix+high ixy_bits),e
+ 974  1CAC DD CB 11 D3      set     2,(ix+high ixy_bits),e
+ 975  1CB0 DD CB 11 DB      set     3,(ix+high ixy_bits),e
+ 976  1CB4 DD CB 11 E3      set     4,(ix+high ixy_bits),e
+ 977  1CB8 DD CB 11 EB      set     5,(ix+high ixy_bits),e
+ 978  1CBC DD CB 11 F3      set     6,(ix+high ixy_bits),e
+ 979  1CC0 DD CB 11 FB      set     7,(ix+high ixy_bits),e
+ 980  1CC4
+ 981  1CC4 DD CB 11 84      res     0,(ix+high ixy_bits),h
+ 982  1CC8 DD CB 11 8C      res     1,(ix+high ixy_bits),h
+ 983  1CCC DD CB 11 94      res     2,(ix+high ixy_bits),h
+ 984  1CD0 DD CB 11 9C      res     3,(ix+high ixy_bits),h
+ 985  1CD4 DD CB 11 A4      res     4,(ix+high ixy_bits),h
+ 986  1CD8 DD CB 11 AC      res     5,(ix+high ixy_bits),h
+ 987  1CDC DD CB 11 B4      res     6,(ix+high ixy_bits),h
+ 988  1CE0 DD CB 11 BC      res     7,(ix+high ixy_bits),h
+ 989  1CE4 DD CB 11 C4      set     0,(ix+high ixy_bits),h
+ 990  1CE8 DD CB 11 CC      set     1,(ix+high ixy_bits),h
+ 991  1CEC DD CB 11 D4      set     2,(ix+high ixy_bits),h
+ 992  1CF0 DD CB 11 DC      set     3,(ix+high ixy_bits),h
+ 993  1CF4 DD CB 11 E4      set     4,(ix+high ixy_bits),h
+ 994  1CF8 DD CB 11 EC      set     5,(ix+high ixy_bits),h
+ 995  1CFC DD CB 11 F4      set     6,(ix+high ixy_bits),h
+ 996  1D00 DD CB 11 FC      set     7,(ix+high ixy_bits),h
+ 997  1D04
+ 998  1D04 DD CB 11 85      res     0,(ix+high ixy_bits),l
+ 999  1D08 DD CB 11 8D      res     1,(ix+high ixy_bits),l
+1000  1D0C DD CB 11 95      res     2,(ix+high ixy_bits),l
+1001  1D10 DD CB 11 9D      res     3,(ix+high ixy_bits),l
+1002  1D14 DD CB 11 A5      res     4,(ix+high ixy_bits),l
+1003  1D18 DD CB 11 AD      res     5,(ix+high ixy_bits),l
+1004  1D1C DD CB 11 B5      res     6,(ix+high ixy_bits),l
+1005  1D20 DD CB 11 BD      res     7,(ix+high ixy_bits),l
+1006  1D24 DD CB 11 C5      set     0,(ix+high ixy_bits),l
+1007  1D28 DD CB 11 CD      set     1,(ix+high ixy_bits),l
+1008  1D2C DD CB 11 D5      set     2,(ix+high ixy_bits),l
+1009  1D30 DD CB 11 DD      set     3,(ix+high ixy_bits),l
+1010  1D34 DD CB 11 E5      set     4,(ix+high ixy_bits),l
+1011  1D38 DD CB 11 ED      set     5,(ix+high ixy_bits),l
+1012  1D3C DD CB 11 F5      set     6,(ix+high ixy_bits),l
+1013  1D40 DD CB 11 FD      set     7,(ix+high ixy_bits),l
+1014  1D44
+1015  1D44 DD CB 11 87      res     0,(ix+high ixy_bits),a
+1016  1D48 DD CB 11 8F      res     1,(ix+high ixy_bits),a
+1017  1D4C DD CB 11 97      res     2,(ix+high ixy_bits),a
+1018  1D50 DD CB 11 9F      res     3,(ix+high ixy_bits),a
+1019  1D54 DD CB 11 A7      res     4,(ix+high ixy_bits),a
+1020  1D58 DD CB 11 AF      res     5,(ix+high ixy_bits),a
+1021  1D5C DD CB 11 B7      res     6,(ix+high ixy_bits),a
+1022  1D60 DD CB 11 BF      res     7,(ix+high ixy_bits),a
+1023  1D64 DD CB 11 C7      set     0,(ix+high ixy_bits),a
+1024  1D68 DD CB 11 CF      set     1,(ix+high ixy_bits),a
+1025  1D6C DD CB 11 D7      set     2,(ix+high ixy_bits),a
+1026  1D70 DD CB 11 DF      set     3,(ix+high ixy_bits),a
+1027  1D74 DD CB 11 E7      set     4,(ix+high ixy_bits),a
+1028  1D78 DD CB 11 EF      set     5,(ix+high ixy_bits),a
+1029  1D7C DD CB 11 F7      set     6,(ix+high ixy_bits),a
+1030  1D80 DD CB 11 FF      set     7,(ix+high ixy_bits),a
+1031  1D84
+1032  1D84                  ; IY (long list it is...)
+1033  1D84 FD CB 11 00      rlc     (iy+high ixy_bits),b
+1034  1D88 FD CB 11 01      rlc     (iy+high ixy_bits),c
+1035  1D8C FD CB 11 02      rlc     (iy+high ixy_bits),d
+1036  1D90 FD CB 11 03      rlc     (iy+high ixy_bits),e
+1037  1D94 FD CB 11 04      rlc     (iy+high ixy_bits),h
+1038  1D98 FD CB 11 05      rlc     (iy+high ixy_bits),l
+1039  1D9C FD CB 11 06      rlc     (iy+high ixy_bits)
+1040  1DA0 FD CB 11 07      rlc     (iy+high ixy_bits),a
+1041  1DA4 FD CB 11 08      rrc     (iy+high ixy_bits),b
+1042  1DA8 FD CB 11 09      rrc     (iy+high ixy_bits),c
+1043  1DAC FD CB 11 0A      rrc     (iy+high ixy_bits),d
+1044  1DB0 FD CB 11 0B      rrc     (iy+high ixy_bits),e
+1045  1DB4 FD CB 11 0C      rrc     (iy+high ixy_bits),h
+1046  1DB8 FD CB 11 0D      rrc     (iy+high ixy_bits),l
+1047  1DBC FD CB 11 0E      rrc     (iy+high ixy_bits)
+1048  1DC0 FD CB 11 0F      rrc     (iy+high ixy_bits),a
+1049  1DC4 FD CB 11 10      rl      (iy+high ixy_bits),b
+1050  1DC8 FD CB 11 11      rl      (iy+high ixy_bits),c
+1051  1DCC FD CB 11 12      rl      (iy+high ixy_bits),d
+1052  1DD0 FD CB 11 13      rl      (iy+high ixy_bits),e
+1053  1DD4 FD CB 11 14      rl      (iy+high ixy_bits),h
+1054  1DD8 FD CB 11 15      rl      (iy+high ixy_bits),l
+1055  1DDC FD CB 11 16      rl      (iy+high ixy_bits)
+1056  1DE0 FD CB 11 17      rl      (iy+high ixy_bits),a
+1057  1DE4 FD CB 11 18      rr      (iy+high ixy_bits),b
+1058  1DE8 FD CB 11 19      rr      (iy+high ixy_bits),c
+1059  1DEC FD CB 11 1A      rr      (iy+high ixy_bits),d
+1060  1DF0 FD CB 11 1B      rr      (iy+high ixy_bits),e
+1061  1DF4 FD CB 11 1C      rr      (iy+high ixy_bits),h
+1062  1DF8 FD CB 11 1D      rr      (iy+high ixy_bits),l
+1063  1DFC FD CB 11 1E      rr      (iy+high ixy_bits)
+1064  1E00 FD CB 11 1F      rr      (iy+high ixy_bits),a
+1065  1E04 FD CB 11 20      sla     (iy+high ixy_bits),b
+1066  1E08 FD CB 11 21      sla     (iy+high ixy_bits),c
+1067  1E0C FD CB 11 22      sla     (iy+high ixy_bits),d
+1068  1E10 FD CB 11 23      sla     (iy+high ixy_bits),e
+1069  1E14 FD CB 11 24      sla     (iy+high ixy_bits),h
+1070  1E18 FD CB 11 25      sla     (iy+high ixy_bits),l
+1071  1E1C FD CB 11 26      sla     (iy+high ixy_bits)
+1072  1E20 FD CB 11 27      sla     (iy+high ixy_bits),a
+1073  1E24 FD CB 11 28      sra     (iy+high ixy_bits),b
+1074  1E28 FD CB 11 29      sra     (iy+high ixy_bits),c
+1075  1E2C FD CB 11 2A      sra     (iy+high ixy_bits),d
+1076  1E30 FD CB 11 2B      sra     (iy+high ixy_bits),e
+1077  1E34 FD CB 11 2C      sra     (iy+high ixy_bits),h
+1078  1E38 FD CB 11 2D      sra     (iy+high ixy_bits),l
+1079  1E3C FD CB 11 2E      sra     (iy+high ixy_bits)
+1080  1E40 FD CB 11 2F      sra     (iy+high ixy_bits),a
+1081  1E44 FD CB 11 30      sli     (iy+high ixy_bits),b
+1082  1E48 FD CB 11 31      sli     (iy+high ixy_bits),c
+1083  1E4C FD CB 11 32      sli     (iy+high ixy_bits),d
+1084  1E50 FD CB 11 33      sli     (iy+high ixy_bits),e
+1085  1E54 FD CB 11 34      sli     (iy+high ixy_bits),h
+1086  1E58 FD CB 11 35      sli     (iy+high ixy_bits),l
+1087  1E5C FD CB 11 36      sli     (iy+high ixy_bits)
+1088  1E60 FD CB 11 37      sli     (iy+high ixy_bits),a
+1089  1E64 FD CB 11 38      srl     (iy+high ixy_bits),b
+1090  1E68 FD CB 11 39      srl     (iy+high ixy_bits),c
+1091  1E6C FD CB 11 3A      srl     (iy+high ixy_bits),d
+1092  1E70 FD CB 11 3B      srl     (iy+high ixy_bits),e
+1093  1E74 FD CB 11 3C      srl     (iy+high ixy_bits),h
+1094  1E78 FD CB 11 3D      srl     (iy+high ixy_bits),l
+1095  1E7C FD CB 11 3E      srl     (iy+high ixy_bits)
+1096  1E80 FD CB 11 3F      srl     (iy+high ixy_bits),a
+1097  1E84
+1098  1E84 FD CB 00 76      bit     ixy_bits&7,(iy)
+1099  1E88 FD CB 00 B0      res     ixy_bits&7,(iy),b
+1100  1E8C FD CB 00 B1      res     ixy_bits&7,(iy),c
+1101  1E90 FD CB 00 B2      res     ixy_bits&7,(iy),d
+1102  1E94 FD CB 00 B3      res     ixy_bits&7,(iy),e
+1103  1E98 FD CB 00 B4      res     ixy_bits&7,(iy),h
+1104  1E9C FD CB 00 B5      res     ixy_bits&7,(iy),l
+1105  1EA0 FD CB 00 B6      res     ixy_bits&7,(iy)
+1106  1EA4 FD CB 00 B7      res     ixy_bits&7,(iy),a
+1107  1EA8 FD CB 00 F0      set     ixy_bits&7,(iy),b
+1108  1EAC FD CB 00 F1      set     ixy_bits&7,(iy),c
+1109  1EB0 FD CB 00 F2      set     ixy_bits&7,(iy),d
+1110  1EB4 FD CB 00 F3      set     ixy_bits&7,(iy),e
+1111  1EB8 FD CB 00 F4      set     ixy_bits&7,(iy),h
+1112  1EBC FD CB 00 F5      set     ixy_bits&7,(iy),l
+1113  1EC0 FD CB 00 F6      set     ixy_bits&7,(iy)
+1114  1EC4 FD CB 00 F7      set     ixy_bits&7,(iy),a
+1115  1EC8
+1116  1EC8 FD CB 11 46      bit     0,(iy+high ixy_bits)
+1117  1ECC FD CB 11 4E      bit     1,(iy+high ixy_bits)
+1118  1ED0 FD CB 11 56      bit     2,(iy+high ixy_bits)
+1119  1ED4 FD CB 11 5E      bit     3,(iy+high ixy_bits)
+1120  1ED8 FD CB 11 66      bit     4,(iy+high ixy_bits)
+1121  1EDC FD CB 11 6E      bit     5,(iy+high ixy_bits)
+1122  1EE0 FD CB 11 76      bit     6,(iy+high ixy_bits)
+1123  1EE4 FD CB 11 7E      bit     7,(iy+high ixy_bits)
+1124  1EE8 FD CB 11 86      res     0,(iy+high ixy_bits)
+1125  1EEC FD CB 11 8E      res     1,(iy+high ixy_bits)
+1126  1EF0 FD CB 11 96      res     2,(iy+high ixy_bits)
+1127  1EF4 FD CB 11 9E      res     3,(iy+high ixy_bits)
+1128  1EF8 FD CB 11 A6      res     4,(iy+high ixy_bits)
+1129  1EFC FD CB 11 AE      res     5,(iy+high ixy_bits)
+1130  1F00 FD CB 11 B6      res     6,(iy+high ixy_bits)
+1131  1F04 FD CB 11 BE      res     7,(iy+high ixy_bits)
+1132  1F08 FD CB 11 C6      set     0,(iy+high ixy_bits)
+1133  1F0C FD CB 11 CE      set     1,(iy+high ixy_bits)
+1134  1F10 FD CB 11 D6      set     2,(iy+high ixy_bits)
+1135  1F14 FD CB 11 DE      set     3,(iy+high ixy_bits)
+1136  1F18 FD CB 11 E6      set     4,(iy+high ixy_bits)
+1137  1F1C FD CB 11 EE      set     5,(iy+high ixy_bits)
+1138  1F20 FD CB 11 F6      set     6,(iy+high ixy_bits)
+1139  1F24 FD CB 11 FE      set     7,(iy+high ixy_bits)
+1140  1F28
+1141  1F28 FD CB 11 80      res     0,(iy+high ixy_bits),b
+1142  1F2C FD CB 11 88      res     1,(iy+high ixy_bits),b
+1143  1F30 FD CB 11 90      res     2,(iy+high ixy_bits),b
+1144  1F34 FD CB 11 98      res     3,(iy+high ixy_bits),b
+1145  1F38 FD CB 11 A0      res     4,(iy+high ixy_bits),b
+1146  1F3C FD CB 11 A8      res     5,(iy+high ixy_bits),b
+1147  1F40 FD CB 11 B0      res     6,(iy+high ixy_bits),b
+1148  1F44 FD CB 11 B8      res     7,(iy+high ixy_bits),b
+1149  1F48 FD CB 11 C0      set     0,(iy+high ixy_bits),b
+1150  1F4C FD CB 11 C8      set     1,(iy+high ixy_bits),b
+1151  1F50 FD CB 11 D0      set     2,(iy+high ixy_bits),b
+1152  1F54 FD CB 11 D8      set     3,(iy+high ixy_bits),b
+1153  1F58 FD CB 11 E0      set     4,(iy+high ixy_bits),b
+1154  1F5C FD CB 11 E8      set     5,(iy+high ixy_bits),b
+1155  1F60 FD CB 11 F0      set     6,(iy+high ixy_bits),b
+1156  1F64 FD CB 11 F8      set     7,(iy+high ixy_bits),b
+1157  1F68
+1158  1F68 FD CB 11 81      res     0,(iy+high ixy_bits),c
+1159  1F6C FD CB 11 89      res     1,(iy+high ixy_bits),c
+1160  1F70 FD CB 11 91      res     2,(iy+high ixy_bits),c
+1161  1F74 FD CB 11 99      res     3,(iy+high ixy_bits),c
+1162  1F78 FD CB 11 A1      res     4,(iy+high ixy_bits),c
+1163  1F7C FD CB 11 A9      res     5,(iy+high ixy_bits),c
+1164  1F80 FD CB 11 B1      res     6,(iy+high ixy_bits),c
+1165  1F84 FD CB 11 B9      res     7,(iy+high ixy_bits),c
+1166  1F88 FD CB 11 C1      set     0,(iy+high ixy_bits),c
+1167  1F8C FD CB 11 C9      set     1,(iy+high ixy_bits),c
+1168  1F90 FD CB 11 D1      set     2,(iy+high ixy_bits),c
+1169  1F94 FD CB 11 D9      set     3,(iy+high ixy_bits),c
+1170  1F98 FD CB 11 E1      set     4,(iy+high ixy_bits),c
+1171  1F9C FD CB 11 E9      set     5,(iy+high ixy_bits),c
+1172  1FA0 FD CB 11 F1      set     6,(iy+high ixy_bits),c
+1173  1FA4 FD CB 11 F9      set     7,(iy+high ixy_bits),c
+1174  1FA8
+1175  1FA8 FD CB 11 82      res     0,(iy+high ixy_bits),d
+1176  1FAC FD CB 11 8A      res     1,(iy+high ixy_bits),d
+1177  1FB0 FD CB 11 92      res     2,(iy+high ixy_bits),d
+1178  1FB4 FD CB 11 9A      res     3,(iy+high ixy_bits),d
+1179  1FB8 FD CB 11 A2      res     4,(iy+high ixy_bits),d
+1180  1FBC FD CB 11 AA      res     5,(iy+high ixy_bits),d
+1181  1FC0 FD CB 11 B2      res     6,(iy+high ixy_bits),d
+1182  1FC4 FD CB 11 BA      res     7,(iy+high ixy_bits),d
+1183  1FC8 FD CB 11 C2      set     0,(iy+high ixy_bits),d
+1184  1FCC FD CB 11 CA      set     1,(iy+high ixy_bits),d
+1185  1FD0 FD CB 11 D2      set     2,(iy+high ixy_bits),d
+1186  1FD4 FD CB 11 DA      set     3,(iy+high ixy_bits),d
+1187  1FD8 FD CB 11 E2      set     4,(iy+high ixy_bits),d
+1188  1FDC FD CB 11 EA      set     5,(iy+high ixy_bits),d
+1189  1FE0 FD CB 11 F2      set     6,(iy+high ixy_bits),d
+1190  1FE4 FD CB 11 FA      set     7,(iy+high ixy_bits),d
+1191  1FE8
+1192  1FE8 FD CB 11 83      res     0,(iy+high ixy_bits),e
+1193  1FEC FD CB 11 8B      res     1,(iy+high ixy_bits),e
+1194  1FF0 FD CB 11 93      res     2,(iy+high ixy_bits),e
+1195  1FF4 FD CB 11 9B      res     3,(iy+high ixy_bits),e
+1196  1FF8 FD CB 11 A3      res     4,(iy+high ixy_bits),e
+1197  1FFC FD CB 11 AB      res     5,(iy+high ixy_bits),e
+1198  2000 FD CB 11 B3      res     6,(iy+high ixy_bits),e
+1199  2004 FD CB 11 BB      res     7,(iy+high ixy_bits),e
+1200  2008 FD CB 11 C3      set     0,(iy+high ixy_bits),e
+1201  200C FD CB 11 CB      set     1,(iy+high ixy_bits),e
+1202  2010 FD CB 11 D3      set     2,(iy+high ixy_bits),e
+1203  2014 FD CB 11 DB      set     3,(iy+high ixy_bits),e
+1204  2018 FD CB 11 E3      set     4,(iy+high ixy_bits),e
+1205  201C FD CB 11 EB      set     5,(iy+high ixy_bits),e
+1206  2020 FD CB 11 F3      set     6,(iy+high ixy_bits),e
+1207  2024 FD CB 11 FB      set     7,(iy+high ixy_bits),e
+1208  2028
+1209  2028 FD CB 11 84      res     0,(iy+high ixy_bits),h
+1210  202C FD CB 11 8C      res     1,(iy+high ixy_bits),h
+1211  2030 FD CB 11 94      res     2,(iy+high ixy_bits),h
+1212  2034 FD CB 11 9C      res     3,(iy+high ixy_bits),h
+1213  2038 FD CB 11 A4      res     4,(iy+high ixy_bits),h
+1214  203C FD CB 11 AC      res     5,(iy+high ixy_bits),h
+1215  2040 FD CB 11 B4      res     6,(iy+high ixy_bits),h
+1216  2044 FD CB 11 BC      res     7,(iy+high ixy_bits),h
+1217  2048 FD CB 11 C4      set     0,(iy+high ixy_bits),h
+1218  204C FD CB 11 CC      set     1,(iy+high ixy_bits),h
+1219  2050 FD CB 11 D4      set     2,(iy+high ixy_bits),h
+1220  2054 FD CB 11 DC      set     3,(iy+high ixy_bits),h
+1221  2058 FD CB 11 E4      set     4,(iy+high ixy_bits),h
+1222  205C FD CB 11 EC      set     5,(iy+high ixy_bits),h
+1223  2060 FD CB 11 F4      set     6,(iy+high ixy_bits),h
+1224  2064 FD CB 11 FC      set     7,(iy+high ixy_bits),h
+1225  2068
+1226  2068 FD CB 11 85      res     0,(iy+high ixy_bits),l
+1227  206C FD CB 11 8D      res     1,(iy+high ixy_bits),l
+1228  2070 FD CB 11 95      res     2,(iy+high ixy_bits),l
+1229  2074 FD CB 11 9D      res     3,(iy+high ixy_bits),l
+1230  2078 FD CB 11 A5      res     4,(iy+high ixy_bits),l
+1231  207C FD CB 11 AD      res     5,(iy+high ixy_bits),l
+1232  2080 FD CB 11 B5      res     6,(iy+high ixy_bits),l
+1233  2084 FD CB 11 BD      res     7,(iy+high ixy_bits),l
+1234  2088 FD CB 11 C5      set     0,(iy+high ixy_bits),l
+1235  208C FD CB 11 CD      set     1,(iy+high ixy_bits),l
+1236  2090 FD CB 11 D5      set     2,(iy+high ixy_bits),l
+1237  2094 FD CB 11 DD      set     3,(iy+high ixy_bits),l
+1238  2098 FD CB 11 E5      set     4,(iy+high ixy_bits),l
+1239  209C FD CB 11 ED      set     5,(iy+high ixy_bits),l
+1240  20A0 FD CB 11 F5      set     6,(iy+high ixy_bits),l
+1241  20A4 FD CB 11 FD      set     7,(iy+high ixy_bits),l
+1242  20A8
+1243  20A8 FD CB 11 87      res     0,(iy+high ixy_bits),a
+1244  20AC FD CB 11 8F      res     1,(iy+high ixy_bits),a
+1245  20B0 FD CB 11 97      res     2,(iy+high ixy_bits),a
+1246  20B4 FD CB 11 9F      res     3,(iy+high ixy_bits),a
+1247  20B8 FD CB 11 A7      res     4,(iy+high ixy_bits),a
+1248  20BC FD CB 11 AF      res     5,(iy+high ixy_bits),a
+1249  20C0 FD CB 11 B7      res     6,(iy+high ixy_bits),a
+1250  20C4 FD CB 11 BF      res     7,(iy+high ixy_bits),a
+1251  20C8 FD CB 11 C7      set     0,(iy+high ixy_bits),a
+1252  20CC FD CB 11 CF      set     1,(iy+high ixy_bits),a
+1253  20D0 FD CB 11 D7      set     2,(iy+high ixy_bits),a
+1254  20D4 FD CB 11 DF      set     3,(iy+high ixy_bits),a
+1255  20D8 FD CB 11 E7      set     4,(iy+high ixy_bits),a
+1256  20DC FD CB 11 EF      set     5,(iy+high ixy_bits),a
+1257  20E0 FD CB 11 F7      set     6,(iy+high ixy_bits),a
+1258  20E4 FD CB 11 FF      set     7,(iy+high ixy_bits),a
+1259  20E8
+1260  20E8 11 10 14 10      RELOCATE_TABLE
+1260  20EC 17 10 1A 10
+1260  20F0 1D 10 20 10
+1260  20F4 23 10 26 10
+1260  20F8 29 10 2C 10
+1260  20FC 2F 10 32 10
+1260  2100 35 10 38 10
+1260  2104 3B 10 3E 10
+1260  2108 41 10 44 10
+1260  210C 49 10 4C 10
+1260  2110 67 10 6A 10
+1260  2114 6D 10 71 10
+1260  2118 75 10 78 10
+1260  211C 7C 10 80 10
+1260  2120 83 10 87 10
+1260  2124 8B 10 8F 10
+1260  2128 93 10 97 10
+1260  212C 9A 10 9E 10
+1260  2130 A2 10 A6 10
+1261  2134
+1262  2134                  ASSERT 0 == 0
+1263  2134                  ASSERT 532 == 532
+1264  2134
+# file closed: relocation_z80.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0026   relocate_count
+0x004C   relocate_size
+0x1004   jr_jp_call
+0x1046   ld_a
+0x104E   ld_r8
+0x1066   ld_r16
+0x10A8   ld_extras
+0x10BA   ld_ixy_r8
+0x110E   alu_imm8
+0x111E   imm8_extras
+0x1122   alu_ixy
+0x1152   ixy_extras
+0x115E   bit_imm8
+0x118E   ixy_bits
