@@ -333,8 +333,9 @@ int check24(aint val) {
 }
 
 void checkLowMemory(byte hiByte, byte lowByte) {
-	//FIXME relocation to switch this off?
-	if (hiByte || !warningNotSuppressed() || !Options::syx.IsLowMemWarningEnabled) {
+	if (hiByte || !Options::syx.IsLowMemWarningEnabled || !warningNotSuppressed() \
+		|| Relocation::isActive)
+	{
 		return;			// address is >= 256 or warning is suppressed
 	}
 	// for addresses 0..255 issue warning
