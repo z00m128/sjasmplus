@@ -742,6 +742,7 @@ namespace Z80 {
 			e[0] = 0x10; e[1] = jmp & 0xFF;
 			EmitBytes(e);
 		} while (Options::syx.MultiArg(lp));
+		Relocation::isResultAffected = false;	// DJNZ is always relocatable
 	}
 
 	static void OpCode_EI() {

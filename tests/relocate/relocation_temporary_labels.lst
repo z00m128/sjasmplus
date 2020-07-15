@@ -121,30 +121,42 @@
 120   1101 FC 04 11         call    m,1F
 121   1104              1:                              ; usage of this label should trigger relocation
 122   1104
-123   1104                  ; the relocation table must be after all temporary labels, as those don't manage
-124   1104                  ; to settle down within 3 passes if there's dynamic-size table ahead, and "forward"
-125   1104                  ; labels are referenced
-126   1104 8F 10 92 10      RELOCATE_TABLE              ; should emit the 36 addresses of opcode data
-126   1108 95 10 98 10
-126   110C 9B 10 9E 10
-126   1110 A1 10 A4 10
-126   1114 A7 10 AA 10
-126   1118 AD 10 B0 10
-126   111C B3 10 B6 10
-126   1120 B9 10 BC 10
-126   1124 BF 10 C2 10
-126   1128 CF 10 D2 10
-126   112C D5 10 D8 10
-126   1130 DB 10 DE 10
-126   1134 E1 10 E4 10
-126   1138 E7 10 EA 10
-126   113C ED 10 F0 10
-126   1140 F3 10 F6 10
-126   1144 F9 10 FC 10
-126   1148 FF 10 02 11
-127   114C
-128   114C                  RELOCATE_END
-129   114C
+123   1104                  ;; adding missing DJNZ (from the first version of the test)
+124   1104              22:
+125   1104 10 FE            djnz    22B
+126   1106 10 00            djnz    22F
+127   1108              22:
+128   1108
+129   1108                  ; the relocation table must be after all temporary labels, as those don't manage
+130   1108                  ; to settle down within 3 passes if there's dynamic-size table ahead, and "forward"
+131   1108                  ; labels are referenced
+132   1108 8F 10 92 10      RELOCATE_TABLE              ; should emit the 36 addresses of opcode data
+132   110C 95 10 98 10
+132   1110 9B 10 9E 10
+132   1114 A1 10 A4 10
+132   1118 A7 10 AA 10
+132   111C AD 10 B0 10
+132   1120 B3 10 B6 10
+132   1124 B9 10 BC 10
+132   1128 BF 10 C2 10
+132   112C CF 10 D2 10
+132   1130 D5 10 D8 10
+132   1134 DB 10 DE 10
+132   1138 E1 10 E4 10
+132   113C E7 10 EA 10
+132   1140 ED 10 F0 10
+132   1144 F3 10 F6 10
+132   1148 F9 10 FC 10
+132   114C FF 10 02 11
+133   1150
+134   1150                  RELOCATE_END
+135   1150
+136   1150                  ;; adding missing DJNZ outside of relocation block
+137   1150              22:
+138   1150 10 FE            djnz    22B
+139   1152 10 00            djnz    22F
+140   1154              22:
+141   1154
 # file closed: relocation_temporary_labels.asm
 
 Value    Label

@@ -120,9 +120,21 @@
     call    m,1F
 1:                              ; usage of this label should trigger relocation
 
+    ;; adding missing DJNZ (from the first version of the test)
+22:
+    djnz    22B
+    djnz    22F
+22:
+
     ; the relocation table must be after all temporary labels, as those don't manage
     ; to settle down within 3 passes if there's dynamic-size table ahead, and "forward"
     ; labels are referenced
     RELOCATE_TABLE              ; should emit the 36 addresses of opcode data
 
     RELOCATE_END
+
+    ;; adding missing DJNZ outside of relocation block
+22:
+    djnz    22B
+    djnz    22F
+22:
