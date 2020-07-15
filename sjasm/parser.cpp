@@ -47,10 +47,14 @@ static int ParseExpPrim(char*& p, aint& nval) {
 			return 0;
 		}
 	} else if (DeviceID && *p == '{') {		// read WORD/BYTE from virtual device memory
-		//FIXME relocation?
 		char* const readMemP = p;
 		const int byteOnly = cmphstr(++p, "b");
-		if (!ParseExpressionEntry(p, nval)) return 0;	// some syntax error inside the address expression
+		// switch off alternative relocation evaluation for the address value
+		const bool oldAreLabelsOffset = Relocation::areLabelsOffset;
+		Relocation::areLabelsOffset = false;
+		int addressParseRes = ParseExpressionEntry(p, nval);
+		Relocation::areLabelsOffset = oldAreLabelsOffset;	// restore alternative evaluation
+		if (!addressParseRes) return 0;	// some syntax error inside the address expression
 		if (!need(p, '}')) {
 			Error("'}' expected", readMemP, SUPPRESS);
 			return 0;
