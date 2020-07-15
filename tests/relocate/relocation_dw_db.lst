@@ -28,13 +28,19 @@ relocation_dw_db.asm(21): warning: Relocation makes one of the expressions unsta
 24    101C 11 08 10         ld      de,table+4
 25    101F ED 53 16 10      ld      (label1+1),de
 26    1023
-27    1023                  RELOCATE_END
-28    1023
-29    1023 04 10 06 10      RELOCATE_TABLE
-29    1027 0A 10 0E 10
-29    102B 16 10 1D 10
-29    102F 21 10
-30    1031
+27    1023                  ; these should warn about unstable result, but only once
+relocation_dw_db.asm(28): warning: value 0x1015 is truncated to 8bit value: 0x15
+relocation_dw_db.asm(28): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+28    1023 0C 15 17 10      db      12, low label1, 23, high label1, 34, label1, 56
+28    1027 22 15 38
+29    102A
+30    102A                  RELOCATE_END
+31    102A
+32    102A 04 10 06 10      RELOCATE_TABLE
+32    102E 0A 10 0E 10
+32    1032 16 10 1D 10
+32    1036 21 10
+33    1038
 # file closed: relocation_dw_db.asm
 
 Value    Label

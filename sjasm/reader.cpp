@@ -644,6 +644,8 @@ template int GetCharConstAsString<int>(char* & p, int e[], int & ei, int max_ei,
 int GetBytes(char*& p, int e[], int add, int dc) {
 	aint val;
 	int t = 0, strRes;
+	// reset alternate result flag in ParseExpression part of code
+	Relocation::isResultAffected = false;
 	do {
 		const int oldT = t;
 		char* const oldP = p;
@@ -671,22 +673,20 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 				continue;
 			}
 		}
-		// reset alternate result flag in ParseExpression part of code
-		Relocation::isResultAffected = false;
 		if (ParseExpressionNoSyntaxError(p, val)) {
 			check8(val);
 			e[t++] = (val + add) & 255;
-			if (Relocation::isResultAffected) {
-				// some result did set the "affected" flag, warn about it
-				if (warningNotSuppressed()) {
-					Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
-				}
-			}
 		} else {
 			Error("Syntax error", p, SUPPRESS);
 			break;
 		}
 	} while(comma(p) && t < 128);
+	if (Relocation::isResultAffected) {
+		// some result did set the "affected" flag, warn about it
+		if (warningNotSuppressed()) {
+			Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
+		}
+	}
 	e[t] = -1;
 	if (t == 128 && *p) Error("Over 128 bytes defined in single DB/DC/... Values over", p, SUPPRESS);
 	return t;

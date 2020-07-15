@@ -24,6 +24,9 @@ label2:
     ld      de,table+4
     ld      (label1+1),de
 
+    ; these should warn about unstable result, but only once
+    db      12, low label1, 23, high label1, 34, label1, 56
+
     RELOCATE_END
 
     RELOCATE_TABLE
