@@ -358,7 +358,9 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 		alignment = -1;
 		return;
 	}
-	//FIXME relocation?!?
+	if (Relocation::isActive && warningNotSuppressed()) {
+		Warning("[ALIGN] inside relocation block: may become misaligned when relocated");
+	}
 	// check if alignment value is power of two (0..15-th power only)
 	if (alignment < 1 || (1<<15) < alignment || (alignment & (alignment-1))) {
 		Error("[ALIGN] Illegal align", oldSrc, SUPPRESS);

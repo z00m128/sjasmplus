@@ -1,0 +1,20 @@
+# file opened: relocation_align.asm
+ 1    0000                  ORG $1000
+ 2    1000
+ 3    1000                  RELOCATE_START
+ 4    1000 12           label1:     DB  0x12
+ 5    1001 00 00 00...          ALIGN   16      ; ok ; suppressed warning
+relocation_align.asm(6): warning: [ALIGN] inside relocation block: may become misaligned when relocated
+ 6    1010 00 00 00...          ALIGN   32      ; warn about relocation mode
+ 7    1020 21 00 10                 ld  hl,label1
+ 8    1023                  RELOCATE_END
+ 9    1023
+10    1023 21 10            RELOCATE_TABLE
+11    1025
+# file closed: relocation_align.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X relocate_count
+0x0002 X relocate_size
+0x1000   label1
