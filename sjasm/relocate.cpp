@@ -101,25 +101,14 @@ void Relocation::dirRELOCATE_END() {
 }
 
 void Relocation::dirRELOCATE_TABLE() {
-	const bool isLastPass = (LASTPASS == pass);
-	warnAboutContentChange = isLastPass;	// don't set it until last pass
-	// select which vector will be used to dump offsets into machine code
-	// will use the backup copy from previous pass if the current pass seems incomplete (TABLE dumped early)
-	auto & dumpOffsets = (offsets.size() < maxTableCount) ? offsetsPrevious : offsets;
-	if (isLastPass && dumpOffsets.size() != maxTableCount) {
-		Warning("Relocation table seems internally inconsistent", "size differs between passes too much");
-	}
+	refreshMaxTableCount();
 	// dump the table into machine code output
-	for (const word offset : dumpOffsets) EmitWord(offset);
-	// if the current pass table is incomplete, at least warn about discrepancies in values
-	if (isLastPass && (offsets.size() < maxTableCount)) {
-		for (size_t oi = 0; oi < offsets.size(); ++oi) {
-			if (offsets[oi] == offsetsPrevious[oi]) continue;
-			Warning("Relocation table seems internally inconsistent", "table content differs in last pass");
-			warnAboutContentChange = false;
-			break;
-		}
+	for (size_t offsetIndex = 0; offsetIndex < maxTableCount; ++offsetIndex) {
+		// select offset from current pass table if possible, but use "offsetsPrevious" as backup
+		const auto offset = (offsetIndex < offsets.size()) ? offsets[offsetIndex] : offsetsPrevious[offsetIndex];
+		EmitWord(offset);
 	}
+	warnAboutContentChange = (LASTPASS == pass);	// set in last pass to check consistency
 }
 
 void Relocation::InitPass() {
