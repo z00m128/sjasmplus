@@ -1,0 +1,34 @@
+# file opened: relocation_issue_with_max_count.asm
+ 1    0000                  ; the forward reference to reloc_label2 without knowing it's relocatable does cause
+ 2    0000                  ; "reloc_label2-reloc_label" to be reported as one more thing to relocate in pass 1
+ 3    0000                  ; thus the max_count is then 2 when pass 1 is finished = bug in early prototype
+ 4    0000                  ORG $1234
+ 5    1234
+ 6    1234                  RELOCATE_START
+ 7    1234
+ 8    1234                  ASSERT 2 * relocate_count == relocate_size
+ 9    1234                  ASSERT 1 == relocate_count
+10    1234 01 00            dw      relocate_count
+11    1236 02 00            dw      relocate_size
+12    1238
+13    1238              reloc_label:
+14    1238 21 38 12         ld      hl,reloc_label              ; relocation needed
+15    123B 01 06 00         ld      bc,reloc_label2-reloc_label ; no relocation
+16    123E
+17    123E              reloc_label2:
+18    123E
+19    123E                  RELOCATE_END
+20    123E
+21    123E 39 12            RELOCATE_TABLE
+22    1240
+23    1240                  ASSERT 0 == 0
+24    1240                  ASSERT 0 == 0
+25    1240
+# file closed: relocation_issue_with_max_count.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001   relocate_count
+0x0002   relocate_size
+0x1238   reloc_label
+0x123E   reloc_label2

@@ -132,8 +132,9 @@ void Relocation::InitPass() {
 	}
 	// keep copy of final offsets table from previous pass
 	offsetsPrevious = offsets;
-	// refresh the maximum count, clear the table for next pass and init the state
-	refreshMaxTableCount();
+	// set the final count as the new maximum count (doesn't matter if it is smaller/bigger than old)
+	maxTableCount = offsets.size();
+	// clear the table for next pass and init the state
 	offsets.clear();
 	isActive = false;
 }
