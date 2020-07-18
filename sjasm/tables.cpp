@@ -268,6 +268,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			label->page = getAddressPageNumber(nvalue, IsDEFL|IsEQU);
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
+			label->isRelocatable = Relocation::isActive && !(IsDEFL || IsEQU);
 			label->updatePass = pass;
 			return 1;
 		}
@@ -286,7 +287,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->value = nvalue;
 	label->used = undefined;
 	label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
-	label->isRelocatable = Relocation::isActive && !(IsDEFL || IsEQU);
+	label->isRelocatable = !undefined && Relocation::isActive && !(IsDEFL || IsEQU);
 	return 1;
 }
 
