@@ -1,0 +1,56 @@
+# file opened: relocation_multi_blocks.asm
+ 1    0000
+ 2    0000              ; first relocation block
+ 3    0000                  RELOCATE_START
+ 4    0000
+ 5    0000                  ORG $1000
+ 6    1000
+ 7    1000                  ASSERT 2 * relocate_count == relocate_size
+ 8    1000                  ASSERT 4 == relocate_count
+ 9    1000 04 00            dw      relocate_count
+10    1002 08 00            dw      relocate_size
+11    1004
+12    1004              reloc1:
+13    1004 21 04 10         ld      hl,reloc1           ; to be relocated
+14    1007 11 0C 20         ld      de,reloc2           ; to be relocated
+15    100A 01 08 10         ld      bc,reloc2-reloc1
+16    100D 31 DC 17         ld      sp,absolute1
+17    1010
+18    1010                  RELOCATE_END
+19    1010
+20    1010              ; no relocation area
+21    1010                  ORG $17DC
+22    17DC              absolute1:
+23    17DC 21 04 10         ld      hl,reloc1
+24    17DF 11 0C 20         ld      de,reloc2
+25    17E2 01 08 10         ld      bc,reloc2-reloc1
+26    17E5 31 DC 17         ld      sp,absolute1
+27    17E8
+28    17E8              ; second relocation block
+29    17E8                  RELOCATE_START
+30    17E8
+31    17E8                  ORG $2000
+32    2000
+33    2000 21 04 10         ld      hl,reloc1           ; to be relocated
+34    2003 11 0C 20         ld      de,reloc2           ; to be relocated
+35    2006 01 08 10         ld      bc,reloc2-reloc1
+36    2009 31 DC 17         ld      sp,absolute1
+37    200C              reloc2:
+38    200C
+39    200C 05 10 08 10      RELOCATE_TABLE
+39    2010 01 20 04 20
+40    2014
+41    2014                  RELOCATE_END
+42    2014
+43    2014                  ASSERT 0 == 0
+44    2014                  ASSERT 0 == 0
+45    2014
+# file closed: relocation_multi_blocks.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0004   relocate_count
+0x0008   relocate_size
+0x1004   reloc1
+0x200C   reloc2
+0x17DC   absolute1
