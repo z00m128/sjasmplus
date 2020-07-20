@@ -181,7 +181,9 @@ bool GetLabelValue(char*& p, aint& val) {
 	CLabelTableEntry* labelEntry = GetLabel(p);
 	if (labelEntry) {
 		val = labelEntry->value;
-		if (labelEntry->isRelocatable && Relocation::areLabelsOffset) val -= 0x0201;
+		if (labelEntry->isRelocatable && Relocation::areLabelsOffset) {
+			val += Relocation::ALTERNATIVE_OFFSET;
+		}
 	} else {
 		val = 0;
 	}
@@ -205,7 +207,7 @@ int GetLocalLabelValue(char*& op, aint& val) {
 	auto label = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
 	if (label) {
 		val = label->value;
-		Relocation::isResultAffected = label->isRelocatable;
+		Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
 	} else {
 		if (LASTPASS == pass) Error("Local label not found", numberB, SUPPRESS);
 		val = 0L;

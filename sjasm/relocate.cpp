@@ -39,6 +39,7 @@ static bool warnAboutContentChange = false;	// if any change in content between 
 bool Relocation::isActive = false;			// when inside relocation block
 bool Relocation::areLabelsOffset = false;	// when the Labels should return the alternative value
 bool Relocation::isResultAffected = false;	// when one of previous expression results was affected by it
+bool Relocation::isRelocatable = false;		// when isResultAffected && difference was precisely "+offset"
 
 // when some part of opcode needs relocation, add its offset to the relocation table
 void Relocation::addOffsetToRelocate(const aint offset) {
@@ -56,9 +57,16 @@ void Relocation::addOffsetToRelocate(const aint offset) {
 
 void Relocation::resolveRelocationAffected(const int opcodeRelOffset) {
 	if (!isResultAffected) return;
-	// the machine code is affected by relocation, add the offset to relocation table
 	isResultAffected = false;				// mark as processed
-	addOffsetToRelocate(CurAddress + opcodeRelOffset);
+	// the machine code is affected by relocation, check if the difference is relocatable, add to table
+	if (isRelocatable) {
+		addOffsetToRelocate(CurAddress + opcodeRelOffset);
+		return;
+	}
+	// difference is not fixable by simple "+offset" relocator, report it as warning
+	if (warningNotSuppressed()) {
+		Warning("Expression can't be relocated by simple \"+offset\" mechanics, value diverts differently.");
+	}
 }
 
 // directives implementation

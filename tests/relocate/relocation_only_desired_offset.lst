@@ -1,0 +1,43 @@
+# file opened: relocation_only_desired_offset.asm
+ 1    0000                  ORG $1000
+ 2    1000                  RELOCATE_START
+ 3    1000                  ASSERT 2 * relocate_count == relocate_size
+ 4    1000                  ASSERT 2 == relocate_count
+ 5    1000 02 00            dw      relocate_count
+ 6    1002 04 00            dw      relocate_size
+ 7    1004
+ 8    1004              reloc1:
+ 9    1004 21 04 10         ld      hl,reloc1           ; to be relocated
+10    1007 11 16 10         ld      de,reloc2           ; to be relocated
+11    100A 01 12 00         ld      bc,reloc2-reloc1    ; not affected by relocation
+12    100D 31 DC 17         ld      sp,absolute1        ; not affected by relocation
+relocation_only_desired_offset.asm(13): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+13    1010 21 2C 20         ld      hl,reloc2*2         ; affected but not relocated (invalid difference) (warning)
+14    1013 21 2C 20         ld      hl,reloc2*2         ; ok ; warning suppressed
+15    1016
+16    1016              reloc2:
+17    1016                  RELOCATE_END
+18    1016
+19    1016              ; no relocation area (no warnings, no relocation data)
+20    1016                  ORG $17DC
+21    17DC              absolute1:
+22    17DC 21 04 10         ld      hl,reloc1
+23    17DF 11 16 10         ld      de,reloc2
+24    17E2 01 12 00         ld      bc,reloc2-reloc1
+25    17E5 31 DC 17         ld      sp,absolute1
+26    17E8 21 2C 20         ld      hl,reloc2*2
+27    17EB
+28    17EB 05 10 08 10      RELOCATE_TABLE
+29    17EF
+30    17EF                  ASSERT 0 == 0
+31    17EF                  ASSERT 1 == 1
+32    17EF
+# file closed: relocation_only_desired_offset.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002   relocate_count
+0x0004   relocate_size
+0x1004   reloc1
+0x1016   reloc2
+0x17DC   absolute1

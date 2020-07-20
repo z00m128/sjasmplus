@@ -325,7 +325,11 @@ int ParseExpression(char*& p, aint& nval) {
 	// if relocation is off, or the alternative run did finish already, do regular evaluation
 	int res = ParseExpressionEntry(p, nval);
 	// set the Relocation::isResultAffected if the two alternative results are different
-	if (res && relocationRes) Relocation::isResultAffected |= (relocationVal != nval);
+	if (res && relocationRes) {
+		const bool isAffected = (relocationVal != nval);
+		Relocation::isResultAffected |= isAffected;
+		Relocation::isRelocatable = isAffected && (Relocation::ALTERNATIVE_OFFSET == (relocationVal - nval));
+	}
 	return res;
 }
 

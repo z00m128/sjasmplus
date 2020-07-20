@@ -31,9 +31,16 @@
 #define __RELOCATE_H__
 
 namespace Relocation {
+	constexpr aint ALTERNATIVE_OFFSET = -0x0201;
+
 	extern bool isActive;			// when inside relocation block
 	extern bool areLabelsOffset;	// when labels should evaluate to alternative values
-	extern bool isResultAffected;	// when one of previous expression results was affected by it
+
+	// when one of previous expression results was affected by alternative values
+	extern bool isResultAffected;	// cumulative for all expression evaluation calls since last clear
+
+	// when isResultAffected && can be relocated by simple +offset
+	extern bool isRelocatable;		// valid value only for last expression evaluated
 
 	// when some part of opcode needs relocation, add its offset to the relocation table
 	void addOffsetToRelocate(const aint offset);
