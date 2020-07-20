@@ -259,6 +259,10 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 		Error("Label table full", NULL, FATAL);
 	}
 
+	// the EQU/DEFL is relocatable when the expression itself is relocatable
+	// the regular label is relocatable when relocation is active
+	const bool isRelocatable = (IsDEFL || IsEQU) ? \
+			Relocation::isResultAffected && Relocation::isRelocatable : Relocation::isActive;
 	// Find label in label table
 	CLabelTableEntry* label = Find(nname);
 	if (label) {
@@ -270,7 +274,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			label->page = getAddressPageNumber(nvalue, IsDEFL|IsEQU);
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
-			label->isRelocatable = Relocation::isActive && !(IsDEFL || IsEQU);
+			label->isRelocatable = isRelocatable;
 			label->updatePass = pass;
 			return 1;
 		}
@@ -289,7 +293,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->value = nvalue;
 	label->used = undefined;
 	label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
-	label->isRelocatable = !undefined && Relocation::isActive && !(IsDEFL || IsEQU);
+	label->isRelocatable = !undefined && isRelocatable;		// ignore "relocatable" for "undefined"
 	return 1;
 }
 

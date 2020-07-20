@@ -1,0 +1,53 @@
+# file opened: relocation_transitive_equ.asm
+ 1    0000                  ORG $1000
+ 2    1000                  RELOCATE_START
+ 3    1000                  ASSERT 2 * relocate_count == relocate_size
+ 4    1000                  ASSERT 1 == relocate_count
+ 5    1000 01 00            dw      relocate_count
+ 6    1002 02 00            dw      relocate_size
+ 7    1004
+ 8    1004              reloc1:
+ 9    1004
+10    1004              equRel      EQU     reloc1 + $0203
+11    1004              equNoRel    EQU     reloc2 - reloc1
+12    1004              equAbs      EQU     absolute1
+13    1004              equNoRel2   EQU     reloc1 * 3  ; can't be easily relocated by "+offset" - silent drop of flag
+14    1004
+15    1004 21 07 12         ld      hl,equRel           ; to be relocated
+16    1007 11 12 00         ld      de,equNoRel         ; not affected by relocation
+17    100A 01 DC 17         ld      bc,equAbs           ; not affected by relocation
+relocation_transitive_equ.asm(18): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+18    100D 21 0E 24         ld      hl,equRel*2         ; affected but not relocated (invalid difference) (warning)
+19    1010 11 0E 24         ld      de,equRel*2         ; ok ; suppressed warning
+20    1013 01 0C 30         ld      bc,equNoRel2        ; not affected by relocation
+21    1016
+22    1016              reloc2:
+23    1016                  RELOCATE_END
+24    1016
+25    1016              ; no relocation area (no warnings, no relocation data)
+26    1016                  ORG $17DC
+27    17DC              absolute1:
+28    17DC 21 07 12         ld      hl,equRel
+29    17DF 11 12 00         ld      de,equNoRel
+30    17E2 01 DC 17         ld      bc,equAbs
+31    17E5 21 0E 24         ld      hl,equRel*2
+32    17E8 01 0C 30         ld      bc,equNoRel2
+33    17EB
+34    17EB 05 10            RELOCATE_TABLE
+35    17ED
+36    17ED                  ASSERT 0 == 0
+37    17ED                  ASSERT 1 == 1
+38    17ED
+# file closed: relocation_transitive_equ.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001   relocate_count
+0x0002   relocate_size
+0x1004   reloc1
+0x1207   equRel
+0x1016   reloc2
+0x0012   equNoRel
+0x17DC   absolute1
+0x17DC   equAbs
+0x300C   equNoRel2

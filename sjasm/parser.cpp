@@ -586,7 +586,8 @@ void ParseLabel() {
 		}
 		bool IsDEFL = NeedDEFL(), IsEQU = NeedEQU();
 		if (IsDEFL || IsEQU) {
-			if (!ParseExpressionEntry(lp, val)) {
+			Relocation::isResultAffected = false;
+			if (!ParseExpression(lp, val)) {
 				Error("Expression error", lp);
 				val = 0;
 			}
