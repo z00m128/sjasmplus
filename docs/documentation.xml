@@ -2586,7 +2586,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_relocate_table" />RELOCATE_TABLE</term>
+            <term><anchor id="po_relocate_table" />RELOCATE_TABLE [&lt;subtract_offset&gt;]</term>
 
             <listitem>
               <para>Emits relocation data gathered across all relocation blocks. There are also
@@ -2597,6 +2597,8 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 				  code which should be adjusted (when the code is relocated to different than original
 				  base address). To base offsets from particular base address, use <link linkend="po_org">ORG</link>
 				  ahead of relocation block to land instructions and labels from there.</para>
+              <para>The &lt;subtract_offset&gt; is just subtracted from every offset recorded in the
+				  relocation table (same what WinAPE does with its optional argument for RELOCATE_TABLE).</para>
             </listitem>
           </varlistentry>
 

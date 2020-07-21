@@ -121,12 +121,19 @@ void Relocation::dirRELOCATE_END() {
 }
 
 void Relocation::dirRELOCATE_TABLE() {
+	aint subtract_offset = 0;
+	if (!SkipBlanks(lp)) {	// should be either empty remaining of line, or <subtract_offset>
+		if (!ParseExpressionNoSyntaxError(lp, subtract_offset)) {
+			Error("[RELOCATE_TABLE] Syntax error in <subtract_offset>", bp, SUPPRESS);
+			return;
+		}
+	}
 	refreshMaxTableCount();
 	// dump the table into machine code output
 	for (size_t offsetIndex = 0; offsetIndex < maxTableCount; ++offsetIndex) {
 		// select offset from current pass table if possible, but use "offsetsPrevious" as backup
 		const auto offset = (offsetIndex < offsets.size()) ? offsets[offsetIndex] : offsetsPrevious[offsetIndex];
-		EmitWord(offset);
+		EmitWord(offset - subtract_offset);
 	}
 	warnAboutContentChange = (LASTPASS == pass);	// set in last pass to check consistency
 }
