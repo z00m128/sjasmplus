@@ -1,0 +1,330 @@
+# file opened: relocation_nested_struct.asm
+  1   0000                  ORG $1000
+  2   1000                  RELOCATE_START
+  3   1000                  ASSERT 2 * relocate_count == relocate_size
+  4   1000                  ASSERT 19 == relocate_count
+  5   1000 13 00            dw      relocate_count
+  6   1002 26 00            dw      relocate_size
+  7   1004
+  8   1004                  STRUCT st1
+  9   1004 ~            b       BYTE    $12
+ 10   1004 ~            w       WORD    absolute1
+ 11   1004 ~            relInit WORD    reloc1          ; the default init value should be relocated
+ 12   1004 ~            noRel   WORD    reloc2-reloc1
+relocation_nested_struct.asm(13): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+ 13   1004 ~            badRel  WORD    2*reloc1        ; warning about not simple "+offset"
+ 14   1004                  ENDS
+ 15   1004
+ 16   1004                  STRUCT st2
+ 17   1004 ~            b       BYTE    $34
+ 18   1004 ~            w       WORD    absolute1
+ 19   1004 ~            relInit WORD    reloc2          ; the default init value should be relocated
+ 20   1004 ~            noRel   WORD    reloc2-reloc1
+relocation_nested_struct.asm(21): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+ 21   1004 ~            badRel  WORD    2*reloc2        ; warning about not simple "+offset"
+ 22   1004 ~            st1A    st1
+relocation_nested_struct.asm(23): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_nested_struct.asm(23): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+ 23   1004 ~            st1B    st1     { high reloc1, absolute2, reloc2, reloc1-reloc2, 2*reloc2 }
+ 24   1004                  ENDS
+ 25   1004
+ 26   1004              reloc1:
+ 27   1004
+ 28   1004                  ; instancing the struct in relocatable block
+ 29   1004 34 DC 87 BB  .t1 st2     {}                  ; default init (no warnings, those were at definition, but relocation data in table)
+ 29   1008 10 B7 00 76
+ 29   100C 21 12 DC 87
+ 29   1010 04 10 B7 00
+ 29   1014 08 20 10 58
+ 29   1018 88 BB 10 49
+ 29   101C FF 76 21
+ 30   101F              ; ^ expected relocation data: 07 10 10 10 19 10
+ 31   101F 34 DC 87 CD  .t2 st2     {,,$ABCD,,,{,,$ABCD,,},{$EF,,$ABCD,,}}   ; remove any relocatable data
+ 31   1023 AB B7 00 76
+ 31   1027 21 12 DC 87
+ 31   102B CD AB B7 00
+ 31   102F 08 20 EF 58
+ 31   1033 88 CD AB 49
+ 31   1037 FF 76 21
+relocation_nested_struct.asm(32): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_nested_struct.asm(32): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+ 32   103A 34 DC 87 CD  .t3 st2     {,,$ABCD,,,{high reloc2,,$ABCD,,},{$EF,,2*reloc1,,reloc2}}   ; some relocatable and 2x warnings
+ 32   103E AB B7 00 76
+ 32   1042 21 10 DC 87
+ 32   1046 CD AB B7 00
+ 32   104A 08 20 EF 58
+ 32   104E 88 08 20 49
+ 32   1052 FF BB 10
+ 33   1055              ; ^ expected relocation data: 53 10
+ 34   1055
+ 35   1055 DD 21 04 10      ld      ix,reloc1.t1        ; to be relocated (address of instance)
+ 36   1059 FD 21 1F 10      ld      iy,.t2              ; to be relocated (address of instance)
+ 37   105D
+ 38   105D                  ; using the struct offsets - no relocation data needed (offsets are relative values)
+ 39   105D DD 7E 09         ld      a,(ix+st2.st1A.b)
+ 40   1060 DD 7E 0A         ld      a,(ix+st2.st1A.w)
+ 41   1063 DD 7E 0C         ld      a,(ix+st2.st1A.relInit)
+ 42   1066 DD 7E 0E         ld      a,(ix+st2.st1A.noRel)
+ 43   1069 3E 1B            ld      a,st2               ; struct length is absolute
+ 44   106B 3E 12            ld      a,st2.st1B          ; offset to nested sub-structure is absolute
+ 45   106D
+ 46   106D                  ; using struct addresses - to be relocated
+ 47   106D 3A 0D 10         ld      a,(reloc1.t1.st1A.b)
+ 48   1070 2A 0E 10         ld      hl,(reloc1.t1.st1A.w)
+ 49   1073 ED 5B 10 10      ld      de,(reloc1.t1.st1A.relInit)
+ 50   1077 ED 4B 12 10      ld      bc,(reloc1.t1.st1A.noRel)
+ 51   107B 3A 31 10         ld      a,(.t2.st1B.b)
+ 52   107E 2A 32 10         ld      hl,(.t2.st1B.w)
+ 53   1081 ED 5B 34 10      ld      de,(.t2.st1B.relInit)
+ 54   1085 ED 4B 36 10      ld      bc,(.t2.st1B.noRel)
+ 55   1089
+ 56   1089                  ; using absolute struct instance = to be ignored
+ 57   1089 3A E5 87         ld      a,(absolute1.t1.st1A.b)
+ 58   108C 2A E6 87         ld      hl,(absolute1.t1.st1A.w)
+ 59   108F ED 5B E8 87      ld      de,(absolute1.t1.st1A.relInit)
+ 60   1093 ED 4B EA 87      ld      bc,(absolute1.t1.st1A.noRel)
+ 61   1097
+ 62   1097                  ; using alias instance placed at particular address
+ 63   1097              akaT1   st2 = .t1               ; transitive relocation - to be relocated
+ 64   1097 ED 5B 04 10      ld      de,(akaT1.b)
+ 65   109B ED 4B 05 10      ld      bc,(akaT1.w)
+ 66   109F 3A 16 10         ld      a,(akaT1.st1B.b)
+ 67   10A2 2A 17 10         ld      hl,(akaT1.st1B.w)
+ 68   10A5 DD 21 16 10      ld      ix,akaT1.st1B
+ 69   10A9
+ 70   10A9                  ; same alias test, but with absolute instance = no relocation data
+ 71   10A9              akaA1   st2 = absolute1.t1
+ 72   10A9 3A E5 87         ld      a,(akaA1.st1A.b)
+ 73   10AC 2A E6 87         ld      hl,(akaA1.st1A.w)
+ 74   10AF ED 5B E8 87      ld      de,(akaA1.st1A.relInit)
+ 75   10B3 ED 4B EA 87      ld      bc,(akaA1.st1A.noRel)
+ 76   10B7 DD 21 E5 87      ld      ix,akaA1.st1A
+ 77   10BB
+ 78   10BB              reloc2:
+ 79   10BB                  RELOCATE_END
+ 80   10BB
+ 81   10BB                  ORG $2000
+ 82   2000 07 10 10 10      RELOCATE_TABLE
+ 82   2004 19 10 53 10
+ 82   2008 57 10 5B 10
+ 82   200C 6E 10 71 10
+ 82   2010 75 10 79 10
+ 82   2014 7C 10 7F 10
+ 82   2018 83 10 87 10
+ 82   201C 99 10 9D 10
+ 82   2020 A0 10 A3 10
+ 82   2024 A7 10
+ 83   2026
+ 84   2026              ; no relocation area (no warnings, no relocation data)
+ 85   2026                  ORG $87DC
+ 86   87DC              absolute1:
+ 87   87DC
+ 88   87DC                  ; instancing the struct in absolute block - NOTHING to be relocated
+ 89   87DC 34 DC 87 BB  .t1 st2     {}
+ 89   87E0 10 B7 00 76
+ 89   87E4 21 12 DC 87
+ 89   87E8 04 10 B7 00
+ 89   87EC 08 20 10 58
+ 89   87F0 88 BB 10 49
+ 89   87F4 FF 76 21
+ 90   87F7                  ; no warning about unstable values or value being different
+ 91   87F7 34 DC 87 CD  .t2 st2     {,,$ABCD,,,{high reloc2,,$ABCD,,},{$EF,,2*reloc1,,reloc2}}
+ 91   87FB AB B7 00 76
+ 91   87FF 21 10 DC 87
+ 91   8803 CD AB B7 00
+ 91   8807 08 20 EF 58
+ 91   880B 88 08 20 49
+ 91   880F FF BB 10
+ 92   8812
+ 93   8812 DD 21 04 10      ld      ix,reloc1.t1        ; not to be relocated even when using relocatable instance
+ 94   8816 FD 21 F7 87      ld      iy,absolute1.t2
+ 95   881A
+ 96   881A                  ; using the struct offsets - no relocation data needed (offsets are relative values)
+ 97   881A DD 7E 09         ld      a,(ix+st2.st1A.b)
+ 98   881D DD 7E 0A         ld      a,(ix+st2.st1A.w)
+ 99   8820 DD 7E 0C         ld      a,(ix+st2.st1A.relInit)
+100   8823 DD 7E 0E         ld      a,(ix+st2.st1A.noRel)
+101   8826 3E 1B            ld      a,st2               ; struct length is absolute
+102   8828 3E 12            ld      a,st2.st1B          ; offset to nested sub-structure is absolute
+103   882A
+104   882A                  ; using struct addresses (relocatable ones and absolute ones - either should be NOT relocated)
+105   882A 3A 0D 10         ld      a,(reloc1.t1.st1A.b)
+106   882D 2A 0E 10         ld      hl,(reloc1.t1.st1A.w)
+107   8830 ED 5B 10 10      ld      de,(reloc1.t1.st1A.relInit)
+108   8834 ED 4B 12 10      ld      bc,(reloc1.t1.st1A.noRel)
+109   8838 3A 09 88         ld      a,(absolute1.t2.st1B.b)
+110   883B 2A 0A 88         ld      hl,(absolute1.t2.st1B.w)
+111   883E ED 5B 0C 88      ld      de,(absolute1.t2.st1B.relInit)
+112   8842 ED 4B 0E 88      ld      bc,(absolute1.t2.st1B.noRel)
+113   8846
+114   8846                  ; using relocatable alias (outside of block = no relocation)
+115   8846 ED 5B 04 10      ld      de,(akaT1.b)
+116   884A ED 4B 05 10      ld      bc,(akaT1.w)
+117   884E 3A 16 10         ld      a,(akaT1.st1B.b)
+118   8851 2A 17 10         ld      hl,(akaT1.st1B.w)
+119   8854 DD 21 16 10      ld      ix,akaT1.st1B
+120   8858              absolute2:
+121   8858
+122   8858                  ASSERT 0 == 0
+123   8858                  ASSERT 6 == 6
+124   8858
+# file closed: relocation_nested_struct.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0013   relocate_count
+0x0026   relocate_size
+0x87DC   absolute1
+0x1004   reloc1
+0x10BB   reloc2
+0x0009 X st1
+0x0000 X st1.b
+0x0001 X st1.w
+0x0003 X st1.relInit
+0x0005 X st1.noRel
+0x0007 X st1.badRel
+0x8858   absolute2
+0x001B   st2
+0x0000 X st2.b
+0x0001 X st2.w
+0x0003 X st2.relInit
+0x0005 X st2.noRel
+0x0007 X st2.badRel
+0x0009 X st2.st1A
+0x0009   st2.st1A.b
+0x000A   st2.st1A.w
+0x000C   st2.st1A.relInit
+0x000E   st2.st1A.noRel
+0x0010 X st2.st1A.badRel
+0x0012   st2.st1B
+0x0012 X st2.st1B.b
+0x0013 X st2.st1B.w
+0x0015 X st2.st1B.relInit
+0x0017 X st2.st1B.noRel
+0x0019 X st2.st1B.badRel
+0x1004   reloc1.t1
+0x1004 X reloc1.t1.b
+0x1005 X reloc1.t1.w
+0x1007 X reloc1.t1.relInit
+0x1009 X reloc1.t1.noRel
+0x100B X reloc1.t1.badRel
+0x100D X reloc1.t1.st1A
+0x100D   reloc1.t1.st1A.b
+0x100E   reloc1.t1.st1A.w
+0x1010   reloc1.t1.st1A.relInit
+0x1012   reloc1.t1.st1A.noRel
+0x1014 X reloc1.t1.st1A.badRel
+0x1016 X reloc1.t1.st1B
+0x1016 X reloc1.t1.st1B.b
+0x1017 X reloc1.t1.st1B.w
+0x1019 X reloc1.t1.st1B.relInit
+0x101B X reloc1.t1.st1B.noRel
+0x101D X reloc1.t1.st1B.badRel
+0x101F   reloc1.t2
+0x101F X reloc1.t2.b
+0x1020 X reloc1.t2.w
+0x1022 X reloc1.t2.relInit
+0x1024 X reloc1.t2.noRel
+0x1026 X reloc1.t2.badRel
+0x1028 X reloc1.t2.st1A
+0x1028 X reloc1.t2.st1A.b
+0x1029 X reloc1.t2.st1A.w
+0x102B X reloc1.t2.st1A.relInit
+0x102D X reloc1.t2.st1A.noRel
+0x102F X reloc1.t2.st1A.badRel
+0x1031 X reloc1.t2.st1B
+0x1031   reloc1.t2.st1B.b
+0x1032   reloc1.t2.st1B.w
+0x1034   reloc1.t2.st1B.relInit
+0x1036   reloc1.t2.st1B.noRel
+0x1038 X reloc1.t2.st1B.badRel
+0x103A X reloc1.t3
+0x103A X reloc1.t3.b
+0x103B X reloc1.t3.w
+0x103D X reloc1.t3.relInit
+0x103F X reloc1.t3.noRel
+0x1041 X reloc1.t3.badRel
+0x1043 X reloc1.t3.st1A
+0x1043 X reloc1.t3.st1A.b
+0x1044 X reloc1.t3.st1A.w
+0x1046 X reloc1.t3.st1A.relInit
+0x1048 X reloc1.t3.st1A.noRel
+0x104A X reloc1.t3.st1A.badRel
+0x104C X reloc1.t3.st1B
+0x104C X reloc1.t3.st1B.b
+0x104D X reloc1.t3.st1B.w
+0x104F X reloc1.t3.st1B.relInit
+0x1051 X reloc1.t3.st1B.noRel
+0x1053 X reloc1.t3.st1B.badRel
+0x87E5   absolute1.t1.st1A.b
+0x87E6   absolute1.t1.st1A.w
+0x87E8   absolute1.t1.st1A.relInit
+0x87EA   absolute1.t1.st1A.noRel
+0x1004 X akaT1
+0x1004   akaT1.b
+0x1005   akaT1.w
+0x1007 X akaT1.relInit
+0x1009 X akaT1.noRel
+0x100B X akaT1.badRel
+0x100D X akaT1.st1A
+0x100D X akaT1.st1A.b
+0x100E X akaT1.st1A.w
+0x1010 X akaT1.st1A.relInit
+0x1012 X akaT1.st1A.noRel
+0x1014 X akaT1.st1A.badRel
+0x1016   akaT1.st1B
+0x1016   akaT1.st1B.b
+0x1017   akaT1.st1B.w
+0x1019 X akaT1.st1B.relInit
+0x101B X akaT1.st1B.noRel
+0x101D X akaT1.st1B.badRel
+0x87DC   absolute1.t1
+0x87DC X akaA1
+0x87DC X akaA1.b
+0x87DD X akaA1.w
+0x87DF X akaA1.relInit
+0x87E1 X akaA1.noRel
+0x87E3 X akaA1.badRel
+0x87E5   akaA1.st1A
+0x87E5   akaA1.st1A.b
+0x87E6   akaA1.st1A.w
+0x87E8   akaA1.st1A.relInit
+0x87EA   akaA1.st1A.noRel
+0x87EC X akaA1.st1A.badRel
+0x87EE X akaA1.st1B
+0x87EE X akaA1.st1B.b
+0x87EF X akaA1.st1B.w
+0x87F1 X akaA1.st1B.relInit
+0x87F3 X akaA1.st1B.noRel
+0x87F5 X akaA1.st1B.badRel
+0x87DC X absolute1.t1.b
+0x87DD X absolute1.t1.w
+0x87DF X absolute1.t1.relInit
+0x87E1 X absolute1.t1.noRel
+0x87E3 X absolute1.t1.badRel
+0x87E5 X absolute1.t1.st1A
+0x87EC X absolute1.t1.st1A.badRel
+0x87EE X absolute1.t1.st1B
+0x87EE X absolute1.t1.st1B.b
+0x87EF X absolute1.t1.st1B.w
+0x87F1 X absolute1.t1.st1B.relInit
+0x87F3 X absolute1.t1.st1B.noRel
+0x87F5 X absolute1.t1.st1B.badRel
+0x87F7   absolute1.t2
+0x87F7 X absolute1.t2.b
+0x87F8 X absolute1.t2.w
+0x87FA X absolute1.t2.relInit
+0x87FC X absolute1.t2.noRel
+0x87FE X absolute1.t2.badRel
+0x8800 X absolute1.t2.st1A
+0x8800 X absolute1.t2.st1A.b
+0x8801 X absolute1.t2.st1A.w
+0x8803 X absolute1.t2.st1A.relInit
+0x8805 X absolute1.t2.st1A.noRel
+0x8807 X absolute1.t2.st1A.badRel
+0x8809 X absolute1.t2.st1B
+0x8809   absolute1.t2.st1B.b
+0x880A   absolute1.t2.st1B.w
+0x880C   absolute1.t2.st1B.relInit
+0x880E   absolute1.t2.st1B.noRel
+0x8810 X absolute1.t2.st1B.badRel

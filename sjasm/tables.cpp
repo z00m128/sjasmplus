@@ -1104,8 +1104,13 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 		case SMEMBD24:
 		case SMEMBDWORD:
 			{
-				if (!ParseExpressionNoSyntaxError(lp, val)) val = ip->def;
-				const bool isRelocatable = SMEMBWORD == ip->type && Relocation::isResultAffected && Relocation::isRelocatable;
+				bool isRelocatable = false;
+				if (ParseExpressionNoSyntaxError(lp, val)) {
+					isRelocatable = SMEMBWORD == ip->type && Relocation::isResultAffected && Relocation::isRelocatable;
+				} else {
+					val = ip->def;
+					isRelocatable = ip->defRelocatable;
+				}
 				CopyMember(ip, val, isRelocatable);
 				if (SMEMBWORD == ip->type) {
 					Relocation::resolveRelocationAffected(INT_MAX);	// clear flags + warn when can't be relocated
