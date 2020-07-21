@@ -218,10 +218,12 @@ public:
 
 class CStructureEntry2 {
 public:
-	aint offset, len, def;
-	EStructureMembers type;
 	CStructureEntry2* next;
-	CStructureEntry2(aint noffset, aint nlen, aint ndef, EStructureMembers ntype);
+	aint offset, len, def;
+	bool defRelocatable;
+	EStructureMembers type;
+
+	CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndefrel, EStructureMembers ntype);
 	~CStructureEntry2();
 	aint ParseValue(char* & p);
 };
@@ -236,10 +238,10 @@ public:
 	void AddMember(CStructureEntry2*);
 	void CopyLabel(char*, aint);
 	void CopyLabels(CStructure*);
-	void CopyMember(CStructureEntry2*, aint);
+	void CopyMember(CStructureEntry2* item, aint newDefault, bool newDefIsRelative);
 	void CopyMembers(CStructure*, char*&);
 	void deflab();
-	void emitlab(char* iid, aint address);
+	void emitlab(char* iid, aint address, bool isRelocatable);
 	void emitmembs(char*&);
 	CStructure* next;
 	CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p);

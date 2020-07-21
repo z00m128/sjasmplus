@@ -60,12 +60,24 @@ void Relocation::resolveRelocationAffected(const int opcodeRelOffset) {
 	isResultAffected = false;				// mark as processed
 	// the machine code is affected by relocation, check if the difference is relocatable, add to table
 	if (isRelocatable) {
-		addOffsetToRelocate(CurAddress + opcodeRelOffset);
+		if (INT_MAX != opcodeRelOffset) {
+			addOffsetToRelocate(CurAddress + opcodeRelOffset);
+		}
 		return;
 	}
 	// difference is not fixable by simple "+offset" relocator, report it as warning
 	if (warningNotSuppressed()) {
 		Warning("Expression can't be relocated by simple \"+offset\" mechanics, value diverts differently.");
+	}
+}
+
+void Relocation::checkAndWarn() {
+	// if nothing is affected by relocation, do nothing here
+	if (!Relocation::isResultAffected) return;
+	// some result did set the "affected" flag, warn about it
+	Relocation::isResultAffected = false;
+	if (warningNotSuppressed()) {
+		Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
 	}
 }
 

@@ -688,7 +688,7 @@ int ParseMacro() {
 	}
 
 	// not a macro, see if it's structure
-	if (StructureTable.Emit(n, 0, p, gl)) {
+	if (StructureTable.Emit(n, nullptr, p, gl)) {
 		lp = p;
 		return 1;
 	}
@@ -865,6 +865,7 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 void ParseStructMember(CStructure* st) {
 	aint val, len;
 	bp = lp;
+	Relocation::isResultAffected = false;
 	switch (GetStructMemberId(lp)) {
 	case SMEMBBLOCK:
 		if (!ParseExpression(lp, len)) {
@@ -879,31 +880,36 @@ void ParseStructMember(CStructure* st) {
 		} else {
 			val = -1;
 		}
-		st->AddMember(new CStructureEntry2(st->noffset, len, val, SMEMBBLOCK));
+		st->AddMember(new CStructureEntry2(st->noffset, len, val, false, SMEMBBLOCK));
 		break;
 	case SMEMBBYTE:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		} check8(val);
-		st->AddMember(new CStructureEntry2(st->noffset, 1, val, SMEMBBYTE));
+		st->AddMember(new CStructureEntry2(st->noffset, 1, val, false, SMEMBBYTE));
 		break;
 	case SMEMBWORD:
-		if (!ParseExpression(lp, val)) {
-			val = 0;
-		} check16(val);
-		st->AddMember(new CStructureEntry2(st->noffset, 2, val, SMEMBWORD));
+		{
+			if (!ParseExpression(lp, val)) {
+				val = 0;
+			}
+			check16(val);
+			const bool isRelocatable = (Relocation::isResultAffected && Relocation::isRelocatable);
+			st->AddMember(new CStructureEntry2(st->noffset, 2, val, isRelocatable, SMEMBWORD));
+			Relocation::resolveRelocationAffected(INT_MAX);	// clear flags + warn when can't be relocated
+		}
 		break;
 	case SMEMBD24:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		} check24(val);
-		st->AddMember(new CStructureEntry2(st->noffset, 3, val, SMEMBD24));
+		st->AddMember(new CStructureEntry2(st->noffset, 3, val, false, SMEMBD24));
 		break;
 	case SMEMBDWORD:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		}
-		st->AddMember(new CStructureEntry2(st->noffset, 4, val, SMEMBDWORD));
+		st->AddMember(new CStructureEntry2(st->noffset, 4, val, false, SMEMBDWORD));
 		break;
 	case SMEMBALIGN:
 	{
@@ -914,7 +920,7 @@ void ParseStructMember(CStructure* st) {
 		aint bytesToAdvance = (~st->noffset + 1) & (val - 1);
 		if (bytesToAdvance < 1) break;		// already aligned, nothing to do
 		// create alignment block
-		st->AddMember(new CStructureEntry2(st->noffset, bytesToAdvance, fill, SMEMBBLOCK));
+		st->AddMember(new CStructureEntry2(st->noffset, bytesToAdvance, fill, false, SMEMBBLOCK));
 		break;
 	}
 	default:
@@ -947,6 +953,7 @@ void ParseStructMember(CStructure* st) {
 		}
 		break;
 	}
+	Relocation::checkAndWarn();
 }
 
 void ParseStructLine(CStructure* st) {

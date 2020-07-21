@@ -681,12 +681,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			break;
 		}
 	} while(comma(p) && t < 128);
-	if (Relocation::isResultAffected) {
-		// some result did set the "affected" flag, warn about it
-		if (warningNotSuppressed()) {
-			Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
-		}
-	}
+	Relocation::checkAndWarn();
 	e[t] = -1;
 	if (t == 128 && *p) Error("Over 128 bytes defined in single DB/DC/... Values over", p, SUPPRESS);
 	return t;

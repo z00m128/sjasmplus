@@ -53,12 +53,8 @@ namespace Z80 {
 			SkipToEol(lp);
 		} else {
 			// recognized instruction
-			if (Relocation::isResultAffected) {
-				// some result did set the "affected" flag, but it was not processed by instruction itself
-				if (warningNotSuppressed()) {
-					Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
-				}
-			}
+			// relocation: check if some expression is "affected", but not processed by instruction
+			Relocation::checkAndWarn();
 		}
 	}
 

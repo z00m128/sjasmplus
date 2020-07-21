@@ -47,6 +47,7 @@ namespace Relocation {
 
 	//convenience method to add particular spot in incoming machine code + clear the flag
 	void resolveRelocationAffected(const int opcodeRelOffset);
+	void checkAndWarn();
 
 	// directives implementation
 	void dirRELOCATE_START();
