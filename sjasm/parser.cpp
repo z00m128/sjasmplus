@@ -87,6 +87,9 @@ static int ParseExpPrim(char*& p, aint& nval) {
 	} else if (*p == '$') {
 		++p;
 		nval = CurAddress;
+		if (Relocation::isActive && Relocation::areLabelsOffset) {
+			nval += Relocation::ALTERNATIVE_OFFSET;
+		}
 		return 1;
 	} else if (!(res = GetCharConst(p, nval))) {
 		if (synerr) Error("Syntax error", p, IF_FIRST);
