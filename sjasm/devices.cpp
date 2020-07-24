@@ -269,7 +269,7 @@ int CDevice::GetPageOfA16(int32_t address) {
 void CDevice::CheckPage(const ECheckPageLevel level) {
 	// fake DISP address gets auto-wrapped FFFF->0 (with warning only)
 	// only with "emit" mode, labels may get the value 0x10000 before the address gets truncated
-	if (PseudoORG && CHECK_NO_EMIT != level && 0x10000 <= CurAddress) {
+	if (DISP_NONE != PseudoORG && CHECK_NO_EMIT != level && 0x10000 <= CurAddress) {
 		if (LASTPASS == pass) {
 			char buf[64];
 			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by DISP", (unsigned int)CurAddress);
@@ -278,7 +278,7 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 		CurAddress &= 0xFFFF;
 	}
 	// check the emit address for bytecode
-	const int realAddr = PseudoORG ? adrdisp : CurAddress;
+	const int realAddr = DISP_NONE != PseudoORG ? adrdisp : CurAddress;
 	// quicker check to avoid scanning whole slots array every byte
 	if (CHECK_RESET != level
 		&& Slots[previousSlotI]->Address <= realAddr
@@ -328,7 +328,7 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 				}
 				prevS->Page = Pages[nextPageN];		// map next page into the guarded slot
 				Page = prevS->Page;
-				if (PseudoORG) adrdisp -= prevS->Size;
+				if (DISP_NONE != PseudoORG) adrdisp -= prevS->Size;
 				else CurAddress -= prevS->Size;
 				MemoryPointer = Page->RAM;
 				return;		// preserve current option status

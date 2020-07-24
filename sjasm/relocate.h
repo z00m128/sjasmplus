@@ -42,12 +42,9 @@ namespace Relocation {
 	// when isResultAffected && can be relocated by simple +offset
 	extern bool isRelocatable;		// valid value only for last expression evaluated
 
-	// when some part of opcode needs relocation, add its offset to the relocation table
-	void addOffsetToRelocate(const aint offset);
-
 	//convenience method to add particular spot in incoming machine code + clear the flag
-	void resolveRelocationAffected(const int opcodeRelOffset);
-	void checkAndWarn();
+	void resolveRelocationAffected(const aint opcodeRelOffset);
+	bool checkAndWarn(bool doError = false);
 
 	// directives implementation
 	void dirRELOCATE_START();

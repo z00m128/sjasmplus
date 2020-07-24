@@ -87,7 +87,7 @@ static int ParseExpPrim(char*& p, aint& nval) {
 	} else if (*p == '$') {
 		++p;
 		nval = CurAddress;
-		if (Relocation::isActive && Relocation::areLabelsOffset) {
+		if (Relocation::isActive && Relocation::areLabelsOffset && DISP_INSIDE_RELOCATE != PseudoORG) {
 			nval += Relocation::ALTERNATIVE_OFFSET;
 		}
 		return 1;
@@ -710,7 +710,7 @@ void ParseInstruction() {
 	// SLD (Source Level Debugging) tracing-data logging
 	if (IsSldExportActive()) {
 		int pageNum = Page->Number;
-		if (PseudoORG) {
+		if (DISP_NONE != PseudoORG) {
 			int mappingPageNum = Device->GetPageOfA16(CurAddress);
 			if (LABEL_PAGE_UNDEFINED == dispPageNum) {	// special DISP page is not set, use mapped
 				pageNum = mappingPageNum;

@@ -29,20 +29,29 @@
 
 #include "sjdefs.h"
 
-// local implementation specific data
-static TextFilePos startPos;				// sourcefile position of last correct RELOCATE_START
-static size_t maxTableCount = 0;			// maximum count of relocation data
-static std::vector<word> offsets;			// offsets collected during current pass
-static std::vector<word> offsetsPrevious;	// offsets from pass2 (to be exported if pass3 is incomplete)
-static bool warnAboutContentChange = false;	// if any change in content between passes should be reported
+// local implementation stuff (shouldn't be visible through the header)
+namespace Relocation {
+	// when some part of opcode needs relocation, add its offset to the relocation table
+	static void addOffsetToRelocate(const aint offset);
 
-bool Relocation::isActive = false;			// when inside relocation block
-bool Relocation::areLabelsOffset = false;	// when the Labels should return the alternative value
-bool Relocation::isResultAffected = false;	// when one of previous expression results was affected by it
-bool Relocation::isRelocatable = false;		// when isResultAffected && difference was precisely "+offset"
+	static void refreshMaxTableCount();
+
+	// local implementation specific data
+	static TextFilePos startPos;				// sourcefile position of last correct RELOCATE_START
+	static size_t maxTableCount = 0;			// maximum count of relocation data
+	static std::vector<word> offsets;			// offsets collected during current pass
+	static std::vector<word> offsetsPrevious;	// offsets from pass2 (to be exported if pass3 is incomplete)
+	static bool warnAboutContentChange = false;	// if any change in content between passes should be reported
+
+	// public API variables
+	bool isActive = false;			// when inside relocation block
+	bool areLabelsOffset = false;	// when the Labels should return the alternative value
+	bool isResultAffected = false;	// when one of previous expression results was affected by it
+	bool isRelocatable = false;		// when isResultAffected && difference was precisely "+offset"
+}
 
 // when some part of opcode needs relocation, add its offset to the relocation table
-void Relocation::addOffsetToRelocate(const aint offset) {
+static void Relocation::addOffsetToRelocate(const aint offset) {
 	// if table was already emitted from previous pass copy, warn about value discrepancies
 	if (warnAboutContentChange) {
 		const size_t newIndex = offsets.size();
@@ -55,13 +64,14 @@ void Relocation::addOffsetToRelocate(const aint offset) {
 	offsets.push_back(offset);
 }
 
-void Relocation::resolveRelocationAffected(const int opcodeRelOffset) {
+void Relocation::resolveRelocationAffected(const aint opcodeRelOffset) {
 	if (!isResultAffected) return;
 	isResultAffected = false;				// mark as processed
 	// the machine code is affected by relocation, check if the difference is relocatable, add to table
 	if (isRelocatable) {
 		if (INT_MAX != opcodeRelOffset) {
-			addOffsetToRelocate(CurAddress + opcodeRelOffset);
+			const aint address = (DISP_INSIDE_RELOCATE == PseudoORG) ? adrdisp : CurAddress;
+			addOffsetToRelocate(address + opcodeRelOffset);
 		}
 		return;
 	}
@@ -71,19 +81,22 @@ void Relocation::resolveRelocationAffected(const int opcodeRelOffset) {
 	}
 }
 
-void Relocation::checkAndWarn() {
+bool Relocation::checkAndWarn(bool doError) {
 	// if nothing is affected by relocation, do nothing here
-	if (!Relocation::isResultAffected) return;
+	if (!Relocation::isResultAffected) return false;
 	// some result did set the "affected" flag, warn about it
 	Relocation::isResultAffected = false;
-	if (warningNotSuppressed()) {
+	if (doError) {
+		Error("Relocation makes one of the expressions unstable, use non-relocatable values only");
+	} else if (warningNotSuppressed()) {
 		Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
 	}
+	return true;
 }
 
 // directives implementation
 
-static void refreshMaxTableCount() {
+static void Relocation::refreshMaxTableCount() {
 	if (maxTableCount < offsets.size()) {
 		maxTableCount = offsets.size();
 	}
@@ -102,10 +115,6 @@ void Relocation::dirRELOCATE_START() {
 		Error(errTxt);
 		return;
 	}
-	if (PseudoORG) {
-		Error("Relocation block can't be used together with DISP");
-		return;
-	}
 	isActive = true;
 	startPos = CurSourcePos;
 	refreshMaxTableCount();
@@ -114,6 +123,10 @@ void Relocation::dirRELOCATE_START() {
 void Relocation::dirRELOCATE_END() {
 	if (!isActive) {
 		Error("Relocation block start for this end is missing");
+		return;
+	}
+	if (DISP_INSIDE_RELOCATE == PseudoORG) {
+		Error("End the current DISP block first");
 		return;
 	}
 	isActive = false;

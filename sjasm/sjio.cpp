@@ -235,13 +235,14 @@ void CheckRamLimitExceeded() {
 	char buf[64];
 	if (CurAddress >= 0x10000) {
 		if (LASTPASS == pass && notWarnedCurAdr) {
-			SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
+			SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s",
+					 (unsigned int)CurAddress, DISP_NONE != PseudoORG ? "DISP":"ORG");
 			Warning(buf);
 			notWarnedCurAdr = false;
 		}
-		if (PseudoORG) CurAddress &= 0xFFFF;	// fake DISP address gets auto-wrapped FFFF->0
+		if (DISP_NONE != PseudoORG) CurAddress &= 0xFFFF;	// fake DISP address gets auto-wrapped FFFF->0
 	} else notWarnedCurAdr = true;
-	if (PseudoORG && adrdisp >= 0x10000) {
+	if (DISP_NONE != PseudoORG && adrdisp >= 0x10000) {
 		if (LASTPASS == pass && notWarnedDisp) {
 			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
 			Warning(buf);
@@ -415,7 +416,7 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 		CheckRamLimitExceeded();
 	}
 	++CurAddress;
-	if (PseudoORG) ++adrdisp;
+	if (DISP_NONE != PseudoORG) ++adrdisp;
 }
 
 void EmitByte(int byte) {
@@ -451,7 +452,7 @@ void EmitWords(int* words) {
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
 	if (len <= 0) {
 		CurAddress = (CurAddress + len) & 0xFFFF;
-		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
+		if (DISP_NONE != PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
 		if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
 		else			CheckRamLimitExceeded();
 		return;
@@ -557,7 +558,7 @@ void BinIncFile(char* fname, int offset, int length) {
 			}
 			length -= advanceLength;
 			if (length <= 0 && 0 == advanceLength) Error("BinIncFile internal error", NULL, FATAL);
-			if (PseudoORG) adrdisp = adrdisp + advanceLength;
+			if (DISP_NONE != PseudoORG) adrdisp = adrdisp + advanceLength;
 			CurAddress = CurAddress + advanceLength;
 		}
 	} else {

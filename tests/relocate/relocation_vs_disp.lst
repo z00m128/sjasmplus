@@ -3,44 +3,54 @@
  2    1000
  3    1000                  RELOCATE_START
  4    1000
- 5    1000 03 00            dw      relocate_count
- 6    1002 06 00            dw      relocate_size
+ 5    1000 04 00            dw      relocate_count
+ 6    1002 08 00            dw      relocate_size
  7    1004
  8    1004              label1:
  9    1004 CD 04 10         call    label1
 10    1007
-relocation_vs_disp.asm(11): error: [DISP] can't be used together with Relocation block
-11    1007                  DISP    $2000       ; error about DISP inside relocation block
-12    1007 C3 04 10         jp      label1
-13    100A
-14    100A                  RELOCATE_END
-15    100A
-16    100A                  DISP    $3000
-17    3000 00               nop
-18    3001              label2:
-19    3001 CD 01 30         call    label2
-relocation_vs_disp.asm(20): error: Relocation block can't be used together with DISP
-20    3004                  RELOCATE_START      ; error about relocation block under DISP
-21    3004 CD 01 30         call    label2
-relocation_vs_disp.asm(22): error: Relocation block start for this end is missing
-22    3007                  RELOCATE_END        ; error about END without START
-23    3007                  ENT
-24    1011
-25    1011                  RELOCATE_START
-26    1011 CD 01 30         call    label2
-27    1014              label3:
-28    1014 CD 14 10         call    label3
-29    1017                  RELOCATE_END
-30    1017
-31    1017 05 10 08 10      RELOCATE_TABLE
-31    101B 15 10
-32    101D
+11    1007                  DISP    $2000
+12    2000 C3 04 10         jp      label1      ; should relocate but at the $100x address ($1008)
+13    2003
+relocation_vs_disp.asm(14): error: End the current DISP block first
+14    2003                  RELOCATE_END        ; error (inner-DISP is still open)
+15    2003
+relocation_vs_disp.asm(16): warning: [DISP] displacement inside another displacement block, ignoring it.
+16    2003                  DISP    $3000       ; DISP inside DISP, will get ignored
+17    2003                  ENT                 ; end the inner-DISP
+18    100A                  RELOCATE_END        ; end first relocation block
+19    100A
+20    100A                  DISP    $3000       ; outer-DISP
+21    3000 00               nop
+22    3001              label2:
+23    3001 CD 01 30         call    label2
+24    3004                  RELOCATE_START
+25    3004 CD 14 10         call    label3      ; should relocate at $300x address ($3005)
+relocation_vs_disp.asm(26): error: The DISP block did start outside of relocation block, can't end inside it
+26    3007                  ENT                 ; error - trying to end outer-DISP inside relocation
+27    3007                  RELOCATE_END        ; end relocation block
+28    3007                  ENT                 ; end outer-block
+29    1011
+30    1011                  RELOCATE_START
+31    1011 CD 01 30         call    label2
+32    1014              label3:
+33    1014 CD 14 10         call    label3      ; classic relocation
+34    1017                  RELOCATE_END
+35    1017
+36    1017 05 10 08 10      RELOCATE_TABLE
+36    101B 05 30 15 10
+37    101F
+38    101F                  ASSERT 2*relocate_count == relocate_size
+39    101F                  ASSERT 4 == relocate_count
+40    101F                  ASSERT 2 == 2
+41    101F                  ASSERT 1 == 1
+42    101F
 # file closed: relocation_vs_disp.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0003   relocate_count
-0x0006   relocate_size
+0x0004   relocate_count
+0x0008   relocate_size
 0x1004   label1
 0x3001   label2
 0x1014   label3

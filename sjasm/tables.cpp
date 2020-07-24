@@ -238,13 +238,13 @@ static short getAddressPageNumber(const aint address, bool forceRecalculateByAdd
 	// fast-shortcut for regular labels in current slot (if they fit into it)
 	auto slot = Device->GetCurrentSlot();
 	assert(Page && slot);
-	if (!forceRecalculateByAddress && !PseudoORG) {
+	if (!forceRecalculateByAddress && DISP_NONE == PseudoORG) {
 		if (slot->Address <= address && address < slot->Address + slot->Size) {
 			return Page->Number;
 		}
 	}
 	// enforce explicit request of fake DISP page
-	if (PseudoORG && LABEL_PAGE_UNDEFINED != dispPageNum) {
+	if (DISP_NONE != PseudoORG && LABEL_PAGE_UNDEFINED != dispPageNum) {
 		return dispPageNum;
 	}
 	// in other case (implicit DISP, out-of-slot-bounds or forceRecalculateByAddress)
@@ -262,7 +262,8 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	// the EQU/DEFL is relocatable when the expression itself is relocatable
 	// the regular label is relocatable when relocation is active
 	const bool isRelocatable = (IsDEFL || IsEQU) ? \
-			Relocation::isResultAffected && Relocation::isRelocatable : Relocation::isActive;
+			Relocation::isResultAffected && Relocation::isRelocatable : \
+			Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
 	// Find label in label table
 	CLabelTableEntry* label = Find(nname);
 	if (label) {
