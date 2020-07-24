@@ -20,4 +20,5 @@ label2:
 
     RELOCATE_TABLE
 
+    RELOCATE_END        ; error about missing START
     RELOCATE_START      ; error about missing END

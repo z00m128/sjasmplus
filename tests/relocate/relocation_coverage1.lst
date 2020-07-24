@@ -1,4 +1,4 @@
-relocation_coverage1.asm(23): error: Missing end of relocation block started here
+relocation_coverage1.asm(24): error: Missing end of relocation block started here
 # file opened: relocation_coverage1.asm
  1    0000                  ORG $1000
  2    1000
@@ -25,8 +25,10 @@ relocation_coverage1.asm(14): warning: Relocation makes one of the expressions u
 20    100F
 21    100F 05 10            RELOCATE_TABLE
 22    1011
-23    1011                  RELOCATE_START      ; error about missing END
-24    1011
+relocation_coverage1.asm(23): error: Relocation block start for this end is missing
+23    1011                  RELOCATE_END        ; error about missing START
+24    1011                  RELOCATE_START      ; error about missing END
+25    1011
 # file closed: relocation_coverage1.asm
 
 Value    Label
