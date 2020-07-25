@@ -4,7 +4,6 @@ sjio_coverage.asm(5): error: [EXPORT] Filename for exportfile was not indicated.
  2    0000                  OUTPUT "ignore.bin",r
  3    0000                  SIZE 1              ; will cause error about exceeeding output size
  4    0000                  OPT --syntax=w      ; warnings as errors
-sjio_coverage.asm(5): error: Label not found: error_about_default_file
  5    0000                  EXPORT error_about_default_file
 sjio_coverage.asm(6): error: ENDMODULE without MODULE
  6    0000                  ENDMODULE   ; error: without beginning of module

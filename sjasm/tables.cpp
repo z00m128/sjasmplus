@@ -163,7 +163,7 @@ static CLabelTableEntry* GetLabel(char*& p) {
 			LabelTable.Insert(findName, 0, true);
 			IsLabelNotFound = 1;
 		}
-		Error("Label not found", findName);
+		Error("Label not found", findName, IF_FIRST);
 	}
 	delete[] fullName;
 	return labelEntry;

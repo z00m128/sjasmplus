@@ -709,7 +709,9 @@ $c     hexadecimal
       precedence of the operators. The following operators may be used in
       expressions:</para>
 
-      <para><programlisting>!     !x       logical not
+      <para><programlisting>norel norel L  Label/symbol L will be treated as non-relocatable
+
+!     !x       logical not
 ~     ~x       complement
 +     +x       does "nothing", can be used to make "+(...)" parse as value (not as memory)
 -     -x       minus

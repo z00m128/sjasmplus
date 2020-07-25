@@ -99,6 +99,18 @@ static int ParseExpPrim(char*& p, aint& nval) {
 }
 
 static int ParseExpUnair(char*& p, aint& nval) {
+	SkipBlanks(p);
+	char* oldP = p;
+	if (cmphstr(p, "norel", true)) {
+		// switch off alternative relocation evaluation for the following part of expression
+		const bool oldAreLabelsOffset = Relocation::areLabelsOffset;
+		Relocation::areLabelsOffset = false;
+		int norelParseRes = ParseExpPrim(p, nval);			// higher priority than other unary
+		Relocation::areLabelsOffset = oldAreLabelsOffset;	// restore alternative evaluation
+		if (norelParseRes) return 1;
+		// "norel" operator didn't parse successfully, try to ignore it (will treat it as label)
+		p = oldP;
+	}
 	aint right;
 	int oper;
 	if ((oper = need(p, "! ~ + - ")) || \
