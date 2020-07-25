@@ -2,7 +2,9 @@
     DEVICE  ZXSPECTRUM48, $5D00
 
     ; prepare the code from address 0 to have table of offsets "from current address"
-    ORG     $0000
+    ; (but store the resulting code from $8000)
+    ORG     $8000
+    DISP    $0000
     RELOCATE_START
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -62,12 +64,6 @@ relocator_code:
 ;; is just small graphics effect using some hard-coded addresses which need
 ;; relocation - as demonstration of the functionality)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    IF 0    ; DEBUG use "1" to test large relocation table
-        DUP 300
-            jp      start
-        EDUP
-    ENDIF
 
     ; user code (will be relocated by relocator)
 start:
@@ -130,11 +126,11 @@ gfx_data:
 .lineSz EQU     ($ - gfx_data)/8
 
 scroll_addresses:
-    DW  $4800 + 3*32 + 12                           ; first byte on first line
-    DW  $4800 + 3*32 + 12 + gfx_data.lineSz - 1     ; last byte on first line
-    DUP     7
-        DW  { $ - 4 } + $100                        ; first byte on next line
-        DW  { $ - 4 } + $100                        ; last byte on next line
+vram_line_first_byte = $4800 + 3*32 + 12
+    DUP     8
+        DW  vram_line_first_byte                        ; first byte of line
+        DW  vram_line_first_byte + gfx_data.lineSz - 1  ; last byte of line
+vram_line_first_byte = vram_line_first_byte + $100
     EDUP
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -144,8 +140,10 @@ scroll_addresses:
 relocator_table:
     RELOCATE_TABLE
 
+; total size of code block
+code_size   EQU     $ - relocator_code
     RELOCATE_END
-code_size:                  ; total size of code block
+    ENT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BASIC loader for TAP file (in include file)
@@ -153,21 +151,12 @@ code_size:                  ; total size of code block
 
     INCLUDE "relocation_basic.i.asm"
 
-    MakeTape "relocate.tap", "relocate", relocator_code, code_size
+    MakeTape "relocate.tap", "relocate", $8000, code_size
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ZX48 SNA file for debugging (enable by "IF 1" change)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     IF 0    ; DEBUG use "1" to produce ZX48 snapshot file (simpler to debug in CSpect)
-        ; copy the code from $0000 to $a000 for SAVESNA
-        OPT listoff
-SNAadr  EQU $A000
-        ORG SNAadr
-copyAdr = 0
-        DUP code_size
-            DB {b copyAdr}
-copyAdr = copyAdr + 1
-        EDUP
-        SAVESNA "relocate.sna", SNAadr
+        SAVESNA "relocate.sna", $8000
     ENDIF
