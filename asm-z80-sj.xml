@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.1 12/01/2020
+  Version: 0.9.2 27/07/2020
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -15,8 +15,12 @@ Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
 
+  27/07/2020: version 0.9.2
+    + new directives added (RELOCATE_..., BPLIST, SETBP)
+    + new predefined defines, new "norel" operator
+
   12/01/2020: version 0.9.1
-    +  fix after-label argument order of rules to work better with numeric constants
+    + fix after-label argument order of rules to work better with numeric constants
 
   11/01/2020: version 0.9
     + new directives added (MMU, CSPECTMAP, SAVEDEV)
@@ -83,7 +87,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="10" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="11" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -244,6 +248,7 @@ TODO missing things:
       <item>align</item>
       <item>assert</item>
       <item>binary</item>
+      <item>bplist</item>
       <item>cspectmap</item>
       <item>defarray</item>
       <item>defdevice</item>
@@ -295,6 +300,9 @@ TODO missing things:
       <item>output</item>
       <item>page</item>
       <item>phase</item>
+      <item>relocate_end</item>
+      <item>relocate_start</item>
+      <item>relocate_table</item>
       <item>rept</item>
       <item>savebin</item>
       <item>savedev</item>
@@ -303,6 +311,8 @@ TODO missing things:
       <item>savesna</item>
       <item>savetap</item>
       <item>savetrd</item>
+      <item>setbp</item>
+      <item>setbreakpoint</item>
       <item>shellexec</item>
       <item>size</item>
       <item>slot</item>
@@ -315,16 +325,22 @@ TODO missing things:
     </list>
     <list name="operators"> <!-- TODO implement all of this -->
       <!-- Predefined values by assembler (not really an operator) -->
-      <item>_SJASMPLUS</item>
-      <item>_VERSION</item>
-      <item>_RELEASE</item>
-      <item>_ERRORS</item>
-      <item>_WARNINGS</item>
+      <item>__SJASMPLUS__</item>
+      <item>__VERSION__</item>
+      <item>__PASS__</item>
+      <item>__ERRORS__</item>
+      <item>__WARNINGS__</item>
+      <item>__INCLUDE_LEVEL__</item>
+      <item>__BASE_FILE__</item>
+      <item>__FILE__</item>
+      <item>__LINE__</item>
+      <item>__COUNTER__</item>
       <!-- Operators -->
       <item>and</item>
       <item>high</item>
       <item>low</item>
       <item>mod</item>
+      <item>norel</item>
       <item>not</item>
       <item>or</item>
       <item>shl</item>
