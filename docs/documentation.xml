@@ -191,6 +191,7 @@
             <listitem>
               <synopsis>- <link linkend="po_lua">`LUA`</link> thew new emit warning (v1.15.1) is now suppressible
 - <link linkend="s_predefined">Predefined defines</link> extended and renamed (following gcc/clang ones)
+- Added <link linkend="po_relocate_end">relocation data generator</link> (similar to WinAPE feature). Check also <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">example</ulink>.
 - bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by "("
 </synopsis>
             </listitem>
