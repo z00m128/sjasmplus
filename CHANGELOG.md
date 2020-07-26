@@ -1,3 +1,9 @@
+## [1.16.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.16.0) - 27.7.2020
+- `LUA` the new emit warning (v1.15.1) is now suppressible
+- Predefined defines extended and renamed (following gcc/clang ones)
+- Added [relocation data generator](http://z00m128.github.io/sjasmplus/documentation.html#po_relocate_end), check also [example](https://github.com/z00m128/sjasmplus/tree/master/examples/relocation)
+- bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by `(`
+
 ## [1.15.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.15.1) - 7.7.2020
 - `EQU` now assigns memory page to symbol based on the symbol value and current memory mapping
 - this does affect also results of `LABELSLIST` (Issue #111)

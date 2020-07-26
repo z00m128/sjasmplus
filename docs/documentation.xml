@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.15.1 Documentation [2020-07-07]</title>
+  <title>SjASMPlus 1.16.0 Documentation [2020-07-27]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -64,6 +64,10 @@
           </listitem>
 
           <listitem>
+            <para>Relocation data generator to support SymbOS-like relocation of executables</para>
+          </listitem>
+
+          <listitem>
             <para>Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op DEVICE)</para>
           </listitem>
 
@@ -77,7 +81,7 @@
 
           <listitem>
             <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
-            Cirrus-CI with 240+ automated tests</ulink> (that's also 240+ examples of usage!)</para>
+            Cirrus-CI with 380+ automated tests</ulink> (that's also 380+ examples of usage!)</para>
           </listitem>
 
           <listitem>
@@ -186,12 +190,12 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.15.2</term>
+            <term>27.7.2020 - 1.16.0</term>
 
             <listitem>
-              <synopsis>- <link linkend="po_lua">`LUA`</link> thew new emit warning (v1.15.1) is now suppressible
+              <synopsis>- <link linkend="po_lua">`LUA`</link> the new emit warning (v1.15.1) is now suppressible
 - <link linkend="s_predefined">Predefined defines</link> extended and renamed (following gcc/clang ones)
-- Added <link linkend="po_relocate_end">relocation data generator</link> (similar to WinAPE feature). Check also <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">example</ulink>.
+- Added <link linkend="po_relocate_end">relocation data generator</link> (similar to WinAPE feature), check also <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">example</ulink>
 - bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by "("
 </synopsis>
             </listitem>
@@ -2572,6 +2576,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 				  <link linkend="po_relocate_start">RELOCATE_START</link>). To get the relocation
 				  data themselves, use <link linkend="po_relocate_table">RELOCATE_TABLE</link> and
 				  related symbols.</para>
+			  <para>For more details/examples check the <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">examples/relocation</ulink> and the <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/relocate">relocation tests</ulink>.</para>
             </listitem>
           </varlistentry>
 
@@ -2585,6 +2590,10 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 				  needs resulting opcode adjusted when relocated to different address will produce
 				  relocation-data for the <link linkend="po_relocate_table">RELOCATE_TABLE</link>.
 				  </para>
+			  <para>The relocation feature of regular label is transitive and EQU value based on already
+				  relocatable label will be tagged as relocatable too. Also structures instantiated in
+				  relocatable block have their labels tagged as relocatable and their initial values may
+				  become part of relocation data if the initial value is based on relocatable value.</para>
             </listitem>
           </varlistentry>
 

@@ -277,7 +277,7 @@ void InitPass() {
 	DefineTable.Replace("_VERSION", "__VERSION__");
 	DefineTable.Replace("_ERRORS", "__ERRORS__");
 	DefineTable.Replace("_WARNINGS", "__WARNINGS__");
-	// predefined defines - sjasmplus v2.x-like (since v1.15.2)
+	// predefined defines - sjasmplus v2.x-like (since v1.16.0)
 	// __DATE__ and __TIME__ are defined just once in main(...) (stored in Options::CmdDefineTable)
 	DefineTable.Replace("__SJASMPLUS__", VERSION_NUM);		// modified from _SJASMPLUS
 	DefineTable.Replace("__VERSION__", "\"" VERSION "\"");	// migrated from _VERSION
