@@ -1,0 +1,39 @@
+relocation_coverage1.asm(24): error: Missing end of relocation block started here
+# file opened: relocation_coverage1.asm
+ 1    0000                  ORG $1000
+ 2    1000
+ 3    1000                  RELOCATE_START
+ 4    1000
+relocation_coverage1.asm(5): error: Relocation block already started at: relocation_coverage1.asm(3)
+ 5    1000                  RELOCATE_START      ; error 2x start
+ 6    1000
+ 7    1000 01 00            dw      relocate_count
+ 8    1002 02 00            dw      relocate_size
+ 9    1004
+10    1004              label1:
+11    1004 CD 04 10         call    label1
+relocation_coverage1.asm(12): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+12    1007 3E 10            ld      a,high label1   ; warning about unstable expression
+13    1009              label2:
+relocation_coverage1.asm(14): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+14    1009 3E 20            ld      a,high(4*label2) - high(2*label1)   ; warning about unstable expression
+15    100B 3E 00            ld      a,high(8*label2) - high(8*label1)   ; this one is stable (no warning)
+16    100D
+17    100D 3E 10            ld      a,high label2   ; ok ; warning supressed
+18    100F
+19    100F                  RELOCATE_END
+20    100F
+21    100F 05 10            RELOCATE_TABLE
+22    1011
+relocation_coverage1.asm(23): error: Relocation block start for this end is missing
+23    1011                  RELOCATE_END        ; error about missing START
+24    1011                  RELOCATE_START      ; error about missing END
+25    1011
+# file closed: relocation_coverage1.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001   relocate_count
+0x0002   relocate_size
+0x1004   label1
+0x1009   label2

@@ -1,0 +1,58 @@
+# file opened: relocation_0000_region.asm
+ 1    0000                  ; the implementation is providing alternate label values being offset by -0x0201
+ 2    0000                  ; to their real value. This test does try relocation blocks near beginnging and end
+ 3    0000                  ; of memory regions to verify that there is no connection between the -0x201 offset
+ 4    0000                  ; and assembling results (there should not be).
+ 5    0000
+ 6    0000                  ORG     0
+ 7    0000                  RELOCATE_START
+ 8    0000 02 00        label1:     DW      label2
+ 9    0002 21 00 00     label2:     ld      hl,label1
+10    0005 ED 5B 00 00              ld      de,(label1)
+11    0009 01 02 00                 ld      bc,label2 - label1
+12    000C CD 00 00                 call    label1
+13    000F CF                       rst     $08
+14    0010
+15    0010 00 00 03 00      RELOCATE_TABLE      ; first copy of relocate table
+15    0014 07 00 0D 00
+15    0018 F9 FF FD FF
+15    001C 00 00
+16    001E
+17    001E                  ; try ORG within the same block, try end region of memory
+18    001E                  ORG     $FFF8
+19    FFF8 C3 02 00     label3:     jp      label2
+20    FFFB F8 FF                    dw      label3 - label1
+21    FFFD F8 FF                    dw      label3
+22    FFFF                      ; check crossing memory limit by instruction in relocation block
+23    FFFF                      ; this emits "incosistent warning" because the table was already emitted
+24    FFFF                      ; but with truncated 0x0000 value, while the new value to be inserted
+25    FFFF                      ; is 0x10000
+relocation_0000_region.asm(26): warning: Relocation table seems internally inconsistent: table content differs in last pass
+relocation_0000_region.asm(26): warning: RAM limit exceeded 0x10000 by ORG
+26    FFFF CD F8 FF                 call    label3
+27    0002                  RELOCATE_END
+28    0002
+29    0002                  ; second copy of relocation table, make it fill memory up to 64kiB boundary
+30    0002                  ORG     $10000 - relocate_size
+31    FFF2 00 00 03 00      RELOCATE_TABLE
+31    FFF6 07 00 0D 00
+31    FFFA F9 FF FD FF
+31    FFFE 00 00
+32    0000
+33    0000                  ; third copy of relocation table, make it leak 1B beyond 0x10000
+34    0000                  ORG     $10000 - relocate_size + 1
+relocation_0000_region.asm(35): warning: RAM limit exceeded 0x10000 by ORG
+35    FFF3 00 00 03 00      RELOCATE_TABLE
+35    FFF7 07 00 0D 00
+35    FFFB F9 FF FD FF
+35    FFFF 00 00
+36    0001
+# file closed: relocation_0000_region.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0007 X relocate_count
+0x000E   relocate_size
+0x0000   label1
+0x0002   label2
+0xFFF8   label3

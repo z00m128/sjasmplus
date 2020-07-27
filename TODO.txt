@@ -5,6 +5,8 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+? refactor temporary labels from double-linked list to simple vector ?
+
 add block/reserve which does really preserve the device memory content (currently only the
 structure block+align does preserve memory, and standalone ALIGN, but not DS/BLOCK)
 
@@ -30,14 +32,6 @@ ARM emulation on x86: https://github.com/nongiach/arm_now  ???
     https://github.com/z00m128/zmakebas (edited)
 
 +3DOS v pythone: https://github.com/shred/nextskeleton/blob/master/skeleton/tools/makeautoexec.py
-
-
-`make install` doesn't refresh binary???
-(does link, but doesn't use the new library, but old)
- --- not sure what was this varmfskii report about, the Makefile is now tuned a bit any way
- -- maybe dependencies? (but it did sound like after clean the `make install` alone doesn't
- work properly, and that should now work) Dependencies are borked, needs `make clean` when
- headers are modified (known bug, too lazy to build dependencies in universal makefile).
 
 consider the "low memory access" warning locked to only ZX-like devices?
 
@@ -93,9 +87,6 @@ where filename modification happens or filename is invalid.
 - evaluation of defarray index is still flaky and doesn't work correctly inside macro/etc
 - needs lot more testing and cleanup
 + should be already a bit more intuitive than 1.08+ (although it may break legacy source)
-
-ZX128 snapshot default state and mapping - still doesn't survive simple `ret` into BASIC
-ret to basic: di : ld iy,#5c3a : ld hl,#2758 : exx : im 1 : ei : ret
 
 DISP inside DISP bugs => documented. Correct solution = nesting DISPs?!
 

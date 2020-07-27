@@ -161,11 +161,15 @@ void dirWORD() {
 	aint val;
 	int teller = 0, e[130];
 	do {
+		// reset alternate result flag in ParseExpression part of code
+		Relocation::isResultAffected = false;
 		if (SkipBlanks()) {
 			Error("Expression expected", NULL, SUPPRESS);
 		} else if (ParseExpressionNoSyntaxError(lp, val)) {
 			check16(val);
-			e[teller++] = val & 65535;
+			e[teller] = val & 65535;
+			Relocation::resolveRelocationAffected(teller * 2);
+			++teller;
 		} else {
 			Error("[DW/DEFW/WORD] Syntax error", lp, SUPPRESS);
 			break;
@@ -278,25 +282,43 @@ void dirORG() {
 		return;
 	}
 	CurAddress = val;
-	if (PseudoORG && warningNotSuppressed()) {
+	if (DISP_NONE != PseudoORG && warningNotSuppressed()) {
 		Warning("[ORG] inside displaced block, the physical address is not modified, only virtual displacement address will change");
 	}
 	if (!DeviceID) return;
-	if (comma(lp))	dirPageImpl("ORG");
-	else 			Device->CheckPage(CDevice::CHECK_RESET);
+	if (!comma(lp)) {
+		Device->CheckPage(CDevice::CHECK_RESET);
+		return;
+	}
+	// emit warning when current slot does not cover address used for ORG
+	auto slot = Device->GetCurrentSlot();
+	if ((CurAddress < slot->Address || slot->Address + slot->Size <= CurAddress) && warningNotSuppressed()) {
+		char warnTxt[LINEMAX];
+		SPRINTF3(warnTxt, LINEMAX,
+					"ORG address 0x%04X is outside of current slot 0x%04X..0x%04X (page argument affects *current* slot)",
+					CurAddress, slot->Address, slot->Address + slot->Size - 1);
+		Warning(warnTxt, bp);
+	}
+	dirPageImpl("ORG");
 }
 
 void dirDISP() {
-	if (PseudoORG) {
+	if (DISP_NONE != PseudoORG) {
 		Warning("[DISP] displacement inside another displacement block, ignoring it.");
 		SkipToEol(lp);
 		return;
 	}
 	aint valAdr, valPageNum;
 	// parse+validate values first, don't even switch into DISP mode in case of any error
+	Relocation::isResultAffected = false;
 	if (!ParseExpressionNoSyntaxError(lp, valAdr)) {
 		Error("[DISP] Syntax error in <address>", lp, SUPPRESS);
 		return;
+	}
+	// the expression of the DISP shouldn't be affected by relocation (even when starting inside relocation block)
+	if (Relocation::checkAndWarn(true)) {
+		SkipToEol(lp);
+		return;		// report it as error and exit early
 	}
 	if (comma(lp)) {
 		if (!ParseExpressionNoSyntaxError(lp, valPageNum)) {
@@ -318,15 +340,25 @@ void dirDISP() {
 	// everything is valid, switch to DISP mode (dispPageNum is already set above)
 	adrdisp = CurAddress;
 	CurAddress = valAdr;
-	PseudoORG = 1;
+	PseudoORG = Relocation::isActive ? DISP_INSIDE_RELOCATE : DISP_ACTIVE;
 }
 
 void dirENT() {
-	if (!PseudoORG) {
-		Error("ENT should be after DISP");return;
+	if (DISP_NONE == PseudoORG) {
+		Error("ENT should be after DISP");
+		return;
+	}
+	// check if the DISP..ENT block is either fully inside relocation block, or engulfing it fully.
+	if (DISP_ACTIVE == PseudoORG && Relocation::isActive) {
+		Error("The DISP block did start outside of relocation block, can't end inside it");
+		return;
+	}
+	if (DISP_INSIDE_RELOCATE == PseudoORG && !Relocation::isActive) {
+		Error("The DISP block did start inside of relocation block, can't end outside of it");
+		return;
 	}
 	CurAddress = adrdisp;
-	PseudoORG = 0;
+	PseudoORG = DISP_NONE;
 	dispPageNum = LABEL_PAGE_UNDEFINED;
 }
 
@@ -407,11 +439,11 @@ void dirMMU() {
 		Device->GetSlot(slotN)->Option = slotOpt;	// resets whole range to NONE when range
 	}
 	// wrap output addresses back into 64ki address space, it's essential for MMU functionality
-	if (PseudoORG) adrdisp &= 0xFFFF; else CurAddress &= 0xFFFF;
+	if (DISP_NONE != PseudoORG) adrdisp &= 0xFFFF; else CurAddress &= 0xFFFF;
 	// set explicit ORG address if the third argument was provided
 	if (0 <= address) {
 		CurAddress = address;
-		if (PseudoORG && warningNotSuppressed()) {
+		if (DISP_NONE != PseudoORG && warningNotSuppressed()) {
 			Warning("[MMU] ORG address inside displaced block");
 		}
 	}
@@ -1668,6 +1700,8 @@ void dirSTRUCT() {
 		}
 		if (cmphstr(lp, "ends")) {
 			st->deflab();
+			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
+			substitutedLine = line;		// override substituted listing for ENDS
 			return;
 		}
 		ParseStructLine(st);
@@ -1901,7 +1935,7 @@ const char *readMemFile(lua_State *, void *ud, size_t *size)
 void dirLUA() {
 	constexpr size_t luaBufferSize = 32768;
 	luaMemFile luaMF;
-	char* id, * buff, * bp;
+	char* id, * buff = nullptr, * bp = nullptr;
 
 	int passToExec = LASTPASS;
 	if ((id = GetID(lp)) && strlen(id) > 0) {
@@ -1920,6 +1954,7 @@ void dirLUA() {
 
 	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
 	const bool execute = (-1 == passToExec) || (passToExec == pass);
+	bool showWarning = warningNotSuppressed();	// remember warning suppression from block start
 
 	if (execute) {
 		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
@@ -1945,7 +1980,13 @@ void dirLUA() {
 			bp += lineLen;
 			*bp++ = '\n';
 		}
-		if (isEndLua) break;
+		if (isEndLua) {		// eat also any trailing eol-type of comment
+			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
+			substitutedLine = line;		// override substituted listing for ENDLUA
+			// take into account also warning suppression used at end of block
+			showWarning = showWarning && warningNotSuppressed();
+			break;
+		}
 		ListFile(true);
 	}
 
@@ -1960,7 +2001,7 @@ void dirLUA() {
 		}
 		LuaStartPos = TextFilePos();
 		delete[] buff;
-		if (DidEmitByte() && (-1 != passToExec)) {
+		if (DidEmitByte() && (-1 != passToExec) && showWarning) {
 			EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
 			Warning("When lua script emits machine code bytes, use \"ALLPASS\" modifier", NULL, warningType);
 		}
@@ -2145,6 +2186,10 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".bplist", dirBPLIST);
 	DirectivesTable.insertd(".setbreakpoint", dirSETBREAKPOINT);
 	DirectivesTable.insertd(".setbp", dirSETBREAKPOINT);
+
+	DirectivesTable.insertd(".relocate_start", Relocation::dirRELOCATE_START);
+	DirectivesTable.insertd(".relocate_end", Relocation::dirRELOCATE_END);
+	DirectivesTable.insertd(".relocate_table", Relocation::dirRELOCATE_TABLE);
 
 #ifdef USE_LUA
 	DirectivesTable.insertd(".lua", dirLUA);

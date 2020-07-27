@@ -1,0 +1,51 @@
+# file opened: relocation_mem_read.asm
+ 1    0000                  DEVICE ZXSPECTRUM48
+ 2    0000                  ORG $8000
+ 3    8000
+ 4    8000                  ; generally speaking, the `{<adr>}` operator is cancelling relocation
+ 5    8000                  ; of <adr> expression and operates in absolute way with the assembling-time
+ 6    8000                  ; address and memory content - seems this way it yields most logical outcomes
+ 7    8000
+ 8    8000                  RELOCATE_START
+ 9    8000 34 12        label1: DW  0x1234
+10    8002 00 80        label2: DW  label1              ; should be relocated
+11    8004
+12    8004                      IF 0x1234 == {label1}   ; should be true
+13    8004 21 02 80                 ld  hl,label2       ; should be relocated
+14    8007                      ENDIF
+15    8007                      IF label1 == {label2}   ; should be true (relocation unstability doesn't matter)
+16    8007 11 00 80                 ld  de,label1       ; should be relocated
+17    800A                      ENDIF
+18    800A
+19    800A 21 34 12             ld  hl,{label1}         ; regular 0x1234 value (reads the correct one always)
+20    800D
+21    800D                  ; ! this lost "needs relocation" property by indirection: be careful when using {adr}
+22    800D 11 00 80             ld  de,{label2}
+23    8010
+24    8010                  ; this should always evaluate to true (not affected by relocation juggling)
+25    8010 FF                   DB  0x1234 == {label1}
+26    8011
+27    8011 34 92                DW  {label1} + label1           ; should be relocated (0x1234 + label1)
+relocation_mem_read.asm(28): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+28    8013 34                   DB  low ({label1} + label1)     ; should warn (byte(0x1234 + label1) is affected)
+29    8014
+30    8014                  ; byte-reading variants use the same technique
+31    8014 FF                   DB  0x34 == {b label1}          ; should be true
+32    8015 34 80                DW  {b label1} + label1         ; should be relocated
+relocation_mem_read.asm(33): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+33    8017 34                   DB  low ({b label1} + label1)   ; should warn
+34    8018
+35    8018                  RELOCATE_END
+36    8018
+37    8018 02 80 05 80      RELOCATE_TABLE
+37    801C 08 80 11 80
+37    8020 15 80
+38    8022
+# file closed: relocation_mem_read.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0005 X relocate_count
+0x000A X relocate_size
+0x8000   label1
+0x8002   label2

@@ -1,0 +1,26 @@
+# file opened: predefined_counter.asm
+ 1    0000 00               DB  0
+ 2    0001
+ 3    0001              TestLabel__COUNTER__:
+ 4    0001                  ; ^^ does NOT work, because "_" at beginning of __COUNTER__
+ 5    0001                  ; prevents sub-word substitution = TODO for sjasmplus v2.x
+ 6    0001
+ 7    0001                  LUA ALLPASS     ; as usually, lua for the rescue
+ 8    0001 ~                    sj.insert_label("lua_label_" .. sj.get_define("__COUNTER__"), sj.current_address)
+ 9    0001 ~                    sj.add_byte(sj.get_define("__COUNTER__"))
+10    0001 ~                    sj.insert_label("lua_label_" .. sj.get_define("__COUNTER__"), sj.current_address)
+11    0001 ~                    sj.add_byte(sj.get_define("__COUNTER__"))
+12    0001 ~                    sj.insert_label("lua_label_" .. sj.get_define("__COUNTER__"), sj.current_address)
+13    0001 ~                    sj.add_byte(sj.get_define("__COUNTER__"))
+14    0001 02 04 06         ENDLUA
+15    0004
+16    0004 07               DB  7
+17    0005
+# file closed: predefined_counter.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X TestLabel__COUNTER__
+0x0001 X lua_label_1
+0x0002 X lua_label_3
+0x0003 X lua_label_5

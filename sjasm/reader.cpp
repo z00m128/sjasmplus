@@ -37,7 +37,7 @@ static const char delimiters_e[] = { ' ',    '"',       '\'',          '>',     
 static const std::array<EDelimiterType, 3> delimiters_all = {DT_QUOTES, DT_APOSTROPHE, DT_ANGLE};
 static const std::array<EDelimiterType, 3> delimiters_noAngle = {DT_QUOTES, DT_APOSTROPHE, DT_COUNT};
 
-int cmphstr(char*& p1, const char* p2) {
+int cmphstr(char*& p1, const char* p2, bool allowParenthesisEnd) {
 	unsigned int i = 0;
 	// check initial non-alpha chars without deciding the upper/lower case of test
 	while (p2[i] && !isalpha((byte)p2[i])) {
@@ -56,7 +56,19 @@ int cmphstr(char*& p1, const char* p2) {
 			++i;
 		}
 	}
-	if (p1[i] && !White(p1[i])) return 0;		// any character above space means "no match"
+	if (p1[i]) {		// there is some character after the first word
+		// whitespace, EOL-comment and block-comment-start keep the match valid
+		// also starting parenthesis when allowParenthesisEnd
+		if (
+			!White(p1[i]) && \
+			!(';' == p1[i]) && \
+			!('/' == p1[i] && '/' == p1[i+1]) && \
+			!('/' == p1[i] && '*' == p1[i+1]) && \
+			!(allowParenthesisEnd && '(' == p1[i])
+		) {
+			return 0;	// anything else invalidates the found match
+		}
+	}
 	// space, tab, enter, \0, ... => "match"
 	p1 += i;
 	return 1;
@@ -321,7 +333,9 @@ int check24(aint val) {
 }
 
 void checkLowMemory(byte hiByte, byte lowByte) {
-	if (hiByte || !warningNotSuppressed() || !Options::syx.IsLowMemWarningEnabled) {
+	if (hiByte || !Options::syx.IsLowMemWarningEnabled || !warningNotSuppressed() \
+		|| Relocation::isActive)
+	{
 		return;			// address is >= 256 or warning is suppressed
 	}
 	// for addresses 0..255 issue warning
@@ -338,18 +352,18 @@ int need(char*& p, char c) {
 	++p; return 1;
 }
 
-int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3) {
+int needa(char*& p, const char* c1, int r1, const char* c2, int r2, const char* c3, int r3, bool allowParenthesisEnd) {
 	//  SkipBlanks(p);
 	if (!isalpha((byte)*p)) {
 		return 0;
 	}
-	if (cmphstr(p, c1)) {
+	if (cmphstr(p, c1, allowParenthesisEnd)) {
 		return r1;
 	}
-	if (c2 && cmphstr(p, c2)) {
+	if (c2 && cmphstr(p, c2, allowParenthesisEnd)) {
 		return r2;
 	}
-	if (c3 && cmphstr(p, c3)) {
+	if (c3 && cmphstr(p, c3, allowParenthesisEnd)) {
 		return r3;
 	}
 	return 0;
@@ -630,6 +644,8 @@ template int GetCharConstAsString<int>(char* & p, int e[], int & ei, int max_ei,
 int GetBytes(char*& p, int e[], int add, int dc) {
 	aint val;
 	int t = 0, strRes;
+	// reset alternate result flag in ParseExpression part of code
+	Relocation::isResultAffected = false;
 	do {
 		const int oldT = t;
 		char* const oldP = p;
@@ -665,6 +681,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			break;
 		}
 	} while(comma(p) && t < 128);
+	Relocation::checkAndWarn();
 	e[t] = -1;
 	if (t == 128 && *p) Error("Over 128 bytes defined in single DB/DC/... Values over", p, SUPPRESS);
 	return t;

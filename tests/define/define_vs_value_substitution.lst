@@ -1,0 +1,25 @@
+# file opened: define_vs_value_substitution.asm
+ 1    0000                  ; testing if the two-level deep substitution happens per-line and not at DEFINE itself
+ 2    0000                  DEFINE xyz 123
+ 3    0000                  DEFINE abc xyz
+ 3    0000                ASSERT 123 == 123
+ 4    0000                  UNDEFINE xyz
+ 5    0000                  DEFINE xyz 456
+ 5    0000                ASSERT 456 == 456
+ 6    0000
+ 7    0000                  ; remove the defines
+ 8    0000                  UNDEFINE abc
+ 8    0000                UNDEFINE xyz
+ 9    0000
+10    0000                  ; second variant defining "abc" ahead of "xyz"
+11    0000                  DEFINE abc xyz
+12    0000                  DEFINE xyz 234
+12    0000                ASSERT 234 == 234
+13    0000                  UNDEFINE xyz
+14    0000                  DEFINE xyz 567
+14    0000                ASSERT 567 == 567
+15    0000
+# file closed: define_vs_value_substitution.asm
+
+Value    Label
+------ - -----------------------------------------------------------

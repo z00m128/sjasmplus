@@ -22,7 +22,6 @@ op_IX_DD.asm(11): error: Illegal instruction:     dec     ixh         ; #DD25
 op_IX_DD.asm(12): error: Illegal instruction:     ld      ixh,0       ; #DD2600
  12   0004                  ld      ixh,0       ; #DD2600
 op_IX_DD.asm(13): error: Label not found: ix
-op_IX_DD.asm(13): error: Label not found: ix
  13   0004 C6 00 C6 00      add     ix,ix       ; #DD29
 op_IX_DD.asm(14): error: Illegal instruction:     ld      ix,(#100)   ; #DD2A0001
  14   0008                  ld      ix,(#100)   ; #DD2A0001

@@ -163,7 +163,7 @@ static CLabelTableEntry* GetLabel(char*& p) {
 			LabelTable.Insert(findName, 0, true);
 			IsLabelNotFound = 1;
 		}
-		Error("Label not found", findName);
+		Error("Label not found", findName, IF_FIRST);
 	}
 	delete[] fullName;
 	return labelEntry;
@@ -179,7 +179,14 @@ bool GetLabelPage(char*& p, aint& val) {
 
 bool GetLabelValue(char*& p, aint& val) {
 	CLabelTableEntry* labelEntry = GetLabel(p);
-	val = labelEntry ? labelEntry->value : 0;
+	if (labelEntry) {
+		val = labelEntry->value;
+		if (labelEntry->isRelocatable && Relocation::areLabelsOffset) {
+			val += Relocation::ALTERNATIVE_OFFSET;
+		}
+	} else {
+		val = 0;
+	}
 	// true even when not found, but valid label name (neeed for expression-eval logic)
 	return !getLabel_invalidName;
 }
@@ -197,11 +204,13 @@ int GetLocalLabelValue(char*& op, aint& val) {
 	if (!GetNumericValue_IntBased(op = numberB, p, val, 10)) return 0;
 	++op;
 	// ^^ advance main parsing pointer op beyond the local label (here it *is* local label)
-	val = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
-	if (-1L == val) {
-		Error("Local label not found", numberB, SUPPRESS);
+	auto label = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
+	if (label) {
+		val = label->value;
+		Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
+	} else {
+		if (LASTPASS == pass) Error("Local label not found", numberB, SUPPRESS);
 		val = 0L;
-		return 1;
 	}
 	return 1;
 }
@@ -212,7 +221,7 @@ void CLabelTableEntry::ClearData() {
 	value = 0;
 	updatePass = 0;
 	page = LABEL_PAGE_UNDEFINED;
-	IsDEFL = IsEQU = used = false;
+	IsDEFL = IsEQU = used = isRelocatable = false;
 }
 
 CLabelTableEntry::CLabelTableEntry() : name(NULL) {
@@ -229,13 +238,13 @@ static short getAddressPageNumber(const aint address, bool forceRecalculateByAdd
 	// fast-shortcut for regular labels in current slot (if they fit into it)
 	auto slot = Device->GetCurrentSlot();
 	assert(Page && slot);
-	if (!forceRecalculateByAddress && !PseudoORG) {
+	if (!forceRecalculateByAddress && DISP_NONE == PseudoORG) {
 		if (slot->Address <= address && address < slot->Address + slot->Size) {
 			return Page->Number;
 		}
 	}
 	// enforce explicit request of fake DISP page
-	if (PseudoORG && LABEL_PAGE_UNDEFINED != dispPageNum) {
+	if (DISP_NONE != PseudoORG && LABEL_PAGE_UNDEFINED != dispPageNum) {
 		return dispPageNum;
 	}
 	// in other case (implicit DISP, out-of-slot-bounds or forceRecalculateByAddress)
@@ -250,6 +259,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 		Error("Label table full", NULL, FATAL);
 	}
 
+	// the EQU/DEFL is relocatable when the expression itself is relocatable
+	// the regular label is relocatable when relocation is active
+	const bool isRelocatable = (IsDEFL || IsEQU) ? \
+			Relocation::isResultAffected && Relocation::isRelocatable : \
+			Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
 	// Find label in label table
 	CLabelTableEntry* label = Find(nname);
 	if (label) {
@@ -261,6 +275,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			label->page = getAddressPageNumber(nvalue, IsDEFL|IsEQU);
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
+			label->isRelocatable = isRelocatable;
 			label->updatePass = pass;
 			return 1;
 		}
@@ -279,6 +294,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->value = nvalue;
 	label->used = undefined;
 	label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+	label->isRelocatable = !undefined && isRelocatable;		// ignore "relocatable" for "undefined"
 	return 1;
 }
 
@@ -542,6 +558,7 @@ int CFunctionTable::Hash(const char* s) {
 CLocalLabelTableEntry::CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous) {
 	nummer = number;
 	value = address;
+	isRelocatable = Relocation::isActive;
 	prev = previous; next = NULL;
 	if (previous) previous->next = this;
 }
@@ -581,18 +598,18 @@ bool CLocalLabelTable::InsertRefresh(const aint nnummer) {
 	return (1 == pass) ? insertImpl(nnummer) : refreshImpl(nnummer);
 }
 
-aint CLocalLabelTable::seekForward(const aint labelNumber) const {
-	if (1 == pass) return 0;			// just building tables in first pass, no results yet
+CLocalLabelTableEntry* CLocalLabelTable::seekForward(const aint labelNumber) const {
+	if (1 == pass) return nullptr;		// just building tables in first pass, no results yet
 	CLocalLabelTableEntry* l = refresh;	// already points on first "forward" local label
 	while (l && l->nummer != labelNumber) l = l->next;
-	return l ? l->value : -1L;
+	return l;
 }
 
-aint CLocalLabelTable::seekBack(const aint labelNumber) const {
-	if (1 == pass) return 0;			// just building tables in first pass, no results yet
+CLocalLabelTableEntry* CLocalLabelTable::seekBack(const aint labelNumber) const {
+	if (1 == pass) return nullptr;		// just building tables in first pass, no results yet
 	CLocalLabelTableEntry* l = refresh ? refresh->prev : last;
 	while (l && l->nummer != labelNumber) l = l->prev;
-	return l ? l->value : -1L;
+	return l;
 }
 
 CStringsList::CStringsList() : string(NULL), next(NULL)
@@ -654,8 +671,23 @@ void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }
 
+static char defineGet__Counter__Buffer[32] = {};
+static char defineGet__Line__Buffer[32] = {};
+
 char* CDefineTable::Get(const char* name) {
 	if (NULL != name) {
+		// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
+		if ('_' == name[1]) {
+			if (!strcmp(name, "__COUNTER__")) {
+				SPRINTF1(defineGet__Counter__Buffer, 30, "%d", PredefinedCounter);
+				++PredefinedCounter;
+				return defineGet__Counter__Buffer;
+			}
+			if (!strcmp(name, "__LINE__")) {
+				SPRINTF1(defineGet__Line__Buffer, 30, "%d", CurSourcePos.line);
+				return defineGet__Line__Buffer;
+			}
+		}
 		CDefineTableEntry* p = defs[(*name)&127];
 		while (p) {
 			if (!strcmp(name, p->name)) {
@@ -945,8 +977,9 @@ CStructureEntry1::~CStructureEntry1() {
 }
 
 
-CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, EStructureMembers ntype) {
-	next = 0; offset = noffset; len = nlen; def = ndef; type = ntype;
+CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndefrel, EStructureMembers ntype) :
+	next(nullptr), offset(noffset), len(nlen), def(ndef), defRelocatable(ndefrel), type(ntype)
+{
 }
 
 CStructureEntry2::~CStructureEntry2() {
@@ -957,24 +990,45 @@ CStructureEntry2::~CStructureEntry2() {
 aint CStructureEntry2::ParseValue(char* & p) {
 	if (SMEMBBYTE != type && SMEMBWORD != type && SMEMBDWORD != type && SMEMBD24 != type) return def;
 	SkipBlanks(p);
-	if ('{' == *p) return def;	// unexpected {
-	aint val;
-	if (!ParseExpressionNoSyntaxError(p, val)) val = def;
-	switch (type) {
-		case SMEMBBYTE:
-			check8(val);
-			return(val & 0xFF);
-		case SMEMBWORD:
-			check16(val);
-			return(val & 0xFFFF);
-		case SMEMBD24:
-			check24(val);
-			return(val & 0xFFFFFF);
-		case SMEMBDWORD:
-			return val;
-		default:
-			return def;
+	aint val = def;
+	bool keepRelocatableFlags = false;	// keep flags from the ParseExpressionNoSyntaxError?
+	// check for unexpected {
+	if ('{' != *p) {
+		if (!(keepRelocatableFlags = ParseExpressionNoSyntaxError(p, val))) {
+			val = def;
+		}
+		switch (type) {
+			case SMEMBBYTE:
+				check8(val);
+				val &= 0xFF;
+				break;
+			case SMEMBWORD:
+				check16(val);
+				val &= 0xFFFF;
+				break;
+			case SMEMBD24:
+				check24(val);
+				val &= 0xFFFFFF;
+				break;
+			case SMEMBDWORD:
+				break;
+			default:
+				break;
+		}
 	}
+	if (!Relocation::isActive) return val;
+	if (SMEMBWORD == type) {
+		if (!keepRelocatableFlags) {	// override flags, if parse expression was not successful
+			Relocation::isResultAffected |= defRelocatable;
+			Relocation::isRelocatable = defRelocatable;
+		}
+		if (Relocation::isResultAffected) {
+			Relocation::resolveRelocationAffected(0);
+		}
+	} else {
+		Relocation::checkAndWarn();
+	}
+	return val;
 }
 
 CStructure::CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p) {
@@ -1027,38 +1081,50 @@ void CStructure::CopyLabels(CStructure* st) {
 	}
 }
 
-void CStructure::CopyMember(CStructureEntry2* ni, aint ndef) {
-	AddMember(new CStructureEntry2(noffset, ni->len, ndef, ni->type));
+void CStructure::CopyMember(CStructureEntry2* item, aint newDefault, bool newDefIsRelative) {
+	AddMember(new CStructureEntry2(noffset, item->len, newDefault, newDefIsRelative, item->type));
 }
 
 void CStructure::CopyMembers(CStructure* st, char*& lp) {
 	aint val;
 	int haakjes = 0;
-	AddMember(new CStructureEntry2(noffset, 0, 0, SMEMBPARENOPEN));
+	AddMember(new CStructureEntry2(noffset, 0, 0, false, SMEMBPARENOPEN));
 	SkipBlanks(lp);
 	if (*lp == '{') {
 		++haakjes; ++lp;
 	}
 	CStructureEntry2* ip = st->mbf;
 	while (ip) {
+		Relocation::isResultAffected = false;
 		switch (ip->type) {
 		case SMEMBBLOCK:
-			CopyMember(ip, ip->def);
+			CopyMember(ip, ip->def, false);
 			break;
 		case SMEMBBYTE:
 		case SMEMBWORD:
 		case SMEMBD24:
 		case SMEMBDWORD:
-			if (!ParseExpressionNoSyntaxError(lp, val)) val = ip->def;
-			CopyMember(ip, val);
-			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
+			{
+				bool isRelocatable = false;
+				if (ParseExpressionNoSyntaxError(lp, val)) {
+					isRelocatable = SMEMBWORD == ip->type && Relocation::isResultAffected && Relocation::isRelocatable;
+				} else {
+					val = ip->def;
+					isRelocatable = ip->defRelocatable;
+				}
+				CopyMember(ip, val, isRelocatable);
+				if (SMEMBWORD == ip->type) {
+					Relocation::resolveRelocationAffected(INT_MAX);	// clear flags + warn when can't be relocated
+				}
+				if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
+			}
 			break;
 		case SMEMBPARENOPEN:
 			SkipBlanks(lp);
 			if (*lp == '{') {
 				++haakjes; ++lp;
 			}
-			CopyMember(ip, 0);
+			CopyMember(ip, 0, false);
 			break;
 		case SMEMBPARENCLOSE:
 			SkipBlanks(lp);
@@ -1066,20 +1132,21 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 				--haakjes; ++lp;
 				if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
 			}
-			CopyMember(ip, 0);
+			CopyMember(ip, 0, false);
 			break;
 		default:
 			Error("internalerror CStructure::CopyMembers", NULL, FATAL);
 		}
+		Relocation::checkAndWarn();
 		ip = ip->next;
 	}
 	while (haakjes--) {
 		if (!need(lp, '}')) Error("closing } missing");
 	}
-	AddMember(new CStructureEntry2(noffset, 0, 0, SMEMBPARENCLOSE));
+	AddMember(new CStructureEntry2(noffset, 0, 0, false, SMEMBPARENCLOSE));
 }
 
-static void InsertSingleStructLabel(char *name, const aint value) {
+static void InsertSingleStructLabel(char *name, const bool isRelocatable, const aint value) {
 	char *op = name, *p;
 	if (!(p = ValidateLabel(op, true))) {
 		Error("Illegal labelname", op, EARLY);
@@ -1094,18 +1161,19 @@ static void InsertSingleStructLabel(char *name, const aint value) {
 			Error("Label has different value in pass 2", p);
 		}
 	} else {
+		Relocation::isResultAffected = Relocation::isRelocatable = isRelocatable;
 		if (!LabelTable.Insert(p, value, false, false, true)) Error("Duplicate label", p, EARLY);
 	}
 	delete[] p;
 }
 
-static void InsertStructSubLabels(const char* mainName, const CStructureEntry1* members, const aint address = 0) {
+static void InsertStructSubLabels(const char* mainName, const bool isRelocatable, const CStructureEntry1* members, const aint address = 0) {
 	char ln[LINEMAX+1];
 	STRCPY(ln, LINEMAX, mainName);
 	char * const lnsubw = ln + strlen(ln);
 	while (members) {
 		STRCPY(lnsubw, LINEMAX-strlen(ln), members->naam);		// overwrite sub-label part
-		InsertSingleStructLabel(ln, members->offset + address);
+		InsertSingleStructLabel(ln, isRelocatable, members->offset + address);
 		members = members->next;
 	}
 }
@@ -1113,12 +1181,12 @@ static void InsertStructSubLabels(const char* mainName, const CStructureEntry1* 
 void CStructure::deflab() {
 	char sn[LINEMAX] = { '@' };
 	STRCPY(sn+1, LINEMAX-1, id);
-	InsertSingleStructLabel(sn, noffset);
+	InsertSingleStructLabel(sn, false, noffset);
 	STRCAT(sn, LINEMAX-1, ".");
-	InsertStructSubLabels(sn, mnf);
+	InsertStructSubLabels(sn, false, mnf);
 }
 
-void CStructure::emitlab(char* iid, aint address) {
+void CStructure::emitlab(char* iid, aint address, const bool isRelocatable) {
 	const aint misalignment = maxAlignment ? ((-address) & (maxAlignment - 1)) : 0;
 	if (misalignment) {
 		// emitting in misaligned position (considering the ALIGN used to define this struct)
@@ -1130,9 +1198,9 @@ void CStructure::emitlab(char* iid, aint address) {
 	}
 	char sn[LINEMAX];
 	STRCPY(sn, LINEMAX-1, iid);
-	InsertSingleStructLabel(sn, address);
+	InsertSingleStructLabel(sn, isRelocatable, address);
 	STRCAT(sn, LINEMAX-1, ".");
-	InsertStructSubLabels(sn, mnf, address);
+	InsertStructSubLabels(sn, isRelocatable, mnf, address);
 }
 
 void CStructure::emitmembs(char*& p) {
@@ -1143,6 +1211,7 @@ void CStructure::emitmembs(char*& p) {
 		++haakjes; ++p;
 	}
 	CStructureEntry2* ip = mbf;
+	Relocation::isResultAffected = false;
 	while (ip) {
 		switch (ip->type) {
 		case SMEMBBLOCK:
@@ -1153,6 +1222,7 @@ void CStructure::emitmembs(char*& p) {
 			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBWORD:
+			// ParseValue will also add relocation data if needed (so the "ParseValue" name is misleading)
 			EmitWord(ip->ParseValue(p));
 			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
@@ -1188,6 +1258,7 @@ void CStructure::emitmembs(char*& p) {
 		if (!need(p, '}')) Error("closing } missing");
 	}
 	if (!SkipBlanks(p)) Error("[STRUCT] Syntax error - too many arguments?");
+	Relocation::checkAndWarn();
 }
 
 CStructureTable::CStructureTable() {
@@ -1219,7 +1290,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 	}
 	strs[(*sp)&127] = new CStructure(naam, sp, 0, gl, strs[(*sp)&127]);
 	if (no) {
-		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, SMEMBBLOCK));
+		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, false, SMEMBBLOCK));
 	}
 	return strs[(*sp)&127];
 }
@@ -1272,7 +1343,11 @@ int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	if (!st) return 0;
 	// create new labels corresponding to current/designed address
 	aint address = CStructureTable::ParseDesignedAddress(p);
-	if (l) st->emitlab(l, (INT_MAX == address) ? CurAddress : address);
+	if (l) {
+		const bool isRelocatable =
+			(INT_MAX == address) ? Relocation::isActive : Relocation::isResultAffected && Relocation::isRelocatable;
+		st->emitlab(l, (INT_MAX == address) ? CurAddress : address, isRelocatable);
+	}
 	if (INT_MAX == address) st->emitmembs(p);	// address was not designed, emit also bytes
 	else if (!l) Warning("[STRUCT] designed address without label = no effect");
 	return 1;

@@ -30,26 +30,31 @@
 
 #include "sjdefs.h"
 
-char dirDEFl[] = "def", dirDEFu[] = "DEF";
-
 static bool synerr = true;	// flag whether ParseExpression should report syntax error with Error()
 
-int ParseExpPrim(char*& p, aint& nval) {
+static int ParseExpressionEntry(char*& p, aint& nval);
+
+static int ParseExpPrim(char*& p, aint& nval) {
 	int res = 0;
 	if (SkipBlanks(p)) {
 		return 0;
 	}
 	if (*p == '(') {
 		++p;
-		res = ParseExpression(p, nval);
+		res = ParseExpressionEntry(p, nval);
 		if (!need(p, ')')) {
-				Error("')' expected");
-				return 0;
-		 }
+			Error("')' expected");
+			return 0;
+		}
 	} else if (DeviceID && *p == '{') {		// read WORD/BYTE from virtual device memory
 		char* const readMemP = p;
 		const int byteOnly = cmphstr(++p, "b");
-		if (!ParseExpression(p, nval)) return 0;	// some syntax error inside the address expression
+		// switch off alternative relocation evaluation for the address value
+		const bool oldAreLabelsOffset = Relocation::areLabelsOffset;
+		Relocation::areLabelsOffset = false;
+		int addressParseRes = ParseExpressionEntry(p, nval);
+		Relocation::areLabelsOffset = oldAreLabelsOffset;	// restore alternative evaluation
+		if (!addressParseRes) return 0;	// some syntax error inside the address expression
 		if (!need(p, '}')) {
 			Error("'}' expected", readMemP, SUPPRESS);
 			return 0;
@@ -82,6 +87,9 @@ int ParseExpPrim(char*& p, aint& nval) {
 	} else if (*p == '$') {
 		++p;
 		nval = CurAddress;
+		if (Relocation::isActive && Relocation::areLabelsOffset && DISP_INSIDE_RELOCATE != PseudoORG) {
+			nval += Relocation::ALTERNATIVE_OFFSET;
+		}
 		return 1;
 	} else if (!(res = GetCharConst(p, nval))) {
 		if (synerr) Error("Syntax error", p, IF_FIRST);
@@ -90,10 +98,23 @@ int ParseExpPrim(char*& p, aint& nval) {
 	return res;
 }
 
-int ParseExpUnair(char*& p, aint& nval) {
+static int ParseExpUnair(char*& p, aint& nval) {
+	SkipBlanks(p);
+	char* oldP = p;
+	if (cmphstr(p, "norel", true)) {
+		// switch off alternative relocation evaluation for the following part of expression
+		const bool oldAreLabelsOffset = Relocation::areLabelsOffset;
+		Relocation::areLabelsOffset = false;
+		int norelParseRes = ParseExpPrim(p, nval);			// higher priority than other unary
+		Relocation::areLabelsOffset = oldAreLabelsOffset;	// restore alternative evaluation
+		if (norelParseRes) return 1;
+		// "norel" operator didn't parse successfully, try to ignore it (will treat it as label)
+		p = oldP;
+	}
 	aint right;
 	int oper;
-	if ((oper = need(p, "! ~ + - ")) || (oper = needa(p, "not", '!', "low", 'l', "high", 'h'))) {
+	if ((oper = need(p, "! ~ + - ")) || \
+		(oper = needa(p, "not", '!', "low", 'l', "high", 'h', true)) ) {
 		switch (oper) {
 		case '!':
 			if (!ParseExpUnair(p, right)) return 0;
@@ -127,7 +148,7 @@ int ParseExpUnair(char*& p, aint& nval) {
 	}
 }
 
-int ParseExpMul(char*& p, aint& nval) {
+static int ParseExpMul(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpUnair(p, left)) return 0;
@@ -151,7 +172,7 @@ int ParseExpMul(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpAdd(char*& p, aint& nval) {
+static int ParseExpAdd(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpMul(p, left)) return 0;
@@ -164,7 +185,7 @@ int ParseExpAdd(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpShift(char*& p, aint& nval) {
+static int ParseExpShift(char*& p, aint& nval) {
 	aint left, right;
 	uint32_t l;
 	int oper;
@@ -189,7 +210,7 @@ int ParseExpShift(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpMinMax(char*& p, aint& nval) {
+static int ParseExpMinMax(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpShift(p, left)) return 0;
@@ -207,7 +228,7 @@ int ParseExpMinMax(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpCmp(char*& p, aint& nval) {
+static int ParseExpCmp(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpMinMax(p, left)) return 0;
@@ -229,7 +250,7 @@ int ParseExpCmp(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpEqu(char*& p, aint& nval) {
+static int ParseExpEqu(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpCmp(p, left)) return 0;
@@ -241,7 +262,7 @@ int ParseExpEqu(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpBitAnd(char*& p, aint& nval) {
+static int ParseExpBitAnd(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpEqu(p, left)) return 0;
 	while (need(p, "&_") || needa(p, "and", '&')) {
@@ -252,7 +273,7 @@ int ParseExpBitAnd(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpBitXor(char*& p, aint& nval) {
+static int ParseExpBitXor(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpBitAnd(p, left)) return 0;
 	while (need(p, "^ ") || needa(p, "xor", '^')) {
@@ -263,7 +284,7 @@ int ParseExpBitXor(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpBitOr(char*& p, aint& nval) {
+static int ParseExpBitOr(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpBitXor(p, left)) return 0;
 	while (need(p, "|_") || needa(p, "or", '|')) {
@@ -274,7 +295,7 @@ int ParseExpBitOr(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpLogAnd(char*& p, aint& nval) {
+static int ParseExpLogAnd(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpBitOr(p, left)) return 0;
 	while (need(p, "&&")) {
@@ -285,7 +306,7 @@ int ParseExpLogAnd(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpLogOr(char*& p, aint& nval) {
+static int ParseExpLogOr(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpLogAnd(p, left)) return 0;
 	while (need(p, "||")) {
@@ -296,10 +317,35 @@ int ParseExpLogOr(char*& p, aint& nval) {
 	return 1;
 }
 
-int ParseExpression(char*& p, aint& nval) {
+static int ParseExpressionEntry(char*& p, aint& nval) {
 	if (ParseExpLogOr(p, nval)) return 1;
 	nval = 0;
 	return 0;
+}
+
+int ParseExpression(char*& p, aint& nval) {
+	// if relocation is active, do the full evaluation in syntax-error-OFF mode with alternative
+	// label values, and remember the result (to compare it with regular evaluation afterward)
+	aint relocationVal = 0;
+	int relocationRes = 0;
+	if (Relocation::isActive) {
+		char* altP = p;
+		bool osynerr = synerr;
+		synerr = false;
+		Relocation::areLabelsOffset = true;
+		relocationRes = ParseExpressionEntry(altP, relocationVal);
+		Relocation::areLabelsOffset = false;
+		synerr = osynerr;
+	}
+	// if relocation is off, or the alternative run did finish already, do regular evaluation
+	int res = ParseExpressionEntry(p, nval);
+	// set the Relocation::isResultAffected if the two alternative results are different
+	if (res && relocationRes) {
+		const bool isAffected = (relocationVal != nval);
+		Relocation::isResultAffected |= isAffected;
+		Relocation::isRelocatable = isAffected && (Relocation::ALTERNATIVE_OFFSET == (relocationVal - nval));
+	}
+	return res;
 }
 
 int ParseExpressionNoSyntaxError(char*& lp, aint& val) {
@@ -331,6 +377,9 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 		alignment = -1;
 		return;
 	}
+	if (Relocation::isActive && warningNotSuppressed()) {
+		Warning("[ALIGN] inside relocation block: may become misaligned when relocated");
+	}
 	// check if alignment value is power of two (0..15-th power only)
 	if (alignment < 1 || (1<<15) < alignment || (alignment & (alignment-1))) {
 		Error("[ALIGN] Illegal align", oldSrc, SUPPRESS);
@@ -338,7 +387,7 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 		return;
 	}
 	if (!comma(src)) return;
-	if (!ParseExpression(lp, fill)) {
+	if (!ParseExpressionEntry(lp, fill)) {
 		Error("[ALIGN] fill-byte expected after comma", bp, IF_FIRST);
 		fill = -1;
 	} else if (fill < 0 || 255 < fill) {
@@ -349,11 +398,11 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 
 static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
-	char* rp = nl,* nid,* kp,* ver;
-	bool isPrevDefDir, isCurrDefDir = false;	// to remember if one of DEFINE-related directives was previous word
+	char* rp = nl,* nid,* ver;
+	bool isDefDir = false;	// to remember if one of DEFINE-related directives was used
 	bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 	char defarrayCountTxt[16] = { 0 };
-	while (*lp) {
+	while (*lp && ((rp - nl) < LINEMAX)) {
 		const char c1 = lp[0], c2 = lp[1];
 		afterNonAlphaNum = afterNonAlphaNumNext;
 		afterNonAlphaNumNext = !isalnum((byte)c1);
@@ -386,8 +435,6 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 
 		// strings parsing
 		if (afterNonAlphaNum && (c1 == '"' || c1 == '\'')) {
-			isPrevDefDir = isCurrDefDir;
-			isCurrDefDir = false;
 			*rp++ = *lp++;				// copy the string delimiter (" or ')
 			// apostrophe inside apostrophes ('') will parse as end + start of another string
 			// which sort of "accidentally" leads to correct final results
@@ -405,11 +452,12 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			continue;
 		}
 
-		// update previous/current word is define-related directive
-		isPrevDefDir = isCurrDefDir;
-		kp = lp;
-		isCurrDefDir = afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine") || cmphstr(kp, "defarray+")
+		// update "is define-related directive" for remainder of the line
+		char* kp = lp;
+		isDefDir |= afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine") || cmphstr(kp, "defarray+")
 			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
+		// if DEFINE-related directive was used, only macro-arguments are substituted
+		// in the remaining part of the line, the define-based substitution is inhibited till EOL
 
 		// The following loop is recursive-like macro/define substitution, the `*lp` here points
 		// at alphabet/underscore char, marking start of "id" string, and it will be parsed by
@@ -425,7 +473,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			const bool canSubstituteInside = '_' != nid[0] || nextSubIdLp == wholeIdLp;
 			if (macrolabp && canSubstituteInside && (ver = MacroDefineTable.getverv(nid))) {
 				dr = 2;			// macro argument substitution is possible
-			} else if (!isPrevDefDir && canSubstituteInside && (ver = DefineTable.Get(nid))) {
+			} else if (!isDefDir && canSubstituteInside && (ver = DefineTable.Get(nid))) {
 				dr = 1;			// DEFINE substitution is possible
 				//handle DEFARRAY case
 				if (DefineTable.DefArrayList) {
@@ -472,7 +520,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			}
 			if (0 < dr) definegereplaced = 1;		// above zero => count as replacement
 			if (0 != dr) {				// any non-zero dr => write to the output
-				while (*ver) *rp++ = *ver++;		// replace the string into target buffer
+				while (*ver && ((rp - nl) < LINEMAX)) *rp++ = *ver++;		// replace the string into target buffer
 				// reset subId parser to catch second+ subId in current Id
 				ResetGrowSubId();
 				nextSubIdLp = lp;
@@ -481,8 +529,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		} while(islabchar(*lp));
 	} // while(*lp)
 	// add line terminator to the output buffer
-	*rp = 0;
-	if (strlen(nl) > LINEMAX - 1) {
+	*rp++ = 0;
+	if (LINEMAX <= (rp - nl)) {
 		Error("line too long after macro expansion", NULL, FATAL);
 	}
 	// check if whole line is just blanks, then return just empty one
@@ -553,6 +601,7 @@ void ParseLabel() {
 		}
 		bool IsDEFL = NeedDEFL(), IsEQU = NeedEQU();
 		if (IsDEFL || IsEQU) {
+			Relocation::isResultAffected = false;
 			if (!ParseExpression(lp, val)) {
 				Error("Expression error", lp);
 				val = 0;
@@ -654,7 +703,7 @@ int ParseMacro() {
 	}
 
 	// not a macro, see if it's structure
-	if (StructureTable.Emit(n, 0, p, gl)) {
+	if (StructureTable.Emit(n, nullptr, p, gl)) {
 		lp = p;
 		return 1;
 	}
@@ -673,7 +722,7 @@ void ParseInstruction() {
 	// SLD (Source Level Debugging) tracing-data logging
 	if (IsSldExportActive()) {
 		int pageNum = Page->Number;
-		if (PseudoORG) {
+		if (DISP_NONE != PseudoORG) {
 			int mappingPageNum = Device->GetPageOfA16(CurAddress);
 			if (LABEL_PAGE_UNDEFINED == dispPageNum) {	// special DISP page is not set, use mapped
 				pageNum = mappingPageNum;
@@ -831,6 +880,7 @@ void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabe
 void ParseStructMember(CStructure* st) {
 	aint val, len;
 	bp = lp;
+	Relocation::isResultAffected = false;
 	switch (GetStructMemberId(lp)) {
 	case SMEMBBLOCK:
 		if (!ParseExpression(lp, len)) {
@@ -845,31 +895,36 @@ void ParseStructMember(CStructure* st) {
 		} else {
 			val = -1;
 		}
-		st->AddMember(new CStructureEntry2(st->noffset, len, val, SMEMBBLOCK));
+		st->AddMember(new CStructureEntry2(st->noffset, len, val, false, SMEMBBLOCK));
 		break;
 	case SMEMBBYTE:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		} check8(val);
-		st->AddMember(new CStructureEntry2(st->noffset, 1, val, SMEMBBYTE));
+		st->AddMember(new CStructureEntry2(st->noffset, 1, val, false, SMEMBBYTE));
 		break;
 	case SMEMBWORD:
-		if (!ParseExpression(lp, val)) {
-			val = 0;
-		} check16(val);
-		st->AddMember(new CStructureEntry2(st->noffset, 2, val, SMEMBWORD));
+		{
+			if (!ParseExpression(lp, val)) {
+				val = 0;
+			}
+			check16(val);
+			const bool isRelocatable = (Relocation::isResultAffected && Relocation::isRelocatable);
+			st->AddMember(new CStructureEntry2(st->noffset, 2, val, isRelocatable, SMEMBWORD));
+			Relocation::resolveRelocationAffected(INT_MAX);	// clear flags + warn when can't be relocated
+		}
 		break;
 	case SMEMBD24:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		} check24(val);
-		st->AddMember(new CStructureEntry2(st->noffset, 3, val, SMEMBD24));
+		st->AddMember(new CStructureEntry2(st->noffset, 3, val, false, SMEMBD24));
 		break;
 	case SMEMBDWORD:
 		if (!ParseExpression(lp, val)) {
 			val = 0;
 		}
-		st->AddMember(new CStructureEntry2(st->noffset, 4, val, SMEMBDWORD));
+		st->AddMember(new CStructureEntry2(st->noffset, 4, val, false, SMEMBDWORD));
 		break;
 	case SMEMBALIGN:
 	{
@@ -880,7 +935,7 @@ void ParseStructMember(CStructure* st) {
 		aint bytesToAdvance = (~st->noffset + 1) & (val - 1);
 		if (bytesToAdvance < 1) break;		// already aligned, nothing to do
 		// create alignment block
-		st->AddMember(new CStructureEntry2(st->noffset, bytesToAdvance, fill, SMEMBBLOCK));
+		st->AddMember(new CStructureEntry2(st->noffset, bytesToAdvance, fill, false, SMEMBBLOCK));
 		break;
 	}
 	default:
@@ -913,6 +968,7 @@ void ParseStructMember(CStructure* st) {
 		}
 		break;
 	}
+	Relocation::checkAndWarn();
 }
 
 void ParseStructLine(CStructure* st) {

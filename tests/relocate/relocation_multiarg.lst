@@ -1,0 +1,66 @@
+# file opened: relocation_multiarg.asm
+ 1    0000                  OPT --zxnext --syntax=abfw
+ 1    0000                ORG $1234
+ 2    1234
+ 3    1234                  RELOCATE_START
+ 4    1234
+ 5    1234                  ASSERT 2 * relocate_count == relocate_size
+ 6    1234                  ASSERT 12 == relocate_count
+ 7    1234 0C 00            dw      relocate_count
+ 8    1236 18 00            dw      relocate_size
+ 9    1238
+10    1238              reloc1:
+11    1238                  ; generate two relocation records:
+12    1238 21 38 12 01      ld      hl,reloc1,,bc,reloc2-reloc1,,de,reloc1+5,,sp,absolute1
+12    123C 52 00 11 3D
+12    1240 12 31 8A 12
+13    1244 C3 38 12 C3      jp      reloc1,,reloc2-reloc1,,reloc1+5,,absolute1
+13    1248 52 00 C3 3D
+13    124C 12 C3 8A 12
+14    1250 CD 38 12 CD      call    reloc1,,reloc2-reloc1,,reloc1+5,,absolute1
+14    1254 52 00 CD 3D
+14    1258 12 CD 8A 12
+15    125C ED 34 38 12      add     hl,reloc1,,bc,reloc2-reloc1,,de,reloc1+5,,hl,absolute1  ; Z80N extras
+15    1260 ED 36 52 00
+15    1264 ED 35 3D 12
+15    1268 ED 34 8A 12
+16    126C 2A 38 12 ED      ld      hl,(reloc1),,bc,(reloc2-reloc1),,de,(reloc1+5),,sp,(absolute1)
+16    1270 4B 52 00 ED
+16    1274 5B 3D 12 ED
+16    1278 7B 8A 12
+17    127B 22 38 12 ED      ld      (reloc1),hl,,(reloc2-reloc1),bc,,(reloc1+5),de,,(absolute1),sp
+17    127F 43 52 00 ED
+17    1283 53 3D 12 ED
+17    1287 73 8A 12
+18    128A
+19    128A              reloc2:
+20    128A
+21    128A                  RELOCATE_END
+22    128A
+23    128A              absolute1:
+24    128A
+25    128A 39 12 3F 12      RELOCATE_TABLE
+25    128E 45 12 4B 12
+25    1292 51 12 57 12
+25    1296 5E 12 66 12
+25    129A 6D 12 75 12
+25    129E 7C 12 84 12
+26    12A2                  ; 39 12 ($1239) 3F 12 ($123F)   ; ld r16,imm16
+27    12A2                  ; 45 12 ($1245) 4B 12 ($124B)   ; jp
+28    12A2                  ; 51 12 ($1251) 57 12 ($1257)   ; call
+29    12A2                  ; 5E 12 ($125E) 66 12 ($1266)   ; add r16,imm16
+30    12A2                  ; 6D 12 ($126D) 75 12 ($1275)   ; ld r16,(mem16)
+31    12A2                  ; 7C 12 ($127C) 84 12 ($1284)   ; ld (mem16),r16
+32    12A2
+33    12A2                  ASSERT 0 == 0
+34    12A2                  ASSERT 0 == 0
+35    12A2
+# file closed: relocation_multiarg.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x000C   relocate_count
+0x0018   relocate_size
+0x1238   reloc1
+0x128A   reloc2
+0x128A   absolute1

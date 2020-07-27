@@ -1,0 +1,21 @@
+# file opened: Issue_99_example1.asm
+ 1    0000                  org #1000
+ 2    1000                  relocate_start
+ 3    1000 21 07 10             ld hl,test
+ 4    1003 11 08 10             ld de,test2
+ 5    1006 C9                   ret
+ 6    1007 00           test	db 0
+ 7    1008 00           test2	db 0
+ 8    1009 02 00                dw relocate_count
+ 9    100B 04 00                dw relocate_size
+10    100D 01 10 04 10      relocate_table
+11    1011                  relocate_end
+12    1011
+# file closed: Issue_99_example1.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002   relocate_count
+0x0004   relocate_size
+0x1007   test
+0x1008   test2

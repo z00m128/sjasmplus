@@ -1,0 +1,65 @@
+# file opened: relocation_disp_inside.asm
+ 1    0000                  ; init ZX48 device, put machine code at $8000
+ 2    0000                  DEVICE ZXSPECTRUM48
+ 2    0000                ORG $8000
+ 3    8000
+ 4    8000                  RELOCATE_START
+ 5    8000
+ 6    8000 02 00            dw      relocate_count
+ 7    8002 04 00            dw      relocate_size
+ 8    8004
+ 9    8004              vram_routine_bytes:                 ; relocatable label
+10    8004                  ; like use case: "helper routine to be displaced at runtime to ULA VRAM"
+relocation_disp_inside.asm(11): error: Relocation makes one of the expressions unstable, use non-relocatable values only
+11    8004                  DISP    vram_routine_bytes      ; error, no DISP for relocatable labels
+12    8004                  DISP    $4000
+13    4000              vram_routine:                       ; absolute label (and "$" should be absolute here too)
+14    4000 21 00 3D         ld      hl,$-$300               ; should not relocate
+15    4003 11 03 48         ld      de,$+$800               ; should not relocate
+16    4006 DD 21 04 80      ld      ix,vram_routine_bytes   ; should give relocate data for the physical location ($8000+ address)
+17    400A C2 00 40         jp      nz,vram_routine         ; should not relocate
+18    400D C3 25 80         jp      absolute1               ; should not relocate
+19    4010
+relocation_disp_inside.asm(20): error: End the current DISP block first
+20    4010                  RELOCATE_END    ; error - can't finish relocate block with DISP block open
+21    4010
+22    4010                  ENT             ; end displacement routine
+23    8014              vram_routine_bytes.size EQU $ - vram_routine_bytes  ; should be length
+24    8014
+25    8014                  ; use case: "dislocating the subroutine to target memory at runtime"
+26    8014 21 04 80         ld      hl,vram_routine_bytes   ; should relocate
+27    8017 11 00 40         ld      de,vram_routine         ; should not relocate
+28    801A 01 10 00         ld      bc,vram_routine_bytes.size  ; absolute size (not relocate)
+29    801D ED B0            ldir
+30    801F CD 00 40         call    vram_routine            ; should not relocate
+31    8022 C3 25 80         jp      absolute1               ; should not relocate
+32    8025
+33    8025                  RELOCATE_END
+34    8025
+35    8025              absolute1:
+36    8025 C3 25 80         jp      absolute1               ; should not relocate
+37    8028
+relocation_disp_inside.asm(38): error: ENT should be after DISP
+38    8028                  ENT                             ; error ENT without DISP
+39    8028
+40    8028 0C 80 15 80      RELOCATE_TABLE
+41    802C                      ; 0C 80 15 80 ($800C, $8015)
+42    802C
+43    802C                  ; verify the actual machine code was placed at $8000 in virtual device memory
+44    802C                  SAVEBIN "relocation_disp_inside.bin", $8000, $ - $8000
+45    802C
+46    802C                  ASSERT 2 == relocate_count
+47    802C                  ASSERT 2*relocate_count == relocate_size
+48    802C                  ASSERT 3 == 3
+49    802C                  ASSERT 0 == 0
+50    802C
+# file closed: relocation_disp_inside.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002   relocate_count
+0x0004   relocate_size
+0x8004   vram_routine_bytes
+0x4000   vram_routine
+0x8025   absolute1
+0x0010   vram_routine_bytes.size

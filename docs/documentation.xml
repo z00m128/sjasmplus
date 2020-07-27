@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.15.1 Documentation [2020-07-07]</title>
+  <title>SjASMPlus 1.16.0 Documentation [2020-07-27]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -64,6 +64,10 @@
           </listitem>
 
           <listitem>
+            <para>Relocation data generator to support SymbOS-like relocation of executables</para>
+          </listitem>
+
+          <listitem>
             <para>Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op DEVICE)</para>
           </listitem>
 
@@ -77,7 +81,7 @@
 
           <listitem>
             <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
-            Cirrus-CI with 240+ automated tests</ulink> (that's also 240+ examples of usage!)</para>
+            Cirrus-CI with 380+ automated tests</ulink> (that's also 380+ examples of usage!)</para>
           </listitem>
 
           <listitem>
@@ -184,6 +188,18 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>27.7.2020 - 1.16.0</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_lua">`LUA`</link> the new emit warning (v1.15.1) is now suppressible
+- <link linkend="s_predefined">Predefined defines</link> extended and renamed (following gcc/clang ones)
+- Added <link linkend="po_relocate_end">relocation data generator</link> (similar to WinAPE feature), check also <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">example</ulink>
+- bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by "("
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>7.7.2020 - 1.15.1</term>
@@ -698,7 +714,9 @@ $c     hexadecimal
       precedence of the operators. The following operators may be used in
       expressions:</para>
 
-      <para><programlisting>!     !x       logical not
+      <para><programlisting>norel norel L  Label/symbol L will be treated as non-relocatable
+
+!     !x       logical not
 ~     ~x       complement
 +     +x       does "nothing", can be used to make "+(...)" parse as value (not as memory)
 -     -x       minus
@@ -1188,15 +1206,133 @@ StartProg:
     </section>
 
     <section>
-      <title>Predefined defines</title>
+      <title><anchor id="s_predefined" />Predefined defines</title>
 
       <para>SjASMPlus has predefined <link
       linkend="po_define">defines</link>.<variablelist>
+
+          <varlistentry>
+            <term>__SJASMPLUS__ = &lt;24bit number&gt;</term>
+
+            <listitem>
+              <para>Current version split into three 8bit values, ie. 0x010F02 for "1.15.2".</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__VERSION__ = "version string"</term>
+
+            <listitem>
+              <para>String value (with quotes around it) of current version like <code>"1.15.2"</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__ERRORS__ = &lt;number&gt;</term>
+
+            <listitem>
+              <para>Number of errors.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__WARNINGS__ = &lt;number&gt;</term>
+
+            <listitem>
+              <para>Number of warnings.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__PASS__ = &lt;number&gt;</term>
+
+            <listitem>
+              <para>Current assembling pass (1, 2 or 3).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__INCLUDE_LEVEL__ = &lt;number&gt;</term>
+
+            <listitem>
+              <para>Current include-nesting level.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__BASE_FILE__ = &lt;name of base file&gt;</term>
+
+            <listitem>
+              <para>Name of base file (include-level zero).</para>
+              <para>This is raw value without quotes, practically unusable by asm source, but LUA
+				  provides means to operate with such string value.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__FILE__ = &lt;name of current file&gt;</term>
+
+            <listitem>
+              <para>Name of current file.</para>
+              <para>This is raw value without quotes, practically unusable by asm source, but LUA
+				  provides means to operate with such string value.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__LINE__ = &lt;number&gt;</term>
+
+            <listitem>
+              <para>Current line number.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__COUNTER__ = &lt;incrementing number&gt;</term>
+
+            <listitem>
+              <para>Does increment upon each usage (starting as value 0). Currently difficult to
+				  use for labels/symbols, because the starting `_` of the define name prevents
+				  mid-word substitution, will make more sense with new substitution rules (if ever
+				  the sjasmplus v2.x happens, would be too big change for v1.x). Right now call
+				  LUA for the rescue.</para>
+			  <example>
+                  <title>__COUNTER__ usage in LUA script</title>
+
+                  <programlisting>    DB __COUNTER__   ; DB 0
+    LUA ALLPASS
+        sj.insert_label("label_" .. sj.get_define("__COUNTER__"), sj.current_address)
+                -- creates "label_1" at "$" (0x0001)
+        sj.insert_label("label_" .. sj.get_define("__COUNTER__"), _c("$+10"))
+                -- creates "label_2" at "$+10" (0x000B)
+    ENDLUA
+label__COUNTER__: ; does *NOT* substitute in current sjasmplus, sorry
+    DB __COUNTER__   ; DB 3
+
+    ; also macro arguments substitution can be used
+    MACRO createLabelWithSuffix label?, suffix?
+label?_suffix? ; define global label
+    ENDM
+    createLabelWithSuffix label, __COUNTER__    ; label_4
+    createLabelWithSuffix label, __COUNTER__    ; label_5</programlisting>
+                </example>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Deprecated predefined values from sjasmplus till version 1.15.1:</term>
+
+            <listitem>
+				<para>The predefined values were renamed and extended to be more like gcc/clang pre-defines,
+					the following ones are deprecated originals.</para>
+            </listitem>
+          </varlistentry>
+
           <varlistentry>
             <term>_SJASMPLUS = 1</term>
 
             <listitem>
-              <para><example>
+              <para>Deprecated, consider using similar __SJASMPLUS__<example>
                   <title></title>
 
                   <para><programlisting>   IFDEF _SJASMPLUS
@@ -1212,7 +1348,7 @@ StartProg:
             <term>_VERSION = "version"</term>
 
             <listitem>
-              <para><example>
+              <para>Deprecated, renamed to __VERSION__<example>
                   <title></title>
 
                   <para><programlisting>   IF _VERSION = "1.07"
@@ -1228,7 +1364,7 @@ StartProg:
             <term>_RELEASE = releasenumber</term>
 
             <listitem>
-              <para><example>
+              <para>Deprecated, consider using similar __SJASMPLUS__<example>
                   <title></title>
 
                   <para><programlisting>   IF _RELEASE = 1 ; 0 - is stable version
@@ -1244,7 +1380,7 @@ StartProg:
             <term>_ERRORS = &lt;number&gt;</term>
 
             <listitem>
-              <para>Number of errors.</para>
+              <para>Number of errors. Deprecated, renamed to __ERRORS__</para>
             </listitem>
           </varlistentry>
 
@@ -1252,7 +1388,7 @@ StartProg:
             <term>_WARNINGS = &lt;number&gt;</term>
 
             <listitem>
-              <para>Number of warnings.</para>
+              <para>Number of warnings. Deprecated, renamed to __WARNINGS__</para>
             </listitem>
           </varlistentry>
         </variablelist></para>
@@ -2141,7 +2277,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>LUA [pass]<anchor id="po_lua" /></term>
+            <term><anchor id="po_lua" />LUA [pass] [; ok comment to suppress "emit with allpass" warning]</term>
 
             <listitem>
               <para>Using pseudo-ops LUA and ENDLUA you can insert Lua
@@ -2323,7 +2459,9 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
             <listitem>
               <para>Set the program counter to a specific address. If the second argument is
               provided, it will change memory page in the current slot, see
-              <link linkend="po_page">PAGE</link>.</para>
+              <link linkend="po_page">PAGE</link> and <link linkend="po_slot">SLOT</link> (it will
+              warn you when &lt;address&gt; is outside of it, you can suppress the warning with
+              ";ok" comment).</para>
               <para>When used inside <link linkend="po_disp">DISP</link> block, only the virtual
 				  "displaced" program counter is affected, but the machine code will be still
 				  sequentially emitted in the original physical location and warning is emitted
@@ -2427,6 +2565,52 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 
             <listitem>
               <para>Synonym of <link linkend="po_disp">DISP</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_relocate_end" />RELOCATE_END</term>
+
+            <listitem>
+              <para>Ends the block of code for which relocation data are produced (started by
+				  <link linkend="po_relocate_start">RELOCATE_START</link>). To get the relocation
+				  data themselves, use <link linkend="po_relocate_table">RELOCATE_TABLE</link> and
+				  related symbols.</para>
+			  <para>For more details/examples check the <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">examples/relocation</ulink> and the <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/relocate">relocation tests</ulink>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_relocate_start" />RELOCATE_START</term>
+
+            <listitem>
+              <para>Marks start of block for which relocation data are produced. Any *regular* label
+				  (not EQU/DEFL symbols) defined inside the RELOCATE_START .. RELOCATE_END block will
+				  be treated as "relocatable" label. Any instruction/directive within the block which
+				  needs resulting opcode adjusted when relocated to different address will produce
+				  relocation-data for the <link linkend="po_relocate_table">RELOCATE_TABLE</link>.
+				  </para>
+			  <para>The relocation feature of regular label is transitive and EQU value based on already
+				  relocatable label will be tagged as relocatable too. Also structures instantiated in
+				  relocatable block have their labels tagged as relocatable and their initial values may
+				  become part of relocation data if the initial value is based on relocatable value.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_relocate_table" />RELOCATE_TABLE [&lt;subtract_offset&gt;]</term>
+
+            <listitem>
+              <para>Emits relocation data gathered across all relocation blocks. There are also
+				  two built-in symbols <code>relocate_count</code> and <code>relocate_size</code>
+				  containing the size of the table (only word-type tables are supported in sjasmplus,
+				  so size is always doubled count).</para>
+              <para>The table is raw array of WORD (16 bit) values with memory offsets of machine
+				  code which should be adjusted (when the code is relocated to different than original
+				  base address). To base offsets from particular base address, use <link linkend="po_org">ORG</link>
+				  ahead of relocation block to land instructions and labels from there.</para>
+              <para>The &lt;subtract_offset&gt; is just subtracted from every offset recorded in the
+				  relocation table (same what WinAPE does with its optional argument for RELOCATE_TABLE).</para>
             </listitem>
           </varlistentry>
 
@@ -3899,7 +4083,11 @@ binData.value2          EQU 0x8101   ; address</synopsis>
         end
         _pl(".savesp: LD SP,0")
         _pc("RET")
-    ENDLUA</programlisting></para>
+    ENDLUA
+
+    LUA PASS2 ; if you fully understand what you are doing
+        sj.add_byte(123) -- and you need emit bytes in other mode
+    ENDLUA ; ok ; you can suppress warning here or at start of block</programlisting></para>
         </example><example>
           <title>Declare function and use it</title>
 

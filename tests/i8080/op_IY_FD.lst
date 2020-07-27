@@ -22,7 +22,6 @@ op_IY_FD.asm(11): error: Illegal instruction:     dec     iyh         ; #FD25
 op_IY_FD.asm(12): error: Illegal instruction:     ld      iyh,0       ; #FD2600
  12   0004                  ld      iyh,0       ; #FD2600
 op_IY_FD.asm(13): error: Label not found: iy
-op_IY_FD.asm(13): error: Label not found: iy
  13   0004 C6 00 C6 00      add     iy,iy       ; #FD29
 op_IY_FD.asm(14): error: Illegal instruction:     ld      iy,(#100)   ; #FD2A0001
  14   0008                  ld      iy,(#100)   ; #FD2A0001

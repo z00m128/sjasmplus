@@ -1,0 +1,39 @@
+diff -Naur original/Cmd-NsLookUp-head.asm src/Cmd-NsLookUp-head.asm
+--- original/Cmd-NsLookUp-head.asm	2016-01-10 02:47:36.000000000 +0100
++++ src/Cmd-NsLookUp-head.asm	2020-07-26 18:20:45.826682919 +0200
+@@ -2,8 +2,8 @@
+ 
+ org #1000
+ 
+-write "e:\symbos\cmd\nslookup.com"
+-READ "..\..\..\SVN-Main\trunk\SymbOS-Constants.asm"
++write "nslookup.com"
++READ <SymbOS-Constants.asm>
+ 
+ relocate_start
+ 
+@@ -109,9 +109,9 @@
+ use_SyNet_DNSRSV        equ 1   ;DNS resolve
+ use_SyNet_DNSVFY        equ 1   ;DNS verify
+ 
+-READ "..\..\..\SVN-Main\trunk\Docs-Developer\symbos_lib-SymShell.asm"
+-READ "..\..\..\SVN-Main\trunk\Docs-Developer\symbos_lib-SystemManager.asm"
+-READ "..\..\..\SVN-Main\trunk\Docs-Developer\symbos_lib-NetworkDaemon.asm"
++READ <symbos_lib-SymShell.asm>
++READ <symbos_lib-SystemManager.asm>
++READ <symbos_lib-NetworkDaemon.asm>
+ READ "Cmd-NsLookUp.asm"
+ 
+ App_EndTrns
+diff -Naur original/SymbOS-Constants.asm src/SymbOS-Constants.asm
+--- original/SymbOS-Constants.asm	2020-07-12 20:18:54.220609176 +0200
++++ src/SymbOS-Constants.asm	2020-07-26 18:07:23.721888233 +0200
+@@ -91,7 +91,7 @@
+ MSC_DSK_MENCTX  equ 52  ;opens context menu (P1=ram bank, P2/3=address data record, P4/5=Xbeg [-1=mouse position], P6/7=Ybeg) ##!!## doc+lib
+ MSC_DSK_STIADD  equ 53  ;adds systray-icon (P1=ram bank, P2/3=address, P4=ID)
+ MSC_DSK_STIREM  equ 54  ;removes systray-icon (P1=number)
+-    MSC_DSK_STIUPD  equ 55  ;updates systray-icon (P1=number)
++MSC_DSK_STIUPD  equ 55  ;updates systray-icon (P1=number)
+ MSC_DSK_CONPOS  equ 56  ;move a virtual control to a new position (P2/3=xpos, P4/5=ypos, P6/7=xlen, P8/9=ylen)
+ 
+ ;Desktop Manager Responses

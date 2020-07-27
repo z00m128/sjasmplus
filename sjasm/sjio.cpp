@@ -125,7 +125,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	PreviousErrorLine = CompiledCurrentLine;
 	++ErrorCount;							// number of non-skipped (!) errors
 
-	DefineTable.Replace("_ERRORS", ErrorCount);
+	DefineTable.Replace("__ERRORS__", ErrorCount);
 
 	initErrorLine();
 	STRCAT(ErrorLine, LINEMAX2-1, "error: ");
@@ -169,7 +169,7 @@ void Warning(const char* message, const char* badValueMessage, EWStatus type)
 
 	++WarningCount;
 
-	DefineTable.Replace("_WARNINGS", WarningCount);
+	DefineTable.Replace("__WARNINGS__", WarningCount);
 
 	initErrorLine();
 	STRCAT(ErrorLine, LINEMAX2-1, "warning: ");
@@ -235,13 +235,14 @@ void CheckRamLimitExceeded() {
 	char buf[64];
 	if (CurAddress >= 0x10000) {
 		if (LASTPASS == pass && notWarnedCurAdr) {
-			SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s", (unsigned int)CurAddress, PseudoORG ? "DISP":"ORG");
+			SPRINTF2(buf, 64, "RAM limit exceeded 0x%X by %s",
+					 (unsigned int)CurAddress, DISP_NONE != PseudoORG ? "DISP":"ORG");
 			Warning(buf);
 			notWarnedCurAdr = false;
 		}
-		if (PseudoORG) CurAddress &= 0xFFFF;	// fake DISP address gets auto-wrapped FFFF->0
+		if (DISP_NONE != PseudoORG) CurAddress &= 0xFFFF;	// fake DISP address gets auto-wrapped FFFF->0
 	} else notWarnedCurAdr = true;
-	if (PseudoORG && adrdisp >= 0x10000) {
+	if (DISP_NONE != PseudoORG && adrdisp >= 0x10000) {
 		if (LASTPASS == pass && notWarnedDisp) {
 			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by ORG", (unsigned int)adrdisp);
 			Warning(buf);
@@ -415,7 +416,7 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 		CheckRamLimitExceeded();
 	}
 	++CurAddress;
-	if (PseudoORG) ++adrdisp;
+	if (DISP_NONE != PseudoORG) ++adrdisp;
 }
 
 void EmitByte(int byte) {
@@ -451,7 +452,7 @@ void EmitWords(int* words) {
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
 	if (len <= 0) {
 		CurAddress = (CurAddress + len) & 0xFFFF;
-		if (PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
+		if (DISP_NONE != PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
 		if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
 		else			CheckRamLimitExceeded();
 		return;
@@ -557,7 +558,7 @@ void BinIncFile(char* fname, int offset, int length) {
 			}
 			length -= advanceLength;
 			if (length <= 0 && 0 == advanceLength) Error("BinIncFile internal error", NULL, FATAL);
-			if (PseudoORG) adrdisp = adrdisp + advanceLength;
+			if (DISP_NONE != PseudoORG) adrdisp = adrdisp + advanceLength;
 			CurAddress = CurAddress + advanceLength;
 		}
 	} else {
@@ -609,6 +610,11 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	}
 	fileNameFull = ofnIt->c_str();				// get const pointer into archive
 	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
+
+	// refresh pre-defined values related to file/include
+	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
+	DefineTable.Replace("__FILE__", fileNameFull);
+	if (0 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", fileNameFull);
 
 	// open default listing file for each new source file (if default listing is ON)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
@@ -665,6 +671,11 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	}
 	fileNameFull = oFileNameFull;
 	CurSourcePos = oSourcePos;
+
+	// refresh pre-defined values related to file/include
+	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
+	DefineTable.Replace("__FILE__", fileNameFull ? fileNameFull : "<none>");
+	if (-1 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", "<none>");
 }
 
 void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)
@@ -1161,11 +1172,11 @@ EReturn ReadFile() {
 			SkipBlanks(p);
 			if ('.' == *p) ++p;
 			if (cmphstr(p, "endif")) {
-				lp = ReplaceDefine(p);
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ENDIF
 				return ENDIF;
 			} else if (cmphstr(p, "else")) {
-				lp = ReplaceDefine(p);
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;
@@ -1190,13 +1201,13 @@ EReturn SkipFile() {
 			if (iflevel) {
 				--iflevel;
 			} else {
-				lp = ReplaceDefine(p);
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ENDIF
 				return ENDIF;
 			}
 		} else if (cmphstr(p, "else")) {
 			if (!iflevel) {
-				lp = ReplaceDefine(p);
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;

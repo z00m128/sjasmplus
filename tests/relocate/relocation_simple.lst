@@ -1,0 +1,32 @@
+# file opened: relocation_simple.asm
+ 1    0000                  ORG $1000
+ 2    1000                  RELOCATE_START
+ 3    1000
+ 4    1000                  ASSERT 2 * relocate_count == relocate_size
+ 5    1000                  ASSERT 3 == relocate_count
+ 6    1000 0B 10 0E 10      RELOCATE_TABLE              ; should emit the three addresses of opcode data:
+ 6    1004 12 10
+ 7    1006                      ; $100B, $100E, $1012
+ 8    1006
+ 9    1006 03 00            dw      relocate_count
+10    1008 06 00            dw      relocate_size
+11    100A              relocatable_label:              ; usage of this label should trigger relocation
+12    100A 21 0A 10         ld      hl,relocatable_label    ; opcode should be in relocation table
+13    100D 2A 0A 10         ld      hl,(relocatable_label)  ; opcode should be in relocation table
+14    1010 C9               ret
+15    1011 C3 0A 10         jp      relocatable_label   ; opcode should be in relocation table
+16    1014              equ_label   equ     $1001
+17    1014 21 01 10         ld      hl,equ_label        ; should be absolute (equ) value (not in relocate data)
+18    1017 2A 01 10         ld      hl,(equ_label)      ; should be absolute (equ) address (not in relocate data)
+19    101A C3 01 10         jp      equ_label           ; jump to absolute address (not in relocate data)
+20    101D
+21    101D                  RELOCATE_END
+22    101D
+# file closed: relocation_simple.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0003   relocate_count
+0x0006   relocate_size
+0x100A   relocatable_label
+0x1001   equ_label

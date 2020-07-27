@@ -22,6 +22,7 @@ set(SOURCES
 	sjasm/io_trd.cpp
 	sjasm/parser.cpp
 	sjasm/reader.cpp
+	sjasm/relocate.cpp
 	sjasm/sjasm.cpp
 	sjasm/sjio.cpp
 	sjasm/support.cpp

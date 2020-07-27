@@ -1,0 +1,29 @@
+# file opened: s_predefined.asm
+ 1    0000 00               DB 0   ; DB 0
+ 2    0001                  LUA ALLPASS
+ 3    0001 ~                    sj.insert_label("label_" .. sj.get_define("__COUNTER__"), sj.current_address)
+ 4    0001 ~                            -- creates "label_1" at "$" (0x0001)
+ 5    0001 ~                    sj.insert_label("label_" .. sj.get_define("__COUNTER__"), _c("$+10"))
+ 6    0001 ~                            -- creates "label_2" at "$+10" (0x000B)
+ 7    0001                  ENDLUA
+ 8    0001              label__COUNTER__: ; does *NOT* substitute in current sjasmplus, sorry
+ 9    0001 03               DB 3   ; DB 3
+10    0002
+11    0002                  ; also macro arguments substitution can be used
+12    0002                  MACRO createLabelWithSuffix label?, suffix?
+13    0002 ~            label?_suffix? ; define global label
+14    0002                  ENDM
+15    0002                  createLabelWithSuffix label, 4    ; label_4
+15    0002             >label_4     ; define global label
+16    0002                  createLabelWithSuffix label, 5    ; label_5
+16    0002             >label_5     ; define global label
+17    0002
+# file closed: s_predefined.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X label_1
+0x000B X label_2
+0x0001 X label__COUNTER__
+0x0002 X label_4
+0x0002 X label_5

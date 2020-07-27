@@ -1,0 +1,83 @@
+# file opened: relocation_z80n.asm
+ 1    0000                  OPT --zxnext
+ 2    0000                  ORG $1000
+ 3    1000
+ 4    1000                  RELOCATE_START
+ 5    1000
+ 6    1000                  ASSERT 2 * relocate_count == relocate_size
+ 7    1000                  ASSERT 3 == relocate_count
+ 8    1000 03 00            dw      relocate_count
+ 9    1002 06 00            dw      relocate_size
+10    1004
+11    1004              add_r16_imm16:
+12    1004 ED 34 04 10      add     hl,add_r16_imm16
+13    1008 ED 35 04 10      add     de,add_r16_imm16
+14    100C ED 36 04 10      add     bc,add_r16_imm16
+15    1010
+16    1010              push_imm16:
+relocation_z80n.asm(17): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    push_imm16          
+17    1010 ED 8A 10 10      push    push_imm16          ; not suitable for relocation because big-endian encoding
+18    1014                  ; try multi arg variation, it will report two errors for two expressions
+relocation_z80n.asm(19): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    0x1234, push_imm16, 0x2345, push_imm16
+relocation_z80n.asm(19): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    0x1234, push_imm16, 0x2345, push_imm16
+19    1014 ED 8A 12 34      push    0x1234, push_imm16, 0x2345, push_imm16
+19    1018 ED 8A 10 10
+19    101C ED 8A 23 45
+19    1020 ED 8A 10 10
+20    1024
+21    1024              imm8_warnings:                  ; warning all
+relocation_z80n.asm(22): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+22    1024 ED 92 10         nextreg high imm8_warnings,a
+relocation_z80n.asm(23): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+23    1027 ED 91 10 34      nextreg high imm8_warnings,$34
+relocation_z80n.asm(24): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+24    102B ED 91 12 10      nextreg $12,high imm8_warnings
+relocation_z80n.asm(25): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+25    102F ED 27 10         test    high imm8_warnings
+26    1032
+27    1032                  RELOCATE_END
+28    1032
+29    1032 06 10 0A 10      RELOCATE_TABLE
+29    1036 0E 10
+30    1038
+31    1038              ;===================================================================================
+32    1038              ; here comes the copy of all the instructions, but outside of relocation block
+33    1038              ; but using the labels which are affected by relocation (this should still *NOT*
+34    1038              ; add to the relocation table, as instructions are outside of relocation block)
+35    1038              ; and thus this should also *NOT* warn about unstable relocation.
+36    1038              ;===================================================================================
+37    1038
+38    1038              ;add_r16_imm16:
+39    1038 ED 34 04 10      add     hl,add_r16_imm16
+40    103C ED 35 04 10      add     de,add_r16_imm16
+41    1040 ED 36 04 10      add     bc,add_r16_imm16
+42    1044
+43    1044              ;push_imm16:
+44    1044 ED 8A 10 10      push    push_imm16          ; not suitable for relocation because big-endian encoding
+45    1048                  ; multi arg variation
+46    1048 ED 8A 12 34      push    0x1234, push_imm16, 0x2345, push_imm16
+46    104C ED 8A 10 10
+46    1050 ED 8A 23 45
+46    1054 ED 8A 10 10
+47    1058
+48    1058              ;imm8_warnings:
+49    1058 ED 92 10         nextreg high imm8_warnings,a
+50    105B ED 91 10 34      nextreg high imm8_warnings,$34
+51    105F ED 91 12 10      nextreg $12,high imm8_warnings
+52    1063 ED 27 10         test    high imm8_warnings
+53    1066
+54    1066 06 10 0A 10      RELOCATE_TABLE
+54    106A 0E 10
+55    106C
+56    106C                  ASSERT 3 == 3
+57    106C                  ASSERT 4 == 4
+58    106C
+# file closed: relocation_z80n.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0003   relocate_count
+0x0006   relocate_size
+0x1004   add_r16_imm16
+0x1010   push_imm16
+0x1024   imm8_warnings

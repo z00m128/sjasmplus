@@ -1,0 +1,9 @@
+# file opened: expression_word_like_operators_with_parentheses.asm
+1     0000 3E 34            ld      a,low(0x1234)
+2     0002 3E 12            ld      a,high(0x1234)
+3     0004 3E 00            ld      a,not(0x1234)
+4     0006
+# file closed: expression_word_like_operators_with_parentheses.asm
+
+Value    Label
+------ - -----------------------------------------------------------

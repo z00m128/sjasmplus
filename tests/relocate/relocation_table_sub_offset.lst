@@ -1,0 +1,40 @@
+# file opened: relocation_table_sub_offset.asm
+ 1    0000                  org $3000
+ 2    3000                  relocate_start
+ 3    3000
+ 4    3000 21 07 30         ld      hl,test
+ 5    3003 11 08 30         ld      de,test2
+ 6    3006 C9               ret
+ 7    3007
+ 8    3007 00           test    db  0
+ 9    3008 00           test2   db  0
+10    3009 02 00                dw  relocate_count
+11    300B 04 00                dw  relocate_size
+12    300D
+13    300D 01 20 04 20      relocate_table $1000    ; test optional argument
+14    3011 01 30 04 30      relocate_table          ; regular table with original offsets
+15    3015 01 40 04 40      relocate_table -$1000
+16    3019
+17    3019                  relocate_end
+18    3019
+19    3019                  ; test syntax error check
+relocation_table_sub_offset.asm(20): error: [RELOCATE_TABLE] Syntax error in <subtract_offset>: relocate_table @@
+20    3019                  relocate_table @@
+relocation_table_sub_offset.asm(21): error: [RELOCATE_TABLE] Syntax error in <subtract_offset>: relocate_table ,
+21    3019                  relocate_table ,
+relocation_table_sub_offset.asm(22): error: Unexpected: ,
+22    3019 01 20 04 20      relocate_table $1000,
+relocation_table_sub_offset.asm(23): error: Unexpected: , 123
+23    301D 01 20 04 20      relocate_table $1000, 123
+24    3021
+25    3021                  ASSERT 4 == 4
+26    3021                  ASSERT 0 == 0
+27    3021
+# file closed: relocation_table_sub_offset.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002   relocate_count
+0x0004   relocate_size
+0x3007   test
+0x3008   test2

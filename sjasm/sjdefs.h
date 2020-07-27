@@ -30,7 +30,8 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.15.1"
+#define VERSION "1.16.0"
+#define VERSION_NUM "0x00011000"
 
 #define LASTPASS 3
 
@@ -103,6 +104,7 @@ extern "C" {
 #include "io_trd.h"
 #include "io_tape.h"
 #include "io_nex.h"
+#include "relocate.h"
 #include "sjasm.h"
 
 #endif

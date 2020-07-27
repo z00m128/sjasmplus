@@ -1,0 +1,134 @@
+# file opened: raw_keyword_parsing.asm
+  1   0000              ; issue in v1.15.1 reported on pk-ru forum:
+  2   0000              ; sometimes the internal function "cmphstr" is used to detect keywords over raw line data
+  3   0000              ; which didn't undergo yet proper substitution and contain block/EOL comment, then it was
+  4   0000              ; possible to miss the keyword if the comment char was right after it without whitespace
+  5   0000
+  6   0000                  DEFINE/*c*/xyz
+  7   0000                  IFDEF xyz
+  8   0000 01                   DB 1
+  9   0001                  ELSE
+ 10   0001 ~                    ASSERT/*c*/0
+ 11   0001                  ENDIF
+ 12   0001                  UNDEFINE xyz
+ 13   0001
+ 14   0001                  ; comment block focused
+ 15   0001                  IF 1
+ 16   0001                      ; nested IF/IFN/IFNUSED
+ 17   0001 02                   DB 2
+ 18   0002                      IFN 0
+ 19   0002 03                       DB 3
+ 20   0003                      ELSE/*c*/
+ 21   0003 ~                        ASSERT/*c*/0
+ 22   0003                      ENDIF/*c*/
+ 23   0003                      ; "//" EOL comment focused
+ 24   0003                      IF 1
+ 25   0003 04                       DB 4
+ 26   0004                      ELSE//c
+ 27   0004 ~                        ASSERT/*c*/0
+ 28   0004                      ENDIF//c
+ 29   0004                      ; ";" EOL comment focused
+ 30   0004                      IFNUSED someLabel
+ 31   0004 05                       DB 5
+ 32   0005                      ELSE;c
+ 33   0005 ~                        ASSERT/*c*/0
+ 34   0005                      ENDIF;c
+ 35   0005                  ELSE; comment - causing issue in v1.15.1
+ 36   0005 ~                    ; nested + skipped IF/IFN/IFNUSED
+ 37   0005 ~                    ASSERT/*c*/0
+ 38   0005 ~                    IFN/*c*/0
+ 39   0005 ~                        DB/*c*/-1
+ 40   0005 ~                    ELSE/*c*/
+ 41   0005 ~                        ASSERT/*c*/0
+ 42   0005 ~                    ENDIF/*c*/
+ 43   0005 ~                    ; "//" EOL comment focused
+ 44   0005 ~                    IF/*c*/1
+ 45   0005 ~                        DB/*c*/-2
+ 46   0005 ~                    ELSE//c
+ 47   0005 ~                        ASSERT/*c*/0
+ 48   0005 ~                    ENDIF//c
+ 49   0005 ~                    ; ";" EOL comment focused
+ 50   0005 ~                    IFNUSED/*c*/someLabel
+ 51   0005 ~                        DB/*c*/-3
+ 52   0005 ~                    ELSE;c
+ 53   0005 ~                        ASSERT/*c*/0
+ 54   0005 ~                    ENDIF;c
+ 55   0005                  ENDIF; comment - causing issue in v1.15.1
+ 56   0005
+ 57   0005                  DUP 1
+ 58   0005 06          >        DB 6
+ 59   0006                  EDUP//c
+ 60   0006
+ 61   0006                  STRUCT  TestStruct
+ 62   0006 ~            s_a     BYTE/*c*/-7
+ 63   0006                  ENDS//c
+ 64   0006
+ 65   0006 07               TestStruct {7}
+ 66   0007
+ 67   0007              ;; LEVEL 2 - add empty defines into sensitive lines to verify they get skipped
+ 68   0007
+ 69   0007                  DEFINE _EMPTINESS_
+ 70   0007
+ 71   0007                  ; DEFINE, IFDEF and UNDEFINE can't provide substitution, so they can't attend LEVEL 2
+ 72   0007
+ 73   0007                  ; comment block focused
+ 74   0007                  IF  1
+ 75   0007                      ; nested IF/IFN/IFNUSED
+ 76   0007 0A                   DB  10
+ 77   0008                      IFN  0
+ 78   0008 0B                       DB  11
+ 79   0009                      ELSE/**/_EMPTINESS_/**/
+ 80   0009 ~                        ASSERT/**/_EMPTINESS_/**/0
+ 81   0009                      ENDIF/**/_EMPTINESS_/**/
+ 82   0009                      ; "//" EOL comment focused
+ 83   0009                      IF  1
+ 84   0009 0C                       DB  12
+ 85   000A                      ELSE/**/_EMPTINESS_//c
+ 86   000A ~                        ASSERT/**/_EMPTINESS_/**/0
+ 87   000A                      ENDIF/**/_EMPTINESS_//c
+ 88   000A                      ; ";" EOL comment focused
+ 89   000A                      IFNUSED  someLabel
+ 90   000A 0D                       DB  13
+ 91   000B                      ELSE/**/_EMPTINESS_;c
+ 92   000B ~                        ASSERT/**/_EMPTINESS_/**/0
+ 93   000B                      ENDIF/**/_EMPTINESS_;c
+ 94   000B                  ELSE; comment - causing issue in v1.15.1
+ 95   000B ~                    ; nested + skipped IF/IFN/IFNUSED
+ 96   000B ~                    ASSERT/**/_EMPTINESS_/**/0
+ 97   000B ~                    IFN/**/_EMPTINESS_/**/0
+ 98   000B ~                        DB/**/_EMPTINESS_/**/-11
+ 99   000B ~                    ELSE/**/_EMPTINESS_/**/
+100   000B ~                        ASSERT/**/_EMPTINESS_/**/0
+101   000B ~                    ENDIF/**/_EMPTINESS_/**/
+102   000B ~                    ; "//" EOL comment focused
+103   000B ~                    IF/**/_EMPTINESS_/**/1
+104   000B ~                        DB/**/_EMPTINESS_/**/-12
+105   000B ~                    ELSE/**/_EMPTINESS_//c
+106   000B ~                        ASSERT/**/_EMPTINESS_/**/0
+107   000B ~                    ENDIF/**/_EMPTINESS_//c
+108   000B ~                    ; ";" EOL comment focused
+109   000B ~                    IFNUSED/**/_EMPTINESS_/**/someLabel
+110   000B ~                        DB/**/_EMPTINESS_/**/-13
+111   000B ~                    ELSE/**/_EMPTINESS_;c
+112   000B ~                        ASSERT/**/_EMPTINESS_/**/0
+113   000B ~                    ENDIF/**/_EMPTINESS_;c
+114   000B                  ENDIF; comment - causing issue in v1.15.1
+115   000B
+116   000B                  DUP  1
+117   000B 0E          >        DB 14
+118   000C                  EDUP/**/_EMPTINESS_//c
+119   000C
+120   000C                  STRUCT   TestStruct_L2
+121   000C ~            s_a     BYTE/**/_EMPTINESS_/**/-14
+122   000C                  ENDS/**/_EMPTINESS_//c
+123   000C
+124   000C 0F               TestStruct_L2  {15}
+125   000D
+# file closed: raw_keyword_parsing.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X TestStruct
+0x0000 X TestStruct.s_a
+0x0001 X TestStruct_L2
+0x0000 X TestStruct_L2.s_a

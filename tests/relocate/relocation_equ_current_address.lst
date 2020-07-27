@@ -1,0 +1,41 @@
+# file opened: relocation_equ_current_address.asm
+ 1    0000                  org $3000
+ 2    3000                  relocate_start
+ 3    3000
+ 4    3000              test1   equ     $           ; should have isRelocatable flag
+ 5    3000              test2   equ     $ + 23      ; should have isRelocatable flag
+ 6    3000              test3   equ     $ - test1   ; size of code = no relocation
+ 7    3000
+ 8    3000 02 00                dw      relocate_count
+ 9    3002 04 00                dw      relocate_size
+10    3004
+11    3004 21 00 30             ld      hl,test1    ; to be relocated
+12    3007 11 17 30             ld      de,test2    ; to be relocated
+13    300A 01 00 00             ld      bc,test3    ; no relocation
+14    300D 31 14 30             ld      sp,noRel1   ; no relocation
+15    3010
+16    3010 05 30 08 30      relocate_table
+17    3014
+18    3014                  relocate_end
+19    3014
+20    3014              noRel1  equ     $
+21    3014                  ; no relocation outside of the block
+22    3014 21 00 30             ld      hl,test1
+23    3017 11 17 30             ld      de,test2
+24    301A 01 00 00             ld      bc,test3
+25    301D 31 14 30             ld      sp,noRel1   ; no relocation
+26    3020
+27    3020                  ASSERT 2 == relocate_count
+28    3020                  ASSERT 0 == 0
+29    3020                  ASSERT 0 == 0
+30    3020
+# file closed: relocation_equ_current_address.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002   relocate_count
+0x0004   relocate_size
+0x3000   test1
+0x3017   test2
+0x0000   test3
+0x3014   noRel1

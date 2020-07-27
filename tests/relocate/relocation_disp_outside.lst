@@ -1,0 +1,41 @@
+# file opened: relocation_disp_outside.asm
+ 1    0000                  ; init ZX48 device, put machine code at $8000
+ 2    0000                  DEVICE ZXSPECTRUM48
+ 2    0000                ORG $8000
+ 3    8000                  ; but make relocation block base address $0000 with DISP
+ 4    8000                  DISP $0000
+ 5    0000
+ 6    0000                  RELOCATE_START
+ 7    0000
+ 8    0000 01 00            dw      relocate_count
+ 9    0002 02 00            dw      relocate_size
+10    0004
+11    0004              label1:
+12    0004 CD 04 00         call    label1              ; relocate
+13    0007 CD 0D 00         call    absolute1           ; no relocation
+14    000A              label2:
+15    000A 21 06 00         ld      hl,label2-label1    ; no relocation
+16    000D
+relocation_disp_outside.asm(17): error: The DISP block did start outside of relocation block, can't end inside it
+17    000D                  ENT                         ; error, can't finish DISP which did start outside
+18    000D
+19    000D                  RELOCATE_END
+20    000D
+21    000D              absolute1:
+22    000D                  ENT
+23    800D
+24    800D 05 00            RELOCATE_TABLE
+25    800F                  ; 05 00
+26    800F
+27    800F                  ; verify the actual machine code was placed at $8000 in virtual device memory
+28    800F                  SAVEBIN "relocation_disp_outside.bin", $8000, $ - $8000
+29    800F
+# file closed: relocation_disp_outside.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001   relocate_count
+0x0002   relocate_size
+0x0004   label1
+0x000D   absolute1
+0x000A   label2
