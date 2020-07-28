@@ -2594,6 +2594,8 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 				  relocatable label will be tagged as relocatable too. Also structures instantiated in
 				  relocatable block have their labels tagged as relocatable and their initial values may
 				  become part of relocation data if the initial value is based on relocatable value.</para>
+			  <para>You can prepend operator <code>norel</code> to label to strip it of its relocatable
+				  property for particular expression.</para>
             </listitem>
           </varlistentry>
 
