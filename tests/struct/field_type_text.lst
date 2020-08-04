@@ -16,7 +16,7 @@
  15   0000 ~            m00     byte    'B'
  16   0000 ~            m01     text    10, { "CDEFG", "H", $40+9, "JKL" }  ; `CDEFGHIJKL`
  17   0000 ~            m02     block   1, 'M'
- 18   0000 ~            m03     text    5, { 'N' }              ; `NNNNN`
+ 18   0000 ~            m03     TEXT    5, { 'N' }              ; `NNNNN`
  19   0000 ~            m04     defs    1, 'O'
  20   0000 ~            m05     substr2 { 'P', { {"QRSTU"} }, 'V', { 'W', "XY" }, 'Z' }
  21   0000 ~            m06     substr2
@@ -384,6 +384,13 @@ field_type_text.asm(104): error: Syntax error: @, @ }
 106   8422 36 00 37 00
 106   8426 00 00 00 00
 107   842A
+108   842A                      STRUCT S_ERR2
+field_type_text.asm(109): error: [STRUCT] Unexpected: texts   30, { "invalid type" }  
+109   842A ~                    texts   30, { "invalid type" }  ; but looks similar
+field_type_text.asm(110): error: [STRUCT] Unexpected: TEXTS   30, { "invalid type" }  
+110   842A ~                    TEXTS   30, { "invalid type" }  ; but looks similar
+111   842A                      ENDS
+112   842A
 # file closed: field_type_text.asm
 
 Value    Label
@@ -740,3 +747,4 @@ Value    Label
 0x8391 X err3.sm00
 0x0094 X S_ERR1
 0x8396 X emitE1
+0x0000 X S_ERR2

@@ -951,6 +951,7 @@ EStructureMembers GetStructMemberId(char*& p) {
 		if (cmphstr(p, "d24")) return SMEMBD24;
 		break;
 	case 't'*2+'e':
+	case 'T'*2+'E':
 		if (cmphstr(p, "text")) return SMEMBTEXT;
 		break;
 	default:

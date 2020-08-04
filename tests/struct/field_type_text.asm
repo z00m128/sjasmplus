@@ -15,7 +15,7 @@ sub1    text    3, { '?' }              ; `???`
 m00     byte    'B'
 m01     text    10, { "CDEFG", "H", $40+9, "JKL" }  ; `CDEFGHIJKL`
 m02     block   1, 'M'
-m03     text    5, { 'N' }              ; `NNNNN`
+m03     TEXT    5, { 'N' }              ; `NNNNN`
 m04     defs    1, 'O'
 m05     substr2 { 'P', { {"QRSTU"} }, 'V', { 'W', "XY" }, 'Z' }
 m06     substr2
@@ -104,3 +104,8 @@ err3    substr1 {{'a','b','c','d','e',$21}}
         text    2, { @, @ }
         ENDS
 emitE1  S_ERR1
+
+        STRUCT S_ERR2
+        texts   30, { "invalid type" }  ; but looks similar
+        TEXTS   30, { "invalid type" }  ; but looks similar
+        ENDS
