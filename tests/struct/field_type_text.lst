@@ -1,0 +1,742 @@
+# file opened: field_type_text.asm
+  1   0000                      STRUCT substr1
+  2   0000 ~            sm00    text    5, { "12!" }    ; last byte fills remaining size, i.e. `12!!!` (in definition)
+  3   0000                      ENDS
+  4   0000
+  5   0000                      STRUCT substr2
+  6   0000 ~                    byte    '3'
+  7   0000 ~            sub0    substr1 { { "4", "5", "67" } }  ; `4567!` - init value does only replace definition values
+  8   0000 ~                    byte    '8'
+  9   0000 ~            sub1    text    3, { '?' }              ; `???`
+ 10   0000 ~                    byte    'A'
+ 11   0000                      ENDS
+ 12   0000
+ 13   0000
+ 14   0000                      STRUCT  str, 1
+ 15   0000 ~            m00     byte    'B'
+ 16   0000 ~            m01     text    10, { "CDEFG", "H", $40+9, "JKL" }  ; `CDEFGHIJKL`
+ 17   0000 ~            m02     block   1, 'M'
+ 18   0000 ~            m03     text    5, { 'N' }              ; `NNNNN`
+ 19   0000 ~            m04     defs    1, 'O'
+ 20   0000 ~            m05     substr2 { 'P', { {"QRSTU"} }, 'V', { 'W', "XY" }, 'Z' }
+ 21   0000 ~            m06     substr2
+ 22   0000 ~            m07     substr1
+ 23   0000 ~            m08     substr2 { 'a', 'b', 'c' }           ; texts are skipped with default initializer
+ 24   0000 ~            m09     substr2 { 'd', {}, 'e', {}, 'f' }   ; texts are skipped with default initializer
+ 25   0000                      ENDS
+ 26   0000
+ 27   0000                      DEVICE ZXSPECTRUM48
+ 28   0000
+ 29   0000                      ORG 0x8000
+ 30   8000 5F 5F 5F...          ds  0x4000, '_'     ; fill memory with '_'
+ 31   C000                      ORG 0x8000
+ 32   8000              ;; first set testing init-values list structure parsing
+ 33   8000 5F 42 43 44  d01     str
+ 33   8004 45 46 47 48
+ 33   8008 49 4A 4B 4C
+ 33   800C 4D 4E 4E 4E
+ 33   8010 4E 4E 4F 50
+ 33   8014 51 52 53 54
+ 33   8018 55 56 57 58
+ 33   801C 59 5A 33 34
+ 33   8020 35 36 37 21
+ 33   8024 38 3F 3F 3F
+ 33   8028 41 31 32 21
+ 33   802C 21 21 61 34
+ 33   8030 35 36 37 21
+ 33   8034 62 3F 3F 3F
+ 33   8038 63 64 34 35
+ 33   803C 36 37 21 65
+ 33   8040 3F 3F 3F 66
+ 33   8044 0A             DB "\n"
+ 34   8045                  ; "_BCDEFGHIJKLMNNNNNOPQRSTUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 35   8045 5F 42 43 44  d02     str     {,,,{'#'}}
+ 35   8049 45 46 47 48
+ 35   804D 49 4A 4B 4C
+ 35   8051 4D 4E 4E 4E
+ 35   8055 4E 4E 4F 23
+ 35   8059 51 52 53 54
+ 35   805D 55 56 57 58
+ 35   8061 59 5A 33 34
+ 35   8065 35 36 37 21
+ 35   8069 38 3F 3F 3F
+ 35   806D 41 31 32 21
+ 35   8071 21 21 61 34
+ 35   8075 35 36 37 21
+ 35   8079 62 3F 3F 3F
+ 35   807D 63 64 34 35
+ 35   8081 36 37 21 65
+ 35   8085 3F 3F 3F 66
+ 35   8089 0A             DB "\n"
+ 36   808A                  ; "_BCDEFGHIJKLMNNNNNO#QRSTUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 37   808A 5F 42 43 44  d03     str     {{},{}{'#'{{"Q##"}}}}
+ 37   808E 45 46 47 48
+ 37   8092 49 4A 4B 4C
+ 37   8096 4D 4E 4E 4E
+ 37   809A 4E 4E 4F 23
+ 37   809E 51 23 23 54
+ 37   80A2 55 56 57 58
+ 37   80A6 59 5A 33 34
+ 37   80AA 35 36 37 21
+ 37   80AE 38 3F 3F 3F
+ 37   80B2 41 31 32 21
+ 37   80B6 21 21 61 34
+ 37   80BA 35 36 37 21
+ 37   80BE 62 3F 3F 3F
+ 37   80C2 63 64 34 35
+ 37   80C6 36 37 21 65
+ 37   80CA 3F 3F 3F 66
+ 37   80CE 0A             DB "\n"
+ 38   80CF                  ; "_BCDEFGHIJKLMNNNNNO#Q##TUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 39   80CF 5F 42 43 44  d04     str     {{},{},{'#',{{"Q##"}}}}
+ 39   80D3 45 46 47 48
+ 39   80D7 49 4A 4B 4C
+ 39   80DB 4D 4E 4E 4E
+ 39   80DF 4E 4E 4F 23
+ 39   80E3 51 23 23 54
+ 39   80E7 55 56 57 58
+ 39   80EB 59 5A 33 34
+ 39   80EF 35 36 37 21
+ 39   80F3 38 3F 3F 3F
+ 39   80F7 41 31 32 21
+ 39   80FB 21 21 61 34
+ 39   80FF 35 36 37 21
+ 39   8103 62 3F 3F 3F
+ 39   8107 63 64 34 35
+ 39   810B 36 37 21 65
+ 39   810F 3F 3F 3F 66
+ 39   8113 0A             DB "\n"
+ 40   8114                  ; "_BCDEFGHIJKLMNNNNNO#Q##TUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 41   8114 5F 42 43 44  d05     str     {{},{},{{}},{'#',{},,{"."}}}
+ 41   8118 45 46 47 48
+ 41   811C 49 4A 4B 4C
+ 41   8120 4D 4E 4E 4E
+ 41   8124 4E 4E 4F 50
+ 41   8128 51 52 53 54
+ 41   812C 55 56 57 58
+ 41   8130 59 5A 23 34
+ 41   8134 35 36 37 21
+ 41   8138 38 2E 3F 3F
+ 41   813C 41 31 32 21
+ 41   8140 21 21 61 34
+ 41   8144 35 36 37 21
+ 41   8148 62 3F 3F 3F
+ 41   814C 63 64 34 35
+ 41   8150 36 37 21 65
+ 41   8154 3F 3F 3F 66
+ 41   8158 0A             DB "\n"
+ 42   8159                  ; "_BCDEFGHIJKLMNNNNNOPQRSTUVWXYZ#4567!8.??A12!!!a4567!b???cd4567!e???f\n"
+ 43   8159
+ 44   8159              ;; identical test cases as d02..d05, but without the top-level enclosing {}
+ 45   8159              ;; but then these need initial comma for 'B' byte, to force first {} to "CDEFG.." text
+ 46   8159 5F 42 43 44  dx2     str      ,,,{'#'}
+ 46   815D 45 46 47 48
+ 46   8161 49 4A 4B 4C
+ 46   8165 4D 4E 4E 4E
+ 46   8169 4E 4E 4F 23
+ 46   816D 51 52 53 54
+ 46   8171 55 56 57 58
+ 46   8175 59 5A 33 34
+ 46   8179 35 36 37 21
+ 46   817D 38 3F 3F 3F
+ 46   8181 41 31 32 21
+ 46   8185 21 21 61 34
+ 46   8189 35 36 37 21
+ 46   818D 62 3F 3F 3F
+ 46   8191 63 64 34 35
+ 46   8195 36 37 21 65
+ 46   8199 3F 3F 3F 66
+ 46   819D 0A             DB "\n"
+ 47   819E                  ; "_BCDEFGHIJKLMNNNNNO#QRSTUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 48   819E 5F 42 43 44  dx3     str      ,{},{}{'#'{{"Q##"}}}
+ 48   81A2 45 46 47 48
+ 48   81A6 49 4A 4B 4C
+ 48   81AA 4D 4E 4E 4E
+ 48   81AE 4E 4E 4F 23
+ 48   81B2 51 23 23 54
+ 48   81B6 55 56 57 58
+ 48   81BA 59 5A 33 34
+ 48   81BE 35 36 37 21
+ 48   81C2 38 3F 3F 3F
+ 48   81C6 41 31 32 21
+ 48   81CA 21 21 61 34
+ 48   81CE 35 36 37 21
+ 48   81D2 62 3F 3F 3F
+ 48   81D6 63 64 34 35
+ 48   81DA 36 37 21 65
+ 48   81DE 3F 3F 3F 66
+ 48   81E2 0A             DB "\n"
+ 49   81E3                  ; "_BCDEFGHIJKLMNNNNNO#Q##TUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 50   81E3 5F 42 43 44  dx4     str      ,{},{},{'#',{{"Q##"}}}
+ 50   81E7 45 46 47 48
+ 50   81EB 49 4A 4B 4C
+ 50   81EF 4D 4E 4E 4E
+ 50   81F3 4E 4E 4F 23
+ 50   81F7 51 23 23 54
+ 50   81FB 55 56 57 58
+ 50   81FF 59 5A 33 34
+ 50   8203 35 36 37 21
+ 50   8207 38 3F 3F 3F
+ 50   820B 41 31 32 21
+ 50   820F 21 21 61 34
+ 50   8213 35 36 37 21
+ 50   8217 62 3F 3F 3F
+ 50   821B 63 64 34 35
+ 50   821F 36 37 21 65
+ 50   8223 3F 3F 3F 66
+ 50   8227 0A             DB "\n"
+ 51   8228                  ; "_BCDEFGHIJKLMNNNNNO#Q##TUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 52   8228 5F 42 43 44  dx5     str      ,{},{},{{}},{'#',{},,{"."}}
+ 52   822C 45 46 47 48
+ 52   8230 49 4A 4B 4C
+ 52   8234 4D 4E 4E 4E
+ 52   8238 4E 4E 4F 50
+ 52   823C 51 52 53 54
+ 52   8240 55 56 57 58
+ 52   8244 59 5A 23 34
+ 52   8248 35 36 37 21
+ 52   824C 38 2E 3F 3F
+ 52   8250 41 31 32 21
+ 52   8254 21 21 61 34
+ 52   8258 35 36 37 21
+ 52   825C 62 3F 3F 3F
+ 52   8260 63 64 34 35
+ 52   8264 36 37 21 65
+ 52   8268 3F 3F 3F 66
+ 52   826C 0A             DB "\n"
+ 53   826D                  ; "_BCDEFGHIJKLMNNNNNOPQRSTUVWXYZ#4567!8.??A12!!!a4567!b???cd4567!e???f\n"
+ 54   826D
+ 55   826D              ;; initial 'B' explicitly modified
+ 56   826D 5F 67 43 44  dy2     str      'g',,,{'#'}
+ 56   8271 45 46 47 48
+ 56   8275 49 4A 4B 4C
+ 56   8279 4D 4E 4E 4E
+ 56   827D 4E 4E 4F 23
+ 56   8281 51 52 53 54
+ 56   8285 55 56 57 58
+ 56   8289 59 5A 33 34
+ 56   828D 35 36 37 21
+ 56   8291 38 3F 3F 3F
+ 56   8295 41 31 32 21
+ 56   8299 21 21 61 34
+ 56   829D 35 36 37 21
+ 56   82A1 62 3F 3F 3F
+ 56   82A5 63 64 34 35
+ 56   82A9 36 37 21 65
+ 56   82AD 3F 3F 3F 66
+ 56   82B1 0A             DB "\n"
+ 57   82B2                  ; "_gCDEFGHIJKLMNNNNNO#QRSTUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 58   82B2 5F 68 43 44  dy3     str      'h',{},{}{'#'{{"Q##"}}}
+ 58   82B6 45 46 47 48
+ 58   82BA 49 4A 4B 4C
+ 58   82BE 4D 4E 4E 4E
+ 58   82C2 4E 4E 4F 23
+ 58   82C6 51 23 23 54
+ 58   82CA 55 56 57 58
+ 58   82CE 59 5A 33 34
+ 58   82D2 35 36 37 21
+ 58   82D6 38 3F 3F 3F
+ 58   82DA 41 31 32 21
+ 58   82DE 21 21 61 34
+ 58   82E2 35 36 37 21
+ 58   82E6 62 3F 3F 3F
+ 58   82EA 63 64 34 35
+ 58   82EE 36 37 21 65
+ 58   82F2 3F 3F 3F 66
+ 58   82F6 0A             DB "\n"
+ 59   82F7                  ; "_hCDEFGHIJKLMNNNNNO#Q##TUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 60   82F7 5F 69 43 44  dy4     str      'i',{},{},{'#',{{"Q##"}}}
+ 60   82FB 45 46 47 48
+ 60   82FF 49 4A 4B 4C
+ 60   8303 4D 4E 4E 4E
+ 60   8307 4E 4E 4F 23
+ 60   830B 51 23 23 54
+ 60   830F 55 56 57 58
+ 60   8313 59 5A 33 34
+ 60   8317 35 36 37 21
+ 60   831B 38 3F 3F 3F
+ 60   831F 41 31 32 21
+ 60   8323 21 21 61 34
+ 60   8327 35 36 37 21
+ 60   832B 62 3F 3F 3F
+ 60   832F 63 64 34 35
+ 60   8333 36 37 21 65
+ 60   8337 3F 3F 3F 66
+ 60   833B 0A             DB "\n"
+ 61   833C                  ; "_iCDEFGHIJKLMNNNNNO#Q##TUVWXYZ34567!8???A12!!!a4567!b???cd4567!e???f\n"
+ 62   833C 5F 6A 43 44  dy5     str      'j',{},{},{{}},{'#',{},,{"."}}
+ 62   8340 45 46 47 48
+ 62   8344 49 4A 4B 4C
+ 62   8348 4D 4E 4E 4E
+ 62   834C 4E 4E 4F 50
+ 62   8350 51 52 53 54
+ 62   8354 55 56 57 58
+ 62   8358 59 5A 23 34
+ 62   835C 35 36 37 21
+ 62   8360 38 2E 3F 3F
+ 62   8364 41 31 32 21
+ 62   8368 21 21 61 34
+ 62   836C 35 36 37 21
+ 62   8370 62 3F 3F 3F
+ 62   8374 63 64 34 35
+ 62   8378 36 37 21 65
+ 62   837C 3F 3F 3F 66
+ 62   8380 0A             DB "\n"
+ 63   8381                  ; "_jCDEFGHIJKLMNNNNNOPQRSTUVWXYZ#4567!8.??A12!!!a4567!b???cd4567!e???f\n"
+ 64   8381
+ 65   8381 31 32 33 21  parse1  substr1 {{'0'|1,'0'|2,'0'+3}}
+ 65   8385 21
+ 65   8386 0A             DB "\n"
+ 66   8387                  ; "123!!\n"
+ 67   8387
+ 68   8387                  ; BIN is produced only from valid emits (skipping the following error checking part)
+ 69   8387                      SAVEBIN  "field_type_text.bin", 0x8000, $-0x8000
+ 70   8387
+ 71   8387              ;; too long text initializer
+field_type_text.asm(72): error: Maximum length of struct text reached. Values over: !"}}
+ 72   8387 61 62 63 64  err1    substr1 {{"abcde!"}}
+ 72   838B 65
+ 73   838C
+ 74   838C              ;; too long text initializer (defined by single bytes)
+field_type_text.asm(75): error: Maximum length of struct text reached. Values over: !'}}
+ 75   838C 61 62 63 64  err2    substr1 {{'a','b','c','d','e','!'}}
+ 75   8390 65
+field_type_text.asm(76): error: Maximum length of struct text reached. Values over: $21}}
+ 76   8391 61 62 63 64  err3    substr1 {{'a','b','c','d','e',$21}}
+ 76   8395 65
+ 77   8396
+ 78   8396                  ; error in text field definition
+ 79   8396                      STRUCT S_ERR1
+ 80   8396 ~                    text    2           ; valid (zeroed)
+ 81   8396 ~                    text    1, {'1'}    ; valid
+ 82   8396 ~                    text    1, {   }    ; valid (zeroed)
+ 83   8396 ~                    text    128, {'2'}  ; valid
+ 84   8396 ~                    ; invalid ones (some error should be reported):
+field_type_text.asm(85): error: [STRUCT] Expression for length of text expected (1..128)
+ 85   8396 ~                    text
+field_type_text.asm(86): error: [STRUCT] Expression for length of text expected (1..128)
+ 86   8396 ~                    text    0, {'3'}
+field_type_text.asm(87): error: [STRUCT] Expression for length of text expected (1..128)
+ 87   8396 ~                    text    -1, {'4'}
+field_type_text.asm(88): error: [STRUCT] Expression for length of text expected (1..128)
+ 88   8396 ~                    text    129, {'5'}
+ 89   8396 ~                    ; next line emits 00 00
+field_type_text.asm(90): error: [STRUCT] Comma expected: @
+ 90   8396 ~                    text    2 @
+ 91   8396 ~                    ; next line emits 00 00
+field_type_text.asm(92): error: TEXT field value must be enclosed in curly braces, missing '{': 
+ 92   8396 ~                    text    2,
+ 93   8396 ~                    ; next line emits 00 00
+field_type_text.asm(94): error: TEXT field value must be enclosed in curly braces, missing '}': 
+ 94   8396 ~                    text    2, {
+ 95   8396 ~                    ; next line emits 00 00
+field_type_text.asm(96): error: Syntax error: '
+ 96   8396 ~                    text    2, {'
+ 97   8396 ~                    ; next line emits 36 00
+field_type_text.asm(98): error: Syntax error: '6
+ 98   8396 ~                    text    2, {'6
+ 99   8396 ~                    ; next line emits 37 00
+field_type_text.asm(100): error: TEXT field value must be enclosed in curly braces, missing '}': 
+100   8396 ~                    text    2, {'7'
+101   8396 ~                    ; next line emits 00 00
+field_type_text.asm(102): error: TEXT field value must be enclosed in curly braces, missing '{': "89"
+field_type_text.asm(102): error: [STRUCT] Unexpected: "89"
+102   8396 ~                    text    2, "89"
+103   8396 ~                    ; next line emits 00 00
+field_type_text.asm(104): error: Syntax error: @, @ }
+104   8396 ~                    text    2, { @, @ }
+105   8396                      ENDS
+106   8396 00 00 31 00  emitE1  S_ERR1
+106   839A 32 32 32 32
+106   839E 32 32 32 32
+106   83A2 32 32 32 32
+106   83A6 32 32 32 32
+106   83AA 32 32 32 32
+106   83AE 32 32 32 32
+106   83B2 32 32 32 32
+106   83B6 32 32 32 32
+106   83BA 32 32 32 32
+106   83BE 32 32 32 32
+106   83C2 32 32 32 32
+106   83C6 32 32 32 32
+106   83CA 32 32 32 32
+106   83CE 32 32 32 32
+106   83D2 32 32 32 32
+106   83D6 32 32 32 32
+106   83DA 32 32 32 32
+106   83DE 32 32 32 32
+106   83E2 32 32 32 32
+106   83E6 32 32 32 32
+106   83EA 32 32 32 32
+106   83EE 32 32 32 32
+106   83F2 32 32 32 32
+106   83F6 32 32 32 32
+106   83FA 32 32 32 32
+106   83FE 32 32 32 32
+106   8402 32 32 32 32
+106   8406 32 32 32 32
+106   840A 32 32 32 32
+106   840E 32 32 32 32
+106   8412 32 32 32 32
+106   8416 32 32 32 32
+106   841A 00 00 00 00
+106   841E 00 00 00 00
+106   8422 36 00 37 00
+106   8426 00 00 00 00
+107   842A
+# file closed: field_type_text.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0005 X substr1
+0x0000 X substr1.sm00
+0x000B X substr2
+0x0001 X substr2.sub0
+0x0001 X substr2.sub0.sm00
+0x0007 X substr2.sub1
+0x0044 X str
+0x0001 X str.m00
+0x0002 X str.m01
+0x000C X str.m02
+0x000D X str.m03
+0x0012 X str.m04
+0x0013 X str.m05
+0x0014 X str.m05.sub0
+0x0014 X str.m05.sub0.sm00
+0x001A X str.m05.sub1
+0x001E X str.m06
+0x001F X str.m06.sub0
+0x001F X str.m06.sub0.sm00
+0x0025 X str.m06.sub1
+0x0029 X str.m07
+0x0029 X str.m07.sm00
+0x002E X str.m08
+0x002F X str.m08.sub0
+0x002F X str.m08.sub0.sm00
+0x0035 X str.m08.sub1
+0x0039 X str.m09
+0x003A X str.m09.sub0
+0x003A X str.m09.sub0.sm00
+0x0040 X str.m09.sub1
+0x8000 X d01
+0x8001 X d01.m00
+0x8002 X d01.m01
+0x800C X d01.m02
+0x800D X d01.m03
+0x8012 X d01.m04
+0x8013 X d01.m05
+0x8014 X d01.m05.sub0
+0x8014 X d01.m05.sub0.sm00
+0x801A X d01.m05.sub1
+0x801E X d01.m06
+0x801F X d01.m06.sub0
+0x801F X d01.m06.sub0.sm00
+0x8025 X d01.m06.sub1
+0x8029 X d01.m07
+0x8029 X d01.m07.sm00
+0x802E X d01.m08
+0x802F X d01.m08.sub0
+0x802F X d01.m08.sub0.sm00
+0x8035 X d01.m08.sub1
+0x8039 X d01.m09
+0x803A X d01.m09.sub0
+0x803A X d01.m09.sub0.sm00
+0x8040 X d01.m09.sub1
+0x8045 X d02
+0x8046 X d02.m00
+0x8047 X d02.m01
+0x8051 X d02.m02
+0x8052 X d02.m03
+0x8057 X d02.m04
+0x8058 X d02.m05
+0x8059 X d02.m05.sub0
+0x8059 X d02.m05.sub0.sm00
+0x805F X d02.m05.sub1
+0x8063 X d02.m06
+0x8064 X d02.m06.sub0
+0x8064 X d02.m06.sub0.sm00
+0x806A X d02.m06.sub1
+0x806E X d02.m07
+0x806E X d02.m07.sm00
+0x8073 X d02.m08
+0x8074 X d02.m08.sub0
+0x8074 X d02.m08.sub0.sm00
+0x807A X d02.m08.sub1
+0x807E X d02.m09
+0x807F X d02.m09.sub0
+0x807F X d02.m09.sub0.sm00
+0x8085 X d02.m09.sub1
+0x808A X d03
+0x808B X d03.m00
+0x808C X d03.m01
+0x8096 X d03.m02
+0x8097 X d03.m03
+0x809C X d03.m04
+0x809D X d03.m05
+0x809E X d03.m05.sub0
+0x809E X d03.m05.sub0.sm00
+0x80A4 X d03.m05.sub1
+0x80A8 X d03.m06
+0x80A9 X d03.m06.sub0
+0x80A9 X d03.m06.sub0.sm00
+0x80AF X d03.m06.sub1
+0x80B3 X d03.m07
+0x80B3 X d03.m07.sm00
+0x80B8 X d03.m08
+0x80B9 X d03.m08.sub0
+0x80B9 X d03.m08.sub0.sm00
+0x80BF X d03.m08.sub1
+0x80C3 X d03.m09
+0x80C4 X d03.m09.sub0
+0x80C4 X d03.m09.sub0.sm00
+0x80CA X d03.m09.sub1
+0x80CF X d04
+0x80D0 X d04.m00
+0x80D1 X d04.m01
+0x80DB X d04.m02
+0x80DC X d04.m03
+0x80E1 X d04.m04
+0x80E2 X d04.m05
+0x80E3 X d04.m05.sub0
+0x80E3 X d04.m05.sub0.sm00
+0x80E9 X d04.m05.sub1
+0x80ED X d04.m06
+0x80EE X d04.m06.sub0
+0x80EE X d04.m06.sub0.sm00
+0x80F4 X d04.m06.sub1
+0x80F8 X d04.m07
+0x80F8 X d04.m07.sm00
+0x80FD X d04.m08
+0x80FE X d04.m08.sub0
+0x80FE X d04.m08.sub0.sm00
+0x8104 X d04.m08.sub1
+0x8108 X d04.m09
+0x8109 X d04.m09.sub0
+0x8109 X d04.m09.sub0.sm00
+0x810F X d04.m09.sub1
+0x8114 X d05
+0x8115 X d05.m00
+0x8116 X d05.m01
+0x8120 X d05.m02
+0x8121 X d05.m03
+0x8126 X d05.m04
+0x8127 X d05.m05
+0x8128 X d05.m05.sub0
+0x8128 X d05.m05.sub0.sm00
+0x812E X d05.m05.sub1
+0x8132 X d05.m06
+0x8133 X d05.m06.sub0
+0x8133 X d05.m06.sub0.sm00
+0x8139 X d05.m06.sub1
+0x813D X d05.m07
+0x813D X d05.m07.sm00
+0x8142 X d05.m08
+0x8143 X d05.m08.sub0
+0x8143 X d05.m08.sub0.sm00
+0x8149 X d05.m08.sub1
+0x814D X d05.m09
+0x814E X d05.m09.sub0
+0x814E X d05.m09.sub0.sm00
+0x8154 X d05.m09.sub1
+0x8159 X dx2
+0x815A X dx2.m00
+0x815B X dx2.m01
+0x8165 X dx2.m02
+0x8166 X dx2.m03
+0x816B X dx2.m04
+0x816C X dx2.m05
+0x816D X dx2.m05.sub0
+0x816D X dx2.m05.sub0.sm00
+0x8173 X dx2.m05.sub1
+0x8177 X dx2.m06
+0x8178 X dx2.m06.sub0
+0x8178 X dx2.m06.sub0.sm00
+0x817E X dx2.m06.sub1
+0x8182 X dx2.m07
+0x8182 X dx2.m07.sm00
+0x8187 X dx2.m08
+0x8188 X dx2.m08.sub0
+0x8188 X dx2.m08.sub0.sm00
+0x818E X dx2.m08.sub1
+0x8192 X dx2.m09
+0x8193 X dx2.m09.sub0
+0x8193 X dx2.m09.sub0.sm00
+0x8199 X dx2.m09.sub1
+0x819E X dx3
+0x819F X dx3.m00
+0x81A0 X dx3.m01
+0x81AA X dx3.m02
+0x81AB X dx3.m03
+0x81B0 X dx3.m04
+0x81B1 X dx3.m05
+0x81B2 X dx3.m05.sub0
+0x81B2 X dx3.m05.sub0.sm00
+0x81B8 X dx3.m05.sub1
+0x81BC X dx3.m06
+0x81BD X dx3.m06.sub0
+0x81BD X dx3.m06.sub0.sm00
+0x81C3 X dx3.m06.sub1
+0x81C7 X dx3.m07
+0x81C7 X dx3.m07.sm00
+0x81CC X dx3.m08
+0x81CD X dx3.m08.sub0
+0x81CD X dx3.m08.sub0.sm00
+0x81D3 X dx3.m08.sub1
+0x81D7 X dx3.m09
+0x81D8 X dx3.m09.sub0
+0x81D8 X dx3.m09.sub0.sm00
+0x81DE X dx3.m09.sub1
+0x81E3 X dx4
+0x81E4 X dx4.m00
+0x81E5 X dx4.m01
+0x81EF X dx4.m02
+0x81F0 X dx4.m03
+0x81F5 X dx4.m04
+0x81F6 X dx4.m05
+0x81F7 X dx4.m05.sub0
+0x81F7 X dx4.m05.sub0.sm00
+0x81FD X dx4.m05.sub1
+0x8201 X dx4.m06
+0x8202 X dx4.m06.sub0
+0x8202 X dx4.m06.sub0.sm00
+0x8208 X dx4.m06.sub1
+0x820C X dx4.m07
+0x820C X dx4.m07.sm00
+0x8211 X dx4.m08
+0x8212 X dx4.m08.sub0
+0x8212 X dx4.m08.sub0.sm00
+0x8218 X dx4.m08.sub1
+0x821C X dx4.m09
+0x821D X dx4.m09.sub0
+0x821D X dx4.m09.sub0.sm00
+0x8223 X dx4.m09.sub1
+0x8228 X dx5
+0x8229 X dx5.m00
+0x822A X dx5.m01
+0x8234 X dx5.m02
+0x8235 X dx5.m03
+0x823A X dx5.m04
+0x823B X dx5.m05
+0x823C X dx5.m05.sub0
+0x823C X dx5.m05.sub0.sm00
+0x8242 X dx5.m05.sub1
+0x8246 X dx5.m06
+0x8247 X dx5.m06.sub0
+0x8247 X dx5.m06.sub0.sm00
+0x824D X dx5.m06.sub1
+0x8251 X dx5.m07
+0x8251 X dx5.m07.sm00
+0x8256 X dx5.m08
+0x8257 X dx5.m08.sub0
+0x8257 X dx5.m08.sub0.sm00
+0x825D X dx5.m08.sub1
+0x8261 X dx5.m09
+0x8262 X dx5.m09.sub0
+0x8262 X dx5.m09.sub0.sm00
+0x8268 X dx5.m09.sub1
+0x826D X dy2
+0x826E X dy2.m00
+0x826F X dy2.m01
+0x8279 X dy2.m02
+0x827A X dy2.m03
+0x827F X dy2.m04
+0x8280 X dy2.m05
+0x8281 X dy2.m05.sub0
+0x8281 X dy2.m05.sub0.sm00
+0x8287 X dy2.m05.sub1
+0x828B X dy2.m06
+0x828C X dy2.m06.sub0
+0x828C X dy2.m06.sub0.sm00
+0x8292 X dy2.m06.sub1
+0x8296 X dy2.m07
+0x8296 X dy2.m07.sm00
+0x829B X dy2.m08
+0x829C X dy2.m08.sub0
+0x829C X dy2.m08.sub0.sm00
+0x82A2 X dy2.m08.sub1
+0x82A6 X dy2.m09
+0x82A7 X dy2.m09.sub0
+0x82A7 X dy2.m09.sub0.sm00
+0x82AD X dy2.m09.sub1
+0x82B2 X dy3
+0x82B3 X dy3.m00
+0x82B4 X dy3.m01
+0x82BE X dy3.m02
+0x82BF X dy3.m03
+0x82C4 X dy3.m04
+0x82C5 X dy3.m05
+0x82C6 X dy3.m05.sub0
+0x82C6 X dy3.m05.sub0.sm00
+0x82CC X dy3.m05.sub1
+0x82D0 X dy3.m06
+0x82D1 X dy3.m06.sub0
+0x82D1 X dy3.m06.sub0.sm00
+0x82D7 X dy3.m06.sub1
+0x82DB X dy3.m07
+0x82DB X dy3.m07.sm00
+0x82E0 X dy3.m08
+0x82E1 X dy3.m08.sub0
+0x82E1 X dy3.m08.sub0.sm00
+0x82E7 X dy3.m08.sub1
+0x82EB X dy3.m09
+0x82EC X dy3.m09.sub0
+0x82EC X dy3.m09.sub0.sm00
+0x82F2 X dy3.m09.sub1
+0x82F7 X dy4
+0x82F8 X dy4.m00
+0x82F9 X dy4.m01
+0x8303 X dy4.m02
+0x8304 X dy4.m03
+0x8309 X dy4.m04
+0x830A X dy4.m05
+0x830B X dy4.m05.sub0
+0x830B X dy4.m05.sub0.sm00
+0x8311 X dy4.m05.sub1
+0x8315 X dy4.m06
+0x8316 X dy4.m06.sub0
+0x8316 X dy4.m06.sub0.sm00
+0x831C X dy4.m06.sub1
+0x8320 X dy4.m07
+0x8320 X dy4.m07.sm00
+0x8325 X dy4.m08
+0x8326 X dy4.m08.sub0
+0x8326 X dy4.m08.sub0.sm00
+0x832C X dy4.m08.sub1
+0x8330 X dy4.m09
+0x8331 X dy4.m09.sub0
+0x8331 X dy4.m09.sub0.sm00
+0x8337 X dy4.m09.sub1
+0x833C X dy5
+0x833D X dy5.m00
+0x833E X dy5.m01
+0x8348 X dy5.m02
+0x8349 X dy5.m03
+0x834E X dy5.m04
+0x834F X dy5.m05
+0x8350 X dy5.m05.sub0
+0x8350 X dy5.m05.sub0.sm00
+0x8356 X dy5.m05.sub1
+0x835A X dy5.m06
+0x835B X dy5.m06.sub0
+0x835B X dy5.m06.sub0.sm00
+0x8361 X dy5.m06.sub1
+0x8365 X dy5.m07
+0x8365 X dy5.m07.sm00
+0x836A X dy5.m08
+0x836B X dy5.m08.sub0
+0x836B X dy5.m08.sub0.sm00
+0x8371 X dy5.m08.sub1
+0x8375 X dy5.m09
+0x8376 X dy5.m09.sub0
+0x8376 X dy5.m09.sub0.sm00
+0x837C X dy5.m09.sub1
+0x8381 X parse1
+0x8381 X parse1.sm00
+0x8387 X err1
+0x8387 X err1.sm00
+0x838C X err2
+0x838C X err2.sm00
+0x8391 X err3
+0x8391 X err3.sm00
+0x0094 X S_ERR1
+0x8396 X emitE1

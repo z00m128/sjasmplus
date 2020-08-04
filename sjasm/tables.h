@@ -41,7 +41,11 @@ struct TextFilePos {
 	void nextSegment(bool endsWithColon = false, size_t advanceColumns = 0);
 };
 
-enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
+enum EStructureMembers {
+	SMEMBUNKNOWN, SMEMBALIGN,
+	SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBTEXT,
+	SMEMBPARENOPEN, SMEMBPARENCLOSE
+};
 
 char* ValidateLabel(const char* naam, bool setNameSpace);
 extern char* PreviousIsLabel;
@@ -219,11 +223,13 @@ public:
 class CStructureEntry2 {
 public:
 	CStructureEntry2* next;
+	byte* text;
 	aint offset, len, def;
 	bool defRelocatable;
 	EStructureMembers type;
 
 	CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndefrel, EStructureMembers ntype);
+	CStructureEntry2(aint noffset, aint nlen, byte* textData);
 	~CStructureEntry2();
 	aint ParseValue(char* & p);
 };
@@ -236,9 +242,7 @@ public:
 	aint noffset;
 	void AddLabel(char*);
 	void AddMember(CStructureEntry2*);
-	void CopyLabel(char*, aint);
 	void CopyLabels(CStructure*);
-	void CopyMember(CStructureEntry2* item, aint newDefault, bool newDefIsRelative);
 	void CopyMembers(CStructure*, char*&);
 	void deflab();
 	void emitlab(char* iid, aint address, bool isRelocatable);
@@ -249,6 +253,8 @@ public:
 private:
 	CStructureEntry1* mnf, * mnl;
 	CStructureEntry2* mbf, * mbl;
+	void CopyLabel(char*, aint);
+	void CopyMember(CStructureEntry2* item, aint newDefault, bool newDefIsRelative);
 };
 
 class CStructureTable {

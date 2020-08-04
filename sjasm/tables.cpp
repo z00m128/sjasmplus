@@ -978,12 +978,19 @@ CStructureEntry1::~CStructureEntry1() {
 
 
 CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndefrel, EStructureMembers ntype) :
-	next(nullptr), offset(noffset), len(nlen), def(ndef), defRelocatable(ndefrel), type(ntype)
+	next(nullptr), text(nullptr), offset(noffset), len(nlen), def(ndef), defRelocatable(ndefrel), type(ntype)
 {
+}
+
+CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, byte* textData) :
+	next(nullptr), text(textData), offset(noffset), len(nlen), def(0), defRelocatable(false), type(SMEMBTEXT)
+{
+	assert(1 <= len && len <= 128 && nullptr != text);
 }
 
 CStructureEntry2::~CStructureEntry2() {
 	if (next) delete next;
+	if (text) delete[] text;
 }
 
 // Parses source input for types: BYTE, WORD, DWORD, D24
@@ -1119,6 +1126,15 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 				if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
 			}
 			break;
+		case SMEMBTEXT:
+			{
+				byte* textData = new byte[ip->len]();	// zero initialized for stable binary results
+				if (nullptr == textData) ErrorOOM();
+				GetStructText(lp, ip->len, textData, ip->text);
+				AddMember(new CStructureEntry2(noffset, ip->len, textData));
+				if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
+			}
+			break;
 		case SMEMBPARENOPEN:
 			SkipBlanks(lp);
 			if (*lp == '{') {
@@ -1236,6 +1252,14 @@ void CStructure::emitmembs(char*& p) {
 			val = ip->ParseValue(p);
 			EmitWord(val & 0xFFFF);
 			EmitWord((val>>16) & 0xFFFF);
+			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
+			break;
+		case SMEMBTEXT:
+			{
+				byte userData[130] = {0};
+				GetStructText(p, ip->len, userData, ip->text);
+				for (aint ii = 0; ii < ip->len; ++ii) EmitByte(userData[ii]);
+			}
 			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
 		case SMEMBPARENOPEN:

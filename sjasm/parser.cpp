@@ -926,6 +926,25 @@ void ParseStructMember(CStructure* st) {
 		}
 		st->AddMember(new CStructureEntry2(st->noffset, 4, val, false, SMEMBDWORD));
 		break;
+	case SMEMBTEXT:
+		{
+			if (!ParseExpression(lp, len) || len < 1 || 128 < len) {
+				Error("[STRUCT] Expression for length of text expected (1..128)");
+				SkipToEol(lp);
+				break;
+			}
+			byte* textData = new byte[len]();	// zero-initialized for stable binary results
+			if (nullptr == textData) ErrorOOM();
+			if (comma(lp)) {		// if comma then init data array explicitly
+				GetStructText(lp, len, textData);
+			} else if (SkipBlanks(lp)) {
+				// if empty without comma, init with the zeroed values
+			} else {
+				Error("[STRUCT] Comma expected", lp, SUPPRESS);	// syntax error
+			}
+			st->AddMember(new CStructureEntry2(st->noffset, len, textData));
+		}
+		break;
 	case SMEMBALIGN:
 	{
 		aint val, fill;
@@ -972,6 +991,7 @@ void ParseStructMember(CStructure* st) {
 }
 
 void ParseStructLine(CStructure* st) {
+	++CompiledCurrentLine;
 	lp = ReplaceDefine(line);
 	if (!*lp) return;
 	ParseStructLabel(st);
