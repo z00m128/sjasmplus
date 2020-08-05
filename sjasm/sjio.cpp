@@ -354,6 +354,8 @@ FILE* GetListingFile() {
 	return NULL;
 }
 
+static aint lastListedLine = -1;
+
 void ListFile(bool showAsSkipped) {
 	if (LASTPASS != pass || NULL == GetListingFile() || donotlist || Options::syx.IsListingSuspended) {
 		donotlist = nListBytes = 0;
@@ -363,7 +365,9 @@ void ListFile(bool showAsSkipped) {
 	do {
 		if (showAsSkipped) substitutedLine = line;	// override substituted lines in skipped mode
 		PrepareListLine(pline, ListAddress);
-		if (pos) pline[24] = 0;		// remove source line on sub-sequent list-lines
+		const bool hideSource = !showAsSkipped && (lastListedLine == CompiledCurrentLine);
+		if (hideSource) pline[24] = 0;				// hide *same* source line on sub-sequent list-lines
+		lastListedLine = CompiledCurrentLine;		// remember this line as listed
 		char* pp = pline + 10;
 		int BtoList = (nListBytes < 4) ? nListBytes : 4;
 		for (int i = 0; i < BtoList; ++i) {
@@ -384,6 +388,7 @@ void ListFile(bool showAsSkipped) {
 void ListSilentOrExternalEmits() {
 	// catch silent/external emits like "sj.add_byte(0x123)" from Lua script
 	if (0 == nListBytes) return;		// no silent/external emit happened
+	++CompiledCurrentLine;
 	char silentOrExternalBytes[] = "; these bytes were emitted silently/externally (lua script?)";
 	substitutedLine = silentOrExternalBytes;
 	eolComment = nullptr;
@@ -1172,10 +1177,12 @@ EReturn ReadFile() {
 			SkipBlanks(p);
 			if ('.' == *p) ++p;
 			if (cmphstr(p, "endif")) {
+				++CompiledCurrentLine;
 				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ENDIF
 				return ENDIF;
 			} else if (cmphstr(p, "else")) {
+				++CompiledCurrentLine;
 				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
@@ -1201,12 +1208,14 @@ EReturn SkipFile() {
 			if (iflevel) {
 				--iflevel;
 			} else {
+				++CompiledCurrentLine;
 				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ENDIF
 				return ENDIF;
 			}
 		} else if (cmphstr(p, "else")) {
 			if (!iflevel) {
+				++CompiledCurrentLine;
 				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
@@ -1242,6 +1251,7 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	// f itself should be already NULL, not resetting it here
 	CStringsList** s = &f;
 	while (ReadLineNoMacro()) {
+		++CompiledCurrentLine;
 		char* p = line;
 		SkipBlanks(p);
 		if ('.' == *p) ++p;

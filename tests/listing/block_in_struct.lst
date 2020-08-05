@@ -1,0 +1,101 @@
+# file opened: block_in_struct.asm
+ 1    0000                  STRUCT shortBlock
+ 2    0000 ~            byte    BYTE    'A'
+ 3    0000 ~            block   BLOCK   5, 'B'
+ 4    0000 ~            word    WORD    'DC'
+ 5    0000                  ENDS
+ 6    0000
+ 7    0000                  STRUCT onLimitBlock
+ 8    0000 ~            byte    BYTE    'A'
+ 9    0000 ~            block   BLOCK   8, 'B'      ; should be emitted without ellipsis
+10    0000 ~            word    WORD    'DC'
+11    0000                  ENDS
+12    0000
+13    0000                  STRUCT longBlock
+14    0000 ~            byte    BYTE    'A'
+15    0000 ~            block   BLOCK   9, 'B'      ; listed with ellipsis, needs fix of following address
+16    0000 ~            word    WORD    'DC'
+17    0000                  ENDS
+18    0000
+19    0000                  ; verify offsets
+20    0000                  ASSERT  6 == shortBlock.word
+21    0000                  ASSERT  9 == onLimitBlock.word
+22    0000                  ASSERT 10 == longBlock.word
+23    0000
+24    0000                  ORG $1000
+25    1000                  ; this should list normally
+26    1000 41 42 42 42  sb      shortBlock          ; should produce continuous 1+5+2 = 8 bytes listing
+26    1004 42 42 43 44
+27    1008
+28    1008                  ORG $2000
+29    2000 41 42 42 42  mb      onLimitBlock        ; should produce continuous 1+8+2 = 11 bytes listing
+29    2004 42 42 42 42
+29    2008 42 43 44
+30    200B
+31    200B                  ORG $3000
+32    3000 41 42 42 42  lb      longBlock           ; should produce ellipsis after "block" + extra "ListFile()" call
+32    3004 42 42 42 42
+32    3008...
+32    300A 43 44
+33    300C                                          ; and advance address for "word"
+34    300C
+35    300C                  ; one more ellipsis not aligning to the very beginning of MC byte quartet in LST
+36    300C                  STRUCT longBlock2
+37    300C ~            byte    BYTE    'A'
+38    300C ~            block1  BLOCK   9, '!'
+39    300C ~            block2  BLOCK   9, 'B'
+40    300C ~            word    WORD    'DC'
+41    300C                  ENDS
+42    300C
+43    300C                  ORG $8000
+44    8000 41 21 21 21  lb2     longBlock2          ; some eol comment
+44    8004 21 21 21 21
+44    8008...
+44    800A 42 42 42 42
+44    800E 42 42 42...
+44    8013 43 44
+45    8015
+46    8015                  ; verify final addresses
+47    8015                  ASSERT $1006 == sb.word
+48    8015                  ASSERT $2009 == mb.word
+49    8015                  ASSERT $300A == lb.word
+50    8015                  ASSERT $8001 == lb2.block1 && $800A == lb2.block2 && $8013 == lb2.word
+51    8015
+# file closed: block_in_struct.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0008 X shortBlock
+0x0000 X shortBlock.byte
+0x0001 X shortBlock.block
+0x0006   shortBlock.word
+0x000B X onLimitBlock
+0x0000 X onLimitBlock.byte
+0x0001 X onLimitBlock.block
+0x0009   onLimitBlock.word
+0x000C X longBlock
+0x0000 X longBlock.byte
+0x0001 X longBlock.block
+0x000A   longBlock.word
+0x1000 X sb
+0x1000 X sb.byte
+0x1001 X sb.block
+0x1006   sb.word
+0x2000 X mb
+0x2000 X mb.byte
+0x2001 X mb.block
+0x2009   mb.word
+0x3000 X lb
+0x3000 X lb.byte
+0x3001 X lb.block
+0x300A   lb.word
+0x0015 X longBlock2
+0x0000 X longBlock2.byte
+0x0001 X longBlock2.block1
+0x000A X longBlock2.block2
+0x0013 X longBlock2.word
+0x8000 X lb2
+0x8000 X lb2.byte
+0x8001   lb2.block1
+0x800A   lb2.block2
+0x8013   lb2.word

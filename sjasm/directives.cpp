@@ -1699,6 +1699,7 @@ void dirSTRUCT() {
 			++lp;
 		}
 		if (cmphstr(lp, "ends")) {
+			++CompiledCurrentLine;
 			st->deflab();
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDS
@@ -1812,6 +1813,7 @@ void dirEDUP() {
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	free(ml);
+	++CompiledCurrentLine;
 	substitutedLine = line;			// override substituted list line for EDUP
 	ListFile();
 }
@@ -1981,6 +1983,7 @@ void dirLUA() {
 			*bp++ = '\n';
 		}
 		if (isEndLua) {		// eat also any trailing eol-type of comment
+			++CompiledCurrentLine;
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDLUA
 			// take into account also warning suppression used at end of block
@@ -2007,6 +2010,7 @@ void dirLUA() {
 		}
 	}
 
+	++CompiledCurrentLine;
 	substitutedLine = line;		// override substituted list line for ENDLUA
 }
 
