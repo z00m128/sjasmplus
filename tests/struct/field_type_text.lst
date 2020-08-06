@@ -327,70 +327,78 @@ field_type_text.asm(90): error: [STRUCT] Comma expected: @
 field_type_text.asm(92): error: TEXT field value must be enclosed in curly braces, missing '{': 
  92   8396 ~                    text    2,
  93   8396 ~                    ; next line emits 00 00
-field_type_text.asm(94): error: TEXT field value must be enclosed in curly braces, missing '}': 
- 94   8396 ~                    text    2, {
+field_type_text.asm(94): error: Syntax error: ,
+ 94   8396 ~                    text    2, {,
  95   8396 ~                    ; next line emits 00 00
 field_type_text.asm(96): error: Syntax error: '
- 96   8396 ~                    text    2, {'
- 97   8396 ~                    ; next line emits 36 00
-field_type_text.asm(98): error: Syntax error: '6
- 98   8396 ~                    text    2, {'6
- 99   8396 ~                    ; next line emits 37 00
-field_type_text.asm(100): error: TEXT field value must be enclosed in curly braces, missing '}': 
-100   8396 ~                    text    2, {'7'
-101   8396 ~                    ; next line emits 00 00
-field_type_text.asm(102): error: TEXT field value must be enclosed in curly braces, missing '{': "89"
-field_type_text.asm(102): error: [STRUCT] Unexpected: "89"
-102   8396 ~                    text    2, "89"
-103   8396 ~                    ; next line emits 00 00
-field_type_text.asm(104): error: Syntax error: @, @ }
-104   8396 ~                    text    2, { @, @ }
-105   8396                      ENDS
-106   8396 00 00 31 00  emitE1  S_ERR1
-106   839A 32 32 32 32
-106   839E 32 32 32 32
-106   83A2 32 32 32 32
-106   83A6 32 32 32 32
-106   83AA 32 32 32 32
-106   83AE 32 32 32 32
-106   83B2 32 32 32 32
-106   83B6 32 32 32 32
-106   83BA 32 32 32 32
-106   83BE 32 32 32 32
-106   83C2 32 32 32 32
-106   83C6 32 32 32 32
-106   83CA 32 32 32 32
-106   83CE 32 32 32 32
-106   83D2 32 32 32 32
-106   83D6 32 32 32 32
-106   83DA 32 32 32 32
-106   83DE 32 32 32 32
-106   83E2 32 32 32 32
-106   83E6 32 32 32 32
-106   83EA 32 32 32 32
-106   83EE 32 32 32 32
-106   83F2 32 32 32 32
-106   83F6 32 32 32 32
-106   83FA 32 32 32 32
-106   83FE 32 32 32 32
-106   8402 32 32 32 32
-106   8406 32 32 32 32
-106   840A 32 32 32 32
-106   840E 32 32 32 32
-106   8412 32 32 32 32
-106   8416 32 32 32 32
-106   841A 00 00 00 00
-106   841E 00 00 00 00
-106   8422 36 00 37 00
-106   8426 00 00 00 00
-107   842A
-108   842A                      STRUCT S_ERR2
-field_type_text.asm(109): error: [STRUCT] Unexpected: texts   30, { "invalid type" }  
-109   842A ~                    texts   30, { "invalid type" }  ; but looks similar
-field_type_text.asm(110): error: [STRUCT] Unexpected: TEXTS   30, { "invalid type" }  
-110   842A ~                    TEXTS   30, { "invalid type" }  ; but looks similar
-111   842A                      ENDS
-112   842A
+ 96   8396                      text    2, {'
+field_type_text.asm(97): error: TEXT field value must be enclosed in curly braces, missing '}': '
+field_type_text.asm(97): error: [STRUCT] Unexpected: '
+ 97   8396 ~                    '
+ 98   8396 ~                    ; next line emits 36 00
+field_type_text.asm(99): error: Syntax error: '6
+ 99   8396                      text    2, {'6
+field_type_text.asm(100): error: TEXT field value must be enclosed in curly braces, missing '}': '
+field_type_text.asm(100): error: [STRUCT] Unexpected: '
+100   8396 ~                    '
+101   8396 ~                    ; next line emits 37 00
+102   8396                      text    2, {'7'
+field_type_text.asm(103): error: TEXT field value must be enclosed in curly braces, missing '}': endIt
+field_type_text.asm(103): error: [STRUCT] Unexpected: endIt
+103   8396 ~            endIt
+104   8396 ~                    ; next line emits 00 00
+field_type_text.asm(105): error: TEXT field value must be enclosed in curly braces, missing '{': "89"
+field_type_text.asm(105): error: [STRUCT] Unexpected: "89"
+105   8396 ~                    text    2, "89"
+106   8396 ~                    ; next line emits 00 00
+field_type_text.asm(107): error: Syntax error: @, @ }
+107   8396 ~                    text    2, { @, @ }
+108   8396                      ENDS
+109   8396 00 00 31 00  emitE1  S_ERR1
+109   839A 32 32 32 32
+109   839E 32 32 32 32
+109   83A2 32 32 32 32
+109   83A6 32 32 32 32
+109   83AA 32 32 32 32
+109   83AE 32 32 32 32
+109   83B2 32 32 32 32
+109   83B6 32 32 32 32
+109   83BA 32 32 32 32
+109   83BE 32 32 32 32
+109   83C2 32 32 32 32
+109   83C6 32 32 32 32
+109   83CA 32 32 32 32
+109   83CE 32 32 32 32
+109   83D2 32 32 32 32
+109   83D6 32 32 32 32
+109   83DA 32 32 32 32
+109   83DE 32 32 32 32
+109   83E2 32 32 32 32
+109   83E6 32 32 32 32
+109   83EA 32 32 32 32
+109   83EE 32 32 32 32
+109   83F2 32 32 32 32
+109   83F6 32 32 32 32
+109   83FA 32 32 32 32
+109   83FE 32 32 32 32
+109   8402 32 32 32 32
+109   8406 32 32 32 32
+109   840A 32 32 32 32
+109   840E 32 32 32 32
+109   8412 32 32 32 32
+109   8416 32 32 32 32
+109   841A 00 00 00 00
+109   841E 00 00 00 00
+109   8422 36 00 37 00
+109   8426 00 00 00 00
+110   842A
+111   842A                      STRUCT S_ERR2
+field_type_text.asm(112): error: [STRUCT] Unexpected: texts   30, { "invalid type" }  
+112   842A ~                    texts   30, { "invalid type" }  ; but looks similar
+field_type_text.asm(113): error: [STRUCT] Unexpected: TEXTS   30, { "invalid type" }  
+113   842A ~                    TEXTS   30, { "invalid type" }  ; but looks similar
+114   842A                      ENDS
+115   842A
 # file closed: field_type_text.asm
 
 Value    Label

@@ -754,7 +754,8 @@ static const byte win2dos[] = //taken from HorrorWord %)))
 
 //#define DEBUG_COUT_PARSE_LINE
 
-void ParseLine(bool parselabels) {
+// returns 1 when already fully processed (part of DUP/etc)
+int PrepareLine() {
 	ListSilentOrExternalEmits();
 
 	++CompiledCurrentLine;
@@ -766,23 +767,23 @@ void ParseLine(bool parselabels) {
 			dup.Pointer->next = f;
 			dup.Pointer = f;
 #ifdef DEBUG_COUT_PARSE_LINE
-			fprintf(stderr, ">%d %ld %c%ld-%d [%s]\n", pass, CurrentSourceLine,
+			fprintf(stderr, ">%d %d %c%ld-%d [%s]\n", pass, CurSourcePos.line,
 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),
 					(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
 			ParseDirective_REPT();
-			return;
+			return 1;
 		}
 	}
 #ifdef DEBUG_COUT_PARSE_LINE
-	fprintf(stderr, "|%d %ld %c%ld-%d [%s]\n", pass, CurrentSourceLine,
+	fprintf(stderr, "|%d %d %c%ld-%d [%s]\n", pass, CurSourcePos.line,
 			(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'), RepeatStack.size(),
 			(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
 	lp = ReplaceDefine(line);
 
 #ifdef DEBUG_COUT_PARSE_LINE
-	fprintf(stderr,"rdOut [%s]->[%s] %ld\n", line, lp, comlin);
+	fprintf(stderr,"rdOut [%s]->[%s] %d\n", line, lp, comlin);
 #endif
 
 	// update current address by memory wrapping, current page, etc... (before the label is defined)
@@ -798,9 +799,27 @@ void ParseLine(bool parselabels) {
 			++lp2;
 		}
 	}
+	return 0;
+}
+
+bool PrepareNonBlankMultiLine(char*& p) {
+	// loop while the current line is blank-only (read further lines until EOF or non-blank char)
+	while (SkipBlanks(p)) {
+		// list the current (old) line
+		ListFile();
+		// read the next line
+		if (!ReadLine()) return false;
+		PrepareLine();
+		p = lp;
+	}
+	return true;
+}
+
+void ParseLine(bool parselabels) {
+
+	if (PrepareLine()) return;
+
 	if (!*lp) {
-
-
 		char *srcNonWhiteChar = line;
 		SkipBlanks(srcNonWhiteChar);
 		// check if only "end-line" comment remained, treat that one as "empty" line too
@@ -813,6 +832,7 @@ void ParseLine(bool parselabels) {
 		}
 		return;
 	}
+
 	if (parselabels) ParseLabel();
 	if (!SkipBlanks()) ParseMacro();
 	if (!SkipBlanks()) ParseInstruction();

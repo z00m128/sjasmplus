@@ -706,8 +706,8 @@ void GetStructText(char*& p, aint len, byte* data, const byte* initData) {
 	}
 	aint ii = 0, val;
 	do {
-		// if no more chars to be parsed, or ending curly brace incoming, finish the loop
-		if (SkipBlanks(p) || '}' == *p) break;
+		// if no more chars/lines to be parsed, or ending curly brace incoming, finish the loop
+		if (!PrepareNonBlankMultiLine(p) || '}' == *p) break;
 		const int oldIi = ii;
 		char* const oldP = p;
 		int strRes;
@@ -735,11 +735,11 @@ void GetStructText(char*& p, aint len, byte* data, const byte* initData) {
 			break;
 		}
 	} while (comma(p));
-	Relocation::checkAndWarn();
-	if (!need(p, '}')) {
+	if (!PrepareNonBlankMultiLine(p) || !need(p, '}')) {
 		Error("TEXT field value must be enclosed in curly braces, missing '}'", p);
 		return;
 	}
+	Relocation::checkAndWarn();
 	// some bytes were initialized explicitly
 	if (nullptr != initData) {
 		// init remaining bytes from initData

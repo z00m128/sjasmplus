@@ -1,0 +1,223 @@
+# file opened: multi_line_initializer.asm
+  1   0000                  STRUCT S_SymbOS_icon_header
+  2   0000 ~            type        BYTE    2
+  3   0000 ~            sizex       BYTE    8
+  4   0000 ~            sizey       BYTE    8
+  5   0000                  ENDS
+  6   0000
+  7   0000                  STRUCT S_SymbOS_exe_header
+  8   0000 ~            codelen     WORD                ;Length of the code area (OS will place this area everywhere)
+  9   0000 ~            datalen     WORD                ;Length of the data area (screen manager data; OS will place this area inside a 16k block of one 64K bank)
+ 10   0000 ~            tranlen     WORD                ;Length of the transfer area (stack, message buffer, desktop manager data; placed between #c000 and #ffff of a 64K bank)
+ 11   0000 ~            datadr:
+ 12   0000 ~            origin      WORD                ;Original origin of the assembler code      ; POST address data area
+ 13   0000 ~            trnadr:
+ 14   0000 ~            relcount    WORD                ;Number of entries in the relocator table   ; POST address transfer area
+ 15   0000 ~            prztab:
+ 16   0000 ~            stacksize   WORD                ;Length of the stack in bytes               ; POST table processes or timer IDs (4*1)
+ 17   0000 ~                        BLOCK   2, 0        ;*reserved* (2 bytes)
+ 18   0000 ~            bnknum      BLOCK   1, 0        ;*reserved* (1 byte)                        ; POST 64K ram bank (1-8), where the application is located
+ 19   0000 ~            name        TEXT    25          ;program name (24+1[0] chars)
+ 20   0000 ~            flags       BYTE                ;flags (+1=16colour icon available)
+ 21   0000 ~            icon16      WORD                ;file offset of 16colour icon
+ 22   0000 ~                        BLOCK   5, 0        ;*reserved* (5 bytes)
+ 23   0000 ~            memtab:                         ;"SymExe10" SymbOS executable file identification ; POST table reserved memory areas
+ 24   0000 ~            identifier  TEXT    8, { "SymExe10" }
+ 25   0000 ~            codex       WORD                ;additional memory for code area (will be reserved directly behind the loaded code area)
+ 26   0000 ~            datex       WORD                ;additional memory for data area (see above)
+ 27   0000 ~            trnex       WORD                ;additional memory for transfer area (see above)
+ 28   0000 ~                        BLOCK   26, 0       ;*reserviert* (26 bytes)
+ 29   0000 ~            appId:
+ 30   0000 ~            osver       WORD                ;required OS version (1.0)
+ 31   0000 ~                    ;Application icon (small version), 8x8 pixel, SymbOS graphic format
+ 32   0000 ~            iconsm      S_SymbOS_icon_header { 2, 8, 8 }
+ 33   0000 ~            icobsmdat   TEXT    16
+ 34   0000 ~                    ;Application icon (big version), 24x24 pixel, SymbOS graphic format
+ 35   0000 ~            iconbg      S_SymbOS_icon_header { 6, 24, 24 }
+ 36   0000 ~            icobbgdat   TEXT    128         ; should be 144 bytes, but "TEXT" can be 128 bytes long at most
+ 37   0000 ~                        TEXT    16          ; so this is split into two blocks
+ 38   0000                  ENDS
+ 39   0000
+ 40   0000                  ASSERT 256 == S_SymbOS_exe_header
+ 41   0000                  ASSERT 6 == S_SymbOS_exe_header.datadr
+ 42   0000                  ASSERT 8 == S_SymbOS_exe_header.trnadr
+ 43   0000                  ASSERT 10 == S_SymbOS_exe_header.prztab
+ 44   0000                  ASSERT 14 == S_SymbOS_exe_header.bnknum
+ 45   0000
+ 46   0000              ;additional memory areas; 8 memory areas can be registered here, each entry consists of 5 bytes
+ 47   0000              ;00  1B  Ram bank number (1-8; if 0, the entry will be ignored)
+ 48   0000              ;01  1W  Address
+ 49   0000              ;03  1W  Length
+ 50   0000                  ASSERT 48 == S_SymbOS_exe_header.memtab
+ 51   0000
+ 52   0000              ;Application ID
+ 53   0000                  ASSERT 88 == S_SymbOS_exe_header.appId
+ 54   0000
+ 55   0000              ;Main process ID is at (S_SymbOS_exe_header.appId+1) (offset 89), but it is not easy
+ 56   0000              ;to create such label if "osver" is WORD type, that would need "union"-like feature
+ 57   0000              ;that's unlikely to happen, it's more reasonable to define osver as two bytes then.
+ 58   0000
+ 59   0000                  OUTPUT "multi_line_initializer.bin"
+ 60   0000                  ORG     #1000
+ 61   1000
+ 62   1000              exeHeader   S_SymbOS_exe_header {
+ 63   1000 34 12            #1234                   ; implicit delimiter at end (newline) (new line is next value)
+ 64   1002 45 23            #2345,                  ; explicit delimiter (comma) is valid only *AFTER* value
+ 65   1004 56 34            #3456
+ 66   1006 11 10            #1011
+ 67   1008 03 02            #0203                   ; relocate_count
+ 68   100A 05 04            #0405                   ; stack size
+ 69   100C 00 00 00 4D      { "MyName" }            ; name
+ 69   1010 79 4E 61 6D
+ 69   1014 65 00 00 00
+ 69   1018 00 00 00 00
+ 69   101C 00 00 00 00
+ 69   1020 00 00 00 00
+ 69   1024 00 00 00 00
+ 70   1028 AA AB AC         #AA, #ACAB,             ; flags, 16col icon offset
+ 71   102B 00 00 00 00      ,                       ; keep default identifier
+ 71   102F 00 53 79 6D
+ 71   1033 45 78 65 31
+ 71   1037 30
+ 72   1038 02 01 04 03      #0102, #0304, #0506     ; code/data/transfer extra memory
+ 72   103C 06 05
+ 73   103E 00 00 00 00      #0708                   ; OS ver
+ 73   1042 00 00 00...
+ 73   1058 08 07
+ 74   105A
+ 75   105A                  ; small icon
+ 76   105A 02               ,                       ; type + size sub-structure (default values)
+ 77   105B
+ 78   105B 08 08            {
+ 79   105D
+ 80   105D                      #31,#F5,#23,#3F,#56,#6E,#47,#6E,#8F,#EA,#FF,#AE,#74,#E2,#77,#EE
+ 81   105D
+ 82   105D 31 F5 23 3F      }
+ 82   1061 56 6E 47 6E
+ 82   1065 8F EA FF AE
+ 82   1069 74 E2 77 EE
+ 83   106D
+ 84   106D                  ; big icon (data are split into two blocks: 128 + 16 bytes
+ 85   106D 06 18 18         {}, {
+ 86   1070                      #00,#00,#D0,#B0,#60,#C0,#00,#10,#60,#D0,#B0,#60,#00,#31,#F6,#FD,
+ 87   1070                      #FB,#F4,#00,#31,#FF,#FF,#FF,#FC,#00,#73,#FF,#FF,#FF,#FA,#00,#73,
+ 88   1070                      #FF,#FF,#FF,#FA,#00,#F7,#F0,#F0,#F7,#B6,#00,#F7,#FF,#FF,#FF,#F6,
+ 89   1070                      #10,#FE,#F0,#F0,#FE,#3E,#10,#FF,#FF,#FF,#FE,#3E,#31,#FF,#FF,#FF,
+ 90   1070                      #FD,#FE,#31,#FF,#FF,#FF,#ED,#3A,#73,#FF,#FF,#FF,#CB,#3A,#73,#FF,
+ 91   1070                      #FF,#FF,#FB,#FE,#F7,#FF,#FF,#FF,#87,#32,#F7,#FF,#FF,#FF,#87,#32,
+ 92   1070                      #70,#F0,#F0,#F0,#FF,#FE,#00,#21,#0F,#0F,#0E,#32,#00,#21,#0F,#0F,
+ 93   1070                      #0E,#32,#00,#31,#FF,#FF,#FF,#FE,#00,#21,#0F,#0F,#0C,#32,#00,#20
+ 94   1070 00 00 D0 B0      },
+ 94   1074 60 C0 00 10
+ 94   1078 60 D0 B0 60
+ 94   107C 00 31 F6 FD
+ 94   1080 FB F4 00 31
+ 94   1084 FF FF FF FC
+ 94   1088 00 73 FF FF
+ 94   108C FF FA 00 73
+ 94   1090 FF FF FF FA
+ 94   1094 00 F7 F0 F0
+ 94   1098 F7 B6 00 F7
+ 94   109C FF FF FF F6
+ 94   10A0 10 FE F0 F0
+ 94   10A4 FE 3E 10 FF
+ 94   10A8 FF FF FE 3E
+ 94   10AC 31 FF FF FF
+ 94   10B0 FD FE 31 FF
+ 94   10B4 FF FF ED 3A
+ 94   10B8 73 FF FF FF
+ 94   10BC CB 3A 73 FF
+ 94   10C0 FF FF FB FE
+ 94   10C4 F7 FF FF FF
+ 94   10C8 87 32 F7 FF
+ 94   10CC FF FF 87 32
+ 94   10D0 70 F0 F0 F0
+ 94   10D4 FF FE 00 21
+ 94   10D8 0F 0F 0E 32
+ 94   10DC 00 21 0F 0F
+ 94   10E0 0E 32 00 31
+ 94   10E4 FF FF FF FE
+ 94   10E8 00 21 0F 0F
+ 94   10EC 0C 32 00 20
+ 95   10F0                  {
+ 96   10F0                      #00,#00,#00,#76,#00,#10,#FF,#FF,#FF,#EC,#00,#00,#F0,#F0,#F0,#C0
+ 97   10F0 00 00 00 76      }
+ 97   10F4 00 10 FF FF
+ 97   10F8 FF EC 00 00
+ 97   10FC F0 F0 F0 C0
+ 98   1100                  ; these empty lines before final "}" are intentional
+ 99   1100
+100   1100              }
+101   1100 27                   daa     ; first line after multi-line struct init (make sure it gets into listing!)
+102   1101                  OUTEND
+103   1101
+# file closed: multi_line_initializer.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0003 X S_SymbOS_icon_header
+0x0000 X S_SymbOS_icon_header.type
+0x0001 X S_SymbOS_icon_header.sizex
+0x0002 X S_SymbOS_icon_header.sizey
+0x0100   S_SymbOS_exe_header
+0x0000 X S_SymbOS_exe_header.codelen
+0x0002 X S_SymbOS_exe_header.datalen
+0x0004 X S_SymbOS_exe_header.tranlen
+0x0006   S_SymbOS_exe_header.datadr
+0x0006 X S_SymbOS_exe_header.origin
+0x0008   S_SymbOS_exe_header.trnadr
+0x0008 X S_SymbOS_exe_header.relcount
+0x000A   S_SymbOS_exe_header.prztab
+0x000A X S_SymbOS_exe_header.stacksize
+0x000E   S_SymbOS_exe_header.bnknum
+0x000F X S_SymbOS_exe_header.name
+0x0028 X S_SymbOS_exe_header.flags
+0x0029 X S_SymbOS_exe_header.icon16
+0x0030   S_SymbOS_exe_header.memtab
+0x0030 X S_SymbOS_exe_header.identifier
+0x0038 X S_SymbOS_exe_header.codex
+0x003A X S_SymbOS_exe_header.datex
+0x003C X S_SymbOS_exe_header.trnex
+0x0058   S_SymbOS_exe_header.appId
+0x0058 X S_SymbOS_exe_header.osver
+0x005A X S_SymbOS_exe_header.iconsm
+0x005A X S_SymbOS_exe_header.iconsm.type
+0x005B X S_SymbOS_exe_header.iconsm.sizex
+0x005C X S_SymbOS_exe_header.iconsm.sizey
+0x005D X S_SymbOS_exe_header.icobsmdat
+0x006D X S_SymbOS_exe_header.iconbg
+0x006D X S_SymbOS_exe_header.iconbg.type
+0x006E X S_SymbOS_exe_header.iconbg.sizex
+0x006F X S_SymbOS_exe_header.iconbg.sizey
+0x0070 X S_SymbOS_exe_header.icobbgdat
+0x1000 X exeHeader
+0x1000 X exeHeader.codelen
+0x1002 X exeHeader.datalen
+0x1004 X exeHeader.tranlen
+0x1006 X exeHeader.datadr
+0x1006 X exeHeader.origin
+0x1008 X exeHeader.trnadr
+0x1008 X exeHeader.relcount
+0x100A X exeHeader.prztab
+0x100A X exeHeader.stacksize
+0x100E X exeHeader.bnknum
+0x100F X exeHeader.name
+0x1028 X exeHeader.flags
+0x1029 X exeHeader.icon16
+0x1030 X exeHeader.memtab
+0x1030 X exeHeader.identifier
+0x1038 X exeHeader.codex
+0x103A X exeHeader.datex
+0x103C X exeHeader.trnex
+0x1058 X exeHeader.appId
+0x1058 X exeHeader.osver
+0x105A X exeHeader.iconsm
+0x105A X exeHeader.iconsm.type
+0x105B X exeHeader.iconsm.sizex
+0x105C X exeHeader.iconsm.sizey
+0x105D X exeHeader.icobsmdat
+0x106D X exeHeader.iconbg
+0x106D X exeHeader.iconbg.type
+0x106E X exeHeader.iconbg.sizex
+0x106F X exeHeader.iconbg.sizey
+0x1070 X exeHeader.icobbgdat

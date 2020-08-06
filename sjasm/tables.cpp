@@ -1229,7 +1229,16 @@ void CStructure::emitmembs(char*& p) {
 	}
 	CStructureEntry2* ip = mbf;
 	Relocation::isResultAffected = false;
-	while (ip) {
+	while (ip || 0 < haakjes) {
+		// check if inside curly braces block, and input seems to be empty -> fetch next line
+		if (0 < haakjes && !PrepareNonBlankMultiLine(p)) break;
+		if (nullptr == ip) {	// no more struct members expected, looking for closing '}'
+			assert(0 < haakjes);
+			if (!need(p, '}')) break;
+			--haakjes;
+			continue;
+		}
+		assert(ip);
 		switch (ip->type) {
 		case SMEMBBLOCK:
 			EmitBlock(ip->def != -1 ? ip->def : 0, ip->len, ip->def == -1, 8);
@@ -1283,8 +1292,8 @@ void CStructure::emitmembs(char*& p) {
 		}
 		ip = ip->next;
 	}
-	while (haakjes--) {
-		if (!need(p, '}')) Error("closing } missing");
+	if (haakjes) {
+		Error("closing } missing");
 	}
 	if (!SkipBlanks(p)) Error("[STRUCT] Syntax error - too many arguments?");
 	Relocation::checkAndWarn();

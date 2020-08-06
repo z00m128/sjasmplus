@@ -91,13 +91,16 @@ err3    substr1 {{'a','b','c','d','e',$21}}
         ; next line emits 00 00
         text    2,
         ; next line emits 00 00
-        text    2, {
+        text    2, {,
         ; next line emits 00 00
         text    2, {'
+        '
         ; next line emits 36 00
         text    2, {'6
+        '
         ; next line emits 37 00
         text    2, {'7'
+endIt
         ; next line emits 00 00
         text    2, "89"
         ; next line emits 00 00
