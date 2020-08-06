@@ -138,3 +138,6 @@ test4b  S_test4 {
 }
 
     OUTEND
+
+test4err    S_SymbOS_icon_header {
+    1,,, ; missing }
