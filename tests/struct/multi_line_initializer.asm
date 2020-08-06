@@ -99,4 +99,42 @@ exeHeader   S_SymbOS_exe_header {
 
 }
         daa     ; first line after multi-line struct init (make sure it gets into listing!)
+
+test2   S_SymbOS_icon_header {
+    1,
+    2, 3
+}
+
+    STRUCT S_test3
+b1  byte    'b'
+icon    S_SymbOS_icon_header {
+    4,
+    5, 6
+}
+b2  byte    'e'
+    ENDS
+
+test3a  S_test3
+
+test3b  S_test3 {
+    'B',
+    { 7,
+        8, 9 },
+    'E'
+}
+
+    STRUCT S_test4
+icon    S_SymbOS_icon_header {
+    10,
+    11, 12
+}
+    ENDS
+
+test4a  S_test4
+
+test4b  S_test4 {
+    { 13,
+        14, 15 }
+}
+
     OUTEND

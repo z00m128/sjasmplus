@@ -149,8 +149,47 @@
  99   1100
 100   1100              }
 101   1100 27                   daa     ; first line after multi-line struct init (make sure it gets into listing!)
-102   1101                  OUTEND
-103   1101
+102   1101
+103   1101              test2   S_SymbOS_icon_header {
+104   1101 01               1,
+105   1102 02 03            2, 3
+106   1104              }
+107   1104
+108   1104                  STRUCT S_test3
+109   1104 ~            b1  byte    'b'
+110   1104              icon    S_SymbOS_icon_header {
+111   1104                  4,
+112   1104                  5, 6
+113   1104 ~            }
+114   1104 ~            b2  byte    'e'
+115   1104                  ENDS
+116   1104
+117   1104 62 04 05 06  test3a  S_test3
+117   1108 65
+118   1109
+119   1109              test3b  S_test3 {
+120   1109 42               'B',
+121   110A 07               { 7,
+122   110B 08 09                8, 9 },
+123   110D 45               'E'
+124   110E              }
+125   110E
+126   110E                  STRUCT S_test4
+127   110E              icon    S_SymbOS_icon_header {
+128   110E                  10,
+129   110E                  11, 12
+130   110E ~            }
+131   110E                  ENDS
+132   110E
+133   110E 0A 0B 0C     test4a  S_test4
+134   1111
+135   1111              test4b  S_test4 {
+136   1111 0D               { 13,
+137   1112 0E 0F                14, 15 }
+138   1114              }
+139   1114
+140   1114                  OUTEND
+141   1114
 # file closed: multi_line_initializer.asm
 
 Value    Label
@@ -221,3 +260,43 @@ Value    Label
 0x106E X exeHeader.iconbg.sizex
 0x106F X exeHeader.iconbg.sizey
 0x1070 X exeHeader.icobbgdat
+0x1101 X test2
+0x1101 X test2.type
+0x1102 X test2.sizex
+0x1103 X test2.sizey
+0x0005 X S_test3
+0x0000 X S_test3.b1
+0x0001 X S_test3.icon
+0x0001 X S_test3.icon.type
+0x0002 X S_test3.icon.sizex
+0x0003 X S_test3.icon.sizey
+0x0004 X S_test3.b2
+0x1104 X test3a
+0x1104 X test3a.b1
+0x1105 X test3a.icon
+0x1105 X test3a.icon.type
+0x1106 X test3a.icon.sizex
+0x1107 X test3a.icon.sizey
+0x1108 X test3a.b2
+0x1109 X test3b
+0x1109 X test3b.b1
+0x110A X test3b.icon
+0x110A X test3b.icon.type
+0x110B X test3b.icon.sizex
+0x110C X test3b.icon.sizey
+0x110D X test3b.b2
+0x0003 X S_test4
+0x0000 X S_test4.icon
+0x0000 X S_test4.icon.type
+0x0001 X S_test4.icon.sizex
+0x0002 X S_test4.icon.sizey
+0x110E X test4a
+0x110E X test4a.icon
+0x110E X test4a.icon.type
+0x110F X test4a.icon.sizex
+0x1110 X test4a.icon.sizey
+0x1111 X test4b
+0x1111 X test4b.icon
+0x1111 X test4b.icon.type
+0x1112 X test4b.icon.sizex
+0x1113 X test4b.icon.sizey

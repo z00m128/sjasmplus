@@ -1102,8 +1102,17 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 		++haakjes; ++lp;
 	}
 	CStructureEntry2* ip = st->mbf;
-	while (ip) {
+	while (ip || 0 < haakjes) {
 		Relocation::isResultAffected = false;
+		// check if inside curly braces block, and input seems to be empty -> fetch next line
+		if (0 < haakjes && !PrepareNonBlankMultiLine(lp)) break;
+		if (nullptr == ip) {	// no more struct members expected, looking for closing '}'
+			assert(0 < haakjes);
+			if (!need(lp, '}')) break;
+			--haakjes;
+			continue;
+		}
+		assert(ip);
 		switch (ip->type) {
 		case SMEMBBLOCK:
 			CopyMember(ip, ip->def, false);
@@ -1157,8 +1166,8 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 		Relocation::checkAndWarn();
 		ip = ip->next;
 	}
-	while (haakjes--) {
-		if (!need(lp, '}')) Error("closing } missing");
+	if (haakjes) {
+		Error("closing } missing");
 	}
 	AddMember(new CStructureEntry2(noffset, 0, 0, false, SMEMBPARENCLOSE));
 }
