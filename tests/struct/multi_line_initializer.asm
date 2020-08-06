@@ -33,8 +33,8 @@ iconsm      S_SymbOS_icon_header { 2, 8, 8 }
 icobsmdat   TEXT    16
         ;Application icon (big version), 24x24 pixel, SymbOS graphic format
 iconbg      S_SymbOS_icon_header { 6, 24, 24 }
-icobbgdat   TEXT    128         ; should be 144 bytes, but "TEXT" can be 128 bytes long at most
-            TEXT    16          ; so this is split into two blocks
+icobbgdat   TEXT    144
+
     ENDS
 
     ASSERT 256 == S_SymbOS_exe_header
@@ -90,11 +90,11 @@ exeHeader   S_SymbOS_exe_header {
         #FD,#FE,#31,#FF,#FF,#FF,#ED,#3A,#73,#FF,#FF,#FF,#CB,#3A,#73,#FF,
         #FF,#FF,#FB,#FE,#F7,#FF,#FF,#FF,#87,#32,#F7,#FF,#FF,#FF,#87,#32,
         #70,#F0,#F0,#F0,#FF,#FE,#00,#21,#0F,#0F,#0E,#32,#00,#21,#0F,#0F,
-        #0E,#32,#00,#31,#FF,#FF,#FF,#FE,#00,#21,#0F,#0F,#0C,#32,#00,#20
-    },
-    {
-        #00,#00,#00,#76,#00,#10,#FF,#FF,#FF,#EC,#00,#00,#F0,#F0,#F0,#C0
+        #0E,#32,#00,#31,#FF,#FF,#FF,#FE,#00,#21,#0F,#0F,#0C,#32,#00,#20,#00,#00,#00,#76,#00,#10,#FF,#FF,#FF,#EC,#00,#00,#F0,#F0,#F0,#C0
     }
+
+
+
     ; these empty lines before final "}" are intentional
 
 }

@@ -80,12 +80,12 @@ err3    substr1 {{'a','b','c','d','e',$21}}
         text    2           ; valid (zeroed)
         text    1, {'1'}    ; valid
         text    1, {   }    ; valid (zeroed)
-        text    128, {'2'}  ; valid
+        text    128, {'2'}  ; valid ; 128 was old maximum, now it is 8192 (not testing)
         ; invalid ones (some error should be reported):
         text
         text    0, {'3'}
         text    -1, {'4'}
-        text    129, {'5'}
+        text    8193, {'5'}
         ; next line emits 00 00
         text    2 @
         ; next line emits 00 00

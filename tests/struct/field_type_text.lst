@@ -310,16 +310,16 @@ field_type_text.asm(76): error: Maximum length of struct text reached. Values ov
  80   8396 ~                    text    2           ; valid (zeroed)
  81   8396 ~                    text    1, {'1'}    ; valid
  82   8396 ~                    text    1, {   }    ; valid (zeroed)
- 83   8396 ~                    text    128, {'2'}  ; valid
+ 83   8396 ~                    text    128, {'2'}  ; valid ; 128 was old maximum, now it is 8192 (not testing)
  84   8396 ~                    ; invalid ones (some error should be reported):
-field_type_text.asm(85): error: [STRUCT] Expression for length of text expected (1..128)
+field_type_text.asm(85): error: [STRUCT] Expression for length of text expected (1..8192)
  85   8396 ~                    text
-field_type_text.asm(86): error: [STRUCT] Expression for length of text expected (1..128)
+field_type_text.asm(86): error: [STRUCT] Expression for length of text expected (1..8192)
  86   8396 ~                    text    0, {'3'}
-field_type_text.asm(87): error: [STRUCT] Expression for length of text expected (1..128)
+field_type_text.asm(87): error: [STRUCT] Expression for length of text expected (1..8192)
  87   8396 ~                    text    -1, {'4'}
-field_type_text.asm(88): error: [STRUCT] Expression for length of text expected (1..128)
- 88   8396 ~                    text    129, {'5'}
+field_type_text.asm(88): error: [STRUCT] Expression for length of text expected (1..8192)
+ 88   8396 ~                    text    8193, {'5'}
  89   8396 ~                    ; next line emits 00 00
 field_type_text.asm(90): error: [STRUCT] Comma expected: @
  90   8396 ~                    text    2 @

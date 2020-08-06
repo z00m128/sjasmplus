@@ -222,6 +222,7 @@ public:
 
 class CStructureEntry2 {
 public:
+	static constexpr aint TEXT_MAX_SIZE = 8192;
 	CStructureEntry2* next;
 	byte* text;
 	aint offset, len, def;

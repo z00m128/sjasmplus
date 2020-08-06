@@ -951,8 +951,8 @@ void ParseStructMember(CStructure* st) {
 		break;
 	case SMEMBTEXT:
 		{
-			if (!ParseExpression(lp, len) || len < 1 || 128 < len) {
-				Error("[STRUCT] Expression for length of text expected (1..128)");
+			if (!ParseExpression(lp, len) || len < 1 || CStructureEntry2::TEXT_MAX_SIZE < len) {
+				Error("[STRUCT] Expression for length of text expected (1..8192)");
 				SkipToEol(lp);
 				break;
 			}

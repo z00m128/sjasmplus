@@ -986,7 +986,7 @@ CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndef
 CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, byte* textData) :
 	next(nullptr), text(textData), offset(noffset), len(nlen), def(0), defRelocatable(false), type(SMEMBTEXT)
 {
-	assert(1 <= len && len <= 128 && nullptr != text);
+	assert(1 <= len && len <= TEXT_MAX_SIZE && nullptr != text);
 }
 
 CStructureEntry2::~CStructureEntry2() {
@@ -1230,6 +1230,7 @@ void CStructure::emitlab(char* iid, aint address, const bool isRelocatable) {
 }
 
 void CStructure::emitmembs(char*& p) {
+	byte* emitTextBuffer = nullptr;
 	aint val;
 	int haakjes = 0;
 	SkipBlanks(p);
@@ -1279,9 +1280,13 @@ void CStructure::emitmembs(char*& p) {
 			break;
 		case SMEMBTEXT:
 			{
-				byte userData[130] = {0};
-				GetStructText(p, ip->len, userData, ip->text);
-				for (aint ii = 0; ii < ip->len; ++ii) EmitByte(userData[ii]);
+				if (nullptr == emitTextBuffer) {
+					emitTextBuffer = new byte[CStructureEntry2::TEXT_MAX_SIZE+2];
+					if (nullptr == emitTextBuffer) ErrorOOM();
+				}
+				memset(emitTextBuffer, 0, ip->len);
+				GetStructText(p, ip->len, emitTextBuffer, ip->text);
+				for (aint ii = 0; ii < ip->len; ++ii) EmitByte(emitTextBuffer[ii]);
 			}
 			if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(p);
 			break;
@@ -1306,6 +1311,7 @@ void CStructure::emitmembs(char*& p) {
 	}
 	if (!SkipBlanks(p)) Error("[STRUCT] Syntax error - too many arguments?");
 	Relocation::checkAndWarn();
+	if (nullptr != emitTextBuffer) delete[] emitTextBuffer;
 }
 
 CStructureTable::CStructureTable() {

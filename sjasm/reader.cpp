@@ -690,7 +690,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 }
 
 void GetStructText(char*& p, aint len, byte* data, const byte* initData) {
-	assert(1 <= len && len <= 128 && nullptr != data);
+	assert(1 <= len && len <= CStructureEntry2::TEXT_MAX_SIZE && nullptr != data);
 	// reset alternate result flag in ParseExpression part of code
 	Relocation::isResultAffected = false;
 	// "{}" is always required to keep the syntax less ambiguous

@@ -34,8 +34,8 @@
  33   0000 ~            icobsmdat   TEXT    16
  34   0000 ~                    ;Application icon (big version), 24x24 pixel, SymbOS graphic format
  35   0000 ~            iconbg      S_SymbOS_icon_header { 6, 24, 24 }
- 36   0000 ~            icobbgdat   TEXT    128         ; should be 144 bytes, but "TEXT" can be 128 bytes long at most
- 37   0000 ~                        TEXT    16          ; so this is split into two blocks
+ 36   0000 ~            icobbgdat   TEXT    144
+ 37   0000 ~
  38   0000                  ENDS
  39   0000
  40   0000                  ASSERT 256 == S_SymbOS_exe_header
@@ -106,8 +106,8 @@
  90   1070                      #FD,#FE,#31,#FF,#FF,#FF,#ED,#3A,#73,#FF,#FF,#FF,#CB,#3A,#73,#FF,
  91   1070                      #FF,#FF,#FB,#FE,#F7,#FF,#FF,#FF,#87,#32,#F7,#FF,#FF,#FF,#87,#32,
  92   1070                      #70,#F0,#F0,#F0,#FF,#FE,#00,#21,#0F,#0F,#0E,#32,#00,#21,#0F,#0F,
- 93   1070                      #0E,#32,#00,#31,#FF,#FF,#FF,#FE,#00,#21,#0F,#0F,#0C,#32,#00,#20
- 94   1070 00 00 D0 B0      },
+ 93   1070                      #0E,#32,#00,#31,#FF,#FF,#FF,#FE,#00,#21,#0F,#0F,#0C,#32,#00,#20,#00,#00,#00,#76,#00,#10,#FF,#FF,#FF,#EC,#00,#00,#F0,#F0,#F0,#C0
+ 94   1070 00 00 D0 B0      }
  94   1074 60 C0 00 10
  94   1078 60 D0 B0 60
  94   107C 00 31 F6 FD
@@ -139,12 +139,13 @@
  94   10E4 FF FF FF FE
  94   10E8 00 21 0F 0F
  94   10EC 0C 32 00 20
- 95   10F0                  {
- 96   10F0                      #00,#00,#00,#76,#00,#10,#FF,#FF,#FF,#EC,#00,#00,#F0,#F0,#F0,#C0
- 97   10F0 00 00 00 76      }
- 97   10F4 00 10 FF FF
- 97   10F8 FF EC 00 00
- 97   10FC F0 F0 F0 C0
+ 94   10F0 00 00 00 76
+ 94   10F4 00 10 FF FF
+ 94   10F8 FF EC 00 00
+ 94   10FC F0 F0 F0 C0
+ 95   1100
+ 96   1100
+ 97   1100
  98   1100                  ; these empty lines before final "}" are intentional
  99   1100
 100   1100              }
