@@ -97,7 +97,7 @@
  82   1065 8F EA FF AE
  82   1069 74 E2 77 EE
  83   106D
- 84   106D                  ; big icon (data are split into two blocks: 128 + 16 bytes
+ 84   106D                  ; big icon (144 bytes of data)
  85   106D 06 18 18         {}, {
  86   1070                      #00,#00,#D0,#B0,#60,#C0,#00,#10,#60,#D0,#B0,#60,#00,#31,#F6,#FD,
  87   1070                      #FB,#F4,#00,#31,#FF,#FF,#FF,#FC,#00,#73,#FF,#FF,#FF,#FA,#00,#73,

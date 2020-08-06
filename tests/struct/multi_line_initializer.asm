@@ -81,7 +81,7 @@ exeHeader   S_SymbOS_exe_header {
 
     }
 
-    ; big icon (data are split into two blocks: 128 + 16 bytes
+    ; big icon (144 bytes of data)
     {}, {
         #00,#00,#D0,#B0,#60,#C0,#00,#10,#60,#D0,#B0,#60,#00,#31,#F6,#FD,
         #FB,#F4,#00,#31,#FF,#FF,#FF,#FC,#00,#73,#FF,#FF,#FF,#FA,#00,#73,
