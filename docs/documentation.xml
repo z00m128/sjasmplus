@@ -190,6 +190,16 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.17.0</term>
+
+            <listitem>
+              <synopsis>- `STRUCT` has new <link linkend="st_text">`TEXT`</link> pseudo-instruction to define "DB-like" data (<ulink url="https://github.com/z00m128/sjasmplus/issues/93">Issue #93</ulink>)
+- fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>27.7.2020 - 1.16.0</term>
 
             <listitem>
@@ -3394,7 +3404,26 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="st_block" />BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]]</term>
+            <term><anchor id="st_text" />TEXT &lt;length&gt;[,{&lt;DB-like operand(s)&gt;}]</term>
+
+            <listitem>
+              <para>(since v1.17) To define a member of the specified <code>length</code> of bytes.
+				  The operands are <link linkend="po_byte">DB-like</link> formatted, and the last
+				  byte explicitly defined will fill the remaining bytes reserved upon definition
+				  (zeroed when no value is specified at all).</para>
+			  <para>The default value can be modified with init values when structure is used, but
+				  then only the given bytes overwrite default content, NOT filling remainder of it.</para>
+			  <para>While the operands are DB-like formatted, they must be enclosed in curly braces.
+				  Also make sure the braces are not mistaken with the optional braces on the sub-structure
+				  boundaries, when using TEXT member in sub-structure, you may need to use curly braces
+				  for the sub-structure itself around of curly braces used for TEXT values (making the
+				  sub-structure braces mandatory in such case). The length can be from 1 to 8192 bytes
+				  (if you need even longer "text", use two members and split your arguments).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="st_block" />BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]</term>
 
             <listitem>
               <para>To define a member of the specified number of bytes. Arguments are set
@@ -3444,6 +3473,17 @@ Main
 		&lt;label&gt;.&lt;struct_field&gt; labels starting from designed address provided by
 		expression, but there will be no machine code emitted (and current address "$" will not
 		advance).</para>
+
+	  <para>(since v1.17) The initial values inside curly braces block can now span over multiple
+		  lines with new line ending current value expression (the comma after expression is optional
+		  in such case). Please bear in mind this is pushing original sjasmplus architecture beyond
+		  its original design (multi-line definitions) and may fail in complex scenarios (for
+		  example the "dot-repeater" macro mechanics will repeat only the remainder of current
+		  line, ignoring the curly-braces block spanning across following lines). If you have
+		  example of code which fails but you believe it's reasonable use case, please open the
+		  issue on github with such example, so it is possible to improve the feature in future
+		  (the dot-repeater is "won't fix" case, but otherwise the feature should work reliably).
+	  </para>
 
     </section>
 
@@ -3560,6 +3600,33 @@ BIN_FILE_MAP.value2     EQU 257      ; offset
 binData                 EQU 0x8000   ; address
 binData.value1          EQU 0x8100   ; address
 binData.value2          EQU 0x8101   ; address</synopsis>
+	  </example>
+
+      <example>
+          <title>docs_examples/st_text.asm</title>
+
+          <para><programlisting>        STRUCT BLOCK_HEADER
+length      WORD    BLOCK_HEADER
+type        BYTE    $AB
+name        TEXT    10, { "none", 32, '!' } ; will produce "none !!!!!" default data
+                    ; because this is definition of the field, here last byte is "filler"
+datastart   WORD
+datalen     WORD
+checksum    BYTE    $CC
+        ENDS
+
+        ORG  0x8000
+head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
+    , ,                     ; Keeping default length and type by specifying empty values.
+    { 'New',                ; The final `name` data will be "New Name!!"
+        32,                 ; overwriting only 8 bytes of default data.
+        "Name" },           ; The last "e" is NOT "filler" in the non-default value.
+        $8000, $1234        ; Explicit datastart and datalen values.
+}                           ; End of initial data block ("checksum" keeps default value).
+
+; machine code (struct data):
+; 12 00 AB 4E 65 77 20 4E 61 6D 65 21 21 00 80 34 12 CC
+; = { $0012, $AB, "New Name!!", $8000, $1234, $CC }</programlisting></para>
 	  </example>
 
 	  <warning>
