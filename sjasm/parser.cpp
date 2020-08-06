@@ -805,6 +805,9 @@ int PrepareLine() {
 bool PrepareNonBlankMultiLine(char*& p) {
 	// loop while the current line is blank-only (read further lines until EOF or non-blank char)
 	while (SkipBlanks(p)) {
+		// if inside macro system, but without any more macro-lines in buffer, act as if "EOF"
+		// (to not leak into reading actual file while the macro is executing)
+		if (listmacro && nullptr == lijstp) return false;
 		// list the current (old) line
 		ListFile();
 		// read the next line
