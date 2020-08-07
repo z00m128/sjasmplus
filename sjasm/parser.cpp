@@ -79,10 +79,26 @@ static int ParseExpPrim(char*& p, aint& nval) {
 		Warning("?<symbol> operator is deprecated and will be removed in v2.x", p);
 		++p;
 		return GetLabelValue(p, nval);
+	} else if (DISP_NONE != PseudoORG && '$' == p[0] && '$' == p[1] && '$' == p[2]) {
+		if ('$' == p[3]) {		// "$$$$" operator to get physical memory page inside DISP block
+			p += 4;
+			nval = DeviceID ? Page->Number : LABEL_PAGE_UNDEFINED;
+			return 1;
+		}
+		// "$$$" operator to get physical address inside DISP block
+		p += 3;
+		nval = adrdisp;		// this is never affected by relocation
+		return 1;
 	} else if (DeviceID && *p == '$' && *(p + 1) == '$') {
 		p += 2;
 		if (isLabelStart(p)) return GetLabelPage(p, nval);
-		nval = Page->Number;
+		if (DISP_NONE != PseudoORG && LABEL_PAGE_UNDEFINED != dispPageNum) {
+			// enforce explicit request of fake DISP page
+			nval = dispPageNum;
+		} else {
+			// current page
+			nval = Page->Number;
+		}
 		return 1;
 	} else if (*p == '$') {
 		++p;
