@@ -194,6 +194,7 @@
 
             <listitem>
               <synopsis>- `STRUCT` has new <link linkend="st_text">`TEXT`</link> pseudo-instruction to define "DB-like" data (<ulink url="https://github.com/z00m128/sjasmplus/issues/93">Issue #93</ulink>)
+- new <link linkend="s_expressions">$$$ and $$$ operators</link> to retrieve "physical" address/page inside DISP block
 - fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
 </synopsis>
             </listitem>
@@ -716,7 +717,9 @@ $c     hexadecimal
       current page in the current slot in the <link
       linkend="s_realdevice">real device emulation mode</link>, '$$label' evaluates to number of page
 	  where the "label" was defined (only regular labels have meaningful value, labels defined
-	  under DISP mode or EQU/DEFL/... will produce irrelevant values) and '{address}' can be used
+	  under DISP mode may return the page specified in DISP itself, EQU/DEFL/... will produce mostly
+	  irrelevant values). '$$$' and '$$$$' can be used inside DISP block to retrieve the "physical"
+	  memory address and page (where the displaced machine code is written to). '{address}' can be used
       to read WORD from virtual device memory (correct value is read only in last pass of assembling,
 	  in early passes the zero value is always returned), '{b address}' reads only BYTE.</para>
 
@@ -775,6 +778,8 @@ or    x or y   bitwise or
 
 $     $        current program counter
 $$    $$       current page at program counter (in virtual device mode)
+$$$   $$$      "physical" program counter (inside DISP block)
+$$$$  $$$$     "physical" memory page (inside DISP block in virtual device mode)
 label label    value of label (aka symbol), usually memory address
 $$lab $$lab    page of "lab" label (in virtual device mode)
 {}    {x}      reads WORD from address x (in virtual device mode, in last pass)
