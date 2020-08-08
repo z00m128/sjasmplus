@@ -4,6 +4,7 @@
 - [`EQU`](http://z00m128.github.io/sjasmplus/documentation.html#po_equ) now allows for optional override of page number assigned to the new symbol
 - new [$$$ and $$$ operators](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to retrieve "physical" address/page inside DISP block
 - fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
+- fixed some memory leaks, undefined behaviour and unaligned memory access
 
 ## [1.16.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.16.0) - 27.7.2020
 - `LUA` the new emit warning (v1.15.1) is now suppressible

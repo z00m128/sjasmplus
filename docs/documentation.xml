@@ -198,6 +198,7 @@
 - <link linkend="po_equ">`EQU`</link> now allows for optional override of page number assigned to the new symbol
 - new <link linkend="s_expressions">$$$ and $$$ operators</link> to retrieve "physical" address/page inside DISP block
 - fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
+- fixed some memory leaks, undefined behaviour and unaligned memory access
 </synopsis>
             </listitem>
           </varlistentry>
