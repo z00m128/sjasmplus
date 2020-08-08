@@ -85,6 +85,20 @@ typedef uint8_t byte;
 typedef uint16_t word;
 typedef std::vector<char> stdin_log_t;
 
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+#endif
+template <typename T>
+struct SAlignSafeCast {
+	T	val;
+}
+#ifndef _MSC_VER
+	__attribute__((packed));
+#else
+	;
+#pragma pack(pop)
+#endif
+
 #ifndef PATH_MAX
 #define PATH_MAX	4096
 #endif
