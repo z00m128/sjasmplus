@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.16.0 Documentation [2020-07-27]</title>
+  <title>SjASMPlus 1.17.0 Documentation [2020-08-08]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -190,10 +190,12 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.17.0</term>
+            <term>8.8.2020 - 1.17.0</term>
 
             <listitem>
               <synopsis>- `STRUCT` has new <link linkend="st_text">`TEXT`</link> pseudo-instruction to define "DB-like" data (<ulink url="https://github.com/z00m128/sjasmplus/issues/93">Issue #93</ulink>)
+- <link linkend="st_usage">`STRUCT` initializer block</link> can be now multi-line (when correctly enclosed in curly braces)
+- <link linkend="po_equ">`EQU`</link> now allows for optional override of page number assigned to the new symbol
 - new <link linkend="s_expressions">$$$ and $$$ operators</link> to retrieve "physical" address/page inside DISP block
 - fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
 </synopsis>
@@ -2103,11 +2105,13 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_equ" />&lt;label&gt; EQU &lt;expression&gt;</term>
+            <term><anchor id="po_equ" />&lt;label&gt; EQU &lt;expression&gt;[,&lt;pageNumber&gt;]</term>
 
             <listitem>
               <para>To give the label a value other than the current program
               counter. The label should not already exist (you can assign only one value to it).
+			  The optional <code>pageNumber</code> can enforce explicit page value for the label
+			  (for the <code>$$label</code> operator).
 			  For modifiable labels holding temporary values use <link linkend="po_defl">DEFL</link>.<example>
                   <title></title>
 
