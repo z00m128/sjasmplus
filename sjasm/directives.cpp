@@ -537,13 +537,12 @@ void dirSIZE() {
 
 void dirINCBIN() {
 	int offset = 0, length = INT_MAX;
-	char* fnaam = GetFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetFileName(lp));
 	if (anyComma(lp)) {
 		aint val;
 		if (!anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("[INCBIN] Syntax error in <offset>", bp, SUPPRESS);
-				delete[] fnaam;
 				return;
 			}
 			offset = val;
@@ -551,24 +550,22 @@ void dirINCBIN() {
 		if (anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("[INCBIN] Syntax error in <length>", bp, SUPPRESS);
-				delete[] fnaam;
 				return;
 			}
 			length = val;
 		}
 	}
-	BinIncFile(fnaam, offset, length);
-	delete[] fnaam;
+	BinIncFile(fnaam.get(), offset, length);
 }
 
 void dirINCHOB() {
 	aint val;
-	char* fnaam, * fnaamh;
+	char* fnaamh;
 	unsigned char len[2];
 	int offset = 0,length = -1;
 	FILE* ff;
 
-	fnaam = GetFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetFileName(lp));
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
@@ -590,12 +587,12 @@ void dirINCHOB() {
 		}
 	}
 
-	fnaamh = GetPath(fnaam);
+	fnaamh = GetPath(fnaam.get());
 	if (!FOPEN_ISOK(ff, fnaamh, "rb")) {
-		Error("[INCHOB] Error opening file", fnaam, FATAL);
+		Error("[INCHOB] Error opening file", fnaam.get(), FATAL);
 	}
 	if (fseek(ff, 0x0b, 0) || 2 != fread(len, 1, 2, ff)) {
-		Error("[INCHOB] Hobeta file has wrong format", fnaam, FATAL);
+		Error("[INCHOB] Hobeta file has wrong format", fnaam.get(), FATAL);
 	}
 	fclose(ff);
 	if (length == -1) {
@@ -603,15 +600,16 @@ void dirINCHOB() {
 		length = len[0] + (len[1] << 8) - offset;
 	}
 	offset += 17;		// adjust offset (skip HOB header)
-	BinIncFile(fnaam, offset, length);
-	delete[] fnaam;
+	BinIncFile(fnaam.get(), offset, length);
 	free(fnaamh);
 }
 
 void dirINCTRD() {
 	aint val, offset = 0, length = INT_MAX;
-	char* filename, * trdname = GetFileName(lp);
-	if ( ! (anyComma(lp) && !anyComma(lp) && (filename = GetFileName(lp)) && filename[0]) ) {
+	std::unique_ptr<char[]> trdname(GetFileName(lp));
+	std::unique_ptr<char[]> filename;
+	if (anyComma(lp) && !anyComma(lp)) filename.reset(GetFileName(lp));
+	if ( !filename || !filename[0] ) {
 		// file-in-disk syntax error
 		Error("[INCTRD] Syntax error", bp, IF_FIRST);
 		SkipToEol(lp);
@@ -645,11 +643,9 @@ void dirINCTRD() {
 			length = val;
 		}
 	}
-	if (TRD_PrepareIncFile(trdname, filename, offset, length)) {
-		BinIncFile(trdname, offset, length);
+	if (TRD_PrepareIncFile(trdname.get(), filename.get(), offset, length)) {
+		BinIncFile(trdname.get(), offset, length);
 	}
-	delete[] trdname;
-	delete[] filename;
 }
 
 void dirSAVESNA() {
@@ -710,7 +706,6 @@ void dirSAVETAP() {
 	bool exec = true, realtapeMode = false;
 	int headerType = -1;
 	aint val;
-	char* fnaamh = NULL;
 	int start = -1, length = -1, param2 = -1, param3 = -1;
 
 	if (!DeviceID) {
@@ -719,6 +714,7 @@ void dirSAVETAP() {
 	}
 
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	std::unique_ptr<char[]> fnaamh;
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			char *tlp = lp;
@@ -780,8 +776,8 @@ void dirSAVETAP() {
 							param3 = val;
 						}
 					} else if (!anyComma(lp)) {
-						fnaamh = GetFileName(lp);
-						if (!*fnaamh) {
+						fnaamh.reset(GetFileName(lp));
+						if (!fnaamh[0]) {
 							Error("[SAVETAP] Syntax error in tape file name", bp, PASS3);
 							return;
 						} else if (anyComma(lp) && !anyComma(lp) && ParseExpression(lp, val)) {
@@ -859,7 +855,7 @@ void dirSAVETAP() {
 		int done = 0;
 
 		if (realtapeMode) {
-			done = TAP_SaveBlock(fnaam.get(), headerType, fnaamh, start, length, param2, param3);
+			done = TAP_SaveBlock(fnaam.get(), headerType, fnaamh.get(), start, length, param2, param3);
 		} else {
 			if (!IsZXSpectrumDevice(DeviceID)) {
 				Error("[SAVETAP snapshot] Device is not of ZX Spectrum type.", Device->ID, SUPPRESS);
@@ -871,10 +867,6 @@ void dirSAVETAP() {
 		if (!done) {
 			Error("[SAVETAP] Error writing file", bp, IF_FIRST);
 		}
-	}
-
-	if (fnaamh) {
-		delete[] fnaamh;
 	}
 }
 
@@ -961,15 +953,15 @@ void dirSAVEHOB() {
 		return;
 	}
 	aint val;
-	char* fnaamh;
 	int start = -1,length = -1;
 	bool exec = true;
 
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	std::unique_ptr<char[]> fnaamh;
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
-			fnaamh = GetFileName(lp);
-			if (!*fnaamh) {
+			fnaamh.reset(GetFileName(lp));
+			if (!fnaamh[0]) {
 				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
 			}
 		} else {
@@ -1005,10 +997,9 @@ void dirSAVEHOB() {
 	} else {
 		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
 	}
-	if (exec && !SaveHobeta(fnaam.get(), fnaamh, start, length)) {
+	if (exec && !SaveHobeta(fnaam.get(), fnaamh.get(), start, length)) {
 		Error("[SAVEHOB] Error writing file (Disk full?)", bp, IF_FIRST); return;
 	}
-	delete[] fnaamh;
 }
 
 void dirEMPTYTRD() {
@@ -1024,19 +1015,18 @@ void dirEMPTYTRD() {
 		return;
 	}
 	if (anyComma(lp)) {
-		char* srcLabel = GetFileName(lp, false);
-		if (!*srcLabel) {
+		std::unique_ptr<char[]> srcLabel(GetFileName(lp, false));
+		if (!srcLabel[0]) {
 			Error("[EMPTYTRD] Syntax error, empty label", bp, IF_FIRST);
 		} else {
 			for (int i = 0; i < 8; ++i) {
 				if (!srcLabel[i]) break;
 				diskLabel[i] = srcLabel[i];
 			}
-			if (8 < strlen(srcLabel)) {
+			if (8 < strlen(srcLabel.get())) {
 				Warning("[EMPTYTRD] label will be truncated to 8 characters", diskLabel);
 			}
 		}
-		delete[] srcLabel;
 	}
 	TRD_SaveEmpty(fnaam.get(), diskLabel);
 }
@@ -1050,16 +1040,16 @@ void dirSAVETRD() {
 
 	bool exec = true, replace = false, addplace = false;
 	aint val;
-	char* fnaamh;
 	int start = -1, length = -1, autostart = -1;
 
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	std::unique_ptr<char[]> fnaamh;
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
 			else if ((addplace = ('&' == *lp))) SkipBlanks(++lp); // detect "&" for "addplace" feature
-			fnaamh = GetFileName(lp);
-			if (!*fnaamh) {
+			fnaamh.reset(GetFileName(lp));
+			if (!fnaamh[0]) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
 		} else {
@@ -1111,21 +1101,19 @@ void dirSAVETRD() {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
-	if (exec) TRD_AddFile(fnaam.get(), fnaamh, start, length, autostart, replace, addplace);
-	delete[] fnaamh;
+	if (exec) TRD_AddFile(fnaam.get(), fnaamh.get(), start, length, autostart, replace, addplace);
 }
 
 void dirENCODING() {
-	char* opt = GetFileName(lp, false);
-	char* comparePtr = opt;
+	std::unique_ptr<char[]> opt(GetFileName(lp, false));
+	char* comparePtr = opt.get();
 	if (cmphstr(comparePtr, "dos")) {
 		ConvertEncoding = ENCDOS;
 	} else if (cmphstr(comparePtr, "win")) {
 		ConvertEncoding = ENCWIN;
 	} else {
-		Error("[ENCODING] Invalid argument (valid values: \"dos\" and \"win\")", opt, IF_FIRST);
+		Error("[ENCODING] Invalid argument (valid values: \"dos\" and \"win\")", opt.get(), IF_FIRST);
 	}
-	delete[] opt;
 }
 
 void dirOPT() {
@@ -1370,17 +1358,15 @@ static void dirENDIF() {
 }*/
 
 void dirINCLUDE() {
-	char* fnaam;
-	fnaam = GetFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetFileName(lp));
 	if (fnaam[0]) {
 		EDelimiterType dt = GetDelimiterOfLastFileName();
 		ListFile();
-		IncludeFile(fnaam, DT_ANGLE == dt);
+		IncludeFile(fnaam.get(), DT_ANGLE == dt);
 		donotlist = 1;
 	} else {
 		Error("[INCLUDE] empty filename", bp);
 	}
-	delete[] fnaam;
 }
 
 void dirOUTPUT() {
@@ -1597,22 +1583,20 @@ void dirASSERT() {
 void dirSHELLEXEC() {
 	//FIXME for v2.x change the "SHELLEXEC <command>[, <params>]" syntax to "SHELLEXEC <whatever>"
 	// (and add good examples how to deal with quotes/colons/long file names with spaces)
-	char* command = NULL;
-	char* parameters = NULL;
-
-	command = GetFileName(lp, false);
+	std::unique_ptr<char[]> command(GetFileName(lp, false));
+	std::unique_ptr<char[]> parameters;
 	if (comma(lp)) {
-		parameters = GetFileName(lp, false);
+		parameters.reset(GetFileName(lp, false));
 	}
 	if (pass == LASTPASS) {
 		if (!system(nullptr)) {
 			Error("[SHELLEXEC] clib command processor is not available on this platform!");
 		} else {
 			temp[0] = 0;
-			STRNCPY(temp, LINEMAX, command, LINEMAX-1);
+			STRNCPY(temp, LINEMAX, command.get(), LINEMAX-1);
 			if (parameters) {
 				STRNCAT(temp, LINEMAX, " ", 2);
-				STRNCAT(temp, LINEMAX, parameters, LINEMAX-1);
+				STRNCAT(temp, LINEMAX, parameters.get(), LINEMAX-1);
 			}
 			if (Options::OutputVerbosity <= OV_ALL) {
 				_CERR "Executing <" _CMDL temp _CMDL ">" _ENDL;
@@ -1627,20 +1611,7 @@ void dirSHELLEXEC() {
 			}
 		}
 	}
-	delete[] command;
-	if (NULL != parameters) {
-		delete[] parameters;
-	}
 }
-
-/*void dirWINEXEC() {
-	char* command;
-	command = GetFileName(lp);
-	if (pass == LASTPASS) {
-
-	}
-	delete[] command;
-}*/
 
 void dirSTRUCT() {
 	CStructure* st;
@@ -2002,11 +1973,11 @@ void dirINCLUDELUA() {
 		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
 		return;
 	}
-	char* fnaam = GetFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetFileName(lp));
 	EDelimiterType dt = GetDelimiterOfLastFileName();
-	char* fullpath = GetPath(fnaam, NULL, DT_ANGLE == dt);
+	char* fullpath = GetPath(fnaam.get(), NULL, DT_ANGLE == dt);
 	if (!fullpath[0]) {
-		Error("[INCLUDELUA] File doesn't exist", fnaam, EARLY);
+		Error("[INCLUDELUA] File doesn't exist", fnaam.get(), EARLY);
 	} else {
 		// archive the filename (for referencing it in SLD tracing data or listing/errors)
 		auto ofnIt = std::find(openedFileNames.cbegin(), openedFileNames.cend(), fullpath);
@@ -2024,7 +1995,6 @@ void dirINCLUDELUA() {
 		LuaStartPos = TextFilePos();
 	}
 	free(fullpath);
-	delete[] fnaam;
 }
 
 #endif //USE_LUA
