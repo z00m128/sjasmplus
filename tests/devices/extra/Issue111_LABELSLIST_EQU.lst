@@ -19,8 +19,8 @@
 18    0000              OTHER_EQU   EQU     $10000
 19    0000
 20    0000              PagesTab:
-Issue111_LABELSLIST_EQU.asm(21): warning: value 0x7F01 is truncated to 8bit value: 0x01
-21    0000 02 07 03 01          DB  $$ADDR3_8000, $$ADDR3_0, $$ADDR3_C000, $$OTHER_EQU, $$PagesTab
+Issue111_LABELSLIST_EQU.asm(21): warning: value 0x7F80 is truncated to 8bit value: 0x80
+21    0000 02 07 03 80          DB  $$ADDR3_8000, $$ADDR3_0, $$ADDR3_C000, $$OTHER_EQU, $$PagesTab
 21    0004 07
 22    0005
 23    0005                  ORG     $C000
@@ -30,8 +30,8 @@ Issue111_LABELSLIST_EQU.asm(21): warning: value 0x7F01 is truncated to 8bit valu
 27    C000
 28    C000              OTHER_EQU2  EQU     $10000
 29    C000
-Issue111_LABELSLIST_EQU.asm(30): warning: value 0x7F01 is truncated to 8bit value: 0x01
-30    C000 03 02 01             DB  $$ORG_ADR, $$ORG_ADR_EQU, $$OTHER_EQU2
+Issue111_LABELSLIST_EQU.asm(30): warning: value 0x7F80 is truncated to 8bit value: 0x80
+30    C000 03 02 80             DB  $$ORG_ADR, $$ORG_ADR_EQU, $$OTHER_EQU2
 31    C003
 32    C003                  LABELSLIST "Issue111_LABELSLIST_EQU.lbl"
 33    C003

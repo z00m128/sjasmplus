@@ -55,7 +55,7 @@ int GetLocalLabelValue(char*& op, aint& val);
 
 constexpr int LABEL_PAGE_UNDEFINED = -1;
 constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
-constexpr int LABEL_PAGE_OUT_OF_BOUNDS = 0x7F01;	// label is defined, but not within Z80 address space
+constexpr int LABEL_PAGE_OUT_OF_BOUNDS = 0x7F80;	// label is defined, but not within Z80 address space
 
 class CLabelTableEntry {
 public:
@@ -74,7 +74,7 @@ public:
 class CLabelTable {
 public:
 	CLabelTable();
-	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false, bool IsEQU = false);
+	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false, bool IsEQU = false, short equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char*, aint);
 	CLabelTableEntry* Find(const char* name, bool onlyDefined = false);
 	bool Remove(const char* name);

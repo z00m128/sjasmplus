@@ -254,7 +254,7 @@ static short getAddressPageNumber(const aint address, bool forceRecalculateByAdd
 	return page;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL, bool IsEQU) {
+int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL, bool IsEQU, short equPageNum) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", NULL, FATAL);
 	}
@@ -272,7 +272,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 		} else {
 			//if label already added (as used, or in previous pass), just refresh values
 			label->value = nvalue;
-			label->page = getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+			if (IsEQU && LABEL_PAGE_UNDEFINED != equPageNum) {
+				label->page = equPageNum;
+			} else {
+				label->page = getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+			}
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
 			label->isRelocatable = isRelocatable;
@@ -293,7 +297,11 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	label->updatePass = pass;
 	label->value = nvalue;
 	label->used = undefined;
-	label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+	if (IsEQU && LABEL_PAGE_UNDEFINED != equPageNum) {
+		label->page = equPageNum;
+	} else {
+		label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+	}
 	label->isRelocatable = !undefined && isRelocatable;		// ignore "relocatable" for "undefined"
 	return 1;
 }

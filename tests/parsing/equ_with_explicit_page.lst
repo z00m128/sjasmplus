@@ -1,0 +1,32 @@
+# file opened: equ_with_explicit_page.asm
+ 1    0000                  DEVICE ZXSPECTRUM1024
+ 2    0000                              ORG     $8000
+ 3    8000              regular:
+ 4    8000
+ 5    8000              equClassic:     EQU     $4000
+ 6    8000                  ; actually in current v1.17.0 this will still receive "page 5" page based
+ 7    8000                  ; on the current memory mapping and the address value, but in docs it's
+ 8    8000                  ; described as "irrelevant". This test is documenting the behaviour for
+ 9    8000                  ; the sake of the test, not making it official/guaranteed, avoid using it
+10    8000
+11    8000              equWithPage:    EQU     $4001  ,  1
+12    8000
+13    8000                  ASSERT $8000 == regular && 2 == $$regular
+14    8000                  ASSERT $4000 == equClassic && 5 == $$equClassic
+15    8000                  ASSERT $4001 == equWithPage && 1 == $$equWithPage
+16    8000
+equ_with_explicit_page.asm(17): error: Expression error: 
+17    8000              errorEqu1       EQU     $4002 ,
+equ_with_explicit_page.asm(18): error: Expression error: @
+equ_with_explicit_page.asm(18): error: Unrecognized instruction: 
+18    8000              errorEqu2       EQU     $4003 , @
+19    8000
+# file closed: equ_with_explicit_page.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000   regular
+0x4000   equClassic
+0x4001   equWithPage
+0x4002 X errorEqu1
+0x4003 X errorEqu2

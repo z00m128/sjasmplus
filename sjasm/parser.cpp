@@ -586,7 +586,7 @@ void ParseLabel() {
 	if (White()) return;
 	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
 	char temp[LINEMAX], * tp = temp, * ttp;
-	aint val;
+	aint val, equPageNum = LABEL_PAGE_UNDEFINED;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
 		*tp = *lp; ++tp; ++lp;
 	}
@@ -618,11 +618,18 @@ void ParseLabel() {
 		bool IsDEFL = NeedDEFL(), IsEQU = NeedEQU();
 		if (IsDEFL || IsEQU) {
 			Relocation::isResultAffected = false;
-			if (!ParseExpression(lp, val)) {
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("Expression error", lp);
 				val = 0;
 			}
 			if (IsLabelNotFound && IsDEFL) Error("Forward reference", NULL, EARLY);
+			// check for explicit page defined by EQU
+			if (IsEQU && comma(lp)) {
+				if (!ParseExpressionNoSyntaxError(lp, equPageNum)) {
+					Error("Expression error", lp);
+					equPageNum = LABEL_PAGE_UNDEFINED;
+				}
+			}
 		} else {
 			int gl = 0;
 			char* p = lp,* n;
@@ -653,7 +660,7 @@ void ParseLabel() {
 				return;
 			}
 			if (IsDEFL) {		//re-set DEFL value
-				LabelTable.Insert(tp, val, false, true, false);
+				LabelTable.Insert(tp, val, false, true);
 			} else if (IsSldExportActive()) {
 				// SLD (Source Level Debugging) tracing-data logging
 				WriteToSldFile(IsEQU ? -1 : label->page, val, IsEQU ? 'D' : 'F', tp);
@@ -668,9 +675,9 @@ void ParseLabel() {
 
 				delete[] buf;
 			}
-		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU) && !LabelTable.Update(tp, val)) {
+		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU, equPageNum) && !LabelTable.Update(tp, val)) {
 			Error("Duplicate label", tp, EARLY);
-		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
+		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU, equPageNum)) {
 			Error("Duplicate label", tp, EARLY);
 		}
 
