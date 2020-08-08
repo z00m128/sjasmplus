@@ -82,7 +82,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace) {
 	else if (local) labelLen += 1 + strlen(vorlabp);
 	if (inModule) labelLen += 1 + strlen(ModuleName);
 	// build fully qualified label name (in newly allocated memory buffer, with precise length)
-	char* label = new char[1+labelLen];
+	char* const label = new char[1+labelLen];
 	if (nullptr == label) ErrorOOM();
 	label[0] = 0;
 	if (inModule) {
@@ -110,8 +110,8 @@ static bool getLabel_invalidName = false;
 
 static CLabelTableEntry* GetLabel(char*& p) {
 	getLabel_invalidName = true;
-	char* fullName = ValidateLabel(p, false);
-	if (nullptr == fullName) return nullptr;
+	std::unique_ptr<char[]> fullName(ValidateLabel(p, false));
+	if (!fullName) return nullptr;
 	getLabel_invalidName = false;
 	const bool global = '@' == *p;
 	const bool local = '.' == *p;
@@ -121,7 +121,7 @@ static CLabelTableEntry* GetLabel(char*& p) {
 	// find the label entry in the label table (for local macro labels it has to try all sub-parts!)
 	// then regular full label has to be tried
 	// and if it's regular non-local in module, then variant w/o current module has to be tried
-	char *findName = fullName;
+	char *findName = fullName.get();
 	bool inTableAlready = false;
 	CLabelTableEntry* labelEntry = nullptr;
 	temp[0] = 0;
@@ -148,9 +148,9 @@ static CLabelTableEntry* GetLabel(char*& p) {
 				findName = temp;
 			}
 		} else {
-			if (!global && !local && fullName == findName && modNameLen) {
+			if (!global && !local && fullName.get() == findName && modNameLen) {
 				// this still may be global label without current module (but author didn't use "@")
-				findName = fullName + modNameLen + 1;
+				findName = fullName.get() + modNameLen + 1;
 			} else {
 				findName = nullptr;	// all options exhausted
 			}
@@ -158,14 +158,13 @@ static CLabelTableEntry* GetLabel(char*& p) {
 	} while (findName);
 	if (nullptr == findName) {		// not found, check if it needs to be inserted into table
 		// canonical name is either in "temp" (when in-macro) or in "fullName" (outside macro)
-		findName = temp[0] ? temp : fullName;
+		findName = temp[0] ? temp : fullName.get();
 		if (!inTableAlready) {
 			LabelTable.Insert(findName, 0, true);
 			IsLabelNotFound = 1;
 		}
 		Error("Label not found", findName, IF_FIRST);
 	}
-	delete[] fullName;
 	return labelEntry;
 }
 
@@ -1181,8 +1180,9 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 }
 
 static void InsertSingleStructLabel(char *name, const bool isRelocatable, const aint value) {
-	char *op = name, *p;
-	if (!(p = ValidateLabel(op, true))) {
+	char *op = name;
+	std::unique_ptr<char[]> p(ValidateLabel(op, true));
+	if (!p) {
 		Error("Illegal labelname", op, EARLY);
 		return;
 	}
@@ -1192,13 +1192,12 @@ static void InsertSingleStructLabel(char *name, const bool isRelocatable, const 
 			Error("Internal error. ParseLabel()", op, FATAL);
 		}
 		if (value != oval) {
-			Error("Label has different value in pass 2", p);
+			Error("Label has different value in pass 2", p.get());
 		}
 	} else {
 		Relocation::isResultAffected = Relocation::isRelocatable = isRelocatable;
-		if (!LabelTable.Insert(p, value, false, false, true)) Error("Duplicate label", p, EARLY);
+		if (!LabelTable.Insert(p.get(), value, false, false, true)) Error("Duplicate label", p.get(), EARLY);
 	}
-	delete[] p;
 }
 
 static void InsertStructSubLabels(const char* mainName, const bool isRelocatable, const CStructureEntry1* members, const aint address = 0) {

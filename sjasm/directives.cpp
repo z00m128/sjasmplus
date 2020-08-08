@@ -1316,10 +1316,9 @@ static bool dirIfusedIfnused(char* & id) {
 			return false;
 		}
 	} else {
-		char* validLabel = ValidateLabel(lp, false);
+		std::unique_ptr<char[]> validLabel(ValidateLabel(lp, false));
 		if (validLabel) {
-			id = STRDUP(validLabel);
-			delete[] validLabel;
+			id = STRDUP(validLabel.get());
 			while (islabchar(*lp)) ++lp;	// advance lp beyond parsed label (valid chars only)
 		} else {
 			SkipToEol(lp);					// ValidateLabel aready reported some error, skip rest
