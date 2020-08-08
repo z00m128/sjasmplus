@@ -419,7 +419,7 @@ bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const
 	}
 	aint digit;
 	const int base = 1<<shiftBase;
-	const aint overflowMask = (~0L)<<(32-shiftBase);
+	const aint overflowMask = (~0UL)<<(32-shiftBase);
 	while (p < pend) {
 		const byte charDigit = *p++;
 		if ('\'' == charDigit && isalnum((byte)*p)) continue;
