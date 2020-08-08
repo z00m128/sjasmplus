@@ -356,13 +356,12 @@ static void dirNexOpen() {
 	}
 	nex.init();			// reset everything around NEX file data
 	// read OPEN command arguments
-	char* fname = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 	aint openArgs[4] = { (-1 == StartAddress ? 0 : StartAddress), 0xFFFE, 0, 0 };
 	if (comma(lp)) {
 		const bool optionals[] = {false, true, true, true};	// start address is mandatory because comma
 		if (!getIntArguments<4>(openArgs, optionals)) {
 			Error("[SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]", bp, SUPPRESS);
-			delete[] fname;
 			return;
 		}
 	}
@@ -374,17 +373,14 @@ static void dirNexOpen() {
 	check16(openArgs[1]);
 	if (openArgs[2] < 0 || SNexHeader::MAX_BANK <= openArgs[2]) {
 		ErrorInt("[SAVENEX] entry bank can be 0..111 value only", openArgs[2], SUPPRESS);
-		delete[] fname;
 		return;
 	}
 	if (openArgs[3] && (openArgs[3] < 2 || 3 < openArgs[3])) {
 		ErrorInt("[SAVENEX] only file version 2 (V1.2) or 3 (V1.3) can be enforced", openArgs[3], SUPPRESS);
-		delete[] fname;
 		return;
 	}
 	// try to open the actual file
-	if (!FOPEN_ISOK(nex.f, fname, "w+b")) Error("[SAVENEX] Error opening file", fname, SUPPRESS);
-	delete[] fname;
+	if (!FOPEN_ISOK(nex.f, fname.get(), "w+b")) Error("[SAVENEX] Error opening file", fname.get(), SUPPRESS);
 	if (nullptr == nex.f) return;
 	// set the argument values into header, and write the initial version of header into file
 	nex.h.pc = openArgs[0] & 0xFFFF;

@@ -664,7 +664,7 @@ void dirSAVESNA() {
 		exec = false;
 	}
 
-	char* fnaam = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	int start = StartAddress;
 	if (anyComma(lp)) {
 		aint val;
@@ -683,11 +683,9 @@ void dirSAVESNA() {
 		exec = false; Error("[SAVESNA] No start address defined", bp, SUPPRESS);
 	}
 
-	if (exec && !SaveSNA_ZX(fnaam, start)) {
+	if (exec && !SaveSNA_ZX(fnaam.get(), start)) {
 		Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
 	}
-
-	delete[] fnaam;
 }
 
 void dirEMPTYTAP() {
@@ -695,14 +693,11 @@ void dirEMPTYTAP() {
 		SkipParam(lp);
 		return;
 	}
-	char* fnaam;
-
-	fnaam = GetOutputFileName(lp);
-	if (!*fnaam) {
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	if (!fnaam[0]) {
 		Error("[EMPTYTAP] Syntax error", bp, IF_FIRST); return;
 	}
-	TAP_SaveEmpty(fnaam);
-	delete[] fnaam;
+	TAP_SaveEmpty(fnaam.get());
 }
 
 void dirSAVETAP() {
@@ -715,7 +710,7 @@ void dirSAVETAP() {
 	bool exec = true, realtapeMode = false;
 	int headerType = -1;
 	aint val;
-	char* fnaam, *fnaamh = NULL;
+	char* fnaamh = NULL;
 	int start = -1, length = -1, param2 = -1, param3 = -1;
 
 	if (!DeviceID) {
@@ -723,7 +718,7 @@ void dirSAVETAP() {
 		exec = false;
 	}
 
-	fnaam = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			char *tlp = lp;
@@ -864,12 +859,12 @@ void dirSAVETAP() {
 		int done = 0;
 
 		if (realtapeMode) {
-			done = TAP_SaveBlock(fnaam, headerType, fnaamh, start, length, param2, param3);
+			done = TAP_SaveBlock(fnaam.get(), headerType, fnaamh, start, length, param2, param3);
 		} else {
 			if (!IsZXSpectrumDevice(DeviceID)) {
 				Error("[SAVETAP snapshot] Device is not of ZX Spectrum type.", Device->ID, SUPPRESS);
 			} else {
-				done = TAP_SaveSnapshot(fnaam, start);
+				done = TAP_SaveSnapshot(fnaam.get(), start);
 			}
 		}
 
@@ -881,7 +876,6 @@ void dirSAVETAP() {
 	if (fnaamh) {
 		delete[] fnaamh;
 	}
-	delete[] fnaam;
 }
 
 void dirSAVEBIN() {
@@ -893,7 +887,7 @@ void dirSAVEBIN() {
 	bool exec = (LASTPASS == pass);
 	aint val;
 	int start = -1, length = -1;
-	char* fnaam = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
@@ -921,10 +915,9 @@ void dirSAVEBIN() {
 		Error("[SAVEBIN] Syntax error. No parameters", bp); return;
 	}
 
-	if (exec && !SaveBinary(fnaam, start, length)) {
+	if (exec && !SaveBinary(fnaam.get(), start, length)) {
 		Error("[SAVEBIN] Error writing file (Disk full?)", bp, IF_FIRST);
 	}
-	delete[] fnaam;
 }
 
 void dirSAVEDEV() {
@@ -932,7 +925,7 @@ void dirSAVEDEV() {
 	if (!exec && LASTPASS == pass) Error("SAVEDEV only allowed in real device emulation mode (See DEVICE)");
 
 	aint args[3]{-1, -1, -1};		// page, offset, length
-	char* fnaam = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	for (auto & arg : args) {
 		if (!comma(lp) || !ParseExpression(lp, arg)) {
 			exec = false;
@@ -954,11 +947,10 @@ void dirSAVEDEV() {
 			if (args[2]) ErrorInt("[SAVEDEV] invalid end address (bad length?)", start + args[2]);
 			else Warning("[SAVEDEV] zero length requested");
 		}
-		if (exec && !SaveDeviceMemory(fnaam, (size_t)start, (size_t)args[2])) {
+		if (exec && !SaveDeviceMemory(fnaam.get(), (size_t)start, (size_t)args[2])) {
 			Error("[SAVEDEV] Error writing file (Disk full?)", bp, IF_FIRST);
 		}
 	}
-	delete[] fnaam;
 }
 
 void dirSAVEHOB() {
@@ -969,11 +961,11 @@ void dirSAVEHOB() {
 		return;
 	}
 	aint val;
-	char* fnaam, * fnaamh;
+	char* fnaamh;
 	int start = -1,length = -1;
 	bool exec = true;
 
-	fnaam = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			fnaamh = GetFileName(lp);
@@ -1013,10 +1005,9 @@ void dirSAVEHOB() {
 	} else {
 		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
 	}
-	if (exec && !SaveHobeta(fnaam, fnaamh, start, length)) {
+	if (exec && !SaveHobeta(fnaam.get(), fnaamh, start, length)) {
 		Error("[SAVEHOB] Error writing file (Disk full?)", bp, IF_FIRST); return;
 	}
-	delete[] fnaam;
 	delete[] fnaamh;
 }
 
@@ -1025,12 +1016,11 @@ void dirEMPTYTRD() {
 		SkipToEol(lp);
 		return;
 	}
-	char* fnaam, diskLabel[9] = "        ";
+	char diskLabel[9] = "        ";
 
-	fnaam = GetOutputFileName(lp);
-	if (!*fnaam) {
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	if (!fnaam[0]) {
 		Error("[EMPTYTRD] Syntax error", bp, IF_FIRST);
-		delete[] fnaam;
 		return;
 	}
 	if (anyComma(lp)) {
@@ -1048,8 +1038,7 @@ void dirEMPTYTRD() {
 		}
 		delete[] srcLabel;
 	}
-	TRD_SaveEmpty(fnaam, diskLabel);
-	delete[] fnaam;
+	TRD_SaveEmpty(fnaam.get(), diskLabel);
 }
 
 void dirSAVETRD() {
@@ -1061,10 +1050,10 @@ void dirSAVETRD() {
 
 	bool exec = true, replace = false, addplace = false;
 	aint val;
-	char* fnaam, * fnaamh;
+	char* fnaamh;
 	int start = -1, length = -1, autostart = -1;
 
-	fnaam = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
@@ -1122,8 +1111,7 @@ void dirSAVETRD() {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
-	if (exec) TRD_AddFile(fnaam, fnaamh, start, length, autostart, replace, addplace);
-	delete[] fnaam;
+	if (exec) TRD_AddFile(fnaam.get(), fnaamh, start, length, autostart, replace, addplace);
 	delete[] fnaamh;
 }
 
@@ -1196,13 +1184,12 @@ void dirLABELSLIST() {
 		SkipParam(lp);
 		return;
 	}
-	char* opt = GetOutputFileName(lp);
-	if (*opt) {
-		STRCPY(Options::UnrealLabelListFName, LINEMAX, opt);
+	std::unique_ptr<char[]> opt(GetOutputFileName(lp));
+	if (opt[0]) {
+		STRCPY(Options::UnrealLabelListFName, LINEMAX, opt.get());
 	} else {
 		Error("[LABELSLIST] No filename", bp, EARLY);	// pass == 1 -> EARLY
 	}
-	delete[] opt;
 }
 
 void dirCSPECTMAP() {
@@ -1211,14 +1198,13 @@ void dirCSPECTMAP() {
 		SkipParam(lp);
 		return;
 	}
-	char* fName = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fName(GetOutputFileName(lp));
 	if (fName[0]) {
-		STRCPY(Options::CSpectMapFName, LINEMAX, fName);
+		STRCPY(Options::CSpectMapFName, LINEMAX, fName.get());
 	} else {		// create default map file name from current source file name (appends ".map")
 		STRCPY(Options::CSpectMapFName, LINEMAX-5, CurSourcePos.filename);
 		STRCAT(Options::CSpectMapFName, LINEMAX-1, ".map");
 	}
-	delete[] fName;
 	// remember page size of current device (in case the source is multi-device later)
 	Options::CSpectMapPageSize = Device->GetPage(0)->Size;
 }
@@ -1231,7 +1217,7 @@ void dirBPLIST() {
 		SkipToEol(lp);
 		return;
 	}
-	char* fname = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fName(GetOutputFileName(lp));
 	EBreakpointsFile type = BPSF_UNREAL;
 	if (cmphstr(lp, "unreal")) {
 		type = BPSF_UNREAL;
@@ -1240,8 +1226,7 @@ void dirBPLIST() {
 	} else if (!SkipBlanks()) {
 		Warning("[BPLIST] invalid breakpoints file type (use \"unreal\" or \"zesarux\")", lp, W_EARLY);
 	}
-	OpenBreakpointsFile(fname, type);
-	delete[] fname;
+	OpenBreakpointsFile(fName.get(), type);
 }
 
 void dirSETBREAKPOINT() {
@@ -1404,7 +1389,8 @@ void dirOUTPUT() {
 		SkipToEol(lp);
 		return;
 	}
-	char* fnaam = GetOutputFileName(lp), modechar = 0;
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	char modechar = 0;
 	int mode = OUTPUT_TRUNCATE;
 	if (comma(lp)) {
 		if (!SkipBlanks(lp)) modechar = (*lp++) | 0x20;
@@ -1414,13 +1400,11 @@ void dirOUTPUT() {
 			case 'a': mode = OUTPUT_APPEND;		break;
 			default:
 				Error("[OUTPUT] Invalid <mode> (valid modes: t, a, r)", bp);
-				delete[] fnaam;
 				return;
 		}
 	}
 	//Options::NoDestinationFile = false;
-	NewDest(fnaam, mode);
-	delete[] fnaam;
+	NewDest(fnaam.get(), mode);
 }
 
 void dirOUTEND()
@@ -1431,9 +1415,7 @@ void dirOUTEND()
 void dirTAPOUT()
 {
 	aint val;
-	char* fnaam;
-
-	fnaam = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	int tape_flag = 255;
 	if (comma(lp))
 	{
@@ -1443,9 +1425,7 @@ void dirTAPOUT()
 		}
 		tape_flag = val;
 	}
-	if (pass == LASTPASS) OpenTapFile(fnaam, tape_flag);
-
-	delete[] fnaam;
+	if (pass == LASTPASS) OpenTapFile(fnaam.get(), tape_flag);
 }
 
 void dirTAPEND()
