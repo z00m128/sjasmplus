@@ -64,9 +64,9 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 	TextFilePos errorPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 	bool isEmittedMsgEnabled = true;
 #ifdef USE_LUA
+	lua_Debug ar;					// must be in this scope, as some memory is reused by errorPos
 	if (LuaStartPos.line) {
 		errorPos = LuaStartPos;
-		lua_Debug ar;
 
 		// find either top level of lua stack, or standalone file, otherwise it's impossible
 		// to precisely report location of error (ASM can have 2+ LUA blocks defining functions)
