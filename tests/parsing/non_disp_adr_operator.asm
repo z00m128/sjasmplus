@@ -56,3 +56,32 @@ noDispPage4 EQU     $$$$    ; error: unexpected "$$"
     ASSERT $6000 == dispAdr4
     ASSERT 4 == $$dispAdr4
     ASSERT 4 == dispPage4
+
+;;;; extended test/example after explicit ",pageNum" was added to EQU mechanics
+
+;; DEVICE + DISP case
+    DEVICE ZXSPECTRUM1024
+    SLOT 2 : ORG $8000, 2 : DISP $A000, 3
+nda1        EQU     $$$,$$$$    ; this symbol has now page 2 (not disp page 3)
+    ENT
+
+    ASSERT $8000 == nda1
+    ASSERT 2 == $$nda1
+
+;; NO_DEVICE + DISP
+    DEVICE NONE
+    ORG $C000 : DISP $E000
+nda2        EQU     $$$,$$$$    ; extended example after adding explicit ",pageNum" to EQU
+    ENT
+
+    ASSERT $C000 == nda2
+    ASSERT $$nda2               ; error: "unexpected $nda2", $$label is disabled w/o device
+
+;; NO_DEVICE + NO_DISP
+    ORG $4000
+nda3        EQU     $$$,$$$$    ; error: "unexpected $$,$$$$"
+
+;; DEVICE + NO_DISP
+    DEVICE ZXSPECTRUM1024
+    SLOT 1 : ORG $6000, 4
+nda4        EQU     $$$,$$$$    ; error: "unexpected $,$$$$"
