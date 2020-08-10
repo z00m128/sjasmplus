@@ -1775,7 +1775,13 @@ namespace Z80 {
 					case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L: case Z80_A:
 						e[0] = 0xed; e[1] = 0x41 + 8 * reg; break;
 					case Z80_UNK:
-						if (0 == GetByteNoMem(lp)) e[0] = 0xed;	// out (c),0
+						if (0 == GetByteNoMem(lp)) {
+							// out (c),0 - warn about it as unstable
+							if (warningNotSuppressed()) {
+								Warning("[OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`");
+							}
+							e[0] = 0xed;
+						}
 						e[1] = 0x71; break;
 					default:
 						break;

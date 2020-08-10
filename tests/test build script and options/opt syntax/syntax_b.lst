@@ -121,9 +121,12 @@ syntax_b.asm(36): error: [NEXTREG] Comma expected
 syntax_b.asm(36): error: Unexpected: [34],[35]
  36   00A1                nextreg [34],[35]
  37   00A1                  ; 2x OK: val, val, ---
+syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  38   00A1 ED 71            out (c),0
+syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  38   00A3 ED 71          out (c),(0)
 syntax_b.asm(38): error: Syntax error: [0]
+syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
 syntax_b.asm(38): error: Unexpected: [0]
  38   00A5 ED 71          out (c),[0]
  39   00A7                  ; 2x OK: val, val, ---
@@ -294,10 +297,13 @@ syntax_b.asm(88): error: Illegal instruction (can't access memory):  [34],[35]
 syntax_b.asm(88): error: Illegal instruction (can't access memory): [35]
  88   018E ED 91 00 00    nextreg [34],[35]
  89   0192                  ; 1x OK: val, ---, ---
+syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0192 ED 71            out (c),0
 syntax_b.asm(90): error: Illegal instruction (can't access memory): (0) 
+syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0194 ED 71          out (c),(0)
 syntax_b.asm(90): error: Illegal instruction (can't access memory): [0]
+syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0196 ED 71          out (c),[0]
  91   0198                  ; 1x OK: val, ---, ---
  92   0198 CB BF            res 7,a
