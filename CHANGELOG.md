@@ -2,7 +2,8 @@
 - `STRUCT` has new [`TEXT`](http://z00m128.github.io/sjasmplus/documentation.html#st_text) pseudo-instruction to define "DB-like" data
 - [`STRUCT` initializer block](http://z00m128.github.io/sjasmplus/documentation.html#st_usage) can be now multi-line (when correctly enclosed in curly braces)
 - [`EQU`](http://z00m128.github.io/sjasmplus/documentation.html#po_equ) now allows for optional override of page number assigned to the new symbol
-- new [$$$ and $$$ operators](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to retrieve "physical" address/page inside DISP block
+- new [$$$ and $$$$ operators](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to retrieve "physical" address/page inside DISP block
+- instruction `out (c),0` now emits warning (can be suppressed by the "; ok" comment)
 - fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
 - fixed some memory leaks, undefined behaviour and unaligned memory access
 

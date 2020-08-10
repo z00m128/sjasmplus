@@ -196,7 +196,8 @@
               <synopsis>- `STRUCT` has new <link linkend="st_text">`TEXT`</link> pseudo-instruction to define "DB-like" data (<ulink url="https://github.com/z00m128/sjasmplus/issues/93">Issue #93</ulink>)
 - <link linkend="st_usage">`STRUCT` initializer block</link> can be now multi-line (when correctly enclosed in curly braces)
 - <link linkend="po_equ">`EQU`</link> now allows for optional override of page number assigned to the new symbol
-- new <link linkend="s_expressions">$$$ and $$$ operators</link> to retrieve "physical" address/page inside DISP block
+- new <link linkend="s_expressions">$$$ and $$$$ operators</link> to retrieve "physical" address/page inside DISP block
+- instruction `out (c),0` now emits warning (can be suppressed by the "; ok" comment)
 - fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
 - fixed some memory leaks, undefined behaviour and unaligned memory access
 </synopsis>
