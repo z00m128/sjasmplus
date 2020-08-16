@@ -1,0 +1,283 @@
+# file opened: multi_line_init2.asm
+ 1    0000              ; variation on more complex internal states of sjasmplus (reading multi-line from macro definition/etc)
+ 2    0000
+ 3    0000                  OUTPUT "multi_line_init2.bin"
+ 4    0000
+ 5    0000 31 29 20 73      DB  "1) single-line classic initializers test:\n"
+ 5    0004 69 6E 67 6C
+ 5    0008 65 2D 6C 69
+ 5    000C 6E 65 20 63
+ 5    0010 6C 61 73 73
+ 5    0014 69 63 20 69
+ 5    0018 6E 69 74 69
+ 5    001C 61 6C 69 7A
+ 5    0020 65 72 73 20
+ 5    0024 74 65 73 74
+ 5    0028 3A 0A
+ 6    002A
+ 7    002A                  STRUCT S_sub1
+ 8    002A ~            b1      byte    $11
+ 9    002A ~            t1      text    5, { "txt", '_' }
+10    002A ~            w1      word    $3322
+11    002A                  ENDS
+12    002A
+13    002A                  STRUCT S_main
+14    002A ~            b2      byte    $44
+15    002A ~            s1      S_sub1
+16    002A                  ENDS
+17    002A
+18    002A                  ; 2x S_main instance by using dot-repeater -> no label assigned to these
+19    002A 61 62 63 64 > S_main { 'a', { 'b', { "cdefg" }, "\nh" } }
+19    002E 65 66 67 68 >
+19    0032 0A          >
+19    0033 61 62 63 64 > S_main { 'a', { 'b', { "cdefg" }, "\nh" } }
+19    0037 65 66 67 68 >
+19    003B 0A          >
+20    003C
+21    003C                  ; 2x S_main instance by using DUP+EDUP
+22    003C              dupRep:
+23    003C                      DUP 2
+24    003C 69 6A 6B 6C >            S_main { 'i', { 'j', { "klmno" }, "\np" } }
+24    0040 6D 6E 6F 70 >
+24    0044 0A          >
+24    0045 69 6A 6B 6C >            S_main { 'i', { 'j', { "klmno" }, "\np" } }
+24    0049 6D 6E 6F 70 >
+24    004D 0A          >
+25    004E                      EDUP
+26    004E
+27    004E                  ; emit structure inside macro
+28    004E              macDef  MACRO   b1?, t1?
+29    004E ~            .macSub     S_main { '<', { b1?, { t1? }, "\n>" } }
+30    004E                      ENDM
+31    004E
+32    004E                  ; emit 2x structure inside macro with dot repeater (structs have own macro-specific label)
+33    004E             > macDef 'B', < 'C', 'D', "EF" >
+33    004E 3C 42 43 44 >.macSub     S_main { '<', { 'B', { 'C', 'D', "EF"  }, "\n>" } }
+33    0052 45 46 5F 3E >
+33    0056 0A          >
+33    0057             > macDef 'B', < 'C', 'D', "EF" >
+33    0057 3C 42 43 44 >.macSub     S_main { '<', { 'B', { 'C', 'D', "EF"  }, "\n>" } }
+33    005B 45 46 5F 3E >
+33    005F 0A          >
+34    0060
+35    0060                      DUP 2
+36    0060             >            macDef 'b', < 'c', 'd', "ef" >
+36    0060 3C 62 63 64 >.macSub     S_main { '<', { 'b', { 'c', 'd', "ef"  }, "\n>" } }
+36    0064 65 66 5F 3E >
+36    0068 0A          >
+36    0069             >            macDef 'b', < 'c', 'd', "ef" >
+36    0069 3C 62 63 64 >.macSub     S_main { '<', { 'b', { 'c', 'd', "ef"  }, "\n>" } }
+36    006D 65 66 5F 3E >
+36    0071 0A          >
+37    0072                      EDUP
+38    0072
+39    0072 0A 32 29 20      DB  "\n2) same code, but multi-line variants:\n"
+39    0076 73 61 6D 65
+39    007A 20 63 6F 64
+39    007E 65 2C 20 62
+39    0082 75 74 20 6D
+39    0086 75 6C 74 69
+39    008A 2D 6C 69 6E
+39    008E 65 20 76 61
+39    0092 72 69 61 6E
+39    0096 74 73 3A 0A
+40    009A 28 64 6F 74      DB  "(dot-repeater variants are NOT supported)\n"
+40    009E 2D 72 65 70
+40    00A2 65 61 74 65
+40    00A6 72 20 76 61
+40    00AA 72 69 61 6E
+40    00AE 74 73 20 61
+40    00B2 72 65 20 4E
+40    00B6 4F 54 20 73
+40    00BA 75 70 70 6F
+40    00BE 72 74 65 64
+40    00C2 29 0A
+41    00C4
+42    00C4                  ; 2x S_main instance by using DUP+EDUP
+43    00C4              mlDupRep:
+44    00C4                      DUP 2
+45    00C4             >            S_main {
+45    00C4 69          >                'i',
+45    00C5             >                {
+45    00C5 6A          >                    'j',
+45    00C6 6B 6C 6D 6E >                    { "klmno" },
+45    00CA 6F          >
+45    00CB 70 0A       >                    "\np"
+45    00CD             >                }
+45    00CD             >            }
+45    00CD             >            S_main {
+45    00CD 69          >                'i',
+45    00CE             >                {
+45    00CE 6A          >                    'j',
+45    00CF 6B 6C 6D 6E >                    { "klmno" },
+45    00D3 6F          >
+45    00D4 70 0A       >                    "\np"
+45    00D6             >                }
+45    00D6             >            }
+53    00D6                      EDUP
+54    00D6
+55    00D6                  ; emit structure inside macro
+56    00D6              macDef2  MACRO   b1?, t1?
+57    00D6 ~            .macSub     S_main {
+58    00D6 ~                '<',
+59    00D6 ~                {
+60    00D6 ~                    b1?,
+61    00D6 ~                    { t1? },
+62    00D6 ~                    "\n>"
+63    00D6 ~                }
+64    00D6 ~            }
+65    00D6                      ENDM
+66    00D6
+67    00D6                  ; emit 2x structure inside macro with dot repeater (structs have own macro-specific label)
+68    00D6             > macDef2 'B', < 'C', 'D', "EF" >
+68    00D6             >.macSub     S_main {
+68    00D6 3C          >    '<',
+68    00D7             >    {
+68    00D7 42          >        'B',
+68    00D8 43 44 45 46 >        { 'C', 'D', "EF"  },
+68    00DC 5F          >
+68    00DD 3E 0A       >        "\n>"
+68    00DF             >    }
+68    00DF             >}
+68    00DF             > macDef2 'B', < 'C', 'D', "EF" >
+68    00DF             >.macSub     S_main {
+68    00DF 3C          >    '<',
+68    00E0             >    {
+68    00E0 42          >        'B',
+68    00E1 43 44 45 46 >        { 'C', 'D', "EF"  },
+68    00E5 5F          >
+68    00E6 3E 0A       >        "\n>"
+68    00E8             >    }
+68    00E8             >}
+69    00E8
+70    00E8                      DUP 2
+71    00E8             >            macDef2 'b', < 'c', 'd', "ef" >
+71    00E8             >.macSub     S_main {
+71    00E8 3C          >    '<',
+71    00E9             >    {
+71    00E9 62          >        'b',
+71    00EA 63 64 65 66 >        { 'c', 'd', "ef"  },
+71    00EE 5F          >
+71    00EF 3E 0A       >        "\n>"
+71    00F1             >    }
+71    00F1             >}
+71    00F1             >            macDef2 'b', < 'c', 'd', "ef" >
+71    00F1             >.macSub     S_main {
+71    00F1 3C          >    '<',
+71    00F2             >    {
+71    00F2 62          >        'b',
+71    00F3 63 64 65 66 >        { 'c', 'd', "ef"  },
+71    00F7 5F          >
+71    00F8 3E 0A       >        "\n>"
+71    00FA             >    }
+71    00FA             >}
+72    00FA                      EDUP
+73    00FA
+74    00FA                  ; 2x S_main instance by using dot-repeater -> this one is *NOT* supported
+75    00FA                  ; it should NOT read more lines outside of the macro scope, and report missing "}"
+multi_line_init2.asm(76): error: closing } missing
+76    00FA             > S_main {
+multi_line_init2.asm(76): error: closing } missing
+76    00FA             > S_main {
+77    00FA 41                   ld  b,c
+77    00FB 0A             ld a,(bc) ; this should be processed as instructions => 41 0A ("A\n")
+78    00FC
+79    00FC                  ; try dot-repeater inside macro definition as ultimate complexity thing
+80    00FC                  ; (ignoring IF type of complexity and recursion, because I want to finish it today)
+81    00FC                  ; this is still *NOT* supported and the second instance will miss the "}"
+82    00FC              macDef3  MACRO   b1?, t1?
+83    00FC ~                    .2 S_main {
+84    00FC ~                '{',
+85    00FC ~                {
+86    00FC ~                    b1?,
+87    00FC ~                    { t1? },
+88    00FC ~                    "\n}"
+89    00FC ~                }
+90    00FC ~            }
+91    00FC                      ENDM
+92    00FC
+93    00FC                  ; this should fail due to dot-repeater used for multi-line initializer
+94    00FC                      macDef3 '1', "2345"
+94    00FC             > S_main {
+94    00FC 7B          >    '{',
+94    00FD             >    {
+94    00FD 31          >        '1',
+94    00FE 32 33 34 35 >        { "2345" },
+94    0102 5F          >
+94    0103 7D 0A       >        "\n}"
+94    0105             >    }
+94    0105             >}
+multi_line_init2.asm(90): error: closing } missing
+multi_line_init2.asm(94): ^ emitted from here
+94    0105             > S_main {
+95    0105 42                   ld  b,d
+95    0106 0A             ld a,(bc) ; this should be processed as instructions => 42 0A ("B\n")
+96    0107
+97    0107                  OUTEND
+98    0107
+# file closed: multi_line_init2.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0008 X S_sub1
+0x0000 X S_sub1.b1
+0x0001 X S_sub1.t1
+0x0006 X S_sub1.w1
+0x0009 X S_main
+0x0000 X S_main.b2
+0x0001 X S_main.s1
+0x0001 X S_main.s1.b1
+0x0002 X S_main.s1.t1
+0x0007 X S_main.s1.w1
+0x002A X dotRep
+0x003C X dupRep
+0x004E X 0>macSub
+0x004E X 0>macSub.b2
+0x004F X 0>macSub.s1
+0x004F X 0>macSub.s1.b1
+0x0050 X 0>macSub.s1.t1
+0x0055 X 0>macSub.s1.w1
+0x0057 X 1>macSub
+0x0057 X 1>macSub.b2
+0x0058 X 1>macSub.s1
+0x0058 X 1>macSub.s1.b1
+0x0059 X 1>macSub.s1.t1
+0x005E X 1>macSub.s1.w1
+0x0060 X 2>macSub
+0x0060 X 2>macSub.b2
+0x0061 X 2>macSub.s1
+0x0061 X 2>macSub.s1.b1
+0x0062 X 2>macSub.s1.t1
+0x0067 X 2>macSub.s1.w1
+0x0069 X 3>macSub
+0x0069 X 3>macSub.b2
+0x006A X 3>macSub.s1
+0x006A X 3>macSub.s1.b1
+0x006B X 3>macSub.s1.t1
+0x0070 X 3>macSub.s1.w1
+0x00C4 X mlDupRep
+0x00D6 X 4>macSub
+0x00D6 X 4>macSub.b2
+0x00D7 X 4>macSub.s1
+0x00D7 X 4>macSub.s1.b1
+0x00D8 X 4>macSub.s1.t1
+0x00DD X 4>macSub.s1.w1
+0x00DF X 5>macSub
+0x00DF X 5>macSub.b2
+0x00E0 X 5>macSub.s1
+0x00E0 X 5>macSub.s1.b1
+0x00E1 X 5>macSub.s1.t1
+0x00E6 X 5>macSub.s1.w1
+0x00E8 X 6>macSub
+0x00E8 X 6>macSub.b2
+0x00E9 X 6>macSub.s1
+0x00E9 X 6>macSub.s1.b1
+0x00EA X 6>macSub.s1.t1
+0x00EF X 6>macSub.s1.w1
+0x00F1 X 7>macSub
+0x00F1 X 7>macSub.b2
+0x00F2 X 7>macSub.s1
+0x00F2 X 7>macSub.s1.b1
+0x00F3 X 7>macSub.s1.t1
+0x00F8 X 7>macSub.s1.w1
+0x00FA X mlDotRep

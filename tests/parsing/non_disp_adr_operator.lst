@@ -1,0 +1,138 @@
+# file opened: non_disp_adr_operator.asm
+ 1    0000              ;; DEVICE + DISP case
+ 2    0000                  DEVICE ZXSPECTRUM1024
+ 3    0000                  SLOT 2
+ 3    0000                ORG $8000, 2
+ 3    8000                DISP $A000, 3
+ 4    A000                      ; inside DISP block displaced to fake $A000 and page 3
+ 5    A000                      ; machine code landing to $8000 and page 2 (physically)
+ 6    A000              dispAdr     EQU     $
+ 7    A000              dispPage    EQU     $$
+ 8    A000              noDispAdr   EQU     $$$     ; (!) this symbol has still "page" set to 3 (disp page)
+ 9    A000              noDispPage  EQU     $$$$    ; you must use `$$$$` operator to extract non-disp page
+10    A000                  ENT
+11    8000
+12    8000                  ASSERT $A000 == dispAdr
+13    8000                  ASSERT 3 == $$dispAdr
+14    8000                  ASSERT 3 == dispPage
+15    8000                  ASSERT $8000 == noDispAdr
+16    8000                  ASSERT 2 == noDispPage
+17    8000
+18    8000                  ; "2 == $$noDispAdr" would be more logical, but impossible to implement in simple way
+19    8000                  ASSERT 3 == $$noDispAdr
+20    8000
+21    8000              ;; NO_DEVICE + DISP
+22    8000                  DEVICE NONE
+23    8000                  ORG $C000
+23    C000                DISP $E000
+24    E000                      ; inside DISP block displaced to $E000, machine code landing to $C000
+25    E000                      ; no pages, because no virtual device is used
+26    E000              dispAdr2    EQU     $
+non_disp_adr_operator.asm(27): error: Unrecognized instruction: $      
+non_disp_adr_operator.asm(27): error: Unexpected: $      
+27    E000              dispPage2   EQU     $$      ; error: unexpected "$"
+28    E000              noDispAdr2  EQU     $$$
+29    E000              noDispPage2 EQU     $$$$
+30    E000                  ENT
+31    C000
+32    C000                  ASSERT $E000 == dispAdr2
+33    C000                  ASSERT $C000 == noDispAdr2
+34    C000                  ASSERT -1 == noDispPage2
+35    C000
+36    C000              ;; NO_DEVICE + NO_DISP
+37    C000                  ORG $4000
+38    4000                      ; NO disp block, no DEVICE block
+39    4000              dispAdr3    EQU     $
+non_disp_adr_operator.asm(40): error: Unrecognized instruction: $      
+non_disp_adr_operator.asm(40): error: Unexpected: $      
+40    4000              dispPage3   EQU     $$      ; error: unexpected "$"
+non_disp_adr_operator.asm(41): error: Unrecognized instruction: $$     
+non_disp_adr_operator.asm(41): error: Unexpected: $$     
+41    4000              noDispAdr3  EQU     $$$     ; error: unexpected "$$"
+non_disp_adr_operator.asm(42): error: Unrecognized instruction: $$$    
+non_disp_adr_operator.asm(42): error: Unexpected: $$$    
+42    4000              noDispPage3 EQU     $$$$    ; error: unexpected "$$$"
+43    4000
+44    4000                  ASSERT $4000 == dispAdr3
+45    4000
+46    4000              ;; DEVICE + NO_DISP
+47    4000                  DEVICE ZXSPECTRUM1024
+48    4000                  SLOT 1
+48    4000                ORG $6000, 4
+49    6000                      ; inside DISP block displaced to fake $A000 and page 3
+50    6000                      ; machine code landing to $8000 and page 2 (physically)
+51    6000              dispAdr4    EQU     $
+52    6000              dispPage4   EQU     $$
+non_disp_adr_operator.asm(53): error: Unrecognized instruction: $     
+non_disp_adr_operator.asm(53): error: Unexpected: $     
+53    6000              noDispAdr4  EQU     $$$     ; error: unexpected "$"
+non_disp_adr_operator.asm(54): error: Unrecognized instruction: $$    
+non_disp_adr_operator.asm(54): error: Unexpected: $$    
+54    6000              noDispPage4 EQU     $$$$    ; error: unexpected "$$"
+55    6000
+56    6000                  ASSERT $6000 == dispAdr4
+57    6000                  ASSERT 4 == $$dispAdr4
+58    6000                  ASSERT 4 == dispPage4
+59    6000
+60    6000              ;;;; extended test/example after explicit ",pageNum" was added to EQU mechanics
+61    6000
+62    6000              ;; DEVICE + DISP case
+63    6000                  DEVICE ZXSPECTRUM1024
+64    6000                  SLOT 2
+64    6000                ORG $8000, 2
+64    8000                DISP $A000, 3
+65    A000              nda1        EQU     $$$,$$$$    ; this symbol has now page 2 (not disp page 3)
+66    A000                  ENT
+67    8000
+68    8000                  ASSERT $8000 == nda1
+69    8000                  ASSERT 2 == $$nda1
+70    8000
+71    8000              ;; NO_DEVICE + DISP
+72    8000                  DEVICE NONE
+73    8000                  ORG $C000
+73    C000                DISP $E000
+74    E000              nda2        EQU     $$$,$$$$    ; extended example after adding explicit ",pageNum" to EQU
+75    E000                  ENT
+76    C000
+77    C000                  ASSERT $C000 == nda2
+non_disp_adr_operator.asm(78): error: Unexpected: $nda2               
+78    C000                  ASSERT $$nda2               ; error: "unexpected $nda2", $$label is disabled w/o device
+79    C000
+80    C000              ;; NO_DEVICE + NO_DISP
+81    C000                  ORG $4000
+non_disp_adr_operator.asm(82): error: Unrecognized instruction: $$,$$$$    
+non_disp_adr_operator.asm(82): error: Unexpected: $$,$$$$    
+82    4000              nda3        EQU     $$$,$$$$    ; error: "unexpected $$,$$$$"
+83    4000
+84    4000              ;; DEVICE + NO_DISP
+85    4000                  DEVICE ZXSPECTRUM1024
+86    4000                  SLOT 1
+86    4000                ORG $6000, 4
+non_disp_adr_operator.asm(87): error: Unrecognized instruction: $,$$$$    
+non_disp_adr_operator.asm(87): error: Unexpected: $,$$$$    
+87    6000              nda4        EQU     $$$,$$$$    ; error: "unexpected $,$$$$"
+88    6000
+# file closed: non_disp_adr_operator.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xA000   dispAdr
+0x0003   dispPage
+0x8000   noDispAdr
+0x0002   noDispPage
+0xE000   dispAdr2
+0xE000 X dispPage2
+0xC000   noDispAdr2
+0xFFFFFFFF   noDispPage2
+0x4000   dispAdr3
+0x4000 X dispPage3
+0x4000 X noDispAdr3
+0x4000 X noDispPage3
+0x6000   dispAdr4
+0x0004   dispPage4
+0x0004 X noDispAdr4
+0x0004 X noDispPage4
+0x8000   nda1
+0xC000   nda2
+0x4000 X nda3
+0x0004 X nda4

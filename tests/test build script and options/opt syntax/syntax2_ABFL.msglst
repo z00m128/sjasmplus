@@ -38,6 +38,7 @@ syntax2_ABFL.asm(24): error: Illegal instruction:     jp      [C]
 25    0015
 26    0015 ED 78            in      a,(c)
 27    0017 DB FE            in      a,(254)
+syntax2_ABFL.asm(28): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
 28    0019 ED 71            out     (c),0
 29    001B ED 41            out     (c),b
 30    001D D3 FE            out     (254),a

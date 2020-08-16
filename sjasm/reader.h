@@ -73,6 +73,7 @@ int GetCharConstInDoubleQuotes(char*& op, aint& val);
 int GetCharConstInApostrophes(char*& op, aint& val);
 template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, int max_ei = 128, int add = 0);
 int GetBytes(char*& p, int e[], int add, int dc);
+void GetStructText(char*& p, aint len, byte* data, const byte* initData = nullptr);	// initData indicate "{}" is required for multi-value init
 int GetBits(char*& p, int e[]);
 int GetBytesHexaText(char*& p, int e[]);
 int cmphstr(char*& p1, const char* p2, bool allowParenthesisEnd = false);		// p2 must be lowercase to match both cases

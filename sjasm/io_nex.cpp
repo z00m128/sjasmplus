@@ -277,10 +277,10 @@ bool SBmpFile::open(const char* bmpname) {
 	const size_t readElements = fread(tempHeader, 1, 0x36, bmp) + fread(palBuffer, 4, 256, bmp);
 	// these following casts assume the sjasmplus itself is running at little-endian platform
 	// if you are using big-endian, report the issue, so this can be fixed in more universal way
-	const uint32_t header2Size = *reinterpret_cast<uint32_t*>(tempHeader + 14);
+	const uint32_t header2Size = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 14)->val;
 	const uint16_t colorPlanes = *reinterpret_cast<uint16_t*>(tempHeader + 26);
 	const uint16_t bpp = *reinterpret_cast<uint16_t*>(tempHeader + 28);
-	const uint32_t compressionType = *reinterpret_cast<uint32_t*>(tempHeader + 30);
+	const uint32_t compressionType = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 30)->val;
 	// check "BM", BITMAPINFOHEADER type (size 40), 8bpp, no compression
 	if (0x36+256 != readElements || 'B' != tempHeader[0] || 'M' != tempHeader[1] ||
 		40 != header2Size || 1 != colorPlanes || 8 != bpp || 0 != compressionType)
@@ -290,10 +290,10 @@ bool SBmpFile::open(const char* bmpname) {
 		close();
 		return false;
 	}
-	colorsCount = *reinterpret_cast<uint32_t*>(tempHeader + 46);
+	colorsCount = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 46)->val;
 	// check if the size is 256x192 (Layer 2) or 128x96 (LoRes), or 320/640 x 256 (V1.3).
-	width = *reinterpret_cast<int32_t*>(tempHeader + 18);
-	height = *reinterpret_cast<int32_t*>(tempHeader + 22);
+	width = reinterpret_cast<SAlignSafeCast<int32_t>*>(tempHeader + 18)->val;
+	height = reinterpret_cast<SAlignSafeCast<int32_t>*>(tempHeader + 22)->val;
 	upsideDown = 0 < height;
 	if (height < 0) height = -height;
 	if (256 == width && 192 == height) type = Layer2;
@@ -314,7 +314,7 @@ word SBmpFile::getColor(uint32_t index) {
 }
 
 void SBmpFile::loadPixelData(byte* buffer) {
-	const uint32_t offset = *reinterpret_cast<uint32_t*>(tempHeader + 10);
+	const uint32_t offset = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 10)->val;
 	const size_t w = static_cast<size_t>(width);
 	for (int32_t y = 0; y < height; ++y) {
 		const int32_t fileY = upsideDown ? (height - y - 1) : y;
@@ -356,13 +356,12 @@ static void dirNexOpen() {
 	}
 	nex.init();			// reset everything around NEX file data
 	// read OPEN command arguments
-	char* fname = GetOutputFileName(lp);
+	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 	aint openArgs[4] = { (-1 == StartAddress ? 0 : StartAddress), 0xFFFE, 0, 0 };
 	if (comma(lp)) {
 		const bool optionals[] = {false, true, true, true};	// start address is mandatory because comma
 		if (!getIntArguments<4>(openArgs, optionals)) {
 			Error("[SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]", bp, SUPPRESS);
-			delete[] fname;
 			return;
 		}
 	}
@@ -374,17 +373,14 @@ static void dirNexOpen() {
 	check16(openArgs[1]);
 	if (openArgs[2] < 0 || SNexHeader::MAX_BANK <= openArgs[2]) {
 		ErrorInt("[SAVENEX] entry bank can be 0..111 value only", openArgs[2], SUPPRESS);
-		delete[] fname;
 		return;
 	}
 	if (openArgs[3] && (openArgs[3] < 2 || 3 < openArgs[3])) {
 		ErrorInt("[SAVENEX] only file version 2 (V1.2) or 3 (V1.3) can be enforced", openArgs[3], SUPPRESS);
-		delete[] fname;
 		return;
 	}
 	// try to open the actual file
-	if (!FOPEN_ISOK(nex.f, fname, "w+b")) Error("[SAVENEX] Error opening file", fname, SUPPRESS);
-	delete[] fname;
+	if (!FOPEN_ISOK(nex.f, fname.get(), "w+b")) Error("[SAVENEX] Error opening file", fname.get(), SUPPRESS);
 	if (nullptr == nex.f) return;
 	// set the argument values into header, and write the initial version of header into file
 	nex.h.pc = openArgs[0] & 0xFFFF;
@@ -786,7 +782,7 @@ static void dirNexScreenUlaTimex(byte scrType) {
 		aint hiResColor = 0;
 		if (ParseExpression(lp, hiResColor)) {
 			if (hiResColor < 0 || 7 < hiResColor) Warning("[SAVENEX] value is not in 0..7 range", bp);
-			nex.h.hiResColour = hiResColor << 3;
+			nex.h.hiResColour = (hiResColor&7) << 3;
 		}
 	}
 	// update header loading screen status

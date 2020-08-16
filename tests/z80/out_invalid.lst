@@ -1,0 +1,20 @@
+# file opened: out_invalid.asm
+out_invalid.asm(1): error: Illegal instruction:     out (c),1                   ; "illegal" error, only "0" is valid
+ 1    0000                  out (c),1                   ; "illegal" error, only "0" is valid
+out_invalid.asm(2): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+ 2    0000 ED 71            out (c),0                   ; "warning" about `out (c),0` being unstable
+ 3    0002 ED 71            out (c),0                   ; ok ; suppressed warning
+ 4    0004
+out_invalid.asm(5): error: [ASSERT] Assertion failed:  0==1        
+ 5    0004                  ASSERT 0==1        ; this assert should fail
+out_invalid.asm(6): error: [ASSERT] Assertion failed:  0==1      
+ 6    0004                  ASSERT 0==1      ; this assert should fail
+ 7    0004
+ 8    0004                  ; update these asserts when editing the file, to make it pass
+ 9    0004                  ASSERT 1==1
+10    0004                  ASSERT 3==3
+11    0004
+# file closed: out_invalid.asm
+
+Value    Label
+------ - -----------------------------------------------------------

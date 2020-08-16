@@ -533,7 +533,7 @@ static int tolua_sjasm_sj_set_page00(lua_State* tolua_S)
  else
 #endif
  {
-  unsigned int n = ((unsigned int)  tolua_tonumber(tolua_S,1,0));
+  aint n = aint(tolua_tonumber(tolua_S,1,0));
   {
    bool tolua_ret = (bool)  LuaSetPage(n);
    tolua_pushboolean(tolua_S,(bool)tolua_ret);
@@ -562,7 +562,7 @@ static int tolua_sjasm_sj_set_slot00(lua_State* tolua_S)
  else
 #endif
  {
-  unsigned int n = ((unsigned int)  tolua_tonumber(tolua_S,1,0));
+  aint n = aint(tolua_tonumber(tolua_S,1,0));
   {
    bool tolua_ret = (bool)  LuaSetSlot(n);
    tolua_pushboolean(tolua_S,(bool)tolua_ret);
@@ -649,7 +649,7 @@ static int tolua_sjasm_sj_add_byte00(lua_State* tolua_S)
  else
 #endif
  {
-  unsigned char byte = ((unsigned char)  tolua_tonumber(tolua_S,1,0));
+  int byte = 0xFF & int(tolua_tonumber(tolua_S,1,0));
   {
    EmitByte(byte);
   }

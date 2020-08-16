@@ -40,7 +40,7 @@ offset_syntax.asm(29): error: Label has different value in pass 2: s4.f1
 offset_syntax.asm(29): error: Label has different value in pass 2: s4.f2
 29    000E 00 00 00 00  s4      S_s4
 29    0012 00 00 00...
-29    0016 7A 00 A0
+29    0030 7A 00 A0
 offset_syntax.asm(30): warning: Label has different value in pass 3: previous value 34 not equal 51
 30    0033              yy:             ; this will move with every pass further down then = lot of errors
 31    0033

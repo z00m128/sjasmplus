@@ -79,10 +79,26 @@ static int ParseExpPrim(char*& p, aint& nval) {
 		Warning("?<symbol> operator is deprecated and will be removed in v2.x", p);
 		++p;
 		return GetLabelValue(p, nval);
+	} else if (DISP_NONE != PseudoORG && '$' == p[0] && '$' == p[1] && '$' == p[2]) {
+		if ('$' == p[3]) {		// "$$$$" operator to get physical memory page inside DISP block
+			p += 4;
+			nval = DeviceID ? Page->Number : LABEL_PAGE_UNDEFINED;
+			return 1;
+		}
+		// "$$$" operator to get physical address inside DISP block
+		p += 3;
+		nval = adrdisp;		// this is never affected by relocation
+		return 1;
 	} else if (DeviceID && *p == '$' && *(p + 1) == '$') {
 		p += 2;
 		if (isLabelStart(p)) return GetLabelPage(p, nval);
-		nval = Page->Number;
+		if (DISP_NONE != PseudoORG && LABEL_PAGE_UNDEFINED != dispPageNum) {
+			// enforce explicit request of fake DISP page
+			nval = dispPageNum;
+		} else {
+			// current page
+			nval = Page->Number;
+		}
 		return 1;
 	} else if (*p == '$') {
 		++p;
@@ -570,7 +586,7 @@ void ParseLabel() {
 	if (White()) return;
 	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
 	char temp[LINEMAX], * tp = temp, * ttp;
-	aint val;
+	aint val, equPageNum = LABEL_PAGE_UNDEFINED;
 	while (*lp && !White() && *lp != ':' && *lp != '=') {
 		*tp = *lp; ++tp; ++lp;
 	}
@@ -602,11 +618,18 @@ void ParseLabel() {
 		bool IsDEFL = NeedDEFL(), IsEQU = NeedEQU();
 		if (IsDEFL || IsEQU) {
 			Relocation::isResultAffected = false;
-			if (!ParseExpression(lp, val)) {
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("Expression error", lp);
 				val = 0;
 			}
 			if (IsLabelNotFound && IsDEFL) Error("Forward reference", NULL, EARLY);
+			// check for explicit page defined by EQU
+			if (IsEQU && comma(lp)) {
+				if (!ParseExpressionNoSyntaxError(lp, equPageNum)) {
+					Error("Expression error", lp);
+					equPageNum = LABEL_PAGE_UNDEFINED;
+				}
+			}
 		} else {
 			int gl = 0;
 			char* p = lp,* n;
@@ -637,7 +660,7 @@ void ParseLabel() {
 				return;
 			}
 			if (IsDEFL) {		//re-set DEFL value
-				LabelTable.Insert(tp, val, false, true, false);
+				LabelTable.Insert(tp, val, false, true);
 			} else if (IsSldExportActive()) {
 				// SLD (Source Level Debugging) tracing-data logging
 				WriteToSldFile(IsEQU ? -1 : label->page, val, IsEQU ? 'D' : 'F', tp);
@@ -652,9 +675,9 @@ void ParseLabel() {
 
 				delete[] buf;
 			}
-		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU) && !LabelTable.Update(tp, val)) {
+		} else if (pass == 2 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU, equPageNum) && !LabelTable.Update(tp, val)) {
 			Error("Duplicate label", tp, EARLY);
-		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU)) {
+		} else if (pass == 1 && !LabelTable.Insert(tp, val, false, IsDEFL, IsEQU, equPageNum)) {
 			Error("Duplicate label", tp, EARLY);
 		}
 
@@ -754,7 +777,8 @@ static const byte win2dos[] = //taken from HorrorWord %)))
 
 //#define DEBUG_COUT_PARSE_LINE
 
-void ParseLine(bool parselabels) {
+// returns 1 when already fully processed (part of DUP/etc)
+int PrepareLine() {
 	ListSilentOrExternalEmits();
 
 	++CompiledCurrentLine;
@@ -766,23 +790,23 @@ void ParseLine(bool parselabels) {
 			dup.Pointer->next = f;
 			dup.Pointer = f;
 #ifdef DEBUG_COUT_PARSE_LINE
-			fprintf(stderr, ">%d %ld %c%ld-%d [%s]\n", pass, CurrentSourceLine,
+			fprintf(stderr, ">%d %d %c%ld-%d [%s]\n", pass, CurSourcePos.line,
 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),
 					(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
 			ParseDirective_REPT();
-			return;
+			return 1;
 		}
 	}
 #ifdef DEBUG_COUT_PARSE_LINE
-	fprintf(stderr, "|%d %ld %c%ld-%d [%s]\n", pass, CurrentSourceLine,
+	fprintf(stderr, "|%d %d %c%ld-%d [%s]\n", pass, CurSourcePos.line,
 			(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'), RepeatStack.size(),
 			(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
 	lp = ReplaceDefine(line);
 
 #ifdef DEBUG_COUT_PARSE_LINE
-	fprintf(stderr,"rdOut [%s]->[%s] %ld\n", line, lp, comlin);
+	fprintf(stderr,"rdOut [%s]->[%s] %d\n", line, lp, comlin);
 #endif
 
 	// update current address by memory wrapping, current page, etc... (before the label is defined)
@@ -798,9 +822,30 @@ void ParseLine(bool parselabels) {
 			++lp2;
 		}
 	}
+	return 0;
+}
+
+bool PrepareNonBlankMultiLine(char*& p) {
+	// loop while the current line is blank-only (read further lines until EOF or non-blank char)
+	while (SkipBlanks(p)) {
+		// if inside macro system, but without any more macro-lines in buffer, act as if "EOF"
+		// (to not leak into reading actual file while the macro is executing)
+		if (listmacro && nullptr == lijstp) return false;
+		// list the current (old) line
+		ListFile();
+		// read the next line
+		if (!ReadLine()) return false;
+		PrepareLine();
+		p = lp;
+	}
+	return true;
+}
+
+void ParseLine(bool parselabels) {
+
+	if (PrepareLine()) return;
+
 	if (!*lp) {
-
-
 		char *srcNonWhiteChar = line;
 		SkipBlanks(srcNonWhiteChar);
 		// check if only "end-line" comment remained, treat that one as "empty" line too
@@ -813,6 +858,7 @@ void ParseLine(bool parselabels) {
 		}
 		return;
 	}
+
 	if (parselabels) ParseLabel();
 	if (!SkipBlanks()) ParseMacro();
 	if (!SkipBlanks()) ParseInstruction();
@@ -926,6 +972,25 @@ void ParseStructMember(CStructure* st) {
 		}
 		st->AddMember(new CStructureEntry2(st->noffset, 4, val, false, SMEMBDWORD));
 		break;
+	case SMEMBTEXT:
+		{
+			if (!ParseExpression(lp, len) || len < 1 || CStructureEntry2::TEXT_MAX_SIZE < len) {
+				Error("[STRUCT] Expression for length of text expected (1..8192)");
+				SkipToEol(lp);
+				break;
+			}
+			byte* textData = new byte[len]();	// zero-initialized for stable binary results
+			if (nullptr == textData) ErrorOOM();
+			if (comma(lp)) {		// if comma then init data array explicitly
+				GetStructText(lp, len, textData);
+			} else if (SkipBlanks(lp)) {
+				// if empty without comma, init with the zeroed values
+			} else {
+				Error("[STRUCT] Comma expected", lp, SUPPRESS);	// syntax error
+			}
+			st->AddMember(new CStructureEntry2(st->noffset, len, textData));
+		}
+		break;
 	case SMEMBALIGN:
 	{
 		aint val, fill;
@@ -972,6 +1037,7 @@ void ParseStructMember(CStructure* st) {
 }
 
 void ParseStructLine(CStructure* st) {
+	++CompiledCurrentLine;
 	lp = ReplaceDefine(line);
 	if (!*lp) return;
 	ParseStructLabel(st);

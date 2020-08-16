@@ -1,0 +1,21 @@
+1) single-line classic initializers test:
+abcdefgh
+abcdefgh
+ijklmnop
+ijklmnop
+<BCDEF_>
+<BCDEF_>
+<bcdef_>
+<bcdef_>
+
+2) same code, but multi-line variants:
+(dot-repeater variants are NOT supported)
+ijklmnop
+ijklmnop
+<BCDEF_>
+<BCDEF_>
+<bcdef_>
+<bcdef_>
+A
+{12345_}
+B

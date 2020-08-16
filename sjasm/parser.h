@@ -41,6 +41,21 @@ int ParseDirective_REPT();
 void ParseInstruction();
 char* ReplaceDefine(char* lp);
 void SetLastParsedLabel(const char* label);
+int PrepareLine();		// initial part of ParseLine, before the actual content parsing logic starts
+
+/**
+ * @brief Reads and prepares for parsing new lines until non-blank char is encountered (producing
+ * listing file along).
+ *
+ * WARNING - this is pushing slightly beyond the original architecture of SjASMPlus, affecting
+ * global state like `lp, line, ...`, so it's *NOT* possible to "roll-back" from this step, this
+ * is one-way ticket in terms of lines parsing.
+ *
+ * @param p parsing pointer (will be adjusted for new line read)
+ * @return bool false when no more lines available, true when non-blank char is ready
+ */
+bool PrepareNonBlankMultiLine(char*& p);
+
 void ParseLine(bool = true);
 void ParseLineSafe(bool = true);
 void ParseStructLine(CStructure* st);

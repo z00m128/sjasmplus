@@ -41,7 +41,11 @@ struct TextFilePos {
 	void nextSegment(bool endsWithColon = false, size_t advanceColumns = 0);
 };
 
-enum EStructureMembers { SMEMBUNKNOWN, SMEMBALIGN, SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
+enum EStructureMembers {
+	SMEMBUNKNOWN, SMEMBALIGN,
+	SMEMBBYTE, SMEMBWORD, SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBTEXT,
+	SMEMBPARENOPEN, SMEMBPARENCLOSE
+};
 
 char* ValidateLabel(const char* naam, bool setNameSpace);
 extern char* PreviousIsLabel;
@@ -51,7 +55,7 @@ int GetLocalLabelValue(char*& op, aint& val);
 
 constexpr int LABEL_PAGE_UNDEFINED = -1;
 constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
-constexpr int LABEL_PAGE_OUT_OF_BOUNDS = 0x7F01;	// label is defined, but not within Z80 address space
+constexpr int LABEL_PAGE_OUT_OF_BOUNDS = 0x7F80;	// label is defined, but not within Z80 address space
 
 class CLabelTableEntry {
 public:
@@ -70,7 +74,7 @@ public:
 class CLabelTable {
 public:
 	CLabelTable();
-	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false, bool IsEQU = false);
+	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false, bool IsEQU = false, short equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char*, aint);
 	CLabelTableEntry* Find(const char* name, bool onlyDefined = false);
 	bool Remove(const char* name);
@@ -218,12 +222,15 @@ public:
 
 class CStructureEntry2 {
 public:
+	static constexpr aint TEXT_MAX_SIZE = 8192;
 	CStructureEntry2* next;
+	byte* text;
 	aint offset, len, def;
 	bool defRelocatable;
 	EStructureMembers type;
 
 	CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndefrel, EStructureMembers ntype);
+	CStructureEntry2(aint noffset, aint nlen, byte* textData);
 	~CStructureEntry2();
 	aint ParseValue(char* & p);
 };
@@ -236,9 +243,7 @@ public:
 	aint noffset;
 	void AddLabel(char*);
 	void AddMember(CStructureEntry2*);
-	void CopyLabel(char*, aint);
 	void CopyLabels(CStructure*);
-	void CopyMember(CStructureEntry2* item, aint newDefault, bool newDefIsRelative);
 	void CopyMembers(CStructure*, char*&);
 	void deflab();
 	void emitlab(char* iid, aint address, bool isRelocatable);
@@ -249,6 +254,8 @@ public:
 private:
 	CStructureEntry1* mnf, * mnl;
 	CStructureEntry2* mbf, * mbl;
+	void CopyLabel(char*, aint);
+	void CopyMember(CStructureEntry2* item, aint newDefault, bool newDefIsRelative);
 };
 
 class CStructureTable {
