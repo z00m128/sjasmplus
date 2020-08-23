@@ -3715,7 +3715,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term><anchor id="lua__pl" />[void] _pl("label code")</term>
 
             <listitem>
-              <para>Parse line of Z80 assembly. Example: <code>_pc("SOMELABEL
+              <para>Parse line of Z80 assembly. Example: <code>_pl("SOMELABEL
               ADD A,B")</code></para>
             </listitem>
           </varlistentry>
