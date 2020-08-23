@@ -1491,10 +1491,13 @@ void dirDISPLAY() {
 		}
 		if (*lp == '/') {
 			switch (optionChar = toupper((byte)lp[1])) {
-			case 'A': case 'D': case 'H':	// known options, switching hex+dec / dec / hex mode
+			case 'A': case 'D': case 'H': case 'B':
+				// known options, switching hex+dec / dec / hex / binary mode
 				decprint = optionChar;
 				break;
 			case 'L': case 'T':				// silently ignored options (legacy compatibility)
+				// in ALASM: 'L' is "concatenate to previous line" (as if there was no \r\n on it)
+				// in ALASM: 'T' used ahead of expression will display first the expression itself, then value
 				break ;
 			default:
 				Error("[DISPLAY] Syntax error, unknown option", lp, SUPPRESS);
@@ -1519,6 +1522,15 @@ void dirDISPLAY() {
 		} else {
 			// string literal was not there, how about expression?
 			if (ParseExpressionNoSyntaxError(lp, val)) {
+				if (decprint == 'B') {	// 8-bit binary (doesn't care about higher bits)
+					*(ep++) = '%';
+					aint bitMask = 0x80;
+					while (bitMask) {
+						*(ep++) = (val & bitMask) ? '1' : '0';
+						if (0x10 == bitMask) *(ep++) = '\'';
+						bitMask >>= 1;
+					}
+				}
 				if (decprint == 'H' || decprint == 'A') {
 					*(ep++) = '0';
 					*(ep++) = 'x';

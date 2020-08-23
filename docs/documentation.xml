@@ -190,6 +190,15 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.17.1</term>
+
+            <listitem>
+              <synopsis>- <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>8.8.2020 - 1.17.0</term>
 
             <listitem>
@@ -1912,8 +1921,9 @@ ENDOFPROG
               ALASM.</emphasis></para>
 
               <para>Out to console a string of bytes. Each value should be
-              between -129 and 256. Keys /D, /H and /A set format of output of
+              between -129 and 256. Keys /D, /B, /H and /A set format of output of
               numbers:<synopsis>/D - out only in Decimal
+/B - out only in Binary (truncated to 8 bit)
 /H - out only in Hexadecimal
 /A - out both in Hexadecimal and Decimal</synopsis>
               <example>
