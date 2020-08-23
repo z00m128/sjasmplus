@@ -72,6 +72,7 @@ void PrintHelp() {
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
 	_COUT "  -                        Reads STDIN as source (even in between regular files)" _ENDL;
 	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
+	_COUT "  --virtlabels             Emit virtual intead of physical address labels in LABELSLIST" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --nofakes                Disable fake instructions" _ENDL;
@@ -108,6 +109,8 @@ namespace Options {
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
 	bool IsLongPtr = false;
+
+	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
 	CStringsList* IncludeDirsList = new CStringsList(".");
@@ -452,6 +455,8 @@ namespace Options {
 					AddLabelListing = true;
 				} else if (!strcmp(opt, "longptr")) {
 					IsLongPtr = true;
+				} else if (!strcmp(opt,"virtlabels")) {
+					EmitVirtualLabels = true;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
 					if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;

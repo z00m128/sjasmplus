@@ -400,9 +400,17 @@ void CLabelTable::DumpForUnreal() {
 		}
 		int lvalue = LabelTable[i].value & PAGE_MASK;
 		ep = ln;
-		if (page < LABEL_PAGE_ROM) ep += sprintf(ep, "%02d", page&255);
-		*(ep++) = ':';
-		PrintHexAlt(ep, lvalue);
+
+		if (!Options::EmitVirtualLabels) {
+			if (page < LABEL_PAGE_ROM) ep += sprintf(ep, "%02d", page&255);
+			*(ep++) = ':';
+			PrintHexAlt(ep, lvalue);
+		}
+		else {
+			*(ep++) = ':';
+			PrintHexAlt(ep, LabelTable[i].value & 0xFFFF);
+		}
+
 		*(ep++) = ' ';
 		STRCPY(ep, LINEMAX-(ep-ln), LabelTable[i].name);
 		STRCAT(ep, LINEMAX, "\n");
