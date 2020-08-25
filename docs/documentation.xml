@@ -448,6 +448,7 @@
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
   -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
+  --virtlabels             Emit virtual intead of physical address labels in LABELSLIST
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions (obsolete, use --syntax=F)
