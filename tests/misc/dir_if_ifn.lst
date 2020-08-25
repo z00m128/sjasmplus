@@ -1,0 +1,117 @@
+# file opened: dir_if_ifn.asm
+  1   0000                  OUTPUT "dir_if_ifn.bin"     ; final output should be 8x 'v'
+  2   0000
+  3   0000                  ;; Check IF functionality in normal code
+  4   0000                  IF 5 < 3 && 2 < 10
+  5   0000 ~                    false
+  6   0000                  ENDIF
+  7   0000
+  8   0000                  IF 3 < 5 && 2 < 10
+  9   0000 76                   halt    ; true
+ 10   0001                  ENDIF
+ 11   0001
+ 12   0001                  IF 3 < 5
+ 13   0001                      IF 5 < 3
+ 14   0001 ~                        nested false
+ 15   0001                      ENDIF
+ 16   0001                      IF 2 < 10
+ 17   0001 76                       halt; nested true
+ 18   0002                      ENDIF
+ 19   0002                  ENDIF
+ 20   0002
+ 21   0002                  IF 5 < 3    ; top level is false
+ 22   0002 ~                    IF 5 < 3
+ 23   0002 ~                        nested false
+ 24   0002 ~                    ENDIF
+ 25   0002 ~                    IF 2 < 10
+ 26   0002 ~                        almost halt; nested true in false
+ 27   0002 ~                    ENDIF
+ 28   0002                  ENDIF
+ 29   0002
+ 30   0002                  ; ELSE variants
+ 31   0002                  IF 3 < 5
+ 32   0002                      IF 5 < 3
+ 33   0002 ~                        nested false
+ 34   0002                      ELSE
+ 35   0002 76                       halt; nested true
+ 36   0003                      ENDIF
+ 37   0003                  ELSE        ; top level is false
+ 38   0003 ~                    IF 5 < 3
+ 39   0003 ~                        nested false
+ 40   0003 ~                    ELSE
+ 41   0003 ~                        almost halt; nested true in false
+ 42   0003 ~                    ENDIF
+ 43   0003                  ENDIF
+ 44   0003
+ 45   0003                  ; check the multi-ELSE error
+ 46   0003                  IF 3 < 2
+ 47   0003 ~                    false
+ 48   0003                  ELSE
+ 49   0003 76                   halt    ; true
+ 50   0004                  ELSE        ; error (only single else is permitted)
+dir_if_ifn.asm(50): error: [IF] one ELSE only expected
+ 51   0004 ~                    false again
+ 52   0004                  ELSE        ; error
+dir_if_ifn.asm(52): error: [IF] one ELSE only expected
+ 53   0004 ~                    false again
+ 54   0004                  ENDIF
+ 55   0004
+ 56   0004                  ;; Check IFN functionality in normal code
+ 57   0004                  IFN 5 < 3 && 2 < 10
+ 58   0004 76                   halt    ; true
+ 59   0005                  ENDIF
+ 60   0005
+ 61   0005                  IFN 3 < 5 && 2 < 10
+ 62   0005 ~                    false
+ 63   0005                  ENDIF
+ 64   0005
+ 65   0005                  IFN 3 < 5   ; top level is false
+ 66   0005 ~                    IFN 5 < 3
+ 67   0005 ~                        almost halt; nested true in false
+ 68   0005 ~                    ENDIF
+ 69   0005 ~                    IFN 2 < 10
+ 70   0005 ~                        nested false
+ 71   0005 ~                    ENDIF
+ 72   0005                  ENDIF
+ 73   0005
+ 74   0005                  IFN 5 < 3   ; true
+ 75   0005                      IFN 5 < 3
+ 76   0005 76                       halt; nested true
+ 77   0006                      ENDIF
+ 78   0006                      IFN 2 < 10
+ 79   0006 ~                        nested false
+ 80   0006                      ENDIF
+ 81   0006                  ENDIF
+ 82   0006
+ 83   0006                  ; ELSE variants
+ 84   0006                  IFN 3 < 5   ; top level is false
+ 85   0006 ~                    IFN 5 < 3
+ 86   0006 ~                        almost halt; nested true in false
+ 87   0006 ~                    ELSE
+ 88   0006 ~                        nested false
+ 89   0006 ~                    ENDIF
+ 90   0006                  ELSE        ; true
+ 91   0006                      IFN 5 < 3
+ 92   0006 76                       halt; nested true
+ 93   0007                      ELSE
+ 94   0007 ~                        nested false
+ 95   0007                      ENDIF
+ 96   0007                  ENDIF
+ 97   0007
+ 98   0007                  ; check the multi-ELSE error
+ 99   0007                  IFN 3 < 2
+100   0007 76                   halt    ; true
+101   0008                  ELSE
+102   0008 ~                    false
+103   0008                  ELSE        ; error (only single else is permitted)
+dir_if_ifn.asm(103): error: [IFN] one ELSE only expected
+104   0008 ~                    false again
+105   0008                  ELSE        ; error
+dir_if_ifn.asm(105): error: [IFN] one ELSE only expected
+106   0008 ~                    false again
+107   0008                  ENDIF
+108   0008
+# file closed: dir_if_ifn.asm
+
+Value    Label
+------ - -----------------------------------------------------------

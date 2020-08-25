@@ -52,3 +52,5 @@
     SAVESNA "coverage2.sna", &
 
     IFUSED ..InvalidName
+
+    ELSEIF 1        ; ELSEIF without appropriate initial IF/IFN block

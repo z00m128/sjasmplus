@@ -1243,33 +1243,6 @@ const static char dirIfErrorsTxtSrc[dirIfErrorsN][dirIfErrorsSZ] = {
 	{ "[%s] one ELSE only expected" }
 };
 
-// main IF implementation parsing/skipping part of source depending on "val", handling ELSE/ENDIF
-static void dirIfInternal(const char* dirName, aint val) {
-	// set up error messages for the particular pseudo-op
-	char errorsTxt[dirIfErrorsN][dirIfErrorsSZ];
-	for (size_t i = 0; i < dirIfErrorsN; ++i) {
-		SPRINTF1(errorsTxt[i], dirIfErrorsSZ, dirIfErrorsTxtSrc[i], dirName);
-	}
-	// do the IF**some** part
-	ListFile();
-	EReturn ret = END;
-	int elseCounter = 0;
-	while (ENDIF != ret) {
-		switch (ret = val ? ReadFile() : SkipFile()) {
-			case ELSE:
-				if (elseCounter++) Warning(errorsTxt[1]);
-				val = !val;
-				break;
-			case ENDIF:
-				break;
-			default:
-				if (IsRunning) Error(errorsTxt[0]);
-				donotlist=!IsRunning;		// do the listing only if still running
-				return;
-		}
-	}
-}
-
 // IF and IFN internal helper, to evaluate expression
 static bool dirIfIfn(aint & val) {
 	IsLabelNotFound = 0;
@@ -1281,6 +1254,44 @@ static bool dirIfIfn(aint & val) {
 		Warning("[IF/IFN] Forward reference", bp, W_EARLY);
 	}
 	return true;
+}
+
+// main IF implementation parsing/skipping part of source depending on "val", handling ELSE/ENDIF
+static void dirIfInternal(const char* dirName, aint val) {
+	// set up error messages for the particular pseudo-op
+	char errorsTxt[dirIfErrorsN][dirIfErrorsSZ];
+	for (size_t i = 0; i < dirIfErrorsN; ++i) {
+		SPRINTF1(errorsTxt[i], dirIfErrorsSZ, dirIfErrorsTxtSrc[i], dirName);
+	}
+	// do the IF**some** part
+	ListFile();
+	EReturn ret = END;
+	aint elseCounter = 0;
+	aint orVal = false;
+	while (ENDIF != ret) {
+		orVal |= val;
+		switch (ret = val ? ReadFile() : SkipFile()) {
+			case ELSE:
+				if (elseCounter++) Error(errorsTxt[1]);
+				val = !val && !orVal;
+				break;
+			case ELSEIF:
+				val = !val && !orVal;
+				if (val) {		// active ELSEIF, evaluate expression
+					if (!dirIfIfn(val)) {
+						val = false;		// syntax error in expression
+						orVal = true;		// force remaining IF-blocks inactive
+					}
+				}
+				break;
+			case ENDIF:
+				break;
+			default:
+				if (IsRunning) Error(errorsTxt[0]);
+				donotlist=!IsRunning;		// do the listing only if still running
+				return;
+		}
+	}
 }
 
 static void dirIF() {
@@ -1347,6 +1358,10 @@ static void dirIFNDEF() {
 
 static void dirELSE() {
 	Error("ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF");
+}
+
+static void dirELSEIF() {
+	Error("ELSEIF without IF/IFN");
 }
 
 static void dirENDIF() {
@@ -2074,6 +2089,7 @@ void InsertDirectives() {
 	//DirectivesTable.insertd(".textarea",dirTEXTAREA);
 	DirectivesTable.insertd(".textarea", dirDISP);
 	DirectivesTable.insertd(".else", dirELSE);
+	DirectivesTable.insertd(".elseif", dirELSEIF);
 	DirectivesTable.insertd(".export", dirEXPORT);
 	DirectivesTable.insertd(".display", dirDISPLAY);
 	DirectivesTable.insertd(".end", dirEND);

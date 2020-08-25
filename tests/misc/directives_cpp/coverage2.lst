@@ -96,6 +96,10 @@ coverage2.asm(52): error: [SAVESNA] No start address defined: SAVESNA "coverage2
 coverage2.asm(54): error: Invalid labelname: .InvalidName
 54    000D                  IFUSED ..InvalidName
 55    000D
+coverage2.asm(56): error: ELSEIF without IF/IFN
+coverage2.asm(56): error: Unexpected: 1        
+56    000D                  ELSEIF 1        ; ELSEIF without appropriate initial IF/IFN block
+57    000D
 # file closed: coverage2.asm
 
 Value    Label

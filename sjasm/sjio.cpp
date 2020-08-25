@@ -1173,20 +1173,22 @@ EReturn ReadFile() {
 	while (ReadLine()) {
 		const bool isInsideDupCollectingLines = !RepeatStack.empty() && !RepeatStack.top().IsInWork;
 		if (!isInsideDupCollectingLines) {
+			// check for ending of IF/IFN/... block (keywords: ENDIF, ELSE and ELSEIF)
 			char* p = line;
 			SkipBlanks(p);
 			if ('.' == *p) ++p;
-			if (cmphstr(p, "endif")) {
+			EReturn retVal = END;
+			if (cmphstr(p, "elseif")) retVal = ELSEIF;
+			if (cmphstr(p, "else")) retVal = ELSE;
+			if (cmphstr(p, "endif")) retVal = ENDIF;
+			if (END != retVal) {
+				// one of the end-block keywords was found, don't parse it as regular line
+				// but just substitute the rest of it and return end value of the keyword
 				++CompiledCurrentLine;
 				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
-				substitutedLine = line;		// override substituted listing for ENDIF
-				return ENDIF;
-			} else if (cmphstr(p, "else")) {
-				++CompiledCurrentLine;
-				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
-				substitutedLine = line;		// override substituted listing for ELSE
-				ListFile();
-				return ELSE;
+				substitutedLine = line;		// for listing override substituted line with source
+				if (ENDIF != retVal) ListFile();	// do the listing for ELSE and ELSEIF
+				return retVal;
 			}
 		}
 		ParseLineSafe();
@@ -1220,6 +1222,14 @@ EReturn SkipFile() {
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;
+			}
+		} else if (cmphstr(p, "elseif")) {
+			if (!iflevel) {
+				++CompiledCurrentLine;
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
+				substitutedLine = line;		// override substituted listing for ELSEIF
+				ListFile();
+				return ELSEIF;
 			}
 		}
 		ListFile(true);
