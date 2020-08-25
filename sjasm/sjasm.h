@@ -86,9 +86,9 @@ namespace Options {
 	extern bool IsLR35902;			// "Sharp LR35902" CPU mode (must be set at CLI, blocks others)
 	extern bool IsLongPtr;
 
-	extern bool EmitVirtualLabels; // emit virtual labels in LABELSLIST, that tied to Z80 address space,
-	                               // not to physical address (PG:ADDR). Format is ":ADDR label", staring
-	                               // from colon, then 16bit address, then label.
+	// emit virtual labels in LABELSLIST, that have only 64ki address and no page
+	// format is then `:ADDR label`, starting from colon, then 16bit address, then label.
+	extern bool EmitVirtualLabels;
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;

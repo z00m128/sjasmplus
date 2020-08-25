@@ -1169,12 +1169,21 @@ void dirOPT() {
 void dirLABELSLIST() {
 	if (pass != 1 || !DeviceID) {
 		if (!DeviceID) Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)");
-		SkipParam(lp);
+		SkipToEol(lp);
 		return;
 	}
 	std::unique_ptr<char[]> opt(GetOutputFileName(lp));
 	if (opt[0]) {
 		STRCPY(Options::UnrealLabelListFName, LINEMAX, opt.get());
+		Options::EmitVirtualLabels = false;
+		if (comma(lp)) {
+			aint virtualLabelsArg;
+			if (!ParseExpressionNoSyntaxError(lp, virtualLabelsArg)) {
+				Error("[LABELSLIST] Syntax error in <virtual labels>", bp, EARLY);
+				return;
+			}
+			Options::EmitVirtualLabels = (virtualLabelsArg != 0);
+		}
 	} else {
 		Error("[LABELSLIST] No filename", bp, EARLY);	// pass == 1 -> EARLY
 	}

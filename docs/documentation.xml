@@ -195,6 +195,7 @@
             <listitem>
               <synopsis>- <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
+- <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
 </synopsis>
             </listitem>
           </varlistentry>
@@ -448,7 +449,6 @@
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
   -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
-  --virtlabels             Emit virtual intead of physical address labels in LABELSLIST
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions (obsolete, use --syntax=F)
@@ -2287,7 +2287,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_labelslist" />LABELSLIST &lt;filename&gt;</term>
+            <term><anchor id="po_labelslist" />LABELSLIST &lt;filename&gt;[,&lt;virtual labels&gt;]</term>
 
             <listitem>
               <para><emphasis>Useful only for ZX-Spectrum Emulator
@@ -2300,6 +2300,9 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
 
               <para><synopsis>NN:ADDRESS LABELNAME</synopsis>
               where NN is number of RAM page and ADDRESS is truncated to 0000..3FFF range</para>
+
+              <para>If <code>&lt;virtual labels&gt;</code> is non zero, then the page number NN is not
+              part of output, and ADDRESS is truncated to 0000..FFFF range.</para>
 
               <para><example>
                   <title></title>
