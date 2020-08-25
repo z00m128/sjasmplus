@@ -194,6 +194,7 @@
 
             <listitem>
               <synopsis>- <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
+- <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
 </synopsis>
             </listitem>
           </varlistentry>
@@ -3068,7 +3069,7 @@ start:
 
             <listitem>
               <para>If &lt;expression&gt; is non-zero the following lines are
-              assembled until an ELSE or ENDIF.</para>
+              assembled until an ELSE, ELSEIF or ENDIF.</para>
 
               <para>Forward reference of label will cause warning - as any machine code emitted inside
 				  the IF/IFN block with such expression can lead to unstable results. If you are sure
@@ -3094,7 +3095,7 @@ start:
 
             <listitem>
               <para>If &lt;expression&gt; is zero the following lines are
-              assembled until an ELSE or ENDIF.</para>
+              assembled until an ELSE, ELSEIF or ENDIF.</para>
             </listitem>
           </varlistentry>
 
@@ -3213,8 +3214,17 @@ LABEL5:
             <term><anchor id="ca_else" />ELSE</term>
 
             <listitem>
-              <para>See <link linkend="ca_if">IF</link>. If the condition is
-              not true, the else-part is assembled.</para>
+              <para>See <link linkend="ca_if">IF</link>. If the IF condition is
+              false (in all previous IF/ELSEIF blocks), the else-part is assembled.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="ca_elseif" />ELSEIF &lt;expression&gt;</term>
+
+            <listitem>
+              <para>If the previous IF-block had false condition, the ELSEIF expression is evaluated
+               and the ELSEIF acts as new <link linkend="ca_if">IF</link>.</para>
             </listitem>
           </varlistentry>
 
