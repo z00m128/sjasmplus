@@ -1749,7 +1749,7 @@ void dirDUP() {
 }
 
 void dirEDUP() {
-	if (RepeatStack.empty()) {
+	if (RepeatStack.empty() || RepeatStack.top().IsInWork) {
 		Error("[EDUP/ENDR] End repeat without repeat");
 		return;
 	}

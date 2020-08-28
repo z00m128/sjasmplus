@@ -720,6 +720,12 @@ int main(int argc, char **argv) {
 			OpenFile(src.fname, false, src.stdin_log);
 		}
 
+		while (!RepeatStack.empty()) {
+			CurSourcePos = RepeatStack.top().sourcePos;	// fake source-file position to mark DUP line
+			Error("[DUP/REPT] missing EDUP/ENDR to end repeat-block");
+			RepeatStack.pop();
+		}
+
 		if (DISP_NONE != PseudoORG) {
 			CurAddress = adrdisp;
 			PseudoORG = DISP_NONE;
