@@ -1,0 +1,22 @@
+# file opened: i_123_fwd_reference.asm
+ 1    0000              	MODULE TestModule
+ 2    0000
+ 3    0000 C3 03 00     		jp	klLDI64	; creates full-module undefined symbol in the table (`TestModule.klLDI64`)
+ 4    0003
+ 5    0003 00           @klLDI64:	nop		; defines global `klLDI64` (will overshadow the `TestModule.klLDI64`)
+ 6    0004
+ 7    0004 EB           cmCOPY:		ex	de, hl  ; defines regular module-label `TestModule.cmCOPY`
+ 8    0005
+ 9    0005                  ; the double klLDI64 confuses here expression evaluator (bug)
+10    0005                  ; to report forward reference warning (in sjasmplus 1.17.0)
+11    0005              	IF	high cmCOPY > high klLDI64
+11    0005                ENDIF
+12    0005
+13    0005              	ENDMODULE
+14    0005
+# file closed: i_123_fwd_reference.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0003   klLDI64
+0x0004   TestModule.cmCOPY

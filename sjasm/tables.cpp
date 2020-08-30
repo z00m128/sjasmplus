@@ -132,7 +132,6 @@ static CLabelTableEntry* GetLabel(char*& p) {
 			if (LASTPASS != pass) labelEntry->used = true;
 			if (LABEL_PAGE_UNDEFINED != labelEntry->page) break;
 			labelEntry = nullptr;
-			IsLabelNotFound = 2;
 		}
 		// not found (the defined one, try more variants)
 		if (inMacro) {				// try outer macro (if there is one)
@@ -162,6 +161,8 @@ static CLabelTableEntry* GetLabel(char*& p) {
 		if (!inTableAlready) {
 			LabelTable.Insert(findName, 0, true);
 			IsLabelNotFound = 1;
+		} else {
+			IsLabelNotFound = 2;
 		}
 		Error("Label not found", findName, IF_FIRST);
 	}
