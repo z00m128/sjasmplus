@@ -4,18 +4,25 @@
  3    0003                  DEFARRAY+   myarray 'D', 'E', 'F'
  4    0003 06 44 46         DB 6, 'D', 'F'
  5    0006
- 6    0006              iii = 0
+ 6    0006              iii = -1
  7    0006                  DUP 6
- 8    0006 41          >iii = iii + 1   DB  'A'    ; substitution happens first (before label++ parsing)
- 8    0007 42          >iii = iii + 1   DB  'B'    ; substitution happens first (before label++ parsing)
- 8    0008 43          >iii = iii + 1   DB  'C'    ; substitution happens first (before label++ parsing)
- 8    0009 44          >iii = iii + 1   DB  'D'    ; substitution happens first (before label++ parsing)
- 8    000A 45          >iii = iii + 1   DB  'E'    ; substitution happens first (before label++ parsing)
- 8    000B 46          >iii = iii + 1   DB  'F'    ; substitution happens first (before label++ parsing)
+ 8    0006             >iii = iii + 1
+ 8    0006 41          >  DB  'A'    ; the DEFL symbol will be updated separately because of colon
+ 8    0007             >iii = iii + 1
+ 8    0007 42          >  DB  'B'    ; the DEFL symbol will be updated separately because of colon
+ 8    0008             >iii = iii + 1
+ 8    0008 43          >  DB  'C'    ; the DEFL symbol will be updated separately because of colon
+ 8    0009             >iii = iii + 1
+ 8    0009 44          >  DB  'D'    ; the DEFL symbol will be updated separately because of colon
+ 8    000A             >iii = iii + 1
+ 8    000A 45          >  DB  'E'    ; the DEFL symbol will be updated separately because of colon
+ 8    000B             >iii = iii + 1
+ 8    000B 46          >  DB  'F'    ; the DEFL symbol will be updated separately because of colon
  9    000C                  EDUP
-10    000C
+10    000C                  ; this used to be without colon, but then colon become mandatory, also "fixing" this test :)
+11    000C
 # file closed: defarray_size.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0006   iii
+0x0005   iii

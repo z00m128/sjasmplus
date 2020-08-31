@@ -190,6 +190,25 @@ labels_syntax_and_find.asm(160): error: Number labels are allowed as address lab
 labels_syntax_and_find.asm(161): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 105
 161   356D              105:    defl    should not work
 162   356D
+labels_syntax_and_find.asm(163): error: Unexpected: cpl     
+163   356D              EquLineRemnants1:   EQU $+1-$100    cpl     ; error
+164   356D              EquLineRemnants2:   EQU $+2-$100
+164   356D 2F             cpl     ; valid
+labels_syntax_and_find.asm(165): error: Unexpected: cpl     
+165   356E              DeflLineRemnants1:  DEFL $+3-$100   cpl     ; error
+166   356E              DeflLineRemnants2:  DEFL $+4-$100
+166   356E 2F             cpl     ; valid
+labels_syntax_and_find.asm(167): error: Unexpected: cpl     
+167   356F              DeflLineRemnants3:  = $+5-$100      cpl     ; error
+168   356F              DeflLineRemnants4:  = $+6-$100
+168   356F 2F             cpl     ; valid
+169   3570
+170   3570              ; the ones without colon are reported as errors since v1.17.1, because without colon
+171   3570              ; this is total "gotcha":
+172   3570              noColonProblemDemonstration EQU $   and 7
+173   3570                  ; ^^ the expression parser will eat whole "$ and 7", no instruction/error here
+174   3570                  ; obviously *this* does NOT report error even after change, it's valid expression...
+175   3570
 # file closed: labels_syntax_and_find.asm
 
 Value    Label
@@ -209,3 +228,10 @@ Value    Label
 0x3372   mod2.nested.nest2unique
 0x3332   mod2.label
 0x3333   mod2.label.local
+0x346E X EquLineRemnants1
+0x346F X EquLineRemnants2
+0x3471 X DeflLineRemnants1
+0x3472 X DeflLineRemnants2
+0x3474 X DeflLineRemnants3
+0x3475 X DeflLineRemnants4
+0x0000 X noColonProblemDemonstration

@@ -18,7 +18,7 @@
 equ_with_explicit_page.asm(17): error: Expression error: 
 17    8000              errorEqu1       EQU     $4002 ,
 equ_with_explicit_page.asm(18): error: Expression error: @
-equ_with_explicit_page.asm(18): error: Unrecognized instruction: 
+equ_with_explicit_page.asm(18): error: Unexpected: @
 18    8000              errorEqu2       EQU     $4003 , @
 19    8000
 # file closed: equ_with_explicit_page.asm

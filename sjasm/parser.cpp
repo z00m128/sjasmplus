@@ -630,6 +630,16 @@ void ParseLabel() {
 					equPageNum = LABEL_PAGE_UNDEFINED;
 				}
 			}
+
+			// after EQU/DEFL expressions there must be <EOL>, anything else is syntax error
+			// this was added in v1.17.1 after realizing the line `label=$+1 and 7`
+			// does evaluate whole "$+1 and 7" as expression, not as instruction `and`
+			// (same problem exists with and/or/xor and if you have macro named after operator)
+			if (!SkipBlanks(lp)) {
+				Error("Unexpected", lp);
+				SkipToEol(lp);
+			}
+
 		} else {
 			int gl = 0;
 			char* p = lp,* n;

@@ -193,7 +193,8 @@
             <term>WIP - 1.17.1</term>
 
             <listitem>
-              <synopsis>- <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
+              <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
+- <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
 - minor bugfixes in parser
