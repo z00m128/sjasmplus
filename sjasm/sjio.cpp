@@ -315,8 +315,7 @@ void PrepareListLine(char* buffer, aint hexadd)
 	int digit = ' ';
 	int linewidth = reglenwidth;
 	aint linenumber = CurSourcePos.line % 10000;
-	if (linewidth > 5)
-	{
+	if (5 <= linewidth) {		// five-digit number, calculate the leading "digit"
 		linewidth = 5;
 		digit = CurSourcePos.line / 10000 + '0';
 		if (digit > '~') digit = '~';
