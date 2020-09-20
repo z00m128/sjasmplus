@@ -197,7 +197,7 @@
 - <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
-- minor bugfixes in parser
+- minor bugfixes in parser and listing-line-numbering
 </synopsis>
             </listitem>
           </varlistentry>

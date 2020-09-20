@@ -74,15 +74,23 @@ dot_repeat.asm(17): error: .N must be positive integer: 0
 dot_repeat.asm(18): error: .N must be positive integer: -16
 18    0030                  .(x-32) nop     ; error should show calculated repeat-counter value
 19    0030
-20    0030                  ;; this unintentionally works (too difficult to prevent and seems harmless)
-21    0030 00          > nop    ; 7x nop
-21    0031 00          > nop
-21    0032 00          > nop
-21    0033 00          > nop
-21    0034 00          > nop
-21    0035 00          > nop
-21    0036 00          > nop
-22    0037
+20    0030                  ;; whole expression must be enclosed in parentheses (did work as "x7" up to v1.17.0)
+dot_repeat.asm(21): error: .N must be positive integer: -1
+21    0030                  .(-1) +8 nop    ; error -1 count
+22    0030
+23    0030 E6 01       > and 1   ; counter example why the above is NOT harmless (revealed in v1.17.0)
+23    0032 E6 01       > and 1
+24    0034                      ; this produces 2x "and 1" (in v1.17.0 it does instead add `and 1` to expression)
+25    0034
+dot_repeat.asm(26): error: Dot-repeater must be followed by number or parentheses: .(5-3   and 2   
+26    0034                  .(5-3   and 2   ; parentheses are not closed
+dot_repeat.asm(27): error: Unrecognized instruction: ) and 3   
+dot_repeat.asm(27): error: Unexpected: ) and 3   
+27    0034             > ) and 3   ; one too many closing parentheses
+dot_repeat.asm(27): error: Unrecognized instruction: ) and 3   
+dot_repeat.asm(27): error: Unexpected: ) and 3   
+27    0034             > ) and 3
+28    0034
 # file closed: dot_repeat.asm
 
 Value    Label

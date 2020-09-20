@@ -62,7 +62,7 @@ int ParseDirective(bool beginningOfLine)
 	}
 
 	// parse repeat-count either from n+1 (digits) or lp (parentheses) (if syntax is valid)
-	if ((isDigitDot && !White(*lp)) || !ParseExpression(isDigitDot ? ++n : lp, val)) {
+	if ((isDigitDot && !White(*lp)) || !ParseExpression(isDigitDot ? ++n : ++lp, val) || (isExprDot && ')' != *lp++)) {
 		lp = olp; Error("Dot-repeater must be followed by number or parentheses", olp, SUPPRESS);
 		return 0;
 	}
