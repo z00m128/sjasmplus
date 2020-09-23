@@ -1,0 +1,114 @@
+# file opened: savenexStackWarnings.asm
+ 1    0000                  DEVICE ZXSPECTRUMNEXT
+ 2    0000
+ 3    0000                  ORG $8004-12
+ 4    7FF8 12               DB  $12
+ 5    7FF9 00 00 00...      DS  11, 0
+ 6    8004 18 FE            jr  $       ; bank 2, $8004
+ 7    8006
+ 8    8006                  ORG $C004-12
+ 9    BFF8 12               DB  $12
+10    BFF9 00 00 00...      DS  11, 0
+11    C004 18 FE            jr  $       ; bank 0, $C004
+12    C006
+13    C006                  MMU 0, 10*2, $0004
+14    0004 18 FE            jr  $       ; bank 10, $C004 (the taint ahead is already there)
+15    0006
+16    0006                  MMU 0 7, 100 ; map the Z80 address space to completely unrelated pages
+17    0006
+18    0006              ;; OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]
+19    0006                  ; warning about ROM area
+savenexStackWarnings.asm(20): warning: [SAVENEX] stackAddress is too close to ROM area
+20    0006                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $0001
+20    0006                SAVENEX CLOSE
+savenexStackWarnings.asm(21): warning: [SAVENEX] stackAddress is too close to ROM area
+21    0006                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $4009
+21    0006                SAVENEX CLOSE
+22    0006
+23    0006                  ; byte-check warnings (valid + tainted for various slot/banks)
+24    0006                  SAVENEX OPEN "savenexStackWarnings.nex"
+24    0006                SAVENEX CLOSE     ; PC=0, SP=0xFFFE
+25    0006
+26    0006                  ; check if wrap-around from $0000 targets correct bank (0 or entryBank) during check
+27    0006                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $0000
+27    0006                SAVENEX CLOSE
+28    0006                  MMU 0, 0*2+1, $1FFF
+28    1FFF 23             DB $23    ; taint end of Bank0
+savenexStackWarnings.asm(29): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+29    2000                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $0000
+29    2000                SAVENEX CLOSE   ; warning
+30    2000
+31    2000                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $0000, 10
+31    2000                SAVENEX CLOSE
+32    2000                  MMU 0, 10*2+1, $1FFF
+32    1FFF 34             DB $34   ; taint end of Bank10
+savenexStackWarnings.asm(33): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+33    2000                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $0000, 10
+33    2000                SAVENEX CLOSE   ; warning
+34    2000
+35    2000                  ; check other more regular crossings+taints of banks
+36    2000                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $400B
+36    2000                SAVENEX CLOSE
+37    2000                  MMU 0, 5*2, $000A
+37    000A 45             DB $45
+savenexStackWarnings.asm(38): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+38    000B                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $400B
+38    000B                SAVENEX CLOSE   ; warning
+39    000B                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $400A
+39    000B                SAVENEX CLOSE
+40    000B                  MMU 0, 5*2, $0000
+40    0000 56             DB $56
+savenexStackWarnings.asm(41): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+41    0001                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $400A
+41    0001                SAVENEX CLOSE   ; warning
+42    0001
+43    0001                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $8004
+43    0001                SAVENEX CLOSE
+44    0001                  MMU 0, 2*2, $0003
+44    0003 67             DB $67
+savenexStackWarnings.asm(45): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+45    0004                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $8004
+45    0004                SAVENEX CLOSE   ; warning
+46    0004                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $8003
+46    0004                SAVENEX CLOSE
+47    0004                  MMU 0, 5*2+1, $1FFF
+47    1FFF 78             DB $78
+savenexStackWarnings.asm(48): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+48    2000                  SAVENEX OPEN "savenexStackWarnings.nex", $8004, $8003
+48    2000                SAVENEX CLOSE   ; warning
+49    2000
+50    2000                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C004
+50    2000                SAVENEX CLOSE
+51    2000                  MMU 0, 0*2, $0003
+51    0003 89             DB $89
+savenexStackWarnings.asm(52): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+52    0004                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C004
+52    0004                SAVENEX CLOSE   ; warning
+53    0004                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C003
+53    0004                SAVENEX CLOSE
+54    0004
+55    0004                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C004, 10
+55    0004                SAVENEX CLOSE
+56    0004                  MMU 0, 10*2, $0003
+56    0003 9A             DB $9A
+savenexStackWarnings.asm(57): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+57    0004                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C004, 10
+57    0004                SAVENEX CLOSE   ; warning
+58    0004                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C003, 10
+58    0004                SAVENEX CLOSE
+59    0004
+60    0004                  MMU 0, 2*2+1, $1FFF
+60    1FFF AB             DB $AB    ; taints both entryBank==0 and entryBank==10
+savenexStackWarnings.asm(61): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+61    2000                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C003
+61    2000                SAVENEX CLOSE   ; warning
+savenexStackWarnings.asm(62): warning: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+62    2000                  SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C003, 10
+62    2000                SAVENEX CLOSE   ; warning
+63    2000
+64    2000                  ASSERT 12 == 12
+65    2000
+# file closed: savenexStackWarnings.asm
+
+Value    Label
+------ - -----------------------------------------------------------
