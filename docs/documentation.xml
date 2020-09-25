@@ -197,6 +197,7 @@
 - <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
+- <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
 - minor bugfixes in parser and listing-line-numbering
 </synopsis>
             </listitem>
@@ -507,7 +508,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     </section>
 
     <section>
-      <title>Source file format</title>
+      <title><anchor id="s_source_format"/>Source file format</title>
 
 		<para>
 		  Lines in the source file should have the following form:
@@ -554,7 +555,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
       <title><anchor id="s_labels" />Labels</title>
 
       <para>Labels are case-sensitive and may be of any reasonable length,
-      that is: up to about 70 characters. Label definitions should start on
+      that is: up to about 70 characters. Label definitions must start on
       the beginning of a line, but don't have to be followed by a colon ':'.
       Generally labels should start with a letter or a underscore ('_'), the
       following characters may be chosen from letters, numbers and the
@@ -568,6 +569,19 @@ MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
       register names as labels but it is not advised to do so. Also note that
       the identifiers defined with the DEFINE pseudo-op use another name
       space.</para>
+
+      <para>(since v1.17.1) Right after label (before the optional colon) you
+      can write extra "SMC offset" (Self Modify Code offset) in the form of plus
+      sign and single decimal digit. The defined label will become equal to current
+      address plus the SMC offset:
+		<programlisting>    ; SMC-offset syntax is very strict, no spacing, single '+', single digit
+answer+1:   ld      a,13        ; "answer" points second opcode byte
+    ; this helps to keep the SMC-label together with the target instruction
+            ld      hl,answer
+            ld      (hl),42     ; fix immediate in `ld a,*` to correct answer
+    ; compare with classic syntax:
+classic equ $+1 : ld a,7        ; often even split to two lines</programlisting>
+      </para>
     </section>
 
     <section>
@@ -686,7 +700,7 @@ $c     hexadecimal
     </section>
 
     <section>
-      <title>Character and string constants</title>
+      <title><anchor id="s_strings" />Character and string constants</title>
 
       <para>Character constants are characters surrounded by single quotes. It
       is possible to use double quotes in some cases, but in general it is
@@ -805,7 +819,7 @@ $$lab $$lab    page of "lab" label (in virtual device mode)
     </section>
 
     <section>
-      <title>Assembly language</title>
+      <title><anchor id="s_asm_lang" />Assembly language</title>
 
       <para>This version only accepts Z80 mnemonics. There are some additions
       to what I think is standard Z80: <itemizedlist>

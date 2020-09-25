@@ -808,8 +808,14 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				continue;
 			}
 			// check if still in label area, if yes, copy the finishing colon as char (don't split by it)
-			if ((IsLabel = IsLabel && islabchar(*rlppos))) {
+			if ((IsLabel = (IsLabel && islabchar(*rlppos)))) {
 				++rlppos;					// label character
+				//SMC offset handling
+				if (ReadBufData() && '+' == *rlpbuf) {	// '+' after label, add it as SMC_offset syntax
+					IsLabel = false;
+					*rlppos++ = *rlpbuf++;
+					if (ReadBufData() && isdigit(byte(*rlpbuf))) *rlppos++ = *rlpbuf++;
+				}
 				if (ReadBufData() && ':' == *rlpbuf) {	// colon after label, add it
 					*rlppos++ = *rlpbuf++;
 					IsLabel = false;

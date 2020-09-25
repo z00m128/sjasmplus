@@ -586,16 +586,26 @@ void ParseLabel() {
 	if (White()) return;
 	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
 	char temp[LINEMAX], * tp = temp, * ttp;
-	aint val, equPageNum = LABEL_PAGE_UNDEFINED;
-	while (*lp && !White() && *lp != ':' && *lp != '=') {
+	aint val, equPageNum = LABEL_PAGE_UNDEFINED, smcOffset = 0;
+	// copy the label name into `temp` array
+	while (*lp && !White() && *lp != ':' && *lp != '=' && *lp != '+') {
 		*tp = *lp; ++tp; ++lp;
 	}
 	*tp = 0;
-	if (*lp == ':') ++lp;
+	// handle the special SMC_offset syntax "<label>+<single_digit>"
+	if ('+' == lp[0] && isdigit(byte(lp[1])) && !isdigit(byte(lp[2]))) {
+		smcOffset = lp[1] - '0';
+		lp += 2;
+	}
+	if (*lp == ':') ++lp;	// eat the optional colon after label
 	tp = temp;
 	SkipBlanks();
 	IsLabelNotFound = 0;
 	if (isdigit((byte)*tp)) {
+		if (smcOffset) {
+			Error("Temporary label can't use SMC-offset");
+			return;
+		}
 		ttp = tp;
 		while (*ttp && isdigit((byte)*ttp)) ++ttp;
 		if (*ttp) {
@@ -612,7 +622,8 @@ void ParseLabel() {
 		}
 	} else {
 		if (isMacroNext()) {
-			SetLastParsedLabel(tp);	// store raw label into "last parsed" without adding module/etc
+			if (smcOffset) Error("Macro name can't use SMC-offset");
+			else SetLastParsedLabel(tp);	// store raw label into "last parsed" without adding module/etc
 			return;					// and don't add it to labels table at all
 		}
 		bool IsDEFL = NeedDEFL(), IsEQU = NeedEQU();
@@ -656,6 +667,7 @@ void ParseLabel() {
 			}
 			val = CurAddress;
 		}
+		val += smcOffset;
 		ttp = tp;
 		if (!(tp = ValidateLabel(tp, true))) {
 			return;
