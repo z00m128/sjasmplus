@@ -459,15 +459,15 @@ void CLabelTable::DumpSymbols() {
 	}
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LabelTable[i].name && isalpha((byte)LabelTable[i].name[0])) {
-			STRCPY(ErrorLine, LINEMAX, LabelTable[i].name);
-			STRCAT(ErrorLine, LINEMAX2-1, ": equ ");
-			STRCAT(ErrorLine, LINEMAX2-1, "0x");
+			STRCPY(temp, LINEMAX-2, LabelTable[i].name);
+			STRCAT(temp, LINEMAX-1, ": equ ");
+			STRCAT(temp, LINEMAX-1, "0x");
 			char lnrs[16], * l = lnrs;
 			PrintHex32(l, LabelTable[i].value);
 			*l = 0;
-			STRCAT(ErrorLine, LINEMAX2-1, lnrs);
-			STRCAT(ErrorLine, LINEMAX2-1, "\n");
-			fputs(ErrorLine, symfp);
+			STRCAT(temp, LINEMAX-1, lnrs);
+			STRCAT(temp, LINEMAX-1, "\n");
+			fputs(temp, symfp);
 		}
 	}
 	fclose(symfp);
