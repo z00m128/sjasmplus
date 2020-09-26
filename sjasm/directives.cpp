@@ -1450,6 +1450,7 @@ void dirDEFINE() {
 		Error("[DEFINE] Illegal <id>", lp, SUPPRESS);
 		return;
 	}
+	if (White(*lp)) ++lp;		// skip one whitespace (not considered part of value) (others are)
 
 	DefineTable.Add(id, lp, 0);
 	SkipToEol(lp);

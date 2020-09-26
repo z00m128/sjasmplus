@@ -963,6 +963,7 @@ EStructureMembers GetStructMemberId(char*& p) {
 int GetMacroArgumentValue(char* & src, char* & dst) {
 	SkipBlanks(src);
 	const char* const dstOrig = dst, * const srcOrig = src;
+	const char* dstStopTrim = dst;
 	while (*src && ',' != *src) {
 		// check if there is some kind of delimiter next (string literal or angle brackets expression)
 		// the angle-bracket can only be used around whole argument (i.e. '<' must be first char)
@@ -1023,8 +1024,10 @@ int GetMacroArgumentValue(char* & src, char* & dst) {
 		}
 		// set ending delimiter for quotes and apostrophe (angles are stripped from value)
 		if (DT_QUOTES == delI || DT_APOSTROPHE == delI) *dst++ = endCh;
+		dstStopTrim = dst;						// should not trim right spaces beyond this point
 		++src;									// advance over delimiter
 	}
+	while (dstStopTrim < dst && White(dst[-1])) --dst;	// trim the right size space from value
 	*dst = 0;									// zero terminator of resulting string value
 	if (! *dstOrig) Warning("[Macro argument parser] empty value", srcOrig);
 	return 1;

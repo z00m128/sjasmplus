@@ -640,7 +640,6 @@ CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStr
 	value = new char[strlen(nvalue) + 1];
 	if (NULL == name || NULL == value) ErrorOOM();
 	char* s1 = value;
-	while (White(*nvalue)) ++nvalue;
 	while (*nvalue && *nvalue != '\n' && *nvalue != '\r') *s1++ = *nvalue++;
 	*s1 = 0;
 	next = nnext;
