@@ -157,12 +157,22 @@
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, Dart Alver</emphasis> -
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, Dart Alver, LVD</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
 
           <listitem>
             <para><emphasis>CKirby</emphasis> - SLD export and support in his tools.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>Simon Brattel</emphasis> - for creating mother of all assemblers Zeus
+				and bringing all the good and peace to the mankind, giving infinite inspiration
+				to sjasmplus contributors who stole his tremendously amazing features without
+				even crediting him - till now, fixed (not sure what the particular list of features
+				was copied from Zeus, I guess DG/DH, I believe some other similarities are rather
+				copied from the ALASM which had many features before Zeus, but who knows, too late
+				to track it all precisely, what happened in 90's and when).</para>
           </listitem>
 
         </itemizedlist></para>
