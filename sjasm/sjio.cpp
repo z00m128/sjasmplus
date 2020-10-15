@@ -1152,20 +1152,25 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	return 0;
 }
 
-void WriteExp(char* n, aint v) {
+void WriteLabelEquValue(char* name, aint value, FILE* f) {
+	if (nullptr == f) return;
 	char lnrs[16],* l = lnrs;
+	STRCPY(temp, LINEMAX-2, name);
+	STRCAT(temp, LINEMAX-1, ": EQU ");
+	STRCAT(temp, LINEMAX-1, "0x");
+	PrintHex32(l, value); *l = 0;
+	STRCAT(temp, LINEMAX-1, lnrs);
+	STRCAT(temp, LINEMAX-1, "\n");
+	fputs(temp, f);
+}
+
+void WriteExp(char* n, aint v) {
 	if (FP_ExportFile == NULL) {
 		if (!FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) {
 			Error("Error opening file", Options::ExportFName, FATAL);
 		}
 	}
-	STRCPY(temp, LINEMAX-2, n);
-	STRCAT(temp, LINEMAX-1, ": EQU ");
-	STRCAT(temp, LINEMAX-1, "0x");
-	PrintHex32(l, v); *l = 0;
-	STRCAT(temp, LINEMAX-1, lnrs);
-	STRCAT(temp, LINEMAX-1, "\n");
-	fputs(temp, FP_ExportFile);
+	WriteLabelEquValue(n, v, FP_ExportFile);
 }
 
 /////// source-level-debugging support by Ckirby
