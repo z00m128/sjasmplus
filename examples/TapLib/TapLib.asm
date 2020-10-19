@@ -40,6 +40,6 @@ baslen	=	$-baszac
 
 	EMPTYTAP tape_file
 	SAVETAP  tape_file,BASIC,prog_name,baszac,baslen,1
-	SAVETAP  tape_file,CODE,prog_name,start_add,code_len,start
+	SAVETAP  tape_file,CODE,prog_name,start_add,code_len,start_add
 
 	ENDM

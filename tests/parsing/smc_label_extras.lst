@@ -1,0 +1,87 @@
+# file opened: smc_label_extras.asm
+ 1    0000              ;  The syntax `<label>+<single_digit>[:]` is meant to be used as self-modify-code marker only,
+ 2    0000              ; so the plus and single digit should cover cases (+1..+3).
+ 3    0000              ;  The syntax is intentionally limited to not clash with regular
+ 4    0000              ; syntax (expressions "eating" `and/or/xor` instruction, etc.)
+ 5    0000
+ 6    0000              x       equ     1
+ 7    0000                  org #8000
+ 8    8000 E6 01        lA:     and 1
+ 9    8002                  ; valid extra syntax (colon is optional)
+10    8002 E6 02        lB+1    and 2
+11    8004 E6 03        lC+1:   and 3
+12    8006 E6 04        lD+0    and 4   ; pointless, but valid
+13    8008 E6 05        lE+9    and 5
+14    800A                  ; valid extra syntax, empty remainder of line
+15    800A              lO+2
+16    800A              lP+3:
+17    800A                  ; syntax errors (single digit only)
+smc_label_extras.asm(18): error: Unrecognized instruction: +10   and 6
+smc_label_extras.asm(18): error: Unexpected: +10   and 6
+18    800A              lF+10   and 6
+smc_label_extras.asm(19): error: Unrecognized instruction: +#1   and 7
+smc_label_extras.asm(19): error: Unexpected: +#1   and 7
+19    800A              lG+#1   and 7
+20    800A                  ; syntax errors (no expressions, no evaluation)
+smc_label_extras.asm(21): error: Unrecognized instruction: +(1)  and 8
+smc_label_extras.asm(21): error: Unexpected: +(1)  and 8
+21    800A              lH+(1)  and 8
+smc_label_extras.asm(22): error: Unrecognized instruction: +x    and 9
+smc_label_extras.asm(22): error: Unexpected: +x    and 9
+22    800A              lI+x    and 9
+smc_label_extras.asm(23): error: Unrecognized instruction: +2  and 10
+smc_label_extras.asm(23): error: Unexpected: +2  and 10
+23    800A              lJ+1+2  and 10
+smc_label_extras.asm(24): error: Unrecognized instruction: -3  and 11
+smc_label_extras.asm(24): error: Unexpected: -3  and 11
+24    800A              lK+1-3  and 11
+25    800A                  ; syntax errors (no minus either)
+smc_label_extras.asm(26): error: Invalid labelname: lL-1
+26    800A E6 0C        lL-1    and 12
+smc_label_extras.asm(27): error: Invalid labelname: lM-1
+27    800C              lM-1
+27    800C E6 0D            and 13
+28    800E
+smc_label_extras.asm(29): error: Temporary label can't use SMC-offset
+smc_label_extras.asm(29): error: Local label not found: 123B
+29    800E 18 00        123+1   jr  123B
+smc_label_extras.asm(30): error: Temporary label can't use SMC-offset
+smc_label_extras.asm(30): error: Local label not found: 124B
+30    8010 18 00        124+1:  jr  124B
+31    8012
+smc_label_extras.asm(32): error: Macro name can't use SMC-offset
+smc_label_extras.asm(32): error: [MACRO] Illegal macroname
+32    8012              lN+1    MACRO
+33    8012 00                       nop
+smc_label_extras.asm(34): error: [ENDM] End macro without macro
+34    8013                      ENDM
+smc_label_extras.asm(35): error: Unrecognized instruction: lN
+35    8013                      lN
+36    8013
+37    8013                  ASSERT #8000+0 == lA
+38    8013                  ASSERT #8002+1 == lB
+39    8013                  ASSERT #8004+1 == lC
+40    8013                  ASSERT #8006+0 == lD
+41    8013                  ASSERT #8008+9 == lE
+42    8013                  ASSERT #800A   == lF
+43    8013                  ASSERT #800A+2 == lO
+44    8013                  ASSERT #800A+3 == lP
+45    8013
+# file closed: smc_label_extras.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001 X x
+0x8000   lA
+0x8003   lB
+0x8005   lC
+0x8006   lD
+0x8011   lE
+0x800C   lO
+0x800D   lP
+0x800A   lF
+0x800A X lG
+0x800A X lH
+0x800A X lI
+0x800B X lJ
+0x800B X lK

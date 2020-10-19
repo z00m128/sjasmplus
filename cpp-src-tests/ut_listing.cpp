@@ -82,6 +82,28 @@ TEST(SjIo_PrepareListLine) {
 	IncludeLevel = 10;
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL("~9999+FEDC              ", listBuf);
+
+	// reglenwidth = 5 (maxpow10 = 100000, lines up to 99999)
+	IncludeLevel = 0;
+	reglenwidth = 5;
+	CurSourcePos.line = 9999;
+	PrepareListLine(listBuf, 0xEDCB);
+	CHECK_EQUAL(" 9999 EDCB              ", listBuf);
+	CurSourcePos.line = 10000;
+	PrepareListLine(listBuf, 0xEDCB);
+	CHECK_EQUAL("10000 EDCB              ", listBuf);
+	CurSourcePos.line = 99999;
+	PrepareListLine(listBuf, 0xEDCB);
+	CHECK_EQUAL("99999 EDCB              ", listBuf);
+
+	// reglenwidth = 6 (maxpow10 = 1000000, lines up to 999999) (first truncated one)
+	reglenwidth = 6;
+	CurSourcePos.line = 99999;
+	PrepareListLine(listBuf, 0xEDCB);
+	CHECK_EQUAL("99999 EDCB              ", listBuf);
+	CurSourcePos.line = 100000;
+	PrepareListLine(listBuf, 0xEDCB);
+	CHECK_EQUAL(":0000 EDCB              ", listBuf);
 }
 
 #endif

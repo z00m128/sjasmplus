@@ -62,7 +62,7 @@ int ParseDirective(bool beginningOfLine)
 	}
 
 	// parse repeat-count either from n+1 (digits) or lp (parentheses) (if syntax is valid)
-	if ((isDigitDot && !White(*lp)) || !ParseExpression(isDigitDot ? ++n : lp, val)) {
+	if ((isDigitDot && !White(*lp)) || !ParseExpression(isDigitDot ? ++n : ++lp, val) || (isExprDot && ')' != *lp++)) {
 		lp = olp; Error("Dot-repeater must be followed by number or parentheses", olp, SUPPRESS);
 		return 0;
 	}
@@ -1169,12 +1169,21 @@ void dirOPT() {
 void dirLABELSLIST() {
 	if (pass != 1 || !DeviceID) {
 		if (!DeviceID) Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)");
-		SkipParam(lp);
+		SkipToEol(lp);
 		return;
 	}
 	std::unique_ptr<char[]> opt(GetOutputFileName(lp));
 	if (opt[0]) {
 		STRCPY(Options::UnrealLabelListFName, LINEMAX, opt.get());
+		Options::EmitVirtualLabels = false;
+		if (comma(lp)) {
+			aint virtualLabelsArg;
+			if (!ParseExpressionNoSyntaxError(lp, virtualLabelsArg)) {
+				Error("[LABELSLIST] Syntax error in <virtual labels>", bp, EARLY);
+				return;
+			}
+			Options::EmitVirtualLabels = (virtualLabelsArg != 0);
+		}
 	} else {
 		Error("[LABELSLIST] No filename", bp, EARLY);	// pass == 1 -> EARLY
 	}
@@ -1243,33 +1252,6 @@ const static char dirIfErrorsTxtSrc[dirIfErrorsN][dirIfErrorsSZ] = {
 	{ "[%s] one ELSE only expected" }
 };
 
-// main IF implementation parsing/skipping part of source depending on "val", handling ELSE/ENDIF
-static void dirIfInternal(const char* dirName, aint val) {
-	// set up error messages for the particular pseudo-op
-	char errorsTxt[dirIfErrorsN][dirIfErrorsSZ];
-	for (size_t i = 0; i < dirIfErrorsN; ++i) {
-		SPRINTF1(errorsTxt[i], dirIfErrorsSZ, dirIfErrorsTxtSrc[i], dirName);
-	}
-	// do the IF**some** part
-	ListFile();
-	EReturn ret = END;
-	int elseCounter = 0;
-	while (ENDIF != ret) {
-		switch (ret = val ? ReadFile() : SkipFile()) {
-			case ELSE:
-				if (elseCounter++) Warning(errorsTxt[1]);
-				val = !val;
-				break;
-			case ENDIF:
-				break;
-			default:
-				if (IsRunning) Error(errorsTxt[0]);
-				donotlist=!IsRunning;		// do the listing only if still running
-				return;
-		}
-	}
-}
-
 // IF and IFN internal helper, to evaluate expression
 static bool dirIfIfn(aint & val) {
 	IsLabelNotFound = 0;
@@ -1281,6 +1263,44 @@ static bool dirIfIfn(aint & val) {
 		Warning("[IF/IFN] Forward reference", bp, W_EARLY);
 	}
 	return true;
+}
+
+// main IF implementation parsing/skipping part of source depending on "val", handling ELSE/ENDIF
+static void dirIfInternal(const char* dirName, aint val) {
+	// set up error messages for the particular pseudo-op
+	char errorsTxt[dirIfErrorsN][dirIfErrorsSZ];
+	for (size_t i = 0; i < dirIfErrorsN; ++i) {
+		SPRINTF1(errorsTxt[i], dirIfErrorsSZ, dirIfErrorsTxtSrc[i], dirName);
+	}
+	// do the IF**some** part
+	ListFile();
+	EReturn ret = END;
+	aint elseCounter = 0;
+	aint orVal = false;
+	while (ENDIF != ret) {
+		orVal |= val;
+		switch (ret = val ? ReadFile() : SkipFile()) {
+			case ELSE:
+				if (elseCounter++) Error(errorsTxt[1]);
+				val = !val && !orVal;
+				break;
+			case ELSEIF:
+				val = !val && !orVal;
+				if (val) {		// active ELSEIF, evaluate expression
+					if (!dirIfIfn(val)) {
+						val = false;		// syntax error in expression
+						orVal = true;		// force remaining IF-blocks inactive
+					}
+				}
+				break;
+			case ENDIF:
+				break;
+			default:
+				if (IsRunning) Error(errorsTxt[0]);
+				donotlist=!IsRunning;		// do the listing only if still running
+				return;
+		}
+	}
 }
 
 static void dirIF() {
@@ -1347,6 +1367,10 @@ static void dirIFNDEF() {
 
 static void dirELSE() {
 	Error("ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF");
+}
+
+static void dirELSEIF() {
+	Error("ELSEIF without IF/IFN");
 }
 
 static void dirENDIF() {
@@ -1426,6 +1450,7 @@ void dirDEFINE() {
 		Error("[DEFINE] Illegal <id>", lp, SUPPRESS);
 		return;
 	}
+	if (White(*lp)) ++lp;		// skip one whitespace (not considered part of value) (others are)
 
 	DefineTable.Add(id, lp, 0);
 	SkipToEol(lp);
@@ -1491,10 +1516,13 @@ void dirDISPLAY() {
 		}
 		if (*lp == '/') {
 			switch (optionChar = toupper((byte)lp[1])) {
-			case 'A': case 'D': case 'H':	// known options, switching hex+dec / dec / hex mode
+			case 'A': case 'D': case 'H': case 'B':
+				// known options, switching hex+dec / dec / hex / binary mode
 				decprint = optionChar;
 				break;
 			case 'L': case 'T':				// silently ignored options (legacy compatibility)
+				// in ALASM: 'L' is "concatenate to previous line" (as if there was no \r\n on it)
+				// in ALASM: 'T' used ahead of expression will display first the expression itself, then value
 				break ;
 			default:
 				Error("[DISPLAY] Syntax error, unknown option", lp, SUPPRESS);
@@ -1519,6 +1547,15 @@ void dirDISPLAY() {
 		} else {
 			// string literal was not there, how about expression?
 			if (ParseExpressionNoSyntaxError(lp, val)) {
+				if (decprint == 'B') {	// 8-bit binary (doesn't care about higher bits)
+					*(ep++) = '%';
+					aint bitMask = 0x80;
+					while (bitMask) {
+						*(ep++) = (val & bitMask) ? '1' : '0';
+						if (0x10 == bitMask) *(ep++) = '\'';
+						bitMask >>= 1;
+					}
+				}
 				if (decprint == 'H' || decprint == 'A') {
 					*(ep++) = '0';
 					*(ep++) = 'x';
@@ -1713,7 +1750,7 @@ void dirDUP() {
 }
 
 void dirEDUP() {
-	if (RepeatStack.empty()) {
+	if (RepeatStack.empty() || RepeatStack.top().IsInWork) {
 		Error("[EDUP/ENDR] End repeat without repeat");
 		return;
 	}
@@ -2062,6 +2099,7 @@ void InsertDirectives() {
 	//DirectivesTable.insertd(".textarea",dirTEXTAREA);
 	DirectivesTable.insertd(".textarea", dirDISP);
 	DirectivesTable.insertd(".else", dirELSE);
+	DirectivesTable.insertd(".elseif", dirELSEIF);
 	DirectivesTable.insertd(".export", dirEXPORT);
 	DirectivesTable.insertd(".display", dirDISPLAY);
 	DirectivesTable.insertd(".end", dirEND);

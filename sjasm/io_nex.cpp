@@ -27,6 +27,7 @@
 
 #include "sjdefs.h"
 #include "crc32c.h"
+#include <cassert>
 
 // Banks in file are ordered in SNA way (but array "banks" in header is in numeric order instead)
 static constexpr aint nexBankOrder[8] = {5, 2, 0, 1, 3, 4, 6, 7};
@@ -339,6 +340,29 @@ static aint getNexBankNum(const aint bankIndex) {
 	return -1;
 }
 
+static void checkStackPointer() {
+	constexpr int CHECK_SIZE = 10;
+	constexpr int EXPECTED_SLOTS_COUNT = 8;
+	const int adrMask = Device->GetCurrentSlot()->Size - 1;
+	const int pages[EXPECTED_SLOTS_COUNT] = { 0, 0, 5*2, 5*2+1, 2*2, 2*2+1, nex.h.entryBank*2, nex.h.entryBank*2+1 };
+	assert(EXPECTED_SLOTS_COUNT == Device->SlotsCount);
+	// check if SP is too close to ROM (0x0001 ... 0x4009)
+	if (0x0000 < nex.h.sp && nex.h.sp < 0x4000 + CHECK_SIZE) {
+		Warning("[SAVENEX] stackAddress is too close to ROM area");
+		return;
+	}
+	// check if good-looking SP points to enough of zeroed memory, warn about overwrite if not
+	word spCheck = word(nex.h.sp - CHECK_SIZE);
+	while (spCheck != nex.h.sp) {
+		const int pageNum = pages[Device->GetSlotOfA16(spCheck)];
+		const size_t offset = Device->GetMemoryOffset(pageNum, spCheck & adrMask);
+		if (0 != Device->Memory[offset]) break;
+		++spCheck;
+	}
+	if (spCheck == nex.h.sp) return;
+	Warning("[SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD");
+}
+
 template <int argsN> static bool getIntArguments(aint (&args)[argsN], const bool argOptional[argsN]) {
 	for (int i = 0; i < argsN; ++i) {
 		if (0 < i && !comma(lp)) return argOptional[i];
@@ -391,6 +415,7 @@ static void dirNexOpen() {
 	nex.writeHeader();
 	// After writing header first time, the file is ready for "append like" usage
 	nex.canAppend = true;
+	checkStackPointer();
 }
 
 static void dirNexCore() {

@@ -28,8 +28,10 @@
 26    0000                              ENDM
 27    0000
 28    0000                  ;; DEFL labels also don't work, even without colon
+label_as_name.asm(29): error: Unexpected: MACRO nameOrArg2?
 29    0000              Babel = 2       MACRO nameOrArg2?
-30    0000 ~                                dz  "name-or-arg2 as name\n"
+30    0000              ;                     dz  "name-or-arg2 as name\n"
+label_as_name.asm(31): error: [ENDM] End macro without macro
 31    0000                              ENDM
 32    0000
 33    0000                  MODULE module1  ; first version did use "module1" as part of macro name - now fixed+tested
@@ -51,7 +53,7 @@
 46    0008 6E 6F 2D 61 >
 46    000C 72 67 0A 00 >
 46    0010                classicNameOneArg 'a'
-46    0010 63 6C 61 73 >        db  "classic-1-arg: ", 'a' , "\n", 0
+46    0010 63 6C 61 73 >        db  "classic-1-arg: ", 'a', "\n", 0
 46    0014 73 69 63 2D >
 46    0018 31 2D 61 72 >
 46    001C 67 3A 20 61 >
@@ -67,7 +69,7 @@
 47    0039 6E 6F 2D 61 >
 47    003D 72 67 0A 00 >
 47    0041                newNameOneArg 'a'
-47    0041 6E 65 77 2D >                    db  "new-1-arg: ", 'a' , "\n", 0
+47    0041 6E 65 77 2D >                    db  "new-1-arg: ", 'a', "\n", 0
 47    0045 31 2D 61 72 >
 47    0049 67 3A 20 61 >
 47    004D 0A 00       >
@@ -83,40 +85,35 @@
 48    006A 61 73 20 6E >
 48    006E 61 6D 65 0A >
 48    0072 00          >
+label_as_name.asm(48): error: Unrecognized instruction: nameOrArg2?
 48    0073                nameOrArg2?
-48    0073 6E 61 6D 65 >                    dz  "name-or-arg2 as name\n"
-48    0077 2D 6F 72 2D >
-48    007B 61 72 67 32 >
-48    007F 20 61 73 20 >
-48    0083 6E 61 6D 65 >
-48    0087 0A 00       >
-49    0089                  newInModule 'm'
-49    0089 69 6E 2D 6D >                    db "in-module-new-1-arg: ", 'm' , "\n", 0
-49    008D 6F 64 75 6C >
-49    0091 65 2D 6E 65 >
-49    0095 77 2D 31 2D >
-49    0099 61 72 67 3A >
-49    009D 20 6D 0A 00 >
-49    00A1                classicInModule 'M'
-49    00A1 69 6E 2D 6D >                    db "in-module-classic-1-arg: ", 'M', "\n", 0
-49    00A5 6F 64 75 6C >
-49    00A9 65 2D 63 6C >
-49    00AD 61 73 73 69 >
-49    00B1 63 2D 31 2D >
-49    00B5 61 72 67 3A >
-49    00B9 20 4D 0A 00 >
-50    00BD
-51    00BD                  ;; invalid macro names
+49    0073                  newInModule 'm'
+49    0073 69 6E 2D 6D >                    db "in-module-new-1-arg: ", 'm', "\n", 0
+49    0077 6F 64 75 6C >
+49    007B 65 2D 6E 65 >
+49    007F 77 2D 31 2D >
+49    0083 61 72 67 3A >
+49    0087 20 6D 0A 00 >
+49    008B                classicInModule 'M'
+49    008B 69 6E 2D 6D >                    db "in-module-classic-1-arg: ", 'M', "\n", 0
+49    008F 6F 64 75 6C >
+49    0093 65 2D 63 6C >
+49    0097 61 73 73 69 >
+49    009B 63 2D 31 2D >
+49    009F 61 72 67 3A >
+49    00A3 20 4D 0A 00 >
+50    00A7
+51    00A7                  ;; invalid macro names
 label_as_name.asm(52): error: [MACRO] Illegal macroname
-52    00BD                              MACRO @invalidClassic   ; no need for "ENDM" due to error
+52    00A7                              MACRO @invalidClassic   ; no need for "ENDM" due to error
 label_as_name.asm(53): error: [MACRO] Illegal macroname
-53    00BD              @invalidNew     MACRO
-54    00BD
+53    00A7              @invalidNew     MACRO
+54    00A7
 label_as_name.asm(55): error: [MACRO] Illegal macroname
-55    00BD                              MACRO #invalidClassic2 arg1?    ; no need for "ENDM" due to error
+55    00A7                              MACRO #invalidClassic2 arg1?    ; no need for "ENDM" due to error
 label_as_name.asm(56): error: [MACRO] Illegal macroname
-56    00BD              #invalidNew2    MACRO arg1?
-57    00BD
+56    00A7              #invalidNew2    MACRO arg1?
+57    00A7
 # file closed: label_as_name.asm
 
 Value    Label

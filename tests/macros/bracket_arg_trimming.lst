@@ -1,0 +1,111 @@
+# file opened: bracket_arg_trimming.asm
+ 1    0000              m1      MACRO   arg1?
+ 2    0000 ~                        DEFINE __check__ arg1?
+ 3    0000 ~                        LUA
+ 4    0000 ~                            x = sj.get_define("__check__")
+ 5    0000 ~                            if x ~= "1,2" then
+ 6    0000 ~                                sj.error("["..x.."] differs from expected [1,2]")
+ 7    0000 ~                            end
+ 8    0000 ~                        ENDLUA
+ 9    0000 ~                        UNDEFINE __check__
+10    0000                      ENDM
+11    0000
+12    0000              m2      MACRO   arg1?
+13    0000 ~                        DEFINE __check__ arg1?
+14    0000 ~                        LUA
+15    0000 ~                            x = sj.get_define("__check__")
+16    0000 ~                            if x ~= " 3,4 " then
+17    0000 ~                                sj.error("["..x.."] differs from expected [ 3,4 ]")
+18    0000 ~                            end
+19    0000 ~                        ENDLUA
+20    0000 ~                        UNDEFINE __check__
+21    0000                      ENDM
+22    0000
+23    0000                   m1  <1,2>
+23    0000             >            DEFINE __check__ arg1?
+23    0000             >            LUA
+23    0000 ~           >                x = sj.get_define("__check__")
+23    0000 ~           >                if x ~= "1,2" then
+23    0000 ~           >                    sj.error("["..x.."] differs from expected [1,2]")
+23    0000 ~           >                end
+23    0000             >            ENDLUA
+23    0000             >            UNDEFINE __check__
+24    0000                   m1  <1,2> ; comment
+24    0000             >            DEFINE __check__ arg1?
+24    0000             >            LUA
+24    0000 ~           >                x = sj.get_define("__check__")
+24    0000 ~           >                if x ~= "1,2" then
+24    0000 ~           >                    sj.error("["..x.."] differs from expected [1,2]")
+24    0000 ~           >                end
+24    0000             >            ENDLUA
+24    0000             >            UNDEFINE __check__
+25    0000                  m1  < 1,2 >
+25    0000             >            DEFINE __check__ arg1?
+25    0000             >            LUA
+25    0000 ~           >                x = sj.get_define("__check__")
+25    0000 ~           >                if x ~= "1,2" then
+25    0000 ~           >                    sj.error("["..x.."] differs from expected [1,2]")
+25    0000 ~           >                end
+bracket_arg_trimming.asm(6): error: [LUA] [ 1,2 ] differs from expected [1,2]
+bracket_arg_trimming.asm(25): ^ emitted from here
+25    0000             >            ENDLUA
+25    0000             >            UNDEFINE __check__
+26    0000                  m1  < 1,2 > ; comment
+26    0000             >            DEFINE __check__ arg1?
+26    0000             >            LUA
+26    0000 ~           >                x = sj.get_define("__check__")
+26    0000 ~           >                if x ~= "1,2" then
+26    0000 ~           >                    sj.error("["..x.."] differs from expected [1,2]")
+26    0000 ~           >                end
+bracket_arg_trimming.asm(6): error: [LUA] [ 1,2 ] differs from expected [1,2]
+bracket_arg_trimming.asm(26): ^ emitted from here
+26    0000             >            ENDLUA
+26    0000             >            UNDEFINE __check__
+27    0000
+28    0000                  m2  <3,4>
+28    0000             >            DEFINE __check__ arg1?
+28    0000             >            LUA
+28    0000 ~           >                x = sj.get_define("__check__")
+28    0000 ~           >                if x ~= " 3,4 " then
+28    0000 ~           >                    sj.error("["..x.."] differs from expected [ 3,4 ]")
+28    0000 ~           >                end
+bracket_arg_trimming.asm(17): error: [LUA] [3,4] differs from expected [ 3,4 ]
+bracket_arg_trimming.asm(28): ^ emitted from here
+28    0000             >            ENDLUA
+28    0000             >            UNDEFINE __check__
+29    0000                  m2  <3,4> ; comment
+29    0000             >            DEFINE __check__ arg1?
+29    0000             >            LUA
+29    0000 ~           >                x = sj.get_define("__check__")
+29    0000 ~           >                if x ~= " 3,4 " then
+29    0000 ~           >                    sj.error("["..x.."] differs from expected [ 3,4 ]")
+29    0000 ~           >                end
+bracket_arg_trimming.asm(17): error: [LUA] [3,4] differs from expected [ 3,4 ]
+bracket_arg_trimming.asm(29): ^ emitted from here
+29    0000             >            ENDLUA
+29    0000             >            UNDEFINE __check__
+30    0000                   m2  < 3,4 >
+30    0000             >            DEFINE __check__ arg1?
+30    0000             >            LUA
+30    0000 ~           >                x = sj.get_define("__check__")
+30    0000 ~           >                if x ~= " 3,4 " then
+30    0000 ~           >                    sj.error("["..x.."] differs from expected [ 3,4 ]")
+30    0000 ~           >                end
+30    0000             >            ENDLUA
+30    0000             >            UNDEFINE __check__
+31    0000                   m2  < 3,4 > ; comment
+31    0000             >            DEFINE __check__ arg1?
+31    0000             >            LUA
+31    0000 ~           >                x = sj.get_define("__check__")
+31    0000 ~           >                if x ~= " 3,4 " then
+31    0000 ~           >                    sj.error("["..x.."] differs from expected [ 3,4 ]")
+31    0000 ~           >                end
+31    0000             >            ENDLUA
+31    0000             >            UNDEFINE __check__
+32    0000
+33    0000                      ASSERT 4 == 4
+34    0000
+# file closed: bracket_arg_trimming.asm
+
+Value    Label
+------ - -----------------------------------------------------------

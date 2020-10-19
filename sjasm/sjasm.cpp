@@ -108,6 +108,7 @@ namespace Options {
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
 	bool IsLongPtr = false;
+	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
 	CStringsList* IncludeDirsList = new CStringsList(".");
@@ -169,7 +170,7 @@ char* DeviceID = 0;
 
 // extend
 const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either full or basename (--fullpath)
-char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2], * bp;
+char* lp, line[LINEMAX], temp[LINEMAX], * bp;
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
 SSource::SSource(SSource && src) {	// move constructor, "pick" the stdin pointer
@@ -208,7 +209,7 @@ int macronummer = 0, lijst = 0, reglenwidth = 0;
 TextFilePos CurSourcePos, DefinitionPos;
 uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
-aint destlen = 0, size = -1L,PreviousErrorLine = -1L, comlin = 0;
+aint destlen = 0, size = -1L, comlin = 0;
 char* CurrentDirectory=NULL;
 
 char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
@@ -717,6 +718,12 @@ int main(int argc, char **argv) {
 			IsRunning = 1;
 			ConvertEncoding = base_encoding;
 			OpenFile(src.fname, false, src.stdin_log);
+		}
+
+		while (!RepeatStack.empty()) {
+			CurSourcePos = RepeatStack.top().sourcePos;	// fake source-file position to mark DUP line
+			Error("[DUP/REPT] missing EDUP/ENDR to end repeat-block");
+			RepeatStack.pop();
 		}
 
 		if (DISP_NONE != PseudoORG) {

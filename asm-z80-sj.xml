@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.2 27/07/2020
+  Version: 0.9.3 18/08/2020
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,10 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  18/08/2020: version 0.9.3
+    + new directive TEXT added (STRUCT field)
+    + adding support for EQU having comma delimited argument and closing curly braces
 
   27/07/2020: version 0.9.2
     + new directives added (RELOCATE_..., BPLIST, SETBP)
@@ -87,7 +91,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="11" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="12" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -242,6 +246,7 @@ TODO missing things:
       <item>dword</item>
       <item>dz</item>
       <item>hex</item>
+      <item>text</item>
       <item>word</item>
       </list>
     <list name="directives">
@@ -358,6 +363,7 @@ TODO missing things:
         <DetectChar attribute="Comment" context="#pop!Normal" char=";" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="/" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
+        <DetectChar attribute="Normal Text" context="#pop!Normal" char="}"/>
         <RegExpr attribute="Label" context="#pop!afterLabel" firstNonSpace="true"
                  String="^(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*:?"/>
         <RegExpr attribute="Label" context="#pop!afterLabel" String="^[0-9]+:?(\s+|$)"/>
@@ -390,7 +396,7 @@ TODO missing things:
         <!-- operators in expression (do word operators before "Arguments", symbols after -->
         <keyword attribute="Normal Text" context="#stay" String="operators"/>
         <IncludeRules context="Arguments" />
-        <AnyChar String="!~+-*/%&lt;>?=&amp;^|[]()" attribute="Normal Text" context="#stay"/>
+        <AnyChar String="!~+-*/%&lt;>?=&amp;^|[]()," attribute="Normal Text" context="#stay"/>
       </context>
 
       <context name="dotRepeat" attribute="Directives" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="Normal">

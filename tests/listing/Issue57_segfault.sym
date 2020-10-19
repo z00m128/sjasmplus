@@ -1,1 +1,1 @@
-SomeRegularLabel: equ 0x00000005
+SomeRegularLabel: EQU 0x00000005

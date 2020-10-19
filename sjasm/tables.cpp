@@ -132,7 +132,6 @@ static CLabelTableEntry* GetLabel(char*& p) {
 			if (LASTPASS != pass) labelEntry->used = true;
 			if (LABEL_PAGE_UNDEFINED != labelEntry->page) break;
 			labelEntry = nullptr;
-			IsLabelNotFound = 2;
 		}
 		// not found (the defined one, try more variants)
 		if (inMacro) {				// try outer macro (if there is one)
@@ -162,6 +161,8 @@ static CLabelTableEntry* GetLabel(char*& p) {
 		if (!inTableAlready) {
 			LabelTable.Insert(findName, 0, true);
 			IsLabelNotFound = 1;
+		} else {
+			IsLabelNotFound = 2;
 		}
 		Error("Label not found", findName, IF_FIRST);
 	}
@@ -388,9 +389,10 @@ void CLabelTable::DumpForUnreal() {
 		Error("Error opening file", Options::UnrealLabelListFName, FATAL);
 	}
 	const int PAGE_MASK = DeviceID ? Device->GetPage(0)->Size - 1 : 0x3FFF;
+	const int ADR_MASK = Options::EmitVirtualLabels ? 0xFFFF : PAGE_MASK;
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
-		int page = LabelTable[i].page;
+		int page = Options::EmitVirtualLabels ? LABEL_PAGE_OUT_OF_BOUNDS : LabelTable[i].page;
 		if (!strcmp(DeviceID, "ZXSPECTRUM48") && page < 4) {	//TODO fix this properly?
 			// convert pages {0, 1, 2, 3} of ZX48 into ZX128-like {ROM, 5, 2, 0}
 			// this can be fooled when there were multiple devices used, Label doesn't know into
@@ -398,11 +400,13 @@ void CLabelTable::DumpForUnreal() {
 			const int fakeZx128Pages[] = {LABEL_PAGE_ROM, 5, 2, 0};
 			page = fakeZx128Pages[page];
 		}
-		int lvalue = LabelTable[i].value & PAGE_MASK;
+		int lvalue = LabelTable[i].value & ADR_MASK;
 		ep = ln;
+
 		if (page < LABEL_PAGE_ROM) ep += sprintf(ep, "%02d", page&255);
 		*(ep++) = ':';
 		PrintHexAlt(ep, lvalue);
+
 		*(ep++) = ' ';
 		STRCPY(ep, LINEMAX-(ep-ln), LabelTable[i].name);
 		STRCAT(ep, LINEMAX, "\n");
@@ -454,17 +458,8 @@ void CLabelTable::DumpSymbols() {
 		Error("Error opening file", Options::SymbolListFName, FATAL);
 	}
 	for (int i = 1; i < NextLocation; ++i) {
-		if (LabelTable[i].name && isalpha((byte)LabelTable[i].name[0])) {
-			STRCPY(ErrorLine, LINEMAX, LabelTable[i].name);
-			STRCAT(ErrorLine, LINEMAX2-1, ": equ ");
-			STRCAT(ErrorLine, LINEMAX2-1, "0x");
-			char lnrs[16], * l = lnrs;
-			PrintHex32(l, LabelTable[i].value);
-			*l = 0;
-			STRCAT(ErrorLine, LINEMAX2-1, lnrs);
-			STRCAT(ErrorLine, LINEMAX2-1, "\n");
-			fputs(ErrorLine, symfp);
-		}
+		if (!LabelTable[i].name || !isalpha((byte)LabelTable[i].name[0])) continue;
+		WriteLabelEquValue(LabelTable[i].name, LabelTable[i].value, symfp);
 	}
 	fclose(symfp);
 }
@@ -636,7 +631,6 @@ CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStr
 	value = new char[strlen(nvalue) + 1];
 	if (NULL == name || NULL == value) ErrorOOM();
 	char* s1 = value;
-	while (White(*nvalue)) ++nvalue;
 	while (*nvalue && *nvalue != '\n' && *nvalue != '\r') *s1++ = *nvalue++;
 	*s1 = 0;
 	next = nnext;

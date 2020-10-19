@@ -159,3 +159,16 @@ Inv&lidL&belN&me:
 103:    equ     should not work
 104:    =       should not work
 105:    defl    should not work
+
+EquLineRemnants1:   EQU $+1-$100    cpl     ; error
+EquLineRemnants2:   EQU $+2-$100  : cpl     ; valid
+DeflLineRemnants1:  DEFL $+3-$100   cpl     ; error
+DeflLineRemnants2:  DEFL $+4-$100 : cpl     ; valid
+DeflLineRemnants3:  = $+5-$100      cpl     ; error
+DeflLineRemnants4:  = $+6-$100    : cpl     ; valid
+
+; the ones without colon are reported as errors since v1.17.1, because without colon
+; this is total "gotcha":
+noColonProblemDemonstration EQU $   and 7
+    ; ^^ the expression parser will eat whole "$ and 7", no instruction/error here
+    ; obviously *this* does NOT report error even after change, it's valid expression...

@@ -115,6 +115,7 @@ extern "C" {
 #include "z80.h"
 #include "directives.h"
 #include "sjio.h"
+#include "io_err.h"
 #include "io_snapshots.h"
 #include "io_trd.h"
 #include "io_tape.h"

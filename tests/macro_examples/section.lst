@@ -26,7 +26,7 @@
 24    0000             >        ; init new section to ORG 0
 24    0000             >        IFNDEF SECTION_MACRO_KNOWN_SECTION_@code
 24    0000             >            DEFINE SECTION_MACRO_KNOWN_SECTION_sectionName?
-24    0000             >SECTION_MACRO_LAST_ADR_@code        = 0
+24    0000             >SECTION_MACRO_LAST_ADR_@code = 0
 24    0000             >        ENDIF
 24    0000             >        ; if sections are switching, remember position of previous
 24    0000             >        IFDEF SECTION_MACRO_PREVIOUS_SECTION
@@ -49,7 +49,7 @@
 30    8001             >        ENDIF
 30    8001             >        ; if sections are switching, remember position of previous
 30    8001             >        IFDEF SECTION_MACRO_PREVIOUS_SECTION
-30    8001             >SECTION_MACRO_LAST_ADR_@code        = $
+30    8001             >SECTION_MACRO_LAST_ADR_@code = $
 30    8001             >            UNDEFINE SECTION_MACRO_PREVIOUS_SECTION
 30    8001             >        ENDIF
 30    8001             >        DEFINE SECTION_MACRO_PREVIOUS_SECTION sectionName?

@@ -86,6 +86,10 @@ namespace Options {
 	extern bool IsLR35902;			// "Sharp LR35902" CPU mode (must be set at CLI, blocks others)
 	extern bool IsLongPtr;
 
+	// emit virtual labels in LABELSLIST, that have only 64ki address and no page
+	// format is then `:ADDR label`, starting from colon, then 16bit address, then label.
+	extern bool EmitVirtualLabels;
+
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;
 
@@ -110,7 +114,7 @@ extern int deviceDirectivesCounter;
 extern const char* fileNameFull;
 
 // extend
-extern char* lp, line[LINEMAX], temp[LINEMAX], ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2], * bp;
+extern char* lp, line[LINEMAX], temp[LINEMAX], * bp;
 extern char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 // the "substitutedLine" may be overriden to point back to un-substituted line, it's only "decorative" for Listing purposes
 
@@ -140,7 +144,7 @@ extern int macronummer, lijst, reglenwidth;
 extern TextFilePos CurSourcePos, DefinitionPos;
 extern uint32_t maxlin;
 extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine, PredefinedCounter;
-extern aint destlen, size, PreviousErrorLine, comlin;
+extern aint destlen, size, comlin;
 
 extern char* vorlabp, * macrolabp, * LastParsedLabel;
 

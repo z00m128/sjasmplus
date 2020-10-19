@@ -101,7 +101,7 @@
 79    0022              1:      djnz    1B      ; macro replacement will be used here
 79    0022 0D          >            dec c
 79    0023 20 FD       >            jr  nz,1B
-79    0025 10 FB       >            @djnz 1B       ; avoid self-reference and use real instruction
+79    0025 10 FB       >            @djnz 1B ; avoid self-reference and use real instruction
 80    0027 10 FE        1:      @djnz   1B      ; original djnz instruction here
 81    0029
 # file closed: s_macros.asm

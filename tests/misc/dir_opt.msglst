@@ -17,7 +17,8 @@ dir_opt.asm(8): error: Fake instructions are not enabled: ld      hl,bc,,de,bc
 12    000C C1               pop     bc  ; validation
 Syntax option not implemented yet: l
 13    000D              OPT push reset --syntax=aBfl    ; this one can be at beggining of line (--dirbol)
-14    000D 00           OPT = 1 nop
+14    000D              OPT = 1
+14    000D 00             nop
 14    000E                OPT --dirbol  ; first is label, instruction, adding --dirbol back (no push/reset)
 dir_opt.asm(15): warning: Fake instruction: ld      hl,bc,,de,bc    
 dir_opt.asm(15): warning: Fake instruction: ld      hl,bc,,de,bc    
@@ -33,7 +34,8 @@ dir_opt.asm(17): error: Z80N instructions are currently disabled: mirror  a
 dir_opt.asm(22): warning: [OPT] no previous syntax found
 22    001B              OPT pop
 22    001B                OPT reset         ; warn about no previous syntax in stack, then reset (but no options)
-23    001B 00           OPT = 2 nop                 ; this one is no more dirbol, but just a label
+23    001B              OPT = 2
+23    001B 00             nop               ; this one is no more dirbol, but just a label
 24    001C
 dir_opt.asm(25): warning: [OPT] too many options
 dir_opt.asm(25): error: [OPT] invalid/failed option: --nologo

@@ -28,18 +28,7 @@
 
 // sjio.h
 
-/**
- * Error types:
- * ALL = will try to display in every pass
- * FATAL = terminates assembler
- * EARLY = displays only during early phase (pass 1+2)
- * PASS3 = normal error message level for code-gen pass (pass 3)
- * IF_FIRST = normal code-gen error, but will display only if it is first error on the current line
- * SUPPRESS = will suppress further errors (PASS3+IF_FIRST+ALL) for current line, except FATAL
- * */
-enum EStatus { ALL, FATAL, EARLY, PASS3, IF_FIRST, SUPPRESS };
-enum EWStatus { W_ALL, W_EARLY, W_PASS3 };
-enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM };
+enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM, ELSEIF };
 
 extern int ListAddress;
 
@@ -47,18 +36,12 @@ extern int ListAddress;
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2
 
-extern FILE* FP_Input;
-
 char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0);
 const char* FilenameBasePos(const char* fullname);
 void ConstructDefaultFilename(char* dest, size_t dest_size, const char* ext, bool checkIfDestIsEmpty = true);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void NewDest(char* newfilename, int mode = OUTPUT_TRUNCATE);
 int FileExists(char* filename);
-void Error(const char* message, const char* badValueMessage = NULL, EStatus type = PASS3);
-void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);
-void ErrorOOM();		// out of memory
-void Warning(const char* message, const char* badValueMessage = NULL, EWStatus type = W_PASS3);
 FILE* GetListingFile();
 void ListFile(bool showAsSkipped = false);
 void ListSilentOrExternalEmits();
@@ -106,6 +89,7 @@ EReturn ReadFile();
 EReturn SkipFile();
 void SeekDest(long, int);
 int ReadFileToCStringsList(CStringsList*& f, const char* end);
+void WriteLabelEquValue(char* name, aint value, FILE* f);
 void WriteExp(char* n, aint v);
 
 /////// source-level-debugging support by Ckirby

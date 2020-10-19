@@ -157,12 +157,22 @@
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, Dart Alver</emphasis> -
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, Dart Alver, LVD</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
 
           <listitem>
             <para><emphasis>CKirby</emphasis> - SLD export and support in his tools.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>Simon Brattel</emphasis> - for creating mother of all assemblers Zeus
+				and bringing all the good and peace to the mankind, giving infinite inspiration
+				to sjasmplus contributors who stole his tremendously amazing features without
+				even crediting him - till now, fixed (not sure what the particular list of features
+				was copied from Zeus, I guess DG/DH, I believe some other similarities are rather
+				copied from the ALASM which had many features before Zeus, but who knows, too late
+				to track it all precisely, what happened in 90's and when).</para>
           </listitem>
 
         </itemizedlist></para>
@@ -188,6 +198,21 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>WIP - 1.17.1</term>
+
+            <listitem>
+              <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
+- <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
+- <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
+- <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
+- <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
+- minor bugfixes in parser and listing-line-numbering
+- Added <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm">example (chargfx2asm)</ulink> how to use sjasmplus as byte-processor for binary files
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>8.8.2020 - 1.17.0</term>
@@ -494,7 +519,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     </section>
 
     <section>
-      <title>Source file format</title>
+      <title><anchor id="s_source_format"/>Source file format</title>
 
 		<para>
 		  Lines in the source file should have the following form:
@@ -541,7 +566,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
       <title><anchor id="s_labels" />Labels</title>
 
       <para>Labels are case-sensitive and may be of any reasonable length,
-      that is: up to about 70 characters. Label definitions should start on
+      that is: up to about 70 characters. Label definitions must start on
       the beginning of a line, but don't have to be followed by a colon ':'.
       Generally labels should start with a letter or a underscore ('_'), the
       following characters may be chosen from letters, numbers and the
@@ -555,6 +580,19 @@ MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
       register names as labels but it is not advised to do so. Also note that
       the identifiers defined with the DEFINE pseudo-op use another name
       space.</para>
+
+      <para>(since v1.17.1) Right after label (before the optional colon) you
+      can write extra "SMC offset" (Self Modify Code offset) in the form of plus
+      sign and single decimal digit. The defined label will become equal to current
+      address plus the SMC offset:
+		<programlisting>    ; SMC-offset syntax is very strict, no spacing, single '+', single digit
+answer+1:   ld      a,13        ; "answer" points second opcode byte
+    ; this helps to keep the SMC-label together with the target instruction
+            ld      hl,answer
+            ld      (hl),42     ; fix immediate in `ld a,*` to correct answer
+    ; compare with classic syntax:
+classic equ $+1 : ld a,7        ; often even split to two lines</programlisting>
+      </para>
     </section>
 
     <section>
@@ -673,7 +711,7 @@ $c     hexadecimal
     </section>
 
     <section>
-      <title>Character and string constants</title>
+      <title><anchor id="s_strings" />Character and string constants</title>
 
       <para>Character constants are characters surrounded by single quotes. It
       is possible to use double quotes in some cases, but in general it is
@@ -792,7 +830,7 @@ $$lab $$lab    page of "lab" label (in virtual device mode)
     </section>
 
     <section>
-      <title>Assembly language</title>
+      <title><anchor id="s_asm_lang" />Assembly language</title>
 
       <para>This version only accepts Z80 mnemonics. There are some additions
       to what I think is standard Z80: <itemizedlist>
@@ -1912,8 +1950,9 @@ ENDOFPROG
               ALASM.</emphasis></para>
 
               <para>Out to console a string of bytes. Each value should be
-              between -129 and 256. Keys /D, /H and /A set format of output of
+              between -129 and 256. Keys /D, /B, /H and /A set format of output of
               numbers:<synopsis>/D - out only in Decimal
+/B - out only in Binary (truncated to 8 bit)
 /H - out only in Hexadecimal
 /A - out both in Hexadecimal and Decimal</synopsis>
               <example>
@@ -2275,7 +2314,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_labelslist" />LABELSLIST &lt;filename&gt;</term>
+            <term><anchor id="po_labelslist" />LABELSLIST &lt;filename&gt;[,&lt;virtual labels&gt;]</term>
 
             <listitem>
               <para><emphasis>Useful only for ZX-Spectrum Emulator
@@ -2288,6 +2327,9 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
 
               <para><synopsis>NN:ADDRESS LABELNAME</synopsis>
               where NN is number of RAM page and ADDRESS is truncated to 0000..3FFF range</para>
+
+              <para>If <code>&lt;virtual labels&gt;</code> is non zero, then the page number NN is not
+              part of output, and ADDRESS is truncated to 0000..FFFF range.</para>
 
               <para><example>
                   <title></title>
@@ -3058,7 +3100,7 @@ start:
 
             <listitem>
               <para>If &lt;expression&gt; is non-zero the following lines are
-              assembled until an ELSE or ENDIF.</para>
+              assembled until an ELSE, ELSEIF or ENDIF.</para>
 
               <para>Forward reference of label will cause warning - as any machine code emitted inside
 				  the IF/IFN block with such expression can lead to unstable results. If you are sure
@@ -3084,7 +3126,7 @@ start:
 
             <listitem>
               <para>If &lt;expression&gt; is zero the following lines are
-              assembled until an ELSE or ENDIF.</para>
+              assembled until an ELSE, ELSEIF or ENDIF.</para>
             </listitem>
           </varlistentry>
 
@@ -3203,8 +3245,17 @@ LABEL5:
             <term><anchor id="ca_else" />ELSE</term>
 
             <listitem>
-              <para>See <link linkend="ca_if">IF</link>. If the condition is
-              not true, the else-part is assembled.</para>
+              <para>See <link linkend="ca_if">IF</link>. If the IF condition is
+              false (in all previous IF/ELSEIF blocks), the else-part is assembled.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="ca_elseif" />ELSEIF &lt;expression&gt;</term>
+
+            <listitem>
+              <para>If the previous IF-block had false condition, the ELSEIF expression is evaluated
+               and the ELSEIF acts as new <link linkend="ca_if">IF</link>.</para>
             </listitem>
           </varlistentry>
 
@@ -3705,7 +3756,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term><anchor id="lua__pl" />[void] _pl("label code")</term>
 
             <listitem>
-              <para>Parse line of Z80 assembly. Example: <code>_pc("SOMELABEL
+              <para>Parse line of Z80 assembly. Example: <code>_pl("SOMELABEL
               ADD A,B")</code></para>
             </listitem>
           </varlistentry>

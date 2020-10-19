@@ -2,4 +2,4 @@
     OUTPUT "256_files.bin"
 x = 0
     ENDIF
-x = x+1     DB  x
+x = x+1 :   DB  x

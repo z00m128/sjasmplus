@@ -32,157 +32,28 @@
 
 #include <fcntl.h>
 
-#define DESTBUFLEN 8192
+int ListAddress;
 
-static void CloseBreakpointsFile();
+static constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;
+static constexpr int DESTBUFLEN = 8192;
 
 // ReadLine buffer and variables around
-char rlbuf[4096 * 2]; //x2 to prevent errors
-char * rlpbuf, * rlpbuf_end, * rlppos;
-bool colonSubline;
-int blockComment;
+static char rlbuf[LINEMAX2 * 2];
+static char * rlpbuf, * rlpbuf_end, * rlppos;
+static bool colonSubline;
+static int blockComment;
 
-constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;
-int ListEmittedBytes[LIST_EMIT_BYTES_BUFFER_SIZE], nListBytes = 0;
-char WriteBuffer[DESTBUFLEN];
-int tape_seek = 0;
-int tape_length = 0;
-int tape_parity = 0x55;
-FILE* FP_tapout = NULL;
-FILE* FP_Input = NULL, * FP_Output = NULL, * FP_RAW = NULL;
-FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
-int ListAddress;
-aint WBLength = 0;
-bool IsSkipErrors = false;
+static int ListEmittedBytes[LIST_EMIT_BYTES_BUFFER_SIZE], nListBytes = 0;
+static char WriteBuffer[DESTBUFLEN];
+static int tape_seek = 0;
+static int tape_length = 0;
+static int tape_parity = 0x55;
+static FILE* FP_tapout = NULL;
+static FILE* FP_Input = NULL, * FP_Output = NULL, * FP_RAW = NULL;
+static FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
+static aint WBLength = 0;
 
-static void initErrorLine() {		// adds filename + line of definition if possible
-	*ErrorLine = 0;
-	*ErrorLine2 = 0;
-	// when OpenFile is reporting error, the filename is still nullptr, but pass==1 already
-	if (pass < 1 || LASTPASS < pass || nullptr == CurSourcePos.filename) return;
-	// during assembling, show also file+line info
-	TextFilePos errorPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
-	bool isEmittedMsgEnabled = true;
-#ifdef USE_LUA
-	lua_Debug ar;					// must be in this scope, as some memory is reused by errorPos
-	if (LuaStartPos.line) {
-		errorPos = LuaStartPos;
-
-		// find either top level of lua stack, or standalone file, otherwise it's impossible
-		// to precisely report location of error (ASM can have 2+ LUA blocks defining functions)
-		int level = 1;			// level 0 is "C" space, ignore that always
-		// suppress "is emitted here" when directly inlined in current code
-		isEmittedMsgEnabled = (0 < listmacro);
-		while (true) {
-			if (!lua_getstack(LUA, level, &ar)) break;	// no more lua stack levels
-			if (!lua_getinfo(LUA, "Sl", &ar)) break;	// no more info about current level
-			if (strcmp("[string \"script\"]", ar.short_src)) {
-				// standalone definition in external file found, pinpoint it precisely
-				errorPos.filename = ar.short_src;
-				errorPos.line = ar.currentline;
-				isEmittedMsgEnabled = true;				// and add "emitted here" in any case
-				break;	// no more lua-stack traversing, stop here
-			}
-			// if source was inlined script, update the possible source line
-			errorPos.line = LuaStartPos.line + ar.currentline;
-			// and keep traversing stack until top level is found (to make the line meaningful)
-			++level;
-		}
-	}
-#endif //USE_LUA
-	SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", errorPos.filename, errorPos.line);
-	// if the error filename:line is not identical with current source line, add ErrorLine2 about emit
-	if (isEmittedMsgEnabled &&
-		(strcmp(errorPos.filename, CurSourcePos.filename) || errorPos.line != CurSourcePos.line)) {
-		SPRINTF2(ErrorLine2, LINEMAX2, "%s(%d): ^ emitted from here\n", CurSourcePos.filename, CurSourcePos.line);
-	}
-}
-
-static void outputErrorLine(const EOutputVerbosity errorLevel) {
-	// always print the message into listing file (the OutputVerbosity does not apply to listing)
-	if (GetListingFile()) {
-		fputs(ErrorLine, GetListingFile());
-		if (*ErrorLine2) fputs(ErrorLine2, GetListingFile());
-	}
-	// print the error into stderr if OutputVerbosity allows this type of message
-	if (Options::OutputVerbosity <= errorLevel) {
-		_CERR ErrorLine _END;
-		if (*ErrorLine2) _CERR ErrorLine2 _END;
-	}
-}
-
-void Error(const char* message, const char* badValueMessage, EStatus type) {
-	// check if it is correct pass by the type of error
-	if (type == EARLY && LASTPASS <= pass) return;
-	if ((type == SUPPRESS || type == IF_FIRST || type == PASS3) && pass < LASTPASS) return;
-	// check if this one should be skipped due to type constraints and current-error-state
-	if (FATAL != type && PreviousErrorLine == CompiledCurrentLine) {
-		// non-fatal error, on the same line as previous, maybe skip?
-		if (IsSkipErrors || IF_FIRST == type) return;
-	}
-	// update current-error-state (reset "skip" on new parsed-line, set "skip" by SUPPRESS type)
-	IsSkipErrors = (IsSkipErrors && (PreviousErrorLine == CompiledCurrentLine)) || (SUPPRESS == type);
-	PreviousErrorLine = CompiledCurrentLine;
-	++ErrorCount;							// number of non-skipped (!) errors
-
-	DefineTable.Replace("__ERRORS__", ErrorCount);
-
-	initErrorLine();
-	STRCAT(ErrorLine, LINEMAX2-1, "error: ");
-#ifdef USE_LUA
-	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
-#endif
-	STRCAT(ErrorLine, LINEMAX2-1, message);
-	if (badValueMessage) {
-		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
-	}
-	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2-1, "\n");	// append EOL if needed
-	outputErrorLine(OV_ERROR);
-	// terminate whole assembler in case of fatal error
-	if (type == FATAL) {
-		ExitASM(1);
-	}
-}
-
-void ErrorInt(const char* message, aint badValue, EStatus type) {
-	char numBuf[24];
-	SPRINTF1(numBuf, 24, "%d", badValue);
-	Error(message, numBuf, type);
-}
-
-void ErrorOOM() {		// out of memory
-	Error("Not enough memory!", nullptr, FATAL);
-}
-
-void Warning(const char* message, const char* badValueMessage, EWStatus type)
-{
-	// check if it is correct pass by the type of error
-	if (type == W_EARLY && LASTPASS <= pass) return;
-	if (type == W_PASS3 && pass < LASTPASS) return;
-
-	// turn the warning into error if "Warnings as errors" is switched on
-	if (Options::syx.WarningsAsErrors) switch (type) {
-		case W_EARLY:	Error(message, badValueMessage, EARLY); return;
-		case W_PASS3:	Error(message, badValueMessage, PASS3); return;
-		case W_ALL:		Error(message, badValueMessage, ALL); return;
-	}
-
-	++WarningCount;
-
-	DefineTable.Replace("__WARNINGS__", WarningCount);
-
-	initErrorLine();
-	STRCAT(ErrorLine, LINEMAX2-1, "warning: ");
-#ifdef USE_LUA
-	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
-#endif
-	STRCAT(ErrorLine, LINEMAX2-1, message);
-	if (badValueMessage) {
-		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
-	}
-	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2-1, "\n");	// append EOL if needed
-	outputErrorLine(OV_WARNING);
-}
+static void CloseBreakpointsFile();
 
 // find position of extension in filename (points at dot char or beyond filename if no extension)
 // filename is pointer to writeable format containing file name (can be full path) (NOT NULL)
@@ -315,8 +186,7 @@ void PrepareListLine(char* buffer, aint hexadd)
 	int digit = ' ';
 	int linewidth = reglenwidth;
 	aint linenumber = CurSourcePos.line % 10000;
-	if (linewidth > 5)
-	{
+	if (5 <= linewidth) {		// five-digit number, calculate the leading "digit"
 		linewidth = 5;
 		digit = CurSourcePos.line / 10000 + '0';
 		if (digit > '~') digit = '~';
@@ -809,8 +679,14 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				continue;
 			}
 			// check if still in label area, if yes, copy the finishing colon as char (don't split by it)
-			if ((IsLabel = IsLabel && islabchar(*rlppos))) {
+			if ((IsLabel = (IsLabel && islabchar(*rlppos)))) {
 				++rlppos;					// label character
+				//SMC offset handling
+				if (ReadBufData() && '+' == *rlpbuf) {	// '+' after label, add it as SMC_offset syntax
+					IsLabel = false;
+					*rlppos++ = *rlpbuf++;
+					if (ReadBufData() && isdigit(byte(*rlpbuf))) *rlppos++ = *rlpbuf++;
+				}
 				if (ReadBufData() && ':' == *rlpbuf) {	// colon after label, add it
 					*rlppos++ = *rlpbuf++;
 					IsLabel = false;
@@ -1173,20 +1049,22 @@ EReturn ReadFile() {
 	while (ReadLine()) {
 		const bool isInsideDupCollectingLines = !RepeatStack.empty() && !RepeatStack.top().IsInWork;
 		if (!isInsideDupCollectingLines) {
+			// check for ending of IF/IFN/... block (keywords: ENDIF, ELSE and ELSEIF)
 			char* p = line;
 			SkipBlanks(p);
 			if ('.' == *p) ++p;
-			if (cmphstr(p, "endif")) {
+			EReturn retVal = END;
+			if (cmphstr(p, "elseif")) retVal = ELSEIF;
+			if (cmphstr(p, "else")) retVal = ELSE;
+			if (cmphstr(p, "endif")) retVal = ENDIF;
+			if (END != retVal) {
+				// one of the end-block keywords was found, don't parse it as regular line
+				// but just substitute the rest of it and return end value of the keyword
 				++CompiledCurrentLine;
 				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
-				substitutedLine = line;		// override substituted listing for ENDIF
-				return ENDIF;
-			} else if (cmphstr(p, "else")) {
-				++CompiledCurrentLine;
-				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
-				substitutedLine = line;		// override substituted listing for ELSE
-				ListFile();
-				return ELSE;
+				substitutedLine = line;		// for listing override substituted line with source
+				if (ENDIF != retVal) ListFile();	// do the listing for ELSE and ELSEIF
+				return retVal;
 			}
 		}
 		ParseLineSafe();
@@ -1220,6 +1098,14 @@ EReturn SkipFile() {
 				substitutedLine = line;		// override substituted listing for ELSE
 				ListFile();
 				return ELSE;
+			}
+		} else if (cmphstr(p, "elseif")) {
+			if (!iflevel) {
+				++CompiledCurrentLine;
+				lp = ReplaceDefine(p);		// skip any empty substitutions and comments
+				substitutedLine = line;		// override substituted listing for ELSEIF
+				ListFile();
+				return ELSEIF;
 			}
 		}
 		ListFile(true);
@@ -1266,20 +1152,25 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	return 0;
 }
 
-void WriteExp(char* n, aint v) {
+void WriteLabelEquValue(char* name, aint value, FILE* f) {
+	if (nullptr == f) return;
 	char lnrs[16],* l = lnrs;
+	STRCPY(temp, LINEMAX-2, name);
+	STRCAT(temp, LINEMAX-1, ": EQU ");
+	STRCAT(temp, LINEMAX-1, "0x");
+	PrintHex32(l, value); *l = 0;
+	STRCAT(temp, LINEMAX-1, lnrs);
+	STRCAT(temp, LINEMAX-1, "\n");
+	fputs(temp, f);
+}
+
+void WriteExp(char* n, aint v) {
 	if (FP_ExportFile == NULL) {
 		if (!FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) {
 			Error("Error opening file", Options::ExportFName, FATAL);
 		}
 	}
-	STRCPY(ErrorLine, LINEMAX2, n);
-	STRCAT(ErrorLine, LINEMAX2-1, ": EQU ");
-	STRCAT(ErrorLine, LINEMAX2-1, "0x");
-	PrintHex32(l, v); *l = 0;
-	STRCAT(ErrorLine, LINEMAX2-1, lnrs);
-	STRCAT(ErrorLine, LINEMAX2-1, "\n");
-	fputs(ErrorLine, FP_ExportFile);
+	WriteLabelEquValue(n, v, FP_ExportFile);
 }
 
 /////// source-level-debugging support by Ckirby

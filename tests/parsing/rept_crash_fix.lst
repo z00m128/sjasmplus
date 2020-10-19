@@ -1,0 +1,37 @@
+# file opened: rept_crash_fix.asm
+ 1    0000              ; regular correct nested DUP (just to be sure it still works)
+ 2    0000                  DUP     2
+ 3    0000             >        DUP     2
+ 4    0000 27          >            daa
+ 4    0001 27          >            daa
+ 5    0002             >        EDUP
+ 3    0002             >        DUP     2
+ 4    0002 27          >            daa
+ 4    0003 27          >            daa
+ 5    0004             >        EDUP
+ 6    0004                  EDUP
+ 7    0004
+ 8    0004              ; first variant of problem -> correct amount of EDUPs
+ 9    0004              ; but nested <count> expression syntax error happens, making nested DUP suddenly missing
+10    0004                  DUP     2
+11    0004 00          >        nop
+rept_crash_fix.asm(12): error: [DUP/REPT] Syntax error in <count>: 
+12    0005             >    DUP
+13    0005 00          >        nop
+rept_crash_fix.asm(14): error: [EDUP/ENDR] End repeat without repeat
+14    0006             >    EDUP
+11    0006 00          >        nop
+rept_crash_fix.asm(12): error: [DUP/REPT] Syntax error in <count>: 
+12    0007             >    DUP
+13    0007 00          >        nop
+rept_crash_fix.asm(14): error: [EDUP/ENDR] End repeat without repeat
+14    0008             >    EDUP
+15    0008                  EDUP
+16    0008
+17    0008              ; second variant of problem -> EDUP missing for real, completely
+18    0008                  DUP     3
+# file closed: rept_crash_fix.asm
+rept_crash_fix.asm(18): error: [DUP/REPT] missing EDUP/ENDR to end repeat-block
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -1,2 +1,2 @@
-ma.lb: equ 0x00000006
-ma.lb2: equ 0x00000008
+ma.lb: EQU 0x00000006
+ma.lb2: EQU 0x00000008

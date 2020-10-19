@@ -1,4 +1,4 @@
-    OUTPUT "dir_if_ifn.bin"     ; final output should be 10x 'v'
+    OUTPUT "dir_if_ifn.bin"     ; final output should be 8x 'v'
 
     ;; Check IF functionality in normal code
     IF 5 < 3 && 2 < 10
@@ -42,15 +42,15 @@
         ENDIF
     ENDIF
 
-    ; check the new multi-ELSE warning
+    ; check the multi-ELSE error
     IF 3 < 2
         false
     ELSE
         halt    ; true
-    ELSE        ; + warning
+    ELSE        ; error (only single else is permitted)
         false again
-    ELSE        ; + warning
-        halt    ; true
+    ELSE        ; error
+        false again
     ENDIF
 
     ;; Check IFN functionality in normal code
@@ -95,13 +95,13 @@
         ENDIF
     ENDIF
 
-    ; check the new multi-ELSE warning
+    ; check the multi-ELSE error
     IFN 3 < 2
         halt    ; true
     ELSE
         false
-    ELSE        ; + warning
-        halt    ; true
-    ELSE        ; + warning
+    ELSE        ; error (only single else is permitted)
+        false again
+    ELSE        ; error
         false again
     ENDIF

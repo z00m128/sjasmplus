@@ -12,7 +12,7 @@
     MACRO .CHK address?
         OPT push listoff
 .SUM = 0                        ; init values for checksumming
-.ADR = address? ASSERT address? < $   ; starting address must be below current
+.ADR = address? : ASSERT address? < $   ; starting address must be below current
         DUP $ - address?        ; do simple sum of all bytes
 .SUM = .SUM + {B .ADR}
 .ADR = .ADR + 1
@@ -24,8 +24,8 @@
     ; similar as .CHK macro, but does use XOR to calculate checksum
     MACRO .CHKXOR address?
         OPT push listoff
-.CSUM = 0                        ; init values for checksumming
-.ADR = address? ASSERT address? < $   ; starting address must be below current
+.CSUM = 0                       ; init values for checksumming
+.ADR = address? : ASSERT address? < $   ; starting address must be below current
         DUP $ - address?        ; do simple sum of all bytes
 .CSUM = .CSUM ^ {B .ADR}
 .ADR = .ADR + 1
