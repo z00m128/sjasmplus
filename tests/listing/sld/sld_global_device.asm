@@ -1,0 +1,3 @@
+    ORG $8000
+    ld b,c
+    DEVICE ZXSPECTRUMNEXT

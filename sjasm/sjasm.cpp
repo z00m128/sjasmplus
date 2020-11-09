@@ -163,10 +163,14 @@ namespace Options {
 
 } // eof namespace Options
 
-CDevice *Devices = 0;
-CDevice *Device = 0;
-CDevicePage *Page = 0;
-char* DeviceID = 0;
+CDevice *Devices = nullptr;
+CDevice *Device = nullptr;
+CDevicePage *Page = nullptr;
+char* DeviceID = nullptr;
+TextFilePos globalDeviceSourcePos = TextFilePos();
+aint deviceDirectivesCount = 0;
+static char* globalDeviceID = nullptr;
+static aint globalDeviceZxRamTop = 0;
 
 // extend
 const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either full or basename (--fullpath)
@@ -229,10 +233,6 @@ TextFilePos LuaStartPos;
 
 #endif //USE_LUA
 
-int deviceDirectivesCounter = 0;
-static char* globalDeviceID = NULL;
-static aint globalDeviceZxRamTop = 0;
-
 void InitPass() {
 	Relocation::InitPass();
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
@@ -250,7 +250,6 @@ void InitPass() {
 	macrolabp = NULL;
 	listmacro = 0;
 	CurAddress = 0;
-	CurSourcePos = DefinitionPos = TextFilePos();	// reset current source/definition positions
 	CompiledCurrentLine = 0;
 	PseudoORG = DISP_NONE; adrdisp = 0; dispPageNum = LABEL_PAGE_UNDEFINED;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
@@ -261,16 +260,32 @@ void InitPass() {
 	MacroDefineTable.ReInit();
 	DefineTable = Options::CmdDefineTable;
 	LocalLabelTable.InitPass();
-	// reset "device" stuff
-	if (2 == pass && Devices && 1 == deviceDirectivesCounter) {	// only single device detected
-		globalDeviceID = STRDUP(Devices->ID);		// make it global for remaining passes
+
+	// reset "device" stuff + detect "global device" directive
+	if (globalDeviceID) {		// globalDeviceID detector has to trigger before every pass
+		free(globalDeviceID);
+		globalDeviceID = nullptr;
+	}
+	if (1 < pass && 1 == deviceDirectivesCount && Devices) {	// only single DEVICE used
+		globalDeviceID = STRDUP(Devices->ID);		// make it global for next pass
 		globalDeviceZxRamTop = Devices->ZxRamTop;
 	}
 	if (Devices) delete Devices;
-	Devices = Device = NULL;
-	DeviceID = NULL;
-	Page = NULL;
-	deviceDirectivesCounter = 0;
+	Devices = Device = nullptr;
+	DeviceID = nullptr;
+	Page = nullptr;
+	deviceDirectivesCount = 0;
+	// resurrect "global" device here
+	if (globalDeviceID) {
+		CurSourcePos = globalDeviceSourcePos;
+		DefinitionPos = TextFilePos();
+		if (!SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
+			Error("Failed to re-initialize global device", globalDeviceID, FATAL);
+		}
+	}
+
+	// reset current source/definition positions
+	CurSourcePos = DefinitionPos = TextFilePos();
 
 	// predefined defines - (deprecated) classic sjasmplus v1.x (till v1.15.1)
 	DefineTable.Replace("_SJASMPLUS", "1");
@@ -291,19 +306,14 @@ void InitPass() {
 	DefineTable.Replace("__LINE__", "<dynamic value>");		// current line in current file
 	DefineTable.Replace("__COUNTER__", "<dynamic value>");	// gcc-like, incremented upon every use
 	PredefinedCounter = 0;
-
-	// resurrect "global" device here
-	if (globalDeviceID && !SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
-		Error("Failed to re-initialize global device", globalDeviceID, FATAL);
-	}
 }
 
 void FreeRAM() {
 	if (Devices) {
-		delete Devices;		Devices = NULL;
+		delete Devices;		Devices = nullptr;
 	}
 	if (globalDeviceID) {
-		free(globalDeviceID);	globalDeviceID = NULL;
+		free(globalDeviceID);	globalDeviceID = nullptr;
 	}
 	lijstp = NULL;		// do not delete this, should be released by owners of DUP/regular macros
 	free(vorlabp);		vorlabp = NULL;
@@ -706,13 +716,9 @@ int main(int argc, char **argv) {
 
 	do {
 		++pass;
+		if (pass == LASTPASS) OpenSld();	//open source level debugging file (BEFORE InitPass)
 		InitPass();
-
-		if (pass == LASTPASS) {
-			OpenDest();
-			//open source level debugging file
-			OpenSld();
-		}
+		if (pass == LASTPASS) OpenDest();
 
 		for (SSource & src : sourceFiles) {
 			IsRunning = 1;

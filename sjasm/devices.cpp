@@ -197,6 +197,25 @@ int SetDevice(char *id, const aint ramtop) {
 	if (ramtop && Device->ZxRamTop && ramtop != Device->ZxRamTop) {
 		Warning("[DEVICE] this device was already opened with different RAMTOP value");
 	}
+	if (IsSldExportActive()) {
+		// SLD tracing data are being exported, export the device data
+		int pageSize = Device->GetCurrentSlot()->Size;
+		int pageCount = Device->PagesCount;
+		int slotsCount = Device->SlotsCount;
+		char buf[LINEMAX];
+		snprintf(buf, LINEMAX, "pages.size:%d,pages.count:%d,slots.count:%d",
+			pageSize, pageCount, slotsCount
+		);
+		for (int slotI = 0; slotI < slotsCount; ++slotI) {
+			size_t bufLen = strlen(buf);
+			char* bufAppend = buf + bufLen;
+			snprintf(bufAppend, LINEMAX-bufLen,
+						(0 == slotI) ? ",slots.adr:%d" : ",%d",
+						Device->GetSlot(slotI)->Address);
+		}
+		// pagesize
+		WriteToSldFile(-1,-1,'Z',buf);
+	}
 	return true;
 }
 

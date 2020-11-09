@@ -1,0 +1,9 @@
+# file opened: sld_global_device.asm
+1     0000                  ORG $8000
+2     8000 41               ld b,c
+3     8001                  DEVICE ZXSPECTRUMNEXT
+4     8001
+# file closed: sld_global_device.asm
+
+Value    Label
+------ - -----------------------------------------------------------

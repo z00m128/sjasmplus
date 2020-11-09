@@ -2037,9 +2037,12 @@ void dirINCLUDELUA() {
 #endif //USE_LUA
 
 void dirDEVICE() {
-	++deviceDirectivesCounter;		// any usage counts, even invalid
-	char* id = GetID(lp);
+	// refresh source position of first DEVICE directive
+	if (1 == ++deviceDirectivesCount) {
+		globalDeviceSourcePos = CurSourcePos;
+	}
 
+	char* id = GetID(lp);
 	if (id) {
 		aint ramtop = 0;
 		if (anyComma(lp)) {
@@ -2050,26 +2053,11 @@ void dirDEVICE() {
 			  	ErrorInt("[DEVICE] valid range for RAMTOP is $5D00..$FFFF", ramtop); return;
 			}
 		}
-		if (!SetDevice(id, ramtop)) {
-			Error("[DEVICE] Invalid parameter", id, IF_FIRST);
-		} else if (IsSldExportActive()) {
-			// SLD tracing data are being exported, export the device data
-			int pageSize = Device->GetCurrentSlot()->Size;
-			int pageCount = Device->PagesCount;
-			int slotsCount = Device->SlotsCount;
-			char buf[LINEMAX];
-			snprintf(buf, LINEMAX, "pages.size:%d,pages.count:%d,slots.count:%d",
-				pageSize, pageCount, slotsCount
-			);
-			for (int slotI = 0; slotI < slotsCount; ++slotI) {
-				size_t bufLen = strlen(buf);
-				char* bufAppend = buf + bufLen;
-				snprintf(bufAppend, LINEMAX-bufLen,
-						 (0 == slotI) ? ",slots.adr:%d" : ",%d",
-						 Device->GetSlot(slotI)->Address);
+		// if (1 == deviceDirectivesCount && Device) -> device was already set globally, skip SetDevice
+		if (1 < deviceDirectivesCount || !Devices) {
+			if (!SetDevice(id, ramtop)) {
+				Error("[DEVICE] Invalid parameter", id, IF_FIRST);
 			}
-			// pagesize
-			WriteToSldFile(-1,-1,'Z',buf);
 		}
 	} else {
 		Error("[DEVICE] Syntax error in <deviceid>", lp, SUPPRESS);

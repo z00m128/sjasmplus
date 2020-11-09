@@ -106,7 +106,8 @@ extern CDevice *Devices;
 extern CDevice *Device;
 extern CDevicePage *Page;
 extern char* DeviceID;
-extern int deviceDirectivesCounter;
+extern TextFilePos globalDeviceSourcePos;
+extern aint deviceDirectivesCount;
 
 //*current* full file name (used as full for CurSourcePos when `--fullpath`)
 //content at this pointer is immutable and valid till assembler exits, so you can archive/reuse it
