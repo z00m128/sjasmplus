@@ -1107,6 +1107,15 @@ EReturn SkipFile() {
 				ListFile();
 				return ELSEIF;
 			}
+		} else if (cmphstr(p, "lua")) {		// lua script block detected, skip it whole
+			// with extra custom while loop, to avoid confusion by `if/...` inside lua scripts
+			ListFile(true);
+			while (ReadLine()) {
+				p = line;
+				SkipBlanks(p);
+				if (cmphstr(p, "endlua")) break;
+				ListFile(true);
+			}
 		}
 		ListFile(true);
 	}
