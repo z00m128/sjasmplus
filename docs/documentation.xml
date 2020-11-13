@@ -210,6 +210,7 @@
 - <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
 - minor bugfixes in parser and listing-line-numbering
 - Added <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm">example (chargfx2asm)</ulink> how to use sjasmplus as byte-processor for binary files
+- <link linkend="c_sld_data">SLD data</link> improvements based on Maziac's feedback and DeZog's needs
 </synopsis>
             </listitem>
           </varlistentry>

@@ -756,32 +756,9 @@ int ParseMacro() {
 	return 0;
 }
 
-static bool PageDiffersWarningShown = false;
-
 void ParseInstruction() {
 	if ('@' == *lp) ++lp;		// skip single '@', if it was used to inhibit macro expansion
-	if (ParseDirective()) {
-		return;
-	}
-
-	// SLD (Source Level Debugging) tracing-data logging
-	if (IsSldExportActive()) {
-		int pageNum = Page->Number;
-		if (DISP_NONE != PseudoORG) {
-			int mappingPageNum = Device->GetPageOfA16(CurAddress);
-			if (LABEL_PAGE_UNDEFINED == dispPageNum) {	// special DISP page is not set, use mapped
-				pageNum = mappingPageNum;
-			} else {
-				pageNum = dispPageNum;					// special DISP page is set, use it instead
-				if (pageNum != mappingPageNum && !PageDiffersWarningShown) {
-					Warning("DISP memory page differs from current mapping");
-					PageDiffersWarningShown = true;		// show warning about different mapping only once
-				}
-			}
-		}
-		WriteToSldFile(pageNum, CurAddress);
-	}
-
+	if (ParseDirective()) return;
 	Z80::GetOpCode();
 }
 

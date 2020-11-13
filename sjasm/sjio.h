@@ -46,10 +46,10 @@ FILE* GetListingFile();
 void ListFile(bool showAsSkipped = false);
 void ListSilentOrExternalEmits();
 void CheckRamLimitExceeded();
-void EmitByte(int byte);
-void EmitWord(int word);
-void EmitBytes(const int* bytes);
-void EmitWords(int* words);
+void EmitByte(int byte, bool isInstructionStart = false);
+void EmitWord(int word, bool isInstructionStart = false);
+void EmitBytes(const int* bytes, bool isInstructionStart = false);
+void EmitWords(int* words, bool isInstructionStart = false);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
 bool DidEmitByte();		// returns true if some byte was emitted since last call to this function
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false, stdin_log_t* fStdinLog = nullptr);

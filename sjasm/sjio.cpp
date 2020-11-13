@@ -294,7 +294,28 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 	if (DISP_NONE != PseudoORG) ++adrdisp;
 }
 
-void EmitByte(int byte) {
+static bool PageDiffersWarningShown = false;
+
+void EmitByte(int byte, bool isInstructionStart) {
+	if (isInstructionStart) {
+		// SLD (Source Level Debugging) tracing-data logging
+		if (IsSldExportActive()) {
+			int pageNum = Page->Number;
+			if (DISP_NONE != PseudoORG) {
+				int mappingPageNum = Device->GetPageOfA16(CurAddress);
+				if (LABEL_PAGE_UNDEFINED == dispPageNum) {	// special DISP page is not set, use mapped
+					pageNum = mappingPageNum;
+				} else {
+					pageNum = dispPageNum;					// special DISP page is set, use it instead
+					if (pageNum != mappingPageNum && !PageDiffersWarningShown) {
+						Warning("DISP memory page differs from current mapping");
+						PageDiffersWarningShown = true;		// show warning about different mapping only once
+					}
+				}
+			}
+			WriteToSldFile(pageNum, CurAddress);
+		}
+	}
 	byte &= 0xFF;
 	if (nListBytes < LIST_EMIT_BYTES_BUFFER_SIZE-1) {
 		ListEmittedBytes[nListBytes++] = byte;		// write also into listing
@@ -307,21 +328,27 @@ void EmitByte(int byte) {
 	EmitByteNoListing(byte);
 }
 
-void EmitWord(int word) {
-	EmitByte(word % 256);
-	EmitByte(word / 256);
+void EmitWord(int word, bool isInstructionStart) {
+	EmitByte(word % 256, isInstructionStart);
+	EmitByte(word / 256, false);
 }
 
-void EmitBytes(const int* bytes) {
+void EmitBytes(const int* bytes, bool isInstructionStart) {
 	if (*bytes == -1) {
 		Error("Illegal instruction", line, IF_FIRST);
 		SkipToEol(lp);
 	}
-	while (*bytes != -1) EmitByte(*bytes++);
+	while (*bytes != -1) {
+		EmitByte(*bytes++, isInstructionStart);
+		isInstructionStart = false;		// only true for first byte
+	}
 }
 
-void EmitWords(int* words) {
-	while (*words != -1) EmitWord(*words++);
+void EmitWords(int* words, bool isInstructionStart) {
+	while (*words != -1) {
+		EmitWord(*words++, isInstructionStart);
+		isInstructionStart = false;		// only true for first word
+	}
 }
 
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {

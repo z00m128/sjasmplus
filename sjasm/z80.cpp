@@ -495,7 +495,7 @@ namespace Z80 {
 					}
 				}
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -561,7 +561,7 @@ namespace Z80 {
 				default:	break;		// unreachable (already validated by `CommonAluOpcode` call)
 				}
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -569,7 +569,7 @@ namespace Z80 {
 		do {
 			int e[] { -1, -1, -1, -1};
 			CommonAluOpcode(0xa0, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -578,7 +578,7 @@ namespace Z80 {
 			int e[] { -1, -1, -1, -1, -1 };
 			byte bit = GetByteNoMem(lp);
 			if (comma(lp) && bit <= 7) OpCode_CbFamily(8 * bit + 0x40, e, false);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -587,7 +587,7 @@ namespace Z80 {
 			Error("[BREAK] fake instruction \"break\" must be specifically enabled by --zxnext=cspect option");
 			return;
 		}
-		EmitByte(0xDD);
+		EmitByte(0xDD, true);
 		EmitByte(0x01);
 	}
 
@@ -605,7 +605,7 @@ namespace Z80 {
 		} else {
 			Error("Z80N barrel shifts exist only with \"DE,B\" arguments", bp, SUPPRESS);
 		}
-		EmitBytes(e);
+		EmitBytes(e, true);
 	}
 
 	static void OpCode_Next_BRLC() {
@@ -645,48 +645,48 @@ namespace Z80 {
 			check16(callad);
 			e[1] = callad & 255; e[2] = (callad >> 8) & 255;
 			Relocation::resolveRelocationAffected(1);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_CCF() {
-		EmitByte(0x3f);
+		EmitByte(0x3f, true);
 	}
 
 	static void OpCode_CP() {
 		do {
 			int e[] { -1, -1, -1, -1};
 			CommonAluOpcode(0xb8, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_CPD() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xA9);
 	}
 
 	static void OpCode_CPDR() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xB9);
 	}
 
 	static void OpCode_CPI() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xA1);
 	}
 
 	static void OpCode_CPIR() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xB1);
 	}
 
 	static void OpCode_CPL() {
-		EmitByte(0x2f);
+		EmitByte(0x2f, true);
 	}
 
 	static void OpCode_DAA() {
-		EmitByte(0x27);
+		EmitByte(0x27, true);
 	}
 
 	static void OpCode_DecInc(const int base8bOpcode, const int base16bOpcode, int* e) {
@@ -714,12 +714,12 @@ namespace Z80 {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			OpCode_DecInc(0x05, 0x0B, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_DI() {
-		EmitByte(0xf3);
+		EmitByte(0xf3, true);
 	}
 
 	static void OpCode_DJNZ() {
@@ -738,13 +738,13 @@ namespace Z80 {
 				Error(el); jmp = 0;
 			}
 			e[0] = 0x10; e[1] = jmp & 0xFF;
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 		Relocation::isResultAffected = false;	// DJNZ is always relocatable
 	}
 
 	static void OpCode_EI() {
-		EmitByte(0xfb);
+		EmitByte(0xfb, true);
 	}
 
 	static void OpCode_EX() {
@@ -783,15 +783,15 @@ namespace Z80 {
 				;
 			}
 		}
-		EmitBytes(e);
+		EmitBytes(e, true);
 	}
 
 	static void OpCode_EXA() {
-		EmitByte(0x08);
+		EmitByte(0x08, true);
 	}
 
 	static void OpCode_EXD() {
-		EmitByte(0xeb);
+		EmitByte(0xeb, true);
 	}
 
 	static void OpCode_Next_EXIT() {	// this is fake instruction for CSpect emulator, not for real Z80N
@@ -799,16 +799,16 @@ namespace Z80 {
 			Error("[EXIT] fake instruction \"exit\" must be specifically enabled by --zxnext=cspect option");
 			return;
 		}
-		EmitByte(0xDD);
+		EmitByte(0xDD, true);
 		EmitByte(0x00);
 	}
 
 	static void OpCode_EXX() {
-		EmitByte(0xd9);
+		EmitByte(0xd9, true);
 	}
 
 	static void OpCode_HALT() {
-		EmitByte(0x76);
+		EmitByte(0x76, true);
 	}
 
 	static void OpCode_IM() {
@@ -818,7 +818,7 @@ namespace Z80 {
 			e[0] = 0xed;
 			e[1] = machineCode[mode];
 		}
-		EmitBytes(e);
+		EmitBytes(e, true);
 	}
 
 	static void OpCode_IN() {
@@ -845,7 +845,7 @@ namespace Z80 {
 					if (Z80_A == reg) e[0] = 0xdb;	// IN A,(n)
 				}
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -853,32 +853,32 @@ namespace Z80 {
 		do {
 			int e[] { -1, -1, -1, -1 };
 			OpCode_DecInc(0x04, 0x03, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_IND() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xAA);
 	}
 
 	static void OpCode_INDR() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xBA);
 	}
 
 	static void OpCode_INI() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xA2);
 	}
 
 	static void OpCode_INIR() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xB2);
 	}
 
 	static void OpCode_INF() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x70);
 	}
 
@@ -923,7 +923,7 @@ namespace Z80 {
 				e[1] = jpad & 255; e[2] = (jpad >> 8) & 255;
 				Relocation::resolveRelocationAffected(1);
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -949,7 +949,7 @@ namespace Z80 {
 				jrad = 0;
 			}
 			e[1] = jrad & 0xFF;
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 		Relocation::isResultAffected = false;	// relative jump is always relocatable
 	}
@@ -1097,7 +1097,7 @@ namespace Z80 {
 			// resolve all register to register cases or fixed memory literals
 			// "(hl)|(ixy+d)|(hl+)|(hl-)" (but not other memory or constant)
 			if (Z80_UNK != reg1 && LD_simple_r_r(e, reg1)) {
-				EmitBytes(e);
+				EmitBytes(e, true);
 				continue;
 			}
 			// memory, constant, fake instruction or syntax error is involved
@@ -1286,7 +1286,7 @@ namespace Z80 {
 			default:
 				break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -1300,13 +1300,13 @@ namespace Z80 {
 			const Z80Reg r2 = comma_ok ? GetRegister(lp) : Z80_UNK;
 			if (Z80_MEM_HL == r1 && Z80_A == r2) e[0] = 0x32;
 			if (Z80_A == r1 && Z80_MEM_HL == r2) e[0] = 0x3A;
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_LDD() {
 		if (Options::noFakes(false)) {
-			EmitByte(0xED);
+			EmitByte(0xED, true);
 			EmitByte(0xA8);
 			return;
 		}
@@ -1388,12 +1388,12 @@ namespace Z80 {
 					e[0] = 0xed; e[1] = 0xa8;			// regular LDD
 				}
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_LDDR() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xB8);
 	}
 
@@ -1402,7 +1402,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xBC);
 	}
 
@@ -1411,7 +1411,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xAC);
 	}
 
@@ -1441,7 +1441,7 @@ namespace Z80 {
 					e[1] = a8 & 0xFF;
 					break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -1455,13 +1455,13 @@ namespace Z80 {
 			const Z80Reg r2 = comma_ok ? GetRegister(lp) : Z80_UNK;
 			if (Z80_MEM_HL == r1 && Z80_A == r2) e[0] = 0x22;
 			if (Z80_A == r1 && Z80_MEM_HL == r2) e[0] = 0x2A;
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_LDI() {
 		if (Options::noFakes(false)) {
-			EmitByte(0xED);
+			EmitByte(0xED, true);
 			EmitByte(0xA0);
 			return;
 		}
@@ -1574,12 +1574,12 @@ namespace Z80 {
 				}
 			}
 
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_LDIR() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xB0);
 	}
 
@@ -1589,7 +1589,7 @@ namespace Z80 {
 // 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 // 			return;
 // 		}
-// 		EmitByte(0xED);
+// 		EmitByte(0xED, true);
 // 		EmitByte(0xB6);
 // 	}
 
@@ -1598,7 +1598,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xB4);
 	}
 
@@ -1607,7 +1607,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xA4);
 	}
 
@@ -1616,7 +1616,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xB7);
 	}
 
@@ -1625,7 +1625,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xA5);
 	}
 
@@ -1639,7 +1639,7 @@ namespace Z80 {
 			Error("[MIRROR] Illegal operand (can be only register A)", line);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x24);
 	}
 
@@ -1661,7 +1661,7 @@ namespace Z80 {
 			Error("Z80N MUL exist only with \"D,E\" arguments", bp, SUPPRESS);
 			return;
 		}
-		EmitBytes(e);
+		EmitBytes(e, true);
 	}
 
 	static void OpCode_MULUB() {
@@ -1683,7 +1683,7 @@ namespace Z80 {
 		default:
 			;
 		}
-		EmitBytes(e);
+		EmitBytes(e, true);
 	}
 
 	static void OpCode_MULUW() {
@@ -1701,11 +1701,11 @@ namespace Z80 {
 		default:
 			;
 		}
-		EmitBytes(e);
+		EmitBytes(e, true);
 	}
 
 	static void OpCode_NEG() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x44);
 	}
 
@@ -1739,29 +1739,29 @@ namespace Z80 {
 				default:
 					break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_NOP() {
-		EmitByte(0x0);
+		EmitByte(0x0, true);
 	}
 
 	static void OpCode_OR() {
 		do {
 			int e[] { -1, -1, -1, -1};
 			CommonAluOpcode(0xb0, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_OTDR() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xBB);
 	}
 
 	static void OpCode_OTIR() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xB3);
 	}
 
@@ -1791,17 +1791,17 @@ namespace Z80 {
 				e[1] = GetByte(lp);		// out ($n),a
 				if (comma(lp) && GetRegister(lp) == Z80_A) e[0] = 0xd3;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_OUTD() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xAB);
 	}
 
 	static void OpCode_OUTI() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0xA3);
 	}
 
@@ -1810,7 +1810,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x90);
 	}
 
@@ -1821,7 +1821,7 @@ namespace Z80 {
 		}
 		char *oldLp = lp;
 		if (Z80_HL != GetRegister(lp)) lp = oldLp;		// "eat" explicit HL argument
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x94);
 	}
 
@@ -1832,7 +1832,7 @@ namespace Z80 {
 		}
 		char *oldLp = lp;
 		if (Z80_HL != GetRegister(lp)) lp = oldLp;		// "eat" explicit HL argument
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x93);
 	}
 
@@ -1857,7 +1857,7 @@ namespace Z80 {
 				c = 0; break;
 			}
 		} while (c && 2 <= t && Options::syx.MultiArg(lp));
-		EmitBytes(&e[t]);
+		EmitBytes(&e[t], true);
 	}
 
 	static void OpCode_POPnormal() {
@@ -1880,7 +1880,7 @@ namespace Z80 {
 			default:
 				break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -1922,7 +1922,7 @@ namespace Z80 {
 			default:
 				break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -1931,24 +1931,24 @@ namespace Z80 {
 			int e[] { -1, -1, -1, -1, -1 };
 			byte bit = GetByteNoMem(lp);
 			if (comma(lp) && bit <= 7) OpCode_CbFamily(8 * bit + 0x80, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_RET() {
 		Z80Cond cc = getz80cond(lp);
-		if (Z80C_UNK == cc) EmitByte(0xc9);
-		else 				EmitByte(0xc0 + cc);
+		if (Z80C_UNK == cc) EmitByte(0xc9, true);
+		else 				EmitByte(0xc0 + cc, true);
 		// multi-argument was intetionally removed by Ped7g (explain in issue why you want *that*?)
 	}
 
 	static void OpCode_RETI() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x4D);
 	}
 
 	static void OpCode_RETN() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x45);
 	}
 
@@ -1966,28 +1966,28 @@ namespace Z80 {
 				break;
 			default:		break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_RLA() {
-		EmitByte(0x17);
+		EmitByte(0x17, true);
 	}
 
 	static void OpCode_RLC() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
 			OpCode_CbFamily(0x00, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_RLCA() {
-		EmitByte(0x7);
+		EmitByte(0x7, true);
 	}
 
 	static void OpCode_RLD() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x6F);
 	}
 
@@ -2005,28 +2005,28 @@ namespace Z80 {
 				break;
 			default:		break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_RRA() {
-		EmitByte(0x1f);
+		EmitByte(0x1f, true);
 	}
 
 	static void OpCode_RRC() {
 		do {
 			int e[] { -1, -1, -1, -1, -1 };
 			OpCode_CbFamily(0x08, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_RRCA() {
-		EmitByte(0xf);
+		EmitByte(0xf, true);
 	}
 
 	static void OpCode_RRD() {
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x67);
 	}
 
@@ -2037,7 +2037,7 @@ namespace Z80 {
 				Error("[RST] Illegal operand", line); SkipToEol(lp);
 				return;
 			} else {			// e == { $00, $08, $10, $18, $20, $28, $30, $38 }
-				EmitByte(0xC7 + e);
+				EmitByte(0xC7 + e, true);
 			}
 		} while (Options::syx.MultiArg(lp));
 	}
@@ -2060,12 +2060,12 @@ namespace Z80 {
 					}
 				}
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_SCF() {
-		EmitByte(0x37);
+		EmitByte(0x37, true);
 	}
 
 	static void OpCode_SET() {
@@ -2073,7 +2073,7 @@ namespace Z80 {
 			int e[] { -1, -1, -1, -1, -1 };
 			byte bit = GetByteNoMem(lp);
 			if (comma(lp) && bit <= 7) OpCode_CbFamily(8 * bit + 0xc0, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -2082,7 +2082,7 @@ namespace Z80 {
 			Error("Z80N instructions are currently disabled", bp, SUPPRESS);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x95);
 	}
 
@@ -2103,7 +2103,7 @@ namespace Z80 {
 				break;
 			default:		break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -2121,7 +2121,7 @@ namespace Z80 {
 				break;
 			default:		break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -2139,7 +2139,7 @@ namespace Z80 {
 				break;
 			default:		break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -2157,12 +2157,12 @@ namespace Z80 {
 				break;
 			default:		break;
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
 	static void OpCode_LR35902_STOP() {	// syntax: STOP [byte_value = 0] = opcode "10 byte_value"
-		EmitByte(0x10);
+		EmitByte(0x10, true);
 		if (SkipBlanks(lp)) {		// is optional byte provided? (if not, default value is zero)
 			EmitByte(0x00);
 		} else {
@@ -2188,7 +2188,7 @@ namespace Z80 {
 					}
 				}
 			}
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
@@ -2203,7 +2203,7 @@ namespace Z80 {
 			Error("[SWAPNIB] Illegal operand (can be only register A)", line);
 			return;
 		}
-		EmitByte(0xED);
+		EmitByte(0xED, true);
 		EmitByte(0x23);
 	}
 
@@ -2213,14 +2213,14 @@ namespace Z80 {
 			return;
 		}
 		int e[] { 0xED, 0x27, GetByteNoMem(lp), -1 };
-		EmitBytes(e);
+		EmitBytes(e, true);
 	}
 
 	static void OpCode_XOR() {
 		do {
 			int e[] { -1, -1, -1, -1};
 			CommonAluOpcode(0xa8, e);
-			EmitBytes(e);
+			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 	}
 
