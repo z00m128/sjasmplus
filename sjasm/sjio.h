@@ -32,6 +32,9 @@ enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM, ELSEIF };
 
 extern int ListAddress;
 
+constexpr int BYTES_END_MARKER = -1;
+constexpr int INSTRUCTION_START_MARKER = -2;
+
 #define OUTPUT_TRUNCATE 0
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2

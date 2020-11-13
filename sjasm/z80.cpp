@@ -1052,6 +1052,7 @@ namespace Z80 {
 			if ((prefix1^prefix2) && (r1 == r2)) {
 				if (prefix2) *e++ = prefix2;
 				*e++ = 0xE5;
+				*e++ = INSTRUCTION_START_MARKER;
 				if (prefix1) *e++ = prefix1;
 				*e++ = 0xE1;
 				return true;
@@ -1060,6 +1061,7 @@ namespace Z80 {
 			if (prefix2) prefix1 = prefix2;		// any non-zero prefix is relevant here
 			if (prefix1) *e++ = prefix1;
 			*e++ = GetRegister_r16High(r2) + GetRegister_r16High(r1)*8 + 0x40;
+			*e++ = INSTRUCTION_START_MARKER;
 			if (prefix1) *e++ = prefix1;
 			*e++ = GetRegister_r16Low(r2) + GetRegister_r16Low(r1)*8 + 0x40;
 			return true;
@@ -1092,7 +1094,7 @@ namespace Z80 {
 		aint b;
 		EBracketType bt;
 		do {
-			int e[] { -1, -1, -1, -1, -1, -1, -1 }, pemaRes;
+			int e[] { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, pemaRes;
 			Z80Reg reg2 = Z80_UNK, reg1 = GetRegister(lp);
 			// resolve all register to register cases or fixed memory literals
 			// "(hl)|(ixy+d)|(hl+)|(hl-)" (but not other memory or constant)
@@ -1142,11 +1144,14 @@ namespace Z80 {
 
 			case Z80_MEM_HL:
 				switch (reg2 = GetRegister(lp)) {
-				case Z80_BC: case Z80_DE:
+				case Z80_BC: case Z80_DE:	// fake ld (hl),bc|de
 					if (Options::noFakes()) break;
-					e[0] = 0x70 + GetRegister_r16Low(reg2); e[1] = 0x23;
-					e[2] = 0x70 + GetRegister_r16High(reg2); e[3] = 0x2b; break;
-				case Z80_UNK:
+					e[0] = 0x70 + GetRegister_r16Low(reg2);		e[1] = INSTRUCTION_START_MARKER;
+					e[2] = 0x23;								e[3] = INSTRUCTION_START_MARKER;
+					e[4] = 0x70 + GetRegister_r16High(reg2);	e[5] = INSTRUCTION_START_MARKER;
+					e[6] = 0x2b;
+					break;
+				case Z80_UNK:	// ld (hl),n
 					e[0] = 0x36; e[1] = GetByteNoMem(lp); break;
 				default:
 					break;
@@ -1159,8 +1164,12 @@ namespace Z80 {
 				case Z80_BC: case Z80_DE: case Z80_HL:
 					if (Options::noFakes()) break;		//fake LD (ixy+#),r16
 					if (e[2] == 127) Error("Offset out of range", nullptr, IF_FIRST);
-					e[0] = e[3] = reg1&0xFF; e[1] = 0x70+GetRegister_r16Low(reg2);
-					e[4] = 0x70+GetRegister_r16High(reg2); e[5] = e[2] + 1;
+					else e[0] = reg1&0xFF;
+					e[1] = 0x70+GetRegister_r16Low(reg2);
+					e[3] = INSTRUCTION_START_MARKER;
+					e[4] = reg1&0xFF;
+					e[5] = 0x70+GetRegister_r16High(reg2);
+					e[6] = e[2] + 1;
 					break;
 				case Z80_UNK:
 					e[0] = reg1&0xFF; e[1] = 0x36; e[3] = GetByteNoMem(lp);	// LD (ixy+#),imm8
@@ -1176,14 +1185,24 @@ namespace Z80 {
 			case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_MEM_HL:	// invalid combinations filtered already by LD_simple_r_r
-					if (Options::noFakes()) break;
-					e[0] = reg1+0x3e; e[1] = 0x23; e[2] = reg1+0x36; e[3] = 0x2b;
+					if (Options::noFakes()) break;	// fake ld bc|de,(hl)
+					e[0] = reg1+0x3e;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = 0x23;
+					e[3] = INSTRUCTION_START_MARKER;
+					e[4] = reg1+0x36;
+					e[5] = INSTRUCTION_START_MARKER;
+					e[6] = 0x2b;
 					break;
 				case Z80_MEM_IX: case Z80_MEM_IY:	// invalid combinations NOT filtered -> validate
-					if (Z80_SP == reg1 || Options::noFakes()) break;
-					e[1] = reg1+0x3e; e[4] = reg1+0x36; e[2] = GetRegister_lastIxyD; e[5] = e[2]+1;
+					if (Z80_SP == reg1 || Options::noFakes()) break;	// fake bc|de|hl,(ix+#)
+					e[1] = reg1+0x3e;
+					e[5] = reg1+0x36;
+					e[2] = GetRegister_lastIxyD;
+					e[6] = e[2]+1;
 					if (e[2] == 127) Error("Offset out of range", nullptr, IF_FIRST);
-					else e[0] = e[3] = reg2&0xFF;
+					else e[0] = e[4] = reg2&0xFF;
+					e[3] = INSTRUCTION_START_MARKER;
 					break;
 				case Z80_SP:
 					if (Options::IsLR35902 && Z80_HL == reg1) {		// "ld hl,sp+r8" syntax = "F8 r8"
@@ -1313,7 +1332,7 @@ namespace Z80 {
 
 		// only when fakes are enabled (but they may be silent/warning enabled, so extra checks needed)
 		do {
-			int e[] { -1, -1, -1, -1, -1, -1, -1};
+			int e[] { -1, -1, -1, -1, -1, -1, -1, -1 };
 			Z80Reg reg2 = Z80_UNK, reg = GetRegister(lp);
 			switch (reg) {
 			case Z80_A:
@@ -1323,14 +1342,20 @@ namespace Z80 {
 				switch (reg = GetRegister(lp)) {
 				case Z80_BC:	// 0x0A 0x0B
 				case Z80_DE:	// 0x1A 0x1B
-					e[1] = reg-5; if (CloseBracket(lp)) e[0] = reg-6;
+					if (CloseBracket(lp)) e[0] = reg-6;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = reg-5;
 					break;
 				case Z80_HL:	// 0x7E	0x2B
-					e[1] = 0x2b; if (CloseBracket(lp)) e[0] = 0x7e;
+					if (CloseBracket(lp)) e[0] = 0x7e;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = 0x2b;
 					break;
 				case Z80_IX: case Z80_IY:
-					e[1] = 0x7e; e[2] = z80GetIDxoffset(lp); e[4] = 0x2b;
-					if (CloseBracket(lp)) e[0] = e[3] = reg;
+					e[1] = 0x7e; e[2] = z80GetIDxoffset(lp);
+					e[3] = INSTRUCTION_START_MARKER;
+					e[5] = 0x2b;
+					if (CloseBracket(lp)) e[0] = e[4] = reg;
 					break;
 				default:
 					break;
@@ -1341,11 +1366,17 @@ namespace Z80 {
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_MEM_HL:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = 0x46 + reg * 8; e[1] = 0x2b;
+					e[0] = 0x46 + reg * 8;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = 0x2b;
 					break;
 				case Z80_MEM_IX: case Z80_MEM_IY:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = e[3] = reg2&0xFF; e[1] = 0x46 + reg * 8; e[2] = GetRegister_lastIxyD; e[4] = 0x2b;
+					e[0] = e[4] = reg2&0xFF;
+					e[1] = 0x46 + reg * 8;
+					e[2] = GetRegister_lastIxyD;
+					e[3] = INSTRUCTION_START_MARKER;
+					e[5] = 0x2b;
 					break;
 				default:
 					break;
@@ -1356,10 +1387,16 @@ namespace Z80 {
 				switch (reg = GetRegister(lp)) {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = 0x70 + reg; e[1] = 0x2b; break;
+					e[0] = 0x70 + reg;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = 0x2b;
+					break;
 				case Z80_UNK:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = 0x36; e[1] = GetByteNoMem(lp); e[2] = 0x2b; break;
+					e[0] = 0x36; e[1] = GetByteNoMem(lp);
+					e[2] = INSTRUCTION_START_MARKER;
+					e[3] = 0x2b;
+					break;
 				default:
 					break;
 				}
@@ -1369,10 +1406,21 @@ namespace Z80 {
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = e[3] = reg&0xFF; e[2] = GetRegister_lastIxyD; e[1] = 0x70 + reg2; e[4] = 0x2b; break;
+					e[0] = e[4] = reg&0xFF;
+					e[2] = GetRegister_lastIxyD;
+					e[1] = 0x70 + reg2;
+					e[3] = INSTRUCTION_START_MARKER;
+					e[5] = 0x2b;
+					break;
 				case Z80_UNK:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = e[4] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByteNoMem(lp); e[5] = 0x2b; break;
+					e[0] = e[5] = reg&0xFF;
+					e[1] = 0x36;
+					e[2] = GetRegister_lastIxyD;
+					e[3] = GetByteNoMem(lp);
+					e[4] = INSTRUCTION_START_MARKER;
+					e[6] = 0x2b;
+					break;
 				default:
 					break;
 				}
@@ -1383,7 +1431,9 @@ namespace Z80 {
 					if (!CloseBracket(lp) || !comma(lp)) break;
 					if ((Z80_BC != reg && Z80_DE != reg) || Z80_A != GetRegister(lp)) break;
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = reg - 14; e[1] = reg - 5;	// LDD (bc|de),a
+					e[0] = reg - 14;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = reg - 5;	// LDD (bc|de),a
 				} else {
 					e[0] = 0xed; e[1] = 0xa8;			// regular LDD
 				}
@@ -1468,7 +1518,7 @@ namespace Z80 {
 
 		// only when fakes are enabled (but they may be silent/warning enabled, so extra checks needed)
 		do {
-			int e[] { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 			Z80Reg reg2 = Z80_UNK, reg = GetRegister(lp);
 			switch (reg) {
 			case Z80_A:
@@ -1479,15 +1529,19 @@ namespace Z80 {
 				case Z80_BC:	// 0A 03
 				case Z80_DE:	// 1A 13
 					if (CloseBracket(lp)) e[0] = reg - Z80_BC + 0x0a;
-					e[1] = reg - Z80_BC + 0x03;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = reg - Z80_BC + 0x03;
 					break;
 				case Z80_HL:
-					e[1] = 0x23; if (CloseBracket(lp)) e[0] = 0x7e;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = 0x23;
+					if (CloseBracket(lp)) e[0] = 0x7e;
 					break;
 				case Z80_IX:
 				case Z80_IY:
-					e[1] = 0x7e; e[4] = 0x23; e[2] = z80GetIDxoffset(lp);
-					if (CloseBracket(lp)) e[0] = e[3] = reg;
+					e[3] = INSTRUCTION_START_MARKER;
+					e[1] = 0x7e; e[5] = 0x23; e[2] = z80GetIDxoffset(lp);
+					if (CloseBracket(lp)) e[0] = e[4] = reg;
 					break;
 				default:
 					break;
@@ -1499,12 +1553,14 @@ namespace Z80 {
 				Options::noFakes();		// to display warning if "-f"
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_HL:
-					e[1] = 0x23; if (CloseBracket(lp)) e[0] = 0x46 + reg * 8;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[2] = 0x23; if (CloseBracket(lp)) e[0] = 0x46 + reg * 8;
 					break;
 				case Z80_IX:
 				case Z80_IY:
-					e[1] = 0x46 + reg * 8; e[4] = 0x23; e[2] = z80GetIDxoffset(lp);
-					if (CloseBracket(lp)) e[0] = e[3] = reg2;
+					e[3] = INSTRUCTION_START_MARKER;
+					e[1] = 0x46 + reg * 8; e[5] = 0x23; e[2] = z80GetIDxoffset(lp);
+					if (CloseBracket(lp)) e[0] = e[4] = reg2;
 					break;
 				default:
 					break;
@@ -1516,13 +1572,18 @@ namespace Z80 {
 				case Z80_MEM_HL:
 					if (Z80_HL == reg) break;
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = 0x3e + reg; e[1] = e[3] = 0x23; e[2] = 0x36 + reg;
+					e[1] = e[3] = e[5] = INSTRUCTION_START_MARKER;
+					e[0] = 0x3e + reg;
+					e[2] = 0x23;
+					e[4] = 0x36 + reg;
+					e[6] = 0x23;
 					break;
 				case Z80_MEM_IX: case Z80_MEM_IY:
 					Options::noFakes();		// to display warning if "-f"
-					e[2] = e[7] = GetRegister_lastIxyD;
-					e[0] = e[3] = e[5] = e[8] = reg2&0xFF;
-					e[1] = 0x3e + reg; e[6] = 0x36 + reg; e[4] = e[9] = 0x23;
+					e[3] = e[6] = e[10] = INSTRUCTION_START_MARKER;
+					e[2] = e[9] = GetRegister_lastIxyD;
+					e[0] = e[4] = e[7] = e[11] = reg2&0xFF;
+					e[1] = 0x3e + reg; e[8] = 0x36 + reg; e[5] = e[12] = 0x23;
 					break;
 				default:
 					break;
@@ -1533,14 +1594,17 @@ namespace Z80 {
 				switch (reg = GetRegister(lp)) {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = 0x70 + reg; e[1] = 0x23; break;
+					e[1] = INSTRUCTION_START_MARKER;
+					e[0] = 0x70 + reg; e[2] = 0x23; break;
 				case Z80_BC: case Z80_DE:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = 0x70 + GetRegister_r16Low(reg); e[2] = 0x70 + GetRegister_r16High(reg);
-					e[1] = e[3] = 0x23; break;
+					e[1] = e[3] = e[5] = INSTRUCTION_START_MARKER;
+					e[0] = 0x70 + GetRegister_r16Low(reg); e[4] = 0x70 + GetRegister_r16High(reg);
+					e[2] = e[6] = 0x23; break;
 				case Z80_UNK:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = 0x36; e[1] = GetByteNoMem(lp); e[2] = 0x23; break;
+					e[2] = INSTRUCTION_START_MARKER;
+					e[0] = 0x36; e[1] = GetByteNoMem(lp); e[3] = 0x23; break;
 				default:
 					break;
 				}
@@ -1550,14 +1614,18 @@ namespace Z80 {
 				switch (reg2 = GetRegister(lp)) {
 				case Z80_A: case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = e[3] = reg&0xFF; e[2] = GetRegister_lastIxyD; e[1] = 0x70 + reg2; e[4] = 0x23; break;
+					e[3] = INSTRUCTION_START_MARKER;
+					e[0] = e[4] = reg&0xFF; e[2] = GetRegister_lastIxyD; e[1] = 0x70 + reg2; e[5] = 0x23; break;
 				case Z80_BC: case Z80_DE: case Z80_HL:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = e[3] = e[5] = e[8] = reg&0xFF; e[4] = e[9] = 0x23; e[2] = e[7] = GetRegister_lastIxyD;
-					e[1] = 0x70 + GetRegister_r16Low(reg2); e[6] = 0x70 + GetRegister_r16High(reg2); break;
+					e[3] = e[6] = e[10] = INSTRUCTION_START_MARKER;
+					e[0] = e[4] = e[7] = e[11] = reg&0xFF; e[5] = e[12] = 0x23; e[2] = e[9] = GetRegister_lastIxyD;
+					e[1] = 0x70 + GetRegister_r16Low(reg2); e[8] = 0x70 + GetRegister_r16High(reg2); break;
 				case Z80_UNK:
 					Options::noFakes();		// to display warning if "-f"
-					e[0] = e[4] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByteNoMem(lp); e[5] = 0x23; break;
+					e[0] = e[5] = reg&0xFF; e[1] = 0x36; e[2] = GetRegister_lastIxyD; e[3] = GetByteNoMem(lp);
+					e[4] = INSTRUCTION_START_MARKER;
+					e[6] = 0x23; break;
 				default:
 					break;
 				}
@@ -1568,7 +1636,8 @@ namespace Z80 {
 					if (!CloseBracket(lp) || !comma(lp)) break;
 					if ((Z80_BC != reg && Z80_DE != reg) || Z80_A != GetRegister(lp)) break;
 					Options::noFakes();
-					e[0] = reg - 14; e[1] = reg - 13;	// LDI (bc|de),a
+					e[1] = INSTRUCTION_START_MARKER;
+					e[0] = reg - 14; e[2] = reg - 13;	// LDI (bc|de),a
 				} else {
 					e[0] = 0xed; e[1] = 0xa0;			// regular LDI
 				}
@@ -1955,14 +2024,15 @@ namespace Z80 {
 	static void OpCode_RL() {
 		Z80Reg reg;
 		do {
-			int e[] { -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1 };
 			switch (reg = OpCode_CbFamily(0x10, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb;
+				e[2] = INSTRUCTION_START_MARKER;
+				e[0] = e[3] = 0xcb;
 				e[1] = 0x10 + GetRegister_r16Low(reg);
-				e[3] = 0x10 + GetRegister_r16High(reg);
+				e[4] = 0x10 + GetRegister_r16High(reg);
 				break;
 			default:		break;
 			}
@@ -1994,14 +2064,15 @@ namespace Z80 {
 	static void OpCode_RR() {
 		Z80Reg reg;
 		do {
-			int e[] { -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1 };
 			switch (reg = OpCode_CbFamily(0x18, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb;
+				e[2] = INSTRUCTION_START_MARKER;
+				e[0] = e[3] = 0xcb;
 				e[1] = 0x18 + GetRegister_r16High(reg);
-				e[3] = 0x18 + GetRegister_r16Low(reg);
+				e[4] = 0x18 + GetRegister_r16Low(reg);
 				break;
 			default:		break;
 			}
@@ -2089,7 +2160,7 @@ namespace Z80 {
 	static void OpCode_SLA() {
 		Z80Reg reg;
 		do {
-			int e[] { -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1 };
 			switch (reg = OpCode_CbFamily(0x20, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_HL:
@@ -2097,9 +2168,10 @@ namespace Z80 {
 				e[0] = 0x29; break;
 			case Z80_BC:	case Z80_DE:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb;
+				e[2] = INSTRUCTION_START_MARKER;
+				e[0] = e[3] = 0xcb;
 				e[1] = 0x20 + GetRegister_r16Low(reg);
-				e[3] = 0x10 + GetRegister_r16High(reg);
+				e[4] = 0x10 + GetRegister_r16High(reg);
 				break;
 			default:		break;
 			}
@@ -2110,14 +2182,15 @@ namespace Z80 {
 	static void OpCode_SLL() {
 		Z80Reg reg;
 		do {
-			int e[] { -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1 };
 			switch (reg = OpCode_CbFamily(0x30, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb;
+				e[2] = INSTRUCTION_START_MARKER;
+				e[0] = e[3] = 0xcb;
 				e[1] = 0x30 + GetRegister_r16Low(reg);
-				e[3] = 0x10 + GetRegister_r16High(reg);
+				e[4] = 0x10 + GetRegister_r16High(reg);
 				break;
 			default:		break;
 			}
@@ -2128,14 +2201,15 @@ namespace Z80 {
 	static void OpCode_SRA() {
 		Z80Reg reg;
 		do {
-			int e[] { -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1 };
 			switch (reg = OpCode_CbFamily(0x28, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb;
+				e[2] = INSTRUCTION_START_MARKER;
+				e[0] = e[3] = 0xcb;
 				e[1] = 0x28 + GetRegister_r16High(reg);
-				e[3] = 0x18 + GetRegister_r16Low(reg);
+				e[4] = 0x18 + GetRegister_r16Low(reg);
 				break;
 			default:		break;
 			}
@@ -2146,14 +2220,15 @@ namespace Z80 {
 	static void OpCode_SRL() {
 		Z80Reg reg;
 		do {
-			int e[] { -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1 };
 			switch (reg = OpCode_CbFamily(0x38, e)) {
 			case Z80_A:		break;			// fully processed by the helper function
 			case Z80_BC:	case Z80_DE:	case Z80_HL:
 				if (Options::noFakes()) break;
-				e[0] = e[2] = 0xcb;
+				e[2] = INSTRUCTION_START_MARKER;
+				e[0] = e[3] = 0xcb;
 				e[1] = 0x38 + GetRegister_r16High(reg);
-				e[3] = 0x18 + GetRegister_r16Low(reg);
+				e[4] = 0x18 + GetRegister_r16Low(reg);
 				break;
 			default:		break;
 			}
@@ -2173,7 +2248,7 @@ namespace Z80 {
 	static void OpCode_SUB() {
 		Z80Reg reg;
 		do {
-			int e[] { -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x90, e, true, true)) {	// handle common 8-bit variants
 				if ((!Options::IsI8080) && (Z80_HL == GetRegister(lp))) {
 					if (!comma(lp)) {
@@ -2182,7 +2257,10 @@ namespace Z80 {
 						switch (reg = GetRegister(lp)) {
 						case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
 							if (Options::noFakes()) break;
-							e[0] = 0xb7; e[1] = 0xed; e[2] = 0x32+reg; break;
+							e[0] = 0xb7;
+							e[1] = INSTRUCTION_START_MARKER;
+							e[2] = 0xed; e[3] = 0x32+reg;
+							break;
 						default: break;
 						}
 					}

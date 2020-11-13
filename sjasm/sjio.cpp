@@ -334,18 +334,19 @@ void EmitWord(int word, bool isInstructionStart) {
 }
 
 void EmitBytes(const int* bytes, bool isInstructionStart) {
-	if (*bytes == -1) {
+	if (BYTES_END_MARKER == *bytes) {
 		Error("Illegal instruction", line, IF_FIRST);
 		SkipToEol(lp);
 	}
-	while (*bytes != -1) {
+	while (BYTES_END_MARKER != *bytes) {
 		EmitByte(*bytes++, isInstructionStart);
-		isInstructionStart = false;		// only true for first byte
+		isInstructionStart = (INSTRUCTION_START_MARKER == *bytes);	// only true for first byte, or when marker
+		if (isInstructionStart) ++bytes;
 	}
 }
 
 void EmitWords(int* words, bool isInstructionStart) {
-	while (*words != -1) {
+	while (BYTES_END_MARKER != *words) {
 		EmitWord(*words++, isInstructionStart);
 		isInstructionStart = false;		// only true for first word
 	}
