@@ -118,19 +118,19 @@ static void getBytesWithCheck(int add = 0, int dc = 0, bool dz = false) {
 	}
 }
 
-void dirBYTE() {
+static void dirBYTE() {
 	getBytesWithCheck();
 }
 
-void dirDC() {
+static void dirDC() {
 	getBytesWithCheck(0, 1);
 }
 
-void dirDZ() {
+static void dirDZ() {
 	getBytesWithCheck(0, 0, true);
 }
 
-void dirABYTE() {
+static void dirABYTE() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
 		getBytesWithCheck(add);
@@ -139,7 +139,7 @@ void dirABYTE() {
 	}
 }
 
-void dirABYTEC() {
+static void dirABYTEC() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
 		getBytesWithCheck(add, 1);
@@ -148,7 +148,7 @@ void dirABYTEC() {
 	}
 }
 
-void dirABYTEZ() {
+static void dirABYTEZ() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
 		getBytesWithCheck(add, 0, true);
@@ -157,7 +157,7 @@ void dirABYTEZ() {
 	}
 }
 
-void dirWORD() {
+static void dirWORD() {
 	aint val;
 	int teller = 0, e[130];
 	do {
@@ -181,7 +181,7 @@ void dirWORD() {
 	else		Error("DW/DEFW/WORD with no arguments");
 }
 
-void dirDWORD() {
+static void dirDWORD() {
 	aint val;
 	int teller = 0, e[130 * 2];
 	do {
@@ -200,7 +200,7 @@ void dirDWORD() {
 	else		Error("DWORD with no arguments");
 }
 
-void dirD24() {
+static void dirD24() {
 	aint val;
 	int teller = 0, e[130 * 3];
 	do {
@@ -220,7 +220,7 @@ void dirD24() {
 	else		Error("D24 with no arguments");
 }
 
-void dirDG() {
+static void dirDG() {
 	int dirDx[130];
 	if (GetBits(lp, dirDx)) {
 		EmitBytes(dirDx);
@@ -229,7 +229,7 @@ void dirDG() {
 	}
 }
 
-void dirDH() {
+static void dirDH() {
 	int dirDx[130];
 	if (GetBytesHexaText(lp, dirDx)) {
 		EmitBytes(dirDx);
@@ -238,7 +238,7 @@ void dirDH() {
 	}
 }
 
-void dirBLOCK() {
+static void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpressionNoSyntaxError(lp, teller)) {
 		if ((signed) teller < 0) {
@@ -275,7 +275,7 @@ static void dirPageImpl(const char* const dirName) {
 	}
 }
 
-void dirORG() {
+static void dirORG() {
 	aint val;
 	if (!ParseExpressionNoSyntaxError(lp, val)) {
 		Error("[ORG] Syntax error in <address>", lp, SUPPRESS);
@@ -302,7 +302,7 @@ void dirORG() {
 	dirPageImpl("ORG");
 }
 
-void dirDISP() {
+static void dirDISP() {
 	if (DISP_NONE != PseudoORG) {
 		Warning("[DISP] displacement inside another displacement block, ignoring it.");
 		SkipToEol(lp);
@@ -343,7 +343,7 @@ void dirDISP() {
 	PseudoORG = Relocation::isActive ? DISP_INSIDE_RELOCATE : DISP_ACTIVE;
 }
 
-void dirENT() {
+static void dirENT() {
 	if (DISP_NONE == PseudoORG) {
 		Error("ENT should be after DISP");
 		return;
@@ -362,7 +362,7 @@ void dirENT() {
 	dispPageNum = LABEL_PAGE_UNDEFINED;
 }
 
-void dirPAGE() {
+static void dirPAGE() {
 	if (!DeviceID) {
 		Warning("PAGE only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
@@ -371,7 +371,7 @@ void dirPAGE() {
 	}
 }
 
-void dirMMU() {
+static void dirMMU() {
 	if (!DeviceID) {
 		Warning("MMU is allowed only in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
@@ -450,7 +450,7 @@ void dirMMU() {
 	Device->CheckPage(CDevice::CHECK_RESET);
 }
 
-void dirSLOT() {
+static void dirSLOT() {
 	aint val;
 	if (!DeviceID) {
 		Warning("SLOT only allowed in real device emulation mode (See DEVICE)");
@@ -468,7 +468,7 @@ void dirSLOT() {
 	}
 }
 
-void dirALIGN() {
+static void dirALIGN() {
 	// default alignment is 4, default filler is "0/none" (if not specified in directive explicitly)
 	aint val, fill;
 	ParseAlignArguments(lp, val, fill);
@@ -480,7 +480,7 @@ void dirALIGN() {
 	else			EmitBlock(fill, len, false);
 }
 
-void dirMODULE() {
+static void dirMODULE() {
 	char* n = GetID(lp);
 	if (n && (nullptr == STRCHR(n, '.'))) {
 		if (*ModuleName) STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), ".");
@@ -497,7 +497,7 @@ void dirMODULE() {
 	}
 }
 
-void dirENDMODULE() {
+static void dirENDMODULE() {
 	if (! *ModuleName) {
 		Error("ENDMODULE without MODULE");
 		return;
@@ -511,7 +511,7 @@ void dirENDMODULE() {
 	vorlabp = STRDUP("_");
 }
 
-void dirEND() {
+static void dirEND() {
 	char* p = lp;
 	aint val;
 	if (ParseExpression(lp, val)) {
@@ -524,7 +524,7 @@ void dirEND() {
 	IsRunning = 0;
 }
 
-void dirSIZE() {
+static void dirSIZE() {
 	aint val;
 	if (!ParseExpressionNoSyntaxError(lp, val)) {
 		Error("[SIZE] Syntax error in <filesize>", bp, SUPPRESS);
@@ -535,7 +535,7 @@ void dirSIZE() {
 	else if (size != val) ErrorInt("[SIZE] Different size than previous", size);	// just check it's same
 }
 
-void dirINCBIN() {
+static void dirINCBIN() {
 	int offset = 0, length = INT_MAX;
 	std::unique_ptr<char[]> fnaam(GetFileName(lp));
 	if (anyComma(lp)) {
@@ -558,7 +558,7 @@ void dirINCBIN() {
 	BinIncFile(fnaam.get(), offset, length);
 }
 
-void dirINCHOB() {
+static void dirINCHOB() {
 	aint val;
 	char* fnaamh;
 	unsigned char len[2];
@@ -604,7 +604,7 @@ void dirINCHOB() {
 	free(fnaamh);
 }
 
-void dirINCTRD() {
+static void dirINCTRD() {
 	aint val, offset = 0, length = INT_MAX;
 	std::unique_ptr<char[]> trdname(GetFileName(lp));
 	std::unique_ptr<char[]> filename;
@@ -648,7 +648,7 @@ void dirINCTRD() {
 	}
 }
 
-void dirSAVESNA() {
+static void dirSAVESNA() {
 	if (pass != LASTPASS) return;		// syntax error is not visible in early passes
 	bool exec = true;
 
@@ -684,7 +684,7 @@ void dirSAVESNA() {
 	}
 }
 
-void dirEMPTYTAP() {
+static void dirEMPTYTAP() {
 	if (pass != LASTPASS) {
 		SkipParam(lp);
 		return;
@@ -696,7 +696,7 @@ void dirEMPTYTAP() {
 	TAP_SaveEmpty(fnaam.get());
 }
 
-void dirSAVETAP() {
+static void dirSAVETAP() {
 
 	if (pass != LASTPASS) {
 		SkipParam(lp);
@@ -870,7 +870,7 @@ void dirSAVETAP() {
 	}
 }
 
-void dirSAVEBIN() {
+static void dirSAVEBIN() {
 	if (!DeviceID) {
 		Error("SAVEBIN only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
@@ -912,7 +912,7 @@ void dirSAVEBIN() {
 	}
 }
 
-void dirSAVEDEV() {
+static void dirSAVEDEV() {
 	bool exec = DeviceID && LASTPASS == pass;
 	if (!exec && LASTPASS == pass) Error("SAVEDEV only allowed in real device emulation mode (See DEVICE)");
 
@@ -945,7 +945,7 @@ void dirSAVEDEV() {
 	}
 }
 
-void dirSAVEHOB() {
+static void dirSAVEHOB() {
 
 	if (!DeviceID || pass != LASTPASS) {
 		if (!DeviceID) Error("SAVEHOB only allowed in real device emulation mode (See DEVICE)");
@@ -1002,7 +1002,7 @@ void dirSAVEHOB() {
 	}
 }
 
-void dirEMPTYTRD() {
+static void dirEMPTYTRD() {
 	if (pass != LASTPASS) {
 		SkipToEol(lp);
 		return;
@@ -1031,7 +1031,7 @@ void dirEMPTYTRD() {
 	TRD_SaveEmpty(fnaam.get(), diskLabel);
 }
 
-void dirSAVETRD() {
+static void dirSAVETRD() {
 	if (!DeviceID || pass != LASTPASS) {
 		if (!DeviceID) Error("SAVETRD only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
@@ -1104,7 +1104,7 @@ void dirSAVETRD() {
 	if (exec) TRD_AddFile(fnaam.get(), fnaamh.get(), start, length, autostart, replace, addplace);
 }
 
-void dirENCODING() {
+static void dirENCODING() {
 	std::unique_ptr<char[]> opt(GetFileName(lp, false));
 	char* comparePtr = opt.get();
 	if (cmphstr(comparePtr, "dos")) {
@@ -1116,7 +1116,7 @@ void dirENCODING() {
 	}
 }
 
-void dirOPT() {
+static void dirOPT() {
 	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...>
 	// process OPT specific command keywords first: {push, pop, reset, listoff, liston}
 	bool didReset = false, didList = Options::syx.IsListingSuspended;
@@ -1166,7 +1166,7 @@ void dirOPT() {
 	if (Options::syx.IsNextEnabled) Z80::InitNextExtensions();
 }
 
-void dirLABELSLIST() {
+static void dirLABELSLIST() {
 	if (pass != 1 || !DeviceID) {
 		if (!DeviceID) Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
@@ -1189,7 +1189,7 @@ void dirLABELSLIST() {
 	}
 }
 
-void dirCSPECTMAP() {
+static void dirCSPECTMAP() {
 	if (LASTPASS != pass || !DeviceID) {
 		if (!DeviceID) Error("CSPECTMAP only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
@@ -1206,7 +1206,7 @@ void dirCSPECTMAP() {
 	Options::CSpectMapPageSize = Device->GetPage(0)->Size;
 }
 
-void dirBPLIST() {
+static void dirBPLIST() {
 	if (2 != pass || !DeviceID) {	// nothing to do in first or last pass, second will open the file
 		if (2 == pass) {	// !Device is true -> no device in second pass -> error
 			Error("BPLIST only allowed in real device emulation mode (See DEVICE)", nullptr, EARLY);
@@ -1226,7 +1226,7 @@ void dirBPLIST() {
 	OpenBreakpointsFile(fName.get(), type);
 }
 
-void dirSETBREAKPOINT() {
+static void dirSETBREAKPOINT() {
 	if (LASTPASS != pass) {
 		SkipToEol(lp);
 		return;
@@ -1381,7 +1381,7 @@ static void dirENDIF() {
   Error("ENDT without TEXTAREA",0);
 }*/
 
-void dirINCLUDE() {
+static void dirINCLUDE() {
 	std::unique_ptr<char[]> fnaam(GetFileName(lp));
 	if (fnaam[0]) {
 		EDelimiterType dt = GetDelimiterOfLastFileName();
@@ -1393,7 +1393,7 @@ void dirINCLUDE() {
 	}
 }
 
-void dirOUTPUT() {
+static void dirOUTPUT() {
 	if (LASTPASS != pass) {
 		SkipToEol(lp);
 		return;
@@ -1416,12 +1416,12 @@ void dirOUTPUT() {
 	NewDest(fnaam.get(), mode);
 }
 
-void dirOUTEND()
+static void dirOUTEND()
 {
 	if (pass == LASTPASS) CloseDest();
 }
 
-void dirTAPOUT()
+static void dirTAPOUT()
 {
 	aint val;
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
@@ -1437,13 +1437,13 @@ void dirTAPOUT()
 	if (pass == LASTPASS) OpenTapFile(fnaam.get(), tape_flag);
 }
 
-void dirTAPEND()
+static void dirTAPEND()
 {
 	// if (!FP_tapout) {Error("TAPEND without TAPOUT", bp, PASS3); return;}
 	if (pass == LASTPASS) CloseTapFile();
 }
 
-void dirDEFINE() {
+static void dirDEFINE() {
 	char* id;
 
 	if (!(id = GetID(lp))) {
@@ -1457,7 +1457,7 @@ void dirDEFINE() {
 	substitutedLine = line;		// override substituted listing for DEFINE
 }
 
-void dirUNDEFINE() {
+static void dirUNDEFINE() {
 	char* id;
 
 	if (!(id = GetID(lp)) && *lp != '*') {
@@ -1480,7 +1480,7 @@ void dirUNDEFINE() {
 	}
 }
 
-void dirEXPORT() {
+static void dirEXPORT() {
 	aint val;
 	char* n, * p;
 
@@ -1504,7 +1504,7 @@ void dirEXPORT() {
 	if (!IsLabelNotFound) WriteExp(p, val);
 }
 
-void dirDISPLAY() {
+static void dirDISPLAY() {
 	char decprint = 'H';
 	char e[LINEMAX + 32], optionChar;		// put extra buffer at end for particular H/A/D number printout
 	char* ep = e, * const endOfE = e + LINEMAX;
@@ -1586,7 +1586,7 @@ void dirDISPLAY() {
 	}
 }
 
-void dirMACRO() {
+static void dirMACRO() {
 	if (lijst) Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
 	char* lpLabel = LastParsedLabel;	// modifiable copy of global buffer pointer
 	// get+validate macro name either from label on same line or from following line
@@ -1598,11 +1598,11 @@ void dirMACRO() {
 	}
 }
 
-void dirENDS() {
+static void dirENDS() {
 	Error("[ENDS] End structure without structure");
 }
 
-void dirASSERT() {
+static void dirASSERT() {
 	char* p = lp;
 	aint val;
 	/*if (!ParseExpression(lp,val)) { Error("Syntax error",0,CATCHALL); return; }
@@ -1617,7 +1617,7 @@ void dirASSERT() {
 	/**lp=0;*/
 }
 
-void dirSHELLEXEC() {
+static void dirSHELLEXEC() {
 	//FIXME for v2.x change the "SHELLEXEC <command>[, <params>]" syntax to "SHELLEXEC <whatever>"
 	// (and add good examples how to deal with quotes/colons/long file names with spaces)
 	std::unique_ptr<char[]> command(GetFileName(lp, false));
@@ -1650,7 +1650,7 @@ void dirSHELLEXEC() {
 	}
 }
 
-void dirSTRUCT() {
+static void dirSTRUCT() {
 	CStructure* st;
 	int global = 0;
 	aint offset = 0;
@@ -1699,7 +1699,7 @@ void dirSTRUCT() {
 	st->deflab();
 }
 
-void dirFPOS() {
+static void dirFPOS() {
 	aint val;
 	int method = SEEK_SET;
 	SkipBlanks(lp);
@@ -1713,7 +1713,7 @@ void dirFPOS() {
 	}
 }
 
-void dirDUP() {
+static void dirDUP() {
 	aint val;
 	IsLabelNotFound = 0;
 
@@ -1749,7 +1749,7 @@ void dirDUP() {
 	RepeatStack.push(dup);
 }
 
-void dirEDUP() {
+static void dirEDUP() {
 	if (RepeatStack.empty() || RepeatStack.top().IsInWork) {
 		Error("[EDUP/ENDR] End repeat without repeat");
 		return;
@@ -1805,7 +1805,7 @@ void dirEDUP() {
 	ListFile();
 }
 
-void dirENDM() {
+static void dirENDM() {
 	if (!RepeatStack.empty()) {
 		Warning("ENDM used as DUP/REPT block terminator, this is deprecated (and bugged when used inside macro), change to EDUP or ENDR");
 		dirEDUP();
@@ -1843,7 +1843,7 @@ static void dirDEFARRAY_add(const char* id) {
 	return;
 }
 
-void dirDEFARRAY() {
+static void dirDEFARRAY() {
 	bool plus = ('+' == *lp) ? ++lp, true : false;
 	const char* id = White() ? GetID(lp) : nullptr;
 	if (!id) {
@@ -1921,7 +1921,7 @@ const char *readMemFile(lua_State *, void *ud, size_t *size)
   return luaMF->text;
 }
 
-void dirLUA() {
+static void dirLUA() {
 	constexpr size_t luaBufferSize = 32768;
 	luaMemFile luaMF;
 	char* id, * buff = nullptr, * bp = nullptr;
@@ -2001,11 +2001,11 @@ void dirLUA() {
 	substitutedLine = line;		// override substituted list line for ENDLUA
 }
 
-void dirENDLUA() {
+static void dirENDLUA() {
 	Error("[ENDLUA] End of lua script without script");
 }
 
-void dirINCLUDELUA() {
+static void dirINCLUDELUA() {
 	if (1 != pass) {
 		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
 		return;
@@ -2036,7 +2036,7 @@ void dirINCLUDELUA() {
 
 #endif //USE_LUA
 
-void dirDEVICE() {
+static void dirDEVICE() {
 	// refresh source position of first DEVICE directive
 	if (1 == ++deviceDirectivesCount) {
 		globalDeviceSourcePos = CurSourcePos;
