@@ -1,0 +1,32 @@
+# file opened: sldopt.asm
+ 1    0000                  DEVICE ZXSPECTRUMNEXT
+ 2    0000                  ORG $8000
+ 3    8000 27                   daa         ; some eol comments with keyword1 included
+ 4    8001 00                   nop         ; some eol comment without any keyword
+ 5    8002              ; full line comment with keyword2 included (line without code)
+ 6    8002              ; full line without any keyword, but wrong cased Keyword2 (SLD keywords are case sensitive)
+ 7    8002 01 62 03     label1: DB  1,"b",3 ; some keyword3 here
+ 8    8005 04 65 06     label2: DB  4,"e",6 ; keyword none here
+ 9    8008
+10    8008                  SLDOPT COMMENT keyword1, keyword2   ; SLDOPT is global directive
+11    8008                  SLDOPT COMMENT keyword2, keyword3   ; and keywords could be added over multiple lines
+12    8008
+13    8008 C9                   ret         ; some keyword1 also after SLDOPT specified (should not matter)
+14    8009 00                   nop         ; some eol comment without any keyword
+15    800A
+16    800A                  ; syntax error
+sldopt.asm(17): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): INVALID whatever
+17    800A                  SLDOPT INVALID whatever
+sldopt.asm(18): error: [SLDOPT COMMENT] invalid keyword: @@@  
+18    800A                  SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
+sldopt.asm(19): error: [SLDOPT COMMENT] invalid keyword: 
+19    800A                  SLDOPT COMMENT
+sldopt.asm(20): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): 
+20    800A                  SLDOPT
+21    800A
+# file closed: sldopt.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8002 X label1
+0x8005 X label2

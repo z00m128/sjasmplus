@@ -2064,6 +2064,17 @@ static void dirDEVICE() {
 	}
 }
 
+static void dirSLDOPT() {
+	SkipBlanks(lp);
+	if (cmphstr(lp, "COMMENT")) {
+		do {
+			SldAddCommentKeyword(GetID(lp));
+		} while (!SkipBlanks(lp) && anyComma(lp));
+	} else {
+		Error("[SLDOPT] Syntax error in <type> (valid is only COMMENT)", lp, SUPPRESS);
+	}
+}
+
 void InsertDirectives() {
 	DirectivesTable.insertd(".assert", dirASSERT);
 	DirectivesTable.insertd(".byte", dirBYTE);
@@ -2169,6 +2180,8 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".relocate_start", Relocation::dirRELOCATE_START);
 	DirectivesTable.insertd(".relocate_end", Relocation::dirRELOCATE_END);
 	DirectivesTable.insertd(".relocate_table", Relocation::dirRELOCATE_TABLE);
+
+	DirectivesTable.insertd(".sldopt", dirSLDOPT);
 
 #ifdef USE_LUA
 	DirectivesTable.insertd(".lua", dirLUA);

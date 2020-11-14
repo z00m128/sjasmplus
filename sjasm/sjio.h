@@ -100,6 +100,8 @@ bool IsSldExportActive();
 void OpenSld();
 void CloseSld();
 void WriteToSldFile(int pageNum, int value, char type = 'T', const char* symbol = nullptr);
+void SldAddCommentKeyword(const char* keyword);
+void SldTrackComments();
 
 /////// Breakpoints list (for different emulators)
 enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX };

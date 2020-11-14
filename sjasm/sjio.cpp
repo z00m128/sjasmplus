@@ -29,6 +29,7 @@
 // sjio.cpp
 
 #include "sjdefs.h"
+#include <cassert>
 
 #include <fcntl.h>
 
@@ -1218,6 +1219,7 @@ static const char* WriteToSld_noSymbol = "";
 static char sldMessage_sourcePos[80];
 static char sldMessage_definitionPos[80];
 static const char* sldMessage_posFormat = "%d:%d:%d";	// at +3 is "%d:%d" and at +6 is "%d"
+static std::vector<std::string> sldCommentKeywords;
 
 static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
 	int offsetFormat = !pos.colBegin ? 6 : !pos.colEnd ? 3 : 0;
@@ -1308,6 +1310,34 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 				CurSourcePos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
 				pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
+}
+
+void SldAddCommentKeyword(const char* keyword) {
+	if (nullptr == keyword || !keyword[0]) {
+		if (LASTPASS == pass) Error("[SLDOPT COMMENT] invalid keyword", lp, SUPPRESS);
+		return;
+	}
+	if (1 == pass) {
+		auto begin = sldCommentKeywords.cbegin();
+		auto end = sldCommentKeywords.cend();
+		// add keyword only if it is new (not included yet)
+		if (std::find(begin, end, keyword) == end) sldCommentKeywords.push_back(keyword);
+	}
+}
+
+void SldTrackComments() {
+	assert(eolComment && IsSldExportActive());
+	if (!eolComment[0]) return;
+	for (auto keyword : sldCommentKeywords) {
+		if (strstr(eolComment, keyword.c_str())) {
+			int pageNum = Page->Number;
+			if (DISP_NONE != PseudoORG) {
+				pageNum = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum : Device->GetPageOfA16(CurAddress);
+			}
+			WriteToSldFile(pageNum, CurAddress, 'K', eolComment);
+			return;
+		}
+	}
 }
 
 /////// Breakpoints list (for different emulators)

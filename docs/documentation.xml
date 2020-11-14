@@ -2961,6 +2961,29 @@ start:
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_sldopt" />SLDOPT &lt;type&gt; &lt;arguments&gt;</term>
+
+            <listitem>
+				<para>Type `<code>COMMENT</code>` - add comma delimited list of case sensitive keywords
+					to be detected in end-of-line comments and exported to
+					<link linkend="c_sld_data">Source Level Debugging (SLD) data</link>.
+					The particular keywords depend on the debugger you are using to process SLD data.</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM128
+    SLDOPT COMMENT WPMEM, Log
+    ORG $8000
+        call init ; Log("calling init") - gets exported to SLD
+        ret       ; no keyword here - not exported to SLD
+var1    DB 1      ; WPMEM - exported
+var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_slot" />SLOT &lt;number&gt;</term>
 
             <listitem>
@@ -4858,6 +4881,11 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
     <section>
 		<title><anchor id="s_sld_file_format" />SLD File Format definition (version "0")</title>
 
+		<para><emphasis>The file format is still under development, it will become version "1"
+				when it will feel ripe enough. If you are working on support in debugger, stay
+				in touch with us, so we can discuss any modifications to current format with you.</emphasis>
+		</para>
+
 		<para>The SLD data is text-file (sjasmplus is using UNIX-like newlines 0x0A, but parsers
 			should rather cope with any of common EOL scheme). The general format is CSV-like
 			using pipe character as delimiter between fields.
@@ -4926,14 +4954,16 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 
 		<para>
 			<code>&lt;type&gt;</code> - single uppercase letter representing type of line, current
-			types: T (instruction Trace), F (Function), D (equ Data), Z (device memory model)
+			types: T (instruction Trace), F (Function), D (equ Data), Z (device memory model),
+			K (keyword comment, see <link linkend="po_sldopt">`SLDOPT COMMENT`</link>)
 		</para>
 
 		<para>
 			<code>&lt;data&gt;</code> - extra data specific for particular line type. Empty for
 			"T" lines, contains label/symbol name for types "F" and "D". The "D" values usually
 			don't have page defined (equals -1), but the tools should accept also valid page
-			value for "D" type too, just like for "F" lines.
+			value for "D" type too, just like for "F" lines. For type "K" the comment containing
+			one of they defined keywords is present.
 		</para>
 
 		<para>

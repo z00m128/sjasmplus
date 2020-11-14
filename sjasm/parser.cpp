@@ -844,6 +844,8 @@ void ParseLine(bool parselabels) {
 
 	if (PrepareLine()) return;
 
+	if (eolComment && IsSldExportActive()) SldTrackComments();
+
 	if (!*lp) {
 		char *srcNonWhiteChar = line;
 		SkipBlanks(srcNonWhiteChar);
