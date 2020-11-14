@@ -10,3 +10,5 @@ sldopt.asm|8||0|4|32773|F|label2
 sldopt.asm|13||0|4|32776|K|; some keyword1 also after SLDOPT specified (should not matter)
 sldopt.asm|13||0|4|32776|T|
 sldopt.asm|14||0|4|32777|T|
+sldopt.asm|17||0|100|50000|K|; keyword2 in displacement block (displaced address reported)
+sldopt.asm|17||0|100|50000|T|

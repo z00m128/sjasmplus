@@ -13,17 +13,21 @@
 12    8008
 13    8008 C9                   ret         ; some keyword1 also after SLDOPT specified (should not matter)
 14    8009 00                   nop         ; some eol comment without any keyword
-15    800A
-16    800A                  ; syntax error
-sldopt.asm(17): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): INVALID whatever
-17    800A                  SLDOPT INVALID whatever
-sldopt.asm(18): error: [SLDOPT COMMENT] invalid keyword: @@@  
-18    800A                  SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
-sldopt.asm(19): error: [SLDOPT COMMENT] invalid keyword: 
-19    800A                  SLDOPT COMMENT
-sldopt.asm(20): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): 
-20    800A                  SLDOPT
-21    800A
+15    800A                  MMU 6, 100
+16    800A                  DISP 50000, 100
+17    C350 2F                   cpl         ; keyword2 in displacement block (displaced address reported)
+18    C351                  ENT
+19    800B
+20    800B                  ; syntax error
+sldopt.asm(21): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): INVALID whatever
+21    800B                  SLDOPT INVALID whatever
+sldopt.asm(22): error: [SLDOPT COMMENT] invalid keyword: @@@  
+22    800B                  SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
+sldopt.asm(23): error: [SLDOPT COMMENT] invalid keyword: 
+23    800B                  SLDOPT COMMENT
+sldopt.asm(24): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): 
+24    800B                  SLDOPT
+25    800B
 # file closed: sldopt.asm
 
 Value    Label

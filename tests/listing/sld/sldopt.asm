@@ -12,6 +12,10 @@ label2: DB  4,"e",6 ; keyword none here
 
         ret         ; some keyword1 also after SLDOPT specified (should not matter)
         nop         ; some eol comment without any keyword
+    MMU 6, 100
+    DISP 50000, 100
+        cpl         ; keyword2 in displacement block (displaced address reported)
+    ENT
 
     ; syntax error
     SLDOPT INVALID whatever
