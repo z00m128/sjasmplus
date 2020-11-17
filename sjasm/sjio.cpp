@@ -1232,6 +1232,16 @@ static void OpenSldImp(const char* sldFilename) {
 		Error("Error opening file", sldFilename, FATAL);
 	}
 	fputs("|SLD.data.version|0\n", FP_SourceLevelDebugging);
+	if (0 < sldCommentKeywords.size()) {
+		fputs("||K|KEYWORDS|", FP_SourceLevelDebugging);
+		bool notFirst = false;
+		for (auto keyword : sldCommentKeywords) {
+			if (notFirst) fputs(",", FP_SourceLevelDebugging);
+			notFirst = true;
+			fputs(keyword.c_str(), FP_SourceLevelDebugging);
+		}
+		fputs("\n", FP_SourceLevelDebugging);
+	}
 }
 
 // will write directly into Options::SourceLevelDebugFName array
