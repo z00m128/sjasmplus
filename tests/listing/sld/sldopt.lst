@@ -18,19 +18,34 @@
 17    C350 2F                   cpl         ; keyword2 in displacement block (displaced address reported)
 18    C351                  ENT
 19    800B
-20    800B                  ; syntax error
-sldopt.asm(21): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): INVALID whatever
-21    800B                  SLDOPT INVALID whatever
-sldopt.asm(22): error: [SLDOPT COMMENT] invalid keyword: @@@  
-22    800B                  SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
-sldopt.asm(23): error: [SLDOPT COMMENT] invalid keyword: 
-23    800B                  SLDOPT COMMENT
-sldopt.asm(24): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): 
-24    800B                  SLDOPT
-25    800B
+20    800B                      ORG 60000
+21    EA60                  MACRO MEMGUARD
+22    EA60 ~                    defb 0  ; WPMEM keyword1
+23    EA60 ~                    nop     ; keyword3
+24    EA60                  ENDM
+25    EA60
+26    EA60                  MEMGUARD
+26    EA60 00          >        defb 0  ; WPMEM keyword1
+26    EA61 00          >        nop     ; keyword3
+27    EA62 D2 04        someData:   dw 1234
+28    EA64                  MEMGUARD
+28    EA64 00          >        defb 0  ; WPMEM keyword1
+28    EA65 00          >        nop     ; keyword3
+29    EA66
+30    EA66                  ; syntax error
+sldopt.asm(31): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): INVALID whatever
+31    EA66                  SLDOPT INVALID whatever
+sldopt.asm(32): error: [SLDOPT COMMENT] invalid keyword: @@@  
+32    EA66                  SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
+sldopt.asm(33): error: [SLDOPT COMMENT] invalid keyword: 
+33    EA66                  SLDOPT COMMENT
+sldopt.asm(34): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): 
+34    EA66                  SLDOPT
+35    EA66
 # file closed: sldopt.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
 0x8002 X label1
 0x8005 X label2
+0xEA62 X someData

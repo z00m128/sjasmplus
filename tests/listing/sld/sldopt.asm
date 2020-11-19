@@ -17,6 +17,16 @@ label2: DB  4,"e",6 ; keyword none here
         cpl         ; keyword2 in displacement block (displaced address reported)
     ENT
 
+        ORG 60000
+    MACRO MEMGUARD
+        defb 0  ; WPMEM keyword1
+        nop     ; keyword3
+    ENDM
+
+    MEMGUARD
+someData:   dw 1234
+    MEMGUARD
+
     ; syntax error
     SLDOPT INVALID whatever
     SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)

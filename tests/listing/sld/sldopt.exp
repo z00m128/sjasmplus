@@ -13,3 +13,10 @@ sldopt.asm|13||0|4|32776|T|
 sldopt.asm|14||0|4|32777|T|
 sldopt.asm|17||0|100|50000|K|; keyword2 in displacement block (displaced address reported)
 sldopt.asm|17||0|100|50000|T|
+sldopt.asm|26||22|1|60000|K|; WPMEM keyword1
+sldopt.asm|26||23|1|60001|K|; keyword3
+sldopt.asm|26||23|1|60001|T|
+sldopt.asm|27||0|1|60002|F|someData
+sldopt.asm|28||22|1|60004|K|; WPMEM keyword1
+sldopt.asm|28||23|1|60005|K|; keyword3
+sldopt.asm|28||23|1|60005|T|
