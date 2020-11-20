@@ -1,0 +1,77 @@
+|SLD.data.version|0
+||K|KEYWORDS|WPMEM
+sld_example.asm|4||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
+sld_example.asm|7||0|-1|21|D|WAIT_DELAY
+sld_example.asm|8||0|-1|168|D|CSPECT_EASY
+sld_example/../sld_example.i.asm|9||0|20|49152|F|mmu6p20
+sld_example/../sld_example.i.asm|10|sld_example.asm|11|20|49152|T|
+sld_example/../sld_example.i.asm|10|sld_example.asm|12|20|49156|T|
+sld_example/../sld_example.i.asm|10|sld_example.asm|13|20|49158|T|
+sld_example/../sld_example.i.asm|11|sld_example/include.i.asm|2|20|49160|F|1>macro2
+sld_example/../sld_example.i.asm|11||2|20|49160|F|2.1>macro1
+sld_example/../sld_example.i.asm|11||3|20|49160|T|
+sld_example/../sld_example.i.asm|11||4|20|49162|K|; WPMEM
+sld_example/../sld_example.i.asm|11||5|20|49163|F|2.1>skip
+sld_example/../sld_example.i.asm|11|sld_example/include.i.asm|4|20|49163|T|
+sld_example/../sld_example.i.asm|11|sld_example/include.i.asm|5|20|49165|K|; WPMEM
+sld_example/../sld_example.i.asm|11|sld_example/include.i.asm|6|20|49166|F|1>skip
+sld_example/../sld_example.i.asm|12||0|20|49166|T|
+sld_example/../sld_example.i.asm|13||0|20|49170|T|
+sld_example/../sld_example.i.asm|15||0|21|49152|F|mmu6p21
+sld_example/../sld_example.i.asm|16|sld_example.asm|11|21|49152|T|
+sld_example/../sld_example.i.asm|16|sld_example.asm|12|21|49156|T|
+sld_example/../sld_example.i.asm|16|sld_example.asm|13|21|49158|T|
+sld_example/../sld_example.i.asm|17|sld_example/include.i.asm|2|21|49160|F|4>macro2
+sld_example/../sld_example.i.asm|17||2|21|49160|F|5.4>macro1
+sld_example/../sld_example.i.asm|17||3|21|49160|T|
+sld_example/../sld_example.i.asm|17||4|21|49162|K|; WPMEM
+sld_example/../sld_example.i.asm|17||5|21|49163|F|5.4>skip
+sld_example/../sld_example.i.asm|17|sld_example/include.i.asm|4|21|49163|T|
+sld_example/../sld_example.i.asm|17|sld_example/include.i.asm|5|21|49165|K|; WPMEM
+sld_example/../sld_example.i.asm|17|sld_example/include.i.asm|6|21|49166|F|4>skip
+sld_example/../sld_example.i.asm|18||0|21|49166|T|
+sld_example/../sld_example.i.asm|19||0|21|49170|T|
+sld_example/include.i.asm|12||0|30|57344|F|mmu7p30
+sld_example/include.i.asm|13|sld_example.asm|11|30|57344|T|
+sld_example/include.i.asm|13|sld_example.asm|12|30|57348|T|
+sld_example/include.i.asm|13|sld_example.asm|13|30|57350|T|
+sld_example/include.i.asm|14|sld_example/../sld_example.i.asm|2|30|57352|F|7>macro1
+sld_example/include.i.asm|14|sld_example/../sld_example.i.asm|3|30|57352|T|
+sld_example/include.i.asm|14|sld_example/../sld_example.i.asm|4|30|57354|K|; WPMEM
+sld_example/include.i.asm|14|sld_example/../sld_example.i.asm|5|30|57355|F|7>skip
+sld_example/include.i.asm|15||0|30|57355|T|
+sld_example/include.i.asm|16||0|30|57359|T|
+sld_example/include.i.asm|18||0|31|57344|F|mmu7p31
+sld_example/include.i.asm|19|sld_example.asm|11|31|57344|T|
+sld_example/include.i.asm|19|sld_example.asm|12|31|57348|T|
+sld_example/include.i.asm|19|sld_example.asm|13|31|57350|T|
+sld_example/include.i.asm|20|sld_example/../sld_example.i.asm|2|31|57352|F|9>macro1
+sld_example/include.i.asm|20|sld_example/../sld_example.i.asm|3|31|57352|T|
+sld_example/include.i.asm|20|sld_example/../sld_example.i.asm|4|31|57354|K|; WPMEM
+sld_example/include.i.asm|20|sld_example/../sld_example.i.asm|5|31|57355|F|9>skip
+sld_example/include.i.asm|21||0|31|57355|T|
+sld_example/include.i.asm|22||0|31|57359|T|
+sld_example.asm|19||0|4|35000|F|start
+sld_example.asm|20||0|4|35000|T|
+sld_example.asm|21||0|4|35001|T|
+sld_example.asm|22||0|4|35005|T|
+sld_example.asm|23||0|4|35009|F|start.loop
+sld_example.asm|24|sld_example/../sld_example.i.asm|2|4|35009|F|10>macro1
+sld_example.asm|24|sld_example/../sld_example.i.asm|3|4|35009|T|
+sld_example.asm|24|sld_example/../sld_example.i.asm|4|4|35011|K|; WPMEM
+sld_example.asm|24|sld_example/../sld_example.i.asm|5|4|35012|F|10>skip
+sld_example.asm|25|sld_example/include.i.asm|2|4|35012|F|11>macro2
+sld_example.asm|25|sld_example/../sld_example.i.asm|2|4|35012|F|12.11>macro1
+sld_example.asm|25|sld_example/../sld_example.i.asm|3|4|35012|T|
+sld_example.asm|25|sld_example/../sld_example.i.asm|4|4|35014|K|; WPMEM
+sld_example.asm|25|sld_example/../sld_example.i.asm|5|4|35015|F|12.11>skip
+sld_example.asm|25|sld_example/include.i.asm|4|4|35015|T|
+sld_example.asm|25|sld_example/include.i.asm|5|4|35017|K|; WPMEM
+sld_example.asm|25|sld_example/include.i.asm|6|4|35018|F|11>skip
+sld_example.asm|26||0|4|35018|T|
+sld_example.asm|27||0|4|35022|T|
+sld_example.asm|28||11|4|35025|T|
+sld_example.asm|28||12|4|35029|T|
+sld_example.asm|28||13|4|35031|T|
+sld_example.asm|29||0|4|35033|T|
+sld_example.asm|30||0|4|35037|T|
