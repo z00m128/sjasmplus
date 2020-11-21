@@ -29,5 +29,14 @@ start:
     nextreg $57,32
     jr .loop
 
+    IF 0    ; make sure the skipped-blocks don't produce SLD data
+        someMacro2
+        DB $EE  ; WPMEM
+    ENDIF
+    /*      ; make sure the comment-blocks don't produce SLD data
+        someMacro2
+        DB $EE  ; WPMEM
+    */
+
     SAVENEX OPEN "sld_example.nex", start, 40000 : SAVENEX AUTO : SAVENEX CLOSE
     CSPECTMAP "sld_example.sym"
