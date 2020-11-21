@@ -1,0 +1,9 @@
+warning: missing  --fullpath  with  --sld  may produce incomplete file paths.
+# file opened: opt_sld_no_fullpath.asm
+1     0000              ; empty asm file just to trigger the test
+2     0000              ; test is looking for warning about --sld option used without --fullpath
+3     0000
+# file closed: opt_sld_no_fullpath.asm
+
+Value    Label
+------ - -----------------------------------------------------------

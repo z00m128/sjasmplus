@@ -653,15 +653,15 @@ int main(int argc, char **argv) {
 			if (!argv[i]) break;
 			sourceFiles.push_back(SSource(argv[i++]));
 		}
-		if (Options::IsDefaultListingName && Options::ListingFName[0]) {
-			Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
-		}
-		if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
-			Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
-		}
-		if (Options::IsDefaultSldName && Options::SourceLevelDebugFName[0]) {
-			Error("Using both  --sld  and  --sld=<filename>  is not possible.", NULL, FATAL);
-		}
+	}
+	if (Options::IsDefaultListingName && Options::ListingFName[0]) {
+		Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
+	}
+	if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
+		Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
+	}
+	if (Options::IsDefaultSldName && Options::SourceLevelDebugFName[0]) {
+		Error("Using both  --sld  and  --sld=<filename>  is not possible.", NULL, FATAL);
 	}
 	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
 
@@ -673,6 +673,10 @@ int main(int argc, char **argv) {
 
 	if (!Options::HideLogo) {
 		_CERR logo _ENDL;
+	}
+
+	if (!Options::IsShowFullPath && (Options::IsDefaultSldName || Options::SourceLevelDebugFName[0])) {
+		Warning("missing  --fullpath  with  --sld  may produce incomplete file paths.", NULL, W_EARLY);
 	}
 
 	if (Options::ShowVersion) {
