@@ -1,0 +1,42 @@
+# file opened: noslot64k_device.asm
+ 1    0000                  DEVICE NOSLOT64K
+ 2    0000                  ; check default page mapping 0 (and ORG 0) - write marker
+ 3    0000 30 30            DB  "00"
+ 4    0002                  ; verify defaut is slot 0 (the only slot)
+ 5    0002                  PAGE 2
+ 5    0002                ASSERT {0x0000} == 0
+ 5    0002                ORG 0x0000
+ 5    0000 32 32          DB "22"
+ 6    0002                  PAGE 3
+ 6    0002                ASSERT {0x0000} == 0
+ 6    0002                ORG 0x0000
+ 6    0000 33 33          DB "33"
+ 7    0002                  ; verify there is single slot and 32 pages
+noslot64k_device.asm(8): error: [SLOT] Slot number must be in range 0..0
+ 8    0002                  SLOT 1      ; error
+noslot64k_device.asm(9): error: [PAGE] Page number must be in range 0..31: 32
+ 9    0002                  PAGE 32     ; error
+10    0002                  ; do few more verifications, reading previously modified pages
+11    0002                  SLOT 0
+11    0002                PAGE 0
+11    0002                ASSERT {0x0000} == "00"
+12    0002                  SLOT 0
+12    0002                PAGE 2
+12    0002                ASSERT {0x0000} == "22"
+13    0002                  SLOT 0
+13    0002                PAGE 3
+13    0002                ASSERT {0x0000} == "33"
+14    0002
+noslot64k_device.asm(15): error: [PAGE] Page number must be in range 0..31: -1
+15    0002                  PAGE -1     ; error
+16    0002
+17    0002                  ; try wrap-around MMU mapping, filling 80kiB
+18    0002                  MMU 0 n, 4, $E000
+19    E000                  ASSERT 4 == $$
+20    E000 44 44 44...      BLOCK 80*1024, $44
+21    2000                  ASSERT 6 == $$
+22    2000
+# file closed: noslot64k_device.asm
+
+Value    Label
+------ - -----------------------------------------------------------

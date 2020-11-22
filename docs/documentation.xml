@@ -206,6 +206,7 @@
               <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
 - <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
+- added <link linkend="po_device">"NOSLOT64K" device</link> with 2MiB of virtual memory
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
 - <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
 - minor bugfixes in parser and listing-line-numbering
@@ -1257,6 +1258,17 @@ StartProg:
               All memory is zeroed during initialization.</para>
             </listitem>
           </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="device_noslot64k" />NOSLOT64K</term>
+
+            <listitem>
+              <para>Has only single slot of size 64kiB (slot 0), covering full Z80 CPU addressing range.
+				  There are 32 memory pages available, by default page 0 is mapped.
+				  That makes in total 2MiB of memory available (32 * 64 ki = 2 Mi).</para>
+            </listitem>
+          </varlistentry>
+
         </variablelist></para>
 
       <para>If you want to see other devices you must write to us. See <link
@@ -1853,16 +1865,17 @@ counter = counter + 1
               <para>Predefined devices' identifiers list:</para>
 
               <synopsis> NONE ; off real device emulation mode
- ZXSPECTRUM48  ; ZX-Spectrum 48 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
- ZXSPECTRUM128 ; ZX-Spectrum 128 (like 48 with 8 pages, default map: 7, 5, 2, 0)
- ZXSPECTRUM256 ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
- ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
+ ZXSPECTRUM48   ; ZX-Spectrum 48 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
+ ZXSPECTRUM128  ; ZX-Spectrum 128 (like 48 with 8 pages, default map: 7, 5, 2, 0)
+ ZXSPECTRUM256  ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
+ ZXSPECTRUM512  ; e.g. ATM-Turbo 512 (another clone)
  ZXSPECTRUM1024
  ZXSPECTRUM2048
  ZXSPECTRUM4096
  ZXSPECTRUM8192
  ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
                 ; (default pages map: 14, 15, 10, 11, 4, 5, 0, 1) (default slot: 7 (0xE000..0xFFFF))
+ NOSLOT64K      ; Single slot (slot 0) covering full 64kiB address range of Z80, 32 pages
 
  ;disable:
    DEVICE NONE

@@ -149,6 +149,13 @@ static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
 	}
 }
 
+static void DeviceNoSlot64k(CDevice **dev, CDevice *parent, aint ramtop) {
+	if (ramtop) Warning("NoSlot64k device doesn't init memory in any way (RAMTOP is ignored)");
+	*dev = new CDevice("NOSLOT64K", parent);
+	const int initialPages[] = { 0 };
+	initRegularSlotDevice(*dev, 0x10000, 1, 32, initialPages);	// 32*64kiB = 2MiB
+}
+
 int SetDevice(char *id, const aint ramtop) {
 	CDevice** dev;
 	CDevice* parent = nullptr;
@@ -185,6 +192,8 @@ int SetDevice(char *id, const aint ramtop) {
 				DeviceZXSpectrum8192(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrumnext")) {
 				DeviceZxSpectrumNext(dev, parent, ramtop);
+			} else if (cmphstr(id, "noslot64k")) {
+				DeviceNoSlot64k(dev, parent, ramtop);
 			} else {
 				return false;
 			}
