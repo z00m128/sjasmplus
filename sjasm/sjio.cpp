@@ -1216,14 +1216,14 @@ void WriteExp(char* n, aint v) {
 static FILE* FP_SourceLevelDebugging = NULL;
 static char sldMessage[LINEMAX];
 static const char* WriteToSld_noSymbol = "";
-static char sldMessage_sourcePos[80];
-static char sldMessage_definitionPos[80];
+static char sldMessage_sourcePos[1024];
+static char sldMessage_definitionPos[1024];
 static const char* sldMessage_posFormat = "%d:%d:%d";	// at +3 is "%d:%d" and at +6 is "%d"
 static std::vector<std::string> sldCommentKeywords;
 
 static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
 	int offsetFormat = !pos.colBegin ? 6 : !pos.colEnd ? 3 : 0;
-	snprintf(buffer, 79, sldMessage_posFormat + offsetFormat, pos.line, pos.colBegin, pos.colEnd);
+	snprintf(buffer, 1024-1, sldMessage_posFormat + offsetFormat, pos.line, pos.colBegin, pos.colEnd);
 }
 
 static void OpenSldImp(const char* sldFilename) {
