@@ -8,7 +8,9 @@ sld_tricky_instructions.asm|5||0|4|32773|T|
 sld_tricky_instructions.asm|5||0|4|32775|T|
 sld_tricky_instructions.asm|5||0|4|32778|T|
 sld_tricky_instructions.asm|8||0|-1|86|D|nn
+sld_tricky_instructions.asm|8||0|-1|86|L|,nn,,+equ,+used
 sld_tricky_instructions.asm|9||0|-1|120|D|mm
+sld_tricky_instructions.asm|9||0|-1|120|L|,mm,,+equ,+used
 sld_tricky_instructions.asm|10||0|4|32781|T|
 sld_tricky_instructions.asm|10||0|4|32783|T|
 sld_tricky_instructions.asm|11||0|4|32785|T|

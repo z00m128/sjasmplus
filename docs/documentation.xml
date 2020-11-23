@@ -4967,16 +4967,17 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 
 		<para>
 			<code>&lt;type&gt;</code> - single uppercase letter representing type of line, current
-			types: T (instruction Trace), F (Function), D (equ Data), Z (device memory model),
-			K (keyword comment, see <link linkend="po_sldopt">`SLDOPT COMMENT`</link>)
+			types: T (instruction Trace), L (Label), F [deprecated, parse L], D [deprecated, parse L], Z (device memory model),
+			K (keyword comment, see <link linkend="po_sldopt">`SLDOPT COMMENT`</link>).
 		</para>
 
 		<para>
 			<code>&lt;data&gt;</code> - extra data specific for particular line type. Empty for
-			"T" lines, contains label/symbol name for types "F" and "D". The "D" values usually
-			don't have page defined (equals -1), but the tools should accept also valid page
-			value for "D" type too, just like for "F" lines. For type "K" the comment containing
-			one of they defined keywords is present.
+			"T" lines. For "L" a list of items separated by comma, where first three items
+			represent sub-parts of symbol name: module name, main label, local label (sub-part
+			may be empty), optional remaining items are usage-traits giving away various internal info about
+			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used).
+			For type "K" the comment containing one of they defined keywords is present.
 		</para>
 
 		<para>
@@ -4999,7 +5000,8 @@ pages.size:&lt;page size&gt;,pages.count:&lt;page count&gt;,slots.count:&lt;slot
 || ZX Spectrum Next device description:
 toplevel.asm|59||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
 || label "main" points to 32768, with page 14 mapped-in (defined in toplevel.asm:62)
-toplevel.asm|62||0|14|32768|F|main
+|| the label "main" is used by other code (IFUSED-like), and has relocation data
+toplevel.asm|62||0|14|32768|L|,main,,+reloc,+used
 || instruction opcode at 32768 (page 14) was created by toplevel.asm:64
 toplevel.asm|64||0|14|32768|T|
 || instruction opcode at 32769 (p 14) was created by toplevel.asm:67
@@ -5010,9 +5012,10 @@ toplevel.asm|68:12:24||0|18|32770|T|
 || instruction opcode at 32771 (p 18) was created by toplevel.asm:68:24 (till EOL)
 toplevel.asm|68:24||0|18|32771|T|
 || "PORT_NUMBER EQU 254" defined at toplevel.asm:69
-toplevel.asm|69||0|-1|254|D|PORT_NUMBER
+toplevel.asm|69||0|-1|254|L|,PORT_NUMBER,,+equ
 || label+instruction emitted from toplevel.asm:70, but defined in include.asm:3
-toplevel.asm|70|include.asm|3|37|40976|F|0>macro_defined_in_include_asm
+|| with macro label "0>macro_defined_in_include_asm" (source ".macro_defined_in_include_asm:")
+toplevel.asm|70|include.asm|3|37|40976|L|,0,macro_defined_in_include_asm,+macro,+used
 toplevel.asm|70|include.asm|3|37|40976|T|
 </programlisting>
 

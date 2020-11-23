@@ -47,7 +47,10 @@ enum EStructureMembers {
 	SMEMBPARENOPEN, SMEMBPARENCLOSE
 };
 
+class CLabelTableEntry;
+
 char* ValidateLabel(const char* naam, bool setNameSpace);
+char* ExportLabelToSld(const char* naam, const CLabelTableEntry* label);
 extern char* PreviousIsLabel;
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);

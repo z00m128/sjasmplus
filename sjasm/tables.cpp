@@ -106,6 +106,36 @@ char* ValidateLabel(const char* naam, bool setNameSpace) {
 	return label;
 }
 
+static char sldLabelExport[2*LINEMAX];
+
+char* ExportLabelToSld(const char* naam, const CLabelTableEntry* label) {
+	// does re-parse the original source line again similarly to ValidateLabel
+	// but prepares SLD 'L'-type line, with module/main/local comma separated + usage traits info
+	assert(nullptr != label);
+	assert(isLabelStart(naam));		// this should be called only when ValidateLabel did succeed
+	const bool global = '@' == *naam;
+	const bool local = '.' == *naam;
+	if (global || local) ++naam;	// single modifier is parsed
+	const bool inMacro = local && macrolabp;
+	const bool inModule = !inMacro && !global && ModuleName[0];
+	// build fully qualified SLD info
+	sldLabelExport[0] = 0;
+	// module part
+	if (inModule) STRCAT(sldLabelExport, LINEMAX, ModuleName);
+	STRCAT(sldLabelExport, 2, ",");
+	// main label part (the `vorlabp` is already the current label, if it was main label)
+	STRCAT(sldLabelExport, LABMAX, inMacro ? macrolabp : vorlabp);
+	STRCAT(sldLabelExport, 2, ",");
+	// local part
+	if (local) STRCAT(sldLabelExport, LABMAX, naam);
+	// usage traits
+	if (label->IsEQU) STRCAT(sldLabelExport, 20, ",+equ");
+	if (inMacro) STRCAT(sldLabelExport, 20, ",+macro");
+	if (label->isRelocatable) STRCAT(sldLabelExport, 20, ",+reloc");
+	if (label->used) STRCAT(sldLabelExport, 20, ",+used");
+	return sldLabelExport;
+}
+
 static bool getLabel_invalidName = false;
 
 static CLabelTableEntry* GetLabel(char*& p) {
