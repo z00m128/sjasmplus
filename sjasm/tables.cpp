@@ -459,6 +459,15 @@ void CLabelTable::DumpForCSpect() {
 			LabelTable[i].IsDEFL ? 2 :
 			(LABEL_PAGE_ROM <= LabelTable[i].page) ? 3 : 0;
 		const short page = labelType ? 0 : LabelTable[i].page;
+			// TODO:
+			// page == -1 will put regular EQU like "BLUE" out of reach for disassembly window
+			// (otherwise BLUE becomes label for address $C001 with default mapping)
+			// BUT then it would be nice to provide real page data for equ which have them explicit
+			// BUT I can't distinguish explicit/implicit page number, as there's heuristic to use current mapping
+			// instead of using the LABEL_PAGE_OUT_OF_BOUNDS page number...
+			// TODO: figure out when/why the implicit page number heuristic happenned and if you can detect
+			// only explicit page numbers used in EQU, and export only those
+
 		const aint longAddress = (PAGE_MASK & LabelTable[i].value) + page * PAGE_SIZE;
 		fprintf(file, "%08X %08X %02X ", 0xFFFF & LabelTable[i].value, longAddress, labelType);
 		// convert primary+local label to be "@" delimited (not "." delimited)
@@ -477,6 +486,9 @@ void CLabelTable::DumpForCSpect() {
 				--localLabelStart;			// and look for next dot
 			} while (temp < localLabelStart && '.' != *localLabelStart);
 		}
+		// convert whole label to upper-case, as CSpect search is malfunctioning otherwise.
+		char* strToUpper = temp;
+		while ((*strToUpper = (char) toupper((byte)*strToUpper))) { ++strToUpper; }
 		fprintf(file, "%s\n", temp);
 	}
 	fclose(file);
