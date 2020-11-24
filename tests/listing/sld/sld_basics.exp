@@ -1,4 +1,4 @@
-|SLD.data.version|0
+|SLD.data.version|1
 sld_basics.asm|11||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
 sld_basics.asm|13||0|-1|0|L|next,,,+module
 sld_basics.asm|15||0|0|57343|F|next._.localLabel1

@@ -1231,7 +1231,7 @@ static void OpenSldImp(const char* sldFilename) {
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
 		Error("Error opening file", sldFilename, FATAL);
 	}
-	fputs("|SLD.data.version|0\n", FP_SourceLevelDebugging);
+	fputs("|SLD.data.version|1\n", FP_SourceLevelDebugging);
 	if (0 < sldCommentKeywords.size()) {
 		fputs("||K|KEYWORDS|", FP_SourceLevelDebugging);
 		bool notFirst = false;

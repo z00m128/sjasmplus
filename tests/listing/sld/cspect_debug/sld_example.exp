@@ -1,4 +1,4 @@
-|SLD.data.version|0
+|SLD.data.version|1
 ||K|KEYWORDS|WPMEM
 sld_example.asm|4||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
 sld_example.asm|7||0|-1|21|D|WAIT_DELAY

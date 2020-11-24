@@ -4892,10 +4892,9 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 	</section>
 
     <section>
-		<title><anchor id="s_sld_file_format" />SLD File Format definition (version "0")</title>
+		<title><anchor id="s_sld_file_format" />SLD File Format definition (version "1")</title>
 
-		<para><emphasis>The file format is still under development, it will become version "1"
-				when it will feel ripe enough. If you are working on support in debugger, stay
+		<para><emphasis>The file format is still under development. If you are working on support in debugger, stay
 				in touch with us, so we can discuss any modifications to current format with you.</emphasis>
 		</para>
 
@@ -4910,7 +4909,7 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			part of line should be ignored (comment line).
 			Currently only one type of "control line" exists, the "SLD.data.version" (third
 			field is integer number):
-<programlisting>|SLD.data.version|0
+<programlisting>|SLD.data.version|1
 ||anything ... comment-like line</programlisting>
 			The file format version line should be always first line of the SLD data file.
 		</para>
@@ -4976,7 +4975,7 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			"T" lines. For "L" a list of items separated by comma, where first three items
 			represent sub-parts of symbol name: module name, main label, local label (sub-part
 			may be empty), optional remaining items are usage-traits giving away various internal info about
-			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used).
+			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used, +module).
 			For type "K" the comment containing one of they defined keywords is present.
 		</para>
 
@@ -4996,7 +4995,7 @@ pages.size:&lt;page size&gt;,pages.count:&lt;page count&gt;,slots.count:&lt;slot
 			<title>Example of SLD file</title>
 
 <programlisting>
-|SLD.data.version|0
+|SLD.data.version|1
 || ZX Spectrum Next device description:
 toplevel.asm|59||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
 || label "main" points to 32768, with page 14 mapped-in (defined in toplevel.asm:62)
