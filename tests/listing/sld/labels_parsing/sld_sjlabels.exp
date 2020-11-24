@@ -25,6 +25,7 @@ sld_sjlabels.asm|20||0|4|32776|L|,main.1,local.1,+used
 sld_sjlabels.asm|21||0|4|32776|T|
 sld_sjlabels.asm|22||0|4|32777|T|
 sld_sjlabels.asm|23||0|4|32779|T|
+sld_sjlabels.asm|25||0|-1|32781|L|module@1,,,+module
 sld_sjlabels.asm|27||0|-1|456|D|module@1._.no_main_local.2e
 sld_sjlabels.asm|27||0|-1|456|L|module@1,_,no_main_local.2e,+equ
 sld_sjlabels.asm|28||0|4|32781|F|module@1._.no_main_local.2

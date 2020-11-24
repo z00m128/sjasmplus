@@ -488,6 +488,9 @@ static void dirMODULE() {
 		// reset non-local label to default "_"
 		if (vorlabp) free(vorlabp);
 		vorlabp = STRDUP("_");
+		if (IsSldExportActive()) {
+			WriteToSldFile(-1, CurAddress, 'L', ExportModuleToSld());
+		}
 	} else {
 		if (n) {
 			Error("[MODULE] Dots not allowed in <module_name>", n, SUPPRESS);

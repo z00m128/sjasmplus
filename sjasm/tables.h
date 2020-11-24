@@ -51,6 +51,7 @@ class CLabelTableEntry;
 
 char* ValidateLabel(const char* naam, bool setNameSpace);
 char* ExportLabelToSld(const char* naam, const CLabelTableEntry* label);
+char* ExportModuleToSld();
 extern char* PreviousIsLabel;
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);

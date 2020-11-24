@@ -136,6 +136,14 @@ char* ExportLabelToSld(const char* naam, const CLabelTableEntry* label) {
 	return sldLabelExport;
 }
 
+char* ExportModuleToSld() {
+	assert(ModuleName[0]);
+	//STRNCPY(strDestination, sizeInBytes, strSource, count)
+	STRNCPY(sldLabelExport, 2*LINEMAX, ModuleName, LINEMAX);
+	STRCAT(sldLabelExport, LINEMAX-1, ",,,+module");
+	return sldLabelExport;
+}
+
 static bool getLabel_invalidName = false;
 
 static CLabelTableEntry* GetLabel(char*& p) {
