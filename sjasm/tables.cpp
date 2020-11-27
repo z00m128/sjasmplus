@@ -1222,7 +1222,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 	AddMember(new CStructureEntry2(noffset, 0, 0, false, SMEMBPARENCLOSE));
 }
 
-static void InsertSingleStructLabel(char *name, const bool isRelocatable, const aint value) {
+static void InsertSingleStructLabel(char *name, const bool isRelocatable, const aint value, const bool isDefine = true) {
 	char *op = name;
 	std::unique_ptr<char[]> p(ValidateLabel(op, true));
 	if (!p) {
@@ -1237,26 +1237,40 @@ static void InsertSingleStructLabel(char *name, const bool isRelocatable, const 
 		if (value != oval) {
 			Error("Label has different value in pass 2", p.get());
 		}
+		if (IsSldExportActive()) {		// SLD (Source Level Debugging) tracing-data logging
+			CLabelTableEntry* label = LabelTable.Find(p.get(), true);
+			assert(label);		// should have been already defined before last pass
+			if (label) WriteToSldFile(isDefine ? -1 : label->page, value, 'L', ExportLabelToSld(name, label));
+		}
 	} else {
 		Relocation::isResultAffected = Relocation::isRelocatable = isRelocatable;
 		if (!LabelTable.Insert(p.get(), value, false, false, true)) Error("Duplicate label", p.get(), EARLY);
 	}
 }
 
-static void InsertStructSubLabels(const char* mainName, const bool isRelocatable, const CStructureEntry1* members, const aint address = 0) {
+static void InsertStructSubLabels(const char* mainName, const bool isRelocatable, const CStructureEntry1* members, const aint address = 0, const bool isDefine = true) {
 	char ln[LINEMAX+1];
 	STRCPY(ln, LINEMAX, mainName);
 	char * const lnsubw = ln + strlen(ln);
 	while (members) {
 		STRCPY(lnsubw, LINEMAX-strlen(ln), members->naam);		// overwrite sub-label part
-		InsertSingleStructLabel(ln, isRelocatable, members->offset + address);
+		InsertSingleStructLabel(ln, isRelocatable, members->offset + address, isDefine);
 		members = members->next;
 	}
 }
 
 void CStructure::deflab() {
-	char sn[LINEMAX] = { '@' };
-	STRCPY(sn+1, LINEMAX-1, id);
+	const size_t moduleNameLength = strlen(ModuleName);
+	char sn[LINEMAX] = { '@', 0 };
+	if (moduleNameLength && (0 == strncmp(id, ModuleName, moduleNameLength)) \
+		&& ('.' == id[moduleNameLength]) && (id[moduleNameLength+1]))
+	{
+		// looks like the structure name starts with current module name, use non-global way then
+		STRCPY(sn, LINEMAX-1, id + moduleNameLength + 1);
+	} else {
+		// the structure name does not match current module, use the global "@id" way to define it
+		STRCPY(sn+1, LINEMAX-1, id);
+	}
 	InsertSingleStructLabel(sn, false, noffset);
 	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, false, mnf);
@@ -1272,11 +1286,11 @@ void CStructure::emitlab(char* iid, aint address, const bool isRelocatable) {
 					naam, maxAlignment, misalignment);
 		Warning(warnTxt);
 	}
-	char sn[LINEMAX];
+	char sn[LINEMAX] { 0 };
 	STRCPY(sn, LINEMAX-1, iid);
-	InsertSingleStructLabel(sn, isRelocatable, address);
+	InsertSingleStructLabel(sn, isRelocatable, address, false);
 	STRCAT(sn, LINEMAX-1, ".");
-	InsertStructSubLabels(sn, isRelocatable, mnf, address);
+	InsertStructSubLabels(sn, isRelocatable, mnf, address, false);
 }
 
 void CStructure::emitmembs(char*& p) {

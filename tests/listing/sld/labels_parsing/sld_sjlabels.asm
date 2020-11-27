@@ -44,3 +44,38 @@ main.2:
     ENDMODULE
 
     DW _.no_main_local.1e, module@1.main.2.local.2e
+
+    STRUCT S_TEST, 10
+byte    BYTE    0x12
+word    WORD    0x3456
+    ENDS
+
+data:
+.s1     S_TEST
+.s2     S_TEST { 0x78, 0x9ABC }
+s3      S_TEST { 0xDE, 0xF023 }
+
+    ld  ix,data.s2
+    ld  a,(ix+S_TEST.word)
+    ld  (s3.word),a
+    ld  de,S_TEST
+    add ix,de
+
+    ; same stuff, but in module m2 (!)
+    MODULE m2
+    STRUCT S_TEST, 10
+byte    BYTE    0x12
+word    WORD    0x3456
+    ENDS
+
+data:
+.s1     S_TEST
+.s2     S_TEST { 0x78, 0x9ABC }
+s3      S_TEST { 0xDE, 0xF023 }
+
+    ld  ix,data.s2
+    ld  a,(ix+S_TEST.word)
+    ld  (s3.word),a
+    ld  de,S_TEST
+    add ix,de
+    ENDMODULE
