@@ -1148,6 +1148,10 @@ static void dirOPT() {
 			Options::syx.IsListingSuspended = didList = true;
 		} else if (cmphstr(lp, "liston")) {
 			Options::syx.IsListingSuspended = false;
+		} else if (cmphstr(lp, "listmc")) {
+			if (!didList) ListFile();		// *list* the OPT line starting the filtering
+			donotlist = 1;
+			Options::syx.IsMcOnlyListing = didList = true;
 		} else {
 			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff)", lp);
 			SkipToEol(lp);

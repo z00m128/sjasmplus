@@ -195,6 +195,7 @@ void PrepareListLine(char* buffer, aint hexadd)
 	}
 	memset(buffer, ' ', 24);
 	if (listmacro) buffer[23] = '>';
+	if (Options::syx.IsMcOnlyListing) buffer[23] = '{';
 	sprintf(buffer, "%*u", linewidth, linenumber); buffer[linewidth] = ' ';
 	memcpy(buffer + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
 	sprintf(buffer + 6, "%04X", hexadd & 0xFFFF); buffer[10] = ' ';
@@ -231,6 +232,9 @@ void ListFile(bool showAsSkipped) {
 	if (LASTPASS != pass || NULL == GetListingFile() || donotlist || Options::syx.IsListingSuspended) {
 		donotlist = nListBytes = 0;
 		return;
+	}
+	if (Options::syx.IsMcOnlyListing && nListBytes <= 0) {
+		return;		// filter out all lines without machine-code bytes
 	}
 	int pos = 0;
 	do {

@@ -209,6 +209,7 @@
 - added <link linkend="po_device">"NOSLOT64K" device</link> with 2MiB of virtual memory
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
 - <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
+- added "listmc" command to <link linkend="po_opt">OPT</link> - to list only lines with machine code bytes
 - minor bugfixes in parser and listing-line-numbering
 - Added <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm">example (chargfx2asm)</ulink> how to use sjasmplus as byte-processor for binary files
 - <link linkend="c_sld_data">SLD data</link> improvements based on Maziac's feedback and DeZog's needs
@@ -2489,7 +2490,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_opt" /><para>OPT [push] [reset] [listoff] [liston] [&lt;command line options&gt;]</para>
+            <term><anchor id="po_opt" /><para>OPT [push] [reset] [listoff] [liston] [listmc] [&lt;command line options&gt;]</para>
 			<para>OPT pop</para></term>
 
             <listitem>
@@ -2499,12 +2500,14 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
 				  <code>--reversepop</code> and <code>--dirbol</code>.
 			  </para>
 			  <para>
-				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston.
+				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston, listmc.
 				  The "push" command will make OPT to preserve current state of options. The "reset"
 				  command will reset OPT-related options to default state. The "listoff" command will
 				  suspend the listing for following lines until "liston" command is used (listing
 				  availability is part of the push/pop state, so to "nest" listing-off you can use
-				  "OPT push listoff : ... code ... : OPT pop" code sequence.
+				  "OPT push listoff : ... code ... : OPT pop" code sequence). The "listmc" command will
+				  filter listing to lines containing machine code bytes, to revert the filter use
+				  either "pop" of previous state or "reset".
 			  </para>
 			  <para>Then the provided options are applied. The default values are: fake instructions
 				  enabled (no warning), multi-argument delimiter is ",", both () and [] brackets
@@ -4975,7 +4978,8 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			"T" lines. For "L" a list of items separated by comma, where first three items
 			represent sub-parts of symbol name: module name, main label, local label (sub-part
 			may be empty), optional remaining items are usage-traits giving away various internal info about
-			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used, +module, +endmod).
+			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used, +module, +endmod,
+			+struct_def, +struct_data).
 			For type "K" the comment containing one of they defined keywords is present.
 		</para>
 

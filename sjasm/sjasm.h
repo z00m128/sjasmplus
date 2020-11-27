@@ -40,6 +40,7 @@ namespace Options {
 		bool		FakeEnabled;
 		bool		FakeWarning;
 		bool		IsListingSuspended;
+		bool		IsMcOnlyListing;
 		bool		CaseInsensitiveInstructions;
 		bool		WarningsAsErrors;
 		bool		Is_M_Memory;
@@ -49,7 +50,8 @@ namespace Options {
 		bool		(*MultiArg)(char*&);	// function checking if multi-arg delimiter is next
 
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
-					IsListingSuspended(false), CaseInsensitiveInstructions(false), WarningsAsErrors(false),
+					IsListingSuspended(false), IsMcOnlyListing(false),
+					CaseInsensitiveInstructions(false), WarningsAsErrors(false),
 					Is_M_Memory(false), IsLowMemWarningEnabled(true),
 					MemoryBrackets(0), IsNextEnabled(0), MultiArg(&comma) {}
 		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
