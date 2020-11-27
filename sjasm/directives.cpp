@@ -505,6 +505,9 @@ static void dirENDMODULE() {
 		Error("ENDMODULE without MODULE");
 		return;
 	}
+	if (IsSldExportActive()) {
+		WriteToSldFile(-1, CurAddress, 'L', ExportModuleToSld(true));
+	}
 	// remove last part of composite modules name
 	char* lastDot = strrchr(ModuleName, '.');
 	if (lastDot)	*lastDot = 0;

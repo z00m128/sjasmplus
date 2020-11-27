@@ -4975,7 +4975,7 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			"T" lines. For "L" a list of items separated by comma, where first three items
 			represent sub-parts of symbol name: module name, main label, local label (sub-part
 			may be empty), optional remaining items are usage-traits giving away various internal info about
-			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used, +module).
+			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used, +module, +endmod).
 			For type "K" the comment containing one of they defined keywords is present.
 		</para>
 
