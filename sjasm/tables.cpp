@@ -133,6 +133,8 @@ char* ExportLabelToSld(const char* naam, const CLabelTableEntry* label) {
 	if (inMacro) STRCAT(sldLabelExport, 20, ",+macro");
 	if (label->isRelocatable) STRCAT(sldLabelExport, 20, ",+reloc");
 	if (label->used) STRCAT(sldLabelExport, 20, ",+used");
+	if (label->isStructDefinition) STRCAT(sldLabelExport, 20, ",+struct_def");
+	if (label->isStructEmit) STRCAT(sldLabelExport, 20, ",+struct_data");
 	return sldLabelExport;
 }
 
@@ -196,7 +198,7 @@ static CLabelTableEntry* GetLabel(char*& p) {
 		// canonical name is either in "temp" (when in-macro) or in "fullName" (outside macro)
 		findName = temp[0] ? temp : fullName.get();
 		if (!inTableAlready) {
-			LabelTable.Insert(findName, 0, true);
+			LabelTable.Insert(findName, 0, LABEL_IS_UNDEFINED);
 			IsLabelNotFound = 1;
 		} else {
 			IsLabelNotFound = 2;
@@ -258,7 +260,7 @@ void CLabelTableEntry::ClearData() {
 	value = 0;
 	updatePass = 0;
 	page = LABEL_PAGE_UNDEFINED;
-	IsDEFL = IsEQU = used = isRelocatable = false;
+	IsDEFL = IsEQU = used = isRelocatable = isStructDefinition = isStructEmit = false;
 }
 
 CLabelTableEntry::CLabelTableEntry() : name(NULL) {
@@ -291,14 +293,18 @@ static short getAddressPageNumber(const aint address, bool forceRecalculateByAdd
 	return page;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL, bool IsEQU, short equPageNum) {
+int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short equPageNum) {
 	if (NextLocation >= LABTABSIZE * 2 / 3) {
 		Error("Label table full", NULL, FATAL);
 	}
+	const bool IsDEFL = !!(traits & LABEL_IS_DEFL);
+	const bool IsEQU = !!(traits & LABEL_IS_EQU);
+	const bool IsDeflEqu = IsDEFL || IsEQU;
+	const bool IsUndefined = !!(traits & LABEL_IS_UNDEFINED);
 
 	// the EQU/DEFL is relocatable when the expression itself is relocatable
 	// the regular label is relocatable when relocation is active
-	const bool isRelocatable = (IsDEFL || IsEQU) ? \
+	const bool isRelocatable = IsDeflEqu ? \
 			Relocation::isResultAffected && Relocation::isRelocatable : \
 			Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
 	// Find label in label table
@@ -312,11 +318,13 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 			if (IsEQU && LABEL_PAGE_UNDEFINED != equPageNum) {
 				label->page = equPageNum;
 			} else {
-				label->page = getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+				label->page = getAddressPageNumber(nvalue, IsDeflEqu);
 			}
 			label->IsDEFL = IsDEFL;
 			label->IsEQU = IsEQU;
 			label->isRelocatable = isRelocatable;
+			label->isStructDefinition = !!(traits & LABEL_IS_STRUCT_D);
+			label->isStructEmit = !!(traits & LABEL_IS_STRUCT_E);
 			label->updatePass = pass;
 			return 1;
 		}
@@ -331,15 +339,17 @@ int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsD
 	if (label->name == NULL) ErrorOOM();
 	label->IsDEFL = IsDEFL;
 	label->IsEQU = IsEQU;
+	label->isStructDefinition = !!(traits & LABEL_IS_STRUCT_D);
+	label->isStructEmit = !!(traits & LABEL_IS_STRUCT_D);
 	label->updatePass = pass;
 	label->value = nvalue;
-	label->used = undefined;
+	label->used = IsUndefined;
 	if (IsEQU && LABEL_PAGE_UNDEFINED != equPageNum) {
 		label->page = equPageNum;
 	} else {
-		label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+		label->page = IsUndefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
 	}
-	label->isRelocatable = !undefined && isRelocatable;		// ignore "relocatable" for "undefined"
+	label->isRelocatable = !IsUndefined && isRelocatable;	// ignore "relocatable" for "undefined"
 	return 1;
 }
 
@@ -1244,7 +1254,8 @@ static void InsertSingleStructLabel(char *name, const bool isRelocatable, const 
 		}
 	} else {
 		Relocation::isResultAffected = Relocation::isRelocatable = isRelocatable;
-		if (!LabelTable.Insert(p.get(), value, false, false, true)) Error("Duplicate label", p.get(), EARLY);
+		unsigned traits = LABEL_IS_EQU|(isDefine ? LABEL_IS_STRUCT_D : LABEL_IS_STRUCT_E);
+		if (!LabelTable.Insert(p.get(), value, traits)) Error("Duplicate label", p.get(), EARLY);
 	}
 }
 

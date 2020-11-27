@@ -61,6 +61,14 @@ constexpr int LABEL_PAGE_UNDEFINED = -1;
 constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
 constexpr int LABEL_PAGE_OUT_OF_BOUNDS = 0x7F80;	// label is defined, but not within Z80 address space
 
+constexpr unsigned LABEL_IS_UNDEFINED = (1<<0);
+constexpr unsigned LABEL_IS_DEFL = (1<<1);
+constexpr unsigned LABEL_IS_EQU = (1<<2);
+constexpr unsigned LABEL_IS_STRUCT_D = (1<<3);
+constexpr unsigned LABEL_IS_STRUCT_E = (1<<4);
+// constexpr unsigned LABEL_IS_RELOC = (1<<5);	// currently not explicitly used in Insert(..) (calculated implicitly)
+// constexpr unsigned LABEL_IS_USED = (1<<6);	// currently not explicitly used in Insert(..) (calculated implicitly)
+
 class CLabelTableEntry {
 public:
 	char*	name;
@@ -71,6 +79,8 @@ public:
 	bool	IsEQU;
 	bool	used;
 	bool	isRelocatable;
+	bool	isStructDefinition;
+	bool	isStructEmit;
 	CLabelTableEntry();
 	void ClearData();
 };
@@ -78,7 +88,7 @@ public:
 class CLabelTable {
 public:
 	CLabelTable();
-	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false, bool IsEQU = false, short equPageNum = LABEL_PAGE_UNDEFINED);
+	int Insert(const char* nname, aint nvalue, unsigned traits = 0, short equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char*, aint);
 	CLabelTableEntry* Find(const char* name, bool onlyDefined = false);
 	bool Remove(const char* name);

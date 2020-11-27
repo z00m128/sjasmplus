@@ -102,8 +102,8 @@ static void Relocation::refreshMaxTableCount() {
 	}
 	// add the relocate_count and relocate_size symbols only when RELOCATE feature was used
 	if (Relocation::isActive || maxTableCount) {
-		LabelTable.Insert("relocate_count", maxTableCount, false, true, false);
-		LabelTable.Insert("relocate_size", maxTableCount * 2, false, true, false);
+		LabelTable.Insert("relocate_count", maxTableCount, LABEL_IS_DEFL);
+		LabelTable.Insert("relocate_size", maxTableCount * 2, LABEL_IS_DEFL);
 	}
 }
 
