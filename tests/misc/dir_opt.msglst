@@ -42,7 +42,7 @@ dir_opt.asm(25): error: [OPT] invalid/failed option: --nologo
 dir_opt.asm(25): error: Unexpected: G 
 25    001C                  OPT --nologo 1 2 3 4 5 6 7 8 9 A B C D E F G ; invalid option(s) and too many of them
 26    001C
-dir_opt.asm(27): error: [OPT] invalid command (valid commands: push, pop, reset, liston, listoff): unknown             
+dir_opt.asm(27): error: [OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listmc): unknown             
 27    001C                  OPT unknown             ; error about invalid command
 dir_opt.asm(28): warning: [OPT] pushing syntax status after reset
 28    001C                  OPT reset push          ; warn about pushing default syntax

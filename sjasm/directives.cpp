@@ -1153,7 +1153,7 @@ static void dirOPT() {
 			donotlist = 1;
 			Options::syx.IsMcOnlyListing = didList = true;
 		} else {
-			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff)", lp);
+			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listmc)", lp);
 			SkipToEol(lp);
 			return;
 		}
