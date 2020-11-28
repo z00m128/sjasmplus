@@ -304,9 +304,12 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 
 	// the EQU/DEFL is relocatable when the expression itself is relocatable
 	// the regular label is relocatable when relocation is active
-	const bool isRelocatable = IsDeflEqu ? \
-			Relocation::isResultAffected && Relocation::isRelocatable : \
-			Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
+	const bool isRelocatable = \
+			(traits&LABEL_HAS_RELOC_TRAIT) ? \
+				!!(traits & LABEL_IS_RELOC) : \
+				IsDeflEqu ? \
+					Relocation::isResultAffected && Relocation::isRelocatable : \
+					Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
 	// Find label in label table
 	CLabelTableEntry* label = Find(nname);
 	if (label) {
@@ -472,6 +475,8 @@ void CLabelTable::DumpForCSpect() {
 	for (int i = 1; i < NextLocation; ++i) {
 		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
 		const int labelType =
+			LabelTable[i].isStructEmit ? 0 :
+			LabelTable[i].isStructDefinition ? 4 :
 			LabelTable[i].IsEQU ? 1 :
 			LabelTable[i].IsDEFL ? 2 :
 			(LABEL_PAGE_ROM <= LabelTable[i].page) ? 3 : 0;
@@ -1254,7 +1259,9 @@ static void InsertSingleStructLabel(char *name, const bool isRelocatable, const 
 		}
 	} else {
 		Relocation::isResultAffected = Relocation::isRelocatable = isRelocatable;
-		unsigned traits = LABEL_IS_EQU|(isDefine ? LABEL_IS_STRUCT_D : LABEL_IS_STRUCT_E);
+		unsigned traits = LABEL_HAS_RELOC_TRAIT \
+						| (isDefine ? LABEL_IS_STRUCT_D : LABEL_IS_STRUCT_E) \
+						| (isRelocatable ? LABEL_IS_RELOC : 0);
 		if (!LabelTable.Insert(p.get(), value, traits)) Error("Duplicate label", p.get(), EARLY);
 	}
 }

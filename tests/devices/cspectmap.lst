@@ -52,6 +52,10 @@ cspectmap.asm(2): error: CSPECTMAP only allowed in real device emulation mode (S
 49    C032              .local..c.:
 50    C032                  ENDMODULE
 51    C032
+52    C032                  ; exporting of struct-emit labels should contain the correct physical address too
+53    C032 00 00 00 00  s1          Struct { 0x1234 }
+53    C036 00 34 12
+54    C039
 # file closed: cspectmap.asm
 
 Value    Label
@@ -77,3 +81,6 @@ Value    Label
 0xC031 X Module.Page30.local
 0xC031 X Module_two_.Page31..A.
 0xC032 X Module_two_.Page31..A..local..c.
+0xC032 X s1
+0xC032 X s1.Field1
+0xC037 X s1.Field2

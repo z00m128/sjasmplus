@@ -48,3 +48,6 @@ Page30:     rla
 Page31..A.: rrca
 .local..c.:
     ENDMODULE
+
+    ; exporting of struct-emit labels should contain the correct physical address too
+s1          Struct { 0x1234 }
