@@ -144,6 +144,9 @@ upx: $(BUILD_EXE)
 	upx --best $(EXE_BASE_NAME)
 	EXE="$(CURDIR)/$(EXE_BASE_NAME)" $(BASH) ContinuousIntegration/test_folder_tests.sh
 
+# make all sjasm/*.o depend on all sjasm/*.h files (no subtle dependencies, all by all affected)
+$(OBJS): $(wildcard $(SUBDIR_BASE)/*.h)
+
 $(BUILD_EXE): $(ALL_OBJS)
 	$(CXX) -o $(BUILD_EXE) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
 
