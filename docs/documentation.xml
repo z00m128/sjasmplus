@@ -200,14 +200,16 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.17.1</term>
+            <term>soon&trade; - 1.18.0</term>
 
             <listitem>
               <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
+- [may break old sources] new <link linkend="s_expressions">abs operator</link> for absolute integer value
 - <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
 - added <link linkend="po_device">"NOSLOT64K" device</link> with 2MiB of virtual memory
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
+- <link linkend="po_cspectmap">`CSPECTMAP`</link> exports STRUCT symbols with more detail (instance labels with physical address)
 - <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
 - added "listmc" command to <link linkend="po_opt">OPT</link> - to list only lines with machine code bytes
 - minor bugfixes in parser and listing-line-numbering
@@ -781,6 +783,7 @@ $c     hexadecimal
 low   low x    low 8 bits of 16 bit value or lower part of register pair
 high  high x   high 8 bits of 16 bit value or higher part of register pair
 not   not x    logical not
+abs   abs x    absolute value (since v1.18.0)
 
 *     x*y      multiplication
 /     x/y      division
