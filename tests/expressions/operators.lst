@@ -152,7 +152,7 @@ operators.asm(65): warning: value 0x10000 is truncated to 16bit value: 0x0000
 65    001B 80 00 80 00
 65    001F 00 00 00 00
 66    0023              abs:
-operators.asm(67): warning: the `abs` is now absolute value operator, if you are using it as label, please rename
+operators.asm(67): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
 67    0023 23 00            DW  abs         ; warning about ABS being now new operator (to be removed ~Dec 2021)
 68    0025
 # file closed: operators.asm

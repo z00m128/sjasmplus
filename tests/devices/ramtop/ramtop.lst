@@ -20,7 +20,7 @@ ramtop.asm(7): error: Unexpected: , 0
 12    0000                  ; more checks exercised
 ramtop.asm(13): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 0
 13    0000                  DEVICE  ZXSPECTRUMNEXT, 0
-ramtop.asm(14): warning: ZXN device doesn't init memory in any way (RAMTOP is ignored)
+ramtop.asm(14): warning[zxnramtop]: ZXN device doesn't init memory in any way (RAMTOP is ignored)
 14    0000                  DEVICE  ZXSPECTRUMNEXT, $5D00   ; warning about ignoring ramtop
 15    0000                  DEVICE  ZXSPECTRUMNEXT, $5D01   ; device was already initialized, silent line (still ignoring ramtop)
 16    0000                  DEVICE  ZXSPECTRUMNEXT          ; no warning (just switching)
@@ -28,7 +28,7 @@ ramtop.asm(14): warning: ZXN device doesn't init memory in any way (RAMTOP is ig
 ramtop.asm(18): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 0
 18    0000                  DEVICE  ZXSPECTRUM256, 0
 19    0000                  DEVICE  ZXSPECTRUM256
-ramtop.asm(20): warning: [DEVICE] this device was already opened with different RAMTOP value
+ramtop.asm(20): warning[devramtop]: [DEVICE] this device was already opened with different RAMTOP value
 20    0000                  DEVICE  ZXSPECTRUM256, $5D00    ; was already opened with default RAMTOP
 21    0000                  DEVICE  ZXSPECTRUM256           ; no warning (same ramtop)
 22    0000
@@ -38,9 +38,16 @@ ramtop.asm(24): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 65536
 24    0000                  DEVICE  ZXSPECTRUM128, $FFFF+1  ; error value
 25    0000                  DEVICE  ZXSPECTRUM128, $FFFF
 26    0000                  DEVICE  ZXSPECTRUM128           ; no warning (just switching device to zx128)
-ramtop.asm(27): warning: [DEVICE] this device was already opened with different RAMTOP value
+ramtop.asm(27): warning[devramtop]: [DEVICE] this device was already opened with different RAMTOP value
 27    0000                  DEVICE  ZXSPECTRUM128, $FFFE    ; warning about different RAMTOP
 28    0000
+ramtop.asm(29): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 0
+29    0000                  DEVICE  NOSLOT64K, 0
+ramtop.asm(30): warning[noslotramtop]: NoSlot64k device doesn't init memory in any way (RAMTOP is ignored)
+30    0000                  DEVICE  NOSLOT64K, $5D00    ; warning about ignoring ramtop
+31    0000                  DEVICE  NOSLOT64K, $5D01    ; device was already initialized, silent line (still ignoring ramtop)
+32    0000                  DEVICE  NOSLOT64K           ; no warning (just switching)
+33    0000
 # file closed: ramtop.asm
 
 Value    Label

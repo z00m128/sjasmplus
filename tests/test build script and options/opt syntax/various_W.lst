@@ -1,0 +1,43 @@
+# file opened: various_W.asm
+ 1    0000              ; various -W<warning_id> combinations (hopefully all of them, if possible)
+ 2    0000
+ 3    0000              ; the default is "enabled" for all warnings
+ 4    0000              abs:
+various_W.asm(5): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
+ 5    0000 21 00 00         ld hl,abs
+various_W.asm(6): warning[zxnramtop]: ZXN device doesn't init memory in any way (RAMTOP is ignored)
+ 6    0003                  DEVICE ZXSPECTRUMNEXT, $8000
+various_W.asm(7): warning[noslotramtop]: NoSlot64k device doesn't init memory in any way (RAMTOP is ignored)
+ 7    0003                  DEVICE NOSLOT64K, $8000
+ 8    0003                  DEVICE ZXSPECTRUM48, $8000
+various_W.asm(8): warning[devramtop]: [DEVICE] this device was already opened with different RAMTOP value
+ 8    0003                DEVICE ZXSPECTRUM48, $8001
+ 9    0003
+10    0003              ; disable/enable specific warning and test specific-suppression in eol comment
+11    0003
+12    0003                  ; abs
+13    0003                  OPT -Wno-abs
+14    0003 21 00 00         ld hl,abs
+15    0006                  OPT -Wabs
+various_W.asm(16): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
+16    0006 21 00 00         ld hl,abs   ; devramtop-ok - some other id, should not suppress abs
+17    0009 21 00 00         ld hl,abs   ; but abs-ok should suppress it
+18    000C
+19    000C                  ; impossible to re-test zxnramtop and noslotramtop, because they are emitted just once
+20    000C
+21    000C                  ; devramtop
+22    000C                  OPT -Wno-devramtop
+23    000C                  DEVICE ZXSPECTRUM48, $8000
+23    000C                DEVICE ZXSPECTRUM48, $8001
+24    000C                  OPT -Wdevramtop
+25    000C                  DEVICE ZXSPECTRUM48, $8000
+various_W.asm(25): warning[devramtop]: [DEVICE] this device was already opened with different RAMTOP value
+25    000C                DEVICE ZXSPECTRUM48, $8001 ; abs-ok - some other id, should not suppress abs
+26    000C                  DEVICE ZXSPECTRUM48, $8000
+26    000C                DEVICE ZXSPECTRUM48, $8001 ; but devramtop-ok should suppress it
+27    000C
+# file closed: various_W.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   abs

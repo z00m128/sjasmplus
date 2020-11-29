@@ -135,7 +135,7 @@ static void DeviceZXSpectrum8192(CDevice **dev, CDevice *parent, aint ramtop) {
 }
 
 static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
-	if (ramtop) Warning("ZXN device doesn't init memory in any way (RAMTOP is ignored)");
+	if (ramtop) WarningById(W_NEXT_RAMTOP);
 	if (Options::IsI8080) Error("Can't use ZXN device while in i8080 assembling mode.", line, FATAL);
 	if (Options::IsLR35902) Error("Can't use ZXN device while in Sharp LR35902 assembling mode.", line, FATAL);
 	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
@@ -150,7 +150,7 @@ static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
 }
 
 static void DeviceNoSlot64k(CDevice **dev, CDevice *parent, aint ramtop) {
-	if (ramtop) Warning("NoSlot64k device doesn't init memory in any way (RAMTOP is ignored)");
+	if (ramtop) WarningById(W_NOSLOT_RAMTOP);
 	*dev = new CDevice("NOSLOT64K", parent);
 	const int initialPages[] = { 0 };
 	initRegularSlotDevice(*dev, 0x10000, 1, 32, initialPages);	// 32*64kiB = 2MiB
@@ -204,7 +204,7 @@ int SetDevice(char *id, const aint ramtop) {
 		Device->CheckPage(CDevice::CHECK_RESET);
 	}
 	if (ramtop && Device->ZxRamTop && ramtop != Device->ZxRamTop) {
-		Warning("[DEVICE] this device was already opened with different RAMTOP value");
+		WarningById(W_DEV_RAMTOP);
 	}
 	if (IsSldExportActive()) {
 		// SLD tracing data are being exported, export the device data

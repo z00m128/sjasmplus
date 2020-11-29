@@ -39,9 +39,19 @@
 enum EStatus { ALL, FATAL, EARLY, PASS3, IF_FIRST, SUPPRESS };
 enum EWStatus { W_ALL, W_EARLY, W_PASS3 };
 
+extern const char* W_ABS_LABEL;
+extern const char* W_NEXT_RAMTOP;
+extern const char* W_NOSLOT_RAMTOP;
+extern const char* W_DEV_RAMTOP;
+
 void Error(const char* message, const char* badValueMessage = nullptr, EStatus type = PASS3);
 void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);
 void ErrorOOM();		// out of memory
+
+bool warningNotSuppressed(bool alsoFake = false);	// checks for "ok" ("fake") in EOL comment
 void Warning(const char* message, const char* badValueMessage = nullptr, EWStatus type = W_PASS3);
+void WarningById(const char* id, const char* badValueMessage = nullptr, EWStatus type = W_PASS3);
+void CliWoption(const char* option);
+void PrintHelpWarnings();
 
 //eof io_err.h

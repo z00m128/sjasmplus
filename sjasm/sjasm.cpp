@@ -39,7 +39,7 @@
 
 #endif //USE_LUA
 
-void PrintHelp() {
+static void PrintHelpMain() {
 	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
 	//     |<-- ...8901234567890123456789012345678901234567890123456789012... 80 chars -->|
 	_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
@@ -48,7 +48,7 @@ void PrintHelp() {
 	//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 	_COUT "\nOption flags as follows:" _ENDL;
-	_COUT "  -h or --help             Help information (you see it)" _ENDL;
+	_COUT "  -h or --help[=warnings]  Help information (you see it)" _ENDL;
 	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions (Z80N)" _ENDL;
 	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
 	_COUT "  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)" _ENDL;
@@ -101,7 +101,8 @@ namespace Options {
 	bool IsShowFullPath = 0;
 	bool AddLabelListing = false;
 	bool HideLogo = 0;
-	bool ShowHelp = 0;
+	bool ShowHelp = false;
+	bool ShowHelpWarnings = false;
 	bool ShowVersion = false;
 	bool NoDestinationFile = true;		// no *.out file by default
 	SSyntax syx, systemSyntax;
@@ -162,6 +163,11 @@ namespace Options {
 	}
 
 } // eof namespace Options
+
+static void PrintHelp(bool forceMainHelp) {
+	if (forceMainHelp || Options::ShowHelp) PrintHelpMain();
+	if (Options::ShowHelpWarnings) PrintHelpWarnings();
+}
 
 CDevice *Devices = nullptr;
 CDevice *Device = nullptr;
@@ -442,6 +448,8 @@ namespace Options {
 					syx.FakeEnabled = false;
 				} else if (!strcmp(opt, "syntax")) {
 					parseSyntaxValue();
+				} else if (!doubleDash && 'W' == opt[0]) {
+					CliWoption(val);
 				} else if (onlySyntaxOptions) {
 					// rest of the options is available only when launching the sjasmplus
 					return;
@@ -455,8 +463,9 @@ namespace Options {
 					// force (silently) other CPU modes OFF
 					IsLR35902 = false;
 					syx.IsNextEnabled = 0;
-				} else if ((!doubleDash && !strcmp(opt,"h") && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
-					ShowHelp = 1;
+				} else if ((!doubleDash && 'h' == opt[0] && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
+					ShowHelp |= strcmp("warnings", val);
+					ShowHelpWarnings |= !strcmp("warnings", val);
 				} else if (doubleDash && !strcmp(opt, "version")) {
 					ShowVersion = true;
 				} else if (!strcmp(opt, "lstlab")) {
@@ -503,8 +512,8 @@ namespace Options {
 				} else if (!strcmp(opt, "dos866")) {
 					ConvertEncoding = ENCDOS;
 				} else if ((doubleDash && !strcmp(opt, "inc")) ||
-							(!doubleDash && !strcmp(opt, "i")) ||
-							(!doubleDash && !strcmp(opt, "I"))) {
+							(!doubleDash && 'i' == opt[0]) ||
+							(!doubleDash && 'I' == opt[0])) {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
 					} else {
@@ -515,7 +524,7 @@ namespace Options {
 							IncludeDirsList = nullptr;
 						}
 					}
-				} else if (!doubleDash && opt[0] == 'D') {
+				} else if (!doubleDash && 'D' == opt[0]) {
 					char defN[LINEMAX], defV[LINEMAX];
 					if (*val) {		// for -Dname=value the `val` contains "name=value" string
 						//TODO the `Error("Duplicate name"..)` is not shown while parsing CLI options
@@ -665,9 +674,9 @@ int main(int argc, char **argv) {
 	}
 	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
 
-	if (argc == 1 || Options::ShowHelp) {
+	if (argc == 1 || Options::ShowHelp || Options::ShowHelpWarnings) {
 		_COUT logo _ENDL;
-		PrintHelp();
+		PrintHelp(argc == 1);
 		exit(argc == 1);
 	}
 
