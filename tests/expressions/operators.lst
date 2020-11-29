@@ -140,8 +140,24 @@ operators.asm(52): error: [DW/DEFW/WORD] Syntax error: {b 0 }
 operators.asm(61): warning: ?<symbol> operator is deprecated and will be removed in v2.x: ?not     
 61    0008 21 08 00         ld  hl,?not     ; deprecated, use "@not" with full global name, or don't use keywords for label names at all
 62    000B
+63    000B                  ; new in v1.18.0
+operators.asm(64): warning: value 0x100 is truncated to 8bit value: 0x00
+operators.asm(64): warning: value 0x100 is truncated to 8bit value: 0x00
+64    000B 10 10 20 20      DB  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(256),abs(-256)
+64    000F 80 80 00 00
+operators.asm(65): warning: value 0x10000 is truncated to 16bit value: 0x0000
+operators.asm(65): warning: value 0x10000 is truncated to 16bit value: 0x0000
+65    0013 10 00 10 00      DW  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(65536),abs(-65536)
+65    0017 20 00 20 00
+65    001B 80 00 80 00
+65    001F 00 00 00 00
+66    0023              abs:
+operators.asm(67): warning: the `abs` is now absolute value operator, if you are using it as label, please rename
+67    0023 23 00            DW  abs         ; warning about ABS being now new operator (to be removed ~Dec 2021)
+68    0025
 # file closed: operators.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
 0x0008   not
+0x0023   abs

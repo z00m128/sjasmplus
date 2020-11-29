@@ -130,7 +130,8 @@ static int ParseExpUnair(char*& p, aint& nval) {
 	aint right;
 	int oper;
 	if ((oper = need(p, "! ~ + - ")) || \
-		(oper = needa(p, "not", '!', "low", 'l', "high", 'h', true)) ) {
+		(oper = needa(p, "not", '!', "low", 'l', "high", 'h', true)) || \
+		(oper = needa(p, "abs", 'a', nullptr, 0, nullptr, 0, true)) ) {
 		switch (oper) {
 		case '!':
 			if (!ParseExpUnair(p, right)) return 0;
@@ -155,6 +156,16 @@ static int ParseExpUnair(char*& p, aint& nval) {
 		case 'h':
 			if (!ParseExpUnair(p, right)) return 0;
 			nval = (right >> 8) & 255;
+			break;
+		case 'a':
+			// fallback in case somebody is using `abs` as regular label (for example BS ROM source)
+			//TODO remove the fallback after ~Dec 2021 (giving one year) (after that abs as label will error out)
+			if (!ParseExpUnair(p, right)) {
+				Warning("the `abs` is now absolute value operator, if you are using it as label, please rename");
+				p = oldP;
+				return ParseExpPrim(p, nval);
+			}
+			nval = abs(right);
 			break;
 		default: Error("internal error", nullptr, FATAL); break;	// unreachable
 		}
