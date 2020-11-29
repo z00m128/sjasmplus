@@ -1,7 +1,7 @@
 # file opened: various_W.asm
  1    0000              ; various -W<warning_id> combinations (hopefully all of them, if possible)
  2    0000
- 3    0000              ; the default is "enabled" for all warnings
+ 3    0000              ; the default is "enabled" for all warnings - exercise all of them
  4    0000              abs:
 various_W.asm(5): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
  5    0000 21 00 00         ld hl,abs
@@ -36,6 +36,11 @@ various_W.asm(25): warning[devramtop]: [DEVICE] this device was already opened w
 26    000C                  DEVICE ZXSPECTRUM48, $8000
 26    000C                DEVICE ZXSPECTRUM48, $8001 ; but devramtop-ok should suppress it
 27    000C
+28    000C              ; testing corner-case states possible with the -W option (test coverage)
+various_W.asm(29): error: no argument after -W: OPT -W -Wnon-existent-warning-id-to-cause-warning
+various_W.asm(29): warning: unknown warning id in -W option: non-existent-warning-id-to-cause-warning
+29    000C                  OPT -W -Wnon-existent-warning-id-to-cause-warning
+30    000C
 # file closed: various_W.asm
 
 Value    Label

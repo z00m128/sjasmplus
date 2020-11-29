@@ -1,6 +1,6 @@
 ; various -W<warning_id> combinations (hopefully all of them, if possible)
 
-; the default is "enabled" for all warnings
+; the default is "enabled" for all warnings - exercise all of them
 abs:
     ld hl,abs
     DEVICE ZXSPECTRUMNEXT, $8000
@@ -24,3 +24,6 @@ abs:
     OPT -Wdevramtop
     DEVICE ZXSPECTRUM48, $8000 : DEVICE ZXSPECTRUM48, $8001 ; abs-ok - some other id, should not suppress abs
     DEVICE ZXSPECTRUM48, $8000 : DEVICE ZXSPECTRUM48, $8001 ; but devramtop-ok should suppress it
+
+; testing corner-case states possible with the -W option (test coverage)
+    OPT -W -Wnon-existent-warning-id-to-cause-warning

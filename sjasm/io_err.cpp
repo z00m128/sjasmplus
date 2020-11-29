@@ -263,7 +263,8 @@ void WarningById(const char* id, const char* badValueMessage, EWStatus type) {
 
 void CliWoption(const char* option) {
 	if (!option[0]) {
-		_CERR "No argument after -W" _ENDL;
+		// from command line pass == 0, from source by OPT the pass is above zero
+		Error("no argument after -W", (0 == pass) ? nullptr : bp, (0 == pass) ? EARLY : PASS3);
 		return;
 	}
 	// check for specific id, with possible "no-" prefix ("-Wabs" vs "-Wno-abs")
