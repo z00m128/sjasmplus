@@ -205,12 +205,12 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	const bool isExtensionB = ('B' == trdf.ext);
 	if (!addplace && warningNotSuppressed()) {
 		if (INVALID_EXTENSION == nameWarning) {
-			Warning("zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.", fhobname);
+			WarningById(W_TRD_EXT_INVALID, fhobname);
 		}
 		if (THREE_LETTER_EXTENSION == nameWarning) {
-			Warning("zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters", fhobname);
+			WarningById(W_TRD_EXT_3, fhobname);
 			if (isExtensionB) {
-				Warning("SAVETRD: the \"B\" extension is always single letter", fhobname);
+				WarningById(W_TRD_EXT_B, fhobname);
 				Lname = STrdFile::NAME_FULL_SZ;
 			}
 		}
@@ -316,7 +316,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		if (STrdHead::NUM_OF_FILES_MAX != fileIndex && warningNotSuppressed()) {
 			// to keep legacy behaviour of older sjasmplus versions, this is just warning
 			// and the same file will be added to end of directory any way
-			Warning("TRD file already exists, creating one more!", fname, W_PASS3);
+			WarningById(W_TRD_DUPLICATE, fname);
 		}
 		fileIndex = trdHead.info.numOfFiles;
 	}

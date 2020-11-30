@@ -3,8 +3,8 @@
  2    1000
  3    1000                  RELOCATE_START
  4    1000 12           label1:     DB  0x12
- 5    1001 00 00 00...          ALIGN   16      ; ok ; suppressed warning
-relocation_align.asm(6): warning: [ALIGN] inside relocation block: may become misaligned when relocated
+ 5    1001 00 00 00...          ALIGN   16      ; relalign-ok ; suppressed warning
+relocation_align.asm(6): warning[relalign]: [ALIGN] inside relocation block: may become misaligned when relocated
  6    1010 00 00 00...          ALIGN   32      ; warn about relocation mode
  7    1020 21 00 10                 ld  hl,label1
  8    1023                  RELOCATE_END

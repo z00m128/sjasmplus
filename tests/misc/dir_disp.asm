@@ -10,7 +10,7 @@ l2:     nop
 
         ORG     $E002       ; warning: only virtual address being modified inside DISP
 l3:     ccf
-        ORG     $F003       ; ok ; warning suppressed
+        ORG     $F003       ; suppress: displacedorg-ok
 l4:     rra
 
     ENT

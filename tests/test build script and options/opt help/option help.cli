@@ -11,6 +11,6 @@ diff help.msglst h.msglst &&\
 help_lines=`wc -l < help.msglst` &&\
 echo "Help lines count: ${help_lines} (must be at least 20 to pass the test)" &&\
 warnings_lines=`wc -l < warnings.msglst` &&\
-echo "Warnings help lines count: ${warnings_lines} (must be at least 7 to pass the test)" &&\
-[[ 20 -le ${help_lines} && 7 -le ${warnings_lines} ]] ;
+echo "Warnings help lines count: ${warnings_lines} (must be at least 10 to pass the test)" &&\
+[[ 20 -le ${help_lines} && 10 -le ${warnings_lines} ]] ;
 last_result=$?

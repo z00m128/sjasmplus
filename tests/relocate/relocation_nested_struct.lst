@@ -11,7 +11,7 @@
  10   1004 ~            w       WORD    absolute1
  11   1004 ~            relInit WORD    reloc1          ; the default init value should be relocated
  12   1004 ~            noRel   WORD    reloc2-reloc1
-relocation_nested_struct.asm(13): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_nested_struct.asm(13): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  13   1004 ~            badRel  WORD    2*reloc1        ; warning about not simple "+offset"
  14   1004                  ENDS
  15   1004
@@ -20,11 +20,11 @@ relocation_nested_struct.asm(13): warning: Expression can't be relocated by simp
  18   1004 ~            w       WORD    absolute1
  19   1004 ~            relInit WORD    reloc2          ; the default init value should be relocated
  20   1004 ~            noRel   WORD    reloc2-reloc1
-relocation_nested_struct.asm(21): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_nested_struct.asm(21): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  21   1004 ~            badRel  WORD    2*reloc2        ; warning about not simple "+offset"
  22   1004 ~            st1A    st1
-relocation_nested_struct.asm(23): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
-relocation_nested_struct.asm(23): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_nested_struct.asm(23): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_nested_struct.asm(23): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  23   1004 ~            st1B    st1     { high reloc1, absolute2, reloc2, reloc1-reloc2, 2*reloc2 }
  24   1004                  ENDS
  25   1004
@@ -46,8 +46,8 @@ relocation_nested_struct.asm(23): warning: Expression can't be relocated by simp
  31   102F 08 20 EF 58
  31   1033 88 CD AB 49
  31   1037 FF 76 21
-relocation_nested_struct.asm(32): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
-relocation_nested_struct.asm(32): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_nested_struct.asm(32): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_nested_struct.asm(32): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  32   103A 34 DC 87 CD  .t3 st2     {,,$ABCD,,,{high reloc2,,$ABCD,,},{$EF,,2*reloc1,,reloc2}}   ; some relocatable and 2x warnings
  32   103E AB B7 00 76
  32   1042 21 10 DC 87

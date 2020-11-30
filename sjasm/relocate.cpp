@@ -77,7 +77,7 @@ void Relocation::resolveRelocationAffected(const aint opcodeRelOffset) {
 	}
 	// difference is not fixable by simple "+offset" relocator, report it as warning
 	if (warningNotSuppressed()) {
-		Warning("Expression can't be relocated by simple \"+offset\" mechanics, value diverts differently.");
+		WarningById(W_REL_DIVERTS);
 	}
 }
 
@@ -89,7 +89,7 @@ bool Relocation::checkAndWarn(bool doError) {
 	if (doError) {
 		Error("Relocation makes one of the expressions unstable, use non-relocatable values only");
 	} else if (warningNotSuppressed()) {
-		Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
+		WarningById(W_REL_UNSTABLE);
 	}
 	return true;
 }

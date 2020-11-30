@@ -10,7 +10,7 @@
  3    C000 31 31          DB "11"
  4    C002                  ASSERT {0xC000} == "11"
  5    C002                  ; test second argument of ORG
-org_page.asm(6): warning: ORG address 0x4000 is outside of current slot 0xC000..0xFFFF (page argument affects *current* slot): ORG 0x4000, 0       
+org_page.asm(6): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0x4000 vs slot 3 range 0xC000..0xFFFF
  6    C002                  ORG 0x4000, 0       ; should do also PAGE 0 in current slot (not related to 0x4000)
  7    4000                      ; since v1.15.2 this should emit warning about address outside current slot
  8    4000 35 35            DB "55"
@@ -18,26 +18,26 @@ org_page.asm(6): warning: ORG address 0x4000 is outside of current slot 0xC000..
  9    4002                ASSERT {0x4000} == "55"
 10    4002                  ; verify warning precision on all ends
 11    4002                  SLOT 2
-org_page.asm(12): warning: ORG address 0x7FFF is outside of current slot 0x8000..0xBFFF (page argument affects *current* slot): ORG 0x7FFF, 7   
+org_page.asm(12): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0x7FFF vs slot 2 range 0x8000..0xBFFF
 12    4002                  ORG 0x7FFF, 7   ; should warn
-org_page.asm(13): warning: ORG address 0xC000 is outside of current slot 0x8000..0xBFFF (page argument affects *current* slot): ORG 0xC000, 7   
+org_page.asm(13): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0xC000 vs slot 2 range 0x8000..0xBFFF
 13    7FFF                  ORG 0xC000, 7   ; should warn
 14    C000                  ORG 0x8000, 6   ; should be ok
 15    8000                  ORG 0xBFFF, 6   ; should be ok
-16    BFFF                  ORG 0x7FFF, 5   ; ok ; should be suppressed
-17    7FFF                  ORG 0xC000, 5   ; ok ; should be suppressed
+16    BFFF                  ORG 0x7FFF, 5   ; orgpage-ok ; should be suppressed
+17    7FFF                  ORG 0xC000, 5   ; orgpage-ok ; should be suppressed
 18    C000
 19    C000                  ; try the warning with 8kiB slots
 20    C000                  DEVICE ZXSPECTRUMNEXT
 21    C000                  SLOT 4
-org_page.asm(22): warning: ORG address 0x7FFF is outside of current slot 0x8000..0x9FFF (page argument affects *current* slot): ORG 0x7FFF, 7   
+org_page.asm(22): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0x7FFF vs slot 4 range 0x8000..0x9FFF
 22    C000                  ORG 0x7FFF, 7   ; should warn
-org_page.asm(23): warning: ORG address 0xA000 is outside of current slot 0x8000..0x9FFF (page argument affects *current* slot): ORG 0xA000, 7   
+org_page.asm(23): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0xA000 vs slot 4 range 0x8000..0x9FFF
 23    7FFF                  ORG 0xA000, 7   ; should warn
 24    A000                  ORG 0x8000, 6   ; should be ok
 25    8000                  ORG 0x9FFF, 6   ; should be ok
-26    9FFF                  ORG 0x7FFF, 5   ; ok ; should be suppressed
-27    7FFF                  ORG 0xA000, 5   ; ok ; should be suppressed
+26    9FFF                  ORG 0x7FFF, 5   ; orgpage-ok ; should be suppressed
+27    7FFF                  ORG 0xA000, 5   ; orgpage-ok ; should be suppressed
 28    A000
 # file closed: org_page.asm
 

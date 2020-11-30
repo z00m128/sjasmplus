@@ -16,9 +16,9 @@
 15    1004 21 07 12         ld      hl,equRel           ; to be relocated
 16    1007 11 12 00         ld      de,equNoRel         ; not affected by relocation
 17    100A 01 DC 17         ld      bc,equAbs           ; not affected by relocation
-relocation_transitive_equ.asm(18): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_transitive_equ.asm(18): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
 18    100D 21 0E 24         ld      hl,equRel*2         ; affected but not relocated (invalid difference) (warning)
-19    1010 11 0E 24         ld      de,equRel*2         ; ok ; suppressed warning
+19    1010 11 0E 24         ld      de,equRel*2         ; reldiverts-ok ; suppressed warning
 20    1013 01 0C 30         ld      bc,equNoRel2        ; not affected by relocation
 21    1016
 22    1016              reloc2:

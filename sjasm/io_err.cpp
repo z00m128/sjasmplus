@@ -179,6 +179,25 @@ const char* W_ABS_LABEL = "abs";
 const char* W_NEXT_RAMTOP = "zxnramtop";
 const char* W_NOSLOT_RAMTOP = "noslotramtop";
 const char* W_DEV_RAMTOP = "devramtop";
+const char* W_DISPLACED_ORG = "displacedorg";
+const char* W_ORG_PAGE = "orgpage";
+const char* W_FWD_REF = "fwdref";
+const char* W_LUA_MC_PASS = "luamc";
+const char* W_NEX_STACK = "nexstack";
+const char* W_NEX_BMP_PAL = "nexbmppal";
+const char* W_SNA_48 = "sna48";
+const char* W_SNA_128 = "sna128";
+const char* W_TRD_EXT_INVALID = "trdext";
+const char* W_TRD_EXT_3 = "trdext3";
+const char* W_TRD_EXT_B = "trdextb";
+const char* W_TRD_DUPLICATE = "trddup";
+const char* W_RELOCATABLE_ALIGN = "relalign";
+const char* W_READ_LOW_MEM = "rdlow";
+const char* W_REL_DIVERTS = "reldiverts";
+const char* W_REL_UNSTABLE = "relunstable";
+const char* W_DISP_MEM_PAGE = "dispmempage";
+const char* W_BP_FILE = "bpfile";
+const char* W_OUT0 = "out0";
 
 static messages_map w_texts = {
 	{ W_ABS_LABEL,
@@ -205,6 +224,120 @@ static messages_map w_texts = {
 			"Warn when different <ramtop> is used for same device."
 		}
 	},
+	{ W_DISPLACED_ORG,
+		{ true,
+			"ORG-address set inside displaced block, the physical address is not modified, only displacement address",
+			"Warn about ORG-address used inside DISP block."
+		}
+	},
+	{ W_ORG_PAGE,
+		{ true,
+			"[ORG] page argument affects current slot while address is outside",
+			"Warn about ORG address vs page argument mismatch."
+		}
+	},
+	{ W_FWD_REF,
+		{ true,
+			"forward reference of symbol",
+			"Warn about using undefined symbol in risky way."
+		}
+	},
+	{ W_LUA_MC_PASS,
+		{ true,
+			"When lua script emits machine code bytes, use \"ALLPASS\" modifier",
+			"Warn when lua script is not ALLPASS, but emits bytes."
+		}
+	},
+	{ W_NEX_STACK,
+		{ true,
+			"[SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD",
+			"Warn when NEX stack points into non-empty memory."
+		}
+	},
+	{ W_NEX_BMP_PAL,
+		{ true,
+			"[SAVENEX] BMP palette has less than 256 colours",
+			"Warn when palette from BMP is incomplete."
+		}
+	},
+	{ W_SNA_48,
+		{ true,
+			"[SAVESNA] RAM <0x4000-0x4001> will be overwritten due to 48k snapshot imperfect format.",
+			"Warn when 48k SNA does use screen for stack."
+		}
+	},
+	{ W_SNA_128,
+		{ true,
+			"only 128kb will be written to snapshot",
+			"Warn when saving snapshot from 256+ki device."
+		}
+	},
+	{ W_TRD_EXT_INVALID,
+		{ true,
+			"invalid file extension, TRDOS official extensions are B, C, D and #.",
+			"Warn when TRD file uses unofficial/invalid extension."
+		}
+	},
+	{ W_TRD_EXT_3,
+		{ true,
+			"3-letter extension of TRDOS file (unofficial extension)",
+			"Warn when TRD file does use 3-letter extension."
+		}
+	},
+	{ W_TRD_EXT_B,
+		{ true,
+			"the \"B\" extension is always single letter",
+			"Warn when long extension starts with letter B (can not)."
+		}
+	},
+	{ W_TRD_DUPLICATE,
+		{ true,
+			"TRD file already exists, creating one more!",
+			"Warn when second file with same name is added to disk."
+		}
+	},
+	{ W_RELOCATABLE_ALIGN,
+		{ true,
+			"[ALIGN] inside relocation block: may become misaligned when relocated",
+			"Warn when align is used inside relocatable code."
+		}
+	},
+	{ W_READ_LOW_MEM,
+		{ true,
+			"Reading memory at low address",
+			"Warn when reading memory from addresses 0..255."
+		}
+	},
+	{ W_REL_DIVERTS,
+		{ true,
+			"Expression can't be relocated by simple \"+offset\" mechanics, value diverts differently.",
+			"Warn when relocated expression differs non-trivially."
+		}
+	},
+	{ W_REL_UNSTABLE,
+		{ true,
+			"Relocation makes one of the expressions unstable, resulting machine code is not relocatable",
+			"Warn when expression result can't be relocated."
+		}
+	},
+	{ W_DISP_MEM_PAGE,
+		{ true,
+			"DISP memory page differs from current mapping",
+			"Warn when DISP page differs from current mapping."
+		}
+	},
+	{ W_BP_FILE,
+		{ true,
+			"breakpoints file was not specified",
+			"Warn when SETBREAKPOINT is used without breakpoint file."
+		}
+	},
+	{ W_OUT0,
+		{ true,
+			"'out (c),0' is unstable, on CMOS based chips it does `out (c),255`",
+			"Warn when instruction `out (c),0` is used."
+		}
+	},
 };
 
 //TODO deprecated, add single-warning around mid 2021, remove ~1y later (replaced by warning-id system)
@@ -220,7 +353,7 @@ bool warningNotSuppressed(bool alsoFake) {
 	return alsoFake ? (nullptr == strstr(eolComment, "fake")) : true;
 }
 
-static bool suppressedById(const char* id) {
+bool suppressedById(const char* id) {
 	assert(id);
 	if (nullptr == eolComment) return false;
 	const size_t idLength = strlen(id);
@@ -261,6 +394,12 @@ void WarningById(const char* id, const char* badValueMessage, EWStatus type) {
 	WarningImpl(id, message, badValueMessage, type);
 }
 
+void WarningById(const char* id, int badValue, EWStatus type) {
+	char buf[32];
+	SPRINTF1(buf, 32, "%d", badValue);
+	WarningById(id, buf, type);
+}
+
 void CliWoption(const char* option) {
 	if (!option[0]) {
 		// from command line pass == 0, from source by OPT the pass is above zero
@@ -268,11 +407,11 @@ void CliWoption(const char* option) {
 		return;
 	}
 	// check for specific id, with possible "no-" prefix ("-Wabs" vs "-Wno-abs")
-	const bool disable = !strncmp("no-", option, 3);
-	const char* id = disable ? option + 3 : option;
+	const bool enable = strncmp("no-", option, 3);
+	const char* id = enable ? option : option + 3;
 	for (auto& w_text : w_texts) {
 		if (!strcmp(id, w_text.first)) {
-			w_text.second.enabled = !disable;
+			w_text.second.enabled = enable;
 			return;
 		}
 	}
@@ -292,6 +431,7 @@ void PrintHelpWarnings() {
 		_COUT "  -W" _CMDL id _CMDL spaceFiller+strlen(id) _CMDL w_texts[id].help _ENDL;
 	}
 	_COUT " Use -Wno- prefix to disable specific warning, example: -Wno-abs" _ENDL;
+	_COUT " Use -ok suffix in comment to suppress it per line, example: jr abs ; abs-ok" _ENDL;
 }
 
 //eof io_err.cpp

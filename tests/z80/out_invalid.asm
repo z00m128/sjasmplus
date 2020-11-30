@@ -1,6 +1,6 @@
     out (c),1                   ; "illegal" error, only "0" is valid
     out (c),0                   ; "warning" about `out (c),0` being unstable
-    out (c),0                   ; ok ; suppressed warning
+    out (c),0                   ; out0-ok ; suppressed warning
 
     ASSERT 0==__ERRORS__        ; this assert should fail
     ASSERT 0==__WARNINGS__      ; this assert should fail

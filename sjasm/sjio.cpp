@@ -313,7 +313,7 @@ void EmitByte(int byte, bool isInstructionStart) {
 				} else {
 					pageNum = dispPageNum;					// special DISP page is set, use it instead
 					if (pageNum != mappingPageNum && !PageDiffersWarningShown) {
-						Warning("DISP memory page differs from current mapping");
+						WarningById(W_DISP_MEM_PAGE);
 						PageDiffersWarningShown = true;		// show warning about different mapping only once
 					}
 				}
@@ -1383,7 +1383,7 @@ static void CloseBreakpointsFile() {
 
 void WriteBreakpoint(const aint val) {
 	if (!FP_BreakpointsFile) {
-		if (warningNotSuppressed()) Warning("breakpoints file was not specified");
+		if (warningNotSuppressed()) WarningById(W_BP_FILE);
 		return;
 	}
 	++breakpointsCounter;

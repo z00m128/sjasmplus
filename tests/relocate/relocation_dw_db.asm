@@ -11,7 +11,7 @@ table:
     dw      $1111, label1, $2222, label2    ; single line having multiple values
     ; warn about unstable expression
     db      high label1
-    db      high label1     ; ok ; supressed warning
+    db      high label1     ; relunstable-ok ; supressed warning
     ; correct + no relocation data
     dw      label2-label1
     db      label2-label1
@@ -19,7 +19,7 @@ table:
 label1:
     ld      hl,0+table
     ld      (hl),low table  ; warn about unstable
-    ld      (hl),low table  ; ok ; suppressed warning
+    ld      (hl),low table  ; relunstable-ok ; suppressed warning
 label2:
     ld      de,table+4
     ld      (label1+1),de

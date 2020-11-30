@@ -1,5 +1,5 @@
-coverage1.asm(2): warning: [IF/IFN] Forward reference: IF 0 < fwdLabel 
-coverage1.asm(3): warning: [IF/IFN] Forward reference: IFN 0 < fwdLabel 
+coverage1.asm(2): warning[fwdref]: forward reference of symbol: IF 0 < fwdLabel 
+coverage1.asm(3): warning[fwdref]: forward reference of symbol: IFN 0 < fwdLabel 
 # file opened: coverage1.asm
 coverage1.asm(1): error: Syntax error: & 
 coverage1.asm(1): error: Unexpected: & 

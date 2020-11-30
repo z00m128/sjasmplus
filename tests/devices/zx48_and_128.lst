@@ -125,7 +125,7 @@ zx48_and_128.asm(61): error: [ORG] Syntax error in <address>: &
 61    0002                  ORG &
 zx48_and_128.asm(61): error: Syntax error in <page_number>: & 
 61    0002                PAGE &
-zx48_and_128.asm(61): warning: ORG address 0x1234 is outside of current slot 0xC000..0xFFFF (page argument affects *current* slot): ORG 0x1234, & 
+zx48_and_128.asm(61): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0x1234 vs slot 3 range 0xC000..0xFFFF
 zx48_and_128.asm(61): error: Syntax error in <page_number>: & 
 61    0002                ORG 0x1234, &
 zx48_and_128.asm(61): error: [DISP] Syntax error in <address>: & 

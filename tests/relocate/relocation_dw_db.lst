@@ -12,25 +12,25 @@
 11    1008 11 11 15 10      dw      $1111, label1, $2222, label2    ; single line having multiple values
 11    100C 22 22 1C 10
 12    1010                  ; warn about unstable expression
-relocation_dw_db.asm(13): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_dw_db.asm(13): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 13    1010 10               db      high label1
-14    1011 10               db      high label1     ; ok ; supressed warning
+14    1011 10               db      high label1     ; relunstable-ok ; supressed warning
 15    1012                  ; correct + no relocation data
 16    1012 07 00            dw      label2-label1
 17    1014 07               db      label2-label1
 18    1015
 19    1015              label1:
 20    1015 21 04 10         ld      hl,0+table
-relocation_dw_db.asm(21): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_dw_db.asm(21): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 21    1018 36 04            ld      (hl),low table  ; warn about unstable
-22    101A 36 04            ld      (hl),low table  ; ok ; suppressed warning
+22    101A 36 04            ld      (hl),low table  ; relunstable-ok ; suppressed warning
 23    101C              label2:
 24    101C 11 08 10         ld      de,table+4
 25    101F ED 53 16 10      ld      (label1+1),de
 26    1023
 27    1023                  ; these should warn about unstable result, but only once
 relocation_dw_db.asm(28): warning: value 0x1015 is truncated to 8bit value: 0x15
-relocation_dw_db.asm(28): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_dw_db.asm(28): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 28    1023 0C 15 17 10      db      12, low label1, 23, high label1, 34, label1, 56
 28    1027 22 15 38
 29    102A

@@ -360,7 +360,7 @@ static void checkStackPointer() {
 		++spCheck;
 	}
 	if (spCheck == nex.h.sp) return;
-	Warning("[SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD");
+	WarningById(W_NEX_STACK);
 }
 
 template <int argsN> static bool getIntArguments(aint (&args)[argsN], const bool argOptional[argsN]) {
@@ -560,9 +560,7 @@ static bool dirNexPaletteMem(const aint page8kNum, const aint palOffset) {
 static bool dirNexPaletteBmp(SBmpFile & bmp) {
 	if (nex.palDefined) return true;	// palette was already defined, silently ignore
 	if (256 != bmp.colorsCount && warningNotSuppressed()) {
-		char buf[128];
-		SPRINTF1(buf, 128, "[SAVENEX] BMP has only %d colors in palette (expect \"any\" values in remaining colors).", bmp.colorsCount);
-		Warning(buf);
+		WarningById(W_NEX_BMP_PAL, bmp.colorsCount);
 	}
 	// copy the data into internal palette buffer
 	nex.palDefined = true;

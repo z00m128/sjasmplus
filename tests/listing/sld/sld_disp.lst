@@ -7,7 +7,7 @@
  6    8000 00                       nop         ; no warning, mapping is identical
  7    8001                          MMU 4, 4    ; emit warning
  8    8001              DispLabel2:
-sld_disp.asm(9): warning: DISP memory page differs from current mapping
+sld_disp.asm(9): warning[dispmempage]: DISP memory page differs from current mapping
  9    8001 00                       nop         ; warning about DISP page being different from current mapping
 10    8002 00                       nop         ; no warning (warning is emitted only once per whole assembling
 11    8003                  ENT

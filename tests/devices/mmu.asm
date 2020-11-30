@@ -117,7 +117,7 @@ label3_p5:  ld sp,"66"  ; '166'     ; last byte of page 5, first two bytes of pa
     DISP 0x8765
     MMU 0, 7, 0x1234
     ASSERT 0x1234 == $ && 7 ==  $$
-    MMU 0, 6, 0x3456    ; ok - suppress warning about ORG inside DISP
+    MMU 0, 6, 0x3456    ; displacedorg-ok - suppress warning about ORG inside DISP
     ASSERT 0x3456 == $ && 6 ==  $$
     ENT
     ASSERT 0x2345 == $ && 6 ==  $$

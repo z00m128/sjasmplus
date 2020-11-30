@@ -9,13 +9,13 @@
  8    0000
  9    0000                  ; the larger ZX-like devices should emit warning when SAVESNA is used
 10    0000                  DEVICE ZXSPECTRUM256
-savesna_128kwarning.asm(11): warning: Only 128kb will be written to snapshot: zx256.sna
+savesna_128kwarning.asm(11): warning[sna128]: only 128kb will be written to snapshot: zx256.sna
 11    0000                  SAVESNA "zx256.sna", $8000
 12    0000                  DEVICE ZXSPECTRUM512
-savesna_128kwarning.asm(13): warning: Only 128kb will be written to snapshot: zx512.sna
+savesna_128kwarning.asm(13): warning[sna128]: only 128kb will be written to snapshot: zx512.sna
 13    0000                  SAVESNA "zx512.sna", $8000
 14    0000                  DEVICE ZXSPECTRUM1024
-savesna_128kwarning.asm(15): warning: Only 128kb will be written to snapshot: zx1024.sna
+savesna_128kwarning.asm(15): warning[sna128]: only 128kb will be written to snapshot: zx1024.sna
 15    0000                  SAVESNA "zx1024.sna", $8000
 16    0000
 17    0000                  ; newly added devices, exercise also the new mem-page limits, etc..
@@ -23,7 +23,7 @@ savesna_128kwarning.asm(15): warning: Only 128kb will be written to snapshot: zx
 19    0000                  PAGE 127    ; good
 savesna_128kwarning.asm(20): error: [PAGE] Page number must be in range 0..127: 128
 20    0000                  PAGE 128    ; error
-savesna_128kwarning.asm(21): warning: Only 128kb will be written to snapshot: zx2048.sna
+savesna_128kwarning.asm(21): warning[sna128]: only 128kb will be written to snapshot: zx2048.sna
 21    0000                  SAVESNA "zx2048.sna", $8000
 22    0000                  SAVEDEV "m2048_end.bin", 127, 0, 0x4000 ; good
 savesna_128kwarning.asm(23): error: [SAVEDEV] invalid end address (bad length?): 2097153
@@ -33,7 +33,7 @@ savesna_128kwarning.asm(23): error: [SAVEDEV] invalid end address (bad length?):
 26    0000                  PAGE 255    ; good
 savesna_128kwarning.asm(27): error: [PAGE] Page number must be in range 0..255: 256
 27    0000                  PAGE 256    ; error
-savesna_128kwarning.asm(28): warning: Only 128kb will be written to snapshot: zx4096.sna
+savesna_128kwarning.asm(28): warning[sna128]: only 128kb will be written to snapshot: zx4096.sna
 28    0000                  SAVESNA "zx4096.sna", $8000
 29    0000                  SAVEDEV "m4096_end.bin", 255, 0, 0x4000 ; good
 savesna_128kwarning.asm(30): error: [SAVEDEV] invalid end address (bad length?): 4194305
@@ -43,12 +43,22 @@ savesna_128kwarning.asm(30): error: [SAVEDEV] invalid end address (bad length?):
 33    0000                  PAGE 511    ; good
 savesna_128kwarning.asm(34): error: [PAGE] Page number must be in range 0..511: 512
 34    0000                  PAGE 512    ; error
-savesna_128kwarning.asm(35): warning: Only 128kb will be written to snapshot: zx8192.sna
+savesna_128kwarning.asm(35): warning[sna128]: only 128kb will be written to snapshot: zx8192.sna
 35    0000                  SAVESNA "zx8192.sna", $8000
 36    0000                  SAVEDEV "m8192_end.bin", 511, 0, 0x4000 ; good
 savesna_128kwarning.asm(37): error: [SAVEDEV] invalid end address (bad length?): 8388609
 37    0000                  SAVEDEV "m8192_end.bin", 511, 0, 0x4001 ; error
 38    0000
+39    0000                  ; check suppression of "only 128k" warning
+40    0000                  DEVICE ZXSPECTRUM256
+41    0000                  SAVESNA "zx256.sna", $8000  ; suppress sna128-ok
+42    0000
+43    0000                  ; check 48k snapshot warning about screen overwritten
+44    0000                  DEVICE ZXSPECTRUM48         ; default stack is already tainted by previous SAVESNA!
+savesna_128kwarning.asm(45): warning[sna48]: [SAVESNA] RAM <0x4000-0x4001> will be overwritten due to 48k snapshot imperfect format.
+45    0000                  SAVESNA "zx48.sna", $8000   ; emit warning
+46    0000                  SAVESNA "zx48.sna", $8000   ; suppress sna48-ok
+47    0000
 # file closed: savesna_128kwarning.asm
 
 Value    Label

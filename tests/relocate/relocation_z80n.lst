@@ -26,13 +26,13 @@ relocation_z80n.asm(19): error: PUSH imm16 is big-endian encoded and can't be pa
 19    1020 ED 8A 10 10
 20    1024
 21    1024              imm8_warnings:                  ; warning all
-relocation_z80n.asm(22): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_z80n.asm(22): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 22    1024 ED 92 10         nextreg high imm8_warnings,a
-relocation_z80n.asm(23): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_z80n.asm(23): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 23    1027 ED 91 10 34      nextreg high imm8_warnings,$34
-relocation_z80n.asm(24): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_z80n.asm(24): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 24    102B ED 91 12 10      nextreg $12,high imm8_warnings
-relocation_z80n.asm(25): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_z80n.asm(25): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 25    102F ED 27 10         test    high imm8_warnings
 26    1032
 27    1032                  RELOCATE_END

@@ -8,8 +8,8 @@ dir_setbp_noFile.asm(5): error: empty filename:
 4     0000                  DEVICE ZXSPECTRUM48
 5     0000                  BPLIST "" invalid_type  ; empty filename, invalid type
 6     0000
-7     0000                  SETBREAKPOINT $     ; ok ; warning suppressed
-dir_setbp_noFile.asm(8): warning: breakpoints file was not specified
+7     0000                  SETBREAKPOINT $     ; bpfile-ok ; warning suppressed
+dir_setbp_noFile.asm(8): warning[bpfile]: breakpoints file was not specified
 8     0000                  SETBREAKPOINT $     ; warning about no file
 9     0000
 # file closed: dir_setbp_noFile.asm

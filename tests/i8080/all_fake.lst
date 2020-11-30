@@ -93,10 +93,10 @@ all_fake.asm(50): error: Label not found: ix
 all_fake.asm(51): error: Label not found: iy
  51   800F 21 00 00     ld_hl_iy            ld hl,iy
 all_fake.asm(52): error: Label not found: ix
-all_fake.asm(52): warning: Accessing low memory address 0x0077, is it ok?: ld hl,(ix+$77)
+all_fake.asm(52): warning[rdlow]: Reading memory at low address: 119
  52   8012 2A 77 00     ld_hl_#ix_nn#       ld hl,(ix+$77)
 all_fake.asm(53): error: Label not found: iy
-all_fake.asm(53): warning: Accessing low memory address 0x0077, is it ok?: ld hl,(iy+$77)
+all_fake.asm(53): warning[rdlow]: Reading memory at low address: 119
  53   8015 2A 77 00     ld_hl_#iy_nn#       ld hl,(iy+$77)
  54   8018
 all_fake.asm(55): error: Illegal instruction: ld_ix_bc            ld ix,bc

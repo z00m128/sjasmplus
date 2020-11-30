@@ -11,9 +11,9 @@
 10    1007 11 16 10         ld      de,reloc2           ; to be relocated
 11    100A 01 12 00         ld      bc,reloc2-reloc1    ; not affected by relocation
 12    100D 31 DC 17         ld      sp,absolute1        ; not affected by relocation
-relocation_only_desired_offset.asm(13): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_only_desired_offset.asm(13): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
 13    1010 21 2C 20         ld      hl,reloc2*2         ; affected but not relocated (invalid difference) (warning)
-14    1013 21 2C 20         ld      hl,reloc2*2         ; ok ; warning suppressed
+14    1013 21 2C 20         ld      hl,reloc2*2         ; reldiverts-ok ; warning suppressed
 15    1016
 16    1016              reloc2:
 17    1016                  RELOCATE_END

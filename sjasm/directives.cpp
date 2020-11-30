@@ -241,7 +241,7 @@ static void dirDH() {
 static void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpressionNoSyntaxError(lp, teller)) {
-		if ((signed) teller < 0) {
+		if (teller < 0) {
 			Warning("Negative BLOCK?");
 		}
 		if (comma(lp)) {
@@ -282,9 +282,7 @@ static void dirORG() {
 		return;
 	}
 	CurAddress = val;
-	if (DISP_NONE != PseudoORG && warningNotSuppressed()) {
-		Warning("[ORG] inside displaced block, the physical address is not modified, only virtual displacement address will change");
-	}
+	if (DISP_NONE != PseudoORG && warningNotSuppressed()) WarningById(W_DISPLACED_ORG);
 	if (!DeviceID) return;
 	if (!comma(lp)) {
 		Device->CheckPage(CDevice::CHECK_RESET);
@@ -294,10 +292,10 @@ static void dirORG() {
 	auto slot = Device->GetCurrentSlot();
 	if ((CurAddress < slot->Address || slot->Address + slot->Size <= CurAddress) && warningNotSuppressed()) {
 		char warnTxt[LINEMAX];
-		SPRINTF3(warnTxt, LINEMAX,
-					"ORG address 0x%04X is outside of current slot 0x%04X..0x%04X (page argument affects *current* slot)",
-					CurAddress, slot->Address, slot->Address + slot->Size - 1);
-		Warning(warnTxt, bp);
+		SPRINTF4(warnTxt, LINEMAX,
+					"address 0x%04X vs slot %d range 0x%04X..0x%04X",
+					CurAddress, Device->GetCurrentSlotNum(), slot->Address, slot->Address + slot->Size - 1);
+		WarningById(W_ORG_PAGE, warnTxt);
 	}
 	dirPageImpl("ORG");
 }
@@ -444,7 +442,7 @@ static void dirMMU() {
 	if (0 <= address) {
 		CurAddress = address;
 		if (DISP_NONE != PseudoORG && warningNotSuppressed()) {
-			Warning("[MMU] ORG address inside displaced block");
+			WarningById(W_DISPLACED_ORG);
 		}
 	}
 	Device->CheckPage(CDevice::CHECK_RESET);
@@ -1270,7 +1268,7 @@ static bool dirIfIfn(aint & val) {
 		return false;
 	}
 	if (IsLabelNotFound && warningNotSuppressed()) {
-		Warning("[IF/IFN] Forward reference", bp, W_EARLY);
+		WarningById(W_FWD_REF, bp, W_EARLY);
 	}
 	return true;
 }
@@ -1953,7 +1951,8 @@ static void dirLUA() {
 
 	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
 	const bool execute = (-1 == passToExec) || (passToExec == pass);
-	bool showWarning = warningNotSuppressed();	// remember warning suppression from block start
+	// remember warning suppression also from block start
+	bool showWarning = !suppressedById(W_LUA_MC_PASS) && warningNotSuppressed();
 
 	if (execute) {
 		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
@@ -1984,7 +1983,7 @@ static void dirLUA() {
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDLUA
 			// take into account also warning suppression used at end of block
-			showWarning = showWarning && warningNotSuppressed();
+			showWarning = showWarning && !suppressedById(W_LUA_MC_PASS) && warningNotSuppressed();
 			break;
 		}
 		ListFile(true);
@@ -2002,8 +2001,8 @@ static void dirLUA() {
 		LuaStartPos = TextFilePos();
 		delete[] buff;
 		if (DidEmitByte() && (-1 != passToExec) && showWarning) {
-			EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
-			Warning("When lua script emits machine code bytes, use \"ALLPASS\" modifier", NULL, warningType);
+			const EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
+			WarningById(W_LUA_MC_PASS, nullptr, warningType);
 		}
 	}
 

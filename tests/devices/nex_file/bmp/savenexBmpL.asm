@@ -27,3 +27,8 @@
     SAVENEX OPEN "savenexBmpL.nex", 0, $FE00, 0, 2
     SAVENEX SCREEN BMP "savenexBmpL_x256/airplane.bmp"
     SAVENEX CLOSE
+
+    ; coverage: palette bmp valid, suppress colour warning
+    SAVENEX OPEN "savenexBmpL.nex"
+    SAVENEX PALETTE BMP "savenexBmpL2/savenexBmpL2_256x8.bmp" ; suppress: nexbmppal-ok
+    SAVENEX CLOSE

@@ -20,9 +20,10 @@ autostart_warning.asm(13): error: zx.trdimage_add_file: provided start+length wi
 14    0000                  SAVETRD "autostart_warning.trd","ok3.C",0,$FF00         ; OK: FF00 length = just fits (last one)
 autostart_warning.asm(15): error: zx.trdimage_add_file: sector length over 0xFF max: SAVETRD "autostart_warning.trd","err4.B",0,$FEFD,$1234  
 15    0000                  SAVETRD "autostart_warning.trd","err4.B",0,$FEFD,$1234  ; err: FEFD length + autostart = too many sectors (0x100+)
-autostart_warning.asm(16): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: warn.X
+autostart_warning.asm(16): warning[trdext]: invalid file extension, TRDOS official extensions are B, C, D and #.: warn.X
 16    0000                  SAVETRD "autostart_warning.trd","warn.X",1,2            ; warning about invalid extension
-17    0000
+17    0000                  SAVETRD "autostart_warning.trd","supwarn.X",1,2         ; suppress warning: trdext-ok
+18    0000
 # file closed: autostart_warning.asm
 
 Value    Label

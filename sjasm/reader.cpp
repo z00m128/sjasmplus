@@ -339,9 +339,7 @@ void checkLowMemory(byte hiByte, byte lowByte) {
 		return;			// address is >= 256 or warning is suppressed
 	}
 	// for addresses 0..255 issue warning
-	char buf[64];
-	SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", lowByte);
-	Warning(buf, bp);
+	WarningById(W_READ_LOW_MEM, lowByte);
 }
 
 int need(char*& p, char c) {

@@ -43,14 +43,35 @@ extern const char* W_ABS_LABEL;
 extern const char* W_NEXT_RAMTOP;
 extern const char* W_NOSLOT_RAMTOP;
 extern const char* W_DEV_RAMTOP;
+extern const char* W_DISPLACED_ORG;
+extern const char* W_ORG_PAGE;
+extern const char* W_FWD_REF;
+extern const char* W_LUA_MC_PASS;
+extern const char* W_NEX_STACK;
+extern const char* W_NEX_BMP_PAL;
+extern const char* W_SNA_48;
+extern const char* W_SNA_128;
+extern const char* W_TRD_EXT_INVALID;
+extern const char* W_TRD_EXT_3;
+extern const char* W_TRD_EXT_B;
+extern const char* W_TRD_DUPLICATE;
+extern const char* W_RELOCATABLE_ALIGN;
+extern const char* W_READ_LOW_MEM;
+extern const char* W_REL_DIVERTS;
+extern const char* W_REL_UNSTABLE;
+extern const char* W_DISP_MEM_PAGE;
+extern const char* W_BP_FILE;
+extern const char* W_OUT0;
 
 void Error(const char* message, const char* badValueMessage = nullptr, EStatus type = PASS3);
 void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);
 void ErrorOOM();		// out of memory
 
 bool warningNotSuppressed(bool alsoFake = false);	// checks for "ok" ("fake") in EOL comment
+bool suppressedById(const char* id);	// checks for "id-ok" in EOL comment
 void Warning(const char* message, const char* badValueMessage = nullptr, EWStatus type = W_PASS3);
 void WarningById(const char* id, const char* badValueMessage = nullptr, EWStatus type = W_PASS3);
+void WarningById(const char* id, int badValue, EWStatus type = W_PASS3);
 void CliWoption(const char* option);
 void PrintHelpWarnings();
 

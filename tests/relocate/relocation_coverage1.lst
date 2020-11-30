@@ -12,14 +12,14 @@ relocation_coverage1.asm(5): error: Relocation block already started at: relocat
  9    1004
 10    1004              label1:
 11    1004 CD 04 10         call    label1
-relocation_coverage1.asm(12): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_coverage1.asm(12): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 12    1007 3E 10            ld      a,high label1   ; warning about unstable expression
 13    1009              label2:
-relocation_coverage1.asm(14): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_coverage1.asm(14): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 14    1009 3E 20            ld      a,high(4*label2) - high(2*label1)   ; warning about unstable expression
 15    100B 3E 00            ld      a,high(8*label2) - high(8*label1)   ; this one is stable (no warning)
 16    100D
-17    100D 3E 10            ld      a,high label2   ; ok ; warning supressed
+17    100D 3E 10            ld      a,high label2   ; relunstable-ok ; warning supressed
 18    100F
 19    100F                  RELOCATE_END
 20    100F

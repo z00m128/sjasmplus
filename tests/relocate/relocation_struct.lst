@@ -11,18 +11,18 @@
  10   1004 ~            y       WORD    absolute1
  11   1004 ~            relInit WORD    reloc1          ; the default init value should be relocated
  12   1004 ~            noRel   WORD    reloc2-reloc1
-relocation_struct.asm(13): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_struct.asm(13): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  13   1004 ~            badRel  WORD    2*reloc1        ; warning about not simple "+offset"
- 14   1004 ~            badRel2 WORD    2*reloc1        ; ok ; suppressed warning
-relocation_struct.asm(15): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 14   1004 ~            badRel2 WORD    2*reloc1        ; reldiverts-ok ; suppressed warning
+relocation_struct.asm(15): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  15   1004 ~            warn1   BYTE    high reloc1     ; warning because unstable
-relocation_struct.asm(16): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_struct.asm(16): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  16   1004 ~            warn2   D24     reloc1          ; warning - D24 is not supported for relocation
-relocation_struct.asm(17): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_struct.asm(17): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  17   1004 ~            warn3   DWORD   reloc1          ; warning - D24 is not supported for relocation
- 18   1004 ~            Swarn1  BYTE    high reloc1     ; ok ; suppressed warning
- 19   1004 ~            Swarn2  D24     reloc1          ; ok ; suppressed warning
- 20   1004 ~            Swarn3  DWORD   reloc1          ; ok ; suppressed warning
+ 18   1004 ~            Swarn1  BYTE    high reloc1     ; relunstable-ok ; suppressed warning
+ 19   1004 ~            Swarn2  D24     reloc1          ; relunstable-ok ; suppressed warning
+ 20   1004 ~            Swarn3  DWORD   reloc1          ; relunstable-ok ; suppressed warning
  21   1004                  ENDS
  22   1004
  23   1004              reloc1:
@@ -43,7 +43,7 @@ relocation_struct.asm(17): warning: Relocation makes one of the expressions unst
  27   1033 04 10 00 04
  27   1037 10 00 00
  28   103A                  ; warning about non-word members
-relocation_struct.asm(29): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_struct.asm(29): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  29   103A 10 12 34 56  .t3 st1     {high reloc1, $3412, $7856}
  29   103E 78 06 01 08
  29   1042 20 08 20 10
@@ -51,7 +51,7 @@ relocation_struct.asm(29): warning: Relocation makes one of the expressions unst
  29   104A 10 00 00 10
  29   104E 04 10 00 04
  29   1052 10 00 00
- 30   1055 10 12 34 56  .t4 st1     {high reloc1, $3412, $7856}     ; ok ; suppressed warning
+ 30   1055 10 12 34 56  .t4 st1     {high reloc1, $3412, $7856}     ; relunstable-ok ; suppressed warning
  30   1059 78 06 01 08
  30   105D 20 08 20 10
  30   1061 04 10 00 04
@@ -59,7 +59,7 @@ relocation_struct.asm(29): warning: Relocation makes one of the expressions unst
  30   1069 04 10 00 04
  30   106D 10 00 00
  31   1070                  ; warning about unrelocatable value
-relocation_struct.asm(32): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_struct.asm(32): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  32   1070 12 DC 87 08  .t5 st1     {,, 2*reloc1}
  32   1074 20 06 01 08
  32   1078 20 08 20 10
@@ -67,7 +67,7 @@ relocation_struct.asm(32): warning: Expression can't be relocated by simple "+of
  32   1080 10 00 00 10
  32   1084 04 10 00 04
  32   1088 10 00 00
- 33   108B 12 DC 87 08  .t6 st1     {,, 2*reloc1}       ; ok ; suppressed warning
+ 33   108B 12 DC 87 08  .t6 st1     {,, 2*reloc1}       ; reldiverts-ok ; suppressed warning
  33   108F 20 06 01 08
  33   1093 20 08 20 10
  33   1097 04 10 00 04

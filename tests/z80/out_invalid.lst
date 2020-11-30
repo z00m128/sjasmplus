@@ -1,9 +1,9 @@
 # file opened: out_invalid.asm
 out_invalid.asm(1): error: Illegal instruction:     out (c),1                   ; "illegal" error, only "0" is valid
  1    0000                  out (c),1                   ; "illegal" error, only "0" is valid
-out_invalid.asm(2): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+out_invalid.asm(2): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  2    0000 ED 71            out (c),0                   ; "warning" about `out (c),0` being unstable
- 3    0002 ED 71            out (c),0                   ; ok ; suppressed warning
+ 3    0002 ED 71            out (c),0                   ; out0-ok ; suppressed warning
  4    0004
 out_invalid.asm(5): error: [ASSERT] Assertion failed:  0==1        
  5    0004                  ASSERT 0==1        ; this assert should fail

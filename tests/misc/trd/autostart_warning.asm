@@ -14,3 +14,4 @@
     SAVETRD "autostart_warning.trd","ok3.C",0,$FF00         ; OK: FF00 length = just fits (last one)
     SAVETRD "autostart_warning.trd","err4.B",0,$FEFD,$1234  ; err: FEFD length + autostart = too many sectors (0x100+)
     SAVETRD "autostart_warning.trd","warn.X",1,2            ; warning about invalid extension
+    SAVETRD "autostart_warning.trd","supwarn.X",1,2         ; suppress warning: trdext-ok

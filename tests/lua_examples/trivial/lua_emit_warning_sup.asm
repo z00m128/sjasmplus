@@ -22,22 +22,22 @@
 
 ;; test suppression at beginning of block
 
-    lua pass1   ; ok - warning should be suppressed (even here at beginning of block)
+    lua pass1   ; luamc-ok - warning should be suppressed (even here at beginning of block)
         sj.warning("but lua warning should work", 11)
         sj.add_byte(11)
     endlua
 
-    lua pass2   ; ok - warning should be suppressed (even here at beginning of block)
+    lua pass2   ; luamc-ok - warning should be suppressed (even here at beginning of block)
         sj.warning("but lua warning should work", 12)
         sj.add_byte(12)
     endlua
 
-    lua pass3   ; ok - warning should be suppressed (even here at beginning of block)
+    lua pass3   ; luamc-ok - warning should be suppressed (even here at beginning of block)
         sj.warning("but lua warning should work", 13)
         sj.add_byte(13)
     endlua
 
-    lua         ; ok - warning should be suppressed (even here at beginning of block)
+    lua         ; luamc-ok - warning should be suppressed (even here at beginning of block)
         sj.warning("but lua warning should work", 14)
         sj.add_byte(14)
     endlua
@@ -47,19 +47,19 @@
     lua pass1
         sj.warning("but lua warning should work", 21)
         sj.add_byte(21)
-    endlua      ; ok
+    endlua      ; luamc-ok
 
     lua pass2
         sj.warning("but lua warning should work", 22)
         sj.add_byte(22)
-    endlua      ; ok
+    endlua      ; luamc-ok
 
     lua pass3
         sj.warning("but lua warning should work", 23)
         sj.add_byte(23)
-    endlua      ; ok
+    endlua      ; luamc-ok
 
     lua
         sj.warning("but lua warning should work", 24)
         sj.add_byte(24)
-    endlua      ; ok
+    endlua      ; luamc-ok

@@ -4,7 +4,7 @@
   3   0000                  OPT reset --zxnext --syntax=a
   4   0000                  ; 3x OK: val, mem, mem
   5   0000 3E 00            ld  a,0
-syntax_b.asm(5): warning: Accessing low memory address 0x0001, is it ok?: ld  a,(1) 
+syntax_b.asm(5): warning[rdlow]: Reading memory at low address: 1
   5   0002 3A 01 00       ld  a,(1)
   5   0005 3A 02 00       ld  a,[2]
   6   0008                  ; 2x OK: val, val, ---
@@ -121,12 +121,12 @@ syntax_b.asm(36): error: [NEXTREG] Comma expected
 syntax_b.asm(36): error: Unexpected: [34],[35]
  36   00A1                nextreg [34],[35]
  37   00A1                  ; 2x OK: val, val, ---
-syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(38): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  38   00A1 ED 71            out (c),0
-syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(38): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  38   00A3 ED 71          out (c),(0)
 syntax_b.asm(38): error: Syntax error: [0]
-syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(38): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
 syntax_b.asm(38): error: Unexpected: [0]
  38   00A5 ED 71          out (c),[0]
  39   00A7                  ; 2x OK: val, val, ---
@@ -178,7 +178,7 @@ syntax_b.asm(53): error: Unexpected: [111]
  55   00EB                  OPT --syntax=b
  56   00EB                  ; 3x OK: val, mem, mem
  57   00EB 3E 00            ld  a,0
-syntax_b.asm(57): warning: Accessing low memory address 0x0001, is it ok?: ld  a,(1) 
+syntax_b.asm(57): warning[rdlow]: Reading memory at low address: 1
  57   00ED 3A 01 00       ld  a,(1)
  57   00F0 3A 02 00       ld  a,[2]
  58   00F3                  ; 1x OK: val, ---, ---
@@ -297,13 +297,13 @@ syntax_b.asm(88): error: Illegal instruction (can't access memory):  [34],[35]
 syntax_b.asm(88): error: Illegal instruction (can't access memory): [35]
  88   018E ED 91 00 00    nextreg [34],[35]
  89   0192                  ; 1x OK: val, ---, ---
-syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(90): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0192 ED 71            out (c),0
 syntax_b.asm(90): error: Illegal instruction (can't access memory): (0) 
-syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(90): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0194 ED 71          out (c),(0)
 syntax_b.asm(90): error: Illegal instruction (can't access memory): [0]
-syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(90): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0196 ED 71          out (c),[0]
  91   0198                  ; 1x OK: val, ---, ---
  92   0198 CB BF            res 7,a

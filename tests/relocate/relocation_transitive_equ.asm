@@ -16,7 +16,7 @@ equNoRel2   EQU     reloc1 * 3  ; can't be easily relocated by "+offset" - silen
     ld      de,equNoRel         ; not affected by relocation
     ld      bc,equAbs           ; not affected by relocation
     ld      hl,equRel*2         ; affected but not relocated (invalid difference) (warning)
-    ld      de,equRel*2         ; ok ; suppressed warning
+    ld      de,equRel*2         ; reldiverts-ok ; suppressed warning
     ld      bc,equNoRel2        ; not affected by relocation
 
 reloc2:
