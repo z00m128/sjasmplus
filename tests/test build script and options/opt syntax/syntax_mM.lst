@@ -6,24 +6,25 @@
  5    0000              ; verify regular syntax works as expected with default options
 syntax_mM.asm(6): warning[rdlow]: Reading memory at low address: 123
  6    0000 3A 7B 00         ld      a,(123)             ; warning about low memory access
- 7    0003 3A 7B 00         ld      a,(123)             ; ok ; warning suppressed
+ 7    0003 3A 7B 00         ld      a,(123)             ; rdlow-ok ; warning suppressed
 syntax_mM.asm(8): error: Label not found: m
  8    0006 C6 00            add     a,m                 ; label not found
  9    0008 86               add     a,(hl)              ; regular add instruction
+syntax_mM.asm(10): warning: `--syntax=m` is deprecated, use `-Wno-rdlow` instead: OPT push --syntax=mM    
 10    0009                  OPT push --syntax=mM    ; test the syntax options "mM"
 11    0009 3A 7B 00         ld      a,(123)
-12    000C 3A 7B 00         ld      a,(123)             ; ok
+12    000C 3A 7B 00         ld      a,(123)             ; rdlow-ok
 13    000F 86               add     a,m                 ; (hl) used
 14    0010 86               add     a,M                 ; (hl) used
 15    0011 86               add     a,(hl)              ; regular add instruction
 16    0012                  OPT pop                 ; test push+pop of new options
 syntax_mM.asm(17): warning[rdlow]: Reading memory at low address: 123
 17    0012 3A 7B 00         ld      a,(123)             ; warning about low memory access
-18    0015 3A 7B 00         ld      a,(123)             ; ok ; warning suppressed
+18    0015 3A 7B 00         ld      a,(123)             ; rdlow-ok ; warning suppressed
 syntax_mM.asm(19): error: Label not found: M
 19    0018 C6 00            add     a,M                 ; label not found
 20    001A 86               add     a,(hl)              ; regular add instruction
-21    001B                  ASSERT 2 == 2 && 2 == 2
+21    001B                  ASSERT 3 == 3 && 2 == 2
 22    001B
 # file closed: syntax_mM.asm
 
