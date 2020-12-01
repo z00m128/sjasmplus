@@ -5,9 +5,9 @@ out_invalid.asm(2): warning[out0]: 'out (c),0' is unstable, on CMOS based chips 
  2    0000 ED 71            out (c),0                   ; "warning" about `out (c),0` being unstable
  3    0002 ED 71            out (c),0                   ; out0-ok ; suppressed warning
  4    0004
-out_invalid.asm(5): error: [ASSERT] Assertion failed:  0==1        
+out_invalid.asm(5): error: [ASSERT] Assertion failed:  0==1
  5    0004                  ASSERT 0==1        ; this assert should fail
-out_invalid.asm(6): error: [ASSERT] Assertion failed:  0==1      
+out_invalid.asm(6): error: [ASSERT] Assertion failed:  0==1
  6    0004                  ASSERT 0==1      ; this assert should fail
  7    0004
  8    0004                  ; update these asserts when editing the file, to make it pass

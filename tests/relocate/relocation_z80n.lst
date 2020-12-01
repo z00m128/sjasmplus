@@ -15,7 +15,7 @@
 14    100C ED 36 04 10      add     bc,add_r16_imm16
 15    1010
 16    1010              push_imm16:
-relocation_z80n.asm(17): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    push_imm16          
+relocation_z80n.asm(17): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    push_imm16
 17    1010 ED 8A 10 10      push    push_imm16          ; not suitable for relocation because big-endian encoding
 18    1014                  ; try multi arg variation, it will report two errors for two expressions
 relocation_z80n.asm(19): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    0x1234, push_imm16, 0x2345, push_imm16

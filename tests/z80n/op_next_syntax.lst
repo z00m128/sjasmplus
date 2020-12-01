@@ -6,23 +6,23 @@
  5    0405                  ; (only variants, multi-arguments and error messages)
  6    0405
  7    0405 ED 23            swapnib a                       ; #ED23
-op_next_syntax.asm(8): error: [SWAPNIB] Illegal operand (can be only register A):     swapnib b 
+op_next_syntax.asm(8): error: [SWAPNIB] Illegal operand (can be only register A):     swapnib b
  8    0407                  swapnib b
-op_next_syntax.asm(8): error: Unexpected: 5 
+op_next_syntax.asm(8): error: Unexpected: 5
  8    0407 ED 23          swapnib 5
-op_next_syntax.asm(8): error: Unexpected: label 
+op_next_syntax.asm(8): error: Unexpected: label
  8    0409 ED 23          swapnib label
-op_next_syntax.asm(8): error: Unexpected: ,,a        
+op_next_syntax.asm(8): error: Unexpected: ,,a
  8    040B ED 23          swapnib a,,a        ; syntax errors
  9    040D
 10    040D ED 24            mirror a                        ; #ED24
-op_next_syntax.asm(11): error: [MIRROR] Illegal operand (can be only register A):     mirror b 
+op_next_syntax.asm(11): error: [MIRROR] Illegal operand (can be only register A):     mirror b
 11    040F                  mirror b
-op_next_syntax.asm(11): error: Unexpected: 5 
+op_next_syntax.asm(11): error: Unexpected: 5
 11    040F ED 24          mirror 5
-op_next_syntax.asm(11): error: Unexpected: label 
+op_next_syntax.asm(11): error: Unexpected: label
 11    0411 ED 24           mirror label
-op_next_syntax.asm(11): error: Unexpected: ,,a           
+op_next_syntax.asm(11): error: Unexpected: ,,a
 11    0413 ED 24          mirror a,,a           ; syntax errors
 12    0415
 op_next_syntax.asm(13): warning: value 0x405 is truncated to 8bit value: 0x05
@@ -33,21 +33,21 @@ op_next_syntax.asm(14): error: Label not found: a
 14    041B ED 27 00       test a
 op_next_syntax.asm(14): error: Label not found: b
 14    041E ED 27 00       test b
-op_next_syntax.asm(14): error: Unexpected: ,,5                          
+op_next_syntax.asm(14): error: Unexpected: ,,5
 14    0421 ED 27 05       test 5,,5                          ; syntax errors
 15    0424
 16    0424 ED 30            mul de
-op_next_syntax.asm(16): warning: Fake instruction: mul                    
+op_next_syntax.asm(16): warning: Fake instruction: mul
 16    0426 ED 30          mul                    ; #ED30 (w/o arguments shows "warning: Fake")
-op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul h,l 
+op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul h,l
 17    0428                  mul h,l
-op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul hl 
+op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul hl
 17    0428                mul hl
-op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul 5 
+op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul 5
 17    0428                mul 5
-op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul label 
+op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul label
 17    0428                mul label
-op_next_syntax.asm(17): error: Unexpected: ,,d,e         
+op_next_syntax.asm(17): error: Unexpected: ,,d,e
 17    0428 ED 30          mul d,e,,d,e         ; syntax errors
 18    042A
 19    042A ED 31 ED 32      add hl,a,,de,a,,bc,a            ; #ED31 ED32 ED33
@@ -59,11 +59,11 @@ op_next_syntax.asm(17): error: Unexpected: ,,d,e
 22    043C ED 8A 01 02      push $102,,label                ; #ED8A0102 ED8A0405
 22    0440 ED 8A 04 05
 23    0444
-op_next_syntax.asm(24): error: Unexpected: a 
+op_next_syntax.asm(24): error: Unexpected: a
 24    0444 ED 90            outinb a
-op_next_syntax.asm(24): error: Unexpected: 5 
+op_next_syntax.asm(24): error: Unexpected: 5
 24    0446 ED 90          outinb 5
-op_next_syntax.asm(24): error: Unexpected: label                          
+op_next_syntax.asm(24): error: Unexpected: label
 24    0448 ED 90          outinb label                          ; syntax errors
 25    044A
 26    044A ED 91 04 05      nextreg $04,$05,,$03,a          ; #ED910405 ED9203
@@ -72,22 +72,22 @@ op_next_syntax.asm(27): error: Illegal instruction:     nextreg $0E,b,,a,$0F    
 27    0451                  nextreg $0E,b,,a,$0F                                        ; syntax errors
 28    0451
 29    0451 ED 93            pixeldn hl                      ; #ED93
-op_next_syntax.asm(30): error: Unexpected: de 
+op_next_syntax.asm(30): error: Unexpected: de
 30    0453 ED 93            pixeldn de
-op_next_syntax.asm(30): error: Unexpected: ,,hl                                 
+op_next_syntax.asm(30): error: Unexpected: ,,hl
 30    0455 ED 93          pixeldn hl,,hl                                 ; syntax errors
 31    0457
 32    0457 ED 94            pixelad hl                      ; #ED94
-op_next_syntax.asm(33): error: Unexpected: de 
+op_next_syntax.asm(33): error: Unexpected: de
 33    0459 ED 94            pixelad de
-op_next_syntax.asm(33): error: Unexpected: ,,hl                                 
+op_next_syntax.asm(33): error: Unexpected: ,,hl
 33    045B ED 94          pixelad hl,,hl                                 ; syntax errors
 34    045D
-op_next_syntax.asm(35): error: Unexpected: a 
+op_next_syntax.asm(35): error: Unexpected: a
 35    045D ED 95            setae a
-op_next_syntax.asm(35): error: Unexpected: 5 
+op_next_syntax.asm(35): error: Unexpected: 5
 35    045F ED 95          setae 5
-op_next_syntax.asm(35): error: Unexpected: label                             
+op_next_syntax.asm(35): error: Unexpected: label
 35    0461 ED 95          setae label                             ; syntax errors
 36    0463
 op_next_syntax.asm(37): error: Illegal instruction:     jp      [c]                                                 ; syntax errors

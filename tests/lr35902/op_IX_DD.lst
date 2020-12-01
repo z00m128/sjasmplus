@@ -2,11 +2,11 @@
   1   0000                  ; all of these should fail on LR35902
   2   0000
 op_IX_DD.asm(3): error: Label not found: ix
-op_IX_DD.asm(3): error: Unexpected: ,bc       
+op_IX_DD.asm(3): error: Unexpected: ,bc
   3   0000 C6 00            add     ix,bc       ; #DD09
   4   0002
 op_IX_DD.asm(5): error: Label not found: ix
-op_IX_DD.asm(5): error: Unexpected: ,de       
+op_IX_DD.asm(5): error: Unexpected: ,de
   5   0002 C6 00            add     ix,de       ; #DD19
   6   0004
 op_IX_DD.asm(7): error: Illegal instruction:     ld      ix,#100     ; #DD210001
@@ -22,7 +22,7 @@ op_IX_DD.asm(11): error: Illegal instruction:     dec     ixh         ; #DD25
 op_IX_DD.asm(12): error: Illegal instruction:     ld      ixh,0       ; #DD2600
  12   0004                  ld      ixh,0       ; #DD2600
 op_IX_DD.asm(13): error: Label not found: ix
-op_IX_DD.asm(13): error: Unexpected: ,ix       
+op_IX_DD.asm(13): error: Unexpected: ,ix
  13   0004 C6 00            add     ix,ix       ; #DD29
 op_IX_DD.asm(14): error: Illegal instruction:     ld      ix,(#100)   ; #DD2A0001
  14   0006                  ld      ix,(#100)   ; #DD2A0001
@@ -42,7 +42,7 @@ op_IX_DD.asm(21): error: Illegal instruction:     dec     (ix+17)     ; #DD3511
 op_IX_DD.asm(22): error: Label not found: ix
  22   0006                  ld      (ix+17),0   ; #DD361100
 op_IX_DD.asm(23): error: Label not found: ix
-op_IX_DD.asm(23): error: Unexpected: ,sp       
+op_IX_DD.asm(23): error: Unexpected: ,sp
  23   0006 C6 00            add     ix,sp       ; #DD39
  24   0008
 op_IX_DD.asm(25): error: Label not found: ixh
@@ -179,7 +179,7 @@ op_IX_DD.asm(93): error: Label not found: ix
  94   005E
 op_IX_DD.asm(95): error: Illegal instruction:     pop     ix          ; #DDE1
  95   005E                  pop     ix          ; #DDE1
-op_IX_DD.asm(96): error: Unrecognized instruction: ex      (sp),ix     
+op_IX_DD.asm(96): error: Unrecognized instruction: ex      (sp),ix
  96   005E                  ex      (sp),ix     ; #DDE3
 op_IX_DD.asm(97): error: Illegal instruction:     push    ix          ; #DDE5
  97   005E                  push    ix          ; #DDE5

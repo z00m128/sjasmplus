@@ -1,5 +1,5 @@
 # file opened: wrong_index_offset.asm
-wrong_index_offset.asm(1): error: Syntax error: —50) 
+wrong_index_offset.asm(1): error: Syntax error: —50)
 1     0000                  LD  A,(IY—50) ; code 151, long dash in Cyrillic cp1251
 2     0000 FD 7E CE         LD  A,(IY-50)
 3     0003

@@ -390,12 +390,12 @@ all_fake.asm(207): error: Illegal instruction: sub_hl_sp           sub hl,sp
 207   801E              sub_hl_sp           sub hl,sp
 208   801E
 209   801E                  ; ZXNext section - there are no true regular fakes yet, but some specials
-all_fake.asm(210): error: Unrecognized instruction: mul         
+all_fake.asm(210): error: Unrecognized instruction: mul
 210   801E              zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
 211   801E                  ; these definitely should not work in i8080 mode (trying to switch --zxnext is fatal error)
-all_fake.asm(212): error: Unrecognized instruction: break       
+all_fake.asm(212): error: Unrecognized instruction: break
 212   801E              zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
-all_fake.asm(213): error: Unrecognized instruction: exit        
+all_fake.asm(213): error: Unrecognized instruction: exit
 213   801E              zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
 214   801E
 # file closed: all_fake.asm

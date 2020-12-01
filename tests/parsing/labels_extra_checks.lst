@@ -44,11 +44,11 @@ labels_extra_checks.asm(33): error: Number labels are allowed as address labels 
 33    1017              25          EQU     25
 34    1017 18 FE                    jr      22B
 35    1019
-labels_extra_checks.asm(36): error: Expression error: 
+labels_extra_checks.asm(36): error: Expression error:
 36    1019              errSymbol1  DEFL    !
-labels_extra_checks.asm(37): error: Expression error: 
+labels_extra_checks.asm(37): error: Expression error:
 37    1019              errSymbol2  =       !
-labels_extra_checks.asm(38): error: Expression error: 
+labels_extra_checks.asm(38): error: Expression error:
 38    1019              errSymbol3  EQU     !
 39    1019
 40    1019                  STRUCT TEST_STRUCT

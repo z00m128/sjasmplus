@@ -55,14 +55,14 @@ macro_errors_reporting.asm(1): error: [MACRO] Illegal macroname
 41    001D
 macro_errors_reporting.asm(42): error: Too many arguments for macro: LmP0
 42    001D                      LmP0 201
-macro_errors_reporting.asm(43): warning: [Macro argument parser] empty value: 
+macro_errors_reporting.asm(43): warning: [Macro argument parser] empty value:
 43    001D                      LmP1
 macro_errors_reporting.asm(9): error: Expression expected
 macro_errors_reporting.asm(43): ^ emitted from here
 43    001D             >            DB
 macro_errors_reporting.asm(44): error: Too many arguments for macro: LmP1
 44    001D                      LmP1 211, 212
-macro_errors_reporting.asm(45): warning: [Macro argument parser] empty value: 
+macro_errors_reporting.asm(45): warning: [Macro argument parser] empty value:
 macro_errors_reporting.asm(45): error: Not enough arguments for macro: LmP2
 45    001D                      LmP2
 macro_errors_reporting.asm(46): error: Not enough arguments for macro: LmP2
@@ -72,14 +72,14 @@ macro_errors_reporting.asm(47): error: Too many arguments for macro: LmP2
 48    001D
 macro_errors_reporting.asm(49): error: Too many arguments for macro: mP0
 49    001D                      mP0  251
-macro_errors_reporting.asm(50): warning: [Macro argument parser] empty value: 
+macro_errors_reporting.asm(50): warning: [Macro argument parser] empty value:
 50    001D                      mP1
 macro_errors_reporting.asm(22): error: Expression expected
 macro_errors_reporting.asm(50): ^ emitted from here
 50    001D             >            DW
 macro_errors_reporting.asm(51): error: Too many arguments for macro: mP1
 51    001D                      mP1  261, 262
-macro_errors_reporting.asm(52): warning: [Macro argument parser] empty value: 
+macro_errors_reporting.asm(52): warning: [Macro argument parser] empty value:
 macro_errors_reporting.asm(52): error: Not enough arguments for macro: mP2
 52    001D                      mP2
 macro_errors_reporting.asm(53): error: Not enough arguments for macro: mP2

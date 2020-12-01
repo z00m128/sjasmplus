@@ -324,7 +324,7 @@ field_type_text.asm(88): error: [STRUCT] Expression for length of text expected 
 field_type_text.asm(90): error: [STRUCT] Comma expected: @
  90   8396 ~                    text    2 @
  91   8396 ~                    ; next line emits 00 00
-field_type_text.asm(92): error: TEXT field value must be enclosed in curly braces, missing '{': 
+field_type_text.asm(92): error: TEXT field value must be enclosed in curly braces, missing '{':
  92   8396 ~                    text    2,
  93   8396 ~                    ; next line emits 00 00
 field_type_text.asm(94): error: Syntax error: ,
@@ -393,9 +393,9 @@ field_type_text.asm(107): error: Syntax error: @, @ }
 109   8426 00 00 00 00
 110   842A
 111   842A                      STRUCT S_ERR2
-field_type_text.asm(112): error: [STRUCT] Unexpected: texts   30, { "invalid type" }  
+field_type_text.asm(112): error: [STRUCT] Unexpected: texts   30, { "invalid type" }
 112   842A ~                    texts   30, { "invalid type" }  ; but looks similar
-field_type_text.asm(113): error: [STRUCT] Unexpected: TEXTS   30, { "invalid type" }  
+field_type_text.asm(113): error: [STRUCT] Unexpected: TEXTS   30, { "invalid type" }
 113   842A ~                    TEXTS   30, { "invalid type" }  ; but looks similar
 114   842A                      ENDS
 115   842A

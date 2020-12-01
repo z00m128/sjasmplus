@@ -80,11 +80,23 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 	}
 }
 
+static void trimAndAddEol(char* lineBuffer) {
+	if (!lineBuffer[0]) return;		// ignore empty line buffer
+	char* lastChar = lineBuffer + strlen(lineBuffer) - 1;
+	while (lineBuffer < lastChar && (' ' == *lastChar || '\t' == *lastChar)) --lastChar;	// trim ending whitespace
+	if ('\n' != *lastChar) lastChar[1] = '\n', lastChar[2] = 0;	// add EOL character if not present
+}
+
 static void outputErrorLine(const EOutputVerbosity errorLevel) {
+	auto lstFile = GetListingFile();
+	if (!lstFile && errorLevel < Options::OutputVerbosity) return;	// no output required
+	// trim end of error/warning line and add EOL char if needed
+	trimAndAddEol(ErrorLine);
+	trimAndAddEol(ErrorLine2);
 	// always print the message into listing file (the OutputVerbosity does not apply to listing)
-	if (GetListingFile()) {
-		fputs(ErrorLine, GetListingFile());
-		if (*ErrorLine2) fputs(ErrorLine2, GetListingFile());
+	if (lstFile) {
+		fputs(ErrorLine, lstFile);
+		if (*ErrorLine2) fputs(ErrorLine2, lstFile);
 	}
 	// print the error into stderr if OutputVerbosity allows this type of message
 	if (Options::OutputVerbosity <= errorLevel) {
@@ -118,7 +130,6 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
-	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2-1, "\n");	// append EOL if needed
 	outputErrorLine(OV_ERROR);
 	// terminate whole assembler in case of fatal error
 	if (type == FATAL) {
@@ -162,7 +173,6 @@ static void WarningImpl(const char* id, const char* message, const char* badValu
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
-	if (!strchr(ErrorLine, '\n')) STRCAT(ErrorLine, LINEMAX2-1, "\n");	// append EOL if needed
 	outputErrorLine(OV_WARNING);
 }
 

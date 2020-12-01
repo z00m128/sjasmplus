@@ -179,7 +179,7 @@ low_mem_access_warning.asm(123): error: Reading memory at low address: 1
 149   0181
 150   0181              ;;;;;;; test suppression for fake instructions ;;;;;;;;;;
 151   0181                  OPT reset --syntax=abf
-low_mem_access_warning.asm(152): warning: Fake instruction: ldi a,(hl)  
+low_mem_access_warning.asm(152): warning: Fake instruction: ldi a,(hl)
 152   0181 7E 23            ldi a,(hl)  ; warning
 153   0183 7E 23            ldi a,(hl)  ; this is "fake" instruction (warning suppressed by "fake")
 154   0185 7E 23            ldi a,(hl)  ; iz fakeish instruztione (substring can be anywhere)

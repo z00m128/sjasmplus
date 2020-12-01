@@ -1,7 +1,7 @@
 # file opened: dir_export.asm
-dir_export.asm(1): error: [EXPORT] Syntax error: 
+dir_export.asm(1): error: [EXPORT] Syntax error:
  1    0000                  EXPORT                      ; syntax error
-dir_export.asm(2): error: [EXPORT] Syntax error: !                   
+dir_export.asm(2): error: [EXPORT] Syntax error: !
  2    0000                  EXPORT  !                   ; syntax error 2
 dir_export.asm(3): error: Label not found: nonExistentLabel
  3    0000                  EXPORT  nonExistentLabel    ; label not found error
@@ -9,7 +9,7 @@ dir_export.asm(3): error: Label not found: nonExistentLabel
 dir_export.asm(5): error: Label not found: _.fwdRefLocal
  5    0000                  EXPORT  .fwdRefLocal        ; this is error, the main label here is undefined ("_")
  6    0000                  EXPORT  fwdRefNormal.fwdRefLocal
-dir_export.asm(7): error: [EXPORT] Syntax error: @fwdRefNormal.fwdRefLocal   
+dir_export.asm(7): error: [EXPORT] Syntax error: @fwdRefNormal.fwdRefLocal
  7    0000                  EXPORT  @fwdRefNormal.fwdRefLocal   ; "@" is not supported in EXPORT ???!?!
  8    0000                  EXPORT  fwdRefEqu
  9    0000                  EXPORT  fwdRefDefl

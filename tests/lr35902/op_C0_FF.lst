@@ -96,7 +96,7 @@ op_C0_FF.asm(79): error: Unrecognized instruction: ex      de,hl
 op_C0_FF.asm(80): error: Label not found: pe
 op_C0_FF.asm(80): error: Unexpected: ,$4241
 80    0054 CD 00 00         call    pe,$4241
-op_C0_FF.asm(81): error: Unrecognized instruction: neg         
+op_C0_FF.asm(81): error: Unrecognized instruction: neg
 81    0057                  neg         ; EXTD 0xED prefix + 0x44
 op_C0_FF.asm(82): error: Unexpected: p
 82    0057 C9               ret     p

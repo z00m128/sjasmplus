@@ -194,8 +194,8 @@
 142   1114              test4err    S_SymbOS_icon_header {
 multi_line_initializer.asm(143): error: closing } missing
 multi_line_initializer.asm(143): error: [STRUCT] Syntax error - too many arguments?
-multi_line_initializer.asm(143): error: Unrecognized instruction: , 
-multi_line_initializer.asm(143): error: Unexpected: , 
+multi_line_initializer.asm(143): error: Unrecognized instruction: ,
+multi_line_initializer.asm(143): error: Unexpected: ,
 143   1114 01 08 08         1,,, ; missing }
 144   1117
 # file closed: multi_line_initializer.asm

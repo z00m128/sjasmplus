@@ -21,9 +21,9 @@
 10    0006                  EDUP
 11    0006
 12    0006                  ; error tests (also for regular DEFARRAY, as it was not tested much before)
-defarray_add.asm(13): error: [DEFARRAY] Syntax error in <id>: 
+defarray_add.asm(13): error: [DEFARRAY] Syntax error in <id>:
 13    0006                  DEFARRAY
-defarray_add.asm(14): error: [DEFARRAY] Syntax error in <id>: 
+defarray_add.asm(14): error: [DEFARRAY] Syntax error in <id>:
 14    0006                  DEFARRAY+
 defarray_add.asm(15): error: Duplicate define (replacing old value): myarray
 15    0006                  DEFARRAY    myarray 'X', 'Y', 'Z'   ; duplicate definition
@@ -39,9 +39,9 @@ defarray_add.asm(20): error: [ARRAY] index not in 0..<Size-1> range: myarray[-1]
 20    0006                  db
 defarray_add.asm(21): error: Syntax error: noneId[0]
 21    0006                  db          noneId[0]
-defarray_add.asm(22): error: [DEFARRAY] missing space between <id> and first <item>: +48              
+defarray_add.asm(22): error: [DEFARRAY] missing space between <id> and first <item>: +48
 22    0006                  DEFARRAY    myarray+48              ; enforce white space between ID and first value
-defarray_add.asm(23): error: [DEFARRAY] missing space between <id> and first <item>: +49              
+defarray_add.asm(23): error: [DEFARRAY] missing space between <id> and first <item>: +49
 23    0006                  DEFARRAY+   myarray+49              ; enforce white space between ID and first value
 24    0006
 # file closed: defarray_add.asm

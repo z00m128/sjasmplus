@@ -63,12 +63,12 @@
 35    0016 ~             /*:"*/
 35    0016 ED B8         lddr
 36    0018
-comments.asm(37): error: Invalid labelname: 
+comments.asm(37): error: Invalid labelname:
 37    0018 27           :   daa
 38    0019 ~            /* END ... // : block comment */
 38    0019 00             nop ; LIVE instr!
-comments.asm(39): error: Unrecognized instruction: */   
-comments.asm(39): error: Unexpected: */   
+comments.asm(39): error: Unrecognized instruction: */
+comments.asm(39): error: Unexpected: */
 39    001A                    */
 39    001A                ; and no <EOL> here
 # file closed: comments.asm

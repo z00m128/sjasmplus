@@ -82,7 +82,7 @@ LR35902_specifics_exercise.asm(69): error: Illegal instruction:             ld  
 LR35902_specifics_exercise.asm(70): error: Illegal instruction:             ld      ( b ) , a
  70   804A                          ld      ( b ) , a
 LR35902_specifics_exercise.asm(71): error: Label not found: c
-LR35902_specifics_exercise.asm(71): error: Illegal instruction (can't access memory):  ( c )       
+LR35902_specifics_exercise.asm(71): error: Illegal instruction (can't access memory):  ( c )
  71   804A 06 00                    ld      b , ( c )       ; error, illegal instruction; --syntax=b reports "ld b,(mem)"
 LR35902_specifics_exercise.asm(72): error: Illegal instruction:             ld      ( c ) , b
  72   804C                          ld      ( c ) , b
@@ -179,7 +179,7 @@ LR35902_specifics_exercise.asm(122): error: Illegal instruction:             ld 
 129   8061 F8 01                    ld      hl , sp + +1
 130   8063 F8 FF                    ld      hl , sp + -1
 131   8065 F8 01                    ld      hl , sp + +1
-LR35902_specifics_exercise.asm(132): error: [LD] `ld hl,sp+r8` expects + or - after sp, found: (+1)        
+LR35902_specifics_exercise.asm(132): error: [LD] `ld hl,sp+r8` expects + or - after sp, found: (+1)
 132   8067                          ld      hl , sp (+1)        ; error, there must be + or - right after "sp"
 133   8067 F8 02                    ld      hl , sp + struct1   ; hl = sp + sizeof(struct1)
 134   8069 F8 7F                    ld      hl , sp + 127
@@ -188,7 +188,7 @@ LR35902_specifics_exercise.asm(135): error: Offset out of range (+128)
 136   806D F8 80                    ld      hl , sp - 128
 LR35902_specifics_exercise.asm(137): error: Offset out of range (-129)
 137   806F F8 7F                    ld      hl , sp - 129       ; error, value is beyond range
-LR35902_specifics_exercise.asm(138): error: Fake instructions are not implemented in Sharp LR35902 mode: ld      hl , de + 1         
+LR35902_specifics_exercise.asm(138): error: Fake instructions are not implemented in Sharp LR35902 mode: ld      hl , de + 1
 138   8071                          ld      hl , de + 1         ; invalid
 LR35902_specifics_exercise.asm(139): error: Illegal instruction:             ld      de , sp + 1         ; invalid
 139   8071                          ld      de , sp + 1         ; invalid
@@ -200,7 +200,7 @@ LR35902_specifics_exercise.asm(142): error: Illegal instruction:             ld 
 144   8074                          ; illegal "add sp,r8" variants
 LR35902_specifics_exercise.asm(145): error: [ADD] Comma expected
 145   8074                          add     sp
-LR35902_specifics_exercise.asm(146): error: Operand expected: 
+LR35902_specifics_exercise.asm(146): error: Operand expected:
 146   8074 E8 00                    add     sp ,
 LR35902_specifics_exercise.asm(147): error: Illegal instruction:             add     sp , hl
 147   8076                          add     sp , hl
@@ -243,17 +243,17 @@ LR35902_specifics_exercise.asm(169): error: Illegal instruction:             ldd
 169   8082                          ldd     (hl),
 LR35902_specifics_exercise.asm(170): error: Illegal instruction:             ldd     [hl],
 170   8082                          ldd     [hl],
-LR35902_specifics_exercise.asm(171): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+LR35902_specifics_exercise.asm(171): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`:
 171   8082                          ldh     a
-LR35902_specifics_exercise.asm(172): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+LR35902_specifics_exercise.asm(172): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`:
 172   8082                          ldh     a,
-LR35902_specifics_exercise.asm(173): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+LR35902_specifics_exercise.asm(173): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`:
 173   8082                          ldh     (var3)
-LR35902_specifics_exercise.asm(174): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+LR35902_specifics_exercise.asm(174): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`:
 174   8082                          ldh     (var3),
-LR35902_specifics_exercise.asm(175): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+LR35902_specifics_exercise.asm(175): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`:
 175   8082                          ldh     [var3]
-LR35902_specifics_exercise.asm(176): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: 
+LR35902_specifics_exercise.asm(176): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`:
 176   8082                          ldh     [var3],
 LR35902_specifics_exercise.asm(177): error: [LDH] only valid combinations: `ldh a,(a8)` or `ldh (a8),a`: ),a
 177   8082                          ldh     [var3),a
@@ -290,7 +290,7 @@ LR35902_specifics_exercise.asm(195): error: Illegal instruction (can't access me
 LR35902_specifics_exercise.asm(196): error: Label not found: hl
 LR35902_specifics_exercise.asm(196): error: Illegal instruction (can't access memory): (hl)
 196   8091 10 00                    stop    (hl)
-LR35902_specifics_exercise.asm(197): error: Unexpected: ,,1        
+LR35902_specifics_exercise.asm(197): error: Unexpected: ,,1
 197   8093 10 00                    stop    0,,1        ; no multi-arg for STOP implemented
 198   8095                          ; legit ones
 199   8095 10 00                    stop                ; implicit 0

@@ -385,12 +385,12 @@ all_fake.asm(208): error: Fake instructions are not implemented in Sharp LR35902
 208   8016              sub_hl_sp           sub hl,sp
 209   8016
 210   8016                  ; ZXNext section - there are no true regular fakes yet, but some specials
-all_fake.asm(211): error: Unrecognized instruction: mul         
+all_fake.asm(211): error: Unrecognized instruction: mul
 211   8016              zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
 212   8016                  ; these definitely should not work in LR35902 mode (trying to switch --zxnext is fatal error)
-all_fake.asm(213): error: Unrecognized instruction: break       
+all_fake.asm(213): error: Unrecognized instruction: break
 213   8016              zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
-all_fake.asm(214): error: Unrecognized instruction: exit        
+all_fake.asm(214): error: Unrecognized instruction: exit
 214   8016              zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
 215   8016
 # file closed: all_fake.asm

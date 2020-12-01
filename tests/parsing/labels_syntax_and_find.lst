@@ -190,15 +190,15 @@ labels_syntax_and_find.asm(160): error: Number labels are allowed as address lab
 labels_syntax_and_find.asm(161): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 105
 161   356D              105:    defl    should not work
 162   356D
-labels_syntax_and_find.asm(163): error: Unexpected: cpl     
+labels_syntax_and_find.asm(163): error: Unexpected: cpl
 163   356D              EquLineRemnants1:   EQU $+1-$100    cpl     ; error
 164   356D              EquLineRemnants2:   EQU $+2-$100
 164   356D 2F             cpl     ; valid
-labels_syntax_and_find.asm(165): error: Unexpected: cpl     
+labels_syntax_and_find.asm(165): error: Unexpected: cpl
 165   356E              DeflLineRemnants1:  DEFL $+3-$100   cpl     ; error
 166   356E              DeflLineRemnants2:  DEFL $+4-$100
 166   356E 2F             cpl     ; valid
-labels_syntax_and_find.asm(167): error: Unexpected: cpl     
+labels_syntax_and_find.asm(167): error: Unexpected: cpl
 167   356F              DeflLineRemnants3:  = $+5-$100      cpl     ; error
 168   356F              DeflLineRemnants4:  = $+6-$100
 168   356F 2F             cpl     ; valid

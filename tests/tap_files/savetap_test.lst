@@ -371,63 +371,63 @@
 140   8040              ;; Error cases ;;
 141   8040              ;;;;;;;;;;;;;;;;;
 142   8040
-savetap_test.asm(143): error: [EMPTYTAP] Syntax error: emptytap ""				
+savetap_test.asm(143): error: [EMPTYTAP] Syntax error: emptytap ""
 143   8040              		emptytap ""				;; Syntax error
-savetap_test.asm(144): error: [SAVETAP] Syntax error. No parameters: savetap	""				
+savetap_test.asm(144): error: [SAVETAP] Syntax error. No parameters: savetap	""
 144   8040              		savetap	""				;; Syntax error. No parameters
-savetap_test.asm(145): error: [SAVETAP] Syntax error. No parameters: savetap	"error"				
+savetap_test.asm(145): error: [SAVETAP] Syntax error. No parameters: savetap	"error"
 145   8040              		savetap	"error"				;; Syntax error. No parameters
-savetap_test.asm(146): error: [SAVETAP] Negative values are not allowed: savetap	"error",-1			
+savetap_test.asm(146): error: [SAVETAP] Negative values are not allowed: savetap	"error",-1
 146   8040              		savetap	"error",-1			;; Negative values are not allowed
 147   8040
-savetap_test.asm(148): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,		
+savetap_test.asm(148): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,
 148   8040              		savetap	"error",HEADLESS,		;; Syntax error
-savetap_test.asm(149): error: [SAVETAP] Syntax error. Missing start address: savetap	"error",HEADLESS,,		
+savetap_test.asm(149): error: [SAVETAP] Syntax error. Missing start address: savetap	"error",HEADLESS,,
 149   8040              		savetap	"error",HEADLESS,,		;; Missing start address
-savetap_test.asm(150): error: [SAVETAP] Negative values are not allowed: savetap	"error",HEADLESS,-1		
+savetap_test.asm(150): error: [SAVETAP] Negative values are not allowed: savetap	"error",HEADLESS,-1
 150   8040              		savetap	"error",HEADLESS,-1		;; Negative values are not allowed
-savetap_test.asm(151): error: [SAVETAP] Negative values are not allowed: savetap	"error",HEADLESS,0,-1		
+savetap_test.asm(151): error: [SAVETAP] Negative values are not allowed: savetap	"error",HEADLESS,0,-1
 151   8040              		savetap	"error",HEADLESS,0,-1		;; Negative values are not allowed
-savetap_test.asm(152): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",HEADLESS,#10000		
+savetap_test.asm(152): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",HEADLESS,#10000
 152   8040              		savetap	"error",HEADLESS,#10000		;; Values higher than FFFFh are not allowed
-savetap_test.asm(153): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",HEADLESS,0,#10000	
+savetap_test.asm(153): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",HEADLESS,0,#10000
 153   8040              		savetap	"error",HEADLESS,0,#10000	;; Values higher than FFFFh are not allowed
-savetap_test.asm(154): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,0,		
+savetap_test.asm(154): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,0,
 154   8040              		savetap	"error",HEADLESS,0,		;; Syntax error
-savetap_test.asm(155): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,0,0,		
+savetap_test.asm(155): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS,0,0,
 155   8040              		savetap	"error",HEADLESS,0,0,		;; Syntax error
-savetap_test.asm(156): error: [SAVETAP] Invalid flag byte: savetap	"error",HEADLESS,0,0,-1		
+savetap_test.asm(156): error: [SAVETAP] Invalid flag byte: savetap	"error",HEADLESS,0,0,-1
 156   8040              		savetap	"error",HEADLESS,0,0,-1		;; Invalid flag byte
-savetap_test.asm(157): error: [SAVETAP] Invalid flag byte: savetap	"error",HEADLESS,0,0,0x100	
+savetap_test.asm(157): error: [SAVETAP] Invalid flag byte: savetap	"error",HEADLESS,0,0,0x100
 157   8040              		savetap	"error",HEADLESS,0,0,0x100	;; Invalid flag byte
 158   8040
-savetap_test.asm(159): error: [SAVETAP] Syntax error in tape file name: savetap	"error",CODE,			
+savetap_test.asm(159): error: [SAVETAP] Syntax error in tape file name: savetap	"error",CODE,
 159   8040              		savetap	"error",CODE,			;; Syntax error
-savetap_test.asm(160): error: [SAVETAP] Syntax error. Missing tape block file name: savetap	"error",CODE,,			
+savetap_test.asm(160): error: [SAVETAP] Syntax error. Missing tape block file name: savetap	"error",CODE,,
 160   8040              		savetap	"error",CODE,,			;; Missing tape block file name
-savetap_test.asm(161): error: [SAVETAP] Syntax error. Missing start address: savetap	"error",CODE,"Err",		
+savetap_test.asm(161): error: [SAVETAP] Syntax error. Missing start address: savetap	"error",CODE,"Err",
 161   8040              		savetap	"error",CODE,"Err",		;; Missing start address
-savetap_test.asm(162): error: [SAVETAP] Syntax error. Missing block length: savetap	"error",CODE,"Err",0,		
+savetap_test.asm(162): error: [SAVETAP] Syntax error. Missing block length: savetap	"error",CODE,"Err",0,
 162   8040              		savetap	"error",CODE,"Err",0,		;; Missing block length
-savetap_test.asm(163): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",-1		
+savetap_test.asm(163): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",-1
 163   8040              		savetap	"error",CODE,"Err",-1		;; Negative values are not allowed
-savetap_test.asm(164): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,-1		
+savetap_test.asm(164): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,-1
 164   8040              		savetap	"error",CODE,"Err",0,-1		;; Negative values are not allowed
-savetap_test.asm(165): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,0,-1	
+savetap_test.asm(165): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,0,-1
 165   8040              		savetap	"error",CODE,"Err",0,0,-1	;; Negative values are not allowed
-savetap_test.asm(166): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,0,0,-1	
+savetap_test.asm(166): error: [SAVETAP] Negative values are not allowed: savetap	"error",CODE,"Err",0,0,0,-1
 166   8040              		savetap	"error",CODE,"Err",0,0,0,-1	;; Negative values are not allowed
-savetap_test.asm(167): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",CODE,"Err",#10000	
+savetap_test.asm(167): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",CODE,"Err",#10000
 167   8040              		savetap	"error",CODE,"Err",#10000	;; Values higher than FFFFh are not allowed
-savetap_test.asm(168): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",CODE,"Err",0,#10000	
+savetap_test.asm(168): error: [SAVETAP] Values higher than FFFFh are not allowed: savetap	"error",CODE,"Err",0,#10000
 168   8040              		savetap	"error",CODE,"Err",0,#10000	;; Values higher than FFFFh are not allowed
-savetap_test.asm(169): error: [SAVETAP] Values more than FFFFh are not allowed: savetap	"error",CODE,"Err",0,0,#10000	
+savetap_test.asm(169): error: [SAVETAP] Values more than FFFFh are not allowed: savetap	"error",CODE,"Err",0,0,#10000
 169   8040              		savetap	"error",CODE,"Err",0,0,#10000	;; Values higher than FFFFh are not allowed
-savetap_test.asm(170): error: [SAVETAP] Values more than FFFFh are not allowed: savetap	"error",CODE,"Err",0,0,0,#10000	
+savetap_test.asm(170): error: [SAVETAP] Values more than FFFFh are not allowed: savetap	"error",CODE,"Err",0,0,0,#10000
 170   8040              		savetap	"error",CODE,"Err",0,0,0,#10000	;; Values higher than FFFFh are not allowed
-savetap_test.asm(171): error: [SAVETAP] Syntax error: savetap	"error",CODE,"Err",0,0,0,	
+savetap_test.asm(171): error: [SAVETAP] Syntax error: savetap	"error",CODE,"Err",0,0,0,
 171   8040              		savetap	"error",CODE,"Err",0,0,0,	;; Syntax error
-savetap_test.asm(172): error: [SAVETAP] Syntax error: savetap	"error",CODE,"Err",0,0,		
+savetap_test.asm(172): error: [SAVETAP] Syntax error: savetap	"error",CODE,"Err",0,0,
 172   8040              		savetap	"error",CODE,"Err",0,0,		;; Syntax error
 173   8040
 savetap_test.asm(174): error: [SAVETAP] Autostart LINE out of range: 16384
@@ -438,12 +438,12 @@ savetap_test.asm(176): error: [SAVETAP] Variable name out of range
 176   8040              		savetap	"error",NUMBERS,"Err",0,0,'?'	;; Variable name out of range
 177   8040
 savetap_test.asm(178): error: Label not found: HEADLESS
-savetap_test.asm(178): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS	
+savetap_test.asm(178): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS
 178   8040              		savetap	"error",HEADLESS	;; Will try to use HEADLESS as label for start of tap-snapshot
 savetap_test.asm(179): error: Label not found: HEADLESS
-savetap_test.asm(179): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS+!	
+savetap_test.asm(179): error: [SAVETAP] Syntax error: savetap	"error",HEADLESS+!
 179   8040              		savetap	"error",HEADLESS+!	;; causing to fail in other part of implementation
-savetap_test.asm(180): error: [SAVETAP] Syntax error. No parameters: savetap	"error",,	        
+savetap_test.asm(180): error: [SAVETAP] Syntax error. No parameters: savetap	"error",,
 180   8040              		savetap	"error",,	        ;; syntax error, no type parameter
 181   8040
 182   8040              		device zxspectrumnext

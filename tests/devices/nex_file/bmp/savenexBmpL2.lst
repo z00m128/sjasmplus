@@ -18,7 +18,7 @@
 17    C003
 18    C003                  ;; SAVENEX SCREEN BMP <filename>[,<savePalette 0/1>]
 19    C003                  ; errors - [un]expected arguments
-savenexBmpL2.asm(20): error: [SAVENEX] Error opening file: 
+savenexBmpL2.asm(20): error: [SAVENEX] Error opening file:
 20    C003                  SAVENEX     SCREEN  BMP
 savenexBmpL2.asm(21): error: [SAVENEX] Error opening file: ,
 21    C003                  SAVENEX     SCREEN  BMP , 0

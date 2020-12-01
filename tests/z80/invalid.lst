@@ -37,7 +37,7 @@ invalid.asm(18): error: Illegal instruction:     ld      h,iyl
 18    0000                  ld      h,iyl
 invalid.asm(19): error: Label not found: e
 invalid.asm(19): error: ')' expected
-invalid.asm(19): error: Unexpected: 5            
+invalid.asm(19): error: Unexpected: 5
 19    0000 EE 00            xor     (e 5            ; did work as `xor 5` up to 1.10.4
 invalid.asm(20): error: Label not found: ixl
 20    0002 EE 00            xor     (ixl+0)
@@ -83,7 +83,7 @@ invalid.asm(40): error: Unrecognized instruction: nextreg $44,a
 40    000C                  nextreg $44,a
 invalid.asm(41): error: Unrecognized instruction: mirror  a
 41    000C                  mirror  a
-invalid.asm(42): error: [ASSERT] Assertion failed:  0=43        
+invalid.asm(42): error: [ASSERT] Assertion failed:  0=43
 42    000C                  ASSERT 0=43        ; this assert should fail
 43    000C
 44    000C                  ASSERT 44=44       ; update this assert when editing the file, to make it pass

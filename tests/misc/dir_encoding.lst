@@ -13,7 +13,7 @@
  8    0018 E1 00            DZ "á"
  9    001A
 10    001A                  ; syntax errors
-dir_encoding.asm(11): error: [ENCODING] Invalid argument (valid values: "dos" and "win"): 
+dir_encoding.asm(11): error: [ENCODING] Invalid argument (valid values: "dos" and "win"):
 11    001A                  ENCODING
 dir_encoding.asm(12): error: No closing delimiter: "
 12    001A                  ENCODING "

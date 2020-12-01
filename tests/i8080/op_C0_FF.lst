@@ -62,13 +62,13 @@
 61    0068 FF               rst     $38
 62    0069
 63    0069                  ; illegal on i8080
-op_C0_FF.asm(64): error: Unrecognized instruction: bit     0,h     
+op_C0_FF.asm(64): error: Unrecognized instruction: bit     0,h
 64    0069                  bit     0,h     ; BITS 0xCB prefix + 0x44
 op_C0_FF.asm(65): error: Unrecognized instruction: exx
 65    0069                  exx
 op_C0_FF.asm(66): error: Illegal instruction:     inc     ix      ; IX 0xDD prefix + 0x44
 66    0069                  inc     ix      ; IX 0xDD prefix + 0x44
-op_C0_FF.asm(67): error: Unrecognized instruction: neg             
+op_C0_FF.asm(67): error: Unrecognized instruction: neg
 67    0069                  neg             ; EXTD 0xED prefix + 0x44
 op_C0_FF.asm(68): error: Illegal instruction:     dec     iy      ; IY 0xFD prefix + 0x44
 68    0069                  dec     iy      ; IY 0xFD prefix + 0x44

@@ -121,16 +121,16 @@ zx48_and_128.asm(57): error: Write outside of device memory at: 65536
 58    0002                  ASSERT {0} == "77"          ; still page 7 there
 59    0002
 60    0002                  ; some more error states
-zx48_and_128.asm(61): error: [ORG] Syntax error in <address>: & 
+zx48_and_128.asm(61): error: [ORG] Syntax error in <address>: &
 61    0002                  ORG &
-zx48_and_128.asm(61): error: Syntax error in <page_number>: & 
+zx48_and_128.asm(61): error: Syntax error in <page_number>: &
 61    0002                PAGE &
 zx48_and_128.asm(61): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0x1234 vs slot 3 range 0xC000..0xFFFF
-zx48_and_128.asm(61): error: Syntax error in <page_number>: & 
+zx48_and_128.asm(61): error: Syntax error in <page_number>: &
 61    0002                ORG 0x1234, &
-zx48_and_128.asm(61): error: [DISP] Syntax error in <address>: & 
+zx48_and_128.asm(61): error: [DISP] Syntax error in <address>: &
 61    1234                DISP &
-zx48_and_128.asm(61): error: [SLOT] Syntax error in <slot_number>: & 
+zx48_and_128.asm(61): error: [SLOT] Syntax error in <slot_number>: &
 61    1234                SLOT & ; syntax errors
 zx48_and_128.asm(62): error: ENT should be after DISP
 62    1234                  ENT

@@ -48,20 +48,20 @@ coverage2.asm(26): error: [DEFARRAY] must have at least one entry
 26    0005                  DEFARRAY syntaxErrArr2
 coverage2.asm(27): error: [DEFARRAY] must have at least one entry
 27    0005                  DEFARRAY syntaxErrArr2  ; empty
-coverage2.asm(28): warning: [Macro argument parser] empty value: 
+coverage2.asm(28): warning: [Macro argument parser] empty value:
 28    0005                  DEFARRAY syntaxErrArr2  1, 2,
 coverage2.asm(29): warning: [Macro argument parser] empty value: ,
-coverage2.asm(29): warning: [Macro argument parser] empty value: 
+coverage2.asm(29): warning: [Macro argument parser] empty value:
 coverage2.asm(29): error: Duplicate define (replacing old value): syntaxErrArr2
 29    0005                  DEFARRAY syntaxErrArr2  1, 2,,
-coverage2.asm(30): warning: [Macro argument parser] empty value: 
+coverage2.asm(30): warning: [Macro argument parser] empty value:
 30    0005                  DEFARRAY+ syntaxErrArr2  3, 4,
 coverage2.asm(31): error: [DEFARRAY] must have at least one entry
 31    0005                  DEFARRAY+ syntaxErrArr2
 coverage2.asm(32): error: [DEFARRAY] must have at least one entry
 32    0005                  DEFARRAY+ syntaxErrArr2    ; empty
 coverage2.asm(33): warning: [Macro argument parser] empty value: ,
-coverage2.asm(33): warning: [Macro argument parser] empty value: 
+coverage2.asm(33): warning: [Macro argument parser] empty value:
 33    0005                  DEFARRAY+ syntaxErrArr2  5, 6,,
 coverage2.asm(34): error: [DEFARRAY] Syntax error:  "3
 34    0005                  DEFARRAY+ syntaxErrArr2  7, 8, "3
@@ -97,12 +97,12 @@ coverage2.asm(54): error: Invalid labelname: .InvalidName
 54    000D                  IFUSED ..InvalidName
 55    000D
 coverage2.asm(56): error: ELSEIF without IF/IFN
-coverage2.asm(56): error: Unexpected: 1        
+coverage2.asm(56): error: Unexpected: 1
 56    000D                  ELSEIF 1        ; ELSEIF without appropriate initial IF/IFN block
 57    000D
 58    000D                  IF 0
 59    000D                  ELSEIF 1 && @   ; syntax error
-coverage2.asm(59): error: Syntax error: @   
+coverage2.asm(59): error: Syntax error: @
 60    000D ~                    false
 61    000D                  ELSEIF 1
 62    000D ~                    still false, the syntax error blocks any remaining conditions

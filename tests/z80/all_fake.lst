@@ -483,7 +483,7 @@ all_fake.asm(205): warning: Fake instruction: sub hl,sp
 205   8308 B7 ED 72     sub_hl_sp           sub hl,sp
 206   830B
 207   830B                  ; ZXNext section - there are no true regular fakes yet, but some specials
-all_fake.asm(208): warning: Fake instruction: mul         
+all_fake.asm(208): warning: Fake instruction: mul
 208   830B ED 30        zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
 209   830D                  ; no message when in --zxnext=cspect mode
 210   830D DD 01        zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction

@@ -15,7 +15,7 @@ offset_syntax.asm(19): error: [STRUCT] Forward reference
 11    0003 00 00 78 00  s1      S_s1
 11    0007 40
 12    0008
-offset_syntax.asm(13): error: [STRUCT] syntax error, unexpected: 2       
+offset_syntax.asm(13): error: [STRUCT] syntax error, unexpected: 2
 13    0008                      STRUCT S_s2 2       ; syntax error (silently ignored in v1.13.0 = bug)
 14    0008 ~            f1          DB  'y'
 15    0008 ~            f2          DW  0x6000

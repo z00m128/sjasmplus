@@ -44,7 +44,7 @@ luaincSSS.asm(19): warning: [LUA] Pass updated to 3, device: ZXSPECTRUM1024
 38    8009
 39    8009                  LUA ALLPASS
 40    8009 ~                inc_ld_system('A', pass)        -- defined in all includes, the one with priority wins
-luaincSSSS_i/luaincSSSS.lua(3): error: [LUA] Unrecognized instruction: LDINVALID A,3 
+luaincSSSS_i/luaincSSSS.lua(3): error: [LUA] Unrecognized instruction: LDINVALID A,3
 luaincSSS.asm(41): ^ emitted from here
 41    8009              LDINVALID A,3 ; overloaded funcion (system-invalid variant)
 41    8009                  ENDLUA

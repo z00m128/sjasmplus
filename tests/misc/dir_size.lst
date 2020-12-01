@@ -24,7 +24,7 @@ dir_size.asm(10): error: [SIZE] Different size than previous: 8
 21    0008                  ; try to end + close OUTPUT by specifying new one
 22    0008                  OUTPUT  "justToEndTap.bin"
 23    0008
-dir_size.asm(24): error: [SIZE] Syntax error in <filesize>: SIZE &      
+dir_size.asm(24): error: [SIZE] Syntax error in <filesize>: SIZE &
 24    0008                  SIZE &      ; parsing error
 25    0008
 # file closed: dir_size.asm

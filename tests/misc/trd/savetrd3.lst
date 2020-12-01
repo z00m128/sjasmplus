@@ -29,8 +29,8 @@ savetrd3.asm(7): error: TRD image does not have a specified file to add data: sa
 18    C006                  PAGE 6 ;set 6 page to current slot
 19    C006                  SAVETRD "savetrd3.trd",&"file3.C",$C000,$4000   ; add 64 sector to file 3
 20    C006
-savetrd3.asm(21): error: [SAVETRD] Autostart is not used here: SAVETRD "savetrd3.trd",&"file1.C",$C000,$4000,10     
-savetrd3.asm(21): error: Unexpected: 10     
+savetrd3.asm(21): error: [SAVETRD] Autostart is not used here: SAVETRD "savetrd3.trd",&"file1.C",$C000,$4000,10
+savetrd3.asm(21): error: Unexpected: 10
 21    C006                  SAVETRD "savetrd3.trd",&"file1.C",$C000,$4000,10     ; error - not autostart used here
 22    C006
 23    C006                  ; on trd: file1.C = 65 sec. , file2.C = 66 sec. , file3.C = 128 sec.

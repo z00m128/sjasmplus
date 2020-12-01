@@ -5,7 +5,7 @@
   4   0000                  ; some tests need more strict syntax rules to hit specific code paths
   5   0000                  OPT reset --syntax=ab
   6   0000
-z80cover100.asm(7): error: Operand expected:      [1234   
+z80cover100.asm(7): error: Operand expected:      [1234
   7   0000 EE 00            xor     [1234   ; "Operand expected" error when parsing of no-memory argument fails
   8   0002
 z80cover100.asm(9): error: Operand expected
@@ -16,25 +16,25 @@ z80cover100.asm(9): error: Operand expected
  13   0006 ED 70            in      low af,(c)          ; tricky way to write "in f,(c)" ("low af" covered)
  14   0008
  15   0008                  ; nonexistent register pairs (with possible match) in `GetRegister` function
-z80cover100.asm(16): error: Illegal instruction:     pop az 
+z80cover100.asm(16): error: Illegal instruction:     pop az
  16   0008                  pop az
-z80cover100.asm(16): error: Illegal instruction:   pop ha 
+z80cover100.asm(16): error: Illegal instruction:   pop ha
  16   0008                pop ha
-z80cover100.asm(16): error: Illegal instruction:   pop xa 
+z80cover100.asm(16): error: Illegal instruction:   pop xa
  16   0008                pop xa
-z80cover100.asm(16): error: Illegal instruction:   pop ya 
+z80cover100.asm(16): error: Illegal instruction:   pop ya
  16   0008                pop ya
 z80cover100.asm(16): error: Illegal instruction:   pop YA
  16   0008                pop YA
  17   0008
  18   0008                  ; invalid registers in common ALU instructions
-z80cover100.asm(19): error: Illegal instruction:     xor af 
+z80cover100.asm(19): error: Illegal instruction:     xor af
  19   0008                  xor af
-z80cover100.asm(19): error: Illegal instruction:   xor sp 
+z80cover100.asm(19): error: Illegal instruction:   xor sp
  19   0008                xor sp
-z80cover100.asm(19): error: Illegal instruction:   xor i 
+z80cover100.asm(19): error: Illegal instruction:   xor i
  19   0008                xor i
-z80cover100.asm(19): error: Illegal instruction:   xor r 
+z80cover100.asm(19): error: Illegal instruction:   xor r
  19   0008                xor r
 z80cover100.asm(19): error: Illegal instruction:   xor f
  19   0008                xor f
@@ -81,7 +81,7 @@ z80cover100.asm(47): error: Illegal instruction:     dec     af
 z80cover100.asm(48): error: Illegal instruction:     inc     af
  48   0038                  inc     af
  49   0038
-z80cover100.asm(50): error: [JR] Illegal condition: jr      p,$             
+z80cover100.asm(50): error: [JR] Illegal condition: jr      p,$
  50   0038                  jr      p,$             ; illegal JR conditions
 z80cover100.asm(51): error: [JR] Illegal condition: jr      ns,$
  51   0038                  jr      ns,$
@@ -137,9 +137,9 @@ z80cover100.asm(72): error: Illegal instruction:     ldi     hl,a
  79   0040                  OPT reset --syntax=abF  ; no fakes allowed
  80   0040 ED A8            ldd                     ; regular ldd
  81   0042 ED A0            ldi                     ; regular ldi
-z80cover100.asm(82): error: Unexpected: a,(hl)          
+z80cover100.asm(82): error: Unexpected: a,(hl)
  82   0044 ED A8            ldd     a,(hl)          ; regular ldd with "unexpected ...." error when fakes are OFF
-z80cover100.asm(83): error: Unexpected: a,(hl)          
+z80cover100.asm(83): error: Unexpected: a,(hl)
  83   0046 ED A0            ldi     a,(hl)          ; regular ldi with "unexpected ...." error when fakes are OFF
  84   0048
  85   0048                  ;; part 2 (new commit)
@@ -334,14 +334,14 @@ z80cover100.asm(199): warning: Fake instruction: ldd     b,(hl)
 z80cover100.asm(200): error: Illegal instruction:     ldd     (hl)
 200   00AA                  ldd     (hl)
 z80cover100.asm(201): warning: Fake instruction: ldd     (hl),
-z80cover100.asm(201): error: Operand expected: 
+z80cover100.asm(201): error: Operand expected:
 201   00AA 36 00 2B         ldd     (hl),
 z80cover100.asm(202): warning: Fake instruction: ldd     (hl),a
 202   00AD 77 2B            ldd     (hl),a
 z80cover100.asm(203): error: Illegal instruction:     ldd     (iy)
 203   00AF                  ldd     (iy)
 z80cover100.asm(204): warning: Fake instruction: ldd     (iy),
-z80cover100.asm(204): error: Operand expected: 
+z80cover100.asm(204): error: Operand expected:
 204   00AF FD 36 00 00      ldd     (iy),
 204   00B3 FD 2B
 z80cover100.asm(205): warning: Fake instruction: ldd     (iy),a
@@ -373,14 +373,14 @@ z80cover100.asm(217): warning: Fake instruction: ldi     b,(hl)
 z80cover100.asm(218): error: Illegal instruction:     ldi     (hl)
 218   00C0                  ldi     (hl)
 z80cover100.asm(219): warning: Fake instruction: ldi     (hl),
-z80cover100.asm(219): error: Operand expected: 
+z80cover100.asm(219): error: Operand expected:
 219   00C0 36 00 23         ldi     (hl),
 z80cover100.asm(220): warning: Fake instruction: ldi     (hl),a
 220   00C3 77 23            ldi     (hl),a
 z80cover100.asm(221): error: Illegal instruction:     ldi     (iy)
 221   00C5                  ldi     (iy)
 z80cover100.asm(222): warning: Fake instruction: ldi     (iy),
-z80cover100.asm(222): error: Operand expected: 
+z80cover100.asm(222): error: Operand expected:
 222   00C5 FD 36 00 00      ldi     (iy),
 222   00C9 FD 23
 z80cover100.asm(223): warning: Fake instruction: ldi     (iy),a

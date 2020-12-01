@@ -15,7 +15,7 @@
 14    1015
 15    1015 3E 10            ld      a,high norel label1         ; no warning about unstable expression
 relocation_norel_operator.asm(16): error: Label not found: high
-relocation_norel_operator.asm(16): error: Unexpected: label1         
+relocation_norel_operator.asm(16): error: Unexpected: label1
 16    1017 3E 00            ld      a,norel high label1         ; error about missing label "high" (norel must be followed by label expression)
 17    1019 3E 10            ld      a,norel  (high label1)      ; (or parentheses will make high operator legal)
 18    101B

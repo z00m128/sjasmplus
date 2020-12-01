@@ -43,7 +43,7 @@ numeric_constants_dg_dh.asm(34): error: [DG] byte needs eight characters:     DG
 numeric_constants_dg_dh.asm(35): error: [DG] byte needs eight characters:     DG '--'
 35    001A                  DG '--'
 36    001A
-numeric_constants_dg_dh.asm(37): error: [DG] byte needs eight characters:     DG --#----#--#      
+numeric_constants_dg_dh.asm(37): error: [DG] byte needs eight characters:     DG --#----#--#
 37    001A 21               DG --#----#--#      ; 8 + 3 bits
 numeric_constants_dg_dh.asm(38): error: [DG] byte needs eight characters:     DG "--#----#--#"
 38    001B 21               DG "--#----#--#"
@@ -76,7 +76,7 @@ numeric_constants_dg_dh.asm(39): error: [DG] byte needs eight characters:     DG
 56    005B 89 AB CD EF
 57    005F
 58    005F                  ; error states
-numeric_constants_dg_dh.asm(59): error: Missing next digit: 3          
+numeric_constants_dg_dh.asm(59): error: Missing next digit: 3
 59    005F                  DH 123          ; 4x syntax error (digits are not in pairs
 numeric_constants_dg_dh.asm(60): error: Missing next digit: 3"
 60    005F                  DH "123"
@@ -89,7 +89,7 @@ numeric_constants_dg_dh.asm(63): error: no arguments
 numeric_constants_dg_dh.asm(64): error: no arguments
 64    0060 12               DH "12",
 65    0061
-numeric_constants_dg_dh.asm(66): error: Digit not in base: G034       
+numeric_constants_dg_dh.asm(66): error: Digit not in base: G034
 66    0061                  DH 12G034       ; wrong base
 numeric_constants_dg_dh.asm(67): error: Digit not in base: G034"
 67    0061                  DH "12G034"

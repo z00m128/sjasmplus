@@ -19,7 +19,7 @@
 18    4002                  ASSERT  4 == $$orgL1.local && 4 == $$@orgL1.local && 1
 get_label_page_operator.asm(19): error: Label not found: MissingLabel
 19    4002                  ASSERT  -1 == $$MissingLabel && 1
-get_label_page_operator.asm(20): error: Unexpected: ..invalidLabelName  
+get_label_page_operator.asm(20): error: Unexpected: ..invalidLabelName
 20    4002                  ASSERT  $$ == $$..invalidLabelName  ; parsing breaks completely, evaluating only first part
 21    4002
 22    4002                  ;; exercise macro nesting and reaching out for labels

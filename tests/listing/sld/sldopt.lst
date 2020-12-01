@@ -35,11 +35,11 @@
 30    EA66                  ; syntax error
 sldopt.asm(31): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): INVALID whatever
 31    EA66                  SLDOPT INVALID whatever
-sldopt.asm(32): error: [SLDOPT COMMENT] invalid keyword: @@@  
+sldopt.asm(32): error: [SLDOPT COMMENT] invalid keyword: @@@
 32    EA66                  SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
-sldopt.asm(33): error: [SLDOPT COMMENT] invalid keyword: 
+sldopt.asm(33): error: [SLDOPT COMMENT] invalid keyword:
 33    EA66                  SLDOPT COMMENT
-sldopt.asm(34): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): 
+sldopt.asm(34): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT):
 34    EA66                  SLDOPT
 35    EA66
 # file closed: sldopt.asm

@@ -10,7 +10,7 @@ syntax_mM.asm(6): warning[rdlow]: Reading memory at low address: 123
 syntax_mM.asm(8): error: Label not found: m
  8    0006 C6 00            add     a,m                 ; label not found
  9    0008 86               add     a,(hl)              ; regular add instruction
-syntax_mM.asm(10): warning: `--syntax=m` is deprecated, use `-Wno-rdlow` instead: OPT push --syntax=mM    
+syntax_mM.asm(10): warning: `--syntax=m` is deprecated, use `-Wno-rdlow` instead: OPT push --syntax=mM
 10    0009                  OPT push --syntax=mM    ; test the syntax options "mM"
 11    0009 3A 7B 00         ld      a,(123)
 12    000C 3A 7B 00         ld      a,(123)             ; rdlow-ok

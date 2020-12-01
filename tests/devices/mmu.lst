@@ -27,8 +27,8 @@ mmu.asm(23): error: [MMU] Second slot number parsing failed: MMU 1
  23   0000                  MMU 1
 mmu.asm(24): error: [MMU] Second slot number parsing failed: MMU 1 !
  24   0000                  MMU 1 !
-mmu.asm(25): warning: [MMU] Unknown slot option (legal: e, w, n): x 
-mmu.asm(25): error: [MMU] Comma and page number expected after slot info: MMU 1 x 
+mmu.asm(25): warning: [MMU] Unknown slot option (legal: e, w, n): x
+mmu.asm(25): error: [MMU] Comma and page number expected after slot info: MMU 1 x
  25   0000                  MMU 1 x ; white space (or comma) after char to detect it as unknown option
 mmu.asm(26): warning: [MMU] Unknown slot option (legal: e, w, n): x,
 mmu.asm(26): error: [MMU] Page number parsing failed: MMU 1 x,

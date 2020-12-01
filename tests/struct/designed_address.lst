@@ -19,7 +19,7 @@
 designed_address.asm(15): warning: [STRUCT] designed address without label = no effect
 15    6790                      S_TEST = $      ; shoud not emit bytes, but also no label = warning
 16    6790
-designed_address.asm(17): error: [STRUCT] Syntax error in designed address:  ++     
+designed_address.asm(17): error: [STRUCT] Syntax error in designed address:  ++
 17    6790              syntaxE S_TEST = ++     ; test syntax error
 18    6790
 # file closed: designed_address.asm

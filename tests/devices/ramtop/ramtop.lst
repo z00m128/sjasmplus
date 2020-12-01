@@ -9,9 +9,9 @@ ramtop.asm(4): error: Unexpected: ,
  4    0000                  DEVICE  NONE,,
 ramtop.asm(5): error: [DEVICE] valid range for RAMTOP is $5D00..$FFFF: 0
  5    0000                  DEVICE  NONE, 0     ; error valid range (ZX-like expected)
-ramtop.asm(6): error: Unexpected: ,    
+ramtop.asm(6): error: Unexpected: ,
  6    0000                  DEVICE  NONE, $8000,    ; error for extra argument
-ramtop.asm(7): error: Unexpected: , 0  
+ramtop.asm(7): error: Unexpected: , 0
  7    0000                  DEVICE  NONE, $8000, 0  ; error for extra argument
  8    0000                  ; following two are "good", because NONE ignores any ramtop value
  9    0000                  DEVICE  NONE, $5D00

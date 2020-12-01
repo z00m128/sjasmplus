@@ -7,13 +7,13 @@
  5    0003 C3 08 00       JP  Label1     ; regular syntax - instruction
  6    0006 00 00            align 4
  6    0008                ALIGN 4           ; regular syntax - directive
-syntax_iI.asm(7): error: Unrecognized instruction: Jp  Label1 
+syntax_iI.asm(7): error: Unrecognized instruction: Jp  Label1
  7    0008                  Jp  Label1
-syntax_iI.asm(7): error: Unrecognized instruction: jP  Label1     
+syntax_iI.asm(7): error: Unrecognized instruction: jP  Label1
  7    0008                jP  Label1     ; 2x error - instruction
-syntax_iI.asm(8): error: Unrecognized instruction: Align 4 
+syntax_iI.asm(8): error: Unrecognized instruction: Align 4
  8    0008                  Align 4
-syntax_iI.asm(8): error: Unrecognized instruction: aLiGN 4           
+syntax_iI.asm(8): error: Unrecognized instruction: aLiGN 4
  8    0008                aLiGN 4           ; 2x error - directive
  9    0008
 10    0008                  OPT --syntax=i      ; test the syntax options "i"
@@ -24,7 +24,7 @@ syntax_iI.asm(8): error: Unrecognized instruction: aLiGN 4
 13    0010                aLiGN 4           ; directives too
 14    0010
 15    0010                  OPT reset           ; reset syntax to defaults
-syntax_iI.asm(16): error: Unrecognized instruction: Jp  Label1                  
+syntax_iI.asm(16): error: Unrecognized instruction: Jp  Label1
 16    0010                  Jp  Label1                  ; error - instruction
 17    0010
 # file closed: syntax_iI.asm

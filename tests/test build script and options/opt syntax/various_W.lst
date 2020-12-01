@@ -1,5 +1,5 @@
-various_W.asm(11): warning[fwdref]: forward reference of symbol: IF fwd_ref_label 
-various_W.asm(83): warning[fwdref]: forward reference of symbol: IF fwd_ref_label    
+various_W.asm(11): warning[fwdref]: forward reference of symbol: IF fwd_ref_label
+various_W.asm(83): warning[fwdref]: forward reference of symbol: IF fwd_ref_label
 # file opened: various_W.asm
   1   0000              ; various -W<warning_id> combinations (hopefully all of them, if possible)
   2   0000

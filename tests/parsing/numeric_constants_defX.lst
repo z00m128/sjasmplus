@@ -79,8 +79,8 @@ numeric_constants_defX.asm(49): error: Expression expected
 49    0095                  DB                              ; expression expected error
 numeric_constants_defX.asm(50): error: Expression expected
 50    0095 01               DB      1,                      ; expression expected error
-numeric_constants_defX.asm(51): warning: Empty string: "", ''                  
-numeric_constants_defX.asm(51): warning: Empty string: ''                  
+numeric_constants_defX.asm(51): warning: Empty string: "", ''
+numeric_constants_defX.asm(51): warning: Empty string: ''
 numeric_constants_defX.asm(51): error: no arguments
 51    0096                  DC      "", ''                  ; 2x warning about empty "string" + 1x error "no arguments"
 52    0096
@@ -256,7 +256,7 @@ numeric_constants_defX.asm(60): error: Over 128 bytes defined in single DB/DC/..
 63    031A 43 43
 numeric_constants_defX.asm(64): error: Expression expected
 64    031C                  DW                              ; error: Expression expected
-numeric_constants_defX.asm(65): error: [DW/DEFW/WORD] Syntax error: &&$                     
+numeric_constants_defX.asm(65): error: [DW/DEFW/WORD] Syntax error: &&$
 65    031C                  DW      &&$                     ; error: Syntax error
 66    031C                  ; 128 values = OK
 67    031C 01 00 02 00      DW      1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
@@ -396,7 +396,7 @@ numeric_constants_defX.asm(69): error: Over 128 values in DW/DEFW/WORD. Values o
 72    0524 43 43 43 43
 numeric_constants_defX.asm(73): error: Expression expected
 73    0528                  DD                              ; error: Expression expected
-numeric_constants_defX.asm(74): error: [DWORD] Syntax error: &&$                     
+numeric_constants_defX.asm(74): error: [DWORD] Syntax error: &&$
 74    0528                  DD      &&$                     ; error: Syntax error
 75    0528                  ; 128 values = OK
 76    0528 FF FF FF FF      DD      -1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
@@ -670,7 +670,7 @@ numeric_constants_defX.asm(82): warning: value 0x43434343 is truncated to 24bit 
 82    0939 43
 numeric_constants_defX.asm(83): error: Expression expected
 83    093A                  D24                             ; error: Expression expected
-numeric_constants_defX.asm(84): error: [D24] Syntax error: &&$                     
+numeric_constants_defX.asm(84): error: [D24] Syntax error: &&$
 84    093A                  D24     &&$                     ; error: Syntax error
 85    093A                  ; 128 values = OK
 86    093A FF FF FF 02      D24     -1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
@@ -869,16 +869,16 @@ numeric_constants_defX.asm(88): error: Over 128 values in D24. Values over: 16
 88    0C36 00 0F 00 00
 89    0C3A
 90    0C3A                  ; check if syntax errors are reported precisely *once* per (tricky) expression
-numeric_constants_defX.asm(91): error: Syntax error: 
+numeric_constants_defX.asm(91): error: Syntax error:
 91    0C3A                  DB      +                       ; error: Syntax error
-numeric_constants_defX.asm(92): error: Syntax error: &&$                     
+numeric_constants_defX.asm(92): error: Syntax error: &&$
 92    0C3A                  DB      &&$                     ; error: Syntax error
 93    0C3A
-numeric_constants_defX.asm(94): error: ABYTE <offset> <bytes>: parsing <offset> failed: ABYTE & 1 
+numeric_constants_defX.asm(94): error: ABYTE <offset> <bytes>: parsing <offset> failed: ABYTE & 1
 94    0C3A                  ABYTE & 1
-numeric_constants_defX.asm(94): error: ABYTEC <offset> <bytes>: parsing <offset> failed: ABYTEC & 2 
+numeric_constants_defX.asm(94): error: ABYTEC <offset> <bytes>: parsing <offset> failed: ABYTEC & 2
 94    0C3A                ABYTEC & 2
-numeric_constants_defX.asm(94): error: ABYTEZ <offset> <bytes>: parsing <offset> failed: ABYTEZ & 3 
+numeric_constants_defX.asm(94): error: ABYTEZ <offset> <bytes>: parsing <offset> failed: ABYTEZ & 3
 94    0C3A                ABYTEZ & 3 ; error: Syntax error
 95    0C3A
 # file closed: numeric_constants_defX.asm
