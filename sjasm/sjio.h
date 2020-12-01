@@ -92,7 +92,7 @@ EReturn ReadFile();
 EReturn SkipFile();
 void SeekDest(long, int);
 int ReadFileToCStringsList(CStringsList*& f, const char* end);
-void WriteLabelEquValue(char* name, aint value, FILE* f);
+void WriteLabelEquValue(const char* name, aint value, FILE* f);
 void WriteExp(char* n, aint v);
 
 /////// source-level-debugging support by Ckirby

@@ -1194,7 +1194,7 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	return 0;
 }
 
-void WriteLabelEquValue(char* name, aint value, FILE* f) {
+void WriteLabelEquValue(const char* name, aint value, FILE* f) {
 	if (nullptr == f) return;
 	char lnrs[16],* l = lnrs;
 	STRCPY(temp, LINEMAX-2, name);
