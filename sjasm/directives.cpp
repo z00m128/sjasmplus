@@ -1121,7 +1121,7 @@ static void dirENCODING() {
 }
 
 static void dirOPT() {
-	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...>
+	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...> -W...
 	// process OPT specific command keywords first: {push, pop, reset, listoff, liston}
 	bool didReset = false, didList = Options::syx.IsListingSuspended;
 	while (!SkipBlanks(lp) && '-' != *lp) {
@@ -1158,16 +1158,17 @@ static void dirOPT() {
 	}
 	// split user arguments into "argc, argv" like variables (by white-space)
 	char parsedOpts[LINEMAX];
-	char* parsedOptsArray[17] {};	// there must be one more nullptr in the array (16+1)
-	int optI = 0, charI = 0, errI;
-	while (optI < 16 && !SkipBlanks(lp)) {
-		parsedOptsArray[optI++] = parsedOpts + charI;
+	std::vector<char*> parsedOptsArray;
+	int charI = 0, errI;
+	while (!SkipBlanks(lp)) {
+		parsedOptsArray.push_back(parsedOpts + charI);
 		while (*lp && !White()) parsedOpts[charI++] = *lp++;
 		parsedOpts[charI++] = 0;
 	}
-	if (!SkipBlanks(lp)) Warning("[OPT] too many options");
+	int optI = parsedOptsArray.size();
+	parsedOptsArray.push_back(nullptr);
 	// parse user arguments and adjust current syntax setup
-	if (optI != (errI = Options::parseSyntaxOptions(optI, parsedOptsArray))) {
+	if (optI != (errI = Options::parseSyntaxOptions(optI, parsedOptsArray.data()))) {
 		Error("[OPT] invalid/failed option", parsedOptsArray[errI]);
 	}
 	// init Z80N extensions if requested (the Init is safe to be called multiple times)
