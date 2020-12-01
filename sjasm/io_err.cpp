@@ -28,7 +28,6 @@
 // io_err.cpp
 
 #include "sjdefs.h"
-#include <tuple>
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
@@ -340,6 +339,10 @@ static messages_map w_texts = {
 	},
 };
 
+static messages_map::iterator findWarningByIdText(const char* id) {
+	return std::find_if(w_texts.begin(), w_texts.end(), [id](const auto& v){ return !strcmp(id, v.first); } );
+}
+
 //TODO deprecated, add single-warning around mid 2021, remove ~1y later (replaced by warning-id system)
 // checks for "ok" (or also "fake") in EOL comment
 // "ok" must follow the comment start, "fake" can be anywhere inside
@@ -368,30 +371,28 @@ bool suppressedById(const char* id) {
 	return false;
 }
 
-void Warning(const char* message, const char* badValueMessage, EWStatus type)
-{
-	// check if it is correct pass by the type of error
-	if (type == W_EARLY && LASTPASS <= pass) return;
-	if (type == W_PASS3 && pass < LASTPASS) return;
+static bool isInactiveTypeInCurrentPass(EWStatus type) {
+	if (type == W_EARLY && LASTPASS <= pass) return true;	// "early" is inactive during pass3+
+	if (type == W_PASS3 && pass < LASTPASS) return true;	// "pass3" is inactive during 0..2 pass
+	return false;
+}
 
+void Warning(const char* message, const char* badValueMessage, EWStatus type) {
+	if (isInactiveTypeInCurrentPass(type)) return;
 	WarningImpl(nullptr, message, badValueMessage, type);
 }
 
 void WarningById(const char* id, const char* badValueMessage, EWStatus type) {
-	// check if it is correct pass by the type of warning
-	if (type == W_EARLY && LASTPASS <= pass) return;
-	if (type == W_PASS3 && pass < LASTPASS) return;
+	if (isInactiveTypeInCurrentPass(type)) return;
 
 	// id-warnings could be suppressed by "id-ok" anywhere in eol comment
 	if (suppressedById(id)) return;
 
-	const messages_map::const_iterator idMessage = w_texts.find(id);
+	const messages_map::const_iterator idMessage = w_texts.find(id);	// searching by id POINTER!
 	assert(idMessage != w_texts.end());
-	const bool enabled = idMessage->second.enabled;
-	if (!enabled) return;
-	const char* message = idMessage->second.txt;
 
-	WarningImpl(id, message, badValueMessage, type);
+	if (!idMessage->second.enabled) return;
+	WarningImpl(id, idMessage->second.txt, badValueMessage, type);
 }
 
 void WarningById(const char* id, int badValue, EWStatus type) {
@@ -409,13 +410,9 @@ void CliWoption(const char* option) {
 	// check for specific id, with possible "no-" prefix ("-Wabs" vs "-Wno-abs")
 	const bool enable = strncmp("no-", option, 3);
 	const char* id = enable ? option : option + 3;
-	for (auto& w_text : w_texts) {
-		if (!strcmp(id, w_text.first)) {
-			w_text.second.enabled = enable;
-			return;
-		}
-	}
-	Warning("unknown warning id in -W option", id, (0 == pass) ? W_EARLY : W_PASS3);
+	auto warning_it = findWarningByIdText(id);
+	if (w_texts.end() != warning_it) warning_it->second.enabled = enable;
+	else Warning("unknown warning id in -W option", id, (0 == pass) ? W_EARLY : W_PASS3);
 }
 
 static const char* spaceFiller = "                       ";
