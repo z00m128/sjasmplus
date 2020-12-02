@@ -90,6 +90,7 @@ class CLabelTable {
 private:
 	symbol_map_t symbols;
 public:
+	CLabelTable() { symbols.reserve(LABTABSIZE); }
 	int Insert(const char* nname, aint nvalue, unsigned traits = 0, short equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char* name, aint value);
 	SLabelTableEntry* Find(const char* name, bool onlyDefined = false);
