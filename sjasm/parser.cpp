@@ -481,8 +481,9 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 
 		// update "is define-related directive" for remainder of the line
 		char* kp = lp;
-		isDefDir |= afterNonAlphaNum && (cmphstr(kp, "define") || cmphstr(kp, "undefine") || cmphstr(kp, "defarray+")
-			|| cmphstr(kp, "defarray") || cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
+		isDefDir |= afterNonAlphaNum && (cmphstr(kp, "define+") || cmphstr(kp, "define")
+			|| cmphstr(kp, "undefine") || cmphstr(kp, "defarray+") || cmphstr(kp, "defarray")
+			|| cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
 		// if DEFINE-related directive was used, only macro-arguments are substituted
 		// in the remaining part of the line, the define-based substitution is inhibited till EOL
 

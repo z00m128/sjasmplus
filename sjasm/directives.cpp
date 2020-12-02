@@ -1453,15 +1453,19 @@ static void dirTAPEND()
 }
 
 static void dirDEFINE() {
+	bool replaceEnabled = ('+' == *lp) ? ++lp, true : false;
 	char* id;
-
 	if (!(id = GetID(lp))) {
 		Error("[DEFINE] Illegal <id>", lp, SUPPRESS);
 		return;
 	}
 	if (White(*lp)) ++lp;		// skip one whitespace (not considered part of value) (others are)
 
-	DefineTable.Add(id, lp, 0);
+	if (replaceEnabled) {
+		DefineTable.Replace(id, lp);
+	} else {
+		DefineTable.Add(id, lp, nullptr);
+	}
 	SkipToEol(lp);
 	substitutedLine = line;		// override substituted listing for DEFINE
 }
