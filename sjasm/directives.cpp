@@ -1525,8 +1525,8 @@ static void dirDISPLAY() {
 		}
 		if (*lp == '/') {
 			switch (optionChar = toupper((byte)lp[1])) {
-			case 'A': case 'D': case 'H': case 'B':
-				// known options, switching hex+dec / dec / hex / binary mode
+			case 'A': case 'D': case 'H': case 'B': case 'C':
+				// known options, switching hex+dec / dec / hex / binary mode / char mode
 				decprint = optionChar;
 				break;
 			case 'L': case 'T':				// silently ignored options (legacy compatibility)
@@ -1563,6 +1563,20 @@ static void dirDISPLAY() {
 						*(ep++) = (val & bitMask) ? '1' : '0';
 						if (0x10 == bitMask) *(ep++) = '\'';
 						bitMask >>= 1;
+					}
+				}
+				if (decprint == 'C') {
+					val &= 0xFF;	// truncate to 8bit value
+					if (' ' <= val && val < 127) {	// printable ASCII
+						*ep++ = '\'';
+						*ep++ = val;
+						*ep++ = '\'';
+					} else {		// non-printable char, do the \x?? form
+						*ep++ = '\'';
+						*ep++ = '\\';
+						*ep++ = 'x';
+						PrintHex(ep, val, 2);
+						*ep++ = '\'';
 					}
 				}
 				if (decprint == 'H' || decprint == 'A') {

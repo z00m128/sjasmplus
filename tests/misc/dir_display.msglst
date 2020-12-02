@@ -17,10 +17,14 @@ dir_display.asm(12): error: [DISPLAY] internal buffer overflow, resulting text i
 dir_display.asm(12): error: Unexpected: "!"
 12    0000                  DISPLAY "#####", x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,/A,x,"!","!"
 13    0000
-14    0000                  ; new in 1.17.1: /B for binary (truncated to 8bit)
+14    0000                  ; new in 1.18.0: /B for binary (truncated to 8bit)
 > %0111'1011 0x007B %1101'1100 0xFEDC %1111'1111 %0000'0000
 15    0000                  DISPLAY /B, 123, " ", 123, " ", /B, $FEDC, " ", $FEDC, " ", /B, -1, " ", /B, -$100
 16    0000
+17    0000                  ; new in 1.18.0: /C for char (truncated to 8bit)
+> 123: '{' ; $FEDC: '\xDC' ; -1: '\xFF' ; -$100: '\x00'
+18    0000                  DISPLAY "123: ",/C,123," ; $FEDC: ",/C,$FEDC," ; -1: ",/C,-1," ; -$100: ",/C,-$100
+19    0000
 # file closed: dir_display.asm
 
 Value    Label
