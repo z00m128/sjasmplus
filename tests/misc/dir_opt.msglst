@@ -7,6 +7,7 @@ dir_opt.asm(4): error: Z80N instructions are currently disabled: mirror  a
  4    0004                  mirror  a               ; error (Z80N instruction)
  5    0004
  6    0004                  ; try all possible options
+dir_opt.asm(7): warning: `--nofakes` is deprecated, use `--syntax=F` instead
  7    0004              OPT push reset --nofakes --syntax=a --zxnext=cspect --reversepop --dirbol
 dir_opt.asm(8): error: Fake instructions are not enabled: ld      hl,bc,,de,bc
  8    0004                  ld      hl,bc,,de,bc    ; error because --nofakes (!)

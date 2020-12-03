@@ -74,7 +74,6 @@ static void PrintHelpMain() {
 	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
-	_COUT "  --nofakes                Disable fake instructions" _ENDL;
 	_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
 	_COUT "  --syntax=<...>           Adjust parsing syntax, check docs for details." _ENDL;
 }
@@ -450,6 +449,8 @@ namespace Options {
 					syx.IsPseudoOpBOF = true;
 				} else if (!strcmp(opt, "nofakes")) {
 					syx.FakeEnabled = false;
+					Warning("`--nofakes` is deprecated, use `--syntax=F` instead", nullptr, (0 == pass) ? W_EARLY : W_PASS3);
+					//TODO remove "--nofakes" option completely after ~8/2021
 				} else if (!strcmp(opt, "syntax")) {
 					parseSyntaxValue();
 				} else if (!doubleDash && 'W' == opt[0]) {
