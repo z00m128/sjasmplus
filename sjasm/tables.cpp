@@ -406,14 +406,29 @@ int CLabelTable::Hash(const char* s) {
 	return h % LABTABSIZE;
 }
 
+static std::vector<int> getSortedOrder(const int N, CLabelTableEntry* table) {
+	std::vector<int> order;
+	order.reserve(N);
+	for (int i = 1; i < N; ++i) order.emplace_back(i);
+	if (Options::SortSymbols) {
+		std::sort(
+			order.begin(), order.end(),
+			[&](const int& a, const int& b) { return strcasecmp(table[a].name, table[b].name) < 0; }
+		);
+	}
+	return order;
+}
+
 void CLabelTable::Dump() {
 	FILE* listFile = GetListingFile();
 	if (NULL == listFile) return;		// listing file must be already opened here
 
+	std::vector<int> order = getSortedOrder(NextLocation, LabelTable);
+
 	char line[LINEMAX], *ep;
 	fputs("\nValue    Label\n", listFile);
 	fputs("------ - -----------------------------------------------------------\n", listFile);
-	for (int i = 1; i < NextLocation; ++i) {
+	for (const int i : order) {
 		if (LABEL_PAGE_UNDEFINED != LabelTable[i].page) {
 			ep = line;
 			*(ep) = 0;

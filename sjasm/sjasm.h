@@ -87,6 +87,7 @@ namespace Options {
 	extern bool IsI8080;			// "i8080" CPU mode (must be set at CLI, blocks others)
 	extern bool IsLR35902;			// "Sharp LR35902" CPU mode (must be set at CLI, blocks others)
 	extern bool IsLongPtr;
+	extern bool SortSymbols;
 
 	// emit virtual labels in LABELSLIST, that have only 64ki address and no page
 	// format is then `:ADDR label`, starting from colon, then 16bit address, then label.

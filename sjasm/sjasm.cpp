@@ -56,8 +56,8 @@ static void PrintHelpMain() {
 	_COUT "  -i<path> or -I<path> or --inc=<path> ( --inc without \"=\" to empty the list)" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
-	_COUT "  --lstlab                 Enable label table in listing" _ENDL;
-	_COUT "  --sym=<filename>         Save symbols list to <filename>" _ENDL;
+	_COUT "  --lstlab[=sort]          Append [sorted] symbol table to listing" _ENDL;
+	_COUT "  --sym=<filename>         Save symbol table to <filename>" _ENDL;
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
 	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
 	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
@@ -108,6 +108,7 @@ namespace Options {
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
 	bool IsLongPtr = false;
+	bool SortSymbols = false;
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
@@ -475,6 +476,7 @@ namespace Options {
 					ShowVersion = true;
 				} else if (!strcmp(opt, "lstlab")) {
 					AddLabelListing = true;
+					if (val[0]) SortSymbols = !strcmp("sort", val);
 				} else if (!strcmp(opt, "longptr")) {
 					IsLongPtr = true;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
@@ -494,6 +496,7 @@ namespace Options {
 					} else if (!strcmp("lstlab", val)) {
 						OutputVerbosity = OV_LST;
 						AddLabelListing = true;
+						SortSymbols = true;
 						HideLogo = true;
 					} else {
 						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
