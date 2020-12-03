@@ -38,6 +38,8 @@ extern const char pathGoodSlash;
 // #define FOPEN(pFile, filename, mode) fopen_s(&pFile, filename, mode)
 // #define FOPEN_ISOK(pFile, filename, mode) (fopen_s(&pFile, filename, mode) == 0)
 
+#define strcasecmp(s1, s2) stricmp(s1, s2)
+
 #else
 
 #include <sys/time.h>
