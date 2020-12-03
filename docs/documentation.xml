@@ -81,7 +81,7 @@
 
           <listitem>
             <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
-            Cirrus-CI with 380+ automated tests</ulink> (that's also 380+ examples of usage!)</para>
+            Cirrus-CI with 400+ automated tests</ulink> (that's also 400+ examples of usage!)</para>
           </listitem>
 
           <listitem>
@@ -205,7 +205,8 @@
             <listitem>
               <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
 - [may break old sources] new <link linkend="s_expressions">abs operator</link> for absolute integer value
-- <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
+- <link linkend="po_display">`DISPLAY`</link> has now also binary and char formatting
+- <link linkend="po_define">`DEFINE+`</link> added to [re]define identifier without error
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
 - added <link linkend="po_device">"NOSLOT64K" device</link> with 2MiB of virtual memory
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
@@ -405,7 +406,7 @@
 	</para>
 
 	<para>
-		You may want to download also the full source package, as it contains more than 240
+		You may want to download also the full source package, as it contains more than 400
 		<emphasis role="strong">automated tests</emphasis> used to verify correctness of executable,
 		and these can be often helpful to better understand how specific feature of sjasmplus works,
 		and <emphasis role="strong">how to use it</emphasis> effectively.
@@ -1784,18 +1785,26 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_define" />DEFINE &lt;id&gt;
-            &lt;replacement&gt;</term>
+            <term><anchor id="po_define" />DEFINE+ &lt;id&gt; &lt;replacement&gt;</term>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DEFINE &lt;id&gt; &lt;replacement&gt;</term>
 
             <listitem>
-              <para>The identifier &lt;id&gt; will be replaced with the
-              &lt;replacement&gt;. The replacement could be omitted, in such
-              case it is still possible to check if the identifier was defined
+              <para>The identifier &lt;id&gt; will be replaced with the &lt;replacement&gt;.
+              The <code>DEFINE+</code> (since v1.18.0) will also redefine the identifier &lt;id&gt;
+              if it already exists. The replacement could be omitted,
+              in such case it is still possible to check if the identifier was defined
               with IFDEF or IFNDEF.<example>
                   <title></title>
 
                   <para><programlisting>    DEFINE str_honderd "Honderd"
-    BYTE str_honderd,0             ; BYTE "Honderd",0</programlisting></para>
+    BYTE str_honderd,0             ; BYTE "Honderd",0
+    DEFINE+ do_stuff set 4,e
+    do_stuff                       ; set 4,e
+    DEFINE+ do_stuff set 2,e
+    do_stuff                       ; set 2,e</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -1968,9 +1977,10 @@ ENDOFPROG
               ALASM.</emphasis></para>
 
               <para>Out to console a string of bytes. Each value should be
-              between -129 and 256. Keys /D, /B, /H and /A set format of output of
+              between -129 and 256. Keys /D, /B, /C, /H and /A set format of output of
               numbers:<synopsis>/D - out only in Decimal
 /B - out only in Binary (truncated to 8 bit)
+/C - out as character in apostrophes (truncated to 8 bit)
 /H - out only in Hexadecimal
 /A - out both in Hexadecimal and Decimal</synopsis>
               <example>
@@ -2368,7 +2378,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               <para>Parameter is optional. It may be:<synopsis>PASS1   -  interpret Lua script in first pass only.
 PASS2   -  interpret Lua script in second pass only.
 PASS3   -  interpret Lua script in third pass only. By default.
-ALLPASS -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</synopsis></para>
+ALLPASS -  interpret Lua script in all passes. It is needed if you generate some Z80 code.</synopsis></para>
 
               <para><example>
                   <title></title>
