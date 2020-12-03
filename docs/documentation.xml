@@ -205,6 +205,7 @@
             <listitem>
               <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
 - [may break old sources] new <link linkend="s_expressions">abs operator</link> for absolute integer value
+- new <link linkend="s_id_warnings">system of warnings</link> (and suppression), the "; ok" comments are now deprecated
 - <link linkend="po_display">`DISPLAY`</link> has now also binary and char formatting
 - <link linkend="po_define">`DEFINE+`</link> added to [re]define identifier without error
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
@@ -352,7 +353,7 @@
 
       <para>Option flags as follows:</para>
 
-      <para><synopsis>  -h or --help             Help information
+      <para><synopsis>  -h or --help[=warnings]  Help information
   --version                Basic info (with --nologo only raw version string)
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
@@ -382,6 +383,7 @@
 		root (the MS_VS build was fixed to behave this way since v1.15.0)
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
+  -W[no-]&lt;warning_id&gt;      Disables/enabled particular warning type
   -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
   --reversepop             Enable reverse POP order (as in base SjASM version)
@@ -398,9 +400,9 @@
   f F    Fake instructions: warning / disabled (default = enabled)
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
-  m      Switch off "Accessing low memory" warning globally
   M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
-  w      Warnings option: report warnings as errors</synopsis>
+  w      Warnings option: report warnings as errors
+  m      *DEPRECATED* use -Wno-rdlow (was "switch off Accessing low memory warning")</synopsis>
   &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
   not working correctly either.
   </para>
@@ -440,6 +442,51 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     </section>
 
     <section>
+      <title><anchor id="s_id_warnings"/>Warnings with id</title>
+
+		<para>
+			Some warnings have own "id" - these can be switched off or suppressed for particular line.
+			The line suppression mechanism requires you to add end-of-line comment with "id-ok" string
+			somewhere in the comment (exception: for fake instructions and --syntax=f mode the word
+			"fake" is enough without -ok suffix) (the "ok" comment suppression mechanism from previous
+			versions of sjasmplus is deprecated and will be removed in future versions).
+		</para>
+		<para>
+			The id-warning is emitted together with its id in brackets:
+			<programlisting>    ld a,(10-2)    ; read memory address 8 - emits warning "rdlow"
+    ld a,(10-2)    ; same instruction, but suppress warning: rdlow-ok
+
+file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
+			To list all warning-ids and short description of each use:
+			<programlisting>sjasmplus --help=warnings</programlisting>
+			To disable particular warning globally you can use option <code>-Wno-&lt;id&gt;</code>,
+			either on command line, or from source by using <code><link linkend="po_opt">OPT</link></code>:
+			<programlisting>&lt;command line&gt;$ sjasmplus -Wno-out0
+
+; in source code:
+    OPT -Wno-trdext -Wno-trdext3 ; disable "trdext" and "trdext3" warnings
+        SAVETRD "image.trd", "file.txt", 30000, 100
+    OPT -Wtrdext3                ; re-enable "trdext3" warning for following code
+; ...</programlisting>
+		</para>
+		<para>
+			Warnings without id can't be suppressed and generally should happen only when the source
+			code has actual bug (in our opinion) and can be modified to fix the warning, or when you
+			are hitting limits of sjasmplus architecture and/or implementation.
+		</para>
+		<para>
+			If you believe you are hitting warning without id on correct code, which can be safely
+			ignored (the machine code produced is stable and as expected), open issue on github with
+			example source, so we can assign the warning new id (or explain why it is problematic :) ).
+		</para>
+		<para>
+			Warnings with id usually signal bug in the code (in common scenarios), but may be misleading
+			in more specialized cases - the decision is left to the author, whether to modify
+			the code to avoid the warning or suppress it and use the resulting machine code "as is".
+		</para>
+    </section>
+
+    <section>
       <title><anchor id="s_source_format"/>Source file format</title>
 
 		<para>
@@ -465,16 +512,6 @@ sjasmplus --lst --lstlab example.asm</programlisting>
  ld /*
  but this won't be ld a,3!
  */ a,3</programlisting>
-			</example>
-
-			Some warnings (low memory-access and fake instruction) can be suppressed for particular
-			line by adding end-of-line type of comment starting with "ok":
-			<example>
-				<title></title>
-
-				<programlisting>        OPT --syntax=f  ; warning on accidental fake instructions
-        ld  hl,de    ; warning here
-        ld  hl,de    ; ok (warning will be suppressed by this comment)</programlisting>
 			</example>
 		</para>
     </section>
@@ -2283,7 +2320,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_lua" />LUA [pass] [; ok comment to suppress "emit with allpass" warning]</term>
+            <term><anchor id="po_lua" />LUA [pass]</term>
 
             <listitem>
               <para>Using pseudo-ops LUA and ENDLUA you can insert Lua
@@ -2424,7 +2461,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
             <listitem>
               <para>Allows to reset and modify <link linkend="s_cli">options</link> affecting syntax and
 				  parsing (for lines of source following the OPT). The options allowed for OPT
-				  are: <code>--nofakes</code>, <code>--syntax</code>, <code>--zxnext</code>,
+				  are: <code>--nofakes</code>, <code>-W[no-]&lt;warning_id&gt;</code>, <code>--syntax</code>, <code>--zxnext</code>,
 				  <code>--reversepop</code> and <code>--dirbol</code>.
 			  </para>
 			  <para>
@@ -2445,6 +2482,9 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               </para>
 			  <para>The "pop" command: the previously preserved state of options is restored (states
 				  are preserved in "stack" way, so further OPT with "pop" will restore older states).
+			  </para>
+			  <para>The <link linkend="s_id_warnings">id-warning system</link> state is NOT saved/restored
+				  by OPT push/pop/reset and can be modified only by <code>-W</code> option.
 			  </para>
 			  <example>
                   <title>docs_examples/po_opt.asm</title>
@@ -2468,13 +2508,10 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               <para>Set the program counter to a specific address. If the second argument is
               provided, it will change memory page in the current slot, see
               <link linkend="po_page">PAGE</link> and <link linkend="po_slot">SLOT</link> (it will
-              warn you when &lt;address&gt; is outside of it, you can suppress the warning with
-              ";ok" comment).</para>
+              warn you when &lt;address&gt; is outside of it).</para>
               <para>When used inside <link linkend="po_disp">DISP</link> block, only the virtual
 				  "displaced" program counter is affected, but the machine code will be still
-				  sequentially emitted in the original physical location and warning is emitted
-				  (you can suppress the warning with ";ok" comment, if you want to use ORG
-				  intentionally in this way).
+				  sequentially emitted in the original physical location and warning is emitted.
                   <example>
                   <title>docs_examples/po_org.asm</title>
 
@@ -2810,8 +2847,7 @@ START  ....     ; some code
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
 			  <para>Save the device memory into TRD disk image. Saving two files with same filename will
-				  emit warning which can be suppressed by "; ok" comment, but two files (with same name)
-				  will be created in the disk directory.</para>
+				  emit warning, but two files (with same name) will be created in the disk directory.</para>
 
 			  <para>Adding pipe character "|" ahead of file
 				  name will make sjasmplus to delete old file(s) with the same name before writing
@@ -2826,8 +2862,8 @@ START  ....     ; some code
 				  only number of sectors patched, up to 255 sectors at most. This is special mode for
 				  single-file big-loaders.</para>
 
-			  <para>The unofficial three-letter extensions are supported, use "; ok" comment to suppress
-				  warning about unofficial extension (official extensions are only: B, C, D and #).
+			  <para>The unofficial three-letter extensions are also supported (official extensions
+				  are only: B, C, D and #).
 
 				<example><title></title>
                   <para><programlisting>    EMPTYTRD "test.trd" ;create empty TRD image
@@ -3074,7 +3110,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
 				  the IF/IFN block with such expression can lead to unstable results. If you are sure
 				  the late definition of label will not affect resulting machine code (the IF block
 				  does not emit any machine code and does not define any label), you can suppress the
-				  warning with end-of-line comment "ok".</para>
+				  warning.</para>
 
 			  <example>
 				  <title></title>
@@ -4186,7 +4222,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
     LUA PASS2 ; if you fully understand what you are doing
         sj.add_byte(123) -- and you need emit bytes in other mode
-    ENDLUA ; ok ; you can suppress warning here or at start of block</programlisting></para>
+    ENDLUA ; luamc-ok ; you can suppress warning here or at start of block</programlisting></para>
         </example><example>
           <title>Declare function and use it</title>
 
@@ -4530,8 +4566,6 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 				  </para>
 				  <para>
 					  By default the palette from BMP file is used, but you can override that by savePalette = 0.
-					  The warning about palette containing less than 256 colours can be suppressed by end-of-line
-					  OK comment like: <code>SAVENEX SCREEN BMP ... ; ok ...your comment</code>.
 				  </para>
 			  </listitem>
 		  </varlistentry>
