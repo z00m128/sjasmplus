@@ -388,7 +388,7 @@
   --longptr                No device: program counter $ can go beyond 0x10000
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
-  --nofakes                Disable fake instructions (obsolete, use --syntax=F)
+  --nofakes                Disable fake instructions (deprecated, use --syntax=F)
   --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)
   --syntax=&lt;...&gt;           Adjust parsing syntax, read details below.</synopsis></para>
 
@@ -2461,7 +2461,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
             <listitem>
               <para>Allows to reset and modify <link linkend="s_cli">options</link> affecting syntax and
 				  parsing (for lines of source following the OPT). The options allowed for OPT
-				  are: <code>--nofakes</code>, <code>-W[no-]&lt;warning_id&gt;</code>, <code>--syntax</code>, <code>--zxnext</code>,
+				  are: <code>-W[no-]&lt;warning_id&gt;</code>, <code>--syntax</code>, <code>--zxnext</code>,
 				  <code>--reversepop</code> and <code>--dirbol</code>.
 			  </para>
 			  <para>

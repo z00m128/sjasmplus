@@ -33,13 +33,11 @@ ARM emulation on x86: https://github.com/nongiach/arm_now  ???
 
 +3DOS v pythone: https://github.com/shred/nextskeleton/blob/master/skeleton/tools/makeautoexec.py
 
-consider the "low memory access" warning locked to only ZX-like devices?
-
 parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???)
 - write tests trying those "while" loops for groups of operators
 - write tests testing operator precedence
 
-CSPECTMAP - needs better support for DISP and instances of STRUCT
+CSPECTMAP - needs better support for DISP
 - also reported to be not as good as external tool, but seems that is due to not-using DEVICE directive by author
 (can't help that)
 
@@ -124,6 +122,9 @@ SHELLEXEC change syntax
 "ok" warning suppressing mechanism for ALL warnings?
 
 EQU and DEFL to not affect local labels (not defining new "main" label)
+
+separate local-labels vs macro-local-labels, like giving the macros new prefix? ">"?
+(issue #120)
 
 Operators precedence: (2 == 3&2) = ((2 == 3)&2) = false in current sjasmplus... ????
     https://en.cppreference.com/w/cpp/language/operator_precedence
