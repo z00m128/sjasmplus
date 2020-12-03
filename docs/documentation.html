@@ -435,7 +435,7 @@ MAIN.loop?</pre><p>It is possible to use mnemonics, pseudo-ops and
       the identifiers defined with the DEFINE pseudo-op use another name
       space.</p>
 
-      <p>(since v1.17.1) Right after label (before the optional colon) you
+      <p>(since v1.18.0) Right after label (before the optional colon) you
       can write extra "SMC offset" (Self Modify Code offset) in the form of plus
       sign and single decimal digit. The defined label will become equal to current
       address plus the SMC offset:
@@ -1255,7 +1255,8 @@ END_OF_PROGRAM</pre>
               <p>Saves labels list in format:</p>
 
               <pre class="synopsis">HEXA_16BIT_ADDRESS HEXA_LONG_ADDRESS TYPE LABELNAME</pre><p>
-              where TYPE is: 00 = regular label, 01 = EQU or struct defined, 02 = DEFL defined.</p>
+              where TYPE is: 00 = regular label, 01 = EQU or struct defined, 02 = DEFL defined,
+              03 = ROM page/"none" device, 04 = STRUCT definition.</p>
 
               <p>If no filename is provided, default is created by appending ".map" to source name.</p>
             </dd><dt><span class="term"><a name="po_d24"></a>D24</span></dt><dd>

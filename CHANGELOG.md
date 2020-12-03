@@ -1,3 +1,19 @@
+## [1.18.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.0) - soon(tm)
+- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
+- [may break old sources] new [abs operator](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) for absolute integer value
+- new [system of warnings](http://z00m128.github.io/sjasmplus/documentation.html#s_id_warnings) (and suppression), the "; ok" comments are now deprecated
+- [`DISPLAY`](http://z00m128.github.io/sjasmplus/documentation.html#po_display) has now also binary and char formatting
+- [`DEFINE+`](http://z00m128.github.io/sjasmplus/documentation.html#po_define) added to [re]define identifier without error
+- [`ELSEIF`](http://z00m128.github.io/sjasmplus/documentation.html#ca_elseif) added to conditional assembling arsenal
+- added ["NOSLOT64K" device](http://z00m128.github.io/sjasmplus/documentation.html#po_device) with 2MiB of virtual memory
+- [`LABELSLIST`](http://z00m128.github.io/sjasmplus/documentation.html#po_labelslist) has new optional argument to dump 16bit "virtual labels"
+- [`CSPECTMAP`](http://z00m128.github.io/sjasmplus/documentation.html#po_cspectmap) exports STRUCT symbols with more detail (instance labels with physical address)
+- [SMC offset](http://z00m128.github.io/sjasmplus/documentation.html#s_labels) syntax for self-modify-code labels for source brevity
+- added "listmc" command to [OPT](http://z00m128.github.io/sjasmplus/documentation.html#po_opt) - to list only lines with machine code bytes
+- minor bugfixes in parser and listing-line-numbering
+- Added [example (chargfx2asm)](https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm) how to use sjasmplus as byte-processor for binary files
+- [SLD data](http://z00m128.github.io/sjasmplus/documentation.html#c_sld_data) improvements based on Maziac's feedback and DeZog's needs
+
 ## [1.17.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.17.0) - 8.8.2020
 - `STRUCT` has new [`TEXT`](http://z00m128.github.io/sjasmplus/documentation.html#st_text) pseudo-instruction to define "DB-like" data
 - [`STRUCT` initializer block](http://z00m128.github.io/sjasmplus/documentation.html#st_usage) can be now multi-line (when correctly enclosed in curly braces)
