@@ -34,8 +34,8 @@ relocation_disp_outside.asm(17): error: The DISP block did start outside of relo
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x000D   absolute1
+0x0004   label1
+0x000A   label2
 0x0001   relocate_count
 0x0002   relocate_size
-0x0004   label1
-0x000D   absolute1
-0x000A   label2

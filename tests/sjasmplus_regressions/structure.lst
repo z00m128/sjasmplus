@@ -47,15 +47,15 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x0008   mod.str
+0x0000   mod.str.f0
+0x0002   mod.str.f1
+0x0004   mod.str.f2
 0x0003   str
 0x0000   str.f0
 0x0001   str.f1
 0x0002   str1
 0x0001   str1.f0
-0x0008   mod.str
-0x0000   mod.str.f0
-0x0002   mod.str.f1
-0x0004   mod.str.f2
 0x000D X usestr
 0x000D X usestr.f0
 0x000E X usestr.f1

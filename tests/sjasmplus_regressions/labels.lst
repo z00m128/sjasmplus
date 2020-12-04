@@ -16,7 +16,7 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x8003   label
 0x8002 X _.label
+0x8003   label
 0x8004   mod.label
 0x8006   mod.label.label

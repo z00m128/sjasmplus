@@ -218,8 +218,6 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x7F00   opJpTab
-0x8000   opRoutines
 0x00FF   __allocateOpMemory_opcode
 0x8000 X opcode_00_impl
 0x8201 X opcode_01_impl
@@ -228,3 +226,5 @@ Value    Label
 0x8204 X opcode_04_impl
 0x80FD X opcode_fd_impl
 0x82FF X opcode_ff_impl
+0x7F00   opJpTab
+0x8000   opRoutines

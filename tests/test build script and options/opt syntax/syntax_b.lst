@@ -367,5 +367,5 @@ syntax_b.asm(112): error: Illegal instruction (can't access memory): (label)
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x01E0   someLabel
 0x01E2   label
+0x01E0   someLabel

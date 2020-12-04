@@ -62,7 +62,6 @@ reader_cpp_coverage.asm(31): error: Syntax error: "
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x04D2 X kickoffWithDotDefl
 0x0000 X coverageStruct
 0x0000 X coverageStruct.LL1
 0x0000 X coverageStruct.ll1
@@ -84,3 +83,4 @@ Value    Label
 0x0000 X coverageStruct.ll9
 0x0000 X coverageStruct.LLA
 0x0000 X coverageStruct.lla
+0x04D2 X kickoffWithDotDefl

@@ -43,11 +43,11 @@ IssueBusyLabelError.asm(33): warning: RAM limit exceeded 0x10000 by ORG
 
 Value    Label
 ------ - -----------------------------------------------------------
-0xFFFF   t1.zac
 0xFFFF0002 X t1.len
-0xFFFF   t2.zac
+0xFFFF   t1.zac
 0xFFFF0002 X t2.len
-0xFFFF   t3.zac
+0xFFFF   t2.zac
 0x0002 X t3.len
-0xFFFF   t4.zac
+0xFFFF   t3.zac
 0x0002 X t4.len
+0xFFFF   t4.zac

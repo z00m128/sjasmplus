@@ -413,7 +413,11 @@ static std::vector<int> getSortedOrder(const int N, CLabelTableEntry* table) {
 	if (Options::SortSymbols) {
 		std::sort(
 			order.begin(), order.end(),
-			[&](const int& a, const int& b) { return strcasecmp(table[a].name, table[b].name) < 0; }
+			[&](const int& a, const int& b) {	// if case insenstive are same, do case sensitive too!
+				int caseres = strcasecmp(table[a].name, table[b].name);
+				if (0 == caseres) return strcmp(table[a].name, table[b].name) < 0;
+				return caseres < 0;
+			}
 		);
 	}
 	return order;

@@ -15,10 +15,10 @@ s_at_labels.asm(5): error: Duplicate label: xxx.Label.Local
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0000 X xxx.Label
-0x0000 X xxx.Label.Local
 0x0000 X Label
 0x0000 X Label2
+0x0000 X xxx.Label
+0x0000 X xxx.Label.Local
 0x0000 X xxx.Label2.Local
-0x0000 X yyy.Local
 0x0000 X xxx.yyy.Local
+0x0000 X yyy.Local

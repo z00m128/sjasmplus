@@ -60,27 +60,27 @@ cspectmap.asm(2): error: CSPECTMAP only allowed in real device emulation mode (S
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x1234 X EquLabel
 0x0013 X DeflLabel
-0x0007 X Struct
-0x0000 X Struct.Field1
-0x0005 X Struct.Field2
+0x1234 X EquLabel
+0xC030 X Module.Page30
+0xC031 X Module.Page30.local
+0xC031 X Module_two_.Page31..A.
+0xC032 X Module_two_.Page31..A..local..c.
 0xC000 X Page00
 0xC001 X Page00.local
 0xC001 X Page01
 0xC002 X Page01.local
 0xC00A X Page0A
-0xC00B X Page0A.local
 0xC00D X Page0A.codeEqu
+0xC00B X Page0A.local
 0xC00C X Page0A.local.local
 0xDFFE X Page0B.A
 0xDFFF X Page0B.A.local.b
 0xC0DF X PageDF.A.B
 0xC0E0 X PageDF.A.B.local.c..d
-0xC030 X Module.Page30
-0xC031 X Module.Page30.local
-0xC031 X Module_two_.Page31..A.
-0xC032 X Module_two_.Page31..A..local..c.
 0xC032 X s1
 0xC032 X s1.Field1
 0xC037 X s1.Field2
+0x0007 X Struct
+0x0000 X Struct.Field1
+0x0005 X Struct.Field2

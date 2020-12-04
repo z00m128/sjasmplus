@@ -28,7 +28,7 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0001   relocate_count
-0x0002   relocate_size
 0x1238   reloc_label
 0x123E   reloc_label2
+0x0001   relocate_count
+0x0002   relocate_size

@@ -213,25 +213,25 @@ labels_syntax_and_find.asm(167): error: Unexpected: cpl
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x3130   mod1.label
-0x3131   mod1.label.local
-0x3534   label
-0x3535   label.local
-0x356A   unique
-0x314A   mod1.mod1unique
-0x334C   mod2.mod2unique
-0x316E   mod1.nested.label
-0x316F   mod1.nested.label.local
-0x3170   mod1.nested.nest1unique
-0x3370   mod2.nested.label
-0x3371   mod2.nested.label.local
-0x3372   mod2.nested.nest2unique
-0x3332   mod2.label
-0x3333   mod2.label.local
-0x346E X EquLineRemnants1
-0x346F X EquLineRemnants2
 0x3471 X DeflLineRemnants1
 0x3472 X DeflLineRemnants2
 0x3474 X DeflLineRemnants3
 0x3475 X DeflLineRemnants4
+0x346E X EquLineRemnants1
+0x346F X EquLineRemnants2
+0x3534   label
+0x3535   label.local
+0x3130   mod1.label
+0x3131   mod1.label.local
+0x314A   mod1.mod1unique
+0x316E   mod1.nested.label
+0x316F   mod1.nested.label.local
+0x3170   mod1.nested.nest1unique
+0x3332   mod2.label
+0x3333   mod2.label.local
+0x334C   mod2.mod2unique
+0x3370   mod2.nested.label
+0x3371   mod2.nested.label.local
+0x3372   mod2.nested.nest2unique
 0x0000 X noColonProblemDemonstration
+0x356A   unique

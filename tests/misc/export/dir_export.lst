@@ -44,14 +44,14 @@ dir_export.asm(22): error: [EXPORT] Syntax error: @LabelNormal.LabelLocal
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x1234 X fwdRefNormal
-0x1235 X fwdRefNormal.fwdRefLocal
-0x2345 X fwdRefEqu
-0x3456 X fwdRefDefl
-0x1237 X LabelNormal
-0x1238 X LabelNormal.LabelLocal
-0x2346 X LabelEqu
-0x3457 X LabelDefl
 0x123A X aha.hehe
 0x123A X aha.hehe.hihi
 0x123A X aha.hehe.hoho
+0x3456 X fwdRefDefl
+0x2345 X fwdRefEqu
+0x1234 X fwdRefNormal
+0x1235 X fwdRefNormal.fwdRefLocal
+0x3457 X LabelDefl
+0x2346 X LabelEqu
+0x1237 X LabelNormal
+0x1238 X LabelNormal.LabelLocal

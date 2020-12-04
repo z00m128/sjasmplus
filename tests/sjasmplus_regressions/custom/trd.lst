@@ -66,7 +66,7 @@ trd.asm(45): error: SAVETRD only allowed in real device emulation mode (See DEVI
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x8205 X end
 0x8000 X label1
 0x8100 X label2
 0x8200 X label3
-0x8205 X end

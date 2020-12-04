@@ -70,6 +70,6 @@ KateSyntaxHighLightTest.asm(39): warning: [DG] character '0' in DG works as valu
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x00A8 X With
 0x00DE   s
 0x00F4   s.localLab
+0x00A8 X With

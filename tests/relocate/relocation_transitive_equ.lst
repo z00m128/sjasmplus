@@ -42,12 +42,12 @@ relocation_transitive_equ.asm(18): warning[reldiverts]: Expression can't be relo
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0001   relocate_count
-0x0002   relocate_size
-0x1004   reloc1
-0x1207   equRel
-0x1016   reloc2
-0x0012   equNoRel
 0x17DC   absolute1
 0x17DC   equAbs
+0x0012   equNoRel
 0x300C   equNoRel2
+0x1207   equRel
+0x1004   reloc1
+0x1016   reloc2
+0x0001   relocate_count
+0x0002   relocate_size

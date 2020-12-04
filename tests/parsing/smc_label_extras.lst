@@ -71,17 +71,17 @@ smc_label_extras.asm(35): error: Unrecognized instruction: lN
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0001 X x
 0x8000   lA
 0x8003   lB
 0x8005   lC
 0x8006   lD
 0x8011   lE
-0x800C   lO
-0x800D   lP
 0x800A   lF
 0x800A X lG
 0x800A X lH
 0x800A X lI
 0x800B X lJ
 0x800B X lK
+0x800C   lO
+0x800D   lP
+0x0001 X x

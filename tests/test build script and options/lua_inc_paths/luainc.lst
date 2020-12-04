@@ -64,6 +64,6 @@ luainc.asm(48): warning: Negative BLOCK?
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x8000   loopyLoop
 0x800D   forwardyLabelo
+0x8000   loopyLoop
 0x0000   stretchItEvenMore

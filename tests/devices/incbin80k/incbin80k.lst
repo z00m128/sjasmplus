@@ -99,15 +99,15 @@ incbin80k.asm(77): error: Write outside of device memory at: 65676
 
 Value    Label
 ------ - -----------------------------------------------------------
-0xE000 X short_start
-0xE051 X short_end
-0xE000 X p3_start
-0xE08C X p3_end
-0xE08C X err_start
 0x100D2 X err_end
-0xE000 X long_start
+0xE08C X err_start
 0xE2BC X long_end
-0xE000 X nodevice_start
+0xE000 X long_start
 0x222BC X nodevice_end
-0xE000 X noram_start
+0xE000 X nodevice_start
 0x1008C X noram_end
+0xE000 X noram_start
+0xE08C X p3_end
+0xE000 X p3_start
+0xE051 X short_end
+0xE000 X short_start

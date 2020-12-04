@@ -455,27 +455,27 @@ savetap_test.asm(183): error: [SAVETAP snapshot] Device is not of ZX Spectrum ty
 Value    Label
 ------ - -----------------------------------------------------------
 0x0000   bas.line10
-0x0018   bas.line10.len
 0x0004   bas.line10.cmds
+0x0018   bas.line10.len
 0x001C X bas.line20
-0x0019   bas.line20.len
 0x0020   bas.line20.cmds
+0x0019   bas.line20.len
 0x0039 X bas.line30
-0x000B   bas.line30.len
 0x003D   bas.line30.cmds
+0x000B   bas.line30.len
 0x0048 X bas.total
-0x0048   nums
-0x0005   nums.datalen
-0x004B   nums.data
-0x0008 X nums.savelen
 0x0050   chars
-0x001F   chars.datalen
 0x0053   chars.data
+0x001F   chars.datalen
 0x0022 X chars.savelen
+0x7FFC   demo
+0x0040 X demo.len
+0x8000   demo.loop
+0x801D   demo.not12
+0x802D   demo.rnd
+0x0048   nums
+0x004B   nums.data
+0x0005   nums.datalen
+0x0008 X nums.savelen
 0x4000   screen
 0x1B00 X screen.len
-0x7FFC   demo
-0x8000   demo.loop
-0x802D   demo.rnd
-0x801D   demo.not12
-0x0040 X demo.len

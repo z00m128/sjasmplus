@@ -48,34 +48,34 @@ offset_syntax.asm(30): warning: Label has different value in pass 3: previous va
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0003 X S_s0
-0x0000 X S_s0.f1
-0x0001 X S_s0.f2
 0x0000 X s0
 0x0000 X s0.f1
 0x0001 X s0.f2
-0x0005 X S_s1
-0x0002 X S_s1.f1
-0x0003 X S_s1.f2
 0x0003 X s1
 0x0005 X s1.f1
 0x0006 X s1.f2
-0x0003 X S_s2
-0x0000 X S_s2.f1
-0x0001 X S_s2.f2
 0x0008 X s2
 0x0008 X s2.f1
 0x0009 X s2.f2
-0x0003 X S_s3
-0x0000 X S_s3.f1
-0x0001 X S_s3.f2
 0x000B X s3
 0x000B X s3.f1
 0x000C X s3.f2
-0x0033   yy
-0x0014 X S_s4
-0x0011 X S_s4.f1
-0x0012 X S_s4.f2
 0x000E X s4
 0x001F X s4.f1
 0x0020 X s4.f2
+0x0003 X S_s0
+0x0000 X S_s0.f1
+0x0001 X S_s0.f2
+0x0005 X S_s1
+0x0002 X S_s1.f1
+0x0003 X S_s1.f2
+0x0003 X S_s2
+0x0000 X S_s2.f1
+0x0001 X S_s2.f2
+0x0003 X S_s3
+0x0000 X S_s3.f1
+0x0001 X S_s3.f2
+0x0014 X S_s4
+0x0011 X S_s4.f1
+0x0012 X S_s4.f2
+0x0033   yy

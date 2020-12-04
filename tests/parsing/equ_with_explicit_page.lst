@@ -25,8 +25,8 @@ equ_with_explicit_page.asm(18): error: Unexpected: @
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x8000   regular
 0x4000   equClassic
 0x4001   equWithPage
 0x4002 X errorEqu1
 0x4003 X errorEqu2
+0x8000   regular

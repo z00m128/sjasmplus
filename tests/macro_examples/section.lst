@@ -121,11 +121,11 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x8007   SECTION_MACRO_LAST_ADR_@code
+0x8009   code_end
 0x8000   code_start
-0xD008   SECTION_MACRO_LAST_ADR_@data
+0xD008   data_end
 0xD000   data_start
 0xD000   s1
 0xD004   s2
-0xD008   data_end
-0x8009   code_end
+0x8007   SECTION_MACRO_LAST_ADR_@code
+0xD008   SECTION_MACRO_LAST_ADR_@data

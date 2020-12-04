@@ -152,6 +152,6 @@ tricky_syntax.asm(71): error: Unexpected: hl
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x0158   d
 0x0152   h
 0x0154   label
-0x0158   d

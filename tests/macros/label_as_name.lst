@@ -118,5 +118,5 @@ label_as_name.asm(56): error: [MACRO] Illegal macroname
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0000 X Label
 0x0002 X Babel
+0x0000 X Label

@@ -27,9 +27,9 @@ s_local_labels.asm(8): error: Label not found: main.ProcessEvent
 Value    Label
 ------ - -----------------------------------------------------------
 0x8000 X main.Main
-0x800F   main.vdp.Cls
-0x8006   main.Main.loop
 0x8012   main.Main.event
-0x800E   SetScreen
-0x800E X main.vdp.SetScreen.loop
+0x8006   main.Main.loop
+0x800F   main.vdp.Cls
 0x800F   main.vdp.Cls.loop
+0x800E X main.vdp.SetScreen.loop
+0x800E   SetScreen

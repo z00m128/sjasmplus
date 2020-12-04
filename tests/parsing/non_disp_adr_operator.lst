@@ -109,22 +109,22 @@ non_disp_adr_operator.asm(87): error: Unexpected: $,$$$$
 Value    Label
 ------ - -----------------------------------------------------------
 0xA000   dispAdr
-0x0003   dispPage
-0x8000   noDispAdr
-0x0002   noDispPage
 0xE000   dispAdr2
-0xE000 X dispPage2
-0xC000   noDispAdr2
-0xFFFFFFFF   noDispPage2
 0x4000   dispAdr3
-0x4000 X dispPage3
-0x4000 X noDispAdr3
-0x4000 X noDispPage3
 0x6000   dispAdr4
+0x0003   dispPage
+0xE000 X dispPage2
+0x4000 X dispPage3
 0x0004   dispPage4
-0x0004 X noDispAdr4
-0x0004 X noDispPage4
 0x8000   nda1
 0xC000   nda2
 0x4000 X nda3
 0x0004 X nda4
+0x8000   noDispAdr
+0xC000   noDispAdr2
+0x4000 X noDispAdr3
+0x0004 X noDispAdr4
+0x0002   noDispPage
+0xFFFFFFFF   noDispPage2
+0x4000 X noDispPage3
+0x0004 X noDispPage4

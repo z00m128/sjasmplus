@@ -87,7 +87,7 @@ for f in "${TEST_FILES[@]}"; do
     options=()
     [[ -s "${OPTIONS_FILE}" ]] && options=(`cat "${OPTIONS_FILE}"`)
     # check if .lst file is required to verify the test, set up options to produce one
-    [[ -s "${LIST_FILE}" ]] && MSG_LIST_FILE="" && options+=("--lst=${dst_base}.lst") && options+=('--lstlab')
+    [[ -s "${LIST_FILE}" ]] && MSG_LIST_FILE="" && options+=("--lst=${dst_base}.lst") && options+=('--lstlab=sort')
     [[ ! -s "${MSG_LIST_FILE}" ]] && MSG_LIST_FILE="" || LIST_FILE="${MSG_LIST_FILE}"
     ## built it with sjasmplus (remember exit code)
     totalChecks=$((totalChecks + 1))    # assembling is one check

@@ -159,5 +159,5 @@ operators.asm(67): warning[abs]: the `abs` is now absolute value operator, if yo
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0008   not
 0x0023   abs
+0x0008   not

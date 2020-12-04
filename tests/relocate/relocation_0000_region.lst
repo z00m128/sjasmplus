@@ -51,8 +51,8 @@ relocation_0000_region.asm(35): warning: RAM limit exceeded 0x10000 by ORG
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0007 X relocate_count
-0x000E   relocate_size
 0x0000   label1
 0x0002   label2
 0xFFF8   label3
+0x0007 X relocate_count
+0x000E   relocate_size

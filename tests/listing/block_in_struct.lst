@@ -65,37 +65,37 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0008 X shortBlock
-0x0000 X shortBlock.byte
-0x0001 X shortBlock.block
-0x0006   shortBlock.word
-0x000B X onLimitBlock
-0x0000 X onLimitBlock.byte
-0x0001 X onLimitBlock.block
-0x0009   onLimitBlock.word
-0x000C X longBlock
-0x0000 X longBlock.byte
-0x0001 X longBlock.block
-0x000A   longBlock.word
-0x1000 X sb
-0x1000 X sb.byte
-0x1001 X sb.block
-0x1006   sb.word
-0x2000 X mb
-0x2000 X mb.byte
-0x2001 X mb.block
-0x2009   mb.word
 0x3000 X lb
-0x3000 X lb.byte
 0x3001 X lb.block
+0x3000 X lb.byte
 0x300A   lb.word
-0x0015 X longBlock2
-0x0000 X longBlock2.byte
-0x0001 X longBlock2.block1
-0x000A X longBlock2.block2
-0x0013 X longBlock2.word
 0x8000 X lb2
-0x8000 X lb2.byte
 0x8001   lb2.block1
 0x800A   lb2.block2
+0x8000 X lb2.byte
 0x8013   lb2.word
+0x000C X longBlock
+0x0001 X longBlock.block
+0x0000 X longBlock.byte
+0x000A   longBlock.word
+0x0015 X longBlock2
+0x0001 X longBlock2.block1
+0x000A X longBlock2.block2
+0x0000 X longBlock2.byte
+0x0013 X longBlock2.word
+0x2000 X mb
+0x2001 X mb.block
+0x2000 X mb.byte
+0x2009   mb.word
+0x000B X onLimitBlock
+0x0001 X onLimitBlock.block
+0x0000 X onLimitBlock.byte
+0x0009   onLimitBlock.word
+0x1000 X sb
+0x1001 X sb.block
+0x1000 X sb.byte
+0x1006   sb.word
+0x0008 X shortBlock
+0x0001 X shortBlock.block
+0x0000 X shortBlock.byte
+0x0006   shortBlock.word

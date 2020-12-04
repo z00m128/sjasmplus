@@ -109,10 +109,10 @@ ifused_test.asm(97): error: Invalid labelname: .InvalidLabel
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x000E   EnableInt
 0x0000 X start
 0x0000 X start.noused
-0x000E   EnableInt
 0x0003   start.used
 0x0010   Wait
-0x0012   Wait.loop
 0x0012 X Wait.halter
+0x0012   Wait.loop

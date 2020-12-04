@@ -136,37 +136,37 @@ labels_extra_checks.asm(95): error: [STRUCT] Can't include itself
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x0000 X errSymbol1
+0x0000 X errSymbol2
+0x0000 X errSymbol3
+0x1036 X Module1.instanceglob2
+0x1036 X Module1.instanceglob2.X
+0x101D X Module1.instanceGlobal
+0x101D X Module1.instanceGlobal.X
+0x101E X Module1.instanceGlobal.Y
+0x1029 X Module1.instanceMod2
+0x1029 X Module1.instanceMod2.Z
+0x1019 X Module1.instanceModule
+0x1019 X Module1.instanceModule.Z
+0x0004 X Module1.TEST_STRUCT
+0x0000 X Module1.TEST_STRUCT.Z
+0x000D X Module1.TEST_STRUCT_2
+0x0000 X Module1.TEST_STRUCT_2.Z
+0x001A X Module1.TEST_STRUCT_3
+0x000D X Module1.TEST_STRUCT_3.Empty
+0x000D X Module1.TEST_STRUCT_3.S2Glob
+0x000D X Module1.TEST_STRUCT_3.S2Glob.X
+0x0000 X Module1.TEST_STRUCT_3.S2Mod
+0x0000 X Module1.TEST_STRUCT_3.S2Mod.Z
+0x001A X Module1.TEST_STRUCT_3.Self
 0x1000   nop
 0x100D   not
 0x1015   symbol_22
 0x0017 X symbol_23
 0x0018 X symbol_24
 0x0019 X symbol_25
-0x0000 X errSymbol1
-0x0000 X errSymbol2
-0x0000 X errSymbol3
 0x0004 X TEST_STRUCT
 0x0000 X TEST_STRUCT.X
 0x0001 X TEST_STRUCT.Y
 0x000D X TEST_STRUCT_2
 0x0000 X TEST_STRUCT_2.X
-0x0004 X Module1.TEST_STRUCT
-0x0000 X Module1.TEST_STRUCT.Z
-0x1019 X Module1.instanceModule
-0x1019 X Module1.instanceModule.Z
-0x101D X Module1.instanceGlobal
-0x101D X Module1.instanceGlobal.X
-0x101E X Module1.instanceGlobal.Y
-0x000D X Module1.TEST_STRUCT_2
-0x0000 X Module1.TEST_STRUCT_2.Z
-0x1029 X Module1.instanceMod2
-0x1029 X Module1.instanceMod2.Z
-0x1036 X Module1.instanceglob2
-0x1036 X Module1.instanceglob2.X
-0x001A X Module1.TEST_STRUCT_3
-0x0000 X Module1.TEST_STRUCT_3.S2Mod
-0x0000 X Module1.TEST_STRUCT_3.S2Mod.Z
-0x000D X Module1.TEST_STRUCT_3.Empty
-0x000D X Module1.TEST_STRUCT_3.S2Glob
-0x000D X Module1.TEST_STRUCT_3.S2Glob.X
-0x001A X Module1.TEST_STRUCT_3.Self

@@ -36,7 +36,7 @@ relocation_norel_operator.asm(16): error: Unexpected: label1
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x1006   label1
+0x1000   norel
 0x0004   relocate_count
 0x0008   relocate_size
-0x1000   norel
-0x1006   label1

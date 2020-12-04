@@ -15,6 +15,6 @@ relocation_align.asm(6): warning[relalign]: [ALIGN] inside relocation block: may
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x1000   label1
 0x0001 X relocate_count
 0x0002 X relocate_size
-0x1000   label1

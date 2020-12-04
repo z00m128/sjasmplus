@@ -54,16 +54,16 @@ forward_reference_errors.asm(42): warning: Label has different value in pass 3: 
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x5678 X defl_lab2
-0x5678 X equ_lab2
-0x0003   normal_label
-0x0004   defl_lab_fwd
 0x0004 X defl_lab
-0x0004   equ_lab_fwd
+0x5678 X defl_lab2
+0x0004   defl_lab_fwd
+0x0004   dup_label_fwd
 0x0004 X equ_lab
+0x5678 X equ_lab2
+0x0004   equ_lab_fwd
+0x0003   normal_label
 0x0004   normal_label2_fwd
+0x0004   normal_label3_fwd
 0x0004   struct_lab_fwd
 0x0005 X test_struct
 0x0004 X test_struct.xyz
-0x0004   dup_label_fwd
-0x0004   normal_label3_fwd

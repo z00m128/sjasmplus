@@ -330,9 +330,6 @@ Value    Label
 0x0002   struct1
 0x0000 X struct1.a
 0x0001 X struct1.b
-0xFEFC X varSX
-0xFEFC   varSX.a
-0xFEFD   varSX.b
 0xFEFE   var1
 0xFEFF   var2
 0xFF01   var3
@@ -340,3 +337,6 @@ Value    Label
 0xFF04 X varS
 0xFF04   varS.a
 0xFF05   varS.b
+0xFEFC X varSX
+0xFEFC   varSX.a
+0xFEFD   varSX.b

@@ -71,11 +71,11 @@ get_label_page_operator.asm(20): error: Unexpected: ..invalidLabelName
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x3FFE   orgL1
-0x3FFE   orgL1.local
+0x8000   0>inner
+0x7FFF   1.0>inner
 0xBFFF   dispL1
-0x4002   orgL1end
 0x7FFF X MacroNestingAndReaching
 0x8001   MacroNestingAndReaching.outer
-0x7FFF   1.0>inner
-0x8000   0>inner
+0x3FFE   orgL1
+0x3FFE   orgL1.local
+0x4002   orgL1end
