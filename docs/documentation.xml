@@ -214,6 +214,7 @@
 - <link linkend="po_cspectmap">`CSPECTMAP`</link> exports STRUCT symbols with more detail (instance labels with physical address)
 - <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
 - added "listmc" command to <link linkend="po_opt">OPT</link> - to list only lines with machine code bytes
+- added <link linkend="s_cli">`--lstlab=sort`</link> variant to have symbols in listings in predictable order
 - minor bugfixes in parser and listing-line-numbering
 - Added <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm">example (chargfx2asm)</ulink> how to use sjasmplus as byte-processor for binary files
 - <link linkend="c_sld_data">SLD data</link> improvements based on Maziac's feedback and DeZog's needs
@@ -365,8 +366,8 @@
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt; ( --inc without "=" to empty the list)
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)
-  --lstlab                 Enable label table in listing
-  --sym=&lt;filename&gt;         Save symbols list to &lt;filename&gt;
+  --lstlab[=sort]          Append [sorted] symbol table to listing
+  --sym=&lt;filename&gt;         Save symbol table to &lt;filename&gt;
   --exp=&lt;filename&gt;         Save exports to &lt;filename&gt; (see EXPORT pseudo-op)
   --raw=&lt;filename&gt;         Machine code saved also to &lt;filename&gt; (- is STDOUT)
   --sld[=&lt;filename&gt;]       Save Source Level Debugging data to &lt;filename&gt;
@@ -377,7 +378,7 @@
   --msg=[all|war|err|none|lst|lstlab]  Stderr messages verbosity ("all" is default)
   Note: "lst" or "lstlab" will turn STDERR into listing file (this will clash with
   `--lst`, use only one of the options) and some diagnostic messages of "all"
-  are omitted, as they are not part of listing files.
+  are omitted, as they are not part of listing files. "lstlab" does sort symbols.
   --fullpath               Show full path to file in errors
   Note: the "fullpath" starts from current working directory, not from file system
 		root (the MS_VS build was fixed to behave this way since v1.15.0)
@@ -392,6 +393,11 @@
   --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)
   --syntax=&lt;...&gt;           Adjust parsing syntax, read details below.</synopsis></para>
 
+  <para>
+	  The option <code>--lstlab=sort</code> will cause also other symbol dumps being sorted (along
+	  listing): <code>--sym</code>, <code>CSPECTMAP</code> and <code>LABELSLIST</code>.
+	  The <code>--msg=lstlab</code> sets always sorting "on" (no "unsorted" option).
+  </para>
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
 	<synopsis>  a      Multi-argument delimiter ",," (default is ",")
@@ -2149,7 +2155,8 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
             <listitem>
               <para>The named label will be written to the export-file, in the
               form 'label: EQU value'. This way the export-file can be
-              included in other sources.<example>
+              included in other sources. Order of labels in file follows the order of EXPORT statements.
+              <example>
                   <title></title>
 
                   <para><programlisting>DRIE=3

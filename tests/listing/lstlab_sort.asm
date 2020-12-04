@@ -1,5 +1,5 @@
 ; check sorting of labels, especially when labels differ only in case
-        ORG $8000
+        DEVICE ZXSPECTRUM128 : ORG $8000
 ; block 3. C
 ccccC       rrca
 ccCcc       rra
@@ -34,3 +34,9 @@ ddDdd       rra
 Ddddd       cpl
 dDddd       ccf
 ddddd       rlca
+
+    ; unreal emulator export
+    LABELSLIST "lstlab_sort.lbl"
+
+    ; #CSpect map export
+    CSPECTMAP "lstlab_sort.exp"

@@ -1,6 +1,7 @@
 # file opened: lstlab_sort.asm
  1    0000              ; check sorting of labels, especially when labels differ only in case
- 2    0000                      ORG $8000
+ 2    0000                      DEVICE ZXSPECTRUM128
+ 2    0000                ORG $8000
  3    8000              ; block 3. C
  4    8000 0F           ccccC       rrca
  5    8001 1F           ccCcc       rra
@@ -36,6 +37,12 @@
 35    8017 3F           dDddd       ccf
 36    8018 07           ddddd       rlca
 37    8019
+38    8019                  ; unreal emulator export
+39    8019                  LABELSLIST "lstlab_sort.lbl"
+40    8019
+41    8019                  ; #CSpect map export
+42    8019                  CSPECTMAP "lstlab_sort.exp"
+43    8019
 # file closed: lstlab_sort.asm
 
 Value    Label

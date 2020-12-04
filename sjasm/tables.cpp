@@ -459,7 +459,8 @@ void CLabelTable::DumpForUnreal() {
 	}
 	const int PAGE_MASK = DeviceID ? Device->GetPage(0)->Size - 1 : 0x3FFF;
 	const int ADR_MASK = Options::EmitVirtualLabels ? 0xFFFF : PAGE_MASK;
-	for (int i = 1; i < NextLocation; ++i) {
+	std::vector<int> order = getSortedOrder(NextLocation, LabelTable);
+	for (const int i : order) {
 		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
 		int page = Options::EmitVirtualLabels ? LABEL_PAGE_OUT_OF_BOUNDS : LabelTable[i].page;
 		if (!strcmp(DeviceID, "ZXSPECTRUM48") && page < 4) {	//TODO fix this properly?
@@ -491,7 +492,8 @@ void CLabelTable::DumpForCSpect() {
 	}
 	const int PAGE_SIZE = Options::CSpectMapPageSize;
 	const int PAGE_MASK = PAGE_SIZE - 1;
-	for (int i = 1; i < NextLocation; ++i) {
+	std::vector<int> order = getSortedOrder(NextLocation, LabelTable);
+	for (const int i : order) {
 		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
 		const int labelType =
 			LabelTable[i].isStructEmit ? 0 :
@@ -540,7 +542,8 @@ void CLabelTable::DumpSymbols() {
 	if (!FOPEN_ISOK(symfp, Options::SymbolListFName, "w")) {
 		Error("Error opening file", Options::SymbolListFName, FATAL);
 	}
-	for (int i = 1; i < NextLocation; ++i) {
+	std::vector<int> order = getSortedOrder(NextLocation, LabelTable);
+	for (const int i : order) {
 		if (!LabelTable[i].name || !isalpha((byte)LabelTable[i].name[0])) continue;
 		WriteLabelEquValue(LabelTable[i].name, LabelTable[i].value, symfp);
 	}
