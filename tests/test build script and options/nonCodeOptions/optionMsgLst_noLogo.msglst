@@ -8,3 +8,7 @@ optionMsgLst_noLogo.asm(5): error: Unrecognized instruction: some_error line
 5     0003                  some_error line
 6     0003
 # file closed: optionMsgLst_noLogo.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X nn

@@ -6,3 +6,6 @@ optionMsgLst.asm(3): error: Unrecognized instruction: some_error line
 3     0003                  some_error line
 4     0003
 # file closed: optionMsgLst.asm
+
+Value    Label
+------ - -----------------------------------------------------------

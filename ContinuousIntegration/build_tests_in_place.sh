@@ -50,7 +50,9 @@ for f in "${TEST_FILES[@]}"; do
     options=()
     [[ -s "${OPTIONS_FILE}" ]] && options=(`cat "${OPTIONS_FILE}"`)
     # check if .lst file already exists, set up options to refresh it + delete it
-    [[ -s "${LIST_FILE}" ]] && options+=("--lst=${LIST_FILE}") && options+=('--lstlab=sort') && rm "${LIST_FILE}"
+    [[ -s "${LIST_FILE}" ]] && options+=("--lst=${LIST_FILE}") && rm "${LIST_FILE}"
+    # enforce all symbol dumps to be sorted in any case (even when no --lst)
+    options+=('--lstlab=sort')
     ## built it with sjasmplus (remember exit code)
     echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
     # switch to test directory and run assembler
