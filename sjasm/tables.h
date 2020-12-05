@@ -28,6 +28,8 @@
 
 // tables.h
 
+#include <unordered_map>
+
 struct TextFilePos {
 	const char*		filename;
 	uint32_t		line;				// line numbering start at 1 (human way) 0 = invalid/init value
@@ -47,10 +49,10 @@ enum EStructureMembers {
 	SMEMBPARENOPEN, SMEMBPARENCLOSE
 };
 
-class CLabelTableEntry;
+struct SLabelTableEntry;
 
 char* ValidateLabel(const char* naam, bool setNameSpace);
-char* ExportLabelToSld(const char* naam, const CLabelTableEntry* label);
+char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label);
 char* ExportModuleToSld(bool endModule = false);
 extern char* PreviousIsLabel;
 bool GetLabelPage(char*& p, aint& val);
@@ -70,28 +72,27 @@ constexpr unsigned LABEL_HAS_RELOC_TRAIT = (1<<5);
 constexpr unsigned LABEL_IS_RELOC = (1<<6);
 // constexpr unsigned LABEL_IS_USED = (1<<7);	// currently not explicitly used in Insert(..) (calculated implicitly)
 
-class CLabelTableEntry {
-public:
-	char*	name;
-	aint	value;
-	int		updatePass;	// last update was in pass
-	short	page;
-	bool	IsDEFL;
-	bool	IsEQU;
-	bool	used;
-	bool	isRelocatable;
-	bool	isStructDefinition;
-	bool	isStructEmit;
-	CLabelTableEntry();
-	void ClearData();
+struct SLabelTableEntry {
+	aint	value = 0;
+	int		updatePass = 0;	// last update was in pass
+	short	page = LABEL_PAGE_UNDEFINED;
+	bool	IsDEFL = false;
+	bool	IsEQU = false;
+	bool	used = false;
+	bool	isRelocatable = false;
+	bool	isStructDefinition = false;
+	bool	isStructEmit = false;
 };
 
+typedef std::unordered_map<std::string, SLabelTableEntry> symbol_map_t;
+
 class CLabelTable {
+private:
+	symbol_map_t symbols;
 public:
-	CLabelTable();
 	int Insert(const char* nname, aint nvalue, unsigned traits = 0, short equPageNum = LABEL_PAGE_UNDEFINED);
-	int Update(char*, aint);
-	CLabelTableEntry* Find(const char* name, bool onlyDefined = false);
+	int Update(char* name, aint value);
+	SLabelTableEntry* Find(const char* name, bool onlyDefined = false);
 	bool Remove(const char* name);
 	bool IsUsed(const char* name);
 	void RemoveAll();
@@ -99,10 +100,6 @@ public:
 	void DumpForUnreal();
 	void DumpForCSpect();
 	void DumpSymbols();
-private:
-	int HashTable[LABTABSIZE], NextLocation;
-	CLabelTableEntry LabelTable[LABTABSIZE];
-	int Hash(const char*);
 };
 
 class CFunctionTableEntry {

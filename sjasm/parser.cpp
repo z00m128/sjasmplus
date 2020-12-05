@@ -689,7 +689,7 @@ void ParseLabel() {
 		unsigned traits = (IsEQU ? LABEL_IS_EQU : 0) | (IsDEFL ? LABEL_IS_DEFL : 0);
 		if (pass == LASTPASS) {
 
-			CLabelTableEntry* label = LabelTable.Find(tp, true);
+			SLabelTableEntry* label = LabelTable.Find(tp, true);
 			if (nullptr == label) {		// should have been already defined before last pass
 				Error("Label not found", tp);
 				return;
