@@ -316,7 +316,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 	label.IsDEFL = IsDEFL;
 	label.IsEQU = IsEQU;
 	label.isStructDefinition = !!(traits & LABEL_IS_STRUCT_D);
-	label.isStructEmit = !!(traits & LABEL_IS_STRUCT_D);
+	label.isStructEmit = !!(traits & LABEL_IS_STRUCT_E);
 	label.updatePass = pass;
 	label.value = nvalue;
 	label.used = IsUndefined;
@@ -382,7 +382,7 @@ void CLabelTable::Dump() {
 	fputs("\nValue    Label\n", listFile);
 	fputs("------ - -----------------------------------------------------------\n", listFile);
 	for (const symbol_map_t::key_type& name: order) {
-		const symbol_map_t::mapped_type& symbol = symbols[name];
+		const symbol_map_t::mapped_type& symbol = symbols.at(name);
 		if (LABEL_PAGE_UNDEFINED == symbol.page) continue;
 		ep = line;
 		*(ep) = 0;
@@ -408,7 +408,7 @@ void CLabelTable::DumpForUnreal() {
 	const int ADR_MASK = Options::EmitVirtualLabels ? 0xFFFF : PAGE_MASK;
 	const auto order = getDumpOrder(symbols);
 	for (const symbol_map_t::key_type& name: order) {
-		const symbol_map_t::mapped_type& symbol = symbols[name];
+		const symbol_map_t::mapped_type& symbol = symbols.at(name);
 		if (LABEL_PAGE_UNDEFINED == symbol.page) continue;
 		int page = Options::EmitVirtualLabels ? LABEL_PAGE_OUT_OF_BOUNDS : symbol.page;
 		if (!strcmp(DeviceID, "ZXSPECTRUM48") && page < 4) {	//TODO fix this properly?
@@ -442,7 +442,7 @@ void CLabelTable::DumpForCSpect() {
 	const int PAGE_MASK = PAGE_SIZE - 1;
 	const auto order = getDumpOrder(symbols);
 	for (const symbol_map_t::key_type& name: order) {
-		const symbol_map_t::mapped_type& symbol = symbols[name];
+		const symbol_map_t::mapped_type& symbol = symbols.at(name);
 		if (LABEL_PAGE_UNDEFINED == symbol.page) continue;
 		const int labelType =
 			symbol.isStructEmit ? 0 :
@@ -492,7 +492,7 @@ void CLabelTable::DumpSymbols() {
 	}
 	const auto order = getDumpOrder(symbols);
 	for (const symbol_map_t::key_type& name: order) {
-		const symbol_map_t::mapped_type& symbol = symbols[name];
+		const symbol_map_t::mapped_type& symbol = symbols.at(name);
 		if (!isalpha((byte)name[0])) continue;
 		WriteLabelEquValue(name.c_str(), symbol.value, symfp);
 	}
