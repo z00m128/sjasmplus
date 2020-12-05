@@ -499,97 +499,28 @@ void CLabelTable::DumpSymbols() {
 	fclose(symfp);
 }
 
-CFunctionTable::CFunctionTable() {
-	NextLocation = 1;
+int CFunctionTable::Insert(const char* name_cstr, function_fn_t nfunp) {
+	std::string name(name_cstr);
+	if (!std::get<1>(functions.emplace(name, nfunp))) return 0;
+	for (auto& c : name) c = toupper(c);
+	return std::get<1>(functions.emplace(name, nfunp));
 }
 
-int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
-	char* p;
-	if (NextLocation >= FUNTABSIZE * 2 / 3) {
-		Error("Functions Table is full", NULL, FATAL);
-	}
-	int tr, htr;
-	tr = Hash(nname);
-	while ((htr = HashTable[tr])) {
-		if (!strcmp((funtab[htr].name), nname)) {
-			return 0;
-		} else if (++tr >= FUNTABSIZE) {
-			tr = 0;
-		}
-	}
-	HashTable[tr] = NextLocation;
-	funtab[NextLocation].name = STRDUP(nname);
-	if (funtab[NextLocation].name == NULL) ErrorOOM();
-	funtab[NextLocation].funp = nfunp;
-	++NextLocation;
-
-	STRCPY(p = temp, LINEMAX, nname);
-	while ((*p = (char) toupper((byte)*p))) { ++p; }
-
-	if (NextLocation >= FUNTABSIZE * 2 / 3) {
-		Error("Functions Table is full", NULL, FATAL);
-	}
-	tr = Hash(temp);
-	while ((htr = HashTable[tr])) {
-		if (!strcmp((funtab[htr].name), temp)) {
-			return 0;
-		} else if (++tr >= FUNTABSIZE) {
-			tr = 0;
-		}
-	}
-	HashTable[tr] = NextLocation;
-	funtab[NextLocation].name = STRDUP(temp);
-	if (funtab[NextLocation].name == NULL) ErrorOOM();
-	funtab[NextLocation].funp = nfunp;
-	++NextLocation;
-
-	return 1;
-}
-
-int CFunctionTable::insertd(const char* name, void(*nfunp) (void)) {
+int CFunctionTable::insertd(const char* name, function_fn_t nfunp) {
 	if ('.' != name[0]) Error("Directive string must start with dot", NULL, FATAL);
 	// insert the non-dot variant first, then dot variant
 	return Insert(name+1, nfunp) && Insert(name, nfunp);
 }
 
-int CFunctionTable::zoek(const char* nname) {
-	int tr, htr, otr;
-	otr = tr = Hash(nname);
-	while ((htr = HashTable[tr])) {
-		if (!strcmp((funtab[htr].name), nname)) {
-			(*funtab[htr].funp)();
-			return 1;
-		}
-		if (++tr >= FUNTABSIZE) tr = 0;
-		if (tr == otr) break;
-	}
-	return 0;
+int CFunctionTable::zoek(const char* name) {
+	auto it = functions.find(name);
+	if (functions.end() == it) return 0;
+	(*it->second)();
+	return 1;
 }
 
-int CFunctionTable::Find(char* nname) {
-	int tr, htr, otr;
-	otr = tr = Hash(nname);
-	while ((htr = HashTable[tr])) {
-		if (!strcmp((funtab[htr].name), nname)) {
-			return 1;
-		}
-		if (++tr >= FUNTABSIZE) {
-			tr = 0;
-		}
-		if (tr == otr) {
-			break;
-		}
-	}
-	return 0;
-}
-
-int CFunctionTable::Hash(const char* s) {
-	const char* ss = s;
-	unsigned int h = 0;
-	for (; *ss != '\0'; ss++) {
-		h = (h << 3) + *ss;
-	}
-	return h % FUNTABSIZE;
+int CFunctionTable::Find(const char* name) const {
+	return (functions.end() != functions.find(name));
 }
 
 CLocalLabelTableEntry::CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous) {

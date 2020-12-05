@@ -103,23 +103,18 @@ public:
 	void DumpSymbols();
 };
 
-class CFunctionTableEntry {
-public:
-	char* name;
-	void (*funp)(void);
-};
+typedef void (*function_fn_t)(void);
+typedef std::unordered_map<std::string, function_fn_t> function_map_t;
 
 class CFunctionTable {
-public:
-	CFunctionTable();
-	int Insert(const char*, void(*) (void));
-	int insertd(const char*, void(*) (void));
-	int zoek(const char*);
-	int Find(char*);
 private:
-	int HashTable[FUNTABSIZE], NextLocation;
-	CFunctionTableEntry funtab[FUNTABSIZE];
-	int Hash(const char*);
+	function_map_t functions;
+public:
+	CFunctionTable() { functions.reserve(FUNTABSIZE); }
+	int Insert(const char*, function_fn_t);
+	int insertd(const char*, function_fn_t);
+	int zoek(const char*);
+	int Find(const char*) const;
 };
 
 class CLocalLabelTableEntry {
