@@ -290,14 +290,6 @@ struct SRepeatStack {
 	int Level;
 };
 
-struct SConditionalStack {
-	aint CurrentSourceLine;
-	CStringsList* Lines;
-	CStringsList* Pointer;
-	bool IsInWork;
-	int Level;
-};
-
 int LuaGetLabel(char *name);
 
 //eof tables.h
