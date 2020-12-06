@@ -1,2 +1,2 @@
-$MEMCHECK "$EXE" --msg=lst --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
+$MEMCHECK "$EXE" "${options[@]}" --msg=lst --fullpath "$file_asm" 2> "${dst_base}.lst"
 last_result=$?
