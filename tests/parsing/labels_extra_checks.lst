@@ -1,3 +1,4 @@
+labels_extra_checks.asm(9): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: not
 # file opened: labels_extra_checks.asm
  1    0000                          ORG     0x1000
  2    1000

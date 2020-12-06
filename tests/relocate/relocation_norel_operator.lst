@@ -1,3 +1,4 @@
+relocation_norel_operator.asm(5): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: norel
 # file opened: relocation_norel_operator.asm
  1    0000                  ORG $1000
  2    1000

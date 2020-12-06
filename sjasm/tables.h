@@ -71,6 +71,7 @@ constexpr unsigned LABEL_IS_STRUCT_E = (1<<4);
 constexpr unsigned LABEL_HAS_RELOC_TRAIT = (1<<5);
 constexpr unsigned LABEL_IS_RELOC = (1<<6);
 constexpr unsigned LABEL_IS_SMC = (1<<7);
+constexpr unsigned LABEL_IS_KEYWORD = (1<<8);
 // constexpr unsigned LABEL_IS_USED = (1<<?);	// currently not explicitly used in Insert(..) (calculated implicitly)
 
 struct SLabelTableEntry {

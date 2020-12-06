@@ -1,3 +1,4 @@
+various_W.asm(4): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: abs
 various_W.asm(11): warning[fwdref]: forward reference of symbol: IF fwd_ref_label
 various_W.asm(83): warning[fwdref]: forward reference of symbol: IF fwd_ref_label
 # file opened: various_W.asm

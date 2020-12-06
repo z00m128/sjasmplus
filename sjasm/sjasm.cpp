@@ -239,6 +239,15 @@ TextFilePos LuaStartPos;
 
 #endif //USE_LUA
 
+// reserve keywords in labels table, to detect when user is defining label colliding with keyword
+static void ReserveLabelKeywords() {
+	for (const char* keyword : {
+		"abs", "and", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "xor"
+	}) {
+		LabelTable.Insert(keyword, -65536, LABEL_IS_UNDEFINED|LABEL_IS_KEYWORD);
+	}
+}
+
 void InitPass() {
 	Relocation::InitPass();
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
@@ -734,6 +743,8 @@ int main(int argc, char **argv) {
 
 	// open lists (if not set to "default" file name, then the OpenFile will handle it)
 	OpenList();
+
+	ReserveLabelKeywords();
 
 	do {
 		++pass;

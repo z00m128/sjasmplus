@@ -208,6 +208,7 @@ const char* W_DISP_MEM_PAGE = "dispmempage";
 const char* W_BP_FILE = "bpfile";
 const char* W_OUT0 = "out0";
 const char* W_BACKSLASH = "backslash";
+const char* W_OPKEYWORD = "opkeyword";
 
 static messages_map w_texts = {
 	{ W_ABS_LABEL,
@@ -352,6 +353,12 @@ static messages_map w_texts = {
 		{ true,
 			"File name contains \\, use / instead (\\ fails on most of the supported platforms)",
 			"Warn when file name contains backslash."
+		}
+	},
+	{ W_OPKEYWORD,
+		{ true,
+			"Label collides with one of the operator keywords, try capitalizing it or other name",
+			"Warn when symbol name collides with operator keyword."
 		}
 	},
 };

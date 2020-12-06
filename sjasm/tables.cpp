@@ -293,6 +293,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 	if (symbols.end() != labelIt) {
 		//if label already added (as used, or in previous pass), just refresh values
 		auto& label = labelIt->second;
+		if (label.traits&LABEL_IS_KEYWORD) WarningById(W_OPKEYWORD, nname, W_EARLY);
 		bool needsUpdate = label.traits&LABEL_IS_DEFL || label.page == LABEL_PAGE_UNDEFINED || label.updatePass < pass;
 		if (needsUpdate) {
 			label.value = nvalue;
@@ -486,6 +487,7 @@ void CLabelTable::DumpSymbols() {
 	for (const symbol_map_t::key_type& name: order) {
 		const symbol_map_t::mapped_type& symbol = symbols.at(name);
 		if (!isalpha((byte)name[0])) continue;
+		if (symbol.traits&LABEL_IS_KEYWORD) continue;
 		WriteLabelEquValue(name.c_str(), symbol.value, symfp);
 	}
 	fclose(symfp);

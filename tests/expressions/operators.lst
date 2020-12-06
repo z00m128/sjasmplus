@@ -1,3 +1,14 @@
+operators.asm(70): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: abs
+operators.asm(71): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: and
+operators.asm(72): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: high
+operators.asm(73): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: low
+operators.asm(74): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: mod
+operators.asm(75): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: norel
+operators.asm(76): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: not
+operators.asm(77): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: or
+operators.asm(78): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: shl
+operators.asm(79): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: shr
+operators.asm(80): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: xor
 # file opened: operators.asm
  1    0000                  ; simple tests of each operator
  2    0000 34 12 CC ED      DW  +0x1234, -0x1234
@@ -136,9 +147,9 @@ operators.asm(52): error: [DW/DEFW/WORD] Syntax error: {b 0 }
 57    0004 34 12            DW  { 0 }
 58    0006 34 00            DW  {b 0 }
 59    0008
-60    0008              not
+60    0008
 operators.asm(61): warning: ?<symbol> operator is deprecated and will be removed in v2.x: ?not
-61    0008 21 08 00         ld  hl,?not     ; deprecated, use "@not" with full global name, or don't use keywords for label names at all
+61    0008 21 25 00         ld  hl,?not     ; deprecated, use "@not" with full global name, or don't use keywords for label names at all
 62    000B
 63    000B                  ; new in v1.18.0
 operators.asm(64): warning: value 0x100 is truncated to 8bit value: 0x00
@@ -151,13 +162,60 @@ operators.asm(65): warning: value 0x10000 is truncated to 16bit value: 0x0000
 65    0017 20 00 20 00
 65    001B 80 00 80 00
 65    001F 00 00 00 00
-66    0023              abs:
+66    0023
 operators.asm(67): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
-67    0023 23 00            DW  abs         ; warning about ABS being now new operator (to be removed ~Dec 2021)
+67    0023 25 00            DW  abs         ; warning about ABS being now new operator (to be removed ~Dec 2021)
 68    0025
+69    0025              ; check all operator keywords to warn about their usage as labels
+70    0025              abs:
+71    0025              and:
+72    0025              high:
+73    0025              low:
+74    0025              mod:
+75    0025              norel:
+76    0025              not:
+77    0025              or:
+78    0025              shl:
+79    0025              shr:
+80    0025              @xor:   ; also global prefix "@" shouldn't matter, should still warn about it!
+81    0025
+82    0025              ; Capitalized variant is ok. It's actually ok also all-caps variant, which should NOT be ok,
+83    0025              ; but whoever uses label like XOR is beyond any good taste and I don't care about him.
+84    0025              Abs:
+85    0025              And:
+86    0025              High:
+87    0025              Low:
+88    0025              Mod:
+89    0025              Norel:
+90    0025              Not:
+91    0025              Or:
+92    0025              Shl:
+93    0025              Shr:
+94    0025              Xor:
+95    0025
 # file closed: operators.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0023   abs
-0x0008   not
+0x0025 X Abs
+0x0025   abs
+0x0025 X And
+0x0025   and
+0x0025 X High
+0x0025   high
+0x0025 X Low
+0x0025   low
+0x0025 X Mod
+0x0025   mod
+0x0025 X Norel
+0x0025   norel
+0x0025 X Not
+0x0025   not
+0x0025 X Or
+0x0025   or
+0x0025 X Shl
+0x0025   shl
+0x0025 X Shr
+0x0025   shr
+0x0025 X Xor
+0x0025   xor
