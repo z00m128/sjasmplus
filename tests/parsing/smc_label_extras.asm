@@ -34,6 +34,14 @@ lN+1    MACRO
         ENDM
         lN
 
+        STRUCT S_TEST
+Byte        BYTE    0x12
+Smc+1       BYTE    0x34    ; error, can't have SMC
+        ENDS
+
+NormalStruct    S_TEST
+SmcStruct+1     S_TEST      ; error, can't have SMC
+
     ASSERT #8000+0 == lA
     ASSERT #8002+1 == lB
     ASSERT #8004+1 == lC
