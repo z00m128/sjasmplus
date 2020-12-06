@@ -129,13 +129,13 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	// local part
 	if (local) STRCAT(sldLabelExport, LABMAX, naam);
 	// usage traits
-	if (label->IsEQU) STRCAT(sldLabelExport, 20, ",+equ");
+	if (label->traits&LABEL_IS_EQU) STRCAT(sldLabelExport, 20, ",+equ");
 	if (inMacro) STRCAT(sldLabelExport, 20, ",+macro");
 	if (label->traits&LABEL_IS_SMC) STRCAT(sldLabelExport, 20, ",+smc");
 	if (label->isRelocatable) STRCAT(sldLabelExport, 20, ",+reloc");
 	if (label->used) STRCAT(sldLabelExport, 20, ",+used");
-	if (label->isStructDefinition) STRCAT(sldLabelExport, 20, ",+struct_def");
-	if (label->isStructEmit) STRCAT(sldLabelExport, 20, ",+struct_data");
+	if (label->traits&LABEL_IS_STRUCT_D) STRCAT(sldLabelExport, 20, ",+struct_def");
+	if (label->traits&LABEL_IS_STRUCT_E) STRCAT(sldLabelExport, 20, ",+struct_data");
 	return sldLabelExport;
 }
 
@@ -278,9 +278,6 @@ static short getAddressPageNumber(const aint address, bool forceRecalculateByAdd
 }
 
 int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short equPageNum) {
-	const bool IsDEFL = !!(traits & LABEL_IS_DEFL);
-	const bool IsEQU = !!(traits & LABEL_IS_EQU);
-	const bool IsDeflEqu = IsDEFL || IsEQU;
 	const bool IsUndefined = !!(traits & LABEL_IS_UNDEFINED);
 
 	// the EQU/DEFL is relocatable when the expression itself is relocatable
@@ -288,7 +285,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 	const bool isRelocatable = \
 			(traits&LABEL_HAS_RELOC_TRAIT) ? \
 				!!(traits & LABEL_IS_RELOC) : \
-				IsDeflEqu ? \
+				(traits & (LABEL_IS_DEFL|LABEL_IS_EQU)) ? \
 					Relocation::isResultAffected && Relocation::isRelocatable : \
 					Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
 	// Find label in label table
@@ -296,37 +293,29 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 	if (symbols.end() != labelIt) {
 		//if label already added (as used, or in previous pass), just refresh values
 		auto& label = labelIt->second;
-		bool needsUpdate = label.IsDEFL || label.page == LABEL_PAGE_UNDEFINED || label.updatePass < pass;
+		bool needsUpdate = label.traits&LABEL_IS_DEFL || label.page == LABEL_PAGE_UNDEFINED || label.updatePass < pass;
 		if (needsUpdate) {
 			label.value = nvalue;
-			if (IsEQU && LABEL_PAGE_UNDEFINED != equPageNum) {
+			if ((traits & LABEL_IS_EQU) && LABEL_PAGE_UNDEFINED != equPageNum) {
 				label.page = equPageNum;
 			} else {
-				label.page = getAddressPageNumber(nvalue, IsDeflEqu);
+				label.page = getAddressPageNumber(nvalue, traits & (LABEL_IS_DEFL|LABEL_IS_EQU));
 			}
 			label.traits = traits;
-			label.IsDEFL = IsDEFL;
-			label.IsEQU = IsEQU;
 			label.isRelocatable = isRelocatable;
-			label.isStructDefinition = !!(traits & LABEL_IS_STRUCT_D);
-			label.isStructEmit = !!(traits & LABEL_IS_STRUCT_E);
 			label.updatePass = pass;
 		}
 		return needsUpdate;
 	}
 	auto& label = symbols[nname];
 	label.traits = traits;
-	label.IsDEFL = IsDEFL;
-	label.IsEQU = IsEQU;
-	label.isStructDefinition = !!(traits & LABEL_IS_STRUCT_D);
-	label.isStructEmit = !!(traits & LABEL_IS_STRUCT_E);
 	label.updatePass = pass;
 	label.value = nvalue;
 	label.used = IsUndefined;
-	if (IsEQU && LABEL_PAGE_UNDEFINED != equPageNum) {
+	if ((traits & LABEL_IS_EQU) && LABEL_PAGE_UNDEFINED != equPageNum) {
 		label.page = equPageNum;
 	} else {
-		label.page = IsUndefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+		label.page = IsUndefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, traits & (LABEL_IS_DEFL|LABEL_IS_EQU));
 	}
 	label.isRelocatable = !IsUndefined && isRelocatable;	// ignore "relocatable" for "undefined"
 	return 1;
@@ -448,10 +437,10 @@ void CLabelTable::DumpForCSpect() {
 		const symbol_map_t::mapped_type& symbol = symbols.at(name);
 		if (LABEL_PAGE_UNDEFINED == symbol.page) continue;
 		const int labelType =
-			symbol.isStructEmit ? 0 :
-			symbol.isStructDefinition ? 4 :
-			symbol.IsEQU ? 1 :
-			symbol.IsDEFL ? 2 :
+			(symbol.traits&LABEL_IS_STRUCT_E) ? 0 :
+			(symbol.traits&LABEL_IS_STRUCT_D) ? 4 :
+			(symbol.traits&LABEL_IS_EQU) ? 1 :
+			(symbol.traits&LABEL_IS_DEFL) ? 2 :
 			(LABEL_PAGE_ROM <= symbol.page) ? 3 : 0;
 		const short page = labelType ? 0 : symbol.page;
 			// TODO:

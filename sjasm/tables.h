@@ -78,12 +78,8 @@ struct SLabelTableEntry {
 	int			updatePass = 0;	// last update was in pass
 	short		page = LABEL_PAGE_UNDEFINED;
 	unsigned	traits = 0;
-	bool		IsDEFL = false;
-	bool		IsEQU = false;
 	bool		used = false;
 	bool		isRelocatable = false;
-	bool		isStructDefinition = false;
-	bool		isStructEmit = false;
 };
 
 typedef std::unordered_map<std::string, SLabelTableEntry> symbol_map_t;
