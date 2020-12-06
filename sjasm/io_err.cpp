@@ -207,6 +207,7 @@ const char* W_REL_UNSTABLE = "relunstable";
 const char* W_DISP_MEM_PAGE = "dispmempage";
 const char* W_BP_FILE = "bpfile";
 const char* W_OUT0 = "out0";
+const char* W_BACKSLASH = "backslash";
 
 static messages_map w_texts = {
 	{ W_ABS_LABEL,
@@ -345,6 +346,12 @@ static messages_map w_texts = {
 		{ true,
 			"'out (c),0' is unstable, on CMOS based chips it does `out (c),255`",
 			"Warn when instruction `out (c),0` is used."
+		}
+	},
+	{ W_BACKSLASH,
+		{ true,
+			"File name contains \\, use / instead (\\ fails on most of the supported platforms)",
+			"Warn when file name contains backslash."
 		}
 	},
 };

@@ -829,13 +829,14 @@ int GetBytesHexaText(char*& p, int e[]) {
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
 static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) {
+	bool slashConverted = false;
 	char* newFn = new char[LINEMAX+1], * result = newFn;
 	if (NULL == newFn) ErrorOOM();
 	// prepend the filename with path-prefix, if some was requested
 	if (pathPrefix) {
 		while (*pathPrefix) {
 			*newFn = *pathPrefix;
-			if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;	// convert slashes if enabled
+			if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;
 			++newFn, ++pathPrefix;
 			if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
 		}
@@ -847,7 +848,7 @@ static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) 
 	// copy all characters until zero or delimiter-end character is reached
 	while (*p && deliE != *p) {
 		*newFn = *p;		// copy character
-		if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;	// convert slashes if enabled
+		if (convertslashes && pathBadSlash == *newFn) slashConverted = (*newFn = pathGoodSlash);
 		++newFn, ++p;
 		if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
 	}
@@ -863,6 +864,7 @@ static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) 
 		}
 	}
 	SkipBlanks(p);			// skip blanks any way
+	if (slashConverted) WarningById(W_BACKSLASH, bp);
 	return result;
 }
 

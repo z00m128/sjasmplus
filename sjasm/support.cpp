@@ -30,9 +30,6 @@
 
 #include "sjdefs.h"
 
-const char pathBadSlash = '\\';
-const char pathGoodSlash = '/';
-
 FILE* dbg_fopen(const char* fname, const char* modes) {
 	FILE* f = fopen(fname, modes);
 	printf("fopen = %p modes [%s]\tname (%lu) [%s]\n", (void*)f, modes, strlen(fname), fname);

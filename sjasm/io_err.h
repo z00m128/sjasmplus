@@ -62,6 +62,7 @@ extern const char* W_REL_UNSTABLE;
 extern const char* W_DISP_MEM_PAGE;
 extern const char* W_BP_FILE;
 extern const char* W_OUT0;
+extern const char* W_BACKSLASH;
 
 void Error(const char* message, const char* badValueMessage = nullptr, EStatus type = PASS3);
 void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);

@@ -28,8 +28,8 @@
 
 // support.h
 
-extern const char pathBadSlash;
-extern const char pathGoodSlash;
+constexpr char pathBadSlash = '\\';
+constexpr char pathGoodSlash = '/';
 
 #if defined (_MSC_VER)
 
