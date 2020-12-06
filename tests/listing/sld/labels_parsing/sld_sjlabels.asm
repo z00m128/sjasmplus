@@ -3,6 +3,7 @@
     MACRO testMacro arg1?
         IF 0 == arg1? : testMacro 1 : ENDIF
 .macro_local.1:
+.smc+1:
         ret
     ENDM
 
@@ -12,10 +13,12 @@
         xor a
         jr nz,.no_main_local.1
         jr z,main.1.local.1
+main.smc1+1:
 main.1e: EQU 234
 main.1:
         halt
         testMacro 0
+.local.smc1+1:
 .local.1e: EQU 345
 .local.1:
         xor a
@@ -29,11 +32,13 @@ main.1:
         xor a
         jr nz,.no_main_local.2
         jr z,main.2.local.2
+main.smc2+1:
 main.2e: EQU 567
 main.2:
         RELOCATE_END
         halt
         testMacro 0
+.local.smc2+1:
 .local.2e: EQU 678
 .local.2:
         xor a

@@ -687,7 +687,7 @@ void ParseLabel() {
 		}
 		// Copy label name to last parsed label variable
 		if (!IsDEFL) SetLastParsedLabel(tp);
-		unsigned traits = (IsEQU ? LABEL_IS_EQU : 0) | (IsDEFL ? LABEL_IS_DEFL : 0);
+		unsigned traits = (IsEQU ? LABEL_IS_EQU : 0) | (IsDEFL ? LABEL_IS_DEFL : 0) | (smcOffset ? LABEL_IS_SMC : 0);
 		if (pass == LASTPASS) {
 
 			SLabelTableEntry* label = LabelTable.Find(tp, true);

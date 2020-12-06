@@ -131,6 +131,7 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	// usage traits
 	if (label->IsEQU) STRCAT(sldLabelExport, 20, ",+equ");
 	if (inMacro) STRCAT(sldLabelExport, 20, ",+macro");
+	if (label->traits&LABEL_IS_SMC) STRCAT(sldLabelExport, 20, ",+smc");
 	if (label->isRelocatable) STRCAT(sldLabelExport, 20, ",+reloc");
 	if (label->used) STRCAT(sldLabelExport, 20, ",+used");
 	if (label->isStructDefinition) STRCAT(sldLabelExport, 20, ",+struct_def");
@@ -303,6 +304,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 			} else {
 				label.page = getAddressPageNumber(nvalue, IsDeflEqu);
 			}
+			label.traits = traits;
 			label.IsDEFL = IsDEFL;
 			label.IsEQU = IsEQU;
 			label.isRelocatable = isRelocatable;
@@ -313,6 +315,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 		return needsUpdate;
 	}
 	auto& label = symbols[nname];
+	label.traits = traits;
 	label.IsDEFL = IsDEFL;
 	label.IsEQU = IsEQU;
 	label.isStructDefinition = !!(traits & LABEL_IS_STRUCT_D);

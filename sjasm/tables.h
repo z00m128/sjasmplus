@@ -70,18 +70,20 @@ constexpr unsigned LABEL_IS_STRUCT_D = (1<<3);
 constexpr unsigned LABEL_IS_STRUCT_E = (1<<4);
 constexpr unsigned LABEL_HAS_RELOC_TRAIT = (1<<5);
 constexpr unsigned LABEL_IS_RELOC = (1<<6);
-// constexpr unsigned LABEL_IS_USED = (1<<7);	// currently not explicitly used in Insert(..) (calculated implicitly)
+constexpr unsigned LABEL_IS_SMC = (1<<7);
+// constexpr unsigned LABEL_IS_USED = (1<<?);	// currently not explicitly used in Insert(..) (calculated implicitly)
 
 struct SLabelTableEntry {
-	aint	value = 0;
-	int		updatePass = 0;	// last update was in pass
-	short	page = LABEL_PAGE_UNDEFINED;
-	bool	IsDEFL = false;
-	bool	IsEQU = false;
-	bool	used = false;
-	bool	isRelocatable = false;
-	bool	isStructDefinition = false;
-	bool	isStructEmit = false;
+	aint		value = 0;
+	int			updatePass = 0;	// last update was in pass
+	short		page = LABEL_PAGE_UNDEFINED;
+	unsigned	traits = 0;
+	bool		IsDEFL = false;
+	bool		IsEQU = false;
+	bool		used = false;
+	bool		isRelocatable = false;
+	bool		isStructDefinition = false;
+	bool		isStructEmit = false;
 };
 
 typedef std::unordered_map<std::string, SLabelTableEntry> symbol_map_t;
