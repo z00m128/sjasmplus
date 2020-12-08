@@ -2,7 +2,7 @@
 coverage2.asm(1): error: [DUP/REPT] Syntax error in <count>: &
  1    0000                  DUP &
  2    0000 00                   nop
-coverage2.asm(3): error: [EDUP/ENDR] End repeat without repeat
+coverage2.asm(3): error: [EDUP/ENDR/ENDW] End repeat without repeat
  3    0001                  EDUP
  4    0001
  5    0001                  DUP 3

@@ -1740,9 +1740,11 @@ static void dirFPOS() {
 	}
 }
 
-static void dirDUP() {
-	aint val;
-	IsLabelNotFound = 0;
+// isWhile == false: DUP/REPT parsing
+// isWhile == true: WHILE parsing
+static void DupWhileImplementation(bool isWhile) {
+	aint val = 0;
+	CStringsList* condition = nullptr;
 
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
@@ -1753,21 +1755,28 @@ static void dirDUP() {
 		}
 	}
 
-	if (!ParseExpressionNoSyntaxError(lp, val)) {
-		Error("[DUP/REPT] Syntax error in <count>", lp, SUPPRESS);
-		return;
-	}
-	if (IsLabelNotFound) {
-		Error("[DUP/REPT] Forward reference", NULL, ALL);
-	}
-	if ((int) val < 1) {
-		ErrorInt("[DUP/REPT] Repeat value must be positive", val, IF_FIRST); return;
+	if (isWhile) {
+		condition = new CStringsList(lp);
+		if (nullptr == condition) ErrorOOM();
+		lp += strlen(condition->string);
+	} else {
+		IsLabelNotFound = 0;
+		if (!ParseExpressionNoSyntaxError(lp, val)) {
+			Error("[DUP/REPT] Syntax error in <count>", lp, SUPPRESS);
+			return;
+		}
+		if (IsLabelNotFound) {
+			Error("[DUP/REPT] Forward reference", NULL, ALL);
+		}
+		if ((int) val < 1) {
+			ErrorInt("[DUP/REPT] Repeat value must be positive", val, IF_FIRST); return;
+		}
 	}
 
 	SRepeatStack dup;
 	dup.RepeatCount = val;
+	dup.RepeatCondition = condition;
 	dup.Level = 0;
-
 	dup.Lines = new CStringsList(lp);
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
 	dup.Pointer = dup.Lines;
@@ -1776,9 +1785,43 @@ static void dirDUP() {
 	RepeatStack.push(dup);
 }
 
+static void dirDUP() {
+	DupWhileImplementation(false);
+}
+
+static void dirWHILE() {
+	DupWhileImplementation(true);
+}
+
+static bool shouldRepeat(SRepeatStack& dup) {
+	if (nullptr == dup.RepeatCondition) {
+		return dup.RepeatCount--;
+	} else {
+		if (100001 < ++dup.RepeatCount) {
+			Error("[WHILE] over 100k of loops - infinite loop?");
+			return false;
+		}
+		aint val = 0;
+		IsLabelNotFound = 0;
+		char* expressionSource = dup.RepeatCondition->string;
+		if (!ParseExpressionNoSyntaxError(expressionSource, val)) {
+			TextFilePos oSrcPos = CurSourcePos;
+			CurSourcePos = dup.RepeatCondition->source;
+			Error("[WHILE] Syntax error in <expression>", dup.RepeatCondition->string, SUPPRESS);
+			CurSourcePos = oSrcPos;
+			return false;
+		}
+		if (IsLabelNotFound) {
+			WarningById(W_FWD_REF, dup.RepeatCondition->string, W_EARLY);
+			return false;
+		}
+		return val;
+	}
+}
+
 static void dirEDUP() {
 	if (RepeatStack.empty() || RepeatStack.top().IsInWork) {
-		Error("[EDUP/ENDR] End repeat without repeat");
+		Error("[EDUP/ENDR/ENDW] End repeat without repeat");
 		return;
 	}
 
@@ -1788,21 +1831,17 @@ static void dirEDUP() {
 		return;
 	}
 	dup.IsInWork = true;
-	// kill the "EDUP" inside DUP-list (also works as "while" terminator)
+	// kill the "EDUP" inside DUP-list (+ works as "while (IsRunning && lijstp && lijstp->string)" terminator)
 	if (dup.Pointer->string) free(dup.Pointer->string);
 	dup.Pointer->string = NULL;
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) ErrorOOM();
 
-	// To achieve the state when SourceLine for DUP-EDUP block is constant EDUP line,
-	// and MacroLine is pointing to source of particular line in block, basically just kill all
-	// lines with CurrentSourceLine in remaining code. (TODO v2.x listing with src+macro lines?!)
-
 	TextFilePos oldPos = CurSourcePos;
 	CStringsList* olijstp = lijstp;
 	++lijst;
-	while (dup.RepeatCount--) {
+	while (shouldRepeat(dup)) {
 		CurSourcePos = dup.sourcePos;
 		DefinitionPos = dup.sourcePos;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
@@ -1819,6 +1858,7 @@ static void dirEDUP() {
 		}
 	}
 	delete dup.Lines;
+	if (dup.RepeatCondition) delete dup.RepeatCondition;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;
@@ -2180,6 +2220,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".endmodule", dirENDMODULE);
 	DirectivesTable.insertd(".rept", dirDUP);
 	DirectivesTable.insertd(".dup", dirDUP);
+	DirectivesTable.insertd(".while", dirWHILE);
 	DirectivesTable.insertd(".disp", dirDISP);
 	DirectivesTable.insertd(".phase", dirDISP);
 	DirectivesTable.insertd(".ent", dirENT);
@@ -2197,6 +2238,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".endm", dirENDM);
 	DirectivesTable.insertd(".edup", dirEDUP);
 	DirectivesTable.insertd(".endr", dirEDUP);
+	DirectivesTable.insertd(".endw", dirEDUP);
 	DirectivesTable.insertd(".ends", dirENDS);
 
 	DirectivesTable.insertd(".device", dirDEVICE);
@@ -2221,7 +2263,9 @@ void InsertDirectives() {
 	DirectivesTable_dup.insertd(".edup", dirEDUP);
 	DirectivesTable_dup.insertd(".endm", dirENDM);
 	DirectivesTable_dup.insertd(".endr", dirEDUP);
+	DirectivesTable_dup.insertd(".endw", dirEDUP);
 	DirectivesTable_dup.insertd(".rept", dirDUP);
+	DirectivesTable_dup.insertd(".while", dirWHILE);
 }
 
 #ifdef USE_LUA

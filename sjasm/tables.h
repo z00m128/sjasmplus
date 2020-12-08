@@ -281,8 +281,8 @@ private:
 
 struct SRepeatStack {
 	int RepeatCount;
+	CStringsList* RepeatCondition;
 	TextFilePos sourcePos;
-	aint CurrentSourceLine;
 	CStringsList* Lines;
 	CStringsList* Pointer;
 	bool IsInWork;

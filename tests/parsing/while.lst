@@ -1,0 +1,138 @@
+while.asm(42): warning[fwdref]: forward reference of symbol:  fwdLabel < $8000
+# file opened: while.asm
+ 1    0000                  ; docs example:
+ 2    0000              ptr = $4000
+ 3    0000                  WHILE ptr < $4020
+ 4    0000 00          >        DB low ptr
+ 5    0001             >ptr = ptr + 1
+ 4    0001 01          >        DB low ptr
+ 5    0002             >ptr = ptr + 1
+ 4    0002 02          >        DB low ptr
+ 5    0003             >ptr = ptr + 1
+ 4    0003 03          >        DB low ptr
+ 5    0004             >ptr = ptr + 1
+ 4    0004 04          >        DB low ptr
+ 5    0005             >ptr = ptr + 1
+ 4    0005 05          >        DB low ptr
+ 5    0006             >ptr = ptr + 1
+ 4    0006 06          >        DB low ptr
+ 5    0007             >ptr = ptr + 1
+ 4    0007 07          >        DB low ptr
+ 5    0008             >ptr = ptr + 1
+ 4    0008 08          >        DB low ptr
+ 5    0009             >ptr = ptr + 1
+ 4    0009 09          >        DB low ptr
+ 5    000A             >ptr = ptr + 1
+ 4    000A 0A          >        DB low ptr
+ 5    000B             >ptr = ptr + 1
+ 4    000B 0B          >        DB low ptr
+ 5    000C             >ptr = ptr + 1
+ 4    000C 0C          >        DB low ptr
+ 5    000D             >ptr = ptr + 1
+ 4    000D 0D          >        DB low ptr
+ 5    000E             >ptr = ptr + 1
+ 4    000E 0E          >        DB low ptr
+ 5    000F             >ptr = ptr + 1
+ 4    000F 0F          >        DB low ptr
+ 5    0010             >ptr = ptr + 1
+ 4    0010 10          >        DB low ptr
+ 5    0011             >ptr = ptr + 1
+ 4    0011 11          >        DB low ptr
+ 5    0012             >ptr = ptr + 1
+ 4    0012 12          >        DB low ptr
+ 5    0013             >ptr = ptr + 1
+ 4    0013 13          >        DB low ptr
+ 5    0014             >ptr = ptr + 1
+ 4    0014 14          >        DB low ptr
+ 5    0015             >ptr = ptr + 1
+ 4    0015 15          >        DB low ptr
+ 5    0016             >ptr = ptr + 1
+ 4    0016 16          >        DB low ptr
+ 5    0017             >ptr = ptr + 1
+ 4    0017 17          >        DB low ptr
+ 5    0018             >ptr = ptr + 1
+ 4    0018 18          >        DB low ptr
+ 5    0019             >ptr = ptr + 1
+ 4    0019 19          >        DB low ptr
+ 5    001A             >ptr = ptr + 1
+ 4    001A 1A          >        DB low ptr
+ 5    001B             >ptr = ptr + 1
+ 4    001B 1B          >        DB low ptr
+ 5    001C             >ptr = ptr + 1
+ 4    001C 1C          >        DB low ptr
+ 5    001D             >ptr = ptr + 1
+ 4    001D 1D          >        DB low ptr
+ 5    001E             >ptr = ptr + 1
+ 4    001E 1E          >        DB low ptr
+ 5    001F             >ptr = ptr + 1
+ 4    001F 1F          >        DB low ptr
+ 5    0020             >ptr = ptr + 1
+ 6    0020                  EDUP
+ 7    0020
+ 8    0020                  ; other tests
+ 9    0020                  DEVICE ZXSPECTRUMNEXT
+ 9    0020                ORG $8000
+10    8000              searchMem:
+11    8000 00 00 00 00      DB  0, 0, 0, 0
+12    8004              needle:
+13    8004 01               DB  1
+14    8005 00 00 00 00      DB  0, 0, 0, 0
+15    8009              searchMemEnd:
+16    8009
+17    8009              ptr = searchMem
+18    8009                  WHILE (ptr < searchMemEnd) && ({b ptr} == 0)    ; search for "1" in memory
+19    8009             >        ; ^ keep in mind {b ..} reads as zero until last pass
+20    8009             >ptr = ptr + 1
+19    8009             >        ; ^ keep in mind {b ..} reads as zero until last pass
+20    8009             >ptr = ptr + 1
+19    8009             >        ; ^ keep in mind {b ..} reads as zero until last pass
+20    8009             >ptr = ptr + 1
+19    8009             >        ; ^ keep in mind {b ..} reads as zero until last pass
+20    8009             >ptr = ptr + 1
+21    8009                  ENDW
+22    8009                  ASSERT needle == ptr
+23    8009
+24    8009                  WHILE needle <= ptr + 3     ; nested whiles
+25    8009             >        WHILE needle <= ptr + 1
+26    8009             >ptr = ptr - 1
+26    8009             >ptr = ptr - 1
+27    8009             >        ENDW
+28    8009             >ptr = ptr - 1
+25    8009             >        WHILE needle <= ptr + 1
+27    8009             >        ENDW
+28    8009             >ptr = ptr - 1
+29    8009                  ENDW
+30    8009                  ASSERT needle == ptr + 4
+31    8009
+32    8009                  ; syntax errors/warnings
+33    8009                  WHILE
+while.asm(33): error: [WHILE] Syntax error in <expression>:
+34    8009                  ENDW
+35    8009
+36    8009                  WHILE @
+while.asm(36): error: [WHILE] Syntax error in <expression>:  @
+38    8009                  ENDW
+39    8009
+40    8009                  WHILE fwdLabel < $8000
+42    8009                  ENDW
+43    8009
+44    8009              fwdLabel:
+45    8009
+46    8009                  ; test the infinite loop guardian (1mil)
+47    8009                  ; manual test because of performance reasons - uncomment to test it
+48    8009              cnt = 0
+49    8009                  OPT push listmc
+while.asm(51): error: [WHILE] over 100k of loops - infinite loop?
+while.asm(52): ^ emitted from here
+53    8009                  OPT pop
+54    8009
+# file closed: while.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x186A1   cnt
+0x8009   fwdLabel
+0x8004   needle
+0x8000   ptr
+0x8000   searchMem
+0x8009   searchMemEnd
