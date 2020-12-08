@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.17.0 Documentation [2020-08-08]</title>
+  <title>SjASMPlus 1.18.0 Documentation [2020-12-12]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -200,7 +200,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>soon&trade; - 1.18.0</term>
+            <term>12.12.2020 - 1.18.0</term>
 
             <listitem>
               <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
@@ -209,6 +209,7 @@
 - <link linkend="po_display">`DISPLAY`</link> has now also binary and char formatting
 - <link linkend="po_define">`DEFINE+`</link> added to [re]define identifier without error
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
+- <link linkend="po_while">`WHILE`</link> added for conditional loops
 - added <link linkend="po_device">"NOSLOT64K" device</link> with 2MiB of virtual memory
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
 - <link linkend="po_cspectmap">`CSPECTMAP`</link> exports STRUCT symbols with more detail (instance labels with physical address)
@@ -216,7 +217,7 @@
 - added exclamation mark prefix for <link linkend="s_local_labels">labels</link> to not affect following local labels
 - added "listmc" command to <link linkend="po_opt">OPT</link> - to list only lines with machine code bytes
 - added <link linkend="s_cli">`--lstlab=sort`</link> variant to have symbols in listings in predictable order
-- minor bugfixes in parser and listing-line-numbering
+- minor bugfixes in parser and listing-line-numbering, refactored symbols/labels implementation
 - Added <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm">example (chargfx2asm)</ulink> how to use sjasmplus as byte-processor for binary files
 - <link linkend="c_sld_data">SLD data</link> improvements based on Maziac's feedback and <ulink url="https://github.com/maziac/DeZog">DeZog</ulink>'s needs
 </synopsis>
@@ -3087,6 +3088,27 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
 
             <listitem>
               <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_while" />WHILE &lt;expression&gt;</term>
+
+            <listitem>
+              <para>While expression evaluates to non-zero value, generates following lines until
+                  an ENDW (EDUP/ENDR alias) pseudo-op is encountered.
+				<example>
+                  <title></title>
+
+                  <programlisting>ptr = $4000
+    WHILE ptr &lt; $4020
+        DB low ptr
+ptr = ptr + 1
+    ENDW    ; EDUP or ENDR works too, but ENDW is advised for WHILE
+
+/* will emit bytes $00, $01, ..., $1F */</programlisting>
+                </example>
+			  </para>
             </listitem>
           </varlistentry>
 

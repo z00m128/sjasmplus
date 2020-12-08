@@ -1,16 +1,19 @@
-## [1.18.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.0) - soon(tm)
+## [1.18.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.0) - 12.12.2020
 - [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
 - [may break old sources] new [abs operator](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) for absolute integer value
 - new [system of warnings](http://z00m128.github.io/sjasmplus/documentation.html#s_id_warnings) (and suppression), the "; ok" comments are now deprecated
 - [`DISPLAY`](http://z00m128.github.io/sjasmplus/documentation.html#po_display) has now also binary and char formatting
 - [`DEFINE+`](http://z00m128.github.io/sjasmplus/documentation.html#po_define) added to [re]define identifier without error
 - [`ELSEIF`](http://z00m128.github.io/sjasmplus/documentation.html#ca_elseif) added to conditional assembling arsenal
+- [`WHILE`](http://z00m128.github.io/sjasmplus/documentation.html#po_while) added for conditional loops
 - added ["NOSLOT64K" device](http://z00m128.github.io/sjasmplus/documentation.html#po_device) with 2MiB of virtual memory
 - [`LABELSLIST`](http://z00m128.github.io/sjasmplus/documentation.html#po_labelslist) has new optional argument to dump 16bit "virtual labels"
 - [`CSPECTMAP`](http://z00m128.github.io/sjasmplus/documentation.html#po_cspectmap) exports STRUCT symbols with more detail (instance labels with physical address)
 - [SMC offset](http://z00m128.github.io/sjasmplus/documentation.html#s_labels) syntax for self-modify-code labels for source brevity
+- added exclamation mark prefix for [labels](http://z00m128.github.io/sjasmplus/documentation.html#s_local_labels) to not affect following local labels
 - added "listmc" command to [OPT](http://z00m128.github.io/sjasmplus/documentation.html#po_opt) - to list only lines with machine code bytes
-- minor bugfixes in parser and listing-line-numbering
+- added `--lstlab=sort` variant to have symbols in listings in predictable order
+- minor bugfixes in parser and listing-line-numbering, refactored symbols/labels implementation
 - Added [example (chargfx2asm)](https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm) how to use sjasmplus as byte-processor for binary files
 - [SLD data](http://z00m128.github.io/sjasmplus/documentation.html#c_sld_data) improvements based on Maziac's feedback and DeZog's needs
 
