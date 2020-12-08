@@ -110,9 +110,6 @@ MMU:
 - custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
 - err/warn/warp option for slot range?
 
-Kate syntax:
-    - backward slashes in path strings are not working as escapes, single "\" there is OK, but syntax highlight thinks it's "DB" like string.
-
 * maybe create extra syntax rules for listing files? (especially if it's possible to include asm syntax for half of line)
 
 ##### sjasmplus 2.x/fork:

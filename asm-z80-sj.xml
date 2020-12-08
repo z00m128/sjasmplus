@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.3 18/08/2020
+  Version: 0.9.4 08/12/2020
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,13 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  08/12/2020: version 0.9.4
+    + new directives: ELSEIF, WHILE, ENDW, [list of known DEVICEs]
+    + new operator: abs
+    + highlighting operators as "Normal Text" inside Arguments
+    + new label prefix char "!"
+    + DEFL/EQU expect only expression afterward (up to colon), instructions not possible
 
   18/08/2020: version 0.9.3
     + new directive TEXT added (STRUCT field)
@@ -91,7 +98,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="12" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="13" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -265,6 +272,7 @@ TODO missing things:
       <item>dup</item>
       <item>edup</item>
       <item>else</item>
+      <item>elseif</item>
       <item>emptytap</item>
       <item>emptytrd</item>
       <item>encoding</item>
@@ -277,6 +285,7 @@ TODO missing things:
       <item>endr</item>
       <item>ends</item>
       <item>endt</item>
+      <item>endw</item>
       <item>ent</item>
       <item>export</item>
       <item>field</item>
@@ -327,6 +336,7 @@ TODO missing things:
       <item>textarea</item>
       <item>undefine</item>
       <item>unphase</item>
+      <item>while</item>
     </list>
     <list name="operators"> <!-- TODO implement all of this -->
       <!-- Predefined values by assembler (not really an operator) -->
@@ -341,6 +351,7 @@ TODO missing things:
       <item>__LINE__</item>
       <item>__COUNTER__</item>
       <!-- Operators -->
+      <item>abs</item>
       <item>and</item>
       <item>high</item>
       <item>low</item>
@@ -354,6 +365,18 @@ TODO missing things:
       <!-- other operators/symbols:
       $ $$ ! ~ + - * / % << >> >>> <? >? < > <= >= = == != & ^ | && || [ ] ( ) { }
       -->
+      <!-- known devices names -->
+      <item>NONE</item>
+      <item>NOSLOT64K</item>
+      <item>ZXSPECTRUM48</item>
+      <item>ZXSPECTRUM128</item>
+      <item>ZXSPECTRUM256</item>
+      <item>ZXSPECTRUM512</item>
+      <item>ZXSPECTRUM1024</item>
+      <item>ZXSPECTRUM2048</item>
+      <item>ZXSPECTRUM4096</item>
+      <item>ZXSPECTRUM8192</item>
+      <item>ZXSPECTRUMNEXT</item>
       </list>
     <contexts>
       <context name="LabelLine" attribute="Normal Text" lineEndContext="#stay" lineEmptyContext="#stay"
@@ -365,38 +388,18 @@ TODO missing things:
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
         <DetectChar attribute="Normal Text" context="#pop!Normal" char="}"/>
         <RegExpr attribute="Label" context="#pop!afterLabel" firstNonSpace="true"
-                 String="^(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*:?"/>
+                 String="^(\.|@|\!|\!@|)[A-Za-z_][A-Za-z0-9_.?!#@]*(\+[0-9]|):?"/>
         <RegExpr attribute="Label" context="#pop!afterLabel" String="^[0-9]+:?(\s+|$)"/>
       </context>
 
-      <!-- Detect EQU/DEFL/= expressions and try to guess where the expression ends and instruction may start (weak heuristic) -->
+      <!-- Detect EQU/DEFL/= expressions, the argument now must end with colon (no instruction possible after expression since sjasmplus v1.18.0 -->
       <context name="afterLabel" attribute="Normal Text" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="dotRepeat">
         <DetectSpaces attribute="Normal Text" context="#stay"/>
-        <DetectChar attribute="Directives" context="#pop!labelArgument" char="=" />
-        <WordDetect attribute="Directives" context="#pop!labelArgument" String="DEFL"/>
-        <WordDetect attribute="Directives" context="#pop!labelArgument" String="defl"/>
-        <WordDetect attribute="Directives" context="#pop!labelArgument" String="EQU"/>
-        <WordDetect attribute="Directives" context="#pop!labelArgument" String="equ"/>
-      </context>
-      <context name="labelArgument" attribute="Normal Text" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="Error">
-        <DetectSpaces attribute="Normal Text" context="#stay"/>
-        <DetectChar attribute="Normal Text" context="#pop!dotRepeat" char=":"/>
-        <!-- exit label argument context on detected keyword, not doing proper expression parsing to guess end of expression -->
-        <DetectChar attribute="Comment" context="#pop!Normal" char=";" lookAhead="true"/>
-        <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="/" lookAhead="true"/>
-        <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
-        <keyword attribute="Comment" context="#pop!Normal" String="flow-instructions" lookAhead="true"/>
-        <keyword attribute="Comment" context="#pop!Normal" String="instructions-unofficial" lookAhead="true"/>
-        <keyword attribute="Comment" context="#pop!Normal" String="instructions-z80n" lookAhead="true"/>
-        <keyword attribute="Comment" context="#pop!Normal" String="instructions" lookAhead="true"/>
-        <keyword attribute="Comment" context="#pop!Normal" String="data" lookAhead="true"/>
-        <keyword attribute="Comment" context="#pop!Normal" String="directives" lookAhead="true"/>
-        <!-- dotRepeat context resolved here too after label arg (duplicity of context definition :/ ) -->
-        <RegExpr attribute="Directives" context="#pop!Normal" String="\.(\d+|\(.*?\))\s"/>
-        <!-- operators in expression (do word operators before "Arguments", symbols after -->
-        <keyword attribute="Normal Text" context="#stay" String="operators"/>
-        <IncludeRules context="Arguments" />
-        <AnyChar String="!~+-*/%&lt;>?=&amp;^|[]()," attribute="Normal Text" context="#stay"/>
+        <DetectChar attribute="Directives" context="#pop!Arguments" char="=" />
+        <WordDetect attribute="Directives" context="#pop!Arguments" String="DEFL"/>
+        <WordDetect attribute="Directives" context="#pop!Arguments" String="defl"/>
+        <WordDetect attribute="Directives" context="#pop!Arguments" String="EQU"/>
+        <WordDetect attribute="Directives" context="#pop!Arguments" String="equ"/>
       </context>
 
       <context name="dotRepeat" attribute="Directives" lineEndContext="LabelLine" fallthrough="true" fallthroughContext="Normal">
@@ -490,10 +493,8 @@ TODO missing things:
       <!-- "Bitstring" highlight for DEFG/DG directive -->
       <context name="Bitstring" attribute="Data" lineEndContext="#pop"
                fallthrough="true" fallthroughContext="#pop!Error">
-        <DetectChar attribute="Comment" context="#stay" char="&quot;"/>
-        <DetectChar attribute="Comment" context="#stay" char="'"/>
-        <DetectChar attribute="Data" context="#stay" char=" "/>
-        <DetectChar attribute="Data" context="#stay" char="\t"/>
+        <DetectSpaces attribute="Comment" context="#stay"/>
+        <AnyChar String="&quot;'" attribute="Comment" context="#stay"/>
         <RegExpr attribute="Data" context="BitstringBits" lookAhead="true" String="(([^\s&quot;';][ \t]*){7}[^\s&quot;';])(.*)$"/>
       </context>
       <context name="BitstringBits" attribute="Data" lineEndContext="#pop#pop" dynamic="true">
@@ -509,6 +510,7 @@ TODO missing things:
         <DetectChar attribute="String" context="StringApostrophe" char="'"/>
         <DetectChar attribute="String" context="String" char="&quot;"/>
         <keyword attribute="Registers" context="#stay" String="registers"/>
+        <keyword attribute="Normal Text" context="#stay" String="operators"/>
         <RegExpr attribute="Label" context="#stay" String="(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*"/>
         <!-- temporary labels may be mistaken for binary number ("1b"), for 1-3 digits it's local label -->
         <RegExpr attribute="Label" context="#stay" String="\d{1,3}[bBfF]\b"/>
@@ -523,6 +525,7 @@ TODO missing things:
         <RegExpr attribute="Number" context="#stay" insensitive="true" String="\d('?\d+)*d?\b"/>
         <Detect2Chars attribute="Number" context="#stay" char="$" char1="$"/>
         <DetectChar attribute="Number" context="#stay" char="$"/>
+        <AnyChar String="!~+-*/%&lt;>?=&amp;^|[]()," attribute="Normal Text" context="#stay"/>
       </context>
 
       <!-- Comments, rules and contexts -->
@@ -602,4 +605,4 @@ TODO missing things:
     </comments>
   </general>
 </language>
-<!-- kate: space-indent on; indent-width 4; replace-tabs on; -->
+<!-- kate: space-indent on; indent-width 2; replace-tabs on; -->
