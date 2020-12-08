@@ -339,6 +339,7 @@ void FreeRAM() {
 		free(PreviousIsLabel);
 		PreviousIsLabel = nullptr;
 	}
+	if (Options::IncludeDirsList) delete Options::IncludeDirsList;
 }
 
 

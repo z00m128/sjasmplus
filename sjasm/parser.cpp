@@ -693,6 +693,7 @@ void ParseLabel() {
 			SLabelTableEntry* label = LabelTable.Find(tp, true);
 			if (nullptr == label) {		// should have been already defined before last pass
 				Error("Label not found", tp);
+				delete[] tp;
 				return;
 			}
 			if (IsDEFL) {		//re-set DEFL value
