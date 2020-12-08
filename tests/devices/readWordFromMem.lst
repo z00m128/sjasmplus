@@ -25,7 +25,7 @@ readWordFromMem.asm(10): error: Address in {..} must fetch bytes from 0x0000..0x
 10    000A 30 00            DB  {b 0}, {b -1}
 readWordFromMem.asm(11): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {b -1}, {b 0}
 11    000C 00 30            DB  {b -1}, {b 0}
-readWordFromMem.asm(12): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {0xFFFF}            
+readWordFromMem.asm(12): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {0xFFFF}
 12    000E 00 00            DW  {0xFFFF}            ; FFFF is already too far for WORD fetch
 readWordFromMem.asm(13): error: Address in {..} must fetch bytes from 0x0000..0xFFFF range: {b 0x10000}
 13    0010 00               DB  {b 0x10000}

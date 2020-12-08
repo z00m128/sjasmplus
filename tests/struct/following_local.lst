@@ -24,6 +24,6 @@ Value    Label
 0x0000 X test.def
 0x0001   test.local
 0x0005 X zz
+0x0006   zz.local2
 0x0005 X zz.ls
 0x0005   zz.ls.def
-0x0006   zz.local2

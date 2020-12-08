@@ -11,18 +11,18 @@
  10   1004 ~            y       WORD    absolute1
  11   1004 ~            relInit WORD    reloc1          ; the default init value should be relocated
  12   1004 ~            noRel   WORD    reloc2-reloc1
-relocation_struct.asm(13): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_struct.asm(13): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  13   1004 ~            badRel  WORD    2*reloc1        ; warning about not simple "+offset"
- 14   1004 ~            badRel2 WORD    2*reloc1        ; ok ; suppressed warning
-relocation_struct.asm(15): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+ 14   1004 ~            badRel2 WORD    2*reloc1        ; reldiverts-ok ; suppressed warning
+relocation_struct.asm(15): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  15   1004 ~            warn1   BYTE    high reloc1     ; warning because unstable
-relocation_struct.asm(16): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_struct.asm(16): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  16   1004 ~            warn2   D24     reloc1          ; warning - D24 is not supported for relocation
-relocation_struct.asm(17): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_struct.asm(17): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  17   1004 ~            warn3   DWORD   reloc1          ; warning - D24 is not supported for relocation
- 18   1004 ~            Swarn1  BYTE    high reloc1     ; ok ; suppressed warning
- 19   1004 ~            Swarn2  D24     reloc1          ; ok ; suppressed warning
- 20   1004 ~            Swarn3  DWORD   reloc1          ; ok ; suppressed warning
+ 18   1004 ~            Swarn1  BYTE    high reloc1     ; relunstable-ok ; suppressed warning
+ 19   1004 ~            Swarn2  D24     reloc1          ; relunstable-ok ; suppressed warning
+ 20   1004 ~            Swarn3  DWORD   reloc1          ; relunstable-ok ; suppressed warning
  21   1004                  ENDS
  22   1004
  23   1004              reloc1:
@@ -43,7 +43,7 @@ relocation_struct.asm(17): warning: Relocation makes one of the expressions unst
  27   1033 04 10 00 04
  27   1037 10 00 00
  28   103A                  ; warning about non-word members
-relocation_struct.asm(29): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_struct.asm(29): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  29   103A 10 12 34 56  .t3 st1     {high reloc1, $3412, $7856}
  29   103E 78 06 01 08
  29   1042 20 08 20 10
@@ -51,7 +51,7 @@ relocation_struct.asm(29): warning: Relocation makes one of the expressions unst
  29   104A 10 00 00 10
  29   104E 04 10 00 04
  29   1052 10 00 00
- 30   1055 10 12 34 56  .t4 st1     {high reloc1, $3412, $7856}     ; ok ; suppressed warning
+ 30   1055 10 12 34 56  .t4 st1     {high reloc1, $3412, $7856}     ; relunstable-ok ; suppressed warning
  30   1059 78 06 01 08
  30   105D 20 08 20 10
  30   1061 04 10 00 04
@@ -59,7 +59,7 @@ relocation_struct.asm(29): warning: Relocation makes one of the expressions unst
  30   1069 04 10 00 04
  30   106D 10 00 00
  31   1070                  ; warning about unrelocatable value
-relocation_struct.asm(32): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_struct.asm(32): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  32   1070 12 DC 87 08  .t5 st1     {,, 2*reloc1}
  32   1074 20 06 01 08
  32   1078 20 08 20 10
@@ -67,7 +67,7 @@ relocation_struct.asm(32): warning: Expression can't be relocated by simple "+of
  32   1080 10 00 00 10
  32   1084 04 10 00 04
  32   1088 10 00 00
- 33   108B 12 DC 87 08  .t6 st1     {,, 2*reloc1}       ; ok ; suppressed warning
+ 33   108B 12 DC 87 08  .t6 st1     {,, 2*reloc1}       ; reldiverts-ok ; suppressed warning
  33   108F 20 06 01 08
  33   1093 20 08 20 10
  33   1097 04 10 00 04
@@ -199,177 +199,177 @@ relocation_struct.asm(32): warning: Expression can't be relocated by simple "+of
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0011   relocate_count
-0x0022   relocate_size
 0x87DC   absolute1
-0x1004   reloc1
-0x110A   reloc2
-0x001B   st1
-0x0000   st1.x
-0x0001   st1.y
-0x0003   st1.relInit
-0x0005   st1.noRel
-0x0007 X st1.badRel
-0x0009 X st1.badRel2
-0x000B X st1.warn1
-0x000C X st1.warn2
-0x000F X st1.warn3
-0x0013 X st1.Swarn1
-0x0014 X st1.Swarn2
-0x0017 X st1.Swarn3
-0x1004   reloc1.t1
-0x1004   reloc1.t1.x
-0x1005   reloc1.t1.y
-0x1007   reloc1.t1.relInit
-0x1009   reloc1.t1.noRel
-0x100B X reloc1.t1.badRel
-0x100D X reloc1.t1.badRel2
-0x100F X reloc1.t1.warn1
-0x1010 X reloc1.t1.warn2
-0x1013 X reloc1.t1.warn3
-0x1017 X reloc1.t1.Swarn1
-0x1018 X reloc1.t1.Swarn2
-0x101B X reloc1.t1.Swarn3
-0x101F   reloc1.t2
-0x101F   reloc1.t2.x
-0x1020   reloc1.t2.y
-0x1022   reloc1.t2.relInit
-0x1024   reloc1.t2.noRel
-0x1026 X reloc1.t2.badRel
-0x1028 X reloc1.t2.badRel2
-0x102A X reloc1.t2.warn1
-0x102B X reloc1.t2.warn2
-0x102E X reloc1.t2.warn3
-0x1032 X reloc1.t2.Swarn1
-0x1033 X reloc1.t2.Swarn2
-0x1036 X reloc1.t2.Swarn3
-0x103A X reloc1.t3
-0x103A X reloc1.t3.x
-0x103B X reloc1.t3.y
-0x103D X reloc1.t3.relInit
-0x103F X reloc1.t3.noRel
-0x1041 X reloc1.t3.badRel
-0x1043 X reloc1.t3.badRel2
-0x1045 X reloc1.t3.warn1
-0x1046 X reloc1.t3.warn2
-0x1049 X reloc1.t3.warn3
-0x104D X reloc1.t3.Swarn1
-0x104E X reloc1.t3.Swarn2
-0x1051 X reloc1.t3.Swarn3
-0x1055 X reloc1.t4
-0x1055 X reloc1.t4.x
-0x1056 X reloc1.t4.y
-0x1058 X reloc1.t4.relInit
-0x105A X reloc1.t4.noRel
-0x105C X reloc1.t4.badRel
-0x105E X reloc1.t4.badRel2
-0x1060 X reloc1.t4.warn1
-0x1061 X reloc1.t4.warn2
-0x1064 X reloc1.t4.warn3
-0x1068 X reloc1.t4.Swarn1
-0x1069 X reloc1.t4.Swarn2
-0x106C X reloc1.t4.Swarn3
-0x1070 X reloc1.t5
-0x1070 X reloc1.t5.x
-0x1071 X reloc1.t5.y
-0x1073 X reloc1.t5.relInit
-0x1075 X reloc1.t5.noRel
-0x1077 X reloc1.t5.badRel
-0x1079 X reloc1.t5.badRel2
-0x107B X reloc1.t5.warn1
-0x107C X reloc1.t5.warn2
-0x107F X reloc1.t5.warn3
-0x1083 X reloc1.t5.Swarn1
-0x1084 X reloc1.t5.Swarn2
-0x1087 X reloc1.t5.Swarn3
-0x108B X reloc1.t6
-0x108B X reloc1.t6.x
-0x108C X reloc1.t6.y
-0x108E X reloc1.t6.relInit
-0x1090 X reloc1.t6.noRel
-0x1092 X reloc1.t6.badRel
-0x1094 X reloc1.t6.badRel2
-0x1096 X reloc1.t6.warn1
-0x1097 X reloc1.t6.warn2
-0x109A X reloc1.t6.warn3
-0x109E X reloc1.t6.Swarn1
-0x109F X reloc1.t6.Swarn2
-0x10A2 X reloc1.t6.Swarn3
-0x87DC   absolute1.t1.x
-0x87DD   absolute1.t1.y
-0x87DF   absolute1.t1.relInit
-0x87E1   absolute1.t1.noRel
-0x1004   akaT1
-0x1004   akaT1.x
-0x1005   akaT1.y
-0x1007   akaT1.relInit
-0x1009   akaT1.noRel
-0x100B X akaT1.badRel
-0x100D X akaT1.badRel2
-0x100F X akaT1.warn1
-0x1010 X akaT1.warn2
-0x1013 X akaT1.warn3
-0x1017 X akaT1.Swarn1
-0x1018 X akaT1.Swarn2
-0x101B X akaT1.Swarn3
 0x87DC   absolute1.t1
-0x87DC   akaA1
-0x87DC   akaA1.x
-0x87DD   akaA1.y
-0x87DF   akaA1.relInit
-0x87E1   akaA1.noRel
-0x87E3 X akaA1.badRel
-0x87E5 X akaA1.badRel2
-0x87E7 X akaA1.warn1
-0x87E8 X akaA1.warn2
-0x87EB X akaA1.warn3
-0x87EF X akaA1.Swarn1
-0x87F0 X akaA1.Swarn2
-0x87F3 X akaA1.Swarn3
 0x87E3 X absolute1.t1.badRel
 0x87E5 X absolute1.t1.badRel2
-0x87E7 X absolute1.t1.warn1
-0x87E8 X absolute1.t1.warn2
-0x87EB X absolute1.t1.warn3
+0x87E1   absolute1.t1.noRel
+0x87DF   absolute1.t1.relInit
 0x87EF X absolute1.t1.Swarn1
 0x87F0 X absolute1.t1.Swarn2
 0x87F3 X absolute1.t1.Swarn3
+0x87E7 X absolute1.t1.warn1
+0x87E8 X absolute1.t1.warn2
+0x87EB X absolute1.t1.warn3
+0x87DC   absolute1.t1.x
+0x87DD   absolute1.t1.y
 0x87F7   absolute1.t2
-0x87F7   absolute1.t2.x
-0x87F8   absolute1.t2.y
-0x87FA   absolute1.t2.relInit
-0x87FC   absolute1.t2.noRel
 0x87FE X absolute1.t2.badRel
 0x8800 X absolute1.t2.badRel2
-0x8802 X absolute1.t2.warn1
-0x8803 X absolute1.t2.warn2
-0x8806 X absolute1.t2.warn3
+0x87FC   absolute1.t2.noRel
+0x87FA   absolute1.t2.relInit
 0x880A X absolute1.t2.Swarn1
 0x880B X absolute1.t2.Swarn2
 0x880E X absolute1.t2.Swarn3
+0x8802 X absolute1.t2.warn1
+0x8803 X absolute1.t2.warn2
+0x8806 X absolute1.t2.warn3
+0x87F7   absolute1.t2.x
+0x87F8   absolute1.t2.y
 0x8812 X absolute1.t3
-0x8812 X absolute1.t3.x
-0x8813 X absolute1.t3.y
-0x8815 X absolute1.t3.relInit
-0x8817 X absolute1.t3.noRel
 0x8819 X absolute1.t3.badRel
 0x881B X absolute1.t3.badRel2
-0x881D X absolute1.t3.warn1
-0x881E X absolute1.t3.warn2
-0x8821 X absolute1.t3.warn3
+0x8817 X absolute1.t3.noRel
+0x8815 X absolute1.t3.relInit
 0x8825 X absolute1.t3.Swarn1
 0x8826 X absolute1.t3.Swarn2
 0x8829 X absolute1.t3.Swarn3
+0x881D X absolute1.t3.warn1
+0x881E X absolute1.t3.warn2
+0x8821 X absolute1.t3.warn3
+0x8812 X absolute1.t3.x
+0x8813 X absolute1.t3.y
 0x882D X absolute1.t5
-0x882D X absolute1.t5.x
-0x882E X absolute1.t5.y
-0x8830 X absolute1.t5.relInit
-0x8832 X absolute1.t5.noRel
 0x8834 X absolute1.t5.badRel
 0x8836 X absolute1.t5.badRel2
-0x8838 X absolute1.t5.warn1
-0x8839 X absolute1.t5.warn2
-0x883C X absolute1.t5.warn3
+0x8832 X absolute1.t5.noRel
+0x8830 X absolute1.t5.relInit
 0x8840 X absolute1.t5.Swarn1
 0x8841 X absolute1.t5.Swarn2
 0x8844 X absolute1.t5.Swarn3
+0x8838 X absolute1.t5.warn1
+0x8839 X absolute1.t5.warn2
+0x883C X absolute1.t5.warn3
+0x882D X absolute1.t5.x
+0x882E X absolute1.t5.y
+0x87DC   akaA1
+0x87E3 X akaA1.badRel
+0x87E5 X akaA1.badRel2
+0x87E1   akaA1.noRel
+0x87DF   akaA1.relInit
+0x87EF X akaA1.Swarn1
+0x87F0 X akaA1.Swarn2
+0x87F3 X akaA1.Swarn3
+0x87E7 X akaA1.warn1
+0x87E8 X akaA1.warn2
+0x87EB X akaA1.warn3
+0x87DC   akaA1.x
+0x87DD   akaA1.y
+0x1004   akaT1
+0x100B X akaT1.badRel
+0x100D X akaT1.badRel2
+0x1009   akaT1.noRel
+0x1007   akaT1.relInit
+0x1017 X akaT1.Swarn1
+0x1018 X akaT1.Swarn2
+0x101B X akaT1.Swarn3
+0x100F X akaT1.warn1
+0x1010 X akaT1.warn2
+0x1013 X akaT1.warn3
+0x1004   akaT1.x
+0x1005   akaT1.y
+0x1004   reloc1
+0x1004   reloc1.t1
+0x100B X reloc1.t1.badRel
+0x100D X reloc1.t1.badRel2
+0x1009   reloc1.t1.noRel
+0x1007   reloc1.t1.relInit
+0x1017 X reloc1.t1.Swarn1
+0x1018 X reloc1.t1.Swarn2
+0x101B X reloc1.t1.Swarn3
+0x100F X reloc1.t1.warn1
+0x1010 X reloc1.t1.warn2
+0x1013 X reloc1.t1.warn3
+0x1004   reloc1.t1.x
+0x1005   reloc1.t1.y
+0x101F   reloc1.t2
+0x1026 X reloc1.t2.badRel
+0x1028 X reloc1.t2.badRel2
+0x1024   reloc1.t2.noRel
+0x1022   reloc1.t2.relInit
+0x1032 X reloc1.t2.Swarn1
+0x1033 X reloc1.t2.Swarn2
+0x1036 X reloc1.t2.Swarn3
+0x102A X reloc1.t2.warn1
+0x102B X reloc1.t2.warn2
+0x102E X reloc1.t2.warn3
+0x101F   reloc1.t2.x
+0x1020   reloc1.t2.y
+0x103A X reloc1.t3
+0x1041 X reloc1.t3.badRel
+0x1043 X reloc1.t3.badRel2
+0x103F X reloc1.t3.noRel
+0x103D X reloc1.t3.relInit
+0x104D X reloc1.t3.Swarn1
+0x104E X reloc1.t3.Swarn2
+0x1051 X reloc1.t3.Swarn3
+0x1045 X reloc1.t3.warn1
+0x1046 X reloc1.t3.warn2
+0x1049 X reloc1.t3.warn3
+0x103A X reloc1.t3.x
+0x103B X reloc1.t3.y
+0x1055 X reloc1.t4
+0x105C X reloc1.t4.badRel
+0x105E X reloc1.t4.badRel2
+0x105A X reloc1.t4.noRel
+0x1058 X reloc1.t4.relInit
+0x1068 X reloc1.t4.Swarn1
+0x1069 X reloc1.t4.Swarn2
+0x106C X reloc1.t4.Swarn3
+0x1060 X reloc1.t4.warn1
+0x1061 X reloc1.t4.warn2
+0x1064 X reloc1.t4.warn3
+0x1055 X reloc1.t4.x
+0x1056 X reloc1.t4.y
+0x1070 X reloc1.t5
+0x1077 X reloc1.t5.badRel
+0x1079 X reloc1.t5.badRel2
+0x1075 X reloc1.t5.noRel
+0x1073 X reloc1.t5.relInit
+0x1083 X reloc1.t5.Swarn1
+0x1084 X reloc1.t5.Swarn2
+0x1087 X reloc1.t5.Swarn3
+0x107B X reloc1.t5.warn1
+0x107C X reloc1.t5.warn2
+0x107F X reloc1.t5.warn3
+0x1070 X reloc1.t5.x
+0x1071 X reloc1.t5.y
+0x108B X reloc1.t6
+0x1092 X reloc1.t6.badRel
+0x1094 X reloc1.t6.badRel2
+0x1090 X reloc1.t6.noRel
+0x108E X reloc1.t6.relInit
+0x109E X reloc1.t6.Swarn1
+0x109F X reloc1.t6.Swarn2
+0x10A2 X reloc1.t6.Swarn3
+0x1096 X reloc1.t6.warn1
+0x1097 X reloc1.t6.warn2
+0x109A X reloc1.t6.warn3
+0x108B X reloc1.t6.x
+0x108C X reloc1.t6.y
+0x110A   reloc2
+0x0011   relocate_count
+0x0022   relocate_size
+0x001B   st1
+0x0007 X st1.badRel
+0x0009 X st1.badRel2
+0x0005   st1.noRel
+0x0003   st1.relInit
+0x0013 X st1.Swarn1
+0x0014 X st1.Swarn2
+0x0017 X st1.Swarn3
+0x000B X st1.warn1
+0x000C X st1.warn2
+0x000F X st1.warn3
+0x0000   st1.x
+0x0001   st1.y

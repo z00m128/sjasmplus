@@ -45,20 +45,20 @@ disp.asm(36): warning: value 0x1000000 is truncated to 16bit value: 0x0000
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x8000 X phase1_start
+0x10003 X longmem
 0xFFFF X longptr1
 0x10000 X longptr2
 0x10001 X longptr3
-0x8003 X phase1_end
-0x8003 X normalmem
-0xFFFF X phase2_start
 0xFFFE X longptr4
 0x10000 X longptr5
 0x10001 X longptr6
-0x10003 X phase2_end
-0x10003 X longmem
-0x240000 X phase3_start
 0xFFFFFF   longptr7
 0x1000000   longptr8
 0x1000001 X longptr9
+0x8003 X normalmem
+0x8003 X phase1_end
+0x8000 X phase1_start
+0x10003 X phase2_end
+0xFFFF X phase2_start
 0x240003 X phase3_end
+0x240000 X phase3_start

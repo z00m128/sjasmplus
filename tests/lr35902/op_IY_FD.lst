@@ -2,11 +2,11 @@
   1   0000                  ; all of these should fail on LR35902
   2   0000
 op_IY_FD.asm(3): error: Label not found: iy
-op_IY_FD.asm(3): error: Unexpected: ,bc       
+op_IY_FD.asm(3): error: Unexpected: ,bc
   3   0000 C6 00            add     iy,bc       ; #FD09
   4   0002
 op_IY_FD.asm(5): error: Label not found: iy
-op_IY_FD.asm(5): error: Unexpected: ,de       
+op_IY_FD.asm(5): error: Unexpected: ,de
   5   0002 C6 00            add     iy,de       ; #FD19
   6   0004
 op_IY_FD.asm(7): error: Illegal instruction:     ld      iy,#100     ; #FD210001
@@ -22,7 +22,7 @@ op_IY_FD.asm(11): error: Illegal instruction:     dec     iyh         ; #FD25
 op_IY_FD.asm(12): error: Illegal instruction:     ld      iyh,0       ; #FD2600
  12   0004                  ld      iyh,0       ; #FD2600
 op_IY_FD.asm(13): error: Label not found: iy
-op_IY_FD.asm(13): error: Unexpected: ,iy       
+op_IY_FD.asm(13): error: Unexpected: ,iy
  13   0004 C6 00            add     iy,iy       ; #FD29
 op_IY_FD.asm(14): error: Illegal instruction:     ld      iy,(#100)   ; #FD2A0001
  14   0006                  ld      iy,(#100)   ; #FD2A0001
@@ -42,7 +42,7 @@ op_IY_FD.asm(21): error: Illegal instruction:     dec     (iy+17)     ; #FD3511
 op_IY_FD.asm(22): error: Label not found: iy
  22   0006                  ld      (iy+17),0   ; #FD361100
 op_IY_FD.asm(23): error: Label not found: iy
-op_IY_FD.asm(23): error: Unexpected: ,sp       
+op_IY_FD.asm(23): error: Unexpected: ,sp
  23   0006 C6 00            add     iy,sp       ; #FD39
  24   0008
 op_IY_FD.asm(25): error: Label not found: iyh
@@ -179,7 +179,7 @@ op_IY_FD.asm(93): error: Label not found: iy
  94   005E
 op_IY_FD.asm(95): error: Illegal instruction:     pop     iy          ; #FDE1
  95   005E                  pop     iy          ; #FDE1
-op_IY_FD.asm(96): error: Unrecognized instruction: ex      (sp),iy     
+op_IY_FD.asm(96): error: Unrecognized instruction: ex      (sp),iy
  96   005E                  ex      (sp),iy     ; #FDE3
 op_IY_FD.asm(97): error: Illegal instruction:     push    iy          ; #FDE5
  97   005E                  push    iy          ; #FDE5

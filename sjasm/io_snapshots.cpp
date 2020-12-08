@@ -101,7 +101,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 		}
 	} else {
 		if (is48kSnap) {
-			Warning("[SAVESNA] RAM <0x4000-0x4001> will be overriden due to 48k snapshot imperfect format.");
+			WarningById(W_SNA_48);
 			snbuf[23] = 0x00; //sp
 			snbuf[24] = 0x40; //sp
 			Device->GetPage(1)->RAM[0] = start & 0xFF;	//pc
@@ -157,7 +157,7 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 	}
 
 	if (128*1024 < Device->PagesCount * Device->GetPage(0)->Size) {
-		Warning("Only 128kb will be written to snapshot", fname);
+		WarningById(W_SNA_128, fname);
 	}
 
 	fclose(ff);

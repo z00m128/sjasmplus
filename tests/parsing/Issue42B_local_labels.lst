@@ -2,13 +2,13 @@
  1    0000 CD 22 00         CALL LABEL3 ; LABEL3 - yes
  2    0003 3A 10 00         LD A,(LABEL1) ;ok low mem; LABEL1 - yes
  3    0006
-Issue42B_local_labels.asm(4): error: Local label not found: 1B      
+Issue42B_local_labels.asm(4): error: Local label not found: 1B
  4    0006 18 F8            jr  1B      ;; error
  5    0008 18 02            jr  1F
  6    000A 18 1B            jr  4F
  7    000C              1
  8    000C 18 FE            jr  1B
-Issue42B_local_labels.asm(9): error: Local label not found: 1F      
+Issue42B_local_labels.asm(9): error: Local label not found: 1F
  9    000E 18 F0            jr  1F      ;; error
 10    0010                  IFUSED LABEL1
 11    0010              LABEL1:
@@ -35,7 +35,7 @@ Issue42B_local_labels.asm(9): error: Local label not found: 1F
 32    0022 33               DB '3'
 33    0023                  ENDIF
 34    0023
-Issue42B_local_labels.asm(35): error: Local label not found: 4B      
+Issue42B_local_labels.asm(35): error: Local label not found: 4B
 35    0023 18 DB            jr  4B      ;; error
 36    0025 18 00            jr  4F
 37    0027              4
@@ -52,7 +52,7 @@ Issue42B_local_labels.asm(35): error: Local label not found: 4B
 48    0031              4               ;; double "4" local label (according to docs this should work)
 49    0031 18 D9            jr  1B
 50    0033 18 FC            jr  4B
-Issue42B_local_labels.asm(51): error: Local label not found: 4F      
+Issue42B_local_labels.asm(51): error: Local label not found: 4F
 51    0035 18 C9            jr  4F      ;; error
 52    0037
 53    0037 3E 19            LD A,LABEL2 ; LABEL2 - yes
@@ -68,6 +68,6 @@ Issue42B_local_labels.asm(51): error: Local label not found: 4F
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0022   LABEL3
 0x0010   LABEL1
 0x0019   LABEL2
+0x0022   LABEL3

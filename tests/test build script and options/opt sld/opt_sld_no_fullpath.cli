@@ -1,0 +1,3 @@
+## run sjasmplus with "--sld" without "--fullpath" to verify there is warning
+$MEMCHECK "$EXE" --nologo --msg=lstlab --sld "$file_asm" 2> "${dst_base}.lst"
+last_result=$?

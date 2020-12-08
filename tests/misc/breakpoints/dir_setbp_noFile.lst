@@ -1,6 +1,6 @@
 dir_setbp_noFile.asm(2): error: BPLIST only allowed in real device emulation mode (See DEVICE)
-dir_setbp_noFile.asm(5): warning: [BPLIST] invalid breakpoints file type (use "unreal" or "zesarux"): invalid_type  
-dir_setbp_noFile.asm(5): error: empty filename: 
+dir_setbp_noFile.asm(5): warning: [BPLIST] invalid breakpoints file type (use "unreal" or "zesarux"): invalid_type
+dir_setbp_noFile.asm(5): error: empty filename:
 # file opened: dir_setbp_noFile.asm
 1     0000                  DEVICE NONE
 2     0000                  BPLIST "dir_setbp_noFile.exp" zesarux  ; not in DEVICE mode
@@ -8,8 +8,8 @@ dir_setbp_noFile.asm(5): error: empty filename:
 4     0000                  DEVICE ZXSPECTRUM48
 5     0000                  BPLIST "" invalid_type  ; empty filename, invalid type
 6     0000
-7     0000                  SETBREAKPOINT $     ; ok ; warning suppressed
-dir_setbp_noFile.asm(8): warning: breakpoints file was not specified
+7     0000                  SETBREAKPOINT $     ; bpfile-ok ; warning suppressed
+dir_setbp_noFile.asm(8): warning[bpfile]: breakpoints file was not specified
 8     0000                  SETBREAKPOINT $     ; warning about no file
 9     0000
 # file closed: dir_setbp_noFile.asm

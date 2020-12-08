@@ -40,6 +40,7 @@ namespace Options {
 		bool		FakeEnabled;
 		bool		FakeWarning;
 		bool		IsListingSuspended;
+		bool		IsMcOnlyListing;
 		bool		CaseInsensitiveInstructions;
 		bool		WarningsAsErrors;
 		bool		Is_M_Memory;
@@ -49,7 +50,8 @@ namespace Options {
 		bool		(*MultiArg)(char*&);	// function checking if multi-arg delimiter is next
 
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
-					IsListingSuspended(false), CaseInsensitiveInstructions(false), WarningsAsErrors(false),
+					IsListingSuspended(false), IsMcOnlyListing(false),
+					CaseInsensitiveInstructions(false), WarningsAsErrors(false),
 					Is_M_Memory(false), IsLowMemWarningEnabled(true),
 					MemoryBrackets(0), IsNextEnabled(0), MultiArg(&comma) {}
 		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
@@ -85,6 +87,7 @@ namespace Options {
 	extern bool IsI8080;			// "i8080" CPU mode (must be set at CLI, blocks others)
 	extern bool IsLR35902;			// "Sharp LR35902" CPU mode (must be set at CLI, blocks others)
 	extern bool IsLongPtr;
+	extern bool SortSymbols;
 
 	// emit virtual labels in LABELSLIST, that have only 64ki address and no page
 	// format is then `:ADDR label`, starting from colon, then 16bit address, then label.
@@ -106,7 +109,8 @@ extern CDevice *Devices;
 extern CDevice *Device;
 extern CDevicePage *Page;
 extern char* DeviceID;
-extern int deviceDirectivesCounter;
+extern TextFilePos globalDeviceSourcePos;
+extern aint deviceDirectivesCount;
 
 //*current* full file name (used as full for CurSourcePos when `--fullpath`)
 //content at this pointer is immutable and valid till assembler exits, so you can archive/reuse it

@@ -1,17 +1,17 @@
 # file opened: inctrd_coverage.asm
-inctrd_coverage.asm(1): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" 
+inctrd_coverage.asm(1): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm"
  1    0000                  INCTRD "inctrd_coverage.asm"
-inctrd_coverage.asm(2): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , 
+inctrd_coverage.asm(2): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" ,
  2    0000                  INCTRD "inctrd_coverage.asm" ,
-inctrd_coverage.asm(3): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , , 
+inctrd_coverage.asm(3): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , ,
  3    0000                  INCTRD "inctrd_coverage.asm" , ,
-inctrd_coverage.asm(4): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , "somefile.B" , 
+inctrd_coverage.asm(4): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , "somefile.B" ,
  4    0000                  INCTRD "inctrd_coverage.asm" , "somefile.B" ,
-inctrd_coverage.asm(5): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , "somefile.B" , @ 
+inctrd_coverage.asm(5): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , "somefile.B" , @
  5    0000                  INCTRD "inctrd_coverage.asm" , "somefile.B" , @
-inctrd_coverage.asm(6): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , "somefile.B" , 1 , 
+inctrd_coverage.asm(6): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , "somefile.B" , 1 ,
  6    0000                  INCTRD "inctrd_coverage.asm" , "somefile.B" , 1 ,
-inctrd_coverage.asm(7): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , "somefile.B" , 2 , @ 
+inctrd_coverage.asm(7): error: [INCTRD] Syntax error: INCTRD "inctrd_coverage.asm" , "somefile.B" , 2 , @
  7    0000                  INCTRD "inctrd_coverage.asm" , "somefile.B" , 2 , @
  8    0000
 inctrd_coverage.asm(9): error: [INCTRD] Negative offset value is not allowed: -1

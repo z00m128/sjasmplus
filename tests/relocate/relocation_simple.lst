@@ -26,7 +26,7 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x1001   equ_label
+0x100A   relocatable_label
 0x0003   relocate_count
 0x0006   relocate_size
-0x100A   relocatable_label
-0x1001   equ_label

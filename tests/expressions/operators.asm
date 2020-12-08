@@ -57,5 +57,38 @@
     DW  { 0 }
     DW  {b 0 }
 
-not
+
     ld  hl,?not     ; deprecated, use "@not" with full global name, or don't use keywords for label names at all
+
+    ; new in v1.18.0
+    DB  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(256),abs(-256)
+    DW  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(65536),abs(-65536)
+
+    DW  abs         ; warning about ABS being now new operator (to be removed ~Dec 2021)
+
+; check all operator keywords to warn about their usage as labels
+abs:
+and:
+high:
+low:
+mod:
+norel:
+not:
+or:
+shl:
+shr:
+@xor:   ; also global prefix "@" shouldn't matter, should still warn about it!
+
+; Capitalized variant is ok. It's actually ok also all-caps variant, which should NOT be ok,
+; but whoever uses label like XOR is beyond any good taste and I don't care about him.
+Abs:
+And:
+High:
+Low:
+Mod:
+Norel:
+Not:
+Or:
+Shl:
+Shr:
+Xor:

@@ -19,30 +19,30 @@
 designed_address.asm(15): warning: [STRUCT] designed address without label = no effect
 15    6790                      S_TEST = $      ; shoud not emit bytes, but also no label = warning
 16    6790
-designed_address.asm(17): error: [STRUCT] Syntax error in designed address:  ++     
+designed_address.asm(17): error: [STRUCT] Syntax error in designed address:  ++
 17    6790              syntaxE S_TEST = ++     ; test syntax error
 18    6790
 # file closed: designed_address.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0007 X S_TEST
-0x0000 X S_TEST.byte
-0x0001 X S_TEST.word
-0x0003 X S_TEST.dword
 0x6780 X default
 0x6780 X default.byte
-0x6781 X default.word
 0x6783 X default.dword
+0x6781 X default.word
 0x1234 X designed
 0x1234 X designed.byte
-0x1235 X designed.word
 0x1237 X designed.dword
+0x1235 X designed.word
 0x6788 X initialized
 0x6788 X initialized.byte
-0x6789 X initialized.word
 0x678B X initialized.dword
+0x6789 X initialized.word
+0x0007 X S_TEST
+0x0000 X S_TEST.byte
+0x0003 X S_TEST.dword
+0x0001 X S_TEST.word
 0x0000 X syntaxE
 0x0000 X syntaxE.byte
-0x0001 X syntaxE.word
 0x0003 X syntaxE.dword
+0x0001 X syntaxE.word

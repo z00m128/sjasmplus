@@ -118,7 +118,7 @@ savenexSyntaxV_1_3.asm(79): error: [SAVENEX] expected syntax is TILE <NextReg $6
  79   0000                  SAVENEX     SCREEN  TILE    0,  1
 savenexSyntaxV_1_3.asm(80): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,
  80   0000                  SAVENEX     SCREEN  TILE    0,  1,
-savenexSyntaxV_1_3.asm(81): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2 
+savenexSyntaxV_1_3.asm(81): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2
  81   0000                  SAVENEX     SCREEN  TILE    0,  1,  2
 savenexSyntaxV_1_3.asm(82): error: [SAVENEX] expected syntax is TILE <NextReg $6B>,<NextReg $6C>,<NextReg $6E>,<NextReg $6F>[,<AlsoStoreBank5 0/1 = 1>]: SAVENEX     SCREEN  TILE    0,  1,  2,
  82   0000                  SAVENEX     SCREEN  TILE    0,  1,  2,
@@ -151,9 +151,9 @@ savenexSyntaxV_1_3.asm(96): error: [SAVENEX] expected syntax is TILE <NextReg $6
  97   0000
  98   0000              ;; SCREEN BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]
  99   0000                  ; errors - [un]expected arguments
-savenexSyntaxV_1_3.asm(100): error: [SAVENEX] Error opening file: 
+savenexSyntaxV_1_3.asm(100): error: [SAVENEX] Error opening file:
 100   0000                  SAVENEX     SCREEN  BMP
-savenexSyntaxV_1_3.asm(101): error: [SAVENEX] Error opening file: 
+savenexSyntaxV_1_3.asm(101): error: [SAVENEX] Error opening file:
 101   0000                  SAVENEX     SCREEN  BMP     ""
 savenexSyntaxV_1_3.asm(102): error: [SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]: SAVENEX     SCREEN  BMP     "",
 102   0000                  SAVENEX     SCREEN  BMP     "",
@@ -164,13 +164,13 @@ savenexSyntaxV_1_3.asm(104): error: [SAVENEX] expected syntax is BMP <filename>[
 105   0000
 106   0000                  ; errors - wrong values
 savenexSyntaxV_1_3.asm(107): warning: [SAVENEX] savePalette should be 0 or 1 (defaulting to 1)
-savenexSyntaxV_1_3.asm(107): error: [SAVENEX] Error opening file: 
+savenexSyntaxV_1_3.asm(107): error: [SAVENEX] Error opening file:
 107   0000                  SAVENEX     SCREEN  BMP     "",     2
 savenexSyntaxV_1_3.asm(108): warning: [SAVENEX] paletteOffset should be in 0..15 range
-savenexSyntaxV_1_3.asm(108): error: [SAVENEX] Error opening file: 
+savenexSyntaxV_1_3.asm(108): error: [SAVENEX] Error opening file:
 108   0000                  SAVENEX     SCREEN  BMP     "",     0,  -2  ; -1 is internal value for "missing" palOfs => legal
 savenexSyntaxV_1_3.asm(109): warning: [SAVENEX] paletteOffset should be in 0..15 range
-savenexSyntaxV_1_3.asm(109): error: [SAVENEX] Error opening file: 
+savenexSyntaxV_1_3.asm(109): error: [SAVENEX] Error opening file:
 109   0000                  SAVENEX     SCREEN  BMP     "",     0,  16
 110   0000
 111   0000                  ; not testing correct variants, because it would make impossible to test other types

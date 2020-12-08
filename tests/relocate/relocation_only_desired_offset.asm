@@ -11,7 +11,7 @@ reloc1:
     ld      bc,reloc2-reloc1    ; not affected by relocation
     ld      sp,absolute1        ; not affected by relocation
     ld      hl,reloc2*2         ; affected but not relocated (invalid difference) (warning)
-    ld      hl,reloc2*2         ; ok ; warning suppressed
+    ld      hl,reloc2*2         ; reldiverts-ok ; warning suppressed
 
 reloc2:
     RELOCATE_END

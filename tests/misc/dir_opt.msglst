@@ -3,12 +3,13 @@
 dir_opt.asm(2): warning: [OPT] no previous syntax found
  2    0000              OPT pop                     ; warn about no previous syntax in stack
  3    0000 60 69 50 59      ld      hl,bc,de,bc
-dir_opt.asm(4): error: Z80N instructions are currently disabled: mirror  a               
+dir_opt.asm(4): error: Z80N instructions are currently disabled: mirror  a
  4    0004                  mirror  a               ; error (Z80N instruction)
  5    0004
  6    0004                  ; try all possible options
+dir_opt.asm(7): warning: `--nofakes` is deprecated, use `--syntax=F` instead
  7    0004              OPT push reset --nofakes --syntax=a --zxnext=cspect --reversepop --dirbol
-dir_opt.asm(8): error: Fake instructions are not enabled: ld      hl,bc,,de,bc    
+dir_opt.asm(8): error: Fake instructions are not enabled: ld      hl,bc,,de,bc
  8    0004                  ld      hl,bc,,de,bc    ; error because --nofakes (!)
  9    0004 90 91            sub     a,b,,c
 10    0006 ED 24            mirror  a
@@ -20,11 +21,11 @@ Syntax option not implemented yet: l
 14    000D              OPT = 1
 14    000D 00             nop
 14    000E                OPT --dirbol  ; first is label, instruction, adding --dirbol back (no push/reset)
-dir_opt.asm(15): warning: Fake instruction: ld      hl,bc,,de,bc    
-dir_opt.asm(15): warning: Fake instruction: ld      hl,bc,,de,bc    
+dir_opt.asm(15): warning: Fake instruction: ld      hl,bc,,de,bc
+dir_opt.asm(15): warning: Fake instruction: ld      hl,bc,,de,bc
 15    000E 60 69 50 59      ld      hl,bc,,de,bc    ; 2x warning about fAkEs (suppression is case sensitive)
 16    0012 60 69            ld      hl,bc           ; fake with suppressed warning
-dir_opt.asm(17): error: Z80N instructions are currently disabled: mirror  a               
+dir_opt.asm(17): error: Z80N instructions are currently disabled: mirror  a
 17    0014                  mirror  a               ; error (Z80N instruction)
 18    0014 E1 C1            pop     hl,,bc          ; pop hl : pop bc
 19    0016 E1               pop     hl  ; validation
@@ -37,12 +38,10 @@ dir_opt.asm(22): warning: [OPT] no previous syntax found
 23    001B              OPT = 2
 23    001B 00             nop               ; this one is no more dirbol, but just a label
 24    001C
-dir_opt.asm(25): warning: [OPT] too many options
 dir_opt.asm(25): error: [OPT] invalid/failed option: --nologo
-dir_opt.asm(25): error: Unexpected: G 
-25    001C                  OPT --nologo 1 2 3 4 5 6 7 8 9 A B C D E F G ; invalid option(s) and too many of them
+25    001C                  OPT --nologo 1 2 3 4 5 6 7 8 9 A B C D E F G ; invalid option(s) and many of them
 26    001C
-dir_opt.asm(27): error: [OPT] invalid command (valid commands: push, pop, reset, liston, listoff): unknown             
+dir_opt.asm(27): error: [OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listmc): unknown
 27    001C                  OPT unknown             ; error about invalid command
 dir_opt.asm(28): warning: [OPT] pushing syntax status after reset
 28    001C                  OPT reset push          ; warn about pushing default syntax

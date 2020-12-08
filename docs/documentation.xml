@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book>
-  <title>SjASMPlus 1.17.0 Documentation [2020-08-08]</title>
+  <title>SjASMPlus 1.18.0 Documentation [2020-12-12]</title>
 
   <chapter>
     <title>Introduction</title>
@@ -81,7 +81,7 @@
 
           <listitem>
             <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
-            Cirrus-CI with 380+ automated tests</ulink> (that's also 380+ examples of usage!)</para>
+            Cirrus-CI with 400+ automated tests</ulink> (that's also 400+ examples of usage!)</para>
           </listitem>
 
           <listitem>
@@ -200,16 +200,26 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.17.1</term>
+            <term>12.12.2020 - 1.18.0</term>
 
             <listitem>
               <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
-- <link linkend="po_display">`DISPLAY`</link> has now also binary formatting
+- [may break old sources] new <link linkend="s_expressions">abs operator</link> for absolute integer value
+- new <link linkend="s_id_warnings">system of warnings</link> (and suppression), the "; ok" comments are now deprecated
+- <link linkend="po_display">`DISPLAY`</link> has now also binary and char formatting
+- <link linkend="po_define">`DEFINE+`</link> added to [re]define identifier without error
 - <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
+- <link linkend="po_while">`WHILE`</link> added for conditional loops
+- added <link linkend="po_device">"NOSLOT64K" device</link> with 2MiB of virtual memory
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
+- <link linkend="po_cspectmap">`CSPECTMAP`</link> exports STRUCT symbols with more detail (instance labels with physical address)
 - <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
-- minor bugfixes in parser and listing-line-numbering
+- added exclamation mark prefix for <link linkend="s_local_labels">labels</link> to not affect following local labels
+- added "listmc" command to <link linkend="po_opt">OPT</link> - to list only lines with machine code bytes
+- added <link linkend="s_cli">`--lstlab=sort`</link> variant to have symbols in listings in predictable order
+- minor bugfixes in parser and listing-line-numbering, refactored symbols/labels implementation
 - Added <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm">example (chargfx2asm)</ulink> how to use sjasmplus as byte-processor for binary files
+- <link linkend="c_sld_data">SLD data</link> improvements based on Maziac's feedback and <ulink url="https://github.com/maziac/DeZog">DeZog</ulink>'s needs
 </synopsis>
             </listitem>
           </varlistentry>
@@ -277,91 +287,6 @@
             </listitem>
           </varlistentry>
 
-<varlistentry>
-            <term>30.1.2020 - 1.14.5</term>
-
-            <listitem>
-              <synopsis>- fix crash when opening source file fails
-- <link linkend="po_disp">`DISP`</link>/<link linkend="po_org">`ORG`</link> warns about being used inside DISP block (also docs extended)
-</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>13.1.2020 - 1.14.4</term>
-
-            <listitem>
-              <synopsis>- added few example utility macros in tests/macro_examples/sj_library.asm (neg r16)
-- added <link linkend="nex_screen">`SAVENEX SCREEN BMP`</link> sub-command to include BMP loading-screen
-- added support for V1.3 of <link linkend="c_savenex">`NEX file format`</link> (new commands: CFG3, PALETTE, COPPER, new screen modes)
-- in lua scripts: `sj.calc(..)` (alias `_c(..)`) now substitutes defines and macro arguments
-- error reporting inside LUA and MACRO refactored to give better info about origin of error
-- macro-arguments parser now recognizes C++ numeric literals with apostrophe as digits-group separator
-- the assembler will instantly exit when run at Big-Endian platform (the rest of code is broken on BE)
-- updated syntax-highlight file for KDE5 editors (Kate)</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>15.11.2019 - 1.14.3</term>
-
-            <listitem>
-              <synopsis>- fix detection of `.end:` and `.END` labels when `--dirbol` is used
-- added export of <link linkend="c_sld_data">SLD (Source Level Debugging) data</link>, see also <ulink url="https://github.com/Ckirby101/NDS-NextDevSystem">NDS (NextDevSystem)</ulink>
-- added <link linkend="s_cli">`--longptr`</link> option to allow labels outside of 16b address space
-- docs: added small details about <link linkend="po_fpos">FPOS</link>, <link linkend="po_savetap">SAVETAP</link>, <link linkend="ca_ifused">IFUSED</link>
-- fix assembling-time reported in linux</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>3.10.2019 - 1.14.2</term>
-
-            <listitem>
-              <synopsis>- added i8080 mode (--i8080 CLI option) (it's still Z80 Zilog syntax, just limited instruction set)
-- added Sharp LR35902 mode (--lr35902 CLI option) (100% syntax compatibility with IDA, 95% bgb)
-- new <link linkend="s_expressions">$$label operator</link> to retrieve page of label
-- 1.14.0 include-path bugfix reverted, the "." is again <link linkend="po_include">automatically added</link> (*did* break projects)
-- small improvements/polish/extra-info in docs, INSTALL, README, few new tests added
-- cmake script fix of SYSTEM_LUA=ON option, <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">CirrusCI</ulink> configs added for macOS and FreeBSD
-- few fixes of memory leaks, invalid memory access, double free/delete, ...
-</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>30.8.2019 - 1.14.1</term>
-
-            <listitem>
-              <synopsis>- refactored <link linkend="po_shellexec">SHELLEXEC</link> to use clib "system(..)" on all platforms (also MS VS), minor fixes
-- <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lua_examples/lua_inctext.lua">lua example "inc_text"</ulink> (result of specific request from sjasmplus user)
-- listing fixed when Lua was used to emit bytes and also parsed lines of assembly source
-- MinGW windows exe prefers "/" file system delimiter ("\" should still work on windows (only))
-- lot of small bugfixes and Cirrus CI infrastructure adjustments (windows MinGW build does run full tests)
-- MS VS builds stabilized and fixed, should now work mostly on par with MinGW builds (99.5%)
-- Using <ulink url="https://lgtm.com/projects/g/z00m128/sjasmplus/">lgtm.com</ulink> code analysis (did help to find new bugs and memory leaks)
-- <ulink url="https://github.com/unittest-cpp/unittest-cpp">UnitTest++</ulink> framework added for regular C++ unit tests, first few tests added
-</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>17.8.2019 - 1.14.0</term>
-
-            <listitem>
-              <synopsis>- <link linkend="po_include">INCLUDE</link> bugfix, now searching paths according to original documentation (may break some projects)
-- <link linkend="po_undefine">UNDEFINE</link> had undocumented feature of removing also labels, cancelled (was broken beyond repair)
-- R800 `MULUB` was producing wrong opcode all those years... fixed
-- <link linkend="po_module">MODULE</link> names can't contain dot any more! MODULE and ENDMODULE resets non-local label to "_"
-- <link linkend="s_cli">--syntax</link> option: "m" (switch off low-mem access warning) and "M" added, "A" removed
-- <link linkend="s_macros">macro</link> expansion can be inhibited by using "@" in front of instruction
-- expression evaluator was not strictly 32 bit (64b binaries could have produced different results than 32b binaries)
-- reading memory addresses 0..255 directly emits warning, use "; ok" comment to suppress it.
-- several tests added to improve the code coverage: <ulink url="https://coveralls.io/github/z00m128/sjasmplus?branch=master">coveralls.io/github/z00m128/sjasmplus</ulink>
-- as tests were added, minor bugs were found and squashed (errors wording, etc)</synopsis>
-            </listitem>
-          </varlistentry>
-
         </variablelist></para>
 
       <para>See <ulink url="https://github.com/z00m128/sjasmplus/blob/master/CHANGELOG.md">CHANGELOG.md</ulink> for full list of changes.</para>
@@ -400,7 +325,7 @@
 	</para>
 
 	<para>
-		You may want to download also the full source package, as it contains more than 240
+		You may want to download also the full source package, as it contains more than 400
 		<emphasis role="strong">automated tests</emphasis> used to verify correctness of executable,
 		and these can be often helpful to better understand how specific feature of sjasmplus works,
 		and <emphasis role="strong">how to use it</emphasis> effectively.
@@ -431,7 +356,7 @@
 
       <para>Option flags as follows:</para>
 
-      <para><synopsis>  -h or --help             Help information
+      <para><synopsis>  -h or --help[=warnings]  Help information
   --version                Basic info (with --nologo only raw version string)
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
@@ -443,8 +368,8 @@
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt; ( --inc without "=" to empty the list)
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)
-  --lstlab                 Enable label table in listing
-  --sym=&lt;filename&gt;         Save symbols list to &lt;filename&gt;
+  --lstlab[=sort]          Append [sorted] symbol table to listing
+  --sym=&lt;filename&gt;         Save symbol table to &lt;filename&gt;
   --exp=&lt;filename&gt;         Save exports to &lt;filename&gt; (see EXPORT pseudo-op)
   --raw=&lt;filename&gt;         Machine code saved also to &lt;filename&gt; (- is STDOUT)
   --sld[=&lt;filename&gt;]       Save Source Level Debugging data to &lt;filename&gt;
@@ -455,20 +380,26 @@
   --msg=[all|war|err|none|lst|lstlab]  Stderr messages verbosity ("all" is default)
   Note: "lst" or "lstlab" will turn STDERR into listing file (this will clash with
   `--lst`, use only one of the options) and some diagnostic messages of "all"
-  are omitted, as they are not part of listing files.
+  are omitted, as they are not part of listing files. "lstlab" does sort symbols.
   --fullpath               Show full path to file in errors
   Note: the "fullpath" starts from current working directory, not from file system
 		root (the MS_VS build was fixed to behave this way since v1.15.0)
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
+  -W[no-]&lt;warning_id&gt;      Disables/enabled particular warning type
   -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
-  --nofakes                Disable fake instructions (obsolete, use --syntax=F)
+  --nofakes                Disable fake instructions (deprecated, use --syntax=F)
   --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)
   --syntax=&lt;...&gt;           Adjust parsing syntax, read details below.</synopsis></para>
 
+  <para>
+	  The option <code>--lstlab=sort</code> will cause also other symbol dumps being sorted (along
+	  listing): <code>--sym</code>, <code>CSPECTMAP</code> and <code>LABELSLIST</code>.
+	  The <code>--msg=lstlab</code> sets always sorting "on" (no "unsorted" option).
+  </para>
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
 	<synopsis>  a      Multi-argument delimiter ",," (default is ",")
@@ -477,9 +408,9 @@
   f F    Fake instructions: warning / disabled (default = enabled)
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
-  m      Switch off "Accessing low memory" warning globally
   M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
-  w      Warnings option: report warnings as errors</synopsis>
+  w      Warnings option: report warnings as errors
+  m      *DEPRECATED* use -Wno-rdlow (was "switch off Accessing low memory warning")</synopsis>
   &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
   not working correctly either.
   </para>
@@ -519,6 +450,51 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     </section>
 
     <section>
+      <title><anchor id="s_id_warnings"/>Warnings with id</title>
+
+		<para>
+			Some warnings have own "id" - these can be switched off or suppressed for particular line.
+			The line suppression mechanism requires you to add end-of-line comment with "id-ok" string
+			somewhere in the comment (exception: for fake instructions and --syntax=f mode the word
+			"fake" is enough without -ok suffix) (the "ok" comment suppression mechanism from previous
+			versions of sjasmplus is deprecated and will be removed in future versions).
+		</para>
+		<para>
+			The id-warning is emitted together with its id in brackets:
+			<programlisting>    ld a,(10-2)    ; read memory address 8 - emits warning "rdlow"
+    ld a,(10-2)    ; same instruction, but suppress warning: rdlow-ok
+
+file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
+			To list all warning-ids and short description of each use:
+			<programlisting>sjasmplus --help=warnings</programlisting>
+			To disable particular warning globally you can use option <code>-Wno-&lt;id&gt;</code>,
+			either on command line, or from source by using <code><link linkend="po_opt">OPT</link></code>:
+			<programlisting>&lt;command line&gt;$ sjasmplus -Wno-out0
+
+; in source code:
+    OPT -Wno-trdext -Wno-trdext3 ; disable "trdext" and "trdext3" warnings
+        SAVETRD "image.trd", "file.txt", 30000, 100
+    OPT -Wtrdext3                ; re-enable "trdext3" warning for following code
+; ...</programlisting>
+		</para>
+		<para>
+			Warnings without id can't be suppressed and generally should happen only when the source
+			code has actual bug (in our opinion) and can be modified to fix the warning, or when you
+			are hitting limits of sjasmplus architecture and/or implementation.
+		</para>
+		<para>
+			If you believe you are hitting warning without id on correct code, which can be safely
+			ignored (the machine code produced is stable and as expected), open issue on github with
+			example source, so we can assign the warning new id (or explain why it is problematic :) ).
+		</para>
+		<para>
+			Warnings with id usually signal bug in the code (in common scenarios), but may be misleading
+			in more specialized cases - the decision is left to the author, whether to modify
+			the code to avoid the warning or suppress it and use the resulting machine code "as is".
+		</para>
+    </section>
+
+    <section>
       <title><anchor id="s_source_format"/>Source file format</title>
 
 		<para>
@@ -545,16 +521,6 @@ sjasmplus --lst --lstlab example.asm</programlisting>
  but this won't be ld a,3!
  */ a,3</programlisting>
 			</example>
-
-			Some warnings (low memory-access and fake instruction) can be suppressed for particular
-			line by adding end-of-line type of comment starting with "ok":
-			<example>
-				<title></title>
-
-				<programlisting>        OPT --syntax=f  ; warning on accidental fake instructions
-        ld  hl,de    ; warning here
-        ld  hl,de    ; ok (warning will be suppressed by this comment)</programlisting>
-			</example>
 		</para>
     </section>
   </chapter>
@@ -577,11 +543,12 @@ sjasmplus --lst --lstlab example.asm</programlisting>
 KIP
 Kip@@
 MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
-      register names as labels but it is not advised to do so. Also note that
+      register names as labels but it is not advised to do so (expression operator keyword used
+      as label will emit warning, and is also not advised). Also note that
       the identifiers defined with the DEFINE pseudo-op use another name
       space.</para>
 
-      <para>(since v1.17.1) Right after label (before the optional colon) you
+      <para>(since v1.18.0) Right after label (before the optional colon) you
       can write extra "SMC offset" (Self Modify Code offset) in the form of plus
       sign and single decimal digit. The defined label will become equal to current
       address plus the SMC offset:
@@ -601,8 +568,11 @@ classic equ $+1 : ld a,7        ; often even split to two lines</programlisting>
       <para>When there is a <link linkend="po_module">module definition</link> all
       labels (except those starting with a '@') are local to that module. To
       use a label from outside the module use modulename.labelname, in this
-      example: 'vdp.Cls' Labels starting with a '.' are also local to the
+      example: 'vdp.Cls'. Labels starting with a '.' are also local to the
       previous non-local label.</para>
+
+      <para>(since v1.18.0) If you start the label with an ! (exclamation mark), it will not
+      affect following local labels (same syntax as <ulink url="http://www.xl2s.tk/">sjasm</ulink>).</para>
 
       <para><example>
           <title>docs_examples/s_local_labels.asm</title>
@@ -621,6 +591,7 @@ Main:                       ; main.Main
 .loop:                      ; main.vdp.SetScreen.loop
             RET
 Cls:                        ; main.vdp.Cls
+!KeepClsForLocal:           ; main.vdp.KeepClsForLocal (since v1.18.0)
 .loop:      DJNZ .loop      ; main.vdp.Cls.loop
             RET
         ENDMODULE
@@ -778,6 +749,7 @@ $c     hexadecimal
 low   low x    low 8 bits of 16 bit value or lower part of register pair
 high  high x   high 8 bits of 16 bit value or higher part of register pair
 not   not x    logical not
+abs   abs x    absolute value (since v1.18.0)
 
 *     x*y      multiplication
 /     x/y      division
@@ -1256,6 +1228,17 @@ StartProg:
               All memory is zeroed during initialization.</para>
             </listitem>
           </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="device_noslot64k" />NOSLOT64K</term>
+
+            <listitem>
+              <para>Has only single slot of size 64kiB (slot 0), covering full Z80 CPU addressing range.
+				  There are 32 memory pages available, by default page 0 is mapped.
+				  That makes in total 2MiB of memory available (32 * 64 ki = 2 Mi).</para>
+            </listitem>
+          </varlistentry>
+
         </variablelist></para>
 
       <para>If you want to see other devices you must write to us. See <link
@@ -1644,7 +1627,8 @@ END_OF_PROGRAM</programlisting></para>
               <para>Saves labels list in format:</para>
 
               <para><synopsis>HEXA_16BIT_ADDRESS HEXA_LONG_ADDRESS TYPE LABELNAME</synopsis>
-              where TYPE is: 00 = regular label, 01 = EQU or struct defined, 02 = DEFL defined.</para>
+              where TYPE is: 00 = regular label, 01 = EQU or struct defined, 02 = DEFL defined,
+              03 = ROM page/"none" device, 04 = STRUCT definition.</para>
 
               <para>If no filename is provided, default is created by appending ".map" to source name.</para>
             </listitem>
@@ -1767,18 +1751,26 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_define" />DEFINE &lt;id&gt;
-            &lt;replacement&gt;</term>
+            <term><anchor id="po_define" />DEFINE+ &lt;id&gt; &lt;replacement&gt;</term>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DEFINE &lt;id&gt; &lt;replacement&gt;</term>
 
             <listitem>
-              <para>The identifier &lt;id&gt; will be replaced with the
-              &lt;replacement&gt;. The replacement could be omitted, in such
-              case it is still possible to check if the identifier was defined
+              <para>The identifier &lt;id&gt; will be replaced with the &lt;replacement&gt;.
+              The <code>DEFINE+</code> (since v1.18.0) will also redefine the identifier &lt;id&gt;
+              if it already exists. The replacement could be omitted,
+              in such case it is still possible to check if the identifier was defined
               with IFDEF or IFNDEF.<example>
                   <title></title>
 
                   <para><programlisting>    DEFINE str_honderd "Honderd"
-    BYTE str_honderd,0             ; BYTE "Honderd",0</programlisting></para>
+    BYTE str_honderd,0             ; BYTE "Honderd",0
+    DEFINE+ do_stuff set 4,e
+    do_stuff                       ; set 4,e
+    DEFINE+ do_stuff set 2,e
+    do_stuff                       ; set 2,e</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -1852,16 +1844,17 @@ counter = counter + 1
               <para>Predefined devices' identifiers list:</para>
 
               <synopsis> NONE ; off real device emulation mode
- ZXSPECTRUM48  ; ZX-Spectrum 48 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
- ZXSPECTRUM128 ; ZX-Spectrum 128 (like 48 with 8 pages, default map: 7, 5, 2, 0)
- ZXSPECTRUM256 ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
- ZXSPECTRUM512 ; e.g. ATM-Turbo 512 (another clone)
+ ZXSPECTRUM48   ; ZX-Spectrum 48 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
+ ZXSPECTRUM128  ; ZX-Spectrum 128 (like 48 with 8 pages, default map: 7, 5, 2, 0)
+ ZXSPECTRUM256  ; e.g. Scorpion 256 (exUSSR clone of ZX-Spectrum 128)
+ ZXSPECTRUM512  ; e.g. ATM-Turbo 512 (another clone)
  ZXSPECTRUM1024
  ZXSPECTRUM2048
  ZXSPECTRUM4096
  ZXSPECTRUM8192
  ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
                 ; (default pages map: 14, 15, 10, 11, 4, 5, 0, 1) (default slot: 7 (0xE000..0xFFFF))
+ NOSLOT64K      ; Single slot (slot 0) covering full 64kiB address range of Z80, 32 pages
 
  ;disable:
    DEVICE NONE
@@ -1950,9 +1943,10 @@ ENDOFPROG
               ALASM.</emphasis></para>
 
               <para>Out to console a string of bytes. Each value should be
-              between -129 and 256. Keys /D, /B, /H and /A set format of output of
+              between -129 and 256. Keys /D, /B, /C, /H and /A set format of output of
               numbers:<synopsis>/D - out only in Decimal
 /B - out only in Binary (truncated to 8 bit)
+/C - out as character in apostrophes (truncated to 8 bit)
 /H - out only in Hexadecimal
 /A - out both in Hexadecimal and Decimal</synopsis>
               <example>
@@ -2168,7 +2162,8 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
             <listitem>
               <para>The named label will be written to the export-file, in the
               form 'label: EQU value'. This way the export-file can be
-              included in other sources.<example>
+              included in other sources. Order of labels in file follows the order of EXPORT statements.
+              <example>
                   <title></title>
 
                   <para><programlisting>DRIE=3
@@ -2340,7 +2335,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_lua" />LUA [pass] [; ok comment to suppress "emit with allpass" warning]</term>
+            <term><anchor id="po_lua" />LUA [pass]</term>
 
             <listitem>
               <para>Using pseudo-ops LUA and ENDLUA you can insert Lua
@@ -2350,7 +2345,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               <para>Parameter is optional. It may be:<synopsis>PASS1   -  interpret Lua script in first pass only.
 PASS2   -  interpret Lua script in second pass only.
 PASS3   -  interpret Lua script in third pass only. By default.
-ALLPASS -  interpret Lua script in all passes. It is need, if you generate some Z80 code.</synopsis></para>
+ALLPASS -  interpret Lua script in all passes. It is needed if you generate some Z80 code.</synopsis></para>
 
               <para><example>
                   <title></title>
@@ -2475,22 +2470,24 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_opt" /><para>OPT [push] [reset] [listoff] [liston] [&lt;command line options&gt;]</para>
+            <term><anchor id="po_opt" /><para>OPT [push] [reset] [listoff] [liston] [listmc] [&lt;command line options&gt;]</para>
 			<para>OPT pop</para></term>
 
             <listitem>
               <para>Allows to reset and modify <link linkend="s_cli">options</link> affecting syntax and
 				  parsing (for lines of source following the OPT). The options allowed for OPT
-				  are: <code>--nofakes</code>, <code>--syntax</code>, <code>--zxnext</code>,
+				  are: <code>-W[no-]&lt;warning_id&gt;</code>, <code>--syntax</code>, <code>--zxnext</code>,
 				  <code>--reversepop</code> and <code>--dirbol</code>.
 			  </para>
 			  <para>
-				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston.
+				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston, listmc.
 				  The "push" command will make OPT to preserve current state of options. The "reset"
 				  command will reset OPT-related options to default state. The "listoff" command will
 				  suspend the listing for following lines until "liston" command is used (listing
 				  availability is part of the push/pop state, so to "nest" listing-off you can use
-				  "OPT push listoff : ... code ... : OPT pop" code sequence.
+				  "OPT push listoff : ... code ... : OPT pop" code sequence). The "listmc" command will
+				  filter listing to lines containing machine code bytes, to revert the filter use
+				  either "pop" of previous state or "reset".
 			  </para>
 			  <para>Then the provided options are applied. The default values are: fake instructions
 				  enabled (no warning), multi-argument delimiter is ",", both () and [] brackets
@@ -2500,6 +2497,9 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               </para>
 			  <para>The "pop" command: the previously preserved state of options is restored (states
 				  are preserved in "stack" way, so further OPT with "pop" will restore older states).
+			  </para>
+			  <para>The <link linkend="s_id_warnings">id-warning system</link> state is NOT saved/restored
+				  by OPT push/pop/reset and can be modified only by <code>-W</code> option.
 			  </para>
 			  <example>
                   <title>docs_examples/po_opt.asm</title>
@@ -2523,13 +2523,10 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               <para>Set the program counter to a specific address. If the second argument is
               provided, it will change memory page in the current slot, see
               <link linkend="po_page">PAGE</link> and <link linkend="po_slot">SLOT</link> (it will
-              warn you when &lt;address&gt; is outside of it, you can suppress the warning with
-              ";ok" comment).</para>
+              warn you when &lt;address&gt; is outside of it).</para>
               <para>When used inside <link linkend="po_disp">DISP</link> block, only the virtual
 				  "displaced" program counter is affected, but the machine code will be still
-				  sequentially emitted in the original physical location and warning is emitted
-				  (you can suppress the warning with ";ok" comment, if you want to use ORG
-				  intentionally in this way).
+				  sequentially emitted in the original physical location and warning is emitted.
                   <example>
                   <title>docs_examples/po_org.asm</title>
 
@@ -2865,8 +2862,7 @@ START  ....     ; some code
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
 			  <para>Save the device memory into TRD disk image. Saving two files with same filename will
-				  emit warning which can be suppressed by "; ok" comment, but two files (with same name)
-				  will be created in the disk directory.</para>
+				  emit warning, but two files (with same name) will be created in the disk directory.</para>
 
 			  <para>Adding pipe character "|" ahead of file
 				  name will make sjasmplus to delete old file(s) with the same name before writing
@@ -2881,8 +2877,8 @@ START  ....     ; some code
 				  only number of sectors patched, up to 255 sectors at most. This is special mode for
 				  single-file big-loaders.</para>
 
-			  <para>The unofficial three-letter extensions are supported, use "; ok" comment to suppress
-				  warning about unofficial extension (official extensions are only: B, C, D and #).
+			  <para>The unofficial three-letter extensions are also supported (official extensions
+				  are only: B, C, D and #).
 
 				<example><title></title>
                   <para><programlisting>    EMPTYTRD "test.trd" ;create empty TRD image
@@ -2955,6 +2951,29 @@ start:
                   <title></title>
 
                   <para><programlisting>    SIZE 32768       ; make sure file will be 32K</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><anchor id="po_sldopt" />SLDOPT &lt;type&gt; &lt;arguments&gt;</term>
+
+            <listitem>
+				<para>Type `<code>COMMENT</code>` - add comma delimited list of case sensitive keywords
+					to be detected in end-of-line comments and exported to
+					<link linkend="c_sld_data">Source Level Debugging (SLD) data</link>.
+					The particular keywords depend on the debugger you are using to process SLD data.</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM128
+    SLDOPT COMMENT WPMEM, Log
+    ORG $8000
+        call init ; Log("calling init") - gets exported to SLD
+        ret       ; no keyword here - not exported to SLD
+var1    DB 1      ; WPMEM - exported
+var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -3073,6 +3092,27 @@ start:
           </varlistentry>
 
           <varlistentry>
+            <term><anchor id="po_while" />WHILE &lt;expression&gt;</term>
+
+            <listitem>
+              <para>While expression evaluates to non-zero value, generates following lines until
+                  an ENDW (EDUP/ENDR alias) pseudo-op is encountered.
+				<example>
+                  <title></title>
+
+                  <programlisting>ptr = $4000
+    WHILE ptr &lt; $4020
+        DB low ptr
+ptr = ptr + 1
+    ENDW    ; EDUP or ENDR works too, but ENDW is advised for WHILE
+
+/* will emit bytes $00, $01, ..., $1F */</programlisting>
+                </example>
+			  </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><anchor id="po_word" />WORD &lt;words&gt;</term>
 
             <listitem>
@@ -3106,7 +3146,7 @@ start:
 				  the IF/IFN block with such expression can lead to unstable results. If you are sure
 				  the late definition of label will not affect resulting machine code (the IF block
 				  does not emit any machine code and does not define any label), you can suppress the
-				  warning with end-of-line comment "ok".</para>
+				  warning.</para>
 
 			  <example>
 				  <title></title>
@@ -4218,7 +4258,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
     LUA PASS2 ; if you fully understand what you are doing
         sj.add_byte(123) -- and you need emit bytes in other mode
-    ENDLUA ; ok ; you can suppress warning here or at start of block</programlisting></para>
+    ENDLUA ; luamc-ok ; you can suppress warning here or at start of block</programlisting></para>
         </example><example>
           <title>Declare function and use it</title>
 
@@ -4562,8 +4602,6 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 				  </para>
 				  <para>
 					  By default the palette from BMP file is used, but you can override that by savePalette = 0.
-					  The warning about palette containing less than 256 colours can be suppressed by end-of-line
-					  OK comment like: <code>SAVENEX SCREEN BMP ... ; ok ...your comment</code>.
 				  </para>
 			  </listitem>
 		  </varlistentry>
@@ -4855,7 +4893,11 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 	</section>
 
     <section>
-		<title><anchor id="s_sld_file_format" />SLD File Format definition (version "0")</title>
+		<title><anchor id="s_sld_file_format" />SLD File Format definition (version "1")</title>
+
+		<para><emphasis>The file format is still under development. If you are working on support in debugger, stay
+				in touch with us, so we can discuss any modifications to current format with you.</emphasis>
+		</para>
 
 		<para>The SLD data is text-file (sjasmplus is using UNIX-like newlines 0x0A, but parsers
 			should rather cope with any of common EOL scheme). The general format is CSV-like
@@ -4868,7 +4910,7 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			part of line should be ignored (comment line).
 			Currently only one type of "control line" exists, the "SLD.data.version" (third
 			field is integer number):
-<programlisting>|SLD.data.version|0
+<programlisting>|SLD.data.version|1
 ||anything ... comment-like line</programlisting>
 			The file format version line should be always first line of the SLD data file.
 		</para>
@@ -4925,14 +4967,18 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 
 		<para>
 			<code>&lt;type&gt;</code> - single uppercase letter representing type of line, current
-			types: T (instruction Trace), F (Function), D (equ Data), Z (device memory model)
+			types: T (instruction Trace), L (Label), F [deprecated, parse L], D [deprecated, parse L], Z (device memory model),
+			K (keyword comment, see <link linkend="po_sldopt">`SLDOPT COMMENT`</link>).
 		</para>
 
 		<para>
 			<code>&lt;data&gt;</code> - extra data specific for particular line type. Empty for
-			"T" lines, contains label/symbol name for types "F" and "D". The "D" values usually
-			don't have page defined (equals -1), but the tools should accept also valid page
-			value for "D" type too, just like for "F" lines.
+			"T" lines. For "L" a list of items separated by comma, where first three items
+			represent sub-parts of symbol name: module name, main label, local label (sub-part
+			may be empty), optional remaining items are usage-traits giving away various internal info about
+			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used, +module, +endmod,
+			+struct_def, +struct_data).
+			For type "K" the comment containing one of they defined keywords is present.
 		</para>
 
 		<para>
@@ -4951,11 +4997,12 @@ pages.size:&lt;page size&gt;,pages.count:&lt;page count&gt;,slots.count:&lt;slot
 			<title>Example of SLD file</title>
 
 <programlisting>
-|SLD.data.version|0
+|SLD.data.version|1
 || ZX Spectrum Next device description:
 toplevel.asm|59||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
 || label "main" points to 32768, with page 14 mapped-in (defined in toplevel.asm:62)
-toplevel.asm|62||0|14|32768|F|main
+|| the label "main" is used by other code (IFUSED-like), and has relocation data
+toplevel.asm|62||0|14|32768|L|,main,,+reloc,+used
 || instruction opcode at 32768 (page 14) was created by toplevel.asm:64
 toplevel.asm|64||0|14|32768|T|
 || instruction opcode at 32769 (p 14) was created by toplevel.asm:67
@@ -4966,9 +5013,10 @@ toplevel.asm|68:12:24||0|18|32770|T|
 || instruction opcode at 32771 (p 18) was created by toplevel.asm:68:24 (till EOL)
 toplevel.asm|68:24||0|18|32771|T|
 || "PORT_NUMBER EQU 254" defined at toplevel.asm:69
-toplevel.asm|69||0|-1|254|D|PORT_NUMBER
+toplevel.asm|69||0|-1|254|L|,PORT_NUMBER,,+equ
 || label+instruction emitted from toplevel.asm:70, but defined in include.asm:3
-toplevel.asm|70|include.asm|3|37|40976|F|0>macro_defined_in_include_asm
+|| with macro label "0>macro_defined_in_include_asm" (source ".macro_defined_in_include_asm:")
+toplevel.asm|70|include.asm|3|37|40976|L|,0,macro_defined_in_include_asm,+macro,+used
 toplevel.asm|70|include.asm|3|37|40976|T|
 </programlisting>
 

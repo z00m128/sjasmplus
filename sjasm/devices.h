@@ -74,6 +74,7 @@ public:
 	void CheckPage(const ECheckPageLevel level);
 	bool SetSlot(int slotNumber);		// sets "current/active" slot
 	CDeviceSlot* GetCurrentSlot();		// returns "current/active" slot
+	int GetCurrentSlotNum() const { return CurrentSlot; }	// returns "current/active" slot
 	int32_t GetMemoryOffset(int page, int32_t offset) const;
 	void Poke(aint z80adr, byte value);	// write byte into device memory with current page-mapping
 	char* ID;

@@ -51,9 +51,9 @@
  5    002F 72          > ld  (hl),d
  6    0030
  7    0030                  ;; syntax errors
-dot_repeat.asm(8): error: Dot-repeater must be followed by number or parentheses: .2.3    nop     
+dot_repeat.asm(8): error: Dot-repeater must be followed by number or parentheses: .2.3    nop
  8    0030                  .2.3    nop     ; there must be space after repeat-counter
-dot_repeat.asm(9): error: Unrecognized instruction: . 16    nop     
+dot_repeat.asm(9): error: Unrecognized instruction: . 16    nop
  9    0030                  . 16    nop     ; but no space after dot
 dot_repeat.asm(10): error: Unrecognized instruction: . (16)  nop
 10    0030                  . (16)  nop
@@ -62,10 +62,10 @@ dot_repeat.asm(11): error: Unrecognized instruction: .-1     nop
 dot_repeat.asm(12): error: Label not found: zz
 dot_repeat.asm(12): error: .N must be positive integer: 0
 12    0030                  .(zz)   nop     ; undefined label
-dot_repeat.asm(13): error: Dot-repeater must be followed by number or parentheses: .16+2   nop     
+dot_repeat.asm(13): error: Dot-repeater must be followed by number or parentheses: .16+2   nop
 13    0030                  .16+2   nop     ; expressions must be in parentheses
-dot_repeat.asm(14): error: Unrecognized instruction: +2   nop     
-dot_repeat.asm(14): error: Unexpected: +2   nop     
+dot_repeat.asm(14): error: Unrecognized instruction: +2   nop
+dot_repeat.asm(14): error: Unexpected: +2   nop
 14    0030             > +2   nop     ; expressions must be in parentheses (this one is ugly :/ )
 15    0030
 16    0030                  ;; value errors
@@ -82,13 +82,13 @@ dot_repeat.asm(21): error: .N must be positive integer: -1
 23    0032 E6 01       > and 1
 24    0034                      ; this produces 2x "and 1" (in v1.17.0 it does instead add `and 1` to expression)
 25    0034
-dot_repeat.asm(26): error: Dot-repeater must be followed by number or parentheses: .(5-3   and 2   
+dot_repeat.asm(26): error: Dot-repeater must be followed by number or parentheses: .(5-3   and 2
 26    0034                  .(5-3   and 2   ; parentheses are not closed
-dot_repeat.asm(27): error: Unrecognized instruction: ) and 3   
-dot_repeat.asm(27): error: Unexpected: ) and 3   
+dot_repeat.asm(27): error: Unrecognized instruction: ) and 3
+dot_repeat.asm(27): error: Unexpected: ) and 3
 27    0034             > ) and 3   ; one too many closing parentheses
-dot_repeat.asm(27): error: Unrecognized instruction: ) and 3   
-dot_repeat.asm(27): error: Unexpected: ) and 3   
+dot_repeat.asm(27): error: Unrecognized instruction: ) and 3
+dot_repeat.asm(27): error: Unexpected: ) and 3
 27    0034             > ) and 3
 28    0034
 # file closed: dot_repeat.asm

@@ -127,7 +127,7 @@ zx256_to_zx1M.asm(28): error: Write outside of device memory at: 65536
  29   0002                  ASSERT {0} == "77"          ; still page 7 there
  30   0002                  ASSERT {0xFFFE} == "CC"
  31   0002
-zx256_to_zx1M.asm(32): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     
+zx256_to_zx1M.asm(32): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1
  32   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     ;; will error out
  33   0002
  34   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -338,7 +338,7 @@ zx256_to_zx1M.asm(61): error: Write outside of device memory at: 65536
  62   0002                  ASSERT {0} == "77"          ; still page 7 there
  63   0002                  ASSERT {0xFFFE} == "CC"
  64   0002
-zx256_to_zx1M.asm(65): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     
+zx256_to_zx1M.asm(65): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1
  65   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     ;; will error out
  66   0002
  67   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -709,7 +709,7 @@ zx256_to_zx1M.asm(94): error: Write outside of device memory at: 65536
  95   0002                  ASSERT {0} == "77"          ; still page 7 there
  96   0002                  ASSERT {0xFFFE} == "CC"
  97   0002
-zx256_to_zx1M.asm(98): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     
+zx256_to_zx1M.asm(98): error: [SAVESNA] Negative values are not allowed: SAVESNA "toCheck_IsZXSpectrumDevice_method", -1
  98   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", -1     ;; will error out
  99   0002
 100   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;

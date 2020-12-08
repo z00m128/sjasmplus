@@ -5,10 +5,10 @@
  4    0000                  ; some tests need more strict syntax rules to hit specific code paths
  5    0000                  OPT reset --syntax=ab --zxnext
  6    0000
-z80n_cover100.asm(7): error: Operand expected: [1234        
+z80n_cover100.asm(7): error: Operand expected: [1234
  7    0000 ED 34 00 00      add     hl,[1234        ; "Operand expected" error
  8    0004
-z80n_cover100.asm(9): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    hl,b            
+z80n_cover100.asm(9): error: Z80N barrel shifts exist only with "DE,B" arguments: brlc    hl,b
  9    0004                  brlc    hl,b            ; "only DE,B arguments" error
 z80n_cover100.asm(10): error: Z80N barrel shifts exist only with "DE,B" arguments: bsla    hl,b
 10    0004                  bsla    hl,b

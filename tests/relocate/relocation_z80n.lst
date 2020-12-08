@@ -15,7 +15,7 @@
 14    100C ED 36 04 10      add     bc,add_r16_imm16
 15    1010
 16    1010              push_imm16:
-relocation_z80n.asm(17): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    push_imm16          
+relocation_z80n.asm(17): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    push_imm16
 17    1010 ED 8A 10 10      push    push_imm16          ; not suitable for relocation because big-endian encoding
 18    1014                  ; try multi arg variation, it will report two errors for two expressions
 relocation_z80n.asm(19): error: PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE: push    0x1234, push_imm16, 0x2345, push_imm16
@@ -26,13 +26,13 @@ relocation_z80n.asm(19): error: PUSH imm16 is big-endian encoded and can't be pa
 19    1020 ED 8A 10 10
 20    1024
 21    1024              imm8_warnings:                  ; warning all
-relocation_z80n.asm(22): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_z80n.asm(22): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 22    1024 ED 92 10         nextreg high imm8_warnings,a
-relocation_z80n.asm(23): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_z80n.asm(23): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 23    1027 ED 91 10 34      nextreg high imm8_warnings,$34
-relocation_z80n.asm(24): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_z80n.asm(24): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 24    102B ED 91 12 10      nextreg $12,high imm8_warnings
-relocation_z80n.asm(25): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_z80n.asm(25): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 25    102F ED 27 10         test    high imm8_warnings
 26    1032
 27    1032                  RELOCATE_END
@@ -76,8 +76,8 @@ relocation_z80n.asm(25): warning: Relocation makes one of the expressions unstab
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x1004   add_r16_imm16
+0x1024   imm8_warnings
+0x1010   push_imm16
 0x0003   relocate_count
 0x0006   relocate_size
-0x1004   add_r16_imm16
-0x1010   push_imm16
-0x1024   imm8_warnings

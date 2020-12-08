@@ -15,7 +15,7 @@
 14    8000                  ASSERT $4000 == equClassic && 5 == $$equClassic
 15    8000                  ASSERT $4001 == equWithPage && 1 == $$equWithPage
 16    8000
-equ_with_explicit_page.asm(17): error: Expression error: 
+equ_with_explicit_page.asm(17): error: Expression error:
 17    8000              errorEqu1       EQU     $4002 ,
 equ_with_explicit_page.asm(18): error: Expression error: @
 equ_with_explicit_page.asm(18): error: Unexpected: @
@@ -25,8 +25,8 @@ equ_with_explicit_page.asm(18): error: Unexpected: @
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x8000   regular
 0x4000   equClassic
 0x4001   equWithPage
 0x4002 X errorEqu1
 0x4003 X errorEqu2
+0x8000   regular

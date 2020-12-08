@@ -1,6 +1,6 @@
-longptr1: EQU 0x0000FFFF
-longptr2: EQU 0x00010000
-longptr3: EQU 0x00010001
 devbyte1: EQU 0x0000FFFF
 devbyte2: EQU 0x00010000
 devbyte3: EQU 0x00010001
+longptr1: EQU 0x0000FFFF
+longptr2: EQU 0x00010000
+longptr3: EQU 0x00010001

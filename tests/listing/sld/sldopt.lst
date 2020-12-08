@@ -1,0 +1,51 @@
+# file opened: sldopt.asm
+ 1    0000                  DEVICE ZXSPECTRUMNEXT
+ 2    0000                  ORG $8000
+ 3    8000 27                   daa         ; some eol comments with keyword1 included
+ 4    8001 00                   nop         ; some eol comment without any keyword
+ 5    8002              ; full line comment with keyword2 included (line without code)
+ 6    8002              ; full line without any keyword, but wrong cased Keyword2 (SLD keywords are case sensitive)
+ 7    8002 01 62 03     label1: DB  1,"b",3 ; some keyword3 here
+ 8    8005 04 65 06     label2: DB  4,"e",6 ; keyword none here
+ 9    8008
+10    8008                  SLDOPT COMMENT keyword1, keyword2   ; SLDOPT is global directive
+11    8008                  SLDOPT COMMENT keyword2, keyword3   ; and keywords could be added over multiple lines
+12    8008
+13    8008 C9                   ret         ; some keyword1 also after SLDOPT specified (should not matter)
+14    8009 00                   nop         ; some eol comment without any keyword
+15    800A                  MMU 6, 100
+16    800A                  DISP 50000, 100
+17    C350 2F                   cpl         ; keyword2 in displacement block (displaced address reported)
+18    C351                  ENT
+19    800B
+20    800B                      ORG 60000
+21    EA60                  MACRO MEMGUARD
+22    EA60 ~                    defb 0  ; WPMEM keyword1
+23    EA60 ~                    nop     ; keyword3
+24    EA60                  ENDM
+25    EA60
+26    EA60                  MEMGUARD
+26    EA60 00          >        defb 0  ; WPMEM keyword1
+26    EA61 00          >        nop     ; keyword3
+27    EA62 D2 04        someData:   dw 1234
+28    EA64                  MEMGUARD
+28    EA64 00          >        defb 0  ; WPMEM keyword1
+28    EA65 00          >        nop     ; keyword3
+29    EA66
+30    EA66                  ; syntax error
+sldopt.asm(31): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): INVALID whatever
+31    EA66                  SLDOPT INVALID whatever
+sldopt.asm(32): error: [SLDOPT COMMENT] invalid keyword: @@@
+32    EA66                  SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
+sldopt.asm(33): error: [SLDOPT COMMENT] invalid keyword:
+33    EA66                  SLDOPT COMMENT
+sldopt.asm(34): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT):
+34    EA66                  SLDOPT
+35    EA66
+# file closed: sldopt.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8002 X label1
+0x8005 X label2
+0xEA62 X someData

@@ -29,6 +29,7 @@
 // sjio.cpp
 
 #include "sjdefs.h"
+#include <cassert>
 
 #include <fcntl.h>
 
@@ -194,6 +195,7 @@ void PrepareListLine(char* buffer, aint hexadd)
 	}
 	memset(buffer, ' ', 24);
 	if (listmacro) buffer[23] = '>';
+	if (Options::syx.IsMcOnlyListing) buffer[23] = '{';
 	sprintf(buffer, "%*u", linewidth, linenumber); buffer[linewidth] = ' ';
 	memcpy(buffer + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
 	sprintf(buffer + 6, "%04X", hexadd & 0xFFFF); buffer[10] = ' ';
@@ -230,6 +232,9 @@ void ListFile(bool showAsSkipped) {
 	if (LASTPASS != pass || NULL == GetListingFile() || donotlist || Options::syx.IsListingSuspended) {
 		donotlist = nListBytes = 0;
 		return;
+	}
+	if (Options::syx.IsMcOnlyListing && nListBytes <= 0) {
+		return;		// filter out all lines without machine-code bytes
 	}
 	int pos = 0;
 	do {
@@ -294,7 +299,28 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 	if (DISP_NONE != PseudoORG) ++adrdisp;
 }
 
-void EmitByte(int byte) {
+static bool PageDiffersWarningShown = false;
+
+void EmitByte(int byte, bool isInstructionStart) {
+	if (isInstructionStart) {
+		// SLD (Source Level Debugging) tracing-data logging
+		if (IsSldExportActive()) {
+			int pageNum = Page->Number;
+			if (DISP_NONE != PseudoORG) {
+				int mappingPageNum = Device->GetPageOfA16(CurAddress);
+				if (LABEL_PAGE_UNDEFINED == dispPageNum) {	// special DISP page is not set, use mapped
+					pageNum = mappingPageNum;
+				} else {
+					pageNum = dispPageNum;					// special DISP page is set, use it instead
+					if (pageNum != mappingPageNum && !PageDiffersWarningShown) {
+						WarningById(W_DISP_MEM_PAGE);
+						PageDiffersWarningShown = true;		// show warning about different mapping only once
+					}
+				}
+			}
+			WriteToSldFile(pageNum, CurAddress);
+		}
+	}
 	byte &= 0xFF;
 	if (nListBytes < LIST_EMIT_BYTES_BUFFER_SIZE-1) {
 		ListEmittedBytes[nListBytes++] = byte;		// write also into listing
@@ -307,21 +333,28 @@ void EmitByte(int byte) {
 	EmitByteNoListing(byte);
 }
 
-void EmitWord(int word) {
-	EmitByte(word % 256);
-	EmitByte(word / 256);
+void EmitWord(int word, bool isInstructionStart) {
+	EmitByte(word % 256, isInstructionStart);
+	EmitByte(word / 256, false);
 }
 
-void EmitBytes(const int* bytes) {
-	if (*bytes == -1) {
+void EmitBytes(const int* bytes, bool isInstructionStart) {
+	if (BYTES_END_MARKER == *bytes) {
 		Error("Illegal instruction", line, IF_FIRST);
 		SkipToEol(lp);
 	}
-	while (*bytes != -1) EmitByte(*bytes++);
+	while (BYTES_END_MARKER != *bytes) {
+		EmitByte(*bytes++, isInstructionStart);
+		isInstructionStart = (INSTRUCTION_START_MARKER == *bytes);	// only true for first byte, or when marker
+		if (isInstructionStart) ++bytes;
+	}
 }
 
-void EmitWords(int* words) {
-	while (*words != -1) EmitWord(*words++);
+void EmitWords(int* words, bool isInstructionStart) {
+	while (BYTES_END_MARKER != *words) {
+		EmitWord(*words++, isInstructionStart);
+		isInstructionStart = false;		// only true for first word
+	}
 }
 
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
@@ -1107,6 +1140,15 @@ EReturn SkipFile() {
 				ListFile();
 				return ELSEIF;
 			}
+		} else if (cmphstr(p, "lua")) {		// lua script block detected, skip it whole
+			// with extra custom while loop, to avoid confusion by `if/...` inside lua scripts
+			ListFile(true);
+			while (ReadLine()) {
+				p = line;
+				SkipBlanks(p);
+				if (cmphstr(p, "endlua")) break;
+				ListFile(true);
+			}
 		}
 		ListFile(true);
 	}
@@ -1152,7 +1194,7 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	return 0;
 }
 
-void WriteLabelEquValue(char* name, aint value, FILE* f) {
+void WriteLabelEquValue(const char* name, aint value, FILE* f) {
 	if (nullptr == f) return;
 	char lnrs[16],* l = lnrs;
 	STRCPY(temp, LINEMAX-2, name);
@@ -1178,13 +1220,14 @@ void WriteExp(char* n, aint v) {
 static FILE* FP_SourceLevelDebugging = NULL;
 static char sldMessage[LINEMAX];
 static const char* WriteToSld_noSymbol = "";
-static char sldMessage_sourcePos[80];
-static char sldMessage_definitionPos[80];
+static char sldMessage_sourcePos[1024];
+static char sldMessage_definitionPos[1024];
 static const char* sldMessage_posFormat = "%d:%d:%d";	// at +3 is "%d:%d" and at +6 is "%d"
+static std::vector<std::string> sldCommentKeywords;
 
 static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
 	int offsetFormat = !pos.colBegin ? 6 : !pos.colEnd ? 3 : 0;
-	snprintf(buffer, 79, sldMessage_posFormat + offsetFormat, pos.line, pos.colBegin, pos.colEnd);
+	snprintf(buffer, 1024-1, sldMessage_posFormat + offsetFormat, pos.line, pos.colBegin, pos.colEnd);
 }
 
 static void OpenSldImp(const char* sldFilename) {
@@ -1192,7 +1235,17 @@ static void OpenSldImp(const char* sldFilename) {
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
 		Error("Error opening file", sldFilename, FATAL);
 	}
-	fputs("|SLD.data.version|0\n", FP_SourceLevelDebugging);
+	fputs("|SLD.data.version|1\n", FP_SourceLevelDebugging);
+	if (0 < sldCommentKeywords.size()) {
+		fputs("||K|KEYWORDS|", FP_SourceLevelDebugging);
+		bool notFirst = false;
+		for (auto keyword : sldCommentKeywords) {
+			if (notFirst) fputs(",", FP_SourceLevelDebugging);
+			notFirst = true;
+			fputs(keyword.c_str(), FP_SourceLevelDebugging);
+		}
+		fputs("\n", FP_SourceLevelDebugging);
+	}
 }
 
 // will write directly into Options::SourceLevelDebugFName array
@@ -1273,6 +1326,34 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	fputs(sldMessage, FP_SourceLevelDebugging);
 }
 
+void SldAddCommentKeyword(const char* keyword) {
+	if (nullptr == keyword || !keyword[0]) {
+		if (LASTPASS == pass) Error("[SLDOPT COMMENT] invalid keyword", lp, SUPPRESS);
+		return;
+	}
+	if (1 == pass) {
+		auto begin = sldCommentKeywords.cbegin();
+		auto end = sldCommentKeywords.cend();
+		// add keyword only if it is new (not included yet)
+		if (std::find(begin, end, keyword) == end) sldCommentKeywords.push_back(keyword);
+	}
+}
+
+void SldTrackComments() {
+	assert(eolComment && IsSldExportActive());
+	if (!eolComment[0]) return;
+	for (auto keyword : sldCommentKeywords) {
+		if (strstr(eolComment, keyword.c_str())) {
+			int pageNum = Page->Number;
+			if (DISP_NONE != PseudoORG) {
+				pageNum = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum : Device->GetPageOfA16(CurAddress);
+			}
+			WriteToSldFile(pageNum, CurAddress, 'K', eolComment);
+			return;
+		}
+	}
+}
+
 /////// Breakpoints list (for different emulators)
 static FILE* FP_BreakpointsFile = nullptr;
 static EBreakpointsFile breakpointsType;
@@ -1302,7 +1383,7 @@ static void CloseBreakpointsFile() {
 
 void WriteBreakpoint(const aint val) {
 	if (!FP_BreakpointsFile) {
-		if (warningNotSuppressed()) Warning("breakpoints file was not specified");
+		if (warningNotSuppressed()) WarningById(W_BP_FILE);
 		return;
 	}
 	++breakpointsCounter;

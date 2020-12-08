@@ -1,6 +1,6 @@
 forward_reference_errors.asm(6): error: Duplicate label: equ_lab2
 forward_reference_errors.asm(14): error: Forward reference
-forward_reference_errors.asm(17): warning: [IF/IFN] Forward reference: IF 0 < normal_label2_fwd
+forward_reference_errors.asm(17): warning[fwdref]: forward reference of symbol: IF 0 < normal_label2_fwd
 forward_reference_errors.asm(21): error: [STRUCT] Forward reference
 forward_reference_errors.asm(25): error: [DUP/REPT] Forward reference
 # file opened: forward_reference_errors.asm
@@ -39,11 +39,11 @@ forward_reference_errors.asm(6): warning: Label has different value in pass 3: p
 31    0004              normal_label2_fwd:
 32    0004              dup_label_fwd:
 33    0004
-34    0004                      IF 0 < normal_label3_fwd    ; ok - since v1.15.0 it's possible to suppress the warning
+34    0004                      IF 0 < normal_label3_fwd    ; fwdref-ok - since v1.15.0 it's possible to suppress the warning
 35    0004                          ASSERT 0 < $
 36    0004                      ENDIF
 37    0004
-38    0004                      IF 4 = normal_label3_fwd    ; ok - but label reports warning even when IF warning is suppressed
+38    0004                      IF 4 = normal_label3_fwd    ; fwdref-ok - but label reports warning even when IF warning is suppressed
 39    0004 ~                        nop
 40    0004                      ENDIF
 41    0004
@@ -54,16 +54,16 @@ forward_reference_errors.asm(42): warning: Label has different value in pass 3: 
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x5678 X defl_lab2
-0x5678 X equ_lab2
-0x0003   normal_label
-0x0004   defl_lab_fwd
 0x0004 X defl_lab
-0x0004   equ_lab_fwd
+0x5678 X defl_lab2
+0x0004   defl_lab_fwd
+0x0004   dup_label_fwd
 0x0004 X equ_lab
+0x5678 X equ_lab2
+0x0004   equ_lab_fwd
+0x0003   normal_label
 0x0004   normal_label2_fwd
+0x0004   normal_label3_fwd
 0x0004   struct_lab_fwd
 0x0005 X test_struct
 0x0004 X test_struct.xyz
-0x0004   dup_label_fwd
-0x0004   normal_label3_fwd

@@ -89,43 +89,43 @@ align.asm(46): warning: Struct SPOS did use ALIGN 4 in definition, but here it i
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x000E   SPOS
-0x0004   SPOS.X
-0x0006   SPOS.Y
-0x000C   SPOS.AD
-0x000F   ST2
-0x0000   ST2.ONEB
-0x0001   ST2.P1
-0x0005   ST2.P1.X
-0x0007   ST2.P1.Y
-0x000D   ST2.P1.AD
+0x8000 X NoWarning
+0x800C X NoWarning.AD
+0x8004 X NoWarning.X
+0x8006 X NoWarning.Y
+0x8004 X NoWarning2
+0x8010 X NoWarning2.AD
+0x8008 X NoWarning2.X
+0x800A X NoWarning2.Y
 0x8000   POS1
+0x800C X POS1.AD
 0x8004 X POS1.X
 0x8006 X POS1.Y
-0x800C X POS1.AD
 0x800E X POS2
 0x800E X POS2.ONEB
 0x800F X POS2.P1
+0x801B X POS2.P1.AD
 0x8013 X POS2.P1.X
 0x8015 X POS2.P1.Y
-0x801B X POS2.P1.AD
-0x8000 X NoWarning
-0x8004 X NoWarning.X
-0x8006 X NoWarning.Y
-0x800C X NoWarning.AD
-0x8001 X Warn3B
-0x8005 X Warn3B.X
-0x8007 X Warn3B.Y
-0x800D X Warn3B.AD
-0x8002 X Warn2B
-0x8006 X Warn2B.X
-0x8008 X Warn2B.Y
-0x800E X Warn2B.AD
+0x000E   SPOS
+0x000C   SPOS.AD
+0x0004   SPOS.X
+0x0006   SPOS.Y
+0x000F   ST2
+0x0000   ST2.ONEB
+0x0001   ST2.P1
+0x000D   ST2.P1.AD
+0x0005   ST2.P1.X
+0x0007   ST2.P1.Y
 0x8003 X Warn1B
+0x800F X Warn1B.AD
 0x8007 X Warn1B.X
 0x8009 X Warn1B.Y
-0x800F X Warn1B.AD
-0x8004 X NoWarning2
-0x8008 X NoWarning2.X
-0x800A X NoWarning2.Y
-0x8010 X NoWarning2.AD
+0x8002 X Warn2B
+0x800E X Warn2B.AD
+0x8006 X Warn2B.X
+0x8008 X Warn2B.Y
+0x8001 X Warn3B
+0x800D X Warn3B.AD
+0x8005 X Warn3B.X
+0x8007 X Warn3B.Y

@@ -2,18 +2,18 @@ Syntax option not implemented yet: L
 # file opened: syntax2_ABFL.asm
  1    0000              ; SYNTAX option "aBFL":     (used to be "ABFL", but "A" was removed)
  2    0000              ;  L is "unimplemented yet" (comments below are for future implementation)
-syntax2_ABFL.asm(3): error: Fake instructions are not enabled: ld      bc,hl       
+syntax2_ABFL.asm(3): error: Fake instructions are not enabled: ld      bc,hl
  3    0000                  ld      bc,hl       ; error
-syntax2_ABFL.asm(4): error: Fake instructions are not enabled: ld      bc,hl       
+syntax2_ABFL.asm(4): error: Fake instructions are not enabled: ld      bc,hl
  4    0000                  ld      bc,hl       ; still error even with "fake" in this comment
  5    0000 90               sub     a,b         ; sub b
  6    0001 97 90            sub     a,,b        ; sub a : sub b
-syntax2_ABFL.asm(7): error: Unexpected: ``b        
+syntax2_ABFL.asm(7): error: Unexpected: ``b
  7    0003 97               sub     a``b        ; error
  8    0004 44 4D            ld      b,h,,c,l    ; ld b,h : ld c,l
-syntax2_ABFL.asm(9): error: Unexpected: ``c,l    
+syntax2_ABFL.asm(9): error: Unexpected: ``c,l
  9    0006 44               ld      b,h``c,l    ; error
-syntax2_ABFL.asm(10): error: Unexpected: , c,l    
+syntax2_ABFL.asm(10): error: Unexpected: , c,l
 10    0007 44               ld      b,h, c,l    ; error
 11    0008              hl:                     ; error
 12    0008 3E 08            ld      a,(hl)      ; expression error  ; with "L" unimplemented this actually works as LD a,8
@@ -38,7 +38,7 @@ syntax2_ABFL.asm(24): error: Illegal instruction:     jp      [C]
 25    0015
 26    0015 ED 78            in      a,(c)
 27    0017 DB FE            in      a,(254)
-syntax2_ABFL.asm(28): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax2_ABFL.asm(28): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
 28    0019 ED 71            out     (c),0
 29    001B ED 41            out     (c),b
 30    001D D3 FE            out     (254),a

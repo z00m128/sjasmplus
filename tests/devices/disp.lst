@@ -29,7 +29,7 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x3FFE X orgLabel
 0xBFFF X dispLabel
-0x7FFE X orgLabel2
 0xBFFD X dispLabel2
+0x3FFE X orgLabel
+0x7FFE X orgLabel2

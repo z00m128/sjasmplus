@@ -194,121 +194,121 @@
 142   1114              test4err    S_SymbOS_icon_header {
 multi_line_initializer.asm(143): error: closing } missing
 multi_line_initializer.asm(143): error: [STRUCT] Syntax error - too many arguments?
-multi_line_initializer.asm(143): error: Unrecognized instruction: , 
-multi_line_initializer.asm(143): error: Unexpected: , 
+multi_line_initializer.asm(143): error: Unrecognized instruction: ,
+multi_line_initializer.asm(143): error: Unexpected: ,
 143   1114 01 08 08         1,,, ; missing }
 144   1117
 # file closed: multi_line_initializer.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0003 X S_SymbOS_icon_header
-0x0000 X S_SymbOS_icon_header.type
-0x0001 X S_SymbOS_icon_header.sizex
-0x0002 X S_SymbOS_icon_header.sizey
-0x0100   S_SymbOS_exe_header
-0x0000 X S_SymbOS_exe_header.codelen
-0x0002 X S_SymbOS_exe_header.datalen
-0x0004 X S_SymbOS_exe_header.tranlen
-0x0006   S_SymbOS_exe_header.datadr
-0x0006 X S_SymbOS_exe_header.origin
-0x0008   S_SymbOS_exe_header.trnadr
-0x0008 X S_SymbOS_exe_header.relcount
-0x000A   S_SymbOS_exe_header.prztab
-0x000A X S_SymbOS_exe_header.stacksize
-0x000E   S_SymbOS_exe_header.bnknum
-0x000F X S_SymbOS_exe_header.name
-0x0028 X S_SymbOS_exe_header.flags
-0x0029 X S_SymbOS_exe_header.icon16
-0x0030   S_SymbOS_exe_header.memtab
-0x0030 X S_SymbOS_exe_header.identifier
-0x0038 X S_SymbOS_exe_header.codex
-0x003A X S_SymbOS_exe_header.datex
-0x003C X S_SymbOS_exe_header.trnex
-0x0058   S_SymbOS_exe_header.appId
-0x0058 X S_SymbOS_exe_header.osver
-0x005A X S_SymbOS_exe_header.iconsm
-0x005A X S_SymbOS_exe_header.iconsm.type
-0x005B X S_SymbOS_exe_header.iconsm.sizex
-0x005C X S_SymbOS_exe_header.iconsm.sizey
-0x005D X S_SymbOS_exe_header.icobsmdat
-0x006D X S_SymbOS_exe_header.iconbg
-0x006D X S_SymbOS_exe_header.iconbg.type
-0x006E X S_SymbOS_exe_header.iconbg.sizex
-0x006F X S_SymbOS_exe_header.iconbg.sizey
-0x0070 X S_SymbOS_exe_header.icobbgdat
 0x1000 X exeHeader
-0x1000 X exeHeader.codelen
-0x1002 X exeHeader.datalen
-0x1004 X exeHeader.tranlen
-0x1006 X exeHeader.datadr
-0x1006 X exeHeader.origin
-0x1008 X exeHeader.trnadr
-0x1008 X exeHeader.relcount
-0x100A X exeHeader.prztab
-0x100A X exeHeader.stacksize
-0x100E X exeHeader.bnknum
-0x100F X exeHeader.name
-0x1028 X exeHeader.flags
-0x1029 X exeHeader.icon16
-0x1030 X exeHeader.memtab
-0x1030 X exeHeader.identifier
-0x1038 X exeHeader.codex
-0x103A X exeHeader.datex
-0x103C X exeHeader.trnex
 0x1058 X exeHeader.appId
-0x1058 X exeHeader.osver
-0x105A X exeHeader.iconsm
-0x105A X exeHeader.iconsm.type
-0x105B X exeHeader.iconsm.sizex
-0x105C X exeHeader.iconsm.sizey
+0x100E X exeHeader.bnknum
+0x1000 X exeHeader.codelen
+0x1038 X exeHeader.codex
+0x1006 X exeHeader.datadr
+0x1002 X exeHeader.datalen
+0x103A X exeHeader.datex
+0x1028 X exeHeader.flags
+0x1070 X exeHeader.icobbgdat
 0x105D X exeHeader.icobsmdat
+0x1029 X exeHeader.icon16
 0x106D X exeHeader.iconbg
-0x106D X exeHeader.iconbg.type
 0x106E X exeHeader.iconbg.sizex
 0x106F X exeHeader.iconbg.sizey
-0x1070 X exeHeader.icobbgdat
-0x1101 X test2
-0x1101 X test2.type
-0x1102 X test2.sizex
-0x1103 X test2.sizey
+0x106D X exeHeader.iconbg.type
+0x105A X exeHeader.iconsm
+0x105B X exeHeader.iconsm.sizex
+0x105C X exeHeader.iconsm.sizey
+0x105A X exeHeader.iconsm.type
+0x1030 X exeHeader.identifier
+0x1030 X exeHeader.memtab
+0x100F X exeHeader.name
+0x1006 X exeHeader.origin
+0x1058 X exeHeader.osver
+0x100A X exeHeader.prztab
+0x1008 X exeHeader.relcount
+0x100A X exeHeader.stacksize
+0x1004 X exeHeader.tranlen
+0x1008 X exeHeader.trnadr
+0x103C X exeHeader.trnex
+0x0100   S_SymbOS_exe_header
+0x0058   S_SymbOS_exe_header.appId
+0x000E   S_SymbOS_exe_header.bnknum
+0x0000 X S_SymbOS_exe_header.codelen
+0x0038 X S_SymbOS_exe_header.codex
+0x0006   S_SymbOS_exe_header.datadr
+0x0002 X S_SymbOS_exe_header.datalen
+0x003A X S_SymbOS_exe_header.datex
+0x0028 X S_SymbOS_exe_header.flags
+0x0070 X S_SymbOS_exe_header.icobbgdat
+0x005D X S_SymbOS_exe_header.icobsmdat
+0x0029 X S_SymbOS_exe_header.icon16
+0x006D X S_SymbOS_exe_header.iconbg
+0x006E X S_SymbOS_exe_header.iconbg.sizex
+0x006F X S_SymbOS_exe_header.iconbg.sizey
+0x006D X S_SymbOS_exe_header.iconbg.type
+0x005A X S_SymbOS_exe_header.iconsm
+0x005B X S_SymbOS_exe_header.iconsm.sizex
+0x005C X S_SymbOS_exe_header.iconsm.sizey
+0x005A X S_SymbOS_exe_header.iconsm.type
+0x0030 X S_SymbOS_exe_header.identifier
+0x0030   S_SymbOS_exe_header.memtab
+0x000F X S_SymbOS_exe_header.name
+0x0006 X S_SymbOS_exe_header.origin
+0x0058 X S_SymbOS_exe_header.osver
+0x000A   S_SymbOS_exe_header.prztab
+0x0008 X S_SymbOS_exe_header.relcount
+0x000A X S_SymbOS_exe_header.stacksize
+0x0004 X S_SymbOS_exe_header.tranlen
+0x0008   S_SymbOS_exe_header.trnadr
+0x003C X S_SymbOS_exe_header.trnex
+0x0003 X S_SymbOS_icon_header
+0x0001 X S_SymbOS_icon_header.sizex
+0x0002 X S_SymbOS_icon_header.sizey
+0x0000 X S_SymbOS_icon_header.type
 0x0005 X S_test3
 0x0000 X S_test3.b1
+0x0004 X S_test3.b2
 0x0001 X S_test3.icon
-0x0001 X S_test3.icon.type
 0x0002 X S_test3.icon.sizex
 0x0003 X S_test3.icon.sizey
-0x0004 X S_test3.b2
-0x1104 X test3a
-0x1104 X test3a.b1
-0x1105 X test3a.icon
-0x1105 X test3a.icon.type
-0x1106 X test3a.icon.sizex
-0x1107 X test3a.icon.sizey
-0x1108 X test3a.b2
-0x1109 X test3b
-0x1109 X test3b.b1
-0x110A X test3b.icon
-0x110A X test3b.icon.type
-0x110B X test3b.icon.sizex
-0x110C X test3b.icon.sizey
-0x110D X test3b.b2
+0x0001 X S_test3.icon.type
 0x0003 X S_test4
 0x0000 X S_test4.icon
-0x0000 X S_test4.icon.type
 0x0001 X S_test4.icon.sizex
 0x0002 X S_test4.icon.sizey
+0x0000 X S_test4.icon.type
+0x1101 X test2
+0x1102 X test2.sizex
+0x1103 X test2.sizey
+0x1101 X test2.type
+0x1104 X test3a
+0x1104 X test3a.b1
+0x1108 X test3a.b2
+0x1105 X test3a.icon
+0x1106 X test3a.icon.sizex
+0x1107 X test3a.icon.sizey
+0x1105 X test3a.icon.type
+0x1109 X test3b
+0x1109 X test3b.b1
+0x110D X test3b.b2
+0x110A X test3b.icon
+0x110B X test3b.icon.sizex
+0x110C X test3b.icon.sizey
+0x110A X test3b.icon.type
 0x110E X test4a
 0x110E X test4a.icon
-0x110E X test4a.icon.type
 0x110F X test4a.icon.sizex
 0x1110 X test4a.icon.sizey
+0x110E X test4a.icon.type
 0x1111 X test4b
 0x1111 X test4b.icon
-0x1111 X test4b.icon.type
 0x1112 X test4b.icon.sizex
 0x1113 X test4b.icon.sizey
+0x1111 X test4b.icon.type
 0x1114 X test4err
-0x1114 X test4err.type
 0x1115 X test4err.sizex
 0x1116 X test4err.sizey
+0x1114 X test4err.type

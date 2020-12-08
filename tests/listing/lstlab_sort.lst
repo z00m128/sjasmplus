@@ -1,0 +1,74 @@
+# file opened: lstlab_sort.asm
+ 1    0000              ; check sorting of labels, especially when labels differ only in case
+ 2    0000                      DEVICE ZXSPECTRUM128
+ 2    0000                ORG $8000
+ 3    8000              ; block 3. C
+ 4    8000 0F           ccccC       rrca
+ 5    8001 1F           ccCcc       rra
+ 6    8002 2F           Ccccc       cpl
+ 7    8003 3F           cCccc       ccf
+ 8    8004 07           ccccc       rlca
+ 9    8005
+10    8005              ; block 2. B
+11    8005 0F           bbbbB       rrca
+12    8006 1F           bbBbb       rra
+13    8007 2F           Bbbbb       cpl
+14    8008 3F           bBbbb       ccf
+15    8009 07           bbbbb       rlca
+16    800A
+17    800A              ; block 5. E
+18    800A 0F           eeeeE       rrca
+19    800B 1F           eeEee       rra
+20    800C 2F           Eeeee       cpl
+21    800D 3F           eEeee       ccf
+22    800E 07           eeeee       rlca
+23    800F
+24    800F              ; block 1. A
+25    800F 0F           aaaaA       rrca
+26    8010 1F           aaAaa       rra
+27    8011 2F           Aaaaa       cpl
+28    8012 3F           aAaaa       ccf
+29    8013 07           aaaaa       rlca
+30    8014
+31    8014              ; block 4. D
+32    8014 0F           ddddD       rrca
+33    8015 1F           ddDdd       rra
+34    8016 2F           Ddddd       cpl
+35    8017 3F           dDddd       ccf
+36    8018 07           ddddd       rlca
+37    8019
+38    8019                  ; unreal emulator export
+39    8019                  LABELSLIST "lstlab_sort.lbl"
+40    8019
+41    8019                  ; #CSpect map export
+42    8019                  CSPECTMAP "lstlab_sort.exp"
+43    8019
+# file closed: lstlab_sort.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8011 X Aaaaa
+0x8012 X aAaaa
+0x8010 X aaAaa
+0x800F X aaaaA
+0x8013 X aaaaa
+0x8007 X Bbbbb
+0x8008 X bBbbb
+0x8006 X bbBbb
+0x8005 X bbbbB
+0x8009 X bbbbb
+0x8002 X Ccccc
+0x8003 X cCccc
+0x8001 X ccCcc
+0x8000 X ccccC
+0x8004 X ccccc
+0x8016 X Ddddd
+0x8017 X dDddd
+0x8015 X ddDdd
+0x8014 X ddddD
+0x8018 X ddddd
+0x800C X Eeeee
+0x800D X eEeee
+0x800B X eeEee
+0x800A X eeeeE
+0x800E X eeeee

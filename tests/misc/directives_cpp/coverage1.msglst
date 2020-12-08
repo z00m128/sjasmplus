@@ -1,11 +1,11 @@
-coverage1.asm(2): warning: [IF/IFN] Forward reference: IF 0 < fwdLabel 
-coverage1.asm(3): warning: [IF/IFN] Forward reference: IFN 0 < fwdLabel 
+coverage1.asm(2): warning[fwdref]: forward reference of symbol: IF 0 < fwdLabel
+coverage1.asm(3): warning[fwdref]: forward reference of symbol: IFN 0 < fwdLabel
 # file opened: coverage1.asm
-coverage1.asm(1): error: Syntax error: & 
-coverage1.asm(1): error: Unexpected: & 
+coverage1.asm(1): error: Syntax error: &
+coverage1.asm(1): error: Unexpected: &
  1    0000                  IF &
-coverage1.asm(1): error: Syntax error: &    
-coverage1.asm(1): error: Unexpected: &    
+coverage1.asm(1): error: Syntax error: &
+coverage1.asm(1): error: Unexpected: &
  1    0000                IFN &    ; syntax errors
  2    0000                  IF 0 < fwdLabel
  2    0000                ENDIF
@@ -42,7 +42,7 @@ coverage1.asm(15): error: [FPOS] Syntax error: &
 18    0009                  ; syntax errors (should not fallback to "truncate", would destroy current output)
 coverage1.asm(19): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",
 19    0009                  OUTPUT "coverage1.bin",
-coverage1.asm(20): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",     
+coverage1.asm(20): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",
 20    0009                  OUTPUT "coverage1.bin",     ; with spaces after comma
 coverage1.asm(21): error: [OUTPUT] Invalid <mode> (valid modes: t, a, r): OUTPUT "coverage1.bin",&
 21    0009                  OUTPUT "coverage1.bin",&

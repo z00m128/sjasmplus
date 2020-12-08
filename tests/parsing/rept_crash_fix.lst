@@ -15,16 +15,16 @@
  9    0004              ; but nested <count> expression syntax error happens, making nested DUP suddenly missing
 10    0004                  DUP     2
 11    0004 00          >        nop
-rept_crash_fix.asm(12): error: [DUP/REPT] Syntax error in <count>: 
+rept_crash_fix.asm(12): error: [DUP/REPT] Syntax error in <count>:
 12    0005             >    DUP
 13    0005 00          >        nop
-rept_crash_fix.asm(14): error: [EDUP/ENDR] End repeat without repeat
+rept_crash_fix.asm(14): error: [EDUP/ENDR/ENDW] End repeat without repeat
 14    0006             >    EDUP
 11    0006 00          >        nop
-rept_crash_fix.asm(12): error: [DUP/REPT] Syntax error in <count>: 
+rept_crash_fix.asm(12): error: [DUP/REPT] Syntax error in <count>:
 12    0007             >    DUP
 13    0007 00          >        nop
-rept_crash_fix.asm(14): error: [EDUP/ENDR] End repeat without repeat
+rept_crash_fix.asm(14): error: [EDUP/ENDR/ENDW] End repeat without repeat
 14    0008             >    EDUP
 15    0008                  EDUP
 16    0008

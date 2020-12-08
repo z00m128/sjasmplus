@@ -13,8 +13,8 @@
     ORG 0xC000, 7   ; should warn
     ORG 0x8000, 6   ; should be ok
     ORG 0xBFFF, 6   ; should be ok
-    ORG 0x7FFF, 5   ; ok ; should be suppressed
-    ORG 0xC000, 5   ; ok ; should be suppressed
+    ORG 0x7FFF, 5   ; orgpage-ok ; should be suppressed
+    ORG 0xC000, 5   ; orgpage-ok ; should be suppressed
 
     ; try the warning with 8kiB slots
     DEVICE ZXSPECTRUMNEXT
@@ -23,5 +23,5 @@
     ORG 0xA000, 7   ; should warn
     ORG 0x8000, 6   ; should be ok
     ORG 0x9FFF, 6   ; should be ok
-    ORG 0x7FFF, 5   ; ok ; should be suppressed
-    ORG 0xA000, 5   ; ok ; should be suppressed
+    ORG 0x7FFF, 5   ; orgpage-ok ; should be suppressed
+    ORG 0xA000, 5   ; orgpage-ok ; should be suppressed

@@ -1,0 +1,14 @@
+# file opened: sorted_msglst.asm
+1     0000              ; verify the symbol table appended by --msg=lstlab is sorted (same as --lstlab=sort)
+2     0000                  ORG $8000
+3     8000              FirstLabel:
+4     8000              SecondLabel:
+5     8000              LastLabel:      ; should be in the middle of the table after being sorted
+6     8000
+# file closed: sorted_msglst.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8000 X FirstLabel
+0x8000 X LastLabel
+0x8000 X SecondLabel

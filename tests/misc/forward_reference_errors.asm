@@ -31,11 +31,11 @@ struct_lab_fwd:
 normal_label2_fwd:
 dup_label_fwd:
 
-        IF 0 < normal_label3_fwd    ; ok - since v1.15.0 it's possible to suppress the warning
+        IF 0 < normal_label3_fwd    ; fwdref-ok - since v1.15.0 it's possible to suppress the warning
             ASSERT 0 < $
         ENDIF
 
-        IF 4 = normal_label3_fwd    ; ok - but label reports warning even when IF warning is suppressed
+        IF 4 = normal_label3_fwd    ; fwdref-ok - but label reports warning even when IF warning is suppressed
             nop
         ENDIF
 

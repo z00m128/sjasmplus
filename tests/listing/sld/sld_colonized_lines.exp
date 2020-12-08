@@ -1,8 +1,9 @@
-|SLD.data.version|0
+|SLD.data.version|1
 sld_colonized_lines.asm|1:1:29||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
 sld_colonized_lines.asm|1:29:35||0|14|0|T|
 sld_colonized_lines.asm|1:47:53||0|4|32768|T|
 sld_colonized_lines.asm|2:1:19||0|36|32769|F|colonsTest1
+sld_colonized_lines.asm|2:1:19||0|36|32769|L|,colonsTest1,
 sld_colonized_lines.asm|2:1:19||0|36|32769|T|
 sld_colonized_lines.asm|2:19:25||0|36|32770|T|
 sld_colonized_lines.asm|2:25:32||0|36|32771|T|
@@ -10,6 +11,7 @@ sld_colonized_lines.asm|2:32:38||0|36|32772|T|
 sld_colonized_lines.asm|2:38:45||0|36|32773|T|
 sld_colonized_lines.asm|2:45||0|36|32774|T|
 sld_colonized_lines.asm|3:1:19||0|36|32775|F|colonsTest2
+sld_colonized_lines.asm|3:1:19||0|36|32775|L|,colonsTest2,
 sld_colonized_lines.asm|3:1:19||0|36|32775|T|
 sld_colonized_lines.asm|3:19:25||0|36|32776|T|
 sld_colonized_lines.asm|3:25:32||0|36|32777|T|

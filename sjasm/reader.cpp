@@ -339,9 +339,7 @@ void checkLowMemory(byte hiByte, byte lowByte) {
 		return;			// address is >= 256 or warning is suppressed
 	}
 	// for addresses 0..255 issue warning
-	char buf[64];
-	SPRINTF1(buf, 64, "Accessing low memory address 0x%04X, is it ok?", lowByte);
-	Warning(buf, bp);
+	WarningById(W_READ_LOW_MEM, lowByte);
 }
 
 int need(char*& p, char c) {
@@ -831,13 +829,14 @@ int GetBytesHexaText(char*& p, int e[]) {
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
 static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) {
+	bool slashConverted = false;
 	char* newFn = new char[LINEMAX+1], * result = newFn;
 	if (NULL == newFn) ErrorOOM();
 	// prepend the filename with path-prefix, if some was requested
 	if (pathPrefix) {
 		while (*pathPrefix) {
 			*newFn = *pathPrefix;
-			if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;	// convert slashes if enabled
+			if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;
 			++newFn, ++pathPrefix;
 			if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
 		}
@@ -849,7 +848,7 @@ static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) 
 	// copy all characters until zero or delimiter-end character is reached
 	while (*p && deliE != *p) {
 		*newFn = *p;		// copy character
-		if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;	// convert slashes if enabled
+		if (convertslashes && pathBadSlash == *newFn) slashConverted = (*newFn = pathGoodSlash);
 		++newFn, ++p;
 		if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
 	}
@@ -865,6 +864,7 @@ static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) 
 		}
 	}
 	SkipBlanks(p);			// skip blanks any way
+	if (slashConverted) WarningById(W_BACKSLASH, bp);
 	return result;
 }
 
@@ -1045,18 +1045,6 @@ EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> d
 
 EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc) {
 	return DelimiterBegins(src, delimiters_all, advanceSrc);
-}
-
-// checks for "ok" (or also "fake") in EOL comment
-// "ok" must follow the comment start, "fake" can be anywhere inside
-bool warningNotSuppressed(bool alsoFake) {
-	if (nullptr == eolComment) return true;
-	char* comment = eolComment;
-	while (';' == *comment || '/' == *comment) ++comment;
-	while (' ' == *comment || '\t' == *comment) ++comment;
-	// check if "ok" is first word
-	if ('o' == comment[0] && 'k' == comment[1] && !isalnum((byte)comment[2])) return false;
-	return alsoFake ? (nullptr == strstr(eolComment, "fake")) : true;
 }
 
 //eof reader.cpp

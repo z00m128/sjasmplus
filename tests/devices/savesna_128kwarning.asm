@@ -35,3 +35,12 @@
     SAVESNA "zx8192.sna", $8000
     SAVEDEV "m8192_end.bin", 511, 0, 0x4000 ; good
     SAVEDEV "m8192_end.bin", 511, 0, 0x4001 ; error
+
+    ; check suppression of "only 128k" warning
+    DEVICE ZXSPECTRUM256
+    SAVESNA "zx256.sna", $8000  ; suppress sna128-ok
+
+    ; check 48k snapshot warning about screen overwritten
+    DEVICE ZXSPECTRUM48         ; default stack is already tainted by previous SAVESNA!
+    SAVESNA "zx48.sna", $8000   ; emit warning
+    SAVESNA "zx48.sna", $8000   ; suppress sna48-ok

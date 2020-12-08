@@ -58,30 +58,49 @@ smc_label_extras.asm(34): error: [ENDM] End macro without macro
 smc_label_extras.asm(35): error: Unrecognized instruction: lN
 35    8013                      lN
 36    8013
-37    8013                  ASSERT #8000+0 == lA
-38    8013                  ASSERT #8002+1 == lB
-39    8013                  ASSERT #8004+1 == lC
-40    8013                  ASSERT #8006+0 == lD
-41    8013                  ASSERT #8008+9 == lE
-42    8013                  ASSERT #800A   == lF
-43    8013                  ASSERT #800A+2 == lO
-44    8013                  ASSERT #800A+3 == lP
-45    8013
+37    8013                      STRUCT S_TEST
+38    8013 ~            Byte        BYTE    0x12
+smc_label_extras.asm(39): error: [STRUCT] Unexpected: +1       BYTE    0x34
+39    8013 ~            Smc+1       BYTE    0x34    ; error, can't have SMC
+40    8013                      ENDS
+41    8013
+42    8013 12           NormalStruct    S_TEST
+smc_label_extras.asm(43): error: Structure instance can't use SMC-offset
+43    8014 12           SmcStruct+1     S_TEST      ; error, can't have SMC
+44    8015
+45    8015                  ASSERT #8000+0 == lA
+46    8015                  ASSERT #8002+1 == lB
+47    8015                  ASSERT #8004+1 == lC
+48    8015                  ASSERT #8006+0 == lD
+49    8015                  ASSERT #8008+9 == lE
+50    8015                  ASSERT #800A   == lF
+51    8015                  ASSERT #800A+2 == lO
+52    8015                  ASSERT #800A+3 == lP
+53    8015
 # file closed: smc_label_extras.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0001 X x
 0x8000   lA
 0x8003   lB
 0x8005   lC
 0x8006   lD
 0x8011   lE
-0x800C   lO
-0x800D   lP
 0x800A   lF
 0x800A X lG
 0x800A X lH
 0x800A X lI
 0x800B X lJ
 0x800B X lK
+0x800C   lO
+0x800D   lP
+0x8013 X NormalStruct
+0x8013 X NormalStruct.Byte
+0x8014 X NormalStruct.Smc
+0x0001 X S_TEST
+0x0000 X S_TEST.Byte
+0x0001 X S_TEST.Smc
+0x8014 X SmcStruct
+0x8014 X SmcStruct.Byte
+0x8015 X SmcStruct.Smc
+0x0001 X x

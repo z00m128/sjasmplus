@@ -3,9 +3,9 @@
  2    0000              ;; The syntax highlight rules are in "asm-z80-sj.xml" file in the project root directory
  3    0000
  4    0000                  device zxspectrum48     ; directive of sjasmplus
-KateSyntaxHighLightTest.asm(5): warning: ORG address 0x00A8 is outside of current slot 0xC000..0xFFFF (page argument affects *current* slot): org     $A8, 0xA8, #A8  
+KateSyntaxHighLightTest.asm(5): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0x00A8 vs slot 3 range 0xC000..0xFFFF
 KateSyntaxHighLightTest.asm(5): error: [ORG] Page number must be in range 0..3: 168
-KateSyntaxHighLightTest.asm(5): error: Unexpected: , #A8  
+KateSyntaxHighLightTest.asm(5): error: Unexpected: , #A8
  5    0000                  org     $A8, 0xA8, #A8  ; hexa, also: 0A8h
 KateSyntaxHighLightTest.asm(6): error: [DISP] <page number> is out of range: 43008
  6    00A8                  disp    43008, 43008d   ; decimal
@@ -29,7 +29,7 @@ KateSyntaxHighLightTest.asm(7): error: Unrecognized instruction: relaxed syntax 
 12    00DB 00
 KateSyntaxHighLightTest.asm(13): error: Unrecognized instruction: ldirx
 13    00DC                  ldirx
-KateSyntaxHighLightTest.asm(14): error: Unrecognized instruction: bsra    de,b            
+KateSyntaxHighLightTest.asm(14): error: Unrecognized instruction: bsra    de,b
 14    00DC                  bsra    de,b            ; NEXT opcodes of course added (can have different colour)
 15    00DC FE 27            cp      ''''            ;"TODO" in comments exists (also FIXME and FIX ME).
 16    00DE              s:  ; some label
@@ -50,7 +50,7 @@ KateSyntaxHighLightTest.asm(14): error: Unrecognized instruction: bsra    de,b
 31    00F2                  ENDM
 32    00F2
 33    00F2                  ; in case you accidentally write non-instruction, it will highlight as label! :D
-KateSyntaxHighLightTest.asm(34): error: Unrecognized instruction: jnz     s               
+KateSyntaxHighLightTest.asm(34): error: Unrecognized instruction: jnz     s
 34    00F2                  jnz     s               ; still makes it easier to catch
 35    00F2                  leMacron arg0           ; but so do also correctly used macros
 35    00F2 DD 01       >        defb    $DD, 1
@@ -58,10 +58,10 @@ KateSyntaxHighLightTest.asm(30): error: Unrecognized instruction: nextreg $15, $
 KateSyntaxHighLightTest.asm(35): ^ emitted from here
 35    00F4             >        nextreg $15, $0
 36    00F4              .localLab:
-KateSyntaxHighLightTest.asm(37): error: Missing next digit: 1   
+KateSyntaxHighLightTest.asm(37): error: Missing next digit: 1
 37    00F4                  hex     F32712bcd3561   ; unpaired digit or non-digit is highlighted as "error"
 KateSyntaxHighLightTest.asm(38): error: Invalid labelname: !alsoThisInvalidLabel
-38    00F4              !alsoThisInvalidLabel
+38    00F4              !!alsoThisInvalidLabel
 KateSyntaxHighLightTest.asm(39): warning: [DG] multiple characters used for 'ones'
 KateSyntaxHighLightTest.asm(39): warning: [DG] character '0' in DG works as value 1
 39    00F4 33 F8            dg      ..##..##  #$01!-._  ; DG bit map is highlights as "data" (0) vs "number" (1)
@@ -70,6 +70,6 @@ KateSyntaxHighLightTest.asm(39): warning: [DG] character '0' in DG works as valu
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x00A8 X With
 0x00DE   s
 0x00F4   s.localLab
+0x00A8 X With

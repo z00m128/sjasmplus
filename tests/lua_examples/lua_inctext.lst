@@ -67,9 +67,9 @@ lua_inctext.asm(18): ^ emitted from here
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x8059   Final
+0x807C   Test2_Final
+0x806B X Test2_Text1
 0x8010   Text1
 0x8030   Text2
 0x8041   Text3
-0x8059   Final
-0x806B X Test2_Text1
-0x807C   Test2_Final

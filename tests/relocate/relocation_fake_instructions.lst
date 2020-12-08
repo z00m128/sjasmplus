@@ -9,291 +9,291 @@
   8   1002 00 00            dw      relocate_size
   9   1004
  10   1004              ixy_fakes_16b:
-relocation_fake_instructions.asm(11): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(11): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  11   1004 DD 4E 10 DD      ld      bc,(ix+high ixy_fakes_16b)
  11   1008 46 11
-relocation_fake_instructions.asm(12): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(12): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  12   100A DD 5E 10 DD      ld      de,(ix+high ixy_fakes_16b)
  12   100E 56 11
-relocation_fake_instructions.asm(13): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(13): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  13   1010 DD 6E 10 DD      ld      hl,(ix+high ixy_fakes_16b)
  13   1014 66 11
-relocation_fake_instructions.asm(14): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(14): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  14   1016 DD 71 10 DD      ld      (ix+high ixy_fakes_16b),bc
  14   101A 70 11
-relocation_fake_instructions.asm(15): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(15): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  15   101C DD 73 10 DD      ld      (ix+high ixy_fakes_16b),de
  15   1020 72 11
-relocation_fake_instructions.asm(16): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(16): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  16   1022 DD 75 10 DD      ld      (ix+high ixy_fakes_16b),hl
  16   1026 74 11
-relocation_fake_instructions.asm(17): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(17): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  17   1028 DD 4E 10 DD      ldi     bc,(ix+high ixy_fakes_16b)
  17   102C 23 DD 46 10
  17   1030 DD 23
-relocation_fake_instructions.asm(18): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(18): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  18   1032 DD 5E 10 DD      ldi     de,(ix+high ixy_fakes_16b)
  18   1036 23 DD 56 10
  18   103A DD 23
-relocation_fake_instructions.asm(19): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(19): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  19   103C DD 6E 10 DD      ldi     hl,(ix+high ixy_fakes_16b)
  19   1040 23 DD 66 10
  19   1044 DD 23
-relocation_fake_instructions.asm(20): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(20): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  20   1046 DD 71 10 DD      ldi     (ix+high ixy_fakes_16b),bc
  20   104A 23 DD 70 10
  20   104E DD 23
-relocation_fake_instructions.asm(21): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(21): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  21   1050 DD 73 10 DD      ldi     (ix+high ixy_fakes_16b),de
  21   1054 23 DD 72 10
  21   1058 DD 23
-relocation_fake_instructions.asm(22): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(22): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  22   105A DD 75 10 DD      ldi     (ix+high ixy_fakes_16b),hl
  22   105E 23 DD 74 10
  22   1062 DD 23
  23   1064
-relocation_fake_instructions.asm(24): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(24): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  24   1064 FD 4E 10 FD      ld      bc,(iy+high ixy_fakes_16b)
  24   1068 46 11
-relocation_fake_instructions.asm(25): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(25): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  25   106A FD 5E 10 FD      ld      de,(iy+high ixy_fakes_16b)
  25   106E 56 11
-relocation_fake_instructions.asm(26): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(26): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  26   1070 FD 6E 10 FD      ld      hl,(iy+high ixy_fakes_16b)
  26   1074 66 11
-relocation_fake_instructions.asm(27): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(27): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  27   1076 FD 71 10 FD      ld      (iy+high ixy_fakes_16b),bc
  27   107A 70 11
-relocation_fake_instructions.asm(28): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(28): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  28   107C FD 73 10 FD      ld      (iy+high ixy_fakes_16b),de
  28   1080 72 11
-relocation_fake_instructions.asm(29): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(29): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  29   1082 FD 75 10 FD      ld      (iy+high ixy_fakes_16b),hl
  29   1086 74 11
-relocation_fake_instructions.asm(30): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(30): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  30   1088 FD 4E 10 FD      ldi     bc,(iy+high ixy_fakes_16b)
  30   108C 23 FD 46 10
  30   1090 FD 23
-relocation_fake_instructions.asm(31): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(31): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  31   1092 FD 5E 10 FD      ldi     de,(iy+high ixy_fakes_16b)
  31   1096 23 FD 56 10
  31   109A FD 23
-relocation_fake_instructions.asm(32): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(32): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  32   109C FD 6E 10 FD      ldi     hl,(iy+high ixy_fakes_16b)
  32   10A0 23 FD 66 10
  32   10A4 FD 23
-relocation_fake_instructions.asm(33): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(33): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  33   10A6 FD 71 10 FD      ldi     (iy+high ixy_fakes_16b),bc
  33   10AA 23 FD 70 10
  33   10AE FD 23
-relocation_fake_instructions.asm(34): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(34): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  34   10B0 FD 73 10 FD      ldi     (iy+high ixy_fakes_16b),de
  34   10B4 23 FD 72 10
  34   10B8 FD 23
-relocation_fake_instructions.asm(35): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(35): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  35   10BA FD 75 10 FD      ldi     (iy+high ixy_fakes_16b),hl
  35   10BE 23 FD 74 10
  35   10C2 FD 23
  36   10C4
  37   10C4              ixy_fakes_8b:
-relocation_fake_instructions.asm(38): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(38): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  38   10C4 DD 7E 10 DD      ldi     a,(ix+high ixy_fakes_8b)
  38   10C8 23
-relocation_fake_instructions.asm(39): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(39): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  39   10C9 DD 46 10 DD      ldi     b,(ix+high ixy_fakes_8b)
  39   10CD 23
-relocation_fake_instructions.asm(40): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(40): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  40   10CE DD 4E 10 DD      ldi     c,(ix+high ixy_fakes_8b)
  40   10D2 23
-relocation_fake_instructions.asm(41): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(41): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  41   10D3 DD 56 10 DD      ldi     d,(ix+high ixy_fakes_8b)
  41   10D7 23
-relocation_fake_instructions.asm(42): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(42): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  42   10D8 DD 5E 10 DD      ldi     e,(ix+high ixy_fakes_8b)
  42   10DC 23
-relocation_fake_instructions.asm(43): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(43): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  43   10DD DD 66 10 DD      ldi     h,(ix+high ixy_fakes_8b)
  43   10E1 23
-relocation_fake_instructions.asm(44): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(44): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  44   10E2 DD 6E 10 DD      ldi     l,(ix+high ixy_fakes_8b)
  44   10E6 23
-relocation_fake_instructions.asm(45): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(45): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  45   10E7 DD 7E 10 DD      ldd     a,(ix+high ixy_fakes_8b)
  45   10EB 2B
-relocation_fake_instructions.asm(46): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(46): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  46   10EC DD 46 10 DD      ldd     b,(ix+high ixy_fakes_8b)
  46   10F0 2B
-relocation_fake_instructions.asm(47): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(47): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  47   10F1 DD 4E 10 DD      ldd     c,(ix+high ixy_fakes_8b)
  47   10F5 2B
-relocation_fake_instructions.asm(48): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(48): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  48   10F6 DD 56 10 DD      ldd     d,(ix+high ixy_fakes_8b)
  48   10FA 2B
-relocation_fake_instructions.asm(49): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(49): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  49   10FB DD 5E 10 DD      ldd     e,(ix+high ixy_fakes_8b)
  49   10FF 2B
-relocation_fake_instructions.asm(50): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(50): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  50   1100 DD 66 10 DD      ldd     h,(ix+high ixy_fakes_8b)
  50   1104 2B
-relocation_fake_instructions.asm(51): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(51): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  51   1105 DD 6E 10 DD      ldd     l,(ix+high ixy_fakes_8b)
  51   1109 2B
-relocation_fake_instructions.asm(52): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(52): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  52   110A DD 77 10 DD      ldi     (ix+high ixy_fakes_8b),a
  52   110E 23
-relocation_fake_instructions.asm(53): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(53): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  53   110F DD 70 10 DD      ldi     (ix+high ixy_fakes_8b),b
  53   1113 23
-relocation_fake_instructions.asm(54): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(54): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  54   1114 DD 71 10 DD      ldi     (ix+high ixy_fakes_8b),c
  54   1118 23
-relocation_fake_instructions.asm(55): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(55): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  55   1119 DD 72 10 DD      ldi     (ix+high ixy_fakes_8b),d
  55   111D 23
-relocation_fake_instructions.asm(56): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(56): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  56   111E DD 73 10 DD      ldi     (ix+high ixy_fakes_8b),e
  56   1122 23
-relocation_fake_instructions.asm(57): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(57): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  57   1123 DD 74 10 DD      ldi     (ix+high ixy_fakes_8b),h
  57   1127 23
-relocation_fake_instructions.asm(58): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(58): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  58   1128 DD 75 10 DD      ldi     (ix+high ixy_fakes_8b),l
  58   112C 23
-relocation_fake_instructions.asm(59): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(59): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  59   112D DD 77 10 DD      ldd     (ix+high ixy_fakes_8b),a
  59   1131 2B
-relocation_fake_instructions.asm(60): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(60): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  60   1132 DD 70 10 DD      ldd     (ix+high ixy_fakes_8b),b
  60   1136 2B
-relocation_fake_instructions.asm(61): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(61): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  61   1137 DD 71 10 DD      ldd     (ix+high ixy_fakes_8b),c
  61   113B 2B
-relocation_fake_instructions.asm(62): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(62): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  62   113C DD 72 10 DD      ldd     (ix+high ixy_fakes_8b),d
  62   1140 2B
-relocation_fake_instructions.asm(63): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(63): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  63   1141 DD 73 10 DD      ldd     (ix+high ixy_fakes_8b),e
  63   1145 2B
-relocation_fake_instructions.asm(64): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(64): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  64   1146 DD 74 10 DD      ldd     (ix+high ixy_fakes_8b),h
  64   114A 2B
-relocation_fake_instructions.asm(65): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(65): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  65   114B DD 75 10 DD      ldd     (ix+high ixy_fakes_8b),l
  65   114F 2B
  66   1150
-relocation_fake_instructions.asm(67): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(67): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  67   1150 FD 7E 10 FD      ldi     a,(iy+high ixy_fakes_8b)
  67   1154 23
-relocation_fake_instructions.asm(68): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(68): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  68   1155 FD 46 10 FD      ldi     b,(iy+high ixy_fakes_8b)
  68   1159 23
-relocation_fake_instructions.asm(69): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(69): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  69   115A FD 4E 10 FD      ldi     c,(iy+high ixy_fakes_8b)
  69   115E 23
-relocation_fake_instructions.asm(70): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(70): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  70   115F FD 56 10 FD      ldi     d,(iy+high ixy_fakes_8b)
  70   1163 23
-relocation_fake_instructions.asm(71): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(71): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  71   1164 FD 5E 10 FD      ldi     e,(iy+high ixy_fakes_8b)
  71   1168 23
-relocation_fake_instructions.asm(72): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(72): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  72   1169 FD 66 10 FD      ldi     h,(iy+high ixy_fakes_8b)
  72   116D 23
-relocation_fake_instructions.asm(73): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(73): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  73   116E FD 6E 10 FD      ldi     l,(iy+high ixy_fakes_8b)
  73   1172 23
-relocation_fake_instructions.asm(74): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(74): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  74   1173 FD 7E 10 FD      ldd     a,(iy+high ixy_fakes_8b)
  74   1177 2B
-relocation_fake_instructions.asm(75): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(75): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  75   1178 FD 46 10 FD      ldd     b,(iy+high ixy_fakes_8b)
  75   117C 2B
-relocation_fake_instructions.asm(76): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(76): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  76   117D FD 4E 10 FD      ldd     c,(iy+high ixy_fakes_8b)
  76   1181 2B
-relocation_fake_instructions.asm(77): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(77): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  77   1182 FD 56 10 FD      ldd     d,(iy+high ixy_fakes_8b)
  77   1186 2B
-relocation_fake_instructions.asm(78): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(78): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  78   1187 FD 5E 10 FD      ldd     e,(iy+high ixy_fakes_8b)
  78   118B 2B
-relocation_fake_instructions.asm(79): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(79): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  79   118C FD 66 10 FD      ldd     h,(iy+high ixy_fakes_8b)
  79   1190 2B
-relocation_fake_instructions.asm(80): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(80): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  80   1191 FD 6E 10 FD      ldd     l,(iy+high ixy_fakes_8b)
  80   1195 2B
-relocation_fake_instructions.asm(81): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(81): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  81   1196 FD 77 10 FD      ldi     (iy+high ixy_fakes_8b),a
  81   119A 23
-relocation_fake_instructions.asm(82): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(82): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  82   119B FD 70 10 FD      ldi     (iy+high ixy_fakes_8b),b
  82   119F 23
-relocation_fake_instructions.asm(83): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(83): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  83   11A0 FD 71 10 FD      ldi     (iy+high ixy_fakes_8b),c
  83   11A4 23
-relocation_fake_instructions.asm(84): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(84): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  84   11A5 FD 72 10 FD      ldi     (iy+high ixy_fakes_8b),d
  84   11A9 23
-relocation_fake_instructions.asm(85): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(85): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  85   11AA FD 73 10 FD      ldi     (iy+high ixy_fakes_8b),e
  85   11AE 23
-relocation_fake_instructions.asm(86): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(86): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  86   11AF FD 74 10 FD      ldi     (iy+high ixy_fakes_8b),h
  86   11B3 23
-relocation_fake_instructions.asm(87): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(87): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  87   11B4 FD 75 10 FD      ldi     (iy+high ixy_fakes_8b),l
  87   11B8 23
-relocation_fake_instructions.asm(88): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(88): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  88   11B9 FD 77 10 FD      ldd     (iy+high ixy_fakes_8b),a
  88   11BD 2B
-relocation_fake_instructions.asm(89): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(89): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  89   11BE FD 70 10 FD      ldd     (iy+high ixy_fakes_8b),b
  89   11C2 2B
-relocation_fake_instructions.asm(90): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(90): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  90   11C3 FD 71 10 FD      ldd     (iy+high ixy_fakes_8b),c
  90   11C7 2B
-relocation_fake_instructions.asm(91): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(91): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  91   11C8 FD 72 10 FD      ldd     (iy+high ixy_fakes_8b),d
  91   11CC 2B
-relocation_fake_instructions.asm(92): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(92): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  92   11CD FD 73 10 FD      ldd     (iy+high ixy_fakes_8b),e
  92   11D1 2B
-relocation_fake_instructions.asm(93): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(93): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  93   11D2 FD 74 10 FD      ldd     (iy+high ixy_fakes_8b),h
  93   11D6 2B
-relocation_fake_instructions.asm(94): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(94): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  94   11D7 FD 75 10 FD      ldd     (iy+high ixy_fakes_8b),l
  94   11DB 2B
  95   11DC
  96   11DC              imm8_fakes:
-relocation_fake_instructions.asm(97): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(97): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  97   11DC 36 11 23         ldi     (hl),high imm8_fakes
-relocation_fake_instructions.asm(98): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(98): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  98   11DF DD 36 0C 11      ldi     (ix+12),high imm8_fakes
  98   11E3 DD 23
-relocation_fake_instructions.asm(99): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(99): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
  99   11E5 FD 36 17 11      ldi     (iy+23),high imm8_fakes
  99   11E9 FD 23
-relocation_fake_instructions.asm(100): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(100): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 100   11EB DD 36 11 22      ldi     (ix+high imm8_fakes),34
 100   11EF DD 23
-relocation_fake_instructions.asm(101): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(101): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 101   11F1 FD 36 11 2D      ldi     (iy+high imm8_fakes),45
 101   11F5 FD 23
 102   11F7
-relocation_fake_instructions.asm(103): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(103): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 103   11F7 36 11 2B         ldd     (hl),high imm8_fakes
-relocation_fake_instructions.asm(104): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(104): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 104   11FA DD 36 0C 11      ldd     (ix+12),high imm8_fakes
 104   11FE DD 2B
-relocation_fake_instructions.asm(105): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(105): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 105   1200 FD 36 17 11      ldd     (iy+23),high imm8_fakes
 105   1204 FD 2B
-relocation_fake_instructions.asm(106): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(106): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 106   1206 DD 36 11 22      ldd     (ix+high imm8_fakes),34
 106   120A DD 2B
-relocation_fake_instructions.asm(107): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_fake_instructions.asm(107): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 107   120C FD 36 11 2D      ldd     (iy+high imm8_fakes),45
 107   1210 FD 2B
 108   1212
@@ -516,8 +516,8 @@ relocation_fake_instructions.asm(107): warning: Relocation makes one of the expr
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0000   relocate_count
-0x0000   relocate_size
+0x11DC   imm8_fakes
 0x1004   ixy_fakes_16b
 0x10C4   ixy_fakes_8b
-0x11DC   imm8_fakes
+0x0000   relocate_count
+0x0000   relocate_size

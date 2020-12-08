@@ -4,7 +4,7 @@
   3   0000                  OPT reset --zxnext --syntax=a
   4   0000                  ; 3x OK: val, mem, mem
   5   0000 3E 00            ld  a,0
-syntax_b.asm(5): warning: Accessing low memory address 0x0001, is it ok?: ld  a,(1) 
+syntax_b.asm(5): warning[rdlow]: Reading memory at low address: 1
   5   0002 3A 01 00       ld  a,(1)
   5   0005 3A 02 00       ld  a,[2]
   6   0008                  ; 2x OK: val, val, ---
@@ -31,8 +31,8 @@ syntax_b.asm(12): error: Unexpected: [8]
  12   001C CE 00          adc a,[8]
  13   001E D6 06            sub a,6
  13   0020 D6 07          sub a,(7)
-syntax_b.asm(13): error: Syntax error: [8]     
-syntax_b.asm(13): error: Unexpected: [8]     
+syntax_b.asm(13): error: Syntax error: [8]
+syntax_b.asm(13): error: Unexpected: [8]
  13   0022 D6 00          sub a,[8]     ; this syntax works because --syntax=A was used
  14   0024 DE 06            sbc a,6
  14   0026 DE 07          sbc a,(7)
@@ -86,31 +86,31 @@ syntax_b.asm(26): error: Unexpected: [17]
  27   0063                  ; 2x OK: val, val, ---
  28   0063 36 12 2B         ldd (hl),18
  28   0066 36 13 2B       ldd (hl),(19)
-syntax_b.asm(28): error: Syntax error: [20]  
-syntax_b.asm(28): error: Unexpected: [20]  
+syntax_b.asm(28): error: Syntax error: [20]
+syntax_b.asm(28): error: Unexpected: [20]
  28   0069 36 00 2B       ldd (hl),[20]  ; Fake instructions
  29   006C                  ; 2x OK: val, val, ---
  30   006C DD 36 00 15      ldd (ix),21
  30   0070 DD 2B
  30   0072 DD 36 00 16    ldd (ix),(22)
  30   0076 DD 2B
-syntax_b.asm(30): error: Syntax error: [23]  
-syntax_b.asm(30): error: Unexpected: [23]  
+syntax_b.asm(30): error: Syntax error: [23]
+syntax_b.asm(30): error: Unexpected: [23]
  30   0078 DD 36 00 00    ldd (ix),[23]  ; Fake instructions
  30   007C DD 2B
  31   007E                  ; 2x OK: val, val, ---
  32   007E 36 18 23         ldi (hl),24
  32   0081 36 19 23       ldi (hl),(25)
-syntax_b.asm(32): error: Syntax error: [26]  
-syntax_b.asm(32): error: Unexpected: [26]  
+syntax_b.asm(32): error: Syntax error: [26]
+syntax_b.asm(32): error: Unexpected: [26]
  32   0084 36 00 23       ldi (hl),[26]  ; Fake instructions
  33   0087                  ; 2x OK: val, val, ---
  34   0087 DD 36 00 1B      ldi (ix),27
  34   008B DD 23
  34   008D DD 36 00 1C    ldi (ix),(28)
  34   0091 DD 23
-syntax_b.asm(34): error: Syntax error: [29]  
-syntax_b.asm(34): error: Unexpected: [29]  
+syntax_b.asm(34): error: Syntax error: [29]
+syntax_b.asm(34): error: Unexpected: [29]
  34   0093 DD 36 00 00    ldi (ix),[29]  ; Fake instructions
  34   0097 DD 23
  35   0099                  ; 2x OK: val, val, ---
@@ -121,12 +121,12 @@ syntax_b.asm(36): error: [NEXTREG] Comma expected
 syntax_b.asm(36): error: Unexpected: [34],[35]
  36   00A1                nextreg [34],[35]
  37   00A1                  ; 2x OK: val, val, ---
-syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(38): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  38   00A1 ED 71            out (c),0
-syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(38): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  38   00A3 ED 71          out (c),(0)
 syntax_b.asm(38): error: Syntax error: [0]
-syntax_b.asm(38): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(38): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
 syntax_b.asm(38): error: Unexpected: [0]
  38   00A5 ED 71          out (c),[0]
  39   00A7                  ; 2x OK: val, val, ---
@@ -178,182 +178,182 @@ syntax_b.asm(53): error: Unexpected: [111]
  55   00EB                  OPT --syntax=b
  56   00EB                  ; 3x OK: val, mem, mem
  57   00EB 3E 00            ld  a,0
-syntax_b.asm(57): warning: Accessing low memory address 0x0001, is it ok?: ld  a,(1) 
+syntax_b.asm(57): warning[rdlow]: Reading memory at low address: 1
  57   00ED 3A 01 00       ld  a,(1)
  57   00F0 3A 02 00       ld  a,[2]
  58   00F3                  ; 1x OK: val, ---, ---
  59   00F3 06 03            ld  b,3
-syntax_b.asm(59): error: Illegal instruction (can't access memory): (4) 
+syntax_b.asm(59): error: Illegal instruction (can't access memory): (4)
  59   00F5 06 00          ld  b,(4)
 syntax_b.asm(59): error: Illegal instruction (can't access memory): [5]
  59   00F7 06 00          ld  b,[5]
  60   00F9                  ; 1x OK: val, ---, ---
  61   00F9 CB 5F            bit 3,a
-syntax_b.asm(61): error: Illegal instruction (can't access memory):  (3),a 
+syntax_b.asm(61): error: Illegal instruction (can't access memory):  (3),a
  61   00FB CB 47          bit (3),a
 syntax_b.asm(61): error: Illegal instruction (can't access memory):  [3],a
  61   00FD CB 47          bit [3],a
  62   00FF                  ; 1x OK: val, ---, ---
  63   00FF C6 06            add a,6
-syntax_b.asm(63): error: Illegal instruction (can't access memory): (7) 
+syntax_b.asm(63): error: Illegal instruction (can't access memory): (7)
  63   0101 C6 00          add a,(7)
 syntax_b.asm(63): error: Illegal instruction (can't access memory): [8]
  63   0103 C6 00          add a,[8]
  64   0105 CE 06            adc a,6
-syntax_b.asm(64): error: Illegal instruction (can't access memory): (7) 
+syntax_b.asm(64): error: Illegal instruction (can't access memory): (7)
  64   0107 CE 00          adc a,(7)
 syntax_b.asm(64): error: Illegal instruction (can't access memory): [8]
  64   0109 CE 00          adc a,[8]
  65   010B D6 06            sub a,6
-syntax_b.asm(65): error: Illegal instruction (can't access memory): (7) 
+syntax_b.asm(65): error: Illegal instruction (can't access memory): (7)
  65   010D D6 00          sub a,(7)
-syntax_b.asm(65): error: Illegal instruction (can't access memory): [8]     
+syntax_b.asm(65): error: Illegal instruction (can't access memory): [8]
  65   010F D6 00          sub a,[8]     ; this syntax works because --syntax=A was used
  66   0111 DE 06            sbc a,6
-syntax_b.asm(66): error: Illegal instruction (can't access memory): (7) 
+syntax_b.asm(66): error: Illegal instruction (can't access memory): (7)
  66   0113 DE 00          sbc a,(7)
 syntax_b.asm(66): error: Illegal instruction (can't access memory): [8]
  66   0115 DE 00          sbc a,[8]
  67   0117 E6 06            and a,6
-syntax_b.asm(67): error: Illegal instruction (can't access memory): (7) 
+syntax_b.asm(67): error: Illegal instruction (can't access memory): (7)
  67   0119 E6 00          and a,(7)
 syntax_b.asm(67): error: Illegal instruction (can't access memory): [8]
  67   011B E6 00          and a,[8]
  68   011D EE 06            xor a,6
-syntax_b.asm(68): error: Illegal instruction (can't access memory): (7) 
+syntax_b.asm(68): error: Illegal instruction (can't access memory): (7)
  68   011F EE 00          xor a,(7)
 syntax_b.asm(68): error: Illegal instruction (can't access memory): [8]
  68   0121 EE 00          xor a,[8]
  69   0123 F6 06            or  a,6
-syntax_b.asm(69): error: Illegal instruction (can't access memory): (7) 
+syntax_b.asm(69): error: Illegal instruction (can't access memory): (7)
  69   0125 F6 00          or  a,(7)
 syntax_b.asm(69): error: Illegal instruction (can't access memory): [8]
  69   0127 F6 00          or  a,[8]
  70   0129 FE 06            cp  a,6
-syntax_b.asm(70): error: Illegal instruction (can't access memory): (7) 
+syntax_b.asm(70): error: Illegal instruction (can't access memory): (7)
  70   012B FE 00          cp  a,(7)
 syntax_b.asm(70): error: Illegal instruction (can't access memory): [8]
  70   012D FE 00          cp  a,[8]
  71   012F                  ; 1x OK: val, ---, ---
  72   012F ED 56            im  1
-syntax_b.asm(72): error: Illegal instruction (can't access memory):   (1)   
+syntax_b.asm(72): error: Illegal instruction (can't access memory):   (1)
  72   0131 ED 46          im  (1)
 syntax_b.asm(72): error: Illegal instruction (can't access memory):   [1]
  72   0133 ED 46          im  [1]
  73   0135                  ; 1x OK: val, ---, ---
  74   0135 36 09            ld (hl),9
-syntax_b.asm(74): error: Illegal instruction (can't access memory): (10) 
+syntax_b.asm(74): error: Illegal instruction (can't access memory): (10)
  74   0137 36 00          ld (hl),(10)
 syntax_b.asm(74): error: Illegal instruction (can't access memory): [11]
  74   0139 36 00          ld (hl),[11]
  75   013B                  ; 1x OK: val, ---, ---
  76   013B DD 36 00 0C      ld (ix),12
-syntax_b.asm(76): error: Illegal instruction (can't access memory): (13) 
+syntax_b.asm(76): error: Illegal instruction (can't access memory): (13)
  76   013F DD 36 00 00    ld (ix),(13)
 syntax_b.asm(76): error: Illegal instruction (can't access memory): [14]
  76   0143 DD 36 00 00    ld (ix),[14]
  77   0147                  ; 1x OK: val, ---, ---
  78   0147 DD 2E 0F         ld  ixl,15
-syntax_b.asm(78): error: Illegal instruction (can't access memory): (16) 
+syntax_b.asm(78): error: Illegal instruction (can't access memory): (16)
  78   014A DD 2E 00       ld  ixl,(16)
 syntax_b.asm(78): error: Illegal instruction (can't access memory): [17]
  78   014D DD 2E 00       ld  ixl,[17]
  79   0150                  ; 1x OK: val, ---, ---
  80   0150 36 12 2B         ldd (hl),18
-syntax_b.asm(80): error: Illegal instruction (can't access memory): (19) 
+syntax_b.asm(80): error: Illegal instruction (can't access memory): (19)
  80   0153 36 00 2B       ldd (hl),(19)
-syntax_b.asm(80): error: Illegal instruction (can't access memory): [20]  
+syntax_b.asm(80): error: Illegal instruction (can't access memory): [20]
  80   0156 36 00 2B       ldd (hl),[20]  ; Fake instructions
  81   0159                  ; 1x OK: val, ---, ---
  82   0159 DD 36 00 15      ldd (ix),21
  82   015D DD 2B
-syntax_b.asm(82): error: Illegal instruction (can't access memory): (22) 
+syntax_b.asm(82): error: Illegal instruction (can't access memory): (22)
  82   015F DD 36 00 00    ldd (ix),(22)
  82   0163 DD 2B
-syntax_b.asm(82): error: Illegal instruction (can't access memory): [23]  
+syntax_b.asm(82): error: Illegal instruction (can't access memory): [23]
  82   0165 DD 36 00 00    ldd (ix),[23]  ; Fake instructions
  82   0169 DD 2B
  83   016B                  ; 1x OK: val, ---, ---
  84   016B 36 18 23         ldi (hl),24
-syntax_b.asm(84): error: Illegal instruction (can't access memory): (25) 
+syntax_b.asm(84): error: Illegal instruction (can't access memory): (25)
  84   016E 36 00 23       ldi (hl),(25)
-syntax_b.asm(84): error: Illegal instruction (can't access memory): [26]  
+syntax_b.asm(84): error: Illegal instruction (can't access memory): [26]
  84   0171 36 00 23       ldi (hl),[26]  ; Fake instructions
  85   0174                  ; 1x OK: val, ---, ---
  86   0174 DD 36 00 1B      ldi (ix),27
  86   0178 DD 23
-syntax_b.asm(86): error: Illegal instruction (can't access memory): (28) 
+syntax_b.asm(86): error: Illegal instruction (can't access memory): (28)
  86   017A DD 36 00 00    ldi (ix),(28)
  86   017E DD 23
-syntax_b.asm(86): error: Illegal instruction (can't access memory): [29]  
+syntax_b.asm(86): error: Illegal instruction (can't access memory): [29]
  86   0180 DD 36 00 00    ldi (ix),[29]  ; Fake instructions
  86   0184 DD 23
  87   0186                  ; 1x OK: val, ---, ---
  88   0186 ED 91 1E 1F      nextreg 30,31
-syntax_b.asm(88): error: Illegal instruction (can't access memory):  (32),(33) 
-syntax_b.asm(88): error: Illegal instruction (can't access memory): (33) 
+syntax_b.asm(88): error: Illegal instruction (can't access memory):  (32),(33)
+syntax_b.asm(88): error: Illegal instruction (can't access memory): (33)
  88   018A ED 91 00 00    nextreg (32),(33)
 syntax_b.asm(88): error: Illegal instruction (can't access memory):  [34],[35]
 syntax_b.asm(88): error: Illegal instruction (can't access memory): [35]
  88   018E ED 91 00 00    nextreg [34],[35]
  89   0192                  ; 1x OK: val, ---, ---
-syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(90): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0192 ED 71            out (c),0
-syntax_b.asm(90): error: Illegal instruction (can't access memory): (0) 
-syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(90): error: Illegal instruction (can't access memory): (0)
+syntax_b.asm(90): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0194 ED 71          out (c),(0)
 syntax_b.asm(90): error: Illegal instruction (can't access memory): [0]
-syntax_b.asm(90): warning: [OUT] 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+syntax_b.asm(90): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
  90   0196 ED 71          out (c),[0]
  91   0198                  ; 1x OK: val, ---, ---
  92   0198 CB BF            res 7,a
-syntax_b.asm(92): error: Illegal instruction (can't access memory):  (7),a 
+syntax_b.asm(92): error: Illegal instruction (can't access memory):  (7),a
  92   019A CB 87          res (7),a
 syntax_b.asm(92): error: Illegal instruction (can't access memory):  [7],a
  92   019C CB 87          res [7],a
  93   019E                  ; 1x OK: val, ---, ---
  94   019E D7               rst 16
-syntax_b.asm(94): error: Illegal instruction (can't access memory):  (16) 
+syntax_b.asm(94): error: Illegal instruction (can't access memory):  (16)
  94   019F C7             rst (16)
 syntax_b.asm(94): error: Illegal instruction (can't access memory):  [16]
  94   01A0 C7             rst [16]
  95   01A1                  ; 1x OK: val, ---, ---
  96   01A1 CB F7            set 6,a
-syntax_b.asm(96): error: Illegal instruction (can't access memory):  (6),a 
+syntax_b.asm(96): error: Illegal instruction (can't access memory):  (6),a
  96   01A3 CB C7          set (6),a
 syntax_b.asm(96): error: Illegal instruction (can't access memory):  [6],a
  96   01A5 CB C7          set [6],a
  97   01A7                  ; 1x OK: val, ---, ---
  98   01A7 ED 27 24         test 36
-syntax_b.asm(98): error: Illegal instruction (can't access memory):  (37) 
+syntax_b.asm(98): error: Illegal instruction (can't access memory):  (37)
  98   01AA ED 27 00       test (37)
 syntax_b.asm(98): error: Illegal instruction (can't access memory):  [38]
  98   01AD ED 27 00       test [38]
  99   01B0
 100   01B0                  ; 1x OK: val, ---, ---
 101   01B0 ED 34 64 00      add hl,100
-syntax_b.asm(101): error: Illegal instruction (can't access memory): (101) 
+syntax_b.asm(101): error: Illegal instruction (can't access memory): (101)
 101   01B4 ED 34 00 00    add hl,(101)
 syntax_b.asm(101): error: Illegal instruction (can't access memory): [102]
 101   01B8 ED 34 00 00    add hl,[102]
 102   01BC ED 36 67 00      add bc,103
-syntax_b.asm(102): error: Illegal instruction (can't access memory): (104) 
+syntax_b.asm(102): error: Illegal instruction (can't access memory): (104)
 102   01C0 ED 36 00 00    add bc,(104)
 syntax_b.asm(102): error: Illegal instruction (can't access memory): [105]
 102   01C4 ED 36 00 00    add bc,[105]
 103   01C8 ED 35 6A 00      add de,106
-syntax_b.asm(103): error: Illegal instruction (can't access memory): (107) 
+syntax_b.asm(103): error: Illegal instruction (can't access memory): (107)
 103   01CC ED 35 00 00    add de,(107)
 syntax_b.asm(103): error: Illegal instruction (can't access memory): [108]
 103   01D0 ED 35 00 00    add de,[108]
 104   01D4 ED 8A 00 6D      push 109
-syntax_b.asm(104): error: Illegal instruction (can't access memory):  (110) 
+syntax_b.asm(104): error: Illegal instruction (can't access memory):  (110)
 104   01D8 ED 8A 00 00    push (110)
 syntax_b.asm(104): error: Illegal instruction (can't access memory):  [111]
 104   01DC ED 8A 00 00    push [111]
 105   01E0
 106   01E0              someLabel:
-syntax_b.asm(107): error: Illegal instruction (can't access memory): (someLabel)       
+syntax_b.asm(107): error: Illegal instruction (can't access memory): (someLabel)
 107   01E0 06 00            ld  b,(someLabel)       ; just make super sure it does catch the original real world annoyance
 108   01E2
 109   01E2                  ;; Docs example from command line options section
@@ -367,5 +367,5 @@ syntax_b.asm(112): error: Illegal instruction (can't access memory): (label)
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x01E0   someLabel
 0x01E2   label
+0x01E0   someLabel

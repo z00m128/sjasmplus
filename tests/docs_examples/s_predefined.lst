@@ -24,6 +24,6 @@ Value    Label
 ------ - -----------------------------------------------------------
 0x0001 X label_1
 0x000B X label_2
-0x0001 X label__COUNTER__
 0x0002 X label_4
 0x0002 X label_5
+0x0001 X label__COUNTER__

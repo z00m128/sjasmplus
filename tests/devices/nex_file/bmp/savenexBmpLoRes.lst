@@ -13,7 +13,7 @@
 12    0000
 13    0000                  ;; SAVENEX SCREEN BMP <filename>[,<savePalette 0/1>]
 14    0000                  ; errors - [un]expected arguments
-savenexBmpLoRes.asm(15): error: [SAVENEX] Error opening file: 
+savenexBmpLoRes.asm(15): error: [SAVENEX] Error opening file:
 15    0000                  SAVENEX     SCREEN  BMP
 savenexBmpLoRes.asm(16): error: [SAVENEX] Error opening file: ,
 16    0000                  SAVENEX     SCREEN  BMP , 0
@@ -25,7 +25,7 @@ savenexBmpLoRes.asm(20): error: [SAVENEX] Error opening file: missing file . bmp
 20    0000                  SAVENEX     SCREEN  BMP "missing file . bmp"
 21    0000
 22    0000                  ; correct one
-savenexBmpLoRes.asm(23): warning: [SAVENEX] BMP has only 255 colors in palette (expect "any" values in remaining colors).
+savenexBmpLoRes.asm(23): warning[nexbmppal]: [SAVENEX] BMP palette has less than 256 colours: 255
 23    0000                  SAVENEX     SCREEN  BMP "savenexBmpLoRes/savenexBmpLoRes.bmp"
 24    0000
 25    0000                  ; revisit screen errors - here no screen should work because bank was written already

@@ -102,16 +102,16 @@ savenexSyntax.asm(100): error: [SAVENEX] is allowed only in ZXSPECTRUMNEXT devic
 100   0000                  SAVENEX     OPEN    "savenexSyntax.nex",    $8000,$FFE0,    15  ; not in NEXT mode
 101   0000
 102   0000                  DEVICE ZXSPECTRUMNEXT
-savenexSyntax.asm(103): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE): NEPO    
+savenexSyntax.asm(103): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE): NEPO
 103   0000                  SAVENEX NEPO    ; wrong command
 104   0000
 105   0000              ;; OPEN <filename>[,<startAddress>,<stackAddress>[,<entryBank 0..111>]]
 106   0000                  ; errors - [un]expected arguments
-savenexSyntax.asm(107): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE): 
+savenexSyntax.asm(107): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE):
 107   0000                  SAVENEX
-savenexSyntax.asm(108): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE): 
+savenexSyntax.asm(108): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE):
 108   0000                  SAVENEX                 ; no command, but with comment
-savenexSyntax.asm(109): error: [SAVENEX] Error opening file: 
+savenexSyntax.asm(109): error: [SAVENEX] Error opening file:
 109   0000                  SAVENEX     OPEN
 savenexSyntax.asm(110): error: [SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]: SAVENEX     OPEN    "savenexSyntax.nex",
 110   0000                  SAVENEX     OPEN    "savenexSyntax.nex",
@@ -206,7 +206,7 @@ savenexSyntax.asm(163): warning: [SAVENEX] values are not within 0/1 or 0..255 r
 165   0000
 166   0000              ;; SCREEN L2 [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]
 167   0000                  ; errors - [un]expected arguments
-savenexSyntax.asm(168): error: [SAVENEX] unknown screen type (types: BMP, L2, L2_320, L2_640, LR, SCR, SHC, SHR, TILE): 
+savenexSyntax.asm(168): error: [SAVENEX] unknown screen type (types: BMP, L2, L2_320, L2_640, LR, SCR, SHC, SHR, TILE):
 168   0000                  SAVENEX     SCREEN
 savenexSyntax.asm(169): error: [SAVENEX] unknown screen type (types: BMP, L2, L2_320, L2_640, LR, SCR, SHC, SHR, TILE): NEERCS
 169   0000                  SAVENEX     SCREEN  NEERCS
@@ -224,21 +224,21 @@ savenexSyntax.asm(175): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..2
 175   0000                  SAVENEX     SCREEN  L2  9 ,    $1FFF ,  10 ,    $1800,
 176   0000
 177   0000                  ; errors - wrong values
-savenexSyntax.asm(178): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2 224, 0, 0, 0     
+savenexSyntax.asm(178): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2 224, 0, 0, 0
 178   0000                  SAVENEX     SCREEN  L2 224, 0, 0, 0     ; pagenum outside of range
-savenexSyntax.asm(179): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2 0, 0, 224, 0     
+savenexSyntax.asm(179): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  L2 0, 0, 224, 0
 179   0000                  SAVENEX     SCREEN  L2 0, 0, 224, 0     ; pagenum outside of range
-savenexSyntax.asm(180): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 218, 1, 0, 0     
+savenexSyntax.asm(180): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 218, 1, 0, 0
 180   0000                  SAVENEX     SCREEN  L2 218, 1, 0, 0     ; values in range, but leaks out of memory
-savenexSyntax.asm(181): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, $1B4001, 0, 0 
+savenexSyntax.asm(181): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, $1B4001, 0, 0
 181   0000                  SAVENEX     SCREEN  L2 0, $1B4001, 0, 0 ; values in range, but leaks out of memory
-savenexSyntax.asm(182): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, 0, 223, 7681  
+savenexSyntax.asm(182): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, 0, 223, 7681
 182   0000                  SAVENEX     SCREEN  L2 0, 0, 223, 7681  ; values in range, but leaks out of memory
-savenexSyntax.asm(183): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, 0, 0, $1BFE01 
+savenexSyntax.asm(183): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, 0, 0, $1BFE01
 183   0000                  SAVENEX     SCREEN  L2 0, 0, 0, $1BFE01 ; values in range, but leaks out of memory
-savenexSyntax.asm(184): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 218, 1           
+savenexSyntax.asm(184): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 218, 1
 184   0000                  SAVENEX     SCREEN  L2 218, 1           ; values in range, but leaks out of memory
-savenexSyntax.asm(185): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, $1B4001       
+savenexSyntax.asm(185): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  L2 0, $1B4001
 185   0000                  SAVENEX     SCREEN  L2 0, $1B4001       ; values in range, but leaks out of memory
 186   0000                  ; not testing correct variants, because it would make impossible to test other types
 187   0000
@@ -258,21 +258,21 @@ savenexSyntax.asm(195): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..2
 195   0000                  SAVENEX     SCREEN  LR  5 ,    $1FFF ,  10 ,    $1800,
 196   0000
 197   0000                  ; errors - wrong values
-savenexSyntax.asm(198): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR 224, 0, 0, 0     
+savenexSyntax.asm(198): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR 224, 0, 0, 0
 198   0000                  SAVENEX     SCREEN  LR 224, 0, 0, 0     ; pagenum outside of range
-savenexSyntax.asm(199): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR 0, 0, 224, 0     
+savenexSyntax.asm(199): error: [SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]: SAVENEX     SCREEN  LR 0, 0, 224, 0
 199   0000                  SAVENEX     SCREEN  LR 0, 0, 224, 0     ; pagenum outside of range
-savenexSyntax.asm(200): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 222, $1001, 0, 0 
+savenexSyntax.asm(200): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 222, $1001, 0, 0
 200   0000                  SAVENEX     SCREEN  LR 222, $1001, 0, 0 ; values in range, but leaks out of memory
-savenexSyntax.asm(201): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, $1BD001, 0, 0 
+savenexSyntax.asm(201): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, $1BD001, 0, 0
 201   0000                  SAVENEX     SCREEN  LR 0, $1BD001, 0, 0 ; values in range, but leaks out of memory
-savenexSyntax.asm(202): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, 0, 223, 7681  
+savenexSyntax.asm(202): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, 0, 223, 7681
 202   0000                  SAVENEX     SCREEN  LR 0, 0, 223, 7681  ; values in range, but leaks out of memory
-savenexSyntax.asm(203): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, 0, 0, $1BFE01 
+savenexSyntax.asm(203): error: [SAVENEX] palette data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, 0, 0, $1BFE01
 203   0000                  SAVENEX     SCREEN  LR 0, 0, 0, $1BFE01 ; values in range, but leaks out of memory
-savenexSyntax.asm(204): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 222, $1001       
+savenexSyntax.asm(204): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 222, $1001
 204   0000                  SAVENEX     SCREEN  LR 222, $1001       ; values in range, but leaks out of memory
-savenexSyntax.asm(205): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, $1BD001       
+savenexSyntax.asm(205): error: [SAVENEX] pixel data address range is outside of Next memory: SAVENEX     SCREEN  LR 0, $1BD001
 205   0000                  SAVENEX     SCREEN  LR 0, $1BD001       ; values in range, but leaks out of memory
 206   0000                  ; not testing correct variants, because it would make impossible to test other types
 207   0000
@@ -287,7 +287,7 @@ savenexSyntax.asm(214): error: [SAVENEX] expected bank number 0..111:     -1
 214   0000                  SAVENEX     BANK    -1
 savenexSyntax.asm(215): error: [SAVENEX] expected bank number 0..111:     112
 215   0000                  SAVENEX     BANK    112
-savenexSyntax.asm(216): error: [SAVENEX] expected bank number 0..111:                   
+savenexSyntax.asm(216): error: [SAVENEX] expected bank number 0..111:
 216   0000                  SAVENEX     BANK    5,                  ; bank 5 will be stored
 savenexSyntax.asm(217): error: [SAVENEX] it's too late to save this bank (correct order: 5, 2, 0, 1, 3, 4, 6, ...): 2
 217   0000                  SAVENEX     BANK    0, 2, 3             ; bank 0 will be stored, 2 = wrong order

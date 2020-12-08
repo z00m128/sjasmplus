@@ -10,10 +10,10 @@ dir_disp.asm(7): warning: [DISP] displacement inside another displacement block,
  8    C001 00           l2:     nop
  9    C002                      ASSERT $C001 == l2  ; not $1234
 10    C002
-dir_disp.asm(11): warning: [ORG] inside displaced block, the physical address is not modified, only virtual displacement address will change
+dir_disp.asm(11): warning[displacedorg]: ORG-address set inside displaced block, the physical address is not modified, only displacement address
 11    C002                      ORG     $E002       ; warning: only virtual address being modified inside DISP
 12    E002 3F           l3:     ccf
-13    E003                      ORG     $F003       ; ok ; warning suppressed
+13    E003                      ORG     $F003       ; suppress: displacedorg-ok
 14    F003 1F           l4:     rra
 15    F004
 16    F004                  ENT

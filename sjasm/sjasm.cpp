@@ -39,7 +39,7 @@
 
 #endif //USE_LUA
 
-void PrintHelp() {
+static void PrintHelpMain() {
 	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
 	//     |<-- ...8901234567890123456789012345678901234567890123456789012... 80 chars -->|
 	_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
@@ -48,7 +48,7 @@ void PrintHelp() {
 	//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 	_COUT "\nOption flags as follows:" _ENDL;
-	_COUT "  -h or --help             Help information (you see it)" _ENDL;
+	_COUT "  -h or --help[=warnings]  Help information (you see it)" _ENDL;
 	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions (Z80N)" _ENDL;
 	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
 	_COUT "  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)" _ENDL;
@@ -56,8 +56,8 @@ void PrintHelp() {
 	_COUT "  -i<path> or -I<path> or --inc=<path> ( --inc without \"=\" to empty the list)" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
-	_COUT "  --lstlab                 Enable label table in listing" _ENDL;
-	_COUT "  --sym=<filename>         Save symbols list to <filename>" _ENDL;
+	_COUT "  --lstlab[=sort]          Append [sorted] symbol table to listing" _ENDL;
+	_COUT "  --sym=<filename>         Save symbol table to <filename>" _ENDL;
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
 	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
 	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
@@ -74,7 +74,6 @@ void PrintHelp() {
 	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
-	_COUT "  --nofakes                Disable fake instructions" _ENDL;
 	_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
 	_COUT "  --syntax=<...>           Adjust parsing syntax, check docs for details." _ENDL;
 }
@@ -101,13 +100,15 @@ namespace Options {
 	bool IsShowFullPath = 0;
 	bool AddLabelListing = false;
 	bool HideLogo = 0;
-	bool ShowHelp = 0;
+	bool ShowHelp = false;
+	bool ShowHelpWarnings = false;
 	bool ShowVersion = false;
 	bool NoDestinationFile = true;		// no *.out file by default
 	SSyntax syx, systemSyntax;
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
 	bool IsLongPtr = false;
+	bool SortSymbols = false;
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
@@ -163,10 +164,19 @@ namespace Options {
 
 } // eof namespace Options
 
-CDevice *Devices = 0;
-CDevice *Device = 0;
-CDevicePage *Page = 0;
-char* DeviceID = 0;
+static void PrintHelp(bool forceMainHelp) {
+	if (forceMainHelp || Options::ShowHelp) PrintHelpMain();
+	if (Options::ShowHelpWarnings) PrintHelpWarnings();
+}
+
+CDevice *Devices = nullptr;
+CDevice *Device = nullptr;
+CDevicePage *Page = nullptr;
+char* DeviceID = nullptr;
+TextFilePos globalDeviceSourcePos = TextFilePos();
+aint deviceDirectivesCount = 0;
+static char* globalDeviceID = nullptr;
+static aint globalDeviceZxRamTop = 0;
 
 // extend
 const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either full or basename (--fullpath)
@@ -229,9 +239,14 @@ TextFilePos LuaStartPos;
 
 #endif //USE_LUA
 
-int deviceDirectivesCounter = 0;
-static char* globalDeviceID = NULL;
-static aint globalDeviceZxRamTop = 0;
+// reserve keywords in labels table, to detect when user is defining label colliding with keyword
+static void ReserveLabelKeywords() {
+	for (const char* keyword : {
+		"abs", "and", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "xor"
+	}) {
+		LabelTable.Insert(keyword, -65536, LABEL_IS_UNDEFINED|LABEL_IS_KEYWORD);
+	}
+}
 
 void InitPass() {
 	Relocation::InitPass();
@@ -250,7 +265,6 @@ void InitPass() {
 	macrolabp = NULL;
 	listmacro = 0;
 	CurAddress = 0;
-	CurSourcePos = DefinitionPos = TextFilePos();	// reset current source/definition positions
 	CompiledCurrentLine = 0;
 	PseudoORG = DISP_NONE; adrdisp = 0; dispPageNum = LABEL_PAGE_UNDEFINED;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
@@ -261,16 +275,32 @@ void InitPass() {
 	MacroDefineTable.ReInit();
 	DefineTable = Options::CmdDefineTable;
 	LocalLabelTable.InitPass();
-	// reset "device" stuff
-	if (2 == pass && Devices && 1 == deviceDirectivesCounter) {	// only single device detected
-		globalDeviceID = STRDUP(Devices->ID);		// make it global for remaining passes
+
+	// reset "device" stuff + detect "global device" directive
+	if (globalDeviceID) {		// globalDeviceID detector has to trigger before every pass
+		free(globalDeviceID);
+		globalDeviceID = nullptr;
+	}
+	if (1 < pass && 1 == deviceDirectivesCount && Devices) {	// only single DEVICE used
+		globalDeviceID = STRDUP(Devices->ID);		// make it global for next pass
 		globalDeviceZxRamTop = Devices->ZxRamTop;
 	}
 	if (Devices) delete Devices;
-	Devices = Device = NULL;
-	DeviceID = NULL;
-	Page = NULL;
-	deviceDirectivesCounter = 0;
+	Devices = Device = nullptr;
+	DeviceID = nullptr;
+	Page = nullptr;
+	deviceDirectivesCount = 0;
+	// resurrect "global" device here
+	if (globalDeviceID) {
+		CurSourcePos = globalDeviceSourcePos;
+		DefinitionPos = TextFilePos();
+		if (!SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
+			Error("Failed to re-initialize global device", globalDeviceID, FATAL);
+		}
+	}
+
+	// reset current source/definition positions
+	CurSourcePos = DefinitionPos = TextFilePos();
 
 	// predefined defines - (deprecated) classic sjasmplus v1.x (till v1.15.1)
 	DefineTable.Replace("_SJASMPLUS", "1");
@@ -291,19 +321,14 @@ void InitPass() {
 	DefineTable.Replace("__LINE__", "<dynamic value>");		// current line in current file
 	DefineTable.Replace("__COUNTER__", "<dynamic value>");	// gcc-like, incremented upon every use
 	PredefinedCounter = 0;
-
-	// resurrect "global" device here
-	if (globalDeviceID && !SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
-		Error("Failed to re-initialize global device", globalDeviceID, FATAL);
-	}
 }
 
 void FreeRAM() {
 	if (Devices) {
-		delete Devices;		Devices = NULL;
+		delete Devices;		Devices = nullptr;
 	}
 	if (globalDeviceID) {
-		free(globalDeviceID);	globalDeviceID = NULL;
+		free(globalDeviceID);	globalDeviceID = nullptr;
 	}
 	lijstp = NULL;		// do not delete this, should be released by owners of DUP/regular macros
 	free(vorlabp);		vorlabp = NULL;
@@ -314,6 +339,7 @@ void FreeRAM() {
 		free(PreviousIsLabel);
 		PreviousIsLabel = nullptr;
 	}
+	if (Options::IncludeDirsList) delete Options::IncludeDirsList;
 }
 
 
@@ -388,7 +414,11 @@ namespace Options {
 				// w - warnings option: report warnings as errors
 				case 'w': syx.WarningsAsErrors = true; break;
 				// m - switch off "Accessing low memory" warning globally
-				case 'm': syx.IsLowMemWarningEnabled = false; break;
+				case 'm':
+					syx.IsLowMemWarningEnabled = false;
+					Warning("`--syntax=m` is deprecated, use `-Wno-rdlow` instead", (0 == pass) ? nullptr : bp, (0 == pass) ? W_EARLY : W_PASS3);
+					//TODO remove "m" option completely after ~8/2021
+					break;
 				// M - alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
 				case 'M': syx.Is_M_Memory = true; break;
 				// unrecognized option
@@ -430,8 +460,12 @@ namespace Options {
 					syx.IsPseudoOpBOF = true;
 				} else if (!strcmp(opt, "nofakes")) {
 					syx.FakeEnabled = false;
+					Warning("`--nofakes` is deprecated, use `--syntax=F` instead", nullptr, (0 == pass) ? W_EARLY : W_PASS3);
+					//TODO remove "--nofakes" option completely after ~8/2021
 				} else if (!strcmp(opt, "syntax")) {
 					parseSyntaxValue();
+				} else if (!doubleDash && 'W' == opt[0]) {
+					CliWoption(val);
 				} else if (onlySyntaxOptions) {
 					// rest of the options is available only when launching the sjasmplus
 					return;
@@ -445,12 +479,14 @@ namespace Options {
 					// force (silently) other CPU modes OFF
 					IsLR35902 = false;
 					syx.IsNextEnabled = 0;
-				} else if ((!doubleDash && !strcmp(opt,"h") && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
-					ShowHelp = 1;
+				} else if ((!doubleDash && 'h' == opt[0] && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
+					ShowHelp |= strcmp("warnings", val);
+					ShowHelpWarnings |= !strcmp("warnings", val);
 				} else if (doubleDash && !strcmp(opt, "version")) {
 					ShowVersion = true;
 				} else if (!strcmp(opt, "lstlab")) {
 					AddLabelListing = true;
+					if (val[0]) SortSymbols = !strcmp("sort", val);
 				} else if (!strcmp(opt, "longptr")) {
 					IsLongPtr = true;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
@@ -470,6 +506,7 @@ namespace Options {
 					} else if (!strcmp("lstlab", val)) {
 						OutputVerbosity = OV_LST;
 						AddLabelListing = true;
+						SortSymbols = true;
 						HideLogo = true;
 					} else {
 						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
@@ -493,8 +530,8 @@ namespace Options {
 				} else if (!strcmp(opt, "dos866")) {
 					ConvertEncoding = ENCDOS;
 				} else if ((doubleDash && !strcmp(opt, "inc")) ||
-							(!doubleDash && !strcmp(opt, "i")) ||
-							(!doubleDash && !strcmp(opt, "I"))) {
+							(!doubleDash && 'i' == opt[0]) ||
+							(!doubleDash && 'I' == opt[0])) {
 					if (*val) {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
 					} else {
@@ -505,7 +542,7 @@ namespace Options {
 							IncludeDirsList = nullptr;
 						}
 					}
-				} else if (!doubleDash && opt[0] == 'D') {
+				} else if (!doubleDash && 'D' == opt[0]) {
 					char defN[LINEMAX], defV[LINEMAX];
 					if (*val) {		// for -Dname=value the `val` contains "name=value" string
 						//TODO the `Error("Duplicate name"..)` is not shown while parsing CLI options
@@ -643,26 +680,30 @@ int main(int argc, char **argv) {
 			if (!argv[i]) break;
 			sourceFiles.push_back(SSource(argv[i++]));
 		}
-		if (Options::IsDefaultListingName && Options::ListingFName[0]) {
-			Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
-		}
-		if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
-			Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
-		}
-		if (Options::IsDefaultSldName && Options::SourceLevelDebugFName[0]) {
-			Error("Using both  --sld  and  --sld=<filename>  is not possible.", NULL, FATAL);
-		}
+	}
+	if (Options::IsDefaultListingName && Options::ListingFName[0]) {
+		Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
+	}
+	if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
+		Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
+	}
+	if (Options::IsDefaultSldName && Options::SourceLevelDebugFName[0]) {
+		Error("Using both  --sld  and  --sld=<filename>  is not possible.", NULL, FATAL);
 	}
 	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
 
-	if (argc == 1 || Options::ShowHelp) {
+	if (argc == 1 || Options::ShowHelp || Options::ShowHelpWarnings) {
 		_COUT logo _ENDL;
-		PrintHelp();
+		PrintHelp(argc == 1);
 		exit(argc == 1);
 	}
 
 	if (!Options::HideLogo) {
 		_CERR logo _ENDL;
+	}
+
+	if (!Options::IsShowFullPath && (Options::IsDefaultSldName || Options::SourceLevelDebugFName[0])) {
+		Warning("missing  --fullpath  with  --sld  may produce incomplete file paths.", NULL, W_EARLY);
 	}
 
 	if (Options::ShowVersion) {
@@ -704,15 +745,13 @@ int main(int argc, char **argv) {
 	// open lists (if not set to "default" file name, then the OpenFile will handle it)
 	OpenList();
 
+	ReserveLabelKeywords();
+
 	do {
 		++pass;
+		if (pass == LASTPASS) OpenSld();	//open source level debugging file (BEFORE InitPass)
 		InitPass();
-
-		if (pass == LASTPASS) {
-			OpenDest();
-			//open source level debugging file
-			OpenSld();
-		}
+		if (pass == LASTPASS) OpenDest();
 
 		for (SSource & src : sourceFiles) {
 			IsRunning = 1;

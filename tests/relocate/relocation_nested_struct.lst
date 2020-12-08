@@ -11,7 +11,7 @@
  10   1004 ~            w       WORD    absolute1
  11   1004 ~            relInit WORD    reloc1          ; the default init value should be relocated
  12   1004 ~            noRel   WORD    reloc2-reloc1
-relocation_nested_struct.asm(13): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_nested_struct.asm(13): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  13   1004 ~            badRel  WORD    2*reloc1        ; warning about not simple "+offset"
  14   1004                  ENDS
  15   1004
@@ -20,11 +20,11 @@ relocation_nested_struct.asm(13): warning: Expression can't be relocated by simp
  18   1004 ~            w       WORD    absolute1
  19   1004 ~            relInit WORD    reloc2          ; the default init value should be relocated
  20   1004 ~            noRel   WORD    reloc2-reloc1
-relocation_nested_struct.asm(21): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_nested_struct.asm(21): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  21   1004 ~            badRel  WORD    2*reloc2        ; warning about not simple "+offset"
  22   1004 ~            st1A    st1
-relocation_nested_struct.asm(23): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
-relocation_nested_struct.asm(23): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_nested_struct.asm(23): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_nested_struct.asm(23): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  23   1004 ~            st1B    st1     { high reloc1, absolute2, reloc2, reloc1-reloc2, 2*reloc2 }
  24   1004                  ENDS
  25   1004
@@ -46,8 +46,8 @@ relocation_nested_struct.asm(23): warning: Expression can't be relocated by simp
  31   102F 08 20 EF 58
  31   1033 88 CD AB 49
  31   1037 FF 76 21
-relocation_nested_struct.asm(32): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
-relocation_nested_struct.asm(32): warning: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+relocation_nested_struct.asm(32): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_nested_struct.asm(32): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
  32   103A 34 DC 87 CD  .t3 st2     {,,$ABCD,,,{high reloc2,,$ABCD,,},{$EF,,2*reloc1,,reloc2}}   ; some relocatable and 2x warnings
  32   103E AB B7 00 76
  32   1042 21 10 DC 87
@@ -172,159 +172,159 @@ relocation_nested_struct.asm(32): warning: Expression can't be relocated by simp
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0013   relocate_count
-0x0026   relocate_size
 0x87DC   absolute1
-0x1004   reloc1
-0x10BB   reloc2
-0x0009 X st1
-0x0000 X st1.b
-0x0001 X st1.w
-0x0003 X st1.relInit
-0x0005 X st1.noRel
-0x0007 X st1.badRel
-0x8858   absolute2
-0x001B   st2
-0x0000 X st2.b
-0x0001 X st2.w
-0x0003 X st2.relInit
-0x0005 X st2.noRel
-0x0007 X st2.badRel
-0x0009 X st2.st1A
-0x0009   st2.st1A.b
-0x000A   st2.st1A.w
-0x000C   st2.st1A.relInit
-0x000E   st2.st1A.noRel
-0x0010 X st2.st1A.badRel
-0x0012   st2.st1B
-0x0012 X st2.st1B.b
-0x0013 X st2.st1B.w
-0x0015 X st2.st1B.relInit
-0x0017 X st2.st1B.noRel
-0x0019 X st2.st1B.badRel
-0x1004   reloc1.t1
-0x1004 X reloc1.t1.b
-0x1005 X reloc1.t1.w
-0x1007 X reloc1.t1.relInit
-0x1009 X reloc1.t1.noRel
-0x100B X reloc1.t1.badRel
-0x100D X reloc1.t1.st1A
-0x100D   reloc1.t1.st1A.b
-0x100E   reloc1.t1.st1A.w
-0x1010   reloc1.t1.st1A.relInit
-0x1012   reloc1.t1.st1A.noRel
-0x1014 X reloc1.t1.st1A.badRel
-0x1016 X reloc1.t1.st1B
-0x1016 X reloc1.t1.st1B.b
-0x1017 X reloc1.t1.st1B.w
-0x1019 X reloc1.t1.st1B.relInit
-0x101B X reloc1.t1.st1B.noRel
-0x101D X reloc1.t1.st1B.badRel
-0x101F   reloc1.t2
-0x101F X reloc1.t2.b
-0x1020 X reloc1.t2.w
-0x1022 X reloc1.t2.relInit
-0x1024 X reloc1.t2.noRel
-0x1026 X reloc1.t2.badRel
-0x1028 X reloc1.t2.st1A
-0x1028 X reloc1.t2.st1A.b
-0x1029 X reloc1.t2.st1A.w
-0x102B X reloc1.t2.st1A.relInit
-0x102D X reloc1.t2.st1A.noRel
-0x102F X reloc1.t2.st1A.badRel
-0x1031 X reloc1.t2.st1B
-0x1031   reloc1.t2.st1B.b
-0x1032   reloc1.t2.st1B.w
-0x1034   reloc1.t2.st1B.relInit
-0x1036   reloc1.t2.st1B.noRel
-0x1038 X reloc1.t2.st1B.badRel
-0x103A X reloc1.t3
-0x103A X reloc1.t3.b
-0x103B X reloc1.t3.w
-0x103D X reloc1.t3.relInit
-0x103F X reloc1.t3.noRel
-0x1041 X reloc1.t3.badRel
-0x1043 X reloc1.t3.st1A
-0x1043 X reloc1.t3.st1A.b
-0x1044 X reloc1.t3.st1A.w
-0x1046 X reloc1.t3.st1A.relInit
-0x1048 X reloc1.t3.st1A.noRel
-0x104A X reloc1.t3.st1A.badRel
-0x104C X reloc1.t3.st1B
-0x104C X reloc1.t3.st1B.b
-0x104D X reloc1.t3.st1B.w
-0x104F X reloc1.t3.st1B.relInit
-0x1051 X reloc1.t3.st1B.noRel
-0x1053 X reloc1.t3.st1B.badRel
-0x87E5   absolute1.t1.st1A.b
-0x87E6   absolute1.t1.st1A.w
-0x87E8   absolute1.t1.st1A.relInit
-0x87EA   absolute1.t1.st1A.noRel
-0x1004 X akaT1
-0x1004   akaT1.b
-0x1005   akaT1.w
-0x1007 X akaT1.relInit
-0x1009 X akaT1.noRel
-0x100B X akaT1.badRel
-0x100D X akaT1.st1A
-0x100D X akaT1.st1A.b
-0x100E X akaT1.st1A.w
-0x1010 X akaT1.st1A.relInit
-0x1012 X akaT1.st1A.noRel
-0x1014 X akaT1.st1A.badRel
-0x1016   akaT1.st1B
-0x1016   akaT1.st1B.b
-0x1017   akaT1.st1B.w
-0x1019 X akaT1.st1B.relInit
-0x101B X akaT1.st1B.noRel
-0x101D X akaT1.st1B.badRel
 0x87DC   absolute1.t1
-0x87DC X akaA1
-0x87DC X akaA1.b
-0x87DD X akaA1.w
-0x87DF X akaA1.relInit
-0x87E1 X akaA1.noRel
-0x87E3 X akaA1.badRel
-0x87E5   akaA1.st1A
-0x87E5   akaA1.st1A.b
-0x87E6   akaA1.st1A.w
-0x87E8   akaA1.st1A.relInit
-0x87EA   akaA1.st1A.noRel
-0x87EC X akaA1.st1A.badRel
-0x87EE X akaA1.st1B
-0x87EE X akaA1.st1B.b
-0x87EF X akaA1.st1B.w
-0x87F1 X akaA1.st1B.relInit
-0x87F3 X akaA1.st1B.noRel
-0x87F5 X akaA1.st1B.badRel
 0x87DC X absolute1.t1.b
-0x87DD X absolute1.t1.w
-0x87DF X absolute1.t1.relInit
-0x87E1 X absolute1.t1.noRel
 0x87E3 X absolute1.t1.badRel
+0x87E1 X absolute1.t1.noRel
+0x87DF X absolute1.t1.relInit
 0x87E5 X absolute1.t1.st1A
+0x87E5   absolute1.t1.st1A.b
 0x87EC X absolute1.t1.st1A.badRel
+0x87EA   absolute1.t1.st1A.noRel
+0x87E8   absolute1.t1.st1A.relInit
+0x87E6   absolute1.t1.st1A.w
 0x87EE X absolute1.t1.st1B
 0x87EE X absolute1.t1.st1B.b
-0x87EF X absolute1.t1.st1B.w
-0x87F1 X absolute1.t1.st1B.relInit
-0x87F3 X absolute1.t1.st1B.noRel
 0x87F5 X absolute1.t1.st1B.badRel
+0x87F3 X absolute1.t1.st1B.noRel
+0x87F1 X absolute1.t1.st1B.relInit
+0x87EF X absolute1.t1.st1B.w
+0x87DD X absolute1.t1.w
 0x87F7   absolute1.t2
 0x87F7 X absolute1.t2.b
-0x87F8 X absolute1.t2.w
-0x87FA X absolute1.t2.relInit
-0x87FC X absolute1.t2.noRel
 0x87FE X absolute1.t2.badRel
+0x87FC X absolute1.t2.noRel
+0x87FA X absolute1.t2.relInit
 0x8800 X absolute1.t2.st1A
 0x8800 X absolute1.t2.st1A.b
-0x8801 X absolute1.t2.st1A.w
-0x8803 X absolute1.t2.st1A.relInit
-0x8805 X absolute1.t2.st1A.noRel
 0x8807 X absolute1.t2.st1A.badRel
+0x8805 X absolute1.t2.st1A.noRel
+0x8803 X absolute1.t2.st1A.relInit
+0x8801 X absolute1.t2.st1A.w
 0x8809 X absolute1.t2.st1B
 0x8809   absolute1.t2.st1B.b
-0x880A   absolute1.t2.st1B.w
-0x880C   absolute1.t2.st1B.relInit
-0x880E   absolute1.t2.st1B.noRel
 0x8810 X absolute1.t2.st1B.badRel
+0x880E   absolute1.t2.st1B.noRel
+0x880C   absolute1.t2.st1B.relInit
+0x880A   absolute1.t2.st1B.w
+0x87F8 X absolute1.t2.w
+0x8858   absolute2
+0x87DC X akaA1
+0x87DC X akaA1.b
+0x87E3 X akaA1.badRel
+0x87E1 X akaA1.noRel
+0x87DF X akaA1.relInit
+0x87E5   akaA1.st1A
+0x87E5   akaA1.st1A.b
+0x87EC X akaA1.st1A.badRel
+0x87EA   akaA1.st1A.noRel
+0x87E8   akaA1.st1A.relInit
+0x87E6   akaA1.st1A.w
+0x87EE X akaA1.st1B
+0x87EE X akaA1.st1B.b
+0x87F5 X akaA1.st1B.badRel
+0x87F3 X akaA1.st1B.noRel
+0x87F1 X akaA1.st1B.relInit
+0x87EF X akaA1.st1B.w
+0x87DD X akaA1.w
+0x1004 X akaT1
+0x1004   akaT1.b
+0x100B X akaT1.badRel
+0x1009 X akaT1.noRel
+0x1007 X akaT1.relInit
+0x100D X akaT1.st1A
+0x100D X akaT1.st1A.b
+0x1014 X akaT1.st1A.badRel
+0x1012 X akaT1.st1A.noRel
+0x1010 X akaT1.st1A.relInit
+0x100E X akaT1.st1A.w
+0x1016   akaT1.st1B
+0x1016   akaT1.st1B.b
+0x101D X akaT1.st1B.badRel
+0x101B X akaT1.st1B.noRel
+0x1019 X akaT1.st1B.relInit
+0x1017   akaT1.st1B.w
+0x1005   akaT1.w
+0x1004   reloc1
+0x1004   reloc1.t1
+0x1004 X reloc1.t1.b
+0x100B X reloc1.t1.badRel
+0x1009 X reloc1.t1.noRel
+0x1007 X reloc1.t1.relInit
+0x100D X reloc1.t1.st1A
+0x100D   reloc1.t1.st1A.b
+0x1014 X reloc1.t1.st1A.badRel
+0x1012   reloc1.t1.st1A.noRel
+0x1010   reloc1.t1.st1A.relInit
+0x100E   reloc1.t1.st1A.w
+0x1016 X reloc1.t1.st1B
+0x1016 X reloc1.t1.st1B.b
+0x101D X reloc1.t1.st1B.badRel
+0x101B X reloc1.t1.st1B.noRel
+0x1019 X reloc1.t1.st1B.relInit
+0x1017 X reloc1.t1.st1B.w
+0x1005 X reloc1.t1.w
+0x101F   reloc1.t2
+0x101F X reloc1.t2.b
+0x1026 X reloc1.t2.badRel
+0x1024 X reloc1.t2.noRel
+0x1022 X reloc1.t2.relInit
+0x1028 X reloc1.t2.st1A
+0x1028 X reloc1.t2.st1A.b
+0x102F X reloc1.t2.st1A.badRel
+0x102D X reloc1.t2.st1A.noRel
+0x102B X reloc1.t2.st1A.relInit
+0x1029 X reloc1.t2.st1A.w
+0x1031 X reloc1.t2.st1B
+0x1031   reloc1.t2.st1B.b
+0x1038 X reloc1.t2.st1B.badRel
+0x1036   reloc1.t2.st1B.noRel
+0x1034   reloc1.t2.st1B.relInit
+0x1032   reloc1.t2.st1B.w
+0x1020 X reloc1.t2.w
+0x103A X reloc1.t3
+0x103A X reloc1.t3.b
+0x1041 X reloc1.t3.badRel
+0x103F X reloc1.t3.noRel
+0x103D X reloc1.t3.relInit
+0x1043 X reloc1.t3.st1A
+0x1043 X reloc1.t3.st1A.b
+0x104A X reloc1.t3.st1A.badRel
+0x1048 X reloc1.t3.st1A.noRel
+0x1046 X reloc1.t3.st1A.relInit
+0x1044 X reloc1.t3.st1A.w
+0x104C X reloc1.t3.st1B
+0x104C X reloc1.t3.st1B.b
+0x1053 X reloc1.t3.st1B.badRel
+0x1051 X reloc1.t3.st1B.noRel
+0x104F X reloc1.t3.st1B.relInit
+0x104D X reloc1.t3.st1B.w
+0x103B X reloc1.t3.w
+0x10BB   reloc2
+0x0013   relocate_count
+0x0026   relocate_size
+0x0009 X st1
+0x0000 X st1.b
+0x0007 X st1.badRel
+0x0005 X st1.noRel
+0x0003 X st1.relInit
+0x0001 X st1.w
+0x001B   st2
+0x0000 X st2.b
+0x0007 X st2.badRel
+0x0005 X st2.noRel
+0x0003 X st2.relInit
+0x0009 X st2.st1A
+0x0009   st2.st1A.b
+0x0010 X st2.st1A.badRel
+0x000E   st2.st1A.noRel
+0x000C   st2.st1A.relInit
+0x000A   st2.st1A.w
+0x0012   st2.st1B
+0x0012 X st2.st1B.b
+0x0019 X st2.st1B.badRel
+0x0017 X st2.st1B.noRel
+0x0015 X st2.st1B.relInit
+0x0013 X st2.st1B.w
+0x0001 X st2.w

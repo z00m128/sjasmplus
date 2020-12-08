@@ -679,5 +679,5 @@ op_BIT_CB.asm(11): error: Unrecognized instruction: sli a
 Value    Label
 ------ - -----------------------------------------------------------
 0x0003   INS_I
-0x0008   REG_I
 0x0008   REG_BIT
+0x0008   REG_I

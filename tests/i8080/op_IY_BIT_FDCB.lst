@@ -731,5 +731,5 @@ op_IY_BIT_FDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(iy+17),a
 Value    Label
 ------ - -----------------------------------------------------------
 0x0002   INS_I
-0x0008   REG_I
 0x0008   REG_BIT
+0x0008   REG_I

@@ -20,9 +20,9 @@ org.asm(14): error: Write outside of device memory at: 65536
 
 Value    Label
 ------ - -----------------------------------------------------------
-0xFFFF X longptr1
-0x10000 X longptr2
-0x10001 X longptr3
 0xFFFF X devbyte1
 0x10000 X devbyte2
 0x10001 X devbyte3
+0xFFFF X longptr1
+0x10000 X longptr2
+0x10001 X longptr3

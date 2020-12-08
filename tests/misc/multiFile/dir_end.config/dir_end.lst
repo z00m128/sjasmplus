@@ -72,8 +72,8 @@ dir_end.asm(10): error: Unrecognized instruction: some_error to check file paths
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0024   end
 0x0022   End
-0x0026   verifyLabel
+0x0024   end
 0x0022   End.end
+0x0026   verifyLabel
 0x001F   verifyLabelFrom_dir_end3.a80

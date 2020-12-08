@@ -121,7 +121,7 @@ TEST(SjIo_FilenameExtPos_WithInit) {
 
 TEST(SjIo_ConstructDefaultFilename) {
 	// verify the global sourceFiles variable is empty for this unit testing
-	CHECK_EQUAL(0, sourceFiles.size());
+	CHECK_EQUAL(0UL, sourceFiles.size());
 	char fname[101];
 	// check the "checkIfDestIsEmpty" argument functionality, and default basename "asm"
 	fname[0] = 'x';	fname[1] = 0;

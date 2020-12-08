@@ -93,19 +93,19 @@ struct_misc.asm(38): error: [IFNDEF] No ENDIF
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0001 X name1
-0x0000 X name1.x
-0x0001 X mod1.name1
-0x0000 X mod1.name1.x
-0x0001 X name2
-0x0000 X name2.x
-0x0001 X notEndedOne
-0x0000 X notEndedOne.x
 0x0000 X i1
 0x0000 X i1.x
-0x0001 X imod1
-0x0001 X imod1.x
 0x0002 X i2
 0x0002 X i2.x
 0x0003 X ie
 0x0003 X ie.x
+0x0001 X imod1
+0x0001 X imod1.x
+0x0001 X mod1.name1
+0x0000 X mod1.name1.x
+0x0001 X name1
+0x0000 X name1.x
+0x0001 X name2
+0x0000 X name2.x
+0x0001 X notEndedOne
+0x0000 X notEndedOne.x

@@ -11,13 +11,13 @@ y       WORD    absolute1
 relInit WORD    reloc1          ; the default init value should be relocated
 noRel   WORD    reloc2-reloc1
 badRel  WORD    2*reloc1        ; warning about not simple "+offset"
-badRel2 WORD    2*reloc1        ; ok ; suppressed warning
+badRel2 WORD    2*reloc1        ; reldiverts-ok ; suppressed warning
 warn1   BYTE    high reloc1     ; warning because unstable
 warn2   D24     reloc1          ; warning - D24 is not supported for relocation
 warn3   DWORD   reloc1          ; warning - D24 is not supported for relocation
-Swarn1  BYTE    high reloc1     ; ok ; suppressed warning
-Swarn2  D24     reloc1          ; ok ; suppressed warning
-Swarn3  DWORD   reloc1          ; ok ; suppressed warning
+Swarn1  BYTE    high reloc1     ; relunstable-ok ; suppressed warning
+Swarn2  D24     reloc1          ; relunstable-ok ; suppressed warning
+Swarn3  DWORD   reloc1          ; relunstable-ok ; suppressed warning
     ENDS
 
 reloc1:
@@ -27,10 +27,10 @@ reloc1:
 .t2 st1     {,reloc1,absolute1} ; "y" to be relocated, "relInit" NOT (absolute value)
     ; warning about non-word members
 .t3 st1     {high reloc1, $3412, $7856}
-.t4 st1     {high reloc1, $3412, $7856}     ; ok ; suppressed warning
+.t4 st1     {high reloc1, $3412, $7856}     ; relunstable-ok ; suppressed warning
     ; warning about unrelocatable value
 .t5 st1     {,, 2*reloc1}
-.t6 st1     {,, 2*reloc1}       ; ok ; suppressed warning
+.t6 st1     {,, 2*reloc1}       ; reldiverts-ok ; suppressed warning
 
     ld      ix,reloc1.t1        ; to be relocated (address of instance)
     ld      iy,.t2              ; to be relocated (address of instance)

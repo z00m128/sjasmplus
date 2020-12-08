@@ -190,15 +190,15 @@ labels_syntax_and_find.asm(160): error: Number labels are allowed as address lab
 labels_syntax_and_find.asm(161): error: Number labels are allowed as address labels only, not for DEFL/=/EQU: 105
 161   356D              105:    defl    should not work
 162   356D
-labels_syntax_and_find.asm(163): error: Unexpected: cpl     
+labels_syntax_and_find.asm(163): error: Unexpected: cpl
 163   356D              EquLineRemnants1:   EQU $+1-$100    cpl     ; error
 164   356D              EquLineRemnants2:   EQU $+2-$100
 164   356D 2F             cpl     ; valid
-labels_syntax_and_find.asm(165): error: Unexpected: cpl     
+labels_syntax_and_find.asm(165): error: Unexpected: cpl
 165   356E              DeflLineRemnants1:  DEFL $+3-$100   cpl     ; error
 166   356E              DeflLineRemnants2:  DEFL $+4-$100
 166   356E 2F             cpl     ; valid
-labels_syntax_and_find.asm(167): error: Unexpected: cpl     
+labels_syntax_and_find.asm(167): error: Unexpected: cpl
 167   356F              DeflLineRemnants3:  = $+5-$100      cpl     ; error
 168   356F              DeflLineRemnants4:  = $+6-$100
 168   356F 2F             cpl     ; valid
@@ -213,25 +213,25 @@ labels_syntax_and_find.asm(167): error: Unexpected: cpl
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x3130   mod1.label
-0x3131   mod1.label.local
-0x3534   label
-0x3535   label.local
-0x356A   unique
-0x314A   mod1.mod1unique
-0x334C   mod2.mod2unique
-0x316E   mod1.nested.label
-0x316F   mod1.nested.label.local
-0x3170   mod1.nested.nest1unique
-0x3370   mod2.nested.label
-0x3371   mod2.nested.label.local
-0x3372   mod2.nested.nest2unique
-0x3332   mod2.label
-0x3333   mod2.label.local
-0x346E X EquLineRemnants1
-0x346F X EquLineRemnants2
 0x3471 X DeflLineRemnants1
 0x3472 X DeflLineRemnants2
 0x3474 X DeflLineRemnants3
 0x3475 X DeflLineRemnants4
+0x346E X EquLineRemnants1
+0x346F X EquLineRemnants2
+0x3534   label
+0x3535   label.local
+0x3130   mod1.label
+0x3131   mod1.label.local
+0x314A   mod1.mod1unique
+0x316E   mod1.nested.label
+0x316F   mod1.nested.label.local
+0x3170   mod1.nested.nest1unique
+0x3332   mod2.label
+0x3333   mod2.label.local
+0x334C   mod2.mod2unique
+0x3370   mod2.nested.label
+0x3371   mod2.nested.label.local
+0x3372   mod2.nested.nest2unique
 0x0000 X noColonProblemDemonstration
+0x356A   unique

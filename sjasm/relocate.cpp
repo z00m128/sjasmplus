@@ -77,7 +77,7 @@ void Relocation::resolveRelocationAffected(const aint opcodeRelOffset) {
 	}
 	// difference is not fixable by simple "+offset" relocator, report it as warning
 	if (warningNotSuppressed()) {
-		Warning("Expression can't be relocated by simple \"+offset\" mechanics, value diverts differently.");
+		WarningById(W_REL_DIVERTS);
 	}
 }
 
@@ -89,7 +89,7 @@ bool Relocation::checkAndWarn(bool doError) {
 	if (doError) {
 		Error("Relocation makes one of the expressions unstable, use non-relocatable values only");
 	} else if (warningNotSuppressed()) {
-		Warning("Relocation makes one of the expressions unstable, resulting machine code is not relocatable");
+		WarningById(W_REL_UNSTABLE);
 	}
 	return true;
 }
@@ -102,8 +102,8 @@ static void Relocation::refreshMaxTableCount() {
 	}
 	// add the relocate_count and relocate_size symbols only when RELOCATE feature was used
 	if (Relocation::isActive || maxTableCount) {
-		LabelTable.Insert("relocate_count", maxTableCount, false, true, false);
-		LabelTable.Insert("relocate_size", maxTableCount * 2, false, true, false);
+		LabelTable.Insert("relocate_count", maxTableCount, LABEL_IS_DEFL);
+		LabelTable.Insert("relocate_size", maxTableCount * 2, LABEL_IS_DEFL);
 	}
 }
 

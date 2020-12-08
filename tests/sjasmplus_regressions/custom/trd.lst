@@ -16,31 +16,31 @@
 12    8205              end
 13    8205
 14    8205                      EMPTYTRD trd.trd
-trd.asm(15): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label1.txt
+trd.asm(15): warning[trdext3]: 3-letter extension of TRDOS file (unofficial extension): label1.txt
 15    8205                      SAVETRD "trd.trd","label1.txt",label1,5     ; new warnings about 3-letter extension
-trd.asm(16): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label2.txt
+trd.asm(16): warning[trdext3]: 3-letter extension of TRDOS file (unofficial extension): label2.txt
 16    8205                      SAVETRD "trd.trd","label2.txt",label2,5
-trd.asm(17): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label3.txt
+trd.asm(17): warning[trdext3]: 3-letter extension of TRDOS file (unofficial extension): label3.txt
 17    8205                      SAVETRD "trd.trd","label3.txt",label3,5
-18    8205                      SAVETRD "trd.trd","label4.txt",label2,5     ; ok ; warning suppressed
+18    8205                      SAVETRD "trd.trd","label4.txt",label2,5     ; trdext3-ok ; warning suppressed
 19    8205                  ; test the "invalid extension warning" and if it can be suppressed
 20    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; no warning
-trd.asm(21): warning: zx.trdimage_add_file: invalid file extension, TRDOS extensions are B, C, D and #.: label2.J
+trd.asm(21): warning[trdext]: invalid file extension, TRDOS official extensions are B, C, D and #.: label2.J
 21    8205                      SAVETRD "trd.trd","label2.J",label2,5       ; warning
-22    8205                      SAVETRD "trd.trd","label3.J",label2,5       ; ok ; warning suppressed
+22    8205                      SAVETRD "trd.trd","label3.J",label2,5       ; trdext-ok ; warning suppressed
 23    8205                  ; test the new warning about saving same file second time (v1.15.1+)
-trd.asm(24): warning: TRD file already exists, creating one more!: trd.trd
+trd.asm(24): warning[trddup]: TRD file already exists, creating one more!: trd.trd
 24    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; warning
-25    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; ok ; warning suppressed
+25    8205                      SAVETRD "trd.trd","label2.B",label2,5       ; trddup-ok ; warning suppressed
 26    8205                  ; test the new warnings about "B" extension allowing only single letter
-trd.asm(27): warning: zx.trdimage_add_file: additional non-standard TRDOS file extension with 3 characters: label2.BAS
-trd.asm(27): warning: SAVETRD: the "B" extension is always single letter: label2.BAS
-trd.asm(27): warning: TRD file already exists, creating one more!: trd.trd
+trd.asm(27): warning[trdext3]: 3-letter extension of TRDOS file (unofficial extension): label2.BAS
+trd.asm(27): warning[trdextb]: the "B" extension is always single letter: label2.BAS
+trd.asm(27): warning[trddup]: TRD file already exists, creating one more!: trd.trd
 27    8205                      SAVETRD "trd.trd","label2.BAS",label1,5     ; 3x warning (3 letter ext, ".B" enforces 1 letter, duplicate file)
-28    8205                      SAVETRD "trd.trd","label2.BAS",label1,5     ; ok ; warnings suppressed
+28    8205                      SAVETRD "trd.trd","label2.BAS",label1,5     ; trdext3-ok, trdextb-ok, trddup-ok ; warnings suppressed
 29    8205                  ; test deletion of duplicate files when in replace/add modes
 30    8205                      SAVETRD "trd.trd",|"label2.B",label2,5
-31    8205                      SAVETRD "trd.trd","label3.J",label2,5       ; ok
+31    8205                      SAVETRD "trd.trd","label3.J",label2,5       ; trdext-ok, trddup-ok
 32    8205                      SAVETRD "trd.trd",&"label3.J",label2,5
 33    8205
 34    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
@@ -66,7 +66,7 @@ trd.asm(45): error: SAVETRD only allowed in real device emulation mode (See DEVI
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x8205 X end
 0x8000 X label1
 0x8100 X label2
 0x8200 X label3
-0x8205 X end

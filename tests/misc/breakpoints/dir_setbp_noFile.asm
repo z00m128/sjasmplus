@@ -4,5 +4,5 @@
     DEVICE ZXSPECTRUM48
     BPLIST "" invalid_type  ; empty filename, invalid type
 
-    SETBREAKPOINT $     ; ok ; warning suppressed
+    SETBREAKPOINT $     ; bpfile-ok ; warning suppressed
     SETBREAKPOINT $     ; warning about no file

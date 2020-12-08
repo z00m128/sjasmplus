@@ -21,8 +21,8 @@ ld_de_k__illegal.asm(11): error: Label not found: m
 Value    Label
 ------ - -----------------------------------------------------------
 0x0001   k
-0x0002   kk
 0x0003   kiki
+0x0002   kk
 0x0004   n
-0x0005   nn
 0x0006   nini
+0x0005   nn

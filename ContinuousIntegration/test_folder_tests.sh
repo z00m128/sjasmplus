@@ -84,10 +84,10 @@ for f in "${TEST_FILES[@]}"; do
         chmod -R 700 ".${subf#$src_dir}"   # force 700 permissions to copied files (recursively)
     done
     # see if there are extra options defined (and read them into array)
-    options=()
-    [[ -s "${OPTIONS_FILE}" ]] && options=(`cat "${OPTIONS_FILE}"`)
+    options=('--lstlab=sort')	# enforce all symbol dumps to be sorted in any case (even when no --lst)
+    [[ -s "${OPTIONS_FILE}" ]] && options+=(`cat "${OPTIONS_FILE}"`)
     # check if .lst file is required to verify the test, set up options to produce one
-    [[ -s "${LIST_FILE}" ]] && MSG_LIST_FILE="" && options+=("--lst=${dst_base}.lst") && options+=('--lstlab')
+    [[ -s "${LIST_FILE}" ]] && MSG_LIST_FILE="" && options+=("--lst=${dst_base}.lst")
     [[ ! -s "${MSG_LIST_FILE}" ]] && MSG_LIST_FILE="" || LIST_FILE="${MSG_LIST_FILE}"
     ## built it with sjasmplus (remember exit code)
     totalChecks=$((totalChecks + 1))    # assembling is one check

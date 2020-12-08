@@ -219,18 +219,6 @@ multi_line_init2.asm(94): ^ emitted from here
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0008 X S_sub1
-0x0000 X S_sub1.b1
-0x0001 X S_sub1.t1
-0x0006 X S_sub1.w1
-0x0009 X S_main
-0x0000 X S_main.b2
-0x0001 X S_main.s1
-0x0001 X S_main.s1.b1
-0x0002 X S_main.s1.t1
-0x0007 X S_main.s1.w1
-0x002A X dotRep
-0x003C X dupRep
 0x004E X 0>macSub
 0x004E X 0>macSub.b2
 0x004F X 0>macSub.s1
@@ -255,7 +243,6 @@ Value    Label
 0x006A X 3>macSub.s1.b1
 0x006B X 3>macSub.s1.t1
 0x0070 X 3>macSub.s1.w1
-0x00C4 X mlDupRep
 0x00D6 X 4>macSub
 0x00D6 X 4>macSub.b2
 0x00D7 X 4>macSub.s1
@@ -280,4 +267,17 @@ Value    Label
 0x00F2 X 7>macSub.s1.b1
 0x00F3 X 7>macSub.s1.t1
 0x00F8 X 7>macSub.s1.w1
+0x002A X dotRep
+0x003C X dupRep
 0x00FA X mlDotRep
+0x00C4 X mlDupRep
+0x0009 X S_main
+0x0000 X S_main.b2
+0x0001 X S_main.s1
+0x0001 X S_main.s1.b1
+0x0002 X S_main.s1.t1
+0x0007 X S_main.s1.w1
+0x0008 X S_sub1
+0x0000 X S_sub1.b1
+0x0001 X S_sub1.t1
+0x0006 X S_sub1.w1

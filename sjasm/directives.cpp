@@ -118,19 +118,19 @@ static void getBytesWithCheck(int add = 0, int dc = 0, bool dz = false) {
 	}
 }
 
-void dirBYTE() {
+static void dirBYTE() {
 	getBytesWithCheck();
 }
 
-void dirDC() {
+static void dirDC() {
 	getBytesWithCheck(0, 1);
 }
 
-void dirDZ() {
+static void dirDZ() {
 	getBytesWithCheck(0, 0, true);
 }
 
-void dirABYTE() {
+static void dirABYTE() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
 		getBytesWithCheck(add);
@@ -139,7 +139,7 @@ void dirABYTE() {
 	}
 }
 
-void dirABYTEC() {
+static void dirABYTEC() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
 		getBytesWithCheck(add, 1);
@@ -148,7 +148,7 @@ void dirABYTEC() {
 	}
 }
 
-void dirABYTEZ() {
+static void dirABYTEZ() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
 		getBytesWithCheck(add, 0, true);
@@ -157,7 +157,7 @@ void dirABYTEZ() {
 	}
 }
 
-void dirWORD() {
+static void dirWORD() {
 	aint val;
 	int teller = 0, e[130];
 	do {
@@ -181,7 +181,7 @@ void dirWORD() {
 	else		Error("DW/DEFW/WORD with no arguments");
 }
 
-void dirDWORD() {
+static void dirDWORD() {
 	aint val;
 	int teller = 0, e[130 * 2];
 	do {
@@ -200,7 +200,7 @@ void dirDWORD() {
 	else		Error("DWORD with no arguments");
 }
 
-void dirD24() {
+static void dirD24() {
 	aint val;
 	int teller = 0, e[130 * 3];
 	do {
@@ -220,7 +220,7 @@ void dirD24() {
 	else		Error("D24 with no arguments");
 }
 
-void dirDG() {
+static void dirDG() {
 	int dirDx[130];
 	if (GetBits(lp, dirDx)) {
 		EmitBytes(dirDx);
@@ -229,7 +229,7 @@ void dirDG() {
 	}
 }
 
-void dirDH() {
+static void dirDH() {
 	int dirDx[130];
 	if (GetBytesHexaText(lp, dirDx)) {
 		EmitBytes(dirDx);
@@ -238,10 +238,10 @@ void dirDH() {
 	}
 }
 
-void dirBLOCK() {
+static void dirBLOCK() {
 	aint teller,val = 0;
 	if (ParseExpressionNoSyntaxError(lp, teller)) {
-		if ((signed) teller < 0) {
+		if (teller < 0) {
 			Warning("Negative BLOCK?");
 		}
 		if (comma(lp)) {
@@ -275,16 +275,14 @@ static void dirPageImpl(const char* const dirName) {
 	}
 }
 
-void dirORG() {
+static void dirORG() {
 	aint val;
 	if (!ParseExpressionNoSyntaxError(lp, val)) {
 		Error("[ORG] Syntax error in <address>", lp, SUPPRESS);
 		return;
 	}
 	CurAddress = val;
-	if (DISP_NONE != PseudoORG && warningNotSuppressed()) {
-		Warning("[ORG] inside displaced block, the physical address is not modified, only virtual displacement address will change");
-	}
+	if (DISP_NONE != PseudoORG && warningNotSuppressed()) WarningById(W_DISPLACED_ORG);
 	if (!DeviceID) return;
 	if (!comma(lp)) {
 		Device->CheckPage(CDevice::CHECK_RESET);
@@ -294,15 +292,15 @@ void dirORG() {
 	auto slot = Device->GetCurrentSlot();
 	if ((CurAddress < slot->Address || slot->Address + slot->Size <= CurAddress) && warningNotSuppressed()) {
 		char warnTxt[LINEMAX];
-		SPRINTF3(warnTxt, LINEMAX,
-					"ORG address 0x%04X is outside of current slot 0x%04X..0x%04X (page argument affects *current* slot)",
-					CurAddress, slot->Address, slot->Address + slot->Size - 1);
-		Warning(warnTxt, bp);
+		SPRINTF4(warnTxt, LINEMAX,
+					"address 0x%04X vs slot %d range 0x%04X..0x%04X",
+					CurAddress, Device->GetCurrentSlotNum(), slot->Address, slot->Address + slot->Size - 1);
+		WarningById(W_ORG_PAGE, warnTxt);
 	}
 	dirPageImpl("ORG");
 }
 
-void dirDISP() {
+static void dirDISP() {
 	if (DISP_NONE != PseudoORG) {
 		Warning("[DISP] displacement inside another displacement block, ignoring it.");
 		SkipToEol(lp);
@@ -343,7 +341,7 @@ void dirDISP() {
 	PseudoORG = Relocation::isActive ? DISP_INSIDE_RELOCATE : DISP_ACTIVE;
 }
 
-void dirENT() {
+static void dirENT() {
 	if (DISP_NONE == PseudoORG) {
 		Error("ENT should be after DISP");
 		return;
@@ -362,7 +360,7 @@ void dirENT() {
 	dispPageNum = LABEL_PAGE_UNDEFINED;
 }
 
-void dirPAGE() {
+static void dirPAGE() {
 	if (!DeviceID) {
 		Warning("PAGE only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
@@ -371,7 +369,7 @@ void dirPAGE() {
 	}
 }
 
-void dirMMU() {
+static void dirMMU() {
 	if (!DeviceID) {
 		Warning("MMU is allowed only in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
@@ -444,13 +442,13 @@ void dirMMU() {
 	if (0 <= address) {
 		CurAddress = address;
 		if (DISP_NONE != PseudoORG && warningNotSuppressed()) {
-			Warning("[MMU] ORG address inside displaced block");
+			WarningById(W_DISPLACED_ORG);
 		}
 	}
 	Device->CheckPage(CDevice::CHECK_RESET);
 }
 
-void dirSLOT() {
+static void dirSLOT() {
 	aint val;
 	if (!DeviceID) {
 		Warning("SLOT only allowed in real device emulation mode (See DEVICE)");
@@ -468,7 +466,7 @@ void dirSLOT() {
 	}
 }
 
-void dirALIGN() {
+static void dirALIGN() {
 	// default alignment is 4, default filler is "0/none" (if not specified in directive explicitly)
 	aint val, fill;
 	ParseAlignArguments(lp, val, fill);
@@ -480,7 +478,7 @@ void dirALIGN() {
 	else			EmitBlock(fill, len, false);
 }
 
-void dirMODULE() {
+static void dirMODULE() {
 	char* n = GetID(lp);
 	if (n && (nullptr == STRCHR(n, '.'))) {
 		if (*ModuleName) STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), ".");
@@ -488,6 +486,9 @@ void dirMODULE() {
 		// reset non-local label to default "_"
 		if (vorlabp) free(vorlabp);
 		vorlabp = STRDUP("_");
+		if (IsSldExportActive()) {
+			WriteToSldFile(-1, CurAddress, 'L', ExportModuleToSld());
+		}
 	} else {
 		if (n) {
 			Error("[MODULE] Dots not allowed in <module_name>", n, SUPPRESS);
@@ -497,10 +498,13 @@ void dirMODULE() {
 	}
 }
 
-void dirENDMODULE() {
+static void dirENDMODULE() {
 	if (! *ModuleName) {
 		Error("ENDMODULE without MODULE");
 		return;
+	}
+	if (IsSldExportActive()) {
+		WriteToSldFile(-1, CurAddress, 'L', ExportModuleToSld(true));
 	}
 	// remove last part of composite modules name
 	char* lastDot = strrchr(ModuleName, '.');
@@ -511,7 +515,7 @@ void dirENDMODULE() {
 	vorlabp = STRDUP("_");
 }
 
-void dirEND() {
+static void dirEND() {
 	char* p = lp;
 	aint val;
 	if (ParseExpression(lp, val)) {
@@ -524,7 +528,7 @@ void dirEND() {
 	IsRunning = 0;
 }
 
-void dirSIZE() {
+static void dirSIZE() {
 	aint val;
 	if (!ParseExpressionNoSyntaxError(lp, val)) {
 		Error("[SIZE] Syntax error in <filesize>", bp, SUPPRESS);
@@ -535,7 +539,7 @@ void dirSIZE() {
 	else if (size != val) ErrorInt("[SIZE] Different size than previous", size);	// just check it's same
 }
 
-void dirINCBIN() {
+static void dirINCBIN() {
 	int offset = 0, length = INT_MAX;
 	std::unique_ptr<char[]> fnaam(GetFileName(lp));
 	if (anyComma(lp)) {
@@ -558,7 +562,7 @@ void dirINCBIN() {
 	BinIncFile(fnaam.get(), offset, length);
 }
 
-void dirINCHOB() {
+static void dirINCHOB() {
 	aint val;
 	char* fnaamh;
 	unsigned char len[2];
@@ -604,7 +608,7 @@ void dirINCHOB() {
 	free(fnaamh);
 }
 
-void dirINCTRD() {
+static void dirINCTRD() {
 	aint val, offset = 0, length = INT_MAX;
 	std::unique_ptr<char[]> trdname(GetFileName(lp));
 	std::unique_ptr<char[]> filename;
@@ -648,7 +652,7 @@ void dirINCTRD() {
 	}
 }
 
-void dirSAVESNA() {
+static void dirSAVESNA() {
 	if (pass != LASTPASS) return;		// syntax error is not visible in early passes
 	bool exec = true;
 
@@ -684,7 +688,7 @@ void dirSAVESNA() {
 	}
 }
 
-void dirEMPTYTAP() {
+static void dirEMPTYTAP() {
 	if (pass != LASTPASS) {
 		SkipParam(lp);
 		return;
@@ -696,7 +700,7 @@ void dirEMPTYTAP() {
 	TAP_SaveEmpty(fnaam.get());
 }
 
-void dirSAVETAP() {
+static void dirSAVETAP() {
 
 	if (pass != LASTPASS) {
 		SkipParam(lp);
@@ -870,7 +874,7 @@ void dirSAVETAP() {
 	}
 }
 
-void dirSAVEBIN() {
+static void dirSAVEBIN() {
 	if (!DeviceID) {
 		Error("SAVEBIN only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
@@ -912,7 +916,7 @@ void dirSAVEBIN() {
 	}
 }
 
-void dirSAVEDEV() {
+static void dirSAVEDEV() {
 	bool exec = DeviceID && LASTPASS == pass;
 	if (!exec && LASTPASS == pass) Error("SAVEDEV only allowed in real device emulation mode (See DEVICE)");
 
@@ -945,7 +949,7 @@ void dirSAVEDEV() {
 	}
 }
 
-void dirSAVEHOB() {
+static void dirSAVEHOB() {
 
 	if (!DeviceID || pass != LASTPASS) {
 		if (!DeviceID) Error("SAVEHOB only allowed in real device emulation mode (See DEVICE)");
@@ -1002,7 +1006,7 @@ void dirSAVEHOB() {
 	}
 }
 
-void dirEMPTYTRD() {
+static void dirEMPTYTRD() {
 	if (pass != LASTPASS) {
 		SkipToEol(lp);
 		return;
@@ -1031,7 +1035,7 @@ void dirEMPTYTRD() {
 	TRD_SaveEmpty(fnaam.get(), diskLabel);
 }
 
-void dirSAVETRD() {
+static void dirSAVETRD() {
 	if (!DeviceID || pass != LASTPASS) {
 		if (!DeviceID) Error("SAVETRD only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
@@ -1104,7 +1108,7 @@ void dirSAVETRD() {
 	if (exec) TRD_AddFile(fnaam.get(), fnaamh.get(), start, length, autostart, replace, addplace);
 }
 
-void dirENCODING() {
+static void dirENCODING() {
 	std::unique_ptr<char[]> opt(GetFileName(lp, false));
 	char* comparePtr = opt.get();
 	if (cmphstr(comparePtr, "dos")) {
@@ -1116,8 +1120,8 @@ void dirENCODING() {
 	}
 }
 
-void dirOPT() {
-	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...>
+static void dirOPT() {
+	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...> -W...
 	// process OPT specific command keywords first: {push, pop, reset, listoff, liston}
 	bool didReset = false, didList = Options::syx.IsListingSuspended;
 	while (!SkipBlanks(lp) && '-' != *lp) {
@@ -1142,31 +1146,36 @@ void dirOPT() {
 			Options::syx.IsListingSuspended = didList = true;
 		} else if (cmphstr(lp, "liston")) {
 			Options::syx.IsListingSuspended = false;
+		} else if (cmphstr(lp, "listmc")) {
+			if (!didList) ListFile();		// *list* the OPT line starting the filtering
+			donotlist = 1;
+			Options::syx.IsMcOnlyListing = didList = true;
 		} else {
-			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff)", lp);
+			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listmc)", lp);
 			SkipToEol(lp);
 			return;
 		}
 	}
 	// split user arguments into "argc, argv" like variables (by white-space)
 	char parsedOpts[LINEMAX];
-	char* parsedOptsArray[17] {};	// there must be one more nullptr in the array (16+1)
-	int optI = 0, charI = 0, errI;
-	while (optI < 16 && !SkipBlanks(lp)) {
-		parsedOptsArray[optI++] = parsedOpts + charI;
+	std::vector<char*> parsedOptsArray;
+	int charI = 0, errI;
+	while (!SkipBlanks(lp)) {
+		parsedOptsArray.push_back(parsedOpts + charI);
 		while (*lp && !White()) parsedOpts[charI++] = *lp++;
 		parsedOpts[charI++] = 0;
 	}
-	if (!SkipBlanks(lp)) Warning("[OPT] too many options");
+	int optI = parsedOptsArray.size();
+	parsedOptsArray.push_back(nullptr);
 	// parse user arguments and adjust current syntax setup
-	if (optI != (errI = Options::parseSyntaxOptions(optI, parsedOptsArray))) {
+	if (optI != (errI = Options::parseSyntaxOptions(optI, parsedOptsArray.data()))) {
 		Error("[OPT] invalid/failed option", parsedOptsArray[errI]);
 	}
 	// init Z80N extensions if requested (the Init is safe to be called multiple times)
 	if (Options::syx.IsNextEnabled) Z80::InitNextExtensions();
 }
 
-void dirLABELSLIST() {
+static void dirLABELSLIST() {
 	if (pass != 1 || !DeviceID) {
 		if (!DeviceID) Error("LABELSLIST only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
@@ -1189,7 +1198,7 @@ void dirLABELSLIST() {
 	}
 }
 
-void dirCSPECTMAP() {
+static void dirCSPECTMAP() {
 	if (LASTPASS != pass || !DeviceID) {
 		if (!DeviceID) Error("CSPECTMAP only allowed in real device emulation mode (See DEVICE)");
 		SkipParam(lp);
@@ -1206,7 +1215,7 @@ void dirCSPECTMAP() {
 	Options::CSpectMapPageSize = Device->GetPage(0)->Size;
 }
 
-void dirBPLIST() {
+static void dirBPLIST() {
 	if (2 != pass || !DeviceID) {	// nothing to do in first or last pass, second will open the file
 		if (2 == pass) {	// !Device is true -> no device in second pass -> error
 			Error("BPLIST only allowed in real device emulation mode (See DEVICE)", nullptr, EARLY);
@@ -1226,7 +1235,7 @@ void dirBPLIST() {
 	OpenBreakpointsFile(fName.get(), type);
 }
 
-void dirSETBREAKPOINT() {
+static void dirSETBREAKPOINT() {
 	if (LASTPASS != pass) {
 		SkipToEol(lp);
 		return;
@@ -1260,7 +1269,7 @@ static bool dirIfIfn(aint & val) {
 		return false;
 	}
 	if (IsLabelNotFound && warningNotSuppressed()) {
-		Warning("[IF/IFN] Forward reference", bp, W_EARLY);
+		WarningById(W_FWD_REF, bp, W_EARLY);
 	}
 	return true;
 }
@@ -1324,7 +1333,7 @@ static bool dirIfusedIfnused(char* & id) {
 			return false;
 		}
 	} else {
-		std::unique_ptr<char[]> validLabel(ValidateLabel(lp, false));
+		std::unique_ptr<char[]> validLabel(ValidateLabel(lp, false, true));
 		if (validLabel) {
 			id = STRDUP(validLabel.get());
 			while (islabchar(*lp)) ++lp;	// advance lp beyond parsed label (valid chars only)
@@ -1381,7 +1390,7 @@ static void dirENDIF() {
   Error("ENDT without TEXTAREA",0);
 }*/
 
-void dirINCLUDE() {
+static void dirINCLUDE() {
 	std::unique_ptr<char[]> fnaam(GetFileName(lp));
 	if (fnaam[0]) {
 		EDelimiterType dt = GetDelimiterOfLastFileName();
@@ -1393,7 +1402,7 @@ void dirINCLUDE() {
 	}
 }
 
-void dirOUTPUT() {
+static void dirOUTPUT() {
 	if (LASTPASS != pass) {
 		SkipToEol(lp);
 		return;
@@ -1416,12 +1425,12 @@ void dirOUTPUT() {
 	NewDest(fnaam.get(), mode);
 }
 
-void dirOUTEND()
+static void dirOUTEND()
 {
 	if (pass == LASTPASS) CloseDest();
 }
 
-void dirTAPOUT()
+static void dirTAPOUT()
 {
 	aint val;
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
@@ -1437,27 +1446,31 @@ void dirTAPOUT()
 	if (pass == LASTPASS) OpenTapFile(fnaam.get(), tape_flag);
 }
 
-void dirTAPEND()
+static void dirTAPEND()
 {
 	// if (!FP_tapout) {Error("TAPEND without TAPOUT", bp, PASS3); return;}
 	if (pass == LASTPASS) CloseTapFile();
 }
 
-void dirDEFINE() {
+static void dirDEFINE() {
+	bool replaceEnabled = ('+' == *lp) ? ++lp, true : false;
 	char* id;
-
 	if (!(id = GetID(lp))) {
 		Error("[DEFINE] Illegal <id>", lp, SUPPRESS);
 		return;
 	}
 	if (White(*lp)) ++lp;		// skip one whitespace (not considered part of value) (others are)
 
-	DefineTable.Add(id, lp, 0);
+	if (replaceEnabled) {
+		DefineTable.Replace(id, lp);
+	} else {
+		DefineTable.Add(id, lp, nullptr);
+	}
 	SkipToEol(lp);
 	substitutedLine = line;		// override substituted listing for DEFINE
 }
 
-void dirUNDEFINE() {
+static void dirUNDEFINE() {
 	char* id;
 
 	if (!(id = GetID(lp)) && *lp != '*') {
@@ -1480,7 +1493,7 @@ void dirUNDEFINE() {
 	}
 }
 
-void dirEXPORT() {
+static void dirEXPORT() {
 	aint val;
 	char* n, * p;
 
@@ -1504,7 +1517,7 @@ void dirEXPORT() {
 	if (!IsLabelNotFound) WriteExp(p, val);
 }
 
-void dirDISPLAY() {
+static void dirDISPLAY() {
 	char decprint = 'H';
 	char e[LINEMAX + 32], optionChar;		// put extra buffer at end for particular H/A/D number printout
 	char* ep = e, * const endOfE = e + LINEMAX;
@@ -1516,8 +1529,8 @@ void dirDISPLAY() {
 		}
 		if (*lp == '/') {
 			switch (optionChar = toupper((byte)lp[1])) {
-			case 'A': case 'D': case 'H': case 'B':
-				// known options, switching hex+dec / dec / hex / binary mode
+			case 'A': case 'D': case 'H': case 'B': case 'C':
+				// known options, switching hex+dec / dec / hex / binary mode / char mode
 				decprint = optionChar;
 				break;
 			case 'L': case 'T':				// silently ignored options (legacy compatibility)
@@ -1556,6 +1569,20 @@ void dirDISPLAY() {
 						bitMask >>= 1;
 					}
 				}
+				if (decprint == 'C') {
+					val &= 0xFF;	// truncate to 8bit value
+					if (' ' <= val && val < 127) {	// printable ASCII
+						*ep++ = '\'';
+						*ep++ = val;
+						*ep++ = '\'';
+					} else {		// non-printable char, do the \x?? form
+						*ep++ = '\'';
+						*ep++ = '\\';
+						*ep++ = 'x';
+						PrintHex(ep, val, 2);
+						*ep++ = '\'';
+					}
+				}
 				if (decprint == 'H' || decprint == 'A') {
 					*(ep++) = '0';
 					*(ep++) = 'x';
@@ -1586,7 +1613,7 @@ void dirDISPLAY() {
 	}
 }
 
-void dirMACRO() {
+static void dirMACRO() {
 	if (lijst) Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
 	char* lpLabel = LastParsedLabel;	// modifiable copy of global buffer pointer
 	// get+validate macro name either from label on same line or from following line
@@ -1598,11 +1625,11 @@ void dirMACRO() {
 	}
 }
 
-void dirENDS() {
+static void dirENDS() {
 	Error("[ENDS] End structure without structure");
 }
 
-void dirASSERT() {
+static void dirASSERT() {
 	char* p = lp;
 	aint val;
 	/*if (!ParseExpression(lp,val)) { Error("Syntax error",0,CATCHALL); return; }
@@ -1617,7 +1644,7 @@ void dirASSERT() {
 	/**lp=0;*/
 }
 
-void dirSHELLEXEC() {
+static void dirSHELLEXEC() {
 	//FIXME for v2.x change the "SHELLEXEC <command>[, <params>]" syntax to "SHELLEXEC <whatever>"
 	// (and add good examples how to deal with quotes/colons/long file names with spaces)
 	std::unique_ptr<char[]> command(GetFileName(lp, false));
@@ -1650,7 +1677,7 @@ void dirSHELLEXEC() {
 	}
 }
 
-void dirSTRUCT() {
+static void dirSTRUCT() {
 	CStructure* st;
 	int global = 0;
 	aint offset = 0;
@@ -1699,7 +1726,7 @@ void dirSTRUCT() {
 	st->deflab();
 }
 
-void dirFPOS() {
+static void dirFPOS() {
 	aint val;
 	int method = SEEK_SET;
 	SkipBlanks(lp);
@@ -1713,9 +1740,11 @@ void dirFPOS() {
 	}
 }
 
-void dirDUP() {
-	aint val;
-	IsLabelNotFound = 0;
+// isWhile == false: DUP/REPT parsing
+// isWhile == true: WHILE parsing
+static void DupWhileImplementation(bool isWhile) {
+	aint val = 0;
+	CStringsList* condition = nullptr;
 
 	if (!RepeatStack.empty()) {
 		SRepeatStack& dup = RepeatStack.top();
@@ -1726,21 +1755,28 @@ void dirDUP() {
 		}
 	}
 
-	if (!ParseExpressionNoSyntaxError(lp, val)) {
-		Error("[DUP/REPT] Syntax error in <count>", lp, SUPPRESS);
-		return;
-	}
-	if (IsLabelNotFound) {
-		Error("[DUP/REPT] Forward reference", NULL, ALL);
-	}
-	if ((int) val < 1) {
-		ErrorInt("[DUP/REPT] Repeat value must be positive", val, IF_FIRST); return;
+	if (isWhile) {
+		condition = new CStringsList(lp);
+		if (nullptr == condition) ErrorOOM();
+		lp += strlen(condition->string);
+	} else {
+		IsLabelNotFound = 0;
+		if (!ParseExpressionNoSyntaxError(lp, val)) {
+			Error("[DUP/REPT] Syntax error in <count>", lp, SUPPRESS);
+			return;
+		}
+		if (IsLabelNotFound) {
+			Error("[DUP/REPT] Forward reference", NULL, ALL);
+		}
+		if ((int) val < 1) {
+			ErrorInt("[DUP/REPT] Repeat value must be positive", val, IF_FIRST); return;
+		}
 	}
 
 	SRepeatStack dup;
 	dup.RepeatCount = val;
+	dup.RepeatCondition = condition;
 	dup.Level = 0;
-
 	dup.Lines = new CStringsList(lp);
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
 	dup.Pointer = dup.Lines;
@@ -1749,9 +1785,43 @@ void dirDUP() {
 	RepeatStack.push(dup);
 }
 
-void dirEDUP() {
+static void dirDUP() {
+	DupWhileImplementation(false);
+}
+
+static void dirWHILE() {
+	DupWhileImplementation(true);
+}
+
+static bool shouldRepeat(SRepeatStack& dup) {
+	if (nullptr == dup.RepeatCondition) {
+		return dup.RepeatCount--;
+	} else {
+		if (100001 < ++dup.RepeatCount) {
+			Error("[WHILE] over 100k of loops - infinite loop?");
+			return false;
+		}
+		aint val = 0;
+		IsLabelNotFound = 0;
+		char* expressionSource = dup.RepeatCondition->string;
+		if (!ParseExpressionNoSyntaxError(expressionSource, val)) {
+			TextFilePos oSrcPos = CurSourcePos;
+			CurSourcePos = dup.RepeatCondition->source;
+			Error("[WHILE] Syntax error in <expression>", dup.RepeatCondition->string, SUPPRESS);
+			CurSourcePos = oSrcPos;
+			return false;
+		}
+		if (IsLabelNotFound) {
+			WarningById(W_FWD_REF, dup.RepeatCondition->string, W_EARLY);
+			return false;
+		}
+		return val;
+	}
+}
+
+static void dirEDUP() {
 	if (RepeatStack.empty() || RepeatStack.top().IsInWork) {
-		Error("[EDUP/ENDR] End repeat without repeat");
+		Error("[EDUP/ENDR/ENDW] End repeat without repeat");
 		return;
 	}
 
@@ -1761,21 +1831,17 @@ void dirEDUP() {
 		return;
 	}
 	dup.IsInWork = true;
-	// kill the "EDUP" inside DUP-list (also works as "while" terminator)
+	// kill the "EDUP" inside DUP-list (+ works as "while (IsRunning && lijstp && lijstp->string)" terminator)
 	if (dup.Pointer->string) free(dup.Pointer->string);
 	dup.Pointer->string = NULL;
 	++listmacro;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) ErrorOOM();
 
-	// To achieve the state when SourceLine for DUP-EDUP block is constant EDUP line,
-	// and MacroLine is pointing to source of particular line in block, basically just kill all
-	// lines with CurrentSourceLine in remaining code. (TODO v2.x listing with src+macro lines?!)
-
 	TextFilePos oldPos = CurSourcePos;
 	CStringsList* olijstp = lijstp;
 	++lijst;
-	while (dup.RepeatCount--) {
+	while (shouldRepeat(dup)) {
 		CurSourcePos = dup.sourcePos;
 		DefinitionPos = dup.sourcePos;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
@@ -1792,6 +1858,7 @@ void dirEDUP() {
 		}
 	}
 	delete dup.Lines;
+	if (dup.RepeatCondition) delete dup.RepeatCondition;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;
@@ -1805,7 +1872,7 @@ void dirEDUP() {
 	ListFile();
 }
 
-void dirENDM() {
+static void dirENDM() {
 	if (!RepeatStack.empty()) {
 		Warning("ENDM used as DUP/REPT block terminator, this is deprecated (and bugged when used inside macro), change to EDUP or ENDR");
 		dirEDUP();
@@ -1843,7 +1910,7 @@ static void dirDEFARRAY_add(const char* id) {
 	return;
 }
 
-void dirDEFARRAY() {
+static void dirDEFARRAY() {
 	bool plus = ('+' == *lp) ? ++lp, true : false;
 	const char* id = White() ? GetID(lp) : nullptr;
 	if (!id) {
@@ -1921,7 +1988,7 @@ const char *readMemFile(lua_State *, void *ud, size_t *size)
   return luaMF->text;
 }
 
-void dirLUA() {
+static void dirLUA() {
 	constexpr size_t luaBufferSize = 32768;
 	luaMemFile luaMF;
 	char* id, * buff = nullptr, * bp = nullptr;
@@ -1943,7 +2010,8 @@ void dirLUA() {
 
 	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
 	const bool execute = (-1 == passToExec) || (passToExec == pass);
-	bool showWarning = warningNotSuppressed();	// remember warning suppression from block start
+	// remember warning suppression also from block start
+	bool showWarning = !suppressedById(W_LUA_MC_PASS) && warningNotSuppressed();
 
 	if (execute) {
 		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
@@ -1974,7 +2042,7 @@ void dirLUA() {
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDLUA
 			// take into account also warning suppression used at end of block
-			showWarning = showWarning && warningNotSuppressed();
+			showWarning = showWarning && !suppressedById(W_LUA_MC_PASS) && warningNotSuppressed();
 			break;
 		}
 		ListFile(true);
@@ -1992,8 +2060,8 @@ void dirLUA() {
 		LuaStartPos = TextFilePos();
 		delete[] buff;
 		if (DidEmitByte() && (-1 != passToExec) && showWarning) {
-			EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
-			Warning("When lua script emits machine code bytes, use \"ALLPASS\" modifier", NULL, warningType);
+			const EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
+			WarningById(W_LUA_MC_PASS, nullptr, warningType);
 		}
 	}
 
@@ -2001,11 +2069,11 @@ void dirLUA() {
 	substitutedLine = line;		// override substituted list line for ENDLUA
 }
 
-void dirENDLUA() {
+static void dirENDLUA() {
 	Error("[ENDLUA] End of lua script without script");
 }
 
-void dirINCLUDELUA() {
+static void dirINCLUDELUA() {
 	if (1 != pass) {
 		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
 		return;
@@ -2036,10 +2104,13 @@ void dirINCLUDELUA() {
 
 #endif //USE_LUA
 
-void dirDEVICE() {
-	++deviceDirectivesCounter;		// any usage counts, even invalid
-	char* id = GetID(lp);
+static void dirDEVICE() {
+	// refresh source position of first DEVICE directive
+	if (1 == ++deviceDirectivesCount) {
+		globalDeviceSourcePos = CurSourcePos;
+	}
 
+	char* id = GetID(lp);
 	if (id) {
 		aint ramtop = 0;
 		if (anyComma(lp)) {
@@ -2050,29 +2121,25 @@ void dirDEVICE() {
 			  	ErrorInt("[DEVICE] valid range for RAMTOP is $5D00..$FFFF", ramtop); return;
 			}
 		}
-		if (!SetDevice(id, ramtop)) {
-			Error("[DEVICE] Invalid parameter", id, IF_FIRST);
-		} else if (IsSldExportActive()) {
-			// SLD tracing data are being exported, export the device data
-			int pageSize = Device->GetCurrentSlot()->Size;
-			int pageCount = Device->PagesCount;
-			int slotsCount = Device->SlotsCount;
-			char buf[LINEMAX];
-			snprintf(buf, LINEMAX, "pages.size:%d,pages.count:%d,slots.count:%d",
-				pageSize, pageCount, slotsCount
-			);
-			for (int slotI = 0; slotI < slotsCount; ++slotI) {
-				size_t bufLen = strlen(buf);
-				char* bufAppend = buf + bufLen;
-				snprintf(bufAppend, LINEMAX-bufLen,
-						 (0 == slotI) ? ",slots.adr:%d" : ",%d",
-						 Device->GetSlot(slotI)->Address);
+		// if (1 == deviceDirectivesCount && Device) -> device was already set globally, skip SetDevice
+		if (1 < deviceDirectivesCount || !Devices) {
+			if (!SetDevice(id, ramtop)) {
+				Error("[DEVICE] Invalid parameter", id, IF_FIRST);
 			}
-			// pagesize
-			WriteToSldFile(-1,-1,'Z',buf);
 		}
 	} else {
 		Error("[DEVICE] Syntax error in <deviceid>", lp, SUPPRESS);
+	}
+}
+
+static void dirSLDOPT() {
+	SkipBlanks(lp);
+	if (cmphstr(lp, "COMMENT")) {
+		do {
+			SldAddCommentKeyword(GetID(lp));
+		} while (!SkipBlanks(lp) && anyComma(lp));
+	} else {
+		Error("[SLDOPT] Syntax error in <type> (valid is only COMMENT)", lp, SUPPRESS);
 	}
 }
 
@@ -2153,6 +2220,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".endmodule", dirENDMODULE);
 	DirectivesTable.insertd(".rept", dirDUP);
 	DirectivesTable.insertd(".dup", dirDUP);
+	DirectivesTable.insertd(".while", dirWHILE);
 	DirectivesTable.insertd(".disp", dirDISP);
 	DirectivesTable.insertd(".phase", dirDISP);
 	DirectivesTable.insertd(".ent", dirENT);
@@ -2170,6 +2238,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".endm", dirENDM);
 	DirectivesTable.insertd(".edup", dirEDUP);
 	DirectivesTable.insertd(".endr", dirEDUP);
+	DirectivesTable.insertd(".endw", dirEDUP);
 	DirectivesTable.insertd(".ends", dirENDS);
 
 	DirectivesTable.insertd(".device", dirDEVICE);
@@ -2182,6 +2251,8 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".relocate_end", Relocation::dirRELOCATE_END);
 	DirectivesTable.insertd(".relocate_table", Relocation::dirRELOCATE_TABLE);
 
+	DirectivesTable.insertd(".sldopt", dirSLDOPT);
+
 #ifdef USE_LUA
 	DirectivesTable.insertd(".lua", dirLUA);
 	DirectivesTable.insertd(".endlua", dirENDLUA);
@@ -2192,7 +2263,9 @@ void InsertDirectives() {
 	DirectivesTable_dup.insertd(".edup", dirEDUP);
 	DirectivesTable_dup.insertd(".endm", dirENDM);
 	DirectivesTable_dup.insertd(".endr", dirEDUP);
+	DirectivesTable_dup.insertd(".endw", dirEDUP);
 	DirectivesTable_dup.insertd(".rept", dirDUP);
+	DirectivesTable_dup.insertd(".while", dirWHILE);
 }
 
 #ifdef USE_LUA

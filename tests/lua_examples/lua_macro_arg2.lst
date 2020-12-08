@@ -85,10 +85,10 @@ lua_macro_arg2.asm(40): ^ emitted from here
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x3456   x
-0x0000 X BigLabel1
 0x0009 X 0>localMacroLabel
+0x0016 X 1>localMacroLabel
+0x0000 X BigLabel1
 0x0009   BigLabel1.local1
 0x000D X BigLabel2
-0x0016 X 1>localMacroLabel
 0x0016   BigLabel2.local2
+0x3456   x

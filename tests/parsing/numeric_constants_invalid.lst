@@ -12,16 +12,16 @@ numeric_constants_invalid.asm(7): error: Syntax error: %
  8    0000
  9    0000                  ;; hard 32b overflow
 10    0000 FF FF FF FF      DD      0xFFFFFFFF                          ; OK
-numeric_constants_invalid.asm(11): error: Overflow: 0x100000000                         
+numeric_constants_invalid.asm(11): error: Overflow: 0x100000000
 11    0004 00 00 00 00      DD      0x100000000                         ; overflow error
 12    0008 FF FF FF FF      DD      %11111111111111111111111111111111   ; OK
-numeric_constants_invalid.asm(13): error: Overflow: %100000000000000000000000000000000  
+numeric_constants_invalid.asm(13): error: Overflow: %100000000000000000000000000000000
 13    000C 00 00 00 00      DD      %100000000000000000000000000000000  ; overflow error
 14    0010 FF FF FF FF      DD      37777777777o                        ; OK
-numeric_constants_invalid.asm(15): error: Overflow: 40000000000o                        
+numeric_constants_invalid.asm(15): error: Overflow: 40000000000o
 15    0014 00 00 00 00      DD      40000000000o                        ; overflow error
 16    0018 FF FF FF FF      DD      4294967295                          ; OK
-numeric_constants_invalid.asm(17): error: Overflow: 4294967296                          
+numeric_constants_invalid.asm(17): error: Overflow: 4294967296
 17    001C 00 00 00 00      DD      4294967296                          ; overflow error
 18    0020
 19    0020                  ;; digit out of base

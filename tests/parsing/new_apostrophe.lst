@@ -7,7 +7,7 @@
  6    0001                  ; test new stricter rules for not-escaping apostrophe strings
  7    0001 5C 45 5C 5C      db  '\E', '\\'          ; test (4 bytes)
  8    0005 5C 45 5C 5C      db  "\\E", "\\\\"       ; expected (emulating expected result in quotes)
-new_apostrophe.asm(9): warning: Empty string: ''  
+new_apostrophe.asm(9): warning: Empty string: ''
  9    0009 27 27 5C 00      db  '''''', '\', 0, ''  ; test (4 bytes) + warning
 10    000D 27 27 5C 00      db  "''", "\\", 0       ; expected (emulating expected result in quotes)
 11    0011
@@ -29,7 +29,7 @@ new_apostrophe.asm(9): warning: Empty string: ''
 17    0038 01             db 1
 18    0039 5C 5C            db  '\\'
 18    003B 02             db 2
-new_apostrophe.asm(19): warning: Empty string: '' 
+new_apostrophe.asm(19): warning: Empty string: ''
 new_apostrophe.asm(19): error: no arguments
 19    003C                  db  ''
 19    003C 03             db 3           ; warning empty string + error no arguments

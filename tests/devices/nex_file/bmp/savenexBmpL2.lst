@@ -18,7 +18,7 @@
 17    C003
 18    C003                  ;; SAVENEX SCREEN BMP <filename>[,<savePalette 0/1>]
 19    C003                  ; errors - [un]expected arguments
-savenexBmpL2.asm(20): error: [SAVENEX] Error opening file: 
+savenexBmpL2.asm(20): error: [SAVENEX] Error opening file:
 20    C003                  SAVENEX     SCREEN  BMP
 savenexBmpL2.asm(21): error: [SAVENEX] Error opening file: ,
 21    C003                  SAVENEX     SCREEN  BMP , 0
@@ -37,7 +37,7 @@ savenexBmpL2.asm(28): error: [SAVENEX] BMP file is not 256x192, 128x96, 320x256 
 29    C003
 30    C003                  ; correct one (with two warnings
 savenexBmpL2.asm(31): warning: [SAVENEX] savePalette should be 0 or 1 (defaulting to 1)
-savenexBmpL2.asm(31): warning: [SAVENEX] BMP has only 10 colors in palette (expect "any" values in remaining colors).
+savenexBmpL2.asm(31): warning[nexbmppal]: [SAVENEX] BMP palette has less than 256 colours: 10
 31    C003                  SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2.bmp", 2  ; will warn: savePalette=2, and "only 10 color"
 32    C003
 33    C003                  SAVENEX     BANK    0

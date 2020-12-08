@@ -4,25 +4,25 @@ Unrecognized syntax option: @
  1    0000              ; SYNTAX option "abfl@":
  2    0000              ;  @ is error "unrecognized" (but outside of list file!)
  3    0000              ;  l is "unimplemented yet" (comments below are for future implementation)
-syntax_abfl.asm(4): warning: Fake instruction: ld      bc,hl       
+syntax_abfl.asm(4): warning: Fake instruction: ld      bc,hl
  4    0000 44 4D            ld      bc,hl       ; warning
  5    0002 44 4D            ld      bc,hl       ; warning removed by using "fake" in this comment
  6    0004 90               sub     a,b         ; sub b
  7    0005 97 90            sub     a,,b        ; sub a : sub b
  8    0007 44 4D            ld      b,h,,c,l    ; ld b,h : ld c,l (same as first fake)
-syntax_abfl.asm(9): error: Unexpected: , c,l    
+syntax_abfl.asm(9): error: Unexpected: , c,l
  9    0009 44               ld      b,h, c,l    ; error
 10    000A              hl:                     ; warning
 11    000A 7E               ld      a,(hl)      ; OK: memory reference
 12    000B 7E               ld      a,[hl]      ; OK: memory reference
-syntax_abfl.asm(13): error: Illegal instruction (can't access memory): (5)       
+syntax_abfl.asm(13): error: Illegal instruction (can't access memory): (5)
 13    000C C6 00            add     a,(5)       ; error (memory reference = illegal instruction)
-syntax_abfl.asm(14): error: Illegal instruction (can't access memory): [6]       
+syntax_abfl.asm(14): error: Illegal instruction (can't access memory): [6]
 14    000E C6 00            add     a,[6]       ; error (memory reference = illegal instruction)
 15    0010 C6 07            add     a,7         ; OK
-syntax_abfl.asm(16): error: Illegal instruction (can't access memory): (8)       
+syntax_abfl.asm(16): error: Illegal instruction (can't access memory): (8)
 16    0012 06 00            ld      b,(8)       ; error (memory reference = illegal instruction)
-syntax_abfl.asm(17): error: Illegal instruction (can't access memory): [9]       
+syntax_abfl.asm(17): error: Illegal instruction (can't access memory): [9]
 17    0014 06 00            ld      b,[9]       ; error (memory reference = illegal instruction)
 18    0016 06 0A            ld      b,10        ; OK
 19    0018

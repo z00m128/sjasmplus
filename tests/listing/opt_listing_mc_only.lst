@@ -1,0 +1,46 @@
+# file opened: opt_listing_mc_only.asm
+ 1    0000                  ORG $100            ; by default listing is ON (full listing)
+ 2    0100 5E 20 4F 52      DZ  "^ ORG"
+ 2    0104 47 00
+ 3    0106 37               scf
+ 4    0107                  OPT push listmc     ; remember current state, switch listing to machine-code-only
+ 6    0200 4E 4F 20 4F {    DZ  "NO ORG1"
+ 6    0204 52 47 31 00 {
+ 7    0208 3F          {    ccf
+ 8    0209                  OPT pop             ; restoring original state
+ 9    0209                  ORG $300
+10    0300 5E 20 4F 52      DZ  "^ ORG"
+10    0304 47 00
+11    0306 27               daa
+12    0307                  OPT listmc          ; (there is no explicit way to turn "mc" mode off, only pop/reset!)
+14    0400 4E 4F 20 4F {    DZ  "NO ORG2"
+14    0404 52 47 32 00 {
+15    0408 2F          {    cpl
+16    0409                  OPT reset           ; reset to default state
+17    0409                  ORG $500            ; by default listing is ON (full listing)
+18    0500 5E 20 4F 52      DZ  "^ ORG"
+18    0504 47 00
+19    0506 1F               rra
+20    0507
+21    0507                  ; nested listing adjusting by suggested push+pop technique
+22    0507                  OPT push listmc     ; switch MC listing twice
+25    0600 4E 4F 20 4F {    DZ  "NO ORG3"
+25    0604 52 47 33 00 {
+26    0608 17          {    rla
+# listing file suspended...
+33    0800 4E 4F 20 4F {    DZ  "NO ORG4"
+33    0804 52 47 34 00 {
+34    0808 0F          {    rrca
+37    0900 4E 4F 20 4F {    DZ  "NO ORG5"
+37    0904 52 47 35 00 {
+38    0908 0F          {    rrca
+39    0909                  OPT pop
+40    0909                  ORG $A00            ; restored to full listing
+41    0A00 5E 20 4F 52      DZ  "^ ORG"
+41    0A04 47 00
+42    0A06 07               rlca
+43    0A07
+# file closed: opt_listing_mc_only.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -51,11 +51,15 @@ void TextFilePos::nextSegment(bool endsWithColon, size_t advanceColumns) {
 
 char* PreviousIsLabel = nullptr;
 
-// since v1.14.2:
-// When "setNameSpace == true" the naam is parsed as whole, reporting invalid labelname error
-// When "setNameSpace == false" the naam is parsed only through valid label chars (early exit)
-// => the labels can be evaluated straight from the expression string without copying them out!
-char* ValidateLabel(const char* naam, bool setNameSpace) {
+// since v1.18.0:
+// The ignore invalid char after feature disconnected from "setNameSpace" to "ignoreCharAfter"
+// (it's for evaluating labels straight from the expressions, without copying them out first)
+// The prefix "!" is now recognized as "do not set main label" for following local labels
+char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
+	if ('!' == *naam) {
+		setNameSpace = false;
+		++naam;
+	}
 	const bool global = '@' == *naam;
 	const bool local = '.' == *naam;
 	if (!isLabelStart(naam)) {		// isLabelStart assures that only single modifier exist
@@ -70,7 +74,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace) {
 	const char* np = naam;
 	while (islabchar(*np)) ++np;
 	if ('[' == *np) return nullptr;	// this is DEFARRAY name, do not process it as label (silent exit)
-	if (setNameSpace && *np) {
+	if (*np && !ignoreCharAfter) {
 		// if this is supposed to be new label, there shoulnd't be anything else after it
 		Error("Invalid labelname", naam);
 		return nullptr;
@@ -106,11 +110,51 @@ char* ValidateLabel(const char* naam, bool setNameSpace) {
 	return label;
 }
 
+static char sldLabelExport[2*LINEMAX];
+
+char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
+	// does re-parse the original source line again similarly to ValidateLabel
+	// but prepares SLD 'L'-type line, with module/main/local comma separated + usage traits info
+	assert(nullptr != label);
+	assert(isLabelStart(naam));		// this should be called only when ValidateLabel did succeed
+	const bool global = '@' == *naam;
+	const bool local = '.' == *naam;
+	if (global || local) ++naam;	// single modifier is parsed
+	const bool inMacro = local && macrolabp;
+	const bool inModule = !inMacro && !global && ModuleName[0];
+	// build fully qualified SLD info
+	sldLabelExport[0] = 0;
+	// module part
+	if (inModule) STRCAT(sldLabelExport, LINEMAX, ModuleName);
+	STRCAT(sldLabelExport, 2, ",");
+	// main label part (the `vorlabp` is already the current label, if it was main label)
+	STRCAT(sldLabelExport, LABMAX, inMacro ? macrolabp : vorlabp);
+	STRCAT(sldLabelExport, 2, ",");
+	// local part
+	if (local) STRCAT(sldLabelExport, LABMAX, naam);
+	// usage traits
+	if (label->traits&LABEL_IS_EQU) STRCAT(sldLabelExport, 20, ",+equ");
+	if (inMacro) STRCAT(sldLabelExport, 20, ",+macro");
+	if (label->traits&LABEL_IS_SMC) STRCAT(sldLabelExport, 20, ",+smc");
+	if (label->isRelocatable) STRCAT(sldLabelExport, 20, ",+reloc");
+	if (label->used) STRCAT(sldLabelExport, 20, ",+used");
+	if (label->traits&LABEL_IS_STRUCT_D) STRCAT(sldLabelExport, 20, ",+struct_def");
+	if (label->traits&LABEL_IS_STRUCT_E) STRCAT(sldLabelExport, 20, ",+struct_data");
+	return sldLabelExport;
+}
+
+char* ExportModuleToSld(bool endModule) {
+	assert(ModuleName[0]);
+	STRNCPY(sldLabelExport, 2*LINEMAX, ModuleName, LINEMAX);
+	STRCAT(sldLabelExport, LINEMAX-1, endModule ? ",,,+endmod" : ",,,+module");
+	return sldLabelExport;
+}
+
 static bool getLabel_invalidName = false;
 
-static CLabelTableEntry* GetLabel(char*& p) {
+static SLabelTableEntry* GetLabel(char*& p) {
 	getLabel_invalidName = true;
-	std::unique_ptr<char[]> fullName(ValidateLabel(p, false));
+	std::unique_ptr<char[]> fullName(ValidateLabel(p, false, true));
 	if (!fullName) return nullptr;
 	getLabel_invalidName = false;
 	const bool global = '@' == *p;
@@ -123,7 +167,7 @@ static CLabelTableEntry* GetLabel(char*& p) {
 	// and if it's regular non-local in module, then variant w/o current module has to be tried
 	char *findName = fullName.get();
 	bool inTableAlready = false;
-	CLabelTableEntry* labelEntry = nullptr;
+	SLabelTableEntry* labelEntry = nullptr;
 	temp[0] = 0;
 	do {
 		labelEntry = LabelTable.Find(findName);
@@ -159,7 +203,7 @@ static CLabelTableEntry* GetLabel(char*& p) {
 		// canonical name is either in "temp" (when in-macro) or in "fullName" (outside macro)
 		findName = temp[0] ? temp : fullName.get();
 		if (!inTableAlready) {
-			LabelTable.Insert(findName, 0, true);
+			LabelTable.Insert(findName, 0, LABEL_IS_UNDEFINED);
 			IsLabelNotFound = 1;
 		} else {
 			IsLabelNotFound = 2;
@@ -171,14 +215,14 @@ static CLabelTableEntry* GetLabel(char*& p) {
 
 
 bool GetLabelPage(char*& p, aint& val) {
-	CLabelTableEntry* labelEntry = GetLabel(p);
+	SLabelTableEntry* labelEntry = GetLabel(p);
 	val = labelEntry ? labelEntry->page : LABEL_PAGE_UNDEFINED;
 	// true even when not found, but valid label name (neeed for expression-eval logic)
 	return !getLabel_invalidName;
 }
 
 bool GetLabelValue(char*& p, aint& val) {
-	CLabelTableEntry* labelEntry = GetLabel(p);
+	SLabelTableEntry* labelEntry = GetLabel(p);
 	if (labelEntry) {
 		val = labelEntry->value;
 		if (labelEntry->isRelocatable && Relocation::areLabelsOffset) {
@@ -215,23 +259,6 @@ int GetLocalLabelValue(char*& op, aint& val) {
 	return 1;
 }
 
-void CLabelTableEntry::ClearData() {
-	if (name) free(name);
-	name = NULL;
-	value = 0;
-	updatePass = 0;
-	page = LABEL_PAGE_UNDEFINED;
-	IsDEFL = IsEQU = used = isRelocatable = false;
-}
-
-CLabelTableEntry::CLabelTableEntry() : name(NULL) {
-	ClearData();
-}
-
-CLabelTable::CLabelTable() {
-	NextLocation = 1;
-}
-
 static short getAddressPageNumber(const aint address, bool forceRecalculateByAddress) {
 	// everything is "ROM" based when device is NONE
 	if (!DeviceID) return LABEL_PAGE_ROM;
@@ -254,131 +281,117 @@ static short getAddressPageNumber(const aint address, bool forceRecalculateByAdd
 	return page;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, bool undefined, bool IsDEFL, bool IsEQU, short equPageNum) {
-	if (NextLocation >= LABTABSIZE * 2 / 3) {
-		Error("Label table full", NULL, FATAL);
-	}
+int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short equPageNum) {
+	const bool IsUndefined = !!(traits & LABEL_IS_UNDEFINED);
 
 	// the EQU/DEFL is relocatable when the expression itself is relocatable
 	// the regular label is relocatable when relocation is active
-	const bool isRelocatable = (IsDEFL || IsEQU) ? \
-			Relocation::isResultAffected && Relocation::isRelocatable : \
-			Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
+	const bool isRelocatable = \
+			(traits&LABEL_HAS_RELOC_TRAIT) ? \
+				!!(traits & LABEL_IS_RELOC) : \
+				(traits & (LABEL_IS_DEFL|LABEL_IS_EQU)) ? \
+					Relocation::isResultAffected && Relocation::isRelocatable : \
+					Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
 	// Find label in label table
-	CLabelTableEntry* label = Find(nname);
-	if (label) {
-		if (!label->IsDEFL && label->page != LABEL_PAGE_UNDEFINED && label->updatePass == pass) {
-			return 0;
-		} else {
-			//if label already added (as used, or in previous pass), just refresh values
-			label->value = nvalue;
-			if (IsEQU && LABEL_PAGE_UNDEFINED != equPageNum) {
-				label->page = equPageNum;
+	symbol_map_t::iterator labelIt = symbols.find(nname);
+	if (symbols.end() != labelIt) {
+		//if label already added (as used, or in previous pass), just refresh values
+		auto& label = labelIt->second;
+		if (label.traits&LABEL_IS_KEYWORD) WarningById(W_OPKEYWORD, nname, W_EARLY);
+		bool needsUpdate = label.traits&LABEL_IS_DEFL || label.page == LABEL_PAGE_UNDEFINED || label.updatePass < pass;
+		if (needsUpdate) {
+			label.value = nvalue;
+			if ((traits & LABEL_IS_EQU) && LABEL_PAGE_UNDEFINED != equPageNum) {
+				label.page = equPageNum;
 			} else {
-				label->page = getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+				label.page = getAddressPageNumber(nvalue, traits & (LABEL_IS_DEFL|LABEL_IS_EQU));
 			}
-			label->IsDEFL = IsDEFL;
-			label->IsEQU = IsEQU;
-			label->isRelocatable = isRelocatable;
-			label->updatePass = pass;
-			return 1;
+			label.traits = traits;
+			label.isRelocatable = isRelocatable;
+			label.updatePass = pass;
 		}
+		return needsUpdate;
 	}
-	int tr = Hash(nname);
-	while (HashTable[tr]) {
-		if (++tr >= LABTABSIZE) tr = 0;
-	}
-	HashTable[tr] = NextLocation;
-	label = LabelTable + NextLocation++;
-	label->name = STRDUP(nname);
-	if (label->name == NULL) ErrorOOM();
-	label->IsDEFL = IsDEFL;
-	label->IsEQU = IsEQU;
-	label->updatePass = pass;
-	label->value = nvalue;
-	label->used = undefined;
-	if (IsEQU && LABEL_PAGE_UNDEFINED != equPageNum) {
-		label->page = equPageNum;
+	auto& label = symbols[nname];
+	label.traits = traits;
+	label.updatePass = pass;
+	label.value = nvalue;
+	label.used = IsUndefined;
+	if ((traits & LABEL_IS_EQU) && LABEL_PAGE_UNDEFINED != equPageNum) {
+		label.page = equPageNum;
 	} else {
-		label->page = undefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, IsDEFL|IsEQU);
+		label.page = IsUndefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, traits & (LABEL_IS_DEFL|LABEL_IS_EQU));
 	}
-	label->isRelocatable = !undefined && isRelocatable;		// ignore "relocatable" for "undefined"
+	label.isRelocatable = !IsUndefined && isRelocatable;	// ignore "relocatable" for "undefined"
 	return 1;
 }
 
-int CLabelTable::Update(char* nname, aint nvalue) {
-	CLabelTableEntry* label = Find(nname);
-	if (label) label->value = nvalue;
-	return NULL != label;
+int CLabelTable::Update(char* name, aint value) {
+	auto labelIt = symbols.find(name);
+	if (symbols.end() != labelIt) labelIt->second.value = value;
+	return (symbols.end() != labelIt);
 }
 
-CLabelTableEntry* CLabelTable::Find(const char* name, bool onlyDefined)
-{
-	//FIXME get rid of this manual hash table implementation (seems still bugged for edge cases)
-	int tr, htr, otr;
-	otr = tr = Hash(name);
-	while ((htr = HashTable[tr])) {
-		if (LabelTable[htr].name && !strcmp(LabelTable[htr].name, name)) {
-			if (onlyDefined && LABEL_PAGE_UNDEFINED == LabelTable[htr].page) return NULL;
-			return LabelTable+htr;
-		}
-		if (LABTABSIZE <= ++tr) tr = 0;
-		if (tr == otr) break;
-	}
-	return NULL;
+SLabelTableEntry* CLabelTable::Find(const char* name, bool onlyDefined) {
+	symbol_map_t::iterator labelIt = symbols.find(name);
+	if (symbols.end() == labelIt) return nullptr;
+	return (onlyDefined && LABEL_PAGE_UNDEFINED == labelIt->second.page) ? nullptr : &labelIt->second;
 }
 
 bool CLabelTable::IsUsed(const char* name) {
-	CLabelTableEntry* label = Find(name);
-	return label ? label->used : false;
+	auto labelIt = symbols.find(name);
+	return (symbols.end() != labelIt) ? labelIt->second.used : false;
 }
 
 bool CLabelTable::Remove(const char* name) {
-	CLabelTableEntry* label = Find(name);
-	if (label) label->ClearData();
-	return NULL != label;
+	return symbols.erase(name);
 }
 
 void CLabelTable::RemoveAll() {
-	for (int i = 1; i < NextLocation; ++i) LabelTable[i].ClearData();
-	NextLocation = 1;
+	symbols.clear();
 }
 
-int CLabelTable::Hash(const char* s) {
-	const char* ss = s;
-	unsigned int h = 0,g;
-	for (; *ss != '\0'; ss++) {
-		h = (h << 4) + *ss;
-		if ((g = h & 0xf0000000)) {
-			h ^= g >> 24; h ^= g;
-		}
+static const std::vector<symbol_map_t::key_type> getDumpOrder(const symbol_map_t& table) {
+	std::vector<symbol_map_t::key_type> order;
+	order.reserve(table.size());
+	for (const auto& it : table) order.emplace_back(it.first);
+	if (Options::SortSymbols) {
+		std::sort(
+			order.begin(), order.end(),
+			[&](const symbol_map_t::key_type& a, const symbol_map_t::key_type& b) {
+				// if case insenstive are same, do case sensitive too!
+				int caseres = strcasecmp(a.c_str(), b.c_str());
+				if (0 == caseres) return a < b;
+				return caseres < 0;
+			}
+		);
 	}
-	return h % LABTABSIZE;
+	return order;
 }
 
 void CLabelTable::Dump() {
 	FILE* listFile = GetListingFile();
 	if (NULL == listFile) return;		// listing file must be already opened here
 
+	const auto order = getDumpOrder(symbols);
+
 	char line[LINEMAX], *ep;
 	fputs("\nValue    Label\n", listFile);
 	fputs("------ - -----------------------------------------------------------\n", listFile);
-	for (int i = 1; i < NextLocation; ++i) {
-		if (LABEL_PAGE_UNDEFINED != LabelTable[i].page) {
-			ep = line;
-			*(ep) = 0;
-			*(ep++) = '0';
-			*(ep++) = 'x';
-			PrintHexAlt(ep, LabelTable[i].value);
-			*(ep++) = ' ';
-			*(ep++) = LabelTable[i].used ? ' ' : 'X';
-			*(ep++) = ' ';
-			STRCPY(ep, LINEMAX - (ep - line), LabelTable[i].name);
-			ep += strlen(LabelTable[i].name);
-			*(ep++) = '\n';
-			*(ep) = 0;
-			fputs(line, listFile);
-		}
+	for (const symbol_map_t::key_type& name: order) {
+		const symbol_map_t::mapped_type& symbol = symbols.at(name);
+		if (LABEL_PAGE_UNDEFINED == symbol.page) continue;
+		ep = line;
+		*(ep) = 0;
+		*(ep++) = '0';
+		*(ep++) = 'x';
+		PrintHexAlt(ep, symbol.value);
+		*(ep++) = ' ';
+		*(ep++) = symbol.used ? ' ' : 'X';
+		*(ep++) = ' ';
+		STRNCPY(ep, LINEMAX, name.c_str(), LINEMAX - (ep - line) - 2);
+		STRNCAT(ep, LINEMAX, "\n", 2);
+		fputs(line, listFile);
 	}
 }
 
@@ -390,9 +403,11 @@ void CLabelTable::DumpForUnreal() {
 	}
 	const int PAGE_MASK = DeviceID ? Device->GetPage(0)->Size - 1 : 0x3FFF;
 	const int ADR_MASK = Options::EmitVirtualLabels ? 0xFFFF : PAGE_MASK;
-	for (int i = 1; i < NextLocation; ++i) {
-		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
-		int page = Options::EmitVirtualLabels ? LABEL_PAGE_OUT_OF_BOUNDS : LabelTable[i].page;
+	const auto order = getDumpOrder(symbols);
+	for (const symbol_map_t::key_type& name: order) {
+		const symbol_map_t::mapped_type& symbol = symbols.at(name);
+		if (LABEL_PAGE_UNDEFINED == symbol.page) continue;
+		int page = Options::EmitVirtualLabels ? LABEL_PAGE_OUT_OF_BOUNDS : symbol.page;
 		if (!strcmp(DeviceID, "ZXSPECTRUM48") && page < 4) {	//TODO fix this properly?
 			// convert pages {0, 1, 2, 3} of ZX48 into ZX128-like {ROM, 5, 2, 0}
 			// this can be fooled when there were multiple devices used, Label doesn't know into
@@ -400,7 +415,7 @@ void CLabelTable::DumpForUnreal() {
 			const int fakeZx128Pages[] = {LABEL_PAGE_ROM, 5, 2, 0};
 			page = fakeZx128Pages[page];
 		}
-		int lvalue = LabelTable[i].value & ADR_MASK;
+		int lvalue = symbol.value & ADR_MASK;
 		ep = ln;
 
 		if (page < LABEL_PAGE_ROM) ep += sprintf(ep, "%02d", page&255);
@@ -408,7 +423,7 @@ void CLabelTable::DumpForUnreal() {
 		PrintHexAlt(ep, lvalue);
 
 		*(ep++) = ' ';
-		STRCPY(ep, LINEMAX-(ep-ln), LabelTable[i].name);
+		STRCPY(ep, LINEMAX-(ep-ln), name.c_str());
 		STRCAT(ep, LINEMAX, "\n");
 		fputs(ln, FP_UnrealList);
 	}
@@ -422,24 +437,36 @@ void CLabelTable::DumpForCSpect() {
 	}
 	const int PAGE_SIZE = Options::CSpectMapPageSize;
 	const int PAGE_MASK = PAGE_SIZE - 1;
-	for (int i = 1; i < NextLocation; ++i) {
-		if (LABEL_PAGE_UNDEFINED == LabelTable[i].page) continue;
+	const auto order = getDumpOrder(symbols);
+	for (const symbol_map_t::key_type& name: order) {
+		const symbol_map_t::mapped_type& symbol = symbols.at(name);
+		if (LABEL_PAGE_UNDEFINED == symbol.page) continue;
 		const int labelType =
-			LabelTable[i].IsEQU ? 1 :
-			LabelTable[i].IsDEFL ? 2 :
-			(LABEL_PAGE_ROM <= LabelTable[i].page) ? 3 : 0;
-		const short page = labelType ? 0 : LabelTable[i].page;
-		const aint longAddress = (PAGE_MASK & LabelTable[i].value) + page * PAGE_SIZE;
-		fprintf(file, "%08X %08X %02X ", 0xFFFF & LabelTable[i].value, longAddress, labelType);
+			(symbol.traits&LABEL_IS_STRUCT_E) ? 0 :
+			(symbol.traits&LABEL_IS_STRUCT_D) ? 4 :
+			(symbol.traits&LABEL_IS_EQU) ? 1 :
+			(symbol.traits&LABEL_IS_DEFL) ? 2 :
+			(LABEL_PAGE_ROM <= symbol.page) ? 3 : 0;
+		const short page = labelType ? 0 : symbol.page;
+			// TODO:
+			// page == -1 will put regular EQU like "BLUE" out of reach for disassembly window
+			// (otherwise BLUE becomes label for address $C001 with default mapping)
+			// BUT then it would be nice to provide real page data for equ which have them explicit
+			// BUT I can't distinguish explicit/implicit page number, as there's heuristic to use current mapping
+			// instead of using the LABEL_PAGE_OUT_OF_BOUNDS page number...
+			// TODO: figure out when/why the implicit page number heuristic happenned and if you can detect
+			// only explicit page numbers used in EQU, and export only those
+
+		const aint longAddress = (PAGE_MASK & symbol.value) + page * PAGE_SIZE;
+		fprintf(file, "%08X %08X %02X ", 0xFFFF & symbol.value, longAddress, labelType);
 		// convert primary+local label to be "@" delimited (not "." delimited)
-		STRCPY(temp, LINEMAX, LabelTable[i].name);
+		STRCPY(temp, LINEMAX, name.c_str());
 		// look for "primary" label (where the local label starts)
 		char* localLabelStart = strrchr(temp, '.');
 		while (temp < localLabelStart) {	// the dot must be at least second character
 			*localLabelStart = 0;			// terminate the possible "primary" part
-			CLabelTableEntry* label = Find(temp, true);
-			if (label) {
-				*localLabelStart = '@';		// "primary" label exists, modify delimiter '.' -> '@'
+			if (Find(temp, true)) {
+				*localLabelStart = '@';
 				break;
 			}
 			*localLabelStart = '.';			// "primary" label didn't work, restore dot
@@ -447,6 +474,9 @@ void CLabelTable::DumpForCSpect() {
 				--localLabelStart;			// and look for next dot
 			} while (temp < localLabelStart && '.' != *localLabelStart);
 		}
+		// convert whole label to upper-case, as CSpect search is malfunctioning otherwise.
+		char* strToUpper = temp;
+		while ((*strToUpper = (char) toupper((byte)*strToUpper))) { ++strToUpper; }
 		fprintf(file, "%s\n", temp);
 	}
 	fclose(file);
@@ -457,104 +487,38 @@ void CLabelTable::DumpSymbols() {
 	if (!FOPEN_ISOK(symfp, Options::SymbolListFName, "w")) {
 		Error("Error opening file", Options::SymbolListFName, FATAL);
 	}
-	for (int i = 1; i < NextLocation; ++i) {
-		if (!LabelTable[i].name || !isalpha((byte)LabelTable[i].name[0])) continue;
-		WriteLabelEquValue(LabelTable[i].name, LabelTable[i].value, symfp);
+	const auto order = getDumpOrder(symbols);
+	for (const symbol_map_t::key_type& name: order) {
+		const symbol_map_t::mapped_type& symbol = symbols.at(name);
+		if (!isalpha((byte)name[0])) continue;
+		if (symbol.traits&LABEL_IS_KEYWORD) continue;
+		WriteLabelEquValue(name.c_str(), symbol.value, symfp);
 	}
 	fclose(symfp);
 }
 
-CFunctionTable::CFunctionTable() {
-	NextLocation = 1;
+int CFunctionTable::Insert(const char* name_cstr, function_fn_t nfunp) {
+	std::string name(name_cstr);
+	if (!std::get<1>(functions.emplace(name, nfunp))) return 0;
+	for (auto& c : name) c = toupper(c);
+	return std::get<1>(functions.emplace(name, nfunp));
 }
 
-int CFunctionTable::Insert(const char* nname, void(*nfunp) (void)) {
-	char* p;
-	if (NextLocation >= FUNTABSIZE * 2 / 3) {
-		Error("Functions Table is full", NULL, FATAL);
-	}
-	int tr, htr;
-	tr = Hash(nname);
-	while ((htr = HashTable[tr])) {
-		if (!strcmp((funtab[htr].name), nname)) {
-			return 0;
-		} else if (++tr >= FUNTABSIZE) {
-			tr = 0;
-		}
-	}
-	HashTable[tr] = NextLocation;
-	funtab[NextLocation].name = STRDUP(nname);
-	if (funtab[NextLocation].name == NULL) ErrorOOM();
-	funtab[NextLocation].funp = nfunp;
-	++NextLocation;
-
-	STRCPY(p = temp, LINEMAX, nname);
-	while ((*p = (char) toupper((byte)*p))) { ++p; }
-
-	if (NextLocation >= FUNTABSIZE * 2 / 3) {
-		Error("Functions Table is full", NULL, FATAL);
-	}
-	tr = Hash(temp);
-	while ((htr = HashTable[tr])) {
-		if (!strcmp((funtab[htr].name), temp)) {
-			return 0;
-		} else if (++tr >= FUNTABSIZE) {
-			tr = 0;
-		}
-	}
-	HashTable[tr] = NextLocation;
-	funtab[NextLocation].name = STRDUP(temp);
-	if (funtab[NextLocation].name == NULL) ErrorOOM();
-	funtab[NextLocation].funp = nfunp;
-	++NextLocation;
-
-	return 1;
-}
-
-int CFunctionTable::insertd(const char* name, void(*nfunp) (void)) {
+int CFunctionTable::insertd(const char* name, function_fn_t nfunp) {
 	if ('.' != name[0]) Error("Directive string must start with dot", NULL, FATAL);
 	// insert the non-dot variant first, then dot variant
 	return Insert(name+1, nfunp) && Insert(name, nfunp);
 }
 
-int CFunctionTable::zoek(const char* nname) {
-	int tr, htr, otr;
-	otr = tr = Hash(nname);
-	while ((htr = HashTable[tr])) {
-		if (!strcmp((funtab[htr].name), nname)) {
-			(*funtab[htr].funp)();
-			return 1;
-		}
-		if (++tr >= FUNTABSIZE) tr = 0;
-		if (tr == otr) break;
-	}
-	return 0;
+int CFunctionTable::zoek(const char* name) {
+	auto it = functions.find(name);
+	if (functions.end() == it) return 0;
+	(*it->second)();
+	return 1;
 }
 
-int CFunctionTable::Find(char* nname) {
-	int tr, htr, otr;
-	otr = tr = Hash(nname);
-	while ((htr = HashTable[tr])) {
-		if (!strcmp((funtab[htr].name), nname)) {
-			return 1;
-		}
-		if (++tr >= FUNTABSIZE) {
-			tr = 0;
-		}
-		if (tr == otr) {
-			break;
-		}
-	}
-	return 0;
-}
-
-int CFunctionTable::Hash(const char* s) {
-	const char* ss = s;
-	unsigned int h = 0;
-	for (; *ss != '\0'; ss++) {
-		h = (h << 3) + *ss;
-	}
-	return h % FUNTABSIZE;
+int CFunctionTable::Find(const char* name) const {
+	return (functions.end() != functions.find(name));
 }
 
 CLocalLabelTableEntry::CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous) {
@@ -1173,7 +1137,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 	AddMember(new CStructureEntry2(noffset, 0, 0, false, SMEMBPARENCLOSE));
 }
 
-static void InsertSingleStructLabel(char *name, const bool isRelocatable, const aint value) {
+static void InsertSingleStructLabel(char *name, const bool isRelocatable, const aint value, const bool isDefine = true) {
 	char *op = name;
 	std::unique_ptr<char[]> p(ValidateLabel(op, true));
 	if (!p) {
@@ -1188,26 +1152,45 @@ static void InsertSingleStructLabel(char *name, const bool isRelocatable, const 
 		if (value != oval) {
 			Error("Label has different value in pass 2", p.get());
 		}
+		if (IsSldExportActive()) {		// SLD (Source Level Debugging) tracing-data logging
+			SLabelTableEntry* symbol = LabelTable.Find(p.get(), true);
+			assert(symbol);	// should have been already defined before last pass
+			if (symbol) {
+				WriteToSldFile(isDefine ? -1 : symbol->page, value, 'L', ExportLabelToSld(name, symbol));
+			}
+		}
 	} else {
 		Relocation::isResultAffected = Relocation::isRelocatable = isRelocatable;
-		if (!LabelTable.Insert(p.get(), value, false, false, true)) Error("Duplicate label", p.get(), EARLY);
+		unsigned traits = LABEL_HAS_RELOC_TRAIT \
+						| (isDefine ? LABEL_IS_STRUCT_D : LABEL_IS_STRUCT_E) \
+						| (isRelocatable ? LABEL_IS_RELOC : 0);
+		if (!LabelTable.Insert(p.get(), value, traits)) Error("Duplicate label", p.get(), EARLY);
 	}
 }
 
-static void InsertStructSubLabels(const char* mainName, const bool isRelocatable, const CStructureEntry1* members, const aint address = 0) {
+static void InsertStructSubLabels(const char* mainName, const bool isRelocatable, const CStructureEntry1* members, const aint address = 0, const bool isDefine = true) {
 	char ln[LINEMAX+1];
 	STRCPY(ln, LINEMAX, mainName);
 	char * const lnsubw = ln + strlen(ln);
 	while (members) {
 		STRCPY(lnsubw, LINEMAX-strlen(ln), members->naam);		// overwrite sub-label part
-		InsertSingleStructLabel(ln, isRelocatable, members->offset + address);
+		InsertSingleStructLabel(ln, isRelocatable, members->offset + address, isDefine);
 		members = members->next;
 	}
 }
 
 void CStructure::deflab() {
-	char sn[LINEMAX] = { '@' };
-	STRCPY(sn+1, LINEMAX-1, id);
+	const size_t moduleNameLength = strlen(ModuleName);
+	char sn[LINEMAX] = { '@', 0 };
+	if (moduleNameLength && (0 == strncmp(id, ModuleName, moduleNameLength)) \
+		&& ('.' == id[moduleNameLength]) && (id[moduleNameLength+1]))
+	{
+		// looks like the structure name starts with current module name, use non-global way then
+		STRCPY(sn, LINEMAX-1, id + moduleNameLength + 1);
+	} else {
+		// the structure name does not match current module, use the global "@id" way to define it
+		STRCPY(sn+1, LINEMAX-1, id);
+	}
 	InsertSingleStructLabel(sn, false, noffset);
 	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, false, mnf);
@@ -1223,11 +1206,11 @@ void CStructure::emitlab(char* iid, aint address, const bool isRelocatable) {
 					naam, maxAlignment, misalignment);
 		Warning(warnTxt);
 	}
-	char sn[LINEMAX];
+	char sn[LINEMAX] { 0 };
 	STRCPY(sn, LINEMAX-1, iid);
-	InsertSingleStructLabel(sn, isRelocatable, address);
+	InsertSingleStructLabel(sn, isRelocatable, address, false);
 	STRCAT(sn, LINEMAX-1, ".");
-	InsertStructSubLabels(sn, isRelocatable, mnf, address);
+	InsertStructSubLabels(sn, isRelocatable, mnf, address, false);
 }
 
 void CStructure::emitmembs(char*& p) {

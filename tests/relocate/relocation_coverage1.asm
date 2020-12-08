@@ -14,7 +14,7 @@ label2:
     ld      a,high(4*label2) - high(2*label1)   ; warning about unstable expression
     ld      a,high(8*label2) - high(8*label1)   ; this one is stable (no warning)
 
-    ld      a,high label2   ; ok ; warning supressed
+    ld      a,high label2   ; relunstable-ok ; warning supressed
 
     RELOCATE_END
 

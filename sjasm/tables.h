@@ -28,6 +28,8 @@
 
 // tables.h
 
+#include <unordered_map>
+
 struct TextFilePos {
 	const char*		filename;
 	uint32_t		line;				// line numbering start at 1 (human way) 0 = invalid/init value
@@ -47,7 +49,11 @@ enum EStructureMembers {
 	SMEMBPARENOPEN, SMEMBPARENCLOSE
 };
 
-char* ValidateLabel(const char* naam, bool setNameSpace);
+struct SLabelTableEntry;
+
+char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter = false);
+char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label);
+char* ExportModuleToSld(bool endModule = false);
 extern char* PreviousIsLabel;
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);
@@ -57,26 +63,36 @@ constexpr int LABEL_PAGE_UNDEFINED = -1;
 constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
 constexpr int LABEL_PAGE_OUT_OF_BOUNDS = 0x7F80;	// label is defined, but not within Z80 address space
 
-class CLabelTableEntry {
-public:
-	char*	name;
-	aint	value;
-	int		updatePass;	// last update was in pass
-	short	page;
-	bool	IsDEFL;
-	bool	IsEQU;
-	bool	used;
-	bool	isRelocatable;
-	CLabelTableEntry();
-	void ClearData();
+constexpr unsigned LABEL_IS_UNDEFINED = (1<<0);
+constexpr unsigned LABEL_IS_DEFL = (1<<1);
+constexpr unsigned LABEL_IS_EQU = (1<<2);
+constexpr unsigned LABEL_IS_STRUCT_D = (1<<3);
+constexpr unsigned LABEL_IS_STRUCT_E = (1<<4);
+constexpr unsigned LABEL_HAS_RELOC_TRAIT = (1<<5);
+constexpr unsigned LABEL_IS_RELOC = (1<<6);
+constexpr unsigned LABEL_IS_SMC = (1<<7);
+constexpr unsigned LABEL_IS_KEYWORD = (1<<8);
+// constexpr unsigned LABEL_IS_USED = (1<<?);	// currently not explicitly used in Insert(..) (calculated implicitly)
+
+struct SLabelTableEntry {
+	aint		value = 0;
+	int			updatePass = 0;	// last update was in pass
+	short		page = LABEL_PAGE_UNDEFINED;
+	unsigned	traits = 0;
+	bool		used = false;
+	bool		isRelocatable = false;
 };
 
+typedef std::unordered_map<std::string, SLabelTableEntry> symbol_map_t;
+
 class CLabelTable {
+private:
+	symbol_map_t symbols;
 public:
-	CLabelTable();
-	int Insert(const char* nname, aint nvalue, bool undefined = false, bool IsDEFL = false, bool IsEQU = false, short equPageNum = LABEL_PAGE_UNDEFINED);
-	int Update(char*, aint);
-	CLabelTableEntry* Find(const char* name, bool onlyDefined = false);
+	CLabelTable() { symbols.reserve(LABTABSIZE); }
+	int Insert(const char* nname, aint nvalue, unsigned traits = 0, short equPageNum = LABEL_PAGE_UNDEFINED);
+	int Update(char* name, aint value);
+	SLabelTableEntry* Find(const char* name, bool onlyDefined = false);
 	bool Remove(const char* name);
 	bool IsUsed(const char* name);
 	void RemoveAll();
@@ -84,29 +100,20 @@ public:
 	void DumpForUnreal();
 	void DumpForCSpect();
 	void DumpSymbols();
-private:
-	int HashTable[LABTABSIZE], NextLocation;
-	CLabelTableEntry LabelTable[LABTABSIZE];
-	int Hash(const char*);
 };
 
-class CFunctionTableEntry {
-public:
-	char* name;
-	void (*funp)(void);
-};
+typedef void (*function_fn_t)(void);
+typedef std::unordered_map<std::string, function_fn_t> function_map_t;
 
 class CFunctionTable {
-public:
-	CFunctionTable();
-	int Insert(const char*, void(*) (void));
-	int insertd(const char*, void(*) (void));
-	int zoek(const char*);
-	int Find(char*);
 private:
-	int HashTable[FUNTABSIZE], NextLocation;
-	CFunctionTableEntry funtab[FUNTABSIZE];
-	int Hash(const char*);
+	function_map_t functions;
+public:
+	CFunctionTable() { functions.reserve(FUNTABSIZE); }
+	int Insert(const char*, function_fn_t);
+	int insertd(const char*, function_fn_t);
+	int zoek(const char*);
+	int Find(const char*) const;
 };
 
 class CLocalLabelTableEntry {
@@ -274,16 +281,8 @@ private:
 
 struct SRepeatStack {
 	int RepeatCount;
+	CStringsList* RepeatCondition;
 	TextFilePos sourcePos;
-	aint CurrentSourceLine;
-	CStringsList* Lines;
-	CStringsList* Pointer;
-	bool IsInWork;
-	int Level;
-};
-
-struct SConditionalStack {
-	aint CurrentSourceLine;
 	CStringsList* Lines;
 	CStringsList* Pointer;
 	bool IsInWork;

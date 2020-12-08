@@ -32,6 +32,9 @@ enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM, ELSEIF };
 
 extern int ListAddress;
 
+constexpr int BYTES_END_MARKER = -1;
+constexpr int INSTRUCTION_START_MARKER = -2;
+
 #define OUTPUT_TRUNCATE 0
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2
@@ -46,10 +49,10 @@ FILE* GetListingFile();
 void ListFile(bool showAsSkipped = false);
 void ListSilentOrExternalEmits();
 void CheckRamLimitExceeded();
-void EmitByte(int byte);
-void EmitWord(int word);
-void EmitBytes(const int* bytes);
-void EmitWords(int* words);
+void EmitByte(int byte, bool isInstructionStart = false);
+void EmitWord(int word, bool isInstructionStart = false);
+void EmitBytes(const int* bytes, bool isInstructionStart = false);
+void EmitWords(int* words, bool isInstructionStart = false);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
 bool DidEmitByte();		// returns true if some byte was emitted since last call to this function
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false, stdin_log_t* fStdinLog = nullptr);
@@ -89,7 +92,7 @@ EReturn ReadFile();
 EReturn SkipFile();
 void SeekDest(long, int);
 int ReadFileToCStringsList(CStringsList*& f, const char* end);
-void WriteLabelEquValue(char* name, aint value, FILE* f);
+void WriteLabelEquValue(const char* name, aint value, FILE* f);
 void WriteExp(char* n, aint v);
 
 /////// source-level-debugging support by Ckirby
@@ -97,6 +100,8 @@ bool IsSldExportActive();
 void OpenSld();
 void CloseSld();
 void WriteToSldFile(int pageNum, int value, char type = 'T', const char* symbol = nullptr);
+void SldAddCommentKeyword(const char* keyword);
+void SldTrackComments();
 
 /////// Breakpoints list (for different emulators)
 enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX };

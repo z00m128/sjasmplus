@@ -25,3 +25,8 @@
     DEVICE  ZXSPECTRUM128, $FFFF
     DEVICE  ZXSPECTRUM128           ; no warning (just switching device to zx128)
     DEVICE  ZXSPECTRUM128, $FFFE    ; warning about different RAMTOP
+
+    DEVICE  NOSLOT64K, 0
+    DEVICE  NOSLOT64K, $5D00    ; warning about ignoring ramtop
+    DEVICE  NOSLOT64K, $5D01    ; device was already initialized, silent line (still ignoring ramtop)
+    DEVICE  NOSLOT64K           ; no warning (just switching)

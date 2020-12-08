@@ -34,10 +34,10 @@
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x8000 X label
-0x8002 X l1.label
-0x8004 X l1.l11.label
 0x8006 X l1.l11.l111.label
 0x8008 X l1.l11.l112.label
+0x8004 X l1.l11.label
 0x800A X l1.l12.label
+0x8002 X l1.label
 0x800C X l2.label
+0x8000 X label

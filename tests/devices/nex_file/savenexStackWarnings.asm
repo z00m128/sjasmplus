@@ -60,5 +60,7 @@
     MMU 0, 2*2+1, $1FFF : DB $AB    ; taints both entryBank==0 and entryBank==10
     SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C003 : SAVENEX CLOSE   ; warning
     SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C003, 10 : SAVENEX CLOSE   ; warning
+    SAVENEX OPEN "savenexStackWarnings.nex", $C004, $C003, 10 ; suppress: nexstack-ok
+    SAVENEX CLOSE
 
     ASSERT 12 == __WARNINGS__

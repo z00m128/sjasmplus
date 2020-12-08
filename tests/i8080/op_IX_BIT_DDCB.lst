@@ -731,5 +731,5 @@ op_IX_BIT_DDCB.asm(34): error: Unrecognized instruction: set REG_BIT,(ix+17),a
 Value    Label
 ------ - -----------------------------------------------------------
 0x0002   INS_I
-0x0008   REG_I
 0x0008   REG_BIT
+0x0008   REG_I

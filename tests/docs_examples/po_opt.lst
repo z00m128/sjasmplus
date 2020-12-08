@@ -2,7 +2,7 @@
 1     0000 C1 E1            POP bc, hl   ; pops BC first
 2     0002                  OPT push reset --reversepop --syntax=af
 3     0002 E1 C1            POP bc,,hl   ; pops HL first
-po_opt.asm(4): warning: Fake instruction: LD  bc,hl    
+po_opt.asm(4): warning: Fake instruction: LD  bc,hl
 4     0004 44 4D            LD  bc,hl    ; warning about Fake instruction
 5     0006 44 4D            LD  bc,hl    ; warning supressed by lowercase "fake" in this comment
 6     0008                  OPT reset --syntax=a

@@ -26,13 +26,13 @@
 25    8010 FF                   DB  0x1234 == {label1}
 26    8011
 27    8011 34 92                DW  {label1} + label1           ; should be relocated (0x1234 + label1)
-relocation_mem_read.asm(28): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_mem_read.asm(28): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 28    8013 34                   DB  low ({label1} + label1)     ; should warn (byte(0x1234 + label1) is affected)
 29    8014
 30    8014                  ; byte-reading variants use the same technique
 31    8014 FF                   DB  0x34 == {b label1}          ; should be true
 32    8015 34 80                DW  {b label1} + label1         ; should be relocated
-relocation_mem_read.asm(33): warning: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+relocation_mem_read.asm(33): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
 33    8017 34                   DB  low ({b label1} + label1)   ; should warn
 34    8018
 35    8018                  RELOCATE_END
@@ -45,7 +45,7 @@ relocation_mem_read.asm(33): warning: Relocation makes one of the expressions un
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0005 X relocate_count
-0x000A X relocate_size
 0x8000   label1
 0x8002   label2
+0x0005 X relocate_count
+0x000A X relocate_size

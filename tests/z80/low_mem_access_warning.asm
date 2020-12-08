@@ -108,55 +108,55 @@
     OPT reset --syntax=abfw
     ; warning not suppressed or wrongly suppressed -> emit warning
     ld  a,(1)
-    ld  a,(1)   ; it's ok
-    ld  a,(1)   ; fake
-    ld  a,(1)   ; "ok"
-    ld  a,(1)   ; OK (big capitals don't work!)
-    ld  a,(1)   ;ok123 (it's not just "ok" word)
-    ld  a,(1)   ;okay (it's not just "ok" word)
-    ld  a,(1)   ; ;ok (not a first word, the second semicolon ruins it)
     ld  a,(1)   ;
     ld  a,(1)   ;	
-    ld  a,(1)   ;o
-    ld  a,(1)   ;Ok
-    ld  a,(1)   ;0k
-    ld  a,(1)   ;oK
+    ld  a,(1)   ;rdlow
+    ld  a,(1)   ;rdlow-
+    ld  a,(1)   ;rdlow-o
+    ld  a,(1)   ;rdlow-Ok
+    ld  a,(1)   ;rdlow-0k
+    ld  a,(1)   ;RDLOW-OK (big capitals don't work!)
+    ld  a,(1)   ;rdlow-oK
+    ld  a,(1)   ;RDLOW-ok
+    ld  a,(1)   ;Rdlow-ok
+    ld  a,(1)   ;rdlow-OK
+    ld  a,(1)   ;Rdlow-Ok
 
     ; warning suppressed correctly
-    ld  a,(1)   ;ok
-    ld  a,(1)   ;;;;;;;;;;;ok
-    ld  a,(1)   //ok
-    ld  a,(1)   /////ok
+    ld  a,(1)   ;rdlow-ok
+    ld  a,(1)   ;;;;;;;;;;;rdlow-ok
+    ld  a,(1)   //rdlow-ok
+    ld  a,(1)   /////rdlow-ok
 
-    ; with whitespace between first word
-    ld  a,(1)   ;    ok
-    ld  a,(1)   ;;;;;;;;;;;    ok
-    ld  a,(1)   //   ok
-    ld  a,(1)   /////   ok
+    ; with whitespace and letters ahead of suppressing text
+    ld  a,(1)   ;  blabla  rdlow-ok
+    ld  a,(1)   ;;;;;;;;;;;  blabla  rdlow-ok
+    ld  a,(1)   //  blabla  rdlow-ok
+    ld  a,(1)   /////  blabla  rdlow-ok
 
     ; following include TABs (mixed with spaces)! (make sure they stay there)
-    ld  a,(1)   ;	  	ok
-    ld  a,(1)   ;;;;;;;;;;;	  	ok
-    ld  a,(1)   //	  	ok
-    ld  a,(1)   /////	  	ok
+    ld  a,(1)   ;	  	rdlow-ok
+    ld  a,(1)   ;;;;;;;;;;;	  	rdlow-ok
+    ld  a,(1)   //	  	rdlow-ok
+    ld  a,(1)   /////	  	rdlow-ok
 
-    ld  a,(1)   ;ok.
-    ld  a,(1)   ;ok?
-    ld  a,(1)   ;ok!
-    ld  a,(1)   ;ok+
-    ld  a,(1)   ;ok blabla
+    ld  a,(1)   ;rdlow-ok.
+    ld  a,(1)   ;rdlow-ok?
+    ld  a,(1)   ;rdlow-ok!
+    ld  a,(1)   ;rdlow-ok+
+    ld  a,(1)   ;rdlow-ok blabla
 
 
-;;;;;;; test new "ok" suppression also with fake instructions ;;;;;;;;;;
+;;;;;;; test suppression for fake instructions ;;;;;;;;;;
     OPT reset --syntax=abf
     ldi a,(hl)  ; warning
     ldi a,(hl)  ; this is "fake" instruction (warning suppressed by "fake")
     ldi a,(hl)  ; iz fakeish instruztione (substring can be anywhere)
-    ldi a,(hl)  ; ok - suppressed with the new method
+    ; the "ok" way is now deprecated since v1.18.0, use "fake"
 
 ;;;;;;; docs-grade example ;;;;;;;;;;
 
     ld      a,(16|4)    ;warning when accidentally using parentheses around 0..255 value
 
-    ld      a,(200)     ;ok Intentionally accessing ROM data at address 200
-        ; the ";ok" as first word of end-of-line-comment does suppress the warning
+    ld      a,(200)     ; rdlow-ok Intentionally accessing ROM data at address 200
+        ; the "rdlow-ok" in the end-of-line-comment does suppress the warning

@@ -22,7 +22,7 @@ OPT pop : OPT pop           ; pop syntax two times (and verify --dirbol works)
 OPT pop : OPT reset         ; warn about no previous syntax in stack, then reset (but no options)
 OPT = 2 : nop               ; this one is no more dirbol, but just a label
 
-    OPT --nologo 1 2 3 4 5 6 7 8 9 A B C D E F G ; invalid option(s) and too many of them
+    OPT --nologo 1 2 3 4 5 6 7 8 9 A B C D E F G ; invalid option(s) and many of them
 
     OPT unknown             ; error about invalid command
     OPT reset push          ; warn about pushing default syntax
