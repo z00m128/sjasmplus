@@ -213,11 +213,12 @@
 - <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
 - <link linkend="po_cspectmap">`CSPECTMAP`</link> exports STRUCT symbols with more detail (instance labels with physical address)
 - <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
+- added exclamation mark prefix for <link linkend="s_local_labels">labels</link> to not affect following local labels
 - added "listmc" command to <link linkend="po_opt">OPT</link> - to list only lines with machine code bytes
 - added <link linkend="s_cli">`--lstlab=sort`</link> variant to have symbols in listings in predictable order
 - minor bugfixes in parser and listing-line-numbering
 - Added <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm">example (chargfx2asm)</ulink> how to use sjasmplus as byte-processor for binary files
-- <link linkend="c_sld_data">SLD data</link> improvements based on Maziac's feedback and DeZog's needs
+- <link linkend="c_sld_data">SLD data</link> improvements based on Maziac's feedback and <ulink url="https://github.com/maziac/DeZog">DeZog</ulink>'s needs
 </synopsis>
             </listitem>
           </varlistentry>
@@ -541,7 +542,8 @@ file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
 KIP
 Kip@@
 MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
-      register names as labels but it is not advised to do so. Also note that
+      register names as labels but it is not advised to do so (expression operator keyword used
+      as label will emit warning, and is also not advised). Also note that
       the identifiers defined with the DEFINE pseudo-op use another name
       space.</para>
 
@@ -565,8 +567,11 @@ classic equ $+1 : ld a,7        ; often even split to two lines</programlisting>
       <para>When there is a <link linkend="po_module">module definition</link> all
       labels (except those starting with a '@') are local to that module. To
       use a label from outside the module use modulename.labelname, in this
-      example: 'vdp.Cls' Labels starting with a '.' are also local to the
+      example: 'vdp.Cls'. Labels starting with a '.' are also local to the
       previous non-local label.</para>
+
+      <para>(since v1.18.0) If you start the label with an ! (exclamation mark), it will not
+      affect following local labels (same syntax as <ulink url="http://www.xl2s.tk/">sjasm</ulink>).</para>
 
       <para><example>
           <title>docs_examples/s_local_labels.asm</title>
@@ -585,6 +590,7 @@ Main:                       ; main.Main
 .loop:                      ; main.vdp.SetScreen.loop
             RET
 Cls:                        ; main.vdp.Cls
+!KeepClsForLocal:           ; main.vdp.KeepClsForLocal (since v1.18.0)
 .loop:      DJNZ .loop      ; main.vdp.Cls.loop
             RET
         ENDMODULE

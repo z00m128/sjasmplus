@@ -51,11 +51,15 @@ void TextFilePos::nextSegment(bool endsWithColon, size_t advanceColumns) {
 
 char* PreviousIsLabel = nullptr;
 
-// since v1.14.2:
-// When "setNameSpace == true" the naam is parsed as whole, reporting invalid labelname error
-// When "setNameSpace == false" the naam is parsed only through valid label chars (early exit)
-// => the labels can be evaluated straight from the expression string without copying them out!
-char* ValidateLabel(const char* naam, bool setNameSpace) {
+// since v1.18.0:
+// The ignore invalid char after feature disconnected from "setNameSpace" to "ignoreCharAfter"
+// (it's for evaluating labels straight from the expressions, without copying them out first)
+// The prefix "!" is now recognized as "do not set main label" for following local labels
+char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
+	if ('!' == *naam) {
+		setNameSpace = false;
+		++naam;
+	}
 	const bool global = '@' == *naam;
 	const bool local = '.' == *naam;
 	if (!isLabelStart(naam)) {		// isLabelStart assures that only single modifier exist
@@ -70,7 +74,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace) {
 	const char* np = naam;
 	while (islabchar(*np)) ++np;
 	if ('[' == *np) return nullptr;	// this is DEFARRAY name, do not process it as label (silent exit)
-	if (setNameSpace && *np) {
+	if (*np && !ignoreCharAfter) {
 		// if this is supposed to be new label, there shoulnd't be anything else after it
 		Error("Invalid labelname", naam);
 		return nullptr;
@@ -150,7 +154,7 @@ static bool getLabel_invalidName = false;
 
 static SLabelTableEntry* GetLabel(char*& p) {
 	getLabel_invalidName = true;
-	std::unique_ptr<char[]> fullName(ValidateLabel(p, false));
+	std::unique_ptr<char[]> fullName(ValidateLabel(p, false, true));
 	if (!fullName) return nullptr;
 	getLabel_invalidName = false;
 	const bool global = '@' == *p;

@@ -51,7 +51,7 @@ enum EStructureMembers {
 
 struct SLabelTableEntry;
 
-char* ValidateLabel(const char* naam, bool setNameSpace);
+char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter = false);
 char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label);
 char* ExportModuleToSld(bool endModule = false);
 extern char* PreviousIsLabel;

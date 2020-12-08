@@ -1333,7 +1333,7 @@ static bool dirIfusedIfnused(char* & id) {
 			return false;
 		}
 	} else {
-		std::unique_ptr<char[]> validLabel(ValidateLabel(lp, false));
+		std::unique_ptr<char[]> validLabel(ValidateLabel(lp, false, true));
 		if (validLabel) {
 			id = STRDUP(validLabel.get());
 			while (islabchar(*lp)) ++lp;	// advance lp beyond parsed label (valid chars only)

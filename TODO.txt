@@ -119,10 +119,6 @@ Kate syntax:
 
 SHELLEXEC change syntax
 
-"ok" warning suppressing mechanism for ALL warnings?
-
-EQU and DEFL to not affect local labels (not defining new "main" label)
-
 separate local-labels vs macro-local-labels, like giving the macros new prefix? ">"?
 (issue #120)
 
@@ -148,9 +144,6 @@ Check about other syntax ambiguities, what seems too much relaxed and could be s
 N-pass
 
 new lua + js support?
-
-Refactor filepath functions to deal with backward slashes systematically
-(or maybe just wait few more years, can't be that long now before windows are gone)
 
 ====================
 Debian packaging:

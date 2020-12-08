@@ -35,5 +35,5 @@ s:  ; some label
     leMacron arg0           ; but so do also correctly used macros
 .localLab:
     hex     F32712bcd3561   ; unpaired digit or non-digit is highlighted as "error"
-!alsoThisInvalidLabel
+!!alsoThisInvalidLabel
     dg      ..##..##  #$01!-._  ; DG bit map is highlights as "data" (0) vs "number" (1)

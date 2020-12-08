@@ -15,13 +15,14 @@ s_local_labels.asm(8): error: Label not found: main.ProcessEvent
 13    800E              .loop:                      ; main.vdp.SetScreen.loop
 14    800E C9                       RET
 15    800F              Cls:                        ; main.vdp.Cls
-16    800F 10 FE        .loop:      DJNZ .loop      ; main.vdp.Cls.loop
-17    8011 C9                       RET
-18    8012                      ENDMODULE
-19    8012
-20    8012 00           Main.event DB 0             ; main.Main.event
-21    8013                  ENDMODULE
-22    8013
+16    800F              !KeepClsForLocal:           ; main.vdp.KeepClsForLocal (since v1.18.0)
+17    800F 10 FE        .loop:      DJNZ .loop      ; main.vdp.Cls.loop
+18    8011 C9                       RET
+19    8012                      ENDMODULE
+20    8012
+21    8012 00           Main.event DB 0             ; main.Main.event
+22    8013                  ENDMODULE
+23    8013
 # file closed: s_local_labels.asm
 
 Value    Label
@@ -31,5 +32,6 @@ Value    Label
 0x8006   main.Main.loop
 0x800F   main.vdp.Cls
 0x800F   main.vdp.Cls.loop
+0x800F X main.vdp.KeepClsForLocal
 0x800E X main.vdp.SetScreen.loop
 0x800E   SetScreen

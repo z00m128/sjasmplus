@@ -61,7 +61,7 @@ KateSyntaxHighLightTest.asm(35): ^ emitted from here
 KateSyntaxHighLightTest.asm(37): error: Missing next digit: 1
 37    00F4                  hex     F32712bcd3561   ; unpaired digit or non-digit is highlighted as "error"
 KateSyntaxHighLightTest.asm(38): error: Invalid labelname: !alsoThisInvalidLabel
-38    00F4              !alsoThisInvalidLabel
+38    00F4              !!alsoThisInvalidLabel
 KateSyntaxHighLightTest.asm(39): warning: [DG] multiple characters used for 'ones'
 KateSyntaxHighLightTest.asm(39): warning: [DG] character '0' in DG works as value 1
 39    00F4 33 F8            dg      ..##..##  #$01!-._  ; DG bit map is highlights as "data" (0) vs "number" (1)

@@ -13,6 +13,7 @@ Main:                       ; main.Main
 .loop:                      ; main.vdp.SetScreen.loop
             RET
 Cls:                        ; main.vdp.Cls
+!KeepClsForLocal:           ; main.vdp.KeepClsForLocal (since v1.18.0)
 .loop:      DJNZ .loop      ; main.vdp.Cls.loop
             RET
         ENDMODULE
