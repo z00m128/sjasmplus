@@ -102,13 +102,14 @@ if(ENABLE_LUA)
 		add_definitions(-DLUA_USE_LINUX)
 	elseif(WIN32)
 		add_definitions(-DLUA_USE_WINDOWS)
+		set(RESOURCES sjasmwin32/sjasmplus.rc)
 	endif()
 endif(ENABLE_LUA)
 
 include_directories(sjasm)
 include_directories(crc32c)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES})
 
 target_link_libraries(
 	${PROJECT_NAME}
