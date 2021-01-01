@@ -1804,7 +1804,7 @@ static bool shouldRepeat(SRepeatStack& dup) {
 		aint val = 0;
 		IsLabelNotFound = 0;
 		char* expressionSource = dup.RepeatCondition->string;
-		if (!ParseExpressionNoSyntaxError(expressionSource, val)) {
+		if (!ParseExpressionNoSyntaxError(expressionSource, val) || *expressionSource) {
 			TextFilePos oSrcPos = CurSourcePos;
 			CurSourcePos = dup.RepeatCondition->source;
 			Error("[WHILE] Syntax error in <expression>", dup.RepeatCondition->string, SUPPRESS);
