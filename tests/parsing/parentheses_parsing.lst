@@ -1,0 +1,17 @@
+# file opened: parentheses_parsing.asm
+ 1    0000              ; during working on advent-of-code 2020 as sjasmplus scripts, I have run into
+ 2    0000              ; insufficient syntax error reporting
+ 3    0000
+ 4    0000              ; AFTER FIX: the while is not executed even once, only syntax error is reported
+ 5    0000
+ 6    0000                  DEVICE ZXSPECTRUMNEXT
+ 7    0000              counter = 1
+ 8    0000                  WHILE (counter < 2)) || (counter < 4)
+parentheses_parsing.asm(8): error: [WHILE] Syntax error in <expression>:  (counter < 2)) || (counter < 4)
+12    0000                  ENDW
+13    0000
+# file closed: parentheses_parsing.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001   counter

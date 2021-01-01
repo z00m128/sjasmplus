@@ -43,10 +43,16 @@
 41    8019                  ; #CSpect map export
 42    8019                  CSPECTMAP "lstlab_sort.exp"
 43    8019
+44    8019              ; --sym was not exporting symbols starting with non-alpha character, ie. underscore labels
+45    8019              ; This seems rather bug than feature, so changed for v1.18.1
+46    8019              ; (I guess the original test was to hide macro labels only, the ones starting with digit)
+47    8019 00           _underscoreLabel    nop
+48    801A
 # file closed: lstlab_sort.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x8019 X _underscoreLabel
 0x8011 X Aaaaa
 0x8012 X aAaaa
 0x8010 X aaAaa

@@ -490,7 +490,7 @@ void CLabelTable::DumpSymbols() {
 	const auto order = getDumpOrder(symbols);
 	for (const symbol_map_t::key_type& name: order) {
 		const symbol_map_t::mapped_type& symbol = symbols.at(name);
-		if (!isalpha((byte)name[0])) continue;
+		if (isdigit((byte)name[0])) continue;
 		if (symbol.traits&LABEL_IS_KEYWORD) continue;
 		WriteLabelEquValue(name.c_str(), symbol.value, symfp);
 	}
