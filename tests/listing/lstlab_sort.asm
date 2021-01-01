@@ -40,3 +40,8 @@ ddddd       rlca
 
     ; #CSpect map export
     CSPECTMAP "lstlab_sort.exp"
+
+; --sym was not exporting symbols starting with non-alpha character, ie. underscore labels
+; This seems rather bug than feature, so changed for v1.18.1
+; (I guess the original test was to hide macro labels only, the ones starting with digit)
+_underscoreLabel    nop
