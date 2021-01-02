@@ -1,0 +1,2 @@
+@call ContinuousIntegration\winbuild_priority_for_git_path.bat
+bash ContinuousIntegration/test_folder_examples.sh

@@ -49,31 +49,30 @@ pipe:
       upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/ -e unittest-cpp/ -e cpp-src-tests/
 
 task:
-  name: windows mingw32 build
+  name: windows mingw build
   env:
     CIRRUS_CLONE_DEPTH: 1
   windows_container:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
     cpu: 2
-  build_script: ContinuousIntegration\winbuild_mingw32.bat
-  sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
-  assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
-  assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat
+  build_script: ContinuousIntegration\winbuild_mingw.bat
+  assemble_examples_script: ContinuousIntegration\winbuild_mingw_examples.bat
+  assemble_tests_script: ContinuousIntegration\winbuild_mingw_tests.bat
 
 task:
-  name: windows Visual Studio 15 2017 build
+  name: windows Visual Studio 2019 build
   env:
     CIRRUS_CLONE_DEPTH: 1
   windows_container:
     image: cirrusci/windowsservercore:cmake
     os_version: 2019
     cpu: 2
-  build_script: ContinuousIntegration\winbuild_vs15_2017.bat
+  # FIXME: currently doesn't work, missing VSC compiler
+  build_script: ContinuousIntegration\winbuild_vs2019.bat
   # exe is installed at the same location as the MinGW build does
-  sjasmplus_exe_existence_script: c:\tools\sjasmplus\sjasmplus --help
-  assemble_examples_script: ContinuousIntegration\winbuild_mingw32_examples.bat
-  assemble_tests_script: ContinuousIntegration\winbuild_mingw32_tests.bat
+  assemble_examples_script: ContinuousIntegration\winbuild_mingw_examples.bat
+  assemble_tests_script: ContinuousIntegration\winbuild_mingw_tests.bat
 
 task:
   name: FreeBSD clang build (with unit tests)
