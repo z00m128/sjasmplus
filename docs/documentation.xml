@@ -1284,6 +1284,22 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
+            <term>__DATE__ = "YYYY-MM-DD"</term>
+
+            <listitem>
+              <para>Date of assembling (timestamp before first pass).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>__TIME__ = "hh:mm:ss"</term>
+
+            <listitem>
+              <para>Time of assembling (timestamp before first pass, 24h form).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>__PASS__ = &lt;number&gt;</term>
 
             <listitem>
