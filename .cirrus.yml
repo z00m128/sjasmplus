@@ -60,19 +60,20 @@ task:
   assemble_examples_script: ContinuousIntegration\winbuild_mingw_examples.bat
   assemble_tests_script: ContinuousIntegration\winbuild_mingw_tests.bat
 
-task:
-  name: windows Visual Studio 2019 build
-  env:
-    CIRRUS_CLONE_DEPTH: 1
-  windows_container:
-    image: cirrusci/windowsservercore:cmake
-    os_version: 2019
-    cpu: 2
-  # FIXME: currently doesn't work, missing VSC compiler
-  build_script: ContinuousIntegration\winbuild_vs2019.bat
-  # exe is installed at the same location as the MinGW build does
-  assemble_examples_script: ContinuousIntegration\winbuild_mingw_examples.bat
-  assemble_tests_script: ContinuousIntegration\winbuild_mingw_tests.bat
+# VS builds are temporarily disabled, see: https://github.com/cirruslabs/docker-images-windows/issues/14
+# task:
+#   name: windows Visual Studio 2019 build
+#   env:
+#     CIRRUS_CLONE_DEPTH: 1
+#   windows_container:
+#     image: cirrusci/windowsservercore:cmake
+#     os_version: 2019
+#     cpu: 2
+#   # FIXME: currently doesn't work, missing VSC compiler
+#   build_script: ContinuousIntegration\winbuild_vs2019.bat
+#   # exe is installed at the same location as the MinGW build does
+#   assemble_examples_script: ContinuousIntegration\winbuild_mingw_examples.bat
+#   assemble_tests_script: ContinuousIntegration\winbuild_mingw_tests.bat
 
 task:
   name: FreeBSD clang build (with unit tests)
