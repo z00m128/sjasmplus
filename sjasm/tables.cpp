@@ -184,7 +184,10 @@ static SLabelTableEntry* GetLabel(char*& p) {
 			if ('>' == *findName++) {
 				inMacro = false;
 				if (modNameLen) {
+					#pragma GCC diagnostic push	// disable gcc8 warning about truncation - that's intended behaviour
+					#pragma GCC diagnostic ignored "-Wstringop-truncation"
 					STRCAT(temp, LINEMAX-2, ModuleName); STRCAT(temp, 2, ".");
+					#pragma GCC diagnostic pop
 				}
 				STRCAT(temp, LABMAX-1, vorlabp); STRCAT(temp, 2, ".");
 				STRCAT(temp, LABMAX-1, findName);

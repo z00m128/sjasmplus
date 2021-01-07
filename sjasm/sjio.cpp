@@ -1218,7 +1218,7 @@ void WriteExp(char* n, aint v) {
 /////// source-level-debugging support by Ckirby
 
 static FILE* FP_SourceLevelDebugging = NULL;
-static char sldMessage[LINEMAX];
+static char sldMessage[LINEMAX2];
 static const char* WriteToSld_noSymbol = "";
 static char sldMessage_sourcePos[1024];
 static char sldMessage_definitionPos[1024];
@@ -1320,7 +1320,7 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 							DefinitionPos.filename : "";
 	WriteToSldFile_TextFilePos(sldMessage_sourcePos, CurSourcePos);
 	WriteToSldFile_TextFilePos(sldMessage_definitionPos, DefinitionPos);
-	snprintf(sldMessage, LINEMAX, "%s|%s|%s|%s|%d|%d|%c|%s\n",
+	snprintf(sldMessage, LINEMAX2, "%s|%s|%s|%s|%d|%d|%c|%s\n",
 				CurSourcePos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
 				pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
