@@ -46,6 +46,18 @@ constexpr char pathGoodSlash = '/';
 #  include <sys/param.h> // mingw, some bsd (not open/macos)
 #elif __has_include(<sys/isadefs.h>)
 #  include <sys/isadefs.h> // solaris
+#elif __has_include(<libkern/OSByteOrder.h>) // macos second variant
+#  include <libkern/OSByteOrder.h>
+#  define htobe16(x) OSSwapHostToBigInt16(x)
+#  define htole16(x) OSSwapHostToLittleInt16(x)
+#  define be16toh(x) OSSwapBigToHostInt16(x)
+#  define le16toh(x) OSSwapLittleToHostInt16(x)
+#  define htobe32(x) OSSwapHostToBigInt32(x)
+#  define htole32(x) OSSwapHostToLittleInt32(x)
+#  define be32toh(x) OSSwapBigToHostInt32(x)
+#  define le32toh(x) OSSwapLittleToHostInt32(x)
+#else
+#  error "No <endian.h> solution found on your platform"
 #endif
 
 #if defined (_MSC_VER)
