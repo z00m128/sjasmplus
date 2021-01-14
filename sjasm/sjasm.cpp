@@ -109,6 +109,7 @@ namespace Options {
 	bool IsLR35902 = false;
 	bool IsLongPtr = false;
 	bool SortSymbols = false;
+	bool IsBigEndian = false;
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
@@ -622,15 +623,10 @@ int main(int argc, char **argv) {
 
 	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
 
-	// verify that I'm running on little-endian platform (the reinterpret word casts will break on BE platform)
-	// The new source is easy to locate through reinterpret_cast keywords, but I have strong
-	// suspicion there is also old sjasmplus code which is not endianness-agnostic.
-	// To fix it would need major testing with some BE platform and deep code review.
-	const word little_endian_test[] = { 0x1234 };
-	const byte le_test_byte = *reinterpret_cast<const byte*>(little_endian_test);
-	if (0x34 != le_test_byte) {
-		ErrorInt("Big-endian platform detected, unfortunately sjasmplus" \
-		" is currently LE-only, please report the issue.", le_test_byte, FATAL);
+	// on my local linux box the <endian.h> is included (deeply nested) by <memory>
+	Options::IsBigEndian = (0x1234 == htobe16(0x1234));
+	if (Options::IsBigEndian) {
+		WarningById(W_BE_HOST, nullptr, W_EARLY);
 	}
 
 	// start counter
