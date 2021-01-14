@@ -90,6 +90,9 @@ struct STrdDisc {
 	static long fileOffset(const long track, const long sector) {
 		return (track * SECTOR_SZ * SECTORS_PER_TRACK) + (sector * SECTOR_SZ);
 	}
+
+	void swapEndianness();
+	bool writeToFile(FILE *ftrd);
 }
 #ifndef _MSC_VER
 	__attribute__((packed));
@@ -99,6 +102,17 @@ struct STrdDisc {
 #endif
 static_assert(STrdDisc::SECTOR_SZ == sizeof(STrdDisc), "TRD disc info is expected to be 256 bytes long!");
 
+void STrdDisc::swapEndianness() {
+	numOfFreeSectors = sj_bswap16(numOfFreeSectors);
+}
+
+bool STrdDisc::writeToFile(FILE *ftrd) {
+	if (Options::IsBigEndian) swapEndianness();		// fix endianness in binary form before write
+	if (1 != fwrite(this, sizeof(STrdDisc), 1, ftrd)) return false;
+	if (Options::IsBigEndian) swapEndianness();		// revert endianness back to native host form
+	return true;
+}
+
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
@@ -107,6 +121,10 @@ struct STrdHead {
 
 	STrdFile	catalog[NUM_OF_FILES_MAX];
 	STrdDisc	info;
+
+	void swapEndianness();
+	bool readFromFile(FILE *ftrd);
+	bool writeToFile(FILE *ftrd);
 }
 #ifndef _MSC_VER
 	__attribute__((packed));
@@ -115,6 +133,27 @@ struct STrdHead {
 #pragma pack(pop)
 #endif
 static_assert(9 * STrdDisc::SECTOR_SZ == sizeof(STrdHead), "TRD catalog and info area should be 9 sectors long!");
+
+void STrdHead::swapEndianness() {
+	info.swapEndianness();
+	for (STrdFile & file : this->catalog) {
+		file.address = sj_bswap16(file.address);
+		file.length = sj_bswap16(file.length);
+	}
+}
+
+bool STrdHead::readFromFile(FILE *ftrd) {
+	if (1 != fread(this, sizeof(STrdHead), 1, ftrd)) return false;
+	if (Options::IsBigEndian) swapEndianness();
+	return this->info.isTrdInfo();
+}
+
+bool STrdHead::writeToFile(FILE *ftrd) {
+	if (Options::IsBigEndian) swapEndianness();		// fix endianness in binary form before write
+	if (1 != fwrite(this, sizeof(STrdHead), 1, ftrd)) return false;
+	if (Options::IsBigEndian) swapEndianness();		// revert endianness back to native host form
+	return true;
+}
 
 /**
  * @brief Write empty TRD file (80 tracks, 2 sides) into file
@@ -133,7 +172,7 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 		STrdDisc discInfo{};
 		// replace label data if requested
 		if (label) memcpy(discInfo.label, label, STrdDisc::LABEL_SZ);
-		if (1 != fwrite(&discInfo, sizeof(STrdDisc), 1, ff)) return 0;
+		if (!discInfo.writeToFile(ff)) return 0;
 	}
 	// zeroes till end of first track
 	if (7 != fwrite(buf, STrdDisc::SECTOR_SZ, 7, ff)) return 0;
@@ -257,7 +296,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	FILE* ff;
 	STrdHead trdHead;
 	if (!FOPEN_ISOK(ff, fname, "r+b")) Error("Error opening file", fname, FATAL);
-	if (1 != fread(&trdHead, sizeof(STrdHead), 1, ff) || !trdHead.info.isTrdInfo()) {
+	if (!trdHead.readFromFile(ff)) {
 		return ReturnWithError("TRD image read error", fname, ff);
 	}
 
@@ -427,7 +466,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	if (fseek(ff, 0, SEEK_SET)) {
 		return ReturnWithError("TRD image has wrong format", fname, ff);
 	}
-	if (1 != fwrite(&trdHead, sizeof(STrdHead), 1, ff)) {
+	if (!trdHead.writeToFile(ff)) {
 		return ReturnWithError("TRD write error", fname, ff);
 	}
 
@@ -448,7 +487,7 @@ int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset,
 	if (!FOPEN_ISOK(ff, fullTrdName, "rb")) Error("[INCTRD] Error opening file", trdname, FATAL);
 	free(fullTrdName);
 	fullTrdName = nullptr;
-	if (1 != fread(&trdHead, sizeof(STrdHead), 1, ff) || !trdHead.info.isTrdInfo()) {
+	if (!trdHead.readFromFile(ff)) {
 		return ReturnWithError("TRD image read error", trdname, ff);
 	}
 	fclose(ff);
