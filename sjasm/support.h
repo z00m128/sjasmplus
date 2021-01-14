@@ -31,6 +31,23 @@
 constexpr char pathBadSlash = '\\';
 constexpr char pathGoodSlash = '/';
 
+////////////// <endian.h> and the need of `htobe16 / htole16 / ...` //////////////////////////////////////////////
+// __has_include should be supported from GCC 5+ and VS2015
+//
+// IMO the <endian.h> should have been standartized in last 30 years (plenty of time to agree on *some* variant)
+//
+// if you have platform where this fails to build, ask the platform vendor why they can't have
+// what 70% of current computers used to build SW (= linux) has, I had enough of headache with it
+#if __has_include(<endian.h>)
+#  include <endian.h> // gnu libc normally provides, linux
+#elif __has_include(<machine/endian.h>)
+#  include <machine/endian.h> //open bsd, macos
+#elif __has_include(<sys/param.h>)
+#  include <sys/param.h> // mingw, some bsd (not open/macos)
+#elif __has_include(<sys/isadefs.h>)
+#  include <sys/isadefs.h> // solaris
+#endif
+
 #if defined (_MSC_VER)
 
 #define _CRT_SECURE_NO_WARNINGS 1

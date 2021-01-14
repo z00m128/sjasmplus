@@ -11,7 +11,7 @@
 
 #if (defined(_WIN16) || defined(_WIN32) || defined(_WIN64)) && !defined(__WINDOWS__)
 
-#	define __WINDOWS__
+#	define __PORTABLE_ENDIAN_H_WINDOWS__
 
 #endif
 
@@ -60,7 +60,7 @@
 #	define be64toh(x) betoh64(x)
 #	define le64toh(x) letoh64(x)
 
-#elif defined(__WINDOWS__)
+#elif defined(__PORTABLE_ENDIAN_H_WINDOWS__)
 
 #	include <winsock2.h>
 #	include <sys/param.h>
