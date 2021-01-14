@@ -84,6 +84,8 @@ struct SNexHeader {
 	uint32_t	crc32c;				// CRC-32C build by: file offset 512->EOF (including append bin), then 508B header
 
 	void init();
+	void prepareLittleEndianBinaryForm();
+	void restoreHostEndianBinaryForm();
 }
 #ifndef _MSC_VER
 	__attribute__((packed));
@@ -128,6 +130,24 @@ void SNexHeader::init() {
 	coreVersion[2] = 28;
 }
 
+void SNexHeader::prepareLittleEndianBinaryForm() {
+	if (Options::IsBigEndian) {
+		sp = sj_bswap16(sp);
+		pc = sj_bswap16(pc);
+		_obsolete_numfiles = sj_bswap16(_obsolete_numfiles);
+		fileHandleCfg = sj_bswap16(fileHandleCfg);
+		banksOffset = sj_bswap32(banksOffset);
+		cliBuffer = sj_bswap16(cliBuffer);
+		cliBufferSize = sj_bswap16(cliBufferSize);
+		crc32c = sj_bswap32(crc32c);
+	}
+}
+
+void SNexHeader::restoreHostEndianBinaryForm() {
+	// it's actually identical to the prepareLittleEndianBinaryForm, but keeping unique naming
+	prepareLittleEndianBinaryForm();
+}
+
 SNexFile::~SNexFile() {
 	finalizeFile();
 }
@@ -163,9 +183,11 @@ void SNexFile::writeHeader() {
 	canAppend = false;							// does fseek, cancel the "append" mode
 	// refresh/write the file header
 	fseek(f, 0, SEEK_SET);
+	h.prepareLittleEndianBinaryForm();
 	if (sizeof(SNexHeader) != fwrite(&h, 1, sizeof(SNexHeader), f)) {
 		Error("[SAVENEX] writing header content failed", NULL, SUPPRESS);
 	}
+	h.restoreHostEndianBinaryForm();
 }
 
 void SNexFile::writePalette() {
@@ -276,12 +298,18 @@ bool SBmpFile::open(const char* bmpname) {
 	palBuffer = new byte[4*256];
 	if (nullptr == palBuffer) ErrorOOM();
 	const size_t readElements = fread(tempHeader, 1, 0x36, bmp) + fread(palBuffer, 4, 256, bmp);
-	// these following casts assume the sjasmplus itself is running at little-endian platform
-	// if you are using big-endian, report the issue, so this can be fixed in more universal way
-	const uint32_t header2Size = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 14)->val;
-	const uint16_t colorPlanes = *reinterpret_cast<uint16_t*>(tempHeader + 26);
-	const uint16_t bpp = *reinterpret_cast<uint16_t*>(tempHeader + 28);
-	const uint32_t compressionType = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 30)->val;
+	// these following casts assume the sjasmplus itself is running at little-endian host
+	uint32_t header2Size = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 14)->val;
+	uint16_t colorPlanes = *reinterpret_cast<uint16_t*>(tempHeader + 26);
+	uint16_t bpp = *reinterpret_cast<uint16_t*>(tempHeader + 28);
+	uint32_t compressionType = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 30)->val;
+	// fix values on BE hosts
+	if (Options::IsBigEndian) {
+		header2Size = sj_bswap32(header2Size);
+		colorPlanes = sj_bswap16(colorPlanes);
+		bpp = sj_bswap16(bpp);
+		compressionType = sj_bswap32(compressionType);
+	}
 	// check "BM", BITMAPINFOHEADER type (size 40), 8bpp, no compression
 	if (0x36+256 != readElements || 'B' != tempHeader[0] || 'M' != tempHeader[1] ||
 		40 != header2Size || 1 != colorPlanes || 8 != bpp || 0 != compressionType)
@@ -291,10 +319,16 @@ bool SBmpFile::open(const char* bmpname) {
 		close();
 		return false;
 	}
-	colorsCount = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 46)->val;
 	// check if the size is 256x192 (Layer 2) or 128x96 (LoRes), or 320/640 x 256 (V1.3).
+	colorsCount = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 46)->val;
 	width = reinterpret_cast<SAlignSafeCast<int32_t>*>(tempHeader + 18)->val;
 	height = reinterpret_cast<SAlignSafeCast<int32_t>*>(tempHeader + 22)->val;
+	// fix values on BE hosts
+	if (Options::IsBigEndian) {
+		colorsCount = sj_bswap32(colorsCount);
+		width = sj_bswap32(width);
+		width = sj_bswap32(width);
+	}
 	upsideDown = 0 < height;
 	if (height < 0) height = -height;
 	if (256 == width && 192 == height) type = Layer2;
@@ -315,7 +349,8 @@ word SBmpFile::getColor(uint32_t index) {
 }
 
 void SBmpFile::loadPixelData(byte* buffer) {
-	const uint32_t offset = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 10)->val;
+	uint32_t offset = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 10)->val;
+	if (Options::IsBigEndian) offset = sj_bswap32(offset);
 	const size_t w = static_cast<size_t>(width);
 	for (int32_t y = 0; y < height; ++y) {
 		const int32_t fileY = upsideDown ? (height - y - 1) : y;
