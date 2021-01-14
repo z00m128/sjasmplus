@@ -31,8 +31,6 @@
 constexpr char pathBadSlash = '\\';
 constexpr char pathGoodSlash = '/';
 
-#include "portable_endian.h"
-
 #if defined (_MSC_VER)
 
 #define _CRT_SECURE_NO_WARNINGS 1

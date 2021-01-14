@@ -43,7 +43,10 @@
 #define _END ;
 
 // standard libraries
+#include "portable_endian.h"	// needs to go first, to include <winsock2.h> ahead of <windows.h>
+
 #ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
 #endif
