@@ -2,6 +2,6 @@
 if [[ -z "${MSG_LIST_FILE}" ]]; then
     last_result=1
 else
-    $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "$file_asm" - "$file_asm" < "$file_asm" 2> "${dst_base}.lst"
+    $MEMCHECK "$EXE" -Wno-behost --nologo --msg=lstlab --fullpath "$file_asm" - "$file_asm" < "$file_asm" 2> "${dst_base}.lst"
     last_result=$?
 fi

@@ -626,7 +626,6 @@ int main(int argc, char **argv) {
 	const word little_endian_test[] = { 0x1234 };
 	const byte le_test_byte = *reinterpret_cast<const byte*>(little_endian_test);
 	Options::IsBigEndian = (0x12 == le_test_byte);
-	if (Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
 
 	// start counter
 	long dwStart = GetTickCount();
@@ -676,6 +675,8 @@ int main(int argc, char **argv) {
 			sourceFiles.push_back(SSource(argv[i++]));
 		}
 	}
+	// warn about BE-host only when there's any CLI argument && after CLI options were parsed
+	if (2 <= argc && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
 	if (Options::IsDefaultListingName && Options::ListingFName[0]) {
 		Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
 	}
