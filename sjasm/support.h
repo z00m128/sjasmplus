@@ -31,16 +31,16 @@
 constexpr char pathBadSlash = '\\';
 constexpr char pathGoodSlash = '/';
 
-constexpr uint16_t bswap16(const uint16_t v) {
+constexpr uint16_t sj_bswap16(const uint16_t v) {
 	return ((v>>8)&0xFF) | ((v<<8)&0xFF00);
 }
 
-constexpr uint32_t bswap32(const uint32_t v) {
+constexpr uint32_t sj_bswap32(const uint32_t v) {
 	return ((v>>24)&0xFF) | ((v>>8)&0xFF00) | ((v<<8)&0xFF0000) | ((v<<24)&0xFF000000);
 }
 
-static_assert(0x3412 == bswap16(0x1234), "internal error in bswap16 implementation");
-static_assert(0x78563412 == bswap32(0x12345678), "internal error in bswap32 implementation");
+static_assert(0x3412 == sj_bswap16(0x1234), "internal error in bswap16 implementation");
+static_assert(0x78563412 == sj_bswap32(0x12345678), "internal error in bswap32 implementation");
 
 #if defined (_MSC_VER)
 
