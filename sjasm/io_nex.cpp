@@ -327,7 +327,7 @@ bool SBmpFile::open(const char* bmpname) {
 	if (Options::IsBigEndian) {
 		colorsCount = sj_bswap32(colorsCount);
 		width = sj_bswap32(width);
-		width = sj_bswap32(width);
+		height = sj_bswap32(height);
 	}
 	upsideDown = 0 < height;
 	if (height < 0) height = -height;
@@ -507,6 +507,10 @@ static void dirNexCfg3() {
 	nex.h.expBusDisable = !!cfgArgs[1];
 	nex.h.cliBuffer = cfgArgs[2];
 	nex.h.cliBufferSize = cfgArgs[3];
+	if (nex.h.hasChecksum && Options::IsBigEndian) {
+		Error("[SAVENEX] CRC feature is not available at big-endian host machine (wrong CRC implementation in sjasmplus, sorry)");
+		nex.h.hasChecksum = false;
+	}
 }
 
 static void dirNexCfg() {
