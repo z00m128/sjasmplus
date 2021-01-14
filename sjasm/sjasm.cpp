@@ -623,11 +623,10 @@ int main(int argc, char **argv) {
 
 	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
 
-	// on my local linux box the <endian.h> is included (deeply nested) by <memory>
-	Options::IsBigEndian = (0x1234 == htobe16(0x1234));
-	if (Options::IsBigEndian) {
-		WarningById(W_BE_HOST, nullptr, W_EARLY);
-	}
+	const word little_endian_test[] = { 0x1234 };
+	const byte le_test_byte = *reinterpret_cast<const byte*>(little_endian_test);
+	Options::IsBigEndian = (0x12 == le_test_byte);
+	if (Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
 
 	// start counter
 	long dwStart = GetTickCount();

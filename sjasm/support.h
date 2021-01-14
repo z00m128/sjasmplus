@@ -31,34 +31,16 @@
 constexpr char pathBadSlash = '\\';
 constexpr char pathGoodSlash = '/';
 
-////////////// <endian.h> and the need of `htobe16 / htole16 / ...` //////////////////////////////////////////////
-// __has_include should be supported from GCC 5+ and VS2015
-//
-// IMO the <endian.h> should have been standartized in last 30 years (plenty of time to agree on *some* variant)
-//
-// if you have platform where this fails to build, ask the platform vendor why they can't have
-// what 70% of current computers used to build SW (= linux) has, I had enough of headache with it
-#if __has_include(<endian.h>)
-#  include <endian.h> // gnu libc normally provides, linux
-#elif __has_include(<machine/endian.h>)
-#  include <machine/endian.h> //open bsd, macos
-#elif __has_include(<sys/param.h>)
-#  include <sys/param.h> // mingw, some bsd (not open/macos)
-#elif __has_include(<sys/isadefs.h>)
-#  include <sys/isadefs.h> // solaris
-#elif __has_include(<libkern/OSByteOrder.h>) // macos second variant
-#  include <libkern/OSByteOrder.h>
-#  define htobe16(x) OSSwapHostToBigInt16(x)
-#  define htole16(x) OSSwapHostToLittleInt16(x)
-#  define be16toh(x) OSSwapBigToHostInt16(x)
-#  define le16toh(x) OSSwapLittleToHostInt16(x)
-#  define htobe32(x) OSSwapHostToBigInt32(x)
-#  define htole32(x) OSSwapHostToLittleInt32(x)
-#  define be32toh(x) OSSwapBigToHostInt32(x)
-#  define le32toh(x) OSSwapLittleToHostInt32(x)
-#else
-#  error "No <endian.h> solution found on your platform"
-#endif
+constexpr uint16_t bswap16(const uint16_t v) {
+	return ((v>>8)&0xFF) | ((v<<8)&0xFF00);
+}
+
+constexpr uint32_t bswap32(const uint32_t v) {
+	return ((v>>24)&0xFF) | ((v>>8)&0xFF00) | ((v<<8)&0xFF0000) | ((v<<24)&0xFF000000);
+}
+
+static_assert(0x3412 == bswap16(0x1234), "internal error in bswap16 implementation");
+static_assert(0x78563412 == bswap32(0x12345678), "internal error in bswap32 implementation");
 
 #if defined (_MSC_VER)
 
