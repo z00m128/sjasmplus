@@ -40,7 +40,8 @@ struct STrdFile {
 
 	byte		filename[NAME_BASE_SZ];
 	byte		ext;
-	word		address;		// sometimes: other two extension letters for 8.3 naming scheme
+	byte		addressLo;		// sometimes: other two extension letters for 8.3 naming scheme
+	byte		addressHi;		// can't be `word` because of BE-hosts support
 	word		length;
 	byte		sectorLength;
 	byte		startSector;
@@ -136,10 +137,7 @@ static_assert(9 * STrdDisc::SECTOR_SZ == sizeof(STrdHead), "TRD catalog and info
 
 void STrdHead::swapEndianness() {
 	info.swapEndianness();
-	for (STrdFile & file : this->catalog) {
-		file.address = sj_bswap16(file.address);
-		file.length = sj_bswap16(file.length);
-	}
+	for (STrdFile & file : this->catalog) file.length = sj_bswap16(file.length);
 }
 
 bool STrdHead::readFromFile(FILE *ftrd) {
@@ -281,10 +279,12 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	trdf.length = word(length);
 	trdf.sectorLength = byte((length + 255 + (0 <= autostart ? 4 : 0))>>8);
 	if (isExtensionB) {
-		trdf.address = word(length);
+		trdf.addressLo = byte(length);
+		trdf.addressHi = byte(length>>8);
 	} else {
 		if (Lname <= int(STrdFile::NAME_FULL_SZ)) {
-			trdf.address = word(start);	// single letter extension => "start" field is used for start value
+			trdf.addressLo = byte(start);	// single letter extension => "start" field is used for start value
+			trdf.addressHi = byte(start>>8);
 		}
 	}
 	if (0 == trdf.sectorLength) {	// can overflow only when 0xFF00 length with autostart => 0
