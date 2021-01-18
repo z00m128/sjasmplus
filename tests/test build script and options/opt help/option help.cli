@@ -3,9 +3,9 @@
 # was used, then exit code is "0", so the "||" and "&&" are mixed to correctly catch these
 # but after that the diff and other tests should be run with "&&" of course
 $MEMCHECK "$EXE" > noopt.msglst ||\
-$MEMCHECK "$EXE" -h> h.msglst &&\
-$MEMCHECK "$EXE" --help > help.msglst &&\
-$MEMCHECK "$EXE" --help=warnings > warnings.msglst &&\
+$MEMCHECK "$EXE" -Wno-behost -h> h.msglst &&\
+$MEMCHECK "$EXE" -Wno-behost --help > help.msglst &&\
+$MEMCHECK "$EXE" -Wno-behost --help=warnings > warnings.msglst &&\
 diff help.msglst noopt.msglst &&\
 diff help.msglst h.msglst &&\
 help_lines=`wc -l < help.msglst` &&\

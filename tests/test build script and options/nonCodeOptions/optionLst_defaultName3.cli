@@ -1,3 +1,3 @@
-$MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath --lst "$file_asm" 2> "$dst_base.exp"
+$MEMCHECK "$EXE" -Wno-behost --nologo --msg=lstlab --fullpath --lst "$file_asm" 2> "$dst_base.exp"
 echo "Testing collision of sjasmplus CLI options"; # echo will reset exit code to valid one.
 last_result=$?

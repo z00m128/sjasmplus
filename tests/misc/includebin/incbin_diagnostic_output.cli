@@ -1,5 +1,5 @@
 # run sjasmplus in --msg=all mode to display INCBIN diagnostic output
 # but deal with dynamic "work time" values to allow for DIFF of "exp" listing files
-$MEMCHECK "$EXE" --nologo --msg=all "$file_asm" 2>&1 |\
+$MEMCHECK "$EXE" --nologo --msg=all "${options[@]}" "$file_asm" 2>&1 |\
 sed -e 's/work\ time:.*seconds/<some work time>/' > "${dst_base}.exp"
 last_result=$?
