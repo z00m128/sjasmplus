@@ -200,6 +200,18 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.18.1</term>
+
+            <listitem>
+              <synopsis>- Big-Endian hosts support (experimental and not tested continuously)
+- fix: option --sym was not exporting labels starting with underscore
+- minor bugfixes in parser, windows cmake-builds have now icon
+- docs: adding some missing information (__DATE__, __TIME__)
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>12.12.2020 - 1.18.0</term>
 
             <listitem>
