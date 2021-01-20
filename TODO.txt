@@ -5,8 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-WHILE - guardian counter configurable?
-
 ------------------------------------------------------------------------------------------------
 @Busy: rekurzivne DEFINE omylom:
 ```

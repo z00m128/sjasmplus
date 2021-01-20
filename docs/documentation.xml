@@ -204,8 +204,11 @@
 
             <listitem>
               <synopsis>- Big-Endian hosts support (experimental and not tested continuously)
+- <link linkend="po_while">`WHILE`</link> has optional argument to set explicit guardian-counter
 - fix: option --sym was not exporting labels starting with underscore
+- fix: SAVENEX BMP-loader bug when certain builds of sjasmplus were unable to open BMP files
 - minor bugfixes in parser, windows cmake-builds have now icon
+- docs: adding "Index" section
 - docs: adding some missing information (__DATE__, __TIME__), fixing HTML anchor names
 </synopsis>
             </listitem>
@@ -3121,16 +3124,18 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
           </varlistentry>
 
           <varlistentry>
-            <term>WHILE<indexterm id="po_while"><primary>WHILE</primary></indexterm> &lt;expression&gt;</term>
+            <term>WHILE<indexterm id="po_while"><primary>WHILE</primary></indexterm> &lt;expression&gt;[, &lt;guardian-counter&gt;]</term>
 
             <listitem>
               <para>While expression evaluates to non-zero value, generates following lines until
-                  an ENDW (EDUP/ENDR alias) pseudo-op is encountered.
+				  an ENDW (EDUP/ENDR alias) pseudo-op is encountered.</para>
+			  <para>The optional guardian-counter value will abort the WHILE if there are
+				  more iterations, default guardian-counter is set to 100k.
 				<example>
                   <title></title>
 
                   <programlisting>ptr = $4000
-    WHILE ptr &lt; $4020
+    WHILE ptr &lt; $4020, 500 ; max 500 loops before error
         DB low ptr
 ptr = ptr + 1
     ENDW    ; EDUP or ENDR works too, but ENDW is advised for WHILE

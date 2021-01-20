@@ -29,6 +29,7 @@
 // direct.cpp
 
 #include "sjdefs.h"
+#include <cassert>
 
 CFunctionTable DirectivesTable;
 CFunctionTable DirectivesTable_dup;
@@ -1759,6 +1760,28 @@ static void DupWhileImplementation(bool isWhile) {
 		condition = new CStringsList(lp);
 		if (nullptr == condition) ErrorOOM();
 		lp += strlen(condition->string);
+		// scan condition string for extra guardian value, and split + parse it as needed
+		char* expressionSource = condition->string;
+		bool parseOk = ParseExpressionNoSyntaxError(expressionSource, val);
+		if (parseOk && *expressionSource && comma(expressionSource)) {
+			// comma found, try to parse explicit guardian value
+			char* guardianSource = expressionSource;
+			parseOk = parseOk && ParseExpressionNoSyntaxError(guardianSource, val);
+			// overwrite the comma to keep only condition string without guardian argument
+			if (parseOk) {
+				assert(',' == expressionSource[-1]);
+				expressionSource[-1] = 0;
+				++val;		// +1 to explicit value to report error when WHILE does *over* that
+			}
+		} else {
+			val = 100001;	// default guardian value is 100k
+		}
+		if (!parseOk) {
+			Error("[WHILE] Syntax error in <expression>", condition->string, SUPPRESS);
+			condition->string[0] = '0';		// force it to evaluate to zero
+			condition->string[1] = 0;
+			val = 1;
+		}
 	} else {
 		IsLabelNotFound = 0;
 		if (!ParseExpressionNoSyntaxError(lp, val)) {
@@ -1797,8 +1820,8 @@ static bool shouldRepeat(SRepeatStack& dup) {
 	if (nullptr == dup.RepeatCondition) {
 		return dup.RepeatCount--;
 	} else {
-		if (100001 < ++dup.RepeatCount) {
-			Error("[WHILE] over 100k of loops - infinite loop?");
+		if (!dup.RepeatCount--) {
+			Error("[WHILE] infinite loop? (reaching the guardian value, default 100k)");
 			return false;
 		}
 		aint val = 0;
