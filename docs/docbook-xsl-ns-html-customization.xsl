@@ -18,4 +18,7 @@ UTF-8 in such case) -->
   <xsl:text disable-output-escaping="yes">&lt;!DOCTYPE html&gt;</xsl:text>
 </xsl:template>
 
+<!-- make IndexTerm items to point directly onto their "anchor" from Index page -->
+<xsl:param name="index.links.to.section" select="0"></xsl:param>
+
 </xsl:stylesheet>
