@@ -260,8 +260,11 @@ void SNexFile::finalizeFile() {
 enum EBmpType { other, Layer2, LoRes, L2_320x256, L2_640x256 };
 
 class SBmpFile {
+	static constexpr size_t HEADERS_SIZE = 0x36;	// 14B header + BITMAPINFOHEADER 40B header
+	static constexpr size_t PALETTE_SIZE = 0x100;
+
 	FILE*		bmp;
-	byte		tempHeader[0x36];		// 14B header + BITMAPINFOHEADER 40B header
+	byte		tempHeader[HEADERS_SIZE];
 	byte*		palBuffer = nullptr;
 
 public:
@@ -294,10 +297,11 @@ bool SBmpFile::open(const char* bmpname) {
 		Error("[SAVENEX] Error opening file", bmpname, SUPPRESS);
 		return false;
 	}
-	// read header of BMP and verify the file is of expected format
-	palBuffer = new byte[4*256];
+	palBuffer = new byte[4*PALETTE_SIZE];
 	if (nullptr == palBuffer) ErrorOOM();
-	const size_t readElements = fread(tempHeader, 1, 0x36, bmp) + fread(palBuffer, 4, 256, bmp);
+	// read header of BMP and verify the file is of expected format
+	bool allRead = (HEADERS_SIZE == fread(tempHeader, 1, HEADERS_SIZE, bmp));
+	allRead = allRead && (PALETTE_SIZE == fread(palBuffer, 4, PALETTE_SIZE, bmp));
 	// these following casts assume the sjasmplus itself is running at little-endian host
 	uint32_t header2Size = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 14)->val;
 	uint16_t colorPlanes = *reinterpret_cast<uint16_t*>(tempHeader + 26);
@@ -311,7 +315,7 @@ bool SBmpFile::open(const char* bmpname) {
 		compressionType = sj_bswap32(compressionType);
 	}
 	// check "BM", BITMAPINFOHEADER type (size 40), 8bpp, no compression
-	if (0x36+256 != readElements || 'B' != tempHeader[0] || 'M' != tempHeader[1] ||
+	if (!allRead || 'B' != tempHeader[0] || 'M' != tempHeader[1] ||
 		40 != header2Size || 1 != colorPlanes || 8 != bpp || 0 != compressionType)
 	{
 		Error("[SAVENEX] BMP file is not in expected format (uncompressed, 8bpp, 40B BITMAPINFOHEADER header)",
