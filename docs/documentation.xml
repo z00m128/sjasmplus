@@ -204,9 +204,11 @@
 
             <listitem>
               <synopsis>- Big-Endian hosts support (experimental and not tested continuously)
+- added "listall", "listact" commands to <link linkend="po_opt">OPT</link> - to switch between listing types
 - <link linkend="po_while">`WHILE`</link> has optional argument to set explicit guardian-counter
 - fix: option --sym was not exporting labels starting with underscore
 - fix: SAVENEX BMP-loader bug when certain builds of sjasmplus were unable to open BMP files
+- fix: after STRUCT instance the "main" label is not polluted by last field of STRUCT
 - minor bugfixes in parser, windows cmake-builds have now icon
 - docs: adding "Index" section
 - docs: adding some missing information (__DATE__, __TIME__), fixing HTML anchor names
@@ -2502,7 +2504,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
           </varlistentry>
 
           <varlistentry>
-            <term><para>OPT<indexterm id="po_opt"><primary>OPT</primary></indexterm> [push] [reset] [listoff] [liston] [listmc] [&lt;command line options&gt;]</para>
+            <term><para>OPT<indexterm id="po_opt"><primary>OPT</primary></indexterm> [push] [reset] [listoff] [liston] [listall] [listact] [listmc] [&lt;command line options&gt;]</para>
 			<para>OPT pop</para></term>
 
             <listitem>
@@ -2512,14 +2514,16 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
 				  <code>--reversepop</code> and <code>--dirbol</code>.
 			  </para>
 			  <para>
-				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston, listmc.
+				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston, listall, listact, listmc.
 				  The "push" command will make OPT to preserve current state of options. The "reset"
 				  command will reset OPT-related options to default state. The "listoff" command will
 				  suspend the listing for following lines until "liston" command is used (listing
 				  availability is part of the push/pop state, so to "nest" listing-off you can use
-				  "OPT push listoff : ... code ... : OPT pop" code sequence). The "listmc" command will
-				  filter listing to lines containing machine code bytes, to revert the filter use
-				  either "pop" of previous state or "reset".
+				  "OPT push listoff : ... code ... : OPT pop" code sequence). The "listall", "listact"
+				  and "listmc" commands will select the filter for listing. The "listmc" lists only
+				  lines containing machine code bytes, "listact" will remove the "skipped" blocks
+				  (like false-blocks of IF/ELSE conditional assembling, or inner definitions of macros
+				  and structures), "listall" will switch back to default listing without filtering.
 			  </para>
 			  <para>Then the provided options are applied. The default values are: fake instructions
 				  enabled (no warning), multi-argument delimiter is ",", both () and [] brackets
