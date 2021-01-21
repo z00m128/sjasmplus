@@ -1,0 +1,20 @@
+# file opened: assert.asm
+ 1    0000                  ASSERT 1    ; no error
+assert.asm(2): error: [ASSERT] Assertion failed:  0
+ 2    0000                  ASSERT 0    ; regular classic assert-triggered error
+assert.asm(3): error: [ASSERT] Syntax error:  @
+ 3    0000                  ASSERT @    ; syntax error
+ 4    0000
+ 5    0000                  ; v1.18.1 extended assert with second argument
+ 6    0000                  ASSERT 1, should pass without error
+assert.asm(7): error: [ASSERT] Assertion failed:  0, should fail and make this second text visible in error line
+ 7    0000                  ASSERT 0, should fail and make this second text visible in error line
+assert.asm(8): error: [ASSERT] Syntax error:  @, should still fail on syntax
+ 8    0000                  ASSERT @, should still fail on syntax
+assert.asm(9): error: [ASSERT] Syntax error:  , another syntax fail (workaround for non-existing "ERROR something" directive)
+ 9    0000                  ASSERT , another syntax fail (workaround for non-existing "ERROR something" directive)
+10    0000
+# file closed: assert.asm
+
+Value    Label
+------ - -----------------------------------------------------------

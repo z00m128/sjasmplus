@@ -1644,16 +1644,14 @@ static void dirENDS() {
 static void dirASSERT() {
 	char* p = lp;
 	aint val;
-	/*if (!ParseExpression(lp,val)) { Error("Syntax error",0,CATCHALL); return; }
-	if (pass==2 && !val) Error("Assertion failed",p);*/
 	if (!ParseExpressionNoSyntaxError(lp, val)) {
-		Error("[ASSERT] Syntax error", NULL, SUPPRESS);
+		Error("[ASSERT] Syntax error", p, SUPPRESS);
 		return;
 	}
 	if (pass == LASTPASS && !val) {
 		Error("[ASSERT] Assertion failed", p);
 	}
-	/**lp=0;*/
+	if (comma(lp)) SkipToEol(lp);
 }
 
 static void dirSHELLEXEC() {

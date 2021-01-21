@@ -206,6 +206,7 @@
               <synopsis>- Big-Endian hosts support (experimental and not tested continuously)
 - added "listall", "listact" commands to <link linkend="po_opt">OPT</link> - to switch between listing types
 - <link linkend="po_while">`WHILE`</link> has optional argument to set explicit guardian-counter
+- <link linkend="po_assert">`ASSERT`</link> has optional argument (to add description/notes for expression)
 - fix: option --sym was not exporting labels starting with underscore
 - fix: SAVENEX BMP-loader bug when certain builds of sjasmplus were unable to open BMP files
 - fix: after STRUCT instance the "main" label is not polluted by last field of STRUCT
@@ -1566,15 +1567,16 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term>ASSERT<indexterm id="po_assert"><primary>ASSERT</primary></indexterm> &lt;expression&gt;</term>
+            <term>ASSERT<indexterm id="po_assert"><primary>ASSERT</primary></indexterm> &lt;expression&gt;[, &lt;anything&gt;]</term>
 
             <listitem>
-              <para>An 'assertion failed' error is issued if the expression
-              evaluates to zero.<example>
+              <para>An 'assertion failed' error is issued if the expression evaluates to zero.
+				  The "anything" (optional argument since v1.18.1) is then also visible in the error
+				  message, so you can add description/notes about expression there.<example>
                   <title></title>
 
                   <para><programlisting>STACKPOINTER=0D500H
-    ASSERT END_OF_PROGRAM &lt; STACKPOINTER
+    ASSERT END_OF_PROGRAM &lt; STACKPOINTER, Program code leaks into stack area
 END_OF_PROGRAM</programlisting></para>
                 </example></para>
             </listitem>
