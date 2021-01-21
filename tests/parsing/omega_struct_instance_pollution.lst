@@ -1,0 +1,87 @@
+# file opened: omega_struct_instance_pollution.asm
+ 1    0000              ; this test is based on Omega (CZ demo scener) issue report, when local label defined
+ 2    0000              ; after structure instance did use as "main" label the last inner-field of structure
+ 3    0000              ; instead of the main structure name. (ie. ".data" after "test: sss" got expanded as
+ 4    0000              ; "test.there.data" instead of expected "test.data")
+ 5    0000              ; - the initial test got extended also with macro emit and structure with local name
+ 6    0000              ; - and SLD file, as it took some effort to get at least somewhat meaningful output
+ 7    0000
+ 8    0000                  DEVICE ZXSPECTRUM48
+ 9    0000
+10    0000                  STRUCT nestS
+11    0000 ~            nested1:    byte
+12    0000 ~            nested2:    word
+13    0000                  ENDS
+14    0000
+15    0000                  STRUCT sss
+16    0000 ~            what:   db 0
+17    0000 ~            where:  dw 0
+18    0000 ~            how:    nestS {$12, $3456}
+19    0000 ~            there:  db 0
+20    0000                  ENDS
+21    0000
+22    0000                  ORG $ABCD
+23    ABCD 23 DB AB 12  test: sss $23,.data,{,.data},$45
+23    ABD1 DB AB 45
+24    ABD4 56 D4 AB 12  .t2:  sss $56,.t2,{,.t2},$78
+24    ABD8 D4 AB 78
+25    ABDB EF           .data db $EF
+26    ABDC
+27    ABDC                  ORG $9876
+28    9876                  MACRO defineStruct naam?
+29    9876 ~            naam?   sss $23,.data,{,.data},$45
+30    9876 ~            .naam?  sss $56,.naam?,{,.naam?},$78
+31    9876 ~            .data   db $DC
+32    9876                  ENDM
+33    9876
+34    9876                  defineStruct fromM
+34    9876 23 84 98 12 >fromM   sss $23,.data,{,.data},$45
+34    987A 84 98 45    >
+34    987D 56 7D 98 12 >.fromM  sss $56,.fromM,{,.fromM},$78
+34    9881 7D 98 78    >
+34    9884 DC          >.data   db $DC
+35    9885
+# file closed: omega_struct_instance_pollution.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x9884   0>data
+0x987D   0>fromM
+0x9880 X 0>fromM.how
+0x9880 X 0>fromM.how.nested1
+0x9881 X 0>fromM.how.nested2
+0x9883 X 0>fromM.there
+0x987D X 0>fromM.what
+0x987E X 0>fromM.where
+0x9876 X fromM
+0x9879 X fromM.how
+0x9879 X fromM.how.nested1
+0x987A X fromM.how.nested2
+0x987C X fromM.there
+0x9876 X fromM.what
+0x9877 X fromM.where
+0x0003 X nestS
+0x0000 X nestS.nested1
+0x0001 X nestS.nested2
+0x0007 X sss
+0x0003 X sss.how
+0x0003 X sss.how.nested1
+0x0004 X sss.how.nested2
+0x0006 X sss.there
+0x0000 X sss.what
+0x0001 X sss.where
+0xABCD X test
+0xABDB   test.data
+0xABD0 X test.how
+0xABD0 X test.how.nested1
+0xABD1 X test.how.nested2
+0xABD4   test.t2
+0xABD7 X test.t2.how
+0xABD7 X test.t2.how.nested1
+0xABD8 X test.t2.how.nested2
+0xABDA X test.t2.there
+0xABD4 X test.t2.what
+0xABD5 X test.t2.where
+0xABD3 X test.there
+0xABCD X test.what
+0xABCE X test.where

@@ -122,13 +122,16 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	if (global || local) ++naam;	// single modifier is parsed
 	const bool inMacro = local && macrolabp;
 	const bool inModule = !inMacro && !global && ModuleName[0];
+	const bool isStructLabel = (label->traits & (LABEL_IS_STRUCT_D|LABEL_IS_STRUCT_E));
 	// build fully qualified SLD info
 	sldLabelExport[0] = 0;
 	// module part
 	if (inModule) STRCAT(sldLabelExport, LINEMAX, ModuleName);
 	STRCAT(sldLabelExport, 2, ",");
 	// main label part (the `vorlabp` is already the current label, if it was main label)
-	STRCAT(sldLabelExport, LABMAX, inMacro ? macrolabp : vorlabp);
+	// except for structure labels: the inner ones don't "set namespace" == vorlabp, use "naam" then
+	// (but only if the main label of structure itself is not local, if it's local, use vorlabp)
+	STRCAT(sldLabelExport, LABMAX, isStructLabel && !local ? naam : inMacro ? macrolabp : vorlabp);
 	STRCAT(sldLabelExport, 2, ",");
 	// local part
 	if (local) STRCAT(sldLabelExport, LABMAX, naam);
@@ -1140,9 +1143,9 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 	AddMember(new CStructureEntry2(noffset, 0, 0, false, SMEMBPARENCLOSE));
 }
 
-static void InsertSingleStructLabel(char *name, const bool isRelocatable, const aint value, const bool isDefine = true) {
+static void InsertSingleStructLabel(const bool setNameSpace, char *name, const bool isRelocatable, const aint value, const bool isDefine = true) {
 	char *op = name;
-	std::unique_ptr<char[]> p(ValidateLabel(op, true));
+	std::unique_ptr<char[]> p(ValidateLabel(op, setNameSpace));
 	if (!p) {
 		Error("Illegal labelname", op, EARLY);
 		return;
@@ -1177,7 +1180,7 @@ static void InsertStructSubLabels(const char* mainName, const bool isRelocatable
 	char * const lnsubw = ln + strlen(ln);
 	while (members) {
 		STRCPY(lnsubw, LINEMAX-strlen(ln), members->naam);		// overwrite sub-label part
-		InsertSingleStructLabel(ln, isRelocatable, members->offset + address, isDefine);
+		InsertSingleStructLabel(false, ln, isRelocatable, members->offset + address, isDefine);
 		members = members->next;
 	}
 }
@@ -1194,7 +1197,7 @@ void CStructure::deflab() {
 		// the structure name does not match current module, use the global "@id" way to define it
 		STRCPY(sn+1, LINEMAX-1, id);
 	}
-	InsertSingleStructLabel(sn, false, noffset);
+	InsertSingleStructLabel(true, sn, false, noffset);
 	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, false, mnf);
 }
@@ -1211,7 +1214,7 @@ void CStructure::emitlab(char* iid, aint address, const bool isRelocatable) {
 	}
 	char sn[LINEMAX] { 0 };
 	STRCPY(sn, LINEMAX-1, iid);
-	InsertSingleStructLabel(sn, isRelocatable, address, false);
+	InsertSingleStructLabel(true, sn, isRelocatable, address, false);
 	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, isRelocatable, mnf, address, false);
 }
