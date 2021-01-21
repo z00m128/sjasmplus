@@ -1,3 +1,16 @@
+## [1.18.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.1) - 23.1.2021
+- Big-Endian hosts support (experimental and not tested continuously)
+- added "listall", "listact" commands to [OPT](http://z00m128.github.io/sjasmplus/documentation.html#po_opt) - to switch between listing types
+- [`WHILE`](http://z00m128.github.io/sjasmplus/documentation.html#po_while) has optional argument to set explicit guardian-counter
+- [`ASSERT`](http://z00m128.github.io/sjasmplus/documentation.html#po_assert) has optional argument (to add description/notes for expression)
+- [`SLOT`](http://z00m128.github.io/sjasmplus/documentation.html#po_slot) and [`MMU`](http://z00m128.github.io/sjasmplus/documentation.html#po_mmu) will now accept also starting address of slot instead of its number
+- fix: option `--sym` was not exporting labels starting with underscore
+- fix: `SAVENEX` BMP-loader bug when certain builds of sjasmplus were unable to open BMP files
+- fix: after `STRUCT` instance the "main" label is not polluted by last field of STRUCT
+- minor bugfixes in parser, windows cmake-builds have now icon
+- docs: adding "Index" section
+- docs: adding some missing information (`__DATE__`, `__TIME__`), fixing HTML anchor names
+
 ## [1.18.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.0) - 12.12.2020
 - [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
 - [may break old sources] new [abs operator](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) for absolute integer value

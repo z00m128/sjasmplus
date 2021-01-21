@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.18.0 Documentation [2020-12-12]</title>
+  <title>SjASMPlus 1.18.1 Documentation [2021-01-23]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -200,13 +200,14 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.18.1</term>
+            <term>23.1.2021 - 1.18.1</term>
 
             <listitem>
               <synopsis>- Big-Endian hosts support (experimental and not tested continuously)
 - added "listall", "listact" commands to <link linkend="po_opt">OPT</link> - to switch between listing types
 - <link linkend="po_while">`WHILE`</link> has optional argument to set explicit guardian-counter
 - <link linkend="po_assert">`ASSERT`</link> has optional argument (to add description/notes for expression)
+- <link linkend="po_slot">`SLOT`</link> and <link linkend="po_mmu">`MMU`</link> will now accept also starting address of slot instead of its number
 - fix: option --sym was not exporting labels starting with underscore
 - fix: SAVENEX BMP-loader bug when certain builds of sjasmplus were unable to open BMP files
 - fix: after STRUCT instance the "main" label is not polluted by last field of STRUCT
