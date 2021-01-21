@@ -47,13 +47,13 @@ mmu.asm(31): error: [MMU] Page number parsing failed: MMU 0 e,!
  33   0000                  ;; correct syntax, invalid arguments
 mmu.asm(34): error: [MMU] Requested page(s) must be in range 0..7
  34   0000                  MMU 0,8
-mmu.asm(35): error: [MMU] Slot number(s) must be in range 0..3 and form a range
+mmu.asm(35): error: [MMU] Slot number(s) must be in range 0..3 (or exact starting address of slot) and form a range
  35   0000                  MMU 4,0
-mmu.asm(36): error: [MMU] Slot number(s) must be in range 0..3 and form a range
+mmu.asm(36): error: [MMU] Slot number(s) must be in range 0..3 (or exact starting address of slot) and form a range
  36   0000                  MMU 3 4,0
 mmu.asm(37): error: [MMU] Requested page(s) must be in range 0..7
  37   0000                  MMU 0 0,8
-mmu.asm(38): error: [MMU] Slot number(s) must be in range 0..3 and form a range
+mmu.asm(38): error: [MMU] Slot number(s) must be in range 0..3 (or exact starting address of slot) and form a range
  38   0000                  MMU 1 0,0
 mmu.asm(39): error: [MMU] Requested page(s) must be in range 0..7
  39   0000                  MMU 0 2,6   ; map pages 6, 7, 8 -> 8 is wrong

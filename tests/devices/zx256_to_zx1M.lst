@@ -112,7 +112,7 @@ zx256_to_zx1M.asm(11): error: [PAGE] Page number must be in range 0..15: 16
  17   0002                PAGE 15
  17   0002                ASSERT {0xC000} == "??"
  18   0002
-zx256_to_zx1M.asm(19): error: [SLOT] Slot number must be in range 0..3
+zx256_to_zx1M.asm(19): error: [SLOT] Slot number must be in range 0..3, or exact starting address of slot
  19   0002                  SLOT 4      ; error
  20   0002
  21   0002                  ; pages: 7:15:7:15
@@ -323,7 +323,7 @@ zx256_to_zx1M.asm(44): error: [PAGE] Page number must be in range 0..31: 32
  50   0002                PAGE 31
  50   0002                ASSERT {0xC000} == "OO"
  51   0002
-zx256_to_zx1M.asm(52): error: [SLOT] Slot number must be in range 0..3
+zx256_to_zx1M.asm(52): error: [SLOT] Slot number must be in range 0..3, or exact starting address of slot
  52   0002                  SLOT 4      ; error
  53   0002
  54   0002                  ; pages: 7:31:7:31
@@ -694,7 +694,7 @@ zx256_to_zx1M.asm(77): error: [PAGE] Page number must be in range 0..63: 64
  83   0002                PAGE 63
  83   0002                ASSERT {0xC000} == $6F6F
  84   0002
-zx256_to_zx1M.asm(85): error: [SLOT] Slot number must be in range 0..3
+zx256_to_zx1M.asm(85): error: [SLOT] Slot number must be in range 0..3, or exact starting address of slot
  85   0002                  SLOT 4      ; error
  86   0002
  87   0002                  ; pages: 7:63:7:63

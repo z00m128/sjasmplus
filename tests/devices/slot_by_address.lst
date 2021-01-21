@@ -1,0 +1,64 @@
+# file opened: slot_by_address.asm
+ 1    0000                  DEVICE NONE         ; set "none" explicitly, to avoid "global device" feature
+slot_by_address.asm(2): warning: SLOT only allowed in real device emulation mode (See DEVICE)
+ 2    0000                  SLOT $4000          ;; warning about non-device mode
+slot_by_address.asm(3): warning: MMU is allowed only in real device emulation mode (See DEVICE)
+ 3    0000                  MMU $4000, 1        ;; warning about non-device mode
+ 4    0000                  DEVICE ZXSPECTRUM128
+ 5    0000
+ 6    0000                  ; mark banks content with values for checking results
+ 7    0000                  MMU 0, 0, 0
+ 7    0000 30 30          DW '00'
+ 8    0002                  MMU 0, 1, 0
+ 8    0000 31 31          DW '11'
+ 9    0002                  MMU 0, 2, 0
+ 9    0000 32 32          DW '22'
+10    0002                  MMU 0, 3, 0
+10    0000 33 33          DW '33'
+11    0002                  MMU 0, 4, 0
+11    0000 34 34          DW '44'
+12    0002                  MMU 0, 5, 0
+12    0000 35 35          DW '55'
+13    0002                  MMU 0, 6, 0
+13    0000 36 36          DW '66'
+14    0002                  MMU 0, 7, 0
+14    0000 37 37          DW '77'
+15    0002                  ; remap ZX128 to banks 0:1:2:3
+16    0002                  MMU 0 3, 0
+17    0002                  ASSERT '00' == {$0000} && '11' == {$4000} && '22' == {$8000} && '33' == {$C000}
+18    0002
+19    0002                  ; test SLOT with valid values
+20    0002                  SLOT $0000
+20    0002                PAGE 4
+21    0002                  SLOT $4000
+21    0002                PAGE 5
+22    0002                  SLOT $8000
+22    0002                PAGE 6
+23    0002                  SLOT $C000
+23    0002                PAGE 7
+24    0002                  ASSERT '44' == {$0000} && '55' == {$4000} && '66' == {$8000} && '77' == {$C000}
+25    0002
+26    0002                  ; test MMU with valid values
+27    0002                  MMU $0000 w, 1
+28    0002                  MMU $4000 w, 2
+29    0002                  MMU $8000 w, 3
+30    0002                  MMU $C000 w, 4
+31    0002                  ASSERT '11' == {$0000} && '22' == {$4000} && '33' == {$8000} && '44' == {$C000}
+32    0002
+33    0002                  MMU $0000 $C000, 2
+34    0002                  ASSERT '22' == {$0000} && '33' == {$4000} && '44' == {$8000} && '55' == {$C000}
+35    0002
+36    0002                  ; test with invalid value (address of start of slot must be exact)
+slot_by_address.asm(37): error: [SLOT] Slot number must be in range 0..3, or exact starting address of slot
+37    0002                  SLOT $1000
+slot_by_address.asm(38): error: [SLOT] Slot number must be in range 0..3, or exact starting address of slot
+38    0002                  SLOT 4
+slot_by_address.asm(39): error: [MMU] Slot number(s) must be in range 0..3 (or exact starting address of slot) and form a range
+39    0002                  MMU $1000, 0
+slot_by_address.asm(40): error: [MMU] Slot number(s) must be in range 0..3 (or exact starting address of slot) and form a range
+40    0002                  MMU 4, 0
+41    0002
+# file closed: slot_by_address.asm
+
+Value    Label
+------ - -----------------------------------------------------------
