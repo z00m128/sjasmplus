@@ -33,6 +33,9 @@ enum EOutputVerbosity { OV_ALL = 0, OV_WARNING, OV_ERROR, OV_NONE, OV_LST };
 
 namespace Options {
 
+	// which lines should made it into listing: all, active (not skipped by IF false), only-if-has-machine-code
+	enum ELstType { LST_T_ALL, LST_T_ACTIVE, LST_T_MC_ONLY };
+
 	// structure to group all options affecting parsing syntax
 	typedef struct SSyntax {
 		bool		IsPseudoOpBOF;
@@ -40,7 +43,7 @@ namespace Options {
 		bool		FakeEnabled;
 		bool		FakeWarning;
 		bool		IsListingSuspended;
-		bool		IsMcOnlyListing;
+		ELstType	ListingType;
 		bool		CaseInsensitiveInstructions;
 		bool		WarningsAsErrors;
 		bool		Is_M_Memory;
@@ -50,7 +53,7 @@ namespace Options {
 		bool		(*MultiArg)(char*&);	// function checking if multi-arg delimiter is next
 
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
-					IsListingSuspended(false), IsMcOnlyListing(false),
+					IsListingSuspended(false), ListingType(LST_T_ALL),
 					CaseInsensitiveInstructions(false), WarningsAsErrors(false),
 					Is_M_Memory(false), IsLowMemWarningEnabled(true),
 					MemoryBrackets(0), IsNextEnabled(0), MultiArg(&comma) {}

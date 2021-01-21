@@ -1,0 +1,67 @@
+# file opened: opt_listing_act_only.asm
+ 1    0000                  ORG $1234
+ 2    1234                  ; by default listing is ON (full listing)
+ 3    1234                      IF 1
+ 4    1234                          ; 1. active branch
+ 5    1234                      ELSE
+ 6    1234 ~                        ; 1. ~LISTED~
+ 7    1234                      ENDIF
+ 8    1234                  OPT push listact    ; remember current state, switch listing to active-only
+ 9    1234                      IF 1
+10    1234                          ; 2. active branch (only)
+11    1234                      ELSE
+13    1234                      ENDIF
+14    1234                  OPT listall         ; switch listing back to ALL lines
+15    1234                      IF 1
+16    1234                          ; 3. active branch
+17    1234                      ELSE
+18    1234 ~                        ; 3. ~LISTED~
+19    1234                      ENDIF
+20    1234                  OPT pop             ; restoring original state
+21    1234                      IF 1
+22    1234                          ; 4. active branch
+23    1234                      ELSE
+24    1234 ~                        ; 4. ~LISTED~
+25    1234                      ENDIF
+26    1234                  OPT listact         ; switch listing to active-only
+27    1234                      IF 1
+28    1234                          ; 5. active branch (only)
+29    1234                      ELSE
+31    1234                      ENDIF
+32    1234                  OPT reset           ; reset to default state
+33    1234                      IF 1
+34    1234                          ; 6. active branch
+35    1234                      ELSE
+36    1234 ~                        ; 6. ~LISTED~
+37    1234                      ENDIF
+38    1234
+39    1234                  ; nested listing adjusting by suggested push+pop technique
+40    1234                  OPT push listact    ; switch active listing twice
+41    1234                  OPT push listact
+42    1234                      IF 1
+43    1234                          ; 7. active branch (only)
+44    1234                      ELSE
+46    1234                      ENDIF
+47    1234                  OPT push listoff    ; switch listing completely off temporarily
+# listing file suspended...
+53    1234                  OPT pop             ; restored to active listing
+54    1234                      IF 1
+55    1234                          ; 9. active branch (only)
+56    1234                      ELSE
+58    1234                      ENDIF
+59    1234                  OPT pop
+60    1234                      IF 1
+61    1234                          ; A. active branch (only)
+62    1234                      ELSE
+64    1234                      ENDIF
+65    1234                  OPT pop             ; restored to full listing
+66    1234                      IF 1
+67    1234                          ; B. active branch
+68    1234                      ELSE
+69    1234 ~                        ; B. ~LISTED~
+70    1234                      ENDIF
+71    1234
+# file closed: opt_listing_act_only.asm
+
+Value    Label
+------ - -----------------------------------------------------------

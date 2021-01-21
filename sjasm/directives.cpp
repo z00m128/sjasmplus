@@ -1123,7 +1123,7 @@ static void dirENCODING() {
 
 static void dirOPT() {
 	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...> -W...
-	// process OPT specific command keywords first: {push, pop, reset, listoff, liston}
+	// process OPT specific command keywords first: {push, pop, reset, listoff, liston, listall, listact, listmc}
 	bool didReset = false, didList = Options::syx.IsListingSuspended;
 	while (!SkipBlanks(lp) && '-' != *lp) {
 		if (cmphstr(lp, "pop")) {	// "pop" previous syntax state
@@ -1147,12 +1147,23 @@ static void dirOPT() {
 			Options::syx.IsListingSuspended = didList = true;
 		} else if (cmphstr(lp, "liston")) {
 			Options::syx.IsListingSuspended = false;
-		} else if (cmphstr(lp, "listmc")) {
-			if (!didList) ListFile();		// *list* the OPT line starting the filtering
+		} else if (cmphstr(lp, "listall")) {
+			if (!didList) ListFile();		// *list* the OPT line changing the filtering
+			didList = true;
 			donotlist = 1;
-			Options::syx.IsMcOnlyListing = didList = true;
+			Options::syx.ListingType = Options::LST_T_ALL;
+		} else if (cmphstr(lp, "listact")) {
+			if (!didList) ListFile();		// *list* the OPT line changing the filtering
+			didList = true;
+			donotlist = 1;
+			Options::syx.ListingType = Options::LST_T_ACTIVE;
+		} else if (cmphstr(lp, "listmc")) {
+			if (!didList) ListFile();		// *list* the OPT line changing the filtering
+			didList = true;
+			donotlist = 1;
+			Options::syx.ListingType = Options::LST_T_MC_ONLY;
 		} else {
-			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listmc)", lp);
+			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listall, listact, listmc)", lp);
 			SkipToEol(lp);
 			return;
 		}
