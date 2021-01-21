@@ -2408,7 +2408,7 @@ ALLPASS -  interpret Lua script in all passes. It is needed if you generate some
           </varlistentry>
 
           <varlistentry>
-            <term>MMU<indexterm id="po_mmu"><primary>MMU</primary><seealso>DEVICE</seealso><seealso>SLOT</seealso><seealso>PAGE</seealso></indexterm> &lt;first slot number&gt; [&lt;last slot number&gt;|&lt;single slot option&gt;], &lt;page number&gt;[,&lt;address&gt;]</term>
+            <term>MMU<indexterm id="po_mmu"><primary>MMU</primary><seealso>DEVICE</seealso><seealso>SLOT</seealso><seealso>PAGE</seealso></indexterm> &lt;first slot number or address&gt; [&lt;last slot number or address&gt;|&lt;single slot option&gt;], &lt;page number&gt;[,&lt;address&gt;]</term>
 
             <listitem>
               <para>Maps memory page(s) to slot(s), similar to SLOT + PAGE combination, but allows
@@ -2420,6 +2420,9 @@ ALLPASS -  interpret Lua script in all passes. It is needed if you generate some
 
 		  <para>The optional third argument is address for <link linkend="po_org">ORG</link>
 			  functionality.</para>
+
+              <para>(since v1.18.1) You can also use starting address of particular slot instead
+              of its number, ie. for ZX128: <code>MMU $8000,3</code> is alias of <code>MMU 2,3</code></para>
 
               <para>Single slot option (default state is: no error/warning and no wrap = nothing special):
                 <synopsis>e = error on writing beyond last byte of slot
@@ -3017,15 +3020,18 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
           </varlistentry>
 
           <varlistentry>
-            <term>SLOT<indexterm id="po_slot"><primary>SLOT</primary><seealso>DEVICE</seealso><seealso>MMU</seealso><seealso>PAGE</seealso></indexterm> &lt;number&gt;</term>
+            <term>SLOT<indexterm id="po_slot"><primary>SLOT</primary><seealso>DEVICE</seealso><seealso>MMU</seealso><seealso>PAGE</seealso></indexterm> &lt;number_or_address&gt;</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Set current slot. Slot's defined by MEMORYMAP pseudo-op.
+              <para>Set current slot. Slots are defined by DEVICE pseudo-op.
               Use pseudo-op <link linkend="po_page">PAGE</link> to change page
               in the current slot.</para>
+
+              <para>(since v1.18.1) You can also use starting address of particular slot instead
+              of its number, ie. for ZX128: <code>SLOT $8000</code> is alias of <code>SLOT 2</code></para>
 
               <para><example>
                   <title></title>
