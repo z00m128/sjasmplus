@@ -43,11 +43,26 @@ ptr = ptr - 1
 
 fwdLabel:
 
-    ; test the infinite loop guardian (1mil)
-    ; manual test because of performance reasons - uncomment to test it
+    ; test the infinite-loop guardian (default 100k)
 cnt = 0
     OPT push listmc
     WHILE cnt <= 100000
 cnt = cnt + 1
     ENDW
     OPT pop
+
+    ; test custom-explicit infinite-loop guardian
+cnt = 0
+    WHILE cnt < 2, 2   ; looping twice with guardian "2" => without error
+cnt = cnt + 1
+    ENDW
+
+cnt = 0
+    WHILE cnt < 4, 2   ; looping trice with guardian "2" => error
+cnt = cnt + 1
+    ENDW
+
+cnt = 0
+    WHILE cnt < 2, @   ; syntax error in guardian-couner value
+cnt = cnt + 1
+    ENDW

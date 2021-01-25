@@ -75,7 +75,7 @@ coverage1.asm(31): warning: [UNDEFINE] Identifier not found: fwdLabel
 coverage1.asm(44): error: [ENDS] End structure without structure
 44    000B                  ENDS
 45    000B                  ASSERT 1            ; valid
-coverage1.asm(46): error: [ASSERT] Syntax error
+coverage1.asm(46): error: [ASSERT] Syntax error:  &
 46    000B                  ASSERT &            ; syntax err
 47    000B
 > DISPLAY has silently skipped options /L and /T. 0x000F 15

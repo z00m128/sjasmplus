@@ -12,7 +12,7 @@
  6    0002                ORG 0x0000
  6    0000 33 33          DB "33"
  7    0002                  ; verify there is single slot and 32 pages
-noslot64k_device.asm(8): error: [SLOT] Slot number must be in range 0..0
+noslot64k_device.asm(8): error: [SLOT] Slot number must be in range 0..0, or exact starting address of slot
  8    0002                  SLOT 1      ; error
 noslot64k_device.asm(9): error: [PAGE] Page number must be in range 0..31: 32
  9    0002                  PAGE 32     ; error

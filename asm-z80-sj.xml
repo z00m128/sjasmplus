@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.4 08/12/2020
+  Version: 0.9.5 21/01/2021
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,9 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  21/01/2021: version 0.9.5
+    + adding missing __DATE__/__TIME__ predefined defines
 
   08/12/2020: version 0.9.4
     + new directives: ELSEIF, WHILE, ENDW, [list of known DEVICEs]
@@ -98,7 +101,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="13" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="14" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -350,6 +353,8 @@ TODO missing things:
       <item>__FILE__</item>
       <item>__LINE__</item>
       <item>__COUNTER__</item>
+      <item>__DATE__</item>
+      <item>__TIME__</item>
       <!-- Operators -->
       <item>abs</item>
       <item>and</item>

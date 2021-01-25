@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-<book>
-  <title>SjASMPlus 1.18.0 Documentation [2020-12-12]</title>
+<book id="sjasmplus_manual">
+  <title>SjASMPlus 1.18.1 Documentation [2021-01-23]</title>
 
-  <chapter>
+  <chapter id="introduction">
     <title>Introduction</title>
 
-    <section>
+    <section id="license">
       <title>License</title>
 
       <para>SjASMPlus is licensed under BSD license.</para>
     </section>
 
-    <section>
+    <section id="about">
       <title>What is it?</title>
 
       <para>
@@ -23,7 +23,7 @@
 	  </para>
     </section>
 
-    <section>
+    <section id="features">
       <title>Main Features</title>
 
       <para><itemizedlist>
@@ -102,7 +102,7 @@
         </itemizedlist></para>
     </section>
 
-    <section>
+    <section id="credits">
       <title>Credits</title>
 
       <para>Special thanks to <emphasis>Sjoerd Mastijn</emphasis>, the author of SjASM.</para>
@@ -180,8 +180,8 @@
       <para>Big thanks to all people, who helped on development of the compiler!</para>
     </section>
 
-    <section>
-      <title><anchor id="feedback" />Feedback</title>
+    <section id="feedback">
+      <title>Feedback</title>
 
       <para>WWW: <ulink
       url="https://github.com/z00m128/sjasmplus">https://github.com/z00m128/sjasmplus</ulink>
@@ -194,10 +194,29 @@
       <para>E-Mail: zoom@centrum.sk, my@aprisobal.by</para>
     </section>
 
-    <section>
+    <section id="news">
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>23.1.2021 - 1.18.1</term>
+
+            <listitem>
+              <synopsis>- Big-Endian hosts support (experimental and not tested continuously)
+- added "listall", "listact" commands to <link linkend="po_opt">OPT</link> - to switch between listing types
+- <link linkend="po_while">`WHILE`</link> has optional argument to set explicit guardian-counter
+- <link linkend="po_assert">`ASSERT`</link> has optional argument (to add description/notes for expression)
+- <link linkend="po_slot">`SLOT`</link> and <link linkend="po_mmu">`MMU`</link> will now accept also starting address of slot instead of its number
+- fix: option --sym was not exporting labels starting with underscore
+- fix: SAVENEX BMP-loader bug when certain builds of sjasmplus were unable to open BMP files
+- fix: after STRUCT instance the "main" label is not polluted by last field of STRUCT
+- minor bugfixes in parser, windows cmake-builds have now icon
+- docs: adding "Index" section
+- docs: adding some missing information (__DATE__, __TIME__), fixing HTML anchor names
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>12.12.2020 - 1.18.0</term>
@@ -293,10 +312,10 @@
     </section>
   </chapter>
 
-  <chapter>
+  <chapter id="where_to_get">
     <title>Where to get and how to use</title>
 
-    <section>
+    <section id="s_packages">
       <title>Packages</title>
 
 	<para>
@@ -347,8 +366,8 @@
 
     </section>
 
-    <section>
-      <title><anchor id="s_cli"/>Command line</title>
+    <section id="s_cli">
+      <title>Command line</title>
 
       <para>Usage:</para>
 
@@ -449,8 +468,8 @@ sjasmplus --lst --lstlab example.asm</programlisting>
   </para>
     </section>
 
-    <section>
-      <title><anchor id="s_id_warnings"/>Warnings with id</title>
+    <section id="s_id_warnings">
+      <title>Warnings with id</title>
 
 		<para>
 			Some warnings have own "id" - these can be switched off or suppressed for particular line.
@@ -494,8 +513,8 @@ file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
 		</para>
     </section>
 
-    <section>
-      <title><anchor id="s_source_format"/>Source file format</title>
+    <section id="s_source_format">
+      <title>Source file format</title>
 
 		<para>
 		  Lines in the source file should have the following form:
@@ -525,11 +544,11 @@ file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
     </section>
   </chapter>
 
-  <chapter>
+  <chapter id="c_labels">
     <title>Labels</title>
 
-    <section>
-      <title><anchor id="s_labels" />Labels</title>
+    <section id="s_labels">
+      <title>Labels</title>
 
       <para>Labels are case-sensitive and may be of any reasonable length,
       that is: up to about 70 characters. Label definitions must start on
@@ -562,8 +581,8 @@ classic equ $+1 : ld a,7        ; often even split to two lines</programlisting>
       </para>
     </section>
 
-    <section>
-      <title><anchor id="s_local_labels" />Local labels</title>
+    <section id="s_local_labels">
+      <title>Local labels</title>
 
       <para>When there is a <link linkend="po_module">module definition</link> all
       labels (except those starting with a '@') are local to that module. To
@@ -601,8 +620,8 @@ Main.event DB 0             ; main.Main.event
         </example></para>
     </section>
 
-    <section>
-      <title><anchor id="s_at_labels" />@ Labels</title>
+    <section id="s_at_labels">
+      <title>@ Labels</title>
 
       <para>Labels starting with a '@' are not touched by the label processing
       and used 'as-is'. See 'SetScreen' in the previous example code. <example>
@@ -620,8 +639,8 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
         </example></para>
     </section>
 
-    <section>
-      <title><anchor id="s_temp_labels" />Temporary labels</title>
+    <section id="s_temp_labels">
+      <title>Temporary labels</title>
 
       <para>To keep the number of used labels reasonable it is possible to use
       numbers as labels. These labels can only be used as labels to jump to.
@@ -654,11 +673,11 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
     </section>
   </chapter>
 
-  <chapter>
+  <chapter id="c_constants">
     <title>Constants, expressions and other features</title>
 
-    <section>
-      <title><anchor id="s_numeric" />Numeric constants</title>
+    <section id="s_numeric">
+      <title>Numeric constants</title>
 
       <para>Numeric constants should always start with a digit or $, # or %.
       The following formats are supported:</para>
@@ -681,8 +700,8 @@ $c     hexadecimal
       They are ignored by the assembler.</para>
     </section>
 
-    <section>
-      <title><anchor id="s_strings" />Character and string constants</title>
+    <section id="s_strings">
+      <title>Character and string constants</title>
 
       <para>Character constants are characters surrounded by single quotes. It
       is possible to use double quotes in some cases, but in general it is
@@ -719,8 +738,8 @@ $c     hexadecimal
         </example></para>
     </section>
 
-    <section>
-      <title><anchor id="s_expressions" />Expressions</title>
+    <section id="s_expressions">
+      <title>Expressions</title>
 
       <para>Expressions are evaluated in signed 32 bits in this version of SjASMPlus (unless explicitly
 		  specified as unsigned, like ">>>" operator), so intermediate values have range -2147483648
@@ -742,67 +761,67 @@ $c     hexadecimal
 
       <para><programlisting>norel norel L  Label/symbol L will be treated as non-relocatable
 
-!     !x       logical not
-~     ~x       complement
+!     !x       <indexterm id="op_log_not"><primary>!</primary></indexterm>logical not
+~     ~x       <indexterm id="op_cpl"><primary>~</primary></indexterm>complement
 +     +x       does "nothing", can be used to make "+(...)" parse as value (not as memory)
 -     -x       minus
-low   low x    low 8 bits of 16 bit value or lower part of register pair
-high  high x   high 8 bits of 16 bit value or higher part of register pair
-not   not x    logical not
-abs   abs x    absolute value (since v1.18.0)
+low   low x    <indexterm id="op_low"><primary>low</primary></indexterm>low 8 bits of 16 bit value or lower part of register pair
+high  high x   <indexterm id="op_high"><primary>high</primary></indexterm>high 8 bits of 16 bit value or higher part of register pair
+not   not x    <indexterm id="op_log_not2"><primary>not</primary></indexterm>logical not
+abs   abs x    <indexterm id="op_abs"><primary>abs</primary></indexterm>absolute value (since v1.18.0)
 
-*     x*y      multiplication
-/     x/y      division
-%     x%y      modulo
-mod   x mod y  modulo
+*     x*y      <indexterm id="op_mul"><primary>*</primary></indexterm>multiplication
+/     x/y      <indexterm id="op_div"><primary>/</primary></indexterm>division
+%     x%y      <indexterm id="op_mod"><primary>%</primary></indexterm>modulo
+mod   x mod y  <indexterm id="op_mod2"><primary>mod</primary></indexterm>modulo
 
-+     x+y      addition
--     x-y      subtraction
++     x+y      <indexterm id="op_add"><primary>+</primary></indexterm>addition
+-     x-y      <indexterm id="op_sub"><primary>-</primary></indexterm>subtraction
 
-&lt;&lt;    x&lt;&lt;y     shift left
-&gt;&gt;    x&gt;&gt;y     shift right signed
-&gt;&gt;&gt;   x&gt;&gt;&gt;y    shift right unsigned
-shl   x shl y  shift left
-shr   x shr y  shift right signed
+&lt;&lt;    x&lt;&lt;y     <indexterm id="op_sla"><primary>&lt;&lt;</primary></indexterm>shift left
+&gt;&gt;    x&gt;&gt;y     <indexterm id="op_sra"><primary>&gt;&gt;</primary></indexterm>shift right signed
+&gt;&gt;&gt;   x&gt;&gt;&gt;y    <indexterm id="op_srl"><primary>&gt;&gt;&gt;</primary></indexterm>shift right unsigned
+shl   x shl y  <indexterm id="op_shl"><primary>shl</primary></indexterm>shift left
+shr   x shr y  <indexterm id="op_shr"><primary>shr</primary></indexterm>shift right signed
 
-&lt;?    x&lt;?y     minimum
-&gt;?    x&gt;?y     maximum
+&lt;?    x&lt;?y     <indexterm id="op_min"><primary>&lt;?</primary></indexterm>minimum
+&gt;?    x&gt;?y     <indexterm id="op_max"><primary>&gt;?</primary></indexterm>maximum
 
-&lt;     x&lt;y      less than
-&gt;     x&gt;y      greater than
-&lt;=    x&lt;=y     equal or less than
-&gt;=    x&gt;=y     equal or greater than
+&lt;     x&lt;y      <indexterm id="op_lt"><primary>&lt;</primary></indexterm>less than
+&gt;     x&gt;y      <indexterm id="op_gt"><primary>&gt;</primary></indexterm>greater than
+&lt;=    x&lt;=y     <indexterm id="op_lte"><primary>&lt;=</primary></indexterm>equal or less than
+&gt;=    x&gt;=y     <indexterm id="op_gte"><primary>&gt;=</primary></indexterm>equal or greater than
 
-=     x=y      equal
-==    x==y     equal
-!=    x!=y     not equal
+=     x=y      <indexterm id="op_eq"><primary>=</primary></indexterm>equal
+==    x==y     <indexterm id="op_eq2"><primary>==</primary></indexterm>equal
+!=    x!=y     <indexterm id="op_neq"><primary>!=</primary></indexterm>not equal
 
-&amp;     x&amp;y      bitwise and
-and   x and y  bitwise and
+&amp;     x&amp;y      <indexterm id="op_bit_and"><primary>&amp;</primary></indexterm>bitwise and
+and   x and y  <indexterm id="op_bit_and2"><primary>and</primary></indexterm>bitwise and
 
-^     x^y      bitwise xor
-xor   x xor y  bitwise xor
+^     x^y      <indexterm id="op_bit_xor"><primary>^</primary></indexterm>bitwise xor
+xor   x xor y  <indexterm id="op_bit_xor2"><primary>xor</primary></indexterm>bitwise xor
 
-|     x|y      bitwise or
-or    x or y   bitwise or
+|     x|y      <indexterm id="op_bit_or"><primary>|</primary></indexterm>bitwise or
+or    x or y   <indexterm id="op_bit_or2"><primary>or</primary></indexterm>bitwise or
 
-&amp;&amp;    x&amp;&amp;y     logical and
+&amp;&amp;    x&amp;&amp;y     <indexterm id="op_logic_and"><primary>&amp;&amp;</primary></indexterm>logical and
 
-||    x||y     logical or
+||    x||y     <indexterm id="op_logic_or"><primary>||</primary></indexterm>logical or
 
-$     $        current program counter
-$$    $$       current page at program counter (in virtual device mode)
-$$$   $$$      "physical" program counter (inside DISP block)
-$$$$  $$$$     "physical" memory page (inside DISP block in virtual device mode)
+$     $        <indexterm id="op_dollar"><primary>$</primary></indexterm>current program counter
+$$    $$       <indexterm id="op_dollar2"><primary>$$</primary></indexterm>current page at program counter (in virtual device mode)
+$$$   $$$      <indexterm id="op_dollar3"><primary>$$$</primary></indexterm>"physical" program counter (inside DISP block)
+$$$$  $$$$     <indexterm id="op_dollar4"><primary>$$$$</primary></indexterm>"physical" memory page (inside DISP block in virtual device mode)
 label label    value of label (aka symbol), usually memory address
-$$lab $$lab    page of "lab" label (in virtual device mode)
-{}    {x}      reads WORD from address x (in virtual device mode, in last pass)
-{b}   {b x}    reads BYTE from address x (in virtual device mode, in last pass)
+$$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexterm>page of "lab" label (in virtual device mode)
+{}    {x}      <indexterm id="op_read_word"><primary>{..}</primary></indexterm>reads WORD from address x (in virtual device mode, in last pass)
+{b}   {b x}    <indexterm id="op_read_byte"><primary>{b ..}</primary></indexterm>reads BYTE from address x (in virtual device mode, in last pass)
 </programlisting></para>
     </section>
 
-    <section>
-      <title><anchor id="s_asm_lang" />Assembly language</title>
+    <section id="s_asm_lang">
+      <title>Assembly language</title>
 
       <para>This version only accepts Z80 mnemonics. There are some additions
       to what I think is standard Z80: <itemizedlist>
@@ -883,8 +902,8 @@ $$lab $$lab    page of "lab" label (in virtual device mode)
    SUB A,B,,C  ; = SUB B, SUB C (the default syntax does for SUB A,B two SUBs!)</programlisting></para>
     </section>
 
-    <section>
-      <title><anchor id="s_fake_instructions" />Fake instructions</title>
+    <section id="s_fake_instructions">
+      <title>Fake instructions</title>
 
       <para>Of course the Z80 is only an 8 bit cpu, but sometimes <code>ld hl,de</code>
       would be nice. SjASMPlus now 'fakes' some instructions like that. This
@@ -1104,8 +1123,8 @@ $$lab $$lab    page of "lab" label (in virtual device mode)
       Likewise, <code>LDD A,(DE)</code> is <code>LD A,(DE):DEC DE</code>.</para>
     </section>
 
-    <section>
-      <title><anchor id="s_realdevice" />Real device emulation mode</title>
+    <section id="s_realdevice">
+      <title>Real device emulation mode</title>
 
       <para>To enable this mode you must use pseudo-op <link
       linkend="po_device">DEVICE</link>.</para>
@@ -1140,7 +1159,7 @@ StartProg:
     SAVESNA "snapshotname.sna", StartProg</programlisting></para>
         </example>Predefined devices:<variablelist>
           <varlistentry>
-            <term><anchor id="device_none" />NONE</term>
+            <term>NONE<indexterm id="device_none"><primary>NONE</primary></indexterm></term>
 
             <listitem>
               <para>Disable real device emulation mode. By default.</para>
@@ -1148,7 +1167,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zx48" />ZXSPECTRUM48</term>
+            <term>ZXSPECTRUM48<indexterm id="device_zx48"><primary>ZXSPECTRUM48</primary></indexterm></term>
 
             <listitem>
               <para>Has 4 slots (0-3) with size 4000h, 4 pages (0-3) with size
@@ -1158,7 +1177,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zx128" />ZXSPECTRUM128</term>
+            <term>ZXSPECTRUM128<indexterm id="device_zx128"><primary>ZXSPECTRUM128</primary></indexterm></term>
 
             <listitem>
               <para>Has 8 RAM pages (0-7) with size 4000h. Default slot is 3.</para>
@@ -1166,7 +1185,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zx256" />ZXSPECTRUM256</term>
+            <term>ZXSPECTRUM256<indexterm id="device_zx256"><primary>ZXSPECTRUM256</primary></indexterm></term>
 
             <listitem>
               <para>Same as Russian clone Scorption 256. Has 16 RAM pages
@@ -1175,7 +1194,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zx512" />ZXSPECTRUM512</term>
+            <term>ZXSPECTRUM512<indexterm id="device_zx512"><primary>ZXSPECTRUM512</primary></indexterm></term>
 
             <listitem>
               <para>Same as Russian clones ATM Turbo 512 and Pentagon 512. Has
@@ -1184,7 +1203,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zx1024" />ZXSPECTRUM1024</term>
+            <term>ZXSPECTRUM1024<indexterm id="device_zx1024"><primary>ZXSPECTRUM1024</primary></indexterm></term>
 
             <listitem>
               <para>Same as Russian clones ATM Turbo 2 and Pentagon 1024 SL.
@@ -1193,7 +1212,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zx2048" />ZXSPECTRUM2048</term>
+            <term>ZXSPECTRUM2048<indexterm id="device_zx2048"><primary>ZXSPECTRUM2048</primary></indexterm></term>
 
             <listitem>
               <para>Similar to other spectrum devices, has 128 RAM pages (0-127) with size 4000h.</para>
@@ -1201,7 +1220,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zx4096" />ZXSPECTRUM4096</term>
+            <term>ZXSPECTRUM4096<indexterm id="device_zx4096"><primary>ZXSPECTRUM4096</primary></indexterm></term>
 
             <listitem>
               <para>Similar to other spectrum devices, has 256 RAM pages (0-255) with size 4000h.</para>
@@ -1209,7 +1228,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zx8192" />ZXSPECTRUM8192</term>
+            <term>ZXSPECTRUM8192<indexterm id="device_zx8192"><primary>ZXSPECTRUM8192</primary></indexterm></term>
 
             <listitem>
               <para>Similar to other spectrum devices, has 512 RAM pages (0-511) with size 4000h.</para>
@@ -1217,7 +1236,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_zxn" />ZXSPECTRUMNEXT</term>
+            <term>ZXSPECTRUMNEXT<indexterm id="device_zxn"><primary>ZXSPECTRUMNEXT</primary></indexterm></term>
 
             <listitem>
               <para>ZX Spectrum Next, has 8 slots (0-7) of size 0x2000 and 224
@@ -1230,7 +1249,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="device_noslot64k" />NOSLOT64K</term>
+            <term>NOSLOT64K<indexterm id="device_noslot64k"><primary>NOSLOT64K</primary></indexterm></term>
 
             <listitem>
               <para>Has only single slot of size 64kiB (slot 0), covering full Z80 CPU addressing range.
@@ -1245,14 +1264,14 @@ StartProg:
       linkend="feedback">Feedback</link> chapter.</para>
     </section>
 
-    <section>
-      <title><anchor id="s_predefined" />Predefined defines</title>
+    <section id="s_predefined">
+      <title>Predefined defines</title>
 
       <para>SjASMPlus has predefined <link
       linkend="po_define">defines</link>.<variablelist>
 
           <varlistentry>
-            <term>__SJASMPLUS__ = &lt;24bit number&gt;</term>
+            <term>__SJASMPLUS__<indexterm id="def__sjasmplus__"><primary>__SJASMPLUS__</primary></indexterm> = &lt;24bit number&gt;</term>
 
             <listitem>
               <para>Current version split into three 8bit values, ie. 0x010F02 for "1.15.2".</para>
@@ -1260,7 +1279,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__VERSION__ = "version string"</term>
+            <term>__VERSION__<indexterm id="def__version__"><primary>__VERSION__</primary></indexterm> = "version string"</term>
 
             <listitem>
               <para>String value (with quotes around it) of current version like <code>"1.15.2"</code>.</para>
@@ -1268,7 +1287,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__ERRORS__ = &lt;number&gt;</term>
+            <term>__ERRORS__<indexterm id="def__errrors__"><primary>__ERRORS__</primary></indexterm> = &lt;number&gt;</term>
 
             <listitem>
               <para>Number of errors.</para>
@@ -1276,7 +1295,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__WARNINGS__ = &lt;number&gt;</term>
+            <term>__WARNINGS__<indexterm id="def__warnings__"><primary>__WARNINGS__</primary></indexterm> = &lt;number&gt;</term>
 
             <listitem>
               <para>Number of warnings.</para>
@@ -1284,7 +1303,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__DATE__ = "YYYY-MM-DD"</term>
+            <term>__DATE__<indexterm id="def__date__"><primary>__DATE__</primary></indexterm> = "YYYY-MM-DD"</term>
 
             <listitem>
               <para>Date of assembling (timestamp before first pass).</para>
@@ -1292,7 +1311,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__TIME__ = "hh:mm:ss"</term>
+            <term>__TIME__<indexterm id="def__time__"><primary>__TIME__</primary></indexterm> = "hh:mm:ss"</term>
 
             <listitem>
               <para>Time of assembling (timestamp before first pass, 24h form).</para>
@@ -1300,7 +1319,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__PASS__ = &lt;number&gt;</term>
+            <term>__PASS__<indexterm id="def__pass__"><primary>__PASS__</primary></indexterm> = &lt;number&gt;</term>
 
             <listitem>
               <para>Current assembling pass (1, 2 or 3).</para>
@@ -1308,7 +1327,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__INCLUDE_LEVEL__ = &lt;number&gt;</term>
+            <term>__INCLUDE_LEVEL__<indexterm id="def__include_level__"><primary>__INCLUDE_LEVEL__</primary></indexterm> = &lt;number&gt;</term>
 
             <listitem>
               <para>Current include-nesting level.</para>
@@ -1316,7 +1335,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__BASE_FILE__ = &lt;name of base file&gt;</term>
+            <term>__BASE_FILE__<indexterm id="def__base_file__"><primary>__BASE_FILE__</primary></indexterm> = &lt;name of base file&gt;</term>
 
             <listitem>
               <para>Name of base file (include-level zero).</para>
@@ -1326,7 +1345,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__FILE__ = &lt;name of current file&gt;</term>
+            <term>__FILE__<indexterm id="def__file__"><primary>__FILE__</primary></indexterm> = &lt;name of current file&gt;</term>
 
             <listitem>
               <para>Name of current file.</para>
@@ -1336,7 +1355,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__LINE__ = &lt;number&gt;</term>
+            <term>__LINE__<indexterm id="def__line__"><primary>__LINE__</primary></indexterm> = &lt;number&gt;</term>
 
             <listitem>
               <para>Current line number.</para>
@@ -1344,7 +1363,7 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>__COUNTER__ = &lt;incrementing number&gt;</term>
+            <term>__COUNTER__<indexterm id="def__counter__"><primary>__COUNTER__</primary></indexterm> = &lt;incrementing number&gt;</term>
 
             <listitem>
               <para>Does increment upon each usage (starting as value 0). Currently difficult to
@@ -1451,25 +1470,27 @@ label?_suffix? ; define global label
     </section>
   </chapter>
 
-  <chapter>
+  <chapter id="c_directives">
     <title>Pseudo-ops (aka Pseudo-instructions, Directives etc)</title>
 
-    <section>
+    <section id="s_directive_usage">
       <title>Simple example of usage</title>
 
       <para><programlisting>     .SOMEPSEUDOOP ;or
      SOMEPSEUDOOP  ;or
      somepseudoop</programlisting></para>
+
+     <para>[Almost] complete list of pseudo-ops follows:</para>
     </section>
 
-    <section>
-      <title><anchor id="s_pseudoops" />Almost complete list</title>
+    <section id="s_pseudoops">
+      <title>Pseudo-ops</title>
 
       <para></para>
 
       <para><variablelist>
           <varlistentry>
-            <term><anchor id="po_dot_repeat" />.&lt;repeat-count&gt; &lt;single instruction&gt;</term>
+            <term>.&lt;repeat-count&gt;<indexterm id="po_dot_repeat"><primary>.&lt;repeat-count&gt;</primary></indexterm> &lt;single instruction&gt;</term>
 
             <listitem>
               <para>Repeat &lt;single instruction&gt; &lt;repeat-count&gt; many times. Doesn't work
@@ -1486,7 +1507,7 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_abyte" />ABYTE &lt;offset&gt; &lt;bytes&gt;</term>
+            <term>ABYTE<indexterm id="po_abyte"><primary>ABYTE</primary></indexterm> &lt;offset&gt; &lt;bytes&gt;</term>
 
             <listitem>
               <para>Defines a byte or a string of bytes. The offset is added
@@ -1500,7 +1521,7 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_abytec" />ABYTEC &lt;offset&gt; &lt;bytes&gt;</term>
+            <term>ABYTEC<indexterm id="po_abytec"><primary>ABYTEC</primary></indexterm> &lt;offset&gt; &lt;bytes&gt;</term>
 
             <listitem>
               <para>Defines a byte or a string of bytes, where the last byte
@@ -1515,7 +1536,7 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_abytez" />ABYTEZ &lt;offset&gt; &lt;bytes&gt;</term>
+            <term>ABYTEZ<indexterm id="po_abytez"><primary>ABYTEZ</primary></indexterm> &lt;offset&gt; &lt;bytes&gt;</term>
 
             <listitem>
               <para>Defines a byte or a string of bytes, followed by a zero.
@@ -1528,7 +1549,7 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_align" />ALIGN
+            <term>ALIGN<indexterm id="po_align"><primary>ALIGN</primary></indexterm>
             [&lt;expression equal to 1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384 or
             32768&gt;[, &lt;byte&gt;]]</term>
 
@@ -1547,22 +1568,23 @@ len        EQU 10
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_assert" />ASSERT &lt;expression&gt;</term>
+            <term>ASSERT<indexterm id="po_assert"><primary>ASSERT</primary></indexterm> &lt;expression&gt;[, &lt;anything&gt;]</term>
 
             <listitem>
-              <para>An 'assertion failed' error is issued if the expression
-              evaluates to zero.<example>
+              <para>An 'assertion failed' error is issued if the expression evaluates to zero.
+				  The "anything" (optional argument since v1.18.1) is then also visible in the error
+				  message, so you can add description/notes about expression there.<example>
                   <title></title>
 
                   <para><programlisting>STACKPOINTER=0D500H
-    ASSERT END_OF_PROGRAM &lt; STACKPOINTER
+    ASSERT END_OF_PROGRAM &lt; STACKPOINTER, Program code leaks into stack area
 END_OF_PROGRAM</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_binary" />BINARY &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
+            <term>BINARY<indexterm id="po_binary"><primary>BINARY</primary><see>INCBIN</see></indexterm> &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_incbin">INCBIN</link>.</para>
@@ -1570,7 +1592,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_block" />BLOCK &lt;length&gt;[,&lt;fill
+            <term>BLOCK<indexterm id="po_block"><primary>BLOCK</primary></indexterm> &lt;length&gt;[,&lt;fill
             byte&gt;]</term>
 
             <listitem>
@@ -1587,7 +1609,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_bplist" />BPLIST &lt;filename&gt; [unreal|zesarux]</term>
+            <term>BPLIST<indexterm id="po_bplist"><primary>BPLIST</primary><seealso>SETBP</seealso></indexterm> &lt;filename&gt; [unreal|zesarux]</term>
 
             <listitem>
 				<para>
@@ -1616,7 +1638,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_byte" />BYTE &lt;bytes&gt;</term>
+            <term>BYTE<indexterm id="po_byte"><primary>BYTE</primary></indexterm> &lt;bytes&gt;</term>
 
             <listitem>
               <para>Defines a byte or a string of bytes. Each value should be
@@ -1631,7 +1653,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_cspectmap" />CSPECTMAP [&lt;filename&gt;]</term>
+            <term>CSPECTMAP<indexterm id="po_cspectmap"><primary>CSPECTMAP</primary></indexterm> [&lt;filename&gt;]</term>
 
             <listitem>
               <para><emphasis>Useful for ZX-Spectrum Emulator
@@ -1651,7 +1673,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_d24" />D24</term>
+            <term>D24<indexterm id="po_d24"><primary>D24</primary></indexterm></term>
 
             <listitem>
               <para>Defines three bytes by 24b constant. Values should be between
@@ -1664,7 +1686,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_db" />DB</term>
+            <term>DB<indexterm id="po_db"><primary>DB</primary><see>BYTE</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
@@ -1672,7 +1694,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dc" />DC</term>
+            <term>DC<indexterm id="po_dc"><primary>DC</primary></indexterm></term>
 
             <listitem>
               <para>Same as <link linkend="po_byte">BYTE</link>, but every
@@ -1685,7 +1707,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dd" />DD</term>
+            <term>DD<indexterm id="po_dd"><primary>DD</primary><see>DWORD</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dword">DWORD</link>.</para>
@@ -1693,7 +1715,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defarray" />DEFARRAY &lt;id&gt; &lt;replacements&gt;</term>
+            <term>DEFARRAY<indexterm id="po_defarray"><primary>DEFARRAY</primary></indexterm> &lt;id&gt; &lt;replacements&gt;</term>
 
             <listitem>
 				<para>Array of DEFINEs. Use <code>id[#]</code> to retrieve current size of array.<example>
@@ -1710,7 +1732,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defarray_plus" />DEFARRAY+ &lt;id&gt; &lt;additional replacements&gt;</term>
+            <term>DEFARRAY+<indexterm id="po_defarray_plus"><primary>DEFARRAY+</primary></indexterm> &lt;id&gt; &lt;additional replacements&gt;</term>
 
             <listitem>
               <para>Appending more DEFINEs to already defined array<example>
@@ -1724,7 +1746,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defb" />DEFB</term>
+            <term>DEFB<indexterm id="po_defb"><primary>DEFB</primary><see>BYTE</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
@@ -1732,7 +1754,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defd" />DEFD</term>
+            <term>DEFD<indexterm id="po_defd"><primary>DEFD</primary><see>DWORD</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dword">DWORD</link>.</para>
@@ -1740,8 +1762,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defdevice" />DEFDEVICE
-            &lt;deviceid&gt;</term>
+            <term>DEFDEVICE &lt;deviceid&gt;</term> <!-- intentionally removed from index -->
 
             <listitem>
               <para>Sorry, not available yet. If you want to see new device in
@@ -1751,7 +1772,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defg" />DEFG</term>
+            <term>DEFG<indexterm id="po_defg"><primary>DEFG</primary><see>DG</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dg">DG</link>.</para>
@@ -1759,7 +1780,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defh" />DEFH</term>
+            <term>DEFH<indexterm id="po_defh"><primary>DEFH</primary><see>DH</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dh">DH</link>.</para>
@@ -1767,11 +1788,11 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_define" />DEFINE+ &lt;id&gt; &lt;replacement&gt;</term>
+            <term>DEFINE+<indexterm id="po_define"><primary>DEFINE+</primary></indexterm> &lt;id&gt; &lt;replacement&gt;</term>
           </varlistentry>
 
           <varlistentry>
-            <term>DEFINE &lt;id&gt; &lt;replacement&gt;</term>
+            <term>DEFINE<indexterm id="po_define2"><primary>DEFINE</primary></indexterm> &lt;id&gt; &lt;replacement&gt;</term>
 
             <listitem>
               <para>The identifier &lt;id&gt; will be replaced with the &lt;replacement&gt;.
@@ -1792,7 +1813,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defl" />&lt;label&gt; DEFL &lt;expression&gt;</term>
+            <term>&lt;label&gt; DEFL<indexterm id="po_defl"><primary>DEFL</primary><seealso>EQU</seealso></indexterm> &lt;expression&gt;</term>
 
             <listitem>
               <para>Assigns value of &lt;expression&gt; to symbol &lt;label&gt;. New label defined
@@ -1812,7 +1833,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defm" />DEFM</term>
+            <term>DEFM<indexterm id="po_defm"><primary>DEFM</primary><see>BYTE</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
@@ -1820,7 +1841,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defs" />DEFS</term>
+            <term>DEFS<indexterm id="po_defs"><primary>DEFS</primary><see>BLOCK</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_block">BLOCK</link>.</para>
@@ -1828,7 +1849,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_defw" />DEFW</term>
+            <term>DEFW<indexterm id="po_defw"><primary>DEFW</primary><see>WORD</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_word">WORD</link>.</para>
@@ -1836,7 +1857,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dephase" />DEPHASE</term>
+            <term>DEPHASE<indexterm id="po_dephase"><primary>DEPHASE</primary><see>ENT</see><seealso>DISP</seealso></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
@@ -1844,7 +1865,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_device" />DEVICE &lt;deviceid&gt;[, &lt;RAMTOP&gt;]</term>
+            <term>DEVICE<indexterm id="po_device"><primary>DEVICE</primary><seealso>MMU</seealso><seealso>ZXSPECTRUM128</seealso><seealso>ZXSPECTRUMNEXT</seealso></indexterm> &lt;deviceid&gt;[, &lt;RAMTOP&gt;]</term>
 
             <listitem>
               <para>Enables <link linkend="s_realdevice">real device emulation
@@ -1880,7 +1901,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dg" />DG &lt;data encoded in bits&gt;</term>
+            <term>DG<indexterm id="po_dg"><primary>DG</primary></indexterm> &lt;data encoded in bits&gt;</term>
 
             <listitem>
               <para>Data comprises of characters in multiples of eight, each block
@@ -1896,7 +1917,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dh" />DH "&lt;data&gt;"[,"&lt;data2&gt;"...]</term>
+            <term>DH<indexterm id="po_dh"><primary>DH</primary></indexterm> "&lt;data&gt;"[,"&lt;data2&gt;"...]</term>
 
             <listitem>
               <para>The data string comprises pairs of hexadecimal digits, each pair is converted to
@@ -1909,7 +1930,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_disp" />DISP &lt;address&gt;[,&lt;page_number&gt;]</term>
+            <term>DISP<indexterm id="po_disp"><primary>DISP</primary><seealso>ENT</seealso></indexterm> &lt;address&gt;[,&lt;page_number&gt;]</term>
 
             <listitem>
               <para>Set the address in which the part of code should work.
@@ -1952,7 +1973,7 @@ ENDOFPROG
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_display" />DISPLAY &lt;bytes&gt;</term>
+            <term>DISPLAY<indexterm id="po_display"><primary>DISPLAY</primary></indexterm> &lt;bytes&gt;</term>
 
             <listitem>
               <para><emphasis>This pseudo-op comes from ZX-Spectrum assembler
@@ -1984,7 +2005,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dm" />DM</term>
+            <term>DM<indexterm id="po_dm"><primary>DM</primary><see>BYTE</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
@@ -1992,7 +2013,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_ds" />DS</term>
+            <term>DS<indexterm id="po_ds"><primary>DS</primary><see>BLOCK</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_block">BLOCK</link>.</para>
@@ -2000,7 +2021,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dup" />DUP &lt;count&gt;</term>
+            <term>DUP<indexterm id="po_dup"><primary>DUP</primary></indexterm> &lt;count&gt;</term>
 
             <listitem>
               <para>DUP specifies the number of times to generate the
@@ -2021,7 +2042,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dw" />DW</term>
+            <term>DW<indexterm id="po_dw"><primary>DW</primary><see>WORD</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_word">WORD</link>.</para>
@@ -2029,7 +2050,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dword" />DWORD</term>
+            <term>DWORD<indexterm id="po_dword"><primary>DWORD</primary></indexterm></term>
 
             <listitem>
               <para>Defines a so called doubleword. Values should be between
@@ -2043,7 +2064,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_dz" />DZ</term>
+            <term>DZ<indexterm id="po_dz"><primary>DZ</primary></indexterm></term>
 
             <listitem>
               <para>Same as <link linkend="po_byte">BYTE</link>, but an extra
@@ -2057,7 +2078,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_emptytap" />EMPTYTAP &lt;filenameoftapefile&gt;</term>
+            <term>EMPTYTAP<indexterm id="po_emptytap"><primary>EMPTYTAP</primary></indexterm> &lt;filenameoftapefile&gt;</term>
 
             <listitem>
               <para><emphasis>Useful only for ZX-Spectrum
@@ -2070,7 +2091,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_emptytrd" />EMPTYTRD &lt;filenameoftrdimage&gt;[,&lt;disclabel&gt;]</term>
+            <term>EMPTYTRD<indexterm id="po_emptytrd"><primary>EMPTYTRD</primary></indexterm> &lt;filenameoftrdimage&gt;[,&lt;disclabel&gt;]</term>
 
             <listitem>
               <para><emphasis>Useful only for ZX-Spectrum users</emphasis></para>
@@ -2081,7 +2102,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_encoding" />ENCODING &lt;encoding&gt;</term>
+            <term>ENCODING<indexterm id="po_encoding"><primary>ENCODING</primary></indexterm> &lt;encoding&gt;</term>
 
             <listitem>
               <para><emphasis>Useful only for non English
@@ -2102,7 +2123,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_end" />END [&lt;startaddress&gt;]</term>
+            <term>END<indexterm id="po_end"><primary>END</primary></indexterm> [&lt;startaddress&gt;]</term>
 
             <listitem>
               <para>The assembler will stop at this point. The pseudo-op
@@ -2112,7 +2133,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_endlua" />ENDLUA</term>
+            <term>ENDLUA<indexterm id="po_endlua"><primary>ENDLUA</primary><seealso>LUA</seealso></indexterm></term>
 
             <listitem>
               <para>See <link linkend="po_lua">LUA</link> for more
@@ -2121,7 +2142,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_endmod" />ENDMOD</term>
+            <term>ENDMOD<indexterm id="po_endmod"><primary>ENDMOD</primary><see>ENDMODULE</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link
@@ -2130,7 +2151,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_endmodule" />ENDMODULE</term>
+            <term>ENDMODULE<indexterm id="po_endmodule"><primary>ENDMODULE</primary><seealso>MODULE</seealso></indexterm></term>
 
             <listitem>
               <para>To indicate the end of a module (see <link
@@ -2139,7 +2160,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_endt" />ENDT</term>
+            <term>ENDT<indexterm id="po_endt"><primary>ENDT</primary><see>ENT</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
@@ -2147,7 +2168,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_ent" />ENT</term>
+            <term>ENT<indexterm id="po_ent"><primary>ENT</primary><seealso>DISP</seealso></indexterm></term>
 
             <listitem>
               <para>Restore current address. See <link
@@ -2156,7 +2177,7 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_equ" />&lt;label&gt; EQU &lt;expression&gt;[,&lt;pageNumber&gt;]</term>
+            <term>&lt;label&gt; EQU<indexterm id="po_equ"><primary>EQU</primary><seealso>DEFL</seealso></indexterm> &lt;expression&gt;[,&lt;pageNumber&gt;]</term>
 
             <listitem>
               <para>To give the label a value other than the current program
@@ -2173,7 +2194,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_export" />EXPORT &lt;label&gt;</term>
+            <term>EXPORT<indexterm id="po_export"><primary>EXPORT</primary></indexterm> &lt;label&gt;</term>
 
             <listitem>
               <para>The named label will be written to the export-file, in the
@@ -2189,7 +2210,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_fpos" />FPOS &lt;position&gt;</term>
+            <term>FPOS<indexterm id="po_fpos"><primary>FPOS</primary></indexterm> &lt;position&gt;</term>
 
             <listitem>
               <para>The FPOS directive makes it possible to set the file
@@ -2214,7 +2235,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_hex" />HEX</term>
+            <term>HEX<indexterm id="po_hex"><primary>HEX</primary><seealso>DH</seealso></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dh">DH</link>, usually used without quotes around data.</para>
@@ -2222,7 +2243,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_incbin" />INCBIN
+            <term>INCBIN<indexterm id="po_incbin"><primary>INCBIN</primary></indexterm>
             &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
@@ -2240,7 +2261,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_inchob" />INCHOB &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
+            <term>INCHOB<indexterm id="po_inchob"><primary>INCHOB</primary></indexterm> &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>To include a data from a hobeta file into the outputfile.
@@ -2255,7 +2276,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_include" />INCLUDE &lt;filename&gt;</term>
+            <term>INCLUDE<indexterm id="po_include"><primary>INCLUDE</primary></indexterm> &lt;filename&gt;</term>
 
             <listitem>
               <para>To include another sourcefile into the current.
@@ -2282,7 +2303,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_includelua" />INCLUDELUA &lt;filename&gt;</term>
+            <term>INCLUDELUA<indexterm id="po_includelua"><primary>INCLUDELUA</primary></indexterm> &lt;filename&gt;</term>
 
             <listitem>
               <para>To include another LUA script in first pass(!). If the
@@ -2301,7 +2322,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_inctrd" />INCTRD
+            <term>INCTRD<indexterm id="po_inctrd"><primary>INCTRD</primary></indexterm>
             &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
@@ -2316,7 +2337,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_insert" />INSERT &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
+            <term>INSERT<indexterm id="po_insert"><primary>INSERT</primary><see>INCBIN</see></indexterm> &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
             <listitem>
               <para>INSERT is a synonym of <link
@@ -2325,7 +2346,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_labelslist" />LABELSLIST &lt;filename&gt;[,&lt;virtual labels&gt;]</term>
+            <term>LABELSLIST<indexterm id="po_labelslist"><primary>LABELSLIST</primary></indexterm> &lt;filename&gt;[,&lt;virtual labels&gt;]</term>
 
             <listitem>
               <para><emphasis>Useful only for ZX-Spectrum Emulator
@@ -2351,7 +2372,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_lua" />LUA [pass]</term>
+            <term>LUA<indexterm id="po_lua"><primary>LUA</primary></indexterm> [pass]</term>
 
             <listitem>
               <para>Using pseudo-ops LUA and ENDLUA you can insert Lua
@@ -2380,7 +2401,7 @@ ALLPASS -  interpret Lua script in all passes. It is needed if you generate some
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_memorymap" />MEMORYMAP</term>
+            <term>MEMORYMAP</term> <!-- intentionally removed from index -->
 
             <listitem>
               <para>Not available yet.</para>
@@ -2388,7 +2409,7 @@ ALLPASS -  interpret Lua script in all passes. It is needed if you generate some
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_mmu" />MMU &lt;first slot number&gt; [&lt;last slot number&gt;|&lt;single slot option&gt;], &lt;page number&gt;[,&lt;address&gt;]</term>
+            <term>MMU<indexterm id="po_mmu"><primary>MMU</primary><seealso>DEVICE</seealso><seealso>SLOT</seealso><seealso>PAGE</seealso></indexterm> &lt;first slot number or address&gt; [&lt;last slot number or address&gt;|&lt;single slot option&gt;], &lt;page number&gt;[,&lt;address&gt;]</term>
 
             <listitem>
               <para>Maps memory page(s) to slot(s), similar to SLOT + PAGE combination, but allows
@@ -2400,6 +2421,9 @@ ALLPASS -  interpret Lua script in all passes. It is needed if you generate some
 
 		  <para>The optional third argument is address for <link linkend="po_org">ORG</link>
 			  functionality.</para>
+
+              <para>(since v1.18.1) You can also use starting address of particular slot instead
+              of its number, ie. for ZX128: <code>MMU $8000,3</code> is alias of <code>MMU 2,3</code></para>
 
               <para>Single slot option (default state is: no error/warning and no wrap = nothing special):
                 <synopsis>e = error on writing beyond last byte of slot
@@ -2427,7 +2451,7 @@ label4_p2: scf      ; first byte of page 2 at 0xC000</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_module" />MODULE &lt;name&gt;</term>
+            <term>MODULE<indexterm id="po_module"><primary>MODULE</primary></indexterm> &lt;name&gt;</term>
 
             <listitem>
               <para>
@@ -2486,7 +2510,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_opt" /><para>OPT [push] [reset] [listoff] [liston] [listmc] [&lt;command line options&gt;]</para>
+            <term><para>OPT<indexterm id="po_opt"><primary>OPT</primary></indexterm> [push] [reset] [listoff] [liston] [listall] [listact] [listmc] [&lt;command line options&gt;]</para>
 			<para>OPT pop</para></term>
 
             <listitem>
@@ -2496,14 +2520,16 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
 				  <code>--reversepop</code> and <code>--dirbol</code>.
 			  </para>
 			  <para>
-				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston, listmc.
+				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston, listall, listact, listmc.
 				  The "push" command will make OPT to preserve current state of options. The "reset"
 				  command will reset OPT-related options to default state. The "listoff" command will
 				  suspend the listing for following lines until "liston" command is used (listing
 				  availability is part of the push/pop state, so to "nest" listing-off you can use
-				  "OPT push listoff : ... code ... : OPT pop" code sequence). The "listmc" command will
-				  filter listing to lines containing machine code bytes, to revert the filter use
-				  either "pop" of previous state or "reset".
+				  "OPT push listoff : ... code ... : OPT pop" code sequence). The "listall", "listact"
+				  and "listmc" commands will select the filter for listing. The "listmc" lists only
+				  lines containing machine code bytes, "listact" will remove the "skipped" blocks
+				  (like false-blocks of IF/ELSE conditional assembling, or inner definitions of macros
+				  and structures), "listall" will switch back to default listing without filtering.
 			  </para>
 			  <para>Then the provided options are applied. The default values are: fake instructions
 				  enabled (no warning), multi-argument delimiter is ",", both () and [] brackets
@@ -2533,7 +2559,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_org" />ORG &lt;address&gt;[,&lt;page_number&gt;]</term>
+            <term>ORG<indexterm id="po_org"><primary>ORG</primary><seealso>DEVICE</seealso></indexterm> &lt;address&gt;[,&lt;page_number&gt;]</term>
 
             <listitem>
               <para>Set the program counter to a specific address. If the second argument is
@@ -2573,7 +2599,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_outend" />OUTEND</term>
+            <term>OUTEND<indexterm id="po_outend"><primary>OUTEND</primary><seealso>OUTPUT</seealso><seealso>SIZE</seealso></indexterm></term>
 
             <listitem>
               <para>Ends generating compiler output to file specified in OUTPUT and resets
@@ -2582,7 +2608,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_output" />OUTPUT
+            <term>OUTPUT<indexterm id="po_output"><primary>OUTPUT</primary><seealso>SIZE</seealso></indexterm>
             [&lt;filename&gt;[,&lt;mode&gt;]]</term>
 
             <listitem>
@@ -2619,7 +2645,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_page" />PAGE &lt;number&gt;</term>
+            <term>PAGE<indexterm id="po_page"><primary>PAGE</primary><seealso>DEVICE</seealso><seealso>MMU</seealso><seealso>SLOT</seealso></indexterm> &lt;number&gt;</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
@@ -2637,7 +2663,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_phase" />PHASE</term>
+            <term>PHASE<indexterm id="po_phase"><primary>PHASE</primary><see>DISP</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_disp">DISP</link>.</para>
@@ -2645,7 +2671,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_relocate_end" />RELOCATE_END</term>
+            <term>RELOCATE_END<indexterm id="po_relocate_end"><primary>RELOCATE_END</primary></indexterm></term>
 
             <listitem>
               <para>Ends the block of code for which relocation data are produced (started by
@@ -2657,7 +2683,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_relocate_start" />RELOCATE_START</term>
+            <term>RELOCATE_START<indexterm id="po_relocate_start"><primary>RELOCATE_START</primary></indexterm></term>
 
             <listitem>
               <para>Marks start of block for which relocation data are produced. Any *regular* label
@@ -2676,7 +2702,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_relocate_table" />RELOCATE_TABLE [&lt;subtract_offset&gt;]</term>
+            <term>RELOCATE_TABLE<indexterm id="po_relocate_table"><primary>RELOCATE_TABLE</primary></indexterm> [&lt;subtract_offset&gt;]</term>
 
             <listitem>
               <para>Emits relocation data gathered across all relocation blocks. There are also
@@ -2693,7 +2719,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_rept" />REPT &lt;count&gt;</term>
+            <term>REPT<indexterm id="po_rept"><primary>REPT</primary><see>DUP</see></indexterm> &lt;count&gt;</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dup">DUP</link>. There is also synonym ENDR to end REPT block (EDUP works too).</para>
@@ -2701,7 +2727,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savebin" />SAVEBIN
+            <term>SAVEBIN<indexterm id="po_savebin"><primary>SAVEBIN</primary></indexterm>
             &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
             <listitem>
@@ -2721,7 +2747,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savedev" />SAVEDEV
+            <term>SAVEDEV<indexterm id="po_savedev"><primary>SAVEDEV</primary></indexterm>
             &lt;filename&gt;,&lt;startPage&gt;,&lt;startOffset&gt;,&lt;length&gt;</term>
 
             <listitem>
@@ -2747,7 +2773,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savehob" />SAVEHOB
+            <term>SAVEHOB<indexterm id="po_savehob"><primary>SAVEHOB</primary></indexterm>
             &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
             <listitem>
@@ -2767,7 +2793,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savenex" />SAVENEX &lt;command&gt; &lt;command arguments&gt;</term>
+            <term>SAVENEX<indexterm id="po_savenex"><primary>SAVENEX</primary></indexterm> &lt;command&gt; &lt;command arguments&gt;</term>
 
             <listitem>
               <para>Commands to build NEX file, for details check <link linkend="c_savenex">SAVENEX
@@ -2779,7 +2805,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savesna" />SAVESNA &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
+            <term>SAVESNA<indexterm id="po_savesna"><primary>SAVESNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
@@ -2799,7 +2825,7 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savetap" /><para>SAVETAP &lt;filename&gt;,BASIC,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;autorunline&gt;[,&lt;lengthwithoutvars&gt;]]</para>
+            <term><para>SAVETAP<indexterm id="po_savetap"><primary>SAVETAP</primary></indexterm> &lt;filename&gt;,BASIC,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;autorunline&gt;[,&lt;lengthwithoutvars&gt;]]</para>
             <para>SAVETAP &lt;filename&gt;,CODE,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;[,&lt;optional3rdparam&gt;]]</para>
             <para>SAVETAP &lt;filename&gt;,NUMBERS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</para>
             <para>SAVETAP &lt;filename&gt;,CHARS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</para>
@@ -2865,13 +2891,13 @@ START  ....     ; some code
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_savetrd" />SAVETRD &lt;filename_of_trd_image&gt;,&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
+            <term>SAVETRD<indexterm id="po_savetrd"><primary>SAVETRD</primary></indexterm> &lt;filename_of_trd_image&gt;,&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
           </varlistentry>
           <varlistentry>
-            <term><anchor />SAVETRD &lt;filename_of_trd_image&gt;,|&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
+            <term>SAVETRD &lt;filename_of_trd_image&gt;,|&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
           </varlistentry>
           <varlistentry>
-            <term><anchor />SAVETRD &lt;filename_of_trd_image&gt;,&amp;&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;</term>
+            <term>SAVETRD &lt;filename_of_trd_image&gt;,&amp;&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;</term>
 
             <listitem>
               <para><emphasis>Works only in real device emulation mode. See
@@ -2909,10 +2935,10 @@ START  ....     ; some code
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_setbp" />SETBP [&lt;expression&gt;]</term>
+            <term>SETBP<indexterm id="po_setbp"><primary>SETBP</primary><seealso>BPLIST</seealso></indexterm> [&lt;expression&gt;]</term>
           </varlistentry>
           <varlistentry>
-            <term><anchor id="po_setbreakpoint" />SETBREAKPOINT [&lt;expression&gt;]</term>
+            <term>SETBREAKPOINT<indexterm id="po_setbreakpoint"><primary>SETBREAKPOINT</primary><see>SETBP</see></indexterm> [&lt;expression&gt;]</term>
 
             <listitem>
 				<para>
@@ -2940,7 +2966,7 @@ start:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_shellexec" />SHELLEXEC &lt;filename&gt;[,&lt;parameters&gt;]</term>
+            <term>SHELLEXEC<indexterm id="po_shellexec"><primary>SHELLEXEC</primary></indexterm> &lt;filename&gt;[,&lt;parameters&gt;]</term>
 
             <listitem>
               <para>Execute external program &lt;filename&gt; using optional
@@ -2958,7 +2984,7 @@ start:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_size" />SIZE &lt;filesize in bytes&gt;</term>
+            <term>SIZE<indexterm id="po_size"><primary>SIZE</primary><seealso>OUTPUT</seealso></indexterm> &lt;filesize in bytes&gt;</term>
 
             <listitem>
               <para>If the resulting file is less than the given length, as
@@ -2972,7 +2998,7 @@ start:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_sldopt" />SLDOPT &lt;type&gt; &lt;arguments&gt;</term>
+            <term>SLDOPT<indexterm id="po_sldopt"><primary>SLDOPT</primary></indexterm> &lt;type&gt; &lt;arguments&gt;</term>
 
             <listitem>
 				<para>Type `<code>COMMENT</code>` - add comma delimited list of case sensitive keywords
@@ -2995,15 +3021,18 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_slot" />SLOT &lt;number&gt;</term>
+            <term>SLOT<indexterm id="po_slot"><primary>SLOT</primary><seealso>DEVICE</seealso><seealso>MMU</seealso><seealso>PAGE</seealso></indexterm> &lt;number_or_address&gt;</term>
 
             <listitem>
               <para><emphasis>Work only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Set current slot. Slot's defined by MEMORYMAP pseudo-op.
+              <para>Set current slot. Slots are defined by DEVICE pseudo-op.
               Use pseudo-op <link linkend="po_page">PAGE</link> to change page
               in the current slot.</para>
+
+              <para>(since v1.18.1) You can also use starting address of particular slot instead
+              of its number, ie. for ZX128: <code>SLOT $8000</code> is alias of <code>SLOT 2</code></para>
 
               <para><example>
                   <title></title>
@@ -3021,7 +3050,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_tapend" />TAPEND</term>
+            <term>TAPEND<indexterm id="po_tapend"><primary>TAPEND</primary><seealso>TAPOUT</seealso></indexterm></term>
 
             <listitem>
               <para>Ends generating compiler output to tape file block specified in TAPOUT.</para>
@@ -3029,7 +3058,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_tapout" />TAPOUT &lt;filename&gt;[,&lt;flagbyte&gt;]</term>
+            <term>TAPOUT<indexterm id="po_tapout"><primary>TAPOUT</primary></indexterm> &lt;filename&gt;[,&lt;flagbyte&gt;]</term>
 
             <listitem>
               <para>Appends one tape block at the end of specified file.
@@ -3057,7 +3086,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
 
 
           <varlistentry>
-            <term><anchor id="po_textarea" />TEXTAREA &lt;address&gt;</term>
+            <term>TEXTAREA<indexterm id="po_textarea"><primary>TEXTAREA</primary><see>DISP</see></indexterm> &lt;address&gt;</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_disp">DISP</link>.</para>
@@ -3065,7 +3094,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_undefine" />UNDEFINE &lt;id&gt;</term>
+            <term>UNDEFINE<indexterm id="po_undefine"><primary>UNDEFINE</primary><seealso>DEFINE</seealso></indexterm> &lt;id&gt;</term>
 
             <listitem>
               <para>Removes the identifier defined by <link
@@ -3100,7 +3129,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_unphase" />UNPHASE</term>
+            <term>UNPHASE<indexterm id="po_unphase"><primary>UNPHASE</primary><see>ENT</see></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
@@ -3108,16 +3137,18 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_while" />WHILE &lt;expression&gt;</term>
+            <term>WHILE<indexterm id="po_while"><primary>WHILE</primary></indexterm> &lt;expression&gt;[, &lt;guardian-counter&gt;]</term>
 
             <listitem>
               <para>While expression evaluates to non-zero value, generates following lines until
-                  an ENDW (EDUP/ENDR alias) pseudo-op is encountered.
+				  an ENDW (EDUP/ENDR alias) pseudo-op is encountered.</para>
+			  <para>The optional guardian-counter value will abort the WHILE if there are
+				  more iterations, default guardian-counter is set to 100k.
 				<example>
                   <title></title>
 
                   <programlisting>ptr = $4000
-    WHILE ptr &lt; $4020
+    WHILE ptr &lt; $4020, 500 ; max 500 loops before error
         DB low ptr
 ptr = ptr + 1
     ENDW    ; EDUP or ENDR works too, but ENDW is advised for WHILE
@@ -3129,7 +3160,7 @@ ptr = ptr + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="po_word" />WORD &lt;words&gt;</term>
+            <term>WORD<indexterm id="po_word"><primary>WORD</primary></indexterm> &lt;words&gt;</term>
 
             <listitem>
               <para>Defines a word. Values should be between -32787 and
@@ -3144,15 +3175,15 @@ ptr = ptr + 1
         </variablelist></para>
     </section>
 
-    <section>
-      <title><anchor id="s_conditional_assembly" />Conditional assembly</title>
+    <section id="s_conditional_assembly"><indexterm id="s_conditional_assembly2"><primary>Conditional assembly</primary></indexterm>
+      <title>Conditional assembly</title>
 
       <para>It may be useful to assemble a part (or not) based on a certain
       condition.</para>
 
       <para><variablelist>
           <varlistentry>
-            <term><anchor id="ca_if" />IF &lt;expression&gt;</term>
+            <term>IF<indexterm id="ca_if"><primary>IF</primary></indexterm> &lt;expression&gt;</term>
 
             <listitem>
               <para>If &lt;expression&gt; is non-zero the following lines are
@@ -3178,7 +3209,7 @@ ptr = ptr + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="ca_ifn" />IFN &lt;expression&gt;</term>
+            <term>IFN<indexterm id="ca_ifn"><primary>IFN</primary></indexterm> &lt;expression&gt;</term>
 
             <listitem>
               <para>If &lt;expression&gt; is zero the following lines are
@@ -3187,7 +3218,7 @@ ptr = ptr + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="ca_ifdef" />IFDEF &lt;id&gt;</term>
+            <term>IFDEF<indexterm id="ca_ifdef"><primary>IFDEF</primary></indexterm> &lt;id&gt;</term>
 
             <listitem>
               <para>The condition is true if there is an id defined. These are
@@ -3206,7 +3237,7 @@ ptr = ptr + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="ca_ifndef" />IFNDEF &lt;id&gt;</term>
+            <term>IFNDEF<indexterm id="ca_ifndef"><primary>IFNDEF</primary></indexterm> &lt;id&gt;</term>
 
             <listitem>
               <para>The condition is true if there isn't an id defined. These
@@ -3225,7 +3256,7 @@ ptr = ptr + 1
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="ca_ifused" />IFUSED &lt;label&gt;</term>
+            <term>IFUSED<indexterm id="ca_ifused"><primary>IFUSED</primary></indexterm> &lt;label&gt;</term>
 
             <listitem>
               <para>The condition is true if there is an label used somewhere
@@ -3289,7 +3320,7 @@ LABEL5:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="ca_ifnused" />IFNUSED &lt;label&gt;</term>
+            <term>IFNUSED<indexterm id="ca_ifnused"><primary>IFNUSED</primary></indexterm> &lt;label&gt;</term>
 
             <listitem>
               <para>The condition is true if there is an label
@@ -3298,7 +3329,7 @@ LABEL5:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="ca_else" />ELSE</term>
+            <term>ELSE<indexterm id="ca_else"><primary>ELSE</primary><seealso>IF</seealso></indexterm></term>
 
             <listitem>
               <para>See <link linkend="ca_if">IF</link>. If the IF condition is
@@ -3307,7 +3338,7 @@ LABEL5:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="ca_elseif" />ELSEIF &lt;expression&gt;</term>
+            <term>ELSEIF<indexterm id="ca_elseif"><primary>ELSEIF</primary><seealso>IF</seealso></indexterm> &lt;expression&gt;</term>
 
             <listitem>
               <para>If the previous IF-block had false condition, the ELSEIF expression is evaluated
@@ -3316,7 +3347,7 @@ LABEL5:
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="ca_endif" />ENDIF</term>
+            <term>ENDIF<indexterm id="ca_endif"><primary>ENDIF</primary></indexterm></term>
 
             <listitem>
               <para>Every <link linkend="ca_if">IF</link> should be followed
@@ -3326,8 +3357,8 @@ LABEL5:
         </variablelist></para>
     </section>
 
-    <section>
-      <title><anchor id="s_macros"/>Macros</title>
+    <section id="s_macros">
+      <title>Macros</title>
 
       <para>The MACRO pseudo-op defines a macro. It should be followed by the
       name of the macro, optionally followed by the parameters. The following
@@ -3442,10 +3473,10 @@ Main
     </section>
   </chapter>
 
-  <chapter>
-    <title><anchor id="c_structures" />Structures</title>
+  <chapter id="c_structures">
+    <title>Structures</title>
 
-    <section>
+    <section id="s_structures_about">
       <title>What is it?</title>
 
       <para>Structures can be used to define data structures in memory more
@@ -3453,7 +3484,7 @@ Main
       structure.</para>
     </section>
 
-    <section>
+    <section id="s_define_structure">
       <title>Defining structure</title>
 
       <para>A structure definition starts with: <code>STRUCT
@@ -3474,15 +3505,15 @@ Main
        <code>offset</code> was defined as first member of structure.</para>
     </section>
 
-    <section>
-      <title>Instructions</title>
+    <section id="s_structure_instructions">
+      <title>STRUCT instructions</title>
 
       <para>Between the STRUCT and ENDS pseudo-instructions the following
       instructions can be used:</para>
 
       <para><variablelist>
           <varlistentry>
-            <term><anchor id="st_byte" />BYTE [&lt;defaultvalue&gt;]</term>
+            <term>BYTE<indexterm id="st_byte"><primary>BYTE</primary></indexterm> [&lt;defaultvalue&gt;]</term>
 
             <listitem>
               <para>To define a one byte member. The defaultvalue is used when
@@ -3492,7 +3523,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="st_word" />WORD [&lt;defaultvalue&gt;]</term>
+            <term>WORD<indexterm id="st_word"><primary>WORD</primary></indexterm> [&lt;defaultvalue&gt;]</term>
 
             <listitem>
               <para>To define a two byte member. The defaultvalue is used when
@@ -3502,7 +3533,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="st_d24" />D24 [&lt;defaultvalue&gt;]</term>
+            <term>D24<indexterm id="st_d24"><primary>D24</primary></indexterm> [&lt;defaultvalue&gt;]</term>
 
             <listitem>
               <para>To define a three byte member. The defaultvalue is used
@@ -3512,7 +3543,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="st_dword" />DWORD [&lt;defaultvalue&gt;]</term>
+            <term>DWORD<indexterm id="st_dword"><primary>DWORD</primary></indexterm> [&lt;defaultvalue&gt;]</term>
 
             <listitem>
               <para>To define a four byte member. The defaultvalue is used
@@ -3522,7 +3553,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="st_text" />TEXT &lt;length&gt;[,{&lt;DB-like operand(s)&gt;}]</term>
+            <term>TEXT<indexterm id="st_text"><primary>TEXT</primary></indexterm> &lt;length&gt;[,{&lt;DB-like operand(s)&gt;}]</term>
 
             <listitem>
               <para>(since v1.17) To define a member of the specified <code>length</code> of bytes.
@@ -3541,7 +3572,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="st_block" />BLOCK &lt;length&gt;[,&lt;fillbyte&gt;]</term>
+            <term>BLOCK<indexterm id="st_block"><primary>BLOCK</primary></indexterm> &lt;length&gt;[,&lt;fillbyte&gt;]</term>
 
             <listitem>
               <para>To define a member of the specified number of bytes. Arguments are set
@@ -3555,7 +3586,7 @@ Main
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="st_align" />ALIGN [&lt;expression&gt;[, &lt;byte&gt;]]</term>
+            <term>ALIGN<indexterm id="st_align"><primary>ALIGN</primary></indexterm> [&lt;expression&gt;[, &lt;byte&gt;]]</term>
 
             <listitem>
               <para>To <link linkend="po_align">align</link> the offset. If the expression
@@ -3576,8 +3607,8 @@ Main
         </variablelist></para>
     </section>
 
-    <section>
-      <title><anchor id="st_usage" />Usage of defined structure</title>
+    <section id="st_usage">
+      <title>Usage of defined structure</title>
 
       <para><code>[&lt;label&gt;] &lt;struct_name&gt; [&lt;initial values&gt;]</code> will emit full
 		structure into machine code, either using default values from structure definition,
@@ -3605,7 +3636,7 @@ Main
 
     </section>
 
-    <section>
+    <section id="s_structure_examples">
       <title>Examples</title>
 
       <example>
@@ -3758,10 +3789,10 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     </section>
   </chapter>
 
-  <chapter>
-    <title><anchor id="c_lua_scripting" />Lua scripting</title>
+  <chapter id="c_lua_scripting">
+    <title>Lua scripting</title>
 
-    <section>
+    <section id="s_lua_oh_why">
       <title>Why?</title>
 
       <para><graphic align="left" fileref="lua.gif" />Why is scripting engine
@@ -3770,7 +3801,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
       powerful scripting engine.</para>
     </section>
 
-    <section>
+    <section id="s_lua_how_to">
       <title>How to use?</title>
 
       <para>You must use <link linkend="po_lua">LUA</link> and <link
@@ -3783,15 +3814,15 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
         </example></para>
     </section>
 
-    <section>
-      <title>SjASMPlus binded functions</title>
+    <section id="s_lua_sjasmplus_bindings">
+      <title>SjASMPlus functions bindings to Lua</title>
 
       <para>From Lua you can control some variables and use functions of the
       compiler. Complete list:</para>
 
       <para><variablelist>
           <varlistentry>
-            <term><anchor id="lua__c" />[integer] _c("expression")</term>
+            <term>[integer] _c("expression")<indexterm id="lua__c"><primary>_c(..)</primary></indexterm></term>
 
             <listitem>
               <para>Calculate expression using calculator of the compiler.
@@ -3800,7 +3831,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="lua__pc" />[void] _pc("code")</term>
+            <term>[void] _pc("code")<indexterm id="lua__pc"><primary>_pc(..)</primary></indexterm></term>
 
             <listitem>
               <para>Parse string of Z80 assembly. Example: <code>_pc("ADD
@@ -3809,7 +3840,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="lua__pl" />[void] _pl("label code")</term>
+            <term>[void] _pl("label code")<indexterm id="lua__pl"><primary>_pl(..)</primary></indexterm></term>
 
             <listitem>
               <para>Parse line of Z80 assembly. Example: <code>_pl("SOMELABEL
@@ -3818,7 +3849,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[integer] sj.calc("expression")</term>
+			  <term>[integer] sj.calc("expression")<indexterm id="lua_sj_calc"><primary>sj.calc(..)</primary><see>_c(..)</see></indexterm></term>
 
             <listitem>
               <para>See <link linkend="lua__c">_c</link></para>
@@ -3826,7 +3857,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.parse_code("code")</term>
+            <term>[void] sj.parse_code("code")<indexterm id="lua_sj_parse_code"><primary>sj.parse_code(..)</primary><see>_pc(..)</see></indexterm></term>
 
             <listitem>
               <para>See <link linkend="lua__pc">_pc</link></para>
@@ -3834,7 +3865,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.parse_line("label code")</term>
+            <term>[void] sj.parse_line("label code")<indexterm id="lua_sj_parse_line"><primary>sj.parse_line(..)</primary><see>_pl(..)</see></indexterm></term>
 
             <listitem>
               <para>See <link linkend="lua__pl">_pl</link></para>
@@ -3842,7 +3873,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.error("message")</term>
+            <term>[void] sj.error("message")<indexterm id="lua_sj_error"><primary>sj.error(..)</primary></indexterm></term>
 
             <listitem>
               <para>Print error message.</para>
@@ -3850,7 +3881,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.warning("message")</term>
+            <term>[void] sj.warning("message")<indexterm id="lua_sj_warning"><primary>sj.warning(..)</primary></indexterm></term>
 
             <listitem>
               <para>Print warning message.</para>
@@ -3858,7 +3889,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.file_exists("filename")</term>
+            <term>[boolean] sj.file_exists("filename")<indexterm id="lua_sj_file_exists"><primary>sj.file_exists(..)</primary></indexterm></term>
 
             <listitem>
               <para>Check for file exists.</para>
@@ -3866,7 +3897,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[string] sj.get_define("name")</term>
+            <term>[string] sj.get_define("name")<indexterm id="lua_sj_get_define"><primary>sj.get_define(..)</primary></indexterm></term>
 
             <listitem>
               <para>Get define value.</para>
@@ -3874,7 +3905,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.insert_define("name", "value")</term>
+            <term>[boolean] sj.insert_define("name", "value")<indexterm id="lua_sj_insert_define"><primary>sj.insert_define(..)</primary></indexterm></term>
 
             <listitem>
               <para>Add new define.</para>
@@ -3882,7 +3913,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[integer] sj.get_label("name")</term>
+            <term>[integer] sj.get_label("name")<indexterm id="lua_sj_get_label"><primary>sj.get_label(..)</primary></indexterm></term>
 
             <listitem>
               <para>Get label address.</para>
@@ -3890,7 +3921,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.insert_label("name", address)</term>
+            <term>[boolean] sj.insert_label("name", address)<indexterm id="lua_sj_insert_label"><primary>sj.insert_label(..)</primary></indexterm></term>
 
             <listitem>
               <para>Add new label.</para>
@@ -3898,8 +3929,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term><anchor id="lua_sj_current_address" />[integer]
-            sj.current_address</term>
+            <term>[integer] sj.current_address<indexterm id="lua_sj_current_address"><primary>sj.current_address</primary></indexterm></term>
 
             <listitem>
               <para>Variable. Current address.</para>
@@ -3907,7 +3937,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[integer] sj.error_count</term>
+            <term>[integer] sj.error_count<indexterm id="lua_sj_error_count"><primary>sj.error_count</primary></indexterm></term>
 
             <listitem>
               <para>Variable. Count of Errors.</para>
@@ -3915,7 +3945,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[integer] sj.warning_count</term>
+            <term>[integer] sj.warning_count<indexterm id="lua_sj_warning_count"><primary>sj.warning_count</primary></indexterm></term>
 
             <listitem>
               <para>Variable. Count of Warnings.</para>
@@ -3923,7 +3953,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.exit(errorcode)</term>
+            <term>[void] sj.exit(errorcode)<indexterm id="lua_sj_exit"><primary>sj.exit(..)</primary></indexterm></term>
 
             <listitem>
               <para>Shutdown the compiler.</para>
@@ -3931,7 +3961,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.add_byte(byte)</term>
+            <term>[void] sj.add_byte(byte)<indexterm id="lua_sj_add_byte"><primary>sj.add_byte(..)</primary></indexterm></term>
 
             <listitem>
               <para>Add byte to output (or to memory) and increase <link
@@ -3940,7 +3970,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.add_word(word)</term>
+            <term>[void] sj.add_word(word)<indexterm id="lua_sj_add_word"><primary>sj.add_word(..)</primary></indexterm></term>
 
             <listitem>
               <para>Add word to output (or to memory) and twice increase <link
@@ -3949,7 +3979,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[integer] sj.get_byte(address)</term>
+            <term>[integer] sj.get_byte(address)<indexterm id="lua_sj_get_byte"><primary>sj.get_byte(..)</primary></indexterm></term>
 
             <listitem>
               <para>Get byte from memory. <emphasis>Work only in real device
@@ -3958,7 +3988,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[integer] sj.get_word(address)</term>
+            <term>[integer] sj.get_word(address)<indexterm id="lua_sj_get_word"><primary>sj.get_word(..)</primary></indexterm></term>
 
             <listitem>
               <para>Get word from memory. <emphasis>Work only in real device
@@ -3967,7 +3997,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[string] sj.get_device()</term>
+            <term>[string] sj.get_device()<indexterm id="lua_sj_get_device"><primary>sj.get_device()</primary></indexterm></term>
 
             <listitem>
               <para>Return current emulating device's identifier. Returns
@@ -3976,7 +4006,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.set_device("id")</term>
+            <term>[boolean] sj.set_device("id")<indexterm id="lua_sj_set_device"><primary>sj.set_device(..)</primary></indexterm></term>
 
             <listitem>
               <para>Set current emulating device's identifier. Returns false
@@ -3985,7 +4015,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.set_page(number)</term>
+            <term>[boolean] sj.set_page(number)<indexterm id="lua_sj_set_page"><primary>sj.set_page(..)</primary></indexterm></term>
 
             <listitem>
               <para>Set page with number "number" to the current slot. Works
@@ -3994,7 +4024,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.set_slot(number)</term>
+            <term>[boolean] sj.set_slot(number)<indexterm id="lua_sj_set_slot"><primary>sj.set_slot(..)</primary></indexterm></term>
 
             <listitem>
               <para>Set current slot with number "number". Works as pseudo-op
@@ -4003,7 +4033,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.shellexec("programname")</term>
+            <term>[void] sj.shellexec("programname")<indexterm id="lua_sj_shellexec"><primary>sj.shellexec(..)</primary></indexterm></term>
 
             <listitem>
               <para>See pseudo-op SHELLEXEC.</para>
@@ -4011,7 +4041,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] zx.trdimage_create("filename")</term>
+            <term>[void] zx.trdimage_create("filename")<indexterm id="lua_zx_trdimage_create"><primary>zx.trdimage_create(..)</primary></indexterm></term>
 
             <listitem>
               <para>Creates emptry TRD image file.</para>
@@ -4019,7 +4049,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] zx.trdimage_add_file("filename", "somenameC",
+            <term>[void] zx.trdimage_add_file<indexterm id="lua_zx_trdimage_add_file"><primary>zx.trdimage_add_file(..)</primary></indexterm>("filename", "somenameC",
             startaddress, length, autostart, replace)</term>
 
             <listitem>
@@ -4029,7 +4059,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] zx.save_snapshot_sna("filename.sna",
+            <term>[void] zx.save_snapshot_sna<indexterm id="lua_zx_save_snapshot_sna"><primary>zx.save_snapshot_sna(..)</primary></indexterm>("filename.sna",
             startaddressofprogram)</term>
 
             <listitem>
@@ -4041,7 +4071,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
         </variablelist></para>
     </section>
 
-    <section>
+    <section id="s_lua_third_party_libs">
       <title>Third-party embedded library(ies)</title>
 
       <para><emphasis>lpack.c</emphasis></para>
@@ -4235,7 +4265,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
         </variablelist></para>
     </section>
 
-    <section>
+    <section id="s_lua_examples">
       <title>Example</title>
 
       <para></para>
@@ -4339,11 +4369,11 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     </section>
   </chapter>
 
-  <chapter>
-    <title><anchor id="c_savenex" />SAVENEX guide</title>
+  <chapter id="c_savenex">
+    <title>SAVENEX guide</title>
 	
-    <section>
-      <title><anchor id="s_savenex_file_format" />NEX File Format</title>
+    <section id="s_savenex_file_format">
+      <title>NEX File Format</title>
 
       <para>NEX is binary format for ZX Spectrum Next, aiming to provide simple delivery of software
       for the platform. For file format details check <ulink url="https://specnext.dev/wiki/NEX_file_format">
@@ -4365,12 +4395,12 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 	  screen (sjasmplus enforces that).</para>
   </section>
   
-  <section>
-	  <title><anchor id="s_savenex_commands" />Detailed description of each SAVENEX command</title>
+  <section id="s_savenex_commands">
+	  <title>Detailed description of each SAVENEX command</title>
 	  <variablelist>
 		  
 		  <varlistentry>
-			  <term><anchor id="nex_open" />
+			  <term id="nex_open">
 				  SAVENEX OPEN &lt;filename&gt;[,&lt;startAddress&gt;[,&lt;stackAddress&gt;[,&lt;entryBank16k 0..111&gt;[,&lt;fileVersion 2..3&gt;]]]]
 			  </term>
 			  <listitem>
@@ -4402,7 +4432,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 		  
 		  <varlistentry>
-			  <term><anchor id="nex_core" />
+			  <term id="nex_core">
 				  SAVENEX CORE &lt;major 0..15&gt;,&lt;minor 0..15&gt;,&lt;subminor 0..255&gt;
 			  </term>
 			  <listitem>
@@ -4414,7 +4444,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 		  
 		  <varlistentry>
-			  <term><anchor id="nex_cfg" />
+			  <term id="nex_cfg">
 				  SAVENEX CFG &lt;border 0..7&gt;[,&lt;fileHandle 0/1/$4000+&gt;[,&lt;PreserveNextRegs 0/1&gt;[,&lt;2MbRamReq 0/1&gt;]]]
 			  </term>
 			  <listitem>
@@ -4430,7 +4460,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 		  
 		  <varlistentry>
-			  <term><anchor id="nex_cfg3" />
+			  <term id="nex_cfg3">
 				  SAVENEX CFG3 &lt;DoCRC 0/1&gt;[,&lt;PreserveExpansionBus 0/1&gt;[,&lt;CLIbufferAdr&gt;,&lt;CLIbufferSize&gt;]]
 			  </term>
 			  <listitem>
@@ -4460,7 +4490,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 
 		  <varlistentry>
-			  <term><anchor id="nex_bar" />
+			  <term id="nex_bar">
 				  SAVENEX BAR &lt;loadBar 0/1&gt;,&lt;barColour 0..255&gt;[,&lt;startDelay 0..255&gt;[,&lt;bankDelay 0..255&gt;[,&lt;posY 0..255&gt;]]]
 			  </term>
 			  <listitem>
@@ -4476,7 +4506,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 		  
 		  <varlistentry>
-			  <term><anchor id="nex_palette" />
+			  <term id="nex_palette">
 				  <para>SAVENEX PALETTE NONE</para>
 				  <para>SAVENEX PALETTE DEFAULT</para>
 				  <para>SAVENEX PALETTE MEM &lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;</para>
@@ -4508,7 +4538,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 
 		  <varlistentry>
-			  <term><anchor id="nex_screen" />
+			  <term id="nex_screen">
 				  SAVENEX SCREEN L2 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]
 			  </term>
 			  <listitem>
@@ -4681,7 +4711,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 
 		  <varlistentry>
-			  <term><anchor id="nex_copper" />
+			  <term id="nex_copper">
 				  SAVENEX COPPER &lt;Page8kNum 0..223&gt;,&lt;offset&gt;
 			  </term>
 			  <listitem>
@@ -4700,7 +4730,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 
 		  <varlistentry>
-			  <term><anchor id="nex_bank" />
+			  <term id="nex_bank">
 				  SAVENEX BANK &lt;bank16k 0..111&gt;[,...]
 			  </term>
 			  <listitem>
@@ -4713,7 +4743,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 		  
 		  <varlistentry>
-			  <term><anchor id="nex_auto" />
+			  <term id="nex_auto">
 				  SAVENEX AUTO [&lt;fromBank16k 0..111&gt;[,&lt;toBank16k 0..111&gt;]]
 			  </term>
 			  <listitem>
@@ -4733,7 +4763,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 		  </varlistentry>
 		  
 		  <varlistentry>
-			  <term><anchor id="nex_close" />
+			  <term id="nex_close">
 				  SAVENEX CLOSE [&lt;fileToAppend&gt;]
 			  </term>
 			  <listitem>
@@ -4749,8 +4779,8 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
   </section>
 	  
-  <section>
-	  <title><anchor id="s_savenex_examples" />Examples</title>
+  <section id="s_savenex_examples">
+	  <title>Examples</title>
 
 	  <example>
           <title>docs_examples/s_savenex_examples.asm</title>
@@ -4779,11 +4809,11 @@ start:  ei : jr $           ; app code entry point, BC = NEX file handle
 
   </chapter>
 
-  <chapter>
-    <title><anchor id="c_sld_data" />Source Level Debugging (SLD) data</title>
+  <chapter id="c_sld_data">
+    <title>Source Level Debugging (SLD) data</title>
 
-    <section>
-		<title><anchor id="s_sld_intro" />What is it?</title>
+    <section id="s_sld_intro">
+		<title>What is it?</title>
 
 		<para>
 			SLD data are extra "tracing" data produced during assembling for debuggers and IDEs,
@@ -4807,8 +4837,8 @@ start:  ei : jr $           ; app code entry point, BC = NEX file handle
 		</para>
 	</section>
 
-    <section>
-		<title><anchor id="s_sld_cli" />Usage</title>
+    <section id="s_sld_cli">
+		<title>Usage</title>
 
 		<para>
 			On the sjasmplus side all you need is to add another command line option when starting
@@ -4835,8 +4865,8 @@ start:  ei : jr $           ; app code entry point, BC = NEX file handle
 
 	</section>
 
-	<section>
-		<title><anchor id="s_sld_source_advice" />How to write "non tricky" source</title>
+	<section id="s_sld_source_advice">
+		<title>How to write "non tricky" source</title>
 
 		<para>
 			For best results (tracing data covering all your instructions and making source-level
@@ -4908,8 +4938,8 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 
 	</section>
 
-    <section>
-		<title><anchor id="s_sld_file_format" />SLD File Format definition (version "1")</title>
+    <section id="s_sld_file_format">
+		<title>SLD File Format definition (version "1")</title>
 
 		<para><emphasis>The file format is still under development. If you are working on support in debugger, stay
 				in touch with us, so we can discuss any modifications to current format with you.</emphasis>
@@ -5041,5 +5071,7 @@ toplevel.asm|70|include.asm|3|37|40976|T|
 </section>
 
   </chapter>
+
+  <index id="index"/>
 
 </book>

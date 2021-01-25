@@ -29,6 +29,7 @@
 // direct.cpp
 
 #include "sjdefs.h"
+#include <cassert>
 
 CFunctionTable DirectivesTable;
 CFunctionTable DirectivesTable_dup;
@@ -369,6 +370,16 @@ static void dirPAGE() {
 	}
 }
 
+static aint slotNumberFromPreciseAddress(aint inputValue) {
+	assert(Device);
+	if (inputValue < Device->SlotsCount) return inputValue;	// seems to be slot number, not address
+	// check if the input value does exactly match start-address of some slot
+	int slotNum = Device->GetSlotOfA16(inputValue);
+	if (-1 == slotNum) return inputValue;	// does not belong to any slot
+	if (inputValue != Device->GetSlot(slotNum)->Address) return inputValue;	// not exact match
+	return slotNum;							// return address converted into slot number
+}
+
 static void dirMMU() {
 	if (!DeviceID) {
 		Warning("MMU is allowed only in real device emulation mode (See DEVICE)");
@@ -416,10 +427,13 @@ static void dirMMU() {
 		check16(address);
 		address &= 0xFFFF;
 	}
+	// convert slot entered as addresses into slot numbering (must be precise start address of slot)
+	slot1 = slotNumberFromPreciseAddress(slot1);
+	slot2 = slotNumberFromPreciseAddress(slot2);
 	// validate argument values
 	if (slot1 < 0 || slot2 < slot1 || Device->SlotsCount <= slot2) {
 		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "[MMU] Slot number(s) must be in range 0..%u and form a range",
+		SPRINTF1(buf, LINEMAX, "[MMU] Slot number(s) must be in range 0..%u (or exact starting address of slot) and form a range",
 				 Device->SlotsCount - 1);
 		Error(buf, NULL, SUPPRESS);
 		return;
@@ -459,9 +473,10 @@ static void dirSLOT() {
 		Error("[SLOT] Syntax error in <slot_number>", lp, SUPPRESS);
 		return;
 	}
+	val = slotNumberFromPreciseAddress(val);
 	if (!Device->SetSlot(val)) {
 		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%u", Device->SlotsCount - 1);
+		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%u, or exact starting address of slot", Device->SlotsCount - 1);
 		Error(buf, NULL, IF_FIRST);
 	}
 }
@@ -1122,7 +1137,7 @@ static void dirENCODING() {
 
 static void dirOPT() {
 	// supported options: --zxnext[=cspect] --reversepop --dirbol --nofakes --syntax=<...> -W...
-	// process OPT specific command keywords first: {push, pop, reset, listoff, liston}
+	// process OPT specific command keywords first: {push, pop, reset, listoff, liston, listall, listact, listmc}
 	bool didReset = false, didList = Options::syx.IsListingSuspended;
 	while (!SkipBlanks(lp) && '-' != *lp) {
 		if (cmphstr(lp, "pop")) {	// "pop" previous syntax state
@@ -1146,12 +1161,23 @@ static void dirOPT() {
 			Options::syx.IsListingSuspended = didList = true;
 		} else if (cmphstr(lp, "liston")) {
 			Options::syx.IsListingSuspended = false;
-		} else if (cmphstr(lp, "listmc")) {
-			if (!didList) ListFile();		// *list* the OPT line starting the filtering
+		} else if (cmphstr(lp, "listall")) {
+			if (!didList) ListFile();		// *list* the OPT line changing the filtering
+			didList = true;
 			donotlist = 1;
-			Options::syx.IsMcOnlyListing = didList = true;
+			Options::syx.ListingType = Options::LST_T_ALL;
+		} else if (cmphstr(lp, "listact")) {
+			if (!didList) ListFile();		// *list* the OPT line changing the filtering
+			didList = true;
+			donotlist = 1;
+			Options::syx.ListingType = Options::LST_T_ACTIVE;
+		} else if (cmphstr(lp, "listmc")) {
+			if (!didList) ListFile();		// *list* the OPT line changing the filtering
+			didList = true;
+			donotlist = 1;
+			Options::syx.ListingType = Options::LST_T_MC_ONLY;
 		} else {
-			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listmc)", lp);
+			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listall, listact, listmc)", lp);
 			SkipToEol(lp);
 			return;
 		}
@@ -1632,16 +1658,14 @@ static void dirENDS() {
 static void dirASSERT() {
 	char* p = lp;
 	aint val;
-	/*if (!ParseExpression(lp,val)) { Error("Syntax error",0,CATCHALL); return; }
-	if (pass==2 && !val) Error("Assertion failed",p);*/
 	if (!ParseExpressionNoSyntaxError(lp, val)) {
-		Error("[ASSERT] Syntax error", NULL, SUPPRESS);
+		Error("[ASSERT] Syntax error", p, SUPPRESS);
 		return;
 	}
 	if (pass == LASTPASS && !val) {
 		Error("[ASSERT] Assertion failed", p);
 	}
-	/**lp=0;*/
+	if (comma(lp)) SkipToEol(lp);
 }
 
 static void dirSHELLEXEC() {
@@ -1759,6 +1783,28 @@ static void DupWhileImplementation(bool isWhile) {
 		condition = new CStringsList(lp);
 		if (nullptr == condition) ErrorOOM();
 		lp += strlen(condition->string);
+		// scan condition string for extra guardian value, and split + parse it as needed
+		char* expressionSource = condition->string;
+		bool parseOk = ParseExpressionNoSyntaxError(expressionSource, val);
+		if (parseOk && *expressionSource && comma(expressionSource)) {
+			// comma found, try to parse explicit guardian value
+			char* guardianSource = expressionSource;
+			parseOk = parseOk && ParseExpressionNoSyntaxError(guardianSource, val);
+			// overwrite the comma to keep only condition string without guardian argument
+			if (parseOk) {
+				assert(',' == expressionSource[-1]);
+				expressionSource[-1] = 0;
+				++val;		// +1 to explicit value to report error when WHILE does *over* that
+			}
+		} else {
+			val = 100001;	// default guardian value is 100k
+		}
+		if (!parseOk) {
+			Error("[WHILE] Syntax error in <expression>", condition->string, SUPPRESS);
+			condition->string[0] = '0';		// force it to evaluate to zero
+			condition->string[1] = 0;
+			val = 1;
+		}
 	} else {
 		IsLabelNotFound = 0;
 		if (!ParseExpressionNoSyntaxError(lp, val)) {
@@ -1797,8 +1843,8 @@ static bool shouldRepeat(SRepeatStack& dup) {
 	if (nullptr == dup.RepeatCondition) {
 		return dup.RepeatCount--;
 	} else {
-		if (100001 < ++dup.RepeatCount) {
-			Error("[WHILE] over 100k of loops - infinite loop?");
+		if (!dup.RepeatCount--) {
+			Error("[WHILE] infinite loop? (reaching the guardian value, default 100k)");
 			return false;
 		}
 		aint val = 0;

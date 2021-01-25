@@ -26,7 +26,7 @@
  7    E002                ORG 0xE000
  7    E000 33 33          DB "33"
  8    E002                  ; verify there are 8 slots and 224 pages
-next_device.asm(9): error: [SLOT] Slot number must be in range 0..7
+next_device.asm(9): error: [SLOT] Slot number must be in range 0..7, or exact starting address of slot
  9    E002                  SLOT 8      ; error
 next_device.asm(10): error: [PAGE] Page number must be in range 0..223: 224
 10    E002                  PAGE 224    ; error

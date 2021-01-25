@@ -209,6 +209,7 @@ const char* W_BP_FILE = "bpfile";
 const char* W_OUT0 = "out0";
 const char* W_BACKSLASH = "backslash";
 const char* W_OPKEYWORD = "opkeyword";
+const char* W_BE_HOST = "behost";
 
 static messages_map w_texts = {
 	{ W_ABS_LABEL,
@@ -359,6 +360,12 @@ static messages_map w_texts = {
 		{ true,
 			"Label collides with one of the operator keywords, try capitalizing it or other name",
 			"Warn when symbol name collides with operator keyword."
+		}
+	},
+	{ W_BE_HOST,
+		{ true,
+			"Big-endian host detected: support is experimental, please report any issues",
+			"Warn when big-endian host runs sjasmplus (experimental)."
 		}
 	},
 };
