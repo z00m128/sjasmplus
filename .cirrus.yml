@@ -40,7 +40,7 @@ pipe:
       # git-clone also submodule for UnitTest++ sources
       submodules_script:
         - git submodule init
-        - git submodule update
+        - git submodule update --depth 1
       generate_gcov_script: make clean && make -j3 coverage
     - image: python:3.7
       # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
@@ -97,7 +97,7 @@ task:
     - c++ --version || echo "no c++"
   submodules_script:
     - git submodule init
-    - git submodule update
+    - git submodule update --depth 1
   # regular binary build (will be not run, just testing the build process)
   build_script: gmake clean && gmake -j4 CC=cc CXX=c++
   # build+test the unit test binary
@@ -117,8 +117,8 @@ task:
     #- c++ --version || echo "no c++"
   submodules_script:
     - git submodule init
-    - git submodule update
+    - git submodule update --depth 1
   build_script:
     - date
-    - make clean && make -j6 CC=cc CXX=c++
-  test_script: make clean && make -j6 CC=cc CXX=c++ tests
+    - make clean && make -j10 CC=cc CXX=c++
+  test_script: make clean && make -j10 CC=cc CXX=c++ tests
