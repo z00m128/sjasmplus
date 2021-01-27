@@ -107,8 +107,8 @@ task:
   name: MacOS default CC build (with unit tests)
   env:
     CIRRUS_CLONE_DEPTH: 1
-  osx_instance:
-    image: catalina-base
+  macos_instance:
+    image: big-sur-base
   #sw_versions2_script:
     #- git --version || echo "no git"
     #- bash --version || echo "no bash"
@@ -120,5 +120,5 @@ task:
     - git submodule update
   build_script:
     - date
-    - make clean && make -j4 CC=cc CXX=c++
-  test_script: make clean && make -j4 CC=cc CXX=c++ tests
+    - make clean && make -j6 CC=cc CXX=c++
+  test_script: make clean && make -j6 CC=cc CXX=c++ tests
