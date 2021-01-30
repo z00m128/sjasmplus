@@ -155,29 +155,36 @@ char* ExportModuleToSld(bool endModule) {
 
 static bool getLabel_invalidName = false;
 
-static SLabelTableEntry* GetLabel(char*& p) {
+// does parse + consume input source at "p" (and stores result into "fullName")
+//  ^^^ may report invalid label name error
+// does search (and only search) LabelTable for various variants of label based on "fullName"
+// No refresh of "used", no inserting into table when not found, no other errrors reported
+// Leaves canonical name in "temp" global variable, if this is inside macro
+// returns table entry, preferring the one with "page defined", if multiple entries are found
+static SLabelTableEntry* SearchLabel(char*& p, bool setUsed, /*out*/ std::unique_ptr<char[]>& fullName) {
 	getLabel_invalidName = true;
-	std::unique_ptr<char[]> fullName(ValidateLabel(p, false, true));
+	fullName.reset(ValidateLabel(p, false, true));
 	if (!fullName) return nullptr;
 	getLabel_invalidName = false;
 	const bool global = '@' == *p;
 	const bool local = '.' == *p;
-	bool inMacro = local && macrolabp;		// not just inside macro, but should be prefixed
 	while (islabchar(*p)) ++p;		// advance pointer beyond the parsed label
-	const int modNameLen = strlen(ModuleName);
 	// find the label entry in the label table (for local macro labels it has to try all sub-parts!)
 	// then regular full label has to be tried
 	// and if it's regular non-local in module, then variant w/o current module has to be tried
-	char *findName = fullName.get();
-	bool inTableAlready = false;
+	bool inMacro = local && macrolabp;		// not just inside macro, but should be prefixed
+	const int modNameLen = strlen(ModuleName);
+	const char *findName = fullName.get();
+	SLabelTableEntry* undefinedLabelEntry = nullptr;
 	SLabelTableEntry* labelEntry = nullptr;
 	temp[0] = 0;
 	do {
 		labelEntry = LabelTable.Find(findName);
 		if (labelEntry) {
-			inTableAlready = true;
-			if (LASTPASS != pass) labelEntry->used = true;
-			if (LABEL_PAGE_UNDEFINED != labelEntry->page) break;
+			if (setUsed && pass < LASTPASS) labelEntry->used = true;
+			if (LABEL_PAGE_UNDEFINED != labelEntry->page) return labelEntry;	// found
+			// if found, but "undefined" one, remember it as fall-back result
+			undefinedLabelEntry = labelEntry;
 			labelEntry = nullptr;
 		}
 		// not found (the defined one, try more variants)
@@ -188,7 +195,9 @@ static SLabelTableEntry* GetLabel(char*& p) {
 				inMacro = false;
 				if (modNameLen) {
 					#pragma GCC diagnostic push	// disable gcc8 warning about truncation - that's intended behaviour
-					#pragma GCC diagnostic ignored "-Wstringop-truncation"
+					#if 8 <= __GNUC__
+						#pragma GCC diagnostic ignored "-Wstringop-truncation"
+					#endif
 					STRCAT(temp, LINEMAX-2, ModuleName); STRCAT(temp, 2, ".");
 					#pragma GCC diagnostic pop
 				}
@@ -205,20 +214,32 @@ static SLabelTableEntry* GetLabel(char*& p) {
 			}
 		}
 	} while (findName);
-	if (nullptr == findName) {		// not found, check if it needs to be inserted into table
-		// canonical name is either in "temp" (when in-macro) or in "fullName" (outside macro)
-		findName = temp[0] ? temp : fullName.get();
-		if (!inTableAlready) {
-			LabelTable.Insert(findName, 0, LABEL_IS_UNDEFINED);
-			IsLabelNotFound = 1;
-		} else {
-			IsLabelNotFound = 2;
-		}
-		Error("Label not found", findName, IF_FIRST);
-	}
-	return labelEntry;
+	return undefinedLabelEntry;
 }
 
+static SLabelTableEntry* GetLabel(char*& p) {
+	std::unique_ptr<char[]> fullName;
+	SLabelTableEntry* labelEntry = SearchLabel(p, true, fullName);
+	if (getLabel_invalidName) return nullptr;
+	if (!labelEntry || LABEL_PAGE_UNDEFINED == labelEntry->page) {
+		IsLabelNotFound = true;
+		char* findName = temp[0] ? temp : fullName.get();
+		if (!labelEntry) {
+			LabelTable.Insert(findName, 0, LABEL_IS_UNDEFINED);
+		}
+		Error("Label not found", findName, IF_FIRST);
+		return nullptr;
+	} else {
+		return labelEntry;
+	}
+}
+
+bool LabelExist(char*& p, aint& val) {
+	std::unique_ptr<char[]> fullName;
+	SLabelTableEntry* labelEntry = SearchLabel(p, false, fullName);
+	val = (labelEntry && LABEL_PAGE_UNDEFINED != labelEntry->page) ? -1 : 0;
+	return !getLabel_invalidName;
+}
 
 bool GetLabelPage(char*& p, aint& val) {
 	SLabelTableEntry* labelEntry = GetLabel(p);
@@ -237,7 +258,7 @@ bool GetLabelValue(char*& p, aint& val) {
 	} else {
 		val = 0;
 	}
-	// true even when not found, but valid label name (neeed for expression-eval logic)
+	// true even when not found, but valid label name (needed for expression-eval logic)
 	return !getLabel_invalidName;
 }
 

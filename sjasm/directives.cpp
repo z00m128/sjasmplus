@@ -852,7 +852,7 @@ static void dirSAVETAP() {
 			}
 			if (!realtapeMode) {
 				lp = tlp;
-				IsLabelNotFound = 0;
+				IsLabelNotFound = false;
 				if (!ParseExpression(lp, val) || IsLabelNotFound) {
 					Error("[SAVETAP] Syntax error", bp, PASS3); return;
 				}
@@ -1289,7 +1289,7 @@ const static char dirIfErrorsTxtSrc[dirIfErrorsN][dirIfErrorsSZ] = {
 
 // IF and IFN internal helper, to evaluate expression
 static bool dirIfIfn(aint & val) {
-	IsLabelNotFound = 0;
+	IsLabelNotFound = false;
 	if (!ParseExpression(lp, val)) {
 		Error("[IF/IFN] Syntax error", lp, IF_FIRST);
 		return false;
@@ -1538,7 +1538,7 @@ static void dirEXPORT() {
 		return;
 	}
 	if (pass != LASTPASS) return;
-	IsLabelNotFound = 0;
+	IsLabelNotFound = false;
 	GetLabelValue(n, val);
 	if (!IsLabelNotFound) WriteExp(p, val);
 }
@@ -1716,7 +1716,7 @@ static void dirSTRUCT() {
 		return;
 	}
 	if (comma(lp)) {
-		IsLabelNotFound = 0;
+		IsLabelNotFound = false;
 		if (!ParseExpressionNoSyntaxError(lp, offset)) {
 			Error("[STRUCT] Offset syntax error", lp, SUPPRESS);
 			return;
@@ -1806,7 +1806,7 @@ static void DupWhileImplementation(bool isWhile) {
 			val = 1;
 		}
 	} else {
-		IsLabelNotFound = 0;
+		IsLabelNotFound = false;
 		if (!ParseExpressionNoSyntaxError(lp, val)) {
 			Error("[DUP/REPT] Syntax error in <count>", lp, SUPPRESS);
 			return;
@@ -1848,7 +1848,7 @@ static bool shouldRepeat(SRepeatStack& dup) {
 			return false;
 		}
 		aint val = 0;
-		IsLabelNotFound = 0;
+		IsLabelNotFound = false;
 		char* expressionSource = dup.RepeatCondition->string;
 		if (!ParseExpressionNoSyntaxError(expressionSource, val) || *expressionSource) {
 			TextFilePos oSrcPos = CurSourcePos;

@@ -212,7 +212,8 @@ std::vector<std::string> openedFileNames;
 int ConvertEncoding = ENCWIN;
 
 EDispMode PseudoORG = DISP_NONE;
-int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
+bool IsLabelNotFound = false;
+int pass = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;
 byte* MemoryPointer=NULL;
@@ -243,7 +244,7 @@ TextFilePos LuaStartPos;
 // reserve keywords in labels table, to detect when user is defining label colliding with keyword
 static void ReserveLabelKeywords() {
 	for (const char* keyword : {
-		"abs", "and", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "xor"
+		"abs", "and", "exist", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "xor"
 	}) {
 		LabelTable.Insert(keyword, -65536, LABEL_IS_UNDEFINED|LABEL_IS_KEYWORD);
 	}

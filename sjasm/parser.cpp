@@ -127,6 +127,17 @@ static int ParseExpUnair(char*& p, aint& nval) {
 		// "norel" operator didn't parse successfully, try to ignore it (will treat it as label)
 		p = oldP;
 	}
+	if (cmphstr(p, "exist", true)) {
+		int existEval = 0, hasParentheses = need(p, '(');
+		if (hasParentheses || isLabelStart(p)) {
+			existEval = LabelExist(p, nval);
+		}
+		if (existEval && hasParentheses) {
+			existEval = need(p, ')');						// check closing parenthesis
+		}
+		if (existEval) return 1;
+		p = oldP;
+	}
 	aint right;
 	int oper;
 	if ((oper = need(p, "! ~ + - ")) || \
@@ -612,7 +623,7 @@ void ParseLabel() {
 	if (*lp == ':') ++lp;	// eat the optional colon after label
 	tp = temp;
 	SkipBlanks();
-	IsLabelNotFound = 0;
+	IsLabelNotFound = false;
 	if (isdigit((byte)*tp)) {
 		if (smcOffset) {
 			Error("Temporary label can't use SMC-offset");

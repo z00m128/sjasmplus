@@ -55,6 +55,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter = 
 char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label);
 char* ExportModuleToSld(bool endModule = false);
 extern char* PreviousIsLabel;
+bool LabelExist(char*& p, aint& val);
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);
 int GetLocalLabelValue(char*& op, aint& val);
