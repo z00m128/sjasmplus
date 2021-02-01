@@ -1,0 +1,22 @@
+issue135_errors_counting.asm(2): warning[fwdref]: forward reference of symbol: IF label
+issue135_errors_counting.asm(5): error: forward reference of symbol: IF label
+# file opened: issue135_errors_counting.asm
+ 1    0000                  ; check warnings counting
+ 2    0000                  IF label
+ 2    0000                ENDIF    ; emit forward-reference warning
+ 3    0000                  ; turn warnings into errors and check errors counting
+ 4    0000                  OPT --syntax=w
+ 5    0000                  IF label
+ 5    0000                ENDIF    ; emit forward-reference error
+ 6    0000              label:
+ 7    0000                  ASSERT 1 == 1 && 1 == 1
+ 8    0000
+ 9    0000              ; extra note: when I initially tried to add also pass3 error/warning (to make sure
+10    0000              ; they are not affected by changing code), it did fix the bug, so the test does only
+11    0000              ; pass1 warning/errors, don't extend it
+12    0000
+# file closed: issue135_errors_counting.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   label

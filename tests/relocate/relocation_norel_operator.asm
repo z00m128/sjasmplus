@@ -2,7 +2,7 @@
 
     RELOCATE_START
 
-norel:  jp norel        ; "norel" as label itself (should relocate)
+norel:  jp norel        ; "norel" as label itself (should relocate) +warning about keyword
     jp norel norel      ; should not relocate
 
 label1:
@@ -26,4 +26,4 @@ label1:
     ASSERT 2*relocate_count == relocate_size
     ASSERT 4 == relocate_count
     ASSERT 2 == __ERRORS__
-    ASSERT 0 == __WARNINGS__
+    ASSERT 1 == __WARNINGS__

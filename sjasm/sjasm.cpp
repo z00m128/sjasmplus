@@ -314,8 +314,8 @@ void InitPass() {
 	// __DATE__ and __TIME__ are defined just once in main(...) (stored in Options::CmdDefineTable)
 	DefineTable.Replace("__SJASMPLUS__", VERSION_NUM);		// modified from _SJASMPLUS
 	DefineTable.Replace("__VERSION__", "\"" VERSION "\"");	// migrated from _VERSION
-	DefineTable.Replace("__ERRORS__", "0");					// migrated from _ERRORS
-	DefineTable.Replace("__WARNINGS__", "0");				// migrated from _WARNINGS
+	DefineTable.Replace("__ERRORS__", ErrorCount);			// migrated from _ERRORS (can be already > 0 from earlier pass)
+	DefineTable.Replace("__WARNINGS__", WarningCount);		// migrated from _WARNINGS (can be already > 0 from earlier pass)
 	DefineTable.Replace("__PASS__", pass);					// current pass of assembler
 	DefineTable.Replace("__INCLUDE_LEVEL__", "-1");			// include nesting
 	DefineTable.Replace("__BASE_FILE__", "<none>");			// the include-level 0 file
