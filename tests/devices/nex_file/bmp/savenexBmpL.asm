@@ -1,7 +1,7 @@
     ; coverage: old V1.2 BMP files (with palOffset defined => warning about V1.3)
     DEVICE ZXSPECTRUMNEXT
     SAVENEX OPEN "savenexBmpL.nex"
-    ; two warnings, about using paletteOffset with BMP 256x192 and only 10 colors in pal
+    ; warning about using paletteOffset with BMP 256x192
     SAVENEX SCREEN BMP "savenexBmpL2/savenexBmpL2.bmp", 1, 10
     SAVENEX CLOSE
 

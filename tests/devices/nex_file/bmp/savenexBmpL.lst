@@ -2,15 +2,13 @@
  1    0000                  ; coverage: old V1.2 BMP files (with palOffset defined => warning about V1.3)
  2    0000                  DEVICE ZXSPECTRUMNEXT
  3    0000                  SAVENEX OPEN "savenexBmpL.nex"
- 4    0000                  ; two warnings, about using paletteOffset with BMP 256x192 and only 10 colors in pal
+ 4    0000                  ; warning about using paletteOffset with BMP 256x192
 savenexBmpL.asm(5): warning: [SAVENEX] BMP paletteOffset is available only for new V1.3 images (320 or 640 x256)
-savenexBmpL.asm(5): warning[nexbmppal]: [SAVENEX] BMP palette has less than 256 colours: 10
  5    0000                  SAVENEX SCREEN BMP "savenexBmpL2/savenexBmpL2.bmp", 1, 10
  6    0000                  SAVENEX CLOSE
  7    0000
  8    0000                  ; coverage: palette bmp valid
  9    0000                  SAVENEX OPEN "savenexBmpL.nex"
-savenexBmpL.asm(10): warning[nexbmppal]: [SAVENEX] BMP palette has less than 256 colours: 10
 10    0000                  SAVENEX PALETTE BMP "savenexBmpL2/savenexBmpL2_256x8.bmp"
 savenexBmpL.asm(11): warning: [SAVENEX] some palette was defined, but without screen it is ignored.
 11    0000                  SAVENEX CLOSE

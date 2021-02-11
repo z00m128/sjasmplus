@@ -48,7 +48,6 @@ extern const char* W_ORG_PAGE;
 extern const char* W_FWD_REF;
 extern const char* W_LUA_MC_PASS;
 extern const char* W_NEX_STACK;
-extern const char* W_NEX_BMP_PAL;
 extern const char* W_SNA_48;
 extern const char* W_SNA_128;
 extern const char* W_TRD_EXT_INVALID;

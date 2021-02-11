@@ -193,7 +193,6 @@ const char* W_ORG_PAGE = "orgpage";
 const char* W_FWD_REF = "fwdref";
 const char* W_LUA_MC_PASS = "luamc";
 const char* W_NEX_STACK = "nexstack";
-const char* W_NEX_BMP_PAL = "nexbmppal";
 const char* W_SNA_48 = "sna48";
 const char* W_SNA_128 = "sna128";
 const char* W_TRD_EXT_INVALID = "trdext";
@@ -264,12 +263,6 @@ static messages_map w_texts = {
 		{ true,
 			"[SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD",
 			"Warn when NEX stack points into non-empty memory."
-		}
-	},
-	{ W_NEX_BMP_PAL,
-		{ true,
-			"[SAVENEX] BMP palette has less than 256 colours",
-			"Warn when palette from BMP is incomplete."
 		}
 	},
 	{ W_SNA_48,

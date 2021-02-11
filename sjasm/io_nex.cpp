@@ -271,7 +271,7 @@ public:
 	EBmpType	type = other;
 	int32_t		width = 0, height = 0;
 	bool		upsideDown = false;
-	uint32_t	colorsCount = 0;
+	uint32_t	colorsUsed = 0;
 
 	~SBmpFile();
 	void close();
@@ -324,12 +324,12 @@ bool SBmpFile::open(const char* bmpname) {
 		return false;
 	}
 	// check if the size is 256x192 (Layer 2) or 128x96 (LoRes), or 320/640 x 256 (V1.3).
-	colorsCount = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 46)->val;
+	colorsUsed = reinterpret_cast<SAlignSafeCast<uint32_t>*>(tempHeader + 46)->val;
 	width = reinterpret_cast<SAlignSafeCast<int32_t>*>(tempHeader + 18)->val;
 	height = reinterpret_cast<SAlignSafeCast<int32_t>*>(tempHeader + 22)->val;
 	// fix values on BE hosts
 	if (Options::IsBigEndian) {
-		colorsCount = sj_bswap32(colorsCount);
+		colorsUsed = sj_bswap32(colorsUsed);
 		width = sj_bswap32(width);
 		height = sj_bswap32(height);
 	}
@@ -345,7 +345,7 @@ bool SBmpFile::open(const char* bmpname) {
 }
 
 word SBmpFile::getColor(uint32_t index) {
-	if (nullptr == bmp || nullptr == palBuffer || colorsCount <= index) return 0;
+	if (nullptr == bmp || nullptr == palBuffer || 256 <= index) return 0;
 	const byte B = palBuffer[index * 4 + 0] >> 5;
 	const byte G = palBuffer[index * 4 + 1] >> 5;
 	const byte R = palBuffer[index * 4 + 2] >> 5;
@@ -602,9 +602,6 @@ static bool dirNexPaletteMem(const aint page8kNum, const aint palOffset) {
 
 static bool dirNexPaletteBmp(SBmpFile & bmp) {
 	if (nex.palDefined) return true;	// palette was already defined, silently ignore
-	if (256 != bmp.colorsCount && warningNotSuppressed()) {
-		WarningById(W_NEX_BMP_PAL, bmp.colorsCount);
-	}
 	// copy the data into internal palette buffer
 	nex.palDefined = true;
 	nex.palette = new byte[SNexHeader::PAL_SIZE];

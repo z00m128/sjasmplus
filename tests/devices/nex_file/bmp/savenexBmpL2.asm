@@ -27,8 +27,8 @@
     SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2_256x8.bmp", 0    ;.. shouldn't warn about colors because savePalette = 0
     SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2_256x8.bmp", 1    ; ok - to suppres "only 10 color" warning
 
-    ; correct one (with two warnings
-    SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2.bmp", 2  ; will warn: savePalette=2, and "only 10 color"
+    ; correct one (with warning)
+    SAVENEX     SCREEN  BMP "savenexBmpL2/savenexBmpL2.bmp", 2  ; will warn: savePalette=2
 
     SAVENEX     BANK    0
 
