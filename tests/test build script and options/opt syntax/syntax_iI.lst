@@ -5,28 +5,35 @@
  4    0000              ; verify regular syntax works as expected with default options
  5    0000 C3 08 00         jp  Label1
  5    0003 C3 08 00       JP  Label1     ; regular syntax - instruction
- 6    0006 00 00            align 4
- 6    0008                ALIGN 4           ; regular syntax - directive
-syntax_iI.asm(7): error: Unrecognized instruction: Jp  Label1
- 7    0008                  Jp  Label1
-syntax_iI.asm(7): error: Unrecognized instruction: jP  Label1
- 7    0008                jP  Label1     ; 2x error - instruction
-syntax_iI.asm(8): error: Unrecognized instruction: Align 4
- 8    0008                  Align 4
-syntax_iI.asm(8): error: Unrecognized instruction: aLiGN 4
- 8    0008                aLiGN 4           ; 2x error - directive
- 9    0008
-10    0008                  OPT --syntax=i      ; test the syntax options "i"
-11    0008              Label1:
-12    0008 C3 08 00         Jp  Label1
-12    000B C3 08 00       jP  Label1     ; instructions should be case insensitive
-13    000E 00 00            Align 4
-13    0010                aLiGN 4           ; directives too
-14    0010
-15    0010                  OPT reset           ; reset syntax to defaults
-syntax_iI.asm(16): error: Unrecognized instruction: Jp  Label1
-16    0010                  Jp  Label1                  ; error - instruction
-17    0010
+ 6    0006 EB               ex  de,hl                   ; regular syntax - registers
+ 7    0007 00               align 4
+ 7    0008                ALIGN 4           ; regular syntax - directive
+syntax_iI.asm(8): error: Unrecognized instruction: Jp  Label1
+ 8    0008                  Jp  Label1
+syntax_iI.asm(8): error: Unrecognized instruction: jP  Label1
+ 8    0008                jP  Label1     ; 2x error - instruction
+syntax_iI.asm(9): error: Illegal instruction:     ex  De,Hl                   ; illegal instruction due to registers
+ 9    0008                  ex  De,Hl                   ; illegal instruction due to registers
+syntax_iI.asm(10): error: Unrecognized instruction: Align 4
+10    0008                  Align 4
+syntax_iI.asm(10): error: Unrecognized instruction: aLiGN 4
+10    0008                aLiGN 4           ; 2x error - directive
+11    0008
+12    0008                  OPT --syntax=i      ; test the syntax options "i"
+13    0008              Label1:
+14    0008 C3 08 00         Jp  Label1
+14    000B C3 08 00       jP  Label1     ; instructions should be case insensitive
+15    000E 00 00            Align 4
+15    0010                aLiGN 4           ; directives too
+16    0010 EB               ex  De,Hl                   ; registers should be also case insensitive
+17    0011 DD 45 DD 4C      ld  b,IXl,c,IXh             ; BTW this is actual way how Zilog describes half-ix regs
+18    0015
+19    0015                  OPT reset           ; reset syntax to defaults
+syntax_iI.asm(20): error: Unrecognized instruction: Jp  Label1
+20    0015                  Jp  Label1                  ; error - instruction
+syntax_iI.asm(21): error: Label not found: IXl
+21    0015 06 00 0E 00      ld  b,IXl,c,IXh             ; error - register (label not found)
+22    0019
 # file closed: syntax_iI.asm
 
 Value    Label

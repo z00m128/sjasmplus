@@ -207,8 +207,20 @@ namespace Z80 {
 	}
 
 	static bool GetRegister_pair(char*& p, const char expect) {
-		if (expect != p[0] || islabchar(p[1])) return false;
+		const char forceCase = Options::syx.CaseInsensitiveInstructions ? 0x20 : 0x00;
+		if ((expect | forceCase) != (p[0] | forceCase) || islabchar(p[1])) return false;
 		++p;
+		return true;
+	}
+
+	static bool GetRegister_3letter(char*& p, const char expect1, const char expect2) {
+		if (islabchar(p[2])) return false;
+		const char e1 = Options::syx.CaseInsensitiveInstructions ? (expect1 | 0x20) : expect1;
+		const char e2 = Options::syx.CaseInsensitiveInstructions ? (expect2 | 0x20) : expect2;
+		const char p1 = Options::syx.CaseInsensitiveInstructions ? (p[0] | 0x20) : p[0];
+		const char p2 = Options::syx.CaseInsensitiveInstructions ? (p[1] | 0x20) : p[1];
+		if (e1 != p1 || e2 != p2) return false;
+		p += 2;
 		return true;
 	}
 
@@ -274,34 +286,12 @@ namespace Z80 {
 			break;
 		case 'i':
 			if (nonZ80CPU) break;
-			if (*p == 'x') {
-				if (!islabchar(*(p + 1))) {
-					++p;
-					return Z80_IX;
-				}
-				if (*(p + 1) == 'h' && !islabchar(*(p + 2))) {
-					p += 2;
-					return Z80_IXH;
-				}
-				if (*(p + 1) == 'l' && !islabchar(*(p + 2))) {
-					p += 2;
-					return Z80_IXL;
-				}
-			}
-			if (*p == 'y') {
-				if (!islabchar(*(p + 1))) {
-					++p;
-					return Z80_IY;
-				}
-				if (*(p + 1) == 'h' && !islabchar(*(p + 2))) {
-					p += 2;
-					return Z80_IYH;
-				}
-				if (*(p + 1) == 'l' && !islabchar(*(p + 2))) {
-					p += 2;
-					return Z80_IYL;
-				}
-			}
+			if (GetRegister_pair(p, 'x')) return Z80_IX;
+			if (GetRegister_pair(p, 'y')) return Z80_IY;
+			if (GetRegister_3letter(p, 'x', 'h')) return Z80_IXH;
+			if (GetRegister_3letter(p, 'x', 'l')) return Z80_IXL;
+			if (GetRegister_3letter(p, 'y', 'h')) return Z80_IYH;
+			if (GetRegister_3letter(p, 'y', 'l')) return Z80_IYL;
 			break;
 		case 'x':
 			if (nonZ80CPU) break;
@@ -338,28 +328,12 @@ namespace Z80 {
 			break;
 		case 'I':
 			if (nonZ80CPU) break;
-			if (*p == 'X') {
-				if (!islabchar(*(p + 1))) {
-					++p; return Z80_IX;
-				}
-				if (*(p + 1) == 'H' && !islabchar(*(p + 2))) {
-					p += 2; return Z80_IXH;
-				}
-				if (*(p + 1) == 'L' && !islabchar(*(p + 2))) {
-					p += 2; return Z80_IXL;
-				}
-			}
-			if (*p == 'Y') {
-				if (!islabchar(*(p + 1))) {
-					++p; return Z80_IY;
-				}
-				if (*(p + 1) == 'H' && !islabchar(*(p + 2))) {
-					p += 2; return Z80_IYH;
-				}
-				if (*(p + 1) == 'L' && !islabchar(*(p + 2))) {
-					p += 2; return Z80_IYL;
-				}
-			}
+			if (GetRegister_pair(p, 'X')) return Z80_IX;
+			if (GetRegister_pair(p, 'Y')) return Z80_IY;
+			if (GetRegister_3letter(p, 'X', 'H')) return Z80_IXH;
+			if (GetRegister_3letter(p, 'X', 'L')) return Z80_IXL;
+			if (GetRegister_3letter(p, 'Y', 'H')) return Z80_IYH;
+			if (GetRegister_3letter(p, 'Y', 'L')) return Z80_IYL;
 			break;
 		case 'X':
 			if (nonZ80CPU) break;
