@@ -1486,6 +1486,12 @@ static void dirDEFINE() {
 		return;
 	}
 	if (White(*lp)) ++lp;		// skip one whitespace (not considered part of value) (others are)
+	// but trim trailing spaces of value, if there's eol-comment
+	if (eolComment) {
+		char *rtrim = lp + strlen(lp);
+		while (lp < rtrim && ' ' == rtrim[-1]) --rtrim;
+		*rtrim = 0;
+	}
 
 	if (replaceEnabled) {
 		DefineTable.Replace(id, lp);

@@ -1,0 +1,13 @@
+# file opened: trimming_define_values.asm
+1     0000                  DEFINE define1 12           ; trailing comments were producing many spaces trailing in the value
+2     0000 0C               DB 12; so here was extra whitespace in listing after substituted "12"
+3     0001                  ; since v1.18.2 these are trimmed, but only when there's eol-comment trailing
+4     0001
+5     0001                  ; without trailing comment, they are part of the value!
+6     0001                  DEFINE define2 34
+7     0001 22               DB 34  ; here should be two spaces after "34" comming from the DEFINE line
+8     0002
+# file closed: trimming_define_values.asm
+
+Value    Label
+------ - -----------------------------------------------------------

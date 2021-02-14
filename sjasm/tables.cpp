@@ -635,6 +635,12 @@ CDefineTableEntry::~CDefineTableEntry() {
 	if (next) delete next;
 }
 
+void CDefineTableEntry::Replace(const char* nvalue) {
+	if (value) delete[] value;
+	value = new char[strlen(nvalue) + 1];
+	strcpy(value, nvalue);
+}
+
 CDefineTable::~CDefineTable() {
 	for (auto def : defs) if (def) delete def;
 }
@@ -708,9 +714,7 @@ int CDefineTable::Replace(const char* name, const char* value) {
 	CDefineTableEntry* p = defs[(*name)&127];
 	while (p) {
 		if (!strcmp(name, p->name)) {
-			delete[](p->value);
-			p->value = new char[strlen(value)+1];
-			strcpy(p->value,value);
+			p->Replace(value);
 			return 0;
 		}
 		p = p->next;

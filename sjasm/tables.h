@@ -157,6 +157,7 @@ public:
 	CDefineTableEntry* next;
 	CDefineTableEntry(const char*, const char*, CStringsList*, CDefineTableEntry*);
 	~CDefineTableEntry();
+	void Replace(const char* nvalue);
 };
 
 class CMacroDefineTable {
