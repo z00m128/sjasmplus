@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.18.1 Documentation [2021-01-23]</title>
+  <title>SjASMPlus 1.18.2 Documentation [2021-02-14]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -200,7 +200,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.18.2</term>
+            <term>14.2.2021 - 1.18.2</term>
 
             <listitem>
               <synopsis>- [may break old sources] new <link linkend="s_expressions">exist operator</link> to check label existence
