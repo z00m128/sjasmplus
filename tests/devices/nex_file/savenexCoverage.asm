@@ -75,3 +75,13 @@
     SAVENEX     OPEN    "savenexCoverage.nex"
     SAVENEX     SCREEN  L2_640
     SAVENEX     CLOSE
+
+;; test the new error message when NEX file has banks 48+, but doesn't set 2MB required
+    SAVENEX     OPEN    "savenexCoverage.nex"
+    SAVENEX     BANK 100
+    SAVENEX     CLOSE   ; error about 2MB required
+
+    SAVENEX     OPEN    "savenexCoverage.nex"
+    SAVENEX     CFG 0, 0, 0, 1  ; 2mb required set
+    SAVENEX     BANK 100
+    SAVENEX     CLOSE

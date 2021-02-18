@@ -254,6 +254,12 @@ void SNexFile::finalizeFile() {
 	copper = nullptr;
 	if (nullptr != palette) delete[] palette;
 	palette = nullptr;
+	// check if there were banks 48+, but 2MB required was not set
+	byte hasExtendedBank = 0;
+	for (int i = 48; i < SNexHeader::MAX_BANK; ++i) hasExtendedBank |= h.banks[i];
+	if (!h.ramReq && hasExtendedBank) {
+		Error("[SAVENEX] 2MB bank (48..111) stored without 2MbRamReq set in CFG");
+	}
 	return;
 }
 
