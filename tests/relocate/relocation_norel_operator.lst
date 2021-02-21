@@ -4,7 +4,7 @@ relocation_norel_operator.asm(5): warning[opkeyword]: Label collides with one of
  2    1000
  3    1000                  RELOCATE_START
  4    1000
- 5    1000 C3 00 10     norel:  jp norel        ; "norel" as label itself (should relocate)
+ 5    1000 C3 00 10     norel:  jp norel        ; "norel" as label itself (should relocate) +warning about keyword
  6    1003 C3 00 10         jp norel norel      ; should not relocate
  7    1006
  8    1006              label1:
@@ -31,7 +31,7 @@ relocation_norel_operator.asm(16): error: Unexpected: label1
 26    1029                  ASSERT 2*relocate_count == relocate_size
 27    1029                  ASSERT 4 == relocate_count
 28    1029                  ASSERT 2 == 2
-29    1029                  ASSERT 0 == 0
+29    1029                  ASSERT 1 == 1
 30    1029
 # file closed: relocation_norel_operator.asm
 

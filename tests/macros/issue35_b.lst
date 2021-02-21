@@ -1,2 +1,15 @@
-issue35_b.asm(2): error: Over 20 defines nested
+# file opened: issue35_b.asm
+1     0000                  MACRO MYMACRO1 addr, string, term
+2     0000 ~                    ld de,addr
+3     0000                  ENDM
+4     0000
+5     0000                  ; this will exercise the max-depth limit = 20 in substitution
+6     0000                  MYMACRO1 test_result_string, string, 0  ; "string = string" causes infinite recursion
+issue35_b.asm(2): error: Unable to finish substitions, line after 20th iteration:         ld de,test_result_string
 issue35_b.asm(6): ^ emitted from here
+6     0000 11 00 00    >        ld de,test_result_string
+7     0003
+# file closed: issue35_b.asm
+
+Value    Label
+------ - -----------------------------------------------------------

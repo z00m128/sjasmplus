@@ -5,20 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-------------------------------------------------------------------------------------------------
-@Busy: rekurzivne DEFINE omylom:
-```
-cond DEFINE aa=bb OR aa=cc OR aa=dd
-IF aa=bb
-...
-ENDIF
-```
-^^^ 1) space mandatory between `<id> <replacement>`
-^^^ 2) if replacement contains <id> itself in substitution position, report infinite recursion
-------------------------------------------------------------------------------------------------
-3) make full-line and 20+ nested subs non-FATAL, just skipping further substitution and continuing with damaged line
- ^^^^ for listing-generating purpose ^^^^^^^ (to search for the bug)
-
 DEFL defined symbols in pass3 - make legal?
 
 "smc+?" syntax to pick most logical argument by assembler itself

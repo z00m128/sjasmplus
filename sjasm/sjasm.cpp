@@ -212,7 +212,8 @@ std::vector<std::string> openedFileNames;
 int ConvertEncoding = ENCWIN;
 
 EDispMode PseudoORG = DISP_NONE;
-int pass = 0, IsLabelNotFound = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
+bool IsLabelNotFound = false;
+int pass = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;
 byte* MemoryPointer=NULL;
@@ -243,7 +244,7 @@ TextFilePos LuaStartPos;
 // reserve keywords in labels table, to detect when user is defining label colliding with keyword
 static void ReserveLabelKeywords() {
 	for (const char* keyword : {
-		"abs", "and", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "xor"
+		"abs", "and", "exist", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "xor"
 	}) {
 		LabelTable.Insert(keyword, -65536, LABEL_IS_UNDEFINED|LABEL_IS_KEYWORD);
 	}
@@ -313,8 +314,8 @@ void InitPass() {
 	// __DATE__ and __TIME__ are defined just once in main(...) (stored in Options::CmdDefineTable)
 	DefineTable.Replace("__SJASMPLUS__", VERSION_NUM);		// modified from _SJASMPLUS
 	DefineTable.Replace("__VERSION__", "\"" VERSION "\"");	// migrated from _VERSION
-	DefineTable.Replace("__ERRORS__", "0");					// migrated from _ERRORS
-	DefineTable.Replace("__WARNINGS__", "0");				// migrated from _WARNINGS
+	DefineTable.Replace("__ERRORS__", ErrorCount);			// migrated from _ERRORS (can be already > 0 from earlier pass)
+	DefineTable.Replace("__WARNINGS__", WarningCount);		// migrated from _WARNINGS (can be already > 0 from earlier pass)
 	DefineTable.Replace("__PASS__", pass);					// current pass of assembler
 	DefineTable.Replace("__INCLUDE_LEVEL__", "-1");			// include nesting
 	DefineTable.Replace("__BASE_FILE__", "<none>");			// the include-level 0 file

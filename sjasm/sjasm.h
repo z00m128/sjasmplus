@@ -144,8 +144,9 @@ extern std::vector<std::string> openedFileNames;	// archive of all files opened 
 enum EDispMode { DISP_NONE = 0, DISP_ACTIVE = 1, DISP_INSIDE_RELOCATE = 2 };
 extern EDispMode PseudoORG;
 
+extern bool IsLabelNotFound;
 extern int ConvertEncoding;
-extern int pass, IsLabelNotFound, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
+extern int pass, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
 extern int adrdisp, dispPageNum, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;

@@ -127,6 +127,17 @@ static int ParseExpUnair(char*& p, aint& nval) {
 		// "norel" operator didn't parse successfully, try to ignore it (will treat it as label)
 		p = oldP;
 	}
+	if (cmphstr(p, "exist", true)) {
+		int existEval = 0, hasParentheses = need(p, '(');
+		if (hasParentheses || isLabelStart(p)) {
+			existEval = LabelExist(p, nval);
+		}
+		if (existEval && hasParentheses) {
+			existEval = need(p, ')');						// check closing parenthesis
+		}
+		if (existEval) return 1;
+		p = oldP;
+	}
 	aint right;
 	int oper;
 	if ((oper = need(p, "! ~ + - ")) || \
@@ -559,12 +570,11 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	// add line terminator to the output buffer
 	*rp++ = 0;
 	if (LINEMAX <= (rp - nl)) {
-		Error("line too long after macro expansion", NULL, FATAL);
+		Error("line too long after macro expansion", nl, SUPPRESS);
 	}
 	// check if whole line is just blanks, then return just empty one
 	rp = nl;
-	SkipBlanks(rp);
-	if (!*rp) *nl = 0;
+	if (SkipBlanks(rp)) *nl = 0;
 	substitutedLine = nl;		// set global pointer to the latest substituted version
 	return definegereplaced;
 }
@@ -578,8 +588,8 @@ char* ReplaceDefine(char* lp) {
 		if (!ReplaceDefineInternal(sline, sline2)) return sline2;
 		if (!ReplaceDefineInternal(sline2, sline)) return sline;
 	}
-	Error("Over 20 defines nested", NULL, FATAL);
-	return NULL;	//unreachable
+	Error("Unable to finish substitions, line after 20th iteration", sline, SUPPRESS);
+	return sline;
 }
 
 void SetLastParsedLabel(const char* label) {
@@ -612,7 +622,7 @@ void ParseLabel() {
 	if (*lp == ':') ++lp;	// eat the optional colon after label
 	tp = temp;
 	SkipBlanks();
-	IsLabelNotFound = 0;
+	IsLabelNotFound = false;
 	if (isdigit((byte)*tp)) {
 		if (smcOffset) {
 			Error("Temporary label can't use SMC-offset");

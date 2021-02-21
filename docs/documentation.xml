@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.18.1 Documentation [2021-01-23]</title>
+  <title>SjASMPlus 1.18.2 Documentation [2021-02-14]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -198,6 +198,17 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>14.2.2021 - 1.18.2</term>
+
+            <listitem>
+              <synopsis>- [may break old sources] new <link linkend="s_expressions">exist operator</link> to check label existence
+- the --syntax=i mode makes now also register parsing case insensitive
+- minor bugfixes (predefined values, savenex BMP loader less strict about "colors used" content)
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>23.1.2021 - 1.18.1</term>
@@ -759,7 +770,8 @@ $c     hexadecimal
       precedence of the operators. The following operators may be used in
       expressions:</para>
 
-      <para><programlisting>norel norel L  Label/symbol L will be treated as non-relocatable
+      <para><programlisting>norel norel L  <indexterm id="op_norel"><primary>norel</primary></indexterm>Label/symbol L will be treated as non-relocatable
+exist exist L  <indexterm id="op_exist"><primary>exist</primary></indexterm>is label/symbol L defined in source (even when not used) (since v1.18.2)
 
 !     !x       <indexterm id="op_log_not"><primary>!</primary></indexterm>logical not
 ~     ~x       <indexterm id="op_cpl"><primary>~</primary></indexterm>complement
@@ -1498,10 +1510,10 @@ label?_suffix? ; define global label
 				  number or expression fully enclosed in parentheses.<example>
                   <title>docs_examples/po_dot_repeat.asm</title>
 
-                  <para><programlisting> .3        INC A    ;will be compiled to INC A:INC A:INC A
-len        EQU 10
- .(12-len) BYTE 0   ;will be compiled to BYTE 0,0
- .2 .3     RET      ;will be compiled to 6x RET</programlisting></para>
+                  <para><programlisting>    .3          INC A    ;will be compiled to INC A:INC A:INC A
+len             EQU 10
+    .(12-len)   BYTE 0   ;will be compiled to BYTE 0,0
+    .2 .3       RET      ;will be compiled to 6x RET</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -4798,7 +4810,7 @@ start:  ei : jr $           ; app code entry point, BC = NEX file handle
     ; write everything into NEX file
     SAVENEX OPEN "example.nex", start, $FFFE, 9  ; stack will go into Layer2
     SAVENEX CORE 2, 0, 0        ; Next core 2.0.0 required as minimum
-    SAVENEX CFG 4, 1            ; green border, file handle in BC
+    SAVENEX CFG 4, 1, 0, 1      ; green border, file handle in BC, reset NextRegs, 2MB required
     SAVENEX BAR 1, $E0, 50, 25  ; do load bar, red colour, start/load delays 50/25 frames
     SAVENEX SCREEN L2 0, 0      ; store the data from C000 (page 0, offset 0), no palette
     SAVENEX BANK 5, 100, 101    ; store the 16ki banks 5 (contains the code at 0x7E00), 100, 101

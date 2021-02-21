@@ -1,3 +1,4 @@
+labels_syntax_and_find.asm(207): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: exist
 # file opened: labels_syntax_and_find.asm
   1   0000                  OUTPUT "labels_syntax_and_find.bin"
   2   0000
@@ -209,6 +210,64 @@ labels_syntax_and_find.asm(167): error: Unexpected: cpl
 173   3570                  ; ^^ the expression parser will eat whole "$ and 7", no instruction/error here
 174   3570                  ; obviously *this* does NOT report error even after change, it's valid expression...
 175   3570
+176   3570              ; FIXME v1.18.2 (1.19.0?) - added "exist" operator for expressions
+177   3570                  ASSERT exist label && exist label.local && exist mod1.label && exist mod1.label.local && exist mod1.mod1unique
+178   3570                  ASSERT exist mod1.nested.label && exist mod1.nested.label.local && exist mod1.nested.nest1unique
+179   3570                  ASSERT exist noColonProblemDemonstration    ; should preserve "unused" flag!
+180   3570                  ASSERT !exist MissingLabel && !exist @MissingLabel && !exist .MissingLabel
+181   3570                  IFUSED MissingLabel
+181   3570 ~              ASSERT 0, "MissingLabel should NOT exist + NOT be used"
+181   3570                ENDIF
+182   3570
+183   3570                  ; do another module setup to test the EXIST searching from inner blocks
+184   3570                  MODULE mod3
+184   3570                ORG $4156
+185   4156                      ; check global ones (outside of current module)
+186   4156 06                   DB  -(exist label + exist label.local + exist unique + exist mod1.label + exist mod1.label.local + exist mod1.mod1unique)  ; == 6 (no error)
+187   4157 06                   DB  -(exist @label + exist @label.local + exist @unique + exist @mod1.label + exist @mod1.label.local + exist @mod1.mod1unique)  ; == 6 (no error)
+188   4158 03                   DB  -(!exist mod2unique + exist mod2.mod2unique + exist @mod2.mod2unique)  ; == 3 (no error) (does not find mod2unique w/o module!)
+189   4159              m3label:
+190   4159 04                   DB -(exist m3label + exist mod3.m3label + !exist @m3label + exist @mod3.m3label)    ; == 4 (no error)
+191   415A              .local:
+192   415A 05                   DB -(exist .local + exist m3label.local + exist mod3.m3label.local + !exist @m3label.local + exist @mod3.m3label.local) ; == 5 (no error)
+193   415B                      ; check nested-module from parent
+194   415B 05                   DB -(!exist m3nlabel + exist nested.m3nlabel + exist nested.m3nlabel.local + exist mod3.nested.m3nlabel.local + exist @mod3.nested.m3nlabel.local)    ; == 5 (no error)
+195   415C                      MODULE nested
+196   415C              m3nlabel:
+197   415C 27                       daa
+198   415D              .local:
+199   415D 2F                       cpl
+200   415E                      ENDMODULE
+201   415E
+202   415E                      ; parentheses form
+203   415E 04                   DB -(exist(m3label) + exist(mod3.m3label) + !exist(@m3label) + exist(@mod3.m3label))    ; == 4 (no error)
+204   415F                  ENDMODULE
+205   415F
+206   415F                  ; errors reporting for exist
+207   415F              exist:              ; warning about reserved keyword (at top of listing, because early pass)
+208   415F 5F 41            DW exist        ; no error, but assembles as label
+labels_syntax_and_find.asm(209): error: Unexpected: 3xist
+209   4161 5F 41            DW exist 3xist  ; unexpected "3xist"
+labels_syntax_and_find.asm(210): error: Unexpected: \ist
+210   4163 00 00            DW exist e\ist  ; unexpected "\ist" ("e") is picked up as label to check existence = 0
+labels_syntax_and_find.asm(211): error: Unexpected: $t
+211   4165 00 00            DW exist exi$t  ; unexpected "$t" ("exi") is picked up as label to check existence = 0
+labels_syntax_and_find.asm(212): error: Unexpected: @@exi
+212   4167 5F 41            DW exist @@exi  ; unexpected "@@exi"
+labels_syntax_and_find.asm(213): error: Invalid labelname: )
+labels_syntax_and_find.asm(213): error: Unexpected: ()
+213   4169 5F 41            DW exist()      ; invalid label name + unexpected
+labels_syntax_and_find.asm(214): error: Invalid labelname: 3xist)
+labels_syntax_and_find.asm(214): error: Unexpected: (3xist)
+214   416B 5F 41            DW exist(3xist) ; invalid label name + unexpected
+labels_syntax_and_find.asm(215): error: Unexpected: (e\ist)
+215   416D 5F 41            DW exist(e\ist) ; unexpected "(e\ist)" - fails as argument for exists, fallback to symbol eval + extra chars
+labels_syntax_and_find.asm(216): error: Unexpected: (exi$t)
+216   416F 5F 41            DW exist(exi$t) ; unexpected "(exi$t)" - fails as argument for exists, fallback to symbol eval + extra chars
+labels_syntax_and_find.asm(217): error: Invalid labelname: @exi)
+labels_syntax_and_find.asm(217): error: Unexpected: (@@exi)
+217   4171 5F 41            DW exist(@@exi) ; invalid label name + unexpected
+218   4173
 # file closed: labels_syntax_and_find.asm
 
 Value    Label
@@ -219,6 +278,7 @@ Value    Label
 0x3475 X DeflLineRemnants4
 0x346E X EquLineRemnants1
 0x346F X EquLineRemnants2
+0x415F   exist
 0x3534   label
 0x3535   label.local
 0x3130   mod1.label
@@ -233,5 +293,9 @@ Value    Label
 0x3370   mod2.nested.label
 0x3371   mod2.nested.label.local
 0x3372   mod2.nested.nest2unique
+0x4159 X mod3.m3label
+0x415A X mod3.m3label.local
+0x415C X mod3.nested.m3nlabel
+0x415D X mod3.nested.m3nlabel.local
 0x0000 X noColonProblemDemonstration
 0x356A   unique

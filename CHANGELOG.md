@@ -1,3 +1,8 @@
+## [1.18.2](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.2) - 14.2.2021
+- [may break old sources] new [exist operator](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to check label existence
+- the `--syntax=i` mode makes now also register parsing case insensitive
+- minor bugfixes (predefined values, savenex BMP loader less strict about "colors used" content)
+
 ## [1.18.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.1) - 23.1.2021
 - Big-Endian hosts support (experimental and not tested continuously)
 - added "listall", "listact" commands to [OPT](http://z00m128.github.io/sjasmplus/documentation.html#po_opt) - to switch between listing types

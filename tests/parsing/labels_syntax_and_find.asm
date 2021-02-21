@@ -172,3 +172,46 @@ DeflLineRemnants4:  = $+6-$100    : cpl     ; valid
 noColonProblemDemonstration EQU $   and 7
     ; ^^ the expression parser will eat whole "$ and 7", no instruction/error here
     ; obviously *this* does NOT report error even after change, it's valid expression...
+
+; FIXME v1.18.2 (1.19.0?) - added "exist" operator for expressions
+    ASSERT exist label && exist label.local && exist mod1.label && exist mod1.label.local && exist mod1.mod1unique
+    ASSERT exist mod1.nested.label && exist mod1.nested.label.local && exist mod1.nested.nest1unique
+    ASSERT exist noColonProblemDemonstration    ; should preserve "unused" flag!
+    ASSERT !exist MissingLabel && !exist @MissingLabel && !exist .MissingLabel
+    IFUSED MissingLabel : ASSERT 0, "MissingLabel should NOT exist + NOT be used" : ENDIF
+
+    ; do another module setup to test the EXIST searching from inner blocks
+    MODULE mod3 : ORG $4156
+        ; check global ones (outside of current module)
+        DB  -(exist label + exist label.local + exist unique + exist mod1.label + exist mod1.label.local + exist mod1.mod1unique)  ; == 6 (no error)
+        DB  -(exist @label + exist @label.local + exist @unique + exist @mod1.label + exist @mod1.label.local + exist @mod1.mod1unique)  ; == 6 (no error)
+        DB  -(!exist mod2unique + exist mod2.mod2unique + exist @mod2.mod2unique)  ; == 3 (no error) (does not find mod2unique w/o module!)
+m3label:
+        DB -(exist m3label + exist mod3.m3label + !exist @m3label + exist @mod3.m3label)    ; == 4 (no error)
+.local:
+        DB -(exist .local + exist m3label.local + exist mod3.m3label.local + !exist @m3label.local + exist @mod3.m3label.local) ; == 5 (no error)
+        ; check nested-module from parent
+        DB -(!exist m3nlabel + exist nested.m3nlabel + exist nested.m3nlabel.local + exist mod3.nested.m3nlabel.local + exist @mod3.nested.m3nlabel.local)    ; == 5 (no error)
+        MODULE nested
+m3nlabel:
+            daa
+.local:
+            cpl
+        ENDMODULE
+
+        ; parentheses form
+        DB -(exist(m3label) + exist(mod3.m3label) + !exist(@m3label) + exist(@mod3.m3label))    ; == 4 (no error)
+    ENDMODULE
+
+    ; errors reporting for exist
+exist:              ; warning about reserved keyword (at top of listing, because early pass)
+    DW exist        ; no error, but assembles as label
+    DW exist 3xist  ; unexpected "3xist"
+    DW exist e\ist  ; unexpected "\ist" ("e") is picked up as label to check existence = 0
+    DW exist exi$t  ; unexpected "$t" ("exi") is picked up as label to check existence = 0
+    DW exist @@exi  ; unexpected "@@exi"
+    DW exist()      ; invalid label name + unexpected
+    DW exist(3xist) ; invalid label name + unexpected
+    DW exist(e\ist) ; unexpected "(e\ist)" - fails as argument for exists, fallback to symbol eval + extra chars
+    DW exist(exi$t) ; unexpected "(exi$t)" - fails as argument for exists, fallback to symbol eval + extra chars
+    DW exist(@@exi) ; invalid label name + unexpected

@@ -104,6 +104,17 @@ savenexCoverage.asm(72): error: [SAVENEX] some bank was already stored (define p
 76    0000                  SAVENEX     SCREEN  L2_640
 77    0000                  SAVENEX     CLOSE
 78    0000
+79    0000              ;; test the new error message when NEX file has banks 48+, but doesn't set 2MB required
+80    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+81    0000                  SAVENEX     BANK 100
+savenexCoverage.asm(82): error: [SAVENEX] 2MB bank (48..111) stored without 2MbRamReq set in CFG
+82    0000                  SAVENEX     CLOSE   ; error about 2MB required
+83    0000
+84    0000                  SAVENEX     OPEN    "savenexCoverage.nex"
+85    0000                  SAVENEX     CFG 0, 0, 0, 1  ; 2mb required set
+86    0000                  SAVENEX     BANK 100
+87    0000                  SAVENEX     CLOSE
+88    0000
 # file closed: savenexCoverage.asm
 
 Value    Label
