@@ -1115,6 +1115,11 @@ EReturn SkipFile() {
 	int iflevel = 0;
 	while (ReadLine()) {
 		char* p = line;
+		if (isLabelStart(p) && !Options::syx.IsPseudoOpBOF) {
+			// this could be label, skip it (the --dirbol users can't use label + IF/... inside block)
+			while (islabchar(*p)) ++p;
+			if (':' == *p) ++p;
+		}
 		SkipBlanks(p);
 		if ('.' == *p) ++p;
 		if (cmphstr(p, "if") || cmphstr(p, "ifn") || cmphstr(p, "ifused") ||
