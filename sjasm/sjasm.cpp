@@ -68,6 +68,7 @@ static void PrintHelpMain() {
 	_COUT "  --msg=[all|war|err|none|lst|lstlab]" _ENDL;
 	_COUT "                           Stderr messages verbosity (\"all\" is default)" _ENDL;
 	_COUT "  --fullpath               Show full path to file in errors" _ENDL;
+	_COUT "  --color=[on|off|auto]    Enable or disable ANSI coloring of warnings/errors" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
 	_COUT "  -                        Reads STDIN as source (even in between regular files)" _ENDL;
@@ -110,6 +111,7 @@ namespace Options {
 	bool IsLongPtr = false;
 	bool SortSymbols = false;
 	bool IsBigEndian = false;
+	bool HasAnsiColours = false;
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
@@ -527,6 +529,16 @@ namespace Options {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
 					IsShowFullPath = 1;
+				} else if (!strcmp(opt, "color")) {
+					if (!strcmp("on", val)) {
+						Options::HasAnsiColours = true;
+					} else if (!strcmp("off", val)) {
+						Options::HasAnsiColours = false;
+					} else if (!strcmp("auto", val)) {
+						// already heuristically detected, nothing to do
+					} else {
+						_CERR "Invalid --color setting \"" _CMDL val _CMDL "\", use: on|off|auto." _ENDL;
+					}
 				} else if (!strcmp(opt, "nologo")) {
 					HideLogo = 1;
 				} else if (!strcmp(opt, "dos866")) {
@@ -616,7 +628,10 @@ int main(int argc, char* argv[]) {
 int main(int argc, char **argv) {
 #endif
 	char buf[MAX_PATH];
-	int base_encoding;
+	// try to auto-detect ANSI-colour support (true if env.var. TERM exist and contains "color" substring)
+	const char* envTerm = std::getenv("TERM");
+	Options::HasAnsiColours = envTerm && strstr(envTerm, "color");
+
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
 	sourceFiles.reserve(32);
@@ -734,7 +749,7 @@ int main(int argc, char **argv) {
 
 	// create default output name, if not specified
 	ConstructDefaultFilename(Options::DestinationFName, LINEMAX, ".out");
-	base_encoding = ConvertEncoding;
+	int base_encoding = ConvertEncoding;
 
 	// init some vars
 	InitCPU();

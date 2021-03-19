@@ -37,6 +37,10 @@ static bool IsSkipErrors = false;
 static char ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2];
 static aint PreviousErrorLine = -1L;
 
+static const char AnsiErrorBeg[] = "\033[31m";
+static const char AnsiWarningBeg[] = "\033[33m";
+static const char AnsiEnd[] = "\033[m";
+
 static void initErrorLine() {		// adds filename + line of definition if possible
 	*ErrorLine = 0;
 	*ErrorLine2 = 0;
@@ -100,8 +104,11 @@ static void outputErrorLine(const EOutputVerbosity errorLevel) {
 	}
 	// print the error into stderr if OutputVerbosity allows this type of message
 	if (Options::OutputVerbosity <= errorLevel) {
+		if (OV_ERROR == errorLevel && Options::HasAnsiColours) _CERR AnsiErrorBeg _END;
+		if (OV_WARNING == errorLevel && Options::HasAnsiColours) _CERR AnsiWarningBeg _END;
 		_CERR ErrorLine _END;
 		if (*ErrorLine2) _CERR ErrorLine2 _END;
+		if (Options::HasAnsiColours) _CERR AnsiEnd _END;
 	}
 }
 

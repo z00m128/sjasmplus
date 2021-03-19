@@ -86,6 +86,7 @@ for f in "${TEST_FILES[@]}"; do
     # see if there are extra options defined (and read them into array)
     options=('--lstlab=sort')	# enforce all symbol dumps to be sorted in any case (even when no --lst)
     options+=('-Wno-behost')	# don't report BE host platform (these kind of tests should pass on any platform)
+    options+=('--color=off')	# don't colorize warnings/errors by default
     [[ -s "${OPTIONS_FILE}" ]] && options+=(`cat "${OPTIONS_FILE}"`)
     # check if .lst file is required to verify the test, set up options to produce one
     [[ -s "${LIST_FILE}" ]] && MSG_LIST_FILE="" && options+=("--lst=${dst_base}.lst")

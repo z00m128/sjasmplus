@@ -92,6 +92,7 @@ namespace Options {
 	extern bool IsLongPtr;
 	extern bool SortSymbols;
 	extern bool IsBigEndian;		// true when hosting platform is big-endian
+	extern bool HasAnsiColours;		// true when host platform (probably) supports ANSI colours
 
 	// emit virtual labels in LABELSLIST, that have only 64ki address and no page
 	// format is then `:ADDR label`, starting from colon, then 16bit address, then label.
