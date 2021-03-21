@@ -35,7 +35,7 @@ static int writeError(char* fname, FILE* & fileToClose) {
 	return 0;
 }
 
-int SaveSNA_ZX(char* fname, unsigned short start) {
+int SaveSNA_ZX(char* fname, word start) {
 	// for Lua
 	if (!DeviceID) {
 		Error("[SAVESNA] Only for real device emulation mode.");

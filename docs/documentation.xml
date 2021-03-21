@@ -2837,7 +2837,13 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the snapshot for emulators of ZX-Spectrum. (If start address is omitted,
-              the one provided by <link linkend="po_end">END</link> is used)<example>
+		  the one provided by <link linkend="po_end">END</link> is used)</para>
+
+              <para>The snapshot header content is hard-wired in sjasmplus binary (disabled interrupts may surprise some users, you can check
+		the <ulink url="https://github.com/z00m128/sjasmplus/blob/master/sjasm/io_snapshots.cpp#L55">source</ulink> to see all the values).
+		If you absolutely need different defaults and can't afford init-code modifying the state, you can post-patch the resulting SNA
+		file directly from source, see <ulink url="https://github.com/z00m128/sjasmplus/issues/139">Issue #139</ulink> for example.
+		<example>
                   <title></title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM128
