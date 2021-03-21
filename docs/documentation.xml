@@ -200,6 +200,16 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.18.3</term>
+
+            <listitem>
+              <synopsis>- added <link linkend="s_cli">`--color`</link> to enable/disable ANSI coloring of errors/warnings
+- minor bugfixes (conditional block parser)
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>14.2.2021 - 1.18.2</term>
 
             <listitem>
@@ -414,6 +424,9 @@
   --fullpath               Show full path to file in errors
   Note: the "fullpath" starts from current working directory, not from file system
 		root (the MS_VS build was fixed to behave this way since v1.15.0)
+  --color=[on|off|auto]    Enable or disable ANSI coloring of warnings/errors
+  Note: auto detection checks for existence of environment variable TERM, and its
+		content is scanned for sub-string "color" (like "xterm-256color")
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
   -W[no-]&lt;warning_id&gt;      Disables/enabled particular warning type
