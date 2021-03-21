@@ -36,8 +36,6 @@ static int writeError(char* fname, FILE* & fileToClose) {
 }
 
 int SaveSNA_ZX(char* fname, unsigned short start) {
-	unsigned char snbuf[31];
-
 	// for Lua
 	if (!DeviceID) {
 		Error("[SAVESNA] Only for real device emulation mode.");
@@ -52,28 +50,22 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 		Error("Error opening file", fname, FATAL);
 	}
 
-	memset(snbuf, 0, sizeof(snbuf));
-	snbuf[0] = 0x3F; //i
-	snbuf[1] = 0x58; //hl'
-	snbuf[2] = 0x27; //hl'
-	snbuf[3] = 0x9B; //de'
-	snbuf[4] = 0x36; //de'
-	snbuf[5] = 0x00; //bc'
-	snbuf[6] = 0x00; //bc'
-	snbuf[7] = 0x44; //af'
-	snbuf[8] = 0x00; //af'
-	snbuf[9] = 0x2B; //hl
-	snbuf[10] = 0x2D; //hl
-	snbuf[11] = 0xDC; //de
-	snbuf[12] = 0x5C; //de
-	snbuf[13] = start & 0xFF;		//bc
-	snbuf[14] = (start>>8) & 0xFF;	//bc
-	snbuf[15] = 0x3a; //iy
-	snbuf[16] = 0x5c; //iy
-	snbuf[17] = 0x3C; //ix
-	snbuf[18] = 0xFF; //ix
-	snbuf[21] = 0x54; //af
-	snbuf[22] = 0x00; //af
+	constexpr int SNA_HEADER_48_SIZE = 27;
+	constexpr int SNA_HEADER_128_SIZE = 4;
+	byte snbuf[SNA_HEADER_48_SIZE + SNA_HEADER_128_SIZE] = {
+	//	I     L'    H'    E'    D'    C'    B'    F'    A'    L     H     E     D     C **  B **
+		0x3F, 0x58, 0x27, 0x9B, 0x36, 0x00, 0x00, 0x44, 0x00, 0x2B, 0x2D, 0xDC, 0x5C, 0x00, 0x00,
+	//	IYL   IYH   IXL   IXH   IFF2  R     F     A     SP(L) SP(H) IM #  border
+		0x3A, 0x5C, 0x3C, 0xFF, 0x00, 0x00, 0x54, 0x00, 0x00, 0x00, 0x01, 0x07,
+	// end of 48k SNA header, following 4 bytes are extra 128k SNA header "interlude" after 48k data
+	//	PC(L) PC(H) 7FFD  TR-DOS
+		0x00, 0x00, 0x00, 0x00
+	};
+
+	// set BC to start address
+	snbuf[13] = start & 0xFF;
+	snbuf[14] = (start>>8) & 0xFF;
+
 	// check if default ZX-like stack was modified - if not, it will be used for snapshot
 	bool is48kSnap = !strcmp(DeviceID, "ZXSPECTRUM48");
 	bool defaultStack = true;
@@ -86,19 +78,20 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 		defaultStack &= (cmpValue == page->RAM[(stackAdr + ii) & (page->Size-1)]);
 	}
 	if (defaultStack) {
-		if (is48kSnap) stackAdr -= 2;
-		snbuf[23] = (stackAdr) & 0xFF;	// SP (may point to injected start address for 48k snap)
-		snbuf[24] = (stackAdr>>8) & 0xFF;
 		if (is48kSnap) {
+			--stackAdr;
 			// inject PC under default stack
 			CDeviceSlot* slot = Device->GetSlot(Device->GetSlotOfA16(stackAdr));
 			CDevicePage* page = Device->GetPage(slot->InitialPage);
-			page->RAM[stackAdr & (page->Size-1)] = start & 0xFF;
-			++stackAdr;
+			page->RAM[stackAdr & (page->Size-1)] = (start>>8) & 0xFF;
+			--stackAdr;
 			slot = Device->GetSlot(Device->GetSlotOfA16(stackAdr));
 			page = Device->GetPage(slot->InitialPage);
-			page->RAM[stackAdr & (page->Size-1)] = (start>>8) & 0xFF;
+			page->RAM[stackAdr & (page->Size-1)] = start & 0xFF;
 		}
+		// SP (may point to injected start address for 48k snap)
+		snbuf[23] = (stackAdr) & 0xFF;
+		snbuf[24] = (stackAdr>>8) & 0xFF;
 	} else {
 		if (is48kSnap) {
 			WarningById(W_SNA_48);
@@ -111,39 +104,27 @@ int SaveSNA_ZX(char* fname, unsigned short start) {
 			snbuf[24] = 0x60; //sp
 		}
 	}
-	snbuf[25] = 1; //im 1
-	snbuf[26] = 7; //border 7
 
-	if (fwrite(snbuf, 1, sizeof(snbuf) - 4, ff) != sizeof(snbuf) - 4) {
+	if (fwrite(snbuf, 1, SNA_HEADER_48_SIZE, ff) != SNA_HEADER_48_SIZE) {
 		return writeError(fname, ff);
 	}
 
-	if (is48kSnap) {
-		if ((aint) fwrite(Device->GetPage(1)->RAM, 1, Device->GetPage(1)->Size, ff) != Device->GetPage(1)->Size) {
+	const int pages48[3] = { 1, 2, 3 };
+	const int pages128[3] = { 5, 2, Device->GetSlot(3)->Page->Number };
+
+	for (const int page : is48kSnap ? pages48 : pages128) {
+		if ((aint) fwrite(Device->GetPage(page)->RAM, 1, Device->GetPage(page)->Size, ff) != Device->GetPage(page)->Size) {
 			return writeError(fname, ff);
 		}
-		if ((aint) fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
-			return writeError(fname, ff);
-		}
-		if ((aint) fwrite(Device->GetPage(3)->RAM, 1, Device->GetPage(3)->Size, ff) != Device->GetPage(3)->Size) {
-			return writeError(fname, ff);
-		}
-	} else {
-		if ((aint) fwrite(Device->GetPage(5)->RAM, 1, Device->GetPage(5)->Size, ff) != Device->GetPage(5)->Size) {
-			return writeError(fname, ff);
-		}
-		if ((aint) fwrite(Device->GetPage(2)->RAM, 1, Device->GetPage(2)->Size, ff) != Device->GetPage(2)->Size) {
-			return writeError(fname, ff);
-		}
-		if ((aint) fwrite(Device->GetPage(Device->GetSlot(3)->Page->Number)->RAM, 1, Device->GetPage(0)->Size, ff) != Device->GetPage(0)->Size) {
-			return writeError(fname, ff);
-		}
+	}
+
+	if (!is48kSnap) {
 		// 128k snapshot extra header fields
 		snbuf[27] = char(start & 0x00FF); //pc
 		snbuf[28] = char(start >> 8); //pc
 		snbuf[29] = 0x10 + Device->GetSlot(3)->Page->Number; //7ffd
 		snbuf[30] = 0; //tr-dos
-		if (fwrite(snbuf + 27, 1, 4, ff) != 4) {
+		if (fwrite(snbuf + SNA_HEADER_48_SIZE, 1, SNA_HEADER_128_SIZE, ff) != SNA_HEADER_128_SIZE) {
 			return writeError(fname, ff);
 		}
 		// 128k banks
