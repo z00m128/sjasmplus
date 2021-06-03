@@ -1,3 +1,5 @@
 # Auto-detect text vs. binary files and ensure newlines are always LF for
 # text files on check-out and check-in.
 * text=auto eol=lf
+sjasm/tolua.bat text eol=crlf
+sjasmwin32/*.rc text eol=crlf
