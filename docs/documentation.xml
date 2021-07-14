@@ -204,6 +204,7 @@
 
             <listitem>
               <synopsis>- added <link linkend="s_cli">`--color`</link> to enable/disable ANSI coloring of errors/warnings
+- `SAVETRD` accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
 - minor bugfixes (conditional block parser)
 </synopsis>
             </listitem>

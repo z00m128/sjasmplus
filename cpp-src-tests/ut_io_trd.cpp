@@ -118,9 +118,20 @@ TEST(SjIoTrd_FilenameToBytes) {
 		CHECK_ARRAY_EQUAL(expected, binName, 12);
 	}
 
-	{	//(?) name with dots inside is shortened to only first word
-		const char fname[LINEMAX] = { "a.b.c.d.C" };
-		const byte expected[12] = { "a       C" };
+	{	// name with dots inside is valid name and does use last dot as extension separator
+		// (behaviour requested by Dart_Alver from zx-pk.ru forums)
+		const char fname[LINEMAX] = { "a.b.c.C" };
+		const byte expected[12] = { "a.b.c   C" };
+		byte binName[12] = { 0 };
+		int length = 1234;
+		CHECK_EQUAL(OK, TRD_FileNameToBytes(fname, binName, length));
+		CHECK_EQUAL(9, length);
+		CHECK_ARRAY_EQUAL(expected, binName, 12);
+	}
+
+	{	// same as previous, but too long name should be trimmed
+		const char fname[LINEMAX] = { "a.b.c.d.e.C" };
+		const byte expected[12] = { "a.b.c.d.C" };
 		byte binName[12] = { 0 };
 		int length = 1234;
 		CHECK_EQUAL(OK, TRD_FileNameToBytes(fname, binName, length));
