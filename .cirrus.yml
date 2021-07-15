@@ -26,6 +26,7 @@ pipe:
   env:
     # needs full clone to calculate revision number from git
     CIRRUS_CLONE_DEPTH: 0
+    CIRRUS_CLONE_SUBMODULES: true
     # coveralls plugin variables (access token + job ID)
     COVERALLS_REPO_TOKEN: ENCRYPTED[8b09887e95ef3aec93b9e31cbbca1f9090704ec9af432869c94d8d79dabdc95640bc061bbaaaf063e31dde112aa93729]
     CI_SERVICE_NAME: 'cirrus-ci'
@@ -37,10 +38,6 @@ pipe:
     memory: 1G
   steps:
     - image: gcc:7
-      # git-clone also submodule for UnitTest++ sources
-      submodules_script:
-        - git submodule init
-        - git submodule update --depth 1
       generate_gcov_script: make clean && make -j3 coverage
     - image: python:3.7
       # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
@@ -80,6 +77,7 @@ task:
   name: FreeBSD clang build (with unit tests)
   env:
     CIRRUS_CLONE_DEPTH: 1
+    CIRRUS_CLONE_SUBMODULES: true
   freebsd_instance:
     image_family: freebsd-13-0-snap
     cpu: 2
@@ -87,18 +85,14 @@ task:
   ## lock pkg on current version (sjasmplus does not care as long as it can install ...)
   ##pkg lock -y pkg &&
   ## - locking disabled after second incident recommending "Consider running 'pkg update -f'"
-  # install git (lite), GNU make and bash
-  # (FreeBSD make can't handle current Makefile, git is needed for UnitTest++ submodule)
-  sw_install_script: IGNORE_OSVERSION=yes pkg update -f && pkg install -y git-lite gmake bash diffutils
+  # install GNU make and bash
+  # (FreeBSD make can't handle current Makefile)
+  sw_install_script: IGNORE_OSVERSION=yes pkg update -f && pkg install -y gmake bash diffutils
   sw_versions2_script:
-    - git --version || echo "no git"
     - bash --version || echo "no bash"
     - gmake --version || echo "no gmake"
     - cc --version || echo "no cc"
     - c++ --version || echo "no c++"
-  submodules_script:
-    - git submodule init
-    - git submodule update --depth 1
   # regular binary build (will be not run, just testing the build process)
   build_script: gmake clean && gmake -j4 CC=cc CXX=c++
   # build+test the unit test binary
@@ -108,6 +102,7 @@ task:
   name: MacOS default CC build (with unit tests)
   env:
     CIRRUS_CLONE_DEPTH: 1
+    CIRRUS_CLONE_SUBMODULES: true
   macos_instance:
     image: big-sur-base
   #sw_versions2_script:
@@ -116,9 +111,6 @@ task:
     #- make --version || echo "no make"
     #- cc --version || echo "no cc"
     #- c++ --version || echo "no c++"
-  submodules_script:
-    - git submodule init
-    - git submodule update --depth 1
   build_script:
     - date
     - make clean && make -j10 CC=cc CXX=c++
