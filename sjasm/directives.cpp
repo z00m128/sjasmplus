@@ -1404,15 +1404,30 @@ static void dirIFNDEF() {
 	}
 }
 
+static void dirElseCheckLiveDup() {
+	if (RepeatStack.empty()) return;
+	if (!RepeatStack.top().IsInWork) return;
+
+	// Seems some ELSE/ELSEIF/ENDIF was encountered inside DUP->EDUP without starting IF
+	// -> probably IF was outside of DUP->EDUP block, which is not legal in sjasmplus
+	// terminate the current DUP->EDUP macro early and report the open ELSE/ELSEIF/ENDIF
+	Error("Conditional block must start and finish inside the repeat block, nested completely");
+	lijstp = nullptr;
+	RepeatStack.top().RepeatCount = 0;
+}
+
 static void dirELSE() {
+	dirElseCheckLiveDup();
 	Error("ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF");
 }
 
 static void dirELSEIF() {
+	dirElseCheckLiveDup();
 	Error("ELSEIF without IF/IFN");
 }
 
 static void dirENDIF() {
+	dirElseCheckLiveDup();
 	Error("ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF");
 }
 

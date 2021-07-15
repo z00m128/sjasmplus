@@ -1174,7 +1174,7 @@ int ReadLineNoMacro(bool SplitByColon) {
 int ReadLine(bool SplitByColon) {
 	DefinitionPos = TextFilePos();
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
-		if (!lijstp) return 0;
+		if (!lijstp || !lijstp->string) return 0;
 		DefinitionPos = lijstp->definition;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing

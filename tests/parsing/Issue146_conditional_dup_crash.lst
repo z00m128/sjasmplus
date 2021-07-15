@@ -1,0 +1,17 @@
+# file opened: Issue146_conditional_dup_crash.asm
+ 1    0000              ; this is currently (v1.18.2) invalid construction of nested DUP->EDUP inside different conditional blocks
+ 2    0000              ; and will not work, but the sjasmplus does segfault hard on this instead of just reporting error
+ 3    0000              i1: ifndef SKIP_DUP
+ 4    0000                      dup 3
+ 5    0000 27          >        daa
+Issue146_conditional_dup_crash.asm(6): error: Conditional block must start and finish inside the repeat block, nested completely
+Issue146_conditional_dup_crash.asm(6): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF
+ 6    0001             >    else
+10    0001                      edup
+11    0001                  endif
+12    0001
+# file closed: Issue146_conditional_dup_crash.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X i1
