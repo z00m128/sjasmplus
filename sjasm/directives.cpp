@@ -282,6 +282,8 @@ static void dirORG() {
 		Error("[ORG] Syntax error in <address>", lp, SUPPRESS);
 		return;
 	}
+	// crop (with warning) address in device or non-longptr mode to 16bit address range
+	if ((DeviceID || !Options::IsLongPtr) && !check16u(val)) val &= 0xFFFF;
 	CurAddress = val;
 	if (DISP_NONE != PseudoORG && warningNotSuppressed()) WarningById(W_DISPLACED_ORG);
 	if (!DeviceID) return;
@@ -336,6 +338,8 @@ static void dirDISP() {
 	} else {
 		dispPageNum = LABEL_PAGE_UNDEFINED;
 	}
+	// crop (with warning) address in device or non-longptr mode to 16bit address range
+	if ((DeviceID || !Options::IsLongPtr) && !check16u(valAdr)) valAdr &= 0xFFFF;
 	// everything is valid, switch to DISP mode (dispPageNum is already set above)
 	adrdisp = CurAddress;
 	CurAddress = valAdr;

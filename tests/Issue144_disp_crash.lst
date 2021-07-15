@@ -1,0 +1,50 @@
+# file opened: Issue144_disp_crash.asm
+ 1    0000              ; reported by Busy
+ 2    0000              	DEVICE	ZXSPECTRUM48
+ 3    0000              	org	#4000
+ 4    4000              	disp #10000-this1+zac1
+ 5    FFFF              zac1
+ 6    FFFF 00           	nop
+ 7    0000              this1
+ 8    0000              	ENT
+ 9    4001              	org	#4000+this1-zac1
+10    4001              	disp	#0000
+11    0000 00           	nop
+12    0001              	ENT
+13    4002
+14    4002              	; test the warnings about cropping invalid ORG and DISP arguments
+Issue144_disp_crash.asm(15): warning: value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
+15    4002              	ORG -1
+Issue144_disp_crash.asm(16): warning: value 0xFFFFFFFE is truncated to 16bit value: 0xFFFE
+16    FFFF              	DISP -2
+17    FFFE              	ENT
+18    FFFF
+19    FFFF              	; no device mode
+20    FFFF              	DEVICE NONE
+21    FFFF
+22    FFFF              	org	#4000
+23    4000              	disp #10000-this2+zac2
+24    FFFF              zac2
+25    FFFF 00           	nop
+26    0000              this2
+27    0000              	ENT
+28    4001              	org	#4000+this2-zac2
+29    4001              	disp	#0000
+30    0000 00           	nop
+31    0001              	ENT
+32    4002
+33    4002              	; test the warnings about cropping invalid ORG and DISP arguments
+Issue144_disp_crash.asm(34): warning: value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
+34    4002              	ORG -1
+Issue144_disp_crash.asm(35): warning: value 0xFFFFFFFE is truncated to 16bit value: 0xFFFE
+35    FFFF              	DISP -2
+36    FFFE              	ENT
+37    FFFF
+# file closed: Issue144_disp_crash.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x10000   this1
+0x10000   this2
+0xFFFF   zac1
+0xFFFF   zac2

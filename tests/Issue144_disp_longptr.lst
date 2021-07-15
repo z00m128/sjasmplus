@@ -1,0 +1,30 @@
+# file opened: Issue144_disp_longptr.asm
+ 1    0000              ; same as Issue144 main test, but in --longptr mode, where the arguments outside of the $0000..$FFFF range are legal
+ 2    0000
+ 3    0000              	org	#4000
+ 4    4000              	disp #10000-this+zac
+ 5    FFFF              zac
+ 6    FFFF 00           	nop
+ 7    0000              this
+ 8    0000              	ENT
+ 9    4001              	org	#4000+this-zac
+10    4001              	disp	#0000
+11    0000 00           	nop
+12    0001              	ENT
+13    4002
+14    4002              	; valid in --longptr mode
+15    4002              	ORG -1
+16    FFFF              long1
+17    FFFF              	DISP -2
+18    FFFE              long2
+19    FFFE 00           	nop
+20    FFFF              	ENT
+21    0000
+# file closed: Issue144_disp_longptr.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xFFFFFFFF X long1
+0xFFFFFFFE X long2
+0x10000   this
+0xFFFF   zac
