@@ -204,6 +204,7 @@
 
             <listitem>
               <synopsis>- added <link linkend="s_cli">`--color`</link> to enable/disable ANSI coloring of errors/warnings
+- added <link linkend="s_cli">`--syntax=s`</link> mode to disable sub-word substitutions of DEFINEs
 - `SAVETRD` accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
 - minor bugfixes (conditional block parser)
 </synopsis>
@@ -453,6 +454,7 @@
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
   M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
+  s      Use only "simple" whole-word substitutions, no sub-words
   w      Warnings option: report warnings as errors
   m      *DEPRECATED* use -Wno-rdlow (was "switch off Accessing low memory warning")</synopsis>
   &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
