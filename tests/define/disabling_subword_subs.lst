@@ -1,0 +1,38 @@
+# file opened: disabling_subword_subs.asm
+ 1    0000              mac1    MACRO x
+ 2    0000 ~                        ld c,x
+ 3    0000 ~            label_x:    dec c
+ 4    0000 ~                        jr nz,label_x
+ 5    0000                      ENDM
+ 6    0000
+ 7    0000                  DEFINE y 34
+ 8    0000
+ 9    0000                  ; by default the substitions work also on subwords
+10    0000                  mac1 12         ; expected "ld c,12" and "label_12"
+10    0000 0E 0C       >            ld c,12
+10    0002 0D          >label_12:    dec c
+10    0003 20 FD       >            jr nz,label_12
+11    0005 06 22            ld b,34          ; expected "ld b,34" and "label_34"
+12    0007              label_34:
+13    0007 05               dec b
+14    0008 20 FD            jr nz,label_34
+15    000A
+16    000A                  ; switch sub-word substitions OFF
+17    000A                  OPT --syntax=s
+18    000A                  mac1 23         ; expected "ld c,23" and "label_x"
+18    000A 0E 17       >            ld c,23
+18    000C 0D          >label_x:    dec c
+18    000D 20 FD       >            jr nz,label_x
+19    000F 06 22            ld b,34          ; expected "ld b,34" and "label_y"
+20    0011              label_y:
+21    0011 05               dec b
+22    0012 20 FD            jr nz,label_y
+23    0014
+# file closed: disabling_subword_subs.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002   label_12
+0x0007   label_34
+0x000C   label_x
+0x0011   label_y

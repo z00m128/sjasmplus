@@ -425,6 +425,8 @@ namespace Options {
 					break;
 				// M - alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
 				case 'M': syx.Is_M_Memory = true; break;
+				// s - switch off sub-word substitution in DEFINEs (s like "Simple defines" or "Sub word")
+				case 's': syx.IsSubwordSubstitution = false; break;
 				// unrecognized option
 				default:
 					if (0 == pass || LASTPASS == pass) {

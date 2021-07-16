@@ -237,7 +237,7 @@ char* GrowSubId(char* & p) {	// appends next part of ID
 	while (islabchar(*p)) {
 		*nidsubp++ = *p++;
 		// break at sub-word boundaries when new underscore block starts or ends
-		if (('_' == *p) != startsAtUnderscore) break;
+		if (Options::syx.IsSubwordSubstitution && (('_' == *p) != startsAtUnderscore)) break;
 	}
 	if (nidtemp+LINEMAX <= nidsubp) Error("ID too long, buffer overflow detected.", NULL, FATAL);
 	*nidsubp = 0;
