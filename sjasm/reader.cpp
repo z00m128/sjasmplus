@@ -232,12 +232,13 @@ void ResetGrowSubId() {
 char* GrowSubId(char* & p) {	// appends next part of ID
 	// The caller function ReplaceDefineInternal already assures the first char of ID is (isalpha() || '_')
 	// so there are no extra tests here to verify validity of first character (like GetID(..) must do)
+	const bool isSubwordSubstitution = Options::syx.IsSubwordSubstitution;	// help compiler -O2
 	bool startsAtUnderscore = ('_' == *p);
 	// add sub-parts delimiter in separate step (i.e. new ID grows like: "a", "a_", "a_b", ...)
 	while (islabchar(*p)) {
 		*nidsubp++ = *p++;
 		// break at sub-word boundaries when new underscore block starts or ends
-		if (Options::syx.IsSubwordSubstitution && (('_' == *p) != startsAtUnderscore)) break;
+		if (isSubwordSubstitution && (('_' == *p) != startsAtUnderscore)) break;
 	}
 	if (nidtemp+LINEMAX <= nidsubp) Error("ID too long, buffer overflow detected.", NULL, FATAL);
 	*nidsubp = 0;
