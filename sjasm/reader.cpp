@@ -232,17 +232,16 @@ void ResetGrowSubId() {
 char* GrowSubId(char* & p) {	// appends next part of ID
 	// The caller function ReplaceDefineInternal already assures the first char of ID is (isalpha() || '_')
 	// so there are no extra tests here to verify validity of first character (like GetID(..) must do)
-	if ('_' == *p) {
-		// add sub-parts delimiter in separate step (i.e. new ID grows like: "a", "a_", "a_b", ...
-		while ('_' == *p) *nidsubp++ = *p++;
-	} else while (*p && (isalnum((byte)*p) || '.' == *p || '?' == *p || '!' == *p || '#' == *p || '@' == *p)) {
-		// add sub-part of id till next underscore
+	bool startsAtUnderscore = ('_' == *p);
+	// add sub-parts delimiter in separate step (i.e. new ID grows like: "a", "a_", "a_b", ...)
+	while (islabchar(*p)) {
 		*nidsubp++ = *p++;
+		// break at sub-word boundaries when new underscore block starts or ends
+		if (('_' == *p) != startsAtUnderscore) break;
 	}
 	if (nidtemp+LINEMAX <= nidsubp) Error("ID too long, buffer overflow detected.", NULL, FATAL);
 	*nidsubp = 0;
-	if (!nidtemp[0]) return NULL;	// result is empty string, return NULL rather
-	return nidtemp;
+	return nidtemp[0] ? nidtemp : nullptr;	// return non-empty string or nullptr
 }
 
 char* GrowSubIdByExtraChar(char* & p) {	// append the next char even if not a legal label/ID char
