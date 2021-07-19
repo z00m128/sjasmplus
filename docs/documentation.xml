@@ -206,7 +206,8 @@
               <synopsis>- added <link linkend="s_cli">`--color`</link> to enable/disable ANSI coloring of errors/warnings
 - added <link linkend="s_cli">`--syntax=s`</link> mode to disable sub-word substitutions of DEFINEs
 - added at-sign prefix for <link linkend="s_local_labels">macro local labels</link> to act as non-macro local label
-- `SAVETRD` accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
+- <link linkend="po_savetrd">`SAVETRD`</link> accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
+- <link linkend="po_savetrd">`SAVETRD`</link> has optional argument to save BASIC with variables (length_minus_variables)
 - minor bugfixes (conditional block parser)
 </synopsis>
             </listitem>
@@ -2942,7 +2943,7 @@ START  ....     ; some code
           </varlistentry>
 
           <varlistentry>
-            <term>SAVETRD<indexterm id="po_savetrd"><primary>SAVETRD</primary></indexterm> &lt;filename_of_trd_image&gt;,&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
+            <term>SAVETRD<indexterm id="po_savetrd"><primary>SAVETRD</primary></indexterm> &lt;filename_of_trd_image&gt;,&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;[,&lt;length_minus_variables&gt;]]</term>
           </varlistentry>
           <varlistentry>
             <term>SAVETRD &lt;filename_of_trd_image&gt;,|&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
