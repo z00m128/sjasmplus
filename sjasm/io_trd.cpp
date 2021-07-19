@@ -231,7 +231,7 @@ static int ReturnWithError(const char* errorText, const char* fname, FILE* fileT
 }
 
 // use autostart == -1 to disable it (the valid autostart is 0..9999 as line number of BASIC program)
-int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace) {
+int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
 
 	// do some preliminary checks with file name and autostart - prepare final catalog entry data
 	union {
@@ -258,6 +258,15 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		Warning("zx.trdimage_add_file: autostart value is BASIC program line number (0..9999) (in lua use -1 otherwise).");
 		autostart = -1;
 	}
+	if (-1 != lengthMinusVars) {
+		if (!isExtensionB) {
+			Error("zx.trdimage_add_file: length without variables is for BASIC files only.");
+			return 0;
+		} else if (lengthMinusVars < 0 || length < lengthMinusVars) {
+			Error("zx.trdimage_add_file: length without variables is not in <0..length> range.");
+			return 0;
+		}
+	}
 
 	// more validations - for Lua (or SAVETRD letting wrong values go through)
 	if (!DeviceID) {
@@ -283,6 +292,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	if (isExtensionB) {
 		trdf.addressLo = byte(length);
 		trdf.addressHi = byte(length>>8);
+		if (-1 != lengthMinusVars) trdf.length = word(lengthMinusVars);
 	} else {
 		if (Lname <= int(STrdFile::NAME_FULL_SZ)) {
 			trdf.addressLo = byte(start);	// single letter extension => "start" field is used for start value

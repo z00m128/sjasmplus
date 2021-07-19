@@ -1063,7 +1063,7 @@ static void dirSAVETRD() {
 
 	bool exec = true, replace = false, addplace = false;
 	aint val;
-	int start = -1, length = -1, autostart = -1;
+	int start = -1, length = -1, autostart = -1, lengthMinusVars = -1;
 
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	std::unique_ptr<char[]> fnaamh;
@@ -1118,13 +1118,20 @@ static void dirSAVETRD() {
 					Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
 				}
 				autostart = val;
+				// optional length of BASIC without variables
+				if (anyComma(lp)) {
+					if (!ParseExpression(lp, val)) {
+						Error("[SAVETRD] Syntax error", bp, PASS3); return;
+					}
+					lengthMinusVars = val;
+				}
 			}
 		}
 	} else {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
-	if (exec) TRD_AddFile(fnaam.get(), fnaamh.get(), start, length, autostart, replace, addplace);
+	if (exec) TRD_AddFile(fnaam.get(), fnaamh.get(), start, length, autostart, replace, addplace, lengthMinusVars);
 }
 
 static void dirENCODING() {

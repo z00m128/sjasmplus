@@ -1,0 +1,29 @@
+# file opened: savetrd_basic_vars.asm
+ 1    0000                  ; test SAVETRD with "BASIC", using the extra optional argument for size w/o BASIC variables
+ 2    0000                  device zxspectrum128
+ 3    0000                  ORG #4000
+ 4    4000 01 02 03 04      DB 1,2,3,4      ; fake "BASIC" program
+ 5    4004
+ 6    4004                  EMPTYTRD "savetrd_basic_vars.trd","bas_vars"    ; create empty TRD image
+ 7    4004
+ 8    4004                  SAVETRD "savetrd_basic_vars.trd","0.B",#4000,21             ; valid, no autoline, no size w/o vars
+ 9    4004                  SAVETRD "savetrd_basic_vars.trd","1.B",#4000,21,34          ; valid, autoline 34, no size w/o vars
+10    4004                  SAVETRD "savetrd_basic_vars.trd","2.B",#4000,21,35,10       ; valid, autoline 34, size w/o vars 10
+11    4004
+12    4004                  ; parsing or logical errors
+savetrd_basic_vars.asm(13): error: zx.trdimage_add_file: length without variables is not in <0..length> range.
+13    4004                  SAVETRD "savetrd_basic_vars.trd","e0.B",#4000,21,36,21+1    ; size w/o vars too big
+savetrd_basic_vars.asm(14): error: [SAVETRD] Syntax error: SAVETRD "savetrd_basic_vars.trd","e1.B",#4000,21,37,
+14    4004                  SAVETRD "savetrd_basic_vars.trd","e1.B",#4000,21,37,        ; missing size w/o vars
+savetrd_basic_vars.asm(15): error: [SAVETRD] Syntax error: SAVETRD "savetrd_basic_vars.trd","e2.B",#4000,21,
+15    4004                  SAVETRD "savetrd_basic_vars.trd","e2.B",#4000,21,           ; missing autoline
+savetrd_basic_vars.asm(16): error: Unexpected: ,
+16    4004                  SAVETRD "savetrd_basic_vars.trd","e3.B",#4000,21,38,10,     ; extra comma
+savetrd_basic_vars.asm(17): warning: zx.trdimage_add_file: autostart value is BASIC program line number (0..9999) (in lua use -1 otherwise).
+savetrd_basic_vars.asm(17): error: zx.trdimage_add_file: length without variables is for BASIC files only.
+17    4004                  SAVETRD "savetrd_basic_vars.trd","e4.C",#4000,21,39,10      ; not a BASIC file
+18    4004
+# file closed: savetrd_basic_vars.asm
+
+Value    Label
+------ - -----------------------------------------------------------
