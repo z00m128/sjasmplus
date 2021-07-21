@@ -1,3 +1,11 @@
+## [1.18.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.3) - soon
+- added [`--color`](http://z00m128.github.io/sjasmplus/documentation.html#s_cli) to enable/disable ANSI coloring of errors/warnings
+- added [`--syntax=s`](http://z00m128.github.io/sjasmplus/documentation.html#s_cli) mode to disable sub-word substitutions of DEFINEs
+- added at-sign prefix for [macro local labels](http://z00m128.github.io/sjasmplus/documentation.html#s_local_labels) to act as non-macro local label
+- [`SAVETRD`](http://z00m128.github.io/sjasmplus/documentation.po_savetrd) accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
+- [`SAVETRD`](http://z00m128.github.io/sjasmplus/documentation.po_savetrd) has optional argument to save BASIC with variables (length_minus_variables)
+- minor bugfixes (conditional block parser)
+
 ## [1.18.2](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.2) - 14.2.2021
 - [may break old sources] new [exist operator](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to check label existence
 - the `--syntax=i` mode makes now also register parsing case insensitive

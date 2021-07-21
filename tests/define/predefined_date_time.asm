@@ -12,4 +12,4 @@
 ; 1.18.2 version check (needs update upon release)
     ASSERT 1 == (__SJASMPLUS__>>16)
     ASSERT 18 == ((__SJASMPLUS__>>8)&0xFF)
-    ASSERT 2 == (__SJASMPLUS__&0xFF)
+    ASSERT 3 == (__SJASMPLUS__&0xFF)
