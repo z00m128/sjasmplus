@@ -283,7 +283,7 @@
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
   --i8080                  Limit valid instructions to i8080 only (+ no fakes)
-  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)
+  --lr35902                Sharp LR35902/SM83 CPU instructions mode (+ no fakes)
   --outprefix=&lt;path&gt;       Prefix for save/output/.. filenames in directives
   Note: if the prefix is folder, the folder must exist before assembling. Prefix
         is applied only to filenames defined in source (not to CLI arguments).
@@ -770,11 +770,11 @@ $$lab $$lab    <a class="indexterm" name="op_label_page"></a>page of "lab" label
             <p>R800's MULUB and MULUW are recognised (but won't work on
             Z80, of course:)</p>
           </li><li class="listitem">
-            <p>Z80N, i8080 and LR35902 modes use the identical Z80 sjasmplus syntax (!), for the
+            <p>Z80N, i8080 and LR35902 (SM83) modes use the identical Z80 sjasmplus syntax (!), for the
 				correct (and incorrect) syntax examples of extended opcodes, please check the test files:
 				Z80N <a class="ulink" href="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_zx_spectrum_next_2_00_26.asm" target="_top">test 1</a>
 				<a class="ulink" href="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_next_syntax.lst" target="_top">test 2</a>
-				and LR35902 <a class="ulink" href="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_syntax_by_neo.lst" target="_top">test 1</a>
+				and LR35902 (SM83) <a class="ulink" href="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_syntax_by_neo.lst" target="_top">test 1</a>
 				<a class="ulink" href="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_specifics_exercise.lst" target="_top">test 2</a>
 				(also for the Z80 syntax examples you can check <a class="ulink" href="https://github.com/z00m128/sjasmplus/tree/master/tests/z80" target="_top">
 					Z80 tests</a>).

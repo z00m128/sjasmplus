@@ -405,7 +405,7 @@
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
   --i8080                  Limit valid instructions to i8080 only (+ no fakes)
-  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)
+  --lr35902                Sharp LR35902/SM83 CPU instructions mode (+ no fakes)
   --outprefix=&lt;path&gt;       Prefix for save/output/.. filenames in directives
   Note: if the prefix is folder, the folder must exist before assembling. Prefix
         is applied only to filenames defined in source (not to CLI arguments).
@@ -908,11 +908,11 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
           </listitem>
 
           <listitem>
-            <para>Z80N, i8080 and LR35902 modes use the identical Z80 sjasmplus syntax (!), for the
+            <para>Z80N, i8080 and LR35902 (SM83) modes use the identical Z80 sjasmplus syntax (!), for the
 				correct (and incorrect) syntax examples of extended opcodes, please check the test files:
 				Z80N <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_zx_spectrum_next_2_00_26.asm">test 1</ulink>
 				<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_next_syntax.lst">test 2</ulink>
-				and LR35902 <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_syntax_by_neo.lst">test 1</ulink>
+				and LR35902 (SM83) <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_syntax_by_neo.lst">test 1</ulink>
 				<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_specifics_exercise.lst">test 2</ulink>
 				(also for the Z80 syntax examples you can check <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/z80">
 					Z80 tests</ulink>).
