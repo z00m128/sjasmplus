@@ -678,8 +678,8 @@ static void dirSAVESNA() {
 	if (!DeviceID) {
 		Error("SAVESNA only allowed in real device emulation mode (See DEVICE)");
 		exec = false;
-	} else if (!IsZXSpectrumDevice(DeviceID)) {
-		Error("[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.");
+	} else if (!IsZXSpectrumDevice(DeviceID) && !IsAmstradCPCDevice(DeviceID)) {
+		Error("[SAVESNA] Device must be ZXSPECTRUM48, ZXSPECTRUM128 or AMSTRADCPC464.");
 		exec = false;
 	}
 
@@ -702,8 +702,14 @@ static void dirSAVESNA() {
 		exec = false; Error("[SAVESNA] No start address defined", bp, SUPPRESS);
 	}
 
-	if (exec && !SaveSNA_ZX(fnaam.get(), start)) {
-		Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
+	if (exec) {
+		if (IsZXSpectrumDevice(DeviceID)) {
+			exec = SaveSNA_ZX(fnaam.get(), start);
+		} else if (IsAmstradCPCDevice(DeviceID)) {
+			exec = SaveSNA_CPC(fnaam.get(), start);
+		}
+		if (!exec)
+			Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
 	}
 }
 

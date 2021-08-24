@@ -43,6 +43,15 @@ bool IsZXSpectrumDevice(char *name) {
 	return true;
 }
 
+bool IsAmstradCPCDevice(const char* name)
+{
+	if (strcmp(name, "AMSTRADCPC464"))
+	{
+		return false;
+	}
+	return true;
+}
+
 static void initRegularSlotDevice(CDevice* const device, const int32_t slotSize, const int32_t slotCount,
 								  const int pageCount, const int* const initialPages) {
 	for (int32_t slotAddress = 0; slotAddress < slotSize * slotCount; slotAddress += slotSize) {
@@ -156,6 +165,13 @@ static void DeviceNoSlot64k(CDevice **dev, CDevice *parent, aint ramtop) {
 	initRegularSlotDevice(*dev, 0x10000, 1, 32, initialPages);	// 32*64kiB = 2MiB
 }
 
+static void DeviceAmstradCPC464(CDevice** dev, CDevice* parent, aint ramtop) {
+	if (ramtop) WarningById(W_NOSLOT_RAMTOP);
+	*dev = new CDevice("AMSTRADCPC464", parent);
+	const int initialPages[] = { 0, 1, 2, 3 };
+	initRegularSlotDevice(*dev, 0x4000, 4, 4, initialPages);
+}
+
 int SetDevice(char *id, const aint ramtop) {
 	CDevice** dev;
 	CDevice* parent = nullptr;
@@ -194,6 +210,8 @@ int SetDevice(char *id, const aint ramtop) {
 				DeviceZxSpectrumNext(dev, parent, ramtop);
 			} else if (cmphstr(id, "noslot64k")) {
 				DeviceNoSlot64k(dev, parent, ramtop);
+			} else if (cmphstr(id, "amstradcpc464")) {
+				DeviceAmstradCPC464(dev, parent, ramtop);
 			} else {
 				return false;
 			}
