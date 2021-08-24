@@ -48,3 +48,8 @@ cpc464.asm(16): error: [SLOT] Slot number must be in range 0..3, or exact starti
 cpc464.asm(25): error: Write outside of device memory at: 65536
 25    FFFE 43 43 44 44      DB  "CCDD"  ; "DD" goes beyond 0x10000 -> lost (error reported)
 26    0002                  ASSERT {0} == "33"          ; still page 3 there
+27    0002
+# file closed: cpc464.asm
+
+Value    Label
+------ - -----------------------------------------------------------

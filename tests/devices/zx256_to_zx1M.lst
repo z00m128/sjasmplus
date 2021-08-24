@@ -715,7 +715,7 @@ zx256_to_zx1M.asm(98): error: [SAVESNA] Negative values are not allowed: SAVESNA
 100   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;
 101   0002                  ;;;;; non ZX device ;;;;;;
 102   0002                  DEVICE ZXSPECTRUMNEXT
-zx256_to_zx1M.asm(103): error: [SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.
+zx256_to_zx1M.asm(103): error: [SAVESNA] Device must be ZXSPECTRUM48, ZXSPECTRUM128 or AMSTRADCPC464.
 103   0002                  SAVESNA "toCheck_IsZXSpectrumDevice_method", 0      ;; will error out
 104   0002
 105   0002                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
