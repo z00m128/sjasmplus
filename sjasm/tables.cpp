@@ -616,6 +616,13 @@ CStringsList::CStringsList() : string(NULL), next(NULL)
 	// all initialized already
 }
 
+CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
+	string = STRDUP(stringSource);
+	next = nnext;
+	source = CurSourcePos;
+	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+}
+
 CStringsList::~CStringsList() {
 	if (string) free(string);
 	if (next) delete next;
@@ -820,13 +827,6 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 		p = p->next;
 	}
 	return 0;
-}
-
-CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
-	string = STRDUP(stringSource);
-	next = nnext;
-	source = CurSourcePos;
-	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 }
 
 CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {

@@ -1840,8 +1840,8 @@ static void DupWhileImplementation(bool isWhile) {
 		}
 		if (!parseOk) {
 			Error("[WHILE] Syntax error in <expression>", condition->string, SUPPRESS);
-			condition->string[0] = '0';		// force it to evaluate to zero
-			condition->string[1] = 0;
+			free(condition->string);			// release original string
+			condition->string = STRDUP("0");	// force it to evaluate to zero
 			val = 1;
 		}
 	} else {
