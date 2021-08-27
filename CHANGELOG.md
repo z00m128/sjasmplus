@@ -1,4 +1,4 @@
-## [1.18.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.3) - soon
+## [1.18.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.3) - 29.8.2021
 - added [`--color`](http://z00m128.github.io/sjasmplus/documentation.html#s_cli) to enable/disable ANSI coloring of errors/warnings
 - added [`--syntax=s`](http://z00m128.github.io/sjasmplus/documentation.html#s_cli) mode to disable sub-word substitutions of DEFINEs
 - added at-sign prefix for [macro local labels](http://z00m128.github.io/sjasmplus/documentation.html#s_local_labels) to act as non-macro local label

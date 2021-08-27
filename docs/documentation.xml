@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.18.2 Documentation [2021-02-14]</title>
+  <title>SjASMPlus 1.18.3 Documentation [2021-08-29]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -200,7 +200,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.18.3</term>
+            <term>29.8.2021 - 1.18.3</term>
 
             <listitem>
               <synopsis>- added <link linkend="s_cli">`--color`</link> to enable/disable ANSI coloring of errors/warnings
