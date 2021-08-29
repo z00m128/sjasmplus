@@ -1115,6 +1115,11 @@ EReturn SkipFile() {
 	int iflevel = 0;
 	while (ReadLine()) {
 		char* p = line;
+		if (isLabelStart(p) && !Options::syx.IsPseudoOpBOF) {
+			// this could be label, skip it (the --dirbol users can't use label + IF/... inside block)
+			while (islabchar(*p)) ++p;
+			if (':' == *p) ++p;
+		}
 		SkipBlanks(p);
 		if ('.' == *p) ++p;
 		if (cmphstr(p, "if") || cmphstr(p, "ifn") || cmphstr(p, "ifused") ||
@@ -1169,7 +1174,7 @@ int ReadLineNoMacro(bool SplitByColon) {
 int ReadLine(bool SplitByColon) {
 	DefinitionPos = TextFilePos();
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
-		if (!lijstp) return 0;
+		if (!lijstp || !lijstp->string) return 0;
 		DefinitionPos = lijstp->definition;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing

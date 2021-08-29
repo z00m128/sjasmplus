@@ -197,13 +197,15 @@ int TRD_SaveEmpty(const char* fname, const char label[8]) {
 }
 
 ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & nameL) {
+	constexpr int baseSz = int(STrdFile::NAME_BASE_SZ);	// pre-cast to `int` (vs `nameL`)
+	const char* ext = strrchr(inputName, '.');
+	const int maxL = std::min(baseSz, ext ? int(ext-inputName) : baseSz);
 	nameL = 0;
-	while (inputName[nameL] && ('.' != inputName[nameL]) && nameL < int(STrdFile::NAME_BASE_SZ)) {
+	while (inputName[nameL] && nameL < maxL) {
 		binName[nameL] = inputName[nameL];
 		++nameL;
 	}
-	while (nameL < int(STrdFile::NAME_BASE_SZ)) binName[nameL++] = ' ';
-	const char* ext = strrchr(inputName, '.');
+	while (nameL < baseSz) binName[nameL++] = ' ';
 	while (ext && ext[1] && nameL < int(STrdFile::NAME_ALT_FULL_SZ)) {
 		binName[nameL] = ext[1];
 		++nameL;
@@ -215,7 +217,7 @@ ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & 
 	int fillIdx = nameL;
 	while (fillIdx < 12) binName[fillIdx++] = 0;
 	if (int(STrdFile::NAME_FULL_SZ) < nameL) return THREE_LETTER_EXTENSION;
-	switch (binName[STrdFile::NAME_BASE_SZ]) {
+	switch (binName[baseSz]) {
 		case 'B': case 'C': case 'D': case '#':
 			return OK;
 	}
@@ -229,7 +231,7 @@ static int ReturnWithError(const char* errorText, const char* fname, FILE* fileT
 }
 
 // use autostart == -1 to disable it (the valid autostart is 0..9999 as line number of BASIC program)
-int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace) {
+int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
 
 	// do some preliminary checks with file name and autostart - prepare final catalog entry data
 	union {
@@ -256,6 +258,15 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		Warning("zx.trdimage_add_file: autostart value is BASIC program line number (0..9999) (in lua use -1 otherwise).");
 		autostart = -1;
 	}
+	if (-1 != lengthMinusVars) {
+		if (!isExtensionB) {
+			Error("zx.trdimage_add_file: length without variables is for BASIC files only.");
+			return 0;
+		} else if (lengthMinusVars < 0 || length < lengthMinusVars) {
+			Error("zx.trdimage_add_file: length without variables is not in <0..length> range.");
+			return 0;
+		}
+	}
 
 	// more validations - for Lua (or SAVETRD letting wrong values go through)
 	if (!DeviceID) {
@@ -281,6 +292,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	if (isExtensionB) {
 		trdf.addressLo = byte(length);
 		trdf.addressHi = byte(length>>8);
+		if (-1 != lengthMinusVars) trdf.length = word(lengthMinusVars);
 	} else {
 		if (Lname <= int(STrdFile::NAME_FULL_SZ)) {
 			trdf.addressLo = byte(start);	// single letter extension => "start" field is used for start value

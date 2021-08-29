@@ -210,7 +210,7 @@ labels_syntax_and_find.asm(167): error: Unexpected: cpl
 173   3570                  ; ^^ the expression parser will eat whole "$ and 7", no instruction/error here
 174   3570                  ; obviously *this* does NOT report error even after change, it's valid expression...
 175   3570
-176   3570              ; FIXME v1.18.2 (1.19.0?) - added "exist" operator for expressions
+176   3570              ; v1.18.2 - added "exist" operator for expressions
 177   3570                  ASSERT exist label && exist label.local && exist mod1.label && exist mod1.label.local && exist mod1.mod1unique
 178   3570                  ASSERT exist mod1.nested.label && exist mod1.nested.label.local && exist mod1.nested.nest1unique
 179   3570                  ASSERT exist noColonProblemDemonstration    ; should preserve "unused" flag!

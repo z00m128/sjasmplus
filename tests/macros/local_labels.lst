@@ -1,0 +1,26 @@
+# file opened: local_labels.asm
+ 1    0000                macro test
+ 2    0000 ~            @.kip3      ; prevent macro-local label and create regular local label instead
+ 3    0000 ~            kip0
+ 4    0000 ~            .kip1
+ 5    0000 ~            @.kip2
+ 6    0000                endm
+ 7    0000
+ 8    0000                module main
+ 9    0000                  ; should produce labels: main.hoi, main.kip0, 0>kip1, main.kip0.kip2, main.hoi.kip3
+10    0000              hoi test
+10    0000             >@.kip3      ; prevent macro-local label and create regular local label instead
+10    0000             >kip0
+10    0000             >.kip1
+10    0000             >@.kip2
+11    0000                endmodule
+12    0000
+# file closed: local_labels.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X 0>kip1
+0x0000 X main.hoi
+0x0000 X main.hoi.kip3
+0x0000 X main.kip0
+0x0000 X main.kip0.kip2

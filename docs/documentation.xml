@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.18.2 Documentation [2021-02-14]</title>
+  <title>SjASMPlus 1.18.3 Documentation [2021-08-29]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -200,6 +200,20 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>29.8.2021 - 1.18.3</term>
+
+            <listitem>
+              <synopsis>- added <link linkend="s_cli">`--color`</link> to enable/disable ANSI coloring of errors/warnings
+- added <link linkend="s_cli">`--syntax=s`</link> mode to disable sub-word substitutions of DEFINEs
+- added at-sign prefix for <link linkend="s_local_labels">macro local labels</link> to act as non-macro local label
+- <link linkend="po_savetrd">`SAVETRD`</link> accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
+- <link linkend="po_savetrd">`SAVETRD`</link> has optional argument to save BASIC with variables (length_minus_variables)
+- minor bugfixes (conditional block parser)
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>14.2.2021 - 1.18.2</term>
 
             <listitem>
@@ -391,7 +405,7 @@
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit" DD00 and "break" DD01 fake instructions)
   --i8080                  Limit valid instructions to i8080 only (+ no fakes)
-  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)
+  --lr35902                Sharp LR35902/SM83 CPU instructions mode (+ no fakes)
   --outprefix=&lt;path&gt;       Prefix for save/output/.. filenames in directives
   Note: if the prefix is folder, the folder must exist before assembling. Prefix
         is applied only to filenames defined in source (not to CLI arguments).
@@ -414,6 +428,9 @@
   --fullpath               Show full path to file in errors
   Note: the "fullpath" starts from current working directory, not from file system
 		root (the MS_VS build was fixed to behave this way since v1.15.0)
+  --color=[on|off|auto]    Enable or disable ANSI coloring of warnings/errors
+  Note: auto detection checks for existence of environment variable TERM, and its
+		content is scanned for sub-string "color" (like "xterm-256color")
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
   -W[no-]&lt;warning_id&gt;      Disables/enabled particular warning type
@@ -439,6 +456,7 @@
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
   M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
+  s      Use only "simple" whole-word substitutions, no sub-words (since v1.18.3)
   w      Warnings option: report warnings as errors
   m      *DEPRECATED* use -Wno-rdlow (was "switch off Accessing low memory warning")</synopsis>
   &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
@@ -604,6 +622,9 @@ classic equ $+1 : ld a,7        ; often even split to two lines</programlisting>
       <para>(since v1.18.0) If you start the label with an ! (exclamation mark), it will not
       affect following local labels (same syntax as <ulink url="http://www.xl2s.tk/">sjasm</ulink>).</para>
 
+      <para>(since v1.18.3) Local label inside macro prefixed with @ (at sign) acts as regular local label,
+      otherwise (older behaviour) the local label is local to each macro's instance.</para>
+
       <para><example>
           <title>docs_examples/s_local_labels.asm</title>
 
@@ -628,6 +649,19 @@ Cls:                        ; main.vdp.Cls
 
 Main.event DB 0             ; main.Main.event
     ENDMODULE</programlisting></para>
+        </example></para>
+
+        <para><example>
+          <title>local labels inside macro</title>
+
+          <programlisting>  macro test
+.kip0       ; this is local to every instance of macro
+@.kip1      ; syntax added in v1.18.3
+  endm
+
+  module main
+hoi test    ; produce labels: main.hoi, 0>kip0, main.hoi.kip1
+  endmodule</programlisting>
         </example></para>
     </section>
 
@@ -874,11 +908,11 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
           </listitem>
 
           <listitem>
-            <para>Z80N, i8080 and LR35902 modes use the identical Z80 sjasmplus syntax (!), for the
+            <para>Z80N, i8080 and LR35902 (SM83) modes use the identical Z80 sjasmplus syntax (!), for the
 				correct (and incorrect) syntax examples of extended opcodes, please check the test files:
 				Z80N <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_zx_spectrum_next_2_00_26.asm">test 1</ulink>
 				<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/z80n/op_next_syntax.lst">test 2</ulink>
-				and LR35902 <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_syntax_by_neo.lst">test 1</ulink>
+				and LR35902 (SM83) <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_syntax_by_neo.lst">test 1</ulink>
 				<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/lr35902/LR35902_specifics_exercise.lst">test 2</ulink>
 				(also for the Z80 syntax examples you can check <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/z80">
 					Z80 tests</ulink>).
@@ -2824,7 +2858,13 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the snapshot for emulators of ZX-Spectrum. (If start address is omitted,
-              the one provided by <link linkend="po_end">END</link> is used)<example>
+		  the one provided by <link linkend="po_end">END</link> is used)</para>
+
+              <para>The snapshot header content is hard-wired in sjasmplus binary (disabled interrupts may surprise some users, you can check
+		the <ulink url="https://github.com/z00m128/sjasmplus/blob/master/sjasm/io_snapshots.cpp#L55">source</ulink> to see all the values).
+		If you absolutely need different defaults and can't afford init-code modifying the state, you can post-patch the resulting SNA
+		file directly from source, see <ulink url="https://github.com/z00m128/sjasmplus/issues/139">Issue #139</ulink> for example.
+		<example>
                   <title></title>
 
                   <para><programlisting>    DEVICE ZXSPECTRUM128
@@ -2903,7 +2943,7 @@ START  ....     ; some code
           </varlistentry>
 
           <varlistentry>
-            <term>SAVETRD<indexterm id="po_savetrd"><primary>SAVETRD</primary></indexterm> &lt;filename_of_trd_image&gt;,&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
+            <term>SAVETRD<indexterm id="po_savetrd"><primary>SAVETRD</primary></indexterm> &lt;filename_of_trd_image&gt;,&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;[,&lt;length_minus_variables&gt;]]</term>
           </varlistentry>
           <varlistentry>
             <term>SAVETRD &lt;filename_of_trd_image&gt;,|&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>

@@ -55,11 +55,17 @@ char* PreviousIsLabel = nullptr;
 // The ignore invalid char after feature disconnected from "setNameSpace" to "ignoreCharAfter"
 // (it's for evaluating labels straight from the expressions, without copying them out first)
 // The prefix "!" is now recognized as "do not set main label" for following local labels
+// since v1.18.3:
+// Inside macro prefix "@." will create non-macro local label instead of macro's instance
 char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	if ('!' == *naam) {
 		setNameSpace = false;
 		++naam;
 	}
+	// check if local label defined inside macro wants to become non-macro local label
+	const bool escMacro = setNameSpace && macrolabp && ('@' == naam[0]) && ('.' == naam[1]);
+	if (escMacro) ++naam;			// such extra "@" is consumed right here and only '.' is left
+	// regular single prefix case in other use cases
 	const bool global = '@' == *naam;
 	const bool local = '.' == *naam;
 	if (!isLabelStart(naam)) {		// isLabelStart assures that only single modifier exist
@@ -68,7 +74,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 		return nullptr;
 	}
 	if (global || local) ++naam;	// single modifier is parsed
-	const bool inMacro = local && macrolabp;
+	const bool inMacro = !escMacro && local && macrolabp;
 	const bool inModule = !inMacro && !global && ModuleName[0];
 	// check all chars of label
 	const char* np = naam;
@@ -610,6 +616,13 @@ CStringsList::CStringsList() : string(NULL), next(NULL)
 	// all initialized already
 }
 
+CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
+	string = STRDUP(stringSource);
+	next = nnext;
+	source = CurSourcePos;
+	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+}
+
 CStringsList::~CStringsList() {
 	if (string) free(string);
 	if (next) delete next;
@@ -814,13 +827,6 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 		p = p->next;
 	}
 	return 0;
-}
-
-CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
-	string = STRDUP(stringSource);
-	next = nnext;
-	source = CurSourcePos;
-	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 }
 
 CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {

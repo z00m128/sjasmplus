@@ -1,0 +1,4 @@
+Invalid --color setting "", use: on|off|auto.
+optionColorOther.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+optionColorOther.asm(3): error: Unrecognized instruction: some_error line
+> something

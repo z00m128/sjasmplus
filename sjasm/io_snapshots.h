@@ -31,7 +31,7 @@
 #ifndef __IO_SNAPSHOTS
 #define __IO_SNAPSHOTS
 
-int SaveSNA_ZX(char* fname, unsigned short start);
+int SaveSNA_ZX(char* fname, word start);
 
 #endif
 

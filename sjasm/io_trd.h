@@ -35,7 +35,7 @@ enum ETrdFileName { OK, INVALID_EXTENSION, THREE_LETTER_EXTENSION };
 
 int TRD_SaveEmpty(const char* fname, const char label[8]);
 ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & nameL);
-int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace);
+int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars = -1);
 
 /**
  * @brief Checks TRD file and return absolute offset + length into the raw file.

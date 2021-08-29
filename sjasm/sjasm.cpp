@@ -43,7 +43,7 @@ static void PrintHelpMain() {
 	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
 	//     |<-- ...8901234567890123456789012345678901234567890123456789012... 80 chars -->|
 	_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
-	_COUT "Copyright 2004-2020 by Aprisobal and all other participants" _ENDL;
+	_COUT "Copyright 2004-2021 by Aprisobal and all other participants" _ENDL;
 	//_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
 	//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
@@ -68,6 +68,7 @@ static void PrintHelpMain() {
 	_COUT "  --msg=[all|war|err|none|lst|lstlab]" _ENDL;
 	_COUT "                           Stderr messages verbosity (\"all\" is default)" _ENDL;
 	_COUT "  --fullpath               Show full path to file in errors" _ENDL;
+	_COUT "  --color=[on|off|auto]    Enable or disable ANSI coloring of warnings/errors" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
 	_COUT "  -                        Reads STDIN as source (even in between regular files)" _ENDL;
@@ -110,6 +111,7 @@ namespace Options {
 	bool IsLongPtr = false;
 	bool SortSymbols = false;
 	bool IsBigEndian = false;
+	bool HasAnsiColours = false;
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
@@ -423,6 +425,8 @@ namespace Options {
 					break;
 				// M - alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
 				case 'M': syx.Is_M_Memory = true; break;
+				// s - switch off sub-word substitution in DEFINEs (s like "Simple defines" or "Sub word")
+				case 's': syx.IsSubwordSubstitution = false; break;
 				// unrecognized option
 				default:
 					if (0 == pass || LASTPASS == pass) {
@@ -527,6 +531,16 @@ namespace Options {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
 					IsShowFullPath = 1;
+				} else if (!strcmp(opt, "color")) {
+					if (!strcmp("on", val)) {
+						Options::HasAnsiColours = true;
+					} else if (!strcmp("off", val)) {
+						Options::HasAnsiColours = false;
+					} else if (!strcmp("auto", val)) {
+						// already heuristically detected, nothing to do
+					} else {
+						_CERR "Invalid --color setting \"" _CMDL val _CMDL "\", use: on|off|auto." _ENDL;
+					}
 				} else if (!strcmp(opt, "nologo")) {
 					HideLogo = 1;
 				} else if (!strcmp(opt, "dos866")) {
@@ -616,7 +630,10 @@ int main(int argc, char* argv[]) {
 int main(int argc, char **argv) {
 #endif
 	char buf[MAX_PATH];
-	int base_encoding;
+	// try to auto-detect ANSI-colour support (true if env.var. TERM exist and contains "color" substring)
+	const char* envTerm = std::getenv("TERM");
+	Options::HasAnsiColours = envTerm && strstr(envTerm, "color");
+
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
 	sourceFiles.reserve(32);
@@ -734,7 +751,7 @@ int main(int argc, char **argv) {
 
 	// create default output name, if not specified
 	ConstructDefaultFilename(Options::DestinationFName, LINEMAX, ".out");
-	base_encoding = ConvertEncoding;
+	int base_encoding = ConvertEncoding;
 
 	// init some vars
 	InitCPU();

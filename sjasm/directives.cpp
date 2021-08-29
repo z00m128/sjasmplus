@@ -282,6 +282,8 @@ static void dirORG() {
 		Error("[ORG] Syntax error in <address>", lp, SUPPRESS);
 		return;
 	}
+	// crop (with warning) address in device or non-longptr mode to 16bit address range
+	if ((DeviceID || !Options::IsLongPtr) && !check16u(val)) val &= 0xFFFF;
 	CurAddress = val;
 	if (DISP_NONE != PseudoORG && warningNotSuppressed()) WarningById(W_DISPLACED_ORG);
 	if (!DeviceID) return;
@@ -336,6 +338,8 @@ static void dirDISP() {
 	} else {
 		dispPageNum = LABEL_PAGE_UNDEFINED;
 	}
+	// crop (with warning) address in device or non-longptr mode to 16bit address range
+	if ((DeviceID || !Options::IsLongPtr) && !check16u(valAdr)) valAdr &= 0xFFFF;
 	// everything is valid, switch to DISP mode (dispPageNum is already set above)
 	adrdisp = CurAddress;
 	CurAddress = valAdr;
@@ -1059,7 +1063,7 @@ static void dirSAVETRD() {
 
 	bool exec = true, replace = false, addplace = false;
 	aint val;
-	int start = -1, length = -1, autostart = -1;
+	int start = -1, length = -1, autostart = -1, lengthMinusVars = -1;
 
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	std::unique_ptr<char[]> fnaamh;
@@ -1114,13 +1118,20 @@ static void dirSAVETRD() {
 					Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
 				}
 				autostart = val;
+				// optional length of BASIC without variables
+				if (anyComma(lp)) {
+					if (!ParseExpression(lp, val)) {
+						Error("[SAVETRD] Syntax error", bp, PASS3); return;
+					}
+					lengthMinusVars = val;
+				}
 			}
 		}
 	} else {
 		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
-	if (exec) TRD_AddFile(fnaam.get(), fnaamh.get(), start, length, autostart, replace, addplace);
+	if (exec) TRD_AddFile(fnaam.get(), fnaamh.get(), start, length, autostart, replace, addplace, lengthMinusVars);
 }
 
 static void dirENCODING() {
@@ -1400,15 +1411,30 @@ static void dirIFNDEF() {
 	}
 }
 
+static void dirElseCheckLiveDup() {
+	if (RepeatStack.empty()) return;
+	if (!RepeatStack.top().IsInWork) return;
+
+	// Seems some ELSE/ELSEIF/ENDIF was encountered inside DUP->EDUP without starting IF
+	// -> probably IF was outside of DUP->EDUP block, which is not legal in sjasmplus
+	// terminate the current DUP->EDUP macro early and report the open ELSE/ELSEIF/ENDIF
+	Error("Conditional block must start and finish inside the repeat block, nested completely");
+	lijstp = nullptr;
+	RepeatStack.top().RepeatCount = 0;
+}
+
 static void dirELSE() {
+	dirElseCheckLiveDup();
 	Error("ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF");
 }
 
 static void dirELSEIF() {
+	dirElseCheckLiveDup();
 	Error("ELSEIF without IF/IFN");
 }
 
 static void dirENDIF() {
+	dirElseCheckLiveDup();
 	Error("ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF");
 }
 
@@ -1549,6 +1575,9 @@ static void dirEXPORT() {
 	if (!IsLabelNotFound) WriteExp(p, val);
 }
 
+static const char AnsiDisplayBeg[] = "\033[36m";
+static const char AnsiDisplayEnd[] = "\033[m";
+
 static void dirDISPLAY() {
 	char decprint = 'H';
 	char e[LINEMAX + 32], optionChar;		// put extra buffer at end for particular H/A/D number printout
@@ -1641,7 +1670,11 @@ static void dirDISPLAY() {
 	*ep = 0; // end line
 
 	if (LASTPASS == pass && *e) {
-		_CERR "> " _CMDL e _ENDL;
+		if (Options::HasAnsiColours) {
+			_CERR "> " _CMDL AnsiDisplayBeg _CMDL e _CMDL AnsiDisplayEnd _ENDL;
+		} else {
+			_CERR "> " _CMDL e _ENDL;
+		}
 	}
 }
 
@@ -1807,8 +1840,8 @@ static void DupWhileImplementation(bool isWhile) {
 		}
 		if (!parseOk) {
 			Error("[WHILE] Syntax error in <expression>", condition->string, SUPPRESS);
-			condition->string[0] = '0';		// force it to evaluate to zero
-			condition->string[1] = 0;
+			free(condition->string);			// release original string
+			condition->string = STRDUP("0");	// force it to evaluate to zero
 			val = 1;
 		}
 	} else {

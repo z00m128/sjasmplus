@@ -173,7 +173,7 @@ noColonProblemDemonstration EQU $   and 7
     ; ^^ the expression parser will eat whole "$ and 7", no instruction/error here
     ; obviously *this* does NOT report error even after change, it's valid expression...
 
-; FIXME v1.18.2 (1.19.0?) - added "exist" operator for expressions
+; v1.18.2 - added "exist" operator for expressions
     ASSERT exist label && exist label.local && exist mod1.label && exist mod1.label.local && exist mod1.mod1unique
     ASSERT exist mod1.nested.label && exist mod1.nested.label.local && exist mod1.nested.nest1unique
     ASSERT exist noColonProblemDemonstration    ; should preserve "unused" flag!
