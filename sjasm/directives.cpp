@@ -678,8 +678,8 @@ static void dirSAVESNA() {
 	if (!DeviceID) {
 		Error("SAVESNA only allowed in real device emulation mode (See DEVICE)");
 		exec = false;
-	} else if (!IsZXSpectrumDevice(DeviceID) && !IsAmstradCPCDevice(DeviceID)) {
-		Error("[SAVESNA] Device must be ZXSPECTRUM48, ZXSPECTRUM128 or AMSTRADCPC464.");
+	} else if (!IsZXSpectrumDevice(DeviceID)) {
+		Error("[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.");
 		exec = false;
 	}
 
@@ -703,12 +703,7 @@ static void dirSAVESNA() {
 	}
 
 	if (exec) {
-		if (IsZXSpectrumDevice(DeviceID)) {
-			exec = SaveSNA_ZX(fnaam.get(), start);
-		} else if (IsAmstradCPCDevice(DeviceID)) {
-			exec = SaveSNA_CPC(fnaam.get(), start);
-		}
-		if (!exec)
+		if (!SaveSNA_ZX(fnaam.get(), start))
 			Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
 	}
 }
@@ -2276,6 +2271,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".savetap", dirSAVETAP);
 	DirectivesTable.insertd(".emptytrd", dirEMPTYTRD);
 	DirectivesTable.insertd(".savetrd", dirSAVETRD);
+	DirectivesTable.insertd(".savecpcsna", dirSAVECPCSNA);
 	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
 	DirectivesTable.insertd(".winexec", dirWINEXEC);
