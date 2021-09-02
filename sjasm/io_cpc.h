@@ -1,10 +1,8 @@
-/* 
+/*
 
-  SjASMPlus Z80 Cross Compiler
+  SjASMPlus Z80 Cross Compiler - modified - SAVECPCSNA extension
 
-  This is modified sources of SjASM by Aprisobal - aprisobal@tut.by
-
-  Copyright (c) 2006 Sjoerd Mastijn
+  Copyright (c) 2006 Sjoerd Mastijn (original SW)
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -26,13 +24,15 @@
 
 */
 
-// io_snapshots.h
+// io_cpc.h
 
-#ifndef __IO_SNAPSHOTS
-#define __IO_SNAPSHOTS
+#ifndef __IO_CPC
+#define __IO_CPC
 
-int SaveSNA_ZX(char* fname, word start);
+int SaveSNA_CPC(const char* fname, word start);
+
+void dirSAVECPCSNA();
 
 #endif
 
-//eof io_snapshots.h
+//eof io_cpc.h

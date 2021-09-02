@@ -24,4 +24,4 @@ start:
     out     (c),a   ; INKR
     jr      .borderMess
 
-    SAVESNA "cpc464_savesna.sna", start
+    SAVECPCSNA "cpc464_savesna.sna", start
