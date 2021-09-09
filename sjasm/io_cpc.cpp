@@ -36,6 +36,15 @@ namespace
 		fclose(fileToClose);
 		return 0;
 	}
+
+	static bool isCPC6128() {
+		return strcmp(DeviceID, "AMSTRADCPC464");
+	}
+
+	static word getCPCMemoryDepth() {
+		return Device->PagesCount * 0x10;
+	}
+
 }
 
 int SaveSNA_CPC(const char* fname, word start) {
@@ -70,7 +79,7 @@ int SaveSNA_CPC(const char* fname, word start) {
 		0x00,		// interlace & skew
 		0x07,		// max raster
 		0x00, 0x00, // cursor start
-		0x30, 0x00, // display (xxPPSSOO) 
+		0x30, 0x00, // display (xxPPSSOO) -> 0xC000 based screen
 		0x00, 0x00, // cursor addr
 		0x00, 0x00  // light pen
 	};
@@ -93,24 +102,25 @@ int SaveSNA_CPC(const char* fname, word start) {
 	// multi-config (RMR: 100I ULVM)
 	snbuf[0x40] = 0b1000'01'01; // Upper ROM paged out, Lower ROM paged in, Mode 1
 	// RAM config (MMR see https://www.grimware.org/doku.php/documentations/devices/gatearray#mmr)
-	snbuf[0x41] = 0;
+	snbuf[0x41] = 0; // default RAM paging
 	// set the crtc registers to the default values
 	snbuf[0x42] = 0x0D;	// selected crtc reg
 	for (int i = 0; i < 18; ++i)
 		snbuf[0x43 + i] = crtc_defaults[i];
 
-	snbuf[0x6B] = 0x40; // 64Kb RAM
+	word memdepth = getCPCMemoryDepth();
+	snbuf[0x6B] = memdepth & 0xFF;
+	snbuf[0x6C] = memdepth >> 8;
 
 	// v2 format fields
-	snbuf[0x6D] = 0;	// machine type (0 = 464, 1 = 664, 2 = 6128)
+	snbuf[0x6D] = isCPC6128() ? 2 : 0;	// machine type (0 = 464, 1 = 664, 2 = 6128)
 
 	if (fwrite(snbuf, 1, SNA_HEADER_SIZE, ff) != SNA_HEADER_SIZE) {
 		return writeError(fname, ff);
 	}
 
-	const int pages464[4] = { 0, 1, 2, 3 };
-
-	for (const int page : pages464) {
+	// Write the pages out in order
+	for (int page = 0; page < Device->PagesCount; ++page) {
 		if ((aint)fwrite(Device->GetPage(page)->RAM, 1, Device->GetPage(page)->Size, ff) != Device->GetPage(page)->Size) {
 			return writeError(fname, ff);
 		}
