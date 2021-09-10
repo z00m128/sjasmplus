@@ -53,7 +53,7 @@ int SaveSNA_CPC(const char* fname, word start) {
 		Error("SAVECPCSNA only allowed in real device emulation mode (See DEVICE)"); return 0;
 	}
 	else if (!IsAmstradCPCDevice(DeviceID)) {
-		Error("[SAVECPCSNA] Device must be AMSTRADCPC464."); return 0;
+		Error("[SAVECPCSNA] Device must be AMSTRADCPC464 or AMSTRADCPC6128."); return 0;
 	}
 
 	FILE* ff;
