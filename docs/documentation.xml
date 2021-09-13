@@ -68,7 +68,7 @@
           </listitem>
 
           <listitem>
-            <para>Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op DEVICE)</para>
+            <para>Virtual device mode for common machines: ZX 128, ZX Next, Amstrad CPC, … (pseudo op DEVICE)</para>
           </listitem>
 
           <listitem>
@@ -77,6 +77,10 @@
 
           <listitem>
             <para>ZX Spectrum Next specific features and directives (Z80N, 8ki memory paging, SAVENEX)</para>
+          </listitem>
+
+          <listitem>
+            <para>Amstrad CPC 464/6128 specific directives (SAVECPCSNA)</para>
           </listitem>
 
           <listitem>
@@ -111,7 +115,7 @@
 
       <para>Thanks to:<itemizedlist>
           <listitem>
-            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Ped7g</emphasis> - additional
+            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Ped7g, Dart Alver, Oli Wilkinson</emphasis> - additional
             programming;</para>
           </listitem>
 
@@ -157,7 +161,7 @@
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, Dart Alver, LVD</emphasis> -
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, LVD</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
 
@@ -198,6 +202,15 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>WIP - 1.18.4</term>
+
+            <listitem>
+              <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>, <link linkend="po_savecpcsna">`SAVECPCSNA`</link>) - by Oli Wilkinson
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>29.8.2021 - 1.18.3</term>
@@ -1305,14 +1318,14 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
-            <term>AMSTRADCPC464<indexterm id="device_cpc48"><primary>AMSTRADCPC464</primary></indexterm></term>
+            <term>AMSTRADCPC464<indexterm id="device_cpc464"><primary>AMSTRADCPC464</primary></indexterm></term>
 
             <listitem>
-              <para>Has 4 slots (0-3) of 0x4000 and 4 pages (0-3) of 0x4000, totalling 64K. These pages are mapped linearly as
+              <para>Has 4 slots (0-3) of size 0x4000 and 4 pages (0-3) of 0x4000, totalling 64K. These pages are mapped linearly as
               { 0, 1, 2, 3 }.</para>
             </listitem>
           </varlistentry>
-          
+
           <varlistentry>
             <term>AMSTRADCPC6128<indexterm id="device_cpc6128"><primary>AMSTRADCPC6128</primary></indexterm></term>
 
@@ -1321,7 +1334,7 @@ StartProg:
               { 0, 1, 2, 3 }.</para>
             </listitem>
           </varlistentry>
-          
+
         </variablelist></para>
 
       <para>If you want to see other devices you must write to us. See <link
@@ -1958,6 +1971,7 @@ counter = counter + 1
  NOSLOT64K      ; Single slot (slot 0) covering full 64kiB address range of Z80, 32 pages
  AMSTRADCPC464  ; Amstrad CPC 464 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
  AMSTRADCPC6128 ; Amstrad CPC 6128 (like 464 with 8 pages)
+
  ;disable:
    DEVICE NONE
  ;enable:
@@ -2193,7 +2207,7 @@ will output to the console strings:
             <listitem>
               <para>The assembler will stop at this point. The pseudo-op
               END does NOT work in the beginning of line (even with --dirbol).
-              The optional argument is used by SAVESNA, SAVESNACPC, SAVETAP and SAVENEX.</para>
+              The optional argument is used by SAVESNA, SAVECPCSNA, SAVETAP and SAVENEX.</para>
             </listitem>
           </varlistentry>
 
@@ -2896,10 +2910,10 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term>SAVESNACPC<indexterm id="po_savesnacpc"><primary>SAVESNACPC</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
+            <term>SAVECPCSNA<indexterm id="po_savecpcsna"><primary>SAVECPCSNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
-              <para><emphasis>Work only in AMSTRADCPC464 / AMSTRADCPC6126 real device emulation mode. See
+              <para><emphasis>Work only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the snapshot for emulators of Amstrad CPC machines. (If start address is omitted,
@@ -2918,11 +2932,11 @@ START  .... ;something code
     ORG $1200
 START  .... ;some code
     RET
-    SAVESNACPC "game.sna",START ;save snapshot to file game.sna. Start address is START ($1200)</programlisting></para>
+    SAVECPCSNA "game.sna",START ;save snapshot to file game.sna. Start address is START ($1200)</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
-       
+
           <varlistentry>
             <term><para>SAVETAP<indexterm id="po_savetap"><primary>SAVETAP</primary></indexterm> &lt;filename&gt;,BASIC,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;autorunline&gt;[,&lt;lengthwithoutvars&gt;]]</para>
             <para>SAVETAP &lt;filename&gt;,CODE,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;[,&lt;optional3rdparam&gt;]]</para>

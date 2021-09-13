@@ -36,9 +36,10 @@ Main Features
 * Multi file output, file updating, various types of exports
 * Structures to work easily with structured data in memory (`STRUCT` pseudo-op)
 * Relocation data generator to support SymbOS-like relocation of executables
-* Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op `DEVICE`)
+* Virtual device mode for common machines: ZX 128, ZX Next, Amstrad CPC, … (pseudo op `DEVICE`)
 * ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD…)
 * ZX Spectrum Next specific features and directives (Z80N, 8ki memory paging, `SAVENEX`)
+* Amstrad CPC 464/6128 specific directives (`SAVECPCSNA`)
 * Correctness is assured by Cirrus-CI with 380+ automated tests (that's also 380+ examples of usage!)
 * Fake instructions as `LD HL,DE` (`LD H,D:LD L,E`) and more
 * Code inlining through colon (`LD A,C:INC A:PUSH AF:IFDEF FX:LD A,D:ENDIF`…)
