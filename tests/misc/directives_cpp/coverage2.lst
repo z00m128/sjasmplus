@@ -109,6 +109,15 @@ coverage2.asm(59): error: Syntax error: @
 64    000D ~                    false
 65    000D                  ENDIF
 66    000D
+67    000D                  DEVICE ZXSPECTRUM48
+coverage2.asm(68): error: Syntax error: &
+coverage2.asm(68): error: Unexpected: &
+68    000D                  SAVESNA "coverage2.sna", &
+coverage2.asm(69): error: [SAVESNA] Negative values are not allowed: SAVESNA "coverage2.sna", -1
+69    000D                  SAVESNA "coverage2.sna", -1
+coverage2.asm(70): error: [SAVESNA] No start address defined: SAVESNA "coverage2.sna"
+70    000D                  SAVESNA "coverage2.sna"
+71    000D
 # file closed: coverage2.asm
 
 Value    Label
