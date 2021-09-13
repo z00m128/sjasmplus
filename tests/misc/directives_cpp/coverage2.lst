@@ -90,7 +90,6 @@ coverage2.asm(50): error: [DEVICE] Syntax error in <deviceid>: &syntaxErrorName
 50    000D                  DEVICE &syntaxErrorName
 51    000D
 coverage2.asm(52): error: SAVESNA only allowed in real device emulation mode (See DEVICE)
-coverage2.asm(52): error: [SAVESNA] No start address defined: SAVESNA "coverage2.sna", &
 52    000D                  SAVESNA "coverage2.sna", &
 53    000D
 coverage2.asm(54): error: Invalid labelname: .InvalidName

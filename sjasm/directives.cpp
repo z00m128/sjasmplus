@@ -673,39 +673,34 @@ static void dirINCTRD() {
 
 static void dirSAVESNA() {
 	if (pass != LASTPASS) return;		// syntax error is not visible in early passes
-	bool exec = true;
 
 	if (!DeviceID) {
-		Error("SAVESNA only allowed in real device emulation mode (See DEVICE)");
-		exec = false;
+		Error("SAVESNA only allowed in real device emulation mode (See DEVICE)", nullptr, SUPPRESS);
+		return;
 	} else if (!IsZXSpectrumDevice(DeviceID)) {
-		Error("[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.");
-		exec = false;
+		Error("[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.", nullptr, SUPPRESS);
+		return;
 	}
 
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	int start = StartAddress;
 	if (anyComma(lp)) {
 		aint val;
-		if (ParseExpression(lp, val)) {
-			if (0 <= start) Warning("[SAVESNA] Start address was also defined by END, SAVESNA argument used instead");
-			if (0 <= val) {
-				start = val;
-			} else {
-				exec = false; Error("[SAVESNA] Negative values are not allowed", bp, SUPPRESS);
-			}
+		if (!ParseExpression(lp, val)) return;
+		if (0 <= start) Warning("[SAVESNA] Start address was also defined by END, SAVESNA argument used instead");
+		if (0 <= val) {
+			start = val;
 		} else {
-			exec = false;
+			Error("[SAVESNA] Negative values are not allowed", bp, SUPPRESS);
+			return;
 		}
 	}
 	if (start < 0) {
-		exec = false; Error("[SAVESNA] No start address defined", bp, SUPPRESS);
+		Error("[SAVESNA] No start address defined", bp, SUPPRESS);
+		return;
 	}
 
-	if (exec) {
-		if (!SaveSNA_ZX(fnaam.get(), start))
-			Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
-	}
+	if (!SaveSNA_ZX(fnaam.get(), start)) Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
 }
 
 static void dirEMPTYTAP() {
