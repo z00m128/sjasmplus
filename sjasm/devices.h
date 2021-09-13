@@ -26,7 +26,7 @@
 
 // devices.h
 
-bool IsZXSpectrumDevice(char *name);
+bool IsZXSpectrumDevice(const char *name);
 bool IsAmstradCPCDevice(const char* name);
 int SetDevice(char *id, const aint ramtop = 0);
 char* GetDeviceName();

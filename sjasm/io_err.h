@@ -40,8 +40,7 @@ enum EStatus { ALL, FATAL, EARLY, PASS3, IF_FIRST, SUPPRESS };
 enum EWStatus { W_ALL, W_EARLY, W_PASS3 };
 
 extern const char* W_ABS_LABEL;
-extern const char* W_NEXT_RAMTOP;
-extern const char* W_NOSLOT_RAMTOP;
+extern const char* W_NO_RAMTOP;
 extern const char* W_DEV_RAMTOP;
 extern const char* W_DISPLACED_ORG;
 extern const char* W_ORG_PAGE;

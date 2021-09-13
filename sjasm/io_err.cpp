@@ -192,8 +192,7 @@ struct WarningEntry {
 typedef std::unordered_map<const char*, WarningEntry> messages_map;
 
 const char* W_ABS_LABEL = "abs";
-const char* W_NEXT_RAMTOP = "zxnramtop";
-const char* W_NOSLOT_RAMTOP = "noslotramtop";
+const char* W_NO_RAMTOP = "noramtop";
 const char* W_DEV_RAMTOP = "devramtop";
 const char* W_DISPLACED_ORG = "displacedorg";
 const char* W_ORG_PAGE = "orgpage";
@@ -224,16 +223,10 @@ static messages_map w_texts = {
 			"Warn about parsing error of new abs operator (v1.18.0)."
 		}
 	},
-	{ W_NEXT_RAMTOP,
+	{ W_NO_RAMTOP,
 		{ true,
-			"ZXN device doesn't init memory in any way (RAMTOP is ignored)",
-			"Warn when <ramtop> argument is used with ZXSPECTRUMNEXT."
-		}
-	},
-	{ W_NOSLOT_RAMTOP,
-		{ true,
-			"NoSlot64k device doesn't init memory in any way (RAMTOP is ignored)",
-			"Warn when <ramtop> argument is used with NOSLOT64K."
+			"current device doesn't init memory in any way (RAMTOP is ignored)",
+			"Warn when device ignores <ramtop> argument."
 		}
 	},
 	{ W_DEV_RAMTOP,

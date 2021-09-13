@@ -28,7 +28,7 @@
 
 #include "sjdefs.h"
 
-bool IsZXSpectrumDevice(char *name) {
+bool IsZXSpectrumDevice(const char *name) {
 	if (strcmp(name, "ZXSPECTRUM48") &&
 		strcmp(name, "ZXSPECTRUM128") &&
 		strcmp(name, "ZXSPECTRUM256") &&
@@ -145,7 +145,7 @@ static void DeviceZXSpectrum8192(CDevice **dev, CDevice *parent, aint ramtop) {
 }
 
 static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
-	if (ramtop) WarningById(W_NEXT_RAMTOP);
+	if (ramtop) WarningById(W_NO_RAMTOP);
 	if (Options::IsI8080) Error("Can't use ZXN device while in i8080 assembling mode.", line, FATAL);
 	if (Options::IsLR35902) Error("Can't use ZXN device while in Sharp LR35902 assembling mode.", line, FATAL);
 	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
@@ -160,21 +160,21 @@ static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
 }
 
 static void DeviceNoSlot64k(CDevice **dev, CDevice *parent, aint ramtop) {
-	if (ramtop) WarningById(W_NOSLOT_RAMTOP);
+	if (ramtop) WarningById(W_NO_RAMTOP);
 	*dev = new CDevice("NOSLOT64K", parent);
 	const int initialPages[] = { 0 };
 	initRegularSlotDevice(*dev, 0x10000, 1, 32, initialPages);	// 32*64kiB = 2MiB
 }
 
 static void DeviceAmstradCPC464(CDevice** dev, CDevice* parent, aint ramtop) {
-	if (ramtop) WarningById(W_NOSLOT_RAMTOP);
+	if (ramtop) WarningById(W_NO_RAMTOP);
 	*dev = new CDevice("AMSTRADCPC464", parent);
 	const int initialPages[] = { 0, 1, 2, 3 };
 	initRegularSlotDevice(*dev, 0x4000, 4, 4, initialPages);
 }
 
 static void DeviceAmstradCPC6128(CDevice** dev, CDevice* parent, aint ramtop) {
-	if (ramtop) WarningById(W_NOSLOT_RAMTOP);
+	if (ramtop) WarningById(W_NO_RAMTOP);
 	*dev = new CDevice("AMSTRADCPC6128", parent);
 	const int initialPages[] = { 0, 1, 2, 3 };
 	initRegularSlotDevice(*dev, 0x4000, 4, 8, initialPages);

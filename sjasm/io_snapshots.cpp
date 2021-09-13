@@ -120,8 +120,8 @@ int SaveSNA_ZX(char* fname, word start) {
 
 	if (!is48kSnap) {
 		// 128k snapshot extra header fields
-		snbuf[27] = char(start & 0x00FF); //pc
-		snbuf[28] = char(start >> 8); //pc
+		snbuf[27] = start & 0xFF; //pc
+		snbuf[28] = (start>>8) & 0xFF; //pc
 		snbuf[29] = 0x10 + Device->GetSlot(3)->Page->Number; //7ffd
 		snbuf[30] = 0; //tr-dos
 		if (fwrite(snbuf + SNA_HEADER_48_SIZE, 1, SNA_HEADER_128_SIZE, ff) != SNA_HEADER_128_SIZE) {

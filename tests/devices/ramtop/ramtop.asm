@@ -30,3 +30,13 @@
     DEVICE  NOSLOT64K, $5D00    ; warning about ignoring ramtop
     DEVICE  NOSLOT64K, $5D01    ; device was already initialized, silent line (still ignoring ramtop)
     DEVICE  NOSLOT64K           ; no warning (just switching)
+
+    DEVICE  AMSTRADCPC464, 0
+    DEVICE  AMSTRADCPC464, $5D00    ; warning about ignoring ramtop
+    DEVICE  AMSTRADCPC464, $5D01    ; device was already initialized, silent line (still ignoring ramtop)
+    DEVICE  AMSTRADCPC464           ; no warning (just switching)
+
+    DEVICE  AMSTRADCPC6128, 0
+    DEVICE  AMSTRADCPC6128, $5D00   ; warning about ignoring ramtop
+    DEVICE  AMSTRADCPC6128, $5D01   ; device was already initialized, silent line (still ignoring ramtop)
+    DEVICE  AMSTRADCPC6128          ; no warning (just switching)
