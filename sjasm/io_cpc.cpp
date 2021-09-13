@@ -97,16 +97,14 @@ int SaveSNA_CPC(const char* fname, word start) {
 	snbuf[0x23] = start & 0xFF; snbuf[0x24] = start >> 8; // pc set to start addr
 	snbuf[0x25] = 1; // im = 1
 	// set the pens to the defaults
-	for (int i = 0; i < 17; ++i)
-		snbuf[0x2F + i] = ga_pens[i];
+	memcpy(snbuf + 0x2F, ga_pens, sizeof(ga_pens));
 	// multi-config (RMR: 100I ULVM)
 	snbuf[0x40] = 0b1000'01'01; // Upper ROM paged out, Lower ROM paged in, Mode 1
 	// RAM config (MMR see https://www.grimware.org/doku.php/documentations/devices/gatearray#mmr)
 	snbuf[0x41] = 0; // default RAM paging
 	// set the crtc registers to the default values
 	snbuf[0x42] = 0x0D;	// selected crtc reg
-	for (int i = 0; i < 18; ++i)
-		snbuf[0x43 + i] = crtc_defaults[i];
+	memcpy(snbuf + 0x43, crtc_defaults, sizeof(crtc_defaults));
 
 	word memdepth = getCPCMemoryDepth();
 	snbuf[0x6B] = memdepth & 0xFF;
@@ -131,6 +129,10 @@ int SaveSNA_CPC(const char* fname, word start) {
 }
 
 void dirSAVECPCSNA() {
+	if (pass != LASTPASS) {
+		SkipToEol(lp);
+		return;
+	}
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	int start = StartAddress;
 	if (anyComma(lp)) {

@@ -30,6 +30,7 @@ LDFLAGS= -s
 OBJS=\
 	$(SUBDIR_BASE)/devices.o \
 	$(SUBDIR_BASE)/directives.o \
+	$(SUBDIR_BASE)/io_cpc.o \
 	$(SUBDIR_BASE)/io_err.o \
 	$(SUBDIR_BASE)/io_nex.o \
 	$(SUBDIR_BASE)/io_snapshots.o \
