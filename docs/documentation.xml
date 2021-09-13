@@ -2826,6 +2826,34 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
+            <term>SAVECPCSNA<indexterm id="po_savecpcsna"><primary>SAVECPCSNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
+
+            <listitem>
+              <para><emphasis>Work only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Save the snapshot for emulators of Amstrad CPC machines. (If start address is omitted,
+		  the one provided by <link linkend="po_end">END</link> is used)</para>
+
+              <para>The snapshot header content is hard-wired in the sjasmplus binary, with the CRTC, Palette and Gate Array registers
+    set to those of a CPC after a boot into the main ROM. Similarly to the ZX-Spectrum SAVESNA directive, interrupts are disabled and must
+    be re-enabled by your program. A full list of the settings can be found in the
+    <ulink url="https://github.com/z00m128/sjasmplus/blob/master/sjasm/io_cpc.cpp#L66">source</ulink>.
+		If you absolutely need different defaults and can't afford init-code modifying the state, you can post-patch the resulting SNA
+		file directly from source, see <ulink url="https://github.com/z00m128/sjasmplus/issues/139">Issue #139</ulink> for example.
+		<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE AMSTRADCPC464
+    ORG $1200
+START  .... ;some code
+    RET
+    SAVECPCSNA "game.sna",START ;save snapshot to file game.sna. Start address is START ($1200)</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>SAVEDEV<indexterm id="po_savedev"><primary>SAVEDEV</primary></indexterm>
             &lt;filename&gt;,&lt;startPage&gt;,&lt;startOffset&gt;,&lt;length&gt;</term>
 
@@ -2905,34 +2933,6 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 START  .... ;something code
     RET
     SAVESNA "game.sna",START ;save snapshot to file game.sna. Start address is START ($8000)</programlisting></para>
-                </example></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>SAVECPCSNA<indexterm id="po_savecpcsna"><primary>SAVECPCSNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
-
-            <listitem>
-              <para><emphasis>Work only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
-              <link linkend="po_device">DEVICE</link>.</emphasis></para>
-
-              <para>Save the snapshot for emulators of Amstrad CPC machines. (If start address is omitted,
-		  the one provided by <link linkend="po_end">END</link> is used)</para>
-
-              <para>The snapshot header content is hard-wired in the sjasmplus binary, with the CRTC, Palette and Gate Array registers
-    set to those of a CPC after a boot into the main ROM. Similarly to the ZX-Spectrum SAVESNA directive, interrupts are disabled and must
-    be re-enabled by your program. A full list of the settings can be found in the 
-    <ulink url="https://github.com/z00m128/sjasmplus/blob/master/sjasm/io_cpc.cpp#L66">source</ulink>.
-		If you absolutely need different defaults and can't afford init-code modifying the state, you can post-patch the resulting SNA
-		file directly from source, see <ulink url="https://github.com/z00m128/sjasmplus/issues/139">Issue #139</ulink> for example.
-		<example>
-                  <title></title>
-
-                  <para><programlisting>    DEVICE AMSTRADCPC464
-    ORG $1200
-START  .... ;some code
-    RET
-    SAVECPCSNA "game.sna",START ;save snapshot to file game.sna. Start address is START ($1200)</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
