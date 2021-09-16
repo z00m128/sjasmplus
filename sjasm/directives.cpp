@@ -2267,6 +2267,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".emptytrd", dirEMPTYTRD);
 	DirectivesTable.insertd(".savetrd", dirSAVETRD);
 	DirectivesTable.insertd(".savecpcsna", dirSAVECPCSNA);
+	DirectivesTable.insertd(".savecdt", dirSAVECDT);
 	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
 	DirectivesTable.insertd(".winexec", dirWINEXEC);

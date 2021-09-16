@@ -22,6 +22,7 @@ set(SOURCES
 	sjasm/io_snapshots.cpp
 	sjasm/io_tape.cpp
 	sjasm/io_trd.cpp
+	sjasm/io_tzx.cpp
 	sjasm/parser.cpp
 	sjasm/reader.cpp
 	sjasm/relocate.cpp

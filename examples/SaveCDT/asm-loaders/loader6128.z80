@@ -1,0 +1,82 @@
+	OUTPUT "build/loader6128.bin"
+
+code_start	equ $8000
+	org code_start
+
+start:
+	ld a,$FF	; OFF
+	call $BC6B	; CASNOISY
+
+	; check loading screen
+	ld a,(settings.load_screen)
+	or a
+	jr z,.load_pages
+
+.load_screen:
+	; load screen
+	ld hl,$C000	; dest
+	ld de,$4000	; size
+	ld a,$16	; type: data
+	call $BCA1	; CASREAD (headerless)
+
+.load_pages:
+	ld hl,page_table
+	ld a,(hl) : inc hl	; read entry count
+	or a
+	jr z,.load_code
+
+.loop_pages:
+	push af
+
+	ld a,(hl) : inc hl	; page num
+	or %11000000		; mask to set bank 1: page n (eg: page at $4000)
+	ld b,$74
+	ld c,a
+
+	di 
+	out (c),c	; mmr -> page in 'n' at $C000
+
+	ld c,(hl) : inc hl	; offset from base int bc
+	ld b,(hl) : inc hl
+	ld e,(hl) : inc hl	; len into de
+	ld d,(hl) : inc hl
+	push hl
+
+	ld hl,$4000	; base
+	add hl,bc	; hl contains target addr
+
+	; load the page
+	ld a,$16	; type: data
+	call $BCA1	; CASREAD (headerless)
+
+	ld bc,$74C0
+	out (c),c	; put mmr back to normal
+	pop hl
+
+	ei
+	
+	pop af
+
+	dec a
+	jr nz,.loop_pages
+
+.load_code:
+	ld hl,(settings.start_addr)
+	push hl
+
+	ld hl,(settings.code_addr)
+	ld de,(settings.code_len)
+	ld a,$16	; type: data
+	jp $BCA1	; CASREAD
+
+settings:
+.load_screen:	.db $00
+.start_addr:	.dw $0000
+.code_addr:		.dw $0000
+.code_len:		.dw $0000
+page_table:
+.num:				.db $00	; how many pages to load?
+.data:	
+	; .db num
+	; .dw start
+	; .dw len

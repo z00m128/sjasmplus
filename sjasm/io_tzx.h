@@ -1,6 +1,6 @@
 /*
 
-  SjASMPlus Z80 Cross Compiler - modified - SAVECPCSNA extension
+  SjASMPlus Z80 Cross Compiler - modified - TZX extension
 
   Copyright (c) 2006 Sjoerd Mastijn (original SW)
 
@@ -24,24 +24,27 @@
 
 */
 
-// io_cpc.h
+// io_tzx.h
 
-#ifndef __IO_CPC
-#define __IO_CPC
+#ifndef __IO_TZX
+#define __IO_TZX
 
-enum ECDTHeadlessFormat { AMSTRAD, SPECTRUM };
+typedef struct STZXTurboBlock {
+	word PilotPulseLen;
+	word FirstSyncLen;
+	word SecondSyncLen;
+	word ZeroBitLen;
+	word OneBitLen;
+	word PilotToneLen;
+	byte LastByteUsedBits;
+	word PauseAfterMs;
+} STZXTurboBlock;
 
-int SaveSNA_CPC(const char* fname, word start);
-
-void SaveCDT_Snapshot(const char* fname, aint startAddr);
-void SaveCDT_SnapshotWithPalette(const char* fname, aint startAddr, byte screenMode, const byte* palette);
-void SaveCDT_BASIC(const char* fname, const char* tfname, aint startAddr, aint length);
-void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, aint length, aint entryAddr);
-void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byte sync, ECDTHeadlessFormat format);
-
-void dirSAVECPCSNA();
-void dirSAVECDT();
+void TZX_CreateEmpty(const char* fname);
+void TZX_AppendStandardBlock(const char* fname, const byte* buf, const aint buflen, word pauseAfterMs, byte sync);
+void TZX_AppendTurboBlock(const char* fname, const byte* buf, const aint buflen, const STZXTurboBlock& turbo);
+void TZX_AppendPauseBlock(const char* fname, word pauseAfterMs);
 
 #endif
 
-// eof io_cpc.h
+//eof io_tzx.h
