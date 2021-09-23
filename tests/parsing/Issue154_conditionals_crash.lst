@@ -1,0 +1,38 @@
+# file opened: Issue154_conditionals_crash.asm
+ 1    0000                  macro prn6x8f_simple
+ 2    0000                  endm
+ 3    0000
+ 4    0000                  ; error - duplicate macro name, ignoring this definition
+Issue154_conditionals_crash.asm(5): error: Duplicate macroname: prn6x8f_simple
+Issue154_conditionals_crash.asm(5): error: Unexpected: FontAddr, shift
+ 5    0000                  macro prn6x8f_simple FontAddr, shift
+Issue154_conditionals_crash.asm(6): error: [ENDM] End macro without macro
+ 6    0000                  endm
+ 7    0000
+ 8    0000                  macro prn6x8f_loop FontAddr
+ 9    0000 ~                    ; error, too many arguments -> but should recover from it, 1.18.3 will hard-crash due to losing FontAddr
+10    0000 ~                    prn6x8f_simple FontAddr, 1
+11    0000 ~                    ; same error as previous line, FontAddr should be correctly substituted (in 1.18.3 it's lost)
+12    0000 ~                    prn6x8f_simple FontAddr, 2
+13    0000                  endm
+14    0000
+15    0000                  macro print6x8_84_fast FontAddr
+16    0000 ~                    prn6x8f_loop FontAddr
+17    0000                  endm
+18    0000
+19    0000              start print6x8_84_fast $c000
+19    0000             >        prn6x8f_loop $c000
+19    0000             >        ; error, too many arguments -> but should recover from it, 1.18.3 will hard-crash due to losing FontAddr
+Issue154_conditionals_crash.asm(10): error: Too many arguments for macro: prn6x8f_simple
+Issue154_conditionals_crash.asm(19): ^ emitted from here
+19    0000             >        prn6x8f_simple $c000, 1
+19    0000             >        ; same error as previous line, FontAddr should be correctly substituted (in 1.18.3 it's lost)
+Issue154_conditionals_crash.asm(12): error: Too many arguments for macro: prn6x8f_simple
+Issue154_conditionals_crash.asm(19): ^ emitted from here
+19    0000             >        prn6x8f_simple $c000, 2
+20    0000
+# file closed: Issue154_conditionals_crash.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X start

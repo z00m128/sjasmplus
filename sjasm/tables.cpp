@@ -928,7 +928,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 		const bool lastArg = NULL == a->next;
 		if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
 			Error("Not enough arguments for macro", naam, SUPPRESS);
-			macrolabp = 0;
+			macrolabp = omacrolabp;
 			return 1;
 		}
 		MacroDefineTable.AddMacro(a->string, ml);
@@ -937,7 +937,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	SkipBlanks(p);
 	if (*p) {
 		Error("Too many arguments for macro", naam, SUPPRESS);
-		macrolabp = 0;
+		macrolabp = omacrolabp;
 		return 1;
 	}
 	// arguments parsed, emit the macro lines and parse them
