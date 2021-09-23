@@ -208,6 +208,7 @@
 
             <listitem>
               <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>, <link linkend="po_savecpcsna">`SAVECPCSNA`</link>) - by Oli Wilkinson
+- minor bugfixes (macros)
 </synopsis>
             </listitem>
           </varlistentry>
@@ -3476,7 +3477,8 @@ LABEL5:
       <para>The MACRO pseudo-op defines a macro. It should be followed by the
       name of the macro, optionally followed by the parameters. The following
       lines will be stored as the macro-body until an ENDM pseudo-op is
-      encountered. Macro's have to be defined before their use.
+      encountered. Macro's have to be defined before their use. Macro's name
+      must be unique (even if two macros differ by required arguments).
 	  <example>
           <title>Macro without parameters (docs_examples/s_macros.asm)</title>
 
@@ -4021,7 +4023,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[boolean] sj.insert_define("name", "value")<indexterm id="lua_sj_insert_define"><primary>sj.insert_define(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Add new define.</para>
+              <para>Add new define (returns true if the define is new, false when define already existed and value was replaced).</para>
             </listitem>
           </varlistentry>
 
