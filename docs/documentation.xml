@@ -208,7 +208,7 @@
 
             <listitem>
               <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>, <link linkend="po_savecpcsna">`SAVECPCSNA`</link>) - by Oli Wilkinson
-- minor bugfixes (macros)
+- minor bugfixes (macros, listing)
 </synopsis>
             </listitem>
           </varlistentry>
