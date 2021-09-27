@@ -1273,10 +1273,7 @@ void CStructure::emitmembs(char*& p) {
 		switch (ip->type) {
 		case SMEMBBLOCK:
 			EmitBlock(ip->def != -1 ? ip->def : 0, ip->len, ip->def == -1, 8);
-			if (8 < ip->len) {	// "..." elipsis happened in listing, force listing
-				ListFile();
-				ListAddress = CurAddress;	// and fix listing address for following byte-listing
-			}
+			if (8 < ip->len) ListFile();	// "..." elipsis happened in listing, force listing
 			break;
 		case SMEMBBYTE:
 			EmitByte(ip->ParseValue(p));

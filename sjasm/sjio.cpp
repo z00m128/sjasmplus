@@ -263,6 +263,7 @@ void ListFile(bool showAsSkipped) {
 		pos += BtoList;
 	} while (0 < nListBytes);
 	nListBytes = 0;
+	ListAddress = CurAddress;			// move ListAddress also beyond unlisted but emitted bytes
 }
 
 void ListSilentOrExternalEmits() {
