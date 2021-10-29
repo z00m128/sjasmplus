@@ -83,6 +83,8 @@ int SaveSNA_CPC(const char* fname, word start) {
 		0x00, 0x00, // cursor addr
 		0x00, 0x00  // light pen
 	};
+	// psg defaults as initialized by ROM
+	const byte psg_defaults[16] = { 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 	// init header
 	byte snbuf[SNA_HEADER_SIZE];
@@ -105,6 +107,10 @@ int SaveSNA_CPC(const char* fname, word start) {
 	// set the crtc registers to the default values
 	snbuf[0x42] = 0x0D;	// selected crtc reg
 	memcpy(snbuf + 0x43, crtc_defaults, sizeof(crtc_defaults));
+	// PPI
+	snbuf[0x59] = 0x82;	// PPI control port default
+	// Set the PSG registers to sensible defaults
+	memcpy(snbuf + 0x5B, psg_defaults, sizeof(psg_defaults));
 
 	word memdepth = getCPCMemoryDepth();
 	snbuf[0x6B] = memdepth & 0xFF;
