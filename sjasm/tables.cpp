@@ -686,7 +686,8 @@ static char defineGet__Counter__Buffer[32] = {};
 static char defineGet__Line__Buffer[32] = {};
 
 char* CDefineTable::Get(const char* name) {
-	if (NULL != name) {
+	DefArrayList = nullptr;
+	if (nullptr != name) {
 		// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
 		if ('_' == name[1]) {
 			if (!strcmp(name, "__COUNTER__")) {
@@ -708,8 +709,7 @@ char* CDefineTable::Get(const char* name) {
 			p = p->next;
 		}
 	}
-	DefArrayList = NULL;
-	return NULL;
+	return nullptr;
 }
 
 int CDefineTable::FindDuplicate(const char* name) {
