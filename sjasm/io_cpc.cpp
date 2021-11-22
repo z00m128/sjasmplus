@@ -198,7 +198,7 @@ namespace CDTUtil {
 		unsigned int aux = c ^ (b << 8);
 		for (aint i = 0; i < 8; i++) {
 			if (aux & 0x8000) {
-				aux = (aux <<= 1) ^ poly;
+				aux = (aux << 1) ^ poly;
 			}
 			else {
 				aux <<= 1;
@@ -655,11 +655,6 @@ void SaveCDT_SnapshotWithPalette(const char* fname, aint startAddr, byte screenM
 	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
 		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", nullptr, SUPPRESS); return;
 	}
-
-	std::unique_ptr<byte[]> ram;
-	byte* ramptr;
-	aint ram_size;
-
 	if (!isCPC6128()) {
 		createCDTDump464(fname, startAddr, screenMode, palette);
 	}
@@ -809,8 +804,6 @@ void dirSAVECDTHeadless() {
 	if (!getIntArguments<4>(args, opt)) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
-
-	const char* pfname = fname.get();
 
 	word start = args[0];
 	word length = args[1];
