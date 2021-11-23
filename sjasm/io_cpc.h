@@ -29,16 +29,6 @@
 #ifndef __IO_CPC
 #define __IO_CPC
 
-enum ECDTHeadlessFormat { AMSTRAD, SPECTRUM };
-
-int SaveSNA_CPC(const char* fname, word start);
-
-void SaveCDT_Snapshot(const char* fname, aint startAddr);
-void SaveCDT_SnapshotWithPalette(const char* fname, aint startAddr, byte screenMode, const byte* palette);
-void SaveCDT_BASIC(const char* fname, const char* tfname, aint startAddr, aint length);
-void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, aint length, aint entryAddr);
-void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byte sync, ECDTHeadlessFormat format);
-
 void dirSAVECPCSNA();
 void dirSAVECDT();
 

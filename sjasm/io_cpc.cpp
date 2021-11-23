@@ -29,6 +29,10 @@
 #include "sjdefs.h"
 #include "io_cpc_ldrs.h"
 
+//
+// Amstrad CPC snapshot file saving (SNA)
+//
+
 namespace
 {
 	// report error and close the file
@@ -57,7 +61,7 @@ namespace
 	}
 }
 
-int SaveSNA_CPC(const char* fname, word start) {
+static int SaveSNA_CPC(const char* fname, word start) {
 	// for Lua
 	if (!DeviceID) {
 		Error("SAVECPCSNA only allowed in real device emulation mode (See DEVICE)"); return 0;
@@ -178,22 +182,21 @@ void dirSAVECPCSNA() {
 // Amstrad CPC tape file saving (CDT)
 //
 
+enum ECDTHeadlessFormat { AMSTRAD, SPECTRUM };
+
 namespace CDTUtil {
 
-	
+	static constexpr word DefaultPause = 1000;
+	static constexpr byte BlockTypeReg = 0x0A;
+	static constexpr byte BlockTypeHeader = 0x2C;
+	static constexpr byte BlockTypeData = 0x16;
 
-	constexpr word DefaultPause = 1000;
-	constexpr byte BlockTypeReg = 0x0A;
-	constexpr byte BlockTypeHeader = 0x2C;
-	constexpr byte BlockTypeData = 0x16;
-
-	constexpr byte FileTypeBASIC = (0 << 1);
-	constexpr byte FileTypeBINARY = (1 << 1);
-	constexpr byte FileTypeSCREEN = (2 << 1);
+	static constexpr byte FileTypeBASIC = (0 << 1);
+	static constexpr byte FileTypeBINARY = (1 << 1);
+	static constexpr byte FileTypeSCREEN = (2 << 1);
 
 	/* CRC polynomial: X^16+X^12+X^5+1 */
-	unsigned int crcupdate(word c, byte b)
-	{
+	static unsigned int crcupdate(word c, byte b) {
 		constexpr unsigned int poly = 4129;
 		unsigned int aux = c ^ (b << 8);
 		for (aint i = 0; i < 8; i++) {
@@ -207,7 +210,7 @@ namespace CDTUtil {
 		return aux;
 	}
 
-	void writeChunkedData(const char* fname, const byte* buf, const aint buflen, word pauseAfter, byte sync) {
+	static void writeChunkedData(const char* fname, const byte* buf, const aint buflen, word pauseAfter, byte sync) {
 		constexpr aint chunkLen = 256;
 
 		const aint chunkCount = (buflen + 255) >> 8;
@@ -267,7 +270,7 @@ namespace CDTUtil {
 		TZX_AppendTurboBlock(fname, chunkedData.get(), dataLen, turbo);
 	}
 
-	void writeTapeFile(const char* fname, const char* tfname, byte fileType, const byte* buf, aint buflen, word memaddr, word startaddr, word pause) {		
+	static void writeTapeFile(const char* fname, const char* tfname, byte fileType, const byte* buf, aint buflen, word memaddr, word startaddr, word pause) {
 		constexpr aint blocksize = 2048;
 		constexpr aint headerlen = 64;
 
@@ -336,7 +339,7 @@ namespace CDTUtil {
 		}
 	}
 
-	void writeBASICLoader(const char* fname, byte screenMode, const byte* palette) {
+	static void writeBASICLoader(const char* fname, byte screenMode, const byte* palette) {
 		constexpr byte mode_values[] = { 0x0E, 0x0F, 0x10 };
 		byte border = 0;
 		border = *palette;
@@ -382,16 +385,11 @@ namespace CDTUtil {
 		writeTapeFile(fname, "LOADER", FileTypeBASIC, basic, basiclen, 0x0170, 0x0000, DefaultPause);
 	}
 
-	void writeUserProgram(const char* fname, const char* tapefname, const byte* buf, aint buflen, word baseAddr, word startAddr) {
+	static void writeUserProgram(const char* fname, const char* tapefname, const byte* buf, aint buflen, word baseAddr, word startAddr) {
 		writeTapeFile(fname, tapefname, FileTypeBINARY, buf, buflen, baseAddr, startAddr, DefaultPause);
 	}
 
-	void writeScreen(const char* fname, const char* tapefname, FILE* f) {
-		const CDevicePage* page = Device->GetPage(3); // 0xC000
-		writeTapeFile(fname, tapefname, FileTypeBINARY, page->RAM, 0x4000, 0xC000, 0x0000, DefaultPause);
-	}
-
-	bool hasScreen() {
+	static bool hasScreen() {
 		const CDevicePage* page = Device->GetPage(3);
 		const byte* ptr = page->RAM;
 		for (int i = 0; i < page->Size; ++i) {
@@ -403,7 +401,7 @@ namespace CDTUtil {
 		return false;
 	}
 
-	aint calcRAMStart(const byte* ram, aint ramlen) {
+	static aint calcRAMStart(const byte* ram, aint ramlen) {
 		aint startAddr = 0x0000;
 		const byte* ptr = ram;
 		for (int i = 0; i < ramlen; ++i) {
@@ -415,7 +413,7 @@ namespace CDTUtil {
 		return 0xFFFF;
 	}
 
-	aint calcRAMLength(const byte* ram, aint ramlen) {
+	static aint calcRAMLength(const byte* ram, aint ramlen) {
 		if (!ramlen) {
 			return 0x0000;
 		}
@@ -434,7 +432,7 @@ namespace CDTUtil {
 		return 0x0000;
 	}
 
-	std::unique_ptr<byte[]> getContigRAM(aint startAddr, aint length) {
+	static std::unique_ptr<byte[]> getContigRAM(aint startAddr, aint length) {
 		std::unique_ptr<byte[]> data(new byte[length]);
 		byte* bptr = data.get();
 		// copy the basic into our buffer
@@ -456,7 +454,7 @@ namespace CDTUtil {
 		return data;
 	}
 
-	constexpr byte basicToHWColor[] = {
+	static constexpr byte basicToHWColor[] = {
 		0x54, 0x44, 0x55, 0x5C,	0x58, 0x5D,	0x4C, 0x45,
 		0x4D, 0x56,	0x46, 0x57,	0x5E, 0x40,	0x5F, 0x4E,
 		0x47, 0x4F,	0x52, 0x42,	0x53, 0x5A,	0x59, 0x5B,
@@ -464,21 +462,7 @@ namespace CDTUtil {
 	};
 }
 
-void SaveCDT_Snapshot(const char* fname, aint startAddr) {
-
-	// Default mode after loading from BASIC
-	constexpr byte mode = 1;
-	// Default ROM palette
-	constexpr byte palette[] = { 
-		1,
-		01, 24, 20, 06, 26, 00, 02, 8,
-		10, 12, 14, 16, 18, 22, 24, 16,
-	};
-
-	SaveCDT_SnapshotWithPalette(fname, startAddr, mode, palette);
-}
-
-void createCDTDump464(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
+static void createCDTDump464(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
 
 	byte* ramptr;
 	aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
@@ -541,7 +525,7 @@ void createCDTDump464(const char* fname, aint startAddr, byte screenMode, const 
 	CDTUtil::writeChunkedData(fname, ramptr + ramBase, ramUsed, CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
 }
 
-void createCDTDump6128(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
+static void createCDTDump6128(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
 
 	byte* ramptr;
 	aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
@@ -651,7 +635,7 @@ void createCDTDump6128(const char* fname, aint startAddr, byte screenMode, const
 	CDTUtil::writeChunkedData(fname, ramptr + ramBase, ramUsed, CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
 }
 
-void SaveCDT_SnapshotWithPalette(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
+static void SaveCDT_SnapshotWithPalette(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
 	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
 		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", nullptr, SUPPRESS); return;
 	}
@@ -663,7 +647,21 @@ void SaveCDT_SnapshotWithPalette(const char* fname, aint startAddr, byte screenM
 	}
 }
 
-void SaveCDT_BASIC(const char* fname, const char* tfname, aint startAddr, aint length) {
+static void SaveCDT_Snapshot(const char* fname, aint startAddr) {
+
+	// Default mode after loading from BASIC
+	constexpr byte mode = 1;
+	// Default ROM palette
+	constexpr byte palette[] = {
+		1,
+		01, 24, 20, 06, 26, 00, 02, 8,
+		10, 12, 14, 16, 18, 22, 24, 16,
+	};
+
+	SaveCDT_SnapshotWithPalette(fname, startAddr, mode, palette);
+}
+
+static void SaveCDT_BASIC(const char* fname, const char* tfname, aint startAddr, aint length) {
 	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
 		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS); return;
 	}
@@ -673,7 +671,7 @@ void SaveCDT_BASIC(const char* fname, const char* tfname, aint startAddr, aint l
 	CDTUtil::writeTapeFile(fname, tfname, CDTUtil::FileTypeBASIC, data.get(), length, startAddr, 0x0000, CDTUtil::DefaultPause);
 }
 
-void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, aint length, aint entryAddr) {
+static void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, aint length, aint entryAddr) {
 	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
 		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS); return;
 	}
@@ -686,7 +684,7 @@ void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, aint le
 	CDTUtil::writeTapeFile(fname, tfname, CDTUtil::FileTypeBINARY, data.get(), length, startAddr, entryAddr, CDTUtil::DefaultPause);
 }
 
-void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byte sync, ECDTHeadlessFormat format) {
+static void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byte sync, ECDTHeadlessFormat format) {
 	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
 		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS); return;
 	}
@@ -699,20 +697,20 @@ void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byte sync,
 }
 
 // Creates a CDT tape file of a full memory snapshot, with loader
-void dirSAVECDTFull() {
+static void dirSAVECDTFull() {
 	// FULL <filename>,[<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]
 	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 
-	aint args[] = { 
-		StartAddress, 
+	aint args[] = {
+		StartAddress,
 		0xFF, 0, // mode, border
 		0, 0, 0, 0, 0, 0, 0, 0, // palette
 		0, 0, 0, 0, 0, 0, 0, 0,
 	};
 
-	bool opt[] = { 
-		true, 
-		true, true, 
+	bool opt[] = {
+		true,
+		true, true,
 		true, true, true, true, true, true, true, true,
 		true, true, true, true, true, true, true, true,
 	};
@@ -731,16 +729,16 @@ void dirSAVECDTFull() {
 	}
 	else {
 		SaveCDT_Snapshot(fname.get(), args[0]);
-	}	
+	}
 }
 
-void dirSAVECDTEmpty() {
+static void dirSAVECDTEmpty() {
 	// EMPTY <filename>
 	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 	TZX_CreateEmpty(fname.get());
 }
 
-void dirSAVECDTBasic() {
+static void dirSAVECDTBasic() {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT BASIC <filename>,<fileintapeheader>,<start>,<length>";
 	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 
@@ -765,7 +763,7 @@ void dirSAVECDTBasic() {
 	SaveCDT_BASIC(fname.get(), tfname.get(), start, length);
 }
 
-void dirSAVECDTCode() {
+static void dirSAVECDTCode() {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]";
 	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 
@@ -791,7 +789,7 @@ void dirSAVECDTCode() {
 	SaveCDT_Code(fname.get(), tfname.get(), start, length, customStart);
 }
 
-void dirSAVECDTHeadless() {
+static void dirSAVECDTHeadless() {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<fileintapeheader>,<start>,<length>[,<sync>,<format>]";
 	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 
@@ -820,7 +818,7 @@ void dirSAVECDTHeadless() {
 	default:
 		Error("[SAVECDT HEADLESS] invalid format flag. Expected 0 (AMSTRAD) or 1 (SPECTRUM).", NULL, SUPPRESS); return;
 	}
-	
+
 	SaveCDT_Headless(fname.get(), start, length, sync, format);
 }
 
