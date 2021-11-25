@@ -701,7 +701,6 @@ typedef void (*savecdt_command_t)(const char*);
 // Creates a CDT tape file of a full memory snapshot, with loader
 static void dirSAVECDTFull(const char* cdtname) {
 	// FULL <filename>,[<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]
-	printf("dirSAVECDTFull [%s]\n", cdtname);
 
 	aint args[] = {
 		StartAddress,
