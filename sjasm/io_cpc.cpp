@@ -696,10 +696,12 @@ static void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byt
 	else Error("Unknown mode specified. Expected 0 (CPC) or 1 (Spectrum).");
 }
 
+typedef void (*savecdt_command_t)(const char*);
+
 // Creates a CDT tape file of a full memory snapshot, with loader
-static void dirSAVECDTFull() {
+static void dirSAVECDTFull(const char* cdtname) {
 	// FULL <filename>,[<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]
-	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
+	printf("dirSAVECDTFull [%s]\n", cdtname);
 
 	aint args[] = {
 		StartAddress,
@@ -725,22 +727,20 @@ static void dirSAVECDTFull() {
 			palette[i] = args[2 + i];
 		}
 
-		SaveCDT_SnapshotWithPalette(fname.get(), args[0], args[1], palette);
+		SaveCDT_SnapshotWithPalette(cdtname, args[0], args[1], palette);
 	}
 	else {
-		SaveCDT_Snapshot(fname.get(), args[0]);
+		SaveCDT_Snapshot(cdtname, args[0]);
 	}
 }
 
-static void dirSAVECDTEmpty() {
+static void dirSAVECDTEmpty(const char* cdtname) {
 	// EMPTY <filename>
-	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
-	TZX_CreateEmpty(fname.get());
+	TZX_CreateEmpty(cdtname);
 }
 
-static void dirSAVECDTBasic() {
+static void dirSAVECDTBasic(const char* cdtname) {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT BASIC <filename>,<fileintapeheader>,<start>,<length>";
-	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;
@@ -760,12 +760,11 @@ static void dirSAVECDTBasic() {
 	word start = args[0];
 	word length = args[1];
 
-	SaveCDT_BASIC(fname.get(), tfname.get(), start, length);
+	SaveCDT_BASIC(cdtname, tfname.get(), start, length);
 }
 
-static void dirSAVECDTCode() {
+static void dirSAVECDTCode(const char* cdtname) {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]";
-	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;
@@ -786,12 +785,11 @@ static void dirSAVECDTCode() {
 	word length = args[1];
 	aint customStart = args[2];
 
-	SaveCDT_Code(fname.get(), tfname.get(), start, length, customStart);
+	SaveCDT_Code(cdtname, tfname.get(), start, length, customStart);
 }
 
-static void dirSAVECDTHeadless() {
+static void dirSAVECDTHeadless(const char* cdtname) {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<fileintapeheader>,<start>,<length>[,<sync>,<format>]";
-	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
 
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;
@@ -819,7 +817,16 @@ static void dirSAVECDTHeadless() {
 		Error("[SAVECDT HEADLESS] invalid format flag. Expected 0 (AMSTRAD) or 1 (SPECTRUM).", NULL, SUPPRESS); return;
 	}
 
-	SaveCDT_Headless(fname.get(), start, length, sync, format);
+	SaveCDT_Headless(cdtname, start, length, sync, format);
+}
+
+static void cdtParseFnameAndExecuteCmd(savecdt_command_t command_fn) {
+	std::unique_ptr<char[]> cdtname(GetOutputFileName(lp));
+	if (!cdtname[0]) {
+		Error("[SAVECDT] CDT file name is empty", bp, SUPPRESS);
+		return;
+	}
+	command_fn(cdtname.get());
 }
 
 void dirSAVECDT() {
@@ -831,11 +838,11 @@ void dirSAVECDT() {
 		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS); return;
 	}
 	SkipBlanks(lp);
-	if (cmphstr(lp, "full")) dirSAVECDTFull();
-	else if (cmphstr(lp, "empty")) dirSAVECDTEmpty();
-	else if (cmphstr(lp, "basic")) dirSAVECDTBasic();
-	else if (cmphstr(lp, "code")) dirSAVECDTCode();
-	else if (cmphstr(lp, "headless")) dirSAVECDTHeadless();
+	if (cmphstr(lp, "full")) cdtParseFnameAndExecuteCmd(dirSAVECDTFull);
+	else if (cmphstr(lp, "empty")) cdtParseFnameAndExecuteCmd(dirSAVECDTEmpty);
+	else if (cmphstr(lp, "basic")) cdtParseFnameAndExecuteCmd(dirSAVECDTBasic);
+	else if (cmphstr(lp, "code")) cdtParseFnameAndExecuteCmd(dirSAVECDTCode);
+	else if (cmphstr(lp, "headless")) cdtParseFnameAndExecuteCmd(dirSAVECDTHeadless);
 	else Error("[SAVECDT] unknown command (commands: FULL, EMPTY, BASIC, CODE, HEADLESS)", lp, SUPPRESS);	
 }
 

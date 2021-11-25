@@ -1,0 +1,38 @@
+# file opened: savecdtCoverage.asm
+ 1    0000              ; test-coverage cases not covered by regular tests
+ 2    0000
+ 3    0000                  DEVICE ZXSPECTRUM48                     ; errors about wrong device
+savecdtCoverage.asm(4): error: [SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode
+ 4    0000                  SAVECDT EMPTY "BadDevice.cdt"
+savecdtCoverage.asm(5): error: [SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode
+ 5    0000                  SAVECDT FULL "BadDevice.cdt"
+savecdtCoverage.asm(6): error: [SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode
+ 6    0000                  SAVECDT BASIC "BadDevice.cdt"
+savecdtCoverage.asm(7): error: [SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode
+ 7    0000                  SAVECDT CODE "BadDevice.cdt"
+savecdtCoverage.asm(8): error: [SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode
+ 8    0000                  SAVECDT HEADLESS "BadDevice.cdt"
+savecdtCoverage.asm(9): error: [SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode
+ 9    0000                  SAVECDT INVALID "BadDevice.cdt"
+10    0000
+11    0000                  DEVICE NONE
+savecdtCoverage.asm(12): error: [SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode
+12    0000                  SAVECDT EMPTY "NoDevice.cdt"            ; error about none device
+13    0000
+14    0000                  DEVICE AMSTRADCPC464
+savecdtCoverage.asm(15): error: [SAVECDT] unknown command (commands: FULL, EMPTY, BASIC, CODE, HEADLESS): INVALID "BadDevice.cdt"
+15    0000                  SAVECDT INVALID "BadDevice.cdt"         ; invalid sub-command
+16    0000                  ; empty filename
+savecdtCoverage.asm(17): error: [SAVECDT] CDT file name is empty: SAVECDT EMPTY
+17    0000                  SAVECDT EMPTY
+savecdtCoverage.asm(18): error: [SAVECDT] CDT file name is empty: SAVECDT EMPTY ""
+18    0000                  SAVECDT EMPTY ""
+savecdtCoverage.asm(19): error: [SAVECDT] CDT file name is empty: SAVECDT FULL
+19    0000                  SAVECDT FULL
+20    0000
+21    0000                  ;TODO add further ones with invalid syntax
+22    0000
+# file closed: savecdtCoverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------
