@@ -820,12 +820,9 @@ static void dirSAVECDTHeadless(const char* cdtname) {
 }
 
 static void cdtParseFnameAndExecuteCmd(savecdt_command_t command_fn) {
-	std::unique_ptr<char[]> cdtname(GetOutputFileName(lp));
-	if (!cdtname[0]) {
-		Error("[SAVECDT] CDT file name is empty", bp, SUPPRESS);
-		return;
-	}
-	command_fn(cdtname.get());
+    std::unique_ptr<char[]> cdtname(GetOutputFileName(lp));
+    if (cdtname[0]) command_fn(cdtname.get());
+    else Error("[SAVECDT] CDT file name is empty", bp, SUPPRESS);
 }
 
 void dirSAVECDT() {
