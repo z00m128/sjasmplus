@@ -29,6 +29,7 @@
 #include "sjdefs.h"
 
 bool IsZXSpectrumDevice(const char *name) {
+	if (nullptr == name) return false;
 	if (strcmp(name, "ZXSPECTRUM48") &&
 		strcmp(name, "ZXSPECTRUM128") &&
 		strcmp(name, "ZXSPECTRUM256") &&
@@ -43,8 +44,8 @@ bool IsZXSpectrumDevice(const char *name) {
 	return true;
 }
 
-bool IsAmstradCPCDevice(const char* name)
-{
+bool IsAmstradCPCDevice(const char* name) {
+	if (nullptr == name) return false;
 	if (strcmp(name, "AMSTRADCPC464") &&
 		strcmp(name, "AMSTRADCPC6128"))
 	{

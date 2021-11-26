@@ -636,19 +636,12 @@ static void createCDTDump6128(const char* fname, aint startAddr, byte screenMode
 }
 
 static void SaveCDT_SnapshotWithPalette(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
-	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
-		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", nullptr, SUPPRESS); return;
-	}
-	if (!isCPC6128()) {
+	isCPC6128() ?
+		createCDTDump6128(fname, startAddr, screenMode, palette) :
 		createCDTDump464(fname, startAddr, screenMode, palette);
-	}
-	else {
-		createCDTDump6128(fname, startAddr, screenMode, palette);
-	}
 }
 
 static void SaveCDT_Snapshot(const char* fname, aint startAddr) {
-
 	// Default mode after loading from BASIC
 	constexpr byte mode = 1;
 	// Default ROM palette
@@ -657,25 +650,16 @@ static void SaveCDT_Snapshot(const char* fname, aint startAddr) {
 		01, 24, 20, 06, 26, 00, 02, 8,
 		10, 12, 14, 16, 18, 22, 24, 16,
 	};
-
 	SaveCDT_SnapshotWithPalette(fname, startAddr, mode, palette);
 }
 
 static void SaveCDT_BASIC(const char* fname, const char* tfname, aint startAddr, aint length) {
-	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
-		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS); return;
-	}
-
 	std::unique_ptr<byte[]> data(CDTUtil::getContigRAM(startAddr, length));
 
 	CDTUtil::writeTapeFile(fname, tfname, CDTUtil::FileTypeBASIC, data.get(), length, startAddr, 0x0000, CDTUtil::DefaultPause);
 }
 
 static void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, aint length, aint entryAddr) {
-	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
-		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS); return;
-	}
-
 	if (entryAddr < 0) {
 		entryAddr = startAddr & 0xFFFF;
 	}
@@ -685,10 +669,6 @@ static void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, 
 }
 
 static void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byte sync, ECDTHeadlessFormat format) {
-	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
-		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS); return;
-	}
-
 	std::unique_ptr<byte[]> data(CDTUtil::getContigRAM(startAddr, length));
 
 	if (format == ECDTHeadlessFormat::AMSTRAD) CDTUtil::writeChunkedData(fname, data.get(), length, CDTUtil::DefaultPause, sync);
@@ -820,9 +800,9 @@ static void dirSAVECDTHeadless(const char* cdtname) {
 }
 
 static void cdtParseFnameAndExecuteCmd(savecdt_command_t command_fn) {
-    std::unique_ptr<char[]> cdtname(GetOutputFileName(lp));
-    if (cdtname[0]) command_fn(cdtname.get());
-    else Error("[SAVECDT] CDT file name is empty", bp, SUPPRESS);
+	std::unique_ptr<char[]> cdtname(GetOutputFileName(lp));
+	if (cdtname[0]) command_fn(cdtname.get());
+	else Error("[SAVECDT] CDT file name is empty", bp, SUPPRESS);
 }
 
 void dirSAVECDT() {
@@ -830,8 +810,9 @@ void dirSAVECDT() {
 		SkipToEol(lp);
 		return;
 	}
-	if (nullptr == DeviceID || !IsAmstradCPCDevice(DeviceID)) {
-		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS); return;
+	if (!IsAmstradCPCDevice(DeviceID)) {
+		Error("[SAVECDT] is allowed only in AMSTRADCPC464 or AMSTRADCPC6128 device mode", NULL, SUPPRESS);
+		return;
 	}
 	SkipBlanks(lp);
 	if (cmphstr(lp, "full")) cdtParseFnameAndExecuteCmd(dirSAVECDTFull);

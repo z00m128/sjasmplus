@@ -18,4 +18,14 @@
     SAVECDT EMPTY ""
     SAVECDT FULL
 
+    ; BASIC syntax errors
+    SAVECDT BASIC "some.cdt"
+    SAVECDT BASIC "some.cdt",
+    SAVECDT BASIC "some.cdt",""
+    SAVECDT BASIC "some.cdt","",
+    SAVECDT BASIC "some.cdt","",0
+    SAVECDT BASIC "some.cdt","",0,
+    SAVECDT BASIC "some.cdt","",0,0,
+    SAVECDT BASIC "some.cdt","",0,&
+
     ;TODO add further ones with invalid syntax
