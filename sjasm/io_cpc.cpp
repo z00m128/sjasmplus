@@ -29,6 +29,11 @@
 #include "sjdefs.h"
 #include "io_cpc_ldrs.h"
 
+//FIXME before v1.18.4:
+// - consider "cdtname" instead of "filename" in error/args hints
+// - getContigRAM seems to be doing too much about device memory, check if some other internal Device API can't simplify it
+// - increase test coverage
+
 //
 // Amstrad CPC snapshot file saving (SNA)
 //
@@ -680,7 +685,7 @@ typedef void (*savecdt_command_t)(const char*);
 
 // Creates a CDT tape file of a full memory snapshot, with loader
 static void dirSAVECDTFull(const char* cdtname) {
-	// FULL <filename>,[<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]
+	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT FULL <filename>[,<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]";
 
 	aint args[] = {
 		StartAddress,
@@ -690,14 +695,14 @@ static void dirSAVECDTFull(const char* cdtname) {
 	};
 
 	bool opt[] = {
-		true,
+		false,
 		true, true,
 		true, true, true, true, true, true, true, true,
 		true, true, true, true, true, true, true, true,
 	};
 
-	if (anyComma(lp)) {
-		getIntArguments<19>(args, opt);
+	if (anyComma(lp) && !getIntArguments<19>(args, opt)) {
+		Error(argerr, lp, SUPPRESS); return;
 	}
 
 	if (args[1] != 0xFF) {
@@ -768,7 +773,7 @@ static void dirSAVECDTCode(const char* cdtname) {
 }
 
 static void dirSAVECDTHeadless(const char* cdtname) {
-	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<fileintapeheader>,<start>,<length>[,<sync>,<format>]";
+	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]";
 
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;

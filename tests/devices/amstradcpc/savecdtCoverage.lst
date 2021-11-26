@@ -49,8 +49,59 @@ savecdtCoverage.asm(29): error: Syntax error: &
 savecdtCoverage.asm(29): error: [SAVECDT] Invalid args. SAVECDT BASIC <filename>,<fileintapeheader>,<start>,<length>: &
 29    0000                  SAVECDT BASIC "some.cdt","",0,&
 30    0000
-31    0000                  ;TODO add further ones with invalid syntax
-32    0000
+31    0000                  ; CODE syntax errors
+savecdtCoverage.asm(32): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]:
+32    0000                  SAVECDT CODE "some.cdt"
+savecdtCoverage.asm(33): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]:
+33    0000                  SAVECDT CODE "some.cdt",
+savecdtCoverage.asm(34): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]:
+34    0000                  SAVECDT CODE "some.cdt",""
+savecdtCoverage.asm(35): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]:
+35    0000                  SAVECDT CODE "some.cdt","",
+savecdtCoverage.asm(36): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]:
+36    0000                  SAVECDT CODE "some.cdt","",0
+savecdtCoverage.asm(37): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]:
+37    0000                  SAVECDT CODE "some.cdt","",0,
+savecdtCoverage.asm(38): error: Syntax error: &
+savecdtCoverage.asm(38): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]: &
+38    0000                  SAVECDT CODE "some.cdt","",0,&
+savecdtCoverage.asm(39): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]:
+39    0000                  SAVECDT CODE "some.cdt","",0,0,
+savecdtCoverage.asm(40): error: Syntax error: &
+savecdtCoverage.asm(40): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]: &
+40    0000                  SAVECDT CODE "some.cdt","",0,0,&
+savecdtCoverage.asm(41): error: [SAVECDT] Invalid args. SAVECDT CODE <filename>,<fileintapeheader>,<start>,<length>[,<customstartaddress>]:
+41    0000                  SAVECDT CODE "some.cdt","",0,0,0,
+42    0000
+43    0000                  ; HEADLESS syntax errors, invalid values
+savecdtCoverage.asm(44): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]:
+44    0000                  SAVECDT HEADLESS "some.cdt"
+savecdtCoverage.asm(45): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]:
+45    0000                  SAVECDT HEADLESS "some.cdt",
+savecdtCoverage.asm(46): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]:
+46    0000                  SAVECDT HEADLESS "some.cdt",0
+savecdtCoverage.asm(47): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]:
+47    0000                  SAVECDT HEADLESS "some.cdt",0,
+savecdtCoverage.asm(48): error: Syntax error: &
+savecdtCoverage.asm(48): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]: &
+48    0000                  SAVECDT HEADLESS "some.cdt",0,&
+savecdtCoverage.asm(49): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]:
+49    0000                  SAVECDT HEADLESS "some.cdt",0,0,
+savecdtCoverage.asm(50): error: Syntax error: &
+savecdtCoverage.asm(50): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]: &
+50    0000                  SAVECDT HEADLESS "some.cdt",0,0,&
+savecdtCoverage.asm(51): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]:
+51    0000                  SAVECDT HEADLESS "some.cdt",0,0,0,
+savecdtCoverage.asm(52): error: [SAVECDT HEADLESS] invalid format flag. Expected 0 (AMSTRAD) or 1 (SPECTRUM).
+52    0000                  SAVECDT HEADLESS "some.cdt",0,0,0,2
+savecdtCoverage.asm(53): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filename>,<start>,<length>[,<sync>,<format>]:
+53    0000                  SAVECDT HEADLESS "some.cdt",0,0,0,0,
+54    0000
+55    0000                  ; FULL syntax errors
+savecdtCoverage.asm(56): error: [SAVECDT] Invalid args. SAVECDT FULL <filename>[,<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]:
+56    0000                  SAVECDT FULL "some.cdt",
+57    0000                  ;TODO more of it...
+58    0000
 # file closed: savecdtCoverage.asm
 
 Value    Label

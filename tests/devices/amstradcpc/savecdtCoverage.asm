@@ -28,4 +28,30 @@
     SAVECDT BASIC "some.cdt","",0,0,
     SAVECDT BASIC "some.cdt","",0,&
 
-    ;TODO add further ones with invalid syntax
+    ; CODE syntax errors
+    SAVECDT CODE "some.cdt"
+    SAVECDT CODE "some.cdt",
+    SAVECDT CODE "some.cdt",""
+    SAVECDT CODE "some.cdt","",
+    SAVECDT CODE "some.cdt","",0
+    SAVECDT CODE "some.cdt","",0,
+    SAVECDT CODE "some.cdt","",0,&
+    SAVECDT CODE "some.cdt","",0,0,
+    SAVECDT CODE "some.cdt","",0,0,&
+    SAVECDT CODE "some.cdt","",0,0,0,
+
+    ; HEADLESS syntax errors, invalid values
+    SAVECDT HEADLESS "some.cdt"
+    SAVECDT HEADLESS "some.cdt",
+    SAVECDT HEADLESS "some.cdt",0
+    SAVECDT HEADLESS "some.cdt",0,
+    SAVECDT HEADLESS "some.cdt",0,&
+    SAVECDT HEADLESS "some.cdt",0,0,
+    SAVECDT HEADLESS "some.cdt",0,0,&
+    SAVECDT HEADLESS "some.cdt",0,0,0,
+    SAVECDT HEADLESS "some.cdt",0,0,0,2
+    SAVECDT HEADLESS "some.cdt",0,0,0,0,
+
+    ; FULL syntax errors
+    SAVECDT FULL "some.cdt",
+    ;TODO more of it...
