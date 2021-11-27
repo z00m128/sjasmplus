@@ -54,4 +54,6 @@
 
     ; FULL syntax errors
     SAVECDT FULL "some.cdt",
-    ;TODO more of it...
+    SAVECDT FULL "some.cdt",0,
+    SAVECDT FULL "some.cdt",0, 0,0, 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+    ; not testing dangling comma after each optional value... it works, really...

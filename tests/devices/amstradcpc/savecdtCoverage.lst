@@ -100,8 +100,12 @@ savecdtCoverage.asm(53): error: [SAVECDT] Invalid args. SAVECDT HEADLESS <filena
 55    0000                  ; FULL syntax errors
 savecdtCoverage.asm(56): error: [SAVECDT] Invalid args. SAVECDT FULL <filename>[,<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]:
 56    0000                  SAVECDT FULL "some.cdt",
-57    0000                  ;TODO more of it...
-58    0000
+savecdtCoverage.asm(57): error: [SAVECDT] Invalid args. SAVECDT FULL <filename>[,<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]:
+57    0000                  SAVECDT FULL "some.cdt",0,
+savecdtCoverage.asm(58): error: [SAVECDT] Invalid args. SAVECDT FULL <filename>[,<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]:
+58    0000                  SAVECDT FULL "some.cdt",0, 0,0, 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+59    0000                  ; not testing dangling comma after each optional value... it works, really...
+60    0000
 # file closed: savecdtCoverage.asm
 
 Value    Label

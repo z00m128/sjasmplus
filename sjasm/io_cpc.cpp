@@ -28,6 +28,7 @@
 
 #include "sjdefs.h"
 #include "io_cpc_ldrs.h"
+#include <cassert>
 
 //FIXME before v1.18.4:
 // - consider "cdtname" instead of "filename" in error/args hints
@@ -674,11 +675,11 @@ static void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, 
 }
 
 static void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byte sync, ECDTHeadlessFormat format) {
+	assert(ECDTHeadlessFormat::AMSTRAD == format || ECDTHeadlessFormat::SPECTRUM == format);
 	std::unique_ptr<byte[]> data(CDTUtil::getContigRAM(startAddr, length));
 
 	if (format == ECDTHeadlessFormat::AMSTRAD) CDTUtil::writeChunkedData(fname, data.get(), length, CDTUtil::DefaultPause, sync);
-	else if (format == ECDTHeadlessFormat::SPECTRUM) TZX_AppendStandardBlock(fname, data.get(), length, CDTUtil::DefaultPause, sync);
-	else Error("Unknown mode specified. Expected 0 (CPC) or 1 (Spectrum).");
+	else TZX_AppendStandardBlock(fname, data.get(), length, CDTUtil::DefaultPause, sync);
 }
 
 typedef void (*savecdt_command_t)(const char*);
