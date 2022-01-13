@@ -34,6 +34,7 @@
 #include <fcntl.h>
 
 int ListAddress;
+std::vector<const char*> archivedFileNames;	// archive of all files opened (also includes!) (fullname!)
 
 static constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;
 static constexpr int DESTBUFLEN = 8192;
@@ -55,6 +56,21 @@ static FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
 static aint WBLength = 0;
 
 static void CloseBreakpointsFile();
+
+// returns permanent C-string pointer to the fullpathname (if new, it is added to archive)
+const char* ArchiveFilename(const char* fullpathname) {
+	for (auto fname : archivedFileNames) {		// search whole archive for identical full name
+		if (!strcmp(fname, fullpathname)) return fname;
+	}
+	const char* newName = STRDUP(fullpathname);
+	archivedFileNames.push_back(newName);
+	return newName;
+}
+
+// does release all archived filenames, making all pointers invalid
+void ReleaseArchivedFilenames() {
+	for (auto filename : archivedFileNames) free((void*)filename);
+}
 
 // find position of extension in filename (points at dot char or beyond filename if no extension)
 // filename is pointer to writeable format containing file name (can be full path) (NOT NULL)
@@ -517,12 +533,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		}
 	}
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
-	auto ofnIt = std::find(openedFileNames.cbegin(), openedFileNames.cend(), fullpath);
-	if (ofnIt == openedFileNames.cend()) {		// new filename, add it to archive
-		openedFileNames.push_back(fullpath);
-		ofnIt = --openedFileNames.cend();
-	}
-	fileNameFull = ofnIt->c_str();				// get const pointer into archive
+	fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
 	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 
 	// refresh pre-defined values related to file/include

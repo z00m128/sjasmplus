@@ -2165,13 +2165,7 @@ static void dirINCLUDELUA() {
 	if (!fullpath[0]) {
 		Error("[INCLUDELUA] File doesn't exist", fnaam.get(), EARLY);
 	} else {
-		// archive the filename (for referencing it in SLD tracing data or listing/errors)
-		auto ofnIt = std::find(openedFileNames.cbegin(), openedFileNames.cend(), fullpath);
-		if (ofnIt == openedFileNames.cend()) {		// new filename, add it to archive
-			openedFileNames.push_back(fullpath);
-			ofnIt = --openedFileNames.cend();
-		}
-		fileNameFull = ofnIt->c_str();				// get const pointer into archive
+		fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
 		LuaStartPos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 		LuaStartPos.line = 1;
 		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);

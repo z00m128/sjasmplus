@@ -209,7 +209,6 @@ SSource::~SSource() {
 }
 
 std::vector<SSource> sourceFiles;
-std::vector<std::string> openedFileNames;
 
 int ConvertEncoding = ENCWIN;
 
@@ -344,6 +343,7 @@ void FreeRAM() {
 		PreviousIsLabel = nullptr;
 	}
 	if (Options::IncludeDirsList) delete Options::IncludeDirsList;
+	ReleaseArchivedFilenames();
 }
 
 
@@ -637,7 +637,7 @@ int main(int argc, char **argv) {
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
 	sourceFiles.reserve(32);
-	openedFileNames.reserve(64);
+	archivedFileNames.reserve(64);
 
 	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
 

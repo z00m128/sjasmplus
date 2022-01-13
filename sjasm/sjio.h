@@ -31,6 +31,7 @@
 enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM, ELSEIF };
 
 extern int ListAddress;
+extern std::vector<const char*> archivedFileNames;	// archive of all files opened (also includes!) (fullname!)
 
 constexpr int BYTES_END_MARKER = -1;
 constexpr int INSTRUCTION_START_MARKER = -2;
@@ -39,6 +40,8 @@ constexpr int INSTRUCTION_START_MARKER = -2;
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2
 
+const char* ArchiveFilename(const char* fullpathname);	// returns permanent C-string pointer to the fullpathname
+void ReleaseArchivedFilenames();	// does release all archived filenames, making all pointers invalid
 char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0);
 const char* FilenameBasePos(const char* fullname);
 void ConstructDefaultFilename(char* dest, size_t dest_size, const char* ext, bool checkIfDestIsEmpty = true);
