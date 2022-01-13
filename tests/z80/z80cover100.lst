@@ -323,35 +323,35 @@ z80cover100.asm(194): error: Illegal instruction:     ldd     a
 194   00A6                  ldd     a
 z80cover100.asm(195): error: Illegal instruction:     ldd     a,
 195   00A6                  ldd     a,
-z80cover100.asm(196): warning: Fake instruction: ldd     a,(hl)
+z80cover100.asm(196): warning[fake]: Fake instruction: ldd     a,(hl)
 196   00A6 7E 2B            ldd     a,(hl)
 z80cover100.asm(197): error: Illegal instruction:     ldd     b
 197   00A8                  ldd     b
 z80cover100.asm(198): error: Illegal instruction:     ldd     b,
 198   00A8                  ldd     b,
-z80cover100.asm(199): warning: Fake instruction: ldd     b,(hl)
+z80cover100.asm(199): warning[fake]: Fake instruction: ldd     b,(hl)
 199   00A8 46 2B            ldd     b,(hl)
 z80cover100.asm(200): error: Illegal instruction:     ldd     (hl)
 200   00AA                  ldd     (hl)
-z80cover100.asm(201): warning: Fake instruction: ldd     (hl),
+z80cover100.asm(201): warning[fake]: Fake instruction: ldd     (hl),
 z80cover100.asm(201): error: Operand expected:
 201   00AA 36 00 2B         ldd     (hl),
-z80cover100.asm(202): warning: Fake instruction: ldd     (hl),a
+z80cover100.asm(202): warning[fake]: Fake instruction: ldd     (hl),a
 202   00AD 77 2B            ldd     (hl),a
 z80cover100.asm(203): error: Illegal instruction:     ldd     (iy)
 203   00AF                  ldd     (iy)
-z80cover100.asm(204): warning: Fake instruction: ldd     (iy),
+z80cover100.asm(204): warning[fake]: Fake instruction: ldd     (iy),
 z80cover100.asm(204): error: Operand expected:
 204   00AF FD 36 00 00      ldd     (iy),
 204   00B3 FD 2B
-z80cover100.asm(205): warning: Fake instruction: ldd     (iy),a
+z80cover100.asm(205): warning[fake]: Fake instruction: ldd     (iy),a
 205   00B5 FD 77 00 FD      ldd     (iy),a
 205   00B9 2B
 z80cover100.asm(206): error: Illegal instruction:     ldd     (de)
 206   00BA                  ldd     (de)
 z80cover100.asm(207): error: Illegal instruction:     ldd     (de),
 207   00BA                  ldd     (de),
-z80cover100.asm(208): warning: Fake instruction: ldd     (de),a
+z80cover100.asm(208): warning[fake]: Fake instruction: ldd     (de),a
 208   00BA 12 1B            ldd     (de),a
 z80cover100.asm(209): error: Illegal instruction:     ldd     (de),b
 209   00BC                  ldd     (de),b
@@ -360,7 +360,7 @@ z80cover100.asm(211): error: Illegal instruction:     ldi     a
 211   00BC                  ldi     a
 z80cover100.asm(212): error: Illegal instruction:     ldi     a,
 212   00BC                  ldi     a,
-z80cover100.asm(213): warning: Fake instruction: ldi     a,(hl)
+z80cover100.asm(213): warning[fake]: Fake instruction: ldi     a,(hl)
 213   00BC 7E 23            ldi     a,(hl)
 z80cover100.asm(214): error: Illegal instruction:     ldi     b
 214   00BE                  ldi     b
@@ -368,29 +368,29 @@ z80cover100.asm(215): error: Illegal instruction:     ldi     bc
 215   00BE                  ldi     bc
 z80cover100.asm(216): error: Illegal instruction:     ldi     b,
 216   00BE                  ldi     b,
-z80cover100.asm(217): warning: Fake instruction: ldi     b,(hl)
+z80cover100.asm(217): warning[fake]: Fake instruction: ldi     b,(hl)
 217   00BE 46 23            ldi     b,(hl)
 z80cover100.asm(218): error: Illegal instruction:     ldi     (hl)
 218   00C0                  ldi     (hl)
-z80cover100.asm(219): warning: Fake instruction: ldi     (hl),
+z80cover100.asm(219): warning[fake]: Fake instruction: ldi     (hl),
 z80cover100.asm(219): error: Operand expected:
 219   00C0 36 00 23         ldi     (hl),
-z80cover100.asm(220): warning: Fake instruction: ldi     (hl),a
+z80cover100.asm(220): warning[fake]: Fake instruction: ldi     (hl),a
 220   00C3 77 23            ldi     (hl),a
 z80cover100.asm(221): error: Illegal instruction:     ldi     (iy)
 221   00C5                  ldi     (iy)
-z80cover100.asm(222): warning: Fake instruction: ldi     (iy),
+z80cover100.asm(222): warning[fake]: Fake instruction: ldi     (iy),
 z80cover100.asm(222): error: Operand expected:
 222   00C5 FD 36 00 00      ldi     (iy),
 222   00C9 FD 23
-z80cover100.asm(223): warning: Fake instruction: ldi     (iy),a
+z80cover100.asm(223): warning[fake]: Fake instruction: ldi     (iy),a
 223   00CB FD 77 00 FD      ldi     (iy),a
 223   00CF 23
 z80cover100.asm(224): error: Illegal instruction:     ldi     (de)
 224   00D0                  ldi     (de)
 z80cover100.asm(225): error: Illegal instruction:     ldi     (de),
 225   00D0                  ldi     (de),
-z80cover100.asm(226): warning: Fake instruction: ldi     (de),a
+z80cover100.asm(226): warning[fake]: Fake instruction: ldi     (de),a
 226   00D0 12 13            ldi     (de),a
 z80cover100.asm(227): error: Illegal instruction:     ldi     (de),b
 227   00D2                  ldi     (de),b

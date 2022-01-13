@@ -4,7 +4,7 @@ Unrecognized syntax option: @
  1    0000              ; SYNTAX option "abfl@":
  2    0000              ;  @ is error "unrecognized" (but outside of list file!)
  3    0000              ;  l is "unimplemented yet" (comments below are for future implementation)
-syntax_abfl.asm(4): warning: Fake instruction: ld      bc,hl
+syntax_abfl.asm(4): warning[fake]: Fake instruction: ld      bc,hl
  4    0000 44 4D            ld      bc,hl       ; warning
  5    0002 44 4D            ld      bc,hl       ; warning removed by using "fake" in this comment
  6    0004 90               sub     a,b         ; sub b

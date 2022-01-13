@@ -215,6 +215,7 @@ const char* W_OUT0 = "out0";
 const char* W_BACKSLASH = "backslash";
 const char* W_OPKEYWORD = "opkeyword";
 const char* W_BE_HOST = "behost";
+const char* W_FAKE = "fake";
 
 static messages_map w_texts = {
 	{ W_ABS_LABEL,
@@ -359,6 +360,12 @@ static messages_map w_texts = {
 		{ true,
 			"Big-endian host detected: support is experimental, please report any issues",
 			"Warn when big-endian host runs sjasmplus (experimental)."
+		}
+	},
+	{ W_FAKE,
+		{ true,	// fake-warnings are enabled/disabled through --syntax, this value here is always true
+			"Fake instruction",
+			"Warn when fake instruction is used in the source."
 		}
 	},
 };

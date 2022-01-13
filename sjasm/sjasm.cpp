@@ -138,7 +138,7 @@ namespace Options {
 		}
 		// check end-of-line comment for mentioning "fake" to remove warning, or beginning with "ok"
 		if (syx.FakeWarning && warningNotSuppressed(true)) {
-			Warning("Fake instruction", bp);
+			WarningById(W_FAKE, bp);
 		}
 		return false;
 	}

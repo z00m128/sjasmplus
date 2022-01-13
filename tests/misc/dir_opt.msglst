@@ -21,8 +21,8 @@ Syntax option not implemented yet: l
 14    000D              OPT = 1
 14    000D 00             nop
 14    000E                OPT --dirbol  ; first is label, instruction, adding --dirbol back (no push/reset)
-dir_opt.asm(15): warning: Fake instruction: ld      hl,bc,,de,bc
-dir_opt.asm(15): warning: Fake instruction: ld      hl,bc,,de,bc
+dir_opt.asm(15): warning[fake]: Fake instruction: ld      hl,bc,,de,bc
+dir_opt.asm(15): warning[fake]: Fake instruction: ld      hl,bc,,de,bc
 15    000E 60 69 50 59      ld      hl,bc,,de,bc    ; 2x warning about fAkEs (suppression is case sensitive)
 16    0012 60 69            ld      hl,bc           ; fake with suppressed warning
 dir_opt.asm(17): error: Z80N instructions are currently disabled: mirror  a
