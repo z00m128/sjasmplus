@@ -606,7 +606,10 @@ void SetLastParsedLabel(const char* label) {
 
 void ParseLabel() {
 	if (White()) return;
-	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
+	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) {
+		if (!SkipBlanks()) Error("Unexpected", lp);
+		return;
+	}
 	char temp[LINEMAX], * tp = temp, * ttp;
 	aint val, equPageNum = LABEL_PAGE_UNDEFINED, smcOffset = 0;
 	// copy the label name into `temp` array

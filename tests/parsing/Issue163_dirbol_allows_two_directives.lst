@@ -1,0 +1,29 @@
+# file opened: Issue163_dirbol_allows_two_directives.asm
+ 1    0000 01               DB 1
+ 1    0001 02            DB 2       ; legal syntax
+Issue163_dirbol_allows_two_directives.asm(2): error: Unrecognized instruction: 3
+Issue163_dirbol_allows_two_directives.asm(2): error: Unexpected: 3
+ 2    0002              DB 3
+ 2    0002 04            DB 4           ; error without --dirbol ("DB" becomes label)
+Issue163_dirbol_allows_two_directives.asm(3): error: Unexpected: DW 6
+ 3    0003 05 00            DW 5 DW 6       ; error, no colon
+Issue163_dirbol_allows_two_directives.asm(4): error: Unrecognized instruction: 7 DW 8
+Issue163_dirbol_allows_two_directives.asm(4): error: Unexpected: 7 DW 8
+ 4    0005              DW 7 DW 8           ; error without --dirbol and no colon ("DW" becomes label)
+ 5    0005
+ 6    0005                  OPT --dirbol
+ 7    0005 01               DB 1
+ 7    0006 02            DB 2       ; legal syntax
+ 8    0007 03           DB 3
+ 8    0008 04            DB 4           ; legal syntax with --dirbol
+Issue163_dirbol_allows_two_directives.asm(9): error: Unexpected: DW 6
+ 9    0009 05 00            DW 5 DW 6       ; error, no colon after DW 5
+Issue163_dirbol_allows_two_directives.asm(10): error: Unexpected: DW 8
+10    000B 07 00 08 00  DW 7 DW 8           ; error, no colon after DW 7 (but DW 7 works with --dirbol)
+11    000F
+# file closed: Issue163_dirbol_allows_two_directives.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002 X DB
+0x0005 X DW
