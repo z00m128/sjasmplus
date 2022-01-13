@@ -46,6 +46,20 @@ dir_opt.asm(27): error: [OPT] invalid command (valid commands: push, pop, reset,
 dir_opt.asm(28): warning: [OPT] pushing syntax status after reset
 28    001C                  OPT reset push          ; warn about pushing default syntax
 29    001C
+30    001C                  ; verify if -Wfake/Wno-fake works similarly to --syntax=f
+31    001C 44 4D            ld      bc,hl           ; no warning in default syntax
+32    001E                  OPT push -Wfake
+dir_opt.asm(33): warning[fake]: Fake instruction: ld      bc,hl
+33    001E 44 4D            ld      bc,hl           ; warning
+34    0020 44 4D            ld      bc,hl           ; warning suppressed by fake-ok
+35    0022                  OPT push -Wno-fake
+36    0022 44 4D            ld      bc,hl           ; no warning
+37    0024                  OPT pop
+dir_opt.asm(38): warning[fake]: Fake instruction: ld      bc,hl
+38    0024 44 4D            ld      bc,hl           ; warning from previous state
+39    0026                  OPT pop
+40    0026 44 4D            ld      bc,hl           ; no warning in default
+41    0028
 # file closed: dir_opt.asm
 
 Value    Label

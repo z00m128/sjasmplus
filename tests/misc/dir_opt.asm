@@ -26,3 +26,15 @@ OPT = 2 : nop               ; this one is no more dirbol, but just a label
 
     OPT unknown             ; error about invalid command
     OPT reset push          ; warn about pushing default syntax
+
+    ; verify if -Wfake/Wno-fake works similarly to --syntax=f
+    ld      bc,hl           ; no warning in default syntax
+    OPT push -Wfake
+    ld      bc,hl           ; warning
+    ld      bc,hl           ; warning suppressed by fake-ok
+    OPT push -Wno-fake
+    ld      bc,hl           ; no warning
+    OPT pop
+    ld      bc,hl           ; warning from previous state
+    OPT pop
+    ld      bc,hl           ; no warning in default

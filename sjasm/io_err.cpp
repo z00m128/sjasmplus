@@ -441,6 +441,11 @@ void CliWoption(const char* option) {
 	// check for specific id, with possible "no-" prefix ("-Wabs" vs "-Wno-abs")
 	const bool enable = strncmp("no-", option, 3);
 	const char* id = enable ? option : option + 3;
+	// handle ID "fake" separately, changing the enable/disable value directly in Options::syx
+	if (!strcmp(id, W_FAKE)) {
+		Options::syx.FakeWarning = enable;
+		return;			// keep the w_texts["fake"].enabled == true all the time
+	}
 	auto warning_it = findWarningByIdText(id);
 	if (w_texts.end() != warning_it) warning_it->second.enabled = enable;
 	else Warning("unknown warning id in -W option", id, (0 == pass) ? W_EARLY : W_PASS3);
