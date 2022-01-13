@@ -417,22 +417,22 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		if (oldTargetEndPos < freePos) {	// some data after old file -> shift them a bit
 			// first move the data inside the TRD image
 			size_t dataToMoveLength = freePos - oldTargetEndPos;
-			byte* dataToMove = new byte[dataToMoveLength];
-			if (nullptr == dataToMove) ErrorOOM();
+			std::unique_ptr<byte[]> dataToMove(new byte[dataToMoveLength]);
+			if (nullptr == dataToMove.get()) ErrorOOM();
 			if (fseek(ff, oldTargetEndPos, SEEK_SET)) {
 				return ReturnWithError("TRD image has wrong format", fname, ff);
 			}
-			if (dataToMoveLength != fread(dataToMove, 1, dataToMoveLength, ff)) {
+			if (dataToMoveLength != fread(dataToMove.get(), 1, dataToMoveLength, ff)) {
 				return ReturnWithError("TRD read error", fname, ff);
 			}
 			if (fseek(ff, newTargetEndPos, SEEK_SET)) {
 				return ReturnWithError("TRD image has wrong format", fname, ff);
 			}
 			// first modification of the provided TRD file (since here, if something fails, the file is damaged)
-			if (dataToMoveLength != fwrite(dataToMove, 1, dataToMoveLength, ff)) {
+			if (dataToMoveLength != fwrite(dataToMove.get(), 1, dataToMoveLength, ff)) {
 				return ReturnWithError("TRD write error", fname, ff);
 			}
-			delete[] dataToMove;
+			dataToMove.release();
 			// adjust all catalog entries which got the content sectors shifted
 			for (unsigned entryIndex = 0; entryIndex < STrdHead::NUM_OF_FILES_MAX; ++entryIndex) {
 				auto & entry = trdHead.catalog[entryIndex];

@@ -266,7 +266,8 @@ char* GetDeviceName() {
 }
 
 CDevice::CDevice(const char *name, CDevice *parent)
-	: Next(NULL), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0) {
+	: Next(NULL), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0),
+	previousSlotI(0), previousSlotOpt(CDeviceSlot::ESlotOptions::O_NONE), limitExceeded(false) {
 	ID = STRDUP(name);
 	if (parent) parent->Next = this;
 	for (auto & slot : Slots) slot = NULL;
