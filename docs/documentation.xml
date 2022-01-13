@@ -208,6 +208,7 @@
 
             <listitem>
               <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>, <link linkend="po_savecpcsna">`SAVECPCSNA`</link>) - by Oli Wilkinson
+- the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
 - bugfixes (macros, listing, file names in errors)
 </synopsis>
             </listitem>
@@ -519,7 +520,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
 			The line suppression mechanism requires you to add end-of-line comment with "id-ok" string
 			somewhere in the comment (exception: for fake instructions and --syntax=f mode the word
 			"fake" is enough without -ok suffix) (the "ok" comment suppression mechanism from previous
-			versions of sjasmplus is deprecated and will be removed in future versions).
+			versions of sjasmplus is removed since v1.18.4).
 		</para>
 		<para>
 			The id-warning is emitted together with its id in brackets:

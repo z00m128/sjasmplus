@@ -374,19 +374,6 @@ static messages_map::iterator findWarningByIdText(const char* id) {
 	return std::find_if(w_texts.begin(), w_texts.end(), [id](const auto& v){ return !strcmp(id, v.first); } );
 }
 
-//TODO deprecated, add single-warning around mid 2021, remove ~1y later (replaced by warning-id system)
-// checks for "ok" (or also "fake") in EOL comment
-// "ok" must follow the comment start, "fake" can be anywhere inside
-bool warningNotSuppressed(bool alsoFake) {
-	if (nullptr == eolComment) return true;
-	char* comment = eolComment;
-	while (';' == *comment || '/' == *comment) ++comment;
-	while (' ' == *comment || '\t' == *comment) ++comment;
-	// check if "ok" is first word
-	if ('o' == comment[0] && 'k' == comment[1] && !isalnum((byte)comment[2])) return false;
-	return alsoFake ? (nullptr == strstr(eolComment, "fake")) : true;
-}
-
 bool suppressedById(const char* id) {
 	assert(id);
 	if (nullptr == eolComment) return false;
@@ -394,6 +381,7 @@ bool suppressedById(const char* id) {
 	assert(0 < idLength);
 	const char* commentToCheck = eolComment;
 	while (const char* idPos = strstr(commentToCheck, id)) {
+		if (!strcmp(id, W_FAKE)) return true;				// "fake" only is enough to suppress those
 		commentToCheck = idPos + idLength;
 		if ('-' == commentToCheck[0] && 'o' == commentToCheck[1] && 'k' == commentToCheck[2]) {
 			return true;

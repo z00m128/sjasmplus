@@ -1,6 +1,6 @@
 # file opened: Issue42B_local_labels.asm
  1    0000 CD 22 00         CALL LABEL3 ; LABEL3 - yes
- 2    0003 3A 10 00         LD A,(LABEL1) ;ok low mem; LABEL1 - yes
+ 2    0003 3A 10 00         LD A,(LABEL1) ;rdlow-ok low mem; LABEL1 - yes
  3    0006
 Issue42B_local_labels.asm(4): error: Local label not found: 1B
  4    0006 18 F8            jr  1B      ;; error

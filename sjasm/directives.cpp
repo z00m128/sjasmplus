@@ -285,7 +285,7 @@ static void dirORG() {
 	// crop (with warning) address in device or non-longptr mode to 16bit address range
 	if ((DeviceID || !Options::IsLongPtr) && !check16u(val)) val &= 0xFFFF;
 	CurAddress = val;
-	if (DISP_NONE != PseudoORG && warningNotSuppressed()) WarningById(W_DISPLACED_ORG);
+	if (DISP_NONE != PseudoORG) WarningById(W_DISPLACED_ORG);
 	if (!DeviceID) return;
 	if (!comma(lp)) {
 		Device->CheckPage(CDevice::CHECK_RESET);
@@ -293,7 +293,7 @@ static void dirORG() {
 	}
 	// emit warning when current slot does not cover address used for ORG
 	auto slot = Device->GetCurrentSlot();
-	if ((CurAddress < slot->Address || slot->Address + slot->Size <= CurAddress) && warningNotSuppressed()) {
+	if ((CurAddress < slot->Address || slot->Address + slot->Size <= CurAddress)) {
 		char warnTxt[LINEMAX];
 		SPRINTF4(warnTxt, LINEMAX,
 					"address 0x%04X vs slot %d range 0x%04X..0x%04X",
@@ -459,7 +459,7 @@ static void dirMMU() {
 	// set explicit ORG address if the third argument was provided
 	if (0 <= address) {
 		CurAddress = address;
-		if (DISP_NONE != PseudoORG && warningNotSuppressed()) {
+		if (DISP_NONE != PseudoORG) {
 			WarningById(W_DISPLACED_ORG);
 		}
 	}
@@ -1301,7 +1301,7 @@ static bool dirIfIfn(aint & val) {
 		Error("[IF/IFN] Syntax error", lp, IF_FIRST);
 		return false;
 	}
-	if (IsLabelNotFound && warningNotSuppressed()) {
+	if (IsLabelNotFound) {
 		WarningById(W_FWD_REF, bp, W_EARLY);
 	}
 	return true;
@@ -2092,7 +2092,7 @@ static void dirLUA() {
 	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
 	const bool execute = (-1 == passToExec) || (passToExec == pass);
 	// remember warning suppression also from block start
-	bool showWarning = !suppressedById(W_LUA_MC_PASS) && warningNotSuppressed();
+	bool showWarning = !suppressedById(W_LUA_MC_PASS);
 
 	if (execute) {
 		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
@@ -2123,7 +2123,7 @@ static void dirLUA() {
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDLUA
 			// take into account also warning suppression used at end of block
-			showWarning = showWarning && !suppressedById(W_LUA_MC_PASS) && warningNotSuppressed();
+			showWarning = showWarning && !suppressedById(W_LUA_MC_PASS);
 			break;
 		}
 		ListFile(true);

@@ -242,7 +242,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	// this will overwrite also first byte of "trd.length" (12 bytes are affected, not just 11)
 	const ETrdFileName nameWarning = TRD_FileNameToBytes(fhobname, longFname, Lname);
 	const bool isExtensionB = ('B' == trdf.ext);
-	if (!addplace && warningNotSuppressed()) {
+	if (!addplace) {
 		if (INVALID_EXTENSION == nameWarning) {
 			WarningById(W_TRD_EXT_INVALID, fhobname);
 		}
@@ -364,7 +364,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		fileIndex = trdHead.info.numOfFiles;
 	} else {
 		// in "normal" mode warn when file already exists
-		if (STrdHead::NUM_OF_FILES_MAX != fileIndex && warningNotSuppressed()) {
+		if (STrdHead::NUM_OF_FILES_MAX != fileIndex) {
 			// to keep legacy behaviour of older sjasmplus versions, this is just warning
 			// and the same file will be added to end of directory any way
 			WarningById(W_TRD_DUPLICATE, fname);

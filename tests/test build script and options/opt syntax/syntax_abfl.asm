@@ -17,4 +17,5 @@ hl:                     ; warning
     ld      b,[9]       ; error (memory reference = illegal instruction)
     ld      b,10        ; OK
 
-    ld      bc,hl       ;ok (warning suppressed by "ok")
+    ld      bc,hl       ;fake (warning suppressed by "fake")
+    ld      bc,hl       ;ok (removed, doesn't suppress any more)

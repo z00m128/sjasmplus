@@ -69,7 +69,6 @@ void Error(const char* message, const char* badValueMessage = nullptr, EStatus t
 void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);
 void ErrorOOM();		// out of memory
 
-bool warningNotSuppressed(bool alsoFake = false);	// checks for "ok" ("fake") in EOL comment
 bool suppressedById(const char* id);	// checks for "id-ok" in EOL comment
 void Warning(const char* message, const char* badValueMessage = nullptr, EWStatus type = W_PASS3);
 void WarningById(const char* id, const char* badValueMessage = nullptr, EWStatus type = W_PASS3);

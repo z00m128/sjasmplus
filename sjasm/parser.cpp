@@ -415,7 +415,7 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 		alignment = -1;
 		return;
 	}
-	if (Relocation::isActive && warningNotSuppressed()) {
+	if (Relocation::isActive) {
 		WarningById(W_RELOCATABLE_ALIGN);
 	}
 	// check if alignment value is power of two (0..15-th power only)

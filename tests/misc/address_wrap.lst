@@ -46,7 +46,7 @@ address_wrap.asm(35): warning: RAM limit exceeded 0x10000 by DISP
 36    0002 18 FE        tc5 jr tc5
 37    0004 CD 02 00         call tc5
 38    0007
-39    0007                  ORG $FFFF       ; ok ; while already inside DISP<->ENT block, use ORG for further changes
+39    0007                  ORG $FFFF       ; displacedorg-ok ; while already inside DISP<->ENT block, use ORG for further changes
 address_wrap.asm(40): warning: RAM limit exceeded 0x10000 by DISP
 40    FFFF 3E 38        ta6 ld a,'8'
 41    0001 18 FE        tb6 jr tb6
@@ -65,7 +65,7 @@ address_wrap.asm(52): warning: RAM limit exceeded 0x10000 by DISP
 53    0002 18 FE        tc7 jr tc7
 54    0004 CD 02 00         call tc7
 55    0007
-56    0007                  ORG $FFFF       ; ok
+56    0007                  ORG $FFFF       ; displacedorg-ok
 address_wrap.asm(57): warning: RAM limit exceeded 0x10000 by DISP
 57    FFFF 3E 38        ta8 ld a,'8'
 58    0001 18 FE        tb8 jr tb8

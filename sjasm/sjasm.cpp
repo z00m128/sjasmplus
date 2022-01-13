@@ -136,8 +136,7 @@ namespace Options {
 			Error(errorTxt, bp, SUPPRESS);
 			return true;
 		}
-		// check end-of-line comment for mentioning "fake" to remove warning, or beginning with "ok"
-		if (syx.FakeWarning && warningNotSuppressed(true)) {
+		if (syx.FakeWarning) {
 			WarningById(W_FAKE, bp);
 		}
 		return false;

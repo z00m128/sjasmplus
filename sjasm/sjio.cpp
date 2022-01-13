@@ -1405,7 +1405,7 @@ static void CloseBreakpointsFile() {
 
 void WriteBreakpoint(const aint val) {
 	if (!FP_BreakpointsFile) {
-		if (warningNotSuppressed()) WarningById(W_BP_FILE);
+		WarningById(W_BP_FILE);
 		return;
 	}
 	++breakpointsCounter;

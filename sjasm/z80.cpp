@@ -1820,9 +1820,7 @@ namespace Z80 {
 					case Z80_UNK:
 						if (0 == GetByteNoMem(lp)) {
 							// out (c),0 - warn about it as unstable
-							if (warningNotSuppressed()) {
-								WarningById(W_OUT0);
-							}
+							WarningById(W_OUT0);
 							e[0] = 0xed;
 						}
 						e[1] = 0x71; break;

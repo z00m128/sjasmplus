@@ -36,7 +36,7 @@ tb5 jr tb5          ; the "tb5" label will equal 0x10000 since v1.15.0 (was 0x00
 tc5 jr tc5
     call tc5
 
-    ORG $FFFF       ; ok ; while already inside DISP<->ENT block, use ORG for further changes
+    ORG $FFFF       ; displacedorg-ok ; while already inside DISP<->ENT block, use ORG for further changes
 ta6 ld a,'8'
 tb6 jr tb6
 tc6 jr tc6
@@ -53,7 +53,7 @@ tb7 jr tb7
 tc7 jr tc7
     call tc7
 
-    ORG $FFFF       ; ok
+    ORG $FFFF       ; displacedorg-ok
 ta8 ld a,'8'
 tb8 jr tb8
 tc8 jr tc8
