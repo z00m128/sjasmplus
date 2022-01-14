@@ -37,3 +37,15 @@ phase3_end:
     ; no warning when explicit truncation is used
     ld      hl,longptr7&$FFFF
     dw      longptr8&$FFFF
+
+; added: in one project the usage of `DS 0` did uncover bug truncating longptr addresses back to 16b, fixed in v1.18.4
+
+    ORG $35000
+phase4_start:
+    PHASE $46000
+longptrA:
+        DS  0,'!'
+longptrB:
+    UNPHASE
+phase4_end:
+    ASSERT longptrA == longptrB && phase4_start == phase4_end

@@ -67,7 +67,7 @@ const char* ArchiveFilename(const char* fullpathname) {
 	return newName;
 }
 
-// does release all archived filenames, making all pointers invalid
+// does release all archived filenames, making all pointers (and archive itself) invalid
 void ReleaseArchivedFilenames() {
 	for (auto filename : archivedFileNames) free((void*)filename);
 }
@@ -381,8 +381,9 @@ void EmitWords(int* words, bool isInstructionStart) {
 
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
 	if (len <= 0) {
-		CurAddress = (CurAddress + len) & 0xFFFF;
-		if (DISP_NONE != PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
+		const aint adrMask = Options::IsLongPtr ? ~0 : 0xFFFF;
+		CurAddress = (CurAddress + len) & adrMask;
+		if (DISP_NONE != PseudoORG) adrdisp = (adrdisp + len) & adrMask;
 		if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
 		else			CheckRamLimitExceeded();
 		return;

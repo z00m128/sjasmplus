@@ -209,6 +209,7 @@
             <listitem>
               <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>, <link linkend="po_savecpcsna">`SAVECPCSNA`</link>) - by Oli Wilkinson
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
+- fix `--longptr` mode to keep 32b address when `DS 0` is used
 - bugfixes (macros, listing, file names in errors)
 </synopsis>
             </listitem>
