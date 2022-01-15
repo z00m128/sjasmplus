@@ -6,3 +6,4 @@ sjasmwin32/sjasmplus.res
 /build/
 /CMakeFiles/sjasmplus.dir/
 /.kdev4
+/.cache
