@@ -483,6 +483,32 @@ z80cover100.asm(274): error: Illegal instruction:     push    e
 z80cover100.asm(275): error: Illegal instruction:     sub     bc,bc
 275   00DB                  sub     bc,bc
 276   00DB
+277   00DB                  ;; part 5 - improving coverage after adding new fake instructions
+z80cover100.asm(278): error: Illegal instruction:     adc     de,af
+278   00DB                  adc     de,af
+z80cover100.asm(279): error: Illegal instruction:     adc     de,1
+279   00DB                  adc     de,1
+z80cover100.asm(280): error: Illegal instruction:     adc     af,hl
+280   00DB                  adc     af,hl
+z80cover100.asm(281): error: Illegal instruction:     add     de,af
+281   00DB                  add     de,af
+z80cover100.asm(282): error: Illegal instruction:     add     de,2
+282   00DB                  add     de,2
+z80cover100.asm(283): error: Illegal instruction:     add     af,hl
+283   00DB                  add     af,hl
+z80cover100.asm(284): error: Illegal instruction:     sbc     de,af
+284   00DB                  sbc     de,af
+z80cover100.asm(285): error: Illegal instruction:     sbc     de,3
+285   00DB                  sbc     de,3
+z80cover100.asm(286): error: Illegal instruction:     sbc     af,hl
+286   00DB                  sbc     af,hl
+z80cover100.asm(287): error: Illegal instruction:     sub     de,af
+287   00DB                  sub     de,af
+z80cover100.asm(288): error: Illegal instruction:     sub     de,4
+288   00DB                  sub     de,4
+z80cover100.asm(289): error: Illegal instruction:     sub     af,hl
+289   00DB                  sub     af,hl
+290   00DB
 # file closed: z80cover100.asm
 
 Value    Label
