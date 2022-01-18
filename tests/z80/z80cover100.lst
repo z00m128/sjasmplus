@@ -412,8 +412,8 @@ z80cover100.asm(237): error: [JR] Target out of range (+128)
 237   00D9 18 00            jr      $+2+128
 z80cover100.asm(238): error: Illegal instruction:     xor     hl,0
 238   00DB                  xor     hl,0
-z80cover100.asm(239): error: Illegal instruction:     adc     de,hl
-239   00DB                  adc     de,hl
+z80cover100.asm(239): error: Illegal instruction:     adc     bc,hl
+239   00DB                  adc     bc,hl
 240   00DB
 241   00DB                  OPT reset --syntax=abF
 z80cover100.asm(242): error: Fake instructions are not enabled: ld      de,(ix)
@@ -480,8 +480,8 @@ z80cover100.asm(273): error: Illegal instruction:     out     (254),h
 273   00DB                  out     (254),h
 z80cover100.asm(274): error: Illegal instruction:     push    e
 274   00DB                  push    e
-z80cover100.asm(275): error: Illegal instruction:     sub     de,de
-275   00DB                  sub     de,de
+z80cover100.asm(275): error: Illegal instruction:     sub     bc,bc
+275   00DB                  sub     bc,bc
 276   00DB
 # file closed: z80cover100.asm
 

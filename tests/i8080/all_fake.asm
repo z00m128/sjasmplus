@@ -201,6 +201,25 @@ ldd_#hl#_nn         ldd (hl),$44
 ldd_#ix_nn#_nn      ldd (ix+$77),$44
 ldd_#iy_nn#_nn      ldd (iy+$77),$44
 
+adc_de_bc           adc de,bc
+adc_de_de           adc de,de
+adc_de_hl           adc de,hl
+adc_de_sp           adc de,sp
+
+add_de_bc           add de,bc
+add_de_de           add de,de
+add_de_hl           add de,hl
+add_de_sp           add de,sp
+
+sbc_de_bc           sbc de,bc
+sbc_de_de           sbc de,de
+sbc_de_hl           sbc de,hl
+sbc_de_sp           sbc de,sp
+
+sub_de_bc           sub de,bc
+sub_de_de           sub de,de
+sub_de_hl           sub de,hl
+sub_de_sp           sub de,sp
 sub_hl_bc           sub hl,bc
 sub_hl_de           sub hl,de
 sub_hl_hl           sub hl,hl

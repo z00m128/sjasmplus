@@ -137,6 +137,7 @@
               <pre class="synopsis">- added Amstrad CPC devices (<a class="link" href="#po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</a>, <a class="link" href="#po_savecpcsna">`SAVECPCSNA`</a>) - by Oli Wilkinson
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
 - fix `--longptr` mode to keep 32b address when `DS 0` is used
+- added fake instructions adc|add|sbc|sub de,bc|de|hl|sp
 - bugfixes (macros, listing, file names in errors)
 </pre>
             </dd><dt><span class="term">29.8.2021 - 1.18.3</span></dt><dd>
@@ -1020,9 +1021,28 @@ $$lab $$lab    <a class="indexterm" name="op_label_page"></a>page of "lab" label
   ldd (ix+nn),mm  ; ld (ix+nn),mm : dec ix
   ldd (iy+nn),mm  ; ld (iy+nn),mm : dec iy
 
+  adc de,bc       ; ex de,hl : adc hl,bc : ex de,hl
+  adc de,de       ; ex de,hl : adc hl,de : ex de,hl         ;; consider alternative: rl e : rl d (-7T)
+  adc de,hl       ; ex de,hl : adc hl,hl : ex de,hl
+  adc de,sp       ; ex de,hl : adc hl,sp : ex de,hl
+
+  add de,bc       ; ex de,hl : add hl,bc : ex de,hl
+  add de,de       ; ex de,hl : add hl,de : ex de,hl         ;; consider alternative: srl e : rl d (-3T)
+  add de,hl       ; ex de,hl : add hl,hl : ex de,hl
+  add de,sp       ; ex de,hl : add hl,sp : ex de,hl
+
+  sbc de,bc       ; ex de,hl : sbc hl,bc : ex de,hl
+  sbc de,de       ; ex de,hl : sbc hl,de : ex de,hl
+  sbc de,hl       ; ex de,hl : sbc hl,hl : ex de,hl
+  sbc de,sp       ; ex de,hl : sbc hl,sp : ex de,hl
+
+  sub de,bc       ; or a : ex de,hl : sub hl,bc : ex de,hl
+  sub de,de       ; or a : ex de,hl : sub hl,de : ex de,hl  ;; consider alternative: ld de,0 (-17T)
+  sub de,hl       ; or a : ex de,hl : sub hl,hl : ex de,hl
+  sub de,sp       ; or a : ex de,hl : sub hl,sp : ex de,hl
   sub hl,bc       ; or a : sbc hl,bc
   sub hl,de       ; or a : sbc hl,de
-  sub hl,hl       ; or a : sbc hl,hl
+  sub hl,hl       ; or a : sbc hl,hl                        ;; consider alternative: ld hl,0 (-9T)
   sub hl,sp       ; or a : sbc hl,sp
 
   ; Z80N only

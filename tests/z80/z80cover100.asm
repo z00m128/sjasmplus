@@ -236,7 +236,7 @@
     jr      $+2-129
     jr      $+2+128
     xor     hl,0
-    adc     de,hl
+    adc     bc,hl
 
     OPT reset --syntax=abF
     ld      de,(ix)
@@ -272,4 +272,4 @@
     out     (c),1
     out     (254),h
     push    e
-    sub     de,de
+    sub     bc,bc

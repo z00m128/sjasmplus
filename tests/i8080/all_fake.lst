@@ -380,28 +380,71 @@ all_fake.asm(201): error: Unrecognized instruction: ldd (ix+$77),$44
 all_fake.asm(202): error: Unrecognized instruction: ldd (iy+$77),$44
 202   801E              ldd_#iy_nn#_nn      ldd (iy+$77),$44
 203   801E
-all_fake.asm(204): error: Illegal instruction: sub_hl_bc           sub hl,bc
-204   801E              sub_hl_bc           sub hl,bc
-all_fake.asm(205): error: Illegal instruction: sub_hl_de           sub hl,de
-205   801E              sub_hl_de           sub hl,de
-all_fake.asm(206): error: Illegal instruction: sub_hl_hl           sub hl,hl
-206   801E              sub_hl_hl           sub hl,hl
-all_fake.asm(207): error: Illegal instruction: sub_hl_sp           sub hl,sp
-207   801E              sub_hl_sp           sub hl,sp
+all_fake.asm(204): error: Fake instructions are not implemented in i8080 mode: adc de,bc
+204   801E              adc_de_bc           adc de,bc
+all_fake.asm(205): error: Fake instructions are not implemented in i8080 mode: adc de,de
+205   801E              adc_de_de           adc de,de
+all_fake.asm(206): error: Fake instructions are not implemented in i8080 mode: adc de,hl
+206   801E              adc_de_hl           adc de,hl
+all_fake.asm(207): error: Fake instructions are not implemented in i8080 mode: adc de,sp
+207   801E              adc_de_sp           adc de,sp
 208   801E
-209   801E                  ; ZXNext section - there are no true regular fakes yet, but some specials
-all_fake.asm(210): error: Unrecognized instruction: mul
-210   801E              zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
-211   801E                  ; these definitely should not work in i8080 mode (trying to switch --zxnext is fatal error)
-all_fake.asm(212): error: Unrecognized instruction: break
-212   801E              zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
-all_fake.asm(213): error: Unrecognized instruction: exit
-213   801E              zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
-214   801E
+all_fake.asm(209): error: Fake instructions are not implemented in i8080 mode: add de,bc
+209   801E              add_de_bc           add de,bc
+all_fake.asm(210): error: Fake instructions are not implemented in i8080 mode: add de,de
+210   801E              add_de_de           add de,de
+all_fake.asm(211): error: Fake instructions are not implemented in i8080 mode: add de,hl
+211   801E              add_de_hl           add de,hl
+all_fake.asm(212): error: Fake instructions are not implemented in i8080 mode: add de,sp
+212   801E              add_de_sp           add de,sp
+213   801E
+all_fake.asm(214): error: Fake instructions are not implemented in i8080 mode: sbc de,bc
+214   801E              sbc_de_bc           sbc de,bc
+all_fake.asm(215): error: Fake instructions are not implemented in i8080 mode: sbc de,de
+215   801E              sbc_de_de           sbc de,de
+all_fake.asm(216): error: Fake instructions are not implemented in i8080 mode: sbc de,hl
+216   801E              sbc_de_hl           sbc de,hl
+all_fake.asm(217): error: Fake instructions are not implemented in i8080 mode: sbc de,sp
+217   801E              sbc_de_sp           sbc de,sp
+218   801E
+all_fake.asm(219): error: Fake instructions are not implemented in i8080 mode: sub de,bc
+219   801E              sub_de_bc           sub de,bc
+all_fake.asm(220): error: Fake instructions are not implemented in i8080 mode: sub de,de
+220   801E              sub_de_de           sub de,de
+all_fake.asm(221): error: Fake instructions are not implemented in i8080 mode: sub de,hl
+221   801E              sub_de_hl           sub de,hl
+all_fake.asm(222): error: Fake instructions are not implemented in i8080 mode: sub de,sp
+222   801E              sub_de_sp           sub de,sp
+all_fake.asm(223): error: Fake instructions are not implemented in i8080 mode: sub hl,bc
+223   801E              sub_hl_bc           sub hl,bc
+all_fake.asm(224): error: Fake instructions are not implemented in i8080 mode: sub hl,de
+224   801E              sub_hl_de           sub hl,de
+all_fake.asm(225): error: Fake instructions are not implemented in i8080 mode: sub hl,hl
+225   801E              sub_hl_hl           sub hl,hl
+all_fake.asm(226): error: Fake instructions are not implemented in i8080 mode: sub hl,sp
+226   801E              sub_hl_sp           sub hl,sp
+227   801E
+228   801E                  ; ZXNext section - there are no true regular fakes yet, but some specials
+all_fake.asm(229): error: Unrecognized instruction: mul
+229   801E              zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
+230   801E                  ; these definitely should not work in i8080 mode (trying to switch --zxnext is fatal error)
+all_fake.asm(231): error: Unrecognized instruction: break
+231   801E              zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
+all_fake.asm(232): error: Unrecognized instruction: exit
+232   801E              zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
+233   801E
 # file closed: all_fake.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x801E X adc_de_bc
+0x801E X adc_de_de
+0x801E X adc_de_hl
+0x801E X adc_de_sp
+0x801E X add_de_bc
+0x801E X add_de_de
+0x801E X add_de_hl
+0x801E X add_de_sp
 0x8018 X ld_#hl#_bc
 0x8018 X ld_#hl#_de
 0x8018 X ld_#ix_nn#_bc
@@ -563,6 +606,10 @@ Value    Label
 0x8000 X rr_bc
 0x8000 X rr_de
 0x8000 X rr_hl
+0x801E X sbc_de_bc
+0x801E X sbc_de_de
+0x801E X sbc_de_hl
+0x801E X sbc_de_sp
 0x8000 X sla_bc
 0x8000 X sla_de
 0x8000 X sla_hl
@@ -578,6 +625,10 @@ Value    Label
 0x8000 X srl_bc
 0x8000 X srl_de
 0x8000 X srl_hl
+0x801E X sub_de_bc
+0x801E X sub_de_de
+0x801E X sub_de_hl
+0x801E X sub_de_sp
 0x801E X sub_hl_bc
 0x801E X sub_hl_de
 0x801E X sub_hl_hl

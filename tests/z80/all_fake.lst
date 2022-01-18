@@ -473,36 +473,83 @@ all_fake.asm(200): warning[fake]: Fake instruction: ldd (iy+$77),$44
 200   82F9 FD 36 77 44  ldd_#iy_nn#_nn      ldd (iy+$77),$44
 200   82FD FD 2B
 201   82FF
-all_fake.asm(202): warning[fake]: Fake instruction: sub hl,bc
-202   82FF B7 ED 42     sub_hl_bc           sub hl,bc
-all_fake.asm(203): warning[fake]: Fake instruction: sub hl,de
-203   8302 B7 ED 52     sub_hl_de           sub hl,de
-all_fake.asm(204): warning[fake]: Fake instruction: sub hl,hl
-204   8305 B7 ED 62     sub_hl_hl           sub hl,hl
-all_fake.asm(205): warning[fake]: Fake instruction: sub hl,sp
-205   8308 B7 ED 72     sub_hl_sp           sub hl,sp
-206   830B
-207   830B                  ; ZXNext section - there are no true regular fakes yet, but some specials
-all_fake.asm(208): warning[fake]: Fake instruction: mul
-208   830B ED 30        zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
-209   830D                  ; no message when in --zxnext=cspect mode
-210   830D DD 01        zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
-211   830F DD 00        zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
-212   8311                  OPT --zxnext    ; do 2x error stating the requirement (using nops to advance labels)
-all_fake.asm(213): error: [BREAK] fake instruction "break" must be specifically enabled by --zxnext=cspect option
-213   8311              zxn_csp_break2      break
-213   8311 00             nop
-all_fake.asm(214): error: [EXIT] fake instruction "exit" must be specifically enabled by --zxnext=cspect option
-214   8312              zxn_csp_exit2       exit
-214   8312 00             nop
-215   8313
-216   8313                  ; debug snapshot for Cspect
-217   8313              ;     DEVICE ZXSPECTRUM48 : CSPECTMAP : SAVESNA "all_fake.sna", 0x8000
-218   8313
+all_fake.asm(202): warning[fake]: Fake instruction: adc de,bc
+202   82FF EB ED 4A EB  adc_de_bc           adc de,bc
+all_fake.asm(203): warning[fake]: Fake instruction: adc de,de
+203   8303 EB ED 6A EB  adc_de_de           adc de,de
+all_fake.asm(204): warning[fake]: Fake instruction: adc de,hl
+204   8307 EB ED 5A EB  adc_de_hl           adc de,hl
+all_fake.asm(205): warning[fake]: Fake instruction: adc de,sp
+205   830B EB ED 7A EB  adc_de_sp           adc de,sp
+206   830F
+all_fake.asm(207): warning[fake]: Fake instruction: add de,bc
+207   830F EB 09 EB     add_de_bc           add de,bc
+all_fake.asm(208): warning[fake]: Fake instruction: add de,de
+208   8312 EB 29 EB     add_de_de           add de,de
+all_fake.asm(209): warning[fake]: Fake instruction: add de,hl
+209   8315 EB 19 EB     add_de_hl           add de,hl
+all_fake.asm(210): warning[fake]: Fake instruction: add de,sp
+210   8318 EB 39 EB     add_de_sp           add de,sp
+211   831B
+all_fake.asm(212): warning[fake]: Fake instruction: sbc de,bc
+212   831B EB ED 42 EB  sbc_de_bc           sbc de,bc
+all_fake.asm(213): warning[fake]: Fake instruction: sbc de,de
+213   831F EB ED 62 EB  sbc_de_de           sbc de,de
+all_fake.asm(214): warning[fake]: Fake instruction: sbc de,hl
+214   8323 EB ED 52 EB  sbc_de_hl           sbc de,hl
+all_fake.asm(215): warning[fake]: Fake instruction: sbc de,sp
+215   8327 EB ED 72 EB  sbc_de_sp           sbc de,sp
+216   832B
+all_fake.asm(217): warning[fake]: Fake instruction: sub de,bc
+217   832B B7 EB ED 42  sub_de_bc           sub de,bc
+217   832F EB
+all_fake.asm(218): warning[fake]: Fake instruction: sub de,de
+218   8330 B7 EB ED 62  sub_de_de           sub de,de
+218   8334 EB
+all_fake.asm(219): warning[fake]: Fake instruction: sub de,hl
+219   8335 B7 EB ED 52  sub_de_hl           sub de,hl
+219   8339 EB
+all_fake.asm(220): warning[fake]: Fake instruction: sub de,sp
+220   833A B7 EB ED 72  sub_de_sp           sub de,sp
+220   833E EB
+all_fake.asm(221): warning[fake]: Fake instruction: sub hl,bc
+221   833F B7 ED 42     sub_hl_bc           sub hl,bc
+all_fake.asm(222): warning[fake]: Fake instruction: sub hl,de
+222   8342 B7 ED 52     sub_hl_de           sub hl,de
+all_fake.asm(223): warning[fake]: Fake instruction: sub hl,hl
+223   8345 B7 ED 62     sub_hl_hl           sub hl,hl
+all_fake.asm(224): warning[fake]: Fake instruction: sub hl,sp
+224   8348 B7 ED 72     sub_hl_sp           sub hl,sp
+225   834B
+226   834B                  ; ZXNext section - there are no true regular fakes yet, but some specials
+all_fake.asm(227): warning[fake]: Fake instruction: mul
+227   834B ED 30        zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
+228   834D                  ; no message when in --zxnext=cspect mode
+229   834D DD 01        zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
+230   834F DD 00        zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
+231   8351                  OPT --zxnext    ; do 2x error stating the requirement (using nops to advance labels)
+all_fake.asm(232): error: [BREAK] fake instruction "break" must be specifically enabled by --zxnext=cspect option
+232   8351              zxn_csp_break2      break
+232   8351 00             nop
+all_fake.asm(233): error: [EXIT] fake instruction "exit" must be specifically enabled by --zxnext=cspect option
+233   8352              zxn_csp_exit2       exit
+233   8352 00             nop
+234   8353
+235   8353                  ; debug snapshot for Cspect
+236   8353              ;     DEVICE ZXSPECTRUM48 : CSPECTMAP : SAVESNA "all_fake.sna", 0x8000
+237   8353
 # file closed: all_fake.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x82FF X adc_de_bc
+0x8303 X adc_de_de
+0x8307 X adc_de_hl
+0x830B X adc_de_sp
+0x830F X add_de_bc
+0x8312 X add_de_de
+0x8315 X add_de_hl
+0x8318 X add_de_sp
 0x80CD X ld_#hl#_bc
 0x80D1 X ld_#hl#_de
 0x80D5 X ld_#ix_nn#_bc
@@ -664,6 +711,10 @@ Value    Label
 0x800E X rr_bc
 0x8012 X rr_de
 0x8016 X rr_hl
+0x831B X sbc_de_bc
+0x831F X sbc_de_de
+0x8323 X sbc_de_hl
+0x8327 X sbc_de_sp
 0x801A X sla_bc
 0x801E X sla_de
 0x8022 X sla_hl
@@ -679,12 +730,16 @@ Value    Label
 0x8047 X srl_bc
 0x804B X srl_de
 0x804F X srl_hl
-0x82FF X sub_hl_bc
-0x8302 X sub_hl_de
-0x8305 X sub_hl_hl
-0x8308 X sub_hl_sp
-0x830D X zxn_csp_break
-0x8311 X zxn_csp_break2
-0x830F X zxn_csp_exit
-0x8312 X zxn_csp_exit2
-0x830B X zxn_mul
+0x832B X sub_de_bc
+0x8330 X sub_de_de
+0x8335 X sub_de_hl
+0x833A X sub_de_sp
+0x833F X sub_hl_bc
+0x8342 X sub_hl_de
+0x8345 X sub_hl_hl
+0x8348 X sub_hl_sp
+0x834D X zxn_csp_break
+0x8351 X zxn_csp_break2
+0x834F X zxn_csp_exit
+0x8352 X zxn_csp_exit2
+0x834B X zxn_mul

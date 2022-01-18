@@ -453,19 +453,33 @@ namespace Z80 {
 
 	static void OpCode_ADC() {
 		const bool nonZ80CPU = Options::IsI8080 || Options::IsLR35902;
-		Z80Reg reg;
+		Z80Reg reg, reg2;
+		int reg2ex;
 		do {
-			int e[] { -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x88, e, true, false)) {	// handle common 8-bit variants
-				if ((!nonZ80CPU) && (Z80_HL == GetRegister(lp))) {
-					if (!comma(lp)) {
-						Error("[ADC] Comma expected");
-					} else {
-						switch (reg = GetRegister(lp)) {
-						case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
-							e[0] = 0xed; e[1] = 0x4a + reg - Z80_BC; break;
-						default: break;
-						}
+				reg = GetRegister(lp);	if (Z80_UNK == reg) break;
+				if (!comma(lp)) {
+					Error("[ADC] Comma expected");
+					break;
+				}
+				reg2 = GetRegister(lp);
+				if (Z80_HL == reg && !nonZ80CPU) {
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+						e[0] = 0xed; e[1] = 0x4a + reg2 - Z80_BC; break;
+					default: break;
+					}
+				} else if (Z80_DE == reg) {		// fake adc de,bc|de|hl|sp
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+						if (Options::noFakes()) break;
+						reg2ex = (Z80_DE == reg2 || Z80_HL == reg2) ? (reg2^0x10) : reg2;
+						e[0] = 0xEB;
+						e[1] = INSTRUCTION_START_MARKER; e[2] = 0xED; e[3] = 0x4A + reg2ex - Z80_BC;
+						e[4] = INSTRUCTION_START_MARKER; e[5] = 0xEB;
+						break;
+					default: break;
 					}
 				}
 			}
@@ -475,8 +489,9 @@ namespace Z80 {
 
 	static void OpCode_ADD() {
 		Z80Reg reg, reg2;
+		int reg2ex;
 		do {
-			int e[] { -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x80, e, true, false)) {	// handle common 8-bit variants
 				// add hl|ixy|bc|de|sp,... variants
 				reg = GetRegister(lp);	if (Z80_UNK == reg) break;
@@ -515,7 +530,18 @@ namespace Z80 {
 						break;
 					}
 					break;
-				case Z80_DE:
+				case Z80_DE:	// fake add de,bc|de|hl|sp
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+						if (Options::noFakes()) break;
+						reg2ex = (Z80_DE == reg2 || Z80_HL == reg2) ? (reg2^0x10) : reg2;
+						e[0] = 0xEB;
+						e[1] = INSTRUCTION_START_MARKER; e[2] = 0x09 + reg2ex - Z80_BC;
+						e[3] = INSTRUCTION_START_MARKER; e[4] = 0xEB;
+						break;
+					default: break;
+					}
+					//continue into `case Z80_BC` for Z80N variants
 				case Z80_BC:
 					if (!Options::syx.IsNextEnabled) break;   // DE|BC is valid first operand only for Z80N
 					if (Z80_A == reg2) {
@@ -2087,19 +2113,33 @@ namespace Z80 {
 
 	static void OpCode_SBC() {
 		const bool nonZ80CPU = Options::IsI8080 || Options::IsLR35902;
-		Z80Reg reg;
+		Z80Reg reg, reg2;
+		int reg2ex;
 		do {
-			int e[] { -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x98, e, true, false)) {	// handle common 8-bit variants
-				if ((!nonZ80CPU) && (Z80_HL == GetRegister(lp))) {
-					if (!comma(lp)) {
-						Error("[SBC] Comma expected");
-					} else {
-						switch (reg = GetRegister(lp)) {
-						case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
-							e[0] = 0xed; e[1] = 0x32 + reg; break;
-						default: break;
-						}
+				reg = GetRegister(lp);	if (Z80_UNK == reg) break;
+				if (!comma(lp)) {
+					Error("[SBC] Comma expected");
+					break;
+				}
+				reg2 = GetRegister(lp);
+				if (Z80_HL == reg && !nonZ80CPU) {
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+						e[0] = 0xed; e[1] = 0x32 + reg2; break;
+					default: break;
+					}
+				} else if (Z80_DE == reg) {		// fake sbc de,bc|de|hl|sp
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+						if (Options::noFakes()) break;
+						reg2ex = (Z80_DE == reg2 || Z80_HL == reg2) ? (reg2^0x10) : reg2;
+						e[0] = 0xEB;
+						e[1] = INSTRUCTION_START_MARKER; e[2] = 0xED; e[3] = 0x32 + reg2ex;
+						e[4] = INSTRUCTION_START_MARKER; e[5] = 0xEB;
+						break;
+					default: break;
 					}
 				}
 			}
@@ -2218,23 +2258,37 @@ namespace Z80 {
 	}
 
 	static void OpCode_SUB() {
-		Z80Reg reg;
+		Z80Reg reg, reg2;
+		int reg2ex;
 		do {
-			int e[] { -1, -1, -1, -1, -1 };
+			int e[] { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 			if (!CommonAluOpcode(0x90, e, true, true)) {	// handle common 8-bit variants
-				if ((!Options::IsI8080) && (Z80_HL == GetRegister(lp))) {
-					if (!comma(lp)) {
-						Error("[SUB] Comma expected");
-					} else {
-						switch (reg = GetRegister(lp)) {
-						case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
-							if (Options::noFakes()) break;
-							e[0] = 0xb7;
-							e[1] = INSTRUCTION_START_MARKER;
-							e[2] = 0xed; e[3] = 0x32+reg;
-							break;
-						default: break;
-						}
+				reg = GetRegister(lp);	if (Z80_UNK == reg) break;
+				if (!comma(lp)) {
+					Error("[SUB] Comma expected");
+					break;
+				}
+				reg2 = GetRegister(lp);
+				if (Z80_HL == reg) {			// fake sub hl,bc|de|hl|sp
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+						if (Options::noFakes()) break;
+						e[0] = 0xB7;
+						e[1] = INSTRUCTION_START_MARKER; e[2] = 0xed; e[3] = 0x32 + reg2;
+						break;
+					default: break;
+					}
+				} else if (Z80_DE == reg) {		// fake sub de,bc|de|hl|sp
+					switch (reg2) {
+					case Z80_BC:	case Z80_DE:	case Z80_HL:	case Z80_SP:
+						if (Options::noFakes()) break;
+						reg2ex = (Z80_DE == reg2 || Z80_HL == reg2) ? (reg2^0x10) : reg2;
+						e[0] = 0xB7;
+						e[1] = INSTRUCTION_START_MARKER; e[2] = 0xEB;
+						e[3] = INSTRUCTION_START_MARKER; e[4] = 0xED; e[5] = 0x32 + reg2ex;
+						e[6] = INSTRUCTION_START_MARKER; e[7] = 0xEB;
+						break;
+					default: break;
 					}
 				}
 			}
