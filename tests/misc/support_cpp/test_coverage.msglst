@@ -11,10 +11,9 @@ test_coverage.asm(7): error: [INCLUDELUA] File doesn't exist: c:/absolute_win_dr
  6    0000                  ; absolute path is ok-ish (still pain if you cooperate with several developers on same project, but your choice)
  7    0000                  INCLUDELUA "c:/absolute_win_drive_path.some.nonexisting.file"
  8    0000
- 9    0000                  ; check LuaShellExec routine
+ 9    0000                  ; check LuaShellExec routine - can't capture output (echo is stdout and redirect to stderr differs per OS)
 10    0000                  LUA PASS3
-11    0000 ~                    sj.shellexec(">&2 echo 'ahoy in stderr'")
-ahoy in stderr
+11    0000 ~                    sj.shellexec("echo hello")
 12    0000                  ENDLUA
 13    0000
 # file closed: test_coverage.asm
