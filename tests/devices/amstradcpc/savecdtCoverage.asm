@@ -39,6 +39,10 @@
     SAVECDT CODE "some.cdt","",0,0,
     SAVECDT CODE "some.cdt","",0,0,&
     SAVECDT CODE "some.cdt","",0,0,0,
+    SAVECDT CODE "some.cdt","c1",-1,1 ; invalid start address
+    SAVECDT CODE "some.cdt","c2",0x1234,0 ; invalid length
+    SAVECDT CODE "some.cdt","c3",0xFFFF,2 ; invalid start+length
+    SAVECDT CODE "some.cdt","c4",0,0x10000 ; invalid length (64ki block is not possible)
 
     ; HEADLESS syntax errors, invalid values
     SAVECDT HEADLESS "some.cdt"
@@ -46,11 +50,15 @@
     SAVECDT HEADLESS "some.cdt",0
     SAVECDT HEADLESS "some.cdt",0,
     SAVECDT HEADLESS "some.cdt",0,&
-    SAVECDT HEADLESS "some.cdt",0,0,
-    SAVECDT HEADLESS "some.cdt",0,0,&
-    SAVECDT HEADLESS "some.cdt",0,0,0,
-    SAVECDT HEADLESS "some.cdt",0,0,0,2
-    SAVECDT HEADLESS "some.cdt",0,0,0,0,
+    SAVECDT HEADLESS "some.cdt",0,1,
+    SAVECDT HEADLESS "some.cdt",0,1,&
+    SAVECDT HEADLESS "some.cdt",0,1,0,
+    SAVECDT HEADLESS "some.cdt",0,1,0,2
+    SAVECDT HEADLESS "some.cdt",0,1,0,0,
+    SAVECDT HEADLESS "some.cdt",-1,1 ; invalid start address
+    SAVECDT HEADLESS "some.cdt",0x1234,0 ; invalid length
+    SAVECDT HEADLESS "some.cdt",0xFFFF,2 ; invalid start+length
+    SAVECDT HEADLESS "some.cdt",0,0x10000 ; invalid length (64ki block is not possible)
 
     ; FULL syntax errors
     SAVECDT FULL "some.cdt",

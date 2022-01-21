@@ -439,6 +439,7 @@ namespace CDTUtil {
 	}
 
 	static std::unique_ptr<byte[]> getContigRAM(aint startAddr, aint length) {
+		assert(0 <= startAddr && 1 <= length && (startAddr+length) <= 0x10000);
 		std::unique_ptr<byte[]> data(new byte[length]);
 		byte* bptr = data.get();
 		// copy the basic into our buffer
@@ -666,9 +667,7 @@ static void SaveCDT_BASIC(const char* fname, const char* tfname, aint startAddr,
 }
 
 static void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, aint length, aint entryAddr) {
-	if (entryAddr < 0) {
-		entryAddr = startAddr & 0xFFFF;
-	}
+	if (entryAddr < 0) entryAddr = startAddr;
 
 	std::unique_ptr<byte[]> data(CDTUtil::getContigRAM(startAddr, length));
 	CDTUtil::writeTapeFile(fname, tfname, CDTUtil::FileTypeBINARY, data.get(), length, startAddr, entryAddr, CDTUtil::DefaultPause);
@@ -760,17 +759,13 @@ static void dirSAVECDTCode(const char* cdtname) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	aint args[] = { StartAddress, 0, -1 };
+	aint args[] = { /*0:start*/ 0, /*1:length*/ 0, /*2:customStart*/ -1 };
 	bool opt[] = { false, false, true };
-	if (!getIntArguments<3>(args, opt)) {
+	if (!getIntArguments<3>(args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	word start = args[0];
-	word length = args[1];
-	aint customStart = args[2];
-
-	SaveCDT_Code(cdtname, tfname.get(), start, length, customStart);
+	SaveCDT_Code(cdtname, tfname.get(), args[0], args[1], args[2]);
 }
 
 static void dirSAVECDTHeadless(const char* cdtname) {
@@ -780,15 +775,11 @@ static void dirSAVECDTHeadless(const char* cdtname) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	aint args[] = { StartAddress, 0, CDTUtil::BlockTypeData, 0 };
+	aint args[] = { /*0:start*/ 0, /*1:length*/ 0, /*2:sync*/ CDTUtil::BlockTypeData, /*3:format*/ 0 };
 	bool opt[] = { false, false, true, true };
-	if (!getIntArguments<4>(args, opt)) {
+	if (!getIntArguments<4>(args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
-
-	word start = args[0];
-	word length = args[1];
-	byte sync = args[2];
 
 	ECDTHeadlessFormat format;
 	switch (args[3]) {
@@ -802,7 +793,7 @@ static void dirSAVECDTHeadless(const char* cdtname) {
 		Error("[SAVECDT HEADLESS] invalid format flag. Expected 0 (AMSTRAD) or 1 (SPECTRUM).", NULL, SUPPRESS); return;
 	}
 
-	SaveCDT_Headless(cdtname, start, length, sync, format);
+	SaveCDT_Headless(cdtname, args[0], args[1], args[2], format);
 }
 
 static void cdtParseFnameAndExecuteCmd(savecdt_command_t command_fn) {
