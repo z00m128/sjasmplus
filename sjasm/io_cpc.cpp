@@ -735,16 +735,13 @@ static void dirSAVECDTBasic(const char* cdtname) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	aint args[] = { StartAddress, 0 };
+	aint args[] = { /*0:start*/ 0, /*1:length*/ 0 };
 	bool opt[] = { false, false };
-	if (!getIntArguments<2>(args, opt)) {
+	if (!getIntArguments<2>(args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	word start = args[0];
-	word length = args[1];
-
-	SaveCDT_BASIC(cdtname, tfname.get(), start, length);
+	SaveCDT_BASIC(cdtname, tfname.get(), args[0], args[1]);
 }
 
 static void dirSAVECDTCode(const char* cdtname) {

@@ -25,8 +25,12 @@
     SAVECDT BASIC "some.cdt","",
     SAVECDT BASIC "some.cdt","",0
     SAVECDT BASIC "some.cdt","",0,
-    SAVECDT BASIC "some.cdt","",0,0,
+    SAVECDT BASIC "some.cdt","",0,1,
     SAVECDT BASIC "some.cdt","",0,&
+    SAVECDT BASIC "some.cdt","b1",-1,1 ; invalid start address
+    SAVECDT BASIC "some.cdt","b2",0x1234,0 ; invalid length
+    SAVECDT BASIC "some.cdt","b3",0xFFFF,2 ; invalid start+length
+    SAVECDT BASIC "some.cdt","b4",0,0x10000 ; invalid length (64ki block is not possible)
 
     ; CODE syntax errors
     SAVECDT CODE "some.cdt"
@@ -36,9 +40,9 @@
     SAVECDT CODE "some.cdt","",0
     SAVECDT CODE "some.cdt","",0,
     SAVECDT CODE "some.cdt","",0,&
-    SAVECDT CODE "some.cdt","",0,0,
-    SAVECDT CODE "some.cdt","",0,0,&
-    SAVECDT CODE "some.cdt","",0,0,0,
+    SAVECDT CODE "some.cdt","",0,1,
+    SAVECDT CODE "some.cdt","",0,1,&
+    SAVECDT CODE "some.cdt","",0,1,0,
     SAVECDT CODE "some.cdt","c1",-1,1 ; invalid start address
     SAVECDT CODE "some.cdt","c2",0x1234,0 ; invalid length
     SAVECDT CODE "some.cdt","c3",0xFFFF,2 ; invalid start+length
