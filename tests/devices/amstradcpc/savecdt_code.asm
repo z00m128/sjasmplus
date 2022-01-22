@@ -29,3 +29,6 @@ dataStart:
 
     ; third block, saving last byte of address space
     SAVECDT CODE "savecdt_code.cdt","code3",endStart,endStart.sz
+
+    ; fourth block, checking truncation of long name
+    SAVECDT CODE "savecdt_code.cdt","long name 123456ccccccccccccccccccccc",dataStart,dataStart.sz

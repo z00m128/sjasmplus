@@ -69,3 +69,8 @@
     SAVECDT FULL "some.cdt",0,
     SAVECDT FULL "some.cdt",0, 0,0, 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
     ; not testing dangling comma after each optional value... it works, really...
+    SAVECDT FULL "some.cdt" ; snapshot of empty machine => error "could not determine the end of the program"
+
+    ; try specific variants (depending on DEVICE state) also in CPC 6128 device
+    DEVICE AMSTRADCPC6128
+    SAVECDT FULL "some.cdt" ; snapshot of empty machine => error "could not determine the end of the program"

@@ -552,7 +552,7 @@ static void createCDTDump6128(const char* fname, aint startAddr, byte screenMode
 	if (ramEnd == 0x0000) {
 		Error("[SAVECDT] Could not determine the end of the program", nullptr, SUPPRESS); return;
 	}
-	if (ramBase == 0xFFFF) {
+	if (ramBase == 0xFFFF) {	// currently unreachable, the ramEnd is always also invalid
 		Error("[SAVECDT] Could not determine the start of the program", nullptr, SUPPRESS); return;
 	}
 
@@ -695,7 +695,7 @@ static void dirSAVECDTFull(const char* cdtname) {
 	};
 
 	bool opt[] = {
-		false,
+		false,	// this is used only when comma was parsed after filename => not optional then
 		true, true,
 		true, true, true, true, true, true, true, true,
 		true, true, true, true, true, true, true, true,
