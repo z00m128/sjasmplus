@@ -1849,8 +1849,8 @@ static void DupWhileImplementation(bool isWhile) {
 		if (IsLabelNotFound) {
 			Error("[DUP/REPT] Forward reference", NULL, ALL);
 		}
-		if ((int) val < 1) {
-			ErrorInt("[DUP/REPT] Repeat value must be positive", val, IF_FIRST); return;
+		if ((int) val < 0) {
+			ErrorInt("[DUP/REPT] Repeat value must be positive or zero", val, IF_FIRST); return;
 		}
 	}
 
@@ -1876,7 +1876,7 @@ static void dirWHILE() {
 
 static bool shouldRepeat(SRepeatStack& dup) {
 	if (nullptr == dup.RepeatCondition) {
-		return dup.RepeatCount--;
+		return 0 <= --dup.RepeatCount;
 	} else {
 		if (!dup.RepeatCount--) {
 			Error("[WHILE] infinite loop? (reaching the guardian value, default 100k)");

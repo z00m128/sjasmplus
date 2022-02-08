@@ -138,6 +138,7 @@
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
 - fix `--longptr` mode to keep 32b address when `DS 0` is used
 - added fake instructions adc|add|sbc|sub de,bc|de|hl|sp
+- DUP/REPT will now accept also zero count (skiping the block)
 - bugfixes (macros, listing, file names in errors)
 </pre>
             </dd><dt><span class="term">29.8.2021 - 1.18.3</span></dt><dd>
@@ -1565,7 +1566,7 @@ will output to the console strings:
               following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.</p><div class="example"><a name="idp1100"></a><p class="title"><b>Example 5.20. </b></p><div class="example-contents">
                   
 
-                  <pre class="programlisting">    DUP 3
+                  <pre class="programlisting">    DUP 3 ; zero count would skip whole block
     NOP
     EDUP
 
