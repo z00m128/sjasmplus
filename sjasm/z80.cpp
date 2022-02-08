@@ -1903,51 +1903,44 @@ namespace Z80 {
 		EmitByte(0x93);
 	}
 
+	static void OpCode_POPone(const Z80Reg r16) {
+		int e[] { -1, -1, -1 };
+		switch (r16) {
+		case Z80_AF:
+			e[0] = 0xf1; break;
+		case Z80_BC:
+			e[0] = 0xc1; break;
+		case Z80_DE:
+			e[0] = 0xd1; break;
+		case Z80_HL:
+			e[0] = 0xe1; break;
+		case Z80_IX:
+		case Z80_IY:
+			e[0] = r16; e[1] = 0xe1; break;
+		default:
+			break;
+		}
+		EmitBytes(e, true);
+	}
+
 	static void OpCode_POPreverse() {
-		int e[30],t = 29,c = 1;
-		e[t] = -1;
+		constexpr int MAX_POP_REGS = 30;
+		Z80Reg regs[MAX_POP_REGS];
+		int rn = 0;
 		do {
-			switch (GetRegister(lp)) {
-			case Z80_AF:
-				e[--t] = 0xf1; break;
-			case Z80_BC:
-				e[--t] = 0xc1; break;
-			case Z80_DE:
-				e[--t] = 0xd1; break;
-			case Z80_HL:
-				e[--t] = 0xe1; break;
-			case Z80_IX:
-				e[--t] = 0xe1; e[--t] = 0xdd; break;
-			case Z80_IY:
-				e[--t] = 0xe1; e[--t] = 0xfd; break;
-			default:
-				c = 0; break;
-			}
-		} while (c && 2 <= t && Options::syx.MultiArg(lp));
-		EmitBytes(&e[t], true);
+			regs[rn++] = GetRegister(lp);
+			// GetRegister_r16Low(regs[rn-1]) works as validator for regular push/pop reg-pairs
+			if (Z80_UNK == GetRegister_r16Low(regs[rn-1]) || MAX_POP_REGS == rn) break;
+		} while (Options::syx.MultiArg(lp));
+		// registers parsed, emit pop instructions in reversed order
+		while (0 <= --rn) {
+			OpCode_POPone(regs[rn]);
+		}
 	}
 
 	static void OpCode_POPnormal() {
-		Z80Reg reg;
 		do {
-			int e[3];
-			e[0] = e[1] = e[2] = -1;
-			switch (reg = GetRegister(lp)) {
-			case Z80_AF:
-				e[0] = 0xf1; break;
-			case Z80_BC:
-				e[0] = 0xc1; break;
-			case Z80_DE:
-				e[0] = 0xd1; break;
-			case Z80_HL:
-				e[0] = 0xe1; break;
-			case Z80_IX:
-			case Z80_IY:
-				e[0] = reg; e[1] = 0xe1; break;
-			default:
-				break;
-			}
-			EmitBytes(e, true);
+			OpCode_POPone(GetRegister(lp));
 		} while (Options::syx.MultiArg(lp));
 	}
 
