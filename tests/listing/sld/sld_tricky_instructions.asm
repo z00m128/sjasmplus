@@ -226,3 +226,4 @@ mm EQU $78
     pop hl,de       ; normal pop
     OPT --reversepop
     pop hl,de       ; reverse pop
+    sla b,c

@@ -171,6 +171,20 @@ bool nonMaComma(char* & p) {
 	return comma(p);
 }
 
+bool relaxedMaComma(char* & p) {
+	SkipBlanks(p);
+	if (',' != p[0]) return false;		// no comma
+	if (',' == p[1]) {
+		// double comma detected, accept it only in --syntax=a mode
+		if (Options::syx.isMultiArgPlainComma()) return false;
+		p += 2;
+		return true;
+	}
+	// single comma is enough in relaxed way, even in --syntax=a mode
+	++p;
+	return true;
+}
+
 //enum EBracketType          { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
 static const char brackets_b[] = { 0,      '(',      '{',      '[',       0 };
 static const char brackets_e[] = { 0,      ')',      '}',      ']',       0 };

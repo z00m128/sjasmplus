@@ -715,7 +715,7 @@ namespace Z80 {
 			int e[] { -1, -1, -1, -1 };
 			OpCode_DecInc(0x05, 0x0B, e);
 			EmitBytes(e, true);
-		} while (Options::syx.MultiArg(lp));
+		} while (relaxedMaComma(lp));
 	}
 
 	static void OpCode_DI() {
@@ -854,7 +854,7 @@ namespace Z80 {
 			int e[] { -1, -1, -1, -1 };
 			OpCode_DecInc(0x04, 0x03, e);
 			EmitBytes(e, true);
-		} while (Options::syx.MultiArg(lp));
+		} while (relaxedMaComma(lp));
 	}
 
 	static void OpCode_IND() {
@@ -1931,7 +1931,7 @@ namespace Z80 {
 			regs[rn++] = GetRegister(lp);
 			// GetRegister_r16Low(regs[rn-1]) works as validator for regular push/pop reg-pairs
 			if (Z80_UNK == GetRegister_r16Low(regs[rn-1]) || MAX_POP_REGS == rn) break;
-		} while (Options::syx.MultiArg(lp));
+		} while (relaxedMaComma(lp));
 		// registers parsed, emit pop instructions in reversed order
 		while (0 <= --rn) {
 			OpCode_POPone(regs[rn]);
@@ -1941,7 +1941,7 @@ namespace Z80 {
 	static void OpCode_POPnormal() {
 		do {
 			OpCode_POPone(GetRegister(lp));
-		} while (Options::syx.MultiArg(lp));
+		} while (relaxedMaComma(lp));
 	}
 
 	static void OpCode_POP() {
@@ -1983,7 +1983,7 @@ namespace Z80 {
 				break;
 			}
 			EmitBytes(e, true);
-		} while (Options::syx.MultiArg(lp));
+		} while (relaxedMaComma(lp));
 	}
 
 	static void OpCode_RES() {

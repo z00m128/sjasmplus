@@ -1,0 +1,41 @@
+# file opened: issue166_multiarg_exceptions.asm
+ 1    0000              ; make some instructions to accept single-comma multi-arg even when --syntax=a mode is specified
+ 2    0000              ; instructions supporting relaxed multi-arg: dec, inc, pop, push
+ 3    0000
+ 4    0000              ; errors of double-comma used without --syntax=a mode
+ 5    0000
+issue166_multiarg_exceptions.asm(6): error: Unexpected: ,,de
+ 6    0000 0B               dec bc,,de
+issue166_multiarg_exceptions.asm(7): error: Unexpected: ,,de
+ 7    0001 03               inc bc,,de
+issue166_multiarg_exceptions.asm(8): error: Unexpected: ,,de
+ 8    0002 E5               push hl,,de
+issue166_multiarg_exceptions.asm(9): error: Unexpected: ,,de
+ 9    0003 E1               pop hl,,de
+10    0004                  OPT --reversepop
+issue166_multiarg_exceptions.asm(11): error: Unexpected: ,,de
+11    0004 E1               pop hl,,de
+12    0005
+13    0005              ; enabled --syntax=a mode, and check mixed commas for relaxed instructions
+14    0005
+15    0005                  OPT reset --syntax=a
+16    0005 0B 1B 2B 3B      dec bc,de,,hl,sp,,ix,iy,,b,c,d,e,,h,l,(hl),a
+16    0009 DD 2B FD 2B
+16    000D 05 0D 15 1D
+16    0011 25 2D 35 3D
+17    0015 03 13 23 33      inc bc,de,,hl,sp,,ix,iy,,b,c,d,e,,h,l,(hl),a
+17    0019 DD 23 FD 23
+17    001D 04 0C 14 1C
+17    0021 24 2C 34 3C
+18    0025 C5 D5 E5 F5      push bc,de,,hl,af,,ix,iy
+18    0029 DD E5 FD E5
+19    002D C1 D1 E1 F1      pop bc,de,,hl,af,,ix,iy
+19    0031 DD E1 FD E1
+20    0035                  OPT --reversepop
+21    0035 FD E1 DD E1      pop bc,de,,hl,af,,ix,iy
+21    0039 F1 E1 D1 C1
+22    003D
+# file closed: issue166_multiarg_exceptions.asm
+
+Value    Label
+------ - -----------------------------------------------------------

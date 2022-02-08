@@ -211,8 +211,9 @@
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
 - fix `--longptr` mode to keep 32b address when `DS 0` is used
 - added fake instructions adc|add|sbc|sub de,bc|de|hl|sp
+- dec|inc|pop|push will accept also single-comma multiarg in --syntax=a mode
 - DUP/REPT will now accept also zero count (skiping the block)
-- bugfixes (macros, listing, file names in errors)
+- bugfixes (macros, listing, file names in errors, SLD reversepop data)
 </synopsis>
             </listitem>
           </varlistentry>
@@ -467,7 +468,7 @@
   </para>
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
-	<synopsis>  a      Multi-argument delimiter ",," (default is ",")
+	<synopsis>  a      Multi-argument delimiter ",," (default is ",") (but dec|inc|pop|push accept also ",")
   b      Whole expression parentheses are legal for memory access only (default = immediate or memory)
   B      memory access brackets [] required (default = relaxed syntax, [] allowed as extra)
   f F    Fake instructions: warning / disabled (default = enabled)
@@ -963,7 +964,11 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
    ; into ",,", to avoid some ambiguities with certain instructions.
    OPT --syntax=a
    LD A,B,,B,D,,D,H ; same as example above in default syntax
-   SUB A,B,,C  ; = SUB B, SUB C (the default syntax does for SUB A,B two SUBs!)</programlisting></para>
+   SUB A,B,,C  ; = SUB B, SUB C (the default syntax does for SUB A,B two SUBs!)
+
+   ; since v1.18.4 DEC|INC|POP|PUSH accepts also single-comma in --syntax=a mode
+   POP bc,de,hl,,af ; both single/double comma works for these four instructions
+</programlisting></para>
     </section>
 
     <section id="s_fake_instructions">
@@ -5060,12 +5065,6 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			debugger can cope with the tracing data containing full line + column begin/end
 			information, the simple/early tools will likely highlight only whole line of source.
 			For a start keeping single instruction per line may keep things simple.
-		</para>
-
-		<para>
-			The multi-arg instructions produce the tracing data only for the first instruction,
-			which will probably cause problems with single-stepping through such code. Rather
-			avoid multi-arg syntax when you are planning to debug the code.
 		</para>
 
 		<para>
