@@ -1818,15 +1818,17 @@ END_OF_PROGRAM</programlisting></para>
             <term>DEFARRAY<indexterm id="po_defarray"><primary>DEFARRAY</primary></indexterm> &lt;id&gt; &lt;replacements&gt;</term>
 
             <listitem>
-				<para>Array of DEFINEs. Use <code>id[#]</code> to retrieve current size of array.<example>
+				<para>Array of DEFINEs.</para>
+				<para>Use <code>id[#]</code> to retrieve current size of array.
+				<example>
                   <title>docs_examples/po_defarray.asm</title>
 
-                  <para><programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
+                  <programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
 CNT DEFL 0 ;or CNT=0
     DUP myarray[#]      ; 6
     DISPLAY myarray[CNT]
 CNT DEFL CNT+1 ;or CNT=CNT+1
-    EDUP</programlisting></para>
+    EDUP</programlisting>
                 </example></para>
             </listitem>
           </varlistentry>
