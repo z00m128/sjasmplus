@@ -426,6 +426,15 @@ namespace Z80 {
 		return true;
 	}
 
+	// handling all the simple ALU opcodes like and/or/xor/... which have no extras
+	static void OpCode_SimpleAlu(const int opcodeBase) {
+		do {
+			int e[] { -1, -1, -1, -1};
+			CommonAluOpcode(opcodeBase, e);
+			EmitBytes(e, true);
+		} while (Options::syx.MultiArg(lp));
+	}
+
 	// returns "Z80_A" when successfully finished, otherwise returns result of "GetRegister(lp)"
 	static Z80Reg OpCode_CbFamily(const int baseOpcode, int* e, bool canHaveDstRegForIxy = true) {
 		Z80Reg reg;
@@ -566,11 +575,7 @@ namespace Z80 {
 	}
 
 	static void OpCode_AND() {
-		do {
-			int e[] { -1, -1, -1, -1};
-			CommonAluOpcode(0xa0, e);
-			EmitBytes(e, true);
-		} while (Options::syx.MultiArg(lp));
+		OpCode_SimpleAlu(0xa0);
 	}
 
 	static void OpCode_BIT() {
@@ -654,11 +659,7 @@ namespace Z80 {
 	}
 
 	static void OpCode_CP() {
-		do {
-			int e[] { -1, -1, -1, -1};
-			CommonAluOpcode(0xb8, e);
-			EmitBytes(e, true);
-		} while (Options::syx.MultiArg(lp));
+		OpCode_SimpleAlu(0xb8);
 	}
 
 	static void OpCode_CPD() {
@@ -1817,11 +1818,7 @@ namespace Z80 {
 	}
 
 	static void OpCode_OR() {
-		do {
-			int e[] { -1, -1, -1, -1};
-			CommonAluOpcode(0xb0, e);
-			EmitBytes(e, true);
-		} while (Options::syx.MultiArg(lp));
+		OpCode_SimpleAlu(0xb0);
 	}
 
 	static void OpCode_OTDR() {
@@ -2314,11 +2311,7 @@ namespace Z80 {
 	}
 
 	static void OpCode_XOR() {
-		do {
-			int e[] { -1, -1, -1, -1};
-			CommonAluOpcode(0xa8, e);
-			EmitBytes(e, true);
-		} while (Options::syx.MultiArg(lp));
+		OpCode_SimpleAlu(0xa8);
 	}
 
 	void Init() {
