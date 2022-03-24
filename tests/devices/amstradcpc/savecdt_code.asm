@@ -3,6 +3,13 @@
     ORG $7FFF
     DB '1'              ; mark page 1 at end
     DB '2'              ; mark page 2 at beginning
+    DB "[5ki:"
+    OPT push listoff
+    DUP 5*1024-7
+      DB low(__COUNTER__)
+    EDUP
+    OPT pop
+    DB "]"
 
     ORG 0x10000-4
 endStart:
@@ -32,3 +39,6 @@ dataStart:
 
     ; fourth block, checking truncation of long name
     SAVECDT CODE "savecdt_code.cdt","long name 123456ccccccccccccccccccccc",dataStart,dataStart.sz
+
+    ; fifth block, checking the internal implementation of splitting long chunks into 2048 byte blocks
+    SAVECDT CODE "savecdt_code.cdt","code5",$8000,5*1024,$8001
