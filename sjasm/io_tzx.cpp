@@ -78,14 +78,9 @@ void TZX_AppendStandardBlock(const char* fname, const byte* buf, const aint bufl
 	fputc(totalDataLen >> 8, ff);
 
 	fputc(sync, ff); // sync pattern
-	// payload
+	fwrite(buf, 1, buflen, ff); // payload
 	byte check = sync;
-	const byte* ptr = buf;
-	for (aint i = 0; i < buflen; ++i) {
-		fputc(*ptr, ff);
-		check ^= *ptr;
-		++ptr;
-	}
+	for (aint i = 0; i < buflen; ++i) check ^= buf[i];
 	fputc(check, ff); // checksum
 	fclose(ff);
 }
