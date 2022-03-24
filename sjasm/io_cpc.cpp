@@ -30,9 +30,6 @@
 #include "io_cpc_ldrs.h"
 #include <cassert>
 
-//FIXME before v1.18.4:
-// - getContigRAM seems to be doing too much about device memory, check if some other internal Device API can't simplify it
-
 //
 // Amstrad CPC snapshot file saving (SNA)
 //
@@ -406,32 +403,15 @@ namespace CDTUtil {
 	}
 
 	static aint calcRAMStart(const byte* ram, aint ramlen) {
-		aint startAddr = 0x0000;
-		const byte* ptr = ram;
 		for (int i = 0; i < ramlen; ++i) {
-			if (*ptr != 0) {
-				return startAddr + i;
-			}
-			++ptr;
+			if (ram[i]) return i;
 		}
-		return 0xFFFF;
+		return 0x10000;
 	}
 
 	static aint calcRAMLength(const byte* ram, aint ramlen) {
-		if (!ramlen) {
-			return 0x0000;
-		}
-		const byte* ptr = ram + ramlen - 1;
-		while (ramlen) {
-			if (ptr < ram) {
-				return 0x0000;
-			}
-
-			if (*ptr != 0) {
-				return ramlen;
-			}
-			--ptr;
-			--ramlen;
+		while (ramlen--) {
+			if (ram[ramlen]) return 1 + ramlen;
 		}
 		return 0x0000;
 	}
@@ -440,22 +420,19 @@ namespace CDTUtil {
 		assert(0 <= startAddr && 1 <= length && (startAddr+length) <= 0x10000);
 		std::unique_ptr<byte[]> data(new byte[length]);
 		byte* bptr = data.get();
-		// copy the basic into our buffer
-		CDeviceSlot* S;
-		for (aint i = 0, ptr; i < Device->SlotsCount; i++) {
-			S = Device->GetSlot(i);
-			if (S->Address + S->Size <= startAddr) continue;
-			if (length <= 0) break;
-
-			ptr = (startAddr - S->Address);
-			while (length && ptr < S->Size) {
-				*bptr = S->Page->RAM[ptr];
-				++bptr;
-				++startAddr;
-				++ptr;
-				--length;
-			}
+		// copy the currently mapped device memory into new continuous buffer
+		while (0 < length) {
+			const int slotId = Device->GetSlotOfA16(startAddr);
+			assert(-1 != slotId);
+			CDeviceSlot* const S = Device->GetSlot(slotId);
+			const aint offset = startAddr - S->Address;
+			const aint slotLength = std::min(S->Size - offset, length);
+			memcpy(bptr, S->Page->RAM+offset, slotLength);
+			bptr += slotLength;
+			startAddr += slotLength;
+			length -= slotLength;
 		}
+		assert(0 == length);
 		return data;
 	}
 
@@ -484,11 +461,8 @@ static void createCDTDump464(const char* fname, aint startAddr, byte screenMode,
 	aint ramBase = CDTUtil::calcRAMStart(ramptr, ram_size);
 	aint ramEnd = CDTUtil::calcRAMLength(ramptr, ram_size);
 
-	if (ramEnd == 0x0000) {
-		Error("[SAVECDT] Could not determine the end of the program", nullptr, SUPPRESS); return;
-	}
-	if (ramBase == 0xFFFF) {
-		Error("[SAVECDT] Could not determine the start of the program", nullptr, SUPPRESS); return;
+	if (0x10000 == ramBase || 0x0000 == ramEnd) {
+		Error("[SAVECDT] Could not determine the start and end of the program", nullptr, SUPPRESS); return;
 	}
 
 	aint ramUsed = ramEnd - ramBase;
@@ -547,11 +521,8 @@ static void createCDTDump6128(const char* fname, aint startAddr, byte screenMode
 	aint ramBase = CDTUtil::calcRAMStart(ramptr, ram_size);
 	aint ramEnd = CDTUtil::calcRAMLength(ramptr, ram_size);
 
-	if (ramEnd == 0x0000) {
-		Error("[SAVECDT] Could not determine the end of the program", nullptr, SUPPRESS); return;
-	}
-	if (ramBase == 0xFFFF) {	// currently unreachable, the ramEnd is always also invalid
-		Error("[SAVECDT] Could not determine the start of the program", nullptr, SUPPRESS); return;
+	if (0x10000 == ramBase || 0x0000 == ramEnd) {
+		Error("[SAVECDT] Could not determine the start and end of the program", nullptr, SUPPRESS); return;
 	}
 
 	aint ramUsed = ramEnd - ramBase;
@@ -593,7 +564,7 @@ static void createCDTDump6128(const char* fname, aint startAddr, byte screenMode
 			aint base = CDTUtil::calcRAMStart(Device->GetPage(i)->RAM, 0x4000);
 			aint length = CDTUtil::calcRAMLength(Device->GetPage(i)->RAM, 0x4000);
 
-			if (length == 0 || base == 0xFFFF) {
+			if (0x10000 == base || 0 == length) {
 				continue;
 			}
 

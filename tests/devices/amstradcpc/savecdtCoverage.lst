@@ -129,12 +129,12 @@ savecdtCoverage.asm(69): error: [SAVECDT] Invalid args. SAVECDT FULL <cdtname>[,
 savecdtCoverage.asm(70): error: [SAVECDT] Invalid args. SAVECDT FULL <cdtname>[,<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]:
 70    0000                  SAVECDT FULL "some.cdt",0, 0,0, 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
 71    0000                  ; not testing dangling comma after each optional value... it works, really...
-savecdtCoverage.asm(72): error: [SAVECDT] Could not determine the end of the program
+savecdtCoverage.asm(72): error: [SAVECDT] Could not determine the start and end of the program
 72    0000                  SAVECDT FULL "some.cdt" ; snapshot of empty machine => error "could not determine the end of the program"
 73    0000
 74    0000                  ; try specific variants (depending on DEVICE state) also in CPC 6128 device
 75    0000                  DEVICE AMSTRADCPC6128
-savecdtCoverage.asm(76): error: [SAVECDT] Could not determine the end of the program
+savecdtCoverage.asm(76): error: [SAVECDT] Could not determine the start and end of the program
 76    0000                  SAVECDT FULL "some.cdt" ; snapshot of empty machine => error "could not determine the end of the program"
 77    0000
 # file closed: savecdtCoverage.asm
