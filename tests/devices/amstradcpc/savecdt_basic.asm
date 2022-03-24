@@ -1,5 +1,16 @@
     DEVICE AMSTRADCPC464
 
+    ORG $0
+basic_code:
+;   10  CLS
+.l10    DW .l10sz, 10 : DB $8A, $00
+.l10sz  EQU $-.l10
+;   20 PRINT "I like rusty spoons"
+.l20    DW .l20sz, 20 : DB $BF, "\"I like rusty spoons\"", $00
+.l20sz  EQU $-.l20
+    .db $00
+.sz equ $-basic_code+1
+
     ORG $7FFF
     DB '1'              ; mark page 1 at end
     DB '2'              ; mark page 2 at beginning
@@ -19,6 +30,9 @@ dataStart:
 
     ; create empty CDT file
     SAVECDT EMPTY "savecdt_basic.cdt"
+
+    ; save valid CPC BASIC example
+    SAVECDT BASIC "savecdt_basic.cdt", "A", basic_code, basic_code.sz
 
     ; first block: pages 0+3
     SAVECDT BASIC "savecdt_basic.cdt","basic1",dataStart,dataStart.sz
