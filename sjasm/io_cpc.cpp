@@ -622,8 +622,8 @@ static void SaveCDT_Snapshot(const char* fname, aint startAddr) {
 	constexpr byte mode = 1;
 	// Default ROM palette
 	constexpr byte palette[] = {
-		1,
-		01, 24, 20, 06, 26, 00, 02, 8,
+		 1,
+		 1, 24, 20,  6, 26,  0,  2,  8,
 		10, 12, 14, 16, 18, 22, 24, 16,
 	};
 	SaveCDT_SnapshotWithPalette(fname, startAddr, mode, palette);
@@ -654,7 +654,7 @@ typedef void (*savecdt_command_t)(const char*);
 
 // Creates a CDT tape file of a full memory snapshot, with loader
 static void dirSAVECDTFull(const char* cdtname) {
-	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT FULL <cdtname>[,<startaddr>,<screenmode>,<border>,<ink0>...<ink15>]";
+	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT FULL <cdtname>[,<startaddr>[,<screenmode>[,<border>[,<ink0>...<ink15>]]]]";
 
 	aint args[] = {
 		StartAddress,
@@ -735,7 +735,7 @@ static void dirSAVECDTCode(const char* cdtname) {
 }
 
 static void dirSAVECDTHeadless(const char* cdtname) {
-	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT HEADLESS <cdtname>,<start>,<length>[,<sync>,<format>]";
+	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT HEADLESS <cdtname>,<start>,<length>[,<sync>[,<format>]]";
 
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;
