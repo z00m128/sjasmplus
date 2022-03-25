@@ -1196,10 +1196,10 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
   sbc de,hl       ; ex de,hl : sbc hl,de : ex de,hl
   sbc de,sp       ; ex de,hl : sbc hl,sp : ex de,hl
 
-  sub de,bc       ; or a : ex de,hl : sub hl,bc : ex de,hl
-  sub de,de       ; or a : ex de,hl : sub hl,hl : ex de,hl  ;; consider alternative: ld de,0 (-17T)
-  sub de,hl       ; or a : ex de,hl : sub hl,de : ex de,hl
-  sub de,sp       ; or a : ex de,hl : sub hl,sp : ex de,hl
+  sub de,bc       ; or a : ex de,hl : sbc hl,bc : ex de,hl
+  sub de,de       ; or a : ex de,hl : sbc hl,hl : ex de,hl  ;; consider alternative: ld de,0 (-17T)
+  sub de,hl       ; or a : ex de,hl : sbc hl,de : ex de,hl
+  sub de,sp       ; or a : ex de,hl : sbc hl,sp : ex de,hl
   sub hl,bc       ; or a : sbc hl,bc
   sub hl,de       ; or a : sbc hl,de
   sub hl,hl       ; or a : sbc hl,hl                        ;; consider alternative: ld hl,0 (-9T)
