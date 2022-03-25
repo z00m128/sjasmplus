@@ -204,10 +204,11 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.18.4</term>
+            <term>WIP - 1.19.0</term>
 
             <listitem>
-              <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>, <link linkend="po_savecpcsna">`SAVECPCSNA`</link>) - by Oli Wilkinson
+              <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>) - by Oli Wilkinson
+- added Amstrad CPC save snapshot and CDT (<link linkend="po_savecpcsna">`SAVECPCSNA`</link>, <link linkend="po_savecdt">`SAVECDT`</link>) - by Oli Wilkinson
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
 - fix `--longptr` mode to keep 32b address when `DS 0` is used
 - added fake instructions adc|add|sbc|sub de,bc|de|hl|sp
@@ -524,7 +525,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
 			The line suppression mechanism requires you to add end-of-line comment with "id-ok" string
 			somewhere in the comment (exception: for fake instructions and --syntax=f mode the word
 			"fake" is enough without -ok suffix) (the "ok" comment suppression mechanism from previous
-			versions of sjasmplus is removed since v1.18.4).
+			versions of sjasmplus is removed since v1.19.0).
 		</para>
 		<para>
 			The id-warning is emitted together with its id in brackets:
@@ -966,7 +967,7 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
    LD A,B,,B,D,,D,H ; same as example above in default syntax
    SUB A,B,,C  ; = SUB B, SUB C (the default syntax does for SUB A,B two SUBs!)
 
-   ; since v1.18.4 DEC|INC|POP|PUSH accepts also single-comma in --syntax=a mode
+   ; since v1.19.0 DEC|INC|POP|PUSH accepts also single-comma in --syntax=a mode
    POP bc,de,hl,,af ; both single/double comma works for these four instructions
 </programlisting></para>
     </section>
@@ -2852,6 +2853,42 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
                   <para><programlisting>    PAGE 7 ;set 7 page to current slot
     SAVEBIN "ram7.bin",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
     SAVEBIN "ram2.bin",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><para>SAVECDT<indexterm id="po_savecdt"><primary>SAVECDT</primary></indexterm>
+                FULL &lt;cdtname&gt;[,&lt;startaddr&gt;[,&lt;screenmode&gt;[,&lt;border&gt;[,&lt;ink0&gt;...&lt;ink15&gt;]]]]</para>
+            <para>SAVECDT EMPTY &lt;cdtname&gt;</para>
+            <para>SAVECDT BASIC &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;</para>
+            <para>SAVECDT CODE &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;]</para>
+            <para>SAVECDT HEADLESS &lt;cdtname&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;sync&gt;[,&lt;format&gt;]]</para></term>
+
+            <listitem>
+              <para><emphasis>Work only in Amstrad device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Manipulate CDT file (tape/TZX file format used by Amstrad CPC emulators).<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE AMSTRADCPC6128
+    ...
+    ; create empty CDT file (truncates already existing file to make it empty)
+    SAVECDT EMPTY "output.cdt"
+
+    ; snapshot-like dump with default loader, including loading screen, all banks, ...
+    SAVECDT FULL "output.cdt" ; defaults: END start addres, screenmode=1, border=1
+                              ; ink# = 1, 24, 20, 6, 26, 0, 2, 8, 10, 12, 14, 16, 18, 22, 24, 16
+
+    ; BASIC program prepared at address "label"
+    SAVECDT BASIC "output.cdt","A",label,length
+
+    ; block of binary data at address "label" (default "entry" = "label")
+    SAVECDT CODE "output.cdt","C",label,length,entry
+
+    ; headless block with custom sync and format at address "label", formats: 0 = AMSTRAD, 1 = ZX
+    SAVECDT HEADLESS "output.cdt",label,length,sync,format ; default sync = 0x16, format = 0</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
