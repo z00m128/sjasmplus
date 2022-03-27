@@ -210,10 +210,11 @@
               <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>) - by Oli Wilkinson
 - added Amstrad CPC save snapshot and CDT (<link linkend="po_savecpcsna">`SAVECPCSNA`</link>, <link linkend="po_savecdt">`SAVECDT`</link>) - by Oli Wilkinson
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
+- new <link linkend="s_temp_labels">temporary label</link> suffix syntax "_b" and "_f", enabling them for all expressions
 - fix `--longptr` mode to keep 32b address when `DS 0` is used
 - added fake instructions adc|add|sbc|sub de,bc|de|hl|sp
 - dec|inc|pop|push will accept also single-comma multiarg in --syntax=a mode
-- DUP/REPT will now accept also zero count (skiping the block)
+- DUP/REPT will now accept also zero count (skipping the block)
 - bugfixes (macros, listing, file names in errors, SLD reversepop data)
 </synopsis>
             </listitem>
@@ -714,6 +715,10 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
       in the same order during every pass of assembling, but they can be used
       within macro, or repeating blocks (old sjasmplus versions didn't allow usage within macro).</para>
 
+      <para>Since v1.19.0 there is alternative syntax using underscore before 'B' and 'F', this
+        alternative underscored suffix enables temporary labels also for regular instructions
+        (in all expressions, same way as other labels).</para>
+
       <para><example>
           <title>docs_examples/s_temp_labels.asm</title>
 
@@ -733,7 +738,12 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
             EDUP
         ENDM
 
-        .4 zing</programlisting></para>
+        .4 zing
+
+        ; since v1.19.0
+        ld hl,1B        ; *old* HL = binary 1, NOT local label
+        ld hl,1_B       ; *new* HL = previous temporary label 1
+        ld hl,1_B*3     ; *new* works also in expressions</programlisting></para>
         </example></para>
     </section>
   </chapter>
