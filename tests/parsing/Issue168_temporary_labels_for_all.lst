@@ -1,0 +1,46 @@
+# file opened: Issue168_temporary_labels_for_all.asm
+ 1    0000                  ORG     $1000
+ 2    1000                  ; regular temporary label syntax
+ 3    1000              1
+ 4    1000 C3 00 10         jp  1B
+ 5    1003 C3 06 10         jp  1F
+ 6    1006              1
+ 7    1006                  ; new underscore suffix syntax
+ 8    1006 C3 06 10         jp  1_B
+ 9    1009 C3 0C 10         jp  1_F
+10    100C              1
+11    100C                  ; old syntax in regular instructions is ignored ("1B" becomes binary value)
+12    100C 21 01 00         ld  hl,1B
+13    100F                  ; new underscore suffix syntax enables temporary labels also in regular instructions
+14    100F 21 0C 10         ld  hl,1_B
+15    1012 21 15 10         ld  hl,1_F
+16    1015              1
+17    1015                  ; check new underscore suffix in expressions
+18    1015 21 15 10         ld  hl,((1_F+(1_B<<1))-1_F)>>1
+19    1018              1
+20    1018                  ; check usage across macro instances
+21    1018                  MACRO node num?, ofs?
+22    1018 ~                    ld hl,1_B+ofs?
+23    1018 ~                    ld (hl),num?
+24    1018 ~                    ld hl,1_F+ofs?
+25    1018 ~            1
+26    1018                  ENDM
+27    1018
+28    1018                  node 'A',1
+28    1018 21 19 10    >        ld hl,1_B+1
+28    101B 36 41       >        ld (hl),'A'
+28    101D 21 21 10    >        ld hl,1_F+1
+28    1020             >1
+29    1020                  node 'B',2
+29    1020 21 22 10    >        ld hl,1_B+2
+29    1023 36 42       >        ld (hl),'B'
+29    1025 21 2A 10    >        ld hl,1_F+2
+29    1028             >1
+30    1028
+Issue168_temporary_labels_for_all.asm(31): error: Unexpected: _B!AD
+31    1028 21 01 00         ld  hl,1_B!AD    ; this should fail
+32    102B
+# file closed: Issue168_temporary_labels_for_all.asm
+
+Value    Label
+------ - -----------------------------------------------------------

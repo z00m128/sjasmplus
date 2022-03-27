@@ -268,17 +268,21 @@ bool GetLabelValue(char*& p, aint& val) {
 	return !getLabel_invalidName;
 }
 
-int GetLocalLabelValue(char*& op, aint& val) {
+int GetLocalLabelValue(char*& op, aint& val, bool requireUnderscore) {
 	char* p = op;
 	if (SkipBlanks(p) || !isdigit((byte)*p)) return 0;
 	char* const numberB = p;
 	while (isdigit((byte)*p)) ++p;
-	const char type = *p|0x20;		// [bB] => 'b', [fF] => 'f'
+	const bool hasUnderscore = ('_' == *p);
+	if (requireUnderscore && !hasUnderscore) return 0;
+	// convert suffix [bB] => 'b', [fF] => 'f' and ignore underscore
+	const char type = (hasUnderscore ? p[1] : p[0]) | 0x20;	// should be 'b' or 'f'
+	const char following = hasUnderscore ? p[2] : p[1];		// should be non-label char
 	if ('b' != type && 'f' != type) return 0;	// local label must have "b" or "f" after number
-	const char following = p[1];	// should be EOL, colon or whitespace
-	if (0 != following && ':' != following && !White(following)) return 0;
+	if (islabchar(following)) return 0;			// that suffix didn't end correctly
 	// numberB -> p are digits to be parsed as integer
 	if (!GetNumericValue_IntBased(op = numberB, p, val, 10)) return 0;
+	if ('_' == *op) ++op;
 	++op;
 	// ^^ advance main parsing pointer op beyond the local label (here it *is* local label)
 	auto label = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);

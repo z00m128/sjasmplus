@@ -68,6 +68,8 @@ static int ParseExpPrim(char*& p, aint& nval) {
 		if (!byteOnly) res += int(MemGetByte(nval + 1)) << 8;
 		nval = res;
 		return 1;
+	} else if (isdigit((byte)*p) && GetLocalLabelValue(p, nval, true)) {	// temporary label with underscore suffix
+		return 1;
 	} else if (isdigit((byte)*p) || (*p == '#' && isalnum((byte)*(p + 1))) || (*p == '$' && isalnum((byte)*(p + 1))) || *p == '%') {
 		return GetConstant(p, nval);
 	} else if (isLabelStart(p)) {
