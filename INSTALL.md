@@ -8,7 +8,7 @@ Requirements:
 
 or
 
-- complete MinGW environment for MS Windows, with MinGW bin directories added in `PATH` variable (typically `C:\MinGW\bin;` `C:\MinGW\msys\1.0\bin`)
+- complete MinGW environment for MS Windows, configured with MinGW bin directories added in `PATH` variable (typically `C:\MinGW\bin;` `C:\MinGW\msys\1.0\bin`) or possibly with any BASH emulator (e.g. the one which comes with [git for windows](https://gitforwindows.org/)) will do it instead of msys is missing / not set.
 - CMake installed into MinGW bin directory (optionally)
 
 Compilation is tested with GCC 5.5.0, it should run also with older 5.x versions. It will not work with GCC 4.x and older.
