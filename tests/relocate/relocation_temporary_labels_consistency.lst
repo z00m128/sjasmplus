@@ -20,14 +20,14 @@
 17    1018 19 10 1C 10
 17    101C 1F 10 22 10
 18    1020
-relocation_temporary_labels_consistency.asm(19): warning: Local label has different address
+relocation_temporary_labels_consistency.asm(19): warning: Temporary label has different address
 19    1020              3:                      ; warning about different address (between pass2 and pass3)
 relocation_temporary_labels_consistency.asm(20): warning: Relocation table seems internally inconsistent: table content differs in last pass
 20    1020 C3 20 10         jp      3B          ; warning about inconsistent table (content differs)
 21    1023 C3 20 10         jp      3B          ; second warning is not issued (one only)
 22    1026 C3 24 10         jp      3F          ; forward label test (also two more opportunities to warn if not yet)
 23    1029 C3 24 10         jp      3F
-relocation_temporary_labels_consistency.asm(24): warning: Local label has different address
+relocation_temporary_labels_consistency.asm(24): warning: Temporary label has different address
 24    102C              3:                      ; warning about different address (between pass2 and pass3)
 25    102C
 26    102C              ; emit final version of the table for comparison

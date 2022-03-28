@@ -290,7 +290,7 @@ int GetLocalLabelValue(char*& op, aint& val, bool requireUnderscore) {
 		val = label->value;
 		Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
 	} else {
-		if (LASTPASS == pass) Error("Local label not found", numberB, SUPPRESS);
+		if (LASTPASS == pass) Error("Temporary label not found", numberB, SUPPRESS);
 		val = 0L;
 	}
 	return 1;
@@ -591,7 +591,7 @@ bool CLocalLabelTable::insertImpl(const aint labelNumber) {
 
 bool CLocalLabelTable::refreshImpl(const aint labelNumber) {
 	if (!refresh || refresh->nummer != labelNumber) return false;
-	if (refresh->value != CurAddress) Warning("Local label has different address");
+	if (refresh->value != CurAddress) Warning("Temporary label has different address");
 	refresh->value = CurAddress;
 	refresh = refresh->next;
 	return true;

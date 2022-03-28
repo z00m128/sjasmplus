@@ -43,10 +43,10 @@ smc_label_extras.asm(27): error: Invalid labelname: lM-1
 27    800C E6 0D            and 13
 28    800E
 smc_label_extras.asm(29): error: Temporary label can't use SMC-offset
-smc_label_extras.asm(29): error: Local label not found: 123B
+smc_label_extras.asm(29): error: Temporary label not found: 123B
 29    800E 18 00        123+1   jr  123B
 smc_label_extras.asm(30): error: Temporary label can't use SMC-offset
-smc_label_extras.asm(30): error: Local label not found: 124B
+smc_label_extras.asm(30): error: Temporary label not found: 124B
 30    8010 18 00        124+1:  jr  124B
 31    8012
 smc_label_extras.asm(32): error: Macro name can't use SMC-offset

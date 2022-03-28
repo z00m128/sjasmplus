@@ -645,7 +645,7 @@ void ParseLabel() {
 		}
 		val = atoi(tp);
 		if (!LocalLabelTable.InsertRefresh(val)) {
-			Error("Local-labels flow differs in this pass (missing/new local label or final pass source difference)");
+			Error("Temporary labels flow differs in this pass (missing/new temporary label or final pass source difference)");
 		}
 	} else {
 		if (isMacroNext()) {
