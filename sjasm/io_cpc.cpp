@@ -50,16 +50,6 @@ namespace
 	static word getCPCMemoryDepth() {
 		return Device->PagesCount * 0x10;
 	}
-
-	template <int argsN> static bool getIntArguments(aint(&args)[argsN], const bool(&argOptional)[argsN]) {	
-		for (int i = 0; i < argsN; ++i) {
-			if (0 < i && !comma(lp)) return argOptional[i];
-			aint val;				// temporary variable to preserve original value in case of error
-			if (!ParseExpression(lp, val)) return (0 == i) && argOptional[i];
-			args[i] = val;
-		}
-		return !comma(lp);
-	}
 }
 
 static int SaveSNA_CPC(const char* fname, word start) {
@@ -670,7 +660,7 @@ static void dirSAVECDTFull(const char* cdtname) {
 		true, true, true, true, true, true, true, true,
 	};
 
-	if (anyComma(lp) && !getIntArguments<19>(args, opt)) {
+	if (anyComma(lp) && !getIntArguments<19>(lp, args, opt)) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
@@ -706,7 +696,7 @@ static void dirSAVECDTBasic(const char* cdtname) {
 
 	aint args[] = { /*0:start*/ 0, /*1:length*/ 0 };
 	bool opt[] = { false, false };
-	if (!getIntArguments<2>(args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
+	if (!getIntArguments<2>(lp, args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
@@ -727,7 +717,7 @@ static void dirSAVECDTCode(const char* cdtname) {
 
 	aint args[] = { /*0:start*/ 0, /*1:length*/ 0, /*2:customStart*/ -1 };
 	bool opt[] = { false, false, true };
-	if (!getIntArguments<3>(args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
+	if (!getIntArguments<3>(lp, args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
@@ -743,7 +733,7 @@ static void dirSAVECDTHeadless(const char* cdtname) {
 
 	aint args[] = { /*0:start*/ 0, /*1:length*/ 0, /*2:sync*/ CDTUtil::BlockTypeData, /*3:format*/ 0 };
 	bool opt[] = { false, false, true, true };
-	if (!getIntArguments<4>(args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
+	if (!getIntArguments<4>(lp, args, opt) || args[0] < 0 || args[1] < 1 || 0x10000 <= args[1] || 0x10000 < (args[0]+args[1])) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 

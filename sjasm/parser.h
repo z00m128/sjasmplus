@@ -62,5 +62,15 @@ void ParseStructLine(CStructure* st);
 uint32_t LuaCalculate(char *str);
 void LuaParseLine(char *str);
 void LuaParseCode(char *str);
-//eof parser.h
 
+template <int argsN> bool getIntArguments(char*& lp, aint (&args)[argsN], const bool (&argOptional)[argsN]) {
+	for (int i = 0; i < argsN; ++i) {
+		if (0 < i && !comma(lp)) return argOptional[i];
+		aint val;				// temporary variable to preserve original value in case of error
+		if (!ParseExpression(lp, val)) return (0 == i) && argOptional[i];
+		args[i] = val;
+	}
+	return !comma(lp);
+}
+
+//eof parser.h
