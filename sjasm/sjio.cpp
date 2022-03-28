@@ -1022,6 +1022,35 @@ int SaveBinary(char* fname, int start, int length) {
 }
 
 
+int SaveBinary3dos(char* fname, int start, int length, byte type, word w2, word w3) {
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("Error opening file", fname, FATAL);
+	// prepare +3DOS 128 byte header content
+	constexpr int hsize = 128;
+	const int full_length = hsize + length;
+	byte sum = 0, p3dos_header[hsize] { "PLUS3DOS\032\001" };
+	p3dos_header[11] = byte(full_length>>0);
+	p3dos_header[12] = byte(full_length>>8);
+	p3dos_header[13] = byte(full_length>>16);
+	p3dos_header[14] = byte(full_length>>24);
+	// +3 BASIC 8 byte header filled with "relevant values"
+	p3dos_header[15+0] = type;
+	p3dos_header[15+1] = byte(length>>0);
+	p3dos_header[15+2] = byte(length>>8);
+	p3dos_header[15+3] = byte(w2>>0);
+	p3dos_header[15+4] = byte(w2>>8);
+	p3dos_header[15+5] = byte(w3>>0);
+	p3dos_header[15+6] = byte(w3>>8);
+	// calculat checksum of the header
+	for (const byte v : p3dos_header) sum += v;
+	p3dos_header[hsize-1] = sum;
+	// write header and data
+	int result = (hsize == (aint) fwrite(p3dos_header, 1, hsize, ff)) ? SaveRAM(ff, start, length) : 0;
+	fclose(ff);
+	return result;
+}
+
+
 // all arguments must be sanitized by caller (this just writes data block into opened file)
 bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
 	return (length == fwrite(Device->Memory + start, 1, length, file));

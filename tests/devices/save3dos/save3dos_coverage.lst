@@ -1,0 +1,49 @@
+# file opened: save3dos_coverage.asm
+ 1    0000                  DEFINE FNAME "save3dos_coverage.bin"
+ 2    0000
+ 3    0000                      DEVICE NONE
+ 4    0000
+ 5    0000                      ; correct syntax, but outside of DEVICE
+save3dos_coverage.asm(6): error: SAVE3DOS works in real device emulation mode (See DEVICE)
+ 6    0000                      SAVE3DOS "save3dos_coverage.bin", $8765, $4321
+ 7    0000
+ 8    0000                      DEVICE ZXSPECTRUM48
+ 9    0000
+10    0000                      ; invalid syntax of arguments (missing or invalid)
+save3dos_coverage.asm(11): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS
+11    0000                      SAVE3DOS
+save3dos_coverage.asm(12): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS "save3dos_coverage.bin"
+12    0000                      SAVE3DOS "save3dos_coverage.bin"
+save3dos_coverage.asm(13): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS "save3dos_coverage.bin",
+13    0000                      SAVE3DOS "save3dos_coverage.bin",
+save3dos_coverage.asm(14): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS "save3dos_coverage.bin",1
+14    0000                      SAVE3DOS "save3dos_coverage.bin",1
+save3dos_coverage.asm(15): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS "save3dos_coverage.bin",1,
+15    0000                      SAVE3DOS "save3dos_coverage.bin",1,
+save3dos_coverage.asm(16): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS "save3dos_coverage.bin",1,2,
+16    0000                      SAVE3DOS "save3dos_coverage.bin",1,2,
+save3dos_coverage.asm(17): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS "save3dos_coverage.bin",1,2,0,
+17    0000                      SAVE3DOS "save3dos_coverage.bin",1,2,0,
+save3dos_coverage.asm(18): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS "save3dos_coverage.bin",1,2,0,22,
+18    0000                      SAVE3DOS "save3dos_coverage.bin",1,2,0,22,
+save3dos_coverage.asm(19): error: [SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]: SAVE3DOS "save3dos_coverage.bin",1,2,0,22,33,
+19    0000                      SAVE3DOS "save3dos_coverage.bin",1,2,0,22,33,
+20    0000
+21    0000                      ; address/size out of range
+save3dos_coverage.asm(22): error: [SAVE3DOS] [address, size] region outside of 64ki: SAVE3DOS "save3dos_coverage.bin",-1,1
+22    0000                      SAVE3DOS "save3dos_coverage.bin",-1,1
+save3dos_coverage.asm(23): error: [SAVE3DOS] [address, size] region outside of 64ki: SAVE3DOS "save3dos_coverage.bin",0,0
+23    0000                      SAVE3DOS "save3dos_coverage.bin",0,0
+save3dos_coverage.asm(24): error: [SAVE3DOS] [address, size] region outside of 64ki: SAVE3DOS "save3dos_coverage.bin",$FFFF,2
+24    0000                      SAVE3DOS "save3dos_coverage.bin",$FFFF,2
+25    0000
+26    0000                      ; other invalid values
+save3dos_coverage.asm(27): error: [SAVE3DOS] expected type 0..3: SAVE3DOS "save3dos_coverage.bin",1,2,-1
+27    0000                      SAVE3DOS "save3dos_coverage.bin",1,2,-1
+save3dos_coverage.asm(28): error: [SAVE3DOS] expected type 0..3: SAVE3DOS "save3dos_coverage.bin",1,2,4
+28    0000                      SAVE3DOS "save3dos_coverage.bin",1,2,4
+29    0000
+# file closed: save3dos_coverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------

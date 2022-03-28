@@ -964,6 +964,44 @@ static void dirSAVEDEV() {
 	}
 }
 
+static void dirSAVE3DOS() {
+	if (!DeviceID) {
+		Error("SAVE3DOS works in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
+		return;
+	}
+	bool exec = (LASTPASS == pass);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	aint args[5] = { -1, -1, 3, -1, -1 };	// address, size, type, w2_line, w3
+	const bool optional[] = {false, false, true, true, true};
+	if (!anyComma(lp) || !getIntArguments<5>(lp, args, optional)) {
+		Error("[SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]", bp, SUPPRESS);
+		return;
+	}
+	aint &address = args[0], &size = args[1], &type = args[2], &w2_line = args[3], &w3 = args[4];
+	if (address < 0 || size < 1 || 0x10000 < address + size) {
+		Error("[SAVE3DOS] [address, size] region outside of 64ki", bp);
+		return;
+	}
+	if (-1 == w3) w3 = size;	// default for w3 is size for all types, unless overridden
+	switch (type) {
+	case 0:		// type Program: default w2 = 0x8000
+		if (-1 == w2_line) w2_line = 0x8000;
+	case 1:		// type Numeric array: no idea what w2 actually should be for these
+	case 2:		// type Character array:
+		break;
+	case 3:		// type Code: default w2 = load address
+		if (-1 == w2_line) w2_line = address;
+		break;
+	default:
+		Error("[SAVE3DOS] expected type 0..3", bp);
+		return;
+	}
+	if (exec && !SaveBinary3dos(fnaam.get(), address, size, type, w2_line, w3)) {
+		Error("[SAVE3DOS] Error writing file (Disk full?)", bp, IF_FIRST);
+	}
+}
+
 static void dirSAVEHOB() {
 
 	if (!DeviceID || pass != LASTPASS) {
@@ -2262,6 +2300,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".savetrd", dirSAVETRD);
 	DirectivesTable.insertd(".savecpcsna", dirSAVECPCSNA);
 	DirectivesTable.insertd(".savecdt", dirSAVECDT);
+	DirectivesTable.insertd(".save3dos", dirSAVE3DOS);
 	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
 	DirectivesTable.insertd(".winexec", dirWINEXEC);
