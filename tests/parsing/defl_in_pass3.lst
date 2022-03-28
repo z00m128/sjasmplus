@@ -1,0 +1,26 @@
+# file opened: defl_in_pass3.asm
+ 1    0000                  ; this is UGLY example, doing machine code generation in last pass, which is sort of "wrong"
+ 2    0000                  ; but for convenience sometimes the DEFL labels in last pass are handy, for example for DISPLAY or data checks
+ 3    0000                  IF 3 == 3
+ 4    0000              p3_defl = 'A'
+ 5    0000              p3_defl = p3_defl + 1
+ 6    0000              p3_defl2 DEFL 'a'
+ 7    0000              p3_defl2 DEFL p3_defl2 + 1
+ 8    0000 42 62                DB p3_defl, p3_defl2    ; expected 'B','b'
+defl_in_pass3.asm(9): error: Label not found: p3_equ
+ 9    0002              p3_equ  EQU 123     ; error
+defl_in_pass3.asm(10): error: Label not found: p3_label
+10    0002              p3_label:           ; error
+defl_in_pass3.asm(11): error: Label not found: p3_label.p3_local
+11    0002              .p3_local:          ; error
+defl_in_pass3.asm(12): error: Temporary labels flow differs in this pass (missing/new temporary label or final pass source difference)
+defl_in_pass3.asm(12): error: Temporary label not found: 3B
+12    0002 18 FC        3       jr  3B      ; error
+13    0004                  ENDIF
+14    0004
+# file closed: defl_in_pass3.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0042 X p3_defl
+0x0062 X p3_defl2

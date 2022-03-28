@@ -5,8 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-DEFL defined symbols in pass3 - make legal?
-
 "smc+?" syntax to pick most logical argument by assembler itself
 
 ? refactor temporary labels from double-linked list to simple vector ?

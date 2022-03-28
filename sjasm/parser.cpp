@@ -706,6 +706,9 @@ void ParseLabel() {
 		if (pass == LASTPASS) {
 
 			SLabelTableEntry* label = LabelTable.Find(tp, true);
+			if (nullptr == label && IsDEFL) {	// DEFL labels can be defined as late as needed (including pass3)
+				if (LabelTable.Insert(tp, val, traits)) label = LabelTable.Find(tp, true);
+			}
 			if (nullptr == label) {		// should have been already defined before last pass
 				Error("Label not found", tp);
 				delete[] tp;
