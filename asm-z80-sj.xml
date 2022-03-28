@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.6 28/03/2022
+  Version: 0.9.6 29/03/2022
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -15,10 +15,10 @@ Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
 
-  28/03/2022: version 0.9.6
+  29/03/2022: version 0.9.6
     + new operator: exist
     + new devices: amstradcpc464, amstradcpc6128
-    + new directives: savecdt, savecpcsna
+    + new directives: save3dos, savecdt, savecpcsna
     + new label prefix combination: "@." (should work only inside macros, but works globally)
     + new temporary label syntax with underscored suffix ("123_b")
 
@@ -107,7 +107,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="15" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="16" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -327,6 +327,7 @@ TODO missing things:
       <item>relocate_start</item>
       <item>relocate_table</item>
       <item>rept</item>
+      <item>save3dos</item>
       <item>savebin</item>
       <item>savecdt</item>
       <item>savecpcsna</item>
