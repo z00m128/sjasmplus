@@ -136,6 +136,7 @@
       <div class="variablelist"><dl class="variablelist"><dt><span class="term">WIP - 1.19.0</span></dt><dd>
               <pre class="synopsis">- added Amstrad CPC devices (<a class="link" href="#po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</a>) - by Oli Wilkinson
 - added Amstrad CPC save snapshot and CDT (<a class="link" href="#po_savecpcsna">`SAVECPCSNA`</a>, <a class="link" href="#po_savecdt">`SAVECDT`</a>) - by Oli Wilkinson
+- added <a class="link" href="#po_save3dos">`SAVE3DOS`</a> (like SAVEBIN with +3DOS header)
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
 - new <a class="link" href="#s_temp_labels" title="Temporary labels">temporary label</a> suffix syntax "_b" and "_f", enabling them for all expressions
 - fix `--longptr` mode to keep 32b address when `DS 0` is used
@@ -448,7 +449,7 @@ file.asm(1): warning[rdlow]: Reading memory at low address: 8</pre><p>
 		  Comment blocks start with '<code class="code">/*</code>' and end with '<code class="code">*/</code>' (work in "nested" way,
 		  i.e. comment block started inside comment block must be also ended, before main block ends).
 
-			</p><div class="example"><a name="idp307"></a><p class="title"><b>Example 2.1. </b></p><div class="example-contents">
+			</p><div class="example"><a name="idp308"></a><p class="title"><b>Example 2.1. </b></p><div class="example-contents">
 				
 
 				<pre class="programlisting">; comment
@@ -517,7 +518,7 @@ classic equ $+1 : ld a,7        ; often even split to two lines</pre><p>
       <p>(since v1.18.3) Local label inside macro prefixed with @ (at sign) acts as regular local label,
       otherwise (older behaviour) the local label is local to each macro's instance.</p>
 
-      <div class="example"><a name="idp326"></a><p class="title"><b>Example 3.1. docs_examples/s_local_labels.asm</b></p><div class="example-contents">
+      <div class="example"><a name="idp327"></a><p class="title"><b>Example 3.1. docs_examples/s_local_labels.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    MODULE main             ; module "main"
@@ -543,7 +544,7 @@ Main.event DB 0             ; main.Main.event
     ENDMODULE</pre>
         </div></div><p><br class="example-break"></p>
 
-        <div class="example"><a name="idp331"></a><p class="title"><b>Example 3.2. local labels inside macro</b></p><div class="example-contents">
+        <div class="example"><a name="idp332"></a><p class="title"><b>Example 3.2. local labels inside macro</b></p><div class="example-contents">
           
 
           <pre class="programlisting">  macro test
@@ -561,7 +562,7 @@ hoi test    ; produce labels: main.hoi, 0&gt;kip0, main.hoi.kip1
       
 
       <p>Labels starting with a '@' are not touched by the label processing
-      and used 'as-is'. See 'SetScreen' in the previous example code. </p><div class="example"><a name="idp337"></a><p class="title"><b>Example 3.3. docs_examples/s_at_labels.asm</b></p><div class="example-contents">
+      and used 'as-is'. See 'SetScreen' in the previous example code. </p><div class="example"><a name="idp338"></a><p class="title"><b>Example 3.3. docs_examples/s_at_labels.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    MODULE xxx
@@ -590,7 +591,7 @@ yyy.Local  ; xxx.yyy.Local</pre>
         alternative underscored suffix enables temporary labels also for regular instructions
         (in all expressions, same way as other labels).</p>
 
-      <div class="example"><a name="idp346"></a><p class="title"><b>Example 3.4. docs_examples/s_temp_labels.asm</b></p><div class="example-contents">
+      <div class="example"><a name="idp347"></a><p class="title"><b>Example 3.4. docs_examples/s_temp_labels.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">        ADD A,E
@@ -668,7 +669,7 @@ $c     hexadecimal
 \R 13
 \T 9
 \V 11</pre><p>Inside single quotes two quotes after each other are
-    parsed as the apostrophe itself (since v1.11).</p><div class="example"><a name="idp365"></a><p class="title"><b>Example 4.1. </b></p><div class="example-contents">
+    parsed as the apostrophe itself (since v1.11).</p><div class="example"><a name="idp366"></a><p class="title"><b>Example 4.1. </b></p><div class="example-contents">
           
 
           <pre class="programlisting">    BYTE "stringconstant\n" ; escape sequence assembles to newline
@@ -1084,7 +1085,7 @@ $$lab $$lab    <a class="indexterm" name="op_label_page"></a>page of "lab" label
 
       <p>If only single DEVICE is used in whole source batch, the device
       becomes "global" and will affect also source ahead of the DEVICE line.
-          </p><div class="example"><a name="idp523"></a><p class="title"><b>Example 4.2. docs_examples/s_realdevice.asm</b></p><div class="example-contents">
+          </p><div class="example"><a name="idp524"></a><p class="title"><b>Example 4.2. docs_examples/s_realdevice.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    DEVICE ZXSPECTRUM128
@@ -1182,7 +1183,7 @@ StartProg:
 				  mid-word substitution, will make more sense with new substitution rules (if ever
 				  the sjasmplus v2.x happens, would be too big change for v1.x). Right now call
 				  LUA for the rescue.</p>
-			  <div class="example"><a name="idp688"></a><p class="title"><b>Example 4.3. __COUNTER__ usage in LUA script</b></p><div class="example-contents">
+			  <div class="example"><a name="idp689"></a><p class="title"><b>Example 4.3. __COUNTER__ usage in LUA script</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DB __COUNTER__   ; DB 0
@@ -1206,7 +1207,7 @@ label?_suffix? ; define global label
 				<p>The predefined values were renamed and extended to be more like gcc/clang pre-defines,
 					the following ones are deprecated originals.</p>
             </dd><dt><span class="term">_SJASMPLUS = 1</span></dt><dd>
-              <p>Deprecated, consider using similar __SJASMPLUS__</p><div class="example"><a name="idp699"></a><p class="title"><b>Example 4.4. </b></p><div class="example-contents">
+              <p>Deprecated, consider using similar __SJASMPLUS__</p><div class="example"><a name="idp700"></a><p class="title"><b>Example 4.4. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">   IFDEF _SJASMPLUS
@@ -1216,7 +1217,7 @@ label?_suffix? ; define global label
    ENDIF</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">_VERSION = "version"</span></dt><dd>
-              <p>Deprecated, renamed to __VERSION__</p><div class="example"><a name="idp707"></a><p class="title"><b>Example 4.5. </b></p><div class="example-contents">
+              <p>Deprecated, renamed to __VERSION__</p><div class="example"><a name="idp708"></a><p class="title"><b>Example 4.5. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">   IF _VERSION = "1.07"
@@ -1226,7 +1227,7 @@ label?_suffix? ; define global label
    ENDIF</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">_RELEASE = releasenumber</span></dt><dd>
-              <p>Deprecated, consider using similar __SJASMPLUS__</p><div class="example"><a name="idp715"></a><p class="title"><b>Example 4.6. </b></p><div class="example-contents">
+              <p>Deprecated, consider using similar __SJASMPLUS__</p><div class="example"><a name="idp716"></a><p class="title"><b>Example 4.6. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">   IF _RELEASE = 1 ; 0 - is stable version
@@ -1264,7 +1265,7 @@ label?_suffix? ; define global label
       <div class="variablelist"><dl class="variablelist"><dt><span class="term">.&lt;repeat-count&gt;<a class="indexterm" name="po_dot_repeat"></a> &lt;single instruction&gt;</span></dt><dd>
               <p>Repeat &lt;single instruction&gt; &lt;repeat-count&gt; many times. Doesn't work
 				  in the beginning of line. The &lt;repeat-count&gt; must be either simple integer
-				  number or expression fully enclosed in parentheses.</p><div class="example"><a name="idp744"></a><p class="title"><b>Example 5.1. docs_examples/po_dot_repeat.asm</b></p><div class="example-contents">
+				  number or expression fully enclosed in parentheses.</p><div class="example"><a name="idp745"></a><p class="title"><b>Example 5.1. docs_examples/po_dot_repeat.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    .3          INC A    ;will be compiled to INC A:INC A:INC A
@@ -1274,7 +1275,7 @@ len             EQU 10
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">ABYTE<a class="indexterm" name="po_abyte"></a> &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
               <p>Defines a byte or a string of bytes. The offset is added
-              to each of the following bytes.</p><div class="example"><a name="idp754"></a><p class="title"><b>Example 5.2. </b></p><div class="example-contents">
+              to each of the following bytes.</p><div class="example"><a name="idp755"></a><p class="title"><b>Example 5.2. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ABYTE 2 4,9    ; Same as BYTE 6,11
@@ -1283,7 +1284,7 @@ len             EQU 10
             </dd><dt><span class="term">ABYTEC<a class="indexterm" name="po_abytec"></a> &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
               <p>Defines a byte or a string of bytes, where the last byte
               of the string will have bit 7 set. The offset is added to each
-              of the following bytes.</p><div class="example"><a name="idp764"></a><p class="title"><b>Example 5.3. </b></p><div class="example-contents">
+              of the following bytes.</p><div class="example"><a name="idp765"></a><p class="title"><b>Example 5.3. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ABYTEC 0 "KIP"        ; Same as BYTE "KI",'P'|128
@@ -1291,7 +1292,7 @@ len             EQU 10
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">ABYTEZ<a class="indexterm" name="po_abytez"></a> &lt;offset&gt; &lt;bytes&gt;</span></dt><dd>
               <p>Defines a byte or a string of bytes, followed by a zero.
-              The offset is added to each of the following bytes.</p><div class="example"><a name="idp774"></a><p class="title"><b>Example 5.4. </b></p><div class="example-contents">
+              The offset is added to each of the following bytes.</p><div class="example"><a name="idp775"></a><p class="title"><b>Example 5.4. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ABYTEZ 0 "KIP"        ; Same as BYTE "KIP",0</pre>
@@ -1302,7 +1303,7 @@ len             EQU 10
               <p>Align advances to nearest address where &lt;new address&gt; modulo &lt;expression&gt; (default 4)
                   equals zero (stays at current address if possible).</p>
               <p>If &lt;byte&gt; is specified, memory advanced over is set to it.
-                  </p><div class="example"><a name="idp785"></a><p class="title"><b>Example 5.5. </b></p><div class="example-contents">
+                  </p><div class="example"><a name="idp786"></a><p class="title"><b>Example 5.5. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ALIGN         ; =&gt; ALIGN 4 - simply align by 4
@@ -1312,7 +1313,7 @@ len             EQU 10
             </dd><dt><span class="term">ASSERT<a class="indexterm" name="po_assert"></a> &lt;expression&gt;[, &lt;anything&gt;]</span></dt><dd>
               <p>An 'assertion failed' error is issued if the expression evaluates to zero.
 				  The "anything" (optional argument since v1.18.1) is then also visible in the error
-				  message, so you can add description/notes about expression there.</p><div class="example"><a name="idp795"></a><p class="title"><b>Example 5.6. </b></p><div class="example-contents">
+				  message, so you can add description/notes about expression there.</p><div class="example"><a name="idp796"></a><p class="title"><b>Example 5.6. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">STACKPOINTER=0D500H
@@ -1325,7 +1326,7 @@ END_OF_PROGRAM</pre>
             byte&gt;]</span></dt><dd>
               <p>Defines space. Has to be followed by the number of byte to
               reserve, optionally followed by the value to fill these bytes
-              with.</p><div class="example"><a name="idp813"></a><p class="title"><b>Example 5.7. </b></p><div class="example-contents">
+              with.</p><div class="example"><a name="idp814"></a><p class="title"><b>Example 5.7. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    BLOCK 500     ; define a block of 500 bytes of zero
@@ -1347,7 +1348,7 @@ END_OF_PROGRAM</pre>
 					loaded snapshot/NEX/... file, or it will even disable breakpoints when changing
 					machine parameters and ignore the <code class="code">--enable-breakpoints</code> option - will
 					be hopefully improved in the future)
-				  </p><div class="example"><a name="idp831"></a><p class="title"><b>Example 5.8. </b></p><div class="example-contents">
+				  </p><div class="example"><a name="idp832"></a><p class="title"><b>Example 5.8. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    BPLIST "bpx.ini" unreal  ; open breakpoints list in "Unreal" format
@@ -1357,7 +1358,7 @@ END_OF_PROGRAM</pre>
 				</p>
             </dd><dt><span class="term">BYTE<a class="indexterm" name="po_byte"></a> &lt;bytes&gt;</span></dt><dd>
               <p>Defines a byte or a string of bytes. Each value should be
-              between -129 and 256.</p><div class="example"><a name="idp840"></a><p class="title"><b>Example 5.9. </b></p><div class="example-contents">
+              between -129 and 256.</p><div class="example"><a name="idp841"></a><p class="title"><b>Example 5.9. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    BYTE 0x56
@@ -1380,7 +1381,7 @@ END_OF_PROGRAM</pre>
               <p>If no filename is provided, default is created by appending ".map" to source name.</p>
             </dd><dt><span class="term">D24<a class="indexterm" name="po_d24"></a></span></dt><dd>
               <p>Defines three bytes by 24b constant. Values should be between
-              -16777217 and 16777216.</p><div class="example"><a name="idp864"></a><p class="title"><b>Example 5.10. </b></p><div class="example-contents">
+              -16777217 and 16777216.</p><div class="example"><a name="idp865"></a><p class="title"><b>Example 5.10. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    D24 0x123456   ; define three bytes 0x56, 0x34, 0x12</pre>
@@ -1389,7 +1390,7 @@ END_OF_PROGRAM</pre>
               <p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p>
             </dd><dt><span class="term">DC<a class="indexterm" name="po_dc"></a></span></dt><dd>
               <p>Same as <a class="link" href="#po_byte">BYTE</a>, but every
-              last character of a string will have bit 7 set.</p><div class="example"><a name="idp883"></a><p class="title"><b>Example 5.11. </b></p><div class="example-contents">
+              last character of a string will have bit 7 set.</p><div class="example"><a name="idp884"></a><p class="title"><b>Example 5.11. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DC "kip" ; same as BYTE "ki",'p'|128</pre>
@@ -1399,7 +1400,7 @@ END_OF_PROGRAM</pre>
             </dd><dt><span class="term">DEFARRAY<a class="indexterm" name="po_defarray"></a> &lt;id&gt; &lt;replacements&gt;</span></dt><dd>
 				<p>Array of DEFINEs.</p>
 				<p>Use <code class="code">id[#]</code> to retrieve current size of array.
-				</p><div class="example"><a name="idp903"></a><p class="title"><b>Example 5.12. docs_examples/po_defarray.asm</b></p><div class="example-contents">
+				</p><div class="example"><a name="idp904"></a><p class="title"><b>Example 5.12. docs_examples/po_defarray.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
@@ -1410,7 +1411,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
     EDUP</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">DEFARRAY+<a class="indexterm" name="po_defarray_plus"></a> &lt;id&gt; &lt;additional replacements&gt;</span></dt><dd>
-              <p>Appending more DEFINEs to already defined array</p><div class="example"><a name="idp912"></a><p class="title"><b>Example 5.13. </b></p><div class="example-contents">
+              <p>Appending more DEFINEs to already defined array</p><div class="example"><a name="idp913"></a><p class="title"><b>Example 5.13. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEFARRAY   myarray 'A', 'B', 'C'
@@ -1434,7 +1435,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               The <code class="code">DEFINE+</code> (since v1.18.0) will also redefine the identifier &lt;id&gt;
               if it already exists. The replacement could be omitted,
               in such case it is still possible to check if the identifier was defined
-              with IFDEF or IFNDEF.</p><div class="example"><a name="idp964"></a><p class="title"><b>Example 5.14. </b></p><div class="example-contents">
+              with IFDEF or IFNDEF.</p><div class="example"><a name="idp965"></a><p class="title"><b>Example 5.14. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEFINE str_honderd "Honderd"
@@ -1448,7 +1449,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
               <p>Assigns value of &lt;expression&gt; to symbol &lt;label&gt;. New label defined
 				  by DEFL is marked internally as "modifiable", allowing to re-assign new values to it with
 				  further DEFL statements (you can use also <code class="code">=</code> instead of <code class="code">DEFL</code>).
-				  </p><div class="example"><a name="idp977"></a><p class="title"><b>Example 5.15. </b></p><div class="example-contents">
+				  </p><div class="example"><a name="idp978"></a><p class="title"><b>Example 5.15. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">counter DEFL 0
@@ -1503,14 +1504,14 @@ counter = counter + 1
               is converted to a byte value.</p>
 
               <p>A hyphen '-' (also '.' and '_') represents 0 and any other non-whitespace character
-              represents 1. It ignores spaces, use them for formatting if you like. Warning, "DG 10100001" is value 255, because character '0' is not a dash '-'. (since v1.11)</p><div class="example"><a name="idp1035"></a><p class="title"><b>Example 5.16. </b></p><div class="example-contents">
+              represents 1. It ignores spaces, use them for formatting if you like. Warning, "DG 10100001" is value 255, because character '0' is not a dash '-'. (since v1.11)</p><div class="example"><a name="idp1036"></a><p class="title"><b>Example 5.16. </b></p><div class="example-contents">
                   
                   <pre class="programlisting">    DG 1-1----1  ; store 161 at the current location
     DG ...# #... .##. .... ; store two bytes: 0x18, 0x60</pre>
               </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">DH<a class="indexterm" name="po_dh"></a> "&lt;data&gt;"[,"&lt;data2&gt;"...]</span></dt><dd>
               <p>The data string comprises pairs of hexadecimal digits, each pair is converted to
-              a byte value. You can add spaces between pairs as you like. (since v1.11)</p><div class="example"><a name="idp1045"></a><p class="title"><b>Example 5.17. </b></p><div class="example-contents">
+              a byte value. You can add spaces between pairs as you like. (since v1.11)</p><div class="example"><a name="idp1046"></a><p class="title"><b>Example 5.17. </b></p><div class="example-contents">
                   
                   <pre class="programlisting">    DH "0123456789ABCDEF"   ; eight bytes #01 #23 ...
     DH "01 23  45 67"       ; four bytes #01 #23 #45 #67</pre>
@@ -1525,7 +1526,7 @@ counter = counter + 1
               instructions and regular labels, but to avoid warning, you must also map-in
               the target page into the target memory slot (<a class="link" href="#po_mmu">MMU</a>).
               When no fixed page in DISP is specified, the current mapping of memory pages is used.
-              </p><div class="example"><a name="idp1064"></a><p class="title"><b>Example 5.18. docs_examples/po_disp.asm</b></p><div class="example-contents">
+              </p><div class="example"><a name="idp1065"></a><p class="title"><b>Example 5.18. docs_examples/po_disp.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM48
@@ -1559,7 +1560,7 @@ ENDOFPROG
 /C - out as character in apostrophes (truncated to 8 bit)
 /H - out only in Hexadecimal
 /A - out both in Hexadecimal and Decimal</pre><p>
-              </p><div class="example"><a name="idp1077"></a><p class="title"><b>Example 5.19. docs_examples/po_display.asm</b></p><div class="example-contents">
+              </p><div class="example"><a name="idp1078"></a><p class="title"><b>Example 5.19. docs_examples/po_display.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ORG 100h
@@ -1580,7 +1581,7 @@ will output to the console strings:
               <p>Synonym of <a class="link" href="#po_block">BLOCK</a>.</p>
             </dd><dt><span class="term">DUP<a class="indexterm" name="po_dup"></a> &lt;count&gt;</span></dt><dd>
               <p>DUP specifies the number of times to generate the
-              following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.</p><div class="example"><a name="idp1103"></a><p class="title"><b>Example 5.20. </b></p><div class="example-contents">
+              following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.</p><div class="example"><a name="idp1104"></a><p class="title"><b>Example 5.20. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DUP 3 ; zero count would skip whole block
@@ -1597,7 +1598,7 @@ will output to the console strings:
               <p>Synonym of <a class="link" href="#po_word">WORD</a>.</p>
             </dd><dt><span class="term">DWORD<a class="indexterm" name="po_dword"></a></span></dt><dd>
               <p>Defines a so called doubleword. Values should be between
-              -2147483649 and 4294967296.</p><div class="example"><a name="idp1121"></a><p class="title"><b>Example 5.21. </b></p><div class="example-contents">
+              -2147483649 and 4294967296.</p><div class="example"><a name="idp1122"></a><p class="title"><b>Example 5.21. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DWORD 4000h,0d000h
@@ -1605,7 +1606,7 @@ will output to the console strings:
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">DZ<a class="indexterm" name="po_dz"></a></span></dt><dd>
               <p>Same as <a class="link" href="#po_byte">BYTE</a>, but an extra
-              zero will be added at the end.</p><div class="example"><a name="idp1132"></a><p class="title"><b>Example 5.22. </b></p><div class="example-contents">
+              zero will be added at the end.</p><div class="example"><a name="idp1133"></a><p class="title"><b>Example 5.22. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DZ 1      ; same as BYTE 1,0
@@ -1630,7 +1631,7 @@ will output to the console strings:
               <p>Set the current encoding, i.e. if you set "DOS", SjASMPlus
               will automatically convert strings from ANSI to DOS-866.
               Encoding may be "DOS"(DOS-866) or "WIN"(ANSI/Win-1251). Default
-              is "WIN". </p><div class="example"><a name="idp1162"></a><p class="title"><b>Example 5.23. </b></p><div class="example-contents">
+              is "WIN". </p><div class="example"><a name="idp1163"></a><p class="title"><b>Example 5.23. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ENCODING "WIN"
@@ -1658,7 +1659,7 @@ will output to the console strings:
               counter. The label should not already exist (you can assign only one value to it).
 			  The optional <code class="code">pageNumber</code> can enforce explicit page value for the label
 			  (for the <code class="code">$$label</code> operator).
-			  For modifiable labels holding temporary values use <a class="link" href="#po_defl">DEFL</a>.</p><div class="example"><a name="idp1222"></a><p class="title"><b>Example 5.24. </b></p><div class="example-contents">
+			  For modifiable labels holding temporary values use <a class="link" href="#po_defl">DEFL</a>.</p><div class="example"><a name="idp1223"></a><p class="title"><b>Example 5.24. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">Label EQU 3
@@ -1668,7 +1669,7 @@ Kip   EQU 0x23*256 + low $</pre>
               <p>The named label will be written to the export-file, in the
               form 'label: EQU value'. This way the export-file can be
               included in other sources. Order of labels in file follows the order of EXPORT statements.
-              </p><div class="example"><a name="idp1232"></a><p class="title"><b>Example 5.25. </b></p><div class="example-contents">
+              </p><div class="example"><a name="idp1233"></a><p class="title"><b>Example 5.25. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">DRIE=3
@@ -1683,7 +1684,7 @@ Kip   EQU 0x23*256 + low $</pre>
               <p>In combination with <a class="link" href="#po_output">OUTPUT</a> &lt;filename&gt;,r it is
               possible to update existing files.</p>
 
-              <div class="example"><a name="idp1245"></a><p class="title"><b>Example 5.26. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1246"></a><p class="title"><b>Example 5.26. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">; This example will result in a file with a length of one byte:
@@ -1698,7 +1699,7 @@ Kip   EQU 0x23*256 + low $</pre>
             &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a binary file into the outputfile. The offset
               and length are optional. Added in v1.12.1: if negative offset or length is provided,
-              it counts relatively from the end of the file.</p><div class="example"><a name="idp1263"></a><p class="title"><b>Example 5.27. </b></p><div class="example-contents">
+              it counts relatively from the end of the file.</p><div class="example"><a name="idp1264"></a><p class="title"><b>Example 5.27. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
@@ -1708,7 +1709,7 @@ Kip   EQU 0x23*256 + low $</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">INCHOB<a class="indexterm" name="po_inchob"></a> &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a data from a hobeta file into the outputfile.
-              The offset and length are optional.</p><div class="example"><a name="idp1273"></a><p class="title"><b>Example 5.28. </b></p><div class="example-contents">
+              The offset and length are optional.</p><div class="example"><a name="idp1274"></a><p class="title"><b>Example 5.28. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCHOB "gfx.$c",7        ; include gfx.scc, skip first 7 bytes
@@ -1729,7 +1730,7 @@ Kip   EQU 0x23*256 + low $</pre>
               with completely empty include-path list, use "<code class="code">--inc</code>" option
               early (order matters) without the "=" to empty the current list, like:
               <code class="code">sjasmplus --inc --inc=path1 --inc=path2 file.asm</code>
-              </p><div class="example"><a name="idp1287"></a><p class="title"><b>Example 5.29. </b></p><div class="example-contents">
+              </p><div class="example"><a name="idp1288"></a><p class="title"><b>Example 5.29. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCLUDE &lt;VDP.I&gt;     ; search for file "VDP.I" in the include directories, then in current
@@ -1742,7 +1743,7 @@ Kip   EQU 0x23*256 + low $</pre>
               directory is the directory the current file comes from) the file
               will be searched for in the directories specified at the
               commandline. When angle brackets are used, the commandline
-              directories are searched before the current directory.</p><div class="example"><a name="idp1297"></a><p class="title"><b>Example 5.30. </b></p><div class="example-contents">
+              directories are searched before the current directory.</p><div class="example"><a name="idp1298"></a><p class="title"><b>Example 5.30. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCLUDELUA &lt;mylibrary1.lua&gt;
@@ -1752,7 +1753,7 @@ Kip   EQU 0x23*256 + low $</pre>
             </dd><dt><span class="term">INCTRD<a class="indexterm" name="po_inctrd"></a>
             &lt;filenameoftrdimage&gt;,&lt;filenameintrdimage&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</span></dt><dd>
               <p>To include a file from a TRD image into the outputfile.
-              The offset and length are optional.</p><div class="example"><a name="idp1307"></a><p class="title"><b>Example 5.31. </b></p><div class="example-contents">
+              The offset and length are optional.</p><div class="example"><a name="idp1308"></a><p class="title"><b>Example 5.31. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    INCTRD "test.trd","mygfx.C" ; include mygfx.C from test.trd
@@ -1764,7 +1765,7 @@ Kip   EQU 0x23*256 + low $</pre>
               <p><span class="emphasis"><em>Useful only for ZX-Spectrum Emulator
               UNREALSPECCY.</em></span></p>
 
-              <p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <p><span class="emphasis"><em>Works only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Save labels list in format:</p>
@@ -1775,7 +1776,7 @@ Kip   EQU 0x23*256 + low $</pre>
               <p>If <code class="code">&lt;virtual labels&gt;</code> is non zero, then the page number NN is not
               part of output, and ADDRESS is truncated to 0000..FFFF range.</p>
 
-              <div class="example"><a name="idp1335"></a><p class="title"><b>Example 5.32. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1336"></a><p class="title"><b>Example 5.32. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    LABELSLIST "x:/somepath/user.l"</pre>
@@ -1789,7 +1790,7 @@ PASS2   -  interpret Lua script in second pass only.
 PASS3   -  interpret Lua script in third pass only. By default.
 ALLPASS -  interpret Lua script in all passes. It is needed if you generate some Z80 code.</pre>
 
-              <div class="example"><a name="idp1349"></a><p class="title"><b>Example 5.33. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1350"></a><p class="title"><b>Example 5.33. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    LUA
@@ -1822,7 +1823,7 @@ ALLPASS -  interpret Lua script in all passes. It is needed if you generate some
                 </p><pre class="synopsis">e = error on writing beyond last byte of slot
 w = warning on writing beyond last byte of slot
 n = wrap address back to start of slot, map next page</pre><p>
-                </p><div class="example"><a name="idp1373"></a><p class="title"><b>Example 5.34. docs_examples/po_mmu.asm</b></p><div class="example-contents">
+                </p><div class="example"><a name="idp1374"></a><p class="title"><b>Example 5.34. docs_examples/po_mmu.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128 : LABELSLIST "po_mmu.lbl"  ; to check label pages
@@ -1845,7 +1846,7 @@ label4_p2: scf      ; first byte of page 2 at 0xC000</pre>
 				  Labels has to be unique only whithin the current module (module is added as prefix to them).
 				  Also note the use of '@' operator to suppress all this label-processing. Modules can
 				  be nested, and module has to be ended by <a class="link" href="#po_endmodule">ENDMODULE</a>.
-			  </p><div class="example"><a name="idp1384"></a><p class="title"><b>Example 5.35. docs_examples/po_module.asm</b></p><div class="example-contents">
+			  </p><div class="example"><a name="idp1385"></a><p class="title"><b>Example 5.35. docs_examples/po_module.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    MODULE xxx
@@ -1924,7 +1925,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
 			  <p>The <a class="link" href="#s_id_warnings" title="Warnings with id">id-warning system</a> state is NOT saved/restored
 				  by OPT push/pop/reset and can be modified only by <code class="code">-W</code> option.
 			  </p>
-			  <div class="example"><a name="idp1413"></a><p class="title"><b>Example 5.36. docs_examples/po_opt.asm</b></p><div class="example-contents">
+			  <div class="example"><a name="idp1414"></a><p class="title"><b>Example 5.36. docs_examples/po_opt.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    POP bc, hl   ; pops BC first
@@ -1944,7 +1945,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               <p>When used inside <a class="link" href="#po_disp">DISP</a> block, only the virtual
 				  "displaced" program counter is affected, but the machine code will be still
 				  sequentially emitted in the original physical location and warning is emitted.
-                  </p><div class="example"><a name="idp1427"></a><p class="title"><b>Example 5.37. docs_examples/po_org.asm</b></p><div class="example-contents">
+                  </p><div class="example"><a name="idp1428"></a><p class="title"><b>Example 5.37. docs_examples/po_org.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    ORG 100h ; or 0x100, or $100, or #100
@@ -1986,7 +1987,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               of the file).</p><pre class="synopsis">OUTPUT &lt;filename&gt;,t  ; truncate (default)
 OUTPUT &lt;filename&gt;,r  ; rewind
 OUTPUT &lt;filename&gt;,a  ; append</pre><p>
-              </p><div class="example"><a name="idp1450"></a><p class="title"><b>Example 5.38. bigfile.asm</b></p><div class="example-contents">
+              </p><div class="example"><a name="idp1451"></a><p class="title"><b>Example 5.38. bigfile.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT loader.com
@@ -2005,12 +2006,12 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
               bigfile.dat.</p>
 
             </dd><dt><span class="term">PAGE<a class="indexterm" name="po_page"></a> &lt;number&gt;</span></dt><dd>
-              <p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <p><span class="emphasis"><em>Works only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Set the current memory page to current slot.</p>
 
-              <div class="example"><a name="idp1467"></a><p class="title"><b>Example 5.39. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1468"></a><p class="title"><b>Example 5.39. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page
@@ -2050,6 +2051,37 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
 				  relocation table (same what WinAPE does with its optional argument for RELOCATE_TABLE).</p>
             </dd><dt><span class="term">REPT<a class="indexterm" name="po_rept"></a> &lt;count&gt;</span></dt><dd>
               <p>Synonym of <a class="link" href="#po_dup">DUP</a>. There is also synonym ENDR to end REPT block (EDUP works too).</p>
+            </dd><dt><span class="term">SAVE3DOS<a class="indexterm" name="po_save3dos"></a>
+                &lt;filename&gt;,&lt;address&gt;,&lt;size&gt;[,&lt;type&gt;[,&lt;w2_line&gt;[,&lt;w3&gt;]]]</span></dt><dd>
+              <p><span class="emphasis"><em>Works only in virtual device emulation mode. See
+              <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
+
+              <p>Like <a class="link" href="#po_savebin">SAVEBIN</a>, saves the block of device RAM
+                from "address", but with +3DOS 128 byte header prepended.</p><div class="example"><a name="idp1530"></a><p class="title"><b>Example 5.40. </b></p><div class="example-contents">
+                  
+
+                  <pre class="programlisting">    DEVICE ZXSPECTRUM48
+    ...
+
+    ; +3 BASIC header (8 bytes starting from offset 15 in +3DOS header):
+    ; type is first byte (0 = basic, 1, 2 = arrays, 3 = code/screen$)
+    ; size is "first word" (bytes 1 and 2)
+    ; w2_line argument is "second word" (bytes 3 and 4)
+    ; w3 argument is "third word" (bytes 5 and 6) (default value = size)
+
+    ; by default the type=3 (CODE/SCREEN$) is saved
+    SAVE3DOS "screen.bin", $4000, $1b00
+    ; type 3: w2 argument $C000 is target load-address
+    SAVE3DOS "code.bin", $8000, $1234, 3, $C000
+    ; type 0: BASIC, default w2 = $8000 (no auto-run)
+    SAVE3DOS "prg1.bas", $5c00, 1234, 0
+    ; type 0: w2_line is LINE auto-run (30 in example)
+    SAVE3DOS "prg2.bas", $5c00, 1234, 0, 30
+    ; type 1: Numeric array (refer to +3 manual for these)
+    SAVE3DOS "b.dat", $8000, 30, 1
+    ; type 2: Character array (or maybe just ignore these)
+    SAVE3DOS "c.dat", $8000, 30, 2</pre>
+                </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">SAVEBIN<a class="indexterm" name="po_savebin"></a>
             &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</span></dt><dd>
               <p><span class="emphasis"><em>Works only in real device emulation mode. See
@@ -2057,7 +2089,7 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
 
               <p>Save the block of RAM.</p>
 
-              <div class="example"><a name="idp1529"></a><p class="title"><b>Example 5.40. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1544"></a><p class="title"><b>Example 5.41. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page to current slot
@@ -2070,10 +2102,10 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
             <p>SAVECDT BASIC &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;</p>
             <p>SAVECDT CODE &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;]</p>
             <p>SAVECDT HEADLESS &lt;cdtname&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;sync&gt;[,&lt;format&gt;]]</p></span></dt><dd>
-              <p><span class="emphasis"><em>Work only in Amstrad device emulation mode. See
+              <p><span class="emphasis"><em>Works only in Amstrad device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
-              <p>Manipulate CDT file (tape/TZX file format used by Amstrad CPC emulators).</p><div class="example"><a name="idp1547"></a><p class="title"><b>Example 5.41. </b></p><div class="example-contents">
+              <p>Manipulate CDT file (tape/TZX file format used by Amstrad CPC emulators).</p><div class="example"><a name="idp1562"></a><p class="title"><b>Example 5.42. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE AMSTRADCPC6128
@@ -2095,7 +2127,7 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
     SAVECDT HEADLESS "output.cdt",label,length,sync,format ; default sync = 0x16, format = 0</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">SAVECPCSNA<a class="indexterm" name="po_savecpcsna"></a> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</span></dt><dd>
-              <p><span class="emphasis"><em>Work only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
+              <p><span class="emphasis"><em>Works only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Save the snapshot for emulators of Amstrad CPC machines. (If start address is omitted,
@@ -2107,7 +2139,7 @@ OUTPUT &lt;filename&gt;,a  ; append</pre><p>
     <a class="ulink" href="https://github.com/z00m128/sjasmplus/blob/master/sjasm/io_cpc.cpp#L66" target="_top">source</a>.
 		If you absolutely need different defaults and can't afford init-code modifying the state, you can post-patch the resulting SNA
 		file directly from source, see <a class="ulink" href="https://github.com/z00m128/sjasmplus/issues/139" target="_top">Issue #139</a> for example.
-		</p><div class="example"><a name="idp1564"></a><p class="title"><b>Example 5.42. </b></p><div class="example-contents">
+		</p><div class="example"><a name="idp1579"></a><p class="title"><b>Example 5.43. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE AMSTRADCPC464
@@ -2131,19 +2163,19 @@ START  .... ;some code
               <p>The offset is not limited to page size, i.e. arguments page=1,offset=0x500 are equal
               to arguments page=0,offset=0x4500 for ZXSPECTRUM128 device (has page size 0x4000).</p>
 
-              <div class="example"><a name="idp1580"></a><p class="title"><b>Example 5.43. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1595"></a><p class="title"><b>Example 5.44. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128 : SAVEDEV "fullram.bin",0,0,0x20000 ; save full 128kiB</pre>
                 </div></div><br class="example-break">
             </dd><dt><span class="term">SAVEHOB<a class="indexterm" name="po_savehob"></a>
             &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</span></dt><dd>
-              <p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <p><span class="emphasis"><em>Works only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Save the block of RAM in Hobeta format.</p>
 
-              <div class="example"><a name="idp1593"></a><p class="title"><b>Example 5.44. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1608"></a><p class="title"><b>Example 5.45. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    PAGE 7 ;set 7 page to current slot
@@ -2157,7 +2189,7 @@ START  .... ;some code
               <p><span class="emphasis"><em>Works only in ZXSPECTRUMNEXT device emulation mode. See 
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
             </dd><dt><span class="term">SAVESNA<a class="indexterm" name="po_savesna"></a> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</span></dt><dd>
-              <p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <p><span class="emphasis"><em>Works only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Save the snapshot for emulators of ZX-Spectrum. (If start address is omitted,
@@ -2167,7 +2199,7 @@ START  .... ;some code
 		the <a class="ulink" href="https://github.com/z00m128/sjasmplus/blob/master/sjasm/io_snapshots.cpp#L55" target="_top">source</a> to see all the values).
 		If you absolutely need different defaults and can't afford init-code modifying the state, you can post-patch the resulting SNA
 		file directly from source, see <a class="ulink" href="https://github.com/z00m128/sjasmplus/issues/139" target="_top">Issue #139</a> for example.
-		</p><div class="example"><a name="idp1620"></a><p class="title"><b>Example 5.45. </b></p><div class="example-contents">
+		</p><div class="example"><a name="idp1635"></a><p class="title"><b>Example 5.46. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128
@@ -2181,11 +2213,11 @@ START  .... ;something code
             <p>SAVETAP &lt;filename&gt;,NUMBERS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</p>
             <p>SAVETAP &lt;filename&gt;,CHARS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</p>
             <p>SAVETAP &lt;filename&gt;,HEADLESS,&lt;start&gt;,&lt;length&gt;[,&lt;customblockflag(0..255)&gt;]</p></span></dt><dd>
-              <p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <p><span class="emphasis"><em>Works only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Append the tape header or block of data to the end of the
-              standard tape file for emulators of ZX-Spectrum.</p><div class="example"><a name="idp1638"></a><p class="title"><b>Example 5.46. </b></p><div class="example-contents">
+              standard tape file for emulators of ZX-Spectrum.</p><div class="example"><a name="idp1653"></a><p class="title"><b>Example 5.47. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM48
@@ -2204,7 +2236,7 @@ START  .... ;something code
     SAVETAP "output.tap",HEADLESS,start,length</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">SAVETAP &lt;filename&gt;[,&lt;startadressofprogram&gt;]</span></dt><dd>
-              <p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <p><span class="emphasis"><em>Works only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Save the tape file for emulators of ZX-Spectrum as a
@@ -2218,7 +2250,7 @@ START  .... ;something code
 				  around region you want to store, if you have zero-ed bytes at beginning or end
 				  of your code).
 
-              </p><div class="example"><a name="idp1651"></a><p class="title"><b>Example 5.47. </b></p><div class="example-contents">
+              </p><div class="example"><a name="idp1666"></a><p class="title"><b>Example 5.48. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM48
@@ -2252,7 +2284,7 @@ START  ....     ; some code
 			  <p>The unofficial three-letter extensions are also supported (official extensions
 				  are only: B, C, D and #).
 
-				</p><div class="example"><a name="idp1670"></a><p class="title"><b>Example 5.48. </b></p><div class="example-contents">
+				</p><div class="example"><a name="idp1685"></a><p class="title"><b>Example 5.49. </b></p><div class="example-contents">
                   <pre class="programlisting">    EMPTYTRD "test.trd" ;create empty TRD image
     PAGE 7 ;set 7 page to current slot
     SAVETRD "test.trd","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file to TRD image
@@ -2269,7 +2301,7 @@ START  ....     ; some code
 				<p>Will add execution-type breakpoint at address &lt;expression&gt; to the
 					<a class="link" href="#po_bplist">BPLIST</a> export file. If no expression is specified,
 					the current program counter will be used.
-				  </p><div class="example"><a name="idp1690"></a><p class="title"><b>Example 5.49. </b></p><div class="example-contents">
+				  </p><div class="example"><a name="idp1705"></a><p class="title"><b>Example 5.50. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    BPLIST "cmd_line.options.txt" zesarux ; open breakpoints list in "ZEsarUX" format
@@ -2285,7 +2317,7 @@ start:
 				</p>
             </dd><dt><span class="term">SHELLEXEC<a class="indexterm" name="po_shellexec"></a> &lt;filename&gt;[,&lt;parameters&gt;]</span></dt><dd>
               <p>Execute external program &lt;filename&gt; using optional
-              command line &lt;parameters&gt;.</p><div class="example"><a name="idp1699"></a><p class="title"><b>Example 5.50. </b></p><div class="example-contents">
+              command line &lt;parameters&gt;.</p><div class="example"><a name="idp1714"></a><p class="title"><b>Example 5.51. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT "mybin.bin"
@@ -2297,7 +2329,7 @@ start:
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">SIZE<a class="indexterm" name="po_size"></a> &lt;filesize in bytes&gt;</span></dt><dd>
               <p>If the resulting file is less than the given length, as
-              many zero bytes are added as necessary. See <a class="link" href="#po_output">OUTPUT</a> for more.</p><div class="example"><a name="idp1711"></a><p class="title"><b>Example 5.51. </b></p><div class="example-contents">
+              many zero bytes are added as necessary. See <a class="link" href="#po_output">OUTPUT</a> for more.</p><div class="example"><a name="idp1726"></a><p class="title"><b>Example 5.52. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    SIZE 32768       ; make sure file will be 32K</pre>
@@ -2308,7 +2340,7 @@ start:
 					<a class="link" href="#c_sld_data" title="Chapter 9. Source Level Debugging (SLD) data">Source Level Debugging (SLD) data</a>.
 					The particular keywords depend on the debugger you are using to process SLD data.</p>
 
-              <div class="example"><a name="idp1724"></a><p class="title"><b>Example 5.52. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1739"></a><p class="title"><b>Example 5.53. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128
@@ -2320,7 +2352,7 @@ var1    DB 1      ; WPMEM - exported
 var2    DB 2      ; WpMem - not exported, case sensitive!</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">SLOT<a class="indexterm" name="po_slot"></a> &lt;number_or_address&gt;</span></dt><dd>
-              <p><span class="emphasis"><em>Work only in real device emulation mode. See
+              <p><span class="emphasis"><em>Works only in real device emulation mode. See
               <a class="link" href="#po_device">DEVICE</a>.</em></span></p>
 
               <p>Set current slot. Slots are defined by DEVICE pseudo-op.
@@ -2330,7 +2362,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</pre>
               <p>(since v1.18.1) You can also use starting address of particular slot instead
               of its number, ie. for ZX128: <code class="code">SLOT $8000</code> is alias of <code class="code">SLOT 2</code></p>
 
-              <div class="example"><a name="idp1745"></a><p class="title"><b>Example 5.53. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1760"></a><p class="title"><b>Example 5.54. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEVICE ZXSPECTRUM128
@@ -2348,7 +2380,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</pre>
               <p>Appends one tape block at the end of specified file.
               All following code will be assembled to this tape file block.</p>
 
-              <p>Default value of flagbyte is 255.</p><div class="example"><a name="idp1763"></a><p class="title"><b>Example 5.54. bigfile.asm</b></p><div class="example-contents">
+              <p>Default value of flagbyte is 255.</p><div class="example"><a name="idp1778"></a><p class="title"><b>Example 5.55. bigfile.asm</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    EMPTYTAP screen.tap
@@ -2370,7 +2402,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</pre>
             </dd><dt><span class="term">UNDEFINE<a class="indexterm" name="po_undefine"></a> &lt;id&gt;</span></dt><dd>
               <p>Removes the identifier defined by <a class="link" href="#po_define">DEFINE</a></p>
 
-              <div class="example"><a name="idp1784"></a><p class="title"><b>Example 5.55. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1799"></a><p class="title"><b>Example 5.56. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    DEFINE Release 1
@@ -2402,7 +2434,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</pre>
 				  an ENDW (EDUP/ENDR alias) pseudo-op is encountered.</p>
 			  <p>The optional guardian-counter value will abort the WHILE if there are
 				  more iterations, default guardian-counter is set to 100k.
-				</p><div class="example"><a name="idp1803"></a><p class="title"><b>Example 5.56. </b></p><div class="example-contents">
+				</p><div class="example"><a name="idp1818"></a><p class="title"><b>Example 5.57. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">ptr = $4000
@@ -2416,7 +2448,7 @@ ptr = ptr + 1
 			  </p>
             </dd><dt><span class="term">WORD<a class="indexterm" name="po_word"></a> &lt;words&gt;</span></dt><dd>
               <p>Defines a word. Values should be between -32787 and
-              65536.</p><div class="example"><a name="idp1812"></a><p class="title"><b>Example 5.57. </b></p><div class="example-contents">
+              65536.</p><div class="example"><a name="idp1827"></a><p class="title"><b>Example 5.58. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    WORD 4000h,0d000h
@@ -2441,7 +2473,7 @@ ptr = ptr + 1
 				  does not emit any machine code and does not define any label), you can suppress the
 				  warning.</p>
 
-			  <div class="example"><a name="idp1829"></a><p class="title"><b>Example 5.58. </b></p><div class="example-contents">
+			  <div class="example"><a name="idp1844"></a><p class="title"><b>Example 5.59. </b></p><div class="example-contents">
 				  
 
 				  <pre class="programlisting">    IF (aaa == 0) || (2 = aaa &amp;&amp; ((bbb % 13) &amp; 0x01))
@@ -2458,7 +2490,7 @@ ptr = ptr + 1
               <p>The condition is true if there is an id defined. These are
               NOT labels.</p>
 
-              <div class="example"><a name="idp1846"></a><p class="title"><b>Example 5.59. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1861"></a><p class="title"><b>Example 5.60. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    IFDEF MSX_LEAN_AND_MEAN
@@ -2471,7 +2503,7 @@ ptr = ptr + 1
               <p>The condition is true if there isn't an id defined. These
               are NOT labels.</p>
 
-              <div class="example"><a name="idp1857"></a><p class="title"><b>Example 5.60. </b></p><div class="example-contents">
+              <div class="example"><a name="idp1872"></a><p class="title"><b>Example 5.61. </b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">1   IN A,(0C4H)
@@ -2485,7 +2517,7 @@ ptr = ptr + 1
               in the code. You can create libraries of useful functions using
               IFUSED pseudo-op</p>
 
-              <div class="example"><a name="idp1868"></a><p class="title"><b>Example 5.61. (similar to tests/misc/ifused_test.asm)</b></p><div class="example-contents">
+              <div class="example"><a name="idp1883"></a><p class="title"><b>Example 5.62. (similar to tests/misc/ifused_test.asm)</b></p><div class="example-contents">
                   
 
                   <pre class="programlisting">    OUTPUT "TEST.OUT"
@@ -2561,7 +2593,7 @@ LABEL5:
       lines will be stored as the macro-body until an ENDM pseudo-op is
       encountered. Macro's have to be defined before their use. Macro's name
       must be unique (even if two macros differ by required arguments).
-	  </p><div class="example"><a name="idp1912"></a><p class="title"><b>Example 5.62. Macro without parameters (docs_examples/s_macros.asm)</b></p><div class="example-contents">
+	  </p><div class="example"><a name="idp1927"></a><p class="title"><b>Example 5.63. Macro without parameters (docs_examples/s_macros.asm)</b></p><div class="example-contents">
           
 
           <pre class="programlisting">  MACRO ADD_HL_A
@@ -2574,7 +2606,7 @@ LABEL5:
         </div></div><p><br class="example-break"></p>
 
       <p>Labels in a macro starting with a dot are local to each macro
-      expansion.</p><div class="example"><a name="idp1916"></a><p class="title"><b>Example 5.63. A macro with parameters (docs_examples/s_macros.asm)</b></p><div class="example-contents">
+      expansion.</p><div class="example"><a name="idp1931"></a><p class="title"><b>Example 5.64. A macro with parameters (docs_examples/s_macros.asm)</b></p><div class="example-contents">
           
 
           <pre class="programlisting">  MACRO WAVEOUT reg, data
@@ -2591,7 +2623,7 @@ LABEL5:
   LD A,17
   OUT (7FH),A</pre>
         </div></div><p><br class="example-break">
-		</p><div class="example"><a name="idp1919"></a><p class="title"><b>Example 5.64. Another example (docs_examples/s_macros.asm)</b></p><div class="example-contents">
+		</p><div class="example"><a name="idp1934"></a><p class="title"><b>Example 5.65. Another example (docs_examples/s_macros.asm)</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    MACRO LOOP
@@ -2615,7 +2647,7 @@ Main
         </div></div><p><br class="example-break"></p>
 
       <p>Angle brackets can be used when the arguments contain commas.
-      </p><div class="example"><a name="idp1923"></a><p class="title"><b>Example 5.65. Argument in angle brackets (docs_examples/s_macros.asm)</b></p><div class="example-contents">
+      </p><div class="example"><a name="idp1938"></a><p class="title"><b>Example 5.66. Argument in angle brackets (docs_examples/s_macros.asm)</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    MACRO UseLess data
@@ -2640,7 +2672,7 @@ Main
 		<p>As compatibility convenience to make porting from different assemblers somewhat
 			easier, there is alternative syntax, where the macro name is written at beginning
 			of line (as if label, but MODULE part is NOT applied to macro name).
-			</p><div class="example"><a name="idp1927"></a><p class="title"><b>Example 5.66. Macro name at beginning of line (docs_examples/s_macros.asm)</b></p><div class="example-contents">
+			</p><div class="example"><a name="idp1942"></a><p class="title"><b>Example 5.67. Macro name at beginning of line (docs_examples/s_macros.asm)</b></p><div class="example-contents">
 				<pre class="programlisting">LabelAsMacroName    MACRO  arg1?, arg2?
                         ld  a,arg1?
                         ld  hl,arg2?
@@ -2655,7 +2687,7 @@ Main
 		<p>
 			If some macro over-shadows regular instruction or directive name, the <code class="code">@</code>
 			character in front of instruction/directive name can be used to inhibit macro expansion.
-			</p><div class="example"><a name="idp1932"></a><p class="title"><b>Example 5.67. Inhibit macro expansion operator (docs_examples/s_macros.asm)</b></p><div class="example-contents">
+			</p><div class="example"><a name="idp1947"></a><p class="title"><b>Example 5.68. Inhibit macro expansion operator (docs_examples/s_macros.asm)</b></p><div class="example-contents">
 				<pre class="programlisting">djnz    MACRO   arg1?
             dec c
             jr  nz,arg1?
@@ -2788,7 +2820,7 @@ Main
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="s_structure_examples"></a>Examples</h2></div></div></div>
       
 
-      <div class="example"><a name="idp2021"></a><p class="title"><b>Example 6.1. docs_examples/c_structures.asm</b></p><div class="example-contents">
+      <div class="example"><a name="idp2036"></a><p class="title"><b>Example 6.1. docs_examples/c_structures.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SCOLOR
@@ -2804,7 +2836,7 @@ SCOLOR.RED	EQU 0 ; offset
 SCOLOR.GREEN	EQU 1 ; offset
 SCOLOR.BLUE	EQU 2 ; offset</pre>
 	  </div></div><br class="example-break">
-	  <div class="example"><a name="idp2027"></a><p class="title"><b>Example 6.2. docs_examples/c_structures.asm</b></p><div class="example-contents">
+	  <div class="example"><a name="idp2042"></a><p class="title"><b>Example 6.2. docs_examples/c_structures.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SDOT
@@ -2825,7 +2857,7 @@ SDOT.C.GREEN	EQU 3 ; offset
 SDOT.C.BLUE	EQU 4 ; offset
 </pre>
 	  </div></div><br class="example-break">
-	  <div class="example"><a name="idp2033"></a><p class="title"><b>Example 6.3. docs_examples/c_structures.asm</b></p><div class="example-contents">
+	  <div class="example"><a name="idp2048"></a><p class="title"><b>Example 6.3. docs_examples/c_structures.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT SPOS,4
@@ -2842,7 +2874,7 @@ SPOS.X	EQU  4 ; offset
 SPOS.Y	EQU  6 ; offset
 SPOS.AD	EQU  8 ; offset</pre>
 	  </div></div><br class="example-break">
-	  <div class="example"><a name="idp2039"></a><p class="title"><b>Example 6.4. docs_examples/c_structures.asm</b></p><div class="example-contents">
+	  <div class="example"><a name="idp2054"></a><p class="title"><b>Example 6.4. docs_examples/c_structures.asm</b></p><div class="example-contents">
           
 
           <p>When a structure is defined it is possible to declare labels
@@ -2873,7 +2905,7 @@ COLOR.BLUE  BYTE 6
   ; etc.</pre>
 
 	  </div></div><br class="example-break">
-      <div class="example"><a name="idp2050"></a><p class="title"><b>Example 6.5. docs_examples/st_usage_example.asm</b></p><div class="example-contents">
+      <div class="example"><a name="idp2065"></a><p class="title"><b>Example 6.5. docs_examples/st_usage_example.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">	STRUCT BIN_FILE_MAP, 256
@@ -2900,7 +2932,7 @@ binData.value1          EQU 0x8100   ; address
 binData.value2          EQU 0x8101   ; address</pre>
 	  </div></div><br class="example-break">
 
-      <div class="example"><a name="idp2056"></a><p class="title"><b>Example 6.6. docs_examples/st_text.asm</b></p><div class="example-contents">
+      <div class="example"><a name="idp2071"></a><p class="title"><b>Example 6.6. docs_examples/st_text.asm</b></p><div class="example-contents">
           
 
           <pre class="programlisting">        STRUCT BLOCK_HEADER
@@ -2953,7 +2985,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="s_lua_how_to"></a>How to use?</h2></div></div></div>
       
 
-      <p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a name="idp2076"></a><p class="title"><b>Example 7.1. Hello World!</b></p><div class="example-contents">
+      <p>You must use <a class="link" href="#po_lua">LUA</a> and <a class="link" href="#po_endlua">ENDLUA</a> pseudo-ops.</p><div class="example"><a name="idp2091"></a><p class="title"><b>Example 7.1. Hello World!</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    LUA
@@ -3010,10 +3042,10 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             </dd><dt><span class="term">[void] sj.add_word(word)<a class="indexterm" name="lua_sj_add_word"></a></span></dt><dd>
               <p>Add word to output (or to memory) and twice increase <a class="link" href="#lua_sj_current_address">sj.current_address</a></p>
             </dd><dt><span class="term">[integer] sj.get_byte(address)<a class="indexterm" name="lua_sj_get_byte"></a></span></dt><dd>
-              <p>Get byte from memory. <span class="emphasis"><em>Work only in real device
+              <p>Get byte from memory. <span class="emphasis"><em>Works only in real device
               emulation mode.</em></span></p>
             </dd><dt><span class="term">[integer] sj.get_word(address)<a class="indexterm" name="lua_sj_get_word"></a></span></dt><dd>
-              <p>Get word from memory. <span class="emphasis"><em>Work only in real device
+              <p>Get word from memory. <span class="emphasis"><em>Works only in real device
               emulation mode.</em></span></p>
             </dd><dt><span class="term">[string] sj.get_device()<a class="indexterm" name="lua_sj_get_device"></a></span></dt><dd>
               <p>Return current emulating device's identifier. Returns
@@ -3037,7 +3069,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
               only in real device emulation mode.</em></span></p>
             </dd><dt><span class="term">[void] zx.save_snapshot_sna<a class="indexterm" name="lua_zx_save_snapshot_sna"></a>("filename.sna",
             startaddressofprogram)</span></dt><dd>
-              <p>Save snapshot of memory in SNA format. <span class="emphasis"><em>Work only
+              <p>Save snapshot of memory in SNA format. <span class="emphasis"><em>Works only
               in real device emulation mode and only for ZXSPECTRUM48 and
               ZXSPECTRUM128..</em></span></p>
             </dd></dl></div>
@@ -3128,7 +3160,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
       <p></p>
 
-      <div class="example"><a name="idp2367"></a><p class="title"><b>Example 7.2. Variables doesn't clear in new passes of the compiler</b></p><div class="example-contents">
+      <div class="example"><a name="idp2382"></a><p class="title"><b>Example 7.2. Variables doesn't clear in new passes of the compiler</b></p><div class="example-contents">
           
 
           <pre class="programlisting">    LUA PASS1
@@ -3145,7 +3177,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
        print (v)
 -- out to console: 2
     ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp2371"></a><p class="title"><b>Example 7.3. To generate some code you need to generate it in all
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp2386"></a><p class="title"><b>Example 7.3. To generate some code you need to generate it in all
           passes</b></p><div class="example-contents">
           
 
@@ -3163,7 +3195,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     LUA PASS2 ; if you fully understand what you are doing
         sj.add_byte(123) -- and you need emit bytes in other mode
     ENDLUA ; luamc-ok ; you can suppress warning here or at start of block</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp2375"></a><p class="title"><b>Example 7.4. Declare function and use it</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp2390"></a><p class="title"><b>Example 7.4. Declare function and use it</b></p><div class="example-contents">
           
 
           <pre class="programlisting">     LUA
@@ -3186,7 +3218,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
      LUA
          savetape_mytype("tapefiles/myprogram.tape", _c("StartGameLabel"))
      ENDLUA</pre>
-        </div></div><p><br class="example-break"></p><div class="example"><a name="idp2379"></a><p class="title"><b>Example 7.5. Simple sample :)</b></p><div class="example-contents">
+        </div></div><p><br class="example-break"></p><div class="example"><a name="idp2394"></a><p class="title"><b>Example 7.5. Simple sample :)</b></p><div class="example-contents">
           
 
           <pre class="programlisting">	LUA
@@ -3556,7 +3588,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
   <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="s_savenex_examples"></a>Examples</h2></div></div></div>
 	  
 
-	  <div class="example"><a name="idp2539"></a><p class="title"><b>Example 8.1. docs_examples/s_savenex_examples.asm</b></p><div class="example-contents">
+	  <div class="example"><a name="idp2554"></a><p class="title"><b>Example 8.1. docs_examples/s_savenex_examples.asm</b></p><div class="example-contents">
           
 		  <p>
 			  Creating NEX file which will have Layer2 loading screen (stripes), progress bar, and will
@@ -3807,7 +3839,7 @@ pages.size:&lt;page size&gt;,pages.count:&lt;page count&gt;,slots.count:&lt;slot
 </pre><p>
 		</p>
 
-		<div class="example"><a name="idp2611"></a><p class="title"><b>Example 9.1. Example of SLD file</b></p><div class="example-contents">
+		<div class="example"><a name="idp2626"></a><p class="title"><b>Example 9.1. Example of SLD file</b></p><div class="example-contents">
 			
 
 <pre class="programlisting">
@@ -3840,6 +3872,6 @@ toplevel.asm|70|include.asm|3|37|40976|T|
 
   </div>
 
-  <div class="index"><div class="titlepage"><div><div><h1 class="title"><a name="index"></a>Index</h1></div></div></div><div xmlns:xlink="http://www.w3.org/1999/xlink" class="index"><div class="indexdiv"><h3>Symbols</h3><dl><dt id="ientry-idp380">!, <a class="indexterm" href="#op_log_not">Expressions</a></dt><dt id="ientry-idp430">!=, <a class="indexterm" href="#op_neq">Expressions</a></dt><dt id="ientry-idp448">$, <a class="indexterm" href="#op_dollar">Expressions</a></dt><dt id="ientry-idp450">$$, <a class="indexterm" href="#op_dollar2">Expressions</a></dt><dt id="ientry-idp452">$$$, <a class="indexterm" href="#op_dollar3">Expressions</a></dt><dt id="ientry-idp454">$$$$, <a class="indexterm" href="#op_dollar4">Expressions</a></dt><dt id="ientry-idp456">$$label, <a class="indexterm" href="#op_label_page">Expressions</a></dt><dt id="ientry-idp396">%, <a class="indexterm" href="#op_mod">Expressions</a></dt><dt id="ientry-idp432">&amp;, <a class="indexterm" href="#op_bit_and">Expressions</a></dt><dt id="ientry-idp444">&amp;&amp;, <a class="indexterm" href="#op_logic_and">Expressions</a></dt><dt id="ientry-idp392">*, <a class="indexterm" href="#op_mul">Expressions</a></dt><dt id="ientry-idp400">+, <a class="indexterm" href="#op_add">Expressions</a></dt><dt id="ientry-idp402">-, <a class="indexterm" href="#op_sub">Expressions</a></dt><dt id="ientry-idp740">.&lt;repeat-count&gt;, <a class="indexterm" href="#po_dot_repeat">Pseudo-ops</a></dt><dt id="ientry-idp394">/, <a class="indexterm" href="#op_div">Expressions</a></dt><dt id="ientry-idp418">&lt;, <a class="indexterm" href="#op_lt">Expressions</a></dt><dt id="ientry-idp404">&lt;&lt;, <a class="indexterm" href="#op_sla">Expressions</a></dt><dt id="ientry-idp422">&lt;=, <a class="indexterm" href="#op_lte">Expressions</a></dt><dt id="ientry-idp414">&lt;?, <a class="indexterm" href="#op_min">Expressions</a></dt><dt id="ientry-idp426">=, <a class="indexterm" href="#op_eq">Expressions</a></dt><dt id="ientry-idp428">==, <a class="indexterm" href="#op_eq2">Expressions</a></dt><dt id="ientry-idp420">&gt;, <a class="indexterm" href="#op_gt">Expressions</a></dt><dt id="ientry-idp424">&gt;=, <a class="indexterm" href="#op_gte">Expressions</a></dt><dt id="ientry-idp406">&gt;&gt;, <a class="indexterm" href="#op_sra">Expressions</a></dt><dt id="ientry-idp408">&gt;&gt;&gt;, <a class="indexterm" href="#op_srl">Expressions</a></dt><dt id="ientry-idp416">&gt;?, <a class="indexterm" href="#op_max">Expressions</a></dt><dt id="ientry-idp436">^, <a class="indexterm" href="#op_bit_xor">Expressions</a></dt><dt id="ientry-idp2086">_c(..), <a class="indexterm" href="#lua__c">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2093">_pc(..), <a class="indexterm" href="#lua__pc">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2100">_pl(..), <a class="indexterm" href="#lua__pl">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp664">__BASE_FILE__, <a class="indexterm" href="#def__base_file__">Predefined defines</a></dt><dt id="ientry-idp684">__COUNTER__, <a class="indexterm" href="#def__counter__">Predefined defines</a></dt><dt id="ientry-idp640">__DATE__, <a class="indexterm" href="#def__date__">Predefined defines</a></dt><dt id="ientry-idp628">__ERRORS__, <a class="indexterm" href="#def__errrors__">Predefined defines</a></dt><dt id="ientry-idp671">__FILE__, <a class="indexterm" href="#def__file__">Predefined defines</a></dt><dt id="ientry-idp658">__INCLUDE_LEVEL__, <a class="indexterm" href="#def__include_level__">Predefined defines</a></dt><dt id="ientry-idp678">__LINE__, <a class="indexterm" href="#def__line__">Predefined defines</a></dt><dt id="ientry-idp652">__PASS__, <a class="indexterm" href="#def__pass__">Predefined defines</a></dt><dt id="ientry-idp615">__SJASMPLUS__, <a class="indexterm" href="#def__sjasmplus__">Predefined defines</a></dt><dt id="ientry-idp646">__TIME__, <a class="indexterm" href="#def__time__">Predefined defines</a></dt><dt id="ientry-idp621">__VERSION__, <a class="indexterm" href="#def__version__">Predefined defines</a></dt><dt id="ientry-idp634">__WARNINGS__, <a class="indexterm" href="#def__warnings__">Predefined defines</a></dt><dt id="ientry-idp458">{..}, <a class="indexterm" href="#op_read_word">Expressions</a></dt><dt id="ientry-idp460">{b ..}, <a class="indexterm" href="#op_read_byte">Expressions</a></dt><dt id="ientry-idp440">|, <a class="indexterm" href="#op_bit_or">Expressions</a></dt><dt id="ientry-idp446">||, <a class="indexterm" href="#op_logic_or">Expressions</a></dt><dt id="ientry-idp382">~, <a class="indexterm" href="#op_cpl">Expressions</a></dt></dl></div><div class="indexdiv"><h3>A</h3><dl><dt id="ientry-idp390">abs, <a class="indexterm" href="#op_abs">Expressions</a></dt><dt id="ientry-idp750">ABYTE, <a class="indexterm" href="#po_abyte">Pseudo-ops</a></dt><dt id="ientry-idp760">ABYTEC, <a class="indexterm" href="#po_abytec">Pseudo-ops</a></dt><dt id="ientry-idp770">ABYTEZ, <a class="indexterm" href="#po_abytez">Pseudo-ops</a></dt><dt id="ientry-idp780">ALIGN, <a class="indexterm" href="#po_align">Pseudo-ops</a>, <a class="indexterm" href="#st_align">STRUCT instructions</a></dt><dt id="ientry-idp597">AMSTRADCPC464, <a class="indexterm" href="#device_cpc464">Real device emulation mode</a></dt><dt id="ientry-idp603">AMSTRADCPC6128, <a class="indexterm" href="#device_cpc6128">Real device emulation mode</a></dt><dt id="ientry-idp434">and, <a class="indexterm" href="#op_bit_and2">Expressions</a></dt><dt id="ientry-idp791">ASSERT, <a class="indexterm" href="#po_assert">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>B</h3><dl><dt id="ientry-idp801">BINARY (see <a href="#ientry-idp1259">INCBIN</a>)</dt><dt id="ientry-idp809">BLOCK, <a class="indexterm" href="#po_block">Pseudo-ops</a>, <a class="indexterm" href="#st_block">STRUCT instructions</a></dt><dt id="ientry-idp819">BPLIST, <a class="indexterm" href="#po_bplist">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1676">SETBP</a>)</dt></dl></dd><dt id="ientry-idp836">BYTE, <a class="indexterm" href="#po_byte">Pseudo-ops</a>, <a class="indexterm" href="#st_byte">STRUCT instructions</a></dt></dl></div><div class="indexdiv"><h3>C</h3><dl><dt id="ientry-idp1816">Conditional assembly, <a class="indexterm" href="#s_conditional_assembly2">Conditional assembly</a></dt><dt id="ientry-idp846">CSPECTMAP, <a class="indexterm" href="#po_cspectmap">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>D</h3><dl><dt id="ientry-idp860">D24, <a class="indexterm" href="#po_d24">Pseudo-ops</a>, <a class="indexterm" href="#st_d24">STRUCT instructions</a></dt><dt id="ientry-idp870">DB (see <a href="#ientry-idp836">BYTE</a>)</dt><dt id="ientry-idp878">DC, <a class="indexterm" href="#po_dc">Pseudo-ops</a></dt><dt id="ientry-idp889">DD (see <a href="#ientry-idp1117">DWORD</a>)</dt><dt id="ientry-idp897">DEFARRAY, <a class="indexterm" href="#po_defarray">Pseudo-ops</a></dt><dt id="ientry-idp908">DEFARRAY+, <a class="indexterm" href="#po_defarray_plus">Pseudo-ops</a></dt><dt id="ientry-idp918">DEFB (see <a href="#ientry-idp836">BYTE</a>)</dt><dt id="ientry-idp926">DEFD (see <a href="#ientry-idp1117">DWORD</a>)</dt><dt id="ientry-idp939">DEFG (see <a href="#ientry-idp1030">DG</a>)</dt><dt id="ientry-idp947">DEFH (see <a href="#ientry-idp1041">DH</a>)</dt><dt id="ientry-idp959">DEFINE, <a class="indexterm" href="#po_define2">Pseudo-ops</a></dt><dt id="ientry-idp955">DEFINE+, <a class="indexterm" href="#po_define">Pseudo-ops</a></dt><dt id="ientry-idp970">DEFL, <a class="indexterm" href="#po_defl">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1214">EQU</a>)</dt></dl></dd><dt id="ientry-idp983">DEFM (see <a href="#ientry-idp836">BYTE</a>)</dt><dt id="ientry-idp991">DEFS (see <a href="#ientry-idp809">BLOCK</a>)</dt><dt id="ientry-idp999">DEFW (see <a href="#ientry-idp1808">WORD</a>)</dt><dt id="ientry-idp1007">DEPHASE (see <a href="#ientry-idp1206">ENT</a>)</dt><dd><dl><dt>(see also <a href="#ientry-idp1051">DISP</a>)</dt></dl></dd><dt id="ientry-idp1016">DEVICE, <a class="indexterm" href="#po_device">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1359">MMU</a>)</dt><dt>(see also <a href="#ientry-idp542">ZXSPECTRUM128</a>)</dt><dt>(see also <a href="#ientry-idp584">ZXSPECTRUMNEXT</a>)</dt></dl></dd><dt id="ientry-idp1030">DG, <a class="indexterm" href="#po_dg">Pseudo-ops</a></dt><dt id="ientry-idp1041">DH, <a class="indexterm" href="#po_dh">Pseudo-ops</a></dt><dt id="ientry-idp1051">DISP, <a class="indexterm" href="#po_disp">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1206">ENT</a>)</dt></dl></dd><dt id="ientry-idp1070">DISPLAY, <a class="indexterm" href="#po_display">Pseudo-ops</a></dt><dt id="ientry-idp1083">DM (see <a href="#ientry-idp836">BYTE</a>)</dt><dt id="ientry-idp1091">DS (see <a href="#ientry-idp809">BLOCK</a>)</dt><dt id="ientry-idp1099">DUP, <a class="indexterm" href="#po_dup">Pseudo-ops</a></dt><dt id="ientry-idp1109">DW (see <a href="#ientry-idp1808">WORD</a>)</dt><dt id="ientry-idp1117">DWORD, <a class="indexterm" href="#po_dword">Pseudo-ops</a>, <a class="indexterm" href="#st_dword">STRUCT instructions</a></dt><dt id="ientry-idp1127">DZ, <a class="indexterm" href="#po_dz">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>E</h3><dl><dt id="ientry-idp1888">ELSE, <a class="indexterm" href="#ca_else">Conditional assembly</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1824">IF</a>)</dt></dl></dd><dt id="ientry-idp1896">ELSEIF, <a class="indexterm" href="#ca_elseif">Conditional assembly</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1824">IF</a>)</dt></dl></dd><dt id="ientry-idp1138">EMPTYTAP, <a class="indexterm" href="#po_emptytap">Pseudo-ops</a></dt><dt id="ientry-idp1147">EMPTYTRD, <a class="indexterm" href="#po_emptytrd">Pseudo-ops</a></dt><dt id="ientry-idp1156">ENCODING, <a class="indexterm" href="#po_encoding">Pseudo-ops</a></dt><dt id="ientry-idp1168">END, <a class="indexterm" href="#po_end">Pseudo-ops</a></dt><dt id="ientry-idp1904">ENDIF, <a class="indexterm" href="#ca_endif">Conditional assembly</a></dt><dt id="ientry-idp1174">ENDLUA, <a class="indexterm" href="#po_endlua">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1341">LUA</a>)</dt></dl></dd><dt id="ientry-idp1182">ENDMOD (see <a href="#ientry-idp1190">ENDMODULE</a>)</dt><dt id="ientry-idp1190">ENDMODULE, <a class="indexterm" href="#po_endmodule">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1379">MODULE</a>)</dt></dl></dd><dt id="ientry-idp1198">ENDT (see <a href="#ientry-idp1206">ENT</a>)</dt><dt id="ientry-idp1206">ENT, <a class="indexterm" href="#po_ent">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1051">DISP</a>)</dt></dl></dd><dt id="ientry-idp1214">EQU, <a class="indexterm" href="#po_equ">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp970">DEFL</a>)</dt></dl></dd><dt id="ientry-idp378">exist, <a class="indexterm" href="#op_exist">Expressions</a></dt><dt id="ientry-idp1228">EXPORT, <a class="indexterm" href="#po_export">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>F</h3><dl><dt id="ientry-idp1238">FPOS, <a class="indexterm" href="#po_fpos">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>H</h3><dl><dt id="ientry-idp1251">HEX, <a class="indexterm" href="#po_hex">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1041">DH</a>)</dt></dl></dd><dt id="ientry-idp386">high, <a class="indexterm" href="#op_high">Expressions</a></dt></dl></div><div class="indexdiv"><h3>I</h3><dl><dt id="ientry-idp1824">IF, <a class="indexterm" href="#ca_if">Conditional assembly</a></dt><dt id="ientry-idp1841">IFDEF, <a class="indexterm" href="#ca_ifdef">Conditional assembly</a></dt><dt id="ientry-idp1835">IFN, <a class="indexterm" href="#ca_ifn">Conditional assembly</a></dt><dt id="ientry-idp1852">IFNDEF, <a class="indexterm" href="#ca_ifndef">Conditional assembly</a></dt><dt id="ientry-idp1881">IFNUSED, <a class="indexterm" href="#ca_ifnused">Conditional assembly</a></dt><dt id="ientry-idp1863">IFUSED, <a class="indexterm" href="#ca_ifused">Conditional assembly</a></dt><dt id="ientry-idp1259">INCBIN, <a class="indexterm" href="#po_incbin">Pseudo-ops</a></dt><dt id="ientry-idp1269">INCHOB, <a class="indexterm" href="#po_inchob">Pseudo-ops</a></dt><dt id="ientry-idp1279">INCLUDE, <a class="indexterm" href="#po_include">Pseudo-ops</a></dt><dt id="ientry-idp1293">INCLUDELUA, <a class="indexterm" href="#po_includelua">Pseudo-ops</a></dt><dt id="ientry-idp1303">INCTRD, <a class="indexterm" href="#po_inctrd">Pseudo-ops</a></dt><dt id="ientry-idp1313">INSERT (see <a href="#ientry-idp1259">INCBIN</a>)</dt></dl></div><div class="indexdiv"><h3>L</h3><dl><dt id="ientry-idp1321">LABELSLIST, <a class="indexterm" href="#po_labelslist">Pseudo-ops</a></dt><dt id="ientry-idp384">low, <a class="indexterm" href="#op_low">Expressions</a></dt><dt id="ientry-idp1341">LUA, <a class="indexterm" href="#po_lua">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>M</h3><dl><dt id="ientry-idp1359">MMU, <a class="indexterm" href="#po_mmu">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1016">DEVICE</a>)</dt><dt>(see also <a href="#ientry-idp1456">PAGE</a>)</dt><dt>(see also <a href="#ientry-idp1730">SLOT</a>)</dt></dl></dd><dt id="ientry-idp398">mod, <a class="indexterm" href="#op_mod2">Expressions</a></dt><dt id="ientry-idp1379">MODULE, <a class="indexterm" href="#po_module">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>N</h3><dl><dt id="ientry-idp530">NONE, <a class="indexterm" href="#device_none">Real device emulation mode</a></dt><dt id="ientry-idp376">norel, <a class="indexterm" href="#op_norel">Expressions</a></dt><dt id="ientry-idp591">NOSLOT64K, <a class="indexterm" href="#device_noslot64k">Real device emulation mode</a></dt><dt id="ientry-idp388">not, <a class="indexterm" href="#op_log_not2">Expressions</a></dt></dl></div><div class="indexdiv"><h3>O</h3><dl><dt id="ientry-idp1395">OPT, <a class="indexterm" href="#po_opt">Pseudo-ops</a></dt><dt id="ientry-idp442">or, <a class="indexterm" href="#op_bit_or2">Expressions</a></dt><dt id="ientry-idp1418">ORG, <a class="indexterm" href="#po_org">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1016">DEVICE</a>)</dt></dl></dd><dt id="ientry-idp1433">OUTEND, <a class="indexterm" href="#po_outend">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1442">OUTPUT</a>)</dt><dt>(see also <a href="#ientry-idp1705">SIZE</a>)</dt></dl></dd><dt id="ientry-idp1442">OUTPUT, <a class="indexterm" href="#po_output">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1705">SIZE</a>)</dt></dl></dd></dl></div><div class="indexdiv"><h3>P</h3><dl><dt id="ientry-idp1456">PAGE, <a class="indexterm" href="#po_page">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1016">DEVICE</a>)</dt><dt>(see also <a href="#ientry-idp1359">MMU</a>)</dt><dt>(see also <a href="#ientry-idp1730">SLOT</a>)</dt></dl></dd><dt id="ientry-idp1473">PHASE (see <a href="#ientry-idp1051">DISP</a>)</dt></dl></div><div class="indexdiv"><h3>R</h3><dl><dt id="ientry-idp1481">RELOCATE_END, <a class="indexterm" href="#po_relocate_end">Pseudo-ops</a></dt><dt id="ientry-idp1492">RELOCATE_START, <a class="indexterm" href="#po_relocate_start">Pseudo-ops</a></dt><dt id="ientry-idp1502">RELOCATE_TABLE, <a class="indexterm" href="#po_relocate_table">Pseudo-ops</a></dt><dt id="ientry-idp1513">REPT (see <a href="#ientry-idp1099">DUP</a>)</dt></dl></div><div class="indexdiv"><h3>S</h3><dl><dt id="ientry-idp1521">SAVEBIN, <a class="indexterm" href="#po_savebin">Pseudo-ops</a></dt><dt id="ientry-idp1536">SAVECDT, <a class="indexterm" href="#po_savecdt">Pseudo-ops</a></dt><dt id="ientry-idp1553">SAVECPCSNA, <a class="indexterm" href="#po_savecpcsna">Pseudo-ops</a></dt><dt id="ientry-idp1570">SAVEDEV, <a class="indexterm" href="#po_savedev">Pseudo-ops</a></dt><dt id="ientry-idp1585">SAVEHOB, <a class="indexterm" href="#po_savehob">Pseudo-ops</a></dt><dt id="ientry-idp1599">SAVENEX, <a class="indexterm" href="#po_savenex">Pseudo-ops</a></dt><dt id="ientry-idp1609">SAVESNA, <a class="indexterm" href="#po_savesna">Pseudo-ops</a></dt><dt id="ientry-idp1627">SAVETAP, <a class="indexterm" href="#po_savetap">Pseudo-ops</a></dt><dt id="ientry-idp1656">SAVETRD, <a class="indexterm" href="#po_savetrd">Pseudo-ops</a></dt><dt id="ientry-idp1676">SETBP, <a class="indexterm" href="#po_setbp">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp819">BPLIST</a>)</dt></dl></dd><dt id="ientry-idp1681">SETBREAKPOINT (see <a href="#ientry-idp1676">SETBP</a>)</dt><dt id="ientry-idp1695">SHELLEXEC, <a class="indexterm" href="#po_shellexec">Pseudo-ops</a></dt><dt id="ientry-idp410">shl, <a class="indexterm" href="#op_shl">Expressions</a></dt><dt id="ientry-idp412">shr, <a class="indexterm" href="#op_shr">Expressions</a></dt><dt id="ientry-idp1705">SIZE, <a class="indexterm" href="#po_size">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1442">OUTPUT</a>)</dt></dl></dd><dt id="ientry-idp2197">sj.add_byte(..), <a class="indexterm" href="#lua_sj_add_byte">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2204">sj.add_word(..), <a class="indexterm" href="#lua_sj_add_word">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2107">sj.calc(..) (see <a href="#ientry-idp2086">_c(..)</a>)</dt><dt id="ientry-idp2173">sj.current_address, <a class="indexterm" href="#lua_sj_current_address">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2131">sj.error(..), <a class="indexterm" href="#lua_sj_error">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2179">sj.error_count, <a class="indexterm" href="#lua_sj_error_count">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2191">sj.exit(..), <a class="indexterm" href="#lua_sj_exit">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2143">sj.file_exists(..), <a class="indexterm" href="#lua_sj_file_exists">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2211">sj.get_byte(..), <a class="indexterm" href="#lua_sj_get_byte">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2149">sj.get_define(..), <a class="indexterm" href="#lua_sj_get_define">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2225">sj.get_device(), <a class="indexterm" href="#lua_sj_get_device">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2161">sj.get_label(..), <a class="indexterm" href="#lua_sj_get_label">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2218">sj.get_word(..), <a class="indexterm" href="#lua_sj_get_word">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2155">sj.insert_define(..), <a class="indexterm" href="#lua_sj_insert_define">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2167">sj.insert_label(..), <a class="indexterm" href="#lua_sj_insert_label">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2115">sj.parse_code(..) (see <a href="#ientry-idp2093">_pc(..)</a>)</dt><dt id="ientry-idp2123">sj.parse_line(..) (see <a href="#ientry-idp2100">_pl(..)</a>)</dt><dt id="ientry-idp2231">sj.set_device(..), <a class="indexterm" href="#lua_sj_set_device">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2237">sj.set_page(..), <a class="indexterm" href="#lua_sj_set_page">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2243">sj.set_slot(..), <a class="indexterm" href="#lua_sj_set_slot">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2249">sj.shellexec(..), <a class="indexterm" href="#lua_sj_shellexec">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2137">sj.warning(..), <a class="indexterm" href="#lua_sj_warning">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2185">sj.warning_count, <a class="indexterm" href="#lua_sj_warning_count">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp1717">SLDOPT, <a class="indexterm" href="#po_sldopt">Pseudo-ops</a></dt><dt id="ientry-idp1730">SLOT, <a class="indexterm" href="#po_slot">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1016">DEVICE</a>)</dt><dt>(see also <a href="#ientry-idp1359">MMU</a>)</dt><dt>(see also <a href="#ientry-idp1456">PAGE</a>)</dt></dl></dd></dl></div><div class="indexdiv"><h3>T</h3><dl><dt id="ientry-idp1751">TAPEND, <a class="indexterm" href="#po_tapend">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1758">TAPOUT</a>)</dt></dl></dd><dt id="ientry-idp1758">TAPOUT, <a class="indexterm" href="#po_tapout">Pseudo-ops</a></dt><dt id="ientry-idp1984">TEXT, <a class="indexterm" href="#st_text">STRUCT instructions</a></dt><dt id="ientry-idp1769">TEXTAREA (see <a href="#ientry-idp1051">DISP</a>)</dt></dl></div><div class="indexdiv"><h3>U</h3><dl><dt id="ientry-idp1777">UNDEFINE, <a class="indexterm" href="#po_undefine">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp959">DEFINE</a>)</dt></dl></dd><dt id="ientry-idp1790">UNPHASE (see <a href="#ientry-idp1206">ENT</a>)</dt></dl></div><div class="indexdiv"><h3>W</h3><dl><dt id="ientry-idp1798">WHILE, <a class="indexterm" href="#po_while">Pseudo-ops</a></dt><dt id="ientry-idp1808">WORD, <a class="indexterm" href="#po_word">Pseudo-ops</a>, <a class="indexterm" href="#st_word">STRUCT instructions</a></dt></dl></div><div class="indexdiv"><h3>X</h3><dl><dt id="ientry-idp438">xor, <a class="indexterm" href="#op_bit_xor2">Expressions</a></dt></dl></div><div class="indexdiv"><h3>Z</h3><dl><dt id="ientry-idp2268">zx.save_snapshot_sna(..), <a class="indexterm" href="#lua_zx_save_snapshot_sna">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2261">zx.trdimage_add_file(..), <a class="indexterm" href="#lua_zx_trdimage_add_file">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2255">zx.trdimage_create(..), <a class="indexterm" href="#lua_zx_trdimage_create">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp560">ZXSPECTRUM1024, <a class="indexterm" href="#device_zx1024">Real device emulation mode</a></dt><dt id="ientry-idp542">ZXSPECTRUM128, <a class="indexterm" href="#device_zx128">Real device emulation mode</a></dt><dt id="ientry-idp566">ZXSPECTRUM2048, <a class="indexterm" href="#device_zx2048">Real device emulation mode</a></dt><dt id="ientry-idp548">ZXSPECTRUM256, <a class="indexterm" href="#device_zx256">Real device emulation mode</a></dt><dt id="ientry-idp572">ZXSPECTRUM4096, <a class="indexterm" href="#device_zx4096">Real device emulation mode</a></dt><dt id="ientry-idp536">ZXSPECTRUM48, <a class="indexterm" href="#device_zx48">Real device emulation mode</a></dt><dt id="ientry-idp554">ZXSPECTRUM512, <a class="indexterm" href="#device_zx512">Real device emulation mode</a></dt><dt id="ientry-idp578">ZXSPECTRUM8192, <a class="indexterm" href="#device_zx8192">Real device emulation mode</a></dt><dt id="ientry-idp584">ZXSPECTRUMNEXT, <a class="indexterm" href="#device_zxn">Real device emulation mode</a></dt></dl></div></div></div>
+  <div class="index"><div class="titlepage"><div><div><h1 class="title"><a name="index"></a>Index</h1></div></div></div><div xmlns:xlink="http://www.w3.org/1999/xlink" class="index"><div class="indexdiv"><h3>Symbols</h3><dl><dt id="ientry-idp381">!, <a class="indexterm" href="#op_log_not">Expressions</a></dt><dt id="ientry-idp431">!=, <a class="indexterm" href="#op_neq">Expressions</a></dt><dt id="ientry-idp449">$, <a class="indexterm" href="#op_dollar">Expressions</a></dt><dt id="ientry-idp451">$$, <a class="indexterm" href="#op_dollar2">Expressions</a></dt><dt id="ientry-idp453">$$$, <a class="indexterm" href="#op_dollar3">Expressions</a></dt><dt id="ientry-idp455">$$$$, <a class="indexterm" href="#op_dollar4">Expressions</a></dt><dt id="ientry-idp457">$$label, <a class="indexterm" href="#op_label_page">Expressions</a></dt><dt id="ientry-idp397">%, <a class="indexterm" href="#op_mod">Expressions</a></dt><dt id="ientry-idp433">&amp;, <a class="indexterm" href="#op_bit_and">Expressions</a></dt><dt id="ientry-idp445">&amp;&amp;, <a class="indexterm" href="#op_logic_and">Expressions</a></dt><dt id="ientry-idp393">*, <a class="indexterm" href="#op_mul">Expressions</a></dt><dt id="ientry-idp401">+, <a class="indexterm" href="#op_add">Expressions</a></dt><dt id="ientry-idp403">-, <a class="indexterm" href="#op_sub">Expressions</a></dt><dt id="ientry-idp741">.&lt;repeat-count&gt;, <a class="indexterm" href="#po_dot_repeat">Pseudo-ops</a></dt><dt id="ientry-idp395">/, <a class="indexterm" href="#op_div">Expressions</a></dt><dt id="ientry-idp419">&lt;, <a class="indexterm" href="#op_lt">Expressions</a></dt><dt id="ientry-idp405">&lt;&lt;, <a class="indexterm" href="#op_sla">Expressions</a></dt><dt id="ientry-idp423">&lt;=, <a class="indexterm" href="#op_lte">Expressions</a></dt><dt id="ientry-idp415">&lt;?, <a class="indexterm" href="#op_min">Expressions</a></dt><dt id="ientry-idp427">=, <a class="indexterm" href="#op_eq">Expressions</a></dt><dt id="ientry-idp429">==, <a class="indexterm" href="#op_eq2">Expressions</a></dt><dt id="ientry-idp421">&gt;, <a class="indexterm" href="#op_gt">Expressions</a></dt><dt id="ientry-idp425">&gt;=, <a class="indexterm" href="#op_gte">Expressions</a></dt><dt id="ientry-idp407">&gt;&gt;, <a class="indexterm" href="#op_sra">Expressions</a></dt><dt id="ientry-idp409">&gt;&gt;&gt;, <a class="indexterm" href="#op_srl">Expressions</a></dt><dt id="ientry-idp417">&gt;?, <a class="indexterm" href="#op_max">Expressions</a></dt><dt id="ientry-idp437">^, <a class="indexterm" href="#op_bit_xor">Expressions</a></dt><dt id="ientry-idp2101">_c(..), <a class="indexterm" href="#lua__c">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2108">_pc(..), <a class="indexterm" href="#lua__pc">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2115">_pl(..), <a class="indexterm" href="#lua__pl">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp665">__BASE_FILE__, <a class="indexterm" href="#def__base_file__">Predefined defines</a></dt><dt id="ientry-idp685">__COUNTER__, <a class="indexterm" href="#def__counter__">Predefined defines</a></dt><dt id="ientry-idp641">__DATE__, <a class="indexterm" href="#def__date__">Predefined defines</a></dt><dt id="ientry-idp629">__ERRORS__, <a class="indexterm" href="#def__errrors__">Predefined defines</a></dt><dt id="ientry-idp672">__FILE__, <a class="indexterm" href="#def__file__">Predefined defines</a></dt><dt id="ientry-idp659">__INCLUDE_LEVEL__, <a class="indexterm" href="#def__include_level__">Predefined defines</a></dt><dt id="ientry-idp679">__LINE__, <a class="indexterm" href="#def__line__">Predefined defines</a></dt><dt id="ientry-idp653">__PASS__, <a class="indexterm" href="#def__pass__">Predefined defines</a></dt><dt id="ientry-idp616">__SJASMPLUS__, <a class="indexterm" href="#def__sjasmplus__">Predefined defines</a></dt><dt id="ientry-idp647">__TIME__, <a class="indexterm" href="#def__time__">Predefined defines</a></dt><dt id="ientry-idp622">__VERSION__, <a class="indexterm" href="#def__version__">Predefined defines</a></dt><dt id="ientry-idp635">__WARNINGS__, <a class="indexterm" href="#def__warnings__">Predefined defines</a></dt><dt id="ientry-idp459">{..}, <a class="indexterm" href="#op_read_word">Expressions</a></dt><dt id="ientry-idp461">{b ..}, <a class="indexterm" href="#op_read_byte">Expressions</a></dt><dt id="ientry-idp441">|, <a class="indexterm" href="#op_bit_or">Expressions</a></dt><dt id="ientry-idp447">||, <a class="indexterm" href="#op_logic_or">Expressions</a></dt><dt id="ientry-idp383">~, <a class="indexterm" href="#op_cpl">Expressions</a></dt></dl></div><div class="indexdiv"><h3>A</h3><dl><dt id="ientry-idp391">abs, <a class="indexterm" href="#op_abs">Expressions</a></dt><dt id="ientry-idp751">ABYTE, <a class="indexterm" href="#po_abyte">Pseudo-ops</a></dt><dt id="ientry-idp761">ABYTEC, <a class="indexterm" href="#po_abytec">Pseudo-ops</a></dt><dt id="ientry-idp771">ABYTEZ, <a class="indexterm" href="#po_abytez">Pseudo-ops</a></dt><dt id="ientry-idp781">ALIGN, <a class="indexterm" href="#po_align">Pseudo-ops</a>, <a class="indexterm" href="#st_align">STRUCT instructions</a></dt><dt id="ientry-idp598">AMSTRADCPC464, <a class="indexterm" href="#device_cpc464">Real device emulation mode</a></dt><dt id="ientry-idp604">AMSTRADCPC6128, <a class="indexterm" href="#device_cpc6128">Real device emulation mode</a></dt><dt id="ientry-idp435">and, <a class="indexterm" href="#op_bit_and2">Expressions</a></dt><dt id="ientry-idp792">ASSERT, <a class="indexterm" href="#po_assert">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>B</h3><dl><dt id="ientry-idp802">BINARY (see <a href="#ientry-idp1260">INCBIN</a>)</dt><dt id="ientry-idp810">BLOCK, <a class="indexterm" href="#po_block">Pseudo-ops</a>, <a class="indexterm" href="#st_block">STRUCT instructions</a></dt><dt id="ientry-idp820">BPLIST, <a class="indexterm" href="#po_bplist">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1691">SETBP</a>)</dt></dl></dd><dt id="ientry-idp837">BYTE, <a class="indexterm" href="#po_byte">Pseudo-ops</a>, <a class="indexterm" href="#st_byte">STRUCT instructions</a></dt></dl></div><div class="indexdiv"><h3>C</h3><dl><dt id="ientry-idp1831">Conditional assembly, <a class="indexterm" href="#s_conditional_assembly2">Conditional assembly</a></dt><dt id="ientry-idp847">CSPECTMAP, <a class="indexterm" href="#po_cspectmap">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>D</h3><dl><dt id="ientry-idp861">D24, <a class="indexterm" href="#po_d24">Pseudo-ops</a>, <a class="indexterm" href="#st_d24">STRUCT instructions</a></dt><dt id="ientry-idp871">DB (see <a href="#ientry-idp837">BYTE</a>)</dt><dt id="ientry-idp879">DC, <a class="indexterm" href="#po_dc">Pseudo-ops</a></dt><dt id="ientry-idp890">DD (see <a href="#ientry-idp1118">DWORD</a>)</dt><dt id="ientry-idp898">DEFARRAY, <a class="indexterm" href="#po_defarray">Pseudo-ops</a></dt><dt id="ientry-idp909">DEFARRAY+, <a class="indexterm" href="#po_defarray_plus">Pseudo-ops</a></dt><dt id="ientry-idp919">DEFB (see <a href="#ientry-idp837">BYTE</a>)</dt><dt id="ientry-idp927">DEFD (see <a href="#ientry-idp1118">DWORD</a>)</dt><dt id="ientry-idp940">DEFG (see <a href="#ientry-idp1031">DG</a>)</dt><dt id="ientry-idp948">DEFH (see <a href="#ientry-idp1042">DH</a>)</dt><dt id="ientry-idp960">DEFINE, <a class="indexterm" href="#po_define2">Pseudo-ops</a></dt><dt id="ientry-idp956">DEFINE+, <a class="indexterm" href="#po_define">Pseudo-ops</a></dt><dt id="ientry-idp971">DEFL, <a class="indexterm" href="#po_defl">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1215">EQU</a>)</dt></dl></dd><dt id="ientry-idp984">DEFM (see <a href="#ientry-idp837">BYTE</a>)</dt><dt id="ientry-idp992">DEFS (see <a href="#ientry-idp810">BLOCK</a>)</dt><dt id="ientry-idp1000">DEFW (see <a href="#ientry-idp1823">WORD</a>)</dt><dt id="ientry-idp1008">DEPHASE (see <a href="#ientry-idp1207">ENT</a>)</dt><dd><dl><dt>(see also <a href="#ientry-idp1052">DISP</a>)</dt></dl></dd><dt id="ientry-idp1017">DEVICE, <a class="indexterm" href="#po_device">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1360">MMU</a>)</dt><dt>(see also <a href="#ientry-idp543">ZXSPECTRUM128</a>)</dt><dt>(see also <a href="#ientry-idp585">ZXSPECTRUMNEXT</a>)</dt></dl></dd><dt id="ientry-idp1031">DG, <a class="indexterm" href="#po_dg">Pseudo-ops</a></dt><dt id="ientry-idp1042">DH, <a class="indexterm" href="#po_dh">Pseudo-ops</a></dt><dt id="ientry-idp1052">DISP, <a class="indexterm" href="#po_disp">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1207">ENT</a>)</dt></dl></dd><dt id="ientry-idp1071">DISPLAY, <a class="indexterm" href="#po_display">Pseudo-ops</a></dt><dt id="ientry-idp1084">DM (see <a href="#ientry-idp837">BYTE</a>)</dt><dt id="ientry-idp1092">DS (see <a href="#ientry-idp810">BLOCK</a>)</dt><dt id="ientry-idp1100">DUP, <a class="indexterm" href="#po_dup">Pseudo-ops</a></dt><dt id="ientry-idp1110">DW (see <a href="#ientry-idp1823">WORD</a>)</dt><dt id="ientry-idp1118">DWORD, <a class="indexterm" href="#po_dword">Pseudo-ops</a>, <a class="indexterm" href="#st_dword">STRUCT instructions</a></dt><dt id="ientry-idp1128">DZ, <a class="indexterm" href="#po_dz">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>E</h3><dl><dt id="ientry-idp1903">ELSE, <a class="indexterm" href="#ca_else">Conditional assembly</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1839">IF</a>)</dt></dl></dd><dt id="ientry-idp1911">ELSEIF, <a class="indexterm" href="#ca_elseif">Conditional assembly</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1839">IF</a>)</dt></dl></dd><dt id="ientry-idp1139">EMPTYTAP, <a class="indexterm" href="#po_emptytap">Pseudo-ops</a></dt><dt id="ientry-idp1148">EMPTYTRD, <a class="indexterm" href="#po_emptytrd">Pseudo-ops</a></dt><dt id="ientry-idp1157">ENCODING, <a class="indexterm" href="#po_encoding">Pseudo-ops</a></dt><dt id="ientry-idp1169">END, <a class="indexterm" href="#po_end">Pseudo-ops</a></dt><dt id="ientry-idp1919">ENDIF, <a class="indexterm" href="#ca_endif">Conditional assembly</a></dt><dt id="ientry-idp1175">ENDLUA, <a class="indexterm" href="#po_endlua">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1342">LUA</a>)</dt></dl></dd><dt id="ientry-idp1183">ENDMOD (see <a href="#ientry-idp1191">ENDMODULE</a>)</dt><dt id="ientry-idp1191">ENDMODULE, <a class="indexterm" href="#po_endmodule">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1380">MODULE</a>)</dt></dl></dd><dt id="ientry-idp1199">ENDT (see <a href="#ientry-idp1207">ENT</a>)</dt><dt id="ientry-idp1207">ENT, <a class="indexterm" href="#po_ent">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1052">DISP</a>)</dt></dl></dd><dt id="ientry-idp1215">EQU, <a class="indexterm" href="#po_equ">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp971">DEFL</a>)</dt></dl></dd><dt id="ientry-idp379">exist, <a class="indexterm" href="#op_exist">Expressions</a></dt><dt id="ientry-idp1229">EXPORT, <a class="indexterm" href="#po_export">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>F</h3><dl><dt id="ientry-idp1239">FPOS, <a class="indexterm" href="#po_fpos">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>H</h3><dl><dt id="ientry-idp1252">HEX, <a class="indexterm" href="#po_hex">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1042">DH</a>)</dt></dl></dd><dt id="ientry-idp387">high, <a class="indexterm" href="#op_high">Expressions</a></dt></dl></div><div class="indexdiv"><h3>I</h3><dl><dt id="ientry-idp1839">IF, <a class="indexterm" href="#ca_if">Conditional assembly</a></dt><dt id="ientry-idp1856">IFDEF, <a class="indexterm" href="#ca_ifdef">Conditional assembly</a></dt><dt id="ientry-idp1850">IFN, <a class="indexterm" href="#ca_ifn">Conditional assembly</a></dt><dt id="ientry-idp1867">IFNDEF, <a class="indexterm" href="#ca_ifndef">Conditional assembly</a></dt><dt id="ientry-idp1896">IFNUSED, <a class="indexterm" href="#ca_ifnused">Conditional assembly</a></dt><dt id="ientry-idp1878">IFUSED, <a class="indexterm" href="#ca_ifused">Conditional assembly</a></dt><dt id="ientry-idp1260">INCBIN, <a class="indexterm" href="#po_incbin">Pseudo-ops</a></dt><dt id="ientry-idp1270">INCHOB, <a class="indexterm" href="#po_inchob">Pseudo-ops</a></dt><dt id="ientry-idp1280">INCLUDE, <a class="indexterm" href="#po_include">Pseudo-ops</a></dt><dt id="ientry-idp1294">INCLUDELUA, <a class="indexterm" href="#po_includelua">Pseudo-ops</a></dt><dt id="ientry-idp1304">INCTRD, <a class="indexterm" href="#po_inctrd">Pseudo-ops</a></dt><dt id="ientry-idp1314">INSERT (see <a href="#ientry-idp1260">INCBIN</a>)</dt></dl></div><div class="indexdiv"><h3>L</h3><dl><dt id="ientry-idp1322">LABELSLIST, <a class="indexterm" href="#po_labelslist">Pseudo-ops</a></dt><dt id="ientry-idp385">low, <a class="indexterm" href="#op_low">Expressions</a></dt><dt id="ientry-idp1342">LUA, <a class="indexterm" href="#po_lua">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>M</h3><dl><dt id="ientry-idp1360">MMU, <a class="indexterm" href="#po_mmu">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1017">DEVICE</a>)</dt><dt>(see also <a href="#ientry-idp1457">PAGE</a>)</dt><dt>(see also <a href="#ientry-idp1745">SLOT</a>)</dt></dl></dd><dt id="ientry-idp399">mod, <a class="indexterm" href="#op_mod2">Expressions</a></dt><dt id="ientry-idp1380">MODULE, <a class="indexterm" href="#po_module">Pseudo-ops</a></dt></dl></div><div class="indexdiv"><h3>N</h3><dl><dt id="ientry-idp531">NONE, <a class="indexterm" href="#device_none">Real device emulation mode</a></dt><dt id="ientry-idp377">norel, <a class="indexterm" href="#op_norel">Expressions</a></dt><dt id="ientry-idp592">NOSLOT64K, <a class="indexterm" href="#device_noslot64k">Real device emulation mode</a></dt><dt id="ientry-idp389">not, <a class="indexterm" href="#op_log_not2">Expressions</a></dt></dl></div><div class="indexdiv"><h3>O</h3><dl><dt id="ientry-idp1396">OPT, <a class="indexterm" href="#po_opt">Pseudo-ops</a></dt><dt id="ientry-idp443">or, <a class="indexterm" href="#op_bit_or2">Expressions</a></dt><dt id="ientry-idp1419">ORG, <a class="indexterm" href="#po_org">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1017">DEVICE</a>)</dt></dl></dd><dt id="ientry-idp1434">OUTEND, <a class="indexterm" href="#po_outend">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1443">OUTPUT</a>)</dt><dt>(see also <a href="#ientry-idp1720">SIZE</a>)</dt></dl></dd><dt id="ientry-idp1443">OUTPUT, <a class="indexterm" href="#po_output">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1720">SIZE</a>)</dt></dl></dd></dl></div><div class="indexdiv"><h3>P</h3><dl><dt id="ientry-idp1457">PAGE, <a class="indexterm" href="#po_page">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1017">DEVICE</a>)</dt><dt>(see also <a href="#ientry-idp1360">MMU</a>)</dt><dt>(see also <a href="#ientry-idp1745">SLOT</a>)</dt></dl></dd><dt id="ientry-idp1474">PHASE (see <a href="#ientry-idp1052">DISP</a>)</dt></dl></div><div class="indexdiv"><h3>R</h3><dl><dt id="ientry-idp1482">RELOCATE_END, <a class="indexterm" href="#po_relocate_end">Pseudo-ops</a></dt><dt id="ientry-idp1493">RELOCATE_START, <a class="indexterm" href="#po_relocate_start">Pseudo-ops</a></dt><dt id="ientry-idp1503">RELOCATE_TABLE, <a class="indexterm" href="#po_relocate_table">Pseudo-ops</a></dt><dt id="ientry-idp1514">REPT (see <a href="#ientry-idp1100">DUP</a>)</dt></dl></div><div class="indexdiv"><h3>S</h3><dl><dt id="ientry-idp1522">SAVE3DOS, <a class="indexterm" href="#po_save3dos">Pseudo-ops</a></dt><dt id="ientry-idp1536">SAVEBIN, <a class="indexterm" href="#po_savebin">Pseudo-ops</a></dt><dt id="ientry-idp1551">SAVECDT, <a class="indexterm" href="#po_savecdt">Pseudo-ops</a></dt><dt id="ientry-idp1568">SAVECPCSNA, <a class="indexterm" href="#po_savecpcsna">Pseudo-ops</a></dt><dt id="ientry-idp1585">SAVEDEV, <a class="indexterm" href="#po_savedev">Pseudo-ops</a></dt><dt id="ientry-idp1600">SAVEHOB, <a class="indexterm" href="#po_savehob">Pseudo-ops</a></dt><dt id="ientry-idp1614">SAVENEX, <a class="indexterm" href="#po_savenex">Pseudo-ops</a></dt><dt id="ientry-idp1624">SAVESNA, <a class="indexterm" href="#po_savesna">Pseudo-ops</a></dt><dt id="ientry-idp1642">SAVETAP, <a class="indexterm" href="#po_savetap">Pseudo-ops</a></dt><dt id="ientry-idp1671">SAVETRD, <a class="indexterm" href="#po_savetrd">Pseudo-ops</a></dt><dt id="ientry-idp1691">SETBP, <a class="indexterm" href="#po_setbp">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp820">BPLIST</a>)</dt></dl></dd><dt id="ientry-idp1696">SETBREAKPOINT (see <a href="#ientry-idp1691">SETBP</a>)</dt><dt id="ientry-idp1710">SHELLEXEC, <a class="indexterm" href="#po_shellexec">Pseudo-ops</a></dt><dt id="ientry-idp411">shl, <a class="indexterm" href="#op_shl">Expressions</a></dt><dt id="ientry-idp413">shr, <a class="indexterm" href="#op_shr">Expressions</a></dt><dt id="ientry-idp1720">SIZE, <a class="indexterm" href="#po_size">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1443">OUTPUT</a>)</dt></dl></dd><dt id="ientry-idp2212">sj.add_byte(..), <a class="indexterm" href="#lua_sj_add_byte">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2219">sj.add_word(..), <a class="indexterm" href="#lua_sj_add_word">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2122">sj.calc(..) (see <a href="#ientry-idp2101">_c(..)</a>)</dt><dt id="ientry-idp2188">sj.current_address, <a class="indexterm" href="#lua_sj_current_address">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2146">sj.error(..), <a class="indexterm" href="#lua_sj_error">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2194">sj.error_count, <a class="indexterm" href="#lua_sj_error_count">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2206">sj.exit(..), <a class="indexterm" href="#lua_sj_exit">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2158">sj.file_exists(..), <a class="indexterm" href="#lua_sj_file_exists">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2226">sj.get_byte(..), <a class="indexterm" href="#lua_sj_get_byte">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2164">sj.get_define(..), <a class="indexterm" href="#lua_sj_get_define">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2240">sj.get_device(), <a class="indexterm" href="#lua_sj_get_device">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2176">sj.get_label(..), <a class="indexterm" href="#lua_sj_get_label">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2233">sj.get_word(..), <a class="indexterm" href="#lua_sj_get_word">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2170">sj.insert_define(..), <a class="indexterm" href="#lua_sj_insert_define">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2182">sj.insert_label(..), <a class="indexterm" href="#lua_sj_insert_label">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2130">sj.parse_code(..) (see <a href="#ientry-idp2108">_pc(..)</a>)</dt><dt id="ientry-idp2138">sj.parse_line(..) (see <a href="#ientry-idp2115">_pl(..)</a>)</dt><dt id="ientry-idp2246">sj.set_device(..), <a class="indexterm" href="#lua_sj_set_device">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2252">sj.set_page(..), <a class="indexterm" href="#lua_sj_set_page">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2258">sj.set_slot(..), <a class="indexterm" href="#lua_sj_set_slot">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2264">sj.shellexec(..), <a class="indexterm" href="#lua_sj_shellexec">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2152">sj.warning(..), <a class="indexterm" href="#lua_sj_warning">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2200">sj.warning_count, <a class="indexterm" href="#lua_sj_warning_count">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp1732">SLDOPT, <a class="indexterm" href="#po_sldopt">Pseudo-ops</a></dt><dt id="ientry-idp1745">SLOT, <a class="indexterm" href="#po_slot">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1017">DEVICE</a>)</dt><dt>(see also <a href="#ientry-idp1360">MMU</a>)</dt><dt>(see also <a href="#ientry-idp1457">PAGE</a>)</dt></dl></dd></dl></div><div class="indexdiv"><h3>T</h3><dl><dt id="ientry-idp1766">TAPEND, <a class="indexterm" href="#po_tapend">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp1773">TAPOUT</a>)</dt></dl></dd><dt id="ientry-idp1773">TAPOUT, <a class="indexterm" href="#po_tapout">Pseudo-ops</a></dt><dt id="ientry-idp1999">TEXT, <a class="indexterm" href="#st_text">STRUCT instructions</a></dt><dt id="ientry-idp1784">TEXTAREA (see <a href="#ientry-idp1052">DISP</a>)</dt></dl></div><div class="indexdiv"><h3>U</h3><dl><dt id="ientry-idp1792">UNDEFINE, <a class="indexterm" href="#po_undefine">Pseudo-ops</a></dt><dd><dl><dt>(see also <a href="#ientry-idp960">DEFINE</a>)</dt></dl></dd><dt id="ientry-idp1805">UNPHASE (see <a href="#ientry-idp1207">ENT</a>)</dt></dl></div><div class="indexdiv"><h3>W</h3><dl><dt id="ientry-idp1813">WHILE, <a class="indexterm" href="#po_while">Pseudo-ops</a></dt><dt id="ientry-idp1823">WORD, <a class="indexterm" href="#po_word">Pseudo-ops</a>, <a class="indexterm" href="#st_word">STRUCT instructions</a></dt></dl></div><div class="indexdiv"><h3>X</h3><dl><dt id="ientry-idp439">xor, <a class="indexterm" href="#op_bit_xor2">Expressions</a></dt></dl></div><div class="indexdiv"><h3>Z</h3><dl><dt id="ientry-idp2283">zx.save_snapshot_sna(..), <a class="indexterm" href="#lua_zx_save_snapshot_sna">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2276">zx.trdimage_add_file(..), <a class="indexterm" href="#lua_zx_trdimage_add_file">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp2270">zx.trdimage_create(..), <a class="indexterm" href="#lua_zx_trdimage_create">SjASMPlus functions bindings to Lua</a></dt><dt id="ientry-idp561">ZXSPECTRUM1024, <a class="indexterm" href="#device_zx1024">Real device emulation mode</a></dt><dt id="ientry-idp543">ZXSPECTRUM128, <a class="indexterm" href="#device_zx128">Real device emulation mode</a></dt><dt id="ientry-idp567">ZXSPECTRUM2048, <a class="indexterm" href="#device_zx2048">Real device emulation mode</a></dt><dt id="ientry-idp549">ZXSPECTRUM256, <a class="indexterm" href="#device_zx256">Real device emulation mode</a></dt><dt id="ientry-idp573">ZXSPECTRUM4096, <a class="indexterm" href="#device_zx4096">Real device emulation mode</a></dt><dt id="ientry-idp537">ZXSPECTRUM48, <a class="indexterm" href="#device_zx48">Real device emulation mode</a></dt><dt id="ientry-idp555">ZXSPECTRUM512, <a class="indexterm" href="#device_zx512">Real device emulation mode</a></dt><dt id="ientry-idp579">ZXSPECTRUM8192, <a class="indexterm" href="#device_zx8192">Real device emulation mode</a></dt><dt id="ientry-idp585">ZXSPECTRUMNEXT, <a class="indexterm" href="#device_zxn">Real device emulation mode</a></dt></dl></div></div></div>
 
 </div></body></html>

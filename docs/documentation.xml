@@ -209,6 +209,7 @@
             <listitem>
               <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>) - by Oli Wilkinson
 - added Amstrad CPC save snapshot and CDT (<link linkend="po_savecpcsna">`SAVECPCSNA`</link>, <link linkend="po_savecdt">`SAVECDT`</link>) - by Oli Wilkinson
+- added <link linkend="po_save3dos">`SAVE3DOS`</link> (like SAVEBIN with +3DOS header)
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
 - new <link linkend="s_temp_labels">temporary label</link> suffix syntax "_b" and "_f", enabling them for all expressions
 - fix `--longptr` mode to keep 32b address when `DS 0` is used
@@ -2474,7 +2475,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               <para><emphasis>Useful only for ZX-Spectrum Emulator
               UNREALSPECCY.</emphasis></para>
 
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save labels list in format:</para>
@@ -2770,7 +2771,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             <term>PAGE<indexterm id="po_page"><primary>PAGE</primary><seealso>DEVICE</seealso><seealso>MMU</seealso><seealso>SLOT</seealso></indexterm> &lt;number&gt;</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Set the current memory page to current slot.</para>
@@ -2849,6 +2850,43 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
+            <term>SAVE3DOS<indexterm id="po_save3dos"><primary>SAVE3DOS</primary></indexterm>
+                &lt;filename&gt;,&lt;address&gt;,&lt;size&gt;[,&lt;type&gt;[,&lt;w2_line&gt;[,&lt;w3&gt;]]]</term>
+
+            <listitem>
+              <para><emphasis>Works only in virtual device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Like <link linkend="po_savebin">SAVEBIN</link>, saves the block of device RAM
+                from "address", but with +3DOS 128 byte header prepended.<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM48
+    ...
+
+    ; +3 BASIC header (8 bytes starting from offset 15 in +3DOS header):
+    ; type is first byte (0 = basic, 1, 2 = arrays, 3 = code/screen$)
+    ; size is "first word" (bytes 1 and 2)
+    ; w2_line argument is "second word" (bytes 3 and 4)
+    ; w3 argument is "third word" (bytes 5 and 6) (default value = size)
+
+    ; by default the type=3 (CODE/SCREEN$) is saved
+    SAVE3DOS "screen.bin", $4000, $1b00
+    ; type 3: w2 argument $C000 is target load-address
+    SAVE3DOS "code.bin", $8000, $1234, 3, $C000
+    ; type 0: BASIC, default w2 = $8000 (no auto-run)
+    SAVE3DOS "prg1.bas", $5c00, 1234, 0
+    ; type 0: w2_line is LINE auto-run (30 in example)
+    SAVE3DOS "prg2.bas", $5c00, 1234, 0, 30
+    ; type 1: Numeric array (refer to +3 manual for these)
+    SAVE3DOS "b.dat", $8000, 30, 1
+    ; type 2: Character array (or maybe just ignore these)
+    SAVE3DOS "c.dat", $8000, 30, 2</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>SAVEBIN<indexterm id="po_savebin"><primary>SAVEBIN</primary></indexterm>
             &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
@@ -2877,7 +2915,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             <para>SAVECDT HEADLESS &lt;cdtname&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;sync&gt;[,&lt;format&gt;]]</para></term>
 
             <listitem>
-              <para><emphasis>Work only in Amstrad device emulation mode. See
+              <para><emphasis>Works only in Amstrad device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Manipulate CDT file (tape/TZX file format used by Amstrad CPC emulators).<example>
@@ -2908,7 +2946,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             <term>SAVECPCSNA<indexterm id="po_savecpcsna"><primary>SAVECPCSNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
-              <para><emphasis>Work only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
+              <para><emphasis>Works only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the snapshot for emulators of Amstrad CPC machines. (If start address is omitted,
@@ -2963,7 +3001,7 @@ START  .... ;some code
             &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the block of RAM in Hobeta format.</para>
@@ -2994,7 +3032,7 @@ START  .... ;some code
             <term>SAVESNA<indexterm id="po_savesna"><primary>SAVESNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the snapshot for emulators of ZX-Spectrum. (If start address is omitted,
@@ -3024,7 +3062,7 @@ START  .... ;something code
             <para>SAVETAP &lt;filename&gt;,HEADLESS,&lt;start&gt;,&lt;length&gt;[,&lt;customblockflag(0..255)&gt;]</para></term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Append the tape header or block of data to the end of the
@@ -3053,7 +3091,7 @@ START  .... ;something code
             <term>SAVETAP &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the tape file for emulators of ZX-Spectrum as a
@@ -3216,7 +3254,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
             <term>SLOT<indexterm id="po_slot"><primary>SLOT</primary><seealso>DEVICE</seealso><seealso>MMU</seealso><seealso>PAGE</seealso></indexterm> &lt;number_or_address&gt;</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Set current slot. Slots are defined by DEVICE pseudo-op.
@@ -4175,7 +4213,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.get_byte(address)<indexterm id="lua_sj_get_byte"><primary>sj.get_byte(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Get byte from memory. <emphasis>Work only in real device
+              <para>Get byte from memory. <emphasis>Works only in real device
               emulation mode.</emphasis></para>
             </listitem>
           </varlistentry>
@@ -4184,7 +4222,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.get_word(address)<indexterm id="lua_sj_get_word"><primary>sj.get_word(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Get word from memory. <emphasis>Work only in real device
+              <para>Get word from memory. <emphasis>Works only in real device
               emulation mode.</emphasis></para>
             </listitem>
           </varlistentry>
@@ -4256,7 +4294,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             startaddressofprogram)</term>
 
             <listitem>
-              <para>Save snapshot of memory in SNA format. <emphasis>Work only
+              <para>Save snapshot of memory in SNA format. <emphasis>Works only
               in real device emulation mode and only for ZXSPECTRUM48 and
               ZXSPECTRUM128..</emphasis></para>
             </listitem>
