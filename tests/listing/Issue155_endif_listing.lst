@@ -1,0 +1,82 @@
+# file opened: Issue155_endif_listing.asm
+ 1    0000              ; Wrong address calculation in listing for lines with ENDIF keyword
+ 2    0000               org 0
+ 3    0000
+ 4    0000               align 16
+ 4    0000                if 1
+ 4    0000                block 0, $ff
+ 4    0000                endif  ; OK
+ 5    0000               align 16
+ 5    0000                if 1
+ 5    0000 FF             block 1, $ff
+ 5    0001                endif  ; OK
+ 6    0001 00 00 00...   align 16
+ 6    0010                if 1
+ 6    0010 FF FF          block 2, $ff
+ 6    0012                endif  ; OK
+ 7    0012 00 00 00...   align 16
+ 7    0020                if 1
+ 7    0020 FF FF FF       block 3, $ff
+ 7    0023                endif  ; OK
+ 8    0023 00 00 00...   align 16
+ 8    0030                if 1
+ 8    0030 FF FF FF FF    block 4, $ff
+ 8    0034                endif  ; OK
+ 9    0034 00 00 00...   align 16
+ 9    0040                if 1
+ 9    0040 FF FF FF...    block 5, $ff
+ 9    0045                endif	 ; =$44 -> WRONG, MUST BE $45
+10    0045 00 00 00...   align 16
+10    0050                if 1
+10    0050 FF FF FF...    block 15, $ff
+10    005F                endif ; =$54 -> WRONG, MUST BE $5F
+11    005F
+12    005F              ; nested condition
+13    005F
+14    005F 00            align 16
+14    0060                if 1
+14    0060                if 1
+14    0060                block 0, $ff
+14    0060                endif
+14    0060                endif  ; OK
+15    0060               align 16
+15    0060                if 1
+15    0060                if 1
+15    0060 FF             block 1, $ff
+15    0061                endif
+15    0061                endif  ; OK
+16    0061 00 00 00...   align 16
+16    0070                if 1
+16    0070                if 1
+16    0070 FF FF          block 2, $ff
+16    0072                endif
+16    0072                endif  ; OK
+17    0072 00 00 00...   align 16
+17    0080                if 1
+17    0080                if 1
+17    0080 FF FF FF       block 3, $ff
+17    0083                endif
+17    0083                endif  ; OK
+18    0083 00 00 00...   align 16
+18    0090                if 1
+18    0090                if 1
+18    0090 FF FF FF FF    block 4, $ff
+18    0094                endif
+18    0094                endif  ; OK
+19    0094 00 00 00...   align 16
+19    00A0                if 1
+19    00A0                if 1
+19    00A0 FF FF FF...    block 5, $ff
+19    00A5                endif
+19    00A5                endif  ; =$A4 -> WRONG, MUST BE $A5
+20    00A5 00 00 00...   align 16
+20    00B0                if 1
+20    00B0                if 1
+20    00B0 FF FF FF...    block 15, $ff
+20    00BF                endif
+20    00BF                endif ; =$B4 -> WRONG, MUST BE $BF
+21    00BF
+# file closed: Issue155_endif_listing.asm
+
+Value    Label
+------ - -----------------------------------------------------------

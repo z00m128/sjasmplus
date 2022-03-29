@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.5 21/01/2021
+  Version: 0.9.6 29/03/2022
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,13 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  29/03/2022: version 0.9.6
+    + new operator: exist
+    + new devices: amstradcpc464, amstradcpc6128
+    + new directives: save3dos, savecdt, savecpcsna
+    + new label prefix combination: "@." (should work only inside macros, but works globally)
+    + new temporary label syntax with underscored suffix ("123_b")
 
   21/01/2021: version 0.9.5
     + adding missing __DATE__/__TIME__ predefined defines
@@ -96,12 +103,11 @@ TODO missing things:
         by editor through some new API, to provide list of various (type) symbols.
     - non-label identifiers (i.e. which are not valid labels (ignored by Label rules),
       but they are valid identifiers for DEFINE or macro argument names
-    - check other FIXME/TODO comments (this is work-in-progress, far from finished)
     - Label identifiers rules into some xml macro (entities were in docs?).
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="14" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="16" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -321,7 +327,10 @@ TODO missing things:
       <item>relocate_start</item>
       <item>relocate_table</item>
       <item>rept</item>
+      <item>save3dos</item>
       <item>savebin</item>
+      <item>savecdt</item>
+      <item>savecpcsna</item>
       <item>savedev</item>
       <item>savehob</item>
       <item>savenex</item>
@@ -358,6 +367,7 @@ TODO missing things:
       <!-- Operators -->
       <item>abs</item>
       <item>and</item>
+      <item>exist</item>
       <item>high</item>
       <item>low</item>
       <item>mod</item>
@@ -371,6 +381,8 @@ TODO missing things:
       $ $$ ! ~ + - * / % << >> >>> <? >? < > <= >= = == != & ^ | && || [ ] ( ) { }
       -->
       <!-- known devices names -->
+      <item>AMSTRADCPC464</item>
+      <item>AMSTRADCPC6128</item>
       <item>NONE</item>
       <item>NOSLOT64K</item>
       <item>ZXSPECTRUM48</item>
@@ -393,7 +405,7 @@ TODO missing things:
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
         <DetectChar attribute="Normal Text" context="#pop!Normal" char="}"/>
         <RegExpr attribute="Label" context="#pop!afterLabel" firstNonSpace="true"
-                 String="^(\.|@|\!|\!@|)[A-Za-z_][A-Za-z0-9_.?!#@]*(\+[0-9]|):?"/>
+                 String="^(@\.|\.|@|\!|\!@|)[A-Za-z_][A-Za-z0-9_.?!#@]*(\+[0-9]|):?"/>
         <RegExpr attribute="Label" context="#pop!afterLabel" String="^[0-9]+:?(\s+|$)"/>
       </context>
 
@@ -517,8 +529,9 @@ TODO missing things:
         <keyword attribute="Registers" context="#stay" String="registers"/>
         <keyword attribute="Normal Text" context="#stay" String="operators"/>
         <RegExpr attribute="Label" context="#stay" String="(\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*"/>
-        <!-- temporary labels may be mistaken for binary number ("1b"), for 1-3 digits it's local label -->
+        <!-- temporary labels may be mistaken for binary number ("1b"), for 1-3 digits it's temporary label -->
         <RegExpr attribute="Label" context="#stay" String="\d{1,3}[bBfF]\b"/>
+        <RegExpr attribute="Label" context="#stay" String="\d+_[bBfF]\b"/>  <!-- v1.19.0 temporary label syntax -->
         <!-- TODO but some DEFINE/macro-arg identifiers can avoid labels rules, like ".._" is valid! -->
         <!-- hexadecimal numbers -->
         <RegExpr attribute="BaseN" context="#stay" insensitive="true" String="((\$|0x|#)[a-f0-9]('?[a-f0-9]+)*|[0-9]('?[a-f0-9]+)*h)\b"/>

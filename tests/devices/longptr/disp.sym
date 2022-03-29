@@ -8,6 +8,8 @@ longptr6: EQU 0x00010001
 longptr7: EQU 0x00FFFFFF
 longptr8: EQU 0x01000000
 longptr9: EQU 0x01000001
+longptrA: EQU 0x00046000
+longptrB: EQU 0x00046000
 normalmem: EQU 0x00008003
 phase1_end: EQU 0x00008003
 phase1_start: EQU 0x00008000
@@ -15,3 +17,5 @@ phase2_end: EQU 0x00010003
 phase2_start: EQU 0x0000FFFF
 phase3_end: EQU 0x00240003
 phase3_start: EQU 0x00240000
+phase4_end: EQU 0x00035000
+phase4_start: EQU 0x00035000

@@ -30,8 +30,8 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.18.3"
-#define VERSION_NUM "0x00011203"
+#define VERSION "1.19.0"
+#define VERSION_NUM "0x00011300"
 
 #define LASTPASS 3
 
@@ -115,10 +115,12 @@ extern "C" {
 #include "z80.h"
 #include "directives.h"
 #include "sjio.h"
+#include "io_cpc.h"
 #include "io_err.h"
 #include "io_snapshots.h"
-#include "io_trd.h"
 #include "io_tape.h"
+#include "io_trd.h"
+#include "io_tzx.h"
 #include "io_nex.h"
 #include "relocate.h"
 #include "sjasm.h"

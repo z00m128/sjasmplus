@@ -68,6 +68,8 @@ static int ParseExpPrim(char*& p, aint& nval) {
 		if (!byteOnly) res += int(MemGetByte(nval + 1)) << 8;
 		nval = res;
 		return 1;
+	} else if (isdigit((byte)*p) && GetLocalLabelValue(p, nval, true)) {	// temporary label with underscore suffix
+		return 1;
 	} else if (isdigit((byte)*p) || (*p == '#' && isalnum((byte)*(p + 1))) || (*p == '$' && isalnum((byte)*(p + 1))) || *p == '%') {
 		return GetConstant(p, nval);
 	} else if (isLabelStart(p)) {
@@ -415,7 +417,7 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 		alignment = -1;
 		return;
 	}
-	if (Relocation::isActive && warningNotSuppressed()) {
+	if (Relocation::isActive) {
 		WarningById(W_RELOCATABLE_ALIGN);
 	}
 	// check if alignment value is power of two (0..15-th power only)
@@ -606,7 +608,10 @@ void SetLastParsedLabel(const char* label) {
 
 void ParseLabel() {
 	if (White()) return;
-	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) return;
+	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) {
+		if (!SkipBlanks()) Error("Unexpected", lp);
+		return;
+	}
 	char temp[LINEMAX], * tp = temp, * ttp;
 	aint val, equPageNum = LABEL_PAGE_UNDEFINED, smcOffset = 0;
 	// copy the label name into `temp` array
@@ -640,7 +645,7 @@ void ParseLabel() {
 		}
 		val = atoi(tp);
 		if (!LocalLabelTable.InsertRefresh(val)) {
-			Error("Local-labels flow differs in this pass (missing/new local label or final pass source difference)");
+			Error("Temporary labels flow differs in this pass (missing/new temporary label or final pass source difference)");
 		}
 	} else {
 		if (isMacroNext()) {
@@ -701,6 +706,9 @@ void ParseLabel() {
 		if (pass == LASTPASS) {
 
 			SLabelTableEntry* label = LabelTable.Find(tp, true);
+			if (nullptr == label && IsDEFL) {	// DEFL labels can be defined as late as needed (including pass3)
+				if (LabelTable.Insert(tp, val, traits)) label = LabelTable.Find(tp, true);
+			}
 			if (nullptr == label) {		// should have been already defined before last pass
 				Error("Label not found", tp);
 				delete[] tp;

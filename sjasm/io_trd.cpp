@@ -242,7 +242,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 	// this will overwrite also first byte of "trd.length" (12 bytes are affected, not just 11)
 	const ETrdFileName nameWarning = TRD_FileNameToBytes(fhobname, longFname, Lname);
 	const bool isExtensionB = ('B' == trdf.ext);
-	if (!addplace && warningNotSuppressed()) {
+	if (!addplace) {
 		if (INVALID_EXTENSION == nameWarning) {
 			WarningById(W_TRD_EXT_INVALID, fhobname);
 		}
@@ -364,7 +364,7 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		fileIndex = trdHead.info.numOfFiles;
 	} else {
 		// in "normal" mode warn when file already exists
-		if (STrdHead::NUM_OF_FILES_MAX != fileIndex && warningNotSuppressed()) {
+		if (STrdHead::NUM_OF_FILES_MAX != fileIndex) {
 			// to keep legacy behaviour of older sjasmplus versions, this is just warning
 			// and the same file will be added to end of directory any way
 			WarningById(W_TRD_DUPLICATE, fname);
@@ -417,22 +417,22 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 		if (oldTargetEndPos < freePos) {	// some data after old file -> shift them a bit
 			// first move the data inside the TRD image
 			size_t dataToMoveLength = freePos - oldTargetEndPos;
-			byte* dataToMove = new byte[dataToMoveLength];
-			if (nullptr == dataToMove) ErrorOOM();
+			std::unique_ptr<byte[]> dataToMove(new byte[dataToMoveLength]);
+			if (nullptr == dataToMove.get()) ErrorOOM();
 			if (fseek(ff, oldTargetEndPos, SEEK_SET)) {
 				return ReturnWithError("TRD image has wrong format", fname, ff);
 			}
-			if (dataToMoveLength != fread(dataToMove, 1, dataToMoveLength, ff)) {
+			if (dataToMoveLength != fread(dataToMove.get(), 1, dataToMoveLength, ff)) {
 				return ReturnWithError("TRD read error", fname, ff);
 			}
 			if (fseek(ff, newTargetEndPos, SEEK_SET)) {
 				return ReturnWithError("TRD image has wrong format", fname, ff);
 			}
 			// first modification of the provided TRD file (since here, if something fails, the file is damaged)
-			if (dataToMoveLength != fwrite(dataToMove, 1, dataToMoveLength, ff)) {
+			if (dataToMoveLength != fwrite(dataToMove.get(), 1, dataToMoveLength, ff)) {
 				return ReturnWithError("TRD write error", fname, ff);
 			}
-			delete[] dataToMove;
+			dataToMove.release();
 			// adjust all catalog entries which got the content sectors shifted
 			for (unsigned entryIndex = 0; entryIndex < STrdHead::NUM_OF_FILES_MAX; ++entryIndex) {
 				auto & entry = trdHead.catalog[entryIndex];

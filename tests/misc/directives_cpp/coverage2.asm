@@ -63,3 +63,8 @@
     ELSE
         false
     ENDIF
+
+    DEVICE ZXSPECTRUM48
+    SAVESNA "coverage2.sna", &
+    SAVESNA "coverage2.sna", -1
+    SAVESNA "coverage2.sna"

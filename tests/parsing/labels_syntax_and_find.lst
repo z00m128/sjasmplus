@@ -173,7 +173,7 @@ labels_syntax_and_find.asm(152): error: Invalid labelname: @1nvalidLabelName
 labels_syntax_and_find.asm(153): error: Invalid labelname: .1nvalidLabelName
 153   356B              @.1nvalidLabelName:
 labels_syntax_and_find.asm(154): error: Invalid temporary label (not a number): 1nvalidLabelName
-labels_syntax_and_find.asm(154): error: Local label not found: 1B
+labels_syntax_and_find.asm(154): error: Temporary label not found: 1B
 154   356B 20 00        1nvalidLabelName: jr  nz,1B
 labels_syntax_and_find.asm(155): error: Invalid labelname: Inv&lidL&belN&me
 155   356D              Inv&lidL&belN&me

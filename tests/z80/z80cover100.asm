@@ -236,7 +236,7 @@
     jr      $+2-129
     jr      $+2+128
     xor     hl,0
-    adc     de,hl
+    adc     bc,hl
 
     OPT reset --syntax=abF
     ld      de,(ix)
@@ -272,4 +272,18 @@
     out     (c),1
     out     (254),h
     push    e
-    sub     de,de
+    sub     bc,bc
+
+    ;; part 5 - improving coverage after adding new fake instructions
+    adc     de,af
+    adc     de,1
+    adc     af,hl
+    add     de,af
+    add     de,2
+    add     af,hl
+    sbc     de,af
+    sbc     de,3
+    sbc     af,hl
+    sub     de,af
+    sub     de,4
+    sub     af,hl

@@ -28,7 +28,8 @@
 
 #include "sjdefs.h"
 
-bool IsZXSpectrumDevice(char *name) {
+bool IsZXSpectrumDevice(const char *name) {
+	if (nullptr == name) return false;
 	if (strcmp(name, "ZXSPECTRUM48") &&
 		strcmp(name, "ZXSPECTRUM128") &&
 		strcmp(name, "ZXSPECTRUM256") &&
@@ -37,6 +38,16 @@ bool IsZXSpectrumDevice(char *name) {
 		strcmp(name, "ZXSPECTRUM2048") &&
 		strcmp(name, "ZXSPECTRUM4096") &&
 		strcmp(name, "ZXSPECTRUM8192"))
+	{
+		return false;
+	}
+	return true;
+}
+
+bool IsAmstradCPCDevice(const char* name) {
+	if (nullptr == name) return false;
+	if (strcmp(name, "AMSTRADCPC464") &&
+		strcmp(name, "AMSTRADCPC6128"))
 	{
 		return false;
 	}
@@ -135,7 +146,7 @@ static void DeviceZXSpectrum8192(CDevice **dev, CDevice *parent, aint ramtop) {
 }
 
 static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
-	if (ramtop) WarningById(W_NEXT_RAMTOP);
+	if (ramtop) WarningById(W_NO_RAMTOP);
 	if (Options::IsI8080) Error("Can't use ZXN device while in i8080 assembling mode.", line, FATAL);
 	if (Options::IsLR35902) Error("Can't use ZXN device while in Sharp LR35902 assembling mode.", line, FATAL);
 	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
@@ -150,10 +161,24 @@ static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
 }
 
 static void DeviceNoSlot64k(CDevice **dev, CDevice *parent, aint ramtop) {
-	if (ramtop) WarningById(W_NOSLOT_RAMTOP);
+	if (ramtop) WarningById(W_NO_RAMTOP);
 	*dev = new CDevice("NOSLOT64K", parent);
 	const int initialPages[] = { 0 };
 	initRegularSlotDevice(*dev, 0x10000, 1, 32, initialPages);	// 32*64kiB = 2MiB
+}
+
+static void DeviceAmstradCPC464(CDevice** dev, CDevice* parent, aint ramtop) {
+	if (ramtop) WarningById(W_NO_RAMTOP);
+	*dev = new CDevice("AMSTRADCPC464", parent);
+	const int initialPages[] = { 0, 1, 2, 3 };
+	initRegularSlotDevice(*dev, 0x4000, 4, 4, initialPages);
+}
+
+static void DeviceAmstradCPC6128(CDevice** dev, CDevice* parent, aint ramtop) {
+	if (ramtop) WarningById(W_NO_RAMTOP);
+	*dev = new CDevice("AMSTRADCPC6128", parent);
+	const int initialPages[] = { 0, 1, 2, 3 };
+	initRegularSlotDevice(*dev, 0x4000, 4, 8, initialPages);
 }
 
 int SetDevice(char *id, const aint ramtop) {
@@ -194,6 +219,10 @@ int SetDevice(char *id, const aint ramtop) {
 				DeviceZxSpectrumNext(dev, parent, ramtop);
 			} else if (cmphstr(id, "noslot64k")) {
 				DeviceNoSlot64k(dev, parent, ramtop);
+			} else if (cmphstr(id, "amstradcpc464")) {
+				DeviceAmstradCPC464(dev, parent, ramtop);
+			} else if (cmphstr(id, "amstradcpc6128")) {
+				DeviceAmstradCPC6128(dev, parent, ramtop);
 			} else {
 				return false;
 			}
@@ -237,7 +266,8 @@ char* GetDeviceName() {
 }
 
 CDevice::CDevice(const char *name, CDevice *parent)
-	: Next(NULL), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0) {
+	: Next(NULL), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0),
+	previousSlotI(0), previousSlotOpt(CDeviceSlot::ESlotOptions::O_NONE), limitExceeded(false) {
 	ID = STRDUP(name);
 	if (parent) parent->Next = this;
 	for (auto & slot : Slots) slot = NULL;

@@ -192,8 +192,7 @@ struct WarningEntry {
 typedef std::unordered_map<const char*, WarningEntry> messages_map;
 
 const char* W_ABS_LABEL = "abs";
-const char* W_NEXT_RAMTOP = "zxnramtop";
-const char* W_NOSLOT_RAMTOP = "noslotramtop";
+const char* W_NO_RAMTOP = "noramtop";
 const char* W_DEV_RAMTOP = "devramtop";
 const char* W_DISPLACED_ORG = "displacedorg";
 const char* W_ORG_PAGE = "orgpage";
@@ -216,6 +215,7 @@ const char* W_OUT0 = "out0";
 const char* W_BACKSLASH = "backslash";
 const char* W_OPKEYWORD = "opkeyword";
 const char* W_BE_HOST = "behost";
+const char* W_FAKE = "fake";
 
 static messages_map w_texts = {
 	{ W_ABS_LABEL,
@@ -224,16 +224,10 @@ static messages_map w_texts = {
 			"Warn about parsing error of new abs operator (v1.18.0)."
 		}
 	},
-	{ W_NEXT_RAMTOP,
+	{ W_NO_RAMTOP,
 		{ true,
-			"ZXN device doesn't init memory in any way (RAMTOP is ignored)",
-			"Warn when <ramtop> argument is used with ZXSPECTRUMNEXT."
-		}
-	},
-	{ W_NOSLOT_RAMTOP,
-		{ true,
-			"NoSlot64k device doesn't init memory in any way (RAMTOP is ignored)",
-			"Warn when <ramtop> argument is used with NOSLOT64K."
+			"current device doesn't init memory in any way (RAMTOP is ignored)",
+			"Warn when device ignores <ramtop> argument."
 		}
 	},
 	{ W_DEV_RAMTOP,
@@ -368,23 +362,16 @@ static messages_map w_texts = {
 			"Warn when big-endian host runs sjasmplus (experimental)."
 		}
 	},
+	{ W_FAKE,
+		{ true,	// fake-warnings are enabled/disabled through --syntax, this value here is always true
+			"Fake instruction",
+			"Warn when fake instruction is used in the source."
+		}
+	},
 };
 
 static messages_map::iterator findWarningByIdText(const char* id) {
 	return std::find_if(w_texts.begin(), w_texts.end(), [id](const auto& v){ return !strcmp(id, v.first); } );
-}
-
-//TODO deprecated, add single-warning around mid 2021, remove ~1y later (replaced by warning-id system)
-// checks for "ok" (or also "fake") in EOL comment
-// "ok" must follow the comment start, "fake" can be anywhere inside
-bool warningNotSuppressed(bool alsoFake) {
-	if (nullptr == eolComment) return true;
-	char* comment = eolComment;
-	while (';' == *comment || '/' == *comment) ++comment;
-	while (' ' == *comment || '\t' == *comment) ++comment;
-	// check if "ok" is first word
-	if ('o' == comment[0] && 'k' == comment[1] && !isalnum((byte)comment[2])) return false;
-	return alsoFake ? (nullptr == strstr(eolComment, "fake")) : true;
 }
 
 bool suppressedById(const char* id) {
@@ -394,6 +381,7 @@ bool suppressedById(const char* id) {
 	assert(0 < idLength);
 	const char* commentToCheck = eolComment;
 	while (const char* idPos = strstr(commentToCheck, id)) {
+		if (!strcmp(id, W_FAKE)) return true;				// "fake" only is enough to suppress those
 		commentToCheck = idPos + idLength;
 		if ('-' == commentToCheck[0] && 'o' == commentToCheck[1] && 'k' == commentToCheck[2]) {
 			return true;
@@ -441,6 +429,11 @@ void CliWoption(const char* option) {
 	// check for specific id, with possible "no-" prefix ("-Wabs" vs "-Wno-abs")
 	const bool enable = strncmp("no-", option, 3);
 	const char* id = enable ? option : option + 3;
+	// handle ID "fake" separately, changing the enable/disable value directly in Options::syx
+	if (!strcmp(id, W_FAKE)) {
+		Options::syx.FakeWarning = enable;
+		return;			// keep the w_texts["fake"].enabled == true all the time
+	}
 	auto warning_it = findWarningByIdText(id);
 	if (w_texts.end() != warning_it) warning_it->second.enabled = enable;
 	else Warning("unknown warning id in -W option", id, (0 == pass) ? W_EARLY : W_PASS3);

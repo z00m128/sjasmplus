@@ -37,7 +37,7 @@ op_next_syntax.asm(14): error: Unexpected: ,,5
 14    0421 ED 27 05       test 5,,5                          ; syntax errors
 15    0424
 16    0424 ED 30            mul de
-op_next_syntax.asm(16): warning: Fake instruction: mul
+op_next_syntax.asm(16): warning[fake]: Fake instruction: mul
 16    0426 ED 30          mul                    ; #ED30 (w/o arguments shows "warning: Fake")
 op_next_syntax.asm(17): error: Z80N MUL exist only with "D,E" arguments: mul h,l
 17    0428                  mul h,l

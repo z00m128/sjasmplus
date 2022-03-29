@@ -16,11 +16,13 @@ set(MY_TOLUA++_LIBRARY "tolua++")
 set(SOURCES
 	sjasm/devices.cpp
 	sjasm/directives.cpp
+	sjasm/io_cpc.cpp
 	sjasm/io_err.cpp
 	sjasm/io_nex.cpp
 	sjasm/io_snapshots.cpp
 	sjasm/io_tape.cpp
 	sjasm/io_trd.cpp
+	sjasm/io_tzx.cpp
 	sjasm/parser.cpp
 	sjasm/reader.cpp
 	sjasm/relocate.cpp

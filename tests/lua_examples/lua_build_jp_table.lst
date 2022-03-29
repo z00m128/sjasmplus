@@ -207,7 +207,7 @@
 119   8304                          lua allpass
 120   8304 ~                            setOrgAfterLastAllocated()
 121   8304              org $8405
-121   8304                          endlua
+121   8405                          endlua
 122   8405
 123   8405                      ;-----------------------------------------------------------------
 124   8405                      ; store result as binary blob for simple verification in hexa editor

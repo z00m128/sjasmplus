@@ -41,6 +41,18 @@ disp.asm(36): warning: value 0x1000000 is truncated to 16bit value: 0x0000
 38    0008 21 FF FF         ld      hl,longptr7&$FFFF
 39    000B 00 00            dw      longptr8&$FFFF
 40    000D
+41    000D              ; added: in one project the usage of `DS 0` did uncover bug truncating longptr addresses back to 16b, fixed in v1.18.4
+42    000D
+43    000D                  ORG $35000
+44    5000              phase4_start:
+45    5000                  PHASE $46000
+46    6000              longptrA:
+47    6000                      DS  0,'!'
+48    6000              longptrB:
+49    6000                  UNPHASE
+50    5000              phase4_end:
+51    5000                  ASSERT longptrA == longptrB && phase4_start == phase4_end
+52    5000
 # file closed: disp.asm
 
 Value    Label
@@ -55,6 +67,8 @@ Value    Label
 0xFFFFFF   longptr7
 0x1000000   longptr8
 0x1000001 X longptr9
+0x46000   longptrA
+0x46000   longptrB
 0x8003 X normalmem
 0x8003 X phase1_end
 0x8000 X phase1_start
@@ -62,3 +76,5 @@ Value    Label
 0xFFFF X phase2_start
 0x240003 X phase3_end
 0x240000 X phase3_start
+0x35000   phase4_end
+0x35000   phase4_start

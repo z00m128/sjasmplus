@@ -268,17 +268,21 @@ bool GetLabelValue(char*& p, aint& val) {
 	return !getLabel_invalidName;
 }
 
-int GetLocalLabelValue(char*& op, aint& val) {
+int GetLocalLabelValue(char*& op, aint& val, bool requireUnderscore) {
 	char* p = op;
 	if (SkipBlanks(p) || !isdigit((byte)*p)) return 0;
 	char* const numberB = p;
 	while (isdigit((byte)*p)) ++p;
-	const char type = *p|0x20;		// [bB] => 'b', [fF] => 'f'
+	const bool hasUnderscore = ('_' == *p);
+	if (requireUnderscore && !hasUnderscore) return 0;
+	// convert suffix [bB] => 'b', [fF] => 'f' and ignore underscore
+	const char type = (hasUnderscore ? p[1] : p[0]) | 0x20;	// should be 'b' or 'f'
+	const char following = hasUnderscore ? p[2] : p[1];		// should be non-label char
 	if ('b' != type && 'f' != type) return 0;	// local label must have "b" or "f" after number
-	const char following = p[1];	// should be EOL, colon or whitespace
-	if (0 != following && ':' != following && !White(following)) return 0;
+	if (islabchar(following)) return 0;			// that suffix didn't end correctly
 	// numberB -> p are digits to be parsed as integer
 	if (!GetNumericValue_IntBased(op = numberB, p, val, 10)) return 0;
+	if ('_' == *op) ++op;
 	++op;
 	// ^^ advance main parsing pointer op beyond the local label (here it *is* local label)
 	auto label = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
@@ -286,7 +290,7 @@ int GetLocalLabelValue(char*& op, aint& val) {
 		val = label->value;
 		Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
 	} else {
-		if (LASTPASS == pass) Error("Local label not found", numberB, SUPPRESS);
+		if (LASTPASS == pass) Error("Temporary label not found", numberB, SUPPRESS);
 		val = 0L;
 	}
 	return 1;
@@ -587,7 +591,7 @@ bool CLocalLabelTable::insertImpl(const aint labelNumber) {
 
 bool CLocalLabelTable::refreshImpl(const aint labelNumber) {
 	if (!refresh || refresh->nummer != labelNumber) return false;
-	if (refresh->value != CurAddress) Warning("Local label has different address");
+	if (refresh->value != CurAddress) Warning("Temporary label has different address");
 	refresh->value = CurAddress;
 	refresh = refresh->next;
 	return true;
@@ -686,7 +690,8 @@ static char defineGet__Counter__Buffer[32] = {};
 static char defineGet__Line__Buffer[32] = {};
 
 char* CDefineTable::Get(const char* name) {
-	if (NULL != name) {
+	DefArrayList = nullptr;
+	if (nullptr != name) {
 		// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
 		if ('_' == name[1]) {
 			if (!strcmp(name, "__COUNTER__")) {
@@ -708,8 +713,7 @@ char* CDefineTable::Get(const char* name) {
 			p = p->next;
 		}
 	}
-	DefArrayList = NULL;
-	return NULL;
+	return nullptr;
 }
 
 int CDefineTable::FindDuplicate(const char* name) {
@@ -928,7 +932,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 		const bool lastArg = NULL == a->next;
 		if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
 			Error("Not enough arguments for macro", naam, SUPPRESS);
-			macrolabp = 0;
+			macrolabp = omacrolabp;
 			return 1;
 		}
 		MacroDefineTable.AddMacro(a->string, ml);
@@ -937,7 +941,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	SkipBlanks(p);
 	if (*p) {
 		Error("Too many arguments for macro", naam, SUPPRESS);
-		macrolabp = 0;
+		macrolabp = omacrolabp;
 		return 1;
 	}
 	// arguments parsed, emit the macro lines and parse them
@@ -1273,10 +1277,7 @@ void CStructure::emitmembs(char*& p) {
 		switch (ip->type) {
 		case SMEMBBLOCK:
 			EmitBlock(ip->def != -1 ? ip->def : 0, ip->len, ip->def == -1, 8);
-			if (8 < ip->len) {	// "..." elipsis happened in listing, force listing
-				ListFile();
-				ListAddress = CurAddress;	// and fix listing address for following byte-listing
-			}
+			if (8 < ip->len) ListFile();	// "..." elipsis happened in listing, force listing
 			break;
 		case SMEMBBYTE:
 			EmitByte(ip->ParseValue(p));

@@ -58,7 +58,7 @@ extern char* PreviousIsLabel;
 bool LabelExist(char*& p, aint& val);
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);
-int GetLocalLabelValue(char*& op, aint& val);
+int GetLocalLabelValue(char*& op, aint& val, bool requireUnderscore = false);
 
 constexpr int LABEL_PAGE_UNDEFINED = -1;
 constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)

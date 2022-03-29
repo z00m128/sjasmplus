@@ -30,10 +30,12 @@ LDFLAGS= -s
 OBJS=\
 	$(SUBDIR_BASE)/devices.o \
 	$(SUBDIR_BASE)/directives.o \
+	$(SUBDIR_BASE)/io_cpc.o \
 	$(SUBDIR_BASE)/io_err.o \
 	$(SUBDIR_BASE)/io_nex.o \
 	$(SUBDIR_BASE)/io_snapshots.o \
 	$(SUBDIR_BASE)/io_trd.o \
+	$(SUBDIR_BASE)/io_tzx.o \
 	$(SUBDIR_BASE)/io_tape.o \
 	$(SUBDIR_BASE)/lua_lpack.o \
 	$(SUBDIR_BASE)/lua_sjasm.o \

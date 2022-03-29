@@ -220,4 +220,10 @@ mm EQU $78
     ; sla c : rl b : sla e : rl d : add hl,hl
     sla bc,de,hl
 
-    ; hopefully that's enough to test...
+    ; hopefully that's enough to test... was not, round 2:
+
+    ; multi-argument instructions
+    pop hl,de       ; normal pop
+    OPT --reversepop
+    pop hl,de       ; reverse pop
+    sla b,c

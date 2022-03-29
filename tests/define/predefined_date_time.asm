@@ -9,7 +9,7 @@
     DD  __ERRORS__, __WARNINGS__
     DB  __PASS__
 
-; 1.18.3 version check (needs update upon release)
+; 1.19.0 version check (needs update upon release)
     ASSERT 1 == (__SJASMPLUS__>>16)
-    ASSERT 18 == ((__SJASMPLUS__>>8)&0xFF)
-    ASSERT 3 == (__SJASMPLUS__&0xFF)
+    ASSERT 19 == ((__SJASMPLUS__>>8)&0xFF)
+    ASSERT 0 == (__SJASMPLUS__&0xFF)

@@ -16,8 +16,8 @@ memory_limits.asm(7): warning: RAM limit exceeded 0x10000 by ORG
 memory_limits.asm(13): warning: RAM limit exceeded 0x10000 by DISP
 13    FFFF ED B0                    ldir            ; warning about DISP memory limit
 14    0001 ED B0                    ldir
-15    0003                          ORG     0       ; ok ; does reset the DISP part only, not real address
-16    0000                          ORG     0xFFFF  ; ok
+15    0003                          ORG     0       ; displacedorg-ok ; does reset the DISP part only, not real address
+16    0000                          ORG     0xFFFF  ; displacedorg-ok
 memory_limits.asm(17): warning: RAM limit exceeded 0x10000 by DISP
 17    FFFF ED B0                    ldir            ; (again) warning about DISP memory limit
 18    0001 ED B0                    ldir            ; no warning (not doubling)
@@ -29,7 +29,7 @@ memory_limits.asm(17): warning: RAM limit exceeded 0x10000 by DISP
 memory_limits.asm(24): warning: RAM limit exceeded 0x10000 by ORG
 24    2000 ED B0                    ldir            ; warning about memory limit
 25    2002 ED B0                    ldir
-26    2004                          ORG     0x3000  ; ok ; does NOT reset physical one, only DISP one
+26    2004                          ORG     0x3000  ; displacedorg-ok ; does NOT reset physical one, only DISP one
 27    3000 ED B0                    ldir
 28    3002 ED B0                    ldir
 29    3004                          ENDT
@@ -58,8 +58,8 @@ memory_limits.asm(44): warning: RAM limit exceeded 0x10000 by ORG
 48    1000                          DISP    0xFFF0
 memory_limits.asm(49): warning: RAM limit exceeded 0x10000 by DISP
 49    FFF0 CC CC CC...              block   100,0xCC    ; warning about DISP memory limit
-50    0054                          ORG     0       ; ok ; does reset the DISP part only, not real address
-51    0000                          ORG     0xFFF0  ; ok
+50    0054                          ORG     0       ; displacedorg-ok ; does reset the DISP part only, not real address
+51    0000                          ORG     0xFFF0  ; displacedorg-ok
 memory_limits.asm(52): warning: RAM limit exceeded 0x10000 by DISP
 52    FFF0 DD DD DD...              block   100,0xDD    ; again
 53    0054                          ENDT
@@ -69,7 +69,7 @@ memory_limits.asm(52): warning: RAM limit exceeded 0x10000 by DISP
 57    FFF0                          DISP    0x2000
 memory_limits.asm(58): warning: RAM limit exceeded 0x10000 by ORG
 58    2000 EE EE EE...              block   100,0xEE    ; warning about memory limit
-59    2064                          ORG     0x3000  ; ok ; does NOT reset physical one, only DISP one
+59    2064                          ORG     0x3000  ; displacedorg-ok ; does NOT reset physical one, only DISP one
 60    3000 FF FF FF...              block   100,0xFF
 61    3064                          ENDT
 62    00B8

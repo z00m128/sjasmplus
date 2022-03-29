@@ -12,8 +12,8 @@
             DISP    0xFFFF
             ldir            ; warning about DISP memory limit
             ldir
-            ORG     0       ; ok ; does reset the DISP part only, not real address
-            ORG     0xFFFF  ; ok
+            ORG     0       ; displacedorg-ok ; does reset the DISP part only, not real address
+            ORG     0xFFFF  ; displacedorg-ok
             ldir            ; (again) warning about DISP memory limit
             ldir            ; no warning (not doubling)
             ENDT
@@ -23,7 +23,7 @@
             DISP    0x2000
             ldir            ; warning about memory limit
             ldir
-            ORG     0x3000  ; ok ; does NOT reset physical one, only DISP one
+            ORG     0x3000  ; displacedorg-ok ; does NOT reset physical one, only DISP one
             ldir
             ldir
             ENDT
@@ -47,8 +47,8 @@
             ORG     0x1000
             DISP    0xFFF0
             block   100,0xCC    ; warning about DISP memory limit
-            ORG     0       ; ok ; does reset the DISP part only, not real address
-            ORG     0xFFF0  ; ok
+            ORG     0       ; displacedorg-ok ; does reset the DISP part only, not real address
+            ORG     0xFFF0  ; displacedorg-ok
             block   100,0xDD    ; again
             ENDT
 
@@ -56,7 +56,7 @@
             ORG     0xFFF0
             DISP    0x2000
             block   100,0xEE    ; warning about memory limit
-            ORG     0x3000  ; ok ; does NOT reset physical one, only DISP one
+            ORG     0x3000  ; displacedorg-ok ; does NOT reset physical one, only DISP one
             block   100,0xFF
             ENDT
 

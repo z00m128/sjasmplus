@@ -1,0 +1,24 @@
+# file opened: savecpcsnaCoverage.asm
+ 1    0000              ; test-coverage cases not covered by regular tests
+ 2    0000
+ 3    0000                  DEVICE ZXSPECTRUM48
+savecpcsnaCoverage.asm(4): error: [SAVECPCSNA] Device must be AMSTRADCPC464 or AMSTRADCPC6128.
+ 4    0000                  SAVECPCSNA "BadDevice.sna", $1234       ; error about wrong device
+ 5    0000
+ 6    0000                  DEVICE NONE
+savecpcsnaCoverage.asm(7): error: SAVECPCSNA only allowed in real device emulation mode (See DEVICE)
+ 7    0000                  SAVECPCSNA "NoDevice.sna", $1234        ; error about none device
+ 8    0000
+ 9    0000                  DEVICE AMSTRADCPC464
+savecpcsnaCoverage.asm(10): error: [SAVECPCSNA] Negative values are not allowed: SAVECPCSNA "file.sna", -1
+10    0000                  SAVECPCSNA "file.sna", -1               ; negative start value
+savecpcsnaCoverage.asm(11): error: Syntax error: &
+savecpcsnaCoverage.asm(11): error: Unexpected: &
+11    0000                  SAVECPCSNA "file.sna", &                ; invalid (parse) start value
+savecpcsnaCoverage.asm(12): error: [SAVECPCSNA] No start address defined: SAVECPCSNA "file.sna"
+12    0000                  SAVECPCSNA "file.sna"                   ; no start address defined
+13    0000
+# file closed: savecpcsnaCoverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------

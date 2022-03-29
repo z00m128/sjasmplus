@@ -52,6 +52,7 @@ bool anyComma(char*& p);		// eats any comma (even one of double-commas)
 bool comma(char*& p);			// eats single comma, but not if double-comma is ahead
 bool doubleComma(char* & p);
 bool nonMaComma(char* & p);		// eats single comma only if multi-arg is configured to non-comma
+bool relaxedMaComma(char* & p);	// checks multi-arg comma (double/single), but also eats single comma
 EBracketType OpenBracket(char*& p);
 int CloseBracket(char*& p);
 char* ParenthesesEnd(char* p);

@@ -141,7 +141,6 @@ typedef struct SSource {
 } SSource;
 
 extern std::vector<SSource> sourceFiles;
-extern std::vector<std::string> openedFileNames;	// archive of all files opened (also includes!) (fullname!)
 
 enum EDispMode { DISP_NONE = 0, DISP_ACTIVE = 1, DISP_INSIDE_RELOCATE = 2 };
 extern EDispMode PseudoORG;

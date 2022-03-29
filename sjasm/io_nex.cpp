@@ -408,16 +408,6 @@ static void checkStackPointer() {
 	WarningById(W_NEX_STACK);
 }
 
-template <int argsN> static bool getIntArguments(aint (&args)[argsN], const bool argOptional[argsN]) {
-	for (int i = 0; i < argsN; ++i) {
-		if (0 < i && !comma(lp)) return argOptional[i];
-		aint val;				// temporary variable to preserve original value in case of error
-		if (!ParseExpression(lp, val)) return (0 == i) && argOptional[i];
-		args[i] = val;
-	}
-	return !comma(lp);
-}
-
 static void dirNexOpen() {
 	if (nex.f) {
 		Error("[SAVENEX] NEX file is already open", bp, SUPPRESS);
@@ -429,7 +419,7 @@ static void dirNexOpen() {
 	aint openArgs[4] = { (-1 == StartAddress ? 0 : StartAddress), 0xFFFE, 0, 0 };
 	if (comma(lp)) {
 		const bool optionals[] = {false, true, true, true};	// start address is mandatory because comma
-		if (!getIntArguments<4>(openArgs, optionals)) {
+		if (!getIntArguments<4>(lp, openArgs, optionals)) {
 			Error("[SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]", bp, SUPPRESS);
 			return;
 		}
@@ -471,7 +461,7 @@ static void dirNexCore() {
 	// parse arguments
 	aint coreArgs[3] = {0};
 	const bool optionals[] = {false, false, false};
-	if (!getIntArguments<3>(coreArgs, optionals)) {
+	if (!getIntArguments<3>(lp, coreArgs, optionals)) {
 		Error("[SAVENEX] expected syntax is CORE <major 0..15>,<minor 0..15>,<subminor 0..255>", bp, SUPPRESS);
 		return;
 	}
@@ -499,7 +489,7 @@ static void dirNexCfg3() {
 	// parse arguments
 	aint cfgArgs[4] = {1, 0};
 	const bool optionals[] = {false, true, true, false};
-	if (!getIntArguments<4>(cfgArgs, optionals)) {
+	if (!getIntArguments<4>(lp, cfgArgs, optionals)) {
 		Error("[SAVENEX] expected syntax is CFG3 <DoCRC 0/1>[,<PreserveExpansionBus 0/1>[,<CLIbufferAdr>,<CLIbufferSize>]]", bp, SUPPRESS);
 		return;
 	}
@@ -532,7 +522,7 @@ static void dirNexCfg() {
 	// parse arguments
 	aint cfgArgs[4] = {0};
 	const bool optionals[] = {false, true, true, true};
-	if (!getIntArguments<4>(cfgArgs, optionals)) {
+	if (!getIntArguments<4>(lp, cfgArgs, optionals)) {
 		Error("[SAVENEX] expected syntax is CFG <border 0..7>[,<fileHandle 0/1/$4000+>[,<PreserveNextRegs 0/1>[,<2MbRamReq 0/1>]]]", bp, SUPPRESS);
 		return;
 	}
@@ -556,7 +546,7 @@ static void dirNexBar() {
 	// parse arguments
 	aint barArgs[5] = {0, 0, 0, 0, 254};
 	const bool optionals[] = {false, false, true, true, true};
-	if (!getIntArguments<5>(barArgs, optionals)) {
+	if (!getIntArguments<5>(lp, barArgs, optionals)) {
 		Error("[SAVENEX] expected syntax is BAR <loadBar 0/1>,<barColour 0..255>[,<startDelay 0..255>[,<bankDelay 0..255>[,<posY 0..255>]]]", bp, SUPPRESS);
 		return;
 	}
@@ -625,7 +615,7 @@ static void dirNexPaletteMem() {
 // ;; SAVENEX PALETTE MEM <palPage8kNum 0..223>,<palOffset>
 	aint palArgs[2] = {0, 0};
 	const bool optionals[] = {false, false};
-	if (!getIntArguments<2>(palArgs, optionals)
+	if (!getIntArguments<2>(lp, palArgs, optionals)
 			|| palArgs[0] < 0 || SNexHeader::MAX_PAGE <= palArgs[0] || palArgs[1] < 0) {
 		Error("[SAVENEX] expected syntax is MEM <palPage8kNum 0..223>,<palOffset 0+>", bp, SUPPRESS);
 		return;
@@ -689,7 +679,7 @@ static void dirNexScreenLayer2andLowRes(EBmpType type) {
 	// parse arguments
 	aint screenArgs[4] = {-1, 0, -1, 0};
 	const bool optionals[] = {true, false, true, false};
-	if (!getIntArguments<4>(screenArgs, optionals)
+	if (!getIntArguments<4>(lp, screenArgs, optionals)
 			|| screenArgs[0] < -1 || SNexHeader::MAX_PAGE <= screenArgs[0]		// -1 for default pixel data
 			|| screenArgs[2] < -1 || SNexHeader::MAX_PAGE <= screenArgs[2]) {	// -1 for no-palette
 		Error("[SAVENEX] expected syntax is ... [<Page8kNum 0..223>,<offset>[,<palPage8kNum 0..223>,<palOffset>]]", bp, SUPPRESS);
@@ -749,7 +739,7 @@ static void dirNexScreenBmp() {
 	aint bmpArgs[2] = { 1, -1 };
 	if (comma(lp)) {	// empty filename will fall here too, causing syntax error
 		const bool optionals[] = {false, true};	// savePalette is mandatory after comma
-		if (!getIntArguments<2>(bmpArgs, optionals)) {
+		if (!getIntArguments<2>(lp, bmpArgs, optionals)) {
 			Error("[SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]", bp, SUPPRESS);
 			delete[] bmpname;
 			return;
@@ -878,7 +868,7 @@ static void dirNexScreenTile() {
 	// parse arguments
 	aint tileArgs[5] = {0, 0, 0, 0, 1};
 	const bool optionals[] = {false, false, false, false, true};
-	if (!getIntArguments<5>(tileArgs, optionals)
+	if (!getIntArguments<5>(lp, tileArgs, optionals)
 			|| tileArgs[0] < 0 || 255 < tileArgs[0]
 			|| tileArgs[1] < 0 || 255 < tileArgs[1]
 			|| tileArgs[2] < 0 || 255 < tileArgs[2]
@@ -950,7 +940,7 @@ static void dirNexCopper() {
 	// parse arguments
 	aint screenArgs[2] = {0, 0};
 	const bool optionals[] = {false, false};
-	if (!getIntArguments<2>(screenArgs, optionals)
+	if (!getIntArguments<2>(lp, screenArgs, optionals)
 			|| screenArgs[0] < 0 || SNexHeader::MAX_PAGE <= screenArgs[0]) {
 		Error("[SAVENEX] expected syntax is COPPER <Page8kNum 0..223>,<offset>", bp, SUPPRESS);
 		return;
@@ -1027,7 +1017,7 @@ static void dirNexAuto() {
 	// parse arguments
 	aint autoArgs[2] = { getNexBankNum(nex.lastBankIndex+1), SNexHeader::MAX_BANK-1 };
 	const bool optionals[] = {true, true};
-	if (!getIntArguments<2>(autoArgs, optionals)
+	if (!getIntArguments<2>(lp, autoArgs, optionals)
 			|| autoArgs[0] < 0 || SNexHeader::MAX_BANK <= autoArgs[0]
 			|| autoArgs[1] < 0 || SNexHeader::MAX_BANK <= autoArgs[1]) {
 		Error("[SAVENEX] expected syntax is AUTO [<fromBank 0..111>[,<toBank 0..111>]]", bp, SUPPRESS);

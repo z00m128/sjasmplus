@@ -1,14 +1,15 @@
 # file opened: po_opt.asm
-1     0000 C1 E1            POP bc, hl   ; pops BC first
-2     0002                  OPT push reset --reversepop --syntax=af
-3     0002 E1 C1            POP bc,,hl   ; pops HL first
-po_opt.asm(4): warning: Fake instruction: LD  bc,hl
-4     0004 44 4D            LD  bc,hl    ; warning about Fake instruction
-5     0006 44 4D            LD  bc,hl    ; warning supressed by lowercase "fake" in this comment
-6     0008                  OPT reset --syntax=a
-7     0008 C1 E1            POP bc,,hl   ; pop BC first (--reversepop was reset)
-8     000A                  OPT pop      ; restoring syntax to original state
-9     000A
+ 1    0000 C1 E1            POP bc, hl   ; pops BC first
+ 2    0002                  OPT push reset --reversepop --syntax=af
+ 3    0002 E1 C1            POP bc,,hl   ; pops HL first
+po_opt.asm(4): warning[fake]: Fake instruction: LD  bc,hl
+ 4    0004 44 4D            LD  bc,hl    ; warning about Fake instruction
+ 5    0006 44 4D            LD  bc,hl    ; warning supressed by lowercase "fake" in this comment (special keyword)
+ 6    0008 44 4D            LD  bc,hl    ; warning supressed by warning id: fake-ok
+ 7    000A                  OPT reset --syntax=a
+ 8    000A C1 E1            POP bc,,hl   ; pop BC first (--reversepop was reset)
+ 9    000C                  OPT pop      ; restoring syntax to original state
+10    000C
 # file closed: po_opt.asm
 
 Value    Label

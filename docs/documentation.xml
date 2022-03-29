@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.18.3 Documentation [2021-08-29]</title>
+  <title>SjASMPlus 1.19.0 Documentation [2022-03-31]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -68,7 +68,7 @@
           </listitem>
 
           <listitem>
-            <para>Virtual device mode for common machines: ZX 128, ZX Next, … (pseudo op DEVICE)</para>
+            <para>Virtual device mode for common machines: ZX 128, ZX Next, Amstrad CPC, … (pseudo op DEVICE)</para>
           </listitem>
 
           <listitem>
@@ -77,6 +77,10 @@
 
           <listitem>
             <para>ZX Spectrum Next specific features and directives (Z80N, 8ki memory paging, SAVENEX)</para>
+          </listitem>
+
+          <listitem>
+            <para>Amstrad CPC 464/6128 specific directives (SAVECPCSNA)</para>
           </listitem>
 
           <listitem>
@@ -111,7 +115,7 @@
 
       <para>Thanks to:<itemizedlist>
           <listitem>
-            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Ped7g</emphasis> - additional
+            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Ped7g, Dart Alver, Oli Wilkinson</emphasis> - additional
             programming;</para>
           </listitem>
 
@@ -157,7 +161,7 @@
           </listitem>
 
           <listitem>
-            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, Dart Alver, LVD</emphasis> -
+            <para><emphasis>Antipod, boo_boo, PulkoMandy, Busy, Liniya, LVD</emphasis> -
             bug fix patches, testing.</para>
           </listitem>
 
@@ -198,6 +202,25 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>31.3.2022 - 1.19.0</term>
+
+            <listitem>
+              <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>) - by Oli Wilkinson
+- added Amstrad CPC save snapshot and CDT (<link linkend="po_savecpcsna">`SAVECPCSNA`</link>, <link linkend="po_savecdt">`SAVECDT`</link>) - by Oli Wilkinson
+- added <link linkend="po_save3dos">`SAVE3DOS`</link> (like SAVEBIN with +3DOS header)
+- the deprecated "ok" warning suppression is removed, use "&lt;warning-id&gt;-ok" comment or -Wno-...
+- new <link linkend="s_temp_labels">temporary label</link> suffix syntax "_b" and "_f", enabling them for all expressions
+- fix `--longptr` mode to keep 32b address when `DS 0` is used
+- added fake instructions adc|add|sbc|sub de,bc|de|hl|sp
+- dec|inc|pop|push will accept also single-comma multiarg in --syntax=a mode
+- DUP/REPT will now accept also zero count (skipping the block)
+- DEFL labels can be defined even as late as in last pass
+- bugfixes (macros, listing, file names in errors, SLD reversepop data)
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>29.8.2021 - 1.18.3</term>
@@ -292,42 +315,6 @@
 - Added <link linkend="po_relocate_end">relocation data generator</link> (similar to WinAPE feature), check also <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">example</ulink>
 - bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by "("
 </synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>7.7.2020 - 1.15.1</term>
-
-            <listitem>
-              <synopsis>- <link linkend="po_equ">`EQU`</link> now assigns memory page to symbol based on the symbol value and current memory mapping
-- this does affect also results of <link linkend="po_labelslist">`LABELSLIST`</link> (<ulink url="https://github.com/z00m128/sjasmplus/issues/111">Issue #111</ulink>)
-- <link linkend="po_lua">`LUA`</link> emits warning when some machine code is emitted without "ALLPASS" modifier
-- <link linkend="po_savetrd">`SAVETRD`</link> refactored: fix couple of bugs and make TRD files conform the actual TR-DOS practice
-- `SAVETRD`: new "&amp;" modifier to produce "mono-loaders" with extra files appended
-- `SAVETRD`: added support for the unofficial 3-letter extensions ("; ok" to suppress warnings)
-- <link linkend="po_inctrd">`INCTRD`</link> refactored and added support for unofficial 3-letter extensions
-- fix <ulink url="https://github.com/z00m128/sjasmplus/issues/108">issue #108</ulink> to detect windows drive letters at beginning of file names with full windows paths
-- bugfixes: RAMTOP w/ global device, "r+w" file operations code review, memory buffer overrun in LUA</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>18.5.2020 - 1.15.0</term>
-
-            <listitem>
-              <synopsis>- added <link linkend="po_bplist">`BPLIST`</link> and <link linkend="po_setbp">`SETBP`</link> to export breakpoints info from asm for Unreal and ZEsarUX emulators
-- added ZX-like <link linkend="po_device">devices</link> with 2/4/8 MiB of virtual memory
-- the fake-sysvars/state of ZXSPECTRUM48/128/... devices reworked, moving stack down by default
-- behaviour of <link linkend="s_cli">`--fullpath`</link> option unified across all platforms and compilers
-- <link linkend="po_defarray">`DEFARRAY`</link> has new operator `[#]` to retrieve current size of array.
-- <link linkend="po_mmu">`MMU`</link> has new optional third argument to set also address (like ORG)
-- use of forward reference in <link linkend="ca_if">IF/IFN</link> emits only warning, and can be suppressed
-- internal Lua updated to 5.1.5 (last official 5.1 version), STDIN can be read multiple times
-- new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro_examples</ulink>: `sj_sysvars.i.asm` and `section.asm`, new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/lua_examples">lua_examples</ulink>: `lua_sin_table.asm`
-- RAM limit exceeded warning/error reworked to report with more sense, fixed bug with missing labels
-- <link linkend="po_savetrd">`SAVETRD`</link> warning about invalid extension can be suppressed by "; ok"
-- <link linkend="po_emptytrd">`EMPTYTRD`</link> takes as second argument disc label
-- added <link linkend="s_cli">`--outprefix`</link> option to prefix any output-directive filename (<ulink url="https://github.com/z00m128/sjasmplus/issues/102">issue #102</ulink>)</synopsis>
             </listitem>
           </varlistentry>
 
@@ -449,7 +436,7 @@
   </para>
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
-	<synopsis>  a      Multi-argument delimiter ",," (default is ",")
+	<synopsis>  a      Multi-argument delimiter ",," (default is ",") (but dec|inc|pop|push accept also ",")
   b      Whole expression parentheses are legal for memory access only (default = immediate or memory)
   B      memory access brackets [] required (default = relaxed syntax, [] allowed as extra)
   f F    Fake instructions: warning / disabled (default = enabled)
@@ -505,7 +492,7 @@ sjasmplus --lst --lstlab example.asm</programlisting>
 			The line suppression mechanism requires you to add end-of-line comment with "id-ok" string
 			somewhere in the comment (exception: for fake instructions and --syntax=f mode the word
 			"fake" is enough without -ok suffix) (the "ok" comment suppression mechanism from previous
-			versions of sjasmplus is deprecated and will be removed in future versions).
+			versions of sjasmplus is removed since v1.19.0).
 		</para>
 		<para>
 			The id-warning is emitted together with its id in brackets:
@@ -694,6 +681,10 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
       in the same order during every pass of assembling, but they can be used
       within macro, or repeating blocks (old sjasmplus versions didn't allow usage within macro).</para>
 
+      <para>Since v1.19.0 there is alternative syntax using underscore before 'B' and 'F', this
+        alternative underscored suffix enables temporary labels also for regular instructions
+        (in all expressions, same way as other labels).</para>
+
       <para><example>
           <title>docs_examples/s_temp_labels.asm</title>
 
@@ -713,7 +704,12 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
             EDUP
         ENDM
 
-        .4 zing</programlisting></para>
+        .4 zing
+
+        ; since v1.19.0
+        ld hl,1B        ; *old* HL = binary 1, NOT temporary label
+        ld hl,1_B       ; *new* HL = previous temporary label 1
+        ld hl,1_B*3     ; *new* works also in expressions</programlisting></para>
         </example></para>
     </section>
   </chapter>
@@ -945,7 +941,11 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
    ; into ",,", to avoid some ambiguities with certain instructions.
    OPT --syntax=a
    LD A,B,,B,D,,D,H ; same as example above in default syntax
-   SUB A,B,,C  ; = SUB B, SUB C (the default syntax does for SUB A,B two SUBs!)</programlisting></para>
+   SUB A,B,,C  ; = SUB B, SUB C (the default syntax does for SUB A,B two SUBs!)
+
+   ; since v1.19.0 DEC|INC|POP|PUSH accepts also single-comma in --syntax=a mode
+   POP bc,de,hl,,af ; both single/double comma works for these four instructions
+</programlisting></para>
     </section>
 
     <section id="s_fake_instructions">
@@ -1157,9 +1157,28 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
   ldd (ix+nn),mm  ; ld (ix+nn),mm : dec ix
   ldd (iy+nn),mm  ; ld (iy+nn),mm : dec iy
 
+  adc de,bc       ; ex de,hl : adc hl,bc : ex de,hl
+  adc de,de       ; ex de,hl : adc hl,hl : ex de,hl         ;; consider alternative: rl e : rl d (-7T)
+  adc de,hl       ; ex de,hl : adc hl,de : ex de,hl
+  adc de,sp       ; ex de,hl : adc hl,sp : ex de,hl
+
+  add de,bc       ; ex de,hl : add hl,bc : ex de,hl
+  add de,de       ; ex de,hl : add hl,hl : ex de,hl         ;; consider alternative: srl e : rl d (-3T)
+  add de,hl       ; ex de,hl : add hl,de : ex de,hl
+  add de,sp       ; ex de,hl : add hl,sp : ex de,hl
+
+  sbc de,bc       ; ex de,hl : sbc hl,bc : ex de,hl
+  sbc de,de       ; ex de,hl : sbc hl,hl : ex de,hl
+  sbc de,hl       ; ex de,hl : sbc hl,de : ex de,hl
+  sbc de,sp       ; ex de,hl : sbc hl,sp : ex de,hl
+
+  sub de,bc       ; or a : ex de,hl : sbc hl,bc : ex de,hl
+  sub de,de       ; or a : ex de,hl : sbc hl,hl : ex de,hl  ;; consider alternative: ld de,0 (-17T)
+  sub de,hl       ; or a : ex de,hl : sbc hl,de : ex de,hl
+  sub de,sp       ; or a : ex de,hl : sbc hl,sp : ex de,hl
   sub hl,bc       ; or a : sbc hl,bc
   sub hl,de       ; or a : sbc hl,de
-  sub hl,hl       ; or a : sbc hl,hl
+  sub hl,hl       ; or a : sbc hl,hl                        ;; consider alternative: ld hl,0 (-9T)
   sub hl,sp       ; or a : sbc hl,sp
 
   ; Z80N only
@@ -1301,6 +1320,24 @@ StartProg:
               <para>Has only single slot of size 64kiB (slot 0), covering full Z80 CPU addressing range.
 				  There are 32 memory pages available, by default page 0 is mapped.
 				  That makes in total 2MiB of memory available (32 * 64 ki = 2 Mi).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>AMSTRADCPC464<indexterm id="device_cpc464"><primary>AMSTRADCPC464</primary></indexterm></term>
+
+            <listitem>
+              <para>Has 4 slots (0-3) of size 0x4000 and 4 pages (0-3) of 0x4000, totalling 64K. These pages are mapped linearly as
+              { 0, 1, 2, 3 }.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>AMSTRADCPC6128<indexterm id="device_cpc6128"><primary>AMSTRADCPC6128</primary></indexterm></term>
+
+            <listitem>
+              <para>Has 4 slots (0-3) of size 0x4000 and 8 RAM pages (0-7) of 0x4000 (128K total). The default page mapping is
+              { 0, 1, 2, 3 }.</para>
             </listitem>
           </varlistentry>
 
@@ -1764,15 +1801,17 @@ END_OF_PROGRAM</programlisting></para>
             <term>DEFARRAY<indexterm id="po_defarray"><primary>DEFARRAY</primary></indexterm> &lt;id&gt; &lt;replacements&gt;</term>
 
             <listitem>
-				<para>Array of DEFINEs. Use <code>id[#]</code> to retrieve current size of array.<example>
+				<para>Array of DEFINEs.</para>
+				<para>Use <code>id[#]</code> to retrieve current size of array.
+				<example>
                   <title>docs_examples/po_defarray.asm</title>
 
-                  <para><programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
+                  <programlisting>    DEFARRAY myarray 10*20,"A",20,&lt;/D,40&gt;,50,70
 CNT DEFL 0 ;or CNT=0
     DUP myarray[#]      ; 6
     DISPLAY myarray[CNT]
 CNT DEFL CNT+1 ;or CNT=CNT+1
-    EDUP</programlisting></para>
+    EDUP</programlisting>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -1938,6 +1977,8 @@ counter = counter + 1
  ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
                 ; (default pages map: 14, 15, 10, 11, 4, 5, 0, 1) (default slot: 7 (0xE000..0xFFFF))
  NOSLOT64K      ; Single slot (slot 0) covering full 64kiB address range of Z80, 32 pages
+ AMSTRADCPC464  ; Amstrad CPC 464 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
+ AMSTRADCPC6128 ; Amstrad CPC 6128 (like 464 with 8 pages)
 
  ;disable:
    DEVICE NONE
@@ -2074,7 +2115,7 @@ will output to the console strings:
               following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.<example>
                   <title></title>
 
-                  <para><programlisting>    DUP 3
+                  <para><programlisting>    DUP 3 ; zero count would skip whole block
     NOP
     EDUP
 
@@ -2174,7 +2215,7 @@ will output to the console strings:
             <listitem>
               <para>The assembler will stop at this point. The pseudo-op
               END does NOT work in the beginning of line (even with --dirbol).
-              The optional argument is used by SAVESNA, SAVETAP and SAVENEX.</para>
+              The optional argument is used by SAVESNA, SAVECPCSNA, SAVETAP and SAVENEX.</para>
             </listitem>
           </varlistentry>
 
@@ -2398,7 +2439,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               <para><emphasis>Useful only for ZX-Spectrum Emulator
               UNREALSPECCY.</emphasis></para>
 
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save labels list in format:</para>
@@ -2694,7 +2735,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             <term>PAGE<indexterm id="po_page"><primary>PAGE</primary><seealso>DEVICE</seealso><seealso>MMU</seealso><seealso>SLOT</seealso></indexterm> &lt;number&gt;</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Set the current memory page to current slot.</para>
@@ -2773,6 +2814,43 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
+            <term>SAVE3DOS<indexterm id="po_save3dos"><primary>SAVE3DOS</primary></indexterm>
+                &lt;filename&gt;,&lt;address&gt;,&lt;size&gt;[,&lt;type&gt;[,&lt;w2_line&gt;[,&lt;w3&gt;]]]</term>
+
+            <listitem>
+              <para><emphasis>Works only in virtual device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Like <link linkend="po_savebin">SAVEBIN</link>, saves the block of device RAM
+                from "address", but with +3DOS 128 byte header prepended.<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM48
+    ...
+
+    ; +3 BASIC header (8 bytes starting from offset 15 in +3DOS header):
+    ; type is first byte (0 = basic, 1, 2 = arrays, 3 = code/screen$)
+    ; size is "first word" (bytes 1 and 2)
+    ; w2_line argument is "second word" (bytes 3 and 4)
+    ; w3 argument is "third word" (bytes 5 and 6) (default value = size)
+
+    ; by default the type=3 (CODE/SCREEN$) is saved
+    SAVE3DOS "screen.bin", $4000, $1b00
+    ; type 3: w2 argument $C000 is target load-address
+    SAVE3DOS "code.bin", $8000, $1234, 3, $C000
+    ; type 0: BASIC, default w2 = $8000 (no auto-run)
+    SAVE3DOS "prg1.bas", $5c00, 1234, 0
+    ; type 0: w2_line is LINE auto-run (30 in example)
+    SAVE3DOS "prg2.bas", $5c00, 1234, 0, 30
+    ; type 1: Numeric array (refer to +3 manual for these)
+    SAVE3DOS "b.dat", $8000, 30, 1
+    ; type 2: Character array (or maybe just ignore these)
+    SAVE3DOS "c.dat", $8000, 30, 2</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>SAVEBIN<indexterm id="po_savebin"><primary>SAVEBIN</primary></indexterm>
             &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
@@ -2788,6 +2866,70 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
                   <para><programlisting>    PAGE 7 ;set 7 page to current slot
     SAVEBIN "ram7.bin",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
     SAVEBIN "ram2.bin",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><para>SAVECDT<indexterm id="po_savecdt"><primary>SAVECDT</primary></indexterm>
+                FULL &lt;cdtname&gt;[,&lt;startaddr&gt;[,&lt;screenmode&gt;[,&lt;border&gt;[,&lt;ink0&gt;...&lt;ink15&gt;]]]]</para>
+            <para>SAVECDT EMPTY &lt;cdtname&gt;</para>
+            <para>SAVECDT BASIC &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;</para>
+            <para>SAVECDT CODE &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;]</para>
+            <para>SAVECDT HEADLESS &lt;cdtname&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;sync&gt;[,&lt;format&gt;]]</para></term>
+
+            <listitem>
+              <para><emphasis>Works only in Amstrad device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Manipulate CDT file (tape/TZX file format used by Amstrad CPC emulators).<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE AMSTRADCPC6128
+    ...
+    ; create empty CDT file (truncates already existing file to make it empty)
+    SAVECDT EMPTY "output.cdt"
+
+    ; snapshot-like dump with default loader, including loading screen, all banks, ...
+    SAVECDT FULL "output.cdt" ; defaults: END start addres, screenmode=1, border=1
+                              ; ink# = 1, 24, 20, 6, 26, 0, 2, 8, 10, 12, 14, 16, 18, 22, 24, 16
+
+    ; BASIC program prepared at address "label"
+    SAVECDT BASIC "output.cdt","A",label,length
+
+    ; block of binary data at address "label" (default "entry" = "label")
+    SAVECDT CODE "output.cdt","C",label,length,entry
+
+    ; headless block with custom sync and format at address "label", formats: 0 = AMSTRAD, 1 = ZX
+    SAVECDT HEADLESS "output.cdt",label,length,sync,format ; default sync = 0x16, format = 0</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SAVECPCSNA<indexterm id="po_savecpcsna"><primary>SAVECPCSNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
+
+            <listitem>
+              <para><emphasis>Works only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Save the snapshot for emulators of Amstrad CPC machines. (If start address is omitted,
+		  the one provided by <link linkend="po_end">END</link> is used)</para>
+
+              <para>The snapshot header content is hard-wired in the sjasmplus binary, with the CRTC, Palette and Gate Array registers
+    set to those of a CPC after a boot into the main ROM. Similarly to the ZX-Spectrum SAVESNA directive, interrupts are disabled and must
+    be re-enabled by your program. A full list of the settings can be found in the
+    <ulink url="https://github.com/z00m128/sjasmplus/blob/master/sjasm/io_cpc.cpp#L66">source</ulink>.
+		If you absolutely need different defaults and can't afford init-code modifying the state, you can post-patch the resulting SNA
+		file directly from source, see <ulink url="https://github.com/z00m128/sjasmplus/issues/139">Issue #139</ulink> for example.
+		<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE AMSTRADCPC464
+    ORG $1200
+START  .... ;some code
+    RET
+    SAVECPCSNA "game.sna",START ;save snapshot to file game.sna. Start address is START ($1200)</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -2823,7 +2965,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the block of RAM in Hobeta format.</para>
@@ -2854,7 +2996,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             <term>SAVESNA<indexterm id="po_savesna"><primary>SAVESNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the snapshot for emulators of ZX-Spectrum. (If start address is omitted,
@@ -2884,7 +3026,7 @@ START  .... ;something code
             <para>SAVETAP &lt;filename&gt;,HEADLESS,&lt;start&gt;,&lt;length&gt;[,&lt;customblockflag(0..255)&gt;]</para></term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Append the tape header or block of data to the end of the
@@ -2913,7 +3055,7 @@ START  .... ;something code
             <term>SAVETAP &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the tape file for emulators of ZX-Spectrum as a
@@ -3076,7 +3218,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
             <term>SLOT<indexterm id="po_slot"><primary>SLOT</primary><seealso>DEVICE</seealso><seealso>MMU</seealso><seealso>PAGE</seealso></indexterm> &lt;number_or_address&gt;</term>
 
             <listitem>
-              <para><emphasis>Work only in real device emulation mode. See
+              <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Set current slot. Slots are defined by DEVICE pseudo-op.
@@ -3415,7 +3557,8 @@ LABEL5:
       <para>The MACRO pseudo-op defines a macro. It should be followed by the
       name of the macro, optionally followed by the parameters. The following
       lines will be stored as the macro-body until an ENDM pseudo-op is
-      encountered. Macro's have to be defined before their use.
+      encountered. Macro's have to be defined before their use. Macro's name
+      must be unique (even if two macros differ by required arguments).
 	  <example>
           <title>Macro without parameters (docs_examples/s_macros.asm)</title>
 
@@ -3960,7 +4103,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[boolean] sj.insert_define("name", "value")<indexterm id="lua_sj_insert_define"><primary>sj.insert_define(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Add new define.</para>
+              <para>Add new define (returns true if the define is new, false when define already existed and value was replaced).</para>
             </listitem>
           </varlistentry>
 
@@ -4034,7 +4177,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.get_byte(address)<indexterm id="lua_sj_get_byte"><primary>sj.get_byte(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Get byte from memory. <emphasis>Work only in real device
+              <para>Get byte from memory. <emphasis>Works only in real device
               emulation mode.</emphasis></para>
             </listitem>
           </varlistentry>
@@ -4043,7 +4186,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.get_word(address)<indexterm id="lua_sj_get_word"><primary>sj.get_word(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Get word from memory. <emphasis>Work only in real device
+              <para>Get word from memory. <emphasis>Works only in real device
               emulation mode.</emphasis></para>
             </listitem>
           </varlistentry>
@@ -4115,7 +4258,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             startaddressofprogram)</term>
 
             <listitem>
-              <para>Save snapshot of memory in SNA format. <emphasis>Work only
+              <para>Save snapshot of memory in SNA format. <emphasis>Works only
               in real device emulation mode and only for ZXSPECTRUM48 and
               ZXSPECTRUM128..</emphasis></para>
             </listitem>
@@ -4972,12 +5115,6 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			debugger can cope with the tracing data containing full line + column begin/end
 			information, the simple/early tools will likely highlight only whole line of source.
 			For a start keeping single instruction per line may keep things simple.
-		</para>
-
-		<para>
-			The multi-arg instructions produce the tracing data only for the first instruction,
-			which will probably cause problems with single-stepping through such code. Rather
-			avoid multi-arg syntax when you are planning to debug the code.
 		</para>
 
 		<para>

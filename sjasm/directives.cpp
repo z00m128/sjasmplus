@@ -285,7 +285,7 @@ static void dirORG() {
 	// crop (with warning) address in device or non-longptr mode to 16bit address range
 	if ((DeviceID || !Options::IsLongPtr) && !check16u(val)) val &= 0xFFFF;
 	CurAddress = val;
-	if (DISP_NONE != PseudoORG && warningNotSuppressed()) WarningById(W_DISPLACED_ORG);
+	if (DISP_NONE != PseudoORG) WarningById(W_DISPLACED_ORG);
 	if (!DeviceID) return;
 	if (!comma(lp)) {
 		Device->CheckPage(CDevice::CHECK_RESET);
@@ -293,7 +293,7 @@ static void dirORG() {
 	}
 	// emit warning when current slot does not cover address used for ORG
 	auto slot = Device->GetCurrentSlot();
-	if ((CurAddress < slot->Address || slot->Address + slot->Size <= CurAddress) && warningNotSuppressed()) {
+	if ((CurAddress < slot->Address || slot->Address + slot->Size <= CurAddress)) {
 		char warnTxt[LINEMAX];
 		SPRINTF4(warnTxt, LINEMAX,
 					"address 0x%04X vs slot %d range 0x%04X..0x%04X",
@@ -459,7 +459,7 @@ static void dirMMU() {
 	// set explicit ORG address if the third argument was provided
 	if (0 <= address) {
 		CurAddress = address;
-		if (DISP_NONE != PseudoORG && warningNotSuppressed()) {
+		if (DISP_NONE != PseudoORG) {
 			WarningById(W_DISPLACED_ORG);
 		}
 	}
@@ -673,38 +673,34 @@ static void dirINCTRD() {
 
 static void dirSAVESNA() {
 	if (pass != LASTPASS) return;		// syntax error is not visible in early passes
-	bool exec = true;
 
 	if (!DeviceID) {
-		Error("SAVESNA only allowed in real device emulation mode (See DEVICE)");
-		exec = false;
+		Error("SAVESNA only allowed in real device emulation mode (See DEVICE)", nullptr, SUPPRESS);
+		return;
 	} else if (!IsZXSpectrumDevice(DeviceID)) {
-		Error("[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.");
-		exec = false;
+		Error("[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.", nullptr, SUPPRESS);
+		return;
 	}
 
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	int start = StartAddress;
 	if (anyComma(lp)) {
 		aint val;
-		if (ParseExpression(lp, val)) {
-			if (0 <= start) Warning("[SAVESNA] Start address was also defined by END, SAVESNA argument used instead");
-			if (0 <= val) {
-				start = val;
-			} else {
-				exec = false; Error("[SAVESNA] Negative values are not allowed", bp, SUPPRESS);
-			}
+		if (!ParseExpression(lp, val)) return;
+		if (0 <= start) Warning("[SAVESNA] Start address was also defined by END, SAVESNA argument used instead");
+		if (0 <= val) {
+			start = val;
 		} else {
-			exec = false;
+			Error("[SAVESNA] Negative values are not allowed", bp, SUPPRESS);
+			return;
 		}
 	}
 	if (start < 0) {
-		exec = false; Error("[SAVESNA] No start address defined", bp, SUPPRESS);
+		Error("[SAVESNA] No start address defined", bp, SUPPRESS);
+		return;
 	}
 
-	if (exec && !SaveSNA_ZX(fnaam.get(), start)) {
-		Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
-	}
+	if (!SaveSNA_ZX(fnaam.get(), start)) Error("[SAVESNA] Error writing file (Disk full?)", bp, IF_FIRST);
 }
 
 static void dirEMPTYTAP() {
@@ -965,6 +961,44 @@ static void dirSAVEDEV() {
 		if (exec && !SaveDeviceMemory(fnaam.get(), (size_t)start, (size_t)args[2])) {
 			Error("[SAVEDEV] Error writing file (Disk full?)", bp, IF_FIRST);
 		}
+	}
+}
+
+static void dirSAVE3DOS() {
+	if (!DeviceID) {
+		Error("SAVE3DOS works in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
+		return;
+	}
+	bool exec = (LASTPASS == pass);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	aint args[5] = { -1, -1, 3, -1, -1 };	// address, size, type, w2_line, w3
+	const bool optional[] = {false, false, true, true, true};
+	if (!anyComma(lp) || !getIntArguments<5>(lp, args, optional)) {
+		Error("[SAVE3DOS] expected syntax is <filename>,<address>,<size>[,<type>[,<w2_line>[,<w3>]]]", bp, SUPPRESS);
+		return;
+	}
+	aint &address = args[0], &size = args[1], &type = args[2], &w2_line = args[3], &w3 = args[4];
+	if (address < 0 || size < 1 || 0x10000 < address + size) {
+		Error("[SAVE3DOS] [address, size] region outside of 64ki", bp);
+		return;
+	}
+	if (-1 == w3) w3 = size;	// default for w3 is size for all types, unless overridden
+	switch (type) {
+	case 0:		// type Program: default w2 = 0x8000
+		if (-1 == w2_line) w2_line = 0x8000;
+	case 1:		// type Numeric array: no idea what w2 actually should be for these
+	case 2:		// type Character array:
+		break;
+	case 3:		// type Code: default w2 = load address
+		if (-1 == w2_line) w2_line = address;
+		break;
+	default:
+		Error("[SAVE3DOS] expected type 0..3", bp);
+		return;
+	}
+	if (exec && !SaveBinary3dos(fnaam.get(), address, size, type, w2_line, w3)) {
+		Error("[SAVE3DOS] Error writing file (Disk full?)", bp, IF_FIRST);
 	}
 }
 
@@ -1305,7 +1339,7 @@ static bool dirIfIfn(aint & val) {
 		Error("[IF/IFN] Syntax error", lp, IF_FIRST);
 		return false;
 	}
-	if (IsLabelNotFound && warningNotSuppressed()) {
+	if (IsLabelNotFound) {
 		WarningById(W_FWD_REF, bp, W_EARLY);
 	}
 	return true;
@@ -1853,8 +1887,8 @@ static void DupWhileImplementation(bool isWhile) {
 		if (IsLabelNotFound) {
 			Error("[DUP/REPT] Forward reference", NULL, ALL);
 		}
-		if ((int) val < 1) {
-			ErrorInt("[DUP/REPT] Repeat value must be positive", val, IF_FIRST); return;
+		if ((int) val < 0) {
+			ErrorInt("[DUP/REPT] Repeat value must be positive or zero", val, IF_FIRST); return;
 		}
 	}
 
@@ -1880,7 +1914,7 @@ static void dirWHILE() {
 
 static bool shouldRepeat(SRepeatStack& dup) {
 	if (nullptr == dup.RepeatCondition) {
-		return dup.RepeatCount--;
+		return 0 <= --dup.RepeatCount;
 	} else {
 		if (!dup.RepeatCount--) {
 			Error("[WHILE] infinite loop? (reaching the guardian value, default 100k)");
@@ -2096,7 +2130,7 @@ static void dirLUA() {
 	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
 	const bool execute = (-1 == passToExec) || (passToExec == pass);
 	// remember warning suppression also from block start
-	bool showWarning = !suppressedById(W_LUA_MC_PASS) && warningNotSuppressed();
+	bool showWarning = !suppressedById(W_LUA_MC_PASS);
 
 	if (execute) {
 		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
@@ -2127,7 +2161,7 @@ static void dirLUA() {
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDLUA
 			// take into account also warning suppression used at end of block
-			showWarning = showWarning && !suppressedById(W_LUA_MC_PASS) && warningNotSuppressed();
+			showWarning = showWarning && !suppressedById(W_LUA_MC_PASS);
 			break;
 		}
 		ListFile(true);
@@ -2169,13 +2203,7 @@ static void dirINCLUDELUA() {
 	if (!fullpath[0]) {
 		Error("[INCLUDELUA] File doesn't exist", fnaam.get(), EARLY);
 	} else {
-		// archive the filename (for referencing it in SLD tracing data or listing/errors)
-		auto ofnIt = std::find(openedFileNames.cbegin(), openedFileNames.cend(), fullpath);
-		if (ofnIt == openedFileNames.cend()) {		// new filename, add it to archive
-			openedFileNames.push_back(fullpath);
-			ofnIt = --openedFileNames.cend();
-		}
-		fileNameFull = ofnIt->c_str();				// get const pointer into archive
+		fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
 		LuaStartPos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 		LuaStartPos.line = 1;
 		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
@@ -2270,6 +2298,9 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".savetap", dirSAVETAP);
 	DirectivesTable.insertd(".emptytrd", dirEMPTYTRD);
 	DirectivesTable.insertd(".savetrd", dirSAVETRD);
+	DirectivesTable.insertd(".savecpcsna", dirSAVECPCSNA);
+	DirectivesTable.insertd(".savecdt", dirSAVECDT);
+	DirectivesTable.insertd(".save3dos", dirSAVE3DOS);
 	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
 	DirectivesTable.insertd(".winexec", dirWINEXEC);

@@ -34,6 +34,7 @@
 #include <fcntl.h>
 
 int ListAddress;
+std::vector<const char*> archivedFileNames;	// archive of all files opened (also includes!) (fullname!)
 
 static constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;
 static constexpr int DESTBUFLEN = 8192;
@@ -55,6 +56,21 @@ static FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
 static aint WBLength = 0;
 
 static void CloseBreakpointsFile();
+
+// returns permanent C-string pointer to the fullpathname (if new, it is added to archive)
+const char* ArchiveFilename(const char* fullpathname) {
+	for (auto fname : archivedFileNames) {		// search whole archive for identical full name
+		if (!strcmp(fname, fullpathname)) return fname;
+	}
+	const char* newName = STRDUP(fullpathname);
+	archivedFileNames.push_back(newName);
+	return newName;
+}
+
+// does release all archived filenames, making all pointers (and archive itself) invalid
+void ReleaseArchivedFilenames() {
+	for (auto filename : archivedFileNames) free((void*)filename);
+}
 
 // find position of extension in filename (points at dot char or beyond filename if no extension)
 // filename is pointer to writeable format containing file name (can be full path) (NOT NULL)
@@ -263,6 +279,7 @@ void ListFile(bool showAsSkipped) {
 		pos += BtoList;
 	} while (0 < nListBytes);
 	nListBytes = 0;
+	ListAddress = CurAddress;			// move ListAddress also beyond unlisted but emitted bytes
 }
 
 void ListSilentOrExternalEmits() {
@@ -364,8 +381,9 @@ void EmitWords(int* words, bool isInstructionStart) {
 
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
 	if (len <= 0) {
-		CurAddress = (CurAddress + len) & 0xFFFF;
-		if (DISP_NONE != PseudoORG) adrdisp = (adrdisp + len) & 0xFFFF;
+		const aint adrMask = Options::IsLongPtr ? ~0 : 0xFFFF;
+		CurAddress = (CurAddress + len) & adrMask;
+		if (DISP_NONE != PseudoORG) adrdisp = (adrdisp + len) & adrMask;
 		if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
 		else			CheckRamLimitExceeded();
 		return;
@@ -516,12 +534,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		}
 	}
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
-	auto ofnIt = std::find(openedFileNames.cbegin(), openedFileNames.cend(), fullpath);
-	if (ofnIt == openedFileNames.cend()) {		// new filename, add it to archive
-		openedFileNames.push_back(fullpath);
-		ofnIt = --openedFileNames.cend();
-	}
-	fileNameFull = ofnIt->c_str();				// get const pointer into archive
+	fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
 	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 
 	// refresh pre-defined values related to file/include
@@ -1009,6 +1022,35 @@ int SaveBinary(char* fname, int start, int length) {
 }
 
 
+int SaveBinary3dos(char* fname, int start, int length, byte type, word w2, word w3) {
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("Error opening file", fname, FATAL);
+	// prepare +3DOS 128 byte header content
+	constexpr int hsize = 128;
+	const int full_length = hsize + length;
+	byte sum = 0, p3dos_header[hsize] { "PLUS3DOS\032\001" };
+	p3dos_header[11] = byte(full_length>>0);
+	p3dos_header[12] = byte(full_length>>8);
+	p3dos_header[13] = byte(full_length>>16);
+	p3dos_header[14] = byte(full_length>>24);
+	// +3 BASIC 8 byte header filled with "relevant values"
+	p3dos_header[15+0] = type;
+	p3dos_header[15+1] = byte(length>>0);
+	p3dos_header[15+2] = byte(length>>8);
+	p3dos_header[15+3] = byte(w2>>0);
+	p3dos_header[15+4] = byte(w2>>8);
+	p3dos_header[15+5] = byte(w3>>0);
+	p3dos_header[15+6] = byte(w3>>8);
+	// calculat checksum of the header
+	for (const byte v : p3dos_header) sum += v;
+	p3dos_header[hsize-1] = sum;
+	// write header and data
+	int result = (hsize == (aint) fwrite(p3dos_header, 1, hsize, ff)) ? SaveRAM(ff, start, length) : 0;
+	fclose(ff);
+	return result;
+}
+
+
 // all arguments must be sanitized by caller (this just writes data block into opened file)
 bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
 	return (length == fwrite(Device->Memory + start, 1, length, file));
@@ -1393,7 +1435,7 @@ static void CloseBreakpointsFile() {
 
 void WriteBreakpoint(const aint val) {
 	if (!FP_BreakpointsFile) {
-		if (warningNotSuppressed()) WarningById(W_BP_FILE);
+		WarningById(W_BP_FILE);
 		return;
 	}
 	++breakpointsCounter;

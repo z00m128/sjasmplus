@@ -7,9 +7,9 @@ various_W.asm(83): warning[fwdref]: forward reference of symbol: IF fwd_ref_labe
   3   0000              ; the default is "enabled" for all warnings - exercise all of them
 various_W.asm(4): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
   4   0000 21 00 00     abs:    ld hl,abs
-various_W.asm(5): warning[zxnramtop]: ZXN device doesn't init memory in any way (RAMTOP is ignored)
+various_W.asm(5): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
   5   0003                  DEVICE ZXSPECTRUMNEXT, $8000
-various_W.asm(6): warning[noslotramtop]: NoSlot64k device doesn't init memory in any way (RAMTOP is ignored)
+various_W.asm(6): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
   6   0003                  DEVICE NOSLOT64K, $8000
   7   0003                  DEVICE ZXSPECTRUM48, $8000
 various_W.asm(7): warning[devramtop]: [DEVICE] this device was already opened with different RAMTOP value

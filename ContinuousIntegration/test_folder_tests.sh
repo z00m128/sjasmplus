@@ -128,8 +128,8 @@ for f in "${TEST_FILES[@]}"; do
     else
         echo -n -e "  \\  \033[92m$ok_tick_text OK\033[0m "
     fi
-    # check binary results, if TAP, BIN, RAW or TRD are present in source directory
-    for binext in {'tap','bin','raw','trd'}; do
+    # check binary results, if TAP, CDT, BIN, RAW or TRD are present in source directory
+    for binext in {'tap','cdt','bin','raw','trd'}; do
         if [[ -f "${CFG_BASE}.${binext}" ]]; then
             totalChecks=$((totalChecks + 1))        # +1 for each binary check
             ! $CMP "${CFG_BASE}.${binext}" "${dst_base}.${binext}" \

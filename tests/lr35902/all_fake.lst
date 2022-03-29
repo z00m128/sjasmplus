@@ -375,28 +375,71 @@ all_fake.asm(202): error: Illegal instruction: ldd_#ix_nn#_nn      ldd (ix+$77),
 all_fake.asm(203): error: Illegal instruction: ldd_#iy_nn#_nn      ldd (iy+$77),$44
 203   8016              ldd_#iy_nn#_nn      ldd (iy+$77),$44
 204   8016
-all_fake.asm(205): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,bc
-205   8016              sub_hl_bc           sub hl,bc
-all_fake.asm(206): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,de
-206   8016              sub_hl_de           sub hl,de
-all_fake.asm(207): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,hl
-207   8016              sub_hl_hl           sub hl,hl
-all_fake.asm(208): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,sp
-208   8016              sub_hl_sp           sub hl,sp
+all_fake.asm(205): error: Fake instructions are not implemented in Sharp LR35902 mode: adc de,bc
+205   8016              adc_de_bc           adc de,bc
+all_fake.asm(206): error: Fake instructions are not implemented in Sharp LR35902 mode: adc de,de
+206   8016              adc_de_de           adc de,de
+all_fake.asm(207): error: Fake instructions are not implemented in Sharp LR35902 mode: adc de,hl
+207   8016              adc_de_hl           adc de,hl
+all_fake.asm(208): error: Fake instructions are not implemented in Sharp LR35902 mode: adc de,sp
+208   8016              adc_de_sp           adc de,sp
 209   8016
-210   8016                  ; ZXNext section - there are no true regular fakes yet, but some specials
-all_fake.asm(211): error: Unrecognized instruction: mul
-211   8016              zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
-212   8016                  ; these definitely should not work in LR35902 mode (trying to switch --zxnext is fatal error)
-all_fake.asm(213): error: Unrecognized instruction: break
-213   8016              zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
-all_fake.asm(214): error: Unrecognized instruction: exit
-214   8016              zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
-215   8016
+all_fake.asm(210): error: Fake instructions are not implemented in Sharp LR35902 mode: add de,bc
+210   8016              add_de_bc           add de,bc
+all_fake.asm(211): error: Fake instructions are not implemented in Sharp LR35902 mode: add de,de
+211   8016              add_de_de           add de,de
+all_fake.asm(212): error: Fake instructions are not implemented in Sharp LR35902 mode: add de,hl
+212   8016              add_de_hl           add de,hl
+all_fake.asm(213): error: Fake instructions are not implemented in Sharp LR35902 mode: add de,sp
+213   8016              add_de_sp           add de,sp
+214   8016
+all_fake.asm(215): error: Fake instructions are not implemented in Sharp LR35902 mode: sbc de,bc
+215   8016              sbc_de_bc           sbc de,bc
+all_fake.asm(216): error: Fake instructions are not implemented in Sharp LR35902 mode: sbc de,de
+216   8016              sbc_de_de           sbc de,de
+all_fake.asm(217): error: Fake instructions are not implemented in Sharp LR35902 mode: sbc de,hl
+217   8016              sbc_de_hl           sbc de,hl
+all_fake.asm(218): error: Fake instructions are not implemented in Sharp LR35902 mode: sbc de,sp
+218   8016              sbc_de_sp           sbc de,sp
+219   8016
+all_fake.asm(220): error: Fake instructions are not implemented in Sharp LR35902 mode: sub de,bc
+220   8016              sub_de_bc           sub de,bc
+all_fake.asm(221): error: Fake instructions are not implemented in Sharp LR35902 mode: sub de,de
+221   8016              sub_de_de           sub de,de
+all_fake.asm(222): error: Fake instructions are not implemented in Sharp LR35902 mode: sub de,hl
+222   8016              sub_de_hl           sub de,hl
+all_fake.asm(223): error: Fake instructions are not implemented in Sharp LR35902 mode: sub de,sp
+223   8016              sub_de_sp           sub de,sp
+all_fake.asm(224): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,bc
+224   8016              sub_hl_bc           sub hl,bc
+all_fake.asm(225): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,de
+225   8016              sub_hl_de           sub hl,de
+all_fake.asm(226): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,hl
+226   8016              sub_hl_hl           sub hl,hl
+all_fake.asm(227): error: Fake instructions are not implemented in Sharp LR35902 mode: sub hl,sp
+227   8016              sub_hl_sp           sub hl,sp
+228   8016
+229   8016                  ; ZXNext section - there are no true regular fakes yet, but some specials
+all_fake.asm(230): error: Unrecognized instruction: mul
+230   8016              zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
+231   8016                  ; these definitely should not work in LR35902 mode (trying to switch --zxnext is fatal error)
+all_fake.asm(232): error: Unrecognized instruction: break
+232   8016              zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
+all_fake.asm(233): error: Unrecognized instruction: exit
+233   8016              zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
+234   8016
 # file closed: all_fake.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x8016 X adc_de_bc
+0x8016 X adc_de_de
+0x8016 X adc_de_hl
+0x8016 X adc_de_sp
+0x8016 X add_de_bc
+0x8016 X add_de_de
+0x8016 X add_de_hl
+0x8016 X add_de_sp
 0x8016 X ld_#hl#_bc
 0x8016 X ld_#hl#_de
 0x8016 X ld_#ix_nn#_bc
@@ -558,6 +601,10 @@ Value    Label
 0x8004 X rr_bc
 0x8004 X rr_de
 0x8004 X rr_hl
+0x8016 X sbc_de_bc
+0x8016 X sbc_de_de
+0x8016 X sbc_de_hl
+0x8016 X sbc_de_sp
 0x8004 X sla_bc
 0x8004 X sla_de
 0x8004 X sla_hl
@@ -573,6 +620,10 @@ Value    Label
 0x8004 X srl_bc
 0x8004 X srl_de
 0x8004 X srl_hl
+0x8016 X sub_de_bc
+0x8016 X sub_de_de
+0x8016 X sub_de_hl
+0x8016 X sub_de_sp
 0x8016 X sub_hl_bc
 0x8016 X sub_hl_de
 0x8016 X sub_hl_hl

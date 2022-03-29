@@ -43,7 +43,7 @@ static void PrintHelpMain() {
 	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
 	//     |<-- ...8901234567890123456789012345678901234567890123456789012... 80 chars -->|
 	_COUT "Based on code of SjASM by Sjoerd Mastijn (http://www.xl2s.tk)" _ENDL;
-	_COUT "Copyright 2004-2021 by Aprisobal and all other participants" _ENDL;
+	_COUT "Copyright 2004-2022 by Aprisobal and all other participants" _ENDL;
 	//_COUT "Patches by Antipod / boo_boo / PulkoMandy and others" _ENDL;
 	//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
@@ -136,9 +136,8 @@ namespace Options {
 			Error(errorTxt, bp, SUPPRESS);
 			return true;
 		}
-		// check end-of-line comment for mentioning "fake" to remove warning, or beginning with "ok"
-		if (syx.FakeWarning && warningNotSuppressed(true)) {
-			Warning("Fake instruction", bp);
+		if (syx.FakeWarning) {
+			WarningById(W_FAKE, bp);
 		}
 		return false;
 	}
@@ -209,7 +208,6 @@ SSource::~SSource() {
 }
 
 std::vector<SSource> sourceFiles;
-std::vector<std::string> openedFileNames;
 
 int ConvertEncoding = ENCWIN;
 
@@ -344,6 +342,7 @@ void FreeRAM() {
 		PreviousIsLabel = nullptr;
 	}
 	if (Options::IncludeDirsList) delete Options::IncludeDirsList;
+	ReleaseArchivedFilenames();
 }
 
 
@@ -637,7 +636,7 @@ int main(int argc, char **argv) {
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
 	sourceFiles.reserve(32);
-	openedFileNames.reserve(64);
+	archivedFileNames.reserve(64);
 
 	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
 

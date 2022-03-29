@@ -1,3 +1,17 @@
+
+## [1.19.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.19.0) - 31.3.2022
+- added Amstrad CPC devices ([`AMSTRADCPC464`, `AMSTRADCPC6128`](http://z00m128.github.io/sjasmplus/documentation.html#po_device)) - by Oli Wilkinson
+- added Amstrad CPC save snapshot and CDT ([`SAVECPCSNA`](http://z00m128.github.io/sjasmplus/documentation.html#po_savecpcsna), [`SAVECDT`](http://z00m128.github.io/sjasmplus/documentation.html#po_savecdt)) - by Oli Wilkinson
+- added [`SAVE3DOS`](http://z00m128.github.io/sjasmplus/documentation.html#po_save3dos) (like SAVEBIN with +3DOS header)
+- the deprecated "ok" warning suppression is removed, use "&lt;warning-id>-ok" comment or -Wno-...
+- new [temporary label](http://z00m128.github.io/sjasmplus/documentation.html#s_temp_labels) suffix syntax `_b` and `_f`, enabling them for all expressions
+- fix `--longptr` mode to keep 32b address when `DS 0` is used
+- added fake instructions adc|add|sbc|sub de,bc|de|hl|sp
+- dec|inc|pop|push will accept also single-comma multiarg in --syntax=a mode
+- DUP/REPT will now accept also zero count (skipping the block)
+- DEFL labels can be defined even as late as in last pass
+- bugfixes (macros, listing, file names in errors, SLD reversepop data)
+
 ## [1.18.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.3) - 29.8.2021
 - added [`--color`](http://z00m128.github.io/sjasmplus/documentation.html#s_cli) to enable/disable ANSI coloring of errors/warnings
 - added [`--syntax=s`](http://z00m128.github.io/sjasmplus/documentation.html#s_cli) mode to disable sub-word substitutions of DEFINEs
@@ -230,7 +244,7 @@
 - Fixed `IF` inside `MACRO`, `DUP` and `REPT`
 - Fixed `ALIGN` behavior and docs wording
 - Fixed `INCHOB`, `INCBIN` (offset / length)
-- Fixed `INCLUDE`, `INCLUDELUA` system path priority ("" vs <>)
+- Fixed `INCLUDE`, `INCLUDELUA` system path priority ("" vs &lt;>)
 - Fixed `END` behavior
 - Fixed `DEFARRAY` to work as documented
 - Fixed and refactored `WORD`, `DWORD`, `D24`
@@ -412,7 +426,7 @@ And thanks to Konami Man:
 ## 1.03 (debug)
 - Added counter of compiled lines
 - Added directive `SAVEHOB`, which saves block of memory in Hobeta format (by Kurles^HS^CPU)
-- Corrected bug with using <..> in directives `INCLUDE`, `INCBIN` and etc (by Kurles^HS^CPU)
+- Corrected bug with using &lt;..> in directives `INCLUDE`, `INCBIN` and etc (by Kurles^HS^CPU)
 
 ## 1.02 (debug)
 - New synonym of `INCBIN` -- `INSERT`
@@ -442,7 +456,7 @@ And thanks to Konami Man:
 ## 0.39f
 - Maximum, minimum, and, or, mod, xor, not, shl, shr, low and high operators added.
 - Logical operations result in -1 or 0 instead of 1 or 0. Of course, -1 for true and 0 for false ;)
-- Fixed the "ifdef <illegal identifier>" bug
+- Fixed the "ifdef &lt;illegal identifier>" bug
 
 ## 0.30
 - `#` Can be used now to indicate a hexadecimal value

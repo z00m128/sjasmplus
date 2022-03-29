@@ -27,7 +27,7 @@ labels_extra_checks.asm(16): warning: Label has different value in pass 3: previ
 20    1014
 21    1014              ; make pass2 differ from pass1, reporting broken flow of local numeric labels
 22    1014                          IFUSED symbol_22
-labels_extra_checks.asm(23): error: Local-labels flow differs in this pass (missing/new local label or final pass source difference)
+labels_extra_checks.asm(23): error: Temporary labels flow differs in this pass (missing/new temporary label or final pass source difference)
 23    1014 00           404         nop
 labels_extra_checks.asm(24): warning: Label has different value in pass 3: previous value 4116 not equal 4117
 24    1015              symbol_22                       ; also duplicate label in pass2 error

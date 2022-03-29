@@ -1,0 +1,35 @@
+	OUTPUT "build/loader464.bin"
+
+code_start	equ $8000
+	org code_start
+
+start:
+	ld a,$FF	; OFF
+	call $BC6B	; CASNOISY
+
+	; check loading screen
+	ld a,(settings.load_screen)
+	or a
+	jr z,.load_code
+
+.load_screen:
+	; load screen
+	ld hl,$C000	; dest
+	ld de,$4000	; size
+	ld a,$16	; type: data
+	call $BCA1	; CASREAD (headerless)
+
+.load_code:
+	ld hl,(settings.start_addr)
+	push hl
+
+	ld hl,(settings.code_addr)
+	ld de,(settings.code_len)
+	ld a,$16	; type: data
+	jp $BCA1	; CASREAD
+
+settings:
+.load_screen:	.db $00
+.start_addr:	.dw $0000
+.code_addr:		.dw $0000
+.code_len:		.dw $0000
