@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.18.3 Documentation [2021-08-29]</title>
+  <title>SjASMPlus 1.19.0 Documentation [2022-03-31]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -204,7 +204,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.19.0</term>
+            <term>31.3.2022 - 1.19.0</term>
 
             <listitem>
               <synopsis>- added Amstrad CPC devices (<link linkend="po_device">"AMSTRADCPC464", "AMSTRADCPC6128"</link>) - by Oli Wilkinson
@@ -315,42 +315,6 @@
 - Added <link linkend="po_relocate_end">relocation data generator</link> (similar to WinAPE feature), check also <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">example</ulink>
 - bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by "("
 </synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>7.7.2020 - 1.15.1</term>
-
-            <listitem>
-              <synopsis>- <link linkend="po_equ">`EQU`</link> now assigns memory page to symbol based on the symbol value and current memory mapping
-- this does affect also results of <link linkend="po_labelslist">`LABELSLIST`</link> (<ulink url="https://github.com/z00m128/sjasmplus/issues/111">Issue #111</ulink>)
-- <link linkend="po_lua">`LUA`</link> emits warning when some machine code is emitted without "ALLPASS" modifier
-- <link linkend="po_savetrd">`SAVETRD`</link> refactored: fix couple of bugs and make TRD files conform the actual TR-DOS practice
-- `SAVETRD`: new "&amp;" modifier to produce "mono-loaders" with extra files appended
-- `SAVETRD`: added support for the unofficial 3-letter extensions ("; ok" to suppress warnings)
-- <link linkend="po_inctrd">`INCTRD`</link> refactored and added support for unofficial 3-letter extensions
-- fix <ulink url="https://github.com/z00m128/sjasmplus/issues/108">issue #108</ulink> to detect windows drive letters at beginning of file names with full windows paths
-- bugfixes: RAMTOP w/ global device, "r+w" file operations code review, memory buffer overrun in LUA</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>18.5.2020 - 1.15.0</term>
-
-            <listitem>
-              <synopsis>- added <link linkend="po_bplist">`BPLIST`</link> and <link linkend="po_setbp">`SETBP`</link> to export breakpoints info from asm for Unreal and ZEsarUX emulators
-- added ZX-like <link linkend="po_device">devices</link> with 2/4/8 MiB of virtual memory
-- the fake-sysvars/state of ZXSPECTRUM48/128/... devices reworked, moving stack down by default
-- behaviour of <link linkend="s_cli">`--fullpath`</link> option unified across all platforms and compilers
-- <link linkend="po_defarray">`DEFARRAY`</link> has new operator `[#]` to retrieve current size of array.
-- <link linkend="po_mmu">`MMU`</link> has new optional third argument to set also address (like ORG)
-- use of forward reference in <link linkend="ca_if">IF/IFN</link> emits only warning, and can be suppressed
-- internal Lua updated to 5.1.5 (last official 5.1 version), STDIN can be read multiple times
-- new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/macro_examples">macro_examples</ulink>: `sj_sysvars.i.asm` and `section.asm`, new <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/lua_examples">lua_examples</ulink>: `lua_sin_table.asm`
-- RAM limit exceeded warning/error reworked to report with more sense, fixed bug with missing labels
-- <link linkend="po_savetrd">`SAVETRD`</link> warning about invalid extension can be suppressed by "; ok"
-- <link linkend="po_emptytrd">`EMPTYTRD`</link> takes as second argument disc label
-- added <link linkend="s_cli">`--outprefix`</link> option to prefix any output-directive filename (<ulink url="https://github.com/z00m128/sjasmplus/issues/102">issue #102</ulink>)</synopsis>
             </listitem>
           </varlistentry>
 
