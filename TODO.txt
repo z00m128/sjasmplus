@@ -5,6 +5,8 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+relocation -> extra support for 256B aligned relocation mode (For symbOS and NextZXOS drivers)
+
 "smc+?" syntax to pick most logical argument by assembler itself
 
 ? refactor temporary labels from double-linked list to simple vector ?
@@ -178,3 +180,4 @@ Twitter
 zx-pk.ru forum
 Next FB
 (maybe once per year or two: next forum, linkedin)
+-- also update .exe/docker in tests/misc
