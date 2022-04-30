@@ -26,6 +26,9 @@ Then run as root or use sudo:
 ### Gentoo GNU/Linux
 Check [cizo2000's github gentoo-overlay/dev-util/sjasmplus](https://github.com/cizo2000/gentoo-overlay/tree/master/dev-util/sjasmplus) for ebuild files.
 
+### Arch Linux
+Recently (2022) it seems leo72 started providing AUR for z00m's fork of sjasmplus: [aur.archlinux.org/packages/sjasmplus-z00m128](https://aur.archlinux.org/packages/sjasmplus-z00m128) (AFAIK there's no connection with any maintainer of this project, but hopefully this will continue and provide good experience to AUR users, thanks leo72).
+
 ## Default method for MS Windows
 Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile.win` according your preferences (default `c:\mingw\usr\local\bin`). Remove `-static` parameter in `CFLAGS` if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Run following commands:
 
