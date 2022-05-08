@@ -306,8 +306,8 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "r+b")) return ReturnWithError("Error opening file", fname, ff);
 	STrdHead trdHead;
-	if (!FOPEN_ISOK(ff, fname, "r+b")) Error("Error opening file", fname, FATAL);
 	if (!trdHead.readFromFile(ff)) {
 		return ReturnWithError("TRD image read error", fname, ff);
 	}
