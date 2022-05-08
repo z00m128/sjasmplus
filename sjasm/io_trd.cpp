@@ -493,12 +493,12 @@ int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset,
 	TRD_FileNameToBytes(filename, trdFormName, Lname);	// ignore diagnostic info about extension
 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
-	FILE* ff;
 	STrdHead trdHead;
 	char* fullTrdName = GetPath(trdname);
-	if (!FOPEN_ISOK(ff, fullTrdName, "rb")) Error("[INCTRD] Error opening file", trdname, FATAL);
+	FILE* ff = fopen(fullTrdName, "rb");
 	free(fullTrdName);
 	fullTrdName = nullptr;
+	if (nullptr == ff) return ReturnWithError("[INCTRD] Error opening file", trdname, ff);
 	if (!trdHead.readFromFile(ff)) {
 		return ReturnWithError("TRD image read error", trdname, ff);
 	}

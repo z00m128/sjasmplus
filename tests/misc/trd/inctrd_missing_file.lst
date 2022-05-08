@@ -1,0 +1,8 @@
+# file opened: inctrd_missing_file.asm
+inctrd_missing_file.asm(1): error: [INCTRD] Error opening file: some missing file.trd
+1     0000                  INCTRD "some missing file.trd", "data.b"
+2     0000
+# file closed: inctrd_missing_file.asm
+
+Value    Label
+------ - -----------------------------------------------------------
