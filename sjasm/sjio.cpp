@@ -463,7 +463,10 @@ void BinIncFile(char* fname, int offset, int length) {
 	}
 	// validate the resulting [offset, length]
 	if (offset < 0 || length < 0 || totlen < offset + length) {
-		Error("file too short", fname, FATAL);
+		Error("file too short", fname);
+		offset = std::min(std::max(0, offset), totlen);			//TODO change to std::clamp when C++17 is used
+		length = std::min(std::max(0, length), totlen-offset);	//TODO change to std::clamp when C++17 is used
+		assert((0 <= offset) && (offset + length <= totlen));
 	}
 	if (0 == length) {
 		Warning("include data: requested to include no data (length=0)");
