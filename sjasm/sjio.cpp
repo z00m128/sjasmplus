@@ -441,12 +441,12 @@ void BinIncFile(char* fname, int offset, int length) {
 	// open the desired file
 	FILE* bif;
 	char* fullFilePath = GetPath(fname);
-	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("Error opening file", fname, FATAL);
+	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("Error opening file", fname);
 	free(fullFilePath);
 
 	// Get length of file
 	int totlen = 0, advanceLength;
-	if (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0) Error("telling file length", fname, FATAL);
+	if (bif && (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0)) Error("telling file length", fname, FATAL);
 
 	// process arguments (extra features like negative offset/length or INT_MAX length)
 	// negative offset means "from the end of file"
@@ -470,14 +470,10 @@ void BinIncFile(char* fname, int offset, int length) {
 	}
 	if (0 == length) {
 		Warning("include data: requested to include no data (length=0)");
-		fclose(bif);
+		if (bif) fclose(bif);
 		return;
 	}
-
-	// Seek to the beginning of part to include
-	if (fseek(bif, offset, SEEK_SET) || ftell(bif) != offset) {
-		Error("seeking in file to offset", fname, FATAL);
-	}
+	assert(nullptr != bif);				// otherwise it was handled by 0 == length case above
 
 	if (pass != LASTPASS) {
 		while (length) {
@@ -496,6 +492,11 @@ void BinIncFile(char* fname, int offset, int length) {
 			CurAddress = CurAddress + advanceLength;
 		}
 	} else {
+		// Seek to the beginning of part to include
+		if (fseek(bif, offset, SEEK_SET) || ftell(bif) != offset) {
+			Error("seeking in file to offset", fname, FATAL);
+		}
+
 		// Reading data from file
 		char* data = new char[length + 1], * bp = data;
 		if (NULL == data) ErrorOOM();
