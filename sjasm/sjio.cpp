@@ -534,7 +534,9 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 
 		if (!*fullpath || !FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 			free(fullpath);
-			Error("Error opening file", nfilename, FATAL);
+			Error("Error opening file", nfilename, ALL);
+			--IncludeLevel;
+			return;
 		}
 	}
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)

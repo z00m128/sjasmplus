@@ -1,1 +1,11 @@
 error: Error opening file: non_existing_file.asm
+error: Error opening file: non_existing_file.asm
+error: Error opening file: non_existing_file.asm
+# file opened: sjio_error_open_file.asm
+1     0000                  ; this is just empty ASM file to trigger the test
+2     0000                  ; it will try to assemble non-existing file, causing fatal error
+3     0000
+# file closed: sjio_error_open_file.asm
+
+Value    Label
+------ - -----------------------------------------------------------
