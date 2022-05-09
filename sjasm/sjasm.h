@@ -47,7 +47,6 @@ namespace Options {
 		bool		CaseInsensitiveInstructions;
 		bool		WarningsAsErrors;
 		bool		Is_M_Memory;
-		bool		IsLowMemWarningEnabled;
 		bool		IsSubwordSubstitution;
 		int			MemoryBrackets;	// 0 = [] enabled (default), 1 = [] disabled, 2 = [] required
 		int			IsNextEnabled;	// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
@@ -56,7 +55,7 @@ namespace Options {
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
 					IsListingSuspended(false), ListingType(LST_T_ALL),
 					CaseInsensitiveInstructions(false), WarningsAsErrors(false),
-					Is_M_Memory(false), IsLowMemWarningEnabled(true), IsSubwordSubstitution(true),
+					Is_M_Memory(false), IsSubwordSubstitution(true),
 					MemoryBrackets(0), IsNextEnabled(0), MultiArg(&comma) {}
 		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
 

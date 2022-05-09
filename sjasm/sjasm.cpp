@@ -416,12 +416,6 @@ namespace Options {
 				case 'i': syx.CaseInsensitiveInstructions = true; break;
 				// w - warnings option: report warnings as errors
 				case 'w': syx.WarningsAsErrors = true; break;
-				// m - switch off "Accessing low memory" warning globally
-				case 'm':
-					syx.IsLowMemWarningEnabled = false;
-					Warning("`--syntax=m` is deprecated, use `-Wno-rdlow` instead", (0 == pass) ? nullptr : bp, (0 == pass) ? W_EARLY : W_PASS3);
-					//TODO remove "m" option completely after ~8/2021
-					break;
 				// M - alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
 				case 'M': syx.Is_M_Memory = true; break;
 				// s - switch off sub-word substitution in DEFINEs (s like "Simple defines" or "Sub word")
