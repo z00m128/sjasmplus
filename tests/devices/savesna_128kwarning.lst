@@ -59,6 +59,10 @@ savesna_128kwarning.asm(45): warning[sna48]: [SAVESNA] RAM <0x4000-0x4001> will 
 45    0000                  SAVESNA "zx48.sna", $8000   ; emit warning
 46    0000                  SAVESNA "zx48.sna", $8000   ; suppress sna48-ok
 47    0000
+48    0000                  ; check fail-to-open file is non-fatal
+savesna_128kwarning.asm(49): error: opening file:
+49    0000                  SAVESNA "", $8000 ; sna48-ok
+50    0000
 # file closed: savesna_128kwarning.asm
 
 Value    Label

@@ -44,3 +44,6 @@
     DEVICE ZXSPECTRUM48         ; default stack is already tainted by previous SAVESNA!
     SAVESNA "zx48.sna", $8000   ; emit warning
     SAVESNA "zx48.sna", $8000   ; suppress sna48-ok
+
+    ; check fail-to-open file is non-fatal
+    SAVESNA "", $8000 ; sna48-ok

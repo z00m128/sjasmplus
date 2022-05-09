@@ -47,7 +47,8 @@ int SaveSNA_ZX(char* fname, word start) {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname, FATAL);
+		Error("opening file", fname);
+		return 0;
 	}
 
 	constexpr int SNA_HEADER_48_SIZE = 27;
