@@ -459,8 +459,8 @@ namespace Options {
 					syx.IsPseudoOpBOF = true;
 				} else if (!strcmp(opt, "nofakes")) {
 					syx.FakeEnabled = false;
-					Warning("`--nofakes` is deprecated, use `--syntax=F` instead", nullptr, (0 == pass) ? W_EARLY : W_PASS3);
-					//TODO remove "--nofakes" option completely after ~8/2021
+					// was deprecated, as it is provided by `--syntax=F` too, but now I decided to keep also this older option
+					// (it's less cryptic than the --syntax letter soup, one duplicity of functionality will not end the world, right?)
 				} else if (!strcmp(opt, "syntax")) {
 					parseSyntaxValue();
 				} else if (!doubleDash && 'W' == opt[0]) {
