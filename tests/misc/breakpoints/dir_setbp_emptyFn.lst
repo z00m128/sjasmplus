@@ -1,4 +1,14 @@
 dir_setbp_emptyFn.asm(1): warning: [BPLIST] invalid breakpoints file type (use "unreal" or "zesarux"): invalid_type
 dir_setbp_emptyFn.asm(1): error: empty filename:
 dir_setbp_emptyFn.asm(2): error: empty filename:
-dir_setbp_emptyFn.asm(3): error: Error opening file: .
+dir_setbp_emptyFn.asm(3): error: opening file: .
+# file opened: dir_setbp_emptyFn.asm
+1     0000                  BPLIST "" invalid_type
+2     0000                  BPLIST ""
+3     0000                  BPLIST .
+4     0000                  DEVICE ZXSPECTRUM48     ; global device specified at end of pass 1
+5     0000
+# file closed: dir_setbp_emptyFn.asm
+
+Value    Label
+------ - -----------------------------------------------------------

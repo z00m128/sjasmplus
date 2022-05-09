@@ -1425,7 +1425,7 @@ void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type) {
 		return;
 	}
 	if (!FOPEN_ISOK(FP_BreakpointsFile, filename, "w")) {
-		Error("Error opening file", filename, FATAL);
+		Error("opening file", filename, EARLY);
 	}
 	breakpointsCounter = 0;
 	breakpointsType = type;

@@ -1287,6 +1287,8 @@ static void dirCSPECTMAP() {
 }
 
 static void dirBPLIST() {
+	// breakpoint file is opened in second pass, and content is written through third pass
+	// so position of `BPLIST` directive in source does not matter
 	if (2 != pass || !DeviceID) {	// nothing to do in first or last pass, second will open the file
 		if (2 == pass) {	// !Device is true -> no device in second pass -> error
 			Error("BPLIST only allowed in real device emulation mode (See DEVICE)", nullptr, EARLY);
