@@ -152,7 +152,7 @@
     ldi a,(hl)  ; warning
     ldi a,(hl)  ; this is "fake" instruction (warning suppressed by "fake")
     ldi a,(hl)  ; iz fakeish instruztione (substring can be anywhere)
-    ; the "ok" way is now deprecated since v1.18.0, use "fake"
+    ; the "ok" way is removed since v1.19.0, use "fake"
 
 ;;;;;;; docs-grade example ;;;;;;;;;;
 

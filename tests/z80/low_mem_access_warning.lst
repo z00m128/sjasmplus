@@ -183,7 +183,7 @@ low_mem_access_warning.asm(152): warning[fake]: Fake instruction: ldi a,(hl)
 152   0181 7E 23            ldi a,(hl)  ; warning
 153   0183 7E 23            ldi a,(hl)  ; this is "fake" instruction (warning suppressed by "fake")
 154   0185 7E 23            ldi a,(hl)  ; iz fakeish instruztione (substring can be anywhere)
-155   0187                  ; the "ok" way is now deprecated since v1.18.0, use "fake"
+155   0187                  ; the "ok" way is removed since v1.19.0, use "fake"
 156   0187
 157   0187              ;;;;;;; docs-grade example ;;;;;;;;;;
 158   0187
