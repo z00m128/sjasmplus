@@ -46,7 +46,7 @@ static aint detect_ram_start(unsigned char* ram, aint length);
 int TAP_SaveEmpty(char* fname) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname, IF_FIRST); return 0;
+		Error("Error opening file", fname); return 0;
 	}
 	fclose(ff);
 	return 1;
