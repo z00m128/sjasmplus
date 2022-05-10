@@ -1,0 +1,124 @@
+all_W.asm(4): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: abs
+all_W.asm(11): warning[fwdref]: forward reference of symbol: IF fwd_ref_label
+# file opened: all_W.asm
+ 1    0000              ; -Wall and -Wno-all test
+ 2    0000
+ 3    0000                  OPT -Wall   ; enable all extra warnings
+all_W.asm(4): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
+ 4    0000 21 00 00     abs:    ld hl,abs
+all_W.asm(5): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
+ 5    0003                  DEVICE ZXSPECTRUMNEXT, $8000
+all_W.asm(6): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
+ 6    0003                  DEVICE NOSLOT64K, $8000
+ 7    0003                  DEVICE ZXSPECTRUM48, $8000
+all_W.asm(7): warning[devramtop]: [DEVICE] this device was already opened with different RAMTOP value
+ 7    0003                DEVICE ZXSPECTRUM48, $8001
+ 8    0003                  DISP 123
+all_W.asm(8): warning[displacedorg]: ORG-address set inside displaced block, the physical address is not modified, only displacement address
+ 8    007B                ORG 345
+ 8    0159                ENT
+all_W.asm(9): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0x007B vs slot 3 range 0xC000..0xFFFF
+ 9    0003                  ORG 123, 0
+10    007B
+11    007B                  IF fwd_ref_label
+11    007B                ENDIF    ; it's W_EARLY warning, emitted before last pass, look at start of listing
+12    007B
+13    007B                  lua pass3
+14    007B ~                    _pc("nop")
+15    007B 00           nop
+all_W.asm(15): warning[luamc]: When lua script emits machine code bytes, use "ALLPASS" modifier
+15    007C                  endlua
+16    007C
+17    007C                  DEVICE ZXSPECTRUMNEXT
+17    007C                ORG $8000
+17    8000 C9             ret
+all_W.asm(17): warning[nexstack]: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
+17    8001                SAVENEX OPEN "all_W.nex", $8000, $8002
+17    8001                SAVENEX CLOSE
+18    8001                  ; omitting "nexbmppal" test because it requires too many prerequisites (has dedicated tests any way)
+19    8001                  ; omitting "sna48" and "sna128" tests (have dedicated test any way)
+20    8001                  ; omitting "trdext", "trdext3", "trdextb" and "trddup" tests (have dedicated test)
+21    8001                  RELOCATE_START
+all_W.asm(21): warning[relalign]: [ALIGN] inside relocation block: may become misaligned when relocated
+21    8001 00             ALIGN 2
+21    8002                RELOCATE_END
+all_W.asm(22): warning[rdlow]: Reading memory at low address: 255
+22    8002 3A FF 00         ld  a,(255)
+23    8005                  ; omitting "reldiverts" and "relunstable" test (relocation has many dedicated+updated tests)
+24    8005                  ; omitting "dispmempage" test (has dedicated test (non-trivial))
+all_W.asm(25): warning[bpfile]: breakpoints file was not specified
+25    8005                  SETBREAKPOINT
+all_W.asm(26): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+26    8005 ED 71            out (c),0
+all_W.asm(27): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): INCBIN "back\slash.bin"
+all_W.asm(27): error: Error opening file: back/slash.bin
+all_W.asm(27): warning: include data: requested to include no data (length=0)
+27    8007                  INCBIN "back\slash.bin"
+all_W.asm(28): warning[fake]: Fake instruction: ld hl,de
+28    8007 62 6B            ld hl,de
+29    8009
+30    8009
+31    8009                  ORG 0       ; start again at zero offset
+32    0000                  OPT -Wno-all    ; disable all extra warnings
+33    0000 21 00 00         ld hl,abs
+34    0003
+35    0003                  ; impossible to re-test zxnramtop and noslotramtop, because they are emitted just once
+36    0003
+37    0003                  ; devramtop
+38    0003                  DEVICE ZXSPECTRUM48, $8002
+39    0003
+40    0003                  ; displacedorg
+41    0003                  DISP 101
+41    0065                ORG 201
+41    00C9                ENT
+42    0003
+43    0003                  ; orgpage
+44    0003                  ORG 123, 0
+45    007B
+46    007B                  ; fwdref
+47    007B                  IF fwd_ref_label
+47    007B                ENDIF
+48    007B
+49    007B                  ; luamc
+50    007B                  lua pass3
+51    007B ~                    _pc("nop")
+52    007B 00           nop
+52    007C                  endlua
+53    007C
+54    007C                  ; nexstack
+55    007C                  DEVICE ZXSPECTRUMNEXT
+55    007C                SAVENEX OPEN "all_W.nex", $8000, $8002
+55    007C                SAVENEX CLOSE
+56    007C
+57    007C                  ; relalign
+58    007C                  RELOCATE_START
+58    007C                ALIGN 2
+58    007C                RELOCATE_END
+59    007C
+60    007C                  ; rdlow
+61    007C 3A FF 00         ld  a,(255)
+62    007F
+63    007F                  ; bpfile
+64    007F                  SETBREAKPOINT
+65    007F
+66    007F                  ; out0
+67    007F ED 71            out (c),0
+68    0081
+69    0081                  ; backslash
+all_W.asm(70): error: Error opening file: back/slash.bin
+all_W.asm(70): warning: include data: requested to include no data (length=0)
+70    0081                  INCBIN "back\slash.bin"
+71    0081
+72    0081                  ; fake
+73    0081 62 6B            ld hl,de
+74    0083
+75    0083              fwd_ref_label:  EQU $1234
+76    0083
+# file closed: all_W.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000   abs
+0x1234   fwd_ref_label
+0x0000 X relocate_count
+0x0000 X relocate_size

@@ -41,7 +41,7 @@ namespace Options {
 		bool		IsPseudoOpBOF;
 		bool		IsReversePOP;
 		bool		FakeEnabled;
-		bool		FakeWarning;
+		bool		FakeWarning;	// accessed also by io_err.cpp implementation for W_FAKE warning state
 		bool		IsListingSuspended;
 		ELstType	ListingType;
 		bool		CaseInsensitiveInstructions;

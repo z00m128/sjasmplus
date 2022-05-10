@@ -216,6 +216,7 @@ const char* W_BACKSLASH = "backslash";
 const char* W_OPKEYWORD = "opkeyword";
 const char* W_BE_HOST = "behost";
 const char* W_FAKE = "fake";
+const char* W_ENABLE_ALL = "all";
 
 static messages_map w_texts = {
 	{ W_ABS_LABEL,
@@ -364,14 +365,29 @@ static messages_map w_texts = {
 	},
 	{ W_FAKE,
 		{ true,	// fake-warnings are enabled/disabled through --syntax, this value here is always true
+				// the main reason is that fake warning enabled can be reset/push/pop by OPT
 			"Fake instruction",
 			"Warn when fake instruction is used in the source."
+		}
+	},
+	{ W_ENABLE_ALL,
+		{ false,
+			"",		// not emitted by code, just command-line option
+			"Enable/disable all id-warnings"
 		}
 	},
 };
 
 static messages_map::iterator findWarningByIdText(const char* id) {
+	// like w_texts.find(id) but compares id content (string), not pointer
 	return std::find_if(w_texts.begin(), w_texts.end(), [id](const auto& v){ return !strcmp(id, v.first); } );
+}
+
+static bool & warning_state(messages_map::value_type & v) {
+	// W_FAKE (ID "fake") stores enabled/disabled state in Options::syx to handle reset/push/pop of the state
+	if (W_FAKE == v.first) return Options::syx.FakeWarning;
+	// other warnings have global state stored in w_texts map
+	return v.second.enabled;
 }
 
 bool suppressedById(const char* id) {
@@ -429,17 +445,23 @@ void CliWoption(const char* option) {
 	// check for specific id, with possible "no-" prefix ("-Wabs" vs "-Wno-abs")
 	const bool enable = strncmp("no-", option, 3);
 	const char* id = enable ? option : option + 3;
-	// handle ID "fake" separately, changing the enable/disable value directly in Options::syx
-	if (!strcmp(id, W_FAKE)) {
-		Options::syx.FakeWarning = enable;
-		return;			// keep the w_texts["fake"].enabled == true all the time
+	// handle ID "all"
+	if (!strcmp(id, W_ENABLE_ALL)) {
+		for (auto & warning_entry : w_texts) warning_state(warning_entry) = enable;
+		return;
 	}
 	auto warning_it = findWarningByIdText(id);
-	if (w_texts.end() != warning_it) warning_it->second.enabled = enable;
-	else Warning("unknown warning id in -W option", id, (0 == pass) ? W_EARLY : W_PASS3);
+	if (w_texts.end() == warning_it) {
+		Warning("unknown warning id in -W option", id, (0 == pass) ? W_EARLY : W_PASS3);
+		return;
+	}
+	warning_state(*warning_it) = enable;
 }
 
-static const char* spaceFiller = "                       ";
+static const char* spaceFiller = "               ";
+static const char* txt_on	= "[on]  ";
+static const char* txt_off	= "[off] ";
+static const char* txt_none	= "      ";
 
 void PrintHelpWarnings() {
 	_COUT "The following options control compiler warning messages:" _ENDL;
@@ -449,10 +471,11 @@ void PrintHelpWarnings() {
 	std::sort(ids.begin(), ids.end(), [](const char* a, const char* b) -> bool { return (strcmp(a,b) < 0); } );
 	for (const auto& id : ids) {
 		assert(strlen(id) < strlen(spaceFiller));
-		_COUT "  -W" _CMDL id _CMDL spaceFiller+strlen(id) _CMDL w_texts[id].help _ENDL;
+		const char* state_txt = (W_ENABLE_ALL == id) ? txt_none : warning_state(*w_texts.find(id)) ? txt_on : txt_off;
+		_COUT " -W" _CMDL id _CMDL spaceFiller+strlen(id) _CMDL state_txt _CMDL w_texts[id].help _ENDL;
 	}
-	_COUT " Use -Wno- prefix to disable specific warning, example: -Wno-abs" _ENDL;
-	_COUT " Use -ok suffix in comment to suppress it per line, example: jr abs ; abs-ok" _ENDL;
+	_COUT "Use -Wno- prefix to disable specific warning, example: -Wno-abs" _ENDL;
+	_COUT "Use -ok suffix in comment to suppress it per line, example: jr abs ; abs-ok" _ENDL;
 }
 
 //eof io_err.cpp
