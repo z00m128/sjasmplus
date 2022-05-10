@@ -1,7 +1,7 @@
 # file opened: syntax_b.asm
   1   0000              ; Thorough tests for memory accessing instructions with --syntax=b
   2   0000                  ; default bracket syntax (relaxed one)
-  3   0000                  OPT reset --zxnext --syntax=a
+  3   0000                  OPT reset --zxnext --syntax=a -Wrdlow
   4   0000                  ; 3x OK: val, mem, mem
   5   0000 3E 00            ld  a,0
 syntax_b.asm(5): warning[rdlow]: Reading memory at low address: 1

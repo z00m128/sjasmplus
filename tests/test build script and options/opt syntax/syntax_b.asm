@@ -1,6 +1,6 @@
 ; Thorough tests for memory accessing instructions with --syntax=b
     ; default bracket syntax (relaxed one)
-    OPT reset --zxnext --syntax=a
+    OPT reset --zxnext --syntax=a -Wrdlow
     ; 3x OK: val, mem, mem
     ld  a,0 : ld  a,(1) : ld  a,[2]
     ; 2x OK: val, val, ---

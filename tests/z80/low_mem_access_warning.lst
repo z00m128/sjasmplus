@@ -1,6 +1,6 @@
 # file opened: low_mem_access_warning.asm
   1   0000              ;;;;;;; warning emitting test (for all affected instructions) ;;;;;;;;;;
-  2   0000                  OPT reset       ; default syntax
+  2   0000                  OPT reset -Wrdlow       ; default syntax, enable rdlow warning
   3   0000                  ; round parentheses memory access to low address 0..255 emits warning
 low_mem_access_warning.asm(4): warning[rdlow]: Reading memory at low address: 1
   4   0000 3A 01 00         ld  a,(1)

@@ -1,5 +1,5 @@
 ;;;;;;; warning emitting test (for all affected instructions) ;;;;;;;;;;
-    OPT reset       ; default syntax
+    OPT reset -Wrdlow       ; default syntax, enable rdlow warning
     ; round parentheses memory access to low address 0..255 emits warning
     ld  a,(1)
     ld  hl,(2)

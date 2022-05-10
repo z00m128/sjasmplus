@@ -121,7 +121,6 @@ op_IY_FD.asm(63): error: Label not found: iyh
 op_IY_FD.asm(64): error: Label not found: iyl
  64   002B 3E 00            ld      a,iyl       ; #FD7D
 op_IY_FD.asm(65): error: Label not found: iy
-op_IY_FD.asm(65): warning[rdlow]: Reading memory at low address: 17
  65   002D 3A 11 00         ld      a,(iy+17)   ; #FD7E11
  66   0030
 op_IY_FD.asm(67): error: Label not found: iyh

@@ -1,4 +1,4 @@
-    ; test various tricky cases of syntax
+    OPT -Wrdlow ; test various tricky cases of syntax, enable rdlow warning
     adc     a , (   ( 3 ) + ( 4 )   )
     ld      a , (   ( 3 ) + ( 4 )   )   // extra warning about if low address is ok
     ld      a ,     ( 3 ) + ( 4 )

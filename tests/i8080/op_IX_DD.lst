@@ -121,7 +121,6 @@ op_IX_DD.asm(63): error: Label not found: ixh
 op_IX_DD.asm(64): error: Label not found: ixl
  64   002B 3E 00            ld      a,ixl       ; #DD7D
 op_IX_DD.asm(65): error: Label not found: ix
-op_IX_DD.asm(65): warning[rdlow]: Reading memory at low address: 17
  65   002D 3A 11 00         ld      a,(ix+17)   ; #DD7E11
  66   0030
 op_IX_DD.asm(67): error: Label not found: ixh

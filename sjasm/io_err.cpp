@@ -310,7 +310,7 @@ static messages_map w_texts = {
 		}
 	},
 	{ W_READ_LOW_MEM,
-		{ true,
+		{ false,
 			"Reading memory at low address",
 			"Warn when reading memory from addresses 0..255."
 		}
