@@ -1126,6 +1126,8 @@ TOLUA_API int tolua_sjasm_open (lua_State* tolua_S)
     101,110,100, 10,101,110,100, 10,101,110,100, 10,32
    };
    tolua_dobuffer(tolua_S,(char*)B,sizeof(B),"tolua: embedded Lua code 1");
+   //FIXME this silently fails, probably due to the binary blob being out of sync with current lua version
+   // this needs to refresh the tolua++ integration, and probably patch tolua++ to report the failure
    lua_settop(tolua_S, top);
   } /* end of embedded lua code */
 
