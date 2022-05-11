@@ -14676,7 +14676,7 @@ TBL_ADDRS:	DEFW	JUMP_TRUE	; $00 Address: $368F - JUMP_TRUE
 		DEFW	INT		; $27 Address: $36AF - INT
 		DEFW	SQR		; $28 Address: $384A - SQR
 		DEFW	SGN		; $29 Address: $3492 - SGN
-		DEFW	ABS		; $2A Address: $346A - ABS
+		DEFW	@ABS		; $2A Address: $346A - ABS
 		DEFW	PEEK		; $2B Address: $34AC - PEEK
 		DEFW	IN_		; $2C Address: $34A5 - IN
 		DEFW	USR_NO		; $2D Address: $34B3 - USR_NO

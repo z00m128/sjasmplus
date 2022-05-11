@@ -4,8 +4,7 @@ all_W.asm(11): warning[fwdref]: forward reference of symbol: IF fwd_ref_label
  1    0000              ; -Wall and -Wno-all test
  2    0000
  3    0000                  OPT -Wall   ; enable all extra warnings
-all_W.asm(4): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
- 4    0000 21 00 00     abs:    ld hl,abs
+ 4    0000 21 00 00     abs:    ld hl,@abs  ; -Wabs removed in v1.20.0, this is placeholder to minimize diff
 all_W.asm(5): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
  5    0003                  DEVICE ZXSPECTRUMNEXT, $8000
 all_W.asm(6): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
@@ -60,7 +59,7 @@ all_W.asm(28): warning[fake]: Fake instruction: ld hl,de
 30    8009
 31    8009                  ORG 0       ; start again at zero offset
 32    0000                  OPT -Wno-all    ; disable all extra warnings
-33    0000 21 00 00         ld hl,abs
+33    0000 21 00 00         ld hl,@abs
 34    0003
 35    0003                  ; impossible to re-test zxnramtop and noslotramtop, because they are emitted just once
 36    0003

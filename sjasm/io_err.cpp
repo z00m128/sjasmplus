@@ -191,7 +191,6 @@ struct WarningEntry {
 
 typedef std::unordered_map<const char*, WarningEntry> messages_map;
 
-const char* W_ABS_LABEL = "abs";
 const char* W_NO_RAMTOP = "noramtop";
 const char* W_DEV_RAMTOP = "devramtop";
 const char* W_DISPLACED_ORG = "displacedorg";
@@ -219,12 +218,6 @@ const char* W_FAKE = "fake";
 const char* W_ENABLE_ALL = "all";
 
 static messages_map w_texts = {
-	{ W_ABS_LABEL,
-		{ true,
-			"the `abs` is now absolute value operator, if you are using it as label, please rename",
-			"Warn about parsing error of new abs operator (v1.18.0)."
-		}
-	},
 	{ W_NO_RAMTOP,
 		{ true,
 			"current device doesn't init memory in any way (RAMTOP is ignored)",

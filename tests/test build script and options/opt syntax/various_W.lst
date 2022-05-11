@@ -5,8 +5,7 @@ various_W.asm(83): warning[fwdref]: forward reference of symbol: IF fwd_ref_labe
   1   0000              ; various -W<warning_id> combinations (hopefully all of them, if possible)
   2   0000
   3   0000              ; the default is "enabled" for all warnings - exercise all of them
-various_W.asm(4): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
-  4   0000 21 00 00     abs:    ld hl,abs
+  4   0000 21 00 00     abs:    ld hl,@abs ; placeholder for removed `ld hl,abs` (-Wabs removed in v1.20.0)
 various_W.asm(5): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
   5   0003                  DEVICE ZXSPECTRUMNEXT, $8000
 various_W.asm(6): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
@@ -71,12 +70,11 @@ various_W.asm(26): warning[out0]: 'out (c),0' is unstable, on CMOS based chips i
  44   0000              ; disable/enable specific warning and test specific-suppression in eol comment
  45   0000
  46   0000                  ; abs
- 47   0000                  OPT -Wno-abs
- 48   0000 21 00 00         ld hl,abs
- 49   0003                  OPT -Wabs
-various_W.asm(50): warning[abs]: the `abs` is now absolute value operator, if you are using it as label, please rename
- 50   0003 21 00 00         ld hl,abs   ; devramtop-ok - some other id, should not suppress abs
- 51   0006 21 00 00         ld hl,abs   ; but abs-ok should suppress it
+ 47   0000                  ; placeholder for removed -Wabs test to minimize diff
+ 48   0000 21 00 00         ld hl,@abs
+ 49   0003
+ 50   0003 21 00 00         ld hl,@abs
+ 51   0006 21 00 00         ld hl,@abs
  52   0009
  53   0009                  ; impossible to re-test zxnramtop and noslotramtop, because they are emitted just once
  54   0009
@@ -85,7 +83,7 @@ various_W.asm(50): warning[abs]: the `abs` is now absolute value operator, if yo
  57   0009                  DEVICE ZXSPECTRUM48, $8002
  58   0009                  OPT -Wdevramtop
 various_W.asm(59): warning[devramtop]: [DEVICE] this device was already opened with different RAMTOP value
- 59   0009                  DEVICE ZXSPECTRUM48, $8003  ; abs-ok - some other id, should not suppress devramtop
+ 59   0009                  DEVICE ZXSPECTRUM48, $8003  ; luamc-ok - some other id, should not suppress devramtop
  60   0009                  DEVICE ZXSPECTRUM48, $8004  ; but devramtop-ok should suppress it
  61   0009
  62   0009                  ; displacedorg
@@ -94,7 +92,7 @@ various_W.asm(59): warning[devramtop]: [DEVICE] this device was already opened w
  65   0065                  ORG 201
  66   00C9                  OPT -Wdisplacedorg
 various_W.asm(67): warning[displacedorg]: ORG-address set inside displaced block, the physical address is not modified, only displacement address
- 67   00C9                  ORG 202     ; abs-ok - some other id, should not suppress displacedorg
+ 67   00C9                  ORG 202     ; luamc-ok - some other id, should not suppress displacedorg
  68   00CA                  ORG 203     ; but displacedorg-ok should suppress it
  69   00CB                  ENT
  70   0009
@@ -103,7 +101,7 @@ various_W.asm(67): warning[displacedorg]: ORG-address set inside displaced block
  73   0009                  ORG 123, 0
  74   007B                  OPT -Worgpage
 various_W.asm(75): warning[orgpage]: [ORG] page argument affects current slot while address is outside: address 0x007B vs slot 3 range 0xC000..0xFFFF
- 75   007B                  ORG 123, 0  ; abs-ok - some other id, should not suppress orgpage
+ 75   007B                  ORG 123, 0  ; luamc-ok - some other id, should not suppress orgpage
  76   007B                  ORG 123, 0  ; but orgpage-ok should suppress it
  77   007B
  78   007B                  ; fwdref
@@ -111,7 +109,7 @@ various_W.asm(75): warning[orgpage]: [ORG] page argument affects current slot wh
  80   007B                  IF fwd_ref_label
  81   007B                  ENDIF
  82   007B                  OPT -Wfwdref
- 83   007B                  IF fwd_ref_label    ; abs-ok - some other id, should not suppress fwdref
+ 83   007B                  IF fwd_ref_label    ; luamc-ok - some other id, should not suppress fwdref
  84   007B                  ENDIF
  85   007B                  IF fwd_ref_label    ; but fwdref-ok should suppress it
  86   007B                  ENDIF
@@ -123,7 +121,7 @@ various_W.asm(75): warning[orgpage]: [ORG] page argument affects current slot wh
  92   007B 00           nop
  92   007C                  endlua
  93   007C                  OPT -Wluamc
- 94   007C                  lua pass3   ; abs-ok - some other id, should not suppress luamc
+ 94   007C                  lua pass3   ; devramtop-ok - some other id, should not suppress luamc
  95   007C ~                    _pc("nop")
  96   007C 00           nop
 various_W.asm(96): warning[luamc]: When lua script emits machine code bytes, use "ALLPASS" modifier
@@ -144,7 +142,7 @@ various_W.asm(96): warning[luamc]: When lua script emits machine code bytes, use
 108   007F                  SAVENEX CLOSE
 109   007F                  OPT -Wnexstack
 various_W.asm(110): warning[nexstack]: [SAVENEX] non-zero data are in stackAddress area, may get overwritten by NEXLOAD
-110   007F                  SAVENEX OPEN "various_W.nex", $8000, $8002  ; abs-ok - some other id, should not suppress nexstack
+110   007F                  SAVENEX OPEN "various_W.nex", $8000, $8002  ; devramtop-ok - some other id, should not suppress nexstack
 111   007F                  SAVENEX CLOSE
 112   007F                  SAVENEX OPEN "various_W.nex", $8000, $8002  ; but nexstack-ok should suppress it
 113   007F                  SAVENEX CLOSE
@@ -155,7 +153,7 @@ various_W.asm(110): warning[nexstack]: [SAVENEX] non-zero data are in stackAddre
 118   007F 00               ALIGN 2
 119   0080                  OPT -Wrelalign
 various_W.asm(120): warning[relalign]: [ALIGN] inside relocation block: may become misaligned when relocated
-120   0080                  ALIGN 4     ; abs-ok - some other id, should not suppress relalign
+120   0080                  ALIGN 4     ; devramtop-ok - some other id, should not suppress relalign
 121   0080                  ALIGN 8     ; but relalign-ok should suppress it
 122   0080                  RELOCATE_END
 123   0080
@@ -164,7 +162,7 @@ various_W.asm(120): warning[relalign]: [ALIGN] inside relocation block: may beco
 126   0080 3A FF 00         ld  a,(255)
 127   0083                  OPT -Wrdlow
 various_W.asm(128): warning[rdlow]: Reading memory at low address: 255
-128   0083 3A FF 00         ld  a,(255)  ; abs-ok - some other id, should not suppress rdlow
+128   0083 3A FF 00         ld  a,(255)  ; devramtop-ok - some other id, should not suppress rdlow
 129   0086 3A FF 00         ld  a,(255)  ; but rdlow-ok should suppress it
 130   0089
 131   0089                  ; bpfile
@@ -172,7 +170,7 @@ various_W.asm(128): warning[rdlow]: Reading memory at low address: 255
 133   0089                  SETBREAKPOINT
 134   0089                  OPT -Wbpfile
 various_W.asm(135): warning[bpfile]: breakpoints file was not specified
-135   0089                  SETBREAKPOINT   ; abs-ok - some other id, should not suppress bpfile
+135   0089                  SETBREAKPOINT   ; devramtop-ok - some other id, should not suppress bpfile
 136   0089                  SETBREAKPOINT   ; but bpfile-ok should suppress it
 137   0089
 138   0089                  ; out0
@@ -180,7 +178,7 @@ various_W.asm(135): warning[bpfile]: breakpoints file was not specified
 140   0089 ED 71            out (c),0
 141   008B                  OPT -Wout0
 various_W.asm(142): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
-142   008B ED 71            out (c),0   ; abs-ok - some other id, should not suppress out0
+142   008B ED 71            out (c),0   ; devramtop-ok - some other id, should not suppress out0
 143   008D ED 71            out (c),0   ; but out0-ok should suppress it
 144   008F
 145   008F              ; testing corner-case states possible with the -W option (test coverage)

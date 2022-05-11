@@ -1,7 +1,7 @@
 ; -Wall and -Wno-all test
 
     OPT -Wall   ; enable all extra warnings
-abs:    ld hl,abs
+abs:    ld hl,@abs  ; -Wabs removed in v1.20.0, this is placeholder to minimize diff
     DEVICE ZXSPECTRUMNEXT, $8000
     DEVICE NOSLOT64K, $8000
     DEVICE ZXSPECTRUM48, $8000 : DEVICE ZXSPECTRUM48, $8001
@@ -30,7 +30,7 @@ abs:    ld hl,abs
 
     ORG 0       ; start again at zero offset
     OPT -Wno-all    ; disable all extra warnings
-    ld hl,abs
+    ld hl,@abs
 
     ; impossible to re-test zxnramtop and noslotramtop, because they are emitted just once
 

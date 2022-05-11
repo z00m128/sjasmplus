@@ -1,7 +1,7 @@
 ; various -W<warning_id> combinations (hopefully all of them, if possible)
 
 ; the default is "enabled" for all warnings - exercise all of them
-abs:    ld hl,abs
+abs:    ld hl,@abs ; placeholder for removed `ld hl,abs` (-Wabs removed in v1.20.0)
     DEVICE ZXSPECTRUMNEXT, $8000
     DEVICE NOSLOT64K, $8000
     DEVICE ZXSPECTRUM48, $8000 : DEVICE ZXSPECTRUM48, $8001
@@ -44,11 +44,11 @@ abs:    ld hl,abs
 ; disable/enable specific warning and test specific-suppression in eol comment
 
     ; abs
-    OPT -Wno-abs
-    ld hl,abs
-    OPT -Wabs
-    ld hl,abs   ; devramtop-ok - some other id, should not suppress abs
-    ld hl,abs   ; but abs-ok should suppress it
+    ; placeholder for removed -Wabs test to minimize diff
+    ld hl,@abs
+
+    ld hl,@abs
+    ld hl,@abs
 
     ; impossible to re-test zxnramtop and noslotramtop, because they are emitted just once
 
@@ -56,7 +56,7 @@ abs:    ld hl,abs
     OPT -Wno-devramtop
     DEVICE ZXSPECTRUM48, $8002
     OPT -Wdevramtop
-    DEVICE ZXSPECTRUM48, $8003  ; abs-ok - some other id, should not suppress devramtop
+    DEVICE ZXSPECTRUM48, $8003  ; luamc-ok - some other id, should not suppress devramtop
     DEVICE ZXSPECTRUM48, $8004  ; but devramtop-ok should suppress it
 
     ; displacedorg
@@ -64,7 +64,7 @@ abs:    ld hl,abs
     OPT -Wno-displacedorg
     ORG 201
     OPT -Wdisplacedorg
-    ORG 202     ; abs-ok - some other id, should not suppress displacedorg
+    ORG 202     ; luamc-ok - some other id, should not suppress displacedorg
     ORG 203     ; but displacedorg-ok should suppress it
     ENT
 
@@ -72,7 +72,7 @@ abs:    ld hl,abs
     OPT -Wno-orgpage
     ORG 123, 0
     OPT -Worgpage
-    ORG 123, 0  ; abs-ok - some other id, should not suppress orgpage
+    ORG 123, 0  ; luamc-ok - some other id, should not suppress orgpage
     ORG 123, 0  ; but orgpage-ok should suppress it
 
     ; fwdref
@@ -80,7 +80,7 @@ abs:    ld hl,abs
     IF fwd_ref_label
     ENDIF
     OPT -Wfwdref
-    IF fwd_ref_label    ; abs-ok - some other id, should not suppress fwdref
+    IF fwd_ref_label    ; luamc-ok - some other id, should not suppress fwdref
     ENDIF
     IF fwd_ref_label    ; but fwdref-ok should suppress it
     ENDIF
@@ -91,7 +91,7 @@ abs:    ld hl,abs
         _pc("nop")
     endlua
     OPT -Wluamc
-    lua pass3   ; abs-ok - some other id, should not suppress luamc
+    lua pass3   ; devramtop-ok - some other id, should not suppress luamc
         _pc("nop")
     endlua
     lua pass3   ; but luamc-ok should suppress it
@@ -107,7 +107,7 @@ abs:    ld hl,abs
     SAVENEX OPEN "various_W.nex", $8000, $8002
     SAVENEX CLOSE
     OPT -Wnexstack
-    SAVENEX OPEN "various_W.nex", $8000, $8002  ; abs-ok - some other id, should not suppress nexstack
+    SAVENEX OPEN "various_W.nex", $8000, $8002  ; devramtop-ok - some other id, should not suppress nexstack
     SAVENEX CLOSE
     SAVENEX OPEN "various_W.nex", $8000, $8002  ; but nexstack-ok should suppress it
     SAVENEX CLOSE
@@ -117,7 +117,7 @@ abs:    ld hl,abs
     OPT -Wno-relalign
     ALIGN 2
     OPT -Wrelalign
-    ALIGN 4     ; abs-ok - some other id, should not suppress relalign
+    ALIGN 4     ; devramtop-ok - some other id, should not suppress relalign
     ALIGN 8     ; but relalign-ok should suppress it
     RELOCATE_END
 
@@ -125,21 +125,21 @@ abs:    ld hl,abs
     OPT -Wno-rdlow
     ld  a,(255)
     OPT -Wrdlow
-    ld  a,(255)  ; abs-ok - some other id, should not suppress rdlow
+    ld  a,(255)  ; devramtop-ok - some other id, should not suppress rdlow
     ld  a,(255)  ; but rdlow-ok should suppress it
 
     ; bpfile
     OPT -Wno-bpfile
     SETBREAKPOINT
     OPT -Wbpfile
-    SETBREAKPOINT   ; abs-ok - some other id, should not suppress bpfile
+    SETBREAKPOINT   ; devramtop-ok - some other id, should not suppress bpfile
     SETBREAKPOINT   ; but bpfile-ok should suppress it
 
     ; out0
     OPT -Wno-out0
     out (c),0
     OPT -Wout0
-    out (c),0   ; abs-ok - some other id, should not suppress out0
+    out (c),0   ; devramtop-ok - some other id, should not suppress out0
     out (c),0   ; but out0-ok should suppress it
 
 ; testing corner-case states possible with the -W option (test coverage)

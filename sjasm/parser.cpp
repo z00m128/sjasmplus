@@ -171,13 +171,7 @@ static int ParseExpUnair(char*& p, aint& nval) {
 			nval = (right >> 8) & 255;
 			break;
 		case 'a':
-			// fallback in case somebody is using `abs` as regular label (for example BS ROM source)
-			//TODO remove the fallback after ~Dec 2021 (giving one year) (after that abs as label will error out)
-			if (!ParseExpUnair(p, right)) {
-				WarningById(W_ABS_LABEL);
-				p = oldP;
-				return ParseExpPrim(p, nval);
-			}
+			if (!ParseExpUnair(p, right)) return 0;
 			nval = abs(right);
 			break;
 		default: Error("internal error", nullptr, FATAL); break;	// unreachable

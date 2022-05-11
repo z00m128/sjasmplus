@@ -64,7 +64,7 @@
     DB  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(256),abs(-256)
     DW  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(65536),abs(-65536)
 
-    DW  abs         ; warning about ABS being now new operator (to be removed ~Dec 2021)
+    DW  @abs        ; fallback parsing of "abs" as label removed in v1.20.0 (requires @abs now)
 
 ; check all operator keywords to warn about their usage as labels
 abs:
