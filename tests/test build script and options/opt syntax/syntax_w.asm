@@ -5,6 +5,7 @@
     ld      a,0x1234            ; warning about lost bytes
     OPT push --syntax=w ; test the syntax option "w"
     ld      a,0x1234            ; error about lost bytes
+    OPT -Wunknown-id-warning-as-error   ; warning type W_PASS03 converted to error (test coverage++)
     OPT pop             ; test push+pop of new option
     ld      a,0x1234            ; warning about lost bytes
-    ASSERT _WARNINGS == 2 && _ERRORS == 1
+    ASSERT _WARNINGS == 2 && _ERRORS == 2
