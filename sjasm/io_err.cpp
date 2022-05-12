@@ -116,6 +116,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	// check if it is correct pass by the type of error
 	if (type == EARLY && LASTPASS <= pass) return;
 	if ((type == SUPPRESS || type == IF_FIRST || type == PASS3) && pass < LASTPASS) return;
+	if (PASS03 == type && 0 < pass && pass < LASTPASS) return;
 	// check if this one should be skipped due to type constraints and current-error-state
 	if (FATAL != type && PreviousErrorLine == CompiledCurrentLine) {
 		// non-fatal error, on the same line as previous, maybe skip?
@@ -159,6 +160,7 @@ static void WarningImpl(const char* id, const char* message, const char* badValu
 	if (Options::syx.WarningsAsErrors) switch (type) {
 		case W_EARLY:	Error(message, badValueMessage, EARLY); return;
 		case W_PASS3:	Error(message, badValueMessage, PASS3); return;
+		case W_PASS03:	Error(message, badValueMessage, PASS03); return;
 		case W_ALL:		Error(message, badValueMessage, ALL); return;
 	}
 
@@ -400,9 +402,16 @@ bool suppressedById(const char* id) {
 }
 
 static bool isInactiveTypeInCurrentPass(EWStatus type) {
-	if (type == W_EARLY && LASTPASS <= pass) return true;	// "early" is inactive during pass3+
-	if (type == W_PASS3 && pass < LASTPASS) return true;	// "pass3" is inactive during 0..2 pass
-	return false;
+	switch (type) {
+		case W_EARLY:	// "early" is inactive during pass3+
+			return LASTPASS <= pass;
+		case W_PASS3:	// "pass3" is inactive during 0..2 pass
+			return pass < LASTPASS;
+		case W_PASS03:	// "pass03" is inactive during 1..2 pass
+			return 0 < pass && pass < LASTPASS;
+		default:		// never inactive for other types (W_ALL)
+			return false;
+	}
 }
 
 void Warning(const char* message, const char* badValueMessage, EWStatus type) {
@@ -431,8 +440,8 @@ void WarningById(const char* id, int badValue, EWStatus type) {
 
 void CliWoption(const char* option) {
 	if (!option[0]) {
-		// from command line pass == 0, from source by OPT the pass is above zero
-		Error("no argument after -W", (0 == pass) ? nullptr : bp, (0 == pass) ? EARLY : PASS3);
+		// from command line 0 == pass, from source by OPT the pass is above zero
+		Error("no argument after -W", (0 == pass) ? nullptr : bp, PASS03);
 		return;
 	}
 	// check for specific id, with possible "no-" prefix ("-Wabs" vs "-Wno-abs")
@@ -445,7 +454,7 @@ void CliWoption(const char* option) {
 	}
 	auto warning_it = findWarningByIdText(id);
 	if (w_texts.end() == warning_it) {
-		Warning("unknown warning id in -W option", id, (0 == pass) ? W_EARLY : W_PASS3);
+		Warning("unknown warning id in -W option", id, W_PASS03);
 		return;
 	}
 	warning_state(*warning_it) = enable;

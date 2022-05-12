@@ -1,4 +1,4 @@
-Syntax option not implemented yet: L
+error: Syntax option not implemented yet: L
 # file opened: syntax2_ABFL.asm
  1    0000              ; SYNTAX option "aBFL":     (used to be "ABFL", but "A" was removed)
  2    0000              ;  L is "unimplemented yet" (comments below are for future implementation)

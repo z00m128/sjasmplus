@@ -15,7 +15,7 @@ dir_opt.asm(8): error: Fake instructions are not enabled: ld      hl,bc,,de,bc
 10    0008 DD 01          break       ; next enabled, including CSpect emulator extras
 11    000A C1 E1            pop     hl,,bc          ; pop bc : pop hl (--reversepop)
 12    000C C1               pop     bc  ; validation
-Syntax option not implemented yet: l
+dir_opt.asm(13): error: Syntax option not implemented yet: l
 13    000D              OPT push reset --syntax=aBfl    ; this one can be at beggining of line (--dirbol)
 14    000D              OPT = 1
 14    000D 00             nop

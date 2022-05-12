@@ -681,7 +681,7 @@ void CDefineTable::Init() {
 
 void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	if (FindDuplicate(name)) {
-		Error("Duplicate define (replacing old value)", name);
+		Error("Duplicate define (replacing old value)", name, PASS03);
 	}
 	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }

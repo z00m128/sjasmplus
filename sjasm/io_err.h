@@ -35,9 +35,10 @@
  * PASS3 = normal error message level for code-gen pass (pass 3)
  * IF_FIRST = normal code-gen error, but will display only if it is first error on the current line
  * SUPPRESS = will suppress further errors (PASS3+IF_FIRST+ALL) for current line, except FATAL
+ * PASS03 = like PASS3, but does display also during pass 0 (sjasmplus init, parsing CLI options)
  * */
-enum EStatus { ALL, FATAL, EARLY, PASS3, IF_FIRST, SUPPRESS };
-enum EWStatus { W_ALL, W_EARLY, W_PASS3 };
+enum EStatus { ALL, FATAL, EARLY, PASS3, IF_FIRST, SUPPRESS, PASS03 };
+enum EWStatus { W_ALL, W_EARLY, W_PASS3, W_PASS03 };
 
 extern const char* W_NO_RAMTOP;
 extern const char* W_DEV_RAMTOP;

@@ -1,5 +1,5 @@
-Syntax option not implemented yet: l
-Unrecognized syntax option: @
+error: Syntax option not implemented yet: l
+error: Unrecognized syntax option: @
 # file opened: syntax_abfl.asm
  1    0000              ; SYNTAX option "abfl@":
  2    0000              ;  @ is error "unrecognized" (but outside of list file!)

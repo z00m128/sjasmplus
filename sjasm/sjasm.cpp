@@ -408,10 +408,11 @@ namespace Options {
 				// l L - warn/error about labels using keywords (default = no message)
 				case 'l':
 				case 'L':
-					if (0 == pass || LASTPASS == pass) {
-						_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
-					}
+				{
+					const char this_option_is[2] = { syntaxOption, 0 };
+					Error("Syntax option not implemented yet", this_option_is, PASS03);
 					break;
+				}
 				// i - case insensitive instructions/directives (default = same case required)
 				case 'i': syx.CaseInsensitiveInstructions = true; break;
 				// w - warnings option: report warnings as errors
@@ -422,9 +423,8 @@ namespace Options {
 				case 's': syx.IsSubwordSubstitution = false; break;
 				// unrecognized option
 				default:
-					if (0 == pass || LASTPASS == pass) {
-						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;
-					}
+					const char this_option_is[2] = { syntaxOption, 0 };
+					Error("Unrecognized syntax option", this_option_is, PASS03);
 					break;
 				}
 			}
@@ -554,7 +554,6 @@ namespace Options {
 				} else if (!doubleDash && 'D' == opt[0]) {
 					char defN[LINEMAX], defV[LINEMAX];
 					if (*val) {		// for -Dname=value the `val` contains "name=value" string
-						//TODO the `Error("Duplicate name"..)` is not shown while parsing CLI options
 						splitByChar(val, '=', defN, LINEMAX, defV, LINEMAX);
 						CmdDefineTable.Add(defN, defV, NULL);
 					} else {
