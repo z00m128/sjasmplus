@@ -29,6 +29,7 @@
 // parser.cpp
 
 #include "sjdefs.h"
+#include <cassert>
 
 static bool synerr = true;	// flag whether ParseExpression should report syntax error with Error()
 
@@ -725,8 +726,8 @@ void ParseLabel() {
 
 				delete[] buf;
 			}
-		} else if (pass == 2 && !LabelTable.Insert(tp, val, traits, equPageNum) && !LabelTable.Update(tp, val)) {
-			Error("Duplicate label", tp, EARLY);
+		} else if (pass == 2 && !LabelTable.Insert(tp, val, traits, equPageNum)) {
+			if (!LabelTable.Update(tp, val)) assert(false); // unreachable, update will always work after insert failed
 		} else if (pass == 1 && !LabelTable.Insert(tp, val, traits, equPageNum)) {
 			Error("Duplicate label", tp, EARLY);
 		}

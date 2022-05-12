@@ -215,3 +215,5 @@ exist:              ; warning about reserved keyword (at top of listing, because
     DW exist(e\ist) ; unexpected "(e\ist)" - fails as argument for exists, fallback to symbol eval + extra chars
     DW exist(exi$t) ; unexpected "(exi$t)" - fails as argument for exists, fallback to symbol eval + extra chars
     DW exist(@@exi) ; invalid label name + unexpected
+
+exist:              ; error Duplicate label: another code path exercised for test coverage
