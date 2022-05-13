@@ -114,7 +114,6 @@ public:
 	int Insert(const char*, function_fn_t);
 	int insertd(const char*, function_fn_t);
 	int zoek(const char*);
-	int Find(const char*) const;
 };
 
 class CLocalLabelTableEntry {
@@ -145,9 +144,10 @@ public:
 	CStringsList* next;
 	TextFilePos source;
 	TextFilePos definition;
-	CStringsList();
 	~CStringsList();
 	CStringsList(const char* stringSource, CStringsList* next = NULL);
+
+	static bool contains(const CStringsList* strlist, const char* searchString);
 };
 
 class CDefineTableEntry {
@@ -203,15 +203,15 @@ public:
 	char* naam;
 	CStringsList* args, * body;
 	CMacroTableEntry* next;
-	CMacroTableEntry(char*, CMacroTableEntry*);
+	CMacroTableEntry(char* nname, CMacroTableEntry* nnext);
 	~CMacroTableEntry();
 };
 
 class CMacroTable {
 public:
-	void Add(char*, char*&);
+	void Add(const char*, char*&);
 	int Emit(char*, char*&);
-	int FindDuplicate(char*);
+	int FindDuplicate(const char*);
 	void ReInit();
 	CMacroTable();
 	~CMacroTable();

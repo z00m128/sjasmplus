@@ -554,10 +554,6 @@ int CFunctionTable::zoek(const char* name) {
 	return 1;
 }
 
-int CFunctionTable::Find(const char* name) const {
-	return (functions.end() != functions.find(name));
-}
-
 CLocalLabelTableEntry::CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous) {
 	nummer = number;
 	value = address;
@@ -615,11 +611,6 @@ CLocalLabelTableEntry* CLocalLabelTable::seekBack(const aint labelNumber) const 
 	return l;
 }
 
-CStringsList::CStringsList() : string(NULL), next(NULL)
-{
-	// all initialized already
-}
-
 CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
 	string = STRDUP(stringSource);
 	next = nnext;
@@ -632,6 +623,13 @@ CStringsList::~CStringsList() {
 	if (next) delete next;
 }
 
+bool CStringsList::contains(const CStringsList* strlist, const char* searchString) {
+	while (nullptr != strlist) {
+		if (!strcmp(searchString, strlist->string)) return true;
+		strlist = strlist->next;
+	}
+	return false;
+}
 
 CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStringsList* nnss, CDefineTableEntry* nnext)
 		: name(NULL), value(NULL) {
@@ -833,8 +831,8 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 	return 0;
 }
 
-CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
-	naam = nnaam; next = nnext; args = body = NULL;
+CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext)
+	: naam(nnaam), args(nullptr), body(nullptr), next(nnext) {
 }
 
 CMacroTableEntry::~CMacroTableEntry() {
@@ -858,7 +856,7 @@ void CMacroTable::ReInit() {
 	for (auto & usedX : used) usedX = false;
 }
 
-int CMacroTable::FindDuplicate(char* naam) {
+int CMacroTable::FindDuplicate(const char* naam) {
 	CMacroTableEntry* p = macs;
 	if (!used[(*naam)&127]) {
 		return 0;
@@ -872,9 +870,7 @@ int CMacroTable::FindDuplicate(char* naam) {
 	return 0;
 }
 
-void CMacroTable::Add(char* nnaam, char*& p) {
-	char* n;
-	CStringsList* s,* l = NULL,* f = NULL;
+void CMacroTable::Add(const char* nnaam, char*& p) {
 	if (FindDuplicate(nnaam)) {
 		Error("Duplicate macroname", nnaam);return;
 	}
@@ -882,24 +878,27 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	if (macroname == NULL) ErrorOOM();
 	macs = new CMacroTableEntry(macroname, macs);
 	used[(*macroname)&127] = true;
-	SkipBlanks(p);
-	while (*p) {
-		if (!(n = GetID(p))) {
-			Error("Illegal macro argument", p, EARLY); break;
+	CStringsList* last = nullptr;
+	do {
+		char* n = GetID(p);
+		if (!n) {
+			// either EOL when no previous argument, or valid name is required after comma (2nd+ loop)
+			if ((1 == pass) && (last || *p)) Error("Illegal argument name", p, EARLY);
+			SkipToEol(p);
+			break;
 		}
-		s = new CStringsList(n); if (!f) {
-									  	f = s;
-									  } if (l) {
-											l->next = s;
-										} l = s;
-		SkipBlanks(p); if (*p == ',') {
-					   	++p;
-					   } else {
-					   	break;
-					   }
-	}
-	macs->args = f;
-	if (*p) {
+		if ((1 == pass) && CStringsList::contains(macs->args, n)) {
+			Error("Duplicate argument name", n, EARLY);
+		}
+		CStringsList* argname = new CStringsList(n);
+		if (!macs->args) {
+			macs->args = argname;	// first argument name, make it head of list
+		} else {
+			last->next = argname;
+		}
+		last = argname;
+	} while (anyComma(p));
+	if ((1 == pass) && *p) {
 		Error("Unexpected", p, EARLY);
 	}
 	ListFile();
