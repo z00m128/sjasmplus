@@ -923,7 +923,7 @@ void ParseLineSafe(bool parselabels) {
 	lp = rp;
 }
 
-void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabel()?
+void ParseStructLabel(CStructure* st) {
 	char* tp, temp[LINEMAX];
 	if (PreviousIsLabel) {
 		free(PreviousIsLabel);
