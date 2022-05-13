@@ -1739,7 +1739,7 @@ static void dirASSERT() {
 }
 
 static void dirSHELLEXEC() {
-	//FIXME for v2.x change the "SHELLEXEC <command>[, <params>]" syntax to "SHELLEXEC <whatever>"
+	//TODO for v2.x change the "SHELLEXEC <command>[, <params>]" syntax to "SHELLEXEC <whatever>"
 	// (and add good examples how to deal with quotes/colons/long file names with spaces)
 	std::unique_ptr<char[]> command(GetFileName(lp, false));
 	std::unique_ptr<char[]> parameters;
