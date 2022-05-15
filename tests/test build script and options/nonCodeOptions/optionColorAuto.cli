@@ -5,7 +5,7 @@ options+=('--fullpath')		# fullpath as other tests
 options+=('--lstlab=sort')	# enforce all symbol dumps to be sorted in any case
 options+=('--msg=war')		# capture terminal stderr output into .lst file
 options+=('--color=auto')	# check the color AUTO mechanics in this test
-if [[ -v NO_COLOR ]]; then
+if [[ ! -z ${NO_COLOR+z} ]]; then
     echo "NO_COLOR was set in the test environment, invalidating this test" 2> "${dst_base}.lst"
     last_result=1
 elif [[ -z "${MSG_LIST_FILE}" ]]; then
