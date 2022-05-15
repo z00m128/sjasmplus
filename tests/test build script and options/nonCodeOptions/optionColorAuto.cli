@@ -1,0 +1,30 @@
+# .msglst is used to compare captured stderr output, not producing real listing file
+options=('-Wno-behost')	# don't report BE host platform (these kind of tests should pass on any platform)
+options+=('--nologo')		# no logo as other tests
+options+=('--fullpath')		# fullpath as other tests
+options+=('--lstlab=sort')	# enforce all symbol dumps to be sorted in any case
+options+=('--msg=war')		# capture terminal stderr output into .lst file
+options+=('--color=auto')	# check the color AUTO mechanics in this test
+if [[ -v NO_COLOR ]]; then
+    echo "NO_COLOR was set in the test environment, invalidating this test" 2> "${dst_base}.lst"
+    last_result=1
+elif [[ -z "${MSG_LIST_FILE}" ]]; then
+    last_result=1
+else
+    # dumb terminal -> auto should produce NO colors
+    TERM="dumb" $MEMCHECK "$EXE" "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
+    # color terminal -> auto should produce COLORS
+    TERM="color" $MEMCHECK "$EXE" "${options[@]}" "$file_asm" 2>> "${dst_base}.lst"
+
+    # test "auto" with NO_COLOR env variable defined (should produce NO color)
+    # color terminal + NO_COLOR defined -> auto should produce NO color
+    TERM="color" NO_COLOR=0 $MEMCHECK "$EXE" "${options[@]}" "$file_asm" 2>> "${dst_base}.lst"
+    # dumb terminal + NO_COLOR defined -> auto should still produce NO color
+    TERM="dumb" NO_COLOR=0 $MEMCHECK "$EXE" "${options[@]}" "$file_asm" 2>> "${dst_base}.lst"
+
+    # test also override of NO_COLOR envvar by using explicit --color=on
+    # color terminal + NO_COLOR defined -> "on" should produce COLORS
+    TERM="color" NO_COLOR=0 $MEMCHECK "$EXE" "${options[@]}"  --color=on "$file_asm" 2>> "${dst_base}.lst"
+    # dumb terminal + NO_COLOR defined -> "on" should produce COLORS
+    TERM="dumb" NO_COLOR=0 $MEMCHECK "$EXE" "${options[@]}" --color=on "$file_asm" 2>> "${dst_base}.lst"
+fi

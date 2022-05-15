@@ -5,6 +5,12 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+http://no-color.org/    -> add to web after v1.20.0 release
+
+listing with pre-substituted original source line included
+ catch list: DUP -> EDUP, `nop:nop:nop`, ...
+ output: maybe `<` like macros have `>`? and missing address, only line number?
+
 relocation -> extra support for 256B aligned relocation mode (For symbOS and NextZXOS drivers)
 
 "smc+?" syntax to pick most logical argument by assembler itself
@@ -17,8 +23,6 @@ structure block+align does preserve memory, and standalone ALIGN, but not DS/BLO
 "emitted from here" error should maybe show original line, as people not using error parsing
 claim it's confusing/useless.
  -> turned out to be lot more difficult than expected (macros + lua inlining)
-
-remote build script - "done" ATM, waiting for feedback/improvements suggestions/logs
 
 ARM emulation on x86: https://github.com/nongiach/arm_now  ???
 

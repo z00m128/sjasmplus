@@ -1,0 +1,18 @@
+optionColorAuto.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+optionColorAuto.asm(3): error: Unrecognized instruction: some_error line
+> something
+[33moptionColorAuto.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+[m[31moptionColorAuto.asm(3): error: Unrecognized instruction: some_error line
+[m> [36msomething[m
+optionColorAuto.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+optionColorAuto.asm(3): error: Unrecognized instruction: some_error line
+> something
+optionColorAuto.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+optionColorAuto.asm(3): error: Unrecognized instruction: some_error line
+> something
+[33moptionColorAuto.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+[m[31moptionColorAuto.asm(3): error: Unrecognized instruction: some_error line
+[m> [36msomething[m
+[33moptionColorAuto.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
+[m[31moptionColorAuto.asm(3): error: Unrecognized instruction: some_error line
+[m> [36msomething[m
