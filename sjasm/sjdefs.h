@@ -61,17 +61,12 @@ using std::flush;
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 #include <math.h>
 
+//FIXME actually move this only to files which do something with lua and not everywhere?
 #ifdef USE_LUA
-
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-#include "tolua++.h"
-}
-
+  #include "lua.hpp"
 #endif //USE_LUA
 
 // global defines
@@ -104,9 +99,11 @@ struct SAlignSafeCast {
 #endif
 
 // include all headers
-extern "C" {
-#include "lua_lpack.h"
-}
+
+// extern "C" { //FIXME remove or update
+// #include "lua_lpack.h"
+// }
+
 #include "devices.h"
 #include "support.h"
 #include "tables.h"

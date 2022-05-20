@@ -12,12 +12,13 @@
 # make clean && make CC=gcc-8 CXX=g++-8		- to compile binary with gcc-8
 # make DEBUG=1 LUA_COVERAGE=1 coverage		- to produce build/debug/coverage/* files by running the tests
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
-# make CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS='-DNDEBUG -O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) -I$(SUBDIR_CRC32C)' LDFLAGS=''	- to cross compile win exe on my linux box with the linux Makefile
+# make CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS='-DNDEBUG -O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_CRC32C)' LDFLAGS=''	- to cross compile win exe on my linux box with the linux Makefile
 # make CFLAGS_EXTRA='-m32' LDFLAGS='-ldl -m32'  - to builds 32b linux executable
 # make CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
 # make CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
 
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
+USE_LUA=1
 CC=gcc
 CXX=g++
 BASH=/usr/bin/env bash
@@ -37,13 +38,17 @@ EXE_BASE_NAME := sjasmplus
 BUILD_DIR := build
 
 SUBDIR_BASE=sjasm
-SUBDIR_LUA=lua5.1
-SUBDIR_TOLUA=tolua++
+SUBDIR_LUA=lua5.4
 SUBDIR_CRC32C=crc32c
 SUBDIR_DOCS=docs
 SUBDIR_COV=coverage
 
-CFLAGS := -Wall -pedantic -DUSE_LUA -DLUA_USE_LINUX -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) -I$(SUBDIR_CRC32C) $(CFLAGS_EXTRA)
+# FIXME too many lua5.4 warnings: -pedantic
+CFLAGS := -Wall -DMAX_PATH=PATH_MAX -I$(SUBDIR_CRC32C)
+ifdef USE_LUA
+CFLAGS += -DUSE_LUA -DLUA_USE_LINUX -I$(SUBDIR_LUA)
+endif
+CFLAGS += $(CFLAGS_EXTRA)
 LDFLAGS := -ldl
 
 ifdef DEBUG
@@ -90,11 +95,6 @@ LUASRCS := $(wildcard $(SUBDIR_LUA)/*.c)
 LUAOBJS := $(call object_files,$(LUASRCS))
 LUAOBJS_UT := $(call object_files_ut,$(LUASRCS))
 
-# tolua files
-TOLUASRCS := $(wildcard $(SUBDIR_TOLUA)/*.c)
-TOLUAOBJS := $(call object_files,$(TOLUASRCS))
-TOLUAOBJS_UT := $(call object_files_ut,$(TOLUASRCS))
-
 # crc32c files
 CRC32CSRCS := $(wildcard $(SUBDIR_CRC32C)/*.cpp)
 CRC32COBJS := $(call object_files,$(CRC32CSRCS))
@@ -106,8 +106,14 @@ UTPPOBJS := $(call object_files,$(UTPPSRCS))
 TESTSSRCS := $(wildcard $(SUBDIR_TESTS)/*.cpp)
 TESTSOBJS := $(call object_files_ut,$(TESTSSRCS))
 
-ALL_OBJS := $(OBJS) $(CRC32COBJS) $(LUAOBJS) $(TOLUAOBJS)
-ALL_OBJS_UT := $(OBJS_UT) $(CRC32COBJS_UT) $(LUAOBJS_UT) $(TOLUAOBJS_UT) $(UTPPOBJS) $(TESTSOBJS)
+ALL_OBJS := $(OBJS) $(CRC32COBJS)
+ifdef USE_LUA
+ALL_OBJS += $(LUAOBJS)
+endif
+ALL_OBJS_UT := $(OBJS_UT) $(CRC32COBJS_UT) $(UTPPOBJS) $(TESTSOBJS)
+ifdef USE_LUA
+ALL_OBJS_UT += $(LUAOBJS_UT)
+endif
 ALL_COVERAGE_RAW := $(patsubst %.o,%.gcno,$(ALL_OBJS_UT)) $(patsubst %.o,%.gcda,$(ALL_OBJS_UT))
 
 # GCOV options to generate coverage files
@@ -186,7 +192,6 @@ ifdef LUA_COVERAGE
 # by default the "external" lua sources are excluded from coverage report, sjasmplus is not focusing to cover+fix lua itself
 # to get full coverage report, including the lua sources, use `make DEBUG=1 LUA_COVERAGE=1 coverage`
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_LUA) $(LUASRCS)
-	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_TOLUA) $(TOLUASRCS)
 endif
 ifndef COVERALLS_SERVICE
 # coversall.io is serviced by 3rd party plugin: https://github.com/eddyxu/cpp-coveralls
@@ -219,7 +224,6 @@ clean:
 		$(BUILD_DIR)/$(SUBDIR_BASE) \
 		$(BUILD_DIR)/$(SUBDIR_CRC32C) \
 		$(BUILD_DIR)/$(SUBDIR_LUA) \
-		$(BUILD_DIR)/$(SUBDIR_TOLUA) \
 		$(BUILD_DIR)/$(SUBDIR_UT)/UnitTest++/Posix \
 		$(BUILD_DIR)/$(SUBDIR_UT)/UnitTest++ \
 		$(BUILD_DIR)/$(SUBDIR_UT) \
@@ -227,7 +231,6 @@ clean:
 		$(BUILD_DIR_UT)/$(SUBDIR_BASE) \
 		$(BUILD_DIR_UT)/$(SUBDIR_CRC32C) \
 		$(BUILD_DIR_UT)/$(SUBDIR_LUA) \
-		$(BUILD_DIR_UT)/$(SUBDIR_TOLUA) \
 		$(BUILD_DIR_UT)/$(SUBDIR_TESTS) \
 		$(BUILD_DIR_UT)/$(SUBDIR_COV) \
 		$(BUILD_DIR_UT)

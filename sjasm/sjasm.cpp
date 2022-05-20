@@ -35,7 +35,7 @@
 
 #ifdef USE_LUA
 
-#include "lua_sjasm.h"
+//#include "lua_sjasm.h"	//FIXME new wrapper to be done
 
 #endif //USE_LUA
 
@@ -726,12 +726,13 @@ int main(int argc, char **argv) {
 #ifdef USE_LUA
 
 	// init LUA
-	LUA = lua_open();
-	lua_atpanic(LUA, (lua_CFunction)LuaFatalError);
-	luaL_openlibs(LUA);
-	luaopen_pack(LUA);
+	LUA = luaL_newstate();
 
-	tolua_sjasm_open(LUA);
+	lua_atpanic(LUA, (lua_CFunction)LuaFatalError);	//FIXME verify if this works
+	luaL_openlibs(LUA);	//FIXME verify if this works
+	//FIXME luaopen_pack(LUA);
+
+	//FIXME tolua_sjasm_open(LUA);
 
 #endif //USE_LUA
 

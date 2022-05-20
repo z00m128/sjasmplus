@@ -2169,7 +2169,8 @@ static void dirLUA() {
 		luaMF.text = buff;
 		luaMF.size = strlen(luaMF.text);
 		DidEmitByte();			// reset the flag before running lua script
-		int error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
+		int error = luaL_dostring(LUA, buff);
+		//FIXME do cleanup, the luaL_dostring seems to be enough, old code: int error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
 		if (error) {
 			_lua_showLoadError(errorType);
 		}
