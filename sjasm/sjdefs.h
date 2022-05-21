@@ -67,6 +67,7 @@ using std::flush;
 //FIXME actually move this only to files which do something with lua and not everywhere?
 #ifdef USE_LUA
   #include "lua.hpp"
+  #include "LuaBridge/LuaBridge.h"
 #endif //USE_LUA
 
 // global defines

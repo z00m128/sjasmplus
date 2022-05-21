@@ -181,9 +181,11 @@ static void DeviceAmstradCPC6128(CDevice** dev, CDevice* parent, aint ramtop) {
 	initRegularSlotDevice(*dev, 0x4000, 4, 8, initialPages);
 }
 
-int SetDevice(char *id, const aint ramtop) {
+bool SetDevice(const char *const_id, const aint ramtop) {
 	CDevice** dev;
 	CDevice* parent = nullptr;
+	char* id = const_cast<char*>(const_id);		//TODO cmphstr for both const/nonconst variants?
+		// ^ argument is const because of lua bindings
 
 	if (!id || cmphstr(id, "none")) {
 		DeviceID = 0; return true;
@@ -257,7 +259,7 @@ int SetDevice(char *id, const aint ramtop) {
 	return true;
 }
 
-char* GetDeviceName() {
+const char* GetDeviceName() {
 	if (!DeviceID) {
 		return (char *)"NONE";
 	} else {

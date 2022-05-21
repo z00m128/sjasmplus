@@ -1076,7 +1076,7 @@ void ParseStructLine(CStructure* st) {
 	if (*lp) Error("[STRUCT] Unexpected", lp);
 }
 
-uint32_t LuaCalculate(char *str) {
+uint32_t LuaCalculate(const char *str) {
 	// substitute defines + macro_args in the `str` first (preserve original global variables)
 	char* const oldSubstitutedLine = substitutedLine;
 	const int oldComlin = comlin;
@@ -1090,11 +1090,13 @@ uint32_t LuaCalculate(char *str) {
 		tmp2 = STRDUP(sline2);
 		if (tmp2 == NULL) ErrorOOM();
 	}
-	char* substitutedStr = ReplaceDefine(str);
+	char* luaInput = STRDUP(str);
+	char* substitutedStr = ReplaceDefine(luaInput);
 
 	// evaluate the expression
 	aint val;
 	int parseResult = ParseExpression(substitutedStr, val);
+	free(luaInput);
 
 	// restore any global values affected by substitution
 	substitutedLine = oldSubstitutedLine;
@@ -1113,7 +1115,7 @@ uint32_t LuaCalculate(char *str) {
 	return parseResult ? val : 0;
 }
 
-void LuaParseLine(char *str) {
+void LuaParseLine(const char *str) {
 	// preserve current actual line which will be parsed next
 	char *oldLine = STRDUP(line);
 	char *oldEolComment = eolComment;
@@ -1130,7 +1132,7 @@ void LuaParseLine(char *str) {
 	free(oldLine);
 }
 
-void LuaParseCode(char *str) {
+void LuaParseCode(const char *str) {
 	char *ml;
 
 	ml = STRDUP(line);

@@ -62,6 +62,7 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 		while (true) {
 			if (!lua_getstack(LUA, level, &ar)) break;	// no more lua stack levels
 			if (!lua_getinfo(LUA, "Sl", &ar)) break;	// no more info about current level
+			//TODO track each chunk under own name, and track their source position
 			if (strcmp("[string \"script\"]", ar.short_src)) {
 				// standalone definition in external file found, pinpoint it precisely
 				errorPos.filename = ar.short_src;

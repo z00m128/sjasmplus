@@ -29,13 +29,13 @@
 #include "sjdefs.h"
 
 // report error and close the file
-static int writeError(char* fname, FILE* & fileToClose) {
+static int writeError(const char* fname, FILE* & fileToClose) {
 	Error("Write error (disk full?)", fname, IF_FIRST);
 	fclose(fileToClose);
 	return 0;
 }
 
-int SaveSNA_ZX(char* fname, word start) {
+int SaveSNA_ZX(const char* fname, word start) {
 	// for Lua
 	if (!DeviceID) {
 		Error("[SAVESNA] Only for real device emulation mode.");

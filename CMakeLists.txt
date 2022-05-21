@@ -10,6 +10,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 project(sjasmplus)
 set(MY_LUA_INCLUDE_DIR "lua5.4")
 set(MY_LUA_LIBRARY "lua5.4")
+set(LUABRIDGE_DIR "LuaBridge/Source")
 
 set(SOURCES
 	sjasm/devices.cpp
@@ -49,6 +50,8 @@ option(ENABLE_LUA "Enable LUA scripting support" ON)
 option(SYSTEM_LUA "Use system LUA package" OFF)
 
 if(ENABLE_LUA)
+	add_subdirectory(${LUABRIDGE_DIR})
+
 	message(STATUS "Looking for Lua 5.4")
 
 	if(SYSTEM_LUA)
@@ -91,21 +94,22 @@ include_directories(crc32c)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES})
 
-target_link_libraries(
-	${PROJECT_NAME}
-	${LUA_LIBRARY}
-)
-
-if(NOT WIN32)
-	find_package(LibDL)
-	if(LIBDL_FOUND)
+if(ENABLE_LUA)
 	target_link_libraries(
 		${PROJECT_NAME}
-		${LIBDL_LIBRARIES}
+		${LUA_LIBRARY}
+		LuaBridge
 	)
-	endif(LIBDL_FOUND)
-endif()
-
+	if(NOT WIN32)
+		find_package(LibDL)
+		if(LIBDL_FOUND)
+		target_link_libraries(
+			${PROJECT_NAME}
+			${LIBDL_LIBRARIES}
+		)
+		endif(LIBDL_FOUND)
+	endif()
+endif(ENABLE_LUA)
 
 install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin)

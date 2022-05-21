@@ -119,7 +119,7 @@ void switchStdOutIntoBinaryMode() {
 
 #ifdef USE_LUA
 
-void LuaShellExec(char *command) {
+void LuaShellExec(const char *command) {
 #ifdef WIN32
 	WinExec(command, SW_SHOWNORMAL);
 #else

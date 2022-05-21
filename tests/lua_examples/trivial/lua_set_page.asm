@@ -18,5 +18,5 @@
     ASSERT(6 == $$)     ; default slot 3 should be page 6 set by lua
 
     lua pass3 ; wrong arguments
-        sj.set_page(233, 2)
+        sj.set_page(233, 2) -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
     endlua

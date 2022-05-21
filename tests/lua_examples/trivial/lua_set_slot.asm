@@ -26,5 +26,5 @@
     ASSERT 6 == $$  ; slot 2 should be active by lua script => page 6 there
 
     lua pass3 ; wrong arguments
-        sj.set_slot(1, 2)
+        sj.set_slot(1, 2)   -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
     endlua

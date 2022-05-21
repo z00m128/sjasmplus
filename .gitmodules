@@ -2,3 +2,6 @@
 	path = unittest-cpp
 	url = https://github.com/unittest-cpp/unittest-cpp.git
 	branch = master
+[submodule "LuaBridge"]
+	path = LuaBridge
+	url = https://github.com/vinniefalco/LuaBridge.git

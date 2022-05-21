@@ -59,9 +59,9 @@ bool PrepareNonBlankMultiLine(char*& p);
 void ParseLine(bool = true);
 void ParseLineSafe(bool = true);
 void ParseStructLine(CStructure* st);
-uint32_t LuaCalculate(char *str);
-void LuaParseLine(char *str);
-void LuaParseCode(char *str);
+uint32_t LuaCalculate(const char *str);
+void LuaParseLine(const char *str);
+void LuaParseCode(const char *str);
 
 template <int argsN> bool getIntArguments(char*& lp, aint (&args)[argsN], const bool (&argOptional)[argsN]) {
 	for (int i = 0; i < argsN; ++i) {

@@ -39,6 +39,7 @@ BUILD_DIR := build
 
 SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.4
+SUBDIR_LUABRIDGE=LuaBridge/Source
 SUBDIR_CRC32C=crc32c
 SUBDIR_DOCS=docs
 SUBDIR_COV=coverage
@@ -46,10 +47,14 @@ SUBDIR_COV=coverage
 # FIXME too many lua5.4 warnings: -pedantic
 CFLAGS := -Wall -DMAX_PATH=PATH_MAX -I$(SUBDIR_CRC32C)
 ifdef USE_LUA
-CFLAGS += -DUSE_LUA -DLUA_USE_LINUX -I$(SUBDIR_LUA)
+CFLAGS += -DUSE_LUA -DLUA_USE_LINUX -I$(SUBDIR_LUA) -I$(SUBDIR_LUABRIDGE)
 endif
 CFLAGS += $(CFLAGS_EXTRA)
-LDFLAGS := -ldl
+
+LDFLAGS :=
+ifdef USE_LUA
+LDFLAGS += -ldl
+endif
 
 ifdef DEBUG
 BUILD_DIR := $(BUILD_DIR)/debug

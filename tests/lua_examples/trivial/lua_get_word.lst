@@ -17,9 +17,7 @@
 13    444E                  ENDLUA
 14    444E
 15    444E                  LUA pass3 ; wrong arguments
-16    444E ~                    sj.get_word(0x1234, 2)
-lua_get_word.asm(16): error: [LUA] error in function 'get_word'.
-     argument #2 is 'number'; '[no object]' expected.
+16    444E ~                    sj.get_word(0x1234, 2)  -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
 17    444E                  ENDLUA
 18    444E
 # file closed: lua_get_word.asm

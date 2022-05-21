@@ -929,13 +929,10 @@ void OpenTapFile(char * tapename, int flagbyte)
 	}
 }
 
-int FileExists(char* file_name) {
-	int exists = 0;
+bool FileExists(const char* file_name) {
 	FILE* test;
-	if (FOPEN_ISOK(test, file_name, "r")) {
-		exists = 1;
-		fclose(test);
-	}
+	bool exists = FOPEN_ISOK(test, file_name, "r");
+	exists && fclose(test);
 	return exists;
 }
 

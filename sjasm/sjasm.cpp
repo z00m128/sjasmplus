@@ -724,6 +724,7 @@ int main(int argc, char **argv) {
 	}
 
 #ifdef USE_LUA
+	//FIXME move this to separate source file
 
 	// init LUA
 	LUA = luaL_newstate();
@@ -732,8 +733,61 @@ int main(int argc, char **argv) {
 	luaL_openlibs(LUA);	//FIXME verify if this works
 	//FIXME luaopen_pack(LUA);
 
-	//FIXME tolua_sjasm_open(LUA);
+	luabridge::getGlobalNamespace(LUA)
+		.addFunction("_c", LuaCalculate)
+		.addFunction("_pl", LuaParseLine)
+		.addFunction("_pc", LuaParseCode)
+		.beginNamespace("sj")
+			.addProperty("current_address", &CurAddress, false)	// read-only
+			.addProperty("warning_count", &WarningCount, false)	// read-only
+			.addProperty("error_count", &ErrorCount, false)	// read-only
+			.addFunction("get_define",
+				(std::function<const char*(const char*)>)[](const char*n) { return DefineTable.Get(n); })
+			.addFunction("insert_define",
+				(std::function<bool(const char*,const char*)>)[](const char*n,const char*v) { return DefineTable.Replace(n, v); })
+			.addFunction("get_label", LuaGetLabel)
+			//FIXME verify the official API only
+			.addFunction("insert_label",
+				(std::function<bool(const char*,int,bool,bool)>)[](const char*n,int a,bool undefined,bool defl) {
+					unsigned traits = (undefined ? LABEL_IS_UNDEFINED : 0) | (defl ? LABEL_IS_DEFL : 0);
+					return LabelTable.Insert(n, a, traits);
+				}
+			)
+			.addFunction("shellexec", LuaShellExec)
+			.addFunction("exit", ExitASM)
+			.addFunction("calc", LuaCalculate)
+			.addFunction("parse_line", LuaParseLine)
+			.addFunction("parse_code", LuaParseCode)
+			.addFunction("add_byte", EmitByte)
+			.addFunction("add_word", EmitWord)
+			.addFunction("get_byte", MemGetByte)
+			.addFunction("get_word", MemGetWord)
+			.addFunction("get_device", GetDeviceName)
+			.addFunction("set_device", SetDevice)
+			.addFunction("set_page", LuaSetPage)
+			.addFunction("set_slot", LuaSetSlot)
+			.addFunction("error", (std::function<void(const char*)>)[](const char*m) { Error(m, nullptr, ALL); })
+			.addFunction("warning", (std::function<void(const char*)>)[](const char*m) { Warning(m, nullptr, W_ALL); })
+			.addFunction("file_exists", FileExists)
+		.endNamespace()
+		.beginNamespace("zx")
+			.addFunction("trdimage_create",
+				(std::function<void(const char*)>)[](const char*n) {
+					char label[9] = {"        "};
+					TRD_SaveEmpty(n,label);
+				}
+			)
+			.addFunction("trdimage_add_file",
+				(std::function<void(const char*,const char*,int,int,int,bool)>)
+					[](const char*trd,const char*file,int start,int length,int autostart,bool replace) {
+					TRD_AddFile(trd,file,start,length,autostart,replace,false);
+				}
+			)
+			.addFunction("save_snapshot_sna", SaveSNA_ZX)	//FIXME fix docs with return int or bool, fix also trd stuff?
+		.endNamespace();
 
+		//FIXME set_device change API to have second argument ramtop
+		//TODO add MMU API?
 #endif //USE_LUA
 
 	// exit with error if no input file were specified

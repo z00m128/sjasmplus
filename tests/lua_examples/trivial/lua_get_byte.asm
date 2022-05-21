@@ -13,5 +13,5 @@ test:   DEFB 0x41, 0x78
     ENDLUA
 
     LUA pass3 ; wrong arguments
-        sj.get_byte(0x1234, 2)
+        sj.get_byte(0x1234, 2)      -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
     ENDLUA

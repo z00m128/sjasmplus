@@ -2062,6 +2062,7 @@ static void SplitLuaErrorMessage(const char*& LuaError)
 	const char* colon2Pos = nullptr != colonPos ? strchr(colonPos+1, ':') : nullptr;
 	if (nullptr == colonPos || nullptr == colon2Pos) return;	// error, format not recognized
 	int lineNumber = atoi(colonPos + 1);
+	//TODO track each chunk under own name, and track their source position
 	if (strstr(LuaError, "[string \"script\"]") == LuaError) {
 		// inlined script, add to start pos
 		LuaStartPos.line += lineNumber;
@@ -2080,33 +2081,8 @@ static void _lua_showLoadError(const EStatus type) {
 	lua_pop(LUA, 1);
 }
 
-typedef struct luaMemFile
-{
-  const char *text;
-  size_t size;
-} luaMemFile;
-
-const char *readMemFile(lua_State *, void *ud, size_t *size)
-{
-  // Convert the ud pointer (UserData) to a pointer of our structure
-  luaMemFile *luaMF = (luaMemFile *) ud;
-
-  // Are we done?
-  if(luaMF->size == 0)
-    return NULL;
-
-  // Read everything at once
-  // And set size to zero to tell the next call we're done
-  *size = luaMF->size;
-  luaMF->size = 0;
-
-  // Return a pointer to the readed text
-  return luaMF->text;
-}
-
 static void dirLUA() {
 	constexpr size_t luaBufferSize = 32768;
-	luaMemFile luaMF;
 	char* id, * buff = nullptr, * bp = nullptr;
 
 	int passToExec = LASTPASS;
@@ -2166,12 +2142,10 @@ static void dirLUA() {
 
 	if (execute) {
 		*bp = 0;
-		luaMF.text = buff;
-		luaMF.size = strlen(luaMF.text);
 		DidEmitByte();			// reset the flag before running lua script
-		int error = luaL_dostring(LUA, buff);
-		//FIXME do cleanup, the luaL_dostring seems to be enough, old code: int error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
-		if (error) {
+		if (luaL_loadbuffer(LUA, buff, bp-buff, "script") || lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
+			//TODO track each chunk under own name, and track their source position
+			//if (luaL_loadbuffer(LUA, buff, bp-buff, std::to_string(++lua_script_counter).c_str()) || lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
 			_lua_showLoadError(errorType);
 		}
 		LuaStartPos = TextFilePos();

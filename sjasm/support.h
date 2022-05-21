@@ -90,7 +90,7 @@ FILE* dbg_fopen(const char* fname, const char* modes);
 void switchStdOutIntoBinaryMode();
 
 #ifdef USE_LUA
-void LuaShellExec(char *command);
+void LuaShellExec(const char *command);
 #endif //USE_LUA
 
 #ifndef WEXITSTATUS

@@ -291,7 +291,7 @@ struct SRepeatStack {
 	int Level;
 };
 
-int LuaGetLabel(char *name);
+int LuaGetLabel(const char *name);
 
 //eof tables.h
 

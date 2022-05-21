@@ -27,7 +27,7 @@
     LUA PASS1
         AY8910_CLOCK_FREQUENCY=1000000
         function getAyMidiFrequency(midiNumber)
-            return math.floor((AY8910_CLOCK_FREQUENCY/16.0)/(math.pow(2,(midiNumber-69)/12.0)*440)+0.5)
+            return math.floor((AY8910_CLOCK_FREQUENCY/16.0)/(2^((midiNumber-69)/12.0)*440)+0.5)
         end
     ENDLUA
 

@@ -17,9 +17,7 @@
 13    7849                  ENDLUA
 14    7849
 15    7849                  LUA pass3 ; wrong arguments
-16    7849 ~                    sj.get_byte(0x1234, 2)
-lua_get_byte.asm(16): error: [LUA] error in function 'get_byte'.
-     argument #2 is 'number'; '[no object]' expected.
+16    7849 ~                    sj.get_byte(0x1234, 2)      -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
 17    7849                  ENDLUA
 18    7849
 # file closed: lua_get_byte.asm
