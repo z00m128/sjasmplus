@@ -171,12 +171,5 @@ extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;
 extern CStructureTable StructureTable;
 
-#ifdef USE_LUA
-
-extern lua_State *LUA;
-extern TextFilePos LuaStartPos;
-
-#endif //USE_LUA
-
 #endif
 //eof sjasm.h

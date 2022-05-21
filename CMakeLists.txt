@@ -22,6 +22,7 @@ set(SOURCES
 	sjasm/io_tape.cpp
 	sjasm/io_trd.cpp
 	sjasm/io_tzx.cpp
+	sjasm/lua_sjasm.cpp
 	sjasm/parser.cpp
 	sjasm/reader.cpp
 	sjasm/relocate.cpp
@@ -74,7 +75,6 @@ if(ENABLE_LUA)
 
 	list(APPEND SOURCES
 		#sjasm/lua_lpack.c		#FIXME debug
-		#sjasm/lua_sjasm.cpp	#FIXME new wrapper file?
 	)
 
 	add_definitions(-DUSE_LUA)

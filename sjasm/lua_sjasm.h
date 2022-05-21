@@ -1,10 +1,9 @@
-/* 
+/*
 
-  SjASMPlus Z80 Cross Compiler
+  SjASMPlus Z80 Cross Compiler - modified - lua scripting module
 
-  This is modified source of SjASM by Aprisobal - aprisobal@tut.by
-
-  Copyright (c) 2005 Sjoerd Mastijn
+  Copyright (c) 2006 Sjoerd Mastijn (original SW)
+  Copyright (c) 2022 Peter Ped Helcmanovsky (lua scripting module)
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -26,10 +25,14 @@
 
 */
 
-// directives.h
+// lua_sjasm.h
 
-extern CFunctionTable DirectivesTable;
-void InsertDirectives();
-bool dirPageImpl(const char* const dirName, int pageNumber);
+void sj_lua_close();
 
-//eof directives.h
+#ifdef USE_LUA
+	void dirLUA();
+	void dirENDLUA();
+	void dirINCLUDELUA();
+#endif //USE_LUA
+
+//eof lua_sjasm.h

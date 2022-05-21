@@ -33,6 +33,18 @@
 #include <algorithm>
 #include <cassert>
 
+#ifdef USE_LUA
+
+	// io_err.cpp is allowed to work with Lua stuff (and LUA global)
+	// no other file (except lua_sjasm.cpp) should need to include/reference these!
+
+	#include "lua.hpp"
+
+	extern lua_State *LUA;
+	extern TextFilePos LuaStartPos;
+
+#endif //USE_LUA
+
 static bool IsSkipErrors = false;
 static char ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2];
 static aint PreviousErrorLine = -1L;
@@ -49,9 +61,11 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 	// during assembling, show also file+line info
 	TextFilePos errorPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
 	bool isEmittedMsgEnabled = true;
+
 #ifdef USE_LUA
 	lua_Debug ar;					// must be in this scope, as some memory is reused by errorPos
 	if (LuaStartPos.line) {
+		assert(LUA);
 		errorPos = LuaStartPos;
 
 		// find either top level of lua stack, or standalone file, otherwise it's impossible
@@ -77,6 +91,7 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 		}
 	}
 #endif //USE_LUA
+
 	SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", errorPos.filename, errorPos.line);
 	// if the error filename:line is not identical with current source line, add ErrorLine2 about emit
 	if (isEmittedMsgEnabled &&

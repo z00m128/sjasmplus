@@ -64,12 +64,6 @@ using std::flush;
 #include <limits.h>
 #include <math.h>
 
-//FIXME actually move this only to files which do something with lua and not everywhere?
-#ifdef USE_LUA
-  #include "lua.hpp"
-  #include "LuaBridge/LuaBridge.h"
-#endif //USE_LUA
-
 // global defines
 #define LINEMAX 2048
 #define LINEMAX2 LINEMAX*2
@@ -101,10 +95,7 @@ struct SAlignSafeCast {
 
 // include all headers
 
-// extern "C" { //FIXME remove or update
-// #include "lua_lpack.h"
-// }
-
+#include "lua_sjasm.h"
 #include "devices.h"
 #include "support.h"
 #include "tables.h"

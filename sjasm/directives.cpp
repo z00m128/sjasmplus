@@ -254,7 +254,7 @@ static void dirBLOCK() {
 	}
 }
 
-static bool dirPageImpl(const char* const dirName, int pageNumber) {
+bool dirPageImpl(const char* const dirName, int pageNumber) {
 	if (!Device) return false;
 	if (pageNumber < 0 || Device->PagesCount <= pageNumber) {
 		char buf[LINEMAX];
@@ -2052,143 +2052,6 @@ static void dirDEFARRAY() {
 	}
 }
 
-#ifdef USE_LUA
-
-// skips file+line_number info (but will adjust global LuaStartPos data for Error output)
-static void SplitLuaErrorMessage(const char*& LuaError)
-{
-	if (nullptr == LuaError) return;
-	const char* colonPos = strchr(LuaError, ':');
-	const char* colon2Pos = nullptr != colonPos ? strchr(colonPos+1, ':') : nullptr;
-	if (nullptr == colonPos || nullptr == colon2Pos) return;	// error, format not recognized
-	int lineNumber = atoi(colonPos + 1);
-	//TODO track each chunk under own name, and track their source position
-	if (strstr(LuaError, "[string \"script\"]") == LuaError) {
-		// inlined script, add to start pos
-		LuaStartPos.line += lineNumber;
-	} else {
-		// standalone script, use line number as is (if provided by lua error)
-		if (lineNumber) LuaStartPos.line = lineNumber;
-	}
-	LuaError = colon2Pos + 1;
-	while (White(*LuaError)) ++LuaError;
-}
-
-static void _lua_showLoadError(const EStatus type) {
-	const char *msgp = lua_tostring(LUA, -1);
-	SplitLuaErrorMessage(msgp);
-	Error(msgp, nullptr, type);
-	lua_pop(LUA, 1);
-}
-
-static void dirLUA() {
-	constexpr size_t luaBufferSize = 32768;
-	char* id, * buff = nullptr, * bp = nullptr;
-
-	int passToExec = LASTPASS;
-	if ((id = GetID(lp)) && strlen(id) > 0) {
-		if (cmphstr(id, "pass1")) {
-			passToExec = 1;
-		} else if (cmphstr(id, "pass2")) {
-			passToExec = 2;
-		} else if (cmphstr(id, "pass3")) {
-			passToExec = LASTPASS;
-		} else if (cmphstr(id, "allpass")) {
-			passToExec = -1;
-		} else {
-			Error("[LUA] Syntax error", id);
-		}
-	}
-
-	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
-	const bool execute = (-1 == passToExec) || (passToExec == pass);
-	// remember warning suppression also from block start
-	bool showWarning = !suppressedById(W_LUA_MC_PASS);
-
-	if (execute) {
-		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
-		buff = new char[luaBufferSize];
-		bp = buff;
-	}
-	ListFile();
-
-	while (1) {
-		if (!ReadLine(false)) {
-			Error("Unexpected end of lua script");
-			break;
-		}
-		lp = line;
-		SkipBlanks(lp);
-		const int isEndLua = cmphstr(lp, "endlua");
-		const size_t lineLen = isEndLua ? (lp - 6 - line) : strlen(line);
-		if (execute) {
-			if (luaBufferSize < (bp - buff) + lineLen + 4) {
-				ErrorInt("[LUA] Maximum byte-size of Lua script is", luaBufferSize-4, FATAL);
-			}
-			STRNCPY(bp, (luaBufferSize - (bp - buff)), line, lineLen);
-			bp += lineLen;
-			*bp++ = '\n';
-		}
-		if (isEndLua) {		// eat also any trailing eol-type of comment
-			++CompiledCurrentLine;
-			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
-			substitutedLine = line;		// override substituted listing for ENDLUA
-			// take into account also warning suppression used at end of block
-			showWarning = showWarning && !suppressedById(W_LUA_MC_PASS);
-			break;
-		}
-		ListFile(true);
-	}
-
-	if (execute) {
-		*bp = 0;
-		DidEmitByte();			// reset the flag before running lua script
-		if (luaL_loadbuffer(LUA, buff, bp-buff, "script") || lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
-			//TODO track each chunk under own name, and track their source position
-			//if (luaL_loadbuffer(LUA, buff, bp-buff, std::to_string(++lua_script_counter).c_str()) || lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
-			_lua_showLoadError(errorType);
-		}
-		LuaStartPos = TextFilePos();
-		delete[] buff;
-		if (DidEmitByte() && (-1 != passToExec) && showWarning) {
-			const EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
-			WarningById(W_LUA_MC_PASS, nullptr, warningType);
-		}
-	}
-
-	++CompiledCurrentLine;
-	substitutedLine = line;		// override substituted list line for ENDLUA
-}
-
-static void dirENDLUA() {
-	Error("[ENDLUA] End of lua script without script");
-}
-
-static void dirINCLUDELUA() {
-	if (1 != pass) {
-		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
-		return;
-	}
-	std::unique_ptr<char[]> fnaam(GetFileName(lp));
-	EDelimiterType dt = GetDelimiterOfLastFileName();
-	char* fullpath = GetPath(fnaam.get(), NULL, DT_ANGLE == dt);
-	if (!fullpath[0]) {
-		Error("[INCLUDELUA] File doesn't exist", fnaam.get(), EARLY);
-	} else {
-		fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
-		LuaStartPos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
-		LuaStartPos.line = 1;
-		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
-		if (error) {
-			_lua_showLoadError(EARLY);
-		}
-		LuaStartPos = TextFilePos();
-	}
-	free(fullpath);
-}
-
-#endif //USE_LUA
-
 static void dirDEVICE() {
 	// refresh source position of first DEVICE directive
 	if (1 == ++deviceDirectivesCount) {
@@ -2355,27 +2218,5 @@ void InsertDirectives() {
 	DirectivesTable_dup.insertd(".rept", dirDUP);
 	DirectivesTable_dup.insertd(".while", dirWHILE);
 }
-
-#ifdef USE_LUA
-
-bool LuaSetPage(aint n) {
-	return dirPageImpl("sj.set_page", n);
-}
-
-bool LuaSetSlot(aint n) {
-	if (!DeviceID) {
-		Warning("sj.set_slot: only allowed in real device emulation mode (See DEVICE)");
-		return false;
-	}
-	if (!Device->SetSlot(n)) {
-		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "sj.set_slot: Slot number must be in range 0..%u", Device->SlotsCount - 1);
-		Error(buf, NULL, IF_FIRST);
-		return false;
-	}
-	return true;
-}
-
-#endif //USE_LUA
 
 //eof direct.cpp

@@ -33,12 +33,6 @@
 #include <chrono>
 #include <ctime>
 
-#ifdef USE_LUA
-
-//#include "lua_sjasm.h"	//FIXME new wrapper to be done
-
-#endif //USE_LUA
-
 static void PrintHelpMain() {
 	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
 	//     |<-- ...8901234567890123456789012345678901234567890123456789012... 80 chars -->|
@@ -233,13 +227,6 @@ CDefineTable DefineTable;
 CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
 CStructureTable StructureTable;
-
-#ifdef USE_LUA
-
-lua_State *LUA;			// lgtm[cpp/short-global-name] .. name seems barely ok (especially considering rest of code)
-TextFilePos LuaStartPos;
-
-#endif //USE_LUA
 
 // reserve keywords in labels table, to detect when user is defining label colliding with keyword
 static void ReserveLabelKeywords() {
@@ -580,14 +567,6 @@ namespace Options {
 	}
 }
 
-#ifdef USE_LUA
-
-void LuaFatalError(lua_State *L) {
-	Error((char *)lua_tostring(L, -1), NULL, FATAL);
-}
-
-#endif //USE_LUA
-
 // ==============================================================================================
 // == UnitTest++ part, checking if unit tests are requested and does launch test-runner then   ==
 // ==============================================================================================
@@ -723,73 +702,6 @@ int main(int argc, char **argv) {
 		if (0 == sourceFiles.size()) exit(0);
 	}
 
-#ifdef USE_LUA
-	//FIXME move this to separate source file
-
-	// init LUA
-	LUA = luaL_newstate();
-
-	lua_atpanic(LUA, (lua_CFunction)LuaFatalError);	//FIXME verify if this works
-	luaL_openlibs(LUA);	//FIXME verify if this works
-	//FIXME luaopen_pack(LUA);
-
-	luabridge::getGlobalNamespace(LUA)
-		.addFunction("_c", LuaCalculate)
-		.addFunction("_pl", LuaParseLine)
-		.addFunction("_pc", LuaParseCode)
-		.beginNamespace("sj")
-			.addProperty("current_address", &CurAddress, false)	// read-only
-			.addProperty("warning_count", &WarningCount, false)	// read-only
-			.addProperty("error_count", &ErrorCount, false)	// read-only
-			.addFunction("get_define",
-				(std::function<const char*(const char*)>)[](const char*n) { return DefineTable.Get(n); })
-			.addFunction("insert_define",
-				(std::function<bool(const char*,const char*)>)[](const char*n,const char*v) { return DefineTable.Replace(n, v); })
-			.addFunction("get_label", LuaGetLabel)
-			//FIXME verify the official API only
-			.addFunction("insert_label",
-				(std::function<bool(const char*,int,bool,bool)>)[](const char*n,int a,bool undefined,bool defl) {
-					unsigned traits = (undefined ? LABEL_IS_UNDEFINED : 0) | (defl ? LABEL_IS_DEFL : 0);
-					return LabelTable.Insert(n, a, traits);
-				}
-			)
-			.addFunction("shellexec", LuaShellExec)
-			.addFunction("exit", ExitASM)
-			.addFunction("calc", LuaCalculate)
-			.addFunction("parse_line", LuaParseLine)
-			.addFunction("parse_code", LuaParseCode)
-			.addFunction("add_byte", EmitByte)
-			.addFunction("add_word", EmitWord)
-			.addFunction("get_byte", MemGetByte)
-			.addFunction("get_word", MemGetWord)
-			.addFunction("get_device", GetDeviceName)
-			.addFunction("set_device", SetDevice)
-			.addFunction("set_page", LuaSetPage)
-			.addFunction("set_slot", LuaSetSlot)
-			.addFunction("error", (std::function<void(const char*)>)[](const char*m) { Error(m, nullptr, ALL); })
-			.addFunction("warning", (std::function<void(const char*)>)[](const char*m) { Warning(m, nullptr, W_ALL); })
-			.addFunction("file_exists", FileExists)
-		.endNamespace()
-		.beginNamespace("zx")
-			.addFunction("trdimage_create",
-				(std::function<void(const char*)>)[](const char*n) {
-					char label[9] = {"        "};
-					TRD_SaveEmpty(n,label);
-				}
-			)
-			.addFunction("trdimage_add_file",
-				(std::function<void(const char*,const char*,int,int,int,bool)>)
-					[](const char*trd,const char*file,int start,int length,int autostart,bool replace) {
-					TRD_AddFile(trd,file,start,length,autostart,replace,false);
-				}
-			)
-			.addFunction("save_snapshot_sna", SaveSNA_ZX)	//FIXME fix docs with return int or bool, fix also trd stuff?
-		.endNamespace();
-
-		//FIXME set_device change API to have second argument ramtop
-		//TODO add MMU API?
-#endif //USE_LUA
-
 	// exit with error if no input file were specified
 	if (0 == sourceFiles.size()) {
 		if (Options::OutputVerbosity <= OV_ERROR) {
@@ -878,12 +790,7 @@ int main(int argc, char **argv) {
 	// free RAM
 	FreeRAM();
 
-#ifdef USE_LUA
-
-	// close Lua
-	lua_close(LUA);
-
-#endif //USE_LUA
+	sj_lua_close();
 
 	return (ErrorCount != 0);
 }
