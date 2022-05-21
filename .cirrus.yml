@@ -31,6 +31,7 @@ pipe:
     COVERALLS_REPO_TOKEN: ENCRYPTED[8b09887e95ef3aec93b9e31cbbca1f9090704ec9af432869c94d8d79dabdc95640bc061bbaaaf063e31dde112aa93729]
     CI_SERVICE_NAME: 'cirrus-ci'
     # makefile variables affecting build options
+    LUA_COVERAGE: 1
     DEBUG: 1
     COVERALLS_SERVICE: 1
   resources:
