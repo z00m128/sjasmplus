@@ -17,15 +17,17 @@ COMPRESS=upx.exe --best -vk --overlay=skip --compress-icons=0
 EXE=sjasmplus.exe
 
 SUBDIR_BASE=sjasm
-SUBDIR_LUA=lua5.1
-SUBDIR_TOLUA=tolua++
+SUBDIR_LUA=lua5.4
+SUBDIR_LUABRIDGE=LuaBridge/Source
 SUBDIR_CRC32C=crc32c
 
-CFLAGS=-DNDEBUG -O2 -Wall -pedantic -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_TOLUA) -I$(SUBDIR_CRC32C)
+# Ped7g: -pedantic removed due to Lua5.4 having too many warnings
+CFLAGS=-DNDEBUG -O2 -Wall -static -DUSE_LUA -DLUA_USE_WINDOWS -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_LUABRIDGE) -I$(SUBDIR_CRC32C)
 CXXFLAGS=-std=gnu++14 $(CFLAGS)
 
 LDFLAGS= -s
 
+# FIXME fix object list when source files are finalised
 #sjasmplus object files
 OBJS=\
 	$(SUBDIR_BASE)/devices.o \
@@ -51,6 +53,7 @@ OBJS=\
 
 #liblua objects
 LUAOBJS= \
+	$(SUBDIR_LUA)/lcorolib.o $(SUBDIR_LUA)/lctype.o $(SUBDIR_LUA)/lutf8lib.o \
 	$(SUBDIR_LUA)/lapi.o $(SUBDIR_LUA)/lauxlib.o $(SUBDIR_LUA)/lbaselib.o \
 	$(SUBDIR_LUA)/lcode.o $(SUBDIR_LUA)/ldblib.o $(SUBDIR_LUA)/ldebug.o \
 	$(SUBDIR_LUA)/ldo.o $(SUBDIR_LUA)/ldump.o $(SUBDIR_LUA)/lfunc.o \
@@ -62,21 +65,13 @@ LUAOBJS= \
 	$(SUBDIR_LUA)/ltablib.o $(SUBDIR_LUA)/ltm.o $(SUBDIR_LUA)/lundump.o \
 	$(SUBDIR_LUA)/lvm.o $(SUBDIR_LUA)/lzio.o
 
-# tolua objects
-TOLUAOBJS=\
-	$(SUBDIR_TOLUA)/tolua_event.o \
-	$(SUBDIR_TOLUA)/tolua_is.o \
-	$(SUBDIR_TOLUA)/tolua_map.o \
-	$(SUBDIR_TOLUA)/tolua_push.o \
-	$(SUBDIR_TOLUA)/tolua_to.o
-
 RES=sjasmwin32/sjasmplus.res
 
 
 .PHONY: all clean
 
-all: $(LUAOBJS) $(TOLUAOBJS) $(OBJS) $(RES)
-	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(TOLUAOBJS) $(LDFLAGS) $(RES)
+all: $(LUAOBJS) $(OBJS) $(RES)
+	$(GPP) -o $(EXE) $(CXXFLAGS) $(OBJS) $(LUAOBJS) $(LDFLAGS) $(RES)
 
 install:
 	$(CREATEDIR) $(PREFIX)
@@ -101,6 +96,5 @@ clean:
 	$(UNINSTALL) \
 		$(SUBDIR_BASE)/*.o \
 		$(SUBDIR_LUA)/*.o \
-		$(SUBDIR_TOLUA)/*.o \
 		$(SUBDIR_CRC32C)/*.o \
 		$(RES) $(EXE) *~

@@ -5,8 +5,8 @@ path_classifiers:
     - "tests/"
     - "examples/"
   library:
-    - "lua5.1/"
-    - "tolua++/"
+    - "lua5.4/"
+    - "LuaBridge/"
     - "unittest-cpp/"
   docs:
     - "docs/"
