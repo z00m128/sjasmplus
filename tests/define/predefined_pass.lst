@@ -1,15 +1,15 @@
 # file opened: predefined_pass.asm
  1    0000                  LUA PASS1
  2    0000 ~                    asmpass = 0 + sj.get_define("__PASS__")
- 3    0000 ~                    if (1 ~= asmpass) then sj.error("unexpected __PASS__ value", asmpass) end
+ 3    0000 ~                    if (1 ~= asmpass) then sj.error("unexpected __PASS__ value "..asmpass) end
  4    0000                  ENDLUA
  5    0000                  LUA PASS2
  6    0000 ~                    asmpass = 0 + sj.get_define("__PASS__")
- 7    0000 ~                    if (2 ~= asmpass) then sj.error("unexpected __PASS__ value", asmpass) end
+ 7    0000 ~                    if (2 ~= asmpass) then sj.error("unexpected __PASS__ value "..asmpass) end
  8    0000                  ENDLUA
  9    0000                  LUA PASS3
 10    0000 ~                    asmpass = 0 + sj.get_define("__PASS__")
-11    0000 ~                    if (3 ~= asmpass) then sj.error("unexpected __PASS__ value", asmpass) end
+11    0000 ~                    if (3 ~= asmpass) then sj.error("unexpected __PASS__ value "..asmpass) end
 12    0000                  ENDLUA
 13    0000
 14    0000                  ASSERT $120 == myLab    ; assert is PASS3
