@@ -32,23 +32,23 @@ lua_emit_warning_sup.asm(21): warning[luamc]: When lua script emits machine code
 23    0002              ;; test suppression at beginning of block
 24    0002
 25    0002                  lua pass1   ; luamc-ok - warning should be suppressed (even here at beginning of block)
-26    0002 ~                    sj.warning("but lua warning should work: 11")
+26    0002 ~                    sj.warning("but lua warning should work", 11)
 27    0002 ~                    sj.add_byte(11)
 28    0002                  endlua
 29    0002
 30    0002                  lua pass2   ; luamc-ok - warning should be suppressed (even here at beginning of block)
-31    0002 ~                    sj.warning("but lua warning should work: 12")
+31    0002 ~                    sj.warning("but lua warning should work", 12)
 32    0002 ~                    sj.add_byte(12)
 33    0002                  endlua
 34    0002
 35    0002                  lua pass3   ; luamc-ok - warning should be suppressed (even here at beginning of block)
-36    0002 ~                    sj.warning("but lua warning should work: 13")
+36    0002 ~                    sj.warning("but lua warning should work", 13)
 37    0002 ~                    sj.add_byte(13)
 lua_emit_warning_sup.asm(36): warning: [LUA] but lua warning should work: 13
 38    0002 0D               endlua
 39    0003
 40    0003                  lua         ; luamc-ok - warning should be suppressed (even here at beginning of block)
-41    0003 ~                    sj.warning("but lua warning should work: 14")
+41    0003 ~                    sj.warning("but lua warning should work", 14)
 42    0003 ~                    sj.add_byte(14)
 lua_emit_warning_sup.asm(41): warning: [LUA] but lua warning should work: 14
 43    0003 0E               endlua
@@ -56,23 +56,23 @@ lua_emit_warning_sup.asm(41): warning: [LUA] but lua warning should work: 14
 45    0004              ;; test suppression at end of block
 46    0004
 47    0004                  lua pass1
-48    0004 ~                    sj.warning("but lua warning should work: 21")
+48    0004 ~                    sj.warning("but lua warning should work", 21)
 49    0004 ~                    sj.add_byte(21)
 50    0004                  endlua      ; luamc-ok
 51    0004
 52    0004                  lua pass2
-53    0004 ~                    sj.warning("but lua warning should work: 22")
+53    0004 ~                    sj.warning("but lua warning should work", 22)
 54    0004 ~                    sj.add_byte(22)
 55    0004                  endlua      ; luamc-ok
 56    0004
 57    0004                  lua pass3
-58    0004 ~                    sj.warning("but lua warning should work: 23")
+58    0004 ~                    sj.warning("but lua warning should work", 23)
 59    0004 ~                    sj.add_byte(23)
 lua_emit_warning_sup.asm(58): warning: [LUA] but lua warning should work: 23
 60    0004 17               endlua      ; luamc-ok
 61    0005
 62    0005                  lua
-63    0005 ~                    sj.warning("but lua warning should work: 24")
+63    0005 ~                    sj.warning("but lua warning should work", 24)
 64    0005 ~                    sj.add_byte(24)
 lua_emit_warning_sup.asm(63): warning: [LUA] but lua warning should work: 24
 65    0005 18               endlua      ; luamc-ok
