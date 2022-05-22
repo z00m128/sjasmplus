@@ -17,23 +17,17 @@
 16    800A              lP+3:
 17    800A                  ; syntax errors (single digit only)
 smc_label_extras.asm(18): error: Unrecognized instruction: +10   and 6
-smc_label_extras.asm(18): error: Unexpected: +10   and 6
 18    800A              lF+10   and 6
 smc_label_extras.asm(19): error: Unrecognized instruction: +#1   and 7
-smc_label_extras.asm(19): error: Unexpected: +#1   and 7
 19    800A              lG+#1   and 7
 20    800A                  ; syntax errors (no expressions, no evaluation)
 smc_label_extras.asm(21): error: Unrecognized instruction: +(1)  and 8
-smc_label_extras.asm(21): error: Unexpected: +(1)  and 8
 21    800A              lH+(1)  and 8
 smc_label_extras.asm(22): error: Unrecognized instruction: +x    and 9
-smc_label_extras.asm(22): error: Unexpected: +x    and 9
 22    800A              lI+x    and 9
 smc_label_extras.asm(23): error: Unrecognized instruction: +2  and 10
-smc_label_extras.asm(23): error: Unexpected: +2  and 10
 23    800A              lJ+1+2  and 10
 smc_label_extras.asm(24): error: Unrecognized instruction: -3  and 11
-smc_label_extras.asm(24): error: Unexpected: -3  and 11
 24    800A              lK+1-3  and 11
 25    800A                  ; syntax errors (no minus either)
 smc_label_extras.asm(26): error: Invalid labelname: lL-1

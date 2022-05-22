@@ -78,29 +78,24 @@
 55    007A                      ; few errors
 initializer_syntax.asm(56): error: [STRUCT] Syntax error - too many arguments?
 initializer_syntax.asm(56): error: Unrecognized instruction: }
-initializer_syntax.asm(56): error: Unexpected: }
 56    007A 08 07 0A 08          SDOT    {,7{,8}}}
 56    007E 0C
 initializer_syntax.asm(57): error: [STRUCT] Syntax error - too many arguments?
 initializer_syntax.asm(57): error: Unrecognized instruction: {
-initializer_syntax.asm(57): error: Unexpected: {
 57    007F 08 07 0A 08          SDOT    {,7{,8}}{
 57    0083 0C
 initializer_syntax.asm(58): error: closing } missing
 initializer_syntax.asm(58): error: [STRUCT] Syntax error - too many arguments?
 initializer_syntax.asm(58): error: Unrecognized instruction: {,8}}
-initializer_syntax.asm(58): error: Unexpected: {,8}}
 58    0084 08 09 0A 07          SDOT    {{,7{,8}}
 58    0088 0C
 initializer_syntax.asm(59): error: closing } missing
 initializer_syntax.asm(59): error: [STRUCT] Syntax error - too many arguments?
 initializer_syntax.asm(59): error: Unrecognized instruction: {,8}}}
-initializer_syntax.asm(59): error: Unexpected: {,8}}}
 59    0089 08 09 0A 07          SDOT    {{,7{,8}}}
 59    008D 0C
 initializer_syntax.asm(60): error: [STRUCT] Syntax error - too many arguments?
 initializer_syntax.asm(60): error: Unrecognized instruction: ,
-initializer_syntax.asm(60): error: Unexpected: ,
 60    008E 08 07 0A 08          SDOT    ,7,,8,,
 60    0092 0C
 61    0093
