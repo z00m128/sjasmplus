@@ -1542,8 +1542,8 @@ static void dirTAPEND()
 
 static void dirDEFINE() {
 	bool replaceEnabled = ('+' == *lp) ? ++lp, true : false;
-	char* id;
-	if (!(id = GetID(lp))) {
+	char* id = GetID(lp);
+	if (nullptr == id) {
 		Error("[DEFINE] Illegal <id>", lp, SUPPRESS);
 		return;
 	}

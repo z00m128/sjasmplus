@@ -54,22 +54,27 @@ lua_warning.asm(31): warning: [LUA] [pass all] warning emitted from lua
 lua_warning.asm(33): error: [LUA] [pass all] second warning emitted from lua
 34    0000                  endlua
 35    0000
-36    0000                  lua pass3 ; wrong arguments
-37    0000 ~                    sj.warning("[nope!]", 2)
-lua_warning.asm(37): error: [LUA] [nope!]: 2
-38    0000                  endlua
-39    0000
-40    0000                  lua pass3
-41    0000 ~                    sj.add_word(sj.error_count)     -- ; should be 0x0008
-42    0000 ~                    sj.add_byte(sj.warning_count)   -- ; should be 0x07
-43    0000 ~                    sj.add_word(0)
-44    0000 ~                    _pl("")         -- ; force emitted bytes in listing as silent/external
-45    0000 08 00 07 00  ; these bytes were emitted silently/externally (lua script?)
-45    0004 00
-45    0005
-lua_warning.asm(45): error: When lua script emits machine code bytes, use "ALLPASS" modifier
-45    0005                  endlua
-46    0005
+36    0000                  lua pass3 ; "bad value" argument (also number works)
+37    0000 ~                    _pc("OPT reset")
+38    0000 ~                    sj.warning("[bad value]", 2)
+39    0000 ~                    _pc("OPT --syntax=w")   ; -- treat warnings as errors
+40    0000 ~                    sj.warning("[bad value]", 2)
+41    0000              OPT reset
+lua_warning.asm(38): warning: [LUA] [bad value]: 2
+41    0000              OPT --syntax=w
+lua_warning.asm(40): error: [LUA] [bad value]: 2
+41    0000                  endlua
+42    0000
+43    0000                  lua allpass
+44    0000 ~                    sj.add_word(sj.error_count)     -- ; should be 0x0008
+45    0000 ~                    sj.add_byte(sj.warning_count)   -- ; should be 0x08
+46    0000 ~                    sj.add_byte(0)
+47    0000 ~                    _pl("")         -- ; force emitted bytes in listing as silent/external
+48    0000 08 00 08 00  ; these bytes were emitted silently/externally (lua script?)
+48    0004
+48    0004                  endlua
+49    0004                  ; expected four bytes: 08 00 08 00
+50    0004
 # file closed: lua_warning.asm
 
 Value    Label

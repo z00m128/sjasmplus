@@ -1,3 +1,7 @@
+lua_inctext.lua(22): error: [LUA] [inc_text]: file not found: missing file
+lua_inctext.asm(18): ^ emitted from here
+lua_inctext.lua(22): error: [LUA] [inc_text]: file not found: missing file
+lua_inctext.asm(18): ^ emitted from here
 # file opened: lua_inctext.asm
  1    0000                  ; setup Lua "inc_text" functionality
  2    0000                  INCLUDELUA "lua_inctext.lua"

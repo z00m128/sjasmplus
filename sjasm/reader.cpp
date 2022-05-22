@@ -232,7 +232,7 @@ char nidtemp[LINEMAX], *nidsubp = nidtemp;
 // add GetLabel where appropriate, handle "@" + "." modifiers more consistently and transparently)
 char* GetID(char*& p) {
 	char* np = nidtemp;
-	if (SkipBlanks(p) || (!isLabelStart(p, false) && *p != '.')) return NULL;
+	if (SkipBlanks(p) || (!isLabelStart(p, false) && *p != '.')) return nullptr;
 	while (islabchar((byte)*p)) *np++ = *p++;
 	*np = 0;
 	return nidtemp;

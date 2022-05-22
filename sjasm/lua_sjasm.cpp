@@ -157,8 +157,10 @@ static const char* lua_sj_get_define(const char* name) {
 
 static bool lua_sj_insert_define(const char* name, const char* value) {
 	// wrapper to resolve member-function call (without std::function wrapping lambda, just to KISS)
-	if (nullptr == name) return true;
-	return DefineTable.Replace(name, value ? value : "");
+	char* lua_name = const_cast<char*>(name);		//TODO v2.x avoid const_cast like this
+	char* id = name ? GetID(lua_name) : nullptr;
+	if (nullptr == id) return false;
+	return DefineTable.Replace(id, value ? value : "");
 }
 
 static bool lua_sj_set_page(aint n) {
@@ -184,9 +186,9 @@ static bool lua_sj_set_slot(aint n) {
 // (as LuaBridge2.6 doesn't offer that type of binding as far as I can tell)
 // Sidestepping LuaBridge write-protection by "rawset" the end point into it
 static const std::string lua_impl_init_bindings_script = R"BINDING_LUA(
-rawset(sj,"error",function(m,v)sj.error_i(m,v or nil)end)
-rawset(sj,"warning",function(m,v)sj.warning_i(m,v or nil)end)
-rawset(sj,"insert_define",function(n,v)sj.insert_define_i(n,v or "")end)
+rawset(sj,"error",function(m,v)sj.error_i(m or "no message",v)end)
+rawset(sj,"warning",function(m,v)sj.warning_i(m or "no message",v)end)
+rawset(sj,"insert_define",function(n,v)return sj.insert_define_i(n,v)end)
 )BINDING_LUA";
 
 static void lua_impl_init() {
