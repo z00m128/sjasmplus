@@ -1,5 +1,5 @@
 lua_coverage.asm(7): error: [INCLUDELUA] File doesn't exist: neverfile.lua
-lua_coverage.asm(1): error: [LUA] unexpected symbol near ';'
+lua_coverage.asm(1): error: [LUA] syntax error near 'error'
 # file opened: lua_coverage.asm
  1    0000              ; various error states, etc... (not a good fit elsewhere)
 lua_coverage.asm(2): error: [ENDLUA] End of lua script without script
@@ -18,22 +18,18 @@ lua_coverage.asm(11): error: [LUA] unexpected symbol near '%'
 12    0000                  ENDLUA
 13    0000
 14    0000                  LUA pass3   ; lua errors in calling known functions
-15    0000 ~                    sj.get_define("define", 2)
-lua_coverage.asm(15): error: [LUA] error in function 'get_define'.
-     argument #2 is 'number'; '[no object]' expected.
+15    0000 ~                    sj.get_define("define", 2)  -- not an error after lua5.4 upgrade, extra arguments are silent
 16    0000                  ENDLUA
 17    0000
 18    0000                  LUA pass3
-19    0000 ~                    sj.insert_define("define", 2, 3)
-lua_coverage.asm(19): error: [LUA] error in function 'insert_define'.
-     argument #3 is 'number'; '[no object]' expected.
+19    0000 ~                    sj.insert_define("define", 2, 3)  -- not an error after lua5.4 upgrade, extra arguments are silent
 20    0000                  ENDLUA
 21    0000
 22    0000                  LUA pass3
 23    0000 ~                    someErrorInLua(1, 2, 3)
 24    0000 ~
 lua_coverage.asm(22): error: [LUA] Unexpected end of lua script
-lua_coverage.asm(23): error: [LUA] attempt to call global 'someErrorInLua' (a nil value)
+lua_coverage.asm(23): error: [LUA] attempt to call a nil value (global 'someErrorInLua')
 24    0000
 # file closed: lua_coverage.asm
 
