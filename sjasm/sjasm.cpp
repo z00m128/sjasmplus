@@ -790,7 +790,7 @@ int main(int argc, char **argv) {
 	// free RAM
 	FreeRAM();
 
-	sj_lua_close();
+	lua_impl_close();
 
 	return (ErrorCount != 0);
 }

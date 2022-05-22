@@ -43,13 +43,12 @@ lua_State *LUA = nullptr;		// lgtm[cpp/short-global-name]
 TextFilePos LuaStartPos;
 // LUA and LuaStartPos are also used by io_err.cpp - keep it in sync in case of some changes
 
-static void LuaFatalError(lua_State *L) {
+static void lua_impl_fatalError(lua_State *L) {
 	Error((char *)lua_tostring(L, -1), NULL, FATAL);
 }
 
 // skips file+line_number info (but will adjust global LuaStartPos data for Error output)
-static void SplitLuaErrorMessage(const char*& LuaError)
-{
+static void lua_impl_splitLuaErrorMessage(const char*& LuaError) {
 	if (nullptr == LuaError) return;
 	const char* colonPos = strchr(LuaError, ':');
 	const char* colon2Pos = nullptr != colonPos ? strchr(colonPos+1, ':') : nullptr;
@@ -67,18 +66,106 @@ static void SplitLuaErrorMessage(const char*& LuaError)
 	while (White(*LuaError)) ++LuaError;
 }
 
-static void _lua_showLoadError(const EStatus type) {
+static void lua_impl_showLoadError(const EStatus type) {
 	const char *msgp = lua_tostring(LUA, -1);
-	SplitLuaErrorMessage(msgp);
+	lua_impl_splitLuaErrorMessage(msgp);
 	Error(msgp, nullptr, type);
 	lua_pop(LUA, 1);
 }
 
-static bool LuaSetPage(aint n) {
+static aint lua_sj_calc(const char *str) {
+	// substitute defines + macro_args in the `str` first (preserve original global variables)
+	char* const oldSubstitutedLine = substitutedLine;
+	const int oldComlin = comlin;
+	comlin = 0;
+	char* tmp = nullptr, * tmp2 = nullptr;
+	if (sline[0]) {
+		tmp = STRDUP(sline);
+		if (nullptr == tmp) ErrorOOM();
+	}
+	if (sline2[0]) {
+		tmp2 = STRDUP(sline2);
+		if (nullptr == tmp2) ErrorOOM();
+	}
+	// non-const copy of input string for ReplaceDefine argument
+	//TODO: v2.x, rewrite whole parser of sjasmplus to start with const input to avoid such copies
+	char* luaInput = STRDUP(str ? str : "");
+	char* substitutedStr = ReplaceDefine(luaInput);
+
+	// evaluate the expression
+	aint val;
+	int parseResult = ParseExpression(substitutedStr, val);
+	free(luaInput);
+
+	// restore any global values affected by substitution
+	sline[0] = 0;
+	if (tmp) {
+		STRCPY(sline, LINEMAX2, tmp);
+		free(tmp);
+	}
+	sline2[0] = 0;
+	if (tmp2) {
+		STRCPY(sline2, LINEMAX2, tmp2);
+		free(tmp2);
+	}
+	substitutedLine = oldSubstitutedLine;
+	comlin = oldComlin;
+
+	return parseResult ? val : 0;
+}
+
+static void lua_sj_parse_line(const char *str) {
+	// preserve current actual line which will be parsed next
+	char *oldLine = STRDUP(line);
+	char *oldEolComment = eolComment;
+	if (nullptr == oldLine) ErrorOOM();
+
+	// inject new line from Lua call and assemble it
+	STRCPY(line, LINEMAX, str ? str : "");
+	eolComment = nullptr;
+	ParseLineSafe();
+
+	// restore the original line
+	STRCPY(line, LINEMAX, oldLine);
+	eolComment = oldEolComment;
+	free(oldLine);
+}
+
+static void lua_sj_parse_code(const char *str) {
+	char *ml = STRDUP(line);
+	if (nullptr == ml) ErrorOOM();
+
+	STRCPY(line, LINEMAX, str ? str : "");
+	ParseLineSafe(false);
+
+	STRCPY(line, LINEMAX, ml);
+	free(ml);
+}
+
+static void lua_sj_error(const char* message, const char* value=nullptr) {
+	Error(message, value, ALL);
+}
+
+static void lua_sj_warning(const char* message, const char* value=nullptr) {
+	Warning(message, value, W_ALL);
+}
+
+static const char* lua_sj_get_define(const char* name) {
+	// wrapper to resolve member-function call (without std::function wrapping lambda, just to KISS)
+	return DefineTable.Get(name);
+}
+
+static bool lua_sj_insert_define(const char* name, const char* value) {
+	// wrapper to resolve member-function call (without std::function wrapping lambda, just to KISS)
+	if (nullptr == name) return true;
+	return DefineTable.Replace(name, value ? value : "");
+}
+
+static bool lua_sj_set_page(aint n) {
 	return dirPageImpl("sj.set_page", n);
 }
 
-static bool LuaSetSlot(aint n) {
+static bool lua_sj_set_slot(aint n) {
 	if (!DeviceID) {
 		Warning("sj.set_slot: only allowed in real device emulation mode (See DEVICE)");
 		return false;
@@ -92,28 +179,40 @@ static bool LuaSetSlot(aint n) {
 	return true;
 }
 
-static void initLUA() {
+// extra lua script inserting interface (sj.something) entry functions
+// for functions with optional arguments, like error and warning
+// (as LuaBridge2.6 doesn't offer that type of binding as far as I can tell)
+// Sidestepping LuaBridge write-protection by "rawset" the end point into it
+static const std::string lua_impl_init_bindings_script = R"BINDING_LUA(
+rawset(sj,"error",function(m,v)sj.error_i(m,v or nil)end)
+rawset(sj,"warning",function(m,v)sj.warning_i(m,v or nil)end)
+rawset(sj,"insert_define",function(n,v)sj.insert_define_i(n,v or "")end)
+)BINDING_LUA";
+
+static void lua_impl_init() {
 	assert(nullptr == LUA);
 
 	// initialise Lua (regular Lua, without sjasmplus bindings/extensions)
 	LUA = luaL_newstate();
-	lua_atpanic(LUA, (lua_CFunction)LuaFatalError);	//FIXME verify if this works
+	lua_atpanic(LUA, (lua_CFunction)lua_impl_fatalError);	//FIXME verify if this works
 	luaL_openlibs(LUA);	//FIXME verify if this works
 	//FIXME luaopen_pack(LUA);
 
 	// initialise sjasmplus bindings/extensions
 	luabridge::getGlobalNamespace(LUA)
-		.addFunction("_c", LuaCalculate)
-		.addFunction("_pl", LuaParseLine)
-		.addFunction("_pc", LuaParseCode)
+		.addFunction("_c", lua_sj_calc)
+		.addFunction("_pl", lua_sj_parse_line)
+		.addFunction("_pc", lua_sj_parse_code)
 		.beginNamespace("sj")
 			.addProperty("current_address", &CurAddress, false)	// read-only
 			.addProperty("warning_count", &WarningCount, false)	// read-only
 			.addProperty("error_count", &ErrorCount, false)	// read-only
-			.addFunction("get_define",
-				(std::function<const char*(const char*)>)[](const char*n) { return DefineTable.Get(n); })
-			.addFunction("insert_define",
-				(std::function<bool(const char*,const char*)>)[](const char*n,const char*v) { return DefineTable.Replace(n, v); })
+			// internal functions which are lua-wrapped to enable optional arguments
+			.addFunction("error_i", lua_sj_error)
+			.addFunction("warning_i", lua_sj_warning)
+			.addFunction("insert_define_i", lua_sj_insert_define)
+			// remaining public functions with all arguments mandatory
+			.addFunction("get_define", lua_sj_get_define)
 			.addFunction("get_label", LuaGetLabel)
 			//FIXME verify the official API only
 			.addFunction("insert_label",
@@ -124,19 +223,17 @@ static void initLUA() {
 			)
 			.addFunction("shellexec", LuaShellExec)
 			.addFunction("exit", ExitASM)
-			.addFunction("calc", LuaCalculate)
-			.addFunction("parse_line", LuaParseLine)
-			.addFunction("parse_code", LuaParseCode)
+			.addFunction("calc", lua_sj_calc)
+			.addFunction("parse_line", lua_sj_parse_line)
+			.addFunction("parse_code", lua_sj_parse_code)
 			.addFunction("add_byte", EmitByte)
 			.addFunction("add_word", EmitWord)
 			.addFunction("get_byte", MemGetByte)
 			.addFunction("get_word", MemGetWord)
 			.addFunction("get_device", GetDeviceName)
 			.addFunction("set_device", SetDevice)
-			.addFunction("set_page", LuaSetPage)
-			.addFunction("set_slot", LuaSetSlot)
-			.addFunction("error", (std::function<void(const char*)>)[](const char*m) { Error(m, nullptr, ALL); })
-			.addFunction("warning", (std::function<void(const char*)>)[](const char*m) { Warning(m, nullptr, W_ALL); })
+			.addFunction("set_page", lua_sj_set_page)
+			.addFunction("set_slot", lua_sj_set_slot)
 			.addFunction("file_exists", FileExists)
 		.endNamespace()
 		.beginNamespace("zx")
@@ -155,6 +252,12 @@ static void initLUA() {
 			.addFunction("save_snapshot_sna", SaveSNA_ZX)	//FIXME fix docs with return int or bool, fix also trd stuff?
 		.endNamespace();
 
+		//TODO when tracking each chunk under own name, this must stay hidden as "chunk 0" or something like that
+		if (luaL_loadbuffer(LUA, lua_impl_init_bindings_script.c_str(), lua_impl_init_bindings_script.size(), "script")
+			|| lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
+			lua_impl_showLoadError(FATAL);								// unreachable? (I hope)
+		}
+
 		//FIXME set_device change API to have second argument ramtop
 		//TODO add MMU API?
 }
@@ -165,7 +268,7 @@ void dirENDLUA() {
 
 void dirLUA() {
 	// lazy init of Lua scripting upon first hit of LUA directive
-	if (nullptr == LUA) initLUA();
+	if (nullptr == LUA) lua_impl_init();
 	assert(LUA);
 
 	constexpr size_t luaBufferSize = 32768;
@@ -232,7 +335,7 @@ void dirLUA() {
 		if (luaL_loadbuffer(LUA, buff, bp-buff, "script") || lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
 			//TODO track each chunk under own name, and track their source position
 			//if (luaL_loadbuffer(LUA, buff, bp-buff, std::to_string(++lua_script_counter).c_str()) || lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
-			_lua_showLoadError(errorType);
+			lua_impl_showLoadError(errorType);
 		}
 		LuaStartPos = TextFilePos();
 		delete[] buff;
@@ -248,7 +351,7 @@ void dirLUA() {
 
 void dirINCLUDELUA() {
 	// lazy init of Lua scripting upon first hit of INCLUDELUA directive
-	if (nullptr == LUA) initLUA();
+	if (nullptr == LUA) lua_impl_init();
 	assert(LUA);
 
 	if (1 != pass) {
@@ -265,7 +368,7 @@ void dirINCLUDELUA() {
 		LuaStartPos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 		LuaStartPos.line = 1;
 		if (luaL_dofile(LUA, fullpath)) {
-			_lua_showLoadError(EARLY);
+			lua_impl_showLoadError(EARLY);
 		}
 		LuaStartPos = TextFilePos();
 	}
@@ -276,13 +379,13 @@ void dirINCLUDELUA() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // close LUA engine and release everything related
-void sj_lua_close() {
+void lua_impl_close() {
 	#ifdef USE_LUA
 		// if Lua was used and initialised, release everything
 		if (LUA) lua_close(LUA);
 	#endif //USE_LUA
 
-	// do nothing when Lua is disabled
+	// do nothing when Lua is compile-time disabled
 }
 
 //eof lua_sjasm.cpp

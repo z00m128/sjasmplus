@@ -16,3 +16,15 @@
         sj.parse_line("pass1: daa      ; will define label, but machine code will be missing")
         _pl("pass1_2: scf      ; same with _pl alias")
     endlua
+
+    ;check lua wrappers to survive invalid args and report assembling errors
+    lua allpass
+        sj.parse_line(nil)
+        sj.parse_line("")
+        sj.parse_line("invalid_1: invalid")
+        sj.parse_line(2) -- becomes string "2" -> temporary label (valid asm syntax)
+        _pl(nil)
+        _pl("")
+        _pl("invalid_3: invalid")
+        _pl(4)
+    endlua

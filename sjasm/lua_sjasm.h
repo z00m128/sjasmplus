@@ -27,7 +27,7 @@
 
 // lua_sjasm.h
 
-void sj_lua_close();
+void lua_impl_close();
 
 #ifdef USE_LUA
 	void dirLUA();

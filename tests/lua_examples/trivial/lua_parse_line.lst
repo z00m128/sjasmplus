@@ -30,6 +30,32 @@ lua_parse_line.asm(14): warning[luamc]: When lua script emits machine code bytes
 17    123C ~                    _pl("pass1_2: scf      ; same with _pl alias")
 18    123C                  endlua
 19    123C
+20    123C                  ;check lua wrappers to survive invalid args and report assembling errors
+21    123C                  lua allpass
+22    123C ~                    sj.parse_line(nil)
+23    123C ~                    sj.parse_line("")
+24    123C ~                    sj.parse_line("invalid_1: invalid")
+25    123C ~                    sj.parse_line(2) -- becomes string "2" -> temporary label (valid asm syntax)
+26    123C ~                    _pl(nil)
+27    123C ~                    _pl("")
+28    123C ~                    _pl("invalid_3: invalid")
+29    123C ~                    _pl(4)
+30    123C
+30    123C
+lua_parse_line.asm(24): warning: [LUA] Label has different value in pass 3: previous value 4666 not equal 4668
+lua_parse_line.asm(24): error: [LUA] Unrecognized instruction: invalid
+30    123C              invalid_1: invalid
+lua_parse_line.asm(25): warning: [LUA] Temporary label has different address
+30    123C              2
+30    123C
+30    123C
+lua_parse_line.asm(28): warning: [LUA] Label has different value in pass 3: previous value 4666 not equal 4668
+lua_parse_line.asm(28): error: [LUA] Unrecognized instruction: invalid
+30    123C              invalid_3: invalid
+lua_parse_line.asm(29): warning: [LUA] Temporary label has different address
+30    123C              4
+30    123C                  endlua
+31    123C
 # file closed: lua_parse_line.asm
 
 Value    Label
@@ -40,5 +66,7 @@ Value    Label
 0x1237 X allpass_4
 0x1238 X allpass_5
 0x1239 X allpass_6
+0x123C X invalid_1
+0x123C X invalid_3
 0x123A X pass1
 0x123B X pass1_2

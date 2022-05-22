@@ -1,0 +1,86 @@
+lua_parse_code.asm(46): warning[luamc]: When lua script emits machine code bytes, use "ALLPASS" modifier
+# file opened: lua_parse_code.asm
+ 1    0000                  org     0x1234          ; eol comment belong to ORG
+ 2    1234                  lua allpass ; machine code needs to be emitted in *every* pass (and the same one)
+ 3    1234 ~                    sj.parse_code("")    -- try without EOL comment first
+ 4    1234 ~                    sj.parse_code(nil)    -- try without EOL comment first
+ 5    1234 ~                    sj.parse_code("rrca")    -- try without EOL comment first
+ 6    1234 ~                    sj.parse_code("rra      ; with eol comment") -- *with*
+ 7    1234 ~                    sj.parse_code("cpl")     -- *without*
+ 8    1234 ~                    _pc("inc bc")
+ 9    1234 ~                    _pc("inc de      ; with eol comment 2")
+10    1234 ~                    _pc("inc hl")
+11    1234 ~                    -- errors
+12    1234 ~                    sj.parse_code("label:")
+13    1234 ~                    _pc("label:")
+14    1234 ~                    sj.parse_code("unknown")
+15    1234 ~                    _pc("unknown")
+16    1234
+16    1234
+16    1234 0F           rrca
+16    1235 1F           rra      ; with eol comment
+16    1236 2F           cpla
+16    1237 03           inc bca
+16    1238 13           inc de         ; with eol comment 2
+16    1239 23           inc hla
+lua_parse_code.asm(12): error: [LUA] Unrecognized instruction: label:
+16    123A              label:a
+lua_parse_code.asm(13): error: [LUA] Unrecognized instruction: label:
+16    123A              label:a
+lua_parse_code.asm(14): error: [LUA] Unrecognized instruction: unknown
+16    123A              unknowna
+lua_parse_code.asm(15): error: [LUA] Unrecognized instruction: unknown
+16    123A              unknowna
+16    123A                  endlua
+17    123A                  lua         ; [pass default] == pass3 - this is not good for ASM parsing lines!
+18    123A ~                    sj.parse_code("")    -- try without EOL comment first
+19    123A ~                    sj.parse_code(nil)    -- try without EOL comment first
+20    123A ~                    sj.parse_code("rrca")    -- try without EOL comment first
+21    123A ~                    sj.parse_code("rra      ; with eol comment") -- *with*
+22    123A ~                    sj.parse_code("cpl")     -- *without*
+23    123A ~                    _pc("inc bc")
+24    123A ~                    _pc("inc de      ; with eol comment 2")
+25    123A ~                    _pc("inc hl")
+26    123A ~                    -- errors
+27    123A ~                    sj.parse_code("label:")
+28    123A ~                    _pc("label:")
+29    123A ~                    sj.parse_code("unknown")
+30    123A ~                    _pc("unknown")
+31    123A
+31    123A
+31    123A 0F           rrca
+31    123B 1F           rra      ; with eol comment
+31    123C 2F           cpla
+31    123D 03           inc bca
+31    123E 13           inc de         ; with eol comment 2
+31    123F 23           inc hla
+lua_parse_code.asm(27): error: [LUA] Unrecognized instruction: label:
+31    1240              label:a
+lua_parse_code.asm(28): error: [LUA] Unrecognized instruction: label:
+31    1240              label:a
+lua_parse_code.asm(29): error: [LUA] Unrecognized instruction: unknown
+31    1240              unknowna
+lua_parse_code.asm(30): error: [LUA] Unrecognized instruction: unknown
+31    1240              unknowna
+lua_parse_code.asm(31): warning[luamc]: When lua script emits machine code bytes, use "ALLPASS" modifier
+31    1240                  endlua
+32    1240                  lua pass1   ; pass1 this is also insufficient to generate valid machine code
+33    1240 ~                    sj.parse_code("")    -- try without EOL comment first
+34    1240 ~                    sj.parse_code(nil)    -- try without EOL comment first
+35    1240 ~                    sj.parse_code("rrca")    -- try without EOL comment first
+36    1240 ~                    sj.parse_code("rra      ; with eol comment") -- *with*
+37    1240 ~                    sj.parse_code("cpl")     -- *without*
+38    1240 ~                    _pc("inc bc")
+39    1240 ~                    _pc("inc de      ; with eol comment 2")
+40    1240 ~                    _pc("inc hl")
+41    1240 ~                    -- errors (but silent, because they are PASS3 type)
+42    1240 ~                    sj.parse_code("label:")
+43    1240 ~                    _pc("label:")
+44    1240 ~                    sj.parse_code("unknown")
+45    1240 ~                    _pc("unknown")
+46    1240                  endlua
+47    1240
+# file closed: lua_parse_code.asm
+
+Value    Label
+------ - -----------------------------------------------------------
