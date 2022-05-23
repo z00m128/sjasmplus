@@ -20,6 +20,12 @@
 16    7849 ~                    sj.get_byte(0x1234, 2)      -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
 17    7849                  ENDLUA
 18    7849
+19    7849                  ; extra test coverage
+20    7849                  LUA PASS3
+21    7849 ~                    sj.get_byte()               -- missing argument
+lua_get_byte.asm(21): error: [LUA] bad argument #1 to 'get_byte' (number expected, got no value)
+22    7849                  ENDLUA
+23    7849
 # file closed: lua_get_byte.asm
 
 Value    Label

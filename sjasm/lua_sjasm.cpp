@@ -142,11 +142,11 @@ static void lua_sj_parse_code(const char *str) {
 	free(ml);
 }
 
-static void lua_sj_error(const char* message, const char* value=nullptr) {
+static void lua_sj_error(const char* message, const char* value = nullptr) {
 	Error(message, value, ALL);
 }
 
-static void lua_sj_warning(const char* message, const char* value=nullptr) {
+static void lua_sj_warning(const char* message, const char* value = nullptr) {
 	Warning(message, value, W_ALL);
 }
 
@@ -195,6 +195,23 @@ static bool lua_sj_set_slot(aint n) {
 	return true;
 }
 
+static bool lua_sj_set_device(const char* id, const aint ramtop = 0) {
+	// refresh source position of first DEVICE directive (to make global-device detection work correctly)
+	if (1 == ++deviceDirectivesCount) {
+		globalDeviceSourcePos = LuaStartPos;	// rough source position, try to find exact line
+		// search for deepest stack level number
+		lua_Debug ar;
+		int ar_level = 0;
+		while (lua_getstack(LUA, ar_level, &ar)) ++ar_level;
+		// some level found, last level in "ar"
+		if (ar_level && lua_getinfo(LUA, "l", &ar)) {
+			if (1 <= ar.currentline) globalDeviceSourcePos.line += ar.currentline;
+		}
+	}
+	// check for nullptr id??
+	return SetDevice(id, ramtop);
+}
+
 // extra lua script inserting interface (sj.something) entry functions
 // for functions with optional arguments, like error and warning
 // (as LuaBridge2.6 doesn't offer that type of binding as far as I can tell)
@@ -204,6 +221,7 @@ rawset(sj,"error",function(m,v)sj.error_i(m or "no message",v)end)
 rawset(sj,"warning",function(m,v)sj.warning_i(m or "no message",v)end)
 rawset(sj,"insert_define",function(n,v)return sj.insert_define_i(n,v)end)
 rawset(sj,"exit",function(e)return sj.exit_i(e or 1)end)
+rawset(sj,"set_device",function(i,t)return sj.set_device_i(i or "NONE",t or 0)end)
 )BINDING_LUA";
 
 static void lua_impl_init() {
@@ -242,7 +260,7 @@ static void lua_impl_init() {
 			.addFunction("get_byte", MemGetByte)
 			.addFunction("get_word", MemGetWord)
 			.addFunction("get_device", GetDeviceName)
-			.addFunction("set_device", SetDevice)
+			.addFunction("set_device_i", lua_sj_set_device)
 			.addFunction("set_page", lua_sj_set_page)
 			.addFunction("set_slot", lua_sj_set_slot)
 			.addFunction("file_exists", FileExists)
