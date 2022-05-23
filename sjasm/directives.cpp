@@ -1808,12 +1808,12 @@ static void dirSTRUCT() {
 		}
 		if (cmphstr(lp, "ends")) {
 			++CompiledCurrentLine;
-			st->deflab();
+			if (st) st->deflab();
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDS
 			return;
 		}
-		ParseStructLine(st);
+		if (st) ParseStructLine(st);
 		ListFile(true);
 	}
 	Error("[STRUCT] Unexpected end of structure");

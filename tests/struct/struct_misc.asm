@@ -32,6 +32,10 @@ x               BYTE    102
         STRUCT name3, &
         ENDS
 
+        STRUCT  name1   ; error duplicate structure name
+x           BYTE    $CC
+        ENDS
+
         STRUCT notEndedOne
 x           BYTE    103
     ENDIF

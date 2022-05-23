@@ -1364,7 +1364,8 @@ CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 	STRCAT(sn, LINEMAX-1, naam);
 	sp = sn;
 	if (FindDuplicate(sp)) {
-		Error("Duplicate structure name", naam, EARLY);
+		Error("[STRUCT] Structure already exist", naam);
+		return nullptr;
 	}
 	strs[(*sp)&127] = new CStructure(naam, sp, 0, gl, strs[(*sp)&127]);
 	if (no) {
