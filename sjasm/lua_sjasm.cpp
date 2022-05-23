@@ -163,6 +163,20 @@ static bool lua_sj_insert_define(const char* name, const char* value) {
 	return DefineTable.Replace(id, value ? value : "");
 }
 
+static int lua_sj_get_label(const char *name) {
+	if (nullptr == name) return -1;
+	aint val;
+	char* n = const_cast<char*>(name);	//TODO try to get rid of const_cast, LuaBridge requires const char* to understand it as lua string
+	if (!GetLabelValue(n, val)) val = -1;
+	return val;
+}
+
+static bool lua_sj_insert_label(const char *name, int address) {
+	std::unique_ptr<char[]> fullName(ValidateLabel(name, false, false));
+	if (nullptr == fullName.get()) return false;
+	return LabelTable.Insert(name, address);
+}
+
 static bool lua_sj_set_page(aint n) {
 	return dirPageImpl("sj.set_page", n);
 }
@@ -213,16 +227,10 @@ static void lua_impl_init() {
 			.addFunction("error_i", lua_sj_error)
 			.addFunction("warning_i", lua_sj_warning)
 			.addFunction("insert_define_i", lua_sj_insert_define)
-			// remaining public functions with all arguments mandatory
+			// remaining public functions with all arguments mandatory (boolean args seems to default to false?)
 			.addFunction("get_define", lua_sj_get_define)
-			.addFunction("get_label", LuaGetLabel)
-			//FIXME verify the official API only
-			.addFunction("insert_label",
-				(std::function<bool(const char*,int,bool,bool)>)[](const char*n,int a,bool undefined,bool defl) {
-					unsigned traits = (undefined ? LABEL_IS_UNDEFINED : 0) | (defl ? LABEL_IS_DEFL : 0);
-					return LabelTable.Insert(n, a, traits);
-				}
-			)
+			.addFunction("get_label", lua_sj_get_label)
+			.addFunction("insert_label", lua_sj_insert_label)
 			.addFunction("shellexec", LuaShellExec)
 			.addFunction("exit", ExitASM)
 			.addFunction("calc", lua_sj_calc)

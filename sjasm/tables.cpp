@@ -58,6 +58,10 @@ char* PreviousIsLabel = nullptr;
 // since v1.18.3:
 // Inside macro prefix "@." will create non-macro local label instead of macro's instance
 char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
+	if (nullptr == naam) {
+		Error("Invalid labelname");
+		return nullptr;
+	}
 	if ('!' == *naam) {
 		setNameSpace = false;
 		++naam;
@@ -1425,14 +1429,6 @@ int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	if (INT_MAX == address) st->emitmembs(p);	// address was not designed, emit also bytes
 	else if (!l) Warning("[STRUCT] designed address without label = no effect");
 	return 1;
-}
-
-int LuaGetLabel(const char *name) {
-	//TODO v2.0: deprecated, use default "calculate" feature to get identical results as asm line
-	aint val;
-	char* n = const_cast<char*>(name);	//TODO try to get rid of const_cast, LuaBridge requires const char* to understand it as lua string
-	if (!GetLabelValue(n, val)) val = -1;
-	return val;
 }
 
 //eof tables.cpp
