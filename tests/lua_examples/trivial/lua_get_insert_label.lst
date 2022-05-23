@@ -5,8 +5,7 @@
 lua_get_insert_label.asm(3): error: [LUA] bad argument #1 to 'get_label' (string expected, got no value)
  4    0000                ENDLUA
  5    0000                LUA
- 6    0000 ~                sj.insert_label()
-lua_get_insert_label.asm(6): error: [LUA] bad argument #2 to 'insert_label' (number expected, got no value)
+ 6    0000 ~                 -- sj.insert_label() -- disabled, the error message is platform+compiler dependent, linux reports #2 arg, macos+bsd #1 arg
  7    0000                ENDLUA
  8    0000                LUA
  9    0000 ~                sj.insert_label("no_address")

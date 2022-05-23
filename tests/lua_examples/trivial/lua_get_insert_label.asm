@@ -3,7 +3,7 @@
     sj.get_label()
   ENDLUA
   LUA
-    sj.insert_label()
+     -- sj.insert_label() -- disabled, the error message is platform+compiler dependent, linux reports #2 arg, macos+bsd #1 arg
   ENDLUA
   LUA
     sj.insert_label("no_address")
