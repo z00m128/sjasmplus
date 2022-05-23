@@ -4,9 +4,9 @@
     ; assembling and across all passes, so just single pure function definition is enough.
     LUA PASS1
         function getMacroArgument(argname)
-            _pl(" DEFINE _LUA_GET_MACRO_ARGUMENT "..argname)
+            _pc("DEFINE _LUA_GET_MACRO_ARGUMENT "..argname)
             local result = sj.get_define("_LUA_GET_MACRO_ARGUMENT")
-            _pl(" UNDEFINE _LUA_GET_MACRO_ARGUMENT")
+            _pc("UNDEFINE _LUA_GET_MACRO_ARGUMENT")
             return result
         end
     ENDLUA
@@ -15,7 +15,7 @@
     ; the value of someArg0 within the Lua
     MACRO someMacro someArg0
         LUA ALLPASS
-            _pc(" db "..getMacroArgument("someArg0"))
+            _pc("db "..getMacroArgument("someArg0"))
         ENDLUA
     ENDM
 
@@ -33,8 +33,8 @@
 
 midi_number=21
     dup 108-21+1
-    LUA
-        _pc(' dw ' .. getAyMidiFrequency(sj.get_label("midi_number")))
+    LUA ALLPASS
+        _pc('dw ' .. getAyMidiFrequency(sj.get_label("midi_number")))
     ENDLUA
 midi_number=midi_number+1
     edup
