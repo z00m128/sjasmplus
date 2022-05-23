@@ -203,6 +203,7 @@ static const std::string lua_impl_init_bindings_script = R"BINDING_LUA(
 rawset(sj,"error",function(m,v)sj.error_i(m or "no message",v)end)
 rawset(sj,"warning",function(m,v)sj.warning_i(m or "no message",v)end)
 rawset(sj,"insert_define",function(n,v)return sj.insert_define_i(n,v)end)
+rawset(sj,"exit",function(e)return sj.exit_i(e or 1)end)
 )BINDING_LUA";
 
 static void lua_impl_init() {
@@ -227,12 +228,12 @@ static void lua_impl_init() {
 			.addFunction("error_i", lua_sj_error)
 			.addFunction("warning_i", lua_sj_warning)
 			.addFunction("insert_define_i", lua_sj_insert_define)
+			.addFunction("exit_i", ExitASM)
 			// remaining public functions with all arguments mandatory (boolean args seems to default to false?)
 			.addFunction("get_define", lua_sj_get_define)
 			.addFunction("get_label", lua_sj_get_label)
 			.addFunction("insert_label", lua_sj_insert_label)
 			.addFunction("shellexec", LuaShellExec)
-			.addFunction("exit", ExitASM)
 			.addFunction("calc", lua_sj_calc)
 			.addFunction("parse_line", lua_sj_parse_line)
 			.addFunction("parse_code", lua_sj_parse_code)
