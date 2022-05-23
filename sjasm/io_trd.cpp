@@ -181,7 +181,7 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 	return 1;
 }
 
-int TRD_SaveEmpty(const char* fname, const char label[8]) {
+bool TRD_SaveEmpty(const char* fname, const char label[8]) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("Error opening file", fname, IF_FIRST);
@@ -231,7 +231,7 @@ static int ReturnWithError(const char* errorText, const char* fname, FILE* fileT
 }
 
 // use autostart == -1 to disable it (the valid autostart is 0..9999 as line number of BASIC program)
-int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
+bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
 
 	// do some preliminary checks with file name and autostart - prepare final catalog entry data
 	union {

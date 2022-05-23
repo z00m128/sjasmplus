@@ -27,7 +27,6 @@ CXXFLAGS=-std=gnu++14 $(CFLAGS)
 
 LDFLAGS= -s
 
-# FIXME fix object list when source files are finalised
 #sjasmplus object files
 OBJS=\
 	$(SUBDIR_BASE)/devices.o \
@@ -39,7 +38,6 @@ OBJS=\
 	$(SUBDIR_BASE)/io_trd.o \
 	$(SUBDIR_BASE)/io_tzx.o \
 	$(SUBDIR_BASE)/io_tape.o \
-	$(SUBDIR_BASE)/lua_lpack.o \
 	$(SUBDIR_BASE)/lua_sjasm.o \
 	$(SUBDIR_BASE)/parser.o \
 	$(SUBDIR_BASE)/reader.o \

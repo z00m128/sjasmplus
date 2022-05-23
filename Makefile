@@ -44,7 +44,7 @@ SUBDIR_CRC32C=crc32c
 SUBDIR_DOCS=docs
 SUBDIR_COV=coverage
 
-# FIXME too many lua5.4 warnings: -pedantic
+# TODO too many lua5.4 warnings: -pedantic removed
 CFLAGS := -Wall -DMAX_PATH=PATH_MAX -I$(SUBDIR_CRC32C)
 ifdef USE_LUA
 CFLAGS += -DUSE_LUA -DLUA_USE_LINUX -I$(SUBDIR_LUA) -I$(SUBDIR_LUABRIDGE)

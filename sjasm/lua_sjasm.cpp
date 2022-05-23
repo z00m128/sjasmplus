@@ -35,10 +35,6 @@
 #include "LuaBridge/LuaBridge.h"
 #include <cassert>
 
-// extern "C" { //FIXME remove or update
-// #include "lua_lpack.h"
-// }
-
 lua_State *LUA = nullptr;		// lgtm[cpp/short-global-name]
 TextFilePos LuaStartPos;
 // LUA and LuaStartPos are also used by io_err.cpp - keep it in sync in case of some changes
@@ -178,6 +174,10 @@ static bool lua_sj_insert_label(const char *name, int address) {
 }
 
 static bool lua_sj_set_page(aint n) {
+	if (!DeviceID) {
+		Warning("sj.set_page: only allowed in real device emulation mode (See DEVICE)");
+		return false;
+	}
 	return dirPageImpl("sj.set_page", n);
 }
 
@@ -186,6 +186,7 @@ static bool lua_sj_set_slot(aint n) {
 		Warning("sj.set_slot: only allowed in real device emulation mode (See DEVICE)");
 		return false;
 	}
+	n = Device->SlotNumberFromPreciseAddress(n);
 	if (!Device->SetSlot(n)) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "sj.set_slot: Slot number must be in range 0..%u", Device->SlotsCount - 1);
@@ -212,6 +213,18 @@ static bool lua_sj_set_device(const char* id, const aint ramtop = 0) {
 	return SetDevice(id, ramtop);
 }
 
+static bool lua_zx_trdimage_create(const char* trdname, const char* label = nullptr) {
+	// setup label to truncated 8 char array padded with spaces
+	char l8[9] = "        ";
+	char* l8_ptr = l8;
+	while (label && *label && (l8_ptr - l8) < 8) *l8_ptr++ = *label++;
+	return TRD_SaveEmpty(trdname, l8);
+}
+
+bool lua_zx_trdimage_add_file(const char* trd, const char* file, int start, int length, int autostart = -1, bool replace = false) {
+	return nullptr != trd && nullptr != file && TRD_AddFile(trd, file, start, length, autostart, replace, false);
+}
+
 // extra lua script inserting interface (sj.something) entry functions
 // for functions with optional arguments, like error and warning
 // (as LuaBridge2.6 doesn't offer that type of binding as far as I can tell)
@@ -222,6 +235,8 @@ rawset(sj,"warning",function(m,v)sj.warning_i(m or "no message",v)end)
 rawset(sj,"insert_define",function(n,v)return sj.insert_define_i(n,v)end)
 rawset(sj,"exit",function(e)return sj.exit_i(e or 1)end)
 rawset(sj,"set_device",function(i,t)return sj.set_device_i(i or "NONE",t or 0)end)
+rawset(zx,"trdimage_create",function(n,l)return zx.trdimage_create_i(n,l)end)
+rawset(zx,"trdimage_add_file",function(t,f,s,l,a,r)return zx.trdimage_add_file_i(t,f,s,l,a or -1,r or false)end)
 )BINDING_LUA";
 
 static void lua_impl_init() {
@@ -230,8 +245,7 @@ static void lua_impl_init() {
 	// initialise Lua (regular Lua, without sjasmplus bindings/extensions)
 	LUA = luaL_newstate();
 	lua_atpanic(LUA, (lua_CFunction)lua_impl_fatalError);	//FIXME verify if this works
-	luaL_openlibs(LUA);	//FIXME verify if this works
-	//FIXME luaopen_pack(LUA);
+	luaL_openlibs(LUA);
 
 	// initialise sjasmplus bindings/extensions
 	luabridge::getGlobalNamespace(LUA)
@@ -247,6 +261,7 @@ static void lua_impl_init() {
 			.addFunction("warning_i", lua_sj_warning)
 			.addFunction("insert_define_i", lua_sj_insert_define)
 			.addFunction("exit_i", ExitASM)
+			.addFunction("set_device_i", lua_sj_set_device)
 			// remaining public functions with all arguments mandatory (boolean args seems to default to false?)
 			.addFunction("get_define", lua_sj_get_define)
 			.addFunction("get_label", lua_sj_get_label)
@@ -260,35 +275,24 @@ static void lua_impl_init() {
 			.addFunction("get_byte", MemGetByte)
 			.addFunction("get_word", MemGetWord)
 			.addFunction("get_device", GetDeviceName)
-			.addFunction("set_device_i", lua_sj_set_device)
 			.addFunction("set_page", lua_sj_set_page)
 			.addFunction("set_slot", lua_sj_set_slot)
+			// MMU API will be not added, it is too dynamic, and _pc("MMU ...") works
 			.addFunction("file_exists", FileExists)
 		.endNamespace()
 		.beginNamespace("zx")
-			.addFunction("trdimage_create",
-				(std::function<void(const char*)>)[](const char*n) {
-					char label[9] = {"        "};
-					TRD_SaveEmpty(n,label);
-				}
-			)
-			.addFunction("trdimage_add_file",
-				(std::function<void(const char*,const char*,int,int,int,bool)>)
-					[](const char*trd,const char*file,int start,int length,int autostart,bool replace) {
-					TRD_AddFile(trd,file,start,length,autostart,replace,false);
-				}
-			)
-			.addFunction("save_snapshot_sna", SaveSNA_ZX)	//FIXME fix docs with return int or bool, fix also trd stuff?
+			.addFunction("trdimage_create_i", lua_zx_trdimage_create)
+			.addFunction("trdimage_add_file_i", lua_zx_trdimage_add_file)
+			.addFunction("save_snapshot_sna", SaveSNA_ZX)
 		.endNamespace();
+
+		//TODO extend bindings with reading macro arguments
 
 		//TODO when tracking each chunk under own name, this must stay hidden as "chunk 0" or something like that
 		if (luaL_loadbuffer(LUA, lua_impl_init_bindings_script.c_str(), lua_impl_init_bindings_script.size(), "script")
 			|| lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
 			lua_impl_showLoadError(FATAL);								// unreachable? (I hope)
 		}
-
-		//FIXME set_device change API to have second argument ramtop
-		//TODO add MMU API?
 }
 
 void dirENDLUA() {

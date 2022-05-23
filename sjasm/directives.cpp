@@ -374,16 +374,6 @@ static void dirPAGE() {
 	}
 }
 
-static aint slotNumberFromPreciseAddress(aint inputValue) {
-	assert(Device);
-	if (inputValue < Device->SlotsCount) return inputValue;	// seems to be slot number, not address
-	// check if the input value does exactly match start-address of some slot
-	int slotNum = Device->GetSlotOfA16(inputValue);
-	if (-1 == slotNum) return inputValue;	// does not belong to any slot
-	if (inputValue != Device->GetSlot(slotNum)->Address) return inputValue;	// not exact match
-	return slotNum;							// return address converted into slot number
-}
-
 static void dirMMU() {
 	if (!DeviceID) {
 		Warning("MMU is allowed only in real device emulation mode (See DEVICE)");
@@ -432,8 +422,8 @@ static void dirMMU() {
 		address &= 0xFFFF;
 	}
 	// convert slot entered as addresses into slot numbering (must be precise start address of slot)
-	slot1 = slotNumberFromPreciseAddress(slot1);
-	slot2 = slotNumberFromPreciseAddress(slot2);
+	slot1 = Device->SlotNumberFromPreciseAddress(slot1);
+	slot2 = Device->SlotNumberFromPreciseAddress(slot2);
 	// validate argument values
 	if (slot1 < 0 || slot2 < slot1 || Device->SlotsCount <= slot2) {
 		char buf[LINEMAX];
@@ -477,7 +467,7 @@ static void dirSLOT() {
 		Error("[SLOT] Syntax error in <slot_number>", lp, SUPPRESS);
 		return;
 	}
-	val = slotNumberFromPreciseAddress(val);
+	val = Device->SlotNumberFromPreciseAddress(val);
 	if (!Device->SetSlot(val)) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%u, or exact starting address of slot", Device->SlotsCount - 1);

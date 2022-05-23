@@ -73,10 +73,6 @@ if(ENABLE_LUA)
 		)
 	endif(LUA_FOUND)
 
-	list(APPEND SOURCES
-		#sjasm/lua_lpack.c		#FIXME debug
-	)
-
 	add_definitions(-DUSE_LUA)
 
 	if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -85,12 +81,15 @@ if(ENABLE_LUA)
 		add_definitions(-DLUA_USE_LINUX)
 	elseif(WIN32)
 		add_definitions(-DLUA_USE_WINDOWS)
-		set(RESOURCES sjasmwin32/sjasmplus.rc)	#FIXME should be outside of ENABLE_LUA block??
 	endif()
 endif(ENABLE_LUA)
 
 include_directories(sjasm)
 include_directories(crc32c)
+
+if(WIN32)
+	set(RESOURCES sjasmwin32/sjasmplus.rc)
+endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES})
 

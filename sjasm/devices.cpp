@@ -433,6 +433,15 @@ void CDevice::Poke(aint z80adr, byte value) {
 	page->RAM[z80adr & (page->Size-1)] = value;
 }
 
+aint CDevice::SlotNumberFromPreciseAddress(aint address) {
+	if (address < SlotsCount) return address;		// seems to be slot number, not address
+	// check if the address (input value) does exactly match start-address of some slot
+	int slotNum = GetSlotOfA16(address);
+	if (-1 == slotNum) return address;				// does not belong to any slot
+	if (address != GetSlot(slotNum)->Address) return address;		// not exact match
+	return slotNum;									// return address converted into slot number
+}
+
 CDevicePage::CDevicePage(byte* memory, int32_t size, int number)
 	: Size(size), Number(number), RAM(memory) {
 	if (nullptr == RAM) Error("No memory defined", nullptr, FATAL);

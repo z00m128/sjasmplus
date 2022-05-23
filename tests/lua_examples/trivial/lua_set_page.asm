@@ -1,7 +1,7 @@
     DEVICE none
 
     lua
-        -- should fail, because no device is set (but it fails silently :/ )
+        -- v1.20.0 added visible warning message
         assert(not sj.set_page(1))
     endlua
 
@@ -19,4 +19,5 @@
 
     lua pass3 ; wrong arguments
         sj.set_page(233, 2) -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
+        sj.set_page()
     endlua
