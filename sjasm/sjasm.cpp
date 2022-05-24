@@ -206,7 +206,7 @@ std::vector<SSource> sourceFiles;
 int ConvertEncoding = ENCWIN;
 
 EDispMode PseudoORG = DISP_NONE;
-bool IsLabelNotFound = false;
+bool IsLabelNotFound = false, IsSubstituting = false;
 int pass = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;

@@ -144,7 +144,7 @@ extern std::vector<SSource> sourceFiles;
 enum EDispMode { DISP_NONE = 0, DISP_ACTIVE = 1, DISP_INSIDE_RELOCATE = 2 };
 extern EDispMode PseudoORG;
 
-extern bool IsLabelNotFound;
+extern bool IsLabelNotFound, IsSubstituting;
 extern int ConvertEncoding;
 extern int pass, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
 extern int adrdisp, dispPageNum, StartAddress;

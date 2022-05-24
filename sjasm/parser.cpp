@@ -391,6 +391,14 @@ int ParseExpressionNoSyntaxError(char*& lp, aint& val) {
 	return ret_val;
 }
 
+static int ParseExpressionInSubstitution(char *& lp, aint& val) {
+	assert(!IsSubstituting);
+	IsSubstituting = true;
+	int ret_val = ParseExpressionNoSyntaxError(lp, val);
+	IsSubstituting = false;
+	return ret_val;
+}
+
 // returns 0 on syntax error, 1 on expression which is not enclosed in parentheses
 // 2 when whole expression is in [] or () (--syntax=b/B affects when "2" is reported)
 int ParseExpressionMemAccess(char*& p, aint& nval) {
@@ -527,20 +535,27 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 						}
 						sprintf(defarrayCountTxt, "%d", val);
 						ver = defarrayCountTxt;
-					} else if ('[' == *lp && GrowSubIdByExtraChar(lp) && ParseExpressionNoSyntaxError(lp, val) && ']' == *lp) {
-						++lp;
-						while (0 < val && a) {
-							a = a->next;
-							--val;
+					} else {
+						char* expLp = lp + ('[' == *lp);	// the '[' will become part of subId in didParseBrackets
+						IsLabelNotFound = false;
+						bool didParseBrackets = '[' == *lp && GrowSubIdByExtraChar(lp) && ParseExpressionInSubstitution(lp, val) && ']' == *lp;
+						if (didParseBrackets && !IsLabelNotFound) {
+							// expression was successfully parsed and all values were known
+							++lp;
+							while (0 < val && a) {
+								a = a->next;
+								--val;
+							}
+							if (val < 0 || NULL == a) {
+								*ver = 0;			// substitute with empty string
+								Error("[ARRAY] index not in 0..<Size-1> range", nextSubIdLp, SUPPRESS);
+							} else {
+								ver = a->string;	// substitute with array value
+							}
+						} else {	// no substition of array possible at this time (index eval / syntax error)
+							lp = expLp;				// restore lp in case expression parser went ahead a lot
+							dr = -1;// write into output, but don't count as replacement
 						}
-						if (val < 0 || NULL == a) {
-							*ver = 0;			// substitute with empty string
-							Error("[ARRAY] index not in 0..<Size-1> range", nextSubIdLp, SUPPRESS);
-						} else {
-							ver = a->string;	// substitute with array value
-						}
-					} else {	// no substition of array possible at this time (index eval / syntax error)
-						dr = -1;// write into output, but don't count as replacement
 					}
 				}
 			} else {

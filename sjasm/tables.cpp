@@ -233,6 +233,9 @@ static SLabelTableEntry* GetLabel(char*& p) {
 	if (getLabel_invalidName) return nullptr;
 	if (!labelEntry || LABEL_PAGE_UNDEFINED == labelEntry->page) {
 		IsLabelNotFound = true;
+		// don't insert labels or report errors during substitution phase
+		if (IsSubstituting) return nullptr;
+		// regular parsing/assembling, track new labels and report "not found" error
 		char* findName = temp[0] ? temp : fullName.get();
 		if (!labelEntry) {
 			LabelTable.Insert(findName, 0, LABEL_IS_UNDEFINED);
