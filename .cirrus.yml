@@ -31,7 +31,7 @@ pipe:
     # coveralls plugin variables (access token + job ID)
     COVERALLS_REPO_TOKEN: ENCRYPTED[8b09887e95ef3aec93b9e31cbbca1f9090704ec9af432869c94d8d79dabdc95640bc061bbaaaf063e31dde112aa93729]
     CI_SERVICE_NAME: 'cirrus-ci'
-    # makefile variables affecting build options
+    # makefile variables affecting build options, LUA_COVERAGE *and* removing -e options to see all of that
     #LUA_COVERAGE: 1
     DEBUG: 1
     COVERALLS_SERVICE: 1
@@ -45,7 +45,7 @@ pipe:
       # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
       install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
       # "-n" as the *.gcov files are already generated in the project root from previous step
-      upload_gcov_data_script: cpp-coveralls -n -e lua5.1/ -e tolua++/ -e unittest-cpp/ -e cpp-src-tests/
+      upload_gcov_data_script: cpp-coveralls -n -e lua5.4/ -e LuaBridge/ -e unittest-cpp/ -e cpp-src-tests/
 
 # MINGW builds are ALSO temporarily disabled as mingw is not part of default windows images any more
 # task:
