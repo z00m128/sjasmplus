@@ -244,7 +244,11 @@ static void lua_impl_init() {
 
 	// initialise Lua (regular Lua, without sjasmplus bindings/extensions)
 	LUA = luaL_newstate();
-	lua_atpanic(LUA, (lua_CFunction)lua_impl_fatalError);	//FIXME verify if this works
+	lua_atpanic(LUA, (lua_CFunction)lua_impl_fatalError);
+
+	// for manual testing of lua_atpanic handler
+	// { /* lua_pushstring(LUA, "testing at panic handler"); */ lua_error(LUA); }
+
 	luaL_openlibs(LUA);
 
 	// initialise sjasmplus bindings/extensions

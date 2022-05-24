@@ -53,6 +53,8 @@ static const char AnsiErrorBeg[] = "\033[31m";
 static const char AnsiWarningBeg[] = "\033[33m";
 static const char AnsiEnd[] = "\033[m";
 
+static const char* nullptr_message_txt = "<nullptr>";
+
 static void initErrorLine() {		// adds filename + line of definition if possible
 	*ErrorLine = 0;
 	*ErrorLine2 = 0;
@@ -150,7 +152,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 #ifdef USE_LUA
 	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
 #endif
-	STRCAT(ErrorLine, LINEMAX2-1, message);
+	STRCAT(ErrorLine, LINEMAX2-1, message ? message : nullptr_message_txt);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
@@ -194,7 +196,7 @@ static void WarningImpl(const char* id, const char* message, const char* badValu
 #ifdef USE_LUA
 	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
 #endif
-	STRCAT(ErrorLine, LINEMAX2-1, message);
+	STRCAT(ErrorLine, LINEMAX2-1, message ? message : nullptr_message_txt);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
