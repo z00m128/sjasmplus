@@ -441,7 +441,8 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 
 static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
-	char* rp = nl,* nid,* ver;
+	char* rp = nl,* nid;
+	const char* ver;
 	bool isDefDir = false;	// to remember if one of DEFINE-related directives was used
 	bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 	char defarrayCountTxt[16] = { 0 };
@@ -547,7 +548,8 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 								--val;
 							}
 							if (val < 0 || NULL == a) {
-								*ver = 0;			// substitute with empty string
+								*defarrayCountTxt = 0;		// substitute with empty string
+								ver = defarrayCountTxt;
 								Error("[ARRAY] index not in 0..<Size-1> range", nextSubIdLp, SUPPRESS);
 							} else {
 								ver = a->string;	// substitute with array value

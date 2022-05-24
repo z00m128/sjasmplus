@@ -1,5 +1,5 @@
+    ; OBSOLETE *more*, v1.20.0: sj.get_define is now extended to search also macro arguments
     ; OBSOLETE, define/macro_arg substitution is added to `_c`/`sj.calc` in v1.14.4
-    ; check new test lua_macro_arg2.asm
 
     ; this test shows possible workaround for:
     ; 1) extracting macro arg through regular DEFINE (to not tamper with current
@@ -21,7 +21,7 @@
             sj.add_word(x)          -- parsed value from lua variable
             sj.add_word(_c("x"))    -- _c will at least recognize the inserted label
             z = _c("arg1?")         -- now substitution in `_c` WORKS in v1.14.4
-
+            assert(x == sj.get_define("arg1?", true))   -- since v1.20.0 sj.get_define can also search macro arguments
         ENDLUA
 .localMacroLabel:
         UNDEFINE __testM_arg1_tmp     ; release the global define

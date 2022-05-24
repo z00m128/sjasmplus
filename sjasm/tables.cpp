@@ -694,31 +694,26 @@ void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 static char defineGet__Counter__Buffer[32] = {};
 static char defineGet__Line__Buffer[32] = {};
 
-char* CDefineTable::Get(const char* name) {
+const char* CDefineTable::Get(const char* name) {
 	DefArrayList = nullptr;
-	if (nullptr != name) {
-		// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
-		if ('_' == name[1]) {
-			if (!strcmp(name, "__COUNTER__")) {
-				SPRINTF1(defineGet__Counter__Buffer, 30, "%d", PredefinedCounter);
-				++PredefinedCounter;
-				return defineGet__Counter__Buffer;
-			}
-			if (!strcmp(name, "__LINE__")) {
-				SPRINTF1(defineGet__Line__Buffer, 30, "%d", CurSourcePos.line);
-				return defineGet__Line__Buffer;
-			}
+	if (nullptr == name) return nullptr;
+	// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
+	if ('_' == name[1]) {
+		if (!strcmp(name, "__COUNTER__")) {
+			SPRINTF1(defineGet__Counter__Buffer, 30, "%d", PredefinedCounter);
+			++PredefinedCounter;
+			return defineGet__Counter__Buffer;
 		}
-		CDefineTableEntry* p = defs[(*name)&127];
-		while (p) {
-			if (!strcmp(name, p->name)) {
-				DefArrayList = p->nss;
-				return p->value;
-			}
-			p = p->next;
+		if (!strcmp(name, "__LINE__")) {
+			SPRINTF1(defineGet__Line__Buffer, 30, "%d", CurSourcePos.line);
+			return defineGet__Line__Buffer;
 		}
 	}
-	return nullptr;
+	CDefineTableEntry* p = defs[(*name)&127];
+	while (p && strcmp(name, p->name)) p = p->next;
+	if (nullptr == p) return nullptr;
+	DefArrayList = p->nss;
+	return p->value;
 }
 
 int CDefineTable::FindDuplicate(const char* name) {
@@ -814,14 +809,12 @@ void CMacroDefineTable::setdefs(CDefineTableEntry* const ndefs) {
 	defs = ndefs;						// the requested chain is new current HEAD
 }
 
-char* CMacroDefineTable::getverv(char* name) {
-	CDefineTableEntry* p = defs;
-	if (!used[(*name)&127]) return NULL;
-	while (p) {
-		if (!strcmp(name, p->name)) return p->value;
-		p = p->next;
-	}
-	return NULL;
+const char* CMacroDefineTable::getverv(const char* name) const {
+	if (nullptr == name) return nullptr;
+	if (!used[(*name)&127]) return nullptr;
+	const CDefineTableEntry* p = defs;
+	while (p && strcmp(name, p->name)) p = p->next;
+	return p ? p->value : nullptr;
 }
 
 int CMacroDefineTable::FindDuplicate(char* name) {

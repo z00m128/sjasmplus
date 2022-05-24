@@ -146,9 +146,9 @@ static void lua_sj_warning(const char* message, const char* value = nullptr) {
 	Warning(message, value, W_ALL);
 }
 
-static const char* lua_sj_get_define(const char* name) {
-	// wrapper to resolve member-function call (without std::function wrapping lambda, just to KISS)
-	return DefineTable.Get(name);
+static const char* lua_sj_get_define(const char* name, bool macro_args = false) {
+	const char* macro_res = (macro_args && macrolabp) ? MacroDefineTable.getverv(name) : nullptr;
+	return macro_res ? macro_res : DefineTable.Get(name);
 }
 
 static bool lua_sj_insert_define(const char* name, const char* value) {
@@ -289,8 +289,6 @@ static void lua_impl_init() {
 			.addFunction("trdimage_add_file_i", lua_zx_trdimage_add_file)
 			.addFunction("save_snapshot_sna", SaveSNA_ZX)
 		.endNamespace();
-
-		//TODO extend bindings with reading macro arguments
 
 		//TODO when tracking each chunk under own name, this must stay hidden as "chunk 0" or something like that
 		if (luaL_loadbuffer(LUA, lua_impl_init_bindings_script.c_str(), lua_impl_init_bindings_script.size(), "script")

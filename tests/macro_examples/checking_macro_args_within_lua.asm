@@ -1,21 +1,13 @@
     OUTPUT "checking_macro_args_within_lua.bin"
 
-    ; define Lua functions rather only in PASS1, the Lua context is global across whole
-    ; assembling and across all passes, so just single pure function definition is enough.
-    LUA PASS1
-        function getMacroArgument(argname)
-            _pc("DEFINE _LUA_GET_MACRO_ARGUMENT "..argname)
-            local result = sj.get_define("_LUA_GET_MACRO_ARGUMENT")
-            _pc("UNDEFINE _LUA_GET_MACRO_ARGUMENT")
-            return result
-        end
-    ENDLUA
+    ; this was originally showing hack-ish solution how to get macro argument value
 
-    ; macro using short Lua script, which does call the function above to figure out
-    ; the value of someArg0 within the Lua
+    ; since v1.20.0 the sj.get_define is extended to search optionally also in macro
+    ; arguments, rendering the original example pointless, this is now as simple as this:
+
     MACRO someMacro someArg0
         LUA ALLPASS
-            _pc("db "..getMacroArgument("someArg0"))
+            _pc("db "..sj.get_define("someArg0", true)) -- "true" to enable search in macro arguments
         ENDLUA
     ENDM
 

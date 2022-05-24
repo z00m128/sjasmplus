@@ -18,7 +18,7 @@ lua_coverage.asm(11): error: [LUA] unexpected symbol near '%'
 12    0000                  ENDLUA
 13    0000
 14    0000                  LUA pass3   ; lua errors in calling known functions
-15    0000 ~                    sj.get_define("define", 2)  -- not an error after lua5.4 upgrade, extra arguments are silent
+15    0000 ~                    sj.get_define("define", true, 2)  -- not an error after lua5.4 upgrade, extra arguments are silent
 16    0000                  ENDLUA
 17    0000
 18    0000                  LUA pass3

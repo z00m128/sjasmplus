@@ -12,7 +12,7 @@
     ENDLUA
 
     LUA pass3   ; lua errors in calling known functions
-        sj.get_define("define", 2)  -- not an error after lua5.4 upgrade, extra arguments are silent
+        sj.get_define("define", true, 2)  -- not an error after lua5.4 upgrade, extra arguments are silent
     ENDLUA
 
     LUA pass3

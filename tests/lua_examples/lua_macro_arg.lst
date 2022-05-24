@@ -1,6 +1,6 @@
 # file opened: lua_macro_arg.asm
- 1    0000                  ; OBSOLETE, define/macro_arg substitution is added to `_c`/`sj.calc` in v1.14.4
- 2    0000                  ; check new test lua_macro_arg2.asm
+ 1    0000                  ; OBSOLETE *more*, v1.20.0: sj.get_define is now extended to search also macro arguments
+ 2    0000                  ; OBSOLETE, define/macro_arg substitution is added to `_c`/`sj.calc` in v1.14.4
  3    0000
  4    0000                  ; this test shows possible workaround for:
  5    0000                  ; 1) extracting macro arg through regular DEFINE (to not tamper with current
@@ -22,7 +22,7 @@
 21    0000 ~                        sj.add_word(x)          -- parsed value from lua variable
 22    0000 ~                        sj.add_word(_c("x"))    -- _c will at least recognize the inserted label
 23    0000 ~                        z = _c("arg1?")         -- now substitution in `_c` WORKS in v1.14.4
-24    0000 ~
+24    0000 ~                        assert(x == sj.get_define("arg1?", true))   -- since v1.20.0 sj.get_define can also search macro arguments
 25    0000 ~                    ENDLUA
 26    0000 ~            .localMacroLabel:
 27    0000 ~                    UNDEFINE __testM_arg1_tmp     ; release the global define
@@ -40,7 +40,7 @@
 32    0000 ~           >            sj.add_word(x)          -- parsed value from lua variable
 32    0000 ~           >            sj.add_word(_c("x"))    -- _c will at least recognize the inserted label
 32    0000 ~           >            z = _c("arg1?")         -- now substitution in `_c` WORKS in v1.14.4
-32    0000 ~           >
+32    0000 ~           >            assert(x == sj.get_define("arg1?", true))   -- since v1.20.0 sj.get_define can also search macro arguments
 32    0000             >!x = 0x1234
 32    0000 11 34 12    >ld de,0x1234
 32    0003 34 12 34 12 >        ENDLUA
@@ -61,7 +61,7 @@
 38    000B ~           >            sj.add_word(x)          -- parsed value from lua variable
 38    000B ~           >            sj.add_word(_c("x"))    -- _c will at least recognize the inserted label
 38    000B ~           >            z = _c("arg1?")         -- now substitution in `_c` WORKS in v1.14.4
-38    000B ~           >
+38    000B ~           >            assert(x == sj.get_define("arg1?", true))   -- since v1.20.0 sj.get_define can also search macro arguments
 38    000B             >!x = 0x3456
 38    000B 11 56 34    >ld de,0x3456
 38    000E 56 34 56 34 >        ENDLUA

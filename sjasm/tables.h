@@ -166,7 +166,7 @@ public:
 	void AddMacro(char*, char*);
 	CDefineTableEntry* getdefs();
 	void setdefs(CDefineTableEntry*);
-	char* getverv(char*);
+	const char* getverv(const char*) const;
 	int FindDuplicate(char*);
 	CMacroDefineTable();
 	CMacroDefineTable(const CMacroDefineTable&) = delete;
@@ -182,7 +182,7 @@ public:
 	CStringsList* DefArrayList;
 	void Init();
 	void Add(const char*, const char*, CStringsList*);
-	char* Get(const char*);
+	const char* Get(const char*);
 	int FindDuplicate(const char*);
 	int Replace(const char*, const char*);
 	int Replace(const char*, const int);

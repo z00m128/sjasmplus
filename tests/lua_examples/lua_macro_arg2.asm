@@ -11,12 +11,12 @@
     ; in the original test code, unless there is serious reason. Upgrade
     ; to lua 5.4 is actually *that* serious reason, sorry.
 
-
+    ; OBSOLETE by v1.20.0: now sj.get_define get search also macro arguments
     MACRO testM arg1?
         LUA ALLPASS
             x = _c("arg1?")     -- get value of evaluated macro argument
-                -- if you want the macro argument without evaluation
-                -- check "lua_macro_arg.asm" test for DEFINE workaround
+            -- if you want macro argument without evaluation or string value, use sj.get_define
+            assert(x == 0+sj.get_define("arg1?", true)) -- enabling macro-arg search with second option
             _pl("!x = "..x)         -- DEFL type label "x" set to value x
             _pc("dw arg1?, x, "..x) -- check all three sources of input value
                 -- _pc does it's own substitution, the label "x" should be set and lua "x"
