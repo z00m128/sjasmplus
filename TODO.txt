@@ -5,6 +5,14 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+Lua error reporting: if function is defined in different anonymous block, only the emit
+line is reported in error message. If each anonymous block would get unique name, and
+track the starting position of the definition, then it would be possible to report even
+errors from inside lua functions defined in current asm file with the definition-line of
+error + "emitted here" line.
+
+Check build with system lua (needs OS with 5.4 package ... oops)
+
 http://no-color.org/    -> add to web after v1.20.0 release
 
 listing with pre-substituted original source line included
@@ -42,12 +50,6 @@ static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
  * https://scan.coverity.com/projects/z00m128-sjasmplus
     (needs build according to their tool or Travis CI)
 
-Lua error reporting: if function is defined in different anonymous block, only the emit
-line is reported in error message. If each anonymous block would get unique name, and
-track the starting position of the definition, then it would be possible to report even
-errors from inside lua functions defined in current asm file with the definition-line of
-error + "emitted here" line.
-
 FIXME in sources mark further points worth refactoring
 
 FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
@@ -75,7 +77,6 @@ where filename modification happens or filename is invalid.
 - inhibitor of substitutions happening (like `@djnz` inhibits macro replacement).
 ** Current refactored implementation:
 - doesn't play priorities as proposed above
-- evaluation of defarray index is still flaky and doesn't work correctly inside macro/etc
 - needs lot more testing and cleanup
 + should be already a bit more intuitive than 1.08+ (although it may break legacy source)
 
@@ -133,7 +134,7 @@ Check about other syntax ambiguities, what seems too much relaxed and could be s
 
 N-pass
 
-new lua + js support?
+js support?
 
 ====================
 Debian packaging:
@@ -173,7 +174,6 @@ Major changes on my mind:
 * macro-defined-operators (not only "instructions")
 * nesting DISPs?
 * better support for Maziac's tools (label type export, whatever else is needed)
-* fresher version of lua, revisit integration
 * maybe also JavaScript scripting support
 * filepath stuff through POSIX/clib API to make it cross-platform without hacks (normal slashes everywhere)
 

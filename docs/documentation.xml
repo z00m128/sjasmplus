@@ -204,6 +204,22 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.20.0</term>
+
+            <listitem>
+              <synopsis>- Lua: <link linkend="c_lua_scripting">upgrade to 5.4</link>, replacing tolua++ bindings with LuaBridge2.6 library, extending some bindings
+- Lua: bindings slightly modified (required by upgrade), refreshed docs, added test coverage
+- Lua: the 3rd party extensions (BTW not working for many years) are obsolete in 5.4 and removed
+- warnings: added -Wall, --help=warnings shows on/off status, rdlow off by default
+- many open-file "fatal" errors become "non-fatal", assembling will continue
+- deprecated features removed: --syntax=m, label `abs` in expressions
+- `--color=auto` will stay no-color when <ulink url="https://no-color.org/">env.var. `NO_COLOR`</ulink> is defined
+- refactorings, improving some error messages and parsing, small fixes in parsing logic
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>31.3.2022 - 1.19.0</term>
 
             <listitem>
@@ -425,7 +441,7 @@
   --longptr                No device: program counter $ can go beyond 0x10000
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
-  --nofakes                Disable fake instructions (deprecated, use --syntax=F)
+  --nofakes                Disable fake instructions (same as --syntax=F)
   --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)
   --syntax=&lt;...&gt;           Adjust parsing syntax, read details below.</synopsis></para>
 
@@ -445,7 +461,7 @@
   M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
   s      Use only "simple" whole-word substitutions, no sub-words (since v1.18.3)
   w      Warnings option: report warnings as errors
-  m      *DEPRECATED* use -Wno-rdlow (was "switch off Accessing low memory warning")</synopsis>
+  m      *REMOVED* in v1.20.0, use -Wno-rdlow</synopsis>
   &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
   not working correctly either.
   </para>
@@ -500,8 +516,11 @@ sjasmplus --lst --lstlab example.asm</programlisting>
     ld a,(10-2)    ; same instruction, but suppress warning: rdlow-ok
 
 file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
-			To list all warning-ids and short description of each use:
-			<programlisting>sjasmplus --help=warnings</programlisting>
+			To list all warning-ids, their on/off state and short description of each use:
+			<programlisting>&lt;command line&gt;$ sjasmplus --help=warnings</programlisting>
+			Most of the extra warnings are by default enabled, but to enable/disable all of them you can use (also in source with OPT directive):
+			<programlisting>&lt;command line&gt;$ sjasmplus -Wall
+&lt;command line&gt;$ sjasmplus -Wno-all</programlisting>
 			To disable particular warning globally you can use option <code>-Wno-&lt;id&gt;</code>,
 			either on command line, or from source by using <code><link linkend="po_opt">OPT</link></code>:
 			<programlisting>&lt;command line&gt;$ sjasmplus -Wno-out0
@@ -3990,10 +4009,26 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     <section id="s_lua_oh_why">
       <title>Why?</title>
 
-      <para><graphic align="left" fileref="lua.gif" />Why is scripting engine
-      as Lua embedded to the compiler? Answer is simple: It need to add extra
-      features by users. And to whole other Lua is enough small, fast and
-      powerful scripting engine.</para>
+      <para><graphic align="top" fileref="lua.gif" />Why is scripting engine
+      as Lua embedded to the compiler? Answer is simple: it can be used to add extra
+      features by users. And Lua is small enough, fast and powerful scripting engine.</para>
+
+      <para>Since v1.20.0 sjasmplus integrates Lua 5.4.4. Before it was using Lua 5.1.5 with
+        few 3rd party external libraries, which were mostly non-functional due to neglected
+        refreshing of tolua++ tool and integration itself. The upgrade to Lua 5.4 was done
+        along replacing tolua++ with LuaBridge2.6, and while there was put lot of effort
+        to maintain original Lua bindings to sjasmplus, there are few changes to the API.</para>
+
+      <para>If your old source does not work any more after upgrade, please carefully check
+        against the <link linkend="s_lua_sjasmplus_bindings">bindings documentation</link> below.</para>
+
+      <para>Check if your code does use only official API, and if you were using secret extra
+        arguments, check the test files and examples how those lua scripts were adjusted to
+        build with v1.20.0. The bindings API documentation has been cleaned up, some API
+        extended and has better test-coverage to make it less likely to change in the future.</para>
+
+      <para>Also please mind the breaking changes of the Lua itself, and adjust your scripts
+        to Lua 5.4 syntax and library functions.</para>
     </section>
 
     <section id="s_lua_how_to">
@@ -4020,8 +4055,8 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] _c("expression")<indexterm id="lua__c"><primary>_c(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Calculate expression using calculator of the compiler.
-              Example: <code>val = _c("SOMELABEL+12")</code>.</para>
+              <para>Calculate expression using calculator of the compiler (32-bit only).
+              Example: <code>val = _c("SOMELABEL+12")</code></para>
             </listitem>
           </varlistentry>
 
@@ -4029,8 +4064,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[void] _pc("code")<indexterm id="lua__pc"><primary>_pc(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Parse string of Z80 assembly. Example: <code>_pc("ADD
-              A,B")</code></para>
+              <para>Parse string of Z80 assembly. Example: <code>_pc("ADD A,B")</code></para>
             </listitem>
           </varlistentry>
 
@@ -4038,8 +4072,11 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[void] _pl("label code")<indexterm id="lua__pl"><primary>_pl(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Parse line of Z80 assembly. Example: <code>_pl("SOMELABEL
-              ADD A,B")</code></para>
+              <para>Parse line of Z80 assembly. Example: <code>_pl("SOMELABEL ADD A,B")</code></para>
+
+              <para>This binding makes almost all pseudo-instructions (directives) available from Lua script
+                with all options and features. In the future the bindings API will be mostly frozen, extended
+                only in case where using <code>_pl(...)</code> is too cumbersome.</para>
             </listitem>
           </varlistentry>
 
@@ -4068,7 +4105,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.error("message")<indexterm id="lua_sj_error"><primary>sj.error(..)</primary></indexterm></term>
+            <term>[void] sj.error("message","bad_value" = nil)<indexterm id="lua_sj_error"><primary>sj.error(..)</primary></indexterm></term>
 
             <listitem>
               <para>Print error message.</para>
@@ -4076,7 +4113,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.warning("message")<indexterm id="lua_sj_warning"><primary>sj.warning(..)</primary></indexterm></term>
+            <term>[void] sj.warning("message","bad_value" = nil)<indexterm id="lua_sj_warning"><primary>sj.warning(..)</primary></indexterm></term>
 
             <listitem>
               <para>Print warning message.</para>
@@ -4092,18 +4129,18 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[string] sj.get_define("name")<indexterm id="lua_sj_get_define"><primary>sj.get_define(..)</primary></indexterm></term>
+            <term>[string] sj.get_define("name", "include_macro_args" = false)<indexterm id="lua_sj_get_define"><primary>sj.get_define(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Get define value.</para>
+              <para>Get define value, returns nil if define is not found. Can optionally search also macro arguments (with higher priority).</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.insert_define("name", "value")<indexterm id="lua_sj_insert_define"><primary>sj.insert_define(..)</primary></indexterm></term>
+            <term>[boolean] sj.insert_define("id", "value" = "")<indexterm id="lua_sj_insert_define"><primary>sj.insert_define(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Add new define (returns true if the define is new, false when define already existed and value was replaced).</para>
+              <para>Add new define. Returns true if the define is new, false when define already existed and value was replaced or when id is invalid.</para>
             </listitem>
           </varlistentry>
 
@@ -4111,7 +4148,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.get_label("name")<indexterm id="lua_sj_get_label"><primary>sj.get_label(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Get label address.</para>
+              <para>Get label address. Returns -1 if name is invalid, 0 when not found or has still undefined value (you can use also <code>_c("name")</code> to get symbol value and do some calculations with it).</para>
             </listitem>
           </varlistentry>
 
@@ -4119,7 +4156,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[boolean] sj.insert_label("name", address)<indexterm id="lua_sj_insert_label"><primary>sj.insert_label(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Add new label.</para>
+              <para>Add new label. Returns true when label was successfully inserted (or value modified first time in next assembling pass), false when name is invalid or label was already defined.</para>
             </listitem>
           </varlistentry>
 
@@ -4127,7 +4164,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.current_address<indexterm id="lua_sj_current_address"><primary>sj.current_address</primary></indexterm></term>
 
             <listitem>
-              <para>Variable. Current address.</para>
+              <para>Read-only variable. Current address.</para>
             </listitem>
           </varlistentry>
 
@@ -4135,7 +4172,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.error_count<indexterm id="lua_sj_error_count"><primary>sj.error_count</primary></indexterm></term>
 
             <listitem>
-              <para>Variable. Count of Errors.</para>
+              <para>Read-only variable. Count of Errors.</para>
             </listitem>
           </varlistentry>
 
@@ -4143,12 +4180,12 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.warning_count<indexterm id="lua_sj_warning_count"><primary>sj.warning_count</primary></indexterm></term>
 
             <listitem>
-              <para>Variable. Count of Warnings.</para>
+              <para>Read-only variable. Count of Warnings.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>[void] sj.exit(errorcode)<indexterm id="lua_sj_exit"><primary>sj.exit(..)</primary></indexterm></term>
+            <term>[void] sj.exit(errorcode = 1)<indexterm id="lua_sj_exit"><primary>sj.exit(..)</primary></indexterm></term>
 
             <listitem>
               <para>Shutdown the compiler.</para>
@@ -4178,7 +4215,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
             <listitem>
               <para>Get byte from memory. <emphasis>Works only in real device
-              emulation mode.</emphasis></para>
+              emulation mode and only in last assembling pass.</emphasis></para>
             </listitem>
           </varlistentry>
 
@@ -4187,7 +4224,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
             <listitem>
               <para>Get word from memory. <emphasis>Works only in real device
-              emulation mode.</emphasis></para>
+              emulation mode and only in last assembling pass.</emphasis></para>
             </listitem>
           </varlistentry>
 
@@ -4201,11 +4238,11 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.set_device("id")<indexterm id="lua_sj_set_device"><primary>sj.set_device(..)</primary></indexterm></term>
+            <term>[boolean] sj.set_device("id" = "NONE", ramtop = 0)<indexterm id="lua_sj_set_device"><primary>sj.set_device(..)</primary></indexterm></term>
 
             <listitem>
               <para>Set current emulating device's identifier. Returns false
-              if no device found.</para>
+              if requested device id is not found and current device set is lost ("NONE" is set).</para>
             </listitem>
           </varlistentry>
 
@@ -4213,17 +4250,17 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[boolean] sj.set_page(number)<indexterm id="lua_sj_set_page"><primary>sj.set_page(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Set page with number "number" to the current slot. Works
-              as pseudo-op PAGE.</para>
+              <para>Set page "number" to the current slot. Works as pseudo-op <link linkend="po_page">PAGE</link>.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>[boolean] sj.set_slot(number)<indexterm id="lua_sj_set_slot"><primary>sj.set_slot(..)</primary></indexterm></term>
+            <term>[boolean] sj.set_slot(number_or_address)<indexterm id="lua_sj_set_slot"><primary>sj.set_slot(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Set current slot with number "number". Works as pseudo-op
-              SLOT.</para>
+              <para>Set current slot to "number". Works as pseudo-op <link linkend="po_slot">SLOT</link>.</para>
+              <para>(since v1.20.0) You can also use starting address of slot instead, ie. for ZX128
+                <code>sj.set_slot(0x8000)</code> is alias of <code>sj.set_slot(2)</code>.</para>
             </listitem>
           </varlistentry>
 
@@ -4236,16 +4273,16 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] zx.trdimage_create("filename")<indexterm id="lua_zx_trdimage_create"><primary>zx.trdimage_create(..)</primary></indexterm></term>
+            <term>[boolean] zx.trdimage_create("trd_name", "label" = "")<indexterm id="lua_zx_trdimage_create"><primary>zx.trdimage_create(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Creates emptry TRD image file.</para>
+              <para>Creates empty TRD image file.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>[void] zx.trdimage_add_file<indexterm id="lua_zx_trdimage_add_file"><primary>zx.trdimage_add_file(..)</primary></indexterm>("filename", "somenameC",
-            startaddress, length, autostart, replace)</term>
+            <term>[boolean] zx.trdimage_add_file<indexterm id="lua_zx_trdimage_add_file"><primary>zx.trdimage_add_file(..)</primary></indexterm>("trd_name", "somenameC",
+            startaddress, length, autostart = -1, replace = false)</term>
 
             <listitem>
               <para>Save block of memory to TRD image file. <emphasis>Work
@@ -4254,7 +4291,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
-            <term>[void] zx.save_snapshot_sna<indexterm id="lua_zx_save_snapshot_sna"><primary>zx.save_snapshot_sna(..)</primary></indexterm>("filename.sna",
+            <term>[boolean] zx.save_snapshot_sna<indexterm id="lua_zx_save_snapshot_sna"><primary>zx.save_snapshot_sna(..)</primary></indexterm>("filename.sna",
             startaddressofprogram)</term>
 
             <listitem>
@@ -4269,195 +4306,18 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     <section id="s_lua_third_party_libs">
       <title>Third-party embedded library(ies)</title>
 
-      <para><emphasis>lpack.c</emphasis></para>
+      <para><emphasis>None at this moment.</emphasis></para>
 
-      <para>a Lua library for packing and unpacking binary data</para>
+      <para>Since v1.20.0 the sjasmplus integrates Lua 5.4.4.</para>
 
-      <para>by Luiz Henrique de Figueiredo
-      &lt;lhf(at)tecgraf.puc-rio.br&gt;</para>
+      <para>The libraries included in older versions of sjasmplus: lpack.c, bit (bitwise operators)
+        and hex (convert to/from hexa numbers) are now all part of the standard Lua 5.4.</para>
 
-      <para>The library adds two functions to the string library:
-      <emphasis>string.pack</emphasis> and
-      <emphasis>string.unpack</emphasis>.</para>
+      <para>Refer to <ulink url="https://www.lua.org/manual/5.4/manual.html#6">Lua documentation</ulink>
+        for full list of functions and detailed help.</para>
 
-      <para>pack is called as follows: string.pack(F,x1,x2,...), where F is a
-      string describing how the values x1, x2, ... are to be interpreted and
-      formatted. Each letter in the format string F consumes one of the given
-      values. Only values of type number or string are accepted. pack returns
-      a (binary) string containing the values packed as described in F. The
-      letter codes understood by pack are listed in lpack.c (they are inspired
-      by Perl's codes but are not the same). Numbers following letter codes in
-      F indicate repetitions.</para>
+      <para>For small example check the test <code>tests/lua_examples/trivial/lua_standard_libs.asm</code></para>
 
-      <para>unpack is called as follows: string.unpack(s,F,[init]), where s is
-      a (binary) string containing data packed as if by pack, F is a format
-      string describing what is to be read from s, and the optional init marks
-      where in s to begin reading the values. unpack returns one value per
-      letter in F until F or s is exhausted (the letters codes are the same as
-      for pack, except that numbers following 'A' are interpreted as the
-      number of characters to read into the string, not as
-      repetitions).</para>
-
-      <para>The first value returned by unpack is the next unread position in
-      s, which can be used as the init position in a subsequent call to
-      unpack. This allows you to unpack values in a loop or in several steps.
-      If the position returned by unpack is beyond the end of s, then s has
-      been exhausted; any calls to unpack starting beyond the end of s will
-      always return nil values.</para>
-
-      <para>List of types for F string:<variablelist>
-          <varlistentry>
-            <term>z</term>
-
-            <listitem>
-              <para>zero-terminated string</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>p</term>
-
-            <listitem>
-              <para>string preceded by length byte</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>P</term>
-
-            <listitem>
-              <para>string preceded by length word</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>a</term>
-
-            <listitem>
-              <para>string preceded by length size_t</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>A</term>
-
-            <listitem>
-              <para>string</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>f</term>
-
-            <listitem>
-              <para>float</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>d</term>
-
-            <listitem>
-              <para>double</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>n</term>
-
-            <listitem>
-              <para>Lua number</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>c</term>
-
-            <listitem>
-              <para>char</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>b</term>
-
-            <listitem>
-              <para>byte = unsigned char</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>h</term>
-
-            <listitem>
-              <para>short = word</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>H</term>
-
-            <listitem>
-              <para>unsigned short</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>i</term>
-
-            <listitem>
-              <para>int</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>I</term>
-
-            <listitem>
-              <para>unsigned int</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>l</term>
-
-            <listitem>
-              <para>long</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>L</term>
-
-            <listitem>
-              <para>unsigned long</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>&lt;</term>
-
-            <listitem>
-              <para>little endian</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>&gt;</term>
-
-            <listitem>
-              <para>big endian</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>=</term>
-
-            <listitem>
-              <para>native endian</para>
-            </listitem>
-          </varlistentry>
-        </variablelist></para>
     </section>
 
     <section id="s_lua_examples">
@@ -4475,7 +4335,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     LUA PASS2
        print (v)
 -- out to console: 1
-       v++
+       v = v + 1
     ENDLUA
 
     LUA PASS3
@@ -4506,7 +4366,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           <para><programlisting>     LUA
          function savetape_mytype(filename, startaddress)
              local fp
-             fp = assert(io.open(fname, "wb"))
+             fp = assert(io.open(filename, "wb"))
              for i = 16384, 32767, 4 do
                  assert(fp:write( string.pack("bbbb",
                                 sj.get_byte(i),
