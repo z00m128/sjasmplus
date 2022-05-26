@@ -1,4 +1,6 @@
+
 ## Installation Instructions
+
 Requirements:
 
 - GNU/Linux / Unix / macOS / BSD with bash compatible shell
@@ -13,8 +15,21 @@ or
 
 Compilation is tested with GCC 5.5.0, it should run also with older 5.x versions. It will not work with GCC 4.x and older.
 
+## Getting full source code of sjasmplus
+
+Use `git` to clone the github repository and all git-submodules:
+
+	git clone --recursive -j8 https://github.com/z00m128/sjasmplus.git
+
+If you already have cloned repository without submodules, you can update submodules only by:
+
+	git submodule update --init --recursive
+
+If you are not using `git`, you can download and extract archive from releases, the manually added `.tar.xz` one (the automatically github provided  zip files are missing the submodules sources and will fail to build). Or you can download the github provided archives, but then you need to download each submodule individually and extract them to correct folders inside sjasmplus folder.
+
 ## Default method for GNU/Linux / Unix / macOS / BSD
-Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile` according your preferences (default `/usr/local`). Run following commands:
+
+Go to folder with sjasmplus project. Edit install path `PREFIX` in file `Makefile` according your preferences (default `/usr/local`). Run following commands:
 
 	make clean
 	make
@@ -24,28 +39,32 @@ Then run as root or use sudo:
 	make install
 
 ### Gentoo GNU/Linux
+
 Check [cizo2000's github gentoo-overlay/dev-util/sjasmplus](https://github.com/cizo2000/gentoo-overlay/tree/master/dev-util/sjasmplus) for ebuild files.
 
 ### Arch Linux
+
 Recently (2022) it seems leo72 started providing AUR for z00m's fork of sjasmplus: [aur.archlinux.org/packages/sjasmplus-z00m128](https://aur.archlinux.org/packages/sjasmplus-z00m128) (AFAIK there's no connection with any maintainer of this project, but hopefully this will continue and provide good experience to AUR users, thanks leo72).
 
 ## Default method for MS Windows
-Extract tarball archive and go to extracted folder. Edit install path `PREFIX` in file `Makefile.win` according your preferences (default `c:\mingw\usr\local\bin`). Remove `-static` parameter in `CFLAGS` if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Run following commands:
+
+Go to folder with sjasmplus project. Edit install path `PREFIX` in file `Makefile.win` according your preferences (default `c:\mingw\usr\local\bin`). Remove `-static` parameter in `CFLAGS` if you don't need standalone Windows executable (binary is MinGW dependant then, but it's smaller). Run following commands:
 
 	make -f Makefile.win clean
 	make -f Makefile.win
 	make -f Makefile.win install
 
 ## CMAKE method for Linux / Unix / macOS / BSD
-Extract tarball archive, go to extracted folder and run following set of commands:
 
-	mkdir build 
+Go to folder with sjasmplus project and run following set of commands:
+
+	mkdir build
 	cd build
 	cmake -DCMAKE_BUILD_TYPE=Release ..
 	make
 	make install
 
-You can have external Lua and ToLua, it is detected automatically. If not, internal version is used.
+The project will use internal copy of Lua 5.4.4 by default, but you can use system Lua 5.4 by using `-DSYSTEM_LUA=ON`.
 
 For disabling of LUA scripting support add `-DENABLE_LUA=OFF` option:
 
@@ -58,10 +77,11 @@ To change install directory prefix add `-DCMAKE_INSTALL_PREFIX:PATH` option with
 	cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
 
 ## CMake method for MS Windows
-Extract tarball archive and go to the extracted folder. Delete or rename file `Makefile`. Rename file `Makefile.win` to `Makefile`. Create `build` subdirectory and enter to it. Run following command:
+
+Go to folder with sjasmplus project. Delete or rename file `Makefile`. Rename file `Makefile.win` to `Makefile`. Create `build` subdirectory and enter to it. Run following command:
 
 	cmake-gui
-	
+
 Click `Browse Source...` button, select extracted tarball folder. Click `Browse Build...` button, select the `build` folder. Click `Configure` button, select `MinGW Makefiles`, select `Use default native compilers`. Click `Finish` and wait until configuration is done. Change `CMAKE_INSTALL_PREFIX` install path according your preferences (click on path). Click `Generate`. Run `cmd.exe`, enter the build directory and run following commands:
 
 	make
@@ -74,10 +94,11 @@ corner-case bugs which need to be fixed, see issues #77 and #78 for details/prog
 The official binary "exe" is built with MinGW toolchain and that's recommended option.
 
 ## Helping with sjasmplus development
+
 There are few extra recommendations if you want to join sjasmplus development and use all the features:
 
 - work with git clone of repository ideally, so you can easily update to latest source base, track your changes or review changes of other developers
-- withing the git repository init and update the submodules too, this will clone the UnitTest++ repository which is required to build unit tests (`git submodule init`,  `git submodule update`)
+- within the git repository init and update the submodules too, this will clone the UnitTest++ and LuaBridge2.6 repository which are required to build sjasmplus and unit tests (`git submodule init`,  `git submodule update`)
 - linux + gcc + Makefile is the config of Ped7g, having access to the same config to re-create his workflow locally may be of help (when troubleshooting some issue or comparing results with different platform)
 - but having different local configuration would be very helpful to keep the source base cross-platform and in good shape
 - you can check `.cirrus.yml` file and accompanying scripts/batch-files in `ContinuousIntegration` folder to see how different environments and different build tasks are prepared and executed. If you are not familiar with CI setup and configuration yet, you should take at least a brief glimpse on it, even if you want just to contribute small patch to the sjasmplus, because any pull request will be scrutinized by the CI build system automatically.
