@@ -29,7 +29,6 @@
 // reader.cpp
 
 #include "sjdefs.h"
-#include <cassert>
 
 //enum EDelimiterType          { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
 static const char delimiters_b[] = { ' ',    '"',       '\'',          '<',      0 };

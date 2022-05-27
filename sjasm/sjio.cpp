@@ -29,7 +29,6 @@
 // sjio.cpp
 
 #include "sjdefs.h"
-#include <cassert>
 
 #include <fcntl.h>
 
@@ -515,14 +514,10 @@ static stdin_log_t* stdin_log = nullptr;
 
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t* fStdinLog)
 {
-	const char* oFileNameFull = fileNameFull;
-	TextFilePos oSourcePos = CurSourcePos;
-	char* oCurrentDirectory, * fullpath;
-	TCHAR* filenamebegin;
-
 	if (++IncludeLevel > 20) {
 		Error("Over 20 files nested", NULL, FATAL);
 	}
+	char* fullpath, * filenamebegin;
 	if (!*nfilename && fStdinLog) {
 		fullpath = STRDUP("console_input");
 		filenamebegin = fullpath;
@@ -539,6 +534,10 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 			return;
 		}
 	}
+
+	TextFilePos oSourcePos = CurSourcePos;
+	const char* oFileNameFull = fileNameFull, * oCurrentDirectory = CurrentDirectory;
+
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
 	fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
 	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
@@ -550,7 +549,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 
 	// open default listing file for each new source file (if default listing is ON)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
-		OpenDefaultList(fullpath);			// explicit listing file is already opened
+		OpenDefaultList(fileNameFull);			// explicit listing file is already opened
 	}
 	// show in listing file which file was opened
 	FILE* listFile = GetListingFile();
@@ -560,9 +559,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		fputs("\n", listFile);
 	}
 
-	oCurrentDirectory = CurrentDirectory;
-	*filenamebegin = 0;
-	CurrentDirectory = fullpath;
+	*filenamebegin = 0;					// shorten fullpath to only-path string
+	CurrentDirectory = fullpath;		// and use it as CurrentDirectory
 
 	rlpbuf = rlpbuf_end = rlbuf;
 	colonSubline = false;
@@ -578,6 +576,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		}
 	}
 	CurrentDirectory = oCurrentDirectory;
+	free(fullpath);						// was used by CurrentDirectory till now
+	fullpath = nullptr;
 
 	// show in listing file which file was closed
 	if (LASTPASS == pass && listFile) {
@@ -594,9 +594,6 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	}
 
 	--IncludeLevel;
-
-	// Free memory
-	free(fullpath);
 
 	if (CurSourcePos.line > maxlin) {
 		maxlin = CurSourcePos.line;

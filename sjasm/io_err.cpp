@@ -31,7 +31,6 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
-#include <cassert>
 
 #ifdef USE_LUA
 

@@ -29,7 +29,6 @@
 // direct.cpp
 
 #include "sjdefs.h"
-#include <cassert>
 
 CFunctionTable DirectivesTable;
 CFunctionTable DirectivesTable_dup;

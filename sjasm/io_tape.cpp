@@ -28,7 +28,6 @@ misrepresented as being the original software.
 
 #include "sjdefs.h"
 #include "io_tape_ldrs.h"
-#include <cassert>
 
 static unsigned char parity;
 

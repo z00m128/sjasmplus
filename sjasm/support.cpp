@@ -29,7 +29,6 @@
 // support.cpp
 
 #include "sjdefs.h"
-#include <cassert>
 
 FILE* SJ_fopen(const char* fname, const char* mode) {
 	if (nullptr == fname || nullptr == mode || !*fname) return nullptr;

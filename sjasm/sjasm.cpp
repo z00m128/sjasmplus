@@ -237,7 +237,7 @@ TextFilePos CurSourcePos, DefinitionPos;
 uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L, comlin = 0;
-char* CurrentDirectory=NULL;
+const char* CurrentDirectory=NULL;
 
 char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
@@ -616,12 +616,13 @@ namespace Options {
 
 // == end of UnitTest++ part ====================================================================
 
+static char launch_directory[MAX_PATH];
+
 #ifdef WIN32
 int main(int argc, char* argv[]) {
 #else
 int main(int argc, char **argv) {
 #endif
-	char buf[MAX_PATH];
 	// existence of NO_COLOR env.var. disables auto-colors: http://no-color.org/
 	const char* envNoColor = std::getenv("NO_COLOR");
 	// try to auto-detect ANSI-colour support (true if env.var. TERM exist and contains "color" substring)
@@ -643,8 +644,8 @@ int main(int argc, char **argv) {
 	long dwStart = GetTickCount();
 
 	// get current directory
-	SJ_GetCurrentDirectory(MAX_PATH, buf);
-	CurrentDirectory = buf;
+	SJ_GetCurrentDirectory(MAX_PATH, launch_directory);
+	CurrentDirectory = launch_directory;
 
 	Options::COptionsParser optParser;
 	char* envFlags = std::getenv("SJASMPLUSOPTS");

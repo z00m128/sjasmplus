@@ -27,7 +27,6 @@
 
 #include "sjdefs.h"
 #include "crc32c.h"
-#include <cassert>
 
 // Banks in file are ordered in SNA way (but array "banks" in header is in numeric order instead)
 static constexpr aint nexBankOrder[8] = {5, 2, 0, 1, 3, 4, 6, 7};

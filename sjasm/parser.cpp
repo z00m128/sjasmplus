@@ -29,7 +29,6 @@
 // parser.cpp
 
 #include "sjdefs.h"
-#include <cassert>
 
 static bool synerr = true;	// flag whether ParseExpression should report syntax error with Error()
 

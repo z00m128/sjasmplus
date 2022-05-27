@@ -33,7 +33,6 @@
 
 #include "lua.hpp"
 #include "LuaBridge/LuaBridge.h"
-#include <cassert>
 
 lua_State *LUA = nullptr;		// lgtm[cpp/short-global-name]
 TextFilePos LuaStartPos;
