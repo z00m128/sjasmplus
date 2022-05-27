@@ -478,23 +478,24 @@ static const char* spaceFiller = "               ";
 static const char* txt_on	= "on";
 static const char* txt_off	= "off";
 static const char* txt_none	= "      ";
+static constexpr const int STATE_TXT_BUFFER_SIZE = 64;
 
 static void initWarningStateTxt(char* buffer, const char* id) {
 	if (W_ENABLE_ALL == id) {
-		STRCPY(buffer, 64, txt_none);
+		STRCPY(buffer, STATE_TXT_BUFFER_SIZE, txt_none);
 		return;
 	}
 	const bool state = warning_state(*w_texts.find(id));
 	buffer[0] = '[';
-	STRCPY(buffer + 1, 63, state ? Options::tcols->display : Options::tcols->warning);
-	STRCAT(buffer, 64, state ? txt_on : txt_off);
-	STRCAT(buffer, 64, Options::tcols->end);
-	STRCAT(buffer, 64, "] ");
-	if (state) STRCAT(buffer, 64, " ");
+	STRCPY(buffer + 1, STATE_TXT_BUFFER_SIZE-1, state ? Options::tcols->display : Options::tcols->warning);
+	STRCAT(buffer, STATE_TXT_BUFFER_SIZE, state ? txt_on : txt_off);
+	STRCAT(buffer, STATE_TXT_BUFFER_SIZE, Options::tcols->end);
+	STRCAT(buffer, STATE_TXT_BUFFER_SIZE, "] ");
+	if (state) STRCAT(buffer, STATE_TXT_BUFFER_SIZE, " ");
 }
 
 void PrintHelpWarnings() {
-	char state_txt[64];
+	char state_txt[STATE_TXT_BUFFER_SIZE+1];
 	_COUT "The following options control compiler warning messages:" _ENDL;
 	std::vector<const char*> ids;
 	ids.reserve(w_texts.size());
@@ -505,8 +506,10 @@ void PrintHelpWarnings() {
 		initWarningStateTxt(state_txt, id);
 		_COUT " -W" _CMDL Options::tcols->bold _CMDL Options::tcols->warning _CMDL id _CMDL Options::tcols->end _CMDL spaceFiller+strlen(id) _CMDL state_txt _CMDL w_texts[id].help _ENDL;
 	}
-	_COUT "Use -Wno- prefix to disable specific warning, example: -Wno-abs" _ENDL;
-	_COUT "Use -ok suffix in comment to suppress it per line, example: jr abs ; abs-ok" _ENDL;
+	_COUT "Use -W" _CMDL Options::tcols->bold _CMDL Options::tcols->warning _CMDL "no-" _CMDL Options::tcols->end;
+	_COUT " prefix to disable specific warning, example: " _CMDL Options::tcols->display _CMDL "-Wno-out0" _CMDL Options::tcols->end _ENDL;
+	_COUT "Use -ok suffix in comment to suppress it per line, example: ";
+	_COUT Options::tcols->display _CMDL "out (c),0 ; out0-ok" _CMDL Options::tcols->end _ENDL;
 }
 
 //eof io_err.cpp
