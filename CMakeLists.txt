@@ -80,7 +80,6 @@ if(ENABLE_LUA)
 	elseif(CYGWIN)
 		add_definitions(-DLUA_USE_LINUX)
 	elseif(WIN32)
-		add_definitions(-DLUA_USE_WINDOWS)
 	endif()
 endif(ENABLE_LUA)
 

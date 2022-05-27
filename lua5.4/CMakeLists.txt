@@ -50,7 +50,6 @@ if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	elseif(CYGWIN)
 		add_definitions(-DLUA_USE_LINUX)
 	elseif(WIN32)
-		add_definitions(-DLUA_USE_WINDOWS)
 endif()
 
 #Ped7g -pedantic removed, there's too many warnings with GCC and Lua5.4
