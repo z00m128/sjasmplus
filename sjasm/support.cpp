@@ -29,12 +29,20 @@
 // support.cpp
 
 #include "sjdefs.h"
+#include <cassert>
 
+FILE* SJ_fopen(const char* fname, const char* mode) {
+	if (nullptr == fname || nullptr == mode || !*fname) return nullptr;
+	return fopen(fname, mode);
+}
+
+/*
 FILE* dbg_fopen(const char* fname, const char* modes) {
 	FILE* f = fopen(fname, modes);
 	printf("fopen = %p modes [%s]\tname (%lu) [%s]\n", (void*)f, modes, strlen(fname), fname);
 	return f;
 }
+*/
 
 void SJ_GetCurrentDirectory(int whatever, char* pad) {
 	pad[0] = 0;
@@ -65,7 +73,9 @@ static bool isWindowsDrivePathStart(const char* filePath) {
 }
 
 int SJ_SearchPath(const char* oudzp, const char* filename, const char*, int maxlen, char* nieuwzp, char** ach) {
-	FILE* fp;
+	assert(nieuwzp);
+	*nieuwzp = 0;
+	if (nullptr == filename) return 0;
 	if (isAnySlash(filename[0]) || isWindowsDrivePathStart(filename)) {
 		STRCPY(nieuwzp, maxlen, filename);
 	} else {
@@ -85,6 +95,7 @@ int SJ_SearchPath(const char* oudzp, const char* filename, const char*, int maxl
 			if (isAnySlash(*p++)) *ach = p;
 		}
 	}
+	FILE* fp;
 	if (FOPEN_ISOK(fp, nieuwzp, "r")) {
 		fclose(fp);
 		return 1;

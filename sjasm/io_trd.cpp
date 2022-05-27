@@ -495,7 +495,7 @@ int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset,
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	STrdHead trdHead;
 	char* fullTrdName = GetPath(trdname);
-	FILE* ff = fopen(fullTrdName, "rb");
+	FILE* ff = SJ_fopen(fullTrdName, "rb");
 	free(fullTrdName);
 	fullTrdName = nullptr;
 	if (nullptr == ff) return ReturnWithError("[INCTRD] Error opening file", trdname, ff);

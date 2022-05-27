@@ -532,7 +532,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	} else {
 		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
 
-		if (!*fullpath || !FOPEN_ISOK(FP_Input, fullpath, "rb")) {
+		if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 			free(fullpath);
 			Error("Error opening file", nfilename, ALL);
 			--IncludeLevel;
