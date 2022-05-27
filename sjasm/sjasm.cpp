@@ -74,6 +74,28 @@ static void PrintHelpMain() {
 }
 
 namespace Options {
+	const STerminalColorSequences tcols_ansi = {
+		/*end*/		"\033[m",
+		/*display*/	"\033[36m",		// Cyan
+		/*warning*/	"\033[33m",		// Yellow
+		/*error*/	"\033[31m",		// Red
+		/*bold*/	"\033[1m"		// bold
+	};
+
+	const STerminalColorSequences tcols_none = {
+		/*end*/		"",
+		/*display*/	"",
+		/*warning*/	"",
+		/*error*/	"",
+		/*bold*/	""
+	};
+
+	const STerminalColorSequences* tcols = &tcols_none;
+
+	void SetTerminalColors(bool enabled) {
+		tcols = enabled ? &tcols_ansi : &tcols_none;
+	}
+
 	char OutPrefix[LINEMAX] = {0};
 	char SymbolListFName[LINEMAX] = {0};
 	char ListingFName[LINEMAX] = {0};
@@ -105,7 +127,6 @@ namespace Options {
 	bool IsLongPtr = false;
 	bool SortSymbols = false;
 	bool IsBigEndian = false;
-	bool HasAnsiColours = false;
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
@@ -513,9 +534,9 @@ namespace Options {
 					IsShowFullPath = 1;
 				} else if (!strcmp(opt, "color")) {
 					if (!strcmp("on", val)) {
-						Options::HasAnsiColours = true;
+						SetTerminalColors(true);
 					} else if (!strcmp("off", val)) {
-						Options::HasAnsiColours = false;
+						SetTerminalColors(false);
 					} else if (!strcmp("auto", val)) {
 						// already heuristically detected, nothing to do
 					} else {
@@ -605,7 +626,7 @@ int main(int argc, char **argv) {
 	const char* envNoColor = std::getenv("NO_COLOR");
 	// try to auto-detect ANSI-colour support (true if env.var. TERM exist and contains "color" substring)
 	const char* envTerm = std::getenv("TERM");
-	Options::HasAnsiColours = !envNoColor && envTerm && strstr(envTerm, "color");
+	Options::SetTerminalColors(!envNoColor && envTerm && strstr(envTerm, "color"));
 
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 

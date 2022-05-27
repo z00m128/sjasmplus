@@ -1596,9 +1596,6 @@ static void dirEXPORT() {
 	if (!IsLabelNotFound) WriteExp(p, val);
 }
 
-static const char AnsiDisplayBeg[] = "\033[36m";
-static const char AnsiDisplayEnd[] = "\033[m";
-
 static void dirDISPLAY() {
 	char decprint = 'H';
 	char e[LINEMAX + 32], optionChar;		// put extra buffer at end for particular H/A/D number printout
@@ -1691,11 +1688,7 @@ static void dirDISPLAY() {
 	*ep = 0; // end line
 
 	if (LASTPASS == pass && *e) {
-		if (Options::HasAnsiColours) {
-			_CERR "> " _CMDL AnsiDisplayBeg _CMDL e _CMDL AnsiDisplayEnd _ENDL;
-		} else {
-			_CERR "> " _CMDL e _ENDL;
-		}
+		_CERR "> " _CMDL Options::tcols->display _CMDL e _CMDL Options::tcols->end _ENDL;
 	}
 }
 

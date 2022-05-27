@@ -36,6 +36,10 @@ namespace Options {
 	// which lines should made it into listing: all, active (not skipped by IF false), only-if-has-machine-code
 	enum ELstType { LST_T_ALL, LST_T_ACTIVE, LST_T_MC_ONLY };
 
+	typedef struct STerminalColorSequences {
+		const char * end, * display, * warning, * error, * bold;
+	} STerminalColorSequences;
+
 	// structure to group all options affecting parsing syntax
 	typedef struct SSyntax {
 		bool		IsPseudoOpBOF;
@@ -68,6 +72,7 @@ namespace Options {
 		static std::stack<SSyntax> syxStack;	// previous syntax
 	} SSyntax;
 
+	extern const STerminalColorSequences* tcols;
 	extern char OutPrefix[LINEMAX];
 	extern char SymbolListFName[LINEMAX];
 	extern char ListingFName[LINEMAX];
@@ -92,7 +97,6 @@ namespace Options {
 	extern bool IsLongPtr;
 	extern bool SortSymbols;
 	extern bool IsBigEndian;		// true when hosting platform is big-endian
-	extern bool HasAnsiColours;		// true when host platform (probably) supports ANSI colours
 
 	// emit virtual labels in LABELSLIST, that have only 64ki address and no page
 	// format is then `:ADDR label`, starting from colon, then 16bit address, then label.
@@ -100,6 +104,8 @@ namespace Options {
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;
+
+	void SetTerminalColors(bool enabled);
 
 	// returns true if fakes are completely disabled, false when they are enabled
 	// showMessage=true: will also display error/warning (use when fake ins. is emitted)

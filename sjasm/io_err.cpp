@@ -49,10 +49,6 @@ static bool IsSkipErrors = false;
 static char ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2];
 static aint PreviousErrorLine = -1L;
 
-static const char AnsiErrorBeg[] = "\033[31m";
-static const char AnsiWarningBeg[] = "\033[33m";
-static const char AnsiEnd[] = "\033[m";
-
 static const char* nullptr_message_txt = "<nullptr>";
 
 static void initErrorLine() {		// adds filename + line of definition if possible
@@ -122,11 +118,11 @@ static void outputErrorLine(const EOutputVerbosity errorLevel) {
 	}
 	// print the error into stderr if OutputVerbosity allows this type of message
 	if (Options::OutputVerbosity <= errorLevel) {
-		if (OV_ERROR == errorLevel && Options::HasAnsiColours) _CERR AnsiErrorBeg _END;
-		if (OV_WARNING == errorLevel && Options::HasAnsiColours) _CERR AnsiWarningBeg _END;
+		if (OV_ERROR == errorLevel) _CERR Options::tcols->error _END;
+		if (OV_WARNING == errorLevel) _CERR Options::tcols->warning _END;
 		_CERR ErrorLine _END;
 		if (*ErrorLine2) _CERR ErrorLine2 _END;
-		if (Options::HasAnsiColours) _CERR AnsiEnd _END;
+		_CERR Options::tcols->end _END;
 	}
 }
 
@@ -479,11 +475,26 @@ void CliWoption(const char* option) {
 }
 
 static const char* spaceFiller = "               ";
-static const char* txt_on	= "[on]  ";
-static const char* txt_off	= "[off] ";
+static const char* txt_on	= "on";
+static const char* txt_off	= "off";
 static const char* txt_none	= "      ";
 
+static void initWarningStateTxt(char* buffer, const char* id) {
+	if (W_ENABLE_ALL == id) {
+		STRCPY(buffer, 64, txt_none);
+		return;
+	}
+	const bool state = warning_state(*w_texts.find(id));
+	buffer[0] = '[';
+	STRCPY(buffer + 1, 63, state ? Options::tcols->display : Options::tcols->warning);
+	STRCAT(buffer, 64, state ? txt_on : txt_off);
+	STRCAT(buffer, 64, Options::tcols->end);
+	STRCAT(buffer, 64, "] ");
+	if (state) STRCAT(buffer, 64, " ");
+}
+
 void PrintHelpWarnings() {
+	char state_txt[64];
 	_COUT "The following options control compiler warning messages:" _ENDL;
 	std::vector<const char*> ids;
 	ids.reserve(w_texts.size());
@@ -491,8 +502,8 @@ void PrintHelpWarnings() {
 	std::sort(ids.begin(), ids.end(), [](const char* a, const char* b) -> bool { return (strcmp(a,b) < 0); } );
 	for (const auto& id : ids) {
 		assert(strlen(id) < strlen(spaceFiller));
-		const char* state_txt = (W_ENABLE_ALL == id) ? txt_none : warning_state(*w_texts.find(id)) ? txt_on : txt_off;
-		_COUT " -W" _CMDL id _CMDL spaceFiller+strlen(id) _CMDL state_txt _CMDL w_texts[id].help _ENDL;
+		initWarningStateTxt(state_txt, id);
+		_COUT " -W" _CMDL Options::tcols->bold _CMDL Options::tcols->warning _CMDL id _CMDL Options::tcols->end _CMDL spaceFiller+strlen(id) _CMDL state_txt _CMDL w_texts[id].help _ENDL;
 	}
 	_COUT "Use -Wno- prefix to disable specific warning, example: -Wno-abs" _ENDL;
 	_COUT "Use -ok suffix in comment to suppress it per line, example: jr abs ; abs-ok" _ENDL;
