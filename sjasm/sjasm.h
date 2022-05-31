@@ -156,7 +156,7 @@ extern int pass, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, l
 extern int adrdisp, dispPageNum, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
-extern TextFilePos CurSourcePos, DefinitionPos;
+extern source_positions_t sourcePosStack;
 extern uint32_t maxlin;
 extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine, PredefinedCounter;
 extern aint destlen, size, comlin;

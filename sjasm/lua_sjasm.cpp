@@ -329,7 +329,8 @@ void dirLUA() {
 	bool showWarning = !suppressedById(W_LUA_MC_PASS);
 
 	if (execute) {
-		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+		assert(!sourcePosStack.empty());
+		LuaStartPos = sourcePosStack.back();
 		buff = new char[luaBufferSize];
 		bp = buff;
 	}

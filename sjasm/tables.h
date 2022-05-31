@@ -35,6 +35,7 @@ struct TextFilePos {
 	uint32_t		line;				// line numbering start at 1 (human way) 0 = invalid/init value
 	uint32_t 		colBegin, colEnd;	// columns coordinates are unused at this moment
 
+	TextFilePos(const char* fileNamePtr);
 	TextFilePos();
 	void newFile(const char* fileNamePtr);	// requires stable immutable pointer (until sjasmplus exits)
 
@@ -42,6 +43,8 @@ struct TextFilePos {
 	// default arguments are basically "next line"
 	void nextSegment(bool endsWithColon = false, size_t advanceColumns = 0);
 };
+
+typedef std::vector<TextFilePos> source_positions_t;
 
 enum EStructureMembers {
 	SMEMBUNKNOWN, SMEMBALIGN,
@@ -143,7 +146,6 @@ public:
 	char* string;
 	CStringsList* next;
 	TextFilePos source;
-	TextFilePos definition;
 	~CStringsList();
 	CStringsList(const char* stringSource, CStringsList* next = NULL);
 

@@ -54,13 +54,12 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 	*ErrorLine = 0;
 	*ErrorLine2 = 0;
 	// when OpenFile is reporting error, the filename is still nullptr, but pass==1 already
-	if (pass < 1 || LASTPASS < pass || nullptr == CurSourcePos.filename) return;
-	// during assembling, show also file+line info
-	TextFilePos errorPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
-	bool isEmittedMsgEnabled = true;
+	if (pass < 1 || LASTPASS < pass || sourcePosStack.empty()) return;
+	TextFilePos errorPos = sourcePosStack.back();
 
 #ifdef USE_LUA
 	lua_Debug ar;					// must be in this scope, as some memory is reused by errorPos
+	bool extra_lua_err = false;
 	if (LuaStartPos.line) {
 		assert(LUA);
 		errorPos = LuaStartPos;
@@ -68,8 +67,6 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 		// find either top level of lua stack, or standalone file, otherwise it's impossible
 		// to precisely report location of error (ASM can have 2+ LUA blocks defining functions)
 		int level = 1;			// level 0 is "C" space, ignore that always
-		// suppress "is emitted here" when directly inlined in current code
-		isEmittedMsgEnabled = (0 < listmacro);
 		while (true) {
 			if (!lua_getstack(LUA, level, &ar)) break;	// no more lua stack levels
 			if (!lua_getinfo(LUA, "Sl", &ar)) break;	// no more info about current level
@@ -78,7 +75,6 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 				// standalone definition in external file found, pinpoint it precisely
 				errorPos.filename = ar.short_src;
 				errorPos.line = ar.currentline;
-				isEmittedMsgEnabled = true;				// and add "emitted here" in any case
 				break;	// no more lua-stack traversing, stop here
 			}
 			// if source was inlined script, update the possible source line
@@ -86,15 +82,19 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 			// and keep traversing stack until top level is found (to make the line meaningful)
 			++level;
 		}
+		extra_lua_err = strcmp(errorPos.filename, sourcePosStack.back().filename);
+		if (extra_lua_err) sourcePosStack.push_back(errorPos);
 	}
 #endif //USE_LUA
 
 	SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", errorPos.filename, errorPos.line);
 	// if the error filename:line is not identical with current source line, add ErrorLine2 about emit
-	if (isEmittedMsgEnabled &&
-		(strcmp(errorPos.filename, CurSourcePos.filename) || errorPos.line != CurSourcePos.line)) {
-		SPRINTF2(ErrorLine2, LINEMAX2, "%s(%d): ^ emitted from here\n", CurSourcePos.filename, CurSourcePos.line);
+	if (2 <= sourcePosStack.size() && size_t(IncludeLevel + 1) < sourcePosStack.size()) {
+		SPRINTF2(ErrorLine2, LINEMAX2, "%s(%d): ^ emitted from here\n", sourcePosStack.end()[-2].filename, sourcePosStack.end()[-2].line);
 	}
+#ifdef USE_LUA
+	if (extra_lua_err) sourcePosStack.pop_back();
+#endif //USE_LUA
 }
 
 static void trimAndAddEol(char* lineBuffer) {

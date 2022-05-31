@@ -31,7 +31,10 @@
 #include <assert.h>
 #include "sjdefs.h"
 
-TextFilePos::TextFilePos() : filename(nullptr), line(0), colBegin(0), colEnd(0) {
+TextFilePos::TextFilePos(const char* fileNamePtr) : filename(fileNamePtr), line(0), colBegin(0), colEnd(0) {
+}
+
+TextFilePos::TextFilePos() : TextFilePos(nullptr) {
 }
 
 void TextFilePos::newFile(const char* fileNamePtr) {
@@ -621,8 +624,7 @@ CLocalLabelTableEntry* CLocalLabelTable::seekBack(const aint labelNumber) const 
 CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
 	string = STRDUP(stringSource);
 	next = nnext;
-	source = CurSourcePos;
-	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+	if (!sourcePosStack.empty()) source = sourcePosStack.back();
 }
 
 CStringsList::~CStringsList() {
@@ -705,7 +707,7 @@ const char* CDefineTable::Get(const char* name) {
 			return defineGet__Counter__Buffer;
 		}
 		if (!strcmp(name, "__LINE__")) {
-			SPRINTF1(defineGet__Line__Buffer, 30, "%d", CurSourcePos.line);
+			SPRINTF1(defineGet__Line__Buffer, 30, "%d", sourcePosStack.empty() ? 0 : sourcePosStack.back().line);
 			return defineGet__Line__Buffer;
 		}
 	}
@@ -951,16 +953,17 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	lijstp = m->body;
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
+	sourcePosStack.push_back(TextFilePos());
 	while (lijstp) {
-		DefinitionPos = lijstp->definition;
+		sourcePosStack.back() = lijstp->source;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
 		lijstp = lijstp->next;
 		ParseLineSafe();
 	}
+	sourcePosStack.pop_back();
 	++CompiledCurrentLine;
-	DefinitionPos = TextFilePos();
 	STRCPY(line, LINEMAX, ml);
 	lijstp = olijstp;
 	--lijst;

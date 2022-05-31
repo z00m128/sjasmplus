@@ -1268,7 +1268,8 @@ static void dirCSPECTMAP() {
 	if (fName[0]) {
 		STRCPY(Options::CSpectMapFName, LINEMAX, fName.get());
 	} else {		// create default map file name from current source file name (appends ".map")
-		STRCPY(Options::CSpectMapFName, LINEMAX-5, CurSourcePos.filename);
+		assert(!sourcePosStack.empty());
+		STRCPY(Options::CSpectMapFName, LINEMAX-5, sourcePosStack.back().filename);
 		STRCAT(Options::CSpectMapFName, LINEMAX-1, ".map");
 	}
 	// remember page size of current device (in case the source is multi-device later)
@@ -1576,7 +1577,8 @@ static void dirEXPORT() {
 	char* n, * p;
 
 	if (!Options::ExportFName[0]) {
-		STRCPY(Options::ExportFName, LINEMAX, CurSourcePos.filename);
+		assert(!sourcePosStack.empty());
+		STRCPY(Options::ExportFName, LINEMAX, sourcePosStack.back().filename);
 		if (!(p = strchr(Options::ExportFName, '.'))) {
 			p = Options::ExportFName;
 		} else {
@@ -1878,7 +1880,8 @@ static void DupWhileImplementation(bool isWhile) {
 	dup.Lines = new CStringsList(lp);
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
 	dup.Pointer = dup.Lines;
-	dup.sourcePos = CurSourcePos;
+	assert(!sourcePosStack.empty());
+	dup.sourcePos = sourcePosStack.back();
 	dup.IsInWork = false;
 	RepeatStack.push(dup);
 }
@@ -1896,17 +1899,19 @@ static bool shouldRepeat(SRepeatStack& dup) {
 		return 0 <= --dup.RepeatCount;
 	} else {
 		if (!dup.RepeatCount--) {
+			sourcePosStack.push_back(dup.RepeatCondition->source);
 			Error("[WHILE] infinite loop? (reaching the guardian value, default 100k)");
+			sourcePosStack.pop_back();
 			return false;
 		}
 		aint val = 0;
 		IsLabelNotFound = false;
 		char* expressionSource = dup.RepeatCondition->string;
 		if (!ParseExpressionNoSyntaxError(expressionSource, val) || *expressionSource) {
-			TextFilePos oSrcPos = CurSourcePos;
-			CurSourcePos = dup.RepeatCondition->source;
+			const TextFilePos oSourcePos = sourcePosStack.back();
+			sourcePosStack.back() = dup.RepeatCondition->source;
 			Error("[WHILE] Syntax error in <expression>", dup.RepeatCondition->string, SUPPRESS);
-			CurSourcePos = oSrcPos;
+			sourcePosStack.back() = oSourcePos;
 			return false;
 		}
 		if (IsLabelNotFound) {
@@ -1936,32 +1941,30 @@ static void dirEDUP() {
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) ErrorOOM();
 
-	TextFilePos oldPos = CurSourcePos;
 	CStringsList* olijstp = lijstp;
 	++lijst;
+	assert(!sourcePosStack.empty());
+	const TextFilePos oSourcePos = sourcePosStack.back();
 	while (shouldRepeat(dup)) {
-		CurSourcePos = dup.sourcePos;
-		DefinitionPos = dup.sourcePos;
+		sourcePosStack.back() = dup.sourcePos;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
-			if (lijstp->source.line) CurSourcePos = lijstp->source;
-			DefinitionPos = lijstp->definition;
+			if (lijstp->source.line) sourcePosStack.back() = lijstp->source;
 			STRCPY(line, LINEMAX, lijstp->string);
 			substitutedLine = line;		// reset substituted listing
 			eolComment = NULL;			// reset end of line comment
 			lijstp = lijstp->next;
 			ParseLineSafe();
-			CurSourcePos.nextSegment();
+			sourcePosStack.back().nextSegment();
 		}
 	}
+	sourcePosStack.back() = oSourcePos;
 	delete dup.Lines;
 	if (dup.RepeatCondition) delete dup.RepeatCondition;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;
-	CurSourcePos = oldPos;
-	DefinitionPos = TextFilePos();
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	free(ml);
@@ -2037,7 +2040,8 @@ static void dirDEFARRAY() {
 static void dirDEVICE() {
 	// refresh source position of first DEVICE directive
 	if (1 == ++deviceDirectivesCount) {
-		globalDeviceSourcePos = CurSourcePos;
+		assert(!sourcePosStack.empty());
+		globalDeviceSourcePos = sourcePosStack.back();
 	}
 
 	char* id = GetID(lp);

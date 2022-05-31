@@ -97,23 +97,23 @@
 43    00C4              mlDupRep:
 44    00C4                      DUP 2
 45    00C4             >            S_main {
-45    00C4 69          >                'i',
-45    00C5             >                {
-45    00C5 6A          >                    'j',
-45    00C6 6B 6C 6D 6E >                    { "klmno" },
-45    00CA 6F          >
-45    00CB 70 0A       >                    "\np"
-45    00CD             >                }
-45    00CD             >            }
+46    00C4 69          >                'i',
+47    00C5             >                {
+48    00C5 6A          >                    'j',
+49    00C6 6B 6C 6D 6E >                    { "klmno" },
+49    00CA 6F          >
+50    00CB 70 0A       >                    "\np"
+51    00CD             >                }
+52    00CD             >            }
 45    00CD             >            S_main {
-45    00CD 69          >                'i',
-45    00CE             >                {
-45    00CE 6A          >                    'j',
-45    00CF 6B 6C 6D 6E >                    { "klmno" },
-45    00D3 6F          >
-45    00D4 70 0A       >                    "\np"
-45    00D6             >                }
-45    00D6             >            }
+46    00CD 69          >                'i',
+47    00CE             >                {
+48    00CE 6A          >                    'j',
+49    00CF 6B 6C 6D 6E >                    { "klmno" },
+49    00D3 6F          >
+50    00D4 70 0A       >                    "\np"
+51    00D6             >                }
+52    00D6             >            }
 53    00D6                      EDUP
 54    00D6
 55    00D6                  ; emit structure inside macro

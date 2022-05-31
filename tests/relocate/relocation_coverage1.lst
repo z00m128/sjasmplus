@@ -4,7 +4,8 @@ relocation_coverage1.asm(24): error: Missing end of relocation block started her
  2    1000
  3    1000                  RELOCATE_START
  4    1000
-relocation_coverage1.asm(5): error: Relocation block already started at: relocation_coverage1.asm(3)
+relocation_coverage1.asm(3): error: Relocation block already started here
+relocation_coverage1.asm(5): ^ emitted from here
  5    1000                  RELOCATE_START      ; error 2x start
  6    1000
  7    1000 01 00            dw      relocate_count

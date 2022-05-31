@@ -201,12 +201,13 @@ void PrepareListLine(char* buffer, aint hexadd)
 
 	int digit = ' ';
 	int linewidth = reglenwidth;
-	aint linenumber = CurSourcePos.line % 10000;
+	uint32_t currentLine = sourcePosStack.at(IncludeLevel).line;
+	aint linenumber = currentLine % 10000;
 	if (5 <= linewidth) {		// five-digit number, calculate the leading "digit"
 		linewidth = 5;
-		digit = CurSourcePos.line / 10000 + '0';
+		digit = currentLine / 10000 + '0';
 		if (digit > '~') digit = '~';
-		if (CurSourcePos.line >= 10000) linenumber += 10000;
+		if (currentLine >= 10000) linenumber += 10000;
 	}
 	memset(buffer, ' ', 24);
 	if (listmacro) buffer[23] = '>';
@@ -535,12 +536,11 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		}
 	}
 
-	TextFilePos oSourcePos = CurSourcePos;
 	const char* oFileNameFull = fileNameFull, * oCurrentDirectory = CurrentDirectory;
 
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
 	fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
-	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
+	sourcePosStack.emplace_back(TextFilePos(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull)));
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
@@ -595,11 +595,9 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 
 	--IncludeLevel;
 
-	if (CurSourcePos.line > maxlin) {
-		maxlin = CurSourcePos.line;
-	}
+	maxlin = std::max(maxlin, sourcePosStack.back().line);
+	sourcePosStack.pop_back();
 	fileNameFull = oFileNameFull;
-	CurSourcePos = oSourcePos;
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
@@ -677,7 +675,10 @@ static bool ReadBufData() {
 		}
 	}
 	// check UTF BOM markers only at the beginning of the file (source line == 0)
-	if (CurSourcePos.line) return (rlpbuf < rlpbuf_end);	// return true if some data were read
+	assert(!sourcePosStack.empty());
+	if (sourcePosStack.back().line) {
+		return (rlpbuf < rlpbuf_end);		// return true if some data were read
+	}
 	//UTF BOM markers detector
 	for (const auto & bomMarkerData : UtfBomMarkers) {
 		if (rlpbuf_end < (rlpbuf + bomMarkerData.length)) continue;	// not enough bytes in buffer
@@ -785,8 +786,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			colonSubline = SplitByColon && ReadBufData() && (':' == *rlpbuf) && ++rlpbuf;
 		}
 		// do +1 for very first colon-segment only (rest is +1 due to artificial space at beginning)
-		size_t advanceColumns = colonSubline ? (0 == CurSourcePos.colEnd) + strlen(line) : 0;
-		CurSourcePos.nextSegment(colonSubline, advanceColumns);
+		assert(!sourcePosStack.empty());
+		size_t advanceColumns = colonSubline ? (0 == sourcePosStack.back().colEnd) + strlen(line) : 0;
+		sourcePosStack.back().nextSegment(colonSubline, advanceColumns);
 		// line is parsed and ready to be processed
 		if (Parse) 	ParseLine();	// processed here in loop
 		else 		return;			// processed externally
@@ -1214,10 +1216,10 @@ int ReadLineNoMacro(bool SplitByColon) {
 }
 
 int ReadLine(bool SplitByColon) {
-	DefinitionPos = TextFilePos();
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
 		if (!lijstp || !lijstp->string) return 0;
-		DefinitionPos = lijstp->definition;
+		assert(!sourcePosStack.empty());
+		sourcePosStack.back() = lijstp->source;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
@@ -1368,12 +1370,18 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	// comment line, not to be parsed
 	if (nullptr == FP_SourceLevelDebugging || !type) return;
 	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
-	const char* macroFN = DefinitionPos.filename && strcmp(DefinitionPos.filename, CurSourcePos.filename) ?
-							DefinitionPos.filename : "";
-	WriteToSldFile_TextFilePos(sldMessage_sourcePos, CurSourcePos);
-	WriteToSldFile_TextFilePos(sldMessage_definitionPos, DefinitionPos);
+
+	assert(!sourcePosStack.empty());
+	const bool outside_source = (sourcePosStack.size() <= size_t(IncludeLevel));
+	const bool has_def_pos = !outside_source && (size_t(IncludeLevel + 1) < sourcePosStack.size());
+	const TextFilePos & curPos = outside_source ? sourcePosStack.back() : sourcePosStack.at(IncludeLevel);
+	const TextFilePos defPos = has_def_pos ? sourcePosStack.back() : TextFilePos();
+
+	const char* macroFN = defPos.filename && strcmp(defPos.filename, curPos.filename) ? defPos.filename : "";
+	WriteToSldFile_TextFilePos(sldMessage_sourcePos, curPos);
+	WriteToSldFile_TextFilePos(sldMessage_definitionPos, defPos);
 	snprintf(sldMessage, LINEMAX2, "%s|%s|%s|%s|%d|%d|%c|%s\n",
-				CurSourcePos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
+				curPos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
 				pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
 }

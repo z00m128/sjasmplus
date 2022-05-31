@@ -233,7 +233,7 @@ int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;
 byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
-TextFilePos CurSourcePos, DefinitionPos;
+source_positions_t sourcePosStack;
 uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L, comlin = 0;
@@ -259,6 +259,7 @@ static void ReserveLabelKeywords() {
 }
 
 void InitPass() {
+	assert(sourcePosStack.empty());				// there's no source position [left] in the stack
 	Relocation::InitPass();
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
 	uint32_t maxpow10 = 1;
@@ -302,15 +303,12 @@ void InitPass() {
 	deviceDirectivesCount = 0;
 	// resurrect "global" device here
 	if (globalDeviceID) {
-		CurSourcePos = globalDeviceSourcePos;
-		DefinitionPos = TextFilePos();
-		if (!SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
+		sourcePosStack.push_back(globalDeviceSourcePos);
+		if (!SetDevice(globalDeviceID, globalDeviceZxRamTop)) {		// manually tested (remove "!")
 			Error("Failed to re-initialize global device", globalDeviceID, FATAL);
 		}
+		sourcePosStack.pop_back();
 	}
-
-	// reset current source/definition positions
-	CurSourcePos = DefinitionPos = TextFilePos();
 
 	// predefined defines - (deprecated) classic sjasmplus v1.x (till v1.15.1)
 	DefineTable.Replace("_SJASMPLUS", "1");
@@ -631,6 +629,7 @@ int main(int argc, char **argv) {
 
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
+	sourcePosStack.reserve(32);
 	sourceFiles.reserve(32);
 	archivedFileNames.reserve(64);
 
@@ -757,8 +756,9 @@ int main(int argc, char **argv) {
 		}
 
 		while (!RepeatStack.empty()) {
-			CurSourcePos = RepeatStack.top().sourcePos;	// fake source-file position to mark DUP line
+			sourcePosStack.push_back(RepeatStack.top().sourcePos);	// mark DUP line with error
 			Error("[DUP/REPT] missing EDUP/ENDR to end repeat-block");
+			sourcePosStack.pop_back();
 			RepeatStack.pop();
 		}
 

@@ -121,7 +121,7 @@ while.asm(36): error: [WHILE] Syntax error in <expression>:  @
 46    8009                  ; test the infinite-loop guardian (default 100k)
 47    8009              cnt = 0
 48    8009                  OPT push listmc
-while.asm(50): error: [WHILE] infinite loop? (reaching the guardian value, default 100k)
+while.asm(49): error: [WHILE] infinite loop? (reaching the guardian value, default 100k)
 while.asm(51): ^ emitted from here
 52    8009                  OPT pop
 53    8009
@@ -137,7 +137,7 @@ while.asm(51): ^ emitted from here
 62    8009             >cnt = cnt + 1
 62    8009             >cnt = cnt + 1
 62    8009             >cnt = cnt + 1
-while.asm(62): error: [WHILE] infinite loop? (reaching the guardian value, default 100k)
+while.asm(61): error: [WHILE] infinite loop? (reaching the guardian value, default 100k)
 while.asm(63): ^ emitted from here
 63    8009                  ENDW
 64    8009
