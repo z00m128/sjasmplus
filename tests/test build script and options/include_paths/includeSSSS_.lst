@@ -1,1 +1,32 @@
 includeSSSS_.asm(9): error: Error opening file: missing_file
+includeSSSS_.asm(9): error: Error opening file: missing_file
+# file opened: includeSSSS_.asm
+ 1    0000              ; test include paths on command line and their priorities:
+ 2    0000              ; includeSSSS_.asm = +include paths "includeSSSS_i", "includeSSSS_v"
+ 3    0000              ; ^^ testing also error when some include is not found
+ 4    0000
+ 5    0000                  INCLUDE includeSSSS_all.i.asm
+# file opened: includeSSSS_all.i.asm
+ 1+   0000              ; valid Z80 source
+ 2+   0000 C9               ret
+ 3+   0001
+# file closed: includeSSSS_all.i.asm
+ 6    0001
+ 7    0001                  INCLUDE <includeSSSS_all.i.asm>
+# file opened: includeSSSS_v/includeSSSS_all.i.asm
+ 1+   0001              ; valid Z80 source
+ 2+   0001 BF               cp      a
+ 3+   0002 C8               ret     z
+ 4+   0003
+# file closed: includeSSSS_v/includeSSSS_all.i.asm
+ 8    0003
+ 9    0003                  INCLUDE <missing_file>
+includeSSSS_.asm(9): error: Error opening file: missing_file
+10    0003
+11    0003                  ASSERT 0 == 0
+12    0003 C7               rst 0
+13    0004
+# file closed: includeSSSS_.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -35,6 +35,7 @@ struct TextFilePos {
 	uint32_t		line;				// line numbering start at 1 (human way) 0 = invalid/init value
 	uint32_t 		colBegin, colEnd;	// columns coordinates are unused at this moment
 
+	TextFilePos(const char* fileNamePtr);
 	TextFilePos();
 	void newFile(const char* fileNamePtr);	// requires stable immutable pointer (until sjasmplus exits)
 
@@ -42,6 +43,8 @@ struct TextFilePos {
 	// default arguments are basically "next line"
 	void nextSegment(bool endsWithColon = false, size_t advanceColumns = 0);
 };
+
+typedef std::vector<TextFilePos> source_positions_t;
 
 enum EStructureMembers {
 	SMEMBUNKNOWN, SMEMBALIGN,
@@ -114,7 +117,6 @@ public:
 	int Insert(const char*, function_fn_t);
 	int insertd(const char*, function_fn_t);
 	int zoek(const char*);
-	int Find(const char*) const;
 };
 
 class CLocalLabelTableEntry {
@@ -144,10 +146,10 @@ public:
 	char* string;
 	CStringsList* next;
 	TextFilePos source;
-	TextFilePos definition;
-	CStringsList();
 	~CStringsList();
 	CStringsList(const char* stringSource, CStringsList* next = NULL);
+
+	static bool contains(const CStringsList* strlist, const char* searchString);
 };
 
 class CDefineTableEntry {
@@ -166,7 +168,7 @@ public:
 	void AddMacro(char*, char*);
 	CDefineTableEntry* getdefs();
 	void setdefs(CDefineTableEntry*);
-	char* getverv(char*);
+	const char* getverv(const char*) const;
 	int FindDuplicate(char*);
 	CMacroDefineTable();
 	CMacroDefineTable(const CMacroDefineTable&) = delete;
@@ -182,7 +184,7 @@ public:
 	CStringsList* DefArrayList;
 	void Init();
 	void Add(const char*, const char*, CStringsList*);
-	char* Get(const char*);
+	const char* Get(const char*);
 	int FindDuplicate(const char*);
 	int Replace(const char*, const char*);
 	int Replace(const char*, const int);
@@ -203,15 +205,15 @@ public:
 	char* naam;
 	CStringsList* args, * body;
 	CMacroTableEntry* next;
-	CMacroTableEntry(char*, CMacroTableEntry*);
+	CMacroTableEntry(char* nname, CMacroTableEntry* nnext);
 	~CMacroTableEntry();
 };
 
 class CMacroTable {
 public:
-	void Add(char*, char*&);
+	void Add(const char*, char*&);
 	int Emit(char*, char*&);
-	int FindDuplicate(char*);
+	int FindDuplicate(const char*);
 	void ReInit();
 	CMacroTable();
 	~CMacroTable();
@@ -290,8 +292,6 @@ struct SRepeatStack {
 	bool IsInWork;
 	int Level;
 };
-
-int LuaGetLabel(char *name);
 
 //eof tables.h
 

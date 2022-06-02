@@ -14,5 +14,9 @@
     endlua
 
     lua pass3   ; wrong arguments
-        sj.file_exists("lua_file_exists.asm", 2)
+        sj.file_exists("lua_file_exists.asm", 2)    -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
+    endlua
+
+    lua
+        assert(false == sj.file_exists(nil))
     endlua

@@ -1,0 +1,50 @@
+arg_name_parsing.asm(19): error: Illegal argument name:
+arg_name_parsing.asm(22): error: Illegal argument name: |
+arg_name_parsing.asm(25): error: Illegal argument name: |
+arg_name_parsing.asm(28): error: Unexpected: x
+arg_name_parsing.asm(31): error: Unexpected: y
+arg_name_parsing.asm(34): error: Duplicate argument name: argx?
+# file opened: arg_name_parsing.asm
+ 1    0000                  MACRO valid0 ; no arg
+ 2    0000 ~                    nop
+ 3    0000                  ENDM
+ 4    0000
+ 5    0000                  MACRO valid1 arg1?  ; 1 arg
+ 6    0000 ~                    DB arg1?
+ 7    0000                  ENDM
+ 8    0000
+ 9    0000                  MACRO valid2 arg1?  ,  arg2?  ; 2 arg
+10    0000 ~                    DB arg1?, arg2?
+11    0000                  ENDM
+12    0000
+13    0000                  valid0
+13    0000 00          >        nop
+14    0001                  valid1 1
+14    0001 01          >        DB 1
+15    0002                  valid2 2, 3
+15    0002 02 03       >        DB 2, 3
+16    0004
+17    0004                  ; parsing errors
+18    0004
+19    0004                  MACRO missing_name1 arg1?  ,   ; extra comma
+20    0004                  ENDM
+21    0004
+22    0004                  MACRO invalid_name1 |   ; invalid char
+23    0004                  ENDM
+24    0004
+25    0004                  MACRO invalid_name2 arg1?  ,  |  ; invalid char in second arg
+26    0004                  ENDM
+27    0004
+28    0004                  MACRO invalid_name3 arg1? x   ; extra x
+29    0004                  ENDM
+30    0004
+31    0004                  MACRO invalid_name4 arg1?, arg2? y   ; extra y
+32    0004                  ENDM
+33    0004
+34    0004                  MACRO duplicate_arg argx?    , argx? ; "argx?" twice
+35    0004                  ENDM
+36    0004
+# file closed: arg_name_parsing.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -2,25 +2,22 @@
  1    0000              ; force non-empty internal sline/sline2 arrays during `_c()` evaluation
  2    0000                  DEFINE  qwe xyz
  3    0000                  DEFINE  xyz abc
- 4    0000                  DEFINE  abc
+ 4    0000                  DEFINE  abc @
  5    0000                  LUA ALLPASS
  6    0000 ~                    sj.add_byte(_c("1+2"))
- 7    0000 03               ENDLUA qwe  ; either sline or sline2 should be non-empty from substitution
- 8    0001                  LUA ALLPASS
- 9    0001 ~                    sj.add_byte(_c("2+3"))
-10    0001 05               ENDLUA xyz  ; either sline or sline2 should be non-empty from substitution
-11    0002                  ; the above trick didn't help, so one more try
-12    0002                  LUA ALLPASS
-13    0002 ~                    _pc("nop qwe")
-14    0002 ~                    sj.add_byte(_c("3+4"))
-15    0002 00           nop
-15    0003 07               ENDLUA
-16    0004                  LUA ALLPASS
-17    0004 ~                    _pc("nop xyz")
-18    0004 ~                    sj.add_byte(_c("5+6"))
-19    0004 00           nop
-19    0005 0B               ENDLUA
-20    0006
+lua_coverage2.asm(7): error: Unexpected: @
+ 7    0000 03               ENDLUA qwe  ; both sline or sline2 will contain "@" from substitution
+ 8    0001
+ 9    0001                  LUA PASS3
+10    0001 ~                    assert(false == zx.trdimage_create())
+11    0001 ~                    assert(false == zx.trdimage_add_file("1.trd",nil,0x1234,1))
+12    0001 ~                    assert(false == zx.save_snapshot_sna(nil,0x8000))
+13    0001 ~                    zx.save_snapshot_sna("1.sna")   -- bad argument #2, exits this script
+lua_coverage2.asm(10): error: [LUA] Error opening file
+lua_coverage2.asm(12): error: [LUA] [SAVESNA] Only for real device emulation mode.
+lua_coverage2.asm(13): error: [LUA] bad argument #2 to 'save_snapshot_sna' (number expected, got no value)
+14    0001                  ENDLUA
+15    0001
 # file closed: lua_coverage2.asm
 
 Value    Label

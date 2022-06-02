@@ -44,18 +44,14 @@ namespace Z80 {
 		// reset alternate result flag in ParseExpression part of code
 		Relocation::isResultAffected = false;
 		bp = lp;
-		if (!(n = getinstr(lp))) {
-			Error("Unrecognized instruction", lp);
-			return;
-		}
-		if (!OpCodeTable.zoek(n)) {
+		if (!(n = getinstr(lp)) || !OpCodeTable.zoek(n)) {
 			Error("Unrecognized instruction", bp);
 			SkipToEol(lp);
-		} else {
-			// recognized instruction
-			// relocation: check if some expression is "affected", but not processed by instruction
-			Relocation::checkAndWarn();
+			return;
 		}
+		// recognized instruction
+		// relocation: check if some expression is "affected", but not processed by instruction
+		Relocation::checkAndWarn();
 	}
 
 	static byte GetByte(char*& p, bool signedCheck = false) {

@@ -9,32 +9,43 @@ lua_set_slot.asm(5): warning: [LUA] sj.set_slot: only allowed in real device emu
  7    0000
  8    0000                  DEVICE zxspectrum128
  9    0000
-10    0000                  ORG 0x8000
-11    8000                  ASSERT 2 == $$  ; slot 2 should be at default page 2
-12    8000
-13    8000                  lua
-14    8000 ~                    assert(not sj.set_slot(4))
-lua_set_slot.asm(14): error: [LUA] sj.set_slot: Slot number must be in range 0..3
-15    8000                  endlua
-16    8000
-17    8000                  lua
-18    8000 ~                    assert(not sj.set_slot(-1))
-lua_set_slot.asm(18): error: [LUA] sj.set_slot: Slot number must be in range 0..3
-19    8000                  endlua
-20    8000
-21    8000                  lua allpass
-22    8000 ~                    assert(sj.set_slot(2))
-23    8000                  endlua
-24    8000
-25    8000                  PAGE 6
-26    8000                  ASSERT 6 == $$  ; slot 2 should be active by lua script => page 6 there
-27    8000
-28    8000                  lua pass3 ; wrong arguments
-29    8000 ~                    sj.set_slot(1, 2)
-lua_set_slot.asm(29): error: [LUA] error in function 'set_slot'.
-     argument #2 is 'number'; '[no object]' expected.
-30    8000                  endlua
-31    8000
+10    0000                  ORG 0xC000
+11    C000                  ASSERT 0 == $$  ; slot 3 should be at default page 0
+12    C000                  ORG 0x8000
+13    8000                  ASSERT 2 == $$  ; slot 2 should be at default page 2
+14    8000
+15    8000                  lua
+16    8000 ~                    assert(not sj.set_slot(4))
+lua_set_slot.asm(16): error: [LUA] sj.set_slot: Slot number must be in range 0..3
+17    8000                  endlua
+18    8000
+19    8000                  lua
+20    8000 ~                    assert(not sj.set_slot(-1))
+lua_set_slot.asm(20): error: [LUA] sj.set_slot: Slot number must be in range 0..3
+21    8000                  endlua
+22    8000
+23    8000                  lua allpass
+24    8000 ~                    assert(sj.set_slot(2))
+25    8000                  endlua
+26    8000
+27    8000                  PAGE 6
+28    8000                  ASSERT 6 == $$  ; slot 2 should be active by lua script => page 6 there
+29    8000
+30    8000                  ; test the address-based slot selecting
+31    8000                  lua allpass
+32    8000 ~                    assert(sj.set_slot(0xC000))
+33    8000                  endlua
+34    8000
+35    8000                  PAGE 5
+36    8000                  ORG 0xC000
+37    C000                  ASSERT 5 == $$  ; slot 3 should be active by lua script => page 5 there
+38    C000
+39    C000                  lua pass3 ; wrong arguments
+40    C000 ~                    sj.set_slot(1, 2)   -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
+41    C000 ~                    sj.set_slot()
+lua_set_slot.asm(41): error: [LUA] bad argument #1 to 'set_slot' (number expected, got no value)
+42    C000                  endlua
+43    C000
 # file closed: lua_set_slot.asm
 
 Value    Label

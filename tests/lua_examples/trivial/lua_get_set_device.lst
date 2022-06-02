@@ -1,0 +1,45 @@
+# file opened: lua_get_set_device.asm
+ 1    0000                LUA ALLPASS
+ 2    0000 ~                assert("NONE" == sj.get_device())
+ 3    0000 ~                assert("NONE" == sj.get_device(1))    -- extra argument doesn't matter with LuaBridge2.6
+ 4    0000 ~
+ 5    0000 ~                sj.set_device("ZXSPECTRUM48")         -- zx48, default ramtop
+ 6    0000 ~                assert("ZXSPECTRUM48" == sj.get_device())
+ 7    0000 ~
+ 8    0000 ~                sj.set_device("ZXSPECTRUM128",0xFEDC) -- zx128, specific ramtop
+ 9    0000 ~                assert("ZXSPECTRUM128" == sj.get_device())
+10    0000 ~
+11    0000 ~                sj.set_device("ZXSPECTRUM128",0xEDCB) -- warning about different ramtop value
+12    0000 ~
+13    0000 ~                sj.set_device("NONE")
+14    0000 ~                assert("NONE" == sj.get_device())
+lua_get_set_device.asm(11): warning[devramtop]: [LUA] [DEVICE] this device was already opened with different RAMTOP value
+15    0000                ENDLUA
+16    0000
+17    0000                DEVICE ZXSPECTRUM48
+18    0000                ORG 0x1234
+18    1234 30             DB 48
+lua_get_set_device.asm(19): warning[devramtop]: [DEVICE] this device was already opened with different RAMTOP value
+19    1235                DEVICE ZXSPECTRUM128, 0xEDCB
+20    1235                ORG 0x1234
+20    1234 80             DB 128
+21    1235
+22    1235                LUA PASS3
+23    1235 ~                sj.set_device("ZXSPECTRUM48")
+24    1235 ~                assert(48 == sj.get_byte(0x1234))
+25    1235 ~                assert("ZXSPECTRUM48" == sj.get_device())
+26    1235 ~
+27    1235 ~                assert(false == sj.set_device("invalid"))
+28    1235 ~                assert("NONE" == sj.get_device())   -- invalid id does cause switch to NONE
+29    1235 ~
+30    1235 ~                sj.set_device("ZXSPECTRUM128",0xFEDC)
+31    1235 ~                assert(128 == sj.get_byte(0x1234))
+32    1235 ~
+33    1235 ~                assert(true == sj.set_device()) -- default id is "NONE"
+34    1235 ~                assert("NONE" == sj.get_device())
+35    1235                ENDLUA
+36    1235
+# file closed: lua_get_set_device.asm
+
+Value    Label
+------ - -----------------------------------------------------------

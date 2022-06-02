@@ -29,7 +29,6 @@
 // sjio.cpp
 
 #include "sjdefs.h"
-#include <cassert>
 
 #include <fcntl.h>
 
@@ -202,12 +201,13 @@ void PrepareListLine(char* buffer, aint hexadd)
 
 	int digit = ' ';
 	int linewidth = reglenwidth;
-	aint linenumber = CurSourcePos.line % 10000;
+	uint32_t currentLine = sourcePosStack.at(IncludeLevel).line;
+	aint linenumber = currentLine % 10000;
 	if (5 <= linewidth) {		// five-digit number, calculate the leading "digit"
 		linewidth = 5;
-		digit = CurSourcePos.line / 10000 + '0';
+		digit = currentLine / 10000 + '0';
 		if (digit > '~') digit = '~';
-		if (CurSourcePos.line >= 10000) linenumber += 10000;
+		if (currentLine >= 10000) linenumber += 10000;
 	}
 	memset(buffer, ' ', 24);
 	if (listmacro) buffer[23] = '>';
@@ -441,12 +441,12 @@ void BinIncFile(char* fname, int offset, int length) {
 	// open the desired file
 	FILE* bif;
 	char* fullFilePath = GetPath(fname);
-	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("Error opening file", fname, FATAL);
+	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("Error opening file", fname);
 	free(fullFilePath);
 
 	// Get length of file
 	int totlen = 0, advanceLength;
-	if (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0) Error("telling file length", fname, FATAL);
+	if (bif && (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0)) Error("telling file length", fname, FATAL);
 
 	// process arguments (extra features like negative offset/length or INT_MAX length)
 	// negative offset means "from the end of file"
@@ -463,18 +463,17 @@ void BinIncFile(char* fname, int offset, int length) {
 	}
 	// validate the resulting [offset, length]
 	if (offset < 0 || length < 0 || totlen < offset + length) {
-		Error("file too short", fname, FATAL);
+		Error("file too short", fname);
+		offset = std::min(std::max(0, offset), totlen);			//TODO change to std::clamp when C++17 is used
+		length = std::min(std::max(0, length), totlen-offset);	//TODO change to std::clamp when C++17 is used
+		assert((0 <= offset) && (offset + length <= totlen));
 	}
 	if (0 == length) {
 		Warning("include data: requested to include no data (length=0)");
-		fclose(bif);
+		if (bif) fclose(bif);
 		return;
 	}
-
-	// Seek to the beginning of part to include
-	if (fseek(bif, offset, SEEK_SET) || ftell(bif) != offset) {
-		Error("seeking in file to offset", fname, FATAL);
-	}
+	assert(nullptr != bif);				// otherwise it was handled by 0 == length case above
 
 	if (pass != LASTPASS) {
 		while (length) {
@@ -493,6 +492,11 @@ void BinIncFile(char* fname, int offset, int length) {
 			CurAddress = CurAddress + advanceLength;
 		}
 	} else {
+		// Seek to the beginning of part to include
+		if (fseek(bif, offset, SEEK_SET) || ftell(bif) != offset) {
+			Error("seeking in file to offset", fname, FATAL);
+		}
+
 		// Reading data from file
 		char* data = new char[length + 1], * bp = data;
 		if (NULL == data) ErrorOOM();
@@ -511,14 +515,10 @@ static stdin_log_t* stdin_log = nullptr;
 
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t* fStdinLog)
 {
-	const char* oFileNameFull = fileNameFull;
-	TextFilePos oSourcePos = CurSourcePos;
-	char* oCurrentDirectory, * fullpath;
-	TCHAR* filenamebegin;
-
 	if (++IncludeLevel > 20) {
 		Error("Over 20 files nested", NULL, FATAL);
 	}
+	char* fullpath, * filenamebegin;
 	if (!*nfilename && fStdinLog) {
 		fullpath = STRDUP("console_input");
 		filenamebegin = fullpath;
@@ -528,14 +528,19 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	} else {
 		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
 
-		if (!*fullpath || !FOPEN_ISOK(FP_Input, fullpath, "rb")) {
+		if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 			free(fullpath);
-			Error("Error opening file", nfilename, FATAL);
+			Error("Error opening file", nfilename, ALL);
+			--IncludeLevel;
+			return;
 		}
 	}
+
+	const char* oFileNameFull = fileNameFull, * oCurrentDirectory = CurrentDirectory;
+
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
 	fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
-	CurSourcePos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
+	sourcePosStack.emplace_back(TextFilePos(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull)));
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
@@ -544,7 +549,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 
 	// open default listing file for each new source file (if default listing is ON)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
-		OpenDefaultList(fullpath);			// explicit listing file is already opened
+		OpenDefaultList(fileNameFull);			// explicit listing file is already opened
 	}
 	// show in listing file which file was opened
 	FILE* listFile = GetListingFile();
@@ -554,9 +559,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		fputs("\n", listFile);
 	}
 
-	oCurrentDirectory = CurrentDirectory;
-	*filenamebegin = 0;
-	CurrentDirectory = fullpath;
+	*filenamebegin = 0;					// shorten fullpath to only-path string
+	CurrentDirectory = fullpath;		// and use it as CurrentDirectory
 
 	rlpbuf = rlpbuf_end = rlbuf;
 	colonSubline = false;
@@ -572,6 +576,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		}
 	}
 	CurrentDirectory = oCurrentDirectory;
+	free(fullpath);						// was used by CurrentDirectory till now
+	fullpath = nullptr;
 
 	// show in listing file which file was closed
 	if (LASTPASS == pass && listFile) {
@@ -589,14 +595,9 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 
 	--IncludeLevel;
 
-	// Free memory
-	free(fullpath);
-
-	if (CurSourcePos.line > maxlin) {
-		maxlin = CurSourcePos.line;
-	}
+	maxlin = std::max(maxlin, sourcePosStack.back().line);
+	sourcePosStack.pop_back();
 	fileNameFull = oFileNameFull;
-	CurSourcePos = oSourcePos;
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
@@ -674,7 +675,10 @@ static bool ReadBufData() {
 		}
 	}
 	// check UTF BOM markers only at the beginning of the file (source line == 0)
-	if (CurSourcePos.line) return (rlpbuf < rlpbuf_end);	// return true if some data were read
+	assert(!sourcePosStack.empty());
+	if (sourcePosStack.back().line) {
+		return (rlpbuf < rlpbuf_end);		// return true if some data were read
+	}
 	//UTF BOM markers detector
 	for (const auto & bomMarkerData : UtfBomMarkers) {
 		if (rlpbuf_end < (rlpbuf + bomMarkerData.length)) continue;	// not enough bytes in buffer
@@ -782,8 +786,9 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			colonSubline = SplitByColon && ReadBufData() && (':' == *rlpbuf) && ++rlpbuf;
 		}
 		// do +1 for very first colon-segment only (rest is +1 due to artificial space at beginning)
-		size_t advanceColumns = colonSubline ? (0 == CurSourcePos.colEnd) + strlen(line) : 0;
-		CurSourcePos.nextSegment(colonSubline, advanceColumns);
+		assert(!sourcePosStack.empty());
+		size_t advanceColumns = colonSubline ? (0 == sourcePosStack.back().colEnd) + strlen(line) : 0;
+		sourcePosStack.back().nextSegment(colonSubline, advanceColumns);
 		// line is parsed and ready to be processed
 		if (Parse) 	ParseLine();	// processed here in loop
 		else 		return;			// processed externally
@@ -923,13 +928,10 @@ void OpenTapFile(char * tapename, int flagbyte)
 	}
 }
 
-int FileExists(char* file_name) {
-	int exists = 0;
+bool FileExists(const char* file_name) {
 	FILE* test;
-	if (FOPEN_ISOK(test, file_name, "r")) {
-		exists = 1;
-		fclose(test);
-	}
+	bool exists = FOPEN_ISOK(test, file_name, "r");
+	exists && fclose(test);
 	return exists;
 }
 
@@ -1214,10 +1216,10 @@ int ReadLineNoMacro(bool SplitByColon) {
 }
 
 int ReadLine(bool SplitByColon) {
-	DefinitionPos = TextFilePos();
 	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
 		if (!lijstp || !lijstp->string) return 0;
-		DefinitionPos = lijstp->definition;
+		assert(!sourcePosStack.empty());
+		sourcePosStack.back() = lijstp->source;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
@@ -1368,12 +1370,18 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	// comment line, not to be parsed
 	if (nullptr == FP_SourceLevelDebugging || !type) return;
 	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
-	const char* macroFN = DefinitionPos.filename && strcmp(DefinitionPos.filename, CurSourcePos.filename) ?
-							DefinitionPos.filename : "";
-	WriteToSldFile_TextFilePos(sldMessage_sourcePos, CurSourcePos);
-	WriteToSldFile_TextFilePos(sldMessage_definitionPos, DefinitionPos);
+
+	assert(!sourcePosStack.empty());
+	const bool outside_source = (sourcePosStack.size() <= size_t(IncludeLevel));
+	const bool has_def_pos = !outside_source && (size_t(IncludeLevel + 1) < sourcePosStack.size());
+	const TextFilePos & curPos = outside_source ? sourcePosStack.back() : sourcePosStack.at(IncludeLevel);
+	const TextFilePos defPos = has_def_pos ? sourcePosStack.back() : TextFilePos();
+
+	const char* macroFN = defPos.filename && strcmp(defPos.filename, curPos.filename) ? defPos.filename : "";
+	WriteToSldFile_TextFilePos(sldMessage_sourcePos, curPos);
+	WriteToSldFile_TextFilePos(sldMessage_definitionPos, defPos);
 	snprintf(sldMessage, LINEMAX2, "%s|%s|%s|%s|%d|%d|%c|%s\n",
-				CurSourcePos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
+				curPos.filename, sldMessage_sourcePos, macroFN, sldMessage_definitionPos,
 				pageNum, value, type, symbol);
 	fputs(sldMessage, FP_SourceLevelDebugging);
 }
@@ -1421,7 +1429,7 @@ void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type) {
 		return;
 	}
 	if (!FOPEN_ISOK(FP_BreakpointsFile, filename, "w")) {
-		Error("Error opening file", filename, FATAL);
+		Error("opening file", filename, EARLY);
 	}
 	breakpointsCounter = 0;
 	breakpointsType = type;

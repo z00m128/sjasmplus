@@ -1,0 +1,96 @@
+# file opened: lua_get_insert_label.asm
+ 1    0000                ; missing arguments errors (stops scripts)
+ 2    0000                LUA
+ 3    0000 ~                sj.get_label()
+lua_get_insert_label.asm(3): error: [LUA] bad argument #1 to 'get_label' (string expected, got no value)
+ 4    0000                ENDLUA
+ 5    0000                LUA
+ 6    0000 ~                 -- sj.insert_label() -- disabled, the error message is platform+compiler dependent, linux reports #2 arg, macos+bsd #1 arg
+ 7    0000                ENDLUA
+ 8    0000                LUA
+ 9    0000 ~                sj.insert_label("no_address")
+lua_get_insert_label.asm(9): error: [LUA] bad argument #2 to 'insert_label' (number expected, got no value)
+10    0000                ENDLUA
+11    0000
+12    0000              foo   EQU   0x1234
+13    0000              bay   EQU   bar + 0x1111
+14    0000
+15    0000                LUA PASS1
+16    0000 ~                -- regular get_label
+17    0000 ~                assert(0x1234 == sj.get_label("foo"))
+18    0000 ~
+19    0000 ~                -- regular insert_label
+20    0000 ~                assert(0 == sj.get_label("bar"))
+21    0000 ~                assert(true == sj.insert_label("bar",0x2345))
+22    0000 ~                assert(0x2345 == sj.get_label("bar"))
+23    0000 ~                assert(false == sj.insert_label("bar",0x3456))  -- can't modify regular label
+24    0000 ~                assert(0x2345 == sj.get_label("bar"))
+25    0000 ~
+26    0000 ~                assert(0x1111 == sj.get_label("bay"))   -- not modified by inserting "bar" yet
+27    0000 ~                assert(0 == sj.get_label("baz"))        -- not defined yet (not modified by inserting "bar")
+28    0000 ~
+29    0000 ~                -- invalid args (avoid hard crash)
+30    0000 ~                assert(-1 == sj.get_label("1_invalid_name"))
+31    0000 ~                assert(-1 == sj.get_label(nil))
+32    0000 ~                assert(-1 == sj.get_label(""))
+33    0000 ~                assert(-1 == sj.get_label(" "))
+34    0000 ~                assert(-1 == sj.get_label("@"))
+35    0000 ~
+36    0000 ~                assert(false == sj.insert_label(nil, 0x2345))
+37    0000 ~                assert(false == sj.insert_label("", 0x2345))
+38    0000 ~                assert(false == sj.insert_label(" ", 0x2345))
+39    0000 ~                assert(false == sj.insert_label("@", 0x2345))
+40    0000 ~                assert(false == sj.insert_label(".", 0x2345))
+41    0000 ~                assert(false == sj.insert_label("1_invalid_name", 0x2345))
+42    0000                ENDLUA
+43    0000
+44    0000                LUA PASS3
+45    0000 ~                -- regular get_label
+46    0000 ~                assert(0x1234 == sj.get_label("foo"))
+47    0000 ~
+48    0000 ~                -- regular insert_label
+49    0000 ~                assert(0x2345 == sj.get_label("bar"))
+50    0000 ~                assert(true == sj.insert_label("bar",0x2346)) -- can modify if defining it first time this pass, but will emit warning
+51    0000 ~                assert(0x2346 == sj.get_label("bar"))
+52    0000 ~                assert(false == sj.insert_label("bar",0x3456)) -- can't modify regular label
+53    0000 ~                assert(0x2346 == sj.get_label("bar"))
+54    0000 ~
+55    0000 ~                assert(0x2345+0x1111 == sj.get_label("bay")) -- defined with older value 0x2345
+56    0000 ~                assert(0x2345+0x1111 == sj.get_label("baz")) -- defined with older value 0x2345
+57    0000 ~
+58    0000 ~                -- invalid args (avoid hard crash) - also produce regular errors in PASS3
+59    0000 ~                assert(-1 == sj.get_label("1_invalid_name"))
+60    0000 ~                assert(-1 == sj.get_label(nil))
+61    0000 ~                assert(-1 == sj.get_label(""))
+62    0000 ~                assert(-1 == sj.get_label(" "))
+63    0000 ~                assert(-1 == sj.get_label("@"))
+64    0000 ~
+65    0000 ~                assert(false == sj.insert_label(nil, 0x2345))
+66    0000 ~                assert(false == sj.insert_label("", 0x2345))
+67    0000 ~                assert(false == sj.insert_label(" ", 0x2345))
+68    0000 ~                assert(false == sj.insert_label("@", 0x2345))
+69    0000 ~                assert(false == sj.insert_label(".", 0x2345))
+70    0000 ~                assert(false == sj.insert_label("1_invalid_name", 0x2345))
+lua_get_insert_label.asm(59): error: [LUA] Invalid labelname: 1_invalid_name
+lua_get_insert_label.asm(61): error: [LUA] Invalid labelname:
+lua_get_insert_label.asm(62): error: [LUA] Invalid labelname:
+lua_get_insert_label.asm(63): error: [LUA] Invalid labelname:
+lua_get_insert_label.asm(65): error: [LUA] Invalid labelname
+lua_get_insert_label.asm(66): error: [LUA] Invalid labelname:
+lua_get_insert_label.asm(67): error: [LUA] Invalid labelname:
+lua_get_insert_label.asm(68): error: [LUA] Invalid labelname:
+lua_get_insert_label.asm(69): error: [LUA] Invalid labelname:
+lua_get_insert_label.asm(70): error: [LUA] Invalid labelname: 1_invalid_name
+71    0000                ENDLUA
+72    0000
+lua_get_insert_label.asm(73): warning: Label has different value in pass 3: previous value 13398 not equal 13399
+73    0000              baz   EQU   bar + 0x1111
+74    0000
+# file closed: lua_get_insert_label.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x2346   bar
+0x3456   bay
+0x3457   baz
+0x1234   foo

@@ -36,18 +36,21 @@ namespace Options {
 	// which lines should made it into listing: all, active (not skipped by IF false), only-if-has-machine-code
 	enum ELstType { LST_T_ALL, LST_T_ACTIVE, LST_T_MC_ONLY };
 
+	typedef struct STerminalColorSequences {
+		const char * end, * display, * warning, * error, * bold;
+	} STerminalColorSequences;
+
 	// structure to group all options affecting parsing syntax
 	typedef struct SSyntax {
 		bool		IsPseudoOpBOF;
 		bool		IsReversePOP;
 		bool		FakeEnabled;
-		bool		FakeWarning;
+		bool		FakeWarning;	// accessed also by io_err.cpp implementation for W_FAKE warning state
 		bool		IsListingSuspended;
 		ELstType	ListingType;
 		bool		CaseInsensitiveInstructions;
 		bool		WarningsAsErrors;
 		bool		Is_M_Memory;
-		bool		IsLowMemWarningEnabled;
 		bool		IsSubwordSubstitution;
 		int			MemoryBrackets;	// 0 = [] enabled (default), 1 = [] disabled, 2 = [] required
 		int			IsNextEnabled;	// 0 = OFF, 1 = ordinary NEXT, 2 = CSpect emulator extensions
@@ -56,7 +59,7 @@ namespace Options {
 		SSyntax() : IsPseudoOpBOF(false), IsReversePOP(false), FakeEnabled(true), FakeWarning(false),
 					IsListingSuspended(false), ListingType(LST_T_ALL),
 					CaseInsensitiveInstructions(false), WarningsAsErrors(false),
-					Is_M_Memory(false), IsLowMemWarningEnabled(true), IsSubwordSubstitution(true),
+					Is_M_Memory(false), IsSubwordSubstitution(true),
 					MemoryBrackets(0), IsNextEnabled(0), MultiArg(&comma) {}
 		bool isMultiArgPlainComma() const { return &comma == MultiArg; }
 
@@ -69,6 +72,7 @@ namespace Options {
 		static std::stack<SSyntax> syxStack;	// previous syntax
 	} SSyntax;
 
+	extern const STerminalColorSequences* tcols;
 	extern char OutPrefix[LINEMAX];
 	extern char SymbolListFName[LINEMAX];
 	extern char ListingFName[LINEMAX];
@@ -93,7 +97,6 @@ namespace Options {
 	extern bool IsLongPtr;
 	extern bool SortSymbols;
 	extern bool IsBigEndian;		// true when hosting platform is big-endian
-	extern bool HasAnsiColours;		// true when host platform (probably) supports ANSI colours
 
 	// emit virtual labels in LABELSLIST, that have only 64ki address and no page
 	// format is then `:ADDR label`, starting from colon, then 16bit address, then label.
@@ -101,6 +104,8 @@ namespace Options {
 
 	extern CStringsList* IncludeDirsList;
 	extern CDefineTable CmdDefineTable;
+
+	void SetTerminalColors(bool enabled);
 
 	// returns true if fakes are completely disabled, false when they are enabled
 	// showMessage=true: will also display error/warning (use when fake ins. is emitted)
@@ -145,13 +150,13 @@ extern std::vector<SSource> sourceFiles;
 enum EDispMode { DISP_NONE = 0, DISP_ACTIVE = 1, DISP_INSIDE_RELOCATE = 2 };
 extern EDispMode PseudoORG;
 
-extern bool IsLabelNotFound;
+extern bool IsLabelNotFound, IsSubstituting;
 extern int ConvertEncoding;
 extern int pass, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
 extern int adrdisp, dispPageNum, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
-extern TextFilePos CurSourcePos, DefinitionPos;
+extern source_positions_t sourcePosStack;
 extern uint32_t maxlin;
 extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine, PredefinedCounter;
 extern aint destlen, size, comlin;
@@ -159,7 +164,7 @@ extern aint destlen, size, comlin;
 extern char* vorlabp, * macrolabp, * LastParsedLabel;
 
 enum EEncoding { ENCDOS, ENCWIN };
-extern char* CurrentDirectory;
+extern const char* CurrentDirectory;
 
 void ExitASM(int p);
 extern CStringsList* lijstp;
@@ -171,13 +176,6 @@ extern CDefineTable DefineTable;
 extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;
 extern CStructureTable StructureTable;
-
-#ifdef USE_LUA
-
-extern lua_State *LUA;
-extern TextFilePos LuaStartPos;
-
-#endif //USE_LUA
 
 #endif
 //eof sjasm.h

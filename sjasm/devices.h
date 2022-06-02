@@ -28,8 +28,8 @@
 
 bool IsZXSpectrumDevice(const char *name);
 bool IsAmstradCPCDevice(const char* name);
-int SetDevice(char *id, const aint ramtop = 0);
-char* GetDeviceName();
+bool SetDevice(const char *const_id, const aint ramtop = 0);
+const char* GetDeviceName();
 
 class CDevicePage {
 public:
@@ -78,6 +78,7 @@ public:
 	int GetCurrentSlotNum() const { return CurrentSlot; }	// returns "current/active" slot
 	int32_t GetMemoryOffset(int page, int32_t offset) const;
 	void Poke(aint z80adr, byte value);	// write byte into device memory with current page-mapping
+	aint SlotNumberFromPreciseAddress(aint address);
 	char* ID;
 	CDevice* Next;
 	int SlotsCount;

@@ -175,11 +175,11 @@ sld_complex.asm|70||56|38|32880|L|,6,mac3_end,+macro
 sld_complex.asm|71||0|38|32880|T|
 sld_complex.asm|72||0|38|32881|F|alternate.end
 sld_complex.asm|72||0|38|32881|L|,alternate,end
-sld_complex.asm|75||75|38|32881|T|
-sld_complex.asm|76||76|38|32882|T|
-sld_complex.asm|75||75|38|32883|T|
-sld_complex.asm|76||76|38|32884|T|
-sld_complex.asm|75||75|38|32885|T|
-sld_complex.asm|76||76|38|32886|T|
+sld_complex.asm|75||0|38|32881|T|
+sld_complex.asm|76||0|38|32882|T|
+sld_complex.asm|75||0|38|32883|T|
+sld_complex.asm|76||0|38|32884|T|
+sld_complex.asm|75||0|38|32885|T|
+sld_complex.asm|76||0|38|32886|T|
 sld_complex.asm|78||0|38|32887|T|
 sld_complex.asm|82||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344

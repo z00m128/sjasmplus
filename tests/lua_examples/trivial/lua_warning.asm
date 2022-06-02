@@ -33,13 +33,17 @@
         sj.warning("[pass all] second warning emitted from lua")
     endlua
 
-    lua pass3 ; wrong arguments
-        sj.warning("[nope!]", 2)
+    lua pass3 ; "bad value" argument (also number works)
+        _pc("OPT reset")
+        sj.warning("[bad value]", 2)
+        _pc("OPT --syntax=w")   ; -- treat warnings as errors
+        sj.warning("[bad value]", 2)
     endlua
 
-    lua pass3
+    lua allpass
         sj.add_word(sj.error_count)     -- ; should be 0x0008
-        sj.add_byte(sj.warning_count)   -- ; should be 0x07
-        sj.add_word(0)
+        sj.add_byte(sj.warning_count)   -- ; should be 0x08
+        sj.add_byte(0)
         _pl("")         -- ; force emitted bytes in listing as silent/external
     endlua
+    ; expected four bytes: 08 00 08 00

@@ -44,8 +44,6 @@ luaincSSSS.asm(19): warning: [LUA] Pass updated to 3, device: ZXSPECTRUM1024
 38    8009
 39    8009                  LUA ALLPASS
 40    8009 ~                inc_ld_system('A', pass)        -- defined in all includes, the one with priority wins
-luaincSSSS_v/luaincSSSS.lua(3): warning[rdlow]: [LUA] Reading memory at low address: 3
-luaincSSSS.asm(41): ^ emitted from here
 41    8009 3A 03 00     LD A,(3) ; overloaded funcion (system-valid variant)
 41    800C                  ENDLUA
 42    800C

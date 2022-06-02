@@ -1,5 +1,5 @@
 ;;;;;;; warning emitting test (for all affected instructions) ;;;;;;;;;;
-    OPT reset       ; default syntax
+    OPT reset -Wrdlow       ; default syntax, enable rdlow warning
     ; round parentheses memory access to low address 0..255 emits warning
     ld  a,(1)
     ld  hl,(2)
@@ -152,7 +152,7 @@
     ldi a,(hl)  ; warning
     ldi a,(hl)  ; this is "fake" instruction (warning suppressed by "fake")
     ldi a,(hl)  ; iz fakeish instruztione (substring can be anywhere)
-    ; the "ok" way is now deprecated since v1.18.0, use "fake"
+    ; the "ok" way is removed since v1.19.0, use "fake"
 
 ;;;;;;; docs-grade example ;;;;;;;;;;
 

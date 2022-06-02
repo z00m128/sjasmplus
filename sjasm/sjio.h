@@ -47,7 +47,7 @@ const char* FilenameBasePos(const char* fullname);
 void ConstructDefaultFilename(char* dest, size_t dest_size, const char* ext, bool checkIfDestIsEmpty = true);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void NewDest(char* newfilename, int mode = OUTPUT_TRUNCATE);
-int FileExists(char* filename);
+bool FileExists(const char* filename);
 FILE* GetListingFile();
 void ListFile(bool showAsSkipped = false);
 void ListSilentOrExternalEmits();

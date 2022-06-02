@@ -1,5 +1,5 @@
 # file opened: tricky_syntax.asm
- 1    0000                  ; test various tricky cases of syntax
+ 1    0000                  OPT -Wrdlow ; test various tricky cases of syntax, enable rdlow warning
  2    0000 CE 07            adc     a , (   ( 3 ) + ( 4 )   )
 tricky_syntax.asm(3): warning[rdlow]: Reading memory at low address: 7
  3    0002 3A 07 00         ld      a , (   ( 3 ) + ( 4 )   )   // extra warning about if low address is ok

@@ -107,14 +107,14 @@ static void Relocation::refreshMaxTableCount() {
 
 void Relocation::dirRELOCATE_START() {
 	if (isActive) {
-		char errTxt[LINEMAX];
-		SPRINTF2(errTxt, LINEMAX, "Relocation block already started at: %s(%d)",
-				 startPos.filename, startPos.line);
-		Error(errTxt);
+		sourcePosStack.push_back(startPos);
+		Error("Relocation block already started here");
+		sourcePosStack.pop_back();
 		return;
 	}
 	isActive = true;
-	startPos = CurSourcePos;
+	assert(!sourcePosStack.empty());
+	startPos = sourcePosStack.back();
 	refreshMaxTableCount();
 }
 
@@ -152,10 +152,9 @@ void Relocation::dirRELOCATE_TABLE() {
 void Relocation::InitPass() {
 	// check if the relocation block is still open (missing RELOCATION_END in source)
 	if (isActive) {
-		TextFilePos oldCurSourcePos = CurSourcePos;
-		CurSourcePos = startPos;
+		sourcePosStack.push_back(startPos);
 		Error("Missing end of relocation block started here");
-		CurSourcePos = oldCurSourcePos;
+		sourcePosStack.pop_back();
 	}
 	// keep copy of final offsets table from previous pass
 	offsetsPrevious = offsets;

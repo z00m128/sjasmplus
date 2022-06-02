@@ -2,8 +2,9 @@
  1    0000                  DEVICE none
  2    0000
  3    0000                  lua
- 4    0000 ~                    -- should fail, because no device is set (but it fails silently :/ )
+ 4    0000 ~                    -- v1.20.0 added visible warning message
  5    0000 ~                    assert(not sj.set_page(1))
+lua_set_page.asm(5): warning: [LUA] sj.set_page: only allowed in real device emulation mode (See DEVICE)
  6    0000                  endlua
  7    0000
  8    0000                  DEVICE zxspectrum128
@@ -21,11 +22,12 @@ lua_set_page.asm(12): error: [LUA] [sj.set_page] Page number must be in range 0.
 18    C000                  ASSERT(6 == $$)     ; default slot 3 should be page 6 set by lua
 19    C000
 20    C000                  lua pass3 ; wrong arguments
-21    C000 ~                    sj.set_page(233, 2)
-lua_set_page.asm(21): error: [LUA] error in function 'set_page'.
-     argument #2 is 'number'; '[no object]' expected.
-22    C000                  endlua
-23    C000
+21    C000 ~                    sj.set_page(233, 2) -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
+22    C000 ~                    sj.set_page()
+lua_set_page.asm(21): error: [LUA] [sj.set_page] Page number must be in range 0..7: 233
+lua_set_page.asm(22): error: [LUA] bad argument #1 to 'set_page' (number expected, got no value)
+23    C000                  endlua
+24    C000
 # file closed: lua_set_page.asm
 
 Value    Label

@@ -26,17 +26,10 @@
 
 */
 
-// direct.h
+// directives.h
 
 extern CFunctionTable DirectivesTable;
 void InsertDirectives();
+bool dirPageImpl(const char* const dirName, int pageNumber);
 
-#ifdef USE_LUA
-
-bool LuaSetPage(aint n);
-bool LuaSetSlot(aint n);
-
-#endif //USE_LUA
-
-//eof direct.h
-
+//eof directives.h

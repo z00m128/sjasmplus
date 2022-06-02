@@ -1,4 +1,5 @@
 labels_syntax_and_find.asm(207): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: exist
+labels_syntax_and_find.asm(219): error: Duplicate label: exist
 # file opened: labels_syntax_and_find.asm
   1   0000                  OUTPUT "labels_syntax_and_find.bin"
   2   0000
@@ -244,6 +245,7 @@ labels_syntax_and_find.asm(167): error: Unexpected: cpl
 204   415F                  ENDMODULE
 205   415F
 206   415F                  ; errors reporting for exist
+labels_syntax_and_find.asm(207): warning: Label has different value in pass 3: previous value 16755 not equal 16735
 207   415F              exist:              ; warning about reserved keyword (at top of listing, because early pass)
 208   415F 5F 41            DW exist        ; no error, but assembles as label
 labels_syntax_and_find.asm(209): error: Unexpected: 3xist
@@ -268,6 +270,9 @@ labels_syntax_and_find.asm(217): error: Invalid labelname: @exi)
 labels_syntax_and_find.asm(217): error: Unexpected: (@@exi)
 217   4171 5F 41            DW exist(@@exi) ; invalid label name + unexpected
 218   4173
+labels_syntax_and_find.asm(219): warning: Label has different value in pass 3: previous value 16735 not equal 16755
+219   4173              exist:              ; error Duplicate label: another code path exercised for test coverage
+220   4173
 # file closed: labels_syntax_and_find.asm
 
 Value    Label
@@ -278,7 +283,7 @@ Value    Label
 0x3475 X DeflLineRemnants4
 0x346E X EquLineRemnants1
 0x346F X EquLineRemnants2
-0x415F   exist
+0x4173   exist
 0x3534   label
 0x3535   label.local
 0x3130   mod1.label

@@ -17,11 +17,17 @@
 13    444E                  ENDLUA
 14    444E
 15    444E                  LUA pass3 ; wrong arguments
-16    444E ~                    sj.get_word(0x1234, 2)
-lua_get_word.asm(16): error: [LUA] error in function 'get_word'.
-     argument #2 is 'number'; '[no object]' expected.
+16    444E ~                    sj.get_word(0x1234, 2)  -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
 17    444E                  ENDLUA
 18    444E
+19    444E                  ; some extra error specific to get word and test coverage
+20    444E                  LUA PASS3
+21    444E ~                    sj.get_word(0xFFFF)     -- invalid address
+22    444E ~                    sj.get_word()           -- missing argument
+lua_get_word.asm(21): error: [LUA] MemGetByte: Error reading address: 65536
+lua_get_word.asm(22): error: [LUA] bad argument #1 to 'get_word' (number expected, got no value)
+23    444E                  ENDLUA
+24    444E
 # file closed: lua_get_word.asm
 
 Value    Label

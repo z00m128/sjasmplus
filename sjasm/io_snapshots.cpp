@@ -29,25 +29,26 @@
 #include "sjdefs.h"
 
 // report error and close the file
-static int writeError(char* fname, FILE* & fileToClose) {
+static bool writeError(const char* fname, FILE* & fileToClose) {
 	Error("Write error (disk full?)", fname, IF_FIRST);
 	fclose(fileToClose);
-	return 0;
+	return false;
 }
 
-int SaveSNA_ZX(char* fname, word start) {
+bool SaveSNA_ZX(const char* fname, word start) {
 	// for Lua
 	if (!DeviceID) {
 		Error("[SAVESNA] Only for real device emulation mode.");
-		return 0;
+		return false;
 	} else if (!IsZXSpectrumDevice(DeviceID)) {
 		Error("[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.");
-		return 0;
+		return false;
 	}
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname, FATAL);
+		Error("opening file", fname);
+		return false;
 	}
 
 	constexpr int SNA_HEADER_48_SIZE = 27;
@@ -142,7 +143,7 @@ int SaveSNA_ZX(char* fname, word start) {
 	}
 
 	fclose(ff);
-	return 1;
+	return true;
 }
 
 //eof io_snapshots.cpp

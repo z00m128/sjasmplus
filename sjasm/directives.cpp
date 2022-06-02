@@ -29,7 +29,6 @@
 // direct.cpp
 
 #include "sjdefs.h"
-#include <cassert>
 
 CFunctionTable DirectivesTable;
 CFunctionTable DirectivesTable_dup;
@@ -254,7 +253,7 @@ static void dirBLOCK() {
 	}
 }
 
-static bool dirPageImpl(const char* const dirName, int pageNumber) {
+bool dirPageImpl(const char* const dirName, int pageNumber) {
 	if (!Device) return false;
 	if (pageNumber < 0 || Device->PagesCount <= pageNumber) {
 		char buf[LINEMAX];
@@ -374,16 +373,6 @@ static void dirPAGE() {
 	}
 }
 
-static aint slotNumberFromPreciseAddress(aint inputValue) {
-	assert(Device);
-	if (inputValue < Device->SlotsCount) return inputValue;	// seems to be slot number, not address
-	// check if the input value does exactly match start-address of some slot
-	int slotNum = Device->GetSlotOfA16(inputValue);
-	if (-1 == slotNum) return inputValue;	// does not belong to any slot
-	if (inputValue != Device->GetSlot(slotNum)->Address) return inputValue;	// not exact match
-	return slotNum;							// return address converted into slot number
-}
-
 static void dirMMU() {
 	if (!DeviceID) {
 		Warning("MMU is allowed only in real device emulation mode (See DEVICE)");
@@ -432,8 +421,8 @@ static void dirMMU() {
 		address &= 0xFFFF;
 	}
 	// convert slot entered as addresses into slot numbering (must be precise start address of slot)
-	slot1 = slotNumberFromPreciseAddress(slot1);
-	slot2 = slotNumberFromPreciseAddress(slot2);
+	slot1 = Device->SlotNumberFromPreciseAddress(slot1);
+	slot2 = Device->SlotNumberFromPreciseAddress(slot2);
 	// validate argument values
 	if (slot1 < 0 || slot2 < slot1 || Device->SlotsCount <= slot2) {
 		char buf[LINEMAX];
@@ -477,7 +466,7 @@ static void dirSLOT() {
 		Error("[SLOT] Syntax error in <slot_number>", lp, SUPPRESS);
 		return;
 	}
-	val = slotNumberFromPreciseAddress(val);
+	val = Device->SlotNumberFromPreciseAddress(val);
 	if (!Device->SetSlot(val)) {
 		char buf[LINEMAX];
 		SPRINTF1(buf, LINEMAX, "[SLOT] Slot number must be in range 0..%u, or exact starting address of slot", Device->SlotsCount - 1);
@@ -1279,7 +1268,8 @@ static void dirCSPECTMAP() {
 	if (fName[0]) {
 		STRCPY(Options::CSpectMapFName, LINEMAX, fName.get());
 	} else {		// create default map file name from current source file name (appends ".map")
-		STRCPY(Options::CSpectMapFName, LINEMAX-5, CurSourcePos.filename);
+		assert(!sourcePosStack.empty());
+		STRCPY(Options::CSpectMapFName, LINEMAX-5, sourcePosStack.back().filename);
 		STRCAT(Options::CSpectMapFName, LINEMAX-1, ".map");
 	}
 	// remember page size of current device (in case the source is multi-device later)
@@ -1287,6 +1277,8 @@ static void dirCSPECTMAP() {
 }
 
 static void dirBPLIST() {
+	// breakpoint file is opened in second pass, and content is written through third pass
+	// so position of `BPLIST` directive in source does not matter
 	if (2 != pass || !DeviceID) {	// nothing to do in first or last pass, second will open the file
 		if (2 == pass) {	// !Device is true -> no device in second pass -> error
 			Error("BPLIST only allowed in real device emulation mode (See DEVICE)", nullptr, EARLY);
@@ -1540,8 +1532,8 @@ static void dirTAPEND()
 
 static void dirDEFINE() {
 	bool replaceEnabled = ('+' == *lp) ? ++lp, true : false;
-	char* id;
-	if (!(id = GetID(lp))) {
+	char* id = GetID(lp);
+	if (nullptr == id) {
 		Error("[DEFINE] Illegal <id>", lp, SUPPRESS);
 		return;
 	}
@@ -1571,17 +1563,12 @@ static void dirUNDEFINE() {
 	}
 
 	if (*lp == '*') {
-		lp++;
-// Label removal removed because it seems to be broken beyond repair
-//		LabelTable.RemoveAll();
+		++lp;
 		DefineTable.RemoveAll();
 	} else if (DefineTable.FindDuplicate(id)) {
 		DefineTable.Remove(id);
-// Label removal removed because it seems to be broken beyond repair
-// 	} else if (LabelTable.Find(id)) {
-// 		LabelTable.Remove(id);
 	} else {
-		Warning("[UNDEFINE] Identifier not found", id); return;
+		Warning("[UNDEFINE] Identifier not found", id);
 	}
 }
 
@@ -1590,7 +1577,8 @@ static void dirEXPORT() {
 	char* n, * p;
 
 	if (!Options::ExportFName[0]) {
-		STRCPY(Options::ExportFName, LINEMAX, CurSourcePos.filename);
+		assert(!sourcePosStack.empty());
+		STRCPY(Options::ExportFName, LINEMAX, sourcePosStack.back().filename);
 		if (!(p = strchr(Options::ExportFName, '.'))) {
 			p = Options::ExportFName;
 		} else {
@@ -1608,9 +1596,6 @@ static void dirEXPORT() {
 	GetLabelValue(n, val);
 	if (!IsLabelNotFound) WriteExp(p, val);
 }
-
-static const char AnsiDisplayBeg[] = "\033[36m";
-static const char AnsiDisplayEnd[] = "\033[m";
 
 static void dirDISPLAY() {
 	char decprint = 'H';
@@ -1704,11 +1689,7 @@ static void dirDISPLAY() {
 	*ep = 0; // end line
 
 	if (LASTPASS == pass && *e) {
-		if (Options::HasAnsiColours) {
-			_CERR "> " _CMDL AnsiDisplayBeg _CMDL e _CMDL AnsiDisplayEnd _ENDL;
-		} else {
-			_CERR "> " _CMDL e _ENDL;
-		}
+		_CERR "> " _CMDL Options::tcols->display _CMDL e _CMDL Options::tcols->end _ENDL;
 	}
 }
 
@@ -1742,7 +1723,7 @@ static void dirASSERT() {
 }
 
 static void dirSHELLEXEC() {
-	//FIXME for v2.x change the "SHELLEXEC <command>[, <params>]" syntax to "SHELLEXEC <whatever>"
+	//TODO for v2.x change the "SHELLEXEC <command>[, <params>]" syntax to "SHELLEXEC <whatever>"
 	// (and add good examples how to deal with quotes/colons/long file names with spaces)
 	std::unique_ptr<char[]> command(GetFileName(lp, false));
 	std::unique_ptr<char[]> parameters;
@@ -1811,12 +1792,12 @@ static void dirSTRUCT() {
 		}
 		if (cmphstr(lp, "ends")) {
 			++CompiledCurrentLine;
-			st->deflab();
+			if (st) st->deflab();
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDS
 			return;
 		}
-		ParseStructLine(st);
+		if (st) ParseStructLine(st);
 		ListFile(true);
 	}
 	Error("[STRUCT] Unexpected end of structure");
@@ -1899,7 +1880,8 @@ static void DupWhileImplementation(bool isWhile) {
 	dup.Lines = new CStringsList(lp);
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
 	dup.Pointer = dup.Lines;
-	dup.sourcePos = CurSourcePos;
+	assert(!sourcePosStack.empty());
+	dup.sourcePos = sourcePosStack.back();
 	dup.IsInWork = false;
 	RepeatStack.push(dup);
 }
@@ -1917,17 +1899,19 @@ static bool shouldRepeat(SRepeatStack& dup) {
 		return 0 <= --dup.RepeatCount;
 	} else {
 		if (!dup.RepeatCount--) {
+			sourcePosStack.push_back(dup.RepeatCondition->source);
 			Error("[WHILE] infinite loop? (reaching the guardian value, default 100k)");
+			sourcePosStack.pop_back();
 			return false;
 		}
 		aint val = 0;
 		IsLabelNotFound = false;
 		char* expressionSource = dup.RepeatCondition->string;
 		if (!ParseExpressionNoSyntaxError(expressionSource, val) || *expressionSource) {
-			TextFilePos oSrcPos = CurSourcePos;
-			CurSourcePos = dup.RepeatCondition->source;
+			const TextFilePos oSourcePos = sourcePosStack.back();
+			sourcePosStack.back() = dup.RepeatCondition->source;
 			Error("[WHILE] Syntax error in <expression>", dup.RepeatCondition->string, SUPPRESS);
-			CurSourcePos = oSrcPos;
+			sourcePosStack.back() = oSourcePos;
 			return false;
 		}
 		if (IsLabelNotFound) {
@@ -1957,32 +1941,30 @@ static void dirEDUP() {
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) ErrorOOM();
 
-	TextFilePos oldPos = CurSourcePos;
 	CStringsList* olijstp = lijstp;
 	++lijst;
+	assert(!sourcePosStack.empty());
+	const TextFilePos oSourcePos = sourcePosStack.back();
 	while (shouldRepeat(dup)) {
-		CurSourcePos = dup.sourcePos;
-		DefinitionPos = dup.sourcePos;
+		sourcePosStack.back() = dup.sourcePos;
 		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
-			if (lijstp->source.line) CurSourcePos = lijstp->source;
-			DefinitionPos = lijstp->definition;
+			if (lijstp->source.line) sourcePosStack.back() = lijstp->source;
 			STRCPY(line, LINEMAX, lijstp->string);
 			substitutedLine = line;		// reset substituted listing
 			eolComment = NULL;			// reset end of line comment
 			lijstp = lijstp->next;
 			ParseLineSafe();
-			CurSourcePos.nextSegment();
+			sourcePosStack.back().nextSegment();
 		}
 	}
+	sourcePosStack.back() = oSourcePos;
 	delete dup.Lines;
 	if (dup.RepeatCondition) delete dup.RepeatCondition;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;
-	CurSourcePos = oldPos;
-	DefinitionPos = TextFilePos();
 	--listmacro;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	free(ml);
@@ -2055,172 +2037,11 @@ static void dirDEFARRAY() {
 	}
 }
 
-#ifdef USE_LUA
-
-// skips file+line_number info (but will adjust global LuaStartPos data for Error output)
-static void SplitLuaErrorMessage(const char*& LuaError)
-{
-	if (nullptr == LuaError) return;
-	const char* colonPos = strchr(LuaError, ':');
-	const char* colon2Pos = nullptr != colonPos ? strchr(colonPos+1, ':') : nullptr;
-	if (nullptr == colonPos || nullptr == colon2Pos) return;	// error, format not recognized
-	int lineNumber = atoi(colonPos + 1);
-	if (strstr(LuaError, "[string \"script\"]") == LuaError) {
-		// inlined script, add to start pos
-		LuaStartPos.line += lineNumber;
-	} else {
-		// standalone script, use line number as is (if provided by lua error)
-		if (lineNumber) LuaStartPos.line = lineNumber;
-	}
-	LuaError = colon2Pos + 1;
-	while (White(*LuaError)) ++LuaError;
-}
-
-static void _lua_showLoadError(const EStatus type) {
-	const char *msgp = lua_tostring(LUA, -1);
-	SplitLuaErrorMessage(msgp);
-	Error(msgp, nullptr, type);
-	lua_pop(LUA, 1);
-}
-
-typedef struct luaMemFile
-{
-  const char *text;
-  size_t size;
-} luaMemFile;
-
-const char *readMemFile(lua_State *, void *ud, size_t *size)
-{
-  // Convert the ud pointer (UserData) to a pointer of our structure
-  luaMemFile *luaMF = (luaMemFile *) ud;
-
-  // Are we done?
-  if(luaMF->size == 0)
-    return NULL;
-
-  // Read everything at once
-  // And set size to zero to tell the next call we're done
-  *size = luaMF->size;
-  luaMF->size = 0;
-
-  // Return a pointer to the readed text
-  return luaMF->text;
-}
-
-static void dirLUA() {
-	constexpr size_t luaBufferSize = 32768;
-	luaMemFile luaMF;
-	char* id, * buff = nullptr, * bp = nullptr;
-
-	int passToExec = LASTPASS;
-	if ((id = GetID(lp)) && strlen(id) > 0) {
-		if (cmphstr(id, "pass1")) {
-			passToExec = 1;
-		} else if (cmphstr(id, "pass2")) {
-			passToExec = 2;
-		} else if (cmphstr(id, "pass3")) {
-			passToExec = LASTPASS;
-		} else if (cmphstr(id, "allpass")) {
-			passToExec = -1;
-		} else {
-			Error("[LUA] Syntax error", id);
-		}
-	}
-
-	const EStatus errorType = (1 == passToExec || 2 == passToExec) ? EARLY : PASS3;
-	const bool execute = (-1 == passToExec) || (passToExec == pass);
-	// remember warning suppression also from block start
-	bool showWarning = !suppressedById(W_LUA_MC_PASS);
-
-	if (execute) {
-		LuaStartPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
-		buff = new char[luaBufferSize];
-		bp = buff;
-	}
-	ListFile();
-
-	while (1) {
-		if (!ReadLine(false)) {
-			Error("Unexpected end of lua script");
-			break;
-		}
-		lp = line;
-		SkipBlanks(lp);
-		const int isEndLua = cmphstr(lp, "endlua");
-		const size_t lineLen = isEndLua ? (lp - 6 - line) : strlen(line);
-		if (execute) {
-			if (luaBufferSize < (bp - buff) + lineLen + 4) {
-				ErrorInt("[LUA] Maximum byte-size of Lua script is", luaBufferSize-4, FATAL);
-			}
-			STRNCPY(bp, (luaBufferSize - (bp - buff)), line, lineLen);
-			bp += lineLen;
-			*bp++ = '\n';
-		}
-		if (isEndLua) {		// eat also any trailing eol-type of comment
-			++CompiledCurrentLine;
-			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
-			substitutedLine = line;		// override substituted listing for ENDLUA
-			// take into account also warning suppression used at end of block
-			showWarning = showWarning && !suppressedById(W_LUA_MC_PASS);
-			break;
-		}
-		ListFile(true);
-	}
-
-	if (execute) {
-		*bp = 0;
-		luaMF.text = buff;
-		luaMF.size = strlen(luaMF.text);
-		DidEmitByte();			// reset the flag before running lua script
-		int error = lua_load(LUA, readMemFile, &luaMF, "script") || lua_pcall(LUA, 0, 0, 0);
-		if (error) {
-			_lua_showLoadError(errorType);
-		}
-		LuaStartPos = TextFilePos();
-		delete[] buff;
-		if (DidEmitByte() && (-1 != passToExec) && showWarning) {
-			const EWStatus warningType = (1 == passToExec || 2 == passToExec) ? W_EARLY : W_PASS3;
-			WarningById(W_LUA_MC_PASS, nullptr, warningType);
-		}
-	}
-
-	++CompiledCurrentLine;
-	substitutedLine = line;		// override substituted list line for ENDLUA
-}
-
-static void dirENDLUA() {
-	Error("[ENDLUA] End of lua script without script");
-}
-
-static void dirINCLUDELUA() {
-	if (1 != pass) {
-		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
-		return;
-	}
-	std::unique_ptr<char[]> fnaam(GetFileName(lp));
-	EDelimiterType dt = GetDelimiterOfLastFileName();
-	char* fullpath = GetPath(fnaam.get(), NULL, DT_ANGLE == dt);
-	if (!fullpath[0]) {
-		Error("[INCLUDELUA] File doesn't exist", fnaam.get(), EARLY);
-	} else {
-		fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
-		LuaStartPos.newFile(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
-		LuaStartPos.line = 1;
-		int error = luaL_loadfile(LUA, fullpath) || lua_pcall(LUA, 0, 0, 0);
-		if (error) {
-			_lua_showLoadError(EARLY);
-		}
-		LuaStartPos = TextFilePos();
-	}
-	free(fullpath);
-}
-
-#endif //USE_LUA
-
 static void dirDEVICE() {
 	// refresh source position of first DEVICE directive
 	if (1 == ++deviceDirectivesCount) {
-		globalDeviceSourcePos = CurSourcePos;
+		assert(!sourcePosStack.empty());
+		globalDeviceSourcePos = sourcePosStack.back();
 	}
 
 	char* id = GetID(lp);
@@ -2383,27 +2204,5 @@ void InsertDirectives() {
 	DirectivesTable_dup.insertd(".rept", dirDUP);
 	DirectivesTable_dup.insertd(".while", dirWHILE);
 }
-
-#ifdef USE_LUA
-
-bool LuaSetPage(aint n) {
-	return dirPageImpl("sj.set_page", n);
-}
-
-bool LuaSetSlot(aint n) {
-	if (!DeviceID) {
-		Warning("sj.set_slot: only allowed in real device emulation mode (See DEVICE)");
-		return false;
-	}
-	if (!Device->SetSlot(n)) {
-		char buf[LINEMAX];
-		SPRINTF1(buf, LINEMAX, "sj.set_slot: Slot number must be in range 0..%u", Device->SlotsCount - 1);
-		Error(buf, NULL, IF_FIRST);
-		return false;
-	}
-	return true;
-}
-
-#endif //USE_LUA
 
 //eof direct.cpp

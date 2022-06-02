@@ -1,0 +1,42 @@
+# file opened: lua_error_warning.asm
+ 1    0000                  ; verify documented usage
+ 2    0000                  lua
+ 3    0000 ~                    sj.error("message")
+ 4    0000 ~                    sj.error("message", "bad value")
+ 5    0000 ~                    sj.warning("message")
+ 6    0000 ~                    sj.warning("message", "bad value")
+lua_error_warning.asm(3): error: [LUA] message
+lua_error_warning.asm(4): error: [LUA] message: bad value
+lua_error_warning.asm(5): warning: [LUA] message
+lua_error_warning.asm(6): warning: [LUA] message: bad value
+ 7    0000                  endlua
+ 8    0000                  ; verify behaviour when mandatory argument is missing (message)
+ 9    0000                  lua
+10    0000 ~                    sj.error()
+lua_error_warning.asm(10): error: [LUA] no message
+11    0000                  endlua
+12    0000                  lua
+13    0000 ~                    sj.error(nil)
+lua_error_warning.asm(13): error: [LUA] no message
+14    0000                  endlua
+15    0000                  lua
+16    0000 ~                    sj.error(nil,123)
+lua_error_warning.asm(16): error: [LUA] no message: 123
+17    0000                  endlua
+18    0000                  lua
+19    0000 ~                    sj.warning()
+lua_error_warning.asm(19): warning: [LUA] no message
+20    0000                  endlua
+21    0000                  lua
+22    0000 ~                    sj.warning(nil)
+lua_error_warning.asm(22): warning: [LUA] no message
+23    0000                  endlua
+24    0000                  lua
+25    0000 ~                    sj.warning(nil,124)
+lua_error_warning.asm(25): warning: [LUA] no message: 124
+26    0000                  endlua
+27    0000
+# file closed: lua_error_warning.asm
+
+Value    Label
+------ - -----------------------------------------------------------

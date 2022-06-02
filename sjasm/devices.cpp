@@ -181,9 +181,11 @@ static void DeviceAmstradCPC6128(CDevice** dev, CDevice* parent, aint ramtop) {
 	initRegularSlotDevice(*dev, 0x4000, 4, 8, initialPages);
 }
 
-int SetDevice(char *id, const aint ramtop) {
+bool SetDevice(const char *const_id, const aint ramtop) {
 	CDevice** dev;
 	CDevice* parent = nullptr;
+	char* id = const_cast<char*>(const_id);		//TODO cmphstr for both const/nonconst variants?
+		// ^ argument is const because of lua bindings
 
 	if (!id || cmphstr(id, "none")) {
 		DeviceID = 0; return true;
@@ -257,7 +259,7 @@ int SetDevice(char *id, const aint ramtop) {
 	return true;
 }
 
-char* GetDeviceName() {
+const char* GetDeviceName() {
 	if (!DeviceID) {
 		return (char *)"NONE";
 	} else {
@@ -429,6 +431,15 @@ void CDevice::Poke(aint z80adr, byte value) {
 	if (-1 == adrPage) return;		// silently ignore invalid address
 	CDevicePage* page = GetPage(adrPage);
 	page->RAM[z80adr & (page->Size-1)] = value;
+}
+
+aint CDevice::SlotNumberFromPreciseAddress(aint address) {
+	if (address < SlotsCount) return address;		// seems to be slot number, not address
+	// check if the address (input value) does exactly match start-address of some slot
+	int slotNum = GetSlotOfA16(address);
+	if (-1 == slotNum) return address;				// does not belong to any slot
+	if (address != GetSlot(slotNum)->Address) return address;		// not exact match
+	return slotNum;									// return address converted into slot number
 }
 
 CDevicePage::CDevicePage(byte* memory, int32_t size, int number)

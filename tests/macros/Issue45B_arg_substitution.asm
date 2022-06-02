@@ -42,29 +42,3 @@ ii=0
 ii=ii+1
     EDUP
     db  arrayTxt[arrayIdx[4]], "\n"
-
-    END
-
-    ;;FIXME not working. Maybe because the [ARRAY] handler is trying to evaluate
-    ; the index-expression too aggressively and too early, not giving the macro
-    ; substitution enough time to replace `idx?` with actual value?
-
-    ; read array items in macro
-    MACRO readArray idx?
-.ii=-idx?
-        db      arrayTxt[ arrayIdx[ idx? + .ii ] ], " "
-        db      arrayTxt[ arrayIdx[ .ii + idx? ] ], " "
-        DUP idx?
-            DEFINE readArrayM_idx? .ii+idx?
-            db      arrayTxt[ arrayIdx[ .ii + idx? ] ], " "
-            db      arrayTxt[arrayIdx[readArrayM_idx?]], " "
-            IF 0 <= readArrayM_idx?
-                db      arrayTxt[arrayIdx[readArrayM_idx?]], " "
-            ENDIF
-            UNDEFINE readArrayM_idx?
-.ii=.ii+1
-        EDUP
-    ENDM
-
-    readArray 4
-    db  arrayTxt[arrayIdx[4]], "\n"

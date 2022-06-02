@@ -48,6 +48,7 @@
 #include <windows.h>
 #endif
 
+#include <cassert>
 #include <memory>
 #include <algorithm>
 #include <stack>
@@ -61,18 +62,8 @@ using std::flush;
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 #include <math.h>
-
-#ifdef USE_LUA
-
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-#include "tolua++.h"
-}
-
-#endif //USE_LUA
 
 // global defines
 #define LINEMAX 2048
@@ -104,9 +95,8 @@ struct SAlignSafeCast {
 #endif
 
 // include all headers
-extern "C" {
-#include "lua_lpack.h"
-}
+
+#include "lua_sjasm.h"
 #include "devices.h"
 #include "support.h"
 #include "tables.h"

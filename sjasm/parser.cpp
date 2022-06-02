@@ -171,13 +171,7 @@ static int ParseExpUnair(char*& p, aint& nval) {
 			nval = (right >> 8) & 255;
 			break;
 		case 'a':
-			// fallback in case somebody is using `abs` as regular label (for example BS ROM source)
-			//TODO remove the fallback after ~Dec 2021 (giving one year) (after that abs as label will error out)
-			if (!ParseExpUnair(p, right)) {
-				WarningById(W_ABS_LABEL);
-				p = oldP;
-				return ParseExpPrim(p, nval);
-			}
+			if (!ParseExpUnair(p, right)) return 0;
 			nval = abs(right);
 			break;
 		default: Error("internal error", nullptr, FATAL); break;	// unreachable
@@ -396,6 +390,14 @@ int ParseExpressionNoSyntaxError(char*& lp, aint& val) {
 	return ret_val;
 }
 
+static int ParseExpressionInSubstitution(char *& lp, aint& val) {
+	assert(!IsSubstituting);
+	IsSubstituting = true;
+	int ret_val = ParseExpressionNoSyntaxError(lp, val);
+	IsSubstituting = false;
+	return ret_val;
+}
+
 // returns 0 on syntax error, 1 on expression which is not enclosed in parentheses
 // 2 when whole expression is in [] or () (--syntax=b/B affects when "2" is reported)
 int ParseExpressionMemAccess(char*& p, aint& nval) {
@@ -438,7 +440,8 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 
 static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
-	char* rp = nl,* nid,* ver;
+	char* rp = nl,* nid;
+	const char* ver;
 	bool isDefDir = false;	// to remember if one of DEFINE-related directives was used
 	bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 	char defarrayCountTxt[16] = { 0 };
@@ -532,20 +535,28 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 						}
 						sprintf(defarrayCountTxt, "%d", val);
 						ver = defarrayCountTxt;
-					} else if ('[' == *lp && GrowSubIdByExtraChar(lp) && ParseExpressionNoSyntaxError(lp, val) && ']' == *lp) {
-						++lp;
-						while (0 < val && a) {
-							a = a->next;
-							--val;
+					} else {
+						char* expLp = lp + ('[' == *lp);	// the '[' will become part of subId in didParseBrackets
+						IsLabelNotFound = false;
+						bool didParseBrackets = '[' == *lp && GrowSubIdByExtraChar(lp) && ParseExpressionInSubstitution(lp, val) && ']' == *lp;
+						if (didParseBrackets && !IsLabelNotFound) {
+							// expression was successfully parsed and all values were known
+							++lp;
+							while (0 < val && a) {
+								a = a->next;
+								--val;
+							}
+							if (val < 0 || NULL == a) {
+								*defarrayCountTxt = 0;		// substitute with empty string
+								ver = defarrayCountTxt;
+								Error("[ARRAY] index not in 0..<Size-1> range", nextSubIdLp, SUPPRESS);
+							} else {
+								ver = a->string;	// substitute with array value
+							}
+						} else {	// no substition of array possible at this time (index eval / syntax error)
+							lp = expLp;				// restore lp in case expression parser went ahead a lot
+							dr = -1;// write into output, but don't count as replacement
 						}
-						if (val < 0 || NULL == a) {
-							*ver = 0;			// substitute with empty string
-							Error("[ARRAY] index not in 0..<Size-1> range", nextSubIdLp, SUPPRESS);
-						} else {
-							ver = a->string;	// substitute with array value
-						}
-					} else {	// no substition of array possible at this time (index eval / syntax error)
-						dr = -1;// write into output, but don't count as replacement
 					}
 				}
 			} else {
@@ -731,8 +742,8 @@ void ParseLabel() {
 
 				delete[] buf;
 			}
-		} else if (pass == 2 && !LabelTable.Insert(tp, val, traits, equPageNum) && !LabelTable.Update(tp, val)) {
-			Error("Duplicate label", tp, EARLY);
+		} else if (pass == 2 && !LabelTable.Insert(tp, val, traits, equPageNum)) {
+			if (!LabelTable.Update(tp, val)) assert(false); // unreachable, update will always work after insert failed
 		} else if (pass == 1 && !LabelTable.Insert(tp, val, traits, equPageNum)) {
 			Error("Duplicate label", tp, EARLY);
 		}
@@ -928,7 +939,7 @@ void ParseLineSafe(bool parselabels) {
 	lp = rp;
 }
 
-void ParseStructLabel(CStructure* st) {	//FIXME Ped7g why not to reuse ParseLabel()?
+void ParseStructLabel(CStructure* st) {
 	char* tp, temp[LINEMAX];
 	if (PreviousIsLabel) {
 		free(PreviousIsLabel);
@@ -1079,73 +1090,6 @@ void ParseStructLine(CStructure* st) {
 	ParseStructMember(st);
 	if (SkipBlanks()) return;
 	if (*lp) Error("[STRUCT] Unexpected", lp);
-}
-
-uint32_t LuaCalculate(char *str) {
-	// substitute defines + macro_args in the `str` first (preserve original global variables)
-	char* const oldSubstitutedLine = substitutedLine;
-	const int oldComlin = comlin;
-	comlin = 0;
-	char* tmp = NULL, * tmp2 = NULL;
-	if (sline[0]) {
-		tmp = STRDUP(sline);
-		if (tmp == NULL) ErrorOOM();
-	}
-	if (sline2[0]) {
-		tmp2 = STRDUP(sline2);
-		if (tmp2 == NULL) ErrorOOM();
-	}
-	char* substitutedStr = ReplaceDefine(str);
-
-	// evaluate the expression
-	aint val;
-	int parseResult = ParseExpression(substitutedStr, val);
-
-	// restore any global values affected by substitution
-	substitutedLine = oldSubstitutedLine;
-	comlin = oldComlin;
-	*sline = 0;
-	*sline2 = 0;
-	if (tmp2 != NULL) {
-		STRCPY(sline2, LINEMAX2, tmp2);
-		free(tmp2);
-	}
-	if (tmp != NULL) {
-		STRCPY(sline, LINEMAX2, tmp);
-		free(tmp);
-	}
-
-	return parseResult ? val : 0;
-}
-
-void LuaParseLine(char *str) {
-	// preserve current actual line which will be parsed next
-	char *oldLine = STRDUP(line);
-	char *oldEolComment = eolComment;
-	if (oldLine == NULL) ErrorOOM();
-
-	// inject new line from Lua call and assemble it
-	STRCPY(line, LINEMAX, str);
-	eolComment = NULL;
-	ParseLineSafe();
-
-	// restore the original line
-	STRCPY(line, LINEMAX, oldLine);
-	eolComment = oldEolComment;
-	free(oldLine);
-}
-
-void LuaParseCode(char *str) {
-	char *ml;
-
-	ml = STRDUP(line);
-	if (ml == NULL) ErrorOOM();
-
-	STRCPY(line, LINEMAX, str);
-	ParseLineSafe(false);
-
-	STRCPY(line, LINEMAX, ml);
-	free(ml);
 }
 
 //eof parser.cpp

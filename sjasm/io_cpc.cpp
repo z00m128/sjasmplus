@@ -28,7 +28,6 @@
 
 #include "sjdefs.h"
 #include "io_cpc_ldrs.h"
-#include <cassert>
 
 //
 // Amstrad CPC snapshot file saving (SNA)

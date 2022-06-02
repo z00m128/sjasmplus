@@ -13,5 +13,11 @@ test:   DEFW 0x4241
     ENDLUA
 
     LUA pass3 ; wrong arguments
-        sj.get_word(0x1234, 2)
+        sj.get_word(0x1234, 2)  -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
+    ENDLUA
+
+    ; some extra error specific to get word and test coverage
+    LUA PASS3
+        sj.get_word(0xFFFF)     -- invalid address
+        sj.get_word()           -- missing argument
     ENDLUA

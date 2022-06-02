@@ -33,12 +33,6 @@
 #include <chrono>
 #include <ctime>
 
-#ifdef USE_LUA
-
-#include "lua_sjasm.h"
-
-#endif //USE_LUA
-
 static void PrintHelpMain() {
 	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
 	//     |<-- ...8901234567890123456789012345678901234567890123456789012... 80 chars -->|
@@ -80,6 +74,28 @@ static void PrintHelpMain() {
 }
 
 namespace Options {
+	const STerminalColorSequences tcols_ansi = {
+		/*end*/		"\033[m",
+		/*display*/	"\033[36m",		// Cyan
+		/*warning*/	"\033[33m",		// Yellow
+		/*error*/	"\033[31m",		// Red
+		/*bold*/	"\033[1m"		// bold
+	};
+
+	const STerminalColorSequences tcols_none = {
+		/*end*/		"",
+		/*display*/	"",
+		/*warning*/	"",
+		/*error*/	"",
+		/*bold*/	""
+	};
+
+	const STerminalColorSequences* tcols = &tcols_none;
+
+	void SetTerminalColors(bool enabled) {
+		tcols = enabled ? &tcols_ansi : &tcols_none;
+	}
+
 	char OutPrefix[LINEMAX] = {0};
 	char SymbolListFName[LINEMAX] = {0};
 	char ListingFName[LINEMAX] = {0};
@@ -111,7 +127,6 @@ namespace Options {
 	bool IsLongPtr = false;
 	bool SortSymbols = false;
 	bool IsBigEndian = false;
-	bool HasAnsiColours = false;
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." directory
@@ -212,17 +227,17 @@ std::vector<SSource> sourceFiles;
 int ConvertEncoding = ENCWIN;
 
 EDispMode PseudoORG = DISP_NONE;
-bool IsLabelNotFound = false;
+bool IsLabelNotFound = false, IsSubstituting = false;
 int pass = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
 int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;
 byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
-TextFilePos CurSourcePos, DefinitionPos;
+source_positions_t sourcePosStack;
 uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L, comlin = 0;
-char* CurrentDirectory=NULL;
+const char* CurrentDirectory=NULL;
 
 char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
@@ -234,13 +249,6 @@ CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
 CStructureTable StructureTable;
 
-#ifdef USE_LUA
-
-lua_State *LUA;			// lgtm[cpp/short-global-name] .. name seems barely ok (especially considering rest of code)
-TextFilePos LuaStartPos;
-
-#endif //USE_LUA
-
 // reserve keywords in labels table, to detect when user is defining label colliding with keyword
 static void ReserveLabelKeywords() {
 	for (const char* keyword : {
@@ -251,6 +259,7 @@ static void ReserveLabelKeywords() {
 }
 
 void InitPass() {
+	assert(sourcePosStack.empty());				// there's no source position [left] in the stack
 	Relocation::InitPass();
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
 	uint32_t maxpow10 = 1;
@@ -294,15 +303,12 @@ void InitPass() {
 	deviceDirectivesCount = 0;
 	// resurrect "global" device here
 	if (globalDeviceID) {
-		CurSourcePos = globalDeviceSourcePos;
-		DefinitionPos = TextFilePos();
-		if (!SetDevice(globalDeviceID, globalDeviceZxRamTop)) {
+		sourcePosStack.push_back(globalDeviceSourcePos);
+		if (!SetDevice(globalDeviceID, globalDeviceZxRamTop)) {		// manually tested (remove "!")
 			Error("Failed to re-initialize global device", globalDeviceID, FATAL);
 		}
+		sourcePosStack.pop_back();
 	}
-
-	// reset current source/definition positions
-	CurSourcePos = DefinitionPos = TextFilePos();
 
 	// predefined defines - (deprecated) classic sjasmplus v1.x (till v1.15.1)
 	DefineTable.Replace("_SJASMPLUS", "1");
@@ -408,29 +414,23 @@ namespace Options {
 				// l L - warn/error about labels using keywords (default = no message)
 				case 'l':
 				case 'L':
-					if (0 == pass || LASTPASS == pass) {
-						_CERR "Syntax option not implemented yet: " _CMDL syntaxOption _ENDL;
-					}
+				{
+					const char this_option_is[2] = { syntaxOption, 0 };
+					Error("Syntax option not implemented yet", this_option_is, PASS03);
 					break;
+				}
 				// i - case insensitive instructions/directives (default = same case required)
 				case 'i': syx.CaseInsensitiveInstructions = true; break;
 				// w - warnings option: report warnings as errors
 				case 'w': syx.WarningsAsErrors = true; break;
-				// m - switch off "Accessing low memory" warning globally
-				case 'm':
-					syx.IsLowMemWarningEnabled = false;
-					Warning("`--syntax=m` is deprecated, use `-Wno-rdlow` instead", (0 == pass) ? nullptr : bp, (0 == pass) ? W_EARLY : W_PASS3);
-					//TODO remove "m" option completely after ~8/2021
-					break;
 				// M - alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
 				case 'M': syx.Is_M_Memory = true; break;
 				// s - switch off sub-word substitution in DEFINEs (s like "Simple defines" or "Sub word")
 				case 's': syx.IsSubwordSubstitution = false; break;
 				// unrecognized option
 				default:
-					if (0 == pass || LASTPASS == pass) {
-						_CERR "Unrecognized syntax option: " _CMDL syntaxOption _ENDL;
-					}
+					const char this_option_is[2] = { syntaxOption, 0 };
+					Error("Unrecognized syntax option", this_option_is, PASS03);
 					break;
 				}
 			}
@@ -465,8 +465,8 @@ namespace Options {
 					syx.IsPseudoOpBOF = true;
 				} else if (!strcmp(opt, "nofakes")) {
 					syx.FakeEnabled = false;
-					Warning("`--nofakes` is deprecated, use `--syntax=F` instead", nullptr, (0 == pass) ? W_EARLY : W_PASS3);
-					//TODO remove "--nofakes" option completely after ~8/2021
+					// was deprecated, as it is provided by `--syntax=F` too, but now I decided to keep also this older option
+					// (it's less cryptic than the --syntax letter soup, one duplicity of functionality will not end the world, right?)
 				} else if (!strcmp(opt, "syntax")) {
 					parseSyntaxValue();
 				} else if (!doubleDash && 'W' == opt[0]) {
@@ -532,9 +532,9 @@ namespace Options {
 					IsShowFullPath = 1;
 				} else if (!strcmp(opt, "color")) {
 					if (!strcmp("on", val)) {
-						Options::HasAnsiColours = true;
+						SetTerminalColors(true);
 					} else if (!strcmp("off", val)) {
-						Options::HasAnsiColours = false;
+						SetTerminalColors(false);
 					} else if (!strcmp("auto", val)) {
 						// already heuristically detected, nothing to do
 					} else {
@@ -560,7 +560,6 @@ namespace Options {
 				} else if (!doubleDash && 'D' == opt[0]) {
 					char defN[LINEMAX], defV[LINEMAX];
 					if (*val) {		// for -Dname=value the `val` contains "name=value" string
-						//TODO the `Error("Duplicate name"..)` is not shown while parsing CLI options
 						splitByChar(val, '=', defN, LINEMAX, defV, LINEMAX);
 						CmdDefineTable.Add(defN, defV, NULL);
 					} else {
@@ -586,14 +585,6 @@ namespace Options {
 		return i;
 	}
 }
-
-#ifdef USE_LUA
-
-void LuaFatalError(lua_State *L) {
-	Error((char *)lua_tostring(L, -1), NULL, FATAL);
-}
-
-#endif //USE_LUA
 
 // ==============================================================================================
 // == UnitTest++ part, checking if unit tests are requested and does launch test-runner then   ==
@@ -623,18 +614,22 @@ void LuaFatalError(lua_State *L) {
 
 // == end of UnitTest++ part ====================================================================
 
+static char launch_directory[MAX_PATH];
+
 #ifdef WIN32
 int main(int argc, char* argv[]) {
 #else
 int main(int argc, char **argv) {
 #endif
-	char buf[MAX_PATH];
+	// existence of NO_COLOR env.var. disables auto-colors: http://no-color.org/
+	const char* envNoColor = std::getenv("NO_COLOR");
 	// try to auto-detect ANSI-colour support (true if env.var. TERM exist and contains "color" substring)
 	const char* envTerm = std::getenv("TERM");
-	Options::HasAnsiColours = envTerm && strstr(envTerm, "color");
+	Options::SetTerminalColors(!envNoColor && envTerm && strstr(envTerm, "color"));
 
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
+	sourcePosStack.reserve(32);
 	sourceFiles.reserve(32);
 	archivedFileNames.reserve(64);
 
@@ -648,8 +643,8 @@ int main(int argc, char **argv) {
 	long dwStart = GetTickCount();
 
 	// get current directory
-	SJ_GetCurrentDirectory(MAX_PATH, buf);
-	CurrentDirectory = buf;
+	SJ_GetCurrentDirectory(MAX_PATH, launch_directory);
+	CurrentDirectory = launch_directory;
 
 	Options::COptionsParser optParser;
 	char* envFlags = std::getenv("SJASMPLUSOPTS");
@@ -728,18 +723,6 @@ int main(int argc, char **argv) {
 		if (0 == sourceFiles.size()) exit(0);
 	}
 
-#ifdef USE_LUA
-
-	// init LUA
-	LUA = lua_open();
-	lua_atpanic(LUA, (lua_CFunction)LuaFatalError);
-	luaL_openlibs(LUA);
-	luaopen_pack(LUA);
-
-	tolua_sjasm_open(LUA);
-
-#endif //USE_LUA
-
 	// exit with error if no input file were specified
 	if (0 == sourceFiles.size()) {
 		if (Options::OutputVerbosity <= OV_ERROR) {
@@ -773,8 +756,9 @@ int main(int argc, char **argv) {
 		}
 
 		while (!RepeatStack.empty()) {
-			CurSourcePos = RepeatStack.top().sourcePos;	// fake source-file position to mark DUP line
+			sourcePosStack.push_back(RepeatStack.top().sourcePos);	// mark DUP line with error
 			Error("[DUP/REPT] missing EDUP/ENDR to end repeat-block");
+			sourcePosStack.pop_back();
 			RepeatStack.pop();
 		}
 
@@ -828,12 +812,7 @@ int main(int argc, char **argv) {
 	// free RAM
 	FreeRAM();
 
-#ifdef USE_LUA
-
-	// close Lua
-	lua_close(LUA);
-
-#endif //USE_LUA
+	lua_impl_close();
 
 	return (ErrorCount != 0);
 }

@@ -1,0 +1,57 @@
+# file opened: lua_calculate.asm
+ 1    0000                  org     0x1234          ; eol comment belong to ORG
+ 2    1234                  lua allpass
+ 3    1234 ~                    assert(0 == _c(nil))
+ 4    1234 ~                    assert(0 == _c(""))
+ 5    1234 ~                    assert(123 == _c("123"))
+ 6    1234 ~                    assert(0x1234 == _c("$"))
+ 7    1234 ~                    assert(0x1234 == _c("label"))
+ 8    1234 ~                    assert(-1 == _c("-1"))      -- check the result is signed integer
+ 9    1234                  endlua
+10    1234                  lua pass1
+11    1234 ~                    assert(0 == _c(nil))
+12    1234 ~                    assert(0 == _c(""))
+13    1234 ~                    assert(123 == _c("123"))
+14    1234 ~                    assert(0x1234 == _c("$"))
+15    1234 ~                    assert(0 == _c("label"))    -- label is not defined yet
+16    1234                  endlua
+17    1234                  lua pass2
+18    1234 ~                    assert(0 == _c(nil))
+19    1234 ~                    assert(0 == _c(""))
+20    1234 ~                    assert(123 == _c("123"))
+21    1234 ~                    assert(0x1234 == _c("$"))
+22    1234 ~                    assert(0x1234 == _c("label"))
+23    1234                  endlua
+24    1234                  lua pass3
+25    1234 ~                    assert(0 == _c(nil))
+26    1234 ~                    assert(0 == _c(""))
+27    1234 ~                    assert(123 == _c("123"))
+28    1234 ~                    assert(0x1234 == _c("$"))
+29    1234 ~                    assert(0x1234 == _c("label"))
+30    1234                  endlua
+31    1234                  lua
+32    1234 ~                    assert(0 == _c(nil))
+33    1234 ~                    assert(0 == _c(""))
+34    1234 ~                    assert(123 == _c("123"))
+35    1234 ~                    assert(0x1234 == _c("$"))
+36    1234 ~                    assert(0x1234 == _c("label"))
+37    1234                  endlua
+38    1234              label:
+39    1234
+40    1234                  ; sjasmplus expression evaluator is strictly 32-bit, following are consequences
+41    1234
+42    1234                  ; Overflow error detected in evaluator (while parsing value)
+43    1234                  lua
+44    1234 ~                    _c("0x1FFFFFFFF")
+lua_calculate.asm(44): error: [LUA] Overflow: 0x1FFFFFFFF
+45    1234                  endlua
+46    1234                  ; truncated result
+47    1234                  lua
+48    1234 ~                    assert(0x34567800 == _c("0x12345678<<8"))
+49    1234                  endlua
+50    1234
+# file closed: lua_calculate.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x1234   label

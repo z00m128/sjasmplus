@@ -31,7 +31,10 @@
 #include <assert.h>
 #include "sjdefs.h"
 
-TextFilePos::TextFilePos() : filename(nullptr), line(0), colBegin(0), colEnd(0) {
+TextFilePos::TextFilePos(const char* fileNamePtr) : filename(fileNamePtr), line(0), colBegin(0), colEnd(0) {
+}
+
+TextFilePos::TextFilePos() : TextFilePos(nullptr) {
 }
 
 void TextFilePos::newFile(const char* fileNamePtr) {
@@ -58,6 +61,10 @@ char* PreviousIsLabel = nullptr;
 // since v1.18.3:
 // Inside macro prefix "@." will create non-macro local label instead of macro's instance
 char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
+	if (nullptr == naam) {
+		Error("Invalid labelname");
+		return nullptr;
+	}
 	if ('!' == *naam) {
 		setNameSpace = false;
 		++naam;
@@ -229,6 +236,9 @@ static SLabelTableEntry* GetLabel(char*& p) {
 	if (getLabel_invalidName) return nullptr;
 	if (!labelEntry || LABEL_PAGE_UNDEFINED == labelEntry->page) {
 		IsLabelNotFound = true;
+		// don't insert labels or report errors during substitution phase
+		if (IsSubstituting) return nullptr;
+		// regular parsing/assembling, track new labels and report "not found" error
 		char* findName = temp[0] ? temp : fullName.get();
 		if (!labelEntry) {
 			LabelTable.Insert(findName, 0, LABEL_IS_UNDEFINED);
@@ -554,10 +564,6 @@ int CFunctionTable::zoek(const char* name) {
 	return 1;
 }
 
-int CFunctionTable::Find(const char* name) const {
-	return (functions.end() != functions.find(name));
-}
-
 CLocalLabelTableEntry::CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous) {
 	nummer = number;
 	value = address;
@@ -615,16 +621,10 @@ CLocalLabelTableEntry* CLocalLabelTable::seekBack(const aint labelNumber) const 
 	return l;
 }
 
-CStringsList::CStringsList() : string(NULL), next(NULL)
-{
-	// all initialized already
-}
-
 CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
 	string = STRDUP(stringSource);
 	next = nnext;
-	source = CurSourcePos;
-	definition = DefinitionPos.line ? DefinitionPos : CurSourcePos;
+	if (!sourcePosStack.empty()) source = sourcePosStack.back();
 }
 
 CStringsList::~CStringsList() {
@@ -632,6 +632,13 @@ CStringsList::~CStringsList() {
 	if (next) delete next;
 }
 
+bool CStringsList::contains(const CStringsList* strlist, const char* searchString) {
+	while (nullptr != strlist) {
+		if (!strcmp(searchString, strlist->string)) return true;
+		strlist = strlist->next;
+	}
+	return false;
+}
 
 CDefineTableEntry::CDefineTableEntry(const char* nname, const char* nvalue, CStringsList* nnss, CDefineTableEntry* nnext)
 		: name(NULL), value(NULL) {
@@ -681,7 +688,7 @@ void CDefineTable::Init() {
 
 void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	if (FindDuplicate(name)) {
-		Error("Duplicate define (replacing old value)", name);
+		Error("Duplicate define (replacing old value)", name, PASS03);
 	}
 	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }
@@ -689,31 +696,26 @@ void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 static char defineGet__Counter__Buffer[32] = {};
 static char defineGet__Line__Buffer[32] = {};
 
-char* CDefineTable::Get(const char* name) {
+const char* CDefineTable::Get(const char* name) {
 	DefArrayList = nullptr;
-	if (nullptr != name) {
-		// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
-		if ('_' == name[1]) {
-			if (!strcmp(name, "__COUNTER__")) {
-				SPRINTF1(defineGet__Counter__Buffer, 30, "%d", PredefinedCounter);
-				++PredefinedCounter;
-				return defineGet__Counter__Buffer;
-			}
-			if (!strcmp(name, "__LINE__")) {
-				SPRINTF1(defineGet__Line__Buffer, 30, "%d", CurSourcePos.line);
-				return defineGet__Line__Buffer;
-			}
+	if (nullptr == name) return nullptr;
+	// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
+	if ('_' == name[1]) {
+		if (!strcmp(name, "__COUNTER__")) {
+			SPRINTF1(defineGet__Counter__Buffer, 30, "%d", PredefinedCounter);
+			++PredefinedCounter;
+			return defineGet__Counter__Buffer;
 		}
-		CDefineTableEntry* p = defs[(*name)&127];
-		while (p) {
-			if (!strcmp(name, p->name)) {
-				DefArrayList = p->nss;
-				return p->value;
-			}
-			p = p->next;
+		if (!strcmp(name, "__LINE__")) {
+			SPRINTF1(defineGet__Line__Buffer, 30, "%d", sourcePosStack.empty() ? 0 : sourcePosStack.back().line);
+			return defineGet__Line__Buffer;
 		}
 	}
-	return nullptr;
+	CDefineTableEntry* p = defs[(*name)&127];
+	while (p && strcmp(name, p->name)) p = p->next;
+	if (nullptr == p) return nullptr;
+	DefArrayList = p->nss;
+	return p->value;
 }
 
 int CDefineTable::FindDuplicate(const char* name) {
@@ -809,14 +811,12 @@ void CMacroDefineTable::setdefs(CDefineTableEntry* const ndefs) {
 	defs = ndefs;						// the requested chain is new current HEAD
 }
 
-char* CMacroDefineTable::getverv(char* name) {
-	CDefineTableEntry* p = defs;
-	if (!used[(*name)&127]) return NULL;
-	while (p) {
-		if (!strcmp(name, p->name)) return p->value;
-		p = p->next;
-	}
-	return NULL;
+const char* CMacroDefineTable::getverv(const char* name) const {
+	if (nullptr == name) return nullptr;
+	if (!used[(*name)&127]) return nullptr;
+	const CDefineTableEntry* p = defs;
+	while (p && strcmp(name, p->name)) p = p->next;
+	return p ? p->value : nullptr;
 }
 
 int CMacroDefineTable::FindDuplicate(char* name) {
@@ -833,8 +833,8 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 	return 0;
 }
 
-CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext) {
-	naam = nnaam; next = nnext; args = body = NULL;
+CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext)
+	: naam(nnaam), args(nullptr), body(nullptr), next(nnext) {
 }
 
 CMacroTableEntry::~CMacroTableEntry() {
@@ -858,7 +858,7 @@ void CMacroTable::ReInit() {
 	for (auto & usedX : used) usedX = false;
 }
 
-int CMacroTable::FindDuplicate(char* naam) {
+int CMacroTable::FindDuplicate(const char* naam) {
 	CMacroTableEntry* p = macs;
 	if (!used[(*naam)&127]) {
 		return 0;
@@ -872,9 +872,7 @@ int CMacroTable::FindDuplicate(char* naam) {
 	return 0;
 }
 
-void CMacroTable::Add(char* nnaam, char*& p) {
-	char* n;
-	CStringsList* s,* l = NULL,* f = NULL;
+void CMacroTable::Add(const char* nnaam, char*& p) {
 	if (FindDuplicate(nnaam)) {
 		Error("Duplicate macroname", nnaam);return;
 	}
@@ -882,24 +880,27 @@ void CMacroTable::Add(char* nnaam, char*& p) {
 	if (macroname == NULL) ErrorOOM();
 	macs = new CMacroTableEntry(macroname, macs);
 	used[(*macroname)&127] = true;
-	SkipBlanks(p);
-	while (*p) {
-		if (!(n = GetID(p))) {
-			Error("Illegal macro argument", p, EARLY); break;
+	CStringsList* last = nullptr;
+	do {
+		char* n = GetID(p);
+		if (!n) {
+			// either EOL when no previous argument, or valid name is required after comma (2nd+ loop)
+			if ((1 == pass) && (last || *p)) Error("Illegal argument name", p, EARLY);
+			SkipToEol(p);
+			break;
 		}
-		s = new CStringsList(n); if (!f) {
-									  	f = s;
-									  } if (l) {
-											l->next = s;
-										} l = s;
-		SkipBlanks(p); if (*p == ',') {
-					   	++p;
-					   } else {
-					   	break;
-					   }
-	}
-	macs->args = f;
-	if (*p) {
+		if ((1 == pass) && CStringsList::contains(macs->args, n)) {
+			Error("Duplicate argument name", n, EARLY);
+		}
+		CStringsList* argname = new CStringsList(n);
+		if (!macs->args) {
+			macs->args = argname;	// first argument name, make it head of list
+		} else {
+			last->next = argname;
+		}
+		last = argname;
+	} while (anyComma(p));
+	if ((1 == pass) && *p) {
 		Error("Unexpected", p, EARLY);
 	}
 	ListFile();
@@ -952,16 +953,17 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	lijstp = m->body;
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
+	sourcePosStack.push_back(TextFilePos());
 	while (lijstp) {
-		DefinitionPos = lijstp->definition;
+		sourcePosStack.back() = lijstp->source;
 		STRCPY(line, LINEMAX, lijstp->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
 		lijstp = lijstp->next;
 		ParseLineSafe();
 	}
+	sourcePosStack.pop_back();
 	++CompiledCurrentLine;
-	DefinitionPos = TextFilePos();
 	STRCPY(line, LINEMAX, ml);
 	lijstp = olijstp;
 	--lijst;
@@ -1361,7 +1363,8 @@ CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 	STRCAT(sn, LINEMAX-1, naam);
 	sp = sn;
 	if (FindDuplicate(sp)) {
-		Error("Duplicate structure name", naam, EARLY);
+		Error("[STRUCT] Structure already exist", naam);
+		return nullptr;
 	}
 	strs[(*sp)&127] = new CStructure(naam, sp, 0, gl, strs[(*sp)&127]);
 	if (no) {
@@ -1426,13 +1429,6 @@ int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	if (INT_MAX == address) st->emitmembs(p);	// address was not designed, emit also bytes
 	else if (!l) Warning("[STRUCT] designed address without label = no effect");
 	return 1;
-}
-
-int LuaGetLabel(char *name) {
-	//TODO v2.0: deprecated, use default "calculate" feature to get identical results as asm line
-	aint val;
-	if (!GetLabelValue(name, val)) val = -1;
-	return val;
 }
 
 //eof tables.cpp

@@ -1,0 +1,33 @@
+# file opened: incbin_tooshort.asm
+ 1    0000                  ; this was changed from fatal error to regular error by request of Neo-spectruman
+ 2    0000                  ; although this seems not very practical, as the internal address will be derailed,
+ 3    0000                  ; probably causing extra errors later, but whatever, you should fix errors in your code
+ 4    0000                  ORG $8000
+ 5    8000
+ 6    8000                  ; test error upon "too short" due to wrong offset
+incbin_tooshort.asm(7): error: file too short: incbin_tooshort.asm
+incbin_tooshort.asm(7): warning: include data: requested to include no data (length=0)
+ 7    8000                  INCBIN "incbin_tooshort.asm", 4000, 1
+ 8    8000                  ASSERT $8000 == $   ; nothing was included
+ 9    8000
+10    8000                  ; test error upon "too short" due to wrong length
+incbin_tooshort.asm(11): error: file too short: incbin_tooshort.asm
+11    8000                  INCBIN "incbin_tooshort.asm", -5, 10
+12    8005                  ASSERT $8005 == $   ; 5 bytes were included
+13    8005
+14    8005                  ; test error upon "too short" due to wrong combination of offset and length
+incbin_tooshort.asm(15): error: file too short: incbin_tooshort.asm
+incbin_tooshort.asm(15): warning: include data: requested to include no data (length=0)
+15    8005                  INCBIN "incbin_tooshort.asm", -5, -10
+16    8005                  ASSERT $8005 == $   ; nothing included
+17    8005
+18    8005                  ; test error upon "too short" due to wrong combination of offset and length
+incbin_tooshort.asm(19): error: file too short: incbin_tooshort.asm
+19    8005                  INCBIN "incbin_tooshort.asm", 5, 4000
+20    83CB                  ; N bytes will be included, up to current file length
+21    83CB                  ASSERT $8005 + 4000 != $    ; but not 4000 for sure
+22    83CB
+# file closed: incbin_tooshort.asm
+
+Value    Label
+------ - -----------------------------------------------------------

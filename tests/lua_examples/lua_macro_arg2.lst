@@ -3,22 +3,22 @@
  2    0000                  ; substitution before the expression is evaluated, so using macro arguments
  3    0000                  ; inside lua script should be now trivial, no more workaround through DEFINE.
  4    0000
- 5    0000                  ; this still shows extra options of `sj.insert_label`, which are not shown in
- 6    0000                  ; official documentation. I'm not sure if these will stay for v2.x, so I'm
- 7    0000                  ; not adding them to docs, but you can learn about any hidden optional arguments
- 8    0000                  ; in sjasm/lua_sjasm.cpp file, tracking down the particular lua stub, and checking
- 9    0000                  ; how many arguments and types are parsed, and how they are used in the call
-10    0000                  ; of internal sjasm function.
-11    0000                  ; These are to stay in v1.x forever like this, unless there will be really serious
-12    0000                  ; reason to modify them. For v2.x the main goal is to mostly keep them and make
-13    0000                  ; them official, but som pruning/reorganization may happen, plus newer Lua version..
-14    0000
+ 5    0000                  ; this example has been reworked to conform to updated lua5.4 and only official
+ 6    0000                  ; documented Lua bindings, the `sj.insert_label` has no more the optional arguments
+ 7    0000                  ; that said, you can use instead the regular asm syntax and `_pl` binding to create
+ 8    0000                  ; any kind of special flavour of label (DEFL, EQU, global, local, ...)
+ 9    0000
+10    0000                  ; The extra options of `sj.insert_label` were promised to stay in v1.x
+11    0000                  ; in the original test code, unless there is serious reason. Upgrade
+12    0000                  ; to lua 5.4 is actually *that* serious reason, sorry.
+13    0000
+14    0000                  ; OBSOLETE by v1.20.0: now sj.get_define get search also macro arguments
 15    0000                  MACRO testM arg1?
 16    0000 ~                    LUA ALLPASS
 17    0000 ~                        x = _c("arg1?")     -- get value of evaluated macro argument
-18    0000 ~                            -- if you want the macro argument without evaluation
-19    0000 ~                            -- check "lua_macro_arg.asm" test for DEFINE workaround
-20    0000 ~                        sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+18    0000 ~                        -- if you want macro argument without evaluation or string value, use sj.get_define
+19    0000 ~                        assert(x == 0+sj.get_define("arg1?", true)) -- enabling macro-arg search with second option
+20    0000 ~                        _pl("!x = "..x)         -- DEFL type label "x" set to value x
 21    0000 ~                        _pc("dw arg1?, x, "..x) -- check all three sources of input value
 22    0000 ~                            -- _pc does it's own substitution, the label "x" should be set and lua "x"
 23    0000 ~                        -- test _c a bit more for handling weird things...
@@ -35,9 +35,9 @@
 34    0000                  testM 0x1234
 34    0000             >        LUA ALLPASS
 34    0000 ~           >            x = _c("arg1?")     -- get value of evaluated macro argument
-34    0000 ~           >                -- if you want the macro argument without evaluation
-34    0000 ~           >                -- check "lua_macro_arg.asm" test for DEFINE workaround
-34    0000 ~           >            sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+34    0000 ~           >            -- if you want macro argument without evaluation or string value, use sj.get_define
+34    0000 ~           >            assert(x == 0+sj.get_define("arg1?", true)) -- enabling macro-arg search with second option
+34    0000 ~           >            _pl("!x = "..x)         -- DEFL type label "x" set to value x
 34    0000 ~           >            _pc("dw arg1?, x, "..x) -- check all three sources of input value
 34    0000 ~           >                -- _pc does it's own substitution, the label "x" should be set and lua "x"
 34    0000 ~           >            -- test _c a bit more for handling weird things...
@@ -45,6 +45,7 @@
 34    0000 ~           >            e2 = _c("define arg1? xx")  -- will emit error "Label not found: define" = OK
 34    0000 ~           >            e3 = _c("$FF&".._c("arg1?"))
 34    0000 ~           >            _pc("db /* e1, e2, e3 */ "..e1..","..e2..","..e3)
+34    0000             >!x = 4660
 34    0000 34 12 34 12 >dw 0x1234, x, 4660
 34    0004 34 12       >
 lua_macro_arg2.asm(25): error: [LUA] Label not found: define
@@ -53,16 +54,16 @@ lua_macro_arg2.asm(34): ^ emitted from here
 34    0009             >        ENDLUA
 34    0009             >.localMacroLabel:   ; check which root the macro local label gets (should be per emit)
 35    0009              .local1:
-36    0009 34 12            DW  x                       ; check that symbol "x" was set by sj.insert_label
-37    000B 18 FC            jr      BigLabel1.local1    ; check "big" label was not modified by sj.insert_label
+36    0009 34 12            DW  x                       ; check that symbol "x" was set by _pl("!x = "..x)
+37    000B 18 FC            jr      BigLabel1.local1    ; check "big" label was not modified by _pl("!x = "..x)
 38    000D              x   = 77
 39    000D              BigLabel2:
 40    000D                  testM 0x3456
 40    000D             >        LUA ALLPASS
 40    000D ~           >            x = _c("arg1?")     -- get value of evaluated macro argument
-40    000D ~           >                -- if you want the macro argument without evaluation
-40    000D ~           >                -- check "lua_macro_arg.asm" test for DEFINE workaround
-40    000D ~           >            sj.insert_label("x", x, false, true)   -- isUndefined=false, isDefl=true
+40    000D ~           >            -- if you want macro argument without evaluation or string value, use sj.get_define
+40    000D ~           >            assert(x == 0+sj.get_define("arg1?", true)) -- enabling macro-arg search with second option
+40    000D ~           >            _pl("!x = "..x)         -- DEFL type label "x" set to value x
 40    000D ~           >            _pc("dw arg1?, x, "..x) -- check all three sources of input value
 40    000D ~           >                -- _pc does it's own substitution, the label "x" should be set and lua "x"
 40    000D ~           >            -- test _c a bit more for handling weird things...
@@ -70,6 +71,7 @@ lua_macro_arg2.asm(34): ^ emitted from here
 40    000D ~           >            e2 = _c("define arg1? xx")  -- will emit error "Label not found: define" = OK
 40    000D ~           >            e3 = _c("$FF&".._c("arg1?"))
 40    000D ~           >            _pc("db /* e1, e2, e3 */ "..e1..","..e2..","..e3)
+40    000D             >!x = 13398
 40    000D 56 34 56 34 >dw 0x3456, x, 13398
 40    0011 56 34       >
 lua_macro_arg2.asm(25): error: [LUA] Label not found: define

@@ -181,7 +181,7 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 	return 1;
 }
 
-int TRD_SaveEmpty(const char* fname, const char label[8]) {
+bool TRD_SaveEmpty(const char* fname, const char label[8]) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("Error opening file", fname, IF_FIRST);
@@ -231,7 +231,7 @@ static int ReturnWithError(const char* errorText, const char* fname, FILE* fileT
 }
 
 // use autostart == -1 to disable it (the valid autostart is 0..9999 as line number of BASIC program)
-int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
+bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
 
 	// do some preliminary checks with file name and autostart - prepare final catalog entry data
 	union {
@@ -306,8 +306,8 @@ int TRD_AddFile(const char* fname, const char* fhobname, int start, int length, 
 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "r+b")) return ReturnWithError("Error opening file", fname, ff);
 	STrdHead trdHead;
-	if (!FOPEN_ISOK(ff, fname, "r+b")) Error("Error opening file", fname, FATAL);
 	if (!trdHead.readFromFile(ff)) {
 		return ReturnWithError("TRD image read error", fname, ff);
 	}
@@ -493,12 +493,12 @@ int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset,
 	TRD_FileNameToBytes(filename, trdFormName, Lname);	// ignore diagnostic info about extension
 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
-	FILE* ff;
 	STrdHead trdHead;
 	char* fullTrdName = GetPath(trdname);
-	if (!FOPEN_ISOK(ff, fullTrdName, "rb")) Error("[INCTRD] Error opening file", trdname, FATAL);
+	FILE* ff = SJ_fopen(fullTrdName, "rb");
 	free(fullTrdName);
 	fullTrdName = nullptr;
+	if (nullptr == ff) return ReturnWithError("[INCTRD] Error opening file", trdname, ff);
 	if (!trdHead.readFromFile(ff)) {
 		return ReturnWithError("TRD image read error", trdname, ff);
 	}

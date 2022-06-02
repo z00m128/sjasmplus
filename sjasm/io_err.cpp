@@ -31,42 +31,50 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
-#include <cassert>
+
+#ifdef USE_LUA
+
+	// io_err.cpp is allowed to work with Lua stuff (and LUA global)
+	// no other file (except lua_sjasm.cpp) should need to include/reference these!
+
+	#include "lua.hpp"
+
+	extern lua_State *LUA;
+	extern TextFilePos LuaStartPos;
+
+#endif //USE_LUA
 
 static bool IsSkipErrors = false;
 static char ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2];
 static aint PreviousErrorLine = -1L;
 
-static const char AnsiErrorBeg[] = "\033[31m";
-static const char AnsiWarningBeg[] = "\033[33m";
-static const char AnsiEnd[] = "\033[m";
+static const char* nullptr_message_txt = "<nullptr>";
 
 static void initErrorLine() {		// adds filename + line of definition if possible
 	*ErrorLine = 0;
 	*ErrorLine2 = 0;
 	// when OpenFile is reporting error, the filename is still nullptr, but pass==1 already
-	if (pass < 1 || LASTPASS < pass || nullptr == CurSourcePos.filename) return;
-	// during assembling, show also file+line info
-	TextFilePos errorPos = DefinitionPos.line ? DefinitionPos : CurSourcePos;
-	bool isEmittedMsgEnabled = true;
+	if (pass < 1 || LASTPASS < pass || sourcePosStack.empty()) return;
+	TextFilePos errorPos = sourcePosStack.back();
+
 #ifdef USE_LUA
 	lua_Debug ar;					// must be in this scope, as some memory is reused by errorPos
+	bool extra_lua_err = false;
 	if (LuaStartPos.line) {
+		assert(LUA);
 		errorPos = LuaStartPos;
 
 		// find either top level of lua stack, or standalone file, otherwise it's impossible
 		// to precisely report location of error (ASM can have 2+ LUA blocks defining functions)
 		int level = 1;			// level 0 is "C" space, ignore that always
-		// suppress "is emitted here" when directly inlined in current code
-		isEmittedMsgEnabled = (0 < listmacro);
 		while (true) {
 			if (!lua_getstack(LUA, level, &ar)) break;	// no more lua stack levels
 			if (!lua_getinfo(LUA, "Sl", &ar)) break;	// no more info about current level
+			//TODO track each chunk under own name, and track their source position
 			if (strcmp("[string \"script\"]", ar.short_src)) {
 				// standalone definition in external file found, pinpoint it precisely
 				errorPos.filename = ar.short_src;
 				errorPos.line = ar.currentline;
-				isEmittedMsgEnabled = true;				// and add "emitted here" in any case
 				break;	// no more lua-stack traversing, stop here
 			}
 			// if source was inlined script, update the possible source line
@@ -74,14 +82,19 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 			// and keep traversing stack until top level is found (to make the line meaningful)
 			++level;
 		}
+		extra_lua_err = strcmp(errorPos.filename, sourcePosStack.back().filename);
+		if (extra_lua_err) sourcePosStack.push_back(errorPos);
 	}
 #endif //USE_LUA
+
 	SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", errorPos.filename, errorPos.line);
 	// if the error filename:line is not identical with current source line, add ErrorLine2 about emit
-	if (isEmittedMsgEnabled &&
-		(strcmp(errorPos.filename, CurSourcePos.filename) || errorPos.line != CurSourcePos.line)) {
-		SPRINTF2(ErrorLine2, LINEMAX2, "%s(%d): ^ emitted from here\n", CurSourcePos.filename, CurSourcePos.line);
+	if (2 <= sourcePosStack.size() && size_t(IncludeLevel + 1) < sourcePosStack.size()) {
+		SPRINTF2(ErrorLine2, LINEMAX2, "%s(%d): ^ emitted from here\n", sourcePosStack.end()[-2].filename, sourcePosStack.end()[-2].line);
 	}
+#ifdef USE_LUA
+	if (extra_lua_err) sourcePosStack.pop_back();
+#endif //USE_LUA
 }
 
 static void trimAndAddEol(char* lineBuffer) {
@@ -104,11 +117,11 @@ static void outputErrorLine(const EOutputVerbosity errorLevel) {
 	}
 	// print the error into stderr if OutputVerbosity allows this type of message
 	if (Options::OutputVerbosity <= errorLevel) {
-		if (OV_ERROR == errorLevel && Options::HasAnsiColours) _CERR AnsiErrorBeg _END;
-		if (OV_WARNING == errorLevel && Options::HasAnsiColours) _CERR AnsiWarningBeg _END;
+		if (OV_ERROR == errorLevel) _CERR Options::tcols->error _END;
+		if (OV_WARNING == errorLevel) _CERR Options::tcols->warning _END;
 		_CERR ErrorLine _END;
 		if (*ErrorLine2) _CERR ErrorLine2 _END;
-		if (Options::HasAnsiColours) _CERR AnsiEnd _END;
+		_CERR Options::tcols->end _END;
 	}
 }
 
@@ -116,6 +129,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	// check if it is correct pass by the type of error
 	if (type == EARLY && LASTPASS <= pass) return;
 	if ((type == SUPPRESS || type == IF_FIRST || type == PASS3) && pass < LASTPASS) return;
+	if (PASS03 == type && 0 < pass && pass < LASTPASS) return;
 	// check if this one should be skipped due to type constraints and current-error-state
 	if (FATAL != type && PreviousErrorLine == CompiledCurrentLine) {
 		// non-fatal error, on the same line as previous, maybe skip?
@@ -133,7 +147,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 #ifdef USE_LUA
 	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
 #endif
-	STRCAT(ErrorLine, LINEMAX2-1, message);
+	STRCAT(ErrorLine, LINEMAX2-1, message ? message : nullptr_message_txt);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
@@ -159,6 +173,7 @@ static void WarningImpl(const char* id, const char* message, const char* badValu
 	if (Options::syx.WarningsAsErrors) switch (type) {
 		case W_EARLY:	Error(message, badValueMessage, EARLY); return;
 		case W_PASS3:	Error(message, badValueMessage, PASS3); return;
+		case W_PASS03:	Error(message, badValueMessage, PASS03); return;
 		case W_ALL:		Error(message, badValueMessage, ALL); return;
 	}
 
@@ -176,7 +191,7 @@ static void WarningImpl(const char* id, const char* message, const char* badValu
 #ifdef USE_LUA
 	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
 #endif
-	STRCAT(ErrorLine, LINEMAX2-1, message);
+	STRCAT(ErrorLine, LINEMAX2-1, message ? message : nullptr_message_txt);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
@@ -191,7 +206,6 @@ struct WarningEntry {
 
 typedef std::unordered_map<const char*, WarningEntry> messages_map;
 
-const char* W_ABS_LABEL = "abs";
 const char* W_NO_RAMTOP = "noramtop";
 const char* W_DEV_RAMTOP = "devramtop";
 const char* W_DISPLACED_ORG = "displacedorg";
@@ -216,14 +230,9 @@ const char* W_BACKSLASH = "backslash";
 const char* W_OPKEYWORD = "opkeyword";
 const char* W_BE_HOST = "behost";
 const char* W_FAKE = "fake";
+const char* W_ENABLE_ALL = "all";
 
 static messages_map w_texts = {
-	{ W_ABS_LABEL,
-		{ true,
-			"the `abs` is now absolute value operator, if you are using it as label, please rename",
-			"Warn about parsing error of new abs operator (v1.18.0)."
-		}
-	},
 	{ W_NO_RAMTOP,
 		{ true,
 			"current device doesn't init memory in any way (RAMTOP is ignored)",
@@ -309,7 +318,7 @@ static messages_map w_texts = {
 		}
 	},
 	{ W_READ_LOW_MEM,
-		{ true,
+		{ false,
 			"Reading memory at low address",
 			"Warn when reading memory from addresses 0..255."
 		}
@@ -364,14 +373,29 @@ static messages_map w_texts = {
 	},
 	{ W_FAKE,
 		{ true,	// fake-warnings are enabled/disabled through --syntax, this value here is always true
+				// the main reason is that fake warning enabled can be reset/push/pop by OPT
 			"Fake instruction",
 			"Warn when fake instruction is used in the source."
+		}
+	},
+	{ W_ENABLE_ALL,
+		{ false,
+			"",		// not emitted by code, just command-line option
+			"Enable/disable all id-warnings"
 		}
 	},
 };
 
 static messages_map::iterator findWarningByIdText(const char* id) {
+	// like w_texts.find(id) but compares id content (string), not pointer
 	return std::find_if(w_texts.begin(), w_texts.end(), [id](const auto& v){ return !strcmp(id, v.first); } );
+}
+
+static bool & warning_state(messages_map::value_type & v) {
+	// W_FAKE (ID "fake") stores enabled/disabled state in Options::syx to handle reset/push/pop of the state
+	if (W_FAKE == v.first) return Options::syx.FakeWarning;
+	// other warnings have global state stored in w_texts map
+	return v.second.enabled;
 }
 
 bool suppressedById(const char* id) {
@@ -391,9 +415,16 @@ bool suppressedById(const char* id) {
 }
 
 static bool isInactiveTypeInCurrentPass(EWStatus type) {
-	if (type == W_EARLY && LASTPASS <= pass) return true;	// "early" is inactive during pass3+
-	if (type == W_PASS3 && pass < LASTPASS) return true;	// "pass3" is inactive during 0..2 pass
-	return false;
+	switch (type) {
+		case W_EARLY:	// "early" is inactive during pass3+
+			return LASTPASS <= pass;
+		case W_PASS3:	// "pass3" is inactive during 0..2 pass
+			return pass < LASTPASS;
+		case W_PASS03:	// "pass03" is inactive during 1..2 pass
+			return 0 < pass && pass < LASTPASS;
+		default:		// never inactive for other types (W_ALL)
+			return false;
+	}
 }
 
 void Warning(const char* message, const char* badValueMessage, EWStatus type) {
@@ -422,26 +453,48 @@ void WarningById(const char* id, int badValue, EWStatus type) {
 
 void CliWoption(const char* option) {
 	if (!option[0]) {
-		// from command line pass == 0, from source by OPT the pass is above zero
-		Error("no argument after -W", (0 == pass) ? nullptr : bp, (0 == pass) ? EARLY : PASS3);
+		// from command line 0 == pass, from source by OPT the pass is above zero
+		Error("no argument after -W", (0 == pass) ? nullptr : bp, PASS03);
 		return;
 	}
 	// check for specific id, with possible "no-" prefix ("-Wabs" vs "-Wno-abs")
 	const bool enable = strncmp("no-", option, 3);
 	const char* id = enable ? option : option + 3;
-	// handle ID "fake" separately, changing the enable/disable value directly in Options::syx
-	if (!strcmp(id, W_FAKE)) {
-		Options::syx.FakeWarning = enable;
-		return;			// keep the w_texts["fake"].enabled == true all the time
+	// handle ID "all"
+	if (!strcmp(id, W_ENABLE_ALL)) {
+		for (auto & warning_entry : w_texts) warning_state(warning_entry) = enable;
+		return;
 	}
 	auto warning_it = findWarningByIdText(id);
-	if (w_texts.end() != warning_it) warning_it->second.enabled = enable;
-	else Warning("unknown warning id in -W option", id, (0 == pass) ? W_EARLY : W_PASS3);
+	if (w_texts.end() == warning_it) {
+		Warning("unknown warning id in -W option", id, W_PASS03);
+		return;
+	}
+	warning_state(*warning_it) = enable;
 }
 
-static const char* spaceFiller = "                       ";
+static const char* spaceFiller = "               ";
+static const char* txt_on	= "on";
+static const char* txt_off	= "off";
+static const char* txt_none	= "      ";
+static constexpr const int STATE_TXT_BUFFER_SIZE = 64;
+
+static void initWarningStateTxt(char* buffer, const char* id) {
+	if (W_ENABLE_ALL == id) {
+		STRCPY(buffer, STATE_TXT_BUFFER_SIZE, txt_none);
+		return;
+	}
+	const bool state = warning_state(*w_texts.find(id));
+	buffer[0] = '[';
+	STRCPY(buffer + 1, STATE_TXT_BUFFER_SIZE-1, state ? Options::tcols->display : Options::tcols->warning);
+	STRCAT(buffer, STATE_TXT_BUFFER_SIZE, state ? txt_on : txt_off);
+	STRCAT(buffer, STATE_TXT_BUFFER_SIZE, Options::tcols->end);
+	STRCAT(buffer, STATE_TXT_BUFFER_SIZE, "] ");
+	if (state) STRCAT(buffer, STATE_TXT_BUFFER_SIZE, " ");
+}
 
 void PrintHelpWarnings() {
+	char state_txt[STATE_TXT_BUFFER_SIZE+1];
 	_COUT "The following options control compiler warning messages:" _ENDL;
 	std::vector<const char*> ids;
 	ids.reserve(w_texts.size());
@@ -449,10 +502,13 @@ void PrintHelpWarnings() {
 	std::sort(ids.begin(), ids.end(), [](const char* a, const char* b) -> bool { return (strcmp(a,b) < 0); } );
 	for (const auto& id : ids) {
 		assert(strlen(id) < strlen(spaceFiller));
-		_COUT "  -W" _CMDL id _CMDL spaceFiller+strlen(id) _CMDL w_texts[id].help _ENDL;
+		initWarningStateTxt(state_txt, id);
+		_COUT " -W" _CMDL Options::tcols->bold _CMDL Options::tcols->warning _CMDL id _CMDL Options::tcols->end _CMDL spaceFiller+strlen(id) _CMDL state_txt _CMDL w_texts[id].help _ENDL;
 	}
-	_COUT " Use -Wno- prefix to disable specific warning, example: -Wno-abs" _ENDL;
-	_COUT " Use -ok suffix in comment to suppress it per line, example: jr abs ; abs-ok" _ENDL;
+	_COUT "Use -W" _CMDL Options::tcols->bold _CMDL Options::tcols->warning _CMDL "no-" _CMDL Options::tcols->end;
+	_COUT " prefix to disable specific warning, example: " _CMDL Options::tcols->display _CMDL "-Wno-out0" _CMDL Options::tcols->end _ENDL;
+	_COUT "Use -ok suffix in comment to suppress it per line, example: ";
+	_COUT Options::tcols->display _CMDL "out (c),0 ; out0-ok" _CMDL Options::tcols->end _ENDL;
 }
 
 //eof io_err.cpp

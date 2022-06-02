@@ -65,7 +65,6 @@ dot_repeat.asm(12): error: .N must be positive integer: 0
 dot_repeat.asm(13): error: Dot-repeater must be followed by number or parentheses: .16+2   nop
 13    0030                  .16+2   nop     ; expressions must be in parentheses
 dot_repeat.asm(14): error: Unrecognized instruction: +2   nop
-dot_repeat.asm(14): error: Unexpected: +2   nop
 14    0030             > +2   nop     ; expressions must be in parentheses (this one is ugly :/ )
 15    0030
 16    0030                  ;; value errors
@@ -85,10 +84,8 @@ dot_repeat.asm(21): error: .N must be positive integer: -1
 dot_repeat.asm(26): error: Dot-repeater must be followed by number or parentheses: .(5-3   and 2
 26    0034                  .(5-3   and 2   ; parentheses are not closed
 dot_repeat.asm(27): error: Unrecognized instruction: ) and 3
-dot_repeat.asm(27): error: Unexpected: ) and 3
 27    0034             > ) and 3   ; one too many closing parentheses
 dot_repeat.asm(27): error: Unrecognized instruction: ) and 3
-dot_repeat.asm(27): error: Unexpected: ) and 3
 27    0034             > ) and 3
 28    0034
 # file closed: dot_repeat.asm

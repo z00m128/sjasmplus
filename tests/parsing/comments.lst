@@ -68,7 +68,6 @@ comments.asm(37): error: Invalid labelname:
 38    0019 ~            /* END ... // : block comment */
 38    0019 00             nop ; LIVE instr!
 comments.asm(39): error: Unrecognized instruction: */
-comments.asm(39): error: Unexpected: */
 39    001A                    */
 39    001A                ; and no <EOL> here
 # file closed: comments.asm

@@ -22,11 +22,13 @@ lua_file_exists.asm(12): error: [LUA] bogus.file does not exist.
 14    0000                  endlua
 15    0000
 16    0000                  lua pass3   ; wrong arguments
-17    0000 ~                    sj.file_exists("lua_file_exists.asm", 2)
-lua_file_exists.asm(17): error: [LUA] error in function 'file_exists'.
-     argument #2 is 'number'; '[no object]' expected.
+17    0000 ~                    sj.file_exists("lua_file_exists.asm", 2)    -- not reported since Lua5.4 and LuaBridge 2.6 integration :(
 18    0000                  endlua
 19    0000
+20    0000                  lua
+21    0000 ~                    assert(false == sj.file_exists(nil))
+22    0000                  endlua
+23    0000
 # file closed: lua_file_exists.asm
 
 Value    Label

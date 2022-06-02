@@ -1,0 +1,12 @@
+# file opened: inctrd_missing_file.asm
+inctrd_missing_file.asm(1): error: [INCTRD] Error opening file: some missing file.trd
+1     0000                  INCTRD "some missing file.trd", "data.b"
+2     0000
+3     0000                  DEVICE ZXSPECTRUM48
+inctrd_missing_file.asm(4): error: Error opening file:
+4     0000                  SAVETRD "", "file.B", $8000, 1  ; make the trd filename fail
+5     0000
+# file closed: inctrd_missing_file.asm
+
+Value    Label
+------ - -----------------------------------------------------------

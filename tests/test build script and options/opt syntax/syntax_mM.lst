@@ -1,31 +1,22 @@
 # file opened: syntax_mM.asm
- 1    0000              ; SYNTAX options "mM":
- 2    0000              ;   m      Switch off "Accessing low memory" warning globally
+ 1    0000              ; SYNTAX options "M":
+ 2    0000              ;   m - removed in v1.20.0, use `-Wno-rdlow` instead
  3    0000              ;   M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
  4    0000
  5    0000              ; verify regular syntax works as expected with default options
-syntax_mM.asm(6): warning[rdlow]: Reading memory at low address: 123
- 6    0000 3A 7B 00         ld      a,(123)             ; warning about low memory access
- 7    0003 3A 7B 00         ld      a,(123)             ; rdlow-ok ; warning suppressed
-syntax_mM.asm(8): error: Label not found: m
- 8    0006 C6 00            add     a,m                 ; label not found
- 9    0008 86               add     a,(hl)              ; regular add instruction
-syntax_mM.asm(10): warning: `--syntax=m` is deprecated, use `-Wno-rdlow` instead: OPT push --syntax=mM
-10    0009                  OPT push --syntax=mM    ; test the syntax options "mM"
-11    0009 3A 7B 00         ld      a,(123)
-12    000C 3A 7B 00         ld      a,(123)             ; rdlow-ok
-13    000F 86               add     a,m                 ; (hl) used
-14    0010 86               add     a,M                 ; (hl) used
-15    0011 86               add     a,(hl)              ; regular add instruction
-16    0012                  OPT pop                 ; test push+pop of new options
-syntax_mM.asm(17): warning[rdlow]: Reading memory at low address: 123
-17    0012 3A 7B 00         ld      a,(123)             ; warning about low memory access
-18    0015 3A 7B 00         ld      a,(123)             ; rdlow-ok ; warning suppressed
-syntax_mM.asm(19): error: Label not found: M
-19    0018 C6 00            add     a,M                 ; label not found
-20    001A 86               add     a,(hl)              ; regular add instruction
-21    001B                  ASSERT 3 == 3 && 2 == 2
-22    001B
+syntax_mM.asm(6): error: Label not found: m
+ 6    0000 C6 00            add     a,m                 ; label not found
+ 7    0002 86               add     a,(hl)              ; regular add instruction
+ 8    0003                  OPT push --syntax=M     ; test the syntax options "M"
+ 9    0003 86               add     a,m                 ; (hl) used
+10    0004 86               add     a,M                 ; (hl) used
+11    0005 86               add     a,(hl)              ; regular add instruction
+12    0006                  OPT pop                 ; test push+pop of new options
+syntax_mM.asm(13): error: Label not found: M
+13    0006 C6 00            add     a,M                 ; label not found
+14    0008 86               add     a,(hl)              ; regular add instruction
+15    0009                  ASSERT 0 == 0 && 2 == 2
+16    0009
 # file closed: syntax_mM.asm
 
 Value    Label

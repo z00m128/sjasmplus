@@ -29,7 +29,6 @@
 // reader.cpp
 
 #include "sjdefs.h"
-#include <cassert>
 
 //enum EDelimiterType          { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
 static const char delimiters_b[] = { ' ',    '"',       '\'',          '<',      0 };
@@ -232,7 +231,7 @@ char nidtemp[LINEMAX], *nidsubp = nidtemp;
 // add GetLabel where appropriate, handle "@" + "." modifiers more consistently and transparently)
 char* GetID(char*& p) {
 	char* np = nidtemp;
-	if (SkipBlanks(p) || (!isLabelStart(p, false) && *p != '.')) return NULL;
+	if (SkipBlanks(p) || (!isLabelStart(p, false) && *p != '.')) return nullptr;
 	while (islabchar((byte)*p)) *np++ = *p++;
 	*np = 0;
 	return nidtemp;
@@ -347,7 +346,7 @@ int check24(aint val) {
 }
 
 void checkLowMemory(byte hiByte, byte lowByte) {
-	if (hiByte || !Options::syx.IsLowMemWarningEnabled || Relocation::isActive) return;
+	if (hiByte || Relocation::isActive) return;
 	// for addresses 0..255 issue warning
 	WarningById(W_READ_LOW_MEM, lowByte);
 }

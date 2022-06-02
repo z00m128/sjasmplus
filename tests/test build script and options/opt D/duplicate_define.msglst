@@ -1,0 +1,11 @@
+error: Duplicate define (replacing old value): cli_double
+error: Duplicate define (replacing old value): cli_double
+# file opened: duplicate_define.asm
+duplicate_define.asm(1): error: Duplicate define (replacing old value): src_double
+1     0000                  DEFINE src_double 4
+2     0000 01 04            DB 1, 4
+3     0002
+# file closed: duplicate_define.asm
+
+Value    Label
+------ - -----------------------------------------------------------

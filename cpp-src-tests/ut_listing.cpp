@@ -27,83 +27,85 @@ TEST(SjIo_PrepareListLine) {
 	substitutedLine = line;
 	listmacro = 0;
 	reglenwidth = 1;
-	CurSourcePos.line = 0;
+	assert(sourcePosStack.empty());
+	for (int inclevel = 11; inclevel--; ) sourcePosStack.push_back(TextFilePos());
 	IncludeLevel = 0;
 	PrepareListLine(listBuf, 0x1234);
 	CHECK_EQUAL("0     1234              ", listBuf);
 
-	CurSourcePos.line = 1;
 	IncludeLevel = 1;
+	sourcePosStack[IncludeLevel].line = 1;
 	PrepareListLine(listBuf, 0x1234);
 	CHECK_EQUAL("1+    1234              ", listBuf);
 
-	CurSourcePos.line = 2;
 	IncludeLevel = 10;
+	sourcePosStack[IncludeLevel].line = 2;
 	PrepareListLine(listBuf, 0x1234);
 	CHECK_EQUAL("2+++++1234              ", listBuf);
 
 	reglenwidth = 7;
-	CurSourcePos.line = 2;
 	IncludeLevel = 0;
+	sourcePosStack[IncludeLevel].line = 2;
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL("    2 FEDC              ", listBuf);
 
-	CurSourcePos.line = 99999;
 	IncludeLevel = 10;
+	sourcePosStack[IncludeLevel].line = 99999;
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL("99999+FEDC              ", listBuf);
 
-	CurSourcePos.line = 100000;
 	IncludeLevel = 0;
+	sourcePosStack[IncludeLevel].line = 100000;
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL(":0000 FEDC              ", listBuf);
 
-	CurSourcePos.line = 119900;
 	IncludeLevel = 10;
+	sourcePosStack[IncludeLevel].line = 119900;
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL(";9900+FEDC              ", listBuf);
 
-	CurSourcePos.line = 179999;
 	IncludeLevel = 0;
+	sourcePosStack[IncludeLevel].line = 179999;
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL("A9999 FEDC              ", listBuf);
 
-	CurSourcePos.line = 779999;		// last non "~" line
 	IncludeLevel = 10;
+	sourcePosStack[IncludeLevel].line = 779999;		// last non "~" line
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL("}9999+FEDC              ", listBuf);
 
-	CurSourcePos.line = 789999;
 	IncludeLevel = 0;
+	sourcePosStack[IncludeLevel].line = 789999;
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL("~9999 FEDC              ", listBuf);
 
-	CurSourcePos.line = 99999999;
 	IncludeLevel = 10;
+	sourcePosStack[IncludeLevel].line = 99999999;
 	PrepareListLine(listBuf, 0xFEDC);
 	CHECK_EQUAL("~9999+FEDC              ", listBuf);
 
 	// reglenwidth = 5 (maxpow10 = 100000, lines up to 99999)
 	IncludeLevel = 0;
 	reglenwidth = 5;
-	CurSourcePos.line = 9999;
+	sourcePosStack[IncludeLevel].line = 9999;
 	PrepareListLine(listBuf, 0xEDCB);
 	CHECK_EQUAL(" 9999 EDCB              ", listBuf);
-	CurSourcePos.line = 10000;
+	sourcePosStack[IncludeLevel].line = 10000;
 	PrepareListLine(listBuf, 0xEDCB);
 	CHECK_EQUAL("10000 EDCB              ", listBuf);
-	CurSourcePos.line = 99999;
+	sourcePosStack[IncludeLevel].line = 99999;
 	PrepareListLine(listBuf, 0xEDCB);
 	CHECK_EQUAL("99999 EDCB              ", listBuf);
 
 	// reglenwidth = 6 (maxpow10 = 1000000, lines up to 999999) (first truncated one)
 	reglenwidth = 6;
-	CurSourcePos.line = 99999;
+	sourcePosStack[IncludeLevel].line = 99999;
 	PrepareListLine(listBuf, 0xEDCB);
 	CHECK_EQUAL("99999 EDCB              ", listBuf);
-	CurSourcePos.line = 100000;
+	sourcePosStack[IncludeLevel].line = 100000;
 	PrepareListLine(listBuf, 0xEDCB);
 	CHECK_EQUAL(":0000 EDCB              ", listBuf);
+	sourcePosStack.clear();
 }
 
 #endif
