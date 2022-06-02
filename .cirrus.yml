@@ -107,7 +107,8 @@ task:
     CIRRUS_CLONE_DEPTH: 1
     CIRRUS_CLONE_SUBMODULES: true
   macos_instance:
-    image: big-sur-base
+    #image: big-sur-base
+    image: ghcr.io/cirruslabs/macos-monterey-base:latest
   #sw_versions2_script:
     #- git --version || echo "no git"
     #- bash --version || echo "no bash"
