@@ -48,7 +48,7 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 	if (pass < 1 || LASTPASS < pass || sourcePosStack.empty()) return;
 	SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", sourcePosStack.back().filename, sourcePosStack.back().line);
 	// if the error filename:line is not identical with current source line, add ErrorLine2 about emit
-	if (std::max(1UL, size_t(IncludeLevel + 1)) < sourcePosStack.size()) {
+	if (std::max(1, aint(IncludeLevel + 1)) < aint(sourcePosStack.size())) {
 		auto previous = sourcePosStack.end() - 2;
 		if (*previous == skipEmitMessagePos && previous != sourcePosStack.begin()) --previous;
 		if (*previous != skipEmitMessagePos && *previous != sourcePosStack.back()) {

@@ -63,7 +63,7 @@ static std::vector<TextFilePos> scripts_origin;
 static char internal_script_name[LINEMAX];
 
 static const char* lua_impl_get_script_name(const TextFilePos & srcPos) {
-	sprintf(internal_script_name, "script %lu", scripts_origin.size());
+	sprintf(internal_script_name, "script %u", uint32_t(scripts_origin.size()));
 	scripts_origin.push_back(srcPos);
 	return internal_script_name;
 }
