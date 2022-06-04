@@ -580,7 +580,7 @@ void CTemporaryLabelTable::InitPass() {
 }
 
 bool CTemporaryLabelTable::insertImpl(const aint labelNumber) {
-	labels.emplace_back(TemporaryLabel(labelNumber, CurAddress));
+	labels.emplace_back(labelNumber, CurAddress);
 	return true;
 }
 
@@ -1419,6 +1419,18 @@ int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	if (INT_MAX == address) st->emitmembs(p);	// address was not designed, emit also bytes
 	else if (!l) Warning("[STRUCT] designed address without label = no effect");
 	return 1;
+}
+
+SRepeatStack::SRepeatStack(aint count, CStringsList* condition, CStringsList* firstLine)
+	: RepeatCount(count), RepeatCondition(condition), Lines(firstLine), Pointer(firstLine), IsInWork(false), Level(0)
+{
+	assert(!sourcePosStack.empty());
+	sourcePos = sourcePosStack.back();
+}
+
+SRepeatStack::~SRepeatStack() {
+	if (RepeatCondition) delete RepeatCondition;
+	if (Lines) delete Lines;
 }
 
 //eof tables.cpp

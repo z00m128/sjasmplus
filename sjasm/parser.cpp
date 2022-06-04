@@ -829,9 +829,8 @@ int PrepareLine() {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
 			lp = line;
-			CStringsList* f = new CStringsList(lp);
-			dup.Pointer->next = f;
-			dup.Pointer = f;
+			dup.Pointer->next = new CStringsList(lp);
+			dup.Pointer = dup.Pointer->next;
 #ifdef DEBUG_COUT_PARSE_LINE
 			fprintf(stderr, ">%d %d %c%ld-%d [%s]\n", pass, CurSourcePos.line,
 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),

@@ -290,6 +290,9 @@ private:
 };
 
 struct SRepeatStack {
+	SRepeatStack(aint count, CStringsList* condition, CStringsList* firstLine);
+	~SRepeatStack();
+
 	int RepeatCount;
 	CStringsList* RepeatCondition;
 	TextFilePos sourcePos;

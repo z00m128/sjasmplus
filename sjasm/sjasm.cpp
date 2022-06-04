@@ -759,8 +759,6 @@ int main(int argc, char **argv) {
 			sourcePosStack.push_back(RepeatStack.top().sourcePos);	// mark DUP line with error
 			Error("[DUP/REPT] missing EDUP/ENDR to end repeat-block");
 			sourcePosStack.pop_back();
-			delete RepeatStack.top().Lines;
-			if (RepeatStack.top().RepeatCondition) delete RepeatStack.top().RepeatCondition;
 			RepeatStack.pop();
 		}
 
