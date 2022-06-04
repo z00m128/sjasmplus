@@ -171,7 +171,7 @@ extern CStringsList* lijstp;
 extern std::stack<SRepeatStack> RepeatStack;
 
 extern CLabelTable LabelTable;
-extern CLocalLabelTable LocalLabelTable;
+extern CTemporaryLabelTable TemporaryLabelTable;
 extern CDefineTable DefineTable;
 extern CMacroDefineTable MacroDefineTable;
 extern CMacroTable MacroTable;

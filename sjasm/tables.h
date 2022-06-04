@@ -68,7 +68,7 @@ extern char* PreviousIsLabel;
 bool LabelExist(char*& p, aint& val);
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);
-int GetLocalLabelValue(char*& op, aint& val, bool requireUnderscore = false);
+int GetTemporaryLabelValue(char*& op, aint& val, bool requireUnderscore = false);
 
 constexpr int LABEL_PAGE_UNDEFINED = -1;
 constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
@@ -126,26 +126,25 @@ public:
 	int zoek(const char*);
 };
 
-class CLocalLabelTableEntry {
-public:
+struct TemporaryLabel {
 	aint nummer, value;
-	CLocalLabelTableEntry* next, * prev;
 	bool isRelocatable;
-	CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous);
+	TemporaryLabel(aint number, aint address);
 };
 
-class CLocalLabelTable {
+class CTemporaryLabelTable {
 public:
-	CLocalLabelTable();
-	~CLocalLabelTable();
+	CTemporaryLabelTable();
 	void InitPass();
-	CLocalLabelTableEntry* seekForward(const aint labelNumber) const;
-	CLocalLabelTableEntry* seekBack(const aint labelNumber) const;
+	const TemporaryLabel* seekForward(const aint labelNumber) const;
+	const TemporaryLabel* seekBack(const aint labelNumber) const;
 	bool InsertRefresh(const aint labelNumber);
 private:
+	typedef std::vector<TemporaryLabel> temporary_labels_t;
+	temporary_labels_t labels;
+	temporary_labels_t::size_type refresh;
 	bool insertImpl(const aint labelNumber);
 	bool refreshImpl(const aint labelNumber);
-	CLocalLabelTableEntry* first, * last, * refresh;
 };
 
 class CStringsList {

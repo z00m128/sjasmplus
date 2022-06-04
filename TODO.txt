@@ -18,8 +18,6 @@ relocation -> extra support for Next driver banks?
 
 "smc+?" syntax to pick most logical argument by assembler itself
 
-? refactor temporary labels from double-linked list to simple vector ?
-
 add block/reserve which does really preserve the device memory content (currently only the
 structure block+align does preserve memory, and standalone ALIGN, but not DS/BLOCK)
 
