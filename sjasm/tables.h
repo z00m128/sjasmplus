@@ -100,6 +100,8 @@ class CLabelTable {
 private:
 	symbol_map_t symbols;
 public:
+	CLabelTable(const CLabelTable&) = delete;
+	CLabelTable& operator=(CLabelTable const &) = delete;
 	CLabelTable() { symbols.reserve(LABTABSIZE); }
 	int Insert(const char* nname, aint nvalue, unsigned traits = 0, short equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char* name, aint value);
@@ -120,6 +122,8 @@ class CFunctionTable {
 private:
 	function_map_t functions;
 public:
+	CFunctionTable(const CFunctionTable&) = delete;
+	CFunctionTable& operator=(CFunctionTable const &) = delete;
 	CFunctionTable() { functions.reserve(FUNTABSIZE); }
 	int Insert(const char*, function_fn_t);
 	int insertd(const char*, function_fn_t);
@@ -134,6 +138,8 @@ struct TemporaryLabel {
 
 class CTemporaryLabelTable {
 public:
+	CTemporaryLabelTable(const CTemporaryLabelTable&) = delete;
+	CTemporaryLabelTable& operator=(CTemporaryLabelTable const &) = delete;
 	CTemporaryLabelTable();
 	void InitPass();
 	const TemporaryLabel* seekForward(const aint labelNumber) const;
@@ -154,6 +160,8 @@ public:
 	TextFilePos source;
 	~CStringsList();
 	CStringsList(const char* stringSource, CStringsList* next = NULL);
+	CStringsList(const CStringsList&) = delete;
+	CStringsList& operator=(CStringsList const &) = delete;
 
 	static bool contains(const CStringsList* strlist, const char* searchString);
 };
@@ -163,6 +171,8 @@ public:
 	char* name, * value;
 	CStringsList* nss;
 	CDefineTableEntry* next;
+	CDefineTableEntry(const CDefineTableEntry&) = delete;
+	CDefineTableEntry& operator=(CDefineTableEntry const &) = delete;
 	CDefineTableEntry(const char*, const char*, CStringsList*, CDefineTableEntry*);
 	~CDefineTableEntry();
 	void Replace(const char* nvalue);
@@ -211,6 +221,8 @@ public:
 	char* naam;
 	CStringsList* args, * body;
 	CMacroTableEntry* next;
+	CMacroTableEntry(const CMacroTableEntry&) = delete;
+	CMacroTableEntry& operator=(CMacroTableEntry const &) = delete;
 	CMacroTableEntry(char* nname, CMacroTableEntry* nnext);
 	~CMacroTableEntry();
 };
@@ -221,6 +233,8 @@ public:
 	int Emit(char*, char*&);
 	int FindDuplicate(const char*);
 	void ReInit();
+	CMacroTable(const CMacroTable&) = delete;
+	CMacroTable& operator=(CMacroTable const &) = delete;
 	CMacroTable();
 	~CMacroTable();
 private:
@@ -233,6 +247,8 @@ public:
 	char* naam;
 	aint offset;
 	CStructureEntry1* next;
+	CStructureEntry1(const CStructureEntry1&) = delete;
+	CStructureEntry1& operator=(CStructureEntry1 const &) = delete;
 	CStructureEntry1(char*, aint);
 	~CStructureEntry1();
 };
@@ -246,6 +262,8 @@ public:
 	bool defRelocatable;
 	EStructureMembers type;
 
+	CStructureEntry2(const CStructureEntry2&) = delete;
+	CStructureEntry2& operator=(CStructureEntry2 const &) = delete;
 	CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndefrel, EStructureMembers ntype);
 	CStructureEntry2(aint noffset, aint nlen, byte* textData);
 	~CStructureEntry2();
@@ -266,6 +284,8 @@ public:
 	void emitlab(char* iid, aint address, bool isRelocatable);
 	void emitmembs(char*&);
 	CStructure* next;
+	CStructure(const CStructure&) = delete;
+	CStructure& operator=(CStructure const &) = delete;
 	CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p);
 	~CStructure();
 private:
@@ -279,6 +299,8 @@ class CStructureTable {
 public:
 	CStructure* Add(char* naam, int no, int gl);
 	void ReInit();
+	CStructureTable(const CStructureTable&) = delete;
+	CStructureTable& operator=(CStructureTable const &) = delete;
 	CStructureTable();
 	~CStructureTable();
 	CStructure* zoek(const char*, int);
@@ -290,6 +312,8 @@ private:
 };
 
 struct SRepeatStack {
+	SRepeatStack(const SRepeatStack&) = delete;
+	SRepeatStack& operator=(SRepeatStack const &) = delete;
 	SRepeatStack(aint count, CStringsList* condition, CStringsList* firstLine);
 	~SRepeatStack();
 
