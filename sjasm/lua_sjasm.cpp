@@ -97,7 +97,7 @@ static int addLuaSourcePositions() {
 		if (isInlinedScript(levelErrorPos, ar.short_src)) {
 			levelErrorPos.line += ar.currentline;
 		} else {
-			levelErrorPos.filename = ArchiveFilename(ar.short_src);
+			levelErrorPos.newFile(ArchiveFilename(ar.short_src));
 			levelErrorPos.line = ar.currentline;
 		}
 		luaPosTemp.push_back(levelErrorPos);
@@ -133,7 +133,7 @@ static TextFilePos lua_impl_splitLuaErrorMessage(const char*& LuaError) {
 	} else {
 		// standalone script, use file name and line number as is (if provided by lua error)
 		STRNCPY(internal_script_name, LINEMAX, LuaError, colonPos - LuaError);
-		luaErrorPos.filename = ArchiveFilename(internal_script_name);
+		luaErrorPos.newFile(ArchiveFilename(internal_script_name));
 		luaErrorPos.line = lineNumber;
 	}
 
