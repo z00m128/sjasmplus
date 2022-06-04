@@ -295,7 +295,13 @@ int GetLocalLabelValue(char*& op, aint& val, bool requireUnderscore) {
 	auto label = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
 	if (label) {
 		val = label->value;
-		Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
+		if (requireUnderscore) {				// part of full expression, do relocation by +offset
+			if (label->isRelocatable && Relocation::areLabelsOffset) {
+				val += Relocation::ALTERNATIVE_OFFSET;
+			}
+		} else {								// single-label-only in jump/call instructions
+			Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
+		}
 	} else {
 		if (LASTPASS == pass) Error("Temporary label not found", numberB, SUPPRESS);
 		val = 0L;

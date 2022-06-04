@@ -3,14 +3,14 @@
 ; first section is not part of relocation table
 1:
 
-    jr      1B                  ; opcode should be in relocation table
+    jr      1B
     jr      nz,1B
     jr      z,1B
     jr      nc,1B
     jr      c,1B
 
     jp      nz,1B
-    jp      1B                  ; opcode should be in relocation table
+    jp      1B
     jp      z,1B
     jp      nc,1B
     jp      c,1B
@@ -29,14 +29,14 @@
     call    p,1B
     call    m,1B
 
-    jr      1F                  ; opcode should be in relocation table
+    jr      1F
     jr      nz,1F
     jr      z,1F
     jr      nc,1F
     jr      c,1F
 
     jp      nz,1F
-    jp      1F                  ; opcode should be in relocation table
+    jp      1F
     jp      z,1F
     jp      nc,1F
     jp      c,1F

@@ -1,0 +1,83 @@
+# file opened: relocation_temporary_labels_exp.asm
+ 1    0000              ; since v1.19.0 it is possible to use temporary labels also in expressions,
+ 2    0000              ; but it was not test-covered for relocation use cases, adding the test (and fix) now
+ 3    0000
+ 4    0000              ; first section is not part of relocation table
+ 5    0000                  ORG $1000
+ 6    1000              2:
+ 7    1000
+ 8    1000 21 00 10         ld      hl,2_B
+ 9    1003 21 09 10         ld      hl,2_F
+10    1006 21 0D 10         ld      hl,3_F              ; not in relocation table, even with relocatable label
+11    1009
+12    1009              2:
+13    1009
+14    1009              ; second section does test relocation
+15    1009
+16    1009                  RELOCATE_START
+17    1009
+18    1009                  ASSERT 2 * relocate_count == relocate_size
+19    1009                  ASSERT 8 == relocate_count
+20    1009 08 00            dw      relocate_count
+21    100B 10 00            dw      relocate_size
+22    100D
+23    100D              3:                              ; usage of this label should trigger relocation
+24    100D
+25    100D                  ORG $2000
+26    2000                  ; no relocation cases
+27    2000 21 09 10         ld      hl,2_B
+28    2003 21 1F 40         ld      hl,2_F
+29    2006 21 0D 10         ld      hl,norel 3_B
+30    2009 21 0F 40         ld      hl,norel 3_F
+31    200C 21 41 22         ld      hl,norel 3_B + 0x1234
+32    200F 21 43 52         ld      hl,norel 3_F + 0x1234
+33    2012 21 41 22         ld      hl,0x1234 + norel 3_B
+34    2015 21 43 52         ld      hl,0x1234 + norel 3_F
+35    2018 21 02 30         ld      hl,3_F - 3_B
+36    201B C3 0D 10         jp      norel 3_B
+37    201E C3 0F 40         jp      norel 3_F
+38    2021
+39    2021                  ORG $3000
+40    3000                  ; relocation cases
+41    3000 21 0D 10         ld      hl,3_B
+42    3003 21 0F 40         ld      hl,3_F
+43    3006 21 41 22         ld      hl,3_B + 0x1234
+44    3009 21 43 52         ld      hl,3_F + 0x1234
+45    300C 21 41 22         ld      hl,0x1234 + 3_B
+46    300F 21 43 52         ld      hl,0x1234 + 3_F
+47    3012 C3 0D 10         jp      3_B
+48    3015 C3 0F 40         jp      3_F
+49    3018
+50    3018                  ORG $4000
+51    4000                  ; unstable expressions
+relocation_temporary_labels_exp.asm(52): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+52    4000 21 0D 00         ld      hl,low 3_B
+relocation_temporary_labels_exp.asm(53): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+53    4003 21 0F 00         ld      hl,low 3_F
+relocation_temporary_labels_exp.asm(54): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+54    4006 21 10 00         ld      hl,high 3_B
+relocation_temporary_labels_exp.asm(55): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+55    4009 21 40 00         ld      hl,high 3_F
+relocation_temporary_labels_exp.asm(56): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+56    400C 21 20 B0         ld      hl,3*3_F - 3_B
+57    400F
+58    400F              3:                              ; usage of this label should trigger relocation
+59    400F
+60    400F                  ; the relocation table must be after all temporary labels, as those don't manage
+61    400F                  ; to settle down within 3 passes if there's dynamic-size table ahead, and "forward"
+62    400F                  ; labels are referenced
+63    400F 01 30 04 30      RELOCATE_TABLE              ; should emit the 16 addresses of opcode data
+63    4013 07 30 0A 30
+63    4017 0D 30 10 30
+63    401B 13 30 16 30
+64    401F
+65    401F                  RELOCATE_END
+66    401F
+67    401F              2:
+68    401F
+# file closed: relocation_temporary_labels_exp.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0008   relocate_count
+0x0010   relocate_size
