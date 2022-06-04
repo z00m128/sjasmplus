@@ -190,7 +190,7 @@ CDevice *Devices = nullptr;
 CDevice *Device = nullptr;
 CDevicePage *Page = nullptr;
 char* DeviceID = nullptr;
-TextFilePos globalDeviceSourcePos = TextFilePos();
+TextFilePos globalDeviceSourcePos;
 aint deviceDirectivesCount = 0;
 static char* globalDeviceID = nullptr;
 static aint globalDeviceZxRamTop = 0;
@@ -759,6 +759,8 @@ int main(int argc, char **argv) {
 			sourcePosStack.push_back(RepeatStack.top().sourcePos);	// mark DUP line with error
 			Error("[DUP/REPT] missing EDUP/ENDR to end repeat-block");
 			sourcePosStack.pop_back();
+			delete RepeatStack.top().Lines;
+			if (RepeatStack.top().RepeatCondition) delete RepeatStack.top().RepeatCondition;
 			RepeatStack.pop();
 		}
 

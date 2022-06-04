@@ -132,7 +132,7 @@ various_W.asm(96): warning[luamc]: When lua script emits machine code bytes, use
  99   007E                  endlua
 100   007E                  lua pass3
 101   007E ~                    _pc("nop")
-102   007E 00           nop; but luamc-ok should suppress it (also at "endlua" line)
+102   007E 00           nop
 102   007F                  endlua      ; but luamc-ok should suppress it (also at "endlua" line)
 103   007F
 104   007F                  ; nexstack

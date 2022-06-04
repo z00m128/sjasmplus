@@ -31,10 +31,7 @@
 #include <assert.h>
 #include "sjdefs.h"
 
-TextFilePos::TextFilePos(const char* fileNamePtr) : filename(fileNamePtr), line(0), colBegin(0), colEnd(0) {
-}
-
-TextFilePos::TextFilePos() : TextFilePos(nullptr) {
+TextFilePos::TextFilePos(const char* fileNamePtr, uint32_t line) : filename(fileNamePtr), line(line), colBegin(0), colEnd(0) {
 }
 
 void TextFilePos::newFile(const char* fileNamePtr) {
@@ -698,7 +695,7 @@ static char defineGet__Line__Buffer[32] = {};
 
 const char* CDefineTable::Get(const char* name) {
 	DefArrayList = nullptr;
-	if (nullptr == name) return nullptr;
+	if (nullptr == name || 0 == name[0]) return nullptr;
 	// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
 	if ('_' == name[1]) {
 		if (!strcmp(name, "__COUNTER__")) {

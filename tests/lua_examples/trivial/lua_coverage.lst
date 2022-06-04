@@ -1,5 +1,6 @@
 lua_coverage.asm(7): error: [INCLUDELUA] File doesn't exist: neverfile.lua
 lua_coverage.asm(1): error: [LUA] syntax error near 'error'
+lua_coverage.asm(8): ^ emitted from here
 # file opened: lua_coverage.asm
  1    0000              ; various error states, etc... (not a good fit elsewhere)
 lua_coverage.asm(2): error: [ENDLUA] End of lua script without script
@@ -27,23 +28,24 @@ lua_coverage.asm(11): error: [LUA] unexpected symbol near '%'
 21    0000
 22    0000                  LUA         ; check read-only property of the directly mapped values
 23    0000 ~                    sj.current_address = 1
-lua_coverage.asm(22): error: [LUA] 'current_address' is read-only
+lua_coverage.asm(24): error: [LUA] 'current_address' is read-only
 24    0000                  ENDLUA
 25    0000                  LUA
 26    0000 ~                    sj.error_count = 2
-lua_coverage.asm(25): error: [LUA] 'error_count' is read-only
+lua_coverage.asm(27): error: [LUA] 'error_count' is read-only
 27    0000                  ENDLUA
 28    0000                  LUA
 29    0000 ~                    sj.warning_count = 3
-lua_coverage.asm(28): error: [LUA] 'warning_count' is read-only
+lua_coverage.asm(30): error: [LUA] 'warning_count' is read-only
 30    0000                  ENDLUA
 31    0000
 32    0000
 33    0000                  LUA pass3
 34    0000 ~                    someErrorInLua(1, 2, 3)
 35    0000 ~
-lua_coverage.asm(33): error: [LUA] Unexpected end of lua script
+lua_coverage.asm(35): error: [LUA] Unexpected end of lua script
 lua_coverage.asm(34): error: [LUA] attempt to call a nil value (global 'someErrorInLua')
+lua_coverage.asm(35): ^ emitted from here
 35    0000
 # file closed: lua_coverage.asm
 

@@ -35,13 +35,20 @@ struct TextFilePos {
 	uint32_t		line;				// line numbering start at 1 (human way) 0 = invalid/init value
 	uint32_t 		colBegin, colEnd;	// columns coordinates are unused at this moment
 
-	TextFilePos(const char* fileNamePtr);
-	TextFilePos();
+	TextFilePos(const char* fileNamePtr = nullptr, uint32_t line = 0);
 	void newFile(const char* fileNamePtr);	// requires stable immutable pointer (until sjasmplus exits)
 
 	// advanceColumns are valid only when true == endsWithColon (else advanceColumns == 0)
 	// default arguments are basically "next line"
 	void nextSegment(bool endsWithColon = false, size_t advanceColumns = 0);
+
+	inline bool operator == (const TextFilePos & b) const {
+		// compares pointers to filenames (!), as they should be stable, provided by ArchiveFilename
+		return filename == b.filename && line == b.line;
+	}
+	inline bool operator != (const TextFilePos & b) const {
+		return !(*this == b);
+	}
 };
 
 typedef std::vector<TextFilePos> source_positions_t;

@@ -32,17 +32,8 @@
 #include <unordered_map>
 #include <algorithm>
 
-#ifdef USE_LUA
-
-	// io_err.cpp is allowed to work with Lua stuff (and LUA global)
-	// no other file (except lua_sjasm.cpp) should need to include/reference these!
-
-	#include "lua.hpp"
-
-	extern lua_State *LUA;
-	extern TextFilePos LuaStartPos;
-
-#endif //USE_LUA
+TextFilePos skipEmitMessagePos;
+const char* extraErrorWarningPrefix = nullptr;
 
 static bool IsSkipErrors = false;
 static char ErrorLine[LINEMAX2], ErrorLine2[LINEMAX2];
@@ -55,46 +46,15 @@ static void initErrorLine() {		// adds filename + line of definition if possible
 	*ErrorLine2 = 0;
 	// when OpenFile is reporting error, the filename is still nullptr, but pass==1 already
 	if (pass < 1 || LASTPASS < pass || sourcePosStack.empty()) return;
-	TextFilePos errorPos = sourcePosStack.back();
-
-#ifdef USE_LUA
-	lua_Debug ar;					// must be in this scope, as some memory is reused by errorPos
-	bool extra_lua_err = false;
-	if (LuaStartPos.line) {
-		assert(LUA);
-		errorPos = LuaStartPos;
-
-		// find either top level of lua stack, or standalone file, otherwise it's impossible
-		// to precisely report location of error (ASM can have 2+ LUA blocks defining functions)
-		int level = 1;			// level 0 is "C" space, ignore that always
-		while (true) {
-			if (!lua_getstack(LUA, level, &ar)) break;	// no more lua stack levels
-			if (!lua_getinfo(LUA, "Sl", &ar)) break;	// no more info about current level
-			//TODO track each chunk under own name, and track their source position
-			if (strcmp("[string \"script\"]", ar.short_src)) {
-				// standalone definition in external file found, pinpoint it precisely
-				errorPos.filename = ar.short_src;
-				errorPos.line = ar.currentline;
-				break;	// no more lua-stack traversing, stop here
-			}
-			// if source was inlined script, update the possible source line
-			errorPos.line = LuaStartPos.line + ar.currentline;
-			// and keep traversing stack until top level is found (to make the line meaningful)
-			++level;
-		}
-		extra_lua_err = strcmp(errorPos.filename, sourcePosStack.back().filename);
-		if (extra_lua_err) sourcePosStack.push_back(errorPos);
-	}
-#endif //USE_LUA
-
-	SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", errorPos.filename, errorPos.line);
+	SPRINTF2(ErrorLine, LINEMAX2, "%s(%d): ", sourcePosStack.back().filename, sourcePosStack.back().line);
 	// if the error filename:line is not identical with current source line, add ErrorLine2 about emit
-	if (2 <= sourcePosStack.size() && size_t(IncludeLevel + 1) < sourcePosStack.size()) {
-		SPRINTF2(ErrorLine2, LINEMAX2, "%s(%d): ^ emitted from here\n", sourcePosStack.end()[-2].filename, sourcePosStack.end()[-2].line);
+	if (std::max(1UL, size_t(IncludeLevel + 1)) < sourcePosStack.size()) {
+		auto previous = sourcePosStack.end() - 2;
+		if (*previous == skipEmitMessagePos && previous != sourcePosStack.begin()) --previous;
+		if (*previous != skipEmitMessagePos && *previous != sourcePosStack.back()) {
+			SPRINTF2(ErrorLine2, LINEMAX2, "%s(%d): ^ emitted from here\n", previous->filename, previous->line);
+		}
 	}
-#ifdef USE_LUA
-	if (extra_lua_err) sourcePosStack.pop_back();
-#endif //USE_LUA
 }
 
 static void trimAndAddEol(char* lineBuffer) {
@@ -144,9 +104,7 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 
 	initErrorLine();
 	STRCAT(ErrorLine, LINEMAX2-1, "error: ");
-#ifdef USE_LUA
-	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
-#endif
+	if (extraErrorWarningPrefix) STRCAT(ErrorLine, LINEMAX2-1, extraErrorWarningPrefix);
 	STRCAT(ErrorLine, LINEMAX2-1, message ? message : nullptr_message_txt);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
@@ -188,9 +146,7 @@ static void WarningImpl(const char* id, const char* message, const char* badValu
 	} else {
 		STRCAT(ErrorLine, LINEMAX2-1, "warning: ");
 	}
-#ifdef USE_LUA
-	if (LuaStartPos.line) STRCAT(ErrorLine, LINEMAX2-1, "[LUA] ");
-#endif
+	if (extraErrorWarningPrefix) STRCAT(ErrorLine, LINEMAX2-1, extraErrorWarningPrefix);
 	STRCAT(ErrorLine, LINEMAX2-1, message ? message : nullptr_message_txt);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);

@@ -5,14 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-Lua error reporting: if function is defined in different anonymous block, only the emit
-line is reported in error message. If each anonymous block would get unique name, and
-track the starting position of the definition, then it would be possible to report even
-errors from inside lua functions defined in current asm file with the definition-line of
-error + "emitted here" line.
-
-Check build with system lua (needs OS with 5.4 package ... oops)
-
 http://no-color.org/    -> add to web after v1.20.0 release
 
 listing with pre-substituted original source line included
@@ -20,6 +12,9 @@ listing with pre-substituted original source line included
  output: maybe `<` like macros have `>`? and missing address, only line number?
 
 relocation -> extra support for 256B aligned relocation mode (For symbOS and NextZXOS drivers)
+
+relocation -> extra support for Next driver banks?
+(see Robin's https://github.com/Threetwosevensixseven/ZXRelocate to learn what exactly that means)
 
 "smc+?" syntax to pick most logical argument by assembler itself
 

@@ -69,6 +69,7 @@ const char* ArchiveFilename(const char* fullpathname) {
 // does release all archived filenames, making all pointers (and archive itself) invalid
 void ReleaseArchivedFilenames() {
 	for (auto filename : archivedFileNames) free((void*)filename);
+	archivedFileNames.clear();
 }
 
 // find position of extension in filename (points at dot char or beyond filename if no extension)
