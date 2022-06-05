@@ -210,11 +210,14 @@
               <synopsis>- Lua: <link linkend="c_lua_scripting">upgrade to 5.4</link>, replacing tolua++ bindings with LuaBridge2.6 library, extending some bindings
 - Lua: bindings slightly modified (required by upgrade), refreshed docs, added test coverage
 - Lua: the 3rd party extensions (BTW not working for many years) are obsolete in 5.4 and removed
+- Lua: more accurate errors/warning location reported even in complex cases
 - warnings: added -Wall, --help=warnings shows on/off status, rdlow off by default
 - many open-file "fatal" errors become "non-fatal", assembling will continue
 - deprecated features removed: --syntax=m, label `abs` in expressions
 - `--color=auto` will stay no-color when <ulink url="https://no-color.org/">env.var. `NO_COLOR`</ulink> is defined
 - refactorings, improving some error messages and parsing, small fixes in parsing logic
+- fix listing of Lua's sj.parse_code (eol-comments), minor memory leaks fixed
+- fix relocation of temporary labels in expressions
 </synopsis>
             </listitem>
           </varlistentry>
