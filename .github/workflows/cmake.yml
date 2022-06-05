@@ -33,8 +33,7 @@ jobs:
       shell: cmd
       run: |
         rem Set GIT directory as priority (over MS crap) path to borrow GNU: bash, find, diff, cmp
-        set PATH=C:\Program Files\Git\bin\;%PATH%
-        copy build\Release\sjasmplus.exe sjasmplus.exe
+        set PATH="C:\Program Files\Git\usr\bin\";"${{github.workspace}}\build\Release\";%PATH%;
         sjasmplus.exe --version
         sjasmplus.exe --help
         sjasmplus.exe --help=warnings
