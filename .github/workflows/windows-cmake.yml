@@ -38,19 +38,19 @@ jobs:
         @rem where cmp
         @rem where gcc
         @rem where mingw32-make
-        echo "*** Set GIT directory as priority (over MS crap) path to borrow GNU: bash, find, diff, cmp"
+        echo *** Set GIT directory as priority (over MS crap) path to borrow GNU: bash, find, diff, cmp
         set PATH="C:\Program Files\Git\usr\bin\";"${{github.workspace}}\build\${{env.BUILD_TYPE}}\";%PATH%;
-        echo "*** check versions of GNU tools"
+        echo *** check versions of GNU tools
         bash --version
         find --version
         diff --version
         cmp --version
         @rem gcc --version
         @rem mingw32-make --version
-        echo "*** Check sjasmplus.exe availability+version+help"
-        sjasmplus.exe --help
-        sjasmplus.exe --help=warnings
-        echo "*** run tests"
+        echo *** Check sjasmplus.exe availability+version+help
+        bash -c "sjasmplus.exe --help"
+        bash -c "sjasmplus.exe --help=warnings"
+        echo *** run tests
         bash ContinuousIntegration/test_folder_tests.sh
-        echo "*** run examples"
+        echo *** run examples
         bash ContinuousIntegration/test_folder_examples.sh
