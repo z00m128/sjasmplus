@@ -35,8 +35,9 @@ jobs:
         rem Set GIT directory as priority (over MS crap) path to borrow GNU: bash, find, diff, cmp
         set PATH="C:\Program Files\Git\usr\bin\";"${{github.workspace}}\build\Release\";%PATH%;
         sjasmplus.exe --version
-        sjasmplus.exe --help
-        sjasmplus.exe --help=warnings
+        bash -c "sjasmplus.exe --help"
+        bash -c "sjasmplus.exe --help=warnings"
+        bash -c "echo invalid \| sjasmplus.exe -"
         where bash
         bash --version
         where find
