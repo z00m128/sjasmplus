@@ -1,0 +1,56 @@
+name: windows-CMake
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      shell: cmd
+      run: |
+        @rem where bash
+        @rem where find
+        @rem where diff
+        @rem where cmp
+        @rem where gcc
+        @rem where mingw32-make
+        echo *** Set GIT directory as priority (over MS crap) path to borrow GNU: bash, find, diff, cmp
+        set PATH="C:\Program Files\Git\usr\bin\";"${{github.workspace}}\build\${{env.BUILD_TYPE}}\";%PATH%;
+        echo *** check versions of GNU tools
+        bash --version
+        find --version
+        diff --version
+        cmp --version
+        @rem gcc --version
+        @rem mingw32-make --version
+        echo *** Check sjasmplus.exe availability+version+help
+        bash -c "sjasmplus.exe --help"
+        bash -c "sjasmplus.exe --help=warnings"
+        echo *** run tests
+        bash ContinuousIntegration/test_folder_tests.sh
+        echo *** run examples
+        bash ContinuousIntegration/test_folder_examples.sh

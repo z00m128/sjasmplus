@@ -4,14 +4,14 @@
   3   1000              ; first section is not part of relocation table
   4   1000              1:
   5   1000
-  6   1000 18 FE            jr      1B                  ; opcode should be in relocation table
+  6   1000 18 FE            jr      1B
   7   1002 20 FC            jr      nz,1B
   8   1004 28 FA            jr      z,1B
   9   1006 30 F8            jr      nc,1B
  10   1008 38 F6            jr      c,1B
  11   100A
  12   100A C2 00 10         jp      nz,1B
- 13   100D C3 00 10         jp      1B                  ; opcode should be in relocation table
+ 13   100D C3 00 10         jp      1B
  14   1010 CA 00 10         jp      z,1B
  15   1013 D2 00 10         jp      nc,1B
  16   1016 DA 00 10         jp      c,1B
@@ -30,14 +30,14 @@
  29   103A F4 00 10         call    p,1B
  30   103D FC 00 10         call    m,1B
  31   1040
- 32   1040 18 3E            jr      1F                  ; opcode should be in relocation table
+ 32   1040 18 3E            jr      1F
  33   1042 20 3C            jr      nz,1F
  34   1044 28 3A            jr      z,1F
  35   1046 30 38            jr      nc,1F
  36   1048 38 36            jr      c,1F
  37   104A
  38   104A C2 80 10         jp      nz,1F
- 39   104D C3 80 10         jp      1F                  ; opcode should be in relocation table
+ 39   104D C3 80 10         jp      1F
  40   1050 CA 80 10         jp      z,1F
  41   1053 D2 80 10         jp      nc,1F
  42   1056 DA 80 10         jp      c,1F

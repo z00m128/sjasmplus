@@ -66,6 +66,9 @@ extern const char* W_BE_HOST;
 extern const char* W_FAKE;
 extern const char* W_ENABLE_ALL;
 
+extern TextFilePos skipEmitMessagePos;
+extern const char* extraErrorWarningPrefix;
+
 void Error(const char* message, const char* badValueMessage = nullptr, EStatus type = PASS3);
 void ErrorInt(const char* message, aint badValue, EStatus type = PASS3);
 void ErrorOOM();		// out of memory

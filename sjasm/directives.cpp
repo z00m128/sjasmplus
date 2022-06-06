@@ -1873,17 +1873,8 @@ static void DupWhileImplementation(bool isWhile) {
 		}
 	}
 
-	SRepeatStack dup;
-	dup.RepeatCount = val;
-	dup.RepeatCondition = condition;
-	dup.Level = 0;
-	dup.Lines = new CStringsList(lp);
+	RepeatStack.emplace(val, condition, new CStringsList(lp));
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
-	dup.Pointer = dup.Lines;
-	assert(!sourcePosStack.empty());
-	dup.sourcePos = sourcePosStack.back();
-	dup.IsInWork = false;
-	RepeatStack.push(dup);
 }
 
 static void dirDUP() {
@@ -1960,8 +1951,6 @@ static void dirEDUP() {
 		}
 	}
 	sourcePosStack.back() = oSourcePos;
-	delete dup.Lines;
-	if (dup.RepeatCondition) delete dup.RepeatCondition;
 	RepeatStack.pop();
 	lijstp = olijstp;
 	--lijst;

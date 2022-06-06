@@ -69,6 +69,7 @@ const char* ArchiveFilename(const char* fullpathname) {
 // does release all archived filenames, making all pointers (and archive itself) invalid
 void ReleaseArchivedFilenames() {
 	for (auto filename : archivedFileNames) free((void*)filename);
+	archivedFileNames.clear();
 }
 
 // find position of extension in filename (points at dot char or beyond filename if no extension)
@@ -540,7 +541,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
 	fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
-	sourcePosStack.emplace_back(TextFilePos(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull)));
+	sourcePosStack.emplace_back(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);

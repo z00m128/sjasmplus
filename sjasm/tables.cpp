@@ -31,10 +31,7 @@
 #include <assert.h>
 #include "sjdefs.h"
 
-TextFilePos::TextFilePos(const char* fileNamePtr) : filename(fileNamePtr), line(0), colBegin(0), colEnd(0) {
-}
-
-TextFilePos::TextFilePos() : TextFilePos(nullptr) {
+TextFilePos::TextFilePos(const char* fileNamePtr, uint32_t line) : filename(fileNamePtr), line(line), colBegin(0), colEnd(0) {
 }
 
 void TextFilePos::newFile(const char* fileNamePtr) {
@@ -278,7 +275,7 @@ bool GetLabelValue(char*& p, aint& val) {
 	return !getLabel_invalidName;
 }
 
-int GetLocalLabelValue(char*& op, aint& val, bool requireUnderscore) {
+int GetTemporaryLabelValue(char*& op, aint& val, bool requireUnderscore) {
 	char* p = op;
 	if (SkipBlanks(p) || !isdigit((byte)*p)) return 0;
 	char* const numberB = p;
@@ -295,10 +292,16 @@ int GetLocalLabelValue(char*& op, aint& val, bool requireUnderscore) {
 	if ('_' == *op) ++op;
 	++op;
 	// ^^ advance main parsing pointer op beyond the local label (here it *is* local label)
-	auto label = ('b' == type) ? LocalLabelTable.seekBack(val) : LocalLabelTable.seekForward(val);
+	auto label = ('b' == type) ? TemporaryLabelTable.seekBack(val) : TemporaryLabelTable.seekForward(val);
 	if (label) {
 		val = label->value;
-		Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
+		if (requireUnderscore) {				// part of full expression, do relocation by +offset
+			if (label->isRelocatable && Relocation::areLabelsOffset) {
+				val += Relocation::ALTERNATIVE_OFFSET;
+			}
+		} else {								// single-label-only in jump/call instructions
+			Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
+		}
 	} else {
 		if (LASTPASS == pass) Error("Temporary label not found", numberB, SUPPRESS);
 		val = 0L;
@@ -564,61 +567,48 @@ int CFunctionTable::zoek(const char* name) {
 	return 1;
 }
 
-CLocalLabelTableEntry::CLocalLabelTableEntry(aint number, aint address, CLocalLabelTableEntry* previous) {
-	nummer = number;
-	value = address;
-	isRelocatable = Relocation::isActive;
-	prev = previous; next = NULL;
-	if (previous) previous->next = this;
+TemporaryLabel::TemporaryLabel(aint number, aint address)
+	: nummer(number), value(address), isRelocatable(Relocation::isActive) {}
+
+CTemporaryLabelTable::CTemporaryLabelTable() {
+	labels.reserve(128);
+	refresh = 0;
 }
 
-CLocalLabelTable::CLocalLabelTable() {
-	first = last = refresh = NULL;
+void CTemporaryLabelTable::InitPass() {
+	refresh = 0;		// reset refresh pointer for next pass
 }
 
-CLocalLabelTable::~CLocalLabelTable() {
-	while (last) {		// release all local labels
-		refresh = last->prev;
-		delete last;
-		last = refresh;
-	}
-}
-
-void CLocalLabelTable::InitPass() {
-	// reset refresh pointer for next pass
-	refresh = first;
-}
-
-bool CLocalLabelTable::insertImpl(const aint labelNumber) {
-	last = new CLocalLabelTableEntry(labelNumber, CurAddress, last);
-	if (!first) first = last;
+bool CTemporaryLabelTable::insertImpl(const aint labelNumber) {
+	labels.emplace_back(labelNumber, CurAddress);
 	return true;
 }
 
-bool CLocalLabelTable::refreshImpl(const aint labelNumber) {
-	if (!refresh || refresh->nummer != labelNumber) return false;
-	if (refresh->value != CurAddress) Warning("Temporary label has different address");
-	refresh->value = CurAddress;
-	refresh = refresh->next;
+bool CTemporaryLabelTable::refreshImpl(const aint labelNumber) {
+	if (labels.size() <= refresh || labels.at(refresh).nummer != labelNumber) return false;
+	TemporaryLabel & to_r = labels.at(refresh);
+	if (to_r.value != CurAddress) Warning("Temporary label has different address");
+	to_r.value = CurAddress;
+	++refresh;
 	return true;
 }
 
-bool CLocalLabelTable::InsertRefresh(const aint nnummer) {
+bool CTemporaryLabelTable::InsertRefresh(const aint nnummer) {
 	return (1 == pass) ? insertImpl(nnummer) : refreshImpl(nnummer);
 }
 
-CLocalLabelTableEntry* CLocalLabelTable::seekForward(const aint labelNumber) const {
-	if (1 == pass) return nullptr;		// just building tables in first pass, no results yet
-	CLocalLabelTableEntry* l = refresh;	// already points on first "forward" local label
-	while (l && l->nummer != labelNumber) l = l->next;
-	return l;
+const TemporaryLabel* CTemporaryLabelTable::seekForward(const aint labelNumber) const {
+	if (1 == pass) return nullptr;					// just building tables in first pass, no results yet
+	temporary_labels_t::size_type i = refresh;		// refresh already points at first "forward" temporary label
+	while (i < labels.size() && labelNumber != labels[i].nummer) ++i;
+	return (i < labels.size()) ? &labels[i] : nullptr;
 }
 
-CLocalLabelTableEntry* CLocalLabelTable::seekBack(const aint labelNumber) const {
-	if (1 == pass) return nullptr;		// just building tables in first pass, no results yet
-	CLocalLabelTableEntry* l = refresh ? refresh->prev : last;
-	while (l && l->nummer != labelNumber) l = l->prev;
-	return l;
+const TemporaryLabel* CTemporaryLabelTable::seekBack(const aint labelNumber) const {
+	if (1 == pass || refresh <= 0) return nullptr;	// just building tables or no temporary label "backward"
+	temporary_labels_t::size_type i = refresh;		// after last "backward" temporary label
+	while (i--) if (labelNumber == labels[i].nummer) return &labels[i];
+	return nullptr;									// not found
 }
 
 CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {
@@ -698,7 +688,7 @@ static char defineGet__Line__Buffer[32] = {};
 
 const char* CDefineTable::Get(const char* name) {
 	DefArrayList = nullptr;
-	if (nullptr == name) return nullptr;
+	if (nullptr == name || 0 == name[0]) return nullptr;
 	// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
 	if ('_' == name[1]) {
 		if (!strcmp(name, "__COUNTER__")) {
@@ -1429,6 +1419,18 @@ int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	if (INT_MAX == address) st->emitmembs(p);	// address was not designed, emit also bytes
 	else if (!l) Warning("[STRUCT] designed address without label = no effect");
 	return 1;
+}
+
+SRepeatStack::SRepeatStack(aint count, CStringsList* condition, CStringsList* firstLine)
+	: RepeatCount(count), RepeatCondition(condition), Lines(firstLine), Pointer(firstLine), IsInWork(false), Level(0)
+{
+	assert(!sourcePosStack.empty());
+	sourcePos = sourcePosStack.back();
+}
+
+SRepeatStack::~SRepeatStack() {
+	if (RepeatCondition) delete RepeatCondition;
+	if (Lines) delete Lines;
 }
 
 //eof tables.cpp

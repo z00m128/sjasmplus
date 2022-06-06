@@ -68,7 +68,7 @@ static int ParseExpPrim(char*& p, aint& nval) {
 		if (!byteOnly) res += int(MemGetByte(nval + 1)) << 8;
 		nval = res;
 		return 1;
-	} else if (isdigit((byte)*p) && GetLocalLabelValue(p, nval, true)) {	// temporary label with underscore suffix
+	} else if (isdigit((byte)*p) && GetTemporaryLabelValue(p, nval, true)) {	// temporary label with underscore suffix
 		return 1;
 	} else if (isdigit((byte)*p) || (*p == '#' && isalnum((byte)*(p + 1))) || (*p == '$' && isalnum((byte)*(p + 1))) || *p == '%') {
 		return GetConstant(p, nval);
@@ -655,7 +655,7 @@ void ParseLabel() {
 			return;
 		}
 		val = atoi(tp);
-		if (!LocalLabelTable.InsertRefresh(val)) {
+		if (!TemporaryLabelTable.InsertRefresh(val)) {
 			Error("Temporary labels flow differs in this pass (missing/new temporary label or final pass source difference)");
 		}
 	} else {
@@ -829,9 +829,8 @@ int PrepareLine() {
 		SRepeatStack& dup = RepeatStack.top();
 		if (!dup.IsInWork) {
 			lp = line;
-			CStringsList* f = new CStringsList(lp);
-			dup.Pointer->next = f;
-			dup.Pointer = f;
+			dup.Pointer->next = new CStringsList(lp);
+			dup.Pointer = dup.Pointer->next;
 #ifdef DEBUG_COUT_PARSE_LINE
 			fprintf(stderr, ">%d %d %c%ld-%d [%s]\n", pass, CurSourcePos.line,
 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),

@@ -190,7 +190,7 @@ CDevice *Devices = nullptr;
 CDevice *Device = nullptr;
 CDevicePage *Page = nullptr;
 char* DeviceID = nullptr;
-TextFilePos globalDeviceSourcePos = TextFilePos();
+TextFilePos globalDeviceSourcePos;
 aint deviceDirectivesCount = 0;
 static char* globalDeviceID = nullptr;
 static aint globalDeviceZxRamTop = 0;
@@ -243,7 +243,7 @@ char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
 CStringsList* lijstp = NULL;
 CLabelTable LabelTable;
-CLocalLabelTable LocalLabelTable;
+CTemporaryLabelTable TemporaryLabelTable;
 CDefineTable DefineTable;
 CMacroDefineTable MacroDefineTable;
 CMacroTable MacroTable;
@@ -285,7 +285,7 @@ void InitPass() {
 	MacroTable.ReInit();
 	MacroDefineTable.ReInit();
 	DefineTable = Options::CmdDefineTable;
-	LocalLabelTable.InitPass();
+	TemporaryLabelTable.InitPass();
 
 	// reset "device" stuff + detect "global device" directive
 	if (globalDeviceID) {		// globalDeviceID detector has to trigger before every pass

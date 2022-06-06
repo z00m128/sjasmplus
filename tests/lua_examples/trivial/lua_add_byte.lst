@@ -1,0 +1,38 @@
+# file opened: lua_add_byte.asm
+ 1    0000                  lua allpass
+ 2    0000 ~                    sj.set_device()
+ 3    0000 ~                    _pc("ORG $8000")
+ 4    0000 ~                    sj.add_byte(0)
+ 5    0000 ~                    _pc("ORG $FFFF")
+ 6    0000 ~                    sj.add_byte(2)
+ 7    0000 ~                    sj.add_byte(0xBA)    -- warning about exceeding memory limit
+ 8    0000 ~                    _pc("ORG $C000")
+ 9    0000 ~                    sj.add_byte(1)
+10    0000 ~
+11    0000 ~                    sj.set_device("ZXSPECTRUM48", 0x5FFF)
+12    0000 ~                    _pc("ORG $8000")
+13    0000 ~                    sj.add_byte(0)
+14    0000 ~                    _pc("ORG $FFFF")
+15    0000 ~                    sj.add_byte(2)
+16    0000 ~                    sj.add_byte(0xBA)    -- error about exceeding device memory limit
+17    0000 ~                    _pc("ORG $C000")
+18    0000 ~                    sj.add_byte(1)
+19    0000              ORG $8000
+19    8000 00           ; these bytes were emitted silently/externally (lua script?)
+19    8001              ORG $FFFF
+lua_add_byte.asm(7): warning: [LUA] RAM limit exceeded 0x10000 by ORG
+19    FFFF 02 BA        ; these bytes were emitted silently/externally (lua script?)
+19    0001              ORG $C000
+19    C000 01           ; these bytes were emitted silently/externally (lua script?)
+19    C001              ORG $8000
+19    8000 00           ; these bytes were emitted silently/externally (lua script?)
+19    8001              ORG $FFFF
+lua_add_byte.asm(16): error: [LUA] Write outside of device memory at: 65536
+19    FFFF 02 BA        ; these bytes were emitted silently/externally (lua script?)
+19    0001              ORG $C000
+19    C000 01               endlua
+20    C001
+# file closed: lua_add_byte.asm
+
+Value    Label
+------ - -----------------------------------------------------------
