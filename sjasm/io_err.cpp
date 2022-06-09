@@ -64,7 +64,7 @@ static void trimAndAddEol(char* lineBuffer) {
 	if ('\n' != *lastChar) lastChar[1] = '\n', lastChar[2] = 0;	// add EOL character if not present
 }
 
-static void outputErrorLine(const EOutputVerbosity errorLevel) {
+static void outputErrorLine(const EOutputVerbosity errorLevel, int keywordPos = -1, int keywordSz = 0) {
 	auto lstFile = GetListingFile();
 	if (!lstFile && errorLevel < Options::OutputVerbosity) return;	// no output required
 	// trim end of error/warning line and add EOL char if needed
@@ -77,11 +77,20 @@ static void outputErrorLine(const EOutputVerbosity errorLevel) {
 	}
 	// print the error into stderr if OutputVerbosity allows this type of message
 	if (Options::OutputVerbosity <= errorLevel) {
-		if (OV_ERROR == errorLevel) _CERR Options::tcols->error _END;
-		if (OV_WARNING == errorLevel) _CERR Options::tcols->warning _END;
-		_CERR ErrorLine _END;
+		if (keywordPos < 0 || keywordSz <= 0) {		// no keyword in message, nothing to colorize
+			_CERR ErrorLine _END;
+		} else {					// colorize the keyword in message
+			assert(keywordPos + keywordSz <= int(strlen(ErrorLine)));
+			if (keywordPos) cerr.write(ErrorLine, keywordPos);	// output filename and line position
+			// switch color for keyword and output it
+			if (OV_ERROR == errorLevel) _CERR Options::tcols->error _END;
+			if (OV_WARNING == errorLevel) _CERR Options::tcols->warning _END;
+			cerr.write(ErrorLine + keywordPos, keywordSz);
+			// switch color off for rest of message
+			_CERR Options::tcols->end _END;
+			_CERR ErrorLine + keywordPos + keywordSz _END;
+		}
 		if (*ErrorLine2) _CERR ErrorLine2 _END;
-		_CERR Options::tcols->end _END;
 	}
 }
 
@@ -103,13 +112,14 @@ void Error(const char* message, const char* badValueMessage, EStatus type) {
 	DefineTable.Replace("__ERRORS__", ErrorCount);
 
 	initErrorLine();
+	const int errorTxtPos = strlen(ErrorLine);
 	STRCAT(ErrorLine, LINEMAX2-1, "error: ");
 	if (extraErrorWarningPrefix) STRCAT(ErrorLine, LINEMAX2-1, extraErrorWarningPrefix);
 	STRCAT(ErrorLine, LINEMAX2-1, message ? message : nullptr_message_txt);
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
-	outputErrorLine(OV_ERROR);
+	outputErrorLine(OV_ERROR, errorTxtPos, 5);
 	// terminate whole assembler in case of fatal error
 	if (type == FATAL) {
 		ExitASM(1);
@@ -139,6 +149,7 @@ static void WarningImpl(const char* id, const char* message, const char* badValu
 	DefineTable.Replace("__WARNINGS__", WarningCount);
 
 	initErrorLine();
+	const int warningTxtPos = strlen(ErrorLine);
 	if (id) {
 		STRCAT(ErrorLine, LINEMAX2-1, "warning[");
 		STRCAT(ErrorLine, LINEMAX2-1, id);
@@ -151,7 +162,7 @@ static void WarningImpl(const char* id, const char* message, const char* badValu
 	if (badValueMessage) {
 		STRCAT(ErrorLine, LINEMAX2-1, ": "); STRCAT(ErrorLine, LINEMAX2-1, badValueMessage);
 	}
-	outputErrorLine(OV_WARNING);
+	outputErrorLine(OV_WARNING, warningTxtPos, 7);
 }
 
 struct WarningEntry {

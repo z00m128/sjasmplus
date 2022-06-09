@@ -26,11 +26,11 @@ main.1:
         jr nz,_.no_main_local.1
 
     MODULE module@1
-        RELOCATE_START
+        RELOCATE_START HIGH
 .no_main_local.2e: EQU 456
-.no_main_local.2:
+.no_main_local.2:  EQU high $
         xor a
-        jr nz,.no_main_local.2
+        jr nz,$+.no_main_local.2
         jr z,main.2.local.2
 main.smc2+1:
 main.2e: EQU 567
@@ -45,7 +45,7 @@ main.2:
 @main.1.local.2e: EQU 789   ; fake global label looking like another local
 @main.1.local.2:    ; fake global label looking like another local
         jr nz,main.2.local.2
-        jr nz,_.no_main_local.2
+        jr nz,$+_.no_main_local.2
     ENDMODULE
 
     DW _.no_main_local.1e, module@1.main.2.local.2e

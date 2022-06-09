@@ -1,0 +1,548 @@
+# file opened: relocation_high_1.asm
+  1   0000                      OPT --zxnext
+  2   0000
+  3   0000                      STRUCT RELSTRUCT
+  4   0000 ~            Byte        BYTE        $11
+  5   0000 ~            Word        WORD        $2233
+  6   0000 ~            Tribyte     D24         $445566
+  7   0000 ~            Dword       DWORD       $778899AA
+  8   0000 ~            Text        TEXT        6, { "Hello", 0 }
+  9   0000                      ENDS
+ 10   0000
+ 11   0000              ; first section is not part of relocation table
+ 12   0000              ; =============================================
+ 13   0000
+ 14   0000                      ORG $8000
+ 15   8000                      ; same as the relocatable block, but outside of RELOCATE_START -> RELOCATE_END
+ 16   8000 21 26 00                 ld      hl,label1
+ 17   8003 2A 26 00                 ld      hl,(label1)
+ 18   8006 22 26 00                 ld      (label1),hl
+ 19   8009 FD 21 26 00              ld      iy,label1
+ 20   800D FD 2A 26 00              ld      iy,(label1)
+ 21   8011 FD 22 26 00              ld      (label1),iy
+ 22   8015 11 26 00                 ld      de,label1
+ 23   8018 ED 5B 26 00              ld      de,(label1)
+ 24   801C ED 53 26 00              ld      (label1),de
+ 25   8020 3A 26 00                 ld      a,(label1)
+ 26   8023 32 26 00                 ld      (label1),a
+ 27   8026 CD 26 00                 call    label1
+ 28   8029 C3 26 00                 jp      label1
+ 29   802C ED 34 26 00              add     hl,label1
+ 30   8030 11 26 00 66              RELSTRUCT {,label1,,,{"text",0}}
+ 30   8034 55 44 AA 99
+ 30   8038 88 77 74 65
+ 30   803C 78 74 00 00
+ 31   8040 30 00 40 00              DW      s1, s1.end, s1.Tribyte, s1.Text, $
+ 31   8044 33 00 3A 00
+ 31   8048 40 80
+ 32   804A ED 8A 11 09              push    label2
+ 33   804E ED 8A 00 11              push    high label2
+ 34   8052 06 11                    ld      b,high label2
+ 35   8054 0E 11                    ld      c,high label2
+ 36   8056 16 11                    ld      d,high label2
+ 37   8058 1E 11                    ld      e,high label2
+ 38   805A 2E 11                    ld      l,high label2
+ 39   805C 26 11                    ld      h,high label2
+ 40   805E 36 11                    ld      (hl),high label2
+ 41   8060 3E 11                    ld      a,high label2
+ 42   8062 C6 11                    add     a,high label2
+ 43   8064 CE 11                    adc     a,high label2
+ 44   8066 D6 11                    sub     high label2
+ 45   8068 DE 11                    sbc     a,high label2
+ 46   806A E6 11                    and     high label2
+ 47   806C EE 11                    xor     high label2
+ 48   806E F6 11                    or      high label2
+ 49   8070 FE 11                    cp      high label2
+ 50   8072 ED 27 11                 test    high label2
+ 51   8075 ED 91 00 11              nextreg $00,high label2
+ 52   8079 DD 26 11                 ld      ixh,high label2
+ 53   807C DD 2E 11                 ld      ixl,high label2
+ 54   807F DD 36 7B 11              ld      (ix+123),high label2
+ 55   8083 FD 26 11                 ld      iyh,high label2
+ 56   8086 FD 2E 11                 ld      iyl,high label2
+ 57   8089 FD 36 7B 11              ld      (iy+123),high label2
+ 58   808D 11 11 00 66              RELSTRUCT {high label2,high label2,,,{"ZX",0}}
+ 58   8091 55 44 AA 99
+ 58   8095 88 77 5A 58
+ 58   8099 00 6C 6F 00
+ 59   809D 11 11 11 11              DB      high s2, high s2.end, high s2.Tribyte, high s2.Text, high $
+ 59   80A1 80
+ 60   80A2 11                       ABYTE   123 high label2-123
+ 61   80A3 11 00                    ABYTEZ  123 high label2-123
+ 62   80A5 C6 11                    add     a,l2_high
+ 63   80A7 21 11 00                 ld      hl,l2_high
+ 64   80AA 2A 11 00                 ld      hl,(l2_high)
+ 65   80AD 22 11 00                 ld      (l2_high),hl
+ 66   80B0 FD 21 11 00              ld      iy,l2_high
+ 67   80B4 FD 2A 11 00              ld      iy,(l2_high)
+ 68   80B8 FD 22 11 00              ld      (l2_high),iy
+ 69   80BC 11 11 00                 ld      de,l2_high
+ 70   80BF ED 5B 11 00              ld      de,(l2_high)
+ 71   80C3 ED 53 11 00              ld      (l2_high),de
+ 72   80C7 3A 11 00                 ld      a,(l2_high)
+ 73   80CA 32 11 00                 ld      (l2_high),a
+ 74   80CD CD 11 00                 call    l2_high
+ 75   80D0 C3 11 00                 jp      l2_high
+ 76   80D3 ED 35 11 00              add     de,l2_high
+ 77   80D7 11 11 00 66              RELSTRUCT {,l2_high,,,{"text",0}}
+ 77   80DB 55 44 AA 99
+ 77   80DF 88 77 74 65
+ 77   80E3 78 74 00 00
+ 78   80E7 13 00 13 00              DW      high s4, high s4.end, high s4.Tribyte, high s4.Text, high $
+ 78   80EB 13 00 13 00
+ 78   80EF 80 00
+ 79   80F1
+ 80   80F1              ; resulting relocation data
+ 81   80F1              ; =========================
+ 82   80F1
+ 83   80F1 4C 00 98 00          DW      relocate_count, relocate_size
+ 84   80F5
+ 85   80F5 02 00 05 00          RELOCATE_TABLE      ; provides relocation addresses pointing directly at the high byte
+ 85   80F9 08 00 0C 00
+ 85   80FD 10 00 14 00
+ 85   8101 17 00 1B 00
+ 85   8105 1F 00 22 00
+ 85   8109 25 00 28 00
+ 85   810D 2B 00 2F 00
+ 85   8111 32 00 41 00
+ 85   8115 43 00 45 00
+ 85   8119 47 00 49 00
+ 85   811D F2 0F F7 0F
+ 85   8121 02 11 04 11
+ 85   8125 06 11 08 11
+ 85   8129 0A 11 0C 11
+ 85   812D 0E 11 10 11
+ 85   8131 12 11 14 11
+ 85   8135 16 11 18 11
+ 85   8139 1A 11 1C 11
+ 85   813D 1E 11 20 11
+ 85   8141 23 11 27 11
+ 85   8145 2A 11 2D 11
+ 85   8149 31 11 34 11
+ 85   814D 37 11 3B 11
+ 85   8151 3C 11 3D 11
+ 85   8155 4C 11 4D 11
+ 85   8159 4E 11 4F 11
+ 85   815D 50 11 51 11
+ 85   8161 52 11 81 13
+ 85   8165 83 13 86 13
+ 85   8169 89 13 8D 13
+ 85   816D 91 13 95 13
+ 85   8171 98 13 9C 13
+ 85   8175 A0 13 A3 13
+ 85   8179 A6 13 A9 13
+ 85   817D AC 13 B0 13
+ 85   8181 B3 13 C2 13
+ 85   8185 C4 13 C6 13
+ 85   8189 C8 13 CA 13
+ 86   818D
+ 87   818D 01 00 04 00          RELOCATE_TABLE +1   ; provides relocation addresses pointing one byte ahead of the high byte
+ 87   8191 07 00 0B 00
+ 87   8195 0F 00 13 00
+ 87   8199 16 00 1A 00
+ 87   819D 1E 00 21 00
+ 87   81A1 24 00 27 00
+ 87   81A5 2A 00 2E 00
+ 87   81A9 31 00 40 00
+ 87   81AD 42 00 44 00
+ 87   81B1 46 00 48 00
+ 87   81B5 F1 0F F6 0F
+ 87   81B9 01 11 03 11
+ 87   81BD 05 11 07 11
+ 87   81C1 09 11 0B 11
+ 87   81C5 0D 11 0F 11
+ 87   81C9 11 11 13 11
+ 87   81CD 15 11 17 11
+ 87   81D1 19 11 1B 11
+ 87   81D5 1D 11 1F 11
+ 87   81D9 22 11 26 11
+ 87   81DD 29 11 2C 11
+ 87   81E1 30 11 33 11
+ 87   81E5 36 11 3A 11
+ 87   81E9 3B 11 3C 11
+ 87   81ED 4B 11 4C 11
+ 87   81F1 4D 11 4E 11
+ 87   81F5 4F 11 50 11
+ 87   81F9 51 11 80 13
+ 87   81FD 82 13 85 13
+ 87   8201 88 13 8C 13
+ 87   8205 90 13 94 13
+ 87   8209 97 13 9B 13
+ 87   820D 9F 13 A2 13
+ 87   8211 A5 13 A8 13
+ 87   8215 AB 13 AF 13
+ 87   8219 B2 13 C1 13
+ 87   821D C3 13 C5 13
+ 87   8221 C7 13 C9 13
+ 88   8225
+ 89   8225              ; second section does test relocation
+ 90   8225              ; ===================================
+ 91   8225
+ 92   8225                  RELOCATE_START HIGH
+ 93   8225                      ORG $0000
+ 94   0000                      ; relocation cases - word immediate instructions (relocation points at high byte)
+ 95   0000 21 26 00                 ld      hl,label1
+ 96   0003 2A 26 00                 ld      hl,(label1)
+ 97   0006 22 26 00                 ld      (label1),hl
+ 98   0009 FD 21 26 00              ld      iy,label1
+ 99   000D FD 2A 26 00              ld      iy,(label1)
+100   0011 FD 22 26 00              ld      (label1),iy
+101   0015 11 26 00                 ld      de,label1
+102   0018 ED 5B 26 00              ld      de,(label1)
+103   001C ED 53 26 00              ld      (label1),de
+104   0020 3A 26 00                 ld      a,(label1)
+105   0023 32 26 00                 ld      (label1),a
+106   0026              label1:
+107   0026 CD 26 00                 call    label1
+108   0029 C3 26 00                 jp      label1
+109   002C ED 34 26 00              add     hl,label1           ; z80n extras
+110   0030 11 26 00 66  s1          RELSTRUCT {,label1,,,{"text",0}}
+110   0034 55 44 AA 99
+110   0038 88 77 74 65
+110   003C 78 74 00 00
+111   0040              .end:
+112   0040 30 00 40 00              DW      s1, s1.end, s1.Tribyte, s1.Text, $
+112   0044 33 00 3A 00
+112   0048 40 00
+113   004A
+114   004A                      ORG $0FF0
+115   0FF0                      ; super special z80n extra, not working in regular full-word relocation mode
+116   0FF0 ED 8A 11 09              push    label2              ; but these are possible in HIGH mode
+117   0FF4 ED 8A 00 11              push    high label2
+118   0FF8
+119   0FF8                      ORG $1101
+120   1101                      ; relocation cases - byte immediate instructions (relocation points at immediate (high byte))
+121   1101 06 11                    ld      b,high label2
+122   1103 0E 11                    ld      c,high label2
+123   1105 16 11                    ld      d,high label2
+124   1107 1E 11                    ld      e,high label2
+125   1109              label2:
+126   1109 2E 11                    ld      l,high label2
+127   110B 26 11                    ld      h,high label2
+128   110D 36 11                    ld      (hl),high label2
+129   110F 3E 11                    ld      a,high label2
+130   1111 C6 11                    add     a,high label2
+131   1113 CE 11                    adc     a,high label2
+132   1115 D6 11                    sub     high label2
+133   1117 DE 11                    sbc     a,high label2
+134   1119 E6 11                    and     high label2
+135   111B EE 11                    xor     high label2
+136   111D F6 11                    or      high label2
+137   111F FE 11                    cp      high label2
+138   1121 ED 27 11                 test    high label2         ; z80n extras
+139   1124 ED 91 00 11              nextreg $00,high label2     ; z80n extras
+140   1128                          ; IX block
+141   1128 DD 26 11                 ld      ixh,high label2
+142   112B DD 2E 11                 ld      ixl,high label2
+143   112E DD 36 7B 11              ld      (ix+123),high label2
+144   1132                          ; IY block
+145   1132 FD 26 11                 ld      iyh,high label2
+146   1135 FD 2E 11                 ld      iyl,high label2
+147   1138 FD 36 7B 11              ld      (iy+123),high label2
+148   113C 11 11 00 66  s2          RELSTRUCT {high label2,high label2,,,{"ZX",0}}
+148   1140 55 44 AA 99
+148   1144 88 77 5A 58
+148   1148 00 6C 6F 00
+149   114C              .end:
+150   114C 11 11 11 11              DB      high s2, high s2.end, high s2.Tribyte, high s2.Text, high $
+150   1150 11
+151   1151 11                       ABYTE   123 high label2-123
+152   1152 11 00                    ABYTEZ  123 high label2-123
+153   1154
+154   1154                          ; test EQU "transitiviness" and test word instruction with high byte only
+155   1154                      ORG $1380
+156   1380              l2_high     EQU     high label2
+157   1380 C6 11                    add     a,l2_high           ; is equ transitive (keeping high/regular knowledge)?
+158   1382 21 11 00                 ld      hl,l2_high
+159   1385 2A 11 00                 ld      hl,(l2_high)
+160   1388 22 11 00                 ld      (l2_high),hl
+161   138B FD 21 11 00              ld      iy,l2_high
+162   138F FD 2A 11 00              ld      iy,(l2_high)
+163   1393 FD 22 11 00              ld      (l2_high),iy
+164   1397 11 11 00                 ld      de,l2_high
+165   139A ED 5B 11 00              ld      de,(l2_high)
+166   139E ED 53 11 00              ld      (l2_high),de
+167   13A2 3A 11 00                 ld      a,(l2_high)
+168   13A5 32 11 00                 ld      (l2_high),a
+169   13A8 CD 11 00                 call    l2_high
+170   13AB C3 11 00                 jp      l2_high
+171   13AE ED 35 11 00              add     de,l2_high           ; z80n extras
+172   13B2 11 11 00 66  s4          RELSTRUCT {,l2_high,,,{"text",0}}
+172   13B6 55 44 AA 99
+172   13BA 88 77 74 65
+172   13BE 78 74 00 00
+173   13C2              .end:
+174   13C2 13 00 13 00              DW      high s4, high s4.end, high s4.Tribyte, high s4.Text, high $
+174   13C6 13 00 13 00
+174   13CA 13 00
+175   13CC
+176   13CC                      ORG $2200
+177   2200                      ; no relocation cases
+178   2200 CF                       rst     $08
+179   2201 09 3C 4C 3F              DB      low label2, low s2, low s2.end, low s2.Tribyte, low s2.Text, low $
+179   2205 46 01
+180   2207 01 E3 10                 ld      bc,label2 - label1
+181   220A 3E 09                    ld      a,low label2
+182   220C 3E 11                    ld      a,high label2 - high label1
+183   220E 36 11                    ld      (hl),high label2 - high label1
+184   2210                          ; IX block
+185   2210 DD 36 09 7B              ld      (ix+low label2),123
+186   2214 DD 36 7B 09              ld      (ix+123),low label2
+187   2218 DD 86 09                 add     a,(ix+low label2)
+188   221B DD 8E 09                 adc     a,(ix+low label2)
+189   221E DD 96 09                 sub     (ix+low label2)
+190   2221 DD 9E 09                 sbc     a,(ix+low label2)
+191   2224 DD A6 09                 and     (ix+low label2)
+192   2227 DD AE 09                 xor     (ix+low label2)
+193   222A DD B6 09                 or      (ix+low label2)
+194   222D DD BE 09                 cp      (ix+low label2)
+195   2230 DD CB 09 46              bit     0,(ix+low label2)
+196   2234 DD CB 7B 4E              bit     7&low label2,(ix+123)
+197   2238 DD CB 09 86              res     0,(ix+low label2)
+198   223C DD CB 7B 8E              res     7&low label2,(ix+123)
+199   2240 DD CB 09 C6              set     0,(ix+low label2)
+200   2244 DD CB 7B CE              set     7&low label2,(ix+123)
+201   2248                          ; IY block
+202   2248 FD 36 09 7B              ld      (iy+low label2),123
+203   224C FD 36 7B 09              ld      (iy+123),low label2
+204   2250 FD 86 09                 add     a,(iy+low label2)
+205   2253 FD 8E 09                 adc     a,(iy+low label2)
+206   2256 FD 96 09                 sub     (iy+low label2)
+207   2259 FD 9E 09                 sbc     a,(iy+low label2)
+208   225C FD A6 09                 and     (iy+low label2)
+209   225F FD AE 09                 xor     (iy+low label2)
+210   2262 FD B6 09                 or      (iy+low label2)
+211   2265 FD BE 09                 cp      (iy+low label2)
+212   2268 FD CB 09 46              bit     0,(iy+low label2)
+213   226C FD CB 7B 4E              bit     7&low label2,(iy+123)
+214   2270 FD CB 09 86              res     0,(iy+low label2)
+215   2274 FD CB 7B 8E              res     7&low label2,(iy+123)
+216   2278 FD CB 09 C6              set     0,(iy+low label2)
+217   227C FD CB 7B CE              set     7&low label2,(iy+123)
+218   2280
+219   2280                      ORG $4400
+220   4400                      ; unstable/can't be relocated by +offset mechanics
+relocation_high_1.asm(221): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+221   4400 D3 11                    out     (high label2),a     ; exception: out (imm8),a is never relocatable
+relocation_high_1.asm(222): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+222   4402 DB 11                    in      a,(high label2)     ; exception: in a,(imm8) is never relocatable
+relocation_high_1.asm(223): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+223   4404 ED 91 11 00              nextreg high label2,$00     ; z80n extras - register number is never relocatable
+relocation_high_1.asm(224): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+224   4408 ED 92 11                 nextreg high label2,a       ; z80n extras - register number is never relocatable
+225   440B                          ; 16bit relocation should be warned against when only high-byte is possible
+relocation_high_1.asm(226): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+226   440B 06 26                    ld      b,label1            ; even if the label is 8bit value like $0026
+relocation_high_1.asm(227): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+227   440D 0E 26                    ld      c,label1
+relocation_high_1.asm(228): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+228   440F 16 26                    ld      d,label1
+relocation_high_1.asm(229): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+229   4411 1E 26                    ld      e,label1
+relocation_high_1.asm(230): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+230   4413 2E 26                    ld      l,label1
+relocation_high_1.asm(231): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+231   4415 26 26                    ld      h,label1
+relocation_high_1.asm(232): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+232   4417 36 26                    ld      (hl),label1
+relocation_high_1.asm(233): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+233   4419 3E 26                    ld      a,label1
+relocation_high_1.asm(234): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+234   441B C6 26                    add     a,label1
+relocation_high_1.asm(235): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+235   441D CE 26                    adc     a,label1
+relocation_high_1.asm(236): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+236   441F D6 26                    sub     label1
+relocation_high_1.asm(237): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+237   4421 DE 26                    sbc     a,label1
+relocation_high_1.asm(238): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+238   4423 E6 26                    and     label1
+relocation_high_1.asm(239): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+239   4425 EE 26                    xor     label1
+relocation_high_1.asm(240): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+240   4427 F6 26                    or      label1
+relocation_high_1.asm(241): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+241   4429 FE 26                    cp      label1
+relocation_high_1.asm(242): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+242   442B ED 27 26                 test    label1              ; z80n extras
+relocation_high_1.asm(243): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+243   442E ED 91 00 26              nextreg $00,label1          ; z80n extras
+relocation_high_1.asm(244): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+244   4432 26 33 22 66  s3          RELSTRUCT {label1,,,,{"ZX",0}}
+244   4436 55 44 AA 99
+244   443A 88 77 5A 58
+244   443E 00 6C 6F 00
+relocation_high_1.asm(245): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+245   4442 26                       DB      label1
+246   4443                          ; IX block
+relocation_high_1.asm(247): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+247   4443 DD 26 26                 ld      ixh,label1
+relocation_high_1.asm(248): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+248   4446 DD 2E 26                 ld      ixl,label1
+relocation_high_1.asm(249): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+249   4449 DD 36 7B 26              ld      (ix+123),label1
+relocation_high_1.asm(250): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+250   444D DD 36 11 7B              ld      (ix+high label2),123
+relocation_high_1.asm(251): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+251   4451 DD 86 11                 add     a,(ix+high label2)
+relocation_high_1.asm(252): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+252   4454 DD 8E 11                 adc     a,(ix+high label2)
+relocation_high_1.asm(253): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+253   4457 DD 96 11                 sub     (ix+high label2)
+relocation_high_1.asm(254): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+254   445A DD 9E 11                 sbc     a,(ix+high label2)
+relocation_high_1.asm(255): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+255   445D DD A6 11                 and     (ix+high label2)
+relocation_high_1.asm(256): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+256   4460 DD AE 11                 xor     (ix+high label2)
+relocation_high_1.asm(257): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+257   4463 DD B6 11                 or      (ix+high label2)
+relocation_high_1.asm(258): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+258   4466 DD BE 11                 cp      (ix+high label2)
+relocation_high_1.asm(259): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+259   4469 DD CB 11 06              rlc     (ix+high label2)
+relocation_high_1.asm(260): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+260   446D DD CB 11 0E              rrc     (ix+high label2)
+relocation_high_1.asm(261): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+261   4471 DD CB 11 16              rl      (ix+high label2)
+relocation_high_1.asm(262): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+262   4475 DD CB 11 1E              rr      (ix+high label2)
+relocation_high_1.asm(263): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+263   4479 DD CB 11 26              sla     (ix+high label2)
+relocation_high_1.asm(264): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+264   447D DD CB 11 2E              sra     (ix+high label2)
+relocation_high_1.asm(265): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+265   4481 DD CB 11 36              sli     (ix+high label2)
+relocation_high_1.asm(266): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+266   4485 DD CB 11 3E              srl     (ix+high label2)
+relocation_high_1.asm(267): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+267   4489 DD CB 11 46              bit     0,(ix+high label2)
+relocation_high_1.asm(268): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+268   448D DD CB 7B 4E              bit     7&high label2,(ix+123)
+relocation_high_1.asm(269): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+269   4491 DD CB 11 86              res     0,(ix+high label2)
+relocation_high_1.asm(270): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+270   4495 DD CB 7B 8E              res     7&high label2,(ix+123)
+relocation_high_1.asm(271): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+271   4499 DD CB 11 C6              set     0,(ix+high label2)
+relocation_high_1.asm(272): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+272   449D DD CB 7B CE              set     7&high label2,(ix+123)
+273   44A1                          ; IY block
+relocation_high_1.asm(274): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+274   44A1 FD 26 26                 ld      iyh,label1
+relocation_high_1.asm(275): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+275   44A4 FD 2E 26                 ld      iyl,label1
+relocation_high_1.asm(276): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+276   44A7 FD 36 7B 26              ld      (iy+123),label1
+relocation_high_1.asm(277): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+277   44AB FD 36 11 7B              ld      (iy+high label2),123
+relocation_high_1.asm(278): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+278   44AF FD 86 11                 add     a,(iy+high label2)
+relocation_high_1.asm(279): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+279   44B2 FD 8E 11                 adc     a,(iy+high label2)
+relocation_high_1.asm(280): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+280   44B5 FD 96 11                 sub     (iy+high label2)
+relocation_high_1.asm(281): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+281   44B8 FD 9E 11                 sbc     a,(iy+high label2)
+relocation_high_1.asm(282): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+282   44BB FD A6 11                 and     (iy+high label2)
+relocation_high_1.asm(283): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+283   44BE FD AE 11                 xor     (iy+high label2)
+relocation_high_1.asm(284): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+284   44C1 FD B6 11                 or      (iy+high label2)
+relocation_high_1.asm(285): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+285   44C4 FD BE 11                 cp      (iy+high label2)
+relocation_high_1.asm(286): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+286   44C7 FD CB 11 06              rlc     (iy+high label2)
+relocation_high_1.asm(287): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+287   44CB FD CB 11 0E              rrc     (iy+high label2)
+relocation_high_1.asm(288): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+288   44CF FD CB 11 16              rl      (iy+high label2)
+relocation_high_1.asm(289): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+289   44D3 FD CB 11 1E              rr      (iy+high label2)
+relocation_high_1.asm(290): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+290   44D7 FD CB 11 26              sla     (iy+high label2)
+relocation_high_1.asm(291): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+291   44DB FD CB 11 2E              sra     (iy+high label2)
+relocation_high_1.asm(292): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+292   44DF FD CB 11 36              sli     (iy+high label2)
+relocation_high_1.asm(293): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+293   44E3 FD CB 11 3E              srl     (iy+high label2)
+relocation_high_1.asm(294): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+294   44E7 FD CB 11 46              bit     0,(iy+high label2)
+relocation_high_1.asm(295): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+295   44EB FD CB 7B 4E              bit     7&high label2,(iy+123)
+relocation_high_1.asm(296): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+296   44EF FD CB 11 86              res     0,(iy+high label2)
+relocation_high_1.asm(297): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+297   44F3 FD CB 7B 8E              res     7&high label2,(iy+123)
+relocation_high_1.asm(298): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+298   44F7 FD CB 11 C6              set     0,(iy+high label2)
+relocation_high_1.asm(299): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+299   44FB FD CB 7B CE              set     7&high label2,(iy+123)
+300   44FF                          ; can't be relocated by +offset
+relocation_high_1.asm(301): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+301   44FF 21 12 22                 ld      hl,label2+label2
+relocation_high_1.asm(302): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+302   4502 21 84 08                 ld      hl,label2>>1
+relocation_high_1.asm(303): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+303   4505 3E 22                    ld      a,high label2 + high label2
+304   4507                          ; transitive EQU
+305   4507              l1_regular  EQU     label1
+relocation_high_1.asm(306): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+306   4507 C6 26                    add     a,l1_regular
+307   4509
+308   4509                          ; ABYTE variants should report unstable when relocatable value is used for "offset" argument
+relocation_high_1.asm(309): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+309   4509 01 02                    ABYTE   high label1 1, 2
+relocation_high_1.asm(310): warning[relunstable]: Relocation makes one of the expressions unstable, resulting machine code is not relocatable
+310   450B 03 00                    ABYTEZ  high label1 3
+311   450D
+312   450D                  RELOCATE_END
+313   450D
+relocation_high_1.asm(314): error: HIGH mode can't be mixed with regular mode
+314   450D                  RELOCATE_START      ; check if regular-mode emits error about mixing modes
+315   450D
+# file closed: relocation_high_1.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0026   l1_regular
+0x0011   l2_high
+0x0026   label1
+0x1109   label2
+0x004C   relocate_count
+0x0098   relocate_size
+0x0010 X RELSTRUCT
+0x0000 X RELSTRUCT.Byte
+0x0006 X RELSTRUCT.Dword
+0x000A X RELSTRUCT.Text
+0x0003 X RELSTRUCT.Tribyte
+0x0001 X RELSTRUCT.Word
+0x0030   s1
+0x0030 X s1.Byte
+0x0036 X s1.Dword
+0x0040   s1.end
+0x003A   s1.Text
+0x0033   s1.Tribyte
+0x0031 X s1.Word
+0x113C   s2
+0x113C X s2.Byte
+0x1142 X s2.Dword
+0x114C   s2.end
+0x1146   s2.Text
+0x113F   s2.Tribyte
+0x113D X s2.Word
+0x4432 X s3
+0x4432 X s3.Byte
+0x4438 X s3.Dword
+0x443C X s3.Text
+0x4435 X s3.Tribyte
+0x4433 X s3.Word
+0x13B2   s4
+0x13B2 X s4.Byte
+0x13B8 X s4.Dword
+0x13C2   s4.end
+0x13BC   s4.Text
+0x13B5   s4.Tribyte
+0x13B3 X s4.Word

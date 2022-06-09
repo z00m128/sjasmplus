@@ -1,11 +1,11 @@
-# file opened: console_input
+# file opened: <stdin>
 1     0000                  ;; test of default output file name in STDIN input file mode
 2     0000
 3     0000                  ; enable output into default output file (will be asm.out in STDIN mode)
 4     0000                  OUTPUT
 5     0000 74 65 73 74      DB      'test'
 6     0004
-# file closed: console_input
+# file closed: <stdin>
 
 Value    Label
 ------ - -----------------------------------------------------------

@@ -40,7 +40,7 @@
 18    0001 02               DB x
 19    0002
 # file closed: stdinWithAsm.asm
-# file opened: console_input
+# file opened: <stdin>
  1    0002              ; this source will be assembled twice, once coming from STDIN, second time as regular file
  2    0002              ; and each time it will also include itself as include file (so 6x times assembled)
  3    0002
@@ -81,7 +81,7 @@
 17    0003
 18    0003 04               DB x
 19    0004
-# file closed: console_input
+# file closed: <stdin>
 # file opened: stdinWithAsm.asm
  1    0004              ; this source will be assembled twice, once coming from STDIN, second time as regular file
  2    0004              ; and each time it will also include itself as include file (so 6x times assembled)

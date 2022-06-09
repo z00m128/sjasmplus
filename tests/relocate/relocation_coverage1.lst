@@ -1,4 +1,4 @@
-relocation_coverage1.asm(24): error: Missing end of relocation block started here
+relocation_coverage1.asm(28): error: Missing end of relocation block started here
 # file opened: relocation_coverage1.asm
  1    0000                  ORG $1000
  2    1000
@@ -22,14 +22,20 @@ relocation_coverage1.asm(14): warning[relunstable]: Relocation makes one of the 
 16    100D
 17    100D 3E 10            ld      a,high label2   ; relunstable-ok ; warning supressed
 18    100F
-19    100F                  RELOCATE_END
-20    100F
-21    100F 05 10            RELOCATE_TABLE
-22    1011
-relocation_coverage1.asm(23): error: Relocation block start for this end is missing
-23    1011                  RELOCATE_END        ; error about missing START
-24    1011                  RELOCATE_START      ; error about missing END
-25    1011
+relocation_coverage1.asm(19): warning[reldiverts]: Expression can't be relocated by simple "+offset" mechanics, value diverts differently.
+19    100F 21 10 00         ld      hl,high label1  ; can't be relocated by simple "+offset" in regular mode (would work in HIGH mode)
+20    1012
+21    1012                  RELOCATE_END
+22    1012
+relocation_coverage1.asm(23): error: HIGH mode can't be mixed with regular mode
+23    1012                  RELOCATE_START   HIGH   ; error - HIGH and "regular" mode can't be mixed in the same assembling unit
+24    1012
+25    1012 05 10            RELOCATE_TABLE
+26    1014
+relocation_coverage1.asm(27): error: Relocation block start for this end is missing
+27    1014                  RELOCATE_END        ; error about missing START
+28    1014                  RELOCATE_START      ; error about missing END
+29    1014
 # file closed: relocation_coverage1.asm
 
 Value    Label

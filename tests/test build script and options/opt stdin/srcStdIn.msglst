@@ -1,4 +1,4 @@
-# file opened: console_input
+# file opened: <stdin>
  1    0000                  OUTPUT "srcStdIn.bin"
  2    0000
  3    0000                  INCLUDE "srcStdIn.i.asm"
@@ -73,7 +73,7 @@
 48    9015 07 07 07...      BLOCK   7, 7
 49    901C 08 08 08...      BLOCK   8, 8
 50    9024
-# file closed: console_input
+# file closed: <stdin>
 
 Value    Label
 ------ - -----------------------------------------------------------

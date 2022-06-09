@@ -1,0 +1,151 @@
+# file opened: relocation_high_2.asm
+ 1    0000              ; test to verify transitions of "relocatable" while using the structs and relocation data generation
+ 2    0000                  RELOCATE_START HIGH ; definition must be in relocation block too to track default values being rel
+ 3    0000                      STRUCT RELSTRUCT
+ 4    0000 ~            ByteRel     BYTE        high rel_label
+ 5    0000 ~            ByteFix     BYTE        high fix_label
+ 6    0000 ~            WordRelMsb  WORD        high rel_label
+ 7    0000 ~            WordFixMsb  WORD        high fix_label
+ 8    0000 ~            WordRel     WORD        rel_label
+ 9    0000 ~            WordFix     WORD        fix_label
+10    0000                      ENDS
+11    0000                  RELOCATE_END
+12    0000
+13    0000                      ORG $8800
+14    8800              fix_label:
+15    8800
+16    8800                      ; these are outside of relocation block -> no relocation data in any case
+17    8800 88 11 88 00  s_1     RELSTRUCT { high fix_label, high rel_label, high fix_label, high rel_label, fix_label, rel_label }
+17    8804 11 00 00 88
+17    8808 00 11
+18    880A 11 88 11 00  s_2     RELSTRUCT
+18    880E 88 00 00 11
+18    8812 00 88
+19    8814
+20    8814 0C 00 18 00          DW      relocate_count, relocate_size
+21    8818
+22    8818 02 11 04 11          RELOCATE_TABLE      ; provides relocation addresses pointing directly at the high byte
+22    881C 07 11 0A 11
+22    8820 0C 11 0F 11
+22    8824 29 11 2C 11
+22    8828 31 11 32 11
+22    882C 34 11 39 11
+23    8830
+24    8830 01 11 03 11          RELOCATE_TABLE +1   ; provides relocation addresses pointing one byte ahead of the high byte
+24    8834 06 11 09 11
+24    8838 0B 11 0E 11
+24    883C 28 11 2B 11
+24    8840 30 11 31 11
+24    8844 33 11 38 11
+25    8848
+26    8848                  RELOCATE_START HIGH
+27    8848                      ORG $1100
+28    1100              rel_label:
+29    1100
+30    1100                      ; check struct defined "at" address
+31    1100              s_at_rel    RELSTRUCT = rel_label + $1000
+32    1100              s_at_fix    RELSTRUCT = fix_label + $1000
+33    1100                          ; these should be relocated
+34    1100 21 00 21                 ld      hl,s_at_rel
+35    1103 21 21 00                 ld      hl,high s_at_rel
+36    1106 3E 21                    ld      a,high s_at_rel
+37    1108 21 01 21                 ld      hl,s_at_rel.ByteFix
+38    110B 21 21 00                 ld      hl,high s_at_rel.ByteFix
+39    110E 3E 21                    ld      a,high s_at_rel.ByteFix
+40    1110                          ; these are fixed
+41    1110 21 00 98                 ld      hl,s_at_fix
+42    1113 21 98 00                 ld      hl,high s_at_fix
+43    1116 3E 98                    ld      a,high s_at_fix
+44    1118 21 01 98                 ld      hl,s_at_fix.ByteFix
+45    111B 21 98 00                 ld      hl,high s_at_fix.ByteFix
+46    111E 3E 98                    ld      a,high s_at_fix.ByteFix
+47    1120
+48    1120 21 01 00                 ld      hl,RELSTRUCT.ByteFix
+49    1123 21 00 00                 ld      hl,high RELSTRUCT.ByteFix
+50    1126 3E 00                    ld      a,high RELSTRUCT.ByteFix
+51    1128
+52    1128                      ; check struct with explicit init values (switching relocatable/fixed) - half of them requires relocation
+53    1128 88 11 88 00  s_init      RELSTRUCT { high fix_label, high rel_label, high fix_label, high rel_label, fix_label, rel_label }
+53    112C 11 00 00 88
+53    1130 00 11
+54    1132
+55    1132                      ; check struct filled with default values (half of them needs relocation)
+56    1132 11 88 11 00  s_default   RELSTRUCT
+56    1136 88 00 00 11
+56    113A 00 88
+57    113C
+58    113C                      ; this makes no sense? should be treated as norel label
+59    113C              s_at_bogus  RELSTRUCT = high rel_label
+60    113C 21 11 00                 ld      hl,s_at_bogus
+61    113F 21 00 00                 ld      hl,high s_at_bogus
+62    1142 3E 00                    ld      a,high s_at_bogus
+63    1144 21 12 00                 ld      hl,s_at_bogus.ByteFix
+64    1147 21 00 00                 ld      hl,high s_at_bogus.ByteFix
+65    114A 3E 00                    ld      a,high s_at_bogus.ByteFix
+66    114C
+67    114C                  RELOCATE_END
+68    114C
+# file closed: relocation_high_2.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x8800   fix_label
+0x1100   rel_label
+0x000C   relocate_count
+0x0018   relocate_size
+0x000A X RELSTRUCT
+0x0001   RELSTRUCT.ByteFix
+0x0000 X RELSTRUCT.ByteRel
+0x0008 X RELSTRUCT.WordFix
+0x0004 X RELSTRUCT.WordFixMsb
+0x0006 X RELSTRUCT.WordRel
+0x0002 X RELSTRUCT.WordRelMsb
+0x8800 X s_1
+0x8801 X s_1.ByteFix
+0x8800 X s_1.ByteRel
+0x8808 X s_1.WordFix
+0x8804 X s_1.WordFixMsb
+0x8806 X s_1.WordRel
+0x8802 X s_1.WordRelMsb
+0x880A X s_2
+0x880B X s_2.ByteFix
+0x880A X s_2.ByteRel
+0x8812 X s_2.WordFix
+0x880E X s_2.WordFixMsb
+0x8810 X s_2.WordRel
+0x880C X s_2.WordRelMsb
+0x0011   s_at_bogus
+0x0012   s_at_bogus.ByteFix
+0x0011 X s_at_bogus.ByteRel
+0x0019 X s_at_bogus.WordFix
+0x0015 X s_at_bogus.WordFixMsb
+0x0017 X s_at_bogus.WordRel
+0x0013 X s_at_bogus.WordRelMsb
+0x9800   s_at_fix
+0x9801   s_at_fix.ByteFix
+0x9800 X s_at_fix.ByteRel
+0x9808 X s_at_fix.WordFix
+0x9804 X s_at_fix.WordFixMsb
+0x9806 X s_at_fix.WordRel
+0x9802 X s_at_fix.WordRelMsb
+0x2100   s_at_rel
+0x2101   s_at_rel.ByteFix
+0x2100 X s_at_rel.ByteRel
+0x2108 X s_at_rel.WordFix
+0x2104 X s_at_rel.WordFixMsb
+0x2106 X s_at_rel.WordRel
+0x2102 X s_at_rel.WordRelMsb
+0x1132 X s_default
+0x1133 X s_default.ByteFix
+0x1132 X s_default.ByteRel
+0x113A X s_default.WordFix
+0x1136 X s_default.WordFixMsb
+0x1138 X s_default.WordRel
+0x1134 X s_default.WordRelMsb
+0x1128 X s_init
+0x1129 X s_init.ByteFix
+0x1128 X s_init.ByteRel
+0x1130 X s_init.WordFix
+0x112C X s_init.WordFixMsb
+0x112E X s_init.WordRel
+0x112A X s_init.WordRelMsb

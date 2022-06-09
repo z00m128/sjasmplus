@@ -31,19 +31,24 @@
 #define __RELOCATE_H__
 
 namespace Relocation {
-	constexpr aint ALTERNATIVE_OFFSET = -0x0201;
+	enum EType {
+		OFF = 0, REGULAR = 1, HIGH = 2
+		// also used as offset adjustment and bool test (so explicit values 0,1,2 are important)
+	};
 
-	extern bool isActive;			// when inside relocation block
+	extern aint alternative_offset;	// offset to add to label value when evaluating alternatives
+
+	extern EType type;				// type of relocation block when inside
 	extern bool areLabelsOffset;	// when labels should evaluate to alternative values
 
 	// when one of previous expression results was affected by alternative values
 	extern bool isResultAffected;	// cumulative for all expression evaluation calls since last clear
 
-	// when isResultAffected && can be relocated by simple +offset
-	extern bool isRelocatable;		// valid value only for last expression evaluated
+	// when isResultAffected && can be relocated by simple +offset (REGULAR -> +offset, HIGH -> +(offset>>8))
+	extern EType deltaType;			// valid value only for last expression evaluated
 
 	//convenience method to add particular spot in incoming machine code + clear the flag
-	void resolveRelocationAffected(const aint opcodeRelOffset);
+	void resolveRelocationAffected(const aint opcodeRelOffset, EType minType = REGULAR);
 	bool checkAndWarn(bool doError = false);
 
 	// directives implementation

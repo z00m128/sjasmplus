@@ -7,16 +7,24 @@ Ped:
 
 http://no-color.org/    -> add to web after v1.20.0 release
 
+relocation -> extra support for 256B aligned relocation mode (For symbOS and NextZXOS drivers)
+ - patch the gameinput pull request to use the new "high" mode after v1.20.0 release
+   ( https://github.com/paulossilva/gameinput/pull/3/files )
+
+errors: add new CLI option for the "emitted/included at/from" messages,
+keeping the assembler more silent in msg=war|err mode
+
 listing with pre-substituted original source line included
  catch list: DUP -> EDUP, `nop:nop:nop`, ...
  output: maybe `<` like macros have `>`? and missing address, only line number?
-
-relocation -> extra support for 256B aligned relocation mode (For symbOS and NextZXOS drivers)
 
 relocation -> extra support for Next driver banks?
 (see Robin's https://github.com/Threetwosevensixseven/ZXRelocate to learn what exactly that means)
 
 "smc+?" syntax to pick most logical argument by assembler itself
+ ^ this feels related to relocation like `Relocation::resolveRelocationAffected(2);` in instructions
+
+check https://github.com/google/AFL
 
 add block/reserve which does really preserve the device memory content (currently only the
 structure block+align does preserve memory, and standalone ALIGN, but not DS/BLOCK)

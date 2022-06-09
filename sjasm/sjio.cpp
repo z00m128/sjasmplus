@@ -521,7 +521,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	}
 	char* fullpath, * filenamebegin;
 	if (!*nfilename && fStdinLog) {
-		fullpath = STRDUP("console_input");
+		fullpath = STRDUP("<stdin>");
 		filenamebegin = fullpath;
 		FP_Input = stdin;
 		stdin_log = fStdinLog;

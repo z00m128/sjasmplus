@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.19.0 Documentation [2022-03-31]</title>
+  <title>SjASMPlus 1.20.0 Documentation [2022-06-13]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -204,7 +204,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.20.0</term>
+            <term>13.6.2022 - 1.20.0</term>
 
             <listitem>
               <synopsis>- Lua: <link linkend="c_lua_scripting">upgrade to 5.4</link>, replacing tolua++ bindings with LuaBridge2.6 library, extending some bindings
@@ -212,12 +212,15 @@
 - Lua: the 3rd party extensions (BTW not working for many years) are obsolete in 5.4 and removed
 - Lua: more accurate errors/warning location reported even in complex cases
 - warnings: added -Wall, --help=warnings shows on/off status, rdlow off by default
+- Added HIGH mode to <link linkend="po_relocate_start">relocation data generator</link> (MSB-only relocation mode)
 - many open-file "fatal" errors become "non-fatal", assembling will continue
 - deprecated features removed: --syntax=m, label `abs` in expressions
 - `--color=auto` will stay no-color when <ulink url="https://no-color.org/">env.var. `NO_COLOR`</ulink> is defined
 - refactorings, improving some error messages and parsing, small fixes in parsing logic
 - fix listing of Lua's sj.parse_code (eol-comments), minor memory leaks fixed
 - fix relocation of temporary labels in expressions
+- invalid CLI options are reported as regular errors (also changing exit code)
+- errors are colored similarly to gcc (only keyword has color), console input name is `&lt;stdin&gt;`
 </synopsis>
             </listitem>
           </varlistentry>
@@ -2787,12 +2790,14 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 				  <link linkend="po_relocate_start">RELOCATE_START</link>). To get the relocation
 				  data themselves, use <link linkend="po_relocate_table">RELOCATE_TABLE</link> and
 				  related symbols.</para>
-			  <para>For more details/examples check the <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">examples/relocation</ulink> and the <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/relocate">relocation tests</ulink>.</para>
+			  <para>For more details/examples check the <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">examples/relocation</ulink>,
+				  <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/SymbOS_nslookup">examples/SymbOS_nslookup</ulink> and the
+				  <ulink url="https://github.com/z00m128/sjasmplus/tree/master/tests/relocate">relocation tests</ulink>.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>RELOCATE_START<indexterm id="po_relocate_start"><primary>RELOCATE_START</primary></indexterm></term>
+            <term>RELOCATE_START<indexterm id="po_relocate_start"><primary>RELOCATE_START</primary></indexterm> [HIGH]</term>
 
             <listitem>
               <para>Marks start of block for which relocation data are produced. Any *regular* label
@@ -2801,12 +2806,19 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 				  needs resulting opcode adjusted when relocated to different address will produce
 				  relocation-data for the <link linkend="po_relocate_table">RELOCATE_TABLE</link>.
 				  </para>
+			  <para>The <code>RELOCATE_START HIGH</code> variant checks only high-byte relocation.
+				  The produced table points to high byte (MSB) of the machine code. This mode is
+				  for OS/loaders which relocate only to 256-byte aligned boundaries (keeping LSB intact).</para>
 			  <para>The relocation feature of regular label is transitive and EQU value based on already
 				  relocatable label will be tagged as relocatable too. Also structures instantiated in
 				  relocatable block have their labels tagged as relocatable and their initial values may
 				  become part of relocation data if the initial value is based on relocatable value.</para>
 			  <para>You can prepend operator <code>norel</code> to label to strip it of its relocatable
 				  property for particular expression.</para>
+			  <para>The internal heuristic is not bullet-proof, some complex expression may fail
+				  to be recognised as fixed/relocatable value and instead warn about unstable result.
+				  It is recommended to assemble relocatable blocks in lower regions of address space
+				  (like <code>ORG 0</code> or <code>ORG $1000</code>) and to keep expressions simple enough.</para>
             </listitem>
           </varlistentry>
 
@@ -2820,10 +2832,10 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 				  so size is always doubled count).</para>
               <para>The table is raw array of WORD (16 bit) values with memory offsets of machine
 				  code which should be adjusted (when the code is relocated to different than original
-				  base address). To base offsets from particular base address, use <link linkend="po_org">ORG</link>
+				  base address). To get offsets from particular base address, use <link linkend="po_org">ORG</link>
 				  ahead of relocation block to land instructions and labels from there.</para>
-              <para>The &lt;subtract_offset&gt; is just subtracted from every offset recorded in the
-				  relocation table (same what WinAPE does with its optional argument for RELOCATE_TABLE).</para>
+              <para>The &lt;subtract_offset&gt; is subtracted from every offset recorded in the relocation table
+				  (same what WinAPE does with its optional argument "base_address" for RELOCATE_TABLE).</para>
             </listitem>
           </varlistentry>
 
@@ -5074,7 +5086,7 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			"T" lines. For "L" a list of items separated by comma, where first three items
 			represent sub-parts of symbol name: module name, main label, local label (sub-part
 			may be empty), optional remaining items are usage-traits giving away various internal info about
-			usage of symbol (currently exported traits: +equ, +macro, +reloc, +used, +module, +endmod,
+			usage of symbol (currently exported traits: +equ, +macro, +reloc, +reloc_high, +used, +module, +endmod,
 			+struct_def, +struct_data).
 			For type "K" the comment containing one of they defined keywords is present.
 		</para>
