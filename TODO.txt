@@ -5,6 +5,13 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+errors: add new CLI option for the "emitted/included at/from" messages,
+keeping the assembler more silent in msg=war|err mode
+
+make unrecognized option more error-like (see gcc) (and probably fail status code too!)
+(also reconsider colors to be gcc-like in errors/warnings)
+see: https://twitter.com/shiru8bit/status/1530327662421372928
+
 http://no-color.org/    -> add to web after v1.20.0 release
 
 listing with pre-substituted original source line included
@@ -17,6 +24,9 @@ relocation -> extra support for Next driver banks?
 (see Robin's https://github.com/Threetwosevensixseven/ZXRelocate to learn what exactly that means)
 
 "smc+?" syntax to pick most logical argument by assembler itself
+ ^ this feels related to relocation like `Relocation::resolveRelocationAffected(2);` in instructions
+
+check https://github.com/google/AFL
 
 add block/reserve which does really preserve the device memory content (currently only the
 structure block+align does preserve memory, and standalone ALIGN, but not DS/BLOCK)

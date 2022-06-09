@@ -22,6 +22,22 @@ adaptation in this example the option `--dirbol` is used to allow directives at
 the beginning of the line.
 
 --------------------------------------------------------------------------------------
+2022-06-09 v1.20.0 update
+
+The SymbOS relocates binaries only by patching the MSB (most significant byte, alias
+"high" byte). The sjasmplus now supports specific `RELOCATE_START HIGH` mode which
+enables programmer to use also expressions like `ld a,high label`, and get the correct
+data for relocation of such instruction.
+
+I'm keeping the example source as it was, but to switch to HIGH mode, two lines have
+be modified:
+line 8: `relocate_start` -> `relocate_start high`
+line 119: `relocate_table` -> `relocate_table +1`
+
+To enable high mode, and to produce relocation table pointing ahead of the MSB (that's
+how SymbOS expects the data, sjasmplus is producing offsets directly onto MSB).
+
+--------------------------------------------------------------------------------------
 The original "#readme.txt" content follows:
 --------------------------------------------------------------------------------------
 
