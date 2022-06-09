@@ -1,10 +1,10 @@
 
 ## [1.19.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.19.0) - 31.3.2022
-- added Amstrad CPC devices ([`AMSTRADCPC464`, `AMSTRADCPC6128`](http://z00m128.github.io/sjasmplus/documentation.html#po_device)) - by Oli Wilkinson
-- added Amstrad CPC save snapshot and CDT ([`SAVECPCSNA`](http://z00m128.github.io/sjasmplus/documentation.html#po_savecpcsna), [`SAVECDT`](http://z00m128.github.io/sjasmplus/documentation.html#po_savecdt)) - by Oli Wilkinson
-- added [`SAVE3DOS`](http://z00m128.github.io/sjasmplus/documentation.html#po_save3dos) (like SAVEBIN with +3DOS header)
+- added Amstrad CPC devices ([`AMSTRADCPC464`, `AMSTRADCPC6128`](https://z00m128.github.io/sjasmplus/documentation.html#po_device)) - by Oli Wilkinson
+- added Amstrad CPC save snapshot and CDT ([`SAVECPCSNA`](https://z00m128.github.io/sjasmplus/documentation.html#po_savecpcsna), [`SAVECDT`](https://z00m128.github.io/sjasmplus/documentation.html#po_savecdt)) - by Oli Wilkinson
+- added [`SAVE3DOS`](https://z00m128.github.io/sjasmplus/documentation.html#po_save3dos) (like SAVEBIN with +3DOS header)
 - the deprecated "ok" warning suppression is removed, use "&lt;warning-id>-ok" comment or -Wno-...
-- new [temporary label](http://z00m128.github.io/sjasmplus/documentation.html#s_temp_labels) suffix syntax `_b` and `_f`, enabling them for all expressions
+- new [temporary label](https://z00m128.github.io/sjasmplus/documentation.html#s_temp_labels) suffix syntax `_b` and `_f`, enabling them for all expressions
 - fix `--longptr` mode to keep 32b address when `DS 0` is used
 - added fake instructions adc|add|sbc|sub de,bc|de|hl|sp
 - dec|inc|pop|push will accept also single-comma multiarg in --syntax=a mode
@@ -13,24 +13,24 @@
 - bugfixes (macros, listing, file names in errors, SLD reversepop data)
 
 ## [1.18.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.3) - 29.8.2021
-- added [`--color`](http://z00m128.github.io/sjasmplus/documentation.html#s_cli) to enable/disable ANSI coloring of errors/warnings
-- added [`--syntax=s`](http://z00m128.github.io/sjasmplus/documentation.html#s_cli) mode to disable sub-word substitutions of DEFINEs
-- added at-sign prefix for [macro local labels](http://z00m128.github.io/sjasmplus/documentation.html#s_local_labels) to act as non-macro local label
-- [`SAVETRD`](http://z00m128.github.io/sjasmplus/documentation.po_savetrd) accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
-- [`SAVETRD`](http://z00m128.github.io/sjasmplus/documentation.po_savetrd) has optional argument to save BASIC with variables (length_minus_variables)
+- added [`--color`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli) to enable/disable ANSI coloring of errors/warnings
+- added [`--syntax=s`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli) mode to disable sub-word substitutions of DEFINEs
+- added at-sign prefix for [macro local labels](https://z00m128.github.io/sjasmplus/documentation.html#s_local_labels) to act as non-macro local label
+- [`SAVETRD`](https://z00m128.github.io/sjasmplus/documentation.po_savetrd) accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
+- [`SAVETRD`](https://z00m128.github.io/sjasmplus/documentation.po_savetrd) has optional argument to save BASIC with variables (length_minus_variables)
 - minor bugfixes (conditional block parser)
 
 ## [1.18.2](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.2) - 14.2.2021
-- [may break old sources] new [exist operator](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to check label existence
+- [may break old sources] new [exist operator](https://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to check label existence
 - the `--syntax=i` mode makes now also register parsing case insensitive
 - minor bugfixes (predefined values, savenex BMP loader less strict about "colors used" content)
 
 ## [1.18.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.1) - 23.1.2021
 - Big-Endian hosts support (experimental and not tested continuously)
-- added "listall", "listact" commands to [OPT](http://z00m128.github.io/sjasmplus/documentation.html#po_opt) - to switch between listing types
-- [`WHILE`](http://z00m128.github.io/sjasmplus/documentation.html#po_while) has optional argument to set explicit guardian-counter
-- [`ASSERT`](http://z00m128.github.io/sjasmplus/documentation.html#po_assert) has optional argument (to add description/notes for expression)
-- [`SLOT`](http://z00m128.github.io/sjasmplus/documentation.html#po_slot) and [`MMU`](http://z00m128.github.io/sjasmplus/documentation.html#po_mmu) will now accept also starting address of slot instead of its number
+- added "listall", "listact" commands to [OPT](https://z00m128.github.io/sjasmplus/documentation.html#po_opt) - to switch between listing types
+- [`WHILE`](https://z00m128.github.io/sjasmplus/documentation.html#po_while) has optional argument to set explicit guardian-counter
+- [`ASSERT`](https://z00m128.github.io/sjasmplus/documentation.html#po_assert) has optional argument (to add description/notes for expression)
+- [`SLOT`](https://z00m128.github.io/sjasmplus/documentation.html#po_slot) and [`MMU`](https://z00m128.github.io/sjasmplus/documentation.html#po_mmu) will now accept also starting address of slot instead of its number
 - fix: option `--sym` was not exporting labels starting with underscore
 - fix: `SAVENEX` BMP-loader bug when certain builds of sjasmplus were unable to open BMP files
 - fix: after `STRUCT` instance the "main" label is not polluted by last field of STRUCT
@@ -40,28 +40,28 @@
 
 ## [1.18.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.18.0) - 12.12.2020
 - [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
-- [may break old sources] new [abs operator](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) for absolute integer value
-- new [system of warnings](http://z00m128.github.io/sjasmplus/documentation.html#s_id_warnings) (and suppression), the "; ok" comments are now deprecated
-- [`DISPLAY`](http://z00m128.github.io/sjasmplus/documentation.html#po_display) has now also binary and char formatting
-- [`DEFINE+`](http://z00m128.github.io/sjasmplus/documentation.html#po_define) added to [re]define identifier without error
-- [`ELSEIF`](http://z00m128.github.io/sjasmplus/documentation.html#ca_elseif) added to conditional assembling arsenal
-- [`WHILE`](http://z00m128.github.io/sjasmplus/documentation.html#po_while) added for conditional loops
-- added ["NOSLOT64K" device](http://z00m128.github.io/sjasmplus/documentation.html#po_device) with 2MiB of virtual memory
-- [`LABELSLIST`](http://z00m128.github.io/sjasmplus/documentation.html#po_labelslist) has new optional argument to dump 16bit "virtual labels"
-- [`CSPECTMAP`](http://z00m128.github.io/sjasmplus/documentation.html#po_cspectmap) exports STRUCT symbols with more detail (instance labels with physical address)
-- [SMC offset](http://z00m128.github.io/sjasmplus/documentation.html#s_labels) syntax for self-modify-code labels for source brevity
-- added exclamation mark prefix for [labels](http://z00m128.github.io/sjasmplus/documentation.html#s_local_labels) to not affect following local labels
-- added "listmc" command to [OPT](http://z00m128.github.io/sjasmplus/documentation.html#po_opt) - to list only lines with machine code bytes
+- [may break old sources] new [abs operator](https://z00m128.github.io/sjasmplus/documentation.html#s_expressions) for absolute integer value
+- new [system of warnings](https://z00m128.github.io/sjasmplus/documentation.html#s_id_warnings) (and suppression), the "; ok" comments are now deprecated
+- [`DISPLAY`](https://z00m128.github.io/sjasmplus/documentation.html#po_display) has now also binary and char formatting
+- [`DEFINE+`](https://z00m128.github.io/sjasmplus/documentation.html#po_define) added to [re]define identifier without error
+- [`ELSEIF`](https://z00m128.github.io/sjasmplus/documentation.html#ca_elseif) added to conditional assembling arsenal
+- [`WHILE`](https://z00m128.github.io/sjasmplus/documentation.html#po_while) added for conditional loops
+- added ["NOSLOT64K" device](https://z00m128.github.io/sjasmplus/documentation.html#po_device) with 2MiB of virtual memory
+- [`LABELSLIST`](https://z00m128.github.io/sjasmplus/documentation.html#po_labelslist) has new optional argument to dump 16bit "virtual labels"
+- [`CSPECTMAP`](https://z00m128.github.io/sjasmplus/documentation.html#po_cspectmap) exports STRUCT symbols with more detail (instance labels with physical address)
+- [SMC offset](https://z00m128.github.io/sjasmplus/documentation.html#s_labels) syntax for self-modify-code labels for source brevity
+- added exclamation mark prefix for [labels](https://z00m128.github.io/sjasmplus/documentation.html#s_local_labels) to not affect following local labels
+- added "listmc" command to [OPT](https://z00m128.github.io/sjasmplus/documentation.html#po_opt) - to list only lines with machine code bytes
 - added `--lstlab=sort` variant to have symbols in listings in predictable order
 - minor bugfixes in parser and listing-line-numbering, refactored symbols/labels implementation
 - Added [example (chargfx2asm)](https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm) how to use sjasmplus as byte-processor for binary files
-- [SLD data](http://z00m128.github.io/sjasmplus/documentation.html#c_sld_data) improvements based on Maziac's feedback and DeZog's needs
+- [SLD data](https://z00m128.github.io/sjasmplus/documentation.html#c_sld_data) improvements based on Maziac's feedback and DeZog's needs
 
 ## [1.17.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.17.0) - 8.8.2020
-- `STRUCT` has new [`TEXT`](http://z00m128.github.io/sjasmplus/documentation.html#st_text) pseudo-instruction to define "DB-like" data
-- [`STRUCT` initializer block](http://z00m128.github.io/sjasmplus/documentation.html#st_usage) can be now multi-line (when correctly enclosed in curly braces)
-- [`EQU`](http://z00m128.github.io/sjasmplus/documentation.html#po_equ) now allows for optional override of page number assigned to the new symbol
-- new [$$$ and $$$$ operators](http://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to retrieve "physical" address/page inside DISP block
+- `STRUCT` has new [`TEXT`](https://z00m128.github.io/sjasmplus/documentation.html#st_text) pseudo-instruction to define "DB-like" data
+- [`STRUCT` initializer block](https://z00m128.github.io/sjasmplus/documentation.html#st_usage) can be now multi-line (when correctly enclosed in curly braces)
+- [`EQU`](https://z00m128.github.io/sjasmplus/documentation.html#po_equ) now allows for optional override of page number assigned to the new symbol
+- new [$$$ and $$$$ operators](https://z00m128.github.io/sjasmplus/documentation.html#s_expressions) to retrieve "physical" address/page inside DISP block
 - instruction `out (c),0` now emits warning (can be suppressed by the "; ok" comment)
 - fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
 - fixed some memory leaks, undefined behaviour and unaligned memory access
@@ -69,7 +69,7 @@
 ## [1.16.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.16.0) - 27.7.2020
 - `LUA` the new emit warning (v1.15.1) is now suppressible
 - Predefined defines extended and renamed (following gcc/clang ones)
-- Added [relocation data generator](http://z00m128.github.io/sjasmplus/documentation.html#po_relocate_end), check also [example](https://github.com/z00m128/sjasmplus/tree/master/examples/relocation)
+- Added [relocation data generator](https://z00m128.github.io/sjasmplus/documentation.html#po_relocate_end), check also [example](https://github.com/z00m128/sjasmplus/tree/master/examples/relocation)
 - bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by `(`
 
 ## [1.15.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.15.1) - 7.7.2020
@@ -101,12 +101,12 @@
 
 ## [1.14.5](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.5) - 30.1.2020
 - fix crash when opening source file fails
-- [DISP](http://z00m128.github.io/sjasmplus/documentation.html#po_disp)/[ORG](http://z00m128.github.io/sjasmplus/documentation.html#po_org) warns about being used inside DISP block (also docs extended)
+- [DISP](https://z00m128.github.io/sjasmplus/documentation.html#po_disp)/[ORG](https://z00m128.github.io/sjasmplus/documentation.html#po_org) warns about being used inside DISP block (also docs extended)
 
 ## [1.14.4](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.4) - 13.1.2020
 - added few example utility macros in tests/macro_examples/sj_library.asm (`neg r16`)
-- added [SAVENEX SCREEN BMP](http://z00m128.github.io/sjasmplus/documentation.html#nex_screen) sub-command to include BMP loading-screen
-- added support for V1.3 of [NEX file format](http://z00m128.github.io/sjasmplus/documentation.html#c_savenex) (new commands: `CFG3`, `PALETTE`, `COPPER`, new screen modes)
+- added [SAVENEX SCREEN BMP](https://z00m128.github.io/sjasmplus/documentation.html#nex_screen) sub-command to include BMP loading-screen
+- added support for V1.3 of [NEX file format](https://z00m128.github.io/sjasmplus/documentation.html#c_savenex) (new commands: `CFG3`, `PALETTE`, `COPPER`, new screen modes)
 - in lua scripts: `sj.calc(..)` (alias `_c(..)`) now substitutes defines and macro arguments
 - error reporting inside LUA and MACRO refactored to give better info about origin of error
 - macro-arguments parser now recognizes C++ numeric literals with apostrophe as digits-group separator
@@ -115,7 +115,7 @@
 
 ## [1.14.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.14.3) - 15.11.2019
 - fix detection of `.end:` and `.END` labels when `--dirbol` is used
-- added export of [SLD (Source Level Debugging) data](http://z00m128.github.io/sjasmplus/documentation.html#c_sld_data), see also [NDS (NextDevSystem)](https://github.com/Ckirby101/NDS-NextDevSystem)
+- added export of [SLD (Source Level Debugging) data](https://z00m128.github.io/sjasmplus/documentation.html#c_sld_data), see also [NDS (NextDevSystem)](https://github.com/Ckirby101/NDS-NextDevSystem)
 - added `--longptr` option to allow labels outside of 16b address space
 - docs: added small details about FPOS, SAVETAP, IFUSED
 - fix assembling-time reported in linux
