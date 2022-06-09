@@ -375,7 +375,7 @@ namespace Options {
 			if (*val) {
 				if (NULL != buffer) STRCPY(buffer, bufferSize, val);
 			} else {
-				_CERR "No parameters found in " _CMDL arg _ENDL;
+				Error("no parameters found in", arg, ALL);
 			}
 			return 1;	// keyword detected, option was processed
 		}
@@ -495,7 +495,9 @@ namespace Options {
 				} else if (!strcmp(opt, "longptr")) {
 					IsLongPtr = true;
 				} else if (CheckAssignmentOption("msg", NULL, 0)) {
-					if (!strcmp("none", val)) {
+					if (!*val) {
+						// nothing to do, CheckAssignmentOption already displayed error
+					} else if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;
 						HideLogo = true;
 					} else if (!strcmp("err", val)) {
@@ -514,7 +516,7 @@ namespace Options {
 						SortSymbols = true;
 						HideLogo = true;
 					} else {
-						_CERR "Unexpected parameter in " _CMDL arg _ENDL;
+						Error("unexpected parameter in", arg, ALL);
 					}
 				} else if (!strcmp(opt, "lst") && !val[0]) {
 					IsDefaultListingName = true;
@@ -538,7 +540,7 @@ namespace Options {
 					} else if (!strcmp("auto", val)) {
 						// already heuristically detected, nothing to do
 					} else {
-						_CERR "Invalid --color setting \"" _CMDL val _CMDL "\", use: on|off|auto." _ENDL;
+						Error("invalid --color setting (use: on|off|auto)", val, ALL);
 					}
 				} else if (!strcmp(opt, "nologo")) {
 					HideLogo = 1;
@@ -551,7 +553,7 @@ namespace Options {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
 					} else {
 						if (!doubleDash || '=' == arg[5]) {
-							_CERR "No include path found in " _CMDL arg _ENDL;
+							Error("no include path found in", arg, ALL);
 						} else {	// individual `--inc` without "=path" will RESET include dirs
 							if (IncludeDirsList) delete IncludeDirsList;
 							IncludeDirsList = nullptr;
@@ -563,13 +565,13 @@ namespace Options {
 						splitByChar(val, '=', defN, LINEMAX, defV, LINEMAX);
 						CmdDefineTable.Add(defN, defV, NULL);
 					} else {
-						_CERR "No parameters found in " _CMDL arg _ENDL;
+						Error("no parameters found in", arg, ALL);
 					}
 				} else if (!doubleDash && 0 == opt[0]) {
 					// only single "-" was on command line = source STDIN
 					sourceFiles.push_back(SSource(1));		// special constructor for stdin input
 				} else {
-					_CERR "Unrecognized option: " _CMDL arg _ENDL;
+					Error("unrecognized option", arg, ALL);
 				}
 
 				++i;					// next CLI argument
@@ -658,7 +660,7 @@ int main(int argc, char **argv) {
 			temp[charI++] = 0;
 		}
 		if (!SkipBlanks(envFlags)) {
-			_CERR "SJASMPLUSOPTS environment variable contains too many options (max is 32)" _ENDL;
+			Error("SJASMPLUSOPTS environment variable contains too many options (max is 32)", nullptr, ALL);
 		}
 		// process environment variable ahead of command line options (in the same way)
 		int i = 0;
@@ -725,9 +727,7 @@ int main(int argc, char **argv) {
 
 	// exit with error if no input file were specified
 	if (0 == sourceFiles.size()) {
-		if (Options::OutputVerbosity <= OV_ERROR) {
-			_CERR "No inputfile(s)" _ENDL;
-		}
+		Error("no inputfile(s)", nullptr, ALL);
 		exit(1);
 	}
 

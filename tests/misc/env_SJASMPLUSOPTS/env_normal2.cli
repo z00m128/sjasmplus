@@ -3,5 +3,6 @@
 # and doubles also the regular line, so the same source is assembled four times in total
 # There are also multiple invalid/unused options just to exercise option parsing in sjasm.cpp
 SJASMPLUSOPTS="-DFLAGSDEFINE=defined $file_asm --dirbol $file_asm --unknownOptionToTestError -i --dos866 -D" \
+NO_COLOR=1 \
 $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" "$file_asm" 2> "${dst_base}.lst"
 last_result=$?

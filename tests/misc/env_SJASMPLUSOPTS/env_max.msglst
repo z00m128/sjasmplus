@@ -1,4 +1,4 @@
-SJASMPLUSOPTS environment variable contains too many options (max is 32)
+error: SJASMPLUSOPTS environment variable contains too many options (max is 32)
 # file opened: env_max.asm
 1     0000 00               DB 0
 2     0001                  IFDEF FLAGSDEFINE

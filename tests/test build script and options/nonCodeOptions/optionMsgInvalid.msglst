@@ -1,4 +1,4 @@
-Unexpected parameter in --msg=invalid
+error: unexpected parameter in: --msg=invalid
 # file opened: optionMsgInvalid.asm
 1     0000 00           nn: nop
 optionMsgInvalid.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
