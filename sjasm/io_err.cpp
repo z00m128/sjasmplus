@@ -64,7 +64,8 @@ static void trimAndAddEol(char* lineBuffer) {
 	if ('\n' != *lastChar) lastChar[1] = '\n', lastChar[2] = 0;	// add EOL character if not present
 }
 
-static void outputErrorLine(const EOutputVerbosity errorLevel, int keywordPos = -1, int keywordSz = 0) {
+static void outputErrorLine(const EOutputVerbosity errorLevel, int keywordPos, int keywordSz) {
+	assert(0 <= keywordPos && 1 <= keywordSz && keywordPos + keywordSz <= int(strlen(ErrorLine)));	// keyword is mandatory
 	auto lstFile = GetListingFile();
 	if (!lstFile && errorLevel < Options::OutputVerbosity) return;	// no output required
 	// trim end of error/warning line and add EOL char if needed
@@ -77,19 +78,14 @@ static void outputErrorLine(const EOutputVerbosity errorLevel, int keywordPos = 
 	}
 	// print the error into stderr if OutputVerbosity allows this type of message
 	if (Options::OutputVerbosity <= errorLevel) {
-		if (keywordPos < 0 || keywordSz <= 0) {		// no keyword in message, nothing to colorize
-			_CERR ErrorLine _END;
-		} else {					// colorize the keyword in message
-			assert(keywordPos + keywordSz <= int(strlen(ErrorLine)));
-			if (keywordPos) cerr.write(ErrorLine, keywordPos);	// output filename and line position
-			// switch color for keyword and output it
-			if (OV_ERROR == errorLevel) _CERR Options::tcols->error _END;
-			if (OV_WARNING == errorLevel) _CERR Options::tcols->warning _END;
-			cerr.write(ErrorLine + keywordPos, keywordSz);
-			// switch color off for rest of message
-			_CERR Options::tcols->end _END;
-			_CERR ErrorLine + keywordPos + keywordSz _END;
-		}
+		if (keywordPos) cerr.write(ErrorLine, keywordPos);	// output filename and line position
+		// colorize the keyword in message
+		if (OV_ERROR == errorLevel) _CERR Options::tcols->error _END;
+		if (OV_WARNING == errorLevel) _CERR Options::tcols->warning _END;
+		cerr.write(ErrorLine + keywordPos, keywordSz);
+		// switch color off for rest of message
+		_CERR Options::tcols->end _END;
+		_CERR ErrorLine + keywordPos + keywordSz _END;
 		if (*ErrorLine2) _CERR ErrorLine2 _END;
 	}
 }
