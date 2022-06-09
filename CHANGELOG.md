@@ -1,4 +1,20 @@
 
+## [1.20.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.20.0) - 13.6.2022
+- Lua: [upgrade to 5.4](https://z00m128.github.io/sjasmplus/documentation.html#c_lua_scripting), replacing tolua++ bindings with LuaBridge2.6 library, extending some bindings
+- Lua: bindings slightly modified (required by upgrade), refreshed docs, added test coverage
+- Lua: the 3rd party extensions (BTW not working for many years) are obsolete in 5.4 and removed
+- Lua: more accurate errors/warning location reported even in complex cases
+- warnings: added -Wall, --help=warnings shows on/off status, rdlow off by default
+- Added HIGH mode to [relocation data generator](https://z00m128.github.io/sjasmplus/documentation.html#po_relocate_start) (MSB-only relocation mode)
+- many open-file "fatal" errors become "non-fatal", assembling will continue
+- deprecated features removed: --syntax=m, label `abs` in expressions
+- `--color=auto` will stay no-color when [env.var. `NO_COLOR`](https://no-color.org/) is defined
+- refactorings, improving some error messages and parsing, small fixes in parsing logic
+- fix listing of Lua's sj.parse_code (eol-comments), minor memory leaks fixed
+- fix relocation of temporary labels in expressions
+- invalid CLI options are reported as regular errors (also changing exit code)
+- errors are colored similarly to gcc (only keyword has color), console input name is `<stdin>`
+
 ## [1.19.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.19.0) - 31.3.2022
 - added Amstrad CPC devices ([`AMSTRADCPC464`, `AMSTRADCPC6128`](https://z00m128.github.io/sjasmplus/documentation.html#po_device)) - by Oli Wilkinson
 - added Amstrad CPC save snapshot and CDT ([`SAVECPCSNA`](https://z00m128.github.io/sjasmplus/documentation.html#po_savecpcsna), [`SAVECDT`](https://z00m128.github.io/sjasmplus/documentation.html#po_savecdt)) - by Oli Wilkinson

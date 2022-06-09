@@ -5,20 +5,18 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+http://no-color.org/    -> add to web after v1.20.0 release
+
+relocation -> extra support for 256B aligned relocation mode (For symbOS and NextZXOS drivers)
+ - patch the gameinput pull request to use the new "high" mode after v1.20.0 release
+   ( https://github.com/paulossilva/gameinput/pull/3/files )
+
 errors: add new CLI option for the "emitted/included at/from" messages,
 keeping the assembler more silent in msg=war|err mode
-
-make unrecognized option more error-like (see gcc) (and probably fail status code too!)
-(also reconsider colors to be gcc-like in errors/warnings)
-see: https://twitter.com/shiru8bit/status/1530327662421372928
-
-http://no-color.org/    -> add to web after v1.20.0 release
 
 listing with pre-substituted original source line included
  catch list: DUP -> EDUP, `nop:nop:nop`, ...
  output: maybe `<` like macros have `>`? and missing address, only line number?
-
-relocation -> extra support for 256B aligned relocation mode (For symbOS and NextZXOS drivers)
 
 relocation -> extra support for Next driver banks?
 (see Robin's https://github.com/Threetwosevensixseven/ZXRelocate to learn what exactly that means)

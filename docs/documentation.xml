@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.19.0 Documentation [2022-03-31]</title>
+  <title>SjASMPlus 1.20.0 Documentation [2022-06-13]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -204,7 +204,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.20.0</term>
+            <term>13.6.2022 - 1.20.0</term>
 
             <listitem>
               <synopsis>- Lua: <link linkend="c_lua_scripting">upgrade to 5.4</link>, replacing tolua++ bindings with LuaBridge2.6 library, extending some bindings
@@ -219,6 +219,8 @@
 - refactorings, improving some error messages and parsing, small fixes in parsing logic
 - fix listing of Lua's sj.parse_code (eol-comments), minor memory leaks fixed
 - fix relocation of temporary labels in expressions
+- invalid CLI options are reported as regular errors (also changing exit code)
+- errors are colored similarly to gcc (only keyword has color), console input name is `&lt;stdin&gt;`
 </synopsis>
             </listitem>
           </varlistentry>
