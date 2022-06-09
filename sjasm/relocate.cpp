@@ -37,6 +37,8 @@ namespace Relocation {
 	static void refreshMaxTableCount();
 
 	// local implementation specific data
+	static constexpr aint ALTERNATIVE_OFFSET_WORD = +0x0272;	// must have at least one bit set in low three due to how some tests are written
+	static constexpr aint ALTERNATIVE_OFFSET_HIGH = +0x0300;
 	static TextFilePos startPos;				// sourcefile position of last correct RELOCATE_START
 	static size_t maxTableCount = 0;			// maximum count of relocation data
 	static std::vector<word> offsets;			// offsets collected during current pass
@@ -44,10 +46,11 @@ namespace Relocation {
 	static bool warnAboutContentChange = false;	// if any change in content between passes should be reported
 
 	// public API variables
-	bool isActive = false;			// when inside relocation block
+	aint alternative_offset = 0;	// offset to add to label value when evaluating alternatives
+	EType type = OFF;				// type of relocation block when inside
 	bool areLabelsOffset = false;	// when the Labels should return the alternative value
 	bool isResultAffected = false;	// when one of previous expression results was affected by it
-	bool isRelocatable = false;		// when isResultAffected && difference was precisely "+offset"
+	EType deltaType = OFF;			// when isResultAffected && difference was precisely "+offset" or "+(offset>>8)"
 }
 
 // when some part of opcode needs relocation, add its offset to the relocation table
@@ -64,19 +67,18 @@ static void Relocation::addOffsetToRelocate(const aint offset) {
 	offsets.push_back(offset);
 }
 
-void Relocation::resolveRelocationAffected(const aint opcodeRelOffset) {
+void Relocation::resolveRelocationAffected(const aint opcodeRelOffset, EType minType) {
+	if (type < minType) return;
 	if (!isResultAffected) return;
 	isResultAffected = false;				// mark as processed
-	// the machine code is affected by relocation, check if the difference is relocatable, add to table
-	if (isRelocatable) {
-		if (INT_MAX != opcodeRelOffset) {
-			const aint address = (DISP_INSIDE_RELOCATE == PseudoORG) ? adrdisp : CurAddress;
-			addOffsetToRelocate(address + opcodeRelOffset);
-		}
+	if (minType <= deltaType) {
+		if (INT_MAX == opcodeRelOffset) return;
+		const aint address = (DISP_INSIDE_RELOCATE == PseudoORG) ? adrdisp : CurAddress;
+		addOffsetToRelocate(address + opcodeRelOffset + type - deltaType);
 		return;
 	}
-	// difference is not fixable by simple "+offset" relocator, report it as warning
-	WarningById(W_REL_DIVERTS);
+	// difference is not fixable by simple "+offset" relocator or in current mode
+	WarningById(deltaType ? W_REL_UNSTABLE : W_REL_DIVERTS);
 }
 
 bool Relocation::checkAndWarn(bool doError) {
@@ -99,27 +101,36 @@ static void Relocation::refreshMaxTableCount() {
 		maxTableCount = offsets.size();
 	}
 	// add the relocate_count and relocate_size symbols only when RELOCATE feature was used
-	if (Relocation::isActive || maxTableCount) {
+	if (type || maxTableCount) {
+		isResultAffected = false;
+		deltaType = OFF;
 		LabelTable.Insert("relocate_count", maxTableCount, LABEL_IS_DEFL);
 		LabelTable.Insert("relocate_size", maxTableCount * 2, LABEL_IS_DEFL);
 	}
 }
 
 void Relocation::dirRELOCATE_START() {
-	if (isActive) {
+	bool isHigh = !SkipBlanks(lp) && cmphstr(lp, "high");
+	if (type) {
 		sourcePosStack.push_back(startPos);
 		Error("Relocation block already started here");
 		sourcePosStack.pop_back();
 		return;
 	}
-	isActive = true;
+	const aint new_offset = isHigh ? ALTERNATIVE_OFFSET_HIGH : ALTERNATIVE_OFFSET_WORD;
+	if (alternative_offset && alternative_offset != new_offset) {
+		Error("HIGH mode can't be mixed with regular mode");
+		return;
+	}
+	alternative_offset = new_offset;
+	type = isHigh ? HIGH : REGULAR;
 	assert(!sourcePosStack.empty());
 	startPos = sourcePosStack.back();
 	refreshMaxTableCount();
 }
 
 void Relocation::dirRELOCATE_END() {
-	if (!isActive) {
+	if (!type) {
 		Error("Relocation block start for this end is missing");
 		return;
 	}
@@ -127,7 +138,7 @@ void Relocation::dirRELOCATE_END() {
 		Error("End the current DISP block first");
 		return;
 	}
-	isActive = false;
+	type = OFF;
 	refreshMaxTableCount();
 }
 
@@ -151,7 +162,7 @@ void Relocation::dirRELOCATE_TABLE() {
 
 void Relocation::InitPass() {
 	// check if the relocation block is still open (missing RELOCATION_END in source)
-	if (isActive) {
+	if (type) {
 		sourcePosStack.push_back(startPos);
 		Error("Missing end of relocation block started here");
 		sourcePosStack.pop_back();
@@ -162,7 +173,7 @@ void Relocation::InitPass() {
 	maxTableCount = offsets.size();
 	// clear the table for next pass and init the state
 	offsets.clear();
-	isActive = false;
+	type = OFF;
 }
 
 //eof relocate.cpp

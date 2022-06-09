@@ -36,8 +36,8 @@ sld_sjlabels.asm|26||0|4|32779|T|
 sld_sjlabels.asm|28||0|-1|32781|L|module@1,,,+module
 sld_sjlabels.asm|30||0|-1|456|D|module@1._.no_main_local.2e
 sld_sjlabels.asm|30||0|-1|456|L|module@1,_,no_main_local.2e,+equ
-sld_sjlabels.asm|31||0|4|32781|F|module@1._.no_main_local.2
-sld_sjlabels.asm|31||0|4|32781|L|module@1,_,no_main_local.2,+reloc,+used
+sld_sjlabels.asm|31||0|-1|128|D|module@1._.no_main_local.2
+sld_sjlabels.asm|31||0|-1|128|L|module@1,_,no_main_local.2,+equ,+reloc_high,+used
 sld_sjlabels.asm|32||0|4|32781|T|
 sld_sjlabels.asm|33||0|4|32782|T|
 sld_sjlabels.asm|34||0|4|32784|T|

@@ -16,7 +16,11 @@ label2:
 
     ld      a,high label2   ; relunstable-ok ; warning supressed
 
+    ld      hl,high label1  ; can't be relocated by simple "+offset" in regular mode (would work in HIGH mode)
+
     RELOCATE_END
+
+    RELOCATE_START   HIGH   ; error - HIGH and "regular" mode can't be mixed in the same assembling unit
 
     RELOCATE_TABLE
 

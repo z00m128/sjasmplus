@@ -133,6 +133,7 @@ static void dirDZ() {
 static void dirABYTE() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
+		Relocation::checkAndWarn();
 		getBytesWithCheck(add);
 	} else {
 		Error("ABYTE <offset> <bytes>: parsing <offset> failed", bp, SUPPRESS);
@@ -142,6 +143,7 @@ static void dirABYTE() {
 static void dirABYTEC() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
+		Relocation::checkAndWarn();
 		getBytesWithCheck(add, 1);
 	} else {
 		Error("ABYTEC <offset> <bytes>: parsing <offset> failed", bp, SUPPRESS);
@@ -151,6 +153,7 @@ static void dirABYTEC() {
 static void dirABYTEZ() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
+		Relocation::checkAndWarn();
 		getBytesWithCheck(add, 0, true);
 	} else {
 		Error("ABYTEZ <offset> <bytes>: parsing <offset> failed", bp, SUPPRESS);
@@ -342,7 +345,7 @@ static void dirDISP() {
 	// everything is valid, switch to DISP mode (dispPageNum is already set above)
 	adrdisp = CurAddress;
 	CurAddress = valAdr;
-	PseudoORG = Relocation::isActive ? DISP_INSIDE_RELOCATE : DISP_ACTIVE;
+	PseudoORG = Relocation::type ? DISP_INSIDE_RELOCATE : DISP_ACTIVE;
 }
 
 static void dirENT() {
@@ -351,11 +354,11 @@ static void dirENT() {
 		return;
 	}
 	// check if the DISP..ENT block is either fully inside relocation block, or engulfing it fully.
-	if (DISP_ACTIVE == PseudoORG && Relocation::isActive) {
+	if (DISP_ACTIVE == PseudoORG && Relocation::type) {
 		Error("The DISP block did start outside of relocation block, can't end inside it");
 		return;
 	}
-	if (DISP_INSIDE_RELOCATE == PseudoORG && !Relocation::isActive) {
+	if (DISP_INSIDE_RELOCATE == PseudoORG && !Relocation::type) {
 		Error("The DISP block did start inside of relocation block, can't end outside of it");
 		return;
 	}

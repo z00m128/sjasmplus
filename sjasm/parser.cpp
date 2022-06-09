@@ -105,8 +105,8 @@ static int ParseExpPrim(char*& p, aint& nval) {
 	} else if (*p == '$') {
 		++p;
 		nval = CurAddress;
-		if (Relocation::isActive && Relocation::areLabelsOffset && DISP_INSIDE_RELOCATE != PseudoORG) {
-			nval += Relocation::ALTERNATIVE_OFFSET;
+		if (Relocation::type && Relocation::areLabelsOffset && DISP_INSIDE_RELOCATE != PseudoORG) {
+			nval += Relocation::alternative_offset;
 		}
 		return 1;
 	} else if (!(res = GetCharConst(p, nval))) {
@@ -362,7 +362,7 @@ int ParseExpression(char*& p, aint& nval) {
 	// label values, and remember the result (to compare it with regular evaluation afterward)
 	aint relocationVal = 0;
 	int relocationRes = 0;
-	if (Relocation::isActive) {
+	if (Relocation::type) {
 		char* altP = p;
 		bool osynerr = synerr;
 		synerr = false;
@@ -377,7 +377,10 @@ int ParseExpression(char*& p, aint& nval) {
 	if (res && relocationRes) {
 		const bool isAffected = (relocationVal != nval);
 		Relocation::isResultAffected |= isAffected;
-		Relocation::isRelocatable = isAffected && (Relocation::ALTERNATIVE_OFFSET == (relocationVal - nval));
+		Relocation::deltaType =
+			(Relocation::alternative_offset == (relocationVal - nval)) ? Relocation::REGULAR :
+			((Relocation::HIGH == Relocation::type) && ((Relocation::alternative_offset >> 8) == (relocationVal - nval))) ? Relocation::HIGH :
+			Relocation::OFF;
 	}
 	return res;
 }
@@ -419,7 +422,7 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 		alignment = -1;
 		return;
 	}
-	if (Relocation::isActive) {
+	if (Relocation::type) {
 		WarningById(W_RELOCATABLE_ALIGN);
 	}
 	// check if alignment value is power of two (0..15-th power only)
@@ -971,50 +974,47 @@ void ParseStructMember(CStructure* st) {
 	aint val, len;
 	bp = lp;
 	Relocation::isResultAffected = false;
+	Relocation::EType deltaType = Relocation::OFF;
 	switch (GetStructMemberId(lp)) {
 	case SMEMBBLOCK:
 		if (!ParseExpression(lp, len)) {
-			len = 1; Error("[STRUCT] Expression expected");
+			len = 1;
+			Error("[STRUCT] Expression expected");
 		}
 		if (comma(lp)) {
 			if (!ParseExpression(lp, val)) {
-				val = 0; Error("[STRUCT] Expression expected");
+				val = 0;
+				Error("[STRUCT] Expression expected");
 			}
 			check8(val);
 			val &= 255;
 		} else {
 			val = -1;
 		}
-		st->AddMember(new CStructureEntry2(st->noffset, len, val, false, SMEMBBLOCK));
+		st->AddMember(new CStructureEntry2(st->noffset, len, val, deltaType, SMEMBBLOCK));
 		break;
 	case SMEMBBYTE:
-		if (!ParseExpression(lp, val)) {
-			val = 0;
-		} check8(val);
-		st->AddMember(new CStructureEntry2(st->noffset, 1, val, false, SMEMBBYTE));
+		if (!ParseExpression(lp, val)) val = 0;
+		check8(val);
+		deltaType = Relocation::isResultAffected ? Relocation::deltaType : Relocation::OFF;
+		st->AddMember(new CStructureEntry2(st->noffset, 1, val, deltaType, SMEMBBYTE));
+		Relocation::resolveRelocationAffected(INT_MAX, Relocation::HIGH);	// clear flags + warn when can't be relocated
 		break;
 	case SMEMBWORD:
-		{
-			if (!ParseExpression(lp, val)) {
-				val = 0;
-			}
-			check16(val);
-			const bool isRelocatable = (Relocation::isResultAffected && Relocation::isRelocatable);
-			st->AddMember(new CStructureEntry2(st->noffset, 2, val, isRelocatable, SMEMBWORD));
-			Relocation::resolveRelocationAffected(INT_MAX);	// clear flags + warn when can't be relocated
-		}
+		if (!ParseExpression(lp, val)) val = 0;
+		check16(val);
+		deltaType = Relocation::isResultAffected ? Relocation::deltaType : Relocation::OFF;
+		st->AddMember(new CStructureEntry2(st->noffset, 2, val, deltaType, SMEMBWORD));
+		Relocation::resolveRelocationAffected(INT_MAX);	// clear flags + warn when can't be relocated
 		break;
 	case SMEMBD24:
-		if (!ParseExpression(lp, val)) {
-			val = 0;
-		} check24(val);
-		st->AddMember(new CStructureEntry2(st->noffset, 3, val, false, SMEMBD24));
+		if (!ParseExpression(lp, val)) val = 0;
+		check24(val);
+		st->AddMember(new CStructureEntry2(st->noffset, 3, val, deltaType, SMEMBD24));
 		break;
 	case SMEMBDWORD:
-		if (!ParseExpression(lp, val)) {
-			val = 0;
-		}
-		st->AddMember(new CStructureEntry2(st->noffset, 4, val, false, SMEMBDWORD));
+		if (!ParseExpression(lp, val)) val = 0;
+		st->AddMember(new CStructureEntry2(st->noffset, 4, val, deltaType, SMEMBDWORD));
 		break;
 	case SMEMBTEXT:
 		{
@@ -1044,7 +1044,7 @@ void ParseStructMember(CStructure* st) {
 		aint bytesToAdvance = (~st->noffset + 1) & (val - 1);
 		if (bytesToAdvance < 1) break;		// already aligned, nothing to do
 		// create alignment block
-		st->AddMember(new CStructureEntry2(st->noffset, bytesToAdvance, fill, false, SMEMBBLOCK));
+		st->AddMember(new CStructureEntry2(st->noffset, bytesToAdvance, fill, deltaType, SMEMBBLOCK));
 		break;
 	}
 	default:
@@ -1053,7 +1053,8 @@ void ParseStructMember(CStructure* st) {
 		CStructure* s;
 		SkipBlanks(pp);
 		if (*pp == '@') {
-			++pp; gl = 1;
+			++pp;
+			gl = 1;
 		}
 		if ((n = GetID(pp)) && (s = StructureTable.zoek(n, gl))) {
 			char* structName = st->naam;	// need copy of pointer so cmphstr can advance it in case of match

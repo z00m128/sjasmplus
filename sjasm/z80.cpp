@@ -37,11 +37,14 @@ namespace Z80 {
 		Z80C_NZ = 0x00, Z80C_Z  = 0x08, Z80C_NC = 0x10, Z80C_C = 0x18,
 		Z80C_PO = 0x20, Z80C_PE = 0x28, Z80C_P  = 0x30, Z80C_M = 0x38, Z80C_UNK };
 
+	static char* lastDisplacementParsedP = nullptr;		// helper variable to prevent double warnings about displacements
+
 	static CFunctionTable OpCodeTable;
 
 	void GetOpCode() {
 		char* n;
 		// reset alternate result flag in ParseExpression part of code
+		lastDisplacementParsedP = nullptr;
 		Relocation::isResultAffected = false;
 		bp = lp;
 		if (!(n = getinstr(lp)) || !OpCodeTable.zoek(n)) {
@@ -110,11 +113,15 @@ namespace Z80 {
 		aint val;
 		char* pp = p;
 		SkipBlanks(pp);
+		const bool parsingFirstTime = (pp != lastDisplacementParsedP);
+		lastDisplacementParsedP = pp;
 		if (')' == *pp || ']' == *pp) return 0;
 		if (!ParseExpression(p, val)) {
 			Error("Operand expected", nullptr, IF_FIRST); return 0;
 		}
 		check8o(val);
+		if (parsingFirstTime) Relocation::checkAndWarn();	// displacement offset is never relocatable
+		else Relocation::isResultAffected = false;			// hide displacement warnings second time
 		return val & 255;
 	}
 
@@ -414,6 +421,7 @@ namespace Z80 {
 				return true;			// successfully assembled
 			case Z80_UNK:
 				e[0] = opcodeBase + 0x46; e[1] = GetByteNoMem(lp);	// imm8 variants
+				Relocation::resolveRelocationAffected(1, Relocation::HIGH);
 				return true;
 			default:
 				break;
@@ -1115,7 +1123,10 @@ namespace Z80 {
 				}
 				switch (ParseExpressionMemAccess(lp, b)) {
 					// LD a,imm8
-					case 1: check8(b); e[0] = 0x06 + 8*reg1; e[1] = b & 255; break;
+					case 1:
+						check8(b); e[0] = 0x06 + 8*reg1; e[1] = b & 255;
+						Relocation::resolveRelocationAffected(1, Relocation::HIGH);
+						break;
 					// LD a,(mem8)
 					case 2:
 						check16(b);
@@ -1137,6 +1148,7 @@ namespace Z80 {
 
 			case Z80_B: case Z80_C: case Z80_D: case Z80_E: case Z80_H: case Z80_L:
 				e[0] = 0x06 + 8*reg1; e[1] = GetByteNoMem(lp);
+				Relocation::resolveRelocationAffected(1, Relocation::HIGH);
 				break;
 
 			case Z80_MEM_HL:
@@ -1149,7 +1161,9 @@ namespace Z80 {
 					e[6] = 0x2b;
 					break;
 				case Z80_UNK:	// ld (hl),n
-					e[0] = 0x36; e[1] = GetByteNoMem(lp); break;
+					e[0] = 0x36; e[1] = GetByteNoMem(lp);
+					Relocation::resolveRelocationAffected(1, Relocation::HIGH);
+					break;
 				default:
 					break;
 				}
@@ -1170,6 +1184,8 @@ namespace Z80 {
 					break;
 				case Z80_UNK:
 					e[0] = reg1&0xFF; e[1] = 0x36; e[3] = GetByteNoMem(lp);	// LD (ixy+#),imm8
+					Relocation::resolveRelocationAffected(3, Relocation::HIGH);
+					break;
 				default:
 					break;
 				}
@@ -1177,6 +1193,7 @@ namespace Z80 {
 
 			case Z80_IXH: case Z80_IXL: case Z80_IYH: case Z80_IYL:
 				e[0] = reg1&0xFF; e[1] = 0x06 + 8*(reg1>>8); e[2] = GetByteNoMem(lp);
+				Relocation::resolveRelocationAffected(2, Relocation::HIGH);
 				break;
 
 			case Z80_BC: case Z80_DE: case Z80_HL: case Z80_SP:
@@ -1791,6 +1808,7 @@ namespace Z80 {
 			}
 			// this code would be enough to get correct assembling, the test above is "extra"
 			e[2] = GetByteNoMem(lp);
+			Relocation::checkAndWarn();		// display warning if register number is trying to be relocatable (impossible)
 			if (!comma(lp)) {
 				Error("[NEXTREG] Comma expected"); break;
 			}
@@ -1801,6 +1819,7 @@ namespace Z80 {
 				case Z80_UNK:
 					e[0] = 0xED; e[1] = 0x91;
 					e[3] = GetByteNoMem(lp);
+					Relocation::resolveRelocationAffected(3, Relocation::HIGH);
 					break;
 				default:
 					break;
@@ -1967,9 +1986,14 @@ namespace Z80 {
 				e[2] = (imm16 >> 8);  // push opcode is big-endian!
 				e[3] = imm16 & 255;
 				if (Relocation::isResultAffected) {
-					// the `push imm16` of Z80N can't be relocated, because it's big-endian encoded
-					Error("PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE", bp);
-					Relocation::isResultAffected = false;
+					if (Relocation::HIGH == Relocation::type) {
+						// push imm16 is big-endian, so the offsets for regular/high value are different and explicit
+						Relocation::resolveRelocationAffected(Relocation::REGULAR == Relocation::deltaType ? 1 : 3);
+					} else {
+						// the `push imm16` of Z80N can't be relocated, because it's big-endian encoded
+						Error("PUSH imm16 is big-endian encoded and can't be part of RELOCATE_TABLE", bp);
+						Relocation::isResultAffected = false;
+					}
 				}
 			}
 			default:
@@ -2303,6 +2327,7 @@ namespace Z80 {
 			return;
 		}
 		int e[] { 0xED, 0x27, GetByteNoMem(lp), -1 };
+		Relocation::resolveRelocationAffected(2, Relocation::HIGH);
 		EmitBytes(e, true);
 	}
 

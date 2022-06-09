@@ -99,6 +99,7 @@ struct SAlignSafeCast {
 #include "lua_sjasm.h"
 #include "devices.h"
 #include "support.h"
+#include "relocate.h"
 #include "tables.h"
 #include "reader.h"
 #include "parser.h"
@@ -112,7 +113,6 @@ struct SAlignSafeCast {
 #include "io_trd.h"
 #include "io_tzx.h"
 #include "io_nex.h"
-#include "relocate.h"
 #include "sjasm.h"
 
 #endif

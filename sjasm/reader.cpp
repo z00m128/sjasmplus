@@ -346,7 +346,7 @@ int check24(aint val) {
 }
 
 void checkLowMemory(byte hiByte, byte lowByte) {
-	if (hiByte || Relocation::isActive) return;
+	if (hiByte || Relocation::type) return;
 	// for addresses 0..255 issue warning
 	WarningById(W_READ_LOW_MEM, lowByte);
 }
@@ -684,6 +684,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 		}
 		if (ParseExpressionNoSyntaxError(p, val)) {
 			check8(val);
+			Relocation::resolveRelocationAffected(t, Relocation::HIGH);
 			e[t++] = (val + add) & 255;
 		} else {
 			Error("Syntax error", p, SUPPRESS);

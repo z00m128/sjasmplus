@@ -86,12 +86,12 @@ constexpr unsigned LABEL_IS_KEYWORD = (1<<8);
 // constexpr unsigned LABEL_IS_USED = (1<<?);	// currently not explicitly used in Insert(..) (calculated implicitly)
 
 struct SLabelTableEntry {
-	aint		value = 0;
-	int			updatePass = 0;	// last update was in pass
-	short		page = LABEL_PAGE_UNDEFINED;
-	unsigned	traits = 0;
-	bool		used = false;
-	bool		isRelocatable = false;
+	aint				value = 0;
+	int					updatePass = 0;	// last update was in pass
+	short				page = LABEL_PAGE_UNDEFINED;
+	unsigned			traits = 0;
+	bool				used = false;
+	Relocation::EType	isRelocatable = Relocation::OFF;
 };
 
 typedef std::unordered_map<std::string, SLabelTableEntry> symbol_map_t;
@@ -259,12 +259,12 @@ public:
 	CStructureEntry2* next;
 	byte* text;
 	aint offset, len, def;
-	bool defRelocatable;
+	Relocation::EType defDeltaType;
 	EStructureMembers type;
 
 	CStructureEntry2(const CStructureEntry2&) = delete;
 	CStructureEntry2& operator=(CStructureEntry2 const &) = delete;
-	CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndefrel, EStructureMembers ntype);
+	CStructureEntry2(aint noffset, aint nlen, aint ndef, Relocation::EType ndeltatype, EStructureMembers ntype);
 	CStructureEntry2(aint noffset, aint nlen, byte* textData);
 	~CStructureEntry2();
 	aint ParseValue(char* & p);
@@ -292,7 +292,7 @@ private:
 	CStructureEntry1* mnf, * mnl;
 	CStructureEntry2* mbf, * mbl;
 	void CopyLabel(char*, aint);
-	void CopyMember(CStructureEntry2* item, aint newDefault, bool newDefIsRelative);
+	void CopyMember(CStructureEntry2* item, aint newDefault, Relocation::EType newDeltaType);
 };
 
 class CStructureTable {

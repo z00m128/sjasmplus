@@ -149,7 +149,8 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	if (label->traits&LABEL_IS_EQU) STRCAT(sldLabelExport, 20, ",+equ");
 	if (inMacro) STRCAT(sldLabelExport, 20, ",+macro");
 	if (label->traits&LABEL_IS_SMC) STRCAT(sldLabelExport, 20, ",+smc");
-	if (label->isRelocatable) STRCAT(sldLabelExport, 20, ",+reloc");
+	if (Relocation::REGULAR == label->isRelocatable) STRCAT(sldLabelExport, 20, ",+reloc");
+	if (Relocation::HIGH == label->isRelocatable) STRCAT(sldLabelExport, 20, ",+reloc_high");
 	if (label->used) STRCAT(sldLabelExport, 20, ",+used");
 	if (label->traits&LABEL_IS_STRUCT_D) STRCAT(sldLabelExport, 20, ",+struct_def");
 	if (label->traits&LABEL_IS_STRUCT_E) STRCAT(sldLabelExport, 20, ",+struct_data");
@@ -265,8 +266,12 @@ bool GetLabelValue(char*& p, aint& val) {
 	SLabelTableEntry* labelEntry = GetLabel(p);
 	if (labelEntry) {
 		val = labelEntry->value;
-		if (labelEntry->isRelocatable && Relocation::areLabelsOffset) {
-			val += Relocation::ALTERNATIVE_OFFSET;
+		if (Relocation::areLabelsOffset) {
+			switch (labelEntry->isRelocatable) {
+				case Relocation::REGULAR:	val += Relocation::alternative_offset;			break;
+				case Relocation::HIGH:		val += Relocation::alternative_offset >> 8;		break;
+				default:					;
+			}
 		}
 	} else {
 		val = 0;
@@ -297,10 +302,11 @@ int GetTemporaryLabelValue(char*& op, aint& val, bool requireUnderscore) {
 		val = label->value;
 		if (requireUnderscore) {				// part of full expression, do relocation by +offset
 			if (label->isRelocatable && Relocation::areLabelsOffset) {
-				val += Relocation::ALTERNATIVE_OFFSET;
+				val += Relocation::alternative_offset;
 			}
 		} else {								// single-label-only in jump/call instructions
-			Relocation::isResultAffected = Relocation::isRelocatable = label->isRelocatable;
+			Relocation::isResultAffected = label->isRelocatable;
+			Relocation::deltaType = label->isRelocatable ? Relocation::REGULAR : Relocation::OFF;
 		}
 	} else {
 		if (LASTPASS == pass) Error("Temporary label not found", numberB, SUPPRESS);
@@ -336,12 +342,13 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 
 	// the EQU/DEFL is relocatable when the expression itself is relocatable
 	// the regular label is relocatable when relocation is active
-	const bool isRelocatable = \
+	const Relocation::EType deltaType = \
 			(traits&LABEL_HAS_RELOC_TRAIT) ? \
-				!!(traits & LABEL_IS_RELOC) : \
+				(traits & LABEL_IS_RELOC ? Relocation::REGULAR : Relocation::OFF) : \
 				(traits & (LABEL_IS_DEFL|LABEL_IS_EQU)) ? \
-					Relocation::isResultAffected && Relocation::isRelocatable : \
-					Relocation::isActive && DISP_INSIDE_RELOCATE != PseudoORG;
+					Relocation::deltaType : \
+					Relocation::type && DISP_INSIDE_RELOCATE != PseudoORG ? \
+						Relocation::REGULAR : Relocation::OFF;
 	// Find label in label table
 	symbol_map_t::iterator labelIt = symbols.find(nname);
 	if (symbols.end() != labelIt) {
@@ -357,7 +364,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 				label.page = getAddressPageNumber(nvalue, traits & (LABEL_IS_DEFL|LABEL_IS_EQU));
 			}
 			label.traits = traits;
-			label.isRelocatable = isRelocatable;
+			label.isRelocatable = deltaType;
 			label.updatePass = pass;
 		}
 		return needsUpdate;
@@ -372,7 +379,7 @@ int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short e
 	} else {
 		label.page = IsUndefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, traits & (LABEL_IS_DEFL|LABEL_IS_EQU));
 	}
-	label.isRelocatable = !IsUndefined && isRelocatable;	// ignore "relocatable" for "undefined"
+	label.isRelocatable = IsUndefined ? Relocation::OFF : deltaType;	// ignore "relocatable" for "undefined"
 	return 1;
 }
 
@@ -568,7 +575,7 @@ int CFunctionTable::zoek(const char* name) {
 }
 
 TemporaryLabel::TemporaryLabel(aint number, aint address)
-	: nummer(number), value(address), isRelocatable(Relocation::isActive) {}
+	: nummer(number), value(address), isRelocatable(bool(Relocation::type)) {}
 
 CTemporaryLabelTable::CTemporaryLabelTable() {
 	labels.reserve(128);
@@ -975,14 +982,13 @@ CStructureEntry1::~CStructureEntry1() {
 	if (next) delete next;
 }
 
-
-CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, bool ndefrel, EStructureMembers ntype) :
-	next(nullptr), text(nullptr), offset(noffset), len(nlen), def(ndef), defRelocatable(ndefrel), type(ntype)
+CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, aint ndef, Relocation::EType ndeltatype, EStructureMembers ntype) :
+	next(nullptr), text(nullptr), offset(noffset), len(nlen), def(ndef), defDeltaType(ndeltatype), type(ntype)
 {
 }
 
 CStructureEntry2::CStructureEntry2(aint noffset, aint nlen, byte* textData) :
-	next(nullptr), text(textData), offset(noffset), len(nlen), def(0), defRelocatable(false), type(SMEMBTEXT)
+	next(nullptr), text(textData), offset(noffset), len(nlen), def(0), defDeltaType(Relocation::OFF), type(SMEMBTEXT)
 {
 	assert(1 <= len && len <= TEXT_MAX_SIZE && nullptr != text);
 }
@@ -1022,18 +1028,21 @@ aint CStructureEntry2::ParseValue(char* & p) {
 				break;
 		}
 	}
-	if (!Relocation::isActive) return val;
-	if (SMEMBWORD == type) {
+	if (!Relocation::type) return val;
+	if (SMEMBBYTE == type && Relocation::HIGH == Relocation::type) {
 		if (!keepRelocatableFlags) {	// override flags, if parse expression was not successful
-			Relocation::isResultAffected |= defRelocatable;
-			Relocation::isRelocatable = defRelocatable;
+			Relocation::isResultAffected |= bool(defDeltaType);
+			Relocation::deltaType = defDeltaType;
 		}
-		if (Relocation::isResultAffected) {
-			Relocation::resolveRelocationAffected(0);
+		Relocation::resolveRelocationAffected(0, Relocation::HIGH);
+	} else if (SMEMBWORD == type) {
+		if (!keepRelocatableFlags) {	// override flags, if parse expression was not successful
+			Relocation::isResultAffected |= bool(defDeltaType);
+			Relocation::deltaType = defDeltaType;
 		}
-	} else {
-		Relocation::checkAndWarn();
+		Relocation::resolveRelocationAffected(0);
 	}
+	Relocation::checkAndWarn();
 	return val;
 }
 
@@ -1087,14 +1096,14 @@ void CStructure::CopyLabels(CStructure* st) {
 	}
 }
 
-void CStructure::CopyMember(CStructureEntry2* item, aint newDefault, bool newDefIsRelative) {
-	AddMember(new CStructureEntry2(noffset, item->len, newDefault, newDefIsRelative, item->type));
+void CStructure::CopyMember(CStructureEntry2* item, aint newDefault, Relocation::EType newDeltaType) {
+	AddMember(new CStructureEntry2(noffset, item->len, newDefault, newDeltaType, item->type));
 }
 
 void CStructure::CopyMembers(CStructure* st, char*& lp) {
 	aint val;
 	int haakjes = 0;
-	AddMember(new CStructureEntry2(noffset, 0, 0, false, SMEMBPARENOPEN));
+	AddMember(new CStructureEntry2(noffset, 0, 0, Relocation::OFF, SMEMBPARENOPEN));
 	SkipBlanks(lp);
 	if (*lp == '{') {
 		++haakjes; ++lp;
@@ -1113,23 +1122,26 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 		assert(ip);
 		switch (ip->type) {
 		case SMEMBBLOCK:
-			CopyMember(ip, ip->def, false);
+			CopyMember(ip, ip->def, Relocation::OFF);
 			break;
 		case SMEMBBYTE:
 		case SMEMBWORD:
 		case SMEMBD24:
 		case SMEMBDWORD:
 			{
-				bool isRelocatable = false;
+				Relocation::EType isRelocatable = Relocation::OFF;
 				if (ParseExpressionNoSyntaxError(lp, val)) {
-					isRelocatable = SMEMBWORD == ip->type && Relocation::isResultAffected && Relocation::isRelocatable;
+					isRelocatable = (Relocation::isResultAffected && (SMEMBWORD == ip->type || SMEMBBYTE == ip->type))
+										? Relocation::deltaType : Relocation::OFF;
 				} else {
 					val = ip->def;
-					isRelocatable = ip->defRelocatable;
+					isRelocatable = ip->defDeltaType;
 				}
 				CopyMember(ip, val, isRelocatable);
 				if (SMEMBWORD == ip->type) {
 					Relocation::resolveRelocationAffected(INT_MAX);	// clear flags + warn when can't be relocated
+				} else if (SMEMBBYTE == ip->type) {
+					Relocation::resolveRelocationAffected(INT_MAX, Relocation::HIGH);	// clear flags + warn when can't be relocated
 				}
 				if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
 			}
@@ -1148,7 +1160,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 			if (*lp == '{') {
 				++haakjes; ++lp;
 			}
-			CopyMember(ip, 0, false);
+			CopyMember(ip, 0, Relocation::OFF);
 			break;
 		case SMEMBPARENCLOSE:
 			SkipBlanks(lp);
@@ -1156,7 +1168,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 				--haakjes; ++lp;
 				if (ip->next && SMEMBPARENCLOSE != ip->next->type) anyComma(lp);
 			}
-			CopyMember(ip, 0, false);
+			CopyMember(ip, 0, Relocation::OFF);
 			break;
 		default:
 			Error("internalerror CStructure::CopyMembers", NULL, FATAL);
@@ -1167,7 +1179,7 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 	if (haakjes) {
 		Error("closing } missing");
 	}
-	AddMember(new CStructureEntry2(noffset, 0, 0, false, SMEMBPARENCLOSE));
+	AddMember(new CStructureEntry2(noffset, 0, 0, Relocation::OFF, SMEMBPARENCLOSE));
 }
 
 static void InsertSingleStructLabel(const bool setNameSpace, char *name, const bool isRelocatable, const aint value, const bool isDefine = true) {
@@ -1193,7 +1205,9 @@ static void InsertSingleStructLabel(const bool setNameSpace, char *name, const b
 			}
 		}
 	} else {
-		Relocation::isResultAffected = Relocation::isRelocatable = isRelocatable;
+		Relocation::isResultAffected = isRelocatable;
+		Relocation::deltaType = isRelocatable ? Relocation::REGULAR : Relocation::OFF;
+		assert(!isDefine || Relocation::OFF == Relocation::deltaType);	// definition labels are always nonrel
 		unsigned traits = LABEL_HAS_RELOC_TRAIT \
 						| (isDefine ? LABEL_IS_STRUCT_D : LABEL_IS_STRUCT_E) \
 						| (isRelocatable ? LABEL_IS_RELOC : 0);
@@ -1358,7 +1372,7 @@ CStructure* CStructureTable::Add(char* naam, int no, int gl) {
 	}
 	strs[(*sp)&127] = new CStructure(naam, sp, 0, gl, strs[(*sp)&127]);
 	if (no) {
-		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, false, SMEMBBLOCK));
+		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, Relocation::OFF, SMEMBBLOCK));
 	}
 	return strs[(*sp)&127];
 }
@@ -1412,9 +1426,11 @@ int CStructureTable::Emit(char* naam, char* l, char*& p, int gl) {
 	// create new labels corresponding to current/designed address
 	aint address = CStructureTable::ParseDesignedAddress(p);
 	if (l) {
-		const bool isRelocatable =
-			(INT_MAX == address) ? Relocation::isActive : Relocation::isResultAffected && Relocation::isRelocatable;
-		st->emitlab(l, (INT_MAX == address) ? CurAddress : address, isRelocatable);
+		const Relocation::EType relocatable =
+			(INT_MAX == address) ?
+				(Relocation::type ? Relocation::REGULAR : Relocation::OFF)
+				: Relocation::isResultAffected ? Relocation::deltaType : Relocation::OFF;
+		st->emitlab(l, (INT_MAX == address) ? CurAddress : address, relocatable == Relocation::REGULAR);
 	}
 	if (INT_MAX == address) st->emitmembs(p);	// address was not designed, emit also bytes
 	else if (!l) Warning("[STRUCT] designed address without label = no effect");
