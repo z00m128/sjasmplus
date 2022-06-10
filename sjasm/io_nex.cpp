@@ -438,7 +438,7 @@ static void dirNexOpen() {
 		return;
 	}
 	// try to open the actual file
-	if (!FOPEN_ISOK(nex.f, fname.get(), "w+b")) Error("[SAVENEX] Error opening file", fname.get(), SUPPRESS);
+	if (!FOPEN_ISOK(nex.f, fname.get(), "w+b")) Error("[SAVENEX] Error opening file for write", fname.get(), SUPPRESS);
 	if (nullptr == nex.f) return;
 	// set the argument values into header, and write the initial version of header into file
 	nex.h.pc = openArgs[0] & 0xFFFF;

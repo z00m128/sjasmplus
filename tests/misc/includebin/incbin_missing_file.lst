@@ -1,5 +1,5 @@
 # file opened: incbin_missing_file.asm
-incbin_missing_file.asm(1): error: Error opening file: some missing file.bin
+incbin_missing_file.asm(1): error: opening file: some missing file.bin
 incbin_missing_file.asm(1): warning: include data: requested to include no data (length=0)
 1     0000                  INCBIN "some missing file.bin"
 2     0000

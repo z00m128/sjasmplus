@@ -62,7 +62,8 @@ static int SaveSNA_CPC(const char* fname, word start) {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[SAVECPCSNA] Error opening file", fname, FATAL);
+		Error("[SAVECPCSNA] Error opening file for write", fname);
+		return 0;
 	}
 
 	// format:  http://cpctech.cpc-live.com/docs/snapshot.html

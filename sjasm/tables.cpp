@@ -456,7 +456,7 @@ void CLabelTable::DumpForUnreal() {
 	char ln[LINEMAX], * ep;
 	FILE* FP_UnrealList;
 	if (!FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
-		Error("Error opening file", Options::UnrealLabelListFName, FATAL);
+		Error("opening file for write", Options::UnrealLabelListFName, FATAL);
 	}
 	const int PAGE_MASK = DeviceID ? Device->GetPage(0)->Size - 1 : 0x3FFF;
 	const int ADR_MASK = Options::EmitVirtualLabels ? 0xFFFF : PAGE_MASK;
@@ -490,7 +490,7 @@ void CLabelTable::DumpForUnreal() {
 void CLabelTable::DumpForCSpect() {
 	FILE* file;
 	if (!FOPEN_ISOK(file, Options::CSpectMapFName, "w")) {
-		Error("Error opening file", Options::CSpectMapFName, FATAL);
+		Error("opening file for write", Options::CSpectMapFName, FATAL);
 	}
 	const int PAGE_SIZE = Options::CSpectMapPageSize;
 	const int PAGE_MASK = PAGE_SIZE - 1;
@@ -542,7 +542,7 @@ void CLabelTable::DumpForCSpect() {
 void CLabelTable::DumpSymbols() {
 	FILE* symfp;
 	if (!FOPEN_ISOK(symfp, Options::SymbolListFName, "w")) {
-		Error("Error opening file", Options::SymbolListFName, FATAL);
+		Error("opening file for write", Options::SymbolListFName, FATAL);
 	}
 	const auto order = getDumpOrder(symbols);
 	for (const symbol_map_t::key_type& name: order) {

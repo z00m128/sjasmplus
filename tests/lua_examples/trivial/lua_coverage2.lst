@@ -13,7 +13,7 @@ lua_coverage2.asm(7): error: Unexpected: @
 11    0001 ~                    assert(false == zx.trdimage_add_file("1.trd",nil,0x1234,1))
 12    0001 ~                    assert(false == zx.save_snapshot_sna(nil,0x8000))
 13    0001 ~                    zx.save_snapshot_sna("1.sna")   -- bad argument #2, exits this script
-lua_coverage2.asm(10): error: [LUA] Error opening file
+lua_coverage2.asm(10): error: [LUA] opening file for write
 lua_coverage2.asm(12): error: [LUA] [SAVESNA] Only for real device emulation mode.
 lua_coverage2.asm(13): error: [LUA] bad argument #2 to 'save_snapshot_sna' (number expected, got no value)
 14    0001                  ENDLUA

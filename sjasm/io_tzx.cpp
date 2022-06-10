@@ -35,7 +35,7 @@ namespace TZXBlockId {
 void TZX_CreateEmpty(const char* fname) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[TZX] Error opening file", fname, FATAL);
+		Error("[TZX] Error opening file for write", fname, FATAL);
 	}
 
 	constexpr byte tzx_major_version = 1;
@@ -53,7 +53,7 @@ void TZX_CreateEmpty(const char* fname) {
 void TZX_AppendPauseBlock(const char* fname, word pauseAfterMs) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file", fname, FATAL);
+		Error("[TZX] Error opening file for append", fname, FATAL);
 	}
 	fputc(TZXBlockId::Pause, ff); // block id
 
@@ -65,7 +65,7 @@ void TZX_AppendPauseBlock(const char* fname, word pauseAfterMs) {
 void TZX_AppendStandardBlock(const char* fname, const byte* buf, const aint buflen, word pauseAfterMs, byte sync) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file", fname, FATAL);
+		Error("[TZX] Error opening file for append", fname, FATAL);
 	}
 
 	const aint totalDataLen = buflen + 2; // + sync byte + checksum
@@ -88,7 +88,7 @@ void TZX_AppendStandardBlock(const char* fname, const byte* buf, const aint bufl
 void TZX_AppendTurboBlock(const char* fname, const byte* buf, const aint buflen, const STZXTurboBlock& turbo) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file", fname, FATAL);
+		Error("[TZX] Error opening file for append", fname, FATAL);
 	}
 
 	fputc(TZXBlockId::Turbo, ff); // block id

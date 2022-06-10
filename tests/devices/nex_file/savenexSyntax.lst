@@ -111,7 +111,7 @@ savenexSyntax.asm(107): error: [SAVENEX] unknown command (commands: OPEN, CORE, 
 107   0000                  SAVENEX
 savenexSyntax.asm(108): error: [SAVENEX] unknown command (commands: OPEN, CORE, CFG, BAR, SCREEN, BANK, AUTO, CLOSE):
 108   0000                  SAVENEX                 ; no command, but with comment
-savenexSyntax.asm(109): error: [SAVENEX] Error opening file:
+savenexSyntax.asm(109): error: [SAVENEX] Error opening file for write:
 109   0000                  SAVENEX     OPEN
 savenexSyntax.asm(110): error: [SAVENEX] expected syntax is OPEN <filename>[,<startAddress>[,<stackAddress>[,<entryBank 0..111>[,<fileVersion 2..3>]]]]: SAVENEX     OPEN    "savenexSyntax.nex",
 110   0000                  SAVENEX     OPEN    "savenexSyntax.nex",

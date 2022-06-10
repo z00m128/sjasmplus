@@ -50,7 +50,7 @@ all_W.asm(25): warning[bpfile]: breakpoints file was not specified
 all_W.asm(26): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
 26    8005 ED 71            out (c),0
 all_W.asm(27): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): INCBIN "back\slash.bin"
-all_W.asm(27): error: Error opening file: back/slash.bin
+all_W.asm(27): error: opening file: back/slash.bin
 all_W.asm(27): warning: include data: requested to include no data (length=0)
 27    8007                  INCBIN "back\slash.bin"
 all_W.asm(28): warning[fake]: Fake instruction: ld hl,de
@@ -104,7 +104,7 @@ all_W.asm(28): warning[fake]: Fake instruction: ld hl,de
 67    007F ED 71            out (c),0
 68    0081
 69    0081                  ; backslash
-all_W.asm(70): error: Error opening file: back/slash.bin
+all_W.asm(70): error: opening file: back/slash.bin
 all_W.asm(70): warning: include data: requested to include no data (length=0)
 70    0081                  INCBIN "back\slash.bin"
 71    0081
