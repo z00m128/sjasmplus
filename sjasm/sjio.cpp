@@ -517,7 +517,9 @@ static stdin_log_t* stdin_log = nullptr;
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t* fStdinLog)
 {
 	if (++IncludeLevel > 20) {
-		Error("Over 20 files nested", NULL, FATAL);
+		Error("Over 20 files nested", NULL, ALL);
+		--IncludeLevel;
+		return;
 	}
 	char* fullpath, * filenamebegin;
 	if (!*nfilename && fStdinLog) {
@@ -913,17 +915,19 @@ void OpenTapFile(char * tapename, int flagbyte)
 {
 	CloseTapFile();
 
-	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b"))	Error( "Error opening file in TAPOUT", tapename, FATAL);
-	if (fseek(FP_tapout, 0, SEEK_END))			Error("File seek end error in TAPOUT", tapename, FATAL);
+	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b")) {
+		Error( "Error opening file in TAPOUT", tapename);
+		return;
+	}
+	if (fseek(FP_tapout, 0, SEEK_END)) Error("File seek end error in TAPOUT", tapename, FATAL);
 
 	tape_seek = ftell(FP_tapout);
 	tape_parity = flagbyte;
 	tape_length = 2;
 
-	char tap_data[4] = { 0,0,0,0 };
-	tap_data[2] = (char)flagbyte;
+	byte tap_data[3] = { 0, 0, (byte)flagbyte };
 
-	if (fwrite(tap_data, 1, 3, FP_tapout) != 3) {
+	if (sizeof(tap_data) != fwrite(tap_data, 1, sizeof(tap_data), FP_tapout)) {
 		fclose(FP_tapout);
 		Error("Write error (disk full?)", NULL, FATAL);
 	}

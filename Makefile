@@ -29,6 +29,7 @@ UNINSTALL=rm -vf
 REMOVEDIR=rm -vdf
 DOCBOOKGEN=xsltproc
 MEMCHECK=valgrind --leak-check=yes
+	# --leak-check=full --show-leak-kinds=all
 
 # all internal file names (sources, module subdirs, build dirs, ...) must be WITHOUT space!
 # (i.e. every relative path from project-dir must be space-less ...)

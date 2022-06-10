@@ -477,7 +477,7 @@ void dirLUA() {
 			if (luaBufferSize < (bp - buff) + lineLen + 4) {
 				ErrorInt("[LUA] Maximum byte-size of Lua script is", luaBufferSize-4, FATAL);
 			}
-			STRNCPY(bp, (luaBufferSize - (bp - buff)), line, lineLen);
+			memcpy(bp, line, lineLen);
 			bp += lineLen;
 			*bp++ = '\n';
 		}

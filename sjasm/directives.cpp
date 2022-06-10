@@ -1697,7 +1697,10 @@ static void dirDISPLAY() {
 }
 
 static void dirMACRO() {
-	if (lijst) Error("[MACRO] No macro definitions allowed here", NULL, FATAL);
+	if (lijst) {
+		Error("[MACRO] No macro definitions allowed here", NULL, SUPPRESS);
+		return;
+	}
 	char* lpLabel = LastParsedLabel;	// modifiable copy of global buffer pointer
 	// get+validate macro name either from label on same line or from following line
 	char* n = GetID(LastParsedLabelLine == CompiledCurrentLine ? lpLabel : lp);

@@ -147,8 +147,8 @@ static void DeviceZXSpectrum8192(CDevice **dev, CDevice *parent, aint ramtop) {
 
 static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
 	if (ramtop) WarningById(W_NO_RAMTOP);
-	if (Options::IsI8080) Error("Can't use ZXN device while in i8080 assembling mode.", line, FATAL);
-	if (Options::IsLR35902) Error("Can't use ZXN device while in Sharp LR35902 assembling mode.", line, FATAL);
+	if (Options::IsI8080) Error("Can't use ZXN device while in i8080 assembling mode", line, FATAL);
+	if (Options::IsLR35902) Error("Can't use ZXN device while in Sharp LR35902 assembling mode", line, FATAL);
 	*dev = new CDevice("ZXSPECTRUMNEXT", parent);
 	const int initialPages[] = {14, 15, 10, 11, 4, 5, 0, 1};	// basically same as ZX128, but 8k
 	initRegularSlotDevice(*dev, 0x2000, 8, 224, initialPages);
