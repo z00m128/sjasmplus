@@ -111,4 +111,26 @@ tapout_test.asm(99): error: SAVETAP only allowed in real device emulation mode (
 100   8024
 tapout_test.asm(101): error: [TAPOUT] Missing flagbyte value: TAPOUT	"tapout_test.tap",
 101   8024              	TAPOUT	"tapout_test.tap",		;; No flagbyte
-tapout_test.asm(102): error: Error opening file in TAPOUT:
+tapout_test.asm(102): error: opening file for write:
+102   8024              	TAPOUT				;; No parameters
+103   8024
+104   8024              ;; End of test file
+105   8024
+# file closed: tapout_test.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x001D   basic
+0x001B   baslen
+0x00AF   CODE
+0x0020   codlen
+0x0005   l1len
+0x000E   l2len
+0x0021   line1
+0x002A   line2
+0x00EF   LOAD
+0x00F9   RANDOMIZE
+0x8000   start
+0x800E   text
+0x0012   txtlen
+0x00C0   USR

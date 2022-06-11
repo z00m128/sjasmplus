@@ -47,7 +47,7 @@ bool SaveSNA_ZX(const char* fname, word start) {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file", fname);
+		Error("opening file for write", fname);
 		return false;
 	}
 

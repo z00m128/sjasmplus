@@ -10,3 +10,4 @@
     SAVECPCSNA "file.sna", -1               ; negative start value
     SAVECPCSNA "file.sna", &                ; invalid (parse) start value
     SAVECPCSNA "file.sna"                   ; no start address defined
+    SAVECPCSNA ".", $1234                   ; fail to open file for write

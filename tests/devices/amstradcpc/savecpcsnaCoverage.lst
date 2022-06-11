@@ -17,7 +17,9 @@ savecpcsnaCoverage.asm(11): error: Unexpected: &
 11    0000                  SAVECPCSNA "file.sna", &                ; invalid (parse) start value
 savecpcsnaCoverage.asm(12): error: [SAVECPCSNA] No start address defined: SAVECPCSNA "file.sna"
 12    0000                  SAVECPCSNA "file.sna"                   ; no start address defined
-13    0000
+savecpcsnaCoverage.asm(13): error: [SAVECPCSNA] Error opening file for write: .
+13    0000                  SAVECPCSNA ".", $1234                   ; fail to open file for write
+14    0000
 # file closed: savecpcsnaCoverage.asm
 
 Value    Label

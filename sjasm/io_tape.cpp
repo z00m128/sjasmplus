@@ -45,7 +45,7 @@ static aint detect_ram_start(unsigned char* ram, aint length);
 int TAP_SaveEmpty(char* fname) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname); return 0;
+		Error("opening file for write", fname); return 0;
 	}
 	fclose(ff);
 	return 1;
@@ -54,7 +54,7 @@ int TAP_SaveEmpty(char* fname) {
 int TAP_SaveBlock(char* fname, unsigned char flag, const char *ftapname, int start, int length, int param2, int param3) {
 	FILE* fpout;
 	if (!FOPEN_ISOK(fpout, fname, "ab")) {
-		Error("Error opening file", fname, FATAL);
+		Error("opening file for append", fname, FATAL);
 	}
 
 	if (length + start > 0x10000) {
@@ -136,7 +136,7 @@ int TAP_SaveBlock(char* fname, unsigned char flag, const char *ftapname, int sta
 int TAP_SaveSnapshot(char* fname, unsigned short start) {
 	FILE* fpout;
 	if (!FOPEN_ISOK(fpout, fname, "wb")) {
-		Error("Error opening file", fname, FATAL);
+		Error("opening file for write", fname, FATAL);
 	}
 
 	aint datastart = 0x5E00;

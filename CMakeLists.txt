@@ -11,6 +11,8 @@ project(sjasmplus)
 set(MY_LUA_INCLUDE_DIR "lua5.4")
 set(MY_LUA_LIBRARY "lua5.4")
 set(LUABRIDGE_DIR "LuaBridge/Source")
+set(UNIT_TESTS_DIR "cpp-src-tests")
+set(UNITTESTPP_DIR "unittest-cpp")
 
 set(SOURCES
 	sjasm/devices.cpp
@@ -49,6 +51,19 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 
 option(ENABLE_LUA "Enable LUA scripting support" ON)
 option(SYSTEM_LUA "Use system LUA package" OFF)
+option(ADD_UNIT_TESTS "Add unit tests into binary" OFF)
+
+if(ADD_UNIT_TESTS)
+	add_definitions(-DADD_UNIT_TESTS)
+	include_directories(${UNITTESTPP_DIR})
+	aux_source_directory(${UNITTESTPP_DIR}/UnitTest++/ UT_SRCS)
+	aux_source_directory(${UNITTESTPP_DIR}/UnitTest++/Posix/ UT_SRCS)
+	aux_source_directory(${UNIT_TESTS_DIR} UT_SRCS)
+	set(SOURCES
+		${SOURCES}
+		${UT_SRCS}
+	)
+endif(ADD_UNIT_TESTS)
 
 if(ENABLE_LUA)
 	add_subdirectory(${LUABRIDGE_DIR})

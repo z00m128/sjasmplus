@@ -442,7 +442,7 @@ void BinIncFile(char* fname, int offset, int length) {
 	// open the desired file
 	FILE* bif;
 	char* fullFilePath = GetPath(fname);
-	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("Error opening file", fname);
+	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("opening file", fname);
 	free(fullFilePath);
 
 	// Get length of file
@@ -517,7 +517,9 @@ static stdin_log_t* stdin_log = nullptr;
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t* fStdinLog)
 {
 	if (++IncludeLevel > 20) {
-		Error("Over 20 files nested", NULL, FATAL);
+		Error("Over 20 files nested", NULL, ALL);
+		--IncludeLevel;
+		return;
 	}
 	char* fullpath, * filenamebegin;
 	if (!*nfilename && fStdinLog) {
@@ -531,7 +533,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 
 		if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 			free(fullpath);
-			Error("Error opening file", nfilename, ALL);
+			Error("opening file", nfilename, ALL);
 			--IncludeLevel;
 			return;
 		}
@@ -801,7 +803,7 @@ static void OpenListImp(const char* listFilename) {
 	if (OV_LST == Options::OutputVerbosity) return;
 	if (NULL == listFilename || !listFilename[0]) return;
 	if (!FOPEN_ISOK(FP_ListingFile, listFilename, "w")) {
-		Error("Error opening file", listFilename, FATAL);
+		Error("opening file for write", listFilename, FATAL);
 	}
 }
 
@@ -871,7 +873,7 @@ void OpenDest(int mode) {
 		mode = OUTPUT_TRUNCATE;
 	}
 	if (!Options::NoDestinationFile && !FOPEN_ISOK(FP_Output, Options::DestinationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
-		Error("Error opening file", Options::DestinationFName, FATAL);
+		Error("opening file for write", Options::DestinationFName, FATAL);
 	}
 	Options::NoDestinationFile = false;
 	if (NULL == FP_RAW && '-' == Options::RAWFName[0] && 0 == Options::RAWFName[1]) {
@@ -880,7 +882,7 @@ void OpenDest(int mode) {
 		switchStdOutIntoBinaryMode();
 	}
 	if (FP_RAW == NULL && Options::RAWFName[0] && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {
-		Error("Error opening file", Options::RAWFName);
+		Error("opening file for write", Options::RAWFName);
 	}
 	if (FP_Output != NULL && mode != OUTPUT_TRUNCATE) {
 		if (fseek(FP_Output, 0, mode == OUTPUT_REWIND ? SEEK_SET : SEEK_END)) {
@@ -913,17 +915,19 @@ void OpenTapFile(char * tapename, int flagbyte)
 {
 	CloseTapFile();
 
-	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b"))	Error( "Error opening file in TAPOUT", tapename, FATAL);
-	if (fseek(FP_tapout, 0, SEEK_END))			Error("File seek end error in TAPOUT", tapename, FATAL);
+	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b")) {
+		Error( "opening file for write", tapename);
+		return;
+	}
+	if (fseek(FP_tapout, 0, SEEK_END)) Error("File seek end error in TAPOUT", tapename, FATAL);
 
 	tape_seek = ftell(FP_tapout);
 	tape_parity = flagbyte;
 	tape_length = 2;
 
-	char tap_data[4] = { 0,0,0,0 };
-	tap_data[2] = (char)flagbyte;
+	byte tap_data[3] = { 0, 0, (byte)flagbyte };
 
-	if (fwrite(tap_data, 1, 3, FP_tapout) != 3) {
+	if (sizeof(tap_data) != fwrite(tap_data, 1, sizeof(tap_data), FP_tapout)) {
 		fclose(FP_tapout);
 		Error("Write error (disk full?)", NULL, FATAL);
 	}
@@ -1017,7 +1021,7 @@ unsigned char MemGetByte(unsigned int address) {
 int SaveBinary(char* fname, int start, int length) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname, FATAL);
+		Error("opening file for write", fname, FATAL);
 	}
 	int result = SaveRAM(ff, start, length);
 	fclose(ff);
@@ -1027,7 +1031,7 @@ int SaveBinary(char* fname, int start, int length) {
 
 int SaveBinary3dos(char* fname, int start, int length, byte type, word w2, word w3) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) Error("Error opening file", fname, FATAL);
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname, FATAL);
 	// prepare +3DOS 128 byte header content
 	constexpr int hsize = 128;
 	const int full_length = hsize + length;
@@ -1063,7 +1067,7 @@ bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
 // start and length must be sanitized by caller
 bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) Error("Error opening file", fname, FATAL);
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname, FATAL);
 	bool res = SaveDeviceMemory(ff, start, length);
 	fclose(ff);
 	return res;
@@ -1120,7 +1124,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname, FATAL);
+		Error("opening file for write", fname, FATAL);
 	}
 
 	int result = (17 == fwrite(header, 1, 17, ff)) && SaveRAM(ff, start, length);
@@ -1264,7 +1268,7 @@ void WriteLabelEquValue(const char* name, aint value, FILE* f) {
 void WriteExp(char* n, aint v) {
 	if (FP_ExportFile == NULL) {
 		if (!FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) {
-			Error("Error opening file", Options::ExportFName, FATAL);
+			Error("opening file for write", Options::ExportFName, FATAL);
 		}
 	}
 	WriteLabelEquValue(n, v, FP_ExportFile);
@@ -1288,7 +1292,7 @@ static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
 static void OpenSldImp(const char* sldFilename) {
 	if (nullptr == sldFilename || !sldFilename[0]) return;
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
-		Error("Error opening file", sldFilename, FATAL);
+		Error("opening file for write", sldFilename, FATAL);
 	}
 	fputs("|SLD.data.version|1\n", FP_SourceLevelDebugging);
 	if (0 < sldCommentKeywords.size()) {
@@ -1430,7 +1434,7 @@ void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type) {
 		return;
 	}
 	if (!FOPEN_ISOK(FP_BreakpointsFile, filename, "w")) {
-		Error("opening file", filename, EARLY);
+		Error("opening file for write", filename, EARLY);
 	}
 	breakpointsCounter = 0;
 	breakpointsType = type;

@@ -1,2 +1,137 @@
+sjasm_coverage2.asm(2): error: Over 20 files nested
+sjasm_coverage2.asm(2): error: Over 20 files nested
+# file opened: sjasm_coverage2.asm
+1     0000              PrematureEnd MACRO arg1?
+2     0000 ~                    include "sjasm_coverage2.asm"
+3     0000 ~                    arg1?
+4     0000                  ENDM
+5     0000
+6     0000                  PrematureEnd END
+6     0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
 sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
 sjasm_coverage2.asm(2): ^ emitted from here
+2+    0000             >PrematureEnd MACRO END
+2+    0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2++   0000             >PrematureEnd MACRO END
+2++   0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++  0000             >PrematureEnd MACRO END
+2+++  0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2++++ 0000             >PrematureEnd MACRO END
+2++++ 0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+# file opened: sjasm_coverage2.asm
+sjasm_coverage2.asm(1): error: [MACRO] No macro definitions allowed here
+sjasm_coverage2.asm(2): ^ emitted from here
+2+++++0000             >PrematureEnd MACRO END
+2+++++0000             >        include "sjasm_coverage2.asm"
+sjasm_coverage2.asm(2): error: Over 20 files nested
+2+++++0000             >        END
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+# file closed: sjasm_coverage2.asm
+6     0000             >        END
+# file closed: sjasm_coverage2.asm
+
+Value    Label
+------ - -----------------------------------------------------------

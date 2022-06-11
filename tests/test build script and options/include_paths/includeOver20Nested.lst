@@ -1,1 +1,111 @@
 includeOver20Nested.asm(2): error: Over 20 files nested
+includeOver20Nested.asm(2): error: Over 20 files nested
+# file opened: includeOver20Nested.asm
+1     0000                  ; infinite recursion -> should produce fatal error
+2     0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+    0000                  ; infinite recursion -> should produce fatal error
+2+    0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1++   0000                  ; infinite recursion -> should produce fatal error
+2++   0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++  0000                  ; infinite recursion -> should produce fatal error
+2+++  0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1++++ 0000                  ; infinite recursion -> should produce fatal error
+2++++ 0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+# file opened: includeOver20Nested.asm
+1+++++0000                  ; infinite recursion -> should produce fatal error
+2+++++0000                  INCLUDE includeOver20Nested.asm
+includeOver20Nested.asm(2): error: Over 20 files nested
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3+++++0000
+# file closed: includeOver20Nested.asm
+3++++ 0000
+# file closed: includeOver20Nested.asm
+3+++  0000
+# file closed: includeOver20Nested.asm
+3++   0000
+# file closed: includeOver20Nested.asm
+3+    0000
+# file closed: includeOver20Nested.asm
+3     0000
+# file closed: includeOver20Nested.asm
+
+Value    Label
+------ - -----------------------------------------------------------

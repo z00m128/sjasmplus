@@ -184,7 +184,7 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 bool TRD_SaveEmpty(const char* fname, const char label[8]) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("Error opening file", fname, IF_FIRST);
+		Error("opening file for write", fname, IF_FIRST);
 		return 0;
 	}
 	byte* buf = (byte*) calloc(STrdDisc::SECTORS_PER_TRACK*STrdDisc::SECTOR_SZ, sizeof(byte));

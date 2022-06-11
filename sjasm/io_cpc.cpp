@@ -62,7 +62,8 @@ static int SaveSNA_CPC(const char* fname, word start) {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[SAVECPCSNA] Error opening file", fname, FATAL);
+		Error("[SAVECPCSNA] Error opening file for write", fname);
+		return 0;
 	}
 
 	// format:  http://cpctech.cpc-live.com/docs/snapshot.html
@@ -177,13 +178,13 @@ enum ECDTHeadlessFormat { AMSTRAD, SPECTRUM };
 namespace CDTUtil {
 
 	static constexpr word DefaultPause = 1000;
-	static constexpr byte BlockTypeReg = 0x0A;
+// 	static constexpr byte BlockTypeReg = 0x0A;			//unused currently, TODO ask Oli about it?
 	static constexpr byte BlockTypeHeader = 0x2C;
 	static constexpr byte BlockTypeData = 0x16;
 
 	static constexpr byte FileTypeBASIC = (0 << 1);
 	static constexpr byte FileTypeBINARY = (1 << 1);
-	static constexpr byte FileTypeSCREEN = (2 << 1);
+// 	static constexpr byte FileTypeSCREEN = (2 << 1);	//unused currently, TODO ask Oli about it?
 
 	/* CRC polynomial: X^16+X^12+X^5+1 */
 	static unsigned int crcupdate(word c, byte b) {
@@ -425,12 +426,14 @@ namespace CDTUtil {
 		return data;
 	}
 
+/* //unused currently, TODO ask Oli about it?
 	static constexpr byte basicToHWColor[] = {
 		0x54, 0x44, 0x55, 0x5C,	0x58, 0x5D,	0x4C, 0x45,
 		0x4D, 0x56,	0x46, 0x57,	0x5E, 0x40,	0x5F, 0x4E,
 		0x47, 0x4F,	0x52, 0x42,	0x53, 0x5A,	0x59, 0x5B,
 		0x4A, 0x43,	0x4B, 0x41,	0x48, 0x49,	0x50, 0x51,
 	};
+*/
 }
 
 static void createCDTDump464(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
