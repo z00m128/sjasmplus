@@ -2999,7 +2999,8 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
         extended and has better test-coverage to make it less likely to change in the future.</p>
 
       <p>Also please mind the breaking changes of the Lua itself, and adjust your scripts
-        to Lua 5.4 syntax and library functions.</p>
+        to Lua 5.4 syntax and library functions, there is example below with common issues
+        already encountered (open github issues with others so we can add them to docs).</p>
     </div>
 
     <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="s_lua_how_to"></a>How to use?</h2></div></div></div>
@@ -3210,7 +3211,27 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 ; print to console our time and build number
 	DISPLAY "Build time: ", TIME
 	DISPLAY "Build number: ", /D, BUILD</pre>
-        </div></div><p><br class="example-break"></p>
+        </div></div><p><br class="example-break">
+
+        </p><div class="example"><a name="idp2317"></a><p class="title"><b>Example 7.6. Common issues with upgrade to Lua 5.4</b></p><div class="example-contents">
+          
+
+          <pre class="programlisting">  LUA ALLPASS
+    x = 2.3 ^ 4.5             -- old syntax: math.exp(2.3, 4.5)
+    _pc("db " .. math.floor(x))
+    _pc("db " .. 35//7)       -- old syntax: 35/7
+      -- floating point values are now formatted rigorously with ".0" from the Lua
+      -- which leads to error in sjasmplus parser: Unexpected: .0
+      -- and requires to enforce integer type already at lua side
+      -- you can use either `math.floor()` function, or integer
+      -- operators like integer divide `//` or left shift `1&lt;&lt;7`
+
+    -- the floating point "12.0" values may get some support in sjasmplus parser in future
+    -- but 1.20.0 errors out on these, so you can patch your lua scripts meanwhile
+  ENDLUA
+</pre>
+        </div></div><p><br class="example-break">
+        </p>
 
       <p></p>
 
@@ -3547,7 +3568,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
   <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="s_savenex_examples"></a>Examples</h2></div></div></div>
 	  
 
-	  <div class="example"><a name="idp2473"></a><p class="title"><b>Example 8.1. docs_examples/s_savenex_examples.asm</b></p><div class="example-contents">
+	  <div class="example"><a name="idp2477"></a><p class="title"><b>Example 8.1. docs_examples/s_savenex_examples.asm</b></p><div class="example-contents">
           
 		  <p>
 			  Creating NEX file which will have Layer2 loading screen (stripes), progress bar, and will
@@ -3798,7 +3819,7 @@ pages.size:&lt;page size&gt;,pages.count:&lt;page count&gt;,slots.count:&lt;slot
 </pre><p>
 		</p>
 
-		<div class="example"><a name="idp2545"></a><p class="title"><b>Example 9.1. Example of SLD file</b></p><div class="example-contents">
+		<div class="example"><a name="idp2549"></a><p class="title"><b>Example 9.1. Example of SLD file</b></p><div class="example-contents">
 			
 
 <pre class="programlisting">
