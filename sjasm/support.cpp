@@ -112,9 +112,11 @@ long GetTickCount() {
 
 #endif	// #ifndef WIN32
 
-#ifdef _WIN32
-#include <fcntl.h>
-#include <io.h>
+#if defined (_WIN32) || defined (__CYGWIN__)
+	// cygwin: O_BINARY is in fcntl.h, setmode is in io.h
+	// MSVC: _O_BINARY and _setmode
+	#include <fcntl.h>
+	#include <io.h>
 #endif
 
 void switchStdOutIntoBinaryMode() {
