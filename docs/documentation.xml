@@ -4043,7 +4043,8 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
         extended and has better test-coverage to make it less likely to change in the future.</para>
 
       <para>Also please mind the breaking changes of the Lua itself, and adjust your scripts
-        to Lua 5.4 syntax and library functions.</para>
+        to Lua 5.4 syntax and library functions, there is example below with common issues
+        already encountered (open github issues with others so we can add them to docs).</para>
     </section>
 
     <section id="s_lua_how_to">
@@ -4431,7 +4432,27 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 ; print to console our time and build number
 	DISPLAY "Build time: ", TIME
 	DISPLAY "Build number: ", /D, BUILD</programlisting></para>
-        </example></para>
+        </example>
+
+        <example>
+          <title>Common issues with upgrade to Lua 5.4</title>
+
+          <para><programlisting>  LUA ALLPASS
+    x = 2.3 ^ 4.5             -- old syntax: math.exp(2.3, 4.5)
+    _pc("db " .. math.floor(x))
+    _pc("db " .. 35//7)       -- old syntax: 35/7
+      -- floating point values are now formatted rigorously with ".0" from the Lua
+      -- which leads to error in sjasmplus parser: Unexpected: .0
+      -- and requires to enforce integer type already at lua side
+      -- you can use either `math.floor()` function, or integer
+      -- operators like integer divide `//` or left shift `1&lt;&lt;7`
+
+    -- the floating point "12.0" values may get some support in sjasmplus parser in future
+    -- but 1.20.0 errors out on these, so you can patch your lua scripts meanwhile
+  ENDLUA
+</programlisting></para>
+        </example>
+        </para>
 
       <para></para>
 
