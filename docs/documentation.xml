@@ -208,6 +208,7 @@
 
             <listitem>
               <synopsis>- parse decimal <link linkend="s_numeric">numeric constants</link> with warning (for easier Lua 5.4 life)
+- added <link linkend="po_saveamsdos">`SAVEAMSDOS`</link> (like SAVEBIN with AMSDOS header)
 </synopsis>
             </listitem>
           </varlistentry>
@@ -2894,6 +2895,28 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
     SAVE3DOS "b.dat", $8000, 30, 1
     ; type 2: Character array (or maybe just ignore these)
     SAVE3DOS "c.dat", $8000, 30, 2</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SAVEAMSDOS<indexterm id="po_saveamsdos"><primary>SAVEAMSDOS</primary></indexterm>
+                &lt;filename&gt;,&lt;address&gt;,&lt;size&gt;[,&lt;start = 0&gt;[,&lt;type = 2&gt;]]</term>
+
+            <listitem>
+              <para><emphasis>Works only in virtual device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Like <link linkend="po_savebin">SAVEBIN</link>, saves the block of device RAM
+                from "address", but with AMSDOS 128 byte header prepended.<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE AMSTRADCPC464
+    ... some code ...
+
+    ; by default the type=2 (BINARY) is saved
+    ; "start" (entry) value is by default 0, overriden here to $1234
+    SAVEAMSDOS "code.bin", $1000, $1b00, $1234</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>

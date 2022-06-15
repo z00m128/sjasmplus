@@ -1033,8 +1033,8 @@ int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname, FATAL);
 	// prepare +3DOS 128 byte header content
-	constexpr int hsize = 128;
-	const int full_length = hsize + length;
+	constexpr aint hsize = 128;
+	const aint full_length = hsize + length;
 	byte sum = 0, p3dos_header[hsize] { "PLUS3DOS\032\001" };
 	p3dos_header[11] = byte(full_length>>0);
 	p3dos_header[12] = byte(full_length>>8);
@@ -1053,6 +1053,34 @@ int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w
 	p3dos_header[hsize-1] = sum;
 	// write header and data
 	int result = (hsize == (aint) fwrite(p3dos_header, 1, hsize, ff)) ? SaveRAM(ff, start, length) : 0;
+	fclose(ff);
+	return result;
+}
+
+
+int SaveBinaryAmsdos(const char* fname, aint start, aint length, word start_adr, byte type) {
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "wb")) {
+		Error("opening file for write", fname, SUPPRESS);
+		return 0;
+	}
+	// prepare AMSDOS 128 byte header content
+	constexpr aint hsize = 128;
+	byte amsdos_header[hsize] {};	// all zeroed (user_number and filename stay like that, just zeroes)
+	amsdos_header[0x12] = type;
+	amsdos_header[0x15] = byte(start>>0);
+	amsdos_header[0x16] = byte(start>>8);
+	amsdos_header[0x18] = amsdos_header[0x40] = byte(length>>0);
+	amsdos_header[0x19] = amsdos_header[0x41] = byte(length>>8);
+	amsdos_header[0x1A] = byte(start_adr>>0);
+	amsdos_header[0x1B] = byte(start_adr>>8);
+	// calculat checksum of the header
+	word sum = 0;
+	for (int ii = 0x43; ii--; ) sum += amsdos_header[ii];
+	amsdos_header[0x43] = byte(sum>>0);
+	amsdos_header[0x44] = byte(sum>>8);
+	// write header and data
+	int result = (hsize == (aint) fwrite(amsdos_header, 1, hsize, ff)) ? SaveRAM(ff, start, length) : 0;
 	fclose(ff);
 	return result;
 }

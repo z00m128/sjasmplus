@@ -87,6 +87,7 @@ unsigned char MemGetByte(unsigned int address);
 unsigned int MemGetWord(unsigned int address);
 int SaveBinary(const char* fname, aint start, aint length);
 int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w2, word w3);
+int SaveBinaryAmsdos(const char* fname, aint start, aint length, word start_adr = 0, byte type = 2);
 bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length);
 bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length);
 int SaveHobeta(const char* fname, const char* fhobname, aint start, aint length);
