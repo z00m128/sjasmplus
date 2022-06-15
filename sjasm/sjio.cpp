@@ -373,7 +373,7 @@ void EmitBytes(const int* bytes, bool isInstructionStart) {
 	}
 }
 
-void EmitWords(int* words, bool isInstructionStart) {
+void EmitWords(const int* words, bool isInstructionStart) {
 	while (BYTES_END_MARKER != *words) {
 		EmitWord(*words++, isInstructionStart);
 		isInstructionStart = false;		// only true for first word
@@ -438,7 +438,7 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 
 // if offset is negative, it functions as "how many bytes from end of file"
 // if length is negative, it functions as "how many bytes from end of file to not load"
-void BinIncFile(char* fname, int offset, int length) {
+void BinIncFile(const char* fname, aint offset, aint length) {
 	// open the desired file
 	FILE* bif;
 	char* fullFilePath = GetPath(fname);
@@ -858,7 +858,7 @@ void SeekDest(long offset, int method) {
 	}
 }
 
-void NewDest(char* newfilename, int mode) {
+void NewDest(const char* newfilename, int mode) {
 	// close previous output file
 	CloseDest();
 
@@ -911,7 +911,7 @@ void CloseTapFile()
 	FP_tapout = NULL;
 }
 
-void OpenTapFile(char * tapename, int flagbyte)
+void OpenTapFile(const char * tapename, int flagbyte)
 {
 	CloseTapFile();
 
@@ -1018,7 +1018,7 @@ unsigned char MemGetByte(unsigned int address) {
 }
 
 
-int SaveBinary(char* fname, int start, int length) {
+int SaveBinary(const char* fname, aint start, aint length) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("opening file for write", fname, FATAL);
@@ -1029,7 +1029,7 @@ int SaveBinary(char* fname, int start, int length) {
 }
 
 
-int SaveBinary3dos(char* fname, int start, int length, byte type, word w2, word w3) {
+int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w2, word w3) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname, FATAL);
 	// prepare +3DOS 128 byte header content
@@ -1074,7 +1074,7 @@ bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length
 }
 
 
-int SaveHobeta(char* fname, char* fhobname, int start, int length) {
+int SaveHobeta(const char* fname, const char* fhobname, aint start, aint length) {
 	unsigned char header[0x11];
 	int i;
 
@@ -1089,7 +1089,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	i = strlen(fhobname);
 	if (i > 1)
 	{
-		char *ext = strrchr(fhobname, '.');
+		const char *ext = strrchr(fhobname, '.');
 		if (ext && ext[1])
 		{
 			header[8] = ext[1];
@@ -1265,7 +1265,7 @@ void WriteLabelEquValue(const char* name, aint value, FILE* f) {
 	fputs(temp, f);
 }
 
-void WriteExp(char* n, aint v) {
+void WriteExp(const char* n, aint v) {
 	if (FP_ExportFile == NULL) {
 		if (!FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) {
 			Error("opening file for write", Options::ExportFName, FATAL);
