@@ -204,6 +204,15 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.20.1</term>
+
+            <listitem>
+              <synopsis>- parse decimal <link linkend="s_numeric">numeric constants</link> with warning (for easier Lua 5.4 life)
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>13.6.2022 - 1.20.0</term>
 
             <listitem>
@@ -764,6 +773,11 @@ $c     hexadecimal
       <para>(v1.12.1) Optional single quotes(') may be inserted between the digits as a separator
       (example: <computeroutput> ld a,%11'01'11'00 </computeroutput>).
       They are ignored by the assembler.</para>
+
+      <para>(v1.20.1) decimal parts are now parsed and ignored (with optional warning), instead of
+        causing syntax error - this should make life easier when formatting values from Lua script.
+        It is also possible to fix all Lua scripts to produce only integer values, but if you prefer
+        to silently ignore the extra decimal part, you can.</para>
     </section>
 
     <section id="s_strings">

@@ -50,6 +50,53 @@ numeric_constants_invalid.asm(30): error: Digit not in base: 12834q
 numeric_constants_invalid.asm(31): error: Digit not in base: 12834o
 31    0020                  DD      12834o
 32    0020
+33    0020                  ;; since v1.20.0 the parser does recognise decimal part of the constant and throws it away with warning
+34    0020                  ;; this is crude work-around to help migrate Lua 5.1 scripts, as those now format values like 2^7 as "128.0"
+35    0020                  OPT -Wdecimalz
+numeric_constants_invalid.asm(36): warning[decimalz]: decimal part is ignored: 12.0
+36    0020 0C               DB      12.0
+numeric_constants_invalid.asm(37): warning[decimalz]: decimal part is ignored: $AB.0
+37    0021 AB               DB      $AB.0
+numeric_constants_invalid.asm(38): warning[decimalz]: decimal part is ignored: %101.0
+38    0022 05               DB      %101.0
+numeric_constants_invalid.asm(39): warning[decimalz]: decimal part is ignored: 0q77.0
+39    0023 3F               DB      0q77.0
+numeric_constants_invalid.asm(40): warning[decimaln]: decimal part is ignored: 12.03
+40    0024 0C               DB      12.03
+numeric_constants_invalid.asm(41): warning[decimaln]: decimal part is ignored: $AB.0E
+41    0025 AB               DB      $AB.0E
+numeric_constants_invalid.asm(42): warning[decimaln]: decimal part is ignored: %101.01
+42    0026 05               DB      %101.01
+numeric_constants_invalid.asm(43): warning[decimaln]: decimal part is ignored: 0q77.01
+43    0027 3F               DB      0q77.01
+44    0028                  LUA ALLPASS     ; warning vs integer variant
+45    0028 ~                    _pc("db " .. 2^7 .. " , " .. (1<<7))    -- "1<<7" is integer variant of "2^7"
+46    0028 ~                    _pc("db " .. 2^7.00001 .. " , " .. math.floor(2^7.00001))
+47    0028 ~                    _pc("db " .. 35/7 .. " , " .. 35//7)    -- "35//7" is integer variant of "35/7"
+48    0028 ~                    _pc("db " .. 36/7 .. " , " .. 36//7)    -- "36//7" is integer variant of "36/7"
+numeric_constants_invalid.asm(45): warning[decimalz]: [LUA] decimal part is ignored: 128.0 , 128
+49    0028 80 80        db 128.0 , 128
+numeric_constants_invalid.asm(46): warning[decimaln]: [LUA] decimal part is ignored: 128.00088723147 , 128
+49    002A 80 80        db 128.00088723147 , 128
+numeric_constants_invalid.asm(47): warning[decimalz]: [LUA] decimal part is ignored: 5.0 , 5
+49    002C 05 05        db 5.0 , 5
+numeric_constants_invalid.asm(48): warning[decimaln]: [LUA] decimal part is ignored: 5.1428571428571 , 5
+49    002E 05 05        db 5.1428571428571 , 5
+49    0030                  ENDLUA
+numeric_constants_invalid.asm(50): warning[decimalz]: decimal part is ignored: 12.0'0
+50    0030 0C               DB      12.0'0
+numeric_constants_invalid.asm(51): warning[decimaln]: decimal part is ignored: 12.0'1
+51    0031 0C               DB      12.0'1
+52    0032                  ; errors when decimal part has invalid digit
+numeric_constants_invalid.asm(53): error: Digit not in base: .A
+53    0032                  DB      12.A
+numeric_constants_invalid.asm(54): error: Digit not in base: .G
+54    0032                  DB      $AB.G
+numeric_constants_invalid.asm(55): error: Digit not in base: .2
+55    0032                  DB      %101.2
+numeric_constants_invalid.asm(56): error: Digit not in base: .8
+56    0032                  DB      0q77.8
+57    0032
 # file closed: numeric_constants_invalid.asm
 
 Value    Label

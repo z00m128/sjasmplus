@@ -194,6 +194,8 @@ const char* W_OPKEYWORD = "opkeyword";
 const char* W_BE_HOST = "behost";
 const char* W_FAKE = "fake";
 const char* W_ENABLE_ALL = "all";
+const char* W_ZERO_DECIMAL = "decimalz";
+const char* W_NON_ZERO_DECIMAL = "decimaln";
 
 static messages_map w_texts = {
 	{ W_NO_RAMTOP,
@@ -339,6 +341,18 @@ static messages_map w_texts = {
 				// the main reason is that fake warning enabled can be reset/push/pop by OPT
 			"Fake instruction",
 			"Warn when fake instruction is used in the source."
+		}
+	},
+	{ W_ZERO_DECIMAL,
+		{ false,
+			"decimal part is ignored",
+			"Warn when numeric constant has decimal part (equal to zero)"
+		}
+	},
+	{ W_NON_ZERO_DECIMAL,
+		{ true,
+			"decimal part is ignored",
+			"Warn when numeric constant has non zero decimal part"
 		}
 	},
 	{ W_ENABLE_ALL,
