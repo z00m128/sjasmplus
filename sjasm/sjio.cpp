@@ -139,6 +139,19 @@ void CheckRamLimitExceeded() {
 	} else notWarnedDisp = true;
 }
 
+void resolveRelocationAndSmartSmc(const aint immediateOffset, Relocation::EType minType) {
+	// call relocation data generator to do its own errands
+	Relocation::resolveRelocationAffected(immediateOffset, minType);
+	// check smart-SMC functionality, if there is unresolved record to be set up
+	if (INT_MAX == immediateOffset || sourcePosStack.empty() || 0 == smartSmcIndex) return;
+	if (smartSmcLines.size() < smartSmcIndex) return;
+	auto & smartSmc = smartSmcLines.at(smartSmcIndex - 1);
+	if (~0U != smartSmc.colBegin || smartSmc != sourcePosStack.back()) return;
+	if (1 < sourcePosStack.back().colBegin) return;		// only first segment belongs to SMC label
+	// record does match current line, resolve the smart offset
+	smartSmc.colBegin = immediateOffset;
+}
+
 void WriteDest() {
 	if (!WBLength) {
 		return;
@@ -743,7 +756,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				if (ReadBufData() && '+' == *rlpbuf) {	// '+' after label, add it as SMC_offset syntax
 					IsLabel = false;
 					*rlppos++ = *rlpbuf++;
-					if (ReadBufData() && isdigit(byte(*rlpbuf))) *rlppos++ = *rlpbuf++;
+					if (ReadBufData() && (isdigit(byte(*rlpbuf)) || '*' == *rlpbuf)) *rlppos++ = *rlpbuf++;
 				}
 				if (ReadBufData() && ':' == *rlpbuf) {	// colon after label, add it
 					*rlppos++ = *rlpbuf++;

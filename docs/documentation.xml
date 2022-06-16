@@ -209,6 +209,7 @@
             <listitem>
               <synopsis>- parse decimal <link linkend="s_numeric">numeric constants</link> with warning (for easier Lua 5.4 life)
 - added <link linkend="po_saveamsdos">`SAVEAMSDOS`</link> (like SAVEBIN with AMSDOS header)
+- added "smart" <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels: `abc+*: or 123`
 </synopsis>
             </listitem>
           </varlistentry>
@@ -629,6 +630,23 @@ answer+1:   ld      a,13        ; "answer" points second opcode byte
             ld      (hl),42     ; fix immediate in `ld a,*` to correct answer
     ; compare with classic syntax:
 classic equ $+1 : ld a,7        ; often even split to two lines</programlisting>
+      </para>
+
+      <para>(since v1.20.1) Smart SMC labels: you can write "plus asterisk" to let sjasmplus adjust
+        self-modify label by most likely offset for following instruction. This works only
+        for instructions with "obvious" target immediate value:
+		<programlisting>    ; smart-SMC syntax is very strict, no spacing, single '+', single '*'
+answer+*:   ld      a,13        ; "answer" points second opcode byte
+    ; this helps to keep the SMC-label together with the target instruction
+            ld      hl,answer
+            ld      (hl),42     ; fix immediate in `ld a,*` to correct answer
+    ; few more examples which byte the "smart SMC" will target in the opcode
+jptarget+*: jp      nz,12345    ; "jptarget" points at second opcode byte (word value 12345)
+ixvalue+*:  ld      ix,12345    ; "ixvalue" points at third opcode byte (word value 12345)
+nxtrval+*:  nextreg $44,123     ; "nxtrval" points at fourth opcode byte (byte value 123)
+    ; unsupported situations, will cause error
+invalid1+*: inc     (ix+123)    ; IXY displacements are not considered (not significant enough)
+invalid2+*: cpl : ld a,14       ; only first instruction after label is considered</programlisting>
       </para>
     </section>
 

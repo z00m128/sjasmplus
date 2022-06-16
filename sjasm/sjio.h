@@ -52,6 +52,7 @@ FILE* GetListingFile();
 void ListFile(bool showAsSkipped = false);
 void ListSilentOrExternalEmits();
 void CheckRamLimitExceeded();
+void resolveRelocationAndSmartSmc(const aint immediateOffset, Relocation::EType minType = Relocation::REGULAR);
 void EmitByte(int byte, bool isInstructionStart = false);
 void EmitWord(int word, bool isInstructionStart = false);
 void EmitBytes(const int* bytes, bool isInstructionStart = false);

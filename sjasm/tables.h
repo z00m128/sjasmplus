@@ -33,7 +33,8 @@
 struct TextFilePos {
 	const char*		filename;
 	uint32_t		line;				// line numbering start at 1 (human way) 0 = invalid/init value
-	uint32_t 		colBegin, colEnd;	// columns coordinates are unused at this moment
+	uint32_t 		colBegin, colEnd;	// columns coordinates for lines with multiple segments using ':'
+					// colBegin is also reused for smartSmc offsets
 
 	TextFilePos(const char* fileNamePtr = nullptr, uint32_t line = 0);
 	void newFile(const char* fileNamePtr);	// requires stable immutable pointer (until sjasmplus exits)
