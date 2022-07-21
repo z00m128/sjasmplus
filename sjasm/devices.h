@@ -54,12 +54,28 @@ public:
 private:
 };
 
-class CDevice {
+class CDeviceDef {
 public:
 
 	constexpr static size_t MAX_SLOT_N = 256;	// minimum possible slot size is 256 bytes
 	constexpr static size_t MAX_PAGE_N = 1024;	// maximum possible total memory is 64MB with 64ki slot size
 
+	CDeviceDef(const CDeviceDef&) = delete;
+	CDeviceDef(const char* name, aint slot_size, aint page_count);
+	~CDeviceDef();
+
+	const char* getID() const { return ID; }
+	const aint SlotSize;
+	const aint SlotsCount;
+	const aint PagesCount;
+	int initialPages[MAX_SLOT_N] = {};
+
+private:
+	char* ID;
+};
+
+class CDevice {
+public:
 	// reset will reinitialize checks, "no emit" will do wrap-only (no machine byte emitted)
 	// "emit" will also report error/warning upon boundary, as the machine byte emit is expected
 	enum ECheckPageLevel{ CHECK_RESET, CHECK_NO_EMIT, CHECK_EMIT };
@@ -88,8 +104,8 @@ public:
 	aint ZxRamTop;		// for ZX-like machines, the RAMTOP system variable
 private:
 	int CurrentSlot;
-	CDeviceSlot* Slots[MAX_SLOT_N];
-	CDevicePage* Pages[MAX_PAGE_N];
+	CDeviceSlot* Slots[CDeviceDef::MAX_SLOT_N];
+	CDevicePage* Pages[CDeviceDef::MAX_PAGE_N];
 
 	// variables for CheckPage logic
 	int previousSlotI;				// previous machine code write happened into this slot

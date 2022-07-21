@@ -181,6 +181,19 @@ static void DeviceAmstradCPC6128(CDevice** dev, CDevice* parent, aint ramtop) {
 	initRegularSlotDevice(*dev, 0x4000, 4, 8, initialPages);
 }
 
+static bool SetUserDefinedDevice(const char* id, CDevice** dev, CDevice* parent, aint ramtop) {
+	auto findIt = std::find_if(
+		DefDevices.begin(), DefDevices.end(),
+		[&](const CDeviceDef* el) { return 0 == strcasecmp(id, el->getID()); }
+	);
+	if (DefDevices.end() == findIt) return false;	// not found
+	const CDeviceDef & def = **findIt;
+	if (ramtop) WarningById(W_NO_RAMTOP);
+	*dev = new CDevice(def.getID(), parent);
+	initRegularSlotDevice(*dev, def.SlotSize, def.SlotsCount, def.PagesCount, def.initialPages);
+	return true;
+}
+
 bool SetDevice(const char *const_id, const aint ramtop) {
 	CDevice** dev;
 	CDevice* parent = nullptr;
@@ -227,7 +240,7 @@ bool SetDevice(const char *const_id, const aint ramtop) {
 				DeviceAmstradCPC464(dev, parent, ramtop);
 			} else if (cmphstr(id, "amstradcpc6128")) {
 				DeviceAmstradCPC6128(dev, parent, ramtop);
-			} else {
+			} else if (!SetUserDefinedDevice(id, dev, parent, ramtop)) {
 				return false;
 			}
 		}
@@ -267,6 +280,18 @@ const char* GetDeviceName() {
 	return DeviceID ? DeviceID : DEVICE_NONE_ID;
 }
 
+std::vector<CDeviceDef*> DefDevices;
+
+CDeviceDef::CDeviceDef(const char* name, aint slot_size, aint page_count)
+	: SlotSize(slot_size), SlotsCount((0x10000 + slot_size - 1) / slot_size), PagesCount(page_count) {
+	assert(name);
+	ID = STRDUP(name);
+}
+
+CDeviceDef::~CDeviceDef() {
+	free(ID);
+}
+
 CDevice::CDevice(const char *name, CDevice *parent)
 	: Next(nullptr), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0),
 	previousSlotI(0), previousSlotOpt(CDeviceSlot::ESlotOptions::O_NONE), limitExceeded(false) {
@@ -285,12 +310,12 @@ CDevice::~CDevice() {
 }
 
 void CDevice::AddSlot(int32_t adr, int32_t size) {
-	if (MAX_SLOT_N == SlotsCount) ErrorInt("Can't add more slots, already at max", MAX_SLOT_N, FATAL);
+	if (CDeviceDef::MAX_SLOT_N == SlotsCount) ErrorInt("Can't add more slots, already at max", CDeviceDef::MAX_SLOT_N, FATAL);
 	Slots[SlotsCount++] = new CDeviceSlot(adr, size);
 }
 
 void CDevice::AddPage(byte* memory, int32_t size) {
-	if (MAX_PAGE_N == PagesCount) ErrorInt("Can't add more pages, already at max", MAX_PAGE_N, FATAL);
+	if (CDeviceDef::MAX_PAGE_N == PagesCount) ErrorInt("Can't add more pages, already at max", CDeviceDef::MAX_PAGE_N, FATAL);
 	Pages[PagesCount] = new CDevicePage(memory, size, PagesCount);
 	PagesCount++;
 }

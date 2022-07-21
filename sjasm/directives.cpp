@@ -2059,6 +2059,60 @@ static void dirDEFARRAY() {
 	}
 }
 
+static const char* DEFDEVICE_SYNTAX_ERR = "[DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]";
+
+static void dirDEFDEVICE() {
+	//DEFDEVICE <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]
+	const char* id = GetID(lp);
+	if (!id) {
+		Error(DEFDEVICE_SYNTAX_ERR, bp, SUPPRESS);
+		return;
+	}
+
+	const bool is_defined = std::any_of(
+		DefDevices.begin(), DefDevices.end(),
+		[&](const CDeviceDef* el) { return 0 == strcasecmp(id, el->getID()); }
+	);
+	if (is_defined || 1 < pass) {
+		// same id defined twice during first pass?
+		if (pass <= 1) Error("[DEFDEVICE] device with such ID is already defined", id, EARLY);
+		// in later passes ignore the line, DEFDEVICE works only in first pass
+		SkipToEol(lp);
+		return;
+	}
+
+	// add new definition if arguments are correct and this is first pass
+	aint args[2 + CDeviceDef::MAX_SLOT_N] = {};	// slot_size, page_count, initial pages, ...
+	bool optional[2 + CDeviceDef::MAX_SLOT_N] = {false, false};
+	aint &slot_size = args[0], &page_count = args[1], *initial_pages = args + 2;
+	for (size_t i = 2; i < CDeviceDef::MAX_SLOT_N; ++i) {
+		args[i] = -1;
+		optional[i] = true;
+	}
+	if (!anyComma(lp) || !getIntArguments<2 + CDeviceDef::MAX_SLOT_N>(lp, args, optional)) {
+		Error(DEFDEVICE_SYNTAX_ERR, bp, EARLY);
+		return;
+	}
+	if (slot_size < 256 || 0x10000 < slot_size || page_count <= 0) {
+		Error("[DEFDEVICE] valid slot_size: 256..64ki, page_count: 1 or more", bp, EARLY);
+		return;
+	}
+	DefDevices.push_back(new CDeviceDef(id, slot_size, page_count));
+
+	// init "initialPages array by going 0, 1, 2, ..., page_count-1, page_count-1, ... or parsed explicit values
+	CDeviceDef & dev = *DefDevices.back();
+	int previous_page = -1;
+	for (int32_t i = 0; i < dev.SlotsCount; ++i) {
+		if (0 <= initial_pages[i] && initial_pages[i] < dev.PagesCount) {
+			previous_page = initial_pages[i];
+		} else {
+			if (-1 != initial_pages[i]) ErrorInt("[DEFDEVICE] invalid initial page", initial_pages[i], EARLY);
+			if (previous_page < dev.PagesCount - 1) ++previous_page;
+		}
+		dev.initialPages[i] = previous_page;
+	}
+}
+
 static void dirDEVICE() {
 	// refresh source position of first DEVICE directive
 	if (1 == ++deviceDirectivesCount) {
@@ -2202,6 +2256,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".ends", dirENDS);
 
 	DirectivesTable.insertd(".device", dirDEVICE);
+	DirectivesTable.insertd(".defdevice", dirDEFDEVICE);
 
 	DirectivesTable.insertd(".bplist", dirBPLIST);
 	DirectivesTable.insertd(".setbreakpoint", dirSETBREAKPOINT);
