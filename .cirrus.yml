@@ -48,19 +48,18 @@ pipe:
       # "-n" as the *.gcov files are already generated in the project root from previous step
       upload_gcov_data_script: cpp-coveralls -n -e lua5.4/ -e LuaBridge/ -e unittest-cpp/ -e cpp-src-tests/
 
-# MINGW builds are ALSO temporarily disabled as mingw is not part of default windows images any more
-# task:
-#   name: windows mingw build
-#   env:
-#     CIRRUS_CLONE_DEPTH: 1
-#     CIRRUS_CLONE_SUBMODULES: true
-#   windows_container:
-#     image: cirrusci/windowsservercore:cmake
-#     os_version: 2019
-#     cpu: 2
-#   build_script: ContinuousIntegration\winbuild_mingw.bat
-#   assemble_examples_script: ContinuousIntegration\winbuild_mingw_examples.bat
-#   assemble_tests_script: ContinuousIntegration\winbuild_mingw_tests.bat
+task:
+  name: windows mingw build
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+    CIRRUS_CLONE_SUBMODULES: true
+  windows_container:
+    image: cirrusci/windowsservercore:cmake
+    os_version: 2019
+    cpu: 2
+  build_script: ContinuousIntegration\winbuild_mingw.bat
+  assemble_examples_script: ContinuousIntegration\winbuild_mingw_examples.bat
+  assemble_tests_script: ContinuousIntegration\winbuild_mingw_tests.bat
 
 # VS builds are temporarily disabled, see: https://github.com/cirruslabs/docker-images-windows/issues/14
 # task:
