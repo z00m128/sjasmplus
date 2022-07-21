@@ -481,6 +481,7 @@ int GetConstant(char*& op, aint& val) {
 	if ('#' == *pend || '$' == *pend || '%' == *pend) ++pend;
 	while (isalnum((byte)*pend) || ('\'' == *pend && isalnum((byte)pend[1]))) ++pend;
 	char* const hardEnd = pend;
+	bool has_decimal_part = ('.' == *hardEnd) && isalnum((byte)hardEnd[1]);
 	// check if the format is defined by prefix (#, $, %, 0x, 0X, 0b, 0B, 0q, 0Q)
 	char* p = op;
 	int shiftBase = 0, base = 0;
@@ -503,11 +504,11 @@ int GetConstant(char*& op, aint& val) {
 	// if the base is still undecided, check for suffix format specifier
 	if (0 == shiftBase) {
 		switch (pend[-1]|0x20) {
-			case 'h': --pend; shiftBase = 4;  break;
-			case 'q': --pend; shiftBase = 3;  break;
-			case 'o': --pend; shiftBase = 3;  break;
-			case 'b': --pend; shiftBase = 1;  break;
-			case 'd': --pend;      base = 10; break;
+			case 'h': --pend; shiftBase = 4;  has_decimal_part = false; break;
+			case 'q': --pend; shiftBase = 3;  has_decimal_part = false; break;
+			case 'o': --pend; shiftBase = 3;  has_decimal_part = false; break;
+			case 'b': --pend; shiftBase = 1;  has_decimal_part = false; break;
+			case 'd': --pend;      base = 10; has_decimal_part = false; break;
 			default:
 				base = 10;
 				break;
@@ -525,7 +526,34 @@ int GetConstant(char*& op, aint& val) {
 		if (!GetNumericValue_IntBased(p, pend, val, base) && GetNumericValue_ProcessLastError(op))
 			return 0;
 	}
-	op = hardEnd;
+	// check for possible decimal part and warn about it appropriately (can be user error or Lua string formatting)
+	if (!has_decimal_part) {
+		// no decimal part detected, all is done here
+		op = hardEnd;
+		return 1;
+	}
+	// possible decimal part detected, try to parse it just to throw it away (with warnings if enabled)
+	p = hardEnd + 1;
+	assert(isalnum((byte)*p));
+	pend = hardEnd + 2;
+	while (isalnum((byte)*pend) || ('\'' == *pend && isalnum((byte)pend[1]))) ++pend;
+	aint fractionVal;
+	if (0 < shiftBase) {
+		GetNumericValue_TwoBased(p, pend, fractionVal, shiftBase);
+	} else {
+		GetNumericValue_IntBased(p, pend, fractionVal, base);
+	}
+	// ignore overflow errors in fractional part, the value is thrown away any way, just report it as non-zero
+	if (getNumericValueErr_overflow == getNumericValueLastErr) {
+		fractionVal = 1;
+		getNumericValueLastErr = nullptr;
+	} else if (nullptr != getNumericValueLastErr) {		// but report other syntax errors
+		GetNumericValue_ProcessLastError(hardEnd);
+		return 0;
+	}
+	// warn about zero/non-zero fractional part in the numeral string
+	WarningById(fractionVal ? W_NON_ZERO_DECIMAL : W_ZERO_DECIMAL, op);
+	op = pend;
 	return 1;
 }
 

@@ -994,6 +994,33 @@ static void dirSAVE3DOS() {
 	}
 }
 
+static void dirSAVEAMSDOS() {
+	if (!DeviceID) {
+		Error("SAVEAMSDOS works in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
+		return;
+	}
+	bool exec = (LASTPASS == pass);
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	aint args[] = { -1, -1, 0, 2 };	// address, size, start, type
+	const bool optional[] = {false, false, true, true};
+	if (!anyComma(lp) || !getIntArguments<4>(lp, args, optional)) {
+		Error("[SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]", bp, SUPPRESS);
+		return;
+	}
+	aint &address = args[0], &size = args[1], &start = args[2], &type = args[3];
+	if (address < 0 || size < 1 || 0x10000 < address + size) {
+		Error("[SAVEAMSDOS] [address, size] region outside of 64ki", bp);
+		return;
+	}
+	check16u(start);
+	if (type < 0) type = -0x1000;		// check8 works for -256..+255 values, in this case just 0..255 is valid
+	check8(type);
+	if (exec && !SaveBinaryAmsdos(fnaam.get(), address, size, start, type)) {
+		Error("[SAVEAMSDOS] Error writing file (Disk full?)", bp, IF_FIRST);
+	}
+}
+
 static void dirSAVEHOB() {
 
 	if (!DeviceID || pass != LASTPASS) {
@@ -2117,6 +2144,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".savecpcsna", dirSAVECPCSNA);
 	DirectivesTable.insertd(".savecdt", dirSAVECDT);
 	DirectivesTable.insertd(".save3dos", dirSAVE3DOS);
+	DirectivesTable.insertd(".saveamsdos", dirSAVEAMSDOS);
 	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
 	DirectivesTable.insertd(".winexec", dirWINEXEC);

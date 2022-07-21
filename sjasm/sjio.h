@@ -46,16 +46,17 @@ char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t 
 const char* FilenameBasePos(const char* fullname);
 void ConstructDefaultFilename(char* dest, size_t dest_size, const char* ext, bool checkIfDestIsEmpty = true);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
-void NewDest(char* newfilename, int mode = OUTPUT_TRUNCATE);
+void NewDest(const char* newfilename, int mode = OUTPUT_TRUNCATE);
 bool FileExists(const char* filename);
 FILE* GetListingFile();
 void ListFile(bool showAsSkipped = false);
 void ListSilentOrExternalEmits();
 void CheckRamLimitExceeded();
+void resolveRelocationAndSmartSmc(const aint immediateOffset, Relocation::EType minType = Relocation::REGULAR);
 void EmitByte(int byte, bool isInstructionStart = false);
 void EmitWord(int word, bool isInstructionStart = false);
 void EmitBytes(const int* bytes, bool isInstructionStart = false);
-void EmitWords(int* words, bool isInstructionStart = false);
+void EmitWords(const int* words, bool isInstructionStart = false);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
 bool DidEmitByte();		// returns true if some byte was emitted since last call to this function
 void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false, stdin_log_t* fStdinLog = nullptr);
@@ -67,7 +68,7 @@ void OpenUnrealList();
 void ReadBufLine(bool Parse = true, bool SplitByColon = true);
 void CloseDest();
 void CloseTapFile();
-void OpenTapFile(char * tapename, int flagbyte);
+void OpenTapFile(const char * tapename, int flagbyte);
 void PrintHex(char* & dest, aint value, int nibbles);
 void PrintHex32(char* & dest, aint value);
 void PrintHexAlt(char* & dest, aint value);
@@ -80,16 +81,17 @@ char* GetPath(const char* fname, char** filenamebegin = NULL, bool systemPathsBe
  * @param offset positive: bytes to skip / negative: bytes to rewind back from end
  * @param length positive: bytes to include / negative: bytes to skip from end / INT_MAX: all remaining
  */
-void BinIncFile(char* fname, int offset = 0, int length = INT_MAX);
+void BinIncFile(const char* fname, aint offset = 0, aint length = INT_MAX);
 
 int SaveRAM(FILE*, int, int);
 unsigned char MemGetByte(unsigned int address);
 unsigned int MemGetWord(unsigned int address);
-int SaveBinary(char* fname, int start, int length);
-int SaveBinary3dos(char* fname, int start, int length, byte type, word w2, word w3);
+int SaveBinary(const char* fname, aint start, aint length);
+int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w2, word w3);
+int SaveBinaryAmsdos(const char* fname, aint start, aint length, word start_adr = 0, byte type = 2);
 bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length);
 bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length);
-int SaveHobeta(char* fname, char* fhobname, int start, int length);
+int SaveHobeta(const char* fname, const char* fhobname, aint start, aint length);
 int ReadLineNoMacro(bool SplitByColon = true);
 int ReadLine(bool SplitByColon = true);
 EReturn ReadFile();
@@ -97,7 +99,7 @@ EReturn SkipFile();
 void SeekDest(long, int);
 int ReadFileToCStringsList(CStringsList*& f, const char* end);
 void WriteLabelEquValue(const char* name, aint value, FILE* f);
-void WriteExp(char* n, aint v);
+void WriteExp(const char* n, aint v);
 
 /////// source-level-debugging support by Ckirby
 bool IsSldExportActive();
@@ -113,4 +115,3 @@ void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type);
 void WriteBreakpoint(const aint val);
 
 //eof sjio.h
-

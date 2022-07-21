@@ -234,6 +234,8 @@ int adrdisp = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;
 byte* MemoryPointer=NULL;
 int macronummer = 0, lijst = 0, reglenwidth = 0;
 source_positions_t sourcePosStack;
+source_positions_t smartSmcLines;
+source_positions_t::size_type smartSmcIndex;
 uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L, comlin = 0;
@@ -277,6 +279,7 @@ void InitPass() {
 	listmacro = 0;
 	CurAddress = 0;
 	CompiledCurrentLine = 0;
+	smartSmcIndex = 0;
 	PseudoORG = DISP_NONE; adrdisp = 0; dispPageNum = LABEL_PAGE_UNDEFINED;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
 	lijstp = NULL;
@@ -632,6 +635,7 @@ int main(int argc, char **argv) {
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
 	sourcePosStack.reserve(32);
+	smartSmcLines.reserve(64);
 	sourceFiles.reserve(32);
 	archivedFileNames.reserve(64);
 

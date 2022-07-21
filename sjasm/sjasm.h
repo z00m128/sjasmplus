@@ -157,6 +157,8 @@ extern int adrdisp, dispPageNum, StartAddress;
 extern byte* MemoryPointer;
 extern int macronummer, lijst, reglenwidth;
 extern source_positions_t sourcePosStack;
+extern source_positions_t smartSmcLines;
+extern source_positions_t::size_type smartSmcIndex;
 extern uint32_t maxlin;
 extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine, PredefinedCounter;
 extern aint destlen, size, comlin;

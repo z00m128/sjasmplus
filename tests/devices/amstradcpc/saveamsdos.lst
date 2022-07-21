@@ -1,0 +1,65 @@
+# file opened: saveamsdos.asm
+ 1    0000                  DEVICE AMSTRADCPC464
+ 2    0000
+ 3    0000                  ORG $1000
+ 4    1000              Code:
+ 5    1000 41               ld  b,c
+ 6    1001              Start:
+ 7    1001 42               ld  b,d
+ 8    1002              Data:
+ 9    1002 43 00            dz  "C"
+10    1004              End:
+11    1004
+12    1004                  DEVICE NONE
+13    1004                  ; error about device mode
+saveamsdos.asm(14): error: SAVEAMSDOS works in real device emulation mode (See DEVICE)
+14    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code, Start
+15    1004
+16    1004                  DEVICE AMSTRADCPC464
+17    1004                  ; check parsing errors
+saveamsdos.asm(18): error: [SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]: SAVEAMSDOS
+18    1004                  SAVEAMSDOS
+saveamsdos.asm(19): error: [SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]: SAVEAMSDOS "saveamsdos.bin"
+19    1004                  SAVEAMSDOS "saveamsdos.bin"
+saveamsdos.asm(20): error: [SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]: SAVEAMSDOS "saveamsdos.bin",
+20    1004                  SAVEAMSDOS "saveamsdos.bin",
+saveamsdos.asm(21): error: [SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]: SAVEAMSDOS "saveamsdos.bin", Code
+21    1004                  SAVEAMSDOS "saveamsdos.bin", Code
+saveamsdos.asm(22): error: [SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]: SAVEAMSDOS "saveamsdos.bin", Code,
+22    1004                  SAVEAMSDOS "saveamsdos.bin", Code,
+saveamsdos.asm(23): error: [SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]: SAVEAMSDOS "saveamsdos.bin", Code, End-Code,
+23    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code,
+saveamsdos.asm(24): error: [SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]: SAVEAMSDOS "saveamsdos.bin", Code, End-Code, Start,
+24    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code, Start,
+saveamsdos.asm(25): error: [SAVEAMSDOS] expected syntax is <filename>,<address>,<size>[,<start = 0>[,<type = 2>]: SAVEAMSDOS "saveamsdos.bin", Code, End-Code, Start, 2,
+25    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code, Start, 2,
+26    1004                  ; check errors of main arguments
+saveamsdos.asm(27): error: opening file for write:
+27    1004                  SAVEAMSDOS "", Code, End-Code
+saveamsdos.asm(28): error: [SAVEAMSDOS] [address, size] region outside of 64ki: SAVEAMSDOS "saveamsdos.bin", -1, End-Code
+28    1004                  SAVEAMSDOS "saveamsdos.bin", -1, End-Code
+saveamsdos.asm(29): error: [SAVEAMSDOS] [address, size] region outside of 64ki: SAVEAMSDOS "saveamsdos.bin", Code, $10001-Code
+29    1004                  SAVEAMSDOS "saveamsdos.bin", Code, $10001-Code
+30    1004                  ; check "start" and "type" validity warning
+saveamsdos.asm(31): warning: value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
+31    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code, -1
+saveamsdos.asm(32): warning: value 0x10000 is truncated to 16bit value: 0x0000
+32    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code, $10000
+saveamsdos.asm(33): warning: value 0xFFFFF000 is truncated to 8bit value: 0x00
+33    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code, Start, -1
+saveamsdos.asm(34): warning: value 0x100 is truncated to 8bit value: 0x00
+34    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code, Start, 256
+35    1004
+36    1004                  ; valid line with all arguments
+37    1004                  SAVEAMSDOS "saveamsdos.bin", Code, End-Code, Start, 0
+38    1004                  ; valid line with default start and type
+39    1004                  SAVEAMSDOS "saveamsdos.raw", Code, End-Code
+40    1004
+# file closed: saveamsdos.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x1000   Code
+0x1002 X Data
+0x1004   End
+0x1001   Start

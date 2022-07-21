@@ -634,9 +634,34 @@ void ParseLabel() {
 	}
 	*tp = 0;
 	// handle the special SMC_offset syntax "<label>+<single_digit>"
-	if ('+' == lp[0] && isdigit(byte(lp[1])) && !isdigit(byte(lp[2]))) {
+	if ('+' == lp[0] && isdigit(byte(lp[1])) && !isalnum(byte(lp[2]))) {
 		smcOffset = lp[1] - '0';
 		lp += 2;
+	}
+	// handle the special SMC_offset syntax "<label>+*" to target significant immediate of the instruction
+	if ('+' == lp[0] && '*' == lp[1] && !isalnum(byte(lp[2]))) {
+		assert(!sourcePosStack.empty());
+		smcOffset = 1;					// heuristic value 1 for first pass or when something fails
+		lp += 2;
+		if (1 == pass) {
+			// put the current source position into smart-smc (if first pass, or missing record)
+			smartSmcLines.push_back(sourcePosStack.back());
+			smartSmcLines.back().colBegin = ~0U;		// mark as unresolved
+		} else {
+			if ((smartSmcLines.size() <= smartSmcIndex)
+				|| smartSmcLines.at(smartSmcIndex) != sourcePosStack.back()) {
+				Error("mismatch of smart-SMC positions between passes");
+			} else {
+				auto & smartSmcLine = smartSmcLines.at(smartSmcIndex);
+				if (~0U == smartSmcLine.colBegin) {
+					Error("unresolved smart-SMC symbol (no significant target)");
+				} else {
+					smcOffset = smartSmcLine.colBegin;	// use the smart value from previous pass
+					smartSmcLine.colBegin = ~0U;		// mark as unsolved again
+				}
+			}
+		}
+		++smartSmcIndex;
 	}
 	if (*lp == ':') ++lp;	// eat the optional colon after label
 	tp = temp;

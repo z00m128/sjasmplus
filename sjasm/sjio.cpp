@@ -139,6 +139,19 @@ void CheckRamLimitExceeded() {
 	} else notWarnedDisp = true;
 }
 
+void resolveRelocationAndSmartSmc(const aint immediateOffset, Relocation::EType minType) {
+	// call relocation data generator to do its own errands
+	Relocation::resolveRelocationAffected(immediateOffset, minType);
+	// check smart-SMC functionality, if there is unresolved record to be set up
+	if (INT_MAX == immediateOffset || sourcePosStack.empty() || 0 == smartSmcIndex) return;
+	if (smartSmcLines.size() < smartSmcIndex) return;
+	auto & smartSmc = smartSmcLines.at(smartSmcIndex - 1);
+	if (~0U != smartSmc.colBegin || smartSmc != sourcePosStack.back()) return;
+	if (1 < sourcePosStack.back().colBegin) return;		// only first segment belongs to SMC label
+	// record does match current line, resolve the smart offset
+	smartSmc.colBegin = immediateOffset;
+}
+
 void WriteDest() {
 	if (!WBLength) {
 		return;
@@ -373,7 +386,7 @@ void EmitBytes(const int* bytes, bool isInstructionStart) {
 	}
 }
 
-void EmitWords(int* words, bool isInstructionStart) {
+void EmitWords(const int* words, bool isInstructionStart) {
 	while (BYTES_END_MARKER != *words) {
 		EmitWord(*words++, isInstructionStart);
 		isInstructionStart = false;		// only true for first word
@@ -438,7 +451,7 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 
 // if offset is negative, it functions as "how many bytes from end of file"
 // if length is negative, it functions as "how many bytes from end of file to not load"
-void BinIncFile(char* fname, int offset, int length) {
+void BinIncFile(const char* fname, aint offset, aint length) {
 	// open the desired file
 	FILE* bif;
 	char* fullFilePath = GetPath(fname);
@@ -743,7 +756,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 				if (ReadBufData() && '+' == *rlpbuf) {	// '+' after label, add it as SMC_offset syntax
 					IsLabel = false;
 					*rlppos++ = *rlpbuf++;
-					if (ReadBufData() && isdigit(byte(*rlpbuf))) *rlppos++ = *rlpbuf++;
+					if (ReadBufData() && (isdigit(byte(*rlpbuf)) || '*' == *rlpbuf)) *rlppos++ = *rlpbuf++;
 				}
 				if (ReadBufData() && ':' == *rlpbuf) {	// colon after label, add it
 					*rlppos++ = *rlpbuf++;
@@ -858,7 +871,7 @@ void SeekDest(long offset, int method) {
 	}
 }
 
-void NewDest(char* newfilename, int mode) {
+void NewDest(const char* newfilename, int mode) {
 	// close previous output file
 	CloseDest();
 
@@ -911,7 +924,7 @@ void CloseTapFile()
 	FP_tapout = NULL;
 }
 
-void OpenTapFile(char * tapename, int flagbyte)
+void OpenTapFile(const char * tapename, int flagbyte)
 {
 	CloseTapFile();
 
@@ -1018,7 +1031,7 @@ unsigned char MemGetByte(unsigned int address) {
 }
 
 
-int SaveBinary(char* fname, int start, int length) {
+int SaveBinary(const char* fname, aint start, aint length) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("opening file for write", fname, FATAL);
@@ -1029,12 +1042,12 @@ int SaveBinary(char* fname, int start, int length) {
 }
 
 
-int SaveBinary3dos(char* fname, int start, int length, byte type, word w2, word w3) {
+int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w2, word w3) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname, FATAL);
 	// prepare +3DOS 128 byte header content
-	constexpr int hsize = 128;
-	const int full_length = hsize + length;
+	constexpr aint hsize = 128;
+	const aint full_length = hsize + length;
 	byte sum = 0, p3dos_header[hsize] { "PLUS3DOS\032\001" };
 	p3dos_header[11] = byte(full_length>>0);
 	p3dos_header[12] = byte(full_length>>8);
@@ -1058,6 +1071,34 @@ int SaveBinary3dos(char* fname, int start, int length, byte type, word w2, word 
 }
 
 
+int SaveBinaryAmsdos(const char* fname, aint start, aint length, word start_adr, byte type) {
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "wb")) {
+		Error("opening file for write", fname, SUPPRESS);
+		return 0;
+	}
+	// prepare AMSDOS 128 byte header content
+	constexpr aint hsize = 128;
+	byte amsdos_header[hsize] {};	// all zeroed (user_number and filename stay like that, just zeroes)
+	amsdos_header[0x12] = type;
+	amsdos_header[0x15] = byte(start>>0);
+	amsdos_header[0x16] = byte(start>>8);
+	amsdos_header[0x18] = amsdos_header[0x40] = byte(length>>0);
+	amsdos_header[0x19] = amsdos_header[0x41] = byte(length>>8);
+	amsdos_header[0x1A] = byte(start_adr>>0);
+	amsdos_header[0x1B] = byte(start_adr>>8);
+	// calculat checksum of the header
+	word sum = 0;
+	for (int ii = 0x43; ii--; ) sum += amsdos_header[ii];
+	amsdos_header[0x43] = byte(sum>>0);
+	amsdos_header[0x44] = byte(sum>>8);
+	// write header and data
+	int result = (hsize == (aint) fwrite(amsdos_header, 1, hsize, ff)) ? SaveRAM(ff, start, length) : 0;
+	fclose(ff);
+	return result;
+}
+
+
 // all arguments must be sanitized by caller (this just writes data block into opened file)
 bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
 	return (length == fwrite(Device->Memory + start, 1, length, file));
@@ -1074,7 +1115,7 @@ bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length
 }
 
 
-int SaveHobeta(char* fname, char* fhobname, int start, int length) {
+int SaveHobeta(const char* fname, const char* fhobname, aint start, aint length) {
 	unsigned char header[0x11];
 	int i;
 
@@ -1089,7 +1130,7 @@ int SaveHobeta(char* fname, char* fhobname, int start, int length) {
 	i = strlen(fhobname);
 	if (i > 1)
 	{
-		char *ext = strrchr(fhobname, '.');
+		const char *ext = strrchr(fhobname, '.');
 		if (ext && ext[1])
 		{
 			header[8] = ext[1];
@@ -1265,7 +1306,7 @@ void WriteLabelEquValue(const char* name, aint value, FILE* f) {
 	fputs(temp, f);
 }
 
-void WriteExp(char* n, aint v) {
+void WriteExp(const char* n, aint v) {
 	if (FP_ExportFile == NULL) {
 		if (!FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) {
 			Error("opening file for write", Options::ExportFName, FATAL);
