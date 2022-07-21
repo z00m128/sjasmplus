@@ -48,6 +48,13 @@ pipe:
       # "-n" as the *.gcov files are already generated in the project root from previous step
       upload_gcov_data_script: cpp-coveralls -n -e lua5.4/ -e LuaBridge/ -e unittest-cpp/ -e cpp-src-tests/
 
+# image cirrusci/windowsservercore:cmake located at (Jul 2022):
+# https://hub.docker.com/layers/windowsservercore/cirrusci/windowsservercore/cmake/images/sha256-25bc1126d3d4b8e4e5c07bc7105612c5c4877816dfdad94bf4fded5f999d1cf3
+# File locations in cirrusci/windowsservercore:cmake
+# - mingw32-make.exe - C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin (and C:\ProgramData\chocolatey\bin)
+# - cmake.exe - C:\Program Files\CMake\bin
+# - vcvar64.bat -C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64
+# other windows images by Cirrus CI: https://hub.docker.com/r/cirrusci/windowsservercore/tags
 task:
   name: windows mingw build
   env:
