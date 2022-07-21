@@ -188,11 +188,13 @@ bool SetDevice(const char *const_id, const aint ramtop) {
 		// ^ argument is const because of lua bindings
 
 	if (!id || cmphstr(id, "none")) {
-		DeviceID = 0; return true;
+		DeviceID = nullptr;
+		Device = nullptr;
+		return true;
 	}
 
 	if (!DeviceID || strcmp(DeviceID, id)) {	// different device than current, change to it
-		DeviceID = 0;
+		DeviceID = nullptr;
 		dev = &Devices;
 		// search for device
 		while (*dev) {
@@ -259,21 +261,19 @@ bool SetDevice(const char *const_id, const aint ramtop) {
 	return true;
 }
 
+const char* DEVICE_NONE_ID = "NONE";
+
 const char* GetDeviceName() {
-	if (!DeviceID) {
-		return (char *)"NONE";
-	} else {
-		return DeviceID;
-	}
+	return DeviceID ? DeviceID : DEVICE_NONE_ID;
 }
 
 CDevice::CDevice(const char *name, CDevice *parent)
-	: Next(NULL), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0),
+	: Next(nullptr), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0),
 	previousSlotI(0), previousSlotOpt(CDeviceSlot::ESlotOptions::O_NONE), limitExceeded(false) {
 	ID = STRDUP(name);
 	if (parent) parent->Next = this;
-	for (auto & slot : Slots) slot = NULL;
-	for (auto & page : Pages) page = NULL;
+	for (auto & slot : Slots) slot = nullptr;
+	for (auto & page : Pages) page = nullptr;
 }
 
 CDevice::~CDevice() {
@@ -357,7 +357,7 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 		// if still in the same slot and within boundaries, we are done
 		if (i == previousSlotI && realAddr < S->Address + S->Size) return;
 		// crossing into other slot, check options for special functionality of old slot
-		if (S->Address + S->Size <= realAddr) MemoryPointer = NULL; // you're not writing there
+		if (S->Address + S->Size <= realAddr) MemoryPointer = nullptr; // you're not writing there
 		switch (previousSlotOpt) {
 			case CDeviceSlot::O_ERROR:
 				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded) {
@@ -406,11 +406,11 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 		previousSlotOpt = S->Option;
 		return;
 	}
-	Error("CheckPage(..): please, contact the author of this program.", NULL, FATAL);
+	Error("CheckPage(..): please, contact the author of this program.", nullptr, FATAL);
 }
 
 bool CDevice::SetSlot(int slotNumber) {
-	if (slotNumber < 0 || SlotsCount <= slotNumber || NULL == Slots[slotNumber]) return false;
+	if (slotNumber < 0 || SlotsCount <= slotNumber || nullptr == Slots[slotNumber]) return false;
 	CurrentSlot = slotNumber;
 	return true;
 }
@@ -448,7 +448,7 @@ CDevicePage::CDevicePage(byte* memory, int32_t size, int number)
 }
 
 CDeviceSlot::CDeviceSlot(int32_t adr, int32_t size)
-	: Address(adr), Size(size), Page(NULL), InitialPage(-1), Option(O_NONE) {
+	: Address(adr), Size(size), Page(nullptr), InitialPage(-1), Option(O_NONE) {
 }
 
 CDeviceSlot::~CDeviceSlot() {
