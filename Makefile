@@ -18,8 +18,8 @@
 # make CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
 
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
-CC?=gcc
-CXX?=g++
+CC?=cc
+CXX?=c++
 BASH?=/usr/bin/env bash
 
 # Use LUA (system-wide or bundled, depending on USE_BUNDLED_LUA)
