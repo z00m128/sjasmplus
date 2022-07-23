@@ -183,14 +183,17 @@ $(OBJS): $(wildcard $(SUBDIR_BASE)/*.h)
 
 $(BUILD_EXE): $(ALL_OBJS)
 	$(CXX) -o $(BUILD_EXE) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
-
-$(BUILD_EXE_UT): $(ALL_OBJS_UT)
-	$(CXX) -o $(BUILD_EXE_UT) $(CXXFLAGS) $(ALL_OBJS_UT) $(LDFLAGS)
-
-install: $(BUILD_EXE)
 ifndef (DEBUG)
 	$(STRIP) $(BUILD_EXE)
 endif
+
+$(BUILD_EXE_UT): $(ALL_OBJS_UT)
+	$(CXX) -o $(BUILD_EXE_UT) $(CXXFLAGS) $(ALL_OBJS_UT) $(LDFLAGS)
+ifndef (DEBUG)
+	$(STRIP) $(BUILD_EXE_UT)
+endif
+
+install: $(BUILD_EXE)
 	$(INSTALL) -d "$(STAGEDIR)/$(PREFIX)/bin"
 	$(INSTALL) $(BUILD_EXE) "$(STAGEDIR)/$(PREFIX)/bin"
 
