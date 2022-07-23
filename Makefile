@@ -42,10 +42,6 @@ DOCBOOKGEN=xsltproc
 MEMCHECK=valgrind --leak-check=yes
 	# --leak-check=full --show-leak-kinds=all
 
-ifndef DEBUG
-STRIP_TARGET=install-strip
-endif
-
 # all internal file names (sources, module subdirs, build dirs, ...) must be WITHOUT space!
 # (i.e. every relative path from project-dir must be space-less ...)
 # the project-dir itself can contain space, or any path leading up to it
@@ -191,12 +187,12 @@ $(BUILD_EXE): $(ALL_OBJS)
 $(BUILD_EXE_UT): $(ALL_OBJS_UT)
 	$(CXX) -o $(BUILD_EXE_UT) $(CXXFLAGS) $(ALL_OBJS_UT) $(LDFLAGS)
 
-install: $(BUILD_EXE) $(STRIP_TARGET)
+install: $(BUILD_EXE)
+ifndef (DEBUG)
+	$(STRIP) $(BUILD_EXE)
+endif
 	$(INSTALL) -d "$(STAGEDIR)/$(PREFIX)/bin"
 	$(INSTALL) $(BUILD_EXE) "$(STAGEDIR)/$(PREFIX)/bin"
-
-install-strip:
-	$(STRIP) $(BUILD_EXE)
 
 uninstall:
 	$(UNINSTALL) "$(STAGEDIR)/$(PREFIX)/bin/$(EXE_BASE_NAME)"
