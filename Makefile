@@ -5,7 +5,6 @@
 # added code coverage targets and variables by Ped7g [2019-07-22]
 
 ## Some examples of my usage of this Makefile:
-# make DEBUG=1					- to get DEBUG build
 # make tests 					- to run the CI test+example script runner
 # make memcheck TEST=misc DEBUG=1		- to use valgrind on assembling sub-directory "misc" in tests
 # make PREFIX=~/.local install			- to install release version into ~/.local/bin/
@@ -14,13 +13,8 @@
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
 # make CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS='-DNDEBUG -O2 -Wall -static -DUSE_LUA -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_LUABRIDGE) -I$(SUBDIR_CRC32C)' LDFLAGS=''	- to cross compile win exe on my linux box with the linux Makefile
 # make CFLAGS_EXTRA='-m32' LDFLAGS='-ldl -m32'  - to builds 32b linux executable
-# make CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
-# make CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
-
-# set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
-CC?=cc
-CXX?=c++
-BASH?=/usr/bin/env bash
+# make KEEP_SYMBOLS=1 CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
+# make KEEP_SYMBOLS=1 CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
 
 # Use LUA (system-wide or bundled, depending on USE_BUNDLED_LUA)
 USE_LUA?=1
@@ -34,12 +28,23 @@ STAGEDIR?=
 # Where to install resulting files
 PREFIX?=/usr/local
 
+# define DEBUG=1 for debug build
+DEBUG?=
+
+ifdef DEBUG
+KEEP_SYMBOLS?=$(DEBUG)
+endif
+
+# set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
+CC?=cc
+CXX?=c++
+BASH?=/usr/bin/env bash
 STRIP?=strip
 INSTALL?=install -c
-UNINSTALL=rm -vf
-REMOVEDIR=rm -vdf
-DOCBOOKGEN=xsltproc
-MEMCHECK=valgrind --leak-check=yes
+UNINSTALL?=rm -vf
+REMOVEDIR?=rm -vdf
+DOCBOOKGEN?=xsltproc
+MEMCHECK?=valgrind --leak-check=yes
 	# --leak-check=full --show-leak-kinds=all
 
 # all internal file names (sources, module subdirs, build dirs, ...) must be WITHOUT space!
@@ -183,13 +188,13 @@ $(OBJS): $(wildcard $(SUBDIR_BASE)/*.h)
 
 $(BUILD_EXE): $(ALL_OBJS)
 	$(CXX) -o $(BUILD_EXE) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
-ifndef (DEBUG)
+ifndef KEEP_SYMBOLS
 	$(STRIP) $(BUILD_EXE)
 endif
 
 $(BUILD_EXE_UT): $(ALL_OBJS_UT)
 	$(CXX) -o $(BUILD_EXE_UT) $(CXXFLAGS) $(ALL_OBJS_UT) $(LDFLAGS)
-ifndef (DEBUG)
+ifndef KEEP_SYMBOLS
 	$(STRIP) $(BUILD_EXE_UT)
 endif
 
