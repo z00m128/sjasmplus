@@ -1,5 +1,6 @@
 task:
   name: Linux gcc 5/9/latest builds
+  skip: "changesIncludeOnly('docs/*')"
   env:
     CIRRUS_CLONE_DEPTH: 1
     CIRRUS_CLONE_SUBMODULES: true
@@ -20,9 +21,11 @@ task:
 
 pipe:
   name: coveralls.io coverage report (linux gcc6)
-  #depends_on: makefile_build  ## saves some resources in case regular build fails, but that's rare
   # check if this is ped7g's repository (the encrypted token belongs to his repo)
   only_if: $CIRRUS_REPO_OWNER == 'ped7g'
+  skip: $CIRRUS_PR
+  skip: "changesIncludeOnly('docs/*')"
+  depends_on: macos  ## saves some resources in case macos build fails (usually first to pass)
   env:
     # needs full clone to calculate revision number from git
     CIRRUS_CLONE_DEPTH: 0
@@ -57,6 +60,7 @@ pipe:
 # other windows images by Cirrus CI: https://hub.docker.com/r/cirrusci/windowsservercore/tags
 task:
   name: windows mingw build
+  skip: "changesIncludeOnly('docs/*')"
   env:
     CIRRUS_CLONE_DEPTH: 1
     CIRRUS_CLONE_SUBMODULES: true
@@ -86,6 +90,7 @@ task:
 
 task:
   name: FreeBSD clang build (with unit tests)
+  skip: "changesIncludeOnly('docs/*')"
   env:
     CIRRUS_CLONE_DEPTH: 1
     CIRRUS_CLONE_SUBMODULES: true
@@ -111,6 +116,7 @@ task:
 
 task:
   name: MacOS default CC build (with unit tests)
+  alias: macos
   env:
     CIRRUS_CLONE_DEPTH: 1
     CIRRUS_CLONE_SUBMODULES: true
