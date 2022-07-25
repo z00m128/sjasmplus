@@ -181,6 +181,19 @@ static void DeviceAmstradCPC6128(CDevice** dev, CDevice* parent, aint ramtop) {
 	initRegularSlotDevice(*dev, 0x4000, 4, 8, initialPages);
 }
 
+static bool SetUserDefinedDevice(const char* id, CDevice** dev, CDevice* parent, aint ramtop) {
+	auto findIt = std::find_if(
+		DefDevices.begin(), DefDevices.end(),
+		[&](const CDeviceDef* el) { return 0 == strcasecmp(id, el->getID()); }
+	);
+	if (DefDevices.end() == findIt) return false;	// not found
+	const CDeviceDef & def = **findIt;
+	if (ramtop) WarningById(W_NO_RAMTOP);
+	*dev = new CDevice(def.getID(), parent);
+	initRegularSlotDevice(*dev, def.SlotSize, def.SlotsCount, def.PagesCount, def.initialPages);
+	return true;
+}
+
 bool SetDevice(const char *const_id, const aint ramtop) {
 	CDevice** dev;
 	CDevice* parent = nullptr;
@@ -188,11 +201,13 @@ bool SetDevice(const char *const_id, const aint ramtop) {
 		// ^ argument is const because of lua bindings
 
 	if (!id || cmphstr(id, "none")) {
-		DeviceID = 0; return true;
+		DeviceID = nullptr;
+		Device = nullptr;
+		return true;
 	}
 
 	if (!DeviceID || strcmp(DeviceID, id)) {	// different device than current, change to it
-		DeviceID = 0;
+		DeviceID = nullptr;
 		dev = &Devices;
 		// search for device
 		while (*dev) {
@@ -225,7 +240,7 @@ bool SetDevice(const char *const_id, const aint ramtop) {
 				DeviceAmstradCPC464(dev, parent, ramtop);
 			} else if (cmphstr(id, "amstradcpc6128")) {
 				DeviceAmstradCPC6128(dev, parent, ramtop);
-			} else {
+			} else if (!SetUserDefinedDevice(id, dev, parent, ramtop)) {
 				return false;
 			}
 		}
@@ -259,21 +274,31 @@ bool SetDevice(const char *const_id, const aint ramtop) {
 	return true;
 }
 
+const char* DEVICE_NONE_ID = "NONE";
+
 const char* GetDeviceName() {
-	if (!DeviceID) {
-		return (char *)"NONE";
-	} else {
-		return DeviceID;
-	}
+	return DeviceID ? DeviceID : DEVICE_NONE_ID;
+}
+
+std::vector<CDeviceDef*> DefDevices;
+
+CDeviceDef::CDeviceDef(const char* name, aint slot_size, aint page_count)
+	: SlotSize(slot_size), SlotsCount((0x10000 + slot_size - 1) / slot_size), PagesCount(page_count) {
+	assert(name);
+	ID = STRDUP(name);
+}
+
+CDeviceDef::~CDeviceDef() {
+	free(ID);
 }
 
 CDevice::CDevice(const char *name, CDevice *parent)
-	: Next(NULL), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0),
+	: Next(nullptr), SlotsCount(0), PagesCount(0), Memory(nullptr), ZxRamTop(0), CurrentSlot(0),
 	previousSlotI(0), previousSlotOpt(CDeviceSlot::ESlotOptions::O_NONE), limitExceeded(false) {
 	ID = STRDUP(name);
 	if (parent) parent->Next = this;
-	for (auto & slot : Slots) slot = NULL;
-	for (auto & page : Pages) page = NULL;
+	for (auto & slot : Slots) slot = nullptr;
+	for (auto & page : Pages) page = nullptr;
 }
 
 CDevice::~CDevice() {
@@ -285,12 +310,12 @@ CDevice::~CDevice() {
 }
 
 void CDevice::AddSlot(int32_t adr, int32_t size) {
-	if (MAX_SLOT_N == SlotsCount) ErrorInt("Can't add more slots, already at max", MAX_SLOT_N, FATAL);
+	if (CDeviceDef::MAX_SLOT_N == SlotsCount) ErrorInt("Can't add more slots, already at max", CDeviceDef::MAX_SLOT_N, FATAL);
 	Slots[SlotsCount++] = new CDeviceSlot(adr, size);
 }
 
 void CDevice::AddPage(byte* memory, int32_t size) {
-	if (MAX_PAGE_N == PagesCount) ErrorInt("Can't add more pages, already at max", MAX_PAGE_N, FATAL);
+	if (CDeviceDef::MAX_PAGE_N == PagesCount) ErrorInt("Can't add more pages, already at max", CDeviceDef::MAX_PAGE_N, FATAL);
 	Pages[PagesCount] = new CDevicePage(memory, size, PagesCount);
 	PagesCount++;
 }
@@ -357,7 +382,7 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 		// if still in the same slot and within boundaries, we are done
 		if (i == previousSlotI && realAddr < S->Address + S->Size) return;
 		// crossing into other slot, check options for special functionality of old slot
-		if (S->Address + S->Size <= realAddr) MemoryPointer = NULL; // you're not writing there
+		if (S->Address + S->Size <= realAddr) MemoryPointer = nullptr; // you're not writing there
 		switch (previousSlotOpt) {
 			case CDeviceSlot::O_ERROR:
 				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded) {
@@ -406,11 +431,11 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 		previousSlotOpt = S->Option;
 		return;
 	}
-	Error("CheckPage(..): please, contact the author of this program.", NULL, FATAL);
+	Error("CheckPage(..): please, contact the author of this program.", nullptr, FATAL);
 }
 
 bool CDevice::SetSlot(int slotNumber) {
-	if (slotNumber < 0 || SlotsCount <= slotNumber || NULL == Slots[slotNumber]) return false;
+	if (slotNumber < 0 || SlotsCount <= slotNumber || nullptr == Slots[slotNumber]) return false;
 	CurrentSlot = slotNumber;
 	return true;
 }
@@ -448,7 +473,7 @@ CDevicePage::CDevicePage(byte* memory, int32_t size, int number)
 }
 
 CDeviceSlot::CDeviceSlot(int32_t adr, int32_t size)
-	: Address(adr), Size(size), Page(NULL), InitialPage(-1), Option(O_NONE) {
+	: Address(adr), Size(size), Page(nullptr), InitialPage(-1), Option(O_NONE) {
 }
 
 CDeviceSlot::~CDeviceSlot() {

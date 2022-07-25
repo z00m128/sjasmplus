@@ -1,0 +1,102 @@
+defdevice_coverage.asm(12): error: [DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]: DEFDEVICE invalidId
+defdevice_coverage.asm(13): error: [DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]: DEFDEVICE invalidId,
+defdevice_coverage.asm(14): error: [DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]: DEFDEVICE invalidId, $10000
+defdevice_coverage.asm(15): error: [DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]: DEFDEVICE invalidId, $10000,
+defdevice_coverage.asm(18): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1 or more: DEFDEVICE invalidId, $10001, 256
+defdevice_coverage.asm(19): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1 or more: DEFDEVICE invalidId, 255, 256
+defdevice_coverage.asm(20): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1 or more: DEFDEVICE invalidId, $10000, 0
+defdevice_coverage.asm(21): error: [DEFDEVICE] invalid initial page: 4
+defdevice_coverage.asm(24): error: [DEFDEVICE] device with such ID is already defined: LIKEZX48
+# file opened: defdevice_coverage.asm
+ 1    0000                  ; correct syntax
+ 2    0000                  DEFDEVICE LikeZx48, $4000, 4, 0, 1, 2, 3
+ 3    0000                  DEFDEVICE LikeZxNext, $2000, 96
+ 4    0000
+ 5    0000                  ; correct syntax, but not defined in first pass - gets silently ignored
+ 6    0000                  IF 1 < 3
+ 7    0000                      DEFDEVICE tooLateId, $4000, 4
+ 8    0000                  ENDIF
+ 9    0000
+10    0000                  ; invalid syntax, missing arguments
+defdevice_coverage.asm(11): error: [DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]: DEFDEVICE
+11    0000                  DEFDEVICE
+12    0000                  DEFDEVICE invalidId
+13    0000                  DEFDEVICE invalidId,
+14    0000                  DEFDEVICE invalidId, $10000
+15    0000                  DEFDEVICE invalidId, $10000,
+16    0000
+17    0000                  ; invalid arguments
+18    0000                  DEFDEVICE invalidId, $10001, 256
+19    0000                  DEFDEVICE invalidId, 255, 256
+20    0000                  DEFDEVICE invalidId, $10000, 0
+21    0000                  DEFDEVICE invalidPage, $4000, 4, 1, 4, 2, 3
+22    0000
+23    0000                  ; re-definition of already defined ID
+24    0000                  DEFDEVICE LIKEZX48, $4000, 8, 2, 3, 4, 5
+25    0000
+26    0000                  ; try to switch to mis-defined devices (errors expected)
+defdevice_coverage.asm(27): error: [DEVICE] Invalid parameter: tooLateId
+27    0000                  DEVICE tooLateId
+defdevice_coverage.asm(28): error: [DEVICE] Invalid parameter: invalidId
+28    0000                  DEVICE invalidId
+29    0000
+30    0000                  ; try to switch to valid user defined devices
+31    0000                  DEVICE LIKEZX48
+32    0000                  DEVICE LIKEZXNEXT
+33    0000
+34    0000                  ; MMU when it runs out of pages
+35    0000                  DEVICE LIKEZX48
+defdevice_coverage.asm(36): error: [MMU] Requested page(s) must be in range 0..3
+36    0000                  MMU 0 3, 2
+37    0000                  MMU 0 n, 3, $3FFF
+38    3FFF 01               DB $01
+defdevice_coverage.asm(39): error: No more memory pages to map next one into slot: 0
+39    4000                  ; error about no more pages to map
+40    4000                  ;(even when there is no byte emit... because address wrap-around happens any way for listing at least)
+41    4000
+42    4000                  ; older SLOT/PAGE
+defdevice_coverage.asm(43): error: [SLOT] Slot number must be in range 0..3, or exact starting address of slot
+43    4000                  SLOT 4
+defdevice_coverage.asm(44): error: [PAGE] Page number must be in range 0..3: 4
+44    4000                  PAGE 4
+45    4000
+defdevice_coverage.asm(46): warning[noramtop]: current device doesn't init memory in any way (RAMTOP is ignored)
+46    4000                  DEVICE LIKEZX48, $8765  ; ramtop warning
+47    4000
+48    4000                  ; non-divisible slot size are technically possible, but they may cause few glitches here and there
+49    4000                  DEFDEVICE weirdSlotSz, $E000, 4
+50    4000
+51    4000                  DEVICE weirdslotsz
+52    4000                  ORG $0000
+52    0000                ASSERT 0 == $$
+53    0000                  ORG $E000
+53    E000                ASSERT 1 == $$
+54    E000                  SLOT 0
+54    E000                PAGE 2
+54    E000                ORG $0000
+54    0000                ASSERT 2 == $$
+55    0000                  SLOT 1
+55    0000                PAGE 1
+55    0000                ORG $E000
+55    E000                ASSERT 1 == $$
+defdevice_coverage.asm(56): error: [SLOT] Slot number must be in range 0..1, or exact starting address of slot
+56    E000                  SLOT 2
+57    E000                  MMU $E000, 3, $FFFE
+58    FFFE                  ASSERT 3 == $$
+59    FFFE 00               nop
+60    FFFF 3E 01            ld a,1
+61    0001              long_ptr_label:
+62    0001                  ; due to weird slot size, this doesn't report 64ki boundary crossing and works a bit like --longptr mode
+63    0001                  ASSERT $10001 == $ && 3 == $$
+64    0001                  ; but trying to set such ORG directly will end with truncated ORG back to slot 0
+defdevice_coverage.asm(65): warning: value 0x10001 is truncated to 16bit value: 0x0001
+65    0001                  ORG $10001
+66    0001              truncated_label:
+67    0001                  ASSERT 2 == $$
+68    0001
+# file closed: defdevice_coverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x10001 X long_ptr_label
+0x0001 X truncated_label

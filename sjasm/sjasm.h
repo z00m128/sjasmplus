@@ -116,6 +116,7 @@ namespace Options {
 		//options[n] must contain nullptr (and it must be valid index)
 } // eof namespace Options
 
+extern std::vector<CDeviceDef*> DefDevices;
 extern CDevice *Devices;
 extern CDevice *Device;
 extern CDevicePage *Page;

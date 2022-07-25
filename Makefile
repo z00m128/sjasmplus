@@ -5,7 +5,6 @@
 # added code coverage targets and variables by Ped7g [2019-07-22]
 
 ## Some examples of my usage of this Makefile:
-# make DEBUG=1					- to get DEBUG build
 # make tests 					- to run the CI test+example script runner
 # make memcheck TEST=misc DEBUG=1		- to use valgrind on assembling sub-directory "misc" in tests
 # make PREFIX=~/.local install			- to install release version into ~/.local/bin/
@@ -14,29 +13,46 @@
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
 # make CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS='-DNDEBUG -O2 -Wall -static -DUSE_LUA -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_LUABRIDGE) -I$(SUBDIR_CRC32C)' LDFLAGS=''	- to cross compile win exe on my linux box with the linux Makefile
 # make CFLAGS_EXTRA='-m32' LDFLAGS='-ldl -m32'  - to builds 32b linux executable
-# make CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
-# make CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
+# make KEEP_SYMBOLS=1 CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
+# make KEEP_SYMBOLS=1 CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
+
+# Use LUA (system-wide or bundled, depending on USE_BUNDLED_LUA)
+USE_LUA?=1
+
+# Use bundled LUA
+USE_BUNDLED_LUA?=1
+
+# Where to stage files when building a package
+STAGEDIR?=
+
+# Where to install resulting files
+PREFIX?=/usr/local
+
+# define DEBUG=1 for debug build
+DEBUG?=
+
+ifdef DEBUG
+KEEP_SYMBOLS?=$(DEBUG)
+endif
 
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
-USE_LUA=1
-CC=gcc
-CXX=g++
-BASH=/usr/bin/env bash
-
-PREFIX=/usr/local
-INSTALL=install -c
-UNINSTALL=rm -vf
-REMOVEDIR=rm -vdf
-DOCBOOKGEN=xsltproc
-MEMCHECK=valgrind --leak-check=yes
+CC?=cc
+CXX?=c++
+BASH?=/usr/bin/env bash
+STRIP?=strip
+INSTALL?=install -c
+UNINSTALL?=rm -vf
+REMOVEDIR?=rm -vdf
+DOCBOOKGEN?=xsltproc
+MEMCHECK?=valgrind --leak-check=yes
 	# --leak-check=full --show-leak-kinds=all
 
 # all internal file names (sources, module subdirs, build dirs, ...) must be WITHOUT space!
 # (i.e. every relative path from project-dir must be space-less ...)
 # the project-dir itself can contain space, or any path leading up to it
 
-EXE_BASE_NAME := sjasmplus
-BUILD_DIR := build
+EXE_BASE_NAME=sjasmplus
+BUILD_DIR=build
 
 SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua5.4
@@ -45,43 +61,46 @@ SUBDIR_CRC32C=crc32c
 SUBDIR_DOCS=docs
 SUBDIR_COV=coverage
 
-# TODO too many lua5.4 warnings: -pedantic removed
-CFLAGS := -Wall -DMAX_PATH=PATH_MAX -I$(SUBDIR_CRC32C)
-ifdef USE_LUA
-CFLAGS += -DUSE_LUA -DLUA_USE_LINUX -I$(SUBDIR_LUA) -I$(SUBDIR_LUABRIDGE)
+ifeq ($(USE_BUNDLED_LUA), 1)
+_LUA_CPPFLAGS=-I$(SUBDIR_LUA)
 endif
-CFLAGS += $(CFLAGS_EXTRA)
 
-LDFLAGS :=
-ifdef USE_LUA
-LDFLAGS += -ldl
+# TODO too many lua5.4 warnings: -pedantic removed
+CPPFLAGS+=-Wall -DMAX_PATH=PATH_MAX -I$(SUBDIR_CRC32C)
+ifeq ($(USE_LUA), 1)
+CPPFLAGS+=-DUSE_LUA -DLUA_USE_LINUX $(_LUA_CPPFLAGS) -I$(SUBDIR_LUABRIDGE)
+endif
+
+CFLAGS+=$(CFLAGS_EXTRA)
+
+ifeq ($(USE_LUA), 1)
+LDFLAGS+=-ldl
 endif
 
 ifdef DEBUG
-BUILD_DIR := $(BUILD_DIR)/debug
-CFLAGS += -g -O0
+BUILD_DIR:=$(BUILD_DIR)/debug
+CFLAGS+=-g -O0
 else
-BUILD_DIR := $(BUILD_DIR)/release
-CFLAGS += -DNDEBUG -O2
-# for Linux (added strip flag)
-LDFLAGS += -s
+BUILD_DIR:=$(BUILD_DIR)/release
+CFLAGS+=-DNDEBUG -O2
 endif
 
 # C++ flags (the CPPFLAGS are for preprocessor BTW, if you always wonder, like me...)
-CXXFLAGS = -std=gnu++14 $(CFLAGS)
-#full path to executable
-BUILD_EXE := $(BUILD_DIR)/$(EXE_BASE_NAME)
+CXXFLAGS?=-std=gnu++14 $(CFLAGS)
+
+# full path to executable
+BUILD_EXE=$(BUILD_DIR)/$(EXE_BASE_NAME)
 
 # UnitTest++ related values (slightly modified defaults)
 # Unit Test exe (checks for "--unittest" and runs unit tests then)
-EXE_UT_BASE_NAME := sjasm+ut
-BUILD_DIR_UT := $(BUILD_DIR)+ut
-SUBDIR_UT := unittest-cpp
-SUBDIR_TESTS := cpp-src-tests
-BUILD_EXE_UT := $(BUILD_DIR_UT)/$(EXE_UT_BASE_NAME)
+EXE_UT_BASE_NAME=sjasm+ut
+BUILD_DIR_UT=$(BUILD_DIR)+ut
+SUBDIR_UT=unittest-cpp
+SUBDIR_TESTS=cpp-src-tests
+BUILD_EXE_UT=$(BUILD_DIR_UT)/$(EXE_UT_BASE_NAME)
 
-EXE_FP := "$(abspath $(BUILD_EXE))"
-EXE_UT_FP := "$(abspath $(BUILD_EXE_UT))"
+EXE_FP="$(abspath $(BUILD_EXE))"
+EXE_UT_FP="$(abspath $(BUILD_EXE_UT))"
 
 # turns list of %.c/%.cpp files into $BUILD_DIR/%.o list
 define object_files
@@ -92,41 +111,47 @@ define object_files_ut
 endef
 
 # sjasmplus files
-SRCS := $(wildcard $(SUBDIR_BASE)/*.c) $(wildcard $(SUBDIR_BASE)/*.cpp)
-OBJS := $(call object_files,$(SRCS))
-OBJS_UT := $(call object_files_ut,$(SRCS))
+SRCS:=$(wildcard $(SUBDIR_BASE)/*.c) $(wildcard $(SUBDIR_BASE)/*.cpp)
+OBJS:=$(call object_files,$(SRCS))
+OBJS_UT:=$(call object_files_ut,$(SRCS))
 
+ifeq ($(USE_BUNDLED_LUA), 1)
 # liblua files
-LUASRCS := $(wildcard $(SUBDIR_LUA)/*.c)
-LUAOBJS := $(call object_files,$(LUASRCS))
-LUAOBJS_UT := $(call object_files_ut,$(LUASRCS))
+LUASRCS:=$(wildcard $(SUBDIR_LUA)/*.c)
+LUAOBJS:=$(call object_files,$(LUASRCS))
+LUAOBJS_UT:=$(call object_files_ut,$(LUASRCS))
+endif
 
 # crc32c files
-CRC32CSRCS := $(wildcard $(SUBDIR_CRC32C)/*.cpp)
-CRC32COBJS := $(call object_files,$(CRC32CSRCS))
-CRC32COBJS_UT := $(call object_files_ut,$(CRC32CSRCS))
+CRC32CSRCS:=$(wildcard $(SUBDIR_CRC32C)/*.cpp)
+CRC32COBJS:=$(call object_files,$(CRC32CSRCS))
+CRC32COBJS_UT:=$(call object_files_ut,$(CRC32CSRCS))
 
 # UnitTest++ files
-UTPPSRCS := $(wildcard $(SUBDIR_UT)/UnitTest++/*.cpp) $(wildcard $(SUBDIR_UT)/UnitTest++/Posix/*.cpp)
-UTPPOBJS := $(call object_files,$(UTPPSRCS))
-TESTSSRCS := $(wildcard $(SUBDIR_TESTS)/*.cpp)
-TESTSOBJS := $(call object_files_ut,$(TESTSSRCS))
+UTPPSRCS:=$(wildcard $(SUBDIR_UT)/UnitTest++/*.cpp) $(wildcard $(SUBDIR_UT)/UnitTest++/Posix/*.cpp)
+UTPPOBJS:=$(call object_files,$(UTPPSRCS))
+TESTSSRCS:=$(wildcard $(SUBDIR_TESTS)/*.cpp)
+TESTSOBJS:=$(call object_files_ut,$(TESTSSRCS))
 
-ALL_OBJS := $(OBJS) $(CRC32COBJS)
-ifdef USE_LUA
-ALL_OBJS += $(LUAOBJS)
+ALL_OBJS:=$(OBJS) $(CRC32COBJS)
+ifeq ($(USE_LUA), 1)
+ifeq ($(USE_BUNDLED_LUA), 1)
+ALL_OBJS+=$(LUAOBJS)
 endif
-ALL_OBJS_UT := $(OBJS_UT) $(CRC32COBJS_UT) $(UTPPOBJS) $(TESTSOBJS)
-ifdef USE_LUA
-ALL_OBJS_UT += $(LUAOBJS_UT)
 endif
-ALL_COVERAGE_RAW := $(patsubst %.o,%.gcno,$(ALL_OBJS_UT)) $(patsubst %.o,%.gcda,$(ALL_OBJS_UT))
+ALL_OBJS_UT=$(OBJS_UT) $(CRC32COBJS_UT) $(UTPPOBJS) $(TESTSOBJS)
+ifeq ($(USE_LUA), 1)
+ifeq ($(USE_BUNDLED_LUA), 1)
+ALL_OBJS_UT+=$(LUAOBJS_UT)
+endif
+endif
+ALL_COVERAGE_RAW:=$(patsubst %.o,%.gcno,$(ALL_OBJS_UT)) $(patsubst %.o,%.gcda,$(ALL_OBJS_UT))
 
 # GCOV options to generate coverage files
 ifdef COVERALLS_SERVICE
-GCOV_OPT := -rlp
+GCOV_OPT=-rlp
 else
-GCOV_OPT := -rlpmab
+GCOV_OPT=-rlpmab
 endif
 
 #implicit rules to compile C/CPP files into $(BUILD_DIR)
@@ -151,7 +176,7 @@ $(BUILD_DIR_UT)/%.o : %.cpp
 
 # "all" will also copy the produced binary into project root directory (to mimick old makefile)
 all: $(BUILD_EXE)
-	cp $(BUILD_EXE) $(EXE_BASE_NAME)
+	$(INSTALL) $(BUILD_EXE) $(EXE_BASE_NAME)
 
 upx: $(BUILD_EXE)
 	cp $(BUILD_EXE) $(EXE_BASE_NAME)
@@ -163,15 +188,22 @@ $(OBJS): $(wildcard $(SUBDIR_BASE)/*.h)
 
 $(BUILD_EXE): $(ALL_OBJS)
 	$(CXX) -o $(BUILD_EXE) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
+ifndef KEEP_SYMBOLS
+	$(STRIP) $(BUILD_EXE)
+endif
 
 $(BUILD_EXE_UT): $(ALL_OBJS_UT)
 	$(CXX) -o $(BUILD_EXE_UT) $(CXXFLAGS) $(ALL_OBJS_UT) $(LDFLAGS)
+ifndef KEEP_SYMBOLS
+	$(STRIP) $(BUILD_EXE_UT)
+endif
 
 install: $(BUILD_EXE)
-	$(INSTALL) $(BUILD_EXE) "$(PREFIX)/bin"
+	$(INSTALL) -d "$(STAGEDIR)/$(PREFIX)/bin"
+	$(INSTALL) $(BUILD_EXE) "$(STAGEDIR)/$(PREFIX)/bin"
 
 uninstall:
-	$(UNINSTALL) "$(PREFIX)/bin/$(EXE_BASE_NAME)"
+	$(UNINSTALL) "$(STAGEDIR)/$(PREFIX)/bin/$(EXE_BASE_NAME)"
 
 tests: $(BUILD_EXE_UT)
 ifdef TEST

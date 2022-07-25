@@ -341,6 +341,8 @@ void FreeRAM() {
 	if (globalDeviceID) {
 		free(globalDeviceID);	globalDeviceID = nullptr;
 	}
+	for (CDeviceDef* deviceDef : DefDevices) delete deviceDef;
+	DefDevices.clear();
 	lijstp = NULL;		// do not delete this, should be released by owners of DUP/regular macros
 	free(vorlabp);		vorlabp = NULL;
 	LabelTable.RemoveAll();

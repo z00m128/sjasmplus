@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.20.0 Documentation [2022-06-13]</title>
+  <title>SjASMPlus 1.20.1 Documentation [2022-07-29]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -204,12 +204,13 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.20.1</term>
+            <term>29.7.2022 - 1.20.1</term>
 
             <listitem>
               <synopsis>- parse decimal <link linkend="s_numeric">numeric constants</link> with warning (for easier Lua 5.4 life)
 - added <link linkend="po_saveamsdos">`SAVEAMSDOS`</link> (like SAVEBIN with AMSDOS header)
 - added "smart" <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels: `abc+*: or 123`
+- added <link linkend="po_defdevice">`DEFDEVICE`</link> to define custom devices
 </synopsis>
             </listitem>
           </varlistentry>
@@ -1905,12 +1906,18 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
           </varlistentry>
 
           <varlistentry>
-            <term>DEFDEVICE &lt;deviceid&gt;</term> <!-- intentionally removed from index -->
+            <term>DEFDEVICE<indexterm id="po_defdevice"><primary>DEFDEVICE</primary><seealso>DEVICE</seealso></indexterm>
+              &lt;deviceid&gt;, &lt;slot_size $100..$10000&gt;, &lt;page_count 1..1024&gt;[, &lt;slot_0_initial_page&gt;[, ...]]</term>
 
             <listitem>
-              <para>Sorry, not available yet. If you want to see new device in
-              SjASMPlus, please, <link linkend="feedback">write
-              us</link>.</para>
+              <para>(since v1.20.1) Add custom device definition. The 64ki Z80 address space is divided evenly by <code>slot_size</code>
+                to form N slots and the total device memory is <code>slot_size * page_count</code> bytes.</para>
+
+              <para>The initial pages are implicitly going from <code>0</code> to <code>page_count-1</code>
+                (repeating page <code>page_count-1</code> for remaining slots when there's not enough pages), but you
+                can specify initial page layout explicitly.</para>
+
+              <para>Use <link linkend="po_device">DEVICE</link> to select the newly defined device.</para>
             </listitem>
           </varlistentry>
 
@@ -2008,7 +2015,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term>DEVICE<indexterm id="po_device"><primary>DEVICE</primary><seealso>MMU</seealso><seealso>ZXSPECTRUM128</seealso><seealso>ZXSPECTRUMNEXT</seealso></indexterm> &lt;deviceid&gt;[, &lt;RAMTOP&gt;]</term>
+            <term>DEVICE<indexterm id="po_device"><primary>DEVICE</primary><seealso>MMU</seealso><seealso>ZXSPECTRUM128</seealso><seealso>ZXSPECTRUMNEXT</seealso><seealso>DEFDEVICE</seealso></indexterm> &lt;deviceid&gt;[, &lt;RAMTOP&gt;]</term>
 
             <listitem>
               <para>Enables <link linkend="s_realdevice">real device emulation
@@ -4502,8 +4509,8 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
       -- you can use either `math.floor()` function, or integer
       -- operators like integer divide `//` or left shift `1&lt;&lt;7`
 
-    -- the floating point "12.0" values may get some support in sjasmplus parser in future
-    -- but 1.20.0 errors out on these, so you can patch your lua scripts meanwhile
+    -- the floating point values (like "12.0") are silently truncated since v1.20.1 (to "12"),
+    -- but v1.20.0 errors out on these, unless you patch the lua script to produce integers
   ENDLUA
 </programlisting></para>
         </example>
