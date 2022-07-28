@@ -211,6 +211,7 @@
 - added <link linkend="po_saveamsdos">`SAVEAMSDOS`</link> (like SAVEBIN with AMSDOS header)
 - added "smart" <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels: `abc+*: or 123`
 - added <link linkend="po_defdevice">`DEFDEVICE`</link> to define custom devices
+- Makefile cleanup
 </synopsis>
             </listitem>
           </varlistentry>
