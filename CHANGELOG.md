@@ -4,6 +4,7 @@
 - added [`SAVEAMSDOS`](https://z00m128.github.io/sjasmplus/documentation.html#po_saveamsdos) (like SAVEBIN with AMSDOS header)
 - added "smart" [SMC offset](https://z00m128.github.io/sjasmplus/documentation.html#s_labels) syntax for self-modify-code labels: `abc+*: or 123`
 - added [`DEFDEVICE`](https://z00m128.github.io/sjasmplus/documentation.html#po_defdevice) to define custom devices
+- Makefile cleanup
 
 ## [1.20.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.20.0) - 13.6.2022
 - Lua: [upgrade to 5.4](https://z00m128.github.io/sjasmplus/documentation.html#c_lua_scripting), replacing tolua++ bindings with LuaBridge2.6 library, extending some bindings
