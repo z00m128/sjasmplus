@@ -1,5 +1,5 @@
 # file opened: macro_errors_reporting.asm
-macro_errors_reporting.asm(1): error: [MACRO] Illegal macroname
+macro_errors_reporting.asm(1): error: [MACRO] Illegal macroname:
  1    0000                      MACRO
  2    0000
  3    0000              ; label-named macros

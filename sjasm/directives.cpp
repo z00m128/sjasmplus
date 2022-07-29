@@ -1728,12 +1728,17 @@ static void dirMACRO() {
 		Error("[MACRO] No macro definitions allowed here", NULL, SUPPRESS);
 		return;
 	}
-	char* lpLabel = LastParsedLabel;	// modifiable copy of global buffer pointer
-	// get+validate macro name either from label on same line or from following line
-	char* n = GetID(LastParsedLabelLine == CompiledCurrentLine ? lpLabel : lp);
-	if (n) MacroTable.Add(n, lp);
-	else {
-		Error("[MACRO] Illegal macroname");
+	// check if the name of macro is defined at beginning of the line ("label" name)
+	const bool labelName = LastParsedLabelLine == CompiledCurrentLine;
+	assert(!labelName || LastParsedLabel);
+	char* lpLabel = labelName ? LastParsedLabel : lp;	// temporary pointer to advance by GetID
+	char* n = GetID(lpLabel);							// get+validate macro name
+	if (*lpLabel && !White(*lpLabel)) n = nullptr;		// if there's unexpected trailing char, report illegal name
+	if (n) {
+		if (!labelName) lp = lpLabel;					// name was after MACRO keyword, advance global `lp` (to parse arguments)
+		MacroTable.Add(n, lp);
+	} else {
+		Error("[MACRO] Illegal macroname", labelName ? LastParsedLabel : lp);	// report what was fed into GetID
 		SkipToEol(lp);
 	}
 }

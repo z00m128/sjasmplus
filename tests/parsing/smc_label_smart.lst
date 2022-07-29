@@ -306,7 +306,7 @@ smc_label_smart.asm(233): error: Temporary label not found: 124B
 234   817D
 smc_label_smart.asm(235): error: unresolved smart-SMC symbol (no significant target)
 smc_label_smart.asm(235): error: Macro name can't use SMC-offset
-smc_label_smart.asm(235): error: [MACRO] Illegal macroname
+smc_label_smart.asm(235): error: [MACRO] Illegal macroname:
 235   817D              lL+*    MACRO
 236   817D 00                       nop
 smc_label_smart.asm(237): error: [ENDM] End macro without macro

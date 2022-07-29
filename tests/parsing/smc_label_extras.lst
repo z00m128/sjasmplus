@@ -44,7 +44,7 @@ smc_label_extras.asm(30): error: Temporary label not found: 124B
 30    8010 18 00        124+1:  jr  124B
 31    8012
 smc_label_extras.asm(32): error: Macro name can't use SMC-offset
-smc_label_extras.asm(32): error: [MACRO] Illegal macroname
+smc_label_extras.asm(32): error: [MACRO] Illegal macroname:
 32    8012              lN+1    MACRO
 33    8012 00                       nop
 smc_label_extras.asm(34): error: [ENDM] End macro without macro

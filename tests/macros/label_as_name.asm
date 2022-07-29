@@ -54,3 +54,7 @@ newInModule     MACRO arg1?
 
                 MACRO #invalidClassic2 arg1?    ; no need for "ENDM" due to error
 #invalidNew2    MACRO arg1?
+
+trailingChar$   MACRO arg1
+
+                MACRO trailingChar$ arg1

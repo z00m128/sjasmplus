@@ -104,16 +104,22 @@ label_as_name.asm(48): error: Unrecognized instruction: nameOrArg2?
 49    00A3 20 4D 0A 00 >
 50    00A7
 51    00A7                  ;; invalid macro names
-label_as_name.asm(52): error: [MACRO] Illegal macroname
+label_as_name.asm(52): error: [MACRO] Illegal macroname:  @invalidClassic
 52    00A7                              MACRO @invalidClassic   ; no need for "ENDM" due to error
-label_as_name.asm(53): error: [MACRO] Illegal macroname
+label_as_name.asm(53): error: [MACRO] Illegal macroname: @invalidNew
 53    00A7              @invalidNew     MACRO
 54    00A7
-label_as_name.asm(55): error: [MACRO] Illegal macroname
+label_as_name.asm(55): error: [MACRO] Illegal macroname:  #invalidClassic2 arg1?
 55    00A7                              MACRO #invalidClassic2 arg1?    ; no need for "ENDM" due to error
-label_as_name.asm(56): error: [MACRO] Illegal macroname
+label_as_name.asm(56): error: [MACRO] Illegal macroname: #invalidNew2
 56    00A7              #invalidNew2    MACRO arg1?
 57    00A7
+label_as_name.asm(58): error: [MACRO] Illegal macroname: trailingChar$
+58    00A7              trailingChar$   MACRO arg1
+59    00A7
+label_as_name.asm(60): error: [MACRO] Illegal macroname:  trailingChar$ arg1
+60    00A7                              MACRO trailingChar$ arg1
+61    00A7
 # file closed: label_as_name.asm
 
 Value    Label
