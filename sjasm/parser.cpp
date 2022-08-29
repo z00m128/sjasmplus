@@ -864,6 +864,15 @@ int PrepareLine() {
 					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),
 					(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
 #endif
+			// check if there's some label at beginning of the line, skip it
+			if (islabchar(*lp)) {
+				// if directives are enabled at beginning of line, check if it is nested DUP/REPT/WHILE/EDUP...
+				if (Options::syx.IsPseudoOpBOF && ParseDirective_REPT()) return 1;
+				// skip label chars and trailing colon
+				while (islabchar(*lp)) ++lp;
+				if (':' == *lp) ++lp;
+			}
+			// catch any nested DUP/WHILE/REPT and EDUP directives
 			ParseDirective_REPT();
 			return 1;
 		}
