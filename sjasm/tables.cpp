@@ -492,8 +492,8 @@ void CLabelTable::DumpForCSpect() {
 	if (!FOPEN_ISOK(file, Options::CSpectMapFName, "w")) {
 		Error("opening file for write", Options::CSpectMapFName, FATAL);
 	}
-	const int PAGE_SIZE = Options::CSpectMapPageSize;
-	const int PAGE_MASK = PAGE_SIZE - 1;
+	const int CSD_PAGE_SIZE = Options::CSpectMapPageSize;
+	const int CSD_PAGE_MASK = CSD_PAGE_SIZE - 1;
 	const auto order = getDumpOrder(symbols);
 	for (const symbol_map_t::key_type& name: order) {
 		const symbol_map_t::mapped_type& symbol = symbols.at(name);
@@ -514,7 +514,7 @@ void CLabelTable::DumpForCSpect() {
 			// TODO: figure out when/why the implicit page number heuristic happenned and if you can detect
 			// only explicit page numbers used in EQU, and export only those
 
-		const aint longAddress = (PAGE_MASK & symbol.value) + page * PAGE_SIZE;
+		const aint longAddress = (CSD_PAGE_MASK & symbol.value) + page * CSD_PAGE_SIZE;
 		fprintf(file, "%08X %08X %02X ", 0xFFFF & symbol.value, longAddress, labelType);
 		// convert primary+local label to be "@" delimited (not "." delimited)
 		STRCPY(temp, LINEMAX, name.c_str());

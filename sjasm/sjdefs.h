@@ -94,6 +94,12 @@ struct SAlignSafeCast {
 #define PATH_MAX	4096
 #endif
 
+// not used by sjasmplus, but define it any way to prevent accidental use by code, as MUSL clib is defining it
+// https://github.com/z00m128/sjasmplus/issues/193
+#ifndef PAGE_SIZE
+#define PAGE_SIZE	4096
+#endif
+
 // include all headers
 
 #include "lua_sjasm.h"
