@@ -1,0 +1,80 @@
+# file opened: dup_index_var.asm
+ 1    0000              	MACRO filler x1, x2, y1, y2
+ 2    0000 ~            		DUP (y2 - y1), .y
+ 3    0000 ~            			DUP (x2 - x1), .x
+ 4    0000 ~            				DB x1 + .x, y1 + .y
+ 5    0000 ~            			EDUP
+ 6    0000 ~            		EDUP
+ 7    0000 ~            		IF .x	; index variable does exist after DUP with last used index (not +1 beyond it!)
+ 8    0000 ~            			DD 0xA0DED1BA	; but this is not documented and rather shouldn't be used at all
+ 9    0000 ~            		ENDIF
+10    0000              	ENDM
+11    0000
+12    0000              	filler 3, 5, 10, 12
+12    0000             >		DUP (12 - 10), .y
+12    0000             >			DUP (5 - 3), .x
+12    0000 03 0A       >				DB 3 + .x, 10 + .y
+12    0002 04 0A       >				DB 3 + .x, 10 + .y
+12    0004             >			EDUP
+12    0004             >			DUP (5 - 3), .x
+12    0004 03 0B       >				DB 3 + .x, 10 + .y
+12    0006 04 0B       >				DB 3 + .x, 10 + .y
+12    0008             >			EDUP
+12    0008             >		EDUP
+12    0008             >		IF .x	; index variable does exist after DUP with last used index (not +1 beyond it!)
+12    0008 BA D1 DE A0 >			DD 0xA0DED1BA	; but this is not documented and rather shouldn't be used at all
+12    000C             >		ENDIF
+13    000C              	filler 100, 101, 200, 201
+13    000C             >		DUP (201 - 200), .y
+13    000C             >			DUP (101 - 100), .x
+13    000C 64 C8       >				DB 100 + .x, 200 + .y
+13    000E             >			EDUP
+13    000E             >		EDUP
+13    000E             >		IF .x	; index variable does exist after DUP with last used index (not +1 beyond it!)
+13    000E ~           >			DD 0xA0DED1BA	; but this is not documented and rather shouldn't be used at all
+13    000E             >		ENDIF
+14    000E
+15    000E              	DUP 4   ,   idx			; eol comment test
+16    000E 12 00       >		DB    0x12, idx
+16    0010 12 01       >		DB    0x12, idx
+16    0012 12 02       >		DB    0x12, idx
+16    0014 12 03       >		DB    0x12, idx
+17    0016              	EDUP
+18    0016
+19    0016              main:
+20    0016              	DUP 2   ,   .idx		; eol comment test
+21    0016 23 00       >		DB    0x23, .idx
+21    0018 23 01       >		DB    0x23, .idx
+22    001A              	EDUP
+23    001A
+dup_index_var.asm(24): error: [DUP/REPT] invalid index variable name: @idx2
+24    001A              	DUP 1   ,   @idx2		; only local label prefix "." is supported for index variable name
+dup_index_var.asm(25): error: Label not found: idx2
+25    001A 34 00       >		DB    0x34, @idx2
+26    001C              	EDUP
+27    001C
+dup_index_var.asm(28): error: [DUP/REPT] invalid index variable name: !idx2
+28    001C              	DUP 1   ,   !idx2		; only local label prefix "." is supported for index variable name
+dup_index_var.asm(29): error: Label not found: idx2
+29    001C 45 00       >		DB    0x45, idx2
+30    001E              	EDUP
+31    001E
+dup_index_var.asm(32): error: [DUP] unexpected chars: .idx
+32    001E              	DUP 1 .idx				; invalid syntax, missing comma
+33    001E              	EDUP
+34    001E
+35    001E              	DUP 1 					; w/o indexVar name, eol comment test
+36    001E 03 01       >		DB idx, .idx
+37    0020              	EDUP
+38    0020
+# file closed: dup_index_var.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001   0>x
+0x0001   0>y
+0x0000   1>x
+0x0000   1>y
+0x0003   idx
+0x0016 X main
+0x0001   main.idx

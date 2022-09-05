@@ -1871,6 +1871,7 @@ static void DupWhileImplementation(bool isWhile) {
 		}
 	}
 
+	const char* indexVar = nullptr;
 	if (isWhile) {
 		condition = new CStringsList(lp);
 		if (nullptr == condition) ErrorOOM();
@@ -1909,10 +1910,17 @@ static void DupWhileImplementation(bool isWhile) {
 		if ((int) val < 0) {
 			ErrorInt("[DUP/REPT] Repeat value must be positive or zero", val, IF_FIRST); return;
 		}
+		if (comma(lp)) {
+			indexVar = GetID(lp);
+			if (nullptr == indexVar) {
+				Error("[DUP/REPT] invalid index variable name", lp, IF_FIRST);
+				SkipToEol(lp);
+			}
+		}
 	}
 
-	RepeatStack.emplace(val, condition, new CStringsList(lp));
-	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, FATAL);	// Ped7g: should have been empty!
+	RepeatStack.emplace(val, condition, new CStringsList(indexVar ? indexVar : ""));
+	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, SUPPRESS);
 }
 
 static void dirDUP() {
@@ -1974,10 +1982,17 @@ static void dirEDUP() {
 	++lijst;
 	assert(!sourcePosStack.empty());
 	const TextFilePos oSourcePos = sourcePosStack.back();
-	while (shouldRepeat(dup)) {
+	aint currentRepeatIndex = 0;
+	while (IsRunning && dup.Lines && shouldRepeat(dup)) {
 		sourcePosStack.back() = dup.sourcePos;
-		donotlist=1;	// skip first empty line (where DUP itself is parsed)
 		lijstp = dup.Lines;
+		assert(lijstp);
+		if (*lijstp->string) {
+			// if the DUP has index variable, the first "line" is the variable name, set it up to current index
+			std::unique_ptr<char[]> indexVar(ValidateLabel(lijstp->string,  false));
+			if (indexVar.get()) LabelTable.Insert(indexVar.get(), currentRepeatIndex++, LABEL_IS_DEFL);
+		}
+		lijstp = lijstp->next;	// skip first empty line / indexVar name
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
 			if (lijstp->source.line) sourcePosStack.back() = lijstp->source;
 			STRCPY(line, LINEMAX, lijstp->string);
