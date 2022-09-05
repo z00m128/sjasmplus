@@ -98,7 +98,7 @@ The official binary "exe" is built with MinGW toolchain and that's recommended o
 There are few extra recommendations if you want to join sjasmplus development and use all the features:
 
 - work with git clone of repository ideally, so you can easily update to latest source base, track your changes or review changes of other developers
-- within the git repository init and update the submodules too, this will clone the UnitTest++ and LuaBridge2.6 repository which are required to build sjasmplus and unit tests (`git submodule init`,  `git submodule update`)
+- within the git repository init and update the submodules too, this will clone the UnitTest++ and LuaBridge2.8 repository which are required to build sjasmplus and unit tests (`git submodule init`,  `git submodule update`)
 - linux + gcc + Makefile is the config of Ped7g, having access to the same config to re-create his workflow locally may be of help (when troubleshooting some issue or comparing results with different platform)
 - but having different local configuration would be very helpful to keep the source base cross-platform and in good shape
 - you can check `.cirrus.yml` file and accompanying scripts/batch-files in `ContinuousIntegration` folder to see how different environments and different build tasks are prepared and executed. If you are not familiar with CI setup and configuration yet, you should take at least a brief glimpse on it, even if you want just to contribute small patch to the sjasmplus, because any pull request will be scrutinized by the CI build system automatically.

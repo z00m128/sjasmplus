@@ -204,6 +204,18 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.20.2</term>
+
+            <listitem>
+              <synopsis>- added optional second argument for <link linkend="po_dup">`DUP`</link> to have index variable
+- fixing variable name-clash when compiling against musl-clib
+- LuaBridge updated to version 2.8
+- minor bugfixes/improvements in parser in specific edge cases
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>29.7.2022 - 1.20.1</term>
 
             <listitem>
@@ -2174,11 +2186,14 @@ will output to the console strings:
           </varlistentry>
 
           <varlistentry>
-            <term>DUP<indexterm id="po_dup"><primary>DUP</primary></indexterm> &lt;count&gt;</term>
+            <term>DUP<indexterm id="po_dup"><primary>DUP</primary></indexterm> &lt;count&gt;[, &lt;index_variable&gt;]</term>
 
             <listitem>
               <para>DUP specifies the number of times to generate the
-              following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.<example>
+              following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.</para>
+              <para>Optional second argument (since v1.20.2) is label name to have repetition index
+                available inside the block (values 0, 1, 2, 3, ...).
+               <example>
                   <title></title>
 
                   <para><programlisting>    DUP 3 ; zero count would skip whole block
@@ -2881,7 +2896,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term>REPT<indexterm id="po_rept"><primary>REPT</primary><see>DUP</see></indexterm> &lt;count&gt;</term>
+            <term>REPT<indexterm id="po_rept"><primary>REPT</primary><see>DUP</see></indexterm> &lt;count&gt;[, &lt;index_variable&gt;]</term>
 
             <listitem>
               <para>Synonym of <link linkend="po_dup">DUP</link>. There is also synonym ENDR to end REPT block (EDUP works too).</para>
