@@ -754,39 +754,55 @@ namespace Z80 {
 
 	static void OpCode_EX() {
 		int e[] { -1, -1, -1, -1 };
-		Z80Reg reg = GetRegister(lp);
-		switch (reg) {
+		// parse first and optional second register, swap them for "(sp)" to have sp always first
+		Z80Reg reg1 = GetRegister(lp), reg2 = Z80_UNK;
+		if (Z80_SP == reg1) {
+			reg1 = Z80_UNK;		// naked SP should not work, must be in brackets
+		} else if (Z80_UNK == reg1 && BT_NONE != OpenBracket(lp) && Z80_SP == GetRegister(lp) && CloseBracket(lp)) {
+			reg1 = Z80_SP;						// using SP register constant for MEM_SP situation
+		}
+		bool has_comma = comma(lp);
+		if (has_comma) {
+			reg2 = GetRegister(lp);
+			if (Z80_AF == reg2 && *lp == '\'') ++lp;
+			if (Z80_UNK == reg2 && BT_NONE != OpenBracket(lp) && Z80_SP == GetRegister(lp) && CloseBracket(lp)) {
+				// "(sp)" at right side, swap it with reg1 (official Zilog syntax)
+				reg2 = reg1;
+				reg1 = Z80_SP;					// using SP register constant for MEM_SP situation
+			}
+		}
+		switch (reg1) {
 		case Z80_AF:
 			if (Options::IsI8080) break;
-			if (comma(lp)) {
-				if (Z80_AF != GetRegister(lp)) break;
-				if (*lp == '\'') ++lp;
-			}
+			if (has_comma && Z80_AF != reg2) break;
 			e[0] = 0x08;
 			break;
 		case Z80_DE:
 		case Z80_HL:
-			if (!comma(lp)) {
-				Error("[EX] Comma expected");
-			} else {	// check for the other one: DE <-> HL
-				if (Z80Reg(reg ^ Z80_DE ^ Z80_HL) == GetRegister(lp)) e[0] = 0xeb;
-			}
-			break;
-		default:
-			if (BT_NONE == OpenBracket(lp) || Z80_SP != GetRegister(lp) || !CloseBracket(lp)) break;
-			if (!comma(lp)) {
+			if (!has_comma) {
 				Error("[EX] Comma expected");
 				break;
 			}
-			switch (reg = GetRegister(lp)) {
+			if (Z80Reg(reg1 ^ Z80_DE ^ Z80_HL) != reg2) break;	// check for the other one: DE <-> HL
+			e[0] = 0xeb;
+			break;
+		case Z80_SP:
+			if (!has_comma) {
+				Error("[EX] Comma expected");
+				break;
+			}
+			switch (reg2) {
 			case Z80_HL:
 				e[0] = 0xe3; break;
 			case Z80_IX:
 			case Z80_IY:
-				e[0] = reg; e[1] = 0xe3; break;
+				e[0] = reg2; e[1] = 0xe3; break;
 			default:
-				;
+				break;
 			}
+			break;
+		default:
+			break;
 		}
 		EmitBytes(e, true);
 	}

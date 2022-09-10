@@ -148,6 +148,40 @@ tricky_syntax.asm(71): error: Unexpected: hl
 72    0156 3E 01            ld      a  ,  high  d
 73    0158              d:
 74    0158
+75    0158 E3               ex      (sp),hl     ; #E3
+76    0159 E3               ex      hl,(sp)     ; #E3
+77    015A DD E3            ex      (sp),ix     ; #DDE3
+78    015C DD E3            ex      ix,(sp)     ; #DDE3
+79    015E FD E3            ex      (sp),iy     ; #FDE3
+80    0160 FD E3            ex      iy,(sp)     ; #FDE3
+81    0162                  ; invalid
+tricky_syntax.asm(82): error: Illegal instruction:     ex      af,
+82    0162                  ex      af,
+tricky_syntax.asm(83): error: Illegal instruction:     ex      af,hl
+83    0162                  ex      af,hl
+tricky_syntax.asm(84): error: Illegal instruction:     ex      af,(sp)
+84    0162                  ex      af,(sp)
+tricky_syntax.asm(85): error: Unexpected: ',af
+85    0162 08               ex      af',af      ; does leak `ex af,af` machine code, but also reports error
+tricky_syntax.asm(86): error: Illegal instruction:     ex      de,bc
+86    0163                  ex      de,bc
+tricky_syntax.asm(87): error: Illegal instruction:     ex      hl,bc
+87    0163                  ex      hl,bc
+tricky_syntax.asm(88): error: Illegal instruction:     ex      sp,hl
+88    0163                  ex      sp,hl
+tricky_syntax.asm(89): error: Illegal instruction:     ex      (sp,hl
+89    0163                  ex      (sp,hl
+tricky_syntax.asm(90): error: Illegal instruction:     ex      de,(sp)
+90    0163                  ex      de,(sp)
+tricky_syntax.asm(91): error: Illegal instruction:     ex      (sp),de
+91    0163                  ex      (sp),de
+tricky_syntax.asm(92): error: Illegal instruction:     ex      hl,sp
+92    0163                  ex      hl,sp
+tricky_syntax.asm(93): error: Illegal instruction:     ex      ix,sp
+93    0163                  ex      ix,sp
+tricky_syntax.asm(94): error: Illegal instruction:     ex      iy,sp
+94    0163                  ex      iy,sp
+95    0163
 # file closed: tricky_syntax.asm
 
 Value    Label

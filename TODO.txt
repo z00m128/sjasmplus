@@ -5,8 +5,6 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-DUP/REPT/WHILE to have internal index counter like `__LOOP_0__` where 0 is nesting level
-
 baze — Today at 22:22
 @neon Even if you keep paging outs in machine code, it's a good idea to keep LOAD in BASIC. My suggestion would be to use set 4,(iy + 1) so that +3 BASIC doesn't corrupt page 7 during IM 1. Then, for every out (c),a you also do ld (#5B5C),a to keep 128 BASIC happy. I think that should work with 48K BASIC, 128K BASIC and +3 BASIC.
 

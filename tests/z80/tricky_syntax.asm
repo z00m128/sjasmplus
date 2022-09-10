@@ -71,3 +71,24 @@ label:
     ld      a  ,  Low  hl   ; error
     ld      a  ,  high  d
 d:
+
+    ex      (sp),hl     ; #E3
+    ex      hl,(sp)     ; #E3
+    ex      (sp),ix     ; #DDE3
+    ex      ix,(sp)     ; #DDE3
+    ex      (sp),iy     ; #FDE3
+    ex      iy,(sp)     ; #FDE3
+    ; invalid
+    ex      af,
+    ex      af,hl
+    ex      af,(sp)
+    ex      af',af      ; does leak `ex af,af` machine code, but also reports error
+    ex      de,bc
+    ex      hl,bc
+    ex      sp,hl
+    ex      (sp,hl
+    ex      de,(sp)
+    ex      (sp),de
+    ex      hl,sp
+    ex      ix,sp
+    ex      iy,sp
