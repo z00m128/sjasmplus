@@ -432,7 +432,7 @@ static void detect_vars_changes() {
 	}
 
 	if (nobas48) {
-		Warning("[SAVETAP] Tape file will not contains data from 0x5B00 to 0x5E00");
+		Warning("[SAVETAP] Tape file will not contain data from 0x5B00 to 0x5E00");
 	}
 }
 
