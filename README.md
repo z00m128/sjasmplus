@@ -3,7 +3,7 @@
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/)
 [![BSD 3-Clause License](https://img.shields.io/github/license/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/blob/master/LICENSE.md)
 [![Coverage Status](https://coveralls.io/repos/github/z00m128/sjasmplus/badge.svg?branch=master)](https://coveralls.io/github/z00m128/sjasmplus?branch=master)
-[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/z00m128/sjasmplus.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/z00m128/sjasmplus/context:cpp)
+[![CodeQL](https://github.com/z00m128/sjasmplus/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/z00m128/sjasmplus/actions/workflows/codeql-analysis.yml)
 [![GNU/Linux](docs/img/linux-logo-24px.png)](https://www.linux.org/)
 [![FreeBSD](docs/img/freeBSD-logo-24px.png)](https://www.freebsd.org/)
 [![NetBSD](docs/img/NetBSD-logo-24px.png)](https://www.netbsd.org/)
