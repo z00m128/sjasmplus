@@ -28,7 +28,6 @@
 
 // tables.cpp
 
-#include <assert.h>
 #include "sjdefs.h"
 
 TextFilePos::TextFilePos(const char* fileNamePtr, uint32_t line) : filename(fileNamePtr), line(line), colBegin(0), colEnd(0) {

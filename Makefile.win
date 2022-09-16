@@ -2,6 +2,9 @@
 # Change `PREFIX` according your needs
 # Run it with `make -f Makefile.win`
 
+# cross-compile from ubuntu with mingw32
+# make -f Makefile.win GCC=x86_64-w64-mingw32-gcc GPP=x86_64-w64-mingw32-g++ WINDRES=x86_64-w64-mingw32-windres
+
 GCC=gcc.exe
 CC=$(GCC)
 GPP=g++.exe
