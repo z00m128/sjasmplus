@@ -1,0 +1,8 @@
+error: opening file for write: .
+# file opened: opt_exp_invalid_fname.asm
+1     0000                  ; no code required here
+2     0000
+# file closed: opt_exp_invalid_fname.asm
+
+Value    Label
+------ - -----------------------------------------------------------
