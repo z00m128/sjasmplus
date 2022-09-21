@@ -332,6 +332,9 @@ void InitPass() {
 	DefineTable.Replace("__LINE__", "<dynamic value>");		// current line in current file
 	DefineTable.Replace("__COUNTER__", "<dynamic value>");	// gcc-like, incremented upon every use
 	PredefinedCounter = 0;
+
+	// open Export file (defined by --exp or by EXPORT directive), even when no EXPORT is in source
+	if (LASTPASS == pass) OpenExpFile();					// will not do anything if filename is empty
 }
 
 void FreeRAM() {

@@ -1294,6 +1294,13 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	return 0;
 }
 
+void OpenExpFile() {
+	assert(nullptr == FP_ExportFile);			// this should be the first and only call to open it
+	if (0 == Options::ExportFName[0]) return;	// no export file name provided, skip opening
+	if (FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) return;
+	Error("opening file for write", Options::ExportFName, ALL);
+}
+
 void WriteLabelEquValue(const char* name, aint value, FILE* f) {
 	if (nullptr == f) return;
 	char lnrs[16],* l = lnrs;
@@ -1307,11 +1314,6 @@ void WriteLabelEquValue(const char* name, aint value, FILE* f) {
 }
 
 void WriteExp(const char* n, aint v) {
-	if (FP_ExportFile == NULL) {
-		if (!FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) {
-			Error("opening file for write", Options::ExportFName, FATAL);
-		}
-	}
 	WriteLabelEquValue(n, v, FP_ExportFile);
 }
 
