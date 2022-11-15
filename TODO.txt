@@ -5,6 +5,9 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+coverage keeps fluctuating because of io_nex.cpp `SNexFile::~SNexFile()`, probably depends on compiler's exact version and mood???
+-> it's global `static SNexFile nex;` -> add maybe unit test instancing it as local variable to enforce exercising destructor?
+
 APPENDBIN to append any-size binary to other file, like for producing large dot files with data files appended
 (and let's do GiB+ support as well, INCBIN is limited to 2GiB by `int32` for length and does read it all into heap memory)
 
