@@ -4,7 +4,7 @@
 #
 ##############################################################
 
-cmake_minimum_required(VERSION 3.9.6)
+cmake_minimum_required(VERSION 3.18.0)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 project(sjasmplus)
@@ -71,7 +71,7 @@ if(ENABLE_LUA)
 	message(STATUS "Looking for Lua 5.4")
 
 	if(SYSTEM_LUA)
-		find_package(Lua "5.4" EXACT)
+		find_package(Lua "5.4" REQUIRED)
 	endif(SYSTEM_LUA)
 
 	if(LUA_FOUND)
@@ -82,10 +82,7 @@ if(ENABLE_LUA)
 		set(LUA_LIBRARY ${MY_LUA_LIBRARY})
 		set(LUA_INCLUDE_DIR ${MY_LUA_INCLUDE_DIR})
 		add_subdirectory(${LUA_INCLUDE_DIR})
-
-		target_include_directories(${MY_LUA_LIBRARY} PUBLIC
-            ${LUA_INCLUDE_DIR}
-		)
+		include_directories(${LUA_INCLUDE_DIR})
 	endif(LUA_FOUND)
 
 	add_definitions(-DUSE_LUA)
