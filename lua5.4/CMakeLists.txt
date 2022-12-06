@@ -5,12 +5,12 @@
 #
 ##############################################################
 
-cmake_minimum_required(VERSION 3.9.6)
+cmake_minimum_required(VERSION 3.18.0)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 project(lua5.4)
 
-set(LUA_SOURCES 
+set(LUA_SOURCES
 	lapi.c
 	lauxlib.c
 	lbaselib.c
@@ -56,5 +56,6 @@ endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wno-pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-pedantic")
 
-add_library(lua5.4 ${LUA_SOURCES})
+add_library(lua5.4 STATIC ${LUA_SOURCES})
 target_include_directories(lua5.4 PUBLIC include)
+
