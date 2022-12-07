@@ -54,15 +54,23 @@ MEMCHECK?=valgrind --leak-check=yes
 EXE_BASE_NAME=sjasmplus
 BUILD_DIR=build
 
+LUA_VER=5.4
+
 SUBDIR_BASE=sjasm
-SUBDIR_LUA=lua5.4
+SUBDIR_LUA=lua$(LUA_VER)
 SUBDIR_LUABRIDGE=LuaBridge/Source
 SUBDIR_CRC32C=crc32c
 SUBDIR_DOCS=docs
 SUBDIR_COV=coverage
 
-ifeq ($(USE_BUNDLED_LUA), 1)
+INCDIR_LUA=/usr/include/lua$(LUA_VER)
+
+ifeq ($(USE_LUA), 1)
 _LUA_CPPFLAGS=-I$(SUBDIR_LUA)
+endif
+
+ifeq ($(USE_BUNDLED_LUA), 0)
+_LUA_CPPFLAGS=-I$(INCDIR_LUA)
 endif
 
 # TODO too many lua5.4 warnings: -pedantic removed
@@ -75,6 +83,10 @@ CFLAGS+=$(CFLAGS_EXTRA)
 
 ifeq ($(USE_LUA), 1)
 LDFLAGS+=-ldl
+endif
+
+ifeq ($(USE_BUNDLED_LUA), 0)
+LDFLAGS+=-llua$(LUA_VER)
 endif
 
 ifdef DEBUG
