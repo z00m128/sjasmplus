@@ -66,7 +66,7 @@ if(ADD_UNIT_TESTS)
 endif(ADD_UNIT_TESTS)
 
 if(ENABLE_LUA)
-	add_subdirectory(${LUABRIDGE_DIR})
+	add_subdirectory(${LUABRIDGE_DIR} EXCLUDE_FROM_ALL)
 
 	message(STATUS "Looking for Lua 5.4")
 
