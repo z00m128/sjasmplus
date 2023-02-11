@@ -89,6 +89,7 @@ int SJ_SearchPath(const char* oudzp, const char* filename, const char* /*extensi
 #define STRCHR(str, charToSearch) strchr(str, charToSearch)
 
 void switchStdOutIntoBinaryMode();
+bool autoColorsDetection();
 
 #ifdef USE_LUA
 void LuaShellExec(const char *command);

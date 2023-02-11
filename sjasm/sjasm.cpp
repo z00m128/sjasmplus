@@ -631,11 +631,7 @@ int main(int argc, char* argv[]) {
 #else
 int main(int argc, char **argv) {
 #endif
-	// existence of NO_COLOR env.var. disables auto-colors: http://no-color.org/
-	const char* envNoColor = std::getenv("NO_COLOR");
-	// try to auto-detect ANSI-colour support (true if env.var. TERM exist and contains "color" substring)
-	const char* envTerm = std::getenv("TERM");
-	Options::SetTerminalColors(!envNoColor && envTerm && strstr(envTerm, "color"));
+	Options::SetTerminalColors(autoColorsDetection());
 
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
 
