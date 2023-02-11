@@ -136,7 +136,7 @@ bool autoColorsDetection() {
 	// check either TERM variable or in windows try to enable virtual terminal emulation
 #if defined (_WIN32)
 	// check if running inside console with isatty
-	if (!_isatty(_fileno(stdout))) return false;	// redirected to file? don't color
+	if (!_isatty(_fileno(stderr))) return false;	// redirected to file? don't color
 	// Try to set output mode to handle virtual terminal sequences (VT100)
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -152,7 +152,7 @@ bool autoColorsDetection() {
 	return false;
 #else
 	// check if running inside console with isatty
-	if (!isatty(STDOUT_FILENO)) return false;		// redirected to file? don't color
+	if (!isatty(STDERR_FILENO)) return false;		// redirected to file? don't color
 	// try to auto-detect ANSI-colour support (true if env.var. TERM exist and contains "color" substring)
 	const char* envTerm = std::getenv("TERM");
 	return envTerm && strstr(envTerm, "color");

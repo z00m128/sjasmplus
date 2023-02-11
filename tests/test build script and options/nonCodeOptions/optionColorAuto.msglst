@@ -2,10 +2,6 @@ optionColorAuto.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x
 optionColorAuto.asm(3): error: Unrecognized instruction: some_error line
 > something
 optionColorAuto.asm(5): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
-optionColorAuto.asm(2): [33mwarning[m: value 0x7761726E is truncated to 8bit value: 0x6E
-optionColorAuto.asm(3): [31merror[m: Unrecognized instruction: some_error line
-> [36msomething[m
-optionColorAuto.asm(5): [33mwarning[m[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
 optionColorAuto.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E
 optionColorAuto.asm(3): error: Unrecognized instruction: some_error line
 > something

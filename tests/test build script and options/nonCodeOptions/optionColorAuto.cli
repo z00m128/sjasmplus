@@ -14,7 +14,8 @@ else
     # dumb terminal -> auto should produce NO colors
     TERM="dumb" $MEMCHECK "$EXE" "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
     # color terminal -> auto should produce COLORS
-    TERM="color" $MEMCHECK "$EXE" "${options[@]}" "$file_asm" 2>> "${dst_base}.lst"
+    #TERM="color" $MEMCHECK "$EXE" "${options[@]}" "$file_asm" 2>> "${dst_base}.lst"
+    ### ^ now auto is also behind isatty(..) test, which makes auto go false when output is redirected
 
     # test "auto" with NO_COLOR env variable defined (should produce NO color)
     # color terminal + NO_COLOR defined -> auto should produce NO color
