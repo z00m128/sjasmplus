@@ -1,4 +1,11 @@
 
+## [1.20.2](https://github.com/z00m128/sjasmplus/releases/tag/v1.20.2) - 14.2.2023
+- added optional second argument for [`DUP`](https://z00m128.github.io/sjasmplus/documentation.html#po_dup) to have index variable
+- option `--exp` will create file even when no `EXPORT` is used
+- fixing variable name-clash when compiling against musl-clib
+- LuaBridge updated, CMake and Makefile updated a bit
+- minor bugfixes/improvements in parser in specific edge cases
+
 ## [1.20.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.20.1) - 29.7.2022
 - parse decimal [numeric constants](https://z00m128.github.io/sjasmplus/documentation.html#s_numeric) with warning (for easier Lua 5.4 life)
 - added [`SAVEAMSDOS`](https://z00m128.github.io/sjasmplus/documentation.html#po_saveamsdos) (like SAVEBIN with AMSDOS header)

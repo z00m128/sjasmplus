@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.20.1 Documentation [2022-07-29]</title>
+  <title>SjASMPlus 1.20.2 Documentation [2023-02-14]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -204,13 +204,13 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>WIP - 1.20.2</term>
+            <term>14.2.2023 - 1.20.2</term>
 
             <listitem>
               <synopsis>- added optional second argument for <link linkend="po_dup">`DUP`</link> to have index variable
 - option `--exp` will create file even when no `EXPORT` is used
 - fixing variable name-clash when compiling against musl-clib
-- LuaBridge updated
+- LuaBridge updated, CMake and Makefile updated a bit
 - minor bugfixes/improvements in parser in specific edge cases
 </synopsis>
             </listitem>
