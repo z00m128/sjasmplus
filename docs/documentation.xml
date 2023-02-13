@@ -208,8 +208,9 @@
 
             <listitem>
               <synopsis>- added optional second argument for <link linkend="po_dup">`DUP`</link> to have index variable
+- option `--exp` will create file even when no `EXPORT` is used
 - fixing variable name-clash when compiling against musl-clib
-- LuaBridge updated to version 2.8
+- LuaBridge updated
 - minor bugfixes/improvements in parser in specific edge cases
 </synopsis>
             </listitem>
@@ -3621,6 +3622,12 @@ LABEL5:
 			"<code>labelY: IFUSED</code>" which does not only check condition, but also does define the label.
 			Once the label is defined, the "call labelY" line inside module will find the global
 			variant and mark it as "used" correctly.
+		</para>
+		<para>
+			Local labels inside the IFUSED block are not visible until the main label is used, if you want to call only
+			local label, you can force the visibility of the routine by "<code>ASSERT main_label</code>" - this will
+			trigger usage of the global "main_label", and then the IFUSED block will be assembled, and local labels
+			will become visible too.
 		</para>
             </listitem>
           </varlistentry>
