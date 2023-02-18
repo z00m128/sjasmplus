@@ -54,7 +54,8 @@ MEMCHECK?=valgrind --leak-check=yes
 EXE_BASE_NAME=sjasmplus
 BUILD_DIR=build
 
-LUA_VER=5.4
+LUA_VER?=5.4
+LUA_LIBNAME?=lua$(LUA_VER)
 
 SUBDIR_BASE=sjasm
 SUBDIR_LUA=lua$(LUA_VER)
@@ -63,7 +64,7 @@ SUBDIR_CRC32C=crc32c
 SUBDIR_DOCS=docs
 SUBDIR_COV=coverage
 
-INCDIR_LUA=/usr/include/lua$(LUA_VER)
+INCDIR_LUA?=/usr/include/lua$(LUA_VER)
 
 ifeq ($(USE_LUA), 1)
 _LUA_CPPFLAGS=-I$(SUBDIR_LUA)
@@ -86,7 +87,7 @@ LDFLAGS+=-ldl
 endif
 
 ifeq ($(USE_BUNDLED_LUA), 0)
-LDFLAGS+=-llua$(LUA_VER)
+LDFLAGS+=-l$(LUA_LIBNAME)
 endif
 
 ifdef DEBUG
