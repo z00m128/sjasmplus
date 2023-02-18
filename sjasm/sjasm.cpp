@@ -64,7 +64,8 @@ static void PrintHelpMain() {
 	_COUT "  --fullpath               Show full path to file in errors" _ENDL;
 	_COUT "  --color=[on|off|auto]    Enable or disable ANSI coloring of warnings/errors" _ENDL;
 	_COUT " Other:" _ENDL;
-	_COUT "  -D<NAME>[=<value>]       Define <NAME> as <value>" _ENDL;
+	_COUT "  -D<NAME>[=<value>] or --define <NAME>[=<value>]" _ENDL;
+	_COUT "                           Define <NAME> as <value>" _ENDL;
 	_COUT "  -                        Reads STDIN as source (even in between regular files)" _ENDL;
 	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
@@ -567,6 +568,12 @@ namespace Options {
 							IncludeDirsList = nullptr;
 						}
 					}
+				} else if (!strcmp(opt, "define")) {	// for --define name=value the next argv is used (if available)
+					const char* defarg = argv[i+1] ? argv[++i] : nullptr;
+					char defN[LINEMAX] {}, defV[LINEMAX] {};
+					if (defarg) splitByChar(defarg, '=', defN, LINEMAX, defV, LINEMAX);
+					if (*defN) CmdDefineTable.Add(defN, defV, nullptr);
+					else Error("missing define value", defarg, ALL);
 				} else if (!doubleDash && 'D' == opt[0]) {
 					char defN[LINEMAX], defV[LINEMAX];
 					if (*val) {		// for -Dname=value the `val` contains "name=value" string

@@ -204,6 +204,16 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>WIP - 1.20.3</term>
+
+            <listitem>
+              <synopsis>- added alias <link linkend="s_cli">`--define`</link> for `-D`
+- minor updates to Makefile
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>14.2.2023 - 1.20.2</term>
 
             <listitem>
@@ -467,7 +477,8 @@
   Note: auto detection checks for existence of environment variable TERM, and its
 		content is scanned for sub-string "color" (like "xterm-256color")
  Other:
-  -D&lt;NAME&gt;[=&lt;value&gt;]       Define &lt;NAME&gt; as &lt;value&gt;
+  -D&lt;NAME&gt;[=&lt;value&gt;] or --define &lt;NAME&gt;[=&lt;value&gt;]
+                           Define &lt;NAME&gt; as &lt;value&gt; (--define since v1.20.3)
   -W[no-]&lt;warning_id&gt;      Disables/enabled particular warning type
   -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
