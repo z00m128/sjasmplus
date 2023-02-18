@@ -67,28 +67,23 @@ SUBDIR_COV=coverage
 INCDIR_LUA?=/usr/include/lua$(LUA_VER)
 
 ifeq ($(USE_LUA), 1)
+LDFLAGS+=-ldl
+ifeq ($(USE_BUNDLED_LUA), 0)
+_LUA_CPPFLAGS=-I$(INCDIR_LUA)
+LDFLAGS+=-l$(LUA_LIBNAME)
+else
 _LUA_CPPFLAGS=-I$(SUBDIR_LUA)
+endif
+CPPFLAGS+=-DUSE_LUA -DLUA_USE_LINUX $(_LUA_CPPFLAGS) -I$(SUBDIR_LUABRIDGE)
 endif
 
 ifeq ($(USE_BUNDLED_LUA), 0)
-_LUA_CPPFLAGS=-I$(INCDIR_LUA)
 endif
 
 # TODO too many lua5.4 warnings: -pedantic removed
 CPPFLAGS+=-Wall -DMAX_PATH=PATH_MAX -I$(SUBDIR_CRC32C)
-ifeq ($(USE_LUA), 1)
-CPPFLAGS+=-DUSE_LUA -DLUA_USE_LINUX $(_LUA_CPPFLAGS) -I$(SUBDIR_LUABRIDGE)
-endif
 
 CFLAGS+=$(CFLAGS_EXTRA)
-
-ifeq ($(USE_LUA), 1)
-LDFLAGS+=-ldl
-endif
-
-ifeq ($(USE_BUNDLED_LUA), 0)
-LDFLAGS+=-l$(LUA_LIBNAME)
-endif
 
 ifdef DEBUG
 BUILD_DIR:=$(BUILD_DIR)/debug
