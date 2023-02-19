@@ -1,0 +1,2 @@
+# assemble the "sjasm_coverage3.asm" file with --define missing arguments
+$MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath --lstlab=sort -Wno-behost --color=off "$file_asm" --define 2> sjasm_coverage3.lst
