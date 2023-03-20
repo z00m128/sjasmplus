@@ -20,11 +20,13 @@ echo -n -e "Project dir \"\033[96m${PROJECT_DIR}\033[0m\". "
 # verify the directory structure is set up as expected and the working directory is project root
 [[ ! -f "${TEST_RUNNER}" ]] && echo -e "\033[91munexpected working directory\033[0m\n$HELP_STRING" && exit 1
 
+# `cmp` on macOS require minus switch to indicate that stdin is going to be processed
+CMP_IN="" && [[ `uname` == 'Darwin' ]] && CMP_IN=" -"
 # check if `gcmp` or `cmp` accepts stdin input for second file to compare
-CMP=gcmp && cat "${TEST_RUNNER}" | $CMP "${TEST_RUNNER}" 2> /dev/null || \
-CMP=cmp && cat "${TEST_RUNNER}" | $CMP "${TEST_RUNNER}" 2> /dev/null || CMP=""
+CMP=gcmp && cat "${TEST_RUNNER}" | $CMP $CMP_IN "${TEST_RUNNER}" 2> /dev/null || \
+CMP=cmp && cat "${TEST_RUNNER}" | $CMP $CMP_IN "${TEST_RUNNER}" 2> /dev/null || CMP=""
 [[ -z $CMP ]] && echo -e "\n\033[91mNo \"cmp\" found which accepts stdin\033[0m (gcmp and cmp tried).\n" && exit 1
-echo -n -e "Using \033[96m${CMP}\033[0m. "
+echo -n -e "Using \033[96m${CMP}${CMP_IN}\033[0m. "
 
 [[ -n "$EXE" ]] && echo -e "Using EXE=\033[96m$EXE\033[0m as assembler binary"
 
@@ -139,7 +141,7 @@ for f in "${TEST_FILES[@]}"; do
         # or see if compressed ".gz" binary was provided and compare that
         if [[ -f "${CFG_BASE}.${binext}.gz" ]]; then
             totalChecks=$((totalChecks + 1))        # +1 for each binary check
-            ! gunzip -c "${CFG_BASE}.${binext}.gz" | $CMP "${dst_base}.${binext}" \
+            ! gunzip -c "${CFG_BASE}.${binext}.gz" | $CMP $CMP_IN "${dst_base}.${binext}" \
                 && exitCode=$((exitCode + 1)) && echo -n -e "\033[91mError: $binext DIFFERS\033[0m " \
                 || echo -n -e "\033[0m \\  \033[92m$binext OK\033[0m "
         fi
