@@ -1,7 +1,7 @@
 ## run sjasmplus with "--outprefix=out_dir/" and moves the outputs back to regular folder
 # to let the regular script check their content
-mkdir -p out_dir/ && \
-"$EXE" --nologo --msg=none --fullpath --outprefix=out_dir/ "${options[@]}" "$file_asm" && \
+mkdir -p out\ dir/ && \
+"$EXE" --nologo --msg=war --fullpath --outprefix=out\ dir/ "${options[@]}" "$file_asm" && \
 rm -f *.raw *.tap *.bin *.lbl *.sym *.exp && \
-mv out_dir/* ./
+mv out\ dir/* ./
 last_result=$?
