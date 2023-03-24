@@ -5,8 +5,11 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+makefile xz -> `tar cvfJ` src package (drop LuaBridge except LuaBridge/Source, drop build, etc..)
+
 coverage keeps fluctuating because of io_nex.cpp `SNexFile::~SNexFile()`, probably depends on compiler's exact version and mood???
 -> it's global `static SNexFile nex;` -> add maybe unit test instancing it as local variable to enforce exercising destructor?
+(not so simple, as unit test doesn't know the struct definition and it's private to io_nex.cpp)
 
 APPENDBIN to append any-size binary to other file, like for producing large dot files with data files appended
 (and let's do GiB+ support as well, INCBIN is limited to 2GiB by `int32` for length and does read it all into heap memory)

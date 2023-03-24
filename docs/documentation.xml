@@ -452,7 +452,7 @@
   --i8080                  Limit valid instructions to i8080 only (+ no fakes)
   --lr35902                Sharp LR35902/SM83 CPU instructions mode (+ no fakes)
   --outprefix=&lt;path&gt;       Prefix for save/output/.. filenames in directives
-  Note: if the prefix is folder, the folder must exist before assembling. Prefix
+  Note: if prefix is folder, it must already exist and add trailing slash. Prefix
         is applied only to filenames defined in source (not to CLI arguments).
   -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt; ( --inc without "=" to empty the list)
                            Include path (later defined have higher priority)
