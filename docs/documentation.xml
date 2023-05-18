@@ -208,6 +208,7 @@
 
             <listitem>
               <synopsis>- added alias <link linkend="s_cli">`--define`</link> for `-D`
+- Lua: minor version upgrade to 5.4.6 (from 5.4.4)
 - minor updates to Makefile
 </synopsis>
             </listitem>
@@ -4121,14 +4122,12 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
       <title>Why?</title>
 
       <para><graphic align="top" fileref="lua.gif" />Why is scripting engine
-      as Lua embedded to the compiler? Answer is simple: it can be used to add extra
+        as <ulink url="https://www.lua.org/">Lua</ulink> embedded to the assembler? Answer is simple: it can be used to add extra
       features by users. And Lua is small enough, fast and powerful scripting engine.</para>
 
-      <para>Since v1.20.0 sjasmplus integrates Lua 5.4.4. Before it was using Lua 5.1.5 with
-        few 3rd party external libraries, which were mostly non-functional due to neglected
-        refreshing of tolua++ tool and integration itself. The upgrade to Lua 5.4 was done
-        along replacing tolua++ with LuaBridge2.6, and while there was put lot of effort
-        to maintain original Lua bindings to sjasmplus, there are few changes to the API.</para>
+      <para>Sjasmplus currently includes Lua 5.4.6 (since v1.20.3). The upgrade from Lua 5.1 in v1.20.0
+        was done along replacing tolua++ with LuaBridge2.6 and while there was lot of effort
+        to maintain original Lua bindings to sjasmplus, there were few changes to the API.</para>
 
       <para>If your old source does not work any more after upgrade, please carefully check
         against the <link linkend="s_lua_sjasmplus_bindings">bindings documentation</link> below.</para>
@@ -4420,7 +4419,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
       <para><emphasis>None at this moment.</emphasis></para>
 
-      <para>Since v1.20.0 the sjasmplus integrates Lua 5.4.4.</para>
+      <para>Since v1.20.0 the sjasmplus integrates Lua 5.4.4 (now 5.4.6).</para>
 
       <para>The libraries included in older versions of sjasmplus: lpack.c, bit (bitwise operators)
         and hex (convert to/from hexa numbers) are now all part of the standard Lua 5.4.</para>
