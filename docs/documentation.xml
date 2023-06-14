@@ -208,6 +208,7 @@
 
             <listitem>
               <synopsis>- added alias <link linkend="s_cli">`--define`</link> for `-D`
+- end of line backslash continues source line (<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/parsing/escape_eol.asm">limited support</ulink>, not recommended)
 - Lua: minor version upgrade to 5.4.6 (from 5.4.4)
 - minor updates to Makefile
 </synopsis>
@@ -598,8 +599,9 @@ file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
 		<para>
 		  Lines in the source file should have the following form:
 		  <programlisting>Label Operator Operand Comment</programlisting>
+		  <emphasis role="strong">Lines without label must start with whitespace.</emphasis>
 		  All fields are optional.
-		  <emphasis role="strong">Lines without label should start with whitespace.</emphasis>
+		  End of line backslash continues source line (since 1.20.3, <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/parsing/escape_eol.asm">limited support</ulink>, not recommended).
 		  Operators and operands can be inlined with colon:
 		  <programlisting>      Operator Operand:Operator Operand:Operator Operand... Comment</programlisting>
 		  Comments should start with '<code>;</code>' or '<code>//</code>'.
