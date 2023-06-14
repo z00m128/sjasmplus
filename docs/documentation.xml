@@ -869,7 +869,8 @@ $c     hexadecimal
 
       <para>Expressions are evaluated in signed 32 bits in this version of SjASMPlus (unless explicitly
 		  specified as unsigned, like ">>>" operator), so intermediate values have range -2147483648
-		  to +2147483647.</para>
+		  to +2147483647. True for boolean results is equal to value -1, false is equal to 0 (so
+		  result of compare or logical operators can be used as all-bit-mask further). </para>
 
       <para>'$' represents the current program counter. '$$' represents the
       current page in the current slot in the <link

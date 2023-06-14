@@ -5,6 +5,8 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+https://www.codefactor.io/repository/github/z00m128/sjasmplus
+
 makefile xz -> `tar cvfJ` src package (drop LuaBridge except LuaBridge/Source, drop build, etc..)
 
 coverage keeps fluctuating because of io_nex.cpp `SNexFile::~SNexFile()`, probably depends on compiler's exact version and mood???
