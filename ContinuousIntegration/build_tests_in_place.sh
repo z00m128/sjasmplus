@@ -39,8 +39,8 @@ for f in "${TEST_FILES[@]}"; do
     ## standalone .asm file was found, try to build it
     totalTests=$((totalTests + 1))
     # set up various "test-name" variables for file operations
-    src_dir=`dirname "$f"`          # source directory
-    file_asm=`basename "$f"`        # just "file.asm" name
+    src_dir=$(dirname "$f")         # source directory
+    file_asm=$(basename "$f")       # just "file.asm" name
     src_base="${f%.asm}"            # source directory + base ("src_dir/file"), to add extensions
     dst_base="${file_asm%.asm}"     # local-directory base (just "file" basically), to add extensions
     [[ -d "${src_base}.config" ]] && CFG_BASE="${src_base}.config/${dst_base}" || CFG_BASE="${src_base}"
@@ -48,13 +48,13 @@ for f in "${TEST_FILES[@]}"; do
     LIST_FILE="${CFG_BASE}.lst"
     # see if there are extra options defined (and read them into array)
     options=()
-    [[ -s "${OPTIONS_FILE}" ]] && options=(`cat "${OPTIONS_FILE}"`)
+    [[ -s "${OPTIONS_FILE}" ]] && options=($(cat "${OPTIONS_FILE}"))
     # check if .lst file already exists, set up options to refresh it + delete it
     [[ -s "${LIST_FILE}" ]] && options+=("--lst=${LIST_FILE}") && rm "${LIST_FILE}"
     # enforce all symbol dumps to be sorted in any case (even when no --lst)
     options+=('--lstlab=sort')
     ## built it with sjasmplus (remember exit code)
-    echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[@]}\033[0m]"
+    echo -e "\033[95mAssembling\033[0m file \033[96m${file_asm}\033[0m in test \033[96m${src_dir}\033[0m, options [\033[96m${options[*]}\033[0m]"
     # switch to test directory and run assembler
     pushd "${src_dir}"
     "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"

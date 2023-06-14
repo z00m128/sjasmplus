@@ -55,7 +55,7 @@ if [ $BUILD_RESULT -ne 0 ]; then
     echo "# Build+install failed:" $BUILD_RESULT
     exit $BUILD_RESULT
 else
-    echo "# 'which sjasmplus' = " `which sjasmplus`
+    echo "# 'which sjasmplus' = " $(which sjasmplus)
     which sjasmplus > ../path_to_binary.log
 fi
 
