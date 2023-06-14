@@ -734,6 +734,13 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			*rlppos = *rlpbuf++;
 			afterNonAlphaNum = afterNonAlphaNumNext;
 			afterNonAlphaNumNext = !isalnum((byte)*rlppos);
+			// handle EOL escaping, limited implementation, usage not recommended
+			if ('\\' == *rlppos && ReadBufData() && ('\r' == *rlpbuf || '\n' == *rlpbuf))  {
+				char CRLFtest = (*rlpbuf++) ^ ('\r'^'\n');	// flip CR->LF || LF->CR (and eats first)
+				if (ReadBufData() && CRLFtest == *rlpbuf) ++rlpbuf;	// if CRLF/LFCR pair, eat also second
+				sourcePosStack.back().nextSegment();	// mark last line in errors/etc
+				continue;								// continue with chars from next line
+			}
 			// Block comments logic first (anything serious may happen only "outside" of block comment
 			if ('*' == *rlppos && ReadBufData() && '/' == *rlpbuf) {
 				if (0 < blockComment) --blockComment;	// block comment ends here, -1 from nesting

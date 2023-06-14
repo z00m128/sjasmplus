@@ -1,0 +1,59 @@
+# file opened: escape_eol.asm
+ 1    0000              ; end of line can be now escaped with backslash (to concatenate multiple lines into one)
+ 2    0000              ; but the implementation is fairly limited:
+ 3    0000              ; - the total line length is still 2k chars max
+ 4    0000              ; - line numbers reported for errors are pointing to last line of full line
+ 5    0000              ; - listing file shows only concatenated line with last line number
+ 6    0000              ; - eol-comments can't be split (they end with EOL even when backslash is there)
+ 7    0000              ; - not even trying what will happen to SLD spans when colons and \ are intermixed
+ 8    0000
+ 9    0000              BUILD_ENTRANCE          EQU     0x01
+10    0000              BUILD_RESIDENTIAL_AREA  EQU     0x02
+11    0000              BUILD_WAREHOUSE         EQU     0x04
+12    0000              BUILD_SHOPPING_AREA     EQU     0x08
+13    0000
+17    0000 DD 36 7B 0F      ld (ix + 123), BUILD_ENTRANCE | BUILD_RESIDENTIAL_AREA         | BUILD_WAREHOUSE         | BUILD_SHOPPING_AREA         ; multi-line finishing here
+18    0004
+escape_eol.asm(19): error: [ASSERT] Assertion failed:  0, "line numbers for single line should work"
+19    0004                  ASSERT 0, "line numbers for single line should work"
+20    0004
+escape_eol.asm(24): error: Label not found: MISSING_LABEL
+24    0004 DD 36 7B 0B      ld (ix + 123), BUILD_ENTRANCE | BUILD_RESIDENTIAL_AREA         | MISSING_LABEL         | BUILD_SHOPPING_AREA         ; multi-line with error, reported error line is *here* (last line of multi-line)
+25    0008
+26    0008                  ; eol comment can't be split \
+escape_eol.asm(27): error: Unrecognized instruction: this is new line
+27    0008                  this is new line
+28    0008
+30    0008 ~                /* inside block comment it's ignored     but that doesn't change anything about it, as the block continues */
+31    0008
+escape_eol.asm(32): error: Unrecognized instruction: invalid
+32    0008                  invalid
+33    0008 00             nop         ; comment for nop, "invalid" report it's own correct line number
+34    0009
+35    0009 00               nop
+escape_eol.asm(36): error: Unrecognized instruction: invalid
+36    000A                invalid         ; comment for invalid, error reports *this* line
+37    000A
+38    000A                  ; let's try macro definitions, because why the heck not
+39    000A                  MACRO my_ml_ma
+42    000A ~                    pop             de
+43    000A ~              push             hl
+44    000A                  ENDM
+45    000A
+46    000A                  my_ml_ma
+46    000A D1          >        pop             de
+46    000B E5          >  push             hl
+47    000C
+50    000C                  DEFINE ML_DEF U REALLY         PUSHING IT,         AREN'T YA?
+51    000C
+escape_eol.asm(52): error: Unrecognized instruction: U REALLY         PUSHING IT,         AREN'T YA?
+52    000C                  U REALLY         PUSHING IT,         AREN'T YA?
+53    000C
+# file closed: escape_eol.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0001   BUILD_ENTRANCE
+0x0002   BUILD_RESIDENTIAL_AREA
+0x0008   BUILD_SHOPPING_AREA
+0x0004   BUILD_WAREHOUSE
