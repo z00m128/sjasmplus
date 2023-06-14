@@ -104,7 +104,7 @@ for f in "${TEST_FILES[@]}"; do
         last_result_origin="custom test script '${CLI_FILE}'"
         ok_tick_text="run"
     else
-        echo -e "\033[95mAssembling\033[0m \"\033[96m${file_asm}\033[0m\" in \"\033[96m${src_dir##$PROJECT_DIR/}\033[0m\", options [\033[96m${options[@]}\033[0m]"
+        echo -e "\033[95mAssembling\033[0m \"\033[96m${file_asm}\033[0m\" in \"\033[96m${src_dir##$PROJECT_DIR/}\033[0m\", options [\033[96m${options[*]}\033[0m]"
         if [[ -z "${MSG_LIST_FILE}" ]]; then
             $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
             last_result=$?
