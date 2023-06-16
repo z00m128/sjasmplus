@@ -708,7 +708,6 @@ static void dirEMPTYTAP() {
 }
 
 static void dirSAVETAP() {
-
 	if (pass != LASTPASS) {
 		SkipParam(lp);
 		return;
@@ -1022,7 +1021,6 @@ static void dirSAVEAMSDOS() {
 }
 
 static void dirSAVEHOB() {
-
 	if (!DeviceID || pass != LASTPASS) {
 		if (!DeviceID) Error("SAVEHOB only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);

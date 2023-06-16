@@ -56,7 +56,6 @@ private:
 
 class CDeviceDef {
 public:
-
 	constexpr static size_t MAX_SLOT_N = 256;	// minimum possible slot size is 256 bytes
 	constexpr static size_t MAX_PAGE_N = 1024;	// maximum possible total memory is 64MB with 64ki slot size
 
@@ -102,6 +101,7 @@ public:
 	int PagesCount;
 	byte* Memory;
 	aint ZxRamTop;		// for ZX-like machines, the RAMTOP system variable
+
 private:
 	int CurrentSlot;
 	CDeviceSlot* Slots[CDeviceDef::MAX_SLOT_N];

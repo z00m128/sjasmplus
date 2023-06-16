@@ -232,7 +232,6 @@ static int ReturnWithError(const char* errorText, const char* fname, FILE* fileT
 
 // use autostart == -1 to disable it (the valid autostart is 0..9999 as line number of BASIC program)
 bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
-
 	// do some preliminary checks with file name and autostart - prepare final catalog entry data
 	union {
 		STrdFile trdf;			// structure to hold future form of catalog record about new file

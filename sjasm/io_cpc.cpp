@@ -437,7 +437,6 @@ namespace CDTUtil {
 }
 
 static void createCDTDump464(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
-
 	byte* ramptr;
 	aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
 	std::unique_ptr<byte[]> ram(new byte[ram_size]);
@@ -497,7 +496,6 @@ static void createCDTDump464(const char* fname, aint startAddr, byte screenMode,
 }
 
 static void createCDTDump6128(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
-
 	byte* ramptr;
 	aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
 	std::unique_ptr<byte[]> ram(new byte[ram_size]);
