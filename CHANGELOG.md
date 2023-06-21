@@ -1,4 +1,11 @@
 
+## [1.20.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.20.3) - 23.6.2023
+- added alias [`--define`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli) for `-D`
+- added [string-literals](https://z00m128.github.io/sjasmplus/documentation.html#s_strings) suffixes Z and C to add zero or set high bit of last char
+- end of line backslash continues source line ([limited support](https://github.com/z00m128/sjasmplus/blob/master/tests/parsing/escape_eol.asm), not recommended)
+- Lua: minor version upgrade to 5.4.6 (from 5.4.4)
+- minor updates to Makefile
+
 ## [1.20.2](https://github.com/z00m128/sjasmplus/releases/tag/v1.20.2) - 14.2.2023
 - added optional second argument for [`DUP`](https://z00m128.github.io/sjasmplus/documentation.html#po_dup) to have index variable
 - option `--exp` will create file even when no `EXPORT` is used
