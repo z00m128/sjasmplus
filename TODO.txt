@@ -148,9 +148,6 @@ https://www.debian.org/doc/manuals/distribute-deb/distribute-deb.html
 ====================
 Docs:
 
-"pseudo-ops as SAVEBIN, SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, LABELSLIST and use special functions in Lua scripts."
-^^ link each?
-
 DEVICE needs better description? Issue #55
 ... and also SAVENEX and default ZXNEXT device... again...
 

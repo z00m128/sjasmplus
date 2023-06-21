@@ -1282,11 +1282,27 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
       <para>To enable this mode you must use pseudo-op <link
       linkend="po_device">DEVICE</link>.</para>
 
-      <para>In this mode the compiler compiling program to virtual memory (as
-      at MSX's WB-ASS2, ZX-Spectrum's GENS, ZEUS, ALASM etc). After this all
-      you can use new pseudo-ops as <link linkend="s_pseudoops">SAVEBIN, SAVEDEV
-      SAVEHOB, SAVETRD, SAVETAP, PAGE, SLOT, MMU, LABELSLIST</link>, use special
-      functions in <link linkend="c_lua_scripting">Lua scripts</link> and use operators
+      <para>In this mode the assembler is assembling program into virtual memory (as
+      MSX's WB-ASS2, ZX-Spectrum's GENS, ZEUS, ALASM etc). You can also use pseudo-ops as
+      <link linkend="po_mmu">MMU</link>,
+      <link linkend="po_slot">SLOT</link>,
+      <link linkend="po_page">PAGE</link>,
+      <link linkend="po_savebin">SAVEBIN</link>,
+      <link linkend="po_savedev">SAVEDEV</link>,
+      <link linkend="po_savetap">SAVETAP</link>,
+      <link linkend="po_savesna">SAVESNA</link>,
+      <link linkend="po_savetrd">SAVETRD</link>,
+      <link linkend="po_savenex">SAVENEX</link>,
+      <link linkend="po_savecdt">SAVECDT</link>,
+      <link linkend="po_savecpcsna">SAVECPCSNA</link>,
+      <link linkend="po_saveamsdos">SAVEAMSDOS</link>,
+      <link linkend="po_save3dos">SAVE3DOS</link>,
+      <link linkend="po_savehob">SAVEHOB</link>,
+      <link linkend="po_bplist">BPLIST</link>,
+      <link linkend="po_setbp">SETBP</link>,
+      <link linkend="po_cspectmap">CSPECTMAP</link>,
+      <link linkend="po_labelslist">LABELSLIST</link>,
+      use special functions in <link linkend="c_lua_scripting">Lua scripts</link> and use operators
       <code>{address}, {b address}</code> to read WORD/BYTE from the virtual memory.</para>
 
       <para>If only single DEVICE is used in whole source batch, the device
