@@ -173,7 +173,7 @@ $(BUILD_DIR_UT)/%.o : %.cpp
 	@mkdir -p $(@D)
 	$(COMPILE.cc) -DADD_UNIT_TESTS -I$(SUBDIR_UT) $(OUTPUT_OPTION) $<
 
-.PHONY: all install uninstall clean docs tests memcheck coverage upx
+.PHONY: all install uninstall clean docs tests memcheck coverage upx srctar
 
 # "all" will also copy the produced binary into project root directory (to mimick old makefile)
 all: $(BUILD_EXE)
@@ -273,3 +273,6 @@ clean:
 		$(BUILD_DIR_UT)/$(SUBDIR_TESTS) \
 		$(BUILD_DIR_UT)/$(SUBDIR_COV) \
 		$(BUILD_DIR_UT)
+
+srctar: clean
+	tar cvfJ sjasmplus-1.20.3-src.tar.xz --exclude .git --exclude .cache --exclude build --exclude *.xz --exclude *.exe --exclude sjasmplus.res --exclude *.o --exclude LuaBridge/Tests --exclude LuaBridge/third_party ./* .cirrus.yml .git*
