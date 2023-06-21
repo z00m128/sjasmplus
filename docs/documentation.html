@@ -1430,10 +1430,13 @@ END_OF_PROGRAM</pre>
               <p>Synonym of <a class="link" href="#po_byte">BYTE</a>.</p>
             </dd><dt><span class="term">DC<a class="indexterm" name="po_dc"></a></span></dt><dd>
               <p>Same as <a class="link" href="#po_byte">BYTE</a>, but every
-              last character of a string will have bit 7 set.</p><div class="example"><a name="idp887"></a><p class="title"><b>Example 5.11. </b></p><div class="example-contents">
+                last character of a string will have bit 7 set. Single character in apostrophes is NOT considered as string.
+                </p><div class="example"><a name="idp887"></a><p class="title"><b>Example 5.11. </b></p><div class="example-contents">
                   
 
-                  <pre class="programlisting">    DC "kip" ; same as BYTE "ki",'p'|128</pre>
+                  <pre class="programlisting">    DC "kip" ; same as BYTE "ki",'p'|128
+    DC 'A'   ; not a string, will produce 0x41 like BYTE 'A'
+    DC "A", 'AB', "AB" ; three strings producing: C1 41 C2 41 C2</pre>
                 </div></div><p><br class="example-break"></p>
             </dd><dt><span class="term">DD<a class="indexterm" name="po_dd"></a></span></dt><dd>
               <p>Synonym of <a class="link" href="#po_dword">DWORD</a>.</p>

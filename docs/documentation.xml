@@ -1869,10 +1869,13 @@ END_OF_PROGRAM</programlisting></para>
 
             <listitem>
               <para>Same as <link linkend="po_byte">BYTE</link>, but every
-              last character of a string will have bit 7 set.<example>
+                last character of a string will have bit 7 set. Single character in apostrophes is NOT considered as string.
+                <example>
                   <title></title>
 
-                  <para><programlisting>    DC "kip" ; same as BYTE "ki",'p'|128</programlisting></para>
+                  <para><programlisting>    DC "kip" ; same as BYTE "ki",'p'|128
+    DC 'A'   ; not a string, will produce 0x41 like BYTE 'A'
+    DC "A", 'AB', "AB" ; three strings producing: C1 41 C2 41 C2</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
