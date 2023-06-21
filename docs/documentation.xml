@@ -208,6 +208,7 @@
 
             <listitem>
               <synopsis>- added alias <link linkend="s_cli">`--define`</link> for `-D`
+- added <link linkend="s_strings">string-literals</link> suffixes Z and C to add zero or set high bit of last char
 - end of line backslash continues source line (<ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/parsing/escape_eol.asm">limited support</ulink>, not recommended)
 - Lua: minor version upgrade to 5.4.6 (from 5.4.4)
 - minor updates to Makefile
@@ -850,7 +851,8 @@ $c     hexadecimal
 \R 13
 \T 9
 \V 11</programlisting><para>Inside single quotes two quotes after each other are
-    parsed as the apostrophe itself (since v1.11).</para><example>
+    parsed as the apostrophe itself (since v1.11).</para>
+  <para>Adding Z or C after quotes/apostrophes will make string zero-terminated or set top bit of last character (since v1.20.3).</para><example>
           <title></title>
 
           <para><programlisting>    BYTE "stringconstant\n" ; escape sequence assembles to newline
@@ -862,7 +864,8 @@ $c     hexadecimal
     LD A,'\E'   ; warning + truncating value to 'E' (0x45)
     LD A,'"'    ; A = 0x22
     LD A,"'"    ; A = 0x27
-    LD A,''''   ; A = 0x27 ; since v1.11</programlisting></para>
+    LD A,''''   ; A = 0x27 ; since v1.11
+    BYTE "AB"Z, "CD"C, 'E'Z, 'F'C ; hex: 41 42 00 43 C4 45 00 C6</programlisting></para>
         </example></para>
     </section>
 
