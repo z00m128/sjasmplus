@@ -671,6 +671,15 @@ template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, in
 		return -1;
 	}
 	++p;
+	if ('Z' == *p) {
+		if (max_ei <= ei) return -2;	// no space for zero byte (keep p pointing at Z to report error)
+		++p;
+		e[ei++] = 0;
+	} else if ('C' == *p) {
+		++p;
+		if (0 == ei) return -1;			// empty string can't have last char patched
+		e[ei - 1] |= 0x80;
+	}
 	return 1 + quotes;
 }
 

@@ -1,0 +1,143 @@
+# file opened: string_literals.asm
+ 1    0000                  ; new string-suffixes to add zero byte or set high bit of last char
+ 2    0000 00               DB ""Z
+ 3    0001 00               DB ''Z
+ 4    0002 61 00            DB "a"Z
+ 5    0004 61 00            DB 'a'Z
+ 6    0006 61 62 63 64      DB "abcdef"Z
+ 6    000A 65 66 00
+ 7    000D 61 62 63 64      DB 'abcdef'Z
+ 7    0011 65 66 00
+string_literals.asm(8): error: no arguments
+ 8    0014                  DB ""C          ; error - can't patch empty string
+string_literals.asm(9): error: no arguments
+ 9    0014                  DB ''C          ; error - can't patch empty string
+10    0014 E1               DB "a"C
+11    0015 E1               DB 'a'C
+12    0016 61 62 63 64      DB "abcdef"C
+12    001A 65 E6
+13    001C 61 62 63 64      DB 'abcdef'C
+13    0020 65 E6
+14    0022 61 62 00 63      DB "ab"Z,"cd"C,"e"Z
+14    0026 E4 65 00
+15    0029
+16    0029                  ; test max-size inputs (128 chars), regular + C will work, Z should fail
+17    0029 30 31 32 33      DB "0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE."
+17    002D 34 35 36 37
+17    0031 38 39 41 42
+17    0035 43 44 45 2E
+17    0039 30 31 32 33
+17    003D 34 35 36 37
+17    0041 38 39 41 42
+17    0045 43 44 45 2E
+17    0049 30 31 32 33
+17    004D 34 35 36 37
+17    0051 38 39 41 42
+17    0055 43 44 45 2E
+17    0059 30 31 32 33
+17    005D 34 35 36 37
+17    0061 38 39 41 42
+17    0065 43 44 45 2E
+17    0069 30 31 32 33
+17    006D 34 35 36 37
+17    0071 38 39 41 42
+17    0075 43 44 45 2E
+17    0079 30 31 32 33
+17    007D 34 35 36 37
+17    0081 38 39 41 42
+17    0085 43 44 45 2E
+17    0089 30 31 32 33
+17    008D 34 35 36 37
+17    0091 38 39 41 42
+17    0095 43 44 45 2E
+17    0099 30 31 32 33
+17    009D 34 35 36 37
+17    00A1 38 39 41 42
+17    00A5 43 44 45 2E
+18    00A9
+19    00A9 30 31 32 33      DB "0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE."C
+19    00AD 34 35 36 37
+19    00B1 38 39 41 42
+19    00B5 43 44 45 2E
+19    00B9 30 31 32 33
+19    00BD 34 35 36 37
+19    00C1 38 39 41 42
+19    00C5 43 44 45 2E
+19    00C9 30 31 32 33
+19    00CD 34 35 36 37
+19    00D1 38 39 41 42
+19    00D5 43 44 45 2E
+19    00D9 30 31 32 33
+19    00DD 34 35 36 37
+19    00E1 38 39 41 42
+19    00E5 43 44 45 2E
+19    00E9 30 31 32 33
+19    00ED 34 35 36 37
+19    00F1 38 39 41 42
+19    00F5 43 44 45 2E
+19    00F9 30 31 32 33
+19    00FD 34 35 36 37
+19    0101 38 39 41 42
+19    0105 43 44 45 2E
+19    0109 30 31 32 33
+19    010D 34 35 36 37
+19    0111 38 39 41 42
+19    0115 43 44 45 2E
+19    0119 30 31 32 33
+19    011D 34 35 36 37
+19    0121 38 39 41 42
+19    0125 43 44 45 AE
+20    0129
+string_literals.asm(21): error: Over 128 bytes defined in single DB/DC/... Values over: Z
+21    0129 30 31 32 33      DB "0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE."Z ; error
+21    012D 34 35 36 37
+21    0131 38 39 41 42
+21    0135 43 44 45 2E
+21    0139 30 31 32 33
+21    013D 34 35 36 37
+21    0141 38 39 41 42
+21    0145 43 44 45 2E
+21    0149 30 31 32 33
+21    014D 34 35 36 37
+21    0151 38 39 41 42
+21    0155 43 44 45 2E
+21    0159 30 31 32 33
+21    015D 34 35 36 37
+21    0161 38 39 41 42
+21    0165 43 44 45 2E
+21    0169 30 31 32 33
+21    016D 34 35 36 37
+21    0171 38 39 41 42
+21    0175 43 44 45 2E
+21    0179 30 31 32 33
+21    017D 34 35 36 37
+21    0181 38 39 41 42
+21    0185 43 44 45 2E
+21    0189 30 31 32 33
+21    018D 34 35 36 37
+21    0191 38 39 41 42
+21    0195 43 44 45 2E
+21    0199 30 31 32 33
+21    019D 34 35 36 37
+21    01A1 38 39 41 42
+21    01A5 43 44 45 2E
+22    01A9
+23    01A9                  ; this works in any expression, if you really want to complicate your life
+24    01A9 41 00 00         DZ "A"Z         ; double zero
+25    01AC 61 E2            DC "ab"C        ; technically patched twice, but to same value
+26    01AE 21 00 41         ld hl,"A"Z      ; ld hl,$4100
+27    01B1 3E C1            ld a,'A'C       ; ld a,$C1
+28    01B3
+29    01B3                  ; DC / DZ directives and their pecularities
+30    01B3 41               DC  'A'         ; not patched, special case of sjasmplus treating this as *character*, not *string*
+31    01B4 C1               DC  "A"
+32    01B5 41 C2            DC  'AB'
+33    01B7 41 C2            DC  "AB"
+34    01B9
+35    01B9 01 02 03 00      DZ 1,2,3        ; will add only single zero at end
+36    01BD 30 B1 32 B3      DC "01","23"    ; will patch both strings with |$80
+37    01C1
+# file closed: string_literals.asm
+
+Value    Label
+------ - -----------------------------------------------------------
