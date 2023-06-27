@@ -16,6 +16,13 @@
 # make KEEP_SYMBOLS=1 CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
 # to cross-compile windows exe try to use Makefile.win instead, this Makefile is now too much linux/posix only
 
+EXE_BASE_NAME=sjasmplus
+
+# Set version, dir and src.tar.xz filename
+VERSION?=1.20.3
+SRCTARFILE?=$(EXE_BASE_NAME)-$(VERSION)-src.tar.xz
+SRCTARDIR?=$(EXE_BASE_NAME)-$(VERSION)
+
 # Use LUA (system-wide or bundled, depending on USE_BUNDLED_LUA)
 USE_LUA?=1
 
@@ -47,11 +54,16 @@ DOCBOOKGEN?=xsltproc
 MEMCHECK?=valgrind --leak-check=yes
 	# --leak-check=full --show-leak-kinds=all
 
+# set up srctar
+MKSRCTARDIR?=mkdir -p ../$(SRCTARDIR)
+MKSRCTAR?=tar cvfJ $(SRCTARFILE) --exclude .git --exclude .github --exclude .cache --exclude build --exclude *.xz --exclude *.exe --exclude sjasmplus.res --exclude *.o --exclude LuaBridge/Tests --exclude LuaBridge/third_party ../$(SRCTARDIR)
+COPYSRC?=cp -r ./* ../$(SRCTARDIR)/
+RMSRCTARDIR?=rm -rf ../$(SRCTARDIR)
+
 # all internal file names (sources, module subdirs, build dirs, ...) must be WITHOUT space!
 # (i.e. every relative path from project-dir must be space-less ...)
 # the project-dir itself can contain space, or any path leading up to it
 
-EXE_BASE_NAME=sjasmplus
 BUILD_DIR=build
 
 LUA_VER?=5.4
@@ -253,6 +265,7 @@ $(SUBDIR_DOCS)/documentation.html: Makefile $(wildcard $(SUBDIR_DOCS)/*.xml) $(w
 clean:
 	$(UNINSTALL) \
 		$(EXE_BASE_NAME) \
+		$(SRCTARFILE) \
 		$(BUILD_EXE) \
 		$(BUILD_EXE_UT) \
 		$(ALL_OBJS) \
@@ -275,4 +288,7 @@ clean:
 		$(BUILD_DIR_UT)
 
 srctar: clean
-	tar cvfJ sjasmplus-1.20.3-src.tar.xz --exclude .git --exclude .cache --exclude build --exclude *.xz --exclude *.exe --exclude sjasmplus.res --exclude *.o --exclude LuaBridge/Tests --exclude LuaBridge/third_party ./* .cirrus.yml .git*
+	$(MKSRCTARDIR)
+	$(COPYSRC)
+	$(MKSRCTAR)
+	$(RMSRCTARDIR)
