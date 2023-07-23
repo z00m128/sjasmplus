@@ -129,6 +129,19 @@ void switchStdOutIntoBinaryMode() {
 #endif
 }
 
+#if defined (_WIN32)
+static bool restoreWinMode = false;
+static HANDLE hWinOut;
+static HANDLE hWinIn;
+static DWORD dwOriginalOutMode = 0, dwOriginalInMode = 0;
+
+void restoreOriginalConsoleMode() {
+	if (!restoreWinMode) return;
+	SetConsoleMode(hWinIn, dwOriginalInMode);
+	SetConsoleMode(hWinOut, dwOriginalOutMode);
+}
+#endif
+
 bool autoColorsDetection() {
 	// existence of NO_COLOR env.var. disables auto-colors: http://no-color.org/
 	const char* envNoColor = std::getenv("NO_COLOR");
@@ -138,15 +151,19 @@ bool autoColorsDetection() {
 	// check if running inside console with isatty
 	if (!_isatty(_fileno(stderr))) return false;	// redirected to file? don't color
 	// Try to set output mode to handle virtual terminal sequences (VT100)
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
-	if (hOut != INVALID_HANDLE_VALUE && hIn != INVALID_HANDLE_VALUE) {
+	hWinOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	hWinIn = GetStdHandle(STD_INPUT_HANDLE);
+	if (hWinOut != INVALID_HANDLE_VALUE && hWinIn != INVALID_HANDLE_VALUE) {
 		DWORD dwOutMode = 0;
 		DWORD dwInMode = 0;
-		if (GetConsoleMode(hOut, &dwOutMode) && GetConsoleMode(hIn, &dwInMode)) {
+		if (GetConsoleMode(hWinOut, &dwOutMode) && GetConsoleMode(hWinIn, &dwInMode)) {
+			dwOriginalInMode = dwInMode;
+			dwOriginalOutMode = dwOutMode;
+			restoreWinMode = true;
+			std::atexit(restoreOriginalConsoleMode);
 			dwOutMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 			dwInMode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
-			return SetConsoleMode(hOut, dwOutMode) && SetConsoleMode(hIn, dwInMode);
+			return SetConsoleMode(hWinOut, dwOutMode) && SetConsoleMode(hWinIn, dwInMode);
 		}
 	}
 	return false;
