@@ -2217,6 +2217,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".savecdt", dirSAVECDT);
 	DirectivesTable.insertd(".save3dos", dirSAVE3DOS);
 	DirectivesTable.insertd(".saveamsdos", dirSAVEAMSDOS);
+	DirectivesTable.insertd(".savecpr", dirSAVECPR);
 	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
 	DirectivesTable.insertd(".winexec", dirWINEXEC);
