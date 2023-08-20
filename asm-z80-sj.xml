@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.6 29/03/2022
+  Version: 0.9.7 20/08/2023
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,10 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  20/08/2023: version 0.9.7
+    + new device: amstradcpcplus
+    + new directive: savecpr
 
   29/03/2022: version 0.9.6
     + new operator: exist
@@ -107,7 +111,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="16" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="17" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -331,6 +335,7 @@ TODO missing things:
       <item>savebin</item>
       <item>savecdt</item>
       <item>savecpcsna</item>
+      <item>savecpr</item>
       <item>savedev</item>
       <item>savehob</item>
       <item>savenex</item>
@@ -383,6 +388,7 @@ TODO missing things:
       <!-- known devices names -->
       <item>AMSTRADCPC464</item>
       <item>AMSTRADCPC6128</item>
+      <item>AMSTRADCPCPLUS</item>
       <item>NONE</item>
       <item>NOSLOT64K</item>
       <item>ZXSPECTRUM48</item>
