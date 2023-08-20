@@ -31,6 +31,7 @@
 
 void dirSAVECPCSNA();
 void dirSAVECDT();
+void dirSAVECPR();
 
 #endif
 

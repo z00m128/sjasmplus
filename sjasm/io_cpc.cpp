@@ -776,4 +776,90 @@ void dirSAVECDT() {
 	else Error("[SAVECDT] unknown command (commands: FULL, EMPTY, BASIC, CODE, HEADLESS)", lp, SUPPRESS);	
 }
 
+//
+// Amstrad CPC cartridge saving (CPR)
+//
+
+static int SaveCPR(const char* fname, int cprSize) {
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fname, "wb")) {
+		Error("[SAVECPR] Error opening file for write", fname);
+		return 0;
+	}
+
+	// format:  https://cpctech.cpcwiki.de/docs/cprdef.html
+	const char magic[12] = { 'R', 'I', 'F', 'F', ' ', ' ', ' ', ' ', 'A', 'M', 'S', '!' };
+	// header is 12 bytes
+	byte snbuf[12];
+	// copy over the magic marker
+	memcpy(snbuf, magic, 12);
+	// (('cbXX' + size of page + page length)) * number of pages) + 'AMS!')
+	aint Length = ((4 + 4 + 0x4000) * cprSize) + 4;
+	for (int loop = 0; loop < 4; ++loop) {
+		snbuf[4 + loop] = Length & 0xFF;
+		Length >>= 8;
+	}
+
+	// first we write the header
+	if (fwrite(snbuf, 1, 12, ff) != 12) {
+		return writeError(fname, ff);
+	}
+
+	// Write the pages out in order
+	for (int page = 0; page < cprSize; ++page) {
+		snbuf[0] = 'c';
+		snbuf[1] = 'b';
+		snbuf[2] = '0' + ((page / 10)%10);
+		snbuf[3] = '0' + (page % 10);
+
+		Length = Device->GetPage(page)->Size;
+		for (int loop = 0; loop < 4; ++loop) {
+			snbuf[4 + loop] = Length & 0xFF;
+		Length >>= 8;
+		}
+
+		// first we write the page header
+		if (fwrite(snbuf, 1, 8, ff) != 8) {
+			return writeError(fname, ff);
+		}
+
+		// then we write the page
+		if ((aint)fwrite(Device->GetPage(page)->RAM, 1, Device->GetPage(page)->Size, ff) != Device->GetPage(page)->Size) {
+			return writeError(fname, ff);
+		}
+	}
+
+	fclose(ff);
+	return 1;
+}
+
+void dirSAVECPR() {
+	if (pass != LASTPASS) {
+		SkipToEol(lp);
+		return;
+	}
+	if (!IsAmstradPLUSDevice(DeviceID)) {
+		Error("[SAVECPR] is allowed only in AMSTRADCPCPLUS device mode", NULL, SUPPRESS);
+		return;
+	}
+	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	if (!fnaam[0]) {
+			Error("[SAVECPR] CPR file name is empty", NULL, SUPPRESS);
+			return;
+	}
+	int cprSize = 32;
+	if (anyComma(lp)) {
+		aint val;
+		if (ParseExpression(lp, val)) {
+			if((val < 1) || (val > 32)) {
+				Error("[SAVECPR] only a size from 1 (16KiB) to 32 (512KiB) is allowed", NULL, SUPPRESS);
+				return;
+			}
+			cprSize = val;
+		}
+	}
+	if (!SaveCPR(fnaam.get(), cprSize))
+		Error("[SAVECPR] Error writing file (Disk full?)", NULL, IF_FIRST);
+}
+
 // eof io_cpc.cpp
