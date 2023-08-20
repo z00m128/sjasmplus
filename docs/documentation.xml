@@ -1298,6 +1298,7 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
       <link linkend="po_savenex">SAVENEX</link>,
       <link linkend="po_savecdt">SAVECDT</link>,
       <link linkend="po_savecpcsna">SAVECPCSNA</link>,
+      <link linkend="po_savecpr">SAVECPR</link>,
       <link linkend="po_saveamsdos">SAVEAMSDOS</link>,
       <link linkend="po_save3dos">SAVE3DOS</link>,
       <link linkend="po_savehob">SAVEHOB</link>,
@@ -1445,6 +1446,16 @@ StartProg:
             <listitem>
               <para>Has 4 slots (0-3) of size 0x4000 and 8 RAM pages (0-7) of 0x4000 (128K total). The default page mapping is
               { 0, 1, 2, 3 }.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>AMSTRADCPCPLUS<indexterm id="device_cpcplus"><primary>AMSTRADCPCPLUS</primary></indexterm></term>
+
+            <listitem>
+              <para>Has 4 slots (0-3) of size 0x4000 and 32 RAM pages (0-31)
+              of 0x4000 (512K total). The default page mapping is { 0, 1, 2, 3
+              }.</para>
             </listitem>
           </varlistentry>
 
@@ -2095,6 +2106,7 @@ counter = counter + 1
  NOSLOT64K      ; Single slot (slot 0) covering full 64kiB address range of Z80, 32 pages
  AMSTRADCPC464  ; Amstrad CPC 464 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
  AMSTRADCPC6128 ; Amstrad CPC 6128 (like 464 with 8 pages)
+ AMSTRADCPCPLUS ; Amstrad CPC Plus (like 464 with 32 pages)
 
  ;disable:
    DEVICE NONE
@@ -3029,7 +3041,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             <para>SAVECDT HEADLESS &lt;cdtname&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;sync&gt;[,&lt;format&gt;]]</para></term>
 
             <listitem>
-              <para><emphasis>Works only in Amstrad device emulation mode. See
+              <para><emphasis>Works only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Manipulate CDT file (tape/TZX file format used by Amstrad CPC emulators).<example>
@@ -3080,6 +3092,28 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 START  .... ;some code
     RET
     SAVECPCSNA "game.sna",START ;save snapshot to file game.sna. Start address is START ($1200)</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SAVECPR<indexterm id="po_savecpr"><primary>SAVECPR</primary></indexterm>
+                &lt;filename&gt;[,&lt;size = 32&gt;]</term>
+
+            <listitem>
+              <para><emphasis>Works only in virtual device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Saves memory per blocks of 16KiB; 1 means 16KiB, 2 means
+                32KiB, ...<example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE AMSTRADCPCPLUS
+    ... some code ...
+
+    ; by default a size of 32 (512KiB) is used
+    ; here we save a block of 16KiB
+    SAVECPR "code.cpr", 1</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
