@@ -1,0 +1,26 @@
+# file opened: savecprCoverage.asm
+ 1    0000              ; test-coverage cases not covered by regular tests
+ 2    0000
+ 3    0000                  DEVICE AMSTRADCPC6128
+savecprCoverage.asm(4): error: [SAVECPR] is allowed only in AMSTRADCPCPLUS device mode
+ 4    0000                  SAVECPR "BadDevice.cpr", 2        ; error about wrong device
+ 5    0000
+ 6    0000                  DEVICE NONE
+savecprCoverage.asm(7): error: [SAVECPR] is allowed only in AMSTRADCPCPLUS device mode
+ 7    0000                  SAVECPR "NoDevice.cpr", 1         ; error about none device
+ 8    0000
+ 9    0000                  DEVICE AMSTRADCPCPLUS
+savecprCoverage.asm(10): error: [SAVECPR] only a size from 1 (16KiB) to 32 (512KiB) is allowed
+10    0000                  SAVECPR "file.cpr", -1            ; negative number of pages
+savecprCoverage.asm(11): error: Syntax error: &
+savecprCoverage.asm(11): error: Unexpected: &
+11    0000                  SAVECPR "file.cpr", &             ; invalid (parse) page value
+savecprCoverage.asm(12): error: [SAVECPR] only a size from 1 (16KiB) to 32 (512KiB) is allowed
+12    0000                  SAVECPR "file.cpr", 33            ; page value out of bound
+savecprCoverage.asm(13): error: [SAVECPR] Error opening file for write: .
+13    0000                  SAVECPR ".", 19                   ; fail to open file for write
+14    0000
+# file closed: savecprCoverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------
