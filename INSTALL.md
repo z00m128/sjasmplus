@@ -58,23 +58,21 @@ Go to folder with sjasmplus project. Edit install path `PREFIX` in file `Makefil
 
 Go to folder with sjasmplus project and run following set of commands:
 
-	mkdir build
-	cd build
-	cmake -DCMAKE_BUILD_TYPE=Release ..
-	make
-	make install
+	cmake -DCMAKE_BUILD_TYPE=Release -S . -B build
+	cmake --build build
+	cmake --install build
 
 The project will use internal copy of Lua 5.4.4 by default, but you can use system Lua 5.4 by using `-DSYSTEM_LUA=ON`.
 
 For disabling of LUA scripting support add `-DENABLE_LUA=OFF` option:
 
-	cmake -DENABLE_LUA=OFF ..
+	cmake -DENABLE_LUA=OFF -DCMAKE_BUILD_TYPE=Release -S . -B build
 
 Binary sjasmplus file will be placed in `/usr/bin` by default.
 
 To change install directory prefix add `-DCMAKE_INSTALL_PREFIX:PATH` option with specified prefix:
 
-	cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
+	cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local -DCMAKE_BUILD_TYPE=Release -S . -B build
 
 ## CMake method for MS Windows
 
