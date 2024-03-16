@@ -5,6 +5,30 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+savenex V1.3 bigger disclaimer/explanation!
+
+ARM! https://cirrus-ci.org/guide/linux/
+> Cirrus CI supports container and arm_container instances in order to run your CI workloads on amd64 and arm64 platforms respectively.
+
+-------------
+can you add a --utc option to sjasmplus so that I don't have to change my hardware time if I want __DATE__ to use UTC.
+I want UTC time zone for release dates, not local time zone?
+
+sjasm.cpp:687
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_c);   // ??? this ???
+
+time.h:
+/* Return the `struct tm' representation of *TIMER
+   in Universal Coordinated Time (aka Greenwich Mean Time).  */
+extern struct tm *gmtime (const time_t *__timer) __THROW;
+
+/* Return the `struct tm' representation
+   of *TIMER in the local timezone.  */
+extern struct tm *localtime (const time_t *__timer) __THROW;
+-------------
+
 https://www.codefactor.io/repository/github/z00m128/sjasmplus
 
 coverage keeps fluctuating because of io_nex.cpp `SNexFile::~SNexFile()`, probably depends on compiler's exact version and mood???
@@ -26,6 +50,8 @@ listing with pre-substituted original source line included
 
 relocation -> extra support for Next driver banks?
 (see Robin's https://github.com/Threetwosevensixseven/ZXRelocate to learn what exactly that means)
+(also https://github.com/Threetwosevensixseven/JetDPCL5/tree/main/src/asm/drv )
+(also https://pastebin.com/4G5nf9qv )
 
 check https://github.com/google/AFL
 
