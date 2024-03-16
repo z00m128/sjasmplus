@@ -21,7 +21,9 @@ savecprCoverage.asm(13): error: [SAVECPR] Error opening file for write: .
 13    0000                  SAVECPR ".", 19                   ; fail to open file for write
 savecprCoverage.asm(14): error: [SAVECPR] only a size from 1 (16KiB) to 32 (512KiB) is allowed
 14    0000                  SAVECPR "file.cpr",               ; missing page value suggested by comma
-15    0000
+savecprCoverage.asm(15): error: [SAVECPR] CPR file name is empty
+15    0000                  SAVECPR "", 1                     ; empty filename
+16    0000
 # file closed: savecprCoverage.asm
 
 Value    Label
