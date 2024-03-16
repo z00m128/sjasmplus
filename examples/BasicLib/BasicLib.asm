@@ -81,6 +81,7 @@ notx		equ	#C3
 bin		equ	#C4
 orx		equ	#C5
 andx		equ	#C6
+not_equal	equ	#C9
 line		equ	#Ca
 then		equ	#Cb
 to		equ	#Cc
