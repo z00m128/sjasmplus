@@ -833,6 +833,8 @@ static int SaveCPR(const char* fname, int cprSize) {
 	return 1;
 }
 
+static const char* err_txt_size = "[SAVECPR] only a size from 1 (16KiB) to 32 (512KiB) is allowed";
+
 void dirSAVECPR() {
 	if (pass != LASTPASS) {
 		SkipToEol(lp);
@@ -844,22 +846,21 @@ void dirSAVECPR() {
 	}
 	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
 	if (!fnaam[0]) {
-			Error("[SAVECPR] CPR file name is empty", NULL, SUPPRESS);
-			return;
+		Error("[SAVECPR] CPR file name is empty", NULL, SUPPRESS);
+		return;
 	}
 	int cprSize = 32;
 	if (anyComma(lp)) {
+		if (SkipBlanks()) Error(err_txt_size, NULL, SUPPRESS);	// return will happen on ParseExpression
 		aint val;
-		if (ParseExpression(lp, val)) {
-			if((val < 1) || (val > 32)) {
-				Error("[SAVECPR] only a size from 1 (16KiB) to 32 (512KiB) is allowed", NULL, SUPPRESS);
-				return;
-			}
-			cprSize = val;
+		if (!ParseExpression(lp, val)) return;
+		if ((val < 1) || (val > 32)) {
+			Error(err_txt_size, NULL, SUPPRESS);
+			return;
 		}
+		cprSize = val;
 	}
-	if (!SaveCPR(fnaam.get(), cprSize))
-		Error("[SAVECPR] Error writing file (Disk full?)", NULL, IF_FIRST);
+	if (!SaveCPR(fnaam.get(), cprSize)) Error("[SAVECPR] Error writing file (Disk full?)", NULL, IF_FIRST);
 }
 
 // eof io_cpc.cpp

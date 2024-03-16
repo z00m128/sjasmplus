@@ -115,7 +115,7 @@
 
       <para>Thanks to:<itemizedlist>
           <listitem>
-            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Ped7g, Dart Alver, Oli Wilkinson</emphasis> - additional
+            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Ped7g, Dart Alver, Oli Wilkinson, Laurent Carlier</emphasis> - additional
             programming;</para>
           </listitem>
 
@@ -202,6 +202,17 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>?.?.2024 - 1.20.4</term>
+
+            <listitem>
+              <synopsis>- added Amstrad CPC device <link linkend="po_device">AMSTRADCPCPLUS</link> - by Laurent Carlier
+- added Amstrad CPC+ <link linkend="po_savecpr">`SAVECPR`</link> to save CPR cartridge - by Laurent Carlier
+- fix: windows cmd.exe console state after running sjasmplus.exe
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>23.6.2023 - 1.20.3</term>
@@ -3072,7 +3083,7 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
             <term>SAVECPCSNA<indexterm id="po_savecpcsna"><primary>SAVECPCSNA</primary></indexterm> &lt;filename&gt;[,&lt;startadressofprogram&gt;]</term>
 
             <listitem>
-              <para><emphasis>Works only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
+              <para><emphasis>Works only in AMSTRADCPC464 / AMSTRADCPC6128 device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Save the snapshot for emulators of Amstrad CPC machines. (If start address is omitted,
@@ -3101,7 +3112,7 @@ START  .... ;some code
                 &lt;filename&gt;[,&lt;size = 32&gt;]</term>
 
             <listitem>
-              <para><emphasis>Works only in virtual device emulation mode. See
+              <para><emphasis>Works only in AMSTRADCPCPLUS device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
               <para>Saves memory per blocks of 16KiB; 1 means 16KiB, 2 means

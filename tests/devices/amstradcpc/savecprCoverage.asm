@@ -11,3 +11,4 @@
     SAVECPR "file.cpr", &             ; invalid (parse) page value
     SAVECPR "file.cpr", 33            ; page value out of bound
     SAVECPR ".", 19                   ; fail to open file for write
+    SAVECPR "file.cpr",               ; missing page value suggested by comma
