@@ -106,11 +106,11 @@ for f in "${TEST_FILES[@]}"; do
     else
         echo -e "\033[95mAssembling\033[0m \"\033[96m${file_asm}\033[0m\" in \"\033[96m${src_dir##$PROJECT_DIR/}\033[0m\", options [\033[96m${options[*]}\033[0m]"
         if [[ -z "${MSG_LIST_FILE}" ]]; then
-            $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+            LANG=C $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
             last_result=$?
             [[ -s "${LIST_FILE}" ]] && ok_tick_text="lst" || ok_tick_text="asm"
         else
-            $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
+            LANG=C $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath "${options[@]}" "$file_asm" 2> "${dst_base}.lst"
             last_result=$?
             ok_tick_text="msg"
         fi

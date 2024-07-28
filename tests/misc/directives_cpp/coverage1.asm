@@ -50,4 +50,4 @@ fwdLabel:
 
     SHELLEXEC "echo -n Ahoy! "
     SHELLEXEC '"echo"', "\ from SHELLEXEC"
-    SHELLEXEC "bash", "-c 'LANG=C; ls my_invalid_filename'"
+    SHELLEXEC "bash", "my_invalid_filename"

@@ -85,9 +85,9 @@ coverage1.asm(49): error: Syntax error: "
 50    000B
 51    000B                  SHELLEXEC "echo -n Ahoy! "
 52    000B                  SHELLEXEC '"echo"', "\ from SHELLEXEC"
-ls: cannot access 'my_invalid_filename': No such file or directory
-coverage1.asm(53): error: [SHELLEXEC] non-zero exit code: 2
-53    000B                  SHELLEXEC "bash", "-c 'LANG=C; ls my_invalid_filename'"
+bash: my_invalid_filename: No such file or directory
+coverage1.asm(53): error: [SHELLEXEC] non-zero exit code: 127
+53    000B                  SHELLEXEC "bash", "my_invalid_filename"
 54    000B
 # file closed: coverage1.asm
 
