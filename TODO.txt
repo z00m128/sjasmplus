@@ -170,6 +170,12 @@ cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LUA=ON -DCMAKE_INSTALL_PREFIX:PATH=~/.
 
 https://www.debian.org/doc/manuals/distribute-deb/distribute-deb.html
 
+https://wiki.debian.org/Packaging/Learn#Level_3:_Packaging_more_complicated_modules
+Next step is packaging more complicated modules that will involve things like, modifying some upstream files,
+ !!!!!!!!!!!!  removing some files from source tarball,   !!!!!!!!!!!!
+ generating some files from source, getting the source tarball from a git commit etc.
+
+So maybe there is a way to provide "OSS" sjasmplus src tar for .deb build from full repo (removing some files in tests which don't fit OSS licensing)
 
 ====================
 Docs:
@@ -191,6 +197,7 @@ Major changes on my mind:
 * n-pass assembling
 * syntax by default similar to `--syntax=abflL`
 * GNU/GCC/clang-ification of assembler, mimicking the general tools as much as possible, like formatting of error reports, options with identical syntax where it makes sense, etc.. (should help with other tools unaware of sjasmplus specifically, but capable to process gcc/clang stuff)
+* GCC include path rules (anchoring from launch dir or main file dir, not changing anchor with each source file)
 * `define` substitution formalized even more (and refactored)
 * C++ification of syntax and language, i.e. changing operator precedence, probably apostrophe enclosed string/char literals escaping rules, etc.
 * new operators (string and device-memory/labels related, type/checks, maybe var-arg-like stuff)
