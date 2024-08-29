@@ -2,7 +2,7 @@
   1   0000                  ORG 0x8000
   1   8000                OUTPUT "all_fake.bin"
   2   8000                  OPT reset --zxnext=cspect --syntax=f   ; fakes warning ON
-  3   8000 DD 01            break   ; CSpect emulator breakpoint (was used to verify all fakes below in debugger)
+  3   8000 FD 00            break   ; CSpect emulator breakpoint (was used to verify all fakes below in debugger)
   4   8002
 all_fake.asm(5): warning[fake]: Fake instruction: rl bc
   5   8002 CB 11 CB 10  rl_bc               rl bc
@@ -525,7 +525,7 @@ all_fake.asm(224): warning[fake]: Fake instruction: sub hl,sp
 all_fake.asm(227): warning[fake]: Fake instruction: mul
 227   834B ED 30        zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mul de"
 228   834D                  ; no message when in --zxnext=cspect mode
-229   834D DD 01        zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
+229   834D FD 00        zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
 230   834F DD 00        zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
 231   8351                  OPT --zxnext    ; do 2x error stating the requirement (using nops to advance labels)
 all_fake.asm(232): error: [BREAK] fake instruction "break" must be specifically enabled by --zxnext=cspect option

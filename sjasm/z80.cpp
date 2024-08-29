@@ -596,8 +596,8 @@ namespace Z80 {
 			Error("[BREAK] fake instruction \"break\" must be specifically enabled by --zxnext=cspect option");
 			return;
 		}
-		EmitByte(0xDD, true);
-		EmitByte(0x01);
+		EmitByte(0xFD, true);
+		EmitByte(0x00);
 	}
 
 	// helper function for BRLC, BSLA, BSRA, BSRF, BSRL, as all need identical operand validation

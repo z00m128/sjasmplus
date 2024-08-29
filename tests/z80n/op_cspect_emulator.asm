@@ -4,4 +4,4 @@
     ;;; available only with option `--zxnext=cspect`
 
     exit                            ; #DD00
-    break                           ; #DD01
+    break                           ; #FD00

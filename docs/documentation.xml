@@ -209,6 +209,7 @@
             <listitem>
               <synopsis>- added Amstrad CPC device <link linkend="po_device">AMSTRADCPCPLUS</link> - by Laurent Carlier
 - added Amstrad CPC+ <link linkend="po_savecpr">`SAVECPR`</link> to save CPR cartridge - by Laurent Carlier
+- ZX Next CSpect emulator v2.19.9.1: `break` opcode changed to `FD 00`
 - fix: windows cmd.exe console state after running sjasmplus.exe
 </synopsis>
             </listitem>
@@ -462,7 +463,7 @@
       <para><synopsis>  -h or --help[=warnings]  Help information
   --version                Basic info (with --nologo only raw version string)
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
-  extra "exit" DD00 and "break" DD01 fake instructions)
+  extra "exit" DD00 and "break" FD00 fake instructions)
   --i8080                  Limit valid instructions to i8080 only (+ no fakes)
   --lr35902                Sharp LR35902/SM83 CPU instructions mode (+ no fakes)
   --outprefix=&lt;path&gt;       Prefix for save/output/.. filenames in directives
