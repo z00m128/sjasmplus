@@ -204,7 +204,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>?.?.2024 - 1.20.4</term>
+            <term>?.?.2024 - 1.21.0</term>
 
             <listitem>
               <synopsis>- added Amstrad CPC device <link linkend="po_device">AMSTRADCPCPLUS</link> - by Laurent Carlier
@@ -3761,6 +3761,17 @@ LABEL5:
       lines will be stored as the macro-body until an ENDM pseudo-op is
       encountered. Macro's have to be defined before their use. Macro's name
       must be unique (even if two macros differ by required arguments).
+      </para>
+      <para>Macros are stored as unparsed text and when used, the stored text
+      is expanded and assembled as newly injected lines of source code. This
+      expansion could cause in edge cases slight difference how the text is
+      parsed and assembled, so using directives further affecting the parsing
+      like <link linkend="po_lua">LUA</link> or <link linkend="po_include">INCLUDE</link>
+      inside macro definition is in current version unsupported. If it works
+      for you in some trivial case, then you can keep using it, it's unlikely
+      the future versions of sjasmplus will do worse than current, but if you
+      hit weird bug for code which works outside of macro, then you are out
+      of luck (unless you want to rewrite sjasmplus internal parsing code).
 	  <example>
           <title>Macro without parameters (docs_examples/s_macros.asm)</title>
 
