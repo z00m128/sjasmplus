@@ -451,10 +451,10 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 
 // if offset is negative, it functions as "how many bytes from end of file"
 // if length is negative, it functions as "how many bytes from end of file to not load"
-void BinIncFile(const char* fname, aint offset, aint length) {
+void BinIncFile(const char* fname, aint offset, aint length, const bool systemPathsFirst) {
 	// open the desired file
 	FILE* bif;
-	char* fullFilePath = GetPath(fname);
+	char* fullFilePath = GetPath(fname, nullptr, systemPathsFirst);
 	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("opening file", fname);
 	free(fullFilePath);
 

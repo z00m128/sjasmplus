@@ -553,6 +553,7 @@ static void dirSIZE() {
 static void dirINCBIN() {
 	int offset = 0, length = INT_MAX;
 	std::unique_ptr<char[]> fnaam(GetFileName(lp));
+	const bool system_paths_first = (DT_ANGLE == GetDelimiterOfLastFileName());
 	if (anyComma(lp)) {
 		aint val;
 		if (!anyComma(lp)) {
@@ -570,7 +571,7 @@ static void dirINCBIN() {
 			length = val;
 		}
 	}
-	BinIncFile(fnaam.get(), offset, length);
+	BinIncFile(fnaam.get(), offset, length, system_paths_first);
 }
 
 static void dirINCHOB() {
@@ -581,6 +582,7 @@ static void dirINCHOB() {
 	FILE* ff;
 
 	std::unique_ptr<char[]> fnaam(GetFileName(lp));
+	const bool system_paths_first = (DT_ANGLE == GetDelimiterOfLastFileName());
 	if (anyComma(lp)) {
 		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
@@ -602,7 +604,7 @@ static void dirINCHOB() {
 		}
 	}
 
-	fnaamh = GetPath(fnaam.get());
+	fnaamh = GetPath(fnaam.get(), nullptr, system_paths_first);
 	if (!FOPEN_ISOK(ff, fnaamh, "rb")) {
 		Error("[INCHOB] Error opening file", fnaam.get(), FATAL);
 	}
@@ -615,13 +617,14 @@ static void dirINCHOB() {
 		length = len[0] + (len[1] << 8) - offset;
 	}
 	offset += 17;		// adjust offset (skip HOB header)
-	BinIncFile(fnaam.get(), offset, length);
+	BinIncFile(fnaam.get(), offset, length, system_paths_first);
 	free(fnaamh);
 }
 
 static void dirINCTRD() {
 	aint val, offset = 0, length = INT_MAX;
 	std::unique_ptr<char[]> trdname(GetFileName(lp));
+	const bool system_paths_first = (DT_ANGLE == GetDelimiterOfLastFileName());
 	std::unique_ptr<char[]> filename;
 	if (anyComma(lp) && !anyComma(lp)) filename.reset(GetFileName(lp));
 	if ( !filename || !filename[0] ) {
@@ -658,8 +661,8 @@ static void dirINCTRD() {
 			length = val;
 		}
 	}
-	if (TRD_PrepareIncFile(trdname.get(), filename.get(), offset, length)) {
-		BinIncFile(trdname.get(), offset, length);
+	if (TRD_PrepareIncFile(trdname.get(), filename.get(), offset, length, system_paths_first)) {
+		BinIncFile(trdname.get(), offset, length, system_paths_first);
 	}
 }
 

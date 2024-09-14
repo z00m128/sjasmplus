@@ -207,7 +207,9 @@
             <term>?.?.2024 - 1.21.0</term>
 
             <listitem>
-              <synopsis>- added Amstrad CPC device <link linkend="po_device">AMSTRADCPCPLUS</link> - by Laurent Carlier
+              <synopsis>
+- <link linkend="po_incbin">`INCBIN`</link>, <link linkend="po_inchob">`INCHOB`</link> and <link linkend="po_inctrd">`INCTRD`</link> support now include paths priority (angle &lt;filename&gt; vs "filename")
+- added Amstrad CPC device <link linkend="po_device">AMSTRADCPCPLUS</link> - by Laurent Carlier
 - added Amstrad CPC+ <link linkend="po_savecpr">`SAVECPR`</link> to save CPR cartridge - by Laurent Carlier
 - ZX Next CSpect emulator v2.19.9.1: `break` opcode changed to `FD 00`
 - fix: windows cmd.exe console state after running sjasmplus.exe
@@ -2479,7 +2481,8 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
             <listitem>
               <para>To include a binary file into the outputfile. The offset
               and length are optional. Added in v1.12.1: if negative offset or length is provided,
-              it counts relatively from the end of the file.<example>
+              it counts relatively from the end of the file.</para>
+              <para>(since v1.21.0) The rules of <link linkend="po_include">INCLUDE</link> are used for file search.<example>
                   <title></title>
 
                   <para><programlisting>    INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
@@ -2495,7 +2498,8 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
 
             <listitem>
               <para>To include a data from a hobeta file into the outputfile.
-              The offset and length are optional.<example>
+              The offset and length are optional.</para>
+              <para>(since v1.21.0) The rules of <link linkend="po_include">INCLUDE</link> are used for file search.<example>
                   <title></title>
 
                   <para><programlisting>    INCHOB "gfx.$c",7        ; include gfx.scc, skip first 7 bytes
@@ -2557,7 +2561,8 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
 
             <listitem>
               <para>To include a file from a TRD image into the outputfile.
-              The offset and length are optional.<example>
+              The offset and length are optional.</para>
+              <para>(since v1.21.0) The rules of <link linkend="po_include">INCLUDE</link> are used for file search.<example>
                   <title></title>
 
                   <para><programlisting>    INCTRD "test.trd","mygfx.C" ; include mygfx.C from test.trd

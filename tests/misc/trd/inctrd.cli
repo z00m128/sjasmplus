@@ -1,5 +1,5 @@
 #decompress the TRD file for inclusion (it's "empty" 640kiB disk image)
 gunzip inctrd/inctrd.trd.gz
 # use normal way of assembling
-$MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
+LANG=C $MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm"
 last_result=$?

@@ -46,7 +46,7 @@ bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length,
  * @param length data length (1 or more or INT_MAX to include all), and return value = data length
  * @return int 0 when error, 1 when offset + length are valid values into TRD image file
  */
-int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset, aint & length);
+int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset, aint & length, const bool systemPathsFirst);
 
 #endif
 

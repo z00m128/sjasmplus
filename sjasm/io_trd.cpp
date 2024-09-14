@@ -485,7 +485,7 @@ bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length,
 	return 1;
 }
 
-int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset, aint & length) {
+int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset, aint & length, const bool systemPathsFirst) {
 	// parse filename into TRD file form (max 8+3, don't warn about 3-letter extension)
 	byte trdFormName[12];
 	int Lname = 0;
@@ -493,7 +493,7 @@ int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset,
 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	STrdHead trdHead;
-	char* fullTrdName = GetPath(trdname);
+	char* fullTrdName = GetPath(trdname, nullptr, systemPathsFirst);
 	FILE* ff = SJ_fopen(fullTrdName, "rb");
 	free(fullTrdName);
 	fullTrdName = nullptr;
