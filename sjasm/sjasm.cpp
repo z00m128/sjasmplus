@@ -47,7 +47,7 @@ static void PrintHelpMain() {
 	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
 	_COUT "  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)" _ENDL;
 	_COUT "  --outprefix=<path>       Prefix for save/output/.. filenames in directives" _ENDL;
-	_COUT "  -i<path> or -I<path> or --inc=<path> ( --inc without \"=\" to empty the list)" _ENDL;
+	_COUT "  -i <path> or -I <path> or --inc= <path> (--inc only to empty the list)" _ENDL;
 	_COUT "                           Include path (later defined have higher priority)" _ENDL;
 	_COUT "  --lst[=<filename>]       Save listing to <filename> (<source>.lst is default)" _ENDL;
 	_COUT "  --lstlab[=sort]          Append [sorted] symbol table to listing" _ENDL;
@@ -562,7 +562,11 @@ namespace Options {
 						IncludeDirsList = new CStringsList(val, IncludeDirsList);
 					} else {
 						if (!doubleDash || '=' == arg[5]) {
-							Error("no include path found in", arg, ALL);
+							if (argv[i+1] && '-' != argv[i+1][0]) {		// include path provided as next argument (after space, like gcc)
+								IncludeDirsList = new CStringsList(argv[++i], IncludeDirsList);	// also advance i++
+							} else {
+								Error("no include path found in", arg, ALL);
+							}
 						} else {	// individual `--inc` without "=path" will RESET include dirs
 							if (IncludeDirsList) delete IncludeDirsList;
 							IncludeDirsList = nullptr;
@@ -591,6 +595,20 @@ namespace Options {
 
 				++i;					// next CLI argument
 			} // end of while ((arg=argv[i]) && ('-' == arg[0]))
+		}
+
+		void checkIncludePaths(const CStringsList* includes) {
+			FILE* dir;
+			while (nullptr != includes) {
+				if (FOPEN_ISOK(dir, includes->string, "r")) {
+					fclose(dir);
+				} else {
+					const char* errtxt = '~' == includes->string[0] ? "include path starts with ~ (check docs)" : "include path not found";
+					Error(errtxt, includes->string, ALL);
+				}
+				includes = includes->next;
+			}
+			return;
 		}
 	};
 
@@ -727,6 +745,8 @@ int main(int argc, char **argv) {
 	if (!Options::IsShowFullPath && (Options::IsDefaultSldName || Options::SourceLevelDebugFName[0])) {
 		Warning("missing  --fullpath  with  --sld  may produce incomplete file paths.", NULL, W_EARLY);
 	}
+
+	optParser.checkIncludePaths(Options::IncludeDirsList);
 
 	if (Options::ShowVersion) {
 		if (Options::HideLogo) {	// if "sjasmplus --version --nologo", emit only the raw VERSION

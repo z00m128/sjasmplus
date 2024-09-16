@@ -209,6 +209,9 @@
             <listitem>
               <synopsis>
 - <link linkend="po_incbin">`INCBIN`</link>, <link linkend="po_inchob">`INCHOB`</link> and <link linkend="po_inctrd">`INCTRD`</link> support now include paths priority (angle &lt;filename&gt; vs "filename")
+- include paths which can't be opened before assembling are now reported in error message
+- include paths which start with literal tilde '~' are reported in error message
+- include options <link linkend="s_cli">`-i, -I, --inc`</link> can take path from next CLI argument (new recommended syntax)
 - added Amstrad CPC device <link linkend="po_device">AMSTRADCPCPLUS</link> - by Laurent Carlier
 - added Amstrad CPC+ <link linkend="po_savecpr">`SAVECPR`</link> to save CPR cartridge - by Laurent Carlier
 - ZX Next CSpect emulator v2.19.9.1: `break` opcode changed to `FD 00`
@@ -471,7 +474,7 @@
   --outprefix=&lt;path&gt;       Prefix for save/output/.. filenames in directives
   Note: if prefix is folder, it must already exist and add trailing slash. Prefix
         is applied only to filenames defined in source (not to CLI arguments).
-  -i&lt;path&gt; or -I&lt;path&gt; or --inc=&lt;path&gt; ( --inc without "=" to empty the list)
+  -i &lt;path&gt; or -I &lt;path&gt; or --inc= &lt;path&gt; (--inc only to empty the list)
                            Include path (later defined have higher priority)
   --lst[=&lt;filename&gt;]       Save listing to &lt;filename&gt; (&lt;source&gt;.lst is default)
   --lstlab[=sort]          Append [sorted] symbol table to listing
@@ -509,6 +512,13 @@
 	  The option <code>--lstlab=sort</code> will cause also other symbol dumps being sorted (along
 	  listing): <code>--sym</code>, <code>CSPECTMAP</code> and <code>LABELSLIST</code>.
 	  The <code>--msg=lstlab</code> sets always sorting "on" (no "unsorted" option).
+  </para>
+  <para>
+	  (since v1.21.0) Include path options <code>-i, -I, --inc=</code> now accept path after space, ie.
+      <code>-I some/path/</code> - this is new and recommended syntax. If you get error "error: include
+      path starts with ~ (check docs)", it means your shell did not substitute the ~ character with
+      $HOME path, probably because you didn't put space between option and ~, so shell considers it
+      to be single string not beginning with ~. Insert space between like: <code>-I ~/include/path</code>
   </para>
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
@@ -555,7 +565,7 @@ label:  dw 15
 sjasmplus --lst --lstlab example.asm</programlisting>
 	will execute the assembling as if command line "<code>sjasmplus --zxnext=cspect --msg=war --lst --lstlab example.asm</code>"
 	was used. Known issue: parser of environment variable delimits each option on any white-space character, so
-	option containing space character will be incorrectly parsed (like "-Ifile-path with space" = fails and
+	option containing space character will be incorrectly parsed (like "-I file-path with space" = fails and
 	there is no way to escape/quote the path in the SJASMPLUSOPTS variable to make it work).
   </para>
     </section>

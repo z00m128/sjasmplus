@@ -1,0 +1,37 @@
+error: no include path found in: -i
+error: no include path found in: --inc=
+error: include path starts with ~ (check docs): ~/tilde3
+error: include path not found: /dev/null/er4
+error: include path not found: /dev/null/er3
+error: include path not found: /dev/null/er2
+error: include path not found: /dev/null/er1
+error: include path starts with ~ (check docs): ~/tilde2
+error: include path starts with ~ (check docs): ~/tilde1
+# file opened: tilde.asm
+ 1    0000              ; testing multiple new changes in v1.21.0:
+ 2    0000              ; - include path options (i, I, inc) now can be provided with path by next following CLI argument, ie. "-I dir/"
+ 3    0000              ;   (this allows the shell to expand ~/ paths to full path)
+ 4    0000              ; - include path literally starting with "~" will be reported with hint to read docs (shell didn't expand it)
+ 5    0000              ; - include path which can't be initially opened will be reported in error (missing dir?)
+ 6    0000              ;
+ 7    0000              ; (test is not testing if the shell did correctly expand "~" in normal use case, because it's not known
+ 8    0000              ; how the test enviroment is set up, if it has $HOME and if it is related to running tests - leap of faith)
+ 9    0000              ;
+10    0000              ; (oh, it does not substitute it from test runner when provided in .options file any way... strange, but it's fine for this test)
+11    0000              ;
+12    0000
+13    0000                  INCLUDE "tilde.i.asm"   ; verify the include path works
+# file opened: tilde/tilde.i.asm
+ 1+   0000                  ASSERT 1
+ 2+   0000
+# file closed: tilde/tilde.i.asm
+14    0000                  INCLUDE <tilde.i.asm>
+# file opened: tilde/tilde.i.asm
+ 1+   0000                  ASSERT 1
+ 2+   0000
+# file closed: tilde/tilde.i.asm
+15    0000
+# file closed: tilde.asm
+
+Value    Label
+------ - -----------------------------------------------------------
