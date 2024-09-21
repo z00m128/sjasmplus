@@ -26,7 +26,7 @@ SUBDIR_CRC32C=crc32c
 
 # Ped7g: -pedantic removed due to Lua5.4 having too many warnings
 CFLAGS=-DNDEBUG -O2 -Wall -static -DUSE_LUA -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_LUABRIDGE) -I$(SUBDIR_CRC32C)
-CXXFLAGS=-std=gnu++14 $(CFLAGS)
+CXXFLAGS=-std=c++17 $(CFLAGS)
 
 LDFLAGS= -s
 

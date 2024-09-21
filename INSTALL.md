@@ -13,7 +13,7 @@ or
 - complete MinGW environment for MS Windows, configured with MinGW bin directories added in `PATH` variable (typically `C:\MinGW\bin;` `C:\MinGW\msys\1.0\bin`) or possibly with any BASH emulator (e.g. the one which comes with [git for windows](https://gitforwindows.org/)) will do it instead of msys is missing / not set.
 - CMake installed into MinGW bin directory (optionally)
 
-Compilation is tested with GCC 5.5.0, it should run also with older 5.x versions. It will not work with GCC 4.x and older.
+C++17 standard is required, compilation is tested with GCC 9.5.0, it should run also with older 9.x versions. It will not work with GCC 8.x and older. C++17 is required since v1.21.0, older versions required C++14 and can be built with GCC 5.x.
 
 ## Getting full source code of sjasmplus
 

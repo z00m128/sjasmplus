@@ -208,6 +208,7 @@
 
             <listitem>
               <synopsis>
+- C++17 standard is now required minimum (to compile sjasmplus sources) (GCC9 for example)
 - <link linkend="po_incbin">`INCBIN`</link>, <link linkend="po_inchob">`INCHOB`</link> and <link linkend="po_inctrd">`INCTRD`</link> support now include paths priority (angle &lt;filename&gt; vs "filename")
 - include paths which can't be opened before assembling are now reported in error message
 - include paths which start with literal tilde '~' are reported in error message

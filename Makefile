@@ -8,7 +8,7 @@
 # make tests 					- to run the CI test+example script runner
 # make memcheck TEST=misc DEBUG=1		- to use valgrind on assembling sub-directory "misc" in tests
 # make PREFIX=~/.local install			- to install release version into ~/.local/bin/
-# make clean && make CC=gcc-8 CXX=g++-8		- to compile binary with gcc-8
+# make clean && make CC=gcc-9 CXX=g++-9		- to compile binary with gcc-9
 # make DEBUG=1 LUA_COVERAGE=1 coverage		- to produce build/debug/coverage/* files by running the tests
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
 # make CFLAGS_EXTRA='-m32' LDFLAGS='-ldl -m32'  - to builds 32b linux executable
@@ -103,7 +103,7 @@ CFLAGS+=-DNDEBUG -O2
 endif
 
 # C++ flags (the CPPFLAGS are for preprocessor BTW, if you always wonder, like me...)
-CXXFLAGS?=-std=gnu++14 $(CFLAGS)
+CXXFLAGS?=-std=c++17 $(CFLAGS)
 
 # full path to executable
 BUILD_EXE=$(BUILD_DIR)/$(EXE_BASE_NAME)
