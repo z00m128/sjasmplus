@@ -5,9 +5,7 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
-savenex V1.3 bigger disclaimer/explanation!
-
-check for in/out having also [] brackets and syntax brackets-only mode?
+check for Z80 in/out having also [] brackets and syntax brackets-only mode? (currently only `(c)` and `(n)` works)
 
 ARM! https://cirrus-ci.org/guide/linux/
 > Cirrus CI supports container and arm_container instances in order to run your CI workloads on amd64 and arm64 platforms respectively.

@@ -518,7 +518,7 @@
       <code>-I some/path/</code> - this is new and recommended syntax. If you get error "error: include
       path starts with ~ (check docs)", it means your shell did not substitute the ~ character with
       $HOME path, probably because you didn't put space between option and ~, so shell considers it
-      to be single string not beginning with ~. Insert space between like: <code>-I ~/include/path</code>
+      to be single string not beginning with ~. Insert space between, like: <code>-I ~/include/path</code>
   </para>
   <para>Value for <code>--syntax</code> option may consist of multiple letters, omitting letter
 	for particular feature will use the default setting:
@@ -1452,6 +1452,7 @@ StartProg:
               <para>Has only single slot of size 64kiB (slot 0), covering full Z80 CPU addressing range.
 				  There are 32 memory pages available, by default page 0 is mapped.
 				  That makes in total 2MiB of memory available (32 * 64 ki = 2 Mi).</para>
+              <para>This is currently recommended choice for ZX80/ZX81 development with DeZog debugger.</para>
             </listitem>
           </varlistentry>
 
@@ -4663,7 +4664,8 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
       https://specnext.dev/wiki/NEX_file_format</ulink>. In short it is header + loading screen +
       like-snapshot binary and remaining resources appended after.</para>
 
-  <para>Sjasmplus currently supports V1.2 and V1.3 of NEX file format (see wiki for details).</para>
+  <para>Sjasmplus currently supports official V1.2 of NEX file format (see wiki for details). The "V1.3" features
+    are currently unofficial extension which does not work with regular NextZXOS distro and require special loader (nexload2).</para>
 
   <para>As such, the SAVENEX commands are available only in ZXSPECTRUMNEXT device emulation mode,
 	  see <link linkend="po_device">DEVICE</link>.</para>
@@ -4706,7 +4708,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 					  released back).
 				  </para>
 				  <para>
-					  The fileVersion can be 2 (NEX V1.2) or 3 (NEX V1.3), which will enforce the
+					  The fileVersion can be 2 (official NEX V1.2) or 3 (unofficial extension V1.3), which will enforce the
 					  specified version of file. Otherwise the file is V1.2 by default and will
 					  auto-switch to V1.3 when some V1.3 feature is configured/used. When version 2
 					  is enforced, any usage of V1.3 feature will emit error.
