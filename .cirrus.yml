@@ -21,7 +21,7 @@ task:
   assemble_examples_script: ContinuousIntegration/test_folder_examples.sh
 
 pipe:
-  name: coveralls.io coverage report (linux gcc6)
+  name: coveralls.io coverage report (linux gcc14)
   # check if this is z00m's repository (the encrypted token belongs to original repo)
   only_if: $CIRRUS_REPO_OWNER == 'z00m128'
   skip: $CIRRUS_PR
@@ -42,7 +42,7 @@ pipe:
     cpu: 2
     memory: 1G
   steps:
-    - image: gcc:11
+    - image: gcc:14
       generate_gcov_script: make clean && make -j3 coverage
     - image: python:3.7
       # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
