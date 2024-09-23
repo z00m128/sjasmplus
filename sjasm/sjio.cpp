@@ -478,8 +478,8 @@ void BinIncFile(const char* fname, aint offset, aint length, const bool systemPa
 	// validate the resulting [offset, length]
 	if (offset < 0 || length < 0 || totlen < offset + length) {
 		Error("file too short", fname);
-		offset = std::min(std::max(0, offset), totlen);			//TODO change to std::clamp when C++17 is used
-		length = std::min(std::max(0, length), totlen-offset);	//TODO change to std::clamp when C++17 is used
+		offset = std::clamp(offset, 0, totlen);
+		length = std::clamp(length, 0, totlen - offset);
 		assert((0 <= offset) && (offset + length <= totlen));
 	}
 	if (0 == length) {
