@@ -6,17 +6,14 @@ scratch area + TODO keeper for sjasmplus developers:
 Ped:
 
 Cirrus-CI .cirrus.yml:
-pipe:
-  name: coveralls.io coverage report (linux gcc6)
-# FIXME verify gcc-11 works with coverage data well, last time I tried to update this the 8 and 9 had "some damage to coverage results"
-# this may be possible to test also locally if it even works?
+- name: coveralls.io coverage report (linux gcc6):
+  GCC14 still doesn't have as perfect coverage report as GCC6 (versions between I tried were also imperfect),
+  so for the moment I will stick with 14 and see how it will go, but update probably ASAP and keep tracking coverge results.
 
-Cirrus-CI .cirrus.yml:
-  name: MacOS default CC build (with unit tests)
-# FIXME verify sonoma base works (and check if there is even newer one)
-- I still get warning message even after switching to `macos-sonoma-base:latest` -> not sure what is happening ("-base" is not a thing any more??). There will be sequoia probably soon, so switch to that later.
-
-.lgtm.yml is not used anymore? the code-ql of github works how? verify + document if lgtm config is still used
+- name: MacOS default CC build (with unit tests):
+  I still get warning message "Only ghcr.io/cirruslabs/macos-runner:sonoma is allowed. Automatically upgraded."
+  even with "macos-sonoma-base" image which seems to exist -> not sure what is happening.
+  There will be sequoia probably soon, so switch to that later and re-check.
 
 macos: plenty of "deprecated" warnings (`sprintf` for example)
 warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead
