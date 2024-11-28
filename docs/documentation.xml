@@ -217,6 +217,7 @@
 - added Amstrad CPC+ <link linkend="po_savecpr">`SAVECPR`</link> to save CPR cartridge - by Laurent Carlier
 - ZX Next CSpect emulator v2.19.9.1: `break` opcode changed to `FD 00`
 - fix: windows cmd.exe console state after running sjasmplus.exe
+- Lua: minor version upgrade to 5.4.7 (from 5.4.6)
 </synopsis>
             </listitem>
           </varlistentry>
@@ -4224,7 +4225,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
         as <ulink url="https://www.lua.org/">Lua</ulink> embedded to the assembler? Answer is simple: it can be used to add extra
       features by users. And Lua is small enough, fast and powerful scripting engine.</para>
 
-      <para>Sjasmplus currently includes Lua 5.4.6 (since v1.20.3). The upgrade from Lua 5.1 in v1.20.0
+      <para>Sjasmplus currently includes Lua 5.4.7 (since v1.21.0). The upgrade from Lua 5.1 in v1.20.0
         was done along replacing tolua++ with LuaBridge2.6 and while there was lot of effort
         to maintain original Lua bindings to sjasmplus, there were few changes to the API.</para>
 
@@ -4518,7 +4519,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
       <para><emphasis>None at this moment.</emphasis></para>
 
-      <para>Since v1.20.0 the sjasmplus integrates Lua 5.4.4 (now 5.4.6).</para>
+      <para>Since v1.20.0 the sjasmplus integrates Lua 5.4.4 (now 5.4.7).</para>
 
       <para>The libraries included in older versions of sjasmplus: lpack.c, bit (bitwise operators)
         and hex (convert to/from hexa numbers) are now all part of the standard Lua 5.4.</para>
