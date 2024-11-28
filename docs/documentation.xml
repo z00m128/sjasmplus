@@ -4514,7 +4514,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     </section>
 
     <section id="s_lua_third_party_libs">
-      <title>Third-party embedded library(ies)</title>
+      <title>Third-party embedded libraries</title>
 
       <para><emphasis>None at this moment.</emphasis></para>
 
@@ -4528,6 +4528,33 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
       <para>For small example check the test <code>tests/lua_examples/trivial/lua_standard_libs.asm</code></para>
 
+    </section>
+
+    <section id="s_lua_third_party_libs_ext">
+      <title>Third-party external libraries</title>
+
+      <para>The default build method of sjasmplus does link Lua interpreter statically &dash; this is not compatible
+        with dynamically loaded extensions (shared libraries). You may encounter error similar to this:</para>
+
+      <para><code>error loading module 'lpeg' from file '/usr/lib/x86_64-linux-gnu/lua/5.4/lpeg.so'(0): error: [LUA] undefined symbol: lua_gettop</code></para>
+
+      <para>You can rebuild the sjasmplus configured to use the OS shared Lua library by reconfiguring the build:
+        <example>
+          <title>Configure and build sjasmplus to use shared lib for Lua</title>
+
+          <para><programlisting>
+# building with make:
+$ make clean &amp;&amp; USE_BUNDLED_LUA=0 make
+# test final binary with your extension and install it where you wish
+
+
+# building with cmake:
+$ cmake -DSYSTEM_LUA=ON -DCMAKE_BUILD_TYPE=Release -S . -B build
+$ cmake --build build
+$ cmake --install build</programlisting></para>
+        </example>
+        This should make Lua interpreter compatible with those extensions and with a bit of luck it will be still
+        compatible with sjasmplus bindings &dash; allowing you to use also the extension API in your code.</para>
     </section>
 
     <section id="s_lua_examples">
