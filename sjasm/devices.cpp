@@ -422,6 +422,10 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 					ErrorInt("No more memory pages to map next one into slot", previousSlotI, SUPPRESS);
 					// disable the option on the overflowing slot
 					prevS->Option = CDeviceSlot::O_NONE;
+					// reset error reporting even when level is CHECK_NO_EMIT, one error is enough
+					limitExceeded = false;
+					previousSlotI = i;
+					previousSlotOpt = S->Option;
 					break;		// continue into next slot, don't wrap any more
 				}
 				if (realAddr != (prevS->Address + prevS->Size)) {	// should be equal
@@ -443,10 +447,12 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 				}
 				break;
 		}
-		// refresh check slot settings
-		limitExceeded &= (previousSlotI == i);	// reset limit flag if slot changed (in non check_reset mode)
-		previousSlotI = i;
-		previousSlotOpt = S->Option;
+		// refresh check slot settings (only in CHECK_EMIT case, otherwise ParseLine will reset it with CHECK_NO_EMIT at BoL!)
+		if (CHECK_EMIT == level) {
+			limitExceeded &= (previousSlotI == i);	// reset limit flag if slot changed (in non check_reset mode)
+			previousSlotI = i;
+			previousSlotOpt = S->Option;
+		}
 		return;
 	}
 	Error("CheckPage(..): please, contact the author of this program.", nullptr, FATAL);

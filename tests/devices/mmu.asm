@@ -121,3 +121,27 @@ label3_p5:  ld sp,"66"  ; '166'     ; last byte of page 5, first two bytes of pa
     ASSERT 0x3456 == $ && 6 ==  $$
     ENT
     ASSERT 0x2345 == $ && 6 ==  $$
+
+;-----------------------------------------------------------
+; new part to verify bugfix for #245
+
+    ; error option (guarding machine code write outside of current slot)
+    MMU 1 e, 5  : ASSERT {0x4000} == "55"
+    ORG 0x7FFF  : ccf : ccf     ; should be error, second `ccf` left the slot memory
+    ASSERT {0x8000} == "7?"     ; but damage is done in the virtual memory, that's how it is
+
+;-----------------------------------------------------------
+; new part: third ORG argument will now warn when it's outside of slot range
+
+    MMU 0, 0, 0x3FFF
+    MMU 0, 0, 0x4000            ; warn
+    MMU 1, 5, 0x3FFF            ; warn
+    MMU 1, 5, 0x4000
+    MMU 1, 5, 0x7FFF
+    MMU 1, 5, 0x8000            ; warn
+    MMU 1 2, 5, 0x3FFF          ; warn
+    MMU 1 2, 5, 0x4000
+    MMU 1 2, 5, 0xBFFF
+    MMU 1 2, 5, 0xC000          ; warn
+    MMU 3, 7, 0xBFFF            ; warn
+    MMU 3, 7, 0xC000

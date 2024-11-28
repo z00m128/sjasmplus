@@ -454,6 +454,15 @@ static void dirMMU() {
 		if (DISP_NONE != PseudoORG) {
 			WarningById(W_DISPLACED_ORG);
 		}
+		// check if explicit ORG address is outside of the slots affected by MMU, warn about it
+		const CDeviceSlot & check_s1 = *Device->GetSlot(slot1);
+		const CDeviceSlot & check_s2 = *Device->GetSlot(slot2);
+		if ((address < check_s1.Address) || (check_s2.Address + check_s2.Size <= address)) {
+			char buf[LINEMAX];
+			SPRINTF3(buf, LINEMAX, "[MMU] Requested ORG address 0x%04X is out of range 0x%04X..0x%04X",
+					 address, check_s1.Address, check_s2.Address + check_s2.Size - 1);
+			Warning(buf);
+		}
 	}
 	Device->CheckPage(CDevice::CHECK_RESET);
 }

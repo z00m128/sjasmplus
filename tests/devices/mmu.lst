@@ -184,6 +184,7 @@ mmu.asm(109): error: Unexpected: ,
 110   0000
 111   0000                  ; valid syntax with address -exercise different code-paths
 112   0000                  ORG 0x1234
+mmu.asm(113): warning: [MMU] Requested ORG address 0x4000 is out of range 0x0000..0x3FFF
 113   1234                  MMU 0, 0, 0x4000
 114   4000                  ASSERT 0x4000 == $ && 6 == $$ && {0x0000} == "00" && {$} == "66"
 mmu.asm(115): warning: value 0x12345 is truncated to 16bit value: 0x2345
@@ -198,6 +199,40 @@ mmu.asm(118): warning[displacedorg]: ORG-address set inside displaced block, the
 122   3456                  ENT
 123   2345                  ASSERT 0x2345 == $ && 6 ==  $$
 124   2345
+125   2345              ;-----------------------------------------------------------
+126   2345              ; new part to verify bugfix for #245
+127   2345
+128   2345                  ; error option (guarding machine code write outside of current slot)
+129   2345                  MMU 1 e, 5
+129   2345                ASSERT {0x4000} == "55"
+130   2345                  ORG 0x7FFF
+130   7FFF 3F             ccf
+mmu.asm(130): error: Write outside of memory slot: 32768
+130   8000 3F             ccf     ; should be error, second `ccf` left the slot memory
+131   8001                  ASSERT {0x8000} == "7?"     ; but damage is done in the virtual memory, that's how it is
+132   8001
+133   8001              ;-----------------------------------------------------------
+134   8001              ; new part: third ORG argument will now warn when it's outside of slot range
+135   8001
+136   8001                  MMU 0, 0, 0x3FFF
+mmu.asm(137): warning: [MMU] Requested ORG address 0x4000 is out of range 0x0000..0x3FFF
+137   3FFF                  MMU 0, 0, 0x4000            ; warn
+mmu.asm(138): warning: [MMU] Requested ORG address 0x3FFF is out of range 0x4000..0x7FFF
+138   4000                  MMU 1, 5, 0x3FFF            ; warn
+139   3FFF                  MMU 1, 5, 0x4000
+140   4000                  MMU 1, 5, 0x7FFF
+mmu.asm(141): warning: [MMU] Requested ORG address 0x8000 is out of range 0x4000..0x7FFF
+141   7FFF                  MMU 1, 5, 0x8000            ; warn
+mmu.asm(142): warning: [MMU] Requested ORG address 0x3FFF is out of range 0x4000..0xBFFF
+142   8000                  MMU 1 2, 5, 0x3FFF          ; warn
+143   3FFF                  MMU 1 2, 5, 0x4000
+144   4000                  MMU 1 2, 5, 0xBFFF
+mmu.asm(145): warning: [MMU] Requested ORG address 0xC000 is out of range 0x4000..0xBFFF
+145   BFFF                  MMU 1 2, 5, 0xC000          ; warn
+mmu.asm(146): warning: [MMU] Requested ORG address 0xBFFF is out of range 0xC000..0xFFFF
+146   C000                  MMU 3, 7, 0xBFFF            ; warn
+147   BFFF                  MMU 3, 7, 0xC000
+148   C000
 # file closed: mmu.asm
 
 Value    Label
