@@ -785,32 +785,30 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
       <title>Temporary labels</title>
 
       <para>To keep the number of used labels reasonable it is possible to use
-      numbers as labels. These labels can only be used as labels to jump to.
-      To jump to these labels, use the number followed by an 'F' for forward
-      branches or a 'B' for backward branches. Temporary labels should be defined
-      in the same order during every pass of assembling, but they can be used
-      within macro, or repeating blocks (old sjasmplus versions didn't allow usage within macro).</para>
+      numbers as labels. To target these labels in all expressions use the number followed by an '_F' for forward
+      search or a '_B' for backward search. Temporary labels should be defined
+      in the same order during every pass of assembling, and they can be used
+      within macro, or repeating blocks.</para>
 
-      <para>Since v1.19.0 there is alternative syntax using underscore before 'B' and 'F', this
-        alternative underscored suffix enables temporary labels also for regular instructions
-        (in all expressions, same way as other labels).</para>
+      <para>Before v1.19.0 the syntax was using only letters 'B' and 'F' and was enabled only
+        for branching instructions (the old syntax still works for those, but only for those).</para>
 
       <para><example>
           <title>docs_examples/s_temp_labels.asm</title>
 
           <para><programlisting>        ADD A,E
-        JR NC,1F
+        JR NC,1_F   ; old syntax "1F"
         INC D
 1       LD E,A
 2       LD B,4
         LD A,(DE)
         OUT (152),A
-        DJNZ 2B
+        DJNZ 2_B    ; old syntax "2B"
 
         MACRO zing
             DUP 2
-                JR 1F
-1               DJNZ    1B
+                JR    1_F
+1               DJNZ  1_B
             EDUP
         ENDM
 
