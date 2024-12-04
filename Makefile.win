@@ -10,7 +10,7 @@ CC=$(GCC)
 GPP=g++.exe
 C++=$(GPP)
 
-PREFIX=c:/mingw/usr/local/bin/
+PREFIX=c:/mingw32/usr/local/bin/
 CREATEDIR=mkdir -p
 INSTALL=cp
 UNINSTALL=rm -f
