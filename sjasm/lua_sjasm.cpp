@@ -338,7 +338,7 @@ static unsigned int lua_sj_get_word(unsigned int address) {
 	return result;
 }
 
-static const char* lua_sj_get_module(void) {
+static const char* lua_sj_get_modules(void) {
 	return ModuleName;
 }
 
@@ -410,7 +410,7 @@ static void lua_impl_init() {
 			.addFunction("get_byte", lua_sj_get_byte)
 			.addFunction("get_word", lua_sj_get_word)
 			.addFunction("get_device", GetDeviceName)		// no error/warning, can be called directly
-			.addFunction("get_module_namespace", lua_sj_get_module)
+			.addFunction("get_modules", lua_sj_get_modules)
 			.addFunction("set_page", lua_sj_set_page)
 			.addFunction("set_slot", lua_sj_set_slot)
 			// MMU API will be not added, it is too dynamic, and _pc("MMU ...") works
