@@ -4447,6 +4447,14 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             </listitem>
           </varlistentry>
 
+         <varlistentry>
+            <term>[string] sj.get_modules()<indexterm id="lua_sj_get_modules"><primary>sj.get_modules()</primary></indexterm></term>
+
+            <listitem>
+              <para>Return current modules namespace. Returns an empty string if not in a module.</para>
+            </listitem>
+          </varlistentry>
+
           <varlistentry>
             <term>[boolean] sj.set_device("id" = "NONE", ramtop = 0)<indexterm id="lua_sj_set_device"><primary>sj.set_device(..)</primary></indexterm></term>
 
