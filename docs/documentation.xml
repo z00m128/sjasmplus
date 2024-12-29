@@ -217,6 +217,7 @@
 - added Amstrad CPC+ <link linkend="po_savecpr">`SAVECPR`</link> to save CPR cartridge - by Laurent Carlier
 - ZX Next CSpect emulator v2.19.9.1: `break` opcode changed to `FD 00`
 - fix: windows cmd.exe console state after running sjasmplus.exe
+- Lua: new function sj.get_modules to get current modules namespace
 - Lua: minor version upgrade to 5.4.7 (from 5.4.6)
 - minor bugfixes/improvements in specific edge cases
 </synopsis>
