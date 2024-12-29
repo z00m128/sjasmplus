@@ -1488,6 +1488,9 @@ StartProg:
 
         </variablelist></para>
 
+      <para>For CPC users this <ulink url="https://github.com/ClaireCheshireCat/dsk-lua">dsk-lua library</ulink>
+        may be of interest.</para>
+
       <para>If you want to see other devices you must write to us. See <link
       linkend="feedback">Feedback</link> chapter.</para>
     </section>
