@@ -261,10 +261,10 @@ static int lua_sj_get_label(const char *name) {
 
 static bool lua_sj_insert_label(const char *name, int address) {
 	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
-	std::unique_ptr<char[]> fullName(ValidateLabel(name, false, false));
+	std::unique_ptr<char[]> fullName(ValidateLabel(name, true, false));
 	removeLuaSourcePositions(positionsAdded);
 	if (nullptr == fullName.get()) return false;
-	return LabelTable.Insert(name, address);
+	return LabelTable.Insert(fullName.get(), address);
 }
 
 static void lua_sj_shellexec(const char *command) {

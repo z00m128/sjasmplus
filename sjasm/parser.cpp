@@ -768,6 +768,8 @@ void ParseLabel() {
 				LabelTable.Update(tp, val);
 
 				delete[] buf;
+			} else {
+				label->updatePass = pass;	// just "touch" it here in third pass
 			}
 		} else if (pass == 2 && !LabelTable.Insert(tp, val, traits, equPageNum)) {
 			if (!LabelTable.Update(tp, val)) assert(false); // unreachable, update will always work after insert failed

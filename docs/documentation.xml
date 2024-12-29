@@ -217,7 +217,8 @@
 - added Amstrad CPC+ <link linkend="po_savecpr">`SAVECPR`</link> to save CPR cartridge - by Laurent Carlier
 - ZX Next CSpect emulator v2.19.9.1: `break` opcode changed to `FD 00`
 - fix: windows cmd.exe console state after running sjasmplus.exe
-- Lua: new function sj.get_modules to get current modules namespace
+- Lua: fix <link linkend="lua_sj_insert_label">sj.insert_label</link> to apply current namespace to name
+- Lua: new <link linkend="lua_sj_get_modules">sj.get_modules</link> to get current modules namespace
 - Lua: minor version upgrade to 5.4.7 (from 5.4.6)
 - minor bugfixes/improvements in specific edge cases
 </synopsis>
@@ -4370,7 +4371,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[boolean] sj.insert_label("name", address)<indexterm id="lua_sj_insert_label"><primary>sj.insert_label(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Add new label. Returns true when label was successfully inserted (or value modified first time in next assembling pass), false when name is invalid or label was already defined.</para>
+              <para>Add new label. Returns true when label was successfully inserted (or value modified first time in next assembling pass), false when name is invalid or label was already defined. Does apply current namespace and label rules to provided "name".</para>
             </listitem>
           </varlistentry>
 
