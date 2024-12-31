@@ -43,12 +43,12 @@ constexpr int INSTRUCTION_START_MARKER = -2;
 const char* ArchiveFilename(const char* fullpathname);	// returns permanent C-string pointer to the fullpathname
 void ReleaseArchivedFilenames();	// does release all archived filenames, making all pointers invalid
 char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0);
-const char* FilenameBasePos(const char* fullname);
-void ConstructDefaultFilename(char* dest, size_t dest_size, const char* ext, bool checkIfDestIsEmpty = true);
+void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty = true);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void OpenExpFile();
 void NewDest(const char* newfilename, int mode = OUTPUT_TRUNCATE);
-bool FileExists(const char* filename);
+bool FileExists(const std::filesystem::path & file_name);
+bool FileExistsCstr(const char* filename);
 FILE* GetListingFile();
 void ListFile(bool showAsSkipped = false);
 void ListSilentOrExternalEmits();

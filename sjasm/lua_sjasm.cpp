@@ -414,7 +414,7 @@ static void lua_impl_init() {
 			.addFunction("set_page", lua_sj_set_page)
 			.addFunction("set_slot", lua_sj_set_slot)
 			// MMU API will be not added, it is too dynamic, and _pc("MMU ...") works
-			.addFunction("file_exists", FileExists)
+			.addFunction("file_exists", FileExistsCstr)
 		.endNamespace()
 		.beginNamespace("zx")
 			.addFunction("trdimage_create_i", lua_zx_trdimage_create)

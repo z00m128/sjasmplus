@@ -68,6 +68,7 @@ static_assert(0x78563412 == sj_bswap32(0x12345678), "internal error in bswap32 i
 long GetTickCount();
 #endif
 
+FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode);
 FILE* SJ_fopen(const char* fname, const char* mode);
 void SJ_GetCurrentDirectory(int, char*);
 int SJ_SearchPath(const char* oudzp, const char* filename, const char* /*extension*/, int maxlen, char* nieuwzp, char** ach);

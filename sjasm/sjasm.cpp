@@ -97,20 +97,17 @@ namespace Options {
 		tcols = enabled ? &tcols_ansi : &tcols_none;
 	}
 
-	char OutPrefix[LINEMAX] = {0};
-	char SymbolListFName[LINEMAX] = {0};
-	char ListingFName[LINEMAX] = {0};
-	char ExportFName[LINEMAX] = {0};
-	char DestinationFName[LINEMAX] = {0};
-	char RAWFName[LINEMAX] = {0};
-	char UnrealLabelListFName[LINEMAX] = {0};
-	char CSpectMapFName[LINEMAX] = {0};
+	std::filesystem::path OutPrefix {""};
+	std::filesystem::path SymbolListFName {""};
+	std::filesystem::path ListingFName {""};
+	std::filesystem::path ExportFName {""};
+	std::filesystem::path DestinationFName {""};
+	std::filesystem::path RAWFName {""};
+	std::filesystem::path UnrealLabelListFName {""};
+	std::filesystem::path CSpectMapFName {""};
 	int CSpectMapPageSize = 0x4000;
-	char SourceLevelDebugFName[LINEMAX] = {0};
+	std::filesystem::path SourceLevelDebugFName {""};
 	bool IsDefaultSldName = false;
-
-	char ZX_SnapshotFName[LINEMAX] = {0};
-	char ZX_TapeFName[LINEMAX] = {0};
 
 	EOutputVerbosity OutputVerbosity = OV_ALL;
 	bool IsLabelTableInListing = 0;
@@ -389,6 +386,17 @@ namespace Options {
 			return 1;	// keyword detected, option was processed
 		}
 
+		// returns 1 when argument was processed (keyword detected, value copied into path var)
+		int CheckAssignmentOption(const char* keyword, std::filesystem::path & path) {
+			if (strcmp(keyword, opt)) return 0;		// detect "keyword" (return 0 if not)
+			if (*val) {
+				path = val;
+			} else {
+				Error("no parameters found in", arg, ALL);
+			}
+			return 1;	// keyword detected, option was processed
+		}
+
 		static void splitByChar(const char* s, const int splitter,
 							   char* v1, const size_t v1Size,
 							   char* v2, const size_t v2Size) {
@@ -532,12 +540,12 @@ namespace Options {
 				} else if (!strcmp(opt, "sld") && !val[0]) {
 					IsDefaultSldName = true;
 				} else if (
-					CheckAssignmentOption("outprefix", OutPrefix, LINEMAX) ||
-					CheckAssignmentOption("sym", SymbolListFName, LINEMAX) ||
-					CheckAssignmentOption("lst", ListingFName, LINEMAX) ||
-					CheckAssignmentOption("exp", ExportFName, LINEMAX) ||
-					CheckAssignmentOption("sld", SourceLevelDebugFName, LINEMAX) ||
-					CheckAssignmentOption("raw", RAWFName, LINEMAX) ) {
+					CheckAssignmentOption("outprefix", OutPrefix) ||
+					CheckAssignmentOption("sym", SymbolListFName) ||
+					CheckAssignmentOption("lst", ListingFName) ||
+					CheckAssignmentOption("exp", ExportFName) ||
+					CheckAssignmentOption("sld", SourceLevelDebugFName) ||
+					CheckAssignmentOption("raw", RAWFName) ) {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
 					IsShowFullPath = 1;
@@ -598,11 +606,9 @@ namespace Options {
 		}
 
 		void checkIncludePaths(const CStringsList* includes) {
-			FILE* dir;
 			while (nullptr != includes) {
-				if (FOPEN_ISOK(dir, includes->string, "r")) {
-					fclose(dir);
-				} else {
+				const std::filesystem::path dir(includes->string);
+				if (!std::filesystem::is_directory(dir)) {
 					const char* errtxt = '~' == includes->string[0] ? "include path starts with ~ (check docs)" : "include path not found";
 					Error(errtxt, includes->string, ALL);
 				}
@@ -721,13 +727,13 @@ int main(int argc, char **argv) {
 	}
 	// warn about BE-host only when there's any CLI argument && after CLI options were parsed
 	if (2 <= argc && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
-	if (Options::IsDefaultListingName && Options::ListingFName[0]) {
+	if (Options::IsDefaultListingName && Options::ListingFName.has_filename()) {
 		Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
 	}
-	if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName[0])) {
+	if (OV_LST == Options::OutputVerbosity && (Options::IsDefaultListingName || Options::ListingFName.has_filename())) {
 		Error("Using  --msg=lst[lab]  and other list options is not possible.", NULL, FATAL);
 	}
-	if (Options::IsDefaultSldName && Options::SourceLevelDebugFName[0]) {
+	if (Options::IsDefaultSldName && Options::SourceLevelDebugFName.has_filename()) {
 		Error("Using both  --sld  and  --sld=<filename>  is not possible.", NULL, FATAL);
 	}
 	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
@@ -742,7 +748,7 @@ int main(int argc, char **argv) {
 		_CERR logo _ENDL;
 	}
 
-	if (!Options::IsShowFullPath && (Options::IsDefaultSldName || Options::SourceLevelDebugFName[0])) {
+	if (!Options::IsShowFullPath && (Options::IsDefaultSldName || Options::SourceLevelDebugFName.has_filename())) {
 		Warning("missing  --fullpath  with  --sld  may produce incomplete file paths.", NULL, W_EARLY);
 	}
 
@@ -764,7 +770,7 @@ int main(int argc, char **argv) {
 	}
 
 	// create default output name, if not specified
-	ConstructDefaultFilename(Options::DestinationFName, LINEMAX, ".out");
+	ConstructDefaultFilename(Options::DestinationFName, ".out");
 	int base_encoding = ConvertEncoding;
 
 	// init some vars
@@ -815,15 +821,15 @@ int main(int argc, char **argv) {
 
 	Close();
 
-	if (Options::UnrealLabelListFName[0]) {
+	if (Options::UnrealLabelListFName.has_filename()) {
 		LabelTable.DumpForUnreal();
 	}
 
-	if (Options::CSpectMapFName[0]) {
+	if (Options::CSpectMapFName.has_filename()) {
 		LabelTable.DumpForCSpect();
 	}
 
-	if (Options::SymbolListFName[0]) {
+	if (Options::SymbolListFName.has_filename()) {
 		LabelTable.DumpSymbols();
 	}
 

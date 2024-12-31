@@ -30,9 +30,14 @@
 
 #include "sjdefs.h"
 
+FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode) {
+	if (nullptr == mode || fname.empty()) return nullptr;
+	return fopen(fname.string().c_str(), mode);
+}
+
 FILE* SJ_fopen(const char* fname, const char* mode) {
-	if (nullptr == fname || nullptr == mode || !*fname) return nullptr;
-	return fopen(fname, mode);
+	if (nullptr == fname) return nullptr;
+	return SJ_fopen(std::filesystem::path(fname), mode);
 }
 
 /*

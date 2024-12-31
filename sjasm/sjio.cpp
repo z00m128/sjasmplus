@@ -72,6 +72,13 @@ void ReleaseArchivedFilenames() {
 	archivedFileNames.clear();
 }
 
+static const char* FilenameBasePos(const char* fullname) {
+	const char* const filenameEnd = fullname + strlen(fullname);
+	const char* baseName = filenameEnd;
+	while (fullname < baseName && '/' != baseName[-1] && '\\' != baseName[-1]) --baseName;
+	return baseName;
+}
+
 // find position of extension in filename (points at dot char or beyond filename if no extension)
 // filename is pointer to writeable format containing file name (can be full path) (NOT NULL)
 // if initWithName and filenameBufferSize are explicitly provided, filename will be first overwritten with those
@@ -91,29 +98,18 @@ char* FilenameExtPos(char* filename, const char* initWithName, size_t initNameMa
 	return filenameEnd;
 }
 
-const char* FilenameBasePos(const char* fullname) {
-	const char* const filenameEnd = fullname + strlen(fullname);
-	const char* baseName = filenameEnd;
-	while (fullname < baseName && '/' != baseName[-1] && '\\' != baseName[-1]) --baseName;
-	return baseName;
-}
-
-void ConstructDefaultFilename(char* dest, size_t dest_size, const char* ext, bool checkIfDestIsEmpty) {
-	if (nullptr == dest || nullptr == ext || !ext[0]) exit(1);	// invalid arguments
+void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty) {
+	if (nullptr == ext || !ext[0]) exit(1);	// invalid arguments
 	// if the destination buffer has already some content and check is requested, exit
-	if (checkIfDestIsEmpty && dest[0]) return;
-	size_t extSz = strlen(ext);
-	dest[0] = 0;
+	if (checkIfDestIsEmpty && !dest.empty()) return;
 	// construct the new default name - search for explicit name in sourcefiles
-	for (SSource & src : sourceFiles) {
+	dest = "asm";		// use "asm" base if no explicit filename available
+	for (const SSource & src : sourceFiles) {
 		if (!src.fname[0]) continue;
-		STRNCPY(dest, dest_size, src.fname, dest_size-1-extSz);
-		dest[dest_size-1-extSz] = 0;
+		dest = src.fname;
 		break;
 	}
-	if (!dest[0]) STRNCPY(dest, dest_size, "asm", dest_size-1);		// no explicit, use "asm" base
-	// replace the extension
-	STRCPY(FilenameExtPos(dest), dest_size, ext);
+	dest.replace_extension(ext);
 }
 
 void CheckRamLimitExceeded() {
@@ -818,12 +814,12 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	} // while (IsRunning && ReadBufData())
 }
 
-static void OpenListImp(const char* listFilename) {
+static void OpenListImp(const std::filesystem::path & listFilename) {
 	// if STDERR is configured to contain listing, disable other listing files
 	if (OV_LST == Options::OutputVerbosity) return;
-	if (NULL == listFilename || !listFilename[0]) return;
+	if (listFilename.empty()) return;
 	if (!FOPEN_ISOK(FP_ListingFile, listFilename, "w")) {
-		Error("opening file for write", listFilename, FATAL);
+		Error("opening file for write", listFilename.string().c_str(), FATAL);
 	}
 }
 
@@ -883,7 +879,7 @@ void NewDest(const char* newfilename, int mode) {
 	CloseDest();
 
 	// and open new file (keep previous/default name, if no explicit was provided)
-	if (newfilename && *newfilename) STRCPY(Options::DestinationFName, LINEMAX, newfilename);
+	if (newfilename && *newfilename) Options::DestinationFName = newfilename;
 	OpenDest(mode);
 }
 
@@ -893,16 +889,16 @@ void OpenDest(int mode) {
 		mode = OUTPUT_TRUNCATE;
 	}
 	if (!Options::NoDestinationFile && !FOPEN_ISOK(FP_Output, Options::DestinationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
-		Error("opening file for write", Options::DestinationFName, FATAL);
+		Error("opening file for write", Options::DestinationFName.string().c_str(), FATAL);
 	}
 	Options::NoDestinationFile = false;
-	if (NULL == FP_RAW && '-' == Options::RAWFName[0] && 0 == Options::RAWFName[1]) {
+	if (NULL == FP_RAW && "-" == Options::RAWFName) {
 		FP_RAW = stdout;
 		fflush(stdout);
 		switchStdOutIntoBinaryMode();
 	}
-	if (FP_RAW == NULL && Options::RAWFName[0] && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {
-		Error("opening file for write", Options::RAWFName);
+	if (FP_RAW == NULL && Options::RAWFName.has_filename() && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {
+		Error("opening file for write", Options::RAWFName.string().c_str());
 	}
 	if (FP_Output != NULL && mode != OUTPUT_TRUNCATE) {
 		if (fseek(FP_Output, 0, mode == OUTPUT_REWIND ? SEEK_SET : SEEK_END)) {
@@ -953,11 +949,15 @@ void OpenTapFile(const char * tapename, int flagbyte)
 	}
 }
 
-bool FileExists(const char* file_name) {
+bool FileExists(const std::filesystem::path & file_name) {
 	FILE* test;
-	bool exists = FOPEN_ISOK(test, file_name, "r");
-	exists && fclose(test);
+	bool exists = FOPEN_ISOK(test, file_name, "r") && (0 == fclose(test));
 	return exists;
+}
+
+bool FileExistsCstr(const char* file_name) {
+	if (nullptr == file_name) return false;
+	return FileExists(std::filesystem::path(file_name));
 }
 
 void Close() {
@@ -1303,9 +1303,9 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 
 void OpenExpFile() {
 	assert(nullptr == FP_ExportFile);			// this should be the first and only call to open it
-	if (0 == Options::ExportFName[0]) return;	// no export file name provided, skip opening
+	if (!Options::ExportFName.has_filename()) return;	// no export file name provided, skip opening
 	if (FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) return;
-	Error("opening file for write", Options::ExportFName, ALL);
+	Error("opening file for write", Options::ExportFName.string().c_str(), ALL);
 }
 
 void WriteLabelEquValue(const char* name, aint value, FILE* f) {
@@ -1339,10 +1339,10 @@ static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
 	snprintf(buffer, 1024-1, sldMessage_posFormat + offsetFormat, pos.line, pos.colBegin, pos.colEnd);
 }
 
-static void OpenSldImp(const char* sldFilename) {
-	if (nullptr == sldFilename || !sldFilename[0]) return;
+static void OpenSldImp(const std::filesystem::path & sldFilename) {
+	if (!sldFilename.has_filename()) return;
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
-		Error("opening file for write", sldFilename, FATAL);
+		Error("opening file for write", sldFilename.string().c_str(), FATAL);
 	}
 	fputs("|SLD.data.version|1\n", FP_SourceLevelDebugging);
 	if (0 < sldCommentKeywords.size()) {
@@ -1357,12 +1357,12 @@ static void OpenSldImp(const char* sldFilename) {
 	}
 }
 
-// will write directly into Options::SourceLevelDebugFName array
+// will write result directly into Options::SourceLevelDebugFName
 static void OpenSld_buildDefaultNameIfNeeded() {
 	// check if SLD file name is already explicitly defined, or default is wanted
-	if (Options::SourceLevelDebugFName[0] || !Options::IsDefaultSldName) return;
+	if (Options::SourceLevelDebugFName.has_filename() || !Options::IsDefaultSldName) return;
 	// name is still empty, and default is wanted, create one (start with "out" or first source name)
-	ConstructDefaultFilename(Options::SourceLevelDebugFName, LINEMAX, ".sld.txt", false);
+	ConstructDefaultFilename(Options::SourceLevelDebugFName, ".sld.txt", false);
 }
 
 // returns true only in the LASTPASS and only when "sld" file was specified by user
