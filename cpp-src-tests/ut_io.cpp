@@ -122,27 +122,26 @@ TEST(SjIo_FilenameExtPos_WithInit) {
 TEST(SjIo_ConstructDefaultFilename) {
 	// verify the global sourceFiles variable is empty for this unit testing
 	CHECK_EQUAL(0UL, sourceFiles.size());
-	char fname[101];
 	// check the "checkIfDestIsEmpty" argument functionality, and default basename "asm"
-	fname[0] = 'x';	fname[1] = 0;
-	ConstructDefaultFilename(fname, 101, ".ext");
+	std::filesystem::path fname {"x"};
+	ConstructDefaultFilename(fname, ".ext");
 	CHECK_EQUAL("x", fname);
-	ConstructDefaultFilename(fname, 101, ".ext", true);
+	ConstructDefaultFilename(fname, ".ext", true);
 	CHECK_EQUAL("x", fname);
-	ConstructDefaultFilename(fname, 101, ".ext", false);
+	ConstructDefaultFilename(fname, ".ext", false);
 	CHECK_EQUAL("asm.ext", fname);
-	fname[0] = 0;
-	ConstructDefaultFilename(fname, 101, ".ext");
+	fname.clear();
+	ConstructDefaultFilename(fname, ".ext");
 	CHECK_EQUAL("asm.ext", fname);
 	// check if first explicit filename is picked
 	sourceFiles.push_back(SSource(1));
-	ConstructDefaultFilename(fname, 101, ".ext", false);
+	ConstructDefaultFilename(fname, ".ext", false);
 	CHECK_EQUAL("asm.ext", fname);
 	sourceFiles.push_back(SSource(".f1.asm"));
-	ConstructDefaultFilename(fname, 101, ".ext", false);
+	ConstructDefaultFilename(fname, ".ext", false);
 	CHECK_EQUAL(".f1.ext", fname);
 	sourceFiles.push_back(SSource("f2.asm"));
-	ConstructDefaultFilename(fname, 101, ".ext", false);
+	ConstructDefaultFilename(fname, ".ext", false);
 	CHECK_EQUAL(".f1.ext", fname);
 	// empty the global sourceFiles again
 	sourceFiles.clear();

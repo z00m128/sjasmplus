@@ -73,16 +73,16 @@ namespace Options {
 	} SSyntax;
 
 	extern const STerminalColorSequences* tcols;
-	extern char OutPrefix[LINEMAX];
-	extern char SymbolListFName[LINEMAX];
-	extern char ListingFName[LINEMAX];
-	extern char ExportFName[LINEMAX];
-	extern char DestinationFName[LINEMAX];
-	extern char RAWFName[LINEMAX];
-	extern char UnrealLabelListFName[LINEMAX];
-	extern char CSpectMapFName[LINEMAX];
+	extern std::filesystem::path OutPrefix;
+	extern std::filesystem::path SymbolListFName;
+	extern std::filesystem::path ListingFName;
+	extern std::filesystem::path ExportFName;
+	extern std::filesystem::path DestinationFName;
+	extern std::filesystem::path RAWFName;
+	extern std::filesystem::path UnrealLabelListFName;
+	extern std::filesystem::path CSpectMapFName;
 	extern int CSpectMapPageSize;
-	extern char SourceLevelDebugFName[LINEMAX];
+	extern std::filesystem::path SourceLevelDebugFName;
 	extern bool IsDefaultSldName;
 
 	extern EOutputVerbosity OutputVerbosity;

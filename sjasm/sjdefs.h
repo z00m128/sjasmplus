@@ -53,6 +53,7 @@
 #include <algorithm>
 #include <stack>
 #include <vector>
+#include <filesystem>
 #include <iostream>
 using std::cout;
 using std::cerr;

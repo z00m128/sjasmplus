@@ -1283,7 +1283,7 @@ static void dirLABELSLIST() {
 	}
 	std::unique_ptr<char[]> opt(GetOutputFileName(lp));
 	if (opt[0]) {
-		STRCPY(Options::UnrealLabelListFName, LINEMAX, opt.get());
+		Options::UnrealLabelListFName = opt.get();
 		Options::EmitVirtualLabels = false;
 		if (comma(lp)) {
 			aint virtualLabelsArg;
@@ -1306,11 +1306,11 @@ static void dirCSPECTMAP() {
 	}
 	std::unique_ptr<char[]> fName(GetOutputFileName(lp));
 	if (fName[0]) {
-		STRCPY(Options::CSpectMapFName, LINEMAX, fName.get());
+		Options::CSpectMapFName = fName.get();
 	} else {		// create default map file name from current source file name (appends ".map")
 		assert(!sourcePosStack.empty());
-		STRCPY(Options::CSpectMapFName, LINEMAX-5, sourcePosStack.back().filename);
-		STRCAT(Options::CSpectMapFName, LINEMAX-1, ".map");
+		Options::CSpectMapFName = sourcePosStack.back().filename;
+		Options::CSpectMapFName += ".map";
 	}
 	// remember page size of current device (in case the source is multi-device later)
 	Options::CSpectMapPageSize = Device->GetPage(0)->Size;
@@ -1616,16 +1616,11 @@ static void dirEXPORT() {
 	aint val;
 	char* n, * p;
 
-	if (!Options::ExportFName[0]) {
+	if (Options::ExportFName.empty()) {
 		assert(!sourcePosStack.empty());
-		STRCPY(Options::ExportFName, LINEMAX, sourcePosStack.back().filename);
-		if (!(p = strchr(Options::ExportFName, '.'))) {
-			p = Options::ExportFName;
-		} else {
-			*p = 0;
-		}
-		STRCAT(p, LINEMAX, ".exp");
-		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName, W_EARLY);
+		Options::ExportFName = sourcePosStack.back().filename;
+		Options::ExportFName.replace_extension(".exp");
+		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName.string().c_str(), W_EARLY);
 	}
 	if (!(n = p = GetID(lp))) {
 		Error("[EXPORT] Syntax error", lp, SUPPRESS);

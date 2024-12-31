@@ -875,31 +875,27 @@ int GetBytesHexaText(char*& p, int e[]) {
 
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
-static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) {
-	bool slashConverted = false;
-	char* newFn = new char[LINEMAX+1], * result = newFn;
-	if (NULL == newFn) ErrorOOM();
-	// prepend the filename with path-prefix, if some was requested
-	if (pathPrefix) {
-		while (*pathPrefix) {
-			*newFn = *pathPrefix;
-			if (convertslashes && pathBadSlash == *newFn) *newFn = pathGoodSlash;
-			++newFn, ++pathPrefix;
-			if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
-		}
-	}
+static char* GetFileName(char*& p, const std::filesystem::path & pathPrefix, bool convertslashes) {
 	// check if some and which delimiter is used for this filename (does advance over white chars)
 	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
 	delimiterOfLastFileName = DelimiterAnyBegins(p);
 	const char deliE = delimiters_e[delimiterOfLastFileName];	// expected ending delimiter
-	// copy all characters until zero or delimiter-end character is reached
-	while (*p && deliE != *p) {
-		*newFn = *p;		// copy character
-		if (convertslashes && pathBadSlash == *newFn) slashConverted = (*newFn = pathGoodSlash);
-		++newFn, ++p;
-		if (LINEMAX <= newFn-result) Error("Filename too long!", NULL, FATAL);
+	// find all characters of file name
+	const char* const name_begin = p;
+	while (*p && deliE != *p) ++p;
+	std::filesystem::path name(name_begin, static_cast<const char* const>(p));
+	if (!pathPrefix.empty()) name = pathPrefix / name;
+	// convert backslash if requested and report them with warning
+	std::string str_name = name.string();
+	if (convertslashes) {
+		if (std::string::npos != str_name.find('\\')) WarningById(W_BACKSLASH, bp);
+		std::replace(str_name.begin(), str_name.end(), '\\', '/');
 	}
-	*newFn = 0;				// add string terminator at end of file name
+	if (LINEMAX <= str_name.size()) Error("Filename too long!", NULL, FATAL);
+	// copy the resulting path to result char array
+	char* newFn = new char[LINEMAX + 1], * result = newFn;
+	if (nullptr == newFn) ErrorOOM();
+	memcpy(newFn, str_name.c_str(), str_name.size() + 1);
 	// verify + skip end-delimiter (if other than space)
 	if (' ' != deliE) {
 		if (deliE == *p) {
@@ -911,7 +907,6 @@ static char* GetFileName(char*& p, const char* pathPrefix, bool convertslashes) 
 		}
 	}
 	SkipBlanks(p);			// skip blanks any way
-	if (slashConverted) WarningById(W_BACKSLASH, bp);
 	return result;
 }
 
@@ -920,7 +915,7 @@ char* GetOutputFileName(char*& p, bool convertslashes) {
 }
 
 char* GetFileName(char*& p, bool convertslashes) {
-	return GetFileName(p, nullptr, convertslashes);
+	return GetFileName(p, "", convertslashes);
 }
 
 EDelimiterType GetDelimiterOfLastFileName() {
