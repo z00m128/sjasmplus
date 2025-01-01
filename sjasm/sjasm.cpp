@@ -374,18 +374,6 @@ namespace Options {
 		char opt[LINEMAX];
 		char val[LINEMAX];
 
-		// returns 1 when argument was processed (keyword detected, value copied into buffer)
-		// If buffer == NULL, only detection of keyword + check for non-zero "value" is done (no copy)
-		int CheckAssignmentOption(const char* keyword, char* buffer, const size_t bufferSize) {
-			if (strcmp(keyword, opt)) return 0;		// detect "keyword" (return 0 if not)
-			if (*val) {
-				if (NULL != buffer) STRCPY(buffer, bufferSize, val);
-			} else {
-				Error("no parameters found in", arg, ALL);
-			}
-			return 1;	// keyword detected, option was processed
-		}
-
 		// returns 1 when argument was processed (keyword detected, value copied into path var)
 		int CheckAssignmentOption(const char* keyword, std::filesystem::path & path) {
 			if (strcmp(keyword, opt)) return 0;		// detect "keyword" (return 0 if not)
@@ -511,10 +499,8 @@ namespace Options {
 					if (val[0]) SortSymbols = !strcmp("sort", val);
 				} else if (!strcmp(opt, "longptr")) {
 					IsLongPtr = true;
-				} else if (CheckAssignmentOption("msg", NULL, 0)) {
-					if (!*val) {
-						// nothing to do, CheckAssignmentOption already displayed error
-					} else if (!strcmp("none", val)) {
+				} else if (!strcmp(opt, "msg")) {
+					if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;
 						HideLogo = true;
 					} else if (!strcmp("err", val)) {
