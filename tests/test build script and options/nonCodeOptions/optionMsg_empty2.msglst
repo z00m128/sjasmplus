@@ -1,4 +1,4 @@
-error: no parameters found in: --msg
+error: unexpected parameter in: --msg
 # file opened: optionMsg_empty2.asm
 1     0000 00           nn: nop
 optionMsg_empty2.asm(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E

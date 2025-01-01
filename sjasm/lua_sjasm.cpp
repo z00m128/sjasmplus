@@ -348,7 +348,7 @@ static bool lua_zx_trdimage_create(const char* trdname, const char* label = null
 	char* l8_ptr = l8;
 	while (label && *label && (l8_ptr - l8) < 8) *l8_ptr++ = *label++;
 	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
-	bool result = TRD_SaveEmpty(trdname, l8);
+	bool result = TRD_SaveEmpty(trdname ? trdname : "", l8);
 	removeLuaSourcePositions(positionsAdded);
 	return result;
 }
@@ -362,7 +362,7 @@ bool lua_zx_trdimage_add_file(const char* trd, const char* file, int start, int 
 
 static bool lua_zx_save_snapshot_sna(const char* fname, word start) {
 	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
-	bool result = SaveSNA_ZX(fname, start);
+	bool result = SaveSNA_ZX(fname ? fname : "", start);
 	removeLuaSourcePositions(positionsAdded);
 	return result;
 }
@@ -526,11 +526,11 @@ void dirINCLUDELUA() {
 		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
 		return;
 	}
-	std::unique_ptr<char[]> fnaam(GetFileName(lp));
+	const std::filesystem::path fnaam = GetFileName(lp);
 	EDelimiterType dt = GetDelimiterOfLastFileName();
-	char* fullpath = GetPath(fnaam.get(), NULL, DT_ANGLE == dt);
+	char* fullpath = GetPath(fnaam.string().c_str(), NULL, DT_ANGLE == dt);	//FIXME fits input path idea
 	if (!fullpath[0]) {
-		Error("[INCLUDELUA] File doesn't exist", fnaam.get(), EARLY);
+		Error("[INCLUDELUA] File doesn't exist", fnaam.string().c_str(), EARLY);
 	} else {
 		extraErrorWarningPrefix = lua_err_prefix;
 		fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive

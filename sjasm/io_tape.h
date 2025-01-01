@@ -33,9 +33,9 @@ misrepresented as being the original software.
 
 enum ETapeHeaderType { BASIC = 0, NUMBERS, CHARS, CODE, HEADLESS = 255 };
 
-int TAP_SaveEmpty(char* fname);
-int TAP_SaveBlock(char* fname, unsigned char flag, const char *ftapname, int start, int length, int param2, int param3);
-int TAP_SaveSnapshot(char* fname, unsigned short start);
+int TAP_SaveEmpty(const std::filesystem::path & fname);
+int TAP_SaveBlock(const std::filesystem::path & fname, unsigned char flag, const char *ftapname, int start, int length, int param2, int param3);
+int TAP_SaveSnapshot(const std::filesystem::path & fname, unsigned short start);
 
 #endif
 

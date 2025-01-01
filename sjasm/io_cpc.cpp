@@ -36,8 +36,8 @@
 namespace
 {
 	// report error and close the file
-	static int writeError(const char* fname, FILE*& fileToClose) {
-		Error("[SAVECPCSNA] Write error (disk full?)", fname, IF_FIRST);
+	static int writeError(const std::filesystem::path & fname, FILE*& fileToClose) {
+		Error("[SAVECPCSNA] Write error (disk full?)", fname.string().c_str(), IF_FIRST);
 		fclose(fileToClose);
 		return 0;
 	}
@@ -51,7 +51,7 @@ namespace
 	}
 }
 
-static int SaveSNA_CPC(const char* fname, word start) {
+static int SaveSNA_CPC(const std::filesystem::path & fname, word start) {
 	// for Lua
 	if (!DeviceID) {
 		Error("SAVECPCSNA only allowed in real device emulation mode (See DEVICE)"); return 0;
@@ -62,7 +62,7 @@ static int SaveSNA_CPC(const char* fname, word start) {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[SAVECPCSNA] Error opening file for write", fname);
+		Error("[SAVECPCSNA] Error opening file for write", fname.string().c_str());
 		return 0;
 	}
 
@@ -144,7 +144,7 @@ void dirSAVECPCSNA() {
 		SkipToEol(lp);
 		return;
 	}
-	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
+	const std::filesystem::path fnaam = GetOutputFileName(lp);
 	int start = StartAddress;
 	if (anyComma(lp)) {
 		aint val;
@@ -165,7 +165,7 @@ void dirSAVECPCSNA() {
 		Error("[SAVECPCSNA] No start address defined", bp, SUPPRESS); return;
 	}
 
-	if (!SaveSNA_CPC(fnaam.get(), start))
+	if (!SaveSNA_CPC(fnaam, start))
 		Error("[SAVECPCSNA] Error writing file (Disk full?)", bp, IF_FIRST);
 }
 
@@ -201,7 +201,7 @@ namespace CDTUtil {
 		return aux;
 	}
 
-	static void writeChunkedData(const char* fname, const byte* buf, const aint buflen, word pauseAfter, byte sync) {
+	static void writeChunkedData(const std::filesystem::path & fname, const byte* buf, const aint buflen, word pauseAfter, byte sync) {
 		constexpr aint chunkLen = 256;
 
 		const aint chunkCount = (buflen + 255) >> 8;
@@ -261,7 +261,10 @@ namespace CDTUtil {
 		TZX_AppendTurboBlock(fname, chunkedData.get(), dataLen, turbo);
 	}
 
-	static void writeTapeFile(const char* fname, const char* tfname, byte fileType, const byte* buf, aint buflen, word memaddr, word startaddr, word pause) {
+	static void writeTapeFile(
+		const std::filesystem::path & fname, const std::string & tfname,
+		byte fileType, const byte* buf, aint buflen, word memaddr, word startaddr, word pause)
+	{
 		constexpr aint blocksize = 2048;
 		constexpr aint headerlen = 64;
 
@@ -279,14 +282,8 @@ namespace CDTUtil {
 		  26    2  Entry address  The execution address for machine code programs
 		*/
 		
-		// ensure name is <= 16
-		aint tapefname_len = strlen(tfname);
-		if (tapefname_len > 16) {
-			tapefname_len = 16;
-		}
-
 		// copy tape file name (16 bytes)
-		memcpy(hbuf, tfname, tapefname_len);
+		memcpy(hbuf, tfname.data(), std::min(static_cast<std::string::size_type>(16), tfname.size()));
 
 		// init header
 		hbuf[16] = 1; // block 1
@@ -330,7 +327,7 @@ namespace CDTUtil {
 		}
 	}
 
-	static void writeBASICLoader(const char* fname, byte screenMode, const byte* palette) {
+	static void writeBASICLoader(const std::filesystem::path & fname, byte screenMode, const byte* palette) {
 		constexpr byte mode_values[] = { 0x0E, 0x0F, 0x10 };
 		byte border = 0;
 		border = *palette;
@@ -376,7 +373,10 @@ namespace CDTUtil {
 		writeTapeFile(fname, "LOADER", FileTypeBASIC, basic, basiclen, 0x0170, 0x0000, DefaultPause);
 	}
 
-	static void writeUserProgram(const char* fname, const char* tapefname, const byte* buf, aint buflen, word baseAddr, word startAddr) {
+	static void writeUserProgram(
+		const std::filesystem::path & fname, const std::string & tapefname,
+		const byte* buf, aint buflen, word baseAddr, word startAddr)
+	{
 		writeTapeFile(fname, tapefname, FileTypeBINARY, buf, buflen, baseAddr, startAddr, DefaultPause);
 	}
 
@@ -436,7 +436,7 @@ namespace CDTUtil {
 */
 }
 
-static void createCDTDump464(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
+static void createCDTDump464(const std::filesystem::path & fname, aint startAddr, byte screenMode, const byte* palette) {
 	byte* ramptr;
 	aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
 	std::unique_ptr<byte[]> ram(new byte[ram_size]);
@@ -495,7 +495,7 @@ static void createCDTDump464(const char* fname, aint startAddr, byte screenMode,
 	CDTUtil::writeChunkedData(fname, ramptr + ramBase, ramUsed, CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
 }
 
-static void createCDTDump6128(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
+static void createCDTDump6128(const std::filesystem::path & fname, aint startAddr, byte screenMode, const byte* palette) {
 	byte* ramptr;
 	aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
 	std::unique_ptr<byte[]> ram(new byte[ram_size]);
@@ -601,13 +601,15 @@ static void createCDTDump6128(const char* fname, aint startAddr, byte screenMode
 	CDTUtil::writeChunkedData(fname, ramptr + ramBase, ramUsed, CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
 }
 
-static void SaveCDT_SnapshotWithPalette(const char* fname, aint startAddr, byte screenMode, const byte* palette) {
+static void SaveCDT_SnapshotWithPalette(const std::filesystem::path & fname,
+										aint startAddr, byte screenMode, const byte* palette)
+{
 	isCPC6128() ?
 		createCDTDump6128(fname, startAddr, screenMode, palette) :
 		createCDTDump464(fname, startAddr, screenMode, palette);
 }
 
-static void SaveCDT_Snapshot(const char* fname, aint startAddr) {
+static void SaveCDT_Snapshot(const std::filesystem::path & fname, aint startAddr) {
 	// Default mode after loading from BASIC
 	constexpr byte mode = 1;
 	// Default ROM palette
@@ -619,20 +621,20 @@ static void SaveCDT_Snapshot(const char* fname, aint startAddr) {
 	SaveCDT_SnapshotWithPalette(fname, startAddr, mode, palette);
 }
 
-static void SaveCDT_BASIC(const char* fname, const char* tfname, aint startAddr, aint length) {
+static void SaveCDT_BASIC(const std::filesystem::path & fname, const std::string & tfname, aint startAddr, aint length) {
 	std::unique_ptr<byte[]> data(CDTUtil::getContigRAM(startAddr, length));
 
 	CDTUtil::writeTapeFile(fname, tfname, CDTUtil::FileTypeBASIC, data.get(), length, startAddr, 0x0000, CDTUtil::DefaultPause);
 }
 
-static void SaveCDT_Code(const char* fname, const char* tfname, aint startAddr, aint length, aint entryAddr) {
+static void SaveCDT_Code(const std::filesystem::path & fname, const std::string & tfname, aint startAddr, aint length, aint entryAddr) {
 	if (entryAddr < 0) entryAddr = startAddr;
 
 	std::unique_ptr<byte[]> data(CDTUtil::getContigRAM(startAddr, length));
 	CDTUtil::writeTapeFile(fname, tfname, CDTUtil::FileTypeBINARY, data.get(), length, startAddr, entryAddr, CDTUtil::DefaultPause);
 }
 
-static void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byte sync, ECDTHeadlessFormat format) {
+static void SaveCDT_Headless(const std::filesystem::path & fname, aint startAddr, aint length, byte sync, ECDTHeadlessFormat format) {
 	assert(ECDTHeadlessFormat::AMSTRAD == format || ECDTHeadlessFormat::SPECTRUM == format);
 	std::unique_ptr<byte[]> data(CDTUtil::getContigRAM(startAddr, length));
 
@@ -640,10 +642,10 @@ static void SaveCDT_Headless(const char* fname, aint startAddr, aint length, byt
 	else TZX_AppendStandardBlock(fname, data.get(), length, CDTUtil::DefaultPause, sync);
 }
 
-typedef void (*savecdt_command_t)(const char*);
+typedef void (*savecdt_command_t)(const std::filesystem::path &);
 
 // Creates a CDT tape file of a full memory snapshot, with loader
-static void dirSAVECDTFull(const char* cdtname) {
+static void dirSAVECDTFull(const std::filesystem::path & cdtname) {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT FULL <cdtname>[,<startaddr>[,<screenmode>[,<border>[,<ink0>...<ink15>]]]]";
 
 	aint args[] = {
@@ -677,19 +679,19 @@ static void dirSAVECDTFull(const char* cdtname) {
 	}
 }
 
-static void dirSAVECDTEmpty(const char* cdtname) {
+static void dirSAVECDTEmpty(const std::filesystem::path & cdtname) {
 	// EMPTY <cdtname>
 	TZX_CreateEmpty(cdtname);
 }
 
-static void dirSAVECDTBasic(const char* cdtname) {
+static void dirSAVECDTBasic(const std::filesystem::path & cdtname) {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT BASIC <cdtname>,<name>,<start>,<length>";
 
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	std::unique_ptr<char[]> tfname(GetFileName(lp));	
+	const std::string tfname = GetDelimitedString(lp);
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
@@ -700,17 +702,17 @@ static void dirSAVECDTBasic(const char* cdtname) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	SaveCDT_BASIC(cdtname, tfname.get(), args[0], args[1]);
+	SaveCDT_BASIC(cdtname, tfname, args[0], args[1]);
 }
 
-static void dirSAVECDTCode(const char* cdtname) {
+static void dirSAVECDTCode(const std::filesystem::path & cdtname) {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT CODE <cdtname>,<name>,<start>,<length>[,<customstartaddress>]";
 
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	std::unique_ptr<char[]> tfname(GetFileName(lp));
+	const std::string tfname = GetDelimitedString(lp);
 	if (!anyComma(lp)) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
@@ -721,10 +723,10 @@ static void dirSAVECDTCode(const char* cdtname) {
 		Error(argerr, lp, SUPPRESS); return;
 	}
 
-	SaveCDT_Code(cdtname, tfname.get(), args[0], args[1], args[2]);
+	SaveCDT_Code(cdtname, tfname, args[0], args[1], args[2]);
 }
 
-static void dirSAVECDTHeadless(const char* cdtname) {
+static void dirSAVECDTHeadless(const std::filesystem::path & cdtname) {
 	constexpr const char* argerr = "[SAVECDT] Invalid args. SAVECDT HEADLESS <cdtname>,<start>,<length>[,<sync>[,<format>]]";
 
 	if (!anyComma(lp)) {
@@ -753,8 +755,8 @@ static void dirSAVECDTHeadless(const char* cdtname) {
 }
 
 static void cdtParseFnameAndExecuteCmd(savecdt_command_t command_fn) {
-	std::unique_ptr<char[]> cdtname(GetOutputFileName(lp));
-	if (cdtname[0]) command_fn(cdtname.get());
+	const std::filesystem::path cdtname = GetOutputFileName(lp);
+	if (cdtname.has_filename()) command_fn(cdtname);
 	else Error("[SAVECDT] CDT file name is empty", bp, SUPPRESS);
 }
 
@@ -780,10 +782,10 @@ void dirSAVECDT() {
 // Amstrad CPC cartridge saving (CPR)
 //
 
-static int SaveCPR(const char* fname, int cprSize) {
+static int SaveCPR(const std::filesystem::path & fname, int cprSize) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[SAVECPR] Error opening file for write", fname);
+		Error("[SAVECPR] Error opening file for write", fname.string().c_str());
 		return 0;
 	}
 
@@ -844,8 +846,8 @@ void dirSAVECPR() {
 		Error("[SAVECPR] is allowed only in AMSTRADCPCPLUS device mode", NULL, SUPPRESS);
 		return;
 	}
-	std::unique_ptr<char[]> fnaam(GetOutputFileName(lp));
-	if (!fnaam[0]) {
+	const std::filesystem::path fnaam = GetOutputFileName(lp);
+	if (!fnaam.has_filename()) {
 		Error("[SAVECPR] CPR file name is empty", NULL, SUPPRESS);
 		return;
 	}
@@ -860,7 +862,7 @@ void dirSAVECPR() {
 		}
 		cprSize = val;
 	}
-	if (!SaveCPR(fnaam.get(), cprSize)) Error("[SAVECPR] Error writing file (Disk full?)", NULL, IF_FIRST);
+	if (!SaveCPR(fnaam, cprSize)) Error("[SAVECPR] Error writing file (Disk full?)", NULL, IF_FIRST);
 }
 
 // eof io_cpc.cpp

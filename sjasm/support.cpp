@@ -52,6 +52,7 @@ void SJ_GetCurrentDirectory(int whatever, char* pad) {
 	pad[0] = 0;
 	//TODO implement this one? And decide what to do with it?
 	// Will affect "--fullpath" paths if implemented correctly (as GetCurrentDirectory on windows)
+	//FIXME double-check with new std::filesystem usage, I think there may be API for this
 }
 
 static bool isAnySlash(const char c) {

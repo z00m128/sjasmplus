@@ -181,10 +181,10 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 	return 1;
 }
 
-bool TRD_SaveEmpty(const char* fname, const char label[8]) {
+bool TRD_SaveEmpty(const std::filesystem::path & fname, const char label[8]) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname, IF_FIRST);
+	if (!fname.has_filename() || !FOPEN_ISOK(ff, fname, "wb")) {
+		Error("opening file for write", fname.string().c_str(), IF_FIRST);
 		return 0;
 	}
 	byte* buf = (byte*) calloc(STrdDisc::SECTORS_PER_TRACK*STrdDisc::SECTOR_SZ, sizeof(byte));
@@ -192,7 +192,7 @@ bool TRD_SaveEmpty(const char* fname, const char label[8]) {
 	int result = saveEmptyWrite(ff, buf, label);
 	free(buf);
 	fclose(ff);
-	if (!result) Error("Write error (disk full?)", fname, IF_FIRST);
+	if (!result) Error("Write error (disk full?)", fname.string().c_str(), IF_FIRST);
 	return result;
 }
 
@@ -224,14 +224,14 @@ ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & 
 	return INVALID_EXTENSION;
 }
 
-static int ReturnWithError(const char* errorText, const char* fname, FILE* fileToClose) {
+static int ReturnWithError(const char* errorText, const std::filesystem::path & fname, FILE* fileToClose) {
 	if (nullptr != fileToClose) fclose(fileToClose);
-	Error(errorText, fname, IF_FIRST);
+	Error(errorText, fname.string().c_str(), IF_FIRST);
 	return 0;
 }
 
 // use autostart == -1 to disable it (the valid autostart is 0..9999 as line number of BASIC program)
-bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
+bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars) {
 	// do some preliminary checks with file name and autostart - prepare final catalog entry data
 	union {
 		STrdFile trdf;			// structure to hold future form of catalog record about new file
@@ -366,7 +366,7 @@ bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length,
 		if (STrdHead::NUM_OF_FILES_MAX != fileIndex) {
 			// to keep legacy behaviour of older sjasmplus versions, this is just warning
 			// and the same file will be added to end of directory any way
-			WarningById(W_TRD_DUPLICATE, fname);
+			WarningById(W_TRD_DUPLICATE, fname.string().c_str());
 		}
 		fileIndex = trdHead.info.numOfFiles;
 	}
@@ -485,7 +485,7 @@ bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length,
 	return 1;
 }
 
-int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset, aint & length, const bool systemPathsFirst) {
+int TRD_PrepareIncFile(const std::filesystem::path & trdname, const char* filename, aint & offset, aint & length, const bool systemPathsFirst) {
 	// parse filename into TRD file form (max 8+3, don't warn about 3-letter extension)
 	byte trdFormName[12];
 	int Lname = 0;
@@ -493,7 +493,7 @@ int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset,
 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	STrdHead trdHead;
-	char* fullTrdName = GetPath(trdname, nullptr, systemPathsFirst);
+	char* fullTrdName = GetPath(trdname.string().c_str(), nullptr, systemPathsFirst);	//FIXME path idea ready with refactoring^2
 	FILE* ff = SJ_fopen(fullTrdName, "rb");
 	free(fullTrdName);
 	fullTrdName = nullptr;

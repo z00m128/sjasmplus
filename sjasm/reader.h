@@ -78,8 +78,9 @@ void GetStructText(char*& p, aint len, byte* data, const byte* initData = nullpt
 int GetBits(char*& p, int e[]);
 int GetBytesHexaText(char*& p, int e[]);
 int cmphstr(char*& p1, const char* p2, bool allowParenthesisEnd = false);		// p2 must be lowercase to match both cases
-char* GetFileName(char*& p, bool convertslashes=true);
-char* GetOutputFileName(char*& p, bool convertslashes=true);	// prepends the filename with OutPrefix
+std::string GetDelimitedString(char*& p);             // get some string within delimiters (none, quotes, apostrophes, chevron)
+std::filesystem::path GetFileName(char*& p);          // get string in delimiters, remember delimiter and convert slashes
+std::filesystem::path GetOutputFileName(char*& p);    // GetFileName plus prepends the filename with OutPrefix
 EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called
 bool isLabelStart(const char *p, bool modifiersAllowed = true);
 int islabchar(char p);

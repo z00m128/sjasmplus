@@ -280,7 +280,7 @@ public:
 
 	~SBmpFile();
 	void close();
-	bool open(const char* bmpname);
+	bool open(const std::filesystem::path & bmpname);
 	word getColor(uint32_t index);
 	void loadPixelData(byte* buffer);
 };
@@ -297,9 +297,9 @@ void SBmpFile::close() {
 	palBuffer = nullptr;
 }
 
-bool SBmpFile::open(const char* bmpname) {
+bool SBmpFile::open(const std::filesystem::path & bmpname) {
 	if (!FOPEN_ISOK(bmp, bmpname, "rb")) {
-		Error("[SAVENEX] Error opening file", bmpname, SUPPRESS);
+		Error("[SAVENEX] Error opening file", bmpname.string().c_str(), SUPPRESS);
 		return false;
 	}
 	palBuffer = new byte[4*PALETTE_SIZE];
@@ -324,7 +324,7 @@ bool SBmpFile::open(const char* bmpname) {
 		40 != header2Size || 1 != colorPlanes || 8 != bpp || 0 != compressionType)
 	{
 		Error("[SAVENEX] BMP file is not in expected format (uncompressed, 8bpp, 40B BITMAPINFOHEADER header)",
-				bmpname, SUPPRESS);
+				bmpname.string().c_str(), SUPPRESS);
 		close();
 		return false;
 	}
@@ -414,7 +414,7 @@ static void dirNexOpen() {
 	}
 	nex.init();			// reset everything around NEX file data
 	// read OPEN command arguments
-	std::unique_ptr<char[]> fname(GetOutputFileName(lp));
+	const std::filesystem::path fname = GetOutputFileName(lp);
 	aint openArgs[4] = { (-1 == StartAddress ? 0 : StartAddress), 0xFFFE, 0, 0 };
 	if (comma(lp)) {
 		const bool optionals[] = {false, true, true, true};	// start address is mandatory because comma
@@ -438,7 +438,7 @@ static void dirNexOpen() {
 		return;
 	}
 	// try to open the actual file
-	if (!FOPEN_ISOK(nex.f, fname.get(), "w+b")) Error("[SAVENEX] Error opening file for write", fname.get(), SUPPRESS);
+	if (!FOPEN_ISOK(nex.f, fname, "w+b")) Error("[SAVENEX] Error opening file for write", fname.string().c_str(), SUPPRESS);
 	if (nullptr == nex.f) return;
 	// set the argument values into header, and write the initial version of header into file
 	nex.h.pc = openArgs[0] & 0xFFFF;
@@ -624,16 +624,14 @@ static void dirNexPaletteMem() {
 
 static void dirNexPaletteBmp() {
 // ;; SAVENEX PALETTE BMP <filename>
-	const char* const bmpname = GetFileName(lp);
-	if (!bmpname[0] || comma(lp)) {
+	const std::filesystem::path bmpname = GetFileName(lp);
+	if (bmpname.empty() || comma(lp)) {
 		Error("[SAVENEX] expected syntax is BMP <filename>", bp, SUPPRESS);
-		delete[] bmpname;
 		return;
 	}
 	// try to open the actual BMP file
 	SBmpFile bmp;
 	bool bmpOpened = bmp.open(bmpname);
-	delete[] bmpname;
 	if (!bmpOpened) return;
 	// check the palette if it was requested from this bmp and process it
 	dirNexPaletteBmp(bmp);
@@ -734,13 +732,12 @@ static void dirNexScreenLayer2andLowRes(EBmpType type) {
 
 static void dirNexScreenBmp() {
 // ;; SAVENEX SCREEN BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]
-	const char* const bmpname = GetFileName(lp);
+	const std::filesystem::path bmpname = GetFileName(lp);
 	aint bmpArgs[2] = { 1, -1 };
 	if (comma(lp)) {	// empty filename will fall here too, causing syntax error
 		const bool optionals[] = {false, true};	// savePalette is mandatory after comma
 		if (!getIntArguments<2>(lp, bmpArgs, optionals)) {
 			Error("[SAVENEX] expected syntax is BMP <filename>[,<savePalette 0/1>[,<paletteOffset 0..15>]]", bp, SUPPRESS);
-			delete[] bmpname;
 			return;
 		}
 	}
@@ -756,10 +753,9 @@ static void dirNexScreenBmp() {
 	SBmpFile bmp;
 	bool bmpOpened = bmp.open(bmpname);
 	if (bmpOpened && other == bmp.type) {
-		Error("[SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256", bmpname, SUPPRESS);
+		Error("[SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256", bmpname.string().c_str(), SUPPRESS);
 		bmpOpened = false;
 	}
-	delete[] bmpname;
 	if (!bmpOpened) return;
 	// bmp opened, and some known type, verify details
 	if ((-1 != bmpArgs[1]) && (Layer2 == bmp.type || LoRes == bmp.type)) {
@@ -1042,12 +1038,12 @@ static void dirNexClose() {
 	// update V1.3 banksOffset in case there was no bank stored at all (before appending binary data!)
 	nex.updateIfAheadFirstBankSave();
 	// read CLOSE command argument and try to append the proposed file (if some was provided)
-	char* appendName = nullptr;
+	std::filesystem::path appendName {""};
 	if (!SkipBlanks(lp)) appendName = GetFileName(lp);
-	if (appendName) {	// some append file requested, try to copy its content at tail of NEX
+	if (appendName.has_filename()) {	// some append file requested, try to copy its content at tail of NEX
 		FILE* appendF = nullptr;
 		if (!FOPEN_ISOK(appendF, appendName, "rb")) {
-			Error("[SAVENEX] Error opening append file", appendName, SUPPRESS);
+			Error("[SAVENEX] Error opening append file", appendName.string().c_str(), SUPPRESS);
 		} else {
 			static constexpr int copyBufSize = 0x4000;
 			byte* copyBuffer = new byte[copyBufSize];
@@ -1062,7 +1058,6 @@ static void dirNexClose() {
 			delete[] copyBuffer;
 			fclose(appendF);
 		}
-		delete[] appendName;
 	}
 	// finalize the NEX file (refresh the header data and close it)
 	nex.finalizeFile();

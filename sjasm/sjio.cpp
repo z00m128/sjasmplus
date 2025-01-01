@@ -450,7 +450,7 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 void BinIncFile(const char* fname, aint offset, aint length, const bool systemPathsFirst) {
 	// open the desired file
 	FILE* bif;
-	char* fullFilePath = GetPath(fname, nullptr, systemPathsFirst);
+	char* fullFilePath = GetPath(fname, nullptr, systemPathsFirst);	//FIXME !research! path idea
 	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("opening file", fname);
 	free(fullFilePath);
 
@@ -538,7 +538,7 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		stdin_log = fStdinLog;
 		stdin_read_it = stdin_log->cbegin();	// reset read iterator (for 2nd+ pass)
 	} else {
-		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);
+		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);	// FIXME !research! path idea not ready
 
 		if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
 			free(fullpath);
@@ -553,6 +553,8 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
 	fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
 	sourcePosStack.emplace_back(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
+	//FIXME with paths it can be: sourcePosStack.emplace_back(Options::IsShowFullPath ? fileNameFull : fileNameFull.filename());
+	//FIXME and remove FilenameBasePos
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
@@ -874,12 +876,12 @@ void SeekDest(long offset, int method) {
 	}
 }
 
-void NewDest(const char* newfilename, int mode) {
+void NewDest(const std::filesystem::path & newfilename, int mode) {
 	// close previous output file
 	CloseDest();
 
 	// and open new file (keep previous/default name, if no explicit was provided)
-	if (newfilename && *newfilename) Options::DestinationFName = newfilename;
+	if (!newfilename.empty()) Options::DestinationFName = newfilename;
 	OpenDest(mode);
 }
 
@@ -927,15 +929,15 @@ void CloseTapFile()
 	FP_tapout = NULL;
 }
 
-void OpenTapFile(const char * tapename, int flagbyte)
+void OpenTapFile(const std::filesystem::path & tapename, int flagbyte)
 {
 	CloseTapFile();
 
 	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b")) {
-		Error( "opening file for write", tapename);
+		Error( "opening file for write", tapename.string().c_str());
 		return;
 	}
-	if (fseek(FP_tapout, 0, SEEK_END)) Error("File seek end error in TAPOUT", tapename, FATAL);
+	if (fseek(FP_tapout, 0, SEEK_END)) Error("File seek end error in TAPOUT", tapename.string().c_str(), FATAL);
 
 	tape_seek = ftell(FP_tapout);
 	tape_parity = flagbyte;
@@ -1038,20 +1040,18 @@ unsigned char MemGetByte(unsigned int address) {
 }
 
 
-int SaveBinary(const char* fname, aint start, aint length) {
+int SaveBinary(const std::filesystem::path & fname, aint start, aint length) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname, FATAL);
-	}
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
 	int result = SaveRAM(ff, start, length);
 	fclose(ff);
 	return result;
 }
 
 
-int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w2, word w3) {
+int SaveBinary3dos(const std::filesystem::path & fname, aint start, aint length, byte type, word w2, word w3) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname, FATAL);
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
 	// prepare +3DOS 128 byte header content
 	constexpr aint hsize = 128;
 	const aint full_length = hsize + length;
@@ -1078,10 +1078,10 @@ int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w
 }
 
 
-int SaveBinaryAmsdos(const char* fname, aint start, aint length, word start_adr, byte type) {
+int SaveBinaryAmsdos(const std::filesystem::path & fname, aint start, aint length, word start_adr, byte type) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname, SUPPRESS);
+		Error("opening file for write", fname.string().c_str(), SUPPRESS);
 		return 0;
 	}
 	// prepare AMSDOS 128 byte header content
@@ -1113,16 +1113,16 @@ bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
 
 
 // start and length must be sanitized by caller
-bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length) {
+bool SaveDeviceMemory(const std::filesystem::path & fname, const size_t start, const size_t length) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname, FATAL);
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
 	bool res = SaveDeviceMemory(ff, start, length);
 	fclose(ff);
 	return res;
 }
 
 
-int SaveHobeta(const char* fname, const char* fhobname, aint start, aint length) {
+int SaveHobeta(const std::filesystem::path & fname, const char* fhobname, aint start, aint length) {
 	unsigned char header[0x11];
 	int i;
 
@@ -1172,7 +1172,7 @@ int SaveHobeta(const char* fname, const char* fhobname, aint start, aint length)
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname, FATAL);
+		Error("opening file for write", fname.string().c_str(), FATAL);
 	}
 
 	int result = (17 == fwrite(header, 1, 17, ff)) && SaveRAM(ff, start, length);
@@ -1474,9 +1474,9 @@ static FILE* FP_BreakpointsFile = nullptr;
 static EBreakpointsFile breakpointsType;
 static int breakpointsCounter;
 
-void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type) {
-	if (nullptr == filename || !filename[0]) {
-		Error("empty filename", filename, EARLY);
+void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpointsFile type) {
+	if (!filename.has_filename()) {
+		Error("empty filename", filename.string().c_str(), EARLY);
 		return;
 	}
 	if (FP_BreakpointsFile) {
@@ -1484,7 +1484,7 @@ void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type) {
 		return;
 	}
 	if (!FOPEN_ISOK(FP_BreakpointsFile, filename, "w")) {
-		Error("opening file for write", filename, EARLY);
+		Error("opening file for write", filename.string().c_str(), EARLY);
 	}
 	breakpointsCounter = 0;
 	breakpointsType = type;

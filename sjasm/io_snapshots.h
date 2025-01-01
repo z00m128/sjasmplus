@@ -31,7 +31,7 @@
 #ifndef __IO_SNAPSHOTS
 #define __IO_SNAPSHOTS
 
-bool SaveSNA_ZX(const char* fname, word start);
+bool SaveSNA_ZX(const std::filesystem::path & fname, word start);
 
 #endif
 

@@ -33,9 +33,9 @@
 
 enum ETrdFileName { OK, INVALID_EXTENSION, THREE_LETTER_EXTENSION };
 
-bool TRD_SaveEmpty(const char* fname, const char label[8]);
+bool TRD_SaveEmpty(const std::filesystem::path & fname, const char label[8]);
 ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & nameL);
-bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars = -1);
+bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars = -1);
 
 /**
  * @brief Checks TRD file and return absolute offset + length into the raw file.
@@ -46,7 +46,7 @@ bool TRD_AddFile(const char* fname, const char* fhobname, int start, int length,
  * @param length data length (1 or more or INT_MAX to include all), and return value = data length
  * @return int 0 when error, 1 when offset + length are valid values into TRD image file
  */
-int TRD_PrepareIncFile(const char* trdname, const char* filename, aint & offset, aint & length, const bool systemPathsFirst);
+int TRD_PrepareIncFile(const std::filesystem::path & trdname, const char* filename, aint & offset, aint & length, const bool systemPathsFirst);
 
 #endif
 

@@ -40,13 +40,14 @@ constexpr int INSTRUCTION_START_MARKER = -2;
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2
 
+//FIXME path for archive too?
 const char* ArchiveFilename(const char* fullpathname);	// returns permanent C-string pointer to the fullpathname
 void ReleaseArchivedFilenames();	// does release all archived filenames, making all pointers invalid
-char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0);
+char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0); //FIXME get rid of this?
 void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty = true);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void OpenExpFile();
-void NewDest(const char* newfilename, int mode = OUTPUT_TRUNCATE);
+void NewDest(const std::filesystem::path & newfilename, int mode = OUTPUT_TRUNCATE);
 bool FileExists(const std::filesystem::path & file_name);
 bool FileExistsCstr(const char* filename);
 FILE* GetListingFile();
@@ -60,8 +61,8 @@ void EmitBytes(const int* bytes, bool isInstructionStart = false);
 void EmitWords(const int* words, bool isInstructionStart = false);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
 bool DidEmitByte();		// returns true if some byte was emitted since last call to this function
-void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false, stdin_log_t* fStdinLog = nullptr);
-void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent);
+void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false, stdin_log_t* fStdinLog = nullptr);  //FIXME path
+void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent); //FIXME path
 void Close();
 void OpenList();
 
@@ -69,11 +70,11 @@ void OpenUnrealList();
 void ReadBufLine(bool Parse = true, bool SplitByColon = true);
 void CloseDest();
 void CloseTapFile();
-void OpenTapFile(const char * tapename, int flagbyte);
+void OpenTapFile(const std::filesystem::path & tapename, int flagbyte);
 void PrintHex(char* & dest, aint value, int nibbles);
 void PrintHex32(char* & dest, aint value);
 void PrintHexAlt(char* & dest, aint value);
-char* GetPath(const char* fname, char** filenamebegin = NULL, bool systemPathsBeforeCurrent = false);
+char* GetPath(const char* fname, char** filenamebegin = NULL, bool systemPathsBeforeCurrent = false); //FIXME path??
 
 /**
  * @brief Includes bytes of particular file into output (and virtual device memory).
@@ -83,17 +84,17 @@ char* GetPath(const char* fname, char** filenamebegin = NULL, bool systemPathsBe
  * @param length positive: bytes to include / negative: bytes to skip from end / INT_MAX: all remaining
  * @param systemPathsFirst true to search first include paths before current directory
  */
-void BinIncFile(const char* fname, aint offset, aint length, const bool systemPathsFirst);
+void BinIncFile(const char* fname, aint offset, aint length, const bool systemPathsFirst); //FIXME path
 
 int SaveRAM(FILE*, int, int);
 unsigned char MemGetByte(unsigned int address);
 unsigned int MemGetWord(unsigned int address);
-int SaveBinary(const char* fname, aint start, aint length);
-int SaveBinary3dos(const char* fname, aint start, aint length, byte type, word w2, word w3);
-int SaveBinaryAmsdos(const char* fname, aint start, aint length, word start_adr = 0, byte type = 2);
+int SaveBinary(const std::filesystem::path & fname, aint start, aint length);
+int SaveBinary3dos(const std::filesystem::path & fname, aint start, aint length, byte type, word w2, word w3);
+int SaveBinaryAmsdos(const std::filesystem::path & fname, aint start, aint length, word start_adr = 0, byte type = 2);
 bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length);
-bool SaveDeviceMemory(const char* fname, const size_t start, const size_t length);
-int SaveHobeta(const char* fname, const char* fhobname, aint start, aint length);
+bool SaveDeviceMemory(const std::filesystem::path & fname, const size_t start, const size_t length);
+int SaveHobeta(const std::filesystem::path & fname, const char* fhobname, aint start, aint length);
 int ReadLineNoMacro(bool SplitByColon = true);
 int ReadLine(bool SplitByColon = true);
 EReturn ReadFile();
@@ -113,7 +114,7 @@ void SldTrackComments();
 
 /////// Breakpoints list (for different emulators)
 enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX };
-void OpenBreakpointsFile(const char* filename, const EBreakpointsFile type);
+void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpointsFile type);
 void WriteBreakpoint(const aint val);
 
 //eof sjio.h

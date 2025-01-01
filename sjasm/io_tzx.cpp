@@ -32,10 +32,10 @@ namespace TZXBlockId {
 	constexpr byte Pause = 0x20;
 }
 
-void TZX_CreateEmpty(const char* fname) {
+void TZX_CreateEmpty(const std::filesystem::path & fname) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[TZX] Error opening file for write", fname, FATAL);
+		Error("[TZX] Error opening file for write", fname.string().c_str(), FATAL);
 	}
 
 	constexpr byte tzx_major_version = 1;
@@ -50,10 +50,11 @@ void TZX_CreateEmpty(const char* fname) {
 	fclose(ff);
 }
 
-void TZX_AppendPauseBlock(const char* fname, word pauseAfterMs) {
+void TZX_AppendPauseBlock(const std::filesystem::path & fname, uint16_t pauseAfterMs)
+{
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file for append", fname, FATAL);
+		Error("[TZX] Error opening file for append", fname.string().c_str(), FATAL);
 	}
 	fputc(TZXBlockId::Pause, ff); // block id
 
@@ -62,10 +63,11 @@ void TZX_AppendPauseBlock(const char* fname, word pauseAfterMs) {
 	fclose(ff);
 }
 
-void TZX_AppendStandardBlock(const char* fname, const byte* buf, const aint buflen, word pauseAfterMs, byte sync) {
+void TZX_AppendStandardBlock(const std::filesystem::path & fname,
+							 const byte* buf, const aint buflen, word pauseAfterMs, byte sync) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file for append", fname, FATAL);
+		Error("[TZX] Error opening file for append", fname.string().c_str(), FATAL);
 	}
 
 	const aint totalDataLen = buflen + 2; // + sync byte + checksum
@@ -85,10 +87,11 @@ void TZX_AppendStandardBlock(const char* fname, const byte* buf, const aint bufl
 	fclose(ff);
 }
 
-void TZX_AppendTurboBlock(const char* fname, const byte* buf, const aint buflen, const STZXTurboBlock& turbo) {
+void TZX_AppendTurboBlock(const std::filesystem::path & fname,
+						  const byte* buf, const aint buflen, const STZXTurboBlock& turbo) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file for append", fname, FATAL);
+		Error("[TZX] Error opening file for append", fname.string().c_str(), FATAL);
 	}
 
 	fputc(TZXBlockId::Turbo, ff); // block id

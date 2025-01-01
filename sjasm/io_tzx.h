@@ -40,10 +40,10 @@ typedef struct STZXTurboBlock {
 	word PauseAfterMs;
 } STZXTurboBlock;
 
-void TZX_CreateEmpty(const char* fname);
-void TZX_AppendStandardBlock(const char* fname, const byte* buf, const aint buflen, word pauseAfterMs, byte sync);
-void TZX_AppendTurboBlock(const char* fname, const byte* buf, const aint buflen, const STZXTurboBlock& turbo);
-void TZX_AppendPauseBlock(const char* fname, word pauseAfterMs);
+void TZX_CreateEmpty(const std::filesystem::path & fname);
+void TZX_AppendStandardBlock(const std::filesystem::path & fname, const byte* buf, const aint buflen, word pauseAfterMs, byte sync);
+void TZX_AppendTurboBlock(const std::filesystem::path & fname, const byte* buf, const aint buflen, const STZXTurboBlock& turbo);
+void TZX_AppendPauseBlock(const std::filesystem::path & fname, word pauseAfterMs);
 
 #endif
 
