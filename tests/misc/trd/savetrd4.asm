@@ -162,3 +162,10 @@
     SAVETRD "savetrd4.trd",&"333.C",#4000,12032 ; error: file not found (even in full catalog)
     ; disk free 0 sec., 0 erased files
 
+    SAVETRD "savetrd4.trd","",#4000,100             ; error: no filename
+    SAVETRD "savetrd4.trd",,#4000,100               ; error: no filename
+    SAVETRD "savetrd4.trd","NOPARAM.C"              ; error: no address
+    SAVETRD "savetrd4.trd","NOPARAM.C",,100         ; error: no address
+    SAVETRD "savetrd4.trd","NOPARAM.C",#4000        ; error: no length
+    SAVETRD "savetrd4.trd","NOPARAM.C",#4000,0      ; error: bad length
+    SAVETRD "savetrd4.trd","NOPARAM.C",#4000,#FF01  ; error: bad length
