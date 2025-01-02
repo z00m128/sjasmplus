@@ -169,6 +169,21 @@ savetrd4.asm(162): error: TRD image does not have a specified file to add data: 
 162   4000                  SAVETRD "savetrd4.trd",&"333.C",#4000,12032 ; error: file not found (even in full catalog)
 163   4000                  ; disk free 0 sec., 0 erased files
 164   4000
+savetrd4.asm(165): error: [SAVETRD] No filename: SAVETRD "savetrd4.trd","",#4000,100
+165   4000                  SAVETRD "savetrd4.trd","",#4000,100             ; error: no filename
+savetrd4.asm(166): error: [SAVETRD] No filename: SAVETRD "savetrd4.trd",,#4000,100
+166   4000                  SAVETRD "savetrd4.trd",,#4000,100               ; error: no filename
+savetrd4.asm(167): error: [SAVETRD] Syntax error. No address: SAVETRD "savetrd4.trd","NOPARAM.C"
+167   4000                  SAVETRD "savetrd4.trd","NOPARAM.C"              ; error: no address
+savetrd4.asm(168): error: zx.trdimage_add_file: start address must be in 0000..FFFF range: SAVETRD "savetrd4.trd","NOPARAM.C",,100
+168   4000                  SAVETRD "savetrd4.trd","NOPARAM.C",,100         ; error: no address
+savetrd4.asm(169): error: [SAVETRD] Syntax error. No length: SAVETRD "savetrd4.trd","NOPARAM.C",#4000
+169   4000                  SAVETRD "savetrd4.trd","NOPARAM.C",#4000        ; error: no length
+savetrd4.asm(170): error: zx.trdimage_add_file: length must be in 0001..FF00 range: SAVETRD "savetrd4.trd","NOPARAM.C",#4000,0
+170   4000                  SAVETRD "savetrd4.trd","NOPARAM.C",#4000,0      ; error: bad length
+savetrd4.asm(171): error: zx.trdimage_add_file: length must be in 0001..FF00 range: SAVETRD "savetrd4.trd","NOPARAM.C",#4000,#FF01
+171   4000                  SAVETRD "savetrd4.trd","NOPARAM.C",#4000,#FF01  ; error: bad length
+172   4000
 # file closed: savetrd4.asm
 
 Value    Label

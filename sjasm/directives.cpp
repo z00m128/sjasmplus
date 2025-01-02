@@ -1126,69 +1126,42 @@ static void dirSAVETRD() {
 	int start = -1, length = -1, autostart = -1, lengthMinusVars = -1;
 
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
+
 	std::string fnaamh {""};
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
-			else if ((addplace = ('&' == *lp))) SkipBlanks(++lp); // detect "&" for "addplace" feature
-			fnaamh = GetDelimitedString(lp);
-			if (fnaamh.empty()) {
-				Error("[SAVETRD] Syntax error", bp, PASS3); return;
-			}
-		} else {
-		  	Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
-		}
-	} else {
-		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return; //is this ok?
+	if (!anyComma(lp)) return Error("[SAVETRD] Syntax error. No parameters", bp, SUPPRESS);
+	if (!anyComma(lp)) {
+		if ((replace = ('|' == *lp))) SkipBlanks(++lp);	// detect "|" for "replace" feature
+		else if ((addplace = ('&' == *lp))) SkipBlanks(++lp); // detect "&" for "addplace" feature
+		fnaamh = GetDelimitedString(lp);
 	}
+	if (fnaamh.empty()) return Error("[SAVETRD] No filename", bp, SUPPRESS);
+
+	if (!anyComma(lp)) return Error("[SAVETRD] Syntax error. No address", bp, SUPPRESS);
+	if (ParseExpressionNoSyntaxError(lp, val) && 0 <= val && val <= 0xFFFF) {
+		start = val;
+	}	// else start == -1 (syntax error or invalid value)
+	if (!anyComma(lp)) return Error("[SAVETRD] Syntax error. No length", bp, SUPPRESS);
+	ParseExpressionNoSyntaxError(lp, length);	// parse error/invalid value will be reported later
 
 	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
+		if (addplace) {
+			Error("[SAVETRD] Autostart is not used here", bp, PASS3); return;
+		} else {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
-			if (val > 0xFFFF) {
-			  	Error("[SAVETRD] Values more than 0FFFFh are not allowed", bp, PASS3); return;
+			if (val < 0) {
+				Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
 			}
-			start = val;
-		} else {
-		  	Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
-		}
-		if (anyComma(lp)) {
-			if (!anyComma(lp)) {
+			autostart = val;
+			// optional length of BASIC without variables
+			if (anyComma(lp)) {
 				if (!ParseExpression(lp, val)) {
 					Error("[SAVETRD] Syntax error", bp, PASS3); return;
 				}
-				if (val < 0) {
-					Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
-				}
-				length = val;
-			} else {
-				Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
+				lengthMinusVars = val;
 			}
 		}
-		if (anyComma(lp)) {
-			if (addplace) {
-				Error("[SAVETRD] Autostart is not used here", bp, PASS3); return;
-			} else {
-				if (!ParseExpression(lp, val)) {
-					Error("[SAVETRD] Syntax error", bp, PASS3); return;
-				}
-				if (val < 0) {
-					Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
-				}
-				autostart = val;
-				// optional length of BASIC without variables
-				if (anyComma(lp)) {
-					if (!ParseExpression(lp, val)) {
-						Error("[SAVETRD] Syntax error", bp, PASS3); return;
-					}
-					lengthMinusVars = val;
-				}
-			}
-		}
-	} else {
-		Error("[SAVETRD] Syntax error. No parameters", bp, PASS3); return;
 	}
 
 	if (exec) TRD_AddFile(fnaam, fnaamh.c_str(), start, length, autostart, replace, addplace, lengthMinusVars);
