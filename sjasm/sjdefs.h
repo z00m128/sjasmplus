@@ -49,6 +49,7 @@
 #endif
 
 #include <cassert>
+#include <utility>
 #include <memory>
 #include <algorithm>
 #include <stack>
