@@ -77,11 +77,12 @@ int GetBytes(char*& p, int e[], int add, int dc);
 void GetStructText(char*& p, aint len, byte* data, const byte* initData = nullptr);	// initData indicate "{}" is required for multi-value init
 int GetBits(char*& p, int e[]);
 int GetBytesHexaText(char*& p, int e[]);
-int cmphstr(char*& p1, const char* p2, bool allowParenthesisEnd = false);		// p2 must be lowercase to match both cases
-std::string GetDelimitedString(char*& p);             // get some string within delimiters (none, quotes, apostrophes, chevron)
-std::filesystem::path GetFileName(char*& p);          // get string in delimiters, remember delimiter and convert slashes
-std::filesystem::path GetOutputFileName(char*& p);    // GetFileName plus prepends the filename with OutPrefix
-EDelimiterType GetDelimiterOfLastFileName();	// DT_NONE if no GetFileName was called
+int cmphstr(char*& p1, const char* p2, bool allowParenthesisEnd = false);   // p2 must be lowercase to match both cases
+std::pair<std::string, EDelimiterType> GetDelimitedStringEx(char*& p);      // get some string within delimiters (none, quotes, apostrophes, chevron)
+std::string GetDelimitedString(char*& p);                                   // get some string within delimiters (none, quotes, apostrophes, chevron)
+std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix = ""); // get string in delimiters, remember delimiter, convert slashes, prepend pathPrefix
+std::filesystem::path GetOutputFileName(char*& p);                          // GetFileName with pathPrefix = OutPrefix
+EDelimiterType GetDelimiterOfLastFileName();                                // DT_NONE if no GetFileName was called
 bool isLabelStart(const char *p, bool modifiersAllowed = true);
 int islabchar(char p);
 EStructureMembers GetStructMemberId(char*& p);

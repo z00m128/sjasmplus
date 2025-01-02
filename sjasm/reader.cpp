@@ -873,61 +873,45 @@ int GetBytesHexaText(char*& p, int e[]) {
 	return bytes;
 }
 
-std::string GetDelimitedString(char*& p) {
-	const char deliE = delimiters_e[DelimiterAnyBegins(p)];
+std::pair<std::string, EDelimiterType> GetDelimitedStringEx(char*& p) {
+	std::pair<std::string, EDelimiterType> result;
+	result.second = DelimiterAnyBegins(p);
+	const char deliE = delimiters_e[result.second];
 	char *p_begin = p;
 	while (*p && deliE != *p) ++p;
-	std::string result(p_begin, p);
+	result.first.assign(p_begin, p);
 	if (' ' != deliE) {
 		if (deliE == *p) {
 			++p;
 		} else {
 			const char delimiterTxt[2] = { deliE, 0 };
 			Error("No closing delimiter", delimiterTxt, SUPPRESS);
-			result = "";		// return "empty" string
+			result.first = "";		// return "empty" string
 		}
 	}
-	SkipBlanks(p);			// skip blanks any way
+	SkipBlanks(p);					// skip blanks any way
 	return result;
+}
+
+std::string GetDelimitedString(char*& p) {
+	return GetDelimitedStringEx(p).first;	// throw away delimter type and return just string
 }
 
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
-static std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix) {
-	// check if some and which delimiter is used for this filename (does advance over white chars)
-	// and remember type of detected delimiter (for GetDelimiterOfLastFileName function)
-	delimiterOfLastFileName = DelimiterAnyBegins(p);
-	const char deliE = delimiters_e[delimiterOfLastFileName];	// expected ending delimiter
-	// find all characters of file name
-	const char* name_begin = p;
-	while (*p && deliE != *p) ++p;
-	std::filesystem::path name(name_begin, static_cast<const char*>(p));
-	if (!pathPrefix.empty()) name = pathPrefix / name;
+std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix) {
+	auto str_name = GetDelimitedStringEx(p);	// get string and its delimiter type
+	delimiterOfLastFileName = str_name.second;	// remember delimiter for GetDelimiterOfLastFileName
 	// convert backslash and report them with warning
-	std::string str_name = name.string();
-	if (std::string::npos != str_name.find('\\')) WarningById(W_BACKSLASH, bp);
-	std::replace(str_name.begin(), str_name.end(), '\\', '/');
-	name = str_name;
-	// verify + skip end-delimiter (if other than space)
-	if (' ' != deliE) {
-		if (deliE == *p) {
-			++p;
-		} else {
-			const char delimiterTxt[2] = { deliE, 0 };
-			Error("No closing delimiter", delimiterTxt, SUPPRESS);
-			name = "";		// return "empty" string filename
-		}
-	}
-	SkipBlanks(p);			// skip blanks any way
-	return name;
+	if (std::string::npos != str_name.first.find('\\')) WarningById(W_BACKSLASH, bp);
+	std::replace(str_name.first.begin(), str_name.first.end(), '\\', '/');
+	// return prefixed path (or just path if no prefix is requested)
+	if (pathPrefix.empty())		return str_name.first;
+	else						return pathPrefix / str_name.first;
 }
 
 std::filesystem::path GetOutputFileName(char*& p) {
 	return GetFileName(p, Options::OutPrefix);
-}
-
-std::filesystem::path GetFileName(char*& p) {
-	return GetFileName(p, "");
 }
 
 EDelimiterType GetDelimiterOfLastFileName() {
