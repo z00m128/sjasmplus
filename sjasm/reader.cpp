@@ -651,42 +651,6 @@ int GetCharConst(char*& p, aint& val) {
 	return 1;
 }
 
-// returns (adjusts also "p" and "ei", and fills "e"):
-//  -2 = buffer full
-//  -1 = syntax error (missing quote/apostrophe)
-//   0 = no string literal detected at p[0]
-//   1 = string literal in single quotes (apostrophe)
-//   2 = string literal in double quotes (")
-template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, int max_ei, int add) {
-	if ('"' != *p && '\'' != *p) return 0;
-	const char* const elementP = p;
-	const bool quotes = ('"' == *p++);
-	aint val;
-	while (ei < max_ei && (quotes ? GetCharConstInDoubleQuotes(p, val) : GetCharConstInApostrophes(p, val))) {
-		e[ei++] = (val + add) & 255;
-	}
-	if ((quotes ? '"' : '\'') != *p) {	// too many/invalid arguments or zero-terminator can lead to this
-		if (*p) return -2;				// too many arguments
-		Error("Syntax error", elementP, SUPPRESS);	// zero-terminator
-		return -1;
-	}
-	++p;
-	if ('Z' == *p) {
-		if (max_ei <= ei) return -2;	// no space for zero byte (keep p pointing at Z to report error)
-		++p;
-		e[ei++] = 0;
-	} else if ('C' == *p) {
-		++p;
-		if (0 == ei) return -1;			// empty string can't have last char patched
-		e[ei - 1] |= 0x80;
-	}
-	return 1 + quotes;
-}
-
-// make sure both specialized instances for `char` and `int` are available for whole app
-template int GetCharConstAsString<char>(char* & p, char e[], int & ei, int max_ei, int add);
-template int GetCharConstAsString<int>(char* & p, int e[], int & ei, int max_ei, int add);
-
 int GetBytes(char*& p, int e[], int add, int dc) {
 	aint val;
 	int t = 0, strRes;
@@ -1084,5 +1048,42 @@ EDelimiterType DelimiterBegins(char*& src, const std::array<EDelimiterType, 3> d
 EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc) {
 	return DelimiterBegins(src, delimiters_all, advanceSrc);
 }
+
+// returns (adjusts also "p" and "ei", and fills "e"):
+//  -2 = buffer full
+//  -1 = syntax error (missing quote/apostrophe)
+//   0 = no string literal detected at p[0]
+//   1 = string literal in single quotes (apostrophe)
+//   2 = string literal in double quotes (")
+template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, int max_ei, int add) {
+	if ('"' != *p && '\'' != *p) return 0;
+	const char* const elementP = p;
+	const bool quotes = ('"' == *p++);
+	aint val;
+	while (ei < max_ei && (quotes ? GetCharConstInDoubleQuotes(p, val) : GetCharConstInApostrophes(p, val))) {
+		e[ei++] = (val + add) & 255;
+	}
+	if ((quotes ? '"' : '\'') != *p) {	// too many/invalid arguments or zero-terminator can lead to this
+		if (*p) return -2;				// too many arguments
+		Error("Syntax error", elementP, SUPPRESS);	// zero-terminator
+		return -1;
+	}
+	++p;
+	if ('Z' == *p) {
+		if (max_ei <= ei) return -2;	// no space for zero byte (keep p pointing at Z to report error)
+		++p;
+		e[ei++] = 0;
+	} else if ('C' == *p) {
+		++p;
+		if (0 == ei) return -1;			// empty string can't have last char patched
+		e[ei - 1] |= 0x80;
+	}
+	return 1 + quotes;
+}
+
+// make sure both specialized instances for `char` and `int` are available for whole app
+// moved to end of file as it seems to derail test coverage data (either this, or the template code)
+template int GetCharConstAsString<char>(char* & p, char e[], int & ei, int max_ei, int add);
+template int GetCharConstAsString<int>(char* & p, int e[], int & ei, int max_ei, int add);
 
 //eof reader.cpp
