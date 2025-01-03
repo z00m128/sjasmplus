@@ -220,7 +220,8 @@
 - Lua: fix <link linkend="lua_sj_insert_label">sj.insert_label</link> to apply current namespace to name
 - Lua: new <link linkend="lua_sj_get_modules">sj.get_modules</link> to get current modules namespace
 - Lua: minor version upgrade to 5.4.7 (from 5.4.6)
-- minor bugfixes/improvements in specific edge cases
+- minor bugfixes in specific edge cases
+- refactored lot of code related to files manipulation (to use C++17 filesystem library)
 </synopsis>
             </listitem>
           </varlistentry>

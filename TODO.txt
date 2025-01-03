@@ -43,7 +43,7 @@ extern struct tm *localtime (const time_t *__timer) __THROW;
 -------------
 
 tables.cpp:1178: error not covered by tests why?? "if (haakjes) { Error("closing } missing"); }"
-also reader.cpp:967: case 'w'*2+'o' (smallcase "word"? or are coverage data misaligned again? also doesn't feel like case matters in other cases)
+sjasm.cpp:789: open DISP is also not reported? intentionally? "if (DISP_NONE != PseudoORG)"
 
 unittest-cpp seems to be pretty dead now, consider migration, for example to https://github.com/neacsum/utpp
 (author claims C++20, header only and somewhat more compatible with GoogleTest)

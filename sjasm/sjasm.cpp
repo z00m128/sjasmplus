@@ -819,24 +819,18 @@ int main(int argc, char **argv) {
 		LabelTable.DumpSymbols();
 	}
 
-	if (Options::OutputVerbosity <= OV_ALL) {
-		_CERR "Errors: " _CMDL ErrorCount _CMDL ", warnings: " _CMDL WarningCount _CMDL ", compiled: " _CMDL CompiledCurrentLine _CMDL " lines" _END;
+	// sync files, release everything
+	cout << flush;
+	FreeRAM();
+	lua_impl_close();
 
+	if (Options::OutputVerbosity <= OV_ALL) {
 		double dwCount;
 		dwCount = GetTickCount() - dwStart;
 		if (dwCount < 0) dwCount = 0;
-		char workTimeTxt[200] = "";
-		SPRINTF1(workTimeTxt, 200, ", work time: %.3f seconds", dwCount / 1000);
-
-		_CERR workTimeTxt _ENDL;
+		fprintf(stderr, "Errors: %d, warnings: %d, compiled: %d lines, work time: %.3f seconds\n",
+				ErrorCount, WarningCount, CompiledCurrentLine, dwCount / 1000);
 	}
-
-	cout << flush;
-
-	// free RAM
-	FreeRAM();
-
-	lua_impl_close();
 
 	return (ErrorCount != 0);
 }
