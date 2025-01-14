@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Basic writing library ;; Busy soft ;; 14.04.2022 ;;
+;; Basic writing library ;; Busy soft ;; 14.01.2025 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; This library can be used for (relative)
@@ -10,6 +10,7 @@
 ;;   LINE ... begin of basic line
 ;;   LEND ... end of basic line
 ;;   NUM .... include number value into basic
+;;   DEC .... Convert value to sequence of decadic digits only
 ;;
 ;; Control variables:
 ;;
@@ -17,7 +18,7 @@
 ;;   line_number ... Actual line number for actual basic line
 ;;   line_step ..... Increment for automatic numbering of lines
 ;;
-;; Typical usage ...
+;; Typical usage:
 ;;
 ;;   LINE : db bright : NUM 1        : LEND
 ;;   LINE : db print,'"Hello world"' : LEND
@@ -44,6 +45,9 @@
 ;;      LINE : ...... : LEND
 ;;      LINE : ...... : LEND
 ;;    ENDMODULE
+;;
+;;  You can create more basic programs
+;;  in your source code by this way.
 
 spectrum	equ	#A3
 play		equ	#A4
@@ -81,7 +85,6 @@ notx		equ	#C3
 bin		equ	#C4
 orx		equ	#C5
 andx		equ	#C6
-not_equal	equ	#C9
 line		equ	#Ca
 then		equ	#Cb
 to		equ	#Cc
@@ -185,6 +188,9 @@ line_useval	=	0
 line_number	=	10
 line_step	=	10
 
+  IFNDEF  BASICLIB_MACROS_DEFINED
+  DEFINE  BASICLIB_MACROS_DEFINED
+
 ;; Begin of basic line
 
 LINE  MACRO
@@ -229,4 +235,14 @@ NUM   MACRO	value
 	ENDIF
       ENDM
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Convert value to sequence of decadic digits only
+
+DEC	MACRO	value
+	  LUA ALLPASS
+	  sj.parse_code('db	"' .. tostring(sj.calc("value")) .. '"')
+	  ENDLUA
+	ENDM
+
+  ENDIF		;; BASICLIB_MACROS_DEFINED ;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
