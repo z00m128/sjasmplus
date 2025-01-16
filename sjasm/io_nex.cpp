@@ -299,7 +299,7 @@ void SBmpFile::close() {
 
 bool SBmpFile::open(const std::filesystem::path & bmpname) {
 	if (!FOPEN_ISOK(bmp, bmpname, "rb")) {
-		Error("[SAVENEX] Error opening file", bmpname.c_str(), SUPPRESS);
+		Error("[SAVENEX] Error opening file", bmpname.string().c_str(), SUPPRESS);
 		return false;
 	}
 	palBuffer = new byte[4*PALETTE_SIZE];
@@ -324,7 +324,7 @@ bool SBmpFile::open(const std::filesystem::path & bmpname) {
 		40 != header2Size || 1 != colorPlanes || 8 != bpp || 0 != compressionType)
 	{
 		Error("[SAVENEX] BMP file is not in expected format (uncompressed, 8bpp, 40B BITMAPINFOHEADER header)",
-				bmpname.c_str(), SUPPRESS);
+				bmpname.string().c_str(), SUPPRESS);
 		close();
 		return false;
 	}
@@ -438,7 +438,7 @@ static void dirNexOpen() {
 		return;
 	}
 	// try to open the actual file
-	if (!FOPEN_ISOK(nex.f, fname, "w+b")) Error("[SAVENEX] Error opening file for write", fname.c_str(), SUPPRESS);
+	if (!FOPEN_ISOK(nex.f, fname, "w+b")) Error("[SAVENEX] Error opening file for write", fname.string().c_str(), SUPPRESS);
 	if (nullptr == nex.f) return;
 	// set the argument values into header, and write the initial version of header into file
 	nex.h.pc = openArgs[0] & 0xFFFF;
@@ -753,7 +753,7 @@ static void dirNexScreenBmp() {
 	SBmpFile bmp;
 	bool bmpOpened = bmp.open(bmpname);
 	if (bmpOpened && other == bmp.type) {
-		Error("[SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256", bmpname.c_str(), SUPPRESS);
+		Error("[SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256", bmpname.string().c_str(), SUPPRESS);
 		bmpOpened = false;
 	}
 	if (!bmpOpened) return;
@@ -1043,7 +1043,7 @@ static void dirNexClose() {
 	if (appendName.has_filename()) {	// some append file requested, try to copy its content at tail of NEX
 		FILE* appendF = nullptr;
 		if (!FOPEN_ISOK(appendF, appendName, "rb")) {
-			Error("[SAVENEX] Error opening append file", appendName.c_str(), SUPPRESS);
+			Error("[SAVENEX] Error opening append file", appendName.string().c_str(), SUPPRESS);
 		} else {
 			static constexpr int copyBufSize = 0x4000;
 			byte* copyBuffer = new byte[copyBufSize];

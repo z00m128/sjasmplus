@@ -580,7 +580,7 @@ static void dirINCBIN() {
 			length = val;
 		}
 	}
-	BinIncFile(fnaam.c_str(), offset, length, system_paths_first);	//FIXME path idea ready with refactoring
+	BinIncFile(fnaam.string().c_str(), offset, length, system_paths_first);	//FIXME path idea ready with refactoring
 }
 
 static void dirINCHOB() {
@@ -613,12 +613,12 @@ static void dirINCHOB() {
 		}
 	}
 
-	fnaamh = GetPath(fnaam.c_str(), nullptr, system_paths_first);	//FIXME path idea ready
+	fnaamh = GetPath(fnaam.string().c_str(), nullptr, system_paths_first);	//FIXME path idea ready
 	if (!FOPEN_ISOK(ff, fnaamh, "rb")) {
-		Error("[INCHOB] Error opening file", fnaam.c_str(), FATAL);
+		Error("[INCHOB] Error opening file", fnaam.string().c_str(), FATAL);
 	}
 	if (fseek(ff, 0x0b, 0) || 2 != fread(len, 1, 2, ff)) {
-		Error("[INCHOB] Hobeta file has wrong format", fnaam.c_str(), FATAL);
+		Error("[INCHOB] Hobeta file has wrong format", fnaam.string().c_str(), FATAL);
 	}
 	fclose(ff);
 	if (length == -1) {
@@ -626,7 +626,7 @@ static void dirINCHOB() {
 		length = len[0] + (len[1] << 8) - offset;
 	}
 	offset += 17;		// adjust offset (skip HOB header)
-	BinIncFile(fnaam.c_str(), offset, length, system_paths_first);	//FIXME path idea ready w/ refactoring
+	BinIncFile(fnaam.string().c_str(), offset, length, system_paths_first);	//FIXME path idea ready w/ refactoring
 	free(fnaamh);
 }
 
@@ -670,8 +670,8 @@ static void dirINCTRD() {
 			length = val;
 		}
 	}
-	if (TRD_PrepareIncFile(trdname.c_str(), filename.c_str(), offset, length, system_paths_first)) {	//FIXME path idea ready w/ refactoring^2
-		BinIncFile(trdname.c_str(), offset, length, system_paths_first);	//FIXME path idea ready w/ refactoring
+	if (TRD_PrepareIncFile(trdname.string().c_str(), filename.c_str(), offset, length, system_paths_first)) {	//FIXME path idea ready w/ refactoring^2
+		BinIncFile(trdname.string().c_str(), offset, length, system_paths_first);	//FIXME path idea ready w/ refactoring
 	}
 }
 
@@ -1483,7 +1483,7 @@ static void dirINCLUDE() {
 	if (fnaam.has_filename()) {
 		EDelimiterType dt = GetDelimiterOfLastFileName();
 		ListFile();
-		IncludeFile(fnaam.c_str(), DT_ANGLE == dt);	//FIXME path idea possible with refactoring^2
+		IncludeFile(fnaam.string().c_str(), DT_ANGLE == dt);	//FIXME path idea possible with refactoring^2
 		donotlist = 1;
 	} else {
 		Error("[INCLUDE] empty filename", bp);
@@ -1590,7 +1590,7 @@ static void dirEXPORT() {
 		assert(!sourcePosStack.empty());
 		Options::ExportFName = sourcePosStack.back().filename;
 		Options::ExportFName.replace_extension(".exp");
-		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName.c_str(), W_EARLY);
+		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName.string().c_str(), W_EARLY);
 	}
 	if (!(n = p = GetID(lp))) {
 		Error("[EXPORT] Syntax error", lp, SUPPRESS);

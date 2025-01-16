@@ -30,7 +30,7 @@
 
 // report error and close the file
 static bool writeError(const std::filesystem::path & fname, FILE* & fileToClose) {
-	Error("Write error (disk full?)", fname.c_str(), IF_FIRST);
+	Error("Write error (disk full?)", fname.string().c_str(), IF_FIRST);
 	fclose(fileToClose);
 	return false;
 }
@@ -47,7 +47,7 @@ bool SaveSNA_ZX(const std::filesystem::path & fname, word start) {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname.c_str());
+		Error("opening file for write", fname.string().c_str());
 		return false;
 	}
 
@@ -139,7 +139,7 @@ bool SaveSNA_ZX(const std::filesystem::path & fname, word start) {
 	}
 
 	if (128*1024 < Device->PagesCount * Device->GetPage(0)->Size) {
-		WarningById(W_SNA_128, fname.c_str());
+		WarningById(W_SNA_128, fname.string().c_str());
 	}
 
 	fclose(ff);
