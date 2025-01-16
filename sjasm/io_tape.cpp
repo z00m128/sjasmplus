@@ -45,7 +45,7 @@ static aint detect_ram_start(unsigned char* ram, aint length);
 int TAP_SaveEmpty(const std::filesystem::path & fname) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname.string().c_str()); return 0;
+		Error("opening file for write", fname.c_str()); return 0;
 	}
 	fclose(ff);
 	return 1;
@@ -54,7 +54,7 @@ int TAP_SaveEmpty(const std::filesystem::path & fname) {
 int TAP_SaveBlock(const std::filesystem::path & fname, unsigned char flag, const char *ftapname, int start, int length, int param2, int param3) {
 	FILE* fpout;
 	if (!FOPEN_ISOK(fpout, fname, "ab")) {
-		Error("opening file for append", fname.string().c_str(), FATAL);
+		Error("opening file for append", fname.c_str(), FATAL);
 	}
 
 	if (length + start > 0x10000) {
@@ -136,7 +136,7 @@ int TAP_SaveBlock(const std::filesystem::path & fname, unsigned char flag, const
 int TAP_SaveSnapshot(const std::filesystem::path & fname, unsigned short start) {
 	FILE* fpout;
 	if (!FOPEN_ISOK(fpout, fname, "wb")) {
-		Error("opening file for write", fname.string().c_str(), FATAL);
+		Error("opening file for write", fname.c_str(), FATAL);
 	}
 
 	aint datastart = 0x5E00;

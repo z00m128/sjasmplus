@@ -31,8 +31,8 @@
 #include "sjdefs.h"
 
 FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode) {
-	if (nullptr == mode || fname.empty()) return nullptr;
-	return fopen(fname.string().c_str(), mode);
+	if (nullptr == mode || fname.empty() || !fname.has_filename()) return nullptr;
+	return fopen(fname.c_str(), mode);
 }
 
 FILE* SJ_fopen(const char* fname, const char* mode) {

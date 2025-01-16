@@ -37,7 +37,7 @@ namespace
 {
 	// report error and close the file
 	static int writeError(const std::filesystem::path & fname, FILE*& fileToClose) {
-		Error("[SAVECPCSNA] Write error (disk full?)", fname.string().c_str(), IF_FIRST);
+		Error("[SAVECPCSNA] Write error (disk full?)", fname.c_str(), IF_FIRST);
 		fclose(fileToClose);
 		return 0;
 	}
@@ -62,7 +62,7 @@ static int SaveSNA_CPC(const std::filesystem::path & fname, word start) {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[SAVECPCSNA] Error opening file for write", fname.string().c_str());
+		Error("[SAVECPCSNA] Error opening file for write", fname.c_str());
 		return 0;
 	}
 
@@ -785,7 +785,7 @@ void dirSAVECDT() {
 static int SaveCPR(const std::filesystem::path & fname, int cprSize) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[SAVECPR] Error opening file for write", fname.string().c_str());
+		Error("[SAVECPR] Error opening file for write", fname.c_str());
 		return 0;
 	}
 

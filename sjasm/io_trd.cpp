@@ -184,7 +184,7 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 bool TRD_SaveEmpty(const std::filesystem::path & fname, const char label[8]) {
 	FILE* ff;
 	if (!fname.has_filename() || !FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname.string().c_str(), IF_FIRST);
+		Error("opening file for write", fname.c_str(), IF_FIRST);
 		return 0;
 	}
 	byte* buf = (byte*) calloc(STrdDisc::SECTORS_PER_TRACK*STrdDisc::SECTOR_SZ, sizeof(byte));
@@ -192,7 +192,7 @@ bool TRD_SaveEmpty(const std::filesystem::path & fname, const char label[8]) {
 	int result = saveEmptyWrite(ff, buf, label);
 	free(buf);
 	fclose(ff);
-	if (!result) Error("Write error (disk full?)", fname.string().c_str(), IF_FIRST);
+	if (!result) Error("Write error (disk full?)", fname.c_str(), IF_FIRST);
 	return result;
 }
 
@@ -226,7 +226,7 @@ ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & 
 
 static int ReturnWithError(const char* errorText, const std::filesystem::path & fname, FILE* fileToClose) {
 	if (nullptr != fileToClose) fclose(fileToClose);
-	Error(errorText, fname.string().c_str(), IF_FIRST);
+	Error(errorText, fname.c_str(), IF_FIRST);
 	return 0;
 }
 
@@ -366,7 +366,7 @@ bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int 
 		if (STrdHead::NUM_OF_FILES_MAX != fileIndex) {
 			// to keep legacy behaviour of older sjasmplus versions, this is just warning
 			// and the same file will be added to end of directory any way
-			WarningById(W_TRD_DUPLICATE, fname.string().c_str());
+			WarningById(W_TRD_DUPLICATE, fname.c_str());
 		}
 		fileIndex = trdHead.info.numOfFiles;
 	}
@@ -493,7 +493,7 @@ int TRD_PrepareIncFile(const std::filesystem::path & trdname, const char* filena
 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	STrdHead trdHead;
-	char* fullTrdName = GetPath(trdname.string().c_str(), nullptr, systemPathsFirst);	//FIXME path idea ready with refactoring^2
+	char* fullTrdName = GetPath(trdname.c_str(), nullptr, systemPathsFirst);	//FIXME path idea ready with refactoring^2
 	FILE* ff = SJ_fopen(fullTrdName, "rb");
 	free(fullTrdName);
 	fullTrdName = nullptr;
