@@ -176,32 +176,6 @@ void ReleaseArchivedFilenames() {
 	archivedFileNames.clear();
 }
 
-static const char* FilenameBasePos(const char* fullname) {
-	const char* const filenameEnd = fullname + strlen(fullname);
-	const char* baseName = filenameEnd;
-	while (fullname < baseName && '/' != baseName[-1] && '\\' != baseName[-1]) --baseName;
-	return baseName;
-}
-
-// find position of extension in filename (points at dot char or beyond filename if no extension)
-// filename is pointer to writeable format containing file name (can be full path) (NOT NULL)
-// if initWithName and filenameBufferSize are explicitly provided, filename will be first overwritten with those
-char* FilenameExtPos(char* filename, const char* initWithName, size_t initNameMaxLength) {
-	// if the init value is provided with positive buffer size, init the buffer first
-	if (0 < initNameMaxLength && initWithName) {
-		STRCPY(filename, initNameMaxLength, initWithName);
-	}
-	// find start of the base filename
-	const char* baseName = FilenameBasePos(filename);
-	// find extension of the filename and return position of it
-	char* const filenameEnd = filename + strlen(filename);
-	char* extPos = filenameEnd;
-	while (baseName < extPos && '.' != *extPos) --extPos;
-	if (baseName < extPos) return extPos;
-	// no extension found (empty filename, or "name", or ".name"), return end of filename
-	return filenameEnd;
-}
-
 void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty) {
 	if (nullptr == ext || !ext[0]) exit(1);	// invalid arguments
 	// if the destination buffer has already some content and check is requested, exit
@@ -523,7 +497,7 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 	// search current directory first (unless "systemPathsBeforeCurrent")
 	if (!systemPathsBeforeCurrent) {
 		// if found, just skip the `while (dir)` loop
-		if (SJ_SearchPath(CurrentDirectory.c_str(), fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
+		if (SJ_SearchPath(CurrentDirectory.string().c_str(), fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
 		else fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 	}
 	while (dir) {
@@ -534,7 +508,7 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 	// if the file was not found in the list, and current directory was not searched yet
 	if (!fullFilePath[0] && systemPathsBeforeCurrent) {
 		//and the current directory was not searched yet, do it now, set empty string if nothing
-		if (!SJ_SearchPath(CurrentDirectory.c_str(), fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
+		if (!SJ_SearchPath(CurrentDirectory.string().c_str(), fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
 			fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 		}
 	}
@@ -622,7 +596,7 @@ void BinIncFile(const char* fname, aint offset, aint length, const bool systemPa
 	fclose(bif);
 }
 
-static void OpenDefaultList(const char *fullpath);
+static void OpenDefaultList(fullpath_ref_t inputFile);
 
 static stdin_log_t::const_iterator stdin_read_it;
 static stdin_log_t* stdin_log = nullptr;
@@ -659,10 +633,8 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	DefineTable.Replace("__FILE__", nfilename.fullStr.c_str());
 	if (0 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", nfilename.fullStr.c_str());
 
-	// open default listing file for each new source file (if default listing is ON)
-	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
-		OpenDefaultList(nfilename.full.c_str());//FIXME use path	// explicit listing file is already opened
-	}
+	// open default listing file for each new source file (if default listing is ON) / explicit listing is already opened
+	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) OpenDefaultList(nfilename);
 	// show in listing file which file was opened
 	FILE* listFile = GetListingFile();
 	if (LASTPASS == pass && listFile) {
@@ -930,18 +902,16 @@ void OpenList() {
 	OpenListImp(Options::ListingFName);
 }
 
-static void OpenDefaultList(const char *fullpath) {	//FIXME take path instead?
+static void OpenDefaultList(fullpath_ref_t inputFile) {
 	// if STDERR is configured to contain listing, disable other listing files
 	if (OV_LST == Options::OutputVerbosity) return;
 	// check if listing file is already opened, or it is set to explicit file name
 	if (!Options::IsDefaultListingName || NULL != FP_ListingFile) return;
-	if (NULL == fullpath || !*fullpath) return;		// no filename provided
+	if (inputFile.full.empty()) return;		// no filename provided
 	// Create default listing name, and try to open it
-	char tempListName[LINEMAX+10];		// make sure there is enough room for new extension
-	char* extPos = FilenameExtPos(tempListName, fullpath, LINEMAX);	// find extension position
-	STRCPY(extPos, 5, ".lst");			// overwrite it with ".lst"
-	// list filename prepared, open it
-	OpenListImp(tempListName);
+	std::filesystem::path listName { inputFile.full };
+	listName.replace_extension("lst");
+	OpenListImp(listName);
 }
 
 void CloseDest() {
@@ -1460,7 +1430,7 @@ static void OpenSld_buildDefaultNameIfNeeded() {
 	// check if SLD file name is already explicitly defined, or default is wanted
 	if (Options::SourceLevelDebugFName.has_filename() || !Options::IsDefaultSldName) return;
 	// name is still empty, and default is wanted, create one (start with "out" or first source name)
-	ConstructDefaultFilename(Options::SourceLevelDebugFName, ".sld.txt", false);
+	ConstructDefaultFilename(Options::SourceLevelDebugFName, "sld.txt", false);
 }
 
 // returns true only in the LASTPASS and only when "sld" file was specified by user

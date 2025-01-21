@@ -497,7 +497,7 @@ namespace Options {
 					IsLR35902 = false;
 					syx.IsNextEnabled = 0;
 				} else if ((!doubleDash && 'h' == opt[0] && !val[0]) || (doubleDash && !strcmp(opt, "help"))) {
-					ShowHelp |= strcmp("warnings", val);
+					ShowHelp |= !!strcmp("warnings", val);
 					ShowHelpWarnings |= !strcmp("warnings", val);
 				} else if (doubleDash && !strcmp(opt, "version")) {
 					ShowVersion = true;
@@ -763,7 +763,7 @@ int main(int argc, char **argv) {
 	}
 
 	// create default output name, if not specified
-	ConstructDefaultFilename(Options::DestinationFName, ".out");
+	ConstructDefaultFilename(Options::DestinationFName, "out");
 	int base_encoding = ConvertEncoding;
 
 	// init some vars

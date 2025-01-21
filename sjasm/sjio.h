@@ -79,7 +79,6 @@ EDelimiterType GetDelimiterOfLastFileName();                                // D
 //FIXME this is still used by Lua to archive its temporary filenames retrieved trough debug interface, maybe abuse GetInputFile here too? (DT_COUNT delim string)
 const char* ArchiveFilename(const char* fullpathname);	// returns permanent c_str pointer to input c_str (used for Lua script file names)
 void ReleaseArchivedFilenames();	// does release all archived filenames, making all pointers invalid
-char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0); //FIXME get rid of this
 void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty = true);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void OpenExpFile();
