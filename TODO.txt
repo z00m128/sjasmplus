@@ -23,6 +23,8 @@ check for Z80 in/out having also [] brackets and syntax brackets-only mode? (cur
 ARM! https://cirrus-ci.org/guide/linux/
 > Cirrus CI supports container and arm_container instances in order to run your CI workloads on amd64 and arm64 platforms respectively.
 
+@Janko at Next discord: `--raw-fill-gaps` to produce fill when second ORG is used and --raw output. (like org $2000 ... org $2100 -> test.dot)
+
 -------------
 can you add a --utc option to sjasmplus so that I don't have to change my hardware time if I want __DATE__ to use UTC.
 I want UTC time zone for release dates, not local time zone?

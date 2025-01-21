@@ -837,8 +837,8 @@ int GetBytesHexaText(char*& p, int e[]) {
 	return bytes;
 }
 
-std::pair<std::string, EDelimiterType> GetDelimitedStringEx(char*& p) {
-	std::pair<std::string, EDelimiterType> result;
+delim_string_t GetDelimitedStringEx(char*& p) {
+	delim_string_t result;
 	result.second = DelimiterAnyBegins(p);
 	const char deliE = delimiters_e[result.second];
 	char *p_begin = p;
@@ -858,29 +858,7 @@ std::pair<std::string, EDelimiterType> GetDelimitedStringEx(char*& p) {
 }
 
 std::string GetDelimitedString(char*& p) {
-	return GetDelimitedStringEx(p).first;	// throw away delimter type and return just string
-}
-
-static EDelimiterType delimiterOfLastFileName = DT_NONE;
-
-std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix) {
-	auto str_name = GetDelimitedStringEx(p);	// get string and its delimiter type
-	delimiterOfLastFileName = str_name.second;	// remember delimiter for GetDelimiterOfLastFileName
-	// convert backslash and report them with warning
-	if (std::string::npos != str_name.first.find('\\')) WarningById(W_BACKSLASH, bp);
-	std::replace(str_name.first.begin(), str_name.first.end(), '\\', '/');
-	// return prefixed path (or just path if no prefix is requested)
-	if (pathPrefix.empty())		return str_name.first;
-	else						return pathPrefix / str_name.first;
-}
-
-std::filesystem::path GetOutputFileName(char*& p) {
-	return GetFileName(p, Options::OutPrefix);
-}
-
-EDelimiterType GetDelimiterOfLastFileName() {
-	// DT_NONE if no GetFileName was called
-	return delimiterOfLastFileName;
+	return GetDelimitedStringEx(p).first;	// throw away delimiter type and return just string
 }
 
 bool isLabelStart(const char *p, bool modifiersAllowed) {

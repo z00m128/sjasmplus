@@ -1479,11 +1479,10 @@ static void dirENDIF() {
 }*/
 
 static void dirINCLUDE() {
-	const std::filesystem::path fnaam = GetFileName(lp);
-	if (fnaam.has_filename()) {
-		EDelimiterType dt = GetDelimiterOfLastFileName();
+	fullpath_ref_t fnaam = GetInputFile(lp);
+	if (fnaam.full.has_filename()) {
 		ListFile();
-		IncludeFile(fnaam.string().c_str(), DT_ANGLE == dt);	//FIXME path idea possible with refactoring^2
+		IncludeFile(fnaam);
 		donotlist = 1;
 	} else {
 		Error("[INCLUDE] empty filename", bp);

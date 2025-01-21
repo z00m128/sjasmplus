@@ -33,6 +33,8 @@
 enum EDelimiterType { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
 enum EBracketType { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
 
+typedef std::pair<std::string, EDelimiterType> delim_string_t;
+
 bool White(const char c);
 bool White();
 void SkipParam(char*&);
@@ -78,11 +80,8 @@ void GetStructText(char*& p, aint len, byte* data, const byte* initData = nullpt
 int GetBits(char*& p, int e[]);
 int GetBytesHexaText(char*& p, int e[]);
 int cmphstr(char*& p1, const char* p2, bool allowParenthesisEnd = false);   // p2 must be lowercase to match both cases
-std::pair<std::string, EDelimiterType> GetDelimitedStringEx(char*& p);      // get some string within delimiters (none, quotes, apostrophes, chevron)
-std::string GetDelimitedString(char*& p);                                   // get some string within delimiters (none, quotes, apostrophes, chevron)
-std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix = ""); // get string in delimiters, remember delimiter, convert slashes, prepend pathPrefix
-std::filesystem::path GetOutputFileName(char*& p);                          // GetFileName with pathPrefix = OutPrefix
-EDelimiterType GetDelimiterOfLastFileName();                                // DT_NONE if no GetFileName was called
+delim_string_t GetDelimitedStringEx(char*& p);  // get some string within delimiters (none, quotes, apostrophes, chevron)
+std::string GetDelimitedString(char*& p);       // get some string within delimiters (none, quotes, apostrophes, chevron)
 bool isLabelStart(const char *p, bool modifiersAllowed = true);
 int islabchar(char p);
 EStructureMembers GetStructMemberId(char*& p);

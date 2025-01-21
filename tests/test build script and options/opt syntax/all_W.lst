@@ -49,7 +49,7 @@ all_W.asm(25): warning[bpfile]: breakpoints file was not specified
 25    8005                  SETBREAKPOINT
 all_W.asm(26): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
 26    8005 ED 71            out (c),0
-all_W.asm(27): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): INCBIN "back\slash.bin"
+all_W.asm(27): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): back\slash.bin
 all_W.asm(27): error: opening file: back/slash.bin
 all_W.asm(27): warning: include data: requested to include no data (length=0)
 27    8007                  INCBIN "back\slash.bin"

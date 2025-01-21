@@ -127,7 +127,7 @@ extern aint deviceDirectivesCount;
 //*current* full file name (used as full for CurSourcePos when `--fullpath`)
 //content at this pointer is immutable and valid till assembler exits, so you can archive/reuse it
 //for example SLD tracing remembers original file where macro was defined by using pointer into this
-extern const char* fileNameFull;
+extern fullpath_p_t fileNameFull;
 
 // extend
 extern char* lp, line[LINEMAX], temp[LINEMAX], * bp;
@@ -167,7 +167,7 @@ extern aint destlen, size, comlin;
 extern char* vorlabp, * macrolabp, * LastParsedLabel;
 
 enum EEncoding { ENCDOS, ENCWIN };
-extern const char* CurrentDirectory;
+extern std::filesystem::path CurrentDirectory;
 
 void ExitASM(int p);
 extern CStringsList* lijstp;

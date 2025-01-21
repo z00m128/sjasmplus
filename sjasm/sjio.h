@@ -40,10 +40,46 @@ constexpr int INSTRUCTION_START_MARKER = -2;
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2
 
-//FIXME path for archive too?
-const char* ArchiveFilename(const char* fullpathname);	// returns permanent C-string pointer to the fullpathname
+// input file archiving helper struct (holding instance of full and base name strings to keep c_str() pointers valid)
+struct SInputFile {
+  const std::filesystem::path full;
+  const std::string fullStr;
+  const std::string baseStr;
+
+  SInputFile(const std::filesystem::path && fullName) :
+                  full(std::move(fullName)),
+                  fullStr(full.string()),
+                  baseStr(full.filename().string()) {
+  }
+
+  SInputFile(int) : full(), fullStr("<stdin>"), baseStr("<stdin>") {} // special const. for stdin
+
+  SInputFile() = delete;
+  SInputFile(const SInputFile &) = delete;
+};
+
+using fullpath_ref_t = const SInputFile &;
+using fullpath_p_t = const SInputFile *;
+
+// map to archive all input files (to have stable valid c_str pointers of their filenames until exit)
+// key: filename + delimiter info
+// value: archived fullpath/basename ready to open or print
+using files_in_map_t = std::map<const delim_string_t, const SInputFile>;
+
+// Look for provided string + delimiter type in include paths and return full path to existing file or original string
+// (archives the input in case this is first time, otherwise returns archived path)
+fullpath_ref_t GetInputFile(delim_string_t && in);
+fullpath_ref_t GetInputFile(char*& p);
+
+std::filesystem::path GetFileName(delim_string_t & str_name, const std::filesystem::path & pathPrefix = "");
+std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix = ""); // get string in delimiters, remember delimiter, convert slashes, prepend pathPrefix
+std::filesystem::path GetOutputFileName(char*& p);                          // GetFileName with pathPrefix = OutPrefix
+EDelimiterType GetDelimiterOfLastFileName();                                // DT_NONE if no GetFileName was called
+
+//FIXME this is still used by Lua to archive its temporary filenames retrieved trough debug interface, maybe abuse GetInputFile here too? (DT_COUNT delim string)
+const char* ArchiveFilename(const char* fullpathname);	// returns permanent c_str pointer to input c_str (used for Lua script file names)
 void ReleaseArchivedFilenames();	// does release all archived filenames, making all pointers invalid
-char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0); //FIXME get rid of this?
+char* FilenameExtPos(char* filename, const char* initWithName = nullptr, size_t initNameMaxLength = 0); //FIXME get rid of this
 void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty = true);
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void OpenExpFile();
@@ -61,8 +97,8 @@ void EmitBytes(const int* bytes, bool isInstructionStart = false);
 void EmitWords(const int* words, bool isInstructionStart = false);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
 bool DidEmitByte();		// returns true if some byte was emitted since last call to this function
-void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent = false, stdin_log_t* fStdinLog = nullptr);  //FIXME path
-void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent); //FIXME path
+void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog = nullptr);
+void IncludeFile(fullpath_ref_t nfilename);
 void Close();
 void OpenList();
 

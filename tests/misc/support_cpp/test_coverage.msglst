@@ -1,5 +1,4 @@
 test_coverage.asm(4): warning: Relative file path with drive letter detected (not supported): c:relative_win_drive_path.some.nonexisting.file
-test_coverage.asm(4): warning: Relative file path with drive letter detected (not supported): c:relative_win_drive_path.some.nonexisting.file
 test_coverage.asm(4): error: [INCLUDELUA] File doesn't exist: c:relative_win_drive_path.some.nonexisting.file
 test_coverage.asm(7): error: [INCLUDELUA] File doesn't exist: c:/absolute_win_drive_path.some.nonexisting.file
 # file opened: test_coverage.asm

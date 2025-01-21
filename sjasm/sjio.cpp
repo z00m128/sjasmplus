@@ -32,8 +32,10 @@
 
 #include <fcntl.h>
 
+static const std::filesystem::path EMPTY_PATH{""};
+
 int ListAddress;
-std::vector<const char*> archivedFileNames;	// archive of all files opened (also includes!) (fullname!)
+std::vector<const char*> archivedFileNames;	// archive of filename strings (Lua scripts only?)
 
 static constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;
 static constexpr int DESTBUFLEN = 8192;
@@ -56,14 +58,116 @@ static aint WBLength = 0;
 
 static void CloseBreakpointsFile();
 
+// convert backslash and report them with warning
+static void FixFileBackslashes(delim_string_t & str) {
+	if (std::string::npos == str.first.find('\\')) return;
+	WarningById(W_BACKSLASH, str.first.c_str());
+	std::replace(str.first.begin(), str.first.end(), '\\', '/');
+}
+
+//FIXME prune these functions after everything will be refactored to GetInput/OutputFileName
+static EDelimiterType delimiterOfLastFileName = DT_NONE;
+
+// do: remember delimiter for GetDelimiterOfLastFileName, convert backslashes, prepend prefix
+std::filesystem::path GetFileName(delim_string_t & str_name, const std::filesystem::path & pathPrefix) {
+	FixFileBackslashes(str_name);
+	delimiterOfLastFileName = str_name.second;	// remember delimiter for GetDelimiterOfLastFileName
+	// return prefixed path (or just path if prefix is empty, "/" is not applied then)
+	return pathPrefix / str_name.first;
+}
+
+std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix) {
+	auto str_name = GetDelimitedStringEx(p);
+	return GetFileName(str_name, pathPrefix);
+}
+
+std::filesystem::path GetOutputFileName(char*& p) {
+	return GetFileName(p, Options::OutPrefix);
+}
+
+EDelimiterType GetDelimiterOfLastFileName() {
+	// DT_NONE if no GetFileName was called
+	return delimiterOfLastFileName;
+}
+
+//FIXME duplicate from support - get rid of SJ_SearchPath, GetPath, ... (whole chain)
+static bool isAnySlash(const char c) {
+	return pathGoodSlash == c || pathBadSlash == c;
+}
+
+//FIXME duplicate from support - get rid of SJ_SearchPath, GetPath, ... (whole chain)
+static bool isWindowsDrivePathStart(const char* filePath) {
+	if (!filePath || !filePath[0] || ':' != filePath[1]) return false;
+	const char driveLetter = toupper(filePath[0]);
+	if (driveLetter < 'A' || 'Z' < driveLetter) return false;
+	if (!isAnySlash(filePath[2])) {
+		Warning("Relative file path with drive letter detected (not supported)", filePath, W_EARLY);
+	}
+	return true;
+}
+
+fullpath_ref_t GetInputFile(delim_string_t && in) {
+
+	static files_in_map_t archivedInputFiles;	// archive of all input files opened so far
+
+	FixFileBackslashes(in);
+	// check if already archived, just return full path
+	const auto lb = archivedInputFiles.lower_bound(in);
+	if (archivedInputFiles.cend() != lb && lb->first == in) return lb->second;
+
+	// !!! any warnings after this point must be W_EARLY, 2nd+ pass does use archived path = no warning !!!
+
+	// not archived yet, look for the file somewhere...
+	const std::filesystem::path name_in{ in.first };
+	// completely empty -> special value to signal stdin
+	if (name_in.empty()) {		// use special SInputFile constructor to have fake name "<stdin>"
+		return archivedInputFiles.emplace_hint(lb, std::move(in), 1)->second;
+	}
+	// no filename - return it as is (it's not valid for open)
+	if (!name_in.has_filename()) {
+		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(name_in))->second;
+	}
+	// absolute path or windows drive letter oddities - use it as is (even if not valid)
+	if (name_in.is_absolute() || isWindowsDrivePathStart(in.first.c_str())) {
+		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(name_in))->second;
+	}
+	// search include paths depending on delimiter and filename - first try current dir (except for "<name>")
+	const auto current_dir_file = CurrentDirectory / name_in;
+	if (DT_ANGLE != in.second) {
+		// force this as result for DT_COUNT delimiter (CLI argument filename => no searching)
+		if (DT_COUNT == in.second || FileExists(current_dir_file)) {	// or if the file exists
+			return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(current_dir_file))->second;
+		}
+	}
+	// search all include paths now
+	CStringsList* dir = Options::IncludeDirsList;	// include-paths to search
+	while (dir) {
+		const auto dir_file = dir->string / name_in;
+		if (FileExists(dir_file)) {
+			return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(dir_file))->second;
+		}
+		dir = dir->next;
+	}
+	// still not found, check current directory for system-paths-first case
+	if (DT_ANGLE == in.second && FileExists(current_dir_file)) {
+		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(current_dir_file))->second;
+	}
+	// not found, return it "as is"
+	return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(name_in))->second;
+}
+
+fullpath_ref_t GetInputFile(char*& p) {
+	auto name_in = GetDelimitedStringEx(p);
+	return GetInputFile(std::move(name_in));
+}
+
 // returns permanent C-string pointer to the fullpathname (if new, it is added to archive)
 const char* ArchiveFilename(const char* fullpathname) {
 	for (auto fname : archivedFileNames) {		// search whole archive for identical full name
 		if (!strcmp(fname, fullpathname)) return fname;
 	}
-	const char* newName = STRDUP(fullpathname);
-	archivedFileNames.push_back(newName);
-	return newName;
+	archivedFileNames.push_back(STRDUP(fullpathname));
+	return archivedFileNames.back();
 }
 
 // does release all archived filenames, making all pointers (and archive itself) invalid
@@ -419,7 +523,7 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 	// search current directory first (unless "systemPathsBeforeCurrent")
 	if (!systemPathsBeforeCurrent) {
 		// if found, just skip the `while (dir)` loop
-		if (SJ_SearchPath(CurrentDirectory, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
+		if (SJ_SearchPath(CurrentDirectory.c_str(), fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
 		else fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 	}
 	while (dir) {
@@ -430,7 +534,7 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 	// if the file was not found in the list, and current directory was not searched yet
 	if (!fullFilePath[0] && systemPathsBeforeCurrent) {
 		//and the current directory was not searched yet, do it now, set empty string if nothing
-		if (!SJ_SearchPath(CurrentDirectory, fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
+		if (!SJ_SearchPath(CurrentDirectory.c_str(), fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
 			fullFilePath[0] = 0;	// clear fullFilePath every time when not found
 		}
 	}
@@ -523,58 +627,51 @@ static void OpenDefaultList(const char *fullpath);
 static stdin_log_t::const_iterator stdin_read_it;
 static stdin_log_t* stdin_log = nullptr;
 
-void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t* fStdinLog)
+void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 {
 	if (++IncludeLevel > 20) {
 		Error("Over 20 files nested", NULL, ALL);
 		--IncludeLevel;
 		return;
 	}
-	char* fullpath, * filenamebegin;
-	if (!*nfilename && fStdinLog) {
-		fullpath = STRDUP("<stdin>");
-		filenamebegin = fullpath;
+	assert(!fStdinLog || nfilename.full.empty());
+	if (fStdinLog) {
 		FP_Input = stdin;
 		stdin_log = fStdinLog;
 		stdin_read_it = stdin_log->cbegin();	// reset read iterator (for 2nd+ pass)
 	} else {
-		fullpath = GetPath(nfilename, &filenamebegin, systemPathsBeforeCurrent);	// FIXME !research! path idea not ready
-
-		if (!FOPEN_ISOK(FP_Input, fullpath, "rb")) {
-			free(fullpath);
-			Error("opening file", nfilename, ALL);
+		if (!FOPEN_ISOK(FP_Input, nfilename.full, "rb")) {
+			Error("opening file", nfilename.fullStr.c_str(), ALL);
 			--IncludeLevel;
 			return;
 		}
 	}
 
-	const char* oFileNameFull = fileNameFull, * oCurrentDirectory = CurrentDirectory;
+	fullpath_p_t oFileNameFull = fileNameFull;
+	const std::filesystem::path oCurrentDirectory = CurrentDirectory;
 
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
-	fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
-	sourcePosStack.emplace_back(Options::IsShowFullPath ? fileNameFull : FilenameBasePos(fileNameFull));
-	//FIXME with paths it can be: sourcePosStack.emplace_back(Options::IsShowFullPath ? fileNameFull : fileNameFull.filename());
-	//FIXME and remove FilenameBasePos
+	fileNameFull = &nfilename;
+	sourcePosStack.emplace_back(Options::IsShowFullPath ? nfilename.fullStr.c_str() : nfilename.baseStr.c_str());
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
-	DefineTable.Replace("__FILE__", fileNameFull);
-	if (0 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", fileNameFull);
+	DefineTable.Replace("__FILE__", nfilename.fullStr.c_str());
+	if (0 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", nfilename.fullStr.c_str());
 
 	// open default listing file for each new source file (if default listing is ON)
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) {
-		OpenDefaultList(fileNameFull);			// explicit listing file is already opened
+		OpenDefaultList(nfilename.full.c_str());//FIXME use path	// explicit listing file is already opened
 	}
 	// show in listing file which file was opened
 	FILE* listFile = GetListingFile();
 	if (LASTPASS == pass && listFile) {
 		fputs("# file opened: ", listFile);
-		fputs(fileNameFull, listFile);
+		fputs(nfilename.fullStr.c_str(), listFile);
 		fputs("\n", listFile);
 	}
 
-	*filenamebegin = 0;					// shorten fullpath to only-path string
-	CurrentDirectory = fullpath;		// and use it as CurrentDirectory
+	CurrentDirectory = fileNameFull->full.parent_path();		// use file's current directory
 
 	rlpbuf = rlpbuf_end = rlbuf;
 	colonSubline = false;
@@ -590,13 +687,11 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 		}
 	}
 	CurrentDirectory = oCurrentDirectory;
-	free(fullpath);						// was used by CurrentDirectory till now
-	fullpath = nullptr;
 
 	// show in listing file which file was closed
 	if (LASTPASS == pass && listFile) {
 		fputs("# file closed: ", listFile);
-		fputs(fileNameFull, listFile);
+		fputs(nfilename.fullStr.c_str(), listFile);
 		fputs("\n", listFile);
 
 		// close listing file (if "default" listing filename is used)
@@ -615,11 +710,12 @@ void OpenFile(const char* nfilename, bool systemPathsBeforeCurrent, stdin_log_t*
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
-	DefineTable.Replace("__FILE__", fileNameFull ? fileNameFull : "<none>");
+	DefineTable.Replace("__FILE__", fileNameFull ? fileNameFull->fullStr.c_str() : "<none>");
+	//FIXME add in some include tests test of __FILE__ just to verify this has still valid c_str pointer
 	if (-1 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", "<none>");
 }
 
-void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)
+void IncludeFile(fullpath_ref_t nfilename)
 {
 	auto oStdin_log = stdin_log;
 	auto oStdin_read_it = stdin_read_it;
@@ -631,7 +727,7 @@ void IncludeFile(const char* nfilename, bool systemPathsBeforeCurrent)
 	bool oColonSubline = colonSubline;
 	if (blockComment) Error("Internal error 'block comment'", NULL, FATAL);	// comment can't INCLUDE
 
-	OpenFile(nfilename, systemPathsBeforeCurrent);
+	OpenFile(nfilename);
 
 	colonSubline = oColonSubline;
 	rlpbuf = pbuf, rlpbuf_end = pbuf_end;
@@ -834,7 +930,7 @@ void OpenList() {
 	OpenListImp(Options::ListingFName);
 }
 
-static void OpenDefaultList(const char *fullpath) {
+static void OpenDefaultList(const char *fullpath) {	//FIXME take path instead?
 	// if STDERR is configured to contain listing, disable other listing files
 	if (OV_LST == Options::OutputVerbosity) return;
 	// check if listing file is already opened, or it is set to explicit file name
@@ -951,10 +1047,12 @@ void OpenTapFile(const std::filesystem::path & tapename, int flagbyte)
 	}
 }
 
+// check if file exists and seems to be regular file (maybe character works too? stdin is what? FIXME)
 bool FileExists(const std::filesystem::path & file_name) {
-	FILE* test;
-	bool exists = FOPEN_ISOK(test, file_name, "r") && (0 == fclose(test));
-	return exists;
+	return	std::filesystem::exists(file_name) && (
+		std::filesystem::is_regular_file(file_name) ||
+		std::filesystem::is_character_file(file_name)	//FIXME verify with stdin if this is needed
+	);
 }
 
 bool FileExistsCstr(const char* file_name) {
@@ -1430,7 +1528,7 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	const bool outside_source = (sourcePosStack.size() <= size_t(IncludeLevel));
 	const bool has_def_pos = !outside_source && (size_t(IncludeLevel + 1) < sourcePosStack.size());
 	const TextFilePos & curPos = outside_source ? sourcePosStack.back() : sourcePosStack.at(IncludeLevel);
-	const TextFilePos defPos = has_def_pos ? sourcePosStack.back() : TextFilePos();
+	const TextFilePos & defPos = has_def_pos ? sourcePosStack.back() : TextFilePos();
 
 	const char* macroFN = defPos.filename && strcmp(defPos.filename, curPos.filename) ? defPos.filename : "";
 	WriteToSldFile_TextFilePos(sldMessage_sourcePos, curPos);

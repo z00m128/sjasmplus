@@ -526,20 +526,16 @@ void dirINCLUDELUA() {
 		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
 		return;
 	}
-	const std::filesystem::path fnaam = GetFileName(lp);
-	EDelimiterType dt = GetDelimiterOfLastFileName();
-	char* fullpath = GetPath(fnaam.string().c_str(), NULL, DT_ANGLE == dt);	//FIXME fits input path idea
-	if (!fullpath[0]) {
-		Error("[INCLUDELUA] File doesn't exist", fnaam.string().c_str(), EARLY);
+	fullpath_ref_t file_in = GetInputFile(lp);
+	if (!FileExists(file_in.full)) {
+		Error("[INCLUDELUA] File doesn't exist", file_in.fullStr.c_str(), EARLY);
 	} else {
 		extraErrorWarningPrefix = lua_err_prefix;
-		fileNameFull = ArchiveFilename(fullpath);	// get const pointer into archive
-		if (luaL_dofile(LUA, fileNameFull)) {
+		if (luaL_dofile(LUA, file_in.fullStr.c_str())) {
 			lua_impl_showLoadError(EARLY);
 		}
 		extraErrorWarningPrefix = nullptr;
 	}
-	free(fullpath);
 }
 
 #endif //USE_LUA

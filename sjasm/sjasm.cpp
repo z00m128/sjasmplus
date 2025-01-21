@@ -129,6 +129,13 @@ namespace Options {
 
 	// Include directories list is initialized with "." directory
 	CStringsList* IncludeDirsList = new CStringsList(".");
+	// CStringsList* IncludeDirsList = nullptr;	// wrong?
+	//FIXME ^ explain this to me like I'm 5yo, seems like empty list does same job after changing to fs::path
+	// ... but that's weird, wasn't there something about includes vs "anchor" dir? But tests *almost* do pass (just extra "./").
+	// Look into it harder! ... I think there should be difference, because CurrentDirectory / fname
+	// is tested and then all include path, so "." is not <empty list>
+	// I guess "." could become at least empty path "", but include paths must contain it/something
+	//FIXME and this list itself could become vector<fs::path> now?
 
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
@@ -194,7 +201,7 @@ static char* globalDeviceID = nullptr;
 static aint globalDeviceZxRamTop = 0;
 
 // extend
-const char* fileNameFull = nullptr, * fileName = nullptr;	//fileName is either full or basename (--fullpath)
+fullpath_p_t fileNameFull = nullptr;
 char* lp, line[LINEMAX], temp[LINEMAX], * bp;
 char sline[LINEMAX2], sline2[LINEMAX2], * substitutedLine, * eolComment, ModuleName[LINEMAX];
 
@@ -237,7 +244,7 @@ source_positions_t::size_type smartSmcIndex;
 uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L, comlin = 0;
-const char* CurrentDirectory=NULL;
+std::filesystem::path CurrentDirectory {};
 
 char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
@@ -773,10 +780,18 @@ int main(int argc, char **argv) {
 		InitPass();
 		if (pass == LASTPASS) OpenDest();
 
+		static bool warn_stdin_default_lst = true;
 		for (SSource & src : sourceFiles) {
+			if (src.stdin_log && warn_stdin_default_lst && 1 == pass && Options::IsDefaultListingName) {
+				Warning("use explicit --lst=<filename> for <stdin> source", nullptr, W_EARLY);
+				warn_stdin_default_lst = false;
+				//FIXME add test ^^
+			}
 			IsRunning = 1;
 			ConvertEncoding = base_encoding;
-			OpenFile(src.fname, false, src.stdin_log);
+			// don't search include paths, but use GetInputFile to get "archived" fullpath_ref_t for c_str() lifetime
+			fullpath_ref_t src_fname = GetInputFile(delim_string_t(src.fname, DT_COUNT));
+			OpenFile(src_fname, src.stdin_log);
 		}
 
 		while (!RepeatStack.empty()) {

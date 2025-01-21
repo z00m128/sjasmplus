@@ -3,9 +3,9 @@
  2    0000                      DEFINE included
  3    0000                      ; these will be now converted to "/" on any platform
  4    0000                      ; as windows `fopen` implementation should accept also "/"
-include_paths_in_linux.asm(5): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): OUTPUT ".\include_paths_in_linux.bin"
+include_paths_in_linux.asm(5): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): .\include_paths_in_linux.bin
  5    0000                      OUTPUT ".\include_paths_in_linux.bin"
-include_paths_in_linux.asm(6): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): INCLUDE ".\include_paths_in_linux.asm"
+include_paths_in_linux.asm(6): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): .\include_paths_in_linux.asm
  6    0000                      INCLUDE ".\include_paths_in_linux.asm"
 # file opened: ./include_paths_in_linux.asm
  1+   0000                  IFNDEF included
@@ -27,7 +27,7 @@ include_paths_in_linux.asm(6): warning[backslash]: File name contains \, use / i
 17+   0001                  ASSERT 1 == $ || 3 == $ || 5 == $
 18+   0001
 # file closed: ./include_paths_in_linux.asm
-include_paths_in_linux.asm(7): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): INCBIN ".\include_paths_in_linux.asm", 4, 1
+include_paths_in_linux.asm(7): warning[backslash]: File name contains \, use / instead (\ fails on most of the supported platforms): .\include_paths_in_linux.asm
  7    0001                      INCBIN ".\include_paths_in_linux.asm", 4, 1
  8    0002
  9    0002                      ; the correct "/" paths should of course work any way
