@@ -70,11 +70,7 @@ using files_in_map_t = std::map<const delim_string_t, const SInputFile>;
 // (archives the input in case this is first time, otherwise returns archived path)
 fullpath_ref_t GetInputFile(delim_string_t && in);
 fullpath_ref_t GetInputFile(char*& p);
-
-std::filesystem::path GetFileName(delim_string_t & str_name, const std::filesystem::path & pathPrefix = "");
-std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix = ""); // get string in delimiters, remember delimiter, convert slashes, prepend pathPrefix
-std::filesystem::path GetOutputFileName(char*& p);                          // GetFileName with pathPrefix = OutPrefix
-EDelimiterType GetDelimiterOfLastFileName();                                // DT_NONE if no GetFileName was called
+std::filesystem::path GetOutputFileName(char*& p);
 
 //FIXME this is still used by Lua to archive its temporary filenames retrieved trough debug interface, maybe abuse GetInputFile here too? (DT_COUNT delim string)
 const char* ArchiveFilename(const char* fullpathname);	// returns permanent c_str pointer to input c_str (used for Lua script file names)
@@ -109,7 +105,6 @@ void OpenTapFile(const std::filesystem::path & tapename, int flagbyte);
 void PrintHex(char* & dest, aint value, int nibbles);
 void PrintHex32(char* & dest, aint value);
 void PrintHexAlt(char* & dest, aint value);
-char* GetPath(const char* fname, char** filenamebegin = NULL, bool systemPathsBeforeCurrent = false); //FIXME path??
 
 /**
  * @brief Includes bytes of particular file into output (and virtual device memory).

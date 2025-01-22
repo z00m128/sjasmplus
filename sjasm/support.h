@@ -28,9 +28,6 @@
 
 // support.h
 
-constexpr char pathBadSlash = '\\';
-constexpr char pathGoodSlash = '/';
-
 constexpr uint16_t sj_bswap16(const uint16_t v) {
 	return ((v>>8)&0xFF) | ((v<<8)&0xFF00);
 }
@@ -61,9 +58,6 @@ static_assert(0x78563412 == sj_bswap32(0x12345678), "internal error in bswap32 i
 
 #endif
 
-#ifndef TCHAR
-#define TCHAR char
-#endif
 #ifndef WIN32
 long GetTickCount();
 #endif
@@ -78,9 +72,7 @@ long GetTickCount();
 
 void SJ_FixSlashes(delim_string_t & str, bool do_warning = true); // convert backslashes, can produce warning
 FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode);
-FILE* SJ_fopen(const char* fname, const char* mode);
 void SJ_GetCurrentDirectory(int, char*);
-int SJ_SearchPath(const char* oudzp, const char* filename, const char* /*extension*/, int maxlen, char* nieuwzp, char** ach);
 
 // FILE* dbg_fopen(const char* fname, const char* modes);
 

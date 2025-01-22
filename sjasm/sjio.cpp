@@ -33,6 +33,8 @@
 #include <fcntl.h>
 
 static const std::filesystem::path EMPTY_PATH{""};
+static constexpr char pathBadSlash = '\\';
+static constexpr char pathGoodSlash = '/';
 
 int ListAddress;
 std::vector<const char*> archivedFileNames;	// archive of filename strings (Lua scripts only?)
@@ -58,37 +60,24 @@ static aint WBLength = 0;
 
 static void CloseBreakpointsFile();
 
-//FIXME prune these functions after everything will be refactored to GetInput/OutputFileName
-static EDelimiterType delimiterOfLastFileName = DT_NONE;
-
-// do: remember delimiter for GetDelimiterOfLastFileName, convert backslashes, prepend prefix
-std::filesystem::path GetFileName(delim_string_t & str_name, const std::filesystem::path & pathPrefix) {
-	SJ_FixSlashes(str_name);
-	delimiterOfLastFileName = str_name.second;	// remember delimiter for GetDelimiterOfLastFileName
-	// return prefixed path (or just path if prefix is empty, "/" is not applied then)
-	return pathPrefix / str_name.first;
-}
-
-std::filesystem::path GetFileName(char*& p, const std::filesystem::path & pathPrefix) {
-	auto str_name = GetDelimitedStringEx(p);
-	return GetFileName(str_name, pathPrefix);
-}
-
 std::filesystem::path GetOutputFileName(char*& p) {
-	return GetFileName(p, Options::OutPrefix);
+	auto str_name = GetDelimitedStringEx(p);	// read delimited filename string
+	SJ_FixSlashes(str_name);					// convert backslashes *with* warning
+	// prefix with output path and force slashes again (without warning)
+	return SJ_force_slash(Options::OutPrefix / str_name.first);
 }
 
-EDelimiterType GetDelimiterOfLastFileName() {
-	// DT_NONE if no GetFileName was called
-	return delimiterOfLastFileName;
-}
-
-//FIXME duplicate from support - get rid of SJ_SearchPath, GetPath, ... (whole chain)
 static bool isAnySlash(const char c) {
 	return pathGoodSlash == c || pathBadSlash == c;
 }
 
-//FIXME duplicate from support - get rid of SJ_SearchPath, GetPath, ... (whole chain)
+/**
+ * @brief Check if the path does start with MS windows drive-letter and colon, but accepts
+ * only absolute form with slash after colon, otherwise warns about relative way not supported.
+ *
+ * @param filePath p_filePath: filename to check
+ * @return bool true if the filename contains drive-letter with ABSOLUTE path
+ */
 static bool isWindowsDrivePathStart(const char* filePath) {
 	if (!filePath || !filePath[0] || ':' != filePath[1]) return false;
 	const char driveLetter = toupper(filePath[0]);
@@ -113,7 +102,7 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 	// not archived yet, look for the file somewhere...
 	const std::filesystem::path name_in{ in.first };
 	// completely empty -> special value to signal stdin
-	if (name_in.empty()) {		// use special SInputFile constructor to have fake name "<stdin>"
+	if (name_in.empty() && DT_COUNT == in.second) {		// use special SInputFile constructor to have fake name "<stdin>"
 		return archivedInputFiles.emplace_hint(lb, std::move(in), 1)->second;
 	}
 	// no filename - return it as is (it's not valid for open)
@@ -481,39 +470,6 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 			else ListEmittedBytes[nListBytes++] = dVal&0xFF;
 		}
 	}
-}
-
-char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCurrent)
-{
-	char fullFilePath[MAX_PATH] = { 0 };
-	CStringsList* dir = Options::IncludeDirsList;	// include-paths to search
-	// search current directory first (unless "systemPathsBeforeCurrent")
-	if (!systemPathsBeforeCurrent) {
-		// if found, just skip the `while (dir)` loop
-		if (SJ_SearchPath(CurrentDirectory.string().c_str(), fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) dir = nullptr;
-		else fullFilePath[0] = 0;	// clear fullFilePath every time when not found
-	}
-	while (dir) {
-		if (SJ_SearchPath(dir->string, fname, nullptr, MAX_PATH, fullFilePath, filenamebegin)) break;
-		fullFilePath[0] = 0;	// clear fullFilePath every time when not found
-		dir = dir->next;
-	}
-	// if the file was not found in the list, and current directory was not searched yet
-	if (!fullFilePath[0] && systemPathsBeforeCurrent) {
-		//and the current directory was not searched yet, do it now, set empty string if nothing
-		if (!SJ_SearchPath(CurrentDirectory.string().c_str(), fname, NULL, MAX_PATH, fullFilePath, filenamebegin)) {
-			fullFilePath[0] = 0;	// clear fullFilePath every time when not found
-		}
-	}
-	if (!fullFilePath[0] && filenamebegin) {	// if still not found, reset also *filenamebegin
-		*filenamebegin = fullFilePath;
-	}
-	// copy the result into new memory
-	char* kip = STRDUP(fullFilePath);
-	if (kip == NULL) ErrorOOM();
-	// convert filenamebegin pointer into the copied string (from temporary buffer pointer)
-	if (filenamebegin) *filenamebegin += (kip - fullFilePath);
-	return kip;
 }
 
 // if offset is negative, it functions as "how many bytes from end of file"
