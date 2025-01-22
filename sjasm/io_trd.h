@@ -40,13 +40,13 @@ bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int 
 /**
  * @brief Checks TRD file and return absolute offset + length into the raw file.
  *
- * @param trdname filename of the TRD image (will be passed to GetPath(...))
+ * @param trd input file with TRD image
  * @param filename filename of the requested file inside the TRD image
  * @param offset data offset (0 or more), and return value = absolute offset into TRD file
  * @param length data length (1 or more or INT_MAX to include all), and return value = data length
  * @return int 0 when error, 1 when offset + length are valid values into TRD image file
  */
-int TRD_PrepareIncFile(const std::filesystem::path & trdname, const char* filename, aint & offset, aint & length, const bool systemPathsFirst);
+int TRD_PrepareIncFile(fullpath_ref_t trd, const char* filename, aint & offset, aint & length);
 
 #endif
 

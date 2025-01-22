@@ -561,8 +561,7 @@ static void dirSIZE() {
 
 static void dirINCBIN() {
 	int offset = 0, length = INT_MAX;
-	const std::filesystem::path fnaam = GetFileName(lp);
-	const bool system_paths_first = (DT_ANGLE == GetDelimiterOfLastFileName());
+	fullpath_ref_t fnaam = GetInputFile(lp);
 	if (anyComma(lp)) {
 		aint val;
 		if (!anyComma(lp)) {
@@ -580,19 +579,15 @@ static void dirINCBIN() {
 			length = val;
 		}
 	}
-	BinIncFile(fnaam.string().c_str(), offset, length, system_paths_first);	//FIXME path idea ready with refactoring
+	BinIncFile(fnaam, offset, length);
 }
 
 static void dirINCHOB() {
-	aint val;
-	char* fnaamh;
 	unsigned char len[2];
 	int offset = 0,length = -1;
-	FILE* ff;
-
-	const std::filesystem::path fnaam = GetFileName(lp);
-	const bool system_paths_first = (DT_ANGLE == GetDelimiterOfLastFileName());
+	fullpath_ref_t fnaam = GetInputFile(lp);
 	if (anyComma(lp)) {
+		aint val;
 		if (!anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
@@ -613,12 +608,12 @@ static void dirINCHOB() {
 		}
 	}
 
-	fnaamh = GetPath(fnaam.string().c_str(), nullptr, system_paths_first);	//FIXME path idea ready
-	if (!FOPEN_ISOK(ff, fnaamh, "rb")) {
-		Error("[INCHOB] Error opening file", fnaam.string().c_str(), FATAL);
+	FILE* ff;
+	if (!FOPEN_ISOK(ff, fnaam.full, "rb")) {
+		Error("[INCHOB] Error opening file", fnaam.fullStr.c_str(), FATAL);
 	}
 	if (fseek(ff, 0x0b, 0) || 2 != fread(len, 1, 2, ff)) {
-		Error("[INCHOB] Hobeta file has wrong format", fnaam.string().c_str(), FATAL);
+		Error("[INCHOB] Hobeta file has wrong format", fnaam.fullStr.c_str(), FATAL);
 	}
 	fclose(ff);
 	if (length == -1) {
@@ -626,14 +621,12 @@ static void dirINCHOB() {
 		length = len[0] + (len[1] << 8) - offset;
 	}
 	offset += 17;		// adjust offset (skip HOB header)
-	BinIncFile(fnaam.string().c_str(), offset, length, system_paths_first);	//FIXME path idea ready w/ refactoring
-	free(fnaamh);
+	BinIncFile(fnaam, offset, length);
 }
 
 static void dirINCTRD() {
 	aint val, offset = 0, length = INT_MAX;
-	const std::filesystem::path trdname = GetFileName(lp);
-	const bool system_paths_first = (DT_ANGLE == GetDelimiterOfLastFileName());
+	fullpath_ref_t trdfile = GetInputFile(lp);
 	std::string filename {""};
 	if (anyComma(lp) && !anyComma(lp)) filename = GetDelimitedString(lp);
 	if (filename.empty()) {
@@ -670,8 +663,8 @@ static void dirINCTRD() {
 			length = val;
 		}
 	}
-	if (TRD_PrepareIncFile(trdname.string().c_str(), filename.c_str(), offset, length, system_paths_first)) {	//FIXME path idea ready w/ refactoring^2
-		BinIncFile(trdname.string().c_str(), offset, length, system_paths_first);	//FIXME path idea ready w/ refactoring
+	if (TRD_PrepareIncFile(trdfile, filename.c_str(), offset, length)) {
+		BinIncFile(trdfile, offset, length);
 	}
 }
 

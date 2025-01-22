@@ -114,12 +114,11 @@ char* GetPath(const char* fname, char** filenamebegin = NULL, bool systemPathsBe
 /**
  * @brief Includes bytes of particular file into output (and virtual device memory).
  *
- * @param fname file name to open (include paths will be searched, order depends on syntax "" vs <>)
+ * @param file input file to open
  * @param offset positive: bytes to skip / negative: bytes to rewind back from end
  * @param length positive: bytes to include / negative: bytes to skip from end / INT_MAX: all remaining
- * @param systemPathsFirst true to search first include paths before current directory
  */
-void BinIncFile(const char* fname, aint offset, aint length, const bool systemPathsFirst); //FIXME path
+void BinIncFile(fullpath_ref_t file, aint offset, aint length);
 
 int SaveRAM(FILE*, int, int);
 unsigned char MemGetByte(unsigned int address);

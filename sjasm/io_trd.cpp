@@ -485,7 +485,7 @@ bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int 
 	return 1;
 }
 
-int TRD_PrepareIncFile(const std::filesystem::path & trdname, const char* filename, aint & offset, aint & length, const bool systemPathsFirst) {
+int TRD_PrepareIncFile(fullpath_ref_t trd, const char* filename, aint & offset, aint & length) {
 	// parse filename into TRD file form (max 8+3, don't warn about 3-letter extension)
 	byte trdFormName[12];
 	int Lname = 0;
@@ -493,13 +493,10 @@ int TRD_PrepareIncFile(const std::filesystem::path & trdname, const char* filena
 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	STrdHead trdHead;
-	char* fullTrdName = GetPath(trdname.string().c_str(), nullptr, systemPathsFirst);	//FIXME path idea ready with refactoring^2
-	FILE* ff = SJ_fopen(fullTrdName, "rb");
-	free(fullTrdName);
-	fullTrdName = nullptr;
-	if (nullptr == ff) return ReturnWithError("[INCTRD] Error opening file", trdname, ff);
+	FILE* ff = SJ_fopen(trd.full, "rb");
+	if (nullptr == ff) return ReturnWithError("[INCTRD] Error opening file", trd.fullStr.c_str(), ff);
 	if (!trdHead.readFromFile(ff)) {
-		return ReturnWithError("TRD image read error", trdname, ff);
+		return ReturnWithError("TRD image read error", trd.fullStr.c_str(), ff);
 	}
 	fclose(ff);
 	ff = nullptr;

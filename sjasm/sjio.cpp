@@ -518,16 +518,14 @@ char* GetPath(const char* fname, char** filenamebegin, bool systemPathsBeforeCur
 
 // if offset is negative, it functions as "how many bytes from end of file"
 // if length is negative, it functions as "how many bytes from end of file to not load"
-void BinIncFile(const char* fname, aint offset, aint length, const bool systemPathsFirst) {
+void BinIncFile(fullpath_ref_t file, aint offset, aint length) {
 	// open the desired file
 	FILE* bif;
-	char* fullFilePath = GetPath(fname, nullptr, systemPathsFirst);	//FIXME !research! path idea
-	if (!FOPEN_ISOK(bif, fullFilePath, "rb")) Error("opening file", fname);
-	free(fullFilePath);
+	if (!FOPEN_ISOK(bif, file.full, "rb")) Error("opening file", file.fullStr.c_str());
 
 	// Get length of file
 	int totlen = 0, advanceLength;
-	if (bif && (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0)) Error("telling file length", fname, FATAL);
+	if (bif && (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0)) Error("telling file length", file.fullStr.c_str(), FATAL);
 
 	// process arguments (extra features like negative offset/length or INT_MAX length)
 	// negative offset means "from the end of file"
@@ -539,12 +537,12 @@ void BinIncFile(const char* fname, aint offset, aint length, const bool systemPa
 	// verbose output of final values (before validation may terminate assembler)
 	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
 		char diagnosticTxt[MAX_PATH];
-		SPRINTF4(diagnosticTxt, MAX_PATH, "include data: name=%s (%d bytes) Offset=%d  Len=%d", fname, totlen, offset, length);
+		SPRINTF4(diagnosticTxt, MAX_PATH, "include data: name=%s (%d bytes) Offset=%d  Len=%d", file.baseStr.c_str(), totlen, offset, length);
 		_CERR diagnosticTxt _ENDL;
 	}
 	// validate the resulting [offset, length]
 	if (offset < 0 || length < 0 || totlen < offset + length) {
-		Error("file too short", fname);
+		Error("file too short", file.fullStr.c_str());
 		offset = std::clamp(offset, 0, totlen);
 		length = std::clamp(length, 0, totlen - offset);
 		assert((0 <= offset) && (offset + length <= totlen));
@@ -575,14 +573,14 @@ void BinIncFile(const char* fname, aint offset, aint length, const bool systemPa
 	} else {
 		// Seek to the beginning of part to include
 		if (fseek(bif, offset, SEEK_SET) || ftell(bif) != offset) {
-			Error("seeking in file to offset", fname, FATAL);
+			Error("seeking in file to offset", file.fullStr.c_str(), FATAL);
 		}
 
 		// Reading data from file
 		char* data = new char[length + 1], * bp = data;
 		if (NULL == data) ErrorOOM();
 		size_t res = fread(bp, 1, length, bif);
-		if (res != (size_t)length) Error("reading data from file failed", fname, FATAL);
+		if (res != (size_t)length) Error("reading data from file failed", file.fullStr.c_str(), FATAL);
 		while (length--) EmitByteNoListing(*bp++);
 		delete[] data;
 	}
