@@ -51,6 +51,6 @@ jobs:
         bash -c "sjasmplus.exe --help"
         bash -c "sjasmplus.exe --help=warnings"
         echo *** run tests
-        bash ContinuousIntegration/test_folder_tests.sh
-        echo *** run examples
+        bash ContinuousIntegration/test_folder_tests.sh &&
+        echo *** run examples &&
         bash ContinuousIntegration/test_folder_examples.sh
