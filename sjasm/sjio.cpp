@@ -58,19 +58,12 @@ static aint WBLength = 0;
 
 static void CloseBreakpointsFile();
 
-// convert backslash and report them with warning
-static void FixFileBackslashes(delim_string_t & str) {
-	if (std::string::npos == str.first.find('\\')) return;
-	WarningById(W_BACKSLASH, str.first.c_str());
-	std::replace(str.first.begin(), str.first.end(), '\\', '/');
-}
-
 //FIXME prune these functions after everything will be refactored to GetInput/OutputFileName
 static EDelimiterType delimiterOfLastFileName = DT_NONE;
 
 // do: remember delimiter for GetDelimiterOfLastFileName, convert backslashes, prepend prefix
 std::filesystem::path GetFileName(delim_string_t & str_name, const std::filesystem::path & pathPrefix) {
-	FixFileBackslashes(str_name);
+	SJ_FixSlashes(str_name);
 	delimiterOfLastFileName = str_name.second;	// remember delimiter for GetDelimiterOfLastFileName
 	// return prefixed path (or just path if prefix is empty, "/" is not applied then)
 	return pathPrefix / str_name.first;
@@ -110,7 +103,7 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 
 	static files_in_map_t archivedInputFiles;	// archive of all input files opened so far
 
-	FixFileBackslashes(in);
+	SJ_FixSlashes(in);
 	// check if already archived, just return full path
 	const auto lb = archivedInputFiles.lower_bound(in);
 	if (archivedInputFiles.cend() != lb && lb->first == in) return lb->second;
@@ -132,7 +125,7 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(name_in))->second;
 	}
 	// search include paths depending on delimiter and filename - first try current dir (except for "<name>")
-	const auto current_dir_file = CurrentDirectory / name_in;
+	const auto current_dir_file = SJ_force_slash(CurrentDirectory / name_in);
 	if (DT_ANGLE != in.second) {
 		// force this as result for DT_COUNT delimiter (CLI argument filename => no searching)
 		if (DT_COUNT == in.second || FileExists(current_dir_file)) {	// or if the file exists
@@ -142,7 +135,7 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 	// search all include paths now
 	CStringsList* dir = Options::IncludeDirsList;	// include-paths to search
 	while (dir) {
-		const auto dir_file = dir->string / name_in;
+		const auto dir_file = SJ_force_slash(dir->string / name_in);
 		if (FileExists(dir_file)) {
 			return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(dir_file))->second;
 		}

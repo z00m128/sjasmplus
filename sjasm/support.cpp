@@ -30,6 +30,20 @@
 
 #include "sjdefs.h"
 
+#if defined (_WIN32) || defined (__CYGWIN__)
+std::filesystem::path SJ_force_slash(const std::filesystem::path path) {
+	delim_string_t pathStr { path.string(), DT_COUNT };
+	SJ_FixSlashes(pathStr, false);
+	return pathStr.first;
+}
+#endif
+
+void SJ_FixSlashes(delim_string_t & str, bool do_warning) {
+	if (std::string::npos == str.first.find('\\')) return;
+	if (do_warning) WarningById(W_BACKSLASH, str.first.c_str());
+	std::replace(str.first.begin(), str.first.end(), '\\', '/');
+}
+
 FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode) {
 	if (nullptr == mode || fname.empty()) return nullptr;
 	return fopen(fname.string().c_str(), mode);

@@ -68,6 +68,15 @@ static_assert(0x78563412 == sj_bswap32(0x12345678), "internal error in bswap32 i
 long GetTickCount();
 #endif
 
+#if defined (_WIN32) || defined (__CYGWIN__)
+    // convert path to string, replace backslashes and convert it back to new path -> sounds fun!
+    std::filesystem::path SJ_force_slash(const std::filesystem::path path); // windows world pain
+#else
+    // do nothing in POSIX world, the "/" path operator will use only forward slash here
+#   define SJ_force_slash(path) path
+#endif
+
+void SJ_FixSlashes(delim_string_t & str, bool do_warning = true); // convert backslashes, can produce warning
 FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode);
 FILE* SJ_fopen(const char* fname, const char* mode);
 void SJ_GetCurrentDirectory(int, char*);

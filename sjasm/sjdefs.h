@@ -52,6 +52,7 @@
 #include <utility>
 #include <memory>
 #include <algorithm>
+#include <array>
 #include <stack>
 #include <vector>
 #include <map>
@@ -69,15 +70,19 @@ using std::flush;
 #include <math.h>
 
 // global defines
+enum EDelimiterType { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
+enum EBracketType { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
+
 #define LINEMAX 2048
 #define LINEMAX2 LINEMAX*2
 #define LABMAX 64
 #define LABTABSIZE 32768
 #define FUNTABSIZE 4096
-typedef int32_t aint;
-typedef uint8_t byte;
-typedef uint16_t word;
-typedef std::vector<char> stdin_log_t;
+using aint = int32_t;
+using byte = uint8_t;
+using word = uint16_t;
+using stdin_log_t = std::vector<char>;
+using delim_string_t = std::pair<std::string, EDelimiterType>;
 
 #ifdef _MSC_VER
 #pragma pack(push, 1)

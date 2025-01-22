@@ -28,13 +28,6 @@
 
 #pragma once
 
-#include <array>
-
-enum EDelimiterType { DT_NONE, DT_QUOTES, DT_APOSTROPHE, DT_ANGLE, DT_COUNT };
-enum EBracketType { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
-
-typedef std::pair<std::string, EDelimiterType> delim_string_t;
-
 bool White(const char c);
 bool White();
 void SkipParam(char*&);
