@@ -31,7 +31,6 @@
 enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM, ELSEIF };
 
 extern int ListAddress;
-extern std::vector<const char*> archivedFileNames;	// archive of all files opened (also includes!) (fullname!)
 
 constexpr int BYTES_END_MARKER = -1;
 constexpr int INSTRUCTION_START_MARKER = -2;
@@ -71,11 +70,8 @@ using files_in_map_t = std::map<const delim_string_t, const SInputFile>;
 fullpath_ref_t GetInputFile(delim_string_t && in);
 fullpath_ref_t GetInputFile(char*& p);
 std::filesystem::path GetOutputFileName(char*& p);
-
-//FIXME this is still used by Lua to archive its temporary filenames retrieved trough debug interface, maybe abuse GetInputFile here too? (DT_COUNT delim string)
-const char* ArchiveFilename(const char* fullpathname);	// returns permanent c_str pointer to input c_str (used for Lua script file names)
-void ReleaseArchivedFilenames();	// does release all archived filenames, making all pointers invalid
 void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty = true);
+
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void OpenExpFile();
 void NewDest(const std::filesystem::path & newfilename, int mode = OUTPUT_TRUNCATE);

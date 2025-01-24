@@ -361,7 +361,6 @@ void FreeRAM() {
 		PreviousIsLabel = nullptr;
 	}
 	if (Options::IncludeDirsList) delete Options::IncludeDirsList;
-	ReleaseArchivedFilenames();
 }
 
 
@@ -662,7 +661,6 @@ int main(int argc, char **argv) {
 	sourcePosStack.reserve(32);
 	smartSmcLines.reserve(64);
 	sourceFiles.reserve(32);
-	archivedFileNames.reserve(64);
 
 	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
 

@@ -44,7 +44,7 @@ struct TextFilePos {
 	void nextSegment(bool endsWithColon = false, size_t advanceColumns = 0);
 
 	inline bool operator == (const TextFilePos & b) const {
-		// compares pointers to filenames (!), as they should be stable, provided by ArchiveFilename
+		// compares pointers to filenames (!), as pointers should be stable (archived by GetInputFile)
 		return filename == b.filename && line == b.line;
 	}
 	inline bool operator != (const TextFilePos & b) const {

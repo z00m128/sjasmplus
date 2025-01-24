@@ -210,6 +210,7 @@
               <synopsis>
 - C++17 standard is now required minimum (to compile sjasmplus sources) (GCC9 for example)
 - <link linkend="po_incbin">`INCBIN`</link>, <link linkend="po_inchob">`INCHOB`</link> and <link linkend="po_inctrd">`INCTRD`</link> support now include paths priority (angle &lt;filename&gt; vs "filename")
+- also <link linkend="po_incbin">`SAVENEX`</link> will respect include paths for source files (BMP, append)
 - include paths which can't be opened before assembling are now reported in error message
 - include paths which start with literal tilde '~' are reported in error message
 - include options <link linkend="s_cli">`-i, -I, --inc`</link> can take path from next CLI argument (new recommended syntax)
@@ -5043,6 +5044,7 @@ $ cmake --install build</programlisting></para>
 			  </term>
 			  <listitem>
 				  <para>
+					  The NEX format V1.3 feature.
 					  Can be used after <link linkend="nex_open">OPEN</link> and before first <link
 						  linkend="nex_auto">AUTO</link> or <link linkend="nex_bank">BANK</link>
 					  command (the copper data are stored between screen and bank data).

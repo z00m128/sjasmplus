@@ -37,7 +37,6 @@ static constexpr char pathBadSlash = '\\';
 static constexpr char pathGoodSlash = '/';
 
 int ListAddress;
-std::vector<const char*> archivedFileNames;	// archive of filename strings (Lua scripts only?)
 
 static constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;
 static constexpr int DESTBUFLEN = 8192;
@@ -141,21 +140,6 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 fullpath_ref_t GetInputFile(char*& p) {
 	auto name_in = GetDelimitedStringEx(p);
 	return GetInputFile(std::move(name_in));
-}
-
-// returns permanent C-string pointer to the fullpathname (if new, it is added to archive)
-const char* ArchiveFilename(const char* fullpathname) {
-	for (auto fname : archivedFileNames) {		// search whole archive for identical full name
-		if (!strcmp(fname, fullpathname)) return fname;
-	}
-	archivedFileNames.push_back(STRDUP(fullpathname));
-	return archivedFileNames.back();
-}
-
-// does release all archived filenames, making all pointers (and archive itself) invalid
-void ReleaseArchivedFilenames() {
-	for (auto filename : archivedFileNames) free((void*)filename);
-	archivedFileNames.clear();
 }
 
 void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty) {
@@ -630,7 +614,6 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
 	DefineTable.Replace("__FILE__", fileNameFull ? fileNameFull->fullStr.c_str() : "<none>");
-	//FIXME add in some include tests test of __FILE__ just to verify this has still valid c_str pointer
 	if (-1 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", "<none>");
 }
 
@@ -964,11 +947,11 @@ void OpenTapFile(const std::filesystem::path & tapename, int flagbyte)
 	}
 }
 
-// check if file exists and seems to be regular file (maybe character works too? stdin is what? FIXME)
+// check if file exists and can be read for content
 bool FileExists(const std::filesystem::path & file_name) {
 	return	std::filesystem::exists(file_name) && (
 		std::filesystem::is_regular_file(file_name) ||
-		std::filesystem::is_character_file(file_name)	//FIXME verify with stdin if this is needed
+		std::filesystem::is_character_file(file_name)	// true for very rare files like /dev/null
 	);
 }
 

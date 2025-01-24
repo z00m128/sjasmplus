@@ -24,6 +24,11 @@ ARM! https://cirrus-ci.org/guide/linux/
 > Cirrus CI supports container and arm_container instances in order to run your CI workloads on amd64 and arm64 platforms respectively.
 
 @Janko at Next discord: `--raw-fill-gaps` to produce fill when second ORG is used and --raw output. (like org $2000 ... org $2100 -> test.dot)
+@Janko: I would rather prefer a new  -o  option which by default also sets the device to "just 64K" model and does what SAVE would do
+    ^ some implicit device thing? like NOSLOT64K? But needs modified regions (or min/max program counter) - should NOT depend on zeroed values :(
+
+ad APPENDBIN - also maybe extend SAVENEX to get var-arg list, not just single file.
+(but then it may not fit on single line, so some extra appendbin would be still useful)
 
 -------------
 can you add a --utc option to sjasmplus so that I don't have to change my hardware time if I want __DATE__ to use UTC.
