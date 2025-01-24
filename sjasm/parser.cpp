@@ -536,7 +536,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 							++val;
 							a = a->next;
 						}
-						sprintf(defarrayCountTxt, "%d", val);
+						SPRINTF1(defarrayCountTxt, 16, "%d", val);
 						ver = defarrayCountTxt;
 					} else {
 						char* expLp = lp + ('[' == *lp);	// the '[' will become part of subId in didParseBrackets

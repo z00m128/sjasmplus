@@ -297,7 +297,7 @@ char* getinstr(char*& p) {
 int check8(aint val) {
 	if (val < -256 || val > 255) {
 		char buffer[64];
-		sprintf(buffer, "value 0x%X is truncated to 8bit value: 0x%02X", val, val&0xFF);
+		SPRINTF2(buffer, 64, "value 0x%X is truncated to 8bit value: 0x%02X", val, val&0xFF);
 		Warning(buffer);
 		return 0;
 	}
@@ -308,7 +308,7 @@ int check8o(aint val)
 {
 	if (val < -128 || val > 127) {
 		char buffer[32];
-		sprintf(buffer,"Offset out of range (%+i)", val);
+		SPRINTF1(buffer, 32, "Offset out of range (%+i)", val);
 		Error(buffer, nullptr, IF_FIRST);
 		return 0;
 	}
@@ -318,7 +318,7 @@ int check8o(aint val)
 int check16(aint val) {
 	if (val < -65536 || val > 65535) {
 		char buffer[64];
-		sprintf(buffer, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
+		SPRINTF2(buffer, 64, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
 		Warning(buffer);
 		return 0;
 	}
@@ -328,7 +328,7 @@ int check16(aint val) {
 int check16u(aint val) {
 	if (val < 0 || val > 65535) {
 		char buffer[64];
-		sprintf(buffer, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
+		SPRINTF2(buffer, 64, "value 0x%X is truncated to 16bit value: 0x%04X", val, val&0xFFFF);
 		Warning(buffer);
 		return 0;
 	}
@@ -338,7 +338,7 @@ int check16u(aint val) {
 int check24(aint val) {
 	if (val < -16777216 || val > 16777215) {
 		char buffer[64];
-		sprintf(buffer, "value 0x%X is truncated to 24bit value: 0x%06X", val, val&0xFFFFFF);
+		SPRINTF2(buffer, 64, "value 0x%X is truncated to 24bit value: 0x%06X", val, val&0xFFFFFF);
 		Warning(buffer);
 		return 0;
 	}
@@ -644,7 +644,7 @@ int GetCharConst(char*& p, aint& val) {
 	} else if (4 < bytes) {
 		const char oldCh = *p;
 		*p = 0;						// shorten the string literal for warning display
-		sprintf(buffer, "String literal truncated to 0x%X", val);
+		SPRINTF1(buffer, 128, "String literal truncated to 0x%X", val);
 		Warning(buffer, op);
 		*p = oldCh;					// restore it
 	}

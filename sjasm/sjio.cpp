@@ -227,7 +227,7 @@ void PrintHex(char* & dest, aint value, int nibbles) {
 	if (nibbles < 1 || 8 < nibbles) ExitASM(33);	// invalid argument
 	const char oldChAfter = dest[nibbles];
 	const aint mask = (int(sizeof(aint)*2) <= nibbles) ? ~0L : (1L<<(nibbles*4))-1L;
-	if (nibbles != sprintf(dest, "%0*X", nibbles, value&mask)) ExitASM(33);
+	if (nibbles != SPRINTF2(dest, 16, "%0*X", nibbles, value&mask)) ExitASM(33);
 	dest += nibbles;
 	*dest = oldChAfter;
 }
@@ -239,7 +239,7 @@ void PrintHex32(char*& dest, aint value) {
 void PrintHexAlt(char*& dest, aint value)
 {
 	char buffer[24] = { 0 }, * bp = buffer;
-	sprintf(buffer, "%04X", value);
+	SPRINTF1(buffer, 24, "%04X", value);
 	while (*bp) *dest++ = *bp++;
 }
 
@@ -266,9 +266,9 @@ void PrepareListLine(char* buffer, aint hexadd)
 	memset(buffer, ' ', 24);
 	if (listmacro) buffer[23] = '>';
 	if (Options::LST_T_MC_ONLY == Options::syx.ListingType) buffer[23] = '{';
-	sprintf(buffer, "%*u", linewidth, linenumber); buffer[linewidth] = ' ';
+	SPRINTF2(buffer, LINEMAX, "%*u", linewidth, linenumber); buffer[linewidth] = ' ';
 	memcpy(buffer + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
-	sprintf(buffer + 6, "%04X", hexadd & 0xFFFF); buffer[10] = ' ';
+	SPRINTF1(buffer + 6, LINEMAX, "%04X", hexadd & 0xFFFF); buffer[10] = ' ';
 	if (digit > '0') *buffer = digit & 0xFF;
 	// if substitutedLine is completely empty, list rather source line any way
 	if (!*substitutedLine) substitutedLine = line;
@@ -321,8 +321,8 @@ void ListFile(bool showAsSkipped) {
 		char* pp = pline + 10;
 		int BtoList = (nListBytes < 4) ? nListBytes : 4;
 		for (int i = 0; i < BtoList; ++i) {
-			if (-2 == ListEmittedBytes[i + pos]) pp += sprintf(pp, "...");
-			else pp += sprintf(pp, " %02X", ListEmittedBytes[i + pos]);
+			if (-2 == ListEmittedBytes[i + pos]) pp += (memcpy(pp, "...", 3), 3);
+			else pp += SPRINTF1(pp, 4, " %02X", ListEmittedBytes[i + pos]);
 		}
 		*pp = ' ';
 		if (showAsSkipped) pline[11] = '~';
