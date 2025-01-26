@@ -36,6 +36,9 @@ static const std::filesystem::path EMPTY_PATH{""};
 static constexpr char pathBadSlash = '\\';
 static constexpr char pathGoodSlash = '/';
 
+std::filesystem::path LaunchDirectory {};
+std::filesystem::path CurrentDirectory {};
+
 int ListAddress;
 
 static constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;

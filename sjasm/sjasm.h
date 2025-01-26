@@ -167,7 +167,6 @@ extern aint destlen, size, comlin;
 extern char* vorlabp, * macrolabp, * LastParsedLabel;
 
 enum EEncoding { ENCDOS, ENCWIN };
-extern std::filesystem::path CurrentDirectory;
 
 void ExitASM(int p);
 extern CStringsList* lijstp;

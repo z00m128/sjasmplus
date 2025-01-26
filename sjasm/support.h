@@ -72,7 +72,6 @@ long GetTickCount();
 
 void SJ_FixSlashes(delim_string_t & str, bool do_warning = true); // convert backslashes, can produce warning
 FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode);
-void SJ_GetCurrentDirectory(int, char*);
 
 // FILE* dbg_fopen(const char* fname, const char* modes);
 

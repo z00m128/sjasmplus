@@ -39,6 +39,9 @@ constexpr int INSTRUCTION_START_MARKER = -2;
 #define OUTPUT_REWIND 1
 #define OUTPUT_APPEND 2
 
+extern std::filesystem::path LaunchDirectory;
+extern std::filesystem::path CurrentDirectory;
+
 // input file archiving helper struct (holding instance of full and base name strings to keep c_str() pointers valid)
 struct SInputFile {
   const std::filesystem::path full;
@@ -47,7 +50,7 @@ struct SInputFile {
 
   SInputFile(const std::filesystem::path && fullName) :
                   full(std::move(fullName)),
-                  fullStr(full.string()),
+                  fullStr(SJ_force_slash(full.lexically_proximate(LaunchDirectory)).string()),
                   baseStr(full.filename().string()) {
   }
 

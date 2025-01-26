@@ -110,11 +110,11 @@ namespace Options {
 	bool IsDefaultSldName = false;
 
 	EOutputVerbosity OutputVerbosity = OV_ALL;
-	bool IsLabelTableInListing = 0;
+	bool IsLabelTableInListing = false;
 	bool IsDefaultListingName = false;
-	bool IsShowFullPath = 0;
+	bool IsShowFullPath = false;
 	bool AddLabelListing = false;
-	bool HideLogo = 0;
+	bool HideLogo = false;
 	bool ShowHelp = false;
 	bool ShowHelpWarnings = false;
 	bool ShowVersion = false;
@@ -244,7 +244,6 @@ source_positions_t::size_type smartSmcIndex;
 uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L, comlin = 0;
-std::filesystem::path CurrentDirectory {};
 
 char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
@@ -540,7 +539,7 @@ namespace Options {
 					CheckAssignmentOption("raw", RAWFName) ) {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
-					IsShowFullPath = 1;
+					IsShowFullPath = true;
 				} else if (!strcmp(opt, "color")) {
 					if (!strcmp("on", val)) {
 						SetTerminalColors(true);
@@ -647,8 +646,6 @@ namespace Options {
 
 // == end of UnitTest++ part ====================================================================
 
-static char launch_directory[MAX_PATH];
-
 #ifdef WIN32
 int main(int argc, char* argv[]) {
 #else
@@ -672,8 +669,8 @@ int main(int argc, char **argv) {
 	long dwStart = GetTickCount();
 
 	// get current directory
-	SJ_GetCurrentDirectory(MAX_PATH, launch_directory);
-	CurrentDirectory = launch_directory;
+	LaunchDirectory = std::filesystem::current_path();
+	CurrentDirectory = LaunchDirectory;
 
 	Options::COptionsParser optParser;
 	char* envFlags = std::getenv("SJASMPLUSOPTS");
