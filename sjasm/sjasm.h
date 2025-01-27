@@ -36,6 +36,9 @@ namespace Options {
 	// which lines should made it into listing: all, active (not skipped by IF false), only-if-has-machine-code
 	enum ELstType { LST_T_ALL, LST_T_ACTIVE, LST_T_MC_ONLY };
 
+	// how file names are displayed in errors, listings, SLD, ...: just base name, relative to launch dir, full absolute path
+	enum EFileVerbosity { FNAME_BASE, FNAME_LAUNCH_REL, FNAME_ABSOLUTE };
+
 	typedef struct STerminalColorSequences {
 		const char * end, * display, * warning, * error, * bold;
 	} STerminalColorSequences;
@@ -88,7 +91,7 @@ namespace Options {
 	extern EOutputVerbosity OutputVerbosity;
 	extern bool IsLabelTableInListing;
 	extern bool IsDefaultListingName;
-	extern bool IsShowFullPath;
+	extern EFileVerbosity FileVerbosity;
 	extern bool AddLabelListing;
 	extern bool NoDestinationFile;
 	extern SSyntax syx;

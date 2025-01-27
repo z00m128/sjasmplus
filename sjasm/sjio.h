@@ -42,22 +42,21 @@ constexpr int INSTRUCTION_START_MARKER = -2;
 extern std::filesystem::path LaunchDirectory;
 extern std::filesystem::path CurrentDirectory;
 
-// input file archiving helper struct (holding instance of full and base name strings to keep c_str() pointers valid)
+// input file archiving helper struct (holding instance name string to keep c_str() pointers valid)
 struct SInputFile {
   const std::filesystem::path full;
-  const std::string fullStr;
-  const std::string baseStr;
+  const std::string str;
 
-  SInputFile(const std::filesystem::path && fullName) :
-                  full(std::move(fullName)),
-                  fullStr(SJ_force_slash(full.lexically_proximate(LaunchDirectory)).string()),
-                  baseStr(full.filename().string()) {
-  }
+  SInputFile(const std::filesystem::path && fullName) : full(std::move(fullName)), str(InitStr()) {}
 
-  SInputFile(int) : full(), fullStr("<stdin>"), baseStr("<stdin>") {} // special const. for stdin
+  SInputFile(int) : full(), str("<stdin>") {} // special const. for stdin
 
+private:
   SInputFile() = delete;
   SInputFile(const SInputFile &) = delete;
+  SInputFile& operator=(const SInputFile &) = delete;
+
+  std::string InitStr();    // convert `full` path into string based on Options::FileVerbosity
 };
 
 using fullpath_ref_t = const SInputFile &;

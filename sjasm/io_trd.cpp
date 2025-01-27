@@ -494,9 +494,9 @@ int TRD_PrepareIncFile(fullpath_ref_t trd, const char* filename, aint & offset, 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	STrdHead trdHead;
 	FILE* ff = SJ_fopen(trd.full, "rb");
-	if (nullptr == ff) return ReturnWithError("[INCTRD] Error opening file", trd.fullStr.c_str(), ff);
+	if (nullptr == ff) return ReturnWithError("[INCTRD] Error opening file", trd.str.c_str(), ff);
 	if (!trdHead.readFromFile(ff)) {
-		return ReturnWithError("TRD image read error", trd.fullStr.c_str(), ff);
+		return ReturnWithError("TRD image read error", trd.str.c_str(), ff);
 	}
 	fclose(ff);
 	ff = nullptr;

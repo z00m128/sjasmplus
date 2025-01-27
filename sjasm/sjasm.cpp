@@ -112,7 +112,7 @@ namespace Options {
 	EOutputVerbosity OutputVerbosity = OV_ALL;
 	bool IsLabelTableInListing = false;
 	bool IsDefaultListingName = false;
-	bool IsShowFullPath = false;
+	EFileVerbosity FileVerbosity = FNAME_BASE;
 	bool AddLabelListing = false;
 	bool HideLogo = false;
 	bool ShowHelp = false;
@@ -539,7 +539,7 @@ namespace Options {
 					CheckAssignmentOption("raw", RAWFName) ) {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
-					IsShowFullPath = true;
+					FileVerbosity = FNAME_LAUNCH_REL;
 				} else if (!strcmp(opt, "color")) {
 					if (!strcmp("on", val)) {
 						SetTerminalColors(true);
@@ -736,7 +736,8 @@ int main(int argc, char **argv) {
 		_CERR logo _ENDL;
 	}
 
-	if (!Options::IsShowFullPath && (Options::IsDefaultSldName || Options::SourceLevelDebugFName.has_filename())) {
+	if ((Options::FNAME_BASE == Options::FileVerbosity) &&
+		(Options::IsDefaultSldName || Options::SourceLevelDebugFName.has_filename())) {
 		Warning("missing  --fullpath  with  --sld  may produce incomplete file paths.", NULL, W_EARLY);
 	}
 

@@ -299,7 +299,7 @@ void SBmpFile::close() {
 
 bool SBmpFile::open(fullpath_ref_t bmpIn) {
 	if (!FOPEN_ISOK(bmp, bmpIn.full, "rb")) {
-		Error("[SAVENEX] Error opening file", bmpIn.fullStr.c_str(), SUPPRESS);
+		Error("[SAVENEX] Error opening file", bmpIn.str.c_str(), SUPPRESS);
 		return false;
 	}
 	palBuffer = new byte[4*PALETTE_SIZE];
@@ -324,7 +324,7 @@ bool SBmpFile::open(fullpath_ref_t bmpIn) {
 		40 != header2Size || 1 != colorPlanes || 8 != bpp || 0 != compressionType)
 	{
 		Error("[SAVENEX] BMP file is not in expected format (uncompressed, 8bpp, 40B BITMAPINFOHEADER header)",
-				bmpIn.fullStr.c_str(), SUPPRESS);
+				bmpIn.str.c_str(), SUPPRESS);
 		close();
 		return false;
 	}
@@ -752,7 +752,7 @@ static void dirNexScreenBmp() {
 	SBmpFile bmp;
 	bool bmpOpened = bmp.open(bmpIn);
 	if (bmpOpened && other == bmp.type) {
-		Error("[SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256", bmpIn.fullStr.c_str(), SUPPRESS);
+		Error("[SAVENEX] BMP file is not 256x192, 128x96, 320x256 or 640x256", bmpIn.str.c_str(), SUPPRESS);
 		bmpOpened = false;
 	}
 	if (!bmpOpened) return;
@@ -1041,7 +1041,7 @@ static void dirNexClose() {
 	if (appendIn.full.has_filename()) {	// some append file requested, try to copy its content at tail of NEX
 		FILE* appendF = nullptr;
 		if (!FOPEN_ISOK(appendF, appendIn.full, "rb")) {
-			Error("[SAVENEX] Error opening append file", appendIn.fullStr.c_str(), SUPPRESS);
+			Error("[SAVENEX] Error opening append file", appendIn.str.c_str(), SUPPRESS);
 		} else {
 			static constexpr int copyBufSize = 0x4000;
 			byte* copyBuffer = new byte[copyBufSize];

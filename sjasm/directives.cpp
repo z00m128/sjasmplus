@@ -610,10 +610,10 @@ static void dirINCHOB() {
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fnaam.full, "rb")) {
-		Error("[INCHOB] Error opening file", fnaam.fullStr.c_str(), FATAL);
+		Error("[INCHOB] Error opening file", fnaam.str.c_str(), FATAL);
 	}
 	if (fseek(ff, 0x0b, 0) || 2 != fread(len, 1, 2, ff)) {
-		Error("[INCHOB] Hobeta file has wrong format", fnaam.fullStr.c_str(), FATAL);
+		Error("[INCHOB] Hobeta file has wrong format", fnaam.str.c_str(), FATAL);
 	}
 	fclose(ff);
 	if (length == -1) {

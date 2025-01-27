@@ -98,7 +98,7 @@ static int addLuaSourcePositions() {
 			levelErrorPos.line += ar.currentline;
 		} else {
 			fullpath_ref_t archivedFname = GetInputFile(delim_string_t(ar.short_src, DT_COUNT));
-			levelErrorPos.newFile(archivedFname.fullStr.c_str());
+			levelErrorPos.newFile(archivedFname.str.c_str());
 			levelErrorPos.line = ar.currentline;
 		}
 		luaPosTemp.push_back(levelErrorPos);
@@ -134,7 +134,7 @@ static TextFilePos lua_impl_splitLuaErrorMessage(const char*& LuaError) {
 	} else {
 		// standalone script, use file name and line number as is (if provided by lua error)
 		fullpath_ref_t archFname = GetInputFile(delim_string_t(std::string(LuaError, colonPos), DT_COUNT));
-		luaErrorPos.newFile(archFname.fullStr.c_str());
+		luaErrorPos.newFile(archFname.str.c_str());
 		luaErrorPos.line = lineNumber;
 	}
 
@@ -529,10 +529,11 @@ void dirINCLUDELUA() {
 	}
 	fullpath_ref_t file_in = GetInputFile(lp);
 	if (!FileExists(file_in.full)) {
-		Error("[INCLUDELUA] File doesn't exist", file_in.fullStr.c_str(), EARLY);
+		Error("[INCLUDELUA] File doesn't exist", file_in.str.c_str(), EARLY);
 	} else {
 		extraErrorWarningPrefix = lua_err_prefix;
-		if (luaL_dofile(LUA, file_in.fullStr.c_str())) {
+		// Use relative-to-launch-dir filename for open to get reasonable source-pos-string in errors
+		if (luaL_dofile(LUA, file_in.full.lexically_proximate(LaunchDirectory).string().c_str())) {
 			lua_impl_showLoadError(EARLY);
 		}
 		extraErrorWarningPrefix = nullptr;

@@ -62,6 +62,15 @@ static aint WBLength = 0;
 
 static void CloseBreakpointsFile();
 
+std::string SInputFile::InitStr() {
+	switch(Options::FileVerbosity) {
+		case Options::FNAME_ABSOLUTE:	return SJ_force_slash(full.lexically_normal()).string();
+		case Options::FNAME_LAUNCH_REL:	return SJ_force_slash(full.lexically_proximate(LaunchDirectory)).string();
+		case Options::FNAME_BASE:
+		default:						return full.filename().string();
+	}
+}
+
 std::filesystem::path GetOutputFileName(char*& p) {
 	auto str_name = GetDelimitedStringEx(p);	// read delimited filename string
 	SJ_FixSlashes(str_name);					// convert backslashes *with* warning
@@ -464,11 +473,11 @@ void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToList
 void BinIncFile(fullpath_ref_t file, aint offset, aint length) {
 	// open the desired file
 	FILE* bif;
-	if (!FOPEN_ISOK(bif, file.full, "rb")) Error("opening file", file.fullStr.c_str());
+	if (!FOPEN_ISOK(bif, file.full, "rb")) Error("opening file", file.str.c_str());
 
 	// Get length of file
 	int totlen = 0, advanceLength;
-	if (bif && (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0)) Error("telling file length", file.fullStr.c_str(), FATAL);
+	if (bif && (fseek(bif, 0, SEEK_END) || (totlen = ftell(bif)) < 0)) Error("telling file length", file.str.c_str(), FATAL);
 
 	// process arguments (extra features like negative offset/length or INT_MAX length)
 	// negative offset means "from the end of file"
@@ -480,12 +489,12 @@ void BinIncFile(fullpath_ref_t file, aint offset, aint length) {
 	// verbose output of final values (before validation may terminate assembler)
 	if (LASTPASS == pass && Options::OutputVerbosity <= OV_ALL) {
 		char diagnosticTxt[MAX_PATH];
-		SPRINTF4(diagnosticTxt, MAX_PATH, "include data: name=%s (%d bytes) Offset=%d  Len=%d", file.baseStr.c_str(), totlen, offset, length);
+		SPRINTF4(diagnosticTxt, MAX_PATH, "include data: name=%s (%d bytes) Offset=%d  Len=%d", file.str.c_str(), totlen, offset, length);
 		_CERR diagnosticTxt _ENDL;
 	}
 	// validate the resulting [offset, length]
 	if (offset < 0 || length < 0 || totlen < offset + length) {
-		Error("file too short", file.fullStr.c_str());
+		Error("file too short", file.str.c_str());
 		offset = std::clamp(offset, 0, totlen);
 		length = std::clamp(length, 0, totlen - offset);
 		assert((0 <= offset) && (offset + length <= totlen));
@@ -516,14 +525,14 @@ void BinIncFile(fullpath_ref_t file, aint offset, aint length) {
 	} else {
 		// Seek to the beginning of part to include
 		if (fseek(bif, offset, SEEK_SET) || ftell(bif) != offset) {
-			Error("seeking in file to offset", file.fullStr.c_str(), FATAL);
+			Error("seeking in file to offset", file.str.c_str(), FATAL);
 		}
 
 		// Reading data from file
 		char* data = new char[length + 1], * bp = data;
 		if (NULL == data) ErrorOOM();
 		size_t res = fread(bp, 1, length, bif);
-		if (res != (size_t)length) Error("reading data from file failed", file.fullStr.c_str(), FATAL);
+		if (res != (size_t)length) Error("reading data from file failed", file.str.c_str(), FATAL);
 		while (length--) EmitByteNoListing(*bp++);
 		delete[] data;
 	}
@@ -549,7 +558,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 		stdin_read_it = stdin_log->cbegin();	// reset read iterator (for 2nd+ pass)
 	} else {
 		if (!FOPEN_ISOK(FP_Input, nfilename.full, "rb")) {
-			Error("opening file", nfilename.fullStr.c_str(), ALL);
+			Error("opening file", nfilename.str.c_str(), ALL);
 			--IncludeLevel;
 			return;
 		}
@@ -560,12 +569,12 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
 	fileNameFull = &nfilename;
-	sourcePosStack.emplace_back(Options::IsShowFullPath ? nfilename.fullStr.c_str() : nfilename.baseStr.c_str());
+	sourcePosStack.emplace_back(nfilename.str.c_str());
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
-	DefineTable.Replace("__FILE__", nfilename.fullStr.c_str());
-	if (0 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", nfilename.fullStr.c_str());
+	DefineTable.Replace("__FILE__", nfilename.str.c_str());
+	if (0 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", nfilename.str.c_str());
 
 	// open default listing file for each new source file (if default listing is ON) / explicit listing is already opened
 	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) OpenDefaultList(nfilename);
@@ -573,7 +582,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	FILE* listFile = GetListingFile();
 	if (LASTPASS == pass && listFile) {
 		fputs("# file opened: ", listFile);
-		fputs(nfilename.fullStr.c_str(), listFile);
+		fputs(nfilename.str.c_str(), listFile);
 		fputs("\n", listFile);
 	}
 
@@ -597,7 +606,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	// show in listing file which file was closed
 	if (LASTPASS == pass && listFile) {
 		fputs("# file closed: ", listFile);
-		fputs(nfilename.fullStr.c_str(), listFile);
+		fputs(nfilename.str.c_str(), listFile);
 		fputs("\n", listFile);
 
 		// close listing file (if "default" listing filename is used)
@@ -616,7 +625,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 
 	// refresh pre-defined values related to file/include
 	DefineTable.Replace("__INCLUDE_LEVEL__", IncludeLevel);
-	DefineTable.Replace("__FILE__", fileNameFull ? fileNameFull->fullStr.c_str() : "<none>");
+	DefineTable.Replace("__FILE__", fileNameFull ? fileNameFull->str.c_str() : "<none>");
 	if (-1 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", "<none>");
 }
 
