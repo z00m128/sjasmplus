@@ -1,0 +1,17 @@
+## run sjasmplus with all --fulpath posssible options "--fullpath=off|rel|on" and uknown value
+LANG=C $MEMCHECK "$EXE" --nologo --msg=lstlab                "${options[@]}" 2> "${dst_base}.1a.lst" "$file_asm"
+LANG=C $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath=off "${options[@]}" 2> "${dst_base}.1b.lst" "$file_asm"
+LANG=C $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath=rel "${options[@]}" 2> "${dst_base}.2a.lst" "$file_asm"
+LANG=C $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath     "${options[@]}" 2> "${dst_base}.2b.lst" "$file_asm"
+LANG=C $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath=on  "${options[@]}" 2> "${dst_base}.3.lst"  "$file_asm"
+LANG=C $MEMCHECK "$EXE" --nologo --msg=lstlab --fullpath=xxx "${options[@]}" 2> "${dst_base}.4.lst"  "$file_asm"
+# check that 1a == 1b, 2a == 2b, and 1 != 2 != 3 != 4 (not checking lst content, differences are enough to pass)
+diff "${dst_base}.1a.lst" "${dst_base}.1b.lst" && \
+diff "${dst_base}.2a.lst" "${dst_base}.2b.lst" && \
+! diff -q "${dst_base}.1a.lst" "${dst_base}.2a.lst" > /dev/null && \
+! diff -q "${dst_base}.1a.lst" "${dst_base}.3.lst" > /dev/null && \
+! diff -q "${dst_base}.1a.lst" "${dst_base}.4.lst" > /dev/null && \
+! diff -q "${dst_base}.2a.lst" "${dst_base}.3.lst" > /dev/null && \
+! diff -q "${dst_base}.2a.lst" "${dst_base}.4.lst" > /dev/null && \
+! diff -q "${dst_base}.3.lst" "${dst_base}.4.lst" > /dev/null
+last_result=$?

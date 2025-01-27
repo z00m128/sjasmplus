@@ -61,7 +61,7 @@ static void PrintHelpMain() {
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
 	_COUT "  --msg=[all|war|err|none|lst|lstlab]" _ENDL;
 	_COUT "                           Stderr messages verbosity (\"all\" is default)" _ENDL;
-	_COUT "  --fullpath               Show full path to file in errors" _ENDL;
+	_COUT "  --fullpath[=on|rel|off]  Input file paths: full | CWD relative | name only" _ENDL;
 	_COUT "  --color=[on|off|auto]    Enable or disable ANSI coloring of warnings/errors" _ENDL;
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>] or --define <NAME>[=<value>]" _ENDL;
@@ -539,7 +539,15 @@ namespace Options {
 					CheckAssignmentOption("raw", RAWFName) ) {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
-					FileVerbosity = FNAME_LAUNCH_REL;
+					if (!strcmp("on", val)) {
+						FileVerbosity = FNAME_ABSOLUTE;
+					} else if (!val[0] || !strcmp("rel", val)) {
+						FileVerbosity = FNAME_LAUNCH_REL;
+					} else if (!strcmp("off", val)) {
+						FileVerbosity = FNAME_BASE;
+					} else {
+						Error("invalid --fullpath setting (use: on|rel|off)", val, ALL);
+					}
 				} else if (!strcmp(opt, "color")) {
 					if (!strcmp("on", val)) {
 						SetTerminalColors(true);

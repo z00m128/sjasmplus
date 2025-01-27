@@ -214,6 +214,7 @@
 - include paths which can't be opened before assembling are now reported in error message
 - include paths which start with literal tilde '~' are reported in error message
 - include options <link linkend="s_cli">`-i, -I, --inc`</link> can take path from next CLI argument (new recommended syntax)
+- option <link linkend="s_cli">`--fullpath`</link> has now three states including full absolute paths
 - added Amstrad CPC device <link linkend="po_device">AMSTRADCPCPLUS</link> - by Laurent Carlier
 - added Amstrad CPC+ <link linkend="po_savecpr">`SAVECPR`</link> to save CPR cartridge - by Laurent Carlier
 - ZX Next CSpect emulator v2.19.9.1: `break` opcode changed to `FD 00`
@@ -497,9 +498,8 @@
   Note: "lst" or "lstlab" will turn STDERR into listing file (this will clash with
   `--lst`, use only one of the options) and some diagnostic messages of "all"
   are omitted, as they are not part of listing files. "lstlab" does sort symbols.
-  --fullpath               Show full path to file in errors
-  Note: the "fullpath" starts from current working directory, not from file system
-		root (the MS_VS build was fixed to behave this way since v1.15.0)
+  --fullpath[=on|rel|off]  Input file paths: full | CWD relative | name only (*)
+  Note: --fullpath without value is "rel" (relative to current working directory)
   --color=[on|off|auto]    Enable or disable ANSI coloring of warnings/errors
   Note: auto detection checks for existence of environment variable TERM, and its
 		content is scanned for sub-string "color" (like "xterm-256color")
