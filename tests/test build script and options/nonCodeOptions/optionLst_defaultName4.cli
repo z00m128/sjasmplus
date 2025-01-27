@@ -1,0 +1,2 @@
+$MEMCHECK "$EXE" -Wno-behost --nologo --msg=war --fullpath --lst - < "$file_asm" 2> "$dst_base.exp"
+last_result=$?

@@ -1,0 +1,2 @@
+warning: use explicit --lst=<filename> for <stdin> source
+<stdin>(2): warning: value 0x7761726E is truncated to 8bit value: 0x6E

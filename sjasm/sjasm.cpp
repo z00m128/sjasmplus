@@ -789,7 +789,6 @@ int main(int argc, char **argv) {
 			if (src.stdin_log && warn_stdin_default_lst && 1 == pass && Options::IsDefaultListingName) {
 				Warning("use explicit --lst=<filename> for <stdin> source", nullptr, W_EARLY);
 				warn_stdin_default_lst = false;
-				//FIXME add test ^^
 			}
 			IsRunning = 1;
 			ConvertEncoding = base_encoding;
