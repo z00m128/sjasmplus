@@ -223,7 +223,7 @@
 - Lua: new <link linkend="lua_sj_get_modules">sj.get_modules</link> to get current modules namespace
 - Lua: minor version upgrade to 5.4.7 (from 5.4.6)
 - minor bugfixes in specific edge cases
-- refactored lot of code related to files manipulation (to use C++17 filesystem library)
+- refactored lot of code related to file names and manipulation (to use C++17 filesystem library)
 </synopsis>
             </listitem>
           </varlistentry>
@@ -841,14 +841,14 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
 $c     hexadecimal
 #c     hexadecimal
 0ch    hexadecimal
-0b1100 binary (v1.12.1)
+0b1100 binary
 %1100  binary
 1100b  binary
-0q14   octal (v1.12.1)
+0q14   octal
 14q    octal
 14o    octal</programlisting></para>
 
-      <para>(v1.12.1) Optional single quotes(') may be inserted between the digits as a separator
+      <para>Optional single quotes(') may be inserted between the digits as a separator
       (example: <computeroutput> ld a,%11'01'11'00 </computeroutput>).
       They are ignored by the assembler.</para>
 
@@ -870,7 +870,7 @@ $c     hexadecimal
 \? 63
 \' 39
 \" 34
-\0 0     ; since v1.11
+\0 0
 \A 7
 \B 8
 \D 127
@@ -880,7 +880,7 @@ $c     hexadecimal
 \R 13
 \T 9
 \V 11</programlisting><para>Inside single quotes two quotes after each other are
-    parsed as the apostrophe itself (since v1.11).</para>
+    parsed as the apostrophe itself.</para>
   <para>Adding Z or C after quotes/apostrophes will make string zero-terminated or set top bit of last character (since v1.20.3).</para><example>
           <title></title>
 
@@ -893,7 +893,7 @@ $c     hexadecimal
     LD A,'\E'   ; warning + truncating value to 'E' (0x45)
     LD A,'"'    ; A = 0x22
     LD A,"'"    ; A = 0x27
-    LD A,''''   ; A = 0x27 ; since v1.11
+    LD A,''''   ; A = 0x27
     BYTE "AB"Z, "CD"C, 'E'Z, 'F'C ; hex: 41 42 00 43 C4 45 00 C6</programlisting></para>
         </example></para>
     </section>
@@ -1057,7 +1057,7 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
    */
    ;or you can write  LD A,B:LD B,D:LD D,H
 
-   ; since v1.13.1 it is possible and *recommended* to change the multi-arg delimiter
+   ; it is possible and *recommended* to change the multi-arg delimiter
    ; into ",,", to avoid some ambiguities with certain instructions.
    OPT --syntax=a
    LD A,B,,B,D,,D,H ; same as example above in default syntax
@@ -2156,7 +2156,7 @@ counter = counter + 1
               is converted to a byte value.</para>
 
               <para>A hyphen '-' (also '.' and '_') represents 0 and any other non-whitespace character
-              represents 1. It ignores spaces, use them for formatting if you like. Warning, "DG 10100001" is value 255, because character '0' is not a dash '-'. (since v1.11)<example>
+              represents 1. It ignores spaces, use them for formatting if you like. Warning, "DG 10100001" is value 255, because character '0' is not a dash '-'.<example>
                   <title></title>
                   <para><programlisting>    DG 1-1----1  ; store 161 at the current location
     DG ...# #... .##. .... ; store two bytes: 0x18, 0x60</programlisting></para>
@@ -2169,7 +2169,7 @@ counter = counter + 1
 
             <listitem>
               <para>The data string comprises pairs of hexadecimal digits, each pair is converted to
-              a byte value. You can add spaces between pairs as you like. (since v1.11)<example>
+              a byte value. You can add spaces between pairs as you like.<example>
                   <title></title>
                   <para><programlisting>    DH "0123456789ABCDEF"   ; eight bytes #01 #23 ...
     DH "01 23  45 67"       ; four bytes #01 #23 #45 #67</programlisting></para>
@@ -2499,7 +2499,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
 
             <listitem>
               <para>To include a binary file into the outputfile. The offset
-              and length are optional. Added in v1.12.1: if negative offset or length is provided,
+              and length are optional. If negative offset or length is provided,
               it counts relatively from the end of the file.</para>
               <para>(since v1.21.0) The rules of <link linkend="po_include">INCLUDE</link> are used for file search.<example>
                   <title></title>
@@ -2540,11 +2540,10 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               brackets are used, the commandline directories are searched
               before the current directory.</para>
               <para>The directory used to launch the assembling process is automatically added
-              to the list (as if "<code>-i.</code>" was added to command line manually)
-              (v1.14.0 and v1.14.1 don't add it, reverted back for v1.14.2). If you want to start
+              to the list (as if "<code>-i .</code>" was added to command line manually). If you want to start
               with completely empty include-path list, use "<code>--inc</code>" option
               early (order matters) without the "=" to empty the current list, like:
-              <code>sjasmplus --inc --inc=path1 --inc=path2 file.asm</code>
+              <code>sjasmplus --inc --inc= path1 --inc= path2 file.asm</code>
               <example>
                   <title></title>
 
@@ -4012,7 +4011,7 @@ Main
                   the structure is later used.
               ('#', DS and DEFS may be used instead of BLOCK).</para>
 
-              <para>(since v1.11) If <code>fillbyte</code> is omitted, the device memory
+              <para>If <code>fillbyte</code> is omitted, the device memory
                   content in the block area is preserved (not zeroed).</para>
             </listitem>
           </varlistentry>
@@ -4024,7 +4023,7 @@ Main
               <para>To <link linkend="po_align">align</link> the offset. If the expression
                   is omitted, 4 is assumed. ('##' May be used instead of ALIGN).</para>
 
-              <para>(since v1.11) If the byte is omitted, device memory content is preserved (not zeroed).</para>
+              <para>If the byte is omitted, device memory content is preserved (not zeroed).</para>
             </listitem>
           </varlistentry>
 
