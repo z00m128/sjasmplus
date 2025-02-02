@@ -150,13 +150,10 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 		}
 	}
 	// search all include paths now
-	CStringsList* dir = Options::IncludeDirsList;	// include-paths to search
-	while (dir) {
-		const auto dir_file = SJ_force_slash(dir->string / name_in);
-		if (FileExists(dir_file)) {
-			return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(dir_file))->second;
-		}
-		dir = dir->next;
+	for (auto incPath = Options::IncludeDirsList.crbegin(); incPath != Options::IncludeDirsList.crend(); ++incPath) {
+		const auto dir_file = SJ_force_slash(*incPath / name_in);
+		if (!FileExists(dir_file)) continue;
+		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(dir_file))->second;
 	}
 	// still not found. Found or not, return current dir path, it's either that or missing
 	// do NOT return it "as input was", because that's enforcing LaunchDir as include path,

@@ -128,10 +128,9 @@ namespace Options {
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." (aka LaunchDirectory aka CWD) directory
-	CStringsList* IncludeDirsList = new CStringsList(".");
-	// Not empty string, because that fails include path existence check
-	// Not empty list because legacy: launch dir was implicit include path (unless reset by `--inc`)
-	//FIXME and this list itself could become vector<fs::path> now? Maybe then empty string path can be used?
+	std::vector<std::filesystem::path> IncludeDirsList{"."};
+		// ^ Not empty string, because that fails include path existence check
+		// ^ Not empty list b/c legacy: launch dir is implicit include path (unless reset by `--inc`)
 
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
@@ -355,7 +354,6 @@ void FreeRAM() {
 		free(PreviousIsLabel);
 		PreviousIsLabel = nullptr;
 	}
-	if (Options::IncludeDirsList) delete Options::IncludeDirsList;
 }
 
 
@@ -562,17 +560,16 @@ namespace Options {
 							(!doubleDash && 'i' == opt[0]) ||
 							(!doubleDash && 'I' == opt[0])) {
 					if (*val) {
-						IncludeDirsList = new CStringsList(val, IncludeDirsList);
+						IncludeDirsList.emplace_back(val);
 					} else {
 						if (!doubleDash || '=' == arg[5]) {
 							if (argv[i+1] && '-' != argv[i+1][0]) {		// include path provided as next argument (after space, like gcc)
-								IncludeDirsList = new CStringsList(argv[++i], IncludeDirsList);	// also advance i++
+								IncludeDirsList.emplace_back(argv[++i]);
 							} else {
 								Error("no include path found for", arg, ALL);
 							}
 						} else {	// individual `--inc` without "= path" will RESET include dirs
-							delete IncludeDirsList;
-							IncludeDirsList = nullptr;
+							IncludeDirsList.clear();
 						}
 					}
 				} else if (!strcmp(opt, "define")) {	// for --define name=value the next argv is used (if available)
@@ -600,14 +597,11 @@ namespace Options {
 			} // end of while ((arg=argv[i]) && ('-' == arg[0]))
 		}
 
-		void checkIncludePaths(const CStringsList* includes) {
-			while (nullptr != includes) {
-				const std::filesystem::path dir(includes->string);
-				if (!std::filesystem::is_directory(dir)) {
-					const char* errtxt = '~' == includes->string[0] ? "include path starts with ~ (check docs)" : "include path not found";
-					Error(errtxt, includes->string, ALL);
-				}
-				includes = includes->next;
+		void checkIncludePaths(const std::vector<std::filesystem::path> & includes) {
+			for (auto it = includes.crbegin(); it != includes.crend(); ++it) {
+				if (std::filesystem::is_directory(*it)) continue;
+				const char* errtxt = '~' == it->string()[0] ? "include path starts with ~ (check docs)" : "include path not found";
+				Error(errtxt, it->string().c_str(), ALL);
 			}
 			return;
 		}
@@ -662,6 +656,7 @@ int main(int argc, char **argv) {
 	sourcePosStack.reserve(32);
 	smartSmcLines.reserve(64);
 	sourceFiles.reserve(32);
+	Options::IncludeDirsList.reserve(32);
 
 	CHECK_UNIT_TESTS		// UnitTest++ extra handling in specially built executable
 

@@ -105,7 +105,7 @@ namespace Options {
 	// format is then `:ADDR label`, starting from colon, then 16bit address, then label.
 	extern bool EmitVirtualLabels;
 
-	extern CStringsList* IncludeDirsList;
+	extern std::vector<std::filesystem::path> IncludeDirsList;
 	extern CDefineTable CmdDefineTable;
 
 	void SetTerminalColors(bool enabled);
