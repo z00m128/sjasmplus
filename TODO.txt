@@ -15,9 +15,6 @@ Cirrus-CI .cirrus.yml:
   even with "macos-sonoma-base" image which seems to exist -> not sure what is happening.
   There will be sequoia probably soon, so switch to that later and re-check.
 
-macos: plenty of "deprecated" warnings (`sprintf` for example)
-warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead
-
 check for Z80 in/out having also [] brackets and syntax brackets-only mode? (currently only `(c)` and `(n)` works)
 
 ARM! https://cirrus-ci.org/guide/linux/
@@ -56,10 +53,6 @@ unittest-cpp seems to be pretty dead now, consider migration, for example to htt
 (author claims C++20, header only and somewhat more compatible with GoogleTest)
 
 https://www.codefactor.io/repository/github/z00m128/sjasmplus
-
-coverage keeps fluctuating because of io_nex.cpp `SNexFile::~SNexFile()`, probably depends on compiler's exact version and mood???
--> it's global `static SNexFile nex;` -> add maybe unit test instancing it as local variable to enforce exercising destructor?
-(not so simple, as unit test doesn't know the struct definition and it's private to io_nex.cpp)
 
 APPENDBIN to append any-size binary to other file, like for producing large dot files with data files appended
 (and let's do GiB+ support as well, INCBIN is limited to 2GiB by `int32` for length and does read it all into heap memory)
