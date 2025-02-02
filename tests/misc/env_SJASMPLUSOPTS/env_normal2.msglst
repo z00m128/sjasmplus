@@ -1,5 +1,5 @@
 error: unrecognized option: --unknownOptionToTestError
-error: no include path found in: -i
+error: no include path found for: -i
 error: no parameters found in: --exp=
 error: no parameters found in: -D
 # file opened: env_normal2.asm

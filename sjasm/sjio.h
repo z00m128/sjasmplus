@@ -40,7 +40,6 @@ constexpr int INSTRUCTION_START_MARKER = -2;
 #define OUTPUT_APPEND 2
 
 extern std::filesystem::path LaunchDirectory;
-extern std::filesystem::path CurrentDirectory;
 
 // input file archiving helper struct (holding instance name string to keep c_str() pointers valid)
 struct SInputFile {
@@ -65,7 +64,8 @@ using fullpath_p_t = const SInputFile *;
 // map to archive all input files (to have stable valid c_str pointers of their filenames until exit)
 // key: filename + delimiter info
 // value: archived fullpath/basename ready to open or print
-using files_in_map_t = std::map<const delim_string_t, const SInputFile>;
+using files_in_map_t = std::map<const delim_string_t, const SInputFile>;      // input files per name
+using dirs_in_map_t = std::map<const std::filesystem::path, files_in_map_t>;  // input files per current directory
 
 // Look for provided string + delimiter type in include paths and return full path to existing file or original string
 // (archives the input in case this is first time, otherwise returns archived path)

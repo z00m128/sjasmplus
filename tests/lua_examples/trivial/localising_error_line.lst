@@ -1,5 +1,5 @@
 localising_error_line.asm(20): error: [LUA] asm:20 pass1
-./localising_error_line.lua(25): error: [LUA] lua:25 pass1 emit from asm:23/24
+localising_error_line.lua(25): error: [LUA] lua:25 pass1 emit from asm:23/24
 localising_error_line.asm(23): ^ emitted from here
 localising_error_line.lua(25): error: [LUA] lua:25 pass1 emit from asm:23/24
 localising_error_line.asm(24): ^ emitted from here

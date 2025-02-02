@@ -1,0 +1,263 @@
+# file opened: launch_dir.asm
+ 1    0000                  ; check if CWD (LaunchingDirectory) is implicit include path
+ 2    0000                  OUTPUT "launch_dir.bin"
+ 3    0000                  ORG ' '
+ 4    0020 22               DB  '"'
+ 5    0021                  INCLUDE "launch_dir/1/launch_dir_a.i.asm"
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1+   0021 31 2F 61         DB  "1/a"
+ 2+   0024                  IF 1 < 2
+ 3+   0024 2E                   DB  '.'
+ 4+   0025                      INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  0025 31 2F 61         DB  "1/a"
+ 2++  0028                  IF 2 < 2
+ 3++  0028 ~                    DB  '.'
+ 4++  0028 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0028                  ELSE
+ 6++  0028 2E                   DB  '.'
+ 7++  0029                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0029 31 2F 62 3B      DB  "1/b;"
+ 2+++ 002D
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  002D                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 5+   002D                  ELSE
+ 6+   002D ~                    DB  '.'
+ 7+   002D ~                    INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+ 8+   002D                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 6    002D                  INCLUDE "launch_dir/1/launch_dir_b.i.asm"
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+   002D 31 2F 62 3B      DB  "1/b;"
+ 2+   0031
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 7    0031                  INCLUDE "launch_dir/2/launch_dir_b.i.asm"
+# file opened: launch_dir/2/launch_dir_b.i.asm
+ 1+   0031 32 2F 62 5B      DB  '2/b['
+ 2+   0035                  IF 1 < 2
+ 3+   0035                      INCLUDE "launch_dir/1/launch_dir_a.i.asm"   ; launch dir is implicit include path by default
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  0035 31 2F 61         DB  "1/a"
+ 2++  0038                  IF 2 < 2
+ 3++  0038 ~                    DB  '.'
+ 4++  0038 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0038                  ELSE
+ 6++  0038 2E                   DB  '.'
+ 7++  0039                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0039 31 2F 62 3B      DB  "1/b;"
+ 2+++ 003D
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  003D                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 4+   003D                      INCLUDE <launch_dir/1/launch_dir_a.i.asm>   ; = makes *these two* work, should fail with: --inc
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  003D 31 2F 61         DB  "1/a"
+ 2++  0040                  IF 2 < 2
+ 3++  0040 ~                    DB  '.'
+ 4++  0040 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0040                  ELSE
+ 6++  0040 2E                   DB  '.'
+ 7++  0041                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0041 31 2F 62 3B      DB  "1/b;"
+ 2+++ 0045
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  0045                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 5+   0045                      INCLUDE "../1/launch_dir_a.i.asm"           ; relative path works from current file dir
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  0045 31 2F 61         DB  "1/a"
+ 2++  0048                  IF 2 < 2
+ 3++  0048 ~                    DB  '.'
+ 4++  0048 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0048                  ELSE
+ 6++  0048 2E                   DB  '.'
+ 7++  0049                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0049 31 2F 62 3B      DB  "1/b;"
+ 2+++ 004D
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  004D                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 6+   004D                      INCLUDE <../1/launch_dir_a.i.asm>
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  004D 31 2F 61         DB  "1/a"
+ 2++  0050                  IF 2 < 2
+ 3++  0050 ~                    DB  '.'
+ 4++  0050 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0050                  ELSE
+ 6++  0050 2E                   DB  '.'
+ 7++  0051                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0051 31 2F 62 3B      DB  "1/b;"
+ 2+++ 0055
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  0055                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 7+   0055                      INCLUDE "launch_dir_b.i.asm"                ; these should find "2/b" variant in current dir
+# file opened: launch_dir/2/launch_dir_b.i.asm
+ 1++  0055 32 2F 62 5B      DB  '2/b['
+ 2++  0059                  IF 2 < 2
+ 3++  0059 ~                    INCLUDE "launch_dir/1/launch_dir_a.i.asm"   ; launch dir is implicit include path by default
+ 4++  0059 ~                    INCLUDE <launch_dir/1/launch_dir_a.i.asm>   ; = makes *these two* work, should fail with: --inc
+ 5++  0059 ~                    INCLUDE "../1/launch_dir_a.i.asm"           ; relative path works from current file dir
+ 6++  0059 ~                    INCLUDE <../1/launch_dir_a.i.asm>
+ 7++  0059 ~                    INCLUDE "launch_dir_b.i.asm"                ; these should find "2/b" variant in current dir
+ 8++  0059 ~                    INCLUDE <launch_dir_b.i.asm>
+ 9++  0059                  ENDIF
+10++  0059 5D               DB  ']'
+# file closed: launch_dir/2/launch_dir_b.i.asm
+ 8+   005A                      INCLUDE <launch_dir_b.i.asm>
+# file opened: launch_dir/2/launch_dir_b.i.asm
+ 1++  005A 32 2F 62 5B      DB  '2/b['
+ 2++  005E                  IF 2 < 2
+ 3++  005E ~                    INCLUDE "launch_dir/1/launch_dir_a.i.asm"   ; launch dir is implicit include path by default
+ 4++  005E ~                    INCLUDE <launch_dir/1/launch_dir_a.i.asm>   ; = makes *these two* work, should fail with: --inc
+ 5++  005E ~                    INCLUDE "../1/launch_dir_a.i.asm"           ; relative path works from current file dir
+ 6++  005E ~                    INCLUDE <../1/launch_dir_a.i.asm>
+ 7++  005E ~                    INCLUDE "launch_dir_b.i.asm"                ; these should find "2/b" variant in current dir
+ 8++  005E ~                    INCLUDE <launch_dir_b.i.asm>
+ 9++  005E                  ENDIF
+10++  005E 5D               DB  ']'
+# file closed: launch_dir/2/launch_dir_b.i.asm
+ 9+   005F                  ENDIF
+10+   005F 5D               DB  ']'
+# file closed: launch_dir/2/launch_dir_b.i.asm
+ 8    0060 22               DB  '"'
+ 9    0061 0A               DB  10
+10    0062                  ORG ' '
+11    0020 3C               DB  "<"
+12    0021                  INCLUDE <launch_dir/1/launch_dir_a.i.asm>
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1+   0021 31 2F 61         DB  "1/a"
+ 2+   0024                  IF 1 < 2
+ 3+   0024 2E                   DB  '.'
+ 4+   0025                      INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  0025 31 2F 61         DB  "1/a"
+ 2++  0028                  IF 2 < 2
+ 3++  0028 ~                    DB  '.'
+ 4++  0028 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0028                  ELSE
+ 6++  0028 2E                   DB  '.'
+ 7++  0029                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0029 31 2F 62 3B      DB  "1/b;"
+ 2+++ 002D
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  002D                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 5+   002D                  ELSE
+ 6+   002D ~                    DB  '.'
+ 7+   002D ~                    INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+ 8+   002D                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+13    002D                  INCLUDE <launch_dir/1/launch_dir_b.i.asm>
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+   002D 31 2F 62 3B      DB  "1/b;"
+ 2+   0031
+# file closed: launch_dir/1/launch_dir_b.i.asm
+14    0031                  INCLUDE <launch_dir/2/launch_dir_b.i.asm>
+# file opened: launch_dir/2/launch_dir_b.i.asm
+ 1+   0031 32 2F 62 5B      DB  '2/b['
+ 2+   0035                  IF 1 < 2
+ 3+   0035                      INCLUDE "launch_dir/1/launch_dir_a.i.asm"   ; launch dir is implicit include path by default
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  0035 31 2F 61         DB  "1/a"
+ 2++  0038                  IF 2 < 2
+ 3++  0038 ~                    DB  '.'
+ 4++  0038 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0038                  ELSE
+ 6++  0038 2E                   DB  '.'
+ 7++  0039                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0039 31 2F 62 3B      DB  "1/b;"
+ 2+++ 003D
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  003D                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 4+   003D                      INCLUDE <launch_dir/1/launch_dir_a.i.asm>   ; = makes *these two* work, should fail with: --inc
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  003D 31 2F 61         DB  "1/a"
+ 2++  0040                  IF 2 < 2
+ 3++  0040 ~                    DB  '.'
+ 4++  0040 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0040                  ELSE
+ 6++  0040 2E                   DB  '.'
+ 7++  0041                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0041 31 2F 62 3B      DB  "1/b;"
+ 2+++ 0045
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  0045                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 5+   0045                      INCLUDE "../1/launch_dir_a.i.asm"           ; relative path works from current file dir
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  0045 31 2F 61         DB  "1/a"
+ 2++  0048                  IF 2 < 2
+ 3++  0048 ~                    DB  '.'
+ 4++  0048 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0048                  ELSE
+ 6++  0048 2E                   DB  '.'
+ 7++  0049                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0049 31 2F 62 3B      DB  "1/b;"
+ 2+++ 004D
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  004D                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 6+   004D                      INCLUDE <../1/launch_dir_a.i.asm>
+# file opened: launch_dir/1/launch_dir_a.i.asm
+ 1++  004D 31 2F 61         DB  "1/a"
+ 2++  0050                  IF 2 < 2
+ 3++  0050 ~                    DB  '.'
+ 4++  0050 ~                    INCLUDE "launch_dir_a.i.asm"    ; should find "1/a" in current dir
+ 5++  0050                  ELSE
+ 6++  0050 2E                   DB  '.'
+ 7++  0051                      INCLUDE "launch_dir_b.i.asm"    ; should find "1/b" variant in current dir
+# file opened: launch_dir/1/launch_dir_b.i.asm
+ 1+++ 0051 31 2F 62 3B      DB  "1/b;"
+ 2+++ 0055
+# file closed: launch_dir/1/launch_dir_b.i.asm
+ 8++  0055                  ENDIF
+# file closed: launch_dir/1/launch_dir_a.i.asm
+ 7+   0055                      INCLUDE "launch_dir_b.i.asm"                ; these should find "2/b" variant in current dir
+# file opened: launch_dir/2/launch_dir_b.i.asm
+ 1++  0055 32 2F 62 5B      DB  '2/b['
+ 2++  0059                  IF 2 < 2
+ 3++  0059 ~                    INCLUDE "launch_dir/1/launch_dir_a.i.asm"   ; launch dir is implicit include path by default
+ 4++  0059 ~                    INCLUDE <launch_dir/1/launch_dir_a.i.asm>   ; = makes *these two* work, should fail with: --inc
+ 5++  0059 ~                    INCLUDE "../1/launch_dir_a.i.asm"           ; relative path works from current file dir
+ 6++  0059 ~                    INCLUDE <../1/launch_dir_a.i.asm>
+ 7++  0059 ~                    INCLUDE "launch_dir_b.i.asm"                ; these should find "2/b" variant in current dir
+ 8++  0059 ~                    INCLUDE <launch_dir_b.i.asm>
+ 9++  0059                  ENDIF
+10++  0059 5D               DB  ']'
+# file closed: launch_dir/2/launch_dir_b.i.asm
+ 8+   005A                      INCLUDE <launch_dir_b.i.asm>
+# file opened: launch_dir/2/launch_dir_b.i.asm
+ 1++  005A 32 2F 62 5B      DB  '2/b['
+ 2++  005E                  IF 2 < 2
+ 3++  005E ~                    INCLUDE "launch_dir/1/launch_dir_a.i.asm"   ; launch dir is implicit include path by default
+ 4++  005E ~                    INCLUDE <launch_dir/1/launch_dir_a.i.asm>   ; = makes *these two* work, should fail with: --inc
+ 5++  005E ~                    INCLUDE "../1/launch_dir_a.i.asm"           ; relative path works from current file dir
+ 6++  005E ~                    INCLUDE <../1/launch_dir_a.i.asm>
+ 7++  005E ~                    INCLUDE "launch_dir_b.i.asm"                ; these should find "2/b" variant in current dir
+ 8++  005E ~                    INCLUDE <launch_dir_b.i.asm>
+ 9++  005E                  ENDIF
+10++  005E 5D               DB  ']'
+# file closed: launch_dir/2/launch_dir_b.i.asm
+ 9+   005F                  ENDIF
+10+   005F 5D               DB  ']'
+# file closed: launch_dir/2/launch_dir_b.i.asm
+15    0060 3E               DB  ">"
+16    0061 0A               DB  10
+17    0062                  OUTEND
+18    0062
+# file closed: launch_dir.asm
+
+Value    Label
+------ - -----------------------------------------------------------

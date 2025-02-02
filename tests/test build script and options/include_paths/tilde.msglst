@@ -1,5 +1,5 @@
-error: no include path found in: -i
-error: no include path found in: --inc=
+error: no include path found for: -i
+error: no include path found for: --inc=
 error: include path starts with ~ (check docs): ~/tilde3
 error: include path not found: /dev/null/er4
 error: include path not found: /dev/null/er3

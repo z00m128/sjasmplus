@@ -33,11 +33,11 @@
 #include <fcntl.h>
 
 static const std::filesystem::path EMPTY_PATH{""};
+static const std::filesystem::path DOUBLE_DOT_PARENT{".."};
 static constexpr char pathBadSlash = '\\';
 static constexpr char pathGoodSlash = '/';
 
 std::filesystem::path LaunchDirectory {};
-std::filesystem::path CurrentDirectory {};
 
 int ListAddress;
 
@@ -63,11 +63,19 @@ static aint WBLength = 0;
 static void CloseBreakpointsFile();
 
 std::string SInputFile::InitStr() {
+	auto canonical = std::filesystem::exists(full) ? std::filesystem::canonical(full) : full.lexically_normal();
 	switch(Options::FileVerbosity) {
-		case Options::FNAME_ABSOLUTE:	return SJ_force_slash(full.lexically_normal()).string();
-		case Options::FNAME_LAUNCH_REL:	return SJ_force_slash(full.lexically_proximate(LaunchDirectory)).string();
+		case Options::FNAME_LAUNCH_REL:
+			{	// try relative to LaunchDirectory, if outside (starts with "../") then keep absolute
+				auto relative = canonical.lexically_proximate(LaunchDirectory);
+				if (relative.begin()->compare(DOUBLE_DOT_PARENT)) canonical = std::move(relative);
+			}
+			[[fallthrough]];
+		case Options::FNAME_ABSOLUTE:
+			return SJ_force_slash(canonical).string();
 		case Options::FNAME_BASE:
-		default:						return full.filename().string();
+		default:
+			return canonical.filename().string();
 	}
 }
 
@@ -101,21 +109,30 @@ static bool isWindowsDrivePathStart(const char* filePath) {
 
 fullpath_ref_t GetInputFile(delim_string_t && in) {
 
-	static files_in_map_t archivedInputFiles;	// archive of all input files opened so far
+	static dirs_in_map_t allArchivedInputFiles;
+	static const SInputFile INPUT_FILE_STDIN(1);	// fake "<stdin>" string and empty path
 
+	// check for special "empty" input value signalling <stdin>, return that instantly
+	if (in.first.empty() && DT_COUNT == in.second) return INPUT_FILE_STDIN;
+
+	// get current file's directory as base (use LaunchDirectory as fallback for stdin or zero level)
+	std::filesystem::path CurrentDirectory = (fileNameFull && !fileNameFull->full.empty()) ? fileNameFull->full : LaunchDirectory;
+	if (!std::filesystem::is_directory(CurrentDirectory)) CurrentDirectory.remove_filename();
+	// make current directory canonical+relative to launchdir (avoid "..//"-like dupes in allArchivedInputFiles)
+	CurrentDirectory = std::filesystem::canonical(CurrentDirectory).lexically_proximate(LaunchDirectory);
+
+	// archive of all input files opened so far in the current directory (search results differ per current dir)
+	files_in_map_t & archivedInputFiles = allArchivedInputFiles[CurrentDirectory];
+
+	// if already archived, return archived full path
 	SJ_FixSlashes(in);
-	// check if already archived, just return full path
 	const auto lb = archivedInputFiles.lower_bound(in);
 	if (archivedInputFiles.cend() != lb && lb->first == in) return lb->second;
 
-	// !!! any warnings after this point must be W_EARLY, 2nd+ pass does use archived path = no warning !!!
+	// !!! any warnings after this point must be W_EARLY, 2nd+ pass should use archived path = no warning !!!
 
 	// not archived yet, look for the file somewhere...
 	const std::filesystem::path name_in{ in.first };
-	// completely empty -> special value to signal stdin
-	if (name_in.empty() && DT_COUNT == in.second) {		// use special SInputFile constructor to have fake name "<stdin>"
-		return archivedInputFiles.emplace_hint(lb, std::move(in), 1)->second;
-	}
 	// no filename - return it as is (it's not valid for open)
 	if (!name_in.has_filename()) {
 		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(name_in))->second;
@@ -141,12 +158,10 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 		}
 		dir = dir->next;
 	}
-	// still not found, check current directory for system-paths-first case
-	if (DT_ANGLE == in.second && FileExists(current_dir_file)) {
-		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(current_dir_file))->second;
-	}
-	// not found, return it "as is"
-	return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(name_in))->second;
+	// still not found. Found or not, return current dir path, it's either that or missing
+	// do NOT return it "as input was", because that's enforcing LaunchDir as include path,
+	// even if explicitly removed by `--inc`
+	return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(current_dir_file))->second;
 }
 
 fullpath_ref_t GetInputFile(char*& p) {
@@ -565,7 +580,6 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	}
 
 	fullpath_p_t oFileNameFull = fileNameFull;
-	const std::filesystem::path oCurrentDirectory = CurrentDirectory;
 
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
 	fileNameFull = &nfilename;
@@ -586,8 +600,6 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 		fputs("\n", listFile);
 	}
 
-	CurrentDirectory = fileNameFull->full.parent_path();		// use file's current directory
-
 	rlpbuf = rlpbuf_end = rlbuf;
 	colonSubline = false;
 	blockComment = 0;
@@ -601,7 +613,6 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 			clearerr(stdin);			// reset EOF on the stdin for another round of input
 		}
 	}
-	CurrentDirectory = oCurrentDirectory;
 
 	// show in listing file which file was closed
 	if (LASTPASS == pass && listFile) {

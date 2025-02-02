@@ -33,11 +33,11 @@ dir_end/dir_end2.i.asm(4): error: Unrecognized instruction: some_error to check 
  4    0013                  ENDM
  5    0013 21 22 00             ld      hl,End.end
  6    0016              INCLUDE "dir_end/dir_end3.i.asm"
-# file opened: ./dir_end/dir_end3.i.asm
+# file opened: dir_end/dir_end3.i.asm
  1+   0016              // include file for dir_end3.a80
  2+   0016 01 26 00             ld      bc,verifyLabel      ; label from first file
  3+   0019 11 1F 00             ld      de,verifyLabelFrom_dir_end3.a80
-./dir_end/dir_end3.i.asm(4): error: Unrecognized instruction: some_error to check file paths output
+dir_end/dir_end3.i.asm(4): error: Unrecognized instruction: some_error to check file paths output
  4+   001C                  some_error to check file paths output
  5+   001C
  6+   001C                      ; do not END here : END : not here */ : END
@@ -47,7 +47,7 @@ dir_end/dir_end2.i.asm(4): error: Unrecognized instruction: some_error to check 
  9+   001E                      xxx     ; MACRO from dir_end1.a80
  9+   001E 00          >    nop
 10+   001F
-# file closed: ./dir_end/dir_end3.i.asm
+# file closed: dir_end/dir_end3.i.asm
  7    001F              verifyLabelFrom_dir_end3.a80:
  8    001F                  E_in_macro
  8    001F             >        END

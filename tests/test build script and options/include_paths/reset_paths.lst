@@ -1,0 +1,16 @@
+reset_paths/reset_paths.i.asm(2): error: opening file: reset_paths/reset_paths/reset_paths.i.asm
+reset_paths/reset_paths.i.asm(2): error: opening file: reset_paths/reset_paths/reset_paths.i.asm
+# file opened: reset_paths.asm
+1     0000                  ; check if CWD (LaunchingDirectory) is correctly reset by --inc option
+2     0000                  INCLUDE "reset_paths/reset_paths.i.asm"
+# file opened: reset_paths/reset_paths.i.asm
+1+    0000                  ; this should fail without implicit CWD include path
+2+    0000                  INCLUDE "reset_paths/reset_paths.i.asm"
+reset_paths/reset_paths.i.asm(2): error: opening file: reset_paths/reset_paths/reset_paths.i.asm
+3+    0000
+# file closed: reset_paths/reset_paths.i.asm
+3     0000
+# file closed: reset_paths.asm
+
+Value    Label
+------ - -----------------------------------------------------------

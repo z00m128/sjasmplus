@@ -127,15 +127,11 @@ namespace Options {
 	bool IsBigEndian = false;
 	bool EmitVirtualLabels = false;
 
-	// Include directories list is initialized with "." directory
+	// Include directories list is initialized with "." (aka LaunchDirectory aka CWD) directory
 	CStringsList* IncludeDirsList = new CStringsList(".");
-	// CStringsList* IncludeDirsList = nullptr;	// wrong?
-	//FIXME ^ explain this to me like I'm 5yo, seems like empty list does same job after changing to fs::path
-	// ... but that's weird, wasn't there something about includes vs "anchor" dir? But tests *almost* do pass (just extra "./").
-	// Look into it harder! ... I think there should be difference, because CurrentDirectory / fname
-	// is tested and then all include path, so "." is not <empty list>
-	// I guess "." could become at least empty path "", but include paths must contain it/something
-	//FIXME and this list itself could become vector<fs::path> now?
+	// Not empty string, because that fails include path existence check
+	// Not empty list because legacy: launch dir was implicit include path (unless reset by `--inc`)
+	//FIXME and this list itself could become vector<fs::path> now? Maybe then empty string path can be used?
 
 	CDefineTable CmdDefineTable;		// is initialized by constructor
 
@@ -572,10 +568,10 @@ namespace Options {
 							if (argv[i+1] && '-' != argv[i+1][0]) {		// include path provided as next argument (after space, like gcc)
 								IncludeDirsList = new CStringsList(argv[++i], IncludeDirsList);	// also advance i++
 							} else {
-								Error("no include path found in", arg, ALL);
+								Error("no include path found for", arg, ALL);
 							}
-						} else {	// individual `--inc` without "=path" will RESET include dirs
-							if (IncludeDirsList) delete IncludeDirsList;
+						} else {	// individual `--inc` without "= path" will RESET include dirs
+							delete IncludeDirsList;
 							IncludeDirsList = nullptr;
 						}
 					}
@@ -676,10 +672,7 @@ int main(int argc, char **argv) {
 	// start counter
 	long dwStart = GetTickCount();
 
-	// get current directory
-	LaunchDirectory = std::filesystem::current_path();
-	CurrentDirectory = LaunchDirectory;
-
+	LaunchDirectory = std::filesystem::current_path();	// get CWD as launch directory
 	Options::COptionsParser optParser;
 	char* envFlags = std::getenv("SJASMPLUSOPTS");
 	if (nullptr != envFlags) {
