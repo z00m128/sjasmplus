@@ -431,7 +431,7 @@ bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int 
 			if (dataToMoveLength != fwrite(dataToMove.get(), 1, dataToMoveLength, ff)) {
 				return ReturnWithError("TRD write error", fname, ff);
 			}
-			dataToMove.release();
+			dataToMove.reset();		// delete allocated memory already here
 			// adjust all catalog entries which got the content sectors shifted
 			for (unsigned entryIndex = 0; entryIndex < STrdHead::NUM_OF_FILES_MAX; ++entryIndex) {
 				auto & entry = trdHead.catalog[entryIndex];
