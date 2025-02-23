@@ -81,7 +81,7 @@ INCDIR_LUA?=/usr/include/lua$(LUA_VER)
 ifeq ($(USE_LUA), 1)
 LDFLAGS+=-ldl
 ifeq ($(USE_BUNDLED_LUA), 0)
-_LUA_CPPFLAGS=-I$(INCDIR_LUA)
+_LUA_CPPFLAGS=-I$(INCDIR_LUA) -DUSE_LUA_SO_LIB
 LDFLAGS+=-l$(LUA_LIBNAME)
 else
 _LUA_CPPFLAGS=-I$(SUBDIR_LUA)
@@ -168,7 +168,11 @@ GCOV_OPT=-rlpmab
 endif
 
 #implicit rules to compile C/CPP files into $(BUILD_DIR)
-$(BUILD_DIR)/%.o : %.c
+$(BUILD_DIR)/$(SUBDIR_LUA)/%.o : $(SUBDIR_LUA)/%.c	# build Lua as C++ library, not C
+	@mkdir -p $(@D)
+	$(COMPILE.cc) -x c++ $(OUTPUT_OPTION) $<
+
+$(BUILD_DIR)/%.o : %.c					# build other .c files as C (if any ever...)
 	@mkdir -p $(@D)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
@@ -177,7 +181,11 @@ $(BUILD_DIR)/%.o : %.cpp
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 #implicit rules to compile C/CPP files into $(BUILD_DIR_UT) (with unit tests enabled)
-$(BUILD_DIR_UT)/%.o : %.c
+$(BUILD_DIR_UT)/$(SUBDIR_LUA)/%.o : $(SUBDIR_LUA)/%.c	# build Lua as C++ library, not C
+	@mkdir -p $(@D)
+	$(COMPILE.cc) -x c++ -DADD_UNIT_TESTS -I$(SUBDIR_UT) $(OUTPUT_OPTION) $<
+
+$(BUILD_DIR_UT)/%.o : %.c				# build other .c files as C (if any ever...)
 	@mkdir -p $(@D)
 	$(COMPILE.c) -DADD_UNIT_TESTS -I$(SUBDIR_UT) $(OUTPUT_OPTION) $<
 

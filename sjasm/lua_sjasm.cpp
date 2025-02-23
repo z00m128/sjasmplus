@@ -31,7 +31,18 @@
 
 #ifdef USE_LUA
 
-#include "lua.hpp"
+#ifdef USE_LUA_SO_LIB
+	// OS Lua is most likely built as C, so fallback to lua.hpp include and treat it as C library
+	#include "lua.hpp"
+#else
+	// bundled Lua is built as C++ library to avoid memory leaks from longjmp usage in C Lua
+	// breaking destructor calls on C++ object instances
+	// see https://github.com/vinniefalco/LuaBridge/issues/323 for one example
+	#include "lauxlib.h"
+	#include "lua.h"
+	#include "lualib.h"
+#endif
+
 #include "LuaBridge/LuaBridge.h"
 
 static lua_State *LUA = nullptr;

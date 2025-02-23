@@ -45,6 +45,9 @@ set(LUA_SOURCES
 	lzio.c
 )
 
+# compile bundled Lua as C++ instead of C
+set_source_files_properties(${LUA_SOURCES} PROPERTIES LANGUAGE CXX )
+
 if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 		add_definitions(-DLUA_USE_LINUX)
 	elseif(CYGWIN)

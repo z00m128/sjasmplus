@@ -84,7 +84,10 @@ uninstall:
 compress:
 	$(COMPRESS) $(EXE)	
 
-.c.o:
+$(SUBDIR_LUA)/%.o : $(SUBDIR_LUA)/%.c	# build Lua as C++ library, not C
+	$(GPP) -x c++ $(CFLAGS) -o $@ -c $<
+
+.c.o:					# build other .c files as C (if any ever...)
 	$(GCC) $(CFLAGS) -o $@ -c $<
 
 .cpp.o:
