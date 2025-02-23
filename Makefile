@@ -1,19 +1,18 @@
 # Makefile for sjasmplus created by Tygrys' hands.
 # install/uninstall features added, CFLAGS and LDFLAGS modification by z00m's hands. [05.05.2016]
 # overall optimization and beautification by mborik's hands. [05.05.2016]
-# overall rewrite by Ped7g [2019-03-21]
-# added code coverage targets and variables by Ped7g [2019-07-22]
+# overall rewrite and extensions by Ped7g [2019-03-21 and following years]
 
 ## Some examples of my usage of this Makefile:
 # make tests 					- to run the CI test+example script runner
 # make memcheck TEST=misc DEBUG=1		- to use valgrind on assembling sub-directory "misc" in tests
 # make PREFIX=~/.local install			- to install release version into ~/.local/bin/
-# make clean && make CC=gcc-9 CXX=g++-9		- to compile binary with gcc-9
+# make clean && make CC=gcc-14 CXX=g++-14	- to compile binary with gcc-14
 # make DEBUG=1 LUA_COVERAGE=1 coverage		- to produce build/debug/coverage/* files by running the tests
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
 # make CFLAGS_EXTRA='-m32' LDFLAGS='-ldl -m32'  - to builds 32b linux executable
-# make KEEP_SYMBOLS=1 CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
-# make KEEP_SYMBOLS=1 CC=clang-12 CXX=clang++-12 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
+# make KEEP_SYMBOLS=1 CC=clang-19 CXX=clang++-19 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
+# make KEEP_SYMBOLS=1 CC=clang-19 CXX=clang++-19 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
 # to cross-compile windows exe try to use Makefile.win instead, this Makefile is now too much linux/posix only
 
 EXE_BASE_NAME=sjasmplus
@@ -23,24 +22,26 @@ VERSION?=1.20.3
 SRCTARFILE?=$(EXE_BASE_NAME)-$(VERSION)-src.tar.xz
 SRCTARDIR?=$(EXE_BASE_NAME)-$(VERSION)
 
-# Use LUA (system-wide or bundled, depending on USE_BUNDLED_LUA)
+# Use LUA (1 = system-wide or bundled, depending on USE_BUNDLED_LUA, 0 = sjasmplus without Lua scripting)
 USE_LUA?=1
 
-# Use bundled LUA
+# Use bundled LUA (1 = bundled source in sjasmplus repo, 0 = OS provided .so library)
 USE_BUNDLED_LUA?=1
 
 # Where to stage files when building a package
 STAGEDIR?=
 
-# Where to install resulting files
+# Where to install resulting files (use "~/.local" to install into user's home dir)
 PREFIX?=/usr/local
 
 # define DEBUG=1 for debug build
 DEBUG?=
-
 ifdef DEBUG
-KEEP_SYMBOLS?=$(DEBUG)
+KEEP_SYMBOLS?=1
 endif
+
+# strip final executable (0 = do stripping, 1 = preserve debug symbols)
+KEEP_SYMBOLS?=0
 
 # set up CC+CXX explicitly, because windows MinGW/MSYS environment don't have it set up
 CC?=cc
@@ -51,7 +52,7 @@ INSTALL?=install -c
 UNINSTALL?=rm -vf
 REMOVEDIR?=rm -vdf
 DOCBOOKGEN?=xsltproc
-MEMCHECK?=valgrind --leak-check=yes
+MEMCHECK?=valgrind --enable-debuginfod=no --leak-check=yes --show-error-list=no --quiet
 	# --leak-check=full --show-leak-kinds=all
 
 # set up srctar
@@ -209,13 +210,13 @@ $(OBJS): $(wildcard $(SUBDIR_BASE)/*.h)
 
 $(BUILD_EXE): $(ALL_OBJS)
 	$(CXX) -o $(BUILD_EXE) $(CXXFLAGS) $(ALL_OBJS) $(LDFLAGS)
-ifndef KEEP_SYMBOLS
+ifeq ($(KEEP_SYMBOLS), 0)
 	$(STRIP) $(BUILD_EXE)
 endif
 
 $(BUILD_EXE_UT): $(ALL_OBJS_UT)
 	$(CXX) -o $(BUILD_EXE_UT) $(CXXFLAGS) $(ALL_OBJS_UT) $(LDFLAGS)
-ifndef KEEP_SYMBOLS
+ifeq ($(KEEP_SYMBOLS), 0)
 	$(STRIP) $(BUILD_EXE_UT)
 endif
 
