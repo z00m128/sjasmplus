@@ -5,6 +5,21 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+CSpect has new fake instructions, activate them by -cspect on CLI:
+setbrk type,start16,end16 = ED 01 type startlo starthi endlo endhi
+    - type 0 exe, 1 read, 2 write, 3 outPort, 4 inPort
+    - set breakpoints zone
+clrbrk type,start16,end16 = ED 02 type startlo starthi endlo endhi
+    - clears breakpoints zone
+
+STRING OPER: ".." like Lua?? And #"str" to count?:
+ similarly the string operators request could maaaaayyybeeee work inside
+the quoted string parser, but need to think more about it, if it will
+collide with something or not (`ld hl,"ab" + "cd"` is valid right now,
+but is it useful? Does replacing this with string+ hurt too much?
+What about `ld hl,"ab"|128` or `ld hl,"ab"+128` ... how far to go with
+string operators? Let's not turn sjasmplus into another JS fiasco :D)
+
 Cirrus-CI .cirrus.yml:
 - name: coveralls.io coverage report (linux gcc6):
   GCC14 still doesn't have as perfect coverage report as GCC6 (versions between I tried were also imperfect),
