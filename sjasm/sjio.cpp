@@ -1303,7 +1303,8 @@ int ReadLine(bool SplitByColon) {
 int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 	// f itself should be already NULL, not resetting it here
 	CStringsList** s = &f;
-	while (ReadLineNoMacro()) {
+	bool SplitByColon = true;
+	while (ReadLineNoMacro(SplitByColon)) {
 		++CompiledCurrentLine;
 		char* p = line;
 		SkipBlanks(p);
@@ -1315,6 +1316,12 @@ int ReadFileToCStringsList(CStringsList*& f, const char* end) {
 		*s = new CStringsList(line);
 		s = &((*s)->next);
 		ListFile(true);
+		// Try to ignore colons inside lua blocks... this is far from bulletproof, but should improve it
+		if (SplitByColon && cmphstr(p, "lua")) {
+			SplitByColon = false;
+		} else if (!SplitByColon && cmphstr(p, "endlua")) {
+			SplitByColon = true;
+		}
 	}
 	return 0;
 }
