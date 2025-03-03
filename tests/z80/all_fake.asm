@@ -228,9 +228,13 @@ zxn_mul             mul         ; no warning "correct" syntax: "mul d,e" and "mu
     ; no message when in --zxnext=cspect mode
 zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
 zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
-    OPT --zxnext    ; do 2x error stating the requirement (using nops to advance labels)
+zxn_csp_clrbrk      clrbrk  $11, $2233, $4455   ; CSpect emulator only: clear breakpoint area
+zxn_csp_setbrk      setbrk  $66, $7788, $99AA   ; CSpect emulator only: set breakpoint area
+    OPT --zxnext    ; do 4x error stating the requirement (using nops to advance labels)
 zxn_csp_break2      break   : nop
 zxn_csp_exit2       exit    : nop
+zxn_csp_clrbrk2     clrbrk  $11, $2233, $4455 : nop
+zxn_csp_setbrk2     setbrk  $66, $7788, $99AA : nop
 
     ; debug snapshot for Cspect
 ;     DEVICE ZXSPECTRUM48 : CSPECTMAP : SAVESNA "all_fake.sna", 0x8000

@@ -527,17 +527,27 @@ all_fake.asm(227): warning[fake]: Fake instruction: mul
 228   834D                  ; no message when in --zxnext=cspect mode
 229   834D FD 00        zxn_csp_break       break       ; CSpect emulator only: breakpoint instruction
 230   834F DD 00        zxn_csp_exit        exit        ; CSpect emulator only: exit instruction
-231   8351                  OPT --zxnext    ; do 2x error stating the requirement (using nops to advance labels)
-all_fake.asm(232): error: [BREAK] fake instruction "break" must be specifically enabled by --zxnext=cspect option
-232   8351              zxn_csp_break2      break
-232   8351 00             nop
-all_fake.asm(233): error: [EXIT] fake instruction "exit" must be specifically enabled by --zxnext=cspect option
-233   8352              zxn_csp_exit2       exit
-233   8352 00             nop
-234   8353
-235   8353                  ; debug snapshot for Cspect
-236   8353              ;     DEVICE ZXSPECTRUM48 : CSPECTMAP : SAVESNA "all_fake.sna", 0x8000
-237   8353
+231   8351 ED 02 11 33  zxn_csp_clrbrk      clrbrk  $11, $2233, $4455   ; CSpect emulator only: clear breakpoint area
+231   8355 22 55 44
+232   8358 ED 01 66 88  zxn_csp_setbrk      setbrk  $66, $7788, $99AA   ; CSpect emulator only: set breakpoint area
+232   835C 77 AA 99
+233   835F                  OPT --zxnext    ; do 4x error stating the requirement (using nops to advance labels)
+all_fake.asm(234): error: [BREAK] fake instruction "break" must be specifically enabled by --zxnext=cspect option
+234   835F              zxn_csp_break2      break
+234   835F 00             nop
+all_fake.asm(235): error: [EXIT] fake instruction "exit" must be specifically enabled by --zxnext=cspect option
+235   8360              zxn_csp_exit2       exit
+235   8360 00             nop
+all_fake.asm(236): error: [CLRBRK] fake instruction "clrbrk" must be specifically enabled by --zxnext=cspect option
+236   8361              zxn_csp_clrbrk2     clrbrk  $11, $2233, $4455
+236   8361 00             nop
+all_fake.asm(237): error: [SETBRK] fake instruction "setbrk" must be specifically enabled by --zxnext=cspect option
+237   8362              zxn_csp_setbrk2     setbrk  $66, $7788, $99AA
+237   8362 00             nop
+238   8363
+239   8363                  ; debug snapshot for Cspect
+240   8363              ;     DEVICE ZXSPECTRUM48 : CSPECTMAP : SAVESNA "all_fake.sna", 0x8000
+241   8363
 # file closed: all_fake.asm
 
 Value    Label
@@ -739,7 +749,11 @@ Value    Label
 0x8345 X sub_hl_hl
 0x8348 X sub_hl_sp
 0x834D X zxn_csp_break
-0x8351 X zxn_csp_break2
+0x835F X zxn_csp_break2
+0x8351 X zxn_csp_clrbrk
+0x8361 X zxn_csp_clrbrk2
 0x834F X zxn_csp_exit
-0x8352 X zxn_csp_exit2
+0x8360 X zxn_csp_exit2
+0x8358 X zxn_csp_setbrk
+0x8362 X zxn_csp_setbrk2
 0x834B X zxn_mul

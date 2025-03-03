@@ -61,3 +61,16 @@
     mul
     mul     d
     mul     d,c
+
+    ; code coverage for clrbrk/setbrk argument parsing errors:
+    OPT reset --syntax=abF --zxnext=cspect
+    clrbrk
+    clrbrk  $EE
+    clrbrk  $EE,
+    clrbrk  $EE, $EEEE
+    clrbrk  $EE, $EEEE,
+    setbrk
+    setbrk  $EE
+    setbrk  $EE,
+    setbrk  $EE, $EEEE
+    setbrk  $EE, $EEEE,

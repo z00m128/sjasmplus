@@ -106,6 +106,35 @@ z80n_cover100.asm(62): error: Z80N MUL exist only with "D,E" arguments: mul     
 z80n_cover100.asm(63): error: Z80N MUL exist only with "D,E" arguments: mul     d,c
 63    0004                  mul     d,c
 64    0004
+65    0004                  ; code coverage for clrbrk/setbrk argument parsing errors:
+66    0004                  OPT reset --syntax=abF --zxnext=cspect
+z80n_cover100.asm(67): error: Operand expected
+z80n_cover100.asm(67): error: [CLRBRK] syntax: CLRBRK <type>, <start_address>, <end_address>
+67    0004                  clrbrk
+z80n_cover100.asm(68): error: [CLRBRK] syntax: CLRBRK <type>, <start_address>, <end_address>
+68    0004                  clrbrk  $EE
+z80n_cover100.asm(69): error: Operand expected
+z80n_cover100.asm(69): error: [CLRBRK] syntax: CLRBRK <type>, <start_address>, <end_address>
+69    0004                  clrbrk  $EE,
+z80n_cover100.asm(70): error: [CLRBRK] syntax: CLRBRK <type>, <start_address>, <end_address>
+70    0004                  clrbrk  $EE, $EEEE
+z80n_cover100.asm(71): error: Operand expected
+71    0004 ED 02 EE EE      clrbrk  $EE, $EEEE,
+71    0008 EE 00 00
+z80n_cover100.asm(72): error: Operand expected
+z80n_cover100.asm(72): error: [SETBRK] syntax: SETBRK <type>, <start_address>, <end_address>
+72    000B                  setbrk
+z80n_cover100.asm(73): error: [SETBRK] syntax: SETBRK <type>, <start_address>, <end_address>
+73    000B                  setbrk  $EE
+z80n_cover100.asm(74): error: Operand expected
+z80n_cover100.asm(74): error: [SETBRK] syntax: SETBRK <type>, <start_address>, <end_address>
+74    000B                  setbrk  $EE,
+z80n_cover100.asm(75): error: [SETBRK] syntax: SETBRK <type>, <start_address>, <end_address>
+75    000B                  setbrk  $EE, $EEEE
+z80n_cover100.asm(76): error: Operand expected
+76    000B ED 01 EE EE      setbrk  $EE, $EEEE,
+76    000F EE 00 00
+77    0012
 # file closed: z80n_cover100.asm
 
 Value    Label

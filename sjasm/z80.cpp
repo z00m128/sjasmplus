@@ -662,6 +662,27 @@ namespace Z80 {
 		EmitByte(0x3f, true);
 	}
 
+	static void OpCode_Next_CLRBRK() {	// this is fake instruction for CSpect emulator, not for real Z80N
+		if (Options::syx.IsNextEnabled < 2) {
+			Error("[CLRBRK] fake instruction \"clrbrk\" must be specifically enabled by --zxnext=cspect option");
+			SkipToEol(lp);
+			return;
+		}
+		int e[] { 0xED, 0x02, -1, -1 };
+		e[2] = GetByte(lp);						// type
+		if (comma(lp)) {
+			word startad = GetWord(lp);			// start address
+			if (comma(lp)) {
+				word endad = GetWord(lp);		// end address
+				EmitBytes(e, true);
+				EmitWord(startad);
+				EmitWord(endad);
+				return;
+			}
+		}
+		Error("[CLRBRK] syntax: CLRBRK <type>, <start_address>, <end_address>");
+	}
+
 	static void OpCode_CP() {
 		OpCode_SimpleAlu(0xb8);
 	}
@@ -2196,6 +2217,27 @@ namespace Z80 {
 		EmitByte(0x95);
 	}
 
+	static void OpCode_Next_SETBRK() {	// this is fake instruction for CSpect emulator, not for real Z80N
+		if (Options::syx.IsNextEnabled < 2) {
+			Error("[SETBRK] fake instruction \"setbrk\" must be specifically enabled by --zxnext=cspect option");
+			SkipToEol(lp);
+			return;
+		}
+		int e[] { 0xED, 0x01, -1, -1 };
+		e[2] = GetByte(lp);						// type
+		if (comma(lp)) {
+			word startad = GetWord(lp);			// start address
+			if (comma(lp)) {
+				word endad = GetWord(lp);		// end address
+				EmitBytes(e, true);
+				EmitWord(startad);
+				EmitWord(endad);
+				return;
+			}
+		}
+		Error("[SETBRK] syntax: SETBRK <type>, <start_address>, <end_address>");
+	}
+
 	static void OpCode_SLA() {
 		Z80Reg reg;
 		do {
@@ -2478,6 +2520,8 @@ namespace Z80 {
 		// CSpect emulator extensions, fake instructions "exit" and "break"
 		OpCodeTable.Insert("exit",		OpCode_Next_EXIT);
 		OpCodeTable.Insert("break",		OpCode_Next_BREAK);
+		OpCodeTable.Insert("setbrk",	OpCode_Next_SETBRK);
+		OpCodeTable.Insert("clrbrk",	OpCode_Next_CLRBRK);
 	}
 } // eof namespace Z80
 
