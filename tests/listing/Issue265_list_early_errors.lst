@@ -1,0 +1,10 @@
+Issue265_list_early_errors.asm(2): error: Duplicate label: duplicate
+# file opened: Issue265_list_early_errors.asm
+1     0000              duplicate:
+2     0000              duplicate:
+3     0000
+# file closed: Issue265_list_early_errors.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0000 X duplicate

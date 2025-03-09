@@ -588,7 +588,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	if (0 == IncludeLevel) DefineTable.Replace("__BASE_FILE__", nfilename.str.c_str());
 
 	// open default listing file for each new source file (if default listing is ON) / explicit listing is already opened
-	if (LASTPASS == pass && 0 == IncludeLevel && Options::IsDefaultListingName) OpenDefaultList(nfilename);
+	if (0 == IncludeLevel && Options::IsDefaultListingName) OpenDefaultList(nfilename);
 	// show in listing file which file was opened
 	FILE* listFile = GetListingFile();
 	if (LASTPASS == pass && listFile) {
@@ -838,7 +838,8 @@ static void OpenListImp(const std::filesystem::path & listFilename) {
 	// if STDERR is configured to contain listing, disable other listing files
 	if (OV_LST == Options::OutputVerbosity) return;
 	if (listFilename.empty()) return;
-	if (!FOPEN_ISOK(FP_ListingFile, listFilename, "w")) {
+	// in first pass overwrite the file, in later passes append to it
+	if (!FOPEN_ISOK(FP_ListingFile, listFilename, pass <= 1 ? "w" : "a")) {
 		Error("opening file for write", listFilename.string().c_str(), FATAL);
 	}
 }

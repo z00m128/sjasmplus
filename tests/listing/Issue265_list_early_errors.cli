@@ -1,0 +1,3 @@
+# enforce default listing name (implicit) to check for the original issue
+LANG=C $MEMCHECK "$EXE" --nologo --msg=none --fullpath -Wno-behost --color=off --lst --lstlab=sort "$file_asm"
+last_result=$?
