@@ -2276,6 +2276,7 @@ will output to the console strings:
             <listitem>
               <para>DUP specifies the number of times to generate the
               following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.</para>
+              <para>DUP itself is internally implemented almost like anonymous macro emitted count-times.</para>
               <para>Optional second argument (since v1.20.2) is label name to have repetition index
                 available inside the block (values 0, 1, 2, 3, ...).
                <example>
@@ -2525,7 +2526,7 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
 
                   <para><programlisting>    INCHOB "gfx.$c",7        ; include gfx.scc, skip first 7 bytes
     INCHOB "sprs.$c",3,256   ; include 256 bytes from offset 3
-    INCHOB gfx.$c ,7        ; note the space between the filename and the ',7' here :)</programlisting></para>
+    INCHOB gfx.$c ,7         ; note the space between the filename and the ',7' here :)</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
@@ -2545,7 +2546,13 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
               to the list (as if "<code>-i .</code>" was added to command line manually). If you want to start
               with completely empty include-path list, use "<code>--inc</code>" option
               early (order matters) without the "=" to empty the current list, like:
-              <code>sjasmplus --inc --inc= path1 --inc= path2 file.asm</code>
+              <code>sjasmplus --inc --inc= path1 --inc= path2 file.asm</code></para>
+              <para>Current implementation expect INCLUDE to be used only outside of macros or
+                conditional/repeatable blocks, so directives like MACRO, DUP, WHILE, IF/IFDEF/../ENDIF should
+                be always nested into single file, not attempting to INCLUDE other pieces of asm sources from
+                within their blocks. While some trivial cases may still work even with current implementation,
+                you are likely to run into weird bugs and inconsistencies if you combine these "contexts of
+                assembling" in other order, not having INCLUDE at top of everything.
               <example>
                   <title></title>
 
@@ -3484,7 +3491,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
 
                   <para><programlisting>    EMPTYTAP screen.tap
 
-    TAPOUT screen.tap,0
+    TAPOUT screen.tap ,0    ; unquoted filename needs space to end it
     DB 3
     DB 'ScreenName'
     DW 6912
@@ -3557,6 +3564,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
             <listitem>
               <para>While expression evaluates to non-zero value, generates following lines until
 				  an ENDW (EDUP/ENDR alias) pseudo-op is encountered.</para>
+              <para>WHILE itself is internally implemented almost like anonymous macro emitted repeatedly.</para>
 			  <para>The optional guardian-counter value will abort the WHILE if there are
 				  more iterations, default guardian-counter is set to 100k.
 				<example>
@@ -3787,9 +3795,10 @@ LABEL5:
       encountered. Macro's have to be defined before their use. Macro's name
       must be unique (even if two macros differ by required arguments).
       </para>
-      <para>Macros are stored as unparsed text and when used, the stored text
-      is expanded and assembled as newly injected lines of source code. This
-      expansion could cause in edge cases slight difference how the text is
+      <para>Macros (also internal ones like DUP/REPT/..) are stored as unparsed
+      text and when used, the stored text is expanded and assembled as newly
+      injected lines of source code.
+      This expansion could cause in edge cases slight difference how the text is
       parsed and assembled, so using directives further affecting the parsing
       like <link linkend="po_lua">LUA</link> or <link linkend="po_include">INCLUDE</link>
       inside macro definition is in current version unsupported. If it works
