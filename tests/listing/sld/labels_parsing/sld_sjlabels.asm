@@ -4,7 +4,7 @@
         IF 0 == arg1? : testMacro 1 : ENDIF
 .macro_local.1:
 .smc+1:
-        ret
+@.loc_arg1?:    ret ; non-macro local label
     ENDM
 
     ORG $8000
@@ -84,3 +84,7 @@ s3      S_TEST { 0xDE, 0xF023 }
     ld  de,S_TEST
     add ix,de
     ENDMODULE
+
+main.3:
+!nonNamespace:
+.local.3:

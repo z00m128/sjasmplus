@@ -124,11 +124,17 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	// does re-parse the original source line again similarly to ValidateLabel
 	// but prepares SLD 'L'-type line, with module/main/local comma separated + usage traits info
 	assert(nullptr != label);
+	// check if this is setting namespace
+	bool setNameSpace = ('!' != *naam);
+	if (!setNameSpace) ++naam;
+	// check if local label defined inside macro wants to become non-macro local label
+	const bool escMacro = setNameSpace && macrolabp && ('@' == naam[0]) && ('.' == naam[1]);
+	if (escMacro) ++naam;			// such extra "@" is consumed right here and only '.' is left
 	assert(isLabelStart(naam));		// this should be called only when ValidateLabel did succeed
 	const bool global = '@' == *naam;
 	const bool local = '.' == *naam;
 	if (global || local) ++naam;	// single modifier is parsed
-	const bool inMacro = local && macrolabp;
+	const bool inMacro = !escMacro && local && macrolabp;
 	const bool inModule = !inMacro && !global && ModuleName[0];
 	const bool isStructLabel = (label->traits & (LABEL_IS_STRUCT_D|LABEL_IS_STRUCT_E));
 	// build fully qualified SLD info
@@ -140,6 +146,7 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	// except for structure labels: the inner ones don't "set namespace" == vorlabp, use "naam" then
 	// (but only if the main label of structure itself is not local, if it's local, use vorlabp)
 	const char* mainLabel = isStructLabel && !local ? naam : inMacro ? macrolabp : vorlabp;
+	if (!setNameSpace) mainLabel = naam;
 	if (vorlabp == mainLabel && ModuleName[0]) {	// vorlabp now contains also module part, skip it
 		auto modNameSz = strlen(ModuleName);
 		if (0 == strncmp(ModuleName, mainLabel, modNameSz)) mainLabel += modNameSz + 1;
