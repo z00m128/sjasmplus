@@ -78,7 +78,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	}
 	if (global || local) ++naam;	// single modifier is parsed
 	const bool inMacro = !escMacro && local && macrolabp;
-	const bool inModule = !inMacro && !global && ModuleName[0];
+	const bool inModule = !inMacro && !global && !local && ModuleName[0];
 	// check all chars of label
 	const char* np = naam;
 	while (islabchar(*np)) ++np;
@@ -106,14 +106,13 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	} else if (local) {
 		STRCAT(label, labelLen, vorlabp);		STRCAT(label, 2, ".");
 	}
-	char* lp = label + strlen(label), * newVorlabP = nullptr;
-	if (setNameSpace && !local) newVorlabP = lp;	// here will start new non-local label prefix
+	char* lp = label + strlen(label);
 	while (truncateAt-- && islabchar(*naam)) *lp++ = *naam++;	// add the new label (truncated if needed)
 	*lp = 0;
 	if (labelLen < lp - label) Error("internal error", nullptr, FATAL);		// should never happen :)
-	if (newVorlabP) {
+	if (setNameSpace && !local) {
 		free(vorlabp);
-		vorlabp = STRDUP(newVorlabP);
+		vorlabp = STRDUP(label);
 		if (vorlabp == NULL) ErrorOOM();
 	}
 	return label;
@@ -140,7 +139,12 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	// main label part (the `vorlabp` is already the current label, if it was main label)
 	// except for structure labels: the inner ones don't "set namespace" == vorlabp, use "naam" then
 	// (but only if the main label of structure itself is not local, if it's local, use vorlabp)
-	STRCAT(sldLabelExport, LABMAX, isStructLabel && !local ? naam : inMacro ? macrolabp : vorlabp);
+	const char* mainLabel = isStructLabel && !local ? naam : inMacro ? macrolabp : vorlabp;
+	if (vorlabp == mainLabel && ModuleName[0]) {	// vorlabp now contains also module part, skip it
+		auto modNameSz = strlen(ModuleName);
+		if (0 == strncmp(ModuleName, mainLabel, modNameSz)) mainLabel += modNameSz + 1;
+	}
+	STRCAT(sldLabelExport, LABMAX, mainLabel);
 	STRCAT(sldLabelExport, 2, ",");
 	// local part
 	if (local) STRCAT(sldLabelExport, LABMAX, naam);

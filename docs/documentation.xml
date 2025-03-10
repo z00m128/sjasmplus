@@ -719,8 +719,7 @@ invalid2+*: cpl : ld a,14       ; only first instruction after label is consider
       <para>When there is a <link linkend="po_module">module definition</link> all
       labels (except those starting with a '@') are local to that module. To
       use a label from outside the module use modulename.labelname, in this
-      example: 'vdp.Cls'. Labels starting with a '.' are also local to the
-      previous non-local label.</para>
+      example: 'vdp.Cls'. Labels starting with a '.' are local to the previous non-local label.</para>
 
       <para>(since v1.18.0) If you start the label with an ! (exclamation mark), it will not
       affect following local labels (same syntax as <ulink url="http://www.xl2s.tk/">sjasm</ulink>).</para>
@@ -742,7 +741,7 @@ Main:                       ; main.Main
 
         MODULE vdp          ; module "main.vdp"
 @SetScreen:                 ; SetScreen
-.loop:                      ; main.vdp.SetScreen.loop
+.loop:                      ; SetScreen.loop (since v1.21.0)
             RET
 Cls:                        ; main.vdp.Cls
 !KeepClsForLocal:           ; main.vdp.KeepClsForLocal (since v1.18.0)
@@ -779,9 +778,7 @@ hoi test    ; produce labels: main.hoi, 0>kip0, main.hoi.kip1
 Label      ; xxx.Label
 .Local     ; xxx.Label.Local
 @Label     ; Label
-.Local     ; xxx.Label.Local =&gt; duplicate label error
-@Label2    ; Label2
-.Local     ; xxx.Label2.Local
+.Local     ; Label.Local
 @yyy.Local ; yyy.Local
 yyy.Local  ; xxx.yyy.Local</programlisting></para>
         </example></para>

@@ -8,7 +8,7 @@ Fn1:        ret
 Fn1.n:          ldir
 .local1:
 @GlobalLabel1:
-.localAfterGlobal1:     ; should be <modules>.Global... according to docs (a bit illogical)
+.localAfterGlobal1:     ; GlobalLabel1.localAfterGlobal1
             ENDMODULE
 
             MODULE nested.Invalid.Name

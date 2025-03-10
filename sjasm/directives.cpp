@@ -503,9 +503,15 @@ static void dirMODULE() {
 	if (n && (nullptr == STRCHR(n, '.'))) {
 		if (*ModuleName) STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), ".");
 		STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), n);
-		// reset non-local label to default "_"
+		// reset non-local label to default "<modules>._"
 		if (vorlabp) free(vorlabp);
-		vorlabp = STRDUP("_");
+		auto modNameSz = strlen(ModuleName);
+		vorlabp = (char*)malloc(modNameSz + 3);
+		memcpy(vorlabp, ModuleName, modNameSz);
+		vorlabp[modNameSz++] = '.';
+		vorlabp[modNameSz++] = '_';
+		vorlabp[modNameSz] = 0;
+
 		if (IsSldExportActive()) {
 			WriteToSldFile(-1, CurAddress, 'L', ExportModuleToSld());
 		}

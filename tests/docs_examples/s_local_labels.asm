@@ -10,7 +10,7 @@ Main:                       ; main.Main
 
         MODULE vdp          ; module "main.vdp"
 @SetScreen:                 ; SetScreen
-.loop:                      ; main.vdp.SetScreen.loop
+.loop:                      ; SetScreen.loop (since v1.21.0)
             RET
 Cls:                        ; main.vdp.Cls
 !KeepClsForLocal:           ; main.vdp.KeepClsForLocal (since v1.18.0)

@@ -12,7 +12,7 @@ s_local_labels.asm(8): error: Label not found: main.ProcessEvent
 10    800E
 11    800E                      MODULE vdp          ; module "main.vdp"
 12    800E              @SetScreen:                 ; SetScreen
-13    800E              .loop:                      ; main.vdp.SetScreen.loop
+13    800E              .loop:                      ; SetScreen.loop (since v1.21.0)
 14    800E C9                       RET
 15    800F              Cls:                        ; main.vdp.Cls
 16    800F              !KeepClsForLocal:           ; main.vdp.KeepClsForLocal (since v1.18.0)
@@ -33,5 +33,5 @@ Value    Label
 0x800F   main.vdp.Cls
 0x800F   main.vdp.Cls.loop
 0x800F X main.vdp.KeepClsForLocal
-0x800E X main.vdp.SetScreen.loop
 0x800E   SetScreen
+0x800E X SetScreen.loop
