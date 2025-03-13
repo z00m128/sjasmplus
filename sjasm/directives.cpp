@@ -1958,7 +1958,14 @@ static void dirEDUP() {
 		if (*lijstp->string) {
 			// if the DUP has index variable, the first "line" is the variable name, set it up to current index
 			std::unique_ptr<char[]> indexVar(ValidateLabel(lijstp->string,  false));
-			if (indexVar.get()) LabelTable.Insert(indexVar.get(), currentRepeatIndex++, LABEL_IS_DEFL);
+			if (indexVar.get() &&
+				!LabelTable.Insert(indexVar.get(), currentRepeatIndex, LABEL_IS_DEFL) &&
+				0 == currentRepeatIndex &&
+				1 == pass)
+			{
+				Error("Duplicate label", indexVar.get(), EARLY);
+			}
+			++currentRepeatIndex;
 		}
 		lijstp = lijstp->next;	// skip first empty line / indexVar name
 		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop

@@ -1,0 +1,14 @@
+issue261_dup_duplicate_label.asm(2): error: Duplicate label: blah
+# file opened: issue261_dup_duplicate_label.asm
+1     0000              blah    EQU 42
+2     0000                      DUP 3, blah
+2     0000 2A          >  DB blah
+2     0001 2A          >  DB blah
+2     0002 2A          >  DB blah
+2     0003                EDUP  ; DUP variable is clashing with EQU symbol -> report error
+3     0003
+# file closed: issue261_dup_duplicate_label.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x002A   blah
