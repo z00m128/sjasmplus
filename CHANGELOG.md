@@ -1,4 +1,24 @@
 
+## [1.21.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.21.0) - 15.3.2025
+- C++17 standard is now required minimum (to compile sjasmplus sources) (GCC9 for example)
+- [`INCBIN`](https://z00m128.github.io/sjasmplus/documentation.html#po_incbin), [`INCHOB`](https://z00m128.github.io/sjasmplus/documentation.html#po_inchob) and [`INCTRD`](https://z00m128.github.io/sjasmplus/documentation.html#po_inctrd) support now include paths priority (angle &lt;filename&gt; vs "filename")
+- also [`SAVENEX`](https://z00m128.github.io/sjasmplus/documentation.html#po_incbin) will respect include paths for source files (BMP, append)
+- include paths which can't be opened before assembling are now reported in error message
+- include paths which start with literal tilde '~' are reported in error message
+- include options [`-i, -I, --inc`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli) can take path from next CLI argument (new recommended syntax)
+- option [`--fullpath`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli) has now three states including full absolute paths
+- added Amstrad CPC device [AMSTRADCPCPLUS](https://z00m128.github.io/sjasmplus/documentation.html#po_device) - by Laurent Carlier
+- added Amstrad CPC+ [`SAVECPR`](https://z00m128.github.io/sjasmplus/documentation.html#po_savecpr) to save CPR cartridge - by Laurent Carlier
+- ZX Next CSpect emulator v2.19.9.1: `break` opcode changed to `FD 00`
+- ZX Next CSpect emulator v3.0.1.5b: new opcodes `setbrk` and `clrbrk`
+- fix: windows cmd.exe console state after running sjasmplus.exe
+- Lua: fix [sj.insert_label](https://z00m128.github.io/sjasmplus/documentation.html#lua_sj_insert_label) to apply current namespace to name
+- Lua: new [sj.get_modules](https://z00m128.github.io/sjasmplus/documentation.html#lua_sj_get_modules) to get current modules namespace
+- Lua: minor version upgrade to 5.4.7 (from 5.4.6)
+- Lua: bundled Lua is now built and linked as C++ code (fixes memory leaks in edge cases)
+- minor bugfixes in specific edge cases
+- refactored lot of code related to file names and manipulation (to use C++17 filesystem library)
+
 ## [1.20.3](https://github.com/z00m128/sjasmplus/releases/tag/v1.20.3) - 23.6.2023
 - added alias [`--define`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli) for `-D`
 - added [string-literals](https://z00m128.github.io/sjasmplus/documentation.html#s_strings) suffixes Z and C to add zero or set high bit of last char
