@@ -111,11 +111,13 @@
 
       <para>Special thanks to <emphasis>Sjoerd Mastijn</emphasis>, the author of SjASM.</para>
 
-      <para><emphasis>Aprisobal </emphasis>- main programming, documentation, etc.</para>
+      <para>Special thanks to <emphasis>Aprisobal</emphasis>, the author of early versions of sjasmplus.</para>
+
+      <para><emphasis>Peter Helcmanovsky </emphasis>(Ped7g) - programming and maintenance since v1.11.0.</para>
 
       <para>Thanks to:<itemizedlist>
           <listitem>
-            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Ped7g, Dart Alver, Oli Wilkinson, Laurent Carlier</emphasis> - additional
+            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Dart Alver, Oli Wilkinson, Laurent Carlier</emphasis> - additional
             programming;</para>
           </listitem>
 
