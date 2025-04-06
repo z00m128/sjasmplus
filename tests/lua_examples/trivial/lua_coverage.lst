@@ -27,8 +27,7 @@ lua_coverage.asm(11): error: [LUA] unexpected symbol near '%'
 20    0000                  ENDLUA
 21    0000
 22    0000                  LUA         ; check read-only property of the directly mapped values
-23    0000 ~                    sj.current_address = 1
-lua_coverage.asm(24): error: [LUA] 'current_address' is read-only
+23    0000 ~                    -- writeable since v1.21.1: sj.current_address = 1
 24    0000                  ENDLUA
 25    0000                  LUA
 26    0000 ~                    sj.error_count = 2

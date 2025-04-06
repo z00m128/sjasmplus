@@ -379,6 +379,10 @@ static bool lua_zx_save_snapshot_sna(const char* fname, word start) {
 	return result;
 }
 
+static aint lua_get_current_address() {
+	return CurAddress;
+}
+
 static void lua_impl_init() {
 	assert(nullptr == LUA);
 
@@ -400,7 +404,7 @@ static void lua_impl_init() {
 		.addFunction("_pl", lua_sj_parse_line)
 		.addFunction("_pc", lua_sj_parse_code)
 		.beginNamespace("sj")
-			.addProperty("current_address", &CurAddress, false)	// read-only
+			.addProperty("current_address", lua_get_current_address, dirOrgOnlyAddr)
 			.addProperty("warning_count", &WarningCount, false)	// read-only
 			.addProperty("error_count", &ErrorCount, false)	// read-only
 			// internal functions which are lua-wrapped to enable optional arguments

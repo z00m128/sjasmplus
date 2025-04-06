@@ -31,5 +31,6 @@
 extern CFunctionTable DirectivesTable;
 void InsertDirectives();
 bool dirPageImpl(const char* const dirName, int pageNumber);
+void dirOrgOnlyAddr(aint address);
 
 //eof directives.h

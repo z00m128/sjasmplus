@@ -205,6 +205,15 @@
 
       <para><variablelist>
 
+          <varlistentry>
+            <term>?.?.? - 1.21.1</term>
+            <listitem>
+              <synopsis>
+- Lua: minor extensions and modifications to API
+              </synopsis>
+            </listitem>
+          </varlistentry>
+
 <varlistentry>
             <term>15.3.2025 - 1.21.0</term>
 
@@ -4274,7 +4283,13 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
       <title>SjASMPlus functions bindings to Lua</title>
 
       <para>From Lua you can control some variables and use functions of the
-      compiler. Complete list:</para>
+        compiler. It's expected to rely on <code>_c</code>, <code>_pc</code> and <code>_pl</code>
+        bindings to use regular pseudo-operations (directives), the direct bindings are either
+        convenience for specific ones or exist due to historical reasons. Future extensions
+        of bindings will mostly focus on giving access to internal state or functionality which
+        is not easily accessible through regular asm directives.</para>
+
+      <para>Complete list:</para>
 
       <para><variablelist>
           <varlistentry>
@@ -4390,7 +4405,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.current_address<indexterm id="lua_sj_current_address"><primary>sj.current_address</primary></indexterm></term>
 
             <listitem>
-              <para>Read-only variable. Current address.</para>
+              <para>Current address, writing new value to it is same as <code>ORG value</code>.</para>
             </listitem>
           </varlistentry>
 

@@ -1,0 +1,32 @@
+# file opened: lua_current_address.asm
+ 1    0000              ; check write-ability of sj.current_address (works like more limited ORG)
+ 2    0000                  DEVICE NONE
+ 3    0000                  LUA ALLPASS
+ 4    0000 ~                    assert(0 == sj.current_address) -- check read of the value
+ 5    0000 ~                    sj.current_address = 0x1234     -- check write of the value
+ 6    0000 ~                    assert(0x1234 == sj.current_address)
+ 7    0000 ~                    sj.current_address = 0x82345    -- truncated with warning
+ 8    0000 ~                    assert(0x2345 == sj.current_address)
+ 9    0000 ~                    sj.current_address = -1         -- truncated with warning
+10    0000 ~                    assert(0xFFFF == sj.current_address)
+lua_current_address.asm(11): warning: [LUA] value 0x82345 is truncated to 16bit value: 0x2345
+lua_current_address.asm(11): warning: [LUA] value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
+11    0000                  ENDLUA
+12    FFFF                  DEVICE ZXSPECTRUM128
+13    FFFF                  LUA ALLPASS
+14    FFFF ~                    _pl("top: di")
+15    FFFF ~                    sj.current_address = 0x4567
+16    FFFF ~                    assert(0x4567 == sj.current_address)
+17    FFFF ~                    _pl("main: di")
+18    FFFF F3           top: di
+18    4567 F3           main: di
+18    4568                  ENDLUA
+19    4568                  ASSERT($FFFF == top)
+20    4568                  ASSERT($4567 == main)
+21    4568
+# file closed: lua_current_address.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x4567   main
+0xFFFF   top

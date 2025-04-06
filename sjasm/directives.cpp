@@ -305,6 +305,15 @@ static void dirORG() {
 	dirPageImpl("ORG");
 }
 
+// public API for lua setter
+void dirOrgOnlyAddr(aint address) {
+	// crop (with warning) address in device or non-longptr mode to 16bit address range
+	if ((DeviceID || !Options::IsLongPtr) && !check16u(address)) address &= 0xFFFF;
+	CurAddress = address;
+	if (DISP_NONE != PseudoORG) WarningById(W_DISPLACED_ORG);
+	if (DeviceID) Device->CheckPage(CDevice::CHECK_RESET);
+}
+
 static void dirDISP() {
 	if (DISP_NONE != PseudoORG) {
 		Warning("[DISP] displacement inside another displacement block, ignoring it.");
