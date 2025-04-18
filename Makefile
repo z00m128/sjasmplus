@@ -105,6 +105,7 @@ CFLAGS+=-g -O0
 else
 BUILD_DIR:=$(BUILD_DIR)/release
 CFLAGS+=-DNDEBUG -O2
+# -flto		# add for LTO (link time optimization) - does make linking lot slower and result is only marginally faster
 endif
 
 # C++ flags (the CPPFLAGS are for preprocessor BTW, if you always wonder, like me...)

@@ -5,6 +5,8 @@ scratch area + TODO keeper for sjasmplus developers:
 ====================
 Ped:
 
+add more C escape sequences: https://en.cppreference.com/w/c/language/escape
+
 STRING OPER: ".." like Lua?? And #"str" to count?:
  similarly the string operators request could maaaaayyybeeee work inside
 the quoted string parser, but need to think more about it, if it will
