@@ -210,6 +210,7 @@
             <listitem>
               <synopsis>
 - <link linkend="po_bplist">`BPLIST`</link> supports now also MAME
+- <link linkend="nex_close">`SAVENEX CLOSE`</link> can append multiple files
 - Lua: minor extensions and modifications to API
 - macros now handle large amount of macros defined better (like 64ki of macros)
               </synopsis>
@@ -5140,12 +5141,12 @@ $ cmake --install build</programlisting></para>
 		  
 		  <varlistentry>
 			  <term id="nex_close">
-				  SAVENEX CLOSE [&lt;fileToAppend&gt;]
+				  SAVENEX CLOSE [&lt;fileToAppend&gt;, ...]
 			  </term>
 			  <listitem>
 				  <para>
 					  Can be used after <link linkend="nex_open">OPEN</link>. The currently open NEX
-					  file will be finalized (header adjusted), and optional extra file just appended
+					  file will be finalized (header adjusted), and optional extra files appended
 					  to the end of NEX file.
 				  </para>
 			  </listitem>

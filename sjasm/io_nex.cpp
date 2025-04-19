@@ -1036,26 +1036,28 @@ static void dirNexClose() {
 	}
 	// update V1.3 banksOffset in case there was no bank stored at all (before appending binary data!)
 	nex.updateIfAheadFirstBankSave();
-	// read CLOSE command argument and try to append the proposed file (if some was provided)
-	fullpath_ref_t appendIn = GetInputFile(lp);
-	if (appendIn.full.has_filename()) {	// some append file requested, try to copy its content at tail of NEX
-		FILE* appendF = nullptr;
-		if (!FOPEN_ISOK(appendF, appendIn.full, "rb")) {
-			Error("[SAVENEX] Error opening append file", appendIn.str.c_str(), SUPPRESS);
-		} else {
-			static constexpr int copyBufSize = 0x4000;
-			byte* copyBuffer = new byte[copyBufSize];
-			if (nullptr == copyBuffer) ErrorOOM();
-			do {
-				const size_t read = fread(copyBuffer, 1, copyBufSize, appendF);
-				if (read) {
-					const size_t write = fwrite(copyBuffer, 1, read, nex.f);
-					if (write != read) Error("[SAVENEX] writing append data failed", NULL, FATAL);
-				}
-			} while (!feof(appendF));
-			delete[] copyBuffer;
-			fclose(appendF);
+	// read CLOSE command arguments and try to append the proposed files (if some were provided)
+	static constexpr int copyBufSize = 0x4000;
+	std::unique_ptr<byte[]> copyBuffer;		// Lazily allocated buffer (if needed)
+	while (!SkipBlanks(lp)) {
+		fullpath_ref_t appendIn = GetInputFile(lp);
+		if (appendIn.full.has_filename()) {	// some append file requested, try to copy its content at tail of NEX
+			FILE* appendF = nullptr;
+			if (!FOPEN_ISOK(appendF, appendIn.full, "rb")) {
+				Error("[SAVENEX] Error opening append file", appendIn.str.c_str(), SUPPRESS);
+			} else {
+				if (!copyBuffer) copyBuffer = std::make_unique<byte[]>(copyBufSize);
+				do {
+					const size_t read = fread(copyBuffer.get(), 1, copyBufSize, appendF);
+					if (read) {
+						const size_t write = fwrite(copyBuffer.get(), 1, read, nex.f);
+						if (write != read) Error("[SAVENEX] writing append data failed", NULL, FATAL);
+					}
+				} while (!feof(appendF));
+				fclose(appendF);
+			}
 		}
+		if (!comma(lp)) break;
 	}
 	// finalize the NEX file (refresh the header data and close it)
 	nex.finalizeFile();

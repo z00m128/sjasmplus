@@ -93,7 +93,7 @@
  92   0000              ;
  93   0000              ; For "fromBank" value use the specified order above in BANK command, i.e. 5, 2, 0, ...
  94   0000              ;
- 95   0000              ;     SAVENEX CLOSE [<fileToAppend>]
+ 95   0000              ;     SAVENEX CLOSE [<fileToAppend>, ...]
  96   0000              ; Can be used after OPEN. The currently open NEX file will be finalized (header adjusted),
  97   0000              ; and optional extra file just appended to the end of NEX file.
  98   0000
@@ -335,21 +335,42 @@ savenexSyntax.asm(239): error: [SAVENEX] all banks are already stored
 savenexSyntax.asm(243): error: [SAVENEX] NEX file is not open
 243   0000                  SAVENEX     CLOSE                       ; should be error (no NEX is open)
 244   0000
-245   0000              ;; create small NEX for BIN comparison, if the thing at least somewhat works
-246   0000              ;; also verify it works twice per source (in sequential order)
-savenexSyntax.asm(247): warning: [SAVENEX] Start address was also defined by END, OPEN argument used instead
-247   0000                  SAVENEX OPEN "savenexSyntax.bin", $5000
-248   0000                  SAVENEX CORE 2,0,28
-248   0000                SAVENEX CFG 4,0,0,1
-248   0000                SAVENEX BAR 0,0,100,0
-249   0000                  ORG $4800
-249   4800 45 5F F5 44    DB $45, $5F, $F5, $44
-250   4804                  ORG $5000
-250   5000 18 FE          jr $                        ; infinite JR loop
-251   5002                  SAVENEX AUTO 5, 5                       ; should store bank5
-252   5002                  ; let it close automatically by ending source
-253   5002
-254   5002                  END $7170       ; invoke warning about different start address
+245   0000              ;; v1.21.1 addition: create small NEX for BIN comparison with CLOSE using list of files to append
+246   0000                  ; create two helper binary files to test CLOSE working with list of files to append
+247   0000                  ORG $F000
+247   F000 41 70 70 65    DB "Append1\0Append2\0"
+247   F004 6E 64 31 00
+247   F008 41 70 70 65
+247   F00C 6E 64 32 00
+247   F010                ASSERT($F010 == $)
+248   F010                  SAVEBIN "1.bin", $F000, 8
+248   F010                SAVEBIN "2.bin", $F008, 8
+249   F010                  ; create NEX file to compare
+savenexSyntax.asm(250): warning: [SAVENEX] Start address was also defined by END, OPEN argument used instead
+250   F010                  SAVENEX OPEN "savenexSyntax.raw", $E000
+251   F010                  SAVENEX CORE 2,0,28
+251   F010                SAVENEX CFG 4,0,0,1
+251   F010                SAVENEX BAR 0,0,100,0
+252   F010                  ORG $E000
+252   E000 18 FE          jr $                        ; infinite JR loop
+253   E002                  SAVENEX BANK 0                          ; store bank0 ($C000..$FFFF)
+254   E002                  SAVENEX CLOSE "1.bin", "2.bin"          ; append both helper files
+255   E002
+256   E002              ;; create small NEX for BIN comparison, if the thing at least somewhat works
+257   E002              ;; also verify it works twice per source (in sequential order)
+savenexSyntax.asm(258): warning: [SAVENEX] Start address was also defined by END, OPEN argument used instead
+258   E002                  SAVENEX OPEN "savenexSyntax.bin", $5000
+259   E002                  SAVENEX CORE 2,0,28
+259   E002                SAVENEX CFG 4,0,0,1
+259   E002                SAVENEX BAR 0,0,100,0
+260   E002                  ORG $4800
+260   4800 45 5F F5 44    DB $45, $5F, $F5, $44
+261   4804                  ORG $5000
+261   5000 18 FE          jr $                        ; infinite JR loop
+262   5002                  SAVENEX AUTO 5, 5                       ; should store bank5
+263   5002                  ; let it close automatically by ending source
+264   5002
+265   5002                  END $7170       ; invoke warning about different start address
 # file closed: savenexSyntax.asm
 
 Value    Label

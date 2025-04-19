@@ -92,7 +92,7 @@
 ;
 ; For "fromBank" value use the specified order above in BANK command, i.e. 5, 2, 0, ...
 ;
-;     SAVENEX CLOSE [<fileToAppend>]
+;     SAVENEX CLOSE [<fileToAppend>, ...]
 ; Can be used after OPEN. The currently open NEX file will be finalized (header adjusted),
 ; and optional extra file just appended to the end of NEX file.
 
@@ -241,6 +241,17 @@
 ;; CLOSE [<fileToAppend>]
     SAVENEX     CLOSE   "savenexSyntax.asm" ; correct one (there's not much to do wrong
     SAVENEX     CLOSE                       ; should be error (no NEX is open)
+
+;; v1.21.1 addition: create small NEX for BIN comparison with CLOSE using list of files to append
+    ; create two helper binary files to test CLOSE working with list of files to append
+    ORG $F000 : DB "Append1\0Append2\0" : ASSERT($F010 == $)
+    SAVEBIN "1.bin", $F000, 8 : SAVEBIN "2.bin", $F008, 8
+    ; create NEX file to compare
+    SAVENEX OPEN "savenexSyntax.raw", $E000
+    SAVENEX CORE 2,0,28 : SAVENEX CFG 4,0,0,1 : SAVENEX BAR 0,0,100,0
+    ORG $E000 : jr $                        ; infinite JR loop
+    SAVENEX BANK 0                          ; store bank0 ($C000..$FFFF)
+    SAVENEX CLOSE "1.bin", "2.bin"          ; append both helper files
 
 ;; create small NEX for BIN comparison, if the thing at least somewhat works
 ;; also verify it works twice per source (in sequential order)
