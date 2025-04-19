@@ -1,0 +1,29 @@
+# file opened: lua_get_page_at.asm
+ 1    0000              ; since v1.21.1 sj.get_page_at is available
+ 2    0000                  DEVICE none
+ 3    0000
+ 4    0000                  lua
+ 5    0000 ~                    -- check warning about device mode needed
+ 6    0000 ~                    assert(-1 == sj.get_page_at())
+lua_get_page_at.asm(6): warning: [LUA] sj.get_page_at: only allowed in real device emulation mode (See DEVICE)
+ 7    0000                  endlua
+ 8    0000
+ 9    0000                  DEVICE zxspectrum128
+10    0000
+11    0000                  lua
+12    0000 ~                    assert(-1 == sj.get_page_at(-1))
+13    0000 ~                    assert(-1 == sj.get_page_at(0x10000))
+14    0000 ~                    assert(7 == sj.get_page_at(0))
+15    0000 ~                    assert(5 == sj.get_page_at(0x4000))
+16    0000 ~                    assert(2 == sj.get_page_at(0x8000))
+17    0000 ~                    assert(0 == sj.get_page_at(0xC000))
+18    0000 ~                    -- test current address as default argument
+19    0000 ~                    assert(7 == sj.get_page_at())
+20    0000 ~                    sj.current_address = 0x8000
+21    0000 ~                    assert(2 == sj.get_page_at())
+22    0000                  endlua
+23    8000
+# file closed: lua_get_page_at.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -61,6 +61,7 @@ rawset(sj,"warning",function(m,v)sj.warning_i(m or "no message",v)end)
 rawset(sj,"insert_define",function(n,v)return sj.insert_define_i(n,v)end)
 rawset(sj,"exit",function(e)return sj.exit_i(e or 1)end)
 rawset(sj,"set_device",function(i,t)return sj.set_device_i(i or "NONE",t or 0)end)
+rawset(sj,"get_page_at",function(a)return sj.get_page_at_i(a or sj.current_address)end)
 rawset(zx,"trdimage_create",function(n,l)return zx.trdimage_create_i(n,l)end)
 rawset(zx,"trdimage_add_file",function(t,f,s,l,a,r)return zx.trdimage_add_file_i(t,f,s,l,a or -1,r or false)end)
 )BINDING_LUA";
@@ -311,6 +312,14 @@ static bool lua_sj_set_slot(aint n) {
 	return result;
 }
 
+static int32_t lua_sj_get_page_at(int32_t addr) {
+	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
+	if (!DeviceID) Warning("sj.get_page_at: only allowed in real device emulation mode (See DEVICE)");
+	int32_t result = DeviceID ? Device->GetPageOfA16(addr) : -1;
+	removeLuaSourcePositions(positionsAdded);
+	return result;
+}
+
 static bool lua_sj_set_device(const char* id, const aint ramtop = 0) {
 	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
 	// refresh source position of first DEVICE directive (to make global-device detection work correctly)
@@ -414,6 +423,7 @@ static void lua_impl_init() {
 			.addFunction("insert_define_i", lua_sj_insert_define)
 			.addFunction("exit_i", ExitASM)
 			.addFunction("set_device_i", lua_sj_set_device)
+			.addFunction("get_page_at_i", lua_sj_get_page_at)
 			// remaining public functions with all arguments mandatory (boolean args seems to default to false?)
 			.addFunction("get_define", lua_sj_get_define)
 			.addFunction("get_label", lua_sj_get_label)
