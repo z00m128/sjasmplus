@@ -826,20 +826,6 @@ const char* CMacroDefineTable::getverv(const char* name) const {
 	return p ? p->value : nullptr;
 }
 
-int CMacroDefineTable::FindDuplicate(char* name) {
-	CDefineTableEntry* p = defs;
-	if (!used[(*name)&127]) {
-		return 0;
-	}
-	while (p) {
-		if (!strcmp(name, p->name)) {
-			return 1;
-		}
-		p = p->next;
-	}
-	return 0;
-}
-
 void CMacroTable::ReInit() {
 	used.assign(128, false);
 	macs.clear();

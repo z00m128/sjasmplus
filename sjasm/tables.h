@@ -186,7 +186,6 @@ public:
 	CDefineTableEntry* getdefs();
 	void setdefs(CDefineTableEntry*);
 	const char* getverv(const char*) const;
-	int FindDuplicate(char*);
 	CMacroDefineTable();
 	CMacroDefineTable(const CMacroDefineTable&) = delete;
 	CMacroDefineTable& operator=(CMacroDefineTable const&) = delete;
