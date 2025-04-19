@@ -37,15 +37,19 @@ lua_coverage.asm(27): error: [LUA] 'error_count' is read-only
 29    0000 ~                    sj.warning_count = 3
 lua_coverage.asm(30): error: [LUA] 'warning_count' is read-only
 30    0000                  ENDLUA
-31    0000
-32    0000
-33    0000                  LUA pass3
-34    0000 ~                    someErrorInLua(1, 2, 3)
-35    0000 ~
-lua_coverage.asm(35): error: [LUA] Unexpected end of lua script
-lua_coverage.asm(34): error: [LUA] attempt to call a nil value (global 'someErrorInLua')
-lua_coverage.asm(35): ^ emitted from here
+31    0000                  LUA
+32    0000 ~                    sj.pass = 4
+lua_coverage.asm(33): error: [LUA] 'pass' is read-only
+33    0000                  ENDLUA
+34    0000
 35    0000
+36    0000                  LUA pass3
+37    0000 ~                    someErrorInLua(1, 2, 3)
+38    0000 ~
+lua_coverage.asm(38): error: [LUA] Unexpected end of lua script
+lua_coverage.asm(37): error: [LUA] attempt to call a nil value (global 'someErrorInLua')
+lua_coverage.asm(38): ^ emitted from here
+38    0000
 # file closed: lua_coverage.asm
 
 Value    Label

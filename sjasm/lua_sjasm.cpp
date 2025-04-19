@@ -407,6 +407,7 @@ static void lua_impl_init() {
 			.addProperty("current_address", lua_get_current_address, dirOrgOnlyAddr)
 			.addProperty("warning_count", &WarningCount, false)	// read-only
 			.addProperty("error_count", &ErrorCount, false)	// read-only
+			.addProperty("pass", &pass, false)	// read-only
 			// internal functions which are lua-wrapped to enable optional arguments
 			.addFunction("error_i", lua_sj_error)
 			.addFunction("warning_i", lua_sj_warning)

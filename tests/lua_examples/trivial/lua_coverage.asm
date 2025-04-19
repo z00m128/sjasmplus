@@ -28,6 +28,9 @@
     LUA
         sj.warning_count = 3
     ENDLUA
+    LUA
+        sj.pass = 4
+    ENDLUA
 
 
     LUA pass3
