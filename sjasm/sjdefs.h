@@ -76,8 +76,6 @@ enum EBracketType { BT_NONE, BT_ROUND, BT_CURLY, BT_SQUARE, BT_COUNT };
 #define LINEMAX 2048
 #define LINEMAX2 LINEMAX*2
 #define LABMAX 64
-#define LABTABSIZE 32768
-#define FUNTABSIZE 4096
 using aint = int32_t;
 using byte = uint8_t;
 using word = uint16_t;

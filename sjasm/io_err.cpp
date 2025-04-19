@@ -29,7 +29,7 @@
 
 #include "sjdefs.h"
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <algorithm>
 
 TextFilePos skipEmitMessagePos;
@@ -167,7 +167,7 @@ struct WarningEntry {
 	const char* help;
 };
 
-typedef std::unordered_map<const char*, WarningEntry> messages_map;
+typedef std::map<const char*, WarningEntry> messages_map;
 
 const char* W_NO_RAMTOP = "noramtop";
 const char* W_DEV_RAMTOP = "devramtop";

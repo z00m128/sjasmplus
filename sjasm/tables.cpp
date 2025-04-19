@@ -840,53 +840,18 @@ int CMacroDefineTable::FindDuplicate(char* name) {
 	return 0;
 }
 
-CMacroTableEntry::CMacroTableEntry(char* nnaam, CMacroTableEntry* nnext)
-	: naam(nnaam), args(nullptr), body(nullptr), next(nnext) {
-}
-
-CMacroTableEntry::~CMacroTableEntry() {
-	if (naam) free(naam);	// must be of STRDUP origin!
-	if (args) delete args;
-	if (body) delete body;
-	if (next) delete next;
-}
-
-CMacroTable::CMacroTable() : macs(nullptr) {
-	for (auto & usedX : used) usedX = false;
-}
-
-CMacroTable::~CMacroTable() {
-	if (macs) delete macs;
-}
-
 void CMacroTable::ReInit() {
-	if (macs) delete macs;
-	macs = nullptr;
-	for (auto & usedX : used) usedX = false;
-}
-
-int CMacroTable::FindDuplicate(const char* naam) {
-	CMacroTableEntry* p = macs;
-	if (!used[(*naam)&127]) {
-		return 0;
-	}
-	while (p) {
-		if (!strcmp(naam, p->naam)) {
-			return 1;
-		}
-		p = p->next;
-	}
-	return 0;
+	used.assign(128, false);
+	macs.clear();
 }
 
 void CMacroTable::Add(const char* nnaam, char*& p) {
-	if (FindDuplicate(nnaam)) {
-		Error("Duplicate macroname", nnaam);return;
+	auto [add_it, is_new] = macs.try_emplace(nnaam, CMacroTableEntry());
+	if (!is_new) {
+		Error("Duplicate macroname", nnaam);
+		return;
 	}
-	char* macroname = STRDUP(nnaam);
-	if (macroname == NULL) ErrorOOM();
-	macs = new CMacroTableEntry(macroname, macs);
-	used[(*macroname)&127] = true;
+	used[nnaam[0] & 127] = true;
 	CStringsList* last = nullptr;
 	do {
 		char* n = GetID(p);
@@ -896,12 +861,12 @@ void CMacroTable::Add(const char* nnaam, char*& p) {
 			SkipToEol(p);
 			break;
 		}
-		if ((1 == pass) && CStringsList::contains(macs->args, n)) {
+		if ((1 == pass) && CStringsList::contains(add_it->second.args, n)) {
 			Error("Duplicate argument name", n, EARLY);
 		}
 		CStringsList* argname = new CStringsList(n);
-		if (!macs->args) {
-			macs->args = argname;	// first argument name, make it head of list
+		if (!add_it->second.args) {
+			add_it->second.args = argname;	// first argument name, make it head of list
 		} else {
 			last->next = argname;
 		}
@@ -911,17 +876,16 @@ void CMacroTable::Add(const char* nnaam, char*& p) {
 		Error("Unexpected", p, EARLY);
 	}
 	ListFile();
-	if (!ReadFileToCStringsList(macs->body, "endm")) {
+	if (!ReadFileToCStringsList(add_it->second.body, "endm")) {
 		Error("Unexpected end of macro", NULL, EARLY);
 	}
 }
 
 int CMacroTable::Emit(char* naam, char*& p) {
 	// search for the desired macro
-	if (!used[(*naam)&127]) return 0;
-	CMacroTableEntry* m = macs;
-	while (m && strcmp(naam, m->naam)) m = m->next;
-	if (!m) return 0;
+	if (!used[naam[0] & 127]) return 0;
+	auto mac_it = macs.find(naam);
+	if (macs.end() == mac_it) return 0;
 	// macro found, emit it, prepare temporary instance label base
 	char* omacrolabp = macrolabp;
 	char labnr[LINEMAX], ml[LINEMAX];
@@ -934,7 +898,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	}
 	// parse argument values
 	CDefineTableEntry* odefs = MacroDefineTable.getdefs();
-	CStringsList* a = m->args;
+	CStringsList* a = mac_it->second.args;
 	while (a) {
 		char* n = ml;
 		const bool lastArg = NULL == a->next;
@@ -957,7 +921,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	ListFile();
 	++listmacro;
 	CStringsList* olijstp = lijstp;
-	lijstp = m->body;
+	lijstp = mac_it->second.body;
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
 	sourcePosStack.push_back(TextFilePos());

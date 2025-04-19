@@ -28,7 +28,7 @@
 
 // tables.h
 
-#include <unordered_map>
+#include <map>
 
 struct TextFilePos {
 	const char*		filename;
@@ -95,7 +95,7 @@ struct SLabelTableEntry {
 	Relocation::EType	isRelocatable = Relocation::OFF;
 };
 
-typedef std::unordered_map<std::string, SLabelTableEntry> symbol_map_t;
+typedef std::map<std::string, SLabelTableEntry> symbol_map_t;
 
 class CLabelTable {
 private:
@@ -103,7 +103,7 @@ private:
 public:
 	CLabelTable(const CLabelTable&) = delete;
 	CLabelTable& operator=(CLabelTable const &) = delete;
-	CLabelTable() { symbols.reserve(LABTABSIZE); }
+	CLabelTable() = default;
 	int Insert(const char* nname, aint nvalue, unsigned traits = 0, short equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char* name, aint value);
 	SLabelTableEntry* Find(const char* name, bool onlyDefined = false);
@@ -117,7 +117,7 @@ public:
 };
 
 typedef void (*function_fn_t)(void);
-typedef std::unordered_map<std::string, function_fn_t> function_map_t;
+typedef std::map<std::string, function_fn_t> function_map_t;
 
 class CFunctionTable {
 private:
@@ -125,7 +125,7 @@ private:
 public:
 	CFunctionTable(const CFunctionTable&) = delete;
 	CFunctionTable& operator=(CFunctionTable const &) = delete;
-	CFunctionTable() { functions.reserve(FUNTABSIZE); }
+	CFunctionTable() = default;
 	int Insert(const char*, function_fn_t);
 	int insertd(const char*, function_fn_t);
 	int zoek(const char*);
@@ -219,28 +219,35 @@ private:
 
 class CMacroTableEntry {
 public:
-	char* naam;
-	CStringsList* args, * body;
-	CMacroTableEntry* next;
+	CStringsList* args = nullptr;
+	CStringsList* body = nullptr;
+	CMacroTableEntry() = default;
 	CMacroTableEntry(const CMacroTableEntry&) = delete;
+	CMacroTableEntry(CMacroTableEntry&& other) noexcept : args(other.args), body(other.body) {
+		other.args = nullptr;
+		other.body = nullptr;
+	}
 	CMacroTableEntry& operator=(CMacroTableEntry const &) = delete;
-	CMacroTableEntry(char* nname, CMacroTableEntry* nnext);
-	~CMacroTableEntry();
+	~CMacroTableEntry() {
+		delete args;
+		delete body;
+	}
 };
 
 class CMacroTable {
 public:
+	CMacroTable() : used(128, false) {}
+	~CMacroTable() = default;
 	void Add(const char*, char*&);
 	int Emit(char*, char*&);
-	int FindDuplicate(const char*);
 	void ReInit();
 	CMacroTable(const CMacroTable&) = delete;
 	CMacroTable& operator=(CMacroTable const &) = delete;
-	CMacroTable();
-	~CMacroTable();
 private:
-	bool used[128];
-	CMacroTableEntry* macs;
+	typedef std::map<std::string, CMacroTableEntry> macro_map_t;
+
+	std::vector<bool> used;
+	macro_map_t macs;
 };
 
 class CStructureEntry1 {
