@@ -4411,6 +4411,19 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
           </varlistentry>
 
           <varlistentry>
+            <term>[integer] sj.pass<indexterm id="lua_sj_pass"><primary>sj.pass</primary></indexterm></term>
+
+            <listitem>
+              <para>Read-only variable. Number of current pass (1 to 3). Pass 1 is very first pass (expect forward declared
+                labels being not known to code yet). Pass 2 is pass when all symbols should be already defined and final
+                layout of code and data should be produced, but machine code is not emitted yet (if ever multi-pass feature
+                happens, value 2 will be returned for all intermediate passes until the code layout is stable and ready for
+                final pass). Pass 3 is final pass when not only everything should match pass 2 but also machine code is being
+                emitted and virtual device memory is being updated and could be read back.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>[integer] sj.error_count<indexterm id="lua_sj_error_count"><primary>sj.error_count</primary></indexterm></term>
 
             <listitem>
@@ -4511,6 +4524,14 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
               <para>Set current slot to "number". Works as pseudo-op <link linkend="po_slot">SLOT</link>.</para>
               <para>(since v1.20.0) You can also use starting address of slot instead, ie. for ZX128
                 <code>sj.set_slot(0x8000)</code> is alias of <code>sj.set_slot(2)</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>[integer] sj.get_page_at(address = sj.current_address)<indexterm id="lua_sj_get_page_at"><primary>sj.get_page_at(..)</primary></indexterm></term>
+
+            <listitem>
+              <para>Get current page at "address". Returns -1 for invalid address or in no device mode.</para>
             </listitem>
           </varlistentry>
 
