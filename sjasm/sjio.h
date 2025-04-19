@@ -140,7 +140,7 @@ void SldAddCommentKeyword(const char* keyword);
 void SldTrackComments();
 
 /////// Breakpoints list (for different emulators)
-enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX };
+enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX, BPSF_MAME };
 void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpointsFile type);
 void WriteBreakpoint(const aint val);
 

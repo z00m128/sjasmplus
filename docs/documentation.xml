@@ -209,6 +209,7 @@
             <term>?.?.? - 1.21.1</term>
             <listitem>
               <synopsis>
+- <link linkend="po_bplist">`BPLIST`</link> supports now also MAME
 - Lua: minor extensions and modifications to API
 - macros now handle large amount of macros defined better (like 64ki of macros)
               </synopsis>
@@ -1854,16 +1855,16 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>BPLIST<indexterm id="po_bplist"><primary>BPLIST</primary><seealso>SETBP</seealso></indexterm> &lt;filename&gt; [unreal|zesarux]</term>
+            <term>BPLIST<indexterm id="po_bplist"><primary>BPLIST</primary><seealso>SETBP</seealso></indexterm> &lt;filename&gt; [unreal|zesarux|mame]</term>
 
             <listitem>
 				<para>
 					<emphasis>Works only in real device emulation mode. See
 						<link linkend="po_device">DEVICE</link>.</emphasis>
 				</para>
-				<para>Opens file to export breakpoints info directly from ASM source, currently two
-					flavours of export are supported: <code>unreal</code> (default) and
-					<code>zesarux</code>. For latest Unreal emulators use filename "bpx.ini", you
+				<para>Opens file to export breakpoints info directly from ASM source, currently three
+					flavours of export are supported: <code>unreal</code> (default), <code>zesarux</code>
+					and <code>mame</code>. For latest Unreal emulators use filename "bpx.ini", you
 					can then load the file from the emulator UI. For ZEsarUX the file will contain
 					command-line options, which you can add to the command when launching the emulator.
 				</para>

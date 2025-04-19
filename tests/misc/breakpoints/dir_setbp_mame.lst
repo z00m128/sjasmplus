@@ -1,0 +1,19 @@
+# file opened: dir_setbp_mame.asm
+ 1    0000                  DEVICE ZXSPECTRUM48
+ 2    0000                  BPLIST "dir_setbp_mame.exp" mame ; valid breakpoints file for MAME
+ 3    0000
+ 4    0000                  SETBREAKPOINT 0x1234
+ 5    0000                  setbreakpoint 0xBCDE
+ 6    0000                  ORG $2345
+ 7    2345                  SETBREAKPOINT       ; default = "$"
+ 8    2345
+ 9    2345                  ; value truncating warnings
+dir_setbp_mame.asm(10): warning: value 0x10000 is truncated to 16bit value: 0x0000
+10    2345                  .SETBREAKPOINT 0x10000
+dir_setbp_mame.asm(11): warning: value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
+11    2345                  .setbreakpoint -1
+12    2345
+# file closed: dir_setbp_mame.asm
+
+Value    Label
+------ - -----------------------------------------------------------

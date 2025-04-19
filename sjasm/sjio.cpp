@@ -1518,6 +1518,7 @@ void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpoi
 
 static void CloseBreakpointsFile() {
 	if (!FP_BreakpointsFile) return;
+	if (BPSF_MAME == breakpointsType) fputs("g\n", FP_BreakpointsFile);
 	fclose(FP_BreakpointsFile);
 	FP_BreakpointsFile = nullptr;
 }
@@ -1528,10 +1529,13 @@ void WriteBreakpoint(const aint val) {
 		return;
 	}
 	++breakpointsCounter;
+	check16u(val);
 	switch (breakpointsType) {
 		case BPSF_UNREAL:
-			check16u(val);
 			fprintf(FP_BreakpointsFile, "x0=0x%04X\n", val&0xFFFF);
+			break;
+		case BPSF_MAME:		// technically "0x" can be omitted for MAME, but it also shouldn't hurt
+			fprintf(FP_BreakpointsFile, "bp 0x%04X\n", val&0xFFFF);
 			break;
 		case BPSF_ZESARUX:
 			if (1 == breakpointsCounter) fputs(" --enable-breakpoints ", FP_BreakpointsFile);
@@ -1539,7 +1543,6 @@ void WriteBreakpoint(const aint val) {
 				Warning("Maximum amount of 100 breakpoints has been already reached, this one is ignored");
 				break;
 			}
-			check16u(val);
 			fprintf(FP_BreakpointsFile, "--set-breakpoint %d \"PC=%d\" ", breakpointsCounter, val&0xFFFF);
 			break;
 	}

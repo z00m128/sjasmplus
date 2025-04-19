@@ -1297,6 +1297,7 @@ static void dirCSPECTMAP() {
 static void dirBPLIST() {
 	// breakpoint file is opened in second pass, and content is written through third pass
 	// so position of `BPLIST` directive in source does not matter
+	// TODO requires extra guard in case of N-pass assembling to open the file only once
 	if (2 != pass || !DeviceID) {	// nothing to do in first or last pass, second will open the file
 		if (2 == pass) {	// !Device is true -> no device in second pass -> error
 			Error("BPLIST only allowed in real device emulation mode (See DEVICE)", nullptr, EARLY);
@@ -1310,6 +1311,8 @@ static void dirBPLIST() {
 		type = BPSF_UNREAL;
 	} else if (cmphstr(lp, "zesarux")) {
 		type = BPSF_ZESARUX;
+	} else if (cmphstr(lp, "mame")) {
+		type = BPSF_MAME;
 	} else if (!SkipBlanks()) {
 		Warning("[BPLIST] invalid breakpoints file type (use \"unreal\" or \"zesarux\")", lp, W_EARLY);
 	}
