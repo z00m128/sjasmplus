@@ -167,7 +167,7 @@ extern uint32_t maxlin;
 extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine, PredefinedCounter;
 extern aint destlen, size, comlin;
 
-extern char* vorlabp, * macrolabp, * LastParsedLabel;
+extern char* macrolabp, * LastParsedLabel;
 
 enum EEncoding { ENCDOS, ENCWIN };
 

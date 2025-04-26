@@ -240,7 +240,7 @@ uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L, comlin = 0;
 
-char* vorlabp=NULL, * macrolabp=NULL, * LastParsedLabel=NULL;
+char* macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
 CStringsList* lijstp = NULL;
 CLabelTable LabelTable;
@@ -259,7 +259,7 @@ static void ReserveLabelKeywords() {
 	}
 }
 
-void InitPass() {
+static void InitPass() {
 	assert(sourcePosStack.empty());				// there's no source position [left] in the stack
 	Relocation::InitPass();
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
@@ -272,8 +272,7 @@ void InitPass() {
 	} while (maxpow10 <= maxlin);
 	*ModuleName = 0;
 	SetLastParsedLabel(nullptr);
-	if (vorlabp) free(vorlabp);
-	vorlabp = STRDUP("_");
+	InitVorlab();
 	macrolabp = NULL;
 	listmacro = 0;
 	CurAddress = 0;
@@ -336,7 +335,7 @@ void InitPass() {
 	if (LASTPASS == pass) OpenExpFile();					// will not do anything if filename is empty
 }
 
-void FreeRAM() {
+static void FreeRAM() {
 	if (Devices) {
 		delete Devices;		Devices = nullptr;
 	}
@@ -346,7 +345,6 @@ void FreeRAM() {
 	for (CDeviceDef* deviceDef : DefDevices) delete deviceDef;
 	DefDevices.clear();
 	lijstp = NULL;		// do not delete this, should be released by owners of DUP/regular macros
-	free(vorlabp);		vorlabp = NULL;
 	LabelTable.RemoveAll();
 	DefineTable.RemoveAll();
 	SetLastParsedLabel(nullptr);

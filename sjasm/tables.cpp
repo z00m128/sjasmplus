@@ -48,6 +48,16 @@ void TextFilePos::nextSegment(bool endsWithColon, size_t advanceColumns) {
 	else				colEnd = 0;
 }
 
+std::string vorlab;
+
+void InitVorlab() {
+	if (ModuleName[0]) {
+		vorlab = ModuleName; vorlab += "._";
+	} else {
+		vorlab = "_";
+	}
+}
+
 char* PreviousIsLabel = nullptr;
 
 // since v1.18.0:
@@ -92,29 +102,25 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	int labelLen = (np - naam), truncateAt = LABMAX;
 	if (LABMAX < labelLen) Error("Label too long", naam, IF_FIRST);	// non-fatal error, will truncate it
 	if (inMacro) labelLen += 1 + strlen(macrolabp);
-	else if (local) labelLen += 1 + strlen(vorlabp);
+	else if (local) labelLen += 1 + vorlab.size();
 	if (inModule) labelLen += 1 + strlen(ModuleName);
 	// build fully qualified label name (in newly allocated memory buffer, with precise length)
 	char* const label = new char[1+labelLen];
 	if (nullptr == label) ErrorOOM();
 	label[0] = 0;
-	if (inModule) {
-		STRCAT(label, labelLen, ModuleName);	STRCAT(label, 2, ".");
+	if (inModule) {		// false when `local` so doesn't double with vorlab content
+		STRCAT(label, labelLen, ModuleName);		STRCAT(label, 2, ".");
 	}
 	if (inMacro) {
-		STRCAT(label, labelLen, macrolabp);		STRCAT(label, 2, ">");
+		STRCAT(label, labelLen, macrolabp);			STRCAT(label, 2, ">");
 	} else if (local) {
-		STRCAT(label, labelLen, vorlabp);		STRCAT(label, 2, ".");
+		STRCAT(label, labelLen, vorlab.c_str());	STRCAT(label, 2, ".");
 	}
 	char* lp = label + strlen(label);
 	while (truncateAt-- && islabchar(*naam)) *lp++ = *naam++;	// add the new label (truncated if needed)
 	*lp = 0;
 	if (labelLen < lp - label) Error("internal error", nullptr, FATAL);		// should never happen :)
-	if (setNameSpace && !local) {
-		free(vorlabp);
-		vorlabp = STRDUP(label);
-		if (vorlabp == NULL) ErrorOOM();
-	}
+	if (setNameSpace && !local) vorlab = label;
 	return label;
 }
 
@@ -142,12 +148,12 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	// module part
 	if (inModule) STRCAT(sldLabelExport, LINEMAX, ModuleName);
 	STRCAT(sldLabelExport, 2, ",");
-	// main label part (the `vorlabp` is already the current label, if it was main label)
-	// except for structure labels: the inner ones don't "set namespace" == vorlabp, use "naam" then
-	// (but only if the main label of structure itself is not local, if it's local, use vorlabp)
-	const char* mainLabel = isStructLabel && !local ? naam : inMacro ? macrolabp : vorlabp;
+	// main label part (the `vorlab` is already the current label, if it was main label)
+	// except for structure labels: the inner ones don't "set namespace" == vorlab, use "naam" then
+	// (but only if the main label of structure itself is not local, if it's local, use vorlab)
+	const char* mainLabel = isStructLabel && !local ? naam : inMacro ? macrolabp : vorlab.data();
 	if (!setNameSpace) mainLabel = naam;
-	if (vorlabp == mainLabel && ModuleName[0]) {	// vorlabp now contains also module part, skip it
+	if (vorlab.data() == mainLabel && ModuleName[0]) {	// vorlab may contain module part, skip it then
 		auto modNameSz = strlen(ModuleName);
 		if (0 == strncmp(ModuleName, mainLabel, modNameSz)) mainLabel += modNameSz + 1;
 	}
@@ -214,15 +220,7 @@ static SLabelTableEntry* SearchLabel(char*& p, bool setUsed, /*out*/ std::unique
 			// if no more outer macros, try module+non-local prefix with the original local label
 			if ('>' == *findName++) {
 				inMacro = false;
-				if (modNameLen) {
-					#pragma GCC diagnostic push	// disable gcc8 warning about truncation - that's intended behaviour
-					#if 8 <= __GNUC__
-						#pragma GCC diagnostic ignored "-Wstringop-truncation"
-					#endif
-					STRCAT(temp, LINEMAX-2, ModuleName); STRCAT(temp, 2, ".");
-					#pragma GCC diagnostic pop
-				}
-				STRCAT(temp, LABMAX-1, vorlabp); STRCAT(temp, 2, ".");
+				STRCAT(temp, LABMAX-1, vorlab.c_str()); STRCAT(temp, 2, ".");
 				STRCAT(temp, LABMAX-1, findName);
 				findName = temp;
 			}

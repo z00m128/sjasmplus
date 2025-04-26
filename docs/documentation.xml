@@ -213,6 +213,7 @@
 - <link linkend="nex_close">`SAVENEX CLOSE`</link> can append multiple files
 - Lua: minor extensions and modifications to API
 - macros now handle large amount of macros defined better (like 64ki of macros)
+- fix local labels inside macros in modules
               </synopsis>
             </listitem>
           </varlistentry>

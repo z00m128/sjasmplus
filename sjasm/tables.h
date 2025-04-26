@@ -62,6 +62,8 @@ enum EStructureMembers {
 
 struct SLabelTableEntry;
 
+extern std::string vorlab;
+void InitVorlab();
 char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter = false);
 char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label);
 char* ExportModuleToSld(bool endModule = false);

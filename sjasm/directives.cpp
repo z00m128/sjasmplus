@@ -512,15 +512,7 @@ static void dirMODULE() {
 	if (n && (nullptr == STRCHR(n, '.'))) {
 		if (*ModuleName) STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), ".");
 		STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), n);
-		// reset non-local label to default "<modules>._"
-		if (vorlabp) free(vorlabp);
-		auto modNameSz = strlen(ModuleName);
-		vorlabp = (char*)malloc(modNameSz + 3);
-		memcpy(vorlabp, ModuleName, modNameSz);
-		vorlabp[modNameSz++] = '.';
-		vorlabp[modNameSz++] = '_';
-		vorlabp[modNameSz] = 0;
-
+		InitVorlab();	// reset non-local label to default "<modules>._"
 		if (IsSldExportActive()) {
 			WriteToSldFile(-1, CurAddress, 'L', ExportModuleToSld());
 		}
@@ -545,9 +537,7 @@ static void dirENDMODULE() {
 	char* lastDot = strrchr(ModuleName, '.');
 	if (lastDot)	*lastDot = 0;
 	else			*ModuleName = 0;
-	// reset non-local label to default "_"
-	if (vorlabp) free(vorlabp);
-	vorlabp = STRDUP("_");
+	InitVorlab();	// reset non-local label to default "<modules>._"
 }
 
 static void dirEND() {
