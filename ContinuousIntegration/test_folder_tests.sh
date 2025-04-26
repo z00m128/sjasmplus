@@ -9,6 +9,13 @@ HELP_STRING+="\n  $ \033[96mContinuousIntegration/test_folder_tests.sh z8\033[0m
 PROJECT_DIR=$PWD
 TEST_RUNNER="${PROJECT_DIR}/ContinuousIntegration/test_folder_tests.sh"
 BUILD_DIR="$PROJECT_DIR/build/tests"
+USER_RAMDISK_DIR="/run/user/$(id -u)"
+if [[ ! $NO_RAMDISK && -d "$USER_RAMDISK_DIR" && -w "$USER_RAMDISK_DIR" ]]; then
+    RAMDISK_BUILD_DIR="$USER_RAMDISK_DIR/sjasmplus_build_tests"
+    mkdir -p "$RAMDISK_BUILD_DIR" && \
+    echo "User ramdisk detected at [$RAMDISK_BUILD_DIR], redirecting tests building there" && \
+    BUILD_DIR="$RAMDISK_BUILD_DIR"
+fi
 exitCode=0
 totalTests=0        # +1 per ASM
 totalChecks=0       # +1 per diff/check
