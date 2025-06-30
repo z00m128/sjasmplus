@@ -14,4 +14,7 @@
         sj.add_word(0xD0BA) -- error about exceeding device memory limit
         _pc("ORG $C000")
         sj.add_word(0x0302)
+
+        _pc("DW -1000")     -- `18 FC` (correct)
+        sj.add_word(-1000)  -- `18 FD` (bug, #280 reported by fmafma)
     endlua

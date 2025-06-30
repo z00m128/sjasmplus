@@ -360,8 +360,8 @@ static void writenumber(unsigned int i, FILE *fp) {
 }
 
 static void writeword(unsigned int i, FILE *fp) {
-	writebyte(i%256,fp);
-	writebyte(i/256,fp);
+	writebyte(i & 0xFF, fp);
+	writebyte((i >> 8) & 0xFF, fp);
 }
 
 static void writebyte(unsigned char c, FILE *fp) {

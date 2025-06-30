@@ -434,8 +434,8 @@ void EmitByte(int byte, bool isInstructionStart) {
 }
 
 void EmitWord(int word, bool isInstructionStart) {
-	EmitByte(word % 256, isInstructionStart);
-	EmitByte(word / 256, false);
+	EmitByte(word & 0xFF, isInstructionStart);
+	EmitByte((word >> 8) & 0xFF, false);			// don't use "/ 256", doesn't work as expected for negative values!
 }
 
 void EmitBytes(const int* bytes, bool isInstructionStart) {

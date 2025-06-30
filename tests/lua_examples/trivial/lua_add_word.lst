@@ -15,21 +15,26 @@
 14    0000 ~                    sj.add_word(0xD0BA) -- error about exceeding device memory limit
 15    0000 ~                    _pc("ORG $C000")
 16    0000 ~                    sj.add_word(0x0302)
-17    0000              ORG $8000
-17    8000 00 01        ; these bytes were emitted silently/externally (lua script?)
-17    8002              ORG $FFFF
+17    0000 ~
+18    0000 ~                    _pc("DW -1000")     -- `18 FC` (correct)
+19    0000 ~                    sj.add_word(-1000)  -- `18 FD` (bug, #280 reported by fmafma)
+20    0000              ORG $8000
+20    8000 00 01        ; these bytes were emitted silently/externally (lua script?)
+20    8002              ORG $FFFF
 lua_add_word.asm(6): warning: [LUA] RAM limit exceeded 0x10000 by ORG
-17    FFFF BA D0        ; these bytes were emitted silently/externally (lua script?)
-17    0001              ORG $C000
-17    C000 02 03        ; these bytes were emitted silently/externally (lua script?)
-17    C002              ORG $8000
-17    8000 00 01        ; these bytes were emitted silently/externally (lua script?)
-17    8002              ORG $FFFF
+20    FFFF BA D0        ; these bytes were emitted silently/externally (lua script?)
+20    0001              ORG $C000
+20    C000 02 03        ; these bytes were emitted silently/externally (lua script?)
+20    C002              ORG $8000
+20    8000 00 01        ; these bytes were emitted silently/externally (lua script?)
+20    8002              ORG $FFFF
 lua_add_word.asm(14): error: [LUA] Write outside of device memory at: 65536
-17    FFFF BA D0        ; these bytes were emitted silently/externally (lua script?)
-17    0001              ORG $C000
-17    C000 02 03            endlua
-18    C002
+20    FFFF BA D0        ; these bytes were emitted silently/externally (lua script?)
+20    0001              ORG $C000
+20    C000 02 03        ; these bytes were emitted silently/externally (lua script?)
+20    C002 18 FC        DW -1000
+20    C004 18 FC            endlua
+21    C006
 # file closed: lua_add_word.asm
 
 Value    Label
