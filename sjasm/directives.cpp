@@ -1316,33 +1316,28 @@ static void dirSETBREAKPOINT() {
 		SkipToEol(lp);
 		return;
 	}
-	aint val = 0;
-	if (SkipBlanks(lp)) {		// without any expression do the "$" breakpoint
-		WriteBreakpoint(CurAddress);
-	} else if (ParseExpressionNoSyntaxError(lp, val)) {
-		WriteBreakpoint(val);
-	} else {
-		Error("[SETBREAKPOINT] Syntax error", bp, SUPPRESS);
-	}
-}
-
-static void dirSETCONDBREAKPOINT() {
-	if (LASTPASS != pass) {
-		SkipToEol(lp);
-		return;
-	}
-	auto arg = GetDelimitedString(lp);
-	char* aP = arg.data();
-	if (anyComma(lp)) {
-		aint val = 0;
-		if (ParseExpressionNoSyntaxError(lp, val)) {
-			WriteCondBreakpoint(aP, val);
+	aint val = CurAddress;
+	char* ifP = NULL;
+	if (!SkipBlanks(lp)) {
+		if (*lp == '"') {
+			auto arg = GetDelimitedString(lp);
+			ifP = arg.data();
 		} else {
-			Error("[SETCONDBREAKPOINT] Syntax error", bp, SUPPRESS);
+			if (!ParseExpressionNoSyntaxError(lp, val)) {
+				Error("[SETBREAKPOINT] Syntax error", bp, SUPPRESS);
+				return;
+			} else if (anyComma(lp)) {
+				auto arg = GetDelimitedString(lp);
+				ifP = arg.data();
+			}
 		}
-	} else {
-		WriteCondBreakpoint(aP, CurAddress);
+		if (!SkipBlanks(lp)) {
+			Error("[SETBREAKPOINT] Syntax error", bp, SUPPRESS);
+			return;
+		}
 	}
+
+	WriteBreakpoint(val, ifP);
 }
 
 /*void dirTEXTAREA() {
@@ -2280,8 +2275,6 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".bplist", dirBPLIST);
 	DirectivesTable.insertd(".setbreakpoint", dirSETBREAKPOINT);
 	DirectivesTable.insertd(".setbp", dirSETBREAKPOINT);
-	DirectivesTable.insertd(".setcondbreakpoint", dirSETCONDBREAKPOINT);
-	DirectivesTable.insertd(".setcondbp", dirSETCONDBREAKPOINT);
 
 	DirectivesTable.insertd(".relocate_start", Relocation::dirRELOCATE_START);
 	DirectivesTable.insertd(".relocate_end", Relocation::dirRELOCATE_END);

@@ -1527,7 +1527,7 @@ static void CloseBreakpointsFile() {
 	FP_BreakpointsFile = nullptr;
 }
 
-void WriteBreakpoint(const aint val) {
+void WriteBreakpoint(const aint val, const char* ifP) {
 	if (!FP_BreakpointsFile) {
 		WarningById(W_BP_FILE);
 		return;
@@ -1536,10 +1536,18 @@ void WriteBreakpoint(const aint val) {
 	check16u(val);
 	switch (breakpointsType) {
 		case BPSF_UNREAL:
-			fprintf(FP_BreakpointsFile, "x0=0x%04X\n", val&0xFFFF);
+			if (ifP == NULL) {
+				fprintf(FP_BreakpointsFile, "x0=0x%04X\n", val&0xFFFF);
+			} else {
+			    Warning("Conditional breakpoints not (yet) supported for Unreal");
+			}
 			break;
 		case BPSF_MAME:		// technically "0x" can be omitted for MAME, but it also shouldn't hurt
-			fprintf(FP_BreakpointsFile, "bp 0x%04X\n", val&0xFFFF);
+			if (ifP == NULL) {
+				fprintf(FP_BreakpointsFile, "bp 0x%04X\n", val&0xFFFF);
+			} else {
+			    Warning("Conditional breakpoints not (yet) supported for MAME");
+			}
 			break;
 		case BPSF_ZESARUX:
 			if (1 == breakpointsCounter) fputs(" --enable-breakpoints ", FP_BreakpointsFile);
@@ -1547,34 +1555,20 @@ void WriteBreakpoint(const aint val) {
 				Warning("Maximum amount of 100 breakpoints has been already reached, this one is ignored");
 				break;
 			}
-			fprintf(FP_BreakpointsFile, "--set-breakpoint %d \"PC=%d\" ", breakpointsCounter, val&0xFFFF);
+			if (ifP == NULL) {
+				fprintf(FP_BreakpointsFile, "--set-breakpoint %d \"PC=%d\" ", breakpointsCounter, val&0xFFFF);
+			} else {
+			    Warning("Conditional breakpoints not (yet) supported for Zesarux");
+			}
 			break;
 		case BPSF_FUSE:
-		    fprintf(FP_BreakpointsFile, "\nbr 0x%04X", val&0xFFFF);
+			if (ifP == NULL) {
+			    fprintf(FP_BreakpointsFile, "\nbr 0x%04X", val&0xFFFF);
+			} else {
+			    fprintf(FP_BreakpointsFile, "\nbr 0x%04X if %s", val&0xFFFF, ifP);
+			}
 			break;
 	}
-}
 
-void WriteCondBreakpoint(const char* cond, const aint val) {
-	if (!FP_BreakpointsFile) {
-		WarningById(W_BP_FILE);
-		return;
-	}
-	++breakpointsCounter;
-	check16u(val);
-	switch (breakpointsType) {
-		case BPSF_UNREAL:
-		    Warning("Conditional breakpoints not supported for Unreal");
-			break;
-		case BPSF_MAME:		// technically "0x" can be omitted for MAME, but it also shouldn't hurt
-		    Warning("Conditional breakpoints not supported for MAME");
-			break;
-		case BPSF_ZESARUX:
-		    Warning("Conditional breakpoints not supported for Zesarux");
-			break;
-		case BPSF_FUSE:
-		    fprintf(FP_BreakpointsFile, "\nbr 0x%04X if %s", val&0xFFFF, cond);
-			break;
-	}
 }
 //eof sjio.cpp
