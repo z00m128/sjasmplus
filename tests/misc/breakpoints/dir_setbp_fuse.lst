@@ -1,0 +1,31 @@
+# file opened: dir_setbp_fuse.asm
+ 1    0000                  device noslot64k
+ 2    0000
+ 3    0000                  org $8000
+ 4    8000
+ 5    8000                  setbp
+ 6    8000 00               nop
+ 7    8001                  setbp $
+ 8    8001 00               nop
+ 9    8002                  setbp $9000
+10    8002 00               nop
+11    8003
+12    8003                  setbp "z80:bc!=0"
+13    8003 00               nop
+14    8004                  setbp $,"z80:de!=0"
+15    8004 00               nop
+16    8005                  setbp $A000,"z80:hl=0"
+17    8005 00               nop
+18    8006
+dir_setbp_fuse.asm(19): error: [SETBREAKPOINT] Syntax error: setbp &
+19    8006                  setbp &
+20    8006 00               nop
+dir_setbp_fuse.asm(21): error: [SETBREAKPOINT] Syntax error: setbp "on monday" !WTF?
+21    8007                  setbp "on monday" !WTF?
+22    8007 00               nop
+23    8008
+24    8008                  bplist "dir_setbp_fuse.exp" fuse
+# file closed: dir_setbp_fuse.asm
+
+Value    Label
+------ - -----------------------------------------------------------
