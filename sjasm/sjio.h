@@ -144,6 +144,5 @@ extern aint sldSwapSrcPos;
 /////// Breakpoints list (for different emulators)
 enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX, BPSF_MAME, BPSF_FUSE };
 void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpointsFile type);
-void WriteBreakpoint(const aint val);
-void WriteCondBreakpoint(const char* cond, const aint val);
+void WriteBreakpoint(const aint val, const char* ifP);
 //eof sjio.h
