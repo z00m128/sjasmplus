@@ -1303,6 +1303,8 @@ static void dirBPLIST() {
 		type = BPSF_ZESARUX;
 	} else if (cmphstr(lp, "mame")) {
 		type = BPSF_MAME;
+	} else if (cmphstr(lp, "fuse")) {
+		type = BPSF_FUSE;
 	} else if (!SkipBlanks()) {
 		Warning("[BPLIST] invalid breakpoints file type (use \"unreal\" or \"zesarux\")", lp, W_EARLY);
 	}
@@ -1321,6 +1323,25 @@ static void dirSETBREAKPOINT() {
 		WriteBreakpoint(val);
 	} else {
 		Error("[SETBREAKPOINT] Syntax error", bp, SUPPRESS);
+	}
+}
+
+static void dirSETCONDBREAKPOINT() {
+	if (LASTPASS != pass) {
+		SkipToEol(lp);
+		return;
+	}
+	auto arg = GetDelimitedString(lp);
+	char* aP = arg.data();
+	if (anyComma(lp)) {
+		aint val = 0;
+		if (ParseExpressionNoSyntaxError(lp, val)) {
+			WriteCondBreakpoint(aP, val);
+		} else {
+			Error("[SETCONDBREAKPOINT] Syntax error", bp, SUPPRESS);
+		}
+	} else {
+		WriteCondBreakpoint(aP, CurAddress);
 	}
 }
 
@@ -2259,6 +2280,8 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".bplist", dirBPLIST);
 	DirectivesTable.insertd(".setbreakpoint", dirSETBREAKPOINT);
 	DirectivesTable.insertd(".setbp", dirSETBREAKPOINT);
+	DirectivesTable.insertd(".setcondbreakpoint", dirSETCONDBREAKPOINT);
+	DirectivesTable.insertd(".setcondbp", dirSETCONDBREAKPOINT);
 
 	DirectivesTable.insertd(".relocate_start", Relocation::dirRELOCATE_START);
 	DirectivesTable.insertd(".relocate_end", Relocation::dirRELOCATE_END);

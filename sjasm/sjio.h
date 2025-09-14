@@ -140,8 +140,8 @@ void SldAddCommentKeyword(const char* keyword);
 void SldTrackComments();
 
 /////// Breakpoints list (for different emulators)
-enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX, BPSF_MAME };
+enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX, BPSF_MAME, BPSF_FUSE };
 void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpointsFile type);
 void WriteBreakpoint(const aint val);
-
+void WriteCondBreakpoint(const char* cond, const aint val);
 //eof sjio.h
