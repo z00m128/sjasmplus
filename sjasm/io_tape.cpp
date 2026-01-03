@@ -141,17 +141,17 @@ int TAP_SaveSnapshot(const std::filesystem::path & fname, unsigned short start) 
 
 	aint datastart = 0x5E00;
 	aint exeat = 0x5E00;
-	aint basiclen = 0x1e + 2;
+	aint blocklen = 0x1e + 2;
 
 	/* Filetype (0: Basic), with autostart "LINE 10" */
-	writeheader(0, "LOADER", basiclen, 10, basiclen, fpout);
+	writeheader(0, "LOADER", blocklen, 10, blocklen, fpout);
 
-	writeword(basiclen + 2, fpout);	// length of block
+	writeword(blocklen + 2, fpout);	// length of block
 	parity = 0;
 	writebyte(0xff, fpout);
 	writebyte(0, fpout);
-	writebyte(10, fpout);		// LINE 10
-	writebyte(basiclen, fpout);	// basic line length
+	writebyte(10, fpout);			// LINE 10
+	writebyte(blocklen - 4, fpout);	// basic line length
 	writebyte(0, fpout);
 
 	// :CLEAR VAL "xxxxx"
