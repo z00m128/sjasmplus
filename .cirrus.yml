@@ -94,7 +94,7 @@ task:
     CIRRUS_CLONE_DEPTH: 1
     CIRRUS_CLONE_SUBMODULES: true
   freebsd_instance:
-    image_family: freebsd-16-0-snap
+    image_family: freebsd-15-0-amd64-ufs
     cpu: 2
     memory: 3G
   ## lock pkg on current version (sjasmplus does not care as long as it can install ...)
