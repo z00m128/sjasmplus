@@ -2290,7 +2290,8 @@ will output to the console strings:
               following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.</para>
               <para>DUP itself is internally implemented almost like anonymous macro emitted count-times.</para>
               <para>Optional second argument (since v1.20.2) is label name to have repetition index
-                available inside the block (values 0, 1, 2, 3, ...).
+                available inside the block (values 0, 1, 2, 3, ...). This label is mutable and global
+                (don't use same label in nested DUP blocks).
                <example>
                   <title></title>
 
