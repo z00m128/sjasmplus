@@ -1,0 +1,41 @@
+# file opened: local_name_in_macros.asm
+ 1    0000              ; local struct names inside macros are not supported, not even non-macro local ones with "@" prefix
+ 2    0000              ; this is just exercising the errors reported when such construct is attempted
+ 3    0000              ; (doesn't even have specific error messages, it's just documenting what happens in current implementation)
+ 4    0000
+ 5    0000              MACRO_STRUCT_1      MACRO init_value?
+ 6    0000 ~                                    STRUCT @.Data               ; <- FAILS, non-macro-local struct names are NOT supported
+ 7    0000 ~            Mx1L                        BYTE    init_value?
+ 8    0000 ~            Mx2L                        BYTE    (init_value?) + 1
+ 9    0000 ~                                    ENDS
+10    0000 ~            MacroD1                 .Data
+11    0000                                  ENDM
+12    0000                      MACRO_STRUCT_1  $40                    ; trigger the failure
+local_name_in_macros.asm(6): error: Invalid labelname: .Data
+local_name_in_macros.asm(12): ^ emitted from here
+12    0000             >                        STRUCT @.Data               ; <- FAILS, non-macro-local struct names are NOT supported
+12    0000 40          >Mx1L                        BYTE    $40
+12    0001 41          >Mx2L                        BYTE    ($40) + 1
+local_name_in_macros.asm(9): error: [ENDS] End structure without structure
+local_name_in_macros.asm(12): ^ emitted from here
+12    0002             >                        ENDS
+local_name_in_macros.asm(10): error: Unrecognized instruction: .Data
+local_name_in_macros.asm(12): ^ emitted from here
+12    0002             >MacroD1                 .Data
+13    0002                      ; ^ IMHO you are complicating it too much if you need this feature, maybe you can refactor sjasmplus internals then...
+14    0002
+15    0002              MACRO_STRUCT_LOCAL  MACRO init_value?
+16    0002 ~                                    STRUCT .Data                ; <- FAILS, macro-local struct names are NOT supported (and not planned)
+17    0002 ~            Mx1L                        BYTE    init_value?
+18    0002 ~            Mx2L                        BYTE    (init_value?) + 1
+19    0002 ~                                    ENDS
+20    0002 ~            MacroDf                 .Data
+21    0002                                  ENDM
+22    0002                      MACRO_STRUCT_LOCAL   $40                    ; trigger the FATAL failure
+22    0002             >                        STRUCT .Data                ; <- FAILS, macro-local struct names are NOT supported (and not planned)
+22    0002 ~           >Mx1L                        BYTE    init_value?
+22    0002 ~           >Mx2L                        BYTE    (init_value?) + 1
+local_name_in_macros.asm(19): error: Invalid labelname: 1>Data
+local_name_in_macros.asm(22): ^ emitted from here
+local_name_in_macros.asm(19): error: Internal error. InsertSingleStructLabel(): 1>Data
+local_name_in_macros.asm(22): ^ emitted from here

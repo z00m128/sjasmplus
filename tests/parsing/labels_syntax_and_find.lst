@@ -257,17 +257,14 @@ labels_syntax_and_find.asm(211): error: Unexpected: $t
 labels_syntax_and_find.asm(212): error: Unexpected: @@exi
 212   4167 5F 41            DW exist @@exi  ; unexpected "@@exi"
 labels_syntax_and_find.asm(213): error: Invalid labelname: )
-labels_syntax_and_find.asm(213): error: Unexpected: ()
 213   4169 5F 41            DW exist()      ; invalid label name + unexpected
 labels_syntax_and_find.asm(214): error: Invalid labelname: 3xist)
-labels_syntax_and_find.asm(214): error: Unexpected: (3xist)
 214   416B 5F 41            DW exist(3xist) ; invalid label name + unexpected
 labels_syntax_and_find.asm(215): error: Unexpected: (e\ist)
 215   416D 5F 41            DW exist(e\ist) ; unexpected "(e\ist)" - fails as argument for exists, fallback to symbol eval + extra chars
 labels_syntax_and_find.asm(216): error: Unexpected: (exi$t)
 216   416F 5F 41            DW exist(exi$t) ; unexpected "(exi$t)" - fails as argument for exists, fallback to symbol eval + extra chars
 labels_syntax_and_find.asm(217): error: Invalid labelname: @exi)
-labels_syntax_and_find.asm(217): error: Unexpected: (@@exi)
 217   4171 5F 41            DW exist(@@exi) ; invalid label name + unexpected
 218   4173
 labels_syntax_and_find.asm(219): warning: Label has different value in pass 3: previous value 16735 not equal 16755

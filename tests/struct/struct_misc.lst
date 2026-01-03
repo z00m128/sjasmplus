@@ -1,5 +1,3 @@
-struct_misc.asm(30): error: Illegal labelname: @.
-struct_misc.asm(30): error: Illegal labelname: @.
 # file opened: struct_misc.asm
  1    0000                  IFNDEF INCLUDED_ONCE
  2    0000                      DEFINE INCLUDED_ONCE
@@ -30,13 +28,14 @@ struct_misc.asm(30): error: Illegal labelname: @.
 23+   0000                          ENDS
 24+   0000                      ENDMODULE
 25+   0000
-struct_misc.asm(26): error: [STRUCT] Illegal structure name: 1llegal name
+struct_misc.asm(26): error: Invalid labelname: 1llegal name
 26+   0000                      STRUCT 1llegal name
 struct_misc.asm(27): error: [ENDS] End structure without structure
 27+   0000                      ENDS
 28+   0000
+struct_misc.asm(29): error: Invalid labelname: .
 29+   0000                      STRUCT @.
-struct_misc.asm(30): error: Invalid labelname: .
+struct_misc.asm(30): error: [ENDS] End structure without structure
 30+   0000                      ENDS
 31+   0000
 struct_misc.asm(32): error: [STRUCT] Offset syntax error: &

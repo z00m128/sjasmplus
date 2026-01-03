@@ -1,0 +1,171 @@
+# file opened: local_name.asm
+  1   0000                  MODULE Whatever
+  2   0000
+  3   0000              MethodA:
+  4   0000                  STRUCT .Data        ; local to MethodA
+  5   0000 ~            X1l  BYTE
+  6   0000 ~            X2l  BYTE
+  7   0000                  ENDS
+  8   0000 0C 22        Md  .Data { 12, 34 }    ; <- WORKS in v1.21.0
+  9   0002
+ 10   0002                  STRUCT Data         ; inside module (standalone)
+ 11   0002 ~            X1m  BYTE
+ 12   0002 ~            X2m  BYTE
+ 13   0002                  ENDS
+ 14   0002
+ 15   0002                  STRUCT @Data        ; global (no module prefix)
+ 16   0002 ~            X1g  BYTE
+ 17   0002 ~            X2g  BYTE
+ 18   0002                  ENDS
+ 19   0002
+ 20   0002 0C 22        Md2 MethodA.Data { 12, 34 }     ; <- FAILS in v1.21.0
+ 21   0004              ; ^ error: Unrecognized instruction: MethodA.Data { 12, 34 }
+ 22   0004 0C 22        Md3 Data { 12, 34 }
+ 23   0006 0C 22        Md4 @Data { 12, 34 }
+ 24   0008
+ 25   0008              MethodB:
+ 26   0008                  STRUCT .Data        ; local to MethodB
+ 27   0008 ~            BX1l  BYTE
+ 28   0008 ~            BX2l  BYTE
+ 29   0008                  ENDS
+local_name.asm(30): error: [STRUCT] Structure already exist: Whatever.MethodB.Data
+ 30   0008                  STRUCT .Data        ; local to MethodB ; <- should fail, duplicity
+ 31   0008 ~            xBX1l  BYTE
+ 32   0008 ~            xBX2l  BYTE
+ 33   0008                  ENDS
+ 34   0008 17 2D        Mdb .Data { 23, 45 }    ; <- WORKS in v1.21.0
+ 35   000A
+ 36   000A                  ; test self-reference check
+ 37   000A              MethodC:
+ 38   000A                  STRUCT .Data
+ 39   000A ~            .CC1    BYTE    $67
+local_name.asm(40): error: [STRUCT] Can't include itself
+ 40   000A ~            .self1: .Data
+local_name.asm(41): error: [STRUCT] Can't include itself
+ 41   000A ~            .self2: MethodC.Data
+local_name.asm(42): error: [STRUCT] Can't include itself
+ 42   000A ~            .self3: Whatever.MethodC.Data
+ 43   000A                  ENDS
+ 44   000A
+ 45   000A 67           Mdc1    .Data
+ 46   000B 67           Mdc2    MethodC.Data
+ 47   000C 67           Mdc3    Whatever.MethodC.Data
+ 48   000D
+ 49   000D 3A 0A 00             ld a,(Mdc1.CC1)
+ 50   0010 3A 0B 00             ld a,(Mdc2.CC1)
+ 51   0013 3A 0C 00     .lMdc3: ld a,(Mdc3.CC1)
+ 52   0016 3A 0A 00             ld a,(Whatever.Mdc1.CC1)
+ 53   0019 3A 0B 00             ld a,(Whatever.Mdc2.CC1)
+ 54   001C 3A 0C 00             ld a,(Whatever.Mdc3.CC1)
+ 55   001F
+ 56   001F                  ENDMODULE
+ 57   001F
+ 58   001F 0C 22        MahInstanceGlob    Data { 12, 34 }
+ 59   0021 0C 22        MahInstanceMod     Whatever.Data { 12, 34 }
+ 60   0023 0C 22        MahInstanceLoc     Whatever.MethodA.Data { 12, 34 } ; <- FAILS in v1.21.0
+ 61   0025              ; ^ error: Unrecognized instruction: Whatever.MethodA.Data { 12, 34 }
+ 62   0025 3A 1F 00             ld a,(MahInstanceGlob.X1g)
+ 63   0028 3A 21 00             ld a,(MahInstanceMod.X1m)
+ 64   002B 3A 23 00             ld a,(MahInstanceLoc.X1l)
+ 65   002E 3A 06 00             ld a,(Whatever.Md4.X1g)
+ 66   0031 3A 04 00             ld a,(Whatever.Md3.X1m)
+ 67   0034 3A 02 00             ld a,(Whatever.Md2.X1l)
+ 68   0037 3A 0A 00             ld a,(Whatever.Mdc1.CC1)
+ 69   003A 3A 0B 00             ld a,(Whatever.Mdc2.CC1)
+ 70   003D 3A 0C 00             ld a,(Whatever.Mdc3.CC1)
+ 71   0040
+local_name.asm(72): error: Invalid labelname: %as
+ 72   0040 67           %as     Whatever.MethodC.Data   ; invalid labelname error reporting check
+ 73   0041
+ 74   0041                  DEVICE ZXSPECTRUMNEXT       ; setup global device for SLD file test
+ 75   0041
+ 76   0041
+ 77   0041
+ 78   0041
+ 79   0041
+ 80   0041
+ 81   0041
+ 82   0041
+ 83   0041
+ 84   0041
+ 85   0041
+ 86   0041
+ 87   0041
+ 88   0041
+ 89   0041
+ 90   0041
+ 91   0041
+ 92   0041
+ 93   0041
+ 94   0041
+ 95   0041
+ 96   0041
+ 97   0041
+ 98   0041
+ 99   0041
+100   0041                  ; reserving 100+ lines
+101   0041
+# file closed: local_name.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x0002 X Data
+0x0000 X Data.X1g
+0x0001 X Data.X2g
+0x001F X MahInstanceGlob
+0x001F   MahInstanceGlob.X1g
+0x0020 X MahInstanceGlob.X2g
+0x0023 X MahInstanceLoc
+0x0023   MahInstanceLoc.X1l
+0x0024 X MahInstanceLoc.X2l
+0x0021 X MahInstanceMod
+0x0021   MahInstanceMod.X1m
+0x0022 X MahInstanceMod.X2m
+0x0002 X Whatever.Data
+0x0000 X Whatever.Data.X1m
+0x0001 X Whatever.Data.X2m
+0x0000 X Whatever.Md
+0x0000 X Whatever.Md.X1l
+0x0001 X Whatever.Md.X2l
+0x0002 X Whatever.Md2
+0x0002   Whatever.Md2.X1l
+0x0003 X Whatever.Md2.X2l
+0x0004 X Whatever.Md3
+0x0004   Whatever.Md3.X1m
+0x0005 X Whatever.Md3.X2m
+0x0006 X Whatever.Md4
+0x0006   Whatever.Md4.X1g
+0x0007 X Whatever.Md4.X2g
+0x0008 X Whatever.Mdb
+0x0008 X Whatever.Mdb.BX1l
+0x0009 X Whatever.Mdb.BX2l
+0x000A X Whatever.Mdc1
+0x000A   Whatever.Mdc1.CC1
+0x000B X Whatever.Mdc1.self1
+0x000B X Whatever.Mdc1.self2
+0x000B X Whatever.Mdc1.self3
+0x000B X Whatever.Mdc2
+0x000B   Whatever.Mdc2.CC1
+0x000C X Whatever.Mdc2.self1
+0x000C X Whatever.Mdc2.self2
+0x000C X Whatever.Mdc2.self3
+0x000C X Whatever.Mdc3
+0x000C   Whatever.Mdc3.CC1
+0x0013 X Whatever.Mdc3.lMdc3
+0x000D X Whatever.Mdc3.self1
+0x000D X Whatever.Mdc3.self2
+0x000D X Whatever.Mdc3.self3
+0x0000 X Whatever.MethodA
+0x0002 X Whatever.MethodA.Data
+0x0000 X Whatever.MethodA.Data.X1l
+0x0001 X Whatever.MethodA.Data.X2l
+0x0008 X Whatever.MethodB
+0x0002 X Whatever.MethodB.Data
+0x0000 X Whatever.MethodB.Data.BX1l
+0x0001 X Whatever.MethodB.Data.BX2l
+0x000A X Whatever.MethodC
+0x0001 X Whatever.MethodC.Data
+0x0000 X Whatever.MethodC.Data.CC1
+0x0001 X Whatever.MethodC.Data.self1
+0x0001 X Whatever.MethodC.Data.self2
+0x0001 X Whatever.MethodC.Data.self3

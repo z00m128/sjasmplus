@@ -93,6 +93,8 @@ static bool isInlinedScript(TextFilePos & errorPos, const char* script_name) {
 // adds current source position in lua script + full stack depth onto sourcePosStack
 // = makes calls to Error/Warning API to display more precise error lines in lua scripts
 static int addLuaSourcePositions() {
+	// count each request for Lua source position as internal new line to reset SUPPRESS type error messages
+	++CompiledCurrentLine;	// otherwise single SUPPRESS error does apply for whole lua block
 	// find all *known* inlined/standalone script names and line numbers on the lua stack
 	assert(LUA);
 	lua_Debug ar;

@@ -1436,6 +1436,7 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	// 'T' = instruction Trace, empty data
 	// 'D' = EQU symbol, <data> is the symbol name ("label")
 	// 'F' = function label, <data> is the symbol name
+	// 'L' = label, <data> contains label parts
 	// 'Z' = device (memory model) changed, <data> has special custom formatting
 	//
 	// 'Z' device <data> format:

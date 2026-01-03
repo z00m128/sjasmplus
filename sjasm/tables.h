@@ -281,8 +281,7 @@ public:
 
 class CStructure {
 public:
-	char* naam, * id;
-	int global;
+	char* naam;
 	int maxAlignment;
 	aint noffset;
 	void AddLabel(char*);
@@ -295,7 +294,7 @@ public:
 	CStructure* next;
 	CStructure(const CStructure&) = delete;
 	CStructure& operator=(CStructure const &) = delete;
-	CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p);
+	CStructure(const char* nnaam, int no, CStructure* p);
 	~CStructure();
 private:
 	CStructureEntry1* mnf, * mnl;
@@ -306,14 +305,14 @@ private:
 
 class CStructureTable {
 public:
-	CStructure* Add(char* naam, int no, int gl);
+	CStructure* Add(const char* naam, int no);
 	void ReInit();
 	CStructureTable(const CStructureTable&) = delete;
 	CStructureTable& operator=(CStructureTable const &) = delete;
 	CStructureTable();
 	~CStructureTable();
 	CStructure* zoek(const char*, int);
-	int FindDuplicate(char*);
+	int FindDuplicate(const char*);
 	int Emit(char*, char*, char*&, int);
 private:
 	static aint ParseDesignedAddress(char* &p);

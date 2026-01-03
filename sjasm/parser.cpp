@@ -1091,8 +1091,7 @@ void ParseStructMember(CStructure* st) {
 			gl = 1;
 		}
 		if ((n = GetID(pp)) && (s = StructureTable.zoek(n, gl))) {
-			char* structName = st->naam;	// need copy of pointer so cmphstr can advance it in case of match
-			if (cmphstr(structName, n)) {
+			if (st == s) {
 				Error("[STRUCT] Can't include itself", NULL);
 				SkipToEol(pp);
 				lp = pp;

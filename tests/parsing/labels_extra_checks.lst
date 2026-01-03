@@ -81,7 +81,7 @@ labels_extra_checks.asm(51): error: [STRUCT] Expression expected
 63    1019 ~                        ALIGN
 64    1019                      ENDS
 65    1019
-labels_extra_checks.asm(66): warning: Struct TEST_STRUCT did use ALIGN 4 in definition, but here it is misaligned by 3 bytes
+labels_extra_checks.asm(66): warning: Struct Module1.TEST_STRUCT did use ALIGN 4 in definition, but here it is misaligned by 3 bytes
 66    1019 FF 00 00 00  instanceModule  TEST_STRUCT
 67    101D
 labels_extra_checks.asm(68): warning: Struct TEST_STRUCT did use ALIGN 4 in definition, but here it is misaligned by 3 bytes

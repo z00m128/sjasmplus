@@ -1765,18 +1765,14 @@ static void dirSHELLEXEC() {
 
 static void dirSTRUCT() {
 	CStructure* st;
-	int global = 0;
 	aint offset = 0;
-	char* naam;
 	SkipBlanks();
-	if (*lp == '@') {
-		++lp; global = 1;
-	}
-
-	if (!(naam = GetID(lp)) || !strlen(naam)) {
-		Error("[STRUCT] Illegal structure name", lp, SUPPRESS);
+	std::unique_ptr<char[]> validLabel(ValidateLabel(lp, false, true));
+	if (!validLabel) {	// ValidateLabel() reports illegal name as "label" ... welp... good enough.
+		SkipToEol(lp);
 		return;
 	}
+	while (islabchar(*lp)) ++lp;	// advance lp beyond parsed label (valid chars only)
 	if (comma(lp)) {
 		IsLabelNotFound = false;
 		if (!ParseExpressionNoSyntaxError(lp, offset)) {
@@ -1790,17 +1786,17 @@ static void dirSTRUCT() {
 	if (!SkipBlanks()) {
 		Error("[STRUCT] syntax error, unexpected", lp);
 	}
-	st = StructureTable.Add(naam, offset, global);
+	st = StructureTable.Add(validLabel.get(), offset);	// create structure and start parsing members
 	ListFile();
 	while (ReadLine()) {
-		lp = line; /*if (White()) { SkipBlanks(lp); if (*lp=='.') ++lp; if (cmphstr(lp,"ends")) break; }*/
+		lp = line;
 		SkipBlanks(lp);
 		if (*lp == '.') {
 			++lp;
 		}
 		if (cmphstr(lp, "ends")) {
 			++CompiledCurrentLine;
-			if (st) st->deflab();
+			if (st) st->deflab();		// create structure symbols from members and struct itself (size)
 			lp = ReplaceDefine(lp);		// skip any empty substitutions and comments
 			substitutedLine = line;		// override substituted listing for ENDS
 			return;

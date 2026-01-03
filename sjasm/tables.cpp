@@ -83,7 +83,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	const bool local = '.' == *naam;
 	if (!isLabelStart(naam)) {		// isLabelStart assures that only single modifier exist
 		if (global || local) ++naam;// single modifier is parsed (even when invalid name)
-		Error("Invalid labelname", naam);
+		Error("Invalid labelname", naam, SUPPRESS);
 		return nullptr;
 	}
 	if (global || local) ++naam;	// single modifier is parsed
@@ -95,7 +95,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	if ('[' == *np) return nullptr;	// this is DEFARRAY name, do not process it as label (silent exit)
 	if (*np && !ignoreCharAfter) {
 		// if this is supposed to be new label, there shoulnd't be anything else after it
-		Error("Invalid labelname", naam);
+		Error("Invalid labelname", naam, SUPPRESS);
 		return nullptr;
 	}
 	// calculate expected length of fully qualified label name
@@ -140,8 +140,11 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	const bool global = '@' == *naam;
 	const bool local = '.' == *naam;
 	if (global || local) ++naam;	// single modifier is parsed
+	const auto modNameSz = strlen(ModuleName);
 	const bool inMacro = !escMacro && local && macrolabp;
-	const bool inModule = !inMacro && !global && ModuleName[0];
+	// struct def full name "@" global marker is not part of "naam" here, deduct it from matching against ModuleName (if any)
+	const bool globalStructDef = (label->traits & LABEL_IS_STRUCT_D) && (('.' != naam[modNameSz]) || strncmp(ModuleName, naam, modNameSz));
+	const bool inModule = !inMacro && !global && modNameSz && !globalStructDef;
 	const bool isStructLabel = (label->traits & (LABEL_IS_STRUCT_D|LABEL_IS_STRUCT_E));
 	// build fully qualified SLD info
 	sldLabelExport[0] = 0;
@@ -153,8 +156,7 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	// (but only if the main label of structure itself is not local, if it's local, use vorlab)
 	const char* mainLabel = isStructLabel && !local ? naam : inMacro ? macrolabp : vorlab.data();
 	if (!setNameSpace) mainLabel = naam;
-	if (vorlab.data() == mainLabel && ModuleName[0]) {	// vorlab may contain module part, skip it then
-		auto modNameSz = strlen(ModuleName);
+	if ((vorlab.data() == mainLabel || isStructLabel) && modNameSz) {	// vorlab may contain module part, skip it then
 		if (0 == strncmp(ModuleName, mainLabel, modNameSz)) mainLabel += modNameSz + 1;
 	}
 	STRCAT(sldLabelExport, LABMAX, mainLabel);
@@ -1004,19 +1006,16 @@ aint CStructureEntry2::ParseValue(char* & p) {
 	return val;
 }
 
-CStructure::CStructure(const char* nnaam, char* nid, int no, int ngl, CStructure* p) {
+CStructure::CStructure(const char* nnaam, int no, CStructure* p) {
 	mnf = mnl = NULL; mbf = mbl = NULL;
 	naam = STRDUP(nnaam);
 	if (naam == NULL) ErrorOOM();
-	id = STRDUP(nid);
-	if (id == NULL) ErrorOOM();
-	next = p; noffset = no; global = ngl;
+	next = p; noffset = no;
 	maxAlignment = 0;
 }
 
 CStructure::~CStructure() {
 	free(naam);
-	free(id);
 	if (mnf) delete mnf;
 	if (mbf) delete mbf;
 	if (next) delete next;
@@ -1141,22 +1140,21 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 }
 
 static void InsertSingleStructLabel(const bool setNameSpace, char *name, const bool isRelocatable, const aint value, const bool isDefine = true) {
-	char *op = name;
-	std::unique_ptr<char[]> p(ValidateLabel(op, setNameSpace));
-	if (!p) {
-		Error("Illegal labelname", op, EARLY);
-		return;
-	}
+	// "isDefine" case already has namespaced-full-name, don't add namespace twice by ValidateLabel
+	std::unique_ptr<char[]> tempFullName(isDefine ? nullptr : ValidateLabel(name, setNameSpace));
+	if (!isDefine && !tempFullName) return;		// invalid labelname reported by ValidateLabel
+	char *fullName = isDefine ? name : tempFullName.get();
 	if (pass == LASTPASS) {
 		aint oval;
-		if (!GetLabelValue(op, oval)) {
-			Error("Internal error. ParseLabel()", op, FATAL);
+		char *lp = name;	// not full name, full name fails in GetLabelValue for local macro labels (trying to full-name it second time)
+		if (!GetLabelValue(lp, oval)) {
+			Error("Internal error. InsertSingleStructLabel()", fullName, FATAL);
 		}
 		if (value != oval) {
-			Error("Label has different value in pass 2", p.get());
+			Error("Label has different value in pass 2", fullName);
 		}
 		if (IsSldExportActive()) {		// SLD (Source Level Debugging) tracing-data logging
-			SLabelTableEntry* symbol = LabelTable.Find(p.get(), true);
+			SLabelTableEntry* symbol = LabelTable.Find(fullName, true);
 			assert(symbol);	// should have been already defined before last pass
 			if (symbol) {
 				WriteToSldFile(isDefine ? -1 : symbol->page, value, 'L', ExportLabelToSld(name, symbol));
@@ -1169,14 +1167,17 @@ static void InsertSingleStructLabel(const bool setNameSpace, char *name, const b
 		unsigned traits = LABEL_HAS_RELOC_TRAIT \
 						| (isDefine ? LABEL_IS_STRUCT_D : LABEL_IS_STRUCT_E) \
 						| (isRelocatable ? LABEL_IS_RELOC : 0);
-		if (!LabelTable.Insert(p.get(), value, traits)) Error("Duplicate label", p.get(), EARLY);
+		if (!LabelTable.Insert(fullName, value, traits)) Error("Duplicate label", fullName, EARLY);
 	}
 }
 
 static void InsertStructSubLabels(const char* mainName, const bool isRelocatable, const CStructureEntry1* members, const aint address = 0, const bool isDefine = true) {
 	char ln[LINEMAX+1];
-	STRCPY(ln, LINEMAX, mainName);
-	char * const lnsubw = ln + strlen(ln);
+	size_t mainNameSz = std::min(strlen(mainName), size_t(LINEMAX-2));
+	memcpy(ln, mainName, mainNameSz);
+	ln[mainNameSz++] = '.';
+	ln[mainNameSz] = 0;
+	char * const lnsubw = ln + mainNameSz;
 	while (members) {
 		STRCPY(lnsubw, LINEMAX-strlen(ln), members->naam);		// overwrite sub-label part
 		InsertSingleStructLabel(false, ln, isRelocatable, members->offset + address, isDefine);
@@ -1185,20 +1186,8 @@ static void InsertStructSubLabels(const char* mainName, const bool isRelocatable
 }
 
 void CStructure::deflab() {
-	const size_t moduleNameLength = strlen(ModuleName);
-	char sn[LINEMAX] = { '@', 0 };
-	if (moduleNameLength && (0 == strncmp(id, ModuleName, moduleNameLength)) \
-		&& ('.' == id[moduleNameLength]) && (id[moduleNameLength+1]))
-	{
-		// looks like the structure name starts with current module name, use non-global way then
-		STRCPY(sn, LINEMAX-1, id + moduleNameLength + 1);
-	} else {
-		// the structure name does not match current module, use the global "@id" way to define it
-		STRCPY(sn+1, LINEMAX-1, id);
-	}
-	InsertSingleStructLabel(true, sn, false, noffset);
-	STRCAT(sn, LINEMAX-1, ".");
-	InsertStructSubLabels(sn, false, mnf);
+	InsertSingleStructLabel(true, naam, false, noffset);
+	InsertStructSubLabels(naam, false, mnf);
 }
 
 void CStructure::emitlab(char* iid, aint address, const bool isRelocatable) {
@@ -1214,7 +1203,6 @@ void CStructure::emitlab(char* iid, aint address, const bool isRelocatable) {
 	char sn[LINEMAX] { 0 };
 	STRCPY(sn, LINEMAX-1, iid);
 	InsertSingleStructLabel(true, sn, isRelocatable, address, false);
-	STRCAT(sn, LINEMAX-1, ".");
 	InsertStructSubLabels(sn, isRelocatable, mnf, address, false);
 }
 
@@ -1315,50 +1303,44 @@ void CStructureTable::ReInit() {
 	}
 }
 
-CStructure* CStructureTable::Add(char* naam, int no, int gl) {
-	char sn[LINEMAX], * sp;
-	sn[0] = 0;
-	if (!gl && *ModuleName) {
-		STRCPY(sn, LINEMAX-2, ModuleName);
-		STRCAT(sn, 2, ".");
-	}
-	STRCAT(sn, LINEMAX-1, naam);
-	sp = sn;
-	if (FindDuplicate(sp)) {
+CStructure* CStructureTable::Add(const char* naam, int offset) {
+	if (FindDuplicate(naam)) {
 		Error("[STRUCT] Structure already exist", naam);
 		return nullptr;
 	}
-	strs[(*sp)&127] = new CStructure(naam, sp, 0, gl, strs[(*sp)&127]);
-	if (no) {
-		strs[(*sp)&127]->AddMember(new CStructureEntry2(0, no, -1, Relocation::OFF, SMEMBBLOCK));
+	CStructure** strsN = strs + (naam[0] & 127);
+	*strsN = new CStructure(naam, 0, *strsN);
+	if (offset) {
+		(*strsN)->AddMember(new CStructureEntry2(0, offset, -1, Relocation::OFF, SMEMBBLOCK));
 	}
-	return strs[(*sp)&127];
+	return *strsN;
 }
 
 CStructure* CStructureTable::zoek(const char* naam, int gl) {
 	char sn[LINEMAX], * sp;
 	sn[0] = 0;
-	if (!gl && *ModuleName) {
-		STRCPY(sn, LINEMAX-2, ModuleName);
-		STRCAT(sn, 2, ".");
+	const char* prependNS = gl ? nullptr : ('.' == naam[0]) ? vorlab.c_str() : ModuleName[0] ? ModuleName : nullptr;
+	if (prependNS) {
+		STRCPY(sn, LINEMAX-2, prependNS);
+		if ('.' != naam[0]) STRCAT(sn, 2, ".");
 	}
 	STRCAT(sn, LINEMAX-1, naam);
 	sp = sn;
 	CStructure* p = strs[(*sp)&127];
 	while (p) {
-		if (!strcmp(sp, p->id)) return p;
+		if (!strcmp(sp, p->naam)) return p;
 		p = p->next;
 	}
 	if (gl || ! *ModuleName) return NULL;
 	sp += 1 + strlen(ModuleName); p = strs[(*sp)&127];
 	while (p) {
-		if (!strcmp(sp, p->id)) return p;
+		if (!strcmp(sp, p->naam)) return p;
 		p = p->next;
 	}
 	return NULL;
 }
 
-int CStructureTable::FindDuplicate(char* naam) {
+int CStructureTable::FindDuplicate(const char* naam) {
 	CStructure* p = strs[(*naam)&127];
 	while (p) {
 		if (!strcmp(naam, p->naam)) return 1;
