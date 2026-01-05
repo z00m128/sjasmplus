@@ -18,9 +18,9 @@ symbol_23   DEFL    23
 symbol_24   =       24
 symbol_25   EQU     25
 
-; make pass2 differ from pass1, reporting broken flow of local numeric labels
+; make pass2 differ from pass1
             IFUSED symbol_22
-404         nop
+404         nop                 ; no error since v1.21.1, temporary labels can change flow until last pass
 symbol_22                       ; also duplicate label in pass2 error
                                 ; ^^^ seems to be bugged currently, only warnings happens
             ENDIF

@@ -40,6 +40,48 @@
 Issue168_temporary_labels_for_all.asm(31): error: Unexpected: _B!AD
 31    1028 21 01 00         ld  hl,1_B!AD    ; this should fail
 32    102B
+33    102B              ; Issue #275 -> refactoring implementation to allow flow changes till next to last pass
+34    102B                  IF 2 <= 3
+35    102B              100:
+36    102B                  ENDIF
+37    102B C3 2B 10         jp  100_b
+38    102E C3 31 10         jp  100_f
+39    1031                  IF 2 <= 3
+40    1031              100:
+41    1031                  ENDIF
+42    1031              ; check warnings about value change in last pass
+43    1031                  IF 3 <= 3
+44    1031 C7               rst 0
+45    1032                  ENDIF
+46    1032                  IF 2 <= 3
+Issue168_temporary_labels_for_all.asm(47): warning: Temporary label has different address
+47    1032              101:
+48    1032                  ENDIF
+49    1032 C3 32 10         jp  101_b
+50    1035 C3 37 10         jp  101_f
+51    1038                  IF 2 <= 3
+Issue168_temporary_labels_for_all.asm(52): warning: Temporary label has different address
+52    1038              101:
+53    1038                  ENDIF
+54    1038              ; check error about flow change in penultimate <-> last pass
+55    1038                  IF 2 == 3
+56    1038 ~                rst 0       ; neutralize address change from previous block
+57    1038                  ENDIF
+58    1038              102:
+59    1038                  IF 3 <= 3
+Issue168_temporary_labels_for_all.asm(60): error: Temporary labels flow differs in last pass (missing/new temporary label since previous pass)
+60    1038              103:
+61    1038                  ENDIF
+62    1038 C3 38 10         jp  102_b
+Issue168_temporary_labels_for_all.asm(63): error: Temporary label not found: 102_f
+63    103B C3 00 00         jp  102_f
+64    103E                  IF 3 <= 3
+Issue168_temporary_labels_for_all.asm(65): error: Temporary labels flow differs in last pass (missing/new temporary label since previous pass)
+65    103E              103:
+66    103E                  ENDIF
+Issue168_temporary_labels_for_all.asm(67): error: Temporary labels flow differs in last pass (missing/new temporary label since previous pass)
+67    103E              102:
+68    103E
 # file closed: Issue168_temporary_labels_for_all.asm
 
 Value    Label

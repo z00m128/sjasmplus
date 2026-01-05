@@ -212,7 +212,8 @@
 - <link linkend="po_bplist">`BPLIST`</link> supports now also MAME
 - <link linkend="nex_close">`SAVENEX CLOSE`</link> can append multiple files
 - Lua: minor extensions and modifications to API
-- macros now handle large amount of macros defined better (like 64ki of macros)
+- refactored: <link linkend="s_temp_labels">temporary labels</link> must match flow only in last pass (earlier passes can differ)
+- refactored: macros now handle large amount of macros defined better (like 64ki of macros)
 - fix invalid BASIC line length in <link linkend="po_savetap">`SAVETAP`</link> loader
 - fix local labels inside macros in modules
 - fix local-label struct name usage
@@ -808,9 +809,8 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
 
       <para>To keep the number of used labels reasonable it is possible to use
       numbers as labels. To target these labels in all expressions use the number followed by an '_F' for forward
-      search or a '_B' for backward search. Temporary labels should be defined
-      in the same order during every pass of assembling, and they can be used
-      within macro, or repeating blocks.</para>
+      search or a '_B' for backward search. Temporary labels must be defined
+      in the same order during last passes of assembling (can reach across macro or repeating blocks).</para>
 
       <para>Before v1.19.0 the syntax was using only letters 'B' and 'F' and was enabled only
         for branching instructions (the old syntax still works for those, but only for those).</para>

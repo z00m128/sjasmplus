@@ -587,45 +587,32 @@ int CFunctionTable::zoek(const char* name) {
 TemporaryLabel::TemporaryLabel(aint number, aint address)
 	: nummer(number), value(address), isRelocatable(bool(Relocation::type)) {}
 
-CTemporaryLabelTable::CTemporaryLabelTable() {
-	labels.reserve(128);
-	refresh = 0;
-}
-
 void CTemporaryLabelTable::InitPass() {
-	refresh = 0;		// reset refresh pointer for next pass
+	labels = std::move(nextPassLabels);				// use labels collected in previous pass
+	nextPassLabels.reserve(128U + labels.size());	// reserve similar memory for next pass
 }
 
-bool CTemporaryLabelTable::insertImpl(const aint labelNumber) {
-	labels.emplace_back(labelNumber, CurAddress);
-	return true;
-}
-
-bool CTemporaryLabelTable::refreshImpl(const aint labelNumber) {
+bool CTemporaryLabelTable::InsertRefresh(const aint labelNumber) {
+	temporary_labels_t::size_type refresh = nextPassLabels.size();
+	nextPassLabels.emplace_back(labelNumber, CurAddress);
 	if (labels.size() <= refresh || labels.at(refresh).nummer != labelNumber) return false;
 	TemporaryLabel & to_r = labels.at(refresh);
 	if (to_r.value != CurAddress) Warning("Temporary label has different address");
-	to_r.value = CurAddress;
-	++refresh;
 	return true;
 }
 
-bool CTemporaryLabelTable::InsertRefresh(const aint nnummer) {
-	return (1 == pass) ? insertImpl(nnummer) : refreshImpl(nnummer);
-}
-
 const TemporaryLabel* CTemporaryLabelTable::seekForward(const aint labelNumber) const {
-	if (1 == pass) return nullptr;					// just building tables in first pass, no results yet
-	temporary_labels_t::size_type i = refresh;		// refresh already points at first "forward" temporary label
+	// has to search through previous pass "labels", so data may be outdated a bit (last pass should match penultimate pass!)
+	temporary_labels_t::size_type i = nextPassLabels.size();	// points at first "forward" temporary label
 	while (i < labels.size() && labelNumber != labels[i].nummer) ++i;
 	return (i < labels.size()) ? &labels[i] : nullptr;
 }
 
 const TemporaryLabel* CTemporaryLabelTable::seekBack(const aint labelNumber) const {
-	if (1 == pass || refresh <= 0) return nullptr;	// just building tables or no temporary label "backward"
-	temporary_labels_t::size_type i = refresh;		// after last "backward" temporary label
-	while (i--) if (labelNumber == labels[i].nummer) return &labels[i];
-	return nullptr;									// not found
+	// will search through nextPassLabels, so data are "fresh" from current pass
+	temporary_labels_t::size_type i = nextPassLabels.size();	// points after last "backward" temporary label
+	while (i-- && labelNumber != nextPassLabels[i].nummer) ;	// empty while statement, condition does all work
+	return (i < nextPassLabels.size()) ? &nextPassLabels[i] : nullptr;
 }
 
 CStringsList::CStringsList(const char* stringSource, CStringsList* nnext) {

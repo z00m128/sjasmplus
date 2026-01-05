@@ -684,7 +684,7 @@ void ParseLabel() {
 		}
 		val = atoi(tp);
 		if (!TemporaryLabelTable.InsertRefresh(val)) {
-			Error("Temporary labels flow differs in this pass (missing/new temporary label or final pass source difference)");
+			Error("Temporary labels flow differs in last pass (missing/new temporary label since previous pass)");
 		}
 	} else {
 		if (isMacroNext()) {

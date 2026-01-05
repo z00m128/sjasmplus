@@ -29,3 +29,39 @@
     node 'B',2
 
     ld  hl,1_B!AD    ; this should fail
+
+; Issue #275 -> refactoring implementation to allow flow changes till next to last pass
+    IF 2 <= __PASS__
+100:
+    ENDIF
+    jp  100_b
+    jp  100_f
+    IF 2 <= __PASS__
+100:
+    ENDIF
+; check warnings about value change in last pass
+    IF 3 <= __PASS__
+    rst 0
+    ENDIF
+    IF 2 <= __PASS__
+101:
+    ENDIF
+    jp  101_b
+    jp  101_f
+    IF 2 <= __PASS__
+101:
+    ENDIF
+; check error about flow change in penultimate <-> last pass
+    IF 2 == __PASS__
+    rst 0       ; neutralize address change from previous block
+    ENDIF
+102:
+    IF 3 <= __PASS__
+103:
+    ENDIF
+    jp  102_b
+    jp  102_f
+    IF 3 <= __PASS__
+103:
+    ENDIF
+102:

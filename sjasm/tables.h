@@ -141,9 +141,9 @@ struct TemporaryLabel {
 
 class CTemporaryLabelTable {
 public:
+	CTemporaryLabelTable() = default;
 	CTemporaryLabelTable(const CTemporaryLabelTable&) = delete;
 	CTemporaryLabelTable& operator=(CTemporaryLabelTable const &) = delete;
-	CTemporaryLabelTable();
 	void InitPass();
 	const TemporaryLabel* seekForward(const aint labelNumber) const;
 	const TemporaryLabel* seekBack(const aint labelNumber) const;
@@ -151,9 +151,7 @@ public:
 private:
 	typedef std::vector<TemporaryLabel> temporary_labels_t;
 	temporary_labels_t labels;
-	temporary_labels_t::size_type refresh;
-	bool insertImpl(const aint labelNumber);
-	bool refreshImpl(const aint labelNumber);
+	temporary_labels_t nextPassLabels;
 };
 
 class CStringsList {

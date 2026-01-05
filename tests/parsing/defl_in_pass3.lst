@@ -13,9 +13,8 @@ defl_in_pass3.asm(10): error: Label not found: p3_label
 10    0002              p3_label:           ; error
 defl_in_pass3.asm(11): error: Label not found: p3_label.p3_local
 11    0002              .p3_local:          ; error
-defl_in_pass3.asm(12): error: Temporary labels flow differs in this pass (missing/new temporary label or final pass source difference)
-defl_in_pass3.asm(12): error: Temporary label not found: 3B
-12    0002 18 FC        3       jr  3B      ; error
+defl_in_pass3.asm(12): error: Temporary labels flow differs in last pass (missing/new temporary label since previous pass)
+12    0002 18 FE        3       jr  3B      ; error
 13    0004                  ENDIF
 14    0004
 # file closed: defl_in_pass3.asm
