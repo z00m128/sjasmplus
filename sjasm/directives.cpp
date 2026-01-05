@@ -286,6 +286,10 @@ static void dirORG() {
 	}
 	// crop (with warning) address in device or non-longptr mode to 16bit address range
 	if ((DeviceID || !Options::IsLongPtr) && !check16u(val)) val &= 0xFFFF;
+	// warn about jump in address in raw/output mode
+	if (DidWriteOutputByte() && (CurAddress != val)) {
+		WarningById(W_FILE_ORG, val - CurAddress);
+	}
 	CurAddress = val;
 	if (DISP_NONE != PseudoORG) WarningById(W_DISPLACED_ORG);
 	if (!DeviceID) return;

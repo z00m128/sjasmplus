@@ -53,7 +53,7 @@ nest1unique:
 
     ENDMODULE
 
-    MODULE mod2 : ORG $3332
+    MODULE mod2 : ORG $3332 ; fileorg-ok
 label:
         add hl,hl
 .local:
@@ -106,7 +106,7 @@ nest2unique:
 
     ENDMODULE
 
-    ORG $3534
+    ORG $3534 ; fileorg-ok
 label:
     dec hl
 .local:
@@ -181,7 +181,7 @@ noColonProblemDemonstration EQU $   and 7
     IFUSED MissingLabel : ASSERT 0, "MissingLabel should NOT exist + NOT be used" : ENDIF
 
     ; do another module setup to test the EXIST searching from inner blocks
-    MODULE mod3 : ORG $4156
+    MODULE mod3 : ORG $4156 ; fileorg-ok
         ; check global ones (outside of current module)
         DB  -(exist label + exist label.local + exist unique + exist mod1.label + exist mod1.label.local + exist mod1.mod1unique)  ; == 6 (no error)
         DB  -(exist @label + exist @label.local + exist @unique + exist @mod1.label + exist @mod1.label.local + exist @mod1.mod1unique)  ; == 6 (no error)

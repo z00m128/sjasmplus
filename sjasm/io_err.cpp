@@ -171,6 +171,7 @@ typedef std::map<const char*, WarningEntry> messages_map;
 
 const char* W_NO_RAMTOP = "noramtop";
 const char* W_DEV_RAMTOP = "devramtop";
+const char* W_FILE_ORG = "fileorg";
 const char* W_DISPLACED_ORG = "displacedorg";
 const char* W_ORG_PAGE = "orgpage";
 const char* W_FWD_REF = "fwdref";
@@ -208,6 +209,12 @@ static messages_map w_texts = {
 		{ true,
 			"[DEVICE] this device was already opened with different RAMTOP value",
 			"Warn when different <ramtop> is used for same device."
+		}
+	},
+	{ W_FILE_ORG,
+		{ true,
+			"ORG does not pad output file to reach target address, bytes skipped",
+			"Warn about ORG skipping bytes in OUTPUT/raw/TAPOUT file."
 		}
 	},
 	{ W_DISPLACED_ORG,

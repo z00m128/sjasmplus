@@ -61,7 +61,7 @@ labels_syntax_and_find.asm(42): error: Label not found: mod1.nested.nest2unique
  54   3170                  ENDMODULE
  55   3170
  56   3170                  MODULE mod2
- 56   3170                ORG $3332
+ 56   3170                ORG $3332 ; fileorg-ok
  57   3332              label:
  58   3332 29                   add hl,hl
  59   3333              .local:
@@ -117,7 +117,7 @@ labels_syntax_and_find.asm(95): error: Label not found: mod2.nested.nest1unique
 106   3372
 107   3372                  ENDMODULE
 108   3372
-109   3372                  ORG $3534
+109   3372                  ORG $3534 ; fileorg-ok
 110   3534              label:
 111   3534 2B               dec hl
 112   3535              .local:
@@ -222,7 +222,7 @@ labels_syntax_and_find.asm(167): error: Unexpected: cpl
 182   3570
 183   3570                  ; do another module setup to test the EXIST searching from inner blocks
 184   3570                  MODULE mod3
-184   3570                ORG $4156
+184   3570                ORG $4156 ; fileorg-ok
 185   4156                      ; check global ones (outside of current module)
 186   4156 06                   DB  -(exist label + exist label.local + exist unique + exist mod1.label + exist mod1.label.local + exist mod1.mod1unique)  ; == 6 (no error)
 187   4157 06                   DB  -(exist @label + exist @label.local + exist @unique + exist @mod1.label + exist @mod1.label.local + exist @mod1.mod1unique)  ; == 6 (no error)

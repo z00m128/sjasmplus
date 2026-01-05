@@ -8,7 +8,7 @@
  7    0000 ~                       ; add padding
  8    0000 ~                       BLOCK addr?-$
  9    0000 ~                     ENDIF
-10    0000 ~                     ORG addr?
+10    0000 ~                     ORG addr?      ; fileorg-ok suppress built-in warning
 11    0000                  ENDM
 12    0000
 13    0000                      OUTPUT  "Issue90_FORG_replacement.bin"
@@ -29,7 +29,7 @@
 22    0003             >           ; add padding
 22    0003 00 00 00... >           BLOCK 0x0066-$
 22    0066             >         ENDIF
-22    0066             >         ORG 0x0066
+22    0066             >         ORG 0x0066      ; fileorg-ok suppress built-in warning
 23    0066
 24    0066 C3 00 01             JP  START
 25    0069              ;--------------------------------
@@ -42,7 +42,7 @@
 26    0069             >           ; add padding
 26    0069 00 00 00... >           BLOCK 0x0100-$
 26    0100             >         ENDIF
-26    0100             >         ORG 0x0100
+26    0100             >         ORG 0x0100      ; fileorg-ok suppress built-in warning
 27    0100
 28    0100 F3           START:	DI
 29    0101 3E 10                LD  a, 0x10
@@ -64,7 +64,7 @@
 38    010C ~           >           ; add padding
 38    010C ~           >           BLOCK addr?-$
 38    010C             >         ENDIF
-38    010C             >         ORG 0x40
+38    010C             >         ORG 0x40      ; fileorg-ok suppress built-in warning
 39    0040
 # file closed: Issue90_FORG_replacement.asm
 

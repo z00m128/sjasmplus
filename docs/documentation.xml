@@ -213,7 +213,11 @@
 - <link linkend="nex_close">`SAVENEX CLOSE`</link> can append multiple files
 - Lua: minor extensions and modifications to API
 - macros now handle large amount of macros defined better (like 64ki of macros)
+- fix invalid BASIC line length in <link linkend="po_savetap">`SAVETAP`</link> loader
 - fix local labels inside macros in modules
+- fix local-label struct name usage
+- warnings: added -Wfileorg when ORG is used to jump addresses while file output is active
+- docs: minor fixes/extensions
               </synopsis>
             </listitem>
           </varlistentry>

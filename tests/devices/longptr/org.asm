@@ -9,7 +9,7 @@ longptr3:   DB      'C'
 
     DEVICE ZXSPECTRUM48
     ; the --longptr should NOT affect actual devices => errors will be reported
-    ORG $FFFF
+    ORG $FFFF               ; fileorg-ok
 devbyte1:   DB      'a'
 devbyte2:   DB      'b'     ; error crossing $10000 address boundary
 devbyte3:   DB      'c'     ; silent after first error reported

@@ -1,0 +1,31 @@
+# file opened: org_warning.asm
+ 1    0000                  OUTPUT "org_warning.bin"
+ 2    0000                  ORG     1000    ; no warning, no byte in the open output file yet, free to set first address
+ 3    03E8 41               ld      b,c
+org_warning.asm(4): warning[fileorg]: ORG does not pad output file to reach target address, bytes skipped: 1999
+ 4    03E9                  ORG     3000    ; warning: ORG not emitting padding bytes
+ 5    0BB8 42               ld      b,d
+org_warning.asm(6): warning[fileorg]: ORG does not pad output file to reach target address, bytes skipped: -1001
+ 6    0BB9                  ORG     2000    ; warning: ORG not emitting padding bytes (erasing in this case)
+ 7    07D0 43               ld      b,e
+ 8    07D1                  ORG     2001    ; no warning, address does match $
+ 9    07D1 44               ld      b,h
+10    07D2                  ORG     4000    ; fileorg-ok ; warning suppressed
+11    0FA0 45               ld      b,l
+12    0FA1                  OUTEND
+13    0FA1
+14    0FA1                  ORG     5000    ; no warning, output file is closed here
+15    1388 21 21 21         ld      hl,"!!"
+16    138B
+17    138B                  OUTPUT "org_warning.bin",a      ; append to first file, but ORG warnings are reset
+18    138B                  ORG     6000    ; no warning, first byte after re-opening the file
+19    1770 46               ld      b,(hl)
+org_warning.asm(20): warning[fileorg]: ORG does not pad output file to reach target address, bytes skipped: 999
+20    1771                  ORG     7000    ; warning
+21    1B58 47               ld      b,a
+22    1B59                  OUTEND
+23    1B59
+# file closed: org_warning.asm
+
+Value    Label
+------ - -----------------------------------------------------------

@@ -7,7 +7,7 @@
     INCLUDE "launch_dir/2/launch_dir_b.i.asm"
     DB  '"'
     DB  10
-    ORG ' '
+    ORG ' ' ; fileorg-ok
     DB  "<"
     INCLUDE <launch_dir/1/launch_dir_a.i.asm>
     INCLUDE <launch_dir/1/launch_dir_b.i.asm>

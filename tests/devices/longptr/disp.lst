@@ -12,7 +12,7 @@
 11    8003
 12    8003 5F           normalmem:  DB      '_'
 13    8004
-14    8004                  ORG $FFFF
+14    8004                  ORG $FFFF               ; fileorg-ok
 15    FFFF              phase2_start:
 16    FFFF                  PHASE $FFFE
 17    FFFE 2E 44        longptr4:   DB      '.D'    ; disp FFFE..FFFF, but crossing real memory $10000
@@ -23,7 +23,7 @@
 22    0003
 23    0003 5F           longmem:    DB      '_'
 24    0004
-25    0004                  ORG $240000
+25    0004                  ORG $240000             ; fileorg-ok
 26    0000              phase3_start:
 27    0000                  PHASE $FFFFFF
 28    FFFF 47           longptr7:   DB      'G'
@@ -43,7 +43,7 @@ disp.asm(36): warning: value 0x1000000 is truncated to 16bit value: 0x0000
 40    000D
 41    000D              ; added: in one project the usage of `DS 0` did uncover bug truncating longptr addresses back to 16b, fixed in v1.18.4
 42    000D
-43    000D                  ORG $35000
+43    000D                  ORG $35000              ; fileorg-ok
 44    5000              phase4_start:
 45    5000                  PHASE $46000
 46    6000              longptrA:

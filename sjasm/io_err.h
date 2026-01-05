@@ -42,6 +42,7 @@ enum EWStatus { W_ALL, W_EARLY, W_PASS3, W_PASS03 };
 
 extern const char* W_NO_RAMTOP;
 extern const char* W_DEV_RAMTOP;
+extern const char* W_FILE_ORG;
 extern const char* W_DISPLACED_ORG;
 extern const char* W_ORG_PAGE;
 extern const char* W_FWD_REF;

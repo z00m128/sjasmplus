@@ -7,7 +7,7 @@
            ; add padding
            BLOCK addr?-$
          ENDIF
-         ORG addr?
+         ORG addr?      ; fileorg-ok suppress built-in warning
     ENDM
 
         OUTPUT  "Issue90_FORG_replacement.bin"

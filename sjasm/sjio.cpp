@@ -379,6 +379,11 @@ bool DidEmitByte() {	// returns true if some byte was emitted since last call to
 	return didEmit;
 }
 
+bool DidWriteOutputByte() {		// returns true while output/raw/tapout is active and some byte was emitted to it
+	aint expectedDestLen = WBLength + destlen;
+	return ((FP_Output || FP_RAW || FP_tapout) && expectedDestLen);
+}
+
 static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 	someByteEmitted = true;
 	if (LASTPASS == pass) {
@@ -884,6 +889,7 @@ void CloseDest() {
 	}
 	fclose(FP_Output);
 	FP_Output = NULL;
+	destlen = 0;
 }
 
 void SeekDest(long offset, int method) {

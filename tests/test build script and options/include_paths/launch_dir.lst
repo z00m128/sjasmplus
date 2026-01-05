@@ -128,7 +128,7 @@
 # file closed: launch_dir/2/launch_dir_b.i.asm
  8    0060 22               DB  '"'
  9    0061 0A               DB  10
-10    0062                  ORG ' '
+10    0062                  ORG ' ' ; fileorg-ok
 11    0020 3C               DB  "<"
 12    0021                  INCLUDE <launch_dir/1/launch_dir_a.i.asm>
 # file opened: launch_dir/1/launch_dir_a.i.asm

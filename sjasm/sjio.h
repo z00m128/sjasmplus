@@ -90,6 +90,7 @@ void EmitBytes(const int* bytes, bool isInstructionStart = false);
 void EmitWords(const int* words, bool isInstructionStart = false);
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory = false, int emitMaxToListing = 4);
 bool DidEmitByte();		// returns true if some byte was emitted since last call to this function
+bool DidWriteOutputByte();  // returns true while output/raw/tapout is active and some byte was emitted to it
 void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog = nullptr);
 void IncludeFile(fullpath_ref_t nfilename);
 void Close();
