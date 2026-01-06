@@ -59,3 +59,40 @@
     dw      #44''43
     dw      0X44''43
     dw      44''43H
+
+    ; digit-group underscore tests - fully valid ones ; v1.21.1: underscore added (it's nice to be C++ compatible, but _ keeps being mentioned)
+    db      %01_01_11_01, 01_01_11_01b, 01_01_11_01B, 0b01_01_11_01, 0B01_01_11_01
+    db      1_1_1q, 1_1_1Q, 1_1_1o, 1_1_1O, 0q1_1_1, 0Q1_1_1
+    dw      1_6_961, 1_6_961d, 1_6_961D
+    dw      $4_4_43, #4_4_43, 0x4_4_43, 0X4_4_43, 4_4_43h, 4_4_43H
+
+    ; digit-group underscore tests - invalid beginning (fewer than with tick, because underscore as first char is valid symbol name)
+    db      %_01_01_11_01
+    db      0B_01_01_11_01
+    db      0Q_1_1_1
+    dw      $_4_4_43
+    dw      #_4_4_43
+    dw      0X_4_4_43
+
+    ; digit-group underscore tests - invalid end
+    db      %01_01_11_01_
+    db      01_01_11_01_B
+    db      0B01_01_11_01_
+    db      1_1_1_Q
+    db      1_1_1_O
+    db      0Q1_1_1_
+    dw      1_6_961_
+    dw      1_6_961_D
+    dw      $4_4_43_
+    dw      #4_4_43_
+    dw      0X4_4_43_
+    dw      4_4_43_H
+
+    ; digit-group underscore tests - two underscores are invalid too
+    db      %0101__1101
+    db      0101__1101B
+    db      11__1Q
+    db      0Q11__1
+    dw      16__961D
+    dw      $44__43
+    dw      44__43H

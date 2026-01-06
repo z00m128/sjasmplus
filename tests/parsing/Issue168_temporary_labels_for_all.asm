@@ -28,8 +28,8 @@
     node 'A',1
     node 'B',2
 
-    ld  hl,1_B!AD    ; this should fail
-
+    ld  hl,1_B!AD    ; this should fail ; v1.21.1 now fails as "Missing next digit" and does NOT emit any machine code
+    hex 21 01 00     ; fake old test .lst result to minimize diff after error change in v1.21.1
 ; Issue #275 -> refactoring implementation to allow flow changes till next to last pass
     IF 2 <= __PASS__
 100:

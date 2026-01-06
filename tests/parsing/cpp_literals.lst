@@ -105,6 +105,73 @@ cpp_literals.asm(60): error: Unexpected: ''43
 cpp_literals.asm(61): error: Unexpected: ''43H
 61    0060 2C 00            dw      44''43H
 62    0062
+63    0062                  ; digit-group underscore tests - fully valid ones ; v1.21.1: underscore added (it's nice to be C++ compatible, but _ keeps being mentioned)
+64    0062 5D 5D 5D 5D      db      %01_01_11_01, 01_01_11_01b, 01_01_11_01B, 0b01_01_11_01, 0B01_01_11_01
+64    0066 5D
+65    0067 49 49 49 49      db      1_1_1q, 1_1_1Q, 1_1_1o, 1_1_1O, 0q1_1_1, 0Q1_1_1
+65    006B 49 49
+66    006D 41 42 41 42      dw      1_6_961, 1_6_961d, 1_6_961D
+66    0071 41 42
+67    0073 43 44 43 44      dw      $4_4_43, #4_4_43, 0x4_4_43, 0X4_4_43, 4_4_43h, 4_4_43H
+67    0077 43 44 43 44
+67    007B 43 44 43 44
+68    007F
+69    007F                  ; digit-group underscore tests - invalid beginning (fewer than with tick, because underscore as first char is valid symbol name)
+cpp_literals.asm(70): error: Missing next digit: %_01_01_11_01
+70    007F                  db      %_01_01_11_01
+cpp_literals.asm(71): error: Missing next digit: 0B_01_01_11_01
+71    007F                  db      0B_01_01_11_01
+cpp_literals.asm(72): error: Missing next digit: 0Q_1_1_1
+72    007F                  db      0Q_1_1_1
+cpp_literals.asm(73): error: Unexpected: _4_4_43
+73    007F 7F 00            dw      $_4_4_43
+cpp_literals.asm(74): error: [DW/DEFW/WORD] Syntax error: #_4_4_43
+74    0081                  dw      #_4_4_43
+cpp_literals.asm(75): error: Missing next digit: 0X_4_4_43
+75    0081                  dw      0X_4_4_43
+76    0081
+77    0081                  ; digit-group underscore tests - invalid end
+cpp_literals.asm(78): error: Unexpected: _
+78    0081 5D               db      %01_01_11_01_
+cpp_literals.asm(79): error: Missing next digit: 01_01_11_01_B
+79    0082                  db      01_01_11_01_B
+cpp_literals.asm(80): error: Unexpected: _
+80    0082 5D               db      0B01_01_11_01_
+cpp_literals.asm(81): error: Missing next digit: 1_1_1_Q
+81    0083                  db      1_1_1_Q
+cpp_literals.asm(82): error: Missing next digit: 1_1_1_O
+82    0083                  db      1_1_1_O
+cpp_literals.asm(83): error: Unexpected: _
+83    0083 49               db      0Q1_1_1_
+cpp_literals.asm(84): error: Unexpected: _
+84    0084 41 42            dw      1_6_961_
+cpp_literals.asm(85): error: Missing next digit: 1_6_961_D
+85    0086                  dw      1_6_961_D
+cpp_literals.asm(86): error: Unexpected: _
+86    0086 43 44            dw      $4_4_43_
+cpp_literals.asm(87): error: Unexpected: _
+87    0088 43 44            dw      #4_4_43_
+cpp_literals.asm(88): error: Unexpected: _
+88    008A 43 44            dw      0X4_4_43_
+cpp_literals.asm(89): error: Missing next digit: 4_4_43_H
+89    008C                  dw      4_4_43_H
+90    008C
+91    008C                  ; digit-group underscore tests - two underscores are invalid too
+cpp_literals.asm(92): error: Unexpected: __1101
+92    008C 05               db      %0101__1101
+cpp_literals.asm(93): error: Unexpected: __1101B
+93    008D 65               db      0101__1101B
+cpp_literals.asm(94): error: Unexpected: __1Q
+94    008E 0B               db      11__1Q
+cpp_literals.asm(95): error: Unexpected: __1
+95    008F 09               db      0Q11__1
+cpp_literals.asm(96): error: Unexpected: __961D
+96    0090 10 00            dw      16__961D
+cpp_literals.asm(97): error: Unexpected: __43
+97    0092 44 00            dw      $44__43
+cpp_literals.asm(98): error: Unexpected: __43H
+98    0094 2C 00            dw      44__43H
+99    0096
 # file closed: cpp_literals.asm
 
 Value    Label

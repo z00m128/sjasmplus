@@ -429,7 +429,7 @@ bool GetNumericValue_TwoBased(char*& p, const char* const pend, aint& val, const
 	const aint overflowMask = (~0UL)<<(32-shiftBase);
 	while (p < pend) {
 		const byte charDigit = *p++;
-		if ('\'' == charDigit && isalnum((byte)*p)) continue;
+		if (('\'' == charDigit || '_' == charDigit) && isalnum((byte)*p)) continue;
 		if (0 == charDigit || !isalnum(charDigit)) {
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
@@ -455,7 +455,7 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 	aint digit;
 	while (p < pend) {
 		const byte charDigit = *p++;
-		if ('\'' == charDigit && isalnum((byte)*p)) continue;
+		if (('\'' == charDigit || '_' == charDigit) && isalnum((byte)*p)) continue;
 		if (0 == charDigit || !isalnum(charDigit)) {
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
@@ -479,7 +479,7 @@ int GetConstant(char*& op, aint& val) {
 	// find end of the numeric literal (pointer is beyond last alfa/digit character
 	char* pend = op;
 	if ('#' == *pend || '$' == *pend || '%' == *pend) ++pend;
-	while (isalnum((byte)*pend) || ('\'' == *pend && isalnum((byte)pend[1]))) ++pend;
+	while (isalnum((byte)*pend) || (('\'' == *pend || '_' == *pend) && isalnum((byte)pend[1]))) ++pend;
 	char* const hardEnd = pend;
 	bool has_decimal_part = ('.' == *hardEnd) && isalnum((byte)hardEnd[1]);
 	// check if the format is defined by prefix (#, $, %, 0x, 0X, 0b, 0B, 0q, 0Q)
@@ -514,7 +514,7 @@ int GetConstant(char*& op, aint& val) {
 				break;
 		}
 	}
-	if ('\'' == *p || '\'' == pend[-1]) {	// digit-group tick can't be first/last digit
+	if ('\'' == *p || '\'' == pend[-1] || '_' == *p || '_' == pend[-1]) {	// digit-group tick can't be first/last digit
 		Error(getNumericValueErr_no_digit, op, SUPPRESS);
 		return 0;
 	}
@@ -536,7 +536,7 @@ int GetConstant(char*& op, aint& val) {
 	p = hardEnd + 1;
 	assert(isalnum((byte)*p));
 	pend = hardEnd + 2;
-	while (isalnum((byte)*pend) || ('\'' == *pend && isalnum((byte)pend[1]))) ++pend;
+	while (isalnum((byte)*pend) || (('\'' == *pend || '_' == *pend) && isalnum((byte)pend[1]))) ++pend;
 	aint fractionVal;
 	if (0 < shiftBase) {
 		GetNumericValue_TwoBased(p, pend, fractionVal, shiftBase);

@@ -211,6 +211,7 @@
               <synopsis>
 - <link linkend="po_bplist">`BPLIST`</link> supports now also MAME
 - <link linkend="nex_close">`SAVENEX CLOSE`</link> can append multiple files
+- <link linkend="s_numeric">numeric constants</link> can separate/group digits also by underscore
 - JR and DJNZ added to "smart" <link linkend="s_labels">SMC offset</link> instructions: `abc+*: jr $`
 - Lua: minor extensions and modifications to API
 - refactored: <link linkend="s_temp_labels">temporary labels</link> must match flow only in last pass (earlier passes can differ)
@@ -865,10 +866,13 @@ $c     hexadecimal
 1100b  binary
 0q14   octal
 14q    octal
-14o    octal</programlisting></para>
+14o    octal
 
-      <para>Optional single quotes(') may be inserted between the digits as a separator
-      (example: <computeroutput> ld a,%11'01'11'00 </computeroutput>).
+12'345 digit separator ' (same as C++)
+1_3_7q digit separator _ (common in other languages/tools)</programlisting></para>
+
+      <para>Optional single quotes (') or underscore (_) may be inserted between the digits as a separator
+      (example: <computeroutput> ld a,%11'01'11'00 : ld e,$40_DD </computeroutput>).
       They are ignored by the assembler.</para>
 
       <para>(v1.20.1) decimal parts are now parsed and ignored (with optional warning), instead of

@@ -37,9 +37,9 @@
 29    1025 21 2A 10    >        ld hl,1_F+2
 29    1028             >1
 30    1028
-Issue168_temporary_labels_for_all.asm(31): error: Unexpected: _B!AD
-31    1028 21 01 00         ld  hl,1_B!AD    ; this should fail
-32    102B
+Issue168_temporary_labels_for_all.asm(31): error: Missing next digit: 1_B!AD
+31    1028                  ld  hl,1_B!AD    ; this should fail ; v1.21.1 now fails as "Missing next digit" and does NOT emit any machine code
+32    1028 21 01 00         hex 21 01 00     ; fake old test .lst result to minimize diff after error change in v1.21.1
 33    102B              ; Issue #275 -> refactoring implementation to allow flow changes till next to last pass
 34    102B                  IF 2 <= 3
 35    102B              100:
