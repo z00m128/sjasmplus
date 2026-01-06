@@ -20,42 +20,42 @@
  18   800C                  ASSERT $800C+1 == _ld_c_i
  19   800C 0E 56        _ld_c_i+*:      ld      c,$56
  20   800E              ; $1x opcodes
-smc_label_smart.asm(21): error: unresolved smart-SMC symbol (no significant target)
- 21   800E 10 FE        Xdjnz+*:        djnz    $           ; not supported
+ 21   800E 10 FE        _djnz+*:        djnz    $
+ 21   8010                ASSERT $800E+1 == _djnz
  22   8010                  ASSERT $8010+1 == _ld_de_i
  23   8010 11 34 12     _ld_de_i+*:     ld      de,$1234
  24   8013                  ASSERT $8013+1 == _ld_d_i
  25   8013 16 56        _ld_d_i+*:      ld      d,$56
-smc_label_smart.asm(26): error: unresolved smart-SMC symbol (no significant target)
- 26   8015 18 FE        Xjr+*:          jr      $           ; not supported
+ 26   8015 18 FE        _jr+*:          jr      $
+ 26   8017                ASSERT $8015+1 == _jr
  27   8017                  ASSERT $8017+1 == _ld_e_i
  28   8017 1E 56        _ld_e_i+*:      ld      e,$56
  29   8019              ; $2x opcodes
-smc_label_smart.asm(30): error: unresolved smart-SMC symbol (no significant target)
- 30   8019 20 FE        Xjr_nz+*:       jr      nz,$        ; not supported
+ 30   8019 20 FE        _jr_nz+*:       jr      nz,$
+ 30   801B                ASSERT $8019+1 == _jr_nz
  31   801B                  ASSERT $801B+1 == _ld_hl_i
  32   801B 21 34 12     _ld_hl_i+*:     ld      hl,$1234
  33   801E                  ASSERT $801E+1 == _ld_m_hl
  34   801E 22 34 12     _ld_m_hl+*:     ld      ($1234),hl
  35   8021                  ASSERT $8021+1 == _ld_h_i
  36   8021 26 56        _ld_h_i+*:      ld      h,$56
-smc_label_smart.asm(37): error: unresolved smart-SMC symbol (no significant target)
- 37   8023 28 FE        Xjr_z+*:        jr      z,$         ; not supported
+ 37   8023 28 FE        _jr_z+*:        jr      z,$
+ 37   8025                ASSERT $8023+1 == _jr_z
  38   8025                  ASSERT $8025+1 == _ld_hl_m
  39   8025 2A 34 12     _ld_hl_m+*:     ld      hl,($1234)
  40   8028                  ASSERT $8028+1 == _ld_l_i
  41   8028 2E 56        _ld_l_i+*:      ld      l,$56
  42   802A              ; $3x opcodes
-smc_label_smart.asm(43): error: unresolved smart-SMC symbol (no significant target)
- 43   802A 30 FE        Xjr_nc+*:       jr      nc,$        ; not supported
+ 43   802A 30 FE        _jr_nc+*:       jr      nc,$
+ 43   802C                ASSERT $802A+1 == _jr_nc
  44   802C                  ASSERT $802C+1 == _ld_sp_i
  45   802C 31 34 12     _ld_sp_i+*:     ld      sp,$1234
  46   802F                  ASSERT $802F+1 == _ld_m_a
  47   802F 32 34 12     _ld_m_a+*:      ld      ($1234),a
  48   8032                  ASSERT $8032+1 == _ld_memhl_i
  49   8032 36 56        _ld_memhl_i+*:  ld      (hl),$56
-smc_label_smart.asm(50): error: unresolved smart-SMC symbol (no significant target)
- 50   8034 38 FE        Xjr_c+*:        jr      c,$         ; not supported
+ 50   8034 38 FE        _jr_c+*:        jr      c,$
+ 50   8036                ASSERT $8034+1 == _jr_c
  51   8036                  ASSERT $8036+1 == _ld_a_m
  52   8036 3A 34 12     _ld_a_m+*:      ld      a,($1234)
  53   8039                  ASSERT $8039+1 == _ld_a_i
@@ -295,11 +295,9 @@ smc_label_smart.asm(229): error: unresolved smart-SMC symbol (no significant tar
 229   8177 E6 08          and 8         ; must be first instruction after smc label, not second+
 230   8179
 231   8179                  ; syntax errors, using SMC label in unsupported context
-smc_label_smart.asm(232): error: unresolved smart-SMC symbol (no significant target)
 smc_label_smart.asm(232): error: Temporary label can't use SMC-offset
 smc_label_smart.asm(232): error: Temporary label not found: 123B
 232   8179 18 00        123+*   jr  123B
-smc_label_smart.asm(233): error: unresolved smart-SMC symbol (no significant target)
 smc_label_smart.asm(233): error: Temporary label can't use SMC-offset
 smc_label_smart.asm(233): error: Temporary label not found: 124B
 233   817B 18 00        124+*:  jr  124B
@@ -378,6 +376,7 @@ Value    Label
 0x8069   _call_po
 0x804A   _call_z
 0x8084   _cp_i
+0x800F   _djnz
 0x803F   _jp
 0x805C   _jp_c
 0x807E   _jp_m
@@ -387,6 +386,11 @@ Value    Label
 0x806E   _jp_pe
 0x8066   _jp_po
 0x8047   _jp_z
+0x8016   _jr
+0x8035   _jr_c
+0x802B   _jr_nc
+0x801A   _jr_nz
+0x8024   _jr_z
 0x803A   _ld_a_i
 0x8037   _ld_a_m
 0x800B   _ld_b_i
@@ -461,15 +465,9 @@ Value    Label
 0x8148 X Xbit0_memiy
 0x80B3 X Xdec_memix
 0x810E X Xdec_memiy
-0x800F X Xdjnz
 0x805F X Xin_n
 0x80B0 X Xinc_memix
 0x810B X Xinc_memiy
-0x8016 X Xjr
-0x8035 X Xjr_c
-0x802B X Xjr_nc
-0x801A X Xjr_nz
-0x8024 X Xjr_z
 0x80C6 X Xld_a_memix
 0x8121 X Xld_a_memiy
 0x80BA X Xld_b_memix

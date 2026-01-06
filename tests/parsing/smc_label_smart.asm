@@ -18,36 +18,36 @@ _ld_b_i+*:      ld      b,$56
     ASSERT $800C+1 == _ld_c_i
 _ld_c_i+*:      ld      c,$56
 ; $1x opcodes
-Xdjnz+*:        djnz    $           ; not supported
+_djnz+*:        djnz    $           : ASSERT $800E+1 == _djnz
     ASSERT $8010+1 == _ld_de_i
 _ld_de_i+*:     ld      de,$1234
     ASSERT $8013+1 == _ld_d_i
 _ld_d_i+*:      ld      d,$56
-Xjr+*:          jr      $           ; not supported
+_jr+*:          jr      $           : ASSERT $8015+1 == _jr
     ASSERT $8017+1 == _ld_e_i
 _ld_e_i+*:      ld      e,$56
 ; $2x opcodes
-Xjr_nz+*:       jr      nz,$        ; not supported
+_jr_nz+*:       jr      nz,$        : ASSERT $8019+1 == _jr_nz
     ASSERT $801B+1 == _ld_hl_i
 _ld_hl_i+*:     ld      hl,$1234
     ASSERT $801E+1 == _ld_m_hl
 _ld_m_hl+*:     ld      ($1234),hl
     ASSERT $8021+1 == _ld_h_i
 _ld_h_i+*:      ld      h,$56
-Xjr_z+*:        jr      z,$         ; not supported
+_jr_z+*:        jr      z,$         : ASSERT $8023+1 == _jr_z
     ASSERT $8025+1 == _ld_hl_m
 _ld_hl_m+*:     ld      hl,($1234)
     ASSERT $8028+1 == _ld_l_i
 _ld_l_i+*:      ld      l,$56
 ; $3x opcodes
-Xjr_nc+*:       jr      nc,$        ; not supported
+_jr_nc+*:       jr      nc,$        : ASSERT $802A+1 == _jr_nc
     ASSERT $802C+1 == _ld_sp_i
 _ld_sp_i+*:     ld      sp,$1234
     ASSERT $802F+1 == _ld_m_a
 _ld_m_a+*:      ld      ($1234),a
     ASSERT $8032+1 == _ld_memhl_i
 _ld_memhl_i+*:  ld      (hl),$56
-Xjr_c+*:        jr      c,$         ; not supported
+_jr_c+*:        jr      c,$         : ASSERT $8034+1 == _jr_c
     ASSERT $8036+1 == _ld_a_m
 _ld_a_m+*:      ld      a,($1234)
     ASSERT $8039+1 == _ld_a_i

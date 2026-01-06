@@ -764,6 +764,8 @@ namespace Z80 {
 				Error(el); jmp = 0;
 			}
 			e[0] = 0x10; e[1] = jmp & 0xFF;
+			resolveRelocationAffected(INT_MAX, Relocation::OFF);	// no relocation for relative jump: clear flag silently
+			resolveRelocationAndSmartSmc(1);						// resolve self-modify-code smart marker
 			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 		Relocation::isResultAffected = false;	// DJNZ is always relocatable
@@ -991,6 +993,8 @@ namespace Z80 {
 				jrad = 0;
 			}
 			e[1] = jrad & 0xFF;
+			resolveRelocationAffected(INT_MAX, Relocation::OFF);	// no relocation for relative jump: clear flag silently
+			resolveRelocationAndSmartSmc(1);						// resolve self-modify-code smart marker
 			EmitBytes(e, true);
 		} while (Options::syx.MultiArg(lp));
 		Relocation::isResultAffected = false;	// relative jump is always relocatable
