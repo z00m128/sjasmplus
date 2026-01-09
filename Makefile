@@ -71,7 +71,7 @@ RMSRCTARDIR?=rm -rf ../$(SRCTARDIR)
 
 BUILD_DIR=build
 
-LUA_VER?=5.4
+LUA_VER?=5.5
 LUA_LIBNAME?=lua$(LUA_VER)
 
 SUBDIR_BASE=sjasm

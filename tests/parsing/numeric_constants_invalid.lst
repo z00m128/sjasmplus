@@ -76,12 +76,12 @@ numeric_constants_invalid.asm(43): warning[decimaln]: decimal part is ignored: 0
 48    0028 ~                    _pc("db " .. 36/7 .. " , " .. 36//7)    -- "36//7" is integer variant of "36/7"
 numeric_constants_invalid.asm(45): warning[decimalz]: [LUA] decimal part is ignored: 128.0 , 128
 49    0028 80 80        db 128.0 , 128
-numeric_constants_invalid.asm(46): warning[decimaln]: [LUA] decimal part is ignored: 128.00088723147 , 128
-49    002A 80 80        db 128.00088723147 , 128
+numeric_constants_invalid.asm(46): warning[decimaln]: [LUA] decimal part is ignored: 128.00088723146598 , 128
+49    002A 80 80        db 128.00088723146598 , 128
 numeric_constants_invalid.asm(47): warning[decimalz]: [LUA] decimal part is ignored: 5.0 , 5
 49    002C 05 05        db 5.0 , 5
-numeric_constants_invalid.asm(48): warning[decimaln]: [LUA] decimal part is ignored: 5.1428571428571 , 5
-49    002E 05 05        db 5.1428571428571 , 5
+numeric_constants_invalid.asm(48): warning[decimaln]: [LUA] decimal part is ignored: 5.1428571428571432 , 5
+49    002E 05 05        db 5.1428571428571432 , 5
 49    0030                  ENDLUA
 numeric_constants_invalid.asm(50): warning[decimalz]: decimal part is ignored: 12.0'0
 50    0030 0C               DB      12.0'0

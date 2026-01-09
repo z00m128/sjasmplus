@@ -1,6 +1,6 @@
 ;
 ; check if standard Lua libraries are loaded
-; see Lua 5.4 manual for full details: https://www.lua.org/manual/5.4/manual.html#6
+; see Lua 5.5 manual for full details: https://www.lua.org/manual/5.5/manual.html#6
 ;
     LUA
         -- base lib
@@ -8,7 +8,7 @@
         assert(2 == tonumber("10", 2))
         assert(43794 == tonumber("ab12", 16))
         assert("1234" == tostring(1234))
-        assert("Lua 5.4" == _VERSION)
+        assert("Lua 5.5" == _VERSION)
         assert("nil" == type(nil))
         -- string manipulation
         assert(0x42 == string.byte("ABC", 2))

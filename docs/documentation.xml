@@ -213,6 +213,7 @@
 - <link linkend="nex_close">`SAVENEX CLOSE`</link> can append multiple files
 - <link linkend="s_numeric">numeric constants</link> can separate/group digits also by underscore
 - JR and DJNZ added to "smart" <link linkend="s_labels">SMC offset</link> instructions: `abc+*: jr $`
+- Lua: version upgrade to 5.5.0 (from 5.4.7)
 - Lua: minor extensions and modifications to API
 - refactored: <link linkend="s_temp_labels">temporary labels</link> must match flow only in last pass (earlier passes can differ)
 - refactored: macros now handle large amount of macros defined better (like 64ki of macros)
@@ -4263,7 +4264,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
         as <ulink url="https://www.lua.org/">Lua</ulink> embedded to the assembler? Answer is simple: it can be used to add extra
       features by users. And Lua is small enough, fast and powerful scripting engine.</para>
 
-      <para>Sjasmplus currently includes Lua 5.4.7 (since v1.21.0). The upgrade from Lua 5.1 in v1.20.0
+      <para>Sjasmplus currently includes Lua 5.5.0 (since v1.21.1). The upgrade from Lua 5.1 in v1.20.0
         was done along replacing tolua++ with LuaBridge2.6 and while there was lot of effort
         to maintain original Lua bindings to sjasmplus, there were few changes to the API.</para>
 
@@ -4276,7 +4277,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
         extended and has better test-coverage to make it less likely to change in the future.</para>
 
       <para>Also please mind the breaking changes of the Lua itself, and adjust your scripts
-        to Lua 5.4 syntax and library functions, there is example below with common issues
+        to Lua 5.5 syntax and library functions, there is example below with common issues
         already encountered (open github issues with others so we can add them to docs).</para>
     </section>
 
@@ -4592,12 +4593,12 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
 
       <para><emphasis>None at this moment.</emphasis></para>
 
-      <para>Since v1.20.0 the sjasmplus integrates Lua 5.4.4 (now 5.4.7).</para>
+      <para>Since v1.20.0 the sjasmplus integrates Lua 5.4.4 (now 5.5.0).</para>
 
       <para>The libraries included in older versions of sjasmplus: lpack.c, bit (bitwise operators)
         and hex (convert to/from hexa numbers) are now all part of the standard Lua 5.4.</para>
 
-      <para>Refer to <ulink url="https://www.lua.org/manual/5.4/manual.html#6">Lua documentation</ulink>
+      <para>Refer to <ulink url="https://www.lua.org/manual/5.5/manual.html#6">Lua documentation</ulink>
         for full list of functions and detailed help.</para>
 
       <para>For small example check the test <code>tests/lua_examples/trivial/lua_standard_libs.asm</code></para>
@@ -4730,7 +4731,7 @@ $ cmake --install build</programlisting></para>
         </example>
 
         <example>
-          <title>Common issues with upgrade to Lua 5.4</title>
+          <title>Common issues with upgrade to Lua 5.5</title>
 
           <para><programlisting>  LUA ALLPASS
     x = 2.3 ^ 4.5             -- old syntax: math.exp(2.3, 4.5)

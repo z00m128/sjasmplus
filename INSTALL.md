@@ -62,7 +62,7 @@ Go to folder with sjasmplus project and run following set of commands:
 	cmake --build build
 	cmake --install build
 
-The project will use internal copy of Lua 5.4.4 by default, but you can use system Lua 5.4 by using `-DSYSTEM_LUA=ON`.
+The project will use internal copy of Lua 5.5.0 by default, but you can use system Lua 5.5 by using `-DSYSTEM_LUA=ON`.
 
 For disabling of LUA scripting support add `-DENABLE_LUA=OFF` option:
 

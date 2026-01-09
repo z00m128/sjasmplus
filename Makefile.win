@@ -20,7 +20,7 @@ COMPRESS=upx.exe --best -vk --overlay=skip --compress-icons=0
 EXE=sjasmplus.exe
 
 SUBDIR_BASE=sjasm
-SUBDIR_LUA=lua5.4
+SUBDIR_LUA=lua5.5
 SUBDIR_LUABRIDGE=LuaBridge/Source
 SUBDIR_CRC32C=crc32c
 
