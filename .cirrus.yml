@@ -120,7 +120,7 @@ task:
     CIRRUS_CLONE_DEPTH: 1
     CIRRUS_CLONE_SUBMODULES: true
   macos_instance:
-    image: ghcr.io/cirruslabs/macos-sonoma-base:latest
+    image: ghcr.io/cirruslabs/macos-runner:tahoe
   sw_versions2_script:
     - git --version || echo "no git"
     - bash --version || echo "no bash"
