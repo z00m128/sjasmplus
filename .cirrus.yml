@@ -48,7 +48,7 @@ pipe:
       # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
       install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
       # "-n" as the *.gcov files are already generated in the project root from previous step
-      upload_gcov_data_script: cpp-coveralls -n -e lua5.4/ -e LuaBridge/ -e unittest-cpp/ -e cpp-src-tests/
+      upload_gcov_data_script: cpp-coveralls -n -e lua5.5/ -e LuaBridge/ -e unittest-cpp/ -e cpp-src-tests/
 
 # image cirrusci/windowsservercore:cmake located at (Jul 2022):
 # https://hub.docker.com/layers/windowsservercore/cirrusci/windowsservercore/cmake/images/sha256-25bc1126d3d4b8e4e5c07bc7105612c5c4877816dfdad94bf4fded5f999d1cf3
