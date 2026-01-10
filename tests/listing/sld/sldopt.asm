@@ -8,7 +8,7 @@ label1: DB  1,"b",3 ; some keyword3 here
 label2: DB  4,"e",6 ; keyword none here
 
     SLDOPT COMMENT keyword1, keyword2   ; SLDOPT is global directive
-    SLDOPT COMMENT keyword2, keyword3   ; and keywords could be added over multiple lines
+    SLDOPT comment keyword2, keyword3   ; and keywords could be added over multiple lines
 
         ret         ; some keyword1 also after SLDOPT specified (should not matter)
         nop         ; some eol comment without any keyword
@@ -32,3 +32,10 @@ someData:   dw 1234
     SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
     SLDOPT COMMENT
     SLDOPT
+
+    SLDOPT swapon       ; swap source pos <-> definition pos in SLD
+    MEMGUARD
+    SLDOPT swapoff      ; swap off
+    MEMGUARD
+
+    ; define some macro with swap on+off inside

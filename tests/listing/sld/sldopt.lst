@@ -9,7 +9,7 @@
  8    8005 04 65 06     label2: DB  4,"e",6 ; keyword none here
  9    8008
 10    8008                  SLDOPT COMMENT keyword1, keyword2   ; SLDOPT is global directive
-11    8008                  SLDOPT COMMENT keyword2, keyword3   ; and keywords could be added over multiple lines
+11    8008                  SLDOPT comment keyword2, keyword3   ; and keywords could be added over multiple lines
 12    8008
 13    8008 C9                   ret         ; some keyword1 also after SLDOPT specified (should not matter)
 14    8009 00                   nop         ; some eol comment without any keyword
@@ -42,6 +42,17 @@ sldopt.asm(33): error: [SLDOPT COMMENT] invalid keyword:
 sldopt.asm(34): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT):
 34    EA66                  SLDOPT
 35    EA66
+36    EA66                  SLDOPT swapon       ; swap source pos <-> definition pos in SLD
+37    EA66                  MEMGUARD
+37    EA66 00          >        defb 0  ; WPMEM keyword1
+37    EA67 00          >        nop     ; keyword3
+38    EA68                  SLDOPT swapoff      ; swap off
+39    EA68                  MEMGUARD
+39    EA68 00          >        defb 0  ; WPMEM keyword1
+39    EA69 00          >        nop     ; keyword3
+40    EA6A
+41    EA6A                  ; define some macro with swap on+off inside
+42    EA6A
 # file closed: sldopt.asm
 
 Value    Label

@@ -23,3 +23,9 @@ sldopt.asm|27||0|1|60002|L|,someData,
 sldopt.asm|28||22|1|60004|K|; WPMEM keyword1
 sldopt.asm|28||23|1|60005|K|; keyword3
 sldopt.asm|28||23|1|60005|T|
+sldopt.asm|22||37|1|60006|K|; WPMEM keyword1
+sldopt.asm|23||37|1|60007|K|; keyword3
+sldopt.asm|23||37|1|60007|T|
+sldopt.asm|39||22|1|60008|K|; WPMEM keyword1
+sldopt.asm|39||23|1|60009|K|; keyword3
+sldopt.asm|39||23|1|60009|T|

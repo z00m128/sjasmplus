@@ -1358,6 +1358,7 @@ void WriteExp(const char* n, aint v) {
 
 /////// source-level-debugging support by Ckirby
 
+aint sldSwapSrcPos = 0;
 static FILE* FP_SourceLevelDebugging = NULL;
 static char sldMessage[LINEMAX2];
 static const char* WriteToSld_noSymbol = "";
@@ -1462,8 +1463,12 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	assert(!sourcePosStack.empty());
 	const bool outside_source = (sourcePosStack.size() <= size_t(IncludeLevel));
 	const bool has_def_pos = !outside_source && (size_t(IncludeLevel + 1) < sourcePosStack.size());
-	const TextFilePos & curPos = outside_source ? sourcePosStack.back() : sourcePosStack.at(IncludeLevel);
-	const TextFilePos & defPos = has_def_pos ? sourcePosStack.back() : TextFilePos();
+	const TextFilePos & curPos = (sldSwapSrcPos <= 0) ?
+										(outside_source ? sourcePosStack.back() : sourcePosStack.at(IncludeLevel)) :
+										sourcePosStack.back();
+	const TextFilePos & defPos =  (sldSwapSrcPos <= 0) ?
+										(has_def_pos ? sourcePosStack.back() : TextFilePos()) :
+										((outside_source || !has_def_pos) ? TextFilePos() : sourcePosStack.at(IncludeLevel));
 
 	const char* macroFN = defPos.filename && strcmp(defPos.filename, curPos.filename) ? defPos.filename : "";
 	WriteToSldFile_TextFilePos(sldMessage_sourcePos, curPos);

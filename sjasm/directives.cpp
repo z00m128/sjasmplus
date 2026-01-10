@@ -2145,6 +2145,10 @@ static void dirSLDOPT() {
 		do {
 			SldAddCommentKeyword(GetID(lp));
 		} while (!SkipBlanks(lp) && anyComma(lp));
+	} else if (cmphstr(lp, "swapon")) {
+		++sldSwapSrcPos;
+	} else if (cmphstr(lp, "swapoff")) {
+		--sldSwapSrcPos;
 	} else {
 		Error("[SLDOPT] Syntax error in <type> (valid is only COMMENT)", lp, SUPPRESS);
 	}
