@@ -2141,7 +2141,7 @@ static void dirDEVICE() {
 
 static void dirSLDOPT() {
 	SkipBlanks(lp);
-	if (cmphstr(lp, "COMMENT")) {
+	if (cmphstr(lp, "comment")) {
 		do {
 			SldAddCommentKeyword(GetID(lp));
 		} while (!SkipBlanks(lp) && anyComma(lp));
