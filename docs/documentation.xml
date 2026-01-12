@@ -213,6 +213,7 @@
 - <link linkend="nex_close">`SAVENEX CLOSE`</link> can append multiple files
 - <link linkend="s_numeric">numeric constants</link> can separate/group digits also by underscore
 - JR and DJNZ added to "smart" <link linkend="s_labels">SMC offset</link> instructions: `abc+*: jr $`
+- <link linkend="po_sldopt">`SLDOPT`</link> extended with swapon/swapoff command to adjust SLD files.
 - Lua: version upgrade to 5.5.0 (from 5.4.7)
 - Lua: minor extensions and modifications to API
 - refactored: <link linkend="s_temp_labels">temporary labels</link> must match flow only in last pass (earlier passes can differ)
@@ -3462,6 +3463,25 @@ start:
 var1    DB 1      ; WPMEM - exported
 var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para>
                 </example></para>
+            </listitem>
+
+            <listitem>
+              <para>Type `<code>SWAPON</code>` and `<code>SWAPOFF</code>` - swaps source and definition positions in
+                <link linkend="c_sld_data">Source Level Debugging (SLD) data</link>.
+                This may help to debug content of macros in debuggers which work only with source file positions.</para>
+
+              <para><example>
+                  <title></title>
+
+                  <para><programlisting>    DEVICE ZXSPECTRUM128
+    MACRO SWAPON_IN_MACRO
+        SLDOPT swapon   ; make `scf` below have SLD data for "source/emit" swapped with "definition" data
+        scf             ; "definition" line
+        SLDOPT swapoff
+    ENDM
+    ORG $8000
+    SWAPON_IN_MACRO     ; "source/emit" line</programlisting></para>
+                  </example></para>
             </listitem>
           </varlistentry>
 

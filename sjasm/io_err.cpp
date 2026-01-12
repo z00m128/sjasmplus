@@ -189,6 +189,7 @@ const char* W_REL_DIVERTS = "reldiverts";
 const char* W_REL_UNSTABLE = "relunstable";
 const char* W_DISP_MEM_PAGE = "dispmempage";
 const char* W_BP_FILE = "bpfile";
+const char* W_SLD_SWAP = "sldswap";
 const char* W_OUT0 = "out0";
 const char* W_BACKSLASH = "backslash";
 const char* W_OPKEYWORD = "opkeyword";
@@ -317,6 +318,12 @@ static messages_map w_texts = {
 		{ true,
 			"breakpoints file was not specified",
 			"Warn when SETBREAKPOINT is used without breakpoint file."
+		}
+	},
+	{ W_SLD_SWAP,
+		{ true,
+			"SLDOPT swapon/swapoff unevenly paired within macro/include",
+			"Warn when SLD swap on/off is uneven per macro/include."
 		}
 	},
 	{ W_OUT0,

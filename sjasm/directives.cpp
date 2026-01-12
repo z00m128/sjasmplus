@@ -2150,7 +2150,7 @@ static void dirSLDOPT() {
 	} else if (cmphstr(lp, "swapoff")) {
 		--sldSwapSrcPos;
 	} else {
-		Error("[SLDOPT] Syntax error in <type> (valid is only COMMENT)", lp, SUPPRESS);
+		Error("[SLDOPT] Syntax error in <type> (valid: COMMENT, SWAPON, SWAPOFF)", lp, SUPPRESS);
 	}
 }
 

@@ -898,6 +898,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	++lijst;
 	STRCPY(ml, LINEMAX, line);
 	sourcePosStack.push_back(TextFilePos());
+	const aint osldSwapSrcPos = sldSwapSrcPos;
 	while (lijstp) {
 		sourcePosStack.back() = lijstp->source;
 		STRCPY(line, LINEMAX, lijstp->string);
@@ -906,6 +907,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 		lijstp = lijstp->next;
 		ParseLineSafe();
 	}
+	if (osldSwapSrcPos != sldSwapSrcPos) WarningById(W_SLD_SWAP, mac_it->first.c_str());
 	sourcePosStack.pop_back();
 	++CompiledCurrentLine;
 	STRCPY(line, LINEMAX, ml);

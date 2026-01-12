@@ -605,6 +605,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	rlpbuf = rlpbuf_end = rlbuf;
 	colonSubline = false;
 	blockComment = 0;
+	const aint osldSwapSrcPos = sldSwapSrcPos;
 
 	ReadBufLine();
 
@@ -616,6 +617,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 		}
 	}
 
+	if (osldSwapSrcPos != sldSwapSrcPos && IncludeLevel) WarningById(W_SLD_SWAP, nfilename.str.c_str());
 	// show in listing file which file was closed
 	if (LASTPASS == pass && listFile) {
 		fputs("# file closed: ", listFile);

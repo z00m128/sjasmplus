@@ -39,3 +39,43 @@ someData:   dw 1234
     MEMGUARD
 
     ; define some macro with swap on+off inside
+    MACRO SWAPON_IN_MACRO
+        SLDOPT swapon
+        scf
+        SLDOPT swapoff
+    ENDM
+    MACRO SWAPOFF_IN_MACRO
+        SLDOPT swapoff
+        ccf
+        SLDOPT swapon
+    ENDM
+    MACRO NESTED_SWAPOFF
+        SLDOPT swapon
+        ld b,c
+        SWAPOFF_IN_MACRO
+        ld b,d
+        SLDOPT swapoff
+    ENDM
+
+    ; swap off initially
+    SWAPON_IN_MACRO     ; swap for scf
+    NESTED_SWAPOFF      ; swap on -> off -> on
+    SWAPOFF_IN_MACRO    ; swap off (2x inside)
+    SWAPON_IN_MACRO     ; swap for scf (again to verify pairings)
+
+    ; check external file and mismatched pairing warnings
+    INCLUDE "sldopt.i.asm" : SLDOPT swapoff      ; fix include mismatch to known state
+    ld h,e
+    SWAPIN_OTHER_FILE
+    SWAPON_MISMATCH
+    ld h,h
+    MEMGUARD            ; swap should be still on
+    SWAPOFF_MISMATCH
+    ld h,l
+    MEMGUARD            ; swap should be still off
+
+    SLDOPT swapon       ; mismatch main file as whole (deliberately NOT warning)
+
+    ; check warning suppression
+    SWAPOFF_MISMATCH_SUP
+    SWAPON_MISMATCH_SUP

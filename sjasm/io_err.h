@@ -60,6 +60,7 @@ extern const char* W_REL_DIVERTS;
 extern const char* W_REL_UNSTABLE;
 extern const char* W_DISP_MEM_PAGE;
 extern const char* W_BP_FILE;
+extern const char* W_SLD_SWAP;
 extern const char* W_OUT0;
 extern const char* W_BACKSLASH;
 extern const char* W_OPKEYWORD;

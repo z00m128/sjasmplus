@@ -33,13 +33,13 @@
 28    EA65 00          >        nop     ; keyword3
 29    EA66
 30    EA66                  ; syntax error
-sldopt.asm(31): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT): INVALID whatever
+sldopt.asm(31): error: [SLDOPT] Syntax error in <type> (valid: COMMENT, SWAPON, SWAPOFF): INVALID whatever
 31    EA66                  SLDOPT INVALID whatever
 sldopt.asm(32): error: [SLDOPT COMMENT] invalid keyword: @@@
 32    EA66                  SLDOPT COMMENT @@@  ; invalid keyword (must roughly fit rules of valid labels)
 sldopt.asm(33): error: [SLDOPT COMMENT] invalid keyword:
 33    EA66                  SLDOPT COMMENT
-sldopt.asm(34): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT):
+sldopt.asm(34): error: [SLDOPT] Syntax error in <type> (valid: COMMENT, SWAPON, SWAPOFF):
 34    EA66                  SLDOPT
 35    EA66
 36    EA66                  SLDOPT swapon       ; swap source pos <-> definition pos in SLD
@@ -52,7 +52,115 @@ sldopt.asm(34): error: [SLDOPT] Syntax error in <type> (valid is only COMMENT):
 39    EA69 00          >        nop     ; keyword3
 40    EA6A
 41    EA6A                  ; define some macro with swap on+off inside
-42    EA6A
+42    EA6A                  MACRO SWAPON_IN_MACRO
+43    EA6A ~                    SLDOPT swapon
+44    EA6A ~                    scf
+45    EA6A ~                    SLDOPT swapoff
+46    EA6A                  ENDM
+47    EA6A                  MACRO SWAPOFF_IN_MACRO
+48    EA6A ~                    SLDOPT swapoff
+49    EA6A ~                    ccf
+50    EA6A ~                    SLDOPT swapon
+51    EA6A                  ENDM
+52    EA6A                  MACRO NESTED_SWAPOFF
+53    EA6A ~                    SLDOPT swapon
+54    EA6A ~                    ld b,c
+55    EA6A ~                    SWAPOFF_IN_MACRO
+56    EA6A ~                    ld b,d
+57    EA6A ~                    SLDOPT swapoff
+58    EA6A                  ENDM
+59    EA6A
+60    EA6A                  ; swap off initially
+61    EA6A                  SWAPON_IN_MACRO     ; swap for scf
+61    EA6A             >        SLDOPT swapon
+61    EA6A 37          >        scf
+61    EA6B             >        SLDOPT swapoff
+62    EA6B                  NESTED_SWAPOFF      ; swap on -> off -> on
+62    EA6B             >        SLDOPT swapon
+62    EA6B 41          >        ld b,c
+62    EA6C             >        SWAPOFF_IN_MACRO
+62    EA6C             >        SLDOPT swapoff
+62    EA6C 3F          >        ccf
+62    EA6D             >        SLDOPT swapon
+62    EA6D 42          >        ld b,d
+62    EA6E             >        SLDOPT swapoff
+63    EA6E                  SWAPOFF_IN_MACRO    ; swap off (2x inside)
+63    EA6E             >        SLDOPT swapoff
+63    EA6E 3F          >        ccf
+63    EA6F             >        SLDOPT swapon
+64    EA6F                  SWAPON_IN_MACRO     ; swap for scf (again to verify pairings)
+64    EA6F             >        SLDOPT swapon
+64    EA6F 37          >        scf
+64    EA70             >        SLDOPT swapoff
+65    EA70
+66    EA70                  ; check external file and mismatched pairing warnings
+67    EA70                  INCLUDE "sldopt.i.asm"
+# file opened: sldopt.i.asm
+ 1+   EA70                  MACRO SWAPIN_OTHER_FILE
+ 2+   EA70 ~                    SLDOPT swapon
+ 3+   EA70 ~                    ld h,c
+ 4+   EA70 ~                    SLDOPT swapoff
+ 5+   EA70                  ENDM
+ 6+   EA70
+ 7+   EA70                  MACRO SWAPON_MISMATCH
+ 8+   EA70 ~                    SLDOPT swapon
+ 9+   EA70 ~                    ld h,d
+10+   EA70                  ENDM
+11+   EA70
+12+   EA70                  MACRO SWAPOFF_MISMATCH
+13+   EA70 ~                    SLDOPT swapoff
+14+   EA70 ~                    ld h,d
+15+   EA70                  ENDM
+16+   EA70
+17+   EA70                  MACRO SWAPON_MISMATCH_SUP
+18+   EA70 ~                    SLDOPT swapon
+19+   EA70 ~                    ld (hl),c           ; sldswap-ok ; suppress warning
+20+   EA70                  ENDM
+21+   EA70
+22+   EA70                  MACRO SWAPOFF_MISMATCH_SUP
+23+   EA70 ~                    SLDOPT swapoff
+24+   EA70 ~                    ld (hl),d           ; sldswap-ok ; suppress warning
+25+   EA70                  ENDM
+26+   EA70
+27+   EA70                  SLDOPT swapon   ; mismatch include file as whole
+28+   EA70
+sldopt.i.asm(28): warning[sldswap]: SLDOPT swapon/swapoff unevenly paired within macro/include: sldopt.i.asm
+# file closed: sldopt.i.asm
+67    EA70                SLDOPT swapoff      ; fix include mismatch to known state
+68    EA70 63               ld h,e
+69    EA71                  SWAPIN_OTHER_FILE
+69    EA71             >        SLDOPT swapon
+69    EA71 61          >        ld h,c
+69    EA72             >        SLDOPT swapoff
+70    EA72                  SWAPON_MISMATCH
+70    EA72             >        SLDOPT swapon
+70    EA72 62          >        ld h,d
+sldopt.i.asm(9): warning[sldswap]: SLDOPT swapon/swapoff unevenly paired within macro/include: SWAPON_MISMATCH
+sldopt.asm(70): ^ emitted from here
+71    EA73 64               ld h,h
+72    EA74                  MEMGUARD            ; swap should be still on
+72    EA74 00          >        defb 0  ; WPMEM keyword1
+72    EA75 00          >        nop     ; keyword3
+73    EA76                  SWAPOFF_MISMATCH
+73    EA76             >        SLDOPT swapoff
+73    EA76 62          >        ld h,d
+sldopt.i.asm(14): warning[sldswap]: SLDOPT swapon/swapoff unevenly paired within macro/include: SWAPOFF_MISMATCH
+sldopt.asm(73): ^ emitted from here
+74    EA77 65               ld h,l
+75    EA78                  MEMGUARD            ; swap should be still off
+75    EA78 00          >        defb 0  ; WPMEM keyword1
+75    EA79 00          >        nop     ; keyword3
+76    EA7A
+77    EA7A                  SLDOPT swapon       ; mismatch main file as whole (deliberately NOT warning)
+78    EA7A
+79    EA7A                  ; check warning suppression
+80    EA7A                  SWAPOFF_MISMATCH_SUP
+80    EA7A             >        SLDOPT swapoff
+80    EA7A 72          >        ld (hl),d           ; sldswap-ok ; suppress warning
+81    EA7B                  SWAPON_MISMATCH_SUP
+81    EA7B             >        SLDOPT swapon
+81    EA7B 71          >        ld (hl),c           ; sldswap-ok ; suppress warning
+82    EA7C
 # file closed: sldopt.asm
 
 Value    Label

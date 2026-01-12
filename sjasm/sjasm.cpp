@@ -280,6 +280,7 @@ static void InitPass() {
 	smartSmcIndex = 0;
 	PseudoORG = DISP_NONE; adrdisp = 0; dispPageNum = LABEL_PAGE_UNDEFINED;
 	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
+	sldSwapSrcPos = 0;
 	lijstp = NULL;
 	DidEmitByte();				// reset the emitted flag
 	StructureTable.ReInit();

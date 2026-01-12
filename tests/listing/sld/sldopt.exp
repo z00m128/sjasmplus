@@ -29,3 +29,23 @@ sldopt.asm|23||37|1|60007|T|
 sldopt.asm|39||22|1|60008|K|; WPMEM keyword1
 sldopt.asm|39||23|1|60009|K|; keyword3
 sldopt.asm|39||23|1|60009|T|
+sldopt.asm|44||61|1|60010|T|
+sldopt.asm|54||62|1|60011|T|
+sldopt.asm|62||49|1|60012|T|
+sldopt.asm|56||62|1|60013|T|
+sldopt.asm|63||49|1|60014|T|
+sldopt.asm|44||64|1|60015|T|
+sldopt.asm|68||0|1|60016|T|
+sldopt.i.asm|3|sldopt.asm|69|1|60017|T|
+sldopt.i.asm|9|sldopt.asm|70|1|60018|T|
+sldopt.asm|71||0|1|60019|T|
+sldopt.asm|22||72|1|60020|K|; WPMEM keyword1
+sldopt.asm|23||72|1|60021|K|; keyword3
+sldopt.asm|23||72|1|60021|T|
+sldopt.asm|73|sldopt.i.asm|14|1|60022|T|
+sldopt.asm|74||0|1|60023|T|
+sldopt.asm|75||22|1|60024|K|; WPMEM keyword1
+sldopt.asm|75||23|1|60025|K|; keyword3
+sldopt.asm|75||23|1|60025|T|
+sldopt.asm|80|sldopt.i.asm|24|1|60026|T|
+sldopt.i.asm|19|sldopt.asm|81|1|60027|T|
