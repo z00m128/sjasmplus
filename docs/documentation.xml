@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.21.0 Documentation [2025-03-15]</title>
+  <title>SjASMPlus 1.21.1 Documentation [2026-01-16]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -206,14 +206,14 @@
       <para><variablelist>
 
           <varlistentry>
-            <term>?.?.? - 1.21.1</term>
+            <term>16.1.2026 - 1.21.1</term>
             <listitem>
               <synopsis>
 - <link linkend="po_bplist">`BPLIST`</link> supports now also MAME
 - <link linkend="nex_close">`SAVENEX CLOSE`</link> can append multiple files
 - <link linkend="s_numeric">numeric constants</link> can separate/group digits also by underscore
 - JR and DJNZ added to "smart" <link linkend="s_labels">SMC offset</link> instructions: `abc+*: jr $`
-- <link linkend="po_sldopt">`SLDOPT`</link> extended with swapon/swapoff command to adjust SLD files.
+- <link linkend="po_sldopt">`SLDOPT`</link> extended with swapon/swapoff command to adjust SLD files
 - Lua: version upgrade to 5.5.0 (from 5.4.7)
 - Lua: minor extensions and modifications to API
 - refactored: <link linkend="s_temp_labels">temporary labels</link> must match flow only in last pass (earlier passes can differ)
@@ -223,7 +223,7 @@
 - fix local-label struct name usage
 - warnings: added -Wfileorg when ORG is used to jump addresses while file output is active
 - docs: minor fixes/extensions
-              </synopsis>
+</synopsis>
             </listitem>
           </varlistentry>
 
@@ -234,7 +234,7 @@
               <synopsis>
 - C++17 standard is now required minimum (to compile sjasmplus sources) (GCC9 for example)
 - <link linkend="po_incbin">`INCBIN`</link>, <link linkend="po_inchob">`INCHOB`</link> and <link linkend="po_inctrd">`INCTRD`</link> support now include paths priority (angle &lt;filename&gt; vs "filename")
-- also <link linkend="po_incbin">`SAVENEX`</link> will respect include paths for source files (BMP, append)
+- also <link linkend="c_savenex">`SAVENEX`</link> will respect include paths for source files (BMP, append)
 - include paths which can't be opened before assembling are now reported in error message
 - include paths which start with literal tilde '~' are reported in error message
 - include options <link linkend="s_cli">`-i, -I, --inc`</link> can take path from next CLI argument (new recommended syntax)

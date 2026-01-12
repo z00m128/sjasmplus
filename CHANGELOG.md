@@ -1,8 +1,24 @@
 
+## [1.21.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.21.1) - 16.1.2026
+- [`BPLIST`](https://z00m128.github.io/sjasmplus/documentation.html#po_bplist) supports now also MAME
+- [`SAVENEX CLOSE`](https://z00m128.github.io/sjasmplus/documentation.html#nex_close) can append multiple files
+- [numeric constants](https://z00m128.github.io/sjasmplus/documentation.html#s_numeric) can separate/group digits also by underscore
+- JR and DJNZ added to "smart" [SMC offset](https://z00m128.github.io/sjasmplus/documentation.html#s_labels) instructions: `abc+*: jr $`
+- [`SLDOPT`](https://z00m128.github.io/sjasmplus/documentation.html#po_sldopt) extended with swapon/swapoff command to adjust SLD files
+- Lua: version upgrade to 5.5.0 (from 5.4.7)
+- Lua: minor extensions and modifications to API
+- refactored: [temporary labels](https://z00m128.github.io/sjasmplus/documentation.html#s_temp_labels) must match flow only in last pass (earlier passes can differ)
+- refactored: macros now handle large amount of macros defined better (like 64ki of macros)
+- fix invalid BASIC line length in [`SAVETAP`](https://z00m128.github.io/sjasmplus/documentation.html#po_savetap) loader
+- fix local labels inside macros in modules
+- fix local-label struct name usage
+- warnings: added -Wfileorg when ORG is used to jump addresses while file output is active
+- docs: minor fixes/extensions
+
 ## [1.21.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.21.0) - 15.3.2025
 - C++17 standard is now required minimum (to compile sjasmplus sources) (GCC9 for example)
 - [`INCBIN`](https://z00m128.github.io/sjasmplus/documentation.html#po_incbin), [`INCHOB`](https://z00m128.github.io/sjasmplus/documentation.html#po_inchob) and [`INCTRD`](https://z00m128.github.io/sjasmplus/documentation.html#po_inctrd) support now include paths priority (angle &lt;filename&gt; vs "filename")
-- also [`SAVENEX`](https://z00m128.github.io/sjasmplus/documentation.html#po_incbin) will respect include paths for source files (BMP, append)
+- also [`SAVENEX`](https://z00m128.github.io/sjasmplus/documentation.html#c_savenex) will respect include paths for source files (BMP, append)
 - include paths which can't be opened before assembling are now reported in error message
 - include paths which start with literal tilde '~' are reported in error message
 - include options [`-i, -I, --inc`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli) can take path from next CLI argument (new recommended syntax)
