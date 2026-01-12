@@ -952,6 +952,7 @@ void CloseTapFile()
 
 	fclose(FP_tapout);
 	FP_tapout = NULL;
+	destlen = 0;
 }
 
 void OpenTapFile(const std::filesystem::path & tapename, int flagbyte)
@@ -974,6 +975,7 @@ void OpenTapFile(const std::filesystem::path & tapename, int flagbyte)
 		fclose(FP_tapout);
 		Error("Write error (disk full?)", NULL, FATAL);
 	}
+	destlen = 0;
 }
 
 // check if file exists and can be read for content
