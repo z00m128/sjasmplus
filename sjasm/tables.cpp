@@ -143,7 +143,7 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	const auto modNameSz = strlen(ModuleName);
 	const bool inMacro = !escMacro && local && macrolabp;
 	// struct def full name "@" global marker is not part of "naam" here, deduct it from matching against ModuleName (if any)
-	const bool globalStructDef = (label->traits & LABEL_IS_STRUCT_D) && (('.' != naam[modNameSz]) || strncmp(ModuleName, naam, modNameSz));
+	const bool globalStructDef = (label->traits & LABEL_IS_STRUCT_D) && (strncmp(ModuleName, naam, modNameSz) || ('.' != naam[modNameSz]));
 	const bool inModule = !inMacro && !global && modNameSz && !globalStructDef;
 	const bool isStructLabel = (label->traits & (LABEL_IS_STRUCT_D|LABEL_IS_STRUCT_E));
 	// build fully qualified SLD info
