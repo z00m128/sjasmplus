@@ -5,6 +5,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -28,6 +29,13 @@ jobs:
     - name: Build
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - uses: actions/upload-artifact@main
+      with:
+        name: sjasmplus-win64-${{ github.sha }}
+        path: |
+          build/Release/sjasmplus.exe
+        if-no-files-found: error
 
     - name: Test
       shell: cmd
