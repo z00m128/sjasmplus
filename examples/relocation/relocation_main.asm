@@ -27,33 +27,24 @@ relocator_code:
         ld      hl,relocator_table-relocator_code   ; offset from start to the table
         add     hl,bc                               ; absolute address of table
         ld      sp,hl
-    ; process the full table of relocation data (A + A' is counter of relocation values)
-        ld      a,1+high relocate_count
-        ex      af,af
-        ld      a,1+low relocate_count
-        jr      .relocate_loop_entry
-.relocate_loop_outer:
-        ex      af,af
+    ; process the full table of relocation data, DE is counter of relocation values
+        ld      de,relocate_count
 .relocate_loop:
     ; relocate single record from the relocate table
         pop     hl
         add     hl,bc       ; HL = address of machine code to modify
-        ld      e,(hl)
+        ld      a,(hl)      ; relocate the value (low byte)
+        add     a,c
+        ld      (hl),a      ; patch the machine code in memory (low byte)
         inc     hl
-        ld      d,(hl)      ; DE = value to modify
-        ex      de,hl
-        add     hl,bc       ; relocate the value
-        ex      de,hl
-        ld      (hl),d      ; patch the machine code in memory
-        dec     hl
-        ld      (hl),e
-.relocate_loop_entry:
+        ld      a,(hl)      ; relocate the value (high byte)
+        adc     a,b
+        ld      (hl),a      ; patch the machine code in memory (high byte)
     ; loop until all "relocate_count" records were processed
-        dec     a
+        dec     de
+        ld      a,e
+        or      d
         jr      nz,.relocate_loop
-        ex      af,af
-        dec     a
-        jr      nz,.relocate_loop_outer
     ; restore SP
         ld      sp,ix
 ; end of relocator
