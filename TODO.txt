@@ -242,3 +242,4 @@ zx-pk.ru forum
 Next FB
 (maybe once per year or two: next forum, linkedin)
 -- also update .exe/docker in tests/misc
+virus total upload to see how many AV vendors fail at basic detection
