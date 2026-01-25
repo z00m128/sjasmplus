@@ -20,9 +20,10 @@ relocator_code:
     ASSERT 0 < relocate_count   ; (for zero relocation_count the relocator is not needed!)
     ; BASIC sets BC to the address of start (after "RANDOMIZE USR x" BC=x upon entry)
         di
-    ; preserve current SP into IX
-        ld      ix,0
-        add     ix,sp
+    ; preserve current SP into DE
+        ld      hl,0
+        add     hl,sp
+        ex      de,hl
     ; set SP to the relocation table data
         ld      hl,relocator_table-relocator_code   ; offset from start to the table
 .end_with_overflow:         ; machine code 09 F9 -> high byte relocation sets carry at end for any BC >= 0x0800
@@ -42,7 +43,8 @@ relocator_code:
         ld      (hl),a      ; patch the machine code in memory (high byte)
     ; loop until the .end_with_overflow record was processed, where the last `adc a,b` sets CF
         jr      nc,.relocate_loop
-        ld      sp,ix       ; restore SP
+        ex      de,hl
+        ld      sp,hl       ; restore SP
 ; end of relocator
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
