@@ -25,10 +25,10 @@ relocator_code:
         add     ix,sp
     ; set SP to the relocation table data
         ld      hl,relocator_table-relocator_code   ; offset from start to the table
+.end_with_overflow:         ; machine code 09 F9 -> high byte relocation sets carry at end for any BC >= 0x0800
         add     hl,bc                               ; absolute address of table
         ld      sp,hl
-    ; process the full table of relocation data, DE is counter of relocation values
-        ld      de,relocate_count
+    ; process the full table of relocation data (until `add hl,bc : ld sp,hl` is damaged setting carry flag)
 .relocate_loop:
     ; relocate single record from the relocate table
         pop     hl
@@ -38,15 +38,11 @@ relocator_code:
         ld      (hl),a      ; patch the machine code in memory (low byte)
         inc     hl
         ld      a,(hl)      ; relocate the value (high byte)
-        adc     a,b
+        adc     a,b         ; this should never overflow for correct relocation
         ld      (hl),a      ; patch the machine code in memory (high byte)
-    ; loop until all "relocate_count" records were processed
-        dec     de
-        ld      a,e
-        or      d
-        jr      nz,.relocate_loop
-    ; restore SP
-        ld      sp,ix
+    ; loop until the .end_with_overflow record was processed, where the last `adc a,b` sets CF
+        jr      nc,.relocate_loop
+        ld      sp,ix       ; restore SP
 ; end of relocator
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -130,6 +126,8 @@ vram_line_first_byte = vram_line_first_byte + $100
 
 relocator_table:
     RELOCATE_TABLE
+    ASSERT $F909 = {$8000+relocator_code.end_with_overflow} ; expected machine code `09 F9`
+    DW norel relocator_code.end_with_overflow           ; address of 09 F9 machine code to terminate relocator loop
 
 ; total size of code block
 code_size   EQU     $ - relocator_code
