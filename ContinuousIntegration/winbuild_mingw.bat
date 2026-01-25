@@ -7,8 +7,6 @@ mingw32-make -f Makefile.win -j3
 dir /N sjasmplus.exe
 rem sjasmplus install
 mingw32-make -f Makefile.win PREFIX=c:/tools/sjasmplus/ install
-mingw32-make -f Makefile.win clean
 rem check installation and paths
 dir /N c:\tools\sjasmplus
-sjasmplus --version
 sjasmplus --help

@@ -10,9 +10,12 @@ task:
       image: gcc:11
       image: gcc:latest
     cpu: 2
-    memory: 1G
+    memory: 2G
+    greedy: true
   gcc_version_script: gcc --version
-  build_script: make clean && make -j3
+  build_script: make clean && make -j8
+  executable_artifacts:
+    path: "sjasmplus"
   install_script: make install && make clean
   ## now try the built+installed sjasmplus with some tests and examples
   # this is not separate task, because that would need again build
@@ -40,10 +43,11 @@ pipe:
     COVERALLS_SERVICE: 1
   resources:
     cpu: 2
-    memory: 1G
+    memory: 2G
+    greedy: true
   steps:
     - image: gcc:14
-      generate_gcov_script: make clean && make -j3 coverage
+      generate_gcov_script: make clean && make -j8 coverage
     - image: python:3.7
       # installing my patched version of "cpp-coveralls" to get support for CI_SERVICE_NAME and git-revision number
       install_coveralls_plugin_script: pip install git+https://github.com/ped7g/cpp-coveralls.git@master
@@ -68,6 +72,11 @@ task:
     os_version: 2019
     cpu: 2
   build_script: ContinuousIntegration\winbuild_mingw.bat
+  executable_artifacts:
+    path: "sjasmplus.exe"
+  clean_script:
+    - mingw32-make -f Makefile.win clean
+    - c:\tools\sjasmplus\sjasmplus --version
   assemble_examples_script: ContinuousIntegration\winbuild_mingw_examples.bat
   assemble_tests_script: ContinuousIntegration\winbuild_mingw_tests.bat
 
@@ -95,7 +104,7 @@ task:
     CIRRUS_CLONE_SUBMODULES: true
   freebsd_instance:
     image_family: freebsd-15-0-amd64-ufs
-    cpu: 2
+    cpu: 4
     memory: 3G
   ## lock pkg on current version (sjasmplus does not care as long as it can install ...)
   ##pkg lock -y pkg &&
@@ -110,6 +119,8 @@ task:
     - c++ --version || echo "no c++"
   # regular binary build (will be not run, just testing the build process)
   build_script: gmake clean && gmake -j4 CC=cc CXX=c++
+  executable_artifacts:
+    path: "sjasmplus"
   # build+test the unit test binary
   test_script: gmake clean && gmake -j4 CC=cc CXX=c++ tests
 
@@ -128,5 +139,8 @@ task:
     - cc --version || echo "no cc"
     - c++ --version || echo "no c++"
     - date
+    - sysctl -n hw.physicalcpu
   build_script: make clean && make -j10 CC=cc CXX=c++
+  executable_artifacts:
+    path: "sjasmplus"
   test_script: make clean && make -j10 CC=cc CXX=c++ tests
