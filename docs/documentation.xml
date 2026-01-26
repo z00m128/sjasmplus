@@ -657,11 +657,15 @@ file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
 		<para>
 		  Lines in the source file should have the following form:
 		  <programlisting>Label Operator Operand Comment</programlisting>
+		  <emphasis role="strong">Labels must start at beginning of line</emphasis> (no whitespace).
 		  <emphasis role="strong">Lines without label must start with whitespace.</emphasis>
 		  All fields are optional.
 		  End of line backslash continues source line (since 1.20.3, <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/parsing/escape_eol.asm">limited support</ulink>, not recommended).
 		  Operators and operands can be inlined with colon:
 		  <programlisting>      Operator Operand:Operator Operand:Operator Operand... Comment</programlisting>
+		  For some instructions operands can be inlined with comma (multi-argument) to produce same instruction with different operands
+          (this is legacy default and it is strongly recommended to <link linkend="s_cli">switch syntax to double-comma</link> for multi-arg):
+		  <programlisting>      Operator Operand1, Operand2, Operand3... Comment</programlisting>
 		  Comments should start with '<code>;</code>' or '<code>//</code>'.
 		  Comment blocks start with '<code>/*</code>' and end with '<code>*/</code>' (work in "nested" way,
 		  i.e. comment block started inside comment block must be also ended, before main block ends).
@@ -677,7 +681,19 @@ file.asm(1): warning[rdlow]: Reading memory at low address: 8</programlisting>
 */
  ld /*
  but this won't be ld a,3!
- */ a,3</programlisting>
+ */ a,3                       ; errors on both lines
+
+label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
+       ld de,bc               ; <link linkend="s_fake_instructions">fake instruction</link> (no warning)
+       sub a,b                ; it's a trap! Does produce two instructions: sub a : sub b
+
+       OPT reset --syntax=abf ; STRONGLY RECOMMENDED for new sources
+       ; multi-arg double-comma, warn on fake instructions, warn on invalid memory parentheses
+       ld e,c,,d,b:inc hl,de  ; some "obvious" instructions still support single-comma multi-arg
+       sub a,b                ; `sub b` with relaxed syntax (to get two subs: `sub a,,b`)
+       ld de,bc               ; warning, not a real instruction
+       ld d,(12+3)            ; error, can't load D from memory
+       ld d,+(12+3)           ; works, unary plus makes it clear it's just immediate value</programlisting>
 			</example>
 		</para>
     </section>
