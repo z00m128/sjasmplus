@@ -73,9 +73,10 @@ Understanding the pass structure is critical for feature development:
   - use `nullptr` over `NULL` or `0` for pointers in new code
   - use `override` keyword for overridden virtual functions
   - prefer range-based for loops where applicable
-  - follow existing patterns in the codebase for consistency
+  - follow existing patterns in the codebase for consistency unless modern practice leads to lot simpler code
   - implementation code is often a bit terse, but straightforward without adding too many layers of indirection and abstractions
   - often implement in-place first, extract to functions later when same-ish code appears multiple times and practical API design emerges
+  - in comparisons use only less or less/equal, ie. `if (0 <= x && x < 100)`, not `if (x >= 0 && x < 100)`
 
 ---
 
