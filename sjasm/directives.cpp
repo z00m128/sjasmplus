@@ -242,7 +242,7 @@ static void dirDH() {
 }
 
 static void dirBLOCK() {
-	aint teller,val = 0;
+	aint teller,val = 0, init_byte_count = 0, emitMaxToListing = 4;
 	if (ParseExpressionNoSyntaxError(lp, teller)) {
 		if (teller < 0) {
 			Warning("Negative BLOCK?");
@@ -250,32 +250,21 @@ static void dirBLOCK() {
 		if (comma(lp)) {
 			// Parse operand list using GetBytes (like DEFB does)
 			int dirDx[130];
-			int byte_count = GetBytes(lp, dirDx, 0, 0);
-			
-			if (byte_count == 0) {
-				Error("DEFS operands expected after comma", lp, SUPPRESS);
-			} else if (byte_count > (int)teller) {
-				// Operands exceed DEFS size - truncate and error
-				Error("DEFS operands exceed specified size, operands over the limit are ignored", lp, SUPPRESS);
-				// Truncate to DEFS size and set sentinel
-				val = dirDx[teller - 1];  // Last byte that will be emitted becomes filler
-				dirDx[teller] = -1;  // Set sentinel after truncation point
-				// Emit truncated operands using EmitBytes (stops at sentinel)
-				EmitBytes(dirDx);
-				// No more bytes to emit (all teller bytes were emitted), EmitBlock with 0 padding
-				EmitBlock(val, 0);
-			} else {
-				// Normal case: operands fit within size
-				// Emit all operand bytes using EmitBytes
-				EmitBytes(dirDx);
-				// Use last operand byte as filler for remaining
-				val = dirDx[byte_count - 1];
-				EmitBlock(val, teller - byte_count);
+			init_byte_count = GetBytes(lp, dirDx, 0, 0);
+			if (teller < init_byte_count) {			// Operands exceed DEFS size - truncate and error
+				ErrorInt("more init values provided than block size, amount of truncated bytes", init_byte_count - teller, SUPPRESS);
+				init_byte_count = teller;
+				if (init_byte_count < 0) init_byte_count = 0;
+				dirDx[init_byte_count] = -1;		// truncate init data
 			}
-		} else {
-			// No operands: use default filler 0x00
-			EmitBlock(0, teller);
+			// emit the explicit init bytes first
+			EmitBytes(dirDx);
+			// last explicit byte is new filler value (if any data were provided)
+			if (0 < init_byte_count) val = dirDx[init_byte_count - 1];
+			emitMaxToListing -= (init_byte_count & 3);
 		}
+		// emit remaining bytes set with filler
+		EmitBlock(val, teller - init_byte_count, false, emitMaxToListing);
 	} else {
 		Error("[BLOCK] Syntax Error in <length>", lp, SUPPRESS);
 	}
