@@ -248,9 +248,34 @@ static void dirBLOCK() {
 			Warning("Negative BLOCK?");
 		}
 		if (comma(lp)) {
-			if (ParseExpression(lp, val)) check8(val);
+			// Parse operand list using GetBytes (like DEFB does)
+			int dirDx[130];
+			int byte_count = GetBytes(lp, dirDx, 0, 0);
+			
+			if (byte_count == 0) {
+				Error("DEFS operands expected after comma", lp, SUPPRESS);
+			} else if (byte_count > (int)teller) {
+				// Operands exceed DEFS size - truncate and error
+				Error("DEFS operands exceed specified size, operands over the limit are ignored", lp, SUPPRESS);
+				// Truncate to DEFS size and set sentinel
+				val = dirDx[teller - 1];  // Last byte that will be emitted becomes filler
+				dirDx[teller] = -1;  // Set sentinel after truncation point
+				// Emit truncated operands using EmitBytes (stops at sentinel)
+				EmitBytes(dirDx);
+				// No more bytes to emit (all teller bytes were emitted), EmitBlock with 0 padding
+				EmitBlock(val, 0);
+			} else {
+				// Normal case: operands fit within size
+				// Emit all operand bytes using EmitBytes
+				EmitBytes(dirDx);
+				// Use last operand byte as filler for remaining
+				val = dirDx[byte_count - 1];
+				EmitBlock(val, teller - byte_count);
+			}
+		} else {
+			// No operands: use default filler 0x00
+			EmitBlock(0, teller);
 		}
-		EmitBlock(val, teller);
 	} else {
 		Error("[BLOCK] Syntax Error in <length>", lp, SUPPRESS);
 	}
