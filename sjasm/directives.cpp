@@ -242,29 +242,29 @@ static void dirDH() {
 }
 
 static void dirBLOCK() {
-	aint teller,val = 0, init_byte_count = 0, emitMaxToListing = 4;
+	int dirDx[130];
+	aint teller = 0, val = 0, initByteCount = 0, emitMaxToListing = 4;
 	if (ParseExpressionNoSyntaxError(lp, teller)) {
 		if (teller < 0) {
 			Warning("Negative BLOCK?");
 		}
 		if (comma(lp)) {
 			// Parse operand list using GetBytes (like DEFB does)
-			int dirDx[130];
-			init_byte_count = GetBytes(lp, dirDx, 0, 0);
-			if (teller < init_byte_count) {			// Operands exceed DEFS size - truncate and error
-				ErrorInt("more init values provided than block size, amount of truncated bytes", init_byte_count - teller, SUPPRESS);
-				init_byte_count = teller;
-				if (init_byte_count < 0) init_byte_count = 0;
-				dirDx[init_byte_count] = -1;		// truncate init data
+			initByteCount = GetBytes(lp, dirDx, 0, 0);
+			if (teller < initByteCount) {		// Operands exceed DEFS size - truncate and error
+				WarningById(W_SHORT_BLOCK, teller);
+				initByteCount = teller;
+				if (initByteCount < 0) initByteCount = 0;
+				dirDx[initByteCount] = -1;		// truncate init data
 			}
-			// emit the explicit init bytes first
-			EmitBytes(dirDx);
-			// last explicit byte is new filler value (if any data were provided)
-			if (0 < init_byte_count) val = dirDx[init_byte_count - 1];
-			emitMaxToListing -= (init_byte_count & 3);
+			if (0 < initByteCount) {			// emit the explicit init bytes first (if any are available)
+				EmitBytes(dirDx);
+				val = dirDx[initByteCount - 1];	// last explicit byte is new filler value
+				emitMaxToListing -= (initByteCount & 3);
+			}
 		}
 		// emit remaining bytes set with filler
-		EmitBlock(val, teller - init_byte_count, false, emitMaxToListing);
+		EmitBlock(val, teller - initByteCount, false, emitMaxToListing);
 	} else {
 		Error("[BLOCK] Syntax Error in <length>", lp, SUPPRESS);
 	}

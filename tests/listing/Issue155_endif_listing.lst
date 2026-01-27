@@ -4,6 +4,7 @@
  3    0000
  4    0000               align 16
  4    0000                if 1
+Issue155_endif_listing.asm(4): warning[shortblock]: init data for block truncated to length: 0
  4    0000                block 0, $ff
  4    0000                endif  ; OK
  5    0000               align 16
@@ -36,6 +37,7 @@
 14    005F 00            align 16
 14    0060                if 1
 14    0060                if 1
+Issue155_endif_listing.asm(14): warning[shortblock]: init data for block truncated to length: 0
 14    0060                block 0, $ff
 14    0060                endif
 14    0060                endif  ; OK

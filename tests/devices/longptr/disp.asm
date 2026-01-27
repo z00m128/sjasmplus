@@ -44,7 +44,7 @@ phase3_end:
 phase4_start:
     PHASE $46000
 longptrA:
-        DS  0,'!'
+        DS  0,'!'           ; shortblock-ok
 longptrB:
     UNPHASE
 phase4_end:

@@ -1,9 +1,11 @@
 # file opened: sjio_coverage4.asm
  1    0000                  DEVICE none
 sjio_coverage4.asm(2): warning: Negative BLOCK?
+sjio_coverage4.asm(2): warning[shortblock]: init data for block truncated to length: -8000
  2    0000                  BLOCK   -8000,11
  3    E0C0                  DISP    0x1234
 sjio_coverage4.asm(4): warning: Negative BLOCK?
+sjio_coverage4.asm(4): warning[shortblock]: init data for block truncated to length: -8000
  4    1234                  BLOCK   -8000,12
  5    F2F4                  ENDT
 sjio_coverage4.asm(6): error: SAVEBIN only allowed in real device emulation mode (See DEVICE)
@@ -11,11 +13,11 @@ sjio_coverage4.asm(6): error: SAVEBIN only allowed in real device emulation mode
  7    C180
  8    C180                  DEVICE zxspectrum48
 sjio_coverage4.asm(9): warning: Negative BLOCK?
+sjio_coverage4.asm(9): warning[shortblock]: init data for block truncated to length: -8000
  9    C180                  BLOCK   -8000,13
 sjio_coverage4.asm(10): error: [BLOCK] Syntax Error in <length>: &, &
 10    A240                  BLOCK   &, &
 sjio_coverage4.asm(10): error: Syntax error: &
-sjio_coverage4.asm(10): error: Unexpected: &
 10    A240 00 00 00...    BLOCK   20,&       ; syntax errors
 11    A254                  ORG     0xFFFC
 12    FFFC 41 48 4F 59      DB      "AHOY"

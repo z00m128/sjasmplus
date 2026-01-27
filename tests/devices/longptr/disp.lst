@@ -47,7 +47,7 @@ disp.asm(36): warning: value 0x1000000 is truncated to 16bit value: 0x0000
 44    5000              phase4_start:
 45    5000                  PHASE $46000
 46    6000              longptrA:
-47    6000                      DS  0,'!'
+47    6000                      DS  0,'!'           ; shortblock-ok
 48    6000              longptrB:
 49    6000                  UNPHASE
 50    5000              phase4_end:

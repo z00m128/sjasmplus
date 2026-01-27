@@ -45,7 +45,7 @@ loopyLoop:
 forwardyLabelo:
     rst 0
 
-    ds  stretchItEvenMore-forwardyLabelo-1, 201
+    ds  stretchItEvenMore-forwardyLabelo-1, 201 ; shortblock-ok
 
     ALIGN 256
 stretchItEvenMore:

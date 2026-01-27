@@ -2,73 +2,62 @@
 ; Tests operand parsing with mixed types, overflows, and device modes
 
 ; ===== PIPE MODE (DEVICE NONE) =====
-    DEVICE NONE
-
-    ORG $0000
+    DEVICE NONE : ORG $2000
 
 ; Case 1: DEFS without operands (default fill 0x00)
-test1
     DEFS 5
 
 ; Case 2: DEFS with single numeric operand (backward compat: DEFS 5, 0x42)
-test2
     DEFS 5, 0x42
 
-; Case 3: DEFS with string operand (no suffix: DEFS 5, "A")
-test3
-    DEFS 5, "A"
+; Case 3: DEFS with string operand (filler is 'B')
+    DEFS 5, "AB"
 
-; Case 4: DEFS with longer suffixed string operand
-test4
+; Case 4: DEFS with suffixed string operand (filler is zero)
     DEFS 10, "AB"Z
 
-; Case 5: DEFS with mixed operands (DEFS 10, 1, 'x', 3)
-test5
-    DEFS 10, 1, 'x', 3
+; Case 5: DEFS with mixed operands (filler is 3)
+    DEFS 10, 1, 2, 'x', 3
 
-; Case 6: DEFS with exact-fit operands (DEFS 3, 0x11, 0x22, 0x33)
-test6
+; Case 6: DEFS with exact-fit operands (no implicit fill)
     DEFS 3, 0x11, 0x22, 0x33
 
 ; Case 7: DEFS with 129-byte operand list (tests GetBytes 128-byte limit)
-; This should trigger GetBytes error "Over 128 bytes defined..."
-test7
+; This should trigger GetBytes error "Over 128 bytes defined..." and init values are truncated to 128 bytes, but total fill is 150 bytes as specified
     DEFS 150, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@"
 
-; Case 8: DEFS with operands exceeding DEFS size (DEFS 3, 1, 2, 3, 4, 5, 6)
-; Expected for DEFS: emit 1, 2, 3; truncate 4, 5, 6; use last byte (3) as filler; error
-test8
+; Case 8: DEFS with operands exceeding DEFS size, warns and truncates init data to length 3
     DEFS 3, 1, 2, 3, 4, 5, 6
 
-; Case 9: DEFS with string and numeric overflow (DEFS 2, "ABC", 0x44)
-; Expected for DEFS: emit 'A', 'B'; truncate 'C', 0x44; use last byte ('B'=0x42) as filler; error
-test9
+; Case 8b: suppress truncation warning
+    DEFS 3, 1, 2, 3, 4, 5, 6    ; shortblock-ok
+
+; Case 9: DEFS with string and numeric overflow ("AB" is used, rest is truncated)
     DEFS 2, "ABC", 0x44
 
-; ===== DEVICE MODE (NOSLOT64K) ===== **** NEEDS UPDATE OF .LST FILE AFTER DEFS IS EXTENDED ****
-    DEVICE NOSLOT64K
+; ===== DEVICE MODE (NOSLOT64K) =====
+    DEVICE NOSLOT64K : ORG $4000
 
-    ORG $4000
-
-; Case 10: DEFS without operands (device mode)
-test10
+; Case 10: DEFS without operands
     DEFS 5
 
-; Case 11: DEFS with mixed operands (device mode: DEFS 10, 1, 'x', 3)
-test11
+; Case 11: DEFS with mixed operands
     DEFS 10, 1, 'x', 3
 
-; Case 12: DEFS with exact-fit operands (device mode: DEFS 3, 0x11, 0x22, 0x33)
-test12
+; Case 12: DEFS with exact-fit operands
     DEFS 3, 0x11, 0x22, 0x33
 
-; Case 13: DEFS with operands exceeding size (device mode: DEFS 3, 1, 2, 3, 4, 5, 6)
-test13
+; Case 13: DEFS with operands exceeding size
     DEFS 3, 1, 2, 3, 4, 5, 6
 
-; Comment: Cases testing C suffix (high-bit setting) can be added if implementation 
-; shows special handling needed. Currently trusting GetCharConstAsString() handles it.
-; Cases for zero DEFS size or negative size not included - existing dirBLOCK already warns,
-; should be covered by existing tests.
+; Case 13b: suppress warning
+    DEFS 3, 1, 2, 3, 4, 5, 6    ; shortblock-ok
 
-    END
+; Case 14: DEFS with invalid data (truncating value warning)
+    DEFS 16, 1, 256, 3, 4, 5, 6
+
+; Examples from Issue #149
+  DEFS 10, "name_1st"Z  ; -> 6e 61 6d 65 5f 31 73 74 00 00 (filler zero)
+  DEFS 10, "name_2"     ; -> 6e 61 6d 65 5f 32 32 32 32 32 (filler '2')
+  DEFS 10, "name_3 "    ; -> 6e 61 6d 65 5f 33 20 20 20 20 (filler space)
+  DEFS 10, 1, 'x', 3    ; -> 01 78 03 03 03 03 03 03 03 03 (filler 3)
