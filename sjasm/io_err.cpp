@@ -198,6 +198,7 @@ const char* W_FAKE = "fake";
 const char* W_ENABLE_ALL = "all";
 const char* W_ZERO_DECIMAL = "decimalz";
 const char* W_NON_ZERO_DECIMAL = "decimaln";
+const char* W_SHORT_BLOCK = "shortblock";
 
 static messages_map w_texts = {
 	{ W_NO_RAMTOP,
@@ -367,6 +368,12 @@ static messages_map w_texts = {
 		{ true,
 			"decimal part is ignored",
 			"Warn when numeric constant has non zero decimal part"
+		}
+	},
+	{ W_SHORT_BLOCK,
+		{ true,
+			"init data for block truncated to length",
+			"Warn when block's length is shorter than init data"
 		}
 	},
 	{ W_ENABLE_ALL,

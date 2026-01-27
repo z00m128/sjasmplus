@@ -54,7 +54,7 @@ luaincSSSS.asm(45): warning: Label has different value in pass 3: previous value
 46    800E C7               rst 0
 47    800F
 luaincSSSS.asm(48): warning: Negative BLOCK?
-48    800F                  ds  stretchItEvenMore-forwardyLabelo-1, 201
+48    800F                  ds  stretchItEvenMore-forwardyLabelo-1, 201 ; shortblock-ok
 49    0000
 50    0000                  ALIGN 256
 51    0000              stretchItEvenMore:

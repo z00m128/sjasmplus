@@ -242,15 +242,29 @@ static void dirDH() {
 }
 
 static void dirBLOCK() {
-	aint teller,val = 0;
+	int dirDx[130];
+	aint teller = 0, val = 0, initByteCount = 0, emitMaxToListing = 4;
 	if (ParseExpressionNoSyntaxError(lp, teller)) {
 		if (teller < 0) {
 			Warning("Negative BLOCK?");
 		}
 		if (comma(lp)) {
-			if (ParseExpression(lp, val)) check8(val);
+			// Parse operand list using GetBytes (like DEFB does)
+			initByteCount = GetBytes(lp, dirDx, 0, 0);
+			if (teller < initByteCount) {		// Operands exceed DEFS size - truncate and error
+				WarningById(W_SHORT_BLOCK, teller);
+				initByteCount = teller;
+				if (initByteCount < 0) initByteCount = 0;
+				dirDx[initByteCount] = -1;		// truncate init data
+			}
+			if (0 < initByteCount) {			// emit the explicit init bytes first (if any are available)
+				EmitBytes(dirDx);
+				val = dirDx[initByteCount - 1];	// last explicit byte is new filler value
+				emitMaxToListing -= (initByteCount & 3);
+			}
 		}
-		EmitBlock(val, teller);
+		// emit remaining bytes set with filler
+		EmitBlock(val, teller - initByteCount, false, emitMaxToListing);
 	} else {
 		Error("[BLOCK] Syntax Error in <length>", lp, SUPPRESS);
 	}
