@@ -93,9 +93,9 @@ defs_string_filler.asm(51): warning[shortblock]: init data for block truncated t
 53    4015              ; Case 13b: suppress warning
 54    4015 01 02 03         DEFS 3, 1, 2, 3, 4, 5, 6    ; shortblock-ok
 55    4018
-56    4018              ; Case 14: DEFS with invalid data (truncating value warning)
+56    4018              ; Case 14: DEFS with invalid data (truncating value 256 warning) (-1 is valid $FF)
 defs_string_filler.asm(57): warning: value 0x100 is truncated to 8bit value: 0x00
-57    4018 01 00 03 04      DEFS 16, 1, 256, 3, 4, 5, 6
+57    4018 01 00 FF 04      DEFS 16, 1, 256, -1, 4, 5, 6
 57    401C 05 06 06...
 58    4028
 59    4028              ; Examples from Issue #149

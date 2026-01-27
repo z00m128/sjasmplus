@@ -53,8 +53,8 @@
 ; Case 13b: suppress warning
     DEFS 3, 1, 2, 3, 4, 5, 6    ; shortblock-ok
 
-; Case 14: DEFS with invalid data (truncating value warning)
-    DEFS 16, 1, 256, 3, 4, 5, 6
+; Case 14: DEFS with invalid data (truncating value 256 warning) (-1 is valid $FF)
+    DEFS 16, 1, 256, -1, 4, 5, 6
 
 ; Examples from Issue #149
   DEFS 10, "name_1st"Z  ; -> 6e 61 6d 65 5f 31 73 74 00 00 (filler zero)

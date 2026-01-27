@@ -205,7 +205,18 @@
 
       <para><variablelist>
 
-          <varlistentry>
+<varlistentry>
+            <term>??.??.2026 - 1.21.2</term>
+            <listitem>
+              <synopsis>
+- <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
+- CI: you can download executables from recent builds (windows, macos, freebsd, linux), for testing
+- refactored: <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">relocation example</ulink> has more size-optimized relocator code
+- docs: minor fixes/extensions</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>16.1.2026 - 1.21.1</term>
             <listitem>
               <synopsis>
@@ -1867,18 +1878,22 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>BLOCK<indexterm id="po_block"><primary>BLOCK</primary></indexterm> &lt;length&gt;[,&lt;fill
-            byte&gt;]</term>
+            <term>BLOCK<indexterm id="po_block"><primary>BLOCK</primary></indexterm> &lt;length&gt;[,&lt;init
+            bytes&gt;]</term>
 
             <listitem>
-              <para>Defines space. Has to be followed by the number of byte to
-              reserve, optionally followed by the value to fill these bytes
-              with.<example>
+              <para>Defines space. Has to be followed by the number of bytes to
+              reserve, optionally followed by values to init bytes with,
+              the last byte value fills remaining bytes of the block. Default fill value is zero.<example>
                   <title></title>
 
-                  <para><programlisting>    BLOCK 500     ; define a block of 500 bytes of zero
-    BLOCK 500,0   ; define a block of 500 bytes of zero
-    BLOCK 400,-1  ; define a block of 400 bytes of 255</programlisting></para>
+                  <para><programlisting>    BLOCK 500             ; define a block of 500 bytes of zero
+    BLOCK 500, 0          ; define a block of 500 bytes of zero
+    BLOCK 400, -1         ; define a block of 400 bytes of 255
+    BLOCK 10, "name_1st"Z ; -> 6e 61 6d 65 5f 31 73 74 00 00 (filler zero)
+    BLOCK 10, "name_2"    ; -> 6e 61 6d 65 5f 32 32 32 32 32 (filler '2')
+    BLOCK 10, "name_3 "   ; -> 6e 61 6d 65 5f 33 20 20 20 20 (filler space)
+    BLOCK 10, 1, 'x', 3   ; -> 01 78 03 03 03 03 03 03 03 03 (filler 3)</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>
