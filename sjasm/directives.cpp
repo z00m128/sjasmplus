@@ -130,6 +130,16 @@ static void dirDZ() {
 	getBytesWithCheck(0, 0, true);
 }
 
+static void dirDP() {
+	// calculate size of the string by subtracting current address + 1 from value of helper temporary label
+	const auto endLabel = TemporaryLabelTable.seekForward(DP_HELPER_LABEL);
+	const aint dpSize = (nullptr != endLabel) ? (endLabel->value - (CurAddress + 1)) : 0;
+	if ((LASTPASS == pass) && (nullptr == endLabel)) Error("dirDP(): please, contact the author of this program.", nullptr, FATAL);
+	EmitByte(dpSize);											// emit the size byte
+	getBytesWithCheck();										// use regular DB-like parsing for string body
+	TemporaryLabelTable.InsertRefresh(DP_HELPER_LABEL);			// insert the forward helper temporary label after it
+}
+
 static void dirABYTE() {
 	aint add;
 	if (ParseExpressionNoSyntaxError(lp, add)) {
@@ -2238,10 +2248,12 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".dz", dirDZ);
 	DirectivesTable.insertd(".db", dirBYTE);
 	DirectivesTable.insertd(".dm", dirBYTE);
+	DirectivesTable.insertd(".dp", dirDP);
 	DirectivesTable.insertd(".dw", dirWORD);
 	DirectivesTable.insertd(".ds", dirBLOCK);
 	DirectivesTable.insertd(".dd", dirDWORD);
 	DirectivesTable.insertd(".defb", dirBYTE);
+	DirectivesTable.insertd(".defp", dirDP);
 	DirectivesTable.insertd(".defw", dirWORD);
 	DirectivesTable.insertd(".defs", dirBLOCK);
 	DirectivesTable.insertd(".defd", dirDWORD);

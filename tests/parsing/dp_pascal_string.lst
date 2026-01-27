@@ -1,0 +1,54 @@
+# file opened: dp_pascal_string.asm
+ 1    0000              ; Test for Issue #241: declaration of Pascal Strings (`DP`)
+ 2    0000                  ORG $8000
+ 3    8000                  OPT reset --syntax=abf
+ 4    8000
+ 5    8000 05 48 65 6C      DP "Hello"                          ; Equivalent to: DB 5,"Hello"
+ 5    8004 6C 6F
+ 6    8006 06 46 6F 6F      DP "Foo", "Bar"                     ; Equivalent to: DB 6,"Foo","Bar"
+ 6    800A 42 61 72
+ 7    800D 08 61 62 63      DP "abc", 13, "efg", 0              ; Equivalent to: DB 8,"abc\refg\0"
+ 7    8011 0D 65 66 67
+ 7    8015 00
+ 8    8016
+ 9    8016                  ; check multiple directives on same line split by colon (each has own length)
+10    8016 08 61 62 63      dp "abc",0,"efg",0
+10    801A 00 65 66 67
+10    801E 00
+10    801F 22 73 65 63   dp "second string with own length byte"
+10    8023 6F 6E 64 20
+10    8027 73 74 72 69
+10    802B 6E 67 20 77
+10    802F 69 74 68 20
+10    8033 6F 77 6E 20
+10    8037 6C 65 6E 67
+10    803B 74 68 20 62
+10    803F 79 74 65
+11    8042
+12    8042                  ; no need to test 256+ lengths because sjasmplus DB-like parser has limit of 128 bytes per line
+13    8042                  ; so any longer pascal string must be defined by DB over multiple lines
+14    8042
+15    8042                  ; test zero size string (but why? just `DB 0` to avoid warnings/errors)
+dp_pascal_string.asm(16): warning: Empty string: ""
+dp_pascal_string.asm(16): error: no arguments
+16    8042 00               dp ""
+17    8043
+18    8043                  ; check alias
+19    8043 05 41 68 6F      DEFP "Ahoy!"
+19    8047 79 21
+20    8049 05 41 68 6F      defp "Ahoy!"
+20    804D 79 21
+21    804F
+22    804F                  ; check syntax error
+dp_pascal_string.asm(23): error: Expression expected
+23    804F 00               DP
+dp_pascal_string.asm(24): error: Syntax error: &
+24    8050 00               DP  &
+dp_pascal_string.asm(25): error: Syntax error: &
+25    8051 05 41 68 6F      DP  "Ahoy!",&
+25    8055 79 21
+26    8057
+# file closed: dp_pascal_string.asm
+
+Value    Label
+------ - -----------------------------------------------------------

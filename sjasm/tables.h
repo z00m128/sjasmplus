@@ -139,6 +139,9 @@ struct TemporaryLabel {
 	TemporaryLabel(aint number, aint address);
 };
 
+// internal temporary label for directive DP (negative int, so user can't define same)
+constexpr const aint DP_HELPER_LABEL = -0x3FFF'FFFF;
+
 class CTemporaryLabelTable {
 public:
 	CTemporaryLabelTable() = default;

@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.8 06/01/2026
+  Version: 0.9.9 28/01/2026
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,9 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  28/01/2026: version 0.9.9
+    + new directive: dp, defp
 
   06/01/2026: version 0.9.8
     + new underscore digit separator
@@ -114,7 +117,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="18" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="19" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -259,11 +262,13 @@ TODO missing things:
       <item>defg</item>
       <item>defh</item>
       <item>defm</item>
+      <item>defp</item>
       <item>defs</item>
       <item>defw</item>
       <item>dg</item>
       <item>dh</item>
       <item>dm</item>
+      <item>dp</item>
       <item>ds</item>
       <item>dw</item>
       <item>dword</item>

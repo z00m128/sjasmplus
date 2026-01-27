@@ -209,6 +209,7 @@
             <term>??.??.2026 - 1.21.2</term>
             <listitem>
               <synopsis>
+- Added <link linkend="po_dp">`DP` (alias `DEFP`)</link> directive to define Pascal strings
 - <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
 - CI: you can download executables from recent builds (windows, macos, freebsd, linux), for testing
 - refactored: <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">relocation example</ulink> has more size-optimized relocator code
@@ -2142,6 +2143,14 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
+            <term>DEFP<indexterm id="po_defp"><primary>DEFP</primary><see>DP</see></indexterm></term>
+
+            <listitem>
+              <para>Synonym of <link linkend="po_dp">DP</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>DEFS<indexterm id="po_defs"><primary>DEFS</primary><see>BLOCK</see></indexterm></term>
 
             <listitem>
@@ -2313,6 +2322,18 @@ will output to the console strings:
 
             <listitem>
               <para>Synonym of <link linkend="po_byte">BYTE</link>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>DP<indexterm id="po_dp"><primary>DP</primary></indexterm> &lt;bytes&gt;</term>
+
+            <listitem>
+              <para>Defines a Pascal string, ie. size of bytes is preceding the data.<example>
+                  <title></title>
+
+                  <para><programlisting>    DP "Ahoy!" ; like: BYTE 5, "Ahoy!"</programlisting></para>
+                </example></para>
             </listitem>
           </varlistentry>
 
