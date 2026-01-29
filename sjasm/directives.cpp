@@ -1334,7 +1334,7 @@ static void dirBPLIST() {
 	} else if (cmphstr(lp, "fuse")) {
 		type = BPSF_FUSE;
 	} else if (!SkipBlanks()) {
-		Warning("[BPLIST] invalid breakpoints file type (use \"unreal\" or \"zesarux\")", lp, W_EARLY);
+		Warning("[BPLIST] invalid breakpoints file type (valid: \"unreal\", \"zesarux\", \"mame\", \"fuse\")", lp, W_EARLY);
 	}
 	OpenBreakpointsFile(fName, type);
 }
@@ -1345,27 +1345,22 @@ static void dirSETBREAKPOINT() {
 		return;
 	}
 	aint val = CurAddress;
-	char* ifP = NULL;
-	if (!SkipBlanks(lp)) {
-		if (*lp == '"') {
-			auto arg = GetDelimitedString(lp);
-			ifP = arg.data();
-		} else {
-			if (!ParseExpressionNoSyntaxError(lp, val)) {
-				Error("[SETBREAKPOINT] Syntax error", bp, SUPPRESS);
-				return;
-			} else if (anyComma(lp)) {
-				auto arg = GetDelimitedString(lp);
-				ifP = arg.data();
-			}
-		}
-		if (!SkipBlanks(lp)) {
+	delim_string_t delimTxt = {};
+	if (!SkipBlanks(lp) && (DT_NONE == DelimiterAnyBegins(lp, false))) {	// not a condition, parse as address
+		if (!ParseExpressionNoSyntaxError(lp, val)) {
 			Error("[SETBREAKPOINT] Syntax error", bp, SUPPRESS);
 			return;
+		} else if (anyComma(lp) && !SkipBlanks(lp)) {						// condition can be second arg
+			if (DT_NONE != DelimiterAnyBegins(lp, false)) delimTxt = GetDelimitedStringEx(lp);
 		}
+	} else {																// condition delimited string follows
+		delimTxt = GetDelimitedStringEx(lp);
 	}
-
-	WriteBreakpoint(val, ifP);
+	if (!SkipBlanks(lp)) {
+		Error("[SETBREAKPOINT] Syntax error", lp, SUPPRESS);
+		return;
+	}
+	WriteBreakpoint(val, (DT_NONE != delimTxt.second && !delimTxt.first.empty()) ? delimTxt.first.c_str() : nullptr);
 }
 
 /*void dirTEXTAREA() {

@@ -211,6 +211,8 @@
               <synopsis>
 - Added <link linkend="po_dp">`DP` (alias `DEFP`)</link> directive to define Pascal strings
 - <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
+- <link linkend="po_bplist">`BPLIST`</link> supports now also FUSE
+- <link linkend="po_setbp">`SETBP`</link> has optional string argument for "conditional" breakpoints (depends on bplist type)
 - CI: you can download executables from recent builds (windows, macos, freebsd, linux), for testing
 - refactored: <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">relocation example</ulink> has more size-optimized relocator code
 - docs: minor fixes/extensions</synopsis>
@@ -1900,7 +1902,7 @@ END_OF_PROGRAM</programlisting></para>
           </varlistentry>
 
           <varlistentry>
-            <term>BPLIST<indexterm id="po_bplist"><primary>BPLIST</primary><seealso>SETBP</seealso></indexterm> &lt;filename&gt; [unreal|zesarux|mame]</term>
+            <term>BPLIST<indexterm id="po_bplist"><primary>BPLIST</primary><seealso>SETBP</seealso></indexterm> &lt;filename&gt; [unreal|zesarux|mame|fuse]</term>
 
             <listitem>
 				<para>
@@ -1908,10 +1910,10 @@ END_OF_PROGRAM</programlisting></para>
 						<link linkend="po_device">DEVICE</link>.</emphasis>
 				</para>
 				<para>Opens file to export breakpoints info directly from ASM source, currently three
-					flavours of export are supported: <code>unreal</code> (default), <code>zesarux</code>
-					and <code>mame</code>. For latest Unreal emulators use filename "bpx.ini", you
-					can then load the file from the emulator UI. For ZEsarUX the file will contain
-					command-line options, which you can add to the command when launching the emulator.
+					flavours of export are supported: <code>unreal</code> (default), <code>zesarux</code>, <code>mame</code>
+					and <code>fuse</code>. For latest Unreal emulators use filename "bpx.ini", you
+					can then load the file from the emulator UI. For ZEsarUX and FUSE the file will contain
+					command-line options or debugger commands, which you can add to the command when launching the emulator.
 				</para>
 				<para>(current version of ZEsarUX will not catch the very first instruction of freshly
 					loaded snapshot/NEX/... file, or it will even disable breakpoints when changing
@@ -3433,10 +3435,13 @@ START  ....     ; some code
           </varlistentry>
 
           <varlistentry>
-            <term>SETBP<indexterm id="po_setbp"><primary>SETBP</primary><seealso>BPLIST</seealso></indexterm> [&lt;expression&gt;]</term>
+            <term>SETBP<indexterm id="po_setbp"><primary>SETBP</primary><seealso>BPLIST</seealso></indexterm> [&lt;expression&gt; | "&lt;condition&gt;"]</term>
           </varlistentry>
           <varlistentry>
-            <term>SETBREAKPOINT<indexterm id="po_setbreakpoint"><primary>SETBREAKPOINT</primary><see>SETBP</see></indexterm> [&lt;expression&gt;]</term>
+            <term>SETBP &lt;expression&gt;, "&lt;condition&gt;"</term>
+          </varlistentry>
+          <varlistentry>
+            <term>SETBREAKPOINT<indexterm id="po_setbreakpoint"><primary>SETBREAKPOINT</primary><see>SETBP</see></indexterm> ...</term>
 
             <listitem>
 				<para>
@@ -3445,7 +3450,8 @@ START  ....     ; some code
 				</para>
 				<para>Will add execution-type breakpoint at address &lt;expression&gt; to the
 					<link linkend="po_bplist">BPLIST</link> export file. If no expression is specified,
-					the current program counter will be used.
+                  the current program counter will be used.</para>
+                <para>Some breakpoint list file types allow for optional extra string like condition of breakpoint, for example <code>fuse</code> file type.
 				  <example>
                   <title></title>
 
@@ -3457,7 +3463,7 @@ start:
         SETBP some_routine_label  ; set also some breakpoint to other code by its label
         SETBREAKPOINT $0D6B       ; alias of SETBP, works identically
         ; ... your code of app
-					  </programlisting>
+        SETBP $1234, "z80:hl=0"   ; with FUSE this will generate `br 0x1234 if z80:hl=0`</programlisting>
 				  </example>
 				</para>
             </listitem>

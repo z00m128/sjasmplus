@@ -10,21 +10,32 @@
  9    8002                  setbp $9000
 10    8002 00               nop
 11    8003
-12    8003                  setbp "z80:bc!=0"
+12    8003                  setbp   "z80:bc!=0"
 13    8003 00               nop
 14    8004                  setbp $,"z80:de!=0"
 15    8004 00               nop
-16    8005                  setbp $A000,"z80:hl=0"
+16    8005                  setbp   $A000,   'z80:hl=0'
 17    8005 00               nop
-18    8006
-dir_setbp_fuse.asm(19): error: [SETBREAKPOINT] Syntax error: setbp &
-19    8006                  setbp &
-20    8006 00               nop
-dir_setbp_fuse.asm(21): error: [SETBREAKPOINT] Syntax error: setbp "on monday" !WTF?
-21    8007                  setbp "on monday" !WTF?
+18    8006                  setbp $B000,""
+19    8006 00               nop
+20    8007
+dir_setbp_fuse.asm(21): error: [SETBREAKPOINT] Syntax error: setbp &
+21    8007                  setbp &
 22    8007 00               nop
-23    8008
-24    8008                  bplist "dir_setbp_fuse.exp" fuse
+dir_setbp_fuse.asm(23): error: [SETBREAKPOINT] Syntax error: !WTF?
+23    8008                  setbp "on monday" !WTF?
+24    8008 00               nop
+dir_setbp_fuse.asm(25): error: [SETBREAKPOINT] Syntax error: setbp ,
+25    8009                  setbp ,
+26    8009 00               nop
+dir_setbp_fuse.asm(27): error: [SETBREAKPOINT] Syntax error: setbp , ""
+27    800A                  setbp , ""
+28    800A 00               nop
+dir_setbp_fuse.asm(29): error: [SETBREAKPOINT] Syntax error: ,
+29    800B                  setbp $, ,
+30    800B 00               nop
+31    800C
+32    800C                  bplist "dir_setbp_fuse.exp" fuse
 # file closed: dir_setbp_fuse.asm
 
 Value    Label

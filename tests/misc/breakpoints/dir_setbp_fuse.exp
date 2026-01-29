@@ -5,3 +5,4 @@ br 0x9000
 br 0x8003 if z80:bc!=0
 br 0x8004 if z80:de!=0
 br 0xA000 if z80:hl=0
+br 0xB000

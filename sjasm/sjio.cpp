@@ -1532,7 +1532,7 @@ void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpoi
 	breakpointsType = type;
 
 	if (type == BPSF_FUSE) {
-		fprintf(FP_BreakpointsFile, "del");
+		fprintf(FP_BreakpointsFile, "del\n");
 	}
 }
 
@@ -1579,9 +1579,9 @@ void WriteBreakpoint(const aint val, const char* ifP) {
 			break;
 		case BPSF_FUSE:
 			if (ifP == NULL) {
-			    fprintf(FP_BreakpointsFile, "\nbr 0x%04X", val&0xFFFF);
+			    fprintf(FP_BreakpointsFile, "br 0x%04X\n", val&0xFFFF);
 			} else {
-			    fprintf(FP_BreakpointsFile, "\nbr 0x%04X if %s", val&0xFFFF, ifP);
+			    fprintf(FP_BreakpointsFile, "br 0x%04X if %s\n", val&0xFFFF, ifP);
 			}
 			break;
 	}
