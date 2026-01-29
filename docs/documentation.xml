@@ -213,6 +213,7 @@
 - <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
 - <link linkend="po_bplist">`BPLIST`</link> supports now also FUSE
 - <link linkend="po_setbp">`SETBP`</link> has optional string argument for "conditional" breakpoints (depends on bplist type)
+- <link linkend="po_device">`DEVICE`</link> ZX-like devices can now init with all-zeroed memory by using RAMTOP -1
 - CI: you can download executables from recent builds (windows, macos, freebsd, linux), for testing
 - refactored: <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">relocation example</ulink> has more size-optimized relocator code
 - docs: minor fixes/extensions</synopsis>
@@ -2188,7 +2189,9 @@ counter = counter + 1
               <para>For ZXSPECTRUM-like devices (except ZX Next) you can provide RAMTOP value,
 				  which will init the device memory in similar way as "<code>CLEAR &lt;RAMTOP&gt;</code>"
 				  in BASIC would do, putting top of the fake-stack at the RAMTOP address. The
-				  default RAMTOP is since v1.15.0 0x5D5B (it was 0xFF57 before).</para>
+				  default RAMTOP is since v1.15.0 0x5D5B (it was 0xFF57 before). Use RAMTOP value -1
+                  to skip device memory init completely and get all-zeroed memory. ZXSPECTRUM128
+                  memory state does match the "USR 0" state (ZX48 ROM reset with ZX128 HW).</para>
 
               <para>Predefined devices' identifiers list:</para>
 

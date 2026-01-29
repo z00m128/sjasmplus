@@ -2159,8 +2159,8 @@ static void dirDEVICE() {
 			if (!ParseExpressionNoSyntaxError(lp, ramtop)) {
 				Error("[DEVICE] Syntax error", bp); return;
 			}
-			if (ramtop < 0x5D00 || 0xFFFF < ramtop) {
-			  	ErrorInt("[DEVICE] valid range for RAMTOP is $5D00..$FFFF", ramtop); return;
+			if ((ramtop < 0x5D00 || 0xFFFF < ramtop) && (-1 != ramtop)) {
+				ErrorInt("[DEVICE] valid range for RAMTOP is $5D00..$FFFF", ramtop); return;
 			}
 		}
 		// if (1 == deviceDirectivesCount && Device) -> device was already set globally, skip SetDevice
