@@ -84,10 +84,11 @@ static void initZxLikeDevice(
 	CDevice* const device, int32_t slotSize, int pageCount, const int* const initialPages, aint ramtop)
 {
 	initRegularSlotDevice(device, slotSize, 0x10000/slotSize, pageCount, initialPages);
-	device->ZxRamTop = (0x5D00 <= ramtop && ramtop <= 0xFFFF) ? ramtop : ZX_RAMTOP_DEFAULT;
+	device->ZxRamTop = ((-1 == ramtop) || (0x5D00 <= ramtop && ramtop <= 0xFFFF)) ? ramtop : ZX_RAMTOP_DEFAULT;
+	if (-1 == ramtop) return;		// explicit user's request to skip ZX memory init
 
 	// set memory to state like if (for snapshot saving):
-		// CLEAR ZxRamTop (0x5D5B default) : LOAD "bin" CODE : ... USR start_adr
+	// CLEAR ZxRamTop (0x5D5B default) : LOAD "bin" CODE : ... USR start_adr
 	aint adr;
 	// ULA attributes: INK 0 : PAPER 7 : FLASH 0 : BRIGTH 0
 	for (adr = 0x5800; adr < 0x5B00; ++adr) device->Poke(adr, 7*8);

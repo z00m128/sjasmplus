@@ -71,6 +71,7 @@ bool SaveSNA_ZX(const std::filesystem::path & fname, word start) {
 	bool is48kSnap = !strcmp(DeviceID, "ZXSPECTRUM48");
 	bool defaultStack = true;
 	aint stackAdr = Device->ZxRamTop + 1 - sizeof(ZX_STACK_DATA);
+	if (stackAdr < 0x4002) stackAdr = 0x4002;
 	for (aint ii = is48kSnap ? -2 : 0; ii < aint(sizeof(ZX_STACK_DATA)); ++ii) {
 		// will check for 48k snap if there is `00 00` ahead of fake stack data
 		const byte cmpValue = (0 <= ii) ? ZX_STACK_DATA[ii] : 0;
