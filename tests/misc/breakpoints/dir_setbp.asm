@@ -14,3 +14,5 @@
 
     ; syntax error test
     SETBP &
+
+    SETBP   "conditions not supported yet"

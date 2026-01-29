@@ -9,3 +9,5 @@
     ; value truncating warnings
     .SETBREAKPOINT 0x10000
     .setbreakpoint -1
+
+    SETBP   "conditions not supported yet"

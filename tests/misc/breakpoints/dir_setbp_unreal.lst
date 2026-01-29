@@ -15,6 +15,9 @@ dir_setbp_unreal.asm(11): warning: value 0x10000 is truncated to 16bit value: 0x
 dir_setbp_unreal.asm(12): warning: value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
 12    2345                  .setbreakpoint -1
 13    2345
+dir_setbp_unreal.asm(14): warning: Conditional breakpoints not (yet) supported for Unreal
+14    2345                  SETBP   "conditions not supported yet"
+15    2345
 # file closed: dir_setbp_unreal.asm
 
 Value    Label

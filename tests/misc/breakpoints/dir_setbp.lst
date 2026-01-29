@@ -20,6 +20,9 @@ dir_setbp.asm(13): warning: value 0xFFFFFFFF is truncated to 16bit value: 0xFFFF
 dir_setbp.asm(16): error: [SETBREAKPOINT] Syntax error: SETBP &
 16    2345                  SETBP &
 17    2345
+dir_setbp.asm(18): warning: Conditional breakpoints not (yet) supported for Zesarux
+18    2345                  SETBP   "conditions not supported yet"
+19    2345
 # file closed: dir_setbp.asm
 
 Value    Label
