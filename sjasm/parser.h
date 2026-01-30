@@ -38,6 +38,8 @@ int ParseExpressionMemAccess(char*& p, aint& nval);
 void ParseAlignArguments(char* & src, aint & alignment, aint & fill);
 int ParseDirective(bool beginningOfLine = 0);
 int ParseDirective_REPT();
+void ParseLabel();
+int ParseMacro();
 void ParseInstruction();
 char* ReplaceDefine(char* lp);
 void SetLastParsedLabel(const char* label);

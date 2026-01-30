@@ -1,0 +1,174 @@
+# file opened: equ_labels.asm
+  1   0000                  STRUCT TEST_STRUCT
+  2   0000 ~            s1      BYTE
+  3   0000                  ENDS
+  4   0000
+  5   0000              M_.!?#@acroName MACRO
+  6   0000 ~            @.L_.!?#@ocalInMacro:   nop     ; local to emit
+  7   0000 ~            .L_.!?#@ocalInMacro:    nop     ; local to macro
+  8   0000                              ENDM
+  9   0000
+ 10   0000              ;;; current status, hopefully covering almost everything except Temporary labels
+ 11   0000                  ORG $4000
+ 12   4000 00           R_.!?#@egular:          nop
+ 13   4001 00           !K_.!?#@eepRegForLocal: nop
+ 14   4002 00           .L_.!?#@ocal:           nop
+ 15   4003              .E_.!?#@mitMacro:       M_.!?#@acroName     ; emit macro
+ 15   4003 00          >@.L_.!?#@ocalInMacro:   nop     ; local to emit
+ 15   4004 00          >.L_.!?#@ocalInMacro:    nop     ; local to macro
+ 16   4005              R_.!?#@egEqu:           EQU $1010
+ 17   4005              R_.!?#@egDefl           = $1020
+ 18   4005 00           R_.!?#@egSelfModifyCode+1:      nop
+ 19   4006 21 39 30     R_.!?#@egSelfModifyCodeAuto+*:  ld hl,12345 ; *MUST* have instruction
+ 20   4009 02           S_.!?#@tructInstance    TEST_STRUCT { 2 }
+ 21   400A 21 0A 40     123                     ld  hl,123_B
+ 22   400D
+ 23   400D                  MODULE M_!?#@odul   ; can't contain dot
+ 24   400D 00           @G_.!?#@lobal:          nop
+ 25   400E 00           R_.!?#@egInMod:         nop
+ 26   400F 00           !K_.!?#@eepRegInModForLocal:    nop
+ 27   4010 00           .L_.!?#@ocalInMod:      nop
+ 28   4011              .E_.!?#@mitMacroInMod:  M_.!?#@acroName     ; emit macro
+ 28   4011 00          >@.L_.!?#@ocalInMacro:   nop     ; local to emit
+ 28   4012 00          >.L_.!?#@ocalInMacro:    nop     ; local to macro
+ 29   4013              R_.!?#@egEquInMod:      EQU $1030
+ 30   4013              R_.!?#@egDeflInMod      = $1040
+ 31   4013 00           SMC_InMod+1:            nop
+ 32   4014 21 39 30     SMC_Auto_InMod+*:       ld hl,12345  ; *MUST* have instruction
+ 33   4017 03           S_.!?#@tructInMod       TEST_STRUCT { 3 }
+ 34   4018 21 18 40     234                     ld  hl,234_B
+ 35   401B                  ENDMODULE
+ 36   401B
+ 37   401B
+ 38   401B              ;;; EQU directive as workaround for indenting some labels (since v1.21.2)
+ 39   401B              ;;; !!! no colons !!! colon is instruction delimiter (optional label char only when label starts line)
+ 40   401B              ;;; Also good luck with syntax highlight and other 3rd party tools :shrug:
+ 41   401B                  ORG $6000
+ 42   6000
+ 43   6000                  STRUCT EQU_STRUCT
+equ_labels.asm(44): error: [STRUCT] Unexpected: EQU     s1      BYTE
+ 44   6000 ~                    EQU     s1      BYTE                ; error, not supported
+ 45   6000                  ENDS
+equ_labels.asm(46): error: [EQU] put name after MACRO instead: EQU EquM_.!?#@acroName  MACRO
+ 46   6000                  EQU EquM_.!?#@acroName  MACRO           ; this is explicitly not supported, just DO NOT, see next line
+ 47   6000                  MACRO M_.!?#@acroWithEqu
+ 48   6000 ~                    EQU @.EquL_.!?#@ocalInMacro     nop     ; local to emit
+ 49   6000 ~                    EQU .EquL_.!?#@ocalInMacro      nop     ; local to macro
+ 50   6000                  ENDM
+ 51   6000
+ 52   6000 00               EQU EquR_.!?#@egular            nop
+ 53   6001 00               EQU !EquK_.!?#@eepRegForLocal   nop
+ 54   6002 00               EQU .EquL_.!?#@ocal             nop
+ 55   6003                  EQU .EquE_.!?#@mitMacro         M_.!?#@acroWithEqu  ; emit macro
+ 55   6003 00          >        EQU @.EquL_.!?#@ocalInMacro     nop     ; local to emit
+ 55   6004 00          >        EQU .EquL_.!?#@ocalInMacro      nop     ; local to macro
+ 56   6005                  EQU EquR_.!?#@egEqu             EQU $1050
+ 57   6005                  EQU EquR_.!?#@egDefl            = $1060
+ 58   6005 00               EQU EquR_.!?#@egSelfModifyCode+1        nop
+ 59   6006 21 39 30         EQU EquR_.!?#@egSelfModifyCodeAuto+*    ld hl,12345 ; and this WORKS OMG
+ 60   6009 04               EQU EquS_.!?#@tructInstance     TEST_STRUCT { 4 }   ; this also WORKS
+ 61   600A 21 0A 60         EQU 123                         ld  hl,123_B
+ 62   600D
+ 63   600D                  MODULE EquM_!?#@odul
+ 64   600D 00               EQU @EquG_.!?#@lobal            nop
+ 65   600E 00               EQU EquR_.!?#@egInMod           nop
+ 66   600F 00               EQU !EquK_.!?#@eepRegInMod      nop
+ 67   6010 00               EQU .EquL_.!?#@ocalInMod        nop
+ 68   6011                  EQU .EquE_.!?#@mitMacroInMod    M_.!?#@acroWithEqu  ; emit macro
+ 68   6011 00          >        EQU @.EquL_.!?#@ocalInMacro     nop     ; local to emit
+ 68   6012 00          >        EQU .EquL_.!?#@ocalInMacro      nop     ; local to macro
+ 69   6013                  EQU EquR_.!?#@egEquInMod        EQU $1070
+ 70   6013                  EQU EquR_.!?#@egDeflInMod       = $1080
+ 71   6013 00               EQU EquSMC_.!?#@_InMod+1        nop
+ 72   6014 21 39 30         EQU EquSMC_.!?#@_Auto_InMod+*   ld hl,12345  ; *MUST* have instruction
+ 73   6017 05               EQU EquS_.!?#@tructInMod        TEST_STRUCT { 5 }
+ 74   6018 21 18 60         EQU 234                         ld  hl,234_B
+ 75   601B                  ENDMODULE
+ 76   601B
+ 77   601B              ;;; verify there's no infinite cycle of EQU in EQU, it naturally failed without extra code check
+ 78   601B              ;;; but extra check was added to make it fail explicitly
+ 79   601B
+ 80   601B              ; Nested1 will eat second EQU as regular label would, evaluating "Nested2 EQU $EEEE" as expression
+equ_labels.asm(81): error: Label not found: Nested2
+equ_labels.asm(81): error: Unexpected: EQU $EEEE
+ 81   601B                  EQU Nested1 EQU Nested2 EQU $EEEE
+ 82   601B
+ 83   601B              ; Second EQU becomes label, all whitespace is skipped in special EQU mode before attempting to find indented label
+equ_labels.asm(84): error: [EQU] too many EQUs here: EQU         EQU Nested2 EQU $1090
+ 84   601B                  EQU         EQU Nested2 EQU $1090
+ 85   601B
+ 86   601B              ; But this was "EQU EQU Nested1" without extra check, so it somewhat worked before extra check
+equ_labels.asm(87): error: [EQU] too many EQUs here: EQU         EQU         EQU Nested1
+ 87   601B                  EQU         EQU         EQU Nested1
+ 88   601B
+ 89   601B
+ 90   601B
+ 91   601B
+ 92   601B
+ 93   601B
+ 94   601B
+ 95   601B
+ 96   601B
+ 97   601B
+ 98   601B
+ 99   601B
+100   601B              ;;; line 100+ in listing
+101   601B
+# file closed: equ_labels.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x4004 X 0>L_.!?#@ocalInMacro
+0x4012 X 1>L_.!?#@ocalInMacro
+0x6004 X 2>EquL_.!?#@ocalInMacro
+0x6012 X 3>EquL_.!?#@ocalInMacro
+0x0000 X EQU_STRUCT
+0x600D X EquG_.!?#@lobal
+0x6001 X EquK_.!?#@eepRegForLocal
+0x600F X EquM_!?#@odul.EquK_.!?#@eepRegInMod
+0x1080 X EquM_!?#@odul.EquR_.!?#@egDeflInMod
+0x1070 X EquM_!?#@odul.EquR_.!?#@egEquInMod
+0x600E X EquM_!?#@odul.EquR_.!?#@egInMod
+0x6011 X EquM_!?#@odul.EquR_.!?#@egInMod.EquE_.!?#@mitMacroInMod
+0x6011 X EquM_!?#@odul.EquR_.!?#@egInMod.EquL_.!?#@ocalInMacro
+0x6010 X EquM_!?#@odul.EquR_.!?#@egInMod.EquL_.!?#@ocalInMod
+0x6017 X EquM_!?#@odul.EquS_.!?#@tructInMod
+0x6017 X EquM_!?#@odul.EquS_.!?#@tructInMod.s1
+0x6015 X EquM_!?#@odul.EquSMC_.!?#@_Auto_InMod
+0x6014 X EquM_!?#@odul.EquSMC_.!?#@_InMod
+0x1060 X EquR_.!?#@egDefl
+0x1050 X EquR_.!?#@egEqu
+0x6006 X EquR_.!?#@egSelfModifyCode
+0x6007 X EquR_.!?#@egSelfModifyCodeAuto
+0x6000 X EquR_.!?#@egular
+0x6003 X EquR_.!?#@egular.EquE_.!?#@mitMacro
+0x6002 X EquR_.!?#@egular.EquL_.!?#@ocal
+0x6003 X EquR_.!?#@egular.EquL_.!?#@ocalInMacro
+0x6009 X EquS_.!?#@tructInstance
+0x6009 X EquS_.!?#@tructInstance.s1
+0x400D X G_.!?#@lobal
+0x4001 X K_.!?#@eepRegForLocal
+0x400F X M_!?#@odul.K_.!?#@eepRegInModForLocal
+0x1040 X M_!?#@odul.R_.!?#@egDeflInMod
+0x1030 X M_!?#@odul.R_.!?#@egEquInMod
+0x400E X M_!?#@odul.R_.!?#@egInMod
+0x4011 X M_!?#@odul.R_.!?#@egInMod.E_.!?#@mitMacroInMod
+0x4011 X M_!?#@odul.R_.!?#@egInMod.L_.!?#@ocalInMacro
+0x4010 X M_!?#@odul.R_.!?#@egInMod.L_.!?#@ocalInMod
+0x4017 X M_!?#@odul.S_.!?#@tructInMod
+0x4017 X M_!?#@odul.S_.!?#@tructInMod.s1
+0x4015 X M_!?#@odul.SMC_Auto_InMod
+0x4014 X M_!?#@odul.SMC_InMod
+0x0000 X Nested1
+0x1020 X R_.!?#@egDefl
+0x1010 X R_.!?#@egEqu
+0x4006 X R_.!?#@egSelfModifyCode
+0x4007 X R_.!?#@egSelfModifyCodeAuto
+0x4000 X R_.!?#@egular
+0x4003 X R_.!?#@egular.E_.!?#@mitMacro
+0x4002 X R_.!?#@egular.L_.!?#@ocal
+0x4003 X R_.!?#@egular.L_.!?#@ocalInMacro
+0x4009 X S_.!?#@tructInstance
+0x4009 X S_.!?#@tructInstance.s1
+0x0001 X TEST_STRUCT
+0x0000 X TEST_STRUCT.s1

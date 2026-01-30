@@ -1621,6 +1621,26 @@ static void dirUNDEFINE() {
 	}
 }
 
+static void dirEQU() {
+	// EQU without leading label will emit as directive, ie. this code happens
+	// this will parse rest of line after EQU as if it was beginning of line
+	// ie. this enables to indent labels through EQU directive
+	// = workaround for people who really hate labels at BOL
+	// THIS IS NOT RECOMMENDED FOR REGULAR USAGE, you will eventually regret using this
+	// but it was interesting experiment to implement it and there was request for it, so:
+	if (NeedEQU()) {
+		Error("[EQU] too many EQUs here", bp, SUPPRESS);
+		return;
+	}
+	if (!SkipBlanks()) ParseLabel();
+	if (isMacroNext()) {
+		Error("[EQU] put name after MACRO instead", bp, SUPPRESS);
+		return;
+	}
+	if (!SkipBlanks()) ParseMacro();
+	if (!SkipBlanks()) ParseInstruction();
+}
+
 static void dirEXPORT() {
 	aint val;
 	char* n, * p;
@@ -2269,6 +2289,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".defs", dirBLOCK);
 	DirectivesTable.insertd(".defd", dirDWORD);
 	DirectivesTable.insertd(".defm", dirBYTE);
+	DirectivesTable.insertd(".equ", dirEQU);
 	DirectivesTable.insertd(".endmod", dirENDMODULE);
 	DirectivesTable.insertd(".endmodule", dirENDMODULE);
 	DirectivesTable.insertd(".rept", dirDUP);
