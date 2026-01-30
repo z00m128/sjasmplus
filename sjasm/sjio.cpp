@@ -737,6 +737,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	// try to read through the buffer and produce new line from it
 	while (IsRunning && ReadBufData()) {
 		// start of new line (or fake "line" by colon)
+		aint indentedColumns = 0;
 		rlppos = line;
 		substitutedLine = line;		// also reset "substituted" line to the raw new one
 		eolComment = NULL;
@@ -746,6 +747,17 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			IsLabel = false;
 		} else {					// starting real new line
 			IsLabel = (0 == blockComment);
+			if (IsLabel && SplitByColon) {	// line can have label and may be processed by ReadBufLine (like split by colons)
+				// skip indented '>' as if it was not part of source (only space and tab can be used)
+				while (ReadBufData() && ((' ' == *rlpbuf) || ('\t' == *rlpbuf))) *rlppos++ = *rlpbuf++;
+				if (ReadBufData() && ('>' == *rlpbuf)) {	// label indentation feature, discard all till here
+					indentedColumns = 1 + rlppos - line;	// track how many columns were discarded
+					++rlpbuf;			// advance after the indentation greater-than >
+					rlppos = line;		// discard copied whitespace
+				} else {				// whitespace as part of line, preserve copied whitespace
+					IsLabel &= (line == rlppos);	// label not possible if whitespace was copied
+				}
+			}
 		}
 		bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 		// copy data from read buffer into `line` buffer until EOL/colon is found
@@ -833,7 +845,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 		}
 		// do +1 for very first colon-segment only (rest is +1 due to artificial space at beginning)
 		assert(!sourcePosStack.empty());
-		size_t advanceColumns = colonSubline ? (0 == sourcePosStack.back().colEnd) + strlen(line) : 0;
+		size_t advanceColumns = colonSubline ? (0 == sourcePosStack.back().colEnd) + (rlppos -line) + indentedColumns : 0;
 		sourcePosStack.back().nextSegment(colonSubline, advanceColumns);
 		// line is parsed and ready to be processed
 		if (Parse) 	ParseLine();	// processed here in loop

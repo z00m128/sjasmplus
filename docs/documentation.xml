@@ -211,6 +211,7 @@
               <synopsis>
 - Added <link linkend="po_dp">`DP` (alias `DEFP`)</link> directive to define Pascal strings
 - <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
+- <link linkend="s_source_format">`&gt;`</link> can be used to indent labels
 - <link linkend="po_bplist">`BPLIST`</link> supports now also FUSE
 - <link linkend="po_setbp">`SETBP`</link> has optional string argument for "conditional" breakpoints (depends on bplist type)
 - <link linkend="po_device">`DEVICE`</link> ZX-like devices can now init with all-zeroed memory by using RAMTOP -1
@@ -710,6 +711,11 @@ label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
        ld d,(12+3)            ; error, can't load D from memory
        ld d,+(12+3)           ; works, unary plus makes it clear it's just immediate value</programlisting>
 			</example>
+			(since v1.21.2) You can indent a label at the beginning of a line by using the indentation character '&gt;'.
+			The label must start immediately after the "greater-than" character (it works by offsetting the logical start of line):
+			<programlisting>ClassicLineLabel:      nop
+   &gt;IndentedMainLabel: ld b,123    ; '&gt;' must be first non-whitespace character on line
+       &gt;.loop:         djnz .loop</programlisting>
 		</para>
     </section>
   </chapter>
@@ -722,7 +728,8 @@ label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
 
       <para>Labels are case-sensitive and may be of any reasonable length,
       that is: up to about 70 characters. Label definitions must start on
-      the beginning of a line, but don't have to be followed by a colon ':'.
+      the beginning of a line (since v1.21.2 you can indent them by leading <code>`&gt;`</code>),
+      but don't have to be followed by a colon ':'.
       Generally labels should start with a letter or a underscore ('_'), the
       following characters may be chosen from letters, numbers and the
       following special symbols: '_', '.', '!', '?', '#' and '@'. Note that
