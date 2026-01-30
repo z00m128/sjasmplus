@@ -1,0 +1,199 @@
+# file opened: indent_labels.asm
+  1   0000                  STRUCT TEST_STRUCT
+  2   0000 ~            s1      BYTE
+  3   0000                  ENDS
+  4   0000
+  5   0000              M_.!?#@acroName MACRO
+  6   0000 ~            @.L_.!?#@ocalInMacro:   nop                 ; local to emit
+  7   0000 ~            .L_.!?#@ocalInMacro:    nop                 ; local to macro
+  8   0000                              ENDM
+  9   0000
+ 10   0000              ;;; old labels syntax requiring labels at beginning of line
+ 11   0000                  ORG $4000
+ 12   4000 00           R_.!?#@egular:          nop
+ 13   4001 00           !K_.!?#@eepRegForLocal: nop
+ 14   4002 00           .L_.!?#@ocal:           nop
+ 15   4003              .E_.!?#@mitMacro:       M_.!?#@acroName     ; emit macro
+ 15   4003 00          >@.L_.!?#@ocalInMacro:   nop                 ; local to emit
+ 15   4004 00          >.L_.!?#@ocalInMacro:    nop                 ; local to macro
+ 16   4005              R_.!?#@egEqu:           EQU $1010
+ 17   4005              R_.!?#@egDefl           = $1020
+ 18   4005 00           R_.!?#@egSelfModifyCode+1:      nop
+ 19   4006 21 39 30     R_.!?#@egSelfModifyCodeAuto+*:  ld hl,12345 ; *MUST* have instruction
+ 20   4009 02           S_.!?#@tructInstance    TEST_STRUCT { 2 }
+ 21   400A 21 0A 40     123                     ld  hl,123_B
+ 22   400D
+ 23   400D                  MODULE M_!?#@odul   ; can't contain dot
+ 24   400D 00           @G_.!?#@lobal:          nop
+ 25   400E 00           R_.!?#@egInMod:         nop
+ 26   400F 00           !K_.!?#@eepRegInModForLocal:    nop
+ 27   4010 00           .L_.!?#@ocalInMod:      nop
+ 28   4011              .E_.!?#@mitMacroInMod:  M_.!?#@acroName     ; emit macro
+ 28   4011 00          >@.L_.!?#@ocalInMacro:   nop                 ; local to emit
+ 28   4012 00          >.L_.!?#@ocalInMacro:    nop                 ; local to macro
+ 29   4013              R_.!?#@egEquInMod:      EQU $1030
+ 30   4013              R_.!?#@egDeflInMod      = $1040
+ 31   4013 00           SMC_InMod+1:            nop
+ 32   4014 21 39 30     SMC_Auto_InMod+*:       ld hl,12345         ; *MUST* have instruction
+ 33   4017 03           S_.!?#@tructInMod       TEST_STRUCT { 3 }
+ 34   4018 21 18 40     234                     ld  hl,234_B
+ 35   401B                  ENDMODULE
+ 36   401B
+ 37   401B
+ 38   401B              ;;; indented '>' as workaround for indenting labels (since v1.21.2)
+ 39   401B              ;;; Good luck with syntax highlight and other 3rd party tools :shrug:
+ 40   401B                  ORG $6000
+ 41   6000
+ 42   6000                  STRUCT IND_STRUCT
+ 43   6000 ~            s1Ind  BYTE
+ 44   6000                  ENDS
+ 45   6000              M_.!?#@acroNameInd     MACRO
+ 46   6000 ~            @.L_.!?#@ocalInMacroInd:       nop     ; local to emit
+ 47   6000 ~            .L_.!?#@ocalInMacroInd:        nop     ; local to macro
+ 48   6000                                     ENDM
+ 49   6000
+ 50   6000                  MACRO M_.!?#@acroWithI2
+ 51   6000 ~            @.L_.!?#@ocalInMacroI2:    nop     ; local to emit
+ 52   6000 ~            .L_.!?#@ocalInMacroI2:     nop     ; local to macro
+ 53   6000                  ENDM
+ 54   6000
+ 55   6000 00           R_.!?#@egularInd:              nop
+ 56   6001 00           !K_.!?#@eepRegForLocalInd:     nop
+ 57   6002 00           .L_.!?#@ocalInd:               nop
+ 58   6003              .E_.!?#@mitMacroInd:           M_.!?#@acroWithI2   ; emit macro
+ 58   6003 00          >@.L_.!?#@ocalInMacroI2:    nop     ; local to emit
+ 58   6004 00          >.L_.!?#@ocalInMacroI2:     nop     ; local to macro
+ 59   6005              .E_.!?#@mitMacroInd2:          M_.!?#@acroNameInd  ; emit macro
+ 59   6005 00          >@.L_.!?#@ocalInMacroInd:       nop     ; local to emit
+ 59   6006 00          >.L_.!?#@ocalInMacroInd:        nop     ; local to macro
+ 60   6007              R_.!?#@egEquInd:               EQU $1050
+ 61   6007              R_.!?#@egDeflInd               = $1060
+ 62   6007 00           R_.!?#@egSelfModifyCodeInd+1:  nop
+ 63   6008 21 39 30     R_.!?#@egSelfModifyCodeAutoInd+*:      ld hl,12345
+ 64   600B 04           S_.!?#@tructInstanceInd        TEST_STRUCT { 4 }
+ 65   600C 21 0C 60     123                            ld  hl,123_B
+ 66   600F
+ 67   600F                  MODULE M_!?#@odulInd
+ 68   600F 00           @G_.!?#@lobalInd:          nop
+ 69   6010 00           R_.!?#@egInModInd:         nop
+ 70   6011 00           !K_.!?#@eepRegInModInd:    nop
+ 71   6012 00           .L_.!?#@ocalInModInd:      nop
+ 72   6013              .E_.!?#@mitMacroInModInd:  M_.!?#@acroWithI2   ; emit macro
+ 72   6013 00          >@.L_.!?#@ocalInMacroI2:    nop     ; local to emit
+ 72   6014 00          >.L_.!?#@ocalInMacroI2:     nop     ; local to macro
+ 73   6015              .E_.!?#@mitMacroInModInd2: M_.!?#@acroNameInd  ; emit macro
+ 73   6015 00          >@.L_.!?#@ocalInMacroInd:       nop     ; local to emit
+ 73   6016 00          >.L_.!?#@ocalInMacroInd:        nop     ; local to macro
+ 74   6017              R_.!?#@egEquInModInd:      EQU $1070
+ 75   6017              R_.!?#@egDeflInModInd      = $1080
+ 76   6017 00           SMC_.!?#@_InModInd+1:      nop
+ 77   6018 21 39 30     SMC_.!?#@_Auto_InModInd+*: ld hl,12345
+ 78   601B 05           S_.!?#@tructInModInd       TEST_STRUCT { 5 }
+ 79   601C 21 1C 60     234                        ld  hl,234_B
+ 80   601F                  ENDMODULE
+ 81   601F
+ 82   601F              ; valid syntax example/edge cases
+ 83   601F 00               nop
+ 83   6020 00            nop
+ 83   6021 00            nop         ; old syntax, should still produce 3x nop
+ 84   6022 00           nop:nop
+ 84   6023 00            nop        ; new enhancement, 1x label "nop", 2x nop
+ 85   6024 00            nop               ; this is legal instruction nop, indentation doesn't enforce label to be used
+ 86   6025              NotTrulyIndentedLabel: ; '>' is allowed also at beginning of line (in case you want visual consistency of all labels)
+ 87   6025
+ 88   6025              ; error reporting cases
+indent_labels.asm(89): error: Unrecognized instruction: >NoLabelHere
+ 89   6025                 >NoLabelHere    ; error, indented label can be used only once, at start of line
+ 90   6025 00           Label1:nop
+indent_labels.asm(90): error: Unrecognized instruction: >Label2
+ 90   6026                   >Label2
+ 90   6026 00            nop     ; only first indentation works, Label2 is error
+ 91   6027
+ 92   6027              ; check LUA blocks are intact by the new syntax (shouldn't apply inside lua block)
+ 93   6027                  LUA allpass
+ 94   6027 ~                    >sj.add_byte(123)       -- error
+indent_labels.asm(94): error: [LUA] unexpected symbol near '>'
+ 95   6027                  ENDLUA
+ 96   6027
+ 97   6027 ~            /*
+ 98   6027 ~                this feature shouldn't be active in block comments:
+ 99   6027 ~                    > don't tamper with this
+100   6027 ~            */
+101   6027                  IF 0
+102   6027 ~             will be discarded as regular asm code, whether the block is active does not matter
+103   6027 ~                    ; sjio.cpp doesn't know if the block is active early enough AND this makes sense in a way,
+104   6027 ~                    ; the block should contain valid asm code in case it hypothetically becomes active
+105   6027 ~                    ; if it was used just as other variant of block-comment, then it gets mangled, tough luck
+106   6027                  ENDIF
+107   6027
+108   6027              ; line with just whitespace
+109   6027
+110   6027              ; indentation line right ahead of <EOF>
+111   6027
+# file closed: indent_labels.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x4004 X 0>L_.!?#@ocalInMacro
+0x4012 X 1>L_.!?#@ocalInMacro
+0x6004 X 2>L_.!?#@ocalInMacroI2
+0x6006 X 3>L_.!?#@ocalInMacroInd
+0x6014 X 4>L_.!?#@ocalInMacroI2
+0x6016 X 5>L_.!?#@ocalInMacroInd
+0x400D X G_.!?#@lobal
+0x600F X G_.!?#@lobalInd
+0x0001 X IND_STRUCT
+0x0000 X IND_STRUCT.s1Ind
+0x4001 X K_.!?#@eepRegForLocal
+0x6001 X K_.!?#@eepRegForLocalInd
+0x6025 X Label1
+0x400F X M_!?#@odul.K_.!?#@eepRegInModForLocal
+0x1040 X M_!?#@odul.R_.!?#@egDeflInMod
+0x1030 X M_!?#@odul.R_.!?#@egEquInMod
+0x400E X M_!?#@odul.R_.!?#@egInMod
+0x4011 X M_!?#@odul.R_.!?#@egInMod.E_.!?#@mitMacroInMod
+0x4011 X M_!?#@odul.R_.!?#@egInMod.L_.!?#@ocalInMacro
+0x4010 X M_!?#@odul.R_.!?#@egInMod.L_.!?#@ocalInMod
+0x4017 X M_!?#@odul.S_.!?#@tructInMod
+0x4017 X M_!?#@odul.S_.!?#@tructInMod.s1
+0x4015 X M_!?#@odul.SMC_Auto_InMod
+0x4014 X M_!?#@odul.SMC_InMod
+0x6011 X M_!?#@odulInd.K_.!?#@eepRegInModInd
+0x1080 X M_!?#@odulInd.R_.!?#@egDeflInModInd
+0x1070 X M_!?#@odulInd.R_.!?#@egEquInModInd
+0x6010 X M_!?#@odulInd.R_.!?#@egInModInd
+0x6013 X M_!?#@odulInd.R_.!?#@egInModInd.E_.!?#@mitMacroInModInd
+0x6015 X M_!?#@odulInd.R_.!?#@egInModInd.E_.!?#@mitMacroInModInd2
+0x6013 X M_!?#@odulInd.R_.!?#@egInModInd.L_.!?#@ocalInMacroI2
+0x6015 X M_!?#@odulInd.R_.!?#@egInModInd.L_.!?#@ocalInMacroInd
+0x6012 X M_!?#@odulInd.R_.!?#@egInModInd.L_.!?#@ocalInModInd
+0x601B X M_!?#@odulInd.S_.!?#@tructInModInd
+0x601B X M_!?#@odulInd.S_.!?#@tructInModInd.s1
+0x6019 X M_!?#@odulInd.SMC_.!?#@_Auto_InModInd
+0x6018 X M_!?#@odulInd.SMC_.!?#@_InModInd
+0x6022 X nop
+0x6025 X NotTrulyIndentedLabel
+0x1020 X R_.!?#@egDefl
+0x1060 X R_.!?#@egDeflInd
+0x1010 X R_.!?#@egEqu
+0x1050 X R_.!?#@egEquInd
+0x4006 X R_.!?#@egSelfModifyCode
+0x4007 X R_.!?#@egSelfModifyCodeAuto
+0x6009 X R_.!?#@egSelfModifyCodeAutoInd
+0x6008 X R_.!?#@egSelfModifyCodeInd
+0x4000 X R_.!?#@egular
+0x4003 X R_.!?#@egular.E_.!?#@mitMacro
+0x4002 X R_.!?#@egular.L_.!?#@ocal
+0x4003 X R_.!?#@egular.L_.!?#@ocalInMacro
+0x6000 X R_.!?#@egularInd
+0x6003 X R_.!?#@egularInd.E_.!?#@mitMacroInd
+0x6005 X R_.!?#@egularInd.E_.!?#@mitMacroInd2
+0x6002 X R_.!?#@egularInd.L_.!?#@ocalInd
+0x6003 X R_.!?#@egularInd.L_.!?#@ocalInMacroI2
+0x6005 X R_.!?#@egularInd.L_.!?#@ocalInMacroInd
+0x4009 X S_.!?#@tructInstance
+0x4009 X S_.!?#@tructInstance.s1
+0x600B X S_.!?#@tructInstanceInd
+0x600B X S_.!?#@tructInstanceInd.s1
+0x0001 X TEST_STRUCT
+0x0000 X TEST_STRUCT.s1
