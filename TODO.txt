@@ -6,6 +6,7 @@ scratch area + TODO keeper for sjasmplus developers:
 Ped:
 
 add more C escape sequences: https://en.cppreference.com/w/c/language/escape
+    - now missing only octal \nnn and hexa \xn...
 
 STRING OPER: ".." like Lua?? And #"str" to count?:
  similarly the string operators request could maaaaayyybeeee work inside
@@ -20,11 +21,6 @@ Cirrus-CI .cirrus.yml:
   GCC14 still doesn't have as perfect coverage report as GCC6 (versions between I tried were also imperfect),
   so for the moment I will stick with 14 and see how it will go, but update probably ASAP and keep tracking coverge results.
 
-- name: MacOS default CC build (with unit tests):
-  I still get warning message "Only ghcr.io/cirruslabs/macos-runner:sonoma is allowed. Automatically upgraded."
-  even with "macos-sonoma-base" image which seems to exist -> not sure what is happening.
-  There will be sequoia probably soon, so switch to that later and re-check.
-
 check for Z80 in/out having also [] brackets and syntax brackets-only mode? (currently only `(c)` and `(n)` works)
 
 ARM! https://cirrus-ci.org/guide/linux/
@@ -33,9 +29,6 @@ ARM! https://cirrus-ci.org/guide/linux/
 @Janko at Next discord: `--raw-fill-gaps` to produce fill when second ORG is used and --raw output. (like org $2000 ... org $2100 -> test.dot)
 @Janko: I would rather prefer a new  -o  option which by default also sets the device to "just 64K" model and does what SAVE would do
     ^ some implicit device thing? like NOSLOT64K? But needs modified regions (or min/max program counter) - should NOT depend on zeroed values :(
-
-ad APPENDBIN - also maybe extend SAVENEX to get var-arg list, not just single file.
-(but then it may not fit on single line, so some extra appendbin would be still useful)
 
 -------------
 can you add a --utc option to sjasmplus so that I don't have to change my hardware time if I want __DATE__ to use UTC.
@@ -56,13 +49,8 @@ extern struct tm *gmtime (const time_t *__timer) __THROW;
 extern struct tm *localtime (const time_t *__timer) __THROW;
 -------------
 
-tables.cpp:1178: error not covered by tests why?? "if (haakjes) { Error("closing } missing"); }"
-sjasm.cpp:789: open DISP is also not reported? intentionally? "if (DISP_NONE != PseudoORG)"
-
 unittest-cpp seems to be pretty dead now, consider migration, for example to https://github.com/neacsum/utpp
 (author claims C++20, header only and somewhat more compatible with GoogleTest)
-
-https://www.codefactor.io/repository/github/z00m128/sjasmplus
 
 APPENDBIN to append any-size binary to other file, like for producing large dot files with data files appended
 (and let's do GiB+ support as well, INCBIN is limited to 2GiB by `int32` for length and does read it all into heap memory)
@@ -104,8 +92,6 @@ CSPECTMAP - needs better support for DISP
     add DOCS example test: "hl: Ld a,(hl),,de,hl" when all is implemented
 
 static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
- * https://scan.coverity.com/projects/z00m128-sjasmplus
-    (needs build according to their tool or Travis CI)
 
 FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
 (breaks ` .34 repeatX` directive probably? .. and END@beginningOfLine? .. actually not?)
@@ -139,12 +125,15 @@ $$label operator to get label page. (and fix pages for defl/equ/expression/... l
     ^^ done, also whole label parsing and validation refactored, the syntax "$$label" is winner
     ^^ TODO: remove this note maybe after some time, when everything will prove to be stable
 //// syntax summary:
-    labels (\.|@|)[A-Za-z_][A-Za-z0-9_.?!#@]*
-    , argument-separator    : instruction-separator     ; // comment
-    # $ hexnums, % binary, "' strings, () parentheses or memcell, [] memcell, {} device mem
-    operators-unary: ! ~ + - low high not
+    (\.|\!?@|)[A-Za-z_][A-Za-z0-9_.?!#@]* labels, \\ continue line (limited!)
+    , argument-separator, : instruction-separator, ; // comment
+    # $ hexnums, % binary, ' _ numerical group separator
+    "' strings, () parentheses or memcell, [] memcell, {} device mem
+    operators-unary: ! ~ + - low high not abs norel exist
     operators-binary: * / % mod + - << >> >>> shl shr <? >? < > <= >= = == != & and ^ xor | or && ||
     us keyboard: ~!@#$%^&*()_+`-=[]{};':"<>?,./\|
+
+original proposals to get label page:
     $$label - hexa are single $ only, so this looks fine (unary operator)
     ?label - 5<?label => ambiguous (there is already unary "?" for labels, undocummented, deprecated)
     \label - looks weird, no syntax clash
