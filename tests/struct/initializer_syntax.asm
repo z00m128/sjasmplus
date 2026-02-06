@@ -58,3 +58,7 @@ DOT1    SDOT                    ; X:8, Y:9, C = { 10, 11, 12 }
         SDOT    {{,7{,8}}
         SDOT    {{,7{,8}}}
         SDOT    ,7,,8,,
+
+        STRUCT SERR
+C       SCOLOR {31,32,33
+        ENDS

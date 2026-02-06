@@ -99,6 +99,14 @@ initializer_syntax.asm(60): error: Unrecognized instruction: ,
 60    008E 08 07 0A 08          SDOT    ,7,,8,,
 60    0092 0C
 61    0093
+62    0093                      STRUCT SERR
+63    0093              C       SCOLOR {31,32,33
+initializer_syntax.asm(64): error: closing } missing
+initializer_syntax.asm(64): error: [STRUCT] Unexpected: ENDS
+64    0093 ~                    ENDS
+65    0093 ~
+initializer_syntax.asm(65): error: [STRUCT] Unexpected end of structure
+65    0093
 # file closed: initializer_syntax.asm
 
 Value    Label
@@ -126,3 +134,8 @@ Value    Label
 0x0002 X SDOT.C.RED
 0x0000 X SDOT.X
 0x0001 X SDOT.Y
+0x0003 X SERR
+0x0000 X SERR.C
+0x0002 X SERR.C.BLUE
+0x0001 X SERR.C.GREEN
+0x0000 X SERR.C.RED
