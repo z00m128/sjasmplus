@@ -67,7 +67,7 @@ Understanding the pass structure is critical for feature development:
 - this is legacy project, so style may vary between different parts of codebase, but generally:
   - new code should mostly follow existing style in the file being modified, but also lean toward modern C++20 practice
   - avoid reformatting of existing code unless it is being modified as part of functional change (no cosmetic-only changes)
-  - use 4 spaces for indentation, no tabs
+  - use tabs (viewed as 4 space wide) for indentation in sjasm/ C++ files, use 2 or 4 spaces in .asm test files (mainly follow other files in the same dir)
   - opening braces on same line
   - use `//` for single-line comments, try to avoid `/* ... */` multi-line comments as they make it harder to temporarily comment out code during development
   - use `nullptr` over `NULL` or `0` for pointers in new code
