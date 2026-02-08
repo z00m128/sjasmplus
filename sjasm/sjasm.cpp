@@ -42,7 +42,7 @@ static void PrintHelpMain() {
 	//_COUT "Tidy up by Tygrys / UB880D / Cizo / mborik / z00m" _ENDL;
 	_COUT "\nUsage:\nsjasmplus [options] sourcefile(s)" _ENDL;
 	_COUT "\nOption flags as follows:" _ENDL;
-	_COUT "  -h or --help[=warnings]  Help information (you see it)" _ENDL;
+	_COUT "  -h or --help[=warnings]  Helpful information" _ENDL;
 	_COUT "  --zxnext[=cspect]        Enable ZX Spectrum Next Z80 extensions (Z80N)" _ENDL;
 	_COUT "  --i8080                  Limit valid instructions to i8080 only (+ no fakes)" _ENDL;
 	_COUT "  --lr35902                Sharp LR35902 CPU instructions mode (+ no fakes)" _ENDL;
@@ -66,6 +66,7 @@ static void PrintHelpMain() {
 	_COUT " Other:" _ENDL;
 	_COUT "  -D<NAME>[=<value>] or --define <NAME>[=<value>]" _ENDL;
 	_COUT "                           Define <NAME> as <value>" _ENDL;
+	_COUT "  -W[no-][all|<id>]        Enable/disable warning(s), see \"--help=warnings\"" _ENDL;
 	_COUT "  -                        Reads STDIN as source (even in between regular files)" _ENDL;
 	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
