@@ -1,4 +1,4 @@
-# run sjasmplus in a ways to display help page, check output to be at least 10 lines long in each case
+# run sjasmplus in a ways to display help page, check output to be at least 15-20 lines long in each case
 # sjasmplus sets exit code to "1" when no option was used, but when "-h" or "--help"
 # was used, then exit code is "0", so the "||" and "&&" are mixed to correctly catch these
 # but after that the diff and other tests should be run with "&&" of course
@@ -6,11 +6,14 @@ $MEMCHECK "$EXE" > noopt.msglst ||\
 $MEMCHECK "$EXE" -Wno-behost -h> h.msglst &&\
 $MEMCHECK "$EXE" -Wno-behost --help > help.msglst &&\
 $MEMCHECK "$EXE" -Wno-behost --help=warnings > warnings.msglst &&\
+$MEMCHECK "$EXE" -Wno-behost --help=syntax > syntax.msglst &&\
 diff help.msglst noopt.msglst &&\
 diff help.msglst h.msglst &&\
 help_lines=`wc -l < help.msglst` &&\
 echo "Help lines count: ${help_lines} (must be at least 20 to pass the test)" &&\
 warnings_lines=`wc -l < warnings.msglst` &&\
-echo "Warnings help lines count: ${warnings_lines} (must be at least 10 to pass the test)" &&\
-[[ 20 -le ${help_lines} && 10 -le ${warnings_lines} ]] ;
+echo "Warnings help lines count: ${warnings_lines} (must be at least 20 to pass the test)" &&\
+syntax_lines=`wc -l < syntax.msglst` &&\
+echo "Syntax help lines count: ${syntax_lines} (must be at least 15 to pass the test)" &&\
+[[ 20 -le ${help_lines} && 20 -le ${warnings_lines} && 15 -le ${syntax_lines} ]] ;
 last_result=$?
