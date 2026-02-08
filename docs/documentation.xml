@@ -419,7 +419,7 @@
 
       <para>Option flags as follows:</para>
 
-      <para><synopsis>  -h or --help[=warnings]  Help information
+      <para><synopsis>  -h or --help[=warnings|=syntax]
   --version                Basic info (with --nologo only raw version string)
   --zxnext[=cspect]        Enable ZX Next Z80 extensions (CSpect emulator has
   extra "exit", "break", "clrbrk" and "setbrk" fake instructions)
@@ -452,7 +452,7 @@
  Other:
   -D&lt;NAME&gt;[=&lt;value&gt;] or --define &lt;NAME&gt;[=&lt;value&gt;]
                            Define &lt;NAME&gt; as &lt;value&gt; (--define since v1.20.3)
-  -W[no-]&lt;warning_id&gt;      Disables/enabled particular warning type
+  -W[no-]&lt;warning_id&gt;      Enable/disable warning(s), see "--help=warnings"
   -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
   --reversepop             Enable reverse POP order (as in base SjASM version)
