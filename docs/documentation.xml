@@ -350,102 +350,6 @@
             </listitem>
           </varlistentry>
 
-<varlistentry>
-            <term>29.8.2021 - 1.18.3</term>
-
-            <listitem>
-              <synopsis>- added <link linkend="s_cli">`--color`</link> to enable/disable ANSI coloring of errors/warnings
-- added <link linkend="s_cli">`--syntax=s`</link> mode to disable sub-word substitutions of DEFINEs
-- added at-sign prefix for <link linkend="s_local_labels">macro local labels</link> to act as non-macro local label
-- <link linkend="po_savetrd">`SAVETRD`</link> accepts names containing dot ("z.x.B" is "z.x" with extension "B") - by Dart Alver
-- <link linkend="po_savetrd">`SAVETRD`</link> has optional argument to save BASIC with variables (length_minus_variables)
-- minor bugfixes (conditional block parser)
-</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>14.2.2021 - 1.18.2</term>
-
-            <listitem>
-              <synopsis>- [may break old sources] new <link linkend="s_expressions">exist operator</link> to check label existence
-- the --syntax=i mode makes now also register parsing case insensitive
-- minor bugfixes (predefined values, savenex BMP loader less strict about "colors used" content)
-</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>23.1.2021 - 1.18.1</term>
-
-            <listitem>
-              <synopsis>- Big-Endian hosts support (experimental and not tested continuously)
-- added "listall", "listact" commands to <link linkend="po_opt">OPT</link> - to switch between listing types
-- <link linkend="po_while">`WHILE`</link> has optional argument to set explicit guardian-counter
-- <link linkend="po_assert">`ASSERT`</link> has optional argument (to add description/notes for expression)
-- <link linkend="po_slot">`SLOT`</link> and <link linkend="po_mmu">`MMU`</link> will now accept also starting address of slot instead of its number
-- fix: option --sym was not exporting labels starting with underscore
-- fix: SAVENEX BMP-loader bug when certain builds of sjasmplus were unable to open BMP files
-- fix: after STRUCT instance the "main" label is not polluted by last field of STRUCT
-- minor bugfixes in parser, windows cmake-builds have now icon
-- docs: adding "Index" section
-- docs: adding some missing information (__DATE__, __TIME__), fixing HTML anchor names
-</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>12.12.2020 - 1.18.0</term>
-
-            <listitem>
-              <synopsis>- [may break old sources] the colon between end of EQU/DEFL/= expression and instruction is mandatory
-- [may break old sources] new <link linkend="s_expressions">abs operator</link> for absolute integer value
-- new <link linkend="s_id_warnings">system of warnings</link> (and suppression), the "; ok" comments are now deprecated
-- <link linkend="po_display">`DISPLAY`</link> has now also binary and char formatting
-- <link linkend="po_define">`DEFINE+`</link> added to [re]define identifier without error
-- <link linkend="ca_elseif">`ELSEIF`</link> added to conditional assembling arsenal
-- <link linkend="po_while">`WHILE`</link> added for conditional loops
-- added <link linkend="po_device">"NOSLOT64K" device</link> with 2MiB of virtual memory
-- <link linkend="po_labelslist">`LABELSLIST`</link> has new optional argument to dump 16bit "virtual labels"
-- <link linkend="po_cspectmap">`CSPECTMAP`</link> exports STRUCT symbols with more detail (instance labels with physical address)
-- <link linkend="s_labels">SMC offset</link> syntax for self-modify-code labels for source brevity
-- added exclamation mark prefix for <link linkend="s_local_labels">labels</link> to not affect following local labels
-- added "listmc" command to <link linkend="po_opt">OPT</link> - to list only lines with machine code bytes
-- added <link linkend="s_cli">`--lstlab=sort`</link> variant to have symbols in listings in predictable order
-- minor bugfixes in parser and listing-line-numbering, refactored symbols/labels implementation
-- Added <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/chargfx2asm">example (chargfx2asm)</ulink> how to use sjasmplus as byte-processor for binary files
-- <link linkend="c_sld_data">SLD data</link> improvements based on Maziac's feedback and <ulink url="https://github.com/maziac/DeZog">DeZog</ulink>'s needs
-</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>8.8.2020 - 1.17.0</term>
-
-            <listitem>
-              <synopsis>- `STRUCT` has new <link linkend="st_text">`TEXT`</link> pseudo-instruction to define "DB-like" data (<ulink url="https://github.com/z00m128/sjasmplus/issues/93">Issue #93</ulink>)
-- <link linkend="st_usage">`STRUCT` initializer block</link> can be now multi-line (when correctly enclosed in curly braces)
-- <link linkend="po_equ">`EQU`</link> now allows for optional override of page number assigned to the new symbol
-- new <link linkend="s_expressions">$$$ and $$$$ operators</link> to retrieve "physical" address/page inside DISP block
-- instruction `out (c),0` now emits warning (can be suppressed by the "; ok" comment)
-- fixed listing of structures using long BLOCK fields (machine code was correct, but listing not)
-- fixed some memory leaks, undefined behaviour and unaligned memory access
-</synopsis>
-            </listitem>
-          </varlistentry>
-
-<varlistentry>
-            <term>27.7.2020 - 1.16.0</term>
-
-            <listitem>
-              <synopsis>- <link linkend="po_lua">`LUA`</link> the new emit warning (v1.15.1) is now suppressible
-- <link linkend="s_predefined">Predefined defines</link> extended and renamed (following gcc/clang ones)
-- Added <link linkend="po_relocate_end">relocation data generator</link> (similar to WinAPE feature), check also <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">example</ulink>
-- bugfixes/improvements in parser like: operators `not`, `low`, `high` can be followed also by "("
-</synopsis>
-            </listitem>
-          </varlistentry>
-
         </variablelist></para>
 
       <para>See <ulink url="https://github.com/z00m128/sjasmplus/blob/master/CHANGELOG.md">CHANGELOG.md</ulink> for full list of changes.</para>
@@ -578,7 +482,7 @@
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
   M      Alias "m" and "M" for "(hl)" to cover 8080-like syntax: ADD A,M
-  s      Use only "simple" whole-word substitutions, no sub-words (since v1.18.3)
+  s      Use only "simple" whole-word substitutions, no sub-words
   w      Warnings option: report warnings as errors
   m      *REMOVED* in v1.20.0, use -Wno-rdlow</synopsis>
   &dagger; work in progress: options "l" and "L" are not implemented yet, following example is then
@@ -744,7 +648,7 @@ MAIN.loop?</programlisting>It is possible to use mnemonics, pseudo-ops and
       the identifiers defined with the DEFINE pseudo-op use another name
       space.</para>
 
-      <para>(since v1.18.0) Right after label (before the optional colon) you
+      <para>Right after label (before the optional colon) you
       can write extra "SMC offset" (Self Modify Code offset) in the form of plus
       sign and single decimal digit. The defined label will become equal to current
       address plus the SMC offset:
@@ -783,10 +687,10 @@ invalid2+*: cpl : ld a,14       ; only first instruction after label is consider
       use a label from outside the module use modulename.labelname, in this
       example: 'vdp.Cls'. Labels starting with a '.' are local to the previous non-local label.</para>
 
-      <para>(since v1.18.0) If you start the label with an ! (exclamation mark), it will not
+      <para>If you start the label with an ! (exclamation mark), it will not
       affect following local labels (same syntax as <ulink url="http://www.xl2s.tk/">sjasm</ulink>).</para>
 
-      <para>(since v1.18.3) Local label inside macro prefixed with @ (at sign) acts as regular local label,
+      <para>Local label inside macro prefixed with @ (at sign) acts as regular local label,
       otherwise (older behaviour) the local label is local to each macro's instance.</para>
 
       <para><example>
@@ -806,7 +710,7 @@ Main:                       ; main.Main
 .loop:                      ; SetScreen.loop (since v1.21.0)
             RET
 Cls:                        ; main.vdp.Cls
-!KeepClsForLocal:           ; main.vdp.KeepClsForLocal (since v1.18.0)
+!KeepClsForLocal:           ; main.vdp.KeepClsForLocal
 .loop:      DJNZ .loop      ; main.vdp.Cls.loop
             RET
         ENDMODULE
@@ -984,7 +888,7 @@ $c     hexadecimal
       expressions:</para>
 
       <para><programlisting>norel norel L  <indexterm id="op_norel"><primary>norel</primary></indexterm>Label/symbol L will be treated as non-relocatable
-exist exist L  <indexterm id="op_exist"><primary>exist</primary></indexterm>is label/symbol L defined in source (even when not used) (since v1.18.2)
+exist exist L  <indexterm id="op_exist"><primary>exist</primary></indexterm>is label/symbol L defined in source (even when not used)
 
 !     !x       <indexterm id="op_log_not"><primary>!</primary></indexterm>logical not
 ~     ~x       <indexterm id="op_cpl"><primary>~</primary></indexterm>complement
@@ -993,7 +897,7 @@ exist exist L  <indexterm id="op_exist"><primary>exist</primary></indexterm>is l
 low   low x    <indexterm id="op_low"><primary>low</primary></indexterm>low 8 bits of 16 bit value or lower part of register pair
 high  high x   <indexterm id="op_high"><primary>high</primary></indexterm>high 8 bits of 16 bit value or higher part of register pair
 not   not x    <indexterm id="op_log_not2"><primary>not</primary></indexterm>logical not
-abs   abs x    <indexterm id="op_abs"><primary>abs</primary></indexterm>absolute value (since v1.18.0)
+abs   abs x    <indexterm id="op_abs"><primary>abs</primary></indexterm>absolute value
 
 *     x*y      <indexterm id="op_mul"><primary>*</primary></indexterm>multiplication
 /     x/y      <indexterm id="op_div"><primary>/</primary></indexterm>division
@@ -1869,7 +1773,7 @@ len             EQU 10
 
             <listitem>
               <para>An 'assertion failed' error is issued if the expression evaluates to zero.
-				  The "anything" (optional argument since v1.18.1) is then also visible in the error
+				  The "anything" is then also visible in the error
 				  message, so you can add description/notes about expression there.<example>
                   <title></title>
 
@@ -2108,7 +2012,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
 
             <listitem>
               <para>The identifier &lt;id&gt; will be replaced with the &lt;replacement&gt;.
-              The <code>DEFINE+</code> (since v1.18.0) will also redefine the identifier &lt;id&gt;
+              The <code>DEFINE+</code> will also redefine the identifier &lt;id&gt;
               if it already exists. The replacement could be omitted,
               in such case it is still possible to check if the identifier was defined
               with IFDEF or IFNDEF.<example>
@@ -2772,7 +2676,7 @@ ALLPASS -  interpret Lua script in all passes. It is needed if you generate some
 		  <para>The optional third argument is address for <link linkend="po_org">ORG</link>
 			  functionality.</para>
 
-              <para>(since v1.18.1) You can also use starting address of particular slot instead
+              <para>You can also use starting address of particular slot instead
               of its number, ie. for ZX128: <code>MMU $8000,3</code> is alias of <code>MMU 2,3</code></para>
 
               <para>Single slot option (default state is: no error/warning and no wrap = nothing special):
@@ -3564,7 +3468,7 @@ var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para
               Use pseudo-op <link linkend="po_page">PAGE</link> to change page
               in the current slot.</para>
 
-              <para>(since v1.18.1) You can also use starting address of particular slot instead
+              <para>You can also use starting address of particular slot instead
               of its number, ie. for ZX128: <code>SLOT $8000</code> is alias of <code>SLOT 2</code></para>
 
               <para><example>
@@ -4109,7 +4013,7 @@ Main
             <term>TEXT<indexterm id="st_text"><primary>TEXT</primary></indexterm> &lt;length&gt;[,{&lt;DB-like operand(s)&gt;}]</term>
 
             <listitem>
-              <para>(since v1.17) To define a member of the specified <code>length</code> of bytes.
+              <para>To define a member of the specified <code>length</code> of bytes.
 				  The operands are <link linkend="po_byte">DB-like</link> formatted, and the last
 				  byte explicitly defined will fill the remaining bytes reserved upon definition
 				  (zeroed when no value is specified at all).</para>
@@ -4176,7 +4080,7 @@ Main
 		expression, but there will be no machine code emitted (and current address "$" will not
 		advance).</para>
 
-	  <para>(since v1.17) The initial values inside curly braces block can now span over multiple
+	  <para>The initial values inside curly braces block can now span over multiple
 		  lines with new line ending current value expression (the comma after expression is optional
 		  in such case). Please bear in mind this is pushing original sjasmplus architecture beyond
 		  its original design (multi-line definitions) and may fail in complex scenarios (for
