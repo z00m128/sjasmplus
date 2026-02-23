@@ -30,6 +30,7 @@ End:
     SAVEHEX "savehex.bin", Code, End-Code, Start,
     ; check errors of main arguments
     SAVEHEX "", Code, End-Code
+    SAVEHEX ".", Code, End-Code, Start
     SAVEHEX "savehex.bin", -1, End-Code
     SAVEHEX "savehex.bin", Code, $10001-Code
     ; check "start" validity warning
@@ -44,3 +45,10 @@ End:
     ; implementation specific, testing different HEX record sizes and edge cases
     SAVEHEX "savehex.cdt", Code, 34
     SAVEHEX "savehex.cpr", Code, 35
+
+    ; coverage for all remaining HEX stuff if possible
+    HEXOUT "savehex.blocked"
+    SAVEHEX "savehex.tap", Code, End-Code   ; can't write file while HEXOUT is active
+    HEXEND -2                               ; will report invalid start address, but also does close!
+    HEXEND &                                ; syntax error (start expression) + no hex output active
+    HEXOUT ""

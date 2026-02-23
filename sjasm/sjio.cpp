@@ -1413,7 +1413,7 @@ static void FlushHexBuffer() {
 bool OpenHex(const std::filesystem::path & fname) {
 	if (!fname.has_filename()) return false;
 	if (nullptr != FP_HEX) {
-		Error("HEX output is already active, can't open for file:", fname.string().c_str(), SUPPRESS);
+		Error("HEX output is already active, can't open for file", fname.string().c_str(), SUPPRESS);
 		return false;
 	}
 	if ("-" == fname) {

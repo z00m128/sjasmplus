@@ -1078,7 +1078,7 @@ static void dirSAVEHEX() {
 		return;
 	}
 	if (start < -1 || 0xFFFF < start) {
-		ErrorInt("[SAVEHEX] start should be -1 to off or uint16", start);
+		ErrorInt("[SAVEHEX] start should be -1 as OFF or uint16", start);
 		start = -1;
 	}
 	if (exec && !SaveHex(fnaam, address, size, start)) {

@@ -1,0 +1,43 @@
+# file opened: hex_coverage.asm
+ 1    0000                  DEVICE ZXSPECTRUM128
+ 2    0000                  HEXOUT "hex_coverage.bin"
+ 3    0000                  ORG $FFFE           ; go beyond 16ki space - .hex output ignores and emits bytes
+ 4    FFFE              Code:                   ; continuing in record starting with 0xFFFE address -> broken
+ 5    FFFE 41               ld  b,c
+ 6    FFFF              Start:
+ 7    FFFF 42               ld  b,d
+ 8    0000              Data:
+hex_coverage.asm(9): error: Write outside of device memory at: 65536
+ 9    0000 43 00            dz  "C"             ; regular device error message
+10    0002              End:
+11    0002                  HEXEND Start
+12    0002
+13    0002                  DEVICE NONE
+14    0002                  HEXOUT "hex_coverage.tap"
+15    0002                  ORG $FFFE           ; go beyond 16ki space - .hex output ignores and emits bytes
+16    FFFE              Code2:                  ; continuing in record starting with 0xFFFE address -> broken
+17    FFFE 41               ld  b,c
+18    FFFF              Start2:
+19    FFFF 42               ld  b,d
+20    0000              Data2:
+hex_coverage.asm(21): warning: RAM limit exceeded 0x10000 by ORG
+21    0000 43 00            dz  "C"             ; regular warning message
+22    0002
+23    0002                  ; --longptr will cause this to go through silently, putting first bytes over 0x10000
+24    0002                  ; into the record block at address 0xFFFE and next record has wrap-around 16b address
+25    0002                  ; so this is basically broken (and not guarded by Intel hex functionality, up to the user)
+26    0002              End2:
+27    0002                  HEXEND Start2
+28    0002
+# file closed: hex_coverage.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xFFFE X Code
+0xFFFE X Code2
+0x10000 X Data
+0x10000 X Data2
+0x10002 X End
+0x10002 X End2
+0xFFFF X Start
+0xFFFF X Start2
