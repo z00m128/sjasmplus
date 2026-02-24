@@ -212,6 +212,7 @@
 - Added <link linkend="po_dp">`DP` (alias `DEFP`)</link> directive to define Pascal strings
 - <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
 - <link linkend="s_source_format">`&gt;`</link> can be used to indent labels
+- Intel HEX output format added: <link linkend="po_savehex">`SAVEHEX`</link>, <link linkend="po_hexout">`HEXOUT`</link>, <link linkend="po_hexend">`HEXEND`</link>, <link linkend="s_cli">`--hex`</link>
 - <link linkend="po_bplist">`BPLIST`</link> supports now also FUSE
 - <link linkend="po_setbp">`SETBP`</link> has optional string argument for "conditional" breakpoints (depends on bplist type)
 - <link linkend="po_device">`DEVICE`</link> ZX-like devices can now init with all-zeroed memory by using RAMTOP -1
@@ -434,6 +435,7 @@
   --lstlab[=sort]          Append [sorted] symbol table to listing
   --sym=&lt;filename&gt;         Save symbol table to &lt;filename&gt;
   --exp=&lt;filename&gt;         Save exports to &lt;filename&gt; (see EXPORT pseudo-op)
+  --hex=&lt;filename&gt;         Intel HEX saved to &lt;filename&gt; (- is STDOUT)
   --raw=&lt;filename&gt;         Machine code saved also to &lt;filename&gt; (- is STDOUT)
   --sld[=&lt;filename&gt;]       Save Source Level Debugging data to &lt;filename&gt;
                            Default name is: "&lt;first input filename&gt;.sld.txt"
@@ -1297,6 +1299,7 @@ $$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexte
       <link linkend="po_savecpr">SAVECPR</link>,
       <link linkend="po_saveamsdos">SAVEAMSDOS</link>,
       <link linkend="po_save3dos">SAVE3DOS</link>,
+      <link linkend="po_savehex">SAVEHEX</link>,
       <link linkend="po_savehob">SAVEHOB</link>,
       <link linkend="po_bplist">BPLIST</link>,
       <link linkend="po_setbp">SETBP</link>,
@@ -2489,6 +2492,31 @@ Kip   EQU 0x23*256 + low $</programlisting></para>
           </varlistentry>
 
           <varlistentry>
+            <term>HEXEND<indexterm id="po_hexend"><primary>HEXEND</primary><seealso>HEXOUT</seealso></indexterm> [-1|&lt;start&gt;]</term>
+
+            <listitem>
+              <para>Finalize currently open HEX file output. If start address is omitted,
+                  the one provided by <link linkend="po_end">END</link> is used, -1 as start address will
+                  explicitly disable the start address record type (03).
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>HEXOUT<indexterm id="po_hexout"><primary>HEXOUT</primary><seealso>HEXEND</seealso></indexterm> &lt;filename&gt;</term>
+
+            <listitem>
+              <para>With HEXOUT it is possible to create multiple Intel HEX files from
+                one source. All following instructions will be assembled to this
+                file. <link linkend="po_hexend">HEXEND</link> will finalize and close any previously opened HEXOUT.</para>
+
+              <para>
+                You can also use <link linkend="po_savehex">SAVEHEX</link> in DEVICE mode, see it also for more details about Intel HEX format.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>INCBIN<indexterm id="po_incbin"><primary>INCBIN</primary></indexterm>
             &lt;filename&gt;[,&lt;offset&gt;[,&lt;length&gt;]]</term>
 
@@ -3177,6 +3205,25 @@ START  .... ;some code
 
                   <programlisting>    DEVICE ZXSPECTRUM128 : SAVEDEV "fullram.bin",0,0,0x20000 ; save full 128kiB</programlisting>
                 </example>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>SAVEHEX<indexterm id="po_savehex"><primary>SAVEHEX</primary></indexterm>
+                &lt;filename&gt;,&lt;address&gt;,&lt;size&gt;[,&lt;start = -1&gt;]</term>
+
+            <listitem>
+              <para><emphasis>Works only in virtual device emulation mode. See
+              <link linkend="po_device">DEVICE</link>.</emphasis></para>
+
+              <para>Like <link linkend="po_savebin">SAVEBIN</link>, saves the block of device RAM
+                from "address", but in <ulink url="https://en.wikipedia.org/wiki/Intel_HEX">Intel HEX</ulink>
+                format. Currently record types 00, 01 and 03 are supported, line endings are always LF,
+                record length is max 16 and there are <emphasis>no</emphasis> 25 NUL chars at beginning of file.
+              </para>
+              <para>
+                You can also use command line option <code>--hex</code> or <link linkend="po_hexout">HEXOUT</link>.
+              </para>
             </listitem>
           </varlistentry>
 
