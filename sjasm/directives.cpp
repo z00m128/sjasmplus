@@ -1058,6 +1058,34 @@ static void dirSAVEAMSDOS() {
 	}
 }
 
+static void dirSAVEHEX() {
+	if (!DeviceID) {
+		Error("SAVEHEX works in real device emulation mode (See DEVICE)");
+		SkipToEol(lp);
+		return;
+	}
+	bool exec = (LASTPASS == pass);
+	const std::filesystem::path fnaam = GetOutputFileName(lp);
+	aint args[] = { -1, -1, -1 };	// address, size, start
+	const bool optional[] = {false, false, true};
+	if (!anyComma(lp) || !getIntArguments<3>(lp, args, optional) || !fnaam.has_filename()) {
+		Error("[SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]", bp, SUPPRESS);
+		return;
+	}
+	aint &address = args[0], &size = args[1], &start = args[2];
+	if (address < 0 || size < 1 || 0x10000 < address + size) {
+		Error("[SAVEHEX] [address, size] region outside of 64ki", bp);
+		return;
+	}
+	if (start < -1 || 0xFFFF < start) {
+		ErrorInt("[SAVEHEX] start should be -1 as OFF or uint16", start);
+		start = -1;
+	}
+	if (exec && !SaveHex(fnaam, address, size, start)) {
+		Error("[SAVEHEX] Error writing file (Disk full?)", bp, IF_FIRST);
+	}
+}
+
 static void dirSAVEHOB() {
 	if (!DeviceID || pass != LASTPASS) {
 		if (!DeviceID) Error("SAVEHOB only allowed in real device emulation mode (See DEVICE)");
@@ -1526,6 +1554,36 @@ static void dirINCLUDE() {
 		donotlist = 1;
 	} else {
 		Error("[INCLUDE] empty filename", bp);
+	}
+}
+
+static void dirHEXOUT() {
+	if (LASTPASS != pass) {
+		SkipToEol(lp);
+	} else {
+		const std::filesystem::path fnaam = GetOutputFileName(lp);
+		if (fnaam.has_filename())	OpenHex(fnaam);
+		else						Error("[HEXOUT] invalid filename", fnaam.string().c_str());
+	}
+}
+
+static void dirHEXEND() {
+	if (LASTPASS != pass) {
+		SkipToEol(lp);
+		return;
+	}
+	char* p = lp;
+	aint start = StartAddress;				// global state StartAddress is default when no/invalid start is provided
+	if (ParseExpression(lp, start)) {		// -1 is explicit "start address OFF"
+		if (start < -1 || 0xFFFF < start) {
+			ErrorInt("[HEXEND] Invalid address", start, IF_FIRST);
+			start = StartAddress;
+		}
+	} else {
+		lp = p;
+	}
+	if (!CloseHex(start)) {
+		Error("[HEXEND] HEX output was not active");
 	}
 }
 
@@ -2236,6 +2294,7 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".save3dos", dirSAVE3DOS);
 	DirectivesTable.insertd(".saveamsdos", dirSAVEAMSDOS);
 	DirectivesTable.insertd(".savecpr", dirSAVECPR);
+	DirectivesTable.insertd(".savehex", dirSAVEHEX);
 	DirectivesTable.insertd(".shellexec", dirSHELLEXEC);
 /*#ifdef WIN32
 	DirectivesTable.insertd(".winexec", dirWINEXEC);
@@ -2246,6 +2305,8 @@ void InsertDirectives() {
 	DirectivesTable.insertd(".ifnused", dirIFNUSED);
 	DirectivesTable.insertd(".ifdef", dirIFDEF);
 	DirectivesTable.insertd(".ifndef", dirIFNDEF);
+	DirectivesTable.insertd(".hexout", dirHEXOUT);
+	DirectivesTable.insertd(".hexend", dirHEXEND);
 	DirectivesTable.insertd(".output", dirOUTPUT);
 	DirectivesTable.insertd(".outend", dirOUTEND);
 	DirectivesTable.insertd(".tapout", dirTAPOUT);

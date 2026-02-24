@@ -1,0 +1,90 @@
+# file opened: savehex.asm
+ 1    0000                  ;SAVEHEX <filename>,<address>,<size>[,<start = -1>]
+ 2    0000
+ 3    0000                  DEVICE ZXSPECTRUM128
+ 4    0000                  ORG $7FFE   ; cross slot regions from Bank 5 to Bank 2
+ 5    7FFE                  ; SAVEHEX HEX record will be split on boundary due to implementation
+ 6    7FFE              Code:
+ 7    7FFE 41               ld  b,c
+ 8    7FFF              Start:
+ 9    7FFF 42               ld  b,d
+10    8000              Data:
+11    8000 43 00            dz  "C"
+12    8002              End:
+13    8002 45 45 45...      block $4000, 'E'    ; fill beyond for longer file test (with various HEX records)
+14    C002
+15    C002                  DEVICE NONE
+16    C002                  ; error about device mode
+savehex.asm(17): error: SAVEHEX works in real device emulation mode (See DEVICE)
+17    C002                  SAVEHEX "savehex.bin",0,1
+18    C002
+19    C002                  DEVICE ZXSPECTRUM128
+20    C002                  ; check parsing/syntax errors
+savehex.asm(21): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX
+21    C002                  SAVEHEX
+savehex.asm(22): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin"
+22    C002                  SAVEHEX "savehex.bin"
+savehex.asm(23): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin",
+23    C002                  SAVEHEX "savehex.bin",
+savehex.asm(24): error: Syntax error: &
+savehex.asm(24): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin", &
+24    C002                  SAVEHEX "savehex.bin", &
+savehex.asm(25): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin", Code
+25    C002                  SAVEHEX "savehex.bin", Code
+savehex.asm(26): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin", Code,
+26    C002                  SAVEHEX "savehex.bin", Code,
+savehex.asm(27): error: Syntax error: &
+savehex.asm(27): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin", Code, &
+27    C002                  SAVEHEX "savehex.bin", Code, &
+savehex.asm(28): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin", Code, End-Code,
+28    C002                  SAVEHEX "savehex.bin", Code, End-Code,
+savehex.asm(29): error: Syntax error: &
+savehex.asm(29): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin", Code, End-Code, &
+29    C002                  SAVEHEX "savehex.bin", Code, End-Code, &
+savehex.asm(30): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "savehex.bin", Code, End-Code, Start,
+30    C002                  SAVEHEX "savehex.bin", Code, End-Code, Start,
+31    C002                  ; check errors of main arguments
+savehex.asm(32): error: [SAVEHEX] expected syntax is <filename>,<address>,<size>[,<start = -1>]: SAVEHEX "", Code, End-Code
+32    C002                  SAVEHEX "", Code, End-Code
+savehex.asm(33): error: opening HEX file for write: .
+33    C002                  SAVEHEX ".", Code, End-Code, Start
+savehex.asm(34): error: [SAVEHEX] [address, size] region outside of 64ki: SAVEHEX "savehex.bin", -1, End-Code
+34    C002                  SAVEHEX "savehex.bin", -1, End-Code
+savehex.asm(35): error: [SAVEHEX] [address, size] region outside of 64ki: SAVEHEX "savehex.bin", Code, $10001-Code
+35    C002                  SAVEHEX "savehex.bin", Code, $10001-Code
+36    C002                  ; check "start" validity warning
+savehex.asm(37): error: [SAVEHEX] start should be -1 as OFF or uint16: -2
+37    C002                  SAVEHEX "savehex.bin", Code, End-Code, -2
+savehex.asm(38): error: [SAVEHEX] start should be -1 as OFF or uint16: 65536
+38    C002                  SAVEHEX "savehex.bin", Code, End-Code, $10000
+39    C002
+40    C002                  ; valid with all arguments
+41    C002                  SAVEHEX "savehex.bin", Code, End-Code, Start
+42    C002                  SAVEHEX "savehex.raw", Code, End-Code, -1
+43    C002                  SAVEHEX "savehex.tap", Code, End-Code
+44    C002
+45    C002                  ; implementation specific, testing different HEX record sizes and edge cases
+46    C002                  SAVEHEX "savehex.cdt", Code, 34
+47    C002                  SAVEHEX "savehex.cpr", Code, 35
+48    C002
+49    C002                  ; coverage for all remaining HEX stuff if possible
+50    C002                  HEXOUT "savehex.blocked"
+savehex.asm(51): error: HEX output is already active, can't open for file: savehex.tap
+51    C002                  SAVEHEX "savehex.tap", Code, End-Code   ; can't write file while HEXOUT is active
+savehex.asm(52): error: [HEXEND] Invalid address: -2
+52    C002                  HEXEND -2                               ; will report invalid start address, but also does close!
+savehex.asm(53): error: Syntax error: &
+savehex.asm(53): error: [HEXEND] HEX output was not active
+savehex.asm(53): error: Unexpected: &
+53    C002                  HEXEND &                                ; syntax error (start expression) + no hex output active
+savehex.asm(54): error: [HEXOUT] invalid filename:
+54    C002                  HEXOUT ""
+55    C002
+# file closed: savehex.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x7FFE   Code
+0x8000 X Data
+0x8002   End
+0x7FFF   Start

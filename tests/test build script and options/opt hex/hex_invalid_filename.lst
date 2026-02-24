@@ -1,0 +1,10 @@
+error: opening HEX file for write: .
+# file opened: hex_invalid_filename.asm
+1     0000 21               DB "!"
+2     0001                  ; `--hex=.` is invalid filename to open for write, at least in Linux
+3     0001                  ; let's hope it's invalid on all platforms and this test will work in CI
+4     0001
+# file closed: hex_invalid_filename.asm
+
+Value    Label
+------ - -----------------------------------------------------------

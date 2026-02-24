@@ -81,6 +81,7 @@ namespace Options {
 	extern std::filesystem::path ListingFName;
 	extern std::filesystem::path ExportFName;
 	extern std::filesystem::path DestinationFName;
+	extern std::filesystem::path HEXFName;
 	extern std::filesystem::path RAWFName;
 	extern std::filesystem::path UnrealLabelListFName;
 	extern std::filesystem::path CSpectMapFName;

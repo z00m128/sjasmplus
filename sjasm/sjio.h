@@ -31,6 +31,7 @@
 enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM, ELSEIF };
 
 extern int ListAddress;
+extern int StartAddress;
 
 constexpr int BYTES_END_MARKER = -1;
 constexpr int INSTRUCTION_START_MARKER = -2;
@@ -131,6 +132,11 @@ void SeekDest(long, int);
 int ReadFileToCStringsList(CStringsList*& f, const char* end);
 void WriteLabelEquValue(const char* name, aint value, FILE* f);
 void WriteExp(const char* n, aint v);
+
+bool OpenHex(const std::filesystem::path & fname);  // Intel HEX writer - if empty filename, then --hex argument is applied
+void EmitToHex(const uint8_t mc);                   // Intel HEX writer - buffered emit of one machine code byte
+bool CloseHex(const aint start = StartAddress);     // finalize + close file handle, returns true on success (false = file not open?)
+bool SaveHex(const std::filesystem::path & fname, aint start, aint length, aint start_adr = -1);
 
 /////// source-level-debugging support by Ckirby
 bool IsSldExportActive();

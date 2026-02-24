@@ -1,0 +1,10 @@
+# file opened: hex_to_stdout.asm
+1     0000 48 45 58 20      DB "HEX to stdout"
+1     0004 74 6F 20 73
+1     0008 74 64 6F 75
+1     000C 74
+2     000D
+# file closed: hex_to_stdout.asm
+
+Value    Label
+------ - -----------------------------------------------------------

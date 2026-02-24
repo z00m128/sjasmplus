@@ -53,6 +53,7 @@ static void PrintHelpMain() {
 	_COUT "  --lstlab[=sort]          Append [sorted] symbol table to listing" _ENDL;
 	_COUT "  --sym=<filename>         Save symbol table to <filename>" _ENDL;
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
+	_COUT "  --hex=<filename>         Intel HEX saved to <filename> (- is STDOUT)" _ENDL;
 	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
 	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
 	_COUT "  --sld[=<filename>]       Save Source Level Debugging data to <filename>" _ENDL;
@@ -127,6 +128,7 @@ namespace Options {
 	std::filesystem::path ListingFName {""};
 	std::filesystem::path ExportFName {""};
 	std::filesystem::path DestinationFName {""};
+	std::filesystem::path HEXFName {""};
 	std::filesystem::path RAWFName {""};
 	std::filesystem::path UnrealLabelListFName {""};
 	std::filesystem::path CSpectMapFName {""};
@@ -557,6 +559,7 @@ namespace Options {
 					CheckAssignmentOption("lst", ListingFName) ||
 					CheckAssignmentOption("exp", ExportFName) ||
 					CheckAssignmentOption("sld", SourceLevelDebugFName) ||
+					CheckAssignmentOption("hex", HEXFName) ||
 					CheckAssignmentOption("raw", RAWFName) ) {
 					// was proccessed inside CheckAssignmentOption function
 				} else if (!strcmp(opt, "fullpath")) {
@@ -797,7 +800,10 @@ int main(int argc, char **argv) {
 		++pass;
 		if (pass == LASTPASS) OpenSld();	//open source level debugging file (BEFORE InitPass)
 		InitPass();
-		if (pass == LASTPASS) OpenDest();
+		if (pass == LASTPASS) {
+			OpenDest();
+			OpenHex(Options::HEXFName);
+		}
 
 		static bool warn_stdin_default_lst = true;
 		for (SSource & src : sourceFiles) {

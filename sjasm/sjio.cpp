@@ -56,7 +56,7 @@ static int tape_seek = 0;
 static int tape_length = 0;
 static int tape_parity = 0x55;
 static FILE* FP_tapout = NULL;
-static FILE* FP_Input = NULL, * FP_Output = NULL, * FP_RAW = NULL;
+static FILE* FP_Input = nullptr, * FP_Output = nullptr, * FP_HEX = nullptr, * FP_RAW = nullptr;
 static FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
 static aint WBLength = 0;
 
@@ -389,6 +389,8 @@ static void EmitByteNoListing(int byte, bool preserveDeviceMemory = false) {
 	if (LASTPASS == pass) {
 		WriteBuffer[WBLength++] = (char)byte;
 		if (DESTBUFLEN == WBLength) WriteDest();
+		// Intel HEX has own buffering scheme and needs fresh CurAddress, so it's outside of WriteDest()
+		if (nullptr != FP_HEX) EmitToHex(static_cast<uint8_t>(byte));
 	}
 	// the page-checking in device mode must be done in all passes, the slot can have "wrap" option
 	if (DeviceID) {
@@ -1014,6 +1016,7 @@ void Close() {
 		fclose(FP_ExportFile);
 		FP_ExportFile = NULL;
 	}
+	CloseHex();
 	if (FP_RAW != NULL) {
 		if (stdout != FP_RAW) fclose(FP_RAW);
 		FP_RAW = NULL;
@@ -1370,6 +1373,120 @@ void WriteLabelEquValue(const char* name, aint value, FILE* f) {
 
 void WriteExp(const char* n, aint v) {
 	WriteLabelEquValue(n, v, FP_ExportFile);
+}
+
+constexpr const aint HEX_RECORD_MAX = 16;
+static uint8_t hexBytes[HEX_RECORD_MAX];
+static aint hexCnt = 0;
+static aint hexAddress = 0;				// original address where buffered data starts
+
+static void WriteHexRecord(const uint8_t block_type, const uint16_t address = 0, const uint8_t length = 0, const uint8_t* data = nullptr) {
+	assert(0x00 == block_type || 0x01 == block_type || 0x03 == block_type);	// currently supported block types
+	assert((0 == length) || ((nullptr != data) && length <= HEX_RECORD_MAX));
+
+	static char hexTxt[] { ":llaaaabbddddddddddddddddddddddddddddddddcc\n" };
+						//  :10123400484558206F6E6C790A70657220313620FF\n\0
+	static_assert(1+(1+2+1+HEX_RECORD_MAX+1)*2+2 == sizeof(hexTxt));
+
+	char* toTxt = hexTxt + 1;
+	PrintHex(toTxt, length, 2);
+	PrintHex(toTxt, address, 4);
+	PrintHex(toTxt, block_type, 2);
+	uint8_t crc = -length - ((address >> 8) & 255) - (address & 255) - block_type;
+	for (uint8_t i = 0; i < length; ++i) {
+		PrintHex(toTxt, data[i], 2);
+		crc -= data[i];
+	}
+	PrintHex(toTxt, crc, 2);
+	*toTxt++ = '\n';
+	*toTxt++ = 0;
+	fputs(hexTxt, FP_HEX);
+}
+
+static void FlushHexBuffer() {
+	assert(nullptr != FP_HEX && 0 <= hexCnt && hexCnt <= HEX_RECORD_MAX);
+	if (0 == hexCnt) return;			// buffer is already empty
+	WriteHexRecord(0x00, hexAddress, hexCnt, hexBytes);
+	hexCnt = 0;
+}
+
+bool OpenHex(const std::filesystem::path & fname) {
+	if (!fname.has_filename()) return false;
+	if (nullptr != FP_HEX) {
+		Error("HEX output is already active, can't open for file", fname.string().c_str(), SUPPRESS);
+		return false;
+	}
+	if ("-" == fname) {
+		if (stdout == FP_RAW) {
+			Error("Directing both --raw and --hex to stdout will produce mixed/corrupted output", nullptr, ALL);
+			return false;
+		}
+		FP_HEX = stdout;
+		fflush(stdout);
+		switchStdOutIntoBinaryMode();
+	} else if (!FOPEN_ISOK(FP_HEX, fname, "wb")) {
+		// use fopen "w" mode to get CRLF EOLs on mingw windows build.
+		// To make CI testing simpler and force world into *NIX LF way there is "wb" right now
+		Error("opening HEX file for write", fname.string().c_str());
+		return false;
+	}
+	hexCnt = 0;
+	return true;
+}
+
+void EmitToHex(const uint8_t mc) {
+	assert(0 <= hexCnt && hexCnt < HEX_RECORD_MAX);
+	if (hexAddress + hexCnt != CurAddress) FlushHexBuffer();	// flush buffer if there is address jump
+	if (0 == hexCnt) hexAddress = CurAddress;					// set current address of buffer at beginning
+	hexBytes[hexCnt++] = mc;
+	if (HEX_RECORD_MAX == hexCnt) FlushHexBuffer();				// buffer is full, write hex record
+}
+
+bool CloseHex(const aint start) {
+	if (nullptr == FP_HEX) return false;
+	FlushHexBuffer();					// write remaining buffer (if any)
+	if (0 <= start) {					// write start address if it was provided
+		hexBytes[0] = static_cast<uint8_t>(start >> 24);
+		hexBytes[1] = static_cast<uint8_t>(start >> 16);
+		hexBytes[2] = static_cast<uint8_t>(start >>  8);
+		hexBytes[3] = static_cast<uint8_t>(start >>  0);
+		WriteHexRecord(0x03, 0x0000, 4, hexBytes);
+	}
+	WriteHexRecord(0x01);				// write EOF record
+	if (stdout != FP_HEX) fclose(FP_HEX);
+	FP_HEX = nullptr;
+	return true;
+}
+
+bool SaveHex(const std::filesystem::path & fname, aint start, aint length, aint start_adr) {
+	if (!DeviceID) return false;
+	if (!OpenHex(fname)) return false;
+	assert(0 <= start && start <= 0xFFFF && 1 <= length && start + length <= 0x1'0000);
+	//unsigned int addadr = 0,save = 0;
+	for (int i = 0; i < Device->SlotsCount; ++i) {
+		CDeviceSlot* slot = Device->GetSlot(i);
+		if (start < slot->Address) return false;	// shouldn't be possible
+		while (start < slot->Address + slot->Size) {
+			aint save = std::min(length, slot->Size - (start - slot->Address));
+			while (HEX_RECORD_MAX <= save) {
+				WriteHexRecord(0x00, start, HEX_RECORD_MAX, slot->Page->RAM + (start - slot->Address));
+				start += HEX_RECORD_MAX;
+				length -= HEX_RECORD_MAX;
+				save -= HEX_RECORD_MAX;
+			}
+			if (0 < save) {
+				WriteHexRecord(0x00, start, save, slot->Page->RAM + (start - slot->Address));
+				start += save;
+				length -= save;
+			}
+			if (length <= 0) {
+				assert(0 == hexCnt);				// this is only active HEX writer, the buffer should/must be empty
+				hexCnt = 0;							// but make sure the HEXOUT buffer is empty to reuse CloseHex()
+				return CloseHex(start_adr);
+			}
+		}
+	}
+	return false;									// shouldn't be possible
 }
 
 /////// source-level-debugging support by Ckirby
