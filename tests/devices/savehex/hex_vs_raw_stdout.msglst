@@ -1,0 +1,9 @@
+error: Directing both --raw and --hex to stdout will produce mixed/corrupted output
+# file opened: hex_vs_raw_stdout.asm
+1     0000                  ; both RAW and HEX to stdout will produce error"
+2     0000 78               DB "x"
+3     0001
+# file closed: hex_vs_raw_stdout.asm
+
+Value    Label
+------ - -----------------------------------------------------------

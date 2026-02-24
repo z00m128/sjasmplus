@@ -1393,9 +1393,9 @@ static void WriteHexRecord(const uint8_t block_type, const uint16_t address = 0,
 	PrintHex(toTxt, address, 4);
 	PrintHex(toTxt, block_type, 2);
 	uint8_t crc = -length - ((address >> 8) & 255) - (address & 255) - block_type;
-	for (const uint8_t* valuePtr = data; valuePtr < data + length; ++valuePtr) {
-		PrintHex(toTxt, *valuePtr, 2);
-		crc -= *valuePtr;
+	for (uint8_t i = 0; i < length; ++i) {
+		PrintHex(toTxt, data[i], 2);
+		crc -= data[i];
 	}
 	PrintHex(toTxt, crc, 2);
 	*toTxt++ = '\n';
@@ -1417,6 +1417,10 @@ bool OpenHex(const std::filesystem::path & fname) {
 		return false;
 	}
 	if ("-" == fname) {
+		if (stdout == FP_RAW) {
+			Error("Directing both --raw and --hex to stdout will produce mixed/corrupted output", nullptr, ALL);
+			return false;
+		}
 		FP_HEX = stdout;
 		fflush(stdout);
 		switchStdOutIntoBinaryMode();

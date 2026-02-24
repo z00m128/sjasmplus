@@ -1567,15 +1567,14 @@ static void dirHEXOUT() {
 	}
 }
 
-static void dirHEXEND()
-{
+static void dirHEXEND() {
 	if (LASTPASS != pass) {
 		SkipToEol(lp);
 		return;
 	}
 	char* p = lp;
-	aint start = StartAddress;
-	if (ParseExpression(lp, start)) {		// -1 is explicit "start address OFF", also affects global state (vs `END` directive)
+	aint start = StartAddress;				// global state StartAddress is default when no/invalid start is provided
+	if (ParseExpression(lp, start)) {		// -1 is explicit "start address OFF"
 		if (start < -1 || 0xFFFF < start) {
 			ErrorInt("[HEXEND] Invalid address", start, IF_FIRST);
 			start = StartAddress;
