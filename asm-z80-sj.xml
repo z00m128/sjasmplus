@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.9 28/01/2026
+  Version: 0.9.10 24/02/2026
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,9 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  24/02/2026: version 0.9.10
+    + new directive: hexout, hexend, savehex
 
   28/01/2026: version 0.9.9
     + new directive: dp, defp
@@ -117,7 +120,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="19" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="20" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -311,6 +314,8 @@ TODO missing things:
       <item>export</item>
       <item>field</item>
       <item>fpos</item>
+      <item>hexout</item>
+      <item>hexend</item>
       <item>if</item>
       <item>ifdef</item>
       <item>ifn</item>
@@ -340,11 +345,13 @@ TODO missing things:
       <item>relocate_table</item>
       <item>rept</item>
       <item>save3dos</item>
+      <item>saveamsdos</item>
       <item>savebin</item>
       <item>savecdt</item>
       <item>savecpcsna</item>
       <item>savecpr</item>
       <item>savedev</item>
+      <item>savehex</item>
       <item>savehob</item>
       <item>savenex</item>
       <item>savesna</item>
