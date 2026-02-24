@@ -1430,6 +1430,7 @@ bool OpenHex(const std::filesystem::path & fname) {
 		Error("opening HEX file for write", fname.string().c_str());
 		return false;
 	}
+	hexCnt = 0;
 	return true;
 }
 
