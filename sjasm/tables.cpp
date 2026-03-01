@@ -68,7 +68,7 @@ char* PreviousIsLabel = nullptr;
 // Inside macro prefix "@." will create non-macro local label instead of macro's instance
 char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	if (nullptr == naam) {
-		Error("Invalid labelname");
+		Error("Invalid (blank) labelname");
 		return nullptr;
 	}
 	if ('!' == *naam) {
@@ -83,7 +83,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	const bool local = '.' == *naam;
 	if (!isLabelStart(naam)) {		// isLabelStart assures that only single modifier exist
 		if (global || local) ++naam;// single modifier is parsed (even when invalid name)
-		Error("Invalid labelname", naam, SUPPRESS);
+		Error("Invalid character at start of labelname", naam, SUPPRESS);
 		return nullptr;
 	}
 	if (global || local) ++naam;	// single modifier is parsed
@@ -95,7 +95,7 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	if ('[' == *np) return nullptr;	// this is DEFARRAY name, do not process it as label (silent exit)
 	if (*np && !ignoreCharAfter) {
 		// if this is supposed to be new label, there shoulnd't be anything else after it
-		Error("Invalid labelname", naam, SUPPRESS);
+		Error("Invalid character after labelname", naam, SUPPRESS);
 		return nullptr;
 	}
 	// calculate expected length of fully qualified label name
