@@ -595,17 +595,16 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	return definegereplaced;
 }
 
-char* ReplaceDefine(char* lp) {
-	// do first replacement into sline buffer (and if no define replace done, just return it)
-	if (!ReplaceDefineInternal(lp, sline)) return sline;
-	// Some define were replaced, line is in "sline", now ping-pong it between sline and sline2
-	int defineReplaceRecursion = 0;
-	while (defineReplaceRecursion++ < 10) {
-		if (!ReplaceDefineInternal(sline, sline2)) return sline2;
-		if (!ReplaceDefineInternal(sline2, sline)) return sline;
+char* ReplaceDefine(char* src) {
+	char* to = sline;
+	for (int maxIter = 21; maxIter--;) {
+		if (!ReplaceDefineInternal(src, to)) return to;	// no more replacements
+		// Some define were replaced, now ping-pong sline <-> sline2 buffers
+		src = to;
+		to = (sline == to) ? sline2 : sline;
 	}
-	Error("Unable to finish substitions, line after 20th iteration", sline, SUPPRESS);
-	return sline;
+	Error("Unable to finish substitions, line after last iteration", src, SUPPRESS);
+	return src;
 }
 
 void SetLastParsedLabel(const char* label) {
