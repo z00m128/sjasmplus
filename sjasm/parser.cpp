@@ -580,10 +580,10 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			if (0 < dr) {
 				definegereplaced = 1;	// above zero => count as replacement
 				// look ahead in "to" array to convert any whitespace enclosed `_` to glue tag
-				char* gluep = rp - 1;	// first skip whitespace next to substitution
-				while ((nl <= gluep) && (GLUE_TAG != gluep[0]) && (White(gluep[0]))) --gluep;
-				// now check if there is glue char '_' and further whitespace ahead of it
-				if ((nl < gluep) && (gluep < rp - 1) && (GLUE_CHAR == gluep[0]) && White(gluep[-1])) {
+				char* gluep = rp;		// first skip whitespace ahead of substitution
+				while ((nl < gluep--) && (GLUE_TAG != gluep[0]) && (White(gluep[0]))) /* empty */;
+				// now check if there was whitespace, is glue char '_' and further whitespace ahead of it
+				if ((nl < gluep) && (gluep + 1 < rp) && (GLUE_CHAR == gluep[0]) && White(gluep[-1])) {
 					gluep[0] = GLUE_TAG;// convert it to glue tag for later
 					// not important to set glueDetected because substition happened
 				}

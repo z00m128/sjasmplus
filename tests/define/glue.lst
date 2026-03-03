@@ -78,11 +78,21 @@ glue.asm(67): error: Unrecognized instruction: 3FEE4
 67    4054                3FEE4
 glue.asm(68): error: Unrecognized instruction: 5FEE6 _ 7BER8
 68    4054                5FEE6 _ 7BER8     ; 6 _ 7 is *not* a glue and must be preserved
-69    4054
+69    4054              ; check robustness of parser code when substituting at start/end of buffer
+glue.asm(70): error: Unrecognized instruction: FEE
+70    4054                FEE
+glue.asm(71): error: Unrecognized instruction: FEE
+71    4054                 FEE ;
+glue.asm(72): error: Unrecognized instruction: FEE _
+72    4054              _   FEE _
+glue.asm(73): error: Unrecognized instruction: _   FEE _
+73    4054               _   FEE _ ;
+74    4054
 # file closed: glue.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x4054 X _
 0x4047   blah.argValue
 0x4044   FEE123
 0x0025   FEEBERZ

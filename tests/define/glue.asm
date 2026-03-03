@@ -66,3 +66,8 @@ FEEBERZ EQU '%'
   FOO _ 2
   3 _ FOO _ 4
   5 _ FOO _ 6 _ 7 _ BAR _ 8     ; 6 _ 7 is *not* a glue and must be preserved
+; check robustness of parser code when substituting at start/end of buffer
+FOO
+ FOO ;
+_ FOO _
+ _ FOO _ ;
