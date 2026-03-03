@@ -644,7 +644,7 @@ char* ReplaceDefine(char* src) {
 		src = to;
 		to = (sline == to) ? sline2 : sline;
 	}
-	Error("Unable to finish substitions, line after last iteration", src, SUPPRESS);
+	Error("Unable to finish substitutions, line after last iteration", src, SUPPRESS);
 	return src;
 }
 
