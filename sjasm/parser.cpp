@@ -441,14 +441,18 @@ void ParseAlignArguments(char* & src, aint & alignment, aint & fill) {
 	}
 }
 
+static constexpr const char GLUE_TAG = 26;		// "substitute" in utf8, kinda fits the purpose?
+static constexpr const char GLUE_CHAR = '_';
+
 static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	int definegereplaced = 0,dr;
 	char* rp = nl,* nid;
 	const char* ver;
 	bool isDefDir = false;	// to remember if one of DEFINE-related directives was used
-	bool afterNonAlphaNum, afterNonAlphaNumNext = true;
+	bool afterNonAlphaNum, afterNonAlphaNumNext = true, glueDetected = false;
 	char defarrayCountTxt[16] = { 0 };
 	while (*lp && ((rp - nl) < LINEMAX)) {
+		glueDetected |= (GLUE_TAG == *lp);		// there is already some glue in source line
 		const char c1 = lp[0], c2 = lp[1];
 		afterNonAlphaNum = afterNonAlphaNumNext;
 		afterNonAlphaNumNext = !isalnum((byte)c1);
@@ -573,7 +577,22 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 				ver = GrowSubId(lp);	// find the first SubId again, for the copy
 				dr = -1;				// write into output, but don't count as replacement
 			}
-			if (0 < dr) definegereplaced = 1;		// above zero => count as replacement
+			if (0 < dr) {
+				definegereplaced = 1;	// above zero => count as replacement
+				// look ahead in "to" array to convert any whitespace enclosed `_` to glue tag
+				char* gluep = rp - 1;	// first skip whitespace next to substitution
+				while ((nl <= gluep) && (GLUE_TAG != gluep[0]) && (White(gluep[0]))) --gluep;
+				// now check if there is glue char '_' and further whitespace ahead of it
+				if ((nl < gluep) && (gluep < rp - 1) && (GLUE_CHAR == gluep[0]) && White(gluep[-1])) {
+					gluep[0] = GLUE_TAG;// convert it to glue tag for later
+					// not important to set glueDetected because substition happened
+				}
+				// look after in "from" array to convert any whitespace enclosed `_` to glue tag
+				for (gluep = lp; GLUE_TAG != gluep[0] && White(gluep[0]); ) ++gluep;
+				if ((lp < gluep) && (GLUE_CHAR == gluep[0]) && White(gluep[1])) {
+					gluep[0] = GLUE_TAG;// convert it to glue tag for later
+				}
+			}
 			if (0 != dr) {				// any non-zero dr => write to the output
 				while (*ver && ((rp - nl) < LINEMAX)) *rp++ = *ver++;		// replace the string into target buffer
 				// reset subId parser to catch second+ subId in current Id
@@ -587,6 +606,28 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	*rp++ = 0;
 	if (LINEMAX <= (rp - nl)) {
 		Error("line too long after macro expansion", nl, SUPPRESS);
+	}
+	// if no substitution happened, but there are glue bytes, glue it all together now
+	if (0 == definegereplaced && glueDetected) {
+		// now glue the pieces together around each glue
+		int dropChars = 0;
+		for (rp = nl; *rp; ++rp) {
+			if (GLUE_TAG == *rp) {
+				char* leftp = rp, * rightp = rp;
+				leftp = rp;
+				while (nl < leftp && White(leftp[-1])) --leftp;	// eat all whitespace to left
+				while (White(rightp[0])) ++rightp;				// eat all whitespace to right
+				// leftp points at left-most whitespace char, rightp points at first non-whitespace or \0
+				if ((nl == leftp) || (0 == rightp[0])) rp[0] = GLUE_CHAR;	// nothing to glue with, restore
+				else {
+					dropChars -= (rightp - leftp);				// discard this whitespace + glue block
+					rp = rightp;
+				}
+			}
+			if (dropChars < 0) rp[dropChars] = rp[0];	// move other chars over removed areas
+		}
+		rp[dropChars] = 0;		// make sure there's zero terminator also for glued result
+		return true;			// report modification
 	}
 	// check if whole line is just blanks, then return just empty one
 	rp = nl;

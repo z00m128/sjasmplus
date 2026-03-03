@@ -1,0 +1,88 @@
+# file opened: glue.asm
+ 1    0000                OUTPUT "glue.bin"
+ 2    0000                ORG $4040
+ 3    4040                DEFINE  FOO   FEE
+ 4    4040                DEFINE  BAR   BER
+ 5    4040                DEFINE  FEEBER   "Ahoy"
+ 6    4040 41 68 6F 79    DB      "Ahoy"
+ 7    4044              ; -> FEE \032 BAR   ; not concatenated yet
+ 8    4044              ; -> FEE \032 BER
+ 9    4044              ; -> no more subs, now concat
+10    4044              ; -> FEEBER
+11    4044              ; -> "Ahoy"
+12    4044
+13    4044              FEE123:
+14    4044 21 44 40       ld hl,  FEE123
+15    4047              ; -> FEE \032 123
+16    4047              ; -> no more subs
+17    4047              ; -> FEE123
+18    4047
+19    4047              ; solution for OP using such new operator
+20    4047                  MACRO M_TOTO arg
+21    4047 ~                    LD HL,blah. _ arg
+22    4047                  ENDM
+23    4047
+24    4047              blah.argValue:
+25    4047                  M_TOTO argValue
+25    4047 21 47 40    >        LD HL,blah.argValue
+26    404A                  ; -> LD HL,blah.argValue
+27    404A
+28    404A              ; _ vs substitution priority is issue without parentheses to resolve something like this to get "Ahoy"Z
+29    404A              FEEBERZ EQU '%'
+30    404A 25             DB   FEEBERZ
+31    404B              ; -> FEE \032 BAR _ Z
+32    404B              ; -> FEE \032 BER \032 Z
+33    404B              ; -> no more subs, now concat
+34    404B              ; -> FEEBERZ
+35    404B              ; -> at no point there is "FEEBER _ Z" to create "Ahoy"Z
+36    404B
+glue.asm(37): error: Unexpected: _ Z
+37    404B 41 68 6F 79    DB     "Ahoy"_ Z
+38    404F              ; -> FEE \032 BAR _ _ Z
+39    404F              ; -> FEE \032 BER \032 _ Z
+40    404F              ; -> no more subs, now concat
+41    404F              ; -> FEEBER_ Z
+42    404F              ; -> "Ahoy"_ Z
+43    404F              ; -> argh ... it will lose whitespace, still fails, and that's the point of the op to glue operands together
+44    404F
+45    404F                DEFINE STR_ZERO_SUFFIX _ Z
+46    404F 41 68 6F 79    DB     "Ahoy"Z
+46    4053 00
+47    4054              ; -> FEE \032 BAR STR_ZERO_SUFFIX
+48    4054              ; -> FEE \032 BER STR_ZERO_SUFFIX
+49    4054              ; -> FEE \032 BER _ Z
+50    4054              ; -> no more subs, now concat
+51    4054              ; -> FEEBER _ Z
+52    4054              ; -> "Ahoy" \032 Z
+53    4054              ; -> no more subs, now concat
+54    4054              ; -> "Ahoy"Z
+55    4054              ; **SUCCESS**
+56    4054
+57    4054              ; tests for leading trailing glue char, should be restored to '_' as there's nothing to glue from one side
+glue.asm(58): error: Unrecognized instruction: _   FEE
+58    4054                _   FEE
+glue.asm(59): error: Unrecognized instruction: FEE _
+59    4054                  FEE _
+glue.asm(60): error: Unrecognized instruction: _   FEE _
+60    4054                _   FEE _
+61    4054              ; EOL comments are out of the equation as well
+62    4054                ; _ FOO
+glue.asm(63): error: Unrecognized instruction: FEE _
+63    4054                  FEE _ ;
+64    4054              ; more combinations of sparse define triggering glue on both sides (against static text)
+glue.asm(65): error: Unrecognized instruction: 1FEE
+65    4054                1FEE
+glue.asm(66): error: Unrecognized instruction: FEE2
+66    4054                  FEE2
+glue.asm(67): error: Unrecognized instruction: 3FEE4
+67    4054                3FEE4
+glue.asm(68): error: Unrecognized instruction: 5FEE6 _ 7BER8
+68    4054                5FEE6 _ 7BER8     ; 6 _ 7 is *not* a glue and must be preserved
+69    4054
+# file closed: glue.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x4047   blah.argValue
+0x4044   FEE123
+0x0025   FEEBERZ
