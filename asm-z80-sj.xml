@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.10 24/02/2026
+  Version: 0.9.11 04/03/2026
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,9 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  04/03/2026: version 0.9.11
+    + labels identation by ">" character
 
   24/02/2026: version 0.9.10
     + new directive: hexout, hexend, savehex
@@ -120,7 +123,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="20" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="21" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -419,15 +422,16 @@ TODO missing things:
     <contexts>
       <context name="LabelLine" attribute="Normal Text" lineEndContext="#stay" lineEmptyContext="#stay"
                fallthrough="true" fallthroughContext="Error">
-        <!-- Labels can start only at the beginning of the line, if not at beginning, the "Normal" context follows -->
+        <!-- line can be indented by '>' -->
+        <RegExpr attribute="Comment" context="#stay" String="^\s*>"/>
+        <!-- Labels start at the beginning of the [indented] line, w/o label the "dotRepeat" context follows -->
+        <RegExpr attribute="Label" context="#pop!afterLabel" String="(@\.|\.|@|\!|\!@|)[A-Za-z_][A-Za-z0-9_.?!#@]*(\+[0-9]|):?"/>
+        <RegExpr attribute="Label" context="#pop!afterLabel" String="[0-9]+:?"/>
         <DetectSpaces attribute="Normal Text" context="#pop!dotRepeat"/>
         <DetectChar attribute="Comment" context="#pop!Normal" char=";" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="/" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="*" lookAhead="true"/>
         <DetectChar attribute="Normal Text" context="#pop!Normal" char="}"/>
-        <RegExpr attribute="Label" context="#pop!afterLabel" firstNonSpace="true"
-                 String="^(@\.|\.|@|\!|\!@|)[A-Za-z_][A-Za-z0-9_.?!#@]*(\+[0-9]|):?"/>
-        <RegExpr attribute="Label" context="#pop!afterLabel" String="^[0-9]+:?(\s+|$)"/>
       </context>
 
       <!-- Detect EQU/DEFL/= expressions, the argument now must end with colon (no instruction possible after expression since sjasmplus v1.18.0 -->
