@@ -560,7 +560,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 							} else {
 								ver = a->string;	// substitute with array value
 							}
-						} else {	// no substition of array possible at this time (index eval / syntax error)
+						} else {	// no substitution of array possible at this time (index eval / syntax error)
 							lp = expLp;				// restore lp in case expression parser went ahead a lot
 							dr = -1;// write into output, but don't count as replacement
 						}
@@ -570,7 +570,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 				dr = 0;			// no possible substitution found
 				ver = nid;
 			}
-			// check if no substition was found, and there's no more chars to extend SubId
+			// check if no substitution was found, and there's no more chars to extend SubId
 			if (0 == dr && !islabchar(*lp)) {
 				lp = nextSubIdLp;		// was fully extended, no match, "eat" first subId
 				ResetGrowSubId();
@@ -585,7 +585,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 				// now check if there was whitespace, is glue char '_' and further whitespace ahead of it
 				if ((nl < gluep) && (gluep + 1 < rp) && (GLUE_CHAR == gluep[0]) && White(gluep[-1])) {
 					gluep[0] = GLUE_TAG;// convert it to glue tag for later
-					// not important to set glueDetected because substition happened
+					// not important to set glueDetected because substitution happened
 				}
 				// look after in "from" array to convert any whitespace enclosed `_` to glue tag
 				for (gluep = lp; GLUE_TAG != gluep[0] && White(gluep[0]); ) ++gluep;
