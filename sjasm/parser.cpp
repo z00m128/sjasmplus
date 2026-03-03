@@ -638,7 +638,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 
 char* ReplaceDefine(char* src) {
 	char* to = sline;
-	for (int maxIter = 21; maxIter--;) {
+	for (int maxIter = 31; maxIter--;) {
 		if (!ReplaceDefineInternal(src, to)) return to;	// no more replacements
 		// Some define were replaced, now ping-pong sline <-> sline2 buffers
 		src = to;
