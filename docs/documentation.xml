@@ -209,6 +209,7 @@
             <term>??.??.2026 - 1.21.2</term>
             <listitem>
               <synopsis>
+- Added <link linkend="s_substitution_and_defines">substitution glue operator `_`</link> to concatenate substitution results
 - Added <link linkend="po_dp">`DP` (alias `DEFP`)</link> directive to define Pascal strings
 - <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
 - <link linkend="s_source_format">`&gt;`</link> can be used to indent labels
@@ -218,6 +219,7 @@
 - <link linkend="po_device">`DEVICE`</link> ZX-like devices can now init with all-zeroed memory by using RAMTOP -1
 - CI: you can download executables from recent builds (windows, macos, freebsd, linux), for testing
 - refactored: <ulink url="https://github.com/z00m128/sjasmplus/tree/master/examples/relocation">relocation example</ulink> has more size-optimized relocator code
+- docs: added new chapter <link linkend="c_assembling_process">Assembling Process</link>
 - docs: minor fixes/extensions</synopsis>
             </listitem>
           </varlistentry>
@@ -624,6 +626,138 @@ label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
        &gt;.loop:         djnz .loop</programlisting>
 		</para>
     </section>
+  </chapter>
+
+  <chapter id="c_assembling_process">
+    <title>Assembling Process</title>
+
+    <section id="s_three_pass_model">
+      <title>The Three-Pass Model</title>
+
+      <para>
+        sjasmplus processes the entire source code three times sequentially.
+        Between passes, the symbols table is preserved (and Lua script global context is maintained),
+        but all other data is discarded before the next pass begins.
+      </para>
+
+      <para>
+        <emphasis>Pass 1 and 2:</emphasis> No machine code is emitted.
+        Instead, the assembler evaluates the size of code and drives symbol evaluation,
+        updating the symbol table content.
+        After Pass 2, all labels should have their final values.
+      </para>
+
+      <para>
+        <emphasis>Pass 3:</emphasis> Machine code is finally emitted.
+        During this pass, the symbol table (computed in earlier passes) is used to resolve
+        forward-referenced symbols correctly.
+        If a symbol evaluates to a different value in Pass 3 compared to Pass 2,
+        a warning or error is reported, indicating the source is too complex to settle within two passes.
+      </para>
+    </section>
+
+    <section id="s_per_line_processing">
+      <title>Per-Line Processing</title>
+
+      <para>
+        Within each pass, source lines are processed sequentially.
+        A single source line undergoes the following stages:
+        <orderedlist>
+          <listitem><para>Substitution (defines, defarrays, macro arguments)</para></listitem>
+          <listitem><para>Label parsing</para></listitem>
+          <listitem><para>Directive or macro invocation parsing</para></listitem>
+          <listitem><para>Instruction parsing</para></listitem>
+        </orderedlist>
+        Lines split by colons (<code>:</code>) are processed as multi-line source code, each segment
+        having its own substitution and parsing process.
+      </para>
+    </section>
+
+    <section id="s_substitution_and_defines">
+      <title>Substitution and Defines</title>
+
+      <para>
+        Substitution replaces identifiers in the source text with their defined values.
+        The process is text-based and iterative: after each replacement, the line is re-scanned
+        for further substitutions (up to ~30 iterations) until no more replacements occur.
+        Only then does the assembler proceed to parse the resulting text.
+      </para>
+
+      <para>
+        Single iteration of substitution happens from left to right, with macro arguments taking precedence
+        over other defines, followed by regular defines and defarray elements (with index expression
+        evaluation).
+      </para>
+
+      <para>
+        <emphasis>Sub-word matching:</emphasis> By default, each underscore (<code>_</code>) in an identifier
+        is treated as a sub-word boundary. The substitution engine attempts various combinations
+        of adjacent sub-words to match against defined keys.
+        Defines and macro arguments starting with underscore (<code>_</code>) are restricted to substitution
+        only at the beginning of an identifier, preventing accidental mid-word matches; for example,
+        a define <code>_VERSION</code> will not match inside <code>MY_VERSION</code>.
+        The order of matching is deterministic, but depends on the implementation; there is no explicit priority like
+        from longest to shortest match.
+        Use the <link linkend="s_cli"><code>--syntax=s</code></link> option to disable sub-word matching
+        to use only simple whole-word substitutions.
+      </para>
+
+      <para>
+        <emphasis>The glue operator (<code>_</code>):</emphasis> When a whitespace-enclosed underscore
+        appears adjacent to a substitution result, it signals that the whitespace should be removed
+        after substitution is complete. This allows concatenating results of substitution into single string
+        (sub-word matching leaves the boundary `_` as part of result, the glue operator is discarded).
+      </para>
+    </section>
+
+    <section id="s_macros_and_expansion">
+      <title>Macros and Expansion</title>
+
+      <para>
+        Macro bodies are stored as unparsed chains of text lines and are <emphasis>not</emphasis>
+        substituted or evaluated when defined.
+        When a macro is invoked, its stored lines are injected into the source stream as if they
+        were part of the original source at that location.
+        During macro expansion, the macro's arguments become temporary defines,
+        which participate in the substitution process for each injected line.
+        After the macro is fully expanded, these temporary defines are discarded,
+        and the substitution environment returns to its prior state.
+      </para>
+    </section>
+
+    <section id="s_assembling_process_example">
+      <title>Comprehensive Example</title>
+
+      <para>
+        The following example demonstrates substitution with iteration, the glue operator,
+        macro argument substitution, and the multi-pass nature of symbol resolution:
+      </para>
+
+      <para><example>
+        <title>docs_examples/s_assembling_process_example.asm</title>
+
+        <programlisting>    ORG $4000
+    DEFINE FULL part1? _ part2? _ .x    ; glue parts together with .x suffix
+    MACRO  ExampleMacro part1?, part2?
+        ld hl,FULL
+    ENDM
+    DEFINE part2? "global def"          ; can be overshadowed by macro argument
+    ; can't be done ahead of MACRO definition in this case
+    ; it would substitute macro argument name in definition with quoted string
+
+    ExampleMacro forward, Label
+    ; emits `ld hl,FULL` which is further processed by substitutions:
+    ; -> `ld hl,part1? _ part2? _ .x` define FULL applied
+    ; -> `ld hl,forward _ Label _ .x` args applied, `_` becomes glue operators
+    ; -> `ld hl,forwardLabel.x` final line to be parsed
+    ; In pass 1 this evaluates to `ld hl,0`, forwardLabel.x is not known yet
+    ; In pass 2 and 3 the symbol `forwardLabel.x` has value $4003
+
+forwardLabel.x:         ; label to be forward-referenced from within macro
+    DB part2?           ; "global def" string emitted here (not `Label`)</programlisting>
+      </example></para>
+    </section>
+
   </chapter>
 
   <chapter id="c_labels">

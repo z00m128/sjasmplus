@@ -1,0 +1,29 @@
+# file opened: s_assembling_process_example.asm
+ 1    0000                  ORG $4000
+ 2    4000                  DEFINE FULL part1? _ part2? _ .x    ; glue parts together with .x suffix
+ 3    4000                  MACRO  ExampleMacro part1?, part2?
+ 4    4000 ~                    ld hl,FULL
+ 5    4000                  ENDM
+ 6    4000                  DEFINE part2? "global def"          ; can be overshadowed by macro argument
+ 7    4000                  ; can't be done ahead of MACRO definition in this case
+ 8    4000                  ; it would substitute macro argument name in definition with quoted string
+ 9    4000
+10    4000                  ExampleMacro forward, Label
+10    4000 21 03 40    >        ld hl,forwardLabel.x
+11    4003                  ; emits `ld hl,FULL` which is further processed by substitutions:
+12    4003                  ; -> `ld hl,part1? _ part2? _ .x` define FULL applied
+13    4003                  ; -> `ld hl,forward _ Label _ .x` args applied, `_` becomes glue operators
+14    4003                  ; -> `ld hl,forwardLabel.x` final line to be parsed
+15    4003                  ; In pass 1 this evaluates to `ld hl,0`, forwardLabel.x is not known yet
+16    4003                  ; In pass 2 and 3 the symbol `forwardLabel.x` has value $4003
+17    4003
+18    4003              forwardLabel.x:         ; label to be forward-referenced from within macro
+19    4003 67 6C 6F 62      DB "global def"           ; "global def" string emitted here (not `Label`)
+19    4007 61 6C 20 64
+19    400B 65 66
+20    400D
+# file closed: s_assembling_process_example.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x4003   forwardLabel.x
