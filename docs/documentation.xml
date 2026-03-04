@@ -703,7 +703,7 @@ label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
       </para>
 
       <para>
-        <emphasis>The glue operator (<code>_</code>):</emphasis> When a whitespace-enclosed underscore
+        <emphasis>The glue operator (<code>_</code>):</emphasis> (since v1.21.2) When a whitespace-enclosed underscore
         appears adjacent to a substitution result, it signals that the whitespace should be removed
         after substitution is complete. This allows concatenating results of substitution into single string
         (sub-word matching leaves the boundary `_` as part of result, the glue operator is discarded).
@@ -984,7 +984,9 @@ $c     hexadecimal
 \T 9
 \V 11</programlisting><para>Inside single quotes two quotes after each other are
     parsed as the apostrophe itself.</para>
-  <para>Adding Z or C after quotes/apostrophes will make string zero-terminated or set top bit of last character (since v1.20.3).</para><example>
+  <para>Adding Z or C after quotes/apostrophes will make string zero-terminated or set top bit of last character (since v1.20.3).</para>
+  <para>String literals can be concatenated using the ".." operator (similar to Lua syntax). Both operands must be string literals (since v1.21.2).</para>
+  <example>
           <title></title>
 
           <para><programlisting>    BYTE "stringconstant\n" ; escape sequence assembles to newline
@@ -997,7 +999,9 @@ $c     hexadecimal
     LD A,'"'    ; A = 0x22
     LD A,"'"    ; A = 0x27
     LD A,''''   ; A = 0x27
-    BYTE "AB"Z, "CD"C, 'E'Z, 'F'C ; hex: 41 42 00 43 C4 45 00 C6</programlisting></para>
+    BYTE "AB"Z, "CD"C, 'E'Z, 'F'C ; hex: 41 42 00 43 C4 45 00 C6
+    DEFINE BIN_EXT ".bin"
+    INCBIN "path" .. '/' .. "name" .. BIN_EXT  ; includes "path/name.bin" file</programlisting></para>
         </example></para>
     </section>
 
@@ -1025,6 +1029,7 @@ $c     hexadecimal
 
       <para><programlisting>norel norel L  <indexterm id="op_norel"><primary>norel</primary></indexterm>Label/symbol L will be treated as non-relocatable
 exist exist L  <indexterm id="op_exist"><primary>exist</primary></indexterm>is label/symbol L defined in source (even when not used)
+..    x..y     <indexterm id="op_str_concat"><primary>..</primary></indexterm>string concatenation (both operands must be string literals)
 
 !     !x       <indexterm id="op_log_not"><primary>!</primary></indexterm>logical not
 ~     ~x       <indexterm id="op_cpl"><primary>~</primary></indexterm>complement

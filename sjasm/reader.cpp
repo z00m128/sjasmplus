@@ -850,7 +850,7 @@ delim_string_t GetDelimitedStringEx(char*& p) {
 			} else {
 				const char delimiterTxt[2] = { deliE, 0 };
 				Error("No closing delimiter", delimiterTxt, SUPPRESS);
-				result.first = "";		// return "empty" string
+				result.first.clear();		// return "empty" string
 				return result;
 			}
 		}
