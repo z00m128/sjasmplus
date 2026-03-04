@@ -9,6 +9,6 @@ mac1    MACRO   arg1
 
  djnz $:mac1 '!':jr $
 
-; since v1.21.2 -> new indentation feature for labels is available
+; since v1.22.0 -> new indentation feature for labels is available
 >colonsTest3: nop : rla : rlca : rra : rrca : ret       ; eol comment
     >colonsTest4: nop : rla : rlca : rra : rrca : ret   ; eol comment

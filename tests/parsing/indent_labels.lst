@@ -40,7 +40,7 @@
  35   401B                  ENDMODULE
  36   401B
  37   401B
- 38   401B              ;;; indented '>' as workaround for indenting labels (since v1.21.2)
+ 38   401B              ;;; indented '>' as workaround for indenting labels (since v1.22.0)
  39   401B              ;;; Good luck with syntax highlight and other 3rd party tools :shrug:
  40   401B                  ORG $6000
  41   6000

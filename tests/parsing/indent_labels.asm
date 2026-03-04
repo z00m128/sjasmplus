@@ -35,7 +35,7 @@ S_.!?#@tructInMod       TEST_STRUCT { 3 }
     ENDMODULE
 
 
-;;; indented '>' as workaround for indenting labels (since v1.21.2)
+;;; indented '>' as workaround for indenting labels (since v1.22.0)
 ;;; Good luck with syntax highlight and other 3rd party tools :shrug:
     ORG $6000
 

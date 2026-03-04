@@ -206,10 +206,11 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>??.??.2026 - 1.21.2</term>
+            <term>15.3.2026 - 1.22.0</term>
             <listitem>
               <synopsis>
 - Added <link linkend="s_substitution_and_defines">substitution glue operator `_`</link> to concatenate substitution results
+- Added string literals <link linkend="s_strings">concatenating operator `..`</link>
 - Added <link linkend="po_dp">`DP` (alias `DEFP`)</link> directive to define Pascal strings
 - <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
 - <link linkend="s_source_format">`&gt;`</link> can be used to indent labels
@@ -619,7 +620,7 @@ label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
        ld d,(12+3)            ; error, can't load D from memory
        ld d,+(12+3)           ; works, unary plus makes it clear it's just immediate value</programlisting>
 			</example>
-			(since v1.21.2) You can indent a label at the beginning of a line by using the indentation character '&gt;'.
+			(since v1.22.0) You can indent a label at the beginning of a line by using the indentation character '&gt;'.
 			The label must start immediately after the "greater-than" character (it works by offsetting the logical start of line):
 			<programlisting>ClassicLineLabel:      nop
    &gt;IndentedMainLabel: ld b,123    ; '&gt;' must be first non-whitespace character on line
@@ -703,7 +704,7 @@ label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
       </para>
 
       <para>
-        <emphasis>The glue operator (<code>_</code>):</emphasis> (since v1.21.2) When a whitespace-enclosed underscore
+        <emphasis>The glue operator (<code>_</code>):</emphasis> (since v1.22.0) When a whitespace-enclosed underscore
         appears adjacent to a substitution result, it signals that the whitespace should be removed
         after substitution is complete. This allows concatenating results of substitution into single string
         (sub-word matching leaves the boundary `_` as part of result, the glue operator is discarded).
@@ -768,7 +769,7 @@ forwardLabel.x:         ; label to be forward-referenced from within macro
 
       <para>Labels are case-sensitive and may be of any reasonable length,
       that is: up to about 70 characters. Label definitions must start on
-      the beginning of a line (since v1.21.2 you can indent them by leading <code>`&gt;`</code>),
+      the beginning of a line (since v1.22.0 you can indent them by leading <code>`&gt;`</code>),
       but don't have to be followed by a colon ':'.
       Generally labels should start with a letter or a underscore ('_'), the
       following characters may be chosen from letters, numbers and the
@@ -985,7 +986,7 @@ $c     hexadecimal
 \V 11</programlisting><para>Inside single quotes two quotes after each other are
     parsed as the apostrophe itself.</para>
   <para>Adding Z or C after quotes/apostrophes will make string zero-terminated or set top bit of last character (since v1.20.3).</para>
-  <para>String literals can be concatenated using the ".." operator (similar to Lua syntax). Both operands must be string literals (since v1.21.2).</para>
+  <para>String literals can be concatenated using the ".." operator (similar to Lua syntax). Both operands must be string literals (since v1.22.0).</para>
   <example>
           <title></title>
 
@@ -1029,7 +1030,7 @@ $c     hexadecimal
 
       <para><programlisting>norel norel L  <indexterm id="op_norel"><primary>norel</primary></indexterm>Label/symbol L will be treated as non-relocatable
 exist exist L  <indexterm id="op_exist"><primary>exist</primary></indexterm>is label/symbol L defined in source (even when not used)
-..    x..y     <indexterm id="op_str_concat"><primary>..</primary></indexterm>string concatenation (both operands must be string literals)
+..    x..y     <indexterm id="op_str_concat"><primary>..</primary></indexterm>string concatenation (both operands must be string literals) (since v1.22.0)
 
 !     !x       <indexterm id="op_log_not"><primary>!</primary></indexterm>logical not
 ~     ~x       <indexterm id="op_cpl"><primary>~</primary></indexterm>complement
