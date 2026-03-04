@@ -2,13 +2,13 @@
     DEFINE KEYWORD_BIN 'b'.."in"
 
     ; filename concatenated from multiple parts:
-    INCBIN "two_dot_strings" .. '.' .. "asm"
+    INCBIN "two_dot_strings" .. '.' .. "asm" : ALIGN $2000
     OUTPUT "two_dot_strings" .. '.' .. KEYWORD_BIN
 
     ; for DB comma can be used in this trivial case, but operator should work too:
     DB  "string" .. ' ' .. "concatenation", 0, '"' .. KEYWORD_BIN .. '"'
-    ; suffix strings support
-    DB "ABC"C .. "Z"Z
+    DB "ABC"C .. "Z"Z           ; suffix strings support
+    DP "Pascal" .. "Str"        ; verify pascal string length
 
     ; not sure about this one, if it should be even supported
     ld  hl,"h" .. "l"

@@ -4,77 +4,80 @@
  3    0000
  4    0000                  ; filename concatenated from multiple parts:
  5    0000                  INCBIN "two_dot_strings" .. '.' .. "asm"
- 6    05B7                  OUTPUT "two_dot_strings" .. '.' .. 'b'.."in"
- 7    05B7
- 8    05B7                  ; for DB comma can be used in this trivial case, but operator should work too:
- 9    05B7 73 74 72 69      DB  "string" .. ' ' .. "concatenation", 0, '"' .. 'b'.."in" .. '"'
- 9    05BB 6E 67 20 63
- 9    05BF 6F 6E 63 61
- 9    05C3 74 65 6E 61
- 9    05C7 74 69 6F 6E
- 9    05CB 00 22 62 69
- 9    05CF 6E 22
-10    05D1                  ; suffix strings support
-11    05D1 41 42 C3 5A      DB "ABC"C .. "Z"Z
-11    05D5 00
-12    05D6
-13    05D6                  ; not sure about this one, if it should be even supported
-14    05D6 21 6C 68         ld  hl,"h" .. "l"
-15    05D9
-16    05D9 42 6C 6F 63      BLOCK 8, "B" .. "lock"Z
-16    05DD 6B 00 00 00
-17    05E1
-18    05E1                  DISPLAY "DISPLAY" .. '..' .. "concatenate"
-19    05E1
-20    05E1                  STRUCT STRUCT_TEXT
-21    05E1 ~            txt     TEXT 8, { "T" .. "ext"Z }
-22    05E1                  ENDS
-23    05E1 54 65 78 74  txt1    STRUCT_TEXT
-23    05E5 00 00 00 00
-24    05E9 73 6F 6D 65  txt2    STRUCT_TEXT { {"some" .. "text"} }
-24    05ED 74 65 78 74
-25    05F1
-26    05F1                  ; syntax variations (condensed whitespace)
-27    05F1 73 74 72 69      DB  "string"..' '.."concatenation", 0, '"'.. 'b'.."in" ..'"'
-27    05F5 6E 67 20 63
-27    05F9 6F 6E 63 61
-27    05FD 74 65 6E 61
-27    0601 74 69 6F 6E
-27    0605 00 22 62 69
-27    0609 6E 22
-28    060B 41 42 C3 5A      DB "ABC"C.."Z"Z
-28    060F 00
-29    0610 21 6C 68         ld  hl,"h".."l"
-30    0613 42 6C 6F 63      BLOCK 8, "B".."lock"Z
-30    0617 6B 00 00 00
-31    061B
-32    061B                  ; errors: missing string literal to concatenate
+ 5    0609 00 00 00...    ALIGN $2000
+ 6    2000                  OUTPUT "two_dot_strings" .. '.' .. 'b'.."in"
+ 7    2000
+ 8    2000                  ; for DB comma can be used in this trivial case, but operator should work too:
+ 9    2000 73 74 72 69      DB  "string" .. ' ' .. "concatenation", 0, '"' .. 'b'.."in" .. '"'
+ 9    2004 6E 67 20 63
+ 9    2008 6F 6E 63 61
+ 9    200C 74 65 6E 61
+ 9    2010 74 69 6F 6E
+ 9    2014 00 22 62 69
+ 9    2018 6E 22
+10    201A 41 42 C3 5A      DB "ABC"C .. "Z"Z           ; suffix strings support
+10    201E 00
+11    201F 09 50 61 73      DP "Pascal" .. "Str"        ; verify pascal string length
+11    2023 63 61 6C 53
+11    2027 74 72
+12    2029
+13    2029                  ; not sure about this one, if it should be even supported
+14    2029 21 6C 68         ld  hl,"h" .. "l"
+15    202C
+16    202C 42 6C 6F 63      BLOCK 8, "B" .. "lock"Z
+16    2030 6B 00 00 00
+17    2034
+18    2034                  DISPLAY "DISPLAY" .. '..' .. "concatenate"
+19    2034
+20    2034                  STRUCT STRUCT_TEXT
+21    2034 ~            txt     TEXT 8, { "T" .. "ext"Z }
+22    2034                  ENDS
+23    2034 54 65 78 74  txt1    STRUCT_TEXT
+23    2038 00 00 00 00
+24    203C 73 6F 6D 65  txt2    STRUCT_TEXT { {"some" .. "text"} }
+24    2040 74 65 78 74
+25    2044
+26    2044                  ; syntax variations (condensed whitespace)
+27    2044 73 74 72 69      DB  "string"..' '.."concatenation", 0, '"'.. 'b'.."in" ..'"'
+27    2048 6E 67 20 63
+27    204C 6F 6E 63 61
+27    2050 74 65 6E 61
+27    2054 74 69 6F 6E
+27    2058 00 22 62 69
+27    205C 6E 22
+28    205E 41 42 C3 5A      DB "ABC"C.."Z"Z
+28    2062 00
+29    2063 21 6C 68         ld  hl,"h".."l"
+30    2066 42 6C 6F 63      BLOCK 8, "B".."lock"Z
+30    206A 6B 00 00 00
+31    206E
+32    206E                  ; errors: missing string literal to concatenate
 two_dot_strings.asm(33): error: [..] String literal expected:
-33    061B 73 74 72 69      DB "string" ..
-33    061F 6E 67
+33    206E 73 74 72 69      DB "string" ..
+33    2072 6E 67
 two_dot_strings.asm(34): error: [..] String literal expected:
-34    0621 73 74 72 69      DB "string" ..    ; space only
-34    0625 6E 67
+34    2074 73 74 72 69      DB "string" ..    ; space only
+34    2078 6E 67
 two_dot_strings.asm(35): error: [..] String literal expected: 0xEE
-35    0627 73 74 72 69      DB "string" .. 0xEE
-35    062B 6E 67
-36    062D
+35    207A 73 74 72 69      DB "string" .. 0xEE
+35    207E 6E 67
+36    2080
 two_dot_strings.asm(37): error: C suffix can't patch empty string: ""C
-37    062D 65 6D 70 74      DB "empty second arg with C" .. ""C     ; error can't patch empty string
-37    0631 79 20 73 65
-37    0635 63 6F 6E 64
-37    0639 20 61 72 67
-37    063D 20 77 69 74
-37    0641 68 20 43
-38    0644
-39    0644                  END
+37    2080 65 6D 70 74      DB "empty second arg with C" .. ""C     ; error can't patch empty string
+37    2084 79 20 73 65
+37    2088 63 6F 6E 64
+37    208C 20 61 72 67
+37    2090 20 77 69 74
+37    2094 68 20 43
+38    2097
+39    2097                  END
 # file closed: two_dot_strings.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
 0x0008 X STRUCT_TEXT
 0x0000 X STRUCT_TEXT.txt
-0x05E1 X txt1
-0x05E1 X txt1.txt
-0x05E9 X txt2
-0x05E9 X txt2.txt
+0x2034 X txt1
+0x2034 X txt1.txt
+0x203C X txt2
+0x203C X txt2.txt
