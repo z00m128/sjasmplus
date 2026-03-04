@@ -92,7 +92,7 @@ coverage2.asm(50): error: [DEVICE] Syntax error in <deviceid>: &syntaxErrorName
 coverage2.asm(52): error: SAVESNA only allowed in real device emulation mode (See DEVICE)
 52    000D                  SAVESNA "coverage2.sna", &
 53    000D
-coverage2.asm(54): error: Invalid labelname: .InvalidName
+coverage2.asm(54): error: Invalid character at start of labelname: .InvalidName
 54    000D                  IFUSED ..InvalidName
 55    000D
 coverage2.asm(56): error: ELSEIF without IF/IFN

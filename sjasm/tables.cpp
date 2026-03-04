@@ -67,7 +67,7 @@ char* PreviousIsLabel = nullptr;
 // since v1.18.3:
 // Inside macro prefix "@." will create non-macro local label instead of macro's instance
 char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
-	if (nullptr == naam) {
+	if (nullptr == naam || 0 == *naam || White(naam[0])) {
 		Error("Invalid (blank) labelname");
 		return nullptr;
 	}

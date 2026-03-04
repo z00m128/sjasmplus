@@ -30,9 +30,9 @@ smc_label_extras.asm(23): error: Unrecognized instruction: +2  and 10
 smc_label_extras.asm(24): error: Unrecognized instruction: -3  and 11
 24    800A              lK+1-3  and 11
 25    800A                  ; syntax errors (no minus either)
-smc_label_extras.asm(26): error: Invalid labelname: lL-1
+smc_label_extras.asm(26): error: Invalid character after labelname: lL-1
 26    800A E6 0C        lL-1    and 12
-smc_label_extras.asm(27): error: Invalid labelname: lM-1
+smc_label_extras.asm(27): error: Invalid character after labelname: lM-1
 27    800C              lM-1
 27    800C E6 0D            and 13
 28    800E

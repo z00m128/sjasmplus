@@ -278,9 +278,9 @@ smc_label_smart.asm(221): error: Unrecognized instruction: +*a
 221   816F              lEb+*a
 221   816F E6 34          and 52
 222   8171                  ; syntax errors (no minus either)
-smc_label_smart.asm(223): error: Invalid labelname: lF-*
+smc_label_smart.asm(223): error: Invalid character after labelname: lF-*
 223   8171 E6 06        lF-*    and 6
-smc_label_smart.asm(224): error: Invalid labelname: lG-*
+smc_label_smart.asm(224): error: Invalid character after labelname: lG-*
 224   8173              lG-*
 224   8173 E6 07            and 7
 225   8175                  ; error unresolved (no suitable instruction is on the line)

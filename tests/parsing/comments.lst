@@ -63,7 +63,7 @@
 35    0016 ~             /*:"*/
 35    0016 ED B8         lddr
 36    0018
-comments.asm(37): error: Invalid labelname:
+comments.asm(37): error: Invalid (blank) labelname
 37    0018 27           :   daa
 38    0019 ~            /* END ... // : block comment */
 38    0019 00             nop ; LIVE instr!

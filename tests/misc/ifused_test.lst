@@ -100,9 +100,9 @@ ifused_test.asm(94): error: Unexpected: &Label
 94    0016                      IFUSED  Invalid&Label
 ifused_test.asm(95): error: Unexpected: %Label
 95    0016                      IFNUSED Invalid%Label
-ifused_test.asm(96): error: Invalid labelname: .InvalidLabel
+ifused_test.asm(96): error: Invalid character at start of labelname: .InvalidLabel
 96    0016                      IFUSED  ..InvalidLabel
-ifused_test.asm(97): error: Invalid labelname: .InvalidLabel
+ifused_test.asm(97): error: Invalid character at start of labelname: .InvalidLabel
 97    0016                      IFNUSED  ..InvalidLabel
 98    0016
 # file closed: ifused_test.asm

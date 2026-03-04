@@ -71,16 +71,16 @@ lua_get_insert_label.asm(9): error: [LUA] bad argument #2 to 'insert_label' (num
  68   0000 ~                assert(false == sj.insert_label("@", 0x2345))
  69   0000 ~                assert(false == sj.insert_label(".", 0x2345))
  70   0000 ~                assert(false == sj.insert_label("1_invalid_name", 0x2345))
-lua_get_insert_label.asm(59): error: [LUA] Invalid labelname: 1_invalid_name
-lua_get_insert_label.asm(61): error: [LUA] Invalid labelname:
-lua_get_insert_label.asm(62): error: [LUA] Invalid labelname:
-lua_get_insert_label.asm(63): error: [LUA] Invalid labelname:
-lua_get_insert_label.asm(65): error: [LUA] Invalid labelname
-lua_get_insert_label.asm(66): error: [LUA] Invalid labelname:
-lua_get_insert_label.asm(67): error: [LUA] Invalid labelname:
-lua_get_insert_label.asm(68): error: [LUA] Invalid labelname:
-lua_get_insert_label.asm(69): error: [LUA] Invalid labelname:
-lua_get_insert_label.asm(70): error: [LUA] Invalid labelname: 1_invalid_name
+lua_get_insert_label.asm(59): error: [LUA] Invalid character at start of labelname: 1_invalid_name
+lua_get_insert_label.asm(61): error: [LUA] Invalid (blank) labelname
+lua_get_insert_label.asm(62): error: [LUA] Invalid (blank) labelname
+lua_get_insert_label.asm(63): error: [LUA] Invalid character at start of labelname:
+lua_get_insert_label.asm(65): error: [LUA] Invalid (blank) labelname
+lua_get_insert_label.asm(66): error: [LUA] Invalid (blank) labelname
+lua_get_insert_label.asm(67): error: [LUA] Invalid (blank) labelname
+lua_get_insert_label.asm(68): error: [LUA] Invalid character at start of labelname:
+lua_get_insert_label.asm(69): error: [LUA] Invalid character at start of labelname:
+lua_get_insert_label.asm(70): error: [LUA] Invalid character at start of labelname: 1_invalid_name
  71   0000                ENDLUA
  72   0000
 lua_get_insert_label.asm(73): warning: Label has different value in pass 3: previous value 13398 not equal 13399

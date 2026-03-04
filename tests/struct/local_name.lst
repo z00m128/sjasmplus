@@ -74,7 +74,7 @@ local_name.asm(42): error: [STRUCT] Can't include itself
  69   003A 3A 0B 00             ld a,(Whatever.Mdc2.CC1)
  70   003D 3A 0C 00             ld a,(Whatever.Mdc3.CC1)
  71   0040
-local_name.asm(72): error: Invalid labelname: %as
+local_name.asm(72): error: Invalid character at start of labelname: %as
  72   0040 67           %as     Whatever.MethodC.Data   ; invalid labelname error reporting check
  73   0041
  74   0041                  DEVICE ZXSPECTRUMNEXT       ; setup global device for SLD file test
