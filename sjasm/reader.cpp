@@ -672,9 +672,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 				t = oldT;
 				p = oldP;		// and continue with the last code-path trying to parse expression
 			} else {	// string literal (not expression), handle the extra string literal logic
-				if (oldT == t) {
-					Warning("Empty string", p-2);
-				} else if (dc) {
+				if (oldT < t && dc) {
 					// mark last "string" byte with |128: single char in quotes *is* string
 					// but single char in apostrophes *is not* (!) (no |128 then)
 					int maxLengthNotString = (1 == strRes);		// 0 for quotes, 1 for apostrophes
@@ -837,23 +835,26 @@ int GetBytesHexaText(char*& p, int e[]) {
 	return bytes;
 }
 
+// supports also string concatenation operator `..`, but then only the last delimiter is reported in result
 delim_string_t GetDelimitedStringEx(char*& p) {
 	delim_string_t result;
-	result.second = DelimiterAnyBegins(p);
-	const char deliE = delimiters_e[result.second];
-	char *p_begin = p;
-	while (*p && deliE != *p) ++p;
-	result.first.assign(p_begin, p);
-	if (' ' != deliE) {
-		if (deliE == *p) {
-			++p;
-		} else {
-			const char delimiterTxt[2] = { deliE, 0 };
-			Error("No closing delimiter", delimiterTxt, SUPPRESS);
-			result.first = "";		// return "empty" string
+	do {
+		result.second = DelimiterAnyBegins(p);
+		const char deliE = delimiters_e[result.second];
+		char *p_begin = p;
+		while (*p && deliE != *p) ++p;
+		result.first.append(p_begin, p);	// append found delimited string
+		if (' ' != deliE) {
+			if (deliE == *p) {
+				++p;
+			} else {
+				const char delimiterTxt[2] = { deliE, 0 };
+				Error("No closing delimiter", delimiterTxt, SUPPRESS);
+				result.first = "";		// return "empty" string
+				return result;
+			}
 		}
-	}
-	SkipBlanks(p);					// skip blanks any way
+	} while (('.'+'.') == need(p, ".."));	// repeat when string concatenation operator is found
 	return result;
 }
 
@@ -1031,32 +1032,44 @@ EDelimiterType DelimiterAnyBegins(char*& src, bool advanceSrc) {
 //  -2 = buffer full
 //  -1 = syntax error (missing quote/apostrophe)
 //   0 = no string literal detected at p[0]
-//   1 = string literal in single quotes (apostrophe)
-//   2 = string literal in double quotes (")
+//   1 = (last) string literal in single quotes (apostrophe)
+//   2 = (last) string literal in double quotes (")
 template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, int max_ei, int add) {
 	if ('"' != *p && '\'' != *p) return 0;
-	const char* const elementP = p;
-	const bool quotes = ('"' == *p++);
-	aint val;
-	while (ei < max_ei && (quotes ? GetCharConstInDoubleQuotes(p, val) : GetCharConstInApostrophes(p, val))) {
-		e[ei++] = (val + add) & 255;
-	}
-	if ((quotes ? '"' : '\'') != *p) {	// too many/invalid arguments or zero-terminator can lead to this
-		if (*p) return -2;				// too many arguments
-		Error("Syntax error", elementP, SUPPRESS);	// zero-terminator
-		return -1;
-	}
-	++p;
-	if ('Z' == *p) {
-		if (max_ei <= ei) return -2;	// no space for zero byte (keep p pointing at Z to report error)
+	do {
+		const int eiStart = ei;
+		const char* const elementP = p;
+		const bool quotes = ('"' == *p++);
+		aint val;
+		while (ei < max_ei && (quotes ? GetCharConstInDoubleQuotes(p, val) : GetCharConstInApostrophes(p, val))) {
+			e[ei++] = (val + add) & 255;
+		}
+		if ((quotes ? '"' : '\'') != *p) {	// too many/invalid arguments or zero-terminator can lead to this
+			if (*p) return -2;				// too many arguments
+			Error("Syntax error", elementP, SUPPRESS);	// zero-terminator
+			return -1;
+		}
 		++p;
-		e[ei++] = 0;
-	} else if ('C' == *p) {
-		++p;
-		if (0 == ei) return -1;			// empty string can't have last char patched
-		e[ei - 1] |= 0x80;
-	}
-	return 1 + quotes;
+		if ('Z' == *p) {
+			if (max_ei <= ei) return -2;	// no space for zero byte (keep p pointing at Z to report error)
+			++p;
+			e[ei++] = 0;
+		} else if ('C' == *p) {
+			++p;
+			if (eiStart == ei) {
+				Error("C suffix can't patch empty string", elementP, SUPPRESS);
+				return -1;			// empty string can't have last char patched
+			}
+			e[ei - 1] |= 0x80;
+		}
+		if (eiStart == ei) Warning("Empty string", elementP);
+		if (('.'+'.') != need(p, "..")) return 1 + quotes;	// type of quotes reported for last segment only
+		// string concatenation operator handling
+		if (SkipBlanks(p) || ('"' != *p && '\'' != *p)) {
+			Error("[..] String literal expected", p, SUPPRESS);
+			return -1;	// another string was expected to follow
+		}
+	} while (true);
 }
 
 // make sure both specialized instances for `char` and `int` are available for whole app

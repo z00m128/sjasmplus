@@ -8,9 +8,9 @@
  6    000A 65 66 00
  7    000D 61 62 63 64      DB 'abcdef'Z
  7    0011 65 66 00
-string_literals.asm(8): error: no arguments
+string_literals.asm(8): error: C suffix can't patch empty string: ""C
  8    0014                  DB ""C          ; error - can't patch empty string
-string_literals.asm(9): error: no arguments
+string_literals.asm(9): error: C suffix can't patch empty string: ''C
  9    0014                  DB ''C          ; error - can't patch empty string
 10    0014 E1               DB "a"C
 11    0015 E1               DB 'a'C

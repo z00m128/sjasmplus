@@ -7,6 +7,7 @@ reader_cpp_coverage.asm(3): error: ')' expected
  4    0000                  .ASSERT(0 == not 1)
 reader_cpp_coverage.asm(5): warning: Unknown escape: \x"
  5    0000 5C 78            .DB  "\x"
+reader_cpp_coverage.asm(6): warning: Empty string: ""
 reader_cpp_coverage.asm(6): warning: Empty string literal converted to value 0!: ""
  6    0002 01               .DB  1+""
 reader_cpp_coverage.asm(7): error: No closing delimiter: "
