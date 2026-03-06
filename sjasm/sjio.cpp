@@ -29,7 +29,7 @@
 // sjio.cpp
 
 #include "sjdefs.h"
-#include <unordered_set>
+#include <set>
 
 #include <fcntl.h>
 
@@ -68,7 +68,8 @@ static aint WBLength = 0;
 // value: archived fullpath/basename ready to open or print
 using files_in_map_t = std::map<const delim_string_t, const SInputFile>;	// input files per name
 using dirs_in_map_t = std::map<const fs::path, files_in_map_t>;				// input files per current directory
-using files_set_t = std::unordered_set<fs::path>;							// files store for --cleanonerror
+using files_set_t = std::set<fs::path>;										// files store for --cleanonerror
+					// std::unordered_set needs fs::path hash, which is part of standard in C++23
 
 static void CloseBreakpointsFile();
 

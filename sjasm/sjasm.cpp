@@ -56,7 +56,7 @@ static void PrintHelpMain() {
 	_COUT "  --hex=<filename>         Intel HEX saved to <filename> (- is STDOUT)" _ENDL;
 	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
 	_COUT "  --sld[=<filename>]       Save Source Level Debugging data to <filename>" _ENDL;
-	_COUT "  --cleanonerror           Remove produced binary outputs upon any error" _ENDL;
+	_COUT "  --cleanonerror           Remove newly created binary outputs upon error" _ENDL;
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;

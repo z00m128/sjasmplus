@@ -1,4 +1,3 @@
-# run sjasmplus with full output to exercise the "Deleting files on error" messages, filter out only those, count filtered lines
 $MEMCHECK "$EXE" "${options[@]}" "$file_asm"
 # only .asm and .cli file should be in the directory, everything else should have been cleaned
 [[ 2 -eq $(ls -A | wc -l) ]] ;

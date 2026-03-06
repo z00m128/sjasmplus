@@ -443,7 +443,8 @@
   --raw=&lt;filename&gt;         Machine code saved also to &lt;filename&gt; (- is STDOUT)
   --sld[=&lt;filename&gt;]       Save Source Level Debugging data to &lt;filename&gt;
                            Default name is: "&lt;first input filename&gt;.sld.txt"
-  --cleanonerror           Remove produced binary outputs upon any error
+  --cleanonerror           Remove newly created binary outputs upon error
+                           Keeps listings, symbol, export and similar files
   Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
  Logging:
   --nologo                 Do not show startup message

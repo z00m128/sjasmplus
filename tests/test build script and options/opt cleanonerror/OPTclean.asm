@@ -4,7 +4,7 @@
         ORG $FF00
         di
         halt
-        SAVEBIN "cleanonerror.bin", $FF00, 2
+        SAVEBIN "OPTclean.bin", $FF00, 2
 
         OPT --cleanonerror
 
