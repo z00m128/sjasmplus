@@ -1,4 +1,20 @@
 
+## [1.22.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.22.0) - 15.3.2026
+- Added [substitution glue operator `_`](https://z00m128.github.io/sjasmplus/documentation.html#s_substitution_and_defines) to concatenate substitution results
+- Added string literals [concatenating operator `..`](https://z00m128.github.io/sjasmplus/documentation.html#s_strings)
+- Added [`DP` (alias `DEFP`)](https://z00m128.github.io/sjasmplus/documentation.html#po_dp) directive to define Pascal strings
+- [`BLOCK` (`DS`)](https://z00m128.github.io/sjasmplus/documentation.html#po_block) can take set of values for init (like DB)
+- [`>`](https://z00m128.github.io/sjasmplus/documentation.html#s_source_format) can be used to indent labels
+- Intel HEX output format added: [`SAVEHEX`](https://z00m128.github.io/sjasmplus/documentation.html#po_savehex), [`HEXOUT`](https://z00m128.github.io/sjasmplus/documentation.html#po_hexout), [`HEXEND`](https://z00m128.github.io/sjasmplus/documentation.html#po_hexend), [`--hex`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli)
+- Added option [`--cleanonerror`](https://z00m128.github.io/sjasmplus/documentation.html#s_cli) to remove binary outputs upon any error (as output may be corrupted)
+- [`BPLIST`](https://z00m128.github.io/sjasmplus/documentation.html#po_bplist) supports now also FUSE
+- [`SETBP`](https://z00m128.github.io/sjasmplus/documentation.html#po_setbp) has optional string argument for "conditional" breakpoints (depends on bplist type)
+- [`DEVICE`](https://z00m128.github.io/sjasmplus/documentation.html#po_device) ZX-like devices can now init with all-zeroed memory by using RAMTOP -1
+- CI: you can download executables from recent builds (windows, macos, freebsd, linux), for testing
+- refactored: [relocation example](https://github.com/z00m128/sjasmplus/tree/master/examples/relocation) has more size-optimized relocator code
+- docs: added new chapter [Assembling Process](https://z00m128.github.io/sjasmplus/documentation.html#c_assembling_process)
+- docs: minor fixes/extensions
+
 ## [1.21.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.21.1) - 16.1.2026
 - [`BPLIST`](https://z00m128.github.io/sjasmplus/documentation.html#po_bplist) supports now also MAME
 - [`SAVENEX CLOSE`](https://z00m128.github.io/sjasmplus/documentation.html#nex_close) can append multiple files
