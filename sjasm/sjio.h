@@ -62,18 +62,15 @@ private:
 using fullpath_ref_t = const SInputFile &;
 using fullpath_p_t = const SInputFile *;
 
-// map to archive all input files (to have stable valid c_str pointers of their filenames until exit)
-// key: filename + delimiter info
-// value: archived fullpath/basename ready to open or print
-using files_in_map_t = std::map<const delim_string_t, const SInputFile>;      // input files per name
-using dirs_in_map_t = std::map<const std::filesystem::path, files_in_map_t>;  // input files per current directory
-
 // Look for provided string + delimiter type in include paths and return full path to existing file or original string
 // (archives the input in case this is first time, otherwise returns archived path)
 fullpath_ref_t GetInputFile(delim_string_t && in);
 fullpath_ref_t GetInputFile(char*& p);
 std::filesystem::path GetOutputFileName(char*& p);
 void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty = true);
+
+void AddDeleteOnError(const std::filesystem::path & output_file);             // candidate file for delete-on-error
+void DeleteOnError(int exitCode);                                             // execute the deletion when 0 != exitCode
 
 void OpenDest(int mode = OUTPUT_TRUNCATE);
 void OpenExpFile();

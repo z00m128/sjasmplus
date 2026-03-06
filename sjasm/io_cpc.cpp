@@ -65,6 +65,7 @@ static int SaveSNA_CPC(const std::filesystem::path & fname, word start) {
 		Error("[SAVECPCSNA] Error opening file for write", fname.string().c_str());
 		return 0;
 	}
+	AddDeleteOnError(fname);
 
 	// format:  http://cpctech.cpc-live.com/docs/snapshot.html
 	constexpr int SNA_HEADER_SIZE = 256;
@@ -788,6 +789,7 @@ static int SaveCPR(const std::filesystem::path & fname, int cprSize) {
 		Error("[SAVECPR] Error opening file for write", fname.string().c_str());
 		return 0;
 	}
+	AddDeleteOnError(fname);
 
 	// format:  https://cpctech.cpcwiki.de/docs/cprdef.html
 	const char magic[12] = { 'R', 'I', 'F', 'F', ' ', ' ', ' ', ' ', 'A', 'M', 'S', '!' };

@@ -1,0 +1,1 @@
+--nologo --msg=none --fullpath --cleanonerror --raw=cleanonerror.raw --hex=cleanonerror.hex

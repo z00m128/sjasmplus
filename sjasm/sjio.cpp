@@ -29,15 +29,18 @@
 // sjio.cpp
 
 #include "sjdefs.h"
+#include <unordered_set>
 
 #include <fcntl.h>
 
-static const std::filesystem::path EMPTY_PATH{""};
-static const std::filesystem::path DOUBLE_DOT_PARENT{".."};
+namespace fs = std::filesystem;
+
+static const fs::path EMPTY_PATH{""};
+static const fs::path DOUBLE_DOT_PARENT{".."};
 static constexpr char pathBadSlash = '\\';
 static constexpr char pathGoodSlash = '/';
 
-std::filesystem::path LaunchDirectory {};
+fs::path LaunchDirectory {};
 
 int ListAddress;
 
@@ -60,10 +63,17 @@ static FILE* FP_Input = nullptr, * FP_Output = nullptr, * FP_HEX = nullptr, * FP
 static FILE* FP_ListingFile = NULL,* FP_ExportFile = NULL;
 static aint WBLength = 0;
 
+// map to archive all input files (to have stable valid c_str pointers of their filenames until exit)
+// key: filename + delimiter info
+// value: archived fullpath/basename ready to open or print
+using files_in_map_t = std::map<const delim_string_t, const SInputFile>;	// input files per name
+using dirs_in_map_t = std::map<const fs::path, files_in_map_t>;				// input files per current directory
+using files_set_t = std::unordered_set<fs::path>;							// files store for --cleanonerror
+
 static void CloseBreakpointsFile();
 
 std::string SInputFile::InitStr() {
-	auto canonical = std::filesystem::exists(full) ? std::filesystem::canonical(full) : full.lexically_normal();
+	auto canonical = fs::exists(full) ? fs::canonical(full) : full.lexically_normal();
 	switch(Options::FileVerbosity) {
 		case Options::FNAME_LAUNCH_REL:
 			{	// try relative to LaunchDirectory, if outside (starts with "../") then keep absolute
@@ -79,7 +89,39 @@ std::string SInputFile::InitStr() {
 	}
 }
 
-std::filesystem::path GetOutputFileName(char*& p) {
+
+static files_set_t DeleteOnErrorFiles;
+
+// candidate file for delete-on-error
+void AddDeleteOnError(const fs::path & output_file) {
+	std::error_code err;
+	auto absolute = fs::absolute(output_file, err);
+	if (err) return;
+	auto canonical = fs::weakly_canonical(absolute, err);
+	if (err) return;
+	DeleteOnErrorFiles.insert(canonical);
+}
+
+// execute the deletion when 0 != exitCode
+void DeleteOnError(int exitCode) {
+	// check proposed exit code, if --cleanonerror is enabled and if there are any filenames
+	if (0 == exitCode || !Options::DeleteOnError || DeleteOnErrorFiles.empty()) return;
+	if (Options::OutputVerbosity <= OV_ALL) {
+		_CERR "Deleting files on error (--cleanonerror):" _ENDL;
+	}
+	// check all recorded filenames and delete the existing ones (listing them with "all" output)
+	std::error_code err;
+	for (const auto & file : DeleteOnErrorFiles) {
+		if (!FileExists(file)) continue;
+		if (Options::OutputVerbosity <= OV_ALL) {
+			_CERR " - " _CMDL file.string().c_str() _ENDL;
+		}
+		fs::remove(file, err);
+	}
+	DeleteOnErrorFiles.clear();
+}
+
+fs::path GetOutputFileName(char*& p) {
 	auto str_name = GetDelimitedStringEx(p);	// read delimited filename string
 	SJ_FixSlashes(str_name);					// convert backslashes *with* warning
 	// prefix with output path and force slashes again (without warning)
@@ -116,10 +158,10 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 	if (in.first.empty() && DT_COUNT == in.second) return INPUT_FILE_STDIN;
 
 	// get current file's directory as base (use LaunchDirectory as fallback for stdin or zero level)
-	std::filesystem::path CurrentDirectory = (fileNameFull && !fileNameFull->full.empty()) ? fileNameFull->full : LaunchDirectory;
-	if (!std::filesystem::is_directory(CurrentDirectory)) CurrentDirectory.remove_filename();
+	fs::path CurrentDirectory = (fileNameFull && !fileNameFull->full.empty()) ? fileNameFull->full : LaunchDirectory;
+	if (!fs::is_directory(CurrentDirectory)) CurrentDirectory.remove_filename();
 	// make current directory canonical+relative to launchdir (avoid "..//"-like dupes in allArchivedInputFiles)
-	CurrentDirectory = std::filesystem::canonical(CurrentDirectory).lexically_proximate(LaunchDirectory);
+	CurrentDirectory = fs::canonical(CurrentDirectory).lexically_proximate(LaunchDirectory);
 
 	// archive of all input files opened so far in the current directory (search results differ per current dir)
 	files_in_map_t & archivedInputFiles = allArchivedInputFiles[CurrentDirectory];
@@ -132,7 +174,7 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 	// !!! any warnings after this point must be W_EARLY, 2nd+ pass should use archived path = no warning !!!
 
 	// not archived yet, look for the file somewhere...
-	const std::filesystem::path name_in{ in.first };
+	const fs::path name_in{ in.first };
 	// no filename - return it as is (it's not valid for open)
 	if (!name_in.has_filename()) {
 		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(name_in))->second;
@@ -166,7 +208,7 @@ fullpath_ref_t GetInputFile(char*& p) {
 	return GetInputFile(std::move(name_in));
 }
 
-void ConstructDefaultFilename(std::filesystem::path & dest, const char* ext, bool checkIfDestIsEmpty) {
+void ConstructDefaultFilename(fs::path & dest, const char* ext, bool checkIfDestIsEmpty) {
 	if (nullptr == ext || !ext[0]) exit(1);	// invalid arguments
 	// if the destination buffer has already some content and check is requested, exit
 	if (checkIfDestIsEmpty && !dest.empty()) return;
@@ -855,7 +897,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	} // while (IsRunning && ReadBufData())
 }
 
-static void OpenListImp(const std::filesystem::path & listFilename) {
+static void OpenListImp(const fs::path & listFilename) {
 	// if STDERR is configured to contain listing, disable other listing files
 	if (OV_LST == Options::OutputVerbosity) return;
 	if (listFilename.empty()) return;
@@ -881,7 +923,7 @@ static void OpenDefaultList(fullpath_ref_t inputFile) {
 	if (!Options::IsDefaultListingName || NULL != FP_ListingFile) return;
 	if (inputFile.full.empty()) return;		// no filename provided
 	// Create default listing name, and try to open it
-	std::filesystem::path listName { inputFile.full };
+	fs::path listName { inputFile.full };
 	listName.replace_extension("lst");
 	OpenListImp(listName);
 }
@@ -915,7 +957,7 @@ void SeekDest(long offset, int method) {
 	}
 }
 
-void NewDest(const std::filesystem::path & newfilename, int mode) {
+void NewDest(const fs::path & newfilename, int mode) {
 	// close previous output file
 	CloseDest();
 
@@ -929,8 +971,12 @@ void OpenDest(int mode) {
 	if (mode != OUTPUT_TRUNCATE && !FileExists(Options::DestinationFName)) {
 		mode = OUTPUT_TRUNCATE;
 	}
-	if (!Options::NoDestinationFile && !FOPEN_ISOK(FP_Output, Options::DestinationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
-		Error("opening file for write", Options::DestinationFName.string().c_str(), FATAL);
+	if (!Options::NoDestinationFile) {
+		if (!FOPEN_ISOK(FP_Output, Options::DestinationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
+			Error("opening file for write", Options::DestinationFName.string().c_str(), FATAL);
+		} else if (OUTPUT_TRUNCATE == mode) {
+			AddDeleteOnError(Options::DestinationFName);	// cleanonerror only in truncate (create) mode
+		}
 	}
 	Options::NoDestinationFile = false;
 	if (NULL == FP_RAW && "-" == Options::RAWFName) {
@@ -938,8 +984,9 @@ void OpenDest(int mode) {
 		fflush(stdout);
 		switchStdOutIntoBinaryMode();
 	}
-	if (FP_RAW == NULL && Options::RAWFName.has_filename() && !FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) {
-		Error("opening file for write", Options::RAWFName.string().c_str());
+	if (FP_RAW == NULL && Options::RAWFName.has_filename()) {
+		if (FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) AddDeleteOnError(Options::RAWFName);
+		else Error("opening file for write", Options::RAWFName.string().c_str());
 	}
 	if (FP_Output != NULL && mode != OUTPUT_TRUNCATE) {
 		if (fseek(FP_Output, 0, mode == OUTPUT_REWIND ? SEEK_SET : SEEK_END)) {
@@ -969,7 +1016,7 @@ void CloseTapFile()
 	destlen = 0;
 }
 
-void OpenTapFile(const std::filesystem::path & tapename, int flagbyte)
+void OpenTapFile(const fs::path & tapename, int flagbyte)
 {
 	CloseTapFile();
 
@@ -977,6 +1024,7 @@ void OpenTapFile(const std::filesystem::path & tapename, int flagbyte)
 		Error( "opening file for write", tapename.string().c_str());
 		return;
 	}
+	// not adding to --cleanonerror, because this is appending to some file, not creating it
 	if (fseek(FP_tapout, 0, SEEK_END)) Error("File seek end error in TAPOUT", tapename.string().c_str(), FATAL);
 
 	tape_seek = ftell(FP_tapout);
@@ -993,21 +1041,22 @@ void OpenTapFile(const std::filesystem::path & tapename, int flagbyte)
 }
 
 // check if file exists and can be read for content
-bool FileExists(const std::filesystem::path & file_name) {
-	return	std::filesystem::exists(file_name) && (
-		std::filesystem::is_regular_file(file_name) ||
-		std::filesystem::is_character_file(file_name)	// true for very rare files like /dev/null
+bool FileExists(const fs::path & file_name) {
+	return	fs::exists(file_name) && (
+		fs::is_regular_file(file_name) ||
+		fs::is_character_file(file_name)	// true for very rare files like /dev/null
 	);
 }
 
 bool FileExistsCstr(const char* file_name) {
 	if (nullptr == file_name) return false;
-	return FileExists(std::filesystem::path(file_name));
+	return FileExists(fs::path(file_name));
 }
 
 void Close() {
 	if (*ModuleName) {
 		Warning("ENDMODULE missing for module", ModuleName, W_ALL);
+		*ModuleName = 0;
 	}
 
 	CloseDest();
@@ -1084,18 +1133,20 @@ unsigned char MemGetByte(unsigned int address) {
 }
 
 
-int SaveBinary(const std::filesystem::path & fname, aint start, aint length) {
+int SaveBinary(const fs::path & fname, aint start, aint length) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
+	AddDeleteOnError(fname);
 	int result = SaveRAM(ff, start, length);
 	fclose(ff);
 	return result;
 }
 
 
-int SaveBinary3dos(const std::filesystem::path & fname, aint start, aint length, byte type, word w2, word w3) {
+int SaveBinary3dos(const fs::path & fname, aint start, aint length, byte type, word w2, word w3) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
+	AddDeleteOnError(fname);
 	// prepare +3DOS 128 byte header content
 	constexpr aint hsize = 128;
 	const aint full_length = hsize + length;
@@ -1122,12 +1173,13 @@ int SaveBinary3dos(const std::filesystem::path & fname, aint start, aint length,
 }
 
 
-int SaveBinaryAmsdos(const std::filesystem::path & fname, aint start, aint length, word start_adr, byte type) {
+int SaveBinaryAmsdos(const fs::path & fname, aint start, aint length, word start_adr, byte type) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("opening file for write", fname.string().c_str(), SUPPRESS);
 		return 0;
 	}
+	AddDeleteOnError(fname);
 	// prepare AMSDOS 128 byte header content
 	constexpr aint hsize = 128;
 	byte amsdos_header[hsize] {};	// all zeroed (user_number and filename stay like that, just zeroes)
@@ -1157,16 +1209,17 @@ bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
 
 
 // start and length must be sanitized by caller
-bool SaveDeviceMemory(const std::filesystem::path & fname, const size_t start, const size_t length) {
+bool SaveDeviceMemory(const fs::path & fname, const size_t start, const size_t length) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
+	AddDeleteOnError(fname);
 	bool res = SaveDeviceMemory(ff, start, length);
 	fclose(ff);
 	return res;
 }
 
 
-int SaveHobeta(const std::filesystem::path & fname, const char* fhobname, aint start, aint length) {
+int SaveHobeta(const fs::path & fname, const char* fhobname, aint start, aint length) {
 	unsigned char header[0x11];
 	int i;
 
@@ -1218,6 +1271,7 @@ int SaveHobeta(const std::filesystem::path & fname, const char* fhobname, aint s
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
 		Error("opening file for write", fname.string().c_str(), FATAL);
 	}
+	AddDeleteOnError(fname);
 
 	int result = (17 == fwrite(header, 1, 17, ff)) && SaveRAM(ff, start, length);
 	fclose(ff);
@@ -1356,6 +1410,7 @@ void OpenExpFile() {
 	assert(nullptr == FP_ExportFile);			// this should be the first and only call to open it
 	if (!Options::ExportFName.has_filename()) return;	// no export file name provided, skip opening
 	if (FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) return;
+	// not adding to --cleanonerror, this is not binary output file
 	Error("opening file for write", Options::ExportFName.string().c_str(), ALL);
 }
 
@@ -1410,7 +1465,7 @@ static void FlushHexBuffer() {
 	hexCnt = 0;
 }
 
-bool OpenHex(const std::filesystem::path & fname) {
+bool OpenHex(const fs::path & fname) {
 	if (!fname.has_filename()) return false;
 	if (nullptr != FP_HEX) {
 		Error("HEX output is already active, can't open for file", fname.string().c_str(), SUPPRESS);
@@ -1429,6 +1484,8 @@ bool OpenHex(const std::filesystem::path & fname) {
 		// To make CI testing simpler and force world into *NIX LF way there is "wb" right now
 		Error("opening HEX file for write", fname.string().c_str());
 		return false;
+	} else {
+		AddDeleteOnError(fname);
 	}
 	hexCnt = 0;
 	return true;
@@ -1458,7 +1515,7 @@ bool CloseHex(const aint start) {
 	return true;
 }
 
-bool SaveHex(const std::filesystem::path & fname, aint start, aint length, aint start_adr) {
+bool SaveHex(const fs::path & fname, aint start, aint length, aint start_adr) {
 	if (!DeviceID) return false;
 	if (!OpenHex(fname)) return false;
 	assert(0 <= start && start <= 0xFFFF && 1 <= length && start + length <= 0x1'0000);
@@ -1505,11 +1562,12 @@ static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
 	snprintf(buffer, 1024-1, sldMessage_posFormat + offsetFormat, pos.line, pos.colBegin, pos.colEnd);
 }
 
-static void OpenSldImp(const std::filesystem::path & sldFilename) {
+static void OpenSldImp(const fs::path & sldFilename) {
 	if (!sldFilename.has_filename()) return;
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
 		Error("opening file for write", sldFilename.string().c_str(), FATAL);
 	}
+	// not adding to --cleanonerror, this is not binary output file
 	fputs("|SLD.data.version|1\n", FP_SourceLevelDebugging);
 	if (0 < sldCommentKeywords.size()) {
 		fputs("||K|KEYWORDS|", FP_SourceLevelDebugging);
@@ -1645,7 +1703,7 @@ static FILE* FP_BreakpointsFile = nullptr;
 static EBreakpointsFile breakpointsType;
 static int breakpointsCounter;
 
-void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpointsFile type) {
+void OpenBreakpointsFile(const fs::path & filename, const EBreakpointsFile type) {
 	if (!filename.has_filename()) {
 		Error("empty filename", filename.string().c_str(), EARLY);
 		return;
@@ -1657,6 +1715,7 @@ void OpenBreakpointsFile(const std::filesystem::path & filename, const EBreakpoi
 	if (!FOPEN_ISOK(FP_BreakpointsFile, filename, "w")) {
 		Error("opening file for write", filename.string().c_str(), EARLY);
 	}
+	// not adding to --cleanonerror, this is not binary output file
 	breakpointsCounter = 0;
 	breakpointsType = type;
 

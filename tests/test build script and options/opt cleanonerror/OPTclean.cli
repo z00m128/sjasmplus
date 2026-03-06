@@ -1,0 +1,16 @@
+# run sjasmplus with full output to exercise the "Deleting files on error" messages, filter out only those, count filtered lines
+filtered=""
+while IFS= read -r line; do
+    case "$line" in
+        "Deleting files on error"*)
+            filtered+="$line"$'\n'
+            ;;
+        *cleanonerror.bin)
+            filtered+="$line"$'\n'
+            ;;
+    esac
+done < <($MEMCHECK "$EXE" --nologo --msg=all --fullpath "${options[@]}" "$file_asm" 2>&1 >/dev/null)
+filtered_lines=$(echo "$filtered" | wc -l)
+# bin file should not exist && 3 or more filtered lines expected (extra empty line plus two with content)
+[[  ! -f cleanonerror.bin && 3 -le ${filtered_lines} ]] ;
+last_result=$?

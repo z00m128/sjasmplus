@@ -54,9 +54,9 @@ static void PrintHelpMain() {
 	_COUT "  --sym=<filename>         Save symbol table to <filename>" _ENDL;
 	_COUT "  --exp=<filename>         Save exports to <filename> (see EXPORT pseudo-op)" _ENDL;
 	_COUT "  --hex=<filename>         Intel HEX saved to <filename> (- is STDOUT)" _ENDL;
-	//_COUT "  --autoreloc              Switch to autorelocation mode. See more in docs." _ENDL;
 	_COUT "  --raw=<filename>         Machine code saved also to <filename> (- is STDOUT)" _ENDL;
 	_COUT "  --sld[=<filename>]       Save Source Level Debugging data to <filename>" _ENDL;
+	_COUT "  --cleanonerror           Remove produced binary outputs upon any error" _ENDL;
 	_COUT " Note: use OUTPUT, LUA/ENDLUA and other pseudo-ops to control output" _ENDL;
 	_COUT " Logging:" _ENDL;
 	_COUT "  --nologo                 Do not show startup message" _ENDL;
@@ -153,6 +153,7 @@ namespace Options {
 	bool IsLongPtr = false;
 	bool SortSymbols = false;
 	bool IsBigEndian = false;
+	bool DeleteOnError = false;
 	bool EmitVirtualLabels = false;
 
 	// Include directories list is initialized with "." (aka LaunchDirectory aka CWD) directory
@@ -386,10 +387,10 @@ static void FreeRAM() {
 
 
 void ExitASM(int p) {
+	if (LASTPASS == pass) Close();
+	cout << flush;
 	FreeRAM();
-	if (pass == LASTPASS) {
-		Close();
-	}
+	DeleteOnError(p);
 	exit(p);
 }
 
@@ -503,6 +504,9 @@ namespace Options {
 					parseSyntaxValue();
 				} else if (!doubleDash && 'W' == opt[0]) {
 					CliWoption(val);
+				} else if (!strcmp(opt, "cleanonerror")) {
+					// this one is not part of syx and can't be reset, but making it available with OPT as well (works even late-enabled)
+					DeleteOnError = true;
 				} else if (onlySyntaxOptions) {
 					// rest of the options is available only when launching the sjasmplus
 					return;
@@ -862,6 +866,7 @@ int main(int argc, char **argv) {
 	cout << flush;
 	FreeRAM();
 	lua_impl_close();
+	DeleteOnError(ErrorCount != 0);
 
 	if (Options::OutputVerbosity <= OV_ALL) {
 		double dwCount;

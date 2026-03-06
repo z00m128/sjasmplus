@@ -48,6 +48,7 @@ int TAP_SaveEmpty(const std::filesystem::path & fname) {
 		Error("opening file for write", fname.string().c_str()); return 0;
 	}
 	fclose(ff);
+	AddDeleteOnError(fname);
 	return 1;
 }
 
@@ -56,6 +57,7 @@ int TAP_SaveBlock(const std::filesystem::path & fname, unsigned char flag, const
 	if (!FOPEN_ISOK(fpout, fname, "ab")) {
 		Error("opening file for append", fname.string().c_str(), FATAL);
 	}
+	// not adding to --cleanonerror, because this is appending to some file, not creating it
 
 	if (length + start > 0x10000) {
 	    length = -1;
@@ -138,6 +140,7 @@ int TAP_SaveSnapshot(const std::filesystem::path & fname, unsigned short start) 
 	if (!FOPEN_ISOK(fpout, fname, "wb")) {
 		Error("opening file for write", fname.string().c_str(), FATAL);
 	}
+	AddDeleteOnError(fname);
 
 	aint datastart = 0x5E00;
 	aint exeat = 0x5E00;

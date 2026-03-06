@@ -215,6 +215,7 @@
 - <link linkend="po_block">`BLOCK` (`DS`)</link> can take set of values for init (like DB)
 - <link linkend="s_source_format">`&gt;`</link> can be used to indent labels
 - Intel HEX output format added: <link linkend="po_savehex">`SAVEHEX`</link>, <link linkend="po_hexout">`HEXOUT`</link>, <link linkend="po_hexend">`HEXEND`</link>, <link linkend="s_cli">`--hex`</link>
+- Added option <link linkend="s_cli">`--cleanonerror`</link> to remove binary outputs upon any error (as output may be corrupted)
 - <link linkend="po_bplist">`BPLIST`</link> supports now also FUSE
 - <link linkend="po_setbp">`SETBP`</link> has optional string argument for "conditional" breakpoints (depends on bplist type)
 - <link linkend="po_device">`DEVICE`</link> ZX-like devices can now init with all-zeroed memory by using RAMTOP -1
@@ -442,6 +443,7 @@
   --raw=&lt;filename&gt;         Machine code saved also to &lt;filename&gt; (- is STDOUT)
   --sld[=&lt;filename&gt;]       Save Source Level Debugging data to &lt;filename&gt;
                            Default name is: "&lt;first input filename&gt;.sld.txt"
+  --cleanonerror           Remove produced binary outputs upon any error
   Note: use OUTPUT,LUA/ENDLUA and other pseudo-ops to control output
  Logging:
   --nologo                 Do not show startup message
@@ -2939,7 +2941,7 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
               <para>Allows to reset and modify <link linkend="s_cli">options</link> affecting syntax and
 				  parsing (for lines of source following the OPT). The options allowed for OPT
 				  are: <code>-W[no-]&lt;warning_id&gt;</code>, <code>--syntax</code>, <code>--zxnext</code>,
-				  <code>--reversepop</code> and <code>--dirbol</code>.
+				  <code>--reversepop</code>, <code>--dirbol</code> and <code>--cleanonerror</code>.
 			  </para>
 			  <para>
 				  Ahead of options you can use OPT commands: push, pop, reset, listoff, liston, listall, listact, listmc.
@@ -2964,6 +2966,9 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
 			  </para>
 			  <para>The <link linkend="s_id_warnings">id-warning system</link> state is NOT saved/restored
 				  by OPT push/pop/reset and can be modified only by <code>-W</code> option.
+			  </para>
+			  <para>The <code>--cleanonerror</code> state is NOT saved/restored
+				  by OPT push/pop/reset and can be only enabled (and stay so).
 			  </para>
 			  <example>
                   <title>docs_examples/po_opt.asm</title>

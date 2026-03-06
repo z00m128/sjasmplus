@@ -187,6 +187,7 @@ bool TRD_SaveEmpty(const std::filesystem::path & fname, const char label[8]) {
 		Error("opening file for write", fname.string().c_str(), IF_FIRST);
 		return 0;
 	}
+	AddDeleteOnError(fname);
 	byte* buf = (byte*) calloc(STrdDisc::SECTORS_PER_TRACK*STrdDisc::SECTOR_SZ, sizeof(byte));
 	if (buf == NULL) ErrorOOM();
 	int result = saveEmptyWrite(ff, buf, label);
@@ -306,6 +307,7 @@ bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int 
 	// read 9 sectors of disk into "trdHead" (contains root directory catalog and disk info data)
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "r+b")) return ReturnWithError("Error opening file", fname, ff);
+	// not adding to --cleanonerror, because this is adding to some file, not creating it
 	STrdHead trdHead;
 	if (!trdHead.readFromFile(ff)) {
 		return ReturnWithError("TRD image read error", fname, ff);

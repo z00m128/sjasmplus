@@ -50,6 +50,7 @@ bool SaveSNA_ZX(const std::filesystem::path & fname, word start) {
 		Error("opening file for write", fname.string().c_str());
 		return false;
 	}
+	AddDeleteOnError(fname);
 
 	constexpr int SNA_HEADER_48_SIZE = 27;
 	constexpr int SNA_HEADER_128_SIZE = 4;
