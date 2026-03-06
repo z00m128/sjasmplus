@@ -11,8 +11,8 @@
 # make DEBUG=1 LUA_COVERAGE=1 coverage		- to produce build/debug/coverage/* files by running the tests
 # make COVERALLS_SERVICE=1 DEBUG=1 coverage	- to produce coverage data and upload them to https://coveralls.io/
 # make CFLAGS_EXTRA='-m32' LDFLAGS='-ldl -m32'  - to builds 32b linux executable
-# make KEEP_SYMBOLS=1 CC=clang-19 CXX=clang++-19 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
-# make KEEP_SYMBOLS=1 CC=clang-19 CXX=clang++-19 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
+# make KEEP_SYMBOLS=1 CC=clang-20 CXX=clang++-20 CFLAGS_EXTRA='-fsanitize=address' LDFLAGS='-ldl -fsanitize=address' - ASAN build
+# make KEEP_SYMBOLS=1 CC=clang-20 CXX=clang++-20 CFLAGS_EXTRA='-fsanitize=undefined' LDFLAGS='-ldl -fsanitize=undefined' - UBSAN build
 # to cross-compile windows exe try to use Makefile.win instead, this Makefile is now too much linux/posix only
 # make callgrind TEST=integration KEEP_SYMBOLS=1 CFLAGS_EXTRA=-g && kcachegrind callgrind.out/cgo.* - callgrind profiling
 

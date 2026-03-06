@@ -227,17 +227,16 @@ int TAP_SaveSnapshot(const std::filesystem::path & fname, unsigned short start) 
 		ram_length -= ram_start;
 
 		// write loader
-		unsigned char *loader = new unsigned char[SaveTAP_ZX_Spectrum_48K_SZ];
-		memcpy(loader, (char*)&SaveTAP_ZX_Spectrum_48K[0], SaveTAP_ZX_Spectrum_48K_SZ);
-		if (loader == NULL) ErrorOOM();
+		uint8_t loader[SaveTAP_ZX_Spectrum_48K_SZ];
+		memcpy(loader, &SaveTAP_ZX_Spectrum_48K[0], SaveTAP_ZX_Spectrum_48K_SZ);
 		// Settings.LoadScreen
-		loader[SaveTAP_ZX_Spectrum_48K_SZ - 7] = char(has_screen_changes());
-		loader[SaveTAP_ZX_Spectrum_48K_SZ - 6] = char(start & 0x00FF);
-		loader[SaveTAP_ZX_Spectrum_48K_SZ - 5] = char(start >> 8);
-		loader[SaveTAP_ZX_Spectrum_48K_SZ - 4] = char((ram_start + 0x5E00) & 0x00FF);
-		loader[SaveTAP_ZX_Spectrum_48K_SZ - 3] = char((ram_start + 0x5E00) >> 8);
-		loader[SaveTAP_ZX_Spectrum_48K_SZ - 2] = char(ram_length & 0x00FF);
-		loader[SaveTAP_ZX_Spectrum_48K_SZ - 1] = char(ram_length >> 8);
+		loader[SaveTAP_ZX_Spectrum_48K_SZ - 7] = uint8_t(has_screen_changes());
+		loader[SaveTAP_ZX_Spectrum_48K_SZ - 6] = uint8_t(start);
+		loader[SaveTAP_ZX_Spectrum_48K_SZ - 5] = uint8_t(start >> 8);
+		loader[SaveTAP_ZX_Spectrum_48K_SZ - 4] = uint8_t(ram_start + 0x5E00);
+		loader[SaveTAP_ZX_Spectrum_48K_SZ - 3] = uint8_t((ram_start + 0x5E00) >> 8);
+		loader[SaveTAP_ZX_Spectrum_48K_SZ - 2] = uint8_t(ram_length);
+		loader[SaveTAP_ZX_Spectrum_48K_SZ - 1] = uint8_t(ram_length >> 8);
 		writecode(loader, SaveTAP_ZX_Spectrum_48K_SZ, 0x5E00, true, fpout);
 
 		// write screen$
