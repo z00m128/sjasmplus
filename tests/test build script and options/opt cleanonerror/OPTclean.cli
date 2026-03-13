@@ -3,8 +3,5 @@
 cleaned_lines_cnt=$($MEMCHECK "$EXE" --nologo --msg=all --fullpath "${options[@]}" "$file_asm" 2>&1 | \
     grep -c -E "(^Deleting files on error|OPTclean\.bin$)")
 # bin file should not exist && at least 2 filtered lines expected
-if [ ! -f OPTclean.bin ] && [ "$cleaned_lines_cnt" -ge 2 ]; then
-    last_result=0
-else
-    last_result=1
-fi
+[[ ! -f OPTclean.bin && $cleaned_lines_cnt -ge 2 ]]
+last_result=$?
