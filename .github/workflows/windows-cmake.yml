@@ -17,7 +17,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
       with:
         submodules: 'true'
 
@@ -30,7 +30,7 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - uses: actions/upload-artifact@main
+    - uses: actions/upload-artifact@v7
       with:
         name: sjasmplus-win64-${{ github.sha }}
         path: |

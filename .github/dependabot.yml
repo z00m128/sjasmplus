@@ -10,3 +10,12 @@ updates:
     assignees:
       - "ped7g"
     rebase-strategy: "disabled"
+
+  # Enable updates of github actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "ped7g"
+    rebase-strategy: "disabled"
