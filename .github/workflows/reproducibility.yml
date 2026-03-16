@@ -1,0 +1,39 @@
+name: Reproducibility Test
+
+on:
+  workflow_dispatch:  # Manual trigger
+  schedule:
+    - cron: '0 8 * * 5'  # Weekly on Friday at 8 AM UTC (morning for most timezones)
+
+jobs:
+  reproducibility:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: 'true'
+
+      - name: Build Docker image
+        run: docker build -f ContinuousIntegration/Dockerfile.reprotest -t reprotest-env .
+
+      - name: Run reproducibility test
+        run: |
+          # reprotest uses setarch and similar namespace tricks, so give the container extra privileges
+          docker run --rm --privileged --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \
+            -v $(pwd):/workspace -w /workspace reprotest-env \
+            bash -lc "
+              echo 1 > /proc/sys/kernel/unprivileged_userns_clone
+              reprotest --min-cpus=99999 --variations=user_group.available+=testuser1:testuser1\;testuser2:testuser2 \"make clean && make -j4\" sjasmplus\
+            "
+
+      - name: Upload build artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reproducibility-failure-artifacts
+          path: |
+            **/*.log
+            build/sjasmplus
+            sjasmplus
+          retention-days: 7
