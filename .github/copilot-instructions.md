@@ -12,6 +12,14 @@
   - Use `Makefile.win` or project files (`sjasmplus.cbp`, `sjasmplus.workspace`).
 - **Run tests:**
   - Unit tests: `make tests`, filter set of tests by adding TEST=<subfolder_name> (subfolders in tests/), like `make tests TEST=misc`
+- **CI/CD:**
+  - **Cirrus CI** (`.cirrus.yml`): Linux GCC builds (9/11/latest), FreeBSD clang, Windows MinGW, coverage reporting. Primary CI for regression and platform testing.
+  - **GitHub Actions** (`.github/workflows/`): CodeQL security analysis, Windows CMake builds, and reproducibility testing (see below).
+- **Binary Reproducibility Testing** (see issue #235):
+  - **Workflow**: `.github/workflows/reproducibility.yml` runs weekly (Friday 8 AM UTC) or on manual trigger (`workflow_dispatch`).
+  - **Tools**: `reprotest` (Debian Reproducible Builds toolkit) verifies that builds with environmental variations (users, timezones, locales, etc.) produce identical binaries.
+  - **Docker setup**: `ContinuousIntegration/Dockerfile.reprotest` contains the reprotest environment; also usable locally with `docker run` for testing before release.
+  - **Running locally**: `docker build -f ContinuousIntegration/Dockerfile.reprotest -t reprotest-env . && docker run --rm --privileged -v $(pwd):/workspace -w /workspace reprotest-env bash -c "reprotest --vary=+all 'make clean && make -j4' sjasmplus"`
 
 ## Assembler Architecture: Three-Pass Model
 Understanding the pass structure is critical for feature development:
@@ -30,6 +38,8 @@ Understanding the pass structure is critical for feature development:
 - **Documentation:**
   - Main docs: `docs/documentation.html` (generated from `docs/documentation.xml`), also available online.
   - Build/install: `Makefile`, `INSTALL.md`.
+  - **Architecture & design**: The "Assembling Process" chapter covers core mechanics (three-pass model, per-line substitution rules, macro expansion). Reference this when understanding how features interact across passes.
+  - Long-standing documentation gaps (e.g., #37 on substitution rules, #182 on pass mechanics) are best addressed via integrated explanatory chapters, not scattered feature notes.
 
 ## Project-Specific Notes
 - **Multi-platform:**
@@ -62,6 +72,15 @@ Understanding the pass structure is critical for feature development:
 - **Pass-aware logic**: Features may depend on multiple passes or require virtual memory. Test with both pipe mode and device mode when applicable.
 - **Backward compatibility**: Multi-platform and device support matter; avoid breaking existing `.asm` files.
 - **Incremental testing**: Add `.asm` test files first, generate `.lst` or binary, patch expected results, then implement feature until test passes (TDD approach).
+- **Substitution system** (key feature, different from typical software):
+  - Happens per-line during assembly (not as pre-processing stage). See section "Assembling Process" in `docs/documentation.xml` for formal rules.
+  - Macro arguments → DEFINE symbols → DEFARRAY (iterated ~30 times until convergence).
+  - Defines starting with `_` have restricted matching (beginning-of-identifier only) to prevent accidental mid-word collisions.
+  - Glue operator `_` (space-enclosed) removes whitespace between substitution results; enables dynamic label assembly (e.g., `part1 _ part2` → `part1part2`).
+  - Implementation: `ReplaceDefineInternal()` in `parser.cpp`, called iteratively until no more replacements.
+- **Documentation approach**:
+  - Long-standing feature gaps (e.g., issue #37 on substitution rules) are addressed via integrated *architecture* chapters (e.g., "Assembling Process"), not scattered feature notes.
+  - When adding major features, consider whether a doc chapter needs updating or a new explanatory section is warranted. See `docs/documentation.xml` for chapter structure.
 
 ## C++ Code Style
 - this is legacy project, so style may vary between different parts of codebase, but generally:
