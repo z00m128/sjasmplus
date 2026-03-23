@@ -77,22 +77,22 @@ constexpr int LABEL_PAGE_UNDEFINED = -1;
 constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
 constexpr int LABEL_PAGE_OUT_OF_BOUNDS = 0x7F80;	// label is defined, but not within Z80 address space
 
-constexpr unsigned LABEL_IS_UNDEFINED = (1<<0);
-constexpr unsigned LABEL_IS_DEFL = (1<<1);
-constexpr unsigned LABEL_IS_EQU = (1<<2);
-constexpr unsigned LABEL_IS_STRUCT_D = (1<<3);
-constexpr unsigned LABEL_IS_STRUCT_E = (1<<4);
-constexpr unsigned LABEL_HAS_RELOC_TRAIT = (1<<5);
-constexpr unsigned LABEL_IS_RELOC = (1<<6);
-constexpr unsigned LABEL_IS_SMC = (1<<7);
-constexpr unsigned LABEL_IS_KEYWORD = (1<<8);
-// constexpr unsigned LABEL_IS_USED = (1<<?);	// currently not explicitly used in Insert(..) (calculated implicitly)
+constexpr uint16_t LABEL_IS_UNDEFINED = (1<<0);
+constexpr uint16_t LABEL_IS_DEFL = (1<<1);
+constexpr uint16_t LABEL_IS_EQU = (1<<2);
+constexpr uint16_t LABEL_IS_STRUCT_D = (1<<3);
+constexpr uint16_t LABEL_IS_STRUCT_E = (1<<4);
+constexpr uint16_t LABEL_HAS_RELOC_TRAIT = (1<<5);
+constexpr uint16_t LABEL_IS_RELOC = (1<<6);
+constexpr uint16_t LABEL_IS_SMC = (1<<7);
+constexpr uint16_t LABEL_IS_KEYWORD = (1<<8);
+// constexpr uint16_t LABEL_IS_USED = (1<<?);	// currently not explicitly used in Insert(..) (calculated implicitly)
 
 struct SLabelTableEntry {
 	aint				value = 0;
-	int					updatePass = 0;	// last update was in pass
-	short				page = LABEL_PAGE_UNDEFINED;
-	unsigned			traits = 0;
+	int16_t				page = LABEL_PAGE_UNDEFINED;
+	uint16_t			traits = 0;
+	int8_t				updatePass = 0;			// last update was in pass
 	bool				used = false;
 	Relocation::EType	isRelocatable = Relocation::OFF;
 };
@@ -106,7 +106,7 @@ public:
 	CLabelTable(const CLabelTable&) = delete;
 	CLabelTable& operator=(CLabelTable const &) = delete;
 	CLabelTable() = default;
-	int Insert(const char* nname, aint nvalue, unsigned traits = 0, short equPageNum = LABEL_PAGE_UNDEFINED);
+	int Insert(const char* nname, aint nvalue, uint16_t traits = 0, int16_t equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char* name, aint value);
 	SLabelTableEntry* Find(const char* name, bool onlyDefined = false);
 	bool Remove(const char* name);

@@ -347,7 +347,7 @@ static short getAddressPageNumber(const aint address, bool forceRecalculateByAdd
 	return page;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, unsigned traits, short equPageNum) {
+int CLabelTable::Insert(const char* nname, aint nvalue, uint16_t traits, int16_t equPageNum) {
 	const bool IsUndefined = !!(traits & LABEL_IS_UNDEFINED);
 
 	// the EQU/DEFL is relocatable when the expression itself is relocatable

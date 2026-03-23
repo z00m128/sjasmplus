@@ -31,7 +31,7 @@
 #define __RELOCATE_H__
 
 namespace Relocation {
-	enum EType {
+	enum EType : uint8_t {
 		OFF = 0, REGULAR = 1, HIGH = 2
 		// also used as offset adjustment and bool test (so explicit values 0,1,2 are important)
 	};
