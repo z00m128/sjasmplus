@@ -2413,21 +2413,21 @@ will output to the console strings:
             <listitem>
               <para>DUP specifies the number of times to generate the
               following lines until an EDUP pseudo-op is encountered. DUP can be used in macro's.</para>
-              <para>DUP itself is internally implemented almost like anonymous macro emitted count-times.</para>
-              <para>Optional second argument (since v1.20.2) is label name to have repetition index
+              <para>DUP itself is internally implemented almost like anonymous macro emitted count-times, zero count skips the block.</para>
+              <para>Optional second argument (since v1.20.2) &lt;index_variable&gt; is label name to have repetition index
                 available inside the block (values 0, 1, 2, 3, ...). This label is mutable and global
                 (don't use same label in nested DUP blocks).
                <example>
                   <title></title>
 
-                  <para><programlisting>    DUP 3 ; zero count would skip whole block
-    NOP
+                  <para><programlisting>    DUP 3, i1 ; zero count would skip whole block
+      NOP
     EDUP
 
-/*this will expand to:
-    NOP
-    NOP
-    NOP
+/*this will expand to (updating also optional index_variable in every loop):
+      NOP   ; i1 == 0
+      NOP   ; i1 == 1
+      NOP   ; i1 == 2
 */</programlisting></para>
                 </example>To repeat just a single instruction you can also use the <link linkend="po_dot_repeat">.&lt;repeat-count&gt;</link> syntax.</para>
             </listitem>
