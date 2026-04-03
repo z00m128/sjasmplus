@@ -1,0 +1,11 @@
+|SLD.data.version|1
+sizeof_tags_sld.asm|5||0|-1|-1|Z|pages.size:16384,pages.count:4,slots.count:4,slots.adr:0,16384,32768,49152
+sizeof_tags_sld.asm|7||0|0|0|F|TagTag
+sizeof_tags_sld.asm|7||0|0|0|L|,TagTag,,+used,+sizeof
+sizeof_tags_sld.asm|8:1:9||0|0|0|F|TagTag.l
+sizeof_tags_sld.asm|8:1:9||0|0|0|L|,TagTag,l,+local,+used,+sizeof
+sizeof_tags_sld.asm|8:1:9||0|0|0|T|
+sizeof_tags_sld.asm|8:9:13||0|0|2|T|
+sizeof_tags_sld.asm|8:15:19||0|0|4|T|
+sizeof_tags_sld.asm|8:20:24||0|0|6|T|
+sizeof_tags_sld.asm|8:24||0|0|8|T|

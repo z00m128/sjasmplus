@@ -1,3 +1,7 @@
+struct_misc.asm(47): error: Duplicate label: whatever.name1.a
+struct_misc.asm(50): error: Duplicate label: name1.x
+struct_misc.asm(47): error: Duplicate label: whatever.name1.a
+struct_misc.asm(50): error: Duplicate label: name1.x
 # file opened: struct_misc.asm
  1    0000                  IFNDEF INCLUDED_ONCE
  2    0000                      DEFINE INCLUDED_ONCE
@@ -48,15 +52,29 @@ struct_misc.asm(35): error: [STRUCT] Structure already exist: name1
 36+   0000 ~            x           BYTE    $CC
 37+   0000                      ENDS
 38+   0000
-39+   0000                      STRUCT notEndedOne
-40+   0000 ~            x           BYTE    103
-struct_misc.asm(41): error: [STRUCT] Unexpected: ENDIF
-41+   0000 ~                ENDIF
-42+   0000 ~
-struct_misc.asm(42): error: [STRUCT] Unexpected end of structure
-42+   0000
-struct_misc.asm(42): error: [IFNDEF] No ENDIF
-42+   0000
+39+   0000                      ; duplicate label may happen even when main struct name is unique
+40+   0000                      MODULE whatever
+41+   0000                          STRUCT name1
+42+   0000 ~            a               BYTE    104
+43+   0000                          ENDS
+44+   0000                      ENDMODULE
+45+   0000                      STRUCT whatever
+46+   0000 ~            name1.a     BYTE    105 ; compounds into whatever.name1.a -> clash with previous struct
+47+   0000                      ENDS
+48+   0000                      STRUCT name1.x  ; clash with name1 struct element x from line 13
+49+   0000 ~            y           BYTE    106
+struct_misc.asm(50): error: Label has different value in pass 2: name1.x
+50+   0000                      ENDS
+51+   0000
+52+   0000                      STRUCT notEndedOne
+53+   0000 ~            x           BYTE    103
+struct_misc.asm(54): error: [STRUCT] Unexpected: ENDIF
+54+   0000 ~                ENDIF
+55+   0000 ~
+struct_misc.asm(55): error: [STRUCT] Unexpected end of structure
+55+   0000
+struct_misc.asm(55): error: [IFNDEF] No ENDIF
+55+   0000
 # file closed: struct_misc.asm
  4    0000
  5    0000                  ; instance defined structures (those which exist, which includes notEndedOne?!)
@@ -93,10 +111,23 @@ struct_misc.asm(42): error: [IFNDEF] No ENDIF
 36    0004 ~            x           BYTE    $CC
 37    0004 ~                    ENDS
 38    0004 ~
-39    0004 ~                    STRUCT notEndedOne
-40    0004 ~            x           BYTE    103
-41    0004                  ENDIF
-42    0004
+39    0004 ~                    ; duplicate label may happen even when main struct name is unique
+40    0004 ~                    MODULE whatever
+41    0004 ~                        STRUCT name1
+42    0004 ~            a               BYTE    104
+43    0004 ~                        ENDS
+44    0004 ~                    ENDMODULE
+45    0004 ~                    STRUCT whatever
+46    0004 ~            name1.a     BYTE    105 ; compounds into whatever.name1.a -> clash with previous struct
+47    0004 ~                    ENDS
+48    0004 ~                    STRUCT name1.x  ; clash with name1 struct element x from line 13
+49    0004 ~            y           BYTE    106
+50    0004 ~                    ENDS
+51    0004 ~
+52    0004 ~                    STRUCT notEndedOne
+53    0004 ~            x           BYTE    103
+54    0004                  ENDIF
+55    0004
 # file closed: struct_misc.asm
 
 Value    Label
@@ -113,7 +144,11 @@ Value    Label
 0x0000 X mod1.name1.x
 0x0001 X name1
 0x0000 X name1.x
+0x0000 X name1.x.y
 0x0001 X name2
 0x0000 X name2.x
 0x0001 X notEndedOne
 0x0000 X notEndedOne.x
+0x0001 X whatever
+0x0001 X whatever.name1
+0x0000 X whatever.name1.a

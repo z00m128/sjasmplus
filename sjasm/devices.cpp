@@ -363,10 +363,10 @@ int CDevice::GetSlotOfA16(int32_t address) {
 }
 
 // returns currently mapped page for the Z80-address (16bit)
-int CDevice::GetPageOfA16(int32_t address) {
+page_t CDevice::GetPageOfA16(int32_t address) {
 	int slotNum = GetSlotOfA16(address);
-	if (-1 == slotNum) return -1;
-	if (nullptr == Slots[slotNum]->Page) return -1;
+	if (-1 == slotNum) return LABEL_PAGE_OUT_OF_BOUNDS;
+	if (nullptr == Slots[slotNum]->Page) return LABEL_PAGE_OUT_OF_BOUNDS;
 	return Slots[slotNum]->Page->Number;
 }
 
@@ -379,6 +379,7 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 			SPRINTF1(buf, 64, "RAM limit exceeded 0x%X by DISP", (unsigned int)CurAddress);
 			Warning(buf);
 		}
+		LabelTable.SizeBoundary(CLabelTable::BOUNDARY_FLOW);	// end of address space is hard SIZEOF-boundary
 		CurAddress &= 0xFFFF;
 	}
 	// check the emit address for bytecode
@@ -417,8 +418,9 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 				break;
 			case CDeviceSlot::O_NEXT:
 			{
+				LabelTable.SizeBoundary(CLabelTable::BOUNDARY_FLOW);	// stop *any* SIZEOF-tracking with warning
 				CDeviceSlot* const prevS = Slots[previousSlotI];
-				const int nextPageN = prevS->Page->Number + 1;
+				const page_t nextPageN = prevS->Page->Number + 1;
 				if (PagesCount <= nextPageN) {
 					ErrorInt("No more memory pages to map next one into slot", previousSlotI, SUPPRESS);
 					// disable the option on the overflowing slot
@@ -477,8 +479,8 @@ int32_t CDevice::GetMemoryOffset(int page, int32_t offset) const {
 
 void CDevice::Poke(aint z80adr, byte value) {
 	// write byte into device memory with current page-mapping
-	const int adrPage = GetPageOfA16(z80adr);
-	if (-1 == adrPage) return;		// silently ignore invalid address
+	const page_t adrPage = GetPageOfA16(z80adr);
+	if (LABEL_PAGE_OUT_OF_BOUNDS == adrPage) return;		// silently ignore invalid address
 	CDevicePage* page = GetPage(adrPage);
 	page->RAM[z80adr & (page->Size-1)] = value;
 }
@@ -492,7 +494,7 @@ aint CDevice::SlotNumberFromPreciseAddress(aint address) {
 	return slotNum;									// return address converted into slot number
 }
 
-CDevicePage::CDevicePage(byte* memory, int32_t size, int number)
+CDevicePage::CDevicePage(byte* memory, int32_t size, page_t number)
 	: Size(size), Number(number), RAM(memory) {
 	if (nullptr == RAM) Error("No memory defined", nullptr, FATAL);
 }

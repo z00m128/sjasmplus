@@ -66,7 +66,8 @@ char* PreviousIsLabel = nullptr;
 // The prefix "!" is now recognized as "do not set main label" for following local labels
 // since v1.18.3:
 // Inside macro prefix "@." will create non-macro local label instead of macro's instance
-char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
+char* ValidateLabel(bool & local, const char* naam, bool setNameSpace, bool ignoreCharAfter) {
+	local = false;
 	if (nullptr == naam || 0 == *naam || White(naam[0])) {
 		Error("Invalid (blank) labelname");
 		return nullptr;
@@ -79,8 +80,8 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	const bool escMacro = setNameSpace && macrolabp && ('@' == naam[0]) && ('.' == naam[1]);
 	if (escMacro) ++naam;			// such extra "@" is consumed right here and only '.' is left
 	// regular single prefix case in other use cases
-	const bool global = '@' == *naam;
-	const bool local = '.' == *naam;
+	const bool global = ('@' == *naam);
+	local = ('.' == *naam);
 	if (!isLabelStart(naam)) {		// isLabelStart assures that only single modifier exist
 		if (global || local) ++naam;// single modifier is parsed (even when invalid name)
 		Error("Invalid character at start of labelname", naam, SUPPRESS);
@@ -124,6 +125,11 @@ char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
 	return label;
 }
 
+char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter) {
+	bool discardIsLocal;
+	return ValidateLabel(discardIsLocal, naam, setNameSpace, ignoreCharAfter);
+}
+
 static char sldLabelExport[2*LINEMAX];
 
 char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
@@ -163,7 +169,9 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	STRCAT(sldLabelExport, 2, ",");
 	// local part
 	if (local) STRCAT(sldLabelExport, LABMAX, naam);
+	assert(local == !!(label->traits&LABEL_IS_LOCAL));
 	// usage traits
+	if (label->traits&LABEL_IS_LOCAL) STRCAT(sldLabelExport, 20, ",+local");
 	if (label->traits&LABEL_IS_EQU) STRCAT(sldLabelExport, 20, ",+equ");
 	if (inMacro) STRCAT(sldLabelExport, 20, ",+macro");
 	if (label->traits&LABEL_IS_SMC) STRCAT(sldLabelExport, 20, ",+smc");
@@ -172,6 +180,7 @@ char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label) {
 	if (label->used) STRCAT(sldLabelExport, 20, ",+used");
 	if (label->traits&LABEL_IS_STRUCT_D) STRCAT(sldLabelExport, 20, ",+struct_def");
 	if (label->traits&LABEL_IS_STRUCT_E) STRCAT(sldLabelExport, 20, ",+struct_data");
+	if (label->traits&LABEL_HAS_SIZE) STRCAT(sldLabelExport, 20, ",+sizeof");
 	return sldLabelExport;
 }
 
@@ -238,10 +247,11 @@ static SLabelTableEntry* SearchLabel(char*& p, bool setUsed, /*out*/ std::unique
 	return undefinedLabelEntry;
 }
 
-static SLabelTableEntry* GetLabel(char*& p) {
+static SLabelTableEntry* GetLabel(char*& p, uint16_t setExtraTraits = 0) {
 	std::unique_ptr<char[]> fullName;
 	SLabelTableEntry* labelEntry = SearchLabel(p, true, fullName);
 	if (getLabel_invalidName) return nullptr;
+	if (labelEntry) labelEntry->traits |= setExtraTraits;
 	if (!labelEntry || LABEL_PAGE_UNDEFINED == labelEntry->page) {
 		IsLabelNotFound = true;
 		// don't insert labels or report errors during substitution phase
@@ -249,7 +259,7 @@ static SLabelTableEntry* GetLabel(char*& p) {
 		// regular parsing/assembling, track new labels and report "not found" error
 		char* findName = temp[0] ? temp : fullName.get();
 		if (!labelEntry) {
-			LabelTable.Insert(findName, 0, LABEL_IS_UNDEFINED);
+			LabelTable.Insert(findName, 0, (LABEL_IS_UNDEFINED | setExtraTraits));
 		}
 		Error("Label not found", findName, IF_FIRST);
 		return nullptr;
@@ -290,6 +300,14 @@ bool GetLabelValue(char*& p, aint& val) {
 	return !getLabel_invalidName;
 }
 
+bool GetLabelSize(char*& p, aint& val) {
+	// if symbol is found, add "sizeof" trait, if not found, insert placeholder with "sizeof" trait
+	SLabelTableEntry* labelEntry = GetLabel(p, LABEL_HAS_SIZE);
+	val = labelEntry ? labelEntry->size : 0;		// get symbol's size as return value
+	// true even when not found, but valid label name (needed for expression-eval logic)
+	return !getLabel_invalidName;
+}
+
 int GetTemporaryLabelValue(char*& op, aint& val, bool requireUnderscore) {
 	char* p = op;
 	if (SkipBlanks(p) || !isdigit((byte)*p)) return 0;
@@ -325,7 +343,7 @@ int GetTemporaryLabelValue(char*& op, aint& val, bool requireUnderscore) {
 	return 1;
 }
 
-static short getAddressPageNumber(const aint address, bool forceRecalculateByAddress) {
+static page_t getAddressPageNumber(const aint address, bool forceRecalculateByAddress) {
 	// everything is "ROM" based when device is NONE
 	if (!DeviceID) return LABEL_PAGE_ROM;
 	// fast-shortcut for regular labels in current slot (if they fit into it)
@@ -342,12 +360,21 @@ static short getAddressPageNumber(const aint address, bool forceRecalculateByAdd
 	}
 	// in other case (implicit DISP, out-of-slot-bounds or forceRecalculateByAddress)
 	// track down the page num from current memory mapping
-	const short page = Device->GetPageOfA16(address);
+	const page_t page = Device->GetPageOfA16(address);
 	if (LABEL_PAGE_UNDEFINED == page) return LABEL_PAGE_OUT_OF_BOUNDS;
 	return page;
 }
 
-int CLabelTable::Insert(const char* nname, aint nvalue, uint16_t traits, int16_t equPageNum) {
+// requires label.page and label.ph_value to be already up-to-date
+static void updatePhAddressPageNumber(SLabelTableEntry & label) {
+	page_t page = LABEL_PAGE_OUT_OF_BOUNDS;
+	if (LABEL_PAGE_UNDEFINED != label.page) {
+		page = DeviceID ? Device->GetPageOfA16(label.ph_value) : LABEL_PAGE_ROM;
+	}
+	label.ph_page = page;
+}
+
+int CLabelTable::Insert(const char* nname, aint nvalue, uint16_t traits, page_t equPageNum) {
 	const bool IsUndefined = !!(traits & LABEL_IS_UNDEFINED);
 
 	// the EQU/DEFL is relocatable when the expression itself is relocatable
@@ -368,12 +395,15 @@ int CLabelTable::Insert(const char* nname, aint nvalue, uint16_t traits, int16_t
 		bool needsUpdate = label.traits&LABEL_IS_DEFL || label.page == LABEL_PAGE_UNDEFINED || label.updatePass < pass;
 		if (needsUpdate) {
 			label.value = nvalue;
+			label.ph_value = (DISP_NONE != PseudoORG) ? adrdisp : CurAddress;
 			if ((traits & LABEL_IS_EQU) && LABEL_PAGE_UNDEFINED != equPageNum) {
 				label.page = equPageNum;
 			} else {
 				label.page = getAddressPageNumber(nvalue, traits & (LABEL_IS_DEFL|LABEL_IS_EQU));
 			}
-			label.traits = traits;
+			updatePhAddressPageNumber(label);
+			label.traits &= LABEL_HAS_SIZE;			// preserve some
+			label.traits |= traits;
 			label.isRelocatable = deltaType;
 			label.updatePass = pass;
 		}
@@ -383,20 +413,34 @@ int CLabelTable::Insert(const char* nname, aint nvalue, uint16_t traits, int16_t
 	label.traits = traits;
 	label.updatePass = pass;
 	label.value = nvalue;
+	label.ph_value = (DISP_NONE != PseudoORG) ? adrdisp : CurAddress;	// in case of expression using undefined label, ph_value is "address" ahead of expression
 	label.used = IsUndefined;
 	if ((traits & LABEL_IS_EQU) && LABEL_PAGE_UNDEFINED != equPageNum) {
 		label.page = equPageNum;
 	} else {
 		label.page = IsUndefined ? LABEL_PAGE_UNDEFINED : getAddressPageNumber(nvalue, traits & (LABEL_IS_DEFL|LABEL_IS_EQU));
 	}
+	updatePhAddressPageNumber(label);
 	label.isRelocatable = IsUndefined ? Relocation::OFF : deltaType;	// ignore "relocatable" for "undefined"
 	return 1;
 }
 
 int CLabelTable::Update(char* name, aint value) {
+	// this may happen in early passes with duplicate labels (ie. the result is wrong anyway and source needs fixing)
+	// or in third pass even when single label drifts from second pass, in such case full update to have correct values
+	// at least for rest of the pass 3 is needed
 	auto labelIt = symbols.find(name);
-	if (symbols.end() != labelIt) labelIt->second.value = value;
-	return (symbols.end() != labelIt);
+	if (symbols.end() == labelIt) return 0;
+	auto& label = labelIt->second;
+	label.value = value;
+	label.ph_value = (DISP_NONE != PseudoORG) ? adrdisp : CurAddress;
+	if (0 == (label.traits & (LABEL_IS_EQU|LABEL_IS_DEFL|LABEL_IS_STRUCT_D))) {
+		if (LABEL_PAGE_UNDEFINED != label.page) {	// regular label with some page, refresh it
+			label.page = getAddressPageNumber(value, false);
+		}
+		updatePhAddressPageNumber(label);
+	}
+	return 1;
 }
 
 SLabelTableEntry* CLabelTable::Find(const char* name, bool onlyDefined) {
@@ -565,6 +609,45 @@ void CLabelTable::DumpSymbols() {
 		WriteLabelEquValue(name.c_str(), symbol.value, symfp);
 	}
 	fclose(symfp);
+}
+
+void CLabelTable::TrackForSize(SLabelTableEntry *label) {
+	assert(label);
+	if ((LABEL_IS_EQU|LABEL_IS_DEFL|LABEL_IS_SMC) & label->traits) {				// skip size counting for certain types of labels
+		Warning("SIZEOF(...) this type of label is invalid, size is zero");
+		return;
+	}
+	const aint myLevel = sourceBlockLevel + (!!(LABEL_IS_LOCAL & label->traits));	// local labels are +1 level
+	sizeofStack.emplace_back(label, myLevel);
+}
+
+void CLabelTable::SizeBoundary(BoundaryLevel boundaryLevel) {
+	if (sizeofStack.empty()) return;
+	if (BOUNDARY_FLOW == boundaryLevel) {
+		Warning("SIZEOF-tracking does not work across wrap-around. Stopping count here.");
+	}
+	// soft boundary, process all stacked labels with current sourceBlockLevel (nesting of source text)
+	aint myLevel = sourceBlockLevel + (BOUNDARY_LOCAL == boundaryLevel);	// local labels are +1 level
+	while (myLevel <= sizeofStack.back().srcLevel) {
+		auto & label = *sizeofStack.back().label;
+		label.size = ((DISP_NONE != PseudoORG) ? adrdisp : CurAddress) - label.ph_value;
+		// printf("boundary: %p, updatePass %d, ph_value %X, size %X, adrdisp %X, CurAddress %X\n", &label, label.updatePass, label.ph_value, label.size, adrdisp, CurAddress);
+		sizeofStack.pop_back();
+		if (sizeofStack.empty()) return;
+	}
+	if (BOUNDARY_FLOW != boundaryLevel && BOUNDARY_ALL != boundaryLevel) return;
+	// process *all* stacked labels, even with lower boundary level, but warn about them
+	// but I don't have names of them! So general warning about "Labels" ... :shrug:
+	assert(!sizeofStack.empty());
+	if (BOUNDARY_ALL == boundaryLevel) {
+		Warning("There are labels in parent scope being SIZEOF-tracked at this point. Stopping their count here.");
+	}
+	do {
+		auto & label = *sizeofStack.back().label;
+		label.size = ((DISP_NONE != PseudoORG) ? adrdisp : CurAddress) - label.ph_value;
+		// printf("boundary: %p, updatePass %d, ph_value %X, size %X, adrdisp %X, CurAddress %X\n", &label, label.updatePass, label.ph_value, label.size, adrdisp, CurAddress);
+		sizeofStack.pop_back();
+	} while (!sizeofStack.empty());
 }
 
 int CFunctionTable::Insert(const char* name_cstr, function_fn_t nfunp) {
@@ -895,6 +978,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	// arguments parsed, emit the macro lines and parse them
 	lp = p;
 	ListFile();
+	sourceBlockLevel += 2;
 	++listmacro;
 	CStringsList* olijstp = lijstp;
 	lijstp = mac_it->second.body;
@@ -910,6 +994,8 @@ int CMacroTable::Emit(char* naam, char*& p) {
 		lijstp = lijstp->next;
 		ParseLineSafe();
 	}
+	LabelTable.SizeBoundary(CLabelTable::BOUNDARY_MAIN);
+	sourceBlockLevel -= 2;
 	if (osldSwapSrcPos != sldSwapSrcPos) WarningById(W_SLD_SWAP, mac_it->first.c_str());
 	sourcePosStack.pop_back();
 	++CompiledCurrentLine;
@@ -1133,7 +1219,8 @@ void CStructure::CopyMembers(CStructure* st, char*& lp) {
 
 static void InsertSingleStructLabel(const bool setNameSpace, char *name, const bool isRelocatable, const aint value, const bool isDefine = true) {
 	// "isDefine" case already has namespaced-full-name, don't add namespace twice by ValidateLabel
-	std::unique_ptr<char[]> tempFullName(isDefine ? nullptr : ValidateLabel(name, setNameSpace));
+	bool isLocal = false;
+	std::unique_ptr<char[]> tempFullName(isDefine ? nullptr : ValidateLabel(isLocal, name, setNameSpace));
 	if (!isDefine && !tempFullName) return;		// invalid labelname reported by ValidateLabel
 	char *fullName = isDefine ? name : tempFullName.get();
 	if (pass == LASTPASS) {
@@ -1157,9 +1244,17 @@ static void InsertSingleStructLabel(const bool setNameSpace, char *name, const b
 		Relocation::deltaType = isRelocatable ? Relocation::REGULAR : Relocation::OFF;
 		assert(!isDefine || Relocation::OFF == Relocation::deltaType);	// definition labels are always nonrel
 		unsigned traits = LABEL_HAS_RELOC_TRAIT \
+						| (isLocal ? LABEL_IS_LOCAL : 0) \
 						| (isDefine ? LABEL_IS_STRUCT_D : LABEL_IS_STRUCT_E) \
 						| (isRelocatable ? LABEL_IS_RELOC : 0);
-		if (!LabelTable.Insert(fullName, value, traits)) Error("Duplicate label", fullName, EARLY);
+		if (!LabelTable.Insert(fullName, value, traits)) {
+			// while main struct name shouldn't be possible to dupe, item names may compound into clash, catched as late as here
+			Error("Duplicate label", fullName, EARLY);
+		} else if (isDefine && setNameSpace) {	// this is name of structure defined, make it's SIZEOF also set
+			SLabelTableEntry* structLabel = LabelTable.Find(fullName, true);
+			assert(structLabel);
+			structLabel->size = value;
+		}
 	}
 }
 
@@ -1196,6 +1291,8 @@ void CStructure::emitlab(char* iid, aint address, const bool isRelocatable) {
 	STRCPY(sn, LINEMAX-1, iid);
 	InsertSingleStructLabel(true, sn, isRelocatable, address, false);
 	InsertStructSubLabels(sn, isRelocatable, mnf, address, false);
+	SLabelTableEntry* structLabel = LabelTable.Find(sn, true);		// set SIZEOF of emitted structure label
+	if (structLabel) structLabel->size = noffset;
 }
 
 void CStructure::emitmembs(char*& p) {

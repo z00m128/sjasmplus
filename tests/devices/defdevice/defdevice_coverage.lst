@@ -2,9 +2,9 @@ defdevice_coverage.asm(12): error: [DEFDEVICE] expected syntax is <deviceid>, <s
 defdevice_coverage.asm(13): error: [DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]: DEFDEVICE invalidId,
 defdevice_coverage.asm(14): error: [DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]: DEFDEVICE invalidId, $10000
 defdevice_coverage.asm(15): error: [DEFDEVICE] expected syntax is <deviceid>, <slot_size>, <page_count>[, <slot_0_initial_page>[, ...]]: DEFDEVICE invalidId, $10000,
-defdevice_coverage.asm(18): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1 or more: DEFDEVICE invalidId, $10001, 256
-defdevice_coverage.asm(19): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1 or more: DEFDEVICE invalidId, 255, 256
-defdevice_coverage.asm(20): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1 or more: DEFDEVICE invalidId, $10000, 0
+defdevice_coverage.asm(18): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1..30000: DEFDEVICE invalidId, $10001, 256
+defdevice_coverage.asm(19): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1..30000: DEFDEVICE invalidId, 255, 256
+defdevice_coverage.asm(20): error: [DEFDEVICE] valid slot_size: 256..64ki, page_count: 1..30000: DEFDEVICE invalidId, $10000, 0
 defdevice_coverage.asm(21): error: [DEFDEVICE] invalid initial page: 4
 defdevice_coverage.asm(24): error: [DEFDEVICE] device with such ID is already defined: LIKEZX48
 # file opened: defdevice_coverage.asm

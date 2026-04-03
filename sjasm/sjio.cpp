@@ -455,9 +455,9 @@ void EmitByte(int byte, bool isInstructionStart) {
 	if (isInstructionStart) {
 		// SLD (Source Level Debugging) tracing-data logging
 		if (IsSldExportActive()) {
-			int pageNum = Page->Number;
+			page_t pageNum = Page->Number;
 			if (DISP_NONE != PseudoORG) {
-				int mappingPageNum = Device->GetPageOfA16(CurAddress);
+				page_t mappingPageNum = Device->GetPageOfA16(CurAddress);
 				if (LABEL_PAGE_UNDEFINED == dispPageNum) {	// special DISP page is not set, use mapped
 					pageNum = mappingPageNum;
 				} else {
@@ -626,6 +626,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 		}
 	}
 
+	sourceBlockLevel += 2;
 	fullpath_p_t oFileNameFull = fileNameFull;
 
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
@@ -653,6 +654,9 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	const aint osldSwapSrcPos = sldSwapSrcPos;
 
 	ReadBufLine();
+
+	LabelTable.SizeBoundary(CLabelTable::BOUNDARY_MAIN);
+	sourceBlockLevel -= 2;
 
 	if (stdin != FP_Input) fclose(FP_Input);
 	else {
@@ -778,10 +782,10 @@ static bool ReadBufData() {
 void ReadBufLine(bool Parse, bool SplitByColon) {
 	// if everything else fails (no data, not running, etc), return empty line
 	*line = 0;
-	bool IsLabel = true;
 	// try to read through the buffer and produce new line from it
 	while (IsRunning && ReadBufData()) {
 		// start of new line (or fake "line" by colon)
+		bool IsLabel = true, sizeofTag = false;
 		aint indentedColumns = 0;
 		rlppos = line;
 		substitutedLine = line;		// also reset "substituted" line to the raw new one
@@ -790,6 +794,13 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			colonSubline = false;	// (can't happen inside block comment)
 			*(rlppos++) = ' ';
 			IsLabel = false;
+			// check for SIZEOF boundary tags `::` and `:.:`, insert them as separate line
+			if ('.' == *rlpbuf) *rlppos++ = *rlpbuf++;	// copy dot char in any case (whether it's part of `:.:` or of something else
+			if (ReadBufData() && (':' == *rlpbuf)) {	// SIZEOF tag detected, recreate the tag line as result
+				line[0] = ':';
+				*rlppos++ = *rlpbuf++;
+				sizeofTag = true;						// and finish this line ASAP (eating EOL if possible)
+			}
 		} else {					// starting real new line
 			IsLabel = (0 == blockComment);
 			if (IsLabel && SplitByColon) {	// line can have label and may be processed by ReadBufLine (like split by colons)
@@ -807,7 +818,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 		bool afterNonAlphaNum, afterNonAlphaNumNext = true;
 		// copy data from read buffer into `line` buffer until EOL/colon is found
 		while (
-				ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf &&	// split by EOL
+				!sizeofTag && ReadBufData() && '\n' != *rlpbuf && '\r' != *rlpbuf &&	// split by EOL
 				// split by colon only on 2nd+ char && SplitByColon && not inside block comment
 				(blockComment || !SplitByColon || rlppos == line || ':' != *rlpbuf)) {
 			// copy the new character to new line
@@ -886,11 +897,15 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 			if (!ReadBufData() && *line) *rlpbuf_end++ = '\n';	// to make listing files "as before"
 		} else {
 			// advance over single colon if that was the reason to terminate line parsing
-			colonSubline = SplitByColon && ReadBufData() && (':' == *rlpbuf) && ++rlpbuf;
+			// (if there was sizeof tag, the colon was already processed as part of tag, but works also as split-colon!)
+			colonSubline = sizeofTag || (SplitByColon && ReadBufData() && (':' == *rlpbuf) && ++rlpbuf);
+			// I can't look here two chars ahead to see if it's `:.:` to just append it to end of empty line
+			// so any of the SIZEOF boundaries will go to separate line (also can't be at beginning of line in source)
 		}
 		// do +1 for very first colon-segment only (rest is +1 due to artificial space at beginning)
+		// remove +1 for SIZEOF tags which don't have extra space
 		assert(!sourcePosStack.empty());
-		size_t advanceColumns = colonSubline ? (0 == sourcePosStack.back().colEnd) + (rlppos -line) + indentedColumns : 0;
+		size_t advanceColumns = colonSubline ? (0 == sourcePosStack.back().colEnd) + (rlppos - line - sizeofTag) + indentedColumns : 0;
 		sourcePosStack.back().nextSegment(colonSubline, advanceColumns);
 		// line is parsed and ready to be processed
 		if (Parse) 	ParseLine();	// processed here in loop
@@ -1689,7 +1704,7 @@ void SldTrackComments() {
 	if (!eolComment[0]) return;
 	for (auto keyword : sldCommentKeywords) {
 		if (strstr(eolComment, keyword.c_str())) {
-			int pageNum = Page->Number;
+			page_t pageNum = Page->Number;
 			if (DISP_NONE != PseudoORG) {
 				pageNum = LABEL_PAGE_UNDEFINED != dispPageNum ? dispPageNum : Device->GetPageOfA16(CurAddress);
 			}

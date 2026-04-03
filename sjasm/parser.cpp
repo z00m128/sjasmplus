@@ -140,6 +140,17 @@ static int ParseExpUnair(char*& p, aint& nval) {
 		if (existEval) return 1;
 		p = oldP;
 	}
+	if (cmphstr(p, "sizeof", true)) {
+		int sizeofEval = 0, hasParentheses = need(p, '(');
+		if (hasParentheses || isLabelStart(p)) {			// may tag label as +sizeof even when closing parenthesis
+			sizeofEval = GetLabelSize(p, nval);				// is missing: OK, it's just extra trait causing extra tracking
+		}
+		if (hasParentheses) {
+			sizeofEval &= need(p, ')');
+		}
+		if (sizeofEval) return 1;	// valid label name (and valid optional parentheses)
+		p = oldP;					// invalid label name or parentheses, try to ignore "sizeof"
+	}
 	aint right;
 	int oper;
 	if ((oper = need(p, "! ~ + - ")) || \
@@ -662,6 +673,14 @@ void SetLastParsedLabel(const char* label) {
 
 void ParseLabel() {
 	if (White()) return;
+	if (':' == *lp) {							// detect possible SIZEOF boundary tag
+		bool isLocal = ('.' == lp[1]);
+		if (':' == lp[1 + isLocal]) {			// tag detected, process it
+			LabelTable.SizeBoundary(isLocal ? CLabelTable::BOUNDARY_LOCAL : CLabelTable::BOUNDARY_MAIN);
+			lp += (2 + isLocal);
+			return;
+		}
+	}
 	if (Options::syx.IsPseudoOpBOF && ParseDirective(true)) {
 		if (!SkipBlanks()) Error("Unexpected", lp);
 		return;
@@ -776,12 +795,13 @@ void ParseLabel() {
 		}
 		val += smcOffset;
 		ttp = tp;
-		if (!(tp = ValidateLabel(tp, true))) {
+		bool isLocal;
+		if (!(tp = ValidateLabel(isLocal, tp, true))) {
 			return;
 		}
 		// Copy label name to last parsed label variable
 		if (!IsDEFL) SetLastParsedLabel(tp);
-		unsigned traits = (IsEQU ? LABEL_IS_EQU : 0) | (IsDEFL ? LABEL_IS_DEFL : 0) | (smcOffset ? LABEL_IS_SMC : 0);
+		unsigned traits = (isLocal ? LABEL_IS_LOCAL : 0) | (IsEQU ? LABEL_IS_EQU : 0) | (IsDEFL ? LABEL_IS_DEFL : 0) | (smcOffset ? LABEL_IS_SMC : 0);
 		if (pass == LASTPASS) {
 			SLabelTableEntry* label = LabelTable.Find(tp, true);
 			if (nullptr == label && IsDEFL) {	// DEFL labels can be defined as late as needed (including pass3)
@@ -801,21 +821,29 @@ void ParseLabel() {
 			}
 
 			if (val != label->value) {
-				char* buf = new char[LINEMAX];
-
-				SPRINTF2(buf, LINEMAX, "previous value %u not equal %u", label->value, val);
+				// unless special label like DEFL, the values from Pass 2 are intact, just label->updatePass is touched
+				// so in case the value mismatch happens, the CLabelTable::Update is used to fix values for Pass 3 (with warning)
+				static constexpr const int WARNING_HELP_BUFFER_MAX = 128;
+				char buf[WARNING_HELP_BUFFER_MAX];
+				SPRINTF2(buf, WARNING_HELP_BUFFER_MAX, "previous value %u not equal %u", label->value, val);
 				Warning("Label has different value in pass 3", buf);
 				LabelTable.Update(tp, val);
-
-				delete[] buf;
 			} else {
 				label->updatePass = pass;	// just "touch" it here in third pass
 			}
 		} else if (pass == 2 && !LabelTable.Insert(tp, val, traits, equPageNum)) {
+			// label already exist, and did NOT need update, ie. duplicate label (could not find other code path to this)
 			if (!LabelTable.Update(tp, val)) assert(false); // unreachable, update will always work after insert failed
 		} else if (pass == 1 && !LabelTable.Insert(tp, val, traits, equPageNum)) {
 			Error("Duplicate label", tp, EARLY);
 		}
+		// sizeof() implementation, must search for inserted label one more time (to do it in every pass)
+		SLabelTableEntry* label = LabelTable.Find(tp, true);
+		assert(label);
+		// soft main/local boundary for current nesting level
+		LabelTable.SizeBoundary(isLocal ? CLabelTable::BOUNDARY_LOCAL : CLabelTable::BOUNDARY_MAIN);
+		// add new label to size tracking if it has SIZEOF trait
+		if (LABEL_HAS_SIZE & label->traits) LabelTable.TrackForSize(label);
 
 // TODO v2.x: this is too complicated in current version: Unreal/Cspect already expect
 // EQU/DEFL to be current page or "ROM" = not a big deal as they did change in v1.x course already.

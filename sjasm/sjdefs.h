@@ -109,10 +109,10 @@ struct SAlignSafeCast {
 // include all headers
 
 #include "lua_sjasm.h"
-#include "devices.h"
 #include "support.h"
 #include "relocate.h"
 #include "tables.h"
+#include "devices.h"
 #include "reader.h"
 #include "parser.h"
 #include "z80.h"

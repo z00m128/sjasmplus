@@ -206,6 +206,17 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>?.?.2026 - 1.23.0</term>
+            <listitem>
+              <synopsis>
+- Added <link linkend="s_sizeof_labels">`SIZEOF`</link> operator for labels
+- refactoring device - page numbering, error values changed from -1 to 0x7F00+ (<link linkend="lua_sj_get_page_at">`get_page_at`</link>)
+- CI: binary reproducibility tested weekly
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>15.3.2026 - 1.22.0</term>
             <listitem>
               <synopsis>
@@ -928,6 +939,64 @@ yyy.Local  ; xxx.yyy.Local</programlisting></para>
         ld hl,1_B*3     ; *new* works also in expressions</programlisting></para>
         </example></para>
     </section>
+
+    <section id="s_sizeof_labels">
+      <title>SIZEOF labels (operator)</title>
+
+      <para>(since v1.23.0) Operator SIZEOF returns "size" of the label. This is usually a distance between two labels of the same or greater "level".
+      For example from main label to main label or from local label to local/main label. Nested labels (inside INCLUDE or MACRO) are
+      "invisible" to the operator, ie. it counts on source-level where the label is defined. Some situations may abruptly stop
+      all counting, like ORG directive (when nested, it will warn about parent-scope labels being interrupted, but on "current level" it
+      just stops the count, as programmer can visually see the ORG as natural boundary for previous label).</para>
+
+      <para><indexterm id="po_colon_colon"><primary>::</primary></indexterm><indexterm id="po_colon_dot_colon"><primary>:.:</primary></indexterm>
+      The size-counting can be also stopped by boundary tags <code>::</code> as main-label level and <code>:.:</code> as local-label level.
+      These also split line as regular colon for inlining more instructions on single line and can't be at beginning of line, even with <code>--dirbol</code>.
+      And size-counting does not follow across MODULE boundaries, which stops counting (even nested in includes/macros, then it stops with warning).
+      For more exhaustive list of all intricacies check <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/expressions/sizeof_label.asm"
+      >test sizeof_label.asm</ulink>.</para>
+
+      <para>For structure members SIZEOF returns zero at this moment (feels like returning member size makes some sense, but wasn't implemented). For
+      the main name of the structure the SIZEOF returns size of structure, this works also for any instance of structure. For EQU and DEFL labels
+      the SIZEOF returns zero size and will warn about type of label. But EQU/DEFL labels still do count as distance boundary. Temporary labels
+      are neither counted as boundary, nor can be SIZEOF counted, they are invisible to SIZEOF feature.</para>
+
+      <para>The distance between labels and/or boundaries is counted over memory where machine code is emitted, inside DISP block the displacement
+      of addresses is ignored, ie. you can SIZEOF also that DISP block you plan to move at runtime elsewhere or count across the DISP entry/exit.</para>
+
+      <para><example>
+          <title>basic SIZEOF usage</title>
+
+          <para><programlisting>; example 1
+CHKCHARS:       ldir
+                ret
+.charlist1:     db  "ABCD"
+.charlist2:     db  "EFG"
+.charlist3:     db  "HIJKLMNO"
+BAR:            ; stops counting of main label CHKCHARS
+    ASSERT 3 + 4 + 3 + 8 == SIZEOF(CHKCHARS)    ; code + three strings
+    ASSERT 4 == SIZEOF(CHKCHARS.charlist1)
+    ASSERT 3 == SIZEOF(CHKCHARS.charlist2)
+    ASSERT 8 == SIZEOF(CHKCHARS.charlist3)
+
+; example 2
+L2:                 ; SIZEOF(L2) is 16 (10 + 1 + 5)
+.locL1: ds  10 :.:  ; SIZEOF(L2.locL1) is 10, tag `:.:` to end local-counting
+        db  0       ; counts to main label "L2"
+.locL2: ds  5 ::    ; SIZEOF(L2.locL2) is 5
+        db  0       ; does not count to any label after `::` tag
+
+; example 3
+        MACRO MyMacro
+@NewGlobalLabel:    ; nested main label inside macro
+          xor a
+        ENDM        ; SIZEOF(NewGlobalLabel) is 1, ENDM is nesting-boundary ending its count
+MyRoutine:
+        MyMacro     ; +1 ; does *NOT* end counting of parent-scoped MyRoutine
+        rld ::      ; +2
+        ASSERT 3 == SIZEOF(MyRoutine)</programlisting></para>
+        </example></para>
+    </section>
   </chapter>
 
   <chapter id="c_constants">
@@ -1031,66 +1100,67 @@ $c     hexadecimal
       precedence of the operators. The following operators may be used in
       expressions:</para>
 
-      <para><programlisting>norel norel L  <indexterm id="op_norel"><primary>norel</primary></indexterm>Label/symbol L will be treated as non-relocatable
-exist exist L  <indexterm id="op_exist"><primary>exist</primary></indexterm>is label/symbol L defined in source (even when not used)
-..    x..y     <indexterm id="op_str_concat"><primary>..</primary></indexterm>string concatenation (both operands must be string literals) (since v1.22.0)
+      <para><programlisting>norel  norel L   <indexterm id="op_norel"><primary>norel</primary></indexterm>Label/symbol L will be treated as non-relocatable
+exist  exist L   <indexterm id="op_exist"><primary>exist</primary></indexterm>is label/symbol L defined in source (even when not used)
+sizeof sizeof L  <indexterm id="op_sizeof"><primary>sizeof</primary></indexterm>size of label/symbol L, details <link linkend="s_sizeof_labels">here</link> (since v1.23.0)
+..     x..y      <indexterm id="op_str_concat"><primary>..</primary></indexterm>string concatenation (both operands must be string literals) (since v1.22.0)
 
-!     !x       <indexterm id="op_log_not"><primary>!</primary></indexterm>logical not
-~     ~x       <indexterm id="op_cpl"><primary>~</primary></indexterm>complement
-+     +x       does "nothing", can be used to make "+(...)" parse as value (not as memory)
--     -x       minus
-low   low x    <indexterm id="op_low"><primary>low</primary></indexterm>low 8 bits of 16 bit value or lower part of register pair
-high  high x   <indexterm id="op_high"><primary>high</primary></indexterm>high 8 bits of 16 bit value or higher part of register pair
-not   not x    <indexterm id="op_log_not2"><primary>not</primary></indexterm>logical not
-abs   abs x    <indexterm id="op_abs"><primary>abs</primary></indexterm>absolute value
+!      !x        <indexterm id="op_log_not"><primary>!</primary></indexterm>logical not
+~      ~x        <indexterm id="op_cpl"><primary>~</primary></indexterm>complement
++      +x        does "nothing", can be used to make "+(...)" parse as value (not as memory)
+-      -x        minus
+low    low x     <indexterm id="op_low"><primary>low</primary></indexterm>low 8 bits of 16 bit value or lower part of register pair
+high   high x    <indexterm id="op_high"><primary>high</primary></indexterm>high 8 bits of 16 bit value or higher part of register pair
+not    not x     <indexterm id="op_log_not2"><primary>not</primary></indexterm>logical not
+abs    abs x     <indexterm id="op_abs"><primary>abs</primary></indexterm>absolute value
 
-*     x*y      <indexterm id="op_mul"><primary>*</primary></indexterm>multiplication
-/     x/y      <indexterm id="op_div"><primary>/</primary></indexterm>division
-%     x%y      <indexterm id="op_mod"><primary>%</primary></indexterm>modulo
-mod   x mod y  <indexterm id="op_mod2"><primary>mod</primary></indexterm>modulo
+*      x*y       <indexterm id="op_mul"><primary>*</primary></indexterm>multiplication
+/      x/y       <indexterm id="op_div"><primary>/</primary></indexterm>division
+%      x%y       <indexterm id="op_mod"><primary>%</primary></indexterm>modulo
+mod    x mod y   <indexterm id="op_mod2"><primary>mod</primary></indexterm>modulo
 
-+     x+y      <indexterm id="op_add"><primary>+</primary></indexterm>addition
--     x-y      <indexterm id="op_sub"><primary>-</primary></indexterm>subtraction
++      x+y       <indexterm id="op_add"><primary>+</primary></indexterm>addition
+-      x-y       <indexterm id="op_sub"><primary>-</primary></indexterm>subtraction
 
-&lt;&lt;    x&lt;&lt;y     <indexterm id="op_sla"><primary>&lt;&lt;</primary></indexterm>shift left
-&gt;&gt;    x&gt;&gt;y     <indexterm id="op_sra"><primary>&gt;&gt;</primary></indexterm>shift right signed
-&gt;&gt;&gt;   x&gt;&gt;&gt;y    <indexterm id="op_srl"><primary>&gt;&gt;&gt;</primary></indexterm>shift right unsigned
-shl   x shl y  <indexterm id="op_shl"><primary>shl</primary></indexterm>shift left
-shr   x shr y  <indexterm id="op_shr"><primary>shr</primary></indexterm>shift right signed
+&lt;&lt;     x&lt;&lt;y      <indexterm id="op_sla"><primary>&lt;&lt;</primary></indexterm>shift left
+&gt;&gt;     x&gt;&gt;y      <indexterm id="op_sra"><primary>&gt;&gt;</primary></indexterm>shift right signed
+&gt;&gt;&gt;    x&gt;&gt;&gt;y     <indexterm id="op_srl"><primary>&gt;&gt;&gt;</primary></indexterm>shift right unsigned
+shl    x shl y   <indexterm id="op_shl"><primary>shl</primary></indexterm>shift left
+shr    x shr y   <indexterm id="op_shr"><primary>shr</primary></indexterm>shift right signed
 
-&lt;?    x&lt;?y     <indexterm id="op_min"><primary>&lt;?</primary></indexterm>minimum
-&gt;?    x&gt;?y     <indexterm id="op_max"><primary>&gt;?</primary></indexterm>maximum
+&lt;?     x&lt;?y      <indexterm id="op_min"><primary>&lt;?</primary></indexterm>minimum
+&gt;?     x&gt;?y      <indexterm id="op_max"><primary>&gt;?</primary></indexterm>maximum
 
-&lt;     x&lt;y      <indexterm id="op_lt"><primary>&lt;</primary></indexterm>less than
-&gt;     x&gt;y      <indexterm id="op_gt"><primary>&gt;</primary></indexterm>greater than
-&lt;=    x&lt;=y     <indexterm id="op_lte"><primary>&lt;=</primary></indexterm>equal or less than
-&gt;=    x&gt;=y     <indexterm id="op_gte"><primary>&gt;=</primary></indexterm>equal or greater than
+&lt;      x&lt;y       <indexterm id="op_lt"><primary>&lt;</primary></indexterm>less than
+&gt;      x&gt;y       <indexterm id="op_gt"><primary>&gt;</primary></indexterm>greater than
+&lt;=     x&lt;=y      <indexterm id="op_lte"><primary>&lt;=</primary></indexterm>equal or less than
+&gt;=     x&gt;=y      <indexterm id="op_gte"><primary>&gt;=</primary></indexterm>equal or greater than
 
-=     x=y      <indexterm id="op_eq"><primary>=</primary></indexterm>equal
-==    x==y     <indexterm id="op_eq2"><primary>==</primary></indexterm>equal
-!=    x!=y     <indexterm id="op_neq"><primary>!=</primary></indexterm>not equal
+=      x=y       <indexterm id="op_eq"><primary>=</primary></indexterm>equal
+==     x==y      <indexterm id="op_eq2"><primary>==</primary></indexterm>equal
+!=     x!=y      <indexterm id="op_neq"><primary>!=</primary></indexterm>not equal
 
-&amp;     x&amp;y      <indexterm id="op_bit_and"><primary>&amp;</primary></indexterm>bitwise and
-and   x and y  <indexterm id="op_bit_and2"><primary>and</primary></indexterm>bitwise and
+&amp;      x&amp;y       <indexterm id="op_bit_and"><primary>&amp;</primary></indexterm>bitwise and
+and    x and y   <indexterm id="op_bit_and2"><primary>and</primary></indexterm>bitwise and
 
-^     x^y      <indexterm id="op_bit_xor"><primary>^</primary></indexterm>bitwise xor
-xor   x xor y  <indexterm id="op_bit_xor2"><primary>xor</primary></indexterm>bitwise xor
+^      x^y       <indexterm id="op_bit_xor"><primary>^</primary></indexterm>bitwise xor
+xor    x xor y   <indexterm id="op_bit_xor2"><primary>xor</primary></indexterm>bitwise xor
 
-|     x|y      <indexterm id="op_bit_or"><primary>|</primary></indexterm>bitwise or
-or    x or y   <indexterm id="op_bit_or2"><primary>or</primary></indexterm>bitwise or
+|      x|y       <indexterm id="op_bit_or"><primary>|</primary></indexterm>bitwise or
+or     x or y    <indexterm id="op_bit_or2"><primary>or</primary></indexterm>bitwise or
 
-&amp;&amp;    x&amp;&amp;y     <indexterm id="op_logic_and"><primary>&amp;&amp;</primary></indexterm>logical and
+&amp;&amp;     x&amp;&amp;y      <indexterm id="op_logic_and"><primary>&amp;&amp;</primary></indexterm>logical and
 
-||    x||y     <indexterm id="op_logic_or"><primary>||</primary></indexterm>logical or
+||     x||y      <indexterm id="op_logic_or"><primary>||</primary></indexterm>logical or
 
-$     $        <indexterm id="op_dollar"><primary>$</primary></indexterm>current program counter
-$$    $$       <indexterm id="op_dollar2"><primary>$$</primary></indexterm>current page at program counter (in virtual device mode)
-$$$   $$$      <indexterm id="op_dollar3"><primary>$$$</primary></indexterm>"physical" program counter (inside DISP block)
-$$$$  $$$$     <indexterm id="op_dollar4"><primary>$$$$</primary></indexterm>"physical" memory page (inside DISP block in virtual device mode)
-label label    value of label (aka symbol), usually memory address
-$$lab $$lab    <indexterm id="op_label_page"><primary>$$label</primary></indexterm>page of "lab" label (in virtual device mode)
-{}    {x}      <indexterm id="op_read_word"><primary>{..}</primary></indexterm>reads WORD from address x (in virtual device mode, in last pass)
-{b}   {b x}    <indexterm id="op_read_byte"><primary>{b ..}</primary></indexterm>reads BYTE from address x (in virtual device mode, in last pass)
+$      $         <indexterm id="op_dollar"><primary>$</primary></indexterm>current program counter
+$$     $$        <indexterm id="op_dollar2"><primary>$$</primary></indexterm>current page at program counter (in virtual device mode)
+$$$    $$$       <indexterm id="op_dollar3"><primary>$$$</primary></indexterm>"physical" program counter (inside DISP block)
+$$$$   $$$$      <indexterm id="op_dollar4"><primary>$$$$</primary></indexterm>"physical" memory page (inside DISP block in virtual device mode)
+label  label     value of label (aka symbol), usually memory address
+$$lab  $$lab     <indexterm id="op_label_page"><primary>$$label</primary></indexterm>page of "lab" label (in virtual device mode)
+{}     {x}       <indexterm id="op_read_word"><primary>{..}</primary></indexterm>reads WORD from address x (in virtual device mode, in last pass)
+{b}    {b x}     <indexterm id="op_read_byte"><primary>{b ..}</primary></indexterm>reads BYTE from address x (in virtual device mode, in last pass)
 </programlisting></para>
     </section>
 
@@ -4730,7 +4800,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[integer] sj.get_page_at(address = sj.current_address)<indexterm id="lua_sj_get_page_at"><primary>sj.get_page_at(..)</primary></indexterm></term>
 
             <listitem>
-              <para>Get current page at "address". Returns -1 for invalid address or in no device mode.</para>
+              <para>Get current page at "address". Returns LABEL_PAGE_OUT_OF_BOUNDS (0x7F80) or LABEL_PAGE_ROM (0x7F00) for invalid address or in no device mode.</para>
             </listitem>
           </varlistentry>
 
@@ -5590,8 +5660,8 @@ varSymbol       =     14        ; =/DEFL labels are omitted completely</programl
 			"T" lines. For "L" a list of items separated by comma, where first three items
 			represent sub-parts of symbol name: module name, main label, local label (sub-part
 			may be empty), optional remaining items are usage-traits giving away various internal info about
-			usage of symbol (currently exported traits: +equ, +macro, +reloc, +reloc_high, +used, +module, +endmod,
-			+struct_def, +struct_data).
+			usage of symbol (currently exported traits: +local, +equ, +macro, +reloc, +reloc_high, +used, +module, +endmod,
+			+struct_def, +struct_data, +sizeof).
 			For type "K" the comment containing one of they defined keywords is present.
 		</para>
 

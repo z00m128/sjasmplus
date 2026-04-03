@@ -4,15 +4,15 @@
  3    0000
  4    0000                  lua
  5    0000 ~                    -- check warning about device mode needed
- 6    0000 ~                    assert(-1 == sj.get_page_at())
+ 6    0000 ~                    assert(0x7F00 == sj.get_page_at())          -- LABEL_PAGE_ROM
 lua_get_page_at.asm(6): warning: [LUA] sj.get_page_at: only allowed in real device emulation mode (See DEVICE)
  7    0000                  endlua
  8    0000
  9    0000                  DEVICE zxspectrum128
 10    0000
 11    0000                  lua
-12    0000 ~                    assert(-1 == sj.get_page_at(-1))
-13    0000 ~                    assert(-1 == sj.get_page_at(0x10000))
+12    0000 ~                    assert(0x7F80 == sj.get_page_at(-1))        -- LABEL_PAGE_OUT_OF_BOUNDS
+13    0000 ~                    assert(0x7F80 == sj.get_page_at(0x10000))   -- LABEL_PAGE_OUT_OF_BOUNDS
 14    0000 ~                    assert(7 == sj.get_page_at(0))
 15    0000 ~                    assert(5 == sj.get_page_at(0x4000))
 16    0000 ~                    assert(2 == sj.get_page_at(0x8000))

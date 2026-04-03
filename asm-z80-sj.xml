@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.11 04/03/2026
+  Version: 0.9.12 16/04/2026
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -14,6 +14,10 @@
 Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
+
+  16/04/2026: version 0.9.12
+    + new directive: sldopt
+    + new operator: sizeof
 
   04/03/2026: version 0.9.11
     + labels identation by ">" character
@@ -123,7 +127,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="21" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="22" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -364,6 +368,7 @@ TODO missing things:
       <item>setbreakpoint</item>
       <item>shellexec</item>
       <item>size</item>
+      <item>sldopt</item>
       <item>slot</item>
       <item>struct</item>
       <item>tapend</item>
@@ -399,6 +404,7 @@ TODO missing things:
       <item>or</item>
       <item>shl</item>
       <item>shr</item>
+      <item>sizeof</item>
       <item>xor</item>
       <!-- other operators/symbols:
       $ $$ ! ~ + - * / % << >> >>> <? >? < > <= >= = == != & ^ | && || [ ] ( ) { }

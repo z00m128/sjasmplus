@@ -57,7 +57,7 @@ local_name.asm|47||0|14|13|L|Whatever,Mdc3.self3,,+struct_data
 local_name.asm|49||0|14|13|T|
 local_name.asm|50||0|14|16|T|
 local_name.asm|51||0|14|19|F|Whatever.Mdc3.lMdc3
-local_name.asm|51||0|14|19|L|Whatever,Mdc3,lMdc3
+local_name.asm|51||0|14|19|L|Whatever,Mdc3,lMdc3,+local
 local_name.asm|51||0|14|19|T|
 local_name.asm|52||0|14|22|T|
 local_name.asm|53||0|14|25|T|

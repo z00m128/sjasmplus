@@ -34,9 +34,9 @@ const char* GetDeviceName();
 
 class CDevicePage {
 public:
-	CDevicePage(byte* memory, int32_t size, int number);
+	CDevicePage(byte* memory, int32_t size, page_t number);
 	int32_t Size;
-	int Number;
+	page_t Number;
 	byte* RAM;
 private:
 };
@@ -50,7 +50,7 @@ public:
 	int32_t Address;
 	int32_t Size;
 	CDevicePage* Page;
-	int16_t InitialPage;
+	page_t InitialPage;
 	ESlotOptions Option;
 private:
 };
@@ -88,7 +88,7 @@ public:
 	CDevicePage* GetPage(int);
 	CDeviceSlot* GetSlot(int);
 	int GetSlotOfA16(int32_t address);
-	int GetPageOfA16(int32_t address);
+	page_t GetPageOfA16(int32_t address);
 	void CheckPage(const ECheckPageLevel level);
 	bool SetSlot(int slotNumber);		// sets "current/active" slot
 	CDeviceSlot* GetCurrentSlot();		// returns "current/active" slot

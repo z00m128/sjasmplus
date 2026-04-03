@@ -1,0 +1,572 @@
+sizeof_label.asm(104): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: sizeof
+sizeof_label.asm(105): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: SIZEOF
+# file opened: sizeof_label.asm
+  1   0000              ; design based on notes in Issue #16: https://github.com/z00m128/sjasmplus/issues/16
+  2   0000
+  3   0000              ;;; basic syntax/behavior test
+  4   0000
+  5   0000                      ORG $1234
+  6   1234 61 62 63     L1:     db  "abc"
+  7   1237 64           .locL1  db  "d"
+  8   1238 65 66        .locL2  db  "ef"
+  9   123A              L2:
+ 10   123A 00 00 00...  .locL1: ds  10
+ 10   1244              :.:
+ 11   1244 00                   db  0
+ 12   1245 00 00 00...  .locL2: ds  5
+ 12   124A              ::
+ 13   124A 00                   db  0
+ 14   124B
+ 15   124B                  ASSERT 6 == SIZEOF(L1)
+ 16   124B                  ASSERT 6 == sizeof(L1)                  ; lowercase
+ 17   124B                  ASSERT 1 == SIZEOF(L1.locL1)
+ 18   124B                  ASSERT 2 == SIZEOF(L1.locL2)
+ 19   124B                  ASSERT 16 == SIZEOF(L2)
+ 20   124B                  ASSERT 10 == SIZEOF(L2.locL1)
+ 21   124B                  ASSERT 5 == SIZEOF(L2.locL2)
+ 22   124B
+ 23   124B              ;;; forward reference should also be possible
+ 24   124B
+ 25   124B                  ASSERT 3 == SIZEOF(FwdRef)
+ 26   124B
+ 27   124B 67 68 69     FwdRef: db  "ghi"
+ 28   124E
+ 28   124E              ::
+ 29   124E
+ 30   124E              ;;; MODULE, ENDMODULE and ORG are also boundary
+ 31   124E
+ 32   124E 61 62 63     Lmod:   db  "abc"
+ 33   1251                      MODULE mod_example
+ 34   1251 64 65 66                 db  "def"                       ; should not count toward Lmod
+ 35   1254 61 62        Lmodin:     db  "ab"
+ 36   1256                      ENDMODULE
+ 37   1256 63 64                db  "cd"                            ; should not count toward Lmodin
+ 38   1258
+ 39   1258 61 62 63     Lorg:   db  "abc"
+ 40   125B                      ORG $3456
+ 41   3456 64 65 66             db  "def"                           ; should not count toward Lorg
+ 42   3459
+ 43   3459                  ASSERT 3 == SIZEOF(Lmod)
+ 44   3459                  ASSERT 2 == SIZEOF(mod_example.Lmodin)
+ 45   3459                  ASSERT 3 == SIZEOF(Lorg)
+ 46   3459
+ 47   3459              ;;; INCLUDE should not set boundary, even if it contains labels
+ 48   3459
+ 49   3459 69 6E 31     Linc1:  db  "in1"
+ 50   345C                      INCLUDE "sizeof_label.1.i.asm"      ; has size of 9
+# file opened: sizeof_label.1.i.asm
+  1+  345C              ; design based on notes in Issue #16: https://github.com/z00m128/sjasmplus/issues/16
+  2+  345C              ; expected size of machine code: 9
+  3+  345C
+  4+  345C              ;;; nested include - SIZEOF "friendly" one, should NOT cause boundary for parent file
+  5+  345C
+  6+  345C                  MACRO IncMacro1     ; total size: 2
+  7+  345C ~            !Inc1Label3:db  "1"
+  8+  345C ~            .MyIncL1:   db  "2"
+  9+  345C ~
+ 10+  345C ~                    ASSERT 1 == SIZEOF(.MyIncL1)
+ 11+  345C ~
+ 12+  345C                  ENDM                ; boundary for macro labels!
+ 13+  345C
+ 14+  345C 3C           Inc1Label1: db  "<"
+ 15+  345D 41           .locL1:     db  "A"
+ 16+  345E                          IncMacro1   ; +2
+ 16+  345E 31          >!Inc1Label3:db  "1"
+ 16+  345F 32          >.MyIncL1:   db  "2"
+ 16+  3460             >
+ 16+  3460             >        ASSERT 1 == SIZEOF(.MyIncL1)
+ 16+  3460             >
+ 17+  3460 42 43        .locL2:     db  "BC"
+ 18+  3462              Inc1Label2:
+ 19+  3462 44           .locL1:     ds  1, "D"
+ 19+  3463              :.:
+ 20+  3463 00                       db  0
+ 20+  3464              ::
+ 21+  3464 3E                       db  '>'
+ 22+  3465
+ 23+  3465                  ASSERT 1 + 1 + 2 + 2        == SIZEOF(Inc1Label1)
+ 24+  3465                  ASSERT 1 + 2                == SIZEOF(Inc1Label1.locL1)
+ 25+  3465                  ASSERT 2                    == SIZEOF(Inc1Label1.locL2)
+ 26+  3465                  ASSERT 1 + 1                == SIZEOF(Inc1Label3)
+ 27+  3465                  ASSERT 1 + 1                == SIZEOF(Inc1Label2)
+ 28+  3465                  ASSERT 1                    == SIZEOF(Inc1Label2.locL1)
+ 29+  3465                  ASSERT 9                    == $ - Inc1Label1
+ 30+  3465
+# file closed: sizeof_label.1.i.asm
+ 51   3465 65 31                db  "e1"
+ 52   3467
+ 53   3467                  ASSERT 3 + 9 + 2 == SIZEOF(Linc1)
+ 54   3467
+ 55   3467 69 6E 32     Linc2:  db  "in2"
+ 56   346A                      INCLUDE "sizeof_label.2.i.asm"      ; has ORG after size of 4, another 2 after ORG (not counted)
+# file opened: sizeof_label.2.i.asm
+  1+  346A              ; design based on notes in Issue #16: https://github.com/z00m128/sjasmplus/issues/16
+  2+  346A              ; expected size of machine code: 4 ahead of ORG, 2 after
+  3+  346A
+  4+  346A              ;;; nested include - SIZEOF "unfriendly" one, should cause boundary for parent file
+  5+  346A
+  6+  346A 3C 49 6E 32  Inc2Label1:     db      "<In2"
+  7+  346E
+  8+  346E              ;;; hard boundary also for parent files (reports any open parent ones as errors)
+sizeof_label.2.i.asm(9): warning: There are labels in parent scope being SIZEOF-tracked at this point. Stopping their count here.
+  9+  346E                          ORG     $2345
+ 10+  2345
+ 11+  2345 21 3E        .loc1:          db      "!>"
+ 12+  2347
+ 13+  2347                          ASSERT 4 == SIZEOF(Inc2Label1)
+ 14+  2347                          ASSERT 2 == SIZEOF(.loc1)       ; EOF boundary (== end of include)
+ 15+  2347
+# file closed: sizeof_label.2.i.asm
+ 57   2347 21                   db  "!"                             ; not counted either
+ 58   2348
+ 59   2348                  ; ORG should have spawn warning about SIZEOF tracking in parent scope (recorded in listing file)
+ 60   2348                  ASSERT 3 + 4 == SIZEOF(Linc2)           ; partial size up to nested ORG
+ 61   2348
+ 62   2348              ;;; MACRO should sets boundaries only on its own source-block-scope, ie. "invisible" for outer emitter
+ 63   2348
+ 64   2348                  MACRO SizeMacro1                        ; total size 6
+ 65   2348 ~            @Mac1_ _ __COUNTER__
+ 65   2348 ~                                    ; make sure nested global label does not set boundary for outer global labels
+ 66   2348 ~                        db  "1"
+ 67   2348 ~            .MyL1:      db  "m1::"
+ 68   2348 ~
+ 68   2348 ~            ::
+ 69   2348 ~                        db  "!"
+ 70   2348 ~
+ 71   2348 ~                    ASSERT 4 == SIZEOF(.MyL1)
+ 72   2348 ~
+ 73   2348                  ENDM
+ 74   2348
+ 75   2348                  MACRO SizeMacro2                        ; total size 5 + 6 + 4 = 15
+ 76   2348 ~            @Mac2_ _ __COUNTER__
+ 76   2348 ~                                    ; make sure nested global label does not set boundary to outer global labels
+ 77   2348 ~                        db  "2"
+ 78   2348 ~            .MyL2:      db  "m2::"
+ 79   2348 ~                        SizeMacro1                      ; nest the SizeMacro1 here
+ 80   2348 ~
+ 80   2348 ~            :.:
+ 80   2348 ~                                          ; test local boundary tag inside macro body
+ 81   2348 ~                        db  "2::"
+ 82   2348 ~
+ 82   2348 ~            ::
+ 82   2348 ~                                           ; test main boundary tag inside macro body
+ 83   2348 ~                        db  "!"
+ 84   2348 ~
+ 85   2348 ~                    ASSERT 4 + 6 == SIZEOF(.MyL2)
+ 86   2348 ~
+ 87   2348                  ENDM
+ 88   2348
+ 89   2348              AheadMacro:
+ 90   2348 30                   db  "0"
+ 91   2349                      SizeMacro1
+ 91   2349             >@Mac1_0
+ 91   2349             >                        ; make sure nested global label does not set boundary for outer global labels
+ 91   2349 31          >            db  "1"
+ 91   234A 6D 31 3A 3A >.MyL1:      db  "m1::"
+ 91   234E             >
+ 91   234E             >::
+ 91   234E 21          >            db  "!"
+ 91   234F             >
+ 91   234F             >        ASSERT 4 == SIZEOF(.MyL1)
+ 91   234F             >
+ 92   234F                      SizeMacro2
+ 92   234F             >@Mac2_1
+ 92   234F             >                        ; make sure nested global label does not set boundary to outer global labels
+ 92   234F 32          >            db  "2"
+ 92   2350 6D 32 3A 3A >.MyL2:      db  "m2::"
+ 92   2354             >            SizeMacro1                      ; nest the SizeMacro1 here
+ 92   2354             >@Mac1_2
+ 92   2354             >                        ; make sure nested global label does not set boundary for outer global labels
+ 92   2354 31          >            db  "1"
+ 92   2355 6D 31 3A 3A >.MyL1:      db  "m1::"
+ 92   2359             >
+ 92   2359             >::
+ 92   2359 21          >            db  "!"
+ 92   235A             >
+ 92   235A             >        ASSERT 4 == SIZEOF(.MyL1)
+ 92   235A             >
+ 92   235A             >
+ 92   235A             >:.:
+ 92   235A             >                              ; test local boundary tag inside macro body
+ 92   235A 32 3A 3A    >            db  "2::"
+ 92   235D             >
+ 92   235D             >::
+ 92   235D             >                               ; test main boundary tag inside macro body
+ 92   235D 21          >            db  "!"
+ 92   235E             >
+ 92   235E             >        ASSERT 4 + 6 == SIZEOF(.MyL2)
+ 92   235E             >
+ 93   235E 3A 3A 30 3A          db  "::0::"
+ 93   2362 3A
+ 94   2363
+ 94   2363              ::
+ 95   2363 21                   db  "!"
+ 96   2364
+ 97   2364                  ASSERT 1 + 6 + 15 + 5 == SIZEOF(AheadMacro)
+ 98   2364                  ASSERT 5 == SIZEOF(Mac1_0)
+ 99   2364                  ASSERT 5 + 6 + 3 == SIZEOF(Mac2_1)
+100   2364                  ASSERT 5 == SIZEOF(Mac1_2)
+101   2364
+102   2364              ;;; check if sizeof is reserved keyword
+103   2364
+104   2364              sizeof:
+105   2364              SIZEOF:
+106   2364
+107   2364              ;;; non-standard edge cases
+108   2364
+sizeof_label.asm(109): warning: SIZEOF(...) this type of label is invalid, size is zero
+109   2364              MyEqu:  EQU $-$100                          ; warn about sizeof equ, also size should be 0
+110   2364 2E                   db  '.'
+110   2365              ::
+111   2365 21                   db  '!'
+112   2366
+113   2366                  ASSERT 0 == SIZEOF(MyEqu)
+114   2366
+sizeof_label.asm(115): warning: SIZEOF(...) this type of label is invalid, size is zero
+115   2366              MyDefl  =   $-$100
+116   2366 2E                   db  '.'
+116   2367              ::
+117   2367 21                   db  '!'
+118   2368
+119   2368                  ASSERT 0 == SIZEOF(MyDefl)
+120   2368
+sizeof_label.asm(121): warning: SIZEOF(...) this type of label is invalid, size is zero
+121   2368 21 34 12     SmcLabel+*: ld  hl,$1234
+122   236B
+123   236B                  ASSERT 0 == SIZEOF(SmcLabel)
+124   236B
+sizeof_label.asm(125): error: Invalid character at start of labelname: 1nvalidLabel)
+125   236B                  ASSERT 0 == SIZEOF(1nvalidLabel)
+126   236B
+127   236B              ;;; STRUCT has implicit SIZEOF for main label/emit, and zero SIZEOF for members of struct
+128   236B
+129   236B                  STRUCT S_MyStruct
+130   236B ~            Item1   WORD
+131   236B ~            Item2   BYTE
+132   236B ~            Item3   TEXT 6, {' '}
+133   236B                  ENDS
+134   236B
+135   236B 00 00 00 20  Struct1 S_MyStruct
+135   236F 20 20 20 20
+135   2373 20
+136   2374
+137   2374                  ASSERT S_MyStruct == SIZEOF(S_MyStruct) ; struct itself is already size, but for convenience make also SIZEOF(struct) work
+138   2374                  ASSERT S_MyStruct == SIZEOF(Struct1)    ; emitted struct will also have SIZEOF defined, this may be even more convenient
+139   2374                  ASSERT Struct1 != SIZEOF(Struct1)       ; but emitted label has value of its address of course, not size
+140   2374                  ; members of struct will report zero as SIZEOF(..), silently without warning (CBA to differ them from main label)
+141   2374                  ASSERT 0 == SIZEOF(S_MyStruct.Item1) && 0 == SIZEOF(S_MyStruct.Item2) &&  0 == SIZEOF(S_MyStruct.Item3)
+142   2374                  ASSERT 0 == SIZEOF(Struct1.Item1) && 0 == SIZEOF(Struct1.Item2) &&  0 == SIZEOF(Struct1.Item3)
+143   2374
+144   2374              ;;; nested MODULE should kill all counting with warning like ORG
+145   2374
+146   2374                  MACRO NestedModuleMacro
+147   2374 ~                    MODULE NestedModule
+148   2374 ~                    ENDMODULE
+149   2374                  ENDM
+150   2374
+151   2374              AheadOfNestedModule:
+152   2374 6D 6F 64         db  "mod"
+153   2377                  NestedModuleMacro                       ; should warn
+sizeof_label.asm(147): warning: There are labels in parent scope being SIZEOF-tracked at this point. Stopping their count here.
+sizeof_label.asm(153): ^ emitted from here
+153   2377             >        MODULE NestedModule
+153   2377             >        ENDMODULE
+154   2377
+155   2377                  ASSERT 3 == SIZEOF(AheadOfNestedModule)
+156   2377
+157   2377              ;;; nested ORG inside macro
+158   2377
+159   2377                  MACRO NestedOrgMacro
+160   2377 ~                    ORG $
+161   2377                  ENDM
+162   2377
+163   2377              AheadOfNestedOrg:
+164   2377 6F 72 67         db  "org"
+165   237A                  NestedOrgMacro                       ; should warn
+sizeof_label.asm(160): warning: There are labels in parent scope being SIZEOF-tracked at this point. Stopping their count here.
+sizeof_label.asm(165): ^ emitted from here
+165   237A             >        ORG $
+166   237A
+167   237A                  ASSERT 3 == SIZEOF(AheadOfNestedOrg)
+168   237A
+169   237A              ;;; SIZEOF counts **across** DISP (displaced) blocks
+170   237A
+171   237A              AcrossDisp:
+172   237A 21               db  '!'
+173   237B                  DISP    $A000
+174   A000 64 69 73 70      db  "disp"
+175   A004                  ENT
+176   237F 2E               db  '.'
+176   2380              ::
+176   2380 21             db  '!'
+177   2381
+178   2381                  ASSERT 6 == SIZEOF(AcrossDisp)
+179   2381
+180   2381              OrgInDisp:
+181   2381 3A               db  ':'
+182   2382                  DISP    $A000
+183   A000 64 69            db  "di"
+184   A002                  ; in this specific case the physical memory flow is not interrupted, labels count size across such "ORG"
+185   A002                  ORG     $B000           ; displacedorg-ok: not a true physical address ORG, just changing displacement
+186   B000 73 70            db  "sp"
+187   B002                  ASSERT 6 == SIZEOF(OrgInDisp)       ; should count correct size even *inside* the size-block
+188   B002                  ENT
+189   2386 2E               db  '.'
+189   2387              ::
+189   2387 21             db  '!'
+190   2388
+191   2388              ;;; non-longptr wrap around 64ki in DISP (emitBlock, emitByteNoListing) does not stop the count (physical memory matters)
+192   2388
+193   2388                  DEVICE NONE
+194   2388                  ORG $FFFE
+195   FFFE              AcrossNoneDevice64ki:       ; will cross into 0x1'0000 territory, but not wrap-around! (not even w/o --longptr)
+sizeof_label.asm(196): warning: RAM limit exceeded 0x10000 by ORG
+196   FFFE 78 56 34 12      dd  $12345678
+197   0002              AcrossNoneDevice64ki_2:
+198   0002 34 12            dw  $1234
+198   0004              ::
+198   0004                         ; count works even in 0x1'0000+ land
+199   0004                  ORG $FF00
+200   FF00                  DISP $FFFE
+201   FFFE              AcrossNoneDevice64ki_3 ; this one does not care about DISP wrap-around, physically it's FF00..FF03 = size 4
+sizeof_label.asm(202): warning: RAM limit exceeded 0x10000 by DISP
+202   FFFE 78 56 34 12          dd  $12345678
+202   0002              ::
+203   0002                  ENT
+204   FF04
+205   FF04                  ASSERT 4 == SIZEOF(AcrossNoneDevice64ki) && 2 == SIZEOF(AcrossNoneDevice64ki_2)
+206   FF04                  ASSERT 4 == SIZEOF(AcrossNoneDevice64ki_3)
+207   FF04
+208   FF04              ;;; DEVICE going outside of address space, MMU (ORG and wrap-around)
+209   FF04
+210   FF04                  DEVICE ZXSPECTRUMNEXT
+211   FF04
+212   FF04                  ORG $FFF9               ; only 7 bytes left till 64ki address space ends
+213   FFF9              Device64kiWrap:
+214   FFF9                  ASSERT 8 == SIZEOF(Device64kiWrap)
+sizeof_label.asm(215): error: Write outside of device memory at: 65536
+215   FFF9 31 32 33 34      db  "12345678"
+215   FFFD 35 36 37 38
+215   0001              ::
+215   0001                      ; warns about writing outside of device mem
+216   0001                  ASSERT $10001 == $      ; confirm being outside of device
+217   0001
+218   0001                  ORG $6000
+219   6000              MmuOrgBoundary:
+220   6000                  ASSERT 3 == SIZEOF(MmuOrgBoundary)
+221   6000 6D 6D 75         db  'mmu'
+222   6003                  MMU $6000 n, 67, $7FF9  ; no warning, this is not nested
+223   7FF9              MmuSlotWrap:
+224   7FF9                  ASSERT 7 == SIZEOF(MmuSlotWrap) ; only 7 bytes left in this slot
+sizeof_label.asm(225): warning: SIZEOF-tracking does not work across wrap-around. Stopping count here.
+225   7FF9 31 32 33 34      db  "12345678"          ; warns about wrap-around finishing sizeof-tracking
+225   7FFD 35 36 37 38
+226   6001                  ASSERT $6001 == $       ; confirm wrap-around
+227   6001
+228   6001              ;;; conditional tag-boundary parsing
+229   6001
+230   6001              ConditionalShortening1:
+231   6001                  ASSERT 11 + 9 + 1 == SIZEOF(ConditionalShortening1)
+232   6001 73 68 6F 72      db  "shortening-"
+232   6005 74 65 6E 69
+232   6009 6E 67 2D
+233   600C                  IFDEF SOME_DEFINE
+234   600C ~                    db  "defined"
+234   600C ~            ::
+235   600C                  ELSE
+236   600C 75 6E 64 65          db  "undefined"
+236   6010 66 69 6E 65
+236   6014 64
+237   6015                  ENDIF
+238   6015 21               db "!"
+238   6016              ::
+239   6016
+240   6016              ConditionalShortening2:
+241   6016                  ASSERT 11 + 9 == SIZEOF(ConditionalShortening2)
+242   6016 73 68 6F 72      db  "shortening-"
+242   601A 74 65 6E 69
+242   601E 6E 67 2D
+243   6021                  IFNDEF SOME_DEFINE
+244   6021 75 6E 64 65          db  "undefined"
+244   6025 66 69 6E 65
+244   6029 64
+244   602A              ::
+245   602A                  ELSE
+246   602A ~                    db  "defined"
+247   602A                  ENDIF
+248   602A 21               db "!"
+248   602B              ::
+249   602B
+250   602B              ;;; some more tags tests
+251   602B
+252   602B              .tagTestLocal:
+sizeof_label.asm(253): error: Invalid (blank) labelname
+253   602B              :
+253   602B                 ; needs whitespace to work, this is just empty label + single colon splitter
+sizeof_label.asm(254): error: Invalid (blank) labelname
+sizeof_label.asm(254): error: Unrecognized instruction: .
+254   602B              :.
+254   602B                ; as above, this becomes empty label, unrecognized instruction and single colons splitter
+255   602B 74 61 67         db  "tag"
+255   602E              ::
+256   602E                  ASSERT 3 == SIZEOF(.tagTestLocal)
+257   602E
+258   602E              ;;; Some examples from original issue post and docs
+259   602E
+260   602E              ; #1
+261   602E              FOO:
+262   602E 3E 03                ld      a,3
+263   6030 CD 3B 60             call    BAR
+264   6033 38 03                jr      c,.skip
+265   6035 3E 01                ld      a,1
+266   6037 C9                   ret
+267   6038
+268   6038 3E 02        .skip:  ld      a,2
+269   603A C9                   ret
+270   603B
+271   603B              BAR:
+272   603B FE 05                cp      5
+273   603D C9                   ret
+274   603E
+275   603E                  ASSERT 13 == SIZEOF(FOO)
+276   603E
+277   603E              ; #2
+278   603E              CHKCHARS:
+279   603E                  ASSERT 43 + 4 + 3 + 8 == SIZEOF(CHKCHARS)
+280   603E                  ASSERT 4 == SIZEOF(.charlist1)
+281   603E                  ASSERT 3 == SIZEOF(.charlist2)
+282   603E                  ASSERT 8 == SIZEOF(.charlist3)
+283   603E 00 00 00...                  ds  43      ; fake "code" omitted, only some bytes reserved here
+284   6069 41 42 43 44  .charlist1:     db  "ABCD"
+285   606D 45 46 47     .charlist2:     db  "EFG"
+286   6070 48 49 48 4B  .charlist3:     db  "HIHKLMNO"
+286   6074 4C 4D 4E 4F
+287   6078
+288   6078              CHKCHARS_BAR:
+289   6078
+290   6078              ; #3
+291   6078              I16_Label:
+292   6078 61 62 63         db "abc"  ; 3 bytes
+293   607B                  IF (0)
+293   607B ~            ::
+293   607B                ENDIF
+294   607B                  ; ^ that syntax should work, because "::" is also instruction delimiter,
+295   607B                  ; not just sizeof "counting" stopper, i.e. ENDIF will be found and assembled.
+296   607B 64               db "d" ; 4th byte
+297   607C                  IF (0)
+298   607C ~            I16_Label2:   ; this one will not assemble into regular labels
+299   607C                  ENDIF
+300   607C 65               db "e" ; 5th byte
+301   607D                  IF (1)
+301   607D              ::
+301   607D                ENDIF
+302   607D 01 05 00         ld bc,SIZEOF(I16_Label) ; 3, 4 or 5?
+303   6080                  ASSERT 5 == SIZEOF(I16_Label)   ; the correct answer is c) "5"
+304   6080
+305   6080              ; #4
+306   6080                      MACRO MyMacro
+307   6080 ~            @NewGlobalLabel:
+308   6080 ~                      xor a
+309   6080                      ENDM        ; SIZEOF(NewGlobalLabel) is 1, ENDM is nesting-boundary ending its count
+310   6080              MyRoutine:
+311   6080                      MyMacro     ; +1
+311   6080             >@NewGlobalLabel:
+311   6080 AF          >          xor a
+312   6081 ED 6F                rld
+312   6083              ::
+312   6083                     ; +2
+313   6083                  ASSERT 1 == SIZEOF(NewGlobalLabel)
+314   6083                  ASSERT 3 == SIZEOF(MyRoutine)
+315   6083
+316   6083              ;;; Temporary labels should not interfere with SIZEOF in any way, let's see what they do
+317   6083
+318   6083              TempLabelMidway:
+319   6083 66 69 72 73          db      "first "
+319   6087 74 20
+320   6089              123:
+321   6089 73 65 63 6F          db      "second"
+321   608D 6E 64
+321   608F              ::
+sizeof_label.asm(321): error: Invalid character at start of labelname: 123_B)
+321   608F 89 60 64 23    dw 123_B, SIZEOF(123_B) ; error: invalid start of labelname
+322   6093
+323   6093                  ASSERT 6 + 6 == SIZEOF(TempLabelMidway) ; first+second counted together
+324   6093
+325   6093              ;;; SIZEOF boundary by EOF of main file
+326   6093
+327   6093                  ASSERT 4 == SIZEOF(EndOfMainAsm)
+328   6093
+329   6093              EndOfMainAsm:
+330   6093 45 4F 46 00          db  "EOF"Z
+331   6097
+# file closed: sizeof_label.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0x345F   0>MyIncL1
+0x234A   1>MyL1
+0x2350   2>MyL2
+0x2355   3.2>MyL1
+0x237A   AcrossDisp
+0xFFFE   AcrossNoneDevice64ki
+0x10002   AcrossNoneDevice64ki_2
+0xFFFE   AcrossNoneDevice64ki_3
+0x2348   AheadMacro
+0x2374   AheadOfNestedModule
+0x2377   AheadOfNestedOrg
+0x603B   BAR
+0x603E   CHKCHARS
+0x6069   CHKCHARS.charlist1
+0x606D   CHKCHARS.charlist2
+0x6070   CHKCHARS.charlist3
+0x6078 X CHKCHARS_BAR
+0x6001   ConditionalShortening1
+0x6016   ConditionalShortening2
+0x602B   ConditionalShortening2.tagTestLocal
+0xFFF9   Device64kiWrap
+0x6093   EndOfMainAsm
+0x602E   FOO
+0x6038   FOO.skip
+0x124B   FwdRef
+0x6078   I16_Label
+0x345C   Inc1Label1
+0x345D   Inc1Label1.locL1
+0x3460   Inc1Label1.locL2
+0x3462   Inc1Label2
+0x3462   Inc1Label2.locL1
+0x345E   Inc1Label3
+0x346A   Inc2Label1
+0x2345   Inc2Label1.loc1
+0x1234   L1
+0x1237   L1.locL1
+0x1238   L1.locL2
+0x123A   L2
+0x123A   L2.locL1
+0x1245   L2.locL2
+0x3459   Linc1
+0x3467   Linc2
+0x124E   Lmod
+0x1258   Lorg
+0x2349   Mac1_0
+0x2354   Mac1_2
+0x234F   Mac2_1
+0x6000   MmuOrgBoundary
+0x7FF9   MmuSlotWrap
+0x1254   mod_example.Lmodin
+0x2266   MyDefl
+0x2264   MyEqu
+0x6080   MyRoutine
+0x6080   NewGlobalLabel
+0x2381   OrgInDisp
+0x0009   S_MyStruct
+0x0000   S_MyStruct.Item1
+0x0002   S_MyStruct.Item2
+0x0003   S_MyStruct.Item3
+0x2364   SIZEOF
+0x2364   sizeof
+0x2369   SmcLabel
+0x236B   Struct1
+0x236B   Struct1.Item1
+0x236D   Struct1.Item2
+0x236E   Struct1.Item3
+0x6083   TempLabelMidway

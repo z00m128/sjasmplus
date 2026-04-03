@@ -269,6 +269,7 @@ source_positions_t::size_type smartSmcIndex;
 uint32_t maxlin = 0;
 aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
 aint destlen = 0, size = -1L, comlin = 0;
+aint sourceBlockLevel = -2;
 
 char* macrolabp=NULL, * LastParsedLabel=NULL;
 std::stack<SRepeatStack> RepeatStack;
@@ -283,7 +284,8 @@ CStructureTable StructureTable;
 // reserve keywords in labels table, to detect when user is defining label colliding with keyword
 static void ReserveLabelKeywords() {
 	for (const char* keyword : {
-		"abs", "and", "exist", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "xor"
+		"abs", "and", "exist", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "sizeof", "xor",
+		"ABS", "AND", "EXIST", "HIGH", "LOW", "MOD", "NOREL", "NOT", "OR", "SHL", "SHR", "SIZEOF", "XOR"
 	}) {
 		LabelTable.Insert(keyword, -65536, LABEL_IS_UNDEFINED|LABEL_IS_KEYWORD);
 	}
@@ -811,6 +813,9 @@ int main(int argc, char **argv) {
 
 		static bool warn_stdin_default_lst = true;
 		for (SSource & src : sourceFiles) {
+			// sanity reset of SIZEOF state (this should NEVER report anything with valid .asm code, unless internal bug)
+			sourceBlockLevel = -2;			// open MODULE and similar errors may leave dangling nesting level
+			LabelTable.SizeBoundary(CLabelTable::BOUNDARY_FLOW);
 			if (src.stdin_log && warn_stdin_default_lst && 1 == pass && Options::IsDefaultListingName) {
 				Warning("use explicit --lst=<filename> for <stdin> source", nullptr, W_EARLY);
 				warn_stdin_default_lst = false;

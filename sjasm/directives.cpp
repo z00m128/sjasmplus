@@ -303,6 +303,7 @@ static void dirPageImpl(const char* const dirName) {
 }
 
 static void dirORG() {
+	if (DISP_NONE == PseudoORG) LabelTable.SizeBoundary(CLabelTable::BOUNDARY_ALL);	// ORG is hard SIZEOF-boundary (even for same address)
 	aint val;
 	if (!ParseExpressionNoSyntaxError(lp, val)) {
 		Error("[ORG] Syntax error in <address>", lp, SUPPRESS);
@@ -335,6 +336,7 @@ static void dirORG() {
 
 // public API for lua setter
 void dirOrgOnlyAddr(aint address) {
+	if (DISP_NONE == PseudoORG) LabelTable.SizeBoundary(CLabelTable::BOUNDARY_ALL);	// ORG is hard SIZEOF-boundary (even for same address)
 	// crop (with warning) address in device or non-longptr mode to 16bit address range
 	if ((DeviceID || !Options::IsLongPtr) && !check16u(address)) address &= 0xFFFF;
 	CurAddress = address;
@@ -487,6 +489,7 @@ static void dirMMU() {
 	if (DISP_NONE != PseudoORG) adrdisp &= 0xFFFF; else CurAddress &= 0xFFFF;
 	// set explicit ORG address if the third argument was provided
 	if (0 <= address) {
+		LabelTable.SizeBoundary(CLabelTable::BOUNDARY_ALL);	// ORG is hard SIZEOF-boundary (even for same address)
 		CurAddress = address;
 		if (DISP_NONE != PseudoORG) {
 			WarningById(W_DISPLACED_ORG);
@@ -536,8 +539,10 @@ static void dirALIGN() {
 }
 
 static void dirMODULE() {
+	LabelTable.SizeBoundary(CLabelTable::BOUNDARY_ALL);	// start of module is hard SIZEOF-boundary
 	char* n = GetID(lp);
 	if (n && (nullptr == STRCHR(n, '.'))) {
+		sourceBlockLevel += 2;
 		if (*ModuleName) STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), ".");
 		STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), n);
 		InitVorlab();	// reset non-local label to default "<modules>._"
@@ -558,6 +563,9 @@ static void dirENDMODULE() {
 		Error("ENDMODULE without MODULE");
 		return;
 	}
+	//SIZEOF-boundary(main) here, "all" shouldn't be needed if this is paired with MODULE correctly
+	LabelTable.SizeBoundary(CLabelTable::BOUNDARY_MAIN);
+	sourceBlockLevel -= 2;
 	if (IsSldExportActive()) {
 		WriteToSldFile(-1, CurAddress, 'L', ExportModuleToSld(true));
 	}
@@ -2183,8 +2191,8 @@ static void dirDEFDEVICE() {
 		Error(DEFDEVICE_SYNTAX_ERR, bp, EARLY);
 		return;
 	}
-	if (slot_size < 256 || 0x10000 < slot_size || page_count <= 0) {
-		Error("[DEFDEVICE] valid slot_size: 256..64ki, page_count: 1 or more", bp, EARLY);
+	if (slot_size < 256 || 0x10000 < slot_size || page_count <= 0 || LABEL_PAGE_MAX_RAM < page_count) {
+		Error("[DEFDEVICE] valid slot_size: 256..64ki, page_count: 1..30000", bp, EARLY);
 		return;
 	}
 	DefDevices.push_back(new CDeviceDef(id, slot_size, page_count));

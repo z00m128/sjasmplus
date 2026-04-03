@@ -52,7 +52,8 @@ struct TextFilePos {
 	}
 };
 
-typedef std::vector<TextFilePos> source_positions_t;
+using source_positions_t = std::vector<TextFilePos>;
+using page_t = int16_t;
 
 enum EStructureMembers {
 	SMEMBUNKNOWN, SMEMBALIGN,
@@ -64,6 +65,7 @@ struct SLabelTableEntry;
 
 extern std::string vorlab;
 void InitVorlab();
+char* ValidateLabel(bool & isLocal, const char* naam, bool setNameSpace, bool ignoreCharAfter = false);
 char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter = false);
 char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label);
 char* ExportModuleToSld(bool endModule = false);
@@ -71,11 +73,13 @@ extern char* PreviousIsLabel;
 bool LabelExist(char*& p, aint& val);
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);
+bool GetLabelSize(char*& p, aint& val);
 int GetTemporaryLabelValue(char*& op, aint& val, bool requireUnderscore = false);
 
-constexpr int LABEL_PAGE_UNDEFINED = -1;
-constexpr int LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
-constexpr int LABEL_PAGE_OUT_OF_BOUNDS = 0x7F80;	// label is defined, but not within Z80 address space
+constexpr page_t LABEL_PAGE_UNDEFINED = -1;
+constexpr page_t LABEL_PAGE_MAX_RAM = 30'000;
+constexpr page_t LABEL_PAGE_ROM = 0x7F00;			// must be minimum of special values (but positive)
+constexpr page_t LABEL_PAGE_OUT_OF_BOUNDS = 0x7F80;	// label is defined, but not within Z80 address space
 
 constexpr uint16_t LABEL_IS_UNDEFINED = (1<<0);
 constexpr uint16_t LABEL_IS_DEFL = (1<<1);
@@ -86,27 +90,43 @@ constexpr uint16_t LABEL_HAS_RELOC_TRAIT = (1<<5);
 constexpr uint16_t LABEL_IS_RELOC = (1<<6);
 constexpr uint16_t LABEL_IS_SMC = (1<<7);
 constexpr uint16_t LABEL_IS_KEYWORD = (1<<8);
+constexpr uint16_t LABEL_HAS_SIZE = (1<<9);		// SIZEOF(label) was used in source elsewhere, track it's size
+constexpr uint16_t LABEL_IS_LOCAL = (1<<10);	// track origin type of the label
 // constexpr uint16_t LABEL_IS_USED = (1<<?);	// currently not explicitly used in Insert(..) (calculated implicitly)
 
 struct SLabelTableEntry {
-	aint				value = 0;
-	int16_t				page = LABEL_PAGE_UNDEFINED;
-	uint16_t			traits = 0;
+	aint				value = 0;				// value of symbol, DISP labels has this one displaced (ie. their destined "address")
+	aint				ph_value = 0;			// physical address for regular labels
+												//(at which address the symbol was defined, "undisplaced" for DISP symbols, address for EQU/DEFL, etc)
+	aint				size = 0;				// when traits LABEL_HAS_SIZE, then this is value for SIZEOF() operator
+	page_t				page = LABEL_PAGE_UNDEFINED;	// page of symbol ("displaced" inside DISP)
+	page_t				ph_page = LABEL_PAGE_UNDEFINED;	// physical page of symbol
+	uint16_t			traits = 0;				//TODO: C++20 allows for default initializer for bit-field, so this may become Nx `bool isXYZ : 1 = false;`
 	int8_t				updatePass = 0;			// last update was in pass
 	bool				used = false;
 	Relocation::EType	isRelocatable = Relocation::OFF;
 };
 
-typedef std::map<std::string, SLabelTableEntry> symbol_map_t;
+using symbol_map_t = std::map<std::string, SLabelTableEntry>;
 
 class CLabelTable {
 private:
 	symbol_map_t symbols;
+
+	// SIZEOF related types and data
+	struct SSizeofStackItem {
+		SLabelTableEntry *	label;
+		aint				srcLevel;
+		SSizeofStackItem(SLabelTableEntry *_label, aint _srcLevel) : label(_label), srcLevel(_srcLevel) {}
+	};
+	using sizeof_stack_t = std::vector<SSizeofStackItem>;
+	sizeof_stack_t sizeofStack;
+
 public:
 	CLabelTable(const CLabelTable&) = delete;
 	CLabelTable& operator=(CLabelTable const &) = delete;
 	CLabelTable() = default;
-	int Insert(const char* nname, aint nvalue, uint16_t traits = 0, int16_t equPageNum = LABEL_PAGE_UNDEFINED);
+	int Insert(const char* nname, aint nvalue, uint16_t traits = 0, page_t equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char* name, aint value);
 	SLabelTableEntry* Find(const char* name, bool onlyDefined = false);
 	bool Remove(const char* name);
@@ -116,6 +136,16 @@ public:
 	void DumpForUnreal();
 	void DumpForCSpect();
 	void DumpSymbols();
+
+	// SIZEOF related API
+	enum BoundaryLevel {
+		BOUNDARY_FLOW,		// flow of addressing is broken in extraordinary way (MMU wrap-around slot, 64ki wrap-around)
+		BOUNDARY_ALL,		// finish counting of all SIZEOF-labels up to current point (ORG-like or MODULE)
+		BOUNDARY_MAIN,		// main and local labels of current nesting index finish counting
+		BOUNDARY_LOCAL,		// local labels only finish counting
+	};
+	void TrackForSize(SLabelTableEntry *label);
+	void SizeBoundary(BoundaryLevel boundaryLevel);
 };
 
 typedef void (*function_fn_t)(void);

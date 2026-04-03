@@ -53,8 +53,8 @@ TEST_FIXTURE(DeviceFixture, Device_GetSlotOfA16) {
 }
 
 TEST_FIXTURE(DeviceFixture, Device_GetPageOfA16) {
-	CHECK(-1 == testDev.GetPageOfA16(0x8000));
-	CHECK(-1 == testDev.GetPageOfA16(-1));
+	CHECK(LABEL_PAGE_OUT_OF_BOUNDS == testDev.GetPageOfA16(0x8000));
+	CHECK(LABEL_PAGE_OUT_OF_BOUNDS == testDev.GetPageOfA16(-1));
 	CHECK(0 == testDev.GetPageOfA16(0x0123));
 	CHECK(1 == testDev.GetPageOfA16(0x4123));
 }

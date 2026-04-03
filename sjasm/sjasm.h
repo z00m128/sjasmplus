@@ -168,6 +168,7 @@ extern source_positions_t::size_type smartSmcIndex;
 extern uint32_t maxlin;
 extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine, PredefinedCounter;
 extern aint destlen, size, comlin;
+extern aint sourceBlockLevel;		// source-block nesting level (for sizeof-like purposes: modules, includes, macros)
 
 extern char* macrolabp, * LastParsedLabel;
 

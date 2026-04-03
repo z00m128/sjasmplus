@@ -295,7 +295,7 @@ int TAP_SaveSnapshot(const std::filesystem::path & fname, unsigned short start) 
 
 		// build pages table
 		aint count = 0;
-		for (aint i=0;i < Device->PagesCount;i++) {
+		for (page_t i=0;i < Device->PagesCount;i++) {
 			if (Device->GetSlot(2)->Page->Number != i && Device->GetSlot(1)->Page->Number != i) {
 				aint length = 0x4000;
 				length = remove_unused_space((unsigned char*)Device->GetPage(i)->RAM, length);

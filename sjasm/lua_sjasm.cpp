@@ -276,10 +276,11 @@ static int lua_sj_get_label(const char *name) {
 
 static bool lua_sj_insert_label(const char *name, int address) {
 	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
-	std::unique_ptr<char[]> fullName(ValidateLabel(name, true, false));
+	bool isLocal;
+	std::unique_ptr<char[]> fullName(ValidateLabel(isLocal, name, true, false));
 	removeLuaSourcePositions(positionsAdded);
 	if (nullptr == fullName.get()) return false;
-	return LabelTable.Insert(fullName.get(), address);
+	return LabelTable.Insert(fullName.get(), address, (isLocal ? LABEL_IS_LOCAL : 0));
 }
 
 static void lua_sj_shellexec(const char *command) {
@@ -317,7 +318,7 @@ static bool lua_sj_set_slot(aint n) {
 static int32_t lua_sj_get_page_at(int32_t addr) {
 	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
 	if (!DeviceID) Warning("sj.get_page_at: only allowed in real device emulation mode (See DEVICE)");
-	int32_t result = DeviceID ? Device->GetPageOfA16(addr) : -1;
+	int32_t result = DeviceID ? Device->GetPageOfA16(addr) : LABEL_PAGE_ROM;
 	removeLuaSourcePositions(positionsAdded);
 	return result;
 }

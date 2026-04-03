@@ -36,6 +36,19 @@ x               BYTE    102
 x           BYTE    $CC
         ENDS
 
+        ; duplicate label may happen even when main struct name is unique
+        MODULE whatever
+            STRUCT name1
+a               BYTE    104
+            ENDS
+        ENDMODULE
+        STRUCT whatever
+name1.a     BYTE    105 ; compounds into whatever.name1.a -> clash with previous struct
+        ENDS
+        STRUCT name1.x  ; clash with name1 struct element x from line 13
+y           BYTE    106
+        ENDS
+
         STRUCT notEndedOne
 x           BYTE    103
     ENDIF

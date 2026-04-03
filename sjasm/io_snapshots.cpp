@@ -112,10 +112,10 @@ bool SaveSNA_ZX(const std::filesystem::path & fname, word start) {
 		return writeError(fname, ff);
 	}
 
-	const int pages48[3] = { 1, 2, 3 };
-	const int pages128[3] = { 5, 2, Device->GetSlot(3)->Page->Number };
+	const page_t pages48[3] = { 1, 2, 3 };
+	const page_t pages128[3] = { 5, 2, Device->GetSlot(3)->Page->Number };
 
-	for (const int page : is48kSnap ? pages48 : pages128) {
+	for (const page_t page : is48kSnap ? pages48 : pages128) {
 		if ((aint) fwrite(Device->GetPage(page)->RAM, 1, Device->GetPage(page)->Size, ff) != Device->GetPage(page)->Size) {
 			return writeError(fname, ff);
 		}
@@ -131,7 +131,7 @@ bool SaveSNA_ZX(const std::filesystem::path & fname, word start) {
 			return writeError(fname, ff);
 		}
 		// 128k banks
-		for (aint i = 0; i < 8; i++) {
+		for (page_t i = 0; i < 8; i++) {
 			if (i != Device->GetSlot(3)->Page->Number && i != 2 && i != 5) {
 				if ((aint) fwrite(Device->GetPage(i)->RAM, 1, Device->GetPage(i)->Size, ff) != Device->GetPage(i)->Size) {
 					return writeError(fname, ff);
