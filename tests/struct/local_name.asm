@@ -90,11 +90,11 @@ MahInstanceLoc     Whatever.MethodA.Data { 12, 34 } ; <- FAILS in v1.21.0
 
 
 
+    ; test edge case in implementation of error handling - open struct which is invalid (duplicate)
 
-
-
-
-
-
+    STRUCT Whatever.MethodB.Data
+xxxx1   BYTE
+xxxx2   BYTE
+    ;ENDS
 
     ; reserving 100+ lines

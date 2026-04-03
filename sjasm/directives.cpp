@@ -1902,7 +1902,7 @@ static void dirSTRUCT() {
 		ListFile(true);
 	}
 	Error("[STRUCT] Unexpected end of structure");
-	st->deflab();
+	if (st) st->deflab();
 }
 
 static void dirFPOS() {

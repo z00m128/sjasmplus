@@ -96,14 +96,17 @@ local_name.asm(72): error: Invalid character at start of labelname: %as
  90   0041
  91   0041
  92   0041
- 93   0041
+ 93   0041                  ; test edge case in implementation of error handling - open struct which is invalid (duplicate)
  94   0041
- 95   0041
- 96   0041
- 97   0041
- 98   0041
- 99   0041
-100   0041                  ; reserving 100+ lines
+local_name.asm(95): error: [STRUCT] Structure already exist: Whatever.MethodB.Data
+ 95   0041                  STRUCT Whatever.MethodB.Data
+ 96   0041 ~            xxxx1   BYTE
+ 97   0041 ~            xxxx2   BYTE
+ 98   0041 ~                ;ENDS
+ 99   0041 ~
+100   0041 ~                ; reserving 100+ lines
+101   0041 ~
+local_name.asm(101): error: [STRUCT] Unexpected end of structure
 101   0041
 # file closed: local_name.asm
 
