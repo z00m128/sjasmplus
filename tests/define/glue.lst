@@ -88,6 +88,21 @@ glue.asm(72): error: Unrecognized instruction: FEE _
 glue.asm(73): error: Unrecognized instruction: _   FEE _
 73    4054               _   FEE _ ;
 74    4054
+75    4054              ; make implementation thorough to process glues which become part of quoted string
+76    4054              ; first version was using binary tag \x1A, but that can be part of user's source code in binary form
+77    4054              ; after some attempts for complex fix, I reverted to old idea of abusing some other binary tag: 0x0A
+78    4054              ; 0x0A can't be part of source code, as it is CR character doing new lines, so in source form it must be always \n or numeric literal
+79    4054                DEFINE QUOTE "
+80    4054 46 45 45       DB "FEE"        ; expected result: DB "FEE"
+81    4057 21 20 1A 20    DB "!  !" .. "FEE" .. "!  !"    ; (obsolete) but do NOT replace user's binary tags \x1A, only original `_` glues!
+81    405B 21 46 45 45
+81    405F 21 20 1A 20
+81    4063 21
+82    4064 21 20 0A 20    DB "! \n !" .. "FEE" .. "! \n !"  ; (duh!) but do NOT replace user's \n, only original `_` glues!
+82    4068 21 46 45 45
+82    406C 21 20 0A 20
+82    4070 21
+83    4071
 # file closed: glue.asm
 
 Value    Label

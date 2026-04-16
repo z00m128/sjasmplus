@@ -71,3 +71,12 @@ FOO
  FOO ;
 _ FOO _
  _ FOO _ ;
+
+; make implementation thorough to process glues which become part of quoted string
+; first version was using binary tag \x1A, but that can be part of user's source code in binary form
+; after some attempts for complex fix, I reverted to old idea of abusing some other binary tag: 0x0A
+; 0x0A can't be part of source code, as it is CR character doing new lines, so in source form it must be always \n or numeric literal
+  DEFINE QUOTE "
+  DB QUOTE _ FOO _ QUOTE        ; expected result: DB "FEE"
+  DB "!  !" .. QUOTE _ FOO _ QUOTE .. "!  !"    ; (obsolete) but do NOT replace user's binary tags \x1A, only original `_` glues!
+  DB "! \n !" .. QUOTE _ FOO _ QUOTE .. "! \n !"  ; (duh!) but do NOT replace user's \n, only original `_` glues!
