@@ -387,7 +387,13 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 	// quicker check to avoid scanning whole slots array every byte
 	if (CHECK_RESET != level
 		&& Slots[previousSlotI]->Address <= realAddr
-		&& realAddr < Slots[previousSlotI]->Address + Slots[previousSlotI]->Size) return;
+		&& realAddr < Slots[previousSlotI]->Address + Slots[previousSlotI]->Size) {
+		// refresh MemoryPointer in case the CurAddress did move a bit without emit (negative BLOCK, etc)
+		MemoryPointer = Slots[previousSlotI]->Page->RAM + (realAddr - Slots[previousSlotI]->Address);
+		assert(	(Slots[previousSlotI]->Page->RAM <= MemoryPointer) &&
+				(MemoryPointer < Slots[previousSlotI]->Page->RAM + Slots[previousSlotI]->Size));
+		return;
+	}
 	for (int i=SlotsCount; i--; ) {
 		CDeviceSlot* const S = Slots[i];
 		if (realAddr < S->Address) continue;

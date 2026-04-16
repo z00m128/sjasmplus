@@ -256,7 +256,7 @@ static void dirBLOCK() {
 	aint teller = 0, val = 0, initByteCount = 0, emitMaxToListing = 4;
 	if (ParseExpressionNoSyntaxError(lp, teller)) {
 		if (teller < 0) {
-			Warning("Negative BLOCK?");
+			Warning("Negative BLOCK moves PC backwards");
 		}
 		if (comma(lp)) {
 			// Parse operand list using GetBytes (like DEFB does)

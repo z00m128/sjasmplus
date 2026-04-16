@@ -1,10 +1,10 @@
 # file opened: sjio_coverage4.asm
  1    0000                  DEVICE none
-sjio_coverage4.asm(2): warning: Negative BLOCK?
+sjio_coverage4.asm(2): warning: Negative BLOCK moves PC backwards
 sjio_coverage4.asm(2): warning[shortblock]: init data for block truncated to length: -8000
  2    0000                  BLOCK   -8000,11
  3    E0C0                  DISP    0x1234
-sjio_coverage4.asm(4): warning: Negative BLOCK?
+sjio_coverage4.asm(4): warning: Negative BLOCK moves PC backwards
 sjio_coverage4.asm(4): warning[shortblock]: init data for block truncated to length: -8000
  4    1234                  BLOCK   -8000,12
  5    F2F4                  ENDT
@@ -12,7 +12,7 @@ sjio_coverage4.asm(6): error: SAVEBIN only allowed in real device emulation mode
  6    C180                  SAVEBIN "sjio_coverage4.bin", 1, 2  ; no device error
  7    C180
  8    C180                  DEVICE zxspectrum48
-sjio_coverage4.asm(9): warning: Negative BLOCK?
+sjio_coverage4.asm(9): warning: Negative BLOCK moves PC backwards
 sjio_coverage4.asm(9): warning[shortblock]: init data for block truncated to length: -8000
  9    C180                  BLOCK   -8000,13
 sjio_coverage4.asm(10): error: [BLOCK] Syntax Error in <length>: &, &

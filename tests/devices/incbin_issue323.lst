@@ -1,0 +1,24 @@
+# file opened: incbin_issue323.asm
+ 1    0000                DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000                ORG 65524
+ 4    FFF4              LOCAL:
+ 5    FFF4 06 01          ld b, 1
+ 6    FFF6 C9             ret
+ 7    FFF7
+incbin_issue323.asm(8): warning: Negative BLOCK moves PC backwards
+incbin_issue323.asm(8): warning[shortblock]: init data for block truncated to length: -1
+ 8    FFF7                block 65526 -$, 255
+ 9    FFF6
+10    FFF6                INCBIN "incbin_issue323.asm", 0, 10   ; assembling gets stuck when file exactly fits or overruns device memory
+11    0000              ;   block 10, 255                       ; same length block has no issue to assemble
+12    0000
+13    0000              t_end
+14    0000                SAVEBIN "incbin_issue323.bin", LOCAL, t_end - LOCAL
+15    0000
+# file closed: incbin_issue323.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xFFF4   LOCAL
+0x10000   t_end
