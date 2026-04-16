@@ -70,6 +70,7 @@ extern const char* W_ENABLE_ALL;
 extern const char* W_ZERO_DECIMAL;
 extern const char* W_NON_ZERO_DECIMAL;
 extern const char* W_SHORT_BLOCK;
+extern const char* W_EMPTY_STRING;
 
 extern TextFilePos skipEmitMessagePos;
 extern const char* extraErrorWarningPrefix;

@@ -1062,7 +1062,7 @@ template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, in
 			}
 			e[ei - 1] |= 0x80;
 		}
-		if (eiStart == ei) Warning("Empty string", elementP);
+		if (eiStart == ei) WarningById(W_EMPTY_STRING, elementP);
 		if (('.'+'.') != need(p, "..")) return 1 + quotes;	// type of quotes reported for last segment only
 		// string concatenation operator handling
 		if (SkipBlanks(p) || ('"' != *p && '\'' != *p)) {

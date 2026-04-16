@@ -29,7 +29,7 @@
 13    8042                  ; so any longer pascal string must be defined by DB over multiple lines
 14    8042
 15    8042                  ; test zero size string (but why? just `DB 0` to avoid warnings/errors)
-dp_pascal_string.asm(16): warning: Empty string: ""
+dp_pascal_string.asm(16): warning[emptystr]: empty string: ""
 dp_pascal_string.asm(16): error: no arguments
 16    8042 00               dp ""
 17    8043

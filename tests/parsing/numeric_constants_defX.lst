@@ -79,8 +79,8 @@ numeric_constants_defX.asm(49): error: Expression expected
 49    0095                  DB                              ; expression expected error
 numeric_constants_defX.asm(50): error: Expression expected
 50    0095 01               DB      1,                      ; expression expected error
-numeric_constants_defX.asm(51): warning: Empty string: "", ''
-numeric_constants_defX.asm(51): warning: Empty string: ''
+numeric_constants_defX.asm(51): warning[emptystr]: empty string: "", ''
+numeric_constants_defX.asm(51): warning[emptystr]: empty string: ''
 numeric_constants_defX.asm(51): error: no arguments
 51    0096                  DC      "", ''                  ; 2x warning about empty "string" + 1x error "no arguments"
 52    0096

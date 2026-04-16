@@ -199,6 +199,7 @@ const char* W_ENABLE_ALL = "all";
 const char* W_ZERO_DECIMAL = "decimalz";
 const char* W_NON_ZERO_DECIMAL = "decimaln";
 const char* W_SHORT_BLOCK = "shortblock";
+const char* W_EMPTY_STRING = "emptystr";
 
 static messages_map w_texts = {
 	{ W_NO_RAMTOP,
@@ -374,6 +375,12 @@ static messages_map w_texts = {
 		{ true,
 			"init data for block truncated to length",
 			"Warn when block's length is shorter than init data"
+		}
+	},
+	{ W_EMPTY_STRING,
+		{ true,
+			"empty string",
+			"Warn when string literal is empty"
 		}
 	},
 	{ W_ENABLE_ALL,

@@ -137,6 +137,13 @@ string_literals.asm(21): error: Over 128 bytes defined in single DB/DC/... Value
 35    01B9 01 02 03 00      DZ 1,2,3        ; will add only single zero at end
 36    01BD 30 B1 32 B3      DC "01","23"    ; will patch both strings with |$80
 37    01C1
+string_literals.asm(38): warning[emptystr]: empty string: "", 9
+38    01C1 08 09            DB 8, "", 9     ; warning about empty string literal
+string_literals.asm(39): warning[emptystr]: empty string: '', 9
+39    01C3 08 09            DB 8, '', 9
+40    01C5 08 09            DB 8, "", 9     ; emptystr-ok ; suppressed warning
+41    01C7 08 09            DB 8, '', 9     ; emptystr-ok
+42    01C9
 # file closed: string_literals.asm
 
 Value    Label

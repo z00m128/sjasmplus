@@ -34,3 +34,8 @@
 
     DZ 1,2,3        ; will add only single zero at end
     DC "01","23"    ; will patch both strings with |$80
+
+    DB 8, "", 9     ; warning about empty string literal
+    DB 8, '', 9
+    DB 8, "", 9     ; emptystr-ok ; suppressed warning
+    DB 8, '', 9     ; emptystr-ok
