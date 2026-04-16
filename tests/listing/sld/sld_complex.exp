@@ -182,4 +182,6 @@ sld_complex.asm|76||0|38|32884|T|
 sld_complex.asm|75||0|38|32885|T|
 sld_complex.asm|76||0|38|32886|T|
 sld_complex.asm|78||0|38|32887|T|
-sld_complex.asm|82||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344
+sld_complex.asm|80||0|123|22136|D|EquWithExplicitPage
+sld_complex.asm|80||0|123|22136|L|,EquWithExplicitPage,,+equ
+sld_complex.asm|84||0|-1|-1|Z|pages.size:8192,pages.count:224,slots.count:8,slots.adr:0,8192,16384,24576,32768,40960,49152,57344

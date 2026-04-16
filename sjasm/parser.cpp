@@ -816,8 +816,8 @@ void ParseLabel() {
 				LabelTable.Insert(tp, val, traits);
 			} else if (IsSldExportActive()) {
 				// SLD (Source Level Debugging) tracing-data logging
-				WriteToSldFile(IsEQU ? -1 : label->page, val, IsEQU ? 'D' : 'F', tp);	//version 0
-				WriteToSldFile(IsEQU ? -1 : label->page, val, 'L', ExportLabelToSld(ttp, label));	//version 1
+				WriteToSldFile(IsEQU ? equPageNum : label->page, val, IsEQU ? 'D' : 'F', tp);	//version 0
+				WriteToSldFile(IsEQU ? equPageNum : label->page, val, 'L', ExportLabelToSld(ttp, label));	//version 1
 			}
 
 			if (val != label->value) {

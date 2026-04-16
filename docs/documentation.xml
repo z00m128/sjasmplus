@@ -211,6 +211,7 @@
               <synopsis>
 - Added <link linkend="s_sizeof_labels">`SIZEOF`</link> operator for labels
 - refactoring device - page numbering, error values changed from -1 to 0x7F00+ (<link linkend="lua_sj_get_page_at">`get_page_at`</link>)
+- small internal bug fixes (edge case with negative blocks, SLD export of EQU adjusted)
 - CI: binary reproducibility tested weekly
 </synopsis>
             </listitem>
@@ -5541,11 +5542,11 @@ start:  ei : jr $           ; app code entry point, BC = NEX file handle
 
 		<para>
 			Only labels defined in regular way get also the memory-page data in SLD file, EQU
-			values are exported without the page information, even if they represent memory
-			address:
+			values have page information only when explicitly given upon definition:
 			<programlisting>
 regularLabel:   nop             ; current page exported to SLD data
 equLabel        EQU   $8000     ; only value without page is exported
+equPagedLabel   EQU   $E123, 4  ; value with page 4 is exported
 varSymbol       =     14        ; =/DEFL labels are omitted completely</programlisting>
 		</para>
 

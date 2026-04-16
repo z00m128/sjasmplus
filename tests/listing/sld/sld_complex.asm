@@ -77,6 +77,8 @@ alternate = 1
         EDUP
         ld      h,a
 
+EquWithExplicitPage     EQU     0x5678, 123
+
     CSPECTMAP "sld_complex.sym"
     DEVICE NONE    ; does damage CSPECTMAP export!! the source must end with NEXT device
     DEVICE ZXSPECTRUMNEXT   ; fix CSPECTMAP to follow Next memory paging
