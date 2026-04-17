@@ -102,7 +102,11 @@ glue.asm(73): error: Unrecognized instruction: _   FEE _
 82    4068 21 46 45 45
 82    406C 21 20 0A 20
 82    4070 21
-83    4071
+83    4071                ; expected result: DB "FEE" .. "FEE" .. "FEE" with lot of spaces removed around glues
+88    4071 46 45 45 46    DB "FEE" .. "FEE" .. "FEE"
+88    4075 45 45 46 45
+88    4079 45
+89    407A
 # file closed: glue.asm
 
 Value    Label

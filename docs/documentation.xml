@@ -211,7 +211,7 @@
               <synopsis>
 - Added <link linkend="s_sizeof_labels">`SIZEOF`</link> operator for labels
 - refactoring device - page numbering, error values changed from -1 to 0x7F00+ (<link linkend="lua_sj_get_page_at">`get_page_at`</link>)
-- small internal bug fixes (edge case with negative blocks, SLD export of EQU adjusted)
+- small internal bug fixes (edge case with negative blocks, `_` glue, SLD export of EQU adjusted)
 - CI: binary reproducibility tested weekly
 </synopsis>
             </listitem>

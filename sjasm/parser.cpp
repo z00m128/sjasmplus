@@ -625,14 +625,13 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		int dropChars = 0;
 		for (rp = nl; *rp; ++rp) {
 			if (GLUE_TAG == *rp) {
-				char* leftp = rp, * rightp = rp;
-				leftp = rp;
+				char* leftp = rp + dropChars, * rightp = rp;
 				while (nl < leftp && White(leftp[-1])) --leftp;	// eat all whitespace to left
 				while (White(rightp[0])) ++rightp;				// eat all whitespace to right
 				// leftp points at left-most whitespace char, rightp points at first non-whitespace or \0
 				if ((nl == leftp) || (0 == rightp[0])) rp[0] = GLUE_CHAR;	// nothing to glue with, restore
 				else {
-					dropChars -= (rightp - leftp);				// discard this whitespace + glue block
+					dropChars = (leftp - rightp);				// discard this whitespace + glue block
 					rp = rightp;
 				}
 			}
@@ -644,7 +643,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 	}
 	// check if whole line is just blanks, then return just empty one
 	rp = nl;
-	if (SkipBlanks(rp)) *nl = 0;
+	if (!glueToProcess && SkipBlanks(rp)) *nl = 0;		// only when glues were processed as well
 	substitutedLine = nl;		// set global pointer to the latest substituted version
 	return definegereplaced;
 }

@@ -80,3 +80,9 @@ _ FOO _
   DB QUOTE _ FOO _ QUOTE        ; expected result: DB "FEE"
   DB "!  !" .. QUOTE _ FOO _ QUOTE .. "!  !"    ; (obsolete) but do NOT replace user's binary tags \x1A, only original `_` glues!
   DB "! \n !" .. QUOTE _ FOO _ QUOTE .. "! \n !"  ; (duh!) but do NOT replace user's \n, only original `_` glues!
+  ; expected result: DB "FEE" .. "FEE" .. "FEE" with lot of spaces removed around glues
+  DB QUOTE _ FOO \
+     _ QUOTE .. QUOTE _ \
+     FOO _\
+     QUOTE .. QUOTE       _            FOO                 _                \
+                                                              QUOTE
