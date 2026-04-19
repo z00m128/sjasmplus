@@ -210,6 +210,7 @@
             <listitem>
               <synopsis>
 - Added <link linkend="s_sizeof_labels">`SIZEOF`</link> operator for labels
+- Added <link linkend="op_label_ph_val">`$$$label`</link> and <link linkend="op_label_ph_page">`$$$$label`</link> operators for labels
 - refactoring device - page numbering, error values changed from -1 to 0x7F00+ (<link linkend="lua_sj_get_page_at">`get_page_at`</link>)
 - small internal bug fixes (edge case with negative blocks, `_` glue, SLD export of EQU adjusted)
 - CI: binary reproducibility tested weekly
@@ -1093,7 +1094,10 @@ $c     hexadecimal
 	  where the "label" was defined (only regular labels have meaningful value, labels defined
 	  under DISP mode may return the page specified in DISP itself, EQU/DEFL/... will produce mostly
 	  irrelevant values). '$$$' and '$$$$' can be used inside DISP block to retrieve the "physical"
-	  memory address and page (where the displaced machine code is written to). '{address}' can be used
+	  memory address and page (where the displaced machine code is written to). '$$$label' and '$$$$label'
+      can be used to read "physical" address and page of any label (for non-regular labels like EQU, DEFL
+      or SMC-offset label the "physical" address is address where the label was defined (see <ulink url="https://github.com/z00m128/sjasmplus/blob/master/tests/devices/get_label_physical_memory_operators.asm">
+      get_label_physical_memory_operators.asm</ulink> test for edge cases and details). '{address}' can be used
       to read WORD from virtual device memory (correct value is read only in last pass of assembling,
 	  in early passes the zero value is always returned), '{b address}' reads only BYTE.</para>
 
@@ -1160,6 +1164,8 @@ $$$    $$$       <indexterm id="op_dollar3"><primary>$$$</primary></indexterm>"p
 $$$$   $$$$      <indexterm id="op_dollar4"><primary>$$$$</primary></indexterm>"physical" memory page (inside DISP block in virtual device mode)
 label  label     value of label (aka symbol), usually memory address
 $$lab  $$lab     <indexterm id="op_label_page"><primary>$$label</primary></indexterm>page of "lab" label (in virtual device mode)
+$$$lab $$$lab    <indexterm id="op_label_ph_val"><primary>$$$label</primary></indexterm>"physical" address of "lab" label
+$$$$lb $$$$lb    <indexterm id="op_label_ph_page"><primary>$$$$label</primary></indexterm>"physical" memory page of "lb" label
 {}     {x}       <indexterm id="op_read_word"><primary>{..}</primary></indexterm>reads WORD from address x (in virtual device mode, in last pass)
 {b}    {b x}     <indexterm id="op_read_byte"><primary>{b ..}</primary></indexterm>reads BYTE from address x (in virtual device mode, in last pass)
 </programlisting></para>

@@ -81,6 +81,12 @@ static int ParseExpPrim(char*& p, aint& nval) {
 		Warning("?<symbol> operator is deprecated and will be removed in v2.x", p);
 		++p;
 		return GetLabelValue(p, nval);
+	} else if ('$' == p[0] && '$' == p[1] && '$' == p[2] && '$' == p[3] && isLabelStart(p + 4)) {
+		p += 4;								// $$$$label variant returns physical page
+		return GetLabelPhPage(p, nval);
+	} else if ('$' == p[0] && '$' == p[1] && '$' == p[2] && isLabelStart(p + 3)) {
+		p += 3;								// $$$label variant returns physical value
+		return GetLabelPhValue(p, nval);
 	} else if (DISP_NONE != PseudoORG && '$' == p[0] && '$' == p[1] && '$' == p[2]) {
 		if ('$' == p[3]) {		// "$$$$" operator to get physical memory page inside DISP block
 			p += 4;

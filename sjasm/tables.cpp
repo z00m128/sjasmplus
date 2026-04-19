@@ -300,6 +300,18 @@ bool GetLabelValue(char*& p, aint& val) {
 	return !getLabel_invalidName;
 }
 
+bool GetLabelPhPage(char*& p, aint& val) {
+	SLabelTableEntry* labelEntry = GetLabel(p);
+	val = labelEntry ? labelEntry->ph_page : LABEL_PAGE_UNDEFINED;
+	return !getLabel_invalidName;		// true even when not found, but valid label name
+}
+
+bool GetLabelPhValue(char*& p, aint& val) {
+	SLabelTableEntry* labelEntry = GetLabel(p);
+	val = labelEntry ? labelEntry->ph_value : 0;	// no relocation logic for ph_value
+	return !getLabel_invalidName;		// true even when not found, but valid label name
+}
+
 bool GetLabelSize(char*& p, aint& val) {
 	// if symbol is found, add "sizeof" trait, if not found, insert placeholder with "sizeof" trait
 	SLabelTableEntry* labelEntry = GetLabel(p, LABEL_HAS_SIZE);

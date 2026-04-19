@@ -73,6 +73,8 @@ extern char* PreviousIsLabel;
 bool LabelExist(char*& p, aint& val);
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);
+bool GetLabelPhPage(char*& p, aint& val);
+bool GetLabelPhValue(char*& p, aint& val);
 bool GetLabelSize(char*& p, aint& val);
 int GetTemporaryLabelValue(char*& op, aint& val, bool requireUnderscore = false);
 
