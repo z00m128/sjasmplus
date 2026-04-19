@@ -1,4 +1,11 @@
 
+## [1.23.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.23.0) - 23.4.2026
+- Added [`SIZEOF`](https://z00m128.github.io/sjasmplus/documentation.html#s_sizeof_labels) operator for labels
+- Added [`$$$label`](https://z00m128.github.io/sjasmplus/documentation.html#op_label_ph_val) and [`$$$$label`](https://z00m128.github.io/sjasmplus/documentation.html#op_label_ph_page) operators for labels
+- refactoring device - page numbering, error values changed from -1 to 0x7F00+ ([`get_page_at`](https://z00m128.github.io/sjasmplus/documentation.html#lua_sj_get_page_at))
+- small internal bug fixes (edge case with negative blocks, `_` glue, SLD export of EQU adjusted)
+- CI: binary reproducibility tested weekly
+
 ## [1.22.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.22.0) - 15.3.2026
 - Added [substitution glue operator `_`](https://z00m128.github.io/sjasmplus/documentation.html#s_substitution_and_defines) to concatenate substitution results
 - Added string literals [concatenating operator `..`](https://z00m128.github.io/sjasmplus/documentation.html#s_strings)

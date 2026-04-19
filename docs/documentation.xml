@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.22.0 Documentation [2026-03-15]</title>
+  <title>SjASMPlus 1.23.0 Documentation [2026-04-23]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -206,15 +206,14 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>?.?.2026 - 1.23.0</term>
+            <term>23.4.2026 - 1.23.0</term>
             <listitem>
               <synopsis>
 - Added <link linkend="s_sizeof_labels">`SIZEOF`</link> operator for labels
 - Added <link linkend="op_label_ph_val">`$$$label`</link> and <link linkend="op_label_ph_page">`$$$$label`</link> operators for labels
 - refactoring device - page numbering, error values changed from -1 to 0x7F00+ (<link linkend="lua_sj_get_page_at">`get_page_at`</link>)
 - small internal bug fixes (edge case with negative blocks, `_` glue, SLD export of EQU adjusted)
-- CI: binary reproducibility tested weekly
-</synopsis>
+- CI: binary reproducibility tested weekly</synopsis>
             </listitem>
           </varlistentry>
 
