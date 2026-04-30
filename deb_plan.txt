@@ -1,0 +1,103 @@
+## Plan: Debian Packaging for sjasmplus
+
+TL;DR: The repo has no existing `debian/` packaging artifacts, and issue 267 is a meta-tracker for creating an official Debian package. The package should be built on a separate branch, use the existing Makefile with system Lua where appropriate, avoid unnecessary `debian/patches`, and exclude ambiguous ROM/test assets and irrelevant submodule content from the source package.
+
+**Steps**
+1. Audit current repository state and issue context
+   - ✓ Confirm issue 267 is meta-tracking Debian packaging and references issue 235 (reproducible builds) plus a fork commit with packaging hints.
+   - ✓ Issue 235 is done (reproducible binary build GitHub action workflow running weekly).
+   - ✓ Confirm there is no existing `debian/` directory or Debian metadata in the repository (only in fork, for local use, not Debian standards).
+   - Identify build system entry points: `Makefile` and `CMakeLists.txt`. Decision: Prefer the existing `Makefile` for Debian packaging because fresh builds begin clean and `make clean && make` is reliable; use CMake only if packaging exposes issues that the Makefile cannot handle.
+   - ✓ Identify license sources: `LICENSE.md` is BSD 3-clause for main code, `tests/LICENSE.md` is BSD 0-clause, and integration ROM directories carry special Amstrad ROM permission disclaimers. Submodules (LuaBridge, unittest-cpp, lua5.5, crc32c) have their own licenses, to be documented in debian/copyright.
+   - Identify repo submodules: `LuaBridge` (needed for Lua support) and `unittest-cpp` (needed only for unit tests).
+   - Verify whether upstream release tarballs exist or if packaging will be maintained from git sources.
+
+2. Establish packaging scope and branch strategy
+   - ✓ Use a separate packaging branch for early Debian files, as issue 267 suggests. (Already on new git branch dedicated to deb issue, outside master.)
+   - Target a single binary package: `sjasmplus`.
+   - Prefer system Lua support to avoid bundling embedded Lua sources in binary packaging.
+   - Exclude or separate non-free / ambiguous test material from the Debian main source package only, not from the branch itself.
+   - Keep the packaging branch complete with current repo files; do not prune files from the branch. Only the generated Debian source package should omit dubious-license assets via Debian source filtering.
+
+3. Define source package layout and metadata
+   - Create `debian/source/format` as `3.0 (quilt)`.
+   - Create `debian/changelog` with an initial Debian package entry, documenting any source exclusions in the changelog.
+   - Create `debian/control` with accurate Build-Depends and package metadata.
+   - Create `debian/rules` using `dh` plus `override_dh_auto_build`/`override_dh_auto_install` where useful, rather than patching the upstream build files unnecessarily.
+     - Prefer a `debian/rules` style that passes build variables such as `PREFIX=/usr`, `DESTDIR=$(DESTDIR)`, and `USE_BUNDLED_LUA=0`.
+   - Create `debian/copyright` documenting:
+     - root source code under BSD 3-clause
+     - tests under BSD 0-clause
+     - third-party Lua and LuaBridge license cases
+     - explicit note about excluded ROM/test files and/or excluded submodule content.
+   - Create `debian/install` or `override_dh_auto_install` so `/usr/bin/sjasmplus`, generated documentation, and examples are installed to appropriate Debian locations.
+     - Examples can be installed under `/usr/share/doc/sjasmplus/examples` or `/usr/share/sjasmplus/examples`.
+     - Generated docs such as `docs/documentation.html` plus CSS/PNG assets should be installed under `/usr/share/doc/sjasmplus`.
+     - Upstream DocBook XML source and build helpers do not need to be installed into the package.
+     - Manpage support is optional for the first Debian package and may be added later if a suitable DocBook-to-man pipeline is created.
+       - Potential approach: Use docbook2x tools (db2x_xsltproc and db2x_manxml) to convert docs/documentation.xml to man pages via Man-XML intermediate format. Stylesheet URI: http://docbook2x.sourceforge.net/latest/xslt/man/docbook.xsl. This could be integrated into debian/rules or Makefile docs target for automated generation during build.
+   - Add `debian/source/options` with source exclusions such as `extend-diff-ignore` for files/directories removed from the source package, and document those removals.
+
+4. Audit and handle problematic source files
+   - Review `tests/integration/bsrom/` and `tests/integration/zx-spectrum-rom/` as likely unsuitable for Debian main because they contain ROM images and special permissions that are not clearly free.
+   - Review the whole `tests/integration/` tree and other examples for any files with unclear license/origin, especially disassembled ROM or binary-derived content.
+   - Decide whether to drop the entire `tests/integration/` directory from the Debian source package, or to exclude specific files using `debian/source/options` and `debian/copyright` Files-Excluded entries.
+   - Confirm other third-party sources in the repo (`LuaBridge`, `crc32c`, `lua5.5`) are compatible with Debian and document them.
+   - Keep `tests/` folder in upstream source if licenses are okay, but do not install tests into the binary package.
+   - Keep `LuaBridge/Source` if Lua support is enabled, but avoid shipping unnecessary `LuaBridge/Tests` and `LuaBridge/third_party` if they are not required for the build.
+   - Treat `unittest-cpp` as build/test-only content, not part of the runtime package.
+
+5. Choose build path and dependency strategy
+   - Prefer the existing `Makefile` if `make clean && make` performs successfully in a fresh source tree, because Debian package builds normally start from a clean build environment.
+   - Keep CMake as an optional fallback only if the Makefile cannot support packaging requirements cleanly.
+   - Build with `SYSTEM_LUA=ON` to use the Debian Lua development package.
+   - Prefer runtime dependency on the Debian Lua shared library, e.g. `liblua5.4-0` or `liblua5.5-0`, depending on the target distribution.
+   - Prefer build dependency on the corresponding `liblua5.x-dev` package.
+   - Set Build-Depends to at least: `debhelper-compat (= 13)`, `cmake`, `g++`, `liblua5.x-dev`, `xsltproc` only if generating docs, and `bash`/`coreutils` as implicit dependencies.
+   - Verify the correct Lua version available in Debian at packaging time, and adjust to system package naming accordingly.
+   - Document that using system Lua is preferable for Debian, and that static/bundled Lua is less desirable and may hurt inclusion.
+
+6. Implement testing and validation
+   - Add Debian test support via `override_dh_auto_test` and/or `debian/tests/control`.
+   - Start with upstream test target(s) that are safe and deterministic, e.g. `make tests TEST=misc` or a narrower subset of tests.
+   - Validate in a clean build environment with `dpkg-buildpackage -us -uc -b`.
+   - Run `lintian` on generated packages and fix policy warnings.
+   - Use `sbuild`, `pbuilder`, or `reprotest` where possible to confirm build-dependency correctness and reproducibility.
+   - Ensure the package builds reproducibly, in line with issue 235 and Debian expectations.
+
+7. Document packaging decisions and future extensions
+   - Add notes to `TODO.txt`, `debian/README.source`, or `debian/README.Debian` describing:
+     - packaging branch strategy
+     - source filtering decisions for ROM/test files and excluded submodule content
+     - how to build and test the Debian package
+     - any deviations from upstream default build options (such as system Lua)
+   - Mention removals in the initial `debian/changelog` entry.
+   - Consider a later `sjasmplus-doc` package if documentation support becomes desirable.
+
+**Relevant files**
+- `/workspaces/sjasmplus/Makefile` — contains install/staging support and source tarball logic.
+- `/workspaces/sjasmplus/CMakeLists.txt` — preferred upstream build route, supports `SYSTEM_LUA` and standard install target.
+- `/workspaces/sjasmplus/LICENSE.md` — main source license.
+- `/workspaces/sjasmplus/tests/LICENSE.md` — test tree license.
+- `/workspaces/sjasmplus/tests/integration/bsrom/` and `/workspaces/sjasmplus/tests/integration/zx-spectrum-rom/` — likely to be excluded or specially handled.
+- `/workspaces/sjasmplus/TODO.txt` — existing Debian packaging notes and roadmap.
+- `/workspaces/sjasmplus/.gitmodules` — identifies `LuaBridge` and `unittest-cpp` as source/test submodules.
+
+**Verification**
+1. Confirm packaging branch can build a Debian source package with `dpkg-source --prepare` or `dpkg-buildpackage`.
+2. Run `lintian` and resolve all Debian policy issues.
+3. Test `debian/rules` with `DEB_BUILD_OPTIONS=nocheck` and with full `dh_auto_test` if safe.
+4. Use `sbuild` or `pbuilder` to verify clean dependency resolution and build environment.
+5. Verify packaging branch excludes non-free ROM test assets from the resulting source package.
+
+**Decisions / Assumptions**
+- Use a separate packaging branch rather than putting unfinished Debian metadata on `master`.
+- Target Debian main repository, so avoid shipping ambiguous ROM/test materials.
+- Prefer CMake and system Lua for better integration with Debian build tools.
+- Start with a single package and add docs/tests packages later if needed.
+- Avoid `debian/patches` unless the upstream build system truly cannot be coerced with overrides.
+
+**Further considerations**
+1. Confirm Debian Lua version available at packaging time; if `lua5.5` is unavailable, adjust to the supported system Lua package.
+2. Decide whether source package should be `3.0 (quilt)` or `3.0 (native)` once branch strategy is fixed.
+3. If the package is intended to be uploaded to Debian, review Debian policy chapters on licensing, `debian/copyright`, and reproducible builds.
