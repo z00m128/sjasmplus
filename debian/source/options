@@ -1,0 +1,4 @@
+extend-diff-ignore = "tests/integration/bsrom/"
+extend-diff-ignore = "tests/integration/zx-spectrum-rom/"
+extend-diff-ignore = "LuaBridge/Tests/"
+extend-diff-ignore = "LuaBridge/third_party/"

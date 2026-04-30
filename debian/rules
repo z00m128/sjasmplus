@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	make USE_BUNDLED_LUA=0
+	make docs
+
+override_dh_auto_install:
+	make install STAGEDIR=$(CURDIR)/debian/sjasmplus PREFIX=/usr
+	dh_install examples/* /usr/share/sjasmplus/examples
+override_dh_auto_test:
+	make tests

@@ -1,0 +1,5 @@
+sjasmplus (1.23.0-1) unstable; urgency=low
+
+  * Initial Debian package (Closes: #267)
+
+ -- Debian sjasmplus Maintainers <pkg-sjasmplus@packages.debian.org>  Wed, 30 Apr 2026 12:00:00 +0000
