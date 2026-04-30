@@ -10,4 +10,7 @@
     .SETBREAKPOINT 0x10000
     .setbreakpoint -1
 
-    SETBP   "conditions not supported yet"
+    ; conditional breakpoints for MAME added since v1.23.1
+    SETBREAKPOINT 0x4000, "hl=1234"
+    SETBREAKPOINT 0x5000, 'a==5'
+    SETBREAKPOINT 0x6000, "bc<0x8000"

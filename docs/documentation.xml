@@ -206,6 +206,16 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>TBD - 1.23.1</term>
+            <listitem>
+              <synopsis>
+- <link linkend="po_setbp">`SETBP`</link> optional "conditional" argument works also for MAME list type
+- docs: minor improvements
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>23.4.2026 - 1.23.0</term>
             <listitem>
               <synopsis>
@@ -2041,13 +2051,16 @@ END_OF_PROGRAM</programlisting></para>
             <listitem>
 				<para>
 					<emphasis>Works only in real device emulation mode. See
-						<link linkend="po_device">DEVICE</link>.</emphasis>
+						<link linkend="po_device">DEVICE</link>.
+						Breakpoints are added using <link linkend="po_setbp">SETBP</link> directive.</emphasis>
 				</para>
-				<para>Opens file to export breakpoints info directly from ASM source, currently three
+				<para>Opens file to export breakpoints info directly from ASM source, currently four
 					flavours of export are supported: <code>unreal</code> (default), <code>zesarux</code>, <code>mame</code>
 					and <code>fuse</code>. For latest Unreal emulators use filename "bpx.ini", you
 					can then load the file from the emulator UI. For ZEsarUX and FUSE the file will contain
 					command-line options or debugger commands, which you can add to the command when launching the emulator.
+					For MAME the file contains debugger script commands in format <code>bp 0xADDR[,condition]</code> per breakpoint,
+					with <code>g</code> command at the end to start execution without initial break.
 				</para>
 				<para>(current version of ZEsarUX will not catch the very first instruction of freshly
 					loaded snapshot/NEX/... file, or it will even disable breakpoints when changing
@@ -2058,7 +2071,10 @@ END_OF_PROGRAM</programlisting></para>
 
                   <programlisting>    BPLIST "bpx.ini" unreal  ; open breakpoints list in "Unreal" format
     ; or (only one file per assembling-unit can be specified)
-    BPLIST "cmd_line_options.txt" zesarux ; open breakpoints list in "ZEsarUX" format</programlisting>
+    BPLIST "cmd_line_options.txt" zesarux ; open breakpoints list in "ZEsarUX" format
+    ; or for MAME debugger
+    BPLIST "breakpoints.txt" mame ; open breakpoints list in "MAME" format
+    ; to be used as debug script: mame -debug -debugscript breakpoints.txt &lt;other_options&gt;</programlisting>
 				  </example>
 				</para>
             </listitem>

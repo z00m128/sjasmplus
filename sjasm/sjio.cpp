@@ -1766,7 +1766,7 @@ void WriteBreakpoint(const aint val, const char* ifP) {
 			if (ifP == NULL) {
 				fprintf(FP_BreakpointsFile, "bp 0x%04X\n", val&0xFFFF);
 			} else {
-			    Warning("Conditional breakpoints not (yet) supported for MAME");
+				fprintf(FP_BreakpointsFile, "bp 0x%04X,%s\n", val&0xFFFF, ifP);
 			}
 			break;
 		case BPSF_ZESARUX:
