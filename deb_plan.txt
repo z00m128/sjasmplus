@@ -64,6 +64,16 @@ TL;DR: The repo has no existing `debian/` packaging artifacts, and issue 267 is 
    - Run `lintian` on generated packages and fix policy warnings.
    - Use `sbuild`, `pbuilder`, or `reprotest` where possible to confirm build-dependency correctness and reproducibility.
    - Ensure the package builds reproducibly, in line with issue 235 and Debian expectations.
+   - Step-by-step testing on local Ubuntu/Debian machine:
+     1. Ensure you are on the `deb_267` branch: `git checkout deb_267`
+     2. Install build dependencies: `sudo apt update && sudo apt install fakeroot liblua5.4-dev liblua5.4-0 xsltproc debhelper`
+        - If liblua5.4-dev is not available, try liblua5.3-dev or liblua5.2-dev and adjust debian/control and debian/rules accordingly.
+     3. Run the package build: `dpkg-buildpackage -us -uc -b`
+        - This should produce a .deb file in the parent directory.
+     4. Check for build errors; if any, note them for packaging fixes.
+     5. Optionally, run `lintian ../sjasmplus_*.deb` to check for Debian policy issues.
+     6. Test the installed package: `sudo dpkg -i ../sjasmplus_*.deb && sjasmplus --help` to verify it works.
+     7. Report results: build success/failure, any errors, lintian output, and whether the binary runs correctly.
 
 7. Document packaging decisions and future extensions
    - Add notes to `TODO.txt`, `debian/README.source`, or `debian/README.Debian` describing:
