@@ -1,0 +1,16 @@
+Source: sjasmplus
+Maintainer: Debian sjasmplus Maintainers <pkg-sjasmplus@packages.debian.org>
+Section: devel
+Priority: optional
+Build-Depends: debhelper-compat (=13), g++, liblua5.4-dev, xsltproc
+Standards-Version: 4.6.2
+
+Package: sjasmplus
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, liblua5.4-0
+Description: Cross-platform Z80 assembler
+ sjasmplus is a command-line cross-compiler of assembly language for the Z80 CPU.
+ It supports many ZX-Spectrum specific directives, has a built-in Lua scripting
+ engine, and uses a 3-pass design for assembling.
+ .
+ This package provides the assembler binary and documentation.

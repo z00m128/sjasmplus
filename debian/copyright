@@ -1,0 +1,6 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: sjasmplus
+Upstream-Contact: z00m128 <z00m128@gmail.com>
+Source: https://github.com/z00m128/sjasmplus
+
+the GHCP prototype contained bogus information, mostly about third party modules/libs

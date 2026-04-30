@@ -1,0 +1,24 @@
+#!/usr/bin/make -f
+
+DEB_LUA_MAKE_ARGS=USE_BUNDLED_LUA=0 LUA_VER=5.4
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	make $(DEB_LUA_MAKE_ARGS)
+	make docs
+
+override_dh_auto_install:
+	make $(DEB_LUA_MAKE_ARGS) install STAGEDIR=$(CURDIR)/debian/sjasmplus PREFIX=/usr
+	for p in examples/*; do \
+		[ "$${p}" = "examples/file name test" ] && continue; \
+		dh_install "$${p}" /usr/share/sjasmplus/examples; \
+	done
+
+override_dh_auto_test:
+	make $(DEB_LUA_MAKE_ARGS) tests
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f docs/documentation.html

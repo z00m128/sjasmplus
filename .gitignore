@@ -7,3 +7,12 @@ sjasmwin32/sjasmplus.res
 /CMakeFiles/sjasmplus.dir/
 /.kdev4
 /.cache
+
+# ignore files created during deb package build
+# Ignore files generated during build
+/debian/files
+/debian/*.substvars
+/debian/*.log
+/debian/*.debhelper
+/debian/*-stamp
+/debian/sjasmplus/
