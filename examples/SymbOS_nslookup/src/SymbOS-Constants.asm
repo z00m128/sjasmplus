@@ -2,7 +2,7 @@
 ;@                                                                            @
 ;@                    S y m b O S   -   C o n s t a n t s                     @
 ;@                                                                            @
-;@             (c) 2000-2015 by Prodatron / SymbiosiS (Jörn Mika)             @
+;@             (c) 2000-2015 by Prodatron / SymbiosiS (JÃ¶rn Mika)             @
 ;@                                                                            @
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
