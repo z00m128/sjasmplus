@@ -438,7 +438,7 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 					break;		// continue into next slot, don't wrap any more
 				}
 				if (realAddr != (prevS->Address + prevS->Size)) {	// should be equal
-					ErrorInt("Write beyond memory slot in wrap-around slot catched too late by",
+					ErrorInt("Write beyond memory slot in wrap-around slot caught too late by",
 								realAddr - prevS->Address - prevS->Size, FATAL);
 					break;
 				}
