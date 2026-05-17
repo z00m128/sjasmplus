@@ -166,7 +166,17 @@ jobs:
             c++ --version   || echo "no c++"
             # FreeBSD make can't handle the Makefile -> use gmake, as Cirrus did
             gmake clean && gmake -j4 CC=cc CXX=c++
+            # Cirrus captured the binary between build and test; the next
+            # `gmake clean` removes it, so copy it aside (sync_files=true
+            # syncs this back to the host for upload-artifact below).
+            cp sjasmplus sjasmplus.freebsd
             gmake clean && gmake -j4 CC=cc CXX=c++ tests
+      - name: Upload sjasmplus binary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        with:
+          name: sjasmplus-freebsd
+          path: sjasmplus.freebsd
+          if-no-files-found: error
 
   # Cirrus: macos_instance, default CC, with unit tests.
   macos:
@@ -209,7 +219,9 @@ jobs:
     needs: [macos]   # mirrors Cirrus `depends_on: macos`
     env:
       DEBUG: 1
-      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      # Boolean gate only -- the secret value is exposed solely to the upload
+      # step below, never to `make coverage` (which builds + runs the suite).
+      COVERALLS_ENABLED: ${{ secrets.COVERALLS_REPO_TOKEN != '' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
@@ -218,8 +230,10 @@ jobs:
       - name: Build coverage (runs full test suite via `make coverage`)
         run: make clean && make -j$(nproc) coverage
       - name: Upload to Coveralls
-        if: ${{ env.COVERALLS_REPO_TOKEN != '' && github.event_name != 'pull_request' }}
+        if: ${{ env.COVERALLS_ENABLED == 'true' && github.event_name != 'pull_request' }}
         continue-on-error: true
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           apt-get update && apt-get install -y python3-pip git
           pip3 install --break-system-packages \
