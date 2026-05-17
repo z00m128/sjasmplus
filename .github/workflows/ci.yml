@@ -1,0 +1,204 @@
+name: CI
+
+# GitHub Actions replacement for Cirrus CI (.cirrus.yml), which shuts down
+# 2026-06-01. Tracks upstream issue z00m128/sjasmplus#336.
+#
+# This is a faithful 1:1 port of every Cirrus task:
+#   Cirrus "Linux gcc 9/11/latest builds"  -> job: linux  (matrix)
+#   Cirrus "windows mingw build"           -> job: windows
+#   Cirrus "FreeBSD clang build"           -> job: freebsd (cross-platform-actions VM)
+#   Cirrus "MacOS default CC build"        -> job: macos
+#   Cirrus "coveralls.io coverage report"  -> job: coverage (optional upload)
+#
+# Triggers mimic Cirrus: every branch push and every pull request, skipped
+# for docs-only changes (Cirrus: skip "changesIncludeOnly('docs/*')").
+
+on:
+  push:
+    paths-ignore: ['docs/**']
+  pull_request:
+    paths-ignore: ['docs/**']
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref. GHA is slower than Cirrus was, so
+# don't pay for stale builds (addresses the speed concern raised in #336).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege for GITHUB_TOKEN. Every job here only reads code and uploads
+# build artifacts (artifact upload uses the Actions service, not this token).
+# Coveralls auth is a separate secret, not GITHUB_TOKEN. So read-only is enough,
+# and this caps the blast radius even if a third-party action is compromised.
+# (Fork PRs already get a read-only token + no secrets; this also protects
+# push/own-branch runs in case the repo default is read-write.)
+permissions:
+  contents: read
+
+jobs:
+
+  # Cirrus: container gcc:9 / gcc:11 / gcc:latest
+  #         build_script: make clean && make -j8
+  #         install_script: make install && make clean
+  #         then test_folder_tests.sh + test_folder_examples.sh
+  # PREFIX defaults to /usr/local, so `make install` puts sjasmplus on PATH
+  # inside the container; the test scripts find it via `command -v` after
+  # `make clean` removes the in-tree binary -- same as Cirrus.
+  linux:
+    name: Linux gcc ${{ matrix.gcc }}
+    runs-on: ubuntu-latest
+    container: gcc:${{ matrix.gcc }}
+    strategy:
+      fail-fast: false
+      matrix:
+        gcc: ['9', '11', 'latest']
+    steps:
+      # NOTE: gcc:9 is Debian buster (old glibc). If actions/checkout@v6's
+      # bundled Node ever fails there, drop that one matrix entry to a manual
+      # `git clone` step -- the other two cover modern toolchains.
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: gcc version
+        run: gcc --version
+      - name: Build
+        run: make clean && make -j$(nproc)
+      - name: Upload sjasmplus binary
+        uses: actions/upload-artifact@v7
+        with:
+          name: sjasmplus-linux-gcc${{ matrix.gcc }}
+          path: sjasmplus
+          if-no-files-found: error
+      - name: Install (then clean, mirrors Cirrus)
+        run: make install && make clean
+      - name: Assemble tests
+        run: ContinuousIntegration/test_folder_tests.sh
+      - name: Assemble examples
+        run: ContinuousIntegration/test_folder_examples.sh
+
+  # Cirrus: windowsservercore:cmake, MinGW via Makefile.win
+  #         build_script: ContinuousIntegration\winbuild_mingw.bat
+  #         clean_script + version check
+  #         assemble_examples / assemble_tests bat wrappers
+  # The Cirrus image had MinGW preinstalled on PATH; GitHub's windows runner
+  # does not guarantee that, so install it explicitly. Git for Windows (bash,
+  # find, diff, cmp -- needed by the .bat/.sh scripts) is preinstalled.
+  windows:
+    name: Windows MinGW
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Set up MinGW (gcc + mingw32-make on PATH)
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+      - name: Build (MinGW, Makefile.win)
+        shell: cmd
+        run: ContinuousIntegration\winbuild_mingw.bat
+      - name: Upload sjasmplus.exe
+        uses: actions/upload-artifact@v7
+        with:
+          name: sjasmplus-windows-mingw
+          path: sjasmplus.exe
+          if-no-files-found: error
+      - name: Clean + version
+        shell: cmd
+        run: |
+          mingw32-make -f Makefile.win clean
+          c:\tools\sjasmplus\sjasmplus --version
+      - name: Assemble examples
+        shell: cmd
+        run: ContinuousIntegration\winbuild_mingw_examples.bat
+      - name: Assemble tests
+        shell: cmd
+        run: ContinuousIntegration\winbuild_mingw_tests.bat
+
+  # Cirrus: freebsd_instance freebsd-15-0, clang, with unit tests.
+  # ped7g flagged cross-platform-actions in #336 -- using it here.
+  # Cirrus used 15.0; cross-platform-actions tracks released images, so this
+  # pins a stable release. Bump `version` when a newer image is available.
+  freebsd:
+    name: FreeBSD clang
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Build + unit tests (FreeBSD VM)
+        uses: cross-platform-actions/action@v0.27.0
+        with:
+          operating_system: freebsd
+          version: '14.2'
+          shell: bash
+          run: |
+            # Cirrus: pkg update -f && pkg install -y gmake bash diffutils
+            sudo IGNORE_OSVERSION=yes pkg update -f
+            sudo pkg install -y gmake bash diffutils
+            bash --version  || echo "no bash"
+            gmake --version || echo "no gmake"
+            cc --version    || echo "no cc"
+            c++ --version   || echo "no c++"
+            # FreeBSD make can't handle the Makefile -> use gmake, as Cirrus did
+            gmake clean && gmake -j4 CC=cc CXX=c++
+            gmake clean && gmake -j4 CC=cc CXX=c++ tests
+
+  # Cirrus: macos_instance, default CC, with unit tests.
+  macos:
+    name: macOS clang
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Tool versions
+        run: |
+          git --version || echo "no git"
+          bash --version || echo "no bash"
+          make --version || echo "no make"
+          cc --version || echo "no cc"
+          c++ --version || echo "no c++"
+          date
+          sysctl -n hw.physicalcpu
+      - name: Build
+        run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++
+      - name: Upload sjasmplus binary
+        uses: actions/upload-artifact@v7
+        with:
+          name: sjasmplus-macos
+          path: sjasmplus
+          if-no-files-found: error
+      - name: Unit tests
+        run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++ tests
+
+  # Cirrus: coveralls.io pipe (gcc:14, DEBUG=1, make coverage).
+  # The Cirrus version was hard-gated to z00m128's repo + encrypted token and
+  # skipped on PRs. Here the coverage *build+tests* always run (extra signal,
+  # mirrors the Cirrus gcc14 compile); the Coveralls upload is opt-in: it only
+  # fires off PRs when a COVERALLS_REPO_TOKEN repo secret exists, and never
+  # breaks the build.
+  coverage:
+    name: Coverage (gcc14)
+    runs-on: ubuntu-latest
+    container: gcc:14
+    needs: [macos]   # mirrors Cirrus `depends_on: macos`
+    env:
+      DEBUG: 1
+      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0   # Cirrus used full clone for the git revision number
+      - name: Build coverage (runs full test suite via `make coverage`)
+        run: make clean && make -j$(nproc) coverage
+      - name: Upload to Coveralls
+        if: ${{ env.COVERALLS_REPO_TOKEN != '' && github.event_name != 'pull_request' }}
+        continue-on-error: true
+        run: |
+          apt-get update && apt-get install -y python3-pip git
+          pip3 install --break-system-packages \
+            git+https://github.com/ped7g/cpp-coveralls.git@master
+          CI_SERVICE_NAME=github-actions \
+          cpp-coveralls -n -e lua5.5/ -e LuaBridge/ -e unittest-cpp/ -e cpp-src-tests/
