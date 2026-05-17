@@ -90,10 +90,23 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-      - name: Set up MinGW (gcc + mingw32-make on PATH)
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
+      # GitHub's windows runner ships MinGW via Chocolatey but not on PATH.
+      # Don't use egor-tensin/setup-mingw: its static workaround crashes on the
+      # current choco mingw layout (missing libpthread.dll.a). Instead expose
+      # mingw + GNU tools exactly where the Cirrus windowsservercore image had
+      # them: the choco mingw bin + Git's usr\bin (bash/find/diff/cmp).
+      - name: Set up MinGW + GNU tools on PATH
+        shell: pwsh
+        run: |
+          choco install mingw -y --no-progress
+          Add-Content $env:GITHUB_PATH 'C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin'
+          Add-Content $env:GITHUB_PATH 'C:\Program Files\Git\usr\bin'
+      - name: Tool versions (mingw + GNU)
+        shell: cmd
+        run: |
+          where mingw32-make && mingw32-make --version
+          where gcc && gcc --version
+          where bash && bash --version
       - name: Build (MinGW, Makefile.win)
         shell: cmd
         run: ContinuousIntegration\winbuild_mingw.bat
