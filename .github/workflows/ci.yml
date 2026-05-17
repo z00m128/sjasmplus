@@ -69,7 +69,7 @@ jobs:
       # `git clone` step -- the other two cover modern toolchains.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
-          submodules: recursive
+          submodules: true
       - name: gcc version
         run: gcc --version
       - name: Build
@@ -100,7 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
-          submodules: recursive
+          submodules: true
       # GitHub's windows runner ships MinGW via Chocolatey but not on PATH.
       # Don't use egor-tensin/setup-mingw: its static workaround crashes on the
       # current choco mingw layout (missing libpthread.dll.a). Instead expose
@@ -149,7 +149,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
-          submodules: recursive
+          submodules: true
       - name: Build + unit tests (FreeBSD VM)
         uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455  # v1.0.0
         with:
@@ -185,7 +185,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
-          submodules: recursive
+          submodules: true
       - name: Tool versions
         run: |
           git --version || echo "no git"
@@ -225,7 +225,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
-          submodules: recursive
+          submodules: true
           fetch-depth: 0   # Cirrus used full clone for the git revision number
       - name: Build coverage (runs full test suite via `make coverage`)
         run: make clean && make -j$(nproc) coverage
