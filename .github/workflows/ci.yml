@@ -1,4 +1,4 @@
-name: CI
+name: CI build, tests, coverage
 
 # GitHub Actions replacement for Cirrus CI (.cirrus.yml), which shuts down
 # 2026-06-01. Tracks upstream issue z00m128/sjasmplus#336.
@@ -21,8 +21,6 @@ name: CI
 #   actions/checkout            v6     -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
 #   actions/upload-artifact     v7     -> 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
 #   cross-platform-actions      v1.0.0 -> 233156312992f3f169d8d0c633c21d12a5d30455
-# (cross-platform-actions bumped v0.27.0 -> v1.0.0: v0.27.0 ran on Node 20,
-#  which GitHub force-deprecates 2026-06-02; v1.0.0 is Node 24.)
 
 on:
   push:
@@ -94,7 +92,7 @@ jobs:
   # The Cirrus image had MinGW preinstalled on PATH; GitHub's windows runner
   # does not guarantee that, so install it explicitly. Git for Windows (bash,
   # find, diff, cmp -- needed by the .bat/.sh scripts) is preinstalled.
-  windows:
+  windows-mingw:
     name: Windows MinGW
     runs-on: windows-latest
     steps:
@@ -138,6 +136,49 @@ jobs:
       - name: Assemble tests
         shell: cmd
         run: ContinuousIntegration\winbuild_mingw_tests.bat
+
+  # Merge of old GHA windows-cmake build into this file to have all build
+  # tasks together (this type of build was not served by Cirrus CI for months).
+  windows-cmake:
+    name: Windows CMake MSVC
+    runs-on: windows-latest
+    env:
+      # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+      BUILD_TYPE: Release
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          submodules: true
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Upload sjasmplus.exe
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        with:
+          name: sjasmplus-win64-${{ github.sha }}
+          path: build/Release/sjasmplus.exe
+          if-no-files-found: error
+      - name: Test
+        shell: cmd
+        run: |
+          echo *** Set GIT directory as priority (over MS crap) path to borrow GNU: bash, find, diff, cmp
+          set PATH="C:\Program Files\Git\usr\bin\";"${{github.workspace}}\build\${{env.BUILD_TYPE}}\";%PATH%;
+          echo *** check versions of GNU tools
+          where bash && bash --version
+          where find && find --version
+          where diff && diff --version
+          where cmp && cmp --version
+          echo *** Check sjasmplus.exe availability+version+help
+          bash -c "sjasmplus.exe --help"
+          bash -c "sjasmplus.exe --help=warnings"
+          echo *** run tests
+          bash ContinuousIntegration/test_folder_tests.sh
+          if %errorlevel% neq 0 exit /b %errorlevel%
+          echo *** run examples
+          bash ContinuousIntegration/test_folder_examples.sh
 
   # Cirrus: freebsd_instance freebsd-15-0, clang, with unit tests.
   # ped7g flagged cross-platform-actions in #336 -- using it here.
