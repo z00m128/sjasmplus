@@ -94,7 +94,7 @@ jobs:
   # find, diff, cmp -- needed by the .bat/.sh scripts) is preinstalled.
   windows-mingw:
     name: Windows MinGW
-    runs-on: windows-latest
+    runs-on: windows-2025-vs2026
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
@@ -141,7 +141,7 @@ jobs:
   # tasks together (this type of build was not served by Cirrus CI for months).
   windows-cmake:
     name: Windows CMake MSVC
-    runs-on: windows-latest
+    runs-on: windows-2025-vs2026
     env:
       # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
       BUILD_TYPE: Release
