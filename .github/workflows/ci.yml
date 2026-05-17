@@ -12,6 +12,17 @@ name: CI
 #
 # Triggers mimic Cirrus: every branch push and every pull request, skipped
 # for docs-only changes (Cirrus: skip "changesIncludeOnly('docs/*')").
+#
+# Supply-chain hardening: every external action is pinned to a full commit
+# SHA, not a moving tag (a tag like @v6 can be silently repointed at malicious
+# code). The trailing "# vX" comment is the human-readable version that SHA
+# resolves to -- bump the SHA and the comment together (Dependabot can do
+# this). SHAs resolved 2026-05-17:
+#   actions/checkout            v6     -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
+#   actions/upload-artifact     v7     -> 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+#   cross-platform-actions      v1.0.0 -> 233156312992f3f169d8d0c633c21d12a5d30455
+# (cross-platform-actions bumped v0.27.0 -> v1.0.0: v0.27.0 ran on Node 20,
+#  which GitHub force-deprecates 2026-06-02; v1.0.0 is Node 24.)
 
 on:
   push:
@@ -56,7 +67,7 @@ jobs:
       # NOTE: gcc:9 is Debian buster (old glibc). If actions/checkout@v6's
       # bundled Node ever fails there, drop that one matrix entry to a manual
       # `git clone` step -- the other two cover modern toolchains.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
       - name: gcc version
@@ -64,7 +75,7 @@ jobs:
       - name: Build
         run: make clean && make -j$(nproc)
       - name: Upload sjasmplus binary
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: sjasmplus-linux-gcc${{ matrix.gcc }}
           path: sjasmplus
@@ -87,7 +98,7 @@ jobs:
     name: Windows MinGW
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
       # GitHub's windows runner ships MinGW via Chocolatey but not on PATH.
@@ -111,7 +122,7 @@ jobs:
         shell: cmd
         run: ContinuousIntegration\winbuild_mingw.bat
       - name: Upload sjasmplus.exe
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: sjasmplus-windows-mingw
           path: sjasmplus.exe
@@ -136,11 +147,11 @@ jobs:
     name: FreeBSD clang
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
       - name: Build + unit tests (FreeBSD VM)
-        uses: cross-platform-actions/action@v0.27.0
+        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455  # v1.0.0
         with:
           operating_system: freebsd
           version: '14.2'
@@ -162,7 +173,7 @@ jobs:
     name: macOS clang
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
       - name: Tool versions
@@ -177,7 +188,7 @@ jobs:
       - name: Build
         run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++
       - name: Upload sjasmplus binary
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: sjasmplus-macos
           path: sjasmplus
@@ -200,7 +211,7 @@ jobs:
       DEBUG: 1
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
           fetch-depth: 0   # Cirrus used full clone for the git revision number
