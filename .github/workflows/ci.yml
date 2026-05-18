@@ -271,13 +271,13 @@ jobs:
       - name: Build coverage (runs full test suite via `make coverage`)
         run: make clean && make -j$(nproc) coverage
       - name: Upload to Coveralls
-        if: ${{ env.COVERALLS_ENABLED == 'true' && github.event_name != 'pull_request' }}
-        continue-on-error: true
+        if: ${{ env.COVERALLS_ENABLED == 'true' }}
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           apt-get update && apt-get install -y python3-pip git
           pip3 install --break-system-packages \
             git+https://github.com/ped7g/cpp-coveralls.git@master
+          git config --global --add safe.directory /__w/sjasmplus/sjasmplus
           CI_SERVICE_NAME=github-actions \
           cpp-coveralls -n -e lua5.5/ -e LuaBridge/ -e unittest-cpp/ -e cpp-src-tests/
