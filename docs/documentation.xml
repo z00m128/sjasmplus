@@ -84,8 +84,8 @@
           </listitem>
 
           <listitem>
-            <para>Correctness is assured by <ulink url="https://cirrus-ci.com/github/z00m128/sjasmplus/master">
-            Cirrus-CI with 400+ automated tests</ulink> (that's also 400+ examples of usage!)</para>
+            <para>Correctness is assured by <ulink url="https://github.com/z00m128/sjasmplus/actions/workflows/ci.yml">
+            GitHub Actions CI with 512+ automated tests</ulink> (that's also 512+ examples of usage!)</para>
           </listitem>
 
           <listitem>
@@ -210,6 +210,8 @@
             <listitem>
               <synopsis>
 - <link linkend="po_setbp">`SETBP`</link> optional "conditional" argument works also for MAME list type
+- CI: migrating from Cirrus CI (ending 1st of June 2026) to GitHub Actions
+- tiny changes to get rid of some lintian/spellcheck warnings
 - docs: minor improvements
 </synopsis>
             </listitem>
