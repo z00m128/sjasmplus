@@ -259,7 +259,7 @@ else
 endif
 
 coverage:
-	$(MAKE) CFLAGS_EXTRA=--coverage tests
+	$(MAKE) CFLAGS_EXTRA='--coverage -fkeep-inline-functions -fkeep-static-functions' tests
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_BASE) $(SRCS)
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_CRC32C) $(CRC32CSRCS)
 ifdef LUA_COVERAGE

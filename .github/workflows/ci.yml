@@ -259,12 +259,13 @@ jobs:
     container: gcc:14
     needs: [macos]   # mirrors Cirrus `depends_on: macos`
     env:
-      CI_SERVICE_NAME: 'github-actions'
-      # LUA_COVERAGE: 1
-      DEBUG: 1
-      # Boolean gate only -- the secret value is exposed solely to the upload
-      # step below, never to `make coverage` (which builds + runs the suite).
+      # Boolean gate only -- the secret value is exposed solely to the upload step, not here
       COVERALLS_ENABLED: ${{ secrets.COVERALLS_REPO_TOKEN != '' }}
+      CI_SERVICE_NAME: 'github-actions'
+      # makefile variables affecting build options, for LUA_COVERAGE remove also `-e lua5.5/`
+      COVERALLS_SERVICE: 1
+      DEBUG: 1
+      # LUA_COVERAGE: 1
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
@@ -274,14 +275,11 @@ jobs:
         run: make clean && make -j$(nproc) coverage
       - name: Upload to Coveralls
         if: ${{ env.COVERALLS_ENABLED == 'true' }}
-        continue-on-error: true
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           apt-get update && apt-get install -y python3-pip git
           pip3 install --break-system-packages \
             git+https://github.com/ped7g/cpp-coveralls.git@master
-          git config --global --add safe.directory /__w/sjasmplus/sjasmplus
-          pwd
-          head -n 10 build/debug+ut/coverage/*.gcov
+          git config --global --add safe.directory $PWD
           cpp-coveralls -n -e lua5.5/ -e LuaBridge/ -e unittest-cpp/ -e cpp-src-tests/
