@@ -259,7 +259,8 @@ else
 endif
 
 coverage:
-	$(MAKE) CFLAGS_EXTRA='--coverage -fkeep-inline-functions -fkeep-static-functions' tests
+	# -fkeep-inline-functions -fkeep-static-functions seem like good idea, but they kill current coverage of header files, so nope
+	$(MAKE) CFLAGS_EXTRA='--coverage' tests
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_BASE) $(SRCS)
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_CRC32C) $(CRC32CSRCS)
 ifdef LUA_COVERAGE

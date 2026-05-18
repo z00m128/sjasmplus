@@ -1,4 +1,5 @@
-name: CI build, tests, coverage
+name: build
+# this name becomes visible on the badge in readme, so keeping it simple "build" intentionally
 
 # GitHub Actions replacement for Cirrus CI (.cirrus.yml), which shuts down
 # 2026-06-01. Tracks upstream issue z00m128/sjasmplus#336.
