@@ -22,6 +22,11 @@ name: build
 #   actions/checkout            v6     -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
 #   actions/upload-artifact     v7     -> 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
 #   cross-platform-actions      v1.0.0 -> 233156312992f3f169d8d0c633c21d12a5d30455
+#   coverallsapp/github-action  v2     -> 5cbfd81b66ca5d10c19b062c04de0199c215fb6e
+#
+# List of GH runners and their details:
+#   repo: https://github.com/actions/runner-images#available-images
+#   docs: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
 
 on:
   push:
@@ -54,14 +59,24 @@ jobs:
   # PREFIX defaults to /usr/local, so `make install` puts sjasmplus on PATH
   # inside the container; the test scripts find it via `command -v` after
   # `make clean` removes the in-tree binary -- same as Cirrus.
+  # Modified to test two specific gcc versions (9 and latest at ARM) and one non-containerized build on Ubuntu "slim"
   linux:
-    name: Linux gcc ${{ matrix.gcc }}
-    runs-on: ubuntu-latest
-    container: gcc:${{ matrix.gcc }}
+    name: Linux ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.container }}
     strategy:
       fail-fast: false
       matrix:
-        gcc: ['9', '11', 'latest']
+        include:
+          - name: 'gcc-9'
+            runner: ubuntu-latest
+            container: gcc:9
+          - name: 'gcc-ubuntu'
+            runner: ubuntu-slim
+            sudo: sudo  # needs sudo for install step since it's not a container
+          - name: 'gcc-latest-arm'
+            runner: ubuntu-24.04-arm
+            container: gcc:latest
     steps:
       # NOTE: gcc:9 is Debian buster (old glibc). If actions/checkout@v6's
       # bundled Node ever fails there, drop that one matrix entry to a manual
@@ -76,11 +91,11 @@ jobs:
       - name: Upload sjasmplus binary
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
-          name: sjasmplus-linux-gcc${{ matrix.gcc }}
+          name: sjasmplus-linux-${{ matrix.name }}
           path: sjasmplus
           if-no-files-found: error
       - name: Install (then clean, mirrors Cirrus)
-        run: make install && make clean
+        run: ${{ matrix.sudo }} make install && make clean
       - name: Assemble tests
         run: ContinuousIntegration/test_folder_tests.sh
       - name: Assemble examples
@@ -222,8 +237,12 @@ jobs:
 
   # Cirrus: macos_instance, default CC, with unit tests.
   macos:
-    name: macOS clang
-    runs-on: macos-latest
+    name: ${{ matrix.runner }} clang
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-26]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
@@ -242,7 +261,7 @@ jobs:
       - name: Upload sjasmplus binary
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
-          name: sjasmplus-macos
+          name: sjasmplus-${{ matrix.runner }}-arm
           path: sjasmplus
           if-no-files-found: error
       - name: Unit tests
@@ -268,15 +287,26 @@ jobs:
       DEBUG: 1
       # LUA_COVERAGE: 1
     steps:
+      - name: Tools preparation
+        run: |
+          apt-get update -qq && apt-get install -qq lcov
+          echo "CPU cores: $(nproc)"
+          git --version || echo "no git"
+          bash --version || echo "no bash"
+          make --version || echo "no make"
+          gcc --version || echo "no gcc"
+          g++ --version || echo "no g++"
+          lcov --version || echo "no lcov"
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: true
           fetch-depth: 0   # Cirrus used full clone for the git revision number
-      - name: Build coverage (runs full test suite via `make coverage`)
-        run: make clean && make -j$(nproc) coverage
+      - name: Build coverage (runs full test suite via `make coverage-lcov`)
+        run: make clean && make -j$(nproc) coverage-lcov
       - name: Upload to Coveralls
         if: ${{ env.COVERALLS_ENABLED == 'true' }}
         uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2
         with:
           github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          format: gcov
+          file: ./coverage.info
+          format: lcov
