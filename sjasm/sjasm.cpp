@@ -672,9 +672,14 @@ namespace Options {
 			exit(exitCode); \
 		} \
 	}
+
+# define VERSION_SUFFIX "+ut"
+
 #else
 
 # define CHECK_UNIT_TESTS { /* no unit tests in this build */ }
+
+# define VERSION_SUFFIX
 
 #endif
 
@@ -687,7 +692,7 @@ int main(int argc, char **argv) {
 #endif
 	Options::SetTerminalColors(autoColorsDetection());
 
-	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION " (https://github.com/z00m128/sjasmplus)";
+	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION VERSION_SUFFIX " (https://github.com/z00m128/sjasmplus)";
 
 	sourcePosStack.reserve(32);
 	smartSmcLines.reserve(64);
