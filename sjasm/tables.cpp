@@ -969,6 +969,12 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	}
 	// parse argument values
 	CDefineTableEntry* odefs = MacroDefineTable.getdefs();
+	auto failEmit = [&](const char* msg, const char* arg, EStatus type = SUPPRESS) -> int {
+		Error(msg, arg, type);
+		MacroDefineTable.setdefs(odefs);
+		macrolabp = omacrolabp;
+		return 1;
+	};
 	CStringsList* a = mac_it->second.args;
 	// detect named arguments syntax "argname = value" (single '=', not "==" comparison)
 	char* pp = p;
@@ -983,14 +989,10 @@ int CMacroTable::Emit(char* naam, char*& p) {
 			char* argName = GetID(p);
 			SkipBlanks(p);
 			if (!argName || '=' != *p || '=' == p[1] || !CStringsList::contains(a, argName)) {
-				Error("Invalid named argument for macro", macName, SUPPRESS);
-				macrolabp = omacrolabp;
-				return 1;
+				return failEmit("Invalid named argument for macro", macName);
 			}
 			if (!seen.emplace(argName, true).second) {
-				Error("Duplicate named argument for macro", argName, SUPPRESS);
-				macrolabp = omacrolabp;
-				return 1;
+				return failEmit("Duplicate named argument for macro", argName);
 			}
 			++p;					// advance over '='
 			char* n = ml;
@@ -999,9 +1001,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 		} while (comma(p));
 		while (a) {
 			if (seen.end() == seen.find(a->string)) {
-				Error("Not enough arguments for macro", macName, SUPPRESS);
-				macrolabp = omacrolabp;
-				return 1;
+				return failEmit("Not enough arguments for macro", macName);
 			}
 			a = a->next;
 		}
@@ -1010,9 +1010,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 			char* n = ml;
 			const bool lastArg = NULL == a->next;
 			if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
-				Error("Not enough arguments for macro", naam, SUPPRESS);
-				macrolabp = omacrolabp;
-				return 1;
+				return failEmit("Not enough arguments for macro", naam);
 			}
 			MacroDefineTable.AddMacro(a->string, ml);
 			a = a->next;
