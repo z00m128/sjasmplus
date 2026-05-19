@@ -970,16 +970,53 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	// parse argument values
 	CDefineTableEntry* odefs = MacroDefineTable.getdefs();
 	CStringsList* a = mac_it->second.args;
-	while (a) {
-		char* n = ml;
-		const bool lastArg = NULL == a->next;
-		if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
-			Error("Not enough arguments for macro", naam, SUPPRESS);
-			macrolabp = omacrolabp;
-			return 1;
+	// detect named arguments syntax "argname = value" (single '=', not "==" comparison)
+	char* pp = p;
+	const char* peekId = GetID(pp);
+	SkipBlanks(pp);
+	if (peekId && '=' == *pp && '=' != pp[1]) {
+		// named arguments, given in any order ("naam" aliases the shared GetID
+		// buffer, so use the stable macro name from the table for messages)
+		const char* macName = mac_it->first.c_str();
+		std::map<std::string, bool> seen;
+		do {
+			char* argName = GetID(p);
+			SkipBlanks(p);
+			if (!argName || '=' != *p || '=' == p[1] || !CStringsList::contains(a, argName)) {
+				Error("Invalid named argument for macro", macName, SUPPRESS);
+				macrolabp = omacrolabp;
+				return 1;
+			}
+			if (!seen.emplace(argName, true).second) {
+				Error("Duplicate named argument for macro", argName, SUPPRESS);
+				macrolabp = omacrolabp;
+				return 1;
+			}
+			++p;					// advance over '='
+			char* n = ml;
+			GetMacroArgumentValue(p, n);
+			MacroDefineTable.AddMacro(argName, ml);
+		} while (comma(p));
+		while (a) {
+			if (seen.end() == seen.find(a->string)) {
+				Error("Not enough arguments for macro", macName, SUPPRESS);
+				macrolabp = omacrolabp;
+				return 1;
+			}
+			a = a->next;
 		}
-		MacroDefineTable.AddMacro(a->string, ml);
-		a = a->next;
+	} else {
+		while (a) {
+			char* n = ml;
+			const bool lastArg = NULL == a->next;
+			if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
+				Error("Not enough arguments for macro", naam, SUPPRESS);
+				macrolabp = omacrolabp;
+				return 1;
+			}
+			MacroDefineTable.AddMacro(a->string, ml);
+			a = a->next;
+		}
 	}
 	SkipBlanks(p);
 	if (*p) {
