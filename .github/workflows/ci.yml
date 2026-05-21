@@ -21,7 +21,7 @@ name: build
 # this). SHAs resolved 2026-05-17:
 #   actions/checkout            v6     -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
 #   actions/upload-artifact     v7     -> 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-#   cross-platform-actions      v1.0.0 -> 233156312992f3f169d8d0c633c21d12a5d30455
+#   cross-platform-actions      v1.1.0 -> 0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0
 #   coverallsapp/github-action  v2     -> 5cbfd81b66ca5d10c19b062c04de0199c215fb6e
 #
 # List of GH runners and their details:
@@ -198,8 +198,6 @@ jobs:
 
   # Cirrus: freebsd_instance freebsd-15-0, clang, with unit tests.
   # ped7g flagged cross-platform-actions in #336 -- using it here.
-  # Cirrus used 15.0; cross-platform-actions tracks released images, so this
-  # pins a stable release. Bump `version` when a newer image is available.
   freebsd:
     name: FreeBSD clang
     runs-on: ubuntu-latest
@@ -207,33 +205,32 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: true
-      - name: Build + unit tests (FreeBSD VM)
+      - name: Initialize FreeBSD VM
         uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0  # v1.1.0
         with:
           operating_system: freebsd
-          version: '14.2'
-          shell: bash
-          run: |
-            # Cirrus: pkg update -f && pkg install -y gmake bash diffutils
-            sudo IGNORE_OSVERSION=yes pkg update -f
-            sudo pkg install -y gmake bash diffutils
-            bash --version  || echo "no bash"
-            gmake --version || echo "no gmake"
-            cc --version    || echo "no cc"
-            c++ --version   || echo "no c++"
-            # FreeBSD make can't handle the Makefile -> use gmake, as Cirrus did
-            gmake clean && gmake -j4 CC=cc CXX=c++
-            # Cirrus captured the binary between build and test; the next
-            # `gmake clean` removes it, so copy it aside (sync_files=true
-            # syncs this back to the host for upload-artifact below).
-            cp sjasmplus sjasmplus.freebsd
-            gmake clean && gmake -j4 CC=cc CXX=c++ tests
+          architecture: x86-64
+          version: '15.0'
+      - name: Build (FreeBSD VM)
+        shell: cpa.sh {0}
+        run: |
+          sudo IGNORE_OSVERSION=yes pkg update -f && sudo pkg install -y gmake bash diffutils
+          bash --version  || echo "no bash"
+          gmake --version || echo "no gmake"
+          cc --version    || echo "no cc"
+          c++ --version   || echo "no c++"
+          # FreeBSD make can't handle the Makefile -> use gmake, as Cirrus did
+          gmake clean && gmake -j4 CC=cc CXX=c++
       - name: Upload sjasmplus binary
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: sjasmplus-freebsd
-          path: sjasmplus.freebsd
+          path: sjasmplus
           if-no-files-found: error
+      - name: Build unit-test variant and run tests (FreeBSD VM)
+        shell: cpa.sh {0}
+        run: |
+          gmake clean && gmake -j4 CC=cc CXX=c++ tests
 
   # Cirrus: macos_instance, default CC, with unit tests.
   macos:
