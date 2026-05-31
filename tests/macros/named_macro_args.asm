@@ -35,3 +35,11 @@
     LOAD_XY x=1, z=2        ; unknown argument name
     LOAD_XY x=1, x=2        ; duplicate argument name
     LOAD_XY x=1             ; missing argument 'y'
+    LOAD_XY 1, y=2          ; positional first then named: not allowed
+    LOAD_XY x=1, 5          ; named first then positional: not allowed
+
+    ; value re-contains the parameter name -> macro substitution loops -> error
+val: ONE <val=$>
+    ONE <val=val=$>
+    ONE val=<val=$>
+    ONE val=val=$

@@ -45,8 +45,31 @@ named_macro_args.asm(36): error: Duplicate named argument for macro: x
 36    000C                  LOAD_XY x=1, x=2        ; duplicate argument name
 named_macro_args.asm(37): error: Not enough arguments for macro: LOAD_XY
 37    000C                  LOAD_XY x=1             ; missing argument 'y'
-38    000C
+named_macro_args.asm(38): error: Named arguments must be used for all parameters or none: LOAD_XY
+38    000C                  LOAD_XY 1, y=2          ; positional first then named: not allowed
+named_macro_args.asm(39): error: Named arguments must be used for all parameters or none: LOAD_XY
+39    000C                  LOAD_XY x=1, 5          ; named first then positional: not allowed
+40    000C
+41    000C                  ; value re-contains the parameter name -> macro substitution loops -> error
+42    000C              val: ONE <val=$>
+named_macro_args.asm(21): error: Unable to finish substitutions, line after last iteration:         DB val=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$
+named_macro_args.asm(42): ^ emitted from here
+42    000C 00          >        DB val=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$
+43    000D                  ONE <val=val=$>
+named_macro_args.asm(21): error: line too long after macro expansion:         DB val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=v
+named_macro_args.asm(43): ^ emitted from here
+43    000D FF          >        DB val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=val=val=$=val=val=$=$=val=val=$=val=val=$=$=$=$=val=val=$=val=val=$=$=val=v
+44    000E                  ONE val=<val=$>
+named_macro_args.asm(21): error: Unable to finish substitutions, line after last iteration:         DB val=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$
+named_macro_args.asm(44): ^ emitted from here
+44    000E 00          >        DB val=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$
+45    000F                  ONE val=val=$
+named_macro_args.asm(21): error: Unable to finish substitutions, line after last iteration:         DB val=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$
+named_macro_args.asm(45): ^ emitted from here
+45    000F 00          >        DB val=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$
+46    0010
 # file closed: named_macro_args.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
+0x000C   val
