@@ -14,9 +14,9 @@
 # code). The trailing "# vX" comment is the human-readable version that SHA
 # resolves to -- bump the SHA and the comment together (Dependabot can do
 # this). SHAs resolved 2026-05-17:
-#   actions/checkout            v6     -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
-#   codeql-action/init          v4     -> 9e0d7b8d25671d64c341c19c0152d693099fb5ba
-#   codeql-action/analyze       v4     -> 9e0d7b8d25671d64c341c19c0152d693099fb5ba
+#   actions/checkout            v6          -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
+#   codeql-action/init          v4.36.0     -> 7211b7c8077ea37d8641b6271f6a365a22a5fbfa
+#   codeql-action/analyze       v4.36.0     -> 7211b7c8077ea37d8641b6271f6a365a22a5fbfa
 #
 name: "CodeQL"
 
@@ -51,7 +51,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa  # v4
+      uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa  # v4.36.0
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -79,4 +79,4 @@ jobs:
     - run: make -j8
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa  # v4
+      uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa  # v4.36.0

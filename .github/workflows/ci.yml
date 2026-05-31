@@ -21,7 +21,7 @@ name: build
 # this). SHAs resolved 2026-05-17:
 #   actions/checkout            v6     -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
 #   actions/upload-artifact     v7     -> 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-#   cross-platform-actions      v1.1.0 -> 0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0
+#   cross-platform-actions      v1.2.0 -> be3d7e9ff5c8770b9c51b1a8c8c5446e1cad7cf9
 #   coverallsapp/github-action  v2     -> 5cbfd81b66ca5d10c19b062c04de0199c215fb6e
 #
 # List of GH runners and their details:
