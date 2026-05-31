@@ -957,6 +957,9 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	if (!used[naam[0] & 127]) return 0;
 	auto mac_it = macs.find(naam);
 	if (macs.end() == mac_it) return 0;
+	// "naam" aliases the shared GetID buffer, so use the stable macro name
+	// from the table for any error message issued after we call GetID again
+	const char* macName = mac_it->first.c_str();
 	// macro found, emit it, prepare temporary instance label base
 	char* omacrolabp = macrolabp;
 	char labnr[LINEMAX], ml[LINEMAX];
@@ -969,21 +972,64 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	}
 	// parse argument values
 	CDefineTableEntry* odefs = MacroDefineTable.getdefs();
+	auto failEmit = [&](const char* msg, const char* arg, EStatus type = SUPPRESS) -> int {
+		Error(msg, arg, type);
+		MacroDefineTable.setdefs(odefs);
+		macrolabp = omacrolabp;
+		return 1;
+	};
+	// detect "argname = value" syntax (single '=', not "==" comparison)
+	auto looksLikeNamedArg = [](char* arg) -> bool {
+		char* pp = arg;
+		const char* id = GetID(pp);
+		SkipBlanks(pp);
+		return id && '=' == *pp && '=' != pp[1];
+	};
 	CStringsList* a = mac_it->second.args;
-	while (a) {
-		char* n = ml;
-		const bool lastArg = NULL == a->next;
-		if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
-			Error("Not enough arguments for macro", naam, SUPPRESS);
-			macrolabp = omacrolabp;
-			return 1;
+	if (looksLikeNamedArg(p)) {
+		// named arguments, given in any order
+		std::map<std::string, bool> seen;
+		do {
+			char* argName = GetID(p);
+			SkipBlanks(p);
+			if (!argName || '=' != *p || '=' == p[1]) {
+				return failEmit("Named arguments must be used for all parameters or none", macName);
+			}
+			if (!CStringsList::contains(a, argName)) {
+				return failEmit("Invalid named argument for macro", macName);
+			}
+			if (!seen.emplace(argName, true).second) {
+				return failEmit("Duplicate named argument for macro", argName);
+			}
+			++p;					// advance over '='
+			char* n = ml;
+			GetMacroArgumentValue(p, n);
+			MacroDefineTable.AddMacro(argName, ml);
+		} while (comma(p));
+		while (a) {
+			if (seen.end() == seen.find(a->string)) {
+				return failEmit("Not enough arguments for macro", macName);
+			}
+			a = a->next;
 		}
-		MacroDefineTable.AddMacro(a->string, ml);
-		a = a->next;
+	} else {
+		while (a) {
+			// once any argument is named, all of them must be named
+			if (looksLikeNamedArg(p)) {
+				return failEmit("Named arguments must be used for all parameters or none", macName);
+			}
+			char* n = ml;
+			const bool lastArg = NULL == a->next;
+			if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
+				return failEmit("Not enough arguments for macro", macName);
+			}
+			MacroDefineTable.AddMacro(a->string, ml);
+			a = a->next;
+		}
 	}
 	SkipBlanks(p);
 	if (*p) {
-		Error("Too many arguments for macro", naam, SUPPRESS);
+		Error("Too many arguments for macro", macName, SUPPRESS);
 		macrolabp = omacrolabp;
 		return 1;
 	}
