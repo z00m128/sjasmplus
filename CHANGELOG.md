@@ -1,4 +1,10 @@
 
+## [1.23.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.23.1) - 13.6.2026
+- [`SETBP`](https://z00m128.github.io/sjasmplus/documentation.html#po_setbp) optional "conditional" argument works also for MAME list type
+- CI: migrating from Cirrus CI (ending 1st of June 2026) to GitHub Actions
+- tiny changes to get rid of some lintian/spellcheck warnings (Debian packaging preparations)
+- docs: minor improvements
+
 ## [1.23.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.23.0) - 23.4.2026
 - Added [`SIZEOF`](https://z00m128.github.io/sjasmplus/documentation.html#s_sizeof_labels) operator for labels
 - Added [`$$$label`](https://z00m128.github.io/sjasmplus/documentation.html#op_label_ph_val) and [`$$$$label`](https://z00m128.github.io/sjasmplus/documentation.html#op_label_ph_page) operators for labels

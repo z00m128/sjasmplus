@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.23.0 Documentation [2026-04-23]</title>
+  <title>SjASMPlus 1.23.1 Documentation [2026-06-13]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -206,14 +206,13 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>TBD - 1.23.1</term>
+            <term>13.6.2026 - 1.23.1</term>
             <listitem>
               <synopsis>
 - <link linkend="po_setbp">`SETBP`</link> optional "conditional" argument works also for MAME list type
 - CI: migrating from Cirrus CI (ending 1st of June 2026) to GitHub Actions
-- tiny changes to get rid of some lintian/spellcheck warnings
-- docs: minor improvements
-</synopsis>
+- tiny changes to get rid of some lintian/spellcheck warnings (Debian packaging preparations)
+- docs: minor improvements</synopsis>
             </listitem>
           </varlistentry>
 
