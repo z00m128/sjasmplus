@@ -1,0 +1,35 @@
+#!/usr/bin/make -f
+
+# See debhelper(7) (uncomment to enable).
+# Output every command that modifies files on the build system.
+# export DH_VERBOSE = 1
+
+
+# See FEATURE AREAS in dpkg-buildflags(1).
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# See ENVIRONMENT in dpkg-buildflags(1).
+# Package maintainers to append CFLAGS.
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# Package maintainers to append LDFLAGS.
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+
+export PREFIX = /usr
+export USE_BUNDLED_LUA = 0
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	dh_auto_build
+	make docs
+	help2man --no-discard-stderr --no-info --name="Z80 Cross-Assembler" --version-option="--version --nologo" --help-option="--help --help=warnings --help=syntax" ./sjasmplus > sjasmplus.1
+
+override_dh_auto_install:
+	dh_auto_install -- STAGEDIR=$(CURDIR)/debian/sjasmplus
+	for p in examples/*; do \
+		[ "$${p}" = "examples/file name test" ] && continue; \
+		dh_installexamples "$${p}"; \
+	done
+	dh_installman sjasmplus.1

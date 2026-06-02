@@ -1,0 +1,8 @@
+Version: 5
+Template: GitHub
+Dist: https://github.com/z00m128/sjasmplus
+Version-Type: SEMANTIC_VERSION
+Dversion-Mangle: auto
+Compression: xz
+Repack: yes
+Repacksuffix: +dfsg

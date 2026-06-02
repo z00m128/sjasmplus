@@ -1,0 +1,42 @@
+Source: sjasmplus
+Section: devel
+Maintainer: Peter Helcmanovsky <ped@7gods.org>
+Build-Depends:
+ debhelper-compat (=13),
+ devscripts,
+ docbook-xml,
+ docbook-xsl-doc-html,
+ docbook-xsl-doc-pdf,
+ docbook-xsl-doc-text,
+ docbook-xsl-ns,
+ g++-15,
+ help2man,
+ liblua5.5-dev,
+ xsltproc,
+Standards-Version: 4.7.4
+Homepage: https://github.com/z00m128/sjasmplus
+Vcs-Browser: https://salsa.debian.org/ped7g/sjasmplus
+Vcs-Git: https://salsa.debian.org/ped7g/sjasmplus.git
+
+Package: sjasmplus
+Architecture: any
+Depends:
+ liblua5.5-0,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: Cross-platform Zilog Z80 assembler (R800/Z80N/i8080/LR35902)
+ sjasmplus is a command-line cross-compiler of assembly language for the Zilog
+ Z80 CPU. It supports many machines specific directives, has a built-in Lua
+ scripting engine, a 3-pass assembling, macro language, structures, virtual
+ device mode.
+ .
+ Z80/R800/Z80N/i8080/LR35902 CPUs documented and undocumented opcodes support,
+ fake instructions, relocation data generator.
+ .
+ Machine specific directives for ZX Spectrum machines (Including ZX Next),
+ Amstrad CPC, IntelHEX support (homemade SBC computers) and emulator specific
+ directives to define breakpoints from code (MAME, FUSE, ZEsarUX).
+ .
+ Supports source-level-debug information for DeZog debugger (VSC extension).
+ .
+ This package provides the assembler binary, examples and documentation.

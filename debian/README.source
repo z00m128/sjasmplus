@@ -1,0 +1,336 @@
+sjasmplus for Debian -- Source Package Documentation
+----------------------------------------------------
+
+This package uses the "3.0 (quilt)" format. The Debian packaging does not build
+its canonical orig tarball directly from the upstreamvcs Git branches during
+CI, because the Debian source must be DFSG-pruned and must contain expanded
+submodule contents as regular files. The Debian-facing Git history therefore
+uses imported upstream branches built from repacked tarballs.
+
+1. REPOSITORY MODEL
+===================
+This workflow uses two repository roles:
+
+* upstreamvcs repository
+  - contains the software development history itself
+  - `master` is the upstreamvcs development branch
+  - release tags like `v1.23.0` are created here
+  - submodules stay as submodules here
+  - `gen-dfsg-tarball` is a helper branch used to generate canonical Debian
+    `+dfsg` orig tarballs from release tags while carrying the `debian/`
+    metadata needed by `gbp export-orig` and `mk-origtargz`
+
+* Salsa Debian packaging repository
+  - contains only Debian-facing imported upstream branches and packaging
+  - `upstream/*` branches are imported from already-pruned `+dfsg` orig tarballs
+  - `debian/*` branches descend from the matching `upstream/*` branch and carry
+    the `debian/` directory
+  - the upstreamvcs `master` branch is not pushed here
+
+In this document, `upstreamvcs` means the original sjasmplus repository, while
+`upstream/*` means the imported Debian-side branches reconstructed from repacked
+tarballs.
+
+2. WHY THIS DESIGN EXISTS
+=========================
+The upstream sources need Debian-specific repacking:
+
+* embedded ROM assets under `tests/integration/` must be excluded for DFSG
+  reasons
+* generated or unused bundled content is removed according to `debian/copyright`
+* submodule contents required by the build is transformed to ordinary files in
+  the orig tarball to avoid git submodules (which would pull extra unused files)
+
+This means the Debian orig tarball is not equivalent to a direct archive of the
+upstreamvcs Git tree. The Debian-side `upstream/*` branches therefore have to
+match the repacked source package, so that `gbp`, `dpkg-source`, and Salsa CI
+can use them directly without heavy CI customization.
+
+Three consequences follow, and all are intentional design choices rather than
+omissions:
+
+* `debian/copyright` `Files-Excluded` is the single source of truth for every
+  DFSG/repack exclusion. `mk-origtargz` reads `Files-Excluded` directly when
+  producing the `+dfsg` tarball.
+
+* The imported `upstream/*` branch is itself the canonical archived form of the
+  pruned source. Once a `+dfsg` tarball is imported, the exact pruned tree lives
+  in Git, and `gbp buildpackage` regenerates the orig tarball deterministically
+  from that branch (`upstream-tree = BRANCH`). For this reason `pristine-tar` is
+  deliberately NOT used: the branch, not a binary delta, is the reproducible
+  record of the orig-tarball contents.
+
+* `debian/watch` is kept only for upstream version monitoring (uscan reporting
+  new releases). It is intentionally NOT the authoritative orig-tarball
+  generator, because uscan / `mk-origtargz` operating on a GitHub release archive
+  cannot expand the Git submodule contents (e.g. `LuaBridge/LuaBridge.h`) that
+  the build requires. The canonical `+dfsg` tarball is produced once by the
+  documented manual flow (which expands submodules), imported into
+  `upstream/latest`, and from then on reproduced from that branch. This manual
+  generation step is expected and defensible: it is the only path that yields a
+  build-complete, DFSG-pruned tree, and its result is archived in Git rather
+  than regenerated on the fly, so there is no ongoing drift in actual builds.
+
+3. BRANCH RELATIONSHIPS
+=======================
+For every packaged upstream release:
+
+* start from an upstreamvcs release tag like `v1.23.0`
+* update `gen-dfsg-tarball` if the repack metadata must change for that release
+* manually generate `sjasmplus_1.23.0+dfsg.orig.tar.xz` from the
+  `gen-dfsg-tarball` branch while targeting the upstreamvcs release tag
+* import that tarball into the Salsa repository as `upstream/latest`
+* create or update `debian/latest` on top of that imported `upstream/latest`
+
+So the ancestry is:
+
+* upstreamvcs tag `v1.23.0`
+  -> manual `+dfsg` tarball creation
+  -> imported Salsa branch `upstream/latest`
+  -> packaging branch `debian/latest`
+
+The imported `upstream/latest` branch is not expected to be merged with the
+upstreamvcs `master` branch. For each new upstream release, regenerate the
+`+dfsg` tarball from the upstreamvcs release tag and import it again.
+
+Recommended history shape:
+
+* initial bootstrap:
+  - create `gen-dfsg-tarball` in the upstreamvcs repository and commit the
+    initial `debian/` metadata there
+  - generate the first `+dfsg` tarball from `gen-dfsg-tarball`
+  - create `upstream/latest` in Salsa by importing that first `+dfsg` tarball
+  - create `debian/latest` from the imported `upstream/latest`
+  - add the initial Debian packaging commits on top
+* later updates:
+  - update `gen-dfsg-tarball` as needed for the next release and generate the
+    new official `+dfsg` tarball, upload it to upstream github release
+  - import the new `+dfsg` tarball into `upstream/latest`
+  - merge `upstream/latest` into `debian/latest`
+  - add any packaging adjustments needed for that release (changelog update)
+  - finish with the release-ready Debian packaging commit
+
+4. GENERATING THE INITIAL DFSG TARBALL
+======================================
+These commands are run in the upstreamvcs repository from the helper branch
+`gen-dfsg-tarball`, which tracks upstream closely enough to keep the upstream
+tags and submodule definitions available while also carrying the current
+`debian/` metadata used for repacking. Replace `1.23.0` with the release being
+packaged.
+
+  # 1. Export the full upstream archive with submodule contents expanded
+  gbp export-orig --upstream-tree=v1.23.0 --submodules --tarball-dir=..
+
+  # 2. Strip excluded paths according to debian/copyright
+  mk-origtargz --repack --compression xz ../sjasmplus_*.orig.tar.gz
+
+  # 3. Remove the intermediate unpruned tarball
+  rm ../sjasmplus_*.orig.tar.gz
+
+The resulting `../sjasmplus_1.23.0+dfsg.orig.tar.xz` is the canonical Debian
+orig tarball for that release (DFSG pruned).
+
+Notes:
+
+* `gbp export-orig` needs enough Debian metadata to determine the package and
+  `mk-origtargz` needs `debian/copyright`, which is why this step runs from the
+  helper branch rather than from a plain upstream tag checkout.
+* The `--submodules` flag is required here so the submodule contents are copied
+  into the tarball. It is only meaningful at this generation step; the imported
+  `upstream/*` branch already stores those files as ordinary tracked files.
+* This tarball is imported once into `upstream/latest`; from then on that branch
+  is authoritative to reproduce the orig tarball (no `pristine-tar`).
+
+5. IMPORTING THE DFSG TARBALL INTO SALSA
+========================================
+Use a checkout of the Salsa packaging repository for the import step.
+
+Bootstrap of a fresh Salsa packaging repository:
+
+  # 1. Start from an empty Salsa repository clone and create the imported upstream branch
+  git checkout --orphan upstream/latest
+  git rm -rf .
+  git commit --allow-empty -m 'Initial upstream branch.'
+
+  # 2. Import the first canonical DFSG tarball as upstream/latest
+  gbp import-orig --no-merge --no-pristine-tar --no-symlink-orig \
+    --upstream-branch=upstream/latest ../sjasmplus_1.23.0+dfsg.orig.tar.xz
+
+  # 3. Create debian/latest from the imported upstream branch
+  git checkout -b debian/latest
+
+  # 4. Copy in the initial Debian packaging metadata and commit it
+  git add debian
+  git commit -m "debian: initial packaging baseline for 1.23.0+dfsg"
+
+  # 5. Push the initial Debian-facing branches to Salsa
+  git push salsa upstream/latest
+  git push salsa debian/latest
+
+After releasing package one can add snapshot commit to prevent accidental
+package reuploads to archive with same version, etc:
+
+  # 1. Add a snapshot changelog entry on debian/latest
+  git checkout debian/latest
+  gbp dch --snapshot
+  editor debian/changelog
+  git commit -m "debian: WIP of next version" debian/changelog
+
+Initial import or refresh of the Debian-side upstream branch:
+
+  # 1. Make sure the packaging repo is on the Debian branch and clean
+  git checkout debian/latest
+  git status --ignored
+
+  # 2. Generate the DFSG tarball in upstreamvcs `gen-dfsg-tarball` branch
+
+  # 3. Import the canonical DFSG tarball into the Debian upstream branch
+  gbp import-orig --no-pristine-tar --no-symlink-orig \
+    --debian-branch=debian/latest --upstream-branch=upstream/latest \
+    ../sjasmplus_1.23.0+dfsg.orig.tar.xz
+  # this will also merge into debian/latest, if not, merge manually
+
+  # 4. Add packaging adjustments for the new release, if needed
+
+  # 5. Inspect the resulting branches and tags
+  git log --oneline --decorate -n 5 upstream/latest
+  git log --oneline --decorate -n 5 debian/latest
+
+  # 6. Push the Debian-facing branches to Salsa
+  git push salsa upstream/latest
+  git push salsa debian/latest
+
+6. BUILDING THE SOURCE AND BINARY PACKAGES
+==========================================
+
+  # 1. Build a source-only upload
+  gbp buildpackage -us -uc -S
+
+  # 2. Build source and binary packages
+  gbp buildpackage -us -uc --git-ignore-new
+
+  # 3. Verify policy compliance metrics
+  lintian -EviIL +pedantic ../sjasmplus_*.changes
+
+  # 4. Normalize formatting of debian/* metadata when needed
+  wrap-and-sort -vast
+
+7. CONTAINERIZED PACKAGING FLOW (PODMAN WORKFLOW)
+=================================================
+Because the host system may not be Debian sid, the packaging workflow can be
+run in an isolated Debian Unstable container.
+
+  # Create and run the isolated workspace
+  podman run --interactive --tty --env='DEB*' --name deb-pkg-env \
+    --shm-size=1G --cap-add SYS_PTRACE --volume=$PWD:/tmp/test:Z \
+    --workdir=/tmp/test debian:sid bash
+
+  # Relaunch after exit (The -ai flags stand for "attach" and "interactive")
+  podman start -ai deb-pkg-env
+
+  # Inside the workspace container, inject identity variables
+  echo 'export DEBFULLNAME="Peter Helcmanovsky"' >> ~/.bashrc
+  echo 'export DEBEMAIL="ped@7gods.org"' >> ~/.bashrc
+  source ~/.bashrc
+
+  # Install required package development utilities
+  apt update && apt install -y devscripts build-essential debhelper-compat git
+
+  # Auto-resolve compile-time requirements from package controls
+  mk-build-deps --install --remove --tool='apt-get -y --no-install-recommends' \
+    debian/control
+
+8. SUBMODULES VS IMPORTED DIRECTORIES
+=====================================
+The safest approach is to use separate local clones or Git worktrees for:
+
+* upstreamvcs tarball generation
+* Salsa packaging branch maintenance
+
+This avoids mixing two different representations of upstream content in one
+working tree:
+
+* the upstreamvcs repository uses normal upstream history and Git submodules
+* the Salsa repository stores imported `upstream/*` branches with ordinary
+  tracked directories instead of gitlinks
+
+If a single checkout must be reused inside the upstreamvcs repository, keep
+the tarball-generation work on `gen-dfsg-tarball`, which is intended to live on
+top of upstream history and therefore should not clash with submodule layout the
+way the imported Salsa `upstream/*` branches would.
+
+If a single checkout must be reused inside the Salsa repository, branch switching
+should stay within the imported/pruned world and should not require submodule
+initialization at all.
+
+If stale submodule metadata from earlier experiments still interferes in a local
+checkout, clean it up before continuing:
+
+  git submodule deinit -f --all
+  git clean -ffd
+
+If old submodule metadata still interferes, remove the corresponding
+`.git/modules/*` entries before retrying.
+
+If the upstreamvcs checkout and the Salsa packaging checkout are kept as two
+separate clones, these branch-shape collisions become unlikely.
+
+9. UPSTREAM BUILD MECHANICS
+===========================
+* The Debian packaging build drops the default embedded Lua runtime engine.
+* Variable flags mapped via `debian/rules`: `USE_BUNDLED_LUA=0`, `PREFIX=/usr`
+* Compilation uses the standard system `liblua5.5-dev` shared files.
+* `docs/documentation.xml` is converted into the HTML documentation via
+  `xsltproc` toolsets. The application manpage is created by `help2man` from
+  `sjasmplus` help output.
+* The main practical reason for the imported-upstream design is Salsa CI:
+  the CI should be able to use the imported `upstream/*` branches and build the
+  correct source package without extensive custom scripting.
+
+Retained convenience copies (vendored code kept after DFSG pruning):
+
+* `LuaBridge/` (minus its `Tests/` and `third_party/`) is a header-only C++/Lua
+  binding with no equivalent Debian package; it is tightly integrated into the
+  build and cannot be swapped for a system library.
+* `unittest-cpp/` is used only by the build-time/CI test suite, not by the
+  installed binary, and is not packaged for Debian.
+* `crc32c/` is not a complete upstream library but a small extracted/embedded
+  source snippet adapted for sjasmplus; there is no suitable system library to
+  link against.
+
+These are documented per-file in `debian/copyright`. They are retained
+deliberately: no packaged Debian equivalents currently exist, and (for
+`unittest-cpp`) the code is test-only. If a future reviewer requires unbundling,
+it would need upstream refactoring that is out of scope for the packaging work.
+
+10. NOTES FROM THE FIRST FAILED APPROACH
+========================================
+The first packaging attempt used a simpler branch model:
+
+* upstreamvcs history mirrored directly into `upstream/latest`
+* `debian/latest` layered on top of that
+* `mk-origtargz` used manually or in Salsa CI to repack the orig tarball on the
+  fly
+
+That approach was abandoned because it did not match how `gbp` and Salsa CI
+expect source packages to be reconstructed:
+
+* the Debian orig tarball is not a direct archive of the upstreamvcs Git tree
+* it removes DFSG-excluded files
+* it expands submodule contents into ordinary files
+* Salsa CI build jobs reconstruct source packages before building binaries, so
+  even binary jobs depend on the orig-tarball reproduction path being correct
+
+The result was a long series of CI mismatches:
+
+* wrong orig tarball contents in `build source`
+* line-ending mismatches in Windows `.rc` files due to different export paths
+* `pristine-tar` verification failures when the configured upstream tree did not
+  match the repacked tarball's real contents
+
+The imported-upstream design exists specifically to avoid repeating that work.
+If this file is being read much later and the setup looks more complicated than
+expected, that complexity is intentional: it keeps the canonical Debian source
+aligned with what Salsa CI and `gbp` can rebuild reliably.
+
+ -- Peter Helcmanovsky <ped@7gods.org>  Sat, 23 May 2026 17:00:00 +0200

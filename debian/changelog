@@ -1,0 +1,5 @@
+sjasmplus (1.23.0+dfsg-1) UNRELEASED; urgency=low
+
+  * Initial Debian package. (Closes: #1136128)
+
+ -- Peter Helcmanovsky <ped@7gods.org>  Sun, 03 May 2026 21:43:08 +0000
