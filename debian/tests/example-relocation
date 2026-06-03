@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+examples_dir=/usr/share/doc/sjasmplus/examples/relocation
+workdir=$(mktemp -d)
+trap 'rm -rf "$workdir"' EXIT INT TERM HUP
+
+cd "$workdir"
+sjasmplus --msg=war --nologo "$examples_dir/relocation_main.asm"
+
+cmp relocate.tap "$examples_dir/relocate.tap"

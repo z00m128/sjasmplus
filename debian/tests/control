@@ -1,0 +1,3 @@
+Depends:
+ @,
+Test-Command: sh debian/tests/example-relocation
