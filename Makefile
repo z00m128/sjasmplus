@@ -19,7 +19,7 @@
 EXE_BASE_NAME=sjasmplus
 
 # Set version, dir and src.tar.xz filename
-VERSION?=1.23.0
+VERSION?=1.23.1
 SRCTARFILE?=$(EXE_BASE_NAME)-$(VERSION)-src.tar.xz
 SRCTARDIR?=$(EXE_BASE_NAME)-$(VERSION)
 
@@ -70,6 +70,8 @@ RMSRCTARDIR?=rm -rf ../$(SRCTARDIR)
 # the project-dir itself can contain space, or any path leading up to it
 
 BUILD_DIR=build
+EXAMPLES_BUILD_DIR:=$(BUILD_DIR)/examples
+TESTS_BUILD_DIR:=$(BUILD_DIR)/tests
 
 LUA_VER?=5.5
 LUA_LIBNAME?=lua$(LUA_VER)
@@ -121,6 +123,7 @@ BUILD_DIR_UT=$(BUILD_DIR)+ut
 SUBDIR_UT=unittest-cpp
 SUBDIR_TESTS=cpp-src-tests
 BUILD_EXE_UT=$(BUILD_DIR_UT)/$(EXE_UT_BASE_NAME)
+LCOV_OUTPUT_FILE=$(BUILD_DIR_UT)/coverage.info
 
 EXE_FP="$(abspath $(BUILD_EXE))"
 EXE_UT_FP="$(abspath $(BUILD_EXE_UT))"
@@ -164,14 +167,10 @@ ALL_OBJS+=$(LUAOBJS)
 ALL_OBJS_UT+=$(LUAOBJS_UT)
 endif
 endif
-ALL_COVERAGE_RAW:=$(patsubst %.o,%.gcno,$(ALL_OBJS_UT)) $(patsubst %.o,%.gcda,$(ALL_OBJS_UT))
+ALL_COVERAGE_RAW:=$(patsubst %.o,%.gcno,$(ALL_OBJS_UT)) $(patsubst %.o,%.gcda,$(ALL_OBJS_UT)) $(LCOV_OUTPUT_FILE)
 
 # GCOV options to generate coverage files
-ifdef COVERALLS_SERVICE
-GCOV_OPT=-rlp
-else
 GCOV_OPT=-rlpmab
-endif
 
 #implicit rules to compile C/CPP files into $(BUILD_DIR)
 $(BUILD_DIR)/$(SUBDIR_LUA)/%.o : $(SUBDIR_LUA)/%.c	# build Lua as C++ library, not C
@@ -199,7 +198,7 @@ $(BUILD_DIR_UT)/%.o : %.cpp
 	@mkdir -p $(@D)
 	$(COMPILE.cc) -DADD_UNIT_TESTS -I$(SUBDIR_UT) $(OUTPUT_OPTION) $<
 
-.PHONY: all install uninstall clean docs tests memcheck callgrind coverage upx srctar
+.PHONY: all install uninstall clean docs tests test memcheck callgrind coverage coverage-lcov upx srctar
 
 # "all" will also copy the produced binary into project root directory (to mimick old makefile)
 all: $(BUILD_EXE)
@@ -232,6 +231,8 @@ install: $(BUILD_EXE)
 uninstall:
 	$(UNINSTALL) "$(STAGEDIR)/$(PREFIX)/bin/$(EXE_BASE_NAME)"
 
+test: tests
+
 tests: $(BUILD_EXE_UT)
 ifdef TEST
 	EXE=$(EXE_UT_FP) $(BASH) ContinuousIntegration/test_folder_tests.sh "$(TEST)"
@@ -259,7 +260,11 @@ else
 endif
 
 coverage:
-	$(MAKE) CFLAGS_EXTRA=--coverage tests
+ifdef COVERALLS_SERVICE
+	$(error gcov coverage is not meant to be used for coveralls.io, use coverage-lcov target instead)
+endif
+	# -fkeep-inline-functions -fkeep-static-functions seem like good idea, but they kill current coverage of header files, so nope
+	$(MAKE) CFLAGS_EXTRA='--coverage' tests
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_BASE) $(SRCS)
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_CRC32C) $(CRC32CSRCS)
 ifdef LUA_COVERAGE
@@ -267,12 +272,16 @@ ifdef LUA_COVERAGE
 # to get full coverage report, including the lua sources, use `make DEBUG=1 LUA_COVERAGE=1 coverage`
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_LUA) $(LUASRCS)
 endif
-ifndef COVERALLS_SERVICE
-# coversall.io is serviced by 3rd party plugin: https://github.com/eddyxu/cpp-coveralls
-# (from *.gcov files stored in project root directory, so not moving them here)
-# local coverage is just moved from project_root to build_dir/coverage/
 	@mkdir -p $(BUILD_DIR_UT)/$(SUBDIR_COV)
 	mv *#*.gcov $(BUILD_DIR_UT)/$(SUBDIR_COV)/
+
+coverage-lcov:
+	$(MAKE) CFLAGS_EXTRA='--coverage' tests
+	lcov --capture --base-directory ./ --directory $(BUILD_DIR_UT) --output-file $(LCOV_OUTPUT_FILE) --no-external --exclude 'unittest-cpp/*' --exclude 'LuaBridge/*' --exclude 'lua5.5/*' --exclude 'cpp-src-tests/*'
+ifdef COVERALLS_SERVICE
+	cp $(LCOV_OUTPUT_FILE) ./
+else
+	genhtml --demangle-cpp -o $(BUILD_DIR_UT)/$(SUBDIR_COV) $(LCOV_OUTPUT_FILE)
 endif
 
 docs: $(SUBDIR_DOCS)/documentation.html ;
@@ -286,6 +295,9 @@ $(SUBDIR_DOCS)/documentation.html: Makefile $(sort $(wildcard $(SUBDIR_DOCS)/*.x
 		$(SUBDIR_DOCS)/documentation.xml
 
 clean:
+# delete generated example [sna, tap, com] files and leftover files from test runner run
+	$(UNINSTALL) $(EXAMPLES_BUILD_DIR)/*
+	$(UNINSTALL) $(TESTS_BUILD_DIR)/*
 	$(UNINSTALL) \
 		$(EXE_BASE_NAME) \
 		$(SRCTARFILE) \
@@ -294,8 +306,10 @@ clean:
 		$(ALL_OBJS) \
 		$(ALL_COVERAGE_RAW) \
 		$(ALL_OBJS_UT) \
-		$(BUILD_DIR_UT)/$(SUBDIR_COV)/*.gcov
+		$(BUILD_DIR_UT)/$(SUBDIR_COV)/**/*
 	$(REMOVEDIR) \
+		$(EXAMPLES_BUILD_DIR) \
+		$(TESTS_BUILD_DIR) \
 		$(BUILD_DIR)/$(SUBDIR_BASE) \
 		$(BUILD_DIR)/$(SUBDIR_CRC32C) \
 		$(BUILD_DIR)/$(SUBDIR_LUA) \
@@ -307,6 +321,7 @@ clean:
 		$(BUILD_DIR_UT)/$(SUBDIR_CRC32C) \
 		$(BUILD_DIR_UT)/$(SUBDIR_LUA) \
 		$(BUILD_DIR_UT)/$(SUBDIR_TESTS) \
+		$(BUILD_DIR_UT)/$(SUBDIR_COV)/* \
 		$(BUILD_DIR_UT)/$(SUBDIR_COV) \
 		$(BUILD_DIR_UT)
 

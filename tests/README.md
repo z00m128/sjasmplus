@@ -22,7 +22,7 @@ Unfortunately some "binary" files in tests directory representing expected resul
 
 ## How to add test
 
-Add `some.asm` file somewhere into `tests/` directory, and watch it being assembled (upon every commit or pull request) at Cirrus CI.
+Add `some.asm` file somewhere into `tests/` directory, and watch it being assembled (upon every commit or pull request) at GitHub Actions CI.
 
 ### But I want to have some ".asm" include file along it
 

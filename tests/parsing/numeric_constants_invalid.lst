@@ -71,17 +71,17 @@ numeric_constants_invalid.asm(43): warning[decimaln]: decimal part is ignored: 0
 43    0027 3F               DB      0q77.01
 44    0028                  LUA ALLPASS     ; warning vs integer variant
 45    0028 ~                    _pc("db " .. 2^7 .. " , " .. (1<<7))    -- "1<<7" is integer variant of "2^7"
-46    0028 ~                    _pc("db " .. 2^7.00001 .. " , " .. math.floor(2^7.00001))
+46    0028 ~                    _pc("db " .. string.format("%.6f", 2^7.00001) .. " , " .. math.floor(2^7.00001))
 47    0028 ~                    _pc("db " .. 35/7 .. " , " .. 35//7)    -- "35//7" is integer variant of "35/7"
-48    0028 ~                    _pc("db " .. 36/7 .. " , " .. 36//7)    -- "36//7" is integer variant of "36/7"
+48    0028 ~                    _pc("db " .. string.format("%.6f", 36/7) .. " , " .. 36//7)    -- "36//7" is integer variant of "36/7"
 numeric_constants_invalid.asm(45): warning[decimalz]: [LUA] decimal part is ignored: 128.0 , 128
 49    0028 80 80        db 128.0 , 128
-numeric_constants_invalid.asm(46): warning[decimaln]: [LUA] decimal part is ignored: 128.00088723146598 , 128
-49    002A 80 80        db 128.00088723146598 , 128
+numeric_constants_invalid.asm(46): warning[decimaln]: [LUA] decimal part is ignored: 128.000887 , 128
+49    002A 80 80        db 128.000887 , 128
 numeric_constants_invalid.asm(47): warning[decimalz]: [LUA] decimal part is ignored: 5.0 , 5
 49    002C 05 05        db 5.0 , 5
-numeric_constants_invalid.asm(48): warning[decimaln]: [LUA] decimal part is ignored: 5.1428571428571432 , 5
-49    002E 05 05        db 5.1428571428571432 , 5
+numeric_constants_invalid.asm(48): warning[decimaln]: [LUA] decimal part is ignored: 5.142857 , 5
+49    002E 05 05        db 5.142857 , 5
 49    0030                  ENDLUA
 numeric_constants_invalid.asm(50): warning[decimalz]: decimal part is ignored: 12.0'0
 50    0030 0C               DB      12.0'0
@@ -96,7 +96,12 @@ numeric_constants_invalid.asm(55): error: Digit not in base: .2
 55    0032                  DB      %101.2
 numeric_constants_invalid.asm(56): error: Digit not in base: .8
 56    0032                  DB      0q77.8
-57    0032
+57    0032                  ; code coverage: make sure the overflow in decimal part doesn't affect other warnings/reporting and is silently ignored
+numeric_constants_invalid.asm(58): warning[decimalz]: decimal part is ignored: 15.0'000'000'000'000'000'000
+58    0032 0F               DB      15.0'000'000'000'000'000'000
+numeric_constants_invalid.asm(59): warning[decimaln]: decimal part is ignored: 15.0'999'999'999'999'999'999
+59    0033 0F               DB      15.0'999'999'999'999'999'999
+60    0034
 # file closed: numeric_constants_invalid.asm
 
 Value    Label

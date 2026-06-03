@@ -13,8 +13,9 @@
 - **Run tests:**
   - Unit tests: `make tests`, filter set of tests by adding TEST=<subfolder_name> (subfolders in tests/), like `make tests TEST=misc`
 - **CI/CD:**
-  - **Cirrus CI** (`.cirrus.yml`): Linux GCC builds (9/11/latest), FreeBSD clang, Windows MinGW, coverage reporting. Primary CI for regression and platform testing.
-  - **GitHub Actions** (`.github/workflows/`): CodeQL security analysis, Windows CMake builds, and reproducibility testing (see below).
+  - **GitHub Actions** (`.github/workflows/`): Linux GCC builds (9/11/latest), FreeBSD clang, Windows MinGW, Windows CMake MSVC, coverage reporting.
+  - **GitHub Actions** (`.github/workflows/`): CodeQL security analysis builds, and reproducibility testing (see below).
+  - Cirrus CI: Cirrus was primary CI platform, but it's gone since 2026-06-01, so all CI tasks were migrated to GitHub Actions. Any mentions of Cirrus should thus describe the migration or are most likely obsolete and should be removed/replaced.
 - **Binary Reproducibility Testing** (see issue #235):
   - **Workflow**: `.github/workflows/reproducibility.yml` runs weekly (Friday 8 AM UTC) or on manual trigger (`workflow_dispatch`).
   - **Tools**: `reprotest` (Debian Reproducible Builds toolkit) verifies that builds with environmental variations (users, timezones, locales, etc.) produce identical binaries.
@@ -43,12 +44,12 @@ Understanding the pass structure is critical for feature development:
 
 ## Project-Specific Notes
 - **Multi-platform:**
-  - Code and build scripts support Linux, macOS, Windows, and CI (see `ContinuousIntegration/` and `.cirrus.yml`).
+  - Code and build scripts support Linux, macOS, Windows, and CI (see `ContinuousIntegration/` and `.github/workflows/ci.yml`).
 - **High test coverage, new features are almost always developed by TDD approach.**
   - most of the features are tested end-to-end via tests in `tests/`, providing both example of usage and ensuring resulting binaries and listing files
   - `tests/` tests consist of main .asm file, all related files must have identical stem name, providing listing file .lst will allow for assembling errors (as long as listing does match, ie. errors were listed), otherwise test must assemble without errors. If assembling without errors is expected, test should rather produce binary to compare end result.
   - listing files contain source files names as they are opened/closed, their line numbers, memory address and emitted machine code bytes and original source with some substitutions applied. Error and warning messages are also included on separate lines ahead of the line causing them.
-  - to add new test to project just create new .asm file in appropriate subfolder of `tests/`, you can generate listing and binary files by running sjasmplus itself, then patch the result to expected content and keep implementing the feature until test passes. The new test will be automatically picked up by `ContinuousIntegration/test_folder_tests.sh` which is used also by `make tests` and Cirrus CI.
+  - to add new test to project just create new .asm file in appropriate subfolder of `tests/`, you can generate listing and binary files by running sjasmplus itself, then patch the result to expected content and keep implementing the feature until test passes. The new test will be automatically picked up by `ContinuousIntegration/test_folder_tests.sh` which is used also by `make tests` and GHA CI.
 - **Examples as tests:**
   - Many `.asm` files in `examples/` and `tests/` are used for regression and feature testing.
 - **Notable features:**

@@ -1260,7 +1260,7 @@ static void InsertSingleStructLabel(const bool setNameSpace, char *name, const b
 						| (isDefine ? LABEL_IS_STRUCT_D : LABEL_IS_STRUCT_E) \
 						| (isRelocatable ? LABEL_IS_RELOC : 0);
 		if (!LabelTable.Insert(fullName, value, traits)) {
-			// while main struct name shouldn't be possible to dupe, item names may compound into clash, catched as late as here
+			// while main struct name shouldn't be possible to dupe, item names may compound into clash, caught as late as here
 			Error("Duplicate label", fullName, EARLY);
 		} else if (isDefine && setNameSpace) {	// this is name of structure defined, make it's SIZEOF also set
 			SLabelTableEntry* structLabel = LabelTable.Find(fullName, true);

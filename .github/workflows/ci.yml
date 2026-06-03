@@ -1,0 +1,309 @@
+name: build
+# this name becomes visible on the badge in readme, so keeping it simple "build" intentionally
+
+# GitHub Actions replacement for Cirrus CI (.cirrus.yml), which shuts down
+# 2026-06-01. Tracks upstream issue z00m128/sjasmplus#336.
+#
+# This is a faithful 1:1 port of every Cirrus task:
+#   Cirrus "Linux gcc 9/11/latest builds"  -> job: linux  (matrix)
+#   Cirrus "windows mingw build"           -> job: windows
+#   Cirrus "FreeBSD clang build"           -> job: freebsd (cross-platform-actions VM)
+#   Cirrus "MacOS default CC build"        -> job: macos
+#   Cirrus "coveralls.io coverage report"  -> job: coverage (optional upload)
+#
+# Triggers mimic Cirrus: every branch push and every pull request, skipped
+# for docs-only changes (Cirrus: skip "changesIncludeOnly('docs/*')").
+#
+# Supply-chain hardening: every external action is pinned to a full commit
+# SHA, not a moving tag (a tag like @v6 can be silently repointed at malicious
+# code). The trailing "# vX" comment is the human-readable version that SHA
+# resolves to -- bump the SHA and the comment together (Dependabot can do
+# this). SHAs resolved 2026-05-17:
+#   actions/checkout            v6     -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
+#   actions/upload-artifact     v7     -> 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+#   cross-platform-actions      v1.2.0 -> be3d7e9ff5c8770b9c51b1a8c8c5446e1cad7cf9
+#   coverallsapp/github-action  v2     -> 5cbfd81b66ca5d10c19b062c04de0199c215fb6e
+#
+# List of GH runners and their details:
+#   repo: https://github.com/actions/runner-images#available-images
+#   docs: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+
+on:
+  push:
+    paths-ignore: ['docs/**']
+  pull_request:
+    paths-ignore: ['docs/**']
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref. GHA is slower than Cirrus was, so
+# don't pay for stale builds (addresses the speed concern raised in #336).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege for GITHUB_TOKEN. Every job here only reads code and uploads
+# build artifacts (artifact upload uses the Actions service, not this token).
+# Coveralls auth is a separate secret, not GITHUB_TOKEN. So read-only is enough,
+# and this caps the blast radius even if a third-party action is compromised.
+# (Fork PRs already get a read-only token + no secrets; this also protects
+# push/own-branch runs in case the repo default is read-write.)
+permissions:
+  contents: read
+
+jobs:
+
+  # Cirrus: container gcc:9 / gcc:11 / gcc:latest
+  #         build_script: make clean && make -j8
+  #         install_script: make install && make clean
+  #         then test_folder_tests.sh + test_folder_examples.sh
+  # PREFIX defaults to /usr/local, so `make install` puts sjasmplus on PATH
+  # inside the container; the test scripts find it via `command -v` after
+  # `make clean` removes the in-tree binary -- same as Cirrus.
+  # Modified to test two specific gcc versions (9 and latest at ARM) and one non-containerized build on Ubuntu "slim"
+  linux:
+    name: Linux ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 'gcc-9'
+            runner: ubuntu-latest
+            container: gcc:9
+          - name: 'gcc-ubuntu'
+            runner: ubuntu-slim
+            sudo: sudo  # needs sudo for install step since it's not a container
+          - name: 'gcc-latest-arm'
+            runner: ubuntu-24.04-arm
+            container: gcc:latest
+    steps:
+      # NOTE: gcc:9 is Debian buster (old glibc). If actions/checkout@v6's
+      # bundled Node ever fails there, drop that one matrix entry to a manual
+      # `git clone` step -- the other two cover modern toolchains.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          submodules: true
+      - name: gcc version
+        run: gcc --version
+      - name: Build
+        run: make clean && make -j$(nproc)
+      - name: Upload sjasmplus binary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        with:
+          name: sjasmplus-linux-${{ matrix.name }}
+          path: sjasmplus
+          if-no-files-found: error
+      - name: Install (then clean, mirrors Cirrus)
+        run: ${{ matrix.sudo }} make install && make clean
+      - name: Assemble tests
+        run: ContinuousIntegration/test_folder_tests.sh
+      - name: Assemble examples
+        run: ContinuousIntegration/test_folder_examples.sh
+
+  # Cirrus: windowsservercore:cmake, MinGW via Makefile.win
+  #         build_script: ContinuousIntegration\winbuild_mingw.bat
+  #         clean_script + version check
+  #         assemble_examples / assemble_tests bat wrappers
+  # The Cirrus image had MinGW preinstalled on PATH; GitHub's windows runner
+  # does not guarantee that, so install it explicitly. Git for Windows (bash,
+  # find, diff, cmp -- needed by the .bat/.sh scripts) is preinstalled.
+  windows-mingw:
+    name: Windows MinGW
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          submodules: true
+      # GitHub's windows runner ships MinGW via Chocolatey but not on PATH.
+      # Don't use egor-tensin/setup-mingw: its static workaround crashes on the
+      # current choco mingw layout (missing libpthread.dll.a). Instead expose
+      # mingw + GNU tools exactly where the Cirrus windowsservercore image had
+      # them: the choco mingw bin + Git's usr\bin (bash/find/diff/cmp).
+      - name: Set up MinGW + GNU tools on PATH
+        shell: pwsh
+        run: |
+          choco install mingw -y --no-progress
+          Add-Content $env:GITHUB_PATH 'C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin'
+          Add-Content $env:GITHUB_PATH 'C:\Program Files\Git\usr\bin'
+      - name: Tool versions (mingw + GNU)
+        shell: cmd
+        run: |
+          where mingw32-make && mingw32-make --version
+          where gcc && gcc --version
+          where bash && bash --version
+      - name: Build (MinGW, Makefile.win)
+        shell: cmd
+        run: ContinuousIntegration\winbuild_mingw.bat
+      - name: Upload sjasmplus.exe
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        with:
+          name: sjasmplus-windows-mingw
+          path: sjasmplus.exe
+          if-no-files-found: error
+      - name: Clean + version
+        shell: cmd
+        run: |
+          mingw32-make -f Makefile.win clean
+          c:\tools\sjasmplus\sjasmplus --version
+      - name: Assemble examples
+        shell: cmd
+        run: ContinuousIntegration\winbuild_mingw_examples.bat
+      - name: Assemble tests
+        shell: cmd
+        run: ContinuousIntegration\winbuild_mingw_tests.bat
+
+  # Merge of old GHA windows-cmake build into this file to have all build
+  # tasks together (this type of build was not served by Cirrus CI for months).
+  windows-cmake:
+    name: Windows CMake MSVC
+    runs-on: windows-2025-vs2026
+    env:
+      # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+      BUILD_TYPE: Release
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          submodules: true
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Upload sjasmplus.exe
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        with:
+          name: sjasmplus-win64-${{ github.sha }}
+          path: build/Release/sjasmplus.exe
+          if-no-files-found: error
+      - name: Test
+        shell: cmd
+        run: |
+          echo *** Set GIT directory as priority (over MS crap) path to borrow GNU: bash, find, diff, cmp
+          set PATH="C:\Program Files\Git\usr\bin\";"${{github.workspace}}\build\${{env.BUILD_TYPE}}\";%PATH%;
+          echo *** check versions of GNU tools
+          where bash && bash --version
+          where find && find --version
+          where diff && diff --version
+          where cmp && cmp --version
+          echo *** Check sjasmplus.exe availability+version+help
+          bash -c "sjasmplus.exe --help"
+          bash -c "sjasmplus.exe --help=warnings"
+          echo *** run tests
+          bash ContinuousIntegration/test_folder_tests.sh
+          if %errorlevel% neq 0 exit /b %errorlevel%
+          echo *** run examples
+          bash ContinuousIntegration/test_folder_examples.sh
+
+  # Cirrus: freebsd_instance freebsd-15-0, clang, with unit tests.
+  # ped7g flagged cross-platform-actions in #336 -- using it here.
+  freebsd:
+    name: FreeBSD clang
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          submodules: true
+      - name: Initialize FreeBSD VM
+        uses: cross-platform-actions/action@be3d7e9ff5c8770b9c51b1a8c8c5446e1cad7cf9  # v1.2.0
+        with:
+          operating_system: freebsd
+          architecture: x86-64
+          version: '15.0'
+      - name: Build (FreeBSD VM)
+        shell: cpa.sh {0}
+        run: |
+          sudo IGNORE_OSVERSION=yes pkg update -f && sudo pkg install -y gmake bash diffutils
+          bash --version  || echo "no bash"
+          gmake --version || echo "no gmake"
+          cc --version    || echo "no cc"
+          c++ --version   || echo "no c++"
+          # FreeBSD make can't handle the Makefile -> use gmake, as Cirrus did
+          gmake clean && gmake -j4 CC=cc CXX=c++
+      - name: Upload sjasmplus binary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        with:
+          name: sjasmplus-freebsd
+          path: sjasmplus
+          if-no-files-found: error
+      - name: Build unit-test variant and run tests (FreeBSD VM)
+        shell: cpa.sh {0}
+        run: |
+          gmake clean && gmake -j4 CC=cc CXX=c++ tests
+
+  # Cirrus: macos_instance, default CC, with unit tests.
+  macos:
+    name: ${{ matrix.runner }} clang
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-26]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          submodules: true
+      - name: Tool versions
+        run: |
+          git --version || echo "no git"
+          bash --version || echo "no bash"
+          make --version || echo "no make"
+          cc --version || echo "no cc"
+          c++ --version || echo "no c++"
+          date
+          sysctl -n hw.physicalcpu
+      - name: Build
+        run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++
+      - name: Upload sjasmplus binary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        with:
+          name: sjasmplus-${{ matrix.runner }}-arm
+          path: sjasmplus
+          if-no-files-found: error
+      - name: Unit tests
+        run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++ tests
+
+  # Cirrus: coveralls.io pipe (gcc:14, DEBUG=1, make coverage).
+  # The Cirrus version was hard-gated to z00m128's repo + encrypted token and
+  # skipped on PRs. Here the coverage *build+tests* always run (extra signal,
+  # mirrors the Cirrus gcc14 compile); the Coveralls upload is opt-in: it only
+  # fires off PRs when a COVERALLS_REPO_TOKEN repo secret exists, and never
+  # breaks the build.
+  coverage:
+    name: Coverage (gcc14)
+    runs-on: ubuntu-latest
+    container: gcc:14
+    needs: [macos]   # mirrors Cirrus `depends_on: macos`
+    env:
+      # Boolean gate only -- the secret value is exposed solely to the upload step, not here
+      COVERALLS_ENABLED: ${{ secrets.COVERALLS_REPO_TOKEN != '' }}
+      CI_SERVICE_NAME: 'github-actions'
+      # makefile variables affecting build options, for LUA_COVERAGE remove also `-e lua5.5/`
+      COVERALLS_SERVICE: 1
+      DEBUG: 1
+      # LUA_COVERAGE: 1
+    steps:
+      - name: Tools preparation
+        run: |
+          apt-get update -qq && apt-get install -qq lcov
+          echo "CPU cores: $(nproc)"
+          git --version || echo "no git"
+          bash --version || echo "no bash"
+          make --version || echo "no make"
+          gcc --version || echo "no gcc"
+          g++ --version || echo "no g++"
+          lcov --version || echo "no lcov"
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          submodules: true
+          fetch-depth: 0   # Cirrus used full clone for the git revision number
+      - name: Build coverage (runs full test suite via `make coverage-lcov`)
+        run: make clean && make -j$(nproc) coverage-lcov
+      - name: Upload to Coveralls
+        if: ${{ env.COVERALLS_ENABLED == 'true' }}
+        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2
+        with:
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          file: ./coverage.info
+          format: lcov

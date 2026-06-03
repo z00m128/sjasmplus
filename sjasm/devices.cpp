@@ -438,7 +438,7 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 					break;		// continue into next slot, don't wrap any more
 				}
 				if (realAddr != (prevS->Address + prevS->Size)) {	// should be equal
-					ErrorInt("Write beyond memory slot in wrap-around slot catched too late by",
+					ErrorInt("Write beyond memory slot in wrap-around slot caught too late by",
 								realAddr - prevS->Address - prevS->Size, FATAL);
 					break;
 				}
@@ -478,7 +478,7 @@ CDeviceSlot* CDevice::GetCurrentSlot() {
 }
 
 // Calling this with (PagesCount, 0) will return total memory size
-int32_t CDevice::GetMemoryOffset(int page, int32_t offset) const {
+int32_t CDevice::GetMemoryOffset(page_t page, int32_t offset) const {
 	if (!Pages[0]) return 0;
 	return offset + page * Pages[0]->Size;
 }

@@ -165,6 +165,8 @@ for f in "${TEST_FILES[@]}"; do
     echo ""     # add new line after each test
     #read -p "press..."      # DEBUG helper to examine produced files
 done # end of FOR (go through all asm files)
+# report version of used sjasmplus
+LANG=C $MEMCHECK "$EXE" --version
 # display OK message if no error was detected ("\u25A0" is UTF big fat filled rectangle/square)
 [[ $exitCode -eq 0 ]] \
     && echo -e "\033[92mFINISHED: OK, $totalChecks checks passed ($totalTests tests) \033[91m\u25A0\033[93m\u25A0\033[32m\u25A0\033[96m\u25A0\033[0m" \

@@ -3,7 +3,7 @@
 ;@                           SymbOS network daemon                            @
 ;@                              N S L O O K U P                               @
 ;@                                                                            @
-;@               (c) 2015 by Prodatron / SymbiosiS (Jˆrn Mika)                @
+;@               (c) 2015 by Prodatron / SymbiosiS (J√∂rn Mika)                @
 ;@                                                                            @
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -149,7 +149,7 @@ db 0
 ;==============================================================================
 
 App_BegTrns
-;### PRGPRZS -> Stack f¸r Programm-Prozess
+;### PRGPRZS -> Stack f√ºr Programm-Prozess
             ds 64
 prgstk      ds 6*2
             dw prgprz

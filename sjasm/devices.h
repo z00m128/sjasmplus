@@ -67,7 +67,7 @@ public:
 	const char* getID() const { return ID; }
 	const aint SlotSize;
 	const aint SlotsCount;
-	const aint PagesCount;
+	const page_t PagesCount;
 	int initialPages[MAX_SLOT_N] = {};
 
 private:
@@ -93,13 +93,13 @@ public:
 	bool SetSlot(int slotNumber);		// sets "current/active" slot
 	CDeviceSlot* GetCurrentSlot();		// returns "current/active" slot
 	int GetCurrentSlotNum() const { return CurrentSlot; }	// returns "current/active" slot
-	int32_t GetMemoryOffset(int page, int32_t offset) const;
+	int32_t GetMemoryOffset(page_t page, int32_t offset) const;
 	void Poke(aint z80adr, byte value);	// write byte into device memory with current page-mapping
 	aint SlotNumberFromPreciseAddress(aint address);
 	char* ID;
 	CDevice* Next;
 	int SlotsCount;
-	int PagesCount;
+	page_t PagesCount;
 	byte* Memory;
 	aint ZxRamTop;		// for ZX-like machines, the RAMTOP system variable
 

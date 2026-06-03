@@ -16,15 +16,15 @@ but is it useful? Does replacing this with string+ hurt too much?
 What about `ld hl,"ab"|128` or `ld hl,"ab"+128` ... how far to go with
 string operators? Let's not turn sjasmplus into another JS fiasco :D)
 
-Cirrus-CI .cirrus.yml:
-- name: coveralls.io coverage report (linux gcc6):
+GHA CI:
+- coveralls.io coverage report:
   GCC14 still doesn't have as perfect coverage report as GCC6 (versions between I tried were also imperfect),
   so for the moment I will stick with 14 and see how it will go, but update probably ASAP and keep tracking coverge results.
+- coveralls.io coverage: also currently the upload of data from CI is done by python script, look for alternative.
+  - since CI builds were migrated to GHA, maybe coveralls.io github action can be used now?
+    https://github.com/marketplace/actions/coveralls-github-action
 
 check for Z80 in/out having also [] brackets and syntax brackets-only mode? (currently only `(c)` and `(n)` works)
-
-ARM! https://cirrus-ci.org/guide/linux/
-> Cirrus CI supports container and arm_container instances in order to run your CI workloads on amd64 and arm64 platforms respectively.
 
 @Janko at Next discord: `--raw-fill-gaps` to produce fill when second ORG is used and --raw output. (like org $2000 ... org $2100 -> test.dot)
 @Janko: I would rather prefer a new  -o  option which by default also sets the device to "just 64K" model and does what SAVE would do

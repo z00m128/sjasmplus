@@ -385,10 +385,10 @@ static aint getNexBankNum(const aint bankIndex) {
 }
 
 static void checkStackPointer() {
-	constexpr int CHECK_SIZE = 10;
-	constexpr int EXPECTED_SLOTS_COUNT = 8;
-	const int adrMask = Device->GetCurrentSlot()->Size - 1;
-	const int pages[EXPECTED_SLOTS_COUNT] = { 0, 0, 5*2, 5*2+1, 2*2, 2*2+1, nex.h.entryBank*2, nex.h.entryBank*2+1 };
+	constexpr size_t CHECK_SIZE = 10;
+	constexpr size_t EXPECTED_SLOTS_COUNT = 8;
+	const word adrMask = static_cast<word>(Device->GetCurrentSlot()->Size - 1);
+	const page_t pages[EXPECTED_SLOTS_COUNT] = { 0, 0, 5*2, 5*2+1, 2*2, 2*2+1, static_cast<page_t>(nex.h.entryBank*2), static_cast<page_t>(nex.h.entryBank*2+1) };
 	assert(EXPECTED_SLOTS_COUNT == Device->SlotsCount);
 	// check if SP is too close to ROM (0x0001 ... 0x4009)
 	if (0x0000 < nex.h.sp && nex.h.sp < 0x4000 + CHECK_SIZE) {
@@ -398,7 +398,7 @@ static void checkStackPointer() {
 	// check if good-looking SP points to enough of zeroed memory, warn about overwrite if not
 	word spCheck = word(nex.h.sp - CHECK_SIZE);
 	while (spCheck != nex.h.sp) {
-		const int pageNum = pages[Device->GetSlotOfA16(spCheck)];
+		const page_t pageNum = pages[Device->GetSlotOfA16(spCheck)];
 		const size_t offset = Device->GetMemoryOffset(pageNum, spCheck & adrMask);
 		if (0 != Device->Memory[offset]) break;
 		++spCheck;

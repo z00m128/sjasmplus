@@ -8,7 +8,8 @@
         assert(2 == tonumber("10", 2))
         assert(43794 == tonumber("ab12", 16))
         assert("1234" == tostring(1234))
-        assert("Lua 5.5" == _VERSION)
+        -- currently supported versions 5.3, 5.4 and 5.5
+        assert("Lua 5.5" == _VERSION or "Lua 5.4" == _VERSION or "Lua 5.3" == _VERSION)
         assert("nil" == type(nil))
         -- string manipulation
         assert(0x42 == string.byte("ABC", 2))

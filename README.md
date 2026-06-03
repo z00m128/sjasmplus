@@ -1,5 +1,5 @@
 # sjasmplus
-[![Build Status](https://api.cirrus-ci.com/github/z00m128/sjasmplus.svg)](https://cirrus-ci.com/github/z00m128/sjasmplus/master)
+[![CI Build Status](https://github.com/z00m128/sjasmplus/actions/workflows/ci.yml/badge.svg)](https://github.com/z00m128/sjasmplus/actions/workflows/ci.yml)
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/)
 [![BSD 3-Clause License](https://img.shields.io/github/license/z00m128/sjasmplus.svg)](https://github.com/z00m128/sjasmplus/blob/master/LICENSE.md)
 [![Coverage Status](https://coveralls.io/repos/github/z00m128/sjasmplus/badge.svg?branch=master)](https://coveralls.io/github/z00m128/sjasmplus?branch=master)
@@ -40,7 +40,7 @@ Main Features
 * ZX Spectrum specific directives and pseudo ops (SAVESNA, SAVETAP, SAVEHOB, INCHOB, INCTRD…)
 * ZX Spectrum Next specific features and directives (Z80N, 8ki memory paging, `SAVENEX`)
 * Amstrad CPC 464/6128 specific directives (`SAVECPCSNA`)
-* Correctness is assured by Cirrus-CI with 380+ automated tests (that's also 380+ examples of usage!)
+* Correctness is assured by GitHub Actions CI with 512+ automated tests (that's also 512+ examples of usage!)
 * Fake instructions as `LD HL,DE` (`LD H,D:LD L,E`) and more
 * Code inlining through colon (`LD A,C:INC A:PUSH AF:IFDEF FX:LD A,D:ENDIF`…)
 * Very fast compilation: 1 million lines by 2-3 seconds on modern computer
@@ -57,15 +57,25 @@ renaming provider, macro documenter and arguments definitions.
 
 This can be further complemented by [Z80 Assembly meter](https://github.com/theNestruo/z80-asm-meter-vscode) plugin for Visual Studio Code.
 
+[MAME](https://github.com/mamedev/mame) is multi-purpose emulation framework, does emulate several Z80 machines like ZX Spectrum, including ZX Spectrum Next (currently most complete and accurate emulation of ZX Next), has built-in debugger and is supported also by DeZog debugger (work in progress WRT ZX Next, but already usable with [Taylorza's plugin](https://github.com/taylorza/MAMEScripts)).
+
 [#CSpect](https://mdf200.itch.io/cspect) is ZX Spectrum Next emulator with built-in debugger and map-files support to show labels from source code.
 
-[ZEsarUX](https://github.com/chernandezba/zesarux) is multi-machine emulator focusing on ZX Spectrum family of machines, including also ZX Spectrum Next, having many many options, lot of menus, and lot debugging capabilities - if you are particularly interested into ZX Spectrum Next SW development, the #CSpect is often a bit ahead in overall emulation fidelity, but ZEsarUX is often more accurate in subtle edge-case details, so you may want to have both of them around for different occasions. Also you may want to have ZEsarUX around for:
+[ZEsarUX](https://github.com/chernandezba/zesarux) is multi-machine emulator focusing on ZX Spectrum family of machines.
 
 [DeZog - Z80 Debugger (for Visual Studio Code)](https://github.com/maziac/DeZog) for debugging ZX Spectrum code, writing unit tests for it, time the execution, etc.
 
 (if you are not excited about using VSC as IDE and want to try some alternative) Syntax highlight (only)
 for [![Kate icon](docs/img/kate-logo-24px.png)Kate editor](https://kate-editor.org/) is
 included directly in sjasmplus [sources](https://github.com/z00m128/sjasmplus/blob/master/asm-z80-sj.xml).
+
+### Alternative tools for Z80 SW development
+
+You may want to check also these awesome tools:
+
+- Rasm https://github.com/EdouardBERGE/rasm - Z80 assembler
+- z88dk https://github.com/z88dk/z88dk - development kit for Z80 family machines (C compiler, assembler, linker, libraries)
+- SDCC https://sdcc.sourceforge.net/ - Small Device C Compiler
 
 --------------------
 
