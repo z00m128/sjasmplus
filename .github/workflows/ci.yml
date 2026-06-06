@@ -230,7 +230,7 @@ jobs:
       - name: Build unit-test variant and run tests (FreeBSD VM)
         shell: cpa.sh {0}
         run: |
-          gmake clean && gmake -j4 CC=cc CXX=c++ tests
+          gmake clean && gmake -j4 CC=cc CXX=c++ test
 
   # Cirrus: macos_instance, default CC, with unit tests.
   macos:
@@ -262,7 +262,7 @@ jobs:
           path: sjasmplus
           if-no-files-found: error
       - name: Unit tests
-        run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++ tests
+        run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++ test
 
   # Cirrus: coveralls.io pipe (gcc:14, DEBUG=1, make coverage).
   # The Cirrus version was hard-gated to z00m128's repo + encrypted token and
