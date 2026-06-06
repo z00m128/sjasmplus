@@ -4,7 +4,7 @@
 # overall rewrite and extensions by Ped7g [2019-03-21 and following years]
 
 ## Some examples of my usage of this Makefile:
-# make tests 					- to run the CI test+example script runner
+# make test 					- to run the CI test+example script runner
 # make memcheck TEST=misc DEBUG=1		- to use valgrind on assembling sub-directory "misc" in tests
 # make PREFIX=~/.local install			- to install release version into ~/.local/bin/
 # make clean && make CC=gcc-14 CXX=g++-14	- to compile binary with gcc-14
@@ -99,19 +99,20 @@ endif
 # TODO too many lua5.4 warnings: -pedantic removed
 CPPFLAGS+=-Wall -DMAX_PATH=PATH_MAX -I$(SUBDIR_CRC32C)
 
-CFLAGS+=$(CFLAGS_EXTRA)
+ADD_SJ_CFLAGS=$(CFLAGS_EXTRA)
 
 ifdef DEBUG
 BUILD_DIR:=$(BUILD_DIR)/debug
-CFLAGS+=-g -O0
+ADD_SJ_CFLAGS+=-g -O0
 else
 BUILD_DIR:=$(BUILD_DIR)/release
-CFLAGS+=-DNDEBUG -O2
+ADD_SJ_CFLAGS+=-DNDEBUG -O2
 # -flto		# add for LTO (link time optimization) - does make linking lot slower and result is only marginally faster
 endif
 
-# C++ flags (the CPPFLAGS are for preprocessor BTW, if you always wonder, like me...)
-CXXFLAGS?=-std=c++17 $(CFLAGS)
+# C/C++ flags (the CPPFLAGS are for preprocessor BTW, if you always wonder, like me...)
+CFLAGS+=$(ADD_SJ_CFLAGS)
+CXXFLAGS+=-std=c++17 $(ADD_SJ_CFLAGS)
 
 # full path to executable
 BUILD_EXE=$(BUILD_DIR)/$(EXE_BASE_NAME)
@@ -231,9 +232,7 @@ install: $(BUILD_EXE)
 uninstall:
 	$(UNINSTALL) "$(STAGEDIR)/$(PREFIX)/bin/$(EXE_BASE_NAME)"
 
-test: tests
-
-tests: $(BUILD_EXE_UT)
+test: $(BUILD_EXE_UT)
 ifdef TEST
 	EXE=$(EXE_UT_FP) $(BASH) ContinuousIntegration/test_folder_tests.sh "$(TEST)"
 else
@@ -241,6 +240,9 @@ else
 	EXE=$(EXE_UT_FP) $(BASH) ContinuousIntegration/test_folder_tests.sh
 	EXE=$(EXE_UT_FP) $(BASH) ContinuousIntegration/test_folder_examples.sh
 endif
+
+tests: test
+	@echo "Makefile target 'tests' is deprecated, use 'test'"
 
 memcheck: $(BUILD_EXE)
 ifdef TEST
