@@ -19,7 +19,7 @@ name: build
 # code). The trailing "# vX" comment is the human-readable version that SHA
 # resolves to -- bump the SHA and the comment together (Dependabot can do
 # this). SHAs resolved 2026-05-17:
-#   actions/checkout            v6     -> de0fac2e4500dabe0009e67214ff5f5447ce83dd
+#   actions/checkout            v6.0.3 -> df4cb1c069e1874edd31b4311f1884172cec0e10
 #   actions/upload-artifact     v7     -> 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
 #   cross-platform-actions      v1.2.0 -> be3d7e9ff5c8770b9c51b1a8c8c5446e1cad7cf9
 #   coverallsapp/github-action  v2     -> 5cbfd81b66ca5d10c19b062c04de0199c215fb6e
@@ -81,7 +81,7 @@ jobs:
       # NOTE: gcc:9 is Debian buster (old glibc). If actions/checkout@v6's
       # bundled Node ever fails there, drop that one matrix entry to a manual
       # `git clone` step -- the other two cover modern toolchains.
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           submodules: true
       - name: gcc version
@@ -112,7 +112,7 @@ jobs:
     name: Windows MinGW
     runs-on: windows-2025-vs2026
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           submodules: true
       # GitHub's windows runner ships MinGW via Chocolatey but not on PATH.
@@ -162,7 +162,7 @@ jobs:
       # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
       BUILD_TYPE: Release
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           submodules: true
       - name: Configure CMake
@@ -202,7 +202,7 @@ jobs:
     name: FreeBSD clang
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           submodules: true
       - name: Initialize FreeBSD VM
@@ -241,7 +241,7 @@ jobs:
       matrix:
         runner: [macos-15, macos-26]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           submodules: true
       - name: Tool versions
@@ -294,7 +294,7 @@ jobs:
           gcc --version || echo "no gcc"
           g++ --version || echo "no g++"
           lcov --version || echo "no lcov"
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           submodules: true
           fetch-depth: 0   # Cirrus used full clone for the git revision number
