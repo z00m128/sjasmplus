@@ -145,12 +145,42 @@ macro_args.asm(48): error: Too many arguments for macro: ccc
 56    0070                  cpp_literals $9'A, $F'0
 56    0070 9A F0       >        db  $9'A, $F'0
 57    0072
+58    0072                  MACRO test_arg_restore varX?
+59    0072 ~                    ASSERT 123 == varX?
+60    0072 ~                    ccc  7, 8
+61    0072 ~                    ASSERT 123 == varX?
+62    0072 ~                    ccc  7, s8, s9
+63    0072 ~                    ASSERT 123 == varX?
+64    0072 ~                    ccc  7, 8, 9, 10
+65    0072 ~                    ASSERT 123 == varX?
+66    0072                  ENDM
+67    0072                  test_arg_restore 123
+67    0072             >        ASSERT 123 == 123
+macro_args.asm(60): error: Not enough arguments for macro: ccc
+macro_args.asm(67): ^ emitted from here
+67    0072             >        ccc  7, 8
+67    0072             >        ASSERT 123 == 123
+67    0072             >        ccc  7, s8, s9
+67    0072             >        DUP (7) & 0x03
+67    0072 3E 07       >        ld  a,7
+67    0074 3E 07       >        ld  a,7
+67    0076 3E 07       >        ld  a,7
+67    0078             >        EDUP
+67    0078 CD 7B 00    >        call .s8_s9
+67    007B             >.s8_s9:
+67    007B             >        ASSERT 123 == 123
+macro_args.asm(64): error: Too many arguments for macro: ccc
+macro_args.asm(67): ^ emitted from here
+67    007B             >        ccc  7, 8, 9, 10
+67    007B             >        ASSERT 123 == 123
+68    007B
 # file closed: macro_args.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
 0x000A X 0>labTest
 0x0011   1.0>yyy_hl
+0x007B   16.14>s8_s9
 0x001F X 2>labTest
 0x0026   3.2>yyy_hl
 0x002D   4>first_second

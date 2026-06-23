@@ -217,7 +217,7 @@ public:
 class CMacroDefineTable {
 public:
 	void ReInit();
-	void AddMacro(char*, char*);
+	void AddMacro(const char* naam, const char* vervanger);
 	CDefineTableEntry* getdefs();
 	void setdefs(CDefineTableEntry*);
 	const char* getverv(const char*) const;

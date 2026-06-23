@@ -54,3 +54,14 @@
 
     cpp_literals %0'110'1010, $F'E      // fixed in v1.14.4
     cpp_literals $9'A, $F'0
+
+    MACRO test_arg_restore varX?
+        ASSERT 123 == varX?
+        ccc  7, 8
+        ASSERT 123 == varX?
+        ccc  7, s8, s9
+        ASSERT 123 == varX?
+        ccc  7, 8, 9, 10
+        ASSERT 123 == varX?
+    ENDM
+    test_arg_restore 123

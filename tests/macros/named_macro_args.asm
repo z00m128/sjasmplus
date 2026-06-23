@@ -43,3 +43,10 @@ val: ONE <val=$>
     ONE <val=val=$>
     ONE val=<val=$>
     ONE val=val=$
+
+    MACRO NONE_ARG
+        ; for sake of completeness to verify arg name parser in "edge case" (empty arg list definition)
+    ENDM
+    NONE_ARG
+    NONE_ARG "unexpected value"
+    NONE_ARG unexpected_value = "???"

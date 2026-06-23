@@ -39,9 +39,9 @@
 32    000C
 33    000C                  ; --- error cases ---
 34    000C
-named_macro_args.asm(35): error: Invalid named argument for macro: LOAD_XY
+named_macro_args.asm(35): error: Invalid named argument: z
 35    000C                  LOAD_XY x=1, z=2        ; unknown argument name
-named_macro_args.asm(36): error: Duplicate named argument for macro: x
+named_macro_args.asm(36): error: Duplicate named argument: x
 36    000C                  LOAD_XY x=1, x=2        ; duplicate argument name
 named_macro_args.asm(37): error: Not enough arguments for macro: LOAD_XY
 37    000C                  LOAD_XY x=1             ; missing argument 'y'
@@ -68,6 +68,16 @@ named_macro_args.asm(21): error: Unable to finish substitutions, line after last
 named_macro_args.asm(45): ^ emitted from here
 45    000F 00          >        DB val=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$=$
 46    0010
+47    0010                  MACRO NONE_ARG
+48    0010 ~                    ; for sake of completeness to verify arg name parser in "edge case" (empty arg list definition)
+49    0010                  ENDM
+50    0010                  NONE_ARG
+50    0010             >        ; for sake of completeness to verify arg name parser in "edge case" (empty arg list definition)
+named_macro_args.asm(51): error: Too many arguments for macro: NONE_ARG
+51    0010                  NONE_ARG "unexpected value"
+named_macro_args.asm(52): error: Too many arguments for macro: NONE_ARG
+52    0010                  NONE_ARG unexpected_value = "???"
+53    0010
 # file closed: named_macro_args.asm
 
 Value    Label
