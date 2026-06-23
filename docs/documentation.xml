@@ -117,8 +117,8 @@
 
       <para>Thanks to:<itemizedlist>
           <listitem>
-            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Dart Alver, Oli Wilkinson, Laurent Carlier, Jone Jones, Pleumann</emphasis> - additional
-            programming;</para>
+            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Dart Alver, Oli Wilkinson, Laurent Carlier, Jone Jones, Pleumann, Ricardo Bittencourt</emphasis>
+              - additional programming;</para>
           </listitem>
 
           <listitem>
@@ -204,6 +204,15 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>TBD - 1.24.0</term>
+            <listitem>
+              <synopsis>
+- Added named arguments emit syntax for <link linkend="s_macros">macros</link> (by Ricardo Bittencourt)
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>13.6.2026 - 1.23.1</term>
