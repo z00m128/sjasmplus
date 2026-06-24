@@ -117,8 +117,8 @@
 
       <para>Thanks to:<itemizedlist>
           <listitem>
-            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Dart Alver, Oli Wilkinson, Laurent Carlier, Jone Jones, Pleumann</emphasis> - additional
-            programming;</para>
+            <para><emphasis>Kurles/HS/CPU, Alexander Kovalenko, Dart Alver, Oli Wilkinson, Laurent Carlier, Jone Jones, Pleumann, Ricardo Bittencourt</emphasis>
+              - additional programming;</para>
           </listitem>
 
           <listitem>
@@ -204,6 +204,15 @@
       <title>What's new?</title>
 
       <para><variablelist>
+
+<varlistentry>
+            <term>TBD - 1.24.0</term>
+            <listitem>
+              <synopsis>
+- Added named arguments emit syntax for <link linkend="s_macros">macros</link> (by Ricardo Bittencourt)
+</synopsis>
+            </listitem>
+          </varlistentry>
 
 <varlistentry>
             <term>13.6.2026 - 1.23.1</term>
@@ -4210,6 +4219,23 @@ Main
 
 1:      djnz    1B      ; macro replacement will be used here
 1:      @djnz   1B      ; original djnz instruction here</programlisting>
+			</example>
+		</para>
+
+		<para>Macro arguments can be also passed by name, using the
+			<code>name=value</code> syntax. In that case the arguments may be given
+			in any order, but either all of them must be named, or none (mixing
+			positional and named arguments in the same call is not allowed). Spaces
+			around the <code>=</code> are permitted.
+			<example><title>Named arguments (docs_examples/s_macros.asm)</title>
+				<programlisting>    MACRO RECT x, y, dx, dy
+      DB x, y, dx, dy
+    ENDM
+
+    RECT 1, 2, 3, 4                  ; classic positional call
+    RECT x=1, y=2, dx=3, dy=4        ; named arguments
+    RECT dx=3, dy=4, x=1, y=2        ; named arguments, in any order
+    RECT x = 1, y = 2, dx = 3, dy = 4 ; spaces around '=' are allowed</programlisting>
 			</example>
 		</para>
 
