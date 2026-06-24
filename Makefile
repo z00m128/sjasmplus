@@ -266,7 +266,7 @@ ifdef COVERALLS_SERVICE
 	$(error gcov coverage is not meant to be used for coveralls.io, use coverage-lcov target instead)
 endif
 	# -fkeep-inline-functions -fkeep-static-functions seem like good idea, but they kill current coverage of header files, so nope
-	$(MAKE) CFLAGS_EXTRA='--coverage' tests
+	$(MAKE) CFLAGS_EXTRA='--coverage' test
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_BASE) $(SRCS)
 	gcov $(GCOV_OPT) --object-directory $(BUILD_DIR_UT)/$(SUBDIR_CRC32C) $(CRC32CSRCS)
 ifdef LUA_COVERAGE
@@ -278,7 +278,7 @@ endif
 	mv *#*.gcov $(BUILD_DIR_UT)/$(SUBDIR_COV)/
 
 coverage-lcov:
-	$(MAKE) CFLAGS_EXTRA='--coverage' tests
+	$(MAKE) CFLAGS_EXTRA='--coverage' test
 	lcov --capture --base-directory ./ --directory $(BUILD_DIR_UT) --output-file $(LCOV_OUTPUT_FILE) --no-external --exclude 'unittest-cpp/*' --exclude 'LuaBridge/*' --exclude 'lua5.5/*' --exclude 'cpp-src-tests/*'
 ifdef COVERALLS_SERVICE
 	cp $(LCOV_OUTPUT_FILE) ./

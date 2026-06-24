@@ -20,9 +20,6 @@ GHA CI:
 - coveralls.io coverage report:
   GCC14 still doesn't have as perfect coverage report as GCC6 (versions between I tried were also imperfect),
   so for the moment I will stick with 14 and see how it will go, but update probably ASAP and keep tracking coverge results.
-- coveralls.io coverage: also currently the upload of data from CI is done by python script, look for alternative.
-  - since CI builds were migrated to GHA, maybe coveralls.io github action can be used now?
-    https://github.com/marketplace/actions/coveralls-github-action
 
 check for Z80 in/out having also [] brackets and syntax brackets-only mode? (currently only `(c)` and `(n)` works)
 
