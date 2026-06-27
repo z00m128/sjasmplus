@@ -284,8 +284,8 @@ CStructureTable StructureTable;
 // reserve keywords in labels table, to detect when user is defining label colliding with keyword
 static void ReserveLabelKeywords() {
 	for (const char* keyword : {
-		"abs", "and", "exist", "high", "low", "mod", "norel", "not", "or", "shl", "shr", "sizeof", "xor",
-		"ABS", "AND", "EXIST", "HIGH", "LOW", "MOD", "NOREL", "NOT", "OR", "SHL", "SHR", "SIZEOF", "XOR"
+		"abs", "and", "exist", "high", "low", "mod", "norel", "not", "or", "pair", "shl", "shr", "sizeof", "u16", "xor",
+		"ABS", "AND", "EXIST", "HIGH", "LOW", "MOD", "NOREL", "NOT", "OR", "PAIR", "SHL", "SHR", "SIZEOF", "U16", "XOR"
 	}) {
 		LabelTable.Insert(keyword, -65536, LABEL_IS_UNDEFINED|LABEL_IS_KEYWORD);
 	}

@@ -210,6 +210,8 @@
             <listitem>
               <synopsis>
 - Added named arguments emit syntax for <link linkend="s_macros">macros</link> (by Ricardo Bittencourt)
+- New operator <link linkend="op_pair">`pair`</link> to put together two 8 bit values as 16 bit value
+- New operator <link linkend="op_u16">`u16`</link> to truncate value to low 16 bits
 - <link linkend="po_savetrd">`SAVETRD`</link> optional "autostart_BASIC_line" argument accepts -1 as OFF
 </synopsis>
             </listitem>
@@ -1129,13 +1131,15 @@ $c     hexadecimal
 exist  exist L   <indexterm id="op_exist"><primary>exist</primary></indexterm>is label/symbol L defined in source (even when not used)
 sizeof sizeof L  <indexterm id="op_sizeof"><primary>sizeof</primary></indexterm>size of label/symbol L, details <link linkend="s_sizeof_labels">here</link> (since v1.23.0)
 ..     x..y      <indexterm id="op_str_concat"><primary>..</primary></indexterm>string concatenation (both operands must be string literals) (since v1.22.0)
+pair(hi,lo)      <indexterm id="op_pair"><primary>pair</primary></indexterm>binary concatenate two 8 bit values into 16 bit value (since v1.24.0)
 
 !      !x        <indexterm id="op_log_not"><primary>!</primary></indexterm>logical not
 ~      ~x        <indexterm id="op_cpl"><primary>~</primary></indexterm>complement
 +      +x        does "nothing", can be used to make "+(...)" parse as value (not as memory)
 -      -x        minus
-low    low x     <indexterm id="op_low"><primary>low</primary></indexterm>low 8 bits of 16 bit value or lower part of register pair
+low    low x     <indexterm id="op_low"><primary>low</primary></indexterm>low 8 bits of value or lower part of register pair
 high   high x    <indexterm id="op_high"><primary>high</primary></indexterm>high 8 bits of 16 bit value or higher part of register pair
+u16    u16 x     <indexterm id="op_u16"><primary>u16</primary></indexterm>low 16 bits of value (since v1.24.0)
 not    not x     <indexterm id="op_log_not2"><primary>not</primary></indexterm>logical not
 abs    abs x     <indexterm id="op_abs"><primary>abs</primary></indexterm>absolute value
 

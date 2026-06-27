@@ -1,220 +1,312 @@
-operators.asm(70): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: abs
-operators.asm(71): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: and
-operators.asm(72): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: high
-operators.asm(73): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: low
-operators.asm(74): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: mod
-operators.asm(75): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: norel
-operators.asm(76): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: not
-operators.asm(77): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: or
-operators.asm(78): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: shl
-operators.asm(79): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: shr
-operators.asm(80): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: xor
+operators.asm(87): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: abs
+operators.asm(88): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: and
+operators.asm(89): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: exist
+operators.asm(90): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: high
+operators.asm(91): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: low
+operators.asm(92): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: mod
+operators.asm(93): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: norel
+operators.asm(94): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: not
+operators.asm(95): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: or
+operators.asm(96): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: pair
+operators.asm(97): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: shl
+operators.asm(98): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: shr
+operators.asm(99): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: sizeof
+operators.asm(100): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: u16
+operators.asm(101): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: xor
+operators.asm(103): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: ABS
+operators.asm(104): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: AND
+operators.asm(105): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: EXIST
+operators.asm(106): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: HIGH
+operators.asm(107): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: LOW
+operators.asm(108): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: MOD
+operators.asm(109): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: NOREL
+operators.asm(110): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: NOT
+operators.asm(111): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: OR
+operators.asm(112): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: PAIR
+operators.asm(113): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: SHL
+operators.asm(114): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: SHR
+operators.asm(115): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: SIZEOF
+operators.asm(116): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: U16
+operators.asm(117): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: XOR
 # file opened: operators.asm
- 1    0000                  ; simple tests of each operator
- 2    0000 34 12 CC ED      DW  +0x1234, -0x1234
- 3    0004 CB ED            DW  ~0x1234
- 4    0006 00 00 00 00      DW  !0x1234, not 0x1234
- 5    000A 34 00 12 00      DW  low 0x1234, high 0x1234
- 6    000E 83 46 C3 BB      DW  0x123 + 0x4560, 0x123 - 0x4560
- 7    0012 A8 03 E8 02      DW  0x12 * 0x34, 0x3456 / 0x12
- 8    0016 06 00 06 00      DW  0x3456 % 0x12, 0x3456 mod 0x12
- 9    001A A0 91 A0 91      DW  0x1234 << 3, 0x1234 shl 3
-10    001E 53 F7 53 F7      DW  -17768 >> 3, -17768 shr 3   ; -17768 = 0xFFFFBA98
-11    0022 53 17 53 17      DW  0xBA98 >> 3, 0xBA98 shr 3   ; expressions are calculated in 32b! 0xBA98 => positive
+  1   0000                  ; simple tests of each operator
+  2   0000 34 12 CC ED      DW  +0x1234, -0x1234
+  3   0004 CB ED            DW  ~0x1234
+  4   0006 00 00 00 00      DW  !0x1234, not 0x1234
+  5   000A 34 00 12 00      DW  low 0x1234, high 0x1234
+  6   000E 83 46 C3 BB      DW  0x123 + 0x4560, 0x123 - 0x4560
+  7   0012 A8 03 E8 02      DW  0x12 * 0x34, 0x3456 / 0x12
+  8   0016 06 00 06 00      DW  0x3456 % 0x12, 0x3456 mod 0x12
+  9   001A A0 91 A0 91      DW  0x1234 << 3, 0x1234 shl 3
+ 10   001E 53 F7 53 F7      DW  -17768 >> 3, -17768 shr 3   ; -17768 = 0xFFFFBA98
+ 11   0022 53 17 53 17      DW  0xBA98 >> 3, 0xBA98 shr 3   ; expressions are calculated in 32b! 0xBA98 => positive
 operators.asm(12): warning: value 0x1FFFF753 is truncated to 16bit value: 0xF753
-12    0026 53 F7 53 17      DW  -17768 >>> 3, 0xBA98 >>> 3  ; first is 0xFFFFBA98u>>3 (warning!)
-13    002A 30 12 30 12      DW  0x1234 & 0x5678, 0x5678 and 0x1234
-14    002E 4C 44 4C 44      DW  0x1234 ^ 0x5678, 0x5678 xor 0x1234
-15    0032 7C 56 7C 56      DW  0x1234 | 0x5678, 0x5678 or 0x1234
-16    0036 34 12 34 12      DW  0x1234 <? 0x5678, 0x5678 <? 0x1234
-17    003A 78 56 78 56      DW  0x1234 >? 0x5678, 0x5678 >? 0x1234
-18    003E FF 00 00         DB  0x1234 < 0x5678, 0x5678 < 0x1234, 0x1234 < 0x1234
-19    0041 00 FF 00         DB  0x1234 > 0x5678, 0x5678 > 0x1234, 0x1234 > 0x1234
-20    0044 FF 00 FF         DB  0x1234 <= 0x5678, 0x5678 <= 0x1234, 0x1234 <= 0x1234
-21    0047 00 FF FF         DB  0x1234 >= 0x5678, 0x5678 >= 0x1234, 0x1234 >= 0x1234
-22    004A 00 00 FF         DB  0x1234 = 0x5678, 0x5678 = 0x1234, 0x1234 = 0x1234
-23    004D 00 00 FF         DB  0x1234 == 0x5678, 0x5678 == 0x1234, 0x1234 == 0x1234
-24    0050 FF FF 00         DB  0x1234 != 0x5678, 0x5678 != 0x1234, 0x1234 != 0x1234
-25    0053 FF 00 00 00      DB  0x0012 && 0x3400, 0 && 0x3400, 0x0012 && 0, 0 && 0
-26    0057 FF FF FF 00      DB  0x0012 || 0x3400, 0 || 0x3400, 0x0012 || 0, 0 || 0
-27    005B 0A 00 0E 00      DW  (2 * 3) + 4, 2 * (3 + 4)
-28    005F 5F 00            DW  $
-29    0061
-30    0061                  ; shifts vs 32bit evaluator, more (tricky) tests:
-operators.asm(31): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
-operators.asm(31): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
-31    0061 A0 91 A0 91      DW  0xABCD1234 << 3, 0xABCD1234 shl 3
-32    0065 53 F7 53 F7      DW  -1164413356 >> 19, -1164413356 shr 19   ; -1164413356 = 0xBA987654
-33    0069 53 F7 53 F7      DW  0xBA987654 >> 19, 0xBA987654 shr 19
-34    006D 53 17 53 17      DW  -1164413356 >>> 19, 0xBA987654 >>> 19
-35    0071
-36    0071                  ; simple error states
-operators.asm(37): error: Syntax error:
-37    0071                  DB !
-operators.asm(37): error: Syntax error:
-37    0071                DB not
-operators.asm(37): error: Syntax error:
-37    0071                DB ~
-operators.asm(37): error: Syntax error:
-37    0071                DB +
-operators.asm(37): error: Syntax error:
-37    0071                DB -
-operators.asm(37): error: Syntax error:
-37    0071                DB low
-operators.asm(37): error: Syntax error:
-37    0071                DB high
-operators.asm(38): error: Syntax error:
-38    0071                  DB 4 *
-operators.asm(38): error: Syntax error:
-38    0071                DB 5 /
-operators.asm(38): error: Syntax error:
-38    0071                DB 6 %
-operators.asm(38): error: Syntax error:
-38    0071                DB 7 mod
-operators.asm(39): error: Division by zero
-39    0071 00               DB 8 / 0
-operators.asm(39): error: Division by zero
-39    0072 00             DB 9 % 0
-operators.asm(39): error: Division by zero
-39    0073 00             DB 10 mod 0
+ 12   0026 53 F7 53 17      DW  -17768 >>> 3, 0xBA98 >>> 3  ; first is 0xFFFFBA98u>>3 (warning!)
+ 13   002A 30 12 30 12      DW  0x1234 & 0x5678, 0x5678 and 0x1234
+ 14   002E 4C 44 4C 44      DW  0x1234 ^ 0x5678, 0x5678 xor 0x1234
+ 15   0032 7C 56 7C 56      DW  0x1234 | 0x5678, 0x5678 or 0x1234
+ 16   0036 34 12 34 12      DW  0x1234 <? 0x5678, 0x5678 <? 0x1234
+ 17   003A 78 56 78 56      DW  0x1234 >? 0x5678, 0x5678 >? 0x1234
+ 18   003E FF 00 00         DB  0x1234 < 0x5678, 0x5678 < 0x1234, 0x1234 < 0x1234
+ 19   0041 00 FF 00         DB  0x1234 > 0x5678, 0x5678 > 0x1234, 0x1234 > 0x1234
+ 20   0044 FF 00 FF         DB  0x1234 <= 0x5678, 0x5678 <= 0x1234, 0x1234 <= 0x1234
+ 21   0047 00 FF FF         DB  0x1234 >= 0x5678, 0x5678 >= 0x1234, 0x1234 >= 0x1234
+ 22   004A 00 00 FF         DB  0x1234 = 0x5678, 0x5678 = 0x1234, 0x1234 = 0x1234
+ 23   004D 00 00 FF         DB  0x1234 == 0x5678, 0x5678 == 0x1234, 0x1234 == 0x1234
+ 24   0050 FF FF 00         DB  0x1234 != 0x5678, 0x5678 != 0x1234, 0x1234 != 0x1234
+ 25   0053 FF 00 00 00      DB  0x0012 && 0x3400, 0 && 0x3400, 0x0012 && 0, 0 && 0
+ 26   0057 FF FF FF 00      DB  0x0012 || 0x3400, 0 || 0x3400, 0x0012 || 0, 0 || 0
+ 27   005B 0A 00 0E 00      DW  (2 * 3) + 4, 2 * (3 + 4)
+ 28   005F 5F 00            DW  $
+ 29   0061                  ; since v1.24.0: pair, u16
+ 30   0061 FE CD 00 00      DD  pair(-51, -2), pair(-270 + 170, -270 + 170 * 2)
+ 30   0065 46 9C 00 00
+ 31   0069 78 56 00 00      DD  u16(0x12345678)
+ 32   006D
+ 33   006D                  ; shifts vs 32bit evaluator, more (tricky) tests:
+operators.asm(34): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
+operators.asm(34): warning: value 0x5E6891A0 is truncated to 16bit value: 0x91A0
+ 34   006D A0 91 A0 91      DW  0xABCD1234 << 3, 0xABCD1234 shl 3
+ 35   0071 53 F7 53 F7      DW  -1164413356 >> 19, -1164413356 shr 19   ; -1164413356 = 0xBA987654
+ 36   0075 53 F7 53 F7      DW  0xBA987654 >> 19, 0xBA987654 shr 19
+ 37   0079 53 17 53 17      DW  -1164413356 >>> 19, 0xBA987654 >>> 19
+ 38   007D
+ 39   007D                  ; simple error states
 operators.asm(40): error: Syntax error:
-40    0074                  DB 11 +
+ 40   007D                  DB !
 operators.asm(40): error: Syntax error:
-40    0074                DB 12 -
+ 40   007D                DB not
+operators.asm(40): error: Syntax error:
+ 40   007D                DB ~
+operators.asm(40): error: Syntax error:
+ 40   007D                DB +
+operators.asm(40): error: Syntax error:
+ 40   007D                DB -
+operators.asm(40): error: Syntax error:
+ 40   007D                DB low
+operators.asm(40): error: Syntax error:
+ 40   007D                DB high
 operators.asm(41): error: Syntax error:
-41    0074                  DB 13 <<
+ 41   007D                  DB 4 *
 operators.asm(41): error: Syntax error:
-41    0074                DB 14 shl
+ 41   007D                DB 5 /
 operators.asm(41): error: Syntax error:
-41    0074                DB 15 >>
+ 41   007D                DB 6 %
 operators.asm(41): error: Syntax error:
-41    0074                DB 16 shr
-operators.asm(41): error: Syntax error:
-41    0074                DB 17 >>>
-operators.asm(42): error: Syntax error:
-42    0074                  DB 18 &
-operators.asm(42): error: Syntax error:
-42    0074                DB 19 and
-operators.asm(42): error: Syntax error:
-42    0074                DB 20 ^
-operators.asm(42): error: Syntax error:
-42    0074                DB 21 xor
-operators.asm(42): error: Syntax error:
-42    0074                DB 22 |
-operators.asm(42): error: Syntax error:
-42    0074                DB 23 or
+ 41   007D                DB 7 mod
+operators.asm(42): error: Division by zero
+ 42   007D 00               DB 8 / 0
+operators.asm(42): error: Division by zero
+ 42   007E 00             DB 9 % 0
+operators.asm(42): error: Division by zero
+ 42   007F 00             DB 10 mod 0
 operators.asm(43): error: Syntax error:
-43    0074                  DB 24 <?
+ 43   0080                  DB 11 +
 operators.asm(43): error: Syntax error:
-43    0074                DB 25 >?
+ 43   0080                DB 12 -
 operators.asm(44): error: Syntax error:
-44    0074                  DB 26 <
+ 44   0080                  DB 13 <<
 operators.asm(44): error: Syntax error:
-44    0074                DB 27 >
+ 44   0080                DB 14 shl
 operators.asm(44): error: Syntax error:
-44    0074                DB 28 <=
+ 44   0080                DB 15 >>
 operators.asm(44): error: Syntax error:
-44    0074                DB 29 >=
+ 44   0080                DB 16 shr
 operators.asm(44): error: Syntax error:
-44    0074                DB 30 =
-operators.asm(44): error: Syntax error:
-44    0074                DB 31 ==
-operators.asm(44): error: Syntax error:
-44    0074                DB 32 !=
+ 44   0080                DB 17 >>>
 operators.asm(45): error: Syntax error:
-45    0074                  DB 33 &&
+ 45   0080                  DB 18 &
 operators.asm(45): error: Syntax error:
-45    0074                DB 34 ||
-operators.asm(45): error: ')' expected
+ 45   0080                DB 19 and
 operators.asm(45): error: Syntax error:
-45    0074                DB (
-operators.asm(45): error: Syntax error: )
-45    0074                DB )
-46    0074
-47    0074                  DEVICE NONE
-48    0074                  ORG 0
-49    0000 34 12            DW  0x1234
-operators.asm(50): error: Unexpected: $
-50    0002 02 00            DW  $$      ; error when not in device mode
-operators.asm(51): error: [DW/DEFW/WORD] Syntax error: { 0 }
-51    0004                  DW  { 0 }
-operators.asm(52): error: [DW/DEFW/WORD] Syntax error: {b 0 }
-52    0004                  DW  {b 0 }
-53    0004                  DEVICE ZXSPECTRUM48
-54    0004                  ORG 0
-55    0000 34 12            DW  0x1234
-56    0002 00 00            DW  $$      ; should be OK
-57    0004 34 12            DW  { 0 }
-58    0006 34 00            DW  {b 0 }
-59    0008
-60    0008
-operators.asm(61): warning: ?<symbol> operator is deprecated and will be removed in v2.x: ?not
-61    0008 21 25 00         ld  hl,?not     ; deprecated, use "@not" with full global name, or don't use keywords for label names at all
-62    000B
-63    000B                  ; new in v1.18.0
-operators.asm(64): warning: value 0x100 is truncated to 8bit value: 0x00
-operators.asm(64): warning: value 0x100 is truncated to 8bit value: 0x00
-64    000B 10 10 20 20      DB  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(256),abs(-256)
-64    000F 80 80 00 00
-operators.asm(65): warning: value 0x10000 is truncated to 16bit value: 0x0000
-operators.asm(65): warning: value 0x10000 is truncated to 16bit value: 0x0000
-65    0013 10 00 10 00      DW  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(65536),abs(-65536)
-65    0017 20 00 20 00
-65    001B 80 00 80 00
-65    001F 00 00 00 00
-66    0023
-67    0023 25 00            DW  @abs        ; fallback parsing of "abs" as label removed in v1.20.0 (requires @abs now)
-68    0025
-69    0025              ; check all operator keywords to warn about their usage as labels
-70    0025              abs:
-71    0025              and:
-72    0025              high:
-73    0025              low:
-74    0025              mod:
-75    0025              norel:
-76    0025              not:
-77    0025              or:
-78    0025              shl:
-79    0025              shr:
-80    0025              @xor:   ; also global prefix "@" shouldn't matter, should still warn about it!
-81    0025
-82    0025              ; Capitalized variant is ok. It's actually ok also all-caps variant, which should NOT be ok,
-83    0025              ; but whoever uses label like XOR is beyond any good taste and I don't care about him.
-84    0025              Abs:
-85    0025              And:
-86    0025              High:
-87    0025              Low:
-88    0025              Mod:
-89    0025              Norel:
-90    0025              Not:
-91    0025              Or:
-92    0025              Shl:
-93    0025              Shr:
-94    0025              Xor:
-95    0025
+ 45   0080                DB 20 ^
+operators.asm(45): error: Syntax error:
+ 45   0080                DB 21 xor
+operators.asm(45): error: Syntax error:
+ 45   0080                DB 22 |
+operators.asm(45): error: Syntax error:
+ 45   0080                DB 23 or
+operators.asm(46): error: Syntax error:
+ 46   0080                  DB 24 <?
+operators.asm(46): error: Syntax error:
+ 46   0080                DB 25 >?
+operators.asm(47): error: Syntax error:
+ 47   0080                  DB 26 <
+operators.asm(47): error: Syntax error:
+ 47   0080                DB 27 >
+operators.asm(47): error: Syntax error:
+ 47   0080                DB 28 <=
+operators.asm(47): error: Syntax error:
+ 47   0080                DB 29 >=
+operators.asm(47): error: Syntax error:
+ 47   0080                DB 30 =
+operators.asm(47): error: Syntax error:
+ 47   0080                DB 31 ==
+operators.asm(47): error: Syntax error:
+ 47   0080                DB 32 !=
+operators.asm(48): error: Syntax error:
+ 48   0080                  DB 33 &&
+operators.asm(48): error: Syntax error:
+ 48   0080                DB 34 ||
+operators.asm(48): error: ')' expected
+operators.asm(48): error: Syntax error:
+ 48   0080                DB (
+operators.asm(48): error: Syntax error: )
+ 48   0080                DB )
+ 49   0080
+ 50   0080                  DEVICE NONE
+ 51   0080                  ORG 0
+ 52   0000 34 12            DW  0x1234
+operators.asm(53): error: Unexpected: $
+ 53   0002 02 00            DW  $$      ; error when not in device mode
+operators.asm(54): error: [DW/DEFW/WORD] Syntax error: { 0 }
+ 54   0004                  DW  { 0 }
+operators.asm(55): error: [DW/DEFW/WORD] Syntax error: {b 0 }
+ 55   0004                  DW  {b 0 }
+ 56   0004                  DEVICE ZXSPECTRUM48
+ 57   0004                  ORG 0
+ 58   0000 34 12            DW  0x1234
+ 59   0002 00 00            DW  $$      ; should be OK
+ 60   0004 34 12            DW  { 0 }
+ 61   0006 34 00            DW  {b 0 }
+ 62   0008
+ 63   0008
+operators.asm(64): warning: ?<symbol> operator is deprecated and will be removed in v2.x: ?not
+ 64   0008 21 2E 00         ld  hl,?not     ; deprecated, use "@not" with full global name, or don't use keywords for label names at all
+ 65   000B
+ 66   000B                  ; new in v1.18.0
+operators.asm(67): warning: value 0x100 is truncated to 8bit value: 0x00
+operators.asm(67): warning: value 0x100 is truncated to 8bit value: 0x00
+ 67   000B 10 10 20 20      DB  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(256),abs(-256)
+ 67   000F 80 80 00 00
+operators.asm(68): warning: value 0x10000 is truncated to 16bit value: 0x0000
+operators.asm(68): warning: value 0x10000 is truncated to 16bit value: 0x0000
+ 68   0013 10 00 10 00      DW  abs 16,abs -16,abs(32),abs(-32), abs ( 128 ) , abs ( -128 ),abs(65536),abs(-65536)
+ 68   0017 20 00 20 00
+ 68   001B 80 00 80 00
+ 68   001F 00 00 00 00
+ 69   0023
+ 70   0023 2E 00            DW  @abs        ; fallback parsing of "abs" as label removed in v1.20.0 (requires @abs now)
+ 71   0025
+ 72   0025                  ; since v1.24.0:
+ 73   0025                  ; - new `pair` has truncation of arguments with warning, expected valid range is -256..+255 for each
+ 74   0025                  ; warnings about values out of range
+operators.asm(75): warning: value 0xFFFFFEFF is truncated to 8bit value: 0xFF
+operators.asm(75): warning: value 0xFFFFFEFF is truncated to 8bit value: 0xFF
+ 75   0025 FF FF 00 00      DD  pair(-257, -257)
+operators.asm(76): warning: value 0x100 is truncated to 8bit value: 0x00
+operators.asm(76): warning: value 0x100 is truncated to 8bit value: 0x00
+ 76   0029 00 00 00 00      DD  pair(256, 256)
+ 77   002D                  ; errors
+operators.asm(78): error: Syntax error: pair
+ 78   002D                  DB pair
+operators.asm(79): error: Syntax error: pair $12, $34
+ 79   002D                  DB pair $12, $34        ; this operator requires parentheses
+operators.asm(80): error: Syntax error: pair($12)
+ 80   002D                  DB pair($12)            ; too few
+operators.asm(81): error: Syntax error: pair($12, $34, $56)
+ 81   002D                  DB pair($12, $34, $56)  ; too many
+ 82   002D                  ; - new `u16` has no warnings, it's brute `& $FFFF` of whatever comes in
+operators.asm(83): error: Syntax error:
+ 83   002D                  DB u16
+operators.asm(84): warning: value 0x3456 is truncated to 8bit value: 0x56
+ 84   002D 56               DB u16 0x123456         ; warn: truncation of u16-truncated value to u8 because of DB, but u16 itself is valid here
+ 85   002E
+ 86   002E              ; check all operator keywords to warn about their usage as labels
+ 87   002E              abs:
+ 88   002E              and:
+ 89   002E              exist:
+ 90   002E              high:
+ 91   002E              low:
+ 92   002E              mod:
+ 93   002E              norel:
+ 94   002E              not:
+ 95   002E              or:
+ 96   002E              pair:
+ 97   002E              shl:
+ 98   002E              shr:
+ 99   002E              sizeof:
+100   002E              u16:
+101   002E              @xor:   ; also global prefix "@" shouldn't matter, should still warn about it!
+102   002E              ; all caps now warns too (since v1.23.0)
+103   002E              ABS:
+104   002E              AND:
+105   002E              EXIST:
+106   002E              HIGH:
+107   002E              LOW:
+108   002E              MOD:
+109   002E              NOREL:
+110   002E              NOT:
+111   002E              OR:
+112   002E              PAIR:
+113   002E              SHL:
+114   002E              SHR:
+115   002E              SIZEOF:
+116   002E              U16:
+117   002E              @XOR:
+118   002E
+119   002E              ; Capitalized variant is ok
+120   002E              Abs:
+121   002E              And:
+122   002E              Exist:
+123   002E              High:
+124   002E              Low:
+125   002E              Mod:
+126   002E              Norel:
+127   002E              Not:
+128   002E              Or:
+129   002E              Pair:
+130   002E              Shl:
+131   002E              Shr:
+132   002E              Sizeof:
+133   002E              ; U16 can't be capitalized, it's all-caps then
+134   002E              Xor:
+135   002E
 # file closed: operators.asm
 
 Value    Label
 ------ - -----------------------------------------------------------
-0x0025 X Abs
-0x0025   abs
-0x0025 X And
-0x0025   and
-0x0025 X High
-0x0025   high
-0x0025 X Low
-0x0025   low
-0x0025 X Mod
-0x0025   mod
-0x0025 X Norel
-0x0025   norel
-0x0025 X Not
-0x0025   not
-0x0025 X Or
-0x0025   or
-0x0025 X Shl
-0x0025   shl
-0x0025 X Shr
-0x0025   shr
-0x0025 X Xor
-0x0025   xor
+0x002E   ABS
+0x002E X Abs
+0x002E   abs
+0x002E   AND
+0x002E X And
+0x002E   and
+0x002E   EXIST
+0x002E X Exist
+0x002E   exist
+0x002E   HIGH
+0x002E X High
+0x002E   high
+0x002E   LOW
+0x002E X Low
+0x002E   low
+0x002E   MOD
+0x002E X Mod
+0x002E   mod
+0x002E   NOREL
+0x002E X Norel
+0x002E   norel
+0x002E   NOT
+0x002E X Not
+0x002E   not
+0x002E   OR
+0x002E X Or
+0x002E   or
+0x002E   PAIR
+0x002E X Pair
+0x002E   pair
+0x002E   SHL
+0x002E X Shl
+0x002E   shl
+0x002E   SHR
+0x002E X Shr
+0x002E   shr
+0x002E   SIZEOF
+0x002E X Sizeof
+0x002E   sizeof
+0x002E   U16
+0x002E   u16
+0x002E   XOR
+0x002E X Xor
+0x002E   xor

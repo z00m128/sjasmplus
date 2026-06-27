@@ -39,7 +39,7 @@ static int ParseExpPrim(char*& p, aint& nval) {
 	if (SkipBlanks(p)) {
 		return 0;
 	}
-	if (*p == '(') {
+	if (*p == '(') {		// already did SkipBlanks, so `need(p, '(')` would do it second time
 		++p;
 		res = ParseExpressionEntry(p, nval);
 		if (!need(p, ')')) {
@@ -157,11 +157,23 @@ static int ParseExpUnair(char*& p, aint& nval) {
 		if (sizeofEval) return 1;	// valid label name (and valid optional parentheses)
 		p = oldP;					// invalid label name or parentheses, try to ignore "sizeof"
 	}
+	if (cmphstr(p, "pair", true)) {
+		aint hi = 0, lo = 0;
+		if (need(p, '(') && ParseExpressionEntry(p, hi) && need(p, ',') && ParseExpressionEntry(p, lo) && need(p, ')')) {
+			check8(hi);
+			check8(lo);
+			nval = ((hi & 0xFF) << 8) | (lo & 0xFF);
+			return 1;
+		} else {
+			p = oldP;
+			return 0;
+		}
+	}
 	aint right;
 	int oper;
 	if ((oper = need(p, "! ~ + - ")) || \
 		(oper = needa(p, "not", '!', "low", 'l', "high", 'h', true)) || \
-		(oper = needa(p, "abs", 'a', nullptr, 0, nullptr, 0, true)) ) {
+		(oper = needa(p, "abs", 'a', "u16", 'u', nullptr, 0, true)) ) {
 		switch (oper) {
 		case '!':
 			if (!ParseExpUnair(p, right)) return 0;
@@ -190,6 +202,10 @@ static int ParseExpUnair(char*& p, aint& nval) {
 		case 'a':
 			if (!ParseExpUnair(p, right)) return 0;
 			nval = abs(right);
+			break;
+		case 'u':
+			if (!ParseExpUnair(p, right)) return 0;
+			nval = right & 0xFFFF;
 			break;
 		default: Error("internal error", nullptr, FATAL); break;	// unreachable
 		}
