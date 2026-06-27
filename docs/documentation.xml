@@ -210,6 +210,7 @@
             <listitem>
               <synopsis>
 - Added named arguments emit syntax for <link linkend="s_macros">macros</link> (by Ricardo Bittencourt)
+- <link linkend="po_savetrd">`SAVETRD`</link> optional "autostart_BASIC_line" argument accepts -1 as OFF
 </synopsis>
             </listitem>
           </varlistentry>
@@ -3627,6 +3628,11 @@ START  ....     ; some code
 				  The new content is appended to the file (sector aligned append) and the catalog entry gets
 				  only number of sectors patched, up to 255 sectors at most. This is special mode for
 				  single-file big-loaders.</para>
+
+			  <para>For BASIC programs (.B extension): the optional argument <code>autostart_BASIC_line</code>
+				  is number of basic line 0..9999, the autostart marker (4 bytes) will be appended after BASIC code.
+				  If you want to use custom <code>length_minus_variables</code> without autostart marker,
+				  use -1 autostart value (since v1.24.0).</para>
 
 			  <para>The unofficial three-letter extensions are also supported (official extensions
 				  are only: B, C, D and #).
