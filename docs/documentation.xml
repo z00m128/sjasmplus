@@ -213,6 +213,7 @@
 - New operator <link linkend="op_pair">`pair`</link> to put together two 8 bit values as 16 bit value
 - New operator <link linkend="op_u16">`u16`</link> to truncate value to low 16 bits
 - <link linkend="po_savetrd">`SAVETRD`</link> optional "autostart_BASIC_line" argument accepts -1 as OFF
+- Added special directive <link linkend="po_cpp_line">`#line`</link> to fake reported source position
 </synopsis>
             </listitem>
           </varlistentry>
@@ -1937,6 +1938,34 @@ label?_suffix? ; define global label
       <para></para>
 
       <para><variablelist>
+          <varlistentry>
+            <term>#line<indexterm id="po_cpp_line"><primary>#line</primary></indexterm> &lt;linenum&gt; [&lt;filename&gt;]</term>
+
+            <listitem>
+              <para>This special directive <emphasis>MUST</emphasis> start at beginning of line same way as label and only the syntax starting with
+                hash is allowed. There could be space between # and <code>line</code>.</para>
+              <para>Specifies reported source position for subsequent lines, starting from &lt;linenum&gt; line number (must be positive integer)
+                and coming from specified &lt;filename&gt; file (in error/warning reports, listing files and SLD files).</para>
+              <para>The directive does <emphasis>NOT</emphasis> work inside <code>MACRO</code>, <code>DUP</code>, <code>LUA</code> and similar
+                blocks, which track their position of definition (even fake one adjusted by <code>#line</code> preceding the block) and report that
+                during emit of lines/instructions.
+                The directive will also update content of <code>__FILE__</code> and <code>__LINE__</code> predefines.
+                The scope of fake source position is current file and it does <emphasis>NOT</emphasis> affect searching directories
+                for <code>INCLUDE</code> search, which will still operate based on real filename of the source including.</para>
+              <para>The main differences from GCC's <code>#line</code> line control is support for only positive integers,
+                hash symbol must be at beginning of line and no macro expansion for arguments (DEFINE substitution is applied to the line,
+                but parsing expects integer literal in decimal form in the result)<example>
+                  <title>line_example.asm</title>
+
+                  <para><programlisting>    ld a,12345  ; warning reported at: line_example.asm(1)
+#   line 101 'some.c'   // quoting the filename is strongly recommended (to avoid `:` as line separator, etc)
+    ld a,23456  ; warning reported at: some.c(101)
+#line 500               // rest of the line is ignored
+    ld a,34567  ; warning reported at: some.c(500)</programlisting></para>
+                </example></para>
+            </listitem>
+          </varlistentry>
+
           <varlistentry>
             <term>.&lt;repeat-count&gt;<indexterm id="po_dot_repeat"><primary>.&lt;repeat-count&gt;</primary></indexterm> &lt;single instruction&gt;</term>
 

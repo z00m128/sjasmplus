@@ -5,7 +5,7 @@
   sjasmplus z00m's variant: https://github.com/z00m128/sjasmplus
 
   Created: Peter Helcmanovsky <ped@7gods.org>
-  Version: 0.9.13 27/06/2026
+  Version: 0.9.13 28/06/2026
 
   To install locally for your KDE5 desktop environment, copy the XML file into:
     ~/.local/share/org.kde.syntax-highlighting/syntax/
@@ -15,8 +15,9 @@ Changelog:
   // dd/mm/yyyy: version x.y (keep changelog in descending order)
   //   what was modified
 
-  27/06/2026: version 0.9.13
+  28/06/2026: version 0.9.13
     + new operator: pair, u16
+    + new special: #line
 
   16/04/2026: version 0.9.12
     + new directive: sldopt
@@ -130,7 +131,7 @@ TODO missing things:
     - when more finished, try to propose to upstream: https://github.com/KDE/syntax-highlighting/tree/master/data/syntax
 
 -->
-<language name="Z80 (sjasmplus)" section="Assembler" version="23" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
+<language name="Z80 (sjasmplus)" section="Assembler" version="24" kateversion="5.0" extensions="*.asm;*.a80;*.s" mimetype="" author="Peter Helcmanovsky (ped@7gods.org)" license="MIT">
   <highlighting>
     <list name="registers">
       <!-- General purpose registers -->
@@ -438,6 +439,7 @@ TODO missing things:
         <!-- Labels start at the beginning of the [indented] line, w/o label the "dotRepeat" context follows -->
         <RegExpr attribute="Label" context="#pop!afterLabel" String="(@\.|\.|@|\!|\!@|)[A-Za-z_][A-Za-z0-9_.?!#@]*(\+[0-9]|):?"/>
         <RegExpr attribute="Label" context="#pop!afterLabel" String="[0-9]+:?"/>
+        <RegExpr attribute="Comment" context="#pop!Arguments" String="#\s*line\s+"/>
         <DetectSpaces attribute="Normal Text" context="#pop!dotRepeat"/>
         <DetectChar attribute="Comment" context="#pop!Normal" char=";" lookAhead="true"/>
         <Detect2Chars attribute="Comment" context="#pop!Normal" char="/" char1="/" lookAhead="true"/>

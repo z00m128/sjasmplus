@@ -1,0 +1,180 @@
+# file opened: cpp_line_emulation.asm
+    1 0000              ; Issue #361 - adding `#line` keyword to inject custom file/line position for following source code
+    2 0000              ; this will also affect listing files and SLD files, although maybe not thoroughly enough
+    3 0000              ; I consider this a feature at this moment, if you want to use `#line`, you should already
+    4 0000              ; have pretty good idea what you are doing and why (probably generating .asm files by compiler)
+    5 0000              ; and either deal with consequences, or open github issue describing the use case and details of issue.
+    6 0000
+    7 0000                  DEVICE ZXSPECTRUM48, -1 ; DEVICE to make SLD file meaningful
+    8 0000                  ORG $C000
+    9 C000 CB 22            sla d                   ; SLD - regular instruction and everything
+   10 C002
+cpp_line_emulation.asm(11): error: Unrecognized instruction: #line 123
+   11 C002                  #line 123               ; error, in sjasmplus the hash must be at beginning of line
+   12 C002 ~            #line 234                ; except label identation, then the beginning of line is shifted after the '>'
+cpp_line_emulation.asm(234): error: Unrecognized instruction: invalid_instruction
+  234 C002                  invalid_instruction     ; error should be reported at line 234
+  235 C002 CB 22            sla d                   ; SLD
+  236 C004
+  237 C004 ~            #line 9997
+cpp_line_emulation.asm(9997): error: Unrecognized instruction: invalid_instruction
+ 9997 C004                  invalid_instruction     ; error should be reported at line 9997
+cpp_line_emulation.asm(9998): error: Unrecognized instruction: invalid_instruction
+ 9998 C004                  invalid_instruction     ; error should be reported at line 9998
+ 9999 C004                  ; and this should bump listing line numbering space for line 10000 as well (next line is 10000)
+10000 C004 ~            #   line   3456             // survive also C/C++ comments and allow whitespace after hash
+cpp_line_emulation.asm(3456): error: Unrecognized instruction: invalid_instruction
+ 3456 C004                  invalid_instruction     ; error should be reported at line 3456
+cpp_line_emulation.asm(3457): error: Unrecognized instruction: invalid_instruction
+ 3457 C004                  invalid_instruction     ; error should be reported at line 3457
+ 3458 C004                  ASSERT 3458 == 3458 ; verify the __LINE__ predefined is updated with fake line number too
+ 3459 C004 CB 22            sla d                   ; SLD
+ 3460 C006 ~            #line 13 "C:/file.pas"      // filenames with colon must be in quotes/apostrophes
+# fake file name: C:/file.pas
+C:/file.pas(13): error: Unrecognized instruction: invalid_instruction
+   13 C006                  invalid_instruction     ; error should be reported at C:/file.pas(13)
+C:/file.pas(14): error: Unrecognized instruction: invalid_instruction
+   14 C006                  invalid_instruction     ; error should be reported at C:/file.pas(14)
+   15 C006 CB 22            sla d                   ; SLD
+   16 C008
+   17 C008 ~            #line 57 /unix/path/file    // nix-like paths can be used without quotes, until you hit "//" in non-canonical path
+# fake file name: /unix/path/file
+   57 C008                                          // so recommended way is to quote filenames even in nix-like situations
+/unix/path/file(58): error: Unrecognized instruction: invalid_instruction
+   58 C008                  invalid_instruction     ; error should be reported at /unix/path/file(58)
+/unix/path/file(59): error: Unrecognized instruction: invalid_instruction
+   59 C008                  invalid_instruction     ; error should be reported at /unix/path/file(59)
+   60 C008 CB 22            sla d                   ; SLD
+   61 C00A
+   62 C00A ~            #line 345                   // keeps fake filename, just changes line number
+/unix/path/file(345): error: Unrecognized instruction: invalid_instruction
+  345 C00A                  invalid_instruction     ; error should be reported at /unix/path/file(345)
+  346 C00A CB 22            sla d                   ; SLD
+  347 C00C
+  348 C00C                  ; syntax errors of #line itself
+/unix/path/file(349): error: #line: positive integer expected: weirdnum
+  349 C00C              #line weirdnum
+  350 C00C ~            #line 9876 "open_quotes
+/unix/path/file(350): error: No closing delimiter: "
+/unix/path/file(351): error: Unrecognized instruction: invalid_instruction
+  351 C00C                  invalid_instruction     ; error should be reported at /unix/path/file(351)
+  352 C00C CB 22            sla d                   ; SLD
+  353 C00E
+  354 C00E                  DEFINE QUOTE "
+  355 C00E 2F 75 6E 69      DB "/unix/path/file"     ; expected result: DB "/unix/path/file"
+  355 C012 78 2F 70 61
+  355 C016 74 68 2F 66
+  355 C01A 69 6C 65
+  356 C01D
+  357 C01D                  ; including 1 byte from myself should work "of course" (even when __FILE__ and source position points to other root dir)
+  358 C01D                  INCBIN "./cpp_line_emulation.asm", 0, 1
+  359 C01E
+  360 C01E                  MACRO lineinside linenum?, fname?
+  361 C01E ~            #line linenum? fname?       ; errors out, #line inside MACRO is NOT supported
+  362 C01E ~                    invalid_instruction
+  363 C01E ~                    sla d               ; SLD
+  364 C01E                  ENDM
+  365 C01E
+  366 C01E                  lineinside 5101, "/other/file.pas"
+/unix/path/file(361): error: #line does not work inside macro/dup/lua block
+/unix/path/file(366): ^ emitted from here
+  366 C01E             >#line 5101 "/other/file.pas"       ; errors out, #line inside MACRO is NOT supported
+/unix/path/file(362): error: Unrecognized instruction: invalid_instruction
+/unix/path/file(366): ^ emitted from here
+  366 C01E             >        invalid_instruction
+  366 C01E CB 22       >        sla d               ; SLD
+/unix/path/file(367): error: Unrecognized instruction: invalid_instruction
+  367 C020                  invalid_instruction     ; macro can't affect source pos reported here
+  368 C020 CB 22            sla d                   ; SLD
+  369 C022
+  370 C022                  DUP 2
+/unix/path/file(371): error: #line does not work inside macro/dup/lua block
+  371 C022             >#line 5201, "/other/file.pas"   ; does NOT work inside DUP block (it's macro body)
+/unix/path/file(372): error: Unrecognized instruction: invalid_instruction
+  372 C022             >        invalid_instruction
+  373 C022 CB 22       >        sla d                   ; SLD
+/unix/path/file(371): error: #line does not work inside macro/dup/lua block
+  371 C024             >#line 5201, "/other/file.pas"   ; does NOT work inside DUP block (it's macro body)
+/unix/path/file(372): error: Unrecognized instruction: invalid_instruction
+  372 C024             >        invalid_instruction
+  373 C024 CB 22       >        sla d                   ; SLD
+  374 C026                  EDUP
+  375 C026
+  376 C026                  LUA ALLPASS
+  377 C026 ~                    _pl("#line 5301 /some/lua.script")
+  378 C026 ~                    _pc("invalid_instruction")
+  379 C026 ~                    _pc("sla d")
+/unix/path/file(377): error: [LUA] #line does not work inside macro/dup/lua block
+  380 C026              #line 5301 /some/lua.script
+/unix/path/file(378): error: [LUA] Unrecognized instruction: invalid_instruction
+  380 C026              invalid_instruction
+  380 C026 CB 22        sla d
+  380 C028                  ENDLUA
+  381 C028
+/unix/path/file(382): error: #line: positive integer expected: -1
+  382 C028              #line -1                    // negative values are not valid
+/unix/path/file(383): error: #line: positive integer expected: 0
+  383 C028              #line 0                     // 0 will also not work, 1 is minimum (difference from GNU cpp)
+/unix/path/file(384): error: Unrecognized instruction: invalid_instruction
+  384 C028                  invalid_instruction     ; error should be reported at /unix/path/file(378)
+  385 C028 CB 22            sla d                   ; SLD
+  386 C02A ~            #line 1 '/another/fake.file'// this is the minimum, test apostrophes and EOL comment connected
+# fake file name: /another/fake.file
+/another/fake.file(1): error: Unrecognized instruction: invalid_instruction
+    1 C02A                  invalid_instruction     ; error should be reported at /another/fake.file(1)
+    2 C02A CB 22            sla d                   ; SLD
+    3 C02C
+    4 C02C                  ; verify INCLUDE does search actual real directories of original file, not depending on __FILE__ content
+    5 C02C                  INCLUDE "cpp_line_emulation/cpp_line_emulation.i.asm"
+# file opened: cpp_line_emulation/cpp_line_emulation.i.asm
+cpp_line_emulation/cpp_line_emulation.i.asm(1): error: Unrecognized instruction: invalid_instruction
+    1+C02C                  invalid_instruction     ; regular file+line report
+    2+C02C CB 22            sla d                   ; SLD
+    3+C02E ~            #   line    100     "/i/am/not/just/include/file"
+# fake file name: /i/am/not/just/include/file
+/i/am/not/just/include/file(100): error: Unrecognized instruction: invalid_instruction
+  100+C02E                  invalid_instruction     ; report /i/am/not/just/include/file(100)
+  101+C02E CB 22            sla d                   ; SLD
+  102+C030                  IFNDEF ALREADY_DEFINED_OUTSIDE_MACRO
+  103+C030                      MACRO mac_from_include
+  104+C030 ~                        invalid_instruction ; report fake definition location
+  105+C030 ~                        sla d               ; SLD
+  106+C030                      ENDM
+  107+C030                      DEFINE ALREADY_DEFINED_OUTSIDE_MACRO
+  108+C030                  ENDIF
+  109+C030                  ; after include EOF the reporting will revert back to what it was before INCLUDE
+# file closed: cpp_line_emulation/cpp_line_emulation.i.asm
+    6 C030                  INCLUDE "cpp_line_emulation.i.asm"          ; search also CLI include path option
+# file opened: cpp_line_emulation/cpp_line_emulation.i.asm
+cpp_line_emulation/cpp_line_emulation.i.asm(1): error: Unrecognized instruction: invalid_instruction
+    1+C030                  invalid_instruction     ; regular file+line report
+    2+C030 CB 22            sla d                   ; SLD
+    3+C032 ~            #   line    100     "/i/am/not/just/include/file"
+# fake file name: /i/am/not/just/include/file
+/i/am/not/just/include/file(100): error: Unrecognized instruction: invalid_instruction
+  100+C032                  invalid_instruction     ; report /i/am/not/just/include/file(100)
+  101+C032 CB 22            sla d                   ; SLD
+  102+C034                  IFNDEF ALREADY_DEFINED_OUTSIDE_MACRO
+  103+C034 ~                    MACRO mac_from_include
+  104+C034 ~                        invalid_instruction ; report fake definition location
+  105+C034 ~                        sla d               ; SLD
+  106+C034 ~                    ENDM
+  107+C034 ~                    DEFINE ALREADY_DEFINED_OUTSIDE_MACRO
+  108+C034                  ENDIF
+  109+C034                  ; after include EOF the reporting will revert back to what it was before INCLUDE
+# file closed: cpp_line_emulation/cpp_line_emulation.i.asm
+    7 C034
+/another/fake.file(8): error: Unrecognized instruction: invalid_instruction
+    8 C034                  invalid_instruction     ; error should be reported at /another/fake.file(8)
+    9 C034 CB 22            sla d                   ; SLD
+   10 C036
+   11 C036                  mac_from_include        ; defined in include
+/i/am/not/just/include/file(104): error: Unrecognized instruction: invalid_instruction
+/another/fake.file(11): ^ emitted from here
+   11 C036             >            invalid_instruction ; report fake definition location
+   11 C036 CB 22       >            sla d               ; SLD
+   12 C038
+# file closed: cpp_line_emulation.asm
+
+Value    Label
+------ - -----------------------------------------------------------
