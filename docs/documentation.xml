@@ -212,6 +212,7 @@
 - Added named arguments emit syntax for <link linkend="s_macros">macros</link> (by Ricardo Bittencourt)
 - New operator <link linkend="op_pair">`pair`</link> to put together two 8 bit values as 16 bit value
 - New operator <link linkend="op_u16">`u16`</link> to truncate value to low 16 bits
+- Added new example <ulink url="https://github.com/z00m128/sjasmplus/blob/master/examples/sj_tutorial/tutorial.asm">examples/sj_tutorial/tutorial.asm</ulink> as quick guide for sjasmplus syntax
 - <link linkend="po_savetrd">`SAVETRD`</link> optional "autostart_BASIC_line" argument accepts -1 as OFF
 - Added special directive <link linkend="po_cpp_line">`#line`</link> to fake reported source position
 </synopsis>
