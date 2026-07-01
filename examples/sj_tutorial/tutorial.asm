@@ -74,6 +74,12 @@ symbol: EQU $C123       ; gives value $C123 to symbol (aka label) `symbol`, no m
         ENDM
         setsplitcounter 200 + 56        ; -> `ld bc,pair(low(200 + 56), high((200 + 56)-1)+1)` -> ld bc,0x0001
 loop:   djnz loop : dec c : jp nz,loop  ; loop 200+56 times
+; DUP directive repeats anonymous-macro-block N times
+        DUP 3, index
+            DB index
+            DB $FF
+        EDUP            ; results in array: 00 FF 01 FF 02 FF
+        .4 ldi          ; dot-repeater will repeat single instruction (4x `ldi` in this case)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; substitution system - happens before line is parsed, defined "ids" are replaced recursively
@@ -98,6 +104,7 @@ v_password  EQU 123     ; does define symbol `v_password`, not `v_red`
 ; and there is "glue" operator `_` to concatenate multiple defines together
         DEFINE QUOTE "
         DISPLAY QUOTE _ __FILE__ contains examples of basic syntax and features of sjasmplus"
+        ; after substitution this becomes: DISPLAY "tutorial.asm contains examples..."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; virtual devices
@@ -114,6 +121,7 @@ v_password  EQU 123     ; does define symbol `v_password`, not `v_red`
         DB  %0101'0101  ; writes into page 5 (this value is now "visible" both at $4000 and $8000, page 5 mapped in two different regions)
         ; this does NOT overwrite `rst 0` instruction in page 3
         ; that one is still there just un-mapped, not "visible" in 16 bit address space with current mapping
+    ; SAVESNA "test.sna", $8000 ; snapshot with start at $8000 (the interrupts are disabled and sysvars may differ from expectations)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; and there's more: structures (`STRUCT`), Lua scripting, modules, temporary labels, ...
