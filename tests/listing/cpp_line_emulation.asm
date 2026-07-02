@@ -87,3 +87,5 @@
     sla d                   ; SLD
 
     mac_from_include        ; defined in include
+
+#line 345 ""                ; empty filename is error

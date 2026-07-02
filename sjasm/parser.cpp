@@ -707,7 +707,10 @@ static int ParseCppLineDirective(char* p) {
 	donotlist = 1;
 	if (White(p[0]) && !SkipBlanks(p)) {	// optional fake filename may follow, try to parse it
 		auto name_in = GetDelimitedStringEx(p);
-		if (name_in.first.empty()) return 0;
+		if (name_in.first.empty()) {
+			Error("#line: empty filename", nullptr, SUPPRESS);
+			return 0;
+		}
 		name_in.second = DT_COUNT;			// override any delimiter to DT_COUNT so GetInputFile doesn't search include paths for file
 		fullpath_ref_t src_fname = GetInputFile(std::move(name_in));
 		sourcePosStack.back().newFile(src_fname.str.c_str());	// will reset also line number
