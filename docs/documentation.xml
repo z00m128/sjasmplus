@@ -210,6 +210,7 @@
             <listitem>
               <synopsis>
 - Added named arguments emit syntax for <link linkend="s_macros">macros</link> (by Ricardo Bittencourt)
+- `MACRO` keyword itself is now disabling substitutions for remainder of line
 - New operator <link linkend="op_pair">`pair`</link> to put together two 8 bit values as 16 bit value
 - New operator <link linkend="op_u16">`u16`</link> to truncate value to low 16 bits
 - Added new example <ulink url="https://github.com/z00m128/sjasmplus/blob/master/examples/sj_tutorial/tutorial.asm">examples/sj_tutorial/tutorial.asm</ulink> as quick guide for sjasmplus syntax
@@ -727,7 +728,8 @@ label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
       <para>
         Single iteration of substitution happens from left to right, with macro arguments taking precedence
         over other defines, followed by regular defines and defarray elements (with index expression
-        evaluation).
+        evaluation). After keywords [<code>DEFINE+, DEFINE, UNDEFINE, DEFARRAY+, DEFARRAY, IFDEF, IFNDEF, MACRO</code>]
+        only macro arguments are substituted, other defines are not substituted till end of line.
       </para>
 
       <para>

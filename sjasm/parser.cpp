@@ -539,7 +539,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		char* kp = lp;
 		isDefDir |= afterNonAlphaNum && (cmphstr(kp, "define+") || cmphstr(kp, "define")
 			|| cmphstr(kp, "undefine") || cmphstr(kp, "defarray+") || cmphstr(kp, "defarray")
-			|| cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
+			|| cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef") || cmphstr(kp, "macro"));
 		// if DEFINE-related directive was used, only macro-arguments are substituted
 		// in the remaining part of the line, the define-based substitution is inhibited till EOL
 
