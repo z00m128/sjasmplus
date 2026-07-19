@@ -15,8 +15,8 @@
 # resolves to -- bump the SHA and the comment together (Dependabot can do
 # this). SHAs resolved 2026-05-17:
 #   actions/checkout            v6.0.3      -> df4cb1c069e1874edd31b4311f1884172cec0e10
-#   codeql-action/init          v4.36.0     -> 7211b7c8077ea37d8641b6271f6a365a22a5fbfa
-#   codeql-action/analyze       v4.36.0     -> 7211b7c8077ea37d8641b6271f6a365a22a5fbfa
+#   codeql-action/init          v4.37.1     -> 7188fc363630916deb702c7fdcf4e481b751f97a
+#   codeql-action/analyze       v4.37.1     -> 7188fc363630916deb702c7fdcf4e481b751f97a
 #
 name: "CodeQL"
 
@@ -79,4 +79,4 @@ jobs:
     - run: make -j8
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9  # v4.37.0
+      uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a  # v4.37.1
