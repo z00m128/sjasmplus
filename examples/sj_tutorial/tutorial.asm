@@ -24,7 +24,7 @@
 ;;; labels must start at beginning of line, trailing colon is optional:
 label                   ; first char is letter or underscore, for more details see:
                         ; https://z00m128.github.io/sjasmplus/documentation.html#s_labels
-.local:                 ; local labels append to previous main label
+.local:                 ; local labels append to previous main label producing: label.local
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; instructions can NOT start at beginning of line, must be indented (otherwise it's label):
@@ -42,7 +42,7 @@ label                   ; first char is letter or underscore, for more details s
     OPT --syntax=b      ; whole expression in parentheses is legal only for memory access
         ld bc,(label)   ; legal, works
     ;   ld b,(label)    ; error: Illegal instruction (can't access memory): (label)
-        ld b,+(label)   ; not a memory access, just immediate value expression
+        ld b,+(label)   ; not a memory access, just immediate value expression starting with unary plus
 ; fake instructions: https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions
         sub hl,bc       ; or a : sbc hl,bc
     OPT reset --syntax=f; restore default syntax, then add warning to fake instruction usage
