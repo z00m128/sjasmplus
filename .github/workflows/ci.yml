@@ -302,7 +302,7 @@ jobs:
         run: make clean && make -j$(nproc) coverage-lcov
       - name: Upload to Coveralls
         if: ${{ env.COVERALLS_ENABLED == 'true' }}
-        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2
+        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2
         with:
           github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
           file: ./coverage.info
