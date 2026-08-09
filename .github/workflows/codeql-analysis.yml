@@ -15,8 +15,8 @@
 # resolves to -- bump the SHA and the comment together (Dependabot can do
 # this). SHAs resolved 2026-05-17:
 #   actions/checkout            v7.0.1      -> 3d3c42e5aac5ba805825da76410c181273ba90b1
-#   codeql-action/init          v4.37.4     -> f205ea1c3313d32999d8d6a48b4f6530d4437b38
-#   codeql-action/analyze       v4.37.4     -> f205ea1c3313d32999d8d6a48b4f6530d4437b38
+#   codeql-action/init          v4.37.6     -> 5595ccaf912efad79be6eef63a5619ff05969be3
+#   codeql-action/analyze       v4.37.6     -> 5595ccaf912efad79be6eef63a5619ff05969be3
 #
 name: "CodeQL"
 
@@ -51,7 +51,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@f205ea1c3313d32999d8d6a48b4f6530d4437b38  # v4.37.4
+      uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3  # v4.37.6
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
