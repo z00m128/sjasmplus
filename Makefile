@@ -19,7 +19,7 @@
 EXE_BASE_NAME=sjasmplus
 
 # Set version, dir and src.tar.xz filename
-VERSION?=1.23.1
+VERSION?=1.24.0
 SRCTARFILE?=$(EXE_BASE_NAME)-$(VERSION)-src.tar.xz
 SRCTARDIR?=$(EXE_BASE_NAME)-$(VERSION)
 

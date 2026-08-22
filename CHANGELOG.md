@@ -1,4 +1,13 @@
 
+## [1.24.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.24.0) - 26.8.2026
+- Added named arguments emit syntax for [macros](https://z00m128.github.io/sjasmplus/documentation.html#s_macros) (by Ricardo Bittencourt)
+- `MACRO` keyword itself is now disabling substitutions for remainder of line
+- New operator [`pair`](https://z00m128.github.io/sjasmplus/documentation.html#op_pair) to put together two 8 bit values as 16 bit value
+- New operator [`u16`](https://z00m128.github.io/sjasmplus/documentation.html#op_u16) to truncate value to low 16 bits
+- Added new example [examples/sj_tutorial/tutorial.asm](https://github.com/z00m128/sjasmplus/blob/master/examples/sj_tutorial/tutorial.asm) as quick guide for sjasmplus syntax
+- [`SAVETRD`](https://z00m128.github.io/sjasmplus/documentation.html#po_savetrd) optional "autostart_BASIC_line" argument accepts -1 as OFF
+- Added special directive [`#line`](https://z00m128.github.io/sjasmplus/documentation.html#po_cpp_line) to fake reported source position</synopsis>
+
 ## [1.23.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.23.1) - 13.6.2026
 - [`SETBP`](https://z00m128.github.io/sjasmplus/documentation.html#po_setbp) optional "conditional" argument works also for MAME list type
 - CI: migrating from Cirrus CI (ending 1st of June 2026) to GitHub Actions

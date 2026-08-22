@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.23.1 Documentation [2026-06-13]</title>
+  <title>SjASMPlus 1.24.0 Documentation [2026-08-26]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -206,7 +206,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>TBD - 1.24.0</term>
+            <term>26.8.2026 - 1.24.0</term>
             <listitem>
               <synopsis>
 - Added named arguments emit syntax for <link linkend="s_macros">macros</link> (by Ricardo Bittencourt)
@@ -215,8 +215,7 @@
 - New operator <link linkend="op_u16">`u16`</link> to truncate value to low 16 bits
 - Added new example <ulink url="https://github.com/z00m128/sjasmplus/blob/master/examples/sj_tutorial/tutorial.asm">examples/sj_tutorial/tutorial.asm</ulink> as quick guide for sjasmplus syntax
 - <link linkend="po_savetrd">`SAVETRD`</link> optional "autostart_BASIC_line" argument accepts -1 as OFF
-- Added special directive <link linkend="po_cpp_line">`#line`</link> to fake reported source position
-</synopsis>
+- Added special directive <link linkend="po_cpp_line">`#line`</link> to fake reported source position</synopsis>
             </listitem>
           </varlistentry>
 
