@@ -1212,8 +1212,8 @@ static void dirSAVETRD() {
 			if (!ParseExpression(lp, val)) {
 				Error("[SAVETRD] Syntax error", bp, PASS3); return;
 			}
-			if (val < 0) {
-				Error("[SAVETRD] Negative values are not allowed", bp, PASS3); return;
+			if (val < -1) {						// -1 is allowed as "no autostart" special value
+				Error("[SAVETRD] Negative values are not allowed", bp, SUPPRESS); return;
 			}
 			autostart = val;
 			// optional length of BASIC without variables

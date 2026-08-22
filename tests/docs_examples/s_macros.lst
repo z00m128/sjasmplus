@@ -104,6 +104,22 @@
 79    0025 10 FB       >            @djnz 1B ; avoid self-reference and use real instruction
 80    0027 10 FE        1:      @djnz   1B      ; original djnz instruction here
 81    0029
+82    0029              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+83    0029              ;;; Named arguments
+84    0029
+85    0029                  MACRO RECT x, y, dx, dy
+86    0029 ~                  DB x, y, dx, dy
+87    0029                  ENDM
+88    0029
+89    0029                  RECT 1, 2, 3, 4                  ; classic positional call
+89    0029 01 02 03 04 >      DB 1, 2, 3, 4
+90    002D                  RECT x=1, y=2, dx=3, dy=4        ; named arguments
+90    002D 01 02 03 04 >      DB 1, 2, 3, 4
+91    0031                  RECT dx=3, dy=4, x=1, y=2        ; named arguments, in any order
+91    0031 01 02 03 04 >      DB 1, 2, 3, 4
+92    0035                  RECT x = 1, y = 2, dx = 3, dy = 4 ; spaces around '=' are allowed
+92    0035 01 02 03 04 >      DB 1, 2, 3, 4
+93    0039
 # file closed: s_macros.asm
 
 Value    Label

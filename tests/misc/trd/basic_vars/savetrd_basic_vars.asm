@@ -15,3 +15,10 @@
     SAVETRD "savetrd_basic_vars.trd","e2.B",#4000,21,           ; missing autoline
     SAVETRD "savetrd_basic_vars.trd","e3.B",#4000,21,38,10,     ; extra comma
     SAVETRD "savetrd_basic_vars.trd","e4.C",#4000,21,39,10      ; not a BASIC file
+    SAVETRD "savetrd_basic_vars.trd","e5.B",#4000,21,-2,10      ; negative autoline = error
+
+    ; valid since v1.24.0:
+    SAVETRD "savetrd_basic_vars.trd","3.B",#4000,21,-1,10       ; valid, no autoline, size w/o vars 10
+        ; useful when user wants to add own autostart tag and fill up remaining bytes of sector
+        ; with custom easter egg message: https://github.com/z00m128/sjasmplus/issues/286
+        ; so the size w/o vars will be what catalogue will show and full size will be written as raw data to sector

@@ -78,3 +78,15 @@ djnz    MACRO   arg1?
 
 1:      djnz    1B      ; macro replacement will be used here
 1:      @djnz   1B      ; original djnz instruction here
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Named arguments
+
+    MACRO RECT x, y, dx, dy
+      DB x, y, dx, dy
+    ENDM
+
+    RECT 1, 2, 3, 4                  ; classic positional call
+    RECT x=1, y=2, dx=3, dy=4        ; named arguments
+    RECT dx=3, dy=4, x=1, y=2        ; named arguments, in any order
+    RECT x = 1, y = 2, dx = 3, dy = 4 ; spaces around '=' are allowed

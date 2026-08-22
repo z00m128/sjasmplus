@@ -29,6 +29,7 @@
 // tables.cpp
 
 #include "sjdefs.h"
+#include <set>
 
 TextFilePos::TextFilePos(const char* fileNamePtr, uint32_t line) : filename(fileNamePtr), line(line), colBegin(0), colEnd(0) {
 }
@@ -883,7 +884,7 @@ void CMacroDefineTable::ReInit() {
 	for (auto & usedX : used) usedX = false;
 }
 
-void CMacroDefineTable::AddMacro(char* naam, char* vervanger) {
+void CMacroDefineTable::AddMacro(const char* naam, const char* vervanger) {
 	CDefineTableEntry* tmpdefs = new CDefineTableEntry(naam, vervanger, 0, defs);
 	defs = tmpdefs;
 	used[(*naam)&127] = true;
@@ -952,12 +953,26 @@ void CMacroTable::Add(const char* nnaam, char*& p) {
 	}
 }
 
+static int FailMacroEmit(char* omacrolabp, CDefineTableEntry* odefs, const char* msg, const char* arg, EStatus type = SUPPRESS) {
+	Error(msg, arg, type);
+	MacroDefineTable.setdefs(odefs);
+	macrolabp = omacrolabp;
+	return 1;
+}
+
+// check if some argument "id" followed by assign `=` is starting at arg_p (affects global GetID buffer, returns just bool)
+static bool IsNamedMacroArg(char *arg_p) {
+	return GetID(arg_p) && !SkipBlanks(arg_p) && '=' == arg_p[0] && '=' != arg_p[1];
+}
+
 int CMacroTable::Emit(char* naam, char*& p) {
 	// search for the desired macro
 	if (!used[naam[0] & 127]) return 0;
 	auto mac_it = macs.find(naam);
 	if (macs.end() == mac_it) return 0;
 	// macro found, emit it, prepare temporary instance label base
+	// "naam" aliases the shared GetID buffer, so use the stable macro name from the table for any error message issued after we call GetID again
+	const char* macName = mac_it->first.c_str();
 	char* omacrolabp = macrolabp;
 	char labnr[LINEMAX], ml[LINEMAX];
 	SPRINTF1(labnr, LINEMAX, "%d", macronummer++);
@@ -967,25 +982,42 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	} else {
 		MacroDefineTable.ReInit();
 	}
-	// parse argument values
 	CDefineTableEntry* odefs = MacroDefineTable.getdefs();
+	// parse argument values
 	CStringsList* a = mac_it->second.args;
-	while (a) {
-		char* n = ml;
-		const bool lastArg = NULL == a->next;
-		if (!GetMacroArgumentValue(p, n) || (!lastArg && !comma(p))) {
-			Error("Not enough arguments for macro", naam, SUPPRESS);
-			macrolabp = omacrolabp;
-			return 1;
+	std::set<std::string> named_args_seen;
+	const bool isNamed = IsNamedMacroArg(p);	// check if first argument is "named", then all must be
+	while (a) {									// list of arguments in definition works also as loop counter (also for named)
+		const char* argName = nullptr;			// parse name of argument if explicit, otherwise take it from definition list
+		if (isNamed) {							// all arguments must be either named or not depending on first one
+			argName = GetID(p);
+			if (!argName || SkipBlanks(p) || '=' != p[0] || '=' == p[1]) {
+				return FailMacroEmit(omacrolabp, odefs, "Named arguments must be used for all parameters or none", macName);
+			}
+			if (!CStringsList::contains(mac_it->second.args, argName)) {	// scan whole list, named args can be shuffled
+				return FailMacroEmit(omacrolabp, odefs, "Invalid named argument", argName);
+			}
+			if (!named_args_seen.emplace(argName).second) {
+				return FailMacroEmit(omacrolabp, odefs, "Duplicate named argument", argName);
+			}
+			++p;								// advance over '='
+		} else {
+			if (IsNamedMacroArg(p)) {
+				return FailMacroEmit(omacrolabp, odefs, "Named arguments must be used for all parameters or none", macName);
+			}
+			argName = a->string;				// implicit name of arg comes from definition list
 		}
-		MacroDefineTable.AddMacro(a->string, ml);
+		// parse value of argument
+		char* val_buf = ml;
+		const bool lastArg = (nullptr == a->next);
+		if (!GetMacroArgumentValue(p, val_buf) || (!lastArg && !comma(p))) {
+			return FailMacroEmit(omacrolabp, odefs, "Not enough arguments for macro", macName);
+		}
+		MacroDefineTable.AddMacro(argName, ml);
 		a = a->next;
 	}
-	SkipBlanks(p);
-	if (*p) {
-		Error("Too many arguments for macro", naam, SUPPRESS);
-		macrolabp = omacrolabp;
-		return 1;
+	if (!SkipBlanks(p)) {
+		return FailMacroEmit(omacrolabp, odefs, "Too many arguments for macro", macName);
 	}
 	// arguments parsed, emit the macro lines and parse them
 	lp = p;

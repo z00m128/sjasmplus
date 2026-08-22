@@ -39,7 +39,7 @@ static int ParseExpPrim(char*& p, aint& nval) {
 	if (SkipBlanks(p)) {
 		return 0;
 	}
-	if (*p == '(') {
+	if (*p == '(') {		// already did SkipBlanks, so `need(p, '(')` would do it second time
 		++p;
 		res = ParseExpressionEntry(p, nval);
 		if (!need(p, ')')) {
@@ -47,8 +47,8 @@ static int ParseExpPrim(char*& p, aint& nval) {
 			return 0;
 		}
 	} else if (DeviceID && *p == '{') {		// read WORD/BYTE from virtual device memory
-		char* const readMemP = p;
-		const int byteOnly = cmphstr(++p, "b");
+		char* const readMemP = p++;
+		const int byteOnly = cmphstr(p, "b");
 		// switch off alternative relocation evaluation for the address value
 		const bool oldAreLabelsOffset = Relocation::areLabelsOffset;
 		Relocation::areLabelsOffset = false;
@@ -157,11 +157,23 @@ static int ParseExpUnair(char*& p, aint& nval) {
 		if (sizeofEval) return 1;	// valid label name (and valid optional parentheses)
 		p = oldP;					// invalid label name or parentheses, try to ignore "sizeof"
 	}
+	if (cmphstr(p, "pair", true)) {
+		aint hi = 0, lo = 0;
+		if (need(p, '(') && ParseExpressionEntry(p, hi) && need(p, ',') && ParseExpressionEntry(p, lo) && need(p, ')')) {
+			check8(hi);
+			check8(lo);
+			nval = ((hi & 0xFF) << 8) | (lo & 0xFF);
+			return 1;
+		} else {
+			p = oldP;
+			return 0;
+		}
+	}
 	aint right;
 	int oper;
 	if ((oper = need(p, "! ~ + - ")) || \
 		(oper = needa(p, "not", '!', "low", 'l', "high", 'h', true)) || \
-		(oper = needa(p, "abs", 'a', nullptr, 0, nullptr, 0, true)) ) {
+		(oper = needa(p, "abs", 'a', "u16", 'u', nullptr, 0, true)) ) {
 		switch (oper) {
 		case '!':
 			if (!ParseExpUnair(p, right)) return 0;
@@ -190,6 +202,10 @@ static int ParseExpUnair(char*& p, aint& nval) {
 		case 'a':
 			if (!ParseExpUnair(p, right)) return 0;
 			nval = abs(right);
+			break;
+		case 'u':
+			if (!ParseExpUnair(p, right)) return 0;
+			nval = right & 0xFFFF;
 			break;
 		default: Error("internal error", nullptr, FATAL); break;	// unreachable
 		}
@@ -523,7 +539,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 		char* kp = lp;
 		isDefDir |= afterNonAlphaNum && (cmphstr(kp, "define+") || cmphstr(kp, "define")
 			|| cmphstr(kp, "undefine") || cmphstr(kp, "defarray+") || cmphstr(kp, "defarray")
-			|| cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef"));
+			|| cmphstr(kp, "ifdef") || cmphstr(kp, "ifndef") || cmphstr(kp, "macro"));
 		// if DEFINE-related directive was used, only macro-arguments are substituted
 		// in the remaining part of the line, the define-based substitution is inhibited till EOL
 
@@ -667,6 +683,53 @@ char* ReplaceDefine(char* src) {
 	return src;
 }
 
+static int ParseCppLineDirective(char* p) {
+	if (SkipBlanks(p) || !cmphstr(p, "line") || SkipBlanks(p)) return 0;
+	assert(!sourcePosStack.empty());
+	if (lijst || extraErrorWarningPrefix) {	// `#line` inside MACRO/LUA does NOT work, not supported, sry
+		// because running macro keeps restoring sourcePosStack.back() value (to where it was defined)
+		// the LUA block detection is using `extraErrorWarningPrefix` -> so far this is used only by Lua related code
+		Error("#line does not work inside macro/dup/lua block", nullptr, SUPPRESS);
+		return 0;
+	}
+	aint linenum = isdigit(p[0]) ? std::atoi(p) : -1;			// got some linenum?
+	if (linenum <= 0) {						// valid range 1+ // difference from GNU cpp where 0 is valid too
+		// even "1" will cause extra UTF BOM marker detection in edge case (ReadBuf fetch new block of bytes)
+		// but that shouldn't cause any ill effect (and just to trigger it requires to very deliberately construct asm source)
+		Error("#line: positive integer expected", p, SUPPRESS);
+		return 0;
+	}
+	while (p[0] && isdigit(p[0])) ++p;		// skip the linenum digits and look for filename
+	// update maxlin for Listing with new max value
+	maxlin = std::max(maxlin, sourcePosStack.back().line);
+	maxlin = std::max(maxlin, static_cast<uint32_t>(linenum));
+	ListFile(true);							// list this early, before sourcePosStack is affected
+	donotlist = 1;
+	if (White(p[0]) && !SkipBlanks(p)) {	// optional fake filename may follow, try to parse it
+		auto name_in = GetDelimitedStringEx(p);
+		if (name_in.first.empty()) {
+			Error("#line: empty filename", nullptr, SUPPRESS);
+			return 0;
+		}
+		name_in.second = DT_COUNT;			// override any delimiter to DT_COUNT so GetInputFile doesn't search include paths for file
+		fullpath_ref_t src_fname = GetInputFile(std::move(name_in));
+		sourcePosStack.back().newFile(src_fname.str.c_str());	// will reset also line number
+		DefineTable.Replace("__FILE__", src_fname.str.c_str());	// set up new __FILE__ predefined value
+		FILE* listFile = GetListingFile();
+		if (LASTPASS == pass && listFile) {
+			fputs("# fake file name: ", listFile);
+			fputs(src_fname.str.c_str(), listFile);
+			fputs("\n", listFile);
+		}
+	}
+	// set line position after optional filename (if there was filename, it will reset line pos)
+	sourcePosStack.back().line = linenum - 1;
+	sourcePosStack.back().colBegin = 0;
+	sourcePosStack.back().colEnd = 0;
+	SkipToEol(lp);							// skip rest of line no matter what is there
+	return 1;
+}
+
 void SetLastParsedLabel(const char* label) {
 	if (LastParsedLabel) free(LastParsedLabel);
 	if (nullptr != label) {
@@ -681,6 +744,7 @@ void SetLastParsedLabel(const char* label) {
 
 void ParseLabel() {
 	if (White()) return;
+	if ('#' == lp[0] && ParseCppLineDirective(lp + 1)) return;
 	if (':' == *lp) {							// detect possible SIZEOF boundary tag
 		bool isLocal = ('.' == lp[1]);
 		if (':' == lp[1 + isLocal]) {			// tag detected, process it

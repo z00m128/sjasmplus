@@ -1,0 +1,63 @@
+# file opened: macro_definition_is_raw.asm
+ 1    0000                  DEFINE+ mymacro defmacro
+ 2    0000                  DEFINE+ myarg defarg
+ 3    0000                  MACRO mymacro myarg
+ 4    0000 ~                    ld hl,myarg
+ 5    0000                  ENDM
+ 6    0000
+ 7    0000              ; **BEFORE** v1.24.0 the definition itself was substituted and body of macro was stored raw, so:
+ 8    0000                  ; MACRO defmacro defarg
+ 9    0000                  ;     ld hl,myarg
+10    0000                  ; ENDM
+11    0000              ; the emit A001 worked because emit was substituted fully (both emit and body)
+12    0000              ; the emit A002 failed on `ld hl,myarg`, because macro arg name was `defarg`, but body contains `myarg`
+13    0000              ; the emit A003 and A004 failed on `Unrecognized instruction: mymacro` because `defmacro` was defined
+14    0000
+15    0000              ; since v1.24.0 the definition of MACRO is now protected from substitution, the `MACRO` keyword stops
+16    0000              ; substitution for remaining part of line, so this is defined:
+17    0000                  ; MACRO mymacro myarg
+18    0000                  ;     ld hl,myarg
+19    0000                  ; ENDM
+20    0000              ; the emit A001 and A002 now fails on unrecognized instruction `defmacro` (no such macro defined)
+21    0000              ; the emit A003 works with value 0xA003 as intended
+22    0000              ; the emit A004 works with value 0xA004 b/c macro arg `myarg`->0xA004 has higher priority than define `myarg`
+23    0000
+macro_definition_is_raw.asm(24): error: Unrecognized instruction: defmacro 0xA001
+24    0000                  defmacro 0xA001          ; substitution defines: mymacro->defmacro and myarg->defarg
+25    0000                  UNDEFINE myarg
+macro_definition_is_raw.asm(26): error: Unrecognized instruction: defmacro 0xA002
+26    0000                  defmacro 0xA002          ; substitution define: mymacro->defmacro
+27    0000                  UNDEFINE mymacro
+28    0000                  mymacro 0xA003          ; no substitution at all
+28    0000 21 03 A0    >        ld hl,0xA003
+29    0003                  DEFINE+ myarg defarg
+30    0003                  mymacro 0xA004          ; substitution define: myarg->defarg
+30    0003 21 04 A0    >        ld hl,0xA004
+31    0006
+32    0006              ; WARNING, the macro definition using name of macro ahead like "label" will have the name substituted!
+33    0006              ; the argument names in definition will be NOT substituted, as they are protected by the `MACRO` keyword
+34    0006
+35    0006                  DEFINE+ labmacro d2macro
+36    0006                  DEFINE+ myarg defarg
+37    0006
+38    0006              d2macro MACRO myarg
+39    0006 ~                    ld hl,myarg
+40    0006                  ENDM
+41    0006              ; so this was defined here:
+42    0006                  ; d2macro MACRO myarg
+43    0006                  ;         ld hl,myarg
+44    0006                  ;     ENDM
+45    0006
+46    0006                  d2macro 0xB001         ; substitutions saves the day and emits macro `d2macro`
+46    0006 21 01 B0    >        ld hl,0xB001
+47    0009                  UNDEFINE labmacro
+macro_definition_is_raw.asm(48): error: Unrecognized instruction: labmacro 0xB002
+48    0009                  labmacro 0xB002         ; unrecognized instruction, the macro was defined as d2macro
+49    0009                  d2macro  0xB003         ; emitting `d2macro` directly
+49    0009 21 03 B0    >        ld hl,0xB003
+50    000C                  ; all this time define `myarg` exists and doesn't change result as inside macro it has lower priority
+51    000C
+# file closed: macro_definition_is_raw.asm
+
+Value    Label
+------ - -----------------------------------------------------------

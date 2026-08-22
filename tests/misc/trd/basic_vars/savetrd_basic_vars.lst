@@ -22,7 +22,15 @@ savetrd_basic_vars.asm(16): error: Unexpected: ,
 savetrd_basic_vars.asm(17): warning: zx.trdimage_add_file: autostart value is BASIC program line number (0..9999) (in lua use -1 otherwise).
 savetrd_basic_vars.asm(17): error: zx.trdimage_add_file: length without variables is for BASIC files only.
 17    4004                  SAVETRD "savetrd_basic_vars.trd","e4.C",#4000,21,39,10      ; not a BASIC file
-18    4004
+savetrd_basic_vars.asm(18): error: [SAVETRD] Negative values are not allowed: SAVETRD "savetrd_basic_vars.trd","e5.B",#4000,21,-2,10
+18    4004                  SAVETRD "savetrd_basic_vars.trd","e5.B",#4000,21,-2,10      ; negative autoline = error
+19    4004
+20    4004                  ; valid since v1.24.0:
+21    4004                  SAVETRD "savetrd_basic_vars.trd","3.B",#4000,21,-1,10       ; valid, no autoline, size w/o vars 10
+22    4004                      ; useful when user wants to add own autostart tag and fill up remaining bytes of sector
+23    4004                      ; with custom easter egg message: https://github.com/z00m128/sjasmplus/issues/286
+24    4004                      ; so the size w/o vars will be what catalogue will show and full size will be written as raw data to sector
+25    4004
 # file closed: savetrd_basic_vars.asm
 
 Value    Label
