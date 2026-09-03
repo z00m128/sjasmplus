@@ -262,6 +262,16 @@ operators.asm(84): warning: value 0x3456 is truncated to 8bit value: 0x56
 133   002E              ; U16 can't be capitalized, it's all-caps then
 134   002E              Xor:
 135   002E
+136   002E                  ; Issue #394 - `1 xor(1+1)` doesn't parse, requires whitespace ahead of parentheses
+137   002E 02 02            DB (1+2)and(2+4),   (1+2) and (2+4)
+138   0030 07 07            DB (1+2)or(2+4),    (1+2) or (2+4)
+139   0032 05 05            DB (1+2)xor(2+4),   (1+2) xor (2+4)
+140   0034 03 03            DB (2+4)shr(2-1),   (2+4) shr (2-1)
+141   0036 30 30            DB (2+4)shl(1+2),   (2+4) shl (1+2)
+142   0038 02 02            DB (2+4+8)mod(1+2), (2+4+8) mod (1+2)
+143   003A 78 56 FF 12      DB low(0x12345678),high(0x12345678),not(0),abs(-0x12)
+144   003E 78 56            DW u16(0x12345678)
+145   0040
 # file closed: operators.asm
 
 Value    Label

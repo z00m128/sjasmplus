@@ -219,7 +219,7 @@ static int ParseExpMul(char*& p, aint& nval) {
 	aint left, right;
 	int oper;
 	if (!ParseExpUnair(p, left)) return 0;
-	while ((oper = need(p, "* / % ")) || (oper = needa(p, "mod", '%'))) {
+	while ((oper = need(p, "* / % ")) || (oper = needa(p, "mod", '%', nullptr, 0, nullptr, 0, true))) {
 		if (!ParseExpUnair(p, right)) return 0;
 		switch (oper) {
 		case '*':
@@ -257,7 +257,7 @@ static int ParseExpShift(char*& p, aint& nval) {
 	uint32_t l;
 	int oper;
 	if (!ParseExpAdd(p, left)) return 0;
-	while ((oper = need(p, "<<>>")) || (oper = needa(p, "shl", '<' + '<', "shr", '>' + '>'))) {
+	while ((oper = need(p, "<<>>")) || (oper = needa(p, "shl", '<' + '<', "shr", '>' + '>', nullptr, 0, true))) {
 		if (oper == '>' + '>' && *p == '>') {
 			++p;
 			oper += '>';
@@ -332,7 +332,7 @@ static int ParseExpEqu(char*& p, aint& nval) {
 static int ParseExpBitAnd(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpEqu(p, left)) return 0;
-	while (need(p, "&_") || needa(p, "and", '&')) {
+	while (need(p, "&_") || cmphstr(p, "and", true)) {
 		if (!ParseExpEqu(p, right)) return 0;
 		left &= right;
 	}
@@ -343,7 +343,7 @@ static int ParseExpBitAnd(char*& p, aint& nval) {
 static int ParseExpBitXor(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpBitAnd(p, left)) return 0;
-	while (need(p, "^ ") || needa(p, "xor", '^')) {
+	while (need(p, '^') || cmphstr(p, "xor", true)) {
 		if (!ParseExpBitAnd(p, right)) return 0;
 		left ^= right;
 	}
@@ -354,7 +354,7 @@ static int ParseExpBitXor(char*& p, aint& nval) {
 static int ParseExpBitOr(char*& p, aint& nval) {
 	aint left, right;
 	if (!ParseExpBitXor(p, left)) return 0;
-	while (need(p, "|_") || needa(p, "or", '|')) {
+	while (need(p, "|_") || cmphstr(p, "or", true)) {
 		if (!ParseExpBitXor(p, right)) return 0;
 		left |= right;
 	}
