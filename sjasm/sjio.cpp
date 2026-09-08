@@ -509,9 +509,8 @@ void EmitWords(const int* words, bool isInstructionStart) {
 
 void EmitBlock(aint byte, aint len, bool preserveDeviceMemory, int emitMaxToListing) {
 	if (len <= 0) {
-		const aint adrMask = Options::IsLongPtr ? ~0 : 0xFFFF;
-		CurAddress = (CurAddress + len) & adrMask;
-		if (DISP_NONE != PseudoORG) adrdisp = (adrdisp + len) & adrMask;
+		CurAddress += len;
+		if (DISP_NONE != PseudoORG) adrdisp += len;
 		if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
 		else			CheckRamLimitExceeded();
 		return;
@@ -581,8 +580,8 @@ void BinIncFile(fullpath_ref_t file, aint offset, aint length) {
 			}
 			length -= advanceLength;
 			if (length <= 0 && 0 == advanceLength) Error("BinIncFile internal error", NULL, FATAL);
-			if (DISP_NONE != PseudoORG) adrdisp = adrdisp + advanceLength;
-			CurAddress = CurAddress + advanceLength;
+			CurAddress += advanceLength;
+			if (DISP_NONE != PseudoORG) adrdisp += advanceLength;
 		}
 	} else {
 		// Seek to the beginning of part to include

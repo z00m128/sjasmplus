@@ -206,6 +206,16 @@
       <para><variablelist>
 
 <varlistentry>
+            <term>? - 1.24.1?</term>
+            <listitem>
+              <synopsis>
+- stop `BLOCK`/`DS` truncating `$` (aka program counter) to 16 bit address space + new test
+- minor changes in examples, docs and expression parser implementation
+</synopsis>
+            </listitem>
+          </varlistentry>
+
+<varlistentry>
             <term>26.8.2026 - 1.24.0</term>
             <listitem>
               <synopsis>
