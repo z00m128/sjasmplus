@@ -15,67 +15,47 @@
         negR16toR16 r16?, r16?
     ENDM
 
-    MACRO negHLuseDE            ; 6B 38T
-        ; HL = -HL, DE = HL (preserves A)
-        ex  de,hl
+    MACRO negDEtoHL
+        ; 6B 29T, but preserves A, HL = -DE
+        ld  hl,0
         or  a
-        sbc hl,hl               ; HL = 0
-        sbc hl,de               ; HL = 0 - HL
-    ENDM
-
-    MACRO negDEuseHL            ; 6B 38T
-        ; DE = -DE, HL = DE (preserves A)
-        or  a
-        sbc hl,hl
         sbc hl,de
-        ex  de,hl
     ENDM
 
     MACRO alignHl alignValue?
         ASSERT 2 <= (alignValue?)
         ASSERT 0 == ((alignValue?) & ((alignValue?)-1)) ; make sure it's power of two
-        push    af
-        IF (alignValue?) == 256
-            xor     a
-            cp      l           ; Fc=1 when 0 < L
-            ld      l,a         ; L = 0
-            adc     a,h
-            ld      h,a
-                ; 20T 5B
-        ELSE : IF (alignValue?) == 2
+        IF (alignValue?) == 2
             inc     hl
             res     0,l
-                ; 14T 3B
-        ELSE : IF (alignValue?) < 256
+                ; 3B 14T
+        ELSEIF (alignValue?) < 256
+            dec     hl
             ld      a,(alignValue?)-1
-            IFNDEF SJ_LIBRARY_USE_Z80N
-                add     a,l
-                rra             ; preserve carry flag for increment of H
-                and     -((alignValue?)>>1)     ; clear bottom bits, Fc=0
-                rla             ; restore add-carry and fix position of L bits
-                ld      l,a
-                adc     a,h     ; A = L + H + add-carry
-                sub     l       ; A = H + add-carry (new H)
-                ld      h,a
-                    ; 42T 11B
-            ELSE
-                add     hl,a    ; add align-1 to HL
-                cpl             ; bits to keep in L (and clear bottom bits)
-                and     l
-                ld      l,a
-                    ; 27T 7B
-            ENDIF
-        ELSE : ASSERT 256 < (alignValue?)
-            xor     a
-            cp      l
+            or      l
             ld      l,a
-            adc     a,h     ; if 0 < L, then ++H here in every case
-            add     a,((alignValue?)-1)>>8
-            and     -((alignValue?)>>8)
+            inc     hl
+                ; 6B 27T, uses A
+        ELSEIF (alignValue?) == 256
+            dec     hl
+            inc     h
+            ld      l,0
+                ; 4B 17T
+        ELSEIF (alignValue?) == 512
+            dec     hl
+            set     0,h
+            inc     h
+            ld      l,0
+                ; 6B 25T
+        ELSE : ASSERT 256 < (alignValue?)
+            dec     hl
+            ld      a,high((alignValue?)-1)
+            or      h
+            inc     a
             ld      h,a
-                ; 34T 9B
-        ENDIF : ENDIF : ENDIF
-        pop     af
+            ld      l,0
+                ; 8B 32T, uses A
+        ENDIF
     ENDM
 
     OPT pop
