@@ -210,6 +210,7 @@
             <listitem>
               <synopsis>
 - stop `BLOCK`/`DS` truncating `$` (aka program counter) to 16 bit address space + new test
+- <link linkend="po_savebin">`SAVEBIN`</link> syntax/arguments tuned (negative values count from top of RAM)
 - minor changes in examples, docs and expression parser implementation
 </synopsis>
             </listitem>
@@ -3372,13 +3373,17 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
 
           <varlistentry>
             <term>SAVEBIN<indexterm id="po_savebin"><primary>SAVEBIN</primary></indexterm>
-            &lt;filename&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
+            &lt;filename&gt;,&lt;startaddress&gt;[,&lt;length&gt;]</term>
 
             <listitem>
               <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the block of RAM.</para>
+              <para>Save the block of RAM. Negative startaddress counts from end of the RAM (0x1'0000 + startaddress),
+                valid range is thus -0x1'0000..+0xFFFF.
+                Negative or zero length counts from end of the RAM, ie. how many bytes are omitted toward end,
+                valid range is thus -0xFFFF..+0x1'0000.
+                Default length argument is <code>0</code> (save bytes from startaddress till end of RAM).</para>
 
               <para><example>
                   <title></title>

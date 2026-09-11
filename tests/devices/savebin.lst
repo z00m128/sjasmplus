@@ -1,29 +1,51 @@
 # file opened: savebin.asm
  1    0000                  DEVICE NONE
-savebin.asm(2): error: SAVEBIN only allowed in real device emulation mode (See DEVICE)
+savebin.asm(2): error: [SAVEBIN] only allowed in real device emulation mode (See DEVICE)
  2    0000                  SAVEBIN "fname",0,1     ; error because no device...
  3    0000
  4    0000                  DEVICE ZXSPECTRUM48
  5    0000                  ; syntax errors
-savebin.asm(6): error: [SAVEBIN] Syntax error. No parameters: SAVEBIN "fname"
+savebin.asm(6): error: [SAVEBIN] expected syntax is SAVEBIN <filename>, <startaddr>[, <length>]: SAVEBIN "fname"
  6    0000                  SAVEBIN "fname"
-savebin.asm(7): error: [SAVEBIN] Syntax error: SAVEBIN "fname",
+savebin.asm(7): error: [SAVEBIN] expected syntax is SAVEBIN <filename>, <startaddr>[, <length>]: SAVEBIN "fname",
  7    0000                  SAVEBIN "fname",
-savebin.asm(8): error: [SAVEBIN] Syntax error: SAVEBIN "fname",&
+savebin.asm(8): error: Syntax error: &
+savebin.asm(8): error: [SAVEBIN] expected syntax is SAVEBIN <filename>, <startaddr>[, <length>]: SAVEBIN "fname",&
  8    0000                  SAVEBIN "fname",&
-savebin.asm(9): error: [SAVEBIN] Values less than 0000h are not allowed: SAVEBIN "fname",-1
- 9    0000                  SAVEBIN "fname",-1
-savebin.asm(10): error: [SAVEBIN] Values more than FFFFh are not allowed: SAVEBIN "fname",0x10000
-10    0000                  SAVEBIN "fname",0x10000
-savebin.asm(11): error: [SAVEBIN] Syntax error. No parameters: SAVEBIN "fname",,
+savebin.asm(9): error: [SAVEBIN] Start value must be in -0x1'0000..0xFFFF range: SAVEBIN "fname",-0x1'0001
+ 9    0000                  SAVEBIN "fname",-0x1'0001
+savebin.asm(10): error: [SAVEBIN] Start value must be in -0x1'0000..0xFFFF range: SAVEBIN "fname",+0x1'0000
+10    0000                  SAVEBIN "fname",+0x1'0000
+savebin.asm(11): error: [SAVEBIN] expected syntax is SAVEBIN <filename>, <startaddr>[, <length>]: SAVEBIN "fname",,
 11    0000                  SAVEBIN "fname",,
-savebin.asm(12): error: [SAVEBIN] Syntax error: SAVEBIN "fname",0xC000,
+savebin.asm(12): error: [SAVEBIN] expected syntax is SAVEBIN <filename>, <startaddr>[, <length>]: SAVEBIN "fname",0xC000,
 12    0000                  SAVEBIN "fname",0xC000,
-savebin.asm(13): error: [SAVEBIN] Syntax error: SAVEBIN "fname",0xC000,&
+savebin.asm(13): error: Syntax error: &
+savebin.asm(13): error: [SAVEBIN] expected syntax is SAVEBIN <filename>, <startaddr>[, <length>]: SAVEBIN "fname",0xC000,&
 13    0000                  SAVEBIN "fname",0xC000,&
-savebin.asm(14): error: [SAVEBIN] Negative values are not allowed: SAVEBIN "fname",0xC000,-1
-14    0000                  SAVEBIN "fname",0xC000,-1
-15    0000
+savebin.asm(14): error: [SAVEBIN] Length value must be in -0xFFFF..0x1'0000 range: SAVEBIN "fname",0xC000,-0x1'0000
+14    0000                  SAVEBIN "fname",0xC000,-0x1'0000
+savebin.asm(15): error: [SAVEBIN] Length value must be in -0xFFFF..0x1'0000 range: SAVEBIN "fname",0xC000,+0x1'0001
+15    0000                  SAVEBIN "fname",0xC000,+0x1'0001
+savebin.asm(16): error: [SAVEBIN] Error writing file (Disk full or zero length?): SAVEBIN "savebin.$$$",-4,-4
+16    0000                  SAVEBIN "savebin.$$$",-4,-4           ; end is not far enough, zero length -> write fails
+17    0000                      ; ^ this will still create empty file `savebin.$$$`
+18    0000
+19    0000                  ; expected syntax: SAVEBIN <filename>, <startaddr>[, <length>]
+20    0000                  ; valid range: for startaddr -0x1'0000..+0xFFFF, for length -0xFFFF..+0x1'0000
+21    0000                  ; start + length reaching outside of 64ki is silently clamped
+22    0000                  ; negative start means from end of RAM, zero or negative length means from end of RAM
+23    0000
+24    0000                  ; valid cases to verify negative start/end feature and basic functionality
+25    0000                  ORG $FFF0
+26    FFF0 30 31 32 33      DB '0123456789ABCDEF'
+26    FFF4 34 35 36 37
+26    FFF8 38 39 41 42
+26    FFFC 43 44 45 46
+27    0000                  SAVEBIN "savebin.bin",$FFF0     ; default length is "to end of RAM" => 16 bytes here
+28    0000                  SAVEBIN "savebin.raw",$FFF0,4   ; '0123'
+29    0000                  SAVEBIN "savebin.tap",-8,-5     ; '89A'
+30    0000
 # file closed: savebin.asm
 
 Value    Label

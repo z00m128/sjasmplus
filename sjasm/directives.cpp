@@ -928,43 +928,26 @@ static void dirSAVETAP() {
 
 static void dirSAVEBIN() {
 	if (!DeviceID) {
-		Error("SAVEBIN only allowed in real device emulation mode (See DEVICE)");
+		Error("[SAVEBIN] only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
 		return;
 	}
 	bool exec = (LASTPASS == pass);
-	aint val;
-	int start = -1, length = -1;
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			if (!ParseExpressionNoSyntaxError(lp, val)) {
-				Error("[SAVEBIN] Syntax error", bp, SUPPRESS); return;
-			}
-			if (val < 0) {
-				Error("[SAVEBIN] Values less than 0000h are not allowed", bp); return;
-			} else if (val > 0xFFFF) {
-			  	Error("[SAVEBIN] Values more than FFFFh are not allowed", bp); return;
-			}
-			start = val;
-		} else {
-		  	Error("[SAVEBIN] Syntax error. No parameters", bp, PASS3); return;
-		}
-		if (anyComma(lp)) {
-			if (!ParseExpressionNoSyntaxError(lp, val)) {
-				Error("[SAVEBIN] Syntax error", bp, SUPPRESS); return;
-			}
-			if (val < 0) {
-				Error("[SAVEBIN] Negative values are not allowed", bp); return;
-			}
-			length = val;
-		}
-	} else {
-		Error("[SAVEBIN] Syntax error. No parameters", bp); return;
+	aint savebinArgs[2] = {0, 0};
+	const bool optionals[] = {false, true};
+	if (!comma(lp) || !getIntArguments<2>(lp, savebinArgs, optionals)) {
+		Error("[SAVEBIN] expected syntax is SAVEBIN <filename>, <startaddr>[, <length>]", bp, SUPPRESS);
+		return;
 	}
-
-	if (exec && !SaveBinary(fnaam, start, length)) {
-		Error("[SAVEBIN] Error writing file (Disk full?)", bp, IF_FIRST);
+	if (savebinArgs[0] < -0x1'0000 || 0xFFFF < savebinArgs[0]) {
+		Error("[SAVEBIN] Start value must be in -0x1'0000..0xFFFF range", bp); return;
+	}
+	if (savebinArgs[1] < -0xFFFF || 0x1'0000 < savebinArgs[1]) {
+		Error("[SAVEBIN] Length value must be in -0xFFFF..0x1'0000 range", bp); return;
+	}
+	if (exec && !SaveBinary(fnaam, savebinArgs[0], savebinArgs[1])) {
+		Error("[SAVEBIN] Error writing file (Disk full or zero length?)", bp, IF_FIRST);
 	}
 }
 

@@ -1093,16 +1093,15 @@ void Close() {
 	CloseBreakpointsFile();
 }
 
+// negative start means from end of RAM, zero or negative length means from end of RAM
 int SaveRAM(FILE* ff, int start, int length) {
-	//unsigned int addadr = 0,save = 0;
 	aint save = 0;
-	if (!DeviceID) return 0;		// unreachable currently
-	if (length + start > 0x10000) {
-		length = -1;
-	}
-	if (length <= 0) {
-		length = 0x10000 - start;
-	}
+	if (!DeviceID || start < -0x1'0000 || 0xFFFF < start) return 0;
+	if (start < 0) start += 0x1'0000;							// count from end of RAM
+	if (length <= 0) length += 0x1'0000 - start;				// count from end of RAM (can NOT be zero)
+	if (length <= 0) return 0;									// start was after the requested end
+	if (0x1'0000 < start + length) length = 0x1'0000 - start;	// clamp length to RAM size
+	assert(0 <= start && start < 0x1'0000 && 0 < length && start + length <= 0x1'0000);
 
 	CDeviceSlot* S;
 	for (int i=0;i<Device->SlotsCount;i++) {
@@ -1239,7 +1238,7 @@ int SaveHobeta(const fs::path & fname, const char* fhobname, aint start, aint le
 	int i;
 
 	if (length + start > 0x10000) {
-		length = -1;
+		length = 0;
 	}
 	if (length <= 0) {
 		length = 0x10000 - start;
