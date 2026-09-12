@@ -1614,6 +1614,12 @@ void OpenSld() {
 	if (nullptr != FP_SourceLevelDebugging) return;
 	// build default filename if not explicitly provided, and default was requested
 	OpenSld_buildDefaultNameIfNeeded();
+	// check if any lines were parsed in pass 2
+	// if none, skip opening SLD file to not clutter output directory in completely invalid runs like missing source files
+	if (CompiledCurrentLine <= 0) {
+		Warning("No SLD file created because no lines assembled", Options::SourceLevelDebugFName.string().c_str());
+		return;
+	}
 	// try to open it if not opened yet
 	OpenSldImp(Options::SourceLevelDebugFName);
 }
