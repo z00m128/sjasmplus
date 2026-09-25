@@ -842,9 +842,9 @@ delim_string_t GetDelimitedStringEx(char*& p) {
 		result.second = DelimiterAnyBegins(p);
 		const char deliE = delimiters_e[result.second];
 		char *p_begin = p;
-		while (*p && deliE != *p) ++p;
+		while (*p && ((DT_NONE != result.second) ? (deliE != *p) : (!White(*p)))) ++p;
 		result.first.append(p_begin, p);	// append found delimited string
-		if (' ' != deliE) {
+		if (DT_NONE != result.second) {
 			if (deliE == *p) {
 				++p;
 			} else {
