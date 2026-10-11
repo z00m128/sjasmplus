@@ -89,7 +89,7 @@ jobs:
       - name: Build
         run: make clean && make -j$(nproc)
       - name: Upload sjasmplus binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7
         with:
           name: sjasmplus-linux-${{ matrix.name }}
           path: sjasmplus
@@ -136,7 +136,7 @@ jobs:
         shell: cmd
         run: ContinuousIntegration\winbuild_mingw.bat
       - name: Upload sjasmplus.exe
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7
         with:
           name: sjasmplus-windows-mingw
           path: sjasmplus.exe
@@ -172,7 +172,7 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       - name: Upload sjasmplus.exe
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7
         with:
           name: sjasmplus-win64-${{ github.sha }}
           path: build/Release/sjasmplus.exe
@@ -222,7 +222,7 @@ jobs:
           # FreeBSD make can't handle the Makefile -> use gmake, as Cirrus did
           gmake clean && gmake -j4 CC=cc CXX=c++
       - name: Upload sjasmplus binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7
         with:
           name: sjasmplus-freebsd
           path: sjasmplus
@@ -256,7 +256,7 @@ jobs:
       - name: Build
         run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++
       - name: Upload sjasmplus binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7
         with:
           name: sjasmplus-${{ matrix.runner }}-arm
           path: sjasmplus
