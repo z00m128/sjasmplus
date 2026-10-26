@@ -11,11 +11,12 @@
 - **Build (Windows):**
   - Use `Makefile.win` or project files (`sjasmplus.cbp`, `sjasmplus.workspace`).
 - **Run tests:**
-  - Unit tests: `make test`, filter set of tests by adding TEST=<subfolder_name> (subfolders in tests/), like `make test TEST=misc`
+  - Full suite: `make test` runs the C++ unit tests, feature-focused assembler tests in `tests/`, and examples.
+  - Focused feature tests: `make test TEST=<folder-prefix>` runs matching tests through `ContinuousIntegration/test_folder_tests.sh` (for example, `make test TEST=misc`). This skips the C++ unit tests and examples.
 - **CI/CD:**
-  - **GitHub Actions** (`.github/workflows/`): Linux GCC builds (9/11/latest), FreeBSD clang, Windows MinGW, Windows CMake MSVC, coverage reporting.
+  - **GitHub Actions** (`.github/workflows/`): Linux GCC toolchain matrix, FreeBSD/macOS Clang, Windows MinGW, Windows CMake/MSVC, and coverage reporting.
   - **GitHub Actions** (`.github/workflows/`): CodeQL security analysis builds, and reproducibility testing (see below).
-  - Cirrus CI: Cirrus was primary CI platform, but it's gone since 2026-06-01, so all CI tasks were migrated to GitHub Actions. Any mentions of Cirrus should thus describe the migration or are most likely obsolete and should be removed/replaced.
+  - Cirrus CI: Cirrus was primary CI platform, but it's gone since 2026-06-01, so Cirrus jobs were migrated to GitHub Actions. Any mentions of Cirrus should describe the migration only.
 - **Binary Reproducibility Testing** (see issue #235):
   - **Workflow**: `.github/workflows/reproducibility.yml` runs weekly (Friday 8 AM UTC) or on manual trigger (`workflow_dispatch`).
   - **Tools**: `reprotest` (Debian Reproducible Builds toolkit) verifies that builds with environmental variations (users, timezones, locales, etc.) produce identical binaries.
@@ -45,11 +46,14 @@ Understanding the pass structure is critical for feature development:
 ## Project-Specific Notes
 - **Multi-platform:**
   - Code and build scripts support Linux, macOS, Windows, and CI (see `ContinuousIntegration/` and `.github/workflows/ci.yml`).
-- **High test coverage, new features are almost always developed by TDD approach.**
-  - most of the features are tested end-to-end via tests in `tests/`, providing both example of usage and ensuring resulting binaries and listing files
+- **Broad feature-regression coverage; new features are almost always developed using TDD.**
+  - The C++ `UnitTest++` suite in `cpp-src-tests/` is small (roughly 1% source coverage) and supplements the assembler-level feature tests; it is not the primary feature test suite.
+  - Tests in `tests/` run the actual assembler end-to-end and compare outputs. In common terminology these are integration tests, but within this project they are the feature/unit tests used to develop and regress individual assembler behaviors.
+  - `make test TEST=<folder-prefix>` is the normal way to run a focused subset of these feature tests during development.
+  - Broader assembly projects live in `tests/integration/` and `examples/`; these exercise complete usage scenarios rather than targeting one implementation feature.
   - `tests/` tests consist of main .asm file, all related files must have identical stem name, providing listing file .lst will allow for assembling errors (as long as listing does match, ie. errors were listed), otherwise test must assemble without errors. If assembling without errors is expected, test should rather produce binary to compare end result.
   - listing files contain source files names as they are opened/closed, their line numbers, memory address and emitted machine code bytes and original source with some substitutions applied. Error and warning messages are also included on separate lines ahead of the line causing them.
-  - to add new test to project just create new .asm file in appropriate subfolder of `tests/`, you can generate listing and binary files by running sjasmplus itself, then patch the result to expected content and keep implementing the feature until test passes. The new test will be automatically picked up by `ContinuousIntegration/test_folder_tests.sh` which is used also by `make test` and GHA CI.
+  - To add a feature test, create a `.asm` file in the appropriate `tests/` subfolder and add its expected listing/binary outputs as needed. Run the matching subset with `make test TEST=<folder-prefix>` while developing; `ContinuousIntegration/test_folder_tests.sh` is also used by the full `make test` target and CI.
 - **Examples as tests:**
   - Many `.asm` files in `examples/` and `tests/` are used for regression and feature testing.
 - **Notable features:**
@@ -85,7 +89,7 @@ Understanding the pass structure is critical for feature development:
 
 ## C++ Code Style
 - this is legacy project, so style may vary between different parts of codebase, but generally:
-  - new code should mostly follow existing style in the file being modified, but also lean toward modern C++20 practice
+  - The project currently targets C++17 in both Make and CMake. Keep new code C++17-compatible by default, but call out significant C++17-vs-C++20 opportunities and weigh their benefits against the lowest supported compiler/toolchain. If a C++20 feature materially improves the code, recommend a deliberate standard bump; if the benefit is too small, keep the C++17-compatible approach (a brief TODO can record a worthwhile deferred idea). Do not silently introduce C++20-only requirements.
   - avoid reformatting of existing code unless it is being modified as part of functional change (no cosmetic-only changes)
   - use tabs (viewed as 4 space wide) for indentation in sjasm/ C++ files, use 2 or 4 spaces in .asm test files (mainly follow other files in the same dir)
   - opening braces on same line

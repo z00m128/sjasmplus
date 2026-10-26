@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build sjasmplus (release)",
+      "type": "shell",
+      "command": "make -j$(nproc)",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "Run sjasmplus tests",
+      "type": "shell",
+      "command": "make -j$(nproc) test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "Build sjasmplus (debug)",
+      "type": "shell",
+      "command": "make -j$(nproc) DEBUG=1 build/debug/sjasmplus",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$gcc"
+    }
+  ]
+}

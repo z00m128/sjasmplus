@@ -7,3 +7,7 @@ sjasmwin32/sjasmplus.res
 /CMakeFiles/sjasmplus.dir/
 /.kdev4
 /.cache
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/tasks.json
+!/.vscode/launch.json
