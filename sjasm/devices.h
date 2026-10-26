@@ -58,7 +58,7 @@ private:
 class CDeviceDef {
 public:
 	constexpr static size_t MAX_SLOT_N = 256;	// minimum possible slot size is 256 bytes
-	constexpr static size_t MAX_PAGE_N = 1024;	// maximum possible total memory is 64MB with 64ki slot size
+	constexpr static size_t MAX_PAGE_N = 4096;	// maximum possible total memory is 256MB with 64ki slot size
 
 	CDeviceDef(const CDeviceDef&) = delete;
 	CDeviceDef(const char* name, aint slot_size, aint page_count);
