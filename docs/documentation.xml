@@ -211,6 +211,8 @@
               <synopsis>
 - stop `BLOCK`/`DS` truncating `$` (aka program counter) to 16 bit address space + new test
 - <link linkend="po_savebin">`SAVEBIN`</link> syntax/arguments tuned (negative values count from top of RAM)
+- Added <link linkend="device_element">`DEVICE ELEMENT`</link> for eLeMeNt ZX / MB03+ URAM: 20MiB, 8kiB pages and slots
+- Raised the device page limit to 4096 and fixed `LABELSLIST` truncating page numbers
 - minor changes in examples, docs and expression parser implementation
 </synopsis>
             </listitem>
@@ -1679,6 +1681,17 @@ StartProg:
           </varlistentry>
 
           <varlistentry>
+            <term>ELEMENT<indexterm id="device_element"><primary>ELEMENT</primary></indexterm></term>
+
+            <listitem>
+              <para>eLeMeNt ZX / MB03+ URAM, has 8 slots (0-7) of size 0x2000 (8kiB) and 2560
+              RAM pages (0-2559), totalling 20MiB of memory. The initial
+              mapping is {0, 1, 2, 3, 4, 5, 6, 7}; the default slot is 7
+              (0xE000..0xFFFF). All memory is initially zeroed.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>NOSLOT64K<indexterm id="device_noslot64k"><primary>NOSLOT64K</primary></indexterm></term>
 
             <listitem>
@@ -2268,7 +2281,7 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
 
           <varlistentry>
             <term>DEFDEVICE<indexterm id="po_defdevice"><primary>DEFDEVICE</primary><seealso>DEVICE</seealso></indexterm>
-              &lt;deviceid&gt;, &lt;slot_size $100..$10000&gt;, &lt;page_count 1..1024&gt;[, &lt;slot_0_initial_page&gt;[, ...]]</term>
+              &lt;deviceid&gt;, &lt;slot_size $100..$10000&gt;, &lt;page_count 1..4096&gt;[, &lt;slot_0_initial_page&gt;[, ...]]</term>
 
             <listitem>
               <para>(since v1.20.1) Add custom device definition. The 64ki Z80 address space is divided evenly by <code>slot_size</code>
@@ -2412,6 +2425,8 @@ counter = counter + 1
  ZXSPECTRUM8192
  ZXSPECTRUMNEXT ; ZX Spectrum Next (8 slots, 224 pages, slot size 0x2000 = 1.75MiB RAM)
                 ; (default pages map: 14, 15, 10, 11, 4, 5, 0, 1) (default slot: 7 (0xE000..0xFFFF))
+ ELEMENT        ; eLeMeNt ZX / MB03+ URAM (8 slots, 2560 pages, slot size 0x2000 = 20MiB RAM)
+                ; (default pages map: 0, 1, 2, 3, 4, 5, 6, 7) (default slot: 7 (0xE000..0xFFFF))
  NOSLOT64K      ; Single slot (slot 0) covering full 64kiB address range of Z80, 32 pages
  AMSTRADCPC464  ; Amstrad CPC 464 (4 slots, 4 pages, slot/page size 0x4000, default map: 0, 1, 2, 3)
  AMSTRADCPC6128 ; Amstrad CPC 6128 (like 464 with 8 pages)
