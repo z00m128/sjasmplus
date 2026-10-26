@@ -543,7 +543,7 @@ void CLabelTable::DumpForUnreal() {
 		int lvalue = symbol.value & ADR_MASK;
 		ep = ln;
 
-		if (page < LABEL_PAGE_ROM) ep += SPRINTF1(ep, LINEMAX, "%02d", page&255);
+		if (page < LABEL_PAGE_ROM) ep += SPRINTF1(ep, LINEMAX, "%02d", page);
 		*(ep++) = ':';
 		PrintHexAlt(ep, lvalue);
 
