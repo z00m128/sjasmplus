@@ -211,6 +211,7 @@
               <synopsis>
 - stop `BLOCK`/`DS` truncating `$` (aka program counter) to 16 bit address space + new test
 - <link linkend="po_savebin">`SAVEBIN`</link> syntax/arguments tuned (negative values count from top of RAM)
+- <link linkend="po_savehob">`SAVEHOB`</link> syntax/arguments tuned
 - Added <link linkend="device_element">`DEVICE ELEMENT`</link> for eLeMeNt ZX / MB03+ URAM: 20MiB, 8kiB pages and slots
 - Raised the device page limit to 4096 and fixed `LABELSLIST` truncating page numbers
 - minor changes in examples, docs and expression parser implementation
@@ -3543,20 +3544,24 @@ START  .... ;some code
 
           <varlistentry>
             <term>SAVEHOB<indexterm id="po_savehob"><primary>SAVEHOB</primary></indexterm>
-            &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startadress&gt;,&lt;lengthofcode&gt;</term>
+            &lt;filename&gt;,&lt;filename_in_trdos&gt;,&lt;startaddress&gt;[,&lt;length&gt;]</term>
 
             <listitem>
               <para><emphasis>Works only in real device emulation mode. See
               <link linkend="po_device">DEVICE</link>.</emphasis></para>
 
-              <para>Save the block of RAM in Hobeta format.</para>
+              <para>Save the block of RAM in Hobeta format. The startaddress must be
+                in range 0x4000..0xFFFF. The length is optional and defaults to 0.
+                A zero or negative length specifies where saving stops, relative to
+                the end of RAM (0x10000). Zero saves through the end of RAM; -256
+                stops 256 bytes before the end.</para>
 
               <para><example>
                   <title></title>
 
                   <para><programlisting>    PAGE 7 ;set 7 page to current slot
-    SAVEHOB "ram7.$c","myfile1.C",$C000,$4000 ;- save 4000h begin from C000h of RAM to file
-    SAVEHOB "ram2.$c","myfile2.C",$8000,$3000 ;- save 3000h begin from 8000h of RAM to file</programlisting></para>
+    SAVEHOB "ram2.$c","myfile1.C",$8000,$3000 ; save 3000h bytes from 8000h of RAM to file
+    SAVEHOB "ram7.$c","myfile2.C",$C000       ; save from C000h to end of RAM</programlisting></para>
                 </example></para>
             </listitem>
           </varlistentry>

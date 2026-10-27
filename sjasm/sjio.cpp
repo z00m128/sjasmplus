@@ -1237,11 +1237,13 @@ int SaveHobeta(const fs::path & fname, const char* fhobname, aint start, aint le
 	unsigned char header[0x11];
 	int i;
 
-	if (length + start > 0x10000) {
-		length = 0;
+	if (0x10000 < start + length) length = 0;
+	if (length <= 0) {		// non-positive length works as offset from "end of RAM"
+		length = (0x10000 + length) - start;
 	}
 	if (length <= 0) {
-		length = 0x10000 - start;
+		ErrorInt("invalid length", length);
+		return 0;
 	}
 
 	memset(header,' ',9);

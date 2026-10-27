@@ -36,9 +36,22 @@ end
 ; TODO add some check to validate resulting files
 
     ; some more syntax error tests for better code coverage
+        SAVEHOB
+        SAVEHOB ,"labels.txt",1,2
+        SAVEHOB "trd/","labels.txt",1,2
         SAVEHOB "trd.$t"
         SAVEHOB "trd.$t",
         SAVEHOB "trd.$t",,
+        SAVEHOB "trd.$t","labels.txt"
+        SAVEHOB "trd.$t","labels.txt",
+        SAVEHOB "trd.$t","labels.txt",,3
+        SAVEHOB "trd.$t","labels.txt",label1,
+        SAVEHOB "trd.$t","labels.txt",label1,,3
+        SAVEHOB "trd.$t","labels.txt",label1,2,
+        SAVEHOB "trd.$t","labels.txt",label1,2,3
+        SAVEHOB "trd.$t","labels.txt",$3FFF,2
+        SAVEHOB "trd.$t","labels.txt",$10000,2
+        SAVEHOB "trd.$t","labels.txt",$FFFF,-2
         DEVICE NONE
         SAVEHOB "trd.$t","labels.txt",label1,end-label1
         EMPTYTRD

@@ -1,0 +1,6 @@
+$MEMCHECK "$EXE" --nologo --msg=none --fullpath "${options[@]}" "$file_asm" && \
+[[ $(wc -c < savehob.explicit.hob) -eq 273 ]] && \
+$CMP savehob.explicit.hob savehob.default.hob && \
+$CMP savehob.explicit.hob savehob.zero.hob && \
+$CMP savehob.explicit.hob savehob.forward.hob
+last_result=$?

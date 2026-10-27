@@ -48,20 +48,46 @@ trd.asm(27): warning[trddup]: TRD file already exists, creating one more!: trd.t
 36    8205              ; TODO add some check to validate resulting files
 37    8205
 38    8205                  ; some more syntax error tests for better code coverage
-trd.asm(39): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t"
-39    8205                      SAVEHOB "trd.$t"
-trd.asm(40): error: [SAVEHOB] Syntax error: SAVEHOB "trd.$t",
-40    8205                      SAVEHOB "trd.$t",
-trd.asm(41): error: [SAVEHOB] Syntax error. No parameters: SAVEHOB "trd.$t",,
-41    8205                      SAVEHOB "trd.$t",,
-42    8205                      DEVICE NONE
-trd.asm(43): error: SAVEHOB only allowed in real device emulation mode (See DEVICE)
-43    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
-trd.asm(44): error: [EMPTYTRD] Syntax error: EMPTYTRD
-44    8205                      EMPTYTRD
-trd.asm(45): error: SAVETRD only allowed in real device emulation mode (See DEVICE)
-45    8205                      SAVETRD "trd.trd","label1.txt",label1,5
-46    8205
+trd.asm(39): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB
+39    8205                      SAVEHOB
+trd.asm(40): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB ,"labels.txt",1,2
+40    8205                      SAVEHOB ,"labels.txt",1,2
+trd.asm(41): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd/","labels.txt",1,2
+41    8205                      SAVEHOB "trd/","labels.txt",1,2
+trd.asm(42): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t"
+42    8205                      SAVEHOB "trd.$t"
+trd.asm(43): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t",
+43    8205                      SAVEHOB "trd.$t",
+trd.asm(44): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t",,
+44    8205                      SAVEHOB "trd.$t",,
+trd.asm(45): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t","labels.txt"
+45    8205                      SAVEHOB "trd.$t","labels.txt"
+trd.asm(46): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t","labels.txt",
+46    8205                      SAVEHOB "trd.$t","labels.txt",
+trd.asm(47): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t","labels.txt",,3
+47    8205                      SAVEHOB "trd.$t","labels.txt",,3
+trd.asm(48): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t","labels.txt",label1,
+48    8205                      SAVEHOB "trd.$t","labels.txt",label1,
+trd.asm(49): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t","labels.txt",label1,,3
+49    8205                      SAVEHOB "trd.$t","labels.txt",label1,,3
+trd.asm(50): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t","labels.txt",label1,2,
+50    8205                      SAVEHOB "trd.$t","labels.txt",label1,2,
+trd.asm(51): error: [SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]: SAVEHOB "trd.$t","labels.txt",label1,2,3
+51    8205                      SAVEHOB "trd.$t","labels.txt",label1,2,3
+trd.asm(52): error: [SAVEHOB] startadress must be 16384..65535: 16383
+52    8205                      SAVEHOB "trd.$t","labels.txt",$3FFF,2
+trd.asm(53): error: [SAVEHOB] startadress must be 16384..65535: 65536
+53    8205                      SAVEHOB "trd.$t","labels.txt",$10000,2
+trd.asm(54): error: invalid length: -1
+54    8205                      SAVEHOB "trd.$t","labels.txt",$FFFF,-2
+55    8205                      DEVICE NONE
+trd.asm(56): error: [SAVEHOB] only allowed in real device emulation mode (See DEVICE)
+56    8205                      SAVEHOB "trd.$t","labels.txt",label1,end-label1
+trd.asm(57): error: [EMPTYTRD] Syntax error: EMPTYTRD
+57    8205                      EMPTYTRD
+trd.asm(58): error: SAVETRD only allowed in real device emulation mode (See DEVICE)
+58    8205                      SAVETRD "trd.trd","label1.txt",label1,5
+59    8205
 # file closed: trd.asm
 
 Value    Label

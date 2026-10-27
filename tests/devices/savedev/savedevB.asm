@@ -15,7 +15,7 @@
     DEVICE NONE
     SAVEDEV "savedevB.bin",0,0,1
     DEVICE ZXSPECTRUM128
-    ; test error messages of SAVEDEV - missing arguments
+    ; test error messages of SAVEDEV - missing/extra arguments
     SAVEDEV
     SAVEDEV "savedevB.bin"
     SAVEDEV "savedevB.bin",
@@ -23,6 +23,8 @@
     SAVEDEV "savedevB.bin",0,
     SAVEDEV "savedevB.bin",0,0
     SAVEDEV "savedevB.bin",0,0,
+    SAVEDEV "savedevB.bin",0,0,1,
+    SAVEDEV "savedevB.bin",0,,1
 
     ; test error messages of SAVEDEV - wrong arguments
     SAVEDEV "savedevB.bin",-1,0,1      ; wrong page

@@ -957,11 +957,10 @@ static void dirSAVEDEV() {
 
 	aint args[3]{-1, -1, -1};		// page, offset, length
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
-	for (auto & arg : args) {
-		if (!comma(lp) || !ParseExpression(lp, arg)) {
-			exec = false;
-			Error("Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>", bp, SUPPRESS);
-		}
+	const bool optional[] = {false, false, false};
+	if (!comma(lp) || !getIntArguments<3>(lp, args, optional)) {
+		exec = false;
+		Error("Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>", bp, SUPPRESS);
 	}
 	if (exec) {
 		// validate arguments
@@ -1079,56 +1078,23 @@ static void dirSAVEHEX() {
 
 static void dirSAVEHOB() {
 	if (!DeviceID || pass != LASTPASS) {
-		if (!DeviceID) Error("SAVEHOB only allowed in real device emulation mode (See DEVICE)");
+		if (!DeviceID) Error("[SAVEHOB] only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
 		return;
 	}
-	aint val;
-	int start = -1,length = -1;
-	bool exec = true;
-
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
 	std::string fnaamh {""};
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			fnaamh = GetDelimitedString(lp);
-			if (fnaamh.empty()) {
-				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
-			}
-		} else {
-		  	Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
-		}
-	} else {
-		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return; //is this ok?
+	if (comma(lp)) fnaamh = GetDelimitedString(lp);
+	aint args[] = {0, 0};
+	const bool optional[] = {false, true};
+	if (!fnaam.has_filename() || fnaamh.empty() || !comma(lp) || !getIntArguments<2>(lp, args, optional) || !SkipBlanks(lp)) {
+		Error("[SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]", bp, SUPPRESS); return;
 	}
-
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
-			}
-			if (val < 0x4000) {
-				Error("[SAVEHOB] Values less than 4000h are not allowed", bp, PASS3); return;
-			} else if (val > 0xFFFF) {
-			  	Error("[SAVEHOB] Values more than FFFFh are not allowed", bp, PASS3); return;
-			}
-			start = val;
-		} else {
-		  	Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
-		}
-		if (anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
-			}
-			if (val < 0) {
-				Error("[SAVEHOB] Negative values are not allowed", bp, PASS3); return;
-			}
-			length = val;
-		}
-	} else {
-		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
+	const aint start = args[0], length = args[1];
+	if (start < 0x4000 || 0xFFFF < start) {
+		ErrorInt("[SAVEHOB] startadress must be 16384..65535", start, PASS3); return;
 	}
-	if (exec && !SaveHobeta(fnaam, fnaamh.c_str(), start, length)) {
+	if (!SaveHobeta(fnaam, fnaamh.c_str(), start, length)) {
 		Error("[SAVEHOB] Error writing file (Disk full?)", bp, IF_FIRST); return;
 	}
 }
