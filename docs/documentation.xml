@@ -1096,7 +1096,7 @@ $c     hexadecimal
 \N 10
 \R 13
 \T 9
-\V 11</programlisting><para>Inside single quotes two quotes after each other are
+\V 11</programlisting></para><para>Inside single quotes two quotes after each other are
     parsed as the apostrophe itself.</para>
   <para>Adding Z or C after quotes/apostrophes will make string zero-terminated or set top bit of last character (since v1.20.3).</para>
   <para>String literals can be concatenated using the ".." operator (similar to Lua syntax). Both operands must be string literals (since v1.22.0).</para>
@@ -1116,7 +1116,7 @@ $c     hexadecimal
     BYTE "AB"Z, "CD"C, 'E'Z, 'F'C ; hex: 41 42 00 43 C4 45 00 C6
     DEFINE BIN_EXT ".bin"
     INCBIN "path" .. '/' .. "name" .. BIN_EXT  ; includes "path/name.bin" file</programlisting></para>
-        </example></para>
+      </example>
     </section>
 
     <section id="s_expressions">
@@ -2314,9 +2314,6 @@ CNT DEFL CNT+1 ;or CNT=CNT+1
 
           <varlistentry>
             <term>DEFINE+<indexterm id="po_define"><primary>DEFINE+</primary></indexterm> &lt;id&gt; &lt;replacement&gt;</term>
-          </varlistentry>
-
-          <varlistentry>
             <term>DEFINE<indexterm id="po_define2"><primary>DEFINE</primary></indexterm> &lt;id&gt; &lt;replacement&gt;</term>
 
             <listitem>
@@ -2390,7 +2387,8 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term>DEPHASE<indexterm id="po_dephase"><primary>DEPHASE</primary><see>ENT</see><seealso>DISP</seealso></indexterm></term>
+            <term>DEPHASE<indexterm><primary>DEPHASE</primary><see>ENT</see></indexterm>
+                         <indexterm id="po_dephase"><primary>DEPHASE</primary><seealso>DISP</seealso></indexterm></term>
 
             <listitem>
               <para>Synonym of <link linkend="po_ent">ENT</link>.</para>
@@ -3100,8 +3098,8 @@ Kup:    ; this is "zzz.Kup", but also defines "non-local" prefix as "Kup"
           </varlistentry>
 
           <varlistentry>
-            <term><para>OPT<indexterm id="po_opt"><primary>OPT</primary></indexterm> [push] [reset] [listoff] [liston] [listall] [listact] [listmc] [&lt;command line options&gt;]</para>
-			<para>OPT pop</para></term>
+            <term>OPT<indexterm id="po_opt"><primary>OPT</primary></indexterm> [push] [reset] [listoff] [liston] [listall] [listact] [listmc] [&lt;command line options&gt;]</term>
+            <term>OPT pop</term>
 
             <listitem>
               <para>Allows to reset and modify <link linkend="s_cli">options</link> affecting syntax and
@@ -3412,12 +3410,12 @@ OUTPUT &lt;filename&gt;,a  ; append</synopsis>
           </varlistentry>
 
           <varlistentry>
-            <term><para>SAVECDT<indexterm id="po_savecdt"><primary>SAVECDT</primary></indexterm>
-                FULL &lt;cdtname&gt;[,&lt;startaddr&gt;[,&lt;screenmode&gt;[,&lt;border&gt;[,&lt;ink0&gt;...&lt;ink15&gt;]]]]</para>
-            <para>SAVECDT EMPTY &lt;cdtname&gt;</para>
-            <para>SAVECDT BASIC &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;</para>
-            <para>SAVECDT CODE &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;]</para>
-            <para>SAVECDT HEADLESS &lt;cdtname&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;sync&gt;[,&lt;format&gt;]]</para></term>
+            <term>SAVECDT<indexterm id="po_savecdt"><primary>SAVECDT</primary></indexterm>
+              FULL &lt;cdtname&gt;[,&lt;startaddr&gt;[,&lt;screenmode&gt;[,&lt;border&gt;[,&lt;ink0&gt;...&lt;ink15&gt;]]]]</term>
+            <term>SAVECDT EMPTY &lt;cdtname&gt;</term>
+            <term>SAVECDT BASIC &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;</term>
+            <term>SAVECDT CODE &lt;cdtname&gt;,&lt;name&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;]</term>
+            <term>SAVECDT HEADLESS &lt;cdtname&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;sync&gt;[,&lt;format&gt;]]</term>
 
             <listitem>
               <para><emphasis>Works only in AMSTRADCPC464 / AMSTRADCPC6128 real device emulation mode. See
@@ -3605,11 +3603,11 @@ START  .... ;something code
           </varlistentry>
 
           <varlistentry>
-            <term><para>SAVETAP<indexterm id="po_savetap"><primary>SAVETAP</primary></indexterm> &lt;filename&gt;,BASIC,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;autorunline&gt;[,&lt;lengthwithoutvars&gt;]]</para>
-            <para>SAVETAP &lt;filename&gt;,CODE,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;[,&lt;optional3rdparam&gt;]]</para>
-            <para>SAVETAP &lt;filename&gt;,NUMBERS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</para>
-            <para>SAVETAP &lt;filename&gt;,CHARS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</para>
-            <para>SAVETAP &lt;filename&gt;,HEADLESS,&lt;start&gt;,&lt;length&gt;[,&lt;customblockflag(0..255)&gt;]</para></term>
+            <term>SAVETAP<indexterm id="po_savetap"><primary>SAVETAP</primary></indexterm> &lt;filename&gt;,BASIC,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;autorunline&gt;[,&lt;lengthwithoutvars&gt;]]</term>
+            <term>SAVETAP &lt;filename&gt;,CODE,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;customstartaddress&gt;[,&lt;optional3rdparam&gt;]]</term>
+            <term>SAVETAP &lt;filename&gt;,NUMBERS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</term>
+            <term>SAVETAP &lt;filename&gt;,CHARS,&lt;fileintapeheader&gt;,&lt;start&gt;,&lt;length&gt;[,&lt;variableletter(A..Z)&gt;]</term>
+            <term>SAVETAP &lt;filename&gt;,HEADLESS,&lt;start&gt;,&lt;length&gt;[,&lt;customblockflag(0..255)&gt;]</term>
 
             <listitem>
               <para><emphasis>Works only in real device emulation mode. See
@@ -3672,11 +3670,7 @@ START  ....     ; some code
 
           <varlistentry>
             <term>SAVETRD<indexterm id="po_savetrd"><primary>SAVETRD</primary></indexterm> &lt;filename_of_trd_image&gt;,&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;[,&lt;length_minus_variables&gt;]]</term>
-          </varlistentry>
-          <varlistentry>
             <term>SAVETRD &lt;filename_of_trd_image&gt;,|&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;[,&lt;autostart_BASIC_line&gt;]</term>
-          </varlistentry>
-          <varlistentry>
             <term>SAVETRD &lt;filename_of_trd_image&gt;,&amp;&lt;filename_in_trdos&gt;,&lt;address&gt;,&lt;length&gt;</term>
 
             <listitem>
@@ -3721,11 +3715,7 @@ START  ....     ; some code
 
           <varlistentry>
             <term>SETBP<indexterm id="po_setbp"><primary>SETBP</primary><seealso>BPLIST</seealso></indexterm> [&lt;expression&gt; | "&lt;condition&gt;"]</term>
-          </varlistentry>
-          <varlistentry>
             <term>SETBP &lt;expression&gt;, "&lt;condition&gt;"</term>
-          </varlistentry>
-          <varlistentry>
             <term>SETBREAKPOINT<indexterm id="po_setbreakpoint"><primary>SETBREAKPOINT</primary><see>SETBP</see></indexterm> ...</term>
 
             <listitem>
@@ -3806,9 +3796,6 @@ start:
 var1    DB 1      ; WPMEM - exported
 var2    DB 2      ; WpMem - not exported, case sensitive!</programlisting></para>
                 </example></para>
-            </listitem>
-
-            <listitem>
               <para>Type `<code>SWAPON</code>` and `<code>SWAPOFF</code>` - swaps source and definition positions in
                 <link linkend="c_sld_data">Source Level Debugging (SLD) data</link>.
                 This may help to debug content of macros in debuggers which work only with source file positions.</para>
@@ -3984,8 +3971,9 @@ ptr = ptr + 1
         </variablelist></para>
     </section>
 
-    <section id="s_conditional_assembly"><indexterm id="s_conditional_assembly2"><primary>Conditional assembly</primary></indexterm>
+    <section id="s_conditional_assembly">
       <title>Conditional assembly</title>
+      <indexterm id="s_conditional_assembly2"><primary>Conditional assembly</primary></indexterm>
 
       <para>It may be useful to assemble a part (or not) based on a certain
       condition.</para>
@@ -4640,7 +4628,7 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
     <section id="s_lua_oh_why">
       <title>Why?</title>
 
-      <para><graphic align="top" fileref="lua.gif" />Why is scripting engine
+      <para><graphic valign="top" fileref="lua.gif" />Why is scripting engine
         as <ulink url="https://www.lua.org/">Lua</ulink> embedded to the assembler? Answer is simple: it can be used to add extra
       features by users. And Lua is small enough, fast and powerful scripting engine.</para>
 
@@ -5274,12 +5262,10 @@ $ cmake --install build</programlisting></para>
 		  </varlistentry>
 		  
 		  <varlistentry>
-			  <term id="nex_palette">
-				  <para>SAVENEX PALETTE NONE</para>
-				  <para>SAVENEX PALETTE DEFAULT</para>
-				  <para>SAVENEX PALETTE MEM &lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;</para>
-				  <para>SAVENEX PALETTE BMP &lt;filename&gt;</para>
-			  </term>
+			  <term id="nex_palette">SAVENEX PALETTE NONE</term>
+        <term>SAVENEX PALETTE DEFAULT</term>
+        <term>SAVENEX PALETTE MEM &lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;</term>
+        <term>SAVENEX PALETTE BMP &lt;filename&gt;</term>
 			  <listitem>
 				  <para>
 					  This is optional command to set palette in alternative way ahead of SCREEN
@@ -5334,10 +5320,8 @@ $ cmake --install build</programlisting></para>
 		  </varlistentry>
 		  
 		  <varlistentry>
-			  <term>
-				  <para>SAVENEX SCREEN L2_320 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]</para>
-				  <para>SAVENEX SCREEN L2_640 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]</para>
-			  </term>
+        <term>SAVENEX SCREEN L2_320 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]</term>
+        <term>SAVENEX SCREEN L2_640 [&lt;Page8kNum 0..223&gt;,&lt;offset&gt;[,&lt;palPage8kNum 0..223&gt;,&lt;palOffset&gt;]]</term>
 			  <listitem>
 				  <para>
 					  Works same way as "L2" variant, but will set up screen for new resolutions 320x256x8
