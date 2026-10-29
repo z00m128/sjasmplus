@@ -55,6 +55,8 @@
 #include <array>
 #include <stack>
 #include <vector>
+#include <string>
+#include <string_view>
 #include <map>
 #include <filesystem>
 #include <iostream>
