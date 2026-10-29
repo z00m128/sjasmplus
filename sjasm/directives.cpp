@@ -1104,7 +1104,7 @@ static void dirEMPTYTRD() {
 		SkipToEol(lp);
 		return;
 	}
-	char diskLabel[9] = "        ";
+	std::string diskLabel;
 
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
 	if (!fnaam.has_filename()) {
@@ -1112,14 +1112,12 @@ static void dirEMPTYTRD() {
 		return;
 	}
 	if (anyComma(lp)) {
-		const std::string srcLabel = GetDelimitedString(lp);
-		if (srcLabel.empty()) {
+		diskLabel = GetDelimitedString(lp);
+		if (diskLabel.empty()) {
 			Error("[EMPTYTRD] Syntax error, empty label", bp, IF_FIRST);
-		} else {
-			memcpy(diskLabel, srcLabel.data(), std::min(static_cast<std::string::size_type>(8), srcLabel.size()));
-			if (8 < srcLabel.size()) {
-				Warning("[EMPTYTRD] label will be truncated to 8 characters", diskLabel);
-			}
+		} else if (TRD_LABEL_SZ < diskLabel.size()) {
+			const std::string message = "[EMPTYTRD] label will be truncated to " + std::to_string(TRD_LABEL_SZ) + " characters";
+			Warning(message.c_str(), diskLabel.substr(0, TRD_LABEL_SZ).c_str());
 		}
 	}
 	TRD_SaveEmpty(fnaam, diskLabel);

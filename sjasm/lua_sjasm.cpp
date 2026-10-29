@@ -367,12 +367,8 @@ static const char* lua_sj_get_modules(void) {
 }
 
 static bool lua_zx_trdimage_create(const char* trdname, const char* label = nullptr) {
-	// setup label to truncated 8 char array padded with spaces
-	char l8[9] = "        ";
-	char* l8_ptr = l8;
-	while (label && *label && (l8_ptr - l8) < 8) *l8_ptr++ = *label++;
 	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
-	bool result = TRD_SaveEmpty(trdname ? trdname : "", l8);
+	bool result = TRD_SaveEmpty(trdname ? trdname : "", label ? label : "");
 	removeLuaSourcePositions(positionsAdded);
 	return result;
 }
