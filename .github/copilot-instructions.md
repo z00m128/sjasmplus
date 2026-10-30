@@ -8,6 +8,10 @@
 ## Build & Test Workflows
 - **Build (Linux/macOS):**
   - Use `make -j8` from the project root.
+- **After header edits (required for Makefile builds):**
+  - Header dependency tracking is incomplete, especially for the `+ut` objects used by `make test`. Run `make clean` before building or testing after changing headers; a passing test run with reused objects does not validate the header changes.
+  - Clean and rebuild with matching configuration options: for example, `make clean && make -j8 test TEST=misc`, or `make DEBUG=1 clean && make -j8 DEBUG=1 test TEST=misc` for debug. Clean each configuration that will be reused.
+  - Run clean and build/test as separate sequential commands, not as parallel goals such as `make -j8 clean test`. This workaround is for the handwritten Makefile, not CMake builds.
 - **Build (Windows):**
   - Use `Makefile.win` or project files (`sjasmplus.cbp`, `sjasmplus.workspace`).
 - **Run tests:**
