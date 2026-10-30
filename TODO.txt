@@ -72,11 +72,43 @@ Output files, devices and loaders
     modified-region tracking or program-counter bounds, NOT scanning for nonzero
     bytes. Zero bytes can be intentional output. Output semantics remain undecided.
 
-[Idea] APPENDBIN and large binary files
-    Append an arbitrary-size binary to another file, e.g. data following a large
-    dot command. Include GiB-scale support in the design. The original constraint
-    noted for INCBIN was its int32 length limit (about 2 GiB) and loading the entire
-    input into heap memory; verify those constraints before reusing its machinery.
+[Research] APPENDBIN and large binary files
+    Proposed syntax: APPENDBIN <existing-target>, <source1>[, <source2>, ...].
+    Low-level file append, pass 3 only; no changes to $, device memory, emitted
+    bytes in listings or regular assembly output. No implicit OUTPUT target.
+    Target uses output filename rules; sources use normal include-path rules.
+    Stream whole files through a bounded buffer (e.g. 16 KiB), supporting GiB
+    sizes without file-length queries or cumulative 32-bit counters. INCBIN
+    currently uses int32 lengths and allocates the selected data in full.
+    Reject missing/non-regular targets, self-append (including aliases), and
+    targets already open for writing; investigate the separate tracker first.
+    Shared helper may accept a write handle and parse the source list from lp,
+    leaving destination positioning, closing and finalization to callers.
+    Reuse for SAVENEX CLOSE; check read errors as well as EOF (its current loop
+    can hang on read error), writes and final close. Stop on failure; partial
+    append remains, no rollback/truncation or new cleanonerror registration.
+    Appending to a closed NEX V1.3 invalidates its CRC. A future SAVENEX APPEND
+    would need a separate tail-data state blocking other content commands until
+    CLOSE finalizes the header/CRC; not part of APPENDBIN itself.
+    Keep CI small: ordered inputs, empty input, repeated calls, buffer boundary
+    and essential rejection cases; no GiB fixtures. Existing SAVENEX tests cover
+    multiple small inputs and a 48+ KiB append crossing its buffer boundary.
+
+[Research] Track active writable file handles and guard conflicting writes
+    Investigate separately before APPENDBIN. Allow multiple readers and normal
+    sequential reuse, e.g. SAVESNA then OUTPUT to patch the closed snapshot.
+    Guard simultaneous writers to the same file, not later intentional writes;
+    assess read/write conflicts separately, without blanket read restrictions.
+    Existing DeleteOnErrorFiles stores canonicalized cleanup paths, not active
+    handles: entries survive close, omit some writers and do not identify hard
+    links. Do not repurpose it as an open-file registry.
+    Consider handle-to-absolute-path tracking, registered on successful open and
+    removed on close, across persistent output owners. Audit coverage/lifecycle
+    and implementation cost before choosing the API or enabling a global guard.
+    C++17 filesystem::equivalent with error_code can detect symlink/hard-link
+    aliases for stable existing paths; refuse unsafe operations if checks fail.
+    A second fopen is not a portable conflict check. External rename/replacement
+    races and native handle-identity APIs are outside the initial scope.
 
 [Idea] Reserve a block without changing existing device memory
     Provide a standalone block/reserve operation which advances the address while
