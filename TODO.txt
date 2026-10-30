@@ -63,13 +63,6 @@ Parser, syntax and safety
 Output files, devices and loaders
 =================================
 
-[Task] Offer UTC timestamps for predefined date/time symbols
-    Requested CLI option: --utc, primarily so __DATE__ uses UTC for release dates.
-    sjasm/sjasm.cpp initializes __DATE__ and __TIME__ together using
-    std::chrono::system_clock and std::localtime. Consider std::gmtime for UTC.
-    Decide and document whether the option affects both symbols; test the default
-    local-time behavior as well. There is no need to change the hardware clock.
-
 [Idea] Fill gaps in raw output, or provide device-backed output
     Request from @Janko on Next Discord: --raw-fill-gaps should emit filler between
     ORG $2000 and a later ORG $2100 when using --raw (for example, building test.dot).

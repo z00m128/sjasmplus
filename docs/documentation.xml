@@ -215,6 +215,7 @@
 - <link linkend="po_savehob">`SAVEHOB`</link> syntax/arguments tuned
 - Added <link linkend="device_element">`DEVICE ELEMENT`</link> for eLeMeNt ZX / MB03+ URAM: 20MiB, 8kiB pages and slots
 - Raised the device page limit to 4096 and fixed `LABELSLIST` truncating page numbers
+- Added `--utc` to use UTC for both `__DATE__` and `__TIME__` (default is local time)
 - minor changes in examples, docs and expression parser implementation
 </synopsis>
             </listitem>
@@ -515,6 +516,7 @@
   -W[no-]&lt;warning_id&gt;      Enable/disable warning(s), see "--help=warnings"
   -                        Reads STDIN as source (even in between regular files)
   --longptr                No device: program counter $ can go beyond 0x10000
+  --utc                    Use UTC for __DATE__ and __TIME__ (default: local)
   --reversepop             Enable reverse POP order (as in base SjASM version)
   --dirbol                 Enable directives processing from the beginning of line
   --nofakes                Disable fake instructions (same as --syntax=F)
@@ -1783,7 +1785,7 @@ StartProg:
             <term>__DATE__<indexterm id="def__date__"><primary>__DATE__</primary></indexterm> = "YYYY-MM-DD"</term>
 
             <listitem>
-              <para>Date of assembling (timestamp before first pass).</para>
+              <para>Date of assembling (timestamp before first pass), in local time by default or UTC with <code>--utc</code>.</para>
             </listitem>
           </varlistentry>
 
@@ -1791,7 +1793,8 @@ StartProg:
             <term>__TIME__<indexterm id="def__time__"><primary>__TIME__</primary></indexterm> = "hh:mm:ss"</term>
 
             <listitem>
-              <para>Time of assembling (timestamp before first pass, 24h form).</para>
+              <para>Time of assembling (timestamp before first pass, 24h form), in local time
+              by default or UTC with <code>--utc</code>. Uses the same timestamp as <code>__DATE__</code>.</para>
             </listitem>
           </varlistentry>
 

@@ -71,6 +71,7 @@ static void PrintHelpMain() {
 	_COUT "  -W[no-][all|<id>]        Enable/disable warning(s), see \"--help=warnings\"" _ENDL;
 	_COUT "  -                        Reads STDIN as source (even in between other files)" _ENDL;
 	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
+	_COUT "  --utc                    Use UTC for __DATE__ and __TIME__ (default: local)" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
@@ -151,6 +152,7 @@ namespace Options {
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
 	bool IsLongPtr = false;
+	bool UseUTC = false;
 	bool SortSymbols = false;
 	bool IsBigEndian = false;
 	bool DeleteOnError = false;
@@ -533,6 +535,8 @@ namespace Options {
 					if (val[0]) SortSymbols = !strcmp("sort", val);
 				} else if (!strcmp(opt, "longptr")) {
 					IsLongPtr = true;
+				} else if (!strcmp(opt, "utc")) {
+					UseUTC = true;
 				} else if (!strcmp(opt, "msg")) {
 					if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;
@@ -732,16 +736,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	// setup __DATE__ and __TIME__ macros (setup them just once, not every pass!)
-	auto now = std::chrono::system_clock::now();
-	std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-	std::tm now_tm = *std::localtime(&now_c);
-	char dateBuffer[32] = {}, timeBuffer[32] = {};
-	SPRINTF3(dateBuffer, 30, "\"%04d-%02d-%02d\"", now_tm.tm_year + 1900, now_tm.tm_mon + 1, now_tm.tm_mday);
-	SPRINTF3(timeBuffer, 30, "\"%02d:%02d:%02d\"", now_tm.tm_hour, now_tm.tm_min, now_tm.tm_sec);
-	Options::CmdDefineTable.Add("__DATE__", dateBuffer, nullptr);
-	Options::CmdDefineTable.Add("__TIME__", timeBuffer, nullptr);
-
 	int i = 1;
 	if (argc > 1) {
 		while (argv[i]) {
@@ -750,6 +744,16 @@ int main(int argc, char **argv) {
 			sourceFiles.push_back(SSource(argv[i++]));
 		}
 	}
+	// setup __DATE__ and __TIME__ macros (setup them just once, not every pass!)
+	auto now = std::chrono::system_clock::now();
+	std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+	std::tm now_tm = *(Options::UseUTC ? std::gmtime(&now_c) : std::localtime(&now_c));
+	char dateBuffer[32] = {}, timeBuffer[32] = {};
+	SPRINTF3(dateBuffer, 30, "\"%04d-%02d-%02d\"", now_tm.tm_year + 1900, now_tm.tm_mon + 1, now_tm.tm_mday);
+	SPRINTF3(timeBuffer, 30, "\"%02d:%02d:%02d\"", now_tm.tm_hour, now_tm.tm_min, now_tm.tm_sec);
+	Options::CmdDefineTable.Add("__DATE__", dateBuffer, nullptr);
+	Options::CmdDefineTable.Add("__TIME__", timeBuffer, nullptr);
+
 	// warn about BE-host only when there's any CLI argument && after CLI options were parsed
 	if (2 <= argc && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
 	if (Options::IsDefaultListingName && Options::ListingFName.has_filename()) {
