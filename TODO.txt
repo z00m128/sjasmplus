@@ -1,231 +1,352 @@
-scratch area + TODO keeper for sjasmplus developers:
-====================================================
+sjasmplus developer TODO and design notes
+=========================================
+
+This is a working notebook, not a release plan or a specification. Items are
+grouped by subject, not ordered by priority. Check current code, tests and docs
+before implementing an old note; uncertain behavior below is not a confirmed bug.
+docs/documentation.xml is the source of truth for documented assembler syntax.
+
+Item status:
+    [Task]       A concrete change or test to investigate and implement.
+    [Research]   Confirm the problem and scope before choosing a change.
+    [Idea]       An undecided proposal, possibly incompatible with existing sources.
+    [Historical] Implemented work or old design context, retained for reference.
+    [Checklist]  Recurring maintainer work, not an assembler feature.
 
 
-====================
-Ped:
+Parser, syntax and safety
+=========================
 
-add more C escape sequences: https://en.cppreference.com/w/c/language/escape
-    - now missing only octal \nnn and hexa \xn...
+[Task] Complete numeric C-style string escapes
+    Original note: octal \nnn and hexadecimal \xn... escapes are still missing.
+    Verify current support and define how many digits each form consumes before
+    implementation; preserve existing literal syntax unless deliberately changed.
+    Reference: https://en.cppreference.com/w/c/language/escape
 
-STRING OPER: ".." like Lua?? And #"str" to count?:
- similarly the string operators request could maaaaayyybeeee work inside
-the quoted string parser, but need to think more about it, if it will
-collide with something or not (`ld hl,"ab" + "cd"` is valid right now,
-but is it useful? Does replacing this with string+ hurt too much?
-What about `ld hl,"ab"|128` or `ld hl,"ab"+128` ... how far to go with
-string operators? Let's not turn sjasmplus into another JS fiasco :D)
+[Research] IN/OUT bracket syntax
+    Check Z80 IN/OUT operands with [] and with --syntax=B (brackets-only mode).
+    The original observation was that only (c) and (n) worked. Establish the current
+    behavior with tests before treating this as a parser defect.
 
-GHA CI:
-- coveralls.io coverage report:
-  GCC14 still doesn't have as perfect coverage report as GCC6 (versions between I tried were also imperfect),
-  so for the moment I will stick with 14 and see how it will go, but update probably ASAP and keep tracking coverge results.
+[Task] Test expression operator groups and precedence
+    Start in parser.cpp, at ParseExpShift and the operator parsers using "needa".
+    Exercise repeated operators in their while loops, operator aliases and precedence.
+    Investigate token transformations such as shr becoming '>'; the original note
+    was a question, not a confirmed defect.
 
-check for Z80 in/out having also [] brackets and syntax brackets-only mode? (currently only `(c)` and `(n)` works)
+[Task] Implement --syntax=l and --syntax=L keyword-label diagnostics
+    l should warn and L should error when a keyword (register, instruction, etc.) is
+    used as a label. Both are documented as unimplemented; parseSyntaxValue() in
+    sjasm/sjasm.cpp currently reports "Syntax option not implemented yet".
+    Turn the documented example "hl: Ld a,(hl),,de,hl" into a docs example test once
+    supported. Consult the --syntax description in docs/documentation.xml for the
+    combined --syntax=faBil behavior. Lowercase i already controls case-insensitive
+    instructions/directives; it does not make labels case-insensitive.
 
-@Janko at Next discord: `--raw-fill-gaps` to produce fill when second ORG is used and --raw output. (like org $2000 ... org $2100 -> test.dot)
-@Janko: I would rather prefer a new  -o  option which by default also sets the device to "just 64K" model and does what SAVE would do
-    ^ some implicit device thing? like NOSLOT64K? But needs modified regions (or min/max program counter) - should NOT depend on zeroed values :(
+[Research] Simplify ParseDirective_REPT without breaking repeat directives
+    Establish why this separate directive path exists before removing it.
+    Suspected edge cases in the old note: " .34 repeatX" and END at beginning of
+    line. Neither is a confirmed reproduction; add focused tests first.
 
--------------
-can you add a --utc option to sjasmplus so that I don't have to change my hardware time if I want __DATE__ to use UTC.
-I want UTC time zone for release dates, not local time zone?
+[Research] Audit STRCPY/STRCAT size limits
+    Maintainer concern: some maximum-size arguments may be incorrect, allowing
+    buffer overflow on malicious source input. No specific failing call was recorded.
+    Audit the wrapper contracts and callers, and retain reproductions as tests.
 
-sjasm.cpp:687
-    auto now = std::chrono::system_clock::now();
-    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-    std::tm now_tm = *std::localtime(&now_c);   // ??? this ???
+[Research] Review output filename validation and modification
+    Review SAVEHOB/SAVETRD/SAVETAP and related directives. Warn or error where a
+    filename is invalid or is modified, after deciding which modifications are
+    intentional format behavior. This is a broader review, not a request to reject
+    every transformed filename.
 
-time.h:
-/* Return the `struct tm' representation of *TIMER
-   in Universal Coordinated Time (aka Greenwich Mean Time).  */
-extern struct tm *gmtime (const time_t *__timer) __THROW;
 
-/* Return the `struct tm' representation
-   of *TIMER in the local timezone.  */
-extern struct tm *localtime (const time_t *__timer) __THROW;
--------------
+Output files, devices and loaders
+=================================
 
-unittest-cpp seems to be pretty dead now, consider migration, for example to https://github.com/neacsum/utpp
-(author claims C++20, header only and somewhat more compatible with GoogleTest)
+[Task] Offer UTC timestamps for predefined date/time symbols
+    Requested CLI option: --utc, primarily so __DATE__ uses UTC for release dates.
+    sjasm/sjasm.cpp initializes __DATE__ and __TIME__ together using
+    std::chrono::system_clock and std::localtime. Consider std::gmtime for UTC.
+    Decide and document whether the option affects both symbols; test the default
+    local-time behavior as well. There is no need to change the hardware clock.
 
-APPENDBIN to append any-size binary to other file, like for producing large dot files with data files appended
-(and let's do GiB+ support as well, INCBIN is limited to 2GiB by `int32` for length and does read it all into heap memory)
+[Idea] Fill gaps in raw output, or provide device-backed output
+    Request from @Janko on Next Discord: --raw-fill-gaps should emit filler between
+    ORG $2000 and a later ORG $2100 when using --raw (for example, building test.dot).
+    Alternative requested by Janko: a new -o option enabling a plain 64K device and
+    saving its assembled range, instead of treating output as a stream.
+    A NOSLOT64K-like implicit device may help, but the written range must come from
+    modified-region tracking or program-counter bounds, NOT scanning for nonzero
+    bytes. Zero bytes can be intentional output. Output semantics remain undecided.
 
-baze — Today at 22:22
-@neon Even if you keep paging outs in machine code, it's a good idea to keep LOAD in BASIC. My suggestion would be to use set 4,(iy + 1) so that +3 BASIC doesn't corrupt page 7 during IM 1. Then, for every out (c),a you also do ld (#5B5C),a to keep 128 BASIC happy. I think that should work with 48K BASIC, 128K BASIC and +3 BASIC.
+[Idea] APPENDBIN and large binary files
+    Append an arbitrary-size binary to another file, e.g. data following a large
+    dot command. Include GiB-scale support in the design. The original constraint
+    noted for INCBIN was its int32 length limit (about 2 GiB) and loading the entire
+    input into heap memory; verify those constraints before reusing its machinery.
 
-errors: add new CLI option for the "emitted/included at/from" messages,
-keeping the assembler more silent in msg=war|err mode
+[Idea] Reserve a block without changing existing device memory
+    Provide a standalone block/reserve operation which advances the address while
+    preserving device bytes. The original note contrasts DS/BLOCK with preserving
+    behavior in structure blocks/alignment and standalone ALIGN.
+    Check the current BLOCK/DS and structure semantics before choosing new syntax.
 
-listing with pre-substituted original source line included
- catch list: DUP -> EDUP, `nop:nop:nop`, ...
- output: maybe `<` like macros have `>`? and missing address, only line number?
+[Research] ZX Spectrum BASIC loader paging compatibility
+    Inspect example loaders in examples/ and the snapshot-style SAVETAP loader,
+    including any embedded machine-code blob. Determine whether they need changes
+    for 48K BASIC, 128K BASIC or +3 BASIC; this is not a confirmed loader bug.
+    Reference advice from baze to @neon on Discord:
+        Keep LOAD in BASIC even if paging OUT instructions stay in machine code.
+        Use "set 4,(iy + 1)" to avoid +3 BASIC corrupting page 7 during IM 1.
+        After each "out (c),a", also do "ld (#5B5C),a" to keep 128 BASIC informed.
+    Research and test the advice before applying it to any loader. Retain it as
+    reference material even if the current examples turn out not to be affected.
 
-relocation -> extra support for Next driver banks?
-(see Robin's https://github.com/Threetwosevensixseven/ZXRelocate to learn what exactly that means)
-(also https://github.com/Threetwosevensixseven/JetDPCL5/tree/main/src/asm/drv )
-(also https://pastebin.com/4G5nf9qv )
+[Research] Relocation support for ZX Next driver banks
+    Determine the required bank relocation behavior from Robin's projects before
+    designing an extension to sjasmplus relocation.
+    References:
+        https://github.com/Threetwosevensixseven/ZXRelocate
+        https://github.com/Threetwosevensixseven/JetDPCL5/tree/main/src/asm/drv
+        https://pastebin.com/4G5nf9qv
 
-check https://github.com/google/AFL
+[Research] CSPECTMAP with DISP
+    Identify and test the desired mapping of displaced addresses in CSPECTMAP.
+    An older comparison with an external tool may have involved source without a
+    DEVICE directive; distinguish that setup issue from actual export limitations.
 
-add block/reserve which does really preserve the device memory content (currently only the
-structure block+align does preserve memory, and standalone ALIGN, but not DS/BLOCK)
+[Idea] Extend MMU mapping options
+    Allow a custom page order for next-page wrapping, e.g. "<3, 5, 1, 2>".
+    Consider error/warning/wrapping options for a slot range, not only one slot.
+    Check existing MMU support first; these are design questions, not fixed syntax.
 
-"emitted from here" error should maybe show original line, as people not using error parsing
-claim it's confusing/useless.
- -> turned out to be lot more difficult than expected (macros + lua inlining)
 
-parser.cpp ParseExpShift and other "needa" doing transformations (shr => '>' ???)
-- write tests trying those "while" loops for groups of operators
-- write tests testing operator precedence
+Diagnostics and listings
+========================
 
-CSPECTMAP - needs better support for DISP
-- also reported to be not as good as external tool, but seems that is due to not-using DEVICE directive by author
-(can't help that)
+[Task] Control expansion/include trace verbosity
+    Add a CLI option for the "emitted/included at/from" diagnostic trace messages,
+    allowing quieter output in --msg=war or --msg=err mode. Decide independently
+    which primary diagnostics and which trace lines should remain visible.
 
---syntax: "I" to uppercase all labels + usage (needs labels refactoring)
---syntax: L options implementation
-    add DOCS example test: "hl: Ld a,(hl),,de,hl" when all is implemented
+[Research] Show original source in "emitted from here" diagnostics
+    Users without editor error parsing found the existing message confusing or
+    unhelpful. Include the relevant original source line if practical.
+    Previous investigation found macros and inline Lua make this harder than a
+    simple formatting change; preserve the correct source/expansion attribution.
 
-static analysis: PVS-Studio https://www.viva64.com/en/m/0036/
+[Idea] Include the original pre-substitution line in listings
+    Cover DUP/EDUP expansion and colon-separated instructions such as nop:nop:nop.
+    Possible presentation: '<' as a counterpart to macro '>', line number but no
+    address. Choose the format before implementation; this is not settled syntax.
 
-FIXME: get rid of ParseDirective_REPT somehow, its existence can't be right
-(breaks ` .34 repeatX` directive probably? .. and END@beginningOfLine? .. actually not?)
+[Idea] Syntax highlighting rules for generated listing files
+    Investigate whether assembler highlighting can apply to only the source-code
+    portion of a listing line, separately from addresses, bytes and diagnostics.
 
-I almost certainly broke some STRCPY/STRCAT max-size limits (i.e. malicious source may buffer overflow)...
 
-Macro world issues:
-- macros for operators? (in ideal case `zeuskeyaddr` possible to recreate in macro?)
-- more operators, capable of some string manipulation and maybe some type/expression checks (islabel)
+Build, test infrastructure and analysis
+=======================================
 
-SAVEHOB/SAVETRD/SAVETAP/... global review of filename handling, adding warnings/errors
-where filename modification happens or filename is invalid.
+[Research] Track GCC/Coveralls coverage quality
+    Historical observation: GCC 14 coverage was less satisfactory than GCC 6;
+    intermediate versions tried also had issues. GCC 14 was retained as the working
+    choice. Reassess newer versions and compare coverage results before switching.
+    Scope: GitHub Actions coverage reporting to coveralls.io, not assembler output.
 
-** Macro/define substitution rules and implementation (proposal):
-- macro arguments substitute with priority, from the longest ones
-- macro arguments substitute even in define related directives
-- define arguments substitute next, from the longest ones (inc. defarray)
-- name of define/macroarg starting with underscore prohibits substitution into middle
-(can substitute only at beginning)
-? extend that rule to underscore at end sealing also the tail?
-- lock some keywords for define/etc... at least put them under warning
-- inhibitor of substitutions happening (like `@djnz` inhibits macro replacement).
-** Current refactored implementation:
-- doesn't play priorities as proposed above
-- needs lot more testing and cleanup
-+ should be already a bit more intuitive than 1.08+ (although it may break legacy source)
+[Research] Future of UnitTest++
+    Consider alternatives if maintenance of unittest-cpp becomes a problem.
+    Candidate: https://github.com/neacsum/utpp
+    Its author describes it as C++20, header-only and more GoogleTest-compatible.
+    Verify current requirements and migration cost; sjasmplus targets C++17, so
+    this candidate may require a deliberate toolchain/standard change.
 
-DISP inside DISP bugs => documented. Correct solution = nesting DISPs?!
+[Research] Fuzz testing
+    Investigate AFL and suitable assembler/parser fuzzing entry points.
+    Original reference: https://github.com/google/AFL
+    No harness, target corpus or integration plan was recorded.
 
-$$label operator to get label page. (and fix pages for defl/equ/expression/... labels)
-    ^^ done, also whole label parsing and validation refactored, the syntax "$$label" is winner
-    ^^ TODO: remove this note maybe after some time, when everything will prove to be stable
-//// syntax summary:
-    (\.|\!?@|)[A-Za-z_][A-Za-z0-9_.?!#@]* labels, \\ continue line (limited!)
-    , argument-separator, : instruction-separator, ; // comment
-    # $ hexnums, % binary, ' _ numerical group separator
-    "' strings, () parentheses or memcell, [] memcell, {} device mem
-    operators-unary: ! ~ + - low high not abs norel exist
-    operators-binary: * / % mod + - << >> >>> shl shr <? >? < > <= >= = == != & and ^ xor | or && ||
-    us keyboard: ~!@#$%^&*()_+`-=[]{};':"<>?,./\|
+[Research] Static analysis
+    Investigate PVS-Studio; no specific setup or findings were recorded.
+    Original reference: https://www.viva64.com/en/m/0036/
 
-original proposals to get label page:
-    $$label - hexa are single $ only, so this looks fine (unary operator)
-    ?label - 5<?label => ambiguous (there is already unary "?" for labels, undocummented, deprecated)
-    \label - looks weird, no syntax clash
-Needs more syntax:
-    - reformat label into different slot... <slot>$$expression ? (binary operator)
-    - differentiate 16+b address space from 16b slot-mapped address space.
-        &label/expression? Similar to C/C++? &0x1231241 ? (5123 + &1234)
 
-MMU:
-- custom pages order for wrap-next-mapping option (like "<3, 5, 1, 2>" ?)
-- err/warn/warp option for slot range?
+String operators and substitution design
+========================================
 
-* maybe create extra syntax rules for listing files? (especially if it's possible to include asm syntax for half of line)
+[Idea] String operations in expressions
+    Consider Lua-like concatenation ("..") and length (#"str"), perhaps implemented
+    in quoted-string parsing. Define the boundary between numeric character
+    constants and strings before adding operators.
+    Existing expressions such as ld hl,"ab" + "cd", ld hl,"ab"|128 and
+    ld hl,"ab"+128 are compatibility cases. Do not silently reinterpret them as
+    string operations. Operator choice and type/coercion rules remain undecided.
 
-##### sjasmplus 2.x/fork:
+[Idea] Macro-defined operators and expression introspection
+    Allow macros to define operators rather than only instruction-like constructs.
+    Motivating example: could an operator like zeuskeyaddr be recreated with a
+    macro? The required semantics/example still need specifying.
+    Also consider string manipulation, islabel-like type/expression checks and
+    variadic facilities. These are exploratory language extensions.
 
-SHELLEXEC change syntax
+[Idea] Uppercase/case-insensitive label handling
+    Original proposal: --syntax=I would uppercase label definitions and references;
+    this would require label-handling refactoring. No such implemented option is
+    established by this note. Keep separate from existing --syntax=i and the
+    proposed l/L keyword-label diagnostics.
 
-separate local-labels vs macro-local-labels, like giving the macros new prefix? ">"?
-(issue #120)
+[Research] Remaining macro/DEFINE substitution proposals
+    Current rules are documented in docs/documentation.xml, "Substitution and
+    Defines". Macro arguments have precedence over defines/defarrays, may substitute
+    in define-related directives, and a leading underscore restricts matching to
+    the beginning of an identifier. Matching is NOT specified as longest-first.
+    Remaining questions from the older proposal:
+        - Should competing macro arguments/defines match longest-first?
+        - Should a trailing underscore restrict matching at the end as well?
+        - Should reserved keywords be protected from DEFINE, or produce a warning?
+        - Should substitution have an explicit inhibitor, analogous to @djnz
+            inhibiting macro replacement?
+    Add tests and assess compatibility before changing the current deterministic
+    matching order. The old comparison with behavior around v1.08 is historical,
+    not a description of a newly pending refactor.
 
-Operators precedence: (2 == 3&2) = ((2 == 3)&2) = false in current sjasmplus... ????
-    https://en.cppreference.com/w/cpp/language/operator_precedence
-Operator "word" or "w16/i16" to truncate big value (similar to "low")
 
-address space of labels -> 2|3:30|29 bits, the top bits being default slot number,
-remaining bits being physical address into global chip address space
--> then producing machine code using the particular label would "format" physical
-label value for particular "slot" (view of value).
+Possible 2.x changes / incompatible fork
+========================================
 
-To stay backward compatible/similar, one would have to support also 0000-FFFF range as if
-going through the mapped pages.. but that does collide with early pages 0..n ...
-How about abusing "@" or "." or something to distinguish between? (& resembles C/C++!)
+These are undecided proposals, not commitments. Create focused GitHub issues
+under the v2.x milestone when scope is clear, and remove duplicate notebook items.
+The intended compatibility break could be larger than the v1.07 to v1.14 changes.
 
-Make --syntax=abflL default for v2.x and check other defaults
-Maybe add support for escaped '\'' and other combinations back, to be more C++ compatible
-(escape sequences in C/C++ are case sensitive => adopt to sjasmplus (insensitive currently))
+[Idea] More than three assembly passes (N-pass assembling)
+    No convergence rules, pass limit or failure behavior have been specified here.
 
-Check about other syntax ambiguities, what seems too much relaxed and could be stricter for v2.x
+[Idea] Stricter defaults and C++-like expression/literal rules
+    Revisit defaults; the old sketch was --syntax=abflL, but l/L are alternative
+    warning/error policies, so the exact combination must be decided, not copied.
+    Review other relaxed/ambiguous syntax and operator precedence.
+    Original precedence question: (2 == 3&2) == ((2 == 3)&2) == false.
+    Establish actual/intended behavior with discriminating tests before changing it.
+    Reference: https://en.cppreference.com/w/cpp/language/operator_precedence
+    Consider a word/w16/i16 truncation operator, analogous to low.
+    Review escaped apostrophes and other character/string literal combinations;
+    C/C++ escapes are case-sensitive, unlike the behavior described in the old note.
 
-N-pass
+[Idea] Separate ordinary local labels from macro-local labels
+    Consider a distinct macro-local prefix, perhaps '>'. See issue #120.
 
-js support?
+[Idea] Physical versus slot-mapped label addresses
+    Represent a label with 2 or 3 high bits for its default slot and the remaining
+    30 or 29 bits for a physical address; machine-code emission would map that
+    physical address into a selected slot.
+    Compatibility problem: ordinary 0000..FFFF mapped addresses collide with early
+    physical pages. Consider explicit notation rather than silently changing them.
+    Undecided sketches: @ or . distinction; &label/expression as in C/C++;
+    <slot>$$expression as a binary slot-remapping operator.
+    Distinguish addresses wider than 16 bits from the 16-bit slot-mapped view.
 
-====================
-Debian packaging:
+[Idea] Nested DISP blocks
+    Existing DISP-inside-DISP limitations/bugs were documented in the old note.
+    Determine whether nesting is the right solution rather than assuming it is.
 
-cmake used to enforce (and test) system libs:
-cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LUA=ON -DCMAKE_INSTALL_PREFIX:PATH=~/.local2/ ..
+[Idea] Change SHELLEXEC syntax
+    See dirSHELLEXEC in sjasm/directives.cpp: the proposed direction is raw command
+    text instead of separate <command>[, <params>]. Work out quoting, colons and
+    filenames with spaces before changing the grammar.
 
-https://www.debian.org/doc/manuals/distribute-deb/distribute-deb.html
+[Idea] Toolchain-style CLI, paths and diagnostics
+    Follow GNU/GCC/Clang conventions where practical, including diagnostic formats
+    and equivalent option syntax, to work with existing editor/build integrations.
+    Consider GCC-like include-path anchoring from the launch/main-file directory,
+    instead of changing the anchor with every included source file.
+    Review cross-platform filesystem APIs and slash handling. The old note proposed
+    POSIX/C-library APIs; reassess against the current filesystem implementation.
 
-https://wiki.debian.org/Packaging/Learn#Level_3:_Packaging_more_complicated_modules
-Next step is packaging more complicated modules that will involve things like, modifying some upstream files,
- !!!!!!!!!!!!  removing some files from source tarball,   !!!!!!!!!!!!
- generating some files from source, getting the source tarball from a git commit etc.
+[Idea] Additional language/tool integration
+    Better support for Maziac's tools, e.g. label-type export; requirements need
+    specifying with the consuming tools.
+    JavaScript scripting support was suggested, but no concrete use case or scope
+    was recorded. Keep as an idea, not an implementation task.
+    Further substitution formalization and new operators are covered above.
 
-So maybe there is a way to provide "OSS" sjasmplus src tar for .deb build from full repo (removing some files in tests which don't fit OSS licensing)
 
-====================
-Docs:
+Debian packaging
+================
 
-DEVICE needs better description? Issue #55
-... and also SAVENEX and default ZXNEXT device... again...
+[Checklist] Build against system libraries
+    CMake is used to enforce/test system-library builds. Historical invocation
+    (from a build directory):
+        cmake -DCMAKE_BUILD_TYPE=Release -DSYSTEM_LUA=ON -DCMAKE_INSTALL_PREFIX:PATH=~/.local2/ ..
+    For documentation-generation dependencies and validation, see docs/README.md.
 
-When printed into PDF from browser on my local system, some of the program listings don't
-fit into their box and the end of line is cut out, check how many chars work and review
-all code listings in docs to fit into default A4 pdf print.
-(already changelog is trimmed ... seems like 88 chars is max, 80 is probably reasonable)
+[Checklist] Generate the cleaned source archive for Debian packaging
+    The gen-dfsg-tarball branch in this official repository provides the cleaned
+    archive, excluding tests with incompatible or unclear licensing and retaining
+    the intended open-source files. Use that branch's archive-generation workflow;
+    the original repacking research task is no longer pending.
+    None of the removed files contribute to the final executable, so the cleaned
+    archive still builds the fully featured sjasmplus binary.
+    References:
+        https://www.debian.org/doc/manuals/distribute-deb/distribute-deb.html
+        https://wiki.debian.org/Packaging/Learn#Level_3:_Packaging_more_complicated_modules
 
-Add chapter about usefult test-examples (library-like functions), like INC_TEXT, etc.
 
-===== github milestone v2.x: => create issues (cleanup this TODO as much as reasonable)
-v2.x of sjasmplus, changing some default settings (making it mildly incompatible with old sources, considerably more than v1.07 vs v1.14 incompatibilities), and refactoring some implementation even further, to make it hopefully a bit cleaner C++ source, simpler to maintain and modify.
+Documentation
+=============
 
-Major changes on my mind:
-* n-pass assembling
-* syntax by default similar to `--syntax=abflL`
-* GNU/GCC/clang-ification of assembler, mimicking the general tools as much as possible, like formatting of error reports, options with identical syntax where it makes sense, etc.. (should help with other tools unaware of sjasmplus specifically, but capable to process gcc/clang stuff)
-* GCC include path rules (anchoring from launch dir or main file dir, not changing anchor with each source file)
-* `define` substitution formalized even more (and refactored)
-* C++ification of syntax and language, i.e. changing operator precedence, probably apostrophe enclosed string/char literals escaping rules, etc.
-* new operators (string and device-memory/labels related, type/checks, maybe var-arg-like stuff)
-* macro-defined-operators (not only "instructions")
-* nesting DISPs?
-* better support for Maziac's tools (label type export, whatever else is needed)
-* maybe also JavaScript scripting support
-* filepath stuff through POSIX/clib API to make it cross-platform without hacks (normal slashes everywhere)
+[Research] DEVICE / SAVENEX / default ZX Next device explanations
+    Review issue #55 and the current manual before adding missing explanations.
+    The original note did not identify specific remaining gaps.
 
-RELEASE spam:
-Next wiki assemblers
-Next discord
-Twitter
-zx-pk.ru forum
-Next FB
-(maybe once per year or two: next forum, linkedin)
--- also update .exe/docker in tests/misc
-virus total upload to see how many AV vendors fail at basic detection
+[Task] Prevent clipped listings when printing the manual to A4 PDF
+    Reproduce browser printing with the default A4 settings, then review long
+    program listings. Historical local observation: about 88 columns fit; 80 was
+    considered a safer target, and changelog lines had already been shortened.
+    Treat those widths as observations, not a portable browser/font guarantee.
+
+[Task] Document reusable test/example routines
+    Add a guide to useful library-like examples, such as INC_TEXT, linking to the
+    actual test/example sources rather than duplicating their implementations.
+
+
+Historical notes / syntax scratchpad
+====================================
+
+[Historical] $$label page operator and label parsing refactor
+    Implemented according to the original note, including work on DEFL/EQU and
+    expression-label pages, label parsing and validation. This is not a new task.
+    The note was retained to watch for regressions; remove when no longer useful.
+    Rejected/older spellings:
+        ?label: ambiguous in 5<?label; an old undocumented '?' label operator was
+            described as deprecated. Verify current support before relying on that.
+        \label: no obvious syntax clash, but $$label was chosen instead.
+
+[Historical] Syntax sketch, NOT an authoritative grammar
+    Retained as context for operator/label design. Check the manual and parser for
+    the full current grammar; this shorthand may be incomplete or outdated.
+        (\.|\!?@|)[A-Za-z_][A-Za-z0-9_.?!#@]* labels, \\ continue line (limited!)
+        , argument separator; : instruction separator; ; and // comments
+        # $ hex numbers; % binary; ' _ numeric group separators
+        " ' strings; () parentheses or memory; [] memory; {} device memory
+        unary: ! ~ + - low high not abs norel exist
+        binary: * / % mod + - << >> >>> shl shr <? >? < > <= >= = == != & and ^ xor | or && ||
+        US keyboard characters: ~!@#$%^&*()_+`-=[]{};':"<>?,./\|
+
+
+Release checklist (maintainer)
+=============================
+
+[Checklist] Announce releases
+    Next wiki assembler list, Next Discord, Twitter, zx-pk.ru forum, Next Facebook.
+    Less frequently (perhaps yearly or every other year): Next forum, LinkedIn.
+
+[Checklist] Update external projects consuming sjasmplus
+    Some external projects maintained by Ped bundle sjasmplus.exe or pin a sjasmplus
+    revision in their CI/Docker setup to assemble their own .asm sources.
+    Update those consumers as appropriate. The old reminder was "update .exe/docker
+    in tests/misc"; exact external repositories/procedures are maintainer context,
+    not actionable instructions for an unfamiliar contributor. Ask before changing
+    bundled executables or external version pins.
+
+[Checklist] Check antivirus false positives
+    Upload the release executable to VirusTotal and review reported detections.
