@@ -12,17 +12,13 @@ hl:                     ; error
     ld      a,(hl)      ; expression error  ; with "L" unimplemented this actually works as LD a,8
     ld      a,[hl]      ; memory reference
 
-    ; some specifics of B mode - I/O instructions still work only with round parentheses
-    jp      (c)
-    jp      [c]
-    jp      (C)
-    jp      [C]
-    OPT --zxnext
-    jp      (c)
-    jp      [c]
-    jp      (C)
-    jp      [C]
+    ; B mode requires square brackets for I/O addresses too
+    in      a,[c] ,, b,[C] ,, a,[254] ,, f,[c] ,, [C]
+    out     [c],b ,, [C],0 ,, [254],a
+    out     [c],(0)      ; value expression, not an address
+    out     [c],[0]      ; error: value operand can't access memory
 
+    ; round parentheses and bare port addresses are errors
     in      a,(c)
     in      a,(254)
     out     (c),0
@@ -31,9 +27,11 @@ hl:                     ; error
 
     in      a,254       ; or without parentheses at all (new syntax variant)
     out     254,a
+    in      a,[c)       ; mismatched brackets
+    out     [254),a
 
-    ; but square brackets will not work (errors)
-    in      a,[c]
-    in      a,[254]
-    out     [c],b
-    out     [254],a
+    jp      (c)         ; next only - here label not found
+    jp      [c]         ; next only
+    OPT --zxnext
+    jp      [c]
+    jp      (c)         ; square brackets required to be Z80N `jp (c)`, this is `jp nnnn` then

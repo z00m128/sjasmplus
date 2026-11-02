@@ -90,9 +90,21 @@ op_next_syntax.asm(35): error: Unexpected: 5
 op_next_syntax.asm(35): error: Unexpected: label
 35    0461 ED 95          setae label                             ; syntax errors
 36    0463
-op_next_syntax.asm(37): error: Illegal instruction:     jp      [c]                                                 ; syntax errors
-37    0463                  jp      [c]                                                 ; syntax errors
-38    0463
+37    0463                  ; I/O address bracket syntax also applies to JP (C)
+38    0463 ED 98            jp      [c]                     ; #ED98
+39    0465                  OPT --syntax=B
+40    0465 ED 98            jp      [c]                     ; #ED98
+op_next_syntax.asm(41): error: Label not found: c
+41    0467 C3 00 00         jp (c)
+op_next_syntax.asm(41): error: Illegal instruction:   jp [c)
+41    046A                jp [c)
+op_next_syntax.asm(41): error: Label not found: c
+op_next_syntax.asm(41): error: ')' expected
+op_next_syntax.asm(41): error: Unexpected: ]
+41    046A C3 00 00       jp (c]
+op_next_syntax.asm(41): error: Illegal instruction:   jp [254]                         ; syntax errors
+41    046D                jp [254]                         ; syntax errors
+42    046D
 # file closed: op_next_syntax.asm
 
 Value    Label

@@ -85,7 +85,7 @@ static void PrintHelpSyntax() {
 	_COUT "  a     Multi-argument delimiter \",,\" (default is \",\")" _ENDL;
 	_COUT "        Even when selected, dec|inc|pop|push instructions still accept also \",\"" _ENDL;
 	_COUT "  b     Whole expression parentheses are legal for memory access only" _ENDL;
-	_COUT "  B     Memory access brackets [] required (by default both () and [] works)" _ENDL;
+	_COUT "  B     Memory/I/O access brackets [] required (default: () or [])" _ENDL;
 	_COUT "  f F   Fake instructions: warning / disabled (default = enabled)" _ENDL;
 	_COUT "  i     Case insensitive instructions/directives (default = same case required)" _ENDL;
 	_COUT "  M     Alias \"m\" and \"M\" for \"(hl)\" to cover 8080-like syntax: ADD A,M" _ENDL;

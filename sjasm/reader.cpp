@@ -130,13 +130,6 @@ int NeedDEFL() {
 	return 0;
 }
 
-bool NeedIoC() {
-	SkipBlanks();
-	if ('(' != lp[0] || 'c' != tolower((byte)lp[1]) || ')' != lp[2]) return false;
-	lp += 3;
-	return true;
-}
-
 bool isMacroNext() {	// checks if ".macro" directive is ahead (but doesn't consume it)
 	if (SkipBlanks()) return false;
 	char* p = lp;

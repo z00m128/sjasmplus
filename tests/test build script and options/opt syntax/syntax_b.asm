@@ -10,7 +10,7 @@
     ; 2x OK: val, val, ---
     add a,6 : add a,(7) : add a,[8]
     adc a,6 : adc a,(7) : adc a,[8]
-    sub a,6 : sub a,(7) : sub a,[8]     ; this syntax works because --syntax=A was used
+    sub a,6 : sub a,(7) : sub a,[8]     ; this syntax works because --syntax=a was used
     sbc a,6 : sbc a,(7) : sbc a,[8]
     and a,6 : and a,(7) : and a,[8]
     xor a,6 : xor a,(7) : xor a,[8]
@@ -62,7 +62,7 @@
     ; 1x OK: val, ---, ---
     add a,6 : add a,(7) : add a,[8]
     adc a,6 : adc a,(7) : adc a,[8]
-    sub a,6 : sub a,(7) : sub a,[8]     ; this syntax works because --syntax=A was used
+    sub a,6 : sub a,(7) : sub a,[8]     ; this syntax works because --syntax=a was used
     sbc a,6 : sbc a,(7) : sbc a,[8]
     and a,6 : and a,(7) : and a,[8]
     xor a,6 : xor a,(7) : xor a,[8]
@@ -111,3 +111,19 @@ someLabel:
 label:  dw 15
         ld b,(label)
         sub a,b
+
+    ; I/O addresses accept both bracket styles and legacy bare immediate ports
+    OPT reset --syntax=a
+    in a,(254),,a,[254],,a,254
+    out (254),a,,[254],a,,254,a
+    in b,(c),,c,[C],,d,[c],,e,[c],,h,[c],,l,[c],,a,[c]
+    out (c),b,,[C],c,,[c],d,,[c],e,,[c],h,,[c],l,,[c],a,,[c],0
+    in f,[c] : in [C]
+    in a,[$fe+1] : out [(1+2)*3],a
+    in a,[254) : out (254],a     ; mismatched brackets
+    in a,[c) : out (c],a
+
+    OPT --syntax=b
+    in a,(254),,a,[254],,a,254
+    out (254),a,,[254],a,,254,a
+    in b,(c) : out (c),b : in f,[c] : in [C] : out [c],0

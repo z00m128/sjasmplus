@@ -216,6 +216,7 @@
 - Added <link linkend="device_element">`DEVICE ELEMENT`</link> for eLeMeNt ZX / MB03+ URAM: 20MiB, 8kiB pages and slots
 - Raised the device page limit to 4096 and fixed `LABELSLIST` truncating page numbers
 - Added `--utc` to use UTC for both `__DATE__` and `__TIME__` (default is local time)
+- I/O operands support `[]` in `IN`, `OUT` and Z80N `JP [C]`
 - minor changes in examples, docs and expression parser implementation
 </synopsis>
             </listitem>
@@ -539,7 +540,7 @@
 	for particular feature will use the default setting:
 	<synopsis>  a      Multi-argument delimiter ",," (default is ",") (but dec|inc|pop|push accept also ",")
   b      Whole expression parentheses are legal for memory access only (default = immediate or memory)
-  B      memory access brackets [] required (default = relaxed syntax, [] allowed as extra)
+  B      memory/I/O access brackets [] required (default = relaxed syntax, [] allowed as extra)
   f F    Fake instructions: warning / disabled (default = enabled)
   i      Case insensitive instructions/directives (default = same case required)
 &dagger; <emphasis>l L    Keyword labels (registers, instructions, ...): warning / error (default = silent)</emphasis>
@@ -1222,8 +1223,9 @@ $$$$lb $$$$lb    <indexterm id="op_label_ph_page"><primary>$$$$label</primary></
       to what I think is standard Z80: <itemizedlist>
           <listitem>
             <para>'[' and ']' can be used instead of '(' and ')' for
-            indirection. So <code>LD A,[HL]</code> is the same as <code>LD A,(HL)</code> (does not
-            apply to IN/OUT ports, those must use '(...)' form)</para>
+            indirection. So <code>LD A,[HL]</code> is the same as <code>LD A,(HL)</code> and
+            <code>IN A,[254]</code> is the same as <code>IN A,(254)</code> (I/O ports support
+            square brackets since v1.24.1).</para>
           </listitem>
 
           <listitem>

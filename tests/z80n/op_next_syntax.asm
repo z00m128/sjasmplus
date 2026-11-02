@@ -34,4 +34,8 @@ label:
 
     setae a : setae 5 : setae label                             ; syntax errors
 
-    jp      [c]                                                 ; syntax errors
+    ; I/O address bracket syntax also applies to JP (C)
+    jp      [c]                     ; #ED98
+    OPT --syntax=B
+    jp      [c]                     ; #ED98
+    jp (c) : jp [c) : jp (c] : jp [254]                         ; syntax errors

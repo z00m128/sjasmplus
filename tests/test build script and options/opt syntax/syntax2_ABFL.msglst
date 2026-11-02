@@ -19,45 +19,53 @@ syntax2_ABFL.asm(10): error: Unexpected: , c,l
 12    0008 3E 08            ld      a,(hl)      ; expression error  ; with "L" unimplemented this actually works as LD a,8
 13    000A 7E               ld      a,[hl]      ; memory reference
 14    000B
-15    000B                  ; some specifics of B mode - I/O instructions still work only with round parentheses
-syntax2_ABFL.asm(16): error: Label not found: c
-16    000B C3 00 00         jp      (c)
-syntax2_ABFL.asm(17): error: Illegal instruction:     jp      [c]
-17    000E                  jp      [c]
-syntax2_ABFL.asm(18): error: Label not found: C
-18    000E C3 00 00         jp      (C)
-syntax2_ABFL.asm(19): error: Illegal instruction:     jp      [C]
-19    0011                  jp      [C]
-20    0011                  OPT --zxnext
-21    0011 ED 98            jp      (c)
-syntax2_ABFL.asm(22): error: Illegal instruction:     jp      [c]
-22    0013                  jp      [c]
-23    0013 ED 98            jp      (C)
-syntax2_ABFL.asm(24): error: Illegal instruction:     jp      [C]
-24    0015                  jp      [C]
-25    0015
-26    0015 ED 78            in      a,(c)
-27    0017 DB FE            in      a,(254)
-syntax2_ABFL.asm(28): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
-28    0019 ED 71            out     (c),0
-29    001B ED 41            out     (c),b
-30    001D D3 FE            out     (254),a
-31    001F
-32    001F DB FE            in      a,254       ; or without parentheses at all (new syntax variant)
-33    0021 D3 FE            out     254,a
-34    0023
-35    0023                  ; but square brackets will not work (errors)
-syntax2_ABFL.asm(36): error: Syntax error: [c]
-syntax2_ABFL.asm(36): error: Unexpected: [c]
-36    0023 DB 00            in      a,[c]
-syntax2_ABFL.asm(37): error: Syntax error: [254]
-syntax2_ABFL.asm(37): error: Unexpected: [254]
-37    0025 DB 00            in      a,[254]
-syntax2_ABFL.asm(38): error: Syntax error: [c],b
-38    0027                  out     [c],b
-syntax2_ABFL.asm(39): error: Syntax error: [254],a
-39    0027                  out     [254],a
-40    0027
+15    000B                  ; B mode requires square brackets for I/O addresses too
+16    000B ED 78 ED 40      in      a,[c] ,, b,[C] ,, a,[254] ,, f,[c] ,, [C]
+16    000F DB FE ED 70
+16    0013 ED 70
+syntax2_ABFL.asm(17): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+17    0015 ED 41 ED 71      out     [c],b ,, [C],0 ,, [254],a
+17    0019 D3 FE
+syntax2_ABFL.asm(18): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+18    001B ED 71            out     [c],(0)      ; value expression, not an address
+syntax2_ABFL.asm(19): error: Illegal instruction (can't access memory): [0]
+syntax2_ABFL.asm(19): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+19    001D ED 71            out     [c],[0]      ; error: value operand can't access memory
+20    001F
+21    001F                  ; round parentheses and bare port addresses are errors
+syntax2_ABFL.asm(22): error: Label not found: c
+syntax2_ABFL.asm(22): error: Port address must use square brackets: (c)
+22    001F DB 00            in      a,(c)
+syntax2_ABFL.asm(23): error: Port address must use square brackets: (254)
+23    0021 DB 00            in      a,(254)
+syntax2_ABFL.asm(24): error: Label not found: c
+syntax2_ABFL.asm(24): error: Port address must use square brackets: (c),0
+24    0023                  out     (c),0
+syntax2_ABFL.asm(25): error: Label not found: c
+syntax2_ABFL.asm(25): error: Port address must use square brackets: (c),b
+25    0023                  out     (c),b
+syntax2_ABFL.asm(26): error: Port address must use square brackets: (254),a
+26    0023 D3 00            out     (254),a
+27    0025
+syntax2_ABFL.asm(28): error: Port address must use square brackets: 254
+28    0025 DB 00            in      a,254       ; or without parentheses at all (new syntax variant)
+syntax2_ABFL.asm(29): error: Port address must use square brackets: 254,a
+29    0027 D3 00            out     254,a
+syntax2_ABFL.asm(30): error: Label not found: c
+syntax2_ABFL.asm(30): error: Unexpected: )
+30    0029 DB 00            in      a,[c)       ; mismatched brackets
+syntax2_ABFL.asm(31): error: Operand expected: [254),a
+31    002B                  out     [254),a
+32    002B
+syntax2_ABFL.asm(33): error: Label not found: c
+33    002B C3 00 00         jp      (c)         ; next only - here label not found
+syntax2_ABFL.asm(34): error: Illegal instruction:     jp      [c]         ; next only
+34    002E                  jp      [c]         ; next only
+35    002E                  OPT --zxnext
+36    002E ED 98            jp      [c]
+syntax2_ABFL.asm(37): error: Label not found: c
+37    0030 C3 00 00         jp      (c)         ; square brackets required to be Z80N `jp (c)`, this is `jp nnnn` then
+38    0033
 # file closed: syntax2_ABFL.asm
 
 Value    Label

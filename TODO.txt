@@ -23,11 +23,6 @@ Parser, syntax and safety
     implementation; preserve existing literal syntax unless deliberately changed.
     Reference: https://en.cppreference.com/w/c/language/escape
 
-[Research] IN/OUT bracket syntax
-    Check Z80 IN/OUT operands with [] and with --syntax=B (brackets-only mode).
-    The original observation was that only (c) and (n) worked. Establish the current
-    behavior with tests before treating this as a parser defect.
-
 [Task] Test expression operator groups and precedence
     Start in parser.cpp, at ParseExpShift and the operator parsers using "needa".
     Exercise repeated operators in their while loops, operator aliases and precedence.
