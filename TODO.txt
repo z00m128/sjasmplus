@@ -42,6 +42,8 @@ Parser, syntax and safety
     Establish why this separate directive path exists before removing it.
     Suspected edge cases in the old note: " .34 repeatX" and END at beginning of
     line. Neither is a confirmed reproduction; add focused tests first.
+    Broader parser/context research (including conditionals in STRUCT and #416):
+    see docs/parser-context-research.md. Research only; no refactor selected.
 
 [Research] Audit STRCPY/STRCAT size limits
     Maintainer concern: some maximum-size arguments may be incorrect, allowing
@@ -240,6 +242,8 @@ The intended compatibility break could be larger than the v1.07 to v1.14 changes
 
 [Idea] More than three assembly passes (N-pass assembling)
     No convergence rules, pass limit or failure behavior have been specified here.
+    Research of repeated logical pass 2, state lifetimes and convergence options:
+    see docs/n-pass-research.md. No implementation or syntax selected.
 
 [Idea] Stricter defaults and C++-like expression/literal rules
     Revisit defaults; the old sketch was --syntax=abflL, but l/L are alternative
