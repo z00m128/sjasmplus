@@ -18,11 +18,69 @@ checks against the accepted baseline. Do not expose an actual-iteration define
 without a demonstrated need. Verbose progress/error messages can report iteration
 counts without making them available to source expressions.
 
-Start opt-in and preserve the existing three-pass default. No command-line syntax,
-default iteration limit, version target, or detailed compatibility policy is
-selected here. Supporting 20+ settling iterations is reasonable; guaranteeing that
-arbitrary programs converge is not. Keep this independent of the larger
+An opt-in rollout preserving the existing three-pass default is this notebook's
+conservative recommendation, not settled maintainer policy: issue #63 explicitly
+considers making N-pass the default. No command-line syntax, default iteration
+limit, version target, or detailed compatibility policy is selected here.
+Supporting 20+ settling iterations is reasonable; guaranteeing that arbitrary
+programs converge is not. Keep this independent of the larger
 [parser-context refactor](parser-context-research.md).
+
+## Earlier Design Notes: Issue #63
+
+Reviewed [N-pass assembling, issue #63](https://github.com/z00m128/sjasmplus/issues/63)
+on 2026-11-04. The issue opened on 2019-08-11; the substantive follow-up design
+comments are from 2022-05-12. Its v2.x milestone is historical planning context,
+not a release commitment made by this notebook.
+
+The original checklist contributes these architectural intentions:
+
+* Group global state by lifetime across three-pass and N-pass assembly.
+* Consider nested assembly contexts and C++ scope-based restoration for includes,
+	nesting, and substitution, replacing manual save/restore where appropriate.
+	This connects to the parser-context research; it is an architectural direction,
+	not proof that the full parser refactor must precede an N-pass prototype.
+* Make output-producing work depend on the final phase, not a physical traversal
+	number, and explicitly establish that a pre-final baseline has been completed.
+	An accepted-baseline state/guard expresses this more reliably than testing that
+	some iteration counter has reached a particular number.
+* Revisit temporary-label sequences that change inside IFUSED, which was already
+	identified as an N-pass compatibility concern. Maintainer clarification on
+	2026-11-04: the later numeric-label refactor is considered sufficient for that
+	original concern, with no further subsystem work currently identified. The
+	unchecked historical item is stale bookkeeping, not evidence of an outstanding
+	defect. Use the implementation as a model for other state lifecycles; the wider
+	N-pass controller/convergence contract remains separate.
+
+The 2022 refinement is essentially the current proposed model: repeat pass 2,
+promoting a nonmatching result to the next baseline; never repeat the emitting
+pass 3. Two policy differences from the conservative proposal here must remain
+visible:
+
+* The issue allows discovery's result to be the first candidate baseline. A match
+	with the first pass 2 could therefore finish in three traversals; typical larger
+	projects were expected to need four. This notebook instead proposes two matching
+	logical-pass-2 results, giving a four-traversal minimum. Whether a sound
+	discovery-to-settling fast path is worthwhile remains a design choice; the issue
+	does not specify which state comparison would establish its safety.
+* The issue explicitly rejects requiring the old three-pass mode as the default,
+	on the basis that `__PASS__` remains 2 during retries. That supports the present
+	cooperative-script model: counting traversals externally is possible but does
+	not invalidate the design. Keep default adoption separate from any temporary
+	opt-in development/rollout strategy.
+
+The issue's estimate of a large build increasing from about 2.5 to 3.0 seconds is
+an illustrative expectation, not a benchmark. Measure real projects before using
+it as a performance claim.
+
+Most importantly, memory-driven layout is explicitly outside the intended model:
+reading final emitted code is useful for checksums and other post-processing,
+but code sizes and label values should already be settled before final emission.
+If generated code must be read to decide the layout of new code, use separate
+assembly stages with intermediate binary files. The dry/final-memory probes below
+are therefore scope boundaries and diagnostic cases, not missing capabilities
+that N-pass support must implement. Full memory simulation or constraint solving
+is not implied by the issue.
 
 ## Scope And Evidence
 
@@ -248,11 +306,14 @@ baseline. Backward searches use fresh current entries; forward searches use the
 previous vector. Current collection can differ from discovery, while final-pass
 errors/warnings enforce agreement with the penultimate traversal.
 
-For N-pass, keep rebasing while settling; promote mismatches to another iteration
-rather than final-phase errors. Compare the entire finished vector, not only
-entries encountered by `InsertRefresh()`: an omitted suffix has no insertion
-call to announce its absence. Preserve relocation metadata and DP's negative
-internal helper IDs, not just user-written positive numeric labels.
+No additional temporary-label redesign is currently identified. The following
+are integration requirements for the N-pass controller/observer, not a claim that
+the existing subsystem needs another refactor: retain its previous/current
+rebasing, let settling differences request another iteration, and compare the
+entire finished sequence. An omitted suffix has no `InsertRefresh()` call to
+announce its absence. Observe relocation metadata and DP's negative internal
+helper IDs as well as user-written positive numeric labels; keep final-phase
+diagnostics tied to the accepted penultimate baseline.
 
 Smart-SMC differs: pass 1 builds `smartSmcLines`; later phases index that original
 position sequence and reuse/update resolved offsets. A source location becoming
@@ -291,13 +352,15 @@ layout-relevant configuration/mapping in stability rather than assuming every
 iteration begins with identical device state. DEFDEVICE's discovery-only rule
 needs deliberate handling if a definition is first reachable later.
 
-Memory-dependent assembly is a separate limitation. `EmitByteNoListing()` updates
+Memory-dependent layout is an accepted scope boundary, as clarified in issue #63.
+`EmitByteNoListing()` updates
 device RAM only in the final phase, and `MemGetByte()` returns zero in earlier
 phases. Therefore dry phase-2 repetition does not make memory-dependent layout
-converge to final execution. Options are to keep/document this restriction, detect
-and reject final layout differences, or introduce a much broader evaluation mode
-that simulates memory writes/reads during settling. The latter is not required to
-support ordinary address/alignment fixed points and should not be smuggled in.
+converge to final execution. Preserve the requirement that layout is settled before
+emission and diagnose prohibited final differences. Final-memory reads for checksums
+or post-processing remain useful; layout depending on generated bytes belongs in
+separate assembly stages. Simulating memory writes/reads during settling would be
+a broader feature outside the intended N-pass work, not a prerequisite.
 
 ## Scripting And External State
 
@@ -603,9 +666,10 @@ looks feasible without the parser refactor or a dependency-graph rewrite.
 The important missing abstraction is a completed traversal with explicit identity,
 defined/referenced state, observable layout effects, provisional diagnostics, and
 controlled assembler-owned side effects. Named-label generations, smart-SMC
-rebasing, BPLIST, stale definitions, and dry/final memory differences are concrete gaps,
+rebasing, BPLIST, stale definitions, and final consistency diagnostics are concrete gaps,
 not hypothetical polishing. The production feature is therefore a cross-cutting
 change, even if the driver diff is small. It is credible as an independent future
 project; it is not yet demonstrated to be a small pre-release enhancement. Shared
 Lua lifetime itself is accepted; only its logical-stage scheduling and effect
-contract need to remain consistent, not hidden or made transactional.
+contract need to remain consistent, not hidden or made transactional. Likewise,
+support for memory-driven layout is outside scope rather than a readiness gap.
