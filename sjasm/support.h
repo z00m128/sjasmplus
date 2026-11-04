@@ -43,9 +43,6 @@ static_assert(0x78563412 == sj_bswap32(0x12345678), "internal error in bswap32 i
 
 #define _CRT_SECURE_NO_WARNINGS 1
 
-// #define FOPEN(pFile, filename, mode) fopen_s(&pFile, filename, mode)
-// #define FOPEN_ISOK(pFile, filename, mode) (fopen_s(&pFile, filename, mode) == 0)
-
 #define strcasecmp(s1, s2) stricmp(s1, s2)
 
 #else
@@ -72,8 +69,8 @@ long GetTickCount();
 
 void SJ_FixSlashes(delim_string_t & str, bool do_warning = true); // convert backslashes, can produce warning
 FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode);
-
-// FILE* dbg_fopen(const char* fname, const char* modes);
+std::string SJ_getenv(const char* name);
+bool SJ_processArgv(int argc, char* argv[], std::vector<std::string>& storage, std::vector<char*>& pointers);
 
 #define FOPEN_ISOK(pFile, filename, mode) ((pFile = SJ_fopen(filename, mode)) != NULL)
 
