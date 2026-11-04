@@ -1288,7 +1288,7 @@ static void dirCSPECTMAP() {
 		Options::CSpectMapFName = fName;
 	} else {		// create default map file name from current source file name (appends ".map")
 		assert(!sourcePosStack.empty());
-		Options::CSpectMapFName = sourcePosStack.back().filename;
+		Options::CSpectMapFName = std::filesystem::u8path(sourcePosStack.back().filename);
 		Options::CSpectMapFName += ".map";
 	}
 	// remember page size of current device (in case the source is multi-device later)
@@ -1518,7 +1518,7 @@ static void dirHEXOUT() {
 	} else {
 		const std::filesystem::path fnaam = GetOutputFileName(lp);
 		if (fnaam.has_filename())	OpenHex(fnaam);
-		else						Error("[HEXOUT] invalid filename", fnaam.string().c_str());
+		else						Error("[HEXOUT] invalid filename", fnaam.u8string().c_str());
 	}
 }
 
@@ -1640,9 +1640,9 @@ static void dirEXPORT() {
 
 	if (Options::ExportFName.empty()) {
 		assert(!sourcePosStack.empty());
-		Options::ExportFName = sourcePosStack.back().filename;
+		Options::ExportFName = std::filesystem::u8path(sourcePosStack.back().filename);
 		Options::ExportFName.replace_extension(".exp");
-		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName.string().c_str(), W_EARLY);
+		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName.u8string().c_str(), W_EARLY);
 	}
 	if (!(n = p = GetID(lp))) {
 		Error("[EXPORT] Syntax error", lp, SUPPRESS);

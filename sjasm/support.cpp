@@ -30,11 +30,56 @@
 
 #include "sjdefs.h"
 
+#ifdef _WIN32
+#include <shellapi.h>
+
+static std::string WindowsUtf8(const wchar_t* text) {
+	const int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text, -1, nullptr, 0, nullptr, nullptr);
+	if (!size) {
+		_CERR "Invalid Unicode in Windows arguments/environment" _ENDL;
+		exit(1);
+	}
+	std::string result(size, '\0');
+	WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text, -1, result.data(), size, nullptr, nullptr);
+	result.resize(size - 1);
+	return result;
+}
+#endif
+
+std::string SJ_getenv(const char* name) {
+	#ifdef _WIN32
+		const std::wstring wideName(name, name + strlen(name));
+		const wchar_t* value = _wgetenv(wideName.c_str());
+		return value ? WindowsUtf8(value) : std::string();
+	#else
+		const char* value = std::getenv(name);
+		return value ? std::string(value) : std::string();
+	#endif
+}
+
+bool SJ_processArgv(int argc, char* argv[], std::vector<std::string>& storage, std::vector<char*>& pointers) {
+	assert(storage.empty() && pointers.empty());
+	#ifdef _WIN32
+		int wideArgc = 0;
+		wchar_t** wideArgv = CommandLineToArgvW(GetCommandLineW(), &wideArgc);
+		if (!wideArgv) return false;
+		storage.reserve(wideArgc);
+		for (int index = 0; index < wideArgc; ++index) storage.push_back(WindowsUtf8(wideArgv[index]));
+		LocalFree(wideArgv);
+		pointers.reserve(storage.size() + 1);
+		for (auto & argument : storage) pointers.push_back(argument.data());
+	#else
+		pointers.assign(argv, argv + argc);
+	#endif
+	pointers.push_back(nullptr);
+	return true;
+}
+
 #if defined (_WIN32) || defined (__CYGWIN__)
 std::filesystem::path SJ_force_slash(const std::filesystem::path path) {
-	delim_string_t pathStr { path.string(), DT_COUNT };
-	SJ_FixSlashes(pathStr, false);
-	return pathStr.first;
+	auto native = path.native();
+	std::replace(native.begin(), native.end(), std::filesystem::path::value_type('\\'), std::filesystem::path::value_type('/'));
+	return std::filesystem::path(native);
 }
 #endif
 
@@ -46,7 +91,12 @@ void SJ_FixSlashes(delim_string_t & str, bool do_warning) {
 
 FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode) {
 	if (nullptr == mode || fname.empty()) return nullptr;
-	return fopen(fname.string().c_str(), mode);
+	#ifdef _WIN32
+		std::wstring wideMode(mode, mode + strlen(mode));
+		return _wfopen(fname.c_str(), wideMode.c_str());	// use specific WIN API _wfopen for non-ASCII paths
+	#else
+		return fopen(fname.c_str(), mode);					// use "native" string for fopen, not u8string() used for diagnostics
+	#endif
 }
 
 #ifndef WIN32

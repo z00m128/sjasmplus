@@ -1,0 +1,2 @@
+    nop
+    ASSERT 0

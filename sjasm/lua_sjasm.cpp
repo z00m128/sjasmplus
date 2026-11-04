@@ -552,17 +552,44 @@ void dirINCLUDELUA() {
 		SkipToEol(lp);		// skip till EOL (colon), to avoid parsing file name
 		return;
 	}
+	// read content of file explicitly on sjasmplus side, to support non-ascii filenames and paths (luaL_dofile does use narrow fopen)
 	fullpath_ref_t file_in = GetInputFile(lp);
+	FILE* infile;
 	if (!FileExists(file_in.full)) {
-		Error("[INCLUDELUA] File doesn't exist", file_in.str.c_str(), EARLY);
-	} else {
-		extraErrorWarningPrefix = lua_err_prefix;
-		// Use relative-to-launch-dir filename for open to get reasonable source-pos-string in errors
-		if (luaL_dofile(LUA, file_in.full.lexically_proximate(LaunchDirectory).string().c_str())) {
-			lua_impl_showLoadError(EARLY);
-		}
-		extraErrorWarningPrefix = nullptr;
+		Error("[INCLUDELUA] File doesn't exist", file_in.str.c_str(), EARLY); return;
 	}
+	if (!FOPEN_ISOK(infile, file_in.full, "rb")) {
+		Error("[INCLUDELUA] Error opening file", file_in.str.c_str(), EARLY); return;
+	}
+	std::string script;
+	char buffer[4096];
+	size_t bytesRead;
+	while (0 < (bytesRead = fread(buffer, 1, sizeof(buffer), infile))) script.append(buffer, bytesRead);
+	const bool readError = ferror(infile);
+	fclose(infile);
+	if (readError) {
+		Error("[INCLUDELUA] Error reading file", file_in.str.c_str(), EARLY);
+		return;
+	}
+	// Mimic lauxlib.c's private skipBOM/skipcomment helpers used by luaL_loadfilex;
+	// luaL_loadbuffer does not perform this cleanup. No character encoding is converted.
+	std::string_view chunk(script);
+	if (chunk.substr(0, 3) == "\xEF\xBB\xBF") chunk.remove_prefix(3);
+	if (!chunk.empty() && '#' == chunk[0]) {
+		// Skip the initial '#' line, retaining its LF for text-script line numbering.
+		const size_t newline = chunk.find('\n');
+		chunk.remove_prefix(std::string_view::npos == newline ? chunk.size() : newline);
+		// Binary chunks need the signature first: remove the retained LF, not the signature byte.
+		if (2 <= chunk.size() && LUA_SIGNATURE[0] == chunk[1]) chunk.remove_prefix(1);
+	}
+	extraErrorWarningPrefix = lua_err_prefix;
+	// '@' marks a file chunk, as in luaL_loadfilex. Keep its path independent of display verbosity;
+	// launch-relative paths preserve directories and normally avoid windows drive colons in Lua error parsing.
+	const std::string chunkName = "@" + SJ_force_slash(file_in.full.lexically_proximate(LaunchDirectory)).u8string();
+	if (luaL_loadbuffer(LUA, chunk.data(), chunk.size(), chunkName.c_str()) || lua_pcall(LUA, 0, LUA_MULTRET, 0)) {
+		lua_impl_showLoadError(EARLY);
+	}
+	extraErrorWarningPrefix = nullptr;
 }
 
 #endif //USE_LUA

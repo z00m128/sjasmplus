@@ -83,10 +83,10 @@ std::string SInputFile::InitStr() {
 			}
 			[[fallthrough]];
 		case Options::FNAME_ABSOLUTE:
-			return SJ_force_slash(canonical).string();
+			return SJ_force_slash(canonical).u8string();
 		case Options::FNAME_BASE:
 		default:
-			return canonical.filename().string();
+			return canonical.filename().u8string();
 	}
 }
 
@@ -115,7 +115,7 @@ void DeleteOnError(int exitCode) {
 	for (const auto & file : DeleteOnErrorFiles) {
 		if (!FileExists(file)) continue;
 		if (Options::OutputVerbosity <= OV_ALL) {
-			_CERR " - " _CMDL file.string().c_str() _ENDL;
+			_CERR " - " _CMDL file.u8string().c_str() _ENDL;
 		}
 		fs::remove(file, err);
 	}
@@ -126,7 +126,7 @@ fs::path GetOutputFileName(char*& p) {
 	auto str_name = GetDelimitedStringEx(p);	// read delimited filename string
 	SJ_FixSlashes(str_name);					// convert backslashes *with* warning
 	// prefix with output path and force slashes again (without warning)
-	return SJ_force_slash(Options::OutPrefix / str_name.first);
+	return SJ_force_slash(Options::OutPrefix / fs::u8path(str_name.first));
 }
 
 static bool isAnySlash(const char c) {
@@ -175,7 +175,7 @@ fullpath_ref_t GetInputFile(delim_string_t && in) {
 	// !!! any warnings after this point must be W_EARLY, 2nd+ pass should use archived path = no warning !!!
 
 	// not archived yet, look for the file somewhere...
-	const fs::path name_in{ in.first };
+	const fs::path name_in = fs::u8path(in.first);
 	// no filename - return it as is (it's not valid for open)
 	if (!name_in.has_filename()) {
 		return archivedInputFiles.emplace_hint(lb, std::move(in), std::move(name_in))->second;
@@ -217,7 +217,7 @@ void ConstructDefaultFilename(fs::path & dest, const char* ext, bool checkIfDest
 	dest = "asm";		// use "asm" base if no explicit filename available
 	for (const SSource & src : sourceFiles) {
 		if (!src.fname[0]) continue;
-		dest = src.fname;
+		dest = fs::u8path(src.fname);
 		break;
 	}
 	dest.replace_extension(ext);
@@ -918,7 +918,7 @@ static void OpenListImp(const fs::path & listFilename) {
 	if (listFilename.empty()) return;
 	// in first pass overwrite the file, in later passes append to it
 	if (!FOPEN_ISOK(FP_ListingFile, listFilename, pass <= 1 ? "w" : "a")) {
-		Error("opening file for write", listFilename.string().c_str(), FATAL);
+		Error("opening file for write", listFilename.u8string().c_str(), FATAL);
 	}
 }
 
@@ -988,7 +988,7 @@ void OpenDest(int mode) {
 	}
 	if (!Options::NoDestinationFile) {
 		if (!FOPEN_ISOK(FP_Output, Options::DestinationFName, mode == OUTPUT_TRUNCATE ? "wb" : "r+b")) {
-			Error("opening file for write", Options::DestinationFName.string().c_str(), FATAL);
+			Error("opening file for write", Options::DestinationFName.u8string().c_str(), FATAL);
 		} else if (OUTPUT_TRUNCATE == mode) {
 			AddDeleteOnError(Options::DestinationFName);	// cleanonerror only in truncate (create) mode
 		}
@@ -1001,7 +1001,7 @@ void OpenDest(int mode) {
 	}
 	if (FP_RAW == NULL && Options::RAWFName.has_filename()) {
 		if (FOPEN_ISOK(FP_RAW, Options::RAWFName, "wb")) AddDeleteOnError(Options::RAWFName);
-		else Error("opening file for write", Options::RAWFName.string().c_str());
+		else Error("opening file for write", Options::RAWFName.u8string().c_str());
 	}
 	if (FP_Output != NULL && mode != OUTPUT_TRUNCATE) {
 		if (fseek(FP_Output, 0, mode == OUTPUT_REWIND ? SEEK_SET : SEEK_END)) {
@@ -1036,11 +1036,11 @@ void OpenTapFile(const fs::path & tapename, int flagbyte)
 	CloseTapFile();
 
 	if (!FOPEN_ISOK(FP_tapout,tapename, "r+b")) {
-		Error( "opening file for write", tapename.string().c_str());
+		Error( "opening file for write", tapename.u8string().c_str());
 		return;
 	}
 	// not adding to --cleanonerror, because this is appending to some file, not creating it
-	if (fseek(FP_tapout, 0, SEEK_END)) Error("File seek end error in TAPOUT", tapename.string().c_str(), FATAL);
+	if (fseek(FP_tapout, 0, SEEK_END)) Error("File seek end error in TAPOUT", tapename.u8string().c_str(), FATAL);
 
 	tape_seek = ftell(FP_tapout);
 	tape_parity = flagbyte;
@@ -1065,7 +1065,7 @@ bool FileExists(const fs::path & file_name) {
 
 bool FileExistsCstr(const char* file_name) {
 	if (nullptr == file_name) return false;
-	return FileExists(fs::path(file_name));
+	return FileExists(fs::u8path(file_name));
 }
 
 void Close() {
@@ -1149,7 +1149,7 @@ unsigned char MemGetByte(unsigned int address) {
 
 int SaveBinary(const fs::path & fname, aint start, aint length) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.u8string().c_str(), FATAL);
 	AddDeleteOnError(fname);
 	int result = SaveRAM(ff, start, length);
 	fclose(ff);
@@ -1159,7 +1159,7 @@ int SaveBinary(const fs::path & fname, aint start, aint length) {
 
 int SaveBinary3dos(const fs::path & fname, aint start, aint length, byte type, word w2, word w3) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.u8string().c_str(), FATAL);
 	AddDeleteOnError(fname);
 	// prepare +3DOS 128 byte header content
 	constexpr aint hsize = 128;
@@ -1190,7 +1190,7 @@ int SaveBinary3dos(const fs::path & fname, aint start, aint length, byte type, w
 int SaveBinaryAmsdos(const fs::path & fname, aint start, aint length, word start_adr, byte type) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname.string().c_str(), SUPPRESS);
+		Error("opening file for write", fname.u8string().c_str(), SUPPRESS);
 		return 0;
 	}
 	AddDeleteOnError(fname);
@@ -1225,7 +1225,7 @@ bool SaveDeviceMemory(FILE* file, const size_t start, const size_t length) {
 // start and length must be sanitized by caller
 bool SaveDeviceMemory(const fs::path & fname, const size_t start, const size_t length) {
 	FILE* ff;
-	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.string().c_str(), FATAL);
+	if (!FOPEN_ISOK(ff, fname, "wb")) Error("opening file for write", fname.u8string().c_str(), FATAL);
 	AddDeleteOnError(fname);
 	bool res = SaveDeviceMemory(ff, start, length);
 	fclose(ff);
@@ -1285,7 +1285,7 @@ int SaveHobeta(const fs::path & fname, const char* fhobname, aint start, aint le
 
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname.string().c_str(), FATAL);
+		Error("opening file for write", fname.u8string().c_str(), FATAL);
 	}
 	AddDeleteOnError(fname);
 
@@ -1427,7 +1427,7 @@ void OpenExpFile() {
 	if (!Options::ExportFName.has_filename()) return;	// no export file name provided, skip opening
 	if (FOPEN_ISOK(FP_ExportFile, Options::ExportFName, "w")) return;
 	// not adding to --cleanonerror, this is not binary output file
-	Error("opening file for write", Options::ExportFName.string().c_str(), ALL);
+	Error("opening file for write", Options::ExportFName.u8string().c_str(), ALL);
 }
 
 void WriteLabelEquValue(const char* name, aint value, FILE* f) {
@@ -1484,7 +1484,7 @@ static void FlushHexBuffer() {
 bool OpenHex(const fs::path & fname) {
 	if (!fname.has_filename()) return false;
 	if (nullptr != FP_HEX) {
-		Error("HEX output is already active, can't open for file", fname.string().c_str(), SUPPRESS);
+		Error("HEX output is already active, can't open for file", fname.u8string().c_str(), SUPPRESS);
 		return false;
 	}
 	if ("-" == fname) {
@@ -1498,7 +1498,7 @@ bool OpenHex(const fs::path & fname) {
 	} else if (!FOPEN_ISOK(FP_HEX, fname, "wb")) {
 		// use fopen "w" mode to get CRLF EOLs on mingw windows build.
 		// To make CI testing simpler and force world into *NIX LF way there is "wb" right now
-		Error("opening HEX file for write", fname.string().c_str());
+		Error("opening HEX file for write", fname.u8string().c_str());
 		return false;
 	} else {
 		AddDeleteOnError(fname);
@@ -1581,7 +1581,7 @@ static void WriteToSldFile_TextFilePos(char* buffer, const TextFilePos & pos) {
 static void OpenSldImp(const fs::path & sldFilename) {
 	if (!sldFilename.has_filename()) return;
 	if (!FOPEN_ISOK(FP_SourceLevelDebugging, sldFilename, "w")) {
-		Error("opening file for write", sldFilename.string().c_str(), FATAL);
+		Error("opening file for write", sldFilename.u8string().c_str(), FATAL);
 	}
 	// not adding to --cleanonerror, this is not binary output file
 	fputs("|SLD.data.version|1\n", FP_SourceLevelDebugging);
@@ -1619,7 +1619,7 @@ void OpenSld() {
 	// check if any lines were parsed in pass 2
 	// if none, skip opening SLD file to not clutter output directory in completely invalid runs like missing source files
 	if (CompiledCurrentLine <= 0) {
-		Warning("No SLD file created because no lines assembled", Options::SourceLevelDebugFName.string().c_str());
+		Warning("No SLD file created because no lines assembled", Options::SourceLevelDebugFName.u8string().c_str());
 		return;
 	}
 	// try to open it if not opened yet
@@ -1727,7 +1727,7 @@ static int breakpointsCounter;
 
 void OpenBreakpointsFile(const fs::path & filename, const EBreakpointsFile type) {
 	if (!filename.has_filename()) {
-		Error("empty filename", filename.string().c_str(), EARLY);
+		Error("empty filename", filename.u8string().c_str(), EARLY);
 		return;
 	}
 	if (FP_BreakpointsFile) {
@@ -1735,7 +1735,7 @@ void OpenBreakpointsFile(const fs::path & filename, const EBreakpointsFile type)
 		return;
 	}
 	if (!FOPEN_ISOK(FP_BreakpointsFile, filename, "w")) {
-		Error("opening file for write", filename.string().c_str(), EARLY);
+		Error("opening file for write", filename.u8string().c_str(), EARLY);
 	}
 	// not adding to --cleanonerror, this is not binary output file
 	breakpointsCounter = 0;

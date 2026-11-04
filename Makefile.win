@@ -28,7 +28,7 @@ SUBDIR_CRC32C=crc32c
 CFLAGS=-DNDEBUG -O2 -Wall -static -DUSE_LUA -DMAX_PATH=PATH_MAX -I$(SUBDIR_LUA) -I$(SUBDIR_LUABRIDGE) -I$(SUBDIR_CRC32C)
 CXXFLAGS=-std=gnu++17 $(CFLAGS)
 
-LDFLAGS= -s
+LDFLAGS= -s -lshell32
 
 #sjasmplus object files
 OBJS=\

@@ -209,6 +209,8 @@
             <term>? - 1.24.1?</term>
             <listitem>
               <synopsis>
+- Windows: fix non-ASCII input/output paths and working directories
+- filename operands use UTF-8 (see <link linkend="s_source_encoding">source encoding notes</link>)
 - stop `BLOCK`/`DS` truncating `$` (aka program counter) to 16 bit address space + new test
 - <link linkend="po_emptytrd">`EMPTYTRD`</link> allows up to 11 character labels
 - <link linkend="po_savebin">`SAVEBIN`</link> syntax/arguments tuned (negative values count from top of RAM)
@@ -684,6 +686,42 @@ label: ld e,c,d,b:inc hl,de   ; DE=BC, ++HL, ++DE
    &gt;IndentedMainLabel: ld b,123    ; '&gt;' must be first non-whitespace character on line
        &gt;.loop:         djnz .loop</programlisting>
 		</para>
+    </section>
+
+    <section id="s_source_encoding">
+      <title>Source Encoding, Filenames and Text Output</title>
+
+        <para>SjASMPlus processes assembly source as bytes, without detecting its character encoding
+          or automatically transcoding string literals. For strings emitted as machine code, the literal
+          bytes are preserved subject to the documented escape sequences and explicit
+          <link linkend="po_encoding">ENCODING</link> conversion. UTF-8, Windows-1251 and other
+          byte-compatible source encodings can therefore be used, and included sources need not all
+          use the same encoding. Raw machine code written to stdout with <code>--raw=-</code> is also
+          written as bytes, without character-encoding conversion.</para>
+
+        <para>On Windows, command-line paths and working directories use native Unicode filenames.
+          Host-filesystem filename operands within assembly source, such as those in
+          <link linkend="po_include">INCLUDE</link>, <link linkend="po_incbin">INCBIN</link>,
+          <link linkend="po_includelua">INCLUDELUA</link> and <link linkend="po_savebin">SAVEBIN</link>,
+          must contain UTF-8 filename text. This requirement applies to filenames, not to the entire
+          source file or its data strings. Legacy code-page bytes in non-ASCII filename operands are
+          not automatically converted and may fail during path conversion. On POSIX systems, native
+          filename bytes are passed through unchanged. ASCII filenames are the most portable choice,
+          including when sources use legacy encodings.</para>
+
+        <para><code>ENCODING "DOS"</code> is a legacy Windows-1251 to DOS-866 byte conversion,
+          not a declaration of the source file's encoding. It acts on the substituted source line,
+          including filename operands, so it can corrupt non-ASCII filenames. Using ASCII filename
+          operands avoids this interaction.</para>
+
+        <para>Diagnostics are written to stderr, separately from raw machine code on stdout.
+          Diagnostics, listings and other text outputs are not normalized to a single character encoding:
+          filesystem path text is represented as UTF-8 on Windows, while source text may retain bytes
+          from another encoding. Such output can therefore contain mixed encodings. SjASMPlus does not
+          change the Windows console code page or automatically transcode messages to match it;
+          non-ASCII text may display incorrectly when the terminal or the program reading an output
+          file interprets those bytes using a different encoding. Successful Unicode file access does
+          not imply that every filename or source excerpt will display correctly.</para>
     </section>
   </chapter>
 

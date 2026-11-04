@@ -410,7 +410,7 @@ namespace Options {
 		int CheckAssignmentOption(const char* keyword, std::filesystem::path & path) {
 			if (strcmp(keyword, opt)) return 0;		// detect "keyword" (return 0 if not)
 			if (*val) {
-				path = val;
+				path = std::filesystem::u8path(val);
 			} else {
 				Error("no parameters found in", arg, ALL);
 			}
@@ -600,11 +600,11 @@ namespace Options {
 							(!doubleDash && 'i' == opt[0]) ||
 							(!doubleDash && 'I' == opt[0])) {
 					if (*val) {
-						IncludeDirsList.emplace_back(val);
+						IncludeDirsList.emplace_back(std::filesystem::u8path(val));
 					} else {
 						if (!doubleDash || '=' == arg[5]) {
 							if (argv[i+1] && '-' != argv[i+1][0]) {		// include path provided as next argument (after space, like gcc)
-								IncludeDirsList.emplace_back(argv[++i]);
+								IncludeDirsList.emplace_back(std::filesystem::u8path(argv[++i]));
 							} else {
 								Error("no include path found for", arg, ALL);
 							}
@@ -640,8 +640,9 @@ namespace Options {
 		void checkIncludePaths(const std::vector<std::filesystem::path> & includes) {
 			for (auto it = includes.crbegin(); it != includes.crend(); ++it) {
 				if (std::filesystem::is_directory(*it)) continue;
-				const char* errtxt = '~' == it->string()[0] ? "include path starts with ~ (check docs)" : "include path not found";
-				Error(errtxt, it->string().c_str(), ALL);
+				const char* u8path = it->u8string().c_str();
+				const char* errtxt = '~' == u8path[0] ? "include path starts with ~ (check docs)" : "include path not found";
+				Error(errtxt, u8path, ALL);
 			}
 			return;
 		}
@@ -668,7 +669,7 @@ namespace Options {
 //detect "--unittest" switch, prepare UnitTest++, run the test runner, collect results, exit
 # define CHECK_UNIT_TESTS \
 	{ \
-		if (2 == argc && !strcmp("--unittest", argv[1])) { \
+		if (3 == argumentPointers.size() && !strcmp("--unittest", argumentPointers[1])) { \
 			_COUT "SjASMPlus \033[96mv" VERSION "\033[0m | \033[95mrunning unit tests:\033[0m" _ENDL _END \
 			int exitCode = STOP_MAKE_BY_NON_ZERO_EXIT_CODE + UnitTest::RunAllTests(); \
 			if (exitCode) _COUT "\033[91mNon-zero result from test runner!\033[0m" _ENDL _END \
@@ -689,11 +690,11 @@ namespace Options {
 
 // == end of UnitTest++ part ====================================================================
 
-#ifdef WIN32
 int main(int argc, char* argv[]) {
-#else
-int main(int argc, char **argv) {
-#endif
+	std::vector<std::string> utf8Arguments;
+	std::vector<char*> argumentPointers;
+	if (!SJ_processArgv(argc, argv, utf8Arguments, argumentPointers)) return 1;
+	const bool noArguments = 2 == argumentPointers.size();
 	Options::SetTerminalColors(autoColorsDetection());
 
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION VERSION_SUFFIX " (https://github.com/z00m128/sjasmplus)";
@@ -714,8 +715,9 @@ int main(int argc, char **argv) {
 
 	LaunchDirectory = std::filesystem::current_path();	// get CWD as launch directory
 	Options::COptionsParser optParser;
-	char* envFlags = std::getenv("SJASMPLUSOPTS");
-	if (nullptr != envFlags) {
+	std::string envOptions = SJ_getenv("SJASMPLUSOPTS");
+	if (!envOptions.empty()) {
+		char* envFlags = envOptions.data();
 		// split environment arguments into "argc, argv" like variables (by white-space)
 		char* parsedOptsArray[33] {};	// there must be one more nullptr in the array (32+1)
 		int optI = 0, charI = 0;
@@ -737,11 +739,11 @@ int main(int argc, char **argv) {
 	}
 
 	int i = 1;
-	if (argc > 1) {
-		while (argv[i]) {
-			optParser.GetOptions(argv, i);
-			if (!argv[i]) break;
-			sourceFiles.push_back(SSource(argv[i++]));
+	if (3 <= argumentPointers.size()) {
+		while (argumentPointers[i]) {
+			optParser.GetOptions(argumentPointers.data(), i);
+			if (!argumentPointers[i]) break;
+			sourceFiles.push_back(SSource(argumentPointers[i++]));
 		}
 	}
 	// setup __DATE__ and __TIME__ macros (setup them just once, not every pass!)
@@ -755,7 +757,7 @@ int main(int argc, char **argv) {
 	Options::CmdDefineTable.Add("__TIME__", timeBuffer, nullptr);
 
 	// warn about BE-host only when there's any CLI argument && after CLI options were parsed
-	if (2 <= argc && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
+	if (3 <= argumentPointers.size() && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
 	if (Options::IsDefaultListingName && Options::ListingFName.has_filename()) {
 		Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
 	}
@@ -767,10 +769,10 @@ int main(int argc, char **argv) {
 	}
 	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
 
-	if (argc == 1 || Options::ShowHelp || Options::ShowHelpWarnings || Options::ShowHelpSyntax) {
+	if (noArguments || Options::ShowHelp || Options::ShowHelpWarnings || Options::ShowHelpSyntax) {
 		_COUT logo _ENDL;
-		PrintHelp(argc == 1);
-		exit(argc == 1);
+		PrintHelp(noArguments);
+		exit(noArguments);
 	}
 
 	if (!Options::HideLogo) {

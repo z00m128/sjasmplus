@@ -523,7 +523,7 @@ void CLabelTable::DumpForUnreal() {
 	char ln[LINEMAX], * ep;
 	FILE* FP_UnrealList;
 	if (!FOPEN_ISOK(FP_UnrealList, Options::UnrealLabelListFName, "w")) {
-		Error("opening file for write", Options::UnrealLabelListFName.string().c_str(), FATAL);
+		Error("opening file for write", Options::UnrealLabelListFName.u8string().c_str(), FATAL);
 	}
 	// not adding to --cleanonerror, this is not binary output file
 	const int PAGE_MASK = DeviceID ? Device->GetPage(0)->Size - 1 : 0x3FFF;
@@ -558,7 +558,7 @@ void CLabelTable::DumpForUnreal() {
 void CLabelTable::DumpForCSpect() {
 	FILE* file;
 	if (!FOPEN_ISOK(file, Options::CSpectMapFName, "w")) {
-		Error("opening file for write", Options::CSpectMapFName.string().c_str(), FATAL);
+		Error("opening file for write", Options::CSpectMapFName.u8string().c_str(), FATAL);
 	}
 	// not adding to --cleanonerror, this is not binary output file
 	const int CSD_PAGE_SIZE = Options::CSpectMapPageSize;
@@ -611,7 +611,7 @@ void CLabelTable::DumpForCSpect() {
 void CLabelTable::DumpSymbols() {
 	FILE* symfp;
 	if (!FOPEN_ISOK(symfp, Options::SymbolListFName, "w")) {
-		Error("opening file for write", Options::SymbolListFName.string().c_str(), FATAL);
+		Error("opening file for write", Options::SymbolListFName.u8string().c_str(), FATAL);
 	}
 	// not adding to --cleanonerror, this is not binary output file
 	const auto order = getDumpOrder(symbols);

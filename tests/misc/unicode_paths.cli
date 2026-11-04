@@ -1,0 +1,70 @@
+(
+    set -eE
+    trap 'printf "Unicode path check failed: %s\n" "$BASH_COMMAND" >&2' ERR
+    directory='unicode_paths_Тест 漢字'
+    reference="$PWD/$directory/данные.txt"
+
+    assemble() {
+        $MEMCHECK "$EXE" --nologo --color=off "${options[@]}" "$@" 2> unicode_paths.log
+    }
+    expect_error() {
+        if assemble "$@"; then
+            printf 'Expected assembler error for: %s\n' "$*" >&2
+            return 1
+        else
+            [[ $? -eq 1 ]]
+        fi
+    }
+
+    cp "$file_asm" "$directory/код.asm"
+    $MEMCHECK "$EXE" --nologo --msg=err --color=off "${options[@]}" --fullpath \
+        -DUNICODE_PATH_DISPLAY "$directory/код.asm" --raw=out.bin
+    $CMP "$reference" out.bin
+
+    assemble "$file_asm" "--raw=$directory/код.bin"
+    $CMP "$reference" "$directory/код.bin"
+
+    cp "$file_asm" "$directory/main.asm"
+    (cd "$directory" && assemble main.asm --raw=out.bin && $CMP "$reference" out.bin)
+
+    printf '\357\273\277' > "$directory/bom.lua"
+    cat "$directory/скрипт.lua" >> "$directory/bom.lua"
+    mv "$directory/bom.lua" "$directory/скрипт.lua"
+    assemble unicode_paths_content.i.asm --raw=out.bin --lst=content.lst
+    $CMP "$reference" out.bin
+    $CMP "$reference" "$directory/выход.bin"
+    grep -Fq "$directory/generated.asm" content.lst
+
+    assemble unicode_paths_include.i.asm "--inc=$directory" --raw=out.bin
+    $CMP "$reference" out.bin
+    assemble unicode_paths_include.i.asm -I "$directory" --raw=out.bin
+    $CMP "$reference" out.bin
+
+    assemble "$directory/код.asm" --lst --sld --fullpath
+    [[ -s "$directory/код.lst" ]]
+    grep -Fq 'код.asm' "$directory/код.sld.txt"
+
+    expect_error "$directory/missing.asm" --fullpath
+    grep -Fq "$directory/missing.asm" unicode_paths.log
+    expect_error "$file_asm" "--raw=$directory/missing/out.bin"
+    grep -Fq "$directory/missing/out.bin" unicode_paths.log
+
+    expect_error unicode_paths_error.i.asm "--raw=$directory/error.bin" --cleanonerror
+    [[ ! -e "$directory/error.bin" ]]
+
+    mkdir unicode_paths_Тест
+    cp "$directory/часть.i.asm" unicode_paths_Тест/
+    SJASMPLUSOPTS='--inc=unicode_paths_Тест' assemble unicode_paths_include.i.asm --raw=out.bin
+    $CMP "$reference" out.bin
+
+    case "$(uname -s)" in
+        Linux|FreeBSD)
+            native_directory=$'unicode_paths_native_\377'
+            mkdir "$native_directory"
+            cp "$file_asm" "$native_directory/main.asm"
+            assemble "$native_directory/main.asm" "--raw=$native_directory/out.bin"
+            $CMP "$reference" "$native_directory/out.bin"
+            ;;
+    esac
+)
+last_result=$?
