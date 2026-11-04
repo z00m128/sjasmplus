@@ -417,14 +417,74 @@ No flag array should be allocated when XMAP is not requested in either design.
   or 0x00 (default/code). The current leaning is DB-like because it imports raw
   bytes, but complex projects also include code assembled in preceding build
   steps. Neither classification can infer the blob's contents or mixed regions.
-  ASCII guessing is rejected. Await practical consumer feedback; an explicit
-  override or imported metadata could be future options, not prerequisites or
-  selected syntax. Do not silently settle the RFC in the implementation.
+  ASCII guessing is rejected. In the 2026-11-04 follow-up, Volutar also favors
+  DB/DEFB because a raw binary has lost its type information, and questions adding
+  XMAP-specific classification parameters to INCBIN. This supports 0x10 as the
+  working default direction, not an implemented or finalized directive contract.
+  Imported metadata is a separate possible extension, discussed below.
 * Structures need their own member-kind coverage, including default text/fillers,
   nested members, wide fields, and blocks that preserve existing memory.
 * A two-byte word crossing a physical page boundary, odd-aligned words, partial
   overwrites, and adjacent address words need consumer tests. The example does
   not establish how word grouping/start boundaries are represented by low bits.
+
+## Follow-Up: INCBIN Metadata Composition And Consumer Coordination
+
+The [2026-11-04 follow-up discussion](https://github.com/z00m128/sjasmplus/issues/161#issuecomment-6634386848)
+adds three directions beyond choosing a default INCBIN flag:
+
+* Volutar suggests that typed data in SLD would also help, at least enough for
+  an external converter: byte versus word versus address data. This is a proposed
+  extension, not information that current SLD already supplies. Typed ranges
+  need extents and bank/address identity, including unlabelled data; more traits
+  on label records alone would not satisfy it. This supports alternatives B/G
+  without choosing native XMAP export versus an intermediate format yet.
+* Volutar identifies [Xpeccy+](https://github.com/dotkoval/xpeccy-plus) as an actively
+  developed, more user/developer-friendly fork and welcomes cross-development
+  agreements. Treat it as a candidate compatibility partner; this notebook has
+  not independently tested its current importer. Agree on a target version and
+  existing format behavior rather than presume it matches the original sample.
+  Existing sjasmplus exports may offer immediate integration opportunities while
+  new typed-memory metadata remains unimplemented.
+* The maintainer proposes assembler-side composition: a producer assembly exports
+  its binary blob and XMAP; a later assembly pairs INCBIN with a possible XMAP
+  import directive and incorporates the metadata into its final exported map.
+  The emulator would receive one composed map, not have to cascade component
+  maps itself. No import directive name, syntax, or automatic pairing is selected.
+
+This import is an independent optional enhancement. Plain INCBIN can remain a
+DB-like byte range; projects with preassembled code or mixed data could explicitly
+restore classification from the producer's map. No type inference from binary
+content and no rerun of the producer's source/scripts is required.
+
+An initial import experiment could handle flags only, leaving labels/comments to
+later work. Before selecting implementation rules, resolve these boundaries:
+
+1. A binary file offset is not an XMAP physical-memory offset. Record or explicitly
+   supply which producer memory range corresponds to the saved blob, especially
+   with partial saves, holes, banks, or concatenated output. INCBIN's offset/length
+   selection must select the corresponding metadata, not the whole producer map.
+2. Translate the selected source range into the importing device's actual write
+   locations, splitting at page boundaries and respecting any displacement policy.
+   Same-page/same-origin import is only a simple special case. A metadata import
+   must not silently relocate machine code or rewrite embedded address values.
+3. Define ordering relative to INCBIN and subsequent writes. Imported flags must
+   replace the default INCBIN classification, including explicit 0x00 code flags;
+   later overwrites should follow the selected ordinary map-write policy. Define
+   what happens if metadata is imported without a matching blob write.
+4. Validate selected bounds, chunk lengths, supported device/mapping information,
+   and missing or stale companion artifacts. XMAP alone does not establish that
+   a map belongs to a particular binary; do not claim identity verification without
+   a corresponding mechanism. Reject unsupported mappings rather than guess.
+5. If labels/comments are later imported, define naming, aliases, address
+   translation, collisions, and merge precedence separately. Moving flag bytes is
+   not sufficient evidence that all exported symbol values should be rebased.
+
+Useful tests include a producer blob containing code plus numeric/string data,
+a partial INCBIN selection, a changed destination origin/page, imported zero flags
+over the DB default, a later overwrite, and mismatched map/blob bounds. Verify
+that the composed map displays correctly in the agreed emulator version and that
+neither producer nor consumer machine-code output is changed by metadata import.
 
 ## Addressing, Overwrites, And Lifetime
 
@@ -517,8 +577,10 @@ data-specific word splitting, marker
 safety, and zero-tag overwrites before extending producer coverage. Verify that
 the non-XMAP path allocates no map; measure tag/check work in the runtime-gated
 variant rather than requiring it to meet the specialized zero-instruction goal.
-Start with device-only snapshots and keep the INCBIN default unresolved pending
-the RFC or an explicit design decision.
+Start with device-only snapshots. The RFC follow-up supports a DB-like INCBIN
+default of 0x10; confirm that design choice before implementation and keep optional
+companion-map import separate from the initial export feature. Coordinate typed
+SLD/converter possibilities and format compatibility with the chosen consumer.
 
 The maintainer's initial preference for a fourth source traversal has receded
 because of its script-visible lifecycle. Retain it as an alternative for an
