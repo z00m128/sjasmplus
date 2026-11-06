@@ -640,9 +640,9 @@ namespace Options {
 		void checkIncludePaths(const std::vector<std::filesystem::path> & includes) {
 			for (auto it = includes.crbegin(); it != includes.crend(); ++it) {
 				if (std::filesystem::is_directory(*it)) continue;
-				const char* u8path = it->u8string().c_str();
+				const std::string u8path = it->u8string();
 				const char* errtxt = '~' == u8path[0] ? "include path starts with ~ (check docs)" : "include path not found";
-				Error(errtxt, u8path, ALL);
+				Error(errtxt, u8path.c_str(), ALL);
 			}
 			return;
 		}
@@ -669,7 +669,7 @@ namespace Options {
 //detect "--unittest" switch, prepare UnitTest++, run the test runner, collect results, exit
 # define CHECK_UNIT_TESTS \
 	{ \
-		if (3 == argumentPointers.size() && !strcmp("--unittest", argumentPointers[1])) { \
+		if (2 == argc && argv && argv[1] && !strcmp("--unittest", argv[1])) { \
 			_COUT "SjASMPlus \033[96mv" VERSION "\033[0m | \033[95mrunning unit tests:\033[0m" _ENDL _END \
 			int exitCode = STOP_MAKE_BY_NON_ZERO_EXIT_CODE + UnitTest::RunAllTests(); \
 			if (exitCode) _COUT "\033[91mNon-zero result from test runner!\033[0m" _ENDL _END \
@@ -691,10 +691,6 @@ namespace Options {
 // == end of UnitTest++ part ====================================================================
 
 int main(int argc, char* argv[]) {
-	std::vector<std::string> utf8Arguments;
-	std::vector<char*> argumentPointers;
-	if (!SJ_processArgv(argc, argv, utf8Arguments, argumentPointers)) return 1;
-	const bool noArguments = 2 == argumentPointers.size();
 	Options::SetTerminalColors(autoColorsDetection());
 
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION VERSION_SUFFIX " (https://github.com/z00m128/sjasmplus)";
@@ -715,36 +711,29 @@ int main(int argc, char* argv[]) {
 
 	LaunchDirectory = std::filesystem::current_path();	// get CWD as launch directory
 	Options::COptionsParser optParser;
+	std::vector<std::string> utf8Arguments;
+	std::vector<char*> argumentPointers;
 	std::string envOptions = SJ_getenv("SJASMPLUSOPTS");
-	if (!envOptions.empty()) {
-		char* envFlags = envOptions.data();
-		// split environment arguments into "argc, argv" like variables (by white-space)
-		char* parsedOptsArray[33] {};	// there must be one more nullptr in the array (32+1)
-		int optI = 0, charI = 0;
-		while (optI < 32 && !SkipBlanks(envFlags)) {
-			parsedOptsArray[optI++] = temp + charI;
-			while (*envFlags && !White(*envFlags) && charI < LINEMAX-1) temp[charI++] = *envFlags++;
-			temp[charI++] = 0;
-		}
-		if (!SkipBlanks(envFlags)) {
+	char* envFlags = envOptions.data();
+	// split environment arguments by white-space, ahead of command line options
+	while (!SkipBlanks(envFlags)) {
+		if (32 <= argumentPointers.size()) {
 			Error("SJASMPLUSOPTS environment variable contains too many options (max is 32)", nullptr, ALL);
+			break;
 		}
-		// process environment variable ahead of command line options (in the same way)
-		int i = 0;
-		while (parsedOptsArray[i]) {
-			optParser.GetOptions(parsedOptsArray, i);
-			if (!parsedOptsArray[i]) break;
-			sourceFiles.push_back(SSource(parsedOptsArray[i++]));
-		}
+		argumentPointers.push_back(envFlags);
+		while (*envFlags && !White(*envFlags)) ++envFlags;
+		if (*envFlags) *envFlags++ = 0;
 	}
+	if (!SJ_processArgv(argc, argv, utf8Arguments, argumentPointers)) return 1;
+	const bool noArguments = argumentPointers.empty();
+	argumentPointers.push_back(nullptr);
 
-	int i = 1;
-	if (3 <= argumentPointers.size()) {
-		while (argumentPointers[i]) {
-			optParser.GetOptions(argumentPointers.data(), i);
-			if (!argumentPointers[i]) break;
-			sourceFiles.push_back(SSource(argumentPointers[i++]));
-		}
+	int i = 0;
+	while (argumentPointers[i]) {
+		optParser.GetOptions(argumentPointers.data(), i);
+		if (!argumentPointers[i]) break;
+		sourceFiles.push_back(SSource(argumentPointers[i++]));
 	}
 	// setup __DATE__ and __TIME__ macros (setup them just once, not every pass!)
 	auto now = std::chrono::system_clock::now();
@@ -756,8 +745,8 @@ int main(int argc, char* argv[]) {
 	Options::CmdDefineTable.Add("__DATE__", dateBuffer, nullptr);
 	Options::CmdDefineTable.Add("__TIME__", timeBuffer, nullptr);
 
-	// warn about BE-host only when there's any CLI argument && after CLI options were parsed
-	if (3 <= argumentPointers.size() && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
+	// warn about BE-host only when there's any argument && after options were parsed
+	if (!noArguments && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
 	if (Options::IsDefaultListingName && Options::ListingFName.has_filename()) {
 		Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
 	}

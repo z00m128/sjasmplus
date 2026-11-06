@@ -20,6 +20,26 @@ TEST(Sanity) {			// just to verify the UnitTest++ test runner works
 	CHECK_EQUAL(1, 1);
 }
 
+TEST(Support_ProcessArgv_NoArguments) {
+	for (int count : { -1, 0, 1 }) {
+		std::vector<std::string> storage;
+		std::vector<char*> pointers;
+		CHECK(SJ_processArgv(count, nullptr, storage, pointers));
+		CHECK(storage.empty());
+		CHECK(pointers.empty());
+	}
+}
+
+TEST(Support_ProcessArgv_SkipsExecutable) {
+	char option[] = "--unittest";
+	char* arguments[] = { nullptr, option, nullptr };
+	std::vector<std::string> storage;
+	std::vector<char*> pointers;
+	CHECK(SJ_processArgv(2, arguments, storage, pointers));
+	CHECK_EQUAL(1, pointers.size());
+	if (1 == pointers.size()) CHECK_EQUAL("--unittest", pointers[0]);
+}
+
 TEST(Reader_GetNumericValue_IntBased_1) {
 	// for 100% coverage (this error state can't be currently reached through ASM file)
 	aint val = 0xBADF00D;

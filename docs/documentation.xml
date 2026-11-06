@@ -211,6 +211,7 @@
               <synopsis>
 - Windows: fix non-ASCII input/output paths and working directories
 - filename operands use UTF-8 (see <link linkend="s_source_encoding">source encoding notes</link>)
+- merge `SJASMPLUSOPTS` arguments with command line arguments, allowing environment-only invocation
 - stop `BLOCK`/`DS` truncating `$` (aka program counter) to 16 bit address space + new test
 - <link linkend="po_emptytrd">`EMPTYTRD`</link> allows up to 11 character labels
 - <link linkend="po_savebin">`SAVEBIN`</link> syntax/arguments tuned (negative values count from top of RAM)
@@ -582,7 +583,11 @@ label:  dw 15
 	  <programlisting>export SJASMPLUSOPTS="--zxnext=cspect --msg=war"
 sjasmplus --lst --lstlab example.asm</programlisting>
 	will execute the assembling as if command line "<code>sjasmplus --zxnext=cspect --msg=war --lst --lstlab example.asm</code>"
-	was used. Known issue: parser of environment variable delimits each option on any white-space character, so
+  was used. The variable can contain up to 32 arguments, including source filenames; if it supplies everything
+  needed for assembly, <code>sjasmplus</code> can be launched without further arguments. Environment arguments
+  and command line arguments form one sequence, so an option at the end of the variable (such as <code>-I</code>)
+  can take its operand from the first command line argument. The 32-argument limit applies only to the variable.
+  Known issue: parser of environment variable delimits each option on any white-space character, so
 	option containing space character will be incorrectly parsed (like "-I file-path with space" = fails and
 	there is no way to escape/quote the path in the SJASMPLUSOPTS variable to make it work).
   </para>

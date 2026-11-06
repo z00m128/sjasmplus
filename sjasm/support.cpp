@@ -58,20 +58,20 @@ std::string SJ_getenv(const char* name) {
 }
 
 bool SJ_processArgv(int argc, char* argv[], std::vector<std::string>& storage, std::vector<char*>& pointers) {
-	assert(storage.empty() && pointers.empty());
+	assert(storage.empty());
+	if (argc <= 1 || nullptr == argv) return true;
 	#ifdef _WIN32
 		int wideArgc = 0;
 		wchar_t** wideArgv = CommandLineToArgvW(GetCommandLineW(), &wideArgc);
 		if (!wideArgv) return false;
 		storage.reserve(wideArgc);
-		for (int index = 0; index < wideArgc; ++index) storage.push_back(WindowsUtf8(wideArgv[index]));
+		for (int index = 1; index < wideArgc; ++index) storage.push_back(WindowsUtf8(wideArgv[index]));
 		LocalFree(wideArgv);
-		pointers.reserve(storage.size() + 1);
+		pointers.reserve(pointers.size() + storage.size() + 1);
 		for (auto & argument : storage) pointers.push_back(argument.data());
 	#else
-		pointers.assign(argv, argv + argc);
+		pointers.insert(pointers.end(), argv + 1, argv + argc);
 	#endif
-	pointers.push_back(nullptr);
 	return true;
 }
 

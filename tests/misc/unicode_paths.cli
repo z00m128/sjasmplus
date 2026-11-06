@@ -57,6 +57,30 @@
     SJASMPLUSOPTS='--inc=unicode_paths_Тест' assemble unicode_paths_include.i.asm --raw=out.bin
     $CMP "$reference" out.bin
 
+    SJASMPLUSOPTS="--nologo --color=off --raw=out.bin $file_asm" \
+        $MEMCHECK "$EXE" 2> unicode_paths.log
+    $CMP "$reference" out.bin
+
+    SJASMPLUSOPTS='--nologo --color=off --raw=out.bin -I' \
+        $MEMCHECK "$EXE" unicode_paths_Тест unicode_paths_include.i.asm 2> unicode_paths.log
+    $CMP "$reference" out.bin
+
+    if SJASMPLUSOPTS='   ' $MEMCHECK "$EXE" > unicode_paths.log 2>&1; then
+        printf 'Expected help and error exit for an empty argument list\n' >&2
+        exit 1
+    else
+        [[ $? -eq 1 ]]
+    fi
+    grep -Fq 'Usage:' unicode_paths.log
+
+    env_flags=''
+    for ((index = 0; index < 32; ++index)); do env_flags+=' --nologo'; done
+    SJASMPLUSOPTS="$env_flags" assemble "$file_asm" --raw=out.bin
+    $CMP "$reference" out.bin
+    env_flags+=' --nologo'
+    SJASMPLUSOPTS="$env_flags" expect_error "$file_asm" --raw=out.bin
+    grep -Fq 'SJASMPLUSOPTS environment variable contains too many options (max is 32)' unicode_paths.log
+
     case "$(uname -s)" in
         Linux|FreeBSD)
             native_directory=$'unicode_paths_native_\377'
