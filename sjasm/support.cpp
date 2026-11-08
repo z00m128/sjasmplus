@@ -29,8 +29,12 @@
 // support.cpp
 
 #include "sjdefs.h"
+#include <chrono>
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
 #include <shellapi.h>
 
 static std::string WindowsUtf8(const wchar_t* text) {
@@ -99,15 +103,10 @@ FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode) {
 	#endif
 }
 
-#ifndef _WIN32
-
-long GetTickCount() {
-	struct timeval tv1[1];
-	gettimeofday(tv1, 0);
-	return tv1->tv_sec * 1000 + tv1->tv_usec / 1000;
+int64_t SJ_getTickCount() {
+	return std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()).count();
 }
-
-#endif	// #ifndef _WIN32
 
 #if defined (_WIN32) || defined (__CYGWIN__)
 	// cygwin: O_BINARY is in fcntl.h, setmode is in io.h

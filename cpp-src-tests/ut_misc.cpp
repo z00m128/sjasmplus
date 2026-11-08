@@ -15,9 +15,20 @@ OF THIS SOFTWARE.
 
 #include "../sjasm/sjdefs.h"
 #include "UnitTest++/UnitTest++.h"
+#include <chrono>
 
 TEST(Sanity) {			// just to verify the UnitTest++ test runner works
 	CHECK_EQUAL(1, 1);
+}
+
+TEST(Support_GetTickCount) {
+	const auto before = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()).count();
+	const auto actual = SJ_getTickCount();
+	const auto after = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()).count();
+	CHECK(before <= actual);
+	CHECK(actual <= after);
 }
 
 TEST(Support_ProcessArgv_NoArguments) {

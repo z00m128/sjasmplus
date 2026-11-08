@@ -707,7 +707,7 @@ int main(int argc, char* argv[]) {
 	Options::IsBigEndian = (0x12 == le_test_byte);
 
 	// start counter
-	long dwStart = GetTickCount();
+	const auto timeStart = SJ_getTickCount();
 
 	LaunchDirectory = std::filesystem::current_path();	// get CWD as launch directory
 	Options::COptionsParser optParser;
@@ -874,11 +874,10 @@ int main(int argc, char* argv[]) {
 	DeleteOnError(ErrorCount != 0);
 
 	if (Options::OutputVerbosity <= OV_ALL) {
-		double dwCount;
-		dwCount = GetTickCount() - dwStart;
-		if (dwCount < 0) dwCount = 0;
+		double timeCount = SJ_getTickCount() - timeStart;
+		if (timeCount < 0) timeCount = 0;
 		fprintf(stderr, "Errors: %d, warnings: %d, compiled: %d lines, work time: %.3f seconds\n",
-				ErrorCount, WarningCount, CompiledCurrentLine, dwCount / 1000);
+				ErrorCount, WarningCount, CompiledCurrentLine, timeCount / 1000);
 	}
 
 	return (ErrorCount != 0);

@@ -42,13 +42,8 @@
 #define _ENDL << endl
 #define _END ;
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <windows.h>
-#endif
-
 #include <cassert>
+#include <cstdint>
 #include <utility>
 #include <memory>
 #include <algorithm>
@@ -100,6 +95,10 @@ struct SAlignSafeCast {
 
 #ifndef PATH_MAX
 #define PATH_MAX	4096
+#endif
+
+#ifndef MAX_PATH
+#define MAX_PATH	PATH_MAX
 #endif
 
 // not used by sjasmplus, but define it any way to prevent accidental use by code, as MUSL clib is defining it

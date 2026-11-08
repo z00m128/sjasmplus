@@ -55,9 +55,7 @@ static_assert(0x78563412 == sj_bswap32(0x12345678), "internal error in bswap32 i
 
 #endif
 
-#ifndef _WIN32
-long GetTickCount();
-#endif
+int64_t SJ_getTickCount();
 
 #if defined (_WIN32) || defined (__CYGWIN__)
     // convert path to string, replace backslashes and convert it back to new path -> sounds fun!
