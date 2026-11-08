@@ -55,7 +55,7 @@ static_assert(0x78563412 == sj_bswap32(0x12345678), "internal error in bswap32 i
 
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 long GetTickCount();
 #endif
 

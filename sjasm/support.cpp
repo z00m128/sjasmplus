@@ -99,7 +99,7 @@ FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode) {
 	#endif
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 
 long GetTickCount() {
 	struct timeval tv1[1];
@@ -107,7 +107,7 @@ long GetTickCount() {
 	return tv1->tv_sec * 1000 + tv1->tv_usec / 1000;
 }
 
-#endif	// #ifndef WIN32
+#endif	// #ifndef _WIN32
 
 #if defined (_WIN32) || defined (__CYGWIN__)
 	// cygwin: O_BINARY is in fcntl.h, setmode is in io.h
@@ -176,7 +176,7 @@ bool autoColorsDetection() {
 #ifdef USE_LUA
 
 void LuaShellExec(const char *command) {
-#ifdef WIN32
+#ifdef _WIN32
 	WinExec(command, SW_SHOWNORMAL);
 #else
 	int ret = system(command);
