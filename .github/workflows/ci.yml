@@ -21,7 +21,7 @@ name: build
 # this). SHAs resolved 2026-05-17:
 #   actions/checkout            v6.0.3 -> df4cb1c069e1874edd31b4311f1884172cec0e10
 #   actions/upload-artifact     v7.0.2 -> cf430e030ddbb5b0abf93d22962f4752f3646cd9  
-#   cross-platform-actions      v1.6.0 -> e0b9770014ba65d5e0815f15b74031c3a635f641
+#   cross-platform-actions      v1.7.0 -> 82668f1fbd89d9c99487604f822cbf6716f124d3
 #   coverallsapp/github-action  v2.3.8 -> 8d6379e14d29928660c4ba802d8e85393440b329
 #
 # List of GH runners and their details:
@@ -208,7 +208,7 @@ jobs:
         with:
           submodules: true
       - name: Initialize FreeBSD VM
-        uses: cross-platform-actions/action@e0b9770014ba65d5e0815f15b74031c3a635f641  # v1.6.0
+        uses: cross-platform-actions/action@82668f1fbd89d9c99487604f822cbf6716f124d3  # v1.7.0
         with:
           operating_system: freebsd
           architecture: x86-64
