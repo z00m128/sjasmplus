@@ -212,6 +212,8 @@
 - Windows: fix non-ASCII input/output paths and working directories
 - filename operands use UTF-8 (see <link linkend="s_source_encoding">source encoding notes</link>)
 - merge `SJASMPLUSOPTS` arguments with command line arguments, allowing environment-only invocation
+- <link linkend="po_shellexec">`SHELLEXEC`</link> distinguishes shell-launch failures and POSIX signal termination from normal exit codes
+- <link linkend="lua_sj_shellexec">`sj.shellexec`</link> now waits for completion on Windows too and reports failures like `SHELLEXEC`
 - stop `BLOCK`/`DS` truncating `$` (aka program counter) to 16 bit address space + new test
 - <link linkend="po_emptytrd">`EMPTYTRD`</link> allows up to 11 character labels
 - <link linkend="po_savebin">`SAVEBIN`</link> syntax/arguments tuned (negative values count from top of RAM)
@@ -3798,7 +3800,10 @@ start:
 
             <listitem>
               <para>Execute external program &lt;filename&gt; using optional
-              command line &lt;parameters&gt;.<example>
+              command line &lt;parameters&gt;. Execution takes place only in the final assembly pass (pass 3).
+              Since v1.24.1 a nonzero exit code, failure to start the shell,
+              or (on POSIX) termination of the shell by a signal is reported as an assembler
+              error, with a separate diagnostic for each case.<example>
                   <title></title>
 
                   <para><programlisting>    OUTPUT "mybin.bin"
@@ -4970,7 +4975,14 @@ head1   BLOCK_HEADER {      ; Multi-line initialization requires curly braces.
             <term>[void] sj.shellexec("programname")<indexterm id="lua_sj_shellexec"><primary>sj.shellexec(..)</primary></indexterm></term>
 
             <listitem>
-              <para>See pseudo-op SHELLEXEC.</para>
+              <para>Same execution and error handling as <link linkend="po_shellexec">SHELLEXEC</link>.
+              Unlike the directive, this function runs in whichever pass executes the calling Lua code
+              (probably usual use case is to use <code>LUA PASS3</code> block).
+              Nonzero exit codes and execution failures are reported as assembler errors.
+              Commands with expected failures must handle them and return zero themselves.</para>
+              <para>Since v1.24.1 the execution is blocking on all platforms.
+              Previously, Windows execution did not wait for completion, and nonzero
+              command exit codes were not reported as assembler errors.</para>
             </listitem>
           </varlistentry>
 

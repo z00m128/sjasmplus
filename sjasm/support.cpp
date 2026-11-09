@@ -29,6 +29,7 @@
 // support.cpp
 
 #include "sjdefs.h"
+#include <cerrno>
 #include <chrono>
 
 #ifdef _WIN32
@@ -48,6 +49,9 @@ static std::string WindowsUtf8(const wchar_t* text) {
 	result.resize(size - 1);
 	return result;
 }
+#else
+#include <sys/wait.h>
+#include <unistd.h>
 #endif
 
 std::string SJ_getenv(const char* name) {
@@ -106,6 +110,35 @@ FILE* SJ_fopen(const std::filesystem::path & fname, const char* mode) {
 int64_t SJ_getTickCount() {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+void SJ_shellExec(const char* command) {
+	if (!system(nullptr)) {
+		Error("[SHELLEXEC] clib command processor is not available on this platform!");
+		return;
+	}
+	if (Options::OutputVerbosity <= OV_ALL) {
+		_CERR "Executing <" _CMDL command _CMDL ">" _ENDL;
+	}
+	cout << flush;
+	cerr << flush;
+	int exitCode = system(command);
+	if (-1 == exitCode) {
+		Error("[SHELLEXEC] Unable to start child process", strerror(errno));
+		return;
+	}
+	#ifndef _WIN32
+		if (WIFSIGNALED(exitCode)) {
+			ErrorInt("[SHELLEXEC] terminated by signal", WTERMSIG(exitCode));
+			return;
+		}
+		if (!WIFEXITED(exitCode)) {
+			ErrorInt("[SHELLEXEC] unrecognized process status", exitCode);
+			return;
+		}
+		exitCode = WEXITSTATUS(exitCode);
+	#endif
+	if (exitCode) ErrorInt("[SHELLEXEC] non-zero exit code", exitCode);
 }
 
 #if defined (_WIN32) || defined (__CYGWIN__)
@@ -171,19 +204,5 @@ bool autoColorsDetection() {
 	return envTerm && strstr(envTerm, "color");
 #endif
 }
-
-#ifdef USE_LUA
-
-void LuaShellExec(const char *command) {
-#ifdef _WIN32
-	WinExec(command, SW_SHOWNORMAL);
-#else
-	int ret = system(command);
-	if ( ret == -1 ) {
-		Error("[LUASHELEXEC] Unable to start child process for command", command, IF_FIRST);
-	}
-#endif
-}
-#endif //USE_LUA
 
 //eof support.cpp

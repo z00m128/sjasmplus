@@ -285,7 +285,7 @@ static bool lua_sj_insert_label(const char *name, int address) {
 
 static void lua_sj_shellexec(const char *command) {
 	int positionsAdded = addLuaSourcePositions();	// add known script positions to sourcePosStack vector
-	LuaShellExec(command);
+	SJ_shellExec(command);
 	removeLuaSourcePositions(positionsAdded);
 }
 

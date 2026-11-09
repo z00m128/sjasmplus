@@ -45,17 +45,10 @@ static_assert(0x78563412 == sj_bswap32(0x12345678), "internal error in bswap32 i
 
 #define strcasecmp(s1, s2) stricmp(s1, s2)
 
-#else
-
-#include <sys/time.h>
-#if !defined(__MINGW32__)
-#include <sys/wait.h>
-#endif
-#include <unistd.h>
-
 #endif
 
 int64_t SJ_getTickCount();
+void SJ_shellExec(const char* command);
 
 #if defined (_WIN32) || defined (__CYGWIN__)
     // convert path to string, replace backslashes and convert it back to new path -> sounds fun!
@@ -86,13 +79,5 @@ bool SJ_processArgv(int argc, char* argv[], std::vector<std::string>& storage, s
 
 void switchStdOutIntoBinaryMode();
 bool autoColorsDetection();
-
-#ifdef USE_LUA
-void LuaShellExec(const char *command);
-#endif //USE_LUA
-
-#ifndef WEXITSTATUS
-# define WEXITSTATUS(exitstatus) (exitstatus)
-#endif
 
 //eof support.h

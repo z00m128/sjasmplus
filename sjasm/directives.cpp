@@ -1796,22 +1796,8 @@ static void dirSHELLEXEC() {
 		parameters = GetDelimitedString(lp);
 	}
 	if (pass == LASTPASS) {
-		if (!system(nullptr)) {
-			Error("[SHELLEXEC] clib command processor is not available on this platform!");
-		} else {
-			if (!parameters.empty()) command += " " + parameters;
-			if (Options::OutputVerbosity <= OV_ALL) {
-				_CERR "Executing <" _CMDL command _CMDL ">" _ENDL;
-			}
-			// flush both stdout and stderr before trying to execute anything externally
-			_COUT flush;
-			_CERR flush;
-			// execute the requested command
-			int exitCode = system(command.c_str());
-			if (exitCode) {
-				ErrorInt("[SHELLEXEC] non-zero exit code", WEXITSTATUS(exitCode));
-			}
-		}
+		if (!parameters.empty()) command += " " + parameters;
+		SJ_shellExec(command.c_str());
 	}
 }
 

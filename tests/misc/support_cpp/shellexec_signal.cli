@@ -1,0 +1,18 @@
+(
+    set -eE
+    trap 'printf "SHELLEXEC signal check failed: %s\n" "$BASH_COMMAND" >&2' ERR
+
+    case "$(uname -s)" in
+        Linux|FreeBSD|Darwin)
+            if $MEMCHECK "$EXE" --nologo --msg=err --color=off "${options[@]}" \
+                "$file_asm" > shellexec_signal.log 2>&1; then
+                printf 'Expected SHELLEXEC signal errors\n' >&2
+                exit 1
+            else
+                [[ $? -eq 1 ]]
+            fi
+            [[ $(grep -Fc "[SHELLEXEC] terminated by signal: $(kill -l TERM)" shellexec_signal.log) -eq 2 ]]
+            ;;
+    esac
+)
+last_result=$?

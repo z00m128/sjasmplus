@@ -45,10 +45,15 @@ Parser, syntax and safety
     Broader parser/context research (including conditionals in STRUCT and #416):
     see docs/parser-context-research.md. Research only; no refactor selected.
 
-[Research] Audit STRCPY/STRCAT size limits
-    Maintainer concern: some maximum-size arguments may be incorrect, allowing
-    buffer overflow on malicious source input. No specific failing call was recorded.
-    Audit the wrapper contracts and callers, and retain reproductions as tests.
+[Research] Refactor C-string wrappers and audit buffer limits
+    STRCPY ignores its size argument; STRCAT passes it to strncat as an append
+    limit, not destination capacity. Repeated STRCAT calls in sjasm/io_err.cpp
+    do not subtract the existing diagnostic length, risking buffer overflow on
+    oversized input. Start with a genuinely bounded diagnostic append helper.
+    Audit the other wrappers and callers before changing their contracts: some
+    callers intentionally pass append counts (e.g. label construction in tables.cpp).
+    Decide truncation/error behavior explicitly, prefer owning strings where
+    practical, and retain oversized-input reproductions as regression tests.
 
 [Research] Review output filename validation and modification
     Review SAVEHOB/SAVETRD/SAVETAP and related directives. Warn or error where a
