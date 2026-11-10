@@ -67,6 +67,8 @@ int GetCharConst(char*& p, aint& val);
 int GetCharConstInDoubleQuotes(char*& op, aint& val);
 int GetCharConstInApostrophes(char*& op, aint& val);
 template <class strT> int GetCharConstAsString(char* & p, strT e[], int & ei, int max_ei = 128, int add = 0);
+// max bytes produced by single GetBytes call (DB/DC/DZ/DP/ABYTE/BLOCK), buffer `e` must have +1 for terminator
+constexpr int GETBYTES_MAX = 256;
 int GetBytes(char*& p, int e[], int add, int dc);
 void GetStructText(char*& p, aint len, byte* data, const byte* initData = nullptr);	// initData indicate "{}" is required for multi-value init
 int GetBits(char*& p, int e[]);
