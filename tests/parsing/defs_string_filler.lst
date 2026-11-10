@@ -25,10 +25,10 @@
 22    2023              ; Case 6: DEFS with exact-fit operands (no implicit fill)
 23    2023 11 22 33         DEFS 3, 0x11, 0x22, 0x33
 24    2026
-25    2026              ; Case 7: DEFS with 129-byte operand list (tests GetBytes 128-byte limit)
-26    2026              ; This should trigger GetBytes error "Over 128 bytes defined..." and init values are truncated to 128 bytes, but total fill is 150 bytes as specified
-defs_string_filler.asm(27): error: Over 128 bytes defined in single DB/DC/... Values over: @"
-27    2026 41 42 43 44      DEFS 150, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@"
+25    2026              ; Case 7: DEFS with 257-byte operand list (tests GetBytes 256-byte limit)
+26    2026              ; This should trigger GetBytes error "Over 256 bytes defined..." and init values are truncated to 256 bytes, but total fill is 300 bytes as specified
+defs_string_filler.asm(27): error: Over 256 bytes defined in single DB/DC/... Values over: @"
+27    2026 41 42 43 44      DEFS 300, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@"
 27    202A 45 46 47 48
 27    202E 49 4A 4B 4C
 27    2032 4D 4E 4F 50
@@ -60,22 +60,54 @@ defs_string_filler.asm(27): error: Over 128 bytes defined in single DB/DC/... Va
 27    209A 5A 30 31 32
 27    209E 33 34 35 36
 27    20A2 37 38 39 21
-27    20A6 21 21 21...
-28    20BC
-29    20BC              ; Case 8: DEFS with operands exceeding DEFS size, warns and truncates init data to length 3
+27    20A6 41 42 43 44
+27    20AA 45 46 47 48
+27    20AE 49 4A 4B 4C
+27    20B2 4D 4E 4F 50
+27    20B6 51 52 53 54
+27    20BA 55 56 57 58
+27    20BE 59 5A 61 62
+27    20C2 63 64 65 66
+27    20C6 67 68 69 6A
+27    20CA 6B 6C 6D 6E
+27    20CE 6F 70 71 72
+27    20D2 73 74 75 76
+27    20D6 77 78 79 7A
+27    20DA 30 31 32 33
+27    20DE 34 35 36 37
+27    20E2 38 39 21 40
+27    20E6 5F 61 62 63
+27    20EA 64 65 66 67
+27    20EE 68 69 6A 6B
+27    20F2 6C 6D 6E 6F
+27    20F6 70 71 72 73
+27    20FA 74 75 76 77
+27    20FE 78 79 7A 41
+27    2102 42 43 44 45
+27    2106 46 47 48 49
+27    210A 4A 4B 4C 4D
+27    210E 4E 4F 50 51
+27    2112 52 53 54 55
+27    2116 56 57 58 59
+27    211A 5A 30 31 32
+27    211E 33 34 35 36
+27    2122 37 38 39 21
+27    2126 21 21 21...
+28    2152
+29    2152              ; Case 8: DEFS with operands exceeding DEFS size, warns and truncates init data to length 3
 defs_string_filler.asm(30): warning[shortblock]: init data for block truncated to length: 3
-30    20BC 01 02 03         DEFS 3, 1, 2, 3, 4, 5, 6
-31    20BF
-32    20BF              ; Case 8b: suppress truncation warning
-33    20BF 01 02 03         DEFS 3, 1, 2, 3, 4, 5, 6    ; shortblock-ok
-34    20C2
-35    20C2              ; Case 9: DEFS with string and numeric overflow ("AB" is used, rest is truncated)
+30    2152 01 02 03         DEFS 3, 1, 2, 3, 4, 5, 6
+31    2155
+32    2155              ; Case 8b: suppress truncation warning
+33    2155 01 02 03         DEFS 3, 1, 2, 3, 4, 5, 6    ; shortblock-ok
+34    2158
+35    2158              ; Case 9: DEFS with string and numeric overflow ("AB" is used, rest is truncated)
 defs_string_filler.asm(36): warning[shortblock]: init data for block truncated to length: 2
-36    20C2 41 42            DEFS 2, "ABC", 0x44
-37    20C4
-38    20C4              ; ===== DEVICE MODE (NOSLOT64K) =====
-39    20C4                  DEVICE NOSLOT64K
-39    20C4                ORG $4000
+36    2158 41 42            DEFS 2, "ABC", 0x44
+37    215A
+38    215A              ; ===== DEVICE MODE (NOSLOT64K) =====
+39    215A                  DEVICE NOSLOT64K
+39    215A                ORG $4000
 40    4000
 41    4000              ; Case 10: DEFS without operands
 42    4000 00 00 00...      DEFS 5
