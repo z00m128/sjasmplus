@@ -9,8 +9,10 @@
     ; check multiple directives on same line split by colon (each has own length)
     dp "abc",0,"efg",0:dp "second string with own length byte"
 
-    ; no need to test 256+ lengths because sjasmplus DB-like parser has limit of 128 bytes per line
-    ; so any longer pascal string must be defined by DB over multiple lines
+    ; max length 255 is OK (DB-like parser accepts up to 256 bytes per directive)
+    DP "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDE"
+    ; 256 bytes is too long for pascal string (length byte would overflow) => error
+    DP "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
 
     ; test zero size string (but why? just `DB 0` to avoid warnings/errors)
     dp ""

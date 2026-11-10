@@ -25,29 +25,159 @@
 10    803B 74 68 20 62
 10    803F 79 74 65
 11    8042
-12    8042                  ; no need to test 256+ lengths because sjasmplus DB-like parser has limit of 128 bytes per line
-13    8042                  ; so any longer pascal string must be defined by DB over multiple lines
-14    8042
-15    8042                  ; test zero size string (but why? just `DB 0` to avoid warnings/errors)
-dp_pascal_string.asm(16): warning[emptystr]: empty string: ""
-dp_pascal_string.asm(16): error: no arguments
-16    8042 00               dp ""
-17    8043
-18    8043                  ; check alias
-19    8043 05 41 68 6F      DEFP "Ahoy!"
-19    8047 79 21
-20    8049 05 41 68 6F      defp "Ahoy!"
-20    804D 79 21
-21    804F
-22    804F                  ; check syntax error
-dp_pascal_string.asm(23): error: Expression expected
-23    804F 00               DP
-dp_pascal_string.asm(24): error: Syntax error: &
-24    8050 00               DP  &
-dp_pascal_string.asm(25): error: Syntax error: &
-25    8051 05 41 68 6F      DP  "Ahoy!",&
-25    8055 79 21
-26    8057
+12    8042                  ; max length 255 is OK (DB-like parser accepts up to 256 bytes per directive)
+13    8042 FF 30 31 32      DP "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDE"
+13    8046 33 34 35 36
+13    804A 37 38 39 41
+13    804E 42 43 44 45
+13    8052 46 30 31 32
+13    8056 33 34 35 36
+13    805A 37 38 39 41
+13    805E 42 43 44 45
+13    8062 46 30 31 32
+13    8066 33 34 35 36
+13    806A 37 38 39 41
+13    806E 42 43 44 45
+13    8072 46 30 31 32
+13    8076 33 34 35 36
+13    807A 37 38 39 41
+13    807E 42 43 44 45
+13    8082 46 30 31 32
+13    8086 33 34 35 36
+13    808A 37 38 39 41
+13    808E 42 43 44 45
+13    8092 46 30 31 32
+13    8096 33 34 35 36
+13    809A 37 38 39 41
+13    809E 42 43 44 45
+13    80A2 46 30 31 32
+13    80A6 33 34 35 36
+13    80AA 37 38 39 41
+13    80AE 42 43 44 45
+13    80B2 46 30 31 32
+13    80B6 33 34 35 36
+13    80BA 37 38 39 41
+13    80BE 42 43 44 45
+13    80C2 46 30 31 32
+13    80C6 33 34 35 36
+13    80CA 37 38 39 41
+13    80CE 42 43 44 45
+13    80D2 46 30 31 32
+13    80D6 33 34 35 36
+13    80DA 37 38 39 41
+13    80DE 42 43 44 45
+13    80E2 46 30 31 32
+13    80E6 33 34 35 36
+13    80EA 37 38 39 41
+13    80EE 42 43 44 45
+13    80F2 46 30 31 32
+13    80F6 33 34 35 36
+13    80FA 37 38 39 41
+13    80FE 42 43 44 45
+13    8102 46 30 31 32
+13    8106 33 34 35 36
+13    810A 37 38 39 41
+13    810E 42 43 44 45
+13    8112 46 30 31 32
+13    8116 33 34 35 36
+13    811A 37 38 39 41
+13    811E 42 43 44 45
+13    8122 46 30 31 32
+13    8126 33 34 35 36
+13    812A 37 38 39 41
+13    812E 42 43 44 45
+13    8132 46 30 31 32
+13    8136 33 34 35 36
+13    813A 37 38 39 41
+13    813E 42 43 44 45
+14    8142                  ; 256 bytes is too long for pascal string (length byte would overflow) => error
+dp_pascal_string.asm(15): error: [DP] String too long for Pascal string, length: 256
+15    8142 00 30 31 32      DP "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+15    8146 33 34 35 36
+15    814A 37 38 39 41
+15    814E 42 43 44 45
+15    8152 46 30 31 32
+15    8156 33 34 35 36
+15    815A 37 38 39 41
+15    815E 42 43 44 45
+15    8162 46 30 31 32
+15    8166 33 34 35 36
+15    816A 37 38 39 41
+15    816E 42 43 44 45
+15    8172 46 30 31 32
+15    8176 33 34 35 36
+15    817A 37 38 39 41
+15    817E 42 43 44 45
+15    8182 46 30 31 32
+15    8186 33 34 35 36
+15    818A 37 38 39 41
+15    818E 42 43 44 45
+15    8192 46 30 31 32
+15    8196 33 34 35 36
+15    819A 37 38 39 41
+15    819E 42 43 44 45
+15    81A2 46 30 31 32
+15    81A6 33 34 35 36
+15    81AA 37 38 39 41
+15    81AE 42 43 44 45
+15    81B2 46 30 31 32
+15    81B6 33 34 35 36
+15    81BA 37 38 39 41
+15    81BE 42 43 44 45
+15    81C2 46 30 31 32
+15    81C6 33 34 35 36
+15    81CA 37 38 39 41
+15    81CE 42 43 44 45
+15    81D2 46 30 31 32
+15    81D6 33 34 35 36
+15    81DA 37 38 39 41
+15    81DE 42 43 44 45
+15    81E2 46 30 31 32
+15    81E6 33 34 35 36
+15    81EA 37 38 39 41
+15    81EE 42 43 44 45
+15    81F2 46 30 31 32
+15    81F6 33 34 35 36
+15    81FA 37 38 39 41
+15    81FE 42 43 44 45
+15    8202 46 30 31 32
+15    8206 33 34 35 36
+15    820A 37 38 39 41
+15    820E 42 43 44 45
+15    8212 46 30 31 32
+15    8216 33 34 35 36
+15    821A 37 38 39 41
+15    821E 42 43 44 45
+15    8222 46 30 31 32
+15    8226 33 34 35 36
+15    822A 37 38 39 41
+15    822E 42 43 44 45
+15    8232 46 30 31 32
+15    8236 33 34 35 36
+15    823A 37 38 39 41
+15    823E 42 43 44 45
+15    8242 46
+16    8243
+17    8243                  ; test zero size string (but why? just `DB 0` to avoid warnings/errors)
+dp_pascal_string.asm(18): warning[emptystr]: empty string: ""
+dp_pascal_string.asm(18): error: no arguments
+18    8243 00               dp ""
+19    8244
+20    8244                  ; check alias
+21    8244 05 41 68 6F      DEFP "Ahoy!"
+21    8248 79 21
+22    824A 05 41 68 6F      defp "Ahoy!"
+22    824E 79 21
+23    8250
+24    8250                  ; check syntax error
+dp_pascal_string.asm(25): error: Expression expected
+25    8250 00               DP
+dp_pascal_string.asm(26): error: Syntax error: &
+26    8251 00               DP  &
+dp_pascal_string.asm(27): error: Syntax error: &
+27    8252 05 41 68 6F      DP  "Ahoy!",&
+27    8256 79 21
+28    8258
 # file closed: dp_pascal_string.asm
 
 Value    Label
