@@ -158,9 +158,8 @@ dp_pascal_string.asm(15): error: [DP] String too long for Pascal string, length:
 15    823E 42 43 44 45
 15    8242 46
 16    8243
-17    8243                  ; test zero size string (but why? just `DB 0` to avoid warnings/errors)
+17    8243                  ; test zero size string (valid pascal string, only emptystr warning, no error)
 dp_pascal_string.asm(18): warning[emptystr]: empty string: ""
-dp_pascal_string.asm(18): error: no arguments
 18    8243 00               dp ""
 19    8244
 20    8244                  ; check alias

@@ -107,13 +107,13 @@ int ParseDirective_REPT() {
 }
 
 
-static void getBytesWithCheck(int add = 0, int dc = 0, bool dz = false) {
+static void getBytesWithCheck(int add = 0, int dc = 0, bool dz = false, bool allowEmpty = false) {
 	check8(add); add &= 255;
 	int dirDx[GETBYTES_MAX + 2];
 	if (GetBytes(lp, dirDx, add, dc)) {
 		EmitBytes(dirDx);
 		if (dz) EmitByte(0);
-	} else {
+	} else if (!allowEmpty) {
 		Error("no arguments");
 	}
 }
@@ -137,7 +137,7 @@ static void dirDP() {
 	if ((LASTPASS == pass) && (nullptr == endLabel)) Error("dirDP(): please, contact the author of this program.", nullptr, FATAL);
 	if (255 < dpSize) ErrorInt("[DP] String too long for Pascal string, length", dpSize, SUPPRESS);
 	EmitByte(dpSize);											// emit the size byte
-	getBytesWithCheck();										// use regular DB-like parsing for string body
+	getBytesWithCheck(0, 0, false, true);						// use regular DB-like parsing for string body (empty is valid)
 	TemporaryLabelTable.InsertRefresh(DP_HELPER_LABEL);			// insert the forward helper temporary label after it
 }
 

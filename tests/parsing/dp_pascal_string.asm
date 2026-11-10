@@ -14,7 +14,7 @@
     ; 256 bytes is too long for pascal string (length byte would overflow) => error
     DP "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
 
-    ; test zero size string (but why? just `DB 0` to avoid warnings/errors)
+    ; test zero size string (valid pascal string, only emptystr warning, no error)
     dp ""
 
     ; check alias
