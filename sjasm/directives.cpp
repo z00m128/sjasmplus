@@ -135,7 +135,7 @@ static void dirDP() {
 	const auto endLabel = TemporaryLabelTable.seekForward(DP_HELPER_LABEL);
 	const aint dpSize = (nullptr != endLabel) ? (endLabel->value - (CurAddress + 1)) : 0;
 	if ((LASTPASS == pass) && (nullptr == endLabel)) Error("dirDP(): please, contact the author of this program.", nullptr, FATAL);
-	if (255 < dpSize) ErrorInt("[DP] String too long for Pascal string, length", dpSize, SUPPRESS);
+	if (dpSize < 0 || 255 < dpSize) ErrorInt("[DP] String length outside 0..255", dpSize, SUPPRESS);
 	EmitByte(dpSize);											// emit the size byte
 	getBytesWithCheck(0, 0, false, true);						// use regular DB-like parsing for string body (empty is valid)
 	TemporaryLabelTable.InsertRefresh(DP_HELPER_LABEL);			// insert the forward helper temporary label after it

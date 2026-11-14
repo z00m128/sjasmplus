@@ -220,6 +220,8 @@
 - <link linkend="po_savehob">`SAVEHOB`</link> syntax/arguments tuned
 - Added <link linkend="device_element">`DEVICE ELEMENT`</link> for eLeMeNt ZX / MB03+ URAM: 20MiB, 8kiB pages and slots
 - Raised the device page limit to 4096 and fixed `LABELSLIST` truncating page numbers
+- Raised <link linkend="po_byte">`DB`</link>-like byte-data capacity from 128 to 256 bytes per directive
+- <link linkend="po_dp">`DP`</link> accepts empty strings (with the existing warning) and rejects lengths outside 0..255
 - Added `--utc` to use UTC for both `__DATE__` and `__TIME__` (default is local time)
 - I/O operands support `[]` in `IN`, `OUT` and Z80N `JP [C]`
 - minor changes in examples, docs and expression parser implementation
@@ -2207,7 +2209,8 @@ END_OF_PROGRAM</programlisting></para>
 
             <listitem>
               <para>Defines a byte or a string of bytes. Each value should be
-              between -129 and 256.<example>
+              between -256 and 255. At most 256 data bytes can be defined by one directive;
+              a string literal's <literal>Z</literal> suffix counts toward this limit.<example>
                   <title></title>
 
                   <para><programlisting>    BYTE 0x56
@@ -2605,11 +2608,15 @@ will output to the console strings:
             <term>DP<indexterm id="po_dp"><primary>DP</primary></indexterm> &lt;bytes&gt;</term>
 
             <listitem>
-              <para>Defines a Pascal string, ie. size of bytes is preceding the data.<example>
+              <para>Defines a Pascal string: one unsigned 8-bit length byte followed by the data.
+              The one-byte length field limits the body to 0..255 bytes, excluding the length byte itself.
+              Operands are parsed like <link linkend="po_byte">BYTE</link>; numeric values and strings can be mixed.
+              <literal>DP ""</literal> emits only a zero length byte, like <literal>DB 0</literal>.
+              <example>
                   <title></title>
 
                   <para><programlisting>    DP "Ahoy!" ; like: BYTE 5, "Ahoy!"</programlisting></para>
-                </example></para>
+              </example></para>
             </listitem>
           </varlistentry>
 

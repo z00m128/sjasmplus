@@ -21,7 +21,7 @@ string_literals.asm(9): error: C suffix can't patch empty string: ''C
 14    0022 61 62 00 63      DB "ab"Z,"cd"C,"e"Z
 14    0026 E4 65 00
 15    0029
-16    0029                  ; test max-size inputs (128 chars), regular + C will work, Z should fail
+16    0029                  ; test max-size inputs (256 chars), regular + C will work, Z should fail
 17    0029 30 31 32 33      DB "0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE.0123456789ABCDE."
 17    002D 34 35 36 37
 17    0031 38 39 41 42

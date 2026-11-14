@@ -91,7 +91,7 @@
 13    813A 37 38 39 41
 13    813E 42 43 44 45
 14    8142                  ; 256 bytes is too long for pascal string (length byte would overflow) => error
-dp_pascal_string.asm(15): error: [DP] String too long for Pascal string, length: 256
+dp_pascal_string.asm(15): error: [DP] String length outside 0..255: 256
 15    8142 00 30 31 32      DP "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
 15    8146 33 34 35 36
 15    814A 37 38 39 41
@@ -177,6 +177,13 @@ dp_pascal_string.asm(27): error: Syntax error: &
 27    8252 05 41 68 6F      DP  "Ahoy!",&
 27    8256 79 21
 28    8258
+29    8258                  ; wrapped logical address produces a negative length, which must be an error
+30    8258                  DISP $FFFE
+dp_pascal_string.asm(31): error: [DP] String length outside 0..255: -65534
+dp_pascal_string.asm(31): warning: RAM limit exceeded 0x10000 by DISP
+31    FFFE 02 61 62         DP "ab"
+32    0001                  ENT
+33    825B
 # file closed: dp_pascal_string.asm
 
 Value    Label

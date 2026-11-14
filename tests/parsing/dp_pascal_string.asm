@@ -25,3 +25,8 @@
     DP
     DP  &
     DP  "Ahoy!",&
+
+    ; wrapped logical address produces a negative length, which must be an error
+    DISP $FFFE
+    DP "ab"
+    ENT
