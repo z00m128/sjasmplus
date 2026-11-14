@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book id="sjasmplus_manual">
-  <title>SjASMPlus 1.24.0 Documentation [2026-08-26]</title>
+  <title>SjASMPlus 1.24.1 Documentation [2026-11-22]</title>
 
   <chapter id="introduction">
     <title>Introduction</title>
@@ -206,7 +206,7 @@
       <para><variablelist>
 
 <varlistentry>
-            <term>? - 1.24.1?</term>
+            <term>22.11.2026 - 1.24.1</term>
             <listitem>
               <synopsis>
 - Windows: fix non-ASCII input/output paths and working directories
