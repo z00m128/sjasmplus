@@ -435,6 +435,195 @@ its current `lineLen` calculation subtracts only the six letters of ENDLUA.
 Merely advancing past the dot before `cmphstr()` would leave a stray dot in the
 script. This is separable from the larger refactor and from #416's comment fix.
 
+## Issue #120: INCLUDE During Macro Expansion
+
+Follow-up research, 2026-11-19, on
+[#120](https://github.com/z00m128/sjasmplus/issues/120). The title mentions Lua
+and modules, but the author's September 2021 clarification isolates the remaining
+use case: a macro includes unchanged third-party assembly, whose ordinary `.local`
+labels should retain their normal main-label scope instead of becoming
+macro-instance labels. INCLUDE already executes during expansion; the missing
+feature is not collecting or executing the INCLUDE directive itself.
+
+### History And Disposition
+
+* The August 2020 discussion proposed adding module/main-label components to
+	macro-local names, or separating ordinary and macro-local label syntax. Current
+	`ValidateLabel()` still builds ordinary macro-local definitions from
+	`macrolabp + ">" + name`, without those components. The proposed naming change
+	was not implemented merely by fixing later module lookup bugs.
+* [#84](https://github.com/z00m128/sjasmplus/issues/84) was closed by
+	[`903d430`](https://github.com/z00m128/sjasmplus/commit/903d430f311971d65daee61db97758515f6e3737)
+	(2021-07-19): `@.label` explicitly defines an ordinary local label inside a
+	macro, following sjasm 0.42 syntax. The March 2021 suggestion involving `!`
+	is not the implemented spelling. See
+	[local_labels.asm](../tests/macros/local_labels.asm). This helps editable macro
+	source, not an arbitrary unmodified include.
+* In September 2021 the author distinguished changing INCLUDE implicitly from an
+	explicit mode switch before INCLUDE. The maintainer was reluctant to change
+	INCLUDE implicitly, but left the explicit switch open. In March 2022 it was
+	deferred because switching label behavior was too entangled with the internals.
+* The August 2024 request to document the limitation has been completed:
+	[`e05471a`](https://github.com/z00m128/sjasmplus/commit/e05471a34173c5ee832387d577db4ceead088da2)
+	(2024-09-01) added the macro-chapter warning. The current INCLUDE entry also
+	warns against mixing includes and block contexts, added by
+	[`2c01480`](https://github.com/z00m128/sjasmplus/commit/2c01480f0bcc4f3ee8788a84afdb915347d4d0d1)
+	(2025-03-09) for [#263](https://github.com/z00m128/sjasmplus/issues/263).
+	Do not open a duplicate "document unsupported macro INCLUDE" task.
+* [#264](https://github.com/z00m128/sjasmplus/issues/264), fixed by
+	[`1736533`](https://github.com/z00m128/sjasmplus/commit/17365332e9ba7b5f9bda85788b1bc2e576d730af)
+	(2025-03-10), made ordinary locals preserve their main label's module/global
+	prefix. This does not change `.local` into an ordinary local inside a macro.
+* [`c6dd679`](https://github.com/z00m128/sjasmplus/commit/c6dd6799fdb4a51aca964d7beb35f924693541a1)
+	(2025-04-26), "Fix local labels inside macros in modules", is a later lookup
+	fix, not implementation of the requested include-label mode. Its existing
+	[regression fixture](../tests/sjasmplus_regressions/local_labels_1.21.0_regression.asm)
+	covers lookup from a macro and resetting the ordinary-local prefix at ENDMODULE.
+* Allowing the same macro name to be defined independently in different MODULE
+	namespaces is a separate proposal, not the clarified #120 request. Macros
+	currently use one name-keyed table and the manual requires unique names.
+	Maintainer disposition: will not implement in v1.x; not committed for v2.x.
+	Do not conflate this with labels defined by a macro in different modules.
+
+### Why Source Ownership Matters
+
+The controlling paths are [CMacroTable::Add/Emit](../sjasm/tables.cpp),
+[dirINCLUDE](../sjasm/directives.cpp), and
+[IncludeFile/OpenFile/ReadLine](../sjasm/sjio.cpp):
+
+1. Definition stores the INCLUDE line as raw text. Expansion substitutes it and
+	invokes the ordinary directive handler, which opens and assembles the file.
+2. `IncludeFile()` saves file buffering and stdin state, but does not suspend
+	`macrolabp`, macro arguments, or the stored-source cursor `lijst/lijstp`.
+	Consequently included statements inherit macro label/substitution context.
+3. `OpenFile()` initially drives the file reader directly. Nested consumers such
+	as IF and LUA instead call `ReadLine()`, which prefers `lijstp` whenever
+	`lijst` is active. Thus a block opened in the included file can read the
+	remaining macro body rather than its own file. Macro definition collection
+	uses `ReadLineNoMacro()`, illustrating the inconsistent source selection.
+
+The probes below confirm this distinction: a plain included instruction works
+during macro replay, but an included IF body can consume caller expansion lines
+instead of included lines. A balanced IF entirely inside the include, compared
+with the same include outside a macro, distinguishes this reader issue from both
+label-policy changes and intentionally crossing block boundaries.
+The architectural requirement is separate input ownership and semantic label
+policy, not simply clearing all "inside macro" state around an include: that
+would also affect argument substitution, nested macros, and caller restoration.
+
+### Current Reproductions
+
+Built with `make -j8`; probes used the release `./sjasmplus` with
+`--nologo --color=off --msg=err`, a five-second timeout, and address assertions
+where applicable. The original ZIP was downloaded and extracted outside the
+repository. Its main file defines a Lua function on PASS1, calls it from a macro's
+ALLPASS Lua block, and injects two MODULE/INCLUDE sequences through `_pl()`.
+The included source is only:
+
+```asm
+MyLabel
+ ld a,a
+.asd
+ ld c,b
+```
+
+The unmodified attachment still reports `[LUA] Duplicate label: 0>asd`.
+Removing Lua and putting the two MODULE/INCLUDE sequences directly in the macro
+also reproduces the collision. There is no need to change Lua function lifetime
+or introduce module-scoped macro definitions to explain it.
+
+Additional temporary probes compared the same included bodies in different
+contexts:
+
+| Included body / caller | Result |
+| --- | --- |
+| Plain `db 1`, direct or in macro | Pass |
+| Balanced `IF 1 / db 1 / ENDIF`, direct | Pass |
+| Same IF body, macro with INCLUDE as its last body line | No ENDIF, then stray ENDIF |
+| Same IF body, macro with `db $EE` after INCLUDE | Same failure; IF reads the macro tail |
+| Same IF body, INCLUDE during `DUP 1` replay | No ENDIF and repeat-boundary/stray-ENDIF errors |
+| Same IF body, INCLUDE inside direct `IF 1` | Pass; the manual's broad warning is not a claim that every combination fails |
+| Balanced ALLPASS Lua emitting `db 1`, direct | Pass |
+| Same Lua body, INCLUDE in macro with trailing `db $EE` | Unexpected end of Lua; Lua tries to parse macro-tail assembly |
+| `DUP 2 / db 1 / EDUP`, direct or included from macro | Pass in this small case; not general block-composition support |
+| Two modules each defining `MyLabel` and `.asd`, direct | Pass |
+| Same two modules, included from one macro expansion | Duplicate `0>asd` |
+| Replace `.asd` with `@.asd` in that include | Pass inside macro; invalid label outside macro |
+| Define macro `duplicate` in each of two modules | Duplicate macroname, as documented |
+
+Minimal source-ownership reproducer, with two files (the names below are proposed
+fixture names, not checked-in tests):
+
+```asm
+; main.asm
+ MACRO wrapper
+ INCLUDE "body.asm"
+ ENDM
+ wrapper
+ ASSERT $ == 1
+
+; body.asm (separate file)
+ IF 1
+ db 1
+ ENDIF
+```
+
+Replacing the macro definition/invocation with just `INCLUDE "body.asm"` passes.
+This is the already reported [#263](https://github.com/z00m128/sjasmplus/issues/263),
+closed as not planned in March 2025, including its follow-up about REPT. Treat it
+as related deferred parser work, not a newly discovered independent ticket.
+Its link to [#261](https://github.com/z00m128/sjasmplus/issues/261) does not make
+repeat-index label collisions another unresolved #120 item: that diagnostic bug
+was fixed by `d0c9ca4`, with existing `issue261_dup_duplicate_label` coverage.
+
+Existing baselines, run sequentially, both passed:
+
+| Command | Tests | Checks |
+| --- | ---: | ---: |
+| `make -j8 test TEST=macros` | 27 | 42 |
+| `make -j8 test TEST=sjasmplus_regressions` | 20 | 29 |
+
+These are research probes, not new permanent regression fixtures. No runtime code
+was changed. The full suite, other toolchains, device mode, and arbitrary nested
+include/macro combinations were not tested in this follow-up.
+
+### Suggested Issue Split
+
+Two distinct follow-ups remain worth tracking. Either narrow #120 to the second
+one and link the first, or replace it with focused issues and retain backlinks.
+This notebook does not create, reopen, or close GitHub issues.
+
+1. **Preserve input ownership when INCLUDE runs during stored-source replay.**
+	Existing report: #263, closed as not planned; carry it into the parser-context
+	work or explicitly supersede it rather than silently duplicating it.
+	A block entirely inside an included file must consume that file's text, return
+	to the correct macro/repeat cursor, and leave the caller tail assembled once.
+	Start with IF and Lua, then characterize nested includes and stored replays.
+	Keep label behavior and expansion-time substitution unchanged. Test exact
+	bytes, errors and source traces, EOF recovery, and no fall-through into caller
+	source. Clean hierarchical nesting still applies; this is not permission for
+	an IF opened in one input to steal a closer from another.
+2. **Design an explicit, scoped ordinary-local label policy for macro-reachable
+	source.** This is #120's September 2021 request, still unimplemented. Preserve
+	current behavior by default; do not make every INCLUDE silently escape macro
+	scope. No switch spelling or implementation is selected. Before implementation,
+	decide whether the policy belongs to an include operation or a surrounding
+	scope, how definitions and references agree, how nested macros/includes inherit
+	it, and what is restored on return/error. Preserve argument substitution and
+	macro-instance state independently. Acceptance examples should include the
+	original unmodified third-party file in two modules, ordinary references inside
+	it, repeated macro invocations, nested macros, and restoration afterward.
+	`@.label` is an existing explicit definition escape, not a transparent source
+	rewrite: it is invalid outside macro expansion and cannot solve the unchanged
+	third-party-file requirement. This remains a design question, not a v1.x promise.
+
+Adding module/main-label components to every macro-local name is an alternative
+label design, not an additional prerequisite for those two items. Likewise, a
+separate macro-local prefix is already recorded under possible incompatible 2.x
+changes in [TODO.txt](../TODO.txt). Avoid opening overlapping syntax proposals as
+if each were an independently required fix. Module-scoped duplicate macro names
+remain explicitly outside this work and rejected for v1.x.
+
 ## What STRUCT Conditionals Actually Need
 
 `ParseStructLine()` substitutes text, parses member labels, then interprets member
@@ -501,6 +690,15 @@ stored input must share lexical behavior without processing comments twice.
 Recursive consumers still need clear bounds and scoped state restoration.
 Avoid a long parameter list of booleans; use named modes with explicit policies.
 
+For #120/#263, sharing structural recognition alone is insufficient. Source
+acquisition must also support nesting such as
+`file -> macro replay -> file -> macro replay -> file`, including repeat replay.
+Each nested input suspends its caller's cursor and resumes it on return; block
+readers must consume the current input, not prefer any active macro globally.
+This can be introduced with scoped recursive input ownership or an input stack;
+it does not require adopting option C's single event driver. Keep this requirement
+separate from any explicit ordinary-local label policy.
+
 Illustrative contracts, not proposed public APIs:
 
 ```text
@@ -557,6 +755,11 @@ turns this option into B, with policies that should be explicit rather than hidd
 * Source origin is not semantic context: a STRUCT can be read from a macro, a
 	conditional from a repeat, and Lua can inject assembly while holding an outer
 	line. Store these dimensions separately.
+* Nested file and stored-source inputs must suspend and resume in the correct
+	order. While assembling an include from a macro, its IF/Lua readers must read
+	the include, not the suspended macro tail. Preserve the caller's cursor,
+	arguments and label policy independently; normal return and error recovery
+	must not accidentally consume or replay caller lines.
 * Preserve macro arguments, macro-local namespaces, include predefined values,
 	repeat index updates, WHILE guardian/evaluation timing, `IsRunning`/END, and
 	pass-specific diagnostics. No eager evaluation during capture or skip.
@@ -603,7 +806,13 @@ separate from broad compatibility changes or mixed-language parsing extensions.
 	 separate feature. Assert structure size, member existence/offset/defaults,
 	 unchanged assembly address during definition, and correct instantiated bytes.
 	 Keep unsupported directives rejected; diagnose crossing ENDS/ENDIF boundaries.
-5. Reassess an explicit driver/context stack only after these changes expose the
+5. Address nested input ownership as a separate increment (#120/#263). Cover
+	`file -> macro replay -> file -> macro replay -> file` and repeat replay,
+	with balanced IF/Lua blocks in included files. Assert exact bytes and that each
+	caller tail resumes once, with correct source traces and bounded EOF/error
+	recovery. Keep default label/substitution rules unchanged; a label-policy
+	extension is separate. A shared scanner alone does not meet this goal.
+6. Reassess an explicit driver/context stack only after these changes expose the
 	 remaining complexity. Do not migrate expression/CPU parsing merely for symmetry.
 
 Coverage dimensions for those stages:

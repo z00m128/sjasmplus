@@ -23,8 +23,17 @@ conservative recommendation, not settled maintainer policy: issue #63 explicitly
 considers making N-pass the default. No command-line syntax, default iteration
 limit, version target, or detailed compatibility policy is selected here.
 Supporting 20+ settling iterations is reasonable; guaranteeing that arbitrary
-programs converge is not. Keep this independent of the larger
+programs converge is not. Provide a command-line override for the settling limit;
+its syntax and default remain undecided. Keep this independent of the larger
 [parser-context refactor](parser-context-research.md).
+
+Maintainer decisions, 2026-11-19: forward ordinary-symbol dependencies, including
+those changing conditional source selection, loops, structures, and substitutions,
+are intended benefits of N-pass. Preserve accumulated usage rather than pruning
+stale uses. Mutable variables require assignment before use within each traversal;
+their values must not carry across traversal boundaries. Device declarations and
+discovery-only metadata must be resolved during discovery, not postponed through
+settling. These decisions refine the research direction, not current behavior.
 
 ## Earlier Design Notes: Issue #63
 
@@ -146,12 +155,13 @@ Separate at least these concepts:
 | Macro/STRUCT definitions and macro arguments | Rebuilt each pass | Correct general direction; generated definitions still publish persistent named symbols |
 | DEFINE/DEFARRAY and `__COUNTER__` | Reset from command-line definitions; counter resets | Keep per-traversal reconstruction and source-order behavior |
 | Named labels: [CLabelTable](../sjasm/tables.cpp) | Map persists; entries refreshed using `updatePass` | Need generation-aware definition identity and a policy for absent definitions |
-| Usage flags and SIZEOF traits/data | Usage accumulates during non-final passes; SIZEOF is tracked through source boundaries | Include relevant state in convergence; do not casually reset sticky usage |
+| Mutable DEFL/`=` symbols | Values currently survive pass boundaries in the named-symbol map | Invalidate values between traversals; preserve assignment-before-use and relevant metadata |
+| Usage flags and SIZEOF traits/data | Usage accumulates during non-final passes; SIZEOF tracking pointers are temporary until source boundaries | Preserve accumulated usage; compare completed sizes, not temporary tracking pointers |
 | Numeric labels: [CTemporaryLabelTable](../sjasm/tables.cpp) | Previous and current ordered vectors | Strong starting pattern; compare complete sequences before final emission |
 | Smart-SMC: [ParseLabel](../sjasm/parser.cpp), [resolveRelocationAndSmartSmc](../sjasm/sjio.cpp) | Positions collected in pass 1; offsets refreshed later | First-pass flow remains an anchor; needs a rebasing policy for adaptive settling |
 | Relocation: [Relocation::InitPass](../sjasm/relocate.cpp) | Current offsets copied to previous; table count refreshed, current cleared | Already iterative in shape; compare ordered contents/count and audit persistent flags |
-| Devices: [InitPass](../sjasm/sjasm.cpp), [devices.cpp](../sjasm/devices.cpp) | Recreated each pass; single-DEVICE global-device heuristic uses preceding pass | Configuration/mapping can itself need settling; not only labels |
-| DEFDEVICE definitions: [dirDEFDEVICE](../sjasm/directives.cpp) | Accepted on pass 1; retained until cleanup | Definitions first reached in a later settling branch are not automatically supported |
+| Devices: [InitPass](../sjasm/sjasm.cpp), [devices.cpp](../sjasm/devices.cpp) | Recreated each pass; single-DEVICE global-device heuristic uses preceding pass | Require discovery-resolved declarations/arguments; still observe layout-relevant page/MMU state |
+| DEFDEVICE definitions: [dirDEFDEVICE](../sjasm/directives.cpp) | Accepted on pass 1; retained until cleanup | Keep discovery-only; reject unresolved arguments and definitions first reached later |
 | Lua VM/global state: [lua_sjasm.cpp](../sjasm/lua_sjasm.cpp) | Persists across all passes | Repeated PASS2/ALLPASS execution is observable and may be non-idempotent |
 | Files/stdin: [OpenFile, ReadBufData](../sjasm/sjio.cpp) | Files re-read; stdin recorded once and replayed | Stable-input assumption needs a policy for includes, binaries, Lua I/O, and external changes |
 | Errors/warnings: [io_err.cpp](../sjasm/io_err.cpp) | Counts persist; phase-gated messages update predefined counts | Retried provisional failures must not accidentally poison success or affect source forever |
@@ -198,11 +208,105 @@ must remain available until the current traversal is complete. Immediate deletio
 at the start would destroy ordinary forward references. Keyword reservations and
 undefined placeholders also need separate handling.
 
-Preserve current source-order evaluation: a reference may see a fresh definition
-earlier in this traversal or a previous-traversal definition later in the source.
+For ordinary labels and EQU, preserve current source-order evaluation: a reference
+may see a fresh definition earlier in this traversal or a previous-traversal
+definition later in the source. Mutable variables are the exception below.
 A strict previous-only double-buffered evaluator is another possible language
 model, but would alter propagation order; it is not merely an implementation
 detail of adding snapshots.
+
+### Mutable Variables Are Traversal-Local
+
+DEFL and `=` express ordered assignments, not forward constant definitions. Each
+traversal, including final emission, starts with their values undefined. Reads
+require a preceding assignment in that traversal; falling back to the previous
+traversal's last assignment is forbidden. Use EQU for a value defined later.
+EQU remains single-definition within a traversal, while its value may change
+between settling traversals.
+
+An assignment RHS may depend on forward ordinary labels/EQU and settle over
+multiple traversals. Mutable operands, however, must already have been assigned
+in the current traversal. A preceding assignment whose RHS is still unresolved
+does not make the expression resolved: retain unresolved-expression information
+through assignments and aliases, rather than treating a numeric placeholder as
+proof of validity.
+
+```asm
+count = finish-start     ; allowed forward ordinary labels
+index = 0
+index = index+1          ; allowed current-traversal value
+copy = laterVariable    ; invalid: no preceding assignment to this variable
+laterVariable = 7
+```
+
+Invalidating mutable values at a traversal boundary enforces this rule even
+after many retries: an unconditional read before assignment stays unresolved,
+whereas a forward ordinary-label dependency can eventually resolve. A read in a
+branch that disappears before settling need not invalidate the accepted source.
+Record unresolved reads even if a later assignment overwrites the same symbol;
+end-of-traversal maps alone cannot establish assignment-before-use. Apply this
+also to `alias EQU laterVariable` before that variable's assignment: neither a
+cached alias value nor an end-of-traversal definition repairs the earlier read.
+
+Physical erasure is not required. Current-generation validity can invalidate the
+value while retaining symbol identity, accumulated usage, and diagnostic/type
+metadata. `CLabelTable` uses `std::map` and already exposes `Remove`. Insertion
+and tree rebalancing preserve pointers to existing entries; erasure invalidates
+only pointers to the erased entry. SIZEOF's open-label stack is temporary:
+boundaries compute sizes and pop pointers, and tracking is rebuilt each pass.
+DEFL/EQU/SMC entries are excluded from tracking. Removing mutable entries, or
+previously tracked ordinary entries after tracking has closed, therefore does
+not inherently threaten SIZEOF. No SIZEOF ownership redesign is needed for such
+pass-boundary removal. If adding general end-of-pass erasure, explicitly drain
+any residual tracking first: malformed nesting currently has a defensive flush
+before the next source. Preserve usage separately if entries are recreated.
+Keep final-traversal values available for symbol/debug dumps until their
+consumers finish. Compare mutable assignment/read events for convergence, not
+an intentionally emptied post-invalidation map.
+
+This is the intended N-pass policy. The value-lifetime correction is also an
+independent candidate for current v1.x three-pass assembly, described below;
+it does not require an N-pass controller or a symbol-table redesign.
+
+## Forward Dependencies: Include And Exclude
+
+| Construct | Intended N-pass policy |
+| --- | --- |
+| Ordinary labels and EQU chains | Allow forward dependencies and propagation up to the configurable settling limit |
+| STRUCT initial offset, member sizes/defaults | Lift the unresolved-offset error; rebuild and settle structure symbols/layout |
+| DUP/REPT counts | Lift the unresolved-count error; allow expansion and label sequences to change while settling |
+| WHILE and IF/IFN/ELSEIF conditions | Lift forward-reference warnings for settling source; allow changes to parsed/assembled lines and layout |
+| IFUSED/IFNUSED | Preserve accumulated uses; allow recursive growth, without dead-code pruning |
+| DEFARRAY indices and substitutions depending on ordinary labels | Allow delayed substitution and substantial source changes; require eventual stability |
+| DEFL/`=` values | No previous-traversal fallback; require preceding assignments to mutable operands |
+| DEFDEVICE and DEVICE arguments | Require discovery-time resolution; do not solve declarations through extra passes |
+| Discovery-only metadata | Require complete resolution in discovery; preserve its phase boundary |
+
+Unresolved expressions use numeric placeholders, normally zero, during
+provisional evaluation; this is not successful resolution. Conditions and loop
+controls still unresolved in final emission are treated as zero with hard error
+diagnostics on stderr; an unresolved STRUCT initial offset likewise uses zero
+and reports an error. For compound conditions, do not let an unresolved operand
+accidentally make the condition true through arithmetic on its zero placeholder.
+Track unresolved state independently of numeric equality. Stable unresolved
+source is invalid, not a reason to spend every remaining iteration repeating the
+same failure. Diagnose it by final validation, and always diagnose unresolved
+reads encountered in pass 3, including final-only source.
+
+Late source selection can introduce new named/numeric labels and smart-SMC sites;
+settling must rebase these records, not forbid the controlling forward reference.
+This does not make macro names, STRUCT type names, or DEFINE/DEFARRAY declarations
+available before their source-order definitions. That would require a separate
+definition-discovery policy. Forward numeric indices into an already defined
+DEFARRAY are in scope; forward textual declarations are not implied.
+
+Delayed substitution may temporarily expose malformed assembly and EARLY
+warnings/errors even when later traversals produce valid source. Do not ban
+forward indices to avoid this. Distinguish such provisional diagnostics where
+practical; remaining cases need characterization and an explicit diagnostic
+policy, not a promise that every eventually valid generated source is already
+handled without early diagnostics. Actual fatal I/O and resource failures remain
+hard failures.
 
 ## Defining Convergence
 
@@ -243,7 +347,7 @@ Ordinary end-of-pass numeric values are too weak. At minimum assess these
 categories when defining the new mode's guarantee:
 
 * Defined-symbol membership, values, page/physical-address metadata, relevant
-	traits, relocatability, computed sizes, and the chosen usage-state policy.
+	traits, relocatability, computed sizes, and accumulated usage bits.
 * Complete numeric-label sequence: identity/order, values, relocation flags, and
 	count, including removed trailing entries and internal DP helper labels.
 * Smart-SMC positions/order and resolved offsets; relocation table contents/count.
@@ -251,7 +355,8 @@ categories when defining the new mode's guarantee:
 	device/page/MMU state and wrapping where these affect addressing.
 * Definition and expression-read events where end-state values conceal different
 	intermediate DEFL values, lookup targets, or flow relevant to layout.
-* Required unresolved references and deferred failures, separately from equality.
+* Required unresolved references and deferred failures, separately from equality,
+	including mutable reads before assignment and unresolved assignment dependencies.
 
 An undefined EQU chain can become numerically stationary at zero while still
 containing missing symbols. Equality does not turn unresolved definitions into
@@ -318,8 +423,9 @@ diagnostics tied to the accepted penultimate baseline.
 Smart-SMC differs: pass 1 builds `smartSmcLines`; later phases index that original
 position sequence and reuse/update resolved offsets. A source location becoming
 active only in pass 2 currently produces a mismatch even if pass 3 repeats it.
-Adopt a previous/current-record model for settling or deliberately restrict that
-case. Do not describe numeric-label flexibility as already applying to smart-SMC.
+Adopt a previous/current-record model for settling so these late-active sites can
+settle too. Do not describe numeric-label flexibility as already applying to
+smart-SMC in the current implementation.
 
 Relocation already copies `offsets` to `offsetsPrevious` and rebuilds the current
 table. `maxTableCount`, early table emission from the previous copy, table content,
@@ -335,11 +441,12 @@ one more dependency at a time. `SearchLabel()` marks uses during non-final phase
 and the `used` bits currently persist. This resembles monotone reachability in
 simple IFUSED libraries, not a freshly computed per-iteration use set.
 
-Preserving sticky uses is the conservative compatibility option. Recomputing
-reachability could remove stale dependencies but changes behavior, especially
-with IFNUSED, conditional references, and namespace fallback. Include usage bits
-in convergence; do not silently substitute one policy for the other. General
-conditional assembly is non-monotone even if a particular IFUSED pattern is not.
+Preserving sticky uses is the selected policy. Include usage bits in convergence
+so reverse-ordered and recursive usage trees can grow across settling traversals.
+Do not recompute reachability or prune stale dependencies when active branches
+change. Users must organize source to avoid unwanted retention, particularly
+with IFNUSED and conditional references. General conditional assembly remains
+non-monotone even though accumulated usage only grows.
 
 SIZEOF mutates symbol sizes at source/block boundaries rather than only when a
 label is inserted. Snapshot after those boundaries are finalized and verify no
@@ -347,10 +454,17 @@ tracking-stack state leaks across iterations. Structure definitions are rebuilt,
 but their size/member symbols participate in the persistent symbol lifecycle.
 
 DEVICE instances are recreated; the global-device detector may change the next
-pass's starting device based on the previous pass's directives. Include the
-layout-relevant configuration/mapping in stability rather than assuming every
-iteration begins with identical device state. DEFDEVICE's discovery-only rule
-needs deliberate handling if a definition is first reachable later.
+pass's starting device based on discovery's directives. Device RAM is allocated
+when a device is instantiated, including dry passes (`initRegularSlotDevice`),
+not only during final emission. The independent integer-offset refactoring
+candidate below would retain dry-pass mapping/address tracking without backing
+RAM and allocate it only in the final pass. Require DEFDEVICE declarations and DEVICE
+selection/arguments to be resolved during discovery. Do not support declarations
+first made meaningful by later settling; diagnose them instead. This does not
+require DEVICE to appear only once or forbid existing source-order device
+switching. Continue observing page/MMU mapping and addressing effects for layout
+stability; the discovery-time rule is not a blanket ban on settling expressions
+used by memory-mapping directives.
 
 Memory-dependent layout is an accepted scope boundary, as clarified in issue #63.
 `EmitByteNoListing()` updates
@@ -411,10 +525,13 @@ startup/final diagnostic types. Counts persist and update `__ERRORS__` and
 the process exit status after the underlying layout later becomes valid. Warning
 state altered through OPT also needs a lifecycle audit beyond syntax-stack reset.
 
-Separate hard errors from provisional settling issues. Never retry fatal I/O,
-invalid syntax, duplicates, or missing inputs merely because another iteration is
-available. Some risky forward references are intentionally forbidden today;
-N-pass support does not automatically legalize them. For retryable phase issues,
+Separate hard errors from provisional settling issues. Never retry fatal I/O or
+resource failures merely because another iteration is available. Syntax,
+duplicate-definition, and missing-input diagnostics from an otherwise valid,
+settled source remain errors; delayed substitutions or changing source selection
+can expose provisional forms that need separate treatment. Lift the explicit
+forward-reference restrictions/warnings listed above, rather than preserving them
+as protection against layout changes. For retryable phase issues,
 options include buffered per-iteration diagnostics, deduplication, or reporting
 only the accepted/failing candidate. Define the counts visible to source under
 that policy; otherwise source depending on `__ERRORS__` can affect its own layout.
@@ -433,9 +550,32 @@ SHELLEXEC are final-only. Preserve that gating. However:
 	printed there even though ordinary listing lines are final-only.
 * Lua PASS2/ALLPASS and discovery-only INCLUDELUA can perform unrestricted I/O.
 	Extra iterations must not be described as fully transactional.
-* LABELSLIST's configuration and DEFDEVICE are discovery-only; CSPECTMAP and many
-	other output configurations are final-only. Preserve their intended scheduling
-	or separately specify changes, rather than replacing every gate with a number.
+* Discovery-only configuration must be resolved in discovery; do not move it
+	into settling merely to allow forward dependencies. The inventory below
+	distinguishes it from later-phase output configuration.
+
+### Discovery-Only And Related Metadata Review
+
+Source inspection on 2026-11-19 identifies these explicit discovery-only paths;
+not every output directive is discovery-only, nor does the current code always
+diagnose unresolved numeric arguments at that boundary.
+
+| Path | Current scheduling and reason visible in code | N-pass treatment |
+| --- | --- | --- |
+| LABELSLIST filename and virtual-label option | `dirLABELSLIST` records options only in pass 1; filenames go into output configuration | Keep discovery-only; unresolved option expressions must error there, not silently freeze zero |
+| DEFDEVICE | Defines persistent device geometry/initial mapping only in pass 1 | Keep discovery-only; require fully resolved arguments |
+| DEVICE | Runs in all passes; discovery drives global-device detection; current dry passes allocate RAM | Preserve execution/recreation and discovery-resolved arguments; integer-offset tracking could remove dry-pass backing RAM independently |
+| SLDOPT COMMENT keywords | `SldAddCommentKeyword` collects keywords only in pass 1 | Preserve discovery-time collection; no numeric forward lookup involved; SWAPON/SWAPOFF are not discovery-only |
+| INCLUDELUA | Loads/executes the file only in pass 1, sharing the persistent VM | Keep scheduling; file selection must be ready then, not discovered through retries |
+| LUA PASS1 | Explicit user-selected discovery execution, not output metadata | Run once; do not replay to satisfy later forward dependencies |
+
+Related paths to avoid misclassifying: BPLIST currently opens in pass 2 and needs
+the accepted-baseline lifecycle described above; CSPECTMAP is final-only; EXPORT
+can establish a default filename during parsing and `InitPass` opens the export
+file on entry to final emission. Listing files may open before the pass loop or
+on first source open, and SLD opens before final `InitPass`. These are distinct
+owners, not evidence that all filenames require a pass-1 directive. Preserve
+existing scheduling unless a particular owner needs an N-pass lifecycle fix.
 
 Do not start final binary/debug/snapshot emission when settling fails. Once final
 emission starts, a mismatch can still be detected after bytes or files were
@@ -587,8 +727,12 @@ Make definition membership and generation boundaries explicit, while lookup can
 still prefer fresh current definitions and fall back to previous ones. Cleaner
 for absence detection, snapshot comparison, and late-defined duplicates than
 overloading `updatePass` further. More invasive ownership changes: SIZEOF stores
-pointers into symbols, lookup returns entry pointers, and macro/module fallback
-mutates traits/usage. Preserve pointer lifetimes or redesign those interfaces.
+pointers only while tracking open labels, lookup returns entry pointers, and
+macro/module fallback mutates traits/usage. Keeping stable map entries or retiring
+them after tracking closes is compatible with SIZEOF as implemented. Replacing
+the owning map while pointers are live would require managing those lifetimes;
+that is a property of the proposed replacement, not a current pointer-stability
+defect or a prerequisite refactor.
 
 This can complement B rather than replace it. A full previous-only evaluation
 model would need separate compatibility justification.
@@ -610,6 +754,97 @@ but expand the semantic and side-effect surface enormously. Arbitrary Lua and
 external commands cannot be rolled back generically. Do not couple these goals
 to a first implementation of repeated logical pass 2.
 
+## Independent Candidates For Current Sjasmplus
+
+These are separate, bounded work items suitable for consideration in current
+v1.x, before N-pass implementation. Neither is implemented by this research.
+Both clarify pass lifetimes and make later repeated settling easier to support;
+they do not require changing the number of passes.
+
+### 1. Reset Mutable Values Between Existing Passes
+
+Make DEFL/`=` values undefined at the beginning of each pass, including pass 3,
+so reading a mutable symbol before its current-pass assignment produces an
+undefined-symbol error rather than consuming the preceding pass's final value.
+Keep same-pass ordered reassignment and forward ordinary-label/EQU dependencies
+on assignment RHSs. This is a value-visibility correction, not N-pass convergence
+machinery. Start with the existing table and a small invalidation/removal API;
+do not make a general table rewrite a prerequisite.
+
+Preserve accumulated usage and symbol-kind information where needed. Distinguish
+an invalidated entry from a real definition and permit the subsequent assignment
+to define it normally. If erasing entries instead, retain any required metadata
+separately. SIZEOF excludes mutable entries and does not obstruct this work.
+Reset at pass entry, or equivalently between traversals, without deleting final
+values before symbol/debug dumps. A direct read-before-assignment error must not
+disappear merely because a later assignment overwrites that variable.
+
+Verify initialized counters/reassignments, direct and aliased forward mutable
+reads, mutable-to-mutable assignment RHSs, ordinary forward EQU/address RHSs,
+pass-selected assignments, usage flags, and final symbol exports. Review existing
+tests/examples for intentional cross-pass mutable state and document the behavior
+change: use EQU for forward constants or explicit Lua state for deliberate
+cross-pass scripting. Full unresolved-expression propagation remains part of
+the broader N-pass diagnostic work, not a prerequisite for rejecting direct
+forward mutable reads in the current assembler.
+
+### 2. Avoid Device RAM Allocation In Dry Passes
+
+Refactor device position tracking to integer offsets, separating address/mapping
+state from backing storage. Keep device geometry, pages/slots, mapping, and
+address progression available in all passes, but allocate backing RAM and perform
+Spectrum-like RAM initialization only for final emission. The primary benefit is
+cleaner ownership and phase separation, not an expected speedup. This remains an
+independent candidate for current three-pass sjasmplus.
+
+Currently `InitPass` deletes the preceding device chain;
+`CDevice::~CDevice` releases its RAM, and device creation allocates it again in
+each pass. The final chain is released at process cleanup. This is not a single
+allocation retained across the whole assembly.
+
+Dry passes do not store emitted machine-code bytes, and `MemGetByte` returns zero
+outside pass 3. They do, however, use `MemoryPointer` and page RAM pointers for
+address arithmetic, including `CheckPage` and INCBIN's page-boundary advance.
+Use integer offsets/remaining lengths for position tracking in every pass,
+forming an actual pointer or indexing the allocated block only at final-pass
+memory access. A page-relative or whole-device offset is an implementation
+choice; retain the existing mapping behavior and represent out-of-range positions
+explicitly. Do not perform arithmetic on fabricated or null pointers: integer
+arithmetic replaces that role without requiring a backing object in dry passes.
+
+`int32_t` is a plausible offset type: its positive range extends to 2 GiB minus
+one byte, comfortably beyond the kilobytes to tens of MiB of relevant devices
+(ZX Next has 2 MiB). This is not a requirement to support multi-gigabyte devices.
+Small devices can still encounter extreme source-controlled addresses, lengths,
+or DISP adjustments, so device capacity alone does not establish arithmetic
+safety. Use ordinary checked arithmetic or wider intermediates for additions,
+subtractions, and size products, validating before narrowing or forming a pointer.
+Do not rely on signed overflow or accidental unsigned wrap. Final accesses must
+be within the allocated block; a one-past-end position can be useful for boundary
+tracking but must not be dereferenced. These are normal correctness requirements,
+not a separate large overflow-handling project.
+
+Audit `CDevicePage`'s current non-null-RAM requirement, device initialization
+writes, memory access paths, and cleanup. Represent absent dry-pass backing
+storage explicitly; keep the existing final-pass memory contents and output
+behavior unchanged. This removes allocation, zero-fill, initialization, and
+release work for dry-pass RAM and lowers dry-pass memory demand. Total assembly
+peak memory may still be set by pass 3; any timing improvement is unmeasured and
+may be negligible in ordinary projects. Pointer-plus-offset access may also
+change final-pass code generation enough to offset allocation savings; on modern
+CPUs the net difference may be within measurement noise. Do not claim a speedup
+without measurement. Extra N-pass dry traversals would avoid repeating the same
+unnecessary backing-store work regardless of the net runtime effect.
+
+Verify built-in and custom devices, single-global and multiple-device sources,
+slot/page transitions and wrap options, DISP, reservations and INCBIN crossing
+pages, dry-pass memory reads returning zero, Spectrum default RAM initialization,
+final memory reads/snapshots/binaries, and cleanup with no backing allocation.
+Include extreme address/length expressions on small devices, negative/one-past-end
+positions, and overflow-safe size calculations. Use sanitizer checks for the
+offset conversion, alongside the normal full suite; measure allocation/memory
+changes separately from any timing claim.
+
 ## Suggested Staging And Verification
 
 1. Add characterization tests for generation refresh, late/removed symbols, usage,
@@ -617,7 +852,8 @@ to a first implementation of repeated logical pass 2.
 	 the legacy default unchanged; record which diagnostics are intentionally weak.
 2. Separate logical phase from definition generation across all insertion paths.
 	 Establish completed-traversal definition membership and preserve source-order
-	 lookup. Test duplicate detection, DEFL resets, STRUCT labels, and generation
+	 ordinary-label lookup, with traversal-local mutable values. Test duplicate
+	 detection, assignment-before-use, STRUCT labels, and generation
 	 widths above 127 independently of any public N-pass option.
 3. Add a read-only convergence observer to existing passes. Exclude bookkeeping
 	 churn and include completed sizes/metadata; explain changes by source location.
@@ -652,7 +888,28 @@ Use existing test homes and fixtures where suitable:
 Add coverage for zero output side effects on non-convergence, BPLIST reopening,
 Lua execution counts, changed input detection policy, page-only/size-only symbol
 changes, removed trailing numeric labels, final-phase divergence, and unnamed
-layout changes hidden by ORG. Include pipe and device modes. For Makefile builds,
+layout changes hidden by ORG. In particular, cover the selected forward policy:
+
+* Forward STRUCT offsets/member sizes, DUP/REPT counts, WHILE and conditional
+	conditions that change expansion/layout and eventually settle without fwdref
+	diagnostics; missing symbols must still fail with final diagnostics.
+* DEFARRAY forward indices changing instructions, definitions, and selected
+	inputs, including provisional malformed text/EARLY diagnostics and non-convergence.
+* Reverse/recursive IFUSED growth and deliberate retention of stale uses; no
+	implicit pruning when branches change.
+* Mutable assignment-before-use in every traversal, including pass 3; reject
+	forward mutable reads even when their previous-pass value would be stable.
+	Allow assignment RHSs with forward ordinary EQU/address dependencies; retain
+	unresolved dependency status through aliases and overwritten assignments.
+* Current-traversal mutable reset/count loops, retained usage metadata, and final
+	symbol dumps after value invalidation is introduced. If general symbol retirement
+	is added, verify SIZEOF tracking is closed before erasure, including malformed
+	nesting recovery; ordinary map growth needs no pointer-stability fix.
+* Discovery-only unresolved metadata/device arguments and declarations reached
+	only later must fail; ordinary device switching/global-device initialization
+	and page/MMU settling must continue to work.
+
+Include pipe and device modes. For Makefile builds,
 clean after header changes before rebuilding/testing; dependency tracking is
 incomplete, especially for the unit-test executable.
 
