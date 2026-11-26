@@ -3,27 +3,26 @@
 ; requires manual config + build + run in emulator/HW to verify results
 
     OPT --syntax=abfw --zxnext=cspect
-    DEFINE SJ_LIBRARY_USE_Z80N
 
     INCLUDE "sj_library.asm"
 
 alignMask=8192
 testValue=0
-addValue=alignMask/90 >? 1      ; either mask/90, or at least 1 ( ">?" is "max" operator)
+addValue=alignMask/277 >? 1     ; either mask/277, or at least 1 ( ">?" is "max" operator)
 
     DEVICE ZXSPECTRUM48
 
     ORG     $8000
 
 ;     break
-    DUP     300
+    DUP     800
         ld      hl,testValue
         ld      de,((testValue+(alignMask-1))&(-alignMask))&0xFFFF
         alignHl alignMask : call assertHLisDE
 testValue=testValue+addValue
     EDUP
-testValue=65536-(301*addValue)
-    DUP     300
+testValue=65536-(801*addValue)
+    DUP     800
         ld      hl,testValue
         ld      de,((testValue+(alignMask-1))&(-alignMask))&0xFFFF
         alignHl alignMask : call assertHLisDE

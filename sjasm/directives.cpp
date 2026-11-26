@@ -107,13 +107,13 @@ int ParseDirective_REPT() {
 }
 
 
-static void getBytesWithCheck(int add = 0, int dc = 0, bool dz = false) {
+static void getBytesWithCheck(int add = 0, int dc = 0, bool dz = false, bool allowEmpty = false) {
 	check8(add); add &= 255;
-	int dirDx[130];
+	int dirDx[GETBYTES_MAX + 2];
 	if (GetBytes(lp, dirDx, add, dc)) {
 		EmitBytes(dirDx);
 		if (dz) EmitByte(0);
-	} else {
+	} else if (!allowEmpty) {
 		Error("no arguments");
 	}
 }
@@ -135,8 +135,9 @@ static void dirDP() {
 	const auto endLabel = TemporaryLabelTable.seekForward(DP_HELPER_LABEL);
 	const aint dpSize = (nullptr != endLabel) ? (endLabel->value - (CurAddress + 1)) : 0;
 	if ((LASTPASS == pass) && (nullptr == endLabel)) Error("dirDP(): please, contact the author of this program.", nullptr, FATAL);
+	if (dpSize < 0 || 255 < dpSize) ErrorInt("[DP] String length outside 0..255", dpSize, SUPPRESS);
 	EmitByte(dpSize);											// emit the size byte
-	getBytesWithCheck();										// use regular DB-like parsing for string body
+	getBytesWithCheck(0, 0, false, true);						// use regular DB-like parsing for string body (empty is valid)
 	TemporaryLabelTable.InsertRefresh(DP_HELPER_LABEL);			// insert the forward helper temporary label after it
 }
 
@@ -252,7 +253,7 @@ static void dirDH() {
 }
 
 static void dirBLOCK() {
-	int dirDx[130];
+	int dirDx[GETBYTES_MAX + 2];
 	aint teller = 0, val = 0, initByteCount = 0, emitMaxToListing = 4;
 	if (ParseExpressionNoSyntaxError(lp, teller)) {
 		if (teller < 0) {
@@ -928,43 +929,26 @@ static void dirSAVETAP() {
 
 static void dirSAVEBIN() {
 	if (!DeviceID) {
-		Error("SAVEBIN only allowed in real device emulation mode (See DEVICE)");
+		Error("[SAVEBIN] only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
 		return;
 	}
 	bool exec = (LASTPASS == pass);
-	aint val;
-	int start = -1, length = -1;
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			if (!ParseExpressionNoSyntaxError(lp, val)) {
-				Error("[SAVEBIN] Syntax error", bp, SUPPRESS); return;
-			}
-			if (val < 0) {
-				Error("[SAVEBIN] Values less than 0000h are not allowed", bp); return;
-			} else if (val > 0xFFFF) {
-			  	Error("[SAVEBIN] Values more than FFFFh are not allowed", bp); return;
-			}
-			start = val;
-		} else {
-		  	Error("[SAVEBIN] Syntax error. No parameters", bp, PASS3); return;
-		}
-		if (anyComma(lp)) {
-			if (!ParseExpressionNoSyntaxError(lp, val)) {
-				Error("[SAVEBIN] Syntax error", bp, SUPPRESS); return;
-			}
-			if (val < 0) {
-				Error("[SAVEBIN] Negative values are not allowed", bp); return;
-			}
-			length = val;
-		}
-	} else {
-		Error("[SAVEBIN] Syntax error. No parameters", bp); return;
+	aint savebinArgs[2] = {0, 0};
+	const bool optionals[] = {false, true};
+	if (!comma(lp) || !getIntArguments<2>(lp, savebinArgs, optionals)) {
+		Error("[SAVEBIN] expected syntax is SAVEBIN <filename>, <startaddr>[, <length>]", bp, SUPPRESS);
+		return;
 	}
-
-	if (exec && !SaveBinary(fnaam, start, length)) {
-		Error("[SAVEBIN] Error writing file (Disk full?)", bp, IF_FIRST);
+	if (savebinArgs[0] < -0x1'0000 || 0xFFFF < savebinArgs[0]) {
+		Error("[SAVEBIN] Start value must be in -0x1'0000..0xFFFF range", bp); return;
+	}
+	if (savebinArgs[1] < -0xFFFF || 0x1'0000 < savebinArgs[1]) {
+		Error("[SAVEBIN] Length value must be in -0xFFFF..0x1'0000 range", bp); return;
+	}
+	if (exec && !SaveBinary(fnaam, savebinArgs[0], savebinArgs[1])) {
+		Error("[SAVEBIN] Error writing file (Disk full or zero length?)", bp, IF_FIRST);
 	}
 }
 
@@ -974,11 +958,10 @@ static void dirSAVEDEV() {
 
 	aint args[3]{-1, -1, -1};		// page, offset, length
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
-	for (auto & arg : args) {
-		if (!comma(lp) || !ParseExpression(lp, arg)) {
-			exec = false;
-			Error("Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>", bp, SUPPRESS);
-		}
+	const bool optional[] = {false, false, false};
+	if (!comma(lp) || !getIntArguments<3>(lp, args, optional)) {
+		exec = false;
+		Error("Expected syntax SAVEDEV <filename>,<startPage>,<startOffset>,<length>", bp, SUPPRESS);
 	}
 	if (exec) {
 		// validate arguments
@@ -1096,56 +1079,23 @@ static void dirSAVEHEX() {
 
 static void dirSAVEHOB() {
 	if (!DeviceID || pass != LASTPASS) {
-		if (!DeviceID) Error("SAVEHOB only allowed in real device emulation mode (See DEVICE)");
+		if (!DeviceID) Error("[SAVEHOB] only allowed in real device emulation mode (See DEVICE)");
 		SkipToEol(lp);
 		return;
 	}
-	aint val;
-	int start = -1,length = -1;
-	bool exec = true;
-
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
 	std::string fnaamh {""};
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			fnaamh = GetDelimitedString(lp);
-			if (fnaamh.empty()) {
-				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
-			}
-		} else {
-		  	Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
-		}
-	} else {
-		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return; //is this ok?
+	if (comma(lp)) fnaamh = GetDelimitedString(lp);
+	aint args[] = {0, 0};
+	const bool optional[] = {false, true};
+	if (!fnaam.has_filename() || fnaamh.empty() || !comma(lp) || !getIntArguments<2>(lp, args, optional) || !SkipBlanks(lp)) {
+		Error("[SAVEHOB] expected syntax is <filename>, <filename_in_trdos>, <startaddress>[, <length>]", bp, SUPPRESS); return;
 	}
-
-	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
-			}
-			if (val < 0x4000) {
-				Error("[SAVEHOB] Values less than 4000h are not allowed", bp, PASS3); return;
-			} else if (val > 0xFFFF) {
-			  	Error("[SAVEHOB] Values more than FFFFh are not allowed", bp, PASS3); return;
-			}
-			start = val;
-		} else {
-		  	Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
-		}
-		if (anyComma(lp)) {
-			if (!ParseExpression(lp, val)) {
-				Error("[SAVEHOB] Syntax error", bp, PASS3); return;
-			}
-			if (val < 0) {
-				Error("[SAVEHOB] Negative values are not allowed", bp, PASS3); return;
-			}
-			length = val;
-		}
-	} else {
-		Error("[SAVEHOB] Syntax error. No parameters", bp, PASS3); return;
+	const aint start = args[0], length = args[1];
+	if (start < 0x4000 || 0xFFFF < start) {
+		ErrorInt("[SAVEHOB] startadress must be 16384..65535", start, PASS3); return;
 	}
-	if (exec && !SaveHobeta(fnaam, fnaamh.c_str(), start, length)) {
+	if (!SaveHobeta(fnaam, fnaamh.c_str(), start, length)) {
 		Error("[SAVEHOB] Error writing file (Disk full?)", bp, IF_FIRST); return;
 	}
 }
@@ -1155,7 +1105,7 @@ static void dirEMPTYTRD() {
 		SkipToEol(lp);
 		return;
 	}
-	char diskLabel[9] = "        ";
+	std::string diskLabel;
 
 	const std::filesystem::path fnaam = GetOutputFileName(lp);
 	if (!fnaam.has_filename()) {
@@ -1163,14 +1113,12 @@ static void dirEMPTYTRD() {
 		return;
 	}
 	if (anyComma(lp)) {
-		const std::string srcLabel = GetDelimitedString(lp);
-		if (srcLabel.empty()) {
+		diskLabel = GetDelimitedString(lp);
+		if (diskLabel.empty()) {
 			Error("[EMPTYTRD] Syntax error, empty label", bp, IF_FIRST);
-		} else {
-			memcpy(diskLabel, srcLabel.data(), std::min(static_cast<std::string::size_type>(8), srcLabel.size()));
-			if (8 < srcLabel.size()) {
-				Warning("[EMPTYTRD] label will be truncated to 8 characters", diskLabel);
-			}
+		} else if (TRD_LABEL_SZ < diskLabel.size()) {
+			const std::string message = "[EMPTYTRD] label will be truncated to " + std::to_string(TRD_LABEL_SZ) + " characters";
+			Warning(message.c_str(), diskLabel.substr(0, TRD_LABEL_SZ).c_str());
 		}
 	}
 	TRD_SaveEmpty(fnaam, diskLabel);
@@ -1341,7 +1289,7 @@ static void dirCSPECTMAP() {
 		Options::CSpectMapFName = fName;
 	} else {		// create default map file name from current source file name (appends ".map")
 		assert(!sourcePosStack.empty());
-		Options::CSpectMapFName = sourcePosStack.back().filename;
+		Options::CSpectMapFName = std::filesystem::u8path(sourcePosStack.back().filename);
 		Options::CSpectMapFName += ".map";
 	}
 	// remember page size of current device (in case the source is multi-device later)
@@ -1571,7 +1519,7 @@ static void dirHEXOUT() {
 	} else {
 		const std::filesystem::path fnaam = GetOutputFileName(lp);
 		if (fnaam.has_filename())	OpenHex(fnaam);
-		else						Error("[HEXOUT] invalid filename", fnaam.string().c_str());
+		else						Error("[HEXOUT] invalid filename", fnaam.u8string().c_str());
 	}
 }
 
@@ -1693,9 +1641,9 @@ static void dirEXPORT() {
 
 	if (Options::ExportFName.empty()) {
 		assert(!sourcePosStack.empty());
-		Options::ExportFName = sourcePosStack.back().filename;
+		Options::ExportFName = std::filesystem::u8path(sourcePosStack.back().filename);
 		Options::ExportFName.replace_extension(".exp");
-		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName.string().c_str(), W_EARLY);
+		Warning("[EXPORT] Filename for exportfile was not indicated. Output will be in", Options::ExportFName.u8string().c_str(), W_EARLY);
 	}
 	if (!(n = p = GetID(lp))) {
 		Error("[EXPORT] Syntax error", lp, SUPPRESS);
@@ -1849,22 +1797,8 @@ static void dirSHELLEXEC() {
 		parameters = GetDelimitedString(lp);
 	}
 	if (pass == LASTPASS) {
-		if (!system(nullptr)) {
-			Error("[SHELLEXEC] clib command processor is not available on this platform!");
-		} else {
-			if (!parameters.empty()) command += " " + parameters;
-			if (Options::OutputVerbosity <= OV_ALL) {
-				_CERR "Executing <" _CMDL command _CMDL ">" _ENDL;
-			}
-			// flush both stdout and stderr before trying to execute anything externally
-			_COUT flush;
-			_CERR flush;
-			// execute the requested command
-			int exitCode = system(command.c_str());
-			if (exitCode) {
-				ErrorInt("[SHELLEXEC] non-zero exit code", WEXITSTATUS(exitCode));
-			}
-		}
+		if (!parameters.empty()) command += " " + parameters;
+		SJ_shellExec(command.c_str());
 	}
 }
 

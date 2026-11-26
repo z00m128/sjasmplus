@@ -31,9 +31,11 @@
 #ifndef __IO_TRD
 #define __IO_TRD
 
+constexpr size_t TRD_LABEL_SZ = 11;
+
 enum ETrdFileName { OK, INVALID_EXTENSION, THREE_LETTER_EXTENSION };
 
-bool TRD_SaveEmpty(const std::filesystem::path & fname, const char label[8]);
+bool TRD_SaveEmpty(const std::filesystem::path & fname, std::string_view label);
 ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & nameL);
 bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int start, int length, int autostart, bool replace, bool addplace, int lengthMinusVars = -1);
 

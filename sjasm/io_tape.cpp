@@ -45,7 +45,7 @@ static aint detect_ram_start(unsigned char* ram, aint length);
 int TAP_SaveEmpty(const std::filesystem::path & fname) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname.string().c_str()); return 0;
+		Error("opening file for write", fname.u8string().c_str()); return 0;
 	}
 	fclose(ff);
 	AddDeleteOnError(fname);
@@ -55,7 +55,7 @@ int TAP_SaveEmpty(const std::filesystem::path & fname) {
 int TAP_SaveBlock(const std::filesystem::path & fname, unsigned char flag, const char *ftapname, int start, int length, int param2, int param3) {
 	FILE* fpout;
 	if (!FOPEN_ISOK(fpout, fname, "ab")) {
-		Error("opening file for append", fname.string().c_str(), FATAL);
+		Error("opening file for append", fname.u8string().c_str(), FATAL);
 	}
 	// not adding to --cleanonerror, because this is appending to some file, not creating it
 
@@ -138,7 +138,7 @@ int TAP_SaveBlock(const std::filesystem::path & fname, unsigned char flag, const
 int TAP_SaveSnapshot(const std::filesystem::path & fname, unsigned short start) {
 	FILE* fpout;
 	if (!FOPEN_ISOK(fpout, fname, "wb")) {
-		Error("opening file for write", fname.string().c_str(), FATAL);
+		Error("opening file for write", fname.u8string().c_str(), FATAL);
 	}
 	AddDeleteOnError(fname);
 

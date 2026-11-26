@@ -22,9 +22,9 @@
 ; Case 6: DEFS with exact-fit operands (no implicit fill)
     DEFS 3, 0x11, 0x22, 0x33
 
-; Case 7: DEFS with 129-byte operand list (tests GetBytes 128-byte limit)
-; This should trigger GetBytes error "Over 128 bytes defined..." and init values are truncated to 128 bytes, but total fill is 150 bytes as specified
-    DEFS 150, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@"
+; Case 7: DEFS with 257-byte operand list (tests GetBytes 256-byte limit)
+; This should trigger GetBytes error "Over 256 bytes defined..." and init values are truncated to 256 bytes, but total fill is 300 bytes as specified
+    DEFS 300, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@"
 
 ; Case 8: DEFS with operands exceeding DEFS size, warns and truncates init data to length 3
     DEFS 3, 1, 2, 3, 4, 5, 6

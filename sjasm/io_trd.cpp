@@ -63,7 +63,6 @@ struct STrdDisc {
 	constexpr static size_t SECTOR_SZ = 256;
 	constexpr static size_t SECTORS_PER_TRACK = 16;
 	constexpr static size_t PASSWORD_SZ = 9;
-	constexpr static size_t LABEL_SZ = 8;
 	constexpr static byte DISK_TYPE_T80_S2 = 0x16;		// 80 tracks, double sided
 	constexpr static byte DISK_TYPE_T40_S2 = 0x17;		// 40 tracks, double sided
 	constexpr static byte DISK_TYPE_T80_S1 = 0x18;		// 80 tracks, single sided
@@ -81,8 +80,7 @@ struct STrdDisc {
 	byte		password[PASSWORD_SZ]	= {' ',' ',' ',' ',' ',' ',' ',' ',' '};
 	byte		_unused3[1]				= {};
 	byte		numOfDeleted			= 0;
-	byte		label[LABEL_SZ]			= {' ',' ',' ',' ',' ',' ',' ',' '};
-	byte		_unused4[3]				= {};
+	byte		label[TRD_LABEL_SZ]		= {' ',' ',' ',' ',' ',' ',' ',' ',0,0,0};
 
 	bool isTrdInfo() const {
 		return (TRDOS_DISC_ID == trDosId);
@@ -156,12 +154,15 @@ bool STrdHead::writeToFile(FILE *ftrd) {
 /**
  * @brief Write empty TRD file (80 tracks, 2 sides) into file
  *
+ * Copies up to TRD_LABEL_SZ bytes of the label over the default label field
+ * (eight spaces followed by three zeroes), leaving uncopied bytes unchanged.
+ *
  * @param ff file handle to write content into
  * @param buf 4096 bytes long buffer (must be zeroed by caller) (16 sectors = 1 track)
- * @param label nullptr or 8 characters long disc label
+ * @param label disc label (any, will be truncated or padded)
  * @return int 1 if OK, 0 in case of write error
  */
-static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
+static int saveEmptyWrite(FILE* ff, byte* buf, std::string_view label) {
 	//catalog (8 zeroed sectors)
 	if (8 != fwrite(buf, STrdDisc::SECTOR_SZ, 8, ff)) return 0;
 	// disc info in sector 8
@@ -169,7 +170,7 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 		// the default 80 track two sided disc info initialized
 		STrdDisc discInfo{};
 		// replace label data if requested
-		if (label) memcpy(discInfo.label, label, STrdDisc::LABEL_SZ);
+		if (!label.empty()) memcpy(discInfo.label, label.data(), std::min(TRD_LABEL_SZ, label.size()));
 		if (!discInfo.writeToFile(ff)) return 0;
 	}
 	// zeroes till end of first track
@@ -181,10 +182,10 @@ static int saveEmptyWrite(FILE* ff, byte* buf, const char label[8]) {
 	return 1;
 }
 
-bool TRD_SaveEmpty(const std::filesystem::path & fname, const char label[8]) {
+bool TRD_SaveEmpty(const std::filesystem::path & fname, std::string_view label) {
 	FILE* ff;
 	if (!fname.has_filename() || !FOPEN_ISOK(ff, fname, "wb")) {
-		Error("opening file for write", fname.string().c_str(), IF_FIRST);
+		Error("opening file for write", fname.u8string().c_str(), IF_FIRST);
 		return 0;
 	}
 	AddDeleteOnError(fname);
@@ -193,7 +194,7 @@ bool TRD_SaveEmpty(const std::filesystem::path & fname, const char label[8]) {
 	int result = saveEmptyWrite(ff, buf, label);
 	free(buf);
 	fclose(ff);
-	if (!result) Error("Write error (disk full?)", fname.string().c_str(), IF_FIRST);
+	if (!result) Error("Write error (disk full?)", fname.u8string().c_str(), IF_FIRST);
 	return result;
 }
 
@@ -227,7 +228,7 @@ ETrdFileName TRD_FileNameToBytes(const char* inputName, byte binName[12], int & 
 
 static int ReturnWithError(const char* errorText, const std::filesystem::path & fname, FILE* fileToClose) {
 	if (nullptr != fileToClose) fclose(fileToClose);
-	Error(errorText, fname.string().c_str(), IF_FIRST);
+	Error(errorText, fname.u8string().c_str(), IF_FIRST);
 	return 0;
 }
 
@@ -368,7 +369,7 @@ bool TRD_AddFile(const std::filesystem::path & fname, const char* fhobname, int 
 		if (STrdHead::NUM_OF_FILES_MAX != fileIndex) {
 			// to keep legacy behaviour of older sjasmplus versions, this is just warning
 			// and the same file will be added to end of directory any way
-			WarningById(W_TRD_DUPLICATE, fname.string().c_str());
+			WarningById(W_TRD_DUPLICATE, fname.u8string().c_str());
 		}
 		fileIndex = trdHead.info.numOfFiles;
 	}

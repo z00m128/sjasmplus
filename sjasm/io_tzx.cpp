@@ -35,7 +35,7 @@ namespace TZXBlockId {
 void TZX_CreateEmpty(const std::filesystem::path & fname) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "wb")) {
-		Error("[TZX] Error opening file for write", fname.string().c_str(), FATAL);
+		Error("[TZX] Error opening file for write", fname.u8string().c_str(), FATAL);
 	}
 	AddDeleteOnError(fname);
 
@@ -55,7 +55,7 @@ void TZX_AppendPauseBlock(const std::filesystem::path & fname, uint16_t pauseAft
 {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file for append", fname.string().c_str(), FATAL);
+		Error("[TZX] Error opening file for append", fname.u8string().c_str(), FATAL);
 	}
 	// not adding to --cleanonerror, because this is appending to some file, not creating it
 	fputc(TZXBlockId::Pause, ff); // block id
@@ -69,7 +69,7 @@ void TZX_AppendStandardBlock(const std::filesystem::path & fname,
 							 const byte* buf, const aint buflen, word pauseAfterMs, byte sync) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file for append", fname.string().c_str(), FATAL);
+		Error("[TZX] Error opening file for append", fname.u8string().c_str(), FATAL);
 	}
 	// not adding to --cleanonerror, because this is appending to some file, not creating it
 
@@ -94,7 +94,7 @@ void TZX_AppendTurboBlock(const std::filesystem::path & fname,
 						  const byte* buf, const aint buflen, const STZXTurboBlock& turbo) {
 	FILE* ff;
 	if (!FOPEN_ISOK(ff, fname, "a+b")) {
-		Error("[TZX] Error opening file for append", fname.string().c_str(), FATAL);
+		Error("[TZX] Error opening file for append", fname.u8string().c_str(), FATAL);
 	}
 	// not adding to --cleanonerror, because this is appending to some file, not creating it
 

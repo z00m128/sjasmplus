@@ -1,0 +1,18 @@
+# file opened: shellexec.asm
+ 1    0000                  SHELLEXEC "exit 0"
+shellexec.asm(2): error: [SHELLEXEC] non-zero exit code: 7
+ 2    0000                  SHELLEXEC "exit", "7"
+ 3    0000
+ 4    0000                  LUA PASS3
+ 5    0000 ~                    os.remove("shellexec.done")
+ 6    0000 ~                    sj.shellexec("echo done > shellexec.done")
+ 7    0000 ~                    local marker = assert(io.open("shellexec.done", "rb"))
+ 8    0000 ~                    assert(marker:read("*a"):find("done", 1, true))
+ 9    0000 ~                    marker:close()
+10    0000 ~                    sj.shellexec("exit 7")
+shellexec.asm(10): error: [LUA] [SHELLEXEC] non-zero exit code: 7
+11    0000                  ENDLUA
+# file closed: shellexec.asm
+
+Value    Label
+------ - -----------------------------------------------------------

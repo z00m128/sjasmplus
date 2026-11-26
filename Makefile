@@ -3,6 +3,10 @@
 # overall optimization and beautification by mborik's hands. [05.05.2016]
 # overall rewrite and extensions by Ped7g [2019-03-21 and following years]
 
+# Header dependencies are incomplete, especially for +ut objects used by tests.
+# After header edits, run make clean before building/testing (make DEBUG=1 clean for debug).
+# Use matching clean/build options and sequential commands, e.g. make clean && make -j8 test.
+
 ## Some examples of my usage of this Makefile:
 # make test 					- to run the CI test+example script runner
 # make memcheck TEST=misc DEBUG=1		- to use valgrind on assembling sub-directory "misc" in tests
@@ -19,7 +23,7 @@
 EXE_BASE_NAME=sjasmplus
 
 # Set version, dir and src.tar.xz filename
-VERSION?=1.24.0
+VERSION?=1.24.1
 SRCTARFILE?=$(EXE_BASE_NAME)-$(VERSION)-src.tar.xz
 SRCTARDIR?=$(EXE_BASE_NAME)-$(VERSION)
 

@@ -132,3 +132,13 @@ Shr:
 Sizeof:
 ; U16 can't be capitalized, it's all-caps then
 Xor:
+
+    ; Issue #394 - `1 xor(1+1)` doesn't parse, requires whitespace ahead of parentheses
+    DB (1+2)and(2+4),   (1+2) and (2+4)
+    DB (1+2)or(2+4),    (1+2) or (2+4)
+    DB (1+2)xor(2+4),   (1+2) xor (2+4)
+    DB (2+4)shr(2-1),   (2+4) shr (2-1)
+    DB (2+4)shl(1+2),   (2+4) shl (1+2)
+    DB (2+4+8)mod(1+2), (2+4+8) mod (1+2)
+    DB low(0x12345678),high(0x12345678),not(0),abs(-0x12)
+    DW u16(0x12345678)

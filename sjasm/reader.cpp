@@ -130,13 +130,6 @@ int NeedDEFL() {
 	return 0;
 }
 
-bool NeedIoC() {
-	SkipBlanks();
-	if ('(' != lp[0] || 'c' != tolower((byte)lp[1]) || ')' != lp[2]) return false;
-	lp += 3;
-	return true;
-}
-
 bool isMacroNext() {	// checks if ".macro" directive is ahead (but doesn't consume it)
 	if (SkipBlanks()) return false;
 	char* p = lp;
@@ -663,7 +656,7 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			Error("Expression expected", NULL, SUPPRESS);
 			break;
 		}
-		if (0 != (strRes = GetCharConstAsString(p, e, t, 128, add))) {
+		if (0 != (strRes = GetCharConstAsString(p, e, t, GETBYTES_MAX, add))) {
 			// string literal parsed (both types)
 			if (strRes < 0) break;		// syntax error happened
 			// single byte "strings" may have further part of expression, detect it here
@@ -689,10 +682,10 @@ int GetBytes(char*& p, int e[], int add, int dc) {
 			Error("Syntax error", p, SUPPRESS);
 			break;
 		}
-	} while(comma(p) && t < 128);
+	} while(comma(p) && t < GETBYTES_MAX);
 	Relocation::checkAndWarn();
 	e[t] = -1;
-	if (t == 128 && *p) Error("Over 128 bytes defined in single DB/DC/... Values over", p, SUPPRESS);
+	if (t == GETBYTES_MAX && *p) Error("Over 256 bytes defined in single DB/DC/... Values over", p, SUPPRESS);
 	return t;
 }
 
@@ -842,9 +835,9 @@ delim_string_t GetDelimitedStringEx(char*& p) {
 		result.second = DelimiterAnyBegins(p);
 		const char deliE = delimiters_e[result.second];
 		char *p_begin = p;
-		while (*p && deliE != *p) ++p;
+		while (*p && ((DT_NONE != result.second) ? (deliE != *p) : (!White(*p)))) ++p;
 		result.first.append(p_begin, p);	// append found delimited string
-		if (' ' != deliE) {
+		if (DT_NONE != result.second) {
 			if (deliE == *p) {
 				++p;
 			} else {

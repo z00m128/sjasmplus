@@ -50,13 +50,13 @@ label                   ; first char is letter or underscore, for more details s
 ; multiple instruction on same line can be split by colon (works as fake new line, but without label)
         ldi:ldi:ldi     ; 3x `ldi` instruction
 ; undocumented Z80 instructions syntax (some examples, others are similar to these):
-        sli b : sll b   ; opcode CB30 (shift left setting bottom bit to 1)
+        sli b : sll b   ; opcode CB30 (2x) (shift left setting bottom bit to 1)
         in (c)          ; opcode ED70
         out (c),0       ; opcode ED71 ; "out0-ok" to suppress warning[out0]
         inc ixh,xh,hx   ; opcode DD24 (3x). Other: IXL (or XL, LX), IYH (YH, HY), IYL (YL, LY)
         rlc (ix+1),b    ; opcode DDCB0100 ; rotate left memory at IX+1 and copy result also to B
-        res 0,(ix+2),a  ; opcode DDCB0287 ; reset lowest bit if (IX+2) and copy result also to A
-    OPT --syntax=abf    ; **RECOMMENDED** syntax setting for new projects
+        res 0,(ix+2),a  ; opcode DDCB0287 ; reset lowest bit at IX+2 and copy result also to A
+    OPT --syntax=abf    ; **RECOMMENDED** syntax setting for new projects **RECOMMENDED**
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; assembler directives
@@ -75,10 +75,10 @@ symbol: EQU $C123       ; gives value $C123 to symbol (aka label) `symbol`, no m
         setsplitcounter 200 + 56        ; -> `ld bc,pair(low(200 + 56), high((200 + 56)-1)+1)` -> ld bc,0x0001
 loop:   djnz loop : dec c : jp nz,loop  ; loop 200+56 times
 ; DUP directive repeats anonymous-macro-block N times
-        DUP 3, index
+        DUP 3, index    ; optional symbol name `index` for internal counter 0, 1, 2, ...
             DB index
-            DB $FF
-        EDUP            ; results in array: 00 FF 01 FF 02 FF
+            DW $FFFE
+        EDUP            ; results in array: 00 FE FF 01 FE FF 02 FE FF
         .4 ldi          ; dot-repeater will repeat single instruction (4x `ldi` in this case)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

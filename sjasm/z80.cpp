@@ -84,6 +84,20 @@ namespace Z80 {
 		}
 	}
 
+	static byte GetIoPort(char*& p) {
+		aint val;
+		char* const oldP = p;
+		const int result = ParseExpressionMemAccess(p, val);
+		if (0 == result) {
+			Error("Operand expected", oldP, IF_FIRST); return 0;
+		}
+		if (2 == Options::syx.MemoryBrackets && 2 != result) {
+			Error("Port address must use square brackets", oldP); return 0;
+		}
+		check8(val);
+		return val & 255;
+	}
+
 	static word GetWord(char*& p) {
 		aint val;
 		if (!ParseExpression(p, val)) {
@@ -387,6 +401,14 @@ namespace Z80 {
 		}
 		p = pp;
 		return Z80_UNK;
+	}
+
+	static bool NeedIoC() {		// looks for "(c)" or "[c]" (or strictly "[c]" with B syntax) as I/O port
+		SkipBlanks();
+		char* const old_p = lp;
+		bool result = (BT_NONE != OpenBracket(lp) && Z80_C == GetRegister(lp) && CloseBracket(lp));
+		if (!result) lp = old_p;
+		return result;
 	}
 
 	static bool CommonAluOpcode(const int opcodeBase, int* e, bool hasNonRegA = false, bool nonMultiArgComma = true) {
@@ -885,7 +907,7 @@ namespace Z80 {
 							break;
 					}
 				} else {
-					e[1] = GetByte(lp);
+					e[1] = GetIoPort(lp);
 					if (Z80_A == reg) e[0] = 0xdb;	// IN A,(n)
 				}
 			}
@@ -934,7 +956,7 @@ namespace Z80 {
 			if (Z80C_UNK == cc) {	// no condition, check for: jp (hl),... and Z80N jp (c)
 				char* expLp = lp;
 				if (Options::syx.IsNextEnabled && NeedIoC()) {
-					e[0] = 0xED; e[1] = 0x98;	// only "(C)" form with parentheses is legal syntax for Z80N "jp (C)"
+					e[0] = 0xED; e[1] = 0x98;	// Z80N "jp (C)" / "jp [C]"
 					reg = Z80_C;	// suppress "jp imm16" parser
 				} else {
 					EBracketType bt = OpenBracket(lp);
@@ -1908,7 +1930,7 @@ namespace Z80 {
 					}
 				}
 			} else {
-				e[1] = GetByte(lp);		// out ($n),a
+				e[1] = GetIoPort(lp);		// out (n),a
 				if (comma(lp) && GetRegister(lp) == Z80_A) e[0] = 0xd3;
 			}
 			EmitBytes(e, true);

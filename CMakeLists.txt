@@ -105,6 +105,10 @@ endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES})
 
+if(WIN32)
+	target_link_libraries(${PROJECT_NAME} shell32)
+endif()
+
 if(ENABLE_LUA)
 	target_link_libraries(
 		${PROJECT_NAME}

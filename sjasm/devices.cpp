@@ -170,6 +170,13 @@ static void DeviceZxSpectrumNext(CDevice **dev, CDevice *parent, aint ramtop) {
 	}
 }
 
+static void DeviceElement(CDevice **dev, CDevice *parent, aint ramtop) {
+	if (ramtop) WarningById(W_NO_RAMTOP);
+	*dev = new CDevice("ELEMENT", parent);
+	const int initialPages[] = {0, 1, 2, 3, 4, 5, 6, 7};
+	initRegularSlotDevice(*dev, 0x2000, 8, 2560, initialPages);
+}
+
 static void DeviceNoSlot64k(CDevice **dev, CDevice *parent, aint ramtop) {
 	if (ramtop) WarningById(W_NO_RAMTOP);
 	*dev = new CDevice("NOSLOT64K", parent);
@@ -251,6 +258,8 @@ bool SetDevice(const char *const_id, const aint ramtop) {
 				DeviceZXSpectrum8192(dev, parent, ramtop);
 			} else if (cmphstr(id, "zxspectrumnext")) {
 				DeviceZxSpectrumNext(dev, parent, ramtop);
+			} else if (cmphstr(id, "element")) {
+				DeviceElement(dev, parent, ramtop);
 			} else if (cmphstr(id, "noslot64k")) {
 				DeviceNoSlot64k(dev, parent, ramtop);
 			} else if (cmphstr(id, "amstradcpc464")) {
@@ -383,36 +392,38 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 		CurAddress &= 0xFFFF;
 	}
 	// check the emit address for bytecode
-	const int realAddr = DISP_NONE != PseudoORG ? adrdisp : CurAddress;
+	const int longAddr = DISP_NONE != PseudoORG ? adrdisp : CurAddress;
 	// quicker check to avoid scanning whole slots array every byte
 	if (CHECK_RESET != level
-		&& Slots[previousSlotI]->Address <= realAddr
-		&& realAddr < Slots[previousSlotI]->Address + Slots[previousSlotI]->Size) {
+		&& Slots[previousSlotI]->Address <= longAddr
+		&& longAddr < Slots[previousSlotI]->Address + Slots[previousSlotI]->Size) {
 		// refresh MemoryPointer in case the CurAddress did move a bit without emit (negative BLOCK, etc)
-		MemoryPointer = Slots[previousSlotI]->Page->RAM + (realAddr - Slots[previousSlotI]->Address);
+		MemoryPointer = Slots[previousSlotI]->Page->RAM + (longAddr - Slots[previousSlotI]->Address);
 		assert(	(Slots[previousSlotI]->Page->RAM <= MemoryPointer) &&
 				(MemoryPointer < Slots[previousSlotI]->Page->RAM + Slots[previousSlotI]->Size));
 		return;
 	}
 	for (int i=SlotsCount; i--; ) {
 		CDeviceSlot* const S = Slots[i];
-		if (realAddr < S->Address) continue;
+		if ((longAddr & 0xFFFF) < S->Address) continue;		// find slot after masking long address against CPU address space
 		Page = S->Page;
-		MemoryPointer = Page->RAM + (realAddr - S->Address);
- 		if (CHECK_RESET == level) {
+		MemoryPointer =
+						(S->Address <= longAddr && longAddr < S->Address + S->Size) ?
+							Page->RAM + (longAddr - S->Address) :
+							nullptr;
+		if (CHECK_RESET == level) {
 			previousSlotOpt = S->Option;
 			previousSlotI = i;
 			limitExceeded = false;
 			return;
 		}
 		// if still in the same slot and within boundaries, we are done
-		if (i == previousSlotI && realAddr < S->Address + S->Size) return;
+		if (i == previousSlotI && S->Address <= longAddr && longAddr < S->Address + S->Size) return;
 		// crossing into other slot, check options for special functionality of old slot
-		if (S->Address + S->Size <= realAddr) MemoryPointer = nullptr; // you're not writing there
 		switch (previousSlotOpt) {
 			case CDeviceSlot::O_ERROR:
 				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded) {
-					ErrorInt("Write outside of memory slot", realAddr, SUPPRESS);
+					ErrorInt("Write outside of memory slot", longAddr, SUPPRESS);
 					limitExceeded = true;
 				}
 				break;
@@ -437,9 +448,9 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 					previousSlotOpt = S->Option;
 					break;		// continue into next slot, don't wrap any more
 				}
-				if (realAddr != (prevS->Address + prevS->Size)) {	// should be equal
+				if (longAddr != (prevS->Address + prevS->Size)) {	// should be equal
 					ErrorInt("Write beyond memory slot in wrap-around slot caught too late by",
-								realAddr - prevS->Address - prevS->Size, FATAL);
+								longAddr - prevS->Address - prevS->Size, FATAL);
 					break;
 				}
 				prevS->Page = Pages[nextPageN];		// map next page into the guarded slot
@@ -451,8 +462,9 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 			}
 			default:
 				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded && !MemoryPointer) {
-					ErrorInt("Write outside of device memory at", realAddr, SUPPRESS);
+					ErrorInt("Write outside of device memory at", longAddr, SUPPRESS);
 					limitExceeded = true;
+					previousSlotI = i;				// in this case change of slot should NOT clear the just set `limitExceeded`
 				}
 				break;
 		}

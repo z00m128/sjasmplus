@@ -15,9 +15,40 @@ OF THIS SOFTWARE.
 
 #include "../sjasm/sjdefs.h"
 #include "UnitTest++/UnitTest++.h"
+#include <chrono>
 
 TEST(Sanity) {			// just to verify the UnitTest++ test runner works
 	CHECK_EQUAL(1, 1);
+}
+
+TEST(Support_GetTickCount) {
+	const auto before = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()).count();
+	const auto actual = SJ_getTickCount();
+	const auto after = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()).count();
+	CHECK(before <= actual);
+	CHECK(actual <= after);
+}
+
+TEST(Support_ProcessArgv_NoArguments) {
+	for (int count : { -1, 0, 1 }) {
+		std::vector<std::string> storage;
+		std::vector<char*> pointers;
+		CHECK(SJ_processArgv(count, nullptr, storage, pointers));
+		CHECK(storage.empty());
+		CHECK(pointers.empty());
+	}
+}
+
+TEST(Support_ProcessArgv_SkipsExecutable) {
+	char option[] = "--unittest";
+	char* arguments[] = { nullptr, option, nullptr };
+	std::vector<std::string> storage;
+	std::vector<char*> pointers;
+	CHECK(SJ_processArgv(2, arguments, storage, pointers));
+	CHECK_EQUAL(1UL, pointers.size());
+	if (1 == pointers.size()) CHECK_EQUAL("--unittest", pointers[0]);
 }
 
 TEST(Reader_GetNumericValue_IntBased_1) {

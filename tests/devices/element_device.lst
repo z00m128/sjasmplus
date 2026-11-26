@@ -1,0 +1,72 @@
+# file opened: element_device.asm
+ 1    0000                  DEVICE ELEMENT
+ 2    0000                  ; 8 slots with 8kiB size, 2560 pages = 20MiB, all memory initially zeroed, initial mapping 0, 1, ...
+ 3    0000              slotNumber = 0
+ 4    0000                  DUP 8
+ 5    0000             >    ORG slotNumber * $2000
+ 6    0000             >    ASSERT $$ == slotNumber
+ 7    0000             >slotNumber = slotNumber + 1
+ 5    0000             >    ORG slotNumber * $2000
+ 6    2000             >    ASSERT $$ == slotNumber
+ 7    2000             >slotNumber = slotNumber + 1
+ 5    2000             >    ORG slotNumber * $2000
+ 6    4000             >    ASSERT $$ == slotNumber
+ 7    4000             >slotNumber = slotNumber + 1
+ 5    4000             >    ORG slotNumber * $2000
+ 6    6000             >    ASSERT $$ == slotNumber
+ 7    6000             >slotNumber = slotNumber + 1
+ 5    6000             >    ORG slotNumber * $2000
+ 6    8000             >    ASSERT $$ == slotNumber
+ 7    8000             >slotNumber = slotNumber + 1
+ 5    8000             >    ORG slotNumber * $2000
+ 6    A000             >    ASSERT $$ == slotNumber
+ 7    A000             >slotNumber = slotNumber + 1
+ 5    A000             >    ORG slotNumber * $2000
+ 6    C000             >    ASSERT $$ == slotNumber
+ 7    C000             >slotNumber = slotNumber + 1
+ 5    C000             >    ORG slotNumber * $2000
+ 6    E000             >    ASSERT $$ == slotNumber
+ 7    E000             >slotNumber = slotNumber + 1
+ 8    E000                  EDUP
+ 9    E000                  ASSERT {b $5800} == 0 && {b $5C00} == 0 && {b $FF58} == 0
+10    E000
+11    E000                  PAGE 2559
+12    E000                  ORG $E000
+13    E000              lastPage:
+14    E000 45 4C 45 4D      DB "ELEMENT!"
+14    E004 45 4E 54 21
+15    E008                  ASSERT $$lastPage == 2559
+16    E008                  ASSERT {b $E000} == 'E'
+17    E008
+18    E008                  MMU $8000, 300
+19    E008                  ORG $8000
+20    8000              middlePage:
+21    8000 A5               DB $A5
+22    8001                  ASSERT $$middlePage == 300
+23    8001                  MMU $8000, 2559
+24    8001                  ASSERT {b $8000} == 'E'
+25    8001                  MMU $8000, 300
+26    8001                  ASSERT {b $8000} == $A5
+27    8001
+28    8001                  SAVEBIN "element_device.bin", $E000, 8
+29    8001                  SAVEDEV "element_device.raw", 0, 2559 * $2000, 8
+30    8001                  CSPECTMAP "element_device.sym"
+31    8001                  LABELSLIST "element_device.lbl"
+32    8001                  DEVICE NONE
+33    8001                  DEVICE ELEMENT
+34    8001                  ORG $E000
+35    E000                  ASSERT $$ == 2559 && {b $E000} == 'E'
+36    E000
+element_device.asm(37): error: [SLOT] Slot number must be in range 0..7, or exact starting address of slot
+37    E000                  SLOT 8      ; error
+element_device.asm(38): error: [PAGE] Page number must be in range 0..2559: 2560
+38    E000                  PAGE 2560   ; error
+element_device.asm(39): error: [PAGE] Page number must be in range 0..2559: -1
+39    E000                  PAGE -1     ; error
+# file closed: element_device.asm
+
+Value    Label
+------ - -----------------------------------------------------------
+0xE000   lastPage
+0x8000   middlePage
+0x0008   slotNumber

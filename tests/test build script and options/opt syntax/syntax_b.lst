@@ -33,7 +33,7 @@ syntax_b.asm(12): error: Unexpected: [8]
  13   0020 D6 07          sub a,(7)
 syntax_b.asm(13): error: Syntax error: [8]
 syntax_b.asm(13): error: Unexpected: [8]
- 13   0022 D6 00          sub a,[8]     ; this syntax works because --syntax=A was used
+ 13   0022 D6 00          sub a,[8]     ; this syntax works because --syntax=a was used
  14   0024 DE 06            sbc a,6
  14   0026 DE 07          sbc a,(7)
 syntax_b.asm(14): error: Syntax error: [8]
@@ -208,7 +208,7 @@ syntax_b.asm(64): error: Illegal instruction (can't access memory): [8]
 syntax_b.asm(65): error: Illegal instruction (can't access memory): (7)
  65   010D D6 00          sub a,(7)
 syntax_b.asm(65): error: Illegal instruction (can't access memory): [8]
- 65   010F D6 00          sub a,[8]     ; this syntax works because --syntax=A was used
+ 65   010F D6 00          sub a,[8]     ; this syntax works because --syntax=a was used
  66   0111 DE 06            sbc a,6
 syntax_b.asm(66): error: Illegal instruction (can't access memory): (7)
  66   0113 DE 00          sbc a,(7)
@@ -363,6 +363,49 @@ syntax_b.asm(112): error: Illegal instruction (can't access memory): (label)
 112   01E4 06 00                ld b,(label)
 113   01E6 90                   sub a,b
 114   01E7
+115   01E7                  ; I/O addresses accept both bracket styles and legacy bare immediate ports
+116   01E7                  OPT reset --syntax=a
+117   01E7 DB FE DB FE      in a,(254),,a,[254],,a,254
+117   01EB DB FE
+118   01ED D3 FE D3 FE      out (254),a,,[254],a,,254,a
+118   01F1 D3 FE
+119   01F3 ED 40 ED 48      in b,(c),,c,[C],,d,[c],,e,[c],,h,[c],,l,[c],,a,[c]
+119   01F7 ED 50 ED 58
+119   01FB ED 60 ED 68
+119   01FF ED 78
+syntax_b.asm(120): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+120   0201 ED 41 ED 49      out (c),b,,[C],c,,[c],d,,[c],e,,[c],h,,[c],l,,[c],a,,[c],0
+120   0205 ED 51 ED 59
+120   0209 ED 61 ED 69
+120   020D ED 79 ED 71
+121   0211 ED 70            in f,[c]
+121   0213 ED 70          in [C]
+122   0215 DB FF            in a,[$fe+1]
+122   0217 D3 09          out [(1+2)*3],a
+syntax_b.asm(123): error: Operand expected: [254)
+syntax_b.asm(123): error: Unexpected: )
+123   0219 DB 00            in a,[254)
+syntax_b.asm(123): error: ')' expected
+123   021B                out (254],a     ; mismatched brackets
+syntax_b.asm(124): error: Label not found: c
+syntax_b.asm(124): error: Unexpected: )
+124   021B DB 00            in a,[c)
+syntax_b.asm(124): error: Label not found: c
+syntax_b.asm(124): error: ')' expected
+124   021D                out (c],a
+125   021D
+126   021D                  OPT --syntax=b
+127   021D DB FE DB FE      in a,(254),,a,[254],,a,254
+127   0221 DB FE
+128   0223 D3 FE D3 FE      out (254),a,,[254],a,,254,a
+128   0227 D3 FE
+129   0229 ED 40            in b,(c)
+129   022B ED 41          out (c),b
+129   022D ED 70          in f,[c]
+129   022F ED 70          in [C]
+syntax_b.asm(129): warning[out0]: 'out (c),0' is unstable, on CMOS based chips it does `out (c),255`
+129   0231 ED 71          out [c],0
+130   0233
 # file closed: syntax_b.asm
 
 Value    Label

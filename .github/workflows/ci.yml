@@ -20,8 +20,8 @@ name: build
 # resolves to -- bump the SHA and the comment together (Dependabot can do
 # this). SHAs resolved 2026-05-17:
 #   actions/checkout            v6.0.3 -> df4cb1c069e1874edd31b4311f1884172cec0e10
-#   actions/upload-artifact     v7     -> 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-#   cross-platform-actions      v1.4.0 -> 24ef01df165c76df1ed2b9f9e9212e78dc2fc963
+#   actions/upload-artifact     v7.0.2 -> cf430e030ddbb5b0abf93d22962f4752f3646cd9  
+#   cross-platform-actions      v1.7.0 -> 82668f1fbd89d9c99487604f822cbf6716f124d3
 #   coverallsapp/github-action  v2.3.8 -> 8d6379e14d29928660c4ba802d8e85393440b329
 #
 # List of GH runners and their details:
@@ -89,7 +89,7 @@ jobs:
       - name: Build
         run: make clean && make -j$(nproc)
       - name: Upload sjasmplus binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: sjasmplus-linux-${{ matrix.name }}
           path: sjasmplus
@@ -132,11 +132,12 @@ jobs:
           where mingw32-make && mingw32-make --version
           where gcc && gcc --version
           where bash && bash --version
+          reg query HKLM\SYSTEM\CurrentControlSet\Control\Nls\CodePage /v ACP
       - name: Build (MinGW, Makefile.win)
         shell: cmd
         run: ContinuousIntegration\winbuild_mingw.bat
       - name: Upload sjasmplus.exe
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: sjasmplus-windows-mingw
           path: sjasmplus.exe
@@ -172,7 +173,7 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       - name: Upload sjasmplus.exe
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: sjasmplus-win64-${{ github.sha }}
           path: build/Release/sjasmplus.exe
@@ -187,6 +188,7 @@ jobs:
           where find && find --version
           where diff && diff --version
           where cmp && cmp --version
+          reg query HKLM\SYSTEM\CurrentControlSet\Control\Nls\CodePage /v ACP
           echo *** Check sjasmplus.exe availability+version+help
           bash -c "sjasmplus.exe --help"
           bash -c "sjasmplus.exe --help=warnings"
@@ -206,7 +208,7 @@ jobs:
         with:
           submodules: true
       - name: Initialize FreeBSD VM
-        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963  # v1.4.0
+        uses: cross-platform-actions/action@82668f1fbd89d9c99487604f822cbf6716f124d3  # v1.7.0
         with:
           operating_system: freebsd
           architecture: x86-64
@@ -222,7 +224,7 @@ jobs:
           # FreeBSD make can't handle the Makefile -> use gmake, as Cirrus did
           gmake clean && gmake -j4 CC=cc CXX=c++
       - name: Upload sjasmplus binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: sjasmplus-freebsd
           path: sjasmplus
@@ -256,7 +258,7 @@ jobs:
       - name: Build
         run: make clean && make -j$(sysctl -n hw.logicalcpu) CC=cc CXX=c++
       - name: Upload sjasmplus binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: sjasmplus-${{ matrix.runner }}-arm
           path: sjasmplus

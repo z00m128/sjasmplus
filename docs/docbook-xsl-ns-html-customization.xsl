@@ -21,4 +21,25 @@ UTF-8 in such case) -->
 <!-- make IndexTerm items to point directly onto their "anchor" from Index page -->
 <xsl:param name="index.links.to.section" select="0"></xsl:param>
 
+<!-- variable list term separator -->
+<xsl:param name="variablelist.term.separator" select="''"/>
+
+<!-- variable list term break after -->
+<xsl:param name="variablelist.term.break.after" select="1"/>
+
+<!-- template to create an anchor - patched to remove auto-generated id anchors for examples, etc... -->
+<xsl:template name="anchor">
+  <xsl:param name="node" select="."/>
+  <xsl:param name="conditional" select="1"/>
+  <xsl:if test="$generate.id.attributes = 0 and ($node/@id or $node/@xml:id)">
+    <a>
+      <xsl:attribute name="name">
+        <xsl:call-template name="object.id">
+          <xsl:with-param name="object" select="$node"/>
+        </xsl:call-template>
+      </xsl:attribute>
+    </a>
+  </xsl:if>
+</xsl:template>
+
 </xsl:stylesheet>

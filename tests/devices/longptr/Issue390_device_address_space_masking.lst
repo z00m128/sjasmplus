@@ -1,0 +1,88 @@
+# file opened: Issue390_device_address_space_masking.asm
+ 1    0000              ; the user issue was detecting overflow of code/data in individual bank/section
+ 2    0000              ; work around idea was to modify --longptr in DEVICE mode to keep `$` 24 bit addressable
+ 3    0000              ; it turned out that is what is happening already without --longptr, so
+ 4    0000              ; `$` can be checked to see how far the assembling went, except some directives
+ 5    0000              ; hard-mask the `$` to 16bit
+ 6    0000
+ 7    0000              ; this test is to find such directives/situations and ensure they
+ 8    0000              ; do NOT modify `$` itself, but just mask its value to device address space
+ 9    0000
+10    0000              ; directives still truncating `$` to 16b (currently intentionally):
+11    0000              ;   - ORG (and various built-in ORG calls) (--longptr enables large address)
+12    0000              ;   - MMU (even without optional ORG argument!)
+13    0000              ;   - DISP block auto-wraps the displaced address (0xFFFF advances to 0x0000) (--longptr enables also large displaced address)
+14    0000
+15    0000                  DEVICE NOSLOT64K
+16    0000
+17    0000                  ORG 0x100
+18    0100 00 00 00...      DS 60000,0
+19    EB60                  ASSERT 60000 + 0x100 == $
+20    EB60
+21    EB60              ; produce error about write outside of device memory at: 65536
+22    EB60              ; this is intended and wanted behavior, the leak of device address space is error
+Issue390_device_address_space_masking.asm(23): error: Write outside of device memory at: 65536
+23    EB60 00 00 00...      DS 60000,0
+24    D5C0                  ASSERT 2 * 60000 + 0x100 == $   ; but the `$` should keep the large address
+25    D5C0              ; only one error per one leak, so second 60k block just advances `$` further
+26    D5C0 00 00 00...      DS 60000,0
+27    C020                  ASSERT 3 * 60000 + 0x100 == $
+28    C020 00               DS 1
+29    C021                  ASSERT 1 + 3 * 60000 + 0x100 == $
+30    C021              ; before fix `DS 1,0` did truncate the address from 0x2'C020 to 0xC021 (-0x2'0000)
+31    C021 00               DS 1,0
+32    C022                  ASSERT 2 + 3 * 60000 + 0x100 == $
+33    C022 00 00            DS 2,0
+34    C024                  ASSERT 4 + 3 * 60000 + 0x100 == $
+35    C024
+36    C024                  ORG 65535
+Issue390_device_address_space_masking.asm(37): error: Write outside of device memory at: 65536
+37    FFFF DD CB 05 A5      res 4,(ix+5),l  ; new error ; long bytecode instruction
+38    0003                  ASSERT 0x1'0003 == $
+39    0003 3E 07            ld a,7
+40    0005                  ASSERT 0x1'0005 == $
+41    0005
+42    0005                  ORG 65535
+Issue390_device_address_space_masking.asm(43): error: Write outside of device memory at: 65536
+43    FFFF DD 71 7B DD      ld (ix+123),bc  ; new error ; fake instruction composed of two long instructions
+43    0003 70 7C
+44    0005                  ASSERT 0x1'0005 == $
+45    0005 3E 07            ld a,7
+46    0007                  ASSERT 0x1'0007 == $
+47    0007                  ; verify memory content, FFFF is overwriten by `ld` fake instruction,
+48    0007                  ; but wrap-around in listing to 0000+ is NOT real, the machine code is just LOST
+49    0007                  ; after error about writing outside of device. This is intended at this moment.
+50    0007                  ; (DISP *has* wrap-around on the displaced address)
+51    0007                  ASSERT $DD == {b $FFFF} && $0000 == {$0000} && $0000 == {$0005}
+52    0007
+53    0007                  ORG 0
+54    0000 3E 07            ld a,7
+55    0002                  ASSERT $3E == {b $0000}
+Issue390_device_address_space_masking.asm(56): warning: Negative BLOCK moves PC backwards
+56    0002                  DS -5           ; warns about negative block size
+Issue390_device_address_space_masking.asm(57): error: Write outside of device memory at: -3
+57    FFFD DD CB 05 A5      res 4,(ix+5),l  ; new error ; write outside of device memory should be detected also here
+58    0001                  ASSERT +2-5+4 == $
+59    0001                  ; verify memory content, end of RAM is intact by `res`, but $0000 becomes $A5 (last byte of opcode), 07 is from previous `ld a,7`
+60    0001                  ASSERT $DD00 == {$FFFE} && $07A5 == {$0000}
+61    0001
+62    0001              ; non-device assembling mode
+63    0001                  DEVICE NONE
+64    0001                  ORG 65535
+Issue390_device_address_space_masking.asm(65): warning: RAM limit exceeded 0x10000 by ORG
+65    FFFF DD CB 05 A5      res 4,(ix+5),l  ; just warning about RAM-limit exceeded in non-device mode
+66    0003                  ASSERT 0x1'0003 == $
+67    0003 3E 07            ld a,7
+68    0005                  ASSERT 0x1'0005 == $
+69    0005
+70    0005                  ORG 0x100
+Issue390_device_address_space_masking.asm(71): warning: RAM limit exceeded 0x10000 by ORG
+71    0100 AA AA AA...      DS 0x1'0000,0xAA        ; warning
+72    0100                  ASSERT 0x1'0100 == $
+73    0100 00               DS 1, 0
+74    0101                  ASSERT 0x1'0101 == $    ; the `$` should retain large address
+75    0101
+# file closed: Issue390_device_address_space_masking.asm
+
+Value    Label
+------ - -----------------------------------------------------------

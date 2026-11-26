@@ -34,6 +34,11 @@ Go to folder with sjasmplus project. Edit install path `PREFIX` in file `Makefil
 	make clean
 	make
 
+When rebuilding after header edits, do not skip `make clean`: the handwritten Makefile's header
+dependency tracking is incomplete. Clean and build/test with matching configuration options,
+for example `make clean && make -j8 test` or `make DEBUG=1 clean && make -j8 DEBUG=1 test`.
+This limitation does not apply to CMake builds.
+
 Then run as root or use sudo:
 
 	make install

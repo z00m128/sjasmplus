@@ -1,4 +1,22 @@
 
+## [1.24.1](https://github.com/z00m128/sjasmplus/releases/tag/v1.24.1) - 22.11.2026
+- Windows: fix non-ASCII input/output paths and working directories
+- filename operands use UTF-8 (see [source encoding notes](https://z00m128.github.io/sjasmplus/documentation.html#s_source_encoding))
+- merge `SJASMPLUSOPTS` arguments with command line arguments, allowing environment-only invocation
+- [`SHELLEXEC`](https://z00m128.github.io/sjasmplus/documentation.html#po_shellexec) distinguishes shell-launch failures and POSIX signal termination from normal exit codes
+- [`sj.shellexec`](https://z00m128.github.io/sjasmplus/documentation.html#lua_sj_shellexec) now waits for completion on Windows too and reports failures like `SHELLEXEC`
+- stop `BLOCK`/`DS` truncating `$` (aka program counter) to 16 bit address space + new test
+- [`EMPTYTRD`](https://z00m128.github.io/sjasmplus/documentation.html#po_emptytrd) allows up to 11 character labels
+- [`SAVEBIN`](https://z00m128.github.io/sjasmplus/documentation.html#po_savebin) syntax/arguments tuned (negative values count from top of RAM)
+- [`SAVEHOB`](https://z00m128.github.io/sjasmplus/documentation.html#po_savehob) syntax/arguments tuned
+- Added [`DEVICE ELEMENT`](https://z00m128.github.io/sjasmplus/documentation.html#device_element) for eLeMeNt ZX / MB03+ URAM: 20MiB, 8kiB pages and slots
+- Raised the device page limit to 4096 and fixed `LABELSLIST` truncating page numbers
+- Raised [`DB`](https://z00m128.github.io/sjasmplus/documentation.html#po_byte)-like byte-data capacity from 128 to 256 bytes per directive
+- [`DP`](https://z00m128.github.io/sjasmplus/documentation.html#po_dp) accepts empty strings (with the existing warning) and rejects lengths outside 0..255
+- Added `--utc` to use UTC for both `__DATE__` and `__TIME__` (default is local time)
+- I/O operands support `[]` in `IN`, `OUT` and Z80N `JP [C]`
+- minor changes in examples, docs and expression parser implementation
+
 ## [1.24.0](https://github.com/z00m128/sjasmplus/releases/tag/v1.24.0) - 26.8.2026
 - Added named arguments emit syntax for [macros](https://z00m128.github.io/sjasmplus/documentation.html#s_macros) (by Ricardo Bittencourt)
 - `MACRO` keyword itself is now disabling substitutions for remainder of line

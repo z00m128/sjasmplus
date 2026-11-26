@@ -1,0 +1,6 @@
+warning: No SLD file created because no lines assembled: skip_sld.exp
+# file opened: skip_sld.asm
+# file closed: skip_sld.asm
+
+Value    Label
+------ - -----------------------------------------------------------

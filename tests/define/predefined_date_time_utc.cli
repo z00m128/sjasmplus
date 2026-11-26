@@ -1,0 +1,19 @@
+last_result=0
+for timestamp_zone in UTC-14 UTC+12; do
+    for timestamp_mode in local utc; do
+        timestamp_options=()
+        timestamp_expected_zone=$timestamp_zone
+        if [[ $timestamp_mode == utc ]]; then
+            timestamp_expected_zone=UTC0
+            timestamp_options=(--utc)
+        fi
+        timestamp_before=$(TZ="$timestamp_expected_zone" date '+%Y-%m-%dT%H:%M:%S')
+        timestamp_actual=$(TZ="$timestamp_zone" SJASMPLUSOPTS='' $MEMCHECK "$EXE" \
+            --nologo --msg=none "${options[@]}" "$file_asm" "${timestamp_options[@]}" --raw=-) || last_result=1
+        timestamp_after=$(TZ="$timestamp_expected_zone" date '+%Y-%m-%dT%H:%M:%S')
+        if [[ ${#timestamp_actual} -ne 19 || $timestamp_actual < $timestamp_before || $timestamp_after < $timestamp_actual ]]; then
+            echo "Timestamp mismatch ($timestamp_zone, $timestamp_mode): $timestamp_before <= $timestamp_actual <= $timestamp_after"
+            last_result=1
+        fi
+    done
+done

@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "ms-vscode.cpptools",
+    "mborik.z80-macroasm",
+    "theNestruo.z80-asm-meter"
+  ]
+}

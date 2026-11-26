@@ -30,8 +30,8 @@
 #define __SJDEFS
 
 // version string
-#define VERSION "1.24.0"
-#define VERSION_NUM "0x00011800"
+#define VERSION "1.24.1"
+#define VERSION_NUM "0x00011801"
 
 #define LASTPASS 3
 
@@ -42,19 +42,16 @@
 #define _ENDL << endl
 #define _END ;
 
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <windows.h>
-#endif
-
 #include <cassert>
+#include <cstdint>
 #include <utility>
 #include <memory>
 #include <algorithm>
 #include <array>
 #include <stack>
 #include <vector>
+#include <string>
+#include <string_view>
 #include <map>
 #include <filesystem>
 #include <iostream>
@@ -98,6 +95,10 @@ struct SAlignSafeCast {
 
 #ifndef PATH_MAX
 #define PATH_MAX	4096
+#endif
+
+#ifndef MAX_PATH
+#define MAX_PATH	PATH_MAX
 #endif
 
 // not used by sjasmplus, but define it any way to prevent accidental use by code, as MUSL clib is defining it

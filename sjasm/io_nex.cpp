@@ -438,7 +438,7 @@ static void dirNexOpen() {
 		return;
 	}
 	// try to open the actual file
-	if (!FOPEN_ISOK(nex.f, fname, "w+b")) Error("[SAVENEX] Error opening file for write", fname.string().c_str(), SUPPRESS);
+	if (!FOPEN_ISOK(nex.f, fname, "w+b")) Error("[SAVENEX] Error opening file for write", fname.u8string().c_str(), SUPPRESS);
 	if (nullptr == nex.f) return;
 	AddDeleteOnError(fname);
 

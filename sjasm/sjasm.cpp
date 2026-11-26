@@ -71,6 +71,7 @@ static void PrintHelpMain() {
 	_COUT "  -W[no-][all|<id>]        Enable/disable warning(s), see \"--help=warnings\"" _ENDL;
 	_COUT "  -                        Reads STDIN as source (even in between other files)" _ENDL;
 	_COUT "  --longptr                No device: program counter $ can go beyond 0x10000" _ENDL;
+	_COUT "  --utc                    Use UTC for __DATE__ and __TIME__ (default: local)" _ENDL;
 	_COUT "  --reversepop             Enable reverse POP order (as in base SjASM version)" _ENDL;
 	_COUT "  --dirbol                 Enable directives from the beginning of line" _ENDL;
 	_COUT "  --dos866                 Encode from Windows codepage to DOS 866 (Cyrillic)" _ENDL;
@@ -84,7 +85,7 @@ static void PrintHelpSyntax() {
 	_COUT "  a     Multi-argument delimiter \",,\" (default is \",\")" _ENDL;
 	_COUT "        Even when selected, dec|inc|pop|push instructions still accept also \",\"" _ENDL;
 	_COUT "  b     Whole expression parentheses are legal for memory access only" _ENDL;
-	_COUT "  B     Memory access brackets [] required (by default both () and [] works)" _ENDL;
+	_COUT "  B     Memory/I/O access brackets [] required (default: () or [])" _ENDL;
 	_COUT "  f F   Fake instructions: warning / disabled (default = enabled)" _ENDL;
 	_COUT "  i     Case insensitive instructions/directives (default = same case required)" _ENDL;
 	_COUT "  M     Alias \"m\" and \"M\" for \"(hl)\" to cover 8080-like syntax: ADD A,M" _ENDL;
@@ -151,6 +152,7 @@ namespace Options {
 	bool IsI8080 = false;
 	bool IsLR35902 = false;
 	bool IsLongPtr = false;
+	bool UseUTC = false;
 	bool SortSymbols = false;
 	bool IsBigEndian = false;
 	bool DeleteOnError = false;
@@ -408,7 +410,7 @@ namespace Options {
 		int CheckAssignmentOption(const char* keyword, std::filesystem::path & path) {
 			if (strcmp(keyword, opt)) return 0;		// detect "keyword" (return 0 if not)
 			if (*val) {
-				path = val;
+				path = std::filesystem::u8path(val);
 			} else {
 				Error("no parameters found in", arg, ALL);
 			}
@@ -533,6 +535,8 @@ namespace Options {
 					if (val[0]) SortSymbols = !strcmp("sort", val);
 				} else if (!strcmp(opt, "longptr")) {
 					IsLongPtr = true;
+				} else if (!strcmp(opt, "utc")) {
+					UseUTC = true;
 				} else if (!strcmp(opt, "msg")) {
 					if (!strcmp("none", val)) {
 						OutputVerbosity = OV_NONE;
@@ -596,11 +600,11 @@ namespace Options {
 							(!doubleDash && 'i' == opt[0]) ||
 							(!doubleDash && 'I' == opt[0])) {
 					if (*val) {
-						IncludeDirsList.emplace_back(val);
+						IncludeDirsList.emplace_back(std::filesystem::u8path(val));
 					} else {
 						if (!doubleDash || '=' == arg[5]) {
 							if (argv[i+1] && '-' != argv[i+1][0]) {		// include path provided as next argument (after space, like gcc)
-								IncludeDirsList.emplace_back(argv[++i]);
+								IncludeDirsList.emplace_back(std::filesystem::u8path(argv[++i]));
 							} else {
 								Error("no include path found for", arg, ALL);
 							}
@@ -636,8 +640,9 @@ namespace Options {
 		void checkIncludePaths(const std::vector<std::filesystem::path> & includes) {
 			for (auto it = includes.crbegin(); it != includes.crend(); ++it) {
 				if (std::filesystem::is_directory(*it)) continue;
-				const char* errtxt = '~' == it->string()[0] ? "include path starts with ~ (check docs)" : "include path not found";
-				Error(errtxt, it->string().c_str(), ALL);
+				const std::string u8path = it->u8string();
+				const char* errtxt = '~' == u8path[0] ? "include path starts with ~ (check docs)" : "include path not found";
+				Error(errtxt, u8path.c_str(), ALL);
 			}
 			return;
 		}
@@ -664,7 +669,7 @@ namespace Options {
 //detect "--unittest" switch, prepare UnitTest++, run the test runner, collect results, exit
 # define CHECK_UNIT_TESTS \
 	{ \
-		if (2 == argc && !strcmp("--unittest", argv[1])) { \
+		if (2 == argc && argv && argv[1] && !strcmp("--unittest", argv[1])) { \
 			_COUT "SjASMPlus \033[96mv" VERSION "\033[0m | \033[95mrunning unit tests:\033[0m" _ENDL _END \
 			int exitCode = STOP_MAKE_BY_NON_ZERO_EXIT_CODE + UnitTest::RunAllTests(); \
 			if (exitCode) _COUT "\033[91mNon-zero result from test runner!\033[0m" _ENDL _END \
@@ -685,11 +690,7 @@ namespace Options {
 
 // == end of UnitTest++ part ====================================================================
 
-#ifdef WIN32
 int main(int argc, char* argv[]) {
-#else
-int main(int argc, char **argv) {
-#endif
 	Options::SetTerminalColors(autoColorsDetection());
 
 	const char* logo = "SjASMPlus Z80 Cross-Assembler v" VERSION VERSION_SUFFIX " (https://github.com/z00m128/sjasmplus)";
@@ -706,52 +707,46 @@ int main(int argc, char **argv) {
 	Options::IsBigEndian = (0x12 == le_test_byte);
 
 	// start counter
-	long dwStart = GetTickCount();
+	const auto timeStart = SJ_getTickCount();
 
 	LaunchDirectory = std::filesystem::current_path();	// get CWD as launch directory
 	Options::COptionsParser optParser;
-	char* envFlags = std::getenv("SJASMPLUSOPTS");
-	if (nullptr != envFlags) {
-		// split environment arguments into "argc, argv" like variables (by white-space)
-		char* parsedOptsArray[33] {};	// there must be one more nullptr in the array (32+1)
-		int optI = 0, charI = 0;
-		while (optI < 32 && !SkipBlanks(envFlags)) {
-			parsedOptsArray[optI++] = temp + charI;
-			while (*envFlags && !White(*envFlags) && charI < LINEMAX-1) temp[charI++] = *envFlags++;
-			temp[charI++] = 0;
-		}
-		if (!SkipBlanks(envFlags)) {
+	std::vector<std::string> utf8Arguments;
+	std::vector<char*> argumentPointers;
+	std::string envOptions = SJ_getenv("SJASMPLUSOPTS");
+	char* envFlags = envOptions.data();
+	// split environment arguments by white-space, ahead of command line options
+	while (!SkipBlanks(envFlags)) {
+		if (32 <= argumentPointers.size()) {
 			Error("SJASMPLUSOPTS environment variable contains too many options (max is 32)", nullptr, ALL);
+			break;
 		}
-		// process environment variable ahead of command line options (in the same way)
-		int i = 0;
-		while (parsedOptsArray[i]) {
-			optParser.GetOptions(parsedOptsArray, i);
-			if (!parsedOptsArray[i]) break;
-			sourceFiles.push_back(SSource(parsedOptsArray[i++]));
-		}
+		argumentPointers.push_back(envFlags);
+		while (*envFlags && !White(*envFlags)) ++envFlags;
+		if (*envFlags) *envFlags++ = 0;
 	}
+	if (!SJ_processArgv(argc, argv, utf8Arguments, argumentPointers)) return 1;
+	const bool noArguments = argumentPointers.empty();
+	argumentPointers.push_back(nullptr);
 
+	int i = 0;
+	while (argumentPointers[i]) {
+		optParser.GetOptions(argumentPointers.data(), i);
+		if (!argumentPointers[i]) break;
+		sourceFiles.push_back(SSource(argumentPointers[i++]));
+	}
 	// setup __DATE__ and __TIME__ macros (setup them just once, not every pass!)
 	auto now = std::chrono::system_clock::now();
 	std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-	std::tm now_tm = *std::localtime(&now_c);
+	std::tm now_tm = *(Options::UseUTC ? std::gmtime(&now_c) : std::localtime(&now_c));
 	char dateBuffer[32] = {}, timeBuffer[32] = {};
 	SPRINTF3(dateBuffer, 30, "\"%04d-%02d-%02d\"", now_tm.tm_year + 1900, now_tm.tm_mon + 1, now_tm.tm_mday);
 	SPRINTF3(timeBuffer, 30, "\"%02d:%02d:%02d\"", now_tm.tm_hour, now_tm.tm_min, now_tm.tm_sec);
 	Options::CmdDefineTable.Add("__DATE__", dateBuffer, nullptr);
 	Options::CmdDefineTable.Add("__TIME__", timeBuffer, nullptr);
 
-	int i = 1;
-	if (argc > 1) {
-		while (argv[i]) {
-			optParser.GetOptions(argv, i);
-			if (!argv[i]) break;
-			sourceFiles.push_back(SSource(argv[i++]));
-		}
-	}
-	// warn about BE-host only when there's any CLI argument && after CLI options were parsed
-	if (2 <= argc && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
+	// warn about BE-host only when there's any argument && after options were parsed
+	if (!noArguments && Options::IsBigEndian) WarningById(W_BE_HOST, nullptr, W_EARLY);
 	if (Options::IsDefaultListingName && Options::ListingFName.has_filename()) {
 		Error("Using both  --lst  and  --lst=<filename>  is not possible.", NULL, FATAL);
 	}
@@ -763,10 +758,10 @@ int main(int argc, char **argv) {
 	}
 	Options::systemSyntax = Options::syx;		// create copy of initial system settings of syntax
 
-	if (argc == 1 || Options::ShowHelp || Options::ShowHelpWarnings || Options::ShowHelpSyntax) {
+	if (noArguments || Options::ShowHelp || Options::ShowHelpWarnings || Options::ShowHelpSyntax) {
 		_COUT logo _ENDL;
-		PrintHelp(argc == 1);
-		exit(argc == 1);
+		PrintHelp(noArguments);
+		exit(noArguments);
 	}
 
 	if (!Options::HideLogo) {
@@ -879,11 +874,10 @@ int main(int argc, char **argv) {
 	DeleteOnError(ErrorCount != 0);
 
 	if (Options::OutputVerbosity <= OV_ALL) {
-		double dwCount;
-		dwCount = GetTickCount() - dwStart;
-		if (dwCount < 0) dwCount = 0;
+		double timeCount = SJ_getTickCount() - timeStart;
+		if (timeCount < 0) timeCount = 0;
 		fprintf(stderr, "Errors: %d, warnings: %d, compiled: %d lines, work time: %.3f seconds\n",
-				ErrorCount, WarningCount, CompiledCurrentLine, dwCount / 1000);
+				ErrorCount, WarningCount, CompiledCurrentLine, timeCount / 1000);
 	}
 
 	return (ErrorCount != 0);
