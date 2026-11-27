@@ -606,14 +606,15 @@ static void dirINCBIN() {
 	fullpath_ref_t fnaam = GetInputFile(lp);
 	if (anyComma(lp)) {
 		aint val;
-		if (!anyComma(lp)) {
+		const bool offsetOmitted = anyComma(lp);
+		if (!offsetOmitted) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("[INCBIN] Syntax error in <offset>", bp, SUPPRESS);
 				return;
 			}
 			offset = val;
-		} else --lp;		// there was second comma right after, reread it
-		if (anyComma(lp)) {
+		}
+		if (offsetOmitted || anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("[INCBIN] Syntax error in <length>", bp, SUPPRESS);
 				return;
@@ -630,7 +631,8 @@ static void dirINCHOB() {
 	fullpath_ref_t fnaam = GetInputFile(lp);
 	if (anyComma(lp)) {
 		aint val;
-		if (!anyComma(lp)) {
+		const bool offsetOmitted = anyComma(lp);
+		if (!offsetOmitted) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
 			}
@@ -638,8 +640,8 @@ static void dirINCHOB() {
 				Error("[INCHOB] Negative values are not allowed", bp); return;
 			}
 			offset += val;
-		} else --lp;		// there was second comma right after, reread it
-		if (anyComma(lp)) {
+		}
+		if (offsetOmitted || anyComma(lp)) {
 			if (!ParseExpression(lp, val)) {
 				Error("[INCHOB] Syntax error", bp, IF_FIRST); return;
 			}
@@ -678,7 +680,8 @@ static void dirINCTRD() {
 		return;
 	}
 	if (anyComma(lp)) {
-		if (!anyComma(lp)) {
+		const bool offsetOmitted = anyComma(lp);
+		if (!offsetOmitted) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST);
 				SkipToEol(lp);
@@ -690,8 +693,8 @@ static void dirINCTRD() {
 				return;
 			}
 			offset = val;
-		} else --lp;		// there was second comma right after, reread it
-		if (anyComma(lp)) {
+		}
+		if (offsetOmitted || anyComma(lp)) {
 			if (!ParseExpressionNoSyntaxError(lp, val)) {
 				Error("[INCTRD] Syntax error", bp, IF_FIRST);
 				SkipToEol(lp);

@@ -239,6 +239,8 @@ The intended compatibility break could be larger than the v1.07 to v1.14 changes
     Revisit defaults; the old sketch was --syntax=abflL, but l/L are alternative
     warning/error policies, so the exact combination must be decided, not copied.
     Review other relaxed/ambiguous syntax and operator precedence.
+    Consider requiring an explicit INCBIN offset when supplying a length:
+    use INCBIN "file",0,length instead of INCBIN "file",,length.
     Original precedence question: (2 == 3&2) == ((2 == 3)&2) == false.
     Establish actual/intended behavior with discriminating tests before changing it.
     Reference: https://en.cppreference.com/w/cpp/language/operator_precedence
