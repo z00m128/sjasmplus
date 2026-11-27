@@ -38,26 +38,6 @@ Parser, syntax and safety
     combined --syntax=faBil behavior. Lowercase i already controls case-insensitive
     instructions/directives; it does not make labels case-insensitive.
 
-[Research] Simplify ParseDirective_REPT without breaking repeat directives
-    Establish why this separate directive path exists before removing it.
-    Suspected edge cases in the old note: " .34 repeatX" and END at beginning of
-    line. Neither is a confirmed reproduction; add focused tests first.
-    Broader parser/context research (including conditionals in STRUCT and #416):
-    see docs/parser-context-research.md. Research only; no refactor selected.
-
-[Research] INCLUDE during macro/repeat replay and ordinary-local label scope
-    #120 still reproduces with the original attachment; Lua is not essential.
-    Separate two concerns: included blocks reading the caller's stored-source
-    stream (#263, closed as not planned), and an explicit scoped policy allowing
-    unchanged included source to use ordinary locals instead of macro locals.
-    The @.label definition escape (#84) and unsupported-INCLUDE warnings already
-    exist; later module/local lookup fixes do not implement that policy.
-    History, current probes and focused issue split:
-    see docs/parser-context-research.md, "Issue #120: INCLUDE During Macro Expansion".
-    No syntax or runtime change selected. Duplicate macro names in different
-    MODULE namespaces will not be implemented in v1.x, and are not committed
-    for v2.x; that is separate from the clarified #120 request.
-
 [Research] Refactor C-string wrappers and audit buffer limits
     STRCPY ignores its size argument; STRCAT passes it to strncat as an append
     limit, not destination capacity. Repeated STRCAT calls in sjasm/io_err.cpp
@@ -169,12 +149,6 @@ Diagnostics and listings
     allowing quieter output in --msg=war or --msg=err mode. Decide independently
     which primary diagnostics and which trace lines should remain visible.
 
-[Research] Show original source in "emitted from here" diagnostics
-    Users without editor error parsing found the existing message confusing or
-    unhelpful. Include the relevant original source line if practical.
-    Previous investigation found macros and inline Lua make this harder than a
-    simple formatting change; preserve the correct source/expansion attribution.
-
 [Idea] Include the original pre-substitution line in listings
     Cover DUP/EDUP expansion and colon-separated instructions such as nop:nop:nop.
     Possible presentation: '<' as a counterpart to macro '>', line number but no
@@ -214,13 +188,11 @@ Build, test infrastructure and analysis
 String operators and substitution design
 ========================================
 
-[Idea] String operations in expressions
-    Consider Lua-like concatenation ("..") and length (#"str"), perhaps implemented
-    in quoted-string parsing. Define the boundary between numeric character
-    constants and strings before adding operators.
-    Existing expressions such as ld hl,"ab" + "cd", ld hl,"ab"|128 and
-    ld hl,"ab"+128 are compatibility cases. Do not silently reinterpret them as
-    string operations. Operator choice and type/coercion rules remain undecided.
+[Idea] String literal byte count in expressions
+    Consider #"string" (a quote cannot start a #hex literal). Count decoded
+    bytes, including embedded zeros and the Z terminator: #"\r\n"Z is 3.
+    Join literal .. chains before counting (unlike Lua's # precedence), without
+    requiring parentheses. Preserve existing numeric quoted-constant expressions.
 
 [Idea] Macro-defined operators and expression introspection
     Allow macros to define operators rather than only instruction-like constructs.
@@ -270,7 +242,6 @@ The intended compatibility break could be larger than the v1.07 to v1.14 changes
     Original precedence question: (2 == 3&2) == ((2 == 3)&2) == false.
     Establish actual/intended behavior with discriminating tests before changing it.
     Reference: https://en.cppreference.com/w/cpp/language/operator_precedence
-    Consider a word/w16/i16 truncation operator, analogous to low.
     Review escaped apostrophes and other character/string literal combinations;
     C/C++ escapes are case-sensitive, unlike the behavior described in the old note.
 
