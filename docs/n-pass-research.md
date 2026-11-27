@@ -454,11 +454,9 @@ tracking-stack state leaks across iterations. Structure definitions are rebuilt,
 but their size/member symbols participate in the persistent symbol lifecycle.
 
 DEVICE instances are recreated; the global-device detector may change the next
-pass's starting device based on discovery's directives. Device RAM is allocated
-when a device is instantiated, including dry passes (`initRegularSlotDevice`),
-not only during final emission. The independent integer-offset refactoring
-candidate below would retain dry-pass mapping/address tracking without backing
-RAM and allocate it only in the final pass. Require DEFDEVICE declarations and DEVICE
+pass's starting device based on discovery's directives. Dry passes track device
+mapping and addresses, including INCBIN page stepping, without backing RAM.
+Only final emission allocates and initializes RAM. Require DEFDEVICE declarations and DEVICE
 selection/arguments to be resolved during discovery. Do not support declarations
 first made meaningful by later settling; diagnose them instead. This does not
 require DEVICE to appear only once or forbid existing source-order device
@@ -564,7 +562,7 @@ diagnose unresolved numeric arguments at that boundary.
 | --- | --- | --- |
 | LABELSLIST filename and virtual-label option | `dirLABELSLIST` records options only in pass 1; filenames go into output configuration | Keep discovery-only; unresolved option expressions must error there, not silently freeze zero |
 | DEFDEVICE | Defines persistent device geometry/initial mapping only in pass 1 | Keep discovery-only; require fully resolved arguments |
-| DEVICE | Runs in all passes; discovery drives global-device detection; current dry passes allocate RAM | Preserve execution/recreation and discovery-resolved arguments; integer-offset tracking could remove dry-pass backing RAM independently |
+| DEVICE | Runs in all passes; discovery drives global-device detection; only the final pass allocates RAM | Preserve execution/recreation and discovery-resolved arguments |
 | SLDOPT COMMENT keywords | `SldAddCommentKeyword` collects keywords only in pass 1 | Preserve discovery-time collection; no numeric forward lookup involved; SWAPON/SWAPOFF are not discovery-only |
 | INCLUDELUA | Loads/executes the file only in pass 1, sharing the persistent VM | Keep scheduling; file selection must be ready then, not discovered through retries |
 | LUA PASS1 | Explicit user-selected discovery execution, not output metadata | Run once; do not replay to satisfy later forward dependencies |
@@ -737,6 +735,22 @@ defect or a prerequisite refactor.
 This can complement B rather than replace it. A full previous-only evaluation
 model would need separate compatibility justification.
 
+The temporary-label pattern is worth prototyping for other traversal-owned
+results: rebuild current definitions in source order and consult an optional
+previous result for forward references. Discovery can use the same path with no
+previous result, while remaining a distinct phase for tasks such as collecting
+global DEVICE usage. Preserve sticky usage and assembly-owned state separately;
+in particular, previous mutable values are not a forward-reference oracle.
+
+Keeping two traversal results and moving or swapping the completed result into
+the previous slot can avoid deep copies. It does not avoid rebuilding entries or
+the cost of keeping two sets live; measure both against the in-place approach.
+Only rotate after consumers of borrowed entries have finished. Equality can be
+expressed as `current.layout == previous.layout` if `layout` is a completed,
+semantic convergence result. Do not compare the entire working context, which
+can include generation IDs, scratch state, and handles unrelated to settling.
+This is a design option to explore early, not a decision to replace the table.
+
 ### D. Dependency Graph / Worklist
 
 Track expression dependencies and reevaluate only affected symbols or layout
@@ -754,14 +768,14 @@ but expand the semantic and side-effect surface enormously. Arbitrary Lua and
 external commands cannot be rolled back generically. Do not couple these goals
 to a first implementation of repeated logical pass 2.
 
-## Independent Candidates For Current Sjasmplus
+## Independent Work For Current Sjasmplus
 
-These are separate, bounded work items suitable for consideration in current
-v1.x, before N-pass implementation. Neither is implemented by this research.
-Both clarify pass lifetimes and make later repeated settling easier to support;
-they do not require changing the number of passes.
+The maintainer prefers shipping behavior-preserving refactors
+in one or more v1.24.x maintenance releases before adding N-pass. This is a
+sequencing preference, not a fixed release schedule or a reason to bundle
+behavior changes with refactors.
 
-### 1. Reset Mutable Values Between Existing Passes
+### Reset Mutable Values Between Existing Passes
 
 Make DEFL/`=` values undefined at the beginning of each pass, including pass 3,
 so reading a mutable symbol before its current-pass assignment produces an
@@ -787,63 +801,6 @@ change: use EQU for forward constants or explicit Lua state for deliberate
 cross-pass scripting. Full unresolved-expression propagation remains part of
 the broader N-pass diagnostic work, not a prerequisite for rejecting direct
 forward mutable reads in the current assembler.
-
-### 2. Avoid Device RAM Allocation In Dry Passes
-
-Refactor device position tracking to integer offsets, separating address/mapping
-state from backing storage. Keep device geometry, pages/slots, mapping, and
-address progression available in all passes, but allocate backing RAM and perform
-Spectrum-like RAM initialization only for final emission. The primary benefit is
-cleaner ownership and phase separation, not an expected speedup. This remains an
-independent candidate for current three-pass sjasmplus.
-
-Currently `InitPass` deletes the preceding device chain;
-`CDevice::~CDevice` releases its RAM, and device creation allocates it again in
-each pass. The final chain is released at process cleanup. This is not a single
-allocation retained across the whole assembly.
-
-Dry passes do not store emitted machine-code bytes, and `MemGetByte` returns zero
-outside pass 3. They do, however, use `MemoryPointer` and page RAM pointers for
-address arithmetic, including `CheckPage` and INCBIN's page-boundary advance.
-Use integer offsets/remaining lengths for position tracking in every pass,
-forming an actual pointer or indexing the allocated block only at final-pass
-memory access. A page-relative or whole-device offset is an implementation
-choice; retain the existing mapping behavior and represent out-of-range positions
-explicitly. Do not perform arithmetic on fabricated or null pointers: integer
-arithmetic replaces that role without requiring a backing object in dry passes.
-
-`int32_t` is a plausible offset type: its positive range extends to 2 GiB minus
-one byte, comfortably beyond the kilobytes to tens of MiB of relevant devices
-(ZX Next has 2 MiB). This is not a requirement to support multi-gigabyte devices.
-Small devices can still encounter extreme source-controlled addresses, lengths,
-or DISP adjustments, so device capacity alone does not establish arithmetic
-safety. Use ordinary checked arithmetic or wider intermediates for additions,
-subtractions, and size products, validating before narrowing or forming a pointer.
-Do not rely on signed overflow or accidental unsigned wrap. Final accesses must
-be within the allocated block; a one-past-end position can be useful for boundary
-tracking but must not be dereferenced. These are normal correctness requirements,
-not a separate large overflow-handling project.
-
-Audit `CDevicePage`'s current non-null-RAM requirement, device initialization
-writes, memory access paths, and cleanup. Represent absent dry-pass backing
-storage explicitly; keep the existing final-pass memory contents and output
-behavior unchanged. This removes allocation, zero-fill, initialization, and
-release work for dry-pass RAM and lowers dry-pass memory demand. Total assembly
-peak memory may still be set by pass 3; any timing improvement is unmeasured and
-may be negligible in ordinary projects. Pointer-plus-offset access may also
-change final-pass code generation enough to offset allocation savings; on modern
-CPUs the net difference may be within measurement noise. Do not claim a speedup
-without measurement. Extra N-pass dry traversals would avoid repeating the same
-unnecessary backing-store work regardless of the net runtime effect.
-
-Verify built-in and custom devices, single-global and multiple-device sources,
-slot/page transitions and wrap options, DISP, reservations and INCBIN crossing
-pages, dry-pass memory reads returning zero, Spectrum default RAM initialization,
-final memory reads/snapshots/binaries, and cleanup with no backing allocation.
-Include extreme address/length expressions on small devices, negative/one-past-end
-positions, and overflow-safe size calculations. Use sanitizer checks for the
-offset conversion, alongside the normal full suite; measure allocation/memory
-changes separately from any timing claim.
 
 ## Suggested Staging And Verification
 
