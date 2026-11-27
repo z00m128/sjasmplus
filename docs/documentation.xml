@@ -205,6 +205,15 @@
 
       <para><variablelist>
 
+          <varlistentry>
+            <term>Unreleased</term>
+            <listitem>
+              <synopsis>
+- refactored: internal implementation of DEVICE memory management
+</synopsis>
+            </listitem>
+          </varlistentry>
+
 <varlistentry>
             <term>22.11.2026 - 1.24.1</term>
             <listitem>

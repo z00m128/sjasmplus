@@ -89,7 +89,7 @@ public:
 	CDeviceSlot* GetSlot(int);
 	int GetSlotOfA16(int32_t address);
 	page_t GetPageOfA16(int32_t address);
-	void CheckPage(const ECheckPageLevel level);
+	int32_t CheckPage(const ECheckPageLevel level);	//returns remaining bytes in the current page
 	bool SetSlot(int slotNumber);		// sets "current/active" slot
 	CDeviceSlot* GetCurrentSlot();		// returns "current/active" slot
 	int GetCurrentSlotNum() const { return CurrentSlot; }	// returns "current/active" slot

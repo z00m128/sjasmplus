@@ -571,12 +571,9 @@ void BinIncFile(fullpath_ref_t file, aint offset, aint length) {
 		while (length) {
 			advanceLength = length;		// maximum possible to advance in address space
 			if (DeviceID) {				// particular device may adjust that to less
-				Device->CheckPage(CDevice::CHECK_EMIT);
-				if (MemoryPointer) {	// fill up current memory page if possible
-					advanceLength = Page->RAM + Page->Size - MemoryPointer;
-					if (length < advanceLength) advanceLength = length;
-					MemoryPointer += advanceLength;		// also update it! Doh!
-				}
+				const int32_t remaining = Device->CheckPage(CDevice::CHECK_EMIT);
+				// if there's no more remaining device memory, advance by rest of the length, otherwise chunk it
+				if (remaining) advanceLength = std::min(length, remaining);
 			}
 			length -= advanceLength;
 			if (length <= 0 && 0 == advanceLength) Error("BinIncFile internal error", NULL, FATAL);

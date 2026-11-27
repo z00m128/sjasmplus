@@ -68,9 +68,9 @@ static void initRegularSlotDevice(CDevice* const device, const int32_t slotSize,
 	for (int32_t slotAddress = 0; slotAddress < slotSize * slotCount; slotAddress += slotSize) {
 		device->AddSlot(slotAddress, slotSize);
 	}
-	device->Memory = new byte[slotSize * pageCount]();
-	for (byte* memPtr = device->Memory; memPtr < device->Memory + slotSize * pageCount; memPtr += slotSize) {
-		device->AddPage(memPtr, slotSize);
+	if (LASTPASS == pass) device->Memory = new byte[size_t(slotSize) * pageCount]();
+	for (int pageNum = 0; pageNum < pageCount; ++pageNum) {
+		device->AddPage(device->Memory ? device->Memory + size_t(slotSize) * pageNum : nullptr, slotSize);
 	}
 	for (int i = 0; i < device->SlotsCount; ++i) {
 		CDeviceSlot* slot = device->GetSlot(i);
@@ -85,6 +85,7 @@ static void initZxLikeDevice(
 {
 	initRegularSlotDevice(device, slotSize, 0x10000/slotSize, pageCount, initialPages);
 	device->ZxRamTop = ((-1 == ramtop) || (0x5D00 <= ramtop && ramtop <= 0xFFFF)) ? ramtop : ZX_RAMTOP_DEFAULT;
+	if (!device->Memory) return;	// no virtual memory in early passes
 	if (-1 == ramtop) return;		// explicit user's request to skip ZX memory init
 
 	// set memory to state like if (for snapshot saving):
@@ -379,7 +380,7 @@ page_t CDevice::GetPageOfA16(int32_t address) {
 	return Slots[slotNum]->Page->Number;
 }
 
-void CDevice::CheckPage(const ECheckPageLevel level) {
+int32_t CDevice::CheckPage(const ECheckPageLevel level) {
 	// fake DISP address gets auto-wrapped FFFF->0 (with warning only)
 	// only with "emit" mode, labels may get the value 0x10000 before the address gets truncated
 	if (DISP_NONE != PseudoORG && CHECK_NO_EMIT != level && 0x10000 <= CurAddress) {
@@ -397,28 +398,27 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 	if (CHECK_RESET != level
 		&& Slots[previousSlotI]->Address <= longAddr
 		&& longAddr < Slots[previousSlotI]->Address + Slots[previousSlotI]->Size) {
-		// refresh MemoryPointer in case the CurAddress did move a bit without emit (negative BLOCK, etc)
-		MemoryPointer = Slots[previousSlotI]->Page->RAM + (longAddr - Slots[previousSlotI]->Address);
-		assert(	(Slots[previousSlotI]->Page->RAM <= MemoryPointer) &&
-				(MemoryPointer < Slots[previousSlotI]->Page->RAM + Slots[previousSlotI]->Size));
-		return;
+		const CDeviceSlot* const slot = Slots[previousSlotI];
+		const int32_t offset = longAddr - slot->Address;
+		MemoryPointer = slot->Page->RAM ? slot->Page->RAM + offset : nullptr;
+		return slot->Page->Size - offset;
 	}
 	for (int i=SlotsCount; i--; ) {
 		CDeviceSlot* const S = Slots[i];
 		if ((longAddr & 0xFFFF) < S->Address) continue;		// find slot after masking long address against CPU address space
 		Page = S->Page;
-		MemoryPointer =
-						(S->Address <= longAddr && longAddr < S->Address + S->Size) ?
-							Page->RAM + (longAddr - S->Address) :
-							nullptr;
+		const bool inSlot = S->Address <= longAddr && longAddr < S->Address + S->Size;
+		const int32_t offset = inSlot ? longAddr - S->Address : 0;
+		const int32_t remaining = inSlot ? Page->Size - offset : 0;
+		MemoryPointer = inSlot && Page->RAM ? Page->RAM + offset : nullptr;
 		if (CHECK_RESET == level) {
 			previousSlotOpt = S->Option;
 			previousSlotI = i;
 			limitExceeded = false;
-			return;
+			return remaining;
 		}
 		// if still in the same slot and within boundaries, we are done
-		if (i == previousSlotI && S->Address <= longAddr && longAddr < S->Address + S->Size) return;
+		if (i == previousSlotI && inSlot) return remaining;
 		// crossing into other slot, check options for special functionality of old slot
 		switch (previousSlotOpt) {
 			case CDeviceSlot::O_ERROR:
@@ -458,10 +458,10 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 				if (DISP_NONE != PseudoORG) adrdisp -= prevS->Size;
 				else CurAddress -= prevS->Size;
 				MemoryPointer = Page->RAM;
-				return;		// preserve current option status
+				return Page->Size;		// preserve current option status
 			}
 			default:
-				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded && !MemoryPointer) {
+				if (LASTPASS == pass && CHECK_EMIT == level && !limitExceeded && !inSlot) {
 					ErrorInt("Write outside of device memory at", longAddr, SUPPRESS);
 					limitExceeded = true;
 					previousSlotI = i;				// in this case change of slot should NOT clear the just set `limitExceeded`
@@ -474,9 +474,10 @@ void CDevice::CheckPage(const ECheckPageLevel level) {
 			previousSlotI = i;
 			previousSlotOpt = S->Option;
 		}
-		return;
+		return remaining;
 	}
 	Error("CheckPage(..): please, contact the author of this program.", nullptr, FATAL);
+	return 0;
 }
 
 bool CDevice::SetSlot(int slotNumber) {
@@ -513,9 +514,7 @@ aint CDevice::SlotNumberFromPreciseAddress(aint address) {
 }
 
 CDevicePage::CDevicePage(byte* memory, int32_t size, page_t number)
-	: Size(size), Number(number), RAM(memory) {
-	if (nullptr == RAM) Error("No memory defined", nullptr, FATAL);
-}
+	: Size(size), Number(number), RAM(memory) {}
 
 CDeviceSlot::CDeviceSlot(int32_t adr, int32_t size)
 	: Address(adr), Size(size), Page(nullptr), InitialPage(-1), Option(O_NONE) {

@@ -59,4 +59,34 @@ TEST_FIXTURE(DeviceFixture, Device_GetPageOfA16) {
 	CHECK(1 == testDev.GetPageOfA16(0x4123));
 }
 
+TEST(Device_AllocateRAMOnlyForFinalPass) {
+	// TODO: Give this test its own pass context instead of saving and restoring globals.
+	const auto savedPass = pass;
+	CDevice* const savedDevices = Devices;
+	CDevice* const savedDevice = Device;
+	const auto savedDeviceID = DeviceID;
+	CDevicePage* const savedPage = Page;
+	byte* const savedMemoryPointer = MemoryPointer;
+	for (pass = 1; pass <= LASTPASS; ++pass) {
+		Devices = nullptr;
+		SetDevice(nullptr, 0);
+		CHECK(SetDevice("ZXSPECTRUM48", 0));
+		if (Device) {
+			const bool hasRAM = LASTPASS == pass;
+			CHECK_EQUAL(hasRAM, Device->Memory != nullptr);
+			CHECK_EQUAL(4, Device->PagesCount);
+			const CDevicePage* const screen = Device->GetSlot(1)->Page;
+			CHECK_EQUAL(hasRAM, screen->RAM != nullptr);
+			if (screen->RAM) CHECK_EQUAL(7 * 8, screen->RAM[0x1800]);
+		}
+		delete Devices;
+	}
+	MemoryPointer = savedMemoryPointer;
+	Page = savedPage;
+	DeviceID = savedDeviceID;
+	Device = savedDevice;
+	Devices = savedDevices;
+	pass = savedPass;
+}
+
 #endif
