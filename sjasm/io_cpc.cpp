@@ -437,14 +437,10 @@ namespace CDTUtil {
 */
 }
 
-static void createCDTDump464(const std::filesystem::path & fname, aint startAddr, byte screenMode, const byte* palette) {
-	byte* ramptr;
-	aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
-	std::unique_ptr<byte[]> ram(new byte[ram_size]);
-	ramptr = ram.get();
-	memcpy(ramptr + 0x0000, Device->GetPage(0)->RAM, 0x4000);
-	memcpy(ramptr + 0x4000, Device->GetPage(1)->RAM, 0x4000);
-	memcpy(ramptr + 0x8000, Device->GetPage(2)->RAM, 0x4000);
+static void SaveCDT_SnapshotWithPalette(const std::filesystem::path & fname, aint startAddr, byte screenMode, const byte* palette) {
+	const bool is6128 = isCPC6128();
+	const byte* const ramptr = Device->GetPage(0)->RAM;
+	constexpr aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
 
 	if (screenMode > 2) {
 		screenMode = 0xFF; // Turn mode & palette select off
@@ -463,103 +459,45 @@ static void createCDTDump464(const std::filesystem::path & fname, aint startAddr
 		startAddr = ramBase;
 	}
 
-	// construct the asm loader
-	byte loader[SaveCDT_AmstradCPC464_Len];
-	memcpy(loader, SaveCDT_AmstradCPC464, SaveCDT_AmstradCPC464_Len);
-
-	// loader settings
-	loader[SaveCDT_AmstradCPC464_Settings + 0x0] = hasScreen;
-	loader[SaveCDT_AmstradCPC464_Settings + 0x1] = startAddr & 0xFF;
-	loader[SaveCDT_AmstradCPC464_Settings + 0x2] = startAddr >> 8;
-
-	loader[SaveCDT_AmstradCPC464_Settings + 0x3] = ramBase & 0xFF;
-	loader[SaveCDT_AmstradCPC464_Settings + 0x4] = ramBase >> 8;
-
-	loader[SaveCDT_AmstradCPC464_Settings + 0x5] = ramUsed & 0xFF;
-	loader[SaveCDT_AmstradCPC464_Settings + 0x6] = ramUsed >> 8;
-
-	// Create an empty file with a 2s pause to start with
-	TZX_CreateEmpty(fname);
-	TZX_AppendPauseBlock(fname, 2000);
-
-	// append a CPC basic loader which will run the asm loader
-	CDTUtil::writeBASICLoader(fname, screenMode, palette);
-
-	// append the asm loader program
-	CDTUtil::writeUserProgram(fname, "CODE", loader, SaveCDT_AmstradCPC464_Len, SaveCDT_AmstradCPC464_ORG, SaveCDT_AmstradCPC464_ORG);
-
-	// append screen if we have one
-	if (hasScreen) {
-		CDTUtil::writeChunkedData(fname, Device->GetPage(3)->RAM, Device->GetPage(3)->Size, CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
-	}
-	// finally write the main code
-	CDTUtil::writeChunkedData(fname, ramptr + ramBase, ramUsed, CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
-}
-
-static void createCDTDump6128(const std::filesystem::path & fname, aint startAddr, byte screenMode, const byte* palette) {
-	byte* ramptr;
-	aint ram_size = 0xC000; // 3 x 16K pages (eg: excl screen)
-	std::unique_ptr<byte[]> ram(new byte[ram_size]);
-	ramptr = ram.get();
-	memcpy(ramptr + 0x0000, Device->GetPage(0)->RAM, 0x4000);
-	memcpy(ramptr + 0x4000, Device->GetPage(1)->RAM, 0x4000);
-	memcpy(ramptr + 0x8000, Device->GetPage(2)->RAM, 0x4000);
-
-	if (screenMode > 2) {
-		screenMode = 0xFF; // Turn mode & palette select off
-	}
-	bool hasScreen = CDTUtil::hasScreen();
-	aint ramBase = CDTUtil::calcRAMStart(ramptr, ram_size);
-	aint ramEnd = CDTUtil::calcRAMLength(ramptr, ram_size);
-
-	if (0x10000 == ramBase || 0x0000 == ramEnd) {
-		Error("[SAVECDT] Could not determine the start and end of the program", nullptr, SUPPRESS); return;
-	}
-
-	aint ramUsed = ramEnd - ramBase;
-
-	if (startAddr < 0) {
-		startAddr = ramBase;
-	}
-
-	// the max possible length for the loader
-	constexpr aint max_loader_len = SaveCDT_AmstradCPC6128_Len + (SaveCDT_AmstradCPC6128_PageEntrySize * 4);
+	constexpr aint extraPageCount = 4;
+	constexpr aint max_loader_len = std::max<aint>(SaveCDT_AmstradCPC464_Len,
+		SaveCDT_AmstradCPC6128_Len + SaveCDT_AmstradCPC6128_PageEntrySize * extraPageCount);
 	// construct the asm loader
 	byte loader[max_loader_len];
-	memcpy(loader, SaveCDT_AmstradCPC6128, SaveCDT_AmstradCPC6128_Len);
-	aint loader_actual_len = SaveCDT_AmstradCPC6128_Len;
+	aint loader_actual_len = is6128 ? SaveCDT_AmstradCPC6128_Len : SaveCDT_AmstradCPC464_Len;
+	const word loaderOrg = is6128 ? SaveCDT_AmstradCPC6128_ORG : SaveCDT_AmstradCPC464_ORG;
+	memcpy(loader, is6128 ? SaveCDT_AmstradCPC6128 : SaveCDT_AmstradCPC464, loader_actual_len);
 
 	// loader settings
-	loader[SaveCDT_AmstradCPC6128_Settings + 0x0] = hasScreen;
-	loader[SaveCDT_AmstradCPC6128_Settings + 0x1] = startAddr & 0xFF;
-	loader[SaveCDT_AmstradCPC6128_Settings + 0x2] = startAddr >> 8;
+	byte* const settings = loader + (is6128 ? SaveCDT_AmstradCPC6128_Settings : SaveCDT_AmstradCPC464_Settings);
+	settings[0] = hasScreen;
+	settings[1] = startAddr & 0xFF;
+	settings[2] = startAddr >> 8;
+	settings[3] = ramBase & 0xFF;
+	settings[4] = ramBase >> 8;
+	settings[5] = ramUsed & 0xFF;
+	settings[6] = ramUsed >> 8;
 
-	loader[SaveCDT_AmstradCPC6128_Settings + 0x3] = ramBase & 0xFF;
-	loader[SaveCDT_AmstradCPC6128_Settings + 0x4] = ramBase >> 8;
-
-	loader[SaveCDT_AmstradCPC6128_Settings + 0x5] = ramUsed & 0xFF;
-	loader[SaveCDT_AmstradCPC6128_Settings + 0x6] = ramUsed >> 8;
-
-	byte* loader_pages = loader + SaveCDT_AmstradCPC6128_Pages;
-	byte* loader_entries = loader_pages + 1;
-
-	unsigned char* pages_ram[4];
-	aint pages_len[4];
-	aint pages_start[4];
+	struct BankBlock {
+		const byte* data;
+		aint length;
+	};
+	BankBlock banks[extraPageCount];
 	aint count = 0;
 
-	// Ignore the lower 64K at this time!
-	for (aint i = 4; i < Device->PagesCount; i++) {
-		{
-			// Calc start and end of this block
-			aint base = CDTUtil::calcRAMStart(Device->GetPage(i)->RAM, 0x4000);
-			aint length = CDTUtil::calcRAMLength(Device->GetPage(i)->RAM, 0x4000);
+	if (is6128) {
+		byte* const loader_pages = loader + SaveCDT_AmstradCPC6128_Pages;
+		byte* loader_entries = loader_pages + 1;
+		for (aint page = 4; page < Device->PagesCount; ++page) {
+			const CDevicePage* const bank = Device->GetPage(page);
+			const aint base = CDTUtil::calcRAMStart(bank->RAM, bank->Size);
+			const aint length = CDTUtil::calcRAMLength(bank->RAM, bank->Size);
 
 			if (0x10000 == base || 0 == length) {
 				continue;
 			}
 
-			loader_entries[0] = i;	// configuration (4-7)
+			loader_entries[0] = page;	// configuration (4-7)
 			loader_entries[1] = base & 0xFF;
 			loader_entries[2] = (base >> 8) & 0xFF;
 			loader_entries[3] = length & 0xFF;
@@ -568,15 +506,11 @@ static void createCDTDump6128(const std::filesystem::path & fname, aint startAdd
 			loader_actual_len += SaveCDT_AmstradCPC6128_PageEntrySize;
 			loader_entries += SaveCDT_AmstradCPC6128_PageEntrySize;
 
-			pages_ram[count] = Device->GetPage(i)->RAM;
-			pages_start[count] = base;
-			pages_len[count] = length;
 
-			++count;
+			banks[count++] = { bank->RAM + base, length };
 		}
+		loader_pages[0] = count;
 	}
-
-	loader_pages[0] = count;
 
 	// Create an empty file with a 2s pause to start with
 	TZX_CreateEmpty(fname);
@@ -586,7 +520,7 @@ static void createCDTDump6128(const std::filesystem::path & fname, aint startAdd
 	CDTUtil::writeBASICLoader(fname, screenMode, palette);
 
 	// append the asm loader program
-	CDTUtil::writeUserProgram(fname, "CODE", loader, loader_actual_len, SaveCDT_AmstradCPC6128_ORG, SaveCDT_AmstradCPC6128_ORG);
+	CDTUtil::writeUserProgram(fname, "CODE", loader, loader_actual_len, loaderOrg, loaderOrg);
 
 	// append screen if we have one
 	if (hasScreen) {
@@ -594,20 +528,12 @@ static void createCDTDump6128(const std::filesystem::path & fname, aint startAdd
 	}
 
 	// Write each of the pages
-	for (aint i = 0; i < count; ++i) {
-		CDTUtil::writeChunkedData(fname, pages_ram[i] + pages_start[i], pages_len[i], CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
+	for (aint index = 0; index < count; ++index) {
+		CDTUtil::writeChunkedData(fname, banks[index].data, banks[index].length, CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
 	}
 
 	// Now drop the rest of the low 64k
 	CDTUtil::writeChunkedData(fname, ramptr + ramBase, ramUsed, CDTUtil::DefaultPause, CDTUtil::BlockTypeData);
-}
-
-static void SaveCDT_SnapshotWithPalette(const std::filesystem::path & fname,
-										aint startAddr, byte screenMode, const byte* palette)
-{
-	isCPC6128() ?
-		createCDTDump6128(fname, startAddr, screenMode, palette) :
-		createCDTDump464(fname, startAddr, screenMode, palette);
 }
 
 static void SaveCDT_Snapshot(const std::filesystem::path & fname, aint startAddr) {

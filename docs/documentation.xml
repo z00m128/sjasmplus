@@ -209,7 +209,7 @@
             <term>Unreleased</term>
             <listitem>
               <synopsis>
-- refactored: internal implementation of DEVICE memory management
+- refactored: internal implementation of DEVICE memory management and SAVECDT
 - fix missed overflow errors for decimal literals
 </synopsis>
             </listitem>
