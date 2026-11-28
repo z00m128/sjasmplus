@@ -130,7 +130,6 @@ public:
 	int Insert(const char* nname, aint nvalue, uint16_t traits = 0, page_t equPageNum = LABEL_PAGE_UNDEFINED);
 	int Update(char* name, aint value);
 	SLabelTableEntry* Find(const char* name, bool onlyDefined = false);
-	bool Remove(const char* name);
 	bool IsUsed(const char* name);
 	void RemoveAll();
 	void Dump();

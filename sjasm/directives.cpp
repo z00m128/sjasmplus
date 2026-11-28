@@ -1632,9 +1632,7 @@ static void dirUNDEFINE() {
 	if (*lp == '*') {
 		++lp;
 		DefineTable.RemoveAll();
-	} else if (DefineTable.FindDuplicate(id)) {
-		DefineTable.Remove(id);
-	} else {
+	} else if (!DefineTable.Remove(id)) {
 		Warning("[UNDEFINE] Identifier not found", id);
 	}
 }

@@ -2,7 +2,13 @@
 1     0000                      define label "value1"
 duplicated_define.asm(2): error: Duplicate define (replacing old value): label
 2     0000                      define label "value2"
-3     0000
+3     0000 76 61 6C 75                  db "value2"
+3     0004 65 32
+4     0006                              undefine label
+5     0006                              ifdef label
+6     0006 ~                                    assert 0
+7     0006                              endif
+8     0006
 # file closed: duplicated_define.asm
 
 Value    Label

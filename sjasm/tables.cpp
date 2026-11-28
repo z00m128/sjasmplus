@@ -462,10 +462,6 @@ bool CLabelTable::IsUsed(const char* name) {
 	return (symbols.end() != labelIt) ? labelIt->second.used : false;
 }
 
-bool CLabelTable::Remove(const char* name) {
-	return symbols.erase(name);
-}
-
 void CLabelTable::RemoveAll() {
 	symbols.clear();
 }
@@ -777,6 +773,7 @@ void CDefineTable::Init() {
 void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
 	if (FindDuplicate(name)) {
 		Error("Duplicate define (replacing old value)", name, PASS03);
+		Remove(name);
 	}
 	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
 }
