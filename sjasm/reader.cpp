@@ -445,7 +445,7 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 		getNumericValueLastErr = getNumericValueErr_syntax;
 		return false;
 	}
-	aint digit;
+	uint32_t accum = 0;
 	while (p < pend) {
 		const byte charDigit = *p++;
 		if (('\'' == charDigit || '_' == charDigit) && isalnum((byte)*p)) continue;
@@ -453,14 +453,16 @@ bool GetNumericValue_IntBased(char*& p, const char* const pend, aint& val, const
 			getNumericValueLastErr = getNumericValueErr_no_digit;
 			break;
 		}
-		if (base <= (digit = getval(charDigit))) {
+		const int digit = getval(charDigit);
+		if (base <= digit) {
 			getNumericValueLastErr = getNumericValueErr_digit;
 			break;
 		}
-		const uint32_t oval = static_cast<uint32_t>(val);
-		val = (val * base) + digit;
-		if (static_cast<uint32_t>(val) < oval) getNumericValueLastErr = getNumericValueErr_overflow;
+		const uint64_t next = uint64_t{accum} * base + digit;
+		if (UINT32_MAX < next) getNumericValueLastErr = getNumericValueErr_overflow;
+		accum = static_cast<uint32_t>(next);
 	}
+	val = static_cast<aint>(accum);
 	return (NULL == getNumericValueLastErr);
 }
 

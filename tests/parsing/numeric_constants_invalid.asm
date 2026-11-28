@@ -57,3 +57,4 @@
     ; code coverage: make sure the overflow in decimal part doesn't affect other warnings/reporting and is silently ignored
     DB      15.0'000'000'000'000'000'000
     DB      15.0'999'999'999'999'999'999
+    DD      5000000000 + 1

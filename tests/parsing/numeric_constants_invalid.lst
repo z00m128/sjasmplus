@@ -101,7 +101,9 @@ numeric_constants_invalid.asm(58): warning[decimalz]: decimal part is ignored: 1
 58    0032 0F               DB      15.0'000'000'000'000'000'000
 numeric_constants_invalid.asm(59): warning[decimaln]: decimal part is ignored: 15.0'999'999'999'999'999'999
 59    0033 0F               DB      15.0'999'999'999'999'999'999
-60    0034
+numeric_constants_invalid.asm(60): error: Overflow: 5000000000 + 1
+60    0034 01 F2 05 2A      DD      5000000000 + 1
+61    0038
 # file closed: numeric_constants_invalid.asm
 
 Value    Label
