@@ -834,17 +834,8 @@ int main(int argc, char* argv[]) {
 			RepeatStack.pop();
 		}
 
-		if (DISP_NONE != PseudoORG) {
-			CurAddress = adrdisp;
-			PseudoORG = DISP_NONE;
-		}
-
 		if (Options::OutputVerbosity <= OV_ALL) {
-			if (pass != LASTPASS) {
-				_CERR "Pass " _CMDL pass _CMDL " complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
-			} else {
-				_CERR "Pass 3 complete" _ENDL;
-			}
+			_CERR "Pass " _CMDL pass _CMDL " complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
 		}
 	} while (pass < LASTPASS);
 
