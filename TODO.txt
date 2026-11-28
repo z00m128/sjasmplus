@@ -250,16 +250,6 @@ The intended compatibility break could be larger than the v1.07 to v1.14 changes
 [Idea] Separate ordinary local labels from macro-local labels
     Consider a distinct macro-local prefix, perhaps '>'. See issue #120.
 
-[Idea] Physical versus slot-mapped label addresses
-    Represent a label with 2 or 3 high bits for its default slot and the remaining
-    30 or 29 bits for a physical address; machine-code emission would map that
-    physical address into a selected slot.
-    Compatibility problem: ordinary 0000..FFFF mapped addresses collide with early
-    physical pages. Consider explicit notation rather than silently changing them.
-    Undecided sketches: @ or . distinction; &label/expression as in C/C++;
-    <slot>$$expression as a binary slot-remapping operator.
-    Distinguish addresses wider than 16 bits from the 16-bit slot-mapped view.
-
 [Idea] Nested DISP blocks
     Existing DISP-inside-DISP limitations/bugs were documented in the old note.
     Determine whether nesting is the right solution rather than assuming it is.
