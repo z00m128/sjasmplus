@@ -30,7 +30,6 @@
 
 enum EReturn { END, ELSE, ENDIF, ENDTEXTAREA, ENDM, ELSEIF };
 
-extern int ListAddress;
 extern int StartAddress;
 
 constexpr int BYTES_END_MARKER = -1;
@@ -78,6 +77,7 @@ void NewDest(const std::filesystem::path & newfilename, int mode = OUTPUT_TRUNCA
 bool FileExists(const std::filesystem::path & file_name);
 bool FileExistsCstr(const char* filename);
 FILE* GetListingFile();
+void PrepareListLine(char* buffer, aint hexadd, bool markReplay = false);
 void ListFile(bool showAsSkipped = false);
 void ListSilentOrExternalEmits();
 void CheckRamLimitExceeded();
@@ -142,7 +142,6 @@ void CloseSld();
 void WriteToSldFile(int pageNum, int value, char type = 'T', const char* symbol = nullptr);
 void SldAddCommentKeyword(const char* keyword);
 void SldTrackComments();
-extern aint sldSwapSrcPos;
 
 /////// Breakpoints list (for different emulators)
 enum EBreakpointsFile { BPSF_UNREAL, BPSF_ZESARUX, BPSF_MAME, BPSF_FUSE };

@@ -555,7 +555,7 @@ static bool ReplaceDefineInternal(char* lp, char* const nl) {
 			nid = GrowSubId(lp);		// grow the current sub-id part by part, checking each combination for substitution
 			// defines/macro arguments can substitute in the middle of ID only if they don't start with underscore
 			const bool canSubstituteInside = '_' != nid[0] || nextSubIdLp == wholeIdLp;
-			if (macrolabp && canSubstituteInside && (ver = MacroDefineTable.getverv(nid))) {
+			if (macrolabp && canSubstituteInside && (ver = CurrentPass().macroArgs.getverv(nid))) {
 				dr = 2;			// macro argument substitution is possible
 			} else if (!isDefDir && canSubstituteInside && (ver = DefineTable.Get(nid))) {
 				dr = 1;			// DEFINE substitution is possible
@@ -686,7 +686,7 @@ char* ReplaceDefine(char* src) {
 static int ParseCppLineDirective(char* p) {
 	if (SkipBlanks(p) || !cmphstr(p, "line") || SkipBlanks(p)) return 0;
 	assert(!sourcePosStack.empty());
-	if (lijst || extraErrorWarningPrefix) {	// `#line` inside MACRO/LUA does NOT work, not supported, sry
+	if (!CurrentPass().replays.empty() || extraErrorWarningPrefix) {	// `#line` inside MACRO/LUA does NOT work, not supported, sry
 		// because running macro keeps restoring sourcePosStack.back() value (to where it was defined)
 		// the LUA block detection is using `extraErrorWarningPrefix` -> so far this is used only by Lua related code
 		Error("#line does not work inside macro/dup/lua block", nullptr, SUPPRESS);
@@ -704,7 +704,7 @@ static int ParseCppLineDirective(char* p) {
 	maxlin = std::max(maxlin, sourcePosStack.back().line);
 	maxlin = std::max(maxlin, static_cast<uint32_t>(linenum));
 	ListFile(true);							// list this early, before sourcePosStack is affected
-	donotlist = 1;
+	CurrentPass().skipNextListing = true;
 	if (White(p[0]) && !SkipBlanks(p)) {	// optional fake filename may follow, try to parse it
 		auto name_in = GetDelimitedStringEx(p);
 		if (name_in.first.empty()) {
@@ -730,16 +730,9 @@ static int ParseCppLineDirective(char* p) {
 	return 1;
 }
 
-void SetLastParsedLabel(const char* label) {
-	if (LastParsedLabel) free(LastParsedLabel);
-	if (nullptr != label) {
-		LastParsedLabel = STRDUP(label);
-		if (nullptr == LastParsedLabel) ErrorOOM();
-		LastParsedLabelLine = CompiledCurrentLine;
-	} else {
-		LastParsedLabel = nullptr;
-		LastParsedLabelLine = 0;
-	}
+static void SetLastParsedLabel(const char* label) {
+	CurrentPass().lastParsedLabel = label;
+	CurrentPass().lastParsedLabelLine = CompiledCurrentLine;
 }
 
 void ParseLabel() {
@@ -772,6 +765,7 @@ void ParseLabel() {
 	// handle the special SMC_offset syntax "<label>+*" to target significant immediate of the instruction
 	if ('+' == lp[0] && '*' == lp[1] && !isalnum(byte(lp[2]))) {
 		assert(!sourcePosStack.empty());
+		auto& smartSmcIndex = CurrentPass().smartSmcIndex;
 		smcOffset = 1;					// heuristic value 1 for first pass or when something fails
 		lp += 2;
 		if (1 == pass) {
@@ -855,7 +849,7 @@ void ParseLabel() {
 			if (*p == '@') {
 				++p; gl = 1;
 			}
-			if ((n = GetID(p)) && StructureTable.Emit(n, tp, p, gl)) {
+			if ((n = GetID(p)) && CurrentPass().structures.Emit(n, tp, p, gl)) {
 				if (smcOffset) Error("Structure instance can't use SMC-offset");
 				lp = p;
 				// this was instancing STRUCT, make it also define "main" label for future "local" ones
@@ -953,7 +947,7 @@ int ParseMacro() {
 		return 0;
 	}
 
-	if (!gl) r = MacroTable.Emit(n, p);		// global '@' operator inhibits macros
+	if (!gl) r = CurrentPass().macros.Emit(n, p);		// global '@' operator inhibits macros
 	if (r == 2) return 1;	// successfully emitted
 	if (r == 1) {			// error reported
 		lp = p;
@@ -961,7 +955,7 @@ int ParseMacro() {
 	}
 
 	// not a macro, see if it's structure
-	if (StructureTable.Emit(n, nullptr, p, gl)) {
+	if (CurrentPass().structures.Emit(n, nullptr, p, gl)) {
 		lp = p;
 		return 1;
 	}
@@ -994,16 +988,17 @@ int PrepareLine() {
 	ListSilentOrExternalEmits();
 
 	++CompiledCurrentLine;
-	if (!RepeatStack.empty()) {
-		SRepeatStack& dup = RepeatStack.top();
+	auto& repeats = CurrentPass().repeats;
+	if (!repeats.empty()) {
+		SRepeatStack& dup = repeats.top();
 		if (!dup.IsInWork) {
 			lp = line;
 			dup.Pointer->next = new CStringsList(lp);
 			dup.Pointer = dup.Pointer->next;
 #ifdef DEBUG_COUT_PARSE_LINE
 			fprintf(stderr, ">%d %d %c%ld-%d [%s]\n", pass, CurSourcePos.line,
-					(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'),RepeatStack.size(),
-					(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
+					(!repeats.empty() && repeats.top().IsInWork ? '!' : '.'),repeats.size(),
+					(!repeats.empty() ? repeats.top().Level : 0), line);
 #endif
 			// check if there's some label at beginning of the line, skip it
 			if (islabchar(*lp)) {
@@ -1020,8 +1015,8 @@ int PrepareLine() {
 	}
 #ifdef DEBUG_COUT_PARSE_LINE
 	fprintf(stderr, "|%d %d %c%ld-%d [%s]\n", pass, CurSourcePos.line,
-			(!RepeatStack.empty() && RepeatStack.top().IsInWork ? '!' : '.'), RepeatStack.size(),
-			(!RepeatStack.empty() ? RepeatStack.top().Level : 0), line);
+			(!repeats.empty() && repeats.top().IsInWork ? '!' : '.'), repeats.size(),
+			(!repeats.empty() ? repeats.top().Level : 0), line);
 #endif
 	lp = ReplaceDefine(line);
 
@@ -1031,9 +1026,9 @@ int PrepareLine() {
 
 	// update current address by memory wrapping, current page, etc... (before the label is defined)
 	if (DeviceID)	Device->CheckPage(CDevice::CHECK_NO_EMIT);
-	ListAddress = CurAddress;
+	CurrentPass().listAddress = CurAddress;
 
-	if (!ConvertEncoding) {
+	if (ENCDOS == CurrentPass().sourceEncoding) {
 		byte* lp2 = (byte*) lp;
 		while (*lp2) {
 			if (128 <= *lp2) {
@@ -1050,7 +1045,8 @@ bool PrepareNonBlankMultiLine(char*& p) {
 	while (SkipBlanks(p)) {
 		// if inside macro system, but without any more macro-lines in buffer, act as if "EOF"
 		// (to not leak into reading actual file while the macro is executing)
-		if (listmacro && nullptr == lijstp) return false;
+		const auto& replays = CurrentPass().replays;
+		if (CurrentPass().replayDepth && (replays.empty() || nullptr == replays.top())) return false;
 		// list the current (old) line
 		ListFile();
 		// read the next line
@@ -1115,16 +1111,9 @@ void ParseLineSafe(bool parselabels) {
 	lp = rp;
 }
 
-void ParseStructLabel(CStructure* st) {
-	char* tp, temp[LINEMAX];
-	if (PreviousIsLabel) {
-		free(PreviousIsLabel);
-		PreviousIsLabel = nullptr;
-	}
-	if (White()) {
-		return;
-	}
-	tp = temp;
+static const char* ParseStructLabel(CStructure* st, char* label) {
+	if (White()) return nullptr;
+	char* tp = label;
 	if (*lp == '.') {
 		++lp;
 	}
@@ -1135,16 +1124,16 @@ void ParseStructLabel(CStructure* st) {
 	if (*lp == ':') {
 		++lp;
 	}
-	tp = temp; SkipBlanks();
-	if (isdigit((byte)*tp)) {
-		Error("[STRUCT] Number labels not allowed within structs"); return;
+	SkipBlanks();
+	if (isdigit((byte)*label)) {
+		Error("[STRUCT] Number labels not allowed within structs");
+		return nullptr;
 	}
-	PreviousIsLabel = STRDUP(tp);
-	if (PreviousIsLabel == NULL) ErrorOOM();
-	st->AddLabel(tp);
+	st->AddLabel(label);
+	return label;
 }
 
-void ParseStructMember(CStructure* st) {
+static void ParseStructMember(CStructure* st, const char* memberLabel) {
 	aint val, len;
 	bp = lp;
 	Relocation::isResultAffected = false;
@@ -1230,7 +1219,7 @@ void ParseStructMember(CStructure* st) {
 			++pp;
 			gl = 1;
 		}
-		if ((n = GetID(pp)) && (s = StructureTable.zoek(n, gl))) {
+		if ((n = GetID(pp)) && (s = CurrentPass().structures.zoek(n, gl))) {
 			if (st == s) {
 				Error("[STRUCT] Can't include itself", NULL);
 				SkipToEol(pp);
@@ -1246,7 +1235,7 @@ void ParseStructMember(CStructure* st) {
 				Warning(warnTxt);
 			}
 			lp = pp;
-			st->CopyLabels(s);
+			st->CopyLabels(s, memberLabel);
 			st->CopyMembers(s, lp);
 		}
 		break;
@@ -1258,9 +1247,10 @@ void ParseStructLine(CStructure* st) {
 	++CompiledCurrentLine;
 	lp = ReplaceDefine(line);
 	if (!*lp) return;
-	ParseStructLabel(st);
+	char label[LINEMAX];
+	const char* memberLabel = ParseStructLabel(st, label);
 	if (SkipBlanks()) return;
-	ParseStructMember(st);
+	ParseStructMember(st, memberLabel);
 	if (SkipBlanks()) return;
 	if (*lp) Error("[STRUCT] Unexpected", lp);
 }

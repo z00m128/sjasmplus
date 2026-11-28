@@ -153,37 +153,57 @@ typedef struct SSource {
 
 extern std::vector<SSource> sourceFiles;
 
+enum EEncoding { ENCDOS, ENCWIN };
+
+class CPassContext {
+	aint predefinedCounter = 0;
+	int macroExpansionSerial = 0;
+
+public:
+	bool sourceActive = false;
+	bool skipNextListing = false;
+	int replayDepth = 0;
+	int listAddress = 0;
+	aint lastListedLine = -1;
+	EEncoding sourceEncoding = ENCWIN;
+	CMacroTable macros;
+	CMacroDefineTable macroArgs;
+	CStructureTable structures;
+	std::stack<SRepeatStack> repeats;
+	std::stack<CStringsList*> replays;
+	source_positions_t::size_type smartSmcIndex = 0;
+	aint sldSwapSrcPos = 0;
+	aint sourceBlockLevel = -2;
+	std::string lastParsedLabel;
+	aint lastParsedLabelLine = 0;
+
+	aint nextPredefinedCounter() { return predefinedCounter++; }
+	int nextMacroExpansionSerial() { return macroExpansionSerial++; }
+};
+
+CPassContext& CurrentPass();
+
 enum EDispMode { DISP_NONE = 0, DISP_ACTIVE = 1, DISP_INSIDE_RELOCATE = 2 };
 extern EDispMode PseudoORG;
 
 extern bool IsLabelNotFound, IsSubstituting;
-extern int ConvertEncoding;
-extern int pass, ErrorCount, WarningCount, IncludeLevel, IsRunning, donotlist, listmacro;
+extern int pass, ErrorCount, WarningCount, IncludeLevel;
 extern int adrdisp, dispPageNum, StartAddress;
 extern byte* MemoryPointer;
-extern int macronummer, lijst, reglenwidth;
+extern int reglenwidth;
 extern source_positions_t sourcePosStack;
 extern source_positions_t smartSmcLines;
-extern source_positions_t::size_type smartSmcIndex;
 extern uint32_t maxlin;
-extern aint CurAddress, CompiledCurrentLine, LastParsedLabelLine, PredefinedCounter;
+extern aint CurAddress, CompiledCurrentLine;
 extern aint destlen, size, comlin;
-extern aint sourceBlockLevel;		// source-block nesting level (for sizeof-like purposes: modules, includes, macros)
 
-extern char* macrolabp, * LastParsedLabel;
-
-enum EEncoding { ENCDOS, ENCWIN };
+extern char* macrolabp;
 
 void ExitASM(int p);
-extern CStringsList* lijstp;
-extern std::stack<SRepeatStack> RepeatStack;
 
 extern CLabelTable LabelTable;
 extern CTemporaryLabelTable TemporaryLabelTable;
 extern CDefineTable DefineTable;
-extern CMacroDefineTable MacroDefineTable;
-extern CMacroTable MacroTable;
-extern CStructureTable StructureTable;
 
 #endif
 //eof sjasm.h

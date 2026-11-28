@@ -17,7 +17,6 @@ OF THIS SOFTWARE.
 #include "UnitTest++/UnitTest++.h"
 
 //sjio.cpp function (not in headers, but globally visible for unit testing)
-void PrepareListLine(char* buffer, aint hexadd);
 
 TEST(SjIo_PrepareListLine) {
 	// PrepareListLine sets 24 chars long prologue of listing line (with empty source line)
@@ -25,13 +24,14 @@ TEST(SjIo_PrepareListLine) {
 	// setup global state of assembler enough to make PrepareListLine work
 	strcpy(line, "");
 	substitutedLine = line;
-	listmacro = 0;
 	reglenwidth = 1;
 	assert(sourcePosStack.empty());
 	for (int inclevel = 11; inclevel--; ) sourcePosStack.push_back(TextFilePos());
 	IncludeLevel = 0;
 	PrepareListLine(listBuf, 0x1234);
 	CHECK_EQUAL("0     1234              ", listBuf);
+	PrepareListLine(listBuf, 0x1234, true);
+	CHECK_EQUAL('>', listBuf[23]);
 
 	IncludeLevel = 1;
 	sourcePosStack[IncludeLevel].line = 1;

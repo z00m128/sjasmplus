@@ -42,8 +42,6 @@ static constexpr char pathGoodSlash = '/';
 
 fs::path LaunchDirectory {};
 
-int ListAddress;
-
 static constexpr int LIST_EMIT_BYTES_BUFFER_SIZE = 1024 * 64;
 static constexpr int DESTBUFLEN = 8192;
 
@@ -250,8 +248,9 @@ void resolveRelocationAndSmartSmc(const aint immediateOffset, Relocation::EType 
 	// call relocation data generator to do its own errands
 	Relocation::resolveRelocationAffected(immediateOffset, minType);
 	// check smart-SMC functionality, if there is unresolved record to be set up
-	if (INT_MAX == immediateOffset || sourcePosStack.empty() || 0 == smartSmcIndex) return;
-	if (smartSmcLines.size() < smartSmcIndex) return;
+	if (INT_MAX == immediateOffset || sourcePosStack.empty()) return;
+	const auto smartSmcIndex = CurrentPass().smartSmcIndex;
+	if (0 == smartSmcIndex || smartSmcLines.size() < smartSmcIndex) return;
 	auto & smartSmc = smartSmcLines.at(smartSmcIndex - 1);
 	if (~0U != smartSmc.colBegin || smartSmc != sourcePosStack.back()) return;
 	if (1 < sourcePosStack.back().colBegin) return;		// only first segment belongs to SMC label
@@ -313,7 +312,7 @@ void PrintHexAlt(char*& dest, aint value)
 static char pline[4*LINEMAX];
 
 // buffer must be at least 4*LINEMAX chars long
-void PrepareListLine(char* buffer, aint hexadd)
+void PrepareListLine(char* buffer, aint hexadd, bool markReplay)
 {
 	////////////////////////////////////////////////////
 	// Line numbers to 1 to 99999 are supported only  //
@@ -331,7 +330,7 @@ void PrepareListLine(char* buffer, aint hexadd)
 		if (currentLine >= 10000) linenumber += 10000;
 	}
 	memset(buffer, ' ', 24);
-	if (listmacro) buffer[23] = '>';
+	if (markReplay) buffer[23] = '>';
 	if (Options::LST_T_MC_ONLY == Options::syx.ListingType) buffer[23] = '{';
 	SPRINTF2(buffer, LINEMAX, "%*u", linewidth, linenumber); buffer[linewidth] = ' ';
 	memcpy(buffer + linewidth, "++++++", IncludeLevel > 6 - linewidth ? 6 - linewidth : IncludeLevel);
@@ -363,11 +362,11 @@ FILE* GetListingFile() {
 	return NULL;
 }
 
-static aint lastListedLine = -1;
-
 void ListFile(bool showAsSkipped) {
-	if (LASTPASS != pass || NULL == GetListingFile() || donotlist || Options::syx.IsListingSuspended) {
-		donotlist = nListBytes = 0;
+	auto& currentPass = CurrentPass();
+	if (LASTPASS != pass || NULL == GetListingFile() || currentPass.skipNextListing || Options::syx.IsListingSuspended) {
+		currentPass.skipNextListing = false;
+		nListBytes = 0;
 		return;
 	}
 	if (showAsSkipped && Options::LST_T_ACTIVE == Options::syx.ListingType) {
@@ -381,10 +380,10 @@ void ListFile(bool showAsSkipped) {
 	int pos = 0;
 	do {
 		if (showAsSkipped) substitutedLine = line;	// override substituted lines in skipped mode
-		PrepareListLine(pline, ListAddress);
-		const bool hideSource = !showAsSkipped && (lastListedLine == CompiledCurrentLine);
+		PrepareListLine(pline, currentPass.listAddress, 0 != currentPass.replayDepth);
+		const bool hideSource = !showAsSkipped && (currentPass.lastListedLine == CompiledCurrentLine);
 		if (hideSource) pline[24] = 0;				// hide *same* source line on sub-sequent list-lines
-		lastListedLine = CompiledCurrentLine;		// remember this line as listed
+		currentPass.lastListedLine = CompiledCurrentLine;	// remember this line as listed
 		char* pp = pline + 10;
 		int BtoList = (nListBytes < 4) ? nListBytes : 4;
 		for (int i = 0; i < BtoList; ++i) {
@@ -396,11 +395,11 @@ void ListFile(bool showAsSkipped) {
 		ListFileStringRtrim();
 		fputs(pline, GetListingFile());
 		nListBytes -= BtoList;
-		ListAddress += BtoList;
+		currentPass.listAddress += BtoList;
 		pos += BtoList;
 	} while (0 < nListBytes);
 	nListBytes = 0;
-	ListAddress = CurAddress;			// move ListAddress also beyond unlisted but emitted bytes
+	currentPass.listAddress = CurAddress;	// move beyond unlisted but emitted bytes
 }
 
 void ListSilentOrExternalEmits() {
@@ -622,7 +621,7 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 		}
 	}
 
-	sourceBlockLevel += 2;
+	CurrentPass().sourceBlockLevel += 2;
 	fullpath_p_t oFileNameFull = fileNameFull;
 
 	// archive the filename (for referencing it in SLD tracing data or listing/errors)
@@ -647,12 +646,13 @@ void OpenFile(fullpath_ref_t nfilename, stdin_log_t* fStdinLog)
 	rlpbuf = rlpbuf_end = rlbuf;
 	colonSubline = false;
 	blockComment = 0;
+	const auto& sldSwapSrcPos = CurrentPass().sldSwapSrcPos;
 	const aint osldSwapSrcPos = sldSwapSrcPos;
 
 	ReadBufLine();
 
 	LabelTable.SizeBoundary(CLabelTable::BOUNDARY_MAIN);
-	sourceBlockLevel -= 2;
+	CurrentPass().sourceBlockLevel -= 2;
 
 	if (stdin != FP_Input) fclose(FP_Input);
 	else {
@@ -779,7 +779,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 	// if everything else fails (no data, not running, etc), return empty line
 	*line = 0;
 	// try to read through the buffer and produce new line from it
-	while (IsRunning && ReadBufData()) {
+	while (CurrentPass().sourceActive && ReadBufData()) {
 		// start of new line (or fake "line" by colon)
 		bool IsLabel = true, sizeofTag = false;
 		aint indentedColumns = 0;
@@ -906,7 +906,7 @@ void ReadBufLine(bool Parse, bool SplitByColon) {
 		// line is parsed and ready to be processed
 		if (Parse) 	ParseLine();	// processed here in loop
 		else 		return;			// processed externally
-	} // while (IsRunning && ReadBufData())
+	} // while (CurrentPass().sourceActive && ReadBufData())
 }
 
 static void OpenListImp(const fs::path & listFilename) {
@@ -1293,7 +1293,8 @@ int SaveHobeta(const fs::path & fname, const char* fhobname, aint start, aint le
 
 EReturn ReadFile() {
 	while (ReadLine()) {
-		const bool isInsideDupCollectingLines = !RepeatStack.empty() && !RepeatStack.top().IsInWork;
+		const auto& repeats = CurrentPass().repeats;
+		const bool isInsideDupCollectingLines = !repeats.empty() && !repeats.top().IsInWork;
 		if (!isInsideDupCollectingLines) {
 			// check for ending of IF/IFN/... block (keywords: ENDIF, ELSE and ELSEIF)
 			char* p = line;
@@ -1374,20 +1375,22 @@ EReturn SkipFile() {
 }
 
 int ReadLineNoMacro(bool SplitByColon) {
-	if (!IsRunning || !ReadBufData()) return 0;
+	if (!CurrentPass().sourceActive || !ReadBufData()) return 0;
 	ReadBufLine(false, SplitByColon);
 	return 1;
 }
 
 int ReadLine(bool SplitByColon) {
-	if (IsRunning && lijst) {		// read MACRO lines, if macro is being emitted
-		if (!lijstp || !lijstp->string) return 0;
+	auto& replays = CurrentPass().replays;
+	if (CurrentPass().sourceActive && !replays.empty()) {	// read MACRO lines, if macro is being emitted
+		const auto* replayLine = replays.top();
+		if (!replayLine || !replayLine->string) return 0;
 		assert(!sourcePosStack.empty());
-		sourcePosStack.back() = lijstp->source;
-		STRCPY(line, LINEMAX, lijstp->string);
+		sourcePosStack.back() = replayLine->source;
+		STRCPY(line, LINEMAX, replayLine->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
-		lijstp = lijstp->next;
+		replays.top() = replayLine->next;
 		return 1;
 	}
 	return ReadLineNoMacro(SplitByColon);
@@ -1561,7 +1564,6 @@ bool SaveHex(const fs::path & fname, aint start, aint length, aint start_adr) {
 
 /////// source-level-debugging support by Ckirby
 
-aint sldSwapSrcPos = 0;
 static FILE* FP_SourceLevelDebugging = NULL;
 static char sldMessage[LINEMAX2];
 static const char* WriteToSld_noSymbol = "";
@@ -1671,6 +1673,7 @@ void WriteToSldFile(int pageNum, int value, char type, const char* symbol) {
 	if (nullptr == symbol) symbol = WriteToSld_noSymbol;
 
 	assert(!sourcePosStack.empty());
+	const aint sldSwapSrcPos = CurrentPass().sldSwapSrcPos;
 	const bool outside_source = (sourcePosStack.size() <= size_t(IncludeLevel));
 	const bool has_def_pos = !outside_source && (size_t(IncludeLevel + 1) < sourcePosStack.size());
 	const TextFilePos & curPos = (sldSwapSrcPos <= 0) ?

@@ -59,7 +59,6 @@ void InitVorlab() {
 	}
 }
 
-char* PreviousIsLabel = nullptr;
 
 // since v1.18.0:
 // The ignore invalid char after feature disconnected from "setNameSpace" to "ignoreCharAfter"
@@ -192,8 +191,6 @@ char* ExportModuleToSld(bool endModule) {
 	return sldLabelExport;
 }
 
-static bool getLabel_invalidName = false;
-
 // does parse + consume input source at "p" (and stores result into "fullName")
 //  ^^^ may report invalid label name error
 // does search (and only search) LabelTable for various variants of label based on "fullName"
@@ -201,10 +198,8 @@ static bool getLabel_invalidName = false;
 // Leaves canonical name in "temp" global variable, if this is inside macro
 // returns table entry, preferring the one with "page defined", if multiple entries are found
 static SLabelTableEntry* SearchLabel(char*& p, bool setUsed, /*out*/ std::unique_ptr<char[]>& fullName) {
-	getLabel_invalidName = true;
 	fullName.reset(ValidateLabel(p, false, true));
 	if (!fullName) return nullptr;
-	getLabel_invalidName = false;
 	const bool global = '@' == *p;
 	const bool local = '.' == *p;
 	while (islabchar(*p)) ++p;		// advance pointer beyond the parsed label
@@ -248,24 +243,24 @@ static SLabelTableEntry* SearchLabel(char*& p, bool setUsed, /*out*/ std::unique
 	return undefinedLabelEntry;
 }
 
-static SLabelTableEntry* GetLabel(char*& p, uint16_t setExtraTraits = 0) {
+static std::pair<SLabelTableEntry*, bool> GetLabel(char*& p, uint16_t setExtraTraits = 0) {
 	std::unique_ptr<char[]> fullName;
 	SLabelTableEntry* labelEntry = SearchLabel(p, true, fullName);
-	if (getLabel_invalidName) return nullptr;
+	if (!fullName) return {nullptr, false};
 	if (labelEntry) labelEntry->traits |= setExtraTraits;
 	if (!labelEntry || LABEL_PAGE_UNDEFINED == labelEntry->page) {
 		IsLabelNotFound = true;
 		// don't insert labels or report errors during substitution phase
-		if (IsSubstituting) return nullptr;
+		if (IsSubstituting) return {nullptr, true};
 		// regular parsing/assembling, track new labels and report "not found" error
 		char* findName = temp[0] ? temp : fullName.get();
 		if (!labelEntry) {
 			LabelTable.Insert(findName, 0, (LABEL_IS_UNDEFINED | setExtraTraits));
 		}
 		Error("Label not found", findName, IF_FIRST);
-		return nullptr;
+		return {nullptr, true};
 	} else {
-		return labelEntry;
+		return {labelEntry, true};
 	}
 }
 
@@ -273,18 +268,18 @@ bool LabelExist(char*& p, aint& val) {
 	std::unique_ptr<char[]> fullName;
 	SLabelTableEntry* labelEntry = SearchLabel(p, false, fullName);
 	val = (labelEntry && LABEL_PAGE_UNDEFINED != labelEntry->page) ? -1 : 0;
-	return !getLabel_invalidName;
+	return bool(fullName);
 }
 
 bool GetLabelPage(char*& p, aint& val) {
-	SLabelTableEntry* labelEntry = GetLabel(p);
+	const auto [labelEntry, validName] = GetLabel(p);
 	val = labelEntry ? labelEntry->page : LABEL_PAGE_UNDEFINED;
 	// true even when not found, but valid label name (neeed for expression-eval logic)
-	return !getLabel_invalidName;
+	return validName;
 }
 
 bool GetLabelValue(char*& p, aint& val) {
-	SLabelTableEntry* labelEntry = GetLabel(p);
+	const auto [labelEntry, validName] = GetLabel(p);
 	if (labelEntry) {
 		val = labelEntry->value;
 		if (Relocation::areLabelsOffset) {
@@ -298,27 +293,27 @@ bool GetLabelValue(char*& p, aint& val) {
 		val = 0;
 	}
 	// true even when not found, but valid label name (needed for expression-eval logic)
-	return !getLabel_invalidName;
+	return validName;
 }
 
 bool GetLabelPhPage(char*& p, aint& val) {
-	SLabelTableEntry* labelEntry = GetLabel(p);
+	const auto [labelEntry, validName] = GetLabel(p);
 	val = labelEntry ? labelEntry->ph_page : LABEL_PAGE_UNDEFINED;
-	return !getLabel_invalidName;		// true even when not found, but valid label name
+	return validName;	// true even when not found, but valid label name
 }
 
 bool GetLabelPhValue(char*& p, aint& val) {
-	SLabelTableEntry* labelEntry = GetLabel(p);
+	const auto [labelEntry, validName] = GetLabel(p);
 	val = labelEntry ? labelEntry->ph_value : 0;	// no relocation logic for ph_value
-	return !getLabel_invalidName;		// true even when not found, but valid label name
+	return validName;	// true even when not found, but valid label name
 }
 
 bool GetLabelSize(char*& p, aint& val) {
 	// if symbol is found, add "sizeof" trait, if not found, insert placeholder with "sizeof" trait
-	SLabelTableEntry* labelEntry = GetLabel(p, LABEL_HAS_SIZE);
+	const auto [labelEntry, validName] = GetLabel(p, LABEL_HAS_SIZE);
 	val = labelEntry ? labelEntry->size : 0;		// get symbol's size as return value
 	// true even when not found, but valid label name (needed for expression-eval logic)
-	return !getLabel_invalidName;
+	return validName;
 }
 
 int GetTemporaryLabelValue(char*& op, aint& val, bool requireUnderscore) {
@@ -630,7 +625,7 @@ void CLabelTable::TrackForSize(SLabelTableEntry *label) {
 		Warning("SIZEOF(...) this type of label is invalid, size is zero");
 		return;
 	}
-	const aint myLevel = sourceBlockLevel + (!!(LABEL_IS_LOCAL & label->traits));	// local labels are +1 level
+	const aint myLevel = CurrentPass().sourceBlockLevel + (!!(LABEL_IS_LOCAL & label->traits));	// local labels are +1 level
 	sizeofStack.emplace_back(label, myLevel);
 }
 
@@ -640,7 +635,7 @@ void CLabelTable::SizeBoundary(BoundaryLevel boundaryLevel) {
 		Warning("SIZEOF-tracking does not work across wrap-around. Stopping count here.");
 	}
 	// soft boundary, process all stacked labels with current sourceBlockLevel (nesting of source text)
-	aint myLevel = sourceBlockLevel + (BOUNDARY_LOCAL == boundaryLevel);	// local labels are +1 level
+	aint myLevel = CurrentPass().sourceBlockLevel + (BOUNDARY_LOCAL == boundaryLevel);	// local labels are +1 level
 	while (myLevel <= sizeofStack.back().srcLevel) {
 		auto & label = *sizeofStack.back().label;
 		label.size = ((DISP_NONE != PseudoORG) ? adrdisp : CurAddress) - label.ph_value;
@@ -795,8 +790,7 @@ const char* CDefineTable::Get(const char* name) {
 	// the __COUNTER__ and __LINE__ have fully dynamic custom implementation here
 	if ('_' == name[1]) {
 		if (!strcmp(name, "__COUNTER__")) {
-			SPRINTF1(defineGet__Counter__Buffer, 30, "%d", PredefinedCounter);
-			++PredefinedCounter;
+			SPRINTF1(defineGet__Counter__Buffer, 30, "%d", CurrentPass().nextPredefinedCounter());
 			return defineGet__Counter__Buffer;
 		}
 		if (!strcmp(name, "__LINE__")) {
@@ -912,11 +906,6 @@ const char* CMacroDefineTable::getverv(const char* name) const {
 	return p ? p->value : nullptr;
 }
 
-void CMacroTable::ReInit() {
-	used.assign(128, false);
-	macs.clear();
-}
-
 void CMacroTable::Add(const char* nnaam, char*& p) {
 	auto [add_it, is_new] = macs.try_emplace(nnaam, CMacroTableEntry());
 	if (!is_new) {
@@ -955,7 +944,7 @@ void CMacroTable::Add(const char* nnaam, char*& p) {
 
 static int FailMacroEmit(char* omacrolabp, CDefineTableEntry* odefs, const char* msg, const char* arg, EStatus type = SUPPRESS) {
 	Error(msg, arg, type);
-	MacroDefineTable.setdefs(odefs);
+	CurrentPass().macroArgs.setdefs(odefs);
 	macrolabp = omacrolabp;
 	return 1;
 }
@@ -973,16 +962,17 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	// macro found, emit it, prepare temporary instance label base
 	// "naam" aliases the shared GetID buffer, so use the stable macro name from the table for any error message issued after we call GetID again
 	const char* macName = mac_it->first.c_str();
+	auto& macroArgs = CurrentPass().macroArgs;
 	char* omacrolabp = macrolabp;
 	char labnr[LINEMAX], ml[LINEMAX];
-	SPRINTF1(labnr, LINEMAX, "%d", macronummer++);
+	SPRINTF1(labnr, LINEMAX, "%d", CurrentPass().nextMacroExpansionSerial());
 	macrolabp = labnr;
 	if (omacrolabp) {
 		STRCAT(macrolabp, LINEMAX-1, "."); STRCAT(macrolabp, LINEMAX-1, omacrolabp);
 	} else {
-		MacroDefineTable.ReInit();
+		macroArgs.ReInit();
 	}
-	CDefineTableEntry* odefs = MacroDefineTable.getdefs();
+	CDefineTableEntry* odefs = macroArgs.getdefs();
 	// parse argument values
 	CStringsList* a = mac_it->second.args;
 	std::set<std::string> named_args_seen;
@@ -1013,7 +1003,7 @@ int CMacroTable::Emit(char* naam, char*& p) {
 		if (!GetMacroArgumentValue(p, val_buf) || (!lastArg && !comma(p))) {
 			return FailMacroEmit(omacrolabp, odefs, "Not enough arguments for macro", macName);
 		}
-		MacroDefineTable.AddMacro(argName, ml);
+		macroArgs.AddMacro(argName, ml);
 		a = a->next;
 	}
 	if (!SkipBlanks(p)) {
@@ -1022,33 +1012,33 @@ int CMacroTable::Emit(char* naam, char*& p) {
 	// arguments parsed, emit the macro lines and parse them
 	lp = p;
 	ListFile();
-	sourceBlockLevel += 2;
-	++listmacro;
-	CStringsList* olijstp = lijstp;
-	lijstp = mac_it->second.body;
-	++lijst;
+	CurrentPass().sourceBlockLevel += 2;
+	++CurrentPass().replayDepth;
+	auto& replays = CurrentPass().replays;
+	replays.push(mac_it->second.body);
 	STRCPY(ml, LINEMAX, line);
 	sourcePosStack.push_back(TextFilePos());
+	const auto& sldSwapSrcPos = CurrentPass().sldSwapSrcPos;
 	const aint osldSwapSrcPos = sldSwapSrcPos;
-	while (lijstp) {
-		sourcePosStack.back() = lijstp->source;
-		STRCPY(line, LINEMAX, lijstp->string);
+	while (const auto* replayLine = replays.top()) {
+		sourcePosStack.back() = replayLine->source;
+		STRCPY(line, LINEMAX, replayLine->string);
 		substitutedLine = line;		// reset substituted listing
 		eolComment = NULL;			// reset end of line comment
-		lijstp = lijstp->next;
+		replays.top() = replayLine->next;
 		ParseLineSafe();
 	}
 	LabelTable.SizeBoundary(CLabelTable::BOUNDARY_MAIN);
-	sourceBlockLevel -= 2;
+	CurrentPass().sourceBlockLevel -= 2;
 	if (osldSwapSrcPos != sldSwapSrcPos) WarningById(W_SLD_SWAP, mac_it->first.c_str());
 	sourcePosStack.pop_back();
 	++CompiledCurrentLine;
 	STRCPY(line, LINEMAX, ml);
-	lijstp = olijstp;
-	--lijst;
-	MacroDefineTable.setdefs(odefs);
+	replays.pop();
+	macroArgs.setdefs(odefs);
 	macrolabp = omacrolabp;
-	--listmacro; donotlist = 1;
+	--CurrentPass().replayDepth;
+	CurrentPass().skipNextListing = true;
 	return 2;
 }
 
@@ -1161,11 +1151,11 @@ void CStructure::CopyLabel(char* nnaam, aint offset) {
 	mnl = n;
 }
 
-void CStructure::CopyLabels(CStructure* st) {
+void CStructure::CopyLabels(CStructure* st, const char* memberLabel) {
 	CStructureEntry1* np = st->mnf;
-	if (!np || !PreviousIsLabel) return;
+	if (!np || !memberLabel) return;
 	char str[LINEMAX];
-	STRCPY(str, LINEMAX-1, PreviousIsLabel);
+	STRCPY(str, LINEMAX-1, memberLabel);
 	STRCAT(str, LINEMAX-1, ".");
 	char * const stw = str + strlen(str);
 	while (np) {
@@ -1427,13 +1417,6 @@ CStructureTable::CStructureTable() {
 
 CStructureTable::~CStructureTable() {
 	for (auto structPtr : strs) if (structPtr) delete structPtr;
-}
-
-void CStructureTable::ReInit() {
-	for (auto & structPtr : strs) {
-		if (structPtr) delete structPtr;
-		structPtr = nullptr;
-	}
 }
 
 CStructure* CStructureTable::Add(const char* naam, int offset) {

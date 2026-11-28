@@ -252,7 +252,7 @@ static void lua_sj_warning(const char* message, const char* value = nullptr) {
 }
 
 static const char* lua_sj_get_define(const char* name, bool macro_args = false) {
-	const char* macro_res = (macro_args && macrolabp) ? MacroDefineTable.getverv(name) : nullptr;
+	const char* macro_res = (macro_args && macrolabp) ? CurrentPass().macroArgs.getverv(name) : nullptr;
 	return macro_res ? macro_res : DefineTable.Get(name);
 }
 

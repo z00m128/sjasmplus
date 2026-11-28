@@ -40,7 +40,6 @@ int ParseDirective(bool beginningOfLine = 0);
 int ParseDirective_REPT();
 void ParseInstruction();
 char* ReplaceDefine(char* lp);
-void SetLastParsedLabel(const char* label);
 int PrepareLine();		// initial part of ParseLine, before the actual content parsing logic starts
 
 /**

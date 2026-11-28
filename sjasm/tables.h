@@ -69,7 +69,6 @@ char* ValidateLabel(bool & isLocal, const char* naam, bool setNameSpace, bool ig
 char* ValidateLabel(const char* naam, bool setNameSpace, bool ignoreCharAfter = false);
 char* ExportLabelToSld(const char* naam, const SLabelTableEntry* label);
 char* ExportModuleToSld(bool endModule = false);
-extern char* PreviousIsLabel;
 bool LabelExist(char*& p, aint& val);
 bool GetLabelPage(char*& p, aint& val);
 bool GetLabelValue(char*& p, aint& val);
@@ -274,7 +273,6 @@ public:
 	~CMacroTable() = default;
 	void Add(const char*, char*&);
 	int Emit(char*, char*&);
-	void ReInit();
 	CMacroTable(const CMacroTable&) = delete;
 	CMacroTable& operator=(CMacroTable const &) = delete;
 private:
@@ -319,7 +317,7 @@ public:
 	aint noffset;
 	void AddLabel(char*);
 	void AddMember(CStructureEntry2*);
-	void CopyLabels(CStructure*);
+	void CopyLabels(CStructure*, const char* memberLabel);
 	void CopyMembers(CStructure*, char*&);
 	void deflab();
 	void emitlab(char* iid, aint address, bool isRelocatable);
@@ -339,7 +337,6 @@ private:
 class CStructureTable {
 public:
 	CStructure* Add(const char* naam, int no);
-	void ReInit();
 	CStructureTable(const CStructureTable&) = delete;
 	CStructureTable& operator=(CStructureTable const &) = delete;
 	CStructureTable();

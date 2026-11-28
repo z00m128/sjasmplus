@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <chrono>
 #include <ctime>
+#include <optional>
 
 static void PrintHelpMain() {
 	// Please keep help lines at most 79 characters long (cursor at column 88 after last char)
@@ -256,32 +257,31 @@ SSource::~SSource() {
 
 std::vector<SSource> sourceFiles;
 
-int ConvertEncoding = ENCWIN;
+static EEncoding defaultSourceEncoding = ENCWIN;
 
 EDispMode PseudoORG = DISP_NONE;
 bool IsLabelNotFound = false, IsSubstituting = false;
 int pass = 0, ErrorCount = 0, WarningCount = 0, IncludeLevel = -1;
-int IsRunning = 0, donotlist = 0, listmacro = 0;
 int adrdisp = 0, dispPageNum = LABEL_PAGE_UNDEFINED, StartAddress = -1;
 byte* MemoryPointer=NULL;
-int macronummer = 0, lijst = 0, reglenwidth = 0;
+int reglenwidth = 0;
 source_positions_t sourcePosStack;
 source_positions_t smartSmcLines;
-source_positions_t::size_type smartSmcIndex;
 uint32_t maxlin = 0;
-aint CurAddress = 0, CompiledCurrentLine = 0, LastParsedLabelLine = 0, PredefinedCounter = 0;
+aint CurAddress = 0, CompiledCurrentLine = 0;
 aint destlen = 0, size = -1L, comlin = 0;
-aint sourceBlockLevel = -2;
 
-char* macrolabp=NULL, * LastParsedLabel=NULL;
-std::stack<SRepeatStack> RepeatStack;
-CStringsList* lijstp = NULL;
+char* macrolabp = nullptr;
 CLabelTable LabelTable;
 CTemporaryLabelTable TemporaryLabelTable;
 CDefineTable DefineTable;
-CMacroDefineTable MacroDefineTable;
-CMacroTable MacroTable;
-CStructureTable StructureTable;
+
+static std::optional<CPassContext> passContext;
+
+CPassContext& CurrentPass() {
+	if (!passContext) Error("Internal error: no active assembly pass", nullptr, FATAL);
+	return *passContext;
+}
 
 // reserve keywords in labels table, to detect when user is defining label colliding with keyword
 static void ReserveLabelKeywords() {
@@ -295,6 +295,7 @@ static void ReserveLabelKeywords() {
 
 static void InitPass() {
 	assert(sourcePosStack.empty());				// there's no source position [left] in the stack
+	assert(nullptr == macrolabp);
 	Relocation::InitPass();
 	Options::SSyntax::restoreSystemSyntax();	// release all stored syntax variants and reset to initial
 	uint32_t maxpow10 = 1;
@@ -305,21 +306,11 @@ static void InitPass() {
 		if (maxpow10 < 10) ExitASM(1);	// 32b overflow
 	} while (maxpow10 <= maxlin);
 	*ModuleName = 0;
-	SetLastParsedLabel(nullptr);
 	InitVorlab();
-	macrolabp = NULL;
-	listmacro = 0;
 	CurAddress = 0;
 	CompiledCurrentLine = 0;
-	smartSmcIndex = 0;
 	PseudoORG = DISP_NONE; adrdisp = 0; dispPageNum = LABEL_PAGE_UNDEFINED;
-	ListAddress = 0; macronummer = 0; lijst = 0; comlin = 0;
-	sldSwapSrcPos = 0;
-	lijstp = NULL;
-	DidEmitByte();				// reset the emitted flag
-	StructureTable.ReInit();
-	MacroTable.ReInit();
-	MacroDefineTable.ReInit();
+	comlin = 0;
 	DefineTable = Options::CmdDefineTable;
 	TemporaryLabelTable.InitPass();
 
@@ -364,8 +355,6 @@ static void InitPass() {
 	DefineTable.Replace("__FILE__", "<none>");				// current file
 	DefineTable.Replace("__LINE__", "<dynamic value>");		// current line in current file
 	DefineTable.Replace("__COUNTER__", "<dynamic value>");	// gcc-like, incremented upon every use
-	PredefinedCounter = 0;
-
 	// open Export file (defined by --exp or by EXPORT directive), even when no EXPORT is in source
 	if (LASTPASS == pass) OpenExpFile();					// will not do anything if filename is empty
 }
@@ -379,14 +368,8 @@ static void FreeRAM() {
 	}
 	for (CDeviceDef* deviceDef : DefDevices) delete deviceDef;
 	DefDevices.clear();
-	lijstp = NULL;		// do not delete this, should be released by owners of DUP/regular macros
 	LabelTable.RemoveAll();
 	DefineTable.RemoveAll();
-	SetLastParsedLabel(nullptr);
-	if (PreviousIsLabel) {
-		free(PreviousIsLabel);
-		PreviousIsLabel = nullptr;
-	}
 }
 
 
@@ -595,7 +578,7 @@ namespace Options {
 				} else if (!strcmp(opt, "nologo")) {
 					HideLogo = 1;
 				} else if (!strcmp(opt, "dos866")) {
-					ConvertEncoding = ENCDOS;
+					defaultSourceEncoding = ENCDOS;
 				} else if ((doubleDash && !strcmp(opt, "inc")) ||
 							(!doubleDash && 'i' == opt[0]) ||
 							(!doubleDash && 'I' == opt[0])) {
@@ -792,7 +775,6 @@ int main(int argc, char* argv[]) {
 
 	// create default output name, if not specified
 	ConstructDefaultFilename(Options::DestinationFName, "out");
-	int base_encoding = ConvertEncoding;
 
 	// init some vars
 	InitCPU();
@@ -805,6 +787,7 @@ int main(int argc, char* argv[]) {
 	do {
 		++pass;
 		if (pass == LASTPASS) OpenSld();	//open source level debugging file (BEFORE InitPass)
+		passContext.emplace();
 		InitPass();
 		if (pass == LASTPASS) {
 			OpenDest();
@@ -814,29 +797,31 @@ int main(int argc, char* argv[]) {
 		static bool warn_stdin_default_lst = true;
 		for (SSource & src : sourceFiles) {
 			// sanity reset of SIZEOF state (this should NEVER report anything with valid .asm code, unless internal bug)
-			sourceBlockLevel = -2;			// open MODULE and similar errors may leave dangling nesting level
+			CurrentPass().sourceBlockLevel = -2;	// open MODULE and similar errors may leave dangling nesting level
 			LabelTable.SizeBoundary(CLabelTable::BOUNDARY_FLOW);
 			if (src.stdin_log && warn_stdin_default_lst && 1 == pass && Options::IsDefaultListingName) {
 				Warning("use explicit --lst=<filename> for <stdin> source", nullptr, W_EARLY);
 				warn_stdin_default_lst = false;
 			}
-			IsRunning = 1;
-			ConvertEncoding = base_encoding;
+			CurrentPass().sourceActive = true;
+			CurrentPass().sourceEncoding = defaultSourceEncoding;
 			// don't search include paths, but use GetInputFile to get "archived" fullpath_ref_t for c_str() lifetime
 			fullpath_ref_t src_fname = GetInputFile(delim_string_t(src.fname, DT_COUNT));
 			OpenFile(src_fname, src.stdin_log);
 		}
 
-		while (!RepeatStack.empty()) {
-			sourcePosStack.push_back(RepeatStack.top().sourcePos);	// mark DUP line with error
+		auto& repeats = CurrentPass().repeats;
+		while (!repeats.empty()) {
+			sourcePosStack.push_back(repeats.top().sourcePos);	// mark DUP line with error
 			Error("[DUP/REPT] missing EDUP/ENDR to end repeat-block");
 			sourcePosStack.pop_back();
-			RepeatStack.pop();
+			repeats.pop();
 		}
 
 		if (Options::OutputVerbosity <= OV_ALL) {
 			_CERR "Pass " _CMDL pass _CMDL " complete (" _CMDL ErrorCount _CMDL " errors)" _ENDL;
 		}
+		passContext.reset();
 	} while (pass < LASTPASS);
 
 	pass = 9999; /* added for detect end of compiling */

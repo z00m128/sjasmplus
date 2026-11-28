@@ -170,6 +170,21 @@ Separate at least these concepts:
 This inventory identifies responsibilities, not a claim that every retained field
 should be reset. Some persistence is intentional and affects language semantics.
 
+### Completed Pass Results
+
+As a separate refactor, let the pass context collect traversal-local observations
+and derive small results before discarding it. Keep those results distinct from
+layout data used to decide convergence.
+
+- **Listing width:** Track the maximum source line in the pass, including `#line`
+	adjustments. Derive the next traversal's listing width in the listing code,
+	capping the digit calculation at five and preserving the existing overflow
+	display. Preserve the running maximum across completed passes for compatibility.
+- **Global device:** Capture the candidate at pass end using the existing
+	single-`DEVICE` heuristic, including its ID, RAM top, and source position.
+	Apply it at the existing next-pass initialization point without retaining the
+	old device objects.
+
 ## Named Symbols: The First Concrete Obstacle
 
 `CLabelTable::Insert()` refreshes an existing ordinary definition when its page is
@@ -343,8 +358,23 @@ should be unambiguous in diagnostics. A finite configurable cap comfortably abov
 
 ### What To Compare
 
-Ordinary end-of-pass numeric values are too weak. At minimum assess these
-categories when defining the new mode's guarantee:
+The goal is layout stability, not byte-for-byte output stability. A generated
+array may contain different bytes on every traversal and still be settled if
+its placement and length are stable and its values do not affect layout.
+Retrying solely because payload bytes differ is not useful.
+
+No raw `CPassContext` fields need to be compared. Macro and structure tables
+are rebuilt in source order; compare their effects, not their final contents.
+In particular, structure-generated labels, offsets, and sizes belong in the
+normal symbol comparison. A different definition that produces the same symbols
+and layout does not by itself require another pass. Likewise, the final
+`__COUNTER__` value and macro expansion serial are not settling criteria; their
+effects on relevant symbols, lookups, or layout still count. Compare the ordered
+Smart-SMC sites and resolved offsets, not the context's cursor.
+
+Use the resulting symbols as the starting point, but do not assume symbol
+equality proves layout equality. Assess these categories when defining the new
+mode's guarantee:
 
 * Defined-symbol membership, values, page/physical-address metadata, relevant
 	traits, relocatability, computed sizes, and accumulated usage bits.
@@ -374,10 +404,9 @@ Start with exact comparisons or verify equality after a matching hash; a hash
 collision must not justify accepting incorrect assembly.
 
 Branch decisions themselves are not universally equal across logical phases:
-`IF __PASS__ == 3` around SAVEBIN is normal final-only behavior. Trace comparison
-must normalize phases and focus on settled semantic/layout effects, not demand
-identical raw directive visitation between settling and final emission. A stricter
-rule for final-only byte emission is a separate compatibility decision.
+`IF __PASS__ == 3` around SAVEBIN is normal final-only behavior. Any layout trace
+used to investigate settling is not a requirement for final emission to match
+phase 2. Compare the final symbol results against the accepted baseline instead.
 
 End address alone is also insufficient: `ORG 0` can hide a changed emitted length.
 End label maps cannot observe unnamed output regions. Depending only on a generic
@@ -597,11 +626,11 @@ side effects may already exist. In particular, do not call phase 3 a speculative
 iteration and rerun it until it happens to agree. Stop with a useful diagnostic.
 
 Final-only file saving is normal. Final-only byte emission is also accepted in
-some current cases without intervening labels, as a probe demonstrates. A strict
-layout-verification mode would reject that if it requires identical dry/final
-layout. Decide and document the new mode's contract instead of imposing a blanket
-"every branch and every directive must match" rule that rejects valid output-only
-phase guards.
+some current cases without intervening labels, as a probe demonstrates. Do not
+require identical dry/final layout or payload bytes. If final symbols still
+match the last accepted phase 2 and the ordinary final-pass checks succeed,
+layout differences introduced by final-only code are the source author's
+responsibility, not a reason to reject the assembly or retry.
 
 ## Characterization Results
 
@@ -821,7 +850,7 @@ forward mutable reads in the current assembler.
 5. Resolve diagnostics, BPLIST/open-file scheduling, scripts, absent-definition
 	 visibility, and stable-input assumptions before presenting it as production
 	 behavior. Keep the final phase single-shot and verify against accepted state.
-6. Document logical PASS2/ALLPASS repetition and strict final-layout rules. Run
+6. Document logical PASS2/ALLPASS repetition and the final symbol checks. Run
 	 the full feature/example/C++ suite and supported-toolchain builds for runtime
 	 changes, not merely the focused baseline used for this notebook.
 

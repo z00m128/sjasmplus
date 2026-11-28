@@ -79,7 +79,7 @@ int ParseDirective(bool beginningOfLine)
 	char* eolCommCopy = eolComment ? STRDUP(eolComment) : nullptr;
 	eolComment = eolCommCopy;
 	if (NULL == ml || NULL == pp) ErrorOOM();
-	++listmacro;
+	++CurrentPass().replayDepth;
 	do {
 		line[0] = ' ';
 		STRCPY(line+1, LINEMAX-1, pp);	// reset `line` to the content which should be repeated
@@ -88,8 +88,8 @@ int ParseDirective(bool beginningOfLine)
 	} while (--val);
 	// restore everything
 	STRCPY(line, LINEMAX, ml);
-	--listmacro;
-	donotlist = 1;
+	--CurrentPass().replayDepth;
+	CurrentPass().skipNextListing = true;
 	if (eolCommCopy) free(eolCommCopy);
 	free(pp);
 	free(ml);
@@ -543,7 +543,7 @@ static void dirMODULE() {
 	LabelTable.SizeBoundary(CLabelTable::BOUNDARY_ALL);	// start of module is hard SIZEOF-boundary
 	char* n = GetID(lp);
 	if (n && (nullptr == STRCHR(n, '.'))) {
-		sourceBlockLevel += 2;
+		CurrentPass().sourceBlockLevel += 2;
 		if (*ModuleName) STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), ".");
 		STRCAT(ModuleName, LINEMAX-1-strlen(ModuleName), n);
 		InitVorlab();	// reset non-local label to default "<modules>._"
@@ -566,7 +566,7 @@ static void dirENDMODULE() {
 	}
 	//SIZEOF-boundary(main) here, "all" shouldn't be needed if this is paired with MODULE correctly
 	LabelTable.SizeBoundary(CLabelTable::BOUNDARY_MAIN);
-	sourceBlockLevel -= 2;
+	CurrentPass().sourceBlockLevel -= 2;
 	if (IsSldExportActive()) {
 		WriteToSldFile(-1, CurAddress, 'L', ExportModuleToSld(true));
 	}
@@ -587,7 +587,7 @@ static void dirEND() {
 		lp = p;
 	}
 
-	IsRunning = 0;
+	CurrentPass().sourceActive = false;
 }
 
 static void dirSIZE() {
@@ -1184,9 +1184,9 @@ static void dirENCODING() {
 	auto arg = GetDelimitedString(lp);
 	char* aP = arg.data();
 	if (cmphstr(aP, "dos")) {
-		ConvertEncoding = ENCDOS;
+		CurrentPass().sourceEncoding = ENCDOS;
 	} else if (cmphstr(aP, "win")) {
-		ConvertEncoding = ENCWIN;
+		CurrentPass().sourceEncoding = ENCWIN;
 	} else {
 		Error("[ENCODING] Invalid argument (valid values: \"dos\" and \"win\")", aP, IF_FIRST);
 	}
@@ -1214,24 +1214,24 @@ static void dirOPT() {
 				FILE* listFile = GetListingFile();
 				if (LASTPASS == pass && listFile) fputs("# listing file suspended...\n", listFile);
 			}
-			donotlist = 1;
+			CurrentPass().skipNextListing = true;
 			Options::syx.IsListingSuspended = didList = true;
 		} else if (cmphstr(lp, "liston")) {
 			Options::syx.IsListingSuspended = false;
 		} else if (cmphstr(lp, "listall")) {
 			if (!didList) ListFile();		// *list* the OPT line changing the filtering
 			didList = true;
-			donotlist = 1;
+			CurrentPass().skipNextListing = true;
 			Options::syx.ListingType = Options::LST_T_ALL;
 		} else if (cmphstr(lp, "listact")) {
 			if (!didList) ListFile();		// *list* the OPT line changing the filtering
 			didList = true;
-			donotlist = 1;
+			CurrentPass().skipNextListing = true;
 			Options::syx.ListingType = Options::LST_T_ACTIVE;
 		} else if (cmphstr(lp, "listmc")) {
 			if (!didList) ListFile();		// *list* the OPT line changing the filtering
 			didList = true;
-			donotlist = 1;
+			CurrentPass().skipNextListing = true;
 			Options::syx.ListingType = Options::LST_T_MC_ONLY;
 		} else {
 			Error("[OPT] invalid command (valid commands: push, pop, reset, liston, listoff, listall, listact, listmc)", lp);
@@ -1405,8 +1405,8 @@ static void dirIfInternal(const char* dirName, aint val) {
 			case ENDIF:
 				break;
 			default:
-				if (IsRunning) Error(errorsTxt[0]);
-				donotlist=!IsRunning;		// do the listing only if still running
+				if (CurrentPass().sourceActive) Error(errorsTxt[0]);
+				CurrentPass().skipNextListing = !CurrentPass().sourceActive;	// do the listing only if still running
 				return;
 		}
 	}
@@ -1426,8 +1426,8 @@ static void dirIFN() {
 static bool dirIfusedIfnused(char* & id) {
 	id = NULL;
 	if (SkipBlanks()) {						// no argument (use last parsed label)
-		if (LastParsedLabel) {
-			id = STRDUP(LastParsedLabel);
+		if (!CurrentPass().lastParsedLabel.empty()) {
+			id = STRDUP(CurrentPass().lastParsedLabel.c_str());
 		} else {
 			Error("[IFUSED/IFNUSED] no label defined ahead");
 			return false;
@@ -1475,15 +1475,16 @@ static void dirIFNDEF() {
 }
 
 static void dirElseCheckLiveDup() {
-	if (RepeatStack.empty()) return;
-	if (!RepeatStack.top().IsInWork) return;
+	auto& repeats = CurrentPass().repeats;
+	if (repeats.empty()) return;
+	if (!repeats.top().IsInWork) return;
 
 	// Seems some ELSE/ELSEIF/ENDIF was encountered inside DUP->EDUP without starting IF
 	// -> probably IF was outside of DUP->EDUP block, which is not legal in sjasmplus
 	// terminate the current DUP->EDUP macro early and report the open ELSE/ELSEIF/ENDIF
 	Error("Conditional block must start and finish inside the repeat block, nested completely");
-	lijstp = nullptr;
-	RepeatStack.top().RepeatCount = 0;
+	CurrentPass().replays.top() = nullptr;
+	repeats.top().RepeatCount = 0;
 }
 
 static void dirELSE() {
@@ -1510,7 +1511,7 @@ static void dirINCLUDE() {
 	if (fnaam.full.has_filename()) {
 		ListFile();
 		IncludeFile(fnaam);
-		donotlist = 1;
+		CurrentPass().skipNextListing = true;
 	} else {
 		Error("[INCLUDE] empty filename", bp);
 	}
@@ -1755,21 +1756,22 @@ static void dirDISPLAY() {
 }
 
 static void dirMACRO() {
-	if (lijst) {
+	if (!CurrentPass().replays.empty()) {
 		Error("[MACRO] No macro definitions allowed here", NULL, SUPPRESS);
 		return;
 	}
 	// check if the name of macro is defined at beginning of the line ("label" name)
-	const bool labelName = LastParsedLabelLine == CompiledCurrentLine;
-	assert(!labelName || LastParsedLabel);
-	char* lpLabel = labelName ? LastParsedLabel : lp;	// temporary pointer to advance by GetID
+	auto& currentPass = CurrentPass();
+	const bool labelName = currentPass.lastParsedLabelLine == CompiledCurrentLine;
+	assert(!labelName || !currentPass.lastParsedLabel.empty());
+	char* lpLabel = labelName ? currentPass.lastParsedLabel.data() : lp;	// temporary pointer to advance by GetID
 	char* n = GetID(lpLabel);							// get+validate macro name
 	if (*lpLabel && !White(*lpLabel)) n = nullptr;		// if there's unexpected trailing char, report illegal name
 	if (n) {
 		if (!labelName) lp = lpLabel;					// name was after MACRO keyword, advance global `lp` (to parse arguments)
-		MacroTable.Add(n, lp);
+		CurrentPass().macros.Add(n, lp);
 	} else {
-		Error("[MACRO] Illegal macroname", labelName ? LastParsedLabel : lp);	// report what was fed into GetID
+		Error("[MACRO] Illegal macroname", labelName ? currentPass.lastParsedLabel.c_str() : lp);	// report what was fed into GetID
 		SkipToEol(lp);
 	}
 }
@@ -1828,7 +1830,7 @@ static void dirSTRUCT() {
 	if (!SkipBlanks()) {
 		Error("[STRUCT] syntax error, unexpected", lp);
 	}
-	st = StructureTable.Add(validLabel.get(), offset);	// create structure and start parsing members
+	st = CurrentPass().structures.Add(validLabel.get(), offset);	// create structure and start parsing members
 	ListFile();
 	while (ReadLine()) {
 		lp = line;
@@ -1870,8 +1872,9 @@ static void DupWhileImplementation(bool isWhile) {
 	aint val = 0;
 	CStringsList* condition = nullptr;
 
-	if (!RepeatStack.empty()) {
-		SRepeatStack& dup = RepeatStack.top();
+	auto& repeats = CurrentPass().repeats;
+	if (!repeats.empty()) {
+		SRepeatStack& dup = repeats.top();
 		if (!dup.IsInWork) {
 			SkipToEol(lp);		// Just skip the expression to the end of line, don't evaluate yet
 			++dup.Level;
@@ -1927,7 +1930,7 @@ static void DupWhileImplementation(bool isWhile) {
 		}
 	}
 
-	RepeatStack.emplace(val, condition, new CStringsList(indexVar ? indexVar : ""));
+	repeats.emplace(val, condition, new CStringsList(indexVar ? indexVar : ""));
 	if (!SkipBlanks()) Error("[DUP] unexpected chars", lp, SUPPRESS);
 }
 
@@ -1968,36 +1971,37 @@ static bool shouldRepeat(SRepeatStack& dup) {
 }
 
 static void dirEDUP() {
-	if (RepeatStack.empty() || RepeatStack.top().IsInWork) {
+	auto& repeats = CurrentPass().repeats;
+	if (repeats.empty() || repeats.top().IsInWork) {
 		Error("[EDUP/ENDR/ENDW] End repeat without repeat");
 		return;
 	}
 
-	SRepeatStack& dup = RepeatStack.top();
+	SRepeatStack& dup = repeats.top();
 	if (!dup.IsInWork && dup.Level) {
 		--dup.Level;
 		return;
 	}
 	dup.IsInWork = true;
-	// kill the "EDUP" inside DUP-list (+ works as "while (IsRunning && lijstp && lijstp->string)" terminator)
+	// kill the "EDUP" inside DUP-list (a null string terminates the inner loop)
 	if (dup.Pointer->string) free(dup.Pointer->string);
 	dup.Pointer->string = NULL;
-	++listmacro;
+	++CurrentPass().replayDepth;
 	char* ml = STRDUP(line);	// copy the EDUP line for List purposes (after the DUP block emit)
 	if (ml == NULL) ErrorOOM();
 
-	CStringsList* olijstp = lijstp;
-	++lijst;
+	auto& replays = CurrentPass().replays;
+	replays.push(nullptr);
 	assert(!sourcePosStack.empty());
 	const TextFilePos oSourcePos = sourcePosStack.back();
 	aint currentRepeatIndex = 0;
-	while (IsRunning && dup.Lines && shouldRepeat(dup)) {
+	while (CurrentPass().sourceActive && dup.Lines && shouldRepeat(dup)) {
 		sourcePosStack.back() = dup.sourcePos;
-		lijstp = dup.Lines;
-		assert(lijstp);
-		if (*lijstp->string) {
+		replays.top() = dup.Lines;
+		assert(replays.top());
+		if (*replays.top()->string) {
 			// if the DUP has index variable, the first "line" is the variable name, set it up to current index
-			std::unique_ptr<char[]> indexVar(ValidateLabel(lijstp->string,  false));
+			std::unique_ptr<char[]> indexVar(ValidateLabel(replays.top()->string,  false));
 			if (indexVar.get() &&
 				!LabelTable.Insert(indexVar.get(), currentRepeatIndex, LABEL_IS_DEFL) &&
 				0 == currentRepeatIndex &&
@@ -2007,22 +2011,22 @@ static void dirEDUP() {
 			}
 			++currentRepeatIndex;
 		}
-		lijstp = lijstp->next;	// skip first empty line / indexVar name
-		while (IsRunning && lijstp && lijstp->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
-			if (lijstp->source.line) sourcePosStack.back() = lijstp->source;
-			STRCPY(line, LINEMAX, lijstp->string);
+		replays.top() = replays.top()->next;	// skip first empty line / indexVar name
+		while (CurrentPass().sourceActive && replays.top() && replays.top()->string) {	// the EDUP/REPT/ENDM line has string=NULL => ends loop
+			const auto* replayLine = replays.top();
+			if (replayLine->source.line) sourcePosStack.back() = replayLine->source;
+			STRCPY(line, LINEMAX, replayLine->string);
 			substitutedLine = line;		// reset substituted listing
 			eolComment = NULL;			// reset end of line comment
-			lijstp = lijstp->next;
+			replays.top() = replayLine->next;
 			ParseLineSafe();
 			sourcePosStack.back().nextSegment();
 		}
 	}
 	sourcePosStack.back() = oSourcePos;
-	RepeatStack.pop();
-	lijstp = olijstp;
-	--lijst;
-	--listmacro;
+	repeats.pop();
+	replays.pop();
+	--CurrentPass().replayDepth;
 	STRCPY(line, LINEMAX,  ml);		// show EDUP line itself
 	free(ml);
 	++CompiledCurrentLine;
@@ -2031,7 +2035,7 @@ static void dirEDUP() {
 }
 
 static void dirENDM() {
-	if (!RepeatStack.empty()) {
+	if (!CurrentPass().repeats.empty()) {
 		Warning("ENDM used as DUP/REPT block terminator, this is deprecated (and bugged when used inside macro), change to EDUP or ENDR");
 		dirEDUP();
 	} else {
@@ -2184,9 +2188,9 @@ static void dirSLDOPT() {
 			SldAddCommentKeyword(GetID(lp));
 		} while (!SkipBlanks(lp) && anyComma(lp));
 	} else if (cmphstr(lp, "swapon")) {
-		++sldSwapSrcPos;
+		++CurrentPass().sldSwapSrcPos;
 	} else if (cmphstr(lp, "swapoff")) {
-		--sldSwapSrcPos;
+		--CurrentPass().sldSwapSrcPos;
 	} else {
 		Error("[SLDOPT] Syntax error in <type> (valid: COMMENT, SWAPON, SWAPOFF)", lp, SUPPRESS);
 	}
