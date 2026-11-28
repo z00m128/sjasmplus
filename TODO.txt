@@ -105,12 +105,6 @@ Output files, devices and loaders
     A second fopen is not a portable conflict check. External rename/replacement
     races and native handle-identity APIs are outside the initial scope.
 
-[Idea] Reserve a block without changing existing device memory
-    Provide a standalone block/reserve operation which advances the address while
-    preserving device bytes. The original note contrasts DS/BLOCK with preserving
-    behavior in structure blocks/alignment and standalone ALIGN.
-    Check the current BLOCK/DS and structure semantics before choosing new syntax.
-
 [Research] ZX Spectrum BASIC loader paging compatibility
     Inspect example loaders in examples/ and the snapshot-style SAVETAP loader,
     including any embedded machine-code blob. Determine whether they need changes

@@ -2176,6 +2176,9 @@ END_OF_PROGRAM</programlisting></para>
     BLOCK 10, "name_3 "   ; -> 6e 61 6d 65 5f 33 20 20 20 20 (filler space)
     BLOCK 10, 1, 'x', 3   ; -> 01 78 03 03 03 03 03 03 03 03 (filler 3)</programlisting></para>
                 </example></para>
+              <para>To skip bytes without overwriting existing device memory, use
+                <link linkend="po_org"><code>ORG $ + &lt;length&gt;</code></link> outside a
+                <link linkend="po_disp">DISP</link> block.</para>
             </listitem>
           </varlistentry>
 
@@ -2451,7 +2454,7 @@ counter = counter + 1
           </varlistentry>
 
           <varlistentry>
-            <term>DEPHASE<indexterm><primary>DEPHASE</primary><see>ENT</see></indexterm>
+            <term>DEPHASE<indexterm id="po_dephase_"><primary>DEPHASE</primary><see>ENT</see></indexterm>
                          <indexterm id="po_dephase"><primary>DEPHASE</primary><seealso>DISP</seealso></indexterm></term>
 
             <listitem>
