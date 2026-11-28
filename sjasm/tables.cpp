@@ -30,6 +30,7 @@
 
 #include "sjdefs.h"
 #include <set>
+#include <string_view>
 
 TextFilePos::TextFilePos(const char* fileNamePtr, uint32_t line) : filename(fileNamePtr), line(line), colBegin(0), colEnd(0) {
 }
@@ -743,39 +744,34 @@ CDefineTableEntry::~CDefineTableEntry() {
 	if (next) delete next;
 }
 
-void CDefineTableEntry::Replace(const char* nvalue) {
-	if (value) delete[] value;
-	value = new char[strlen(nvalue) + 1];
-	strcpy(value, nvalue);
-}
-
-CDefineTable::~CDefineTable() {
-	for (auto def : defs) if (def) delete def;
-}
-
 CDefineTable& CDefineTable::operator=(CDefineTable const & defTable) {
+	if (this == &defTable) return *this;
 	RemoveAll();
-	for (CDefineTableEntry* srcDef : defTable.defs) {
-		CDefineTableEntry* srcD = srcDef;
-		while (srcD) {
-			Add(srcD->name, srcD->value, srcD->nss);
-			srcD = srcD->next;
+	for (const auto& [name, source] : defTable.defs) {
+		auto& target = defs.try_emplace(defs.end(), name)->second;
+		target.value = source.value;
+		CStringsList* tail = nullptr;
+		for (auto* item = source.items.get(); item; item = item->next) {
+			auto copy = std::make_unique<CStringsList>(item->string);
+			copy->source = item->source;
+			auto* next = copy.get();
+			if (tail) tail->next = copy.release();
+			else target.items = std::move(copy);
+			tail = next;
 		}
 	}
 	return *this;
 }
 
-void CDefineTable::Init() {
-	DefArrayList = NULL;
-	for (auto & def : defs) def = NULL;
-}
-
 void CDefineTable::Add(const char* name, const char* value, CStringsList* nss) {
-	if (FindDuplicate(name)) {
+	const auto [entry, inserted] = defs.try_emplace(name);
+	if (!inserted) {
 		Error("Duplicate define (replacing old value)", name, PASS03);
-		Remove(name);
+		DefArrayList = nullptr;
 	}
-	defs[(*name)&127] = new CDefineTableEntry(name, value, nss, defs[(*name)&127]);
+	const std::string_view text(value);
+	entry->second.value = text.substr(0, text.find_first_of("\n\r"));
+	entry->second.items.reset(nss);
 }
 
 static char defineGet__Counter__Buffer[32] = {};
@@ -795,35 +791,21 @@ const char* CDefineTable::Get(const char* name) {
 			return defineGet__Line__Buffer;
 		}
 	}
-	CDefineTableEntry* p = defs[(*name)&127];
-	while (p && strcmp(name, p->name)) p = p->next;
-	if (nullptr == p) return nullptr;
-	DefArrayList = p->nss;
-	return p->value;
+	const auto entry = defs.find(name);
+	if (defs.end() == entry) return nullptr;
+	DefArrayList = entry->second.items.get();
+	return entry->second.value.c_str();
 }
 
 int CDefineTable::FindDuplicate(const char* name) {
-	CDefineTableEntry* p = defs[(*name)&127];
-	while (p) {
-		if (!strcmp(name, p->name)) {
-			return 1;
-		}
-		p = p->next;
-	}
-	return 0;
+	return defs.end() != defs.find(name);
 }
 
 int CDefineTable::Replace(const char* name, const char* value) {
-	CDefineTableEntry* p = defs[(*name)&127];
-	while (p) {
-		if (!strcmp(name, p->name)) {
-			p->Replace(value);
-			return 0;
-		}
-		p = p->next;
-	}
-	defs[(*name)&127] = new CDefineTableEntry(name, value, 0, defs[(*name)&127]);
-	return 1;
+	const auto [entry, inserted] = defs.try_emplace(name);
+	const std::string_view text(value);
+	entry->second.value = text.substr(0, text.find_first_of("\n\r"));
+	return inserted;
 }
 
 int CDefineTable::Replace(const char* name, const int value) {
@@ -833,32 +815,16 @@ int CDefineTable::Replace(const char* name, const int value) {
 }
 
 int CDefineTable::Remove(const char* name) {
-	CDefineTableEntry* p = defs[(*name)&127];
-	CDefineTableEntry* p2 = NULL;
-	while (p) {
-		if (!strcmp(name, p->name)) {
-			// unchain the particular item
-			if (NULL == p2) defs[(*name)&127] = p->next;
-			else			p2->next = p->next;
-			p->next = NULL;
-			// delete it
-			delete p;
-			DefArrayList = NULL;		// may be invalid here, so just reset it
-			return 1;
-		}
-		p2 = p;
-		p = p->next;
-	}
-	return 0;
+	const auto entry = defs.find(name);
+	if (defs.end() == entry) return 0;
+	DefArrayList = nullptr;
+	defs.erase(entry);
+	return 1;
 }
 
 void CDefineTable::RemoveAll() {
-	DefArrayList = NULL;
-	for (auto & def : defs) {
-		if (!def) continue;
-		delete def;
-		def = NULL;
-	}
+	DefArrayList = nullptr;
+	defs.clear();
 }
 
 CMacroDefineTable::CMacroDefineTable() : defs(nullptr) {

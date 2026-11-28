@@ -210,6 +210,7 @@
             <listitem>
               <synopsis>
 - refactored: internal implementation of DEVICE memory management and SAVECDT
+- refactored: internal implementation of DEFINE data structures
 - fix redefinition of DEFINE not replacing the old value correctly
 - fix missed overflow errors for decimal literals
 </synopsis>

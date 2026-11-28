@@ -29,6 +29,7 @@
 // tables.h
 
 #include <map>
+#include <memory>
 
 struct TextFilePos {
 	const char*		filename;
@@ -209,7 +210,6 @@ public:
 	CDefineTableEntry& operator=(CDefineTableEntry const &) = delete;
 	CDefineTableEntry(const char*, const char*, CStringsList*, CDefineTableEntry*);
 	~CDefineTableEntry();
-	void Replace(const char* nvalue);
 };
 
 class CMacroDefineTable {
@@ -230,8 +230,7 @@ private:
 
 class CDefineTable {
 public:
-	CStringsList* DefArrayList;
-	void Init();
+	CStringsList* DefArrayList = nullptr;
 	void Add(const char*, const char*, CStringsList*);
 	const char* Get(const char*);
 	int FindDuplicate(const char*);
@@ -239,14 +238,15 @@ public:
 	int Replace(const char*, const int);
 	int Remove(const char*);
 	void RemoveAll();
-	CDefineTable() {
-		Init();
-	}
-	~CDefineTable();
+	CDefineTable() = default;
 	CDefineTable(const CDefineTable&) = delete;
 	CDefineTable& operator=(CDefineTable const & defTable);
 private:
-	CDefineTableEntry* defs[128];
+	struct Definition {
+		std::string value;
+		std::unique_ptr<CStringsList> items;
+	};
+	std::map<std::string, Definition, std::less<>> defs;
 };
 
 class CMacroTableEntry {

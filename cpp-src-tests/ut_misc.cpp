@@ -21,6 +21,18 @@ TEST(Sanity) {			// just to verify the UnitTest++ test runner works
 	CHECK_EQUAL(1, 1);
 }
 
+TEST(DefineTable_ReplaceTruncatesAtLineBreak) {
+	CDefineTable defines;
+	for (const char* value : { "value\nignored", "value\rignored" }) {
+		defines.RemoveAll();
+		CHECK_EQUAL(1, defines.Replace("name", value));
+		CHECK_EQUAL("value", defines.Get("name"));
+		defines.Replace("name", "previous");
+		CHECK_EQUAL(0, defines.Replace("name", value));
+		CHECK_EQUAL("value", defines.Get("name"));
+	}
+}
+
 TEST(Support_GetTickCount) {
 	const auto before = std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::steady_clock::now().time_since_epoch()).count();
